@@ -479,7 +479,32 @@ function initNarration() {
     });
   });
 
-  // Highlight logic
+  // Auto-scroll tracking — disable when user manually scrolls away
+  let autoScrollEnabled = true;
+  let lastProgrammaticScroll = 0;
+
+  function isInViewport(el) {
+    const rect = el.getBoundingClientRect();
+    return rect.top < window.innerHeight && rect.bottom > 0;
+  }
+
+  function doAutoScroll(el) {
+    lastProgrammaticScroll = Date.now();
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  // Listen for manual scrolls to detect when the user leaves the narration area
+  window.addEventListener('scroll', () => {
+    if (audio.paused) return;
+    // Ignore scroll events caused by our own scrollIntoView
+    if (Date.now() - lastProgrammaticScroll < 1000) return;
+    // User is manually scrolling — check if active element is still visible
+    if (activeChunk) {
+      const el = document.querySelector('[data-narration-id="' + activeChunk + '"]');
+      if (el) autoScrollEnabled = isInViewport(el);
+    }
+  }, { passive: true });
+
   function updateHighlight(time) {
     let newChunk = null;
 
@@ -511,26 +536,30 @@ function initNarration() {
       if (el !== newCollapsible) el.classList.remove('narration-reading');
     });
 
-    // Add new highlight
+    // Add new highlight (always), but only auto-scroll if user hasn't scrolled away
     if (newEl) {
       if (newCollapsible && !newCollapsible.classList.contains('open')) {
         // Content is collapsed — shimmer the collapsible toggle
         if (!newCollapsible.classList.contains('narration-reading')) {
           newCollapsible.classList.add('narration-reading');
         }
-        const toggle = newCollapsible.querySelector('.collapsible-toggle');
-        if (toggle) {
-          const rect = toggle.getBoundingClientRect();
-          if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
-            toggle.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (autoScrollEnabled) {
+          const toggle = newCollapsible.querySelector('.collapsible-toggle');
+          if (toggle) {
+            const rect = toggle.getBoundingClientRect();
+            if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
+              doAutoScroll(toggle);
+            }
           }
         }
       } else {
         // Content is visible — highlight normally
         newEl.classList.add('narration-active');
-        const rect = newEl.getBoundingClientRect();
-        if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
-          newEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (autoScrollEnabled) {
+          const rect = newEl.getBoundingClientRect();
+          if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
+            doAutoScroll(newEl);
+          }
         }
       }
     }
@@ -568,6 +597,54 @@ function initNarration() {
       e.preventDefault();
       audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
     }
+  });
+
+  // --- Floating mini-player ---
+  const fab = document.createElement('div');
+  fab.className = 'narration-fab';
+  fab.innerHTML =
+    '<button class="narration-fab-play" aria-label="Pause narration">' +
+      '<svg class="narration-icon-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+      '<svg class="narration-icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>' +
+    '</button>' +
+    '<div class="narration-fab-progress"><div class="narration-fab-progress-fill"></div></div>' +
+    '<span class="narration-fab-time">0:00</span>';
+  document.body.appendChild(fab);
+
+  const fabPlay = fab.querySelector('.narration-fab-play');
+  const fabFill = fab.querySelector('.narration-fab-progress-fill');
+  const fabTime = fab.querySelector('.narration-fab-time');
+
+  fabPlay.addEventListener('click', () => {
+    if (audio.paused) audio.play();
+    else audio.pause();
+  });
+
+  // Sync fab state with audio
+  audio.addEventListener('play', () => fabPlay.classList.add('playing'));
+  audio.addEventListener('pause', () => fabPlay.classList.remove('playing'));
+  audio.addEventListener('timeupdate', () => {
+    if (!audio.duration) return;
+    fabFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
+    fabTime.textContent = fmtTime(audio.currentTime);
+  });
+
+  // Show fab when main player is out of view AND audio has been used
+  let mainPlayerVisible = true;
+  let audioStarted = false;
+  const observer = new IntersectionObserver(([entry]) => {
+    mainPlayerVisible = entry.isIntersecting;
+    fab.classList.toggle('visible', !mainPlayerVisible && audioStarted);
+  }, { threshold: 0 });
+  observer.observe(playerEl);
+
+  audio.addEventListener('play', () => {
+    audioStarted = true;
+    fab.classList.toggle('visible', !mainPlayerVisible);
+  });
+  audio.addEventListener('ended', () => {
+    audioStarted = false;
+    fab.classList.remove('visible');
   });
 }
 
