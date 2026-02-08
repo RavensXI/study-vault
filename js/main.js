@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initAccessibility();
   initGlossary();
   initLightbox();
+  initHeroEdit();
 });
 
 /* --- Scroll Progress Bar --- */
@@ -859,5 +860,123 @@ function initLightbox() {
 
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && overlay.classList.contains('active')) close();
+  });
+}
+
+/* --- Hero Image Position Editor (add ?hero-edit to URL) --- */
+function initHeroEdit() {
+  if (!new URLSearchParams(window.location.search).has('hero-edit')) return;
+
+  const imgs = document.querySelectorAll('.lesson-hero-image img');
+  if (!imgs.length) return;
+
+  // Inject styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .hero-edit-active .lesson-hero-image { position: relative; cursor: grab; }
+    .hero-edit-active .lesson-hero-image:active { cursor: grabbing; }
+    .hero-edit-label {
+      position: absolute; top: 0.5rem; left: 0.5rem; z-index: 100;
+      background: rgba(0,0,0,0.75); color: #fff; font: 600 14px/1 monospace;
+      padding: 0.35rem 0.6rem; border-radius: 6px; pointer-events: none;
+      user-select: none;
+    }
+    .hero-edit-panel {
+      position: fixed; bottom: 1rem; right: 1rem; z-index: 9999;
+      background: #1a1a1a; color: #eee; font: 13px/1.5 monospace;
+      padding: 1rem 1.25rem; border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.3); max-width: 380px;
+    }
+    .hero-edit-panel h4 { margin: 0 0 0.5rem; font-size: 14px; color: #fff; }
+    .hero-edit-panel p { margin: 0.2rem 0; font-size: 12px; color: #aaa; }
+    .hero-edit-panel button {
+      margin-top: 0.75rem; padding: 0.4rem 0.8rem; border: none;
+      background: var(--accent, #2563eb); color: #fff; border-radius: 6px;
+      font: 600 13px/1 system-ui; cursor: pointer;
+    }
+    .hero-edit-panel button:hover { filter: brightness(1.15); }
+    .hero-edit-panel .hero-edit-output {
+      margin-top: 0.5rem; padding: 0.5rem; background: #111; border-radius: 6px;
+      font-size: 11px; white-space: pre; max-height: 200px; overflow-y: auto;
+      user-select: all;
+    }
+  `;
+  document.head.appendChild(style);
+  document.body.classList.add('hero-edit-active');
+
+  // Panel
+  const panel = document.createElement('div');
+  panel.className = 'hero-edit-panel';
+  panel.innerHTML = '<h4>Hero Position Editor</h4>' +
+    '<p>Drag images up/down to reposition.</p>' +
+    '<button class="hero-edit-copy">Copy values</button>' +
+    '<div class="hero-edit-output" style="display:none"></div>';
+  document.body.appendChild(panel);
+
+  const output = panel.querySelector('.hero-edit-output');
+  const copyBtn = panel.querySelector('.hero-edit-copy');
+
+  // Get current Y% from an img's object-position
+  function getYPct(img) {
+    const pos = img.style.objectPosition || getComputedStyle(img).objectPosition || 'center center';
+    const parts = pos.trim().split(/\s+/);
+    const yStr = parts.length > 1 ? parts[1] : parts[0];
+    const val = parseFloat(yStr);
+    return isNaN(val) ? 50 : val;
+  }
+
+  imgs.forEach(img => {
+    const figure = img.closest('.lesson-hero-image');
+
+    // Label
+    const label = document.createElement('div');
+    label.className = 'hero-edit-label';
+    label.textContent = 'Y: ' + getYPct(img).toFixed(0) + '%';
+    figure.appendChild(label);
+
+    let dragging = false;
+    let startY = 0;
+    let startPct = 0;
+
+    function onStart(e) {
+      e.preventDefault();
+      dragging = true;
+      startY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+      startPct = getYPct(img);
+    }
+
+    function onMove(e) {
+      if (!dragging) return;
+      const clientY = e.type.startsWith('touch') ? e.touches[0].clientY : e.clientY;
+      const delta = clientY - startY;
+      // Dragging down → image shifts up (lower %) ; dragging up → image shifts down (higher %)
+      // Sensitivity: ~0.3% per pixel
+      const newPct = Math.max(0, Math.min(100, startPct - delta * 0.3));
+      img.style.objectPosition = 'center ' + newPct.toFixed(1) + '%';
+      label.textContent = 'Y: ' + newPct.toFixed(0) + '%';
+    }
+
+    function onEnd() {
+      dragging = false;
+    }
+
+    figure.addEventListener('mousedown', onStart);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onEnd);
+    figure.addEventListener('touchstart', onStart, { passive: false });
+    window.addEventListener('touchmove', onMove, { passive: true });
+    window.addEventListener('touchend', onEnd);
+  });
+
+  copyBtn.addEventListener('click', () => {
+    let text = '';
+    imgs.forEach(img => {
+      const src = img.getAttribute('src') || '';
+      const lesson = src.replace('-hero.jpg', '').replace('lesson-', 'Lesson ');
+      text += lesson + ': center ' + getYPct(img).toFixed(0) + '%\n';
+    });
+    output.textContent = text.trim();
+    output.style.display = 'block';
+    navigator.clipboard.writeText(text.trim()).catch(() => {});
   });
 }
