@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initGlossary();
   initLightbox();
   initHeroEdit();
+  initPageTransitions();
 });
 
 /* --- Scroll Progress Bar --- */
@@ -978,5 +979,26 @@ function initHeroEdit() {
     output.textContent = text.trim();
     output.style.display = 'block';
     navigator.clipboard.writeText(text.trim()).catch(() => {});
+  });
+}
+
+/* --- Page Transitions --- */
+function initPageTransitions() {
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a[href]');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
+
+    // Skip external links, anchors, new-tab links, and special protocols
+    if (!href || href.startsWith('#') || href.startsWith('http') ||
+        href.startsWith('mailto:') || href.startsWith('tel:') ||
+        link.target === '_blank' || e.ctrlKey || e.metaKey || e.shiftKey) return;
+
+    e.preventDefault();
+    document.body.classList.add('page-exit');
+
+    // Navigate after exit animation completes
+    setTimeout(() => { window.location.href = href; }, 200);
   });
 }
