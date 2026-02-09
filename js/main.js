@@ -984,6 +984,16 @@ function initHeroEdit() {
 
 /* --- Page Transitions --- */
 function initPageTransitions() {
+  // Clear the page-enter animation after it finishes so that
+  // transform: translateY(0) doesn't persist on <body>.
+  // Any transform on body breaks position:fixed descendants (lightbox, mini-player, etc.)
+  document.body.addEventListener('animationend', (e) => {
+    if (e.animationName === 'page-enter') {
+      document.body.style.opacity = '1';
+      document.body.style.animation = 'none';
+    }
+  });
+
   document.addEventListener('click', (e) => {
     const link = e.target.closest('a[href]');
     if (!link) return;
