@@ -174,6 +174,14 @@ function initPracticeQuestions() {
 
     const q = questions[currentIndex];
     typeEl.textContent = q.type;
+    var existingTag = typeEl.parentNode.querySelector('.practice-past-paper-tag');
+    if (existingTag) existingTag.remove();
+    if (q.pastPaper) {
+      var tag = document.createElement('span');
+      tag.className = 'practice-past-paper-tag';
+      tag.textContent = 'Past paper';
+      typeEl.after(tag);
+    }
     textEl.textContent = q.text;
     marksEl.innerHTML = formatMarkScheme(q.marks);
     marksEl.style.display = 'none'; // hide mark scheme initially
