@@ -354,7 +354,7 @@ function initPracticeQuestions() {
     marksEl.style.display = visible ? 'none' : 'block';
     showMarksLink.textContent = visible ? 'Show mark scheme' : 'Hide mark scheme';
   });
-  marksEl.parentNode.insertBefore(showMarksLink, marksEl.nextSibling);
+  marksEl.parentNode.insertBefore(showMarksLink, marksEl);
 }
 
 /* --- Mobile Navigation --- */
