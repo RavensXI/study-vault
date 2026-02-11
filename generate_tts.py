@@ -120,6 +120,10 @@ def normalise_for_tts(text):
     text = re.sub(r'\(([^)]+)\)', r', \1,', text)
     # Ampersands → "and"
     text = text.replace(' & ', ' and ')
+    # "vs." → "versus"
+    text = re.sub(r'\bvs\.', 'versus', text)
+    # Rate slashes: "/year", "/day" etc → "per year", "per day"
+    text = re.sub(r'/(\w+)', r' per \1', text)
     # Numbered list items: "1. Text" → "1, Text" (avoids "one period")
     text = re.sub(r'(\d+)\. ', r'\1, ', text)
     # Clean up punctuation artefacts from above transformations
