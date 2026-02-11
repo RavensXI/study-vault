@@ -240,6 +240,13 @@ def inline_manifest(html_path, manifest):
             new_manifest + '\n\n    window.practiceQuestions'
         )
 
+    # Fill in the audio <source> src if it's empty
+    wav_filename = os.path.basename(html_path).replace('.html', '-narration.wav')
+    content = content.replace(
+        '<source src="" type="audio/wav">',
+        f'<source src="{wav_filename}" type="audio/wav">'
+    )
+
     with open(html_path, 'w', encoding='utf-8') as f:
         f.write(content)
 
