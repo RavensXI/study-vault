@@ -355,6 +355,9 @@ li {
   border: 1px solid var(--border-light);
   border-radius: var(--radius);
   padding: 1.25rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
 .sidebar-section-title {
@@ -864,17 +867,23 @@ body[class*="overlay-"] .sidebar-section {
 
 /* --- Narration Player --- */
 .sidebar-video {
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 */
+  height: 0;
   border-radius: 8px;
   overflow: hidden;
   background: #000;
 }
 .sidebar-video iframe {
-  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   border: 0;
+}
+.sidebar-section:has(.sidebar-video) {
+  overflow: hidden;
 }
 
 .narration-player {
