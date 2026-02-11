@@ -66,6 +66,34 @@ function initCollapsibles() {
       btn.setAttribute('aria-expanded', expanded);
     });
   });
+
+  // Sidebar collapsibles (Related Media)
+  document.querySelectorAll('.sidebar-collapsible-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const section = btn.closest('.sidebar-collapsible');
+      const content = section.querySelector('.sidebar-collapsible-content');
+      const isOpen = section.classList.contains('open');
+
+      if (isOpen) {
+        content.style.maxHeight = content.scrollHeight + 'px';
+        content.offsetHeight;
+        content.style.maxHeight = '0';
+        section.classList.remove('open');
+      } else {
+        section.classList.add('open');
+        content.style.maxHeight = content.scrollHeight + 'px';
+        const onEnd = () => {
+          if (section.classList.contains('open')) {
+            content.style.maxHeight = 'none';
+          }
+          content.removeEventListener('transitionend', onEnd);
+        };
+        content.addEventListener('transitionend', onEnd);
+      }
+
+      btn.setAttribute('aria-expanded', section.classList.contains('open'));
+    });
+  });
 }
 
 /* --- Visited Lesson Tracking (localStorage) --- */
