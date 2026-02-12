@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLightbox();
   initHeroEdit();
   initPageTransitions();
+  initKnowledgeCheck();
 });
 
 /* --- Scroll Progress Bar --- */
@@ -1047,4 +1048,267 @@ function initPageTransitions() {
     // Navigate after exit animation completes
     setTimeout(() => { window.location.href = href; }, 200);
   });
+}
+
+/* --- Knowledge Check Quiz --- */
+function initKnowledgeCheck() {
+  const btn = document.getElementById('knowledge-check-btn');
+  const questions = window.knowledgeCheck;
+  if (!btn || !questions || !questions.length) return;
+
+  const unit = document.body.dataset.unit || 'unknown';
+  const lesson = document.body.dataset.lesson || 'unknown';
+  const storageKey = 'studyvault-kc-' + unit + '/' + lesson;
+
+  // Show saved score on button
+  const scoreEl = document.getElementById('knowledge-check-score');
+  const saved = localStorage.getItem(storageKey);
+  if (saved && scoreEl) scoreEl.textContent = saved;
+
+  btn.addEventListener('click', () => openKnowledgeCheck(questions, storageKey, scoreEl));
+}
+
+function openKnowledgeCheck(questions, storageKey, scoreEl) {
+  let current = 0;
+  let score = 0;
+
+  const overlay = document.createElement('div');
+  overlay.className = 'kc-overlay';
+  overlay.innerHTML =
+    '<div class="kc-modal">' +
+      '<div class="kc-header">' +
+        '<span class="kc-title">Knowledge Check</span>' +
+        '<span class="kc-step" id="kc-step"></span>' +
+      '</div>' +
+      '<div class="kc-body" id="kc-body"></div>' +
+      '<div class="kc-footer" id="kc-footer"></div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) closeKC(); });
+  const onKey = (e) => { if (e.key === 'Escape') closeKC(); };
+  document.addEventListener('keydown', onKey);
+
+  function closeKC() {
+    document.removeEventListener('keydown', onKey);
+    overlay.remove();
+  }
+
+  function getBody() { return overlay.querySelector('#kc-body'); }
+  function getFooter() { return overlay.querySelector('#kc-footer'); }
+
+  function addNextBtn(isCorrect) {
+    const isLast = current === questions.length - 1;
+    const footer = getFooter();
+    footer.querySelector('.kc-btn-primary').style.display = 'none';
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'kc-btn kc-btn-primary';
+    nextBtn.textContent = isLast ? 'See results' : 'Next';
+    nextBtn.addEventListener('click', () => {
+      current++;
+      current < questions.length ? showQuestion() : showResult();
+    });
+    footer.appendChild(nextBtn);
+    // Delay focus to prevent Enter key bleed-through
+    setTimeout(() => nextBtn.focus(), 50);
+  }
+
+  function showQuestion() {
+    const q = questions[current];
+    overlay.querySelector('#kc-step').textContent = (current + 1) + ' / ' + questions.length;
+
+    switch (q.type) {
+      case 'mcq': renderMCQ(q); break;
+      case 'fill': renderFill(q); break;
+      case 'match': renderMatch(q); break;
+    }
+  }
+
+  // --- Multiple Choice ---
+  function renderMCQ(q) {
+    const body = getBody();
+    const footer = getFooter();
+    let selected = -1;
+
+    body.innerHTML = '<p class="kc-question">' + q.q + '</p><div class="kc-options" id="kc-options"></div>';
+    footer.innerHTML = '<button class="kc-btn kc-btn-primary" id="kc-check" disabled>Check</button>';
+
+    const grid = body.querySelector('#kc-options');
+    q.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'kc-option';
+      btn.textContent = opt;
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('locked')) return;
+        grid.querySelectorAll('.kc-option').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selected = i;
+        footer.querySelector('#kc-check').disabled = false;
+      });
+      grid.appendChild(btn);
+    });
+
+    footer.querySelector('#kc-check').addEventListener('click', () => {
+      if (selected < 0) return;
+      grid.querySelectorAll('.kc-option').forEach(b => b.classList.add('locked'));
+      const correct = selected === q.correct;
+      grid.children[selected].classList.add(correct ? 'correct' : 'incorrect');
+      if (!correct) grid.children[q.correct].classList.add('correct');
+      if (correct) score++;
+      addNextBtn(correct);
+    });
+  }
+
+  // --- Fill in the Blank ---
+  function renderFill(q) {
+    const body = getBody();
+    const footer = getFooter();
+    let selected = -1;
+
+    const sentence = q.q.replace('_____', '<span class="kc-blank" id="kc-blank">?</span>');
+    body.innerHTML = '<p class="kc-question kc-fill-sentence">' + sentence + '</p><div class="kc-fill-options" id="kc-fill-opts"></div>';
+    footer.innerHTML = '<button class="kc-btn kc-btn-primary" id="kc-check" disabled>Check</button>';
+
+    const opts = body.querySelector('#kc-fill-opts');
+    // Shuffle option order for display
+    const indices = q.options.map((_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = indices[i]; indices[i] = indices[j]; indices[j] = t;
+    }
+
+    indices.forEach(i => {
+      const btn = document.createElement('button');
+      btn.className = 'kc-fill-btn';
+      btn.textContent = q.options[i];
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('locked')) return;
+        opts.querySelectorAll('.kc-fill-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selected = i;
+        body.querySelector('#kc-blank').textContent = q.options[i];
+        body.querySelector('#kc-blank').classList.add('filled');
+        footer.querySelector('#kc-check').disabled = false;
+      });
+      opts.appendChild(btn);
+    });
+
+    footer.querySelector('#kc-check').addEventListener('click', () => {
+      if (selected < 0) return;
+      opts.querySelectorAll('.kc-fill-btn').forEach(b => b.classList.add('locked'));
+      const correct = selected === q.correct;
+      const blank = body.querySelector('#kc-blank');
+      blank.classList.add(correct ? 'correct' : 'incorrect');
+      opts.querySelectorAll('.kc-fill-btn').forEach(b => {
+        const idx = q.options.indexOf(b.textContent);
+        if (idx === q.correct) b.classList.add('correct');
+        else if (b.classList.contains('selected') && !correct) b.classList.add('incorrect');
+      });
+      if (correct) score++;
+      addNextBtn(correct);
+    });
+  }
+
+  // --- Match Up ---
+  function renderMatch(q) {
+    const body = getBody();
+    const footer = getFooter();
+
+    body.innerHTML = '<p class="kc-question">' + q.q + '</p><div class="kc-match" id="kc-match"></div>';
+    footer.innerHTML = '<button class="kc-btn kc-btn-primary" id="kc-check" disabled>Check</button>';
+
+    const container = body.querySelector('#kc-match');
+
+    // Shuffle right-side options
+    const shuffled = q.right.map((r, i) => ({ text: r, idx: i }));
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = shuffled[i]; shuffled[i] = shuffled[j]; shuffled[j] = t;
+    }
+
+    q.left.forEach((left, i) => {
+      const row = document.createElement('div');
+      row.className = 'kc-match-row';
+      const label = document.createElement('span');
+      label.className = 'kc-match-left';
+      label.textContent = left;
+      const sel = document.createElement('select');
+      sel.className = 'kc-match-select';
+      sel.innerHTML = '<option value="">Select\u2026</option>';
+      shuffled.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = s.idx;
+        opt.textContent = s.text;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener('change', checkAllSelected);
+      row.appendChild(label);
+      row.appendChild(sel);
+      container.appendChild(row);
+    });
+
+    function checkAllSelected() {
+      const selects = container.querySelectorAll('.kc-match-select');
+      const allFilled = Array.from(selects).every(s => s.value !== '');
+      footer.querySelector('#kc-check').disabled = !allFilled;
+    }
+
+    footer.querySelector('#kc-check').addEventListener('click', () => {
+      const selects = container.querySelectorAll('.kc-match-select');
+      let allCorrect = true;
+      selects.forEach((sel, i) => {
+        sel.disabled = true;
+        const row = sel.closest('.kc-match-row');
+        if (parseInt(sel.value) === q.order[i]) {
+          row.classList.add('correct');
+        } else {
+          row.classList.add('incorrect');
+          allCorrect = false;
+        }
+      });
+      if (allCorrect) score++;
+      addNextBtn(allCorrect);
+    });
+  }
+
+  function showResult() {
+    const body = getBody();
+    const footer = getFooter();
+    overlay.querySelector('#kc-step').textContent = 'Done';
+
+    const total = questions.length;
+    const pct = Math.round(score / total * 100);
+    let msg = '';
+    if (pct === 100) msg = 'Perfect recall. You know this topic.';
+    else if (pct >= 60) msg = 'Solid effort. Review what you missed and try again.';
+    else msg = 'Read through the lesson and give it another go.';
+
+    body.innerHTML =
+      '<div class="kc-result">' +
+        '<div class="kc-result-score">' + score + '/' + total + '</div>' +
+        '<div class="kc-result-label">' + pct + '% correct</div>' +
+        '<p class="kc-result-msg">' + msg + '</p>' +
+      '</div>';
+    footer.innerHTML =
+      '<button class="kc-btn kc-btn-secondary" id="kc-retry">Try again</button>' +
+      '<button class="kc-btn kc-btn-primary" id="kc-close">Close</button>';
+
+    const scoreStr = score + '/' + total;
+    const prev = localStorage.getItem(storageKey);
+    const prevScore = prev ? parseInt(prev) : 0;
+    if (score >= prevScore) {
+      localStorage.setItem(storageKey, scoreStr);
+      if (scoreEl) scoreEl.textContent = scoreStr;
+    }
+
+    overlay.querySelector('#kc-close').addEventListener('click', closeKC);
+    overlay.querySelector('#kc-retry').addEventListener('click', () => {
+      current = 0;
+      score = 0;
+      showQuestion();
+    });
+  }
+
+  showQuestion();
 }
