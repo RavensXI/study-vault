@@ -7,7 +7,7 @@ Teacher: Tom Shaun, email: `t.shaun@unity.lancs.sch.uk`
 Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ## Current Status
-**Phase 6 complete** — Knowledge Check quizzes added to all 60 lessons (300 questions total). Sidebar restructured: Resources and Navigate sections removed, Lesson Podcast and Study Tools consolidated into Related Media.
+**Phase 7 complete** — Exam Technique guide section added: 1 hub page + 7 individual guide pages covering every AQA question type. "How do I answer this?" links added dynamically to all 60 lessons' practice questions via JS.
 
 **What's done:**
 - Homepage with 4 unit cards and progress bars
@@ -20,7 +20,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Hero images on all 60 lesson pages (Wikimedia Commons, public domain/CC)
 - Infographic diagrams on all 60 lesson pages (Gemini API generated, one per lesson minimum) — each replaces a text element (key fact box, collapsible, or bullet list) to avoid duplication
 - Practice questions on all 60 lessons (6 per lesson, 360 total) with real AQA past paper questions tagged — see Practice Questions section below
-- TTS narration on all 60 lessons across all 4 units (ElevenLabs Turbo v2.5, cloned voice)
+- TTS narration player UI on all 60 lesson pages (player, mini-player, keyboard shortcuts, paragraph highlighting) — **audio files currently removed**, awaiting ElevenLabs regeneration (see TODO)
 - Accessibility toolbar: dark mode, dyslexia font, font sizing, Irlen overlays
 - Glossary tooltips, collapsible sections, timelines, key fact boxes
 - Floating narration mini-player (appears when main player scrolls out of view)
@@ -42,11 +42,18 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Resources sidebar section removed (Podcast and Notebook consolidated into Related Media)
 - Navigate sidebar section removed (redundant with top nav bar)
 - Knowledge Check quizzes on all 60 lessons (5 questions per lesson, 300 total) — modal overlay with MCQ, fill-in-the-blank, and match-up question types. Best score saved to localStorage. See Knowledge Check section below.
+- Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type (4/8/12/16+4 marks). Each guide has: What the Examiner Wants, Step-by-Step Formula, Timing breakdown, Paragraph Templates, Annotated Model Answer, Common Mistakes. "How do I answer this?" links appear dynamically on all 60 lessons' practice questions (JS-driven, no lesson HTML changes). Homepage banner links to hub. See Exam Technique section below.
 
 **Still TODO:**
-- TTS narration regeneration — 184 `<ul>`/`<ol>` elements were missing `data-narration-id` attributes (now fixed), so bullet lists are silently skipped during narration on all 60 lessons. Full regeneration needed via `generate_tts.py`. Estimated ~355k credits (~$106 overage, or ~$66–88 spread over 3–4 months using included Creator plan credits). Plan: regenerate one unit per month to avoid overage charges.
+- TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month on Creator plan, ~355k credits total). All 60 WAV and JSON files have been deleted; `<source src="">` and `window.narrationManifest` cleared in all HTML. The narration player UI remains in place ready for new audio. The 184 missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed, so bullet lists will be included when audio is regenerated. Generation script: `generate_tts.py` (ElevenLabs version).
 - PWA (service worker + manifest.json)
 - Delete old v1 flat HTML files (conflict-tension.html, health-people.html, elizabethan.html, america.html)
+
+**What didn't work — Gemini 2.5 Flash TTS (abandoned):**
+Attempted using Gemini TTS (`gemini-2.5-flash-preview-tts`) as a cheap interim replacement (~$3–5 total for all 60 lessons). Script: `generate_tts_gemini.py`. Generated all 60 lessons with Charon/Kore voices + faster-whisper timestamp alignment. Two fatal issues:
+1. **Progressive speedup** — the model progressively eliminates pauses as text gets longer. Silence between words drops from ~35% to ~15% over the course of a lesson, effectively doubling speech rate by the end. Affects ALL lessons, not just long ones. By the final minutes the audio is unintelligibly fast with a high-pitched screeching quality.
+2. **Hard output cap at ~655 seconds** — 5 longer lessons (health L12, america L02/L07/L13/L14) hit an exact 31,446,330-byte ceiling. The model compresses all remaining text into the fixed output window, making the speedup even more extreme.
+Batching into shorter API calls (~3000 chars each) was tried but still exhibited speedup within each batch, plus audible pace jumps between batches. Gemini TTS is unsuitable for long-form narration. ElevenLabs remains the only viable option.
 
 **Future features (planned but not started):**
 - Retrieval Practice — cross-lesson spaced repetition quiz (separate from per-lesson Knowledge Check). Would dynamically select questions from lessons the student studied days/weeks ago. Requires backend.
@@ -68,32 +75,33 @@ Study Vault/
 ├── conflict-tension/
 │   ├── index.html            ← Unit contents page
 │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-*-narration.wav           ← TTS audio (all 15 lessons)
-│   ├── lesson-*-narration.json          ← Narration timestamp manifests
 │   ├── Versailles_1919.jpg              ← Hero images (various naming)
 │   ├── lesson 2 hero.jpg … etc
 │   └── diagram_*.png                    ← Infographic diagrams (15 files)
 ├── health-people/
 │   ├── index.html
 │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-*-narration.wav           ← TTS audio (all 15 lessons)
-│   ├── lesson-*-narration.json
 │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
 │   └── diagram_*.png                    ← Infographic diagrams (21 files)
 ├── elizabethan/
 │   ├── index.html
 │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-*-narration.wav           ← TTS audio (all 15 lessons)
-│   ├── lesson-*-narration.json
 │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
 │   └── diagram_*.png                    ← Infographic diagrams (20 files)
 ├── america/
 │   ├── index.html
 │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-*-narration.wav           ← TTS audio (all 15 lessons)
-│   ├── lesson-*-narration.json
 │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
 │   └── diagram_*.png                    ← Infographic diagrams (15 files)
+├── exam-technique/
+│   ├── index.html            ← Hub page with 7 guide cards
+│   ├── factor-essay.html     ← 16+4 SPaG: "How far do you agree?" (Conflict, Health)
+│   ├── write-an-account.html ← 8 marks: "Write an account" (Conflict, Elizabethan)
+│   ├── explain-significance.html ← 8 marks: "Explain significance/importance" (Health, Elizabethan)
+│   ├── which-had-more-impact.html ← 12 marks: "Which had more impact?" (America)
+│   ├── in-what-ways.html     ← 8 marks: "In what ways were lives affected?" (America)
+│   ├── explain-similarities.html ← 8 marks: "Explain two similarities" (Health)
+│   └── describe-two.html     ← 4 marks: "Describe two" (America)
 │
 │ OLD v1 FILES (to be deleted):
 ├── conflict-tension.html
@@ -393,11 +401,56 @@ window.knowledgeCheck = [
 
 ---
 
+## Exam Technique Section
+
+7 guide pages covering every AQA question type, plus a hub page. Accessible from the homepage banner and via "How do I answer this?" links on every lesson's practice questions.
+
+### Guide pages
+
+| File | Marks | Question Type | Units |
+|------|-------|--------------|-------|
+| `factor-essay.html` | 16+4 SPaG | "How far do you agree?" / "Has [factor] been the main factor?" | Conflict, Health |
+| `write-an-account.html` | 8 | "Write an account of..." | Conflict, Elizabethan |
+| `explain-significance.html` | 8 | "Explain the significance..." / "Explain what was important..." | Health, Elizabethan |
+| `which-had-more-impact.html` | 12 | "Which had more impact?" | America |
+| `in-what-ways.html` | 8 | "In what ways were lives affected?" | America |
+| `explain-similarities.html` | 8 | "Explain two ways... similar" | Health |
+| `describe-two.html` | 4 | "Describe two..." | America |
+
+### Each guide contains
+1. **What the Examiner Wants** — plain English + simplified level descriptors
+2. **Step-by-Step Formula** — numbered steps (`.guide-steps` / `.guide-step` / `.guide-step-number`)
+3. **Timing** — minutes breakdown with visual bar (`.guide-timing-bar`)
+4. **Paragraph Templates** — sentence starters (`.guide-template` / `.guide-template-label` / `.guide-starter`)
+5. **Annotated Model Answer** — with examiner callouts (`.guide-model-question` / `.guide-model-paragraph` / `.guide-annotation` / `.guide-model-mark`)
+6. **Common Mistakes** — what to avoid (`.guide-mistakes` / `.guide-mistake` / `.guide-mistake-icon`)
+
+### JS integration
+`getGuideUrl(type)` in `initPracticeQuestions()` maps practice question `type` strings to guide filenames via substring matching. The link is inserted dynamically after the question type badge (and past-paper tag if present) as a `<a class="practice-guide-link" target="_blank">`. No lesson HTML files are modified.
+
+Type string → guide mapping:
+- `'Describe two'` → `describe-two.html`
+- `'Write an account'` → `write-an-account.html`
+- `'Explain the significance'` → `explain-significance.html`
+- `'Explain what was important'` → `explain-significance.html`
+- `'Explain two similarities'` → `explain-similarities.html`
+- `'In what ways'` → `in-what-ways.html`
+- `'Which had more impact'` → `which-had-more-impact.html`
+- `'How far do you agree'` → `factor-essay.html`
+- `'Has '` (with trailing space) → `factor-essay.html` (catches all Health factor variants)
+
+### Theme
+Purple: accent `#7c3aed`, light `#f5f3ff`, badge `#ede9fe`. Body class: `unit-exam-technique`. Dark mode variants included.
+
+---
+
 ## TTS Narration Generation
 
-All 60 lessons have narration generated via ElevenLabs. The script is `generate_tts.py` in the project root.
+**Current state:** All narration audio has been removed. WAV files, JSON manifests, and HTML references (`<source src="">`, `window.narrationManifest`) are all cleared. The narration player UI remains in all 60 lesson pages, ready for new audio. The 184 previously-missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed.
 
-### Process
+**Plan:** Regenerate with ElevenLabs cloned voice (`generate_tts.py`) one unit per month (~$22/month on Creator plan, ~355k credits total).
+
+### ElevenLabs process (generate_tts.py)
 1. Extract narrable text from the HTML (every element with `data-narration-id`)
 2. Skip visual-only elements (`.key-fact-label`, `.exam-tip-label`)
 3. Normalise text for speech (strip quotes, convert parentheses to commas, `&` → "and", `vs.` → "versus", rate slashes → "per", etc.)
@@ -413,7 +466,7 @@ All 60 lessons have narration generated via ElevenLabs. The script is `generate_
 - Each chunk's duration = len(pcm_bytes) / (24000 * 2)
 - Add 0.4s silence (padding) between chunks
 - Manifest JSON: `[{ "id": "n1", "start": 0.0, "end": 1.57 }, ...]`
-- Total credits used: ~211k across all 60 lessons
+- Previous run used ~211k credits across all 60 lessons; next run will be higher due to the 184 newly-tagged bullet lists
 
 ---
 
@@ -466,7 +519,7 @@ All initialised in `DOMContentLoaded`:
 - `initCollapsibles()` — expand/collapse with smooth animation (also handles sidebar collapsibles for Related Media)
 - `initVisitedTracking()` — localStorage `studyvault-visited`, marks lessons visited
 - `initMobileNav()` — hamburger menu for mobile
-- `initPracticeQuestions()` — random question selection, AI clipboard marking, email to teacher, formatted mark scheme display, past paper badge rendering via `pastPaper` property
+- `initPracticeQuestions()` — random question selection, AI clipboard marking, email to teacher, formatted mark scheme display, past paper badge rendering via `pastPaper` property, "How do I answer this?" guide links via `getGuideUrl()` type-string mapping
 - `initNarration()` — play/pause, progress bar, speed toggle (1x/1.25x/1.5x/0.75x), paragraph highlighting, collapsed section shimmer, keyboard shortcuts (Space=play/pause, Left/Right=skip 5s), floating mini-player when main player out of view, auto-scroll suppression when user scrolls away
 - `initAccessibility()` — dark mode toggle, dyslexia font toggle (OpenDyslexic), font size A-/A+ (3 steps), Irlen overlay colours (6 options), all persisted in localStorage `studyvault-a11y`
 - `initGlossary()` — creates popup tooltips from `data-def` attributes, hover on desktop, tap on mobile, viewport flip detection

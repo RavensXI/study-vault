@@ -193,6 +193,25 @@ function initPracticeQuestions() {
 
   let currentIndex = -1;
 
+  function getGuideUrl(type) {
+    if (!type) return null;
+    var guides = [
+      ['Describe two', 'describe-two.html'],
+      ['Write an account', 'write-an-account.html'],
+      ['Explain the significance', 'explain-significance.html'],
+      ['Explain what was important', 'explain-significance.html'],
+      ['Explain two similarities', 'explain-similarities.html'],
+      ['In what ways', 'in-what-ways.html'],
+      ['Which had more impact', 'which-had-more-impact.html'],
+      ['How far do you agree', 'factor-essay.html'],
+      ['Has ', 'factor-essay.html']
+    ];
+    for (var i = 0; i < guides.length; i++) {
+      if (type.indexOf(guides[i][0]) !== -1) return '../exam-technique/' + guides[i][1];
+    }
+    return null;
+  }
+
   function showQuestion() {
     // Pick a random question different from current
     let idx;
@@ -205,11 +224,24 @@ function initPracticeQuestions() {
     typeEl.textContent = q.type;
     var existingTag = typeEl.parentNode.querySelector('.practice-past-paper-tag');
     if (existingTag) existingTag.remove();
+    var existingGuide = typeEl.parentNode.querySelector('.practice-guide-link');
+    if (existingGuide) existingGuide.remove();
     if (q.pastPaper) {
       var tag = document.createElement('span');
       tag.className = 'practice-past-paper-tag';
       tag.textContent = 'Past paper';
       typeEl.after(tag);
+    }
+    var guideUrl = getGuideUrl(q.type);
+    if (guideUrl) {
+      var guideLink = document.createElement('a');
+      guideLink.className = 'practice-guide-link';
+      guideLink.href = guideUrl;
+      guideLink.target = '_blank';
+      guideLink.rel = 'noopener noreferrer';
+      guideLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How do I answer this?';
+      var insertAfter = typeEl.parentNode.querySelector('.practice-past-paper-tag') || typeEl;
+      insertAfter.after(guideLink);
     }
     textEl.textContent = q.text;
     marksEl.innerHTML = formatMarkScheme(q.marks);
