@@ -9,7 +9,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 ## Current Status
 **Platform branch** — This branch extends the single-subject History site into a multi-subject GCSE revision platform. It is being developed separately from `main` so current students can keep using the live History site while platform features are built. The `main` branch has the live student-facing site (History only); this `platform` branch adds login, subject selection, a student dashboard, and moves all History content into a `history/` subfolder.
 
-**Main branch** — Exam Technique guide pages (Phase 8 complete), plus all original History content at root level. See the `main` branch CLAUDE.md for full details on lesson content, practice questions, knowledge checks, etc.
+**Main branch** — Phase 9 complete (Revision Techniques section, nav improvements, image compression). See the `main` branch CLAUDE.md for full details.
 
 **What's done:**
 - Homepage with 4 unit cards and progress bars
@@ -50,6 +50,11 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Subject picker — 25 GCSE subjects in 6 groups (Core, Sciences, Languages, Humanities, Creative & Practical, Business & Computing)
 - Student dashboard with greeting, exam countdown, today's revision cards, progress stats, subject grid
 - Subject card images for all 25 subjects (Unsplash/free stock photos)
+- Revision Techniques guide section — 1 hub page + 7 guide pages for evidence-based revision strategies (green theme `#16a34a`). Hub at `revision-technique/index.html`, guides cover retrieval practice, spaced repetition, elaborative interrogation, dual coding, interleaving, knowledge organisers, timed exam practice. Each has research citations, step-by-step method, worked examples, common mistakes.
+- Site-wide nav links: Exam Technique + Revision Techniques in header nav on all lesson/unit/guide pages. JS-driven icons (pen for exam technique in purple, lightbulb for revision techniques in green) via `initNavIcons()`
+- Contextual revision tips: green lightbulb buttons auto-injected on `.key-fact`, `.timeline`, `.collapsible` elements linking to relevant revision technique guides — via `initRevisionTips()`
+- Pill-styled prev/next lesson links in header nav, smart back-link positioning on first/last lessons via `initLessonNavBackSlot()`
+- **Image compression**: all images compressed (hero JPGs resized to max 1400px at quality 82, diagram PNGs converted to JPEG at quality 85, subject selector images resized to 640px at quality 80). Total reduction ~77%.
 
 **Still TODO:**
 - TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month on Creator plan, ~355k credits total). All 60 WAV and JSON files have been deleted; `<source src="">` and `window.narrationManifest` cleared in all HTML. The narration player UI remains in place ready for new audio. The 184 missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed, so bullet lists will be included when audio is regenerated. Generation script: `generate_tts.py` (ElevenLabs version).
@@ -86,31 +91,40 @@ Study Vault/
 │   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
 │   │   ├── Versailles_1919.jpg              ← Hero images (various naming)
 │   │   ├── lesson 2 hero.jpg … etc
-│   │   └── diagram_*.png                    ← Infographic diagrams (15 files)
+│   │   └── diagram_*.jpg                    ← Infographic diagrams (15 files, converted from PNG)
 │   ├── health-people/
 │   │   ├── index.html
 │   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
 │   │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
-│   │   └── diagram_*.png                    ← Infographic diagrams (21 files)
+│   │   └── diagram_*.jpg                    ← Infographic diagrams (21 files, converted from PNG)
 │   ├── elizabethan/
 │   │   ├── index.html
 │   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
 │   │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
-│   │   └── diagram_*.png                    ← Infographic diagrams (20 files)
+│   │   └── diagram_*.jpg                    ← Infographic diagrams (20 files, converted from PNG)
 │   ├── america/
 │   │   ├── index.html
 │   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
 │   │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
-│   │   └── diagram_*.png                    ← Infographic diagrams (15 files)
-│   └── exam-technique/
-│       ├── index.html            ← Hub page with 7 guide cards
-│       ├── factor-essay.html     ← 16+4 SPaG: "How far do you agree?" (Conflict, Health)
-│       ├── write-an-account.html ← 8 marks: "Write an account" (Conflict, Elizabethan)
-│       ├── explain-significance.html ← 8 marks: "Explain significance/importance" (Health, Elizabethan)
-│       ├── which-had-more-impact.html ← 12 marks: "Which had more impact?" (America)
-│       ├── in-what-ways.html     ← 8 marks: "In what ways were lives affected?" (America)
-│       ├── explain-similarities.html ← 8 marks: "Explain two similarities" (Health)
-│       └── describe-two.html     ← 4 marks: "Describe two" (America)
+│   │   └── diagram_*.jpg                    ← Infographic diagrams (15 files, converted from PNG)
+│   ├── exam-technique/
+│   │   ├── index.html            ← Hub page with 7 guide cards (purple theme)
+│   │   ├── factor-essay.html     ← 16+4 SPaG: "How far do you agree?" (Conflict, Health)
+│   │   ├── write-an-account.html ← 8 marks: "Write an account" (Conflict, Elizabethan)
+│   │   ├── explain-significance.html ← 8 marks: "Explain significance/importance" (Health, Elizabethan)
+│   │   ├── which-had-more-impact.html ← 12 marks: "Which had more impact?" (America)
+│   │   ├── in-what-ways.html     ← 8 marks: "In what ways were lives affected?" (America)
+│   │   ├── explain-similarities.html ← 8 marks: "Explain two similarities" (Health)
+│   │   └── describe-two.html     ← 4 marks: "Describe two" (America)
+│   └── revision-technique/
+│       ├── index.html            ← Hub page with 7 technique cards (green theme)
+│       ├── retrieval-practice.html    ← Brain dumps, self-quizzing, flashcards
+│       ├── spaced-repetition.html     ← Spacing effect, revision timetables
+│       ├── elaborative-interrogation.html ← Asking "why/how", causal chains
+│       ├── dual-coding.html           ← Timelines, flowcharts, comparison tables
+│       ├── interleaving.html          ← Mixing topics and question types
+│       ├── knowledge-organisers.html  ← One-page summaries + self-test
+│       └── timed-exam-practice.html   ← Full timed answers with self-marking
 │
 │ OLD v1 FILES (to be deleted):
 ├── conflict-tension.html
@@ -249,9 +263,8 @@ All platform CSS is in `css/style.css`. Key class patterns:
 All have dark mode variants via `body.dark-mode` selectors. Mobile responsive breakpoints at 960px and 768px.
 
 ### What's still needed on this branch
-- Merge latest `main` changes (exam technique hub redesign, guide page improvements) into platform branch — adjust paths from root to `history/` subfolder
+- Content for other subjects beyond History — **Business Studies is next** (line manager's subject, for demo purposes)
 - Eventually: real authentication backend (likely Supabase), cross-device progress sync
-- Eventually: content for other subjects beyond History
 - Eventually: replace `main` with `platform` as the live site
 
 ---
@@ -286,6 +299,8 @@ Each unit has a body class that sets CSS custom properties:
 | Health & People | `unit-health` | `#0d9488` (teal) | `#f0fdfa` | `#ccfbf1` |
 | Elizabethan | `unit-elizabethan` | `#b45309` (amber) | `#fffbeb` | `#fef3c7` |
 | America | `unit-america` | `#2563eb` (blue) | `#eff6ff` | `#dbeafe` |
+| Exam Technique | `unit-exam-technique` | `#7c3aed` (purple) | `#f5f3ff` | `#ede9fe` |
+| Revision Techniques | `unit-revision-technique` | `#16a34a` (green) | `#f0fdf4` | `#dcfce7` |
 
 ---
 
@@ -421,7 +436,7 @@ Every lesson page follows this exact structure. Copy `conflict-tension/lesson-01
 **Diagram:**
 ```html
 <figure class="diagram">
-  <img src="diagram_name.png" alt="Descriptive alt text">
+  <img src="diagram_name.jpg" alt="Descriptive alt text">
 </figure>
 ```
 
@@ -656,6 +671,9 @@ All initialised in `DOMContentLoaded`:
 - `initLightbox()` — click-to-expand on hero images and diagrams, overlay with close button
 - `initHeroEdit()` — activated via `?hero-edit` URL param, drag hero images to adjust object-position, copy values button
 - `initPageTransitions()` — intercepts internal link clicks, fades out page, then navigates; new page fades in via CSS animation
+- `initRevisionTips()` — green lightbulb tips auto-injected on `.key-fact`, `.timeline`, `.collapsible` linking to revision technique guides
+- `initNavIcons()` — pen icon (purple) on Exam Technique nav links, lightbulb icon (green) on Revision Techniques nav links, pill styling on prev/next lesson links
+- `initLessonNavBackSlot()` — moves back-to-unit pill into empty grid slot on first/last lessons
 
 ---
 
@@ -781,7 +799,7 @@ All 60 lessons have at least one infographic diagram generated via Gemini API (`
 
 **Design principles:** Infographics NOT illustrations. One concept per image. Let visuals do the work. Replace the text element the diagram covers. Keep text minimal and bold. Clean white background.
 
-**Diagram counts:** Elizabethan 20, Health 21, Conflict 15 (6 pre-existing + 9 new), America 15. Total: ~71 diagram PNGs.
+**Diagram counts:** Elizabethan 20, Health 21, Conflict 15 (6 pre-existing + 9 new), America 15. Total: ~71 diagrams (now JPG format — converted from PNG for faster loading).
 
 ### Elizabethan (amber #b45309)
 | Lesson | Filename | Concept |
