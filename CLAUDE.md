@@ -7,9 +7,9 @@ Teacher: Tom Shaun, email: `t.shaun@unity.lancs.sch.uk`
 Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ## Current Status
-**Phase 8 in progress (platform branch)** — Multi-subject platform migration. History content moved into `history/` subfolder. New top-level homepage with subject cards (History active, Geography and English Literature as Coming Soon). All 60 lessons, 4 unit indexes, and exam technique pages updated with new asset paths. The `main` branch retains the Phase 7 single-subject layout for current students.
+**Platform branch** — This branch extends the single-subject History site into a multi-subject GCSE revision platform. It is being developed separately from `main` so current students can keep using the live History site while platform features are built. The `main` branch has the live student-facing site (History only); this `platform` branch adds login, subject selection, a student dashboard, and moves all History content into a `history/` subfolder.
 
-**Phase 7 complete (main branch)** — Exam Technique guide section added: 1 hub page + 7 individual guide pages covering every AQA question type. "How do I answer this?" links added dynamically to all 60 lessons' practice questions via JS.
+**Main branch** — Exam Technique guide pages (Phase 8 complete), plus all original History content at root level. See the `main` branch CLAUDE.md for full details on lesson content, practice questions, knowledge checks, etc.
 
 **What's done:**
 - Homepage with 4 unit cards and progress bars
@@ -45,7 +45,11 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Navigate sidebar section removed (redundant with top nav bar)
 - Knowledge Check quizzes on all 60 lessons (5 questions per lesson, 300 total) — modal overlay with MCQ, fill-in-the-blank, and match-up question types. Best score saved to localStorage. See Knowledge Check section below.
 - Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type (4/8/12/16+4 marks). Each guide has: What the Examiner Wants, Step-by-Step Formula, Timing breakdown, Paragraph Templates, Annotated Model Answer, Common Mistakes. "How do I answer this?" links appear dynamically on all 60 lessons' practice questions (JS-driven, no lesson HTML changes). Homepage banner links to hub. See Exam Technique section below.
-- Multi-subject platform structure — History content moved into `history/` subfolder. New top-level homepage with subject selection cards. History card links to `history/index.html`. Geography and English Literature shown as Coming Soon (greyed out, non-clickable). All internal navigation links still work via relative path resolution.
+- Multi-subject platform structure — History content moved into `history/` subfolder
+- Student login system with 3 demo accounts (Emma, Jake, Guest)
+- Subject picker — 25 GCSE subjects in 6 groups (Core, Sciences, Languages, Humanities, Creative & Practical, Business & Computing)
+- Student dashboard with greeting, exam countdown, today's revision cards, progress stats, subject grid
+- Subject card images for all 25 subjects (Unsplash/free stock photos)
 
 **Still TODO:**
 - TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month on Creator plan, ~355k credits total). All 60 WAV and JSON files have been deleted; `<source src="">` and `window.narrationManifest` cleared in all HTML. The narration player UI remains in place ready for new audio. The 184 missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed, so bullet lists will be included when audio is regenerated. Generation script: `generate_tts.py` (ElevenLabs version).
@@ -132,6 +136,123 @@ Study Vault/
 - **Root `index.html`** references CSS/JS as `css/style.css` and `js/main.js`
 - **`../index.html`** links in lesson/unit pages naturally resolve to `history/index.html` (correct)
 - **`../exam-technique/`** in JS `getGuideUrl()` resolves to `history/exam-technique/` (correct)
+
+---
+
+## Platform Features (this branch only)
+
+### Branch relationship
+- **`main`** — live student-facing site. History content at root level (`conflict-tension/`, `health-people/`, etc.). Single-subject, no login.
+- **`platform`** — multi-subject platform. History content under `history/` subfolder. Login system, subject picker, dashboard. Will eventually replace `main` when ready.
+- When merging `main` improvements into `platform`, be aware of the path difference (root vs `history/` subfolder).
+
+### Student Login System
+
+The root `index.html` is a single-page app with three views: login, subject picker, and dashboard. All state is in localStorage — no backend.
+
+**Three demo accounts:**
+```javascript
+var demoUsers = [
+  { username: 'emma', password: 'revision', name: 'Emma Wilson',
+    defaults: ['history','english-lit','maths','combined-science','geography','french','fine-art'],
+    examDate: '2026-05-11',
+    stats: { lessons: 14, totalLessons: 60, avgScore: 78, streak: 5 },
+    todayRevision: [
+      { subject: 'History', lesson: 'The Abyssinia Crisis', tag: 'new', color: '#c44536', url: 'history/conflict-tension/lesson-09.html' },
+      { subject: 'English Lit', lesson: 'An Inspector Calls: Themes', tag: 'revisit', color: '#7c3aed' },
+      { subject: 'Geography', lesson: 'Urban Challenges in the UK', tag: 'new', color: '#059669' },
+      { subject: 'French', lesson: 'School and Education Vocabulary', tag: 'new', color: '#1d4ed8' }
+    ]
+  },
+  { username: 'jake', password: 'revision', name: 'Jake Morris',
+    defaults: ['history','english-lang','maths','physics','computer-science','sport-science','business'],
+    examDate: '2026-05-11',
+    stats: { lessons: 9, totalLessons: 60, avgScore: 65, streak: 3 },
+    todayRevision: [
+      { subject: 'History', lesson: 'America and the Boom', tag: 'new', color: '#c44536', url: 'history/america/lesson-01.html' },
+      { subject: 'Physics', lesson: 'Energy Stores and Transfers', tag: 'revisit', color: '#0284c7' },
+      { subject: 'Computer Science', lesson: 'Binary and Data Representation', tag: 'new', color: '#4f46e5' },
+      { subject: 'Maths', lesson: 'Quadratic Equations', tag: 'new', color: '#2563eb' }
+    ]
+  },
+  { username: 'guest', password: 'guest', name: 'Guest Student',
+    defaults: null, examDate: '2026-05-11', stats: null, todayRevision: null }
+];
+```
+
+**Auth flow:**
+1. User enters username/password → matched against `demoUsers` array
+2. On match: `{ username, name }` saved to `localStorage` key `studyvault-user`
+3. Demo data (stats, todayRevision, examDate) saved to `studyvault-demo-{username}`
+4. If user has saved subjects → go to dashboard. If not (or guest) → go to subject picker
+5. Sign out clears the user key and shows login again
+
+**Helper functions in index.html:**
+- `getUser()` / `setUser(u)` / `clearUser()` — manage `studyvault-user` in localStorage
+- `findDemoUser(username)` — look up a demo user by username
+- `getDemoData()` / `saveDemoData(demo)` — manage `studyvault-demo-{username}` in localStorage
+- `getSaved()` / `save(ids)` — manage `studyvault-subjects-{username}` in localStorage
+
+### Subject Picker
+
+25 GCSE subjects across 6 groups. Cards show subject image, name, and exam board. Students toggle cards to select/deselect. "Continue" button requires at least one selection.
+
+**Subject groups:**
+| Group | Subjects |
+|-------|----------|
+| Core | English Language (AQA), English Literature (AQA), Mathematics (Edexcel) |
+| Sciences | Combined Science Trilogy (AQA), Biology (AQA), Chemistry (AQA), Physics (AQA) |
+| Languages | French (AQA), German (AQA), Spanish (AQA) |
+| Humanities | Geography (AQA), **History (AQA)** ← only active subject, Religious Studies (AQA) |
+| Creative & Practical | Fine Art, Textiles, Photography, D&T, Food, Drama (OCR), Music (Eduqas), Music Tech (NCFE) |
+| Business & Computing | Business (Edexcel), Computer Science (OCR), Creative iMedia (OCR), Sport Science (OCR) |
+
+Only History has `active: true` and a `url` property. All other subjects render as "Coming Soon" cards (greyed out, non-clickable).
+
+**Subject images:** `images/subject-{id}.jpg` — one per subject. Downloaded from Unsplash via `download_subject_images.py`. History image uses the existing hero style.
+
+### Student Dashboard
+
+Visible after login when subjects are saved. Four sections top to bottom:
+
+**1. Greeting + Exam Countdown**
+- Time-of-day greeting: "Good morning, Emma" / "Good afternoon" / "Good evening"
+- Countdown pill: "84 days until your first exam" (AQA GCSEs start May 11, 2026)
+
+**2. Today's Revision Panel**
+- 3-4 cards in horizontal row. Each shows subject colour accent, subject name, lesson title, tag ("New" green / "Revisit" amber)
+- History cards have URLs and are clickable links. Other subjects are greyed-out divs
+- Guest user sees "Select your subjects to get started"
+
+**3. Progress Stats Row**
+- 3 stat cards: Lessons completed (X / 60 with progress bar), Avg quiz score (% with colour: green ≥70, amber ≥50, red <50), Best streak (X days)
+- Hidden for guest user (no stats)
+
+**4. Subject Cards Grid**
+- Shows only the user's selected subjects (not all 25)
+- History card shows progress bar with lesson count
+- Other subjects show "Coming Soon" badge
+- "Change subjects" and "Sign out" buttons above the grid
+
+### CSS for platform features
+
+All platform CSS is in `css/style.css`. Key class patterns:
+
+**Login:** `.login-section`, `.login-box`, `.login-field`, `.login-btn`, `.login-error`, `.login-demo`, `.login-demo-account`
+
+**Subject picker:** `.subject-picker`, `.picker-intro`, `.picker-group`, `.picker-group-label`, `.picker-group-cards`, `.picker-card`, `.picker-card.selected`, `.picker-card-image`, `.picker-card-name`, `.picker-card-board`, `.picker-card-check`, `.picker-continue-btn`
+
+**Dashboard:** `.dashboard`, `.dashboard-greeting-row`, `.dashboard-greeting`, `.greeting-text`, `.dashboard-countdown`, `.dashboard-section-title`, `.dashboard-today`, `.today-cards`, `.today-card`, `.today-card--disabled`, `.today-card-subject`, `.today-card-lesson`, `.today-tag`, `.today-tag--new`, `.today-tag--revisit`, `.dashboard-stats`, `.stat-card`, `.stat-value`, `.stat-total`, `.stat-label`, `.stat-bar`, `.stat-bar-fill`, `.stat-good`, `.stat-ok`, `.stat-low`, `.dashboard-actions`, `.dashboard-action-btn`, `.dashboard-signout-btn`
+
+**Subject cards:** `.subject-grid`, `.subject-card`, `.subject-card--coming-soon`, `.unit-card-image`, `.unit-card-body`, `.subject-progress`, `.subject-progress-bar`, `.subject-progress-fill`, `.subject-progress-label`, `.coming-soon-badge`
+
+All have dark mode variants via `body.dark-mode` selectors. Mobile responsive breakpoints at 960px and 768px.
+
+### What's still needed on this branch
+- Merge latest `main` changes (exam technique hub redesign, guide page improvements) into platform branch — adjust paths from root to `history/` subfolder
+- Eventually: real authentication backend (likely Supabase), cross-device progress sync
+- Eventually: content for other subjects beyond History
+- Eventually: replace `main` with `platform` as the live site
 
 ---
 
