@@ -276,6 +276,60 @@ li {
   opacity: 1;
 }
 
+.header-nav a .nav-icon {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  vertical-align: -0.1em;
+  margin-right: 0.2em;
+}
+
+.header-nav a .nav-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.header-nav a.nav-exam-technique .nav-icon {
+  color: #7c3aed;
+}
+
+.header-nav a.nav-revision-techniques .nav-icon {
+  color: #16a34a;
+}
+
+.header-nav a.nav-exam-technique:hover .nav-icon {
+  color: #6d28d9;
+}
+
+.header-nav a.nav-revision-techniques:hover .nav-icon {
+  color: #15803d;
+}
+
+body.dark-mode .header-nav a.nav-exam-technique .nav-icon {
+  color: #a78bfa;
+}
+
+body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
+  color: #4ade80;
+}
+
+.header-nav a.nav-lesson-pill {
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.3em 0.85em;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.header-nav a.nav-lesson-pill:hover {
+  background: var(--accent);
+  color: #fff;
+  opacity: 0.88;
+  text-decoration: none;
+}
+
 /* Mobile hamburger */
 .mobile-menu-btn {
   display: none;
@@ -2214,15 +2268,25 @@ h3[data-narration-id].narration-active {
 .back-link {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-secondary);
+  gap: 0.35rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-badge);
+  padding: 0.5em 1.1em;
+  border-radius: 999px;
   margin-top: 1.5rem;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .back-link:hover {
-  color: var(--accent);
+  background: var(--accent-badge);
+  border-color: var(--accent);
+  text-decoration: none;
+  opacity: 1;
 }
 
 /* ============================
@@ -3199,6 +3263,12 @@ body.dark-mode .stat-bar-fill {
     padding: 0.65em 0.75em;
   }
 
+  .header-nav a.nav-lesson-pill {
+    width: auto;
+    align-self: flex-start;
+    font-size: 0.9rem;
+  }
+
   .mobile-menu-btn {
     display: flex;
     align-items: center;
@@ -3337,6 +3407,17 @@ body.unit-exam-technique {
 body.dark-mode.unit-exam-technique {
   --accent-light: #1f1a2e;
   --accent-badge: #2a2040;
+}
+
+body.unit-revision-technique {
+  --accent: #16a34a;
+  --accent-light: #f0fdf4;
+  --accent-badge: #dcfce7;
+}
+
+body.dark-mode.unit-revision-technique {
+  --accent-light: #0a2618;
+  --accent-badge: #14532d;
 }
 
 /* --- Exam Technique Banner (Homepage) --- */
@@ -3527,11 +3608,13 @@ body.dark-mode .guide-question-card:hover {
 }
 
 /* --- Guide Page Header (centred on guide pages) --- */
-body.unit-exam-technique .unit-page-header {
+body.unit-exam-technique .unit-page-header,
+body.unit-revision-technique .unit-page-header {
   text-align: center;
 }
 
-body.unit-exam-technique .unit-page-header p {
+body.unit-exam-technique .unit-page-header p,
+body.unit-revision-technique .unit-page-header p {
   margin-left: auto;
   margin-right: auto;
 }
@@ -3729,13 +3812,22 @@ body.unit-exam-technique .unit-page-header p {
 }
 
 .guide-nav-link {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--accent);
+  background: var(--accent-light);
+  border: 1px solid var(--accent-badge);
+  padding: 0.5em 1.1em;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .guide-nav-link:hover {
-  text-decoration: underline;
+  background: var(--accent-badge);
+  border-color: var(--accent);
+  text-decoration: none;
+  opacity: 1;
 }
 
 /* --- Practice Guide Link (in lesson practice sections) --- */
@@ -3937,6 +4029,97 @@ body.dark-mode .guide-quick-ref {
 body.dark-mode .guide-video-placeholder {
   background: var(--accent-light);
   border-color: var(--accent-badge);
+}
+
+/* ============================
+   Revision Technique Tips
+   ============================ */
+.revision-tip-anchor {
+  position: relative;
+}
+
+.revision-tip-btn {
+  position: absolute;
+  top: 0.55rem;
+  right: 0.55rem;
+  width: 1.65rem;
+  height: 1.65rem;
+  border: none;
+  border-radius: 50%;
+  background: #f0fdf4;
+  color: #16a34a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s ease, transform 0.15s ease;
+  z-index: 2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.revision-tip-btn:hover {
+  background: #dcfce7;
+  transform: scale(1.1);
+}
+
+.revision-tip-btn svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.revision-tip-popup {
+  display: none;
+  position: absolute;
+  top: 2.6rem;
+  right: 0.3rem;
+  width: 15rem;
+  background: #fff;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  box-shadow: 0 4px 16px rgba(22, 163, 74, 0.10), 0 1px 3px rgba(0, 0, 0, 0.06);
+  z-index: 10;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-color, #2d2a26);
+}
+
+.revision-tip-popup.is-open {
+  display: block;
+}
+
+.revision-tip-popup p {
+  margin: 0 0 0.45rem;
+}
+
+.revision-tip-popup a {
+  color: #16a34a;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.revision-tip-popup a:hover {
+  text-decoration: underline;
+}
+
+body.dark-mode .revision-tip-btn {
+  background: #0a2618;
+  color: #4ade80;
+}
+
+body.dark-mode .revision-tip-btn:hover {
+  background: #14532d;
+}
+
+body.dark-mode .revision-tip-popup {
+  background: #0a1f17;
+  border-color: #14532d;
+  color: #e8f0ec;
+}
+
+body.dark-mode .revision-tip-popup a {
+  color: #4ade80;
 }
 
 /* ============================
