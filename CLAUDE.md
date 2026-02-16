@@ -1,13 +1,15 @@
 # StudyVault — Project Reference
 
-GCSE History revision site rebuilt from WordPress to static HTML. Opens directly in browser via `file://` protocol — no server, no build tools. Hosted on GitHub Pages via https://github.com/RavensXI/study-vault.
+Multi-subject GCSE revision site rebuilt from WordPress to static HTML. Opens directly in browser via `file://` protocol — no server, no build tools. Hosted on GitHub Pages via https://github.com/RavensXI/study-vault. Currently History only — Geography and English Literature are planned (Coming Soon cards on homepage).
 
 ## Owner
 Teacher: Tom Shaun, email: `t.shaun@unity.lancs.sch.uk`
 Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ## Current Status
-**Phase 7 complete** — Exam Technique guide section added: 1 hub page + 7 individual guide pages covering every AQA question type. "How do I answer this?" links added dynamically to all 60 lessons' practice questions via JS.
+**Phase 8 in progress (platform branch)** — Multi-subject platform migration. History content moved into `history/` subfolder. New top-level homepage with subject cards (History active, Geography and English Literature as Coming Soon). All 60 lessons, 4 unit indexes, and exam technique pages updated with new asset paths. The `main` branch retains the Phase 7 single-subject layout for current students.
+
+**Phase 7 complete (main branch)** — Exam Technique guide section added: 1 hub page + 7 individual guide pages covering every AQA question type. "How do I answer this?" links added dynamically to all 60 lessons' practice questions via JS.
 
 **What's done:**
 - Homepage with 4 unit cards and progress bars
@@ -43,6 +45,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Navigate sidebar section removed (redundant with top nav bar)
 - Knowledge Check quizzes on all 60 lessons (5 questions per lesson, 300 total) — modal overlay with MCQ, fill-in-the-blank, and match-up question types. Best score saved to localStorage. See Knowledge Check section below.
 - Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type (4/8/12/16+4 marks). Each guide has: What the Examiner Wants, Step-by-Step Formula, Timing breakdown, Paragraph Templates, Annotated Model Answer, Common Mistakes. "How do I answer this?" links appear dynamically on all 60 lessons' practice questions (JS-driven, no lesson HTML changes). Homepage banner links to hub. See Exam Technique section below.
+- Multi-subject platform structure — History content moved into `history/` subfolder. New top-level homepage with subject selection cards. History card links to `history/index.html`. Geography and English Literature shown as Coming Soon (greyed out, non-clickable). All internal navigation links still work via relative path resolution.
 
 **Still TODO:**
 - TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month on Creator plan, ~355k credits total). All 60 WAV and JSON files have been deleted; `<source src="">` and `window.narrationManifest` cleared in all HTML. The narration player UI remains in place ready for new audio. The 184 missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed, so bullet lists will be included when audio is regenerated. Generation script: `generate_tts.py` (ElevenLabs version).
@@ -66,42 +69,44 @@ Batching into shorter API calls (~3000 chars each) was tried but still exhibited
 ```
 Study Vault/
 ├── CLAUDE.md                 ← This file
-├── index.html                ← Homepage (4 unit cards + progress)
+├── index.html                ← NEW: subject selection homepage (History + Coming Soon cards)
 ├── preview.html              ← Responsive preview tool (dev only)
 ├── css/style.css             ← All styling
 ├── js/main.js                ← All JS
 ├── images/padlock.svg            ← Logo lock icon source (inline SVG used in all pages)
 ├── fonts/opendyslexic-0.91.12/compiled/  ← OpenDyslexic woff2/woff
-├── conflict-tension/
-│   ├── index.html            ← Unit contents page
-│   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── Versailles_1919.jpg              ← Hero images (various naming)
-│   ├── lesson 2 hero.jpg … etc
-│   └── diagram_*.png                    ← Infographic diagrams (15 files)
-├── health-people/
-│   ├── index.html
-│   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
-│   └── diagram_*.png                    ← Infographic diagrams (21 files)
-├── elizabethan/
-│   ├── index.html
-│   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
-│   └── diagram_*.png                    ← Infographic diagrams (20 files)
-├── america/
-│   ├── index.html
-│   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
-│   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
-│   └── diagram_*.png                    ← Infographic diagrams (15 files)
-├── exam-technique/
-│   ├── index.html            ← Hub page with 7 guide cards
-│   ├── factor-essay.html     ← 16+4 SPaG: "How far do you agree?" (Conflict, Health)
-│   ├── write-an-account.html ← 8 marks: "Write an account" (Conflict, Elizabethan)
-│   ├── explain-significance.html ← 8 marks: "Explain significance/importance" (Health, Elizabethan)
-│   ├── which-had-more-impact.html ← 12 marks: "Which had more impact?" (America)
-│   ├── in-what-ways.html     ← 8 marks: "In what ways were lives affected?" (America)
-│   ├── explain-similarities.html ← 8 marks: "Explain two similarities" (Health)
-│   └── describe-two.html     ← 4 marks: "Describe two" (America)
+├── history/
+│   ├── index.html            ← History landing page (4 unit cards + progress + quotes)
+│   ├── conflict-tension/
+│   │   ├── index.html            ← Unit contents page
+│   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
+│   │   ├── Versailles_1919.jpg              ← Hero images (various naming)
+│   │   ├── lesson 2 hero.jpg … etc
+│   │   └── diagram_*.png                    ← Infographic diagrams (15 files)
+│   ├── health-people/
+│   │   ├── index.html
+│   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
+│   │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
+│   │   └── diagram_*.png                    ← Infographic diagrams (21 files)
+│   ├── elizabethan/
+│   │   ├── index.html
+│   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
+│   │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
+│   │   └── diagram_*.png                    ← Infographic diagrams (20 files)
+│   ├── america/
+│   │   ├── index.html
+│   │   ├── lesson-01.html … lesson-15.html  ← All 15 lessons (full content)
+│   │   ├── lesson-01-hero.jpg … lesson-15-hero.jpg  ← Hero images
+│   │   └── diagram_*.png                    ← Infographic diagrams (15 files)
+│   └── exam-technique/
+│       ├── index.html            ← Hub page with 7 guide cards
+│       ├── factor-essay.html     ← 16+4 SPaG: "How far do you agree?" (Conflict, Health)
+│       ├── write-an-account.html ← 8 marks: "Write an account" (Conflict, Elizabethan)
+│       ├── explain-significance.html ← 8 marks: "Explain significance/importance" (Health, Elizabethan)
+│       ├── which-had-more-impact.html ← 12 marks: "Which had more impact?" (America)
+│       ├── in-what-ways.html     ← 8 marks: "In what ways were lives affected?" (America)
+│       ├── explain-similarities.html ← 8 marks: "Explain two similarities" (Health)
+│       └── describe-two.html     ← 4 marks: "Describe two" (America)
 │
 │ OLD v1 FILES (to be deleted):
 ├── conflict-tension.html
@@ -120,6 +125,13 @@ Study Vault/
     ├── Elizabeth Past Exams/ ← 7 sittings (AQA 8145/2B/C)
     └── America Past Exams/  ← 7 sittings (AQA 8145/1A/D)
 ```
+
+### Path conventions after history/ migration
+- **Lesson/unit pages** reference CSS/JS as `../../css/style.css` and `../../js/main.js`
+- **`history/index.html`** references CSS/JS as `../css/style.css` and `../js/main.js`
+- **Root `index.html`** references CSS/JS as `css/style.css` and `js/main.js`
+- **`../index.html`** links in lesson/unit pages naturally resolve to `history/index.html` (correct)
+- **`../exam-technique/`** in JS `getGuideUrl()` resolves to `history/exam-technique/` (correct)
 
 ---
 
@@ -172,7 +184,7 @@ Every lesson page follows this exact structure. Copy `conflict-tension/lesson-01
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lesson N: TITLE - StudyVault</title>
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body class="unit-UNITCLASS" data-unit="UNIT-SLUG" data-lesson="lesson-NN">
 
@@ -238,7 +250,7 @@ Every lesson page follows this exact structure. Copy `conflict-tension/lesson-01
     </aside>
   </div>
 
-  <script src="../js/main.js"></script>
+  <script src="../../js/main.js"></script>
   <script>
     window.narrationManifest = [ /* timestamp data */ ];
     window.practiceQuestions = [ /* question bank */ ];
