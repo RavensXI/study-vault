@@ -258,25 +258,21 @@ All have dark mode variants via `body.dark-mode` selectors. Mobile responsive br
 
 ## API Details
 
-### Gemini API
-- **Environment variable name**: `Gemini Image Gen`
-- **API key**: `AIzaSyArEFIYvrTXarX6dKnzr8mez3S9C43NJx8`
+API keys are stored in environment variables — never commit them to the repo.
 
-### Image Generation
-- **Model**: `gemini-3-pro-image-preview` (best text accuracy — gemini-2.5-flash-image has spelling errors)
+### Gemini API
+- **Environment variable**: `GEMINI_API_KEY`
+- **Image model**: `gemini-3-pro-image-preview` (best text accuracy)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent`
 - **Cost**: ~$0.134 per image
-- **Style guidance**: Visually interesting, consistent with the warm site palette, easy for students to understand. Diagrams should use clear text labels and simple layouts.
 
 ### TTS (Text-to-Speech) — ElevenLabs
+- **Environment variable**: `ELEVENLABS_API_KEY`
 - **Provider**: ElevenLabs (Creator plan, $22/month, 107k credits/month + extra usage enabled)
-- **API key**: `sk_37afa4e9f19765f44dd63e4827a22946de57096e9f3b7f14`
 - **Voice ID**: `Nd6wm0mR1AWfjae7WcRB` (cloned voice)
 - **Model**: `eleven_turbo_v2_5` (0.5 credits per character)
 - **Output format**: Raw PCM 24kHz 16-bit mono → converted to WAV via Python
-- **Process**: Extract text from `data-narration-id` elements → normalise for speech → generate per-paragraph audio chunks → concatenate into single WAV → output timestamp manifest JSON
 - **Generation script**: `generate_tts.py` (Python, uses ElevenLabs REST API)
-- **Status**: All 60 lessons generated (~211k credits total)
 
 ---
 
