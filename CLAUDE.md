@@ -7,7 +7,7 @@ Teacher: Tom Shaun, email: `t.shaun@unity.lancs.sch.uk`
 Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ## Current Status
-**Phase 8 complete** — Exam Technique guide pages redesigned: two-column layout with sidebar, collapsible sections, styled tables, visible model answer annotations, and a Weak vs Strong comparison section on each guide. Hub page updated to grouped-by-paper layout.
+**Phase 9 complete** — Revision Techniques section added, site-wide navigation improved, all images compressed.
 
 **What's done:**
 - Homepage with 4 unit cards and progress bars
@@ -17,7 +17,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Readability pass on all 60 lessons
 - Glossary tooltip definitions trimmed to single-sentence definitions only (354 trimmed)
 - Hero images on all 60 lesson pages (Wikimedia Commons, public domain/CC)
-- Infographic diagrams on all 60 lesson pages (Gemini API generated, one per lesson minimum)
+- Infographic diagrams on all 60 lesson pages (Gemini API generated, one per lesson minimum) — **converted from PNG to JPG** for faster loading
 - Practice questions on all 60 lessons (6 per lesson, 360 total) with real AQA past paper questions tagged
 - TTS narration player UI on all 60 lesson pages — **audio files currently removed**, awaiting ElevenLabs regeneration
 - Accessibility toolbar: dark mode, dyslexia font, font sizing, Irlen overlays
@@ -27,7 +27,14 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Embedded YouTube video players in sidebar (45 lessons — America has no videos yet)
 - Related Media sidebar sections on all 60 lessons (Podcasts, Movies, TV Shows, Documentaries, Study Tools)
 - Knowledge Check quizzes on all 60 lessons (5 questions per lesson, 300 total)
-- Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type
+- Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type (purple theme `#7c3aed`)
+- Revision Techniques guide section — 1 hub page + 7 guide pages for evidence-based revision strategies (green theme `#16a34a`)
+- Site-wide nav links: Exam Technique + Revision Techniques in header nav on all pages (60 lessons, 4 unit indexes, 8 exam technique pages, 8 revision technique pages)
+- Nav icons: pen icon for Exam Technique (purple), lightbulb icon for Revision Techniques (green) — JS-injected via `initNavIcons()`
+- Contextual revision tips: green lightbulb buttons auto-injected on `.key-fact`, `.timeline`, `.collapsible` elements linking to relevant revision technique guides — JS-driven via `initRevisionTips()`
+- Pill-styled prev/next lesson links in header nav
+- Smart back-link positioning: on first/last lessons, the back-to-unit pill moves into the empty prev/next grid slot — JS-driven via `initLessonNavBackSlot()`
+- **Image compression**: all images compressed (138 MB → 31 MB, 77% reduction). Hero JPGs resized to max 1400px wide at quality 82. Diagram PNGs converted to JPEG at quality 85.
 
 **Still TODO:**
 - TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month). Generation script: `generate_tts.py`. All 60 WAV/JSON files deleted; player UI remains ready.
@@ -51,7 +58,7 @@ Study Vault/
 ├── elizabethan/              ← 15 lessons + hero images + diagrams
 ├── america/                  ← 15 lessons + hero images + diagrams
 ├── exam-technique/
-│   ├── index.html            ← Hub page with 7 guide cards
+│   ├── index.html            ← Hub page with 7 guide cards (purple theme)
 │   ├── factor-essay.html     ← 16+4 SPaG: "How far do you agree?"
 │   ├── write-an-account.html ← 8 marks: "Write an account"
 │   ├── explain-significance.html ← 8 marks: "Explain significance/importance"
@@ -59,6 +66,15 @@ Study Vault/
 │   ├── in-what-ways.html     ← 8 marks: "In what ways were lives affected?"
 │   ├── explain-similarities.html ← 8 marks: "Explain two similarities"
 │   └── describe-two.html     ← 4 marks: "Describe two"
+├── revision-technique/
+│   ├── index.html            ← Hub page with 7 technique cards (green theme)
+│   ├── retrieval-practice.html    ← Brain dumps, self-quizzing, flashcards
+│   ├── spaced-repetition.html     ← Spacing effect, revision timetables
+│   ├── elaborative-interrogation.html ← Asking "why/how", causal chains
+│   ├── dual-coding.html           ← Timelines, flowcharts, comparison tables
+│   ├── interleaving.html          ← Mixing topics and question types
+│   ├── knowledge-organisers.html  ← One-page summaries + self-test
+│   └── timed-exam-practice.html   ← Full timed answers with self-marking
 │
 │ TEACHER REFERENCE (not committed):
 └── Spec and Materials/
@@ -95,6 +111,7 @@ Each unit has a body class that sets CSS custom properties:
 | Elizabethan | `unit-elizabethan` | `#b45309` (amber) | `#fffbeb` | `#fef3c7` |
 | America | `unit-america` | `#2563eb` (blue) | `#eff6ff` | `#dbeafe` |
 | Exam Technique | `unit-exam-technique` | `#7c3aed` (purple) | `#f5f3ff` | `#ede9fe` |
+| Revision Techniques | `unit-revision-technique` | `#16a34a` (green) | `#f0fdf4` | `#dcfce7` |
 
 ---
 
@@ -153,7 +170,7 @@ Key structural elements:
 **Diagram / Hero image:**
 ```html
 <figure class="diagram">
-  <img src="diagram_name.png" alt="Descriptive alt text">
+  <img src="diagram_name.jpg" alt="Descriptive alt text">
 </figure>
 
 <figure class="lesson-hero-image">
@@ -231,6 +248,37 @@ Guide pages use the same `lesson-page` two-column layout as lessons. Each contai
 
 ---
 
+## Revision Techniques Section
+
+7 guide pages in `revision-technique/` covering evidence-based revision strategies tailored to GCSE History. Each guide cites cognitive science research. Hub page groups techniques into Foundation (use throughout) and Exam Preparation (final weeks).
+
+| File | Badge | Timing | Key Research |
+|------|-------|--------|-------------|
+| `retrieval-practice.html` | Active recall | 18 min | Roediger & Karpicke (2006), Dunlosky (2013) |
+| `spaced-repetition.html` | Scheduling | Ongoing | Ebbinghaus (1885), Cepeda (2006) |
+| `elaborative-interrogation.html` | Deep thinking | 15 min | Pressley (1987), Chi (1994) |
+| `dual-coding.html` | Visual learning | 25 min | Paivio (1971), Mayer (2009) |
+| `interleaving.html` | Mixed practice | 45 min | Rohrer & Taylor (2007), Kornell & Bjork (2008) |
+| `knowledge-organisers.html` | Summarising | 35 min | Fiorella & Mayer (2016), EEF/Ofsted (2021) |
+| `timed-exam-practice.html` | Exam readiness | Varies | Dunlosky (2013), AQA examiner reports |
+
+Guide pages use the same `lesson-page` two-column layout as exam technique guides. Each contains: What the Research Says (evidence table), Step-by-Step Method, When and How Often (timing bar), Worked Example (collapsible, real GCSE History content), Common Mistakes. Sidebar has Quick Reference card, Video placeholder, and Other Techniques collapsible.
+
+Navigation chain: Retrieval Practice → Spaced Repetition → Elaborative Interrogation → Dual Coding → Interleaving → Knowledge Organisers → Timed Exam Practice.
+
+Theme: green `#16a34a`. Body class: `unit-revision-technique`.
+
+---
+
+## Image Compression
+
+All images compressed to reduce total size from 138 MB to 31 MB (77% reduction):
+- **Hero JPGs**: resized to max 1400px wide, JPEG quality 82
+- **Diagram PNGs**: converted to JPEG quality 85, old PNGs deleted. All HTML `src` attributes updated from `.png` to `.jpg`
+- When adding new diagrams, save directly as `.jpg` (not `.png`)
+
+---
+
 ## Image Generation
 
 ### Design principles for diagrams
@@ -267,6 +315,9 @@ All initialised in `DOMContentLoaded`:
 - `initLightbox()` — click-to-expand on hero images and diagrams
 - `initHeroEdit()` — `?hero-edit` URL param for adjusting hero image positions
 - `initPageTransitions()` — fade-out/in between internal pages
+- `initRevisionTips()` — green lightbulb tips auto-injected on `.key-fact`, `.timeline`, `.collapsible` linking to revision technique guides
+- `initNavIcons()` — pen icon (purple) on Exam Technique nav links, lightbulb icon (green) on Revision Techniques nav links, pill styling on prev/next lesson links
+- `initLessonNavBackSlot()` — moves back-to-unit pill into empty grid slot on first/last lessons
 
 ---
 
