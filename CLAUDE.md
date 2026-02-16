@@ -69,13 +69,15 @@ Study Vault/
 
 ## API Details
 
+API keys are stored in environment variables — never commit them to the repo.
+
 ### Gemini API
-- **API key**: `AIzaSyArEFIYvrTXarX6dKnzr8mez3S9C43NJx8`
+- **Environment variable**: `GEMINI_API_KEY`
 - **Image model**: `gemini-3-pro-image-preview` (best text accuracy)
 - **Endpoint**: `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image-preview:generateContent`
 
 ### TTS — ElevenLabs
-- **API key**: `sk_37afa4e9f19765f44dd63e4827a22946de57096e9f3b7f14`
+- **Environment variable**: `ELEVENLABS_API_KEY`
 - **Voice ID**: `Nd6wm0mR1AWfjae7WcRB` (cloned voice)
 - **Model**: `eleven_turbo_v2_5` (0.5 credits per character)
 - **Script**: `generate_tts.py` — see script for full process details
