@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   initHeroEdit();
   initPageTransitions();
   initKnowledgeCheck();
+  initLessonNavBackSlot();
+  initNavIcons();
+  initRevisionTips();
 });
 
 /* --- Scroll Progress Bar --- */
@@ -239,7 +242,7 @@ function initPracticeQuestions() {
       guideLink.href = guideUrl;
       guideLink.target = '_blank';
       guideLink.rel = 'noopener noreferrer';
-      guideLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>How do I answer this?';
+      guideLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>How do I answer this?';
       var insertAfter = typeEl.parentNode.querySelector('.practice-past-paper-tag') || typeEl;
       insertAfter.after(guideLink);
     }
@@ -1343,4 +1346,134 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
   }
 
   showQuestion();
+}
+
+/* --- Lesson Nav: move back-link into empty grid slot --- */
+function initLessonNavBackSlot() {
+  var lessonNav = document.querySelector('.lesson-nav');
+  if (!lessonNav) return;
+  var prev = lessonNav.querySelector('.lesson-nav-link--prev');
+  var next = lessonNav.querySelector('.lesson-nav-link--next');
+  var backLink = lessonNav.nextElementSibling;
+  if (!backLink || !backLink.classList.contains('back-link')) return;
+  if (!prev && next) {
+    backLink.style.gridColumn = '1';
+    backLink.style.alignSelf = 'center';
+    backLink.style.marginTop = '0';
+    lessonNav.prepend(backLink);
+  } else if (prev && !next) {
+    backLink.style.gridColumn = '2';
+    backLink.style.justifySelf = 'end';
+    backLink.style.alignSelf = 'center';
+    backLink.style.marginTop = '0';
+    lessonNav.appendChild(backLink);
+  }
+}
+
+/* --- Nav Icons --- */
+function initNavIcons() {
+  var navLinks = document.querySelectorAll('.header-nav a');
+  var icons = {
+    'Exam Technique': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+    'Revision Techniques': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>'
+  };
+  var classes = {
+    'Exam Technique': 'nav-exam-technique',
+    'Revision Techniques': 'nav-revision-techniques'
+  };
+  navLinks.forEach(function (link) {
+    var text = link.textContent.trim();
+    if (icons[text]) {
+      var span = document.createElement('span');
+      span.className = 'nav-icon';
+      span.innerHTML = icons[text];
+      link.prepend(span);
+    }
+    if (classes[text]) {
+      link.classList.add(classes[text]);
+    }
+    if (/Previous Lesson|Next Lesson/.test(text)) {
+      link.classList.add('nav-lesson-pill');
+    }
+  });
+}
+
+/* --- Revision Technique Tips (lightbulbs) --- */
+function initRevisionTips() {
+  const article = document.querySelector('article.study-notes');
+  if (!article) return;
+
+  const basePath = (function () {
+    const parts = location.pathname.split('/');
+    parts.pop();
+    return parts.join('/') + '/../revision-technique/';
+  })();
+
+  const lightbulbSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>';
+
+  const tips = [
+    {
+      selector: '.key-fact',
+      text: 'Cover this box and try to recall every detail from memory.',
+      link: 'retrieval-practice.html',
+      label: 'Retrieval Practice'
+    },
+    {
+      selector: '.timeline',
+      text: 'Draw this timeline from memory on a blank page \u2014 then check your gaps.',
+      link: 'dual-coding.html',
+      label: 'Dual Coding'
+    },
+    {
+      selector: '.collapsible',
+      text: 'After reading, ask \u201cwhy?\u201d and \u201chow?\u201d for each key fact inside.',
+      link: 'elaborative-interrogation.html',
+      label: 'Elaborative Interrogation',
+      maxPerPage: 1
+    }
+  ];
+
+  let openPopup = null;
+
+  tips.forEach(function (tip) {
+    const els = article.querySelectorAll(tip.selector);
+    const limit = tip.maxPerPage || Infinity;
+    let count = 0;
+
+    els.forEach(function (el) {
+      if (count >= limit) return;
+      count++;
+
+      el.classList.add('revision-tip-anchor');
+
+      const btn = document.createElement('button');
+      btn.className = 'revision-tip-btn';
+      btn.setAttribute('aria-label', 'Revision tip');
+      btn.innerHTML = lightbulbSVG;
+
+      const popup = document.createElement('div');
+      popup.className = 'revision-tip-popup';
+      popup.innerHTML = '<p>' + tip.text + '</p><a href="' + basePath + tip.link + '">' + tip.label + ' \u2192</a>';
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (openPopup && openPopup !== popup) {
+          openPopup.classList.remove('is-open');
+        }
+        popup.classList.toggle('is-open');
+        openPopup = popup.classList.contains('is-open') ? popup : null;
+      });
+
+      el.appendChild(btn);
+      el.appendChild(popup);
+    });
+  });
+
+  // Close on outside click
+  document.addEventListener('click', function () {
+    if (openPopup) {
+      openPopup.classList.remove('is-open');
+      openPopup = null;
+    }
+  });
 }
