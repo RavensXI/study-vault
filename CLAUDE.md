@@ -7,7 +7,7 @@ Teacher: Tom Shaun, email: `t.shaun@unity.lancs.sch.uk`
 Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ## Current Status
-**Phase 7 complete** — Exam Technique guide section added: 1 hub page + 7 individual guide pages covering every AQA question type. "How do I answer this?" links added dynamically to all 60 lessons' practice questions via JS.
+**Phase 8 complete** — Exam Technique guide pages redesigned: two-column layout with sidebar, collapsible sections, styled tables, visible model answer annotations, and a Weak vs Strong comparison section on each guide. Hub page updated to grouped-by-paper layout.
 
 **What's done:**
 - Homepage with 4 unit cards and progress bars
@@ -42,7 +42,8 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Resources sidebar section removed (Podcast and Notebook consolidated into Related Media)
 - Navigate sidebar section removed (redundant with top nav bar)
 - Knowledge Check quizzes on all 60 lessons (5 questions per lesson, 300 total) — modal overlay with MCQ, fill-in-the-blank, and match-up question types. Best score saved to localStorage. See Knowledge Check section below.
-- Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type (4/8/12/16+4 marks). Each guide has: What the Examiner Wants, Step-by-Step Formula, Timing breakdown, Paragraph Templates, Annotated Model Answer, Common Mistakes. "How do I answer this?" links appear dynamically on all 60 lessons' practice questions (JS-driven, no lesson HTML changes). Homepage banner links to hub. See Exam Technique section below.
+- Exam Technique guide section — 1 hub page + 7 guide pages for every AQA question type (4/8/12/16+4 marks). Each guide has: What the Examiner Wants, Step-by-Step Formula, Timing breakdown, Paragraph Templates, Annotated Model Answer, Weak vs Strong comparison, Common Mistakes. "How do I answer this?" links appear dynamically on all 60 lessons' practice questions (JS-driven, no lesson HTML changes). Homepage banner links to hub. See Exam Technique section below.
+- Exam Technique guide pages redesigned to match lesson page quality — two-column `lesson-page` grid layout with sticky sidebar (Quick Reference card, Video placeholder, Other Guides collapsible). Paragraph Templates, Model Answer, and Weak vs Strong sections are collapsible. Level descriptor tables styled with accent-coloured headers. Model answer annotations rendered as visible purple pill badges (`<span class="guide-annotation">`). Hub page updated to grouped-by-paper card layout. Scroll progress bar added to all guide pages.
 
 **Still TODO:**
 - TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month on Creator plan, ~355k credits total). All 60 WAV and JSON files have been deleted; `<source src="">` and `window.narrationManifest` cleared in all HTML. The narration player UI remains in place ready for new audio. The 184 missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed, so bullet lists will be included when audio is regenerated. Generation script: `generate_tts.py` (ElevenLabs version).
@@ -403,7 +404,7 @@ window.knowledgeCheck = [
 
 ## Exam Technique Section
 
-7 guide pages covering every AQA question type, plus a hub page. Accessible from the homepage banner and via "How do I answer this?" links on every lesson's practice questions.
+7 guide pages covering every AQA question type, plus a hub page (grouped by exam paper). Accessible from the homepage banner and via "How do I answer this?" links on every lesson's practice questions.
 
 ### Guide pages
 
@@ -417,13 +418,34 @@ window.knowledgeCheck = [
 | `explain-similarities.html` | 8 | "Explain two ways... similar" | Health |
 | `describe-two.html` | 4 | "Describe two..." | America |
 
-### Each guide contains
-1. **What the Examiner Wants** — plain English + simplified level descriptors
+### Guide page layout
+Each guide page uses the same `lesson-page` two-column grid as lesson pages (`<main class="lesson-content">` + `<aside class="lesson-sidebar">`), with `<div class="scroll-progress">` at the top.
+
+### Each guide contains (main column)
+1. **What the Examiner Wants** — plain English + styled level descriptors table (`.guide-levels` — accent header, hover highlight)
 2. **Step-by-Step Formula** — numbered steps (`.guide-steps` / `.guide-step` / `.guide-step-number`)
 3. **Timing** — minutes breakdown with visual bar (`.guide-timing-bar`)
-4. **Paragraph Templates** — sentence starters (`.guide-template` / `.guide-template-label` / `.guide-starter`)
-5. **Annotated Model Answer** — with examiner callouts (`.guide-model-question` / `.guide-model-paragraph` / `.guide-annotation` / `.guide-model-mark`)
-6. **Common Mistakes** — what to avoid (`.guide-mistakes` / `.guide-mistake` / `.guide-mistake-icon`)
+4. **Paragraph Templates** — collapsible. Sentence starters (`.guide-template` / `.guide-template-label` / `.guide-starter`)
+5. **Annotated Model Answer** — collapsible. Question box + model paragraphs with visible annotation pill badges as `<span class="guide-annotation">` first child of each `.guide-model-paragraph`. No `data-annotation` attributes. (`.guide-model-question` / `.guide-model-paragraph` / `.guide-annotation` / `.guide-model-mark`)
+6. **Weak vs Strong: Spot the Difference** — collapsible. Shows same question answered at Level 2 (red left border, `.guide-weak-answer` + `.guide-annotation-weak`) then Level 4 (accent border, standard `.guide-annotation`). Each guide uses a different question/unit from its model answer for variety.
+7. **Common Mistakes** — what to avoid (`.guide-mistakes` / `.guide-mistake` / `.guide-mistake-icon`)
+
+### Sidebar (3 sections)
+1. **Quick Reference** (`.guide-quick-ref`) — mini timing bar (`.guide-quick-ref-bar`, 0.6rem height, no text, `title` tooltips), total time label (`.guide-quick-ref-total`), numbered structure summary (`.guide-quick-ref-steps`). Content differs per guide.
+2. **Video** — placeholder (`.guide-video-placeholder`) with play icon SVG + "Video walkthrough coming soon". Swap for `.sidebar-video` YouTube iframe when videos arrive.
+3. **Other Guides** — sidebar collapsible listing 6 links to other guides (excluding current page), using `.sidebar-collapsible` / `.sidebar-media-item` pattern.
+
+### Quick Reference content per guide
+
+| Guide | Time | Structure |
+|-------|------|-----------|
+| Factor Essay (16+4) | 25 min | Plan > Stated factor + evidence > Other factor + comparison > Conclusion + judgement > Proofread SPaG |
+| Write an Account (8) | 12 min | Plan > Beginning + causes > Development > Outcome + consequence |
+| Explain Significance (8) | 12 min | Plan > Significance + evidence > Wider or long-term impact |
+| Which Had More Impact (12) | 16 min | Plan > Bullet A + evidence > Bullet B + evidence > Judgement |
+| In What Ways (8) | 12 min | Plan > Impact 1 + evidence > Impact 2 + evidence |
+| Explain Similarities (8) | 12 min | Plan > Similarity 1 + both periods > Similarity 2 + both periods |
+| Describe Two (4) | 5 min | Think > Point 1 + supporting detail > Point 2 + supporting detail |
 
 ### JS integration
 `getGuideUrl(type)` in `initPracticeQuestions()` maps practice question `type` strings to guide filenames via substring matching. The link is inserted dynamically after the question type badge (and past-paper tag if present) as a `<a class="practice-guide-link" target="_blank">`. No lesson HTML files are modified.
