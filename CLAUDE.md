@@ -55,6 +55,14 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Contextual revision tips: green lightbulb buttons auto-injected on `.key-fact`, `.timeline`, `.collapsible` elements linking to relevant revision technique guides — via `initRevisionTips()`
 - Pill-styled prev/next lesson links in header nav, smart back-link positioning on first/last lessons via `initLessonNavBackSlot()`
 - **Image compression**: all images compressed (hero JPGs resized to max 1400px at quality 82, diagram PNGs converted to JPEG at quality 85, subject selector images resized to 640px at quality 80). Total reduction ~77%.
+- **Business Studies (Edexcel 1BS0)** — second subject, partially built:
+  - CSS colour themes: Theme 1 cyan `#0891b2`, Theme 2 emerald `#059669` (with dark mode variants)
+  - Business activated in subject picker (`active: true`, `url: 'business/index.html'`)
+  - Landing page (`business/index.html`) with 2 theme cards + quote ticker
+  - Theme 1 index (`business/theme-1/index.html`) with 15 lesson cards
+  - Theme 2 index (`business/theme-2/index.html`) with 15 lesson cards
+  - First lesson built: Theme 1 Lesson 1 "Enterprise & New Business Ideas" (spec 1.1.1 + 1.1.2) with hero image, diagram, practice questions (Edexcel format), knowledge check, related media sidebar
+  - `generate_diagram.py` helper script for Gemini API diagram generation
 
 **Still TODO:**
 - TTS narration regeneration with ElevenLabs cloned voice — one unit per month (~$22/month on Creator plan, ~355k credits total). All 60 WAV and JSON files have been deleted; `<source src="">` and `window.narrationManifest` cleared in all HTML. The narration player UI remains in place ready for new audio. The 184 missing `data-narration-id` attributes on `<ul>`/`<ol>` elements have been fixed, so bullet lists will be included when audio is regenerated. Generation script: `generate_tts.py` (ElevenLabs version).
@@ -125,6 +133,18 @@ Study Vault/
 │       ├── interleaving.html          ← Mixing topics and question types
 │       ├── knowledge-organisers.html  ← One-page summaries + self-test
 │       └── timed-exam-practice.html   ← Full timed answers with self-marking
+│
+├── business/
+│   ├── index.html            ← Business landing page (2 theme cards + progress + quotes)
+│   ├── theme-1/
+│   │   ├── index.html            ← Theme 1 unit index (15 lesson cards)
+│   │   ├── lesson-01.html        ← Enterprise & New Business Ideas (full content)
+│   │   ├── lesson-01-hero.jpg    ← Portobello Road Market (public domain)
+│   │   └── diagram_risk_reward.jpg ← Risk vs Reward balance (Gemini-generated)
+│   ├── theme-2/
+│   │   └── index.html            ← Theme 2 unit index (15 lesson cards)
+│   ├── exam-technique/           ← (placeholder, not yet built)
+│   └── revision-technique/       ← (placeholder, not yet built)
 │
 │ OLD v1 FILES (to be deleted):
 ├── conflict-tension.html
@@ -221,7 +241,7 @@ var demoUsers = [
 | Creative & Practical | Fine Art, Textiles, Photography, D&T, Food, Drama (OCR), Music (Eduqas), Music Tech (NCFE) |
 | Business & Computing | Business (Edexcel), Computer Science (OCR), Creative iMedia (OCR), Sport Science (OCR) |
 
-Only History has `active: true` and a `url` property. All other subjects render as "Coming Soon" cards (greyed out, non-clickable).
+History and Business have `active: true` and a `url` property. All other subjects render as "Coming Soon" cards (greyed out, non-clickable).
 
 **Subject images:** `images/subject-{id}.jpg` — one per subject. Downloaded from Unsplash via `download_subject_images.py`. History image uses the existing hero style.
 
@@ -263,7 +283,8 @@ All platform CSS is in `css/style.css`. Key class patterns:
 All have dark mode variants via `body.dark-mode` selectors. Mobile responsive breakpoints at 960px and 768px.
 
 ### What's still needed on this branch
-- Content for other subjects beyond History — **Business Studies is next** (line manager's subject, for demo purposes)
+- **Business Studies**: 29 more lessons to build (Theme 1 lessons 2–15, Theme 2 lessons 1–15), each needing hero image + diagram + practice questions + knowledge check + related media. Also needs exam technique and revision technique guide pages.
+- Content for other subjects beyond History and Business
 - Eventually: real authentication backend (likely Supabase), cross-device progress sync
 - Eventually: replace `main` with `platform` as the live site
 
@@ -301,6 +322,8 @@ Each unit has a body class that sets CSS custom properties:
 | America | `unit-america` | `#2563eb` (blue) | `#eff6ff` | `#dbeafe` |
 | Exam Technique | `unit-exam-technique` | `#7c3aed` (purple) | `#f5f3ff` | `#ede9fe` |
 | Revision Techniques | `unit-revision-technique` | `#16a34a` (green) | `#f0fdf4` | `#dcfce7` |
+| Business Theme 1 | `unit-business-1` | `#0891b2` (cyan) | `#ecfeff` | `#cffafe` |
+| Business Theme 2 | `unit-business-2` | `#059669` (emerald) | `#ecfdf5` | `#d1fae5` |
 
 ---
 
@@ -585,6 +608,67 @@ Type string → guide mapping:
 
 ### Theme
 Purple: accent `#7c3aed`, light `#f5f3ff`, badge `#ede9fe`. Body class: `unit-exam-technique`. Dark mode variants included.
+
+---
+
+## Business Studies (Edexcel 1BS0)
+
+Second subject on the platform. Edexcel GCSE Business, spec code 1BS0. Two themes (not four units like History), 15 lessons each, 30 total.
+
+### Spec structure
+- **Theme 1: Investigating Small Business** (Paper 1, 1BS0/01) — spotting opportunities, marketing, finance, business ownership, external influences
+- **Theme 2: Building a Business** (Paper 2, 1BS0/02) — growth, marketing mix, operations, finance, HR, organisational structures
+
+### Body classes and data attributes
+- Theme 1: `body class="unit-business-1" data-unit="business-theme-1"`
+- Theme 2: `body class="unit-business-2" data-unit="business-theme-2"`
+
+### Practice question types (Edexcel format)
+Business uses Edexcel mark schemes, not AQA. Question types per lesson:
+- 1x Define (1 mark) — "State one..."
+- 1x Outline (2 marks) — "Outline one..."
+- 2x Explain (3 marks) — "Explain one way/reason..."
+- 1x Discuss (6 marks) — "Discuss the advantages/disadvantages..."
+- 1x Justify/Evaluate (9 or 12 marks) — "Justify why..." / "Evaluate whether..."
+
+### Path conventions
+- `business/index.html` → `../css/style.css`, `../js/main.js`
+- `business/theme-1/*.html` → `../../css/style.css`, `../../js/main.js`
+- Nav links: `../exam-technique/index.html`, `../revision-technique/index.html` (Business will need its own exam/revision technique pages eventually)
+
+### Theme 1 lesson topics (spec 1.1–1.5)
+1. Enterprise & New Business Ideas (1.1.1 + 1.1.2)
+2. The Role of Enterprise & Adding Value (1.1.3 + 1.1.4)
+3. Customer Needs & Market Research (1.2.1 + 1.2.2)
+4. Market Segmentation & Competition (1.2.3 + 1.2.4)
+5. Business Aims & Objectives (1.3.1 + 1.3.2)
+6. Revenue, Costs & Profit (1.3.3)
+7. Break-Even Analysis (1.3.4)
+8. Cash & Cash-Flow Forecasts (1.3.5)
+9. Sources of Business Finance (1.4.1)
+10. Business Ownership & Liability (1.4.2 + 1.4.3)
+11. Business Location (1.4.4)
+12. The Marketing Mix (1.4.5)
+13. Business Plans (1.4.6)
+14. Stakeholders & Technology (1.5.1 + 1.5.2)
+15. Legislation, the Economy & External Influences (1.5.3 + 1.5.4)
+
+### Theme 2 lesson topics (spec 2.1–2.5)
+1. Business Growth (2.1.1)
+2. Changing Aims & Objectives (2.1.2)
+3. Globalisation (2.1.3 + 2.1.4)
+4. Ethics & the Environment (2.1.5)
+5. Product Design & the Product Life Cycle (2.2.1)
+6. Pricing Strategies (2.2.2)
+7. Promotion & Place (2.2.3 + 2.2.4)
+8. Using the Marketing Mix (2.2.5)
+9. Business Operations & Production (2.3.1)
+10. Working with Suppliers (2.3.2)
+11. Quality & Customer Service (2.3.3 + 2.3.4)
+12. Business Calculations (2.4.1 + 2.4.2)
+13. Understanding Business Performance (2.4.3)
+14. Organisational Structures & Recruitment (2.5.1 + 2.5.2)
+15. Training, Development & Motivation (2.5.3 + 2.5.4)
 
 ---
 
