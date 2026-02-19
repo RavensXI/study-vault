@@ -1227,11 +1227,14 @@ body[class*="overlay-"] .sidebar-section {
   font-weight: 700;
   color: var(--text-primary);
   min-width: 80px;
-  flex-shrink: 0;
+  max-width: 55%;
+  flex-shrink: 1;
+  word-break: break-word;
 }
 
 .kc-match-select {
   flex: 1;
+  min-width: 0;
   padding: 0.4rem 0.5rem;
   border: 2px solid var(--border-lighter);
   border-radius: var(--radius-sm);
@@ -1458,6 +1461,18 @@ h3[data-narration-id].narration-active {
 .conclusion[data-narration-id].narration-active,
 .timeline[data-narration-id].narration-active {
   box-shadow: -4px 0 0 #e6b800, var(--shadow-sm);
+}
+
+/* When a list inside a key-fact is narrated, highlight the whole box */
+.key-fact:has([data-narration-id].narration-active) {
+  box-shadow: -4px 0 0 #e6b800, var(--shadow-sm);
+  background-color: #fef9e7;
+}
+
+/* Lists have their own indentation — don't add extra padding-left */
+ul[data-narration-id].narration-active,
+ol[data-narration-id].narration-active {
+  padding-left: revert;
 }
 
 /* Collapsible shimmer when narration is reading collapsed content */

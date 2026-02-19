@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initLessonNavBackSlot();
   initNavIcons();
   initRevisionTips();
+  initLogoLink();
 });
 
 /* --- Scroll Progress Bar --- */
@@ -207,7 +208,14 @@ function initPracticeQuestions() {
       ['In what ways', 'in-what-ways.html'],
       ['Which had more impact', 'which-had-more-impact.html'],
       ['How far do you agree', 'factor-essay.html'],
-      ['Has ', 'factor-essay.html']
+      ['Has ', 'factor-essay.html'],
+      ['Define', 'define.html'],
+      ['Outline', 'outline.html'],
+      ['Explain one way', 'explain-one-way.html'],
+      ['Calculate', 'calculate.html'],
+      ['Discuss', 'discuss.html'],
+      ['Justify', 'justify-evaluate.html'],
+      ['Evaluate', 'justify-evaluate.html']
     ];
     for (var i = 0; i < guides.length; i++) {
       if (type.indexOf(guides[i][0]) !== -1) return '../exam-technique/' + guides[i][1];
@@ -461,220 +469,40 @@ function initMobileNav() {
 
 /* --- Narration Player --- */
 function initNarration() {
-  const playerEl = document.querySelector('.narration-player');
+  var playerEl = document.querySelector('.narration-player');
   if (!playerEl) return;
 
-  const audio = playerEl.querySelector('.narration-audio');
-  const playBtn = playerEl.querySelector('.narration-play');
-  const progress = playerEl.querySelector('.narration-progress');
-  const progressFill = playerEl.querySelector('.narration-progress-fill');
-  const timeEl = playerEl.querySelector('.narration-time');
-  const speedBtn = playerEl.querySelector('.narration-speed');
+  var audio = playerEl.querySelector('.narration-audio');
+  var playBtn = playerEl.querySelector('.narration-play');
+  var progressFill = playerEl.querySelector('.narration-progress-fill');
+  var timeEl = playerEl.querySelector('.narration-time');
+  var speedBtn = playerEl.querySelector('.narration-speed');
 
   if (!audio) return;
 
-  let manifest = window.narrationManifest || [];
-  let activeChunk = null;
-  const speeds = [1, 1.25, 1.5, 0.75];
-  let speedIndex = 0;
+  // Manifest: [{ id: "n1", src: "narration_n1.wav", duration: 14.2 }, ...]
+  var manifest = window.narrationManifest || [];
+  if (!manifest.length || !manifest[0].src) return;
 
-  // Format time as m:ss
-  function fmtTime(s) {
-    const m = Math.floor(s / 60);
-    const sec = Math.floor(s % 60);
-    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  // Calculate total duration and cumulative start offsets
+  var totalDuration = 0;
+  var offsets = [];
+  for (var i = 0; i < manifest.length; i++) {
+    offsets.push(totalDuration);
+    totalDuration += manifest[i].duration;
   }
+  if (totalDuration === 0) return;
 
-  // Play / Pause
-  playBtn.addEventListener('click', () => {
-    if (audio.paused) {
-      audio.play();
-    } else {
-      audio.pause();
-    }
-  });
-
-  audio.addEventListener('play', () => {
-    playBtn.classList.add('playing');
-    playBtn.setAttribute('aria-label', 'Pause narration');
-  });
-
-  audio.addEventListener('pause', () => {
-    playBtn.classList.remove('playing');
-    playBtn.setAttribute('aria-label', 'Play narration');
-  });
-
-  // Progress bar update
-  audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    const pct = (audio.currentTime / audio.duration) * 100;
-    progressFill.style.width = pct + '%';
-    timeEl.textContent = fmtTime(audio.currentTime) + ' / ' + fmtTime(audio.duration);
-
-    // Highlight current chunk
-    updateHighlight(audio.currentTime);
-  });
-
-  // Click to seek on progress bar
-  progress.addEventListener('click', (e) => {
-    const rect = progress.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    audio.currentTime = pct * audio.duration;
-  });
-
-  // Speed toggle
-  speedBtn.addEventListener('click', () => {
-    speedIndex = (speedIndex + 1) % speeds.length;
-    audio.playbackRate = speeds[speedIndex];
-    speedBtn.textContent = speeds[speedIndex] + 'x';
-  });
-
-  // Click on narrated element to jump to that point
-  document.querySelectorAll('[data-narration-id]').forEach(el => {
-    el.addEventListener('click', () => {
-      const id = el.dataset.narrationId;
-      const entry = manifest.find(m => m.id === id);
-      if (entry) {
-        audio.currentTime = entry.start;
-        if (audio.paused) audio.play();
-      }
-    });
-  });
-
-  // When a collapsible opens, re-apply highlight if narration is inside it
-  document.querySelectorAll('.collapsible-toggle').forEach(toggle => {
-    toggle.addEventListener('click', () => {
-      if (activeChunk && !audio.paused) {
-        // Force re-evaluation by clearing activeChunk
-        const current = activeChunk;
-        activeChunk = null;
-        updateHighlight(audio.currentTime);
-      }
-    });
-  });
-
-  // Auto-scroll tracking — disable when user manually scrolls away
-  let autoScrollEnabled = true;
-  let lastProgrammaticScroll = 0;
-
-  function isInViewport(el) {
-    const rect = el.getBoundingClientRect();
-    return rect.top < window.innerHeight && rect.bottom > 0;
-  }
-
-  function doAutoScroll(el) {
-    lastProgrammaticScroll = Date.now();
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  // Listen for manual scrolls to detect when the user leaves the narration area
-  window.addEventListener('scroll', () => {
-    if (audio.paused) return;
-    // Ignore scroll events caused by our own scrollIntoView
-    if (Date.now() - lastProgrammaticScroll < 1000) return;
-    // User is manually scrolling — check if active element is still visible
-    if (activeChunk) {
-      const el = document.querySelector('[data-narration-id="' + activeChunk + '"]');
-      if (el) autoScrollEnabled = isInViewport(el);
-    }
-  }, { passive: true });
-
-  function updateHighlight(time) {
-    let newChunk = null;
-
-    for (let i = manifest.length - 1; i >= 0; i--) {
-      if (time >= manifest[i].start && time < manifest[i].end) {
-        newChunk = manifest[i].id;
-        break;
-      }
-    }
-
-    if (newChunk === activeChunk) return;
-
-    // Remove old highlight
-    if (activeChunk) {
-      const oldEl = document.querySelector('[data-narration-id="' + activeChunk + '"]');
-      if (oldEl) oldEl.classList.remove('narration-active');
-    }
-
-    // Work out where the new chunk lives
-    let newCollapsible = null;
-    let newEl = null;
-    if (newChunk) {
-      newEl = document.querySelector('[data-narration-id="' + newChunk + '"]');
-      if (newEl) newCollapsible = newEl.closest('.collapsible');
-    }
-
-    // Remove shimmer from any collapsible that isn't the current one
-    document.querySelectorAll('.collapsible.narration-reading').forEach(el => {
-      if (el !== newCollapsible) el.classList.remove('narration-reading');
-    });
-
-    // Add new highlight (always), but only auto-scroll if user hasn't scrolled away
-    if (newEl) {
-      if (newCollapsible && !newCollapsible.classList.contains('open')) {
-        // Content is collapsed — shimmer the collapsible toggle
-        if (!newCollapsible.classList.contains('narration-reading')) {
-          newCollapsible.classList.add('narration-reading');
-        }
-        if (autoScrollEnabled) {
-          const toggle = newCollapsible.querySelector('.collapsible-toggle');
-          if (toggle) {
-            const rect = toggle.getBoundingClientRect();
-            if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
-              doAutoScroll(toggle);
-            }
-          }
-        }
-      } else {
-        // Content is visible — highlight normally
-        newEl.classList.add('narration-active');
-        if (autoScrollEnabled) {
-          const rect = newEl.getBoundingClientRect();
-          if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
-            doAutoScroll(newEl);
-          }
-        }
-      }
-    }
-
-    activeChunk = newChunk;
-  }
-
-  // Clear highlight when audio ends
-  audio.addEventListener('ended', () => {
-    if (activeChunk) {
-      const el = document.querySelector('[data-narration-id="' + activeChunk + '"]');
-      if (el) el.classList.remove('narration-active');
-      activeChunk = null;
-    }
-    // Clear any collapsible pulse
-    document.querySelectorAll('.collapsible.narration-reading').forEach(el => {
-      el.classList.remove('narration-reading');
-    });
-  });
-
-  // Keyboard shortcuts
-  document.addEventListener('keydown', (e) => {
-    // Don't capture when typing in inputs
-    const tag = e.target.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
-
-    if (e.code === 'Space') {
-      e.preventDefault();
-      if (audio.paused) audio.play();
-      else audio.pause();
-    } else if (e.code === 'ArrowLeft') {
-      e.preventDefault();
-      audio.currentTime = Math.max(0, audio.currentTime - 5);
-    } else if (e.code === 'ArrowRight') {
-      e.preventDefault();
-      audio.currentTime = Math.min(audio.duration || 0, audio.currentTime + 5);
-    }
-  });
+  var currentIndex = -1;
+  var activeChunk = null;
+  var speeds = [1, 1.25, 1.5, 0.75];
+  var speedIndex = 0;
+  var isPlaying = false;
+  var autoScrollEnabled = true;
+  var lastProgrammaticScroll = 0;
 
   // --- Floating mini-player ---
-  const fab = document.createElement('div');
+  var fab = document.createElement('div');
   fab.className = 'narration-fab';
   fab.innerHTML =
     '<button class="narration-fab-play" aria-label="Pause narration">' +
@@ -685,40 +513,229 @@ function initNarration() {
     '<span class="narration-fab-time">0:00</span>';
   document.body.appendChild(fab);
 
-  const fabPlay = fab.querySelector('.narration-fab-play');
-  const fabFill = fab.querySelector('.narration-fab-progress-fill');
-  const fabTime = fab.querySelector('.narration-fab-time');
+  var fabPlay = fab.querySelector('.narration-fab-play');
+  var fabFill = fab.querySelector('.narration-fab-progress-fill');
+  var fabTime = fab.querySelector('.narration-fab-time');
+  var mainPlayerVisible = true;
+  var audioStarted = false;
 
-  fabPlay.addEventListener('click', () => {
-    if (audio.paused) audio.play();
-    else audio.pause();
-  });
-
-  // Sync fab state with audio
-  audio.addEventListener('play', () => fabPlay.classList.add('playing'));
-  audio.addEventListener('pause', () => fabPlay.classList.remove('playing'));
-  audio.addEventListener('timeupdate', () => {
-    if (!audio.duration) return;
-    fabFill.style.width = (audio.currentTime / audio.duration * 100) + '%';
-    fabTime.textContent = fmtTime(audio.currentTime);
-  });
-
-  // Show fab when main player is out of view AND audio has been used
-  let mainPlayerVisible = true;
-  let audioStarted = false;
-  const observer = new IntersectionObserver(([entry]) => {
-    mainPlayerVisible = entry.isIntersecting;
+  var observer = new IntersectionObserver(function(entries) {
+    mainPlayerVisible = entries[0].isIntersecting;
     fab.classList.toggle('visible', !mainPlayerVisible && audioStarted);
   }, { threshold: 0 });
   observer.observe(playerEl);
 
-  audio.addEventListener('play', () => {
-    audioStarted = true;
-    fab.classList.toggle('visible', !mainPlayerVisible);
+  // --- Helpers ---
+
+  function fmtTime(s) {
+    var m = Math.floor(s / 60);
+    var sec = Math.floor(s % 60);
+    return m + ':' + (sec < 10 ? '0' : '') + sec;
+  }
+
+  function globalTime() {
+    if (currentIndex < 0) return 0;
+    return offsets[currentIndex] + (audio.currentTime || 0);
+  }
+
+  function loadClip(index) {
+    if (index < 0 || index >= manifest.length) return false;
+    currentIndex = index;
+    audio.src = manifest[index].src;
+    audio.playbackRate = speeds[speedIndex];
+    // Preload next clip for gapless transition
+    if (index + 1 < manifest.length) {
+      var preload = new Audio();
+      preload.src = manifest[index + 1].src;
+      preload.preload = 'auto';
+    }
+    return true;
+  }
+
+  function startPlayback() {
+    if (currentIndex < 0) loadClip(0);
+    audio.play();
+  }
+
+  function isInViewport(el) {
+    var rect = el.getBoundingClientRect();
+    return rect.top < window.innerHeight && rect.bottom > 0;
+  }
+
+  function doAutoScroll(el) {
+    lastProgrammaticScroll = Date.now();
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function setHighlight(chunkId) {
+    if (chunkId === activeChunk) return;
+
+    // Remove old highlight
+    if (activeChunk) {
+      var oldEl = document.querySelector('[data-narration-id="' + activeChunk + '"]');
+      if (oldEl) oldEl.classList.remove('narration-active');
+    }
+
+    var newEl = null;
+    var newCollapsible = null;
+    if (chunkId) {
+      newEl = document.querySelector('[data-narration-id="' + chunkId + '"]');
+      if (newEl) newCollapsible = newEl.closest('.collapsible');
+    }
+
+    // Remove shimmer from any collapsible that isn't the current one
+    document.querySelectorAll('.collapsible.narration-reading').forEach(function(el) {
+      if (el !== newCollapsible) el.classList.remove('narration-reading');
+    });
+
+    if (newEl) {
+      if (newCollapsible && !newCollapsible.classList.contains('open')) {
+        // Content is collapsed — shimmer the collapsible toggle
+        if (!newCollapsible.classList.contains('narration-reading')) {
+          newCollapsible.classList.add('narration-reading');
+        }
+        if (autoScrollEnabled) {
+          var toggle = newCollapsible.querySelector('.collapsible-toggle');
+          if (toggle) {
+            var rect = toggle.getBoundingClientRect();
+            if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
+              doAutoScroll(toggle);
+            }
+          }
+        }
+      } else {
+        newEl.classList.add('narration-active');
+        if (autoScrollEnabled) {
+          var rect = newEl.getBoundingClientRect();
+          if (rect.top < 80 || rect.bottom > window.innerHeight - 80) {
+            doAutoScroll(newEl);
+          }
+        }
+      }
+    }
+
+    activeChunk = chunkId;
+  }
+
+  function clearHighlight() {
+    if (activeChunk) {
+      var el = document.querySelector('[data-narration-id="' + activeChunk + '"]');
+      if (el) el.classList.remove('narration-active');
+      activeChunk = null;
+    }
+    document.querySelectorAll('.collapsible.narration-reading').forEach(function(el) {
+      el.classList.remove('narration-reading');
+    });
+  }
+
+  // --- Play / Pause ---
+
+  playBtn.addEventListener('click', function() {
+    if (audio.paused) { startPlayback(); } else { audio.pause(); }
   });
-  audio.addEventListener('ended', () => {
-    audioStarted = false;
-    fab.classList.remove('visible');
+
+  fabPlay.addEventListener('click', function() {
+    if (audio.paused) { startPlayback(); } else { audio.pause(); }
+  });
+
+  audio.addEventListener('play', function() {
+    isPlaying = true;
+    audioStarted = true;
+    playBtn.classList.add('playing');
+    playBtn.setAttribute('aria-label', 'Pause narration');
+    fabPlay.classList.add('playing');
+    fab.classList.toggle('visible', !mainPlayerVisible);
+    if (currentIndex >= 0) setHighlight(manifest[currentIndex].id);
+  });
+
+  audio.addEventListener('pause', function() {
+    isPlaying = false;
+    playBtn.classList.remove('playing');
+    playBtn.setAttribute('aria-label', 'Play narration');
+    fabPlay.classList.remove('playing');
+  });
+
+  // --- Progress ---
+
+  audio.addEventListener('timeupdate', function() {
+    var gt = globalTime();
+    var pct = (gt / totalDuration * 100) + '%';
+    progressFill.style.width = pct;
+    timeEl.textContent = fmtTime(gt) + ' / ' + fmtTime(totalDuration);
+    fabFill.style.width = pct;
+    fabTime.textContent = fmtTime(gt);
+  });
+
+  // --- Clip ended — advance or finish ---
+
+  audio.addEventListener('ended', function() {
+    if (currentIndex + 1 < manifest.length) {
+      loadClip(currentIndex + 1);
+      audio.play();
+    } else {
+      isPlaying = false;
+      audioStarted = false;
+      currentIndex = -1;
+      clearHighlight();
+      progressFill.style.width = '100%';
+      playBtn.classList.remove('playing');
+      playBtn.setAttribute('aria-label', 'Play narration');
+      fabPlay.classList.remove('playing');
+      fab.classList.remove('visible');
+    }
+  });
+
+  // --- Speed toggle ---
+
+  speedBtn.addEventListener('click', function() {
+    speedIndex = (speedIndex + 1) % speeds.length;
+    audio.playbackRate = speeds[speedIndex];
+    speedBtn.textContent = speeds[speedIndex] + 'x';
+  });
+
+  // --- Click paragraph to jump to that clip ---
+
+  document.querySelectorAll('[data-narration-id]').forEach(function(el) {
+    el.addEventListener('click', function() {
+      var id = el.dataset.narrationId;
+      for (var i = 0; i < manifest.length; i++) {
+        if (manifest[i].id === id) { loadClip(i); audio.play(); break; }
+      }
+    });
+  });
+
+  // --- Collapsible re-highlight ---
+
+  document.querySelectorAll('.collapsible-toggle').forEach(function(toggle) {
+    toggle.addEventListener('click', function() {
+      if (activeChunk && isPlaying) {
+        var current = activeChunk;
+        activeChunk = null;
+        setHighlight(current);
+      }
+    });
+  });
+
+  // --- Auto-scroll suppression ---
+
+  window.addEventListener('scroll', function() {
+    if (!isPlaying) return;
+    if (Date.now() - lastProgrammaticScroll < 1000) return;
+    if (activeChunk) {
+      var el = document.querySelector('[data-narration-id="' + activeChunk + '"]');
+      if (el) autoScrollEnabled = isInViewport(el);
+    }
+  }, { passive: true });
+
+  // --- Keyboard: Space to play/pause ---
+
+  document.addEventListener('keydown', function(e) {
+    var tag = e.target.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+    if (e.code === 'Space') {
+      e.preventDefault();
+      if (audio.paused) { startPlayback(); } else { audio.pause(); }
+    }
   });
 }
 
@@ -1396,6 +1413,17 @@ function initNavIcons() {
       link.classList.add('nav-lesson-pill');
     }
   });
+}
+
+/* --- Logo Link → Root Dashboard --- */
+function initLogoLink() {
+  var brand = document.querySelector('.header-brand');
+  if (!brand) return;
+  // Pages with data-unit are 2 levels deep (subject/unit-folder/).
+  // Update logo href to go to the root dashboard.
+  if (document.body.dataset.unit) {
+    brand.setAttribute('href', '../../index.html');
+  }
 }
 
 /* --- Revision Technique Tips (lightbulbs) --- */
