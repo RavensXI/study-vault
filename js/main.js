@@ -90,6 +90,16 @@ function initCollapsibles() {
         const onEnd = () => {
           if (section.classList.contains('open')) {
             content.style.maxHeight = 'none';
+            const sidebar = section.closest('.lesson-sidebar');
+            if (sidebar) {
+              const sidebarRect = sidebar.getBoundingClientRect();
+              const sectionRect = section.getBoundingClientRect();
+              const sectionBottomInScroll = sectionRect.bottom - sidebarRect.top + sidebar.scrollTop;
+              const visibleBottom = sidebar.scrollTop + sidebar.clientHeight;
+              if (sectionBottomInScroll > visibleBottom - 16) {
+                sidebar.scrollTo({ top: sectionBottomInScroll - sidebar.clientHeight + 16, behavior: 'smooth' });
+              }
+            }
           }
           content.removeEventListener('transitionend', onEnd);
         };
