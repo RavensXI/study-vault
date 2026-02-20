@@ -427,7 +427,7 @@ OpenClaw runs in WSL2 Ubuntu as a systemd user service under the `tshau` account
 
 ### Telegram Bot
 - **Bot**: `@tom_shaun_bot`
-- **Token**: `8152595300:AAF6HGoF6HZBMf-VJFKSH-ipaW5d2Saglk0`
+- **Token**: *(store in `~/.openclaw/openclaw.json` — never commit)*
 - **User ID**: `8504241823`
 - **DM policy**: allowlist (only Tom's account)
 - **Binding**: DMs route to `main` agent
