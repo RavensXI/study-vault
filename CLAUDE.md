@@ -18,7 +18,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 **History (complete — 60 lessons across 4 units):**
 - All lessons cross-referenced against teacher PPTs, readability-passed for GCSE students
 - Hero images (Wikimedia Commons), infographic diagrams (Gemini API, ~71 total), practice questions (6/lesson, 360 total with AQA past paper tags), knowledge checks (5/lesson, 300 total)
-- TTS narration player UI in place — **audio files removed**, awaiting ElevenLabs regeneration
+- TTS narration: Conflict & Tension lessons 01–14 fully narrated, lesson 15 partial (1 clip). Qwen3-TTS generated locally on AMD RX 6800 using ICL mode with 30s reference clip. Other 3 units (45 lessons) not started. Player UI in place on all 60 lessons. See TTS Narration section.
 - Accessibility toolbar (dark mode, dyslexia font, font sizing, Irlen overlays)
 - Glossary tooltips, collapsible sections, timelines, key fact boxes, lightbox
 - Embedded YouTube videos in sidebar (45 lessons — Conflict, Health, Elizabethan)
@@ -41,7 +41,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ### Still TODO
 - **Business Studies**: 29 more lessons (Theme 1 L02–L15, Theme 2 L01–L15)
-- TTS narration regeneration with ElevenLabs (~$22/month, one unit per month)
+- TTS narration — generate remaining ~46 lessons (finish Conflict 15, then Health, Elizabethan, America). Current Qwen3-TTS approach works but is slow. See TTS Narration section.
 - PWA (service worker + manifest.json)
 - Delete old v1 flat HTML files (conflict-tension.html, health-people.html, elizabethan.html, america.html)
 
@@ -96,12 +96,16 @@ API keys are stored in environment variables — never commit them.
 - **Cost**: ~$0.134 per image
 - See `generate_diagram.py` for usage
 
-### ElevenLabs TTS
+### TTS Status: Qwen3-TTS working locally but slow
+Qwen3-TTS runs on local AMD RX 6800 and has generated narration for Conflict & Tension lessons 01–10. Quality is acceptable but generation is slow. Looking for a faster model/approach to complete the remaining ~50 lessons.
+
+### ElevenLabs TTS (paid fallback — best quality but expensive)
 - **Env var**: `ELEVENLABS_API_KEY`
 - **Voice ID**: `Nd6wm0mR1AWfjae7WcRB` (cloned voice)
 - **Model**: `eleven_turbo_v2_5` (0.5 credits/char)
-- **Output**: PCM 24kHz 16-bit mono → WAV
-- See `generate_tts.py` for usage
+- **Script**: `generate_tts.py`
+- **Quality**: Good voice cloning, but too expensive at scale (25 subjects, ~1000+ lessons)
+- **Estimated cost**: ~$20-30 for 60 History lessons; hundreds for full site
 
 ---
 
@@ -354,9 +358,50 @@ All initialised in `DOMContentLoaded`:
 
 ## TTS Narration
 
-Audio removed from all 60 lessons. Player UI remains. Plan: regenerate via ElevenLabs (`generate_tts.py`) one unit per month.
+### Current status (19 Feb 2026)
+Qwen3-TTS (`Qwen3-TTS-12Hz-1.7B-Base`) running locally on AMD RX 6800 (CPU mode, ~6x real-time). Uses ICL voice cloning with a 30-second reference clip for accent preservation.
 
-Process: extract `data-narration-id` elements → normalise text → generate per-chunk via API → concatenate into single WAV with 0.4s silence padding → record timestamps → inline manifest as `window.narrationManifest`.
+**Narration progress:**
+
+| Unit | Lessons done | Notes |
+|------|-------------|-------|
+| Conflict & Tension 01–14 | 14/15 | Fully working — audio files + manifest correct |
+| Conflict & Tension 15 | partial | 1 audio clip generated, batch was stopped early |
+| Health & People | 0/15 | Not started |
+| Elizabethan | 0/15 | Not started |
+| America | 0/15 | Not started |
+
+Audio file naming convention: `narration_lesson-NN_nX.wav` (e.g. `narration_lesson-01_n1.wav`). Files live in the unit folder alongside lesson HTML (e.g. `conflict-tension/narration_lesson-01_n1.wav`).
+
+### Models tried
+
+| Model | Result | Notes |
+|-------|--------|-------|
+| **Qwen3-TTS** (local AMD RX 6800) | **Working — current approach** | Acceptable voice quality. Slow generation but functional. Generated Conflict lessons 01–10 locally. |
+| **Qwen3-TTS** (RunPod RTX 4090) | Too slow | ~14x real-time. Stock `qwen-tts` barely uses GPU (3%). Community fork (`dffdeeq/Qwen3-TTS-streaming`) tried with `torch.compile` — spent 30+ min compiling, never finished. |
+| **Chatterbox TTS** | Bad voice quality | Fast generation but terrible voice cloning — "someone doing a bad English accent". Zero-shot cloning doesn't work for every voice. |
+| **GPT-SoVITS v2Pro** (fine-tuned) | Mediocre + truncation | Trained on 6 min of teacher's voice. Voice somewhat recognisable but not convincing. Consistently truncates output. Chinese-first model. |
+
+**Not yet tried:**
+- **F5-TTS** — English-focused, good voice cloning reported, 15x real-time on GPU. Worth testing next.
+- **Professional narration** — hire a narrator or use a non-cloned AI voice.
+
+### Voice cloning config
+- **Reference audio**: `voicebox-test/voice_sample_30s.wav` (30s crop of teacher reading, 24kHz mono)
+- **ICL mode**: `x_vector_only_mode=False` with reference transcript in `REF_TEXT` constant — preserves Lancashire accent
+- **Model**: `Qwen/Qwen3-TTS-12Hz-1.7B-Base` via `qwen-tts` package
+- 10s clip was too thin (accent lost), 59s was too slow to process on CPU. 30s is the sweet spot.
+
+### Infrastructure
+- `generate_narration.py` — batch script wired for Qwen3-TTS. Extracts `data-narration-id` text from HTML, generates per-chunk WAV via ICL voice cloning, updates `window.narrationManifest`. Skips existing audio files. Has UTF-8 encoding fix for Windows.
+- `voicebox-test/voice_sample_30s.wav` — 30s reference clip (the one that works)
+- `voicebox-test/voice_sample.wav` — full 58.9s reference (too slow for CPU prompt building)
+- `voicebox-test/new test clone.m4a` — original 30s voice sample (m4a format)
+- `voicebox-test/new test appeasement.m4a` — 6 min voice sample (teacher reading lesson content)
+- `runpod/` — setup scripts for RunPod cloud GPU (setup.sh, run_all.sh, pack_for_upload.sh, pack_results.sh)
+- `test_gptsovits.py` — standalone GPT-SoVITS inference script
+
+**Generation process:** extract `data-narration-id` elements → normalise text → build voice prompt from 30s reference (ICL mode) → generate per-chunk WAV → update `window.narrationManifest` in HTML.
 
 ---
 
@@ -366,3 +411,67 @@ Channel: `@UnityCollegeHistory`. Three playlists mapped 1:1 to lessons (Elizabet
 
 ## Conflict & Tension Hero Images
 Conflict hero images use older naming (e.g. `Versailles_1919.jpg`, `lesson 2 hero.jpg` with spaces). Other units use `lesson-NN-hero.jpg`.
+
+---
+
+## OpenClaw (Agent Automation)
+
+OpenClaw runs in WSL2 Ubuntu as a systemd user service under the `tshau` account. It provides a Telegram bot and scheduled research agents.
+
+### Setup
+- **Config**: `~/.openclaw/openclaw.json` (in Ubuntu/WSL)
+- **Gateway**: `ws://127.0.0.1:18789`, systemd service `openclaw-gateway`
+- **Model**: `claude-sonnet-4-6` (default for all agents)
+- **Auth**: Anthropic API key (`sk-ant-api03-...`) — billed via console.anthropic.com credits
+- **WSL persistence**: `.wslconfig` set with `autoMemoryReclaim=false` to keep gateway alive
+
+### Telegram Bot
+- **Bot**: `@tom_shaun_bot`
+- **Token**: `8152595300:AAF6HGoF6HZBMf-VJFKSH-ipaW5d2Saglk0`
+- **User ID**: `8504241823`
+- **DM policy**: allowlist (only Tom's account)
+- **Binding**: DMs route to `main` agent
+
+### Agents
+| Agent | Role |
+|-------|------|
+| `main` | Default Telegram responder. Handles DMs, weekly digest compilation, file access, general questions. |
+| `research-tts` | Daily TTS/voice cloning research (cron, no direct Telegram access). |
+| `research-tech` | Daily EdTech/dev tools research (cron, no direct Telegram access). |
+| `orchestrator` | Unused — merged into main agent. |
+| `file-access` | Unused — merged into main agent. |
+
+Agent instructions: `~/.openclaw/agents/{agent-id}/agent/AGENT.md`
+
+### Cron Jobs
+| Job | Schedule | Agent | What it does |
+|-----|----------|-------|-------------|
+| TTS Research Daily | 8:00am daily (Europe/London) | `research-tts` | Scans for new TTS models, voice cloning breakthroughs, AMD GPU compatibility |
+| Tech Research Daily | 8:05am daily (Europe/London) | `research-tech` | Scans for EdTech tools, static site innovations, AI in education |
+| Weekly Digest | Monday 9:00am (Europe/London) | `main` | Compiles findings from both research agents into a Telegram summary |
+
+### Common commands (run in Ubuntu)
+```bash
+openclaw status              # Check gateway + channels
+openclaw logs --follow       # Live gateway logs
+openclaw cron list           # List scheduled jobs
+systemctl --user restart openclaw-gateway   # Restart gateway
+nano ~/.openclaw/agents/research-tts/agent/AGENT.md  # Edit agent instructions
+```
+
+### Research Log Pipeline
+Two research agents run daily and write findings to log files in the Study Vault directory:
+- **`tts-research-log.md`** — TTS/voice cloning developments (from `research-tts` agent, 8am daily)
+- **`tech-research-log.md`** — EdTech/dev tools developments (from `research-tech` agent, 8:05am daily)
+
+These logs are NOT sent to Telegram. They are written for Claude Code to read during conversations:
+- **Narration / TTS discussions** → read `tts-research-log.md` for recent model releases, benchmarks, AMD compatibility
+- **Website / platform development** → read `tech-research-log.md` for relevant tools, PWA updates, hosting options, EdTech innovations
+- **Any new feature or architectural decision** → check both logs in case something relevant has landed
+
+When any of these topics come up, **read the relevant log file(s) first** before making recommendations.
+
+The **weekly digest** (Monday 9am, `main` agent) reads both logs and sends a short nudge to Tom's Telegram with highlights.
+
+### WSL Keep-Alive
+OpenClaw runs in WSL2 Ubuntu. A VBS script in the Windows Startup folder (`shell:startup/keep-wsl-alive.vbs`) runs `wsl -d Ubuntu -- sleep infinity` on login to prevent WSL from shutting down the distro. If cron jobs aren't firing, check that Ubuntu is running: `wsl -l -v`.
