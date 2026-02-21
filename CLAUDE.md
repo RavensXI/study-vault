@@ -18,7 +18,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 **History (complete — 60 lessons across 4 units):**
 - All lessons cross-referenced against teacher PPTs, readability-passed for GCSE students
 - Hero images (Wikimedia Commons), infographic diagrams (Gemini API, ~71 total), practice questions (6/lesson, 360 total with AQA past paper tags), knowledge checks (5/lesson, 300 total)
-- TTS narration: Conflict & Tension lessons 01–14 fully narrated, lesson 15 partial (1 clip). Qwen3-TTS generated locally on AMD RX 6800 using ICL mode with 30s reference clip. Other 3 units (45 lessons) not started. Player UI in place on all 60 lessons. See TTS Narration section.
+- TTS narration: Conflict & Tension all 15 manifests populated. Lessons 01–14 fully narrated, lesson 15 partial (1 clip). WAV files stored locally only — gitignored, need hosting solution. Other 3 units not started. Player UI in place on all 60 lessons.
 - Accessibility toolbar (dark mode, dyslexia font, font sizing, Irlen overlays)
 - Glossary tooltips, collapsible sections, timelines, key fact boxes, lightbox
 - Embedded YouTube videos in sidebar (45 lessons — Conflict, Health, Elizabethan)
@@ -34,20 +34,24 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Dashboard: greeting + exam countdown, today's revision cards, progress stats, subject grid
 - All state in localStorage — no backend
 
-**Business Studies (Edexcel 1BS0) — partially built:**
-- Landing page + Theme 1 and Theme 2 index pages (15 lesson cards each)
-- One lesson built: Theme 1 Lesson 1 "Enterprise & New Business Ideas"
-- `generate_diagram.py` helper script for Gemini API diagram generation
+**Business Studies (Edexcel 1BS0) — presentation-ready:**
+- Landing page (`business/index.html`) with distinct images: `subject-business-1.jpg` (market stall) for Theme 1, `subject-business.jpg` (high street) for Theme 2
+- Theme 1 and Theme 2 index pages (15 lesson cards each)
+- All 30 lessons built with full content, diagrams (matplotlib reference + Gemini concept images), practice questions, knowledge checks, Related Media, video placeholders
+- Theme 1 Lesson 1 fully featured: YouTube video embedded, Spotify podcast linked, TTS narration (33 clips, 7 min audio — WAV files local only)
+- Exam Technique guides: hub + 6 guide pages (`business/exam-technique/`) for all Edexcel question types
+- Revision Technique guides: hub + 8 guide pages (`business/revision-technique/`) including business-specific `practising-calculations.html`
+- Hybrid diagram system: matplotlib for structured reference graphics, Gemini for photorealistic concept images
 
 ### Still TODO
-- **Business Studies**: 29 more lessons (Theme 1 L02–L15, Theme 2 L01–L15)
-- TTS narration — generate remaining ~46 lessons (finish Conflict 15, then Health, Elizabethan, America). Current Qwen3-TTS approach works but is slow. See TTS Narration section.
+- **Business Studies**: audio hosting solution needed before narration WAVs can go live (Cloudflare R2 recommended — free 10GB tier, zero egress). Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
+- TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons). KaniTTS-2 flagged as worth testing (RTF ~0.2, zero-shot voice cloning, PyTorch so potentially AMD-compatible).
 - PWA (service worker + manifest.json)
+- Real auth backend (Supabase) + teacher analytics dashboard — deferred until institutional green light
 - Delete old v1 flat HTML files (conflict-tension.html, health-people.html, elizabethan.html, america.html)
 
 ### Future features (not started)
 - Retrieval Practice — cross-lesson spaced repetition quiz (requires backend)
-- Real auth backend (likely Supabase) for cross-device sync + teacher analytics
 - Content for subjects beyond History and Business
 
 ---
@@ -71,10 +75,10 @@ Study Vault/
 │   └── revision-technique/   ← Hub + 7 guide pages (green theme)
 ├── business/
 │   ├── index.html            ← Business landing page (2 theme cards)
-│   ├── theme-1/              ← 15 lesson cards, 1 lesson built
-│   ├── theme-2/              ← 15 lesson cards, no lessons yet
-│   ├── exam-technique/       ← placeholder
-│   └── revision-technique/   ← placeholder
+│   ├── theme-1/              ← 15 lessons + diagrams (all built)
+│   ├── theme-2/              ← 15 lessons + diagrams (all built)
+│   ├── exam-technique/       ← Hub + 6 guide pages (Edexcel question types)
+│   └── revision-technique/   ← Hub + 8 guide pages (incl. practising-calculations)
 └── Spec and Materials/       ← Teacher PPTs (untracked)
     └── Lessons/{Health,America,Conflict,Elizabeth}/
 ```
@@ -246,7 +250,7 @@ Three sections in order: **Knowledge Check** (button → modal quiz), **Related 
 
 Related Media order: Lesson Podcast (always first) → Podcasts → Movies → TV Shows → Documentaries → Study Tools (always last). Empty categories omitted. Links: podcast episodes use specific episode URLs; movies/TV use JustWatch UK; max ~3 items per category.
 
-Do NOT add a "Key Facts" section to the sidebar. Sidebar uses `position: sticky; top: 5rem` — no independent scrolling.
+Do NOT add a "Key Facts" section to the sidebar. Sidebar scrolls independently within `max-height: calc(100vh - 6rem)` — a subtle accent-coloured scrollbar appears on hover.
 
 See any existing lesson file for full HTML patterns.
 
@@ -294,18 +298,32 @@ Two themes, 15 lessons each, 30 total. Body classes: `unit-business-1` / `unit-b
 
 ## Diagram Generation
 
-**Design principles:** Infographics NOT illustrations. One concept per image. Minimal text (3-5 word labels). Let visuals do the work. Clean white background, landscape format. Use unit accent colour. Each diagram replaces a text element to avoid duplication.
+Business Studies uses a **hybrid approach** — two diagrams per lesson:
 
-**Prompt pattern:**
+**1. Matplotlib reference graphic** (`diagram_name.jpg`)
+- Tiles, bar/line charts, flow diagrams, matrices, pyramids, org charts
+- Cyan palette for Theme 1 (`#075985 → #38bdf8`), emerald for Theme 2 (`#064e3b → #34d399`)
+- `FancyBboxPatch` rounded tiles, drop shadows, bold labels, divider lines
+- See existing Business lesson Python scripts for the tile template
+
+**2. Gemini concept image** (`diagram_name_concept.jpg`)
+- Photorealistic editorial photo where it adds genuine value — e.g. Ferrari for adding value, dealer row for proximity to competitors, container ship for globalisation
+- Only include if it makes the concept click. Remove if it's generic fluff.
+- Use `class="diagram"` (full width, 720px max). Place well away from other images (15+ lines of content between them). Move to just before `<div class="exam-tip">` if needed for separation.
+
+**Gemini prompt pattern for concept images:**
 ```
-Create a clear educational diagram showing [SUBJECT].
-Use a warm color palette with [UNIT ACCENT COLOR] as the primary color.
-Keep text MINIMAL — short labels only, let the visuals communicate the concept.
-Clean white background, landscape format, professional textbook quality.
-Suitable for GCSE students aged 15-16. No watermarks.
+Editorial photography: [specific real-world scene that illustrates the concept].
+[Mood/lighting details]. No text or logos. Professional stock photo quality.
 ```
 
-Diagram filenames: `diagram_descriptive_name.jpg`. See `generate_diagram.py` for API usage.
+**Gemini API call format** (use `responseModalities: ["TEXT", "IMAGE"]` — NOT `responseMimeType`):
+```python
+payload = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseModalities': ['TEXT', 'IMAGE']}}
+```
+API key fallback in `generate_tts_gemini.py`. Model: `gemini-3-pro-image-preview`.
+
+Diagram filenames: `diagram_descriptive_name.jpg`. History diagrams (Gemini-only) follow the same naming. See `generate_diagram.py` for API usage.
 
 ---
 
@@ -358,18 +376,21 @@ All initialised in `DOMContentLoaded`:
 
 ## TTS Narration
 
-### Current status (19 Feb 2026)
-Qwen3-TTS (`Qwen3-TTS-12Hz-1.7B-Base`) running locally on AMD RX 6800 (CPU mode, ~6x real-time). Uses ICL voice cloning with a 30-second reference clip for accent preservation.
+### Current status (21 Feb 2026)
+Qwen3-TTS (`Qwen3-TTS-12Hz-1.7B-Base`) running locally on AMD RX 6800 (CPU mode, ~6x real-time). Uses ICL voice cloning with a 30-second reference clip for accent preservation. CHUNK_TIMEOUT set to 600s (bumped from 300s to handle long paragraphs).
+
+**WAV files are gitignored** — 19MB per lesson is too large to commit. Cloudflare R2 recommended for hosting (free 10GB tier). Before narrating more lessons, set up R2 and update the manifest `src` paths to use R2 URLs.
 
 **Narration progress:**
 
 | Unit | Lessons done | Notes |
 |------|-------------|-------|
-| Conflict & Tension 01–14 | 14/15 | Fully working — audio files + manifest correct |
-| Conflict & Tension 15 | partial | 1 audio clip generated, batch was stopped early |
+| Conflict & Tension 01–14 | 14/15 | Manifests populated, WAVs local only |
+| Conflict & Tension 15 | partial | 1 audio clip generated |
 | Health & People | 0/15 | Not started |
 | Elizabethan | 0/15 | Not started |
 | America | 0/15 | Not started |
+| Business Theme 1 L01 | 1/30 | 33 clips, 7 min audio, WAVs local only |
 
 Audio file naming convention: `narration_lesson-NN_nX.wav` (e.g. `narration_lesson-01_n1.wav`). Files live in the unit folder alongside lesson HTML (e.g. `conflict-tension/narration_lesson-01_n1.wav`).
 
@@ -383,7 +404,8 @@ Audio file naming convention: `narration_lesson-NN_nX.wav` (e.g. `narration_less
 | **GPT-SoVITS v2Pro** (fine-tuned) | Mediocre + truncation | Trained on 6 min of teacher's voice. Voice somewhat recognisable but not convincing. Consistently truncates output. Chinese-first model. |
 
 **Not yet tried:**
-- **F5-TTS** — English-focused, good voice cloning reported, 15x real-time on GPU. Worth testing next.
+- **KaniTTS-2** — 400M param model, RTF ~0.2 on RTX 5080, zero-shot voice cloning via 128-dim speaker embeddings (WavLM). `pip install kani-tts-2`. Standard PyTorch so AMD/ROCm should work in principle. Flagged by research-tts agent 20 Feb 2026 as hottest new model.
+- **F5-TTS** — English-focused, good voice cloning reported, 15x real-time on GPU.
 - **Professional narration** — hire a narrator or use a non-cloned AI voice.
 
 ### Voice cloning config
@@ -472,6 +494,8 @@ These logs are NOT sent to Telegram. They are written for Claude Code to read du
 When any of these topics come up, **read the relevant log file(s) first** before making recommendations.
 
 The **weekly digest** (Monday 9am, `main` agent) reads both logs and sends a short nudge to Tom's Telegram with highlights.
+
+**Note on agent log writing (fixed 21 Feb 2026):** Agents must write findings to `/tmp/{tts,tech}-findings.md` first, then append using `cat /tmp/findings.md >> "/mnt/c/Users/tshau/Documents/Study Vault/tts-research-log.md"`. Do NOT use the `write` tool directly on the log file — it overwrites instead of appending. Both AGENT.md files have been updated with this instruction.
 
 ### WSL Keep-Alive
 OpenClaw runs in WSL2 Ubuntu. A VBS script in the Windows Startup folder (`shell:startup/keep-wsl-alive.vbs`) runs `wsl -d Ubuntu -- sleep infinity` on login to prevent WSL from shutting down the distro. If cron jobs aren't firing, check that Ubuntu is running: `wsl -l -v`.
