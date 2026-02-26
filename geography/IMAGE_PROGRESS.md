@@ -9,7 +9,7 @@
 - Paper 1 (indigo): `#312e81 #3730a3 #4338ca #4f46e5 #6366f1 #818cf8`, shadow `#c7d2fe`, title `#1e1b4b`
 - Paper 2 (red): `#7f1d1d #991b1b #b91c1c #dc2626 #ef4444 #f87171`, shadow `#fecaca`, title `#450a0a`
 
-**Gemini API key**: `AIzaSyCW-APQx2QDUIMfjJQdwt3Z4RRMDYqyEuo`
+**Gemini API key**: use `$GEMINI_API_KEY` env var
 
 **Hero image HTML pattern**:
 ```html
