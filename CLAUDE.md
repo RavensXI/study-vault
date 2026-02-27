@@ -64,7 +64,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons). KaniTTS-2 flagged as worth testing (RTF ~0.2, zero-shot voice cloning, PyTorch so potentially AMD-compatible).
 - PWA (service worker + manifest.json)
 - Real auth backend (Supabase) + teacher analytics dashboard — deferred until institutional green light
-- Delete old v1 flat HTML files (conflict-tension.html, health-people.html, elizabethan.html, america.html)
+
 
 ### Future features (not started)
 - Retrieval Practice — cross-lesson spaced repetition quiz (requires backend)
@@ -117,26 +117,14 @@ Study Vault/
 
 ---
 
-## API Details
+## API Keys
 
-API keys are stored in environment variables — never commit them.
+All stored in environment variables — never commit them.
 
-### Gemini API (diagrams)
-- **Env var**: `GEMINI_API_KEY`
-- **Model**: `gemini-3-pro-image-preview`
-- **Cost**: ~$0.134 per image
-- See `generate_diagram.py` for usage
-
-### TTS Status: Qwen3-TTS working locally but slow
-Qwen3-TTS runs on local AMD RX 6800 and has generated narration for Conflict & Tension lessons 01–10. Quality is acceptable but generation is slow. Looking for a faster model/approach to complete the remaining ~50 lessons.
-
-### ElevenLabs TTS (paid fallback — best quality but expensive)
-- **Env var**: `ELEVENLABS_API_KEY`
-- **Voice ID**: `Nd6wm0mR1AWfjae7WcRB` (cloned voice)
-- **Model**: `eleven_turbo_v2_5` (0.5 credits/char)
-- **Script**: `generate_tts.py`
-- **Quality**: Good voice cloning, but too expensive at scale (25 subjects, ~1000+ lessons)
-- **Estimated cost**: ~$20-30 for 60 History lessons; hundreds for full site
+| Service | Env Var | Used For |
+|---------|---------|----------|
+| Gemini | `GEMINI_API_KEY` | Diagram generation (see `DIAGRAM_PIPELINE.md`) |
+| ElevenLabs | `ELEVENLABS_API_KEY` | TTS paid fallback (see `NARRATION_PIPELINE.md`) |
 
 ---
 
@@ -160,127 +148,17 @@ Qwen3-TTS runs on local AMD RX 6800 and has generated narration for Conflict & T
 
 ## Lesson Page Template
 
-Copy `history/conflict-tension/lesson-01.html` as the canonical template. Key structure:
+Full template, content components (key facts, collapsibles, timelines, glossary terms, diagrams, hero images), and content editing conventions documented in **`LESSON_TEMPLATE.md`** — read that file before building or editing lessons.
 
-```html
-<body class="unit-UNITCLASS" data-unit="UNIT-SLUG" data-lesson="lesson-NN">
-  <div class="scroll-progress"></div>
-  <header class="page-header"><!-- Brand + nav --></header>
-  <div class="lesson-page">
-    <main class="lesson-content">
-      <!-- lesson-header, hero image, a11y toolbar, narration player -->
-      <article class="study-notes">
-        <!-- Content with data-narration-id="n1", n2, etc. on every element -->
-      </article>
-      <div class="exam-tip" data-narration-id="nXX">...</div>
-      <div class="conclusion" data-narration-id="nXX">...</div>
-      <section class="practice-section" id="practice">...</section>
-      <nav class="lesson-nav">...</nav>
-    </main>
-    <aside class="lesson-sidebar">
-      <!-- Knowledge Check, Related Media, Video -->
-    </aside>
-  </div>
-  <script src="../../js/main.js"></script>
-  <script>
-    window.narrationManifest = [];
-    window.practiceQuestions = [ /* 6 questions */ ];
-    window.knowledgeCheck = [ /* 5 questions */ ];
-  </script>
-</body>
-```
-
-### Content Components
-
-```html
-<!-- Key Fact -->
-<div class="key-fact" data-narration-id="nX">
-  <div class="key-fact-label">Key Fact</div>
-  <p>Content...</p>
-</div>
-
-<!-- Collapsible -->
-<div class="collapsible">
-  <button class="collapsible-toggle" aria-expanded="false">
-    <span>Title</span>
-    <svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
-  <div class="collapsible-content"><div class="collapsible-inner">
-    <p data-narration-id="nX">Content...</p>
-  </div></div>
-</div>
-
-<!-- Timeline -->
-<div class="timeline" data-narration-id="nX">
-  <div class="timeline-event">
-    <div class="timeline-date">DATE</div>
-    <h4>Title</h4><p>Description</p>
-  </div>
-</div>
-
-<!-- Glossary term (single-sentence definition only) -->
-<dfn class="term" data-def="Definition.">term</dfn>
-
-<!-- Diagram -->
-<figure class="diagram"><img src="diagram_name.jpg" alt="..."></figure>
-
-<!-- Hero image -->
-<figure class="lesson-hero-image">
-  <img src="lesson-NN-hero.jpg" alt="..." style="object-position: center XX%;">
-  <figcaption>Description</figcaption>
-</figure>
-```
-
-Hero images: `object-fit: cover`, 280px desktop / 200px mobile. Use `?hero-edit` URL param to adjust position.
+Canonical template: `history/conflict-tension/lesson-01.html`.
 
 ---
 
-## Practice Questions
+## Practice Questions & Knowledge Checks
 
-6 per lesson. Real past paper questions tagged with `pastPaper` property (gold badge). Use unicode escapes in JS: `\u2014` (em dash), `\u2013` (en dash), `\u2019`/`\u2018` (smart quotes).
+Full details documented in **`QUESTIONS_PIPELINE.md`** — read that file before writing questions for any subject. Covers question formats, mark allocations per subject/exam board, `getGuideUrl()` mapping, knowledge check types, and sourcing guidance.
 
-**History (AQA) question types by unit:**
-- **Conflict**: 3x "Write an account" (8 marks) + 3x "How far do you agree?" (16+4 SPaG)
-- **Health**: Mix of "Explain significance" (8) + "Explain two ways similar" (8) + "Has [factor] been the main factor?" (16+4 SPaG)
-- **Elizabethan**: 6x 8-mark only ("Explain what was important" / "Write an account")
-- **America**: 2x "Describe two" (4) + 2x "In what ways" (8) + 2x "Which had more impact?" (12)
-
-**Business (Edexcel) question types per lesson:**
-- 1x Define (1 mark), 1x Outline (2), 2x Explain (3), 1x Discuss (6), 1x Justify/Evaluate (9 or 12)
-
-**Sport Science (OCR) question types per lesson:**
-- 1x Identify (1 mark), 1x State (2), 1x Describe (3), 1x Explain (4), 1x Extended response (6), 1x Discuss* (8, QWC assessed)
-
-### Exam Technique guide mapping
-`getGuideUrl(type)` maps practice question type strings to guide files via substring matching:
-- `'Describe two'` → `describe-two.html`
-- `'Write an account'` → `write-an-account.html`
-- `'Explain the significance'` / `'Explain what was important'` → `explain-significance.html`
-- `'Explain two similarities'` → `explain-similarities.html`
-- `'In what ways'` → `in-what-ways.html`
-- `'Which had more impact'` → `which-had-more-impact.html`
-- `'How far do you agree'` / `'Has '` → `factor-essay.html`
-
-**Generic entries (at end of array — match after subject-specific entries):**
-- `'Identify'` → `identify-state.html`
-- `'State'` → `identify-state.html`
-- `'Extended response'` → `extended-response.html`
-- `'Describe'` → `describe.html`
-- `'Explain'` → `explain.html`
-
----
-
-## Knowledge Check
-
-5 per lesson. Three question types — standard mix: 2 MCQ + 2 fill-in-the-blank + 1 match-up.
-
-```javascript
-{ type: "mcq", q: "Question?", options: ["A", "B", "C", "D"], correct: 2 }          // 0-based index
-{ type: "fill", q: "Sentence with _____.", options: ["w1", "w2", "w3", "w4"], correct: 1 }
-{ type: "match", q: "Match:", left: ["A", "B", "C"], right: ["1", "2", "3"], order: [0, 1, 2] }
-```
-
-Best score saved to `studyvault-kc-{data-unit}/{data-lesson}` in localStorage.
+**Summary:** 6 practice questions + 5 knowledge checks per lesson. Past paper questions tagged with `pastPaper` property. Knowledge checks: 2 MCQ + 2 fill-in-the-blank + 1 match-up. Best score in localStorage.
 
 ---
 
@@ -288,83 +166,21 @@ Best score saved to `studyvault-kc-{data-unit}/{data-lesson}` in localStorage.
 
 Three sections in order: **Knowledge Check** (button → modal quiz), **Related Media** (collapsible categories), **Video** (YouTube embed, 45 lessons only).
 
-Related Media order: Lesson Podcast (always first) → Podcasts → Movies → TV Shows → Documentaries → Study Tools (always last). Empty categories omitted. Links: podcast episodes use specific episode URLs; movies/TV use JustWatch UK; max ~3 items per category.
+Full Related Media curation process, HTML patterns, category emojis, and link conventions documented in **`RELATED_MEDIA_PIPELINE.md`** — read that file before adding or updating Related Media.
+
+**Summary:** Spin up research agents (one per lesson) to find engaging external content. Category order: Lesson Podcast → Podcasts → Videos & Channels → Movies → TV Shows → Documentaries → Study Tools. Empty categories omitted. Max 3 items per category. Movies/TV/docs use JustWatch UK URLs; podcasts use specific episode URLs.
 
 Do NOT add a "Key Facts" section to the sidebar. Sidebar scrolls independently within `max-height: calc(100vh - 6rem)` — a subtle accent-coloured scrollbar appears on hover.
 
-See any existing lesson file for full HTML patterns.
-
 ---
 
-## Business Studies (Edexcel 1BS0)
+## Subject Build Plans
 
-Two themes, 15 lessons each, 30 total. Body classes: `unit-business-1` / `unit-business-2`. Data attributes: `data-unit="business-theme-1"` / `"business-theme-2"`.
+Lesson breakdowns, spec references, exam/revision technique guides, and subject-specific notes:
 
-### Theme 1: Investigating Small Business (spec 1.1–1.5)
-1. Enterprise & New Business Ideas (1.1.1+1.1.2) ← **built**
-2. The Role of Enterprise & Adding Value (1.1.3+1.1.4)
-3. Customer Needs & Market Research (1.2.1+1.2.2)
-4. Market Segmentation & Competition (1.2.3+1.2.4)
-5. Business Aims & Objectives (1.3.1+1.3.2)
-6. Revenue, Costs & Profit (1.3.3)
-7. Break-Even Analysis (1.3.4)
-8. Cash & Cash-Flow Forecasts (1.3.5)
-9. Sources of Business Finance (1.4.1)
-10. Business Ownership & Liability (1.4.2+1.4.3)
-11. Business Location (1.4.4)
-12. The Marketing Mix (1.4.5)
-13. Business Plans (1.4.6)
-14. Stakeholders & Technology (1.5.1+1.5.2)
-15. Legislation, the Economy & External Influences (1.5.3+1.5.4)
-
-### Theme 2: Building a Business (spec 2.1–2.5)
-1. Business Growth (2.1.1)
-2. Changing Aims & Objectives (2.1.2)
-3. Globalisation (2.1.3+2.1.4)
-4. Ethics & the Environment (2.1.5)
-5. Product Design & the Product Life Cycle (2.2.1)
-6. Pricing Strategies (2.2.2)
-7. Promotion & Place (2.2.3+2.2.4)
-8. Using the Marketing Mix (2.2.5)
-9. Business Operations & Production (2.3.1)
-10. Working with Suppliers (2.3.2)
-11. Quality & Customer Service (2.3.3+2.3.4)
-12. Business Calculations (2.4.1+2.4.2)
-13. Understanding Business Performance (2.4.3)
-14. Organisational Structures & Recruitment (2.5.1+2.5.2)
-15. Training, Development & Motivation (2.5.3+2.5.4)
-
----
-
-## Sport Science (OCR Cambridge National R180)
-
-One unit (R180: Reducing the Risk of Sports Injuries), 10 lessons. Body class: `unit-sport-science`. Data attribute: `data-unit="sport-science-r180"`. Orange theme (#ea580c).
-
-### R180: Reducing the Risk of Sports Injuries (exam unit, 40%)
-1. Extrinsic Factors (1.1)
-2. Intrinsic Factors (1.2)
-3. Warm Up Routines (2.1–2.2)
-4. Cool Down Routines (2.3–2.4)
-5. Acute Sports Injuries (3.1)
-6. Chronic Sports Injuries (3.2)
-7. Reducing Risk & Emergency Action Plans (4.1)
-8. Treatment & Rehabilitation (4.2)
-9. Medical Conditions: Asthma, Diabetes & Epilepsy (5.1–5.3)
-10. Medical Conditions: SCA, Hypothermia, Heat Exhaustion & Dehydration (5.4–5.5)
-
-### Exam Technique Guides (OCR question types)
-- `identify-state.html` — 1–2 marks (Identify / State)
-- `describe.html` — 3 marks (Describe)
-- `explain.html` — 4 marks (Explain)
-- `extended-response.html` — 6 marks (Extended response)
-- `discuss.html` — 8 marks (Discuss*, QWC assessed)
-
-### Revision Technique Guides
-- `retrieval-practice.html`, `spaced-repetition.html`, `dual-coding.html`, `knowledge-organisers.html`, `flashcard-drills.html`, `scenario-practice.html`, `timed-exam-practice.html`
-
-### PPT Source Material
-Located in `Spec and Materials/OCR Sport Science/` (untracked). Six topic folders:
-- `1 Extrinsic factors/`, `2 Intrinsic factors/`, `3 Warm up and cool down/`, `4 different types.../`, `5 Reducing Risk.../`, `6 causes.../`
+- **Business Studies (Edexcel 1BS0):** `business/BUILD_PLAN.md` — 2 themes, 30 lessons, cyan/emerald
+- **Geography (AQA 8035):** `geography/BUILD_PLAN.md` — 2 papers, 40 lessons, indigo/red
+- **Sport Science (OCR R180):** `sport-science/BUILD_PLAN.md` — 1 unit, 10 lessons, orange
 
 ---
 
@@ -420,68 +236,20 @@ All initialised in `DOMContentLoaded`:
 
 ## Content Editing Conventions
 
-**Scope:** Only edit within `<article class="study-notes">`, `<div class="exam-tip">`, and `<div class="conclusion">`. Never touch header, sidebar, nav, scripts.
+See **`LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
-**Preserve:** All `data-narration-id` attributes, all `<dfn class="term" data-def="...">` glossary terms (single-sentence definitions), HTML structure, HTML entities (`&mdash;` `&ndash;` `&rsquo;` etc.).
-
-**Readability (GCSE age 15-16):** Short sentences, active voice, minimal filler, concrete over abstract, 2-3 key takeaways.
-
-**Cross-referencing PPTs:** Read with `python -m markitdown "filepath"` (.pptx only). Add exam-relevant facts/dates/names only. Weave naturally into existing sections.
-
-**PPT folders:** Health → `Spec and Materials/Lessons/Health/`, America → `.../America/`, Conflict → `.../Conflict/`, Elizabethan → `.../Elizabeth/` (note: "Elizabeth" not "Elizabethan")
+- **Scope:** Only edit within `<article class="study-notes">`, `<div class="exam-tip">`, `<div class="conclusion">`
+- **Preserve:** All `data-narration-id` attributes, glossary `<dfn>` terms, HTML entities
+- **Readability:** Short sentences, active voice, concrete over abstract (GCSE age 15-16)
+- **PPTs:** Read with `python -m markitdown "filepath"` (.pptx only)
 
 ---
 
 ## TTS Narration
 
-### Current status (21 Feb 2026)
-Qwen3-TTS (`Qwen3-TTS-12Hz-1.7B-Base`) running locally on AMD RX 6800 (CPU mode, ~6x real-time). Uses ICL voice cloning with a 30-second reference clip for accent preservation. CHUNK_TIMEOUT set to 600s (bumped from 300s to handle long paragraphs).
+Full details documented in **`NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
 
-**WAV files are gitignored** — 19MB per lesson is too large to commit. Cloudflare R2 recommended for hosting (free 10GB tier). Before narrating more lessons, set up R2 and update the manifest `src` paths to use R2 URLs.
-
-**Narration progress:**
-
-| Unit | Lessons done | Notes |
-|------|-------------|-------|
-| Conflict & Tension 01–14 | 14/15 | Manifests populated, WAVs local only |
-| Conflict & Tension 15 | partial | 1 audio clip generated |
-| Health & People | 0/15 | Not started |
-| Elizabethan | 0/15 | Not started |
-| America | 0/15 | Not started |
-| Business Theme 1 L01 | 1/30 | 33 clips, 7 min audio, WAVs local only |
-
-Audio file naming convention: `narration_lesson-NN_nX.wav` (e.g. `narration_lesson-01_n1.wav`). Files live in the unit folder alongside lesson HTML (e.g. `conflict-tension/narration_lesson-01_n1.wav`).
-
-### Models tried
-
-| Model | Result | Notes |
-|-------|--------|-------|
-| **Qwen3-TTS** (local AMD RX 6800) | **Working — current approach** | Acceptable voice quality. Slow generation but functional. Generated Conflict lessons 01–10 locally. |
-| **Qwen3-TTS** (RunPod RTX 4090) | Too slow | ~14x real-time. Stock `qwen-tts` barely uses GPU (3%). Community fork (`dffdeeq/Qwen3-TTS-streaming`) tried with `torch.compile` — spent 30+ min compiling, never finished. |
-| **Chatterbox TTS** | Bad voice quality | Fast generation but terrible voice cloning — "someone doing a bad English accent". Zero-shot cloning doesn't work for every voice. |
-| **GPT-SoVITS v2Pro** (fine-tuned) | Mediocre + truncation | Trained on 6 min of teacher's voice. Voice somewhat recognisable but not convincing. Consistently truncates output. Chinese-first model. |
-
-**Not yet tried:**
-- **KaniTTS-2** — 400M param model, RTF ~0.2 on RTX 5080, zero-shot voice cloning via 128-dim speaker embeddings (WavLM). `pip install kani-tts-2`. Standard PyTorch so AMD/ROCm should work in principle. Flagged by research-tts agent 20 Feb 2026 as hottest new model.
-- **F5-TTS** — English-focused, good voice cloning reported, 15x real-time on GPU.
-- **Professional narration** — hire a narrator or use a non-cloned AI voice.
-
-### Voice cloning config
-- **Reference audio**: `voicebox-test/voice_sample_30s.wav` (30s crop of teacher reading, 24kHz mono)
-- **ICL mode**: `x_vector_only_mode=False` with reference transcript in `REF_TEXT` constant — preserves Lancashire accent
-- **Model**: `Qwen/Qwen3-TTS-12Hz-1.7B-Base` via `qwen-tts` package
-- 10s clip was too thin (accent lost), 59s was too slow to process on CPU. 30s is the sweet spot.
-
-### Infrastructure
-- `generate_narration.py` — batch script wired for Qwen3-TTS. Extracts `data-narration-id` text from HTML, generates per-chunk WAV via ICL voice cloning, updates `window.narrationManifest`. Skips existing audio files. Has UTF-8 encoding fix for Windows.
-- `voicebox-test/voice_sample_30s.wav` — 30s reference clip (the one that works)
-- `voicebox-test/voice_sample.wav` — full 58.9s reference (too slow for CPU prompt building)
-- `voicebox-test/new test clone.m4a` — original 30s voice sample (m4a format)
-- `voicebox-test/new test appeasement.m4a` — 6 min voice sample (teacher reading lesson content)
-- `runpod/` — setup scripts for RunPod cloud GPU (setup.sh, run_all.sh, pack_for_upload.sh, pack_results.sh)
-- `test_gptsovits.py` — standalone GPT-SoVITS inference script
-
-**Generation process:** extract `data-narration-id` elements → normalise text → build voice prompt from 30s reference (ICL mode) → generate per-chunk WAV → update `window.narrationManifest` in HTML.
+**Summary:** Qwen3-TTS running locally on AMD RX 6800 (CPU mode, slow but working). Conflict & Tension lessons 01–14 narrated, everything else pending. WAV files gitignored — need Cloudflare R2 hosting before going live. Also check `tts-research-log.md` for latest model developments.
 
 ---
 
@@ -494,66 +262,10 @@ Conflict hero images use older naming (e.g. `Versailles_1919.jpg`, `lesson 2 her
 
 ---
 
-## OpenClaw (Agent Automation)
+## Research Logs
 
-OpenClaw runs in WSL2 Ubuntu as a systemd user service under the `tshau` account. It provides a Telegram bot and scheduled research agents.
+Two automated research agents write daily findings to log files in this directory:
+- **`tts-research-log.md`** — TTS/voice cloning developments (new models, benchmarks, AMD compatibility)
+- **`tech-research-log.md`** — EdTech/dev tools developments (hosting, PWA, AI in education)
 
-### Setup
-- **Config**: `~/.openclaw/openclaw.json` (in Ubuntu/WSL)
-- **Gateway**: `ws://127.0.0.1:18789`, systemd service `openclaw-gateway`
-- **Model**: `claude-sonnet-4-6` (default for all agents)
-- **Auth**: Anthropic API key (`sk-ant-api03-...`) — billed via console.anthropic.com credits
-- **WSL persistence**: `.wslconfig` set with `autoMemoryReclaim=false` to keep gateway alive
-
-### Telegram Bot
-- **Bot**: `@tom_shaun_bot`
-- **Token**: *(store in `~/.openclaw/openclaw.json` — never commit)*
-- **User ID**: `8504241823`
-- **DM policy**: allowlist (only Tom's account)
-- **Binding**: DMs route to `main` agent
-
-### Agents
-| Agent | Role |
-|-------|------|
-| `main` | Default Telegram responder. Handles DMs, weekly digest compilation, file access, general questions. |
-| `research-tts` | Daily TTS/voice cloning research (cron, no direct Telegram access). |
-| `research-tech` | Daily EdTech/dev tools research (cron, no direct Telegram access). |
-| `orchestrator` | Unused — merged into main agent. |
-| `file-access` | Unused — merged into main agent. |
-
-Agent instructions: `~/.openclaw/agents/{agent-id}/agent/AGENT.md`
-
-### Cron Jobs
-| Job | Schedule | Agent | What it does |
-|-----|----------|-------|-------------|
-| TTS Research Daily | 8:00am daily (Europe/London) | `research-tts` | Scans for new TTS models, voice cloning breakthroughs, AMD GPU compatibility |
-| Tech Research Daily | 8:05am daily (Europe/London) | `research-tech` | Scans for EdTech tools, static site innovations, AI in education |
-| Weekly Digest | Monday 9:00am (Europe/London) | `main` | Compiles findings from both research agents into a Telegram summary |
-
-### Common commands (run in Ubuntu)
-```bash
-openclaw status              # Check gateway + channels
-openclaw logs --follow       # Live gateway logs
-openclaw cron list           # List scheduled jobs
-systemctl --user restart openclaw-gateway   # Restart gateway
-nano ~/.openclaw/agents/research-tts/agent/AGENT.md  # Edit agent instructions
-```
-
-### Research Log Pipeline
-Two research agents run daily and write findings to log files in the Study Vault directory:
-- **`tts-research-log.md`** — TTS/voice cloning developments (from `research-tts` agent, 8am daily)
-- **`tech-research-log.md`** — EdTech/dev tools developments (from `research-tech` agent, 8:05am daily)
-
-These logs are NOT sent to Telegram. They are written for Claude Code to read during conversations:
-- **Narration / TTS discussions** → read `tts-research-log.md` for recent model releases, benchmarks, AMD compatibility
-- **Website / platform development** → read `tech-research-log.md` for relevant tools, PWA updates, hosting options, EdTech innovations
-- **Any new feature or architectural decision** → check both logs in case something relevant has landed
-
-When any of these topics come up, **read the relevant log file(s) first** before making recommendations.
-
-The **weekly digest** (Monday 9am, `main` agent) reads both logs and sends a short nudge to Tom's Telegram with highlights.
-
-**Note on agent log writing (fixed 21 Feb 2026):** Agents must write findings to `/tmp/{tts,tech}-findings.md` first, then append using `cat /tmp/findings.md >> "/mnt/c/Users/tshau/Documents/Study Vault/tts-research-log.md"`. Do NOT use the `write` tool directly on the log file — it overwrites instead of appending. Both AGENT.md files have been updated with this instruction.
-
-### WSL Keep-Alive
-OpenClaw runs in WSL2 Ubuntu. A VBS script in the Windows Startup folder (`shell:startup/keep-wsl-alive.vbs`) runs `wsl -d Ubuntu -- sleep infinity` on login to prevent WSL from shutting down the distro. If cron jobs aren't firing, check that Ubuntu is running: `wsl -l -v`.
+When TTS, narration, hosting, or platform architecture topics come up, **read the relevant log file(s) first** before making recommendations.
