@@ -30,7 +30,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 **Platform features:**
 - Root `index.html` — single-page app with login, subject picker, and dashboard views
 - 3 demo accounts (emma/jake/guest, all password "revision" except guest/"guest")
-- Subject picker: 25 GCSE subjects in 6 groups. History and Business are `active: true` with URLs; others show "Coming Soon"
+- Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, and Sport Science are `active: true` with URLs; others show "Coming Soon"
 - Dashboard: greeting + exam countdown, today's revision cards, progress stats, subject grid
 - All state in localStorage — no backend
 
@@ -43,7 +43,23 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Revision Technique guides: hub + 8 guide pages (`business/revision-technique/`) including business-specific `practising-calculations.html`
 - Hybrid diagram system: matplotlib for structured reference graphics, Gemini for photorealistic concept images
 
+**Geography (AQA 8035) — complete (40 lessons across 2 papers):**
+- Paper 1 (Physical Geography, indigo theme) and Paper 2 (Human Geography, red theme), 20 lessons each
+- All lessons built with full content, practice questions (6/lesson, AQA format), knowledge checks (5/lesson)
+- Exam Technique guides: hub + guide pages for AQA Geography question types
+- Revision Technique guides: hub + guide pages adapted for Geography context
+
+**Sport Science (OCR Cambridge National R180) — content-ready:**
+- Landing page (`sport-science/index.html`) with single R180 unit card, orange theme (#ea580c)
+- Unit index page (`sport-science/r180/index.html`) with 10 lesson cards
+- All 10 lessons built with full content sourced from teacher PPTs, practice questions (6/lesson, OCR format: 1/2/3/4/6/8 marks), knowledge checks (5/lesson)
+- Exam Technique guides: hub + 5 guide pages (`sport-science/exam-technique/`) for OCR question types (Identify/State, Describe, Explain, Extended response, Discuss)
+- Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
+- Narration player UI in place on all 10 lessons (empty manifests, ready for audio)
+- Still needs: hero images (Wikimedia Commons), matplotlib diagrams, Gemini concept images
+
 ### Still TODO
+- **Sport Science**: Hero images, matplotlib reference diagrams (orange palette), Gemini concept images (selective). No narration yet.
 - **Business Studies**: audio hosting solution needed before narration WAVs can go live (Cloudflare R2 recommended — free 10GB tier, zero egress). Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
 - TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons). KaniTTS-2 flagged as worth testing (RTF ~0.2, zero-shot voice cloning, PyTorch so potentially AMD-compatible).
 - PWA (service worker + manifest.json)
@@ -52,7 +68,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 ### Future features (not started)
 - Retrieval Practice — cross-lesson spaced repetition quiz (requires backend)
-- Content for subjects beyond History and Business
+- Content for remaining subjects beyond History, Business, Geography, and Sport Science
 
 ---
 
@@ -79,6 +95,17 @@ Study Vault/
 │   ├── theme-2/              ← 15 lessons + diagrams (all built)
 │   ├── exam-technique/       ← Hub + 6 guide pages (Edexcel question types)
 │   └── revision-technique/   ← Hub + 8 guide pages (incl. practising-calculations)
+├── geography/
+│   ├── index.html            ← Geography landing page (2 paper cards)
+│   ├── paper-1/              ← 20 lessons (Physical Geography, indigo)
+│   ├── paper-2/              ← 20 lessons (Human Geography, red)
+│   ├── exam-technique/       ← Hub + guide pages (AQA Geography)
+│   └── revision-technique/   ← Hub + guide pages
+├── sport-science/
+│   ├── index.html            ← Sport Science landing page (1 unit card)
+│   ├── r180/                 ← 10 lessons (orange theme)
+│   ├── exam-technique/       ← Hub + 5 guide pages (OCR question types)
+│   └── revision-technique/   ← Hub + 7 guide pages
 └── Spec and Materials/       ← Teacher PPTs (untracked)
     └── Lessons/{Health,America,Conflict,Elizabeth}/
 ```
@@ -125,6 +152,9 @@ Qwen3-TTS runs on local AMD RX 6800 and has generated narration for Conflict & T
 | Revision Techniques | `unit-revision-technique` | `#16a34a` (green) |
 | Business Theme 1 | `unit-business-1` | `#0891b2` (cyan) |
 | Business Theme 2 | `unit-business-2` | `#059669` (emerald) |
+| Geography Paper 1 | `unit-geography-1` | `#4f46e5` (indigo) |
+| Geography Paper 2 | `unit-geography-2` | `#dc2626` (red) |
+| Sport Science R180 | `unit-sport-science` | `#ea580c` (orange) |
 
 ---
 
@@ -218,6 +248,9 @@ Hero images: `object-fit: cover`, 280px desktop / 200px mobile. Use `?hero-edit`
 **Business (Edexcel) question types per lesson:**
 - 1x Define (1 mark), 1x Outline (2), 2x Explain (3), 1x Discuss (6), 1x Justify/Evaluate (9 or 12)
 
+**Sport Science (OCR) question types per lesson:**
+- 1x Identify (1 mark), 1x State (2), 1x Describe (3), 1x Explain (4), 1x Extended response (6), 1x Discuss* (8, QWC assessed)
+
 ### Exam Technique guide mapping
 `getGuideUrl(type)` maps practice question type strings to guide files via substring matching:
 - `'Describe two'` → `describe-two.html`
@@ -227,6 +260,13 @@ Hero images: `object-fit: cover`, 280px desktop / 200px mobile. Use `?hero-edit`
 - `'In what ways'` → `in-what-ways.html`
 - `'Which had more impact'` → `which-had-more-impact.html`
 - `'How far do you agree'` / `'Has '` → `factor-essay.html`
+
+**Generic entries (at end of array — match after subject-specific entries):**
+- `'Identify'` → `identify-state.html`
+- `'State'` → `identify-state.html`
+- `'Extended response'` → `extended-response.html`
+- `'Describe'` → `describe.html`
+- `'Explain'` → `explain.html`
 
 ---
 
@@ -296,34 +336,52 @@ Two themes, 15 lessons each, 30 total. Body classes: `unit-business-1` / `unit-b
 
 ---
 
+## Sport Science (OCR Cambridge National R180)
+
+One unit (R180: Reducing the Risk of Sports Injuries), 10 lessons. Body class: `unit-sport-science`. Data attribute: `data-unit="sport-science-r180"`. Orange theme (#ea580c).
+
+### R180: Reducing the Risk of Sports Injuries (exam unit, 40%)
+1. Extrinsic Factors (1.1)
+2. Intrinsic Factors (1.2)
+3. Warm Up Routines (2.1–2.2)
+4. Cool Down Routines (2.3–2.4)
+5. Acute Sports Injuries (3.1)
+6. Chronic Sports Injuries (3.2)
+7. Reducing Risk & Emergency Action Plans (4.1)
+8. Treatment & Rehabilitation (4.2)
+9. Medical Conditions: Asthma, Diabetes & Epilepsy (5.1–5.3)
+10. Medical Conditions: SCA, Hypothermia, Heat Exhaustion & Dehydration (5.4–5.5)
+
+### Exam Technique Guides (OCR question types)
+- `identify-state.html` — 1–2 marks (Identify / State)
+- `describe.html` — 3 marks (Describe)
+- `explain.html` — 4 marks (Explain)
+- `extended-response.html` — 6 marks (Extended response)
+- `discuss.html` — 8 marks (Discuss*, QWC assessed)
+
+### Revision Technique Guides
+- `retrieval-practice.html`, `spaced-repetition.html`, `dual-coding.html`, `knowledge-organisers.html`, `flashcard-drills.html`, `scenario-practice.html`, `timed-exam-practice.html`
+
+### PPT Source Material
+Located in `Spec and Materials/OCR Sport Science/` (untracked). Six topic folders:
+- `1 Extrinsic factors/`, `2 Intrinsic factors/`, `3 Warm up and cool down/`, `4 different types.../`, `5 Reducing Risk.../`, `6 causes.../`
+
+---
+
 ## Diagram Generation
 
-Business Studies uses a **hybrid approach** — two diagrams per lesson:
+Full pipeline documented in **`DIAGRAM_PIPELINE.md`** — read that file before creating or updating diagrams.
 
-**1. Matplotlib reference graphic** (`diagram_name.jpg`)
-- Tiles, bar/line charts, flow diagrams, matrices, pyramids, org charts
-- Cyan palette for Theme 1 (`#075985 → #38bdf8`), emerald for Theme 2 (`#064e3b → #34d399`)
-- `FancyBboxPatch` rounded tiles, drop shadows, bold labels, divider lines
-- See existing Business lesson Python scripts for the tile template
+**Summary:** 4-step process — (1) research agents find real citable data, (2) matplotlib generates data-accurate baseline, (3) Gemini pictorial isotype redesign using thematic icons, (4) QC agent review with up to 3 regeneration iterations.
 
-**2. Gemini concept image** (`diagram_name_concept.jpg`)
-- Photorealistic editorial photo where it adds genuine value — e.g. Ferrari for adding value, dealer row for proximity to competitors, container ship for globalisation
-- Only include if it makes the concept click. Remove if it's generic fluff.
-- Use `class="diagram"` (full width, 720px max). Place well away from other images (15+ lines of content between them). Move to just before `<div class="exam-tip">` if needed for separation.
+**Key details:**
+- Model: `gemini-3.1-flash-image-preview`, API key in `$GEMINI_API_KEY`
+- Filenames: `diagram_descriptive_name.jpg`, matplotlib backups as `*_matplotlib.jpg`
+- HTML: `<figure class="diagram">`, full width, 720px max
+- Placement: at **content-relevant locations**, not always at the top. 15+ lines from other images.
+- Helper scripts: `gemini_regen.py`, `generate_{subject}_diagrams.py`, `generate_{subject}_gemini_infographics.py`
 
-**Gemini prompt pattern for concept images:**
-```
-Editorial photography: [specific real-world scene that illustrates the concept].
-[Mood/lighting details]. No text or logos. Professional stock photo quality.
-```
-
-**Gemini API call format** (use `responseModalities: ["TEXT", "IMAGE"]` — NOT `responseMimeType`):
-```python
-payload = {'contents': [{'parts': [{'text': prompt}]}], 'generationConfig': {'responseModalities': ['TEXT', 'IMAGE']}}
-```
-API key fallback in `generate_tts_gemini.py`. Model: `gemini-3-pro-image-preview`.
-
-Diagram filenames: `diagram_descriptive_name.jpg`. History diagrams (Gemini-only) follow the same naming. See `generate_diagram.py` for API usage.
+**Legacy:** Business uses hybrid matplotlib + Gemini concept images. History uses Gemini-only infographics (~71 total).
 
 ---
 

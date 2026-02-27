@@ -225,7 +225,12 @@ function initPracticeQuestions() {
       ['Calculate', 'calculate.html'],
       ['Discuss', 'discuss.html'],
       ['Justify', 'justify-evaluate.html'],
-      ['Evaluate', 'justify-evaluate.html']
+      ['Evaluate', 'justify-evaluate.html'],
+      ['Identify', 'identify-state.html'],
+      ['State', 'identify-state.html'],
+      ['Extended response', 'extended-response.html'],
+      ['Describe', 'describe.html'],
+      ['Explain', 'explain.html']
     ];
     for (var i = 0; i < guides.length; i++) {
       if (type.indexOf(guides[i][0]) !== -1) return '../exam-technique/' + guides[i][1];
