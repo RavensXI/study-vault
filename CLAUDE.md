@@ -54,17 +54,18 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Exam Technique guides: hub + guide pages for AQA Geography question types
 - Revision Technique guides: hub + guide pages adapted for Geography context
 
-**Sport Science (OCR Cambridge National R180) — content-ready:**
-- Landing page (`sport-science/index.html`) with single R180 unit card, orange theme (#ea580c)
+**Sport Science (OCR Cambridge National R180) — presentation-ready:**
+- Landing page (`sport-science/index.html`) with single centred R180 unit card, orange theme (#ea580c)
 - Unit index page (`sport-science/r180/index.html`) with 10 lesson cards
 - All 10 lessons built with full content sourced from teacher PPTs, practice questions (6/lesson, OCR format: 1/2/3/4/6/8 marks), knowledge checks (5/lesson)
+- Hero images (Wikimedia Commons, user-selected), Gemini pictorial isotype diagrams (all 10 QC'd)
+- Related Media sidebar curated for all 10 lessons (podcasts, videos, movies, TV, documentaries, study tools)
 - Exam Technique guides: hub + 5 guide pages (`sport-science/exam-technique/`) for OCR question types (Identify/State, Describe, Explain, Extended response, Discuss)
 - Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
 - Narration player UI in place on all 10 lessons (empty manifests, ready for audio)
-- Still needs: hero images (Wikimedia Commons), matplotlib diagrams, Gemini concept images
 
 ### Still TODO
-- **Sport Science**: Hero images, matplotlib reference diagrams (orange palette), Gemini concept images (selective). No narration yet.
+- **Sport Science**: TTS narration (empty manifests, ready for audio). YouTube videos for lessons 2–10.
 - **Business Studies**: audio hosting solution needed before narration WAVs can go live (Cloudflare R2 recommended — free 10GB tier, zero egress). Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
 - TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons). KaniTTS-2 flagged as worth testing (RTF ~0.2, zero-shot voice cloning, PyTorch so potentially AMD-compatible).
 - PWA (service worker + manifest.json)
@@ -129,6 +130,7 @@ Study Vault/
 │   ├── generate_sport_*.py
 │   ├── download_sport_heroes.py
 │   ├── insert_sport_images.py
+│   ├── compress_images.py    ← Resize & compress all project images (Pillow)
 │   ├── voice-reference/      ← Voice cloning samples
 │   └── runpod/               ← RunPod deployment scripts
 ├── tts-research-log.md       ← TTS research (external agents)
@@ -260,6 +262,7 @@ All initialised in `DOMContentLoaded`:
 - Logo: inline SVG padlock replaces period in "StudyVault." — `currentColor`, scales with text
 - Narration highlight: gold `#fef9e7` with `#e6b800` border
 - Key takeaways: 2-3 bullets, not exhaustive lists
+- Images: hero images max 1200px wide, diagrams max 1000px wide, JPEG quality 82. Run `python scripts/compress_images.py` after adding new images.
 
 ---
 
