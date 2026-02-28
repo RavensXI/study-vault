@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavIcons();
   initRevisionTips();
   initLogoLink();
+  initLessonPill();
 });
 
 /* --- Scroll Progress Bar --- */
@@ -1439,6 +1440,18 @@ function initLogoLink() {
   if (document.body.dataset.unit) {
     brand.setAttribute('href', '../../index.html');
   }
+}
+
+/* --- Lesson Pill (header) --- */
+function initLessonPill() {
+  var match = location.pathname.match(/lesson-0*(\d+)\.html/);
+  if (!match) return;
+  var unitLabel = document.querySelector('.header-unit-label');
+  if (!unitLabel) return;
+  var pill = document.createElement('span');
+  pill.className = 'header-lesson-label';
+  pill.textContent = 'Lesson ' + parseInt(match[1], 10);
+  unitLabel.parentNode.insertBefore(pill, unitLabel.nextSibling);
 }
 
 /* --- Revision Technique Tips (lightbulbs) --- */
