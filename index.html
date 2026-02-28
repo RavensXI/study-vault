@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>StudyVault &mdash; GCSE Revision</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 </head>
 <body>
 
@@ -17,20 +18,19 @@
   <section id="login-section" class="login-section" style="display: none;">
     <div class="login-box">
       <h2>Sign in</h2>
-      <form id="login-form" autocomplete="on">
-        <div class="login-field">
-          <label for="login-user">Username</label>
-          <input type="text" id="login-user" autocomplete="username" required>
-        </div>
-        <div class="login-field">
-          <label for="login-pass">Password</label>
-          <input type="password" id="login-pass" autocomplete="current-password" required>
-        </div>
-        <div id="login-error" class="login-error" style="display: none;">Invalid username or password</div>
-        <button type="submit" class="login-btn">Sign in</button>
-      </form>
-      <div class="login-demo">
-        <p class="login-demo-label">Demo accounts</p>
+
+      <!-- Microsoft SSO -->
+      <button type="button" id="sso-btn" class="login-sso-btn">
+        <svg class="login-sso-icon" viewBox="0 0 21 21" aria-hidden="true"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
+        Sign in with Microsoft
+      </button>
+      <div id="sso-error" class="login-error" style="display: none;"></div>
+
+      <!-- Separator -->
+      <div class="login-separator"><span>or use a demo account</span></div>
+
+      <!-- Demo accounts -->
+      <div class="login-demo login-demo--sso">
         <div class="login-demo-accounts">
           <button type="button" class="login-demo-account" data-user="emma" data-pass="revision">
             <strong>Emma Wilson</strong><span>emma &nbsp;/&nbsp; revision</span>
@@ -43,6 +43,20 @@
           </button>
         </div>
       </div>
+
+      <!-- Hidden demo login form (auto-submitted by demo account buttons) -->
+      <form id="login-form" autocomplete="on" style="display: none;">
+        <div class="login-field">
+          <label for="login-user">Username</label>
+          <input type="text" id="login-user" autocomplete="username" required>
+        </div>
+        <div class="login-field">
+          <label for="login-pass">Password</label>
+          <input type="password" id="login-pass" autocomplete="current-password" required>
+        </div>
+        <div id="login-error" class="login-error" style="display: none;">Invalid username or password</div>
+        <button type="submit" class="login-btn">Sign in</button>
+      </form>
     </div>
   </section>
 
@@ -86,8 +100,16 @@
   <script src="js/main.js"></script>
   <script>
   (function () {
+    /* ======== Supabase client ======== */
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
     /* ======== Data ======== */
     var USER_KEY = 'studyvault-user';
+    /* The active normalised user: { id, name, email, isDemo } */
+    var currentUser = null;
 
     var demoUsers = [
       { username: 'emma', password: 'revision', name: 'Emma Wilson',
@@ -165,6 +187,8 @@
     var dashboardEl  = document.getElementById('dashboard');
     var loginForm    = document.getElementById('login-form');
     var loginError   = document.getElementById('login-error');
+    var ssoBtn       = document.getElementById('sso-btn');
+    var ssoError     = document.getElementById('sso-error');
     var pickerGrid   = document.getElementById('picker-groups');
     var subjectGrid  = document.getElementById('subject-grid');
     var continueBtn  = document.getElementById('picker-continue');
@@ -175,15 +199,46 @@
     var statsEl      = document.getElementById('dashboard-stats');
 
     /* ======== Auth helpers ======== */
-    function getUser () {
-      try { var v = localStorage.getItem(USER_KEY); return v ? JSON.parse(v) : null; } catch (e) { return null; }
+    /* Normalise a Supabase user into our format */
+    function normaliseSupabaseUser (sbUser) {
+      var meta = sbUser.user_metadata || {};
+      var name = meta.full_name || meta.name || meta.preferred_username || sbUser.email || 'Student';
+      return { id: sbUser.id, name: name, email: sbUser.email, isDemo: false };
     }
-    function setUser (u) { localStorage.setItem(USER_KEY, JSON.stringify(u)); }
-    function clearUser () { localStorage.removeItem(USER_KEY); }
+
+    /* Get current user (already resolved at init) */
+    function getUser () { return currentUser; }
+
+    /* Set user for demo accounts (writes to localStorage) */
+    function setDemoUser (u) {
+      currentUser = { id: u.username, name: u.name, email: null, isDemo: true };
+      localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+    }
+
+    /* Clear user session */
+    function clearUser () {
+      var wasSSO = currentUser && !currentUser.isDemo;
+      currentUser = null;
+      localStorage.removeItem(USER_KEY);
+      if (wasSSO) { sb.auth.signOut(); }
+    }
+
+    /* Read demo user from localStorage (for page-load before async check) */
+    function loadDemoUser () {
+      try {
+        var v = localStorage.getItem(USER_KEY);
+        if (!v) return null;
+        var u = JSON.parse(v);
+        if (u && u.isDemo) return u;
+        /* Legacy format (pre-SSO): { username, name } → treat as demo */
+        if (u && u.username && !u.id) return { id: u.username, name: u.name, email: null, isDemo: true };
+        return null;
+      } catch (e) { return null; }
+    }
 
     function subjectsKey () {
       var u = getUser();
-      return u ? 'studyvault-subjects-' + u.username : 'studyvault-subjects';
+      return u ? 'studyvault-subjects-' + u.id : 'studyvault-subjects';
     }
     function getSaved () {
       try { var v = localStorage.getItem(subjectsKey()); return v ? JSON.parse(v) : null; } catch (e) { return null; }
@@ -200,14 +255,14 @@
     function getDemoData () {
       var u = getUser();
       if (!u) return null;
-      var key = 'studyvault-demo-' + u.username;
+      var key = 'studyvault-demo-' + u.id;
       try { var v = localStorage.getItem(key); return v ? JSON.parse(v) : null; } catch (e) { return null; }
     }
 
     function saveDemoData (demo) {
       var u = getUser();
       if (!u) return;
-      localStorage.setItem('studyvault-demo-' + u.username, JSON.stringify(demo));
+      localStorage.setItem('studyvault-demo-' + u.id, JSON.stringify(demo));
     }
 
     /* ======== View switching ======== */
@@ -222,6 +277,7 @@
       loginEl.style.display = '';
       loginForm.reset();
       loginError.style.display = 'none';
+      ssoError.style.display = 'none';
     }
 
     function showPicker () {
@@ -236,7 +292,31 @@
       renderDashboard();
     }
 
-    /* ======== Login ======== */
+    /* Route an authenticated user to the right view */
+    function routeUser () {
+      var saved = getSaved();
+      if (saved && saved.length > 0) { showDashboard(); } else { showPicker(); }
+    }
+
+    /* ======== Microsoft SSO ======== */
+    ssoBtn.addEventListener('click', function () {
+      ssoBtn.disabled = true;
+      ssoBtn.textContent = 'Redirecting\u2026';
+      sb.auth.signInWithOAuth({
+        provider: 'azure',
+        options: { redirectTo: window.location.origin + window.location.pathname }
+      }).then(function (res) {
+        if (res.error) {
+          ssoError.textContent = res.error.message || 'Sign-in failed. Please try again.';
+          ssoError.style.display = '';
+          ssoBtn.disabled = false;
+          ssoBtn.innerHTML = '<svg class="login-sso-icon" viewBox="0 0 21 21" aria-hidden="true"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg> Sign in with Microsoft';
+        }
+        /* If no error, the browser is redirecting — button stays disabled */
+      });
+    });
+
+    /* ======== Demo login ======== */
     loginForm.addEventListener('submit', function (e) {
       e.preventDefault();
       var username = document.getElementById('login-user').value.trim().toLowerCase();
@@ -251,7 +331,7 @@
 
       if (!match) { loginError.style.display = ''; return; }
 
-      setUser({ username: match.username, name: match.name });
+      setDemoUser({ username: match.username, name: match.name });
 
       /* Pre-populate subjects for demo users on first login */
       if (match.defaults && !getSaved()) { save(match.defaults); }
@@ -261,16 +341,16 @@
         saveDemoData({ stats: match.stats, todayRevision: match.todayRevision, examDate: match.examDate });
       }
 
-      var saved = getSaved();
-      if (saved && saved.length > 0) { showDashboard(); } else { showPicker(); }
+      routeUser();
     });
 
-    /* Auto-fill demo credentials on click */
+    /* Demo account buttons: auto-fill and submit */
     document.querySelectorAll('.login-demo-account').forEach(function (btn) {
       btn.addEventListener('click', function () {
         document.getElementById('login-user').value = btn.dataset.user;
         document.getElementById('login-pass').value = btn.dataset.pass;
-        document.getElementById('login-user').focus();
+        loginForm.style.display = '';
+        loginForm.requestSubmit ? loginForm.requestSubmit() : loginForm.dispatchEvent(new Event('submit'));
       });
     });
 
@@ -367,7 +447,7 @@
           th += '</' + tag + '>';
         });
         th += '</div></div>';
-      } else if (u && u.username === 'guest') {
+      } else if (u && u.isDemo && u.id === 'guest') {
         th += '<div class="dashboard-today-inner">';
         th += '<h3 class="dashboard-section-title">Today\u2019s Revision</h3>';
         th += '<p class="dashboard-empty">Select your subjects to get started</p>';
@@ -429,21 +509,51 @@
 
     changeBtn.addEventListener('click', function () { showPicker(); });
 
-    /* ======== Init ======== */
-    var user = getUser();
-    if (!user) {
-      showLogin();
-    } else {
-      /* Ensure demo data is populated for returning users */
-      if (!getDemoData()) {
-        var du = findDemoUser(user.username);
-        if (du && (du.stats || du.todayRevision)) {
-          saveDemoData({ stats: du.stats, todayRevision: du.todayRevision, examDate: du.examDate });
-        }
+    /* ======== Supabase auth state listener ======== */
+    sb.auth.onAuthStateChange(function (event, session) {
+      if (event === 'SIGNED_IN' && session && session.user) {
+        currentUser = normaliseSupabaseUser(session.user);
+        /* Persist a minimal marker so we know to check Supabase on next load */
+        localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+        routeUser();
+      } else if (event === 'SIGNED_OUT') {
+        currentUser = null;
+        localStorage.removeItem(USER_KEY);
+        showLogin();
       }
-      var saved = getSaved();
-      if (saved && saved.length > 0) { showDashboard(); } else { showPicker(); }
-    }
+    });
+
+    /* ======== Init ======== */
+    /* 1. Check Supabase session first (async) */
+    sb.auth.getSession().then(function (res) {
+      var session = res.data && res.data.session;
+      if (session && session.user) {
+        currentUser = normaliseSupabaseUser(session.user);
+        localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+        routeUser();
+        return;
+      }
+
+      /* 2. No SSO session — check for demo user in localStorage */
+      var demo = loadDemoUser();
+      if (demo) {
+        currentUser = demo;
+        /* Re-save in normalised format */
+        localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+        /* Ensure demo dashboard data is populated */
+        if (!getDemoData()) {
+          var du = findDemoUser(demo.id);
+          if (du && (du.stats || du.todayRevision)) {
+            saveDemoData({ stats: du.stats, todayRevision: du.todayRevision, examDate: du.examDate });
+          }
+        }
+        routeUser();
+        return;
+      }
+
+      /* 3. No session at all — show login */
+      showLogin();
+    });
   })();
   </script>
 </body>

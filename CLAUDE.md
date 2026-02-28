@@ -1,6 +1,10 @@
 # StudyVault — Project Reference
 
-Multi-subject GCSE revision site rebuilt from WordPress to static HTML. Opens directly in browser via `file://` protocol — no server, no build tools. Hosted on GitHub Pages via https://github.com/RavensXI/study-vault.
+Multi-subject GCSE revision site rebuilt from WordPress to static HTML. Opens directly in browser via `file://` protocol — no server, no build tools. Repo: https://github.com/RavensXI/study-vault.
+
+### Deployments
+- **GitHub Pages** (`main` branch): https://ravensxi.github.io/study-vault/ — History only, no login
+- **Vercel** (`platform` branch): https://study-vault-alpha.vercel.app/ — full multi-subject platform with login
 
 ## Owner
 Teacher: Tom Shaun, email: `t.shaun@unity.lancs.sch.uk`
@@ -29,10 +33,11 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 
 **Platform features:**
 - Root `index.html` — single-page app with login, subject picker, and dashboard views
-- 3 demo accounts (emma/jake/guest, all password "revision" except guest/"guest")
+- **Microsoft SSO** via Supabase Auth (Azure AD / Entra) — "Sign in with Microsoft" button for Unity College accounts. Supabase JS client loaded via CDN. SSO users get UUID-based localStorage keys; demo users keep username-based keys. `onAuthStateChange` listener handles session lifecycle. **Code is complete but SSO is blocked pending Entra admin consent** — Unity College's tenant restricts user consent. Network manager (Global Admin) needs to grant tenant-wide admin consent for the "StudyVault" Enterprise Application (Entra ID → Enterprise Applications → StudyVault → Permissions → Grant admin consent). App only requests `User.Read` (name + email). Deputy head approval being sought first (meeting Tuesday), then network manager does the one-click consent.
+- 3 demo accounts (emma/jake/guest) kept alongside SSO for non-Unity demos. Demo account buttons auto-submit (no manual form).
 - Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, and Sport Science are `active: true` with URLs; others show "Coming Soon"
 - Dashboard: greeting + exam countdown, today's revision cards, progress stats, subject grid
-- All state in localStorage — no backend
+- Auth state: Supabase session checked first (async), then localStorage demo fallback. Subject/progress data in localStorage keyed by user ID.
 
 **Business Studies (Edexcel 1BS0) — presentation-ready:**
 - Landing page (`business/index.html`) with distinct images: `subject-business-1.jpg` (market stall) for Theme 1, `subject-business.jpg` (high street) for Theme 2
@@ -63,11 +68,15 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - **Business Studies**: audio hosting solution needed before narration WAVs can go live (Cloudflare R2 recommended — free 10GB tier, zero egress). Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
 - TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons). KaniTTS-2 flagged as worth testing (RTF ~0.2, zero-shot voice cloning, PyTorch so potentially AMD-compatible).
 - PWA (service worker + manifest.json)
-- Real auth backend (Supabase) + teacher analytics dashboard — deferred until institutional green light
+- **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel (`study-vault-alpha.vercel.app`). OAuth redirects won't work from `file://`, need a server or Vercel.
+- Auth guards on lesson/subject pages (currently open by direct URL)
+- Supabase database tables (profiles, progress tracking) + teacher analytics dashboard
+- Role detection (teacher vs student) — needs profiles table
+- Remove demo accounts once SSO is battle-tested
 
 
 ### Future features (not started)
-- Retrieval Practice — cross-lesson spaced repetition quiz (requires backend)
+- Retrieval Practice / Flashcards — port spaced repetition flashcard system from `../vaultcards/` (React/Supabase app with Leitner-box algorithm, decks, streak tracking, XP, achievements, head-to-head challenges, teacher deck creation, PowerPoint→AI card generation). Requires Supabase backend first. Algorithms and data model are portable; React/Tailwind UI is not — will need vanilla JS/CSS reimplementation to fit Study Vault's static architecture.
 - Content for remaining subjects beyond History, Business, Geography, and Sport Science
 
 ---
@@ -143,6 +152,8 @@ All stored in environment variables — never commit them.
 |---------|---------|----------|
 | Gemini | `GEMINI_API_KEY` | Diagram generation (see `docs/DIAGRAM_PIPELINE.md`) |
 | ElevenLabs | `ELEVENLABS_API_KEY` | TTS paid fallback (see `docs/NARRATION_PIPELINE.md`) |
+| Supabase | `SUPABASE_URL` | Project URL (`https://baipckgywpnwapobwtsy.supabase.co`) — hardcoded in `index.html` |
+| Supabase | `SUPABASE_ANON_KEY` | Publishable anon key — hardcoded in `index.html` (safe for client-side). Microsoft SSO (Azure AD) configured. |
 
 ---
 
