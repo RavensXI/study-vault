@@ -58,7 +58,7 @@ Located in `Spec and Materials/OCR Sport Science/` (untracked). Six topic folder
 
 ## Diagram Approach
 
-Uses the **pictorial isotype pipeline** (see `DIAGRAM_PIPELINE.md`):
+Uses the **pictorial isotype pipeline** (see `docs/DIAGRAM_PIPELINE.md`):
 1. Research agents found real citable data (peer-reviewed studies, NHS, Sport England)
 2. Matplotlib baselines generated with orange palette (`#9a3412` → `#fb923c`)
 3. Gemini pictorial isotype redesign (thematic icons matching each topic)
@@ -72,4 +72,4 @@ Matplotlib backups stored as `*_matplotlib.jpg` (not committed to git).
 
 - TTS narration (narration player UI in place, empty manifests)
 - YouTube videos for lessons 2–10 (L01 has one video)
-- Related media curation for all 10 lessons (see `RELATED_MEDIA_PIPELINE.md`)
+- Related media curation for all 10 lessons (see `docs/RELATED_MEDIA_PIPELINE.md`)

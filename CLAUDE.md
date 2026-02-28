@@ -106,6 +106,24 @@ Study Vault/
 │   ├── r180/                 ← 10 lessons (orange theme)
 │   ├── exam-technique/       ← Hub + 5 guide pages (OCR question types)
 │   └── revision-technique/   ← Hub + 7 guide pages
+├── docs/                     ← Pipeline & reference docs
+│   ├── DIAGRAM_PIPELINE.md
+│   ├── NARRATION_PIPELINE.md
+│   ├── LESSON_TEMPLATE.md
+│   ├── QUESTIONS_PIPELINE.md
+│   ├── RELATED_MEDIA_PIPELINE.md
+│   ├── SUBJECT_PLAYBOOK.md
+│   └── SUBJECT_PROMPT.md
+├── scripts/                  ← Build scripts & voice references
+│   ├── gemini_regen.py
+│   ├── generate_narration.py
+│   ├── generate_sport_*.py
+│   ├── download_sport_heroes.py
+│   ├── insert_sport_images.py
+│   ├── voice-reference/      ← Voice cloning samples
+│   └── runpod/               ← RunPod deployment scripts
+├── tts-research-log.md       ← TTS research (external agents)
+├── tech-research-log.md      ← EdTech research (external agents)
 └── Spec and Materials/       ← Teacher PPTs (untracked)
     └── Lessons/{Health,America,Conflict,Elizabeth}/
 ```
@@ -123,8 +141,8 @@ All stored in environment variables — never commit them.
 
 | Service | Env Var | Used For |
 |---------|---------|----------|
-| Gemini | `GEMINI_API_KEY` | Diagram generation (see `DIAGRAM_PIPELINE.md`) |
-| ElevenLabs | `ELEVENLABS_API_KEY` | TTS paid fallback (see `NARRATION_PIPELINE.md`) |
+| Gemini | `GEMINI_API_KEY` | Diagram generation (see `docs/DIAGRAM_PIPELINE.md`) |
+| ElevenLabs | `ELEVENLABS_API_KEY` | TTS paid fallback (see `docs/NARRATION_PIPELINE.md`) |
 
 ---
 
@@ -148,7 +166,7 @@ All stored in environment variables — never commit them.
 
 ## Lesson Page Template
 
-Full template, content components (key facts, collapsibles, timelines, glossary terms, diagrams, hero images), and content editing conventions documented in **`LESSON_TEMPLATE.md`** — read that file before building or editing lessons.
+Full template, content components (key facts, collapsibles, timelines, glossary terms, diagrams, hero images), and content editing conventions documented in **`docs/LESSON_TEMPLATE.md`** — read that file before building or editing lessons.
 
 Canonical template: `history/conflict-tension/lesson-01.html`.
 
@@ -156,7 +174,7 @@ Canonical template: `history/conflict-tension/lesson-01.html`.
 
 ## Practice Questions & Knowledge Checks
 
-Full details documented in **`QUESTIONS_PIPELINE.md`** — read that file before writing questions for any subject. Covers question formats, mark allocations per subject/exam board, `getGuideUrl()` mapping, knowledge check types, and sourcing guidance.
+Full details documented in **`docs/QUESTIONS_PIPELINE.md`** — read that file before writing questions for any subject. Covers question formats, mark allocations per subject/exam board, `getGuideUrl()` mapping, knowledge check types, and sourcing guidance.
 
 **Summary:** 6 practice questions + 5 knowledge checks per lesson. Past paper questions tagged with `pastPaper` property. Knowledge checks: 2 MCQ + 2 fill-in-the-blank + 1 match-up. Best score in localStorage.
 
@@ -166,7 +184,7 @@ Full details documented in **`QUESTIONS_PIPELINE.md`** — read that file before
 
 Three sections in order: **Knowledge Check** (button → modal quiz), **Related Media** (collapsible categories), **Video** (YouTube embed, 45 lessons only).
 
-Full Related Media curation process, HTML patterns, category emojis, and link conventions documented in **`RELATED_MEDIA_PIPELINE.md`** — read that file before adding or updating Related Media.
+Full Related Media curation process, HTML patterns, category emojis, and link conventions documented in **`docs/RELATED_MEDIA_PIPELINE.md`** — read that file before adding or updating Related Media.
 
 **Summary:** Spin up research agents (one per lesson) to find engaging external content. Category order: Lesson Podcast → Podcasts → Videos & Channels → Movies → TV Shows → Documentaries → Study Tools. Empty categories omitted. Max 3 items per category. Movies/TV/docs use JustWatch UK URLs; podcasts use specific episode URLs.
 
@@ -186,7 +204,7 @@ Lesson breakdowns, spec references, exam/revision technique guides, and subject-
 
 ## Diagram Generation
 
-Full pipeline documented in **`DIAGRAM_PIPELINE.md`** — read that file before creating or updating diagrams.
+Full pipeline documented in **`docs/DIAGRAM_PIPELINE.md`** — read that file before creating or updating diagrams.
 
 **Summary:** 4-step process — (1) research agents find real citable data, (2) matplotlib generates data-accurate baseline, (3) Gemini pictorial isotype redesign using thematic icons, (4) QC agent review with up to 3 regeneration iterations.
 
@@ -195,7 +213,7 @@ Full pipeline documented in **`DIAGRAM_PIPELINE.md`** — read that file before 
 - Filenames: `diagram_descriptive_name.jpg`, matplotlib backups as `*_matplotlib.jpg`
 - HTML: `<figure class="diagram">`, full width, 720px max
 - Placement: at **content-relevant locations**, not always at the top. 15+ lines from other images.
-- Helper scripts: `gemini_regen.py`, `generate_{subject}_diagrams.py`, `generate_{subject}_gemini_infographics.py`
+- Helper scripts: `scripts/gemini_regen.py`, `scripts/generate_{subject}_diagrams.py`, `scripts/generate_{subject}_gemini_infographics.py`
 
 **Legacy:** Business uses hybrid matplotlib + Gemini concept images. History uses Gemini-only infographics (~71 total).
 
@@ -236,7 +254,7 @@ All initialised in `DOMContentLoaded`:
 
 ## Content Editing Conventions
 
-See **`LESSON_TEMPLATE.md`** for full conventions. Key rules:
+See **`docs/LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
 - **Scope:** Only edit within `<article class="study-notes">`, `<div class="exam-tip">`, `<div class="conclusion">`
 - **Preserve:** All `data-narration-id` attributes, glossary `<dfn>` terms, HTML entities
@@ -247,7 +265,7 @@ See **`LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
 ## TTS Narration
 
-Full details documented in **`NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
+Full details documented in **`docs/NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
 
 **Summary:** Qwen3-TTS running locally on AMD RX 6800 (CPU mode, slow but working). Conflict & Tension lessons 01–14 narrated, everything else pending. WAV files gitignored — need Cloudflare R2 hosting before going live. Also check `tts-research-log.md` for latest model developments.
 

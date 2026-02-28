@@ -85,4 +85,4 @@ Colour palettes:
 
 - Audio hosting solution needed before narration WAVs can go live
 - YouTube videos and podcasts for lessons 2–30 (deferred until green-lit by management)
-- Consider upgrading diagrams to pictorial isotype pipeline (see `DIAGRAM_PIPELINE.md`)
+- Consider upgrading diagrams to pictorial isotype pipeline (see `docs/DIAGRAM_PIPELINE.md`)
