@@ -14,7 +14,7 @@ import os
 import re
 import sys
 import time
-import wave
+import struct
 from html.parser import HTMLParser
 
 # Fix Windows console encoding — allow Unicode chars to print without crashing
@@ -36,10 +36,43 @@ except (AttributeError, OSError):
 import azure.cognitiveservices.speech as speechsdk
 
 
-def get_wav_duration(wav_path):
-    """Return duration of a WAV file in seconds."""
-    with wave.open(wav_path, "rb") as wf:
-        return wf.getnframes() / wf.getframerate()
+def get_mp3_duration(mp3_path):
+    """Return duration of an MP3 file in seconds by reading MPEG frames."""
+    SAMPLE_RATES = {0: [11025, 12000, 8000], 1: [0, 0, 0],
+                    2: [22050, 24000, 16000], 3: [44100, 48000, 32000]}
+    BITRATES_V1 = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320, 0]
+    SAMPLES_PER_FRAME = 1152  # MPEG1 Layer III
+
+    file_size = os.path.getsize(mp3_path)
+    with open(mp3_path, "rb") as f:
+        data = f.read(min(file_size, 16384))  # Read enough to find a frame
+
+    # Skip ID3v2 tag if present
+    offset = 0
+    if data[:3] == b"ID3":
+        tag_size = ((data[6] & 0x7f) << 21 | (data[7] & 0x7f) << 14 |
+                    (data[8] & 0x7f) << 7 | (data[9] & 0x7f))
+        offset = tag_size + 10
+
+    # Find first valid MPEG frame header
+    while offset < len(data) - 4:
+        if data[offset] == 0xFF and (data[offset + 1] & 0xE0) == 0xE0:
+            header = struct.unpack(">I", data[offset:offset + 4])[0]
+            version = (header >> 19) & 3
+            bitrate_idx = (header >> 12) & 0xF
+            sr_idx = (header >> 10) & 3
+
+            if version == 3 and bitrate_idx not in (0, 15) and sr_idx != 3:
+                bitrate = BITRATES_V1[bitrate_idx] * 1000
+                sample_rate = SAMPLE_RATES[version][sr_idx]
+                if bitrate > 0 and sample_rate > 0:
+                    audio_bytes = file_size - offset
+                    total_frames = audio_bytes * sample_rate / (SAMPLES_PER_FRAME * (bitrate / 8))
+                    return total_frames * SAMPLES_PER_FRAME / sample_rate
+        offset += 1
+
+    # Fallback: estimate from file size and known bitrate (96kbps)
+    return file_size * 8 / 96000
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
@@ -133,11 +166,11 @@ def extract_narration_chunks(html_path):
 
 
 def generate_audio(text, voice_name, output_path):
-    """Generate a WAV file from text using Azure TTS."""
+    """Generate an MP3 file from text using Azure TTS."""
     config = speechsdk.SpeechConfig(subscription=AZURE_KEY, region=AZURE_REGION)
     config.speech_synthesis_voice_name = voice_name
     config.set_speech_synthesis_output_format(
-        speechsdk.SpeechSynthesisOutputFormat.Riff24Khz16BitMonoPcm
+        speechsdk.SpeechSynthesisOutputFormat.Audio24Khz96KBitRateMonoMp3
     )
     audio_config = speechsdk.audio.AudioOutputConfig(filename=output_path)
     synth = speechsdk.SpeechSynthesizer(speech_config=config, audio_config=audio_config)
@@ -201,14 +234,14 @@ def process_lesson(lesson_dir, lesson_num):
     total_chars = 0
     generated_count = 0
     for narration_id, text in chunks:
-        wav_filename = f"narration_lesson-{lesson_num:02d}_{narration_id}.wav"
-        wav_path = os.path.join(lesson_dir, wav_filename)
+        mp3_filename = f"narration_lesson-{lesson_num:02d}_{narration_id}.mp3"
+        mp3_path = os.path.join(lesson_dir, mp3_filename)
 
         # Skip if already generated
-        if os.path.exists(wav_path):
-            dur = get_wav_duration(wav_path)
+        if os.path.exists(mp3_path):
+            dur = get_mp3_duration(mp3_path)
             print(f"    {narration_id}: already exists ({dur:.1f}s), skipping")
-            manifest_entries.append({"id": narration_id, "src": wav_filename, "duration": round(dur, 2)})
+            manifest_entries.append({"id": narration_id, "src": mp3_filename, "duration": round(dur, 2)})
             continue
 
         total_chars += len(text)
@@ -217,9 +250,9 @@ def process_lesson(lesson_dir, lesson_num):
         display = display.encode("ascii", errors="replace").decode("ascii")
         print(f"    {narration_id}: {display}")
 
-        if generate_audio(text, voice, wav_path):
-            dur = get_wav_duration(wav_path)
-            manifest_entries.append({"id": narration_id, "src": wav_filename, "duration": round(dur, 2)})
+        if generate_audio(text, voice, mp3_path):
+            dur = get_mp3_duration(mp3_path)
+            manifest_entries.append({"id": narration_id, "src": mp3_filename, "duration": round(dur, 2)})
             generated_count += 1
         else:
             print(f"    FAILED: {narration_id}")
