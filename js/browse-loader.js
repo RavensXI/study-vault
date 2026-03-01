@@ -124,6 +124,9 @@
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
     contentEl.style.display = '';
+
+    // Add nav icons (pencil/lightbulb) to Exam Technique / Revision Techniques links
+    if (typeof initNavIcons === 'function') initNavIcons();
   }
 
   // ---- Render unit index page (lesson cards) ----
@@ -206,10 +209,9 @@
     contentEl.innerHTML = html;
     contentEl.style.display = '';
 
-    // Update visited cards from localStorage
-    if (typeof updateVisitedCards === 'function') {
-      updateVisitedCards();
-    }
+    // Add nav icons and update visited cards
+    if (typeof initNavIcons === 'function') initNavIcons();
+    if (typeof updateVisitedCards === 'function') updateVisitedCards();
   }
 
   // ---- Main ----
