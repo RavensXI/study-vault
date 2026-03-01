@@ -56,7 +56,7 @@
   async function renderSubjectLanding(subjectSlug) {
     var subjectResult = await sb
       .from('subjects')
-      .select('id, slug, name, exam_board, spec_code, color, image_url')
+      .select('id, slug, name, exam_board, spec_code, color, image_url, settings')
       .eq('slug', subjectSlug)
       .single();
 
@@ -93,11 +93,15 @@
     // Unit grid — uses same .unit-card structure as static pages
     html += '<div class="unit-grid">';
 
+    // Get image positions from subject settings
+    var imgPositions = (subject.settings && subject.settings.unit_image_positions) || {};
+
     units.forEach(function (unit) {
       html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
-        html += '<img src="' + esc(unit.image_url) + '" alt="' + esc(unit.name) + '">';
+        var imgStyle = imgPositions[unit.slug] ? ' style="object-position: ' + imgPositions[unit.slug] + '"' : '';
+        html += '<img src="' + esc(unit.image_url) + '" alt="' + esc(unit.name) + '"' + imgStyle + '>';
       }
       html += '</div>';
       html += '<div class="unit-card-body">';
@@ -111,6 +115,11 @@
     });
 
     html += '</div>';
+
+    // Quote ticker
+    if (subject.settings && subject.settings.quote_ticker_html) {
+      html += subject.settings.quote_ticker_html;
+    }
 
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
