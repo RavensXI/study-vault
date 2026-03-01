@@ -169,7 +169,7 @@
       var heroImg = document.getElementById('hero-image');
       heroImg.src = lesson.hero_image_url;
       heroImg.alt = lesson.hero_image_alt || '';
-      if (lesson.hero_image_position) {
+      if (lesson.hero_image_position && lesson.hero_image_position !== 'center 50%') {
         heroImg.style.objectPosition = lesson.hero_image_position;
       }
       if (lesson.hero_image_caption) {
