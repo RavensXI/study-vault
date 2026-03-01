@@ -120,7 +120,7 @@
         examDate: '2026-05-11',
         stats: { lessons: 14, totalLessons: 60, avgScore: 78, streak: 5 },
         todayRevision: [
-          { subject: 'History', lesson: 'The Abyssinia Crisis', tag: 'new', color: '#c44536', url: 'history/conflict-tension/lesson-09.html' },
+          { subject: 'History', lesson: 'The Abyssinia Crisis', tag: 'new', color: '#c44536', url: '/lesson/history/conflict-tension/9' },
           { subject: 'English Lit', lesson: 'An Inspector Calls: Themes', tag: 'revisit', color: '#7c3aed' },
           { subject: 'Geography', lesson: 'Urban Challenges in the UK', tag: 'new', color: '#059669' },
           { subject: 'French', lesson: 'School and Education Vocabulary', tag: 'new', color: '#1d4ed8' }
@@ -131,8 +131,8 @@
         examDate: '2026-05-11',
         stats: { lessons: 9, totalLessons: 60, avgScore: 65, streak: 3 },
         todayRevision: [
-          { subject: 'History', lesson: 'America and the Boom', tag: 'new', color: '#c44536', url: 'history/america/lesson-01.html' },
-          { subject: 'Business', lesson: 'Enterprise &amp; New Business Ideas', tag: 'new', color: '#0891b2', url: 'business/theme-1/lesson-01.html' },
+          { subject: 'History', lesson: 'America and the Boom', tag: 'new', color: '#c44536', url: '/lesson/history/america/1' },
+          { subject: 'Business', lesson: 'Enterprise &amp; New Business Ideas', tag: 'new', color: '#0891b2', url: '/lesson/business/theme-1/1' },
           { subject: 'Computer Science', lesson: 'Binary and Data Representation', tag: 'new', color: '#4f46e5' },
           { subject: 'Physics', lesson: 'Energy Stores and Transfers', tag: 'revisit', color: '#0284c7' }
         ]
@@ -159,8 +159,8 @@
         { id: 'spanish', name: 'Spanish', board: 'AQA', image: 'images/subject-spanish.jpg', color: '#dc2626' }
       ]},
       { label: 'Humanities', subjects: [
-        { id: 'geography', name: 'Geography', board: 'AQA', image: 'images/subject-geography.jpg', color: '#059669', active: true, url: 'geography/index.html', detail: '2 papers, 40 lessons' },
-        { id: 'history', name: 'History', board: 'AQA', image: 'images/subject-history.jpg', color: '#c44536', active: true, url: 'history/index.html', detail: '4 units, 60 lessons' },
+        { id: 'geography', name: 'Geography', board: 'AQA', image: 'images/subject-geography.jpg', color: '#059669', active: true, url: '/browse/geography', detail: '2 papers, 40 lessons' },
+        { id: 'history', name: 'History', board: 'AQA', image: 'images/subject-history.jpg', color: '#c44536', active: true, url: '/browse/history', detail: '4 units, 60 lessons' },
         { id: 'religious-studies', name: 'Religious Studies', board: 'AQA', image: 'images/subject-religious-studies.jpg', color: '#b45309' }
       ]},
       { label: 'Creative &amp; Practical', subjects: [
@@ -174,10 +174,10 @@
         { id: 'music-tech', name: 'Music Technology', board: 'NCFE', image: 'images/subject-music-tech.jpg', color: '#7c3aed' }
       ]},
       { label: 'Business &amp; Computing', subjects: [
-        { id: 'business', name: 'Business', board: 'Pearson Edexcel', image: 'images/subject-business.jpg', color: '#0891b2', active: true, url: 'business/index.html', detail: '2 themes, 30 lessons' },
+        { id: 'business', name: 'Business', board: 'Pearson Edexcel', image: 'images/subject-business.jpg', color: '#0891b2', active: true, url: '/browse/business', detail: '2 themes, 30 lessons' },
         { id: 'computer-science', name: 'Computer Science', board: 'OCR', image: 'images/subject-computer-science.jpg', color: '#4f46e5' },
         { id: 'creative-imedia', name: 'Creative iMedia', board: 'OCR', image: 'images/subject-creative-imedia.jpg', color: '#0891b2' },
-        { id: 'sport-science', name: 'Sport Science', board: 'OCR', image: 'images/subject-sport-science.jpg', color: '#ea580c', active: true, url: 'sport-science/index.html', detail: '1 unit, 10 lessons' }
+        { id: 'sport-science', name: 'Sport Science', board: 'OCR', image: 'images/subject-sport-science.jpg', color: '#ea580c', active: true, url: '/browse/sport-science', detail: '1 unit, 10 lessons' }
       ]}
     ];
 
@@ -297,6 +297,13 @@
 
     /* Route an authenticated user to the right view */
     function routeUser () {
+      /* Check for ?redirect= from auth guards on dynamic pages */
+      var params = new URLSearchParams(window.location.search);
+      var redirect = params.get('redirect');
+      if (redirect && redirect.startsWith('/')) {
+        window.location.href = redirect;
+        return;
+      }
       var saved = getSaved();
       if (saved && saved.length > 0) { showDashboard(); } else { showPicker(); }
     }
