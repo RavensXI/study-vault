@@ -62,12 +62,12 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Related Media sidebar curated for all 10 lessons (podcasts, videos, movies, TV, documentaries, study tools)
 - Exam Technique guides: hub + 5 guide pages (`sport-science/exam-technique/`) for OCR question types (Identify/State, Describe, Explain, Extended response, Discuss)
 - Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
-- Narration player UI in place on all 10 lessons (empty manifests, ready for audio)
+- TTS narration complete: all 10 lessons narrated with Azure Speech (350 clips, manifests with durations). Odd lessons = Ollie (male), even = Bella (female). WAV files local only — need R2 hosting.
 
 ### Still TODO
-- **Sport Science**: TTS narration (empty manifests, ready for audio). YouTube videos for lessons 2–10.
+- **Sport Science**: YouTube videos for lessons 2–10. Audio hosting needed (WAVs generated but local only).
 - **Business Studies**: audio hosting solution needed before narration WAVs can go live (Cloudflare R2 recommended — free 10GB tier, zero egress). Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
-- TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons). KaniTTS-2 flagged as worth testing (RTF ~0.2, zero-shot voice cloning, PyTorch so potentially AMD-compatible).
+- TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons) and Business (29 lessons). Use Azure Speech script (`scripts/generate_azure_narration.py`) — update `LESSON_DIR` for each subject.
 - PWA (service worker + manifest.json)
 - **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel (`study-vault-alpha.vercel.app`). OAuth redirects won't work from `file://`, need a server or Vercel.
 - Auth guards on lesson/subject pages (currently open by direct URL)
@@ -126,7 +126,8 @@ Study Vault/
 │   └── SUBJECT_PROMPT.md
 ├── scripts/                  ← Build scripts & voice references
 │   ├── gemini_regen.py
-│   ├── generate_narration.py
+│   ├── generate_azure_narration.py  ← Azure Speech TTS batch generator
+│   ├── generate_narration.py        ← Legacy Qwen3-TTS (Conflict lessons)
 │   ├── generate_sport_*.py
 │   ├── download_sport_heroes.py
 │   ├── insert_sport_images.py
@@ -156,6 +157,7 @@ All stored in environment variables — never commit them.
 | ElevenLabs | `ELEVENLABS_API_KEY` | TTS paid fallback (see `docs/NARRATION_PIPELINE.md`) |
 | Supabase | `SUPABASE_URL` | Project URL (`https://baipckgywpnwapobwtsy.supabase.co`) — hardcoded in `index.html` |
 | Supabase | `SUPABASE_ANON_KEY` | Publishable anon key — hardcoded in `index.html` (safe for client-side). Microsoft SSO (Azure AD) configured. |
+| Azure Speech | `AZURE_SPEECH_KEY` | TTS narration generation (region: `uksouth`, S0 tier). See `docs/NARRATION_PIPELINE.md` |
 
 ---
 
@@ -250,6 +252,7 @@ All initialised in `DOMContentLoaded`:
 - `initRevisionTips()` — green lightbulb tips on `.key-fact`, `.timeline`, `.collapsible`
 - `initNavIcons()` — pen (purple) / lightbulb (green) icons on nav links, pill-styled prev/next
 - `initLessonNavBackSlot()` — back-link positioning on first/last lessons
+- `initLessonPill()` — lesson number pill in sticky header, auto-detected from URL
 
 ---
 
@@ -281,7 +284,7 @@ See **`docs/LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
 Full details documented in **`docs/NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
 
-**Summary:** Qwen3-TTS running locally on AMD RX 6800 (CPU mode, slow but working). Conflict & Tension lessons 01–14 narrated, everything else pending. WAV files gitignored — need Cloudflare R2 hosting before going live. Also check `tts-research-log.md` for latest model developments.
+**Summary:** Azure Speech (cloud API) is the current TTS approach — near-instant, deterministic, British English voices alternating by lesson (Ollie male + Bella female). Sport Science R180 fully narrated (10/10 lessons, 350 clips). Conflict & Tension 01–14 narrated with legacy Qwen3-TTS. WAV files gitignored — need Cloudflare R2 hosting before going live. Also check `tts-research-log.md` for latest model developments.
 
 ---
 
