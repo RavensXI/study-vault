@@ -265,8 +265,9 @@ function initPracticeQuestions() {
 
     for (var i = 0; i < guides.length; i++) {
       if (type.indexOf(guides[i][0]) !== -1) {
+        var slug = guides[i][1].replace('.html', '');
         if (isDynamic) {
-          return '/' + subjectSlug + '/exam-technique/' + guides[i][1];
+          return '/guide/' + subjectSlug + '/exam-technique/' + slug;
         }
         return '../exam-technique/' + guides[i][1];
       }
@@ -1502,7 +1503,7 @@ function initRevisionTips() {
     // Dynamic route: /lesson/{subject}/{unit}/{number}
     var dynamicMatch = location.pathname.match(/^\/lesson\/([^/]+)\//);
     if (dynamicMatch) {
-      return '/' + dynamicMatch[1] + '/revision-technique/';
+      return '/guide/' + dynamicMatch[1] + '/revision-technique/';
     }
     // Static route: {subject}/{unit}/lesson-NN.html
     const parts = location.pathname.split('/');
@@ -1554,7 +1555,8 @@ function initRevisionTips() {
 
       const popup = document.createElement('div');
       popup.className = 'revision-tip-popup';
-      popup.innerHTML = '<p>' + tip.text + '</p><a href="' + basePath + tip.link + '">' + tip.label + ' \u2192</a>';
+      var tipHref = basePath + (basePath.startsWith('/guide/') ? tip.link.replace('.html', '') : tip.link);
+      popup.innerHTML = '<p>' + tip.text + '</p><a href="' + tipHref + '">' + tip.label + ' \u2192</a>';
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();

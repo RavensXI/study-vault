@@ -81,8 +81,8 @@
     // Add nav links
     var nav = document.getElementById('header-nav');
     nav.innerHTML = '<a href="/">Home</a>' +
-      '<a href="/' + subjectSlug + '/exam-technique/index.html">Exam Technique</a>' +
-      '<a href="/' + subjectSlug + '/revision-technique/index.html">Revision Techniques</a>';
+      '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>' +
+      '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
 
     // Build HTML matching static landing page structure
     var html = '';
@@ -152,8 +152,8 @@
     var nav = document.getElementById('header-nav');
     nav.innerHTML = '<a href="/">Home</a>' +
       '<a href="/browse/' + subjectSlug + '">Subject Home</a>' +
-      '<a href="/' + subjectSlug + '/exam-technique/index.html">Exam Technique</a>' +
-      '<a href="/' + subjectSlug + '/revision-technique/index.html">Revision Techniques</a>';
+      '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>' +
+      '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
 
     var html = '';
 

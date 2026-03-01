@@ -143,8 +143,8 @@
     var subjectSlug = params.subjectSlug;
     var unitSlug = params.unitSlug;
     document.getElementById('nav-unit-overview').href = browseUrl(subjectSlug, unitSlug);
-    document.getElementById('nav-exam-technique').href = '/' + subjectSlug + '/exam-technique/index.html';
-    document.getElementById('nav-revision-technique').href = '/' + subjectSlug + '/revision-technique/index.html';
+    document.getElementById('nav-exam-technique').href = '/guide/' + subjectSlug + '/exam-technique';
+    document.getElementById('nav-revision-technique').href = '/guide/' + subjectSlug + '/revision-technique';
 
     if (data.prevLesson) {
       var prevLink = document.getElementById('nav-prev-lesson');
