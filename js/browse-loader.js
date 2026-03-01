@@ -84,24 +84,22 @@
       '<a href="/' + subjectSlug + '/exam-technique/index.html">Exam Technique</a>' +
       '<a href="/' + subjectSlug + '/revision-technique/index.html">Revision Techniques</a>';
 
-    // Build HTML using the same structure as static landing pages
+    // Build HTML matching static landing page structure
     var html = '';
 
     // Hero
     html += '<section class="hero"><h1>' + esc(subject.name) + '</h1></section>';
 
-    // Unit grid
+    // Unit grid — uses same .unit-card structure as static pages
     html += '<div class="unit-grid">';
 
     units.forEach(function (unit) {
       html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
-
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
         html += '<img src="' + esc(unit.image_url) + '" alt="' + esc(unit.name) + '">';
       }
       html += '</div>';
-
       html += '<div class="unit-card-body">';
       html += '<h2>' + esc(unit.name) + '</h2>';
       if (unit.subtitle) {
@@ -117,11 +115,6 @@
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
     contentEl.style.display = '';
-
-    // Update visited progress from localStorage
-    if (typeof initVisitedTracking === 'function') {
-      initVisitedTracking();
-    }
   }
 
   // ---- Render unit index page (lesson cards) ----
@@ -143,7 +136,7 @@
 
     var lessonsResult = await sb
       .from('lessons')
-      .select('id, lesson_number, slug, title, hero_image_url, status')
+      .select('id, lesson_number, slug, title, description, status')
       .eq('unit_id', unit.id)
       .eq('status', 'live')
       .order('lesson_number');
@@ -164,16 +157,18 @@
 
     var html = '';
 
-    // Hero
-    html += '<section class="hero"><h1>' + esc(unit.name) + '</h1>';
+    // Unit page header — coloured strip with title and description
+    html += '<div class="unit-page-header">';
+    html += '<div class="unit-page-header-inner">';
+    html += '<h1>' + esc(unit.name) + '</h1>';
     if (unit.subtitle) {
-      html += '<p class="hero-subtitle">' + esc(unit.subtitle) + '</p>';
+      html += '<p>' + esc(unit.subtitle) + '</p>';
     }
-    html += '</section>';
+    html += '</div></div>';
 
     // Progress bar
-    html += '<div class="unit-progress-header">';
-    html += '<span class="unit-progress-label">0 of ' + unit.lesson_count + ' lessons visited</span>';
+    html += '<div class="unit-progress">';
+    html += '<div class="unit-progress-label">0 of ' + unit.lesson_count + ' lessons visited</div>';
     html += '<div class="progress-bar-track"><div class="progress-bar-fill"></div></div>';
     html += '</div>';
 
@@ -184,14 +179,19 @@
       var url = '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
       html += '<a href="' + url + '" class="lesson-card" data-lesson="' + esc(lesson.slug) + '">';
       html += '<span class="lesson-card-number">Lesson ' + lesson.lesson_number + '</span>';
-      html += '<h3 class="lesson-card-title">' + esc(lesson.title) + '</h3>';
+      html += '<h3>' + esc(lesson.title) + '</h3>';
+      if (lesson.description) {
+        html += '<p>' + esc(lesson.description) + '</p>';
+      }
       html += '</a>';
     });
 
     html += '</div>';
 
-    // Back link
+    // Back link — wrapped in container to match static page padding
+    html += '<div style="max-width: var(--page-max); margin: 0 auto; padding: 0 1.5rem 3rem;">';
     html += '<a href="/browse/' + subjectSlug + '" class="back-link">&larr; Back to ' + esc(subject.name) + '</a>';
+    html += '</div>';
 
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
