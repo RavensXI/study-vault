@@ -123,10 +123,10 @@
   }
 
   // ---- Render lesson ----
-  function renderLesson(data) {
+  function renderLesson(data, params) {
     var lesson = data.lesson;
     var unit = data.unit;
-    var subject = data.subject;
+    var subject = data.subject || {};
 
     // Set page title
     document.title = 'Lesson ' + lesson.lesson_number + ': ' + lesson.title + ' - StudyVault';
@@ -139,9 +139,9 @@
     // Header unit label
     document.getElementById('header-unit-label').textContent = unit.name;
 
-    // Navigation links
-    var subjectSlug = subject.slug;
-    var unitSlug = unit.slug;
+    // Navigation links — use params from URL (always reliable) over DB join
+    var subjectSlug = params.subjectSlug;
+    var unitSlug = params.unitSlug;
     document.getElementById('nav-unit-overview').href = browseUrl(subjectSlug, unitSlug);
     document.getElementById('nav-exam-technique').href = '/' + subjectSlug + '/exam-technique/index.html';
     document.getElementById('nav-revision-technique').href = '/' + subjectSlug + '/revision-technique/index.html';
@@ -365,7 +365,7 @@
         return;
       }
 
-      renderLesson(data);
+      renderLesson(data, params);
       recordVisit(user, data.lesson.id);
     } catch (err) {
       console.error('Lesson loader error:', err);
