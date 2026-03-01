@@ -66,14 +66,23 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
 - TTS narration complete: all 10 lessons narrated with Azure Speech (350 clips, manifests with durations). Odd lessons = Ollie (male), even = Bella (female). MP3s hosted on Cloudflare R2.
 
+### Dynamic Architecture (in progress)
+Schema, migration script, frontend templates, QC page, and pipeline adapter all built. Steps to activate:
+1. **Run SQL migration** — paste `supabase/migrations/001_schema.sql` into Supabase SQL Editor
+2. **Run migration script** — `python scripts/migrate_to_supabase.py --dry-run` then without `--dry-run`
+3. **Upload images** — `python scripts/upload_images_to_r2.py` then `--update-db`
+4. **Set Tom's profile to platform_admin** — `UPDATE profiles SET role = 'platform_admin' WHERE email = 't.shaun@unity.lancs.sch.uk'`
+5. **Test on Vercel** — dynamic routes (`/lesson/history/conflict-tension/1`) should render from DB
+6. **Verify** — `python scripts/migrate_to_supabase.py --validate`
+
 ### Still TODO
+- **Dynamic architecture activation**: Run the 6 steps above
 - **Sport Science**: YouTube videos for lessons 2–10.
 - **Business Studies**: Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
 - PWA (service worker + manifest.json)
 - **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel (`study-vault-alpha.vercel.app`). OAuth redirects won't work from `file://`, need a server or Vercel.
-- Auth guards on lesson/subject pages (currently open by direct URL)
-- Supabase database tables (profiles, progress tracking) + teacher analytics dashboard
-- Role detection (teacher vs student) — needs profiles table
+- Auth guards on lesson/subject pages (currently open by direct URL) — dynamic pages have auth guards, static pages still open
+- Role detection (teacher vs student) — profiles table now exists, needs testing
 - Remove demo accounts once SSO is battle-tested
 
 
@@ -88,8 +97,18 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 Study Vault/
 ├── CLAUDE.md
 ├── index.html                ← Subject selection / login / dashboard (SPA)
+├── lesson.html               ← Dynamic lesson template (Supabase-driven)
+├── browse.html               ← Dynamic browse template (subject/unit index)
+├── vercel.json               ← Vercel rewrites for dynamic routes
 ├── css/style.css             ← All styling
-├── js/main.js                ← All JS
+├── js/
+│   ├── main.js               ← All JS (Phase 1/2 split for dynamic pages)
+│   ├── lesson-loader.js      ← Fetches lesson from Supabase, populates template
+│   └── browse-loader.js      ← Fetches subject/unit data, renders cards
+├── admin/
+│   └── review.html           ← QC review page (platform_admin only)
+├── supabase/
+│   └── migrations/001_schema.sql  ← Full DB schema (tables, RLS, triggers)
 ├── images/                   ← padlock.svg, subject-{id}.jpg
 ├── fonts/opendyslexic-*/     ← OpenDyslexic woff2/woff
 ├── history/
@@ -126,6 +145,9 @@ Study Vault/
 │   ├── SUBJECT_PLAYBOOK.md
 │   └── SUBJECT_PROMPT.md
 ├── scripts/                  ← Build scripts & voice references
+│   ├── migrate_to_supabase.py       ← Migrate 140 lessons from HTML to Supabase
+│   ├── supabase_writer.py           ← Pipeline adapter (DB writes instead of HTML)
+│   ├── upload_images_to_r2.py       ← Upload hero images + diagrams to R2
 │   ├── gemini_regen.py
 │   ├── generate_azure_narration.py  ← Azure Speech TTS batch generator (MP3 output)
 │   ├── convert_wav_to_mp3.py        ← Batch WAV→MP3 converter (ffmpeg)
@@ -160,6 +182,7 @@ All stored in environment variables — never commit them.
 | ElevenLabs | `ELEVENLABS_API_KEY` | TTS paid fallback (see `docs/NARRATION_PIPELINE.md`) |
 | Supabase | `SUPABASE_URL` | Project URL (`https://baipckgywpnwapobwtsy.supabase.co`) — hardcoded in `index.html` |
 | Supabase | `SUPABASE_ANON_KEY` | Publishable anon key — hardcoded in `index.html` (safe for client-side). Microsoft SSO (Azure AD) configured. |
+| Supabase | `SUPABASE_SERVICE_KEY` | Service role key — **server-side only** (bypasses RLS). Used by migration and pipeline scripts. Never commit. |
 | Azure Speech | `AZURE_SPEECH_KEY` | TTS narration generation (region: `uksouth`, S0 tier). See `docs/NARRATION_PIPELINE.md` |
 | Cloudflare R2 | `R2_ACCESS_KEY_ID` | S3-compatible access key for narration audio bucket |
 | Cloudflare R2 | `R2_SECRET_ACCESS_KEY` | Secret key for R2 bucket access |
@@ -242,23 +265,32 @@ Full pipeline documented in **`docs/DIAGRAM_PIPELINE.md`** — read that file be
 
 ## JS Features (main.js)
 
-All initialised in `DOMContentLoaded`:
+Split into two phases for dynamic page support:
+
+**Phase 1 — runs on DOMContentLoaded (static elements always present):**
 - `initScrollProgress()` — accent-coloured bar at page top
+- `initMobileNav()` — hamburger menu
+- `initAccessibility()` — dark mode, dyslexia font, font size, Irlen overlays (persisted in `studyvault-a11y`)
+- `initPageTransitions()` — fade-out/in on internal links
+
+**Phase 2 — `window.initLessonFeatures()` (called after content injection, or immediately on static pages):**
 - `initCollapsibles()` — expand/collapse with animation
 - `initVisitedTracking()` — localStorage `studyvault-visited`
-- `initMobileNav()` — hamburger menu
-- `initPracticeQuestions()` — random question selection, mark scheme display, past paper badges, guide links via `getGuideUrl()`
+- `initPracticeQuestions()` — random question selection, mark scheme display, past paper badges, guide links via `getGuideUrl()` (supports both static `../exam-technique/` and dynamic `/subject/exam-technique/` paths)
 - `initNarration()` — play/pause, speed toggle, paragraph highlighting, mini-player, auto-scroll suppression
-- `initAccessibility()` — dark mode, dyslexia font, font size, Irlen overlays (persisted in `studyvault-a11y`)
 - `initGlossary()` — popup tooltips from `data-def`, hover/tap
 - `initKnowledgeCheck()` — modal quiz overlay, best score in localStorage
 - `initLightbox()` — click-to-expand on hero images and diagrams
 - `initHeroEdit()` — `?hero-edit` URL param for position adjustment
-- `initPageTransitions()` — fade-out/in on internal links
-- `initRevisionTips()` — green lightbulb tips on `.key-fact`, `.timeline`, `.collapsible`
+- `initRevisionTips()` — green lightbulb tips on `.key-fact`, `.timeline`, `.collapsible` (supports dynamic paths)
 - `initNavIcons()` — pen (purple) / lightbulb (green) icons on nav links, pill-styled prev/next
 - `initLessonNavBackSlot()` — back-link positioning on first/last lessons
-- `initLessonPill()` — lesson number pill in sticky header, auto-detected from URL
+- `initLessonPill()` — lesson number pill in sticky header (supports both `lesson-NN.html` and `/lesson/.../N` URLs)
+- `initLogoLink()` — logo links to root (skips rewrite on dynamic routes)
+
+**Dynamic page loaders (separate files):**
+- `lesson-loader.js` — auth check → parse `/lesson/{subject}/{unit}/{number}` → fetch from Supabase → populate template → call `initLessonFeatures()`
+- `browse-loader.js` — auth check → render subject landing or unit index from Supabase
 
 ---
 

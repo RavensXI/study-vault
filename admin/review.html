@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Review - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .review-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .review-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .review-stats { display: flex; gap: 1.5rem; font-size: 0.875rem; color: var(--text-muted); }
+    .review-stat { display: flex; align-items: center; gap: 0.35rem; }
+    .review-stat-num { font-weight: 700; font-size: 1.1rem; color: var(--text-color); }
+
+    .review-filters { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+    .review-filter { padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.82rem; transition: all 0.15s; }
+    .review-filter.active { background: var(--text-color); color: white; border-color: var(--text-color); }
+
+    .review-queue { display: flex; flex-direction: column; gap: 1rem; }
+    .review-card { background: white; border-radius: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); overflow: hidden; transition: box-shadow 0.15s; }
+    .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .review-card-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0ede8; }
+    .review-card-info h3 { font-family: 'Source Serif 4', serif; font-size: 1.05rem; margin: 0 0 0.25rem; }
+    .review-card-meta { font-size: 0.78rem; color: var(--text-muted); }
+    .review-card-actions { display: flex; gap: 0.5rem; }
+
+    .review-btn { padding: 0.4rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.15s; }
+    .review-btn--preview { background: #eef2ff; color: #4f46e5; }
+    .review-btn--preview:hover { background: #e0e7ff; }
+    .review-btn--approve { background: #dcfce7; color: #16a34a; }
+    .review-btn--approve:hover { background: #bbf7d0; }
+    .review-btn--reject { background: #fef2f2; color: #dc2626; }
+    .review-btn--reject:hover { background: #fee2e2; }
+
+    .status-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .status-draft { background: #f3f4f6; color: #6b7280; }
+    .status-review { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #d1fae5; color: #065f46; }
+    .status-live { background: #dbeafe; color: #1d4ed8; }
+
+    .review-empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+    .review-empty svg { width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.3; }
+
+    .review-preview-banner { background: #fef3c7; color: #92400e; padding: 0.75rem 1.25rem; font-size: 0.875rem; font-weight: 600; text-align: center; border-bottom: 2px solid #f59e0b; }
+
+    .reject-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .reject-modal-inner { background: white; border-radius: 16px; padding: 2rem; max-width: 480px; width: 90%; }
+    .reject-modal h3 { margin: 0 0 1rem; font-family: 'Source Serif 4', serif; }
+    .reject-modal textarea { width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.875rem; resize: vertical; }
+    .reject-modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+
+    .review-loading { text-align: center; padding: 4rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+        <span class="header-unit-label">Content Review</span>
+      </a>
+
+      <nav class="header-nav">
+        <a href="/">Dashboard</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="review-layout" id="review-app">
+    <div class="review-loading" id="review-loading">Loading review queue...</div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    var app = document.getElementById('review-app');
+    var loadingEl = document.getElementById('review-loading');
+    var currentFilter = 'review'; // Default to showing items in review
+
+    // ---- Auth: must be platform_admin ----
+    async function checkAdmin() {
+      var result = await sb.auth.getSession();
+      if (!result.data.session) return false;
+
+      var userId = result.data.session.user.id;
+      var profile = await sb.from('profiles').select('role').eq('id', userId).single();
+      return profile.data && profile.data.role === 'platform_admin';
+    }
+
+    // ---- Fetch review queue ----
+    async function fetchQueue(statusFilter) {
+      var query = sb
+        .from('lessons')
+        .select('id, lesson_number, slug, title, status, updated_at, unit_id, units!inner(name, slug, subject_id, subjects!inner(name, slug, school_id, schools!inner(name)))')
+        .order('updated_at', { ascending: false });
+
+      if (statusFilter && statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
+
+      var result = await query;
+      return result.data || [];
+    }
+
+    // ---- Count by status ----
+    async function fetchCounts() {
+      var statuses = ['draft', 'review', 'approved', 'live'];
+      var counts = {};
+      for (var i = 0; i < statuses.length; i++) {
+        var result = await sb.from('lessons').select('id', { count: 'exact', head: true }).eq('status', statuses[i]);
+        counts[statuses[i]] = result.count || 0;
+      }
+      return counts;
+    }
+
+    // ---- Approve lesson ----
+    async function approveLessonAction(lessonId) {
+      await sb.from('lessons').update({
+        status: 'live',
+        approved_at: new Date().toISOString()
+      }).eq('id', lessonId);
+
+      // Log
+      var session = await sb.auth.getSession();
+      await sb.from('content_pipeline_logs').insert({
+        lesson_id: lessonId,
+        from_status: 'review',
+        to_status: 'live',
+        changed_by: session.data.session.user.id,
+        notes: 'Approved via review UI'
+      });
+
+      await renderApp();
+    }
+
+    // ---- Reject lesson ----
+    async function rejectLessonAction(lessonId, notes) {
+      await sb.from('lessons').update({
+        status: 'draft'
+      }).eq('id', lessonId);
+
+      var session = await sb.auth.getSession();
+      await sb.from('content_pipeline_logs').insert({
+        lesson_id: lessonId,
+        from_status: 'review',
+        to_status: 'draft',
+        changed_by: session.data.session.user.id,
+        notes: notes || 'Rejected via review UI'
+      });
+
+      await renderApp();
+    }
+
+    // ---- Show reject modal ----
+    function showRejectModal(lessonId, title) {
+      var modal = document.createElement('div');
+      modal.className = 'reject-modal';
+      modal.innerHTML =
+        '<div class="reject-modal-inner">' +
+          '<h3>Request Changes</h3>' +
+          '<p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">Lesson: ' + escapeHtml(title) + '</p>' +
+          '<textarea id="reject-notes" placeholder="What needs to change? (optional)"></textarea>' +
+          '<div class="reject-modal-actions">' +
+            '<button class="review-btn" onclick="this.closest(\'.reject-modal\').remove()">Cancel</button>' +
+            '<button class="review-btn review-btn--reject" id="reject-confirm">Send back to draft</button>' +
+          '</div>' +
+        '</div>';
+
+      document.body.appendChild(modal);
+      modal.querySelector('#reject-confirm').addEventListener('click', function () {
+        var notes = modal.querySelector('#reject-notes').value;
+        modal.remove();
+        rejectLessonAction(lessonId, notes);
+      });
+      modal.addEventListener('click', function (e) {
+        if (e.target === modal) modal.remove();
+      });
+    }
+
+    // ---- Render ----
+    async function renderApp() {
+      var counts = await fetchCounts();
+      var lessons = await fetchQueue(currentFilter);
+
+      var totalReview = counts.review || 0;
+
+      var html = '<div class="review-header">';
+      html += '<h1>Content Review</h1>';
+      html += '<div class="review-stats">';
+      html += '<div class="review-stat"><span class="review-stat-num">' + totalReview + '</span> awaiting review</div>';
+      html += '<div class="review-stat"><span class="review-stat-num">' + (counts.live || 0) + '</span> live</div>';
+      html += '<div class="review-stat"><span class="review-stat-num">' + (counts.draft || 0) + '</span> drafts</div>';
+      html += '</div></div>';
+
+      // Filters
+      html += '<div class="review-filters">';
+      ['review', 'draft', 'live', 'all'].forEach(function (f) {
+        var label = f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1);
+        var count = f === 'all' ? '' : ' (' + (counts[f] || 0) + ')';
+        html += '<button class="review-filter' + (currentFilter === f ? ' active' : '') + '" data-filter="' + f + '">' + label + count + '</button>';
+      });
+      html += '</div>';
+
+      // Queue
+      if (lessons.length === 0) {
+        html += '<div class="review-empty">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        html += '<p>No lessons with status "' + currentFilter + '"</p>';
+        html += '</div>';
+      } else {
+        html += '<div class="review-queue">';
+        lessons.forEach(function (lesson) {
+          var unit = lesson.units;
+          var subject = unit.subjects;
+          var school = subject.schools;
+          var previewUrl = '/lesson/' + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number;
+
+          html += '<div class="review-card">';
+          html += '<div class="review-card-header">';
+          html += '<div class="review-card-info">';
+          html += '<h3>Lesson ' + lesson.lesson_number + ': ' + escapeHtml(lesson.title) + '</h3>';
+          html += '<div class="review-card-meta">';
+          html += escapeHtml(school.name) + ' &rarr; ' + escapeHtml(subject.name) + ' &rarr; ' + escapeHtml(unit.name);
+          html += ' &middot; <span class="status-badge status-' + lesson.status + '">' + lesson.status + '</span>';
+          html += ' &middot; ' + new Date(lesson.updated_at).toLocaleDateString('en-GB');
+          html += '</div></div>';
+
+          html += '<div class="review-card-actions">';
+          html += '<a href="' + previewUrl + '" target="_blank" class="review-btn review-btn--preview">Preview</a>';
+          if (lesson.status === 'review') {
+            html += '<button class="review-btn review-btn--approve" data-action="approve" data-id="' + lesson.id + '">Approve</button>';
+            html += '<button class="review-btn review-btn--reject" data-action="reject" data-id="' + lesson.id + '" data-title="' + escapeAttr(lesson.title) + '">Request Changes</button>';
+          }
+          html += '</div></div></div>';
+        });
+        html += '</div>';
+      }
+
+      app.innerHTML = html;
+
+      // Bind filter clicks
+      app.querySelectorAll('.review-filter').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          currentFilter = btn.dataset.filter;
+          renderApp();
+        });
+      });
+
+      // Bind action buttons
+      app.querySelectorAll('[data-action="approve"]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          approveLessonAction(btn.dataset.id);
+        });
+      });
+
+      app.querySelectorAll('[data-action="reject"]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          showRejectModal(btn.dataset.id, btn.dataset.title);
+        });
+      });
+    }
+
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    function escapeAttr(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    }
+
+    // ---- Init ----
+    async function init() {
+      var isAdmin = await checkAdmin();
+      if (!isAdmin) {
+        app.innerHTML = '<div class="review-empty"><h2>Access Denied</h2><p>This page is restricted to platform administrators.</p><a href="/">Back to Dashboard</a></div>';
+        return;
+      }
+      await renderApp();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+</body>
+</html>

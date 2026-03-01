@@ -1,27 +1,48 @@
 /* ============================================
    StudyVault v2 — main.js
    Scroll progress, collapsibles, visited tracking, mobile nav
+
+   Phase 1: Runs on DOMContentLoaded — static elements always present
+   Phase 2: initLessonFeatures() — called after dynamic content injection
+            (by lesson-loader.js) OR immediately for static lesson pages
    ============================================ */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Phase 1 — always runs (static elements)
   initScrollProgress();
+  initMobileNav();
+  initAccessibility();
+  initPageTransitions();
+
+  // Phase 2 — runs immediately if content is already in the page (static pages)
+  // For dynamic pages, lesson-loader.js calls window.initLessonFeatures() after inject
+  if (!document.getElementById('lesson-loading')) {
+    initLessonFeatures();
+  }
+});
+
+/**
+ * Phase 2 init — call this after dynamic content has been injected into the DOM.
+ * Safe to call on static pages too (all functions guard with early returns).
+ */
+function initLessonFeatures() {
   initCollapsibles();
   initVisitedTracking();
-  initMobileNav();
   initPracticeQuestions();
   initNarration();
-  initAccessibility();
   initGlossary();
   initLightbox();
   initHeroEdit();
-  initPageTransitions();
   initKnowledgeCheck();
   initLessonNavBackSlot();
   initNavIcons();
   initRevisionTips();
   initLogoLink();
   initLessonPill();
-});
+}
+
+// Expose globally for lesson-loader.js
+window.initLessonFeatures = initLessonFeatures;
 
 /* --- Scroll Progress Bar --- */
 function initScrollProgress() {
@@ -233,8 +254,22 @@ function initPracticeQuestions() {
       ['Describe', 'describe.html'],
       ['Explain', 'explain.html']
     ];
+
+    // Detect if running on dynamic route (/lesson/...) or static (subject/unit/lesson-NN.html)
+    var isDynamic = /^\/lesson\//.test(location.pathname);
+    var subjectSlug = '';
+    if (isDynamic) {
+      var parts = location.pathname.split('/');
+      subjectSlug = parts[2] || ''; // /lesson/{subject}/...
+    }
+
     for (var i = 0; i < guides.length; i++) {
-      if (type.indexOf(guides[i][0]) !== -1) return '../exam-technique/' + guides[i][1];
+      if (type.indexOf(guides[i][0]) !== -1) {
+        if (isDynamic) {
+          return '/' + subjectSlug + '/exam-technique/' + guides[i][1];
+        }
+        return '../exam-technique/' + guides[i][1];
+      }
     }
     return null;
   }
@@ -1435,17 +1470,21 @@ function initNavIcons() {
 function initLogoLink() {
   var brand = document.querySelector('.header-brand');
   if (!brand) return;
-  // Pages with data-unit are 2 levels deep (subject/unit-folder/).
-  // Update logo href to go to the root dashboard.
-  if (document.body.dataset.unit) {
+  // Dynamic routes already have href="/" in the template.
+  // Static pages with data-unit are 2 levels deep — update to root.
+  if (document.body.dataset.unit && !location.pathname.startsWith('/lesson/')) {
     brand.setAttribute('href', '../../index.html');
   }
 }
 
 /* --- Lesson Pill (header) --- */
 function initLessonPill() {
-  var match = location.pathname.match(/lesson-0*(\d+)\.html/);
+  // Support both static (lesson-01.html) and dynamic (/lesson/.../1) URLs
+  var match = location.pathname.match(/lesson-0*(\d+)\.html/) ||
+              location.pathname.match(/\/lesson\/[^/]+\/[^/]+\/(\d+)/);
   if (!match) return;
+  // Skip if pill already exists (e.g. added by lesson-loader.js)
+  if (document.querySelector('.header-lesson-label')) return;
   var unitLabel = document.querySelector('.header-unit-label');
   if (!unitLabel) return;
   var pill = document.createElement('span');
@@ -1460,6 +1499,12 @@ function initRevisionTips() {
   if (!article) return;
 
   const basePath = (function () {
+    // Dynamic route: /lesson/{subject}/{unit}/{number}
+    var dynamicMatch = location.pathname.match(/^\/lesson\/([^/]+)\//);
+    if (dynamicMatch) {
+      return '/' + dynamicMatch[1] + '/revision-technique/';
+    }
+    // Static route: {subject}/{unit}/lesson-NN.html
     const parts = location.pathname.split('/');
     parts.pop();
     return parts.join('/') + '/../revision-technique/';
