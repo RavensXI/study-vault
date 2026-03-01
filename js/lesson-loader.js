@@ -146,6 +146,12 @@
     document.getElementById('nav-exam-technique').href = '/' + subjectSlug + '/exam-technique/index.html';
     document.getElementById('nav-revision-technique').href = '/' + subjectSlug + '/revision-technique/index.html';
 
+    if (data.prevLesson) {
+      var prevLink = document.getElementById('nav-prev-lesson');
+      prevLink.href = lessonUrl(subjectSlug, unitSlug, data.prevLesson.lesson_number);
+      prevLink.style.display = '';
+    }
+
     if (data.nextLesson) {
       var nextLink = document.getElementById('nav-next-lesson');
       nextLink.href = lessonUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number);
