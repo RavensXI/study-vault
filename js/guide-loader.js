@@ -187,10 +187,10 @@
       '<a href="' + guideUrl(subjectSlug, guideType) + '">All Guides</a>' +
       '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>';
 
-    // Render content inside the same layout as static guide pages
-    var html = '<div class="lesson-page"><main class="lesson-content">';
+    // Content already includes <main> + <aside> from the original .lesson-page
+    var html = '<div class="lesson-page">';
     html += guide.content_html;
-    html += '</main></div>';
+    html += '</div>';
 
     contentEl.innerHTML = html;
     loadingEl.style.display = 'none';
