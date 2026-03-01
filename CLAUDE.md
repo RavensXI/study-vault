@@ -22,7 +22,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 **History (complete — 60 lessons across 4 units):**
 - All lessons cross-referenced against teacher PPTs, readability-passed for GCSE students
 - Hero images (Wikimedia Commons), infographic diagrams (Gemini API, ~71 total), practice questions (6/lesson, 360 total with AQA past paper tags), knowledge checks (5/lesson, 300 total)
-- TTS narration: Conflict & Tension all 15 manifests populated. Lessons 01–14 fully narrated, lesson 15 partial (1 clip). WAV files stored locally only — gitignored, need hosting solution. Other 3 units not started. Player UI in place on all 60 lessons.
+- TTS narration: All 60 lessons fully narrated with Azure Speech (Ollie/Bella alternating). MP3s hosted on Cloudflare R2. Manifests populated with R2 URLs and durations. Player UI in place on all 60 lessons.
 - Accessibility toolbar (dark mode, dyslexia font, font sizing, Irlen overlays)
 - Glossary tooltips, collapsible sections, timelines, key fact boxes, lightbox
 - Embedded YouTube videos in sidebar (45 lessons — Conflict, Health, Elizabethan)
@@ -43,7 +43,8 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Landing page (`business/index.html`) with distinct images: `subject-business-1.jpg` (market stall) for Theme 1, `subject-business.jpg` (high street) for Theme 2
 - Theme 1 and Theme 2 index pages (15 lesson cards each)
 - All 30 lessons built with full content, diagrams (matplotlib reference + Gemini concept images), practice questions, knowledge checks, Related Media, video placeholders
-- Theme 1 Lesson 1 fully featured: YouTube video embedded, Spotify podcast linked, TTS narration (33 clips, 7 min audio — WAV files local only)
+- TTS narration: All 30 lessons fully narrated with Azure Speech. MP3s hosted on Cloudflare R2.
+- Theme 1 Lesson 1 fully featured: YouTube video embedded, Spotify podcast linked
 - Exam Technique guides: hub + 6 guide pages (`business/exam-technique/`) for all Edexcel question types
 - Revision Technique guides: hub + 8 guide pages (`business/revision-technique/`) including business-specific `practising-calculations.html`
 - Hybrid diagram system: matplotlib for structured reference graphics, Gemini for photorealistic concept images
@@ -51,6 +52,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 **Geography (AQA 8035) — complete (40 lessons across 2 papers):**
 - Paper 1 (Physical Geography, indigo theme) and Paper 2 (Human Geography, red theme), 20 lessons each
 - All lessons built with full content, practice questions (6/lesson, AQA format), knowledge checks (5/lesson)
+- TTS narration: All 40 lessons fully narrated with Azure Speech. MP3s hosted on Cloudflare R2.
 - Exam Technique guides: hub + guide pages for AQA Geography question types
 - Revision Technique guides: hub + guide pages adapted for Geography context
 
@@ -62,12 +64,11 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Related Media sidebar curated for all 10 lessons (podcasts, videos, movies, TV, documentaries, study tools)
 - Exam Technique guides: hub + 5 guide pages (`sport-science/exam-technique/`) for OCR question types (Identify/State, Describe, Explain, Extended response, Discuss)
 - Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
-- TTS narration complete: all 10 lessons narrated with Azure Speech (350 clips, manifests with durations). Odd lessons = Ollie (male), even = Bella (female). WAV files local only — need R2 hosting.
+- TTS narration complete: all 10 lessons narrated with Azure Speech (350 clips, manifests with durations). Odd lessons = Ollie (male), even = Bella (female). MP3s hosted on Cloudflare R2.
 
 ### Still TODO
-- **Sport Science**: YouTube videos for lessons 2–10. Audio hosting needed (WAVs generated but local only).
-- **Business Studies**: audio hosting solution needed before narration WAVs can go live (Cloudflare R2 recommended — free 10GB tier, zero egress). Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
-- TTS narration — remaining History units (Health, Elizabethan, America — 45 lessons) and Business (29 lessons). Use Azure Speech script (`scripts/generate_azure_narration.py`) — update `LESSON_DIR` for each subject.
+- **Sport Science**: YouTube videos for lessons 2–10.
+- **Business Studies**: Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
 - PWA (service worker + manifest.json)
 - **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel (`study-vault-alpha.vercel.app`). OAuth redirects won't work from `file://`, need a server or Vercel.
 - Auth guards on lesson/subject pages (currently open by direct URL)
@@ -126,7 +127,9 @@ Study Vault/
 │   └── SUBJECT_PROMPT.md
 ├── scripts/                  ← Build scripts & voice references
 │   ├── gemini_regen.py
-│   ├── generate_azure_narration.py  ← Azure Speech TTS batch generator
+│   ├── generate_azure_narration.py  ← Azure Speech TTS batch generator (MP3 output)
+│   ├── convert_wav_to_mp3.py        ← Batch WAV→MP3 converter (ffmpeg)
+│   ├── upload_to_r2.py              ← Upload narration MP3s to Cloudflare R2
 │   ├── generate_narration.py        ← Legacy Qwen3-TTS (Conflict lessons)
 │   ├── generate_sport_*.py
 │   ├── download_sport_heroes.py
@@ -158,6 +161,9 @@ All stored in environment variables — never commit them.
 | Supabase | `SUPABASE_URL` | Project URL (`https://baipckgywpnwapobwtsy.supabase.co`) — hardcoded in `index.html` |
 | Supabase | `SUPABASE_ANON_KEY` | Publishable anon key — hardcoded in `index.html` (safe for client-side). Microsoft SSO (Azure AD) configured. |
 | Azure Speech | `AZURE_SPEECH_KEY` | TTS narration generation (region: `uksouth`, S0 tier). See `docs/NARRATION_PIPELINE.md` |
+| Cloudflare R2 | `R2_ACCESS_KEY_ID` | S3-compatible access key for narration audio bucket |
+| Cloudflare R2 | `R2_SECRET_ACCESS_KEY` | Secret key for R2 bucket access |
+| Cloudflare R2 | `R2_ACCOUNT_ID` | Cloudflare account ID for R2 endpoint URL |
 
 ---
 
@@ -259,7 +265,7 @@ All initialised in `DOMContentLoaded`:
 ## Design Rules
 - Background: warm cream `#faf8f5`, not bright white
 - Text: warm dark brown `#2d2a26`, not pure black
-- Font: Inter (body) + Source Serif 4 (headings) via Google Fonts
+- Font: Inter (body) + Source Serif 4 (headings) via Google Fonts `<link>` tags in HTML `<head>` (not CSS `@import` — avoids render-blocking waterfall)
 - Cards: `border-radius: 16px`, soft warm shadows
 - All data inlined in HTML (no fetch — `file://` CORS restrictions)
 - Logo: inline SVG padlock replaces period in "StudyVault." — `currentColor`, scales with text
@@ -284,7 +290,7 @@ See **`docs/LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
 Full details documented in **`docs/NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
 
-**Summary:** Azure Speech (cloud API) is the current TTS approach — near-instant, deterministic, British English voices alternating by lesson (Ollie male + Bella female). Sport Science R180 fully narrated (10/10 lessons, 350 clips). Conflict & Tension 01–14 narrated with legacy Qwen3-TTS. WAV files gitignored — need Cloudflare R2 hosting before going live. Also check `tts-research-log.md` for latest model developments.
+**Summary:** Azure Speech (cloud API) — near-instant, deterministic, British English voices alternating by lesson (Ollie male odd, Bella female even). **All 140 lessons fully narrated** across all 4 subjects (~4,600 MP3 clips). Audio hosted on **Cloudflare R2** (`studyvault-audio` bucket, public r2.dev URL). Manifests in each lesson HTML point to R2 URLs with durations. Generation script outputs MP3 directly (96kbps, 24kHz, mono). Also check `tts-research-log.md` for latest model developments.
 
 ---
 
