@@ -20,7 +20,6 @@
   // ---- Parse URL ----
   function parseUrl() {
     var path = window.location.pathname;
-    // /browse/{subject}/{unit?}
     var match = path.match(/^\/browse\/([^/]+)(?:\/([^/]+))?\/?$/);
     if (!match) return null;
     return {
@@ -55,7 +54,6 @@
 
   // ---- Render subject landing page (unit cards) ----
   async function renderSubjectLanding(subjectSlug) {
-    // Fetch subject with its units
     var subjectResult = await sb
       .from('subjects')
       .select('id, slug, name, exam_board, spec_code, color, image_url')
@@ -86,47 +84,48 @@
       '<a href="/' + subjectSlug + '/exam-technique/index.html">Exam Technique</a>' +
       '<a href="/' + subjectSlug + '/revision-technique/index.html">Revision Techniques</a>';
 
-    var html = '<div class="subject-landing" style="max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem;">';
-    html += '<h1 style="font-family: \'Source Serif 4\', serif; margin-bottom: 0.5rem;">' + esc(subject.name) + '</h1>';
-    html += '<p style="color: var(--text-muted); margin-bottom: 2rem;">' + esc(subject.exam_board + (subject.spec_code ? ' ' + subject.spec_code : '')) + '</p>';
+    // Build HTML using the same structure as static landing pages
+    var html = '';
 
-    html += '<div class="unit-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem;">';
+    // Hero
+    html += '<section class="hero"><h1>' + esc(subject.name) + '</h1></section>';
+
+    // Unit grid
+    html += '<div class="unit-grid">';
 
     units.forEach(function (unit) {
-      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" ' +
-        'style="display: block; border-radius: 16px; overflow: hidden; background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.08); text-decoration: none; color: inherit; transition: transform 0.2s, box-shadow 0.2s;">';
+      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
 
+      html += '<div class="unit-card-image">';
       if (unit.image_url) {
-        html += '<div style="height: 160px; overflow: hidden;"><img src="' + esc(unit.image_url) + '" alt="" style="width: 100%; height: 100%; object-fit: cover;"></div>';
-      } else {
-        html += '<div style="height: 160px; background: ' + unit.accent + '; opacity: 0.15;"></div>';
+        html += '<img src="' + esc(unit.image_url) + '" alt="' + esc(unit.name) + '">';
       }
-
-      html += '<div style="padding: 1.25rem;">';
-      html += '<h3 style="font-family: \'Source Serif 4\', serif; font-size: 1.15rem; margin: 0 0 0.25rem;">' + esc(unit.name) + '</h3>';
-      if (unit.subtitle) {
-        html += '<p style="color: var(--text-muted); font-size: 0.875rem; margin: 0 0 0.5rem;">' + esc(unit.subtitle) + '</p>';
-      }
-      html += '<span style="font-size: 0.82rem; color: ' + unit.accent + '; font-weight: 600;">' + unit.lesson_count + ' lessons</span>';
-
-      // Progress bar placeholder
-      html += '<div class="unit-progress" style="margin-top: 0.75rem; height: 4px; background: #eee; border-radius: 2px;">';
-      html += '<div class="unit-progress-fill" style="height: 100%; border-radius: 2px; background: ' + unit.accent + '; width: 0; transition: width 0.3s;"></div>';
       html += '</div>';
 
+      html += '<div class="unit-card-body">';
+      html += '<h2>' + esc(unit.name) + '</h2>';
+      if (unit.subtitle) {
+        html += '<p class="unit-subtitle">' + esc(unit.subtitle) + '</p>';
+      }
+      html += '<span class="unit-meta">0 of ' + unit.lesson_count + ' lessons visited</span>';
+      html += '<div class="progress-bar-track"><div class="progress-bar-fill"></div></div>';
       html += '</div></a>';
     });
 
-    html += '</div></div>';
+    html += '</div>';
 
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
     contentEl.style.display = '';
+
+    // Update visited progress from localStorage
+    if (typeof initVisitedTracking === 'function') {
+      initVisitedTracking();
+    }
   }
 
   // ---- Render unit index page (lesson cards) ----
   async function renderUnitIndex(subjectSlug, unitSlug) {
-    // Fetch unit with subject
     var unitResult = await sb
       .from('units')
       .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name)')
@@ -142,7 +141,6 @@
     var unit = unitResult.data;
     var subject = unit.subjects;
 
-    // Fetch lessons
     var lessonsResult = await sb
       .from('lessons')
       .select('id, lesson_number, slug, title, hero_image_url, status')
@@ -154,6 +152,7 @@
 
     document.title = unit.name + ' - StudyVault';
     document.body.classList.add(unit.body_class);
+    document.body.dataset.unit = unit.slug;
     document.getElementById('header-unit-label').textContent = unit.name;
 
     // Nav links
@@ -163,34 +162,45 @@
       '<a href="/' + subjectSlug + '/exam-technique/index.html">Exam Technique</a>' +
       '<a href="/' + subjectSlug + '/revision-technique/index.html">Revision Techniques</a>';
 
-    var html = '<div class="unit-index" style="max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem;">';
-    html += '<h1 style="font-family: \'Source Serif 4\', serif; margin-bottom: 0.25rem;">' + esc(unit.name) + '</h1>';
-    if (unit.subtitle) {
-      html += '<p style="color: var(--text-muted); margin-bottom: 2rem;">' + esc(unit.subtitle) + '</p>';
-    }
+    var html = '';
 
-    html += '<div class="lesson-cards" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.25rem;">';
+    // Hero
+    html += '<section class="hero"><h1>' + esc(unit.name) + '</h1>';
+    if (unit.subtitle) {
+      html += '<p class="hero-subtitle">' + esc(unit.subtitle) + '</p>';
+    }
+    html += '</section>';
+
+    // Progress bar
+    html += '<div class="unit-progress-header">';
+    html += '<span class="unit-progress-label">0 of ' + unit.lesson_count + ' lessons visited</span>';
+    html += '<div class="progress-bar-track"><div class="progress-bar-fill"></div></div>';
+    html += '</div>';
+
+    // Lesson grid
+    html += '<div class="lesson-grid">';
 
     lessons.forEach(function (lesson) {
       var url = '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
-      html += '<a href="' + url + '" class="lesson-card" data-lesson="' + esc(lesson.slug) + '" ' +
-        'style="display: block; border-radius: 12px; overflow: hidden; background: white; box-shadow: 0 1px 8px rgba(0,0,0,0.06); text-decoration: none; color: inherit; transition: transform 0.15s, box-shadow 0.15s; border-left: 4px solid ' + unit.accent + ';">';
-
-      html += '<div style="padding: 1rem 1.25rem;">';
-      html += '<span style="font-size: 0.75rem; font-weight: 600; color: ' + unit.accent + '; text-transform: uppercase;">Lesson ' + lesson.lesson_number + '</span>';
-      html += '<h3 style="font-family: \'Source Serif 4\', serif; font-size: 1rem; margin: 0.25rem 0 0; line-height: 1.4;">' + esc(lesson.title) + '</h3>';
-      html += '</div></a>';
+      html += '<a href="' + url + '" class="lesson-card" data-lesson="' + esc(lesson.slug) + '">';
+      html += '<span class="lesson-card-number">Lesson ' + lesson.lesson_number + '</span>';
+      html += '<h3 class="lesson-card-title">' + esc(lesson.title) + '</h3>';
+      html += '</a>';
     });
 
     html += '</div>';
 
     // Back link
-    html += '<a href="/browse/' + subjectSlug + '" class="back-link" style="display: inline-block; margin-top: 2rem;">&larr; Back to ' + esc(subject.name) + '</a>';
-    html += '</div>';
+    html += '<a href="/browse/' + subjectSlug + '" class="back-link">&larr; Back to ' + esc(subject.name) + '</a>';
 
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
     contentEl.style.display = '';
+
+    // Update visited cards from localStorage
+    if (typeof updateVisitedCards === 'function') {
+      updateVisitedCards();
+    }
   }
 
   // ---- Main ----
