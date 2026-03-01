@@ -66,24 +66,39 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
 - TTS narration complete: all 10 lessons narrated with Azure Speech (350 clips, manifests with durations). Odd lessons = Ollie (male), even = Bella (female). MP3s hosted on Cloudflare R2.
 
-### Dynamic Architecture (in progress)
-Schema, migration script, frontend templates, QC page, and pipeline adapter all built. Steps to activate:
-1. **Run SQL migration** — paste `supabase/migrations/001_schema.sql` into Supabase SQL Editor
-2. **Run migration script** — `python scripts/migrate_to_supabase.py --dry-run` then without `--dry-run`
-3. **Upload images** — `python scripts/upload_images_to_r2.py` then `--update-db`
-4. **Set Tom's profile to platform_admin** — `UPDATE profiles SET role = 'platform_admin' WHERE email = 't.shaun@unity.lancs.sch.uk'`
-5. **Test on Vercel** — dynamic routes (`/lesson/history/conflict-tension/1`) should render from DB
-6. **Verify** — `python scripts/migrate_to_supabase.py --validate`
+### Dynamic Architecture (LIVE on Vercel)
+All content now served from Supabase on the `platform` branch (Vercel deployment). Static HTML files remain in repo as backup but are no longer linked from the dynamic site.
+
+**What's running:**
+- 140 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
+- 62 guide pages (54 individual + 8 hub indexes) in `guide_pages` table
+- 387 images on Cloudflare R2 (`studyvault-images` bucket)
+- 4,661 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
+- Dynamic templates: `lesson.html`, `browse.html`, `guide.html` with JS loaders
+- URL scheme: `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
+- Dashboard links to dynamic routes (not static HTML)
+- Auth guards on all dynamic pages (Supabase session or demo localStorage)
+- Public RLS policies for live content (anon users can read `status='live'` rows)
+- QC review page at `/admin/review` (platform_admin only)
+- Pipeline adapter: `scripts/supabase_writer.py` for writing new content to DB
+
+**Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, classes, class_members
+
+**R2 buckets:**
+- `studyvault-audio` — narration MP3s, public URL: `https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev`
+- `studyvault-images` — hero images + diagrams, public URL: `https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`
 
 ### Still TODO
-- **Dynamic architecture activation**: Run the 6 steps above
-- **Sport Science**: YouTube videos for lessons 2–10.
-- **Business Studies**: Videos and podcasts for lessons 2–30 (deferred until green-lit by management).
+- **Platform admin setup**: SSO must be active first, then: `UPDATE profiles SET role = 'platform_admin' WHERE email = 't.shaun@unity.lancs.sch.uk'`
+- **Direct Postgres connection**: Tom's home network is IPv6-only to Supabase — need to troubleshoot or use a different network. Env var `SUPABASE_DB_URL` has the password.
+- **2 parsing fixes**: Business Theme 1 Lesson 9 (0 practice questions) and Theme 2 Lesson 14 (0 knowledge checks) — JS syntax the parser couldn't handle
+- **Sport Science**: YouTube videos for lessons 2–10
+- **Business Studies**: Videos and podcasts for lessons 2–30 (deferred until green-lit by management)
 - PWA (service worker + manifest.json)
-- **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel (`study-vault-alpha.vercel.app`). OAuth redirects won't work from `file://`, need a server or Vercel.
-- Auth guards on lesson/subject pages (currently open by direct URL) — dynamic pages have auth guards, static pages still open
-- Role detection (teacher vs student) — profiles table now exists, needs testing
+- **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel
+- Role detection (teacher vs student) — profiles table exists, needs testing
 - Remove demo accounts once SSO is battle-tested
+- Retire static HTML files once dynamic system is fully verified
 
 
 ### Future features (not started)
@@ -99,12 +114,14 @@ Study Vault/
 ├── index.html                ← Subject selection / login / dashboard (SPA)
 ├── lesson.html               ← Dynamic lesson template (Supabase-driven)
 ├── browse.html               ← Dynamic browse template (subject/unit index)
+├── guide.html                ← Dynamic guide template (exam/revision technique)
 ├── vercel.json               ← Vercel rewrites for dynamic routes
 ├── css/style.css             ← All styling
 ├── js/
 │   ├── main.js               ← All JS (Phase 1/2 split for dynamic pages)
 │   ├── lesson-loader.js      ← Fetches lesson from Supabase, populates template
-│   └── browse-loader.js      ← Fetches subject/unit data, renders cards
+│   ├── browse-loader.js      ← Fetches subject/unit data, renders cards
+│   └── guide-loader.js       ← Fetches guide pages (exam/revision technique)
 ├── admin/
 │   └── review.html           ← QC review page (platform_admin only)
 ├── supabase/
@@ -166,9 +183,9 @@ Study Vault/
 ```
 
 ### Path conventions
-- Root `index.html` → `css/style.css`, `js/main.js`
-- Subject landing pages (e.g. `history/index.html`) → `../css/style.css`, `../js/main.js`
-- Lesson/unit pages (e.g. `history/conflict-tension/lesson-01.html`) → `../../css/style.css`, `../../js/main.js`
+- **Dynamic pages** (`lesson.html`, `browse.html`, `guide.html`): absolute paths (`/css/style.css`, `/js/main.js`)
+- **Static pages** (legacy HTML files still in repo): relative paths (`../../css/style.css`)
+- **URL scheme**: `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 
 ---
 
@@ -187,6 +204,7 @@ All stored in environment variables — never commit them.
 | Cloudflare R2 | `R2_ACCESS_KEY_ID` | S3-compatible access key for narration audio bucket |
 | Cloudflare R2 | `R2_SECRET_ACCESS_KEY` | Secret key for R2 bucket access |
 | Cloudflare R2 | `R2_ACCOUNT_ID` | Cloudflare account ID for R2 endpoint URL |
+| Supabase | `SUPABASE_DB_URL` | Direct Postgres password (IPv6 connection blocked from Tom's network — troubleshoot later) |
 
 ---
 
@@ -290,7 +308,8 @@ Split into two phases for dynamic page support:
 
 **Dynamic page loaders (separate files):**
 - `lesson-loader.js` — auth check → parse `/lesson/{subject}/{unit}/{number}` → fetch from Supabase → populate template → call `initLessonFeatures()`
-- `browse-loader.js` — auth check → render subject landing or unit index from Supabase
+- `browse-loader.js` — auth check → render subject landing or unit index from Supabase → calls `initNavIcons()` for header icons
+- `guide-loader.js` — auth check → render guide hub index or individual guide page from Supabase → rewrites relative links to dynamic `/guide/` routes
 
 ---
 
@@ -299,7 +318,7 @@ Split into two phases for dynamic page support:
 - Text: warm dark brown `#2d2a26`, not pure black
 - Font: Inter (body) + Source Serif 4 (headings) via Google Fonts `<link>` tags in HTML `<head>` (not CSS `@import` — avoids render-blocking waterfall)
 - Cards: `border-radius: 16px`, soft warm shadows
-- All data inlined in HTML (no fetch — `file://` CORS restrictions)
+- Static pages: data inlined in HTML. Dynamic pages: data fetched from Supabase at runtime.
 - Logo: inline SVG padlock replaces period in "StudyVault." — `currentColor`, scales with text
 - Narration highlight: gold `#fef9e7` with `#e6b800` border
 - Key takeaways: 2-3 bullets, not exhaustive lists
