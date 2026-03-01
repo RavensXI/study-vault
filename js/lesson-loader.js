@@ -219,17 +219,9 @@
     pageEl.style.display = '';
 
     // Init lesson features from main.js (Phase 2 functions)
+    // This includes initLessonPill() which creates the header lesson pill
     if (typeof window.initLessonFeatures === 'function') {
       window.initLessonFeatures();
-    }
-
-    // Lesson pill in header
-    var unitLabel = document.querySelector('.header-unit-label');
-    if (unitLabel) {
-      var pill = document.createElement('span');
-      pill.className = 'header-lesson-label';
-      pill.textContent = 'Lesson ' + lesson.lesson_number;
-      unitLabel.parentNode.insertBefore(pill, unitLabel.nextSibling);
     }
   }
 
