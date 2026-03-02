@@ -216,7 +216,8 @@
           html += '<div class="action-row">';
           html += '<button class="btn btn-outline search-btn" data-lesson-id="' + l.id + '" data-title="' + esc(l.title) + '">Search Wikimedia</button>';
           html += '<input type="text" class="search-input" id="search-' + l.id + '" placeholder="Custom search terms..." value="' + esc(l.title) + '">';
-          html += '<button class="btn btn-success save-btn" data-lesson-id="' + l.id + '">Save Position</button>';
+          html += '<label class="btn btn-outline upload-label" data-lesson-id="' + l.id + '">Upload Image<input type="file" accept="image/*" class="upload-input" data-lesson-id="' + l.id + '" style="display:none"></label>';
+          html += '<button class="btn btn-success save-btn" data-lesson-id="' + l.id + '">Save</button>';
           if (l.hero_image_url) {
             html += '<button class="btn btn-danger remove-btn" data-lesson-id="' + l.id + '">Remove</button>';
           }
@@ -280,6 +281,15 @@
         });
 
         document.addEventListener('mouseup', function () { isDragging = false; });
+      });
+
+      // Upload buttons
+      document.querySelectorAll('.upload-input').forEach(function (input) {
+        input.addEventListener('change', function () {
+          if (this.files.length) {
+            uploadImage(this.dataset.lessonId, this.files[0]);
+          }
+        });
       });
 
       // Search buttons
@@ -370,6 +380,38 @@
         });
       } catch (err) {
         container.innerHTML = '<span style="font-size:0.78rem;color:#dc2626">Search failed: ' + err.message + '</span>';
+      }
+    }
+
+    // ---- Upload a local image ----
+    async function uploadImage(lessonId, file) {
+      var preview = document.getElementById('preview-' + lessonId);
+      preview.innerHTML = '<div class="no-image">Uploading...</div>';
+
+      try {
+        // Upload to Supabase Storage (pipeline-uploads bucket, reused for hero images)
+        var path = 'hero-uploads/' + lessonId + '/' + file.name;
+        var uploadResult = await sb.storage.from('pipeline-uploads').upload(path, file, { upsert: true });
+        if (uploadResult.error) throw new Error(uploadResult.error.message);
+
+        // Get the public URL
+        var urlResult = sb.storage.from('pipeline-uploads').getPublicUrl(path);
+        var publicUrl = urlResult.data.publicUrl;
+
+        // Show in preview
+        preview.innerHTML = '<img src="' + publicUrl + '" alt="' + esc(file.name) + '" style="object-position: center 50%;">' +
+          '<span class="position-label">center 50%</span>';
+
+        // Enable slider
+        var slider = document.querySelector('.pos-slider[data-lesson-id="' + lessonId + '"]');
+        if (slider) { slider.disabled = false; slider.value = 50; }
+        document.getElementById('posval-' + lessonId).textContent = '50%';
+
+        // Store for saving
+        preview.dataset.pendingUrl = publicUrl;
+        preview.dataset.pendingAlt = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
+      } catch (err) {
+        preview.innerHTML = '<div class="no-image" style="color:#dc2626">Upload failed: ' + err.message + '</div>';
       }
     }
 
