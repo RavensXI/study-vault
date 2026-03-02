@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Pipeline - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .pipeline-layout { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .pipeline-header { margin-bottom: 2rem; }
+    .pipeline-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0 0 0.35rem; }
+    .pipeline-header p { color: var(--text-muted); font-size: 0.875rem; margin: 0; }
+
+    /* Upload form */
+    .upload-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+    .upload-card h2 { font-family: 'Source Serif 4', serif; font-size: 1.2rem; margin: 0 0 1.25rem; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group.full-width { grid-column: 1 / -1; }
+    .form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text-color); }
+    .form-group input, .form-group select { padding: 0.55rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.875rem; font-family: inherit; }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }
+
+    .dropzone { border: 2px dashed #ddd; border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.15s; margin-bottom: 1.25rem; }
+    .dropzone:hover, .dropzone.dragover { border-color: #7c3aed; background: #f5f3ff; }
+    .dropzone p { margin: 0; color: var(--text-muted); font-size: 0.875rem; }
+    .dropzone .file-name { font-weight: 600; color: var(--text-color); margin-top: 0.5rem; }
+    .dropzone input[type="file"] { display: none; }
+
+    .color-row { display: flex; gap: 1rem; align-items: flex-end; }
+    .color-row .form-group { flex: 1; }
+    .color-row input[type="color"] { height: 40px; padding: 2px; border-radius: 8px; cursor: pointer; }
+
+    .btn { padding: 0.6rem 1.5rem; border-radius: 10px; border: none; cursor: pointer; font-size: 0.875rem; font-weight: 600; transition: all 0.15s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #7c3aed; color: white; }
+    .btn-primary:hover:not(:disabled) { background: #6d28d9; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover:not(:disabled) { background: #15803d; }
+    .btn-outline { background: transparent; border: 1px solid #ddd; color: var(--text-color); }
+    .btn-outline:hover:not(:disabled) { background: #f9fafb; }
+
+    /* Plan review */
+    .plan-card { background: white; border-radius: 16px; padding: 2rem; box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 1rem; }
+    .plan-card h2 { font-family: 'Source Serif 4', serif; font-size: 1.2rem; margin: 0 0 1rem; }
+    .unit-block { margin-bottom: 1.5rem; }
+    .unit-block h3 { font-size: 0.95rem; font-weight: 700; margin: 0 0 0.5rem; padding-bottom: 0.4rem; border-bottom: 2px solid #e5e7eb; }
+    .lesson-list { list-style: none; padding: 0; margin: 0; }
+    .lesson-list li { padding: 0.4rem 0; font-size: 0.875rem; color: var(--text-color); display: flex; gap: 0.5rem; }
+    .lesson-list .lesson-num { font-weight: 700; color: var(--text-muted); min-width: 2rem; }
+
+    /* Progress grid */
+    .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .progress-bar-outer { width: 100%; height: 8px; background: #e5e7eb; border-radius: 4px; overflow: hidden; margin-bottom: 1.5rem; }
+    .progress-bar-inner { height: 100%; background: #16a34a; border-radius: 4px; transition: width 0.3s; }
+    .progress-stats { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+
+    .lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0.75rem; }
+    .lesson-card { background: white; border-radius: 12px; padding: 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border-left: 3px solid #e5e7eb; }
+    .lesson-card.done { border-left-color: #16a34a; }
+    .lesson-card.in-progress { border-left-color: #f59e0b; }
+    .lesson-card.error { border-left-color: #dc2626; }
+    .lesson-card h4 { font-size: 0.82rem; font-weight: 600; margin: 0 0 0.25rem; }
+    .lesson-card .lesson-meta { font-size: 0.72rem; color: var(--text-muted); }
+    .lesson-card .status-icon { float: right; font-size: 1rem; }
+
+    /* Status indicators */
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #f59e0b; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .phase-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .phase-uploaded { background: #f3f4f6; color: #6b7280; }
+    .phase-parsing { background: #fef3c7; color: #92400e; }
+    .phase-parsed { background: #dbeafe; color: #1d4ed8; }
+    .phase-planning { background: #fef3c7; color: #92400e; }
+    .phase-planned { background: #dbeafe; color: #1d4ed8; }
+    .phase-generating { background: #fef3c7; color: #92400e; }
+    .phase-complete { background: #d1fae5; color: #065f46; }
+    .phase-failed { background: #fee2e2; color: #dc2626; }
+
+    .error-msg { background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 0.75rem 1rem; color: #dc2626; font-size: 0.82rem; margin: 1rem 0; }
+    .info-msg { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; color: #1d4ed8; font-size: 0.82rem; margin: 1rem 0; }
+
+    .done-section { text-align: center; padding: 2rem; }
+    .done-section h2 { font-family: 'Source Serif 4', serif; color: #16a34a; }
+    .done-links { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+        <span class="header-unit-label">Content Pipeline</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Dashboard</a>
+        <a href="/admin/review">Review Queue</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="pipeline-layout" id="pipeline-app">
+    <div class="pipeline-header">
+      <h1>Content Generation Pipeline</h1>
+      <p>Upload teacher resources and generate revision lessons automatically.</p>
+    </div>
+    <div id="pipeline-content">Loading...</div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    var contentEl = document.getElementById('pipeline-content');
+    var accessToken = null;
+    var currentJob = null;
+    var pollTimer = null;
+
+    // ---- Auth ----
+    async function init() {
+      var result = await sb.auth.getSession();
+      if (!result.data.session) {
+        contentEl.innerHTML = '<div class="error-msg">Not logged in. <a href="/">Go to login</a></div>';
+        return;
+      }
+      accessToken = result.data.session.access_token;
+
+      // Check for existing jobs (resume support)
+      var jobs = await sb.from('upload_jobs')
+        .select('id, current_phase, subject_slug, subject_config, filename, lesson_plan, extracted_text')
+        .in('current_phase', ['uploaded', 'parsed', 'planned', 'generating', 'complete'])
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (jobs.data && jobs.data.length > 0) {
+        currentJob = jobs.data[0];
+        await resumeJob(currentJob);
+      } else {
+        renderUploadForm();
+      }
+    }
+
+    // ---- API helper ----
+    async function apiCall(endpoint, body) {
+      var opts = {
+        headers: {
+          'Authorization': 'Bearer ' + accessToken,
+          'Content-Type': 'application/json',
+        },
+      };
+      if (body !== undefined) {
+        opts.method = 'POST';
+        opts.body = JSON.stringify(body);
+      }
+      var resp = await fetch(endpoint, opts);
+      var data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || data.detail || 'API error');
+      return data;
+    }
+
+    // ---- Resume an in-progress job ----
+    async function resumeJob(job) {
+      var phase = job.current_phase;
+      if (phase === 'uploaded') {
+        renderReadyToParse(job);
+      } else if (phase === 'parsed') {
+        renderReadyForGeneration(job);
+      } else if (phase === 'planned' || phase === 'generating' || phase === 'complete') {
+        renderProgress(job);
+      }
+    }
+
+    // ---- Upload Form ----
+    function renderUploadForm() {
+      var selectedFile = null;
+
+      contentEl.innerHTML =
+        '<div class="upload-card">' +
+          '<h2>Upload Teaching Resources</h2>' +
+          '<div class="dropzone" id="dropzone">' +
+            '<p>Drag and drop a .pptx file here, or click to browse</p>' +
+            '<input type="file" id="file-input" accept=".pptx,.ppt">' +
+          '</div>' +
+          '<div class="form-grid">' +
+            '<div class="form-group"><label>Subject Name</label><input type="text" id="subject-name" placeholder="e.g. Drama"></div>' +
+            '<div class="form-group"><label>Spec Code</label><input type="text" id="spec-code" placeholder="e.g. J316"></div>' +
+            '<div class="form-group"><label>Exam Board</label>' +
+              '<select id="exam-board"><option value="OCR">OCR</option><option value="AQA">AQA</option><option value="Edexcel">Edexcel</option><option value="WJEC">WJEC</option></select>' +
+            '</div>' +
+            '<div class="form-group"><label>Unit Colour</label><input type="color" id="color1" value="#7c3aed"></div>' +
+          '</div>' +
+          '<button class="btn btn-primary" id="upload-btn" disabled>Upload &amp; Parse</button>' +
+        '</div>';
+
+      var dropzone = document.getElementById('dropzone');
+      var fileInput = document.getElementById('file-input');
+      var uploadBtn = document.getElementById('upload-btn');
+
+      dropzone.addEventListener('click', function () { fileInput.click(); });
+      dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('dragover'); });
+      dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('dragover'); });
+      dropzone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        dropzone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+          selectedFile = e.dataTransfer.files[0];
+          dropzone.innerHTML = '<p class="file-name">' + selectedFile.name + '</p><p>' + (selectedFile.size / 1024).toFixed(0) + ' KB</p>';
+          uploadBtn.disabled = !document.getElementById('subject-name').value;
+        }
+      });
+      fileInput.addEventListener('change', function () {
+        if (fileInput.files.length) {
+          selectedFile = fileInput.files[0];
+          dropzone.innerHTML = '<p class="file-name">' + selectedFile.name + '</p><p>' + (selectedFile.size / 1024).toFixed(0) + ' KB</p>';
+          uploadBtn.disabled = !document.getElementById('subject-name').value;
+        }
+      });
+      document.getElementById('subject-name').addEventListener('input', function () {
+        uploadBtn.disabled = !this.value || !selectedFile;
+      });
+
+      uploadBtn.addEventListener('click', async function () {
+        if (!selectedFile) return;
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = 'Uploading...';
+
+        try {
+          var tempId = crypto.randomUUID();
+          var storagePath = tempId + '/' + selectedFile.name;
+
+          var uploadResult = await sb.storage.from('pipeline-uploads').upload(storagePath, selectedFile);
+          if (uploadResult.error) throw new Error('Storage upload failed: ' + uploadResult.error.message);
+
+          var job = await apiCall('/api/pipeline/upload', {
+            subject_name: document.getElementById('subject-name').value,
+            exam_board: document.getElementById('exam-board').value,
+            spec_code: document.getElementById('spec-code').value,
+            storage_path: storagePath,
+            filename: selectedFile.name,
+          });
+
+          uploadBtn.textContent = 'Parsing PPT...';
+          var parseResult = await apiCall('/api/pipeline/parse', { job_id: job.job_id });
+
+          // Refetch the full job
+          var refetch = await sb.from('upload_jobs').select('*').eq('id', job.job_id).single();
+          currentJob = refetch.data;
+          renderReadyForGeneration(currentJob);
+        } catch (err) {
+          contentEl.innerHTML += '<div class="error-msg">' + err.message + '</div>';
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = 'Upload & Parse';
+        }
+      });
+    }
+
+    // ---- Ready to parse (uploaded but not yet parsed) ----
+    function renderReadyToParse(job) {
+      contentEl.innerHTML =
+        '<div class="upload-card">' +
+          '<h2>File Uploaded — Ready to Parse</h2>' +
+          '<p><strong>File:</strong> ' + job.filename + '</p>' +
+          '<button class="btn btn-primary" id="parse-btn">Parse PPT</button>' +
+        '</div>';
+
+      document.getElementById('parse-btn').addEventListener('click', async function () {
+        this.disabled = true;
+        this.textContent = 'Parsing...';
+        try {
+          await apiCall('/api/pipeline/parse', { job_id: job.id });
+          var refetch = await sb.from('upload_jobs').select('*').eq('id', job.id).single();
+          currentJob = refetch.data;
+          renderReadyForGeneration(currentJob);
+        } catch (err) {
+          contentEl.innerHTML += '<div class="error-msg">' + err.message + '</div>';
+        }
+      });
+    }
+
+    // ---- Ready for generation (parsed, waiting for Claude Code) ----
+    function renderReadyForGeneration(job) {
+      var config = job.subject_config || {};
+      var textLen = (job.extracted_text || '').length;
+      var preview = (job.extracted_text || '').substring(0, 600).replace(/</g, '&lt;');
+
+      contentEl.innerHTML =
+        '<div class="upload-card">' +
+          '<h2>PPT Parsed — Ready for Generation</h2>' +
+          '<div class="form-grid" style="margin-bottom:1rem">' +
+            '<div><strong>Subject:</strong> ' + (config.subject_name || job.subject_slug) + '</div>' +
+            '<div><strong>Exam Board:</strong> ' + (config.exam_board || '—') + ' ' + (config.spec_code || '') + '</div>' +
+            '<div><strong>File:</strong> ' + job.filename + '</div>' +
+            '<div><strong>Extracted:</strong> ' + textLen.toLocaleString() + ' characters</div>' +
+          '</div>' +
+          '<details style="margin-bottom:1.25rem">' +
+            '<summary style="cursor:pointer;font-size:0.82rem;color:var(--text-muted)">Preview extracted text</summary>' +
+            '<pre style="background:#f9fafb;padding:1rem;border-radius:8px;font-size:0.75rem;max-height:300px;overflow:auto;white-space:pre-wrap;margin-top:0.5rem">' + preview + '...</pre>' +
+          '</details>' +
+          '<div class="info-msg">' +
+            '<strong>Next step:</strong> Open Claude Code and say:<br>' +
+            '<code style="background:#e0e7ff;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.82rem">Generate lessons for pipeline job ' + job.id + '</code>' +
+          '</div>' +
+        '</div>';
+    }
+
+    // ---- Generation progress (polls Supabase for updates from Claude Code) ----
+    async function renderProgress(job) {
+      // Fetch pipeline steps
+      var stepsResult = await sb.from('pipeline_steps')
+        .select('*')
+        .eq('job_id', job.id)
+        .order('unit_slug')
+        .order('lesson_number');
+
+      var steps = stepsResult.data || [];
+      var total = steps.length;
+      var contentDone = steps.filter(function (s) { return s.content_done; }).length;
+      var pct = total > 0 ? Math.round((contentDone / total) * 100) : 0;
+      var allDone = total > 0 && contentDone === total;
+
+      var html =
+        '<div class="progress-header">' +
+          '<h2 style="font-family:Source Serif 4,serif;margin:0">Generation Progress</h2>' +
+          '<span class="phase-badge phase-' + job.current_phase + '">' + job.current_phase + '</span>' +
+        '</div>' +
+        '<div class="progress-bar-outer"><div class="progress-bar-inner" style="width:' + pct + '%"></div></div>' +
+        '<div class="progress-stats">' + contentDone + ' of ' + total + ' lessons generated (' + pct + '%)' +
+          (allDone ? '' : ' &mdash; <span class="spinner" style="width:12px;height:12px;border-width:1.5px;vertical-align:middle"></span> auto-refreshing') +
+        '</div>';
+
+      if (allDone) {
+        html += '<button class="btn btn-success" id="review-btn">Send All to QA Review</button> ';
+        html += '<a href="/admin/review" class="btn btn-outline" style="margin-left:0.5rem">Open Review Queue</a>';
+      }
+
+      html += '<div class="lesson-grid" id="lesson-grid">';
+      for (var i = 0; i < steps.length; i++) {
+        var s = steps[i];
+        var cls = s.content_done ? 'done' : (s.last_error ? 'error' : '');
+        var icon = s.content_done ? '&#10003;' : (s.last_error ? '&#10007;' : '&mdash;');
+        html += '<div class="lesson-card ' + cls + '">' +
+          '<span class="status-icon">' + icon + '</span>' +
+          '<h4>L' + s.lesson_number + ': ' + s.lesson_title + '</h4>' +
+          '<div class="lesson-meta">' + s.unit_slug + '</div>' +
+          (s.lesson_id && s.content_done ? '<a href="/lesson/' + job.subject_slug + '/' + s.unit_slug + '/' + s.lesson_number + '" style="font-size:0.72rem;color:#4f46e5">Preview</a>' : '') +
+          (s.last_error ? '<div class="lesson-meta" style="color:#dc2626">' + s.last_error.substring(0, 60) + '</div>' : '') +
+        '</div>';
+      }
+      html += '</div>';
+
+      contentEl.innerHTML = html;
+
+      // Wire review button
+      var reviewBtn = document.getElementById('review-btn');
+      if (reviewBtn) {
+        reviewBtn.addEventListener('click', async function () {
+          this.disabled = true;
+          this.textContent = 'Sending to review...';
+          for (var i = 0; i < steps.length; i++) {
+            if (steps[i].lesson_id) {
+              await sb.from('lessons').update({ status: 'review' }).eq('id', steps[i].lesson_id);
+            }
+          }
+          await sb.from('upload_jobs').update({ current_phase: 'complete' }).eq('id', job.id);
+          this.textContent = 'Sent to review!';
+        });
+      }
+
+      // Auto-refresh every 5s if not all done
+      if (!allDone) {
+        if (pollTimer) clearTimeout(pollTimer);
+        pollTimer = setTimeout(async function () {
+          var refetch = await sb.from('upload_jobs').select('*').eq('id', job.id).single();
+          if (refetch.data) renderProgress(refetch.data);
+        }, 5000);
+      }
+    }
+
+    // ---- Kick off ----
+    init();
+  })();
+  </script>
+</body>
+</html>
