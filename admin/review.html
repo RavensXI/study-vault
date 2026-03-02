@@ -68,7 +68,10 @@
       </a>
 
       <nav class="header-nav">
-        <a href="/">Dashboard</a>
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review</a>
+        <a href="/admin/images">Images</a>
+        <a href="/">Student View</a>
       </nav>
     </div>
   </header>
@@ -90,14 +93,25 @@
     var loadingEl = document.getElementById('review-loading');
     var currentFilter = 'review'; // Default to showing items in review
 
-    // ---- Auth: must be platform_admin ----
+    // ---- Auth: must be platform_admin or demo admin ----
     async function checkAdmin() {
+      // Try Supabase SSO session
       var result = await sb.auth.getSession();
-      if (!result.data.session) return false;
+      if (result.data.session) {
+        var userId = result.data.session.user.id;
+        var profile = await sb.from('profiles').select('role').eq('id', userId).single();
+        return profile.data && profile.data.role === 'platform_admin';
+      }
 
-      var userId = result.data.session.user.id;
-      var profile = await sb.from('profiles').select('role').eq('id', userId).single();
-      return profile.data && profile.data.role === 'platform_admin';
+      // Fallback: demo user (emma/jake are treated as admin for testing)
+      try {
+        var stored = localStorage.getItem('studyvault-user');
+        if (stored) {
+          var u = JSON.parse(stored);
+          if (u && u.isDemo && (u.id === 'emma' || u.id === 'jake')) return true;
+        }
+      } catch (e) {}
+      return false;
     }
 
     // ---- Fetch review queue ----
