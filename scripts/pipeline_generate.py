@@ -111,22 +111,30 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         sys.exit(1)
 
     # Upsert subject
+    subject_slug = plan.get("subject_slug", job.get("subject_slug"))
     subject_data = {
-        "school_id": school_id,
-        "slug": plan.get("subject_slug", job.get("subject_slug")),
+        "slug": subject_slug,
         "name": plan.get("subject_name", config.get("subject_name", "Unknown")),
         "exam_board": plan.get("exam_board", config.get("exam_board", "Unknown")),
         "spec_code": plan.get("spec_code", config.get("spec_code")) or None,
         "status": "draft",
         "is_active": False,
     }
-    subject = sb.table("subjects").upsert(subject_data, on_conflict="school_id,slug").select("id").single().execute().data
+    if school_id:
+        subject_data["school_id"] = school_id
+    else:
+        # Find or use the first school as default
+        schools = sb.table("schools").select("id").limit(1).execute()
+        subject_data["school_id"] = schools.data[0]["id"] if schools.data else None
+
+    result = sb.table("subjects").upsert(subject_data, on_conflict="school_id,slug").execute()
+    subject_id = result.data[0]["id"]
 
     # Upsert unit
     colors = config.get("colors", {})
     accent = colors.get(f"color{unit_index + 1}", colors.get("color1", "#6b7280"))
     unit_data = {
-        "subject_id": subject["id"],
+        "subject_id": subject_id,
         "slug": unit_slug,
         "name": unit_plan["name"],
         "body_class": f"unit-{plan.get('subject_slug', 'unknown')}-{unit_index + 1}",
@@ -135,11 +143,12 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "accent_badge": accent + "33",
         "lesson_count": len(unit_plan.get("lessons", [])),
     }
-    unit = sb.table("units").upsert(unit_data, on_conflict="subject_id,slug").select("id").single().execute().data
+    result = sb.table("units").upsert(unit_data, on_conflict="subject_id,slug").execute()
+    unit_id = result.data[0]["id"]
 
     # Upsert lesson
     lesson_record = {
-        "unit_id": unit["id"],
+        "unit_id": unit_id,
         "lesson_number": lesson_number,
         "slug": f"lesson-{lesson_number:02d}",
         "title": lesson_plan["title"],
@@ -151,7 +160,8 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "glossary_terms": lesson_data.get("glossary_terms", []),
         "status": "draft",
     }
-    lesson = sb.table("lessons").upsert(lesson_record, on_conflict="unit_id,lesson_number").select("id").single().execute().data
+    result = sb.table("lessons").upsert(lesson_record, on_conflict="unit_id,lesson_number").execute()
+    lesson_id = result.data[0]["id"]
 
     # Update pipeline step
     sb.table("pipeline_steps").upsert({
@@ -159,7 +169,7 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "unit_slug": unit_slug,
         "lesson_number": lesson_number,
         "lesson_title": lesson_plan["title"],
-        "lesson_id": lesson["id"],
+        "lesson_id": lesson_id,
         "content_done": True,
         "questions_done": True,
         "glossary_done": True,
@@ -172,7 +182,7 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "current_phase": "generating",
     }).eq("id", job_id).execute()
 
-    print(f"OK: Lesson {lesson_number} '{lesson_plan['title']}' written to Supabase (id: {lesson['id']})")
+    print(f"OK: Lesson {lesson_number} '{lesson_plan['title']}' written to Supabase (id: {lesson_id})")
 
 
 def cmd_status(job_id):
