@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image QA - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .qa-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .qa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .qa-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .qa-controls { display: flex; gap: 0.75rem; align-items: center; }
+    .qa-controls select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+
+    .lesson-row { background: white; border-radius: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 1.25rem; overflow: hidden; }
+    .lesson-row-header { padding: 0.75rem 1.25rem; background: #f9fafb; border-bottom: 1px solid #f0ede8; display: flex; justify-content: space-between; align-items: center; }
+    .lesson-row-header h3 { margin: 0; font-size: 0.95rem; font-family: 'Source Serif 4', serif; }
+    .lesson-row-header .lesson-num { color: var(--text-muted); font-size: 0.78rem; }
+    .lesson-row-body { padding: 1.25rem; }
+
+    /* Hero preview — matches lesson page crop */
+    .hero-preview { position: relative; width: 100%; height: 200px; border-radius: 10px; overflow: hidden; background: #f0ede8; margin-bottom: 1rem; cursor: grab; }
+    .hero-preview:active { cursor: grabbing; }
+    .hero-preview img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }
+    .hero-preview .no-image { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.82rem; }
+    .hero-preview .position-label { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65); color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; pointer-events: none; }
+
+    /* Position slider */
+    .position-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+    .position-row label { font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+    .position-row input[type="range"] { flex: 1; accent-color: #7c3aed; }
+    .position-row .pos-value { font-size: 0.75rem; color: var(--text-muted); min-width: 3rem; text-align: right; }
+
+    /* Candidates grid */
+    .candidates { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .candidate { width: 140px; height: 90px; border-radius: 8px; overflow: hidden; cursor: pointer; border: 3px solid transparent; transition: border-color 0.15s; position: relative; flex-shrink: 0; }
+    .candidate:hover { border-color: #7c3aed; }
+    .candidate.selected { border-color: #7c3aed; }
+    .candidate img { width: 100%; height: 100%; object-fit: cover; }
+    .candidate .badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.6); color: white; font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; }
+
+    /* Action buttons */
+    .action-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .btn { padding: 0.45rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.15s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #7c3aed; color: white; }
+    .btn-primary:hover:not(:disabled) { background: #6d28d9; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover:not(:disabled) { background: #15803d; }
+    .btn-outline { background: transparent; border: 1px solid #ddd; color: var(--text-color); }
+    .btn-outline:hover:not(:disabled) { background: #f9fafb; }
+    .btn-danger { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+    .btn-danger:hover:not(:disabled) { background: #fee2e2; }
+
+    .save-toast { display: inline-block; font-size: 0.78rem; color: #16a34a; font-weight: 600; margin-left: 0.5rem; opacity: 0; transition: opacity 0.3s; }
+    .save-toast.show { opacity: 1; }
+
+    .search-input { padding: 0.4rem 0.65rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.78rem; font-family: inherit; width: 200px; }
+
+    .loading-msg { text-align: center; padding: 3rem; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+        <span class="header-unit-label">Image QA</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Dashboard</a>
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review Queue</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="qa-layout" id="qa-app">
+    <div class="qa-header">
+      <h1>Hero Image QA</h1>
+      <div class="qa-controls">
+        <select id="subject-select"><option value="">Loading...</option></select>
+        <select id="unit-select"><option value="">All units</option></select>
+      </div>
+    </div>
+    <div id="qa-content"><div class="loading-msg">Select a subject to begin.</div></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    var contentEl = document.getElementById('qa-content');
+    var subjectSelect = document.getElementById('subject-select');
+    var unitSelect = document.getElementById('unit-select');
+    var demoUser = null;
+    var accessToken = null;
+
+    // ---- Auth ----
+    async function getAuth() {
+      var result = await sb.auth.getSession();
+      if (result.data.session) {
+        accessToken = result.data.session.access_token;
+        return;
+      }
+      try {
+        var stored = localStorage.getItem('studyvault-user');
+        if (stored) {
+          var u = JSON.parse(stored);
+          if (u && u.isDemo) demoUser = u.id;
+        }
+      } catch (e) {}
+    }
+
+    function authHeaders() {
+      var h = { 'Content-Type': 'application/json' };
+      if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
+      else if (demoUser) h['X-Demo-User'] = demoUser;
+      return h;
+    }
+
+    // ---- Load subjects ----
+    async function loadSubjects() {
+      await getAuth();
+      var result = await sb.from('subjects').select('id, slug, name').eq('status', 'live').order('name');
+      var subjects = result.data || [];
+      subjectSelect.innerHTML = '<option value="">Select subject...</option>';
+      subjects.forEach(function (s) {
+        subjectSelect.innerHTML += '<option value="' + s.slug + '">' + s.name + '</option>';
+      });
+    }
+
+    subjectSelect.addEventListener('change', async function () {
+      var slug = this.value;
+      if (!slug) { contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>'; return; }
+      await loadUnitsAndLessons(slug);
+    });
+
+    unitSelect.addEventListener('change', function () {
+      if (subjectSelect.value) loadUnitsAndLessons(subjectSelect.value);
+    });
+
+    // ---- Load units + lessons ----
+    async function loadUnitsAndLessons(subjectSlug) {
+      contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
+
+      var subjectResult = await sb.from('subjects').select('id').eq('slug', subjectSlug).single();
+      if (!subjectResult.data) { contentEl.innerHTML = '<div class="loading-msg">Subject not found.</div>'; return; }
+
+      var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', subjectResult.data.id).order('sort_order');
+      var units = unitsResult.data || [];
+
+      // Populate unit dropdown
+      unitSelect.innerHTML = '<option value="">All units</option>';
+      units.forEach(function (u) {
+        unitSelect.innerHTML += '<option value="' + u.slug + '"' + (unitSelect.value === u.slug ? ' selected' : '') + '>' + u.name + '</option>';
+      });
+
+      var selectedUnit = unitSelect.value;
+      var html = '';
+
+      for (var ui = 0; ui < units.length; ui++) {
+        var u = units[ui];
+        if (selectedUnit && u.slug !== selectedUnit) continue;
+
+        var lessonsResult = await sb.from('lessons')
+          .select('id, lesson_number, title, hero_image_url, hero_image_alt, hero_image_caption, hero_image_position')
+          .eq('unit_id', u.id)
+          .order('lesson_number');
+
+        var lessons = lessonsResult.data || [];
+
+        for (var li = 0; li < lessons.length; li++) {
+          var l = lessons[li];
+          var pos = l.hero_image_position || 'center 50%';
+          var yMatch = pos.match(/(\d+)%/);
+          var yVal = yMatch ? parseInt(yMatch[1]) : 50;
+
+          html += '<div class="lesson-row" data-lesson-id="' + l.id + '" data-unit-slug="' + u.slug + '">';
+          html += '<div class="lesson-row-header"><h3>Lesson ' + l.lesson_number + ': ' + esc(l.title) + '</h3><span class="lesson-num">' + u.name + '</span></div>';
+          html += '<div class="lesson-row-body">';
+
+          // Hero preview
+          html += '<div class="hero-preview" id="preview-' + l.id + '">';
+          if (l.hero_image_url) {
+            html += '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.hero_image_alt || '') + '" style="object-position: ' + pos + ';">';
+            html += '<span class="position-label">' + pos + '</span>';
+          } else {
+            html += '<div class="no-image">No hero image</div>';
+          }
+          html += '</div>';
+
+          // Position slider
+          html += '<div class="position-row">';
+          html += '<label>Position</label>';
+          html += '<input type="range" min="0" max="100" value="' + yVal + '" data-lesson-id="' + l.id + '" class="pos-slider"' + (l.hero_image_url ? '' : ' disabled') + '>';
+          html += '<span class="pos-value" id="posval-' + l.id + '">' + yVal + '%</span>';
+          html += '</div>';
+
+          // Candidates area
+          html += '<div class="candidates" id="candidates-' + l.id + '"></div>';
+
+          // Action buttons
+          html += '<div class="action-row">';
+          html += '<button class="btn btn-outline search-btn" data-lesson-id="' + l.id + '" data-title="' + esc(l.title) + '">Search Wikimedia</button>';
+          html += '<input type="text" class="search-input" id="search-' + l.id + '" placeholder="Custom search terms..." value="' + esc(l.title) + '">';
+          html += '<button class="btn btn-success save-btn" data-lesson-id="' + l.id + '">Save Position</button>';
+          if (l.hero_image_url) {
+            html += '<button class="btn btn-danger remove-btn" data-lesson-id="' + l.id + '">Remove</button>';
+          }
+          html += '<span class="save-toast" id="toast-' + l.id + '">Saved!</span>';
+          html += '</div>';
+
+          html += '</div></div>';
+        }
+      }
+
+      contentEl.innerHTML = html;
+      wireUpEvents();
+    }
+
+    // ---- Wire up interactive events ----
+    function wireUpEvents() {
+      // Position sliders
+      document.querySelectorAll('.pos-slider').forEach(function (slider) {
+        slider.addEventListener('input', function () {
+          var id = this.dataset.lessonId;
+          var val = this.value;
+          document.getElementById('posval-' + id).textContent = val + '%';
+          var img = document.querySelector('#preview-' + id + ' img');
+          if (img) {
+            img.style.objectPosition = 'center ' + val + '%';
+            var label = document.querySelector('#preview-' + id + ' .position-label');
+            if (label) label.textContent = 'center ' + val + '%';
+          }
+        });
+      });
+
+      // Drag to position on preview
+      document.querySelectorAll('.hero-preview').forEach(function (preview) {
+        var isDragging = false;
+        var startY, startPos;
+
+        preview.addEventListener('mousedown', function (e) {
+          var img = preview.querySelector('img');
+          if (!img) return;
+          isDragging = true;
+          startY = e.clientY;
+          var match = (img.style.objectPosition || 'center 50%').match(/(\d+)%/);
+          startPos = match ? parseInt(match[1]) : 50;
+          e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', function (e) {
+          if (!isDragging) return;
+          var delta = startY - e.clientY;
+          var newPos = Math.max(0, Math.min(100, startPos + delta * 0.5));
+          var img = preview.querySelector('img');
+          if (img) {
+            img.style.objectPosition = 'center ' + Math.round(newPos) + '%';
+            var label = preview.querySelector('.position-label');
+            if (label) label.textContent = 'center ' + Math.round(newPos) + '%';
+          }
+          var id = preview.id.replace('preview-', '');
+          var slider = document.querySelector('.pos-slider[data-lesson-id="' + id + '"]');
+          if (slider) { slider.value = Math.round(newPos); }
+          document.getElementById('posval-' + id).textContent = Math.round(newPos) + '%';
+        });
+
+        document.addEventListener('mouseup', function () { isDragging = false; });
+      });
+
+      // Search buttons
+      document.querySelectorAll('.search-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = this.dataset.lessonId;
+          var searchInput = document.getElementById('search-' + id);
+          var query = searchInput ? searchInput.value : this.dataset.title;
+          searchWikimedia(id, query);
+        });
+      });
+
+      // Save buttons
+      document.querySelectorAll('.save-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          savePosition(this.dataset.lessonId);
+        });
+      });
+
+      // Remove buttons
+      document.querySelectorAll('.remove-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          removeHero(this.dataset.lessonId);
+        });
+      });
+    }
+
+    // ---- Search Wikimedia Commons ----
+    async function searchWikimedia(lessonId, query) {
+      var container = document.getElementById('candidates-' + lessonId);
+      container.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted)">Searching...</span>';
+
+      try {
+        var url = 'https://commons.wikimedia.org/w/api.php?action=query&list=search&srsearch=' +
+          encodeURIComponent(query + ' filetype:bitmap') +
+          '&srnamespace=6&srlimit=8&format=json&origin=*';
+
+        var resp = await fetch(url);
+        var data = await resp.json();
+        var results = (data.query && data.query.search) || [];
+
+        if (results.length === 0) {
+          container.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted)">No results. Try different search terms.</span>';
+          return;
+        }
+
+        // Get thumbnail URLs for each result
+        var titles = results.map(function (r) { return r.title; }).join('|');
+        var infoUrl = 'https://commons.wikimedia.org/w/api.php?action=query&titles=' +
+          encodeURIComponent(titles) +
+          '&prop=imageinfo&iiprop=url|mime|size&iiurlwidth=400&format=json&origin=*';
+
+        var infoResp = await fetch(infoUrl);
+        var infoData = await infoResp.json();
+        var pages = infoData.query.pages;
+
+        var html = '';
+        var count = 0;
+        for (var pid in pages) {
+          var page = pages[pid];
+          var ii = page.imageinfo && page.imageinfo[0];
+          if (!ii || !ii.mime || !ii.mime.startsWith('image/jpeg')) continue;
+          if (ii.size < 50000) continue;
+          if (ii.width < ii.height) continue; // landscape only
+
+          var thumbUrl = ii.thumburl || ii.url;
+          var fullUrl = ii.url;
+          html += '<div class="candidate" data-lesson-id="' + lessonId + '" data-url="' + esc(fullUrl) + '" data-thumb="' + esc(thumbUrl) + '" data-title="' + esc(page.title.replace('File:', '')) + '">';
+          html += '<img src="' + esc(thumbUrl) + '" alt="candidate" loading="lazy">';
+          html += '<span class="badge">' + (count + 1) + '</span>';
+          html += '</div>';
+          count++;
+          if (count >= 4) break;
+        }
+
+        if (count === 0) {
+          container.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted)">No suitable landscape JPEG images found. Try different terms.</span>';
+          return;
+        }
+
+        container.innerHTML = html;
+
+        // Wire click to select
+        container.querySelectorAll('.candidate').forEach(function (cand) {
+          cand.addEventListener('click', function () {
+            selectCandidate(this);
+          });
+        });
+      } catch (err) {
+        container.innerHTML = '<span style="font-size:0.78rem;color:#dc2626">Search failed: ' + err.message + '</span>';
+      }
+    }
+
+    // ---- Select a candidate image ----
+    function selectCandidate(el) {
+      var lessonId = el.dataset.lessonId;
+      var url = el.dataset.url;
+      var title = el.dataset.title;
+
+      // Highlight selected
+      el.parentNode.querySelectorAll('.candidate').forEach(function (c) { c.classList.remove('selected'); });
+      el.classList.add('selected');
+
+      // Update preview
+      var preview = document.getElementById('preview-' + lessonId);
+      preview.innerHTML = '<img src="' + url + '" alt="' + esc(title) + '" style="object-position: center 50%;">' +
+        '<span class="position-label">center 50%</span>';
+
+      // Enable slider
+      var slider = document.querySelector('.pos-slider[data-lesson-id="' + lessonId + '"]');
+      if (slider) { slider.disabled = false; slider.value = 50; }
+      document.getElementById('posval-' + lessonId).textContent = '50%';
+
+      // Store the URL for saving
+      preview.dataset.pendingUrl = url;
+      preview.dataset.pendingAlt = title;
+    }
+
+    // ---- Save position (and new image if selected) ----
+    async function savePosition(lessonId) {
+      var preview = document.getElementById('preview-' + lessonId);
+      var slider = document.querySelector('.pos-slider[data-lesson-id="' + lessonId + '"]');
+      var posValue = 'center ' + (slider ? slider.value : 50) + '%';
+
+      var body = {
+        lesson_id: lessonId,
+        hero_image_position: posValue,
+      };
+
+      // If a new candidate was selected
+      if (preview.dataset.pendingUrl) {
+        body.hero_image_url = preview.dataset.pendingUrl;
+        body.hero_image_alt = preview.dataset.pendingAlt || '';
+        body.hero_image_caption = preview.dataset.pendingAlt || '';
+        delete preview.dataset.pendingUrl;
+        delete preview.dataset.pendingAlt;
+      }
+
+      try {
+        var resp = await fetch('/api/pipeline/update-hero', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        });
+        var data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Save failed');
+
+        var toast = document.getElementById('toast-' + lessonId);
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); }, 2000);
+      } catch (err) {
+        alert('Save failed: ' + err.message);
+      }
+    }
+
+    // ---- Remove hero image ----
+    async function removeHero(lessonId) {
+      try {
+        var resp = await fetch('/api/pipeline/update-hero', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            lesson_id: lessonId,
+            hero_image_url: null,
+            hero_image_alt: null,
+            hero_image_caption: null,
+          }),
+        });
+        if (!resp.ok) throw new Error('Remove failed');
+
+        var preview = document.getElementById('preview-' + lessonId);
+        preview.innerHTML = '<div class="no-image">No hero image</div>';
+        var slider = document.querySelector('.pos-slider[data-lesson-id="' + lessonId + '"]');
+        if (slider) slider.disabled = true;
+
+        var toast = document.getElementById('toast-' + lessonId);
+        toast.textContent = 'Removed!';
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); toast.textContent = 'Saved!'; }, 2000);
+      } catch (err) {
+        alert('Remove failed: ' + err.message);
+      }
+    }
+
+    // ---- Utility ----
+    function esc(str) {
+      var div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    // ---- Init ----
+    loadSubjects();
+  })();
+  </script>
+</body>
+</html>
