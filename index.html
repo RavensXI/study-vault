@@ -30,19 +30,29 @@
       <div id="sso-error" class="login-error" style="display: none;"></div>
 
       <!-- Separator -->
-      <div class="login-separator"><span>or use a demo account</span></div>
+      <div class="login-separator"><span>student demo</span></div>
 
-      <!-- Demo accounts -->
+      <!-- Student demo accounts -->
       <div class="login-demo login-demo--sso">
         <div class="login-demo-accounts">
           <button type="button" class="login-demo-account" data-user="emma" data-pass="revision">
-            <strong>Emma Wilson</strong><span>emma &nbsp;/&nbsp; revision</span>
+            <strong>Emma Wilson</strong><span>Student dashboard</span>
           </button>
           <button type="button" class="login-demo-account" data-user="jake" data-pass="revision">
-            <strong>Jake Morris</strong><span>jake &nbsp;/&nbsp; revision</span>
+            <strong>Jake Morris</strong><span>Student dashboard</span>
           </button>
-          <button type="button" class="login-demo-account" data-user="guest" data-pass="guest">
-            <strong>Guest Student</strong><span>guest &nbsp;/&nbsp; guest</span>
+        </div>
+      </div>
+
+      <!-- Admin & teacher tools -->
+      <div class="login-separator"><span>admin &amp; teacher tools</span></div>
+      <div class="login-demo login-demo--sso">
+        <div class="login-demo-accounts">
+          <button type="button" class="login-demo-account login-demo-account--admin" data-user="emma" data-pass="revision" data-redirect="/admin/pipeline">
+            <strong>Admin</strong><span>Pipeline &middot; QA &middot; Images</span>
+          </button>
+          <button type="button" class="login-demo-account login-demo-account--teacher" data-user="emma" data-pass="revision" data-redirect="/teacher/dashboard">
+            <strong>Teacher Demo</strong><span>Analytics dashboard</span>
           </button>
         </div>
       </div>
@@ -357,6 +367,12 @@
     /* Demo account buttons: auto-fill and submit */
     document.querySelectorAll('.login-demo-account').forEach(function (btn) {
       btn.addEventListener('click', function () {
+        /* If the button has a redirect, store it so routeUser picks it up */
+        if (btn.dataset.redirect) {
+          var url = new URL(window.location);
+          url.searchParams.set('redirect', btn.dataset.redirect);
+          window.history.replaceState(null, '', url);
+        }
         document.getElementById('login-user').value = btn.dataset.user;
         document.getElementById('login-pass').value = btn.dataset.pass;
         loginForm.style.display = '';
