@@ -364,8 +364,8 @@
     // ---- Ready for generation (parsed, waiting for Claude Code) ----
     function renderReadyForGeneration(job) {
       var config = job.subject_config || {};
-      var textLen = (job.extracted_text || '').length;
-      var preview = (job.extracted_text || '').substring(0, 600).replace(/</g, '&lt;');
+      var textLen = job.extracted_text_length || (job.extracted_text || '').length;
+      var preview = (job.extracted_text_preview || (job.extracted_text || '').substring(0, 600)).replace(/</g, '&lt;');
 
       contentEl.innerHTML =
         '<div class="upload-card">' +
@@ -384,7 +384,13 @@
             '<strong>Next step:</strong> Open Claude Code and say:<br>' +
             '<code style="background:#e0e7ff;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.82rem">Generate lessons for pipeline job ' + job.id + '</code>' +
           '</div>' +
+          '<button class="btn btn-outline" id="new-upload-btn" style="margin-top:1rem">Start New Upload</button>' +
         '</div>';
+
+      document.getElementById('new-upload-btn').addEventListener('click', function () {
+        currentJob = null;
+        renderUploadForm();
+      });
     }
 
     // ---- Generation progress (polls API for updates from Claude Code) ----

@@ -18,7 +18,7 @@ module.exports = async function handler(req, res) {
     const { data: jobs } = await supabase
       .from('upload_jobs')
       .select('id, filename, status, current_phase, subject_slug, subject_config, lesson_plan, lessons_created, error_message, created_at, updated_at')
-      .in('current_phase', ['uploaded', 'parsed', 'planned', 'generating', 'complete'])
+      .in('current_phase', ['uploaded', 'parsed', 'planned', 'generating'])
       .order('created_at', { ascending: false })
       .limit(1);
 
@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
     }
     const { data, error: jobError } = await supabase
       .from('upload_jobs')
-      .select('id, filename, status, current_phase, subject_slug, subject_config, lesson_plan, lessons_created, error_message, created_at, updated_at')
+      .select('id, filename, status, current_phase, subject_slug, subject_config, lesson_plan, lessons_created, error_message, extracted_text, created_at, updated_at')
       .eq('id', job_id)
       .single();
 
@@ -57,6 +57,13 @@ module.exports = async function handler(req, res) {
   const diagramsComplete = steps?.filter(s => s.diagrams_done).length || 0;
   const narrationComplete = steps?.filter(s => s.narration_done).length || 0;
   const allContentDone = totalSteps > 0 && contentComplete === totalSteps;
+
+  // Send text length + preview, not the full extracted text
+  const textLen = job.extracted_text ? job.extracted_text.length : 0;
+  const textPreview = job.extracted_text ? job.extracted_text.substring(0, 600) : '';
+  delete job.extracted_text;
+  job.extracted_text_length = textLen;
+  job.extracted_text_preview = textPreview;
 
   return res.status(200).json({
     job,
