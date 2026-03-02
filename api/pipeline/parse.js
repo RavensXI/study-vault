@@ -2,6 +2,7 @@ const { requireTeacher } = require('./_lib/auth');
 const { supabase } = require('./_lib/supabase');
 const JSZip = require('jszip');
 const { parseStringPromise } = require('xml2js');
+const pdfParse = require('pdf-parse');
 
 /**
  * Extract text from XML nodes by walking the tree for text elements.
@@ -136,7 +137,7 @@ module.exports = async function handler(req, res) {
       const ext = fileName.split('.').pop().toLowerCase();
 
       // Only parse supported formats
-      if (!['pptx', 'docx'].includes(ext)) continue;
+      if (!['pptx', 'docx', 'pdf', 'txt'].includes(ext)) continue;
 
       const filePath = folderPrefix + '/' + fileName;
       const { data: fileData, error: fileError } = await supabase.storage
@@ -150,22 +151,30 @@ module.exports = async function handler(req, res) {
 
       const buffer = Buffer.from(await fileData.arrayBuffer());
 
-      if (ext === 'pptx') {
-        const text = await parsePptx(buffer, fileName);
-        allText.push(text);
-        // Count slides from the output
-        const slideCount = (text.match(/--- Slide \d+ ---/g) || []).length;
-        totalSlides += slideCount;
-      } else if (ext === 'docx') {
-        const text = await parseDocx(buffer, fileName);
-        allText.push(text);
+      try {
+        if (ext === 'pptx') {
+          const text = await parsePptx(buffer, fileName);
+          allText.push(text);
+          const slideCount = (text.match(/--- Slide \d+ ---/g) || []).length;
+          totalSlides += slideCount;
+        } else if (ext === 'docx') {
+          const text = await parseDocx(buffer, fileName);
+          allText.push(text);
+        } else if (ext === 'pdf') {
+          const result = await pdfParse(buffer);
+          allText.push(`=== FILE: ${fileName} (${result.numpages} pages) ===\n\n${result.text}`);
+        } else if (ext === 'txt') {
+          allText.push(`=== FILE: ${fileName} ===\n\n${buffer.toString('utf-8')}`);
+        }
+      } catch (parseErr) {
+        allText.push(`=== FILE: ${fileName} ===\n\n(Parse error: ${parseErr.message})`);
       }
 
       filesParsed++;
     }
 
     if (filesParsed === 0) {
-      throw new Error('No .pptx or .docx files found to parse. Upload PowerPoint or Word files.');
+      throw new Error('No supported files found. Upload .pptx, .docx, .pdf, or .txt files.');
     }
 
     const extractedText = allText.join('\n\n\n');
