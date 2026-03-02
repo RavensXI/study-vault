@@ -232,6 +232,7 @@ function initPracticeQuestions() {
   function getGuideUrl(type) {
     if (!type) return null;
     var guides = [
+      // History (AQA) — subject-specific, matched first
       ['Describe two', 'describe-two.html'],
       ['Write an account', 'write-an-account.html'],
       ['Explain the significance', 'explain-significance.html'],
@@ -241,6 +242,18 @@ function initPracticeQuestions() {
       ['Which had more impact', 'which-had-more-impact.html'],
       ['How far do you agree', 'factor-essay.html'],
       ['Has ', 'factor-essay.html'],
+      // Drama (OCR) — subject-specific
+      ['Costume', 'costume-design.html'],
+      ['Voice', 'voice-skills.html'],
+      ['Physicality', 'physicality.html'],
+      ['Movement', 'physicality.html'],
+      ['Staging', 'staging.html'],
+      ['Lighting', 'design.html'],
+      ['Sound', 'design.html'],
+      ['Director', 'director.html'],
+      ['Set Design', 'set-design.html'],
+      ['Section B', 'section-b-essay.html'],
+      // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],
       ['Explain one way', 'explain-one-way.html'],
@@ -251,6 +264,8 @@ function initPracticeQuestions() {
       ['Identify', 'identify-state.html'],
       ['State', 'identify-state.html'],
       ['Extended response', 'extended-response.html'],
+      ['Extended Explanation', 'director.html'],
+      ['Analyse', 'design.html'],
       ['Describe', 'describe.html'],
       ['Explain', 'explain.html']
     ];
