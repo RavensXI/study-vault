@@ -152,19 +152,16 @@
         return;
       }
 
-      // Check for existing jobs (resume support)
-      var jobs = await sb.from('upload_jobs')
-        .select('id, current_phase, subject_slug, subject_config, filename, lesson_plan, extracted_text')
-        .in('current_phase', ['uploaded', 'parsed', 'planned', 'generating', 'complete'])
-        .order('created_at', { ascending: false })
-        .limit(1);
-
-      if (jobs.data && jobs.data.length > 0) {
-        currentJob = jobs.data[0];
-        await resumeJob(currentJob);
-      } else {
-        renderUploadForm();
-      }
+      // Check for existing jobs via API (bypasses RLS for demo users)
+      try {
+        var jobsResult = await apiCall('/api/pipeline/status?latest=1');
+        if (jobsResult.job) {
+          currentJob = jobsResult.job;
+          await resumeJob(currentJob);
+          return;
+        }
+      } catch (e) {}
+      renderUploadForm();
     }
 
     // ---- API helper ----
@@ -329,8 +326,9 @@
           uploadBtn.textContent = 'Parsing files...';
           var parseResult = await apiCall('/api/pipeline/parse', { job_id: job.job_id });
 
-          var refetch = await sb.from('upload_jobs').select('*').eq('id', job.job_id).single();
-          currentJob = refetch.data;
+          // Fetch job via API (bypasses RLS for demo users)
+          var status = await apiCall('/api/pipeline/status?job_id=' + job.job_id);
+          currentJob = status.job;
           renderReadyForGeneration(currentJob);
         } catch (err) {
           contentEl.innerHTML += '<div class="error-msg">' + err.message + '</div>';
@@ -389,16 +387,11 @@
         '</div>';
     }
 
-    // ---- Generation progress (polls Supabase for updates from Claude Code) ----
+    // ---- Generation progress (polls API for updates from Claude Code) ----
     async function renderProgress(job) {
-      // Fetch pipeline steps
-      var stepsResult = await sb.from('pipeline_steps')
-        .select('*')
-        .eq('job_id', job.id)
-        .order('unit_slug')
-        .order('lesson_number');
-
-      var steps = stepsResult.data || [];
+      // Fetch pipeline steps via API (bypasses RLS)
+      var status = await apiCall('/api/pipeline/status?job_id=' + job.id);
+      var steps = status.steps || [];
       var total = steps.length;
       var contentDone = steps.filter(function (s) { return s.content_done; }).length;
       var pct = total > 0 ? Math.round((contentDone / total) * 100) : 0;
@@ -442,12 +435,10 @@
         reviewBtn.addEventListener('click', async function () {
           this.disabled = true;
           this.textContent = 'Sending to review...';
-          for (var i = 0; i < steps.length; i++) {
-            if (steps[i].lesson_id) {
-              await sb.from('lessons').update({ status: 'review' }).eq('id', steps[i].lesson_id);
-            }
-          }
-          await sb.from('upload_jobs').update({ current_phase: 'complete' }).eq('id', job.id);
+          await apiCall('/api/pipeline/approve-plan', {
+            job_id: job.id,
+            action: 'send_to_review',
+          });
           this.textContent = 'Sent to review!';
         });
       }
@@ -455,9 +446,8 @@
       // Auto-refresh every 5s if not all done
       if (!allDone) {
         if (pollTimer) clearTimeout(pollTimer);
-        pollTimer = setTimeout(async function () {
-          var refetch = await sb.from('upload_jobs').select('*').eq('id', job.id).single();
-          if (refetch.data) renderProgress(refetch.data);
+        pollTimer = setTimeout(function () {
+          renderProgress(job);
         }, 5000);
       }
     }

@@ -13,9 +13,27 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { job_id, plan, colors } = req.body;
+  const { job_id, plan, colors, action } = req.body;
   if (!job_id) {
     return res.status(400).json({ error: 'Missing job_id' });
+  }
+
+  // Handle "send to review" action
+  if (action === 'send_to_review') {
+    const { data: steps } = await supabase
+      .from('pipeline_steps')
+      .select('lesson_id, content_done')
+      .eq('job_id', job_id);
+
+    let count = 0;
+    for (const s of (steps || [])) {
+      if (s.content_done && s.lesson_id) {
+        await supabase.from('lessons').update({ status: 'review' }).eq('id', s.lesson_id);
+        count++;
+      }
+    }
+    await supabase.from('upload_jobs').update({ current_phase: 'complete' }).eq('id', job_id);
+    return res.status(200).json({ status: 'sent_to_review', lessons_count: count });
   }
 
   // Fetch the upload job

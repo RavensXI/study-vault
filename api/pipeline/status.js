@@ -9,20 +9,37 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { job_id } = req.query;
-  if (!job_id) {
-    return res.status(400).json({ error: 'Missing job_id query parameter' });
-  }
+  const { job_id, latest } = req.query;
 
-  // Fetch the upload job
-  const { data: job, error: jobError } = await supabase
-    .from('upload_jobs')
-    .select('id, filename, status, current_phase, subject_slug, subject_config, lesson_plan, lessons_created, error_message, created_at, updated_at')
-    .eq('id', job_id)
-    .single();
+  let job;
 
-  if (jobError || !job) {
-    return res.status(404).json({ error: 'Upload job not found' });
+  if (latest) {
+    // Find the most recent active job
+    const { data: jobs } = await supabase
+      .from('upload_jobs')
+      .select('id, filename, status, current_phase, subject_slug, subject_config, lesson_plan, lessons_created, error_message, created_at, updated_at')
+      .in('current_phase', ['uploaded', 'parsed', 'planned', 'generating', 'complete'])
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    job = jobs?.[0] || null;
+    if (!job) {
+      return res.status(200).json({ job: null, steps: [], summary: { total: 0 } });
+    }
+  } else {
+    if (!job_id) {
+      return res.status(400).json({ error: 'Missing job_id query parameter' });
+    }
+    const { data, error: jobError } = await supabase
+      .from('upload_jobs')
+      .select('id, filename, status, current_phase, subject_slug, subject_config, lesson_plan, lessons_created, error_message, created_at, updated_at')
+      .eq('id', job_id)
+      .single();
+
+    if (jobError || !data) {
+      return res.status(404).json({ error: 'Upload job not found' });
+    }
+    job = data;
   }
 
   // Fetch pipeline steps
