@@ -1,5 +1,7 @@
 # Questions Pipeline — Practice Questions & Knowledge Checks
 
+> **API Integration:** This document is injected into the content generation API call. It defines question formats, mark allocations per exam board, and the getGuideUrl() mapping that links question types to exam technique guides.
+
 Reference for building practice questions and knowledge checks on lesson pages.
 
 ---

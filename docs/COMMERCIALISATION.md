@@ -194,4 +194,267 @@ Data flywheel: every school that uploads resources teaches the AI what good teac
 | No school branding | School-branded |
 | Major specs only | Exact spec match guaranteed |
 | No login required | Login + progress tracking |
+| Copy-to-clipboard AI marking | In-app AI marking (examiner-calibrated) |
 | Community support | Direct support |
+
+---
+
+## Planned Feature: In-App AI Marking
+
+### Current state
+Practice questions have "AI Mark My Answer" button → copies question + mark scheme + student answer to clipboard → student pastes into ChatGPT/Claude. Works but zero friction, zero data capture.
+
+### Planned upgrade
+Direct in-app AI marking via Vercel Serverless Function (`/api/mark`). One click → examiner-quality feedback appears inline.
+
+### Cost per marking request
+~500–800 tokens in, ~300–500 out.
+
+| Model | Cost/request | 28 students × 10/month × 10 months |
+|---|---|---|
+| Claude Haiku | ~£0.0002 | ~£0.56/year per class |
+| GPT-4o-mini | ~£0.0003 | ~£0.84/year per class |
+| Claude Sonnet | ~£0.002 | ~£5.60/year per class |
+
+At 500 schools: ~£300–400/year total AI spend. Essentially free.
+
+### Architecture
+```
+Student clicks "AI Mark" → POST /api/mark
+  → Vercel function validates auth
+  → Checks monthly usage limit (Supabase query)
+  → Calls LLM with examiner-calibrated prompt
+  → Saves request + response to Supabase
+  → Returns structured feedback to browser
+```
+
+### Feedback structure
+- **Marks awarded:** e.g. 3/4
+- **Strengths:** What the student got right, with specifics
+- **Gaps:** What's missing for full marks
+- **Examiner tip:** Links to relevant exam technique guide
+
+### Usage limits
+10–20 markings/month per student (free with Premium subscription). Encourages quality over spam. Unlimited marking as a paid add-on (£50/year).
+
+### Data value for teacher dashboard
+Every marking attempt is logged — teachers can see:
+- Which questions students are attempting
+- Average scores on extended writing
+- Weak areas in exam technique
+- Improvement over time
+
+This data is uncapturable in the current clipboard model.
+
+### Supabase table needed
+```sql
+CREATE TABLE ai_marking_requests (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id text NOT NULL,
+  lesson_slug text,
+  subject text NOT NULL,
+  question_text text NOT NULL,
+  mark_scheme text NOT NULL,
+  student_answer text NOT NULL,
+  ai_feedback jsonb NOT NULL,
+  model_used text,
+  tokens_used int,
+  created_at timestamptz DEFAULT now()
+);
+CREATE INDEX idx_marking_user_month ON ai_marking_requests (user_id, created_at);
+```
+
+### Build effort
+1. One Vercel serverless function (`/api/mark.js`, ~80 lines)
+2. One Supabase table (above)
+3. System prompts per exam board (AQA, Edexcel, OCR)
+4. Frontend: replace clipboard button with AI mark button + inline feedback display
+5. Usage counter component ("7 of 10 markings remaining")
+
+---
+
+## Planned Feature: Submit to Teacher (Marking Queue)
+
+### Concept
+Students submit practice answers directly to their teacher via the platform. Replaces the current "copy to clipboard" flow with an in-platform submission that lands in the teacher dashboard.
+
+Two buttons side by side on each practice question:
+- **"AI Mark"** — instant AI feedback (for independent revision, evenings/weekends)
+- **"Submit to Teacher"** — goes to teacher's marking queue (for homework, timed practice, answers that matter)
+
+### Teacher Marking Queue (dashboard section)
+- Submissions arrive sorted by date, filterable by class/student/question
+- Each shows: student name, question text, mark allocation, student's answer
+- Teacher writes feedback + marks awarded → "Return to Student"
+- Student sees feedback next login (notification badge on practice section)
+
+### Key workflows
+
+**1. Set assignments:** Teacher selects a question from any lesson → sets a due date → students see it flagged on their lesson page → submit via the platform. Teacher gets all 28 answers in one view.
+
+**2. Bulk marking:** When 25 students answer the same question, show all answers side by side. Much faster to mark than isolated submissions.
+
+**3. AI-assisted marking:** AI pre-marks each submission (marks + feedback draft). Teacher reviews, adjusts marks, adds personalised comments. Cuts marking time by ~70% while keeping human quality. Students see "Marked by Mr Shaun" not "Marked by AI."
+
+### Data generated
+- Which students are doing practice (not just visiting lessons)
+- Extended writing quality over time (teacher-validated scores)
+- Which questions teachers are setting (popular = worth improving)
+- Teacher marking turnaround times
+- Comparison: AI marks vs teacher marks (calibration data)
+
+### Supabase tables needed
+```sql
+CREATE TABLE student_submissions (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  student_id text NOT NULL,
+  teacher_id text,               -- NULL if unassigned
+  class_id uuid REFERENCES classes(id),
+  lesson_slug text,
+  subject text NOT NULL,
+  question_text text NOT NULL,
+  mark_scheme text NOT NULL,
+  max_marks int NOT NULL,
+  student_answer text NOT NULL,
+  -- AI pre-marking (optional)
+  ai_marks int,
+  ai_feedback jsonb,
+  -- Teacher marking
+  teacher_marks int,
+  teacher_feedback text,
+  marked_at timestamptz,
+  -- Assignment context (NULL if voluntary submission)
+  assignment_id uuid,
+  status text DEFAULT 'pending', -- pending | marked | returned
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE assignments (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  teacher_id text NOT NULL,
+  class_id uuid REFERENCES classes(id),
+  lesson_slug text,
+  subject text NOT NULL,
+  question_text text NOT NULL,
+  mark_scheme text NOT NULL,
+  max_marks int NOT NULL,
+  due_date timestamptz,
+  created_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX idx_submissions_teacher ON student_submissions (teacher_id, status);
+CREATE INDEX idx_submissions_student ON student_submissions (student_id, created_at);
+```
+
+### Commercial value
+This is the feature that makes StudyVault indispensable for teachers, not just students. It replaces exercise books for extended writing practice. Once a teacher is setting homework through the platform and marking in the dashboard, switching away means losing their entire marking history and workflow. Strong retention driver.
+
+---
+
+## Content Revisions & School Customisation
+
+### Types of change (by frequency)
+
+| Frequency | Examples |
+|---|---|
+| **Rare** (every 5–8 years) | Exam board switch, complete spec change |
+| **Occasional** (1–2/year) | Swapping optional topics within a spec, restructuring unit order |
+| **Frequent** (ongoing) | Rewording a paragraph, adding a mnemonic, updating a teaching method for a question type |
+
+### Why generation credits are the wrong model
+- Creates anxiety about spending them — teachers hesitate to request changes
+- "What counts as one generation?" is impossible to define fairly (a paragraph fix vs a full subject rebuild)
+- Punishes the most engaged schools — the teachers who care most about quality hit the limit first
+
+### Three-tier approach instead
+
+#### Tier 1: Self-Service Edits (unlimited, free with Premium)
+
+A lightweight CMS layer on top of generated content. Teachers click "Edit" on any lesson and make changes directly:
+
+- Edit/reword text within a lesson
+- Add mnemonics, teacher notes, school-specific context
+- Reorder content sections
+- Toggle sections on/off ("hide this collapsible for my students")
+- Update exam technique guides with their preferred method/approach
+
+Changes are saved **per-school** — the base content stays the same, the school's customisations overlay on top. Other schools using the same subject still see the original.
+
+**Handles ~80% of change requests. Costs nothing. Zero involvement from us.**
+
+#### Tier 2: Topic Swaps & Partial Rebuilds (included in Premium, queued)
+
+When a school drops a topic and picks a different one, or needs new content for a different optional unit:
+
+1. Teacher submits request via dashboard ("Switching from America to Cold War")
+2. Uploads their resources for the new topic
+3. AI generates new content → automated QC runs
+4. Teacher reviews and approves (or flags issues)
+5. Goes live
+
+Included in Premium — no extra charge. Processed within ~2 weeks during term, faster during holidays. Most schools need 2–3 of these per year at most.
+
+#### Tier 3: Full Subject Rebuild (one-off fee or included in higher tiers)
+
+Complete exam board switch or new spec rollout — essentially re-onboarding that subject:
+
+- Full regeneration from new resources
+- New diagrams, narration, questions
+- Full QA cycle
+
+Pricing options:
+- **Included once/year in Unlimited tier** — incentivises top-tier adoption
+- **£150–200 one-off on lower tiers** — cheaper than initial subject cost (infrastructure exists)
+- **Free when triggered by an actual spec change** — if AQA issues a new History spec, we regenerate for all schools on that spec simultaneously. Part of the service.
+
+The spec-change guarantee is a major selling point: *"When the spec changes, we handle it. Your revision site updates automatically."* No other revision resource does this.
+
+### Per-school customisation architecture
+
+Data model supports a layered override system:
+
+```
+Base content (shared, maintained by StudyVault)
+       ↓
+School-level overrides (per-school customisations)
+       ↓
+What the student sees (merged at render time)
+```
+
+```sql
+CREATE TABLE school_content_overrides (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  school_id uuid REFERENCES schools(id) NOT NULL,
+  lesson_id uuid REFERENCES lessons(id),
+  guide_page_id uuid REFERENCES guide_pages(id),
+  -- What's being overridden
+  override_type text NOT NULL,    -- 'replace_section' | 'hide_section' | 'append' | 'teacher_note'
+  target_selector text,           -- CSS-style selector or section ID within content
+  original_content text,          -- snapshot of what was replaced (for diffing)
+  custom_content text,            -- the school's replacement/addition
+  edited_by text NOT NULL,        -- teacher profile ID
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+CREATE INDEX idx_overrides_school_lesson ON school_content_overrides (school_id, lesson_id);
+```
+
+**Benefits of this approach:**
+- One canonical version of each lesson maintained centrally
+- Schools customise without affecting anyone else
+- When base content updates (spec change), school overrides are preserved where they don't conflict
+- Analytics: which parts of lessons are schools commonly changing? Signal that base content may need improving.
+- School feels ownership over "their" version while we maintain the foundation
+
+### Summary table
+
+| Change type | How handled | Cost to school | Our effort |
+|---|---|---|---|
+| Text tweaks, mnemonics, rewordings | Self-service editor | Free (unlimited) | None |
+| Toggle/reorder sections | Self-service editor | Free (unlimited) | None |
+| Teacher notes / school-specific additions | Self-service editor | Free (unlimited) | None |
+| New optional topic (upload resources) | Queued generation | Free with Premium | Low (automated) |
+| New exam technique method | Self-service or queued | Free with Premium | Low |
+| Full exam board switch | Queued generation | Included in Unlimited / £150 one-off | Medium |
+| Spec change (exam board issues new spec) | We regenerate for all schools | Free — part of the service | Medium (batch) |

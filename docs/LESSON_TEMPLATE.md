@@ -1,5 +1,7 @@
 # Lesson Template — Building Lesson Pages
 
+> **API Integration:** This document is injected into the content generation API call as structural reference. It tells the LLM what HTML components are available and how to use them.
+
 Reference for building new lesson pages. Copy `history/conflict-tension/lesson-01.html` as the canonical template.
 
 ---

@@ -1,10 +1,42 @@
 # Lesson Generation Prompt — System + User Template
 
-The complete prompt used to generate each lesson. The system prompt stays constant across all lessons and subjects. The user message is assembled per-lesson from the spec, PPT content, past papers, and lesson plan.
+The prompt for content generation (Steps 1 and 2 of the pipeline). Other pipeline steps use their own specialist docs as prompts — see the assembly table below.
 
-For the commercial product, this is called via the Claude API. For now (Max plan), Claude Code uses it as internal guidance.
+**Lessons learned from Drama test run (March 2026):** This prompt was significantly expanded after the first end-to-end pipeline test. The original version missed: lesson descriptions for browse cards, past paper extraction, hero image captions, related media deduplication, exam/revision technique guide generation, question type to guide page mapping, and subject activation steps. All of these are now included.
 
-**Lessons learned from Drama test run (March 2026):** This prompt was significantly expanded after the first end-to-end pipeline test. The original version missed: lesson descriptions for browse cards, past paper extraction, hero image captions, related media deduplication, exam/revision technique guide generation, question type → guide page mapping, and subject activation steps. All of these are now included.
+---
+
+## Prompt Assembly Architecture
+
+Each pipeline step assembles its prompt by combining:
+1. The step-specific prompt (this file, or the relevant specialist doc)
+2. The source material (PPT text, spec, past papers) from Supabase
+3. A structural example (existing lesson HTML)
+
+The orchestration code (API route or Claude Code) reads the `.md` files from disk and injects them into the API message. The model sees the full context — it cannot read files itself.
+
+### Which docs are injected per step
+
+| Step | System prompt source | Also injected |
+|------|---------------------|---------------|
+| Plan | GENERATION_PROMPT.md (Planning section) | Spec, PPT text |
+| Content | GENERATION_PROMPT.md (Content section) | LESSON_TEMPLATE.md, QUESTIONS_PIPELINE.md, spec extract, PPT extract, past papers |
+| Diagrams | DIAGRAM_PIPELINE.md | Lesson content summary |
+| Hero Images | (no prompt — Wikimedia API search) | — |
+| Related Media | RELATED_MEDIA_PIPELINE.md | Lesson title + topic |
+| Narration | (no prompt — Azure Speech API) | NARRATION_PIPELINE.md for config |
+| Exam Technique Guides | GENERATION_PROMPT.md (Exam Technique section) | Past paper mark schemes |
+| Revision Technique Guides | GENERATION_PROMPT.md (Revision Technique section) | — |
+
+### Specialist docs (single source of truth)
+
+- **`LESSON_TEMPLATE.md`** — HTML components, page structure, path conventions. Injected into Content step.
+- **`QUESTIONS_PIPELINE.md`** — Question formats, mark allocations, `getGuideUrl()` mapping. Injected into Content step.
+- **`DIAGRAM_PIPELINE.md`** — 4-step pictorial isotype diagram process. Used as the Gemini prompt for Step 3.
+- **`RELATED_MEDIA_PIPELINE.md`** — Sidebar media curation, categories, link conventions. Used as the Claude prompt for Step 5.
+- **`NARRATION_PIPELINE.md`** — Azure Speech config, voice selection, R2 hosting. Read by scripts, not sent to an LLM.
+
+Do NOT duplicate content from these docs into this file. Reference them by name.
 
 ---
 
@@ -40,7 +72,7 @@ DESCRIPTION (required — used on browse page lesson cards):
 
 CONTENT HTML RULES:
 - Every visible element gets a sequential data-narration-id attribute: n1, n2, n3, etc. No gaps, no skipping.
-- Use these HTML components:
+- Use the HTML components defined in LESSON_TEMPLATE.md (injected separately). Key components:
 
   Headings:
   <h2 data-narration-id="n1">Section heading</h2>
@@ -97,6 +129,7 @@ PRACTICE QUESTIONS:
 - The "marks" field is the MARK SCHEME as a STRING (never a number). Include level descriptors or bullet points showing what earns marks.
 - The "type" field MUST use one of the registered question type names for this exam board (see QUESTION TYPE MAPPING below). Never invent new type names — the type string is used to link to exam technique guide pages.
 - Questions must test content from THIS specific lesson.
+- See QUESTIONS_PIPELINE.md (injected separately) for full question format rules, mark allocations per exam board, and getGuideUrl() mapping.
 
   PAST PAPER QUESTIONS:
   If past papers are provided in the source material, you MUST:
@@ -260,35 +293,45 @@ Do NOT include data-narration-id attributes (guides don't have narration).
 
 ---
 
-## Related Media Prompt
+## Revision Technique Guide Prompt
 
-After content generation, related media is researched per lesson. Requires web search capability.
+Standard revision technique guides adapted per subject. One API call per guide. Hub index generated separately.
 
 ```
-Research external learning resources for a GCSE revision lesson.
+You are generating a revision technique guide page for StudyVault, a GCSE revision website.
 
-SUBJECT: {subject_name} ({exam_board})
-LESSON: {lesson_title}
-TOPIC: {brief topic description}
+SUBJECT: {subject_name} ({exam_board} {spec_code})
+TECHNIQUE: {technique_name}
 
-Find real, specific resources in these categories (omit empty ones, max 3 items per category):
+Generate a guide page as HTML (no JSON wrapper — just content_html) that includes:
 
-1. Podcasts — specific episode links (never channel homepages)
-2. Videos & Channels — YouTube videos about this specific topic
-3. Movies — relevant films on JustWatch UK (age-appropriate: PG, 12A, or 15 only)
-4. TV Shows — relevant series on JustWatch UK
-5. Documentaries — relevant docs on JustWatch UK
-6. Study Tools — BBC Bitesize pages, Seneca Learning, subject-specific revision sites
+1. WHAT IT IS: Explain the technique in plain language for a 15-16 year old.
+2. WHY IT WORKS: Brief cognitive science explanation (1-2 paragraphs max).
+3. HOW TO DO IT: Step-by-step instructions with subject-specific examples.
+4. EXAMPLE: A worked example using real content from this subject (in a collapsible section).
+5. COMMON MISTAKES: 2-3 bullet points of what students get wrong.
+6. QUICK START: A "try it now" prompt — one concrete action the student can do immediately.
 
-RULES:
-- Every link must go to SPECIFIC content (episode page, video, movie page) — NEVER a channel homepage or generic page.
-- DEDUPLICATE across lessons: if a resource appears in a previous lesson for this subject, do NOT include it again. Each lesson should have mostly unique resources.
-- Verify links are real and accessible.
-- All content must be age-appropriate for 15-16 year olds.
+Use the same HTML components as lessons: <h2>, <p>, <div class="key-fact">, <div class="collapsible">, etc.
+Do NOT include data-narration-id attributes (guides don't have narration).
 
-Return JSON: [{ "category": "...", "emoji": "🎬", "items": [{ "title": "...", "url": "...", "description": "..." }] }]
-Category emojis: Podcasts 🎙️, Videos & Channels 🎬, Movies 🎥, TV Shows 📺, Documentaries 🎞️, Study Tools 📚
+Standard techniques (adapt examples for each subject):
+- Retrieval Practice
+- Spaced Repetition
+- Interleaving
+- Dual Coding
+- Elaborative Interrogation
+- Knowledge Organisers
+- Timed Exam Practice
+
+Add one subject-specific technique where appropriate (e.g. "Practising Calculations" for Business).
 ```
+
+---
+
+## Related Media
+
+Related media curation is handled by `RELATED_MEDIA_PIPELINE.md`. That document contains the full prompt, category structure, HTML patterns, and link conventions. The orchestration code reads it and injects it into the Claude API call for Step 5.
 
 ---
 
@@ -298,13 +341,16 @@ Category emojis: Podcasts 🎙️, Videos & Channels 🎬, Movies 🎥, TV Shows
 |-------|-----------------|---------------|
 | System prompt — quality standards | Readability target, source fidelity rules | Edit this file |
 | System prompt — output format | HTML components, narration IDs, word count targets | Edit this file |
-| System prompt — question rules | Mark scheme format, question count, past paper extraction | Edit this file |
+| System prompt — question rules | Mark scheme format, question count, past paper extraction | Edit this file or QUESTIONS_PIPELINE.md |
 | Planning prompt — lesson structure | How lessons are grouped, weighted, and named | Edit this file |
 | User message — spec extract | What spec content is fed per lesson | Improve spec mapping in the planning step |
 | User message — source material | Which PPT slides map to which lesson | Improve the planning step's section markers |
-| User message — past papers | Which past paper questions are fed per lesson | Improve past paper → lesson mapping |
+| User message — past papers | Which past paper questions are fed per lesson | Improve past paper to lesson mapping |
 | User message — structural example | Which existing lesson is used as format reference | Pick a different exemplar lesson |
 | Question type config | Mark allocations per exam board | Edit the QUESTION_SPECS and QUESTION_TYPE_NAMES configs |
+| Diagram generation | Pictorial style, colour palettes, QC process | Edit DIAGRAM_PIPELINE.md |
+| Related media curation | Categories, link rules, deduplication | Edit RELATED_MEDIA_PIPELINE.md |
+| Narration config | Voices, format, R2 hosting | Edit NARRATION_PIPELINE.md |
 
 ---
 
@@ -345,27 +391,27 @@ const QUESTION_TYPE_NAMES = {
 Run after every lesson is generated, before writing to Supabase:
 
 ```
-✓ JSON is valid and parseable
-✓ All required keys present: description, content_html, exam_tip_html, conclusion_html, practice_questions, knowledge_checks, glossary_terms
-✓ description is 60-100 characters
-✓ content_html has sequential data-narration-id (n1, n2, n3... no gaps)
-✓ At least 2 <div class="key-fact"> in content_html
-✓ At least 2 <div class="collapsible"> in content_html
-✓ At least 3 <dfn class="term"> in content_html
-✓ Exactly 6 practice_questions with fields: text, type, marks (all strings)
-✓ Every practice question "type" matches a registered question_type_name
-✓ Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)
-✓ All glossary_terms match <dfn> elements in content_html
-✓ No <h1> tags in content_html
-✓ HTML entities used correctly (&amp; &mdash; &rsquo; &ldquo; &rdquo;)
-✓ Word count 800-1500 (excluding HTML tags)
+ JSON is valid and parseable
+ All required keys present: description, content_html, exam_tip_html, conclusion_html, practice_questions, knowledge_checks, glossary_terms
+ description is 60-100 characters
+ content_html has sequential data-narration-id (n1, n2, n3... no gaps)
+ At least 2 <div class="key-fact"> in content_html
+ At least 2 <div class="collapsible"> in content_html
+ At least 3 <dfn class="term"> in content_html
+ Exactly 6 practice_questions with fields: text, type, marks (all strings)
+ Every practice question "type" matches a registered question_type_name
+ Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)
+ All glossary_terms match <dfn> elements in content_html
+ No <h1> tags in content_html
+ HTML entities used correctly (&amp; &mdash; &rsquo; &ldquo; &rdquo;)
+ Word count 800-1500 (excluding HTML tags)
 ```
 
 ---
 
 ## Full Pipeline Checklist (one-shot subject build)
 
-Everything that must be generated for a complete subject:
+Everything that must be generated for a complete subject. Steps reference their specialist docs.
 
 **Planning:**
 - [ ] Spec downloaded/loaded from library
@@ -374,7 +420,7 @@ Everything that must be generated for a complete subject:
 - [ ] Question type names defined and registered in getGuideUrl()
 - [ ] CSS colour classes added to style.css (light + dark mode)
 
-**Per-lesson content:**
+**Per-lesson content (this file's prompts):**
 - [ ] Content HTML with narration IDs
 - [ ] Practice questions (with past paper tags where available)
 - [ ] Knowledge checks (2 MCQ + 2 fill + 1 match)
@@ -383,12 +429,12 @@ Everything that must be generated for a complete subject:
 - [ ] Conclusion / key takeaways
 - [ ] Lesson description for browse cards
 
-**Per-lesson assets (parallel):**
+**Per-lesson assets (parallel — see specialist docs):**
 - [ ] Hero image (Wikimedia Commons, landscape, >50KB, with caption + alt text)
-- [ ] Related media (deduplicated across lessons, verified links)
-- [ ] Diagram (where data/concept justifies it)
+- [ ] Related media (see RELATED_MEDIA_PIPELINE.md)
+- [ ] Diagram (see DIAGRAM_PIPELINE.md)
 
-**Per-lesson narration (after content + diagrams finalised):**
+**Per-lesson narration (after content + diagrams — see NARRATION_PIPELINE.md):**
 - [ ] TTS clips for every narration ID (Azure Speech, Ollie odd / Bella even)
 - [ ] MP3s uploaded to R2
 - [ ] Narration manifest with R2 URLs and durations

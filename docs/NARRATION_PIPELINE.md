@@ -1,5 +1,7 @@
 # Narration Pipeline — TTS
 
+> **API Integration:** This document is read by the orchestration code to configure Azure Speech API calls. It is not sent to an LLM — narration is deterministic TTS generation.
+
 Process for generating text-to-speech narration for lesson pages.
 
 ---

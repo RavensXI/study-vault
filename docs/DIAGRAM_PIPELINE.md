@@ -1,5 +1,7 @@
 # Diagram Pipeline — Pictorial Isotype Infographics
 
+> **API Integration:** This document is read by the orchestration code and injected into the Gemini API call for diagram generation. It serves as both human documentation and machine-readable instructions.
+
 Subject-agnostic process for creating data-driven pictorial infographics for lesson pages. Established with Sport Science, reusable for all future subjects.
 
 ---

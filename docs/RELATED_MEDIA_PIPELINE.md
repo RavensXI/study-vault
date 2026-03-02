@@ -1,5 +1,7 @@
 # Related Media Pipeline — Curating Sidebar Content
 
+> **API Integration:** This document is read by the orchestration code and injected into the Claude API call for related media curation. The Related Media prompt section below is sent as the system prompt.
+
 Subject-agnostic process for populating the Related Media sidebar on lesson pages. The goal is to give students genuinely enjoyable content that reinforces learning without feeling like revision.
 
 ---
