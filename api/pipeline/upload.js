@@ -19,20 +19,23 @@ module.exports = async function handler(req, res) {
   // Generate a slug from the subject name
   const subject_slug = subject_name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
-  // Create the upload_job record
+  // Build the record — school_id and uploaded_by may be null for demo users
+  const record = {
+    filename,
+    file_hash: file_hash || null,
+    status: 'pending',
+    subject_slug,
+    subject_config: { subject_name, exam_board, spec_code },
+    ppt_storage_path: storage_path,
+    current_phase: 'uploaded',
+  };
+  if (auth.profile.school_id) record.school_id = auth.profile.school_id;
+  // Only set uploaded_by if it's a valid UUID (not a demo username)
+  if (auth.profile.id && auth.profile.id.length > 10) record.uploaded_by = auth.profile.id;
+
   const { data: job, error } = await supabase
     .from('upload_jobs')
-    .insert({
-      school_id: auth.profile.school_id,
-      uploaded_by: auth.profile.id,
-      filename,
-      file_hash: file_hash || null,
-      status: 'pending',
-      subject_slug,
-      subject_config: { subject_name, exam_board, spec_code },
-      ppt_storage_path: storage_path,
-      current_phase: 'uploaded',
-    })
+    .insert(record)
     .select('id, status, current_phase')
     .single();
 
