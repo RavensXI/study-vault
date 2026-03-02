@@ -16,6 +16,15 @@
     .qa-controls { display: flex; gap: 0.75rem; align-items: center; }
     .qa-controls select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
 
+    /* Tabs */
+    .qa-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid #e5e7eb; }
+    .qa-tab { padding: 0.6rem 1.25rem; font-size: 0.875rem; font-weight: 600; border: none; background: none; cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; }
+    .qa-tab.active { color: #7c3aed; border-bottom-color: #7c3aed; }
+    .qa-tab:hover:not(.active) { color: var(--text-color); }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
     .lesson-row { background: white; border-radius: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 1.25rem; overflow: hidden; }
     .lesson-row-header { padding: 0.75rem 1.25rem; background: #f9fafb; border-bottom: 1px solid #f0ede8; display: flex; justify-content: space-between; align-items: center; }
     .lesson-row-header h3 { margin: 0; font-size: 0.95rem; font-family: 'Source Serif 4', serif; }
@@ -45,7 +54,7 @@
     .candidate .badge { position: absolute; top: 4px; left: 4px; background: rgba(0,0,0,0.6); color: white; font-size: 0.6rem; padding: 1px 5px; border-radius: 3px; }
 
     /* Action buttons */
-    .action-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .action-row { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
     .btn { padding: 0.45rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.15s; }
     .btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-primary { background: #7c3aed; color: white; }
@@ -63,6 +72,29 @@
     .search-input { padding: 0.4rem 0.65rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.78rem; font-family: inherit; width: 200px; }
 
     .loading-msg { text-align: center; padding: 3rem; color: var(--text-muted); }
+
+    /* Diagram tab styles */
+    .diagram-preview { position: relative; max-width: 720px; border-radius: 10px; overflow: hidden; background: #f0ede8; margin-bottom: 1rem; }
+    .diagram-preview img { display: block; width: 100%; height: auto; max-height: 500px; object-fit: contain; }
+    .diagram-preview .no-image { display: flex; align-items: center; justify-content: center; height: 200px; color: var(--text-muted); font-size: 0.82rem; }
+
+    .diagram-context { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; padding: 0.75rem 1rem; background: #f9fafb; border-radius: 8px; border-left: 3px solid #7c3aed; }
+    .diagram-context strong { color: var(--text-color); }
+
+    .diagram-prompt-area { margin-bottom: 1rem; }
+    .diagram-prompt-area label { display: block; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .diagram-prompt-area textarea { width: 100%; max-width: 720px; min-height: 100px; padding: 0.6rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.78rem; font-family: inherit; line-height: 1.5; resize: vertical; box-sizing: border-box; }
+    .diagram-prompt-area textarea:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15); }
+
+    .diagram-status { font-size: 0.78rem; margin-top: 0.5rem; }
+    .diagram-status.error { color: #dc2626; }
+    .diagram-status.success { color: #16a34a; }
+    .diagram-status.working { color: #7c3aed; }
+
+    .diagram-result { margin-top: 1rem; max-width: 720px; border-radius: 10px; overflow: hidden; background: #f0ede8; }
+    .diagram-result img { display: block; width: 100%; height: auto; }
+
+    .diagram-count { font-size: 0.72rem; color: var(--text-muted); margin-left: 0.5rem; }
   </style>
 </head>
 <body>
@@ -84,13 +116,25 @@
 
   <div class="qa-layout" id="qa-app">
     <div class="qa-header">
-      <h1>Hero Image QA</h1>
+      <h1>Image QA</h1>
       <div class="qa-controls">
         <select id="subject-select"><option value="">Loading...</option></select>
         <select id="unit-select"><option value="">All units</option></select>
       </div>
     </div>
-    <div id="qa-content"><div class="loading-msg">Select a subject to begin.</div></div>
+
+    <div class="qa-tabs">
+      <button class="qa-tab active" data-tab="hero">Hero Images</button>
+      <button class="qa-tab" data-tab="diagrams">Diagrams</button>
+    </div>
+
+    <div id="panel-hero" class="tab-panel active">
+      <div id="qa-content"><div class="loading-msg">Select a subject to begin.</div></div>
+    </div>
+
+    <div id="panel-diagrams" class="tab-panel">
+      <div id="diagrams-content"><div class="loading-msg">Select a subject to begin.</div></div>
+    </div>
   </div>
 
   <script>
@@ -103,10 +147,41 @@
     );
 
     var contentEl = document.getElementById('qa-content');
+    var diagramsContentEl = document.getElementById('diagrams-content');
     var subjectSelect = document.getElementById('subject-select');
     var unitSelect = document.getElementById('unit-select');
     var demoUser = null;
     var accessToken = null;
+    var activeTab = 'hero';
+
+    // Track loaded state per tab so switching tabs re-fetches if needed
+    var heroLoaded = false;
+    var diagramsLoaded = false;
+
+    // ---- Tabs ----
+    document.querySelectorAll('.qa-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var target = this.dataset.tab;
+        if (target === activeTab) return;
+
+        document.querySelectorAll('.qa-tab').forEach(function (t) { t.classList.remove('active'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+
+        this.classList.add('active');
+        document.getElementById('panel-' + target).classList.add('active');
+        activeTab = target;
+
+        // Reload content for the new tab if a subject is selected
+        var slug = subjectSelect.value;
+        if (slug) {
+          if (target === 'hero' && !heroLoaded) {
+            loadUnitsAndLessons(slug);
+          } else if (target === 'diagrams' && !diagramsLoaded) {
+            loadDiagrams(slug);
+          }
+        }
+      });
+    });
 
     // ---- Auth ----
     async function getAuth() {
@@ -144,15 +219,41 @@
 
     subjectSelect.addEventListener('change', async function () {
       var slug = this.value;
-      if (!slug) { contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>'; return; }
-      await loadUnitsAndLessons(slug);
+      heroLoaded = false;
+      diagramsLoaded = false;
+      if (!slug) {
+        contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+        diagramsContentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+        return;
+      }
+      if (activeTab === 'hero') {
+        await loadUnitsAndLessons(slug);
+        // Pre-load diagrams in background
+        loadDiagrams(slug);
+      } else {
+        await loadDiagrams(slug);
+        // Pre-load hero in background
+        loadUnitsAndLessons(slug);
+      }
     });
 
     unitSelect.addEventListener('change', function () {
-      if (subjectSelect.value) loadUnitsAndLessons(subjectSelect.value);
+      if (!subjectSelect.value) return;
+      heroLoaded = false;
+      diagramsLoaded = false;
+      if (activeTab === 'hero') {
+        loadUnitsAndLessons(subjectSelect.value);
+        loadDiagrams(subjectSelect.value);
+      } else {
+        loadDiagrams(subjectSelect.value);
+        loadUnitsAndLessons(subjectSelect.value);
+      }
     });
 
-    // ---- Load units + lessons ----
+    // ================================================================
+    //  HERO IMAGES TAB
+    // ================================================================
+
     async function loadUnitsAndLessons(subjectSlug) {
       contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
 
@@ -162,11 +263,13 @@
       var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', subjectResult.data.id).order('sort_order');
       var units = unitsResult.data || [];
 
-      // Populate unit dropdown
-      unitSelect.innerHTML = '<option value="">All units</option>';
-      units.forEach(function (u) {
-        unitSelect.innerHTML += '<option value="' + u.slug + '"' + (unitSelect.value === u.slug ? ' selected' : '') + '>' + u.name + '</option>';
-      });
+      // Populate unit dropdown (only from hero tab load or first load)
+      if (activeTab === 'hero') {
+        unitSelect.innerHTML = '<option value="">All units</option>';
+        units.forEach(function (u) {
+          unitSelect.innerHTML += '<option value="' + u.slug + '"' + (unitSelect.value === u.slug ? ' selected' : '') + '>' + u.name + '</option>';
+        });
+      }
 
       var selectedUnit = unitSelect.value;
       var html = '';
@@ -229,13 +332,14 @@
       }
 
       contentEl.innerHTML = html;
-      wireUpEvents();
+      heroLoaded = true;
+      wireUpHeroEvents();
     }
 
-    // ---- Wire up interactive events ----
-    function wireUpEvents() {
+    // ---- Wire up hero interactive events ----
+    function wireUpHeroEvents() {
       // Position sliders
-      document.querySelectorAll('.pos-slider').forEach(function (slider) {
+      document.querySelectorAll('#panel-hero .pos-slider').forEach(function (slider) {
         slider.addEventListener('input', function () {
           var id = this.dataset.lessonId;
           var val = this.value;
@@ -250,7 +354,7 @@
       });
 
       // Drag to position on preview
-      document.querySelectorAll('.hero-preview').forEach(function (preview) {
+      document.querySelectorAll('#panel-hero .hero-preview').forEach(function (preview) {
         var isDragging = false;
         var startY, startPos;
 
@@ -284,7 +388,7 @@
       });
 
       // Upload buttons
-      document.querySelectorAll('.upload-input').forEach(function (input) {
+      document.querySelectorAll('#panel-hero .upload-input').forEach(function (input) {
         input.addEventListener('change', function () {
           if (this.files.length) {
             uploadImage(this.dataset.lessonId, this.files[0]);
@@ -293,7 +397,7 @@
       });
 
       // Search buttons
-      document.querySelectorAll('.search-btn').forEach(function (btn) {
+      document.querySelectorAll('#panel-hero .search-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
           var id = this.dataset.lessonId;
           var searchInput = document.getElementById('search-' + id);
@@ -303,14 +407,14 @@
       });
 
       // Save buttons
-      document.querySelectorAll('.save-btn').forEach(function (btn) {
+      document.querySelectorAll('#panel-hero .save-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
           savePosition(this.dataset.lessonId);
         });
       });
 
       // Remove buttons
-      document.querySelectorAll('.remove-btn').forEach(function (btn) {
+      document.querySelectorAll('#panel-hero .remove-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
           removeHero(this.dataset.lessonId);
         });
@@ -503,6 +607,184 @@
         setTimeout(function () { toast.classList.remove('show'); toast.textContent = 'Saved!'; }, 2000);
       } catch (err) {
         alert('Remove failed: ' + err.message);
+      }
+    }
+
+    // ================================================================
+    //  DIAGRAMS TAB
+    // ================================================================
+
+    async function loadDiagrams(subjectSlug) {
+      diagramsContentEl.innerHTML = '<div class="loading-msg">Loading diagrams...</div>';
+
+      var subjectResult = await sb.from('subjects').select('id').eq('slug', subjectSlug).single();
+      if (!subjectResult.data) { diagramsContentEl.innerHTML = '<div class="loading-msg">Subject not found.</div>'; return; }
+
+      var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', subjectResult.data.id).order('sort_order');
+      var units = unitsResult.data || [];
+
+      // Populate unit dropdown if diagrams tab triggered the load
+      if (activeTab === 'diagrams') {
+        var currentUnit = unitSelect.value;
+        unitSelect.innerHTML = '<option value="">All units</option>';
+        units.forEach(function (u) {
+          unitSelect.innerHTML += '<option value="' + u.slug + '"' + (currentUnit === u.slug ? ' selected' : '') + '>' + u.name + '</option>';
+        });
+      }
+
+      var selectedUnit = unitSelect.value;
+      var html = '';
+      var totalDiagrams = 0;
+
+      for (var ui = 0; ui < units.length; ui++) {
+        var u = units[ui];
+        if (selectedUnit && u.slug !== selectedUnit) continue;
+
+        var lessonsResult = await sb.from('lessons')
+          .select('id, lesson_number, title, content_html, diagrams')
+          .eq('unit_id', u.id)
+          .order('lesson_number');
+
+        var lessons = lessonsResult.data || [];
+
+        for (var li = 0; li < lessons.length; li++) {
+          var l = lessons[li];
+          var diagrams = l.diagrams || [];
+          var diagramCount = diagrams.length;
+          totalDiagrams += diagramCount;
+
+          // Content preview — strip HTML tags and truncate
+          var plainText = (l.content_html || '').replace(/<[^>]+>/g, '').substring(0, 200);
+
+          html += '<div class="lesson-row" data-lesson-id="' + l.id + '">';
+          html += '<div class="lesson-row-header">';
+          html += '<h3>Lesson ' + l.lesson_number + ': ' + esc(l.title);
+          html += '<span class="diagram-count">' + diagramCount + ' diagram' + (diagramCount !== 1 ? 's' : '') + '</span>';
+          html += '</h3>';
+          html += '<span class="lesson-num">' + u.name + '</span>';
+          html += '</div>';
+          html += '<div class="lesson-row-body">';
+
+          // Content context
+          if (plainText) {
+            html += '<div class="diagram-context"><strong>Context:</strong> ' + esc(plainText) + (plainText.length >= 200 ? '...' : '') + '</div>';
+          }
+
+          // Show each existing diagram
+          if (diagramCount > 0) {
+            for (var di = 0; di < diagrams.length; di++) {
+              var d = diagrams[di];
+              html += '<div class="diagram-preview" id="diag-preview-' + l.id + '-' + di + '">';
+              html += '<img src="' + esc(d.url) + '" alt="' + esc(d.alt || 'Diagram ' + (di + 1)) + '" loading="lazy">';
+              html += '</div>';
+              if (d.alt) {
+                html += '<p style="font-size:0.75rem;color:var(--text-muted);margin:0.25rem 0 1rem;">' + esc(d.alt) + '</p>';
+              }
+            }
+          } else {
+            html += '<div class="diagram-preview"><div class="no-image">No diagrams for this lesson</div></div>';
+          }
+
+          // Regeneration prompt area
+          html += '<div class="diagram-prompt-area">';
+          html += '<label>Gemini Prompt</label>';
+          html += '<textarea id="diag-prompt-' + l.id + '" placeholder="Enter a prompt for Gemini diagram generation...">';
+          // Pre-fill with a sensible default prompt
+          html += esc('Create a clear, educational infographic diagram for a GCSE lesson titled "' + l.title + '". Use pictorial isotype icons. The diagram should be visually engaging and suitable for 15-16 year old students.');
+          html += '</textarea>';
+          html += '</div>';
+
+          // Action buttons
+          html += '<div class="action-row">';
+          html += '<button class="btn btn-primary diag-generate-btn" data-lesson-id="' + l.id + '">Generate with Gemini</button>';
+          html += '<span class="save-toast" id="diag-toast-' + l.id + '">Saved!</span>';
+          html += '</div>';
+
+          // Status area
+          html += '<div class="diagram-status" id="diag-status-' + l.id + '"></div>';
+
+          // Result area (for new generation)
+          html += '<div class="diagram-result" id="diag-result-' + l.id + '" style="display:none;"></div>';
+
+          html += '</div></div>';
+        }
+      }
+
+      if (!html) {
+        html = '<div class="loading-msg">No lessons found.</div>';
+      }
+
+      diagramsContentEl.innerHTML = html;
+      diagramsLoaded = true;
+      wireUpDiagramEvents();
+    }
+
+    function wireUpDiagramEvents() {
+      document.querySelectorAll('#panel-diagrams .diag-generate-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var lessonId = this.dataset.lessonId;
+          generateDiagram(lessonId);
+        });
+      });
+    }
+
+    async function generateDiagram(lessonId) {
+      var btn = document.querySelector('.diag-generate-btn[data-lesson-id="' + lessonId + '"]');
+      var statusEl = document.getElementById('diag-status-' + lessonId);
+      var resultEl = document.getElementById('diag-result-' + lessonId);
+      var promptEl = document.getElementById('diag-prompt-' + lessonId);
+      var prompt = promptEl.value.trim();
+
+      if (!prompt) {
+        statusEl.className = 'diagram-status error';
+        statusEl.textContent = 'Please enter a prompt before generating.';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Generating...';
+      statusEl.className = 'diagram-status working';
+      statusEl.textContent = 'Sending to Gemini API... This may take 15-30 seconds.';
+      resultEl.style.display = 'none';
+
+      try {
+        var resp = await fetch('/api/pipeline/regenerate-diagram', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            lesson_id: lessonId,
+            prompt: prompt,
+          }),
+        });
+
+        var data = await resp.json();
+
+        if (!resp.ok) {
+          throw new Error(data.error || 'Generation failed');
+        }
+
+        // Show the result
+        resultEl.innerHTML = '<img src="' + esc(data.diagram_url) + '" alt="Generated diagram">';
+        resultEl.style.display = 'block';
+
+        statusEl.className = 'diagram-status success';
+        statusEl.textContent = 'Diagram generated and saved successfully.';
+
+        // Update the existing preview if there was one
+        var firstPreview = document.getElementById('diag-preview-' + lessonId + '-0');
+        if (firstPreview) {
+          firstPreview.innerHTML = '<img src="' + esc(data.diagram_url) + '" alt="Updated diagram" loading="lazy">';
+        }
+
+        var toast = document.getElementById('diag-toast-' + lessonId);
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); }, 2000);
+      } catch (err) {
+        statusEl.className = 'diagram-status error';
+        statusEl.textContent = 'Error: ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Generate with Gemini';
       }
     }
 
