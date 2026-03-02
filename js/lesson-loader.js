@@ -66,7 +66,7 @@
     // First, get the unit
     var unitResult = await sb
       .from('units')
-      .select('id, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
+      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
       .eq('slug', params.unitSlug)
       .eq('subjects.slug', params.subjectSlug)
       .single();
