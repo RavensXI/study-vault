@@ -225,9 +225,14 @@
     pageEl.style.display = '';
 
     // Init lesson features from main.js (Phase 2 functions)
-    // This includes initLessonPill() which creates the header lesson pill
+    // Wrapped in its own try/catch so a feature init failure doesn't
+    // block visit tracking or show a misleading "could not load" error
     if (typeof window.initLessonFeatures === 'function') {
-      window.initLessonFeatures();
+      try {
+        window.initLessonFeatures();
+      } catch (featureErr) {
+        console.warn('Feature init error (non-fatal):', featureErr);
+      }
     }
   }
 
