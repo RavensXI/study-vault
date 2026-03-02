@@ -118,7 +118,7 @@
     async function fetchQueue(statusFilter) {
       var query = sb
         .from('lessons')
-        .select('id, lesson_number, slug, title, status, updated_at, unit_id, units!inner(name, slug, subject_id, subjects!inner(name, slug, school_id, schools!inner(name)))')
+        .select('id, lesson_number, slug, title, status, updated_at, unit_id, units!inner(name, slug, subject_id, subjects!inner(name, slug))')
         .order('updated_at', { ascending: false });
 
       if (statusFilter && statusFilter !== 'all') {
@@ -239,7 +239,6 @@
         lessons.forEach(function (lesson) {
           var unit = lesson.units;
           var subject = unit.subjects;
-          var school = subject.schools;
           var previewUrl = '/lesson/' + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number;
 
           html += '<div class="review-card">';
@@ -247,7 +246,7 @@
           html += '<div class="review-card-info">';
           html += '<h3>Lesson ' + lesson.lesson_number + ': ' + escapeHtml(lesson.title) + '</h3>';
           html += '<div class="review-card-meta">';
-          html += escapeHtml(school.name) + ' &rarr; ' + escapeHtml(subject.name) + ' &rarr; ' + escapeHtml(unit.name);
+          html += escapeHtml(subject.name) + ' &rarr; ' + escapeHtml(unit.name);
           html += ' &middot; <span class="status-badge status-' + lesson.status + '">' + lesson.status + '</span>';
           html += ' &middot; ' + new Date(lesson.updated_at).toLocaleDateString('en-GB');
           html += '</div></div>';
