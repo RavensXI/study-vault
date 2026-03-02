@@ -84,6 +84,11 @@
       '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>' +
       '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
 
+    // Apply colour theme from first unit's body class
+    if (units.length > 0 && units[0].body_class) {
+      document.body.classList.add(units[0].body_class);
+    }
+
     // Build HTML matching static landing page structure
     var html = '';
 
