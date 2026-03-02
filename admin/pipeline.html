@@ -124,17 +124,33 @@
 
     var contentEl = document.getElementById('pipeline-content');
     var accessToken = null;
+    var demoUser = null;
     var currentJob = null;
     var pollTimer = null;
 
     // ---- Auth ----
     async function init() {
+      // 1. Try Supabase SSO session
       var result = await sb.auth.getSession();
-      if (!result.data.session) {
-        contentEl.innerHTML = '<div class="error-msg">Not logged in. <a href="/">Go to login</a></div>';
+      if (result.data.session) {
+        accessToken = result.data.session.access_token;
+      } else {
+        // 2. Try demo user from localStorage
+        try {
+          var stored = localStorage.getItem('studyvault-user');
+          if (stored) {
+            var u = JSON.parse(stored);
+            if (u && u.isDemo && u.id) {
+              demoUser = u.id;
+            }
+          }
+        } catch (e) {}
+      }
+
+      if (!accessToken && !demoUser) {
+        contentEl.innerHTML = '<div class="error-msg">Not logged in. <a href="/">Go to login</a> first, then come back here.</div>';
         return;
       }
-      accessToken = result.data.session.access_token;
 
       // Check for existing jobs (resume support)
       var jobs = await sb.from('upload_jobs')
@@ -153,12 +169,13 @@
 
     // ---- API helper ----
     async function apiCall(endpoint, body) {
-      var opts = {
-        headers: {
-          'Authorization': 'Bearer ' + accessToken,
-          'Content-Type': 'application/json',
-        },
-      };
+      var headers = { 'Content-Type': 'application/json' };
+      if (accessToken) {
+        headers['Authorization'] = 'Bearer ' + accessToken;
+      } else if (demoUser) {
+        headers['X-Demo-User'] = demoUser;
+      }
+      var opts = { headers: headers };
       if (body !== undefined) {
         opts.method = 'POST';
         opts.body = JSON.stringify(body);
