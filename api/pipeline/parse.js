@@ -2,7 +2,8 @@ const { requireTeacher } = require('./_lib/auth');
 const { supabase } = require('./_lib/supabase');
 const JSZip = require('jszip');
 const { parseStringPromise } = require('xml2js');
-const pdfParse = require('pdf-parse');
+let pdfParse;
+try { pdfParse = require('pdf-parse'); } catch (e) { pdfParse = null; }
 
 /**
  * Extract text from XML nodes by walking the tree for text elements.
@@ -161,8 +162,12 @@ module.exports = async function handler(req, res) {
           const text = await parseDocx(buffer, fileName);
           allText.push(text);
         } else if (ext === 'pdf') {
-          const result = await pdfParse(buffer);
-          allText.push(`=== FILE: ${fileName} (${result.numpages} pages) ===\n\n${result.text}`);
+          if (!pdfParse) {
+            allText.push(`=== FILE: ${fileName} ===\n\n(PDF parsing unavailable)`);
+          } else {
+            const result = await pdfParse(buffer, { max: 50 });
+            allText.push(`=== FILE: ${fileName} (${result.numpages} pages) ===\n\n${result.text}`);
+          }
         } else if (ext === 'txt') {
           allText.push(`=== FILE: ${fileName} ===\n\n${buffer.toString('utf-8')}`);
         }
