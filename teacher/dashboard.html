@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Dashboard — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf8f5;
+      --bg-card: #ffffff;
+      --text: #2d2a26;
+      --text-muted: #6b6560;
+      --text-light: #9a938c;
+      --border: #e8e4df;
+      --border-light: #f0ece7;
+      --header-bg: #1e293b;
+      --header-text: #f1f5f9;
+      --accent: #7c3aed;
+      --accent-light: #ede9fe;
+      --green: #16a34a;
+      --green-bg: #f0fdf4;
+      --amber: #d97706;
+      --amber-bg: #fffbeb;
+      --red: #dc2626;
+      --red-bg: #fef2f2;
+      --blue: #2563eb;
+      --blue-bg: #eff6ff;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 1px 3px rgba(45,42,38,0.06), 0 1px 2px rgba(45,42,38,0.04);
+      --shadow-md: 0 4px 12px rgba(45,42,38,0.08), 0 2px 4px rgba(45,42,38,0.04);
+      --shadow-lg: 0 10px 30px rgba(45,42,38,0.1), 0 4px 8px rgba(45,42,38,0.06);
+      /* Unit colors */
+      --conflict: #c44536;
+      --health: #0d9488;
+      --elizabethan: #b45309;
+      --america: #2563eb;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .dash-header {
+      background: var(--header-bg);
+      color: var(--header-text);
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .dash-header-left { display: flex; align-items: center; gap: 1rem; }
+    .dash-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+    }
+    .dash-logo svg { width: 18px; height: 18px; vertical-align: -2px; margin-left: 1px; }
+    .dash-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--accent);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: 99px;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .dash-header-right { display: flex; align-items: center; gap: 1rem; }
+    .dash-teacher {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+    }
+    .dash-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 0.8rem;
+    }
+    .notification-btn {
+      background: none;
+      border: none;
+      color: var(--header-text);
+      cursor: pointer;
+      position: relative;
+      padding: 4px;
+    }
+    .notification-btn svg { width: 20px; height: 20px; }
+    .notification-dot {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      width: 8px;
+      height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      border: 2px solid var(--header-bg);
+    }
+
+    /* ── Controls Bar ── */
+    .controls-bar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .controls-left { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+    .controls-right { display: flex; align-items: center; gap: 0.5rem; }
+    .control-select {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.825rem;
+      padding: 0.4rem 2rem 0.4rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b6560' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 0.6rem center;
+      color: var(--text);
+      cursor: pointer;
+      appearance: none;
+    }
+    .control-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .btn-sm {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.4rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s;
+    }
+    .btn-sm:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-sm svg { width: 14px; height: 14px; }
+
+    /* ── Main Layout ── */
+    .dashboard { max-width: 1400px; margin: 0 auto; padding: 1.5rem 2rem 3rem; }
+
+    /* ── Metric Cards ── */
+    .metrics-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      box-shadow: var(--shadow);
+      border-left: 4px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+    .metric-card.green { border-left-color: var(--green); }
+    .metric-card.blue { border-left-color: var(--blue); }
+    .metric-card.amber { border-left-color: var(--amber); }
+    .metric-card.purple { border-left-color: var(--accent); }
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'Source Serif 4', Georgia, serif;
+      line-height: 1.2;
+    }
+    .metric-trend {
+      font-size: 0.75rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    .metric-trend.up { color: var(--green); }
+    .metric-trend.down { color: var(--red); }
+    .metric-trend svg { width: 12px; height: 12px; }
+
+    /* ── Alerts Panel ── */
+    .alerts-panel {
+      background: var(--red-bg);
+      border: 1px solid #fecaca;
+      border-radius: var(--radius);
+      padding: 1rem 1.35rem;
+      margin-bottom: 1.5rem;
+    }
+    .alerts-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .alerts-title {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--red);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .alerts-title svg { width: 16px; height: 16px; }
+    .alerts-count {
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--red);
+      color: #fff;
+      padding: 1px 7px;
+      border-radius: 99px;
+    }
+    .alert-toggle {
+      font-size: 0.8rem;
+      color: var(--red);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      font-family: 'Inter', sans-serif;
+    }
+    .alert-items { display: flex; flex-direction: column; gap: 0.5rem; }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 0.85rem;
+      background: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 0.84rem;
+    }
+    .alert-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .alert-dot.red { background: var(--red); }
+    .alert-dot.amber { background: var(--amber); }
+    .alert-name { font-weight: 600; }
+    .alert-action {
+      margin-left: auto;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--accent-light);
+      border: none;
+      padding: 3px 10px;
+      border-radius: 99px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      white-space: nowrap;
+    }
+    .alert-action:hover { background: var(--accent); color: #fff; }
+
+    /* ── Two-Column Grid ── */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 1.5rem;
+      align-items: start;
+    }
+
+    /* ── Student Table ── */
+    .students-panel {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .students-header {
+      padding: 1rem 1.35rem 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .students-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .search-box {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.825rem;
+      padding: 0.4rem 0.75rem 0.4rem 2rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239a938c' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='M21 21l-4.35-4.35'/%3E%3C/svg%3E") no-repeat 0.6rem center;
+      width: 200px;
+      color: var(--text);
+    }
+    .search-box:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+    .student-table { width: 100%; border-collapse: collapse; }
+    .student-table th {
+      text-align: left;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .student-table th:hover { color: var(--accent); }
+    .student-table th.sorted { color: var(--accent); }
+    .student-table th .sort-arrow { font-size: 0.6rem; margin-left: 2px; }
+    .student-table td {
+      padding: 0.7rem 1rem;
+      font-size: 0.84rem;
+      border-bottom: 1px solid var(--border-light);
+      vertical-align: middle;
+    }
+    .student-table tr:last-child td { border-bottom: none; }
+    .student-table tbody tr { cursor: pointer; transition: background 0.1s; }
+    .student-table tbody tr:hover { background: #faf8f5; }
+    .student-name-cell { display: flex; align-items: center; gap: 0.6rem; }
+    .student-initials {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .student-name-text { font-weight: 500; }
+    .status-badge {
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .status-badge.excellent { background: var(--green-bg); color: var(--green); }
+    .status-badge.on-track { background: var(--blue-bg); color: var(--blue); }
+    .status-badge.attention { background: var(--amber-bg); color: var(--amber); }
+    .status-badge.at-risk { background: var(--red-bg); color: var(--red); }
+    .progress-bar-cell { min-width: 100px; }
+    .progress-bar {
+      height: 6px;
+      background: var(--border-light);
+      border-radius: 99px;
+      overflow: hidden;
+      position: relative;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+    .progress-text {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .score-cell { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .score-cell.high { color: var(--green); }
+    .score-cell.mid { color: var(--amber); }
+    .score-cell.low { color: var(--red); }
+    .last-active { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .last-active.stale { color: var(--red); font-weight: 500; }
+
+    /* ── Insights Sidebar ── */
+    .insights-col { display: flex; flex-direction: column; gap: 1.5rem; }
+    .insight-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .insight-header {
+      padding: 1rem 1.25rem 0.6rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .insight-body { padding: 0 1.25rem 1.25rem; }
+
+    /* ── Engagement Chart ── */
+    .chart-wrapper { position: relative; height: 180px; }
+
+    /* ── Topic Heatmap ── */
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      padding: 0 1.25rem;
+    }
+    .heatmap-legend-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(to right, var(--red), var(--amber), var(--green));
+    }
+    .heatmap-unit { margin-bottom: 0.75rem; padding: 0 1.25rem; }
+    .heatmap-unit:last-child { margin-bottom: 0.5rem; }
+    .heatmap-unit-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.3rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .heatmap-unit-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: repeat(15, 1fr);
+      gap: 3px;
+    }
+    .heatmap-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      cursor: pointer;
+      position: relative;
+      min-width: 0;
+    }
+    .heatmap-cell:hover { outline: 2px solid var(--text); outline-offset: 1px; }
+    .heatmap-tooltip {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--header-bg);
+      color: #fff;
+      font-size: 0.68rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .heatmap-cell:hover .heatmap-tooltip { display: block; }
+
+    /* ── Exam Countdown ── */
+    .countdown-card {
+      background: linear-gradient(135deg, var(--accent) 0%, #6d28d9 100%);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-md);
+    }
+    .countdown-label { font-size: 0.75rem; opacity: 0.85; font-weight: 500; }
+    .countdown-number {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .countdown-sub { font-size: 0.8rem; opacity: 0.9; margin-top: 0.15rem; }
+
+    /* ── Student Detail Panel ── */
+    .detail-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(30,41,59,0.3);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .detail-overlay.open { opacity: 1; pointer-events: auto; }
+    .detail-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 520px;
+      max-width: 90vw;
+      height: 100vh;
+      background: var(--bg);
+      box-shadow: var(--shadow-lg);
+      z-index: 201;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .detail-panel.open { transform: translateX(0); }
+    .detail-header {
+      padding: 1.25rem 1.5rem;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .detail-student-info { display: flex; align-items: center; gap: 0.75rem; }
+    .detail-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .detail-name {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+    }
+    .detail-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 4px;
+    }
+    .detail-close:hover { color: var(--text); }
+    .detail-close svg { width: 20px; height: 20px; }
+    .detail-body { padding: 1.5rem; flex: 1; }
+    .detail-section { margin-bottom: 1.75rem; }
+    .detail-section:last-child { margin-bottom: 0; }
+    .detail-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Activity calendar */
+    .activity-calendar { display: flex; flex-direction: column; gap: 0.25rem; }
+    .activity-week-labels {
+      display: grid;
+      grid-template-columns: 28px repeat(7, 1fr);
+      gap: 3px;
+      font-size: 0.6rem;
+      color: var(--text-light);
+      text-align: center;
+      margin-bottom: 2px;
+    }
+    .activity-row {
+      display: grid;
+      grid-template-columns: 28px repeat(7, 1fr);
+      gap: 3px;
+      align-items: center;
+    }
+    .activity-row-label { font-size: 0.6rem; color: var(--text-light); }
+    .activity-cell {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: var(--border-light);
+    }
+    .activity-cell.l1 { background: #dcfce7; }
+    .activity-cell.l2 { background: #86efac; }
+    .activity-cell.l3 { background: #22c55e; }
+    .activity-cell.l4 { background: #15803d; }
+    .activity-cell.future { background: transparent; border: 1px dashed var(--border); }
+
+    /* Unit bars */
+    .unit-bars { display: flex; flex-direction: column; gap: 0.6rem; }
+    .unit-bar-row { display: flex; align-items: center; gap: 0.75rem; }
+    .unit-bar-label { font-size: 0.78rem; width: 120px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .unit-bar-track {
+      flex: 1;
+      height: 10px;
+      background: var(--border-light);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .unit-bar-fill { height: 100%; border-radius: 99px; }
+    .unit-bar-value { font-size: 0.75rem; font-weight: 600; width: 36px; text-align: right; }
+
+    /* Recent activity */
+    .activity-feed { display: flex; flex-direction: column; gap: 0; }
+    .feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.6rem 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: 0.8rem;
+    }
+    .feed-item:last-child { border-bottom: none; }
+    .feed-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .feed-icon.visit { background: var(--blue-bg); color: var(--blue); }
+    .feed-icon.quiz { background: var(--green-bg); color: var(--green); }
+    .feed-icon.listen { background: var(--amber-bg); color: var(--amber); }
+    .feed-text { flex: 1; }
+    .feed-time { font-size: 0.7rem; color: var(--text-light); white-space: nowrap; margin-top: 1px; }
+
+    /* Suggestions */
+    .suggestion-card {
+      background: var(--accent-light);
+      border-radius: var(--radius-sm);
+      padding: 0.85rem 1rem;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      border-left: 3px solid var(--accent);
+    }
+    .suggestion-card + .suggestion-card { margin-top: 0.5rem; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .insights-col { flex-direction: row; flex-wrap: wrap; }
+      .insights-col > * { flex: 1; min-width: 300px; }
+    }
+    @media (max-width: 768px) {
+      .metrics-row { grid-template-columns: repeat(2, 1fr); }
+      .dash-header { padding: 0 1rem; }
+      .controls-bar { padding: 0.75rem 1rem; }
+      .dashboard { padding: 1rem; }
+      .detail-panel { width: 100vw; max-width: 100vw; }
+      .student-table { font-size: 0.78rem; }
+      .student-table th, .student-table td { padding: 0.5rem 0.6rem; }
+    }
+    @media (max-width: 550px) {
+      .metrics-row { grid-template-columns: 1fr; }
+    }
+
+    /* ── Demo Banner ── */
+    .demo-banner {
+      background: var(--accent-light);
+      border-bottom: 1px solid #c4b5fd;
+      padding: 0.5rem 2rem;
+      font-size: 0.78rem;
+      color: var(--accent);
+      text-align: center;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="demo-banner">
+    Demo — viewing sample data for 11A History (AQA 8035). This is a prototype of the teacher analytics dashboard.
+  </div>
+
+  <!-- Header -->
+  <header class="dash-header">
+    <div class="dash-header-left">
+      <a href="/" class="dash-logo">StudyVault<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/><circle cx="12" cy="16" r="1"/></svg></a>
+      <span class="dash-badge">Teacher</span>
+    </div>
+    <div class="dash-header-right">
+      <button class="notification-btn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        <span class="notification-dot"></span>
+      </button>
+      <div class="dash-teacher">
+        <span>Mr Shaun</span>
+        <div class="dash-avatar">TS</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Controls -->
+  <div class="controls-bar">
+    <div class="controls-left">
+      <select class="control-select" id="classSelect">
+        <option selected>11A History</option>
+        <option>11B History</option>
+        <option>10A History</option>
+      </select>
+      <select class="control-select" id="unitFilter">
+        <option value="all">All Units</option>
+        <option value="conflict-tension">Conflict &amp; Tension</option>
+        <option value="health-people">Health &amp; People</option>
+        <option value="elizabethan">Elizabethan England</option>
+        <option value="america">America 1920–73</option>
+      </select>
+      <select class="control-select" id="dateRange">
+        <option value="7">Last 7 days</option>
+        <option value="14">Last 14 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="term">This term</option>
+      </select>
+    </div>
+    <div class="controls-right">
+      <button class="btn-sm" title="Export CSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="btn-sm" title="Print report">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        Print
+      </button>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <main class="dashboard">
+
+    <!-- Metric Cards -->
+    <div class="metrics-row" id="metricsRow"></div>
+
+    <!-- Alerts -->
+    <div class="alerts-panel" id="alertsPanel" style="display:none;"></div>
+
+    <!-- Two-column layout -->
+    <div class="dashboard-grid">
+
+      <!-- Student Table -->
+      <section class="students-panel">
+        <div class="students-header">
+          <div class="students-title">Student Overview</div>
+          <input type="text" class="search-box" placeholder="Search students..." id="studentSearch">
+        </div>
+        <div style="overflow-x: auto;">
+          <table class="student-table">
+            <thead>
+              <tr>
+                <th data-sort="name">Name <span class="sort-arrow"></span></th>
+                <th data-sort="lastActive">Last Active <span class="sort-arrow"></span></th>
+                <th data-sort="progress">Progress <span class="sort-arrow"></span></th>
+                <th data-sort="kcAvg">KC Score <span class="sort-arrow"></span></th>
+                <th data-sort="practiceAvg">Practice <span class="sort-arrow"></span></th>
+                <th data-sort="status">Status <span class="sort-arrow"></span></th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Insights Sidebar -->
+      <div class="insights-col">
+
+        <!-- Exam Countdown -->
+        <div class="countdown-card">
+          <div class="countdown-label">Days until first exam</div>
+          <div class="countdown-number" id="countdownNumber"></div>
+          <div class="countdown-sub">AQA History Paper 1 — 10 June 2026</div>
+        </div>
+
+        <!-- Weekly Engagement -->
+        <div class="insight-card">
+          <div class="insight-header">Weekly Engagement</div>
+          <div class="insight-body">
+            <div class="chart-wrapper">
+              <canvas id="engagementChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Topic Heatmap -->
+        <div class="insight-card">
+          <div class="insight-header">Topic Performance</div>
+          <div class="heatmap-legend">
+            <span>Low</span>
+            <div class="heatmap-legend-bar"></div>
+            <span>High</span>
+          </div>
+          <div id="heatmapContainer"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Student Detail Panel -->
+  <div class="detail-overlay" id="detailOverlay"></div>
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div class="detail-student-info">
+        <div class="detail-avatar" id="detailAvatar"></div>
+        <div>
+          <div class="detail-name" id="detailName"></div>
+          <div id="detailStatus"></div>
+        </div>
+      </div>
+      <button class="detail-close" id="detailClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18"/><path d="M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="detail-body" id="detailBody"></div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────
+    //  Mock Data
+    // ─────────────────────────────────────────────
+    const UNITS = [
+      { name: 'Conflict & Tension', slug: 'conflict-tension', color: '#c44536', lessons: 15 },
+      { name: 'Health & People', slug: 'health-people', color: '#0d9488', lessons: 15 },
+      { name: 'Elizabethan England', slug: 'elizabethan', color: '#b45309', lessons: 15 },
+      { name: 'America 1920–73', slug: 'america', color: '#2563eb', lessons: 15 }
+    ];
+
+    const EXAM_DATE = new Date('2026-06-10');
+    const TODAY = new Date('2026-03-02');
+
+    const AVATAR_COLORS = [
+      '#7c3aed','#2563eb','#0891b2','#059669','#16a34a',
+      '#d97706','#dc2626','#c44536','#b45309','#0d9488',
+      '#4f46e5','#6d28d9','#0284c7','#0f766e','#ca8a04'
+    ];
+
+    function daysAgo(d) {
+      const diff = TODAY - new Date(d);
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
+
+    function formatLastActive(dateStr) {
+      const days = daysAgo(dateStr);
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      return `${days}d ago`;
+    }
+
+    function initials(name) {
+      return name.split(' ').map(n => n[0]).join('');
+    }
+
+    // Generate realistic student data
+    const students = [
+      // Excellent performers
+      { id:1,  name:'Amara Osei',        lastActive:'2026-03-02', lessonsVisited:54, kcAvg:91, practiceAvg:88, timeMinutes:2100, streak:21, unitBreakdown:[14,14,13,13] },
+      { id:2,  name:'Olivia Bennett',     lastActive:'2026-03-02', lessonsVisited:48, kcAvg:86, practiceAvg:82, timeMinutes:1840, streak:14, unitBreakdown:[13,13,11,11] },
+      { id:3,  name:'Priya Sharma',       lastActive:'2026-03-01', lessonsVisited:50, kcAvg:88, practiceAvg:85, timeMinutes:1950, streak:16, unitBreakdown:[14,12,12,12] },
+      { id:4,  name:'James Whitmore',     lastActive:'2026-03-02', lessonsVisited:45, kcAvg:82, practiceAvg:79, timeMinutes:1620, streak:11, unitBreakdown:[12,12,11,10] },
+      { id:5,  name:'Zainab Hussain',     lastActive:'2026-03-01', lessonsVisited:47, kcAvg:84, practiceAvg:80, timeMinutes:1780, streak:13, unitBreakdown:[13,12,11,11] },
+
+      // On track
+      { id:6,  name:'Thomas Gallagher',   lastActive:'2026-03-02', lessonsVisited:40, kcAvg:74, practiceAvg:70, timeMinutes:1400, streak:9,  unitBreakdown:[11,10,10,9] },
+      { id:7,  name:'Ethan Cooper',       lastActive:'2026-03-01', lessonsVisited:35, kcAvg:72, practiceAvg:68, timeMinutes:1200, streak:6,  unitBreakdown:[10,9,8,8] },
+      { id:8,  name:'Isla MacDonald',     lastActive:'2026-02-28', lessonsVisited:38, kcAvg:70, practiceAvg:66, timeMinutes:1320, streak:5,  unitBreakdown:[11,10,9,8] },
+      { id:9,  name:'Mohammed Khan',      lastActive:'2026-03-01', lessonsVisited:36, kcAvg:71, practiceAvg:67, timeMinutes:1280, streak:7,  unitBreakdown:[10,9,9,8] },
+      { id:10, name:'Emily Richardson',   lastActive:'2026-02-27', lessonsVisited:34, kcAvg:73, practiceAvg:69, timeMinutes:1180, streak:4,  unitBreakdown:[9,9,8,8] },
+      { id:11, name:'Liam Patterson',     lastActive:'2026-03-02', lessonsVisited:32, kcAvg:68, practiceAvg:64, timeMinutes:1100, streak:8,  unitBreakdown:[9,8,8,7] },
+      { id:12, name:'Grace Thornton',     lastActive:'2026-02-28', lessonsVisited:37, kcAvg:75, practiceAvg:71, timeMinutes:1340, streak:5,  unitBreakdown:[10,10,9,8] },
+      { id:13, name:'Noah Williams',      lastActive:'2026-03-01', lessonsVisited:33, kcAvg:69, practiceAvg:65, timeMinutes:1150, streak:6,  unitBreakdown:[9,8,8,8] },
+      { id:14, name:'Freya Dawson',       lastActive:'2026-02-26', lessonsVisited:30, kcAvg:66, practiceAvg:63, timeMinutes:1020, streak:3,  unitBreakdown:[8,8,7,7] },
+      { id:15, name:'Aiden Murray',       lastActive:'2026-02-28', lessonsVisited:31, kcAvg:67, practiceAvg:62, timeMinutes:1060, streak:4,  unitBreakdown:[9,8,7,7] },
+      { id:16, name:'Chloe Evans',        lastActive:'2026-03-01', lessonsVisited:29, kcAvg:65, practiceAvg:61, timeMinutes: 980, streak:5,  unitBreakdown:[8,7,7,7] },
+
+      // Needs attention
+      { id:17, name:'Tyler Brooks',       lastActive:'2026-02-24', lessonsVisited:22, kcAvg:58, practiceAvg:52, timeMinutes:680, streak:0,  unitBreakdown:[7,6,5,4] },
+      { id:18, name:'Megan Foster',       lastActive:'2026-02-25', lessonsVisited:20, kcAvg:55, practiceAvg:48, timeMinutes:620, streak:0,  unitBreakdown:[6,5,5,4] },
+      { id:19, name:'Kai Nakamura',       lastActive:'2026-02-23', lessonsVisited:24, kcAvg:60, practiceAvg:54, timeMinutes:740, streak:0,  unitBreakdown:[8,6,6,4] },
+      { id:20, name:'Poppy Cartwright',   lastActive:'2026-02-22', lessonsVisited:19, kcAvg:52, practiceAvg:46, timeMinutes:560, streak:0,  unitBreakdown:[6,5,4,4] },
+      { id:21, name:'Lucas Reed',         lastActive:'2026-02-26', lessonsVisited:26, kcAvg:56, practiceAvg:50, timeMinutes:800, streak:0,  unitBreakdown:[8,7,6,5] },
+      { id:22, name:'Ruby Chen',          lastActive:'2026-02-20', lessonsVisited:18, kcAvg:61, practiceAvg:55, timeMinutes:540, streak:0,  unitBreakdown:[5,5,4,4] },
+
+      // At risk
+      { id:23, name:'Ryan Taylor',        lastActive:'2026-02-18', lessonsVisited:20, kcAvg:38, practiceAvg:30, timeMinutes:480, streak:0,  unitBreakdown:[7,6,4,3] },
+      { id:24, name:'Sophie Mitchell',    lastActive:'2026-02-15', lessonsVisited:6,  kcAvg:42, practiceAvg:35, timeMinutes:180, streak:0,  unitBreakdown:[3,2,1,0] },
+      { id:25, name:'Connor Walsh',       lastActive:'2026-02-10', lessonsVisited:4,  kcAvg:35, practiceAvg:28, timeMinutes:120, streak:0,  unitBreakdown:[2,1,1,0] },
+      { id:26, name:'Amelia Turner',      lastActive:'2026-02-16', lessonsVisited:10, kcAvg:44, practiceAvg:38, timeMinutes:280, streak:0,  unitBreakdown:[4,3,2,1] },
+      { id:27, name:'Jake Harrison',      lastActive:'2026-02-20', lessonsVisited:15, kcAvg:40, practiceAvg:33, timeMinutes:400, streak:0,  unitBreakdown:[5,4,3,3] },
+      { id:28, name:'Courtney Price',     lastActive:'2026-02-22', lessonsVisited:12, kcAvg:46, practiceAvg:40, timeMinutes:340, streak:0,  unitBreakdown:[4,3,3,2] }
+    ];
+
+    // Assign status
+    students.forEach(s => {
+      const days = daysAgo(s.lastActive);
+      if (s.kcAvg >= 80 && s.lessonsVisited >= 40) s.status = 'excellent';
+      else if (s.kcAvg >= 60 && days <= 5) s.status = 'on-track';
+      else if (s.kcAvg < 45 || days > 12) s.status = 'at-risk';
+      else s.status = 'attention';
+    });
+
+    // Generate topic performance (avg class score per lesson)
+    function generateTopicScores() {
+      const scores = [];
+      UNITS.forEach(unit => {
+        const unitScores = [];
+        for (let i = 0; i < unit.lessons; i++) {
+          // Some lessons harder than others
+          const base = 50 + Math.sin(i * 1.3 + UNITS.indexOf(unit)) * 15;
+          const noise = (Math.sin(i * 7.7 + UNITS.indexOf(unit) * 3.3) * 10);
+          unitScores.push(Math.round(Math.max(30, Math.min(95, base + noise))));
+        }
+        scores.push({ unit: unit.name, slug: unit.slug, color: unit.color, scores: unitScores });
+      });
+      return scores;
+    }
+
+    const topicScores = generateTopicScores();
+
+    // Engagement data (daily active students over 28 days)
+    const engagementData = [];
+    for (let i = 27; i >= 0; i--) {
+      const d = new Date(TODAY);
+      d.setDate(d.getDate() - i);
+      const dayOfWeek = d.getDay();
+      // Lower on weekends, higher during week, general upward trend
+      const base = dayOfWeek === 0 || dayOfWeek === 6 ? 8 : 16;
+      const trend = (28 - i) * 0.15;
+      const noise = Math.sin(i * 2.1) * 3;
+      engagementData.push({
+        date: d.toISOString().split('T')[0],
+        label: d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
+        count: Math.round(Math.max(3, Math.min(28, base + trend + noise)))
+      });
+    }
+
+    // ─────────────────────────────────────────────
+    //  Render Functions
+    // ─────────────────────────────────────────────
+
+    // Metric cards
+    function renderMetrics() {
+      const active7d = students.filter(s => daysAgo(s.lastActive) <= 7).length;
+      const avgKC = Math.round(students.reduce((a, s) => a + s.kcAvg, 0) / students.length);
+      const totalHours = Math.round(students.reduce((a, s) => a + s.timeMinutes, 0) / 60);
+      const container = document.getElementById('metricsRow');
+      container.innerHTML = `
+        <div class="metric-card blue">
+          <div class="metric-label">Students Enrolled</div>
+          <div class="metric-value">${students.length}</div>
+          <div class="metric-trend up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17l5-5 5 5"/></svg>
+            2 new this term
+          </div>
+        </div>
+        <div class="metric-card green">
+          <div class="metric-label">Active This Week</div>
+          <div class="metric-value">${active7d}</div>
+          <div class="metric-trend ${active7d >= 20 ? 'up' : 'down'}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="${active7d >= 20 ? 'M7 17l5-5 5 5' : 'M7 7l5 5 5-5'}"/></svg>
+            ${Math.round(active7d / students.length * 100)}% of class
+          </div>
+        </div>
+        <div class="metric-card amber">
+          <div class="metric-label">Avg KC Score</div>
+          <div class="metric-value">${avgKC}%</div>
+          <div class="metric-trend up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17l5-5 5 5"/></svg>
+            +3% vs last month
+          </div>
+        </div>
+        <div class="metric-card purple">
+          <div class="metric-label">Total Study Hours</div>
+          <div class="metric-value">${totalHours}</div>
+          <div class="metric-trend up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17l5-5 5 5"/></svg>
+            +18% vs last month
+          </div>
+        </div>
+      `;
+    }
+
+    // Alerts
+    function renderAlerts() {
+      const atRisk = students.filter(s => s.status === 'at-risk');
+      const attention = students.filter(s => s.status === 'attention');
+      const alerts = [];
+
+      atRisk.forEach(s => {
+        const days = daysAgo(s.lastActive);
+        let reason = '';
+        if (days > 10 && s.kcAvg < 45) reason = `Not logged in for ${days} days, KC average ${s.kcAvg}%`;
+        else if (days > 10) reason = `Not logged in for ${days} days`;
+        else if (s.kcAvg < 45) reason = `KC average only ${s.kcAvg}% — may need differentiated support`;
+        else reason = `Only visited ${s.lessonsVisited}/60 lessons`;
+        alerts.push({ name: s.name, reason, severity: 'red', id: s.id });
+      });
+
+      // Add a couple of attention alerts
+      const lowAmerica = students.filter(s => s.unitBreakdown[3] <= 4 && s.status !== 'at-risk');
+      if (lowAmerica.length >= 3) {
+        alerts.push({ name: `${lowAmerica.length} students`, reason: 'Have fewer than 5 America lessons visited — consider setting a guided task', severity: 'amber', id: null });
+      }
+
+      if (alerts.length === 0) {
+        document.getElementById('alertsPanel').style.display = 'none';
+        return;
+      }
+
+      const panel = document.getElementById('alertsPanel');
+      panel.style.display = 'block';
+      panel.innerHTML = `
+        <div class="alerts-header">
+          <div class="alerts-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Needs Attention
+            <span class="alerts-count">${alerts.length}</span>
+          </div>
+        </div>
+        <div class="alert-items">
+          ${alerts.map(a => `
+            <div class="alert-item">
+              <span class="alert-dot ${a.severity}"></span>
+              <div><span class="alert-name">${a.name}</span> — ${a.reason}</div>
+              ${a.id ? `<button class="alert-action" onclick="openDetail(${a.id})">View</button>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // Student table
+    let currentSort = { field: 'status', dir: 'asc' };
+    const statusOrder = { 'at-risk': 0, 'attention': 1, 'on-track': 2, 'excellent': 3 };
+    const statusLabels = { 'excellent': 'Excellent', 'on-track': 'On Track', 'attention': 'Attention', 'at-risk': 'At Risk' };
+
+    function sortStudents(list, field, dir) {
+      return [...list].sort((a, b) => {
+        let va, vb;
+        if (field === 'name') { va = a.name; vb = b.name; }
+        else if (field === 'lastActive') { va = new Date(a.lastActive); vb = new Date(b.lastActive); }
+        else if (field === 'progress') { va = a.lessonsVisited; vb = b.lessonsVisited; }
+        else if (field === 'kcAvg') { va = a.kcAvg; vb = b.kcAvg; }
+        else if (field === 'practiceAvg') { va = a.practiceAvg; vb = b.practiceAvg; }
+        else if (field === 'status') { va = statusOrder[a.status]; vb = statusOrder[b.status]; }
+        if (va < vb) return dir === 'asc' ? -1 : 1;
+        if (va > vb) return dir === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+
+    function renderStudentTable(filter = '') {
+      const tbody = document.getElementById('studentTableBody');
+      let filtered = students;
+      if (filter) {
+        const q = filter.toLowerCase();
+        filtered = students.filter(s => s.name.toLowerCase().includes(q));
+      }
+      const sorted = sortStudents(filtered, currentSort.field, currentSort.dir);
+
+      tbody.innerHTML = sorted.map((s, i) => {
+        const pct = Math.round(s.lessonsVisited / 60 * 100);
+        const progressColor = pct >= 70 ? 'var(--green)' : pct >= 40 ? 'var(--amber)' : 'var(--red)';
+        const scoreClass = s.kcAvg >= 70 ? 'high' : s.kcAvg >= 55 ? 'mid' : 'low';
+        const practiceClass = s.practiceAvg >= 70 ? 'high' : s.practiceAvg >= 55 ? 'mid' : 'low';
+        const days = daysAgo(s.lastActive);
+        const staleClass = days > 7 ? 'stale' : '';
+        const avatarColor = AVATAR_COLORS[i % AVATAR_COLORS.length];
+
+        return `
+          <tr onclick="openDetail(${s.id})">
+            <td>
+              <div class="student-name-cell">
+                <div class="student-initials" style="background:${avatarColor}">${initials(s.name)}</div>
+                <span class="student-name-text">${s.name}</span>
+              </div>
+            </td>
+            <td><span class="last-active ${staleClass}">${formatLastActive(s.lastActive)}</span></td>
+            <td class="progress-bar-cell">
+              <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${progressColor}"></div></div>
+              <div class="progress-text">${s.lessonsVisited}/60 lessons (${pct}%)</div>
+            </td>
+            <td><span class="score-cell ${scoreClass}">${s.kcAvg}%</span></td>
+            <td><span class="score-cell ${practiceClass}">${s.practiceAvg}%</span></td>
+            <td><span class="status-badge ${s.status}">${statusLabels[s.status]}</span></td>
+          </tr>
+        `;
+      }).join('');
+
+      // Update sort arrows
+      document.querySelectorAll('.student-table th').forEach(th => {
+        const field = th.dataset.sort;
+        th.classList.toggle('sorted', field === currentSort.field);
+        const arrow = th.querySelector('.sort-arrow');
+        if (field === currentSort.field) {
+          arrow.textContent = currentSort.dir === 'asc' ? ' \u25B2' : ' \u25BC';
+        } else {
+          arrow.textContent = '';
+        }
+      });
+    }
+
+    // Engagement chart
+    function renderEngagementChart() {
+      const ctx = document.getElementById('engagementChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: engagementData.map(d => d.label),
+          datasets: [{
+            data: engagementData.map(d => d.count),
+            borderColor: '#7c3aed',
+            backgroundColor: 'rgba(124,58,237,0.08)',
+            borderWidth: 2,
+            fill: true,
+            tension: 0.35,
+            pointRadius: 0,
+            pointHoverRadius: 5,
+            pointHoverBackgroundColor: '#7c3aed',
+            pointHoverBorderColor: '#fff',
+            pointHoverBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1e293b',
+              titleFont: { family: 'Inter', size: 11 },
+              bodyFont: { family: 'Inter', size: 12 },
+              padding: 8,
+              cornerRadius: 6,
+              callbacks: { label: ctx => `${ctx.parsed.y} students active` }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'Inter', size: 9 }, color: '#9a938c', maxTicksLimit: 7 }
+            },
+            y: {
+              grid: { color: '#f0ece7' },
+              ticks: { font: { family: 'Inter', size: 10 }, color: '#9a938c', stepSize: 5 },
+              min: 0,
+              max: 30
+            }
+          }
+        }
+      });
+    }
+
+    // Topic heatmap
+    function renderHeatmap() {
+      const container = document.getElementById('heatmapContainer');
+      container.innerHTML = topicScores.map(unit => {
+        const cells = unit.scores.map((score, i) => {
+          let bg;
+          if (score >= 75) bg = '#22c55e';
+          else if (score >= 65) bg = '#86efac';
+          else if (score >= 55) bg = '#fbbf24';
+          else if (score >= 45) bg = '#fb923c';
+          else bg = '#ef4444';
+          return `<div class="heatmap-cell" style="background:${bg}" title="Lesson ${i+1}: ${score}%">
+            <div class="heatmap-tooltip">L${i+1}: ${score}% avg</div>
+          </div>`;
+        }).join('');
+        return `
+          <div class="heatmap-unit">
+            <div class="heatmap-unit-label">
+              <div class="heatmap-unit-dot" style="background:${unit.color}"></div>
+              ${unit.unit}
+            </div>
+            <div class="heatmap-grid">${cells}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // Exam countdown
+    function renderCountdown() {
+      const diff = EXAM_DATE - TODAY;
+      const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+      document.getElementById('countdownNumber').textContent = days;
+    }
+
+    // ─────────────────────────────────────────────
+    //  Student Detail Panel
+    // ─────────────────────────────────────────────
+    function openDetail(studentId) {
+      const s = students.find(st => st.id === studentId);
+      if (!s) return;
+
+      const overlay = document.getElementById('detailOverlay');
+      const panel = document.getElementById('detailPanel');
+      const avatarIdx = students.indexOf(s);
+      const avatarColor = AVATAR_COLORS[avatarIdx % AVATAR_COLORS.length];
+
+      document.getElementById('detailAvatar').style.background = avatarColor;
+      document.getElementById('detailAvatar').textContent = initials(s.name);
+      document.getElementById('detailName').textContent = s.name;
+      document.getElementById('detailStatus').innerHTML = `<span class="status-badge ${s.status}">${statusLabels[s.status]}</span>`;
+
+      // Generate activity calendar (last 4 weeks)
+      let calendarHTML = '<div class="activity-calendar">';
+      calendarHTML += '<div class="activity-week-labels"><span></span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>';
+      for (let w = 3; w >= 0; w--) {
+        const weekStart = new Date(TODAY);
+        weekStart.setDate(weekStart.getDate() - (w * 7 + weekStart.getDay() - 1));
+        const weekLabel = weekStart.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        calendarHTML += `<div class="activity-row"><span class="activity-row-label">${weekLabel}</span>`;
+        for (let d = 0; d < 7; d++) {
+          const cellDate = new Date(weekStart);
+          cellDate.setDate(cellDate.getDate() + d);
+          if (cellDate > TODAY) {
+            calendarHTML += '<div class="activity-cell future"></div>';
+          } else {
+            // Simulate activity based on student engagement level
+            const hash = (s.id * 31 + cellDate.getDate() * 7 + cellDate.getMonth() * 13) % 100;
+            const threshold = s.status === 'excellent' ? 25 : s.status === 'on-track' ? 45 : s.status === 'attention' ? 70 : 85;
+            const dayOfWeek = cellDate.getDay();
+            const weekendPenalty = (dayOfWeek === 0 || dayOfWeek === 6) ? 15 : 0;
+            let level = '';
+            if (hash + weekendPenalty < threshold * 0.4) level = 'l4';
+            else if (hash + weekendPenalty < threshold * 0.6) level = 'l3';
+            else if (hash + weekendPenalty < threshold * 0.8) level = 'l2';
+            else if (hash + weekendPenalty < threshold) level = 'l1';
+            calendarHTML += `<div class="activity-cell ${level}"></div>`;
+          }
+        }
+        calendarHTML += '</div>';
+      }
+      calendarHTML += '</div>';
+
+      // Unit coverage bars
+      const unitBarsHTML = UNITS.map((unit, i) => {
+        const visited = s.unitBreakdown[i];
+        const pct = Math.round(visited / unit.lessons * 100);
+        return `
+          <div class="unit-bar-row">
+            <div class="unit-bar-label">${unit.name}</div>
+            <div class="unit-bar-track">
+              <div class="unit-bar-fill" style="width:${pct}%;background:${unit.color}"></div>
+            </div>
+            <div class="unit-bar-value">${pct}%</div>
+          </div>`;
+      }).join('');
+
+      // Recent activity feed
+      const feedItems = generateFeed(s);
+      const feedHTML = feedItems.map(f => `
+        <div class="feed-item">
+          <div class="feed-icon ${f.type}">${f.icon}</div>
+          <div class="feed-text">${f.text}</div>
+          <div class="feed-time">${f.time}</div>
+        </div>
+      `).join('');
+
+      // Suggestions
+      const suggestions = generateSuggestions(s);
+      const suggestionsHTML = suggestions.map(sg => `<div class="suggestion-card">${sg}</div>`).join('');
+
+      document.getElementById('detailBody').innerHTML = `
+        <div class="detail-section">
+          <div class="detail-section-title">Quick Stats</div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.75rem;">
+            <div style="text-align:center;padding:0.75rem;background:var(--bg-card);border-radius:var(--radius-sm);box-shadow:var(--shadow);">
+              <div style="font-size:1.4rem;font-weight:700;font-family:'Source Serif 4',serif;">${s.lessonsVisited}</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">Lessons</div>
+            </div>
+            <div style="text-align:center;padding:0.75rem;background:var(--bg-card);border-radius:var(--radius-sm);box-shadow:var(--shadow);">
+              <div style="font-size:1.4rem;font-weight:700;font-family:'Source Serif 4',serif;color:${s.kcAvg >= 70 ? 'var(--green)' : s.kcAvg >= 55 ? 'var(--amber)' : 'var(--red)'};">${s.kcAvg}%</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">KC Avg</div>
+            </div>
+            <div style="text-align:center;padding:0.75rem;background:var(--bg-card);border-radius:var(--radius-sm);box-shadow:var(--shadow);">
+              <div style="font-size:1.4rem;font-weight:700;font-family:'Source Serif 4',serif;">${Math.round(s.timeMinutes / 60)}h</div>
+              <div style="font-size:0.7rem;color:var(--text-muted);">Study Time</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Activity (Last 4 Weeks)</div>
+          ${calendarHTML}
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Unit Coverage</div>
+          <div class="unit-bars">${unitBarsHTML}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Recent Activity</div>
+          <div class="activity-feed">${feedHTML}</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Suggested Actions</div>
+          ${suggestionsHTML}
+        </div>
+      `;
+
+      overlay.classList.add('open');
+      panel.classList.add('open');
+    }
+
+    function closeDetail() {
+      document.getElementById('detailOverlay').classList.remove('open');
+      document.getElementById('detailPanel').classList.remove('open');
+    }
+
+    function generateFeed(s) {
+      const items = [];
+      const lessonNames = [
+        'The Treaty of Versailles', 'The League of Nations', 'Hitler\'s Foreign Policy',
+        'Medieval Medicine', 'Renaissance Surgery', 'Public Health in Industrial Britain',
+        'Elizabeth\'s Court', 'Religious Settlement', 'Mary Queen of Scots',
+        'The Boom of the 1920s', 'The Wall Street Crash', 'The New Deal'
+      ];
+      // Generate plausible recent activity
+      const engaged = s.status === 'excellent' || s.status === 'on-track';
+      const count = engaged ? 6 : 3;
+      for (let i = 0; i < count; i++) {
+        const dAgo = i + (engaged ? 0 : 3);
+        const lesson = lessonNames[(s.id * 3 + i) % lessonNames.length];
+        const types = engaged ? ['visit','quiz','listen','visit','quiz','visit'] : ['visit','listen','visit'];
+        const type = types[i % types.length];
+        const time = dAgo === 0 ? 'Today' : dAgo === 1 ? 'Yesterday' : `${dAgo}d ago`;
+
+        if (type === 'visit') {
+          items.push({ type: 'visit', icon: '\u{1F4D6}', text: `Visited <strong>${lesson}</strong>`, time });
+        } else if (type === 'quiz') {
+          const score = Math.round(s.kcAvg / 20 + (Math.sin(i * 3.7) > 0 ? 1 : 0));
+          items.push({ type: 'quiz', icon: '\u2713', text: `Scored <strong>${score}/5</strong> on ${lesson} KC`, time });
+        } else {
+          const mins = 8 + ((s.id + i) % 7);
+          items.push({ type: 'listen', icon: '\u{1F3A7}', text: `Listened to narration for <strong>${mins} min</strong>`, time });
+        }
+      }
+      return items;
+    }
+
+    function generateSuggestions(s) {
+      const suggestions = [];
+      const days = daysAgo(s.lastActive);
+
+      if (days > 10) suggestions.push(`<strong>${s.name}</strong> hasn't logged in for ${days} days. Consider a 1-to-1 check-in or a nudge via email/ClassCharts.`);
+      if (s.kcAvg < 45) suggestions.push(`Knowledge check average is ${s.kcAvg}% — well below the class average. May benefit from differentiated resources or targeted revision sessions.`);
+
+      // Check for unit gaps
+      const weakestUnit = s.unitBreakdown.indexOf(Math.min(...s.unitBreakdown));
+      const weakPct = Math.round(s.unitBreakdown[weakestUnit] / UNITS[weakestUnit].lessons * 100);
+      if (weakPct < 40) {
+        suggestions.push(`Weakest unit is <strong>${UNITS[weakestUnit].name}</strong> (${weakPct}% covered). Consider setting a targeted homework on this unit.`);
+      }
+
+      if (s.lessonsVisited >= 40 && s.kcAvg >= 75) {
+        suggestions.push(`Strong performance across the board. Consider setting extension tasks or peer mentoring role for weaker students.`);
+      }
+
+      if (s.lessonsVisited > 25 && s.kcAvg < 50) {
+        suggestions.push(`${s.name} is visiting lessons but scoring low — engagement is there but understanding may need support. Consider intervention group.`);
+      }
+
+      if (suggestions.length === 0) {
+        suggestions.push('On track. No specific interventions needed at this time. Continue monitoring.');
+      }
+
+      return suggestions;
+    }
+
+    // ─────────────────────────────────────────────
+    //  Event Listeners
+    // ─────────────────────────────────────────────
+
+    // Table sorting
+    document.querySelectorAll('.student-table th[data-sort]').forEach(th => {
+      th.addEventListener('click', () => {
+        const field = th.dataset.sort;
+        if (currentSort.field === field) {
+          currentSort.dir = currentSort.dir === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort = { field, dir: field === 'name' ? 'asc' : 'desc' };
+        }
+        renderStudentTable(document.getElementById('studentSearch').value);
+      });
+    });
+
+    // Search
+    document.getElementById('studentSearch').addEventListener('input', e => {
+      renderStudentTable(e.target.value);
+    });
+
+    // Detail panel close
+    document.getElementById('detailClose').addEventListener('click', closeDetail);
+    document.getElementById('detailOverlay').addEventListener('click', closeDetail);
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+
+    // ─────────────────────────────────────────────
+    //  Init
+    // ─────────────────────────────────────────────
+    renderMetrics();
+    renderAlerts();
+    renderStudentTable();
+    renderEngagementChart();
+    renderHeatmap();
+    renderCountdown();
+  </script>
+</body>
+</html>
