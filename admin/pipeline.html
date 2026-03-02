@@ -200,14 +200,15 @@
 
     // ---- Upload Form ----
     function renderUploadForm() {
-      var selectedFile = null;
+      var selectedFiles = [];
 
       contentEl.innerHTML =
         '<div class="upload-card">' +
           '<h2>Upload Teaching Resources</h2>' +
+          '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">Upload PPTs, Word docs, and PDFs. Select multiple files or drag a folder.</p>' +
           '<div class="dropzone" id="dropzone">' +
-            '<p>Drag and drop a .pptx file here, or click to browse</p>' +
-            '<input type="file" id="file-input" accept=".pptx,.ppt">' +
+            '<p>Drag and drop files or a folder here, or click to browse</p>' +
+            '<input type="file" id="file-input" multiple>' +
           '</div>' +
           '<div class="form-grid">' +
             '<div class="form-group"><label>Subject Name</label><input type="text" id="subject-name" placeholder="e.g. Drama"></div>' +
@@ -224,53 +225,110 @@
       var fileInput = document.getElementById('file-input');
       var uploadBtn = document.getElementById('upload-btn');
 
+      function updateDropzoneDisplay() {
+        if (selectedFiles.length === 0) return;
+        var totalKB = 0;
+        for (var i = 0; i < selectedFiles.length; i++) totalKB += selectedFiles[i].size;
+        var names = selectedFiles.map(function (f) { return f.name; });
+        var display = names.length <= 5 ? names.join(', ') : names.slice(0, 5).join(', ') + ' + ' + (names.length - 5) + ' more';
+        dropzone.innerHTML = '<p class="file-name">' + selectedFiles.length + ' file(s) selected</p><p style="font-size:0.75rem;color:var(--text-muted)">' + display + '</p><p>' + (totalKB / 1024).toFixed(0) + ' KB total</p>';
+        uploadBtn.disabled = !document.getElementById('subject-name').value;
+      }
+
+      function collectFiles(fileList) {
+        selectedFiles = [];
+        for (var i = 0; i < fileList.length; i++) {
+          var f = fileList[i];
+          var ext = f.name.split('.').pop().toLowerCase();
+          if (['pptx', 'ppt', 'docx', 'doc', 'pdf', 'txt'].includes(ext)) {
+            selectedFiles.push(f);
+          }
+        }
+        updateDropzoneDisplay();
+      }
+
+      // Folder drop support — recursively read directory entries
+      async function getFilesFromDrop(dataTransfer) {
+        var files = [];
+        var items = dataTransfer.items;
+        if (!items) { return Array.from(dataTransfer.files); }
+
+        var promises = [];
+        for (var i = 0; i < items.length; i++) {
+          var entry = items[i].webkitGetAsEntry ? items[i].webkitGetAsEntry() : null;
+          if (entry) {
+            promises.push(readEntry(entry, files));
+          } else if (items[i].getAsFile) {
+            files.push(items[i].getAsFile());
+          }
+        }
+        await Promise.all(promises);
+        return files;
+      }
+
+      function readEntry(entry, files) {
+        return new Promise(function (resolve) {
+          if (entry.isFile) {
+            entry.file(function (f) { files.push(f); resolve(); });
+          } else if (entry.isDirectory) {
+            var reader = entry.createReader();
+            reader.readEntries(function (entries) {
+              Promise.all(entries.map(function (e) { return readEntry(e, files); })).then(resolve);
+            });
+          } else {
+            resolve();
+          }
+        });
+      }
+
       dropzone.addEventListener('click', function () { fileInput.click(); });
       dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('dragover'); });
       dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('dragover'); });
-      dropzone.addEventListener('drop', function (e) {
+      dropzone.addEventListener('drop', async function (e) {
         e.preventDefault();
         dropzone.classList.remove('dragover');
-        if (e.dataTransfer.files.length) {
-          selectedFile = e.dataTransfer.files[0];
-          dropzone.innerHTML = '<p class="file-name">' + selectedFile.name + '</p><p>' + (selectedFile.size / 1024).toFixed(0) + ' KB</p>';
-          uploadBtn.disabled = !document.getElementById('subject-name').value;
-        }
+        dropzone.innerHTML = '<p>Reading files...</p>';
+        var allFiles = await getFilesFromDrop(e.dataTransfer);
+        collectFiles(allFiles);
       });
       fileInput.addEventListener('change', function () {
-        if (fileInput.files.length) {
-          selectedFile = fileInput.files[0];
-          dropzone.innerHTML = '<p class="file-name">' + selectedFile.name + '</p><p>' + (selectedFile.size / 1024).toFixed(0) + ' KB</p>';
-          uploadBtn.disabled = !document.getElementById('subject-name').value;
-        }
+        collectFiles(fileInput.files);
       });
       document.getElementById('subject-name').addEventListener('input', function () {
-        uploadBtn.disabled = !this.value || !selectedFile;
+        uploadBtn.disabled = !this.value || selectedFiles.length === 0;
       });
 
       uploadBtn.addEventListener('click', async function () {
-        if (!selectedFile) return;
+        if (selectedFiles.length === 0) return;
         uploadBtn.disabled = true;
-        uploadBtn.textContent = 'Uploading...';
 
         try {
-          var tempId = crypto.randomUUID();
-          var storagePath = tempId + '/' + selectedFile.name;
+          var jobPrefix = crypto.randomUUID();
+          var filenames = [];
 
-          var uploadResult = await sb.storage.from('pipeline-uploads').upload(storagePath, selectedFile);
-          if (uploadResult.error) throw new Error('Storage upload failed: ' + uploadResult.error.message);
+          // Upload each file
+          for (var i = 0; i < selectedFiles.length; i++) {
+            uploadBtn.textContent = 'Uploading ' + (i + 1) + '/' + selectedFiles.length + '...';
+            var f = selectedFiles[i];
+            var storagePath = jobPrefix + '/' + f.name;
+            var uploadResult = await sb.storage.from('pipeline-uploads').upload(storagePath, f);
+            if (uploadResult.error) throw new Error('Upload failed for ' + f.name + ': ' + uploadResult.error.message);
+            filenames.push(f.name);
+          }
 
+          // Create the upload_job
           var job = await apiCall('/api/pipeline/upload', {
             subject_name: document.getElementById('subject-name').value,
             exam_board: document.getElementById('exam-board').value,
             spec_code: document.getElementById('spec-code').value,
-            storage_path: storagePath,
-            filename: selectedFile.name,
+            storage_path: jobPrefix,
+            filename: filenames.join(', '),
           });
 
-          uploadBtn.textContent = 'Parsing PPT...';
+          // Parse all files
+          uploadBtn.textContent = 'Parsing files...';
           var parseResult = await apiCall('/api/pipeline/parse', { job_id: job.job_id });
 
-          // Refetch the full job
           var refetch = await sb.from('upload_jobs').select('*').eq('id', job.job_id).single();
           currentJob = refetch.data;
           renderReadyForGeneration(currentJob);
