@@ -87,7 +87,7 @@ T=12   Last narration finishes. All flags green.
 T=12   Commit, push, live.
 ```
 
-**Target: 10-lesson subject in ~12 minutes** with streaming. Previous approaches: 36 min (run 1, sequential), ~20 min target (run 2, batch parallel). Streaming eliminates the wait-for-all-content bottleneck.
+**Target: 10-lesson subject in ~12 minutes** with streaming. Benchmarks: 36 min (run 1, sequential), 21:49 (run 3, streaming with one stuck agent). Streaming eliminates the wait-for-all-content bottleneck.
 
 ### Execution Rules
 
@@ -130,10 +130,12 @@ Plus any additional techniques. If these three are missing, lightbulb links will
 ```
 Hub index pages use a different structure (`guide-hub` div, no `<main>`/`<aside>`).
 
-**CSS/activation agent MUST set `subjects.settings`** jsonb with:
-- `quote_ticker_html` — scrolling quotes for the browse page header
-- `unit_image_positions` — hero image positions for unit cards on browse page
-Also set the unit's `description` field for the browse card subtitle.
+**CSS/activation agent MUST set these Supabase fields** (pipeline_generate.py write does NOT set them):
+- `subjects.settings.quote_ticker_html` — scrolling quotes for the browse page header
+- `units.accent` / `accent_light` / `accent_badge` — the correct colour (pipeline_generate.py only sets colour on first create, not updates)
+- `units.image_url` — a hero image URL to show on the unit card on the browse page
+- `units.subtitle` — description text for the browse card
+- `units.body_class` — CSS class name (e.g. `unit-food-technology-1`)
 
 **Media curation agents MUST search beyond study tools.** Include:
 - Movies and documentaries (search JustWatch UK). Examples: Super Size Me, Fed Up, What the Health for nutrition topics.

@@ -127,19 +127,31 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
     subject_id = result.data[0]["id"]
 
     # Upsert unit
-    colors = config.get("colors", {})
-    accent = colors.get(f"color{unit_index + 1}", colors.get("color1", "#6b7280"))
-    unit_data = {
-        "subject_id": subject_id,
-        "slug": unit_slug,
-        "name": unit_plan["name"],
-        "body_class": f"unit-{plan.get('subject_slug', 'unknown')}-{unit_index + 1}",
-        "accent": accent,
-        "accent_light": accent + "22",
-        "accent_badge": accent + "33",
-        "lesson_count": len(unit_plan.get("lessons", [])),
-    }
-    result = sb.table("units").upsert(unit_data, on_conflict="subject_id,slug").execute()
+    # Check if unit already exists (don't overwrite accent set by activation agent)
+    existing_unit = sb.table("units").select("id").eq("subject_id", subject_id).eq("slug", unit_slug).execute()
+    if existing_unit.data:
+        # Unit exists — only update name and lesson_count, preserve accent/body_class
+        unit_id = existing_unit.data[0]["id"]
+        sb.table("units").update({
+            "name": unit_plan["name"],
+            "lesson_count": len(unit_plan.get("lessons", [])),
+        }).eq("id", unit_id).execute()
+    else:
+        # New unit — set accent from config
+        colors = config.get("colors", {})
+        accent = colors.get(f"color{unit_index + 1}", colors.get("color1", "#6b7280"))
+        unit_data = {
+            "subject_id": subject_id,
+            "slug": unit_slug,
+            "name": unit_plan["name"],
+            "body_class": f"unit-{plan.get('subject_slug', 'unknown')}-{unit_index + 1}",
+            "accent": accent,
+            "accent_light": accent + "22",
+            "accent_badge": accent + "33",
+            "lesson_count": len(unit_plan.get("lessons", [])),
+        }
+        result = sb.table("units").upsert(unit_data, on_conflict="subject_id,slug").execute()
+        unit_id = result.data[0]["id"]
     unit_id = result.data[0]["id"]
 
     # Upsert lesson
