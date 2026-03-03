@@ -253,6 +253,12 @@ function initPracticeQuestions() {
       ['Director', 'director.html'],
       ['Set Design', 'set-design.html'],
       ['Section B', 'section-b-essay.html'],
+      // Food Technology (AQA) — subject-specific
+      ['1 mark \u2014 Define', 'define-1-mark.html'],
+      ['2 marks \u2014 Name/Identify', 'name-identify-2-marks.html'],
+      ['4 marks \u2014 Explain', 'explain-4-marks.html'],
+      ['6 marks \u2014 Explain', 'explain-6-marks.html'],
+      ['8 marks \u2014 Discuss', 'discuss-8-marks.html'],
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],
