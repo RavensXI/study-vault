@@ -88,28 +88,17 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true });
 
     } else if (action === 'approve_all') {
-      // Bulk approve all lessons in review status for a given subject
-      const { subject_slug } = req.body;
-      let query = supabase
+      // Bulk approve all lessons in review status — single update, no loop
+      const { error, count } = await supabase
         .from('lessons')
-        .select('id, unit_id, units!inner(subject_id, subjects!inner(slug))')
+        .update({ status: 'live', approved_at: new Date().toISOString() })
         .eq('status', 'review');
 
-      const { data: reviewLessons } = await query;
-      const toApprove = subject_slug
-        ? (reviewLessons || []).filter(l => l.units?.subjects?.slug === subject_slug)
-        : (reviewLessons || []);
-
-      let count = 0;
-      for (const l of toApprove) {
-        await supabase
-          .from('lessons')
-          .update({ status: 'live', approved_at: new Date().toISOString() })
-          .eq('id', l.id);
-        count++;
+      if (error) {
+        return res.status(500).json({ error: 'Failed to bulk approve', detail: error.message });
       }
 
-      return res.status(200).json({ ok: true, approved: count });
+      return res.status(200).json({ ok: true, approved: count || 0 });
     }
 
     return res.status(400).json({ error: 'Unknown action: ' + action });
