@@ -114,8 +114,8 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "name": plan.get("subject_name", config.get("subject_name", "Unknown")),
         "exam_board": plan.get("exam_board", config.get("exam_board", "Unknown")),
         "spec_code": plan.get("spec_code", config.get("spec_code")) or None,
-        "status": "draft",
-        "is_active": False,
+        "status": "live",
+        "is_active": True,
     }
     if school_id:
         subject_data["school_id"] = school_id
@@ -154,7 +154,7 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "practice_questions": lesson_data.get("practice_questions", []),
         "knowledge_checks": lesson_data.get("knowledge_checks", []),
         "glossary_terms": lesson_data.get("glossary_terms", []),
-        "status": "draft",
+        "status": "live",
     }
     result = sb.table("lessons").upsert(lesson_record, on_conflict="unit_id,lesson_number").execute()
     lesson_id = result.data[0]["id"]

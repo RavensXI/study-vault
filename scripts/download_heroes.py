@@ -145,12 +145,14 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
         r2_url = upload_file_to_r2(r2_client, IMAGES_BUCKET, final_path, r2_key, "image/jpeg")
         print(f"  R2 URL: {r2_url}")
 
-        # Update Supabase lesson
-        alt_text = lesson_title
+        # Update Supabase lesson — use Wikimedia title (cleaned) as caption, lesson title as alt
+        wiki_title = chosen.get("title", "").replace("File:", "").rsplit(".", 1)[0].replace("_", " ").strip()
+        alt_text = f"{lesson_title} — {wiki_title}" if wiki_title else lesson_title
         print(f"  Updating Supabase lesson {lesson_id[:8]}...")
         sb.table("lessons").update({
             "hero_image_url": r2_url,
             "hero_image_alt": alt_text,
+            "hero_image_caption": wiki_title or lesson_title,
         }).eq("id", lesson_id).execute()
         print(f"  Done!")
 

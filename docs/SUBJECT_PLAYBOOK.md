@@ -99,6 +99,42 @@ Use the `model` parameter on Agent tool calls. **Opus for anything that touches 
 | CSS + subject activation | **opus** | Touches code — must get it right first time |
 | getGuideUrl mappings | **opus** | Touches code |
 
+### Agent Prompt Requirements (lessons learned from QA)
+
+**Revision technique guides MUST include these three slugs** (hardcoded in main.js lightbulb tips):
+- `retrieval-practice` — linked from `.key-fact` elements
+- `dual-coding` — linked from `.timeline` elements
+- `elaborative-interrogation` — linked from `.collapsible` elements
+Plus any additional techniques. If these three are missing, lightbulb links will 404.
+
+**All guide pages MUST use this HTML structure** (required by `guide-loader.js`):
+```html
+<main class="lesson-content">
+  <!-- guide content here -->
+</main>
+<aside class="lesson-sidebar">
+  <div class="guide-quick-ref">...</div>
+  <div class="guide-other">...</div>
+</aside>
+```
+Hub index pages use a different structure (`guide-hub` div, no `<main>`/`<aside>`).
+
+**CSS/activation agent MUST set `subjects.settings`** jsonb with:
+- `quote_ticker_html` — scrolling quotes for the browse page header
+- `unit_image_positions` — hero image positions for unit cards on browse page
+Also set the unit's `description` field for the browse card subtitle.
+
+**Media curation agents MUST search beyond study tools.** Include:
+- Movies and documentaries (search JustWatch UK). Examples: Super Size Me, Fed Up, What the Health for nutrition topics.
+- Podcasts (search Spotify for specific episodes, not just channels).
+- Don't settle for only BBC Bitesize + Seneca + YouTube — push for varied, engaging content.
+
+**Hero images:** Alt text should be descriptive (not just the lesson title). `download_heroes.py` now cleans the Wikimedia filename into a readable caption.
+
+**Diagrams:** No figcaption needed — alt text is sufficient. `generate_diagrams.py` no longer adds captions.
+
+**Lessons are created with `status: 'live'`** — no manual approval step needed during generation.
+
 ### Manual Scripts (for individual reruns)
 ```bash
 python scripts/generate_diagrams.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]

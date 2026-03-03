@@ -139,15 +139,14 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
     diagram_entry = {
         "url": r2_url,
         "alt": f"Diagram: {lesson_title}",
-        "caption": lesson_title,
     }
     diagrams.append(diagram_entry)
 
-    # Inject figure into content HTML
+    # Inject figure into content HTML (no caption on diagrams — alt text is sufficient)
     content_html = lesson.data.get("content_html") or ""
     if content_html and r2_url not in content_html:
         content_html = inject_diagram_into_html(
-            content_html, r2_url, diagram_entry["alt"], diagram_entry["caption"]
+            content_html, r2_url, diagram_entry["alt"]
         )
 
     sb.table("lessons").update({
