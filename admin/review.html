@@ -91,90 +91,64 @@
 
     var app = document.getElementById('review-app');
     var loadingEl = document.getElementById('review-loading');
-    var currentFilter = 'review'; // Default to showing items in review
+    var currentFilter = 'review';
+    var accessToken = null;
+    var demoUser = null;
 
-    // ---- Auth: must be platform_admin or demo admin ----
+    // ---- Auth ----
     async function checkAdmin() {
-      // Try Supabase SSO session
       var result = await sb.auth.getSession();
       if (result.data.session) {
-        var userId = result.data.session.user.id;
-        var profile = await sb.from('profiles').select('role').eq('id', userId).single();
-        return profile.data && profile.data.role === 'platform_admin';
+        accessToken = result.data.session.access_token;
+        return true;
       }
-
-      // Fallback: demo user (emma/jake are treated as admin for testing)
       try {
         var stored = localStorage.getItem('studyvault-user');
         if (stored) {
           var u = JSON.parse(stored);
-          if (u && u.isDemo && (u.id === 'emma' || u.id === 'jake')) return true;
+          if (u && u.isDemo && (u.id === 'emma' || u.id === 'jake')) {
+            demoUser = u.id;
+            return true;
+          }
         }
       } catch (e) {}
       return false;
     }
 
-    // ---- Fetch review queue ----
-    async function fetchQueue(statusFilter) {
-      var query = sb
-        .from('lessons')
-        .select('id, lesson_number, slug, title, status, updated_at, unit_id, units!inner(name, slug, subject_id, subjects!inner(name, slug))')
-        .order('updated_at', { ascending: false });
-
-      if (statusFilter && statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+    // ---- API helper (uses service key server-side, bypasses RLS) ----
+    async function apiCall(endpoint, body) {
+      var headers = { 'Content-Type': 'application/json' };
+      if (accessToken) {
+        headers['Authorization'] = 'Bearer ' + accessToken;
+      } else if (demoUser) {
+        headers['X-Demo-User'] = demoUser;
       }
-
-      var result = await query;
-      return result.data || [];
+      var opts = { headers: headers };
+      if (body !== undefined) {
+        opts.method = 'POST';
+        opts.body = JSON.stringify(body);
+      }
+      var resp = await fetch(endpoint, opts);
+      var data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'API error');
+      return data;
     }
 
-    // ---- Count by status ----
-    async function fetchCounts() {
-      var statuses = ['draft', 'review', 'approved', 'live'];
-      var counts = {};
-      for (var i = 0; i < statuses.length; i++) {
-        var result = await sb.from('lessons').select('id', { count: 'exact', head: true }).eq('status', statuses[i]);
-        counts[statuses[i]] = result.count || 0;
-      }
-      return counts;
+    // ---- Fetch review queue + counts via API ----
+    async function fetchData(statusFilter) {
+      var url = '/api/pipeline/review?filter=' + (statusFilter || 'review');
+      return await apiCall(url);
     }
 
-    // ---- Approve lesson ----
+    // ---- Approve lesson via API ----
     async function approveLessonAction(lessonId) {
-      await sb.from('lessons').update({
-        status: 'live',
-        approved_at: new Date().toISOString()
-      }).eq('id', lessonId);
-
-      // Log
-      var session = await sb.auth.getSession();
-      await sb.from('content_pipeline_logs').insert({
-        lesson_id: lessonId,
-        from_status: 'review',
-        to_status: 'live',
-        changed_by: session.data.session.user.id,
-        notes: 'Approved via review UI'
-      });
-
+      await apiCall('/api/pipeline/review', { lesson_id: lessonId, action: 'approve' });
       await renderApp();
     }
 
-    // ---- Reject lesson ----
+    // ---- Reject lesson via API ----
     async function rejectLessonAction(lessonId, notes) {
-      await sb.from('lessons').update({
-        status: 'draft'
-      }).eq('id', lessonId);
-
-      var session = await sb.auth.getSession();
-      await sb.from('content_pipeline_logs').insert({
-        lesson_id: lessonId,
-        from_status: 'review',
-        to_status: 'draft',
-        changed_by: session.data.session.user.id,
-        notes: notes || 'Rejected via review UI'
-      });
-
+      await apiCall('/api/pipeline/review', { lesson_id: lessonId, action: 'reject', notes: notes });
       await renderApp();
     }
 
@@ -206,8 +180,9 @@
 
     // ---- Render ----
     async function renderApp() {
-      var counts = await fetchCounts();
-      var lessons = await fetchQueue(currentFilter);
+      var data = await fetchData(currentFilter);
+      var counts = data.counts || {};
+      var lessons = data.lessons || [];
 
       var totalReview = counts.review || 0;
 
@@ -218,6 +193,10 @@
       html += '<div class="review-stat"><span class="review-stat-num">' + (counts.live || 0) + '</span> live</div>';
       html += '<div class="review-stat"><span class="review-stat-num">' + (counts.draft || 0) + '</span> drafts</div>';
       html += '</div></div>';
+
+      if (totalReview > 0) {
+        html += '<div style="margin-bottom:1rem"><button class="review-btn review-btn--approve" id="approve-all-btn" style="padding:0.5rem 1.25rem">Approve All in Review (' + totalReview + ')</button></div>';
+      }
 
       // Filters
       html += '<div class="review-filters">';
@@ -263,6 +242,17 @@
       }
 
       app.innerHTML = html;
+
+      // Bind approve-all button
+      var approveAllBtn = document.getElementById('approve-all-btn');
+      if (approveAllBtn) {
+        approveAllBtn.addEventListener('click', async function () {
+          this.disabled = true;
+          this.textContent = 'Approving...';
+          await apiCall('/api/pipeline/review', { action: 'approve_all' });
+          await renderApp();
+        });
+      }
 
       // Bind filter clicks
       app.querySelectorAll('.review-filter').forEach(function (btn) {
