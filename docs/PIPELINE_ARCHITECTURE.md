@@ -286,14 +286,39 @@ Each route uses the service key for Supabase writes. Auth verified via JWT or de
 
 ## Claude Code Mode (current, Max plan)
 
-Same pipeline, but I (Claude Code) execute each step directly:
-1. Read spec + PPT text from Supabase: `pipeline_generate.py info {job_id}` + `text {job_id}`
-2. Generate each lesson's JSON (including `diagram_prompt` + `hero_keywords`)
-3. Write to Supabase: `pipeline_generate.py write {job_id} {unit} {num} _temp.json` per lesson
-4. Run all assets autonomously: `pipeline_generate.py run-all-assets {job_id}` — diagrams + heroes in parallel, then narration
-5. Curate related media via web search, mark `media_done` per lesson
-6. Generate exam/revision technique guides via `SupabaseWriter`
-7. Send to review: `pipeline_generate.py review {job_id}`
+Same pipeline, but Claude Code executes all steps autonomously. **Never pause to ask for permission between steps — run the full pipeline end-to-end once the user says "go".**
+
+### Execution order (maximise parallelism)
+
+**Phase 1 — Setup (~1 min):**
+1. Find job: `pipeline_generate.py info {job_id}` + `text {job_id}`
+2. Read spec from `Spec and Materials/` via `python -m markitdown`
+3. Create lesson plan + pipeline steps in Supabase
+
+**Phase 2 — Maximum parallel launch (~5 min):**
+Launch ALL of these as background agents in a **single message**:
+- N lesson content agents (one per lesson, using Write tool for JSON + `pipeline_generate.py write`)
+- 1 exam technique guides agent (only needs question types from plan)
+- 1 revision technique guides agent (only needs subject name)
+- 1 CSS + subject activation + homepage picker agent (only needs slug + colour)
+- 1 getGuideUrl mapping agent (only needs question type strings)
+
+**Phase 3 — Assets + media in parallel (~10-15 min):**
+When content agents complete, launch simultaneously:
+- `pipeline_generate.py run-all-assets {job_id}` (background) — diagrams + heroes parallel, then narration
+- N media curation agents (one per lesson, all at once) — web search doesn't depend on assets
+
+**Phase 4 — Commit + deploy:**
+When all flags are green: commit CSS/JS changes, push to Vercel.
+
+### Key rules
+- **Never ask, just execute** — stopping for permission adds minutes of wasted round-trips
+- **Launch all agents in single batches** — never stagger (3 now, 7 later)
+- **Use Write tool for JSON files** — not bash heredocs (shell escaping breaks on HTML content)
+- **Media runs alongside assets** — media only needs lesson titles, not diagrams/heroes/narration
+- **Guides and CSS run alongside content** — they don't depend on lesson HTML
+
+### Target: 10-lesson subject in under 20 minutes
 
 **Asset scripts (subject-agnostic, all accept `--job-id`):**
 - `scripts/generate_diagrams.py` — reads `diagram_prompt` from pipeline_steps, calls Gemini, uploads to R2
@@ -301,19 +326,23 @@ Same pipeline, but I (Claude Code) execute each step directly:
 - `scripts/generate_narration.py` — extracts text from lesson HTML, Azure Speech TTS, uploads to R2
 - `scripts/pipeline_generate.py assets {job_id}` — shows per-lesson asset completion table
 
-The prompts are identical — the only difference is whether a human (Tom) triggers each step in conversation or a browser triggers it via API calls.
+See `docs/SUBJECT_PLAYBOOK.md` for the full execution playbook with timing targets.
 
 ---
 
 ## Estimated Timelines
 
-| Subject size | Content | Assets (parallel) | Narration | Total |
-|-------------|---------|-------------------|-----------|-------|
-| 10 lessons | ~10 min | ~15 min | ~15 min | ~40 min |
-| 15 lessons | ~15 min | ~20 min | ~20 min | ~55 min |
-| 30 lessons | ~30 min | ~35 min | ~35 min | ~100 min |
+**Claude Code mode (with full parallelism):**
 
-These assume the commercial API with parallelisation. In Claude Code mode, content generation is slower (conversation overhead) but asset generation runs at the same speed.
+| Subject size | Phase 2 (content + guides + CSS) | Phase 3 (assets + media parallel) | Total |
+|-------------|----------------------------------|-----------------------------------|-------|
+| 10 lessons | ~5 min | ~13 min | ~18 min |
+| 15 lessons | ~7 min | ~18 min | ~25 min |
+| 30 lessons | ~12 min | ~25 min | ~37 min |
+
+**Benchmark:** Food Technology (10 lessons) first build took 36 minutes with suboptimal ordering. With full parallelism (guides/CSS alongside content, media alongside assets), target is under 20 minutes.
+
+Narration is always the bottleneck — it runs sequentially per lesson (~8-12 min for 10 lessons). Everything else parallelises well.
 
 ---
 

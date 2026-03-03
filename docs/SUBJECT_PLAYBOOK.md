@@ -18,72 +18,79 @@ Before starting a build, the teacher MUST provide:
 
 ## One-Shot Build Flow
 
-### Step 1: Upload & Parse
-Teacher uploads PPTs via `/admin/pipeline`. The web UI:
-- Uploads files to Supabase Storage (`pipeline-uploads` bucket)
-- Extracts text from PPTs (serverless parser)
-- Creates an `upload_job` with extracted text and subject config
+**CRITICAL: Execute autonomously. Never stop to ask the user for permission between steps. The entire flow runs without pausing.**
 
-### Step 2: Plan & Generate Content
-In Claude Code:
+### Phase 1: Setup (T=0)
+
+Teacher uploads PPTs via `/admin/pipeline`. Claude Code finds the job:
 ```bash
 python scripts/pipeline_generate.py info <job_id>
 python scripts/pipeline_generate.py text <job_id>
 ```
 
-Claude Code reads the spec + extracted PPT text, then generates each lesson's JSON (content, questions, knowledge checks, glossary, plus `diagram_prompt` and `hero_keywords` for asset scripts).
+Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create the lesson plan and pipeline steps in Supabase.
 
-```bash
-# Write each lesson to Supabase
-python scripts/pipeline_generate.py write <job_id> <unit_slug> <lesson_number> _temp_lesson.json
+### Phase 2: Maximum Parallel Launch (T=1 min)
+
+**Launch ALL of the following as parallel background agents in a SINGLE message:**
+
+| Agent | Depends on | Count |
+|-------|-----------|-------|
+| Lesson content agents (one per lesson) | Plan | 10-30 |
+| Exam technique guides agent | Question types from plan | 1 |
+| Revision technique guides agent | Subject name only | 1 |
+| CSS + subject activation agent | Subject slug + colour | 1 |
+| getGuideUrl mapping agent | Question type strings | 1 |
+
+**Why this works:** Guides, CSS, and mappings do NOT depend on lesson content. They only need the plan (question types, subject slug, colour). Launch them at the same time as content generation.
+
+Each lesson content agent uses the **Write tool** (not bash heredocs) to create its temp JSON, then runs `pipeline_generate.py write`. The Write tool handles all escaping natively.
+
+### Phase 3: Assets + Media in Parallel (T=5 min, when content lands)
+
+**As soon as all content agents complete, launch TWO things simultaneously:**
+
+```
+Background: python scripts/pipeline_generate.py run-all-assets <job_id>
+Parallel:   10 media curation agents (one per lesson, all at once)
 ```
 
-### Step 3: Asset Generation
-Run all assets autonomously:
+**Why this works:** Media curation (web search for podcasts, videos, study tools) does NOT depend on diagrams, heroes, or narration. It only needs lesson titles/topics. Run it alongside asset generation, not after.
+
+### Phase 4: Commit + Push (T=15-18 min)
+
+When media agents and assets both finish:
 ```bash
-python scripts/pipeline_generate.py run-all-assets <job_id>
+python scripts/pipeline_generate.py status <job_id>   # Verify all flags green
+git add / commit / push                                # Deploy to Vercel
 ```
 
-This orchestrates:
-1. **Diagrams + Heroes in parallel** — `generate_diagrams.py` reads `diagram_prompt` from pipeline_steps, calls Gemini; `download_heroes.py` reads `hero_keywords`, searches Wikimedia
-2. **Narration (sequential, after diagrams)** — `generate_narration.py` extracts text from lesson HTML, generates Azure Speech TTS, uploads MP3s to R2
+### Target Timeline
 
-Or run individually:
+```
+T=0    Plan + pipeline steps
+T=1    PARALLEL: content agents + guides + CSS + getGuideUrl
+T=5    Content done → PARALLEL: run-all-assets + media agents
+T=12   Media done
+T=18   Narration finishes (slowest asset). All flags green.
+T=18   Commit, push, live.
+```
+
+**For a 10-lesson subject, target is under 20 minutes.** The first Food Tech build took 36 minutes due to sequential execution and unnecessary pauses. The optimised flow above eliminates both.
+
+### Execution Rules
+
+1. **Never ask permission** — execute the full pipeline autonomously once the user says "go"
+2. **Launch all agents in single batches** — never launch 3 then wait then launch 7 more
+3. **Use the Write tool for JSON files** — not bash heredocs (shell escaping issues)
+4. **Maximise parallelism** — if task B doesn't depend on task A's output, run them together
+5. **Media runs alongside assets, not after** — this saves ~10 minutes
+
+### Manual Scripts (for individual reruns)
 ```bash
 python scripts/generate_diagrams.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
 python scripts/download_heroes.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
 python scripts/generate_narration.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
-```
-
-### Step 4: Related Media
-Claude Code curates related media via web search (scripts can't do this). For each lesson:
-- Research podcasts, videos, movies, TV, documentaries, study tools
-- Write via `SupabaseWriter.update_related_media()`, then mark `media_done=true` on the pipeline step
-
-See `RELATED_MEDIA_PIPELINE.md` for category rules and link conventions.
-
-### Step 5: Exam & Revision Technique Guides
-Claude Code generates guide pages via `SupabaseWriter.upsert_guide()`:
-- Exam technique hub + one guide per question type
-- Revision technique hub + 7-8 standard guides adapted for the subject
-
-### Step 6: Subject Activation
-- Add CSS colour classes to `css/style.css` (light + dark mode)
-- Update `subjects` table: `is_active: true`, set `settings` jsonb (quote ticker, unit images)
-- Update root `index.html` subject picker
-- Register question type names in `getGuideUrl()` mapping in `js/main.js`
-
-### Step 7: QA Review
-```bash
-python scripts/pipeline_generate.py review <job_id>
-```
-
-Then use `/admin/review` to QC each lesson and `/admin/images` to adjust hero image positions.
-
-### Step 8: Check Progress
-```bash
-python scripts/pipeline_generate.py status <job_id>   # Summary with asset flags
-python scripts/pipeline_generate.py assets <job_id>    # Detailed per-lesson table
 ```
 
 ---
