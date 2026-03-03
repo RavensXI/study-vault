@@ -31,11 +31,12 @@
     .lesson-row-header .lesson-num { color: var(--text-muted); font-size: 0.78rem; }
     .lesson-row-body { padding: 1.25rem; }
 
-    /* Hero preview — matches lesson page crop */
-    /* Lesson page grid: 1160px max - 48px padding - 260px sidebar - 48px gap = ~804px content column */
-    .hero-preview { position: relative; width: 100%; max-width: 804px; height: 280px; border-radius: 10px; overflow: hidden; background: #f0ede8; margin-bottom: 1rem; cursor: grab; }
+    /* Hero preview — uses the EXACT same CSS as the lesson page hero */
+    /* Wrapped in a container that simulates the lesson content column width */
+    .hero-preview-wrap { width: 100%; max-width: calc(var(--page-max, 1160px) - var(--sidebar-width, 260px) - 3rem - 3rem); }
+    .hero-preview { position: relative; margin: 0 0 1rem; border-radius: var(--radius, 16px); overflow: hidden; background: #f0ede8; cursor: grab; }
     .hero-preview:active { cursor: grabbing; }
-    .hero-preview img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; user-select: none; }
+    .hero-preview img { display: block; width: 100%; height: 280px; object-fit: cover; pointer-events: none; user-select: none; }
     .hero-preview .no-image { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.82rem; }
     .hero-preview .position-label { position: absolute; bottom: 8px; right: 8px; background: rgba(0,0,0,0.65); color: white; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; pointer-events: none; }
 
@@ -295,15 +296,15 @@
           html += '<div class="lesson-row-header"><h3>Lesson ' + l.lesson_number + ': ' + esc(l.title) + '</h3><span class="lesson-num">' + u.name + '</span></div>';
           html += '<div class="lesson-row-body">';
 
-          // Hero preview
-          html += '<div class="hero-preview" id="preview-' + l.id + '">';
+          // Hero preview — wrapped to simulate lesson content column width
+          html += '<div class="hero-preview-wrap"><div class="hero-preview" id="preview-' + l.id + '">';
           if (l.hero_image_url) {
             html += '<img src="' + esc(l.hero_image_url) + '" alt="' + esc(l.hero_image_alt || '') + '" style="object-position: ' + pos + ';">';
             html += '<span class="position-label">' + pos + '</span>';
           } else {
             html += '<div class="no-image">No hero image</div>';
           }
-          html += '</div>';
+          html += '</div></div>';
 
           // Position slider
           html += '<div class="position-row">';
