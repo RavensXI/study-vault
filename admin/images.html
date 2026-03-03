@@ -313,12 +313,10 @@
           html += '<span class="pos-value" id="posval-' + l.id + '">' + yVal + '%</span>';
           html += '</div>';
 
-          // Caption and alt text editing
-          html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;max-width:804px">';
-          html += '<div><label style="font-size:0.72rem;font-weight:600;display:block;margin-bottom:0.25rem">Caption</label>';
-          html += '<input type="text" class="caption-input" id="caption-' + l.id + '" value="' + esc(l.hero_image_caption || '') + '" placeholder="Image caption shown below hero" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.78rem;font-family:inherit;box-sizing:border-box"></div>';
-          html += '<div><label style="font-size:0.72rem;font-weight:600;display:block;margin-bottom:0.25rem">Alt Text</label>';
-          html += '<input type="text" class="alt-input" id="alt-' + l.id + '" value="' + esc(l.hero_image_alt || '') + '" placeholder="Descriptive alt text for accessibility" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.78rem;font-family:inherit;box-sizing:border-box"></div>';
+          // Caption (also used as alt text)
+          html += '<div style="margin-bottom:1rem;max-width:804px">';
+          html += '<label style="font-size:0.72rem;font-weight:600;display:block;margin-bottom:0.25rem">Caption</label>';
+          html += '<input type="text" class="caption-input" id="caption-' + l.id + '" value="' + esc(l.hero_image_caption || l.hero_image_alt || '') + '" placeholder="Describe the image (shown below hero + used for accessibility)" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.78rem;font-family:inherit;box-sizing:border-box">';
           html += '</div>';
 
           // Candidates area
@@ -559,15 +557,15 @@
       var slider = document.querySelector('.pos-slider[data-lesson-id="' + lessonId + '"]');
       var posValue = 'center ' + (slider ? slider.value : 50) + '%';
 
-      // Read caption and alt from input fields
+      // Caption field doubles as alt text
       var captionEl = document.getElementById('caption-' + lessonId);
-      var altEl = document.getElementById('alt-' + lessonId);
+      var captionVal = captionEl ? captionEl.value : '';
 
       var body = {
         lesson_id: lessonId,
         hero_image_position: posValue,
-        hero_image_caption: captionEl ? captionEl.value : undefined,
-        hero_image_alt: altEl ? altEl.value : undefined,
+        hero_image_caption: captionVal,
+        hero_image_alt: captionVal,
       };
 
       // If a new candidate was selected
