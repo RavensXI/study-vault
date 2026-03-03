@@ -42,8 +42,27 @@ module.exports = async function handler(req, res) {
   if (req.method === 'POST') {
     const { lesson_id, action, notes } = req.body;
 
-    if (!lesson_id || !action) {
-      return res.status(400).json({ error: 'Missing lesson_id or action' });
+    if (!action) {
+      return res.status(400).json({ error: 'Missing action' });
+    }
+
+    // approve_all doesn't need lesson_id — handle it first
+    if (action === 'approve_all') {
+      const { data, error } = await supabase
+        .from('lessons')
+        .update({ status: 'live', approved_at: new Date().toISOString() })
+        .eq('status', 'review')
+        .select('id');
+
+      if (error) {
+        return res.status(500).json({ error: 'Failed to bulk approve', detail: error.message });
+      }
+
+      return res.status(200).json({ ok: true, approved: data ? data.length : 0 });
+    }
+
+    if (!lesson_id) {
+      return res.status(400).json({ error: 'Missing lesson_id' });
     }
 
     if (action === 'approve') {
@@ -87,18 +106,6 @@ module.exports = async function handler(req, res) {
 
       return res.status(200).json({ ok: true });
 
-    } else if (action === 'approve_all') {
-      // Bulk approve all lessons in review status — single update, no loop
-      const { error, count } = await supabase
-        .from('lessons')
-        .update({ status: 'live', approved_at: new Date().toISOString() })
-        .eq('status', 'review');
-
-      if (error) {
-        return res.status(500).json({ error: 'Failed to bulk approve', detail: error.message });
-      }
-
-      return res.status(200).json({ ok: true, approved: count || 0 });
     }
 
     return res.status(400).json({ error: 'Unknown action: ' + action });

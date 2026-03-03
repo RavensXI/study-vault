@@ -249,8 +249,14 @@
         approveAllBtn.addEventListener('click', async function () {
           this.disabled = true;
           this.textContent = 'Approving...';
-          await apiCall('/api/pipeline/review', { action: 'approve_all' });
-          await renderApp();
+          try {
+            var result = await apiCall('/api/pipeline/review', { action: 'approve_all' });
+            this.textContent = 'Approved ' + (result.approved || 0) + ' lessons';
+            setTimeout(function () { renderApp(); }, 1000);
+          } catch (err) {
+            this.textContent = 'Error: ' + err.message;
+            this.disabled = false;
+          }
         });
       }
 
