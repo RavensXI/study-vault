@@ -86,6 +86,19 @@ T=18   Commit, push, live.
 4. **Maximise parallelism** — if task B doesn't depend on task A's output, run them together
 5. **Media runs alongside assets, not after** — this saves ~10 minutes
 
+### Model Selection
+
+Use the `model` parameter on Agent tool calls. **Opus for anything that touches code or lesson quality. Cheaper models for everything else.**
+
+| Task | Model | Why |
+|------|-------|-----|
+| Lesson content agents | **opus** | Quality-critical — content accuracy, HTML structure, exam alignment |
+| Exam technique guides | **sonnet** | Templated writing, no code changes |
+| Revision technique guides | **sonnet** | Templated writing, no code changes |
+| Media curation agents | **haiku** | Web search + write JSON to Supabase. No creative writing, no code. |
+| CSS + subject activation | **opus** | Touches code — must get it right first time |
+| getGuideUrl mappings | **opus** | Touches code |
+
 ### Manual Scripts (for individual reruns)
 ```bash
 python scripts/generate_diagrams.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
