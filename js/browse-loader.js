@@ -96,7 +96,7 @@
     html += '<section class="hero"><h1>' + esc(subject.name) + '</h1></section>';
 
     // Unit grid — uses same .unit-card structure as static pages
-    html += '<div class="unit-grid">';
+    html += '<div class="unit-grid' + (units.length === 1 ? ' single-unit' : '') + '">';
 
     // Get image positions from subject settings
     var imgPositions = (subject.settings && subject.settings.unit_image_positions) || {};
