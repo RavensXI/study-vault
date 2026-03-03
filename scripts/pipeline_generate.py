@@ -156,6 +156,8 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "glossary_terms": lesson_data.get("glossary_terms", []),
         "status": "live",
     }
+    if lesson_data.get("description"):
+        lesson_record["description"] = lesson_data["description"]
     result = sb.table("lessons").upsert(lesson_record, on_conflict="unit_id,lesson_number").execute()
     lesson_id = result.data[0]["id"]
 
