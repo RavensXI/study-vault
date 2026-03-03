@@ -131,7 +131,13 @@ Plus any additional techniques. If these three are missing, lightbulb links will
 Hub index pages use a different structure (`guide-hub` div, no `<main>`/`<aside>`).
 
 **CSS/activation agent MUST set these Supabase fields** (pipeline_generate.py write does NOT set them):
-- `subjects.settings.quote_ticker_html` — scrolling quotes for the browse page header
+- `subjects.settings.quote_ticker_html` — scrolling quotes. MUST use the full HTML structure (not bare spans):
+  ```html
+  <div class="quote-ticker"><div class="quote-ticker-track">
+  <span class="quote-item" style="--q-color: #ACCENT;">"Quote" <em>— Author</em></span>
+  ...duplicate first 2 quotes at end for seamless loop...
+  </div></div>
+  ```
 - `units.accent` / `accent_light` / `accent_badge` — the correct colour (pipeline_generate.py only sets colour on first create, not updates)
 - `units.image_url` — a hero image URL to show on the unit card on the browse page
 - `units.subtitle` — description text for the browse card
