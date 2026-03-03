@@ -694,9 +694,13 @@
           html += '</textarea>';
           html += '</div>';
 
-          // Action buttons
-          html += '<div class="action-row">';
-          html += '<button class="btn btn-primary diag-generate-btn" data-lesson-id="' + l.id + '">Generate with Gemini</button>';
+          // Iterate checkbox + action buttons
+          var hasDiagram = diagrams && diagrams.length > 0;
+          html += '<div class="action-row" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">';
+          if (hasDiagram) {
+            html += '<label style="font-size:0.78rem;display:flex;align-items:center;gap:0.35rem;cursor:pointer"><input type="checkbox" id="diag-iterate-' + l.id + '" checked> Iterate on current image</label>';
+          }
+          html += '<button class="btn btn-primary diag-generate-btn" data-lesson-id="' + l.id + '">' + (hasDiagram ? 'Regenerate' : 'Generate') + ' with Gemini</button>';
           html += '<span class="save-toast" id="diag-toast-' + l.id + '">Saved!</span>';
           html += '</div>';
 
@@ -747,6 +751,9 @@
       statusEl.textContent = 'Sending to Gemini API... This may take 15-30 seconds.';
       resultEl.style.display = 'none';
 
+      var iterateEl = document.getElementById('diag-iterate-' + lessonId);
+      var iterate = iterateEl ? iterateEl.checked : false;
+
       try {
         var resp = await fetch('/api/pipeline/regenerate-diagram', {
           method: 'POST',
@@ -754,6 +761,7 @@
           body: JSON.stringify({
             lesson_id: lessonId,
             prompt: prompt,
+            iterate: iterate,
           }),
         });
 

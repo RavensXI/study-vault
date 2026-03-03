@@ -21,7 +21,7 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { lesson_id, prompt } = req.body;
+  const { lesson_id, prompt, iterate } = req.body;
 
   if (!lesson_id) {
     return res.status(400).json({ error: 'Missing lesson_id' });
@@ -60,13 +60,29 @@ module.exports = async function handler(req, res) {
   const unitSlug = unit?.slug || 'unknown';
 
   try {
-    // 2. Call Gemini API to generate the diagram
+    // 2. Build Gemini API payload — optionally include current image for iteration
+    const parts = [{
+      text: prompt.trim() + '\n\nGenerate the image only. No text response needed.'
+    }];
+
+    if (iterate && lesson.diagrams && lesson.diagrams.length > 0) {
+      const currentUrl = lesson.diagrams[0].url;
+      try {
+        const imgResp = await fetch(currentUrl);
+        if (imgResp.ok) {
+          const imgBuffer = Buffer.from(await imgResp.arrayBuffer());
+          const imgBase64 = imgBuffer.toString('base64');
+          const mime = currentUrl.endsWith('.png') ? 'image/png' : 'image/jpeg';
+          parts.push({ inlineData: { mimeType: mime, data: imgBase64 } });
+        }
+      } catch (imgErr) {
+        console.warn('Could not fetch current diagram for iteration:', imgErr.message);
+        // Continue without the image — falls back to text-only generation
+      }
+    }
+
     const geminiPayload = {
-      contents: [{
-        parts: [{
-          text: prompt.trim() + '\n\nGenerate the image only. No text response needed.'
-        }]
-      }],
+      contents: [{ parts }],
       generationConfig: {
         responseModalities: ['IMAGE', 'TEXT'],
         temperature: 1.0,
