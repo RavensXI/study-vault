@@ -2,20 +2,22 @@
 Pipeline Generate — Helper for Claude Code content generation sessions.
 
 Reads an upload_job from Supabase (PPT extracted text + lesson plan),
-provides functions to write generated lessons back to the database.
-Designed to be used within a Claude Code session where Claude generates
-the content and this script handles all DB operations.
+provides functions to write generated lessons back to the database,
+and orchestrates asset generation scripts.
 
 Usage (from Claude Code):
     python scripts/pipeline_generate.py info <job_id>
     python scripts/pipeline_generate.py text <job_id>
     python scripts/pipeline_generate.py write <job_id> <unit_slug> <lesson_number> <json_file>
     python scripts/pipeline_generate.py status <job_id>
+    python scripts/pipeline_generate.py assets <job_id>
+    python scripts/pipeline_generate.py run-all-assets <job_id>
     python scripts/pipeline_generate.py review <job_id>
 """
 
 import json
 import os
+import subprocess
 import sys
 
 try:
@@ -24,16 +26,11 @@ try:
 except (AttributeError, OSError):
     pass
 
-from supabase import create_client
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
 
-
-def get_client():
-    url = os.environ.get("SUPABASE_URL")
-    key = os.environ.get("SUPABASE_SERVICE_KEY")
-    if not url or not key:
-        print("ERROR: SUPABASE_URL and SUPABASE_SERVICE_KEY must be set")
-        sys.exit(1)
-    return create_client(url, key)
+from lib.supabase_client import get_client
+from lib.pipeline import get_progress_summary, get_job_subject_slug
 
 
 def cmd_info(job_id):
@@ -123,7 +120,6 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
     if school_id:
         subject_data["school_id"] = school_id
     else:
-        # Find or use the first school as default
         schools = sb.table("schools").select("id").limit(1).execute()
         subject_data["school_id"] = schools.data[0]["id"] if schools.data else None
 
@@ -163,8 +159,8 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
     result = sb.table("lessons").upsert(lesson_record, on_conflict="unit_id,lesson_number").execute()
     lesson_id = result.data[0]["id"]
 
-    # Update pipeline step
-    sb.table("pipeline_steps").upsert({
+    # Update pipeline step — include asset metadata if present in lesson JSON
+    step_data = {
         "job_id": job_id,
         "unit_slug": unit_slug,
         "lesson_number": lesson_number,
@@ -173,7 +169,24 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         "content_done": True,
         "questions_done": True,
         "glossary_done": True,
-    }, on_conflict="job_id,unit_slug,lesson_number").execute()
+        "subject_slug": subject_slug,
+    }
+
+    # Store diagram prompt if provided in lesson JSON
+    if lesson_data.get("diagram_prompt"):
+        step_data["diagram_prompt"] = lesson_data["diagram_prompt"]
+
+    # Store hero keywords if provided in lesson JSON
+    if lesson_data.get("hero_keywords"):
+        step_data["hero_keywords"] = lesson_data["hero_keywords"]
+
+    # Store diagram style if provided
+    if lesson_data.get("diagram_style"):
+        step_data["diagram_style"] = lesson_data["diagram_style"]
+
+    sb.table("pipeline_steps").upsert(
+        step_data, on_conflict="job_id,unit_slug,lesson_number"
+    ).execute()
 
     # Update lessons_created count
     completed = sb.table("pipeline_steps").select("id").eq("job_id", job_id).eq("content_done", True).execute()
@@ -183,21 +196,161 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
     }).eq("id", job_id).execute()
 
     print(f"OK: Lesson {lesson_number} '{lesson_plan['title']}' written to Supabase (id: {lesson_id})")
+    if lesson_data.get("diagram_prompt"):
+        print(f"    diagram_prompt stored ({len(lesson_data['diagram_prompt'])} chars)")
+    if lesson_data.get("hero_keywords"):
+        print(f"    hero_keywords stored: {lesson_data['hero_keywords']}")
 
 
 def cmd_status(job_id):
-    """Show pipeline progress summary."""
+    """Show pipeline progress summary with all asset flags."""
+    sb = get_client()
+    summary = get_progress_summary(sb, job_id)
+    total = summary["total"]
+
+    print(f"Pipeline Progress ({total} lessons):")
+    print(f"  Content:   {summary['content']}/{total}")
+    print(f"  Diagrams:  {summary['diagrams']}/{total}")
+    print(f"  Heroes:    {summary['heroes']}/{total}")
+    print(f"  Narration: {summary['narration']}/{total}")
+    print(f"  Media:     {summary['media']}/{total}")
+    if summary["errors"]:
+        print(f"  Errors:    {summary['errors']}")
+
+    # Per-lesson detail
+    steps = sb.table("pipeline_steps").select("*").eq("job_id", job_id).order("unit_slug").order("lesson_number").execute()
+    print()
+    for s in (steps.data or []):
+        flags = ""
+        flags += "C" if s["content_done"] else "."
+        flags += "D" if s["diagrams_done"] else "."
+        flags += "H" if s["hero_done"] else "."
+        flags += "N" if s["narration_done"] else "."
+        flags += "M" if s["media_done"] else "."
+        err = f" ERR: {s['last_error'][:40]}" if s.get("last_error") else ""
+        print(f"  [{flags}] L{s['lesson_number']:02d} {s['lesson_title']}{err}")
+
+    print(f"\n  Legend: C=Content D=Diagrams H=Hero N=Narration M=Media")
+
+
+def cmd_assets(job_id):
+    """Show detailed per-lesson asset completion table."""
     sb = get_client()
     steps = sb.table("pipeline_steps").select("*").eq("job_id", job_id).order("unit_slug").order("lesson_number").execute()
 
-    total = len(steps.data) if steps.data else 0
-    done = sum(1 for s in (steps.data or []) if s["content_done"])
-    errors = sum(1 for s in (steps.data or []) if s.get("last_error"))
+    if not steps.data:
+        print("No pipeline steps found for this job.")
+        return
 
-    print(f"Progress: {done}/{total} lessons generated ({errors} errors)")
-    for s in (steps.data or []):
-        icon = "[OK]" if s["content_done"] else ("[ERR]" if s.get("last_error") else "[  ]")
-        print(f"  {icon} L{s['lesson_number']} {s['lesson_title']}")
+    # Header
+    print(f"{'Lesson':<8} {'Unit':<20} {'Content':>7} {'Diag':>6} {'Hero':>6} {'Narr':>6} {'Media':>6} {'Prompt':>7} {'Keywords':>8}")
+    print("-" * 85)
+
+    for s in steps.data:
+        yes_no = lambda v: "yes" if v else " - "
+        has_prompt = "yes" if s.get("diagram_prompt") else " - "
+        has_kw = "yes" if s.get("hero_keywords") else " - "
+        print(
+            f"L{s['lesson_number']:02d}      "
+            f"{s['unit_slug']:<20} "
+            f"{yes_no(s['content_done']):>7} "
+            f"{yes_no(s['diagrams_done']):>6} "
+            f"{yes_no(s['hero_done']):>6} "
+            f"{yes_no(s['narration_done']):>6} "
+            f"{yes_no(s['media_done']):>6} "
+            f"{has_prompt:>7} "
+            f"{has_kw:>8}"
+        )
+
+    summary = get_progress_summary(sb, job_id)
+    total = summary["total"]
+    print(f"\nTotals: C={summary['content']}/{total} D={summary['diagrams']}/{total} "
+          f"H={summary['heroes']}/{total} N={summary['narration']}/{total} M={summary['media']}/{total}")
+
+
+def cmd_run_all_assets(job_id):
+    """Orchestrate: diagrams + heroes in parallel, then narration."""
+    sb = get_client()
+
+    # Verify all content is done
+    summary = get_progress_summary(sb, job_id)
+    if summary["content"] < summary["total"]:
+        print(f"ERROR: Not all content is done ({summary['content']}/{summary['total']}). "
+              f"Complete content generation first.")
+        sys.exit(1)
+
+    print(f"Running asset generation for job {job_id}")
+    print(f"  {summary['total']} lessons, subject: {get_job_subject_slug(sb, job_id)}")
+    print()
+
+    python = sys.executable
+
+    # Step 1: Run diagrams and heroes in parallel
+    print("Step 1: Diagrams + Heroes (parallel)")
+    print("=" * 50)
+
+    procs = []
+
+    if summary["diagrams"] < summary["total"]:
+        print("  Starting diagram generation...")
+        p_diag = subprocess.Popen(
+            [python, os.path.join(SCRIPT_DIR, "generate_diagrams.py"), "--job-id", job_id],
+            stdout=sys.stdout, stderr=sys.stderr,
+        )
+        procs.append(("diagrams", p_diag))
+    else:
+        print("  Diagrams: all done, skipping")
+
+    if summary["heroes"] < summary["total"]:
+        print("  Starting hero image download...")
+        p_hero = subprocess.Popen(
+            [python, os.path.join(SCRIPT_DIR, "download_heroes.py"), "--job-id", job_id],
+            stdout=sys.stdout, stderr=sys.stderr,
+        )
+        procs.append(("heroes", p_hero))
+    else:
+        print("  Heroes: all done, skipping")
+
+    # Wait for parallel processes
+    for name, proc in procs:
+        rc = proc.wait()
+        status = "OK" if rc == 0 else f"FAILED (exit {rc})"
+        print(f"\n  {name}: {status}")
+
+    # Step 2: Run narration (after diagrams — placement can shift narration IDs)
+    print(f"\nStep 2: Narration (sequential)")
+    print("=" * 50)
+
+    # Re-check progress after parallel step
+    summary = get_progress_summary(sb, job_id)
+    if summary["narration"] < summary["total"]:
+        print("  Starting narration generation...")
+        rc = subprocess.call(
+            [python, os.path.join(SCRIPT_DIR, "generate_narration.py"), "--job-id", job_id],
+            stdout=sys.stdout, stderr=sys.stderr,
+        )
+        status = "OK" if rc == 0 else f"FAILED (exit {rc})"
+        print(f"\n  narration: {status}")
+    else:
+        print("  Narration: all done, skipping")
+
+    # Final summary
+    summary = get_progress_summary(sb, job_id)
+    total = summary["total"]
+    print(f"\n{'=' * 50}")
+    print(f"ASSET GENERATION COMPLETE")
+    print(f"{'=' * 50}")
+    print(f"  Content:   {summary['content']}/{total}")
+    print(f"  Diagrams:  {summary['diagrams']}/{total}")
+    print(f"  Heroes:    {summary['heroes']}/{total}")
+    print(f"  Narration: {summary['narration']}/{total}")
+    print(f"  Media:     {summary['media']}/{total} (curated separately)")
+
+    all_done = all(summary[k] >= total for k in ("content", "diagrams", "heroes", "narration"))
+    if all_done:
+        print(f"\nAll automated assets complete! Next: curate related media, then review.")
+    else:
+        print(f"\nSome assets still pending — check errors above.")
 
 
 def cmd_review(job_id):
@@ -217,7 +370,7 @@ def cmd_review(job_id):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print(__doc__)
+        print(__doc__.strip())
         sys.exit(1)
 
     cmd = sys.argv[1]
@@ -234,6 +387,10 @@ if __name__ == "__main__":
         cmd_write(job_id, sys.argv[3], sys.argv[4], sys.argv[5])
     elif cmd == "status":
         cmd_status(job_id)
+    elif cmd == "assets":
+        cmd_assets(job_id)
+    elif cmd == "run-all-assets":
+        cmd_run_all_assets(job_id)
     elif cmd == "review":
         cmd_review(job_id)
     else:

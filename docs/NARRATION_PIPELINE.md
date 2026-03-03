@@ -22,7 +22,7 @@ Speed: ~49 clips per minute (near-instant). A full 10-lesson subject generates i
 
 ## Narration Progress
 
-**All 140 lessons fully narrated.** ~4,600 MP3 clips total, hosted on Cloudflare R2.
+**All 152 lessons fully narrated.** ~5,000 MP3 clips total, hosted on Cloudflare R2.
 
 | Unit | Lessons | Clips | Voice | Status |
 |------|---------|-------|-------|--------|
@@ -35,6 +35,8 @@ Speed: ~49 clips per minute (near-instant). A full 10-lesson subject generates i
 | Geography Paper 1 | 20/20 | ~600 | Ollie (odd) + Bella (even) | Complete, on R2 |
 | Geography Paper 2 | 20/20 | ~600 | Ollie (odd) + Bella (even) | Complete, on R2 |
 | Sport Science R180 | 10/10 | 350 | Ollie (odd) + Bella (even) | Complete, on R2 |
+| Drama Blood Brothers | 6/6 | ~200 | Ollie (odd) + Bella (even) | Complete, on R2 |
+| Drama Rise Up | 6/6 | ~200 | Ollie (odd) + Bella (even) | Complete, on R2 |
 
 ---
 
@@ -54,7 +56,15 @@ Audio file naming: `narration_lesson-NN_nX.mp3` (e.g. `narration_lesson-01_n1.mp
 
 ## Scripts
 
-### `scripts/generate_azure_narration.py`
+**Subject-agnostic script (new, recommended):**
+- `scripts/generate_narration.py --job-id <uuid>` — processes any subject by querying `pipeline_steps` for pending lessons. Accepts `--lessons 1,2,3` filter and `--dry-run`. Uses shared library (`scripts/lib/`).
+
+**Per-subject scripts (deprecated, kept for reference):**
+- `scripts/generate_drama_narration.py` — Drama-specific (hardcoded lesson list)
+- `scripts/generate_azure_narration.py` — Older batch script
+- `scripts/generate_narration_legacy_qwen.py` — Original Qwen3-TTS script (Conflict lessons only)
+
+### `scripts/generate_azure_narration.py` (deprecated)
 
 Batch TTS generator using Azure Speech. Outputs MP3 directly.
 
@@ -112,7 +122,7 @@ All narration MP3s are hosted on **Cloudflare R2** (S3-compatible object storage
 - **Bucket**: `studyvault-audio`
 - **Public URL**: `https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev`
 - **Example**: `https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history/conflict-tension/narration_lesson-01_n1.mp3`
-- **Total size**: ~834 MB across ~4,600 files
+- **Total size**: ~834 MB across ~5,000 files
 - **Free tier**: 10 GB storage, 10M reads/month, zero egress — well within limits
 
 File organisation on R2 mirrors local paths:
@@ -154,7 +164,7 @@ Each lesson's `window.narrationManifest` contains entries like:
 
 Kept for reference — Conflict & Tension lessons 01–14 were originally generated with this approach but have since been regenerated with Azure Speech.
 
-- `scripts/generate_narration.py` — batch script for Qwen3-TTS voice cloning
+- `scripts/generate_narration_legacy_qwen.py` — batch script for Qwen3-TTS voice cloning
 - `scripts/voice-reference/voice_sample_30s.wav` — 30s teacher reference clip
 - `scripts/voice-reference/voice_sample.wav` — full 58.9s reference
 - `scripts/runpod/` — RunPod cloud GPU deployment scripts

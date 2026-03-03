@@ -1,395 +1,246 @@
-"""Generate per-paragraph narration audio for a StudyVault lesson.
+"""
+Subject-agnostic TTS narration generator.
+
+Queries pipeline_steps for lessons needing narration, generates MP3s via
+Azure Speech, uploads to R2, and updates Supabase manifests.
 
 Usage:
-    python generate_narration.py conflict-tension/lesson-01.html
-
-Reads every element with data-narration-id from the lesson HTML,
-generates a WAV clip for each via Qwen3-TTS voice cloning, and
-writes the updated manifest back into the HTML.
-
-Output files go into the lesson's directory as narration_lesson-NN_nX.wav.
+    python scripts/generate_narration.py --job-id <uuid>
+    python scripts/generate_narration.py --job-id <uuid> --lessons 1,2,3
+    python scripts/generate_narration.py --job-id <uuid> --dry-run
 """
 
-import sys
+import argparse
+import io
 import os
-import re
-import html
+import sys
 import time
-import threading
 
-# Force UTF-8 output on Windows (avoids cp1252 crashes when logging to file)
-if sys.stdout.encoding != 'utf-8':
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-if sys.stderr.encoding != 'utf-8':
-    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+# Fix Windows console encoding
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+    os.environ["PYTHONUTF8"] = "1"
+try:
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+except (AttributeError, OSError):
+    try:
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
-# ---------------------------------------------------------------------------
-# Config
-# ---------------------------------------------------------------------------
-
+# Add scripts/ to path for lib imports
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
-VOICE_REF_DIR = os.path.join(SCRIPT_DIR, "voice-reference")
-REF_AUDIO = os.path.join(VOICE_REF_DIR, "new test clone.m4a")
-REF_AUDIO_WAV = os.path.join(VOICE_REF_DIR, "voice_sample_30s.wav")  # 30s clip — best accent quality on CPU
+sys.path.insert(0, SCRIPT_DIR)
 
-# Transcript of the 30s reference clip (corrected from Whisper output)
-REF_TEXT = ("The Treaty of Versailles was shaped by three leaders with very different goals. "
-            "Understanding their clashing aims is key to explaining why the treaty ended up the way it did. "
-            "The Big Three were David Lloyd George of Britain, Georges Clemenceau of France, "
-            "and Woodrow Wilson of the USA. Germany was not invited. Although 32 nations attended "
-            "the Paris Peace Conference from January 1919, and Italy made it a Big Four, "
-            "Italy was virtually ignored, so in reality it was")
-
-# Labels to skip — these are visual-only and shouldn't be narrated
-SKIP_LABELS = {"Key Fact", "Exam Tip"}
-
-# ---------------------------------------------------------------------------
-# Text extraction
-# ---------------------------------------------------------------------------
-
-def strip_html(s):
-    """Remove HTML tags, decode entities, normalise whitespace."""
-    s = re.sub(r'<[^>]+>', '', s)
-    s = html.unescape(s)
-    # Normalise whitespace
-    s = re.sub(r'\s+', ' ', s).strip()
-    return s
+from lib.supabase_client import get_client
+from lib.r2 import get_r2_client, upload_bytes_to_r2, AUDIO_BUCKET, AUDIO_PUBLIC_URL
+from lib.narration import (
+    extract_narration_chunks,
+    generate_audio_rest,
+    get_mp3_duration,
+    get_voice_for_lesson,
+    AZURE_KEY,
+)
+from lib.pipeline import (
+    get_pending_lessons,
+    mark_asset_done,
+    mark_asset_error,
+    get_job_subject_slug,
+    get_progress_summary,
+)
 
 
-def normalise_for_speech(s):
-    """Clean up text for more natural TTS output."""
-    s = s.replace('\u2014', ' \u2014 ')   # em dash
-    s = s.replace('\u2013', ' to ')        # en dash → "to"
-    s = s.replace('&', ' and ')
-    s = s.replace('vs.', 'versus')
-    # Rate slashes like "km/h" → "per"
-    s = re.sub(r'(\d)\s*/\s*([a-zA-Z])', r'\1 per \2', s)
-    # Collapse multiple spaces
-    s = re.sub(r'\s+', ' ', s).strip()
-    return s
+def process_lesson(sb, r2_client, step, subject_slug):
+    """Process a single lesson: fetch HTML, extract chunks, generate TTS, upload, update manifest.
 
+    Args:
+        sb: Supabase client.
+        r2_client: R2 S3 client.
+        step: pipeline_step dict (with joined lessons data).
+        subject_slug: Subject slug for R2 key paths.
 
-def find_inner_html(content, start_pos, tag):
-    """Find the inner HTML of an element starting at start_pos (the '<' of the opening tag).
-
-    Uses a nesting counter to handle nested tags of the same type.
-    Returns (inner_html, end_pos) or (None, -1) if not found.
+    Returns:
+        (clips_generated, total_chars, elapsed_seconds)
     """
-    # Find end of opening tag
-    gt_pos = content.index('>', start_pos)
-    inner_start = gt_pos + 1
+    lesson = step.get("lessons") or {}
+    lesson_id = step["lesson_id"]
+    unit_slug = step["unit_slug"]
+    lesson_number = step["lesson_number"]
 
-    # Count nesting to find matching close tag
-    depth = 1
-    pos = inner_start
-    open_re = re.compile(r'<' + tag + r'[\s>/]')
-    close_re = re.compile(r'</' + tag + r'>')
+    voice_name, voice_label = get_voice_for_lesson(lesson_number)
 
-    while depth > 0 and pos < len(content):
-        next_open = open_re.search(content, pos)
-        next_close = close_re.search(content, pos)
+    print(f"\n  {unit_slug} / Lesson {lesson_number:02d} ({voice_label})")
+    print(f"  {'=' * 50}")
 
-        if next_close is None:
-            break
+    lesson_start = time.time()
 
-        if next_open and next_open.start() < next_close.start():
-            depth += 1
-            pos = next_open.end()
-        else:
-            depth -= 1
-            if depth == 0:
-                return content[inner_start:next_close.start()], next_close.end()
-            pos = next_close.end()
+    # Combine HTML parts for parsing
+    combined_html = ""
+    for field in ("content_html", "exam_tip_html", "conclusion_html"):
+        html_part = lesson.get(field)
+        if html_part:
+            combined_html += html_part
 
-    return None, -1
+    if not combined_html:
+        # Fallback: fetch directly from lessons table
+        direct = sb.table("lessons").select("content_html, exam_tip_html, conclusion_html").eq("id", lesson_id).single().execute()
+        if direct.data:
+            for field in ("content_html", "exam_tip_html", "conclusion_html"):
+                html_part = direct.data.get(field)
+                if html_part:
+                    combined_html += html_part
 
+    if not combined_html:
+        print("  ERROR: No HTML content found")
+        return 0, 0, 0.0
 
-def extract_chunks(html_path):
-    """Extract narration chunks from lesson HTML.
+    # Extract narration chunks
+    chunks = extract_narration_chunks(combined_html)
+    if not chunks:
+        print("  ERROR: No narration chunks found (no data-narration-id elements)")
+        return 0, 0, 0.0
 
-    Returns list of { id: "n1", text: "..." } in document order.
+    print(f"  Found {len(chunks)} narration chunks")
 
-    For container elements (key-fact, exam-tip, conclusion), excludes:
-    - Visual labels (.key-fact-label, .exam-tip-label)
-    - Text belonging to child elements with their own data-narration-id
-    """
-    with open(html_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    chunks = []
-
-    # Find every element with data-narration-id
-    for m in re.finditer(r'<(\w+)\s([^>]*data-narration-id="(n\d+)"[^>]*)>', content):
-        tag = m.group(1)
-        nid = m.group(3)
-        start_pos = m.start()
-
-        inner, _ = find_inner_html(content, start_pos, tag)
-        if inner is None:
-            continue
-
-        # Remove child elements that have their own data-narration-id
-        cleaned = inner
-        for child_m in re.finditer(
-            r'<(\w+)\s[^>]*data-narration-id="n\d+"[^>]*>',
-            inner
-        ):
-            child_tag = child_m.group(1)
-            child_inner, child_end = find_inner_html(inner, child_m.start(), child_tag)
-            if child_inner is not None:
-                # Remove the entire child element from cleaned
-                full_child = inner[child_m.start():child_end]
-                cleaned = cleaned.replace(full_child, '', 1)
-
-        # Remove label divs (key-fact-label, exam-tip-label)
-        cleaned = re.sub(
-            r'<div\s+class="(?:key-fact|exam-tip)-label"[^>]*>.*?</div>',
-            '', cleaned, flags=re.DOTALL
-        )
-
-        text = strip_html(cleaned)
-
-        # Skip empty chunks
-        if not text:
-            continue
-
-        text = normalise_for_speech(text)
-        if text:
-            chunks.append({"id": nid, "text": text})
-
-    return chunks
-
-
-# ---------------------------------------------------------------------------
-# Audio generation (Qwen3-TTS)
-# ---------------------------------------------------------------------------
-
-MODEL_ID = "Qwen/Qwen3-TTS-12Hz-1.7B-Base"
-CHUNK_TIMEOUT = 600  # 10 minutes max per chunk (CPU generation is slow)
-
-
-def load_model():
-    """Load Qwen3-TTS model."""
-    import torch
-    from qwen_tts import Qwen3TTSModel
-
-    device = "cuda:0" if torch.cuda.is_available() else "cpu"
-    print(f"Loading Qwen3-TTS on {device}...")
-
-    kwargs = {}
-    if device != "cpu":
-        kwargs["device_map"] = device
-    else:
-        kwargs["device_map"] = "cpu"
-
-    model = Qwen3TTSModel.from_pretrained(MODEL_ID, **kwargs)
-    print(f"Model loaded on {device}")
-    return model
-
-
-def create_voice_prompt(model):
-    """Build a reusable voice clone prompt from the reference audio (ICL mode for accent)."""
-    print(f"Building voice clone prompt from {REF_AUDIO_WAV}...")
-    prompts = model.create_voice_clone_prompt(
-        ref_audio=REF_AUDIO_WAV,
-        ref_text=REF_TEXT,
-        x_vector_only_mode=False
-    )
-    print("Voice clone prompt ready.")
-    return prompts
-
-
-def generate_clip(model, text, voice_prompt, output_path):
-    """Generate a single narration clip. Returns duration in seconds, or None on timeout."""
-    import soundfile as sf
-    import numpy as np
-
-    result = [None]
-    error = [None]
-
-    def _run():
-        try:
-            wavs, sr = model.generate_voice_clone(
-                text=text,
-                language="english",
-                voice_clone_prompt=voice_prompt,
-            )
-            audio = wavs[0]  # single text input → single output
-            sf.write(output_path, audio, sr)
-            duration = len(audio) / sr
-            result[0] = round(duration, 2)
-        except Exception as e:
-            error[0] = e
-
-    t = threading.Thread(target=_run, daemon=True)
-    t.start()
-    t.join(timeout=CHUNK_TIMEOUT)
-
-    if t.is_alive():
-        print(f"  TIMEOUT after {CHUNK_TIMEOUT}s — skipping this chunk")
-        if os.path.exists(output_path):
-            os.remove(output_path)
-        return None
-
-    if error[0]:
-        print(f"  ERROR: {error[0]}")
-        return None
-
-    return result[0]
-
-
-# ---------------------------------------------------------------------------
-# HTML manifest update
-# ---------------------------------------------------------------------------
-
-def update_manifest(html_path, manifest_entries):
-    """Write the new narrationManifest into the lesson HTML."""
-    with open(html_path, 'r', encoding='utf-8') as f:
-        content = f.read()
-
-    # Build JS manifest array
-    items = []
-    for entry in manifest_entries:
-        items.append(
-            '      { id: "%s", src: "%s", duration: %s }'
-            % (entry["id"], entry["src"], entry["duration"])
-        )
-    manifest_js = "[\n" + ",\n".join(items) + "\n    ]"
-
-    # Replace the existing narrationManifest line
-    content = re.sub(
-        r'window\.narrationManifest\s*=\s*\[.*?\];',
-        'window.narrationManifest = ' + manifest_js + ';',
-        content,
-        flags=re.DOTALL
-    )
-
-    with open(html_path, 'w', encoding='utf-8') as f:
-        f.write(content)
-
-    print(f"Updated manifest in {html_path} ({len(manifest_entries)} clips)")
-
-
-# ---------------------------------------------------------------------------
-# Main
-# ---------------------------------------------------------------------------
-
-def process_lesson(html_path, rel_path, model, voice_prompt):
-    """Generate narration for a single lesson. Returns (success_count, skip_count, fail_count)."""
-    import soundfile as sf
-
-    lesson_dir = os.path.dirname(html_path)
-
-    # Derive lesson prefix from filename: "lesson-02.html" → "lesson-02"
-    lesson_prefix = os.path.splitext(os.path.basename(html_path))[0]
-
-    chunks = extract_chunks(html_path)
-    print(f"Found {len(chunks)} narration chunks in {rel_path}")
-    for c in chunks:
-        words = len(c["text"].split())
-        print(f"  {c['id']}: {words} words — {c['text'][:60]}...")
-
-    total_words = sum(len(c["text"].split()) for c in chunks)
-    print(f"\nTotal: {total_words} words")
-    print()
-
+    # Generate audio, upload, build manifest
     manifest = []
-    successes = skips = fails = 0
-    total_start = time.time()
+    total_chars = 0
+    generated_count = 0
+    total_duration = 0.0
 
-    for i, chunk in enumerate(chunks):
-        clip_filename = f"narration_{lesson_prefix}_{chunk['id']}.wav"
-        clip_path = os.path.join(lesson_dir, clip_filename)
+    for narration_id, text in chunks:
+        r2_key = f"{subject_slug}/{unit_slug}/narration_lesson-{lesson_number:02d}_{narration_id}.mp3"
+        public_url = f"{AUDIO_PUBLIC_URL}/{r2_key}"
 
-        # Skip if already generated
-        if os.path.exists(clip_path):
-            data, sr = sf.read(clip_path)
-            duration = round(len(data) / sr, 2)
-            print(f"[{i+1}/{len(chunks)}] {chunk['id']}: SKIPPED (exists, {duration}s)")
-            manifest.append({"id": chunk["id"], "src": clip_filename, "duration": duration})
-            skips += 1
+        total_chars += len(text)
+
+        # Display truncated text
+        display = text[:70] + "..." if len(text) > 70 else text
+        display = display.encode("ascii", errors="replace").decode("ascii")
+        print(f"    {narration_id}: {display}")
+
+        # Generate MP3
+        mp3_bytes = generate_audio_rest(text, voice_name)
+        if mp3_bytes is None:
+            print(f"    FAILED to generate audio for {narration_id}")
             continue
 
-        print(f"[{i+1}/{len(chunks)}] {chunk['id']}: Generating ({len(chunk['text'].split())} words)...")
-        clip_start = time.time()
+        # Calculate duration
+        duration = get_mp3_duration(mp3_bytes)
+        total_duration += duration
 
-        duration = generate_clip(model, chunk["text"], voice_prompt, clip_path)
+        # Upload to R2
+        upload_bytes_to_r2(r2_client, AUDIO_BUCKET, r2_key, mp3_bytes, "audio/mpeg")
 
-        elapsed = time.time() - clip_start
+        manifest.append({
+            "id": narration_id,
+            "src": public_url,
+            "duration": duration,
+        })
+        generated_count += 1
+        print(f"           -> {len(mp3_bytes)/1024:.0f} KB, {duration:.1f}s, uploaded")
 
-        if duration is None:
-            print(f"  FAILED after {elapsed:.1f}s — chunk skipped")
-            fails += 1
-            continue
+    if not manifest:
+        print("  ERROR: No audio generated")
+        return 0, 0, 0.0
 
-        print(f"  Done in {elapsed:.1f}s — clip duration: {duration}s")
-        manifest.append({"id": chunk["id"], "src": clip_filename, "duration": duration})
-        successes += 1
+    # Update narration manifest in Supabase
+    sb.table("lessons").update({"narration_manifest": manifest}).eq("id", lesson_id).execute()
 
-    total_elapsed = time.time() - total_start
-    total_audio = sum(m["duration"] for m in manifest)
-    print(f"\nLesson complete in {total_elapsed/60:.1f} minutes")
-    print(f"Total audio duration: {total_audio:.1f}s ({total_audio/60:.1f} min)")
-    print(f"Generated: {successes}  Skipped: {skips}  Failed: {fails}")
+    elapsed = time.time() - lesson_start
+    print(f"  Manifest updated ({len(manifest)} entries)")
+    print(f"  Total: {generated_count} clips, {total_chars:,} chars, {total_duration:.1f}s audio, {elapsed:.1f}s elapsed")
 
-    # Write manifest back into HTML (only includes successful + skipped clips)
-    update_manifest(html_path, manifest)
-    return successes, skips, fails
+    return generated_count, total_chars, elapsed
 
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python generate_narration.py <lesson.html> [lesson2.html ...]")
-        print("Example: python generate_narration.py conflict-tension/lesson-01.html")
-        print("Batch:   python generate_narration.py conflict-tension/lesson-*.html")
+    parser = argparse.ArgumentParser(description="Generate TTS narration for pipeline lessons")
+    parser.add_argument("--job-id", required=True, help="Upload job UUID")
+    parser.add_argument("--lessons", help="Comma-separated lesson numbers to process (default: all pending)")
+    parser.add_argument("--dry-run", action="store_true", help="Show what would be processed without generating")
+    args = parser.parse_args()
+
+    # Validate Azure key
+    if not AZURE_KEY:
+        print("ERROR: AZURE_SPEECH_KEY environment variable not set")
         sys.exit(1)
 
-    # Resolve all lesson paths
-    lessons = []
-    for arg in sys.argv[1:]:
-        path = os.path.join(PROJECT_ROOT, arg)
-        if os.path.exists(path):
-            lessons.append((path, arg))
-        else:
-            print(f"WARNING: File not found, skipping: {arg}")
+    sb = get_client()
 
-    if not lessons:
-        print("ERROR: No valid lesson files found.")
-        sys.exit(1)
+    # Resolve subject slug
+    subject_slug = get_job_subject_slug(sb, args.job_id)
+    print(f"Subject: {subject_slug}")
 
-    print(f"{'='*60}")
-    print(f"BATCH RUN: {len(lessons)} lesson(s)")
-    print(f"{'='*60}\n")
+    # Parse lesson filter
+    specific_lessons = None
+    if args.lessons:
+        specific_lessons = [int(x.strip()) for x in args.lessons.split(",")]
+        print(f"Filtering to lessons: {specific_lessons}")
 
-    # Load model and build voice prompt once for all lessons
-    model = load_model()
-    voice_prompt = create_voice_prompt(model)
-    print("Starting generation...\n")
+    # Get pending lessons
+    pending = get_pending_lessons(sb, args.job_id, "narration_done", specific_lessons)
+    if not pending:
+        print("No lessons pending narration. All done!")
+        return
 
-    batch_start = time.time()
-    results = []
+    print(f"\nFound {len(pending)} lessons needing narration")
+    print("=" * 55)
 
-    for idx, (html_path, rel_path) in enumerate(lessons):
-        print(f"\n{'='*60}")
-        print(f"LESSON {idx+1}/{len(lessons)}: {rel_path}")
-        print(f"{'='*60}\n")
+    if args.dry_run:
+        for step in pending:
+            print(f"  [DRY RUN] L{step['lesson_number']:02d} ({step['unit_slug']}): {step['lesson_title']}")
+        return
 
-        successes, skips, fails = process_lesson(html_path, rel_path, model, voice_prompt)
-        results.append((rel_path, successes, skips, fails))
+    # Create R2 client
+    r2_client = get_r2_client()
 
-    # Final summary
-    batch_elapsed = time.time() - batch_start
-    print(f"\n{'='*60}")
-    print(f"BATCH COMPLETE — {len(lessons)} lessons in {batch_elapsed/60:.1f} minutes")
-    print(f"{'='*60}")
-    for rel_path, s, sk, f in results:
-        status = "OK" if f == 0 else f"WARN ({f} failed)"
-        print(f"  {rel_path}: {s} generated, {sk} skipped — {status}")
-    total_fails = sum(r[3] for r in results)
-    if total_fails:
-        print(f"\n{total_fails} chunk(s) failed (timeout/error) — re-run those lessons to retry.")
-    print()
+    # Process each lesson
+    total_start = time.time()
+    total_clips = 0
+    total_chars = 0
+    lesson_results = []
+
+    for step in pending:
+        try:
+            clips, chars, elapsed = process_lesson(sb, r2_client, step, subject_slug)
+            total_clips += clips
+            total_chars += chars
+            lesson_results.append((step["unit_slug"], step["lesson_number"], clips, chars, elapsed))
+
+            if clips > 0:
+                mark_asset_done(sb, step["id"], "narration_done")
+            else:
+                mark_asset_error(sb, step["id"], "No audio clips generated")
+        except Exception as e:
+            print(f"  ERROR: {e}")
+            mark_asset_error(sb, step["id"], str(e))
+            lesson_results.append((step["unit_slug"], step["lesson_number"], 0, 0, 0.0))
+
+    total_elapsed = time.time() - total_start
+
+    # Summary
+    print(f"\n{'=' * 55}")
+    print(f"SUMMARY")
+    print(f"{'=' * 55}")
+    print(f"{'Unit':<20} {'Lesson':<10} {'Clips':<8} {'Chars':<10} {'Time':<10}")
+    print(f"{'-' * 55}")
+    for unit_slug, lesson_num, clips, chars, elapsed in lesson_results:
+        print(f"{unit_slug:<20} L{lesson_num:02d}       {clips:<8} {chars:<10,} {elapsed:.1f}s")
+    print(f"{'-' * 55}")
+    print(f"{'TOTAL':<31} {total_clips:<8} {total_chars:<10,} {total_elapsed:.1f}s")
+
+    cost_estimate = total_chars * 16 / 1_000_000
+    print(f"\nEstimated cost: ${cost_estimate:.2f} (at $16/1M chars)")
+    if total_elapsed > 0:
+        print(f"Clips/min: {total_clips / (total_elapsed / 60):.0f}")
+
+    # Show overall progress
+    summary = get_progress_summary(sb, args.job_id)
+    print(f"\nJob progress: {summary['narration']}/{summary['total']} narration done")
+    print(f"Done!")
 
 
 if __name__ == "__main__":

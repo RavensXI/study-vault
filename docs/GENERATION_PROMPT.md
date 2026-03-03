@@ -62,7 +62,10 @@ Return a single JSON object with these exact keys:
   "conclusion_html": "...",
   "practice_questions": [...],
   "knowledge_checks": [...],
-  "glossary_terms": [...]
+  "glossary_terms": [...],
+  "diagram_prompt": "Full Gemini prompt for this lesson's pictorial isotype diagram (see DIAGRAM_PIPELINE.md for style rules)",
+  "hero_keywords": ["primary search term", "fallback 1", "fallback 2"],
+  "diagram_style": "gemini_only"
 }
 
 DESCRIPTION (required — used on browse page lesson cards):
@@ -152,6 +155,22 @@ KNOWLEDGE CHECKS:
 GLOSSARY TERMS:
 - Array of { "term": "word", "definition": "Single sentence definition." }
 - Include every term that appears as a <dfn> in the content_html.
+
+DIAGRAM PROMPT (required — used by generate_diagrams.py):
+- A complete, self-contained prompt for Gemini to generate a pictorial isotype diagram.
+- Include the lesson topic, what data/concepts to illustrate, the subject's colour palette, and style instructions.
+- The script sends this prompt directly to Gemini — it must be fully specified with no placeholders.
+- See DIAGRAM_PIPELINE.md for the standard prompt template and style rules.
+
+HERO KEYWORDS (required — used by download_heroes.py):
+- Array of 3-4 Wikimedia Commons search terms: primary query first, then fallbacks.
+- Primary should be the most specific (e.g. "Freedom Riders bus 1961").
+- Fallbacks should be progressively broader (e.g. "civil rights bus", "1960s civil rights movement").
+- Target landscape photographs, not illustrations or logos.
+
+DIAGRAM STYLE (optional, default "gemini_only"):
+- "gemini_only" — Gemini generates the diagram from the prompt text alone (default for most subjects).
+- "matplotlib_gemini" — A matplotlib baseline is generated first, then Gemini transforms it into a pictorial isotype.
 
 Return ONLY valid JSON. No markdown code fences. No explanation text outside the JSON.
 ```

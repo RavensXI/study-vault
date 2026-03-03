@@ -4,6 +4,8 @@
 
 Subject-agnostic process for creating data-driven pictorial infographics for lesson pages. Established with Sport Science, reusable for all future subjects.
 
+> **Default approach: Gemini-only.** The diagram prompt (stored on `pipeline_steps.diagram_prompt`) is sent directly to Gemini without a matplotlib baseline. For data-driven subjects, Claude Code generates matplotlib code as a separate inline step before calling the Gemini script.
+
 ---
 
 ## Overview
@@ -166,6 +168,23 @@ Spin up dedicated QC agents (one per image) to carefully inspect each Gemini out
 
 ## Helper Scripts
 
+**Subject-agnostic script (new, recommended):**
+- `scripts/generate_diagrams.py --job-id <uuid>` — processes any subject by reading `diagram_prompt` from `pipeline_steps`. Accepts `--lessons 1,2,3` filter and `--dry-run`. Uses shared library (`scripts/lib/`).
+
+**Per-subject scripts (deprecated, kept for reference):**
+- `scripts/generate_drama_diagrams.py`
+- `scripts/gemini_regen.py` (standalone helper for single diagram re-generation)
+
+### `scripts/generate_diagrams.py` (recommended)
+
+Generic diagram generator that works for any subject. Reads the `diagram_prompt` stored on each lesson's `pipeline_steps` row and sends it to Gemini. Usage:
+
+```
+python scripts/generate_diagrams.py --job-id <uuid>
+python scripts/generate_diagrams.py --job-id <uuid> --lessons 1,2,3
+python scripts/generate_diagrams.py --job-id <uuid> --dry-run
+```
+
 ### `scripts/gemini_regen.py`
 
 Regeneration helper for QC agents. Takes a matplotlib backup image, an output path, and a prompt file:
@@ -176,7 +195,7 @@ python scripts/gemini_regen.py <matplotlib_backup.jpg> <output.jpg> <prompt.txt>
 
 The agent writes its corrected prompt to a `.txt` file, then calls this script. 180-second timeout.
 
-### `generate_{subject}_diagrams.py`
+### `generate_{subject}_diagrams.py` (deprecated)
 
 Per-subject matplotlib generation script. Contains one function per lesson that creates the data-accurate baseline chart. Run with:
 
@@ -186,7 +205,7 @@ python generate_{subject}_diagrams.py
 
 Generates all diagrams for the subject in one go. Skips existing files unless forced.
 
-### `generate_{subject}_gemini_infographics.py`
+### `generate_{subject}_gemini_infographics.py` (deprecated)
 
 Per-subject Gemini batch script. Contains tailored pictorial prompts for each lesson. Backs up matplotlib originals as `*_matplotlib.jpg` before overwriting. 5-second delay between API calls for rate limiting.
 

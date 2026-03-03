@@ -92,6 +92,9 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 - Admin tools: `/admin/pipeline` (upload/generate), `/admin/review` (QC review), `/admin/images` (hero image QA + diagram QA with Gemini regen)
 - Admin login on homepage with Pipeline, Review, Images nav
 - Pipeline adapter: `scripts/supabase_writer.py` for writing new content to DB
+- Subject-agnostic asset scripts: `generate_narration.py`, `generate_diagrams.py`, `download_heroes.py` (all accept `--job-id`)
+- Asset orchestrator: `pipeline_generate.py run-all-assets {job_id}` runs diagrams + heroes in parallel, then narration
+- Shared library: `scripts/lib/` (supabase_client, r2, narration, wikimedia, gemini, pipeline helpers)
 
 **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
 
@@ -186,25 +189,30 @@ Study Vault/
 │   ├── GENERATION_PROMPT.md  ← Inject-at-call-time prompt for content generation
 │   └── PIPELINE_ARCHITECTURE.md ← Full pipeline architecture docs
 ├── scripts/                  ← Build scripts & voice references
-│   ├── migrate_to_supabase.py       ← Migrate 140 lessons from HTML to Supabase
+│   ├── lib/                         ← Shared library for pipeline scripts
+│   │   ├── supabase_client.py       ← get_client() factory
+│   │   ├── r2.py                    ← R2 upload helpers + bucket constants
+│   │   ├── narration.py             ← NarrationExtractor, Azure TTS, MP3 duration
+│   │   ├── wikimedia.py             ← Wikimedia search, download, resize
+│   │   ├── gemini.py                ← call_gemini_image() wrapper
+│   │   └── pipeline.py              ← get_pending_lessons(), mark_asset_done(), progress
+│   ├── generate_narration.py        ← Subject-agnostic TTS narration (--job-id)
+│   ├── generate_diagrams.py         ← Subject-agnostic Gemini diagrams (--job-id)
+│   ├── download_heroes.py           ← Subject-agnostic Wikimedia heroes (--job-id)
+│   ├── pipeline_generate.py         ← CLI helper (info, text, write, status, assets, run-all-assets, review)
 │   ├── supabase_writer.py           ← Pipeline adapter (DB writes instead of HTML)
+│   ├── migrate_to_supabase.py       ← Migrate 140 lessons from HTML to Supabase
 │   ├── upload_images_to_r2.py       ← Upload hero images + diagrams to R2
-│   ├── gemini_regen.py
-│   ├── generate_azure_narration.py  ← Azure Speech TTS batch generator (MP3 output)
-│   ├── convert_wav_to_mp3.py        ← Batch WAV→MP3 converter (ffmpeg)
-│   ├── upload_to_r2.py              ← Upload narration MP3s to Cloudflare R2
-│   ├── generate_narration.py        ← Legacy Qwen3-TTS (Conflict lessons)
-│   ├── pipeline_generate.py         ← CLI helper for pipeline (info, text, write, status, review)
-│   ├── generate_drama_diagrams.py   ← Drama Gemini diagram generation
-│   ├── generate_drama_narration.py  ← Drama Azure Speech TTS generation
-│   ├── download_drama_heroes.py     ← Drama hero image downloader
+│   ├── gemini_regen.py              ← Standalone Gemini regen helper
+│   ├── generate_azure_narration.py  ← Legacy Azure TTS batch generator
+│   ├── generate_narration_legacy_qwen.py ← Legacy Qwen3-TTS (Conflict lessons)
+│   ├── generate_drama_diagrams.py   ← Drama-specific diagrams (deprecated)
+│   ├── generate_drama_narration.py  ← Drama-specific narration (deprecated)
+│   ├── download_drama_heroes.py     ← Drama-specific heroes (deprecated)
 │   ├── tag_drama_past_papers.py     ← Drama past paper question tagger
-│   ├── generate_sport_*.py
-│   ├── download_sport_heroes.py
-│   ├── insert_sport_images.py
-│   ├── compress_images.py    ← Resize & compress all project images (Pillow)
-│   ├── voice-reference/      ← Voice cloning samples
-│   └── runpod/               ← RunPod deployment scripts
+│   ├── compress_images.py           ← Resize & compress all project images (Pillow)
+│   ├── voice-reference/             ← Voice cloning samples
+│   └── runpod/                      ← RunPod deployment scripts
 ├── tts-research-log.md       ← TTS research (external agents)
 ├── tech-research-log.md      ← EdTech research (external agents)
 └── Spec and Materials/       ← Teacher PPTs (untracked)

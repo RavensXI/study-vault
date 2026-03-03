@@ -273,16 +273,33 @@ The browser orchestrates the rolling pipeline:
 
 Each route uses the service key for Supabase writes. Auth verified via JWT or demo header.
 
+**Script-to-API mapping:**
+
+| Script | Future API Route |
+|--------|-----------------|
+| `generate_narration.py` | `POST /api/pipeline/narrate` |
+| `generate_diagrams.py` | `POST /api/pipeline/diagrams` |
+| `download_heroes.py` | `POST /api/pipeline/heroes` |
+| Claude Code media curation | `POST /api/pipeline/media` |
+
 ---
 
 ## Claude Code Mode (current, Max plan)
 
 Same pipeline, but I (Claude Code) execute each step directly:
-1. Read spec + PPT text from Supabase
-2. Generate each lesson's content in conversation
-3. Write to Supabase via `scripts/pipeline_generate.py`
-4. Run diagram/hero/narration scripts locally
-5. Research related media via web search
+1. Read spec + PPT text from Supabase: `pipeline_generate.py info {job_id}` + `text {job_id}`
+2. Generate each lesson's JSON (including `diagram_prompt` + `hero_keywords`)
+3. Write to Supabase: `pipeline_generate.py write {job_id} {unit} {num} _temp.json` per lesson
+4. Run all assets autonomously: `pipeline_generate.py run-all-assets {job_id}` — diagrams + heroes in parallel, then narration
+5. Curate related media via web search, mark `media_done` per lesson
+6. Generate exam/revision technique guides via `SupabaseWriter`
+7. Send to review: `pipeline_generate.py review {job_id}`
+
+**Asset scripts (subject-agnostic, all accept `--job-id`):**
+- `scripts/generate_diagrams.py` — reads `diagram_prompt` from pipeline_steps, calls Gemini, uploads to R2
+- `scripts/download_heroes.py` — reads `hero_keywords` from pipeline_steps, searches Wikimedia, uploads to R2
+- `scripts/generate_narration.py` — extracts text from lesson HTML, Azure Speech TTS, uploads to R2
+- `scripts/pipeline_generate.py assets {job_id}` — shows per-lesson asset completion table
 
 The prompts are identical — the only difference is whether a human (Tom) triggers each step in conversation or a browser triggers it via API calls.
 

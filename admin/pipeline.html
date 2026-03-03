@@ -88,6 +88,39 @@
     .done-section { text-align: center; padding: 2rem; }
     .done-section h2 { font-family: 'Source Serif 4', serif; color: #16a34a; }
     .done-links { display: flex; gap: 0.75rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap; }
+
+    /* Asset badges */
+    .asset-badges { display: flex; gap: 3px; margin-top: 0.4rem; }
+    .asset-badge { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 18px; border-radius: 3px; font-size: 0.62rem; font-weight: 700; line-height: 1; }
+    .asset-badge.done { background: #d1fae5; color: #065f46; }
+    .asset-badge.pending { background: #f3f4f6; color: #9ca3af; }
+    .asset-badge.error { background: #fee2e2; color: #dc2626; }
+
+    /* Multi-segment progress summary */
+    .progress-segments { display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem; margin-bottom: 1rem; font-size: 0.78rem; }
+    .progress-segments .seg { color: var(--text-muted); }
+    .progress-segments .seg strong { color: var(--text-color); }
+
+    /* Job list */
+    .job-list-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
+    .job-list-header h2 { font-family: 'Source Serif 4', serif; font-size: 1.2rem; margin: 0; }
+    .job-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+    .job-table th { text-align: left; font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); padding: 0.5rem 0.75rem; border-bottom: 2px solid #e5e7eb; }
+    .job-table td { padding: 0.65rem 0.75rem; font-size: 0.82rem; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    .job-table tr.clickable { cursor: pointer; transition: background 0.1s; }
+    .job-table tr.clickable:hover { background: #f9fafb; }
+    .job-subject { font-weight: 600; }
+    .job-file { color: var(--text-muted); font-size: 0.75rem; }
+    .job-date { color: var(--text-muted); font-size: 0.75rem; }
+    .job-counts { font-size: 0.72rem; color: var(--text-muted); }
+    .job-counts strong { color: var(--text-color); }
+    .filter-tabs { display: flex; gap: 0.25rem; background: #f3f4f6; border-radius: 8px; padding: 2px; }
+    .filter-tab { padding: 0.3rem 0.75rem; border-radius: 6px; border: none; background: transparent; cursor: pointer; font-size: 0.75rem; font-weight: 500; color: var(--text-muted); }
+    .filter-tab.active { background: white; color: var(--text-color); box-shadow: 0 1px 2px rgba(0,0,0,0.06); }
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-state p { margin: 0.5rem 0; font-size: 0.875rem; }
+    .back-link { font-size: 0.82rem; color: #4f46e5; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 1rem; }
+    .back-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -154,16 +187,112 @@
         return;
       }
 
-      // Check for existing jobs via API (bypasses RLS for demo users)
+      renderJobList();
+    }
+
+    // ---- Job List (default view) ----
+    async function renderJobList(filter) {
+      if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+      currentJob = null;
+      filter = filter || 'all';
+
+      contentEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem">Loading jobs...</p>';
+
+      var data;
       try {
-        var jobsResult = await apiCall('/api/pipeline/status?latest=1');
-        if (jobsResult.job) {
-          currentJob = jobsResult.job;
-          await resumeJob(currentJob);
-          return;
+        data = await apiCall('/api/pipeline/status?list=1');
+      } catch (e) {
+        contentEl.innerHTML = '<div class="error-msg">Failed to load jobs: ' + e.message + '</div>';
+        return;
+      }
+
+      var jobs = data.jobs || [];
+
+      // Filter
+      var filtered = jobs;
+      if (filter === 'active') {
+        filtered = jobs.filter(function (j) { return j.current_phase !== 'complete' && j.current_phase !== 'failed'; });
+      } else if (filter === 'complete') {
+        filtered = jobs.filter(function (j) { return j.current_phase === 'complete'; });
+      }
+
+      var html =
+        '<div class="job-list-header">' +
+          '<h2>Pipeline Jobs</h2>' +
+          '<button class="btn btn-primary" id="new-job-btn">New Upload</button>' +
+        '</div>' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">' +
+          '<div class="filter-tabs">' +
+            '<button class="filter-tab' + (filter === 'all' ? ' active' : '') + '" data-filter="all">All (' + jobs.length + ')</button>' +
+            '<button class="filter-tab' + (filter === 'active' ? ' active' : '') + '" data-filter="active">Active (' + jobs.filter(function (j) { return j.current_phase !== 'complete' && j.current_phase !== 'failed'; }).length + ')</button>' +
+            '<button class="filter-tab' + (filter === 'complete' ? ' active' : '') + '" data-filter="complete">Complete (' + jobs.filter(function (j) { return j.current_phase === 'complete'; }).length + ')</button>' +
+          '</div>' +
+        '</div>';
+
+      if (filtered.length === 0) {
+        html += '<div class="empty-state">' +
+          '<p>' + (filter === 'all' ? 'No pipeline jobs yet.' : 'No ' + filter + ' jobs.') + '</p>' +
+          (filter === 'all' ? '<p>Upload teacher resources to get started.</p>' : '') +
+        '</div>';
+      } else {
+        html += '<table class="job-table"><thead><tr>' +
+          '<th>Subject</th><th>Phase</th><th>Progress</th><th>Date</th>' +
+        '</tr></thead><tbody>';
+
+        for (var i = 0; i < filtered.length; i++) {
+          var j = filtered[i];
+          var c = j.counts;
+          var date = new Date(j.created_at);
+          var dateStr = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+          var progress = c.total > 0
+            ? '<span class="job-counts"><strong>' + c.content + '</strong>/' + c.total + ' C &middot; <strong>' + c.diagrams + '</strong> D &middot; <strong>' + c.heroes + '</strong> H &middot; <strong>' + c.narration + '</strong> N &middot; <strong>' + c.media + '</strong> M</span>'
+            : '<span class="job-counts">&mdash;</span>';
+
+          html += '<tr class="clickable" data-job-id="' + j.id + '">' +
+            '<td><span class="job-subject">' + j.subject_name + '</span><br><span class="job-file">' + (j.filename || '').substring(0, 40) + '</span></td>' +
+            '<td><span class="phase-badge phase-' + j.current_phase + '">' + j.current_phase + '</span></td>' +
+            '<td>' + progress + '</td>' +
+            '<td><span class="job-date">' + dateStr + '</span></td>' +
+          '</tr>';
         }
-      } catch (e) {}
-      renderUploadForm();
+
+        html += '</tbody></table>';
+      }
+
+      contentEl.innerHTML = html;
+
+      // Wire filter tabs
+      var tabs = contentEl.querySelectorAll('.filter-tab');
+      for (var t = 0; t < tabs.length; t++) {
+        tabs[t].addEventListener('click', function () {
+          renderJobList(this.getAttribute('data-filter'));
+        });
+      }
+
+      // Wire new job button
+      document.getElementById('new-job-btn').addEventListener('click', function () {
+        renderUploadForm();
+      });
+
+      // Wire job row clicks
+      var rows = contentEl.querySelectorAll('tr.clickable');
+      for (var r = 0; r < rows.length; r++) {
+        rows[r].addEventListener('click', function () {
+          openJob(this.getAttribute('data-job-id'));
+        });
+      }
+    }
+
+    // ---- Open a specific job ----
+    async function openJob(jobId) {
+      contentEl.innerHTML = '<p style="color:var(--text-muted);font-size:0.82rem">Loading job...</p>';
+      try {
+        var status = await apiCall('/api/pipeline/status?job_id=' + jobId);
+        currentJob = status.job;
+        resumeJob(currentJob);
+      } catch (e) {
+        contentEl.innerHTML = '<div class="error-msg">Failed to load job: ' + e.message + '</div>';
+      }
     }
 
     // ---- API helper ----
@@ -202,6 +331,7 @@
       var selectedFiles = [];
 
       contentEl.innerHTML =
+        '<a class="back-link" id="back-to-jobs">&larr; All Jobs</a>' +
         '<div class="upload-card">' +
           '<h2>Upload Teaching Resources</h2>' +
           '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">Upload PPTs, Word docs, and PDFs. Select multiple files or drag a folder.</p>' +
@@ -280,6 +410,7 @@
         });
       }
 
+      document.getElementById('back-to-jobs').addEventListener('click', function () { renderJobList(); });
       dropzone.addEventListener('click', function () { fileInput.click(); });
       dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('dragover'); });
       dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('dragover'); });
@@ -343,12 +474,14 @@
     // ---- Ready to parse (uploaded but not yet parsed) ----
     function renderReadyToParse(job) {
       contentEl.innerHTML =
+        '<a class="back-link" id="back-to-jobs">&larr; All Jobs</a>' +
         '<div class="upload-card">' +
           '<h2>File Uploaded — Ready to Parse</h2>' +
           '<p><strong>File:</strong> ' + job.filename + '</p>' +
           '<button class="btn btn-primary" id="parse-btn">Parse PPT</button>' +
         '</div>';
 
+      document.getElementById('back-to-jobs').addEventListener('click', function () { renderJobList(); });
       document.getElementById('parse-btn').addEventListener('click', async function () {
         this.disabled = true;
         this.textContent = 'Parsing...';
@@ -370,6 +503,7 @@
       var preview = (job.extracted_text_preview || (job.extracted_text || '').substring(0, 600)).replace(/</g, '&lt;');
 
       contentEl.innerHTML =
+        '<a class="back-link" id="back-to-jobs">&larr; All Jobs</a>' +
         '<div class="upload-card">' +
           '<h2>PPT Parsed — Ready for Generation</h2>' +
           '<div class="form-grid" style="margin-bottom:1rem">' +
@@ -389,6 +523,7 @@
           '<button class="btn btn-outline" id="new-upload-btn" style="margin-top:1rem">Start New Upload</button>' +
         '</div>';
 
+      document.getElementById('back-to-jobs').addEventListener('click', function () { renderJobList(); });
       document.getElementById('new-upload-btn').addEventListener('click', function () {
         currentJob = null;
         renderUploadForm();
@@ -400,22 +535,36 @@
       // Fetch pipeline steps via API (bypasses RLS)
       var status = await apiCall('/api/pipeline/status?job_id=' + job.id);
       var steps = status.steps || [];
-      var total = steps.length;
-      var contentDone = steps.filter(function (s) { return s.content_done; }).length;
+      var sm = status.summary || {};
+      var total = sm.total || steps.length;
+      var contentDone = sm.content_complete || 0;
       var pct = total > 0 ? Math.round((contentDone / total) * 100) : 0;
-      var allDone = total > 0 && contentDone === total;
+      var allContentDone = sm.all_content_done;
+
+      // Check if ALL assets are done (not just content)
+      var allAssetsDone = allContentDone &&
+        (sm.diagrams_complete || 0) >= total &&
+        (sm.hero_complete || 0) >= total &&
+        (sm.narration_complete || 0) >= total;
 
       var html =
+        '<a class="back-link" id="back-to-jobs">&larr; All Jobs</a>' +
         '<div class="progress-header">' +
           '<h2 style="font-family:Source Serif 4,serif;margin:0">Generation Progress</h2>' +
           '<span class="phase-badge phase-' + job.current_phase + '">' + job.current_phase + '</span>' +
         '</div>' +
         '<div class="progress-bar-outer"><div class="progress-bar-inner" style="width:' + pct + '%"></div></div>' +
-        '<div class="progress-stats">' + contentDone + ' of ' + total + ' lessons generated (' + pct + '%)' +
-          (allDone ? '' : ' &mdash; <span class="spinner" style="width:12px;height:12px;border-width:1.5px;vertical-align:middle"></span> auto-refreshing') +
+        '<div class="progress-segments">' +
+          '<span class="seg"><strong>' + contentDone + '/' + total + '</strong> content</span>' +
+          '<span class="seg"><strong>' + (sm.diagrams_complete || 0) + '/' + total + '</strong> diagrams</span>' +
+          '<span class="seg"><strong>' + (sm.hero_complete || 0) + '/' + total + '</strong> heroes</span>' +
+          '<span class="seg"><strong>' + (sm.narration_complete || 0) + '/' + total + '</strong> narration</span>' +
+          '<span class="seg"><strong>' + (sm.media_complete || 0) + '/' + total + '</strong> media</span>' +
+          (sm.error_count ? '<span class="seg" style="color:#dc2626"><strong>' + sm.error_count + '</strong> errors</span>' : '') +
+          (allContentDone ? '' : ' <span class="spinner" style="width:12px;height:12px;border-width:1.5px;vertical-align:middle"></span>') +
         '</div>';
 
-      if (allDone) {
+      if (allContentDone) {
         html += '<button class="btn btn-success" id="review-btn">Send All to QA Review</button> ';
         html += '<a href="/admin/review" class="btn btn-outline" style="margin-left:0.5rem">Open Review Queue</a>';
       }
@@ -425,10 +574,23 @@
         var s = steps[i];
         var cls = s.content_done ? 'done' : (s.last_error ? 'error' : '');
         var icon = s.content_done ? '&#10003;' : (s.last_error ? '&#10007;' : '&mdash;');
+
+        // Asset badge helper
+        function badge(flag, letter) {
+          return '<span class="asset-badge ' + (flag ? 'done' : 'pending') + '">' + letter + '</span>';
+        }
+
         html += '<div class="lesson-card ' + cls + '">' +
           '<span class="status-icon">' + icon + '</span>' +
           '<h4>L' + s.lesson_number + ': ' + s.lesson_title + '</h4>' +
           '<div class="lesson-meta">' + s.unit_slug + '</div>' +
+          '<div class="asset-badges">' +
+            badge(s.content_done, 'C') +
+            badge(s.diagrams_done, 'D') +
+            badge(s.hero_done, 'H') +
+            badge(s.narration_done, 'N') +
+            badge(s.media_done, 'M') +
+          '</div>' +
           (s.lesson_id && s.content_done ? '<a href="/lesson/' + job.subject_slug + '/' + s.unit_slug + '/' + s.lesson_number + '" style="font-size:0.72rem;color:#4f46e5">Preview</a>' : '') +
           (s.last_error ? '<div class="lesson-meta" style="color:#dc2626">' + s.last_error.substring(0, 60) + '</div>' : '') +
         '</div>';
@@ -436,6 +598,9 @@
       html += '</div>';
 
       contentEl.innerHTML = html;
+
+      // Wire back link
+      document.getElementById('back-to-jobs').addEventListener('click', function () { renderJobList(); });
 
       // Wire review button
       var reviewBtn = document.getElementById('review-btn');
@@ -448,15 +613,19 @@
             action: 'send_to_review',
           });
           this.textContent = 'Sent to review!';
+          // Refresh after a moment to update the view
+          setTimeout(function () { renderJobList(); }, 1500);
         });
       }
 
-      // Auto-refresh every 5s if not all done
-      if (!allDone) {
+      // Auto-refresh every 5s if not all content done, or 15s if assets still running
+      var needsRefresh = !allContentDone || (!allAssetsDone && allContentDone);
+      if (needsRefresh) {
+        var interval = allContentDone ? 15000 : 5000;
         if (pollTimer) clearTimeout(pollTimer);
         pollTimer = setTimeout(function () {
           renderProgress(job);
-        }, 5000);
+        }, interval);
       }
     }
 
