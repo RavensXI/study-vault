@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { subject_name, exam_board, spec_code, storage_path, filename, file_hash } = req.body;
+  const { subject_name, exam_board, spec_code, storage_path, filename, file_hash, school_id: body_school_id } = req.body;
 
   if (!subject_name || !exam_board || !storage_path || !filename) {
     return res.status(400).json({ error: 'Missing required fields: subject_name, exam_board, storage_path, filename' });
@@ -29,7 +29,8 @@ module.exports = async function handler(req, res) {
     ppt_storage_path: storage_path,
     current_phase: 'uploaded',
   };
-  if (auth.profile.school_id) record.school_id = auth.profile.school_id;
+  // School from form dropdown (preferred), falling back to auth profile
+  record.school_id = body_school_id || auth.profile.school_id || null;
   // Only set uploaded_by if it's a valid UUID (not a demo username)
   if (auth.profile.id && auth.profile.id.length > 10) record.uploaded_by = auth.profile.id;
 

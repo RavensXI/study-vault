@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
   if (list) {
     const { data: jobs } = await supabase
       .from('upload_jobs')
-      .select('id, filename, status, current_phase, subject_slug, subject_config, lessons_created, created_at, updated_at')
+      .select('id, filename, status, current_phase, subject_slug, subject_config, lessons_created, created_at, updated_at, schools(name)')
       .order('created_at', { ascending: false })
       .limit(50);
 
@@ -41,13 +41,22 @@ module.exports = async function handler(req, res) {
       if (s.media_done) c.media++;
     }
 
+    // Fetch schools list for the dropdown
+    const { data: schools } = await supabase
+      .from('schools')
+      .select('id, name, slug')
+      .order('name');
+
     const enriched = (jobs || []).map(j => ({
       ...j,
       subject_name: (j.subject_config || {}).subject_name || j.subject_slug || '—',
+      school_name: j.schools?.name || '—',
       counts: countsByJob[j.id] || { total: 0, content: 0, diagrams: 0, heroes: 0, narration: 0, media: 0 },
     }));
+    // Remove nested schools object from response
+    enriched.forEach(j => delete j.schools);
 
-    return res.status(200).json({ jobs: enriched });
+    return res.status(200).json({ jobs: enriched, schools: schools || [] });
   }
 
   let job;

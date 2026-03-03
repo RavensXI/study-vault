@@ -162,6 +162,7 @@
     var demoUser = null;
     var currentJob = null;
     var pollTimer = null;
+    var allSchools = [];
 
     // ---- Auth ----
     async function init() {
@@ -207,6 +208,8 @@
       }
 
       var jobs = data.jobs || [];
+      // Store schools list for upload form dropdown
+      allSchools = data.schools || [];
 
       // Filter
       var filtered = jobs;
@@ -236,7 +239,7 @@
         '</div>';
       } else {
         html += '<table class="job-table"><thead><tr>' +
-          '<th>Subject</th><th>Phase</th><th>Progress</th><th>Date</th>' +
+          '<th>Subject</th><th>School</th><th>Phase</th><th>Progress</th><th>Date</th>' +
         '</tr></thead><tbody>';
 
         for (var i = 0; i < filtered.length; i++) {
@@ -250,6 +253,7 @@
 
           html += '<tr class="clickable" data-job-id="' + j.id + '">' +
             '<td><span class="job-subject">' + j.subject_name + '</span><br><span class="job-file">' + (j.filename || '').substring(0, 40) + '</span></td>' +
+            '<td style="font-size:0.78rem">' + (j.school_name || '—') + '</td>' +
             '<td><span class="phase-badge phase-' + j.current_phase + '">' + j.current_phase + '</span></td>' +
             '<td>' + progress + '</td>' +
             '<td><span class="job-date">' + dateStr + '</span></td>' +
@@ -340,11 +344,18 @@
             '<input type="file" id="file-input" multiple>' +
           '</div>' +
           '<div class="form-grid">' +
-            '<div class="form-group"><label>Subject Name</label><input type="text" id="subject-name" placeholder="e.g. Drama"></div>' +
-            '<div class="form-group"><label>Spec Code</label><input type="text" id="spec-code" placeholder="e.g. J316"></div>' +
-            '<div class="form-group"><label>Exam Board</label>' +
-              '<select id="exam-board"><option value="OCR">OCR</option><option value="AQA">AQA</option><option value="Edexcel">Edexcel</option><option value="WJEC">WJEC</option></select>' +
+            '<div class="form-group"><label>School</label>' +
+              '<select id="school-id">' +
+                (allSchools.length === 0
+                  ? '<option value="">No schools configured</option>'
+                  : '<option value="">Select school...</option>' + allSchools.map(function (s) { return '<option value="' + s.id + '">' + s.name + '</option>'; }).join('')) +
+              '</select>' +
             '</div>' +
+            '<div class="form-group"><label>Subject Name</label><input type="text" id="subject-name" placeholder="e.g. Food Technology"></div>' +
+            '<div class="form-group"><label>Exam Board</label>' +
+              '<select id="exam-board"><option value="AQA">AQA</option><option value="OCR">OCR</option><option value="Edexcel">Edexcel</option><option value="WJEC">WJEC</option><option value="Eduqas">Eduqas</option></select>' +
+            '</div>' +
+            '<div class="form-group"><label>Spec Code</label><input type="text" id="spec-code" placeholder="e.g. J309"></div>' +
             '<div class="form-group"><label>Unit Colour</label><input type="color" id="color1" value="#7c3aed"></div>' +
           '</div>' +
           '<button class="btn btn-primary" id="upload-btn" disabled>Upload &amp; Parse</button>' +
@@ -361,7 +372,8 @@
         var names = selectedFiles.map(function (f) { return f.name; });
         var display = names.length <= 5 ? names.join(', ') : names.slice(0, 5).join(', ') + ' + ' + (names.length - 5) + ' more';
         dropzone.innerHTML = '<p class="file-name">' + selectedFiles.length + ' file(s) selected</p><p style="font-size:0.75rem;color:var(--text-muted)">' + display + '</p><p>' + (totalKB / 1024).toFixed(0) + ' KB total</p>';
-        uploadBtn.disabled = !document.getElementById('subject-name').value;
+        var hasSchool = !allSchools.length || document.getElementById('school-id').value;
+        uploadBtn.disabled = !document.getElementById('subject-name').value || !hasSchool;
       }
 
       function collectFiles(fileList) {
@@ -424,9 +436,12 @@
       fileInput.addEventListener('change', function () {
         collectFiles(fileInput.files);
       });
-      document.getElementById('subject-name').addEventListener('input', function () {
-        uploadBtn.disabled = !this.value || selectedFiles.length === 0;
-      });
+      function checkUploadReady() {
+        var hasSchool = !allSchools.length || document.getElementById('school-id').value;
+        uploadBtn.disabled = !document.getElementById('subject-name').value || selectedFiles.length === 0 || !hasSchool;
+      }
+      document.getElementById('subject-name').addEventListener('input', checkUploadReady);
+      document.getElementById('school-id').addEventListener('change', checkUploadReady);
 
       uploadBtn.addEventListener('click', async function () {
         if (selectedFiles.length === 0) return;
@@ -451,6 +466,7 @@
             subject_name: document.getElementById('subject-name').value,
             exam_board: document.getElementById('exam-board').value,
             spec_code: document.getElementById('spec-code').value,
+            school_id: document.getElementById('school-id').value || null,
             storage_path: jobPrefix,
             filename: filenames.join(', '),
           });
