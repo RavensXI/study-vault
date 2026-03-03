@@ -106,7 +106,7 @@ Use the `model` parameter on Agent tool calls. **Opus for anything that touches 
 | Lesson content agents | **opus** | Quality-critical — content accuracy, HTML structure, exam alignment |
 | Exam technique guides | **sonnet** | Templated writing, no code changes |
 | Revision technique guides | **sonnet** | Templated writing, no code changes |
-| Media curation agents | **haiku** | Web search + write JSON to Supabase. No creative writing, no code. |
+| Media curation agents | **sonnet** | Haiku produces inconsistent JSON structures that crash lesson-loader. Sonnet is reliable. |
 | CSS + subject activation | **opus** | Touches code — must get it right first time |
 | getGuideUrl mappings | **opus** | Touches code |
 
