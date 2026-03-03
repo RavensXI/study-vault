@@ -112,11 +112,11 @@ Use the `model` parameter on Agent tool calls. **Opus for anything that touches 
 
 ### Agent Prompt Requirements (lessons learned from QA)
 
-**Revision technique guides MUST include these three slugs** (hardcoded in main.js lightbulb tips):
-- `retrieval-practice` — linked from `.key-fact` elements
-- `dual-coding` — linked from `.timeline` elements
-- `elaborative-interrogation` — linked from `.collapsible` elements
-Plus any additional techniques. If these three are missing, lightbulb links will 404.
+**Revision techniques should be chosen per subject during planning.** Consider what content types the subject has (memorisation-heavy? analysis-heavy? practical skills?) and pick techniques that genuinely suit it. Not every subject needs the same set.
+
+**Current limitation (TODO: refactor):** `initRevisionTips()` in main.js hardcodes three lightbulb tip links for ALL subjects: `retrieval-practice` (on `.key-fact`), `dual-coding` (on `.timeline`), `elaborative-interrogation` (on `.collapsible`). Until refactored to read from `subjects.settings.revision_tip_mappings`, these three slugs MUST exist to avoid 404s. Additional subject-specific techniques beyond these three are encouraged.
+
+**Planned fix:** Store `revision_tip_mappings` in `subjects.settings` mapping CSS selectors to technique slug/label/tip text. `initRevisionTips()` reads from settings (passed via lesson-loader) instead of hardcoded array. Each subject gets bespoke lightbulb tips.
 
 **All guide pages MUST use this HTML structure** (required by `guide-loader.js`):
 ```html
