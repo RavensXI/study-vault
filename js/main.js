@@ -41,8 +41,9 @@ function initLessonFeatures() {
   initLessonPill();
 }
 
-// Expose globally for lesson-loader.js
+// Expose globally for lesson-loader.js and guide-loader.js
 window.initLessonFeatures = initLessonFeatures;
+window.initNavIcons = initNavIcons;
 
 /* --- Scroll Progress Bar --- */
 function initScrollProgress() {

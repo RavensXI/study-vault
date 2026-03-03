@@ -108,13 +108,16 @@
     // Nav
     var nav = document.getElementById('header-nav');
     nav.innerHTML = '<a href="/">Home</a>' +
-      '<a href="/browse/' + subjectSlug + '">' + esc(subject.name) + '</a>' +
+      '<a href="/browse/' + subjectSlug + '">Unit Overview</a>' +
       '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>';
 
     // The hub content_html includes the unit-page-header, guide-hub, etc.
     contentEl.innerHTML = hubResult.data.content_html;
     loadingEl.style.display = 'none';
     contentEl.style.display = '';
+
+    // Init nav icons on hub page
+    if (typeof window.initNavIcons === 'function') window.initNavIcons();
 
     // Rewrite any relative guide links to dynamic routes
     contentEl.querySelectorAll('a[href]').forEach(function (link) {
@@ -186,6 +189,9 @@
     nav.innerHTML = '<a href="/">Home</a>' +
       '<a href="' + guideUrl(subjectSlug, guideType) + '">All Guides</a>' +
       '<a href="' + guideUrl(subjectSlug, otherType) + '">' + otherLabel + '</a>';
+
+    // Init nav icons immediately after setting nav HTML
+    if (typeof window.initNavIcons === 'function') window.initNavIcons();
 
     // Content already includes <main> + <aside> from the original .lesson-page
     var html = '<div class="lesson-page">';
