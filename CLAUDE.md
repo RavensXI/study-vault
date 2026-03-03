@@ -35,7 +35,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Root `index.html` — single-page app with login, subject picker, and dashboard views
 - **Microsoft SSO** via Supabase Auth (Azure AD / Entra) — "Sign in with Microsoft" button for Unity College accounts. Supabase JS client loaded via CDN. SSO users get UUID-based localStorage keys; demo users keep username-based keys. `onAuthStateChange` listener handles session lifecycle. **Code is complete but SSO is blocked pending Entra admin consent** — Unity College's tenant restricts user consent. Network manager (Global Admin) needs to grant tenant-wide admin consent for the "StudyVault" Enterprise Application (Entra ID → Enterprise Applications → StudyVault → Permissions → Grant admin consent). App only requests `User.Read` (name + email). Deputy head approval being sought first (meeting Tuesday), then network manager does the one-click consent.
 - 3 demo accounts (emma/jake/guest) kept alongside SSO for non-Unity demos. Demo account buttons auto-submit (no manual form).
-- Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, and Sport Science are `active: true` with URLs; others show "Coming Soon"
+- Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, Sport Science, and Drama are `active: true` with URLs; others show "Coming Soon"
 - Dashboard: greeting + exam countdown, today's revision cards, progress stats, subject grid
 - Auth state: Supabase session checked first (async), then localStorage demo fallback. Subject/progress data in localStorage keyed by user ID.
 
@@ -66,29 +66,43 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Revision Technique guides: hub + 7 guide pages (`sport-science/revision-technique/`) with sport-science-specific examples
 - TTS narration complete: all 10 lessons narrated with Azure Speech (350 clips, manifests with durations). Odd lessons = Ollie (male), even = Bella (female). MP3s hosted on Cloudflare R2.
 
+**Drama (OCR J316) — complete (12 lessons across 2 units):**
+- Blood Brothers Section A (6 lessons, purple theme) and Rise Up Section B (6 lessons, purple theme)
+- All 12 lessons built via content generation pipeline, practice questions (6/lesson, OCR format), knowledge checks (5/lesson)
+- 24 past paper questions tagged from OCR specimen/sample papers
+- TTS narration: All 12 lessons fully narrated with Azure Speech (400 clips). MP3s hosted on Cloudflare R2.
+- Gemini pictorial isotype diagrams (12 total, all QC'd)
+- Exam Technique guides: hub + 9 guide pages (`drama/exam-technique/`) for OCR question types
+- Revision Technique guides: hub + 8 guide pages (`drama/revision-technique/`)
+- First subject built entirely through the automated content generation pipeline
+
 ### Dynamic Architecture (LIVE on Vercel)
 All content now served from Supabase on the `platform` branch (Vercel deployment). Static HTML files remain in repo as backup but are no longer linked from the dynamic site.
 
 **What's running:**
-- 140 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
-- 62 guide pages (54 individual + 8 hub indexes) in `guide_pages` table
-- 387 images on Cloudflare R2 (`studyvault-images` bucket)
-- 4,661 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
+- 152 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
+- 79 guide pages in `guide_pages` table
+- Images on Cloudflare R2 (`studyvault-images` bucket)
+- ~5,000 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
 - Dynamic templates: `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - URL scheme: `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - Dashboard links to dynamic routes (not static HTML)
 - Auth guards on all dynamic pages (Supabase session or demo localStorage)
 - Public RLS policies for live content (anon users can read `status='live'` rows)
-- QC review page at `/admin/review` (platform_admin only)
+- Admin tools: `/admin/pipeline` (upload/generate), `/admin/review` (QC review), `/admin/images` (hero image QA + diagram QA with Gemini regen)
+- Admin login on homepage with Pipeline, Review, Images nav
 - Pipeline adapter: `scripts/supabase_writer.py` for writing new content to DB
 
-**Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, classes, class_members
+**Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
 
 **R2 buckets:**
 - `studyvault-audio` — narration MP3s, public URL: `https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev`
 - `studyvault-images` — hero images + diagrams, public URL: `https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`
 
 ### Still TODO
+- **Drama hero images**: Need QA positioning via `/admin/images`
+- **Drama L1**: NotebookLM video still needed
+- **Dashboard progress bars**: Currently use hardcoded demo data — need real Supabase queries
 - **Platform admin setup**: SSO must be active first, then: `UPDATE profiles SET role = 'platform_admin' WHERE email = 't.shaun@unity.lancs.sch.uk'`
 - **Direct Postgres connection**: Tom's home network is IPv6-only to Supabase — need to troubleshoot or use a different network. Env var `SUPABASE_DB_URL` has the password.
 - **2 parsing fixes**: Business Theme 1 Lesson 9 (0 practice questions) and Theme 2 Lesson 14 (0 knowledge checks) — JS syntax the parser couldn't handle
@@ -103,7 +117,7 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 
 ### Future features (not started)
 - Retrieval Practice / Flashcards — port spaced repetition flashcard system from `../vaultcards/` (React/Supabase app with Leitner-box algorithm, decks, streak tracking, XP, achievements, head-to-head challenges, teacher deck creation, PowerPoint→AI card generation). Requires Supabase backend first. Algorithms and data model are portable; React/Tailwind UI is not — will need vanilla JS/CSS reimplementation to fit Study Vault's static architecture.
-- Content for remaining subjects beyond History, Business, Geography, and Sport Science
+- Content for remaining subjects beyond History, Business, Geography, Sport Science, and Drama
 
 ---
 
@@ -122,8 +136,13 @@ Study Vault/
 │   ├── lesson-loader.js      ← Fetches lesson from Supabase, populates template
 │   ├── browse-loader.js      ← Fetches subject/unit data, renders cards
 │   └── guide-loader.js       ← Fetches guide pages (exam/revision technique)
+├── package.json              ← npm deps (jszip, xml2js, pdf-parse, @supabase/supabase-js, @aws-sdk/client-s3)
 ├── admin/
-│   └── review.html           ← QC review page (platform_admin only)
+│   ├── pipeline.html         ← Content generation pipeline UI
+│   ├── review.html           ← QC review page (platform_admin only)
+│   └── images.html           ← Image QA tool (hero images + diagrams with Gemini regen)
+├── api/pipeline/             ← Vercel serverless routes (upload, parse, approve-plan, status)
+│   └── _lib/                 ← Shared auth.js, supabase.js
 ├── supabase/
 │   └── migrations/001_schema.sql  ← Full DB schema (tables, RLS, triggers)
 ├── images/                   ← padlock.svg, subject-{id}.jpg
@@ -153,6 +172,9 @@ Study Vault/
 │   ├── r180/                 ← 10 lessons (orange theme)
 │   ├── exam-technique/       ← Hub + 5 guide pages (OCR question types)
 │   └── revision-technique/   ← Hub + 7 guide pages
+├── drama/                    ← Drama (OCR J316), built via pipeline
+│   └── (static backups — content served dynamically from Supabase)
+├── specs/                    ← Exam board specifications (OCR J316 Drama spec)
 ├── docs/                     ← Pipeline & reference docs
 │   ├── DIAGRAM_PIPELINE.md
 │   ├── NARRATION_PIPELINE.md
@@ -160,7 +182,9 @@ Study Vault/
 │   ├── QUESTIONS_PIPELINE.md
 │   ├── RELATED_MEDIA_PIPELINE.md
 │   ├── SUBJECT_PLAYBOOK.md
-│   └── SUBJECT_PROMPT.md
+│   ├── SUBJECT_PROMPT.md
+│   ├── GENERATION_PROMPT.md  ← Inject-at-call-time prompt for content generation
+│   └── PIPELINE_ARCHITECTURE.md ← Full pipeline architecture docs
 ├── scripts/                  ← Build scripts & voice references
 │   ├── migrate_to_supabase.py       ← Migrate 140 lessons from HTML to Supabase
 │   ├── supabase_writer.py           ← Pipeline adapter (DB writes instead of HTML)
@@ -170,6 +194,11 @@ Study Vault/
 │   ├── convert_wav_to_mp3.py        ← Batch WAV→MP3 converter (ffmpeg)
 │   ├── upload_to_r2.py              ← Upload narration MP3s to Cloudflare R2
 │   ├── generate_narration.py        ← Legacy Qwen3-TTS (Conflict lessons)
+│   ├── pipeline_generate.py         ← CLI helper for pipeline (info, text, write, status, review)
+│   ├── generate_drama_diagrams.py   ← Drama Gemini diagram generation
+│   ├── generate_drama_narration.py  ← Drama Azure Speech TTS generation
+│   ├── download_drama_heroes.py     ← Drama hero image downloader
+│   ├── tag_drama_past_papers.py     ← Drama past paper question tagger
 │   ├── generate_sport_*.py
 │   ├── download_sport_heroes.py
 │   ├── insert_sport_images.py
@@ -223,6 +252,8 @@ All stored in environment variables — never commit them.
 | Geography Paper 1 | `unit-geography-1` | `#4f46e5` (indigo) |
 | Geography Paper 2 | `unit-geography-2` | `#dc2626` (red) |
 | Sport Science R180 | `unit-sport-science` | `#ea580c` (orange) |
+| Drama Section A | `unit-drama-section-a` | `#7c3aed` (purple) |
+| Drama Section B | `unit-drama-section-b` | `#7c3aed` (purple) |
 
 ---
 
@@ -261,6 +292,7 @@ Lesson breakdowns, spec references, exam/revision technique guides, and subject-
 - **Business Studies (Edexcel 1BS0):** `business/BUILD_PLAN.md` — 2 themes, 30 lessons, cyan/emerald
 - **Geography (AQA 8035):** `geography/BUILD_PLAN.md` — 2 papers, 40 lessons, indigo/red
 - **Sport Science (OCR R180):** `sport-science/BUILD_PLAN.md` — 1 unit, 10 lessons, orange
+- **Drama (OCR J316):** Built via pipeline — 2 units, 12 lessons, purple
 
 ---
 
@@ -341,7 +373,7 @@ See **`docs/LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
 Full details documented in **`docs/NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
 
-**Summary:** Azure Speech (cloud API) — near-instant, deterministic, British English voices alternating by lesson (Ollie male odd, Bella female even). **All 140 lessons fully narrated** across all 4 subjects (~4,600 MP3 clips). Audio hosted on **Cloudflare R2** (`studyvault-audio` bucket, public r2.dev URL). Manifests in each lesson HTML point to R2 URLs with durations. Generation script outputs MP3 directly (96kbps, 24kHz, mono). Also check `tts-research-log.md` for latest model developments.
+**Summary:** Azure Speech (cloud API) — near-instant, deterministic, British English voices alternating by lesson (Ollie male odd, Bella female even). **All 152 lessons fully narrated** across all 5 subjects (~5,000 MP3 clips). Audio hosted on **Cloudflare R2** (`studyvault-audio` bucket, public r2.dev URL). Manifests in each lesson HTML point to R2 URLs with durations. Generation script outputs MP3 directly (96kbps, 24kHz, mono). Also check `tts-research-log.md` for latest model developments.
 
 ---
 
