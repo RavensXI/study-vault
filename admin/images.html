@@ -313,6 +313,14 @@
           html += '<span class="pos-value" id="posval-' + l.id + '">' + yVal + '%</span>';
           html += '</div>';
 
+          // Caption and alt text editing
+          html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1rem;max-width:804px">';
+          html += '<div><label style="font-size:0.72rem;font-weight:600;display:block;margin-bottom:0.25rem">Caption</label>';
+          html += '<input type="text" class="caption-input" id="caption-' + l.id + '" value="' + esc(l.hero_image_caption || '') + '" placeholder="Image caption shown below hero" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.78rem;font-family:inherit;box-sizing:border-box"></div>';
+          html += '<div><label style="font-size:0.72rem;font-weight:600;display:block;margin-bottom:0.25rem">Alt Text</label>';
+          html += '<input type="text" class="alt-input" id="alt-' + l.id + '" value="' + esc(l.hero_image_alt || '') + '" placeholder="Descriptive alt text for accessibility" style="width:100%;padding:0.4rem 0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.78rem;font-family:inherit;box-sizing:border-box"></div>';
+          html += '</div>';
+
           // Candidates area
           html += '<div class="candidates" id="candidates-' + l.id + '"></div>';
 
@@ -551,16 +559,22 @@
       var slider = document.querySelector('.pos-slider[data-lesson-id="' + lessonId + '"]');
       var posValue = 'center ' + (slider ? slider.value : 50) + '%';
 
+      // Read caption and alt from input fields
+      var captionEl = document.getElementById('caption-' + lessonId);
+      var altEl = document.getElementById('alt-' + lessonId);
+
       var body = {
         lesson_id: lessonId,
         hero_image_position: posValue,
+        hero_image_caption: captionEl ? captionEl.value : undefined,
+        hero_image_alt: altEl ? altEl.value : undefined,
       };
 
       // If a new candidate was selected
       if (preview.dataset.pendingUrl) {
         body.hero_image_url = preview.dataset.pendingUrl;
-        body.hero_image_alt = preview.dataset.pendingAlt || '';
-        body.hero_image_caption = preview.dataset.pendingAlt || '';
+        if (!body.hero_image_alt) body.hero_image_alt = preview.dataset.pendingAlt || '';
+        if (!body.hero_image_caption) body.hero_image_caption = preview.dataset.pendingAlt || '';
         delete preview.dataset.pendingUrl;
         delete preview.dataset.pendingAlt;
       }
