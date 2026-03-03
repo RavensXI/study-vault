@@ -143,6 +143,34 @@ Hub index pages use a different structure (`guide-hub` div, no `<main>`/`<aside>
 - `units.subtitle` — description text for the browse card
 - `units.body_class` — CSS class name (e.g. `unit-food-technology-1`)
 
+**Media curation agents MUST write this exact JSON structure** to `lessons.related_media` (lesson-loader.js crashes on any other format):
+```json
+[
+  {
+    "category": "Videos & Channels",
+    "emoji": "&#127909;",
+    "items": [
+      {"title": "Video Title", "url": "https://...", "description": "Why this is useful"}
+    ]
+  },
+  {
+    "category": "Documentaries",
+    "emoji": "&#127916;",
+    "items": [
+      {"title": "Film Title (Year)", "url": "https://www.justwatch.com/uk/movie/...", "description": "..."}
+    ]
+  },
+  {
+    "category": "Study Tools",
+    "emoji": "&#128218;",
+    "items": [
+      {"title": "Site Name — Topic", "url": "https://...", "description": "..."}
+    ]
+  }
+]
+```
+Each object MUST have `category` (string), `emoji` (HTML entity), and `items` (array of objects with `title`, `url`, `description`). Empty categories should be omitted, not included with empty items arrays. Max 3 items per category.
+
 **Media curation agents MUST search beyond study tools.** Include:
 - Movies and documentaries (search JustWatch UK). Examples: Super Size Me, Fed Up, What the Health for nutrition topics.
 - Podcasts (search Spotify for specific episodes, not just channels).
