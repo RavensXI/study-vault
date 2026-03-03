@@ -46,37 +46,48 @@ Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create th
 
 Each lesson content agent uses the **Write tool** (not bash heredocs) to create its temp JSON, then runs `pipeline_generate.py write`. The Write tool handles all escaping natively.
 
-### Phase 3: Assets + Media in Parallel (T=5 min, when content lands)
+### Phase 3: Per-Lesson Streaming (T=1+ min, as each content agent completes)
 
-**As soon as all content agents complete, launch TWO things simultaneously:**
+**Do NOT wait for all content to finish. As each lesson's content agent completes, IMMEDIATELY launch that lesson's downstream work:**
 
-```
-Background: python scripts/pipeline_generate.py run-all-assets <job_id>
-Parallel:   10 media curation agents (one per lesson, all at once)
-```
+For each completed lesson, launch in parallel:
+- `generate_diagrams.py --job-id <id> --lessons <N>` (background)
+- `download_heroes.py --job-id <id> --lessons <N>` (background)
+- `generate_narration.py --job-id <id> --lessons <N>` (background, after diagrams — or accept slight narration ID risk)
+- 1 media curation agent for lesson N (background, haiku)
 
-**Why this works:** Media curation (web search for podcasts, videos, study tools) does NOT depend on diagrams, heroes, or narration. It only needs lesson titles/topics. Run it alongside asset generation, not after.
+**This means:** By the time L10's content finishes, L1-L9's assets may already be done. A stuck lesson only blocks itself, not the other 9.
 
-### Phase 4: Commit + Push (T=15-18 min)
+### Supervisor Responsibilities
 
-When media agents and assets both finish:
+While agents run, actively monitor:
+1. **Check for stuck agents** — if a content agent has produced zero output after 3 minutes, kill and relaunch it
+2. **Launch downstream immediately** — don't accumulate completions. As each notification arrives, fire that lesson's assets + media in the same response
+3. **Track progress** — periodically run `pipeline_generate.py status <job_id>` to see overall state
+4. **Handle failures** — if an asset script fails for one lesson, note it and move on. Don't block other lessons.
+
+### Phase 4: Commit + Push
+
+When all flags are green (or all automated ones — media may still be running):
 ```bash
-python scripts/pipeline_generate.py status <job_id>   # Verify all flags green
+python scripts/pipeline_generate.py status <job_id>   # Verify flags
 git add / commit / push                                # Deploy to Vercel
 ```
 
-### Target Timeline
+### Target Timeline (streaming)
 
 ```
 T=0    Plan + pipeline steps
-T=1    PARALLEL: content agents + guides + CSS + getGuideUrl
-T=5    Content done → PARALLEL: run-all-assets + media agents
-T=12   Media done
-T=18   Narration finishes (slowest asset). All flags green.
-T=18   Commit, push, live.
+T=0    PARALLEL: 10 content agents + guides + CSS + getGuideUrl
+T=1    First content lands → immediately launch its assets + media
+T=2    More content landing → each triggers its own assets + media
+T=3    Supervisor detects stuck agent → kill + relaunch
+T=5    All content done. Most assets already running or finished.
+T=12   Last narration finishes. All flags green.
+T=12   Commit, push, live.
 ```
 
-**For a 10-lesson subject, target is under 20 minutes.** The first Food Tech build took 36 minutes due to sequential execution and unnecessary pauses. The optimised flow above eliminates both.
+**Target: 10-lesson subject in ~12 minutes** with streaming. Previous approaches: 36 min (run 1, sequential), ~20 min target (run 2, batch parallel). Streaming eliminates the wait-for-all-content bottleneck.
 
 ### Execution Rules
 
