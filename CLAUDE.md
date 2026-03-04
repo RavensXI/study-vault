@@ -35,7 +35,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Root `index.html` — single-page app with login, subject picker, and dashboard views
 - **Microsoft SSO** via Supabase Auth (Azure AD / Entra) — "Sign in with Microsoft" button for Unity College accounts. Supabase JS client loaded via CDN. SSO users get UUID-based localStorage keys; demo users keep username-based keys. `onAuthStateChange` listener handles session lifecycle. **Code is complete but SSO is blocked pending Entra admin consent** — Unity College's tenant restricts user consent. Network manager (Global Admin) needs to grant tenant-wide admin consent for the "StudyVault" Enterprise Application (Entra ID → Enterprise Applications → StudyVault → Permissions → Grant admin consent). App only requests `User.Read` (name + email). Deputy head approval being sought first (meeting Tuesday), then network manager does the one-click consent.
 - 3 demo accounts (emma/jake/guest) kept alongside SSO for non-Unity demos. Demo account buttons auto-submit (no manual form).
-- Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, Sport Science, and Drama are `active: true` with URLs; others show "Coming Soon"
+- Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, Sport Science, Drama, and Food Technology are `active: true` with URLs; others show "Coming Soon"
 - Dashboard: greeting + exam countdown, today's revision cards, progress stats, subject grid
 - Auth state: Supabase session checked first (async), then localStorage demo fallback. Subject/progress data in localStorage keyed by user ID.
 
@@ -76,20 +76,30 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Revision Technique guides: hub + 8 guide pages (`drama/revision-technique/`)
 - First subject built entirely through the automated content generation pipeline
 
+**Food Technology (AQA 8585) — complete (10 lessons, 1 unit):**
+- Nutrition and Health unit, teal theme (`#0d9488`)
+- All 10 lessons built via one-shot pipeline with generic scripts, practice questions (6/lesson, AQA format), knowledge checks (5/lesson)
+- TTS narration: All 10 lessons narrated with Azure Speech (~380 clips). MP3s on R2.
+- Gemini pictorial isotype diagrams (10 total), hero images (Wikimedia Commons)
+- Exam Technique guides: hub + 5 guide pages for AQA question types
+- Revision Technique guides: hub + 7 guide pages
+- Related media curated for all 10 lessons
+- L1 has NotebookLM video overview (YouTube embedded in sidebar)
+
 ### Dynamic Architecture (LIVE on Vercel)
 All content now served from Supabase on the `platform` branch (Vercel deployment). Static HTML files remain in repo as backup but are no longer linked from the dynamic site.
 
 **What's running:**
-- 152 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
-- 79 guide pages in `guide_pages` table
+- 162 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
+- 93 guide pages in `guide_pages` table
 - Images on Cloudflare R2 (`studyvault-images` bucket)
-- ~5,000 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
+- ~5,400 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
 - Dynamic templates: `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - URL scheme: `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - Dashboard links to dynamic routes (not static HTML)
 - Auth guards on all dynamic pages (Supabase session or demo localStorage)
 - Public RLS policies for live content (anon users can read `status='live'` rows)
-- Admin tools: `/admin/pipeline` (upload/generate), `/admin/review` (QC review), `/admin/images` (hero image QA + diagram QA with Gemini regen)
+- Admin tools: `/admin/pipeline` (upload/generate), `/admin/review` (QC review with bulk approve), `/admin/images` (hero image QA with caption editing + diagram QA with iterative Gemini regen)
 - Admin login on homepage with Pipeline, Review, Images nav
 - Pipeline adapter: `scripts/supabase_writer.py` for writing new content to DB
 - Subject-agnostic asset scripts: `generate_narration.py`, `generate_diagrams.py`, `download_heroes.py` (all accept `--job-id`)
@@ -104,8 +114,8 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 
 ### Still TODO
 - **Drama hero images**: Need QA positioning via `/admin/images`
-- **Drama L1**: NotebookLM video still needed
 - **Dashboard progress bars**: Currently use hardcoded demo data — need real Supabase queries
+- **Subject-specific revision tips**: `initRevisionTips()` hardcodes 3 techniques for ALL subjects — refactor to read from `subjects.settings.revision_tip_mappings`
 - **Platform admin setup**: SSO must be active first, then: `UPDATE profiles SET role = 'platform_admin' WHERE email = 't.shaun@unity.lancs.sch.uk'`
 - **Direct Postgres connection**: Tom's home network is IPv6-only to Supabase — need to troubleshoot or use a different network. Env var `SUPABASE_DB_URL` has the password.
 - **2 parsing fixes**: Business Theme 1 Lesson 9 (0 practice questions) and Theme 2 Lesson 14 (0 knowledge checks) — JS syntax the parser couldn't handle
@@ -119,8 +129,20 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 
 
 ### Future features (not started)
+- **Auto-fetch exam specs & papers**: When a teacher uploads lessons, automatically find the exam board spec, past papers, and mark schemes. Either scrape/search at generation time or build a bank of specs beforehand. Need to determine the most reliable approach (exam board websites, curated library, or hybrid).
+- **Hero image bank + Unsplash API**: Build a reusable library of hero images from previous generations. When the next school does the same topic (e.g. WW1), reuse the same hero image instead of searching Wikimedia again. Also integrate the Unsplash API as an additional free image source alongside Wikimedia Commons.
+- **Teacher data dashboard**: Major upgrade from current demo/hardcoded state. Needs real Supabase queries for progress tracking, engagement metrics, class-level insights. Key for selling to SLT — should be visually compelling and data-rich. Dedicated session to design and build.
+- **Teacher content editor (block-based)**: Full block-based editor for teachers to QA and revise AI-generated content before publishing. Validated by Drama teacher feedback (Mar 2026) — nearly all feedback was structural (add key fact boxes, add character quotes, swap hero images, apply frameworks across units) rather than prose tweaks. A simple text editor won't cut it. Needs:
+  - **Content blocks** teachers can see, reorder, edit, add, and delete: paragraph/prose (rich text), key fact box, collapsible section, timeline entry, diagram (with caption), hero image (with search/upload/reposition)
+  - **"Add block" button** between sections — teacher picks type, fills content, it slots in with correct styling
+  - **Cross-lesson templates** — "push this block to all lessons in unit" (e.g. a paragraph structure framework that applies to every Rise Up lesson)
+  - **Image picker** — search Wikimedia/Unsplash, upload custom, reposition. Not just a URL field.
+  - **Preview mode** — toggle between editing and student view
+  - **No AI regeneration** — deliberate product decision. Teacher feedback shows they always know *exactly* what they want changed (specific facts, exam board terminology, teaching mnemonics). Regeneration would: change things they already approved, cost API money with no ceiling, still require editing the output. The AI's job is the first 80% pass; the teacher's job is the 20% subject expertise polish. A good editor respects that division. Only AI assist: optional "format my rough note into a key-fact box" (single small call, teacher approves before insertion) and "check readability level" on pasted text.
+  - This is the **#1 blocker for commercial viability** — without it, teacher feedback flows through Tom as a bottleneck (email → relay → manual edit). Doesn't scale to multiple schools.
+- **Pipeline UX & permissions rework**: Clarify who sees what — admin vs teacher screens. Currently can't QA images before publishing (have to set lessons live first, which doesn't make sense). Need a proper preview/staging state, clearer QA flow, and role-appropriate views for the pipeline.
 - Retrieval Practice / Flashcards — port spaced repetition flashcard system from `../vaultcards/` (React/Supabase app with Leitner-box algorithm, decks, streak tracking, XP, achievements, head-to-head challenges, teacher deck creation, PowerPoint→AI card generation). Requires Supabase backend first. Algorithms and data model are portable; React/Tailwind UI is not — will need vanilla JS/CSS reimplementation to fit Study Vault's static architecture.
-- Content for remaining subjects beyond History, Business, Geography, Sport Science, and Drama
+- Content for remaining subjects beyond History, Business, Geography, Sport Science, Drama, and Food Technology
 
 ---
 
@@ -262,6 +284,7 @@ All stored in environment variables — never commit them.
 | Sport Science R180 | `unit-sport-science` | `#ea580c` (orange) |
 | Drama Section A | `unit-drama-section-a` | `#7c3aed` (purple) |
 | Drama Section B | `unit-drama-section-b` | `#7c3aed` (purple) |
+| Food Tech Nutrition | `unit-food-technology-1` | `#0d9488` (teal) |
 
 ---
 
@@ -314,7 +337,8 @@ Full pipeline documented in **`docs/DIAGRAM_PIPELINE.md`** — read that file be
 - Model: `gemini-3.1-flash-image-preview`, API key in `$GEMINI_API_KEY`
 - Filenames: `diagram_descriptive_name.jpg`, matplotlib backups as `*_matplotlib.jpg`
 - HTML: `<figure class="diagram">`, full width, 720px max
-- Placement: at **content-relevant locations**, not always at the top. 15+ lines from other images.
+- Placement: content generation places a `<!-- DIAGRAM -->` placeholder at the most relevant location. `generate_diagrams.py` replaces it with the figure tag. Falls back to midpoint `<h2>` if no placeholder exists.
+- Iterative regeneration: `/admin/images` Diagrams tab has "Iterate on current image" checkbox — sends existing diagram to Gemini alongside the prompt for refinement
 - Helper scripts: `scripts/gemini_regen.py`, `scripts/generate_{subject}_diagrams.py`, `scripts/generate_{subject}_gemini_infographics.py`
 
 **Legacy:** Business uses hybrid matplotlib + Gemini concept images. History uses Gemini-only infographics (~71 total).

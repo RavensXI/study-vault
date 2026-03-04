@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
-    .pipeline-layout { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .pipeline-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
     .pipeline-header { margin-bottom: 2rem; }
     .pipeline-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0 0 0.35rem; }
     .pipeline-header p { color: var(--text-muted); font-size: 0.875rem; margin: 0; }
@@ -121,6 +121,60 @@
     .empty-state p { margin: 0.5rem 0; font-size: 0.875rem; }
     .back-link { font-size: 0.82rem; color: #4f46e5; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 1rem; }
     .back-link:hover { text-decoration: underline; }
+
+    /* File triage */
+    .triage-summary {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.75rem 1rem; background: #f9fafb; border-radius: 10px;
+      margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;
+    }
+    .triage-summary .counts { font-size: 0.875rem; font-weight: 600; }
+    .triage-summary .size { font-size: 0.82rem; color: var(--text-muted); }
+    .triage-actions { display: flex; gap: 0.5rem; }
+    .triage-actions .btn { padding: 0.35rem 0.8rem; font-size: 0.78rem; }
+    .triage-sort { display: flex; gap: 0.5rem; margin-bottom: 0.75rem; align-items: center; }
+    .triage-sort label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+    .triage-sort select { padding: 0.3rem 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 0.78rem; font-family: inherit; }
+    .triage-folder { margin-bottom: 0.5rem; }
+    .triage-folder-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.4rem 0.5rem; background: #f3f4f6; border-radius: 8px;
+      cursor: pointer; user-select: none; font-size: 0.82rem; font-weight: 600;
+    }
+    .triage-folder-header input[type="checkbox"] { accent-color: #7c3aed; }
+    .triage-folder-header .folder-count { font-weight: 400; color: var(--text-muted); font-size: 0.75rem; margin-left: auto; }
+    .triage-file {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.35rem 0.5rem 0.35rem 2rem; font-size: 0.82rem;
+      border-bottom: 1px solid #f3f4f6; transition: opacity 0.15s;
+    }
+    .triage-file:last-child { border-bottom: none; }
+    .triage-file input[type="checkbox"] { accent-color: #7c3aed; flex-shrink: 0; }
+    .triage-file .file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .triage-file .file-size { color: var(--text-muted); font-size: 0.75rem; flex-shrink: 0; min-width: 3.5rem; text-align: right; }
+    .triage-file .file-tag {
+      display: inline-block; padding: 0.1rem 0.4rem; border-radius: 4px;
+      font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.03em; flex-shrink: 0;
+    }
+    .triage-file .file-tag.exclude { background: #fee2e2; color: #dc2626; }
+    .triage-file .file-tag.duplicate { background: #fef3c7; color: #92400e; }
+    .triage-file .file-tag.lesson { background: #dbeafe; color: #1d4ed8; }
+    .triage-file.excluded { opacity: 0.45; }
+    .triage-file.excluded .file-name { text-decoration: line-through; }
+    .triage-file-list { max-height: 500px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.25rem 0; }
+
+    /* Upload layout with guide sidebar */
+    .upload-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
+    .upload-guide { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
+    .upload-guide h3 { font-family: 'Source Serif 4', serif; font-size: 1rem; margin: 0 0 1rem; }
+    .upload-guide h4 { font-size: 0.78rem; font-weight: 700; margin: 1rem 0 0.35rem; color: var(--text-color); text-transform: uppercase; letter-spacing: 0.03em; }
+    .upload-guide h4:first-of-type { margin-top: 0; }
+    .upload-guide ul { margin: 0; padding-left: 1.25rem; }
+    .upload-guide li { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0.3rem; }
+    .upload-guide li strong { color: var(--text-color); font-weight: 600; }
+    .upload-guide .guide-note { font-size: 0.72rem; color: var(--text-muted); background: #f9fafb; border-radius: 8px; padding: 0.6rem 0.75rem; margin-top: 1rem; line-height: 1.5; }
+    @media (max-width: 800px) { .upload-layout { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
@@ -158,6 +212,125 @@
     );
 
     var contentEl = document.getElementById('pipeline-content');
+
+    // ---- File triage constants ----
+    var EXCLUDE_FOLDER_PATTERNS = [
+      'old', 'archive', 'backup', 'do not use', "don't use", 'dont use',
+      'retired', 'previous', 'drafts', 'copy of', 'temp', 'unused',
+      'obsolete', 'deprecated', 'delete', 'trash'
+    ];
+    var EXCLUDE_FILE_PREFIXES = ['~$', '._'];
+    var EXCLUDE_FILE_NAMES = ['thumbs.db', '.ds_store', 'desktop.ini', '.gitkeep'];
+    var SUPPORTED_EXTENSIONS = ['pptx', 'docx', 'pdf', 'txt'];
+    var LEGACY_EXTENSIONS = ['ppt', 'doc'];
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+    }
+
+    function detectLessonNumber(filename) {
+      var base = filename.replace(/\.[^.]+$/, '');
+      var patterns = [
+        /lesson\s*(\d+)/i,
+        /\bL(\d+)\b/,
+        /^(\d{1,2})\s*[-_.\s]/,
+        /topic\s*(\d+)/i,
+        /week\s*(\d+)/i,
+        /unit\s*(\d+)/i
+      ];
+      for (var i = 0; i < patterns.length; i++) {
+        var m = base.match(patterns[i]);
+        if (m) return parseInt(m[1], 10);
+      }
+      return null;
+    }
+
+    function scanAndClassify(rawFiles) {
+      var scanned = [];
+
+      for (var i = 0; i < rawFiles.length; i++) {
+        var f = rawFiles[i];
+        var relativePath = f._relativePath || f.webkitRelativePath || f.name;
+        var name = f.name;
+        var ext = name.split('.').pop().toLowerCase();
+        var pathParts = relativePath.split('/');
+        var folder = pathParts.length > 1 ? pathParts.slice(0, -1).join('/') : '(root)';
+
+        var isSupported = SUPPORTED_EXTENSIONS.indexOf(ext) !== -1;
+        var isLegacy = LEGACY_EXTENSIONS.indexOf(ext) !== -1;
+        if (!isSupported && !isLegacy) continue;
+
+        var autoExcluded = false;
+        var excludeReason = '';
+
+        // Check folder name patterns
+        var folderLower = folder.toLowerCase();
+        for (var p = 0; p < EXCLUDE_FOLDER_PATTERNS.length; p++) {
+          if (folderLower.indexOf(EXCLUDE_FOLDER_PATTERNS[p]) !== -1) {
+            autoExcluded = true;
+            excludeReason = "In \u2018" + EXCLUDE_FOLDER_PATTERNS[p] + "\u2019 folder";
+            break;
+          }
+        }
+
+        // Check file prefix patterns
+        if (!autoExcluded) {
+          for (var px = 0; px < EXCLUDE_FILE_PREFIXES.length; px++) {
+            if (name.indexOf(EXCLUDE_FILE_PREFIXES[px]) === 0) {
+              autoExcluded = true;
+              excludeReason = name.indexOf('~$') === 0 ? 'Office temp file' : 'System file';
+              break;
+            }
+          }
+        }
+
+        // Check exact filenames
+        if (!autoExcluded && EXCLUDE_FILE_NAMES.indexOf(name.toLowerCase()) !== -1) {
+          autoExcluded = true;
+          excludeReason = 'System file';
+        }
+
+        // Legacy formats
+        if (!autoExcluded && isLegacy) {
+          autoExcluded = true;
+          excludeReason = 'Legacy format (save as .' + ext + 'x)';
+        }
+
+        scanned.push({
+          file: f,
+          relativePath: relativePath,
+          folder: folder,
+          name: name,
+          ext: ext,
+          size: f.size,
+          included: !autoExcluded,
+          autoExcluded: autoExcluded,
+          excludeReason: excludeReason,
+          isDuplicate: false,
+          lessonNumber: detectLessonNumber(name)
+        });
+      }
+
+      // Duplicate detection: same filename in different folders
+      var nameMap = {};
+      for (var d = 0; d < scanned.length; d++) {
+        var key = scanned[d].name.toLowerCase();
+        if (!nameMap[key]) nameMap[key] = [];
+        nameMap[key].push(d);
+      }
+      for (var k in nameMap) {
+        if (nameMap[k].length > 1) {
+          for (var di = 0; di < nameMap[k].length; di++) {
+            scanned[nameMap[k][di]].isDuplicate = true;
+          }
+        }
+      }
+
+      return scanned;
+    }
+
     var accessToken = null;
     var demoUser = null;
     var currentJob = null;
@@ -331,11 +504,12 @@
     }
 
     // ---- Upload Form ----
-    function renderUploadForm() {
+    function renderUploadForm(restoreValues) {
       var selectedFiles = [];
 
       contentEl.innerHTML =
         '<a class="back-link" id="back-to-jobs">&larr; All Jobs</a>' +
+        '<div class="upload-layout">' +
         '<div class="upload-card">' +
           '<h2>Upload Teaching Resources</h2>' +
           '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">Upload PPTs, Word docs, and PDFs. Select multiple files or drag a folder.</p>' +
@@ -358,7 +532,39 @@
             '<div class="form-group"><label>Spec Code</label><input type="text" id="spec-code" placeholder="e.g. J309"></div>' +
             '<div class="form-group"><label>Unit Colour</label><input type="color" id="color1" value="#7c3aed"></div>' +
           '</div>' +
-          '<button class="btn btn-primary" id="upload-btn" disabled>Upload &amp; Parse</button>' +
+          '<button class="btn btn-primary" id="upload-btn" disabled>Review Files</button>' +
+        '</div>' +
+        '<div class="upload-guide">' +
+          '<h3>Before You Upload</h3>' +
+          '<h4>What to include</h4>' +
+          '<ul>' +
+            '<li><strong>Lesson PowerPoints</strong> \u2014 one per topic works best</li>' +
+            '<li><strong>Worksheets or handouts</strong> (.docx, .pdf) with extra detail</li>' +
+            '<li>Speaker notes are used \u2014 the more detail in your slides, the better the output</li>' +
+          '</ul>' +
+          '<h4>What to leave out</h4>' +
+          '<ul>' +
+            '<li>Videos and images \u2014 we can\u2019t extract text from these</li>' +
+            '<li>Old or superseded versions \u2014 we\u2019ll flag \u201cold\u201d and \u201carchive\u201d folders automatically, but a clean folder is faster</li>' +
+            '<li>Blank templates or cover slides</li>' +
+          '</ul>' +
+          '<h4>File formats</h4>' +
+          '<ul>' +
+            '<li><strong>.pptx</strong> and <strong>.docx</strong> give the best results</li>' +
+            '<li><strong>.pdf</strong> works but loses formatting</li>' +
+            '<li>Legacy <strong>.ppt</strong> / <strong>.doc</strong> files need re-saving as .pptx / .docx first</li>' +
+            '<li>Max <strong>50 MB</strong> per file</li>' +
+          '</ul>' +
+          '<h4>Folder uploads</h4>' +
+          '<ul>' +
+            '<li>You can drag an entire folder \u2014 we\u2019ll scan it and let you pick which files to include</li>' +
+            '<li>Folders named \u201cold\u201d, \u201carchive\u201d, \u201cdo not use\u201d etc. are auto-excluded</li>' +
+            '<li>Office temp files (~$) and system files are filtered out</li>' +
+          '</ul>' +
+          '<div class="guide-note">' +
+            'Don\u2019t worry about getting it perfect \u2014 you\u2019ll review the generated content before students see it.' +
+          '</div>' +
+        '</div>' +
         '</div>';
 
       var dropzone = document.getElementById('dropzone');
@@ -367,24 +573,23 @@
 
       function updateDropzoneDisplay() {
         if (selectedFiles.length === 0) return;
-        var totalKB = 0;
-        for (var i = 0; i < selectedFiles.length; i++) totalKB += selectedFiles[i].size;
-        var names = selectedFiles.map(function (f) { return f.name; });
-        var display = names.length <= 5 ? names.join(', ') : names.slice(0, 5).join(', ') + ' + ' + (names.length - 5) + ' more';
-        dropzone.innerHTML = '<p class="file-name">' + selectedFiles.length + ' file(s) selected</p><p style="font-size:0.75rem;color:var(--text-muted)">' + display + '</p><p>' + (totalKB / 1024).toFixed(0) + ' KB total</p>';
+        var totalBytes = 0;
+        var supportedCount = 0;
+        for (var i = 0; i < selectedFiles.length; i++) {
+          totalBytes += selectedFiles[i].size;
+          var ext = selectedFiles[i].name.split('.').pop().toLowerCase();
+          if (SUPPORTED_EXTENSIONS.indexOf(ext) !== -1 || LEGACY_EXTENSIONS.indexOf(ext) !== -1) supportedCount++;
+        }
+        dropzone.innerHTML =
+          '<p class="file-name">' + selectedFiles.length + ' file(s) found (' + supportedCount + ' supported)</p>' +
+          '<p style="font-size:0.75rem;color:var(--text-muted)">Click \u201cReview Files\u201d to select which to upload</p>' +
+          '<p>' + formatFileSize(totalBytes) + ' total</p>';
         var hasSchool = !allSchools.length || document.getElementById('school-id').value;
-        uploadBtn.disabled = !document.getElementById('subject-name').value || !hasSchool;
+        uploadBtn.disabled = !document.getElementById('subject-name').value || supportedCount === 0 || !hasSchool;
       }
 
       function collectFiles(fileList) {
-        selectedFiles = [];
-        for (var i = 0; i < fileList.length; i++) {
-          var f = fileList[i];
-          var ext = f.name.split('.').pop().toLowerCase();
-          if (['pptx', 'ppt', 'docx', 'doc', 'pdf', 'txt'].includes(ext)) {
-            selectedFiles.push(f);
-          }
-        }
+        selectedFiles = Array.from(fileList);
         updateDropzoneDisplay();
       }
 
@@ -410,12 +615,25 @@
       function readEntry(entry, files) {
         return new Promise(function (resolve) {
           if (entry.isFile) {
-            entry.file(function (f) { files.push(f); resolve(); });
+            entry.file(function (f) {
+              f._relativePath = entry.fullPath.replace(/^\//, '');
+              files.push(f);
+              resolve();
+            });
           } else if (entry.isDirectory) {
             var reader = entry.createReader();
-            reader.readEntries(function (entries) {
-              Promise.all(entries.map(function (e) { return readEntry(e, files); })).then(resolve);
-            });
+            var allEntries = [];
+            function readBatch() {
+              reader.readEntries(function (entries) {
+                if (entries.length === 0) {
+                  Promise.all(allEntries.map(function (e) { return readEntry(e, files); })).then(resolve);
+                } else {
+                  allEntries = allEntries.concat(Array.from(entries));
+                  readBatch();
+                }
+              });
+            }
+            readBatch();
           } else {
             resolve();
           }
@@ -443,48 +661,238 @@
       document.getElementById('subject-name').addEventListener('input', checkUploadReady);
       document.getElementById('school-id').addEventListener('change', checkUploadReady);
 
-      uploadBtn.addEventListener('click', async function () {
+      uploadBtn.addEventListener('click', function () {
         if (selectedFiles.length === 0) return;
-        uploadBtn.disabled = true;
-
-        try {
-          var jobPrefix = crypto.randomUUID();
-          var filenames = [];
-
-          // Upload each file
-          for (var i = 0; i < selectedFiles.length; i++) {
-            uploadBtn.textContent = 'Uploading ' + (i + 1) + '/' + selectedFiles.length + '...';
-            var f = selectedFiles[i];
-            var storagePath = jobPrefix + '/' + f.name;
-            var uploadResult = await sb.storage.from('pipeline-uploads').upload(storagePath, f);
-            if (uploadResult.error) throw new Error('Upload failed for ' + f.name + ': ' + uploadResult.error.message);
-            filenames.push(f.name);
-          }
-
-          // Create the upload_job
-          var job = await apiCall('/api/pipeline/upload', {
-            subject_name: document.getElementById('subject-name').value,
-            exam_board: document.getElementById('exam-board').value,
-            spec_code: document.getElementById('spec-code').value,
-            school_id: document.getElementById('school-id').value || null,
-            storage_path: jobPrefix,
-            filename: filenames.join(', '),
-          });
-
-          // Parse all files
-          uploadBtn.textContent = 'Parsing files...';
-          var parseResult = await apiCall('/api/pipeline/parse', { job_id: job.job_id });
-
-          // Fetch job via API (bypasses RLS for demo users)
-          var status = await apiCall('/api/pipeline/status?job_id=' + job.job_id);
-          currentJob = status.job;
-          renderReadyForGeneration(currentJob);
-        } catch (err) {
-          contentEl.innerHTML += '<div class="error-msg">' + err.message + '</div>';
-          uploadBtn.disabled = false;
-          uploadBtn.textContent = 'Upload & Parse';
-        }
+        var formValues = {
+          school_id: document.getElementById('school-id').value,
+          subject_name: document.getElementById('subject-name').value,
+          exam_board: document.getElementById('exam-board').value,
+          spec_code: document.getElementById('spec-code').value,
+          color1: document.getElementById('color1').value
+        };
+        var scanned = scanAndClassify(selectedFiles);
+        renderTriage(scanned, formValues);
       });
+
+      // Restore form values if returning from triage
+      if (restoreValues) {
+        var el;
+        if (restoreValues.school_id && (el = document.getElementById('school-id'))) el.value = restoreValues.school_id;
+        if (restoreValues.subject_name && (el = document.getElementById('subject-name'))) el.value = restoreValues.subject_name;
+        if (restoreValues.exam_board && (el = document.getElementById('exam-board'))) el.value = restoreValues.exam_board;
+        if (restoreValues.spec_code && (el = document.getElementById('spec-code'))) el.value = restoreValues.spec_code;
+        if (restoreValues.color1 && (el = document.getElementById('color1'))) el.value = restoreValues.color1;
+      }
+    }
+
+    // ---- File Triage ----
+    function renderTriage(scannedFiles, formValues) {
+      var currentSort = 'smart';
+
+      function sortFiles(files, mode) {
+        var sorted = files.slice();
+        if (mode === 'smart') {
+          sorted.sort(function (a, b) {
+            if (a.included !== b.included) return a.included ? -1 : 1;
+            if (a.lessonNumber !== null && b.lessonNumber !== null) return a.lessonNumber - b.lessonNumber;
+            if (a.lessonNumber !== null) return -1;
+            if (b.lessonNumber !== null) return 1;
+            return a.name.localeCompare(b.name);
+          });
+        } else if (mode === 'folder') {
+          sorted.sort(function (a, b) {
+            if (a.folder !== b.folder) return a.folder.localeCompare(b.folder);
+            return a.name.localeCompare(b.name);
+          });
+        } else if (mode === 'name') {
+          sorted.sort(function (a, b) { return a.name.localeCompare(b.name); });
+        } else if (mode === 'size') {
+          sorted.sort(function (a, b) { return b.size - a.size; });
+        } else if (mode === 'type') {
+          sorted.sort(function (a, b) {
+            if (a.ext !== b.ext) return a.ext.localeCompare(b.ext);
+            return a.name.localeCompare(b.name);
+          });
+        }
+        return sorted;
+      }
+
+      var extIcons = { pptx: '\uD83D\uDCCA', ppt: '\uD83D\uDCCA', docx: '\uD83D\uDCC4', doc: '\uD83D\uDCC4', pdf: '\uD83D\uDCD5', txt: '\uD83D\uDCDD' };
+
+      function fileRow(sf) {
+        var cls = 'triage-file' + (sf.included ? '' : ' excluded');
+        var tags = '';
+        if (sf.autoExcluded && sf.excludeReason) tags += '<span class="file-tag exclude">' + sf.excludeReason + '</span>';
+        if (sf.isDuplicate) tags += '<span class="file-tag duplicate">Duplicate name</span>';
+        if (sf.lessonNumber !== null && sf.included) tags += '<span class="file-tag lesson">L' + sf.lessonNumber + '</span>';
+        return '<div class="' + cls + '" data-path="' + sf.relativePath.replace(/"/g, '&quot;') + '">' +
+          '<input type="checkbox"' + (sf.included ? ' checked' : '') + ' data-file-check="' + sf.relativePath.replace(/"/g, '&quot;') + '">' +
+          '<span style="width:1rem;text-align:center;flex-shrink:0">' + (extIcons[sf.ext] || '\uD83D\uDCCE') + '</span>' +
+          '<span class="file-name" title="' + sf.relativePath.replace(/"/g, '&quot;') + '">' + sf.name + '</span>' +
+          tags +
+          '<span class="file-size">' + formatFileSize(sf.size) + '</span>' +
+        '</div>';
+      }
+
+      function render() {
+        var sorted = sortFiles(scannedFiles, currentSort);
+        var includedCount = 0, includedSize = 0;
+        for (var i = 0; i < scannedFiles.length; i++) {
+          if (scannedFiles[i].included) { includedCount++; includedSize += scannedFiles[i].size; }
+        }
+
+        var html =
+          '<a class="back-link" id="triage-back-link">&larr; Back to Upload Form</a>' +
+          '<div class="upload-card">' +
+            '<h2>Review Files</h2>' +
+            '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">' +
+              'Uncheck files you don\u2019t want to upload. Greyed-out files were auto-excluded.</p>' +
+            '<div class="triage-summary">' +
+              '<div><span class="counts">' + includedCount + ' files selected</span>' +
+              '<span class="size"> of ' + scannedFiles.length + ' found &middot; ' + formatFileSize(includedSize) + '</span></div>' +
+              '<div class="triage-actions">' +
+                '<button class="btn btn-outline" id="triage-sel-all">Select All</button>' +
+                '<button class="btn btn-outline" id="triage-desel-all">Deselect All</button>' +
+              '</div>' +
+            '</div>' +
+            '<div class="triage-sort">' +
+              '<label>Sort:</label>' +
+              '<select id="triage-sort">' +
+                '<option value="smart"' + (currentSort === 'smart' ? ' selected' : '') + '>Smart (lessons first)</option>' +
+                '<option value="folder"' + (currentSort === 'folder' ? ' selected' : '') + '>By folder</option>' +
+                '<option value="name"' + (currentSort === 'name' ? ' selected' : '') + '>By name</option>' +
+                '<option value="size"' + (currentSort === 'size' ? ' selected' : '') + '>By size</option>' +
+                '<option value="type"' + (currentSort === 'type' ? ' selected' : '') + '>By type</option>' +
+              '</select>' +
+            '</div>' +
+            '<div class="triage-file-list">';
+
+        if (currentSort === 'folder') {
+          var folders = {};
+          for (var g = 0; g < sorted.length; g++) {
+            var fld = sorted[g].folder;
+            if (!folders[fld]) folders[fld] = [];
+            folders[fld].push(sorted[g]);
+          }
+          var folderNames = Object.keys(folders).sort();
+          for (var fi = 0; fi < folderNames.length; fi++) {
+            var fn = folderNames[fi];
+            var ff = folders[fn];
+            var folderInc = ff.filter(function (f) { return f.included; }).length;
+            var allInc = folderInc === ff.length;
+            var noneInc = folderInc === 0;
+            html += '<div class="triage-folder">' +
+              '<div class="triage-folder-header">' +
+                '<input type="checkbox"' + (allInc ? ' checked' : '') +
+                  (!allInc && !noneInc ? ' data-indeterminate="1"' : '') +
+                  ' data-folder-check="' + fn.replace(/"/g, '&quot;') + '">' +
+                '<span>\uD83D\uDCC1 ' + fn + '</span>' +
+                '<span class="folder-count">' + folderInc + '/' + ff.length + '</span>' +
+              '</div>';
+            for (var ffi = 0; ffi < ff.length; ffi++) html += fileRow(ff[ffi]);
+            html += '</div>';
+          }
+        } else {
+          for (var fl = 0; fl < sorted.length; fl++) html += fileRow(sorted[fl]);
+        }
+
+        html += '</div>'; // file-list
+        if (includedCount === 0) {
+          html += '<div class="info-msg" style="margin-top:0.75rem">No files selected. Check some files above or go back and drop a different folder.</div>';
+        }
+        html += '<div style="display:flex;gap:0.75rem;margin-top:1.25rem">' +
+          '<button class="btn btn-primary" id="triage-upload-btn"' + (includedCount === 0 ? ' disabled' : '') + '>' +
+            'Upload ' + includedCount + ' File' + (includedCount !== 1 ? 's' : '') + ' &amp; Parse</button>' +
+          '<button class="btn btn-outline" id="triage-back-btn">Back</button>' +
+        '</div></div>';
+
+        contentEl.innerHTML = html;
+
+        // Set indeterminate checkboxes
+        var indets = contentEl.querySelectorAll('[data-indeterminate]');
+        for (var ii = 0; ii < indets.length; ii++) indets[ii].indeterminate = true;
+
+        // Wire events
+        document.getElementById('triage-back-link').addEventListener('click', function () { renderUploadForm(formValues); });
+        document.getElementById('triage-back-btn').addEventListener('click', function () { renderUploadForm(formValues); });
+        document.getElementById('triage-sort').addEventListener('change', function () { currentSort = this.value; render(); });
+        document.getElementById('triage-sel-all').addEventListener('click', function () {
+          for (var i = 0; i < scannedFiles.length; i++) scannedFiles[i].included = true;
+          render();
+        });
+        document.getElementById('triage-desel-all').addEventListener('click', function () {
+          for (var i = 0; i < scannedFiles.length; i++) scannedFiles[i].included = false;
+          render();
+        });
+
+        var fileChecks = contentEl.querySelectorAll('[data-file-check]');
+        for (var fc = 0; fc < fileChecks.length; fc++) {
+          fileChecks[fc].addEventListener('change', function () {
+            var path = this.getAttribute('data-file-check');
+            for (var j = 0; j < scannedFiles.length; j++) {
+              if (scannedFiles[j].relativePath === path) { scannedFiles[j].included = this.checked; break; }
+            }
+            render();
+          });
+        }
+
+        var folderChecks = contentEl.querySelectorAll('[data-folder-check]');
+        for (var fci = 0; fci < folderChecks.length; fci++) {
+          folderChecks[fci].addEventListener('change', function () {
+            var folder = this.getAttribute('data-folder-check');
+            var checked = this.checked;
+            for (var j = 0; j < scannedFiles.length; j++) {
+              if (scannedFiles[j].folder === folder) scannedFiles[j].included = checked;
+            }
+            render();
+          });
+        }
+
+        var uploadBtn = document.getElementById('triage-upload-btn');
+        if (uploadBtn) uploadBtn.addEventListener('click', function () { doTriageUpload(scannedFiles, formValues, uploadBtn); });
+      }
+
+      render();
+    }
+
+    async function doTriageUpload(scannedFiles, formValues, btn) {
+      var included = scannedFiles.filter(function (f) { return f.included; });
+      if (included.length === 0) return;
+      btn.disabled = true;
+
+      try {
+        var jobPrefix = crypto.randomUUID();
+        var filenames = [];
+
+        for (var i = 0; i < included.length; i++) {
+          btn.textContent = 'Uploading ' + (i + 1) + '/' + included.length + '...';
+          var sf = included[i];
+          var storagePath = jobPrefix + '/' + i + '_' + sf.name;
+          var uploadResult = await sb.storage.from('pipeline-uploads').upload(storagePath, sf.file);
+          if (uploadResult.error) throw new Error('Upload failed for ' + sf.name + ': ' + uploadResult.error.message);
+          filenames.push(sf.name);
+        }
+
+        var job = await apiCall('/api/pipeline/upload', {
+          subject_name: formValues.subject_name,
+          exam_board: formValues.exam_board,
+          spec_code: formValues.spec_code,
+          school_id: formValues.school_id || null,
+          storage_path: jobPrefix,
+          filename: filenames.join(', ')
+        });
+
+        btn.textContent = 'Parsing files...';
+        await apiCall('/api/pipeline/parse', { job_id: job.job_id });
+
+        var status = await apiCall('/api/pipeline/status?job_id=' + job.job_id);
+        currentJob = status.job;
+        renderReadyForGeneration(currentJob);
+      } catch (err) {
+        contentEl.innerHTML += '<div class="error-msg">' + err.message + '</div>';
+        btn.disabled = false;
+        btn.textContent = 'Upload & Parse';
+      }
     }
 
     // ---- Ready to parse (uploaded but not yet parsed) ----
