@@ -164,6 +164,40 @@
     .triage-file.excluded .file-name { text-decoration: line-through; }
     .triage-file-list { max-height: 500px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.25rem 0; }
 
+    /* Wizard steps */
+    .wizard-progress { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .wizard-dot {
+      width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; font-weight: 700; background: #e5e7eb; color: #9ca3af; transition: all 0.2s;
+    }
+    .wizard-dot.active { background: #7c3aed; color: white; }
+    .wizard-dot.done { background: #16a34a; color: white; }
+    .wizard-dot.skipped { background: #e5e7eb; color: #d1d5db; }
+    .wizard-connector { flex: 0 0 24px; height: 2px; background: #e5e7eb; }
+    .wizard-connector.done { background: #16a34a; }
+    .wizard-step-label { font-size: 0.78rem; color: var(--text-muted); margin-left: 0.5rem; }
+    .wizard-step-title { font-family: 'Source Serif 4', serif; font-size: 1.15rem; margin: 0 0 0.35rem; }
+    .wizard-step-desc { font-size: 0.875rem; color: var(--text-muted); margin: 0 0 1.25rem; }
+    .wizard-step-desc strong { color: var(--text-color); }
+    .wizard-group { margin-bottom: 0.75rem; }
+    .wizard-group-header {
+      display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem;
+      background: #f9fafb; border-radius: 8px; font-size: 0.82rem; font-weight: 600; color: var(--text-color);
+    }
+    .wizard-group-header .group-count { font-weight: 400; color: var(--text-muted); font-size: 0.75rem; margin-left: auto; }
+    .wizard-group-files { display: none; border: 1px solid #f3f4f6; border-radius: 0 0 8px 8px; margin-top: -2px; padding: 0.25rem 0; }
+    .wizard-group-files.expanded { display: block; }
+    .wizard-actions { display: flex; gap: 0.75rem; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; }
+    .wizard-actions .btn-success { padding: 0.65rem 1.5rem; font-size: 0.9rem; }
+    .wizard-review-link { font-size: 0.82rem; color: #4f46e5; cursor: pointer; text-decoration: none; }
+    .wizard-review-link:hover { text-decoration: underline; }
+    .wizard-dupe-group { background: #f9fafb; border-radius: 10px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; }
+    .wizard-dupe-group .dupe-title { font-size: 0.82rem; font-weight: 600; margin-bottom: 0.35rem; }
+    .wizard-dupe-group .dupe-copy { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0; font-size: 0.82rem; }
+    .wizard-dupe-group .dupe-copy .folder-path { color: var(--text-muted); font-size: 0.75rem; }
+    .wizard-dupe-group .dupe-copy.removed { opacity: 0.45; text-decoration: line-through; }
+    .wizard-empty-step { text-align: center; padding: 2rem 1rem; color: #16a34a; font-size: 0.875rem; font-weight: 600; }
+
     /* Upload layout with guide sidebar */
     .upload-layout { display: grid; grid-template-columns: 1fr 300px; gap: 1.5rem; align-items: start; }
     .upload-guide { background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 1px 8px rgba(0,0,0,0.06); }
@@ -304,6 +338,17 @@
           excludeReason = 'Over 50 MB (' + formatFileSize(f.size) + ')';
         }
 
+        // Assign category for wizard steps
+        var category = 'keep';
+        if (autoExcluded) {
+          // Check if it's in an excluded folder
+          var inExcludedFolder = false;
+          for (var ef = 0; ef < EXCLUDE_FOLDER_PATTERNS.length; ef++) {
+            if (folderLower.indexOf(EXCLUDE_FOLDER_PATTERNS[ef]) !== -1) { inExcludedFolder = true; break; }
+          }
+          category = inExcludedFolder ? 'old_folder' : 'junk';
+        }
+
         scanned.push({
           file: f,
           relativePath: relativePath,
@@ -315,6 +360,7 @@
           autoExcluded: autoExcluded,
           excludeReason: excludeReason,
           isDuplicate: false,
+          category: category,
           lessonNumber: detectLessonNumber(name)
         });
       }
@@ -347,6 +393,7 @@
                   scanned[group[gi]].autoExcluded = true;
                   scanned[group[gi]].included = false;
                   scanned[group[gi]].excludeReason = 'Exact duplicate';
+                  scanned[group[gi]].category = 'duplicate';
                 }
               }
               scanned[group[0]].isDuplicate = false; // first copy is not flagged
@@ -739,7 +786,7 @@
           color1: document.getElementById('color1').value
         };
         var scanned = scanAndClassify(selectedFiles);
-        renderTriage(scanned, formValues);
+        renderWizard(scanned, formValues);
       });
 
       // Restore form values if returning from triage
@@ -753,75 +800,336 @@
       }
     }
 
-    // ---- File Triage ----
-    function renderTriage(scannedFiles, formValues) {
+    // ---- File Review Wizard ----
+    function renderWizard(scannedFiles, formValues) {
+      var step = 1;
       var currentSort = 'smart';
+      var expandedSteps = {}; // track which steps have "review individually" expanded
 
-      function sortFiles(files, mode) {
-        var sorted = files.slice();
-        if (mode === 'smart') {
-          sorted.sort(function (a, b) {
-            if (a.included !== b.included) return a.included ? -1 : 1;
-            if (a.lessonNumber !== null && b.lessonNumber !== null) return a.lessonNumber - b.lessonNumber;
-            if (a.lessonNumber !== null) return -1;
-            if (b.lessonNumber !== null) return 1;
-            return a.name.localeCompare(b.name);
-          });
-        } else if (mode === 'folder') {
-          sorted.sort(function (a, b) {
-            if (a.folder !== b.folder) return a.folder.localeCompare(b.folder);
-            return a.name.localeCompare(b.name);
-          });
-        } else if (mode === 'name') {
-          sorted.sort(function (a, b) { return a.name.localeCompare(b.name); });
-        } else if (mode === 'size') {
-          sorted.sort(function (a, b) { return b.size - a.size; });
-        } else if (mode === 'type') {
-          sorted.sort(function (a, b) {
-            if (a.ext !== b.ext) return a.ext.localeCompare(b.ext);
-            return a.name.localeCompare(b.name);
-          });
+      // Categorise files for each step
+      var junkFiles = scannedFiles.filter(function (f) { return f.category === 'junk'; });
+      var oldFolderFiles = scannedFiles.filter(function (f) { return f.category === 'old_folder'; });
+      var dupeFiles = scannedFiles.filter(function (f) { return f.category === 'duplicate'; });
+
+      // Build duplicate groups for step 3
+      var dupeGroups = {};
+      for (var dg = 0; dg < scannedFiles.length; dg++) {
+        var sf = scannedFiles[dg];
+        if (sf.category === 'duplicate' || sf.category === 'keep') {
+          var key = sf.name.toLowerCase();
+          if (!dupeGroups[key]) dupeGroups[key] = [];
+          dupeGroups[key].push(sf);
         }
-        return sorted;
+      }
+      // Only keep groups that actually have duplicates
+      var dupeGroupList = [];
+      for (var gk in dupeGroups) {
+        if (dupeGroups[gk].length > 1) {
+          var hasDupe = false;
+          for (var gi = 0; gi < dupeGroups[gk].length; gi++) {
+            if (dupeGroups[gk][gi].category === 'duplicate') { hasDupe = true; break; }
+          }
+          if (hasDupe) dupeGroupList.push(dupeGroups[gk]);
+        }
+      }
+
+      function shouldSkip(s) {
+        if (s === 1 && junkFiles.length === 0) return true;
+        if (s === 2 && oldFolderFiles.length === 0) return true;
+        if (s === 3 && dupeGroupList.length === 0) return true;
+        return false;
+      }
+
+      // Find first valid step
+      while (step <= 3 && shouldSkip(step)) step++;
+      if (step > 4) step = 4;
+
+      function nextStep() { step++; while (step <= 3 && shouldSkip(step)) step++; renderStep(); }
+      function prevStep() { step--; while (step >= 1 && shouldSkip(step)) step--; if (step < 1) { renderUploadForm(formValues); return; } renderStep(); }
+
+      var stepLabels = ['', 'Junk Files', 'Old Folders', 'Duplicates', 'Final Review'];
+
+      function progressBar() {
+        var html = '<div class="wizard-progress">';
+        for (var s = 1; s <= 4; s++) {
+          if (s > 1) html += '<div class="wizard-connector' + (s <= step ? ' done' : '') + '"></div>';
+          var cls = s < step ? 'done' : (s === step ? 'active' : (shouldSkip(s) && s <= 3 ? 'skipped' : ''));
+          html += '<div class="wizard-dot ' + cls + '">' + s + '</div>';
+        }
+        html += '<span class="wizard-step-label">' + stepLabels[step] + '</span>';
+        html += '</div>';
+        return html;
       }
 
       var extIcons = { pptx: '\uD83D\uDCCA', ppt: '\uD83D\uDCCA', docx: '\uD83D\uDCC4', doc: '\uD83D\uDCC4', pdf: '\uD83D\uDCD5', txt: '\uD83D\uDCDD' };
 
-      function fileRow(sf) {
+      function fileRow(sf, showFolder) {
         var cls = 'triage-file' + (sf.included ? '' : ' excluded');
         var tags = '';
         if (sf.autoExcluded && sf.excludeReason) tags += '<span class="file-tag exclude">' + sf.excludeReason + '</span>';
-        if (sf.isDuplicate) tags += '<span class="file-tag duplicate">Duplicate name</span>';
+        if (sf.isDuplicate && sf.category !== 'duplicate') tags += '<span class="file-tag duplicate">Duplicate name</span>';
         if (sf.lessonNumber !== null && sf.included) tags += '<span class="file-tag lesson">L' + sf.lessonNumber + '</span>';
+        var nameDisplay = showFolder ? '<span style="color:var(--text-muted);font-size:0.72rem">' + sf.folder + '/</span> ' + sf.name : sf.name;
         return '<div class="' + cls + '" data-path="' + sf.relativePath.replace(/"/g, '&quot;') + '">' +
           '<input type="checkbox"' + (sf.included ? ' checked' : '') + ' data-file-check="' + sf.relativePath.replace(/"/g, '&quot;') + '">' +
           '<span style="width:1rem;text-align:center;flex-shrink:0">' + (extIcons[sf.ext] || '\uD83D\uDCCE') + '</span>' +
-          '<span class="file-name" title="' + sf.relativePath.replace(/"/g, '&quot;') + '">' + sf.name + '</span>' +
+          '<span class="file-name" title="' + sf.relativePath.replace(/"/g, '&quot;') + '">' + nameDisplay + '</span>' +
           tags +
           '<span class="file-size">' + formatFileSize(sf.size) + '</span>' +
         '</div>';
       }
 
-      function render() {
-        // Preserve scroll position across re-renders
+      function wireFileChecks() {
+        var checks = contentEl.querySelectorAll('[data-file-check]');
+        for (var i = 0; i < checks.length; i++) {
+          checks[i].addEventListener('change', function () {
+            var path = this.getAttribute('data-file-check');
+            for (var j = 0; j < scannedFiles.length; j++) {
+              if (scannedFiles[j].relativePath === path) { scannedFiles[j].included = this.checked; break; }
+            }
+          });
+        }
+      }
+
+      // ---- Step 1: Junk Files ----
+      function renderJunkStep() {
+        // Group junk by reason
+        var groups = {};
+        for (var i = 0; i < junkFiles.length; i++) {
+          var reason = junkFiles[i].excludeReason || 'Other';
+          if (!groups[reason]) groups[reason] = [];
+          groups[reason].push(junkFiles[i]);
+        }
+        var isExpanded = expandedSteps[1];
+
+        var html = progressBar() +
+          '<div class="upload-card">' +
+            '<h2 class="wizard-step-title">Junk Files</h2>' +
+            '<p class="wizard-step-desc">We found <strong>' + junkFiles.length + ' file' + (junkFiles.length !== 1 ? 's' : '') + '</strong> that can\u2019t be used or are likely junk.</p>';
+
+        var reasons = Object.keys(groups);
+        for (var r = 0; r < reasons.length; r++) {
+          var grp = groups[reasons[r]];
+          html += '<div class="wizard-group">' +
+            '<div class="wizard-group-header"><span>' + reasons[r] + '</span><span class="group-count">' + grp.length + ' file' + (grp.length !== 1 ? 's' : '') + '</span></div>' +
+            '<div class="wizard-group-files' + (isExpanded ? ' expanded' : '') + '">';
+          for (var gi = 0; gi < grp.length; gi++) html += fileRow(grp[gi], true);
+          html += '</div></div>';
+        }
+
+        html += '<div class="wizard-actions">' +
+          '<button class="btn btn-success" id="wizard-continue">Remove these and continue</button>' +
+          '<a class="wizard-review-link" id="wizard-expand">' + (isExpanded ? 'Hide details' : 'Let me review individually') + '</a>' +
+          '</div>';
+
+        // Back button
+        html += '<div style="margin-top:0.75rem"><a class="back-link" id="wizard-back">&larr; Back to upload form</a></div>';
+        html += '</div>';
+
+        contentEl.innerHTML = html;
+        wireFileChecks();
+
+        document.getElementById('wizard-continue').addEventListener('click', function () {
+          // Ensure all junk files are excluded
+          for (var i = 0; i < junkFiles.length; i++) {
+            if (!junkFiles[i].included) continue; // already excluded, respect checkbox
+            // Only exclude if user hasn't manually checked them back
+          }
+          nextStep();
+        });
+        document.getElementById('wizard-expand').addEventListener('click', function () {
+          expandedSteps[1] = !expandedSteps[1];
+          renderStep();
+        });
+        document.getElementById('wizard-back').addEventListener('click', function () { renderUploadForm(formValues); });
+      }
+
+      // ---- Step 2: Old/Archive Folders ----
+      function renderOldFolderStep() {
+        // Group by folder
+        var folders = {};
+        for (var i = 0; i < oldFolderFiles.length; i++) {
+          var f = oldFolderFiles[i];
+          if (!folders[f.folder]) folders[f.folder] = { files: [], size: 0 };
+          folders[f.folder].files.push(f);
+          folders[f.folder].size += f.size;
+        }
+        var folderNames = Object.keys(folders).sort();
+        var isExpanded = expandedSteps[2];
+
+        var html = progressBar() +
+          '<div class="upload-card">' +
+            '<h2 class="wizard-step-title">Old / Archive Folders</h2>' +
+            '<p class="wizard-step-desc">We found <strong>' + folderNames.length + ' folder' + (folderNames.length !== 1 ? 's' : '') + '</strong> that look like old or archived resources.</p>';
+
+        for (var fi = 0; fi < folderNames.length; fi++) {
+          var fn = folderNames[fi];
+          var fd = folders[fn];
+          html += '<div class="wizard-group">' +
+            '<div class="wizard-group-header">' +
+              '<span>\uD83D\uDCC1 ' + fn + '</span>' +
+              '<span class="group-count">' + fd.files.length + ' file' + (fd.files.length !== 1 ? 's' : '') + ', ' + formatFileSize(fd.size) + '</span>' +
+            '</div>' +
+            '<div class="wizard-group-files' + (isExpanded ? ' expanded' : '') + '">';
+          for (var ffi = 0; ffi < fd.files.length; ffi++) html += fileRow(fd.files[ffi], false);
+          html += '</div></div>';
+        }
+
+        html += '<div class="wizard-actions">' +
+          '<button class="btn btn-success" id="wizard-continue">Remove these and continue</button>' +
+          '<a class="wizard-review-link" id="wizard-expand">' + (isExpanded ? 'Hide details' : 'Let me review individually') + '</a>' +
+          '</div>';
+        html += '<div style="margin-top:0.75rem"><a class="back-link" id="wizard-back">&larr; Back</a></div>';
+        html += '</div>';
+
+        contentEl.innerHTML = html;
+        wireFileChecks();
+
+        document.getElementById('wizard-continue').addEventListener('click', function () { nextStep(); });
+        document.getElementById('wizard-expand').addEventListener('click', function () {
+          expandedSteps[2] = !expandedSteps[2];
+          renderStep();
+        });
+        document.getElementById('wizard-back').addEventListener('click', function () { prevStep(); });
+      }
+
+      // ---- Step 3: Exact Duplicates ----
+      function renderDuplicateStep() {
+        var removedCount = 0;
+        for (var c = 0; c < dupeGroupList.length; c++) {
+          for (var ci = 0; ci < dupeGroupList[c].length; ci++) {
+            if (dupeGroupList[c][ci].category === 'duplicate' && !dupeGroupList[c][ci].included) removedCount++;
+          }
+        }
+
+        var isExpanded = expandedSteps[3];
+        var html = progressBar() +
+          '<div class="upload-card">' +
+            '<h2 class="wizard-step-title">Exact Duplicates</h2>' +
+            '<p class="wizard-step-desc">We found <strong>' + removedCount + ' duplicate file' + (removedCount !== 1 ? 's' : '') + '</strong> (same name and size in different folders). We\u2019ll keep one copy of each.</p>';
+
+        for (var dgi = 0; dgi < dupeGroupList.length; dgi++) {
+          var group = dupeGroupList[dgi];
+          var keptFile = null;
+          var removedFiles = [];
+          for (var gf = 0; gf < group.length; gf++) {
+            if (group[gf].category !== 'duplicate') { keptFile = group[gf]; }
+            else { removedFiles.push(group[gf]); }
+          }
+          if (!keptFile && group.length > 0) keptFile = group[0]; // fallback
+
+          html += '<div class="wizard-dupe-group">' +
+            '<div class="dupe-title">' + (extIcons[keptFile.ext] || '\uD83D\uDCCE') + ' ' + keptFile.name + ' <span style="color:var(--text-muted);font-size:0.75rem">(' + formatFileSize(keptFile.size) + ')</span></div>';
+
+          // Show kept copy
+          html += '<div class="dupe-copy"><span style="color:#16a34a;font-weight:600;font-size:0.75rem">KEEP</span> ' + keptFile.folder + '</div>';
+          // Show removed copies
+          for (var ri = 0; ri < removedFiles.length; ri++) {
+            html += '<div class="dupe-copy removed"><span style="color:#dc2626;font-weight:600;font-size:0.75rem">REMOVE</span> ' + removedFiles[ri].folder + '</div>';
+          }
+
+          if (isExpanded) {
+            // Show radio buttons to choose which copy to keep
+            html += '<div style="margin-top:0.35rem;padding-top:0.35rem;border-top:1px solid #e5e7eb;font-size:0.78rem;color:var(--text-muted)">Choose which to keep:</div>';
+            for (var rr = 0; rr < group.length; rr++) {
+              var isKept = group[rr].included;
+              html += '<div class="dupe-copy"><label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">' +
+                '<input type="radio" name="dupe-' + dgi + '" value="' + group[rr].relativePath.replace(/"/g, '&quot;') + '"' + (isKept ? ' checked' : '') + ' data-dupe-group="' + dgi + '">' +
+                group[rr].folder + '</label></div>';
+            }
+          }
+          html += '</div>';
+        }
+
+        html += '<div class="wizard-actions">' +
+          '<button class="btn btn-success" id="wizard-continue">Keep one of each and continue</button>' +
+          '<a class="wizard-review-link" id="wizard-expand">' + (isExpanded ? 'Hide choices' : 'Let me choose which copies to keep') + '</a>' +
+          '</div>';
+        html += '<div style="margin-top:0.75rem"><a class="back-link" id="wizard-back">&larr; Back</a></div>';
+        html += '</div>';
+
+        contentEl.innerHTML = html;
+
+        // Wire radio buttons for custom dupe selection
+        var radios = contentEl.querySelectorAll('[data-dupe-group]');
+        for (var rd = 0; rd < radios.length; rd++) {
+          radios[rd].addEventListener('change', function () {
+            var groupIdx = parseInt(this.getAttribute('data-dupe-group'), 10);
+            var keepPath = this.value;
+            var grp = dupeGroupList[groupIdx];
+            for (var g = 0; g < grp.length; g++) {
+              grp[g].included = (grp[g].relativePath === keepPath);
+            }
+            renderStep(); // re-render to update visual state
+          });
+        }
+
+        document.getElementById('wizard-continue').addEventListener('click', function () { nextStep(); });
+        document.getElementById('wizard-expand').addEventListener('click', function () {
+          expandedSteps[3] = !expandedSteps[3];
+          renderStep();
+        });
+        document.getElementById('wizard-back').addEventListener('click', function () { prevStep(); });
+      }
+
+      // ---- Step 4: Final Review ----
+      function renderFinalStep() {
         var prevList = contentEl.querySelector('.triage-file-list');
         var scrollTop = prevList ? prevList.scrollTop : 0;
 
-        var sorted = sortFiles(scannedFiles, currentSort);
+        // Only show files that survived steps 1-3 (included=true) plus clean files
+        var allFiles = scannedFiles;
         var includedCount = 0, includedSize = 0;
-        for (var i = 0; i < scannedFiles.length; i++) {
-          if (scannedFiles[i].included) { includedCount++; includedSize += scannedFiles[i].size; }
+        for (var i = 0; i < allFiles.length; i++) {
+          if (allFiles[i].included) { includedCount++; includedSize += allFiles[i].size; }
         }
 
-        var html =
-          '<a class="back-link" id="triage-back-link">&larr; Back to Upload Form</a>' +
+        // Sort
+        function sortFiles(files, mode) {
+          var sorted = files.slice();
+          if (mode === 'smart') {
+            sorted.sort(function (a, b) {
+              if (a.included !== b.included) return a.included ? -1 : 1;
+              if (a.lessonNumber !== null && b.lessonNumber !== null) return a.lessonNumber - b.lessonNumber;
+              if (a.lessonNumber !== null) return -1;
+              if (b.lessonNumber !== null) return 1;
+              return a.name.localeCompare(b.name);
+            });
+          } else if (mode === 'folder') {
+            sorted.sort(function (a, b) {
+              if (a.folder !== b.folder) return a.folder.localeCompare(b.folder);
+              return a.name.localeCompare(b.name);
+            });
+          } else if (mode === 'name') {
+            sorted.sort(function (a, b) { return a.name.localeCompare(b.name); });
+          } else if (mode === 'size') {
+            sorted.sort(function (a, b) { return b.size - a.size; });
+          } else if (mode === 'type') {
+            sorted.sort(function (a, b) {
+              if (a.ext !== b.ext) return a.ext.localeCompare(b.ext);
+              return a.name.localeCompare(b.name);
+            });
+          }
+          return sorted;
+        }
+
+        // Only show files not already removed in earlier steps (or show all and let checkboxes reflect state)
+        var displayFiles = sortFiles(allFiles.filter(function (f) {
+          // Hide junk/old_folder/duplicate that are excluded — they were dealt with
+          if (!f.included && (f.category === 'junk' || f.category === 'old_folder' || f.category === 'duplicate')) return false;
+          return true;
+        }), currentSort);
+
+        var removedCount = allFiles.length - displayFiles.length;
+
+        var html = progressBar() +
           '<div class="upload-card">' +
-            '<h2>Review Files</h2>' +
-            '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">' +
-              'Uncheck files you don\u2019t want to upload. Greyed-out files were auto-excluded.</p>' +
+            '<h2 class="wizard-step-title">Final Review</h2>' +
+            '<p class="wizard-step-desc"><strong>' + includedCount + ' file' + (includedCount !== 1 ? 's' : '') + '</strong> ready to upload (' + formatFileSize(includedSize) + ')' +
+              (removedCount > 0 ? ' &middot; ' + removedCount + ' removed in earlier steps' : '') + '</p>' +
             '<div class="triage-summary">' +
               '<div><span class="counts">' + includedCount + ' files selected</span>' +
-              '<span class="size"> of ' + scannedFiles.length + ' found &middot; ' + formatFileSize(includedSize) + '</span></div>' +
+              '<span class="size"> of ' + displayFiles.length + ' shown &middot; ' + formatFileSize(includedSize) + '</span></div>' +
               '<div class="triage-actions">' +
                 '<button class="btn btn-outline" id="triage-sel-all">Select All</button>' +
                 '<button class="btn btn-outline" id="triage-desel-all">Deselect All</button>' +
@@ -841,10 +1149,10 @@
 
         if (currentSort === 'folder') {
           var folders = {};
-          for (var g = 0; g < sorted.length; g++) {
-            var fld = sorted[g].folder;
+          for (var g = 0; g < displayFiles.length; g++) {
+            var fld = displayFiles[g].folder;
             if (!folders[fld]) folders[fld] = [];
-            folders[fld].push(sorted[g]);
+            folders[fld].push(displayFiles[g]);
           }
           var folderNames = Object.keys(folders).sort();
           for (var fi = 0; fi < folderNames.length; fi++) {
@@ -861,21 +1169,22 @@
                 '<span>\uD83D\uDCC1 ' + fn + '</span>' +
                 '<span class="folder-count">' + folderInc + '/' + ff.length + '</span>' +
               '</div>';
-            for (var ffi = 0; ffi < ff.length; ffi++) html += fileRow(ff[ffi]);
+            for (var ffi = 0; ffi < ff.length; ffi++) html += fileRow(ff[ffi], false);
             html += '</div>';
           }
         } else {
-          for (var fl = 0; fl < sorted.length; fl++) html += fileRow(sorted[fl]);
+          for (var fl = 0; fl < displayFiles.length; fl++) html += fileRow(displayFiles[fl], false);
         }
 
         html += '</div>'; // file-list
+
         if (includedCount === 0) {
           html += '<div class="info-msg" style="margin-top:0.75rem">No files selected. Check some files above or go back and drop a different folder.</div>';
         }
-        html += '<div style="display:flex;gap:0.75rem;margin-top:1.25rem">' +
+        html += '<div class="wizard-actions">' +
           '<button class="btn btn-primary" id="triage-upload-btn"' + (includedCount === 0 ? ' disabled' : '') + '>' +
             'Upload ' + includedCount + ' File' + (includedCount !== 1 ? 's' : '') + ' &amp; Parse</button>' +
-          '<button class="btn btn-outline" id="triage-back-btn">Back</button>' +
+          '<a class="back-link" id="wizard-back" style="margin:0">&larr; Back</a>' +
         '</div></div>';
 
         contentEl.innerHTML = html;
@@ -889,26 +1198,27 @@
         for (var ii = 0; ii < indets.length; ii++) indets[ii].indeterminate = true;
 
         // Wire events
-        document.getElementById('triage-back-link').addEventListener('click', function () { renderUploadForm(formValues); });
-        document.getElementById('triage-back-btn').addEventListener('click', function () { renderUploadForm(formValues); });
-        document.getElementById('triage-sort').addEventListener('change', function () { currentSort = this.value; render(); });
+        document.getElementById('triage-sort').addEventListener('change', function () { currentSort = this.value; renderStep(); });
         document.getElementById('triage-sel-all').addEventListener('click', function () {
-          for (var i = 0; i < scannedFiles.length; i++) scannedFiles[i].included = true;
-          render();
+          for (var i = 0; i < displayFiles.length; i++) displayFiles[i].included = true;
+          renderStep();
         });
         document.getElementById('triage-desel-all').addEventListener('click', function () {
-          for (var i = 0; i < scannedFiles.length; i++) scannedFiles[i].included = false;
-          render();
+          for (var i = 0; i < displayFiles.length; i++) displayFiles[i].included = false;
+          renderStep();
         });
 
-        var fileChecks = contentEl.querySelectorAll('[data-file-check]');
-        for (var fc = 0; fc < fileChecks.length; fc++) {
-          fileChecks[fc].addEventListener('change', function () {
+        wireFileChecks();
+
+        // Wire file checkbox changes to re-render (for count updates)
+        var checks = contentEl.querySelectorAll('[data-file-check]');
+        for (var ch = 0; ch < checks.length; ch++) {
+          checks[ch].addEventListener('change', function () {
             var path = this.getAttribute('data-file-check');
             for (var j = 0; j < scannedFiles.length; j++) {
               if (scannedFiles[j].relativePath === path) { scannedFiles[j].included = this.checked; break; }
             }
-            render();
+            renderStep();
           });
         }
 
@@ -920,15 +1230,23 @@
             for (var j = 0; j < scannedFiles.length; j++) {
               if (scannedFiles[j].folder === folder) scannedFiles[j].included = checked;
             }
-            render();
+            renderStep();
           });
         }
 
         var uploadBtn = document.getElementById('triage-upload-btn');
         if (uploadBtn) uploadBtn.addEventListener('click', function () { doTriageUpload(scannedFiles, formValues, uploadBtn); });
+        document.getElementById('wizard-back').addEventListener('click', function () { prevStep(); });
       }
 
-      render();
+      function renderStep() {
+        if (step === 1) renderJunkStep();
+        else if (step === 2) renderOldFolderStep();
+        else if (step === 3) renderDuplicateStep();
+        else renderFinalStep();
+      }
+
+      renderStep();
     }
 
     async function doTriageUpload(scannedFiles, formValues, btn) {
