@@ -803,6 +803,10 @@
       }
 
       function render() {
+        // Preserve scroll position across re-renders
+        var prevList = contentEl.querySelector('.triage-file-list');
+        var scrollTop = prevList ? prevList.scrollTop : 0;
+
         var sorted = sortFiles(scannedFiles, currentSort);
         var includedCount = 0, includedSize = 0;
         for (var i = 0; i < scannedFiles.length; i++) {
@@ -875,6 +879,10 @@
         '</div></div>';
 
         contentEl.innerHTML = html;
+
+        // Restore scroll position
+        var newList = contentEl.querySelector('.triage-file-list');
+        if (newList) newList.scrollTop = scrollTop;
 
         // Set indeterminate checkboxes
         var indets = contentEl.querySelectorAll('[data-indeterminate]');
