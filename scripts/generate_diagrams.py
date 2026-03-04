@@ -59,21 +59,27 @@ def slugify(text):
 def inject_diagram_into_html(content_html, diagram_url, diagram_alt, diagram_caption=None):
     """Insert a <figure class="diagram"> into the content HTML.
 
-    Places the diagram after the first few paragraphs (15+ lines from top),
-    or at the end if content is short.
+    Looks for a <!-- DIAGRAM --> placeholder in the HTML (placed by content
+    generation to mark the most relevant location). Falls back to midpoint
+    h2 if no placeholder exists.
     """
     figure_html = f'<figure class="diagram"><img src="{diagram_url}" alt="{diagram_alt}" loading="lazy">'
     if diagram_caption:
         figure_html += f'<figcaption>{diagram_caption}</figcaption>'
     figure_html += '</figure>'
 
-    # Find a good insertion point: after 3rd paragraph or section heading
-    paragraphs = list(re.finditer(r'</p>', content_html))
-    if len(paragraphs) >= 3:
-        insert_pos = paragraphs[2].end()
-        return content_html[:insert_pos] + '\n\n' + figure_html + '\n\n' + content_html[insert_pos:]
+    # Primary: replace <!-- DIAGRAM --> placeholder from content generation
+    if '<!-- DIAGRAM -->' in content_html:
+        return content_html.replace('<!-- DIAGRAM -->', figure_html, 1)
 
-    # Fallback: insert before conclusion or at end
+    # Fallback: h2 nearest to midpoint
+    h2_matches = list(re.finditer(r'<h2[^>]*>', content_html))
+    if len(h2_matches) >= 2:
+        target_pos = len(content_html) // 2
+        best = min(h2_matches, key=lambda m: abs(m.start() - target_pos))
+        return content_html[:best.start()] + figure_html + '\n\n' + content_html[best.start():]
+
+    # Last resort: before conclusion or at end
     conclusion_match = re.search(r'<div class="conclusion"', content_html)
     if conclusion_match:
         return content_html[:conclusion_match.start()] + figure_html + '\n\n' + content_html[conclusion_match.start():]

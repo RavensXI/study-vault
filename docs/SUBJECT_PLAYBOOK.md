@@ -54,7 +54,7 @@ For each completed lesson, launch in parallel:
 - `generate_diagrams.py --job-id <id> --lessons <N>` (background)
 - `download_heroes.py --job-id <id> --lessons <N>` (background)
 - `generate_narration.py --job-id <id> --lessons <N>` (background, after diagrams — or accept slight narration ID risk)
-- 1 media curation agent for lesson N (background, haiku)
+- 1 media curation agent for lesson N (background, sonnet)
 
 **This means:** By the time L10's content finishes, L1-L9's assets may already be done. A stuck lesson only blocks itself, not the other 9.
 
@@ -224,6 +224,7 @@ Run after every lesson is generated, before writing to Supabase:
 ✓ Every practice question "type" matches a registered question_type_name
 ✓ Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)
 ✓ All glossary_terms match <dfn> elements in content_html
+✓ Exactly one <!-- DIAGRAM --> placeholder in content_html (at a content-relevant location, not near the top)
 ✓ No <h1> tags in content_html
 ✓ Word count 800-1500 (excluding HTML tags)
 ✓ diagram_prompt is a complete Gemini prompt (not a placeholder)
@@ -280,3 +281,5 @@ View progress: `pipeline_generate.py status <job_id>` or `/admin/pipeline` UI.
 | Windows encoding crashes | `sys.stdout.reconfigure(encoding='utf-8')` in all scripts |
 | Missing diagram_prompt | Validate JSON output includes diagram_prompt before writing |
 | Empty hero_keywords | Derive from lesson title as fallback — script handles this |
+| Diagrams clustered at top | Content HTML must include `<!-- DIAGRAM -->` at content-relevant spot |
+| Diagram inside collapsible | Placeholder must be between sections, not inside collapsibles |

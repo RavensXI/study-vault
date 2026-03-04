@@ -261,6 +261,12 @@ function initPracticeQuestions() {
       ['4 marks \u2014 Explain', 'explain-4-marks.html'],
       ['6 marks \u2014 Explain', 'explain-6-marks.html'],
       ['8 marks \u2014 Discuss', 'discuss-8-marks.html'],
+      // Religious Education (AQA 8062)
+      ['1 mark \u2014 Multiple Choice', 'multiple-choice-1-mark.html'],
+      ['2 marks \u2014 Give Two', 'give-two-2-marks.html'],
+      ['4 marks \u2014 Explain Two Contrasting', 'explain-two-contrasting-4-marks.html'],
+      ['5 marks \u2014 Explain Two with Sources', 'explain-two-sources-5-marks.html'],
+      ['12 marks \u2014 Evaluate a Statement', 'evaluate-statement-12-marks.html'],
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],

@@ -111,6 +111,7 @@ CONTENT HTML RULES:
     </div>
   </div>
 
+- Place a <!-- DIAGRAM --> comment at the most content-relevant location for the lesson's diagram. Choose the spot where a visual would best support the surrounding text — NOT at the top. Each lesson's diagram illustrates a different aspect, so placement should vary across lessons in a unit.
 - Use &amp; for &, &mdash; for em-dash, &rsquo; for right single quote, &ldquo;/&rdquo; for double quotes.
 - Do NOT include <h1> tags — the lesson title is rendered separately by the template.
 - Aim for 800-1500 words of content (excluding HTML tags).
@@ -241,13 +242,32 @@ EXAM BOARD: {exam_board} ({spec_code})
 
 Create a lesson plan that:
 
-1. MAPS TO THE SPEC: Group lessons by the exam's component/section structure. Allocate lesson count proportional to mark weighting (e.g. a 50-mark section gets more lessons than a 30-mark section).
+1. CALIBRATES LESSON COUNT: The number of lessons must reflect the subject's content density and exam weighting — NOT a 1:1 mapping of spec bullet points to lessons. Use these benchmarks:
 
-2. COVERS ALL SPEC REQUIREMENTS: Every assessable topic in the spec must appear in at least one lesson. Flag any spec requirements that have no matching source material.
+   EXISTING SUBJECTS (for calibration):
+   - History (AQA, 4 units): 60 lessons — rich narrative topics (wars, social change) needing 15 lessons/unit
+   - Geography (AQA, 2 papers): 40 lessons — mixed narrative + conceptual, 20 lessons/paper
+   - Business (Edexcel, 2 themes): 30 lessons — applied concepts, 15 lessons/theme
+   - Drama (OCR, 2 components): 12 lessons — text study + devising, 6 lessons/component
+   - Sport Science (OCR, 1 unit): 10 lessons — factual/conceptual
+   - Food Technology (AQA, 1 unit): 10 lessons — applied knowledge
+   - Religious Education (AQA, 8 sections): 40 lessons — conceptual/comparison topics, 5 lessons/section
 
-3. USES THE SOURCE MATERIAL: Map each lesson to specific slides/pages from the teacher's resources. Include ppt_section_markers for each lesson.
+   RULES FOR CALIBRATION:
+   - Subjects with short conceptual topics (RE beliefs, science facts) need FEWER lessons with MORE topics combined per lesson. A spec bullet like "Nature of God" is a paragraph, not a full lesson.
+   - Subjects with rich narrative topics (history events, drama texts) need MORE lessons because each topic has depth, chronology, and case studies.
+   - Combine related spec topics into single substantive lessons (e.g. "Zakah AND Sawm" as one lesson, not two).
+   - Consider the STUDENT'S total revision load: they study 8-10 GCSEs. If every subject has 60 lessons, that's 500+ lessons to revise. Keep it manageable.
+   - Target: 5-8 lessons per unit/section for conceptual subjects, 10-20 for narrative-heavy subjects.
+   - Each lesson should have enough material for 800-1500 words of content. If a spec topic only generates 200 words, combine it with related topics.
 
-4. IDENTIFIES PAST PAPER COVERAGE: Note which past paper questions are relevant to each lesson.
+2. MAPS TO THE SPEC: Group lessons by the exam's component/section structure. Allocate lesson count proportional to mark weighting (e.g. a 50-mark section gets more lessons than a 30-mark section).
+
+3. COVERS ALL SPEC REQUIREMENTS: Every assessable topic in the spec must appear in at least one lesson. Flag any spec requirements that have no matching source material.
+
+4. USES THE SOURCE MATERIAL: Map each lesson to specific slides/pages from the teacher's resources. Include ppt_section_markers for each lesson.
+
+5. IDENTIFIES PAST PAPER COVERAGE: Note which past paper questions are relevant to each lesson.
 
 Return a JSON object:
 {
@@ -417,6 +437,7 @@ Run after every lesson is generated, before writing to Supabase:
  At least 2 <div class="key-fact"> in content_html
  At least 2 <div class="collapsible"> in content_html
  At least 3 <dfn class="term"> in content_html
+ Exactly one <!-- DIAGRAM --> placeholder in content_html (at a content-relevant location, not near the top)
  Exactly 6 practice_questions with fields: text, type, marks (all strings)
  Every practice question "type" matches a registered question_type_name
  Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)

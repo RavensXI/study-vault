@@ -152,7 +152,8 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         }
         result = sb.table("units").upsert(unit_data, on_conflict="subject_id,slug").execute()
         unit_id = result.data[0]["id"]
-    unit_id = result.data[0]["id"]
+
+    # unit_id is now set from either branch above
 
     # Upsert lesson
     lesson_record = {

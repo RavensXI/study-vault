@@ -86,14 +86,24 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Related media curated for all 10 lessons
 - L1 has NotebookLM video overview (YouTube embedded in sidebar)
 
+**Religious Education (AQA 8062) — complete (40 lessons across 8 units):**
+- 8 units: Christianity Beliefs, Christianity Practices, Islam Beliefs, Islam Practices, Theme A Relationships, Theme B Religion & Life, Theme D Peace & Conflict, Theme E Crime & Punishment
+- All 40 lessons built via one-shot pipeline, practice questions (6/lesson, AQA format), knowledge checks (5/lesson)
+- TTS narration: All 40 lessons narrated with Azure Speech. MP3s on R2.
+- Gemini pictorial isotype diagrams (40 total), hero images (Wikimedia Commons)
+- Exam Technique guides: hub + 5 guide pages for AQA RS question types
+- Revision Technique guides: hub + 7 guide pages (3 mandatory + 4 RE-specific)
+- Related media curated for all 40 lessons
+- 8 distinct unit colour themes (blue, sky, emerald, green, pink, lime, amber, violet)
+
 ### Dynamic Architecture (LIVE on Vercel)
 All content now served from Supabase on the `platform` branch (Vercel deployment). Static HTML files remain in repo as backup but are no longer linked from the dynamic site.
 
 **What's running:**
-- 162 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
-- 93 guide pages in `guide_pages` table
+- 202 lessons in Supabase `lessons` table with content_html, questions, narration manifests, related media
+- 107 guide pages in `guide_pages` table
 - Images on Cloudflare R2 (`studyvault-images` bucket)
-- ~5,400 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
+- ~6,200 narration MP3s on Cloudflare R2 (`studyvault-audio` bucket)
 - Dynamic templates: `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - URL scheme: `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - Dashboard links to dynamic routes (not static HTML)
@@ -113,6 +123,7 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 - `studyvault-images` — hero images + diagrams, public URL: `https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`
 
 ### Still TODO
+- **Client-side file parsing**: Move PPTX/DOCX/PDF/TXT parsing from server to browser. Currently uploads raw files to Supabase Storage → server parses → deletes originals. This means source files transit through our infrastructure, violating the "no human sees source materials" privacy promise. Fix: parse in-browser using JSZip (already browser-compatible), DOMParser (replaces xml2js), and PDF.js (replaces pdf-parse). Upload only extracted text to Supabase — no `pipeline-uploads` bucket needed, no server-side parse endpoint, no timeout issues, no storage limits. `scripts/parse_job_local.js` (local fallback) should also be retired once this ships.
 - **Drama hero images**: Need QA positioning via `/admin/images`
 - **Dashboard progress bars**: Currently use hardcoded demo data — need real Supabase queries
 - **Subject-specific revision tips**: `initRevisionTips()` hardcodes 3 techniques for ALL subjects — refactor to read from `subjects.settings.revision_tip_mappings`
@@ -142,7 +153,7 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
   - This is the **#1 blocker for commercial viability** — without it, teacher feedback flows through Tom as a bottleneck (email → relay → manual edit). Doesn't scale to multiple schools.
 - **Pipeline UX & permissions rework**: Clarify who sees what — admin vs teacher screens. Currently can't QA images before publishing (have to set lessons live first, which doesn't make sense). Need a proper preview/staging state, clearer QA flow, and role-appropriate views for the pipeline.
 - Retrieval Practice / Flashcards — port spaced repetition flashcard system from `../vaultcards/` (React/Supabase app with Leitner-box algorithm, decks, streak tracking, XP, achievements, head-to-head challenges, teacher deck creation, PowerPoint→AI card generation). Requires Supabase backend first. Algorithms and data model are portable; React/Tailwind UI is not — will need vanilla JS/CSS reimplementation to fit Study Vault's static architecture.
-- Content for remaining subjects beyond History, Business, Geography, Sport Science, Drama, and Food Technology
+- Content for remaining subjects beyond History, Business, Geography, Sport Science, Drama, Food Technology, and Religious Education
 
 ---
 
@@ -285,6 +296,14 @@ All stored in environment variables — never commit them.
 | Drama Section A | `unit-drama-section-a` | `#7c3aed` (purple) |
 | Drama Section B | `unit-drama-section-b` | `#7c3aed` (purple) |
 | Food Tech Nutrition | `unit-food-technology-1` | `#0d9488` (teal) |
+| RE Christianity Beliefs | `unit-christianity-beliefs` | `#1e40af` (blue) |
+| RE Christianity Practices | `unit-christianity-practices` | `#0284c7` (sky) |
+| RE Islam Beliefs | `unit-islam-beliefs` | `#047857` (emerald) |
+| RE Islam Practices | `unit-islam-practices` | `#15803d` (green) |
+| RE Theme A Relationships | `unit-theme-a-relationships` | `#be185d` (pink) |
+| RE Theme B Religion & Life | `unit-theme-b-religion-life` | `#65a30d` (lime) |
+| RE Theme D Peace & Conflict | `unit-theme-d-peace-conflict` | `#92400e` (amber) |
+| RE Theme E Crime & Punishment | `unit-theme-e-crime-punishment` | `#6d28d9` (violet) |
 
 ---
 
@@ -405,7 +424,7 @@ See **`docs/LESSON_TEMPLATE.md`** for full conventions. Key rules:
 
 Full details documented in **`docs/NARRATION_PIPELINE.md`** — read that file before doing any narration work. Covers models tried, voice cloning config, generation process, infrastructure, and progress tracking.
 
-**Summary:** Azure Speech (cloud API) — near-instant, deterministic, British English voices alternating by lesson (Ollie male odd, Bella female even). **All 152 lessons fully narrated** across all 5 subjects (~5,000 MP3 clips). Audio hosted on **Cloudflare R2** (`studyvault-audio` bucket, public r2.dev URL). Manifests in each lesson HTML point to R2 URLs with durations. Generation script outputs MP3 directly (96kbps, 24kHz, mono). Also check `tts-research-log.md` for latest model developments.
+**Summary:** Azure Speech (cloud API) — near-instant, deterministic, British English voices alternating by lesson (Ollie male odd, Bella female even). **All 202 lessons fully narrated** across all 7 subjects (~6,200 MP3 clips). Audio hosted on **Cloudflare R2** (`studyvault-audio` bucket, public r2.dev URL). Manifests in each lesson HTML point to R2 URLs with durations. Generation script outputs MP3 directly (96kbps, 24kHz, mono). Also check `tts-research-log.md` for latest model developments.
 
 ---
 
