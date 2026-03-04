@@ -189,6 +189,13 @@ module.exports = async function handler(req, res) {
       current_phase: 'parsed',
     }).eq('id', job_id);
 
+    // Clean up uploaded files from storage — text is saved, originals no longer needed
+    const filePaths = fileList
+      .map(f => folderPrefix + '/' + f.name);
+    if (filePaths.length > 0) {
+      await supabase.storage.from('pipeline-uploads').remove(filePaths);
+    }
+
     return res.status(200).json({
       job_id,
       status: 'parsed',
