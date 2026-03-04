@@ -298,6 +298,12 @@
           excludeReason = 'Legacy format (save as .' + ext + 'x)';
         }
 
+        // File size limit (50 MB Supabase free plan)
+        if (!autoExcluded && f.size > 50 * 1024 * 1024) {
+          autoExcluded = true;
+          excludeReason = 'Over 50 MB (' + formatFileSize(f.size) + ')';
+        }
+
         scanned.push({
           file: f,
           relativePath: relativePath,
@@ -313,17 +319,41 @@
         });
       }
 
-      // Duplicate detection: same filename in different folders
-      var nameMap = {};
+      // Duplicate detection: same name + same size = exact duplicate, auto-exclude extras
+      // Same name but different size = flag as duplicate but let teacher decide
+      var dupeMap = {};
       for (var d = 0; d < scanned.length; d++) {
         var key = scanned[d].name.toLowerCase();
-        if (!nameMap[key]) nameMap[key] = [];
-        nameMap[key].push(d);
+        if (!dupeMap[key]) dupeMap[key] = [];
+        dupeMap[key].push(d);
       }
-      for (var k in nameMap) {
-        if (nameMap[k].length > 1) {
-          for (var di = 0; di < nameMap[k].length; di++) {
-            scanned[nameMap[k][di]].isDuplicate = true;
+      for (var k in dupeMap) {
+        if (dupeMap[k].length > 1) {
+          var indices = dupeMap[k];
+          // Group by size to find exact duplicates
+          var sizeGroups = {};
+          for (var di = 0; di < indices.length; di++) {
+            var sz = scanned[indices[di]].size;
+            if (!sizeGroups[sz]) sizeGroups[sz] = [];
+            sizeGroups[sz].push(indices[di]);
+          }
+          for (var sz in sizeGroups) {
+            var group = sizeGroups[sz];
+            if (group.length > 1) {
+              // Exact duplicates (same name + same size): keep first, auto-exclude rest
+              for (var gi = 1; gi < group.length; gi++) {
+                scanned[group[gi]].isDuplicate = true;
+                if (!scanned[group[gi]].autoExcluded) {
+                  scanned[group[gi]].autoExcluded = true;
+                  scanned[group[gi]].included = false;
+                  scanned[group[gi]].excludeReason = 'Exact duplicate';
+                }
+              }
+              scanned[group[0]].isDuplicate = false; // first copy is not flagged
+            } else {
+              // Same name, different size: flag but don't auto-exclude
+              scanned[group[0]].isDuplicate = true;
+            }
           }
         }
       }
