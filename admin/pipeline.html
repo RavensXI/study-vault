@@ -514,8 +514,13 @@
           '<h2>Upload Teaching Resources</h2>' +
           '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">Upload PPTs, Word docs, and PDFs. Select multiple files or drag a folder.</p>' +
           '<div class="dropzone" id="dropzone">' +
-            '<p>Drag and drop files or a folder here, or click to browse</p>' +
-            '<input type="file" id="file-input" multiple>' +
+            '<p>Drag and drop files or a folder here</p>' +
+            '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem">' +
+              '<button type="button" class="btn btn-outline" id="browse-files-btn" style="font-size:0.78rem;padding:0.35rem 0.8rem">Browse Files</button>' +
+              '<button type="button" class="btn btn-outline" id="browse-folder-btn" style="font-size:0.78rem;padding:0.35rem 0.8rem">Browse Folder</button>' +
+            '</div>' +
+            '<input type="file" id="file-input" multiple style="display:none">' +
+            '<input type="file" id="folder-input" webkitdirectory style="display:none">' +
           '</div>' +
           '<div class="form-grid">' +
             '<div class="form-group"><label>School</label>' +
@@ -569,6 +574,7 @@
 
       var dropzone = document.getElementById('dropzone');
       var fileInput = document.getElementById('file-input');
+      var folderInput = document.getElementById('folder-input');
       var uploadBtn = document.getElementById('upload-btn');
 
       function updateDropzoneDisplay() {
@@ -583,13 +589,34 @@
         dropzone.innerHTML =
           '<p class="file-name">' + selectedFiles.length + ' file(s) found (' + supportedCount + ' supported)</p>' +
           '<p style="font-size:0.75rem;color:var(--text-muted)">Click \u201cReview Files\u201d to select which to upload</p>' +
-          '<p>' + formatFileSize(totalBytes) + ' total</p>';
+          '<p>' + formatFileSize(totalBytes) + ' total</p>' +
+          '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem">' +
+            '<button type="button" class="btn btn-outline" id="add-more-files-btn" style="font-size:0.72rem;padding:0.25rem 0.6rem">+ Add Files</button>' +
+            '<button type="button" class="btn btn-outline" id="add-more-folder-btn" style="font-size:0.72rem;padding:0.25rem 0.6rem">+ Add Folder</button>' +
+            '<button type="button" class="btn btn-outline" id="clear-files-btn" style="font-size:0.72rem;padding:0.25rem 0.6rem;color:#dc2626;border-color:#fecaca">Clear All</button>' +
+          '</div>';
+        // Wire the dynamically created buttons
+        document.getElementById('add-more-files-btn').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
+        document.getElementById('add-more-folder-btn').addEventListener('click', function (e) { e.stopPropagation(); folderInput.click(); });
+        document.getElementById('clear-files-btn').addEventListener('click', function (e) {
+          e.stopPropagation();
+          selectedFiles = [];
+          dropzone.innerHTML =
+            '<p>Drag and drop files or a folder here</p>' +
+            '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem">' +
+              '<button type="button" class="btn btn-outline" id="browse-files-btn" style="font-size:0.78rem;padding:0.35rem 0.8rem">Browse Files</button>' +
+              '<button type="button" class="btn btn-outline" id="browse-folder-btn" style="font-size:0.78rem;padding:0.35rem 0.8rem">Browse Folder</button>' +
+            '</div>';
+          document.getElementById('browse-files-btn').addEventListener('click', function (ev) { ev.stopPropagation(); fileInput.click(); });
+          document.getElementById('browse-folder-btn').addEventListener('click', function (ev) { ev.stopPropagation(); folderInput.click(); });
+          uploadBtn.disabled = true;
+        });
         var hasSchool = !allSchools.length || document.getElementById('school-id').value;
         uploadBtn.disabled = !document.getElementById('subject-name').value || supportedCount === 0 || !hasSchool;
       }
 
       function collectFiles(fileList) {
-        selectedFiles = Array.from(fileList);
+        selectedFiles = selectedFiles.concat(Array.from(fileList));
         updateDropzoneDisplay();
       }
 
@@ -641,7 +668,8 @@
       }
 
       document.getElementById('back-to-jobs').addEventListener('click', function () { renderJobList(); });
-      dropzone.addEventListener('click', function () { fileInput.click(); });
+      document.getElementById('browse-files-btn').addEventListener('click', function (e) { e.stopPropagation(); fileInput.click(); });
+      document.getElementById('browse-folder-btn').addEventListener('click', function (e) { e.stopPropagation(); folderInput.click(); });
       dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('dragover'); });
       dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('dragover'); });
       dropzone.addEventListener('drop', async function (e) {
@@ -653,6 +681,16 @@
       });
       fileInput.addEventListener('change', function () {
         collectFiles(fileInput.files);
+      });
+      folderInput.addEventListener('change', function () {
+        var files = Array.from(folderInput.files);
+        // webkitdirectory gives us webkitRelativePath on each file
+        for (var i = 0; i < files.length; i++) {
+          if (!files[i]._relativePath && files[i].webkitRelativePath) {
+            files[i]._relativePath = files[i].webkitRelativePath;
+          }
+        }
+        collectFiles(files);
       });
       function checkUploadReady() {
         var hasSchool = !allSchools.length || document.getElementById('school-id').value;
