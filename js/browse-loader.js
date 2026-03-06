@@ -95,6 +95,11 @@
     // Hero
     html += '<section class="hero"><h1>' + esc(subject.name) + '</h1></section>';
 
+    // Quote ticker — between title and unit cards
+    if (subject.settings && subject.settings.quote_ticker_html) {
+      html += subject.settings.quote_ticker_html;
+    }
+
     // Unit grid — uses same .unit-card structure as static pages
     html += '<div class="unit-grid' + (units.length === 1 ? ' single-unit' : '') + '">';
 
@@ -120,11 +125,6 @@
     });
 
     html += '</div>';
-
-    // Quote ticker
-    if (subject.settings && subject.settings.quote_ticker_html) {
-      html += subject.settings.quote_ticker_html;
-    }
 
     loadingEl.style.display = 'none';
     contentEl.innerHTML = html;
