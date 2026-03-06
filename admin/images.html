@@ -325,6 +325,7 @@
           // Action buttons
           html += '<div class="action-row">';
           html += '<button class="btn btn-outline search-btn" data-lesson-id="' + l.id + '" data-title="' + esc(l.title) + '">Search Wikimedia</button>';
+          html += '<button class="btn btn-outline unsplash-btn" data-lesson-id="' + l.id + '" data-title="' + esc(l.title) + '">Search Unsplash</button>';
           html += '<input type="text" class="search-input" id="search-' + l.id + '" placeholder="Custom search terms..." value="' + esc(l.title) + '">';
           html += '<label class="btn btn-outline upload-label" data-lesson-id="' + l.id + '">Upload Image<input type="file" accept="image/*" class="upload-input" data-lesson-id="' + l.id + '" style="display:none"></label>';
           html += '<button class="btn btn-success save-btn" data-lesson-id="' + l.id + '">Save</button>';
@@ -413,6 +414,16 @@
         });
       });
 
+      // Unsplash search buttons
+      document.querySelectorAll('#panel-hero .unsplash-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = this.dataset.lessonId;
+          var searchInput = document.getElementById('search-' + id);
+          var query = searchInput ? searchInput.value : this.dataset.title;
+          searchUnsplash(id, query);
+        });
+      });
+
       // Save buttons
       document.querySelectorAll('#panel-hero .save-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -491,6 +502,47 @@
         });
       } catch (err) {
         container.innerHTML = '<span style="font-size:0.78rem;color:#dc2626">Search failed: ' + err.message + '</span>';
+      }
+    }
+
+    // ---- Search Unsplash ----
+    async function searchUnsplash(lessonId, query) {
+      var container = document.getElementById('candidates-' + lessonId);
+      container.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted)">Searching Unsplash...</span>';
+
+      try {
+        var resp = await fetch('/api/pipeline/search-unsplash?q=' + encodeURIComponent(query), {
+          headers: authHeaders(),
+        });
+        var data = await resp.json();
+
+        if (!resp.ok) throw new Error(data.error || 'Search failed');
+
+        var results = data.results || [];
+        if (results.length === 0) {
+          container.innerHTML = '<span style="font-size:0.78rem;color:var(--text-muted)">No Unsplash results. Try different search terms.</span>';
+          return;
+        }
+
+        var html = '';
+        for (var i = 0; i < Math.min(results.length, 4); i++) {
+          var r = results[i];
+          html += '<div class="candidate" data-lesson-id="' + lessonId + '" data-url="' + esc(r.url) + '" data-thumb="' + esc(r.thumb) + '" data-title="' + esc('Photo by ' + r.photographer + ' on Unsplash') + '">';
+          html += '<img src="' + esc(r.thumb) + '" alt="candidate" loading="lazy">';
+          html += '<span class="badge">U' + (i + 1) + '</span>';
+          html += '</div>';
+        }
+
+        container.innerHTML = html;
+
+        // Wire click to select
+        container.querySelectorAll('.candidate').forEach(function (cand) {
+          cand.addEventListener('click', function () {
+            selectCandidate(this);
+          });
+        });
+      } catch (err) {
+        container.innerHTML = '<span style="font-size:0.78rem;color:#dc2626">Unsplash search failed: ' + err.message + '</span>';
       }
     }
 
