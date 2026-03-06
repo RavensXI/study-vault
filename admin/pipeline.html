@@ -9,6 +9,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script>
+    // Lazy-load PDF.js only when a PDF file is encountered
+    var pdfjsReady = null;
+    function ensurePdfJs() {
+      if (!pdfjsReady) {
+        pdfjsReady = import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.min.mjs').then(function(mod) {
+          window.pdfjsLib = mod;
+          mod.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.0.379/build/pdf.worker.min.mjs';
+          return mod;
+        });
+      }
+      return pdfjsReady;
+    }
+  </script>
   <style>
     .pipeline-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
     .pipeline-header { margin-bottom: 2rem; }
@@ -1249,6 +1264,99 @@
       renderStep();
     }
 
+    // ---- Browser-side file parsers ----
+    async function parsePptxBrowser(buffer, filename) {
+      var zip = await JSZip.loadAsync(buffer);
+      var slides = [];
+
+      for (var name in zip.files) {
+        var slideMatch = name.match(/^ppt\/slides\/slide(\d+)\.xml$/);
+        if (!slideMatch) continue;
+
+        var slideNumber = parseInt(slideMatch[1]);
+        var xml = await zip.files[name].async('string');
+        var doc = new DOMParser().parseFromString(xml, 'text/xml');
+        var textEls = doc.getElementsByTagName('a:t');
+        var texts = [];
+        for (var t = 0; t < textEls.length; t++) {
+          var txt = textEls[t].textContent.trim();
+          if (txt) texts.push(txt);
+        }
+
+        var notes = '';
+        var notesPath = 'ppt/notesSlides/notesSlide' + slideNumber + '.xml';
+        if (zip.files[notesPath]) {
+          var notesXml = await zip.files[notesPath].async('string');
+          var notesDoc = new DOMParser().parseFromString(notesXml, 'text/xml');
+          var notesEls = notesDoc.getElementsByTagName('a:t');
+          var noteTexts = [];
+          for (var n = 0; n < notesEls.length; n++) {
+            var nt = notesEls[n].textContent.trim();
+            if (nt) noteTexts.push(nt);
+          }
+          notes = noteTexts.join(' ');
+        }
+
+        slides.push({ slideNumber: slideNumber, text: texts.join(' '), notes: notes });
+      }
+
+      slides.sort(function (a, b) { return a.slideNumber - b.slideNumber; });
+
+      var lines = slides.map(function (s) {
+        var content = '--- Slide ' + s.slideNumber + ' ---\n' + s.text;
+        if (s.notes) content += '\n[Speaker Notes: ' + s.notes + ']';
+        return content;
+      });
+
+      return '=== FILE: ' + filename + ' (' + slides.length + ' slides) ===\n\n' + lines.join('\n\n');
+    }
+
+    async function parseDocxBrowser(buffer, filename) {
+      var zip = await JSZip.loadAsync(buffer);
+      var docFile = zip.files['word/document.xml'];
+      if (!docFile) return '=== FILE: ' + filename + ' ===\n\n(No document.xml found)';
+
+      var xml = await docFile.async('string');
+      var doc = new DOMParser().parseFromString(xml, 'text/xml');
+      var textEls = doc.getElementsByTagName('w:t');
+      var texts = [];
+      for (var t = 0; t < textEls.length; t++) {
+        var txt = textEls[t].textContent.trim();
+        if (txt) texts.push(txt);
+      }
+
+      return '=== FILE: ' + filename + ' ===\n\n' + texts.join(' ');
+    }
+
+    async function parsePdfBrowser(buffer, filename) {
+      var pdfjs = await ensurePdfJs();
+      var pdf = await pdfjs.getDocument({ data: buffer }).promise;
+      var pages = [];
+
+      for (var p = 1; p <= pdf.numPages; p++) {
+        var page = await pdf.getPage(p);
+        var content = await page.getTextContent();
+        var text = content.items.map(function (item) { return item.str; }).join(' ');
+        pages.push(text);
+      }
+
+      return '=== FILE: ' + filename + ' (' + pdf.numPages + ' pages) ===\n\n' + pages.join('\n\n');
+    }
+
+    async function parseFileBrowser(file) {
+      var ext = file.name.split('.').pop().toLowerCase();
+      var buffer = await file.arrayBuffer();
+
+      if (ext === 'pptx') return await parsePptxBrowser(buffer, file.name);
+      if (ext === 'docx') return await parseDocxBrowser(buffer, file.name);
+      if (ext === 'pdf') return await parsePdfBrowser(buffer, file.name);
+      if (ext === 'txt') {
+        var text = new TextDecoder('utf-8').decode(buffer);
+        return '=== FILE: ' + file.name + ' ===\n\n' + text;
+      }
+      return null; // unsupported format
+    }
+
     async function doTriageUpload(scannedFiles, formValues) {
       var included = scannedFiles.filter(function (f) { return f.included; });
       if (included.length === 0) return;
@@ -1256,70 +1364,66 @@
       var totalSize = 0;
       for (var ts = 0; ts < included.length; ts++) totalSize += included[ts].size;
 
-      // Take over the entire content area with a dedicated upload progress view
-      function renderUploadProgress(current, total, currentName, phase) {
+      // Take over the entire content area with a dedicated progress view
+      function renderParseProgress(current, total, currentName) {
         var pct = total > 0 ? Math.round((current / total) * 100) : 0;
-        var uploadedSize = 0;
-        for (var us = 0; us < current; us++) uploadedSize += included[us].size;
+        var parsedSize = 0;
+        for (var us = 0; us < current; us++) parsedSize += included[us].size;
 
         contentEl.innerHTML =
           '<div class="upload-card" style="text-align:center;padding:3rem 2rem">' +
-            '<h2 style="font-family:Source Serif 4,serif;margin:0 0 0.5rem">' +
-              (phase === 'uploading' ? 'Uploading Files...' : 'Parsing Files...') +
-            '</h2>' +
+            '<h2 style="font-family:Source Serif 4,serif;margin:0 0 0.5rem">Parsing Files...</h2>' +
             '<p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 1.5rem">' +
-              (phase === 'uploading'
-                ? 'Please don\u2019t close or navigate away from this page.'
-                : 'Extracting text from your files. This may take a moment.') +
+              'Extracting text from your files in the browser. No files leave your device.' +
             '</p>' +
             '<div class="progress-bar-outer" style="margin-bottom:0.75rem">' +
               '<div class="progress-bar-inner" style="width:' + pct + '%;background:#7c3aed"></div>' +
             '</div>' +
-            (phase === 'uploading'
-              ? '<p style="font-size:0.875rem;font-weight:600;margin:0 0 0.25rem">' + current + ' / ' + total + ' files (' + pct + '%)</p>' +
-                '<p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.25rem">' + formatFileSize(uploadedSize) + ' / ' + formatFileSize(totalSize) + '</p>' +
-                '<p style="font-size:0.78rem;color:var(--text-muted);margin:0">' + (currentName || '') + '</p>'
-              : '<p style="font-size:0.875rem;margin:0"><span class="spinner" style="vertical-align:middle;margin-right:0.5rem"></span>Parsing...</p>') +
+            '<p style="font-size:0.875rem;font-weight:600;margin:0 0 0.25rem">' + current + ' / ' + total + ' files (' + pct + '%)</p>' +
+            '<p style="font-size:0.78rem;color:var(--text-muted);margin:0 0 0.25rem">' + formatFileSize(parsedSize) + ' / ' + formatFileSize(totalSize) + '</p>' +
+            '<p style="font-size:0.78rem;color:var(--text-muted);margin:0">' + (currentName || '') + '</p>' +
           '</div>';
       }
 
-      renderUploadProgress(0, included.length, included[0].name, 'uploading');
+      renderParseProgress(0, included.length, included[0].name);
 
       try {
-        var jobPrefix = crypto.randomUUID();
+        var allText = [];
         var filenames = [];
         var failedFiles = [];
 
         for (var i = 0; i < included.length; i++) {
-          renderUploadProgress(i, included.length, included[i].name, 'uploading');
+          renderParseProgress(i, included.length, included[i].name);
           var sf = included[i];
-          var storagePath = jobPrefix + '/' + i + '_' + sf.name;
           try {
-            var uploadResult = await sb.storage.from('pipeline-uploads').upload(storagePath, sf.file);
-            if (uploadResult.error) throw uploadResult.error;
-            filenames.push(sf.name);
+            var parsed = await parseFileBrowser(sf.file);
+            if (parsed) {
+              allText.push(parsed);
+              filenames.push(sf.name);
+            } else {
+              failedFiles.push({ name: sf.name, error: 'Unsupported format' });
+            }
           } catch (fileErr) {
-            failedFiles.push({ name: sf.name, error: fileErr.message || 'Upload failed' });
+            failedFiles.push({ name: sf.name, error: fileErr.message || 'Parse failed' });
           }
         }
 
         if (filenames.length === 0) {
-          throw new Error('All ' + included.length + ' files failed to upload.');
+          throw new Error('All ' + included.length + ' files failed to parse.');
         }
 
-        renderUploadProgress(included.length, included.length, '', 'uploading');
+        renderParseProgress(included.length, included.length, 'Saving...');
+
+        var extractedText = allText.join('\n\n\n');
 
         var job = await apiCall('/api/pipeline/upload', {
           subject_name: formValues.subject_name,
           exam_board: formValues.exam_board,
           spec_code: formValues.spec_code,
           school_id: formValues.school_id || null,
-          storage_path: jobPrefix,
-          filename: filenames.join(', ')
+          filename: filenames.join(', '),
+          extracted_text: extractedText
         });
-
-        renderUploadProgress(included.length, included.length, '', 'parsing');
-        await apiCall('/api/pipeline/parse', { job_id: job.job_id });
 
         var status = await apiCall('/api/pipeline/status?job_id=' + job.job_id);
         currentJob = status.job;
@@ -1328,10 +1432,10 @@
         if (failedFiles.length > 0) {
           var failHtml =
             '<div class="upload-card">' +
-              '<h2 style="font-family:Source Serif 4,serif;color:#16a34a;margin:0 0 0.5rem">Upload Complete</h2>' +
-              '<p style="font-size:0.875rem;margin:0 0 1rem"><strong>' + filenames.length + '</strong> files uploaded and parsed successfully.</p>' +
+              '<h2 style="font-family:Source Serif 4,serif;color:#16a34a;margin:0 0 0.5rem">Parsing Complete</h2>' +
+              '<p style="font-size:0.875rem;margin:0 0 1rem"><strong>' + filenames.length + '</strong> files parsed successfully.</p>' +
               '<div class="error-msg" style="text-align:left">' +
-                '<strong>' + failedFiles.length + ' file' + (failedFiles.length !== 1 ? 's' : '') + ' failed to upload:</strong><br>';
+                '<strong>' + failedFiles.length + ' file' + (failedFiles.length !== 1 ? 's' : '') + ' failed to parse:</strong><br>';
           for (var fi = 0; fi < failedFiles.length; fi++) {
             failHtml += '<span style="font-size:0.78rem">' + failedFiles[fi].name + ' \u2014 ' + failedFiles[fi].error + '</span><br>';
           }

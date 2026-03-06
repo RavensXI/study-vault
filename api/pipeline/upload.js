@@ -10,10 +10,16 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { subject_name, exam_board, spec_code, storage_path, filename, file_hash, school_id: body_school_id } = req.body;
+  const { subject_name, exam_board, spec_code, storage_path, filename, file_hash, school_id: body_school_id, extracted_text } = req.body;
 
-  if (!subject_name || !exam_board || !storage_path || !filename) {
-    return res.status(400).json({ error: 'Missing required fields: subject_name, exam_board, storage_path, filename' });
+  if (!subject_name || !exam_board || !filename) {
+    return res.status(400).json({ error: 'Missing required fields: subject_name, exam_board, filename' });
+  }
+
+  // Client-side parsing: extracted_text provided → skip straight to 'parsed'
+  // Legacy server-side parsing: storage_path provided → start at 'uploaded'
+  if (!extracted_text && !storage_path) {
+    return res.status(400).json({ error: 'Either extracted_text or storage_path is required' });
   }
 
   // Generate a slug from the subject name
@@ -26,9 +32,14 @@ module.exports = async function handler(req, res) {
     status: 'pending',
     subject_slug,
     subject_config: { subject_name, exam_board, spec_code },
-    ppt_storage_path: storage_path,
-    current_phase: 'uploaded',
+    ppt_storage_path: storage_path || null,
+    current_phase: extracted_text ? 'parsed' : 'uploaded',
   };
+
+  // If text was parsed client-side, store it directly
+  if (extracted_text) {
+    record.extracted_text = extracted_text;
+  }
   // School from form dropdown (preferred), falling back to auth profile
   record.school_id = body_school_id || auth.profile.school_id || null;
   // Only set uploaded_by if it's a valid UUID (not a demo username)
