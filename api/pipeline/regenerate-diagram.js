@@ -124,14 +124,18 @@ module.exports = async function handler(req, res) {
       return res.status(502).json({ error: 'Gemini did not return an image. Try rephrasing your prompt.' });
     }
 
-    // 3. Upload to R2
-    const imageBuffer = Buffer.from(imageBase64, 'base64');
-    const ext = imageMime.includes('png') ? 'png' : 'jpg';
+    // 3. Compress and upload to R2
+    const sharp = require('sharp');
+    const rawBuffer = Buffer.from(imageBase64, 'base64');
+    const imageBuffer = await sharp(rawBuffer)
+      .resize({ width: 1000, withoutEnlargement: true })
+      .jpeg({ quality: 82 })
+      .toBuffer();
+
     const hash = crypto.createHash('md5').update(imageBuffer).digest('hex').substring(0, 8);
-    const filename = `diagram_generated_${hash}.${ext}`;
+    const filename = `diagram_generated_${hash}.jpg`;
     const r2Key = `${subjectSlug}/${unitSlug}/${filename}`;
 
-    // Use S3-compatible API via AWS SDK (available in Vercel Node runtime)
     const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 
     const s3 = new S3Client({
@@ -147,7 +151,7 @@ module.exports = async function handler(req, res) {
       Bucket: R2_BUCKET,
       Key: r2Key,
       Body: imageBuffer,
-      ContentType: imageMime,
+      ContentType: 'image/jpeg',
     }));
 
     const publicUrl = `${R2_PUBLIC_URL}/${r2Key}`;
