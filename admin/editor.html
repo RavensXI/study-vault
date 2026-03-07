@@ -82,9 +82,9 @@
     .save-actions { display: flex; gap: 0.5rem; align-items: center; }
 
     /* ---- Preview ---- */
-    .preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-warm, #faf8f5); z-index: 200; overflow-y: auto; display: none; }
+    .preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-warm, #faf8f5); z-index: 10001; overflow-y: auto; display: none; }
     .preview-overlay.active { display: block; }
-    .preview-bar { position: sticky; top: 0; background: #fef3c7; padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f59e0b; z-index: 1; font-size: 0.82rem; font-weight: 600; color: #92400e; }
+    .preview-bar { position: sticky; top: 0; background: #fef3c7; padding: 0.75rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f59e0b; z-index: 999; font-size: 0.9rem; font-weight: 600; color: #92400e; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     .preview-content { max-width: 750px; margin: 2rem auto; padding: 0 1.5rem; }
 
     /* ---- States ---- */
@@ -191,7 +191,7 @@
   <div class="preview-overlay" id="preview-overlay">
     <div class="preview-bar">
       <span>Preview Mode (read-only)</span>
-      <button class="btn btn-outline" id="close-preview-btn">Close preview</button>
+      <button class="btn" id="close-preview-btn" style="background:#92400e;color:#fff;font-weight:600;padding:0.4rem 1.2rem;border-radius:6px;cursor:pointer">Back to Editor</button>
     </div>
     <div class="preview-content study-notes" id="preview-content"></div>
   </div>
@@ -838,6 +838,12 @@
 
     document.getElementById('close-preview-btn').addEventListener('click', function () {
       previewOverlay.classList.remove('active');
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && previewOverlay.classList.contains('active')) {
+        previewOverlay.classList.remove('active');
+      }
     });
 
     // ================================================================
