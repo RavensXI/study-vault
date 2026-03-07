@@ -834,15 +834,19 @@
         previewContent.appendChild(concDiv);
       }
       previewOverlay.classList.add('active');
+      saveBar.style.display = 'none';
     });
 
-    document.getElementById('close-preview-btn').addEventListener('click', function () {
+    function closePreview() {
       previewOverlay.classList.remove('active');
-    });
+      saveBar.style.display = '';
+    }
+
+    document.getElementById('close-preview-btn').addEventListener('click', closePreview);
 
     document.addEventListener('keydown', function (e) {
       if (e.key === 'Escape' && previewOverlay.classList.contains('active')) {
-        previewOverlay.classList.remove('active');
+        closePreview();
       }
     });
 
