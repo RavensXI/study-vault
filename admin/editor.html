@@ -74,8 +74,8 @@
     .editor-section-content:empty::before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; }
 
     /* ---- Save Bar ---- */
-    .save-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; padding: 0.65rem 1.5rem; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.04); transform: translateY(100%); transition: transform 0.25s; }
-    .save-bar.visible { transform: translateY(0); }
+    .save-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; padding: 0.65rem 1.5rem; display: none; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.04); }
+    .save-bar.visible { display: flex; }
     .save-status { font-size: 0.78rem; color: var(--text-muted); }
     .save-status.saved { color: #16a34a; }
     .save-status.error { color: #dc2626; }
@@ -426,7 +426,11 @@
 
       // Reset dirty state
       isDirty = false;
-      saveBar.classList.remove('visible');
+      saveBar.classList.add('visible');
+      saveStatus.textContent = 'No changes';
+      saveStatus.className = 'save-status saved';
+      saveBtn.disabled = true;
+      discardBtn.disabled = true;
     }
 
     // ================================================================
@@ -760,8 +764,9 @@
         isDirty = false;
         saveStatus.textContent = 'Saved!';
         saveStatus.className = 'save-status saved';
+        discardBtn.disabled = true;
         setTimeout(function () {
-          if (!isDirty) saveBar.classList.remove('visible');
+          if (!isDirty) saveStatus.textContent = 'No changes';
         }, 2000);
       } catch (err) {
         saveStatus.textContent = 'Error: ' + err.message;
@@ -775,9 +780,10 @@
     function markDirty() {
       if (!isDirty) {
         isDirty = true;
-        saveBar.classList.add('visible');
         saveStatus.textContent = 'Unsaved changes';
         saveStatus.className = 'save-status';
+        saveBtn.disabled = false;
+        discardBtn.disabled = false;
       }
     }
 
