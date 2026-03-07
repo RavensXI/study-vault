@@ -270,8 +270,9 @@ function initPracticeQuestions() {
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],
-      ['Explain one way', 'explain-one-way.html'],
+      ['Explain one way', 'explain.html'],
       ['Calculate', 'calculate.html'],
+      ['Analyse', 'analyse.html'],
       ['Discuss', 'discuss.html'],
       ['Justify', 'justify-evaluate.html'],
       ['Evaluate', 'justify-evaluate.html'],
@@ -279,7 +280,6 @@ function initPracticeQuestions() {
       ['State', 'identify-state.html'],
       ['Extended response', 'extended-response.html'],
       ['Extended Explanation', 'director.html'],
-      ['Analyse', 'design.html'],
       ['Describe', 'describe.html'],
       ['Explain', 'explain.html']
     ];
@@ -774,16 +774,21 @@ function initNarration() {
     speedBtn.textContent = speeds[speedIndex] + 'x';
   });
 
-  // --- Click paragraph to jump to that clip ---
+  // --- Click paragraph to jump to that clip (desktop only) ---
 
-  document.querySelectorAll('[data-narration-id]').forEach(function(el) {
-    el.addEventListener('click', function() {
-      var id = el.dataset.narrationId;
-      for (var i = 0; i < manifest.length; i++) {
-        if (manifest[i].id === id) { loadClip(i); audio.play(); break; }
-      }
+  var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  if (!isTouchDevice) {
+    document.querySelectorAll('[data-narration-id]').forEach(function(el) {
+      el.addEventListener('click', function(e) {
+        // Don't hijack glossary term clicks
+        if (e.target.closest('dfn, .glossary-popup')) return;
+        var id = el.dataset.narrationId;
+        for (var i = 0; i < manifest.length; i++) {
+          if (manifest[i].id === id) { loadClip(i); audio.play(); break; }
+        }
+      });
     });
-  });
+  }
 
   // --- Collapsible re-highlight ---
 
