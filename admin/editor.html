@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Editor - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* ---- Layout ---- */
+    .editor-layout { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.5rem 6rem; }
+
+    /* ---- Lesson Picker ---- */
+    .editor-picker { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .editor-picker select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; background: white; }
+    .editor-picker .picker-nav { display: flex; gap: 0.25rem; margin-left: 0.5rem; }
+
+    /* ---- Buttons ---- */
+    .btn { padding: 0.45rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.78rem; font-weight: 600; transition: all 0.15s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: #7c3aed; color: white; }
+    .btn-primary:hover:not(:disabled) { background: #6d28d9; }
+    .btn-success { background: #16a34a; color: white; }
+    .btn-success:hover:not(:disabled) { background: #15803d; }
+    .btn-outline { background: transparent; border: 1px solid #ddd; color: var(--text-color); }
+    .btn-outline:hover:not(:disabled) { background: #f9fafb; }
+    .btn-sm { padding: 0.3rem 0.65rem; font-size: 0.72rem; }
+
+    /* ---- Toolbar ---- */
+    .editor-toolbar { position: sticky; top: 56px; z-index: 10; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.3rem 0.5rem; display: none; gap: 0.15rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.05); align-items: center; }
+    .editor-toolbar.visible { display: flex; }
+    .toolbar-btn { padding: 0.25rem 0.55rem; border: none; background: none; cursor: pointer; border-radius: 4px; font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
+    .toolbar-btn:hover { background: #f3f4f6; }
+    .toolbar-sep { width: 1px; height: 20px; background: #e5e7eb; margin: 0 0.2rem; }
+    .toolbar-label { font-size: 0.7rem; color: var(--text-muted); margin-right: 0.15rem; }
+
+    /* ---- Block Cards ---- */
+    .editor-block { background: white; border-radius: 10px; border: 1px solid #e5e7eb; transition: border-color 0.15s, box-shadow 0.15s; }
+    .editor-block:focus-within { border-color: #c4b5fd; box-shadow: 0 0 0 2px rgba(124,58,237,0.08); }
+    .block-controls { display: flex; justify-content: space-between; align-items: center; padding: 0.25rem 0.65rem; border-bottom: 1px solid #f0ede8; }
+    .block-badge { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: white; padding: 0.1rem 0.45rem; border-radius: 4px; line-height: 1.4; }
+    .block-actions { display: flex; gap: 0.15rem; opacity: 0; transition: opacity 0.15s; }
+    .editor-block:hover .block-actions, .editor-block:focus-within .block-actions { opacity: 1; }
+    .block-btn { width: 22px; height: 22px; border: none; background: none; cursor: pointer; border-radius: 4px; font-size: 0.78rem; color: #9ca3af; display: flex; align-items: center; justify-content: center; padding: 0; }
+    .block-btn:hover { background: #f3f4f6; color: var(--text-color); }
+    .block-btn.block-delete:hover { background: #fef2f2; color: #dc2626; }
+    .editor-block-content { padding: 0.65rem 0.85rem; }
+
+    /* Contenteditable styling */
+    .editor-block-content [contenteditable="true"] { outline: none; min-height: 1.2em; border-radius: 3px; transition: background 0.15s; }
+    .editor-block-content [contenteditable="true"]:focus { background: rgba(124,58,237,0.03); }
+    .editor-block-content [contenteditable="true"]:empty::before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; }
+    .block-readonly-note { font-size: 0.7rem; color: var(--text-muted); font-style: italic; margin-top: 0.35rem; }
+
+    /* ---- Add Block Gap ---- */
+    .add-block-gap { display: flex; justify-content: center; align-items: center; padding: 0.25rem 0; position: relative; }
+    .add-block-gap::before { content: ''; position: absolute; left: 15%; right: 15%; top: 50%; border-top: 1px dashed #e5e7eb; }
+    .add-block-btn { position: relative; z-index: 1; width: 22px; height: 22px; border-radius: 50%; border: 1px dashed #d1d5db; background: white; cursor: pointer; font-size: 0.9rem; color: #9ca3af; display: flex; align-items: center; justify-content: center; padding: 0; transition: all 0.15s; line-height: 1; }
+    .add-block-btn:hover { border-color: #7c3aed; color: #7c3aed; background: #f5f3ff; }
+    .add-block-menu { position: absolute; top: calc(100% + 2px); left: 50%; transform: translateX(-50%); background: white; border: 1px solid #e5e7eb; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); padding: 0.2rem; z-index: 20; display: none; min-width: 150px; }
+    .add-block-gap.open .add-block-menu { display: block; }
+    .add-block-menu button { display: block; width: 100%; text-align: left; padding: 0.4rem 0.65rem; border: none; background: none; cursor: pointer; font-size: 0.78rem; font-family: inherit; border-radius: 5px; }
+    .add-block-menu button:hover { background: #f5f3ff; color: #7c3aed; }
+
+    /* ---- Section Editors (Exam Tip, Conclusion) ---- */
+    .editor-section { margin-top: 1.25rem; background: white; border-radius: 10px; border: 1px solid #e5e7eb; overflow: hidden; }
+    .editor-section:focus-within { border-color: #c4b5fd; box-shadow: 0 0 0 2px rgba(124,58,237,0.08); }
+    .editor-section-header { padding: 0.5rem 0.85rem; background: #f9fafb; border-bottom: 1px solid #f0ede8; font-weight: 600; font-size: 0.82rem; font-family: 'Source Serif 4', serif; display: flex; justify-content: space-between; align-items: center; }
+    .editor-section-content { padding: 0.65rem 0.85rem; min-height: 3em; outline: none; }
+    .editor-section-content:focus { background: rgba(124,58,237,0.02); }
+    .editor-section-content:empty::before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; }
+
+    /* ---- Save Bar ---- */
+    .save-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; padding: 0.65rem 1.5rem; display: flex; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.04); transform: translateY(100%); transition: transform 0.25s; }
+    .save-bar.visible { transform: translateY(0); }
+    .save-status { font-size: 0.78rem; color: var(--text-muted); }
+    .save-status.saved { color: #16a34a; }
+    .save-status.error { color: #dc2626; }
+    .save-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+    /* ---- Preview ---- */
+    .preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-warm, #faf8f5); z-index: 200; overflow-y: auto; display: none; }
+    .preview-overlay.active { display: block; }
+    .preview-bar { position: sticky; top: 0; background: #fef3c7; padding: 0.6rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f59e0b; z-index: 1; font-size: 0.82rem; font-weight: 600; color: #92400e; }
+    .preview-content { max-width: 750px; margin: 2rem auto; padding: 0 1.5rem; }
+
+    /* ---- States ---- */
+    .editor-loading { text-align: center; padding: 4rem; color: var(--text-muted); }
+    .editor-empty { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.85rem; }
+
+    /* ---- Content styling within editor (mirror student view) ---- */
+    .editor-block-content .key-fact,
+    .editor-block-content .collapsible,
+    .editor-block-content .timeline { pointer-events: auto; }
+    .editor-block-content .collapsible-content { display: block !important; max-height: none !important; }
+    .editor-block-content .collapsible-toggle { pointer-events: none; }
+    .editor-block-content figure.diagram img { max-width: 100%; height: auto; border-radius: 8px; }
+
+    /* Ensure narration highlight colours don't confuse teacher */
+    .editor-block-content [data-narration-id] { background: transparent !important; border-left: none !important; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+        <span class="header-unit-label">Content Editor</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review</a>
+        <a href="/admin/images">Images</a>
+        <a href="/admin/editor">Editor</a>
+        <a href="/">Student View</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="editor-layout">
+    <!-- Lesson Picker -->
+    <div class="editor-picker">
+      <select id="pick-subject"><option value="">Subject...</option></select>
+      <select id="pick-unit" disabled><option value="">Unit...</option></select>
+      <select id="pick-lesson" disabled><option value="">Lesson...</option></select>
+      <button class="btn btn-primary" id="load-btn" disabled>Load</button>
+      <div class="picker-nav">
+        <button class="btn btn-outline btn-sm" id="prev-btn" disabled title="Previous lesson">&larr;</button>
+        <button class="btn btn-outline btn-sm" id="next-btn" disabled title="Next lesson">&rarr;</button>
+      </div>
+      <a href="#" id="preview-link" class="btn btn-outline btn-sm" target="_blank" style="display:none">View live</a>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="editor-toolbar" id="editor-toolbar">
+      <span class="toolbar-label">Format:</span>
+      <button class="toolbar-btn" data-cmd="bold" title="Bold (Ctrl+B)"><strong>B</strong></button>
+      <button class="toolbar-btn" data-cmd="italic" title="Italic (Ctrl+I)"><em>I</em></button>
+      <button class="toolbar-btn" data-cmd="underline" title="Underline (Ctrl+U)"><u>U</u></button>
+      <span class="toolbar-sep"></span>
+      <button class="toolbar-btn" data-cmd="glossary" title="Glossary term">
+        <span style="border-bottom:1px dashed #7c3aed;color:#7c3aed">G</span>
+      </button>
+      <span class="toolbar-sep"></span>
+      <button class="toolbar-btn" id="preview-btn" title="Preview as student sees it">Preview</button>
+    </div>
+
+    <!-- Editor Content -->
+    <div id="editor-area" style="display:none">
+      <div id="editor-blocks"></div>
+
+      <!-- Exam Tip -->
+      <div class="editor-section" id="exam-tip-section">
+        <div class="editor-section-header">
+          Exam Tip
+          <span style="font-size:0.7rem;color:var(--text-muted);font-weight:400">Optional</span>
+        </div>
+        <div class="editor-section-content" id="exam-tip-editor" contenteditable="true" data-placeholder="Add an exam tip..."></div>
+      </div>
+
+      <!-- Conclusion -->
+      <div class="editor-section" id="conclusion-section">
+        <div class="editor-section-header">
+          Key Takeaways
+          <span style="font-size:0.7rem;color:var(--text-muted);font-weight:400">Optional</span>
+        </div>
+        <div class="editor-section-content" id="conclusion-editor" contenteditable="true" data-placeholder="Add key takeaways..."></div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="editor-empty" class="editor-empty">
+      Select a subject, unit, and lesson above to start editing.
+    </div>
+  </div>
+
+  <!-- Save Bar -->
+  <div class="save-bar" id="save-bar">
+    <span class="save-status" id="save-status">Unsaved changes</span>
+    <div class="save-actions">
+      <button class="btn btn-outline" id="discard-btn">Discard changes</button>
+      <button class="btn btn-success" id="save-btn">Save (Ctrl+S)</button>
+    </div>
+  </div>
+
+  <!-- Preview Overlay -->
+  <div class="preview-overlay" id="preview-overlay">
+    <div class="preview-bar">
+      <span>Preview Mode (read-only)</span>
+      <button class="btn btn-outline" id="close-preview-btn">Close preview</button>
+    </div>
+    <div class="preview-content study-notes" id="preview-content"></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ================================================================
+    //  CONFIG
+    // ================================================================
+    var BLOCK_TYPES = {
+      heading:     { label: 'Heading',     color: '#7c3aed' },
+      paragraph:   { label: 'Paragraph',   color: '#2563eb' },
+      'key-fact':  { label: 'Key Fact',    color: '#ea580c' },
+      collapsible: { label: 'Collapsible', color: '#0891b2' },
+      timeline:    { label: 'Timeline',    color: '#16a34a' },
+      diagram:     { label: 'Diagram',     color: '#dc2626', readOnly: true },
+      list:        { label: 'List',        color: '#059669' },
+      blockquote:  { label: 'Quote',       color: '#92400e' },
+      unknown:     { label: 'Block',       color: '#6b7280' }
+    };
+
+    var NEW_BLOCK_TYPES = ['paragraph', 'heading', 'key-fact', 'list', 'collapsible'];
+
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    // ================================================================
+    //  STATE
+    // ================================================================
+    var accessToken = null;
+    var demoUser = null;
+    var currentLesson = null;   // full lesson row from Supabase
+    var currentUnit = null;
+    var currentSubject = null;
+    var blockEls = [];           // array of DOM elements (the content blocks)
+    var isDirty = false;
+    var allLessons = [];         // lessons in current unit (for prev/next)
+
+    // DOM refs
+    var pickSubject = document.getElementById('pick-subject');
+    var pickUnit = document.getElementById('pick-unit');
+    var pickLesson = document.getElementById('pick-lesson');
+    var loadBtn = document.getElementById('load-btn');
+    var prevBtn = document.getElementById('prev-btn');
+    var nextBtn = document.getElementById('next-btn');
+    var previewLink = document.getElementById('preview-link');
+    var editorArea = document.getElementById('editor-area');
+    var editorBlocks = document.getElementById('editor-blocks');
+    var editorToolbar = document.getElementById('editor-toolbar');
+    var editorEmpty = document.getElementById('editor-empty');
+    var examTipEditor = document.getElementById('exam-tip-editor');
+    var conclusionEditor = document.getElementById('conclusion-editor');
+    var saveBar = document.getElementById('save-bar');
+    var saveStatus = document.getElementById('save-status');
+    var saveBtn = document.getElementById('save-btn');
+    var discardBtn = document.getElementById('discard-btn');
+    var previewOverlay = document.getElementById('preview-overlay');
+    var previewContent = document.getElementById('preview-content');
+
+    // ================================================================
+    //  AUTH
+    // ================================================================
+    async function getAuth() {
+      var result = await sb.auth.getSession();
+      if (result.data.session) {
+        accessToken = result.data.session.access_token;
+        return;
+      }
+      try {
+        var stored = localStorage.getItem('studyvault-user');
+        if (stored) {
+          var u = JSON.parse(stored);
+          if (u && u.isDemo) demoUser = u.id;
+        }
+      } catch (e) {}
+    }
+
+    function authHeaders() {
+      var h = { 'Content-Type': 'application/json' };
+      if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
+      else if (demoUser) h['X-Demo-User'] = demoUser;
+      return h;
+    }
+
+    // ================================================================
+    //  LESSON PICKER
+    // ================================================================
+    async function loadSubjects() {
+      await getAuth();
+      var result = await sb.from('subjects').select('id, slug, name').eq('status', 'live').order('name');
+      var subjects = result.data || [];
+      pickSubject.innerHTML = '<option value="">Subject...</option>';
+      subjects.forEach(function (s) {
+        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + esc(s.name) + '</option>';
+      });
+      // Auto-select from URL params
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('subject')) {
+        pickSubject.value = params.get('subject');
+        pickSubject.dispatchEvent(new Event('change'));
+      }
+    }
+
+    pickSubject.addEventListener('change', async function () {
+      pickUnit.innerHTML = '<option value="">Unit...</option>';
+      pickLesson.innerHTML = '<option value="">Lesson...</option>';
+      pickUnit.disabled = true;
+      pickLesson.disabled = true;
+      loadBtn.disabled = true;
+      if (!this.value) return;
+
+      var opt = this.options[this.selectedIndex];
+      var subjectId = opt.dataset.id;
+      var result = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', subjectId).order('sort_order');
+      var units = result.data || [];
+      units.forEach(function (u) {
+        pickUnit.innerHTML += '<option value="' + u.slug + '" data-id="' + u.id + '">' + esc(u.name) + '</option>';
+      });
+      pickUnit.disabled = false;
+
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('unit')) {
+        pickUnit.value = params.get('unit');
+        pickUnit.dispatchEvent(new Event('change'));
+      }
+    });
+
+    pickUnit.addEventListener('change', async function () {
+      pickLesson.innerHTML = '<option value="">Lesson...</option>';
+      pickLesson.disabled = true;
+      loadBtn.disabled = true;
+      if (!this.value) return;
+
+      var opt = this.options[this.selectedIndex];
+      var unitId = opt.dataset.id;
+      var result = await sb.from('lessons').select('id, lesson_number, title, slug').eq('unit_id', unitId).eq('status', 'live').order('lesson_number');
+      allLessons = result.data || [];
+      allLessons.forEach(function (l) {
+        pickLesson.innerHTML += '<option value="' + l.id + '">' + l.lesson_number + '. ' + esc(l.title) + '</option>';
+      });
+      pickLesson.disabled = false;
+
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('lesson')) {
+        // Find by lesson number
+        var num = parseInt(params.get('lesson'), 10);
+        var match = allLessons.find(function (l) { return l.lesson_number === num; });
+        if (match) pickLesson.value = match.id;
+      }
+      pickLesson.dispatchEvent(new Event('change'));
+    });
+
+    pickLesson.addEventListener('change', function () {
+      loadBtn.disabled = !this.value;
+      // Auto-load if coming from URL params
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('lesson') && this.value) {
+        // Clear params so subsequent changes don't auto-load
+        window.history.replaceState({}, '', window.location.pathname);
+        loadLesson();
+      }
+    });
+
+    loadBtn.addEventListener('click', function () { loadLesson(); });
+
+    // Prev/Next navigation
+    prevBtn.addEventListener('click', function () { navigateLesson(-1); });
+    nextBtn.addEventListener('click', function () { navigateLesson(1); });
+
+    function navigateLesson(dir) {
+      if (!currentLesson || !allLessons.length) return;
+      var idx = allLessons.findIndex(function (l) { return l.id === currentLesson.id; });
+      var newIdx = idx + dir;
+      if (newIdx < 0 || newIdx >= allLessons.length) return;
+      if (isDirty && !confirm('You have unsaved changes. Discard and move to next lesson?')) return;
+      pickLesson.value = allLessons[newIdx].id;
+      loadLesson();
+    }
+
+    // ================================================================
+    //  LOAD LESSON
+    // ================================================================
+    async function loadLesson() {
+      var lessonId = pickLesson.value;
+      if (!lessonId) return;
+
+      editorBlocks.innerHTML = '<div class="editor-loading">Loading lesson...</div>';
+      editorArea.style.display = '';
+      editorEmpty.style.display = 'none';
+      editorToolbar.classList.add('visible');
+
+      var result = await sb.from('lessons')
+        .select('*, units!inner(slug, name, body_class, accent, subject_id, subjects!inner(slug, name))')
+        .eq('id', lessonId)
+        .single();
+
+      if (result.error || !result.data) {
+        editorBlocks.innerHTML = '<div class="editor-loading" style="color:#dc2626">Failed to load lesson.</div>';
+        return;
+      }
+
+      currentLesson = result.data;
+      currentUnit = result.data.units;
+      currentSubject = result.data.units.subjects;
+
+      // Set page title
+      document.title = 'Edit: L' + currentLesson.lesson_number + ' ' + currentLesson.title + ' - StudyVault';
+
+      // Set body class for unit theming
+      document.body.className = currentUnit.body_class || '';
+
+      // Preview link
+      previewLink.href = '/lesson/' + currentSubject.slug + '/' + currentUnit.slug + '/' + currentLesson.lesson_number;
+      previewLink.style.display = '';
+
+      // Parse and render content blocks
+      blockEls = parseBlocks(currentLesson.content_html || '');
+      renderBlocks();
+
+      // Exam tip & conclusion
+      examTipEditor.innerHTML = currentLesson.exam_tip_html || '';
+      conclusionEditor.innerHTML = currentLesson.conclusion_html || '';
+
+      // Update prev/next buttons
+      var idx = allLessons.findIndex(function (l) { return l.id === currentLesson.id; });
+      prevBtn.disabled = idx <= 0;
+      nextBtn.disabled = idx >= allLessons.length - 1;
+
+      // Reset dirty state
+      isDirty = false;
+      saveBar.classList.remove('visible');
+    }
+
+    // ================================================================
+    //  BLOCK PARSER
+    // ================================================================
+    function parseBlocks(html) {
+      var temp = document.createElement('div');
+      temp.innerHTML = html;
+      return Array.from(temp.children);
+    }
+
+    function getBlockType(el) {
+      var tag = el.tagName.toLowerCase();
+      if (tag === 'h2' || tag === 'h3') return 'heading';
+      if (tag === 'p') return 'paragraph';
+      if (el.classList.contains('key-fact')) return 'key-fact';
+      if (el.classList.contains('collapsible')) return 'collapsible';
+      if (el.classList.contains('timeline')) return 'timeline';
+      if (tag === 'figure' && el.classList.contains('diagram')) return 'diagram';
+      if (tag === 'figure') return 'diagram';
+      if (tag === 'ul' || tag === 'ol') return 'list';
+      if (tag === 'blockquote') return 'blockquote';
+      return 'unknown';
+    }
+
+    // ================================================================
+    //  BLOCK RENDERING
+    // ================================================================
+    function renderBlocks() {
+      editorBlocks.innerHTML = '';
+      addGap(0);
+      blockEls.forEach(function (el, i) {
+        editorBlocks.appendChild(createBlockCard(el, i));
+        addGap(i + 1);
+      });
+    }
+
+    function createBlockCard(el, index) {
+      var type = getBlockType(el);
+      var cfg = BLOCK_TYPES[type] || BLOCK_TYPES.unknown;
+
+      var card = document.createElement('div');
+      card.className = 'editor-block';
+      card.dataset.index = index;
+
+      // Controls
+      var controls = document.createElement('div');
+      controls.className = 'block-controls';
+      controls.innerHTML =
+        '<span class="block-badge" style="background:' + cfg.color + '">' + cfg.label + '</span>' +
+        '<div class="block-actions">' +
+          '<button class="block-btn" data-action="up" title="Move up">&uarr;</button>' +
+          '<button class="block-btn" data-action="down" title="Move down">&darr;</button>' +
+          '<button class="block-btn block-delete" data-action="delete" title="Delete">&times;</button>' +
+        '</div>';
+      card.appendChild(controls);
+
+      // Content wrapper
+      var content = document.createElement('div');
+      content.className = 'editor-block-content';
+      content.appendChild(el);
+      card.appendChild(content);
+
+      // Make editable
+      makeEditable(el, type);
+
+      // Add read-only note for diagrams (after content wrapper exists)
+      if (el._readOnly) {
+        var note = document.createElement('div');
+        note.className = 'block-readonly-note';
+        note.textContent = 'Edit diagrams in the Images tool.';
+        content.appendChild(note);
+      }
+
+      // Wire control buttons
+      controls.addEventListener('click', function (e) {
+        var action = e.target.closest('[data-action]');
+        if (!action) return;
+        var idx = parseInt(card.dataset.index, 10);
+        switch (action.dataset.action) {
+          case 'up': moveBlock(idx, -1); break;
+          case 'down': moveBlock(idx, 1); break;
+          case 'delete': deleteBlock(idx); break;
+        }
+      });
+
+      return card;
+    }
+
+    function makeEditable(el, type) {
+      if (BLOCK_TYPES[type] && BLOCK_TYPES[type].readOnly) {
+        // Note is appended after the content wrapper is built
+        el._readOnly = true;
+        return;
+      }
+
+      switch (type) {
+        case 'heading':
+        case 'paragraph':
+        case 'blockquote':
+          el.contentEditable = 'true';
+          el.dataset.placeholder = 'Type here...';
+          break;
+        case 'list':
+          el.contentEditable = 'true';
+          break;
+        case 'key-fact':
+          el.querySelectorAll('p').forEach(function (p) {
+            p.contentEditable = 'true';
+            p.dataset.placeholder = 'Type key fact content...';
+          });
+          break;
+        case 'collapsible':
+          el.querySelectorAll('.collapsible-inner p, .collapsible-inner li').forEach(function (p) {
+            p.contentEditable = 'true';
+          });
+          break;
+        case 'timeline':
+          el.querySelectorAll('.timeline-date, h4, p').forEach(function (child) {
+            child.contentEditable = 'true';
+          });
+          break;
+        case 'unknown':
+          el.contentEditable = 'true';
+          break;
+      }
+    }
+
+    // ---- Add Block Gaps ----
+    function addGap(index) {
+      var gap = document.createElement('div');
+      gap.className = 'add-block-gap';
+      gap.dataset.index = index;
+
+      var btn = document.createElement('button');
+      btn.className = 'add-block-btn';
+      btn.textContent = '+';
+      btn.title = 'Add block';
+      gap.appendChild(btn);
+
+      var menu = document.createElement('div');
+      menu.className = 'add-block-menu';
+      NEW_BLOCK_TYPES.forEach(function (t) {
+        var opt = document.createElement('button');
+        opt.dataset.type = t;
+        opt.textContent = BLOCK_TYPES[t].label;
+        menu.appendChild(opt);
+      });
+      gap.appendChild(menu);
+
+      btn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var wasOpen = gap.classList.contains('open');
+        closeAllMenus();
+        if (!wasOpen) gap.classList.add('open');
+      });
+
+      menu.addEventListener('click', function (e) {
+        var typeBtn = e.target.closest('[data-type]');
+        if (!typeBtn) return;
+        var insertIdx = parseInt(gap.dataset.index, 10);
+        addBlockAt(typeBtn.dataset.type, insertIdx);
+        closeAllMenus();
+      });
+
+      editorBlocks.appendChild(gap);
+    }
+
+    function closeAllMenus() {
+      document.querySelectorAll('.add-block-gap.open').forEach(function (g) {
+        g.classList.remove('open');
+      });
+    }
+
+    // ================================================================
+    //  BLOCK OPERATIONS
+    // ================================================================
+    function moveBlock(index, dir) {
+      var newIdx = index + dir;
+      if (newIdx < 0 || newIdx >= blockEls.length) return;
+      var temp = blockEls[index];
+      blockEls[index] = blockEls[newIdx];
+      blockEls[newIdx] = temp;
+      renderBlocks();
+      markDirty();
+    }
+
+    function deleteBlock(index) {
+      if (!confirm('Delete this block?')) return;
+      blockEls.splice(index, 1);
+      renderBlocks();
+      markDirty();
+    }
+
+    function addBlockAt(type, index) {
+      var el = createNewBlock(type);
+      blockEls.splice(index, 0, el);
+      renderBlocks();
+      markDirty();
+      // Focus the new block
+      var cards = editorBlocks.querySelectorAll('.editor-block');
+      if (cards[index]) {
+        var editable = cards[index].querySelector('[contenteditable="true"]');
+        if (editable) editable.focus();
+      }
+    }
+
+    function createNewBlock(type) {
+      var temp = document.createElement('div');
+      switch (type) {
+        case 'paragraph':
+          temp.innerHTML = '<p>New paragraph text.</p>';
+          break;
+        case 'heading':
+          temp.innerHTML = '<h2>New Section Heading</h2>';
+          break;
+        case 'key-fact':
+          temp.innerHTML = '<div class="key-fact"><div class="key-fact-label">Key Fact</div><p>Enter key fact content here.</p></div>';
+          break;
+        case 'list':
+          temp.innerHTML = '<ul><li>Item 1</li><li>Item 2</li></ul>';
+          break;
+        case 'collapsible':
+          temp.innerHTML = '<div class="collapsible"><button class="collapsible-toggle" aria-expanded="false"><span>Section Title</span><svg class="collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="collapsible-content"><div class="collapsible-inner"><p>Content goes here.</p></div></div></div>';
+          break;
+        default:
+          temp.innerHTML = '<p>New block.</p>';
+      }
+      return temp.firstElementChild;
+    }
+
+    // ================================================================
+    //  TOOLBAR
+    // ================================================================
+    editorToolbar.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-cmd]');
+      if (!btn) return;
+      var cmd = btn.dataset.cmd;
+      if (cmd === 'glossary') {
+        addGlossaryTerm();
+      } else {
+        document.execCommand(cmd, false, null);
+      }
+      markDirty();
+    });
+
+    function addGlossaryTerm() {
+      var sel = window.getSelection();
+      if (!sel.rangeCount || sel.isCollapsed) {
+        alert('Select some text first to make it a glossary term.');
+        return;
+      }
+      var text = sel.toString().trim();
+      if (!text) return;
+      var def = prompt('Definition for "' + text + '":');
+      if (!def) return;
+
+      var range = sel.getRangeAt(0);
+      try {
+        var dfn = document.createElement('dfn');
+        dfn.className = 'term';
+        dfn.setAttribute('data-def', def);
+        range.surroundContents(dfn);
+        markDirty();
+      } catch (e) {
+        alert('Could not wrap selection. Make sure you select text within a single block.');
+      }
+    }
+
+    // ================================================================
+    //  SERIALIZATION
+    // ================================================================
+    function serializeContent() {
+      var html = '';
+      blockEls.forEach(function (el) {
+        var clone = el.cloneNode(true);
+        // Strip contenteditable attributes
+        clone.removeAttribute('contenteditable');
+        clone.removeAttribute('data-placeholder');
+        clone.querySelectorAll('[contenteditable]').forEach(function (child) {
+          child.removeAttribute('contenteditable');
+          child.removeAttribute('data-placeholder');
+        });
+        // Remove any read-only notes we injected
+        clone.querySelectorAll('.block-readonly-note').forEach(function (n) { n.remove(); });
+        html += clone.outerHTML + '\n';
+      });
+      return html.trim();
+    }
+
+    function serializeSection(editorEl) {
+      var clone = editorEl.cloneNode(true);
+      clone.removeAttribute('contenteditable');
+      clone.removeAttribute('data-placeholder');
+      var inner = clone.innerHTML.trim();
+      return inner || null;
+    }
+
+    // ================================================================
+    //  SAVE
+    // ================================================================
+    saveBtn.addEventListener('click', saveLesson);
+    discardBtn.addEventListener('click', function () {
+      if (!confirm('Discard all changes and reload?')) return;
+      loadLesson();
+    });
+
+    async function saveLesson() {
+      if (!currentLesson) return;
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+      saveStatus.textContent = 'Saving...';
+      saveStatus.className = 'save-status';
+
+      var body = {
+        lesson_id: currentLesson.id,
+        content_html: serializeContent(),
+        exam_tip_html: serializeSection(examTipEditor),
+        conclusion_html: serializeSection(conclusionEditor)
+      };
+
+      try {
+        var resp = await fetch('/api/pipeline/update-lesson', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify(body)
+        });
+        var data = await resp.json();
+        if (!resp.ok) throw new Error(data.error || 'Save failed');
+
+        isDirty = false;
+        saveStatus.textContent = 'Saved!';
+        saveStatus.className = 'save-status saved';
+        setTimeout(function () {
+          if (!isDirty) saveBar.classList.remove('visible');
+        }, 2000);
+      } catch (err) {
+        saveStatus.textContent = 'Error: ' + err.message;
+        saveStatus.className = 'save-status error';
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save (Ctrl+S)';
+      }
+    }
+
+    function markDirty() {
+      if (!isDirty) {
+        isDirty = true;
+        saveBar.classList.add('visible');
+        saveStatus.textContent = 'Unsaved changes';
+        saveStatus.className = 'save-status';
+      }
+    }
+
+    // Track input in contenteditable areas
+    document.addEventListener('input', function (e) {
+      if (e.target.closest('#editor-area')) markDirty();
+    });
+
+    // Warn on navigate away
+    window.addEventListener('beforeunload', function (e) {
+      if (isDirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    // Ctrl+S shortcut
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (currentLesson && isDirty) saveLesson();
+      }
+    });
+
+    // ================================================================
+    //  PASTE HANDLING — strip external formatting
+    // ================================================================
+    document.addEventListener('paste', function (e) {
+      var target = e.target;
+      if (target.isContentEditable || target.contentEditable === 'true') {
+        if (!target.closest('#editor-area')) return;
+        e.preventDefault();
+        var text = e.clipboardData.getData('text/plain');
+        document.execCommand('insertText', false, text);
+      }
+    });
+
+    // ================================================================
+    //  PREVIEW
+    // ================================================================
+    document.getElementById('preview-btn').addEventListener('click', function () {
+      previewContent.innerHTML = serializeContent();
+      // Exam tip
+      var tipHtml = serializeSection(examTipEditor);
+      if (tipHtml) {
+        var tipDiv = document.createElement('div');
+        tipDiv.className = 'exam-tip';
+        tipDiv.innerHTML = tipHtml;
+        previewContent.appendChild(tipDiv);
+      }
+      // Conclusion
+      var concHtml = serializeSection(conclusionEditor);
+      if (concHtml) {
+        var concDiv = document.createElement('div');
+        concDiv.className = 'conclusion';
+        concDiv.innerHTML = concHtml;
+        previewContent.appendChild(concDiv);
+      }
+      previewOverlay.classList.add('active');
+    });
+
+    document.getElementById('close-preview-btn').addEventListener('click', function () {
+      previewOverlay.classList.remove('active');
+    });
+
+    // ================================================================
+    //  CLOSE MENUS ON OUTSIDE CLICK
+    // ================================================================
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.add-block-gap')) closeAllMenus();
+    });
+
+    // ================================================================
+    //  UTILITY
+    // ================================================================
+    function esc(str) {
+      var div = document.createElement('div');
+      div.textContent = str || '';
+      return div.innerHTML;
+    }
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+    loadSubjects();
+  })();
+  </script>
+</body>
+</html>
