@@ -975,15 +975,20 @@ function initGlossary() {
     // Horizontal: shift popup so it stays within viewport
     if (popup) {
       popup.style.left = '';
-      popup.style.transform = '';
+      popup.style.right = '';
       term.classList.add('term-visible');
       const popupRect = popup.getBoundingClientRect();
-      const overflowRight = popupRect.right - (window.innerWidth - 8);
+      const overflowRight = popupRect.right - window.innerWidth + 8;
       const overflowLeft = 8 - popupRect.left;
-      if (overflowRight > 0) {
-        popup.style.left = 'calc(50% - ' + overflowRight + 'px)';
-      } else if (overflowLeft > 0) {
-        popup.style.left = 'calc(50% + ' + overflowLeft + 'px)';
+      if (overflowRight > 0 || overflowLeft > 0) {
+        // Switch from centred positioning to absolute pixel positioning
+        const termRect = term.getBoundingClientRect();
+        let popupLeft = termRect.left + termRect.width / 2 - popupRect.width / 2;
+        // Clamp within viewport
+        popupLeft = Math.max(8, Math.min(popupLeft, window.innerWidth - popupRect.width - 8));
+        // Convert to position relative to the term's left edge
+        popup.style.left = (popupLeft - termRect.left) + 'px';
+        popup.style.transform = 'none';
       }
     } else {
       term.classList.add('term-visible');
@@ -994,6 +999,12 @@ function initGlossary() {
 
   function hideTerm(term) {
     term.classList.remove('term-visible', 'term-flip');
+    const popup = term.querySelector('.term-popup');
+    if (popup) {
+      popup.style.left = '';
+      popup.style.right = '';
+      popup.style.transform = '';
+    }
     if (activeTerm === term) activeTerm = null;
   }
 
