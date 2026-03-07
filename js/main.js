@@ -972,24 +972,20 @@ function initGlossary() {
     // Vertical: flip below if near top of viewport
     term.classList.toggle('term-flip', rect.top < 100);
 
-    // Horizontal: shift popup so it stays within viewport
+    // Horizontal: position popup within viewport
     if (popup) {
-      popup.style.left = '';
-      popup.style.right = '';
+      // Calculate where the popup would naturally centre (term centre - half popup width)
+      const termCentre = rect.left + rect.width / 2;
+      const popupWidth = Math.min(popup.scrollWidth, 280); // max-width from CSS
+      let popupLeft = termCentre - popupWidth / 2;
+
+      // Clamp within viewport with 8px margin
+      popupLeft = Math.max(8, Math.min(popupLeft, window.innerWidth - popupWidth - 8));
+
+      // Set as pixel position relative to the term
+      popup.style.left = (popupLeft - rect.left) + 'px';
+      popup.style.transform = 'none';
       term.classList.add('term-visible');
-      const popupRect = popup.getBoundingClientRect();
-      const overflowRight = popupRect.right - window.innerWidth + 8;
-      const overflowLeft = 8 - popupRect.left;
-      if (overflowRight > 0 || overflowLeft > 0) {
-        // Switch from centred positioning to absolute pixel positioning
-        const termRect = term.getBoundingClientRect();
-        let popupLeft = termRect.left + termRect.width / 2 - popupRect.width / 2;
-        // Clamp within viewport
-        popupLeft = Math.max(8, Math.min(popupLeft, window.innerWidth - popupRect.width - 8));
-        // Convert to position relative to the term's left edge
-        popup.style.left = (popupLeft - termRect.left) + 'px';
-        popup.style.transform = 'none';
-      }
     } else {
       term.classList.add('term-visible');
     }
