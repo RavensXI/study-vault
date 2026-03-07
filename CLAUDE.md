@@ -124,16 +124,20 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 - `studyvault-images` — hero images + diagrams, public URL: `https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`
 
 ### Still TODO
-- ~~**Client-side file parsing**~~ — **DONE.** Files now parsed in-browser using JSZip (PPTX/DOCX), DOMParser (XML text extraction), and PDF.js (PDFs). Only extracted text sent to Supabase — no files leave the user's device. `api/pipeline/upload.js` accepts `extracted_text` directly, skips to `parsed` phase. `api/pipeline/parse.js` retained as legacy fallback.
+- ~~**Client-side file parsing**~~ — **DONE.**
+- ~~**PWA**~~ — **DONE.** Service worker (`service-worker.js`) + `manifest.json` + padlock icons. Network-first for shell assets (CSS/JS/HTML), cache-first for R2 assets and fonts. Installable on mobile. `overflow-x: clip` on html+body prevents horizontal scroll.
+- ~~**Demo accounts cleanup**~~ — **DONE.** Single student demo (Emma Wilson) with all 7 built subjects. Jake and Guest removed.
+- ~~**Dashboard per-subject progress**~~ — **DONE.** Subject cards show per-subject completion (e.g. "8/60") not global total. Stats bar sums across selected subjects.
+- ~~**Image compression pipeline**~~ — **DONE.** Auto-compression in `upload_bytes_to_r2` and `upload_file_to_r2` (Pillow) and `regenerate-diagram.js` (sharp). Heroes max 1200px, diagrams max 1000px, JPEG quality 82. Bulk script: `scripts/compress_r2_images.py`.
+- ~~**Mobile UX fixes**~~ — **DONE.** Click-to-seek narration disabled on touch. Glossary tooltips use `touchend` for instant single-tap (no double-tap). Tooltips clamped within viewport. Mini-player uses width+right (no left overflow). Narration chunk hover/cursor/tap-highlight disabled on touch via `@media (hover: hover)`.
 - **Drama hero images**: Need QA positioning via `/admin/images`
-- **Dashboard progress bars**: Currently use hardcoded demo data — need real Supabase queries
+- **Dashboard progress bars**: Demo data is per-subject now but still hardcoded — need real Supabase queries for actual student tracking
 - **Subject-specific revision tips**: `initRevisionTips()` hardcodes 3 techniques for ALL subjects — refactor to read from `subjects.settings.revision_tip_mappings`
 - **Platform admin setup**: SSO must be active first, then: `UPDATE profiles SET role = 'platform_admin' WHERE email = 't.shaun@unity.lancs.sch.uk'`
 - **Direct Postgres connection**: Tom's home network is IPv6-only to Supabase — need to troubleshoot or use a different network. Env var `SUPABASE_DB_URL` has the password.
 - **2 parsing fixes**: Business Theme 1 Lesson 9 (0 practice questions) and Theme 2 Lesson 14 (0 knowledge checks) — JS syntax the parser couldn't handle
 - **Sport Science**: YouTube videos for lessons 2–10
 - **Business Studies**: Videos and podcasts for lessons 2–30 (deferred until green-lit by management)
-- PWA (service worker + manifest.json)
 - **Microsoft SSO activation**: network manager grants Entra admin consent (one click) → then test on Vercel
 - Role detection (teacher vs student) — profiles table exists, needs testing
 - Remove demo accounts once SSO is battle-tested
@@ -153,6 +157,8 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
   - **No AI regeneration** — deliberate product decision. Teacher feedback shows they always know *exactly* what they want changed (specific facts, exam board terminology, teaching mnemonics). Regeneration would: change things they already approved, cost API money with no ceiling, still require editing the output. The AI's job is the first 80% pass; the teacher's job is the 20% subject expertise polish. A good editor respects that division. Only AI assist: optional "format my rough note into a key-fact box" (single small call, teacher approves before insertion) and "check readability level" on pasted text.
   - This is the **#1 blocker for commercial viability** — without it, teacher feedback flows through Tom as a bottleneck (email → relay → manual edit). Doesn't scale to multiple schools.
 - **Pipeline UX & permissions rework**: Clarify who sees what — admin vs teacher screens. Currently can't QA images before publishing (have to set lessons live first, which doesn't make sense). Need a proper preview/staging state, clearer QA flow, and role-appropriate views for the pipeline.
+- **Smart revision recommendations**: Dashboard "Today's Revision" cards and subject browse pages driven by a retrieval practice algorithm instead of hardcoded demo data. Two paths into revision: (1) algorithmic "Up Next" — spaced repetition prioritising unvisited lessons, low knowledge check scores, and time-since-last-visit; (2) student choice — browse units freely, but each subject's browse page shows a "Recommended Next" card at the top. Needs real Supabase tracking (lesson_visits + knowledge_check_scores tables exist), a recommendation algorithm (portable from VaultCards Leitner-box), and UI changes to browse-loader + dashboard. Works alongside the flashcard system below.
+- **Rank-up / prestige system**: Students can fill subject progress bars multiple times and "rank up" — gamification layer on top of lesson completion. Needs design decisions: rank names/tiers, visual treatment (badge, colour change, animation on rank-up), XP-based vs pure completion-based, whether ranks are per-subject or global. Could tie into the retrieval practice algorithm (revisiting = more XP than first visit).
 - Retrieval Practice / Flashcards — port spaced repetition flashcard system from `../vaultcards/` (React/Supabase app with Leitner-box algorithm, decks, streak tracking, XP, achievements, head-to-head challenges, teacher deck creation, PowerPoint→AI card generation). Requires Supabase backend first. Algorithms and data model are portable; React/Tailwind UI is not — will need vanilla JS/CSS reimplementation to fit Study Vault's static architecture.
 - Content for remaining subjects beyond History, Business, Geography, Sport Science, Drama, Food Technology, and Religious Education
 
