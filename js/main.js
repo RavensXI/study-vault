@@ -974,15 +974,24 @@ function initGlossary() {
 
     // Horizontal: position popup within viewport
     if (popup) {
-      // Calculate where the popup would naturally centre (term centre - half popup width)
-      const termCentre = rect.left + rect.width / 2;
-      const popupWidth = Math.min(popup.scrollWidth, 280); // max-width from CSS
-      let popupLeft = termCentre - popupWidth / 2;
+      // Reset to default positioning first so we can measure natural width
+      popup.style.left = '';
+      popup.style.transform = '';
 
-      // Clamp within viewport with 8px margin
+      // Temporarily make visible to measure, then position
+      popup.style.visibility = 'hidden';
+      popup.style.opacity = '1';
+      popup.style.pointerEvents = 'none';
+      const popupWidth = popup.offsetWidth;
+      popup.style.visibility = '';
+      popup.style.opacity = '';
+      popup.style.pointerEvents = '';
+
+      // Calculate clamped position
+      const termCentre = rect.left + rect.width / 2;
+      let popupLeft = termCentre - popupWidth / 2;
       popupLeft = Math.max(8, Math.min(popupLeft, window.innerWidth - popupWidth - 8));
 
-      // Set as pixel position relative to the term
       popup.style.left = (popupLeft - rect.left) + 'px';
       popup.style.transform = 'none';
       term.classList.add('term-visible');
@@ -1004,24 +1013,40 @@ function initGlossary() {
     if (activeTerm === term) activeTerm = null;
   }
 
-  terms.forEach(term => {
-    // Desktop: hover
-    term.addEventListener('mouseenter', () => showTerm(term));
-    term.addEventListener('mouseleave', () => hideTerm(term));
+  var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 
-    // Mobile: tap to toggle
-    term.addEventListener('click', (e) => {
-      e.preventDefault();
-      if (term.classList.contains('term-visible')) {
-        hideTerm(term);
-      } else {
-        showTerm(term);
-      }
-    });
+  terms.forEach(term => {
+    if (isTouch) {
+      // Mobile: use touchend for instant response (no double-tap)
+      var touchMoved = false;
+      term.addEventListener('touchstart', () => { touchMoved = false; }, { passive: true });
+      term.addEventListener('touchmove', () => { touchMoved = true; }, { passive: true });
+      term.addEventListener('touchend', (e) => {
+        if (touchMoved) return; // was a scroll, not a tap
+        e.preventDefault();
+        if (term.classList.contains('term-visible')) {
+          hideTerm(term);
+        } else {
+          showTerm(term);
+        }
+      });
+    } else {
+      // Desktop: hover to show, click to toggle
+      term.addEventListener('mouseenter', () => showTerm(term));
+      term.addEventListener('mouseleave', () => hideTerm(term));
+      term.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (term.classList.contains('term-visible')) {
+          hideTerm(term);
+        } else {
+          showTerm(term);
+        }
+      });
+    }
   });
 
-  // Close on tap elsewhere (mobile)
-  document.addEventListener('click', (e) => {
+  // Close on tap elsewhere
+  document.addEventListener(isTouch ? 'touchend' : 'click', (e) => {
     if (activeTerm && !e.target.closest('.term')) {
       hideTerm(activeTerm);
     }
