@@ -966,11 +966,29 @@ function initGlossary() {
   function showTerm(term) {
     if (activeTerm && activeTerm !== term) hideTerm(activeTerm);
 
-    // Check if popup would go off the top of the viewport — flip below if so
     const rect = term.getBoundingClientRect();
+    const popup = term.querySelector('.term-popup');
+
+    // Vertical: flip below if near top of viewport
     term.classList.toggle('term-flip', rect.top < 100);
 
-    term.classList.add('term-visible');
+    // Horizontal: shift popup so it stays within viewport
+    if (popup) {
+      popup.style.left = '';
+      popup.style.transform = '';
+      term.classList.add('term-visible');
+      const popupRect = popup.getBoundingClientRect();
+      const overflowRight = popupRect.right - (window.innerWidth - 8);
+      const overflowLeft = 8 - popupRect.left;
+      if (overflowRight > 0) {
+        popup.style.left = 'calc(50% - ' + overflowRight + 'px)';
+      } else if (overflowLeft > 0) {
+        popup.style.left = 'calc(50% + ' + overflowLeft + 'px)';
+      }
+    } else {
+      term.classList.add('term-visible');
+    }
+
     activeTerm = term;
   }
 
