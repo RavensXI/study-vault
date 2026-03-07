@@ -125,7 +125,7 @@
       { username: 'emma', password: 'revision', name: 'Emma Wilson',
         defaults: ['history','business','geography','sport-science','drama','food-technology','religious-education'],
         examDate: '2026-05-11',
-        stats: { lessons: 24, totalLessons: 202, avgScore: 74, streak: 5 },
+        stats: { avgScore: 74, streak: 5, perSubject: { 'history': 8, 'business': 4, 'geography': 5, 'sport-science': 3, 'drama': 2, 'food-technology': 1, 'religious-studies': 6 } },
         todayRevision: [
           { subject: 'History', lesson: 'The Abyssinia Crisis', tag: 'new', color: '#c44536', url: '/lesson/history/conflict-tension/9' },
           { subject: 'Business', lesson: 'Enterprise &amp; New Business Ideas', tag: 'new', color: '#0891b2', url: '/lesson/business/theme-1/1' },
@@ -153,22 +153,22 @@
         { id: 'spanish', name: 'Spanish', board: 'AQA', image: 'images/subject-spanish.jpg', color: '#dc2626' }
       ]},
       { label: 'Humanities', subjects: [
-        { id: 'geography', name: 'Geography', board: 'AQA', image: 'images/subject-geography.jpg', color: '#059669', active: true, url: '/browse/geography', detail: '2 papers, 40 lessons' },
-        { id: 'history', name: 'History', board: 'AQA', image: 'images/subject-history.jpg', color: '#c44536', active: true, url: '/browse/history', detail: '4 units, 60 lessons' },
-        { id: 'religious-studies', name: 'Religious Studies', board: 'AQA', image: 'images/subject-religious-studies.jpg', color: '#1e40af', active: true, url: '/browse/religious-education', detail: '8 units, 40 lessons' }
+        { id: 'geography', name: 'Geography', board: 'AQA', image: 'images/subject-geography.jpg', color: '#059669', active: true, url: '/browse/geography', detail: '2 papers, 40 lessons', totalLessons: 40 },
+        { id: 'history', name: 'History', board: 'AQA', image: 'images/subject-history.jpg', color: '#c44536', active: true, url: '/browse/history', detail: '4 units, 60 lessons', totalLessons: 60 },
+        { id: 'religious-studies', name: 'Religious Studies', board: 'AQA', image: 'images/subject-religious-studies.jpg', color: '#1e40af', active: true, url: '/browse/religious-education', detail: '8 units, 40 lessons', totalLessons: 40 }
       ]},
       { label: 'Creative &amp; Practical', subjects: [
         { id: 'dt', name: 'Design &amp; Technology', board: 'AQA', image: 'images/subject-dt.jpg', color: '#d97706' },
-        { id: 'food-technology', name: 'Food Preparation &amp; Nutrition', board: 'AQA', image: 'images/subject-food.jpg', color: '#0d9488', active: true, url: '/browse/food-technology', detail: 'AQA 8585' },
-        { id: 'drama', name: 'Drama', board: 'OCR', image: 'images/subject-drama.jpg', color: '#7c3aed', active: true, url: '/browse/drama', detail: '2 units, 12 lessons' },
+        { id: 'food-technology', name: 'Food Preparation &amp; Nutrition', board: 'AQA', image: 'images/subject-food.jpg', color: '#0d9488', active: true, url: '/browse/food-technology', detail: 'AQA 8585', totalLessons: 10 },
+        { id: 'drama', name: 'Drama', board: 'OCR', image: 'images/subject-drama.jpg', color: '#7c3aed', active: true, url: '/browse/drama', detail: '2 units, 12 lessons', totalLessons: 12 },
         { id: 'music', name: 'Music', board: 'Eduqas (WJEC)', image: 'images/subject-music.jpg', color: '#9333ea' },
         { id: 'music-tech', name: 'Music Technology', board: 'NCFE', image: 'images/subject-music-tech.jpg', color: '#7c3aed' }
       ]},
       { label: 'Business &amp; Computing', subjects: [
-        { id: 'business', name: 'Business', board: 'Pearson Edexcel', image: 'images/subject-business.jpg', color: '#0891b2', active: true, url: '/browse/business', detail: '2 themes, 30 lessons' },
+        { id: 'business', name: 'Business', board: 'Pearson Edexcel', image: 'images/subject-business.jpg', color: '#0891b2', active: true, url: '/browse/business', detail: '2 themes, 30 lessons', totalLessons: 30 },
         { id: 'computer-science', name: 'Computer Science', board: 'OCR', image: 'images/subject-computer-science.jpg', color: '#4f46e5' },
         { id: 'creative-imedia', name: 'Creative iMedia', board: 'OCR', image: 'images/subject-creative-imedia.jpg', color: '#0891b2' },
-        { id: 'sport-science', name: 'Sport Science', board: 'OCR', image: 'images/subject-sport-science.jpg', color: '#ea580c', active: true, url: '/browse/sport-science', detail: '1 unit, 10 lessons' }
+        { id: 'sport-science', name: 'Sport Science', board: 'OCR', image: 'images/subject-sport-science.jpg', color: '#ea580c', active: true, url: '/browse/sport-science', detail: '1 unit, 10 lessons', totalLessons: 10 }
       ]}
     ];
 
@@ -461,11 +461,24 @@
       var sh = '';
       if (demo && demo.stats) {
         var s = demo.stats;
-        var pct = Math.round((s.lessons / s.totalLessons) * 100);
+        var totalDone = 0, totalAvail = 0;
+        if (s.perSubject) {
+          var ids = getSaved() || [];
+          ids.forEach(function (id) {
+            for (var i = 0; i < all.length; i++) {
+              if (all[i].id === id && all[i].totalLessons) {
+                totalDone += (s.perSubject[id] || 0);
+                totalAvail += all[i].totalLessons;
+                break;
+              }
+            }
+          });
+        }
+        var pct = totalAvail ? Math.round((totalDone / totalAvail) * 100) : 0;
         var scoreClass = s.avgScore >= 70 ? 'stat-good' : (s.avgScore >= 50 ? 'stat-ok' : 'stat-low');
         sh += '<div class="dashboard-stats-inner">';
         sh += '<div class="stat-card">';
-        sh += '<div class="stat-value">' + s.lessons + ' <span class="stat-total">/ ' + s.totalLessons + '</span></div>';
+        sh += '<div class="stat-value">' + totalDone + ' <span class="stat-total">/ ' + totalAvail + '</span></div>';
         sh += '<div class="stat-label">Lessons completed</div>';
         sh += '<div class="stat-bar"><div class="stat-bar-fill" style="width:' + pct + '%"></div></div>';
         sh += '</div>';
@@ -498,10 +511,11 @@
         html += '<div class="unit-card-image"><img src="' + s.image + '" alt="' + s.name + '"></div>';
         html += '<div class="unit-card-body"><h2>' + s.name + '</h2>';
         html += '<p class="unit-subtitle">' + s.board + (s.detail ? ' \u2014 ' + s.detail : '') + '</p>';
-        if (s.active && demo && demo.stats) {
-          var pctS = Math.round((demo.stats.lessons / demo.stats.totalLessons) * 100);
+        if (s.active && demo && demo.stats && s.totalLessons) {
+          var done = (demo.stats.perSubject && demo.stats.perSubject[s.id]) || 0;
+          var pctS = Math.round((done / s.totalLessons) * 100);
           html += '<div class="subject-progress"><div class="subject-progress-bar"><div class="subject-progress-fill" style="width:' + pctS + '%"></div></div>';
-          html += '<span class="subject-progress-label">' + demo.stats.lessons + ' / ' + demo.stats.totalLessons + ' lessons</span></div>';
+          html += '<span class="subject-progress-label">' + done + ' / ' + s.totalLessons + ' lessons</span></div>';
         }
         if (!s.active) html += '<span class="coming-soon-badge">Coming Soon</span>';
         html += '</div></' + tag + '>';
