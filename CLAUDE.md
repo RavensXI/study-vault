@@ -35,19 +35,19 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Root `index.html` — single-page app with login, subject picker, and dashboard views
 - **Microsoft SSO** via Supabase Auth (Azure AD / Entra) — "Sign in with Microsoft" button for Unity College accounts. Supabase JS client loaded via CDN. SSO users get UUID-based localStorage keys; demo users keep username-based keys. `onAuthStateChange` listener handles session lifecycle. **Code is complete but SSO is blocked pending Entra admin consent** — Unity College's tenant restricts user consent. Network manager (Global Admin) needs to grant tenant-wide admin consent for the "StudyVault" Enterprise Application (Entra ID → Enterprise Applications → StudyVault → Permissions → Grant admin consent). App only requests `User.Read` (name + email). Deputy head approval being sought first (meeting Tuesday), then network manager does the one-click consent.
 - 3 demo accounts (emma/jake/guest) kept alongside SSO for non-Unity demos. Demo account buttons auto-submit (no manual form).
-- Subject picker: 25 GCSE subjects in 6 groups. History, Business, Geography, Sport Science, Drama, and Food Technology are `active: true` with URLs; others show "Coming Soon"
+- Subject picker: 22 GCSE subjects in 6 groups (Fine Art, Textiles, Photography removed — no written exams). History, Business, Geography, Sport Science, Drama, Food Technology, and Religious Education are `active: true` with URLs; others show "Coming Soon"
 - Dashboard: greeting + exam countdown, today's revision cards, progress stats, subject grid
 - Auth state: Supabase session checked first (async), then localStorage demo fallback. Subject/progress data in localStorage keyed by user ID.
 
-**Business Studies (Edexcel 1BS0) — presentation-ready:**
-- Landing page (`business/index.html`) with distinct images: `subject-business-1.jpg` (market stall) for Theme 1, `subject-business.jpg` (high street) for Theme 2
-- Theme 1 and Theme 2 index pages (15 lesson cards each)
-- All 30 lessons built with full content, diagrams (matplotlib reference + Gemini concept images), practice questions, knowledge checks, Related Media, video placeholders
+**Business Studies (Edexcel 1BS0) — complete (30 lessons across 2 themes):**
+- Rebuilt from actual teacher PPTs (37 core teaching presentations, 652MB)
+- Theme 1 (Investigating Small Business, cyan) and Theme 2 (Building a Business, emerald), 15 lessons each
+- All 30 lessons built via pipeline with full content, practice questions (6/lesson, Edexcel format), knowledge checks (5/lesson)
 - TTS narration: All 30 lessons fully narrated with Azure Speech. MP3s hosted on Cloudflare R2.
-- Theme 1 Lesson 1 fully featured: YouTube video embedded, Spotify podcast linked
-- Exam Technique guides: hub + 6 guide pages (`business/exam-technique/`) for all Edexcel question types
-- Revision Technique guides: hub + 8 guide pages (`business/revision-technique/`) including business-specific `practising-calculations.html`
-- Hybrid diagram system: matplotlib for structured reference graphics, Gemini for photorealistic concept images
+- Gemini pictorial isotype diagrams (30 total), hero images (Wikimedia Commons)
+- Exam Technique guides: hub + 7 guide pages for all Edexcel question types including Analyse and Calculate
+- Revision Technique guides: hub + 10 guide pages including business-specific `practising-calculations`
+- Related media curated for all 30 lessons
 
 **Geography (AQA 8035) — complete (40 lessons across 2 papers):**
 - Paper 1 (Physical Geography, indigo theme) and Paper 2 (Human Geography, red theme), 20 lessons each
@@ -95,6 +95,7 @@ Git config: user "Tom Shaun", email "tomshaun90@gmail.com"
 - Revision Technique guides: hub + 7 guide pages (3 mandatory + 4 RE-specific)
 - Related media curated for all 40 lessons
 - 8 distinct unit colour themes (blue, sky, emerald, green, pink, lime, amber, violet)
+- L1 (Christianity Beliefs) has NotebookLM video overview (YouTube embedded in sidebar)
 
 ### Dynamic Architecture (LIVE on Vercel)
 All content now served from Supabase on the `platform` branch (Vercel deployment). Static HTML files remain in repo as backup but are no longer linked from the dynamic site.
@@ -109,12 +110,12 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 - Dashboard links to dynamic routes (not static HTML)
 - Auth guards on all dynamic pages (Supabase session or demo localStorage)
 - Public RLS policies for live content (anon users can read `status='live'` rows)
-- Admin tools: `/admin/pipeline` (upload/generate), `/admin/review` (QC review with bulk approve), `/admin/images` (hero image QA with caption editing + diagram QA with iterative Gemini regen)
+- Admin tools: `/admin/pipeline` (upload/generate), `/admin/review` (QC review with bulk approve), `/admin/images` (hero image QA with Wikimedia + Unsplash search, caption editing + diagram QA with iterative Gemini regen)
 - Admin login on homepage with Pipeline, Review, Images nav
 - Pipeline adapter: `scripts/supabase_writer.py` for writing new content to DB
 - Subject-agnostic asset scripts: `generate_narration.py`, `generate_diagrams.py`, `download_heroes.py` (all accept `--job-id`)
 - Asset orchestrator: `pipeline_generate.py run-all-assets {job_id}` runs diagrams + heroes in parallel, then narration
-- Shared library: `scripts/lib/` (supabase_client, r2, narration, wikimedia, gemini, pipeline helpers)
+- Shared library: `scripts/lib/` (supabase_client, r2, narration, wikimedia, unsplash, gemini, pipeline helpers)
 
 **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
 
@@ -123,7 +124,7 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 - `studyvault-images` — hero images + diagrams, public URL: `https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`
 
 ### Still TODO
-- **Client-side file parsing**: Move PPTX/DOCX/PDF/TXT parsing from server to browser. Currently uploads raw files to Supabase Storage → server parses → deletes originals. This means source files transit through our infrastructure, violating the "no human sees source materials" privacy promise. Fix: parse in-browser using JSZip (already browser-compatible), DOMParser (replaces xml2js), and PDF.js (replaces pdf-parse). Upload only extracted text to Supabase — no `pipeline-uploads` bucket needed, no server-side parse endpoint, no timeout issues, no storage limits. `scripts/parse_job_local.js` (local fallback) should also be retired once this ships.
+- ~~**Client-side file parsing**~~ — **DONE.** Files now parsed in-browser using JSZip (PPTX/DOCX), DOMParser (XML text extraction), and PDF.js (PDFs). Only extracted text sent to Supabase — no files leave the user's device. `api/pipeline/upload.js` accepts `extracted_text` directly, skips to `parsed` phase. `api/pipeline/parse.js` retained as legacy fallback.
 - **Drama hero images**: Need QA positioning via `/admin/images`
 - **Dashboard progress bars**: Currently use hardcoded demo data — need real Supabase queries
 - **Subject-specific revision tips**: `initRevisionTips()` hardcodes 3 techniques for ALL subjects — refactor to read from `subjects.settings.revision_tip_mappings`
@@ -141,7 +142,7 @@ All content now served from Supabase on the `platform` branch (Vercel deployment
 
 ### Future features (not started)
 - **Auto-fetch exam specs & papers**: When a teacher uploads lessons, automatically find the exam board spec, past papers, and mark schemes. Either scrape/search at generation time or build a bank of specs beforehand. Need to determine the most reliable approach (exam board websites, curated library, or hybrid).
-- **Hero image bank + Unsplash API**: Build a reusable library of hero images from previous generations. When the next school does the same topic (e.g. WW1), reuse the same hero image instead of searching Wikimedia again. Also integrate the Unsplash API as an additional free image source alongside Wikimedia Commons.
+- **Hero image bank**: Build a reusable library of hero images from previous generations. When the next school does the same topic (e.g. WW1), reuse the same hero image instead of searching Wikimedia again. (Unsplash API integration is done — see `scripts/lib/unsplash.py`, `download_heroes.py`, and `/admin/images` search.)
 - **Teacher data dashboard**: Major upgrade from current demo/hardcoded state. Needs real Supabase queries for progress tracking, engagement metrics, class-level insights. Key for selling to SLT — should be visually compelling and data-rich. Dedicated session to design and build.
 - **Teacher content editor (block-based)**: Full block-based editor for teachers to QA and revise AI-generated content before publishing. Validated by Drama teacher feedback (Mar 2026) — nearly all feedback was structural (add key fact boxes, add character quotes, swap hero images, apply frameworks across units) rather than prose tweaks. A simple text editor won't cut it. Needs:
   - **Content blocks** teachers can see, reorder, edit, add, and delete: paragraph/prose (rich text), key fact box, collapsible section, timeline entry, diagram (with caption), hero image (with search/upload/reposition)
@@ -177,7 +178,7 @@ Study Vault/
 │   ├── pipeline.html         ← Content generation pipeline UI
 │   ├── review.html           ← QC review page (platform_admin only)
 │   └── images.html           ← Image QA tool (hero images + diagrams with Gemini regen)
-├── api/pipeline/             ← Vercel serverless routes (upload, parse, approve-plan, status)
+├── api/pipeline/             ← Vercel serverless routes (upload, parse, approve-plan, status, search-unsplash, regenerate-diagram, update-hero)
 │   └── _lib/                 ← Shared auth.js, supabase.js
 ├── supabase/
 │   └── migrations/001_schema.sql  ← Full DB schema (tables, RLS, triggers)
@@ -228,10 +229,11 @@ Study Vault/
 │   │   ├── narration.py             ← NarrationExtractor, Azure TTS, MP3 duration
 │   │   ├── wikimedia.py             ← Wikimedia search, download, resize
 │   │   ├── gemini.py                ← call_gemini_image() wrapper
+│   │   ├── unsplash.py              ← search_unsplash(), trigger_unsplash_download()
 │   │   └── pipeline.py              ← get_pending_lessons(), mark_asset_done(), progress
 │   ├── generate_narration.py        ← Subject-agnostic TTS narration (--job-id)
 │   ├── generate_diagrams.py         ← Subject-agnostic Gemini diagrams (--job-id)
-│   ├── download_heroes.py           ← Subject-agnostic Wikimedia heroes (--job-id)
+│   ├── download_heroes.py           ← Subject-agnostic hero images: Unsplash first, Wikimedia fallback (--job-id)
 │   ├── pipeline_generate.py         ← CLI helper (info, text, write, status, assets, run-all-assets, review)
 │   ├── supabase_writer.py           ← Pipeline adapter (DB writes instead of HTML)
 │   ├── migrate_to_supabase.py       ← Migrate 140 lessons from HTML to Supabase
@@ -274,6 +276,7 @@ All stored in environment variables — never commit them.
 | Cloudflare R2 | `R2_ACCESS_KEY_ID` | S3-compatible access key for narration audio bucket |
 | Cloudflare R2 | `R2_SECRET_ACCESS_KEY` | Secret key for R2 bucket access |
 | Cloudflare R2 | `R2_ACCOUNT_ID` | Cloudflare account ID for R2 endpoint URL |
+| Unsplash | `UNSPLASH_ACCESS_KEY` | Hero image search (Unsplash License — free for commercial use). Used by `scripts/lib/unsplash.py` and `api/pipeline/search-unsplash.js`. Add to Vercel env vars. |
 | Supabase | `SUPABASE_DB_URL` | Direct Postgres password (IPv6 connection blocked from Tom's network — troubleshoot later) |
 
 ---
