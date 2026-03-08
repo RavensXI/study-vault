@@ -11,7 +11,17 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ---- Layout ---- */
-    .editor-layout { max-width: 920px; margin: 0 auto; padding: 1.5rem 1.5rem 6rem; }
+    .editor-layout { max-width: 1120px; margin: 0 auto; padding: 1.5rem 1.5rem 3rem; display: flex; gap: 1.25rem; align-items: flex-start; }
+    .editor-main { flex: 1; min-width: 0; }
+    .editor-sidebar { width: 180px; flex-shrink: 0; position: sticky; top: 70px; display: none; }
+    .editor-sidebar.visible { display: block; }
+    .editor-sidebar-inner { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 0.85rem; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }
+    .editor-sidebar-inner .btn { width: 100%; margin-bottom: 0.45rem; text-align: center; }
+    .editor-sidebar-inner .btn:last-child { margin-bottom: 0; }
+    .sidebar-status { font-size: 0.72rem; text-align: center; margin-bottom: 0.6rem; font-weight: 600; }
+    .sidebar-status.saved { color: #16a34a; }
+    .sidebar-status.error { color: #dc2626; }
+    .sidebar-divider { border: none; border-top: 1px solid #e5e7eb; margin: 0.5rem 0; }
 
     /* ---- Lesson Picker ---- */
     .editor-picker { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
@@ -73,16 +83,8 @@
     .editor-section-content:focus { background: rgba(124,58,237,0.02); }
     .editor-section-content:empty::before { content: attr(data-placeholder); color: #9ca3af; font-style: italic; }
 
-    /* Override overflow-x:clip from style.css — it breaks position:fixed */
-    html, body { overflow-x: visible !important; overflow-y: visible !important; }
-
-    /* ---- Save Bar ---- */
-    .save-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; padding: 0.65rem 1.5rem; display: none; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 -2px 8px rgba(0,0,0,0.04); }
-    .save-bar.visible { display: flex; }
-    .save-status { font-size: 0.78rem; color: var(--text-muted); }
-    .save-status.saved { color: #16a34a; }
-    .save-status.error { color: #dc2626; }
-    .save-actions { display: flex; gap: 0.5rem; align-items: center; }
+    /* hide legacy save bar */
+    .save-bar { display: none !important; }
 
     /* ---- Preview ---- */
     .preview-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg-warm, #faf8f5); z-index: 10001; overflow-y: auto; display: none; }
@@ -125,6 +127,7 @@
   </header>
 
   <div class="editor-layout">
+   <div class="editor-main">
     <!-- Lesson Picker -->
     <div class="editor-picker">
       <select id="pick-subject"><option value="">Subject...</option></select>
@@ -148,8 +151,7 @@
       <button class="toolbar-btn" data-cmd="glossary" title="Glossary term">
         <span style="border-bottom:1px dashed #7c3aed;color:#7c3aed">G</span>
       </button>
-      <span class="toolbar-sep"></span>
-      <button class="toolbar-btn" id="preview-btn" title="Preview as student sees it">Preview</button>
+      <button class="toolbar-btn" id="preview-btn" title="Preview as student sees it" style="display:none">Preview</button>
     </div>
 
     <!-- Editor Content -->
@@ -179,6 +181,18 @@
     <div id="editor-empty" class="editor-empty">
       Select a subject, unit, and lesson above to start editing.
     </div>
+   </div><!-- /.editor-main -->
+
+   <!-- Sticky Sidebar -->
+   <div class="editor-sidebar" id="editor-sidebar">
+    <div class="editor-sidebar-inner">
+      <div class="sidebar-status saved" id="sidebar-status">No changes</div>
+      <button class="btn btn-success" id="sidebar-save-btn" disabled>Save (Ctrl+S)</button>
+      <button class="btn btn-outline" id="sidebar-discard-btn" disabled>Discard</button>
+      <hr class="sidebar-divider">
+      <button class="btn btn-outline" id="sidebar-preview-btn">Preview</button>
+    </div>
+   </div>
   </div>
 
   <!-- Save Bar -->
@@ -257,6 +271,11 @@
     var discardBtn = document.getElementById('discard-btn');
     var previewOverlay = document.getElementById('preview-overlay');
     var previewContent = document.getElementById('preview-content');
+    var editorSidebar = document.getElementById('editor-sidebar');
+    var sidebarStatus = document.getElementById('sidebar-status');
+    var sidebarSaveBtn = document.getElementById('sidebar-save-btn');
+    var sidebarDiscardBtn = document.getElementById('sidebar-discard-btn');
+    var sidebarPreviewBtn = document.getElementById('sidebar-preview-btn');
 
     // ================================================================
     //  AUTH
@@ -429,11 +448,13 @@
 
       // Reset dirty state
       isDirty = false;
-      saveBar.classList.add('visible');
-      saveStatus.textContent = 'No changes';
-      saveStatus.className = 'save-status saved';
       saveBtn.disabled = true;
       discardBtn.disabled = true;
+      editorSidebar.classList.add('visible');
+      sidebarStatus.textContent = 'No changes';
+      sidebarStatus.className = 'sidebar-status saved';
+      sidebarSaveBtn.disabled = true;
+      sidebarDiscardBtn.disabled = true;
     }
 
     // ================================================================
@@ -735,18 +756,21 @@
     // ================================================================
     //  SAVE
     // ================================================================
-    saveBtn.addEventListener('click', saveLesson);
-    discardBtn.addEventListener('click', function () {
+    sidebarSaveBtn.addEventListener('click', saveLesson);
+    sidebarDiscardBtn.addEventListener('click', function () {
       if (!confirm('Discard all changes and reload?')) return;
       loadLesson();
+    });
+    sidebarPreviewBtn.addEventListener('click', function () {
+      document.getElementById('preview-btn').click();
     });
 
     async function saveLesson() {
       if (!currentLesson) return;
-      saveBtn.disabled = true;
-      saveBtn.textContent = 'Saving...';
-      saveStatus.textContent = 'Saving...';
-      saveStatus.className = 'save-status';
+      sidebarSaveBtn.disabled = true;
+      sidebarSaveBtn.textContent = 'Saving...';
+      sidebarStatus.textContent = 'Saving...';
+      sidebarStatus.className = 'sidebar-status';
 
       var body = {
         lesson_id: currentLesson.id,
@@ -765,28 +789,28 @@
         if (!resp.ok) throw new Error(data.error || 'Save failed');
 
         isDirty = false;
-        saveStatus.textContent = 'Saved!';
-        saveStatus.className = 'save-status saved';
-        discardBtn.disabled = true;
+        sidebarStatus.textContent = 'Saved!';
+        sidebarStatus.className = 'sidebar-status saved';
+        sidebarDiscardBtn.disabled = true;
         setTimeout(function () {
-          if (!isDirty) saveStatus.textContent = 'No changes';
+          if (!isDirty) sidebarStatus.textContent = 'No changes';
         }, 2000);
       } catch (err) {
-        saveStatus.textContent = 'Error: ' + err.message;
-        saveStatus.className = 'save-status error';
+        sidebarStatus.textContent = 'Error: ' + err.message;
+        sidebarStatus.className = 'sidebar-status error';
       } finally {
-        saveBtn.disabled = false;
-        saveBtn.textContent = 'Save (Ctrl+S)';
+        sidebarSaveBtn.disabled = false;
+        sidebarSaveBtn.textContent = 'Save (Ctrl+S)';
       }
     }
 
     function markDirty() {
       if (!isDirty) {
         isDirty = true;
-        saveStatus.textContent = 'Unsaved changes';
-        saveStatus.className = 'save-status';
-        saveBtn.disabled = false;
-        discardBtn.disabled = false;
+        sidebarStatus.textContent = 'Unsaved changes';
+        sidebarStatus.className = 'sidebar-status';
+        sidebarSaveBtn.disabled = false;
+        sidebarDiscardBtn.disabled = false;
       }
     }
 
@@ -843,12 +867,10 @@
         previewContent.appendChild(concDiv);
       }
       previewOverlay.classList.add('active');
-      saveBar.style.display = 'none';
     });
 
     function closePreview() {
       previewOverlay.classList.remove('active');
-      saveBar.style.display = '';
     }
 
     document.getElementById('close-preview-btn').addEventListener('click', closePreview);
