@@ -143,6 +143,12 @@ Hub index pages use a different structure (`guide-hub` div, no `<main>`/`<aside>
 - `units.subtitle` — description text for the browse card
 - `units.body_class` — CSS class name (e.g. `unit-food-technology-1`)
 
+**CRITICAL — two pitfalls found in Music pipeline (Mar 2026):**
+1. **Settings must be a dict, NOT a JSON string.** Supabase-py auto-serialises dicts to jsonb. If you do `{"settings": json.dumps({...})}` it double-serialises and the frontend gets a string instead of an object. The quote ticker silently fails. Always write: `{"settings": {"quote_ticker_html": "..."}}`
+2. **Unit `image_url` must be set explicitly.** It's not set by the generation step or the assets step. After heroes are generated, run `pipeline_api_generate.py activate <job_id>` to copy each unit's first lesson hero image to `units.image_url` and verify settings format.
+
+**Post-generation safety net:** `python scripts/pipeline_api_generate.py activate <job_id>` — fixes settings format, sets unit images from hero images, verifies all required fields.
+
 **Media curation agents MUST write this exact JSON structure** to `lessons.related_media` (lesson-loader.js crashes on any other format):
 ```json
 [

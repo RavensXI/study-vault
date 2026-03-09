@@ -8,11 +8,13 @@ Usage:
     python scripts/pipeline_api_generate.py plan <job_id>
     python scripts/pipeline_api_generate.py generate <job_id> [--lesson N] [--unit SLUG] [--dry-run]
     python scripts/pipeline_api_generate.py cost <job_id>
+    python scripts/pipeline_api_generate.py activate <job_id>
 
 Commands:
     plan       Generate a lesson plan from the job's extracted text
     generate   Generate lesson content (all lessons, or filtered by --lesson/--unit)
     cost       Estimate API cost for the job based on token counts
+    activate   Post-generation: set unit images from heroes, verify settings format
 """
 
 import json
@@ -707,6 +709,71 @@ def cmd_cost(job_id):
     print(f"  Plan step adds ~${0.50:.2f} extra.")
 
 
+def cmd_activate(job_id):
+    """Post-generation activation: set unit images from hero images, verify settings format."""
+    sb = get_client()
+
+    job = sb.table("upload_jobs").select("*").eq("id", job_id).single().execute().data
+    plan = job.get("lesson_plan")
+    if isinstance(plan, str):
+        plan = json.loads(plan)
+
+    subject_slug = plan.get("subject_slug")
+    subj = sb.table("subjects").select("id,settings").eq("slug", subject_slug).single().execute().data
+    subject_id = subj["id"]
+
+    # Fix 1: Ensure settings is a proper dict, not a JSON string
+    settings = subj.get("settings")
+    if isinstance(settings, str):
+        settings = json.loads(settings)
+        sb.table("subjects").update({"settings": settings}).eq("id", subject_id).execute()
+        print("Fixed: settings was a JSON string, converted to object")
+    elif settings is None:
+        print("WARNING: No settings found for subject")
+    else:
+        print("Settings: OK (dict)")
+
+    # Fix 2: Set unit image_url from first lesson's hero image (if not already set)
+    units = sb.table("units").select("id,slug,image_url").eq("subject_id", subject_id).execute()
+    images_set = 0
+    for u in units.data:
+        if u.get("image_url"):
+            print(f"  {u['slug']}: already has image")
+            continue
+        lesson = (
+            sb.table("lessons")
+            .select("hero_image_url")
+            .eq("unit_id", u["id"])
+            .order("lesson_number")
+            .limit(1)
+            .execute()
+        )
+        if lesson.data and lesson.data[0].get("hero_image_url"):
+            url = lesson.data[0]["hero_image_url"]
+            sb.table("units").update({"image_url": url}).eq("id", u["id"]).execute()
+            print(f"  {u['slug']}: set image from L01 hero")
+            images_set += 1
+        else:
+            print(f"  {u['slug']}: WARNING — no hero image found")
+
+    # Verify: check all units have required fields
+    units = sb.table("units").select("slug,accent,body_class,image_url,subtitle").eq("subject_id", subject_id).execute()
+    issues = []
+    for u in units.data:
+        missing = [f for f in ["accent", "body_class", "image_url", "subtitle"] if not u.get(f)]
+        if missing:
+            issues.append(f"  {u['slug']}: missing {', '.join(missing)}")
+
+    if issues:
+        print(f"\nWARNINGS ({len(issues)} units with issues):")
+        for i in issues:
+            print(i)
+    else:
+        print(f"\nAll {len(units.data)} units verified: accent, body_class, image_url, subtitle all set")
+
+    print(f"\nActivation complete. Images set: {images_set}")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print(__doc__)
@@ -742,6 +809,9 @@ if __name__ == "__main__":
 
     elif command == "cost":
         cmd_cost(job_id)
+
+    elif command == "activate":
+        cmd_activate(job_id)
 
     else:
         print(f"Unknown command: {command}")
