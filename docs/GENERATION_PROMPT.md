@@ -159,7 +159,8 @@ GLOSSARY TERMS:
 
 DIAGRAM PROMPT (required — used by generate_diagrams.py):
 - A complete, self-contained prompt for Gemini to generate a pictorial isotype diagram.
-- Include the lesson topic, what data/concepts to illustrate, the subject's colour palette, and style instructions.
+- Include the lesson topic, what data/concepts to illustrate, and style instructions.
+- COLOUR: You MUST use the UNIT ACCENT COLOUR provided in the user message as the diagram's primary colour. Never default to teal or any other colour. State the hex code explicitly in the prompt (e.g. "Use #be185d as the primary colour").
 - The script sends this prompt directly to Gemini — it must be fully specified with no placeholders.
 - See DIAGRAM_PIPELINE.md for the standard prompt template and style rules.
 
@@ -185,6 +186,7 @@ Assembled per-lesson by the pipeline. Variables in {braces}.
 ```
 SUBJECT: {subject_name} ({exam_board} {spec_code})
 UNIT: {unit_name} — {unit_subtitle}
+UNIT ACCENT COLOUR: {unit_accent_hex} — use this as the primary colour in the diagram_prompt
 LESSON {lesson_number} of {total_lessons}: {lesson_title}
 
 EXAM SPECIFICATION (relevant extract):
@@ -438,6 +440,7 @@ Run after every lesson is generated, before writing to Supabase:
  At least 2 <div class="collapsible"> in content_html
  At least 3 <dfn class="term"> in content_html
  Exactly one <!-- DIAGRAM --> placeholder in content_html (at a content-relevant location, not near the top)
+ diagram_prompt includes the unit accent hex colour (not a default/generic colour)
  Exactly 6 practice_questions with fields: text, type, marks (all strings)
  Every practice question "type" matches a registered question_type_name
  Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)

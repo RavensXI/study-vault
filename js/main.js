@@ -267,6 +267,12 @@ function initPracticeQuestions() {
       ['4 marks \u2014 Explain Two Contrasting', 'explain-two-contrasting-4-marks.html'],
       ['5 marks \u2014 Explain Two with Sources', 'explain-two-sources-5-marks.html'],
       ['12 marks \u2014 Evaluate a Statement', 'evaluate-statement-12-marks.html'],
+      // Music (Eduqas C660U)
+      ['Multiple Choice', 'multiple-choice.html'],
+      ['Identification', 'identification.html'],
+      ['Short Feature Identification', 'short-feature-identification.html'],
+      ['Extended Listening Response', 'extended-listening-response.html'],
+      ['Prepared Extract', 'prepared-extract.html'],
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],

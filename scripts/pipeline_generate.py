@@ -13,6 +13,7 @@ Usage (from Claude Code):
     python scripts/pipeline_generate.py assets <job_id>
     python scripts/pipeline_generate.py run-all-assets <job_id>
     python scripts/pipeline_generate.py review <job_id>
+    python scripts/pipeline_generate.py export <job_id_or_subject_slug>
 """
 
 import json
@@ -31,6 +32,25 @@ sys.path.insert(0, SCRIPT_DIR)
 
 from lib.supabase_client import get_client
 from lib.pipeline import get_progress_summary, get_job_subject_slug
+
+
+def _save_local_content(subject_slug, unit_slug, lesson_number, title, lesson_data):
+    """Save lesson content as a local text file for external tools (e.g. NotebookLM)."""
+    project_root = os.path.dirname(SCRIPT_DIR)
+    content_dir = os.path.join(project_root, subject_slug, unit_slug)
+    os.makedirs(content_dir, exist_ok=True)
+
+    filepath = os.path.join(content_dir, f"lesson-{lesson_number:02d}-content.txt")
+
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(f"# {title}\n\n")
+        f.write(lesson_data.get("content_html", ""))
+        if lesson_data.get("exam_tip_html"):
+            f.write(f"\n\n## Exam Tip\n\n{lesson_data['exam_tip_html']}")
+        if lesson_data.get("conclusion_html"):
+            f.write(f"\n\n## Conclusion\n\n{lesson_data['conclusion_html']}")
+
+    print(f"    Local content saved: {filepath}")
 
 
 def cmd_info(job_id):
@@ -86,7 +106,11 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
     # Fetch the job for plan info
     job = sb.table("upload_jobs").select("*").eq("id", job_id).single().execute().data
     plan = job.get("lesson_plan") or {}
+    if isinstance(plan, str):
+        plan = json.loads(plan)
     config = job.get("subject_config") or {}
+    if isinstance(config, str):
+        config = json.loads(config)
     school_id = job.get("school_id")
 
     # Find unit and lesson in plan
@@ -215,6 +239,9 @@ def cmd_write(job_id, unit_slug, lesson_number, json_file):
         print(f"    diagram_prompt stored ({len(lesson_data['diagram_prompt'])} chars)")
     if lesson_data.get("hero_keywords"):
         print(f"    hero_keywords stored: {lesson_data['hero_keywords']}")
+
+    # Save content locally for external tools (e.g. NotebookLM video generation)
+    _save_local_content(subject_slug, unit_slug, lesson_number, lesson_plan["title"], lesson_data)
 
 
 def cmd_status(job_id):
@@ -383,6 +410,68 @@ def cmd_review(job_id):
     print(f"Sent {count} lessons to review.")
 
 
+def cmd_export(job_id_or_subject):
+    """Export lesson content from Supabase to local text files.
+
+    Accepts either a job_id (UUID) or a subject slug.
+    Creates {subject_slug}/{unit_slug}/lesson-NN-content.txt for each lesson.
+    """
+    sb = get_client()
+
+    # Determine if argument is a job_id (UUID) or subject slug
+    is_uuid = len(job_id_or_subject) == 36 and job_id_or_subject.count("-") == 4
+
+    if is_uuid:
+        # Get subject slug from job
+        subject_slug = get_job_subject_slug(sb, job_id_or_subject)
+        if not subject_slug:
+            print(f"ERROR: Could not determine subject slug for job {job_id_or_subject}")
+            sys.exit(1)
+        print(f"Exporting from job {job_id_or_subject} (subject: {subject_slug})")
+    else:
+        subject_slug = job_id_or_subject
+        print(f"Exporting subject: {subject_slug}")
+
+    # Find the subject
+    subjects = sb.table("subjects").select("id, name").eq("slug", subject_slug).execute()
+    if not subjects.data:
+        print(f"ERROR: Subject '{subject_slug}' not found in Supabase")
+        sys.exit(1)
+    subject_id = subjects.data[0]["id"]
+    print(f"Subject: {subjects.data[0]['name']}")
+
+    # Get all units for this subject
+    units = sb.table("units").select("id, slug, name").eq("subject_id", subject_id).order("sort_order").execute()
+    if not units.data:
+        print(f"ERROR: No units found for subject '{subject_slug}'")
+        sys.exit(1)
+
+    total = 0
+    for unit in units.data:
+        lessons = (
+            sb.table("lessons")
+            .select("lesson_number, title, content_html, exam_tip_html, conclusion_html")
+            .eq("unit_id", unit["id"])
+            .order("lesson_number")
+            .execute()
+        )
+
+        if not lessons.data:
+            continue
+
+        print(f"\n  {unit['name']} ({unit['slug']}): {len(lessons.data)} lessons")
+        for lesson in lessons.data:
+            lesson_data = {
+                "content_html": lesson.get("content_html", ""),
+                "exam_tip_html": lesson.get("exam_tip_html"),
+                "conclusion_html": lesson.get("conclusion_html"),
+            }
+            _save_local_content(subject_slug, unit["slug"], lesson["lesson_number"], lesson["title"], lesson_data)
+            total += 1
+
+    print(f"\nExported {total} lessons to {subject_slug}/")
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 3:
         print(__doc__.strip())
@@ -408,6 +497,8 @@ if __name__ == "__main__":
         cmd_run_all_assets(job_id)
     elif cmd == "review":
         cmd_review(job_id)
+    elif cmd == "export":
+        cmd_export(job_id)
     else:
         print(f"Unknown command: {cmd}")
         print(__doc__)

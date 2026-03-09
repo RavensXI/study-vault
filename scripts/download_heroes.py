@@ -38,6 +38,7 @@ sys.path.insert(0, SCRIPT_DIR)
 
 from lib.supabase_client import get_client
 from lib.r2 import get_r2_client, upload_file_to_r2, IMAGES_BUCKET
+from lib.unsplash import search_unsplash, trigger_unsplash_download
 from lib.wikimedia import (
     search_wikimedia,
     download_image,
@@ -76,7 +77,7 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
         hero_keywords = [lesson_title]
         print(f"  No hero_keywords stored — using lesson title as search query")
 
-    # Search Wikimedia with keywords (primary + fallbacks)
+    # Search for hero image — try Unsplash first (higher quality), Wikimedia fallback
     chosen = None
     for i, query in enumerate(hero_keywords):
         if i > 0:
@@ -85,8 +86,19 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
         else:
             print(f"  Searching: {query}")
 
+        # Try Unsplash first
+        results = search_unsplash(query)
+        if results:
+            print(f"  Unsplash: {len(results)} landscape candidates")
+            for r in results[:5]:
+                print(f"    - {r['title'][:60]}  ({r['width']}x{r['height']}, by {r.get('photographer', '?')})")
+            chosen = results[0]
+            break
+
+        # Fall back to Wikimedia
+        time.sleep(API_DELAY)
         results = search_wikimedia(query)
-        print(f"  Found {len(results)} landscape JPEG candidates")
+        print(f"  Wikimedia: {len(results)} landscape JPEG candidates")
 
         for r in results[:5]:
             print(f"    - {r['title'][:60]}  ({r['width']}x{r['height']}, {r['size']/1024:.0f}KB)")
@@ -145,14 +157,24 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
         r2_url = upload_file_to_r2(r2_client, IMAGES_BUCKET, final_path, r2_key, "image/jpeg")
         print(f"  R2 URL: {r2_url}")
 
-        # Update Supabase lesson — use Wikimedia title (cleaned) as caption, lesson title as alt
-        wiki_title = chosen.get("title", "").replace("File:", "").rsplit(".", 1)[0].replace("_", " ").strip()
-        alt_text = f"{lesson_title} — {wiki_title}" if wiki_title else lesson_title
+        # Build caption and alt text based on source
+        if chosen.get("source") == "unsplash":
+            photographer = chosen.get("photographer", "Unknown")
+            caption = f"Photo by {photographer} on Unsplash"
+            alt_text = chosen.get("title", "") or lesson_title
+            # Trigger Unsplash download tracking (API guidelines requirement)
+            trigger_unsplash_download(chosen.get("_download_location", ""))
+        else:
+            # Wikimedia — clean filename as caption
+            wiki_title = chosen.get("title", "").replace("File:", "").rsplit(".", 1)[0].replace("_", " ").strip()
+            caption = wiki_title or lesson_title
+            alt_text = f"{lesson_title} — {wiki_title}" if wiki_title else lesson_title
+
         print(f"  Updating Supabase lesson {lesson_id[:8]}...")
         sb.table("lessons").update({
             "hero_image_url": r2_url,
             "hero_image_alt": alt_text,
-            "hero_image_caption": wiki_title or lesson_title,
+            "hero_image_caption": caption,
         }).eq("id", lesson_id).execute()
         print(f"  Done!")
 
@@ -203,7 +225,7 @@ def main():
             else:
                 failed += 1
                 if not args.dry_run:
-                    mark_asset_error(sb, step["id"], "No suitable Wikimedia image found")
+                    mark_asset_error(sb, step["id"], "No suitable hero image found")
         except Exception as e:
             print(f"  ERROR: {e}")
             failed += 1

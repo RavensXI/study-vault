@@ -44,7 +44,7 @@ def call_gemini_image(prompt, input_image_path=None, output_path=None, timeout=1
 
     payload = {
         "contents": [{"parts": parts}],
-        "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
+        "generationConfig": {"responseModalities": ["IMAGE", "TEXT"]},
     }
 
     req = urllib.request.Request(
