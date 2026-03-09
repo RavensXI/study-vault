@@ -36,20 +36,44 @@ Schools upload their teaching resources (PPTs, worksheets) → AI generates poli
 
 ---
 
-## Recommended Phasing
+## Penetration Pricing Strategy
 
-**Phase 1 — Start with per-subject pricing (£250–350/subject/year)**
+Start low to build market share and word of mouth, then raise prices for new schools once established. **Never raise prices on existing schools** — they took the risk early and they become your advocates.
+
+### Why this works in education
+- **Teachers talk to each other** — subject networks, TeachMeet events, edu Twitter/X. One enthusiastic Head of History is worth more than any marketing spend. Give them a price they'll rave about.
+- **Early adopters take the most risk** — trying an unproven product from a new company. Reward that with a locked-in price that builds fierce loyalty.
+- **Schools hate price surprises** — grandfathering is expected in education SaaS. "Your price never goes up" is a genuine selling point.
+- **Margins can absorb it** — at ~48p/lesson generation cost, even £100/subject/year is 85% margin year 1 and 99%+ from year 2 onwards.
+
+### Pricing Phases
+
+| | Launch (first ~20 schools) | Standard (once established) |
+|---|---|---|
+| Per subject | **£100/yr** | £200–250/yr |
+| Starter (3 subjects) | **£250/yr** | £500/yr |
+| Unlimited | **£1,000/yr** | £2,000–2,500/yr |
+
+**Launch price is locked in forever** for early schools. At £100/subject, a Head of Department can pay from their stationery budget without asking SLT. When they tell colleagues at other schools, they're saying "it's only £100 a year" — even though new schools pay double.
+
+### Phased Rollout
+
+**Phase 1 — Launch pricing, per-subject (first ~20 schools)**
 - Lowest friction: single department can trial without whole-school buy-in
 - Proves value quickly: one subject, one term, measurable impact
 - Natural expansion: other departments ask for it
+- Revenue: 20 schools × 3 subjects × £100 = **£6,000/yr** (cost: ~£360)
 
-**Phase 2 — Introduce tiered licences**
+**Phase 2 — Standard pricing, introduce tiered licences**
 - When 3+ departments in same school want in
 - Unlimited tier is the upsell (margin lives here)
+- Launch schools still pay launch prices — they're your case studies
+- Revenue: 50 schools × mix of tiers = **£50,000–80,000/yr**
 
-**Phase 3 — MAT-level deals**
+**Phase 3 — MAT-level deals at standard pricing**
 - Case studies from Phase 1/2 schools
 - Trust Director of Education as single buyer
+- 10-school MAT at £1,500/school = £15,000/deal
 
 ---
 
@@ -110,33 +134,48 @@ Ads are simultaneously revenue AND a sales tool. Every ad impression is a micro-
 | Domain | ~£1 | ~£1 |
 | **Total** | **~£5–20** | **~£100–170** |
 
-### AI Generation Cost Per Subject: ~£2–5
-(Azure Speech ~£1–3 + Gemini API ~£0.50–2 + R2 storage pennies)
+### AI Generation Cost Per Subject (verified Mar 2026, 26-lesson Music subject)
+
+| Component | Cost per lesson | 26 lessons |
+|-----------|----------------|------------|
+| Claude API (content + guides + media) | £0.39 | £10.14 |
+| Gemini diagram | £0.05 | £1.30 |
+| Azure narration | £0.04 | £1.04 |
+| Hero images (Unsplash/Wikimedia) | Free | Free |
+| **Total** | **~£0.48** | **~£12.48** |
+
+Notes:
+- Claude API cost includes prompt caching (~60% saving vs list price)
+- Actual API balance drop: $12.63 (£9.97) for Claude, ~$1.74 (£1.37) Gemini, ~$1.28 (£1.01) Azure
+- Smaller subjects (10 lessons) cost ~£5–6 total; larger subjects (40 lessons) cost ~£20–25
+- Guides and media are per-subject (not per-lesson), so per-lesson cost drops slightly with more lessons
 
 ### Margins by Phase
 
-**Phase 1 (10 schools, manual QA):**
-- Revenue: 10 × £1,500 = £15,000/year
-- Infra + AI costs: ~£500/year
-- Your QA time: ~200–300 hours
-- **Margin excl. time: ~97%**
-- **Effective hourly rate: £50–75/hr**
+**Phase 1 (20 schools, launch pricing, manual QA):**
+- Revenue: 20 × 3 subjects × £100 = £6,000/year
+- AI generation: 60 subjects × £12 = ~£720
+- Infra: ~£300/year
+- Your QA time: ~150 hours
+- **Margin excl. time: ~83%**
+- **Effective hourly rate: ~£33/hr** (but building the foundation)
 
-**Phase 2 (50 schools, semi-automated QC):**
-- Revenue: £100,000/year
-- Infra + AI: ~£2,500/year
-- Your time: ~500 hours/year (automated QC catches 80%)
-- **Margin excl. time: ~97%**
-- **Margin incl. time at £40/hr: ~77%**
+**Phase 2 (50 schools, mix of launch + standard pricing):**
+- Revenue: ~£60,000/year
+- AI generation: ~£1,500 (one-off, year 1 only)
+- Infra: ~£600/year
+- Your time: ~300 hours/year
+- **Margin excl. time: ~96%**
+- **Margin incl. time at £40/hr: ~76%**
 
-**Phase 3 (200+ schools, largely automated):**
-- Revenue: £400,000–750,000/year
+**Phase 3 (200+ schools, standard pricing, largely automated):**
+- Revenue: £400,000–600,000/year
 - Infra + AI: ~£6,000/year
 - 1 QA hire: ~£30,000/year
-- **Margin: ~90%+**
+- **Margin: ~94%+**
 
 ### Why Margins Are Exceptional
-No engineering team (Claude + Python scripts), no content team (Gemini + Azure Speech), no infrastructure team (R2 + Vercel free tier). The only real cost is QA labour, which drops with automation.
+No engineering team (Claude Code + Python scripts), no content team (Gemini + Azure Speech), no infrastructure team (R2 + Vercel free tier). Generation cost is one-off per school — year 2+ is pure recurring revenue minus hosting. The only real cost is QA labour, which drops with automation.
 
 ---
 
@@ -144,9 +183,10 @@ No engineering team (Claude + Python scripts), no content team (Gemini + Azure S
 
 | Phase | Timeline | Revenue | Key Driver |
 |-------|----------|---------|------------|
-| Proving | Year 1–2 | £15,000/yr | 10 schools, word of mouth from Unity |
-| Growth | Year 3–4 | £140,000/yr | 50 schools + 2 MATs, case studies |
-| Scale | Year 5+ | £750,000/yr | 200 schools + 10 MATs |
+| Launch | Year 1 | £6,000/yr | 20 schools at launch pricing, word of mouth from Unity |
+| Proving | Year 2 | £30,000–60,000/yr | 50 schools, mix of launch + standard pricing |
+| Growth | Year 3–4 | £100,000–200,000/yr | 100 schools + 2 MATs, case studies |
+| Scale | Year 5+ | £500,000–750,000/yr | 200 schools + 10 MATs |
 | Ceiling | — | £2–3M/yr | 500 schools + 30 MATs (<15% market penetration) |
 
 England alone has ~3,500 secondary schools.
