@@ -266,7 +266,7 @@
     // ---- File triage constants ----
     var EXCLUDE_FOLDER_PATTERNS = [
       'old', 'archive', 'backup', 'do not use', "don't use", 'dont use',
-      'retired', 'previous', 'drafts', 'copy of', 'temp', 'unused',
+      'retired', 'previous', 'drafts', 'copy of', '\\btemp\\b', 'unused',
       'obsolete', 'deprecated', 'delete', 'trash'
     ];
     var EXCLUDE_FILE_PREFIXES = ['~$', '._'];
@@ -318,9 +318,13 @@
         // Check folder name patterns
         var folderLower = folder.toLowerCase();
         for (var p = 0; p < EXCLUDE_FOLDER_PATTERNS.length; p++) {
-          if (folderLower.indexOf(EXCLUDE_FOLDER_PATTERNS[p]) !== -1) {
+          var pat = EXCLUDE_FOLDER_PATTERNS[p];
+          var matched = pat.indexOf('\\b') !== -1
+            ? new RegExp(pat, 'i').test(folderLower)
+            : folderLower.indexOf(pat) !== -1;
+          if (matched) {
             autoExcluded = true;
-            excludeReason = "In \u2018" + EXCLUDE_FOLDER_PATTERNS[p] + "\u2019 folder";
+            excludeReason = "In \u2018" + pat.replace(/\\b/g, '') + "\u2019 folder";
             break;
           }
         }
@@ -360,7 +364,11 @@
           // Check if it's in an excluded folder
           var inExcludedFolder = false;
           for (var ef = 0; ef < EXCLUDE_FOLDER_PATTERNS.length; ef++) {
-            if (folderLower.indexOf(EXCLUDE_FOLDER_PATTERNS[ef]) !== -1) { inExcludedFolder = true; break; }
+            var efPat = EXCLUDE_FOLDER_PATTERNS[ef];
+            var efMatch = efPat.indexOf('\\b') !== -1
+              ? new RegExp(efPat, 'i').test(folderLower)
+              : folderLower.indexOf(efPat) !== -1;
+            if (efMatch) { inExcludedFolder = true; break; }
           }
           category = inExcludedFolder ? 'old_folder' : 'junk';
         }
@@ -906,6 +914,17 @@
             for (var j = 0; j < scannedFiles.length; j++) {
               if (scannedFiles[j].relativePath === path) { scannedFiles[j].included = this.checked; break; }
             }
+            // Update "Keep N checked" button if on old folders step
+            var keepBtn = document.getElementById('wizard-keep');
+            if (keepBtn) {
+              var checkedCount = oldFolderFiles.filter(function (f) { return f.included; }).length;
+              if (checkedCount > 0) {
+                keepBtn.textContent = 'Keep ' + checkedCount + ' checked and continue';
+                keepBtn.style.display = '';
+              } else {
+                keepBtn.style.display = 'none';
+              }
+            }
           });
         }
       }
@@ -994,17 +1013,39 @@
           html += '</div></div>';
         }
 
-        html += '<div class="wizard-actions">' +
-          '<button class="btn btn-success" id="wizard-continue">Remove these and continue</button>' +
-          '<a class="wizard-review-link" id="wizard-expand">' + (isExpanded ? 'Hide details' : 'Let me review individually') + '</a>' +
-          '</div>';
+        if (isExpanded) {
+          var checkedCount = oldFolderFiles.filter(function (f) { return f.included; }).length;
+          html += '<div class="wizard-actions">';
+          if (checkedCount > 0) {
+            html += '<button class="btn btn-success" id="wizard-keep">Keep ' + checkedCount + ' checked and continue</button>';
+          }
+          html += '<button class="btn ' + (checkedCount > 0 ? 'btn-outline' : 'btn-success') + '" id="wizard-continue">Remove all and continue</button>' +
+            '<a class="wizard-review-link" id="wizard-expand">Hide details</a>' +
+            '</div>';
+        } else {
+          html += '<div class="wizard-actions">' +
+            '<button class="btn btn-success" id="wizard-continue">Remove these and continue</button>' +
+            '<a class="wizard-review-link" id="wizard-expand">Let me review individually</a>' +
+            '</div>';
+        }
         html += '<div style="margin-top:0.75rem"><a class="back-link" id="wizard-back">&larr; Back</a></div>';
         html += '</div>';
 
         contentEl.innerHTML = html;
         wireFileChecks();
 
-        document.getElementById('wizard-continue').addEventListener('click', function () { nextStep(); });
+        document.getElementById('wizard-continue').addEventListener('click', function () {
+          // When removing all, uncheck everything
+          for (var ra = 0; ra < oldFolderFiles.length; ra++) oldFolderFiles[ra].included = false;
+          nextStep();
+        });
+        var keepBtn = document.getElementById('wizard-keep');
+        if (keepBtn) {
+          keepBtn.addEventListener('click', function () {
+            // Checked files stay included, unchecked get excluded
+            nextStep();
+          });
+        }
         document.getElementById('wizard-expand').addEventListener('click', function () {
           expandedSteps[2] = !expandedSteps[2];
           renderStep();
