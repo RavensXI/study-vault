@@ -13,7 +13,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Login, dashboard, 7 subjects.
+- **`platform`** (current) — multi-subject. History under `history/`. Login, dashboard, 8 subjects.
 
 ## Subjects (all complete, all on Vercel)
 
@@ -26,15 +26,16 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 1/12 |
 | Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 1/10 |
 | Religious Education | AQA 8062 | 40 | 8 | 1/40 |
-| **Total** | | **202** | **20** | **64/202** |
+| Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 |
+| **Total** | | **228** | **26** | **64/228** |
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~6,200 MP3s on R2), Gemini diagrams, hero images, exam technique guides, revision technique guides, related media.
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~7,000 MP3s on R2), Gemini diagrams, hero images, exam technique guides, revision technique guides, related media.
 
 ## Dynamic Architecture (LIVE on Vercel)
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **202 lessons** + **107 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`).
+- **228 lessons** + **123 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth:** Supabase session (Microsoft SSO — blocked pending Entra admin consent) + localStorage demo fallback (Emma Wilson)
@@ -43,15 +44,12 @@ All content served from Supabase. Static HTML files remain as backup.
 - **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`)
 
 ## Active TODO
-- **Drama hero images**: QA positioning via `/admin/images`
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
-- **Subject-specific revision tips**: `initRevisionTips()` hardcodes 3 techniques for ALL subjects — refactor to `subjects.settings.revision_tip_mappings`
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **NotebookLM videos**: 137 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
-- **2 parsing fixes**: Business T1 L9 (0 questions), T2 L14 (0 knowledge checks)
-- **Sport Science videos**: lessons 2–10
+- **NotebookLM videos**: 163 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
+- **Guide page editor**: Teachers need to edit exam technique and revision technique guides via `/admin/editor` (or a new admin page). Exam technique guides are the highest priority — these are the most important pages for teachers to write themselves, tailored to their students and marking experience.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
 
 ## API Keys
@@ -92,6 +90,7 @@ All in environment variables — never commit.
 | `docs/UNIT_THEMES.md` | Unit body classes and accent colours |
 | `docs/FUTURE_FEATURES.md` | Planned features and wishlist |
 | `docs/FILE_STRUCTURE.md` | Repo file/folder layout |
+| `docs/COMMERCIALISATION.md` | Pricing, cost model, commercial strategy |
 | `{subject}/BUILD_PLAN.md` | Subject-specific lesson breakdown |
 | `tts-research-log.md` | TTS/voice cloning developments |
 | `tech-research-log.md` | EdTech/platform developments |

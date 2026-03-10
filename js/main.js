@@ -261,11 +261,12 @@ function initPracticeQuestions() {
       ['4 marks \u2014 Explain', 'explain-4-marks.html'],
       ['6 marks \u2014 Explain', 'explain-6-marks.html'],
       ['8 marks \u2014 Discuss', 'discuss-8-marks.html'],
-      // Religious Education (AQA 8062)
+      // Religious Education (AQA 8062) — 2026 exam types
       ['1 mark \u2014 Multiple Choice', 'multiple-choice-1-mark.html'],
-      ['2 marks \u2014 Give Two', 'give-two-2-marks.html'],
-      ['4 marks \u2014 Explain Two Contrasting', 'explain-two-contrasting-4-marks.html'],
-      ['5 marks \u2014 Explain Two with Sources', 'explain-two-sources-5-marks.html'],
+      ['1 mark \u2014 Give/Name', 'give-name-1-mark.html'],
+      ['4 marks \u2014 Explain Influence', 'explain-influence-4-marks.html'],
+      ['4 marks \u2014 Explain Similarities & Differences', 'explain-similarities-differences-4-marks.html'],
+      ['6 marks \u2014 Explain with Sources', 'explain-sources-6-marks.html'],
       ['12 marks \u2014 Evaluate a Statement', 'evaluate-statement-12-marks.html'],
       // Music (Eduqas C660U)
       ['Multiple Choice', 'multiple-choice.html'],
@@ -1589,9 +1590,11 @@ function initRevisionTips() {
   const article = document.querySelector('article.study-notes');
   if (!article) return;
 
+  // Detect subject from URL
+  var dynamicMatch = location.pathname.match(/^\/lesson\/([^/]+)\//);
+  var subject = dynamicMatch ? dynamicMatch[1] : null;
+
   const basePath = (function () {
-    // Dynamic route: /lesson/{subject}/{unit}/{number}
-    var dynamicMatch = location.pathname.match(/^\/lesson\/([^/]+)\//);
     if (dynamicMatch) {
       return '/guide/' + dynamicMatch[1] + '/revision-technique/';
     }
@@ -1603,27 +1606,54 @@ function initRevisionTips() {
 
   const lightbulbSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>';
 
-  const tips = [
-    {
-      selector: '.key-fact',
-      text: 'Cover this box and try to recall every detail from memory.',
-      link: 'retrieval-practice.html',
-      label: 'Retrieval Practice'
-    },
-    {
-      selector: '.timeline',
-      text: 'Draw this timeline from memory on a blank page \u2014 then check your gaps.',
-      link: 'dual-coding.html',
-      label: 'Dual Coding'
-    },
-    {
-      selector: '.collapsible',
-      text: 'After reading, ask \u201cwhy?\u201d and \u201chow?\u201d for each key fact inside.',
-      link: 'elaborative-interrogation.html',
-      label: 'Elaborative Interrogation',
-      maxPerPage: 1
-    }
+  // Default tips (universal fallback)
+  var defaultTips = [
+    { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+    { selector: '.timeline', text: 'Draw this timeline from memory on a blank page \u2014 then check your gaps.', link: 'dual-coding.html', label: 'Dual Coding' },
+    { selector: '.collapsible', text: 'After reading, ask \u201cwhy?\u201d and \u201chow?\u201d for each key fact inside.', link: 'elaborative-interrogation.html', label: 'Elaborative Interrogation', maxPerPage: 1 }
   ];
+
+  // Subject-specific tips — each links to that subject's revision technique guides
+  var subjectTips = {
+    'history': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: '.timeline', text: 'Draw this timeline from memory on a blank page \u2014 then check your gaps.', link: 'dual-coding.html', label: 'Dual Coding' },
+      { selector: '.collapsible', text: 'After reading, ask \u201cwhy?\u201d and \u201chow?\u201d for each key fact inside.', link: 'elaborative-interrogation.html', label: 'Elaborative Interrogation', maxPerPage: 1 },
+      { selector: 'figure.diagram', text: 'Recreate this diagram as a knowledge organiser \u2014 connect the concepts in your own layout.', link: 'knowledge-organisers.html', label: 'Knowledge Organisers', maxPerPage: 1 }
+    ],
+    'business': [
+      { selector: '.key-fact', text: 'Cover this box and write down everything you remember.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Use this diagram as the start of a mind map \u2014 add your own examples and connections.', link: 'mind-mapping.html', label: 'Mind Mapping', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Summarise the key points inside in your own words before moving on.', link: 'active-reading.html', label: 'Active Reading', maxPerPage: 1 }
+    ],
+    'geography': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Sketch a simplified version of this diagram from memory, adding your own labels.', link: 'sketch-maps.html', label: 'Sketch Maps', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Turn the key details inside into a case study revision card.', link: 'case-study-cards.html', label: 'Case Study Cards', maxPerPage: 1 }
+    ],
+    'sport-science': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory and label each component.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Create a sports scenario that applies the concepts described inside.', link: 'scenario-practice.html', label: 'Scenario Practice', maxPerPage: 1 }
+    ],
+    'food-technology': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each nutritional concept.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Explain the content inside to someone else in your own words.', link: 'teach-back.html', label: 'Teach Back', maxPerPage: 1 }
+    ],
+    'religious-education': [
+      { selector: '.key-fact', text: 'Turn this into a flashcard \u2014 the key teaching on one side, its source and meaning on the other.', link: 'quote-flashcards.html', label: 'Quote Flashcards' },
+      { selector: 'figure.diagram', text: 'Create a comparison table from this diagram showing similarities and differences.', link: 'comparison-tables.html', label: 'Comparison Tables', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Use the points inside to plan both sides of a 12-mark evaluation answer.', link: 'argument-planning.html', label: 'Argument Planning', maxPerPage: 1 }
+    ],
+    'gcse-music': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each musical element.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Listen to an example piece and try to identify each element discussed inside.', link: 'active-listening.html', label: 'Active Listening', maxPerPage: 1 }
+    ]
+  };
+
+  const tips = subjectTips[subject] || defaultTips;
 
   let openPopup = null;
 
