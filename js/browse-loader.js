@@ -101,13 +101,13 @@
     }
 
     // Unit grid — uses same .unit-card structure as static pages
-    html += '<div class="unit-grid' + (units.length === 1 ? ' single-unit' : '') + '">';
+    html += '<div class="unit-grid sv-stagger' + (units.length === 1 ? ' single-unit' : '') + '">';
 
     // Get image positions from subject settings
     var imgPositions = (subject.settings && subject.settings.unit_image_positions) || {};
 
     units.forEach(function (unit) {
-      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
+      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card sv-reveal" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
         var imgStyle = imgPositions[unit.slug] ? ' style="object-position: ' + imgPositions[unit.slug] + '"' : '';
@@ -132,6 +132,7 @@
 
     // Add nav icons (pencil/lightbulb) to Exam Technique / Revision Techniques links
     if (typeof initNavIcons === 'function') initNavIcons();
+    if (typeof initRevealAnimations === 'function') initRevealAnimations();
   }
 
   // ---- Render unit index page (lesson cards) ----
@@ -190,11 +191,11 @@
     html += '</div>';
 
     // Lesson grid
-    html += '<div class="lesson-grid">';
+    html += '<div class="lesson-grid sv-stagger">';
 
     lessons.forEach(function (lesson) {
       var url = '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
-      html += '<a href="' + url + '" class="lesson-card" data-lesson="' + esc(lesson.slug) + '">';
+      html += '<a href="' + url + '" class="lesson-card sv-reveal" data-lesson="' + esc(lesson.slug) + '">';
       html += '<span class="lesson-card-number">Lesson ' + lesson.lesson_number + '</span>';
       html += '<h3>' + esc(lesson.title) + '</h3>';
       if (lesson.description) {
@@ -214,9 +215,10 @@
     contentEl.innerHTML = html;
     contentEl.style.display = '';
 
-    // Add nav icons and update visited cards
+    // Add nav icons, update visited cards, trigger reveal animations
     if (typeof initNavIcons === 'function') initNavIcons();
     if (typeof updateVisitedCards === 'function') updateVisitedCards();
+    if (typeof initRevealAnimations === 'function') initRevealAnimations();
   }
 
   // ---- Main ----

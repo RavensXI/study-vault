@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileNav();
   initAccessibility();
   initPageTransitions();
+  initRevealAnimations();
 
   // Phase 2 — runs immediately if content is already in the page (static pages)
   // For dynamic pages, lesson-loader.js calls window.initLessonFeatures() after inject
@@ -1244,6 +1245,31 @@ function initPageTransitions() {
     setTimeout(() => { window.location.href = href; }, 200);
   });
 }
+
+/* --- Scroll Reveal Animations --- */
+function initRevealAnimations() {
+  var els = document.querySelectorAll('.sv-reveal');
+  if (!els.length) return;
+
+  // If user prefers reduced motion, show everything immediately
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    els.forEach(function (el) { el.classList.add('sv-visible'); });
+    return;
+  }
+
+  var observer = new IntersectionObserver(function (entries) {
+    entries.forEach(function (entry) {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('sv-visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  els.forEach(function (el) { observer.observe(el); });
+}
+// Also expose globally so browse-loader can call after injecting content
+window.initRevealAnimations = initRevealAnimations;
 
 /* --- Knowledge Check Quiz --- */
 function initKnowledgeCheck() {

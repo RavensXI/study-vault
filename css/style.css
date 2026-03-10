@@ -4595,3 +4595,80 @@ body.dark-mode .revision-tip-popup a {
     text-decoration: underline;
   }
 }
+
+/* ============================
+   Page Entrance Animations
+   ============================ */
+
+@keyframes sv-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sv-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Elements with .sv-reveal start hidden, animate when .sv-visible is added */
+.sv-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.sv-reveal.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children — each card delays slightly longer */
+.sv-stagger > .sv-reveal:nth-child(1) { transition-delay: 0s; }
+.sv-stagger > .sv-reveal:nth-child(2) { transition-delay: 0.06s; }
+.sv-stagger > .sv-reveal:nth-child(3) { transition-delay: 0.12s; }
+.sv-stagger > .sv-reveal:nth-child(4) { transition-delay: 0.18s; }
+.sv-stagger > .sv-reveal:nth-child(5) { transition-delay: 0.24s; }
+.sv-stagger > .sv-reveal:nth-child(6) { transition-delay: 0.3s; }
+.sv-stagger > .sv-reveal:nth-child(7) { transition-delay: 0.36s; }
+.sv-stagger > .sv-reveal:nth-child(8) { transition-delay: 0.42s; }
+.sv-stagger > .sv-reveal:nth-child(n+9) { transition-delay: 0.48s; }
+
+/* Hero entrance — plays immediately on page load */
+.hero {
+  animation: sv-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Home page card image zoom on hover */
+.home-card-img {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.home-card:hover .home-card-img {
+  transform: scale(1.05);
+}
+
+/* Enhanced hover for home cards */
+.home-card {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.home-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+/* Browse page — unit page header fade */
+.unit-page-header {
+  animation: sv-fade-in 0.4s ease both;
+}
+
+/* Respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .sv-reveal { opacity: 1; transform: none; transition: none; }
+  .hero { animation: none; }
+  .unit-page-header { animation: none; }
+  .home-card-img { transition: none; }
+  .home-card { transition: none; }
+  .unit-card-image img { transition: none; }
+  .unit-card { transition: none; }
+  .lesson-card { transition: none; }
+}
