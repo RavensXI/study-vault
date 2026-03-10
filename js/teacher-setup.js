@@ -131,19 +131,19 @@
   // ---- Inline styles for the modal ----
   var style = document.createElement('style');
   style.textContent = [
-    '.teacher-welcome-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; padding: 1.5rem; font-family: Inter, system-ui, sans-serif; }',
-    '.teacher-welcome-box { background: white; border-radius: 16px; padding: 2rem 2rem 1.75rem; max-width: 400px; width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }',
-    '.teacher-welcome-box h2 { font-family: "Source Serif 4", Georgia, serif; font-size: 1.3rem; margin: 0 0 0.35rem; color: #2d2a26; }',
-    '.teacher-welcome-box p { font-size: 0.88rem; color: #6b6560; margin: 0 0 1.25rem; }',
-    '.teacher-welcome-form label { display: block; font-size: 0.82rem; font-weight: 600; color: #2d2a26; margin-bottom: 0.3rem; }',
-    '.teacher-welcome-input, .teacher-welcome-select { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #ddd; border-radius: 10px; font-size: 0.88rem; font-family: inherit; margin-bottom: 1rem; background: white; }',
-    '.teacher-welcome-input:focus, .teacher-welcome-select:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.15); }',
-    '.teacher-welcome-actions { text-align: center; }',
-    '.teacher-welcome-btn { width: 100%; padding: 0.7rem; background: #7c3aed; color: white; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; }',
-    '.teacher-welcome-btn:hover:not(:disabled) { background: #6d28d9; }',
-    '.teacher-welcome-btn:disabled { opacity: 0.5; cursor: not-allowed; }',
-    '.teacher-welcome-link { display: block; margin-top: 0.75rem; font-size: 0.82rem; color: #6b6560; text-decoration: none; }',
-    '.teacher-welcome-link:hover { color: #7c3aed; }'
+    '.teacher-welcome-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(45,42,38,0.65); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; padding: 1.5rem; font-family: Inter, system-ui, sans-serif; }',
+    '.teacher-welcome-box { background: #faf8f5; border-radius: 20px; padding: 2.5rem 2.25rem 2rem; max-width: 380px; width: 100%; box-shadow: 0 12px 40px rgba(0,0,0,0.2); }',
+    '.teacher-welcome-box h2 { font-family: "Source Serif 4", Georgia, serif; font-size: 1.4rem; font-weight: 700; margin: 0 0 0.3rem; color: #2d2a26; }',
+    '.teacher-welcome-box p { font-size: 0.85rem; color: #6b6560; margin: 0 0 1.5rem; line-height: 1.5; }',
+    '.teacher-welcome-form label { display: block; font-size: 0.78rem; font-weight: 600; color: #2d2a26; margin-bottom: 0.35rem; letter-spacing: 0.01em; }',
+    '.teacher-welcome-input, .teacher-welcome-select { width: 100%; padding: 0.65rem 0.85rem; border: 1px solid #ddd; border-radius: 10px; font-size: 0.88rem; font-family: inherit; margin-bottom: 1.15rem; background: white; color: #2d2a26; }',
+    '.teacher-welcome-input:focus, .teacher-welcome-select:focus { outline: none; border-color: #2d2a26; box-shadow: 0 0 0 2px rgba(45,42,38,0.1); }',
+    '.teacher-welcome-actions { margin-top: 0.25rem; text-align: center; }',
+    '.teacher-welcome-btn { width: 100%; padding: 0.75rem; background: #2d2a26; color: #faf8f5; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: background 0.15s; }',
+    '.teacher-welcome-btn:hover:not(:disabled) { background: #1a1816; }',
+    '.teacher-welcome-btn:disabled { opacity: 0.35; cursor: not-allowed; }',
+    '.teacher-welcome-link { display: block; margin-top: 0.85rem; font-size: 0.82rem; color: #6b6560; text-decoration: none; transition: color 0.15s; }',
+    '.teacher-welcome-link:hover { color: #2d2a26; }'
   ].join('\n');
   document.head.appendChild(style);
 })();
