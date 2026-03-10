@@ -233,13 +233,6 @@
       return;
     }
 
-    var authed = await checkAuth();
-    if (!authed) {
-      var redirect = encodeURIComponent(window.location.pathname);
-      window.location.href = '/?redirect=' + redirect;
-      return;
-    }
-
     try {
       if (params.slug) {
         await renderGuide(params);

@@ -351,13 +351,8 @@
       return;
     }
 
-    // Auth check
+    // Auth check (optional — for tracking, not gating)
     var user = await checkAuth();
-    if (!user) {
-      var redirect = encodeURIComponent(window.location.pathname);
-      window.location.href = '/?redirect=' + redirect;
-      return;
-    }
 
     // Fetch lesson
     try {
