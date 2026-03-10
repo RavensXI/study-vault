@@ -15,6 +15,10 @@
 
   var session = getSession();
   if (session && allowedRoles.indexOf(session.role) !== -1) {
+    // Ensure demo user exists in localStorage for API calls
+    if (!localStorage.getItem('studyvault-user')) {
+      localStorage.setItem('studyvault-user', JSON.stringify({ id: 'emma', name: 'Emma Wilson', email: null, isDemo: true }));
+    }
     return; // Valid session — page renders normally
   }
 
@@ -80,6 +84,10 @@
         if (res.ok && res.data.role) {
           if (allowedRoles.indexOf(res.data.role) !== -1) {
             sessionStorage.setItem(SESSION_KEY, JSON.stringify({ role: res.data.role }));
+            // Set demo user in localStorage so admin API calls work (X-Demo-User header)
+            if (res.data.role === 'admin' || res.data.role === 'teacher') {
+              localStorage.setItem('studyvault-user', JSON.stringify({ id: 'emma', name: 'Emma Wilson', email: null, isDemo: true }));
+            }
             overlay.remove();
             gateCSS.remove();
           } else {
