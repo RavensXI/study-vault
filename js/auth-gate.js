@@ -88,8 +88,7 @@
             if (res.data.role === 'admin' || res.data.role === 'teacher') {
               localStorage.setItem('studyvault-user', JSON.stringify({ id: 'emma', name: 'Emma Wilson', email: null, isDemo: true }));
             }
-            overlay.remove();
-            gateCSS.remove();
+            location.reload();
           } else {
             error.textContent = 'You don\u2019t have access to this page.';
             error.style.display = '';
