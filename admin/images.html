@@ -219,6 +219,12 @@
       subjects.forEach(function (s) {
         subjectSelect.innerHTML += '<option value="' + s.slug + '">' + s.name + '</option>';
       });
+      // Auto-select from URL params
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('subject')) {
+        subjectSelect.value = params.get('subject');
+        subjectSelect.dispatchEvent(new Event('change'));
+      }
     }
 
     subjectSelect.addEventListener('change', async function () {
@@ -273,6 +279,13 @@
         units.forEach(function (u) {
           unitSelect.innerHTML += '<option value="' + u.slug + '"' + (unitSelect.value === u.slug ? ' selected' : '') + '>' + u.name + '</option>';
         });
+        // Auto-select unit from URL params
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('unit')) {
+          unitSelect.value = params.get('unit');
+          // Clear params so subsequent changes don't re-trigger
+          window.history.replaceState({}, '', window.location.pathname);
+        }
       }
 
       var selectedUnit = unitSelect.value;
