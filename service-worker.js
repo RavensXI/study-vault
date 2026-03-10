@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sv-v2';
+const CACHE_VERSION = 'sv-v3';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
@@ -53,6 +53,22 @@ self.addEventListener('fetch', function (event) {
   // Skip non-GET requests and Supabase API calls
   if (event.request.method !== 'GET') return;
   if (url.hostname.includes('supabase')) return;
+
+  // Local images — cache first (rarely change, used on home page)
+  if (url.origin === self.location.origin && url.pathname.startsWith('/images/')) {
+    event.respondWith(
+      caches.open(RUNTIME_CACHE).then(function (cache) {
+        return cache.match(event.request).then(function (cached) {
+          if (cached) return cached;
+          return fetch(event.request).then(function (response) {
+            if (response.ok) cache.put(event.request, response.clone());
+            return response;
+          });
+        });
+      })
+    );
+    return;
+  }
 
   // R2 assets (audio, images) — cache first (large, rarely change)
   if (url.hostname.includes('r2.dev')) {
