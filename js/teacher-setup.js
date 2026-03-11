@@ -40,8 +40,8 @@
   var teacher = getTeacher();
   if (teacher && teacher.name && teacher.subject) {
     var params = new URLSearchParams(window.location.search);
-    // If URL already has unit param, let the page load normally
-    if (params.get('unit')) return;
+    // If URL already has unit or type param, let the page load normally
+    if (params.get('unit') || params.get('type')) return;
     // Show unit picker
     showUnitPicker(teacher);
     return;
