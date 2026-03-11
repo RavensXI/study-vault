@@ -105,8 +105,6 @@
     .block-remove-item { width: 18px; height: 18px; border: none; background: none; cursor: pointer; color: #d1d5db; font-size: 0.75rem; border-radius: 3px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; margin-left: 0.25rem; transition: all 0.15s; }
     .block-remove-item:hover { color: #dc2626; background: #fef2f2; }
 
-    /* Hub page read-only notice */
-    .hub-readonly-notice { background: #fef3c7; border: 1px solid #f59e0b; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.82rem; color: #92400e; margin-bottom: 1rem; }
   </style>
 </head>
 <body>
@@ -138,7 +136,7 @@
         <option value="exam-technique">Exam Technique</option>
         <option value="revision-technique">Revision Technique</option>
       </select>
-      <select id="pick-guide" disabled><option value="">Guide page...</option></select>
+      <select id="pick-guide" disabled><option value="">Select one...</option></select>
       <button class="btn btn-primary" id="load-btn" disabled>Load</button>
       <a href="#" id="preview-link" class="btn btn-outline btn-sm" target="_blank" style="display:none">View live</a>
     </div>
@@ -228,7 +226,6 @@
     // ================================================================
     var currentGuide = null;
     var currentSubject = null;
-    var isHubPage = false;
     var mainBlockEls = [];
     var sidebarBlockEls = [];
     var isDirty = false;
@@ -302,16 +299,9 @@
         .eq('guide_type', guideType)
         .order('sort_order');
 
-      var guides = result.data || [];
+      var guides = (result.data || []).filter(function (g) { return g.slug !== 'index'; });
 
-      // Put hub page first
-      var hub = guides.find(function (g) { return g.slug === 'index'; });
-      var others = guides.filter(function (g) { return g.slug !== 'index'; });
-
-      if (hub) {
-        pickGuide.innerHTML += '<option value="' + hub.id + '">Hub Page</option>';
-      }
-      others.forEach(function (g) {
+      guides.forEach(function (g) {
         pickGuide.innerHTML += '<option value="' + g.id + '">' + esc(g.title) + '</option>';
       });
       pickGuide.disabled = false;
@@ -363,54 +353,29 @@
 
       currentGuide = result.data;
       currentSubject = result.data.subjects;
-      isHubPage = currentGuide.slug === 'index';
 
       // Set page title
       document.title = 'Edit: ' + currentGuide.title + ' - StudyVault';
 
       // Preview link
-      if (isHubPage) {
-        previewLink.href = '/guide/' + currentSubject.slug + '/' + currentGuide.guide_type;
-      } else {
-        previewLink.href = '/guide/' + currentSubject.slug + '/' + currentGuide.guide_type + '/' + currentGuide.slug;
-      }
+      previewLink.href = '/guide/' + currentSubject.slug + '/' + currentGuide.guide_type + '/' + currentGuide.slug;
       previewLink.style.display = '';
 
-      // Parse content
+      // Parse content — split main and aside
       var temp = document.createElement('div');
       temp.innerHTML = currentGuide.content_html || '';
 
-      if (isHubPage) {
-        // Hub pages: no main/aside split
-        mainBlockEls = Array.from(temp.children);
-        sidebarBlockEls = [];
-        sidebarLabel.style.display = 'none';
-        editorBlocks.innerHTML = '';
-        var notice = document.createElement('div');
-        notice.className = 'hub-readonly-notice';
-        notice.textContent = 'Hub pages are read-only in this editor. Use the pipeline scripts to regenerate hub pages.';
-        editorBlocks.appendChild(notice);
-        // Show hub content as read-only preview
-        var hubPreview = document.createElement('div');
-        hubPreview.className = 'editor-block-content';
-        hubPreview.innerHTML = currentGuide.content_html || '';
-        editorBlocks.appendChild(hubPreview);
-      } else {
-        // Individual guide: split main and aside
-        var mainEl = temp.querySelector('main');
-        var asideEl = temp.querySelector('aside');
+      var mainEl = temp.querySelector('main');
+      var asideEl = temp.querySelector('aside');
 
-        // Parse main content blocks (skip the lesson-header, we handle it specially)
-        var mainChildren = mainEl ? Array.from(mainEl.children) : Array.from(temp.children);
-        mainBlockEls = mainChildren;
+      var mainChildren = mainEl ? Array.from(mainEl.children) : Array.from(temp.children);
+      mainBlockEls = mainChildren;
 
-        // Parse sidebar sections
-        sidebarBlockEls = asideEl ? Array.from(asideEl.children) : [];
-        sidebarLabel.style.display = sidebarBlockEls.length ? '' : 'none';
+      sidebarBlockEls = asideEl ? Array.from(asideEl.children) : [];
+      sidebarLabel.style.display = sidebarBlockEls.length ? '' : 'none';
 
-        renderBlocks();
-        renderSidebarBlocks();
-      }
+      renderBlocks();
+      renderSidebarBlocks();
 
       // Reset dirty state
       isDirty = false;
@@ -871,10 +836,6 @@
     }
 
     function serializeContent() {
-      if (isHubPage) {
-        return currentGuide.content_html;
-      }
-
       // Main content
       var mainHtml = '';
       mainBlockEls.forEach(function (el) {
@@ -907,7 +868,7 @@
     });
 
     async function saveGuide() {
-      if (!currentGuide || isHubPage) return;
+      if (!currentGuide) return;
       sidebarSaveBtn.disabled = true;
       sidebarSaveBtn.textContent = 'Saving...';
       sidebarStatus.textContent = 'Saving...';
@@ -967,7 +928,7 @@
     document.addEventListener('keydown', function (e) {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        if (currentGuide && isDirty && !isHubPage) saveGuide();
+        if (currentGuide && isDirty) saveGuide();
       }
     });
 

@@ -141,10 +141,10 @@
             '<span class="tw-action-title">Edit Lessons</span>' +
             '<span class="tw-action-desc">Review and edit lesson content for your subject</span>' +
           '</a>' +
-          '<a class="tw-action-btn" id="tw-go-guides" href="/admin/editor-guide">' +
+          '<button class="tw-action-btn" id="tw-go-guides" type="button">' +
             '<span class="tw-action-title">Edit Guides</span>' +
             '<span class="tw-action-desc">Edit exam technique and revision technique guides</span>' +
-          '</a>' +
+          '</button>' +
           '<a class="tw-action-btn" id="tw-go-images" href="/admin/images">' +
             '<span class="tw-action-title">Manage Images</span>' +
             '<span class="tw-action-desc">Check hero images and diagram positioning</span>' +
@@ -187,8 +187,14 @@
     }
 
     editorLink.addEventListener('click', saveAndGo);
-    guidesLink.addEventListener('click', saveAndGo);
     imagesLink.addEventListener('click', saveAndGo);
+
+    guidesLink.addEventListener('click', function () {
+      var data = { name: nameInput.value.trim(), subject: subjectSelect.value };
+      if (!data.name || !data.subject) return;
+      sessionStorage.setItem(TEACHER_KEY, JSON.stringify(data));
+      showGuideTypePicker(data.subject, page.querySelector('.tw-card'));
+    });
   }
 
   // ==================================================================
@@ -271,8 +277,8 @@
       '<div class="tw-unit-card" style="margin-bottom: 0.75rem;">' +
         '<div class="tw-unit-name">Guides</div>' +
         '<div class="tw-unit-links">' +
-          '<a href="/admin/editor-guide?subject=' + subjectSlug + '&type=exam-technique" class="tw-unit-link tw-unit-link-primary">Exam Technique</a>' +
-          '<a href="/admin/editor-guide?subject=' + subjectSlug + '&type=revision-technique" class="tw-unit-link">Revision Technique</a>' +
+          '<button class="tw-unit-link tw-unit-link-primary" data-guide-pick="exam-technique" type="button">Exam Technique</button>' +
+          '<button class="tw-unit-link" data-guide-pick="revision-technique" type="button">Revision Technique</button>' +
         '</div>' +
       '</div>';
 
@@ -297,6 +303,97 @@
 
     html += '</div>';
     container.innerHTML = html;
+
+    // Wire guide type buttons to open guide list in modal
+    container.querySelectorAll('[data-guide-pick]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var cardEl = container.closest('.tw-card');
+        showGuideList(subjectSlug, btn.dataset.guidePick, cardEl);
+      });
+    });
+  }
+
+  // ==================================================================
+  //  GUIDE PICKER (within modal)
+  // ==================================================================
+
+  function showGuideTypePicker(subjectSlug, cardEl) {
+    cardEl.innerHTML =
+      '<div class="tw-brand">StudyVault</div>' +
+      '<h1>Edit Guides</h1>' +
+      '<p>Choose a guide type to edit.</p>' +
+      '<button class="tw-action-btn tw-action-primary" data-guide-type="exam-technique" type="button">' +
+        '<span class="tw-action-title">Exam Technique</span>' +
+        '<span class="tw-action-desc">Step-by-step guides for each question type</span>' +
+      '</button>' +
+      '<button class="tw-action-btn" data-guide-type="revision-technique" type="button">' +
+        '<span class="tw-action-title">Revision Technique</span>' +
+        '<span class="tw-action-desc">Study methods and revision strategies</span>' +
+      '</button>' +
+      '<a href="#" class="tw-back" id="tw-guides-back">\u2190 Back</a>';
+
+    cardEl.querySelector('#tw-guides-back').addEventListener('click', function (e) {
+      e.preventDefault();
+      location.reload();
+    });
+
+    cardEl.querySelectorAll('[data-guide-type]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        showGuideList(subjectSlug, btn.dataset.guideType, cardEl);
+      });
+    });
+  }
+
+  function showGuideList(subjectSlug, guideType, cardEl) {
+    var typeLabel = guideType === 'exam-technique' ? 'Exam Technique' : 'Revision Technique';
+    cardEl.innerHTML =
+      '<div class="tw-brand">StudyVault</div>' +
+      '<h1>' + typeLabel + ' Guides</h1>' +
+      '<div id="tw-guide-list"><div class="tw-loading">Loading guides\u2026</div></div>' +
+      '<a href="#" class="tw-back" id="tw-guides-back">\u2190 Back</a>';
+
+    cardEl.querySelector('#tw-guides-back').addEventListener('click', function (e) {
+      e.preventDefault();
+      showGuideTypePicker(subjectSlug, cardEl);
+    });
+
+    var sbc = window.supabase.createClient(SB_URL, SB_KEY);
+    var container = document.getElementById('tw-guide-list');
+
+    sbc.from('subjects').select('id').eq('slug', subjectSlug).single()
+      .then(function (subjectResult) {
+        if (!subjectResult.data) {
+          container.innerHTML = '<div class="tw-loading">Subject not found.</div>';
+          return;
+        }
+        return sbc.from('guide_pages')
+          .select('id, slug, title, sort_order')
+          .eq('subject_id', subjectResult.data.id)
+          .eq('guide_type', guideType)
+          .neq('slug', 'index')
+          .order('sort_order');
+      })
+      .then(function (guidesResult) {
+        if (!guidesResult) return;
+        var guides = guidesResult.data || [];
+        if (!guides.length) {
+          container.innerHTML = '<div class="tw-loading">No guides found.</div>';
+          return;
+        }
+        var html = '<div class="tw-unit-grid">';
+        guides.forEach(function (g) {
+          var url = '/admin/editor-guide?subject=' + subjectSlug + '&type=' + guideType + '&slug=' + g.slug;
+          html +=
+            '<a href="' + url + '" class="tw-unit-card" style="text-decoration:none;display:block;">' +
+              '<div class="tw-unit-name">' + escHtml(g.title) + '</div>' +
+            '</a>';
+        });
+        html += '</div>';
+        container.innerHTML = html;
+      })
+      .catch(function () {
+        container.innerHTML = '<div class="tw-loading">Failed to load guides.</div>';
+      });
   }
 
   function escHtml(str) {
