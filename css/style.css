@@ -4661,14 +4661,177 @@ body.dark-mode .revision-tip-popup a {
   animation: sv-fade-in 0.4s ease both;
 }
 
+/* Header entrance */
+.page-header {
+  animation: sv-fade-in 0.35s ease both;
+}
+
+/* Lesson page — hero image fade + rise */
+.lesson-hero-image {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.lesson-hero-image.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Lesson page — content blocks reveal on scroll */
+.study-notes > h2,
+.study-notes > p,
+.study-notes > .key-fact,
+.study-notes > .collapsible,
+.study-notes > .timeline,
+.study-notes > figure.diagram,
+.study-notes > blockquote,
+.study-notes > ul,
+.study-notes > ol {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.study-notes > h2.sv-visible,
+.study-notes > p.sv-visible,
+.study-notes > .key-fact.sv-visible,
+.study-notes > .collapsible.sv-visible,
+.study-notes > .timeline.sv-visible,
+.study-notes > figure.diagram.sv-visible,
+.study-notes > blockquote.sv-visible,
+.study-notes > ul.sv-visible,
+.study-notes > ol.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Lesson sidebar — slide in */
+.lesson-sidebar {
+  opacity: 0;
+  transform: translateX(16px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s,
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s;
+}
+.lesson-sidebar.sv-visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Exam tip, conclusion, practice — reveal on scroll */
+.exam-tip,
+.conclusion,
+.practice-section {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.exam-tip.sv-visible,
+.conclusion.sv-visible,
+.practice-section.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Lesson prev/next nav */
+.lesson-nav {
+  opacity: 0;
+  transition: opacity 0.4s ease 0.1s;
+}
+.lesson-nav.sv-visible {
+  opacity: 1;
+}
+
+/* Narration player — subtle fade */
+.narration-player {
+  opacity: 0;
+  transition: opacity 0.4s ease 0.15s;
+}
+.narration-player.sv-visible {
+  opacity: 1;
+}
+
+/* Guide hub — guide cards stagger */
+.guide-hub .guide-card {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.guide-hub .guide-card.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+/* Stagger guide cards */
+.guide-hub .guide-card:nth-child(1) { transition-delay: 0s; }
+.guide-hub .guide-card:nth-child(2) { transition-delay: 0.06s; }
+.guide-hub .guide-card:nth-child(3) { transition-delay: 0.12s; }
+.guide-hub .guide-card:nth-child(4) { transition-delay: 0.18s; }
+.guide-hub .guide-card:nth-child(5) { transition-delay: 0.24s; }
+.guide-hub .guide-card:nth-child(6) { transition-delay: 0.3s; }
+.guide-hub .guide-card:nth-child(7) { transition-delay: 0.36s; }
+.guide-hub .guide-card:nth-child(8) { transition-delay: 0.42s; }
+.guide-hub .guide-card:nth-child(n+9) { transition-delay: 0.48s; }
+
+/* Guide individual page — content fade */
+#guide-content .lesson-page {
+  animation: sv-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* Respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
-  .sv-reveal { opacity: 1; transform: none; transition: none; }
-  .hero { animation: none; }
-  .unit-page-header { animation: none; }
+  .sv-reveal,
+  .lesson-hero-image,
+  .study-notes > h2,
+  .study-notes > p,
+  .study-notes > .key-fact,
+  .study-notes > .collapsible,
+  .study-notes > .timeline,
+  .study-notes > figure.diagram,
+  .study-notes > blockquote,
+  .study-notes > ul,
+  .study-notes > ol,
+  .lesson-sidebar,
+  .exam-tip,
+  .conclusion,
+  .practice-section,
+  .lesson-nav,
+  .narration-player,
+  .guide-hub .guide-card { opacity: 1; transform: none; transition: none; }
+  .hero,
+  .page-header,
+  .unit-page-header,
+  #guide-content .lesson-page { animation: none; }
   .home-card-img { transition: none; }
   .home-card { transition: none; }
   .unit-card-image img { transition: none; }
   .unit-card { transition: none; }
   .lesson-card { transition: none; }
+}
+
+/* Mobile — faster, smaller animations for performance */
+@media (max-width: 768px) {
+  .sv-reveal,
+  .lesson-hero-image,
+  .study-notes > h2,
+  .study-notes > p,
+  .study-notes > .key-fact,
+  .study-notes > .collapsible,
+  .study-notes > .timeline,
+  .study-notes > figure.diagram,
+  .study-notes > blockquote,
+  .study-notes > ul,
+  .study-notes > ol,
+  .lesson-sidebar,
+  .exam-tip,
+  .conclusion,
+  .practice-section,
+  .guide-hub .guide-card {
+    transform: translateY(10px);
+    transition-duration: 0.35s;
+  }
+  .lesson-sidebar {
+    transform: translateY(10px);
+  }
 }

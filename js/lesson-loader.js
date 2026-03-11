@@ -234,6 +234,11 @@
         console.warn('Feature init error (non-fatal):', featureErr);
       }
     }
+
+    // Trigger scroll reveal animations on lesson content
+    if (typeof window.initRevealAnimations === 'function') {
+      window.initRevealAnimations();
+    }
   }
 
   // ---- Render related media sidebar ----

@@ -1248,7 +1248,38 @@ function initPageTransitions() {
 
 /* --- Scroll Reveal Animations --- */
 function initRevealAnimations() {
-  var els = document.querySelectorAll('.sv-reveal');
+  // Collect all elements that need reveal animation
+  var els = Array.prototype.slice.call(document.querySelectorAll('.sv-reveal'));
+
+  // Lesson page elements (content blocks, sidebar, hero, sections)
+  var lessonSelectors = [
+    '.lesson-hero-image',
+    '.study-notes > h2',
+    '.study-notes > p',
+    '.study-notes > .key-fact',
+    '.study-notes > .collapsible',
+    '.study-notes > .timeline',
+    '.study-notes > figure.diagram',
+    '.study-notes > blockquote',
+    '.study-notes > ul',
+    '.study-notes > ol',
+    '.lesson-sidebar',
+    '.exam-tip',
+    '.conclusion',
+    '.practice-section',
+    '.lesson-nav',
+    '.narration-player',
+    '.guide-hub .guide-card'
+  ];
+
+  lessonSelectors.forEach(function (sel) {
+    var matches = document.querySelectorAll(sel);
+    matches.forEach(function (el) {
+      // Only add if not already visible (avoid re-animating on re-init)
+      if (!el.classList.contains('sv-visible')) els.push(el);
+    });
+  });
+
   if (!els.length) return;
 
   // If user prefers reduced motion, show everything immediately
@@ -1264,11 +1295,11 @@ function initRevealAnimations() {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
 
   els.forEach(function (el) { observer.observe(el); });
 }
-// Also expose globally so browse-loader can call after injecting content
+// Expose globally so loaders can call after injecting content
 window.initRevealAnimations = initRevealAnimations;
 
 /* --- Knowledge Check Quiz --- */

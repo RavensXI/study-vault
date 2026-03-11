@@ -118,6 +118,7 @@
 
     // Init nav icons on hub page
     if (typeof window.initNavIcons === 'function') window.initNavIcons();
+    if (typeof window.initRevealAnimations === 'function') window.initRevealAnimations();
 
     // Rewrite any relative guide links to dynamic routes
     contentEl.querySelectorAll('a[href]').forEach(function (link) {
@@ -222,6 +223,9 @@
     // Init collapsibles if any exist in the guide content
     if (typeof window.initLessonFeatures === 'function') {
       window.initLessonFeatures();
+    }
+    if (typeof window.initRevealAnimations === 'function') {
+      window.initRevealAnimations();
     }
   }
 
