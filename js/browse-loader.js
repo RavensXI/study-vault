@@ -101,13 +101,13 @@
     }
 
     // Unit grid — uses same .unit-card structure as static pages
-    html += '<div class="unit-grid sv-stagger' + (units.length === 1 ? ' single-unit' : '') + '">';
+    html += '<div class="unit-grid' + (units.length === 1 ? ' single-unit' : '') + '">';
 
     // Get image positions from subject settings
     var imgPositions = (subject.settings && subject.settings.unit_image_positions) || {};
 
     units.forEach(function (unit) {
-      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card sv-reveal" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
+      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
         var imgStyle = imgPositions[unit.slug] ? ' style="object-position: ' + imgPositions[unit.slug] + '"' : '';
