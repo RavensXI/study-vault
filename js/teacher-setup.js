@@ -67,7 +67,7 @@
       '.tw-form input:focus, .tw-form select:focus { outline: none; border-color: #2d2a26; box-shadow: 0 0 0 2px rgba(45,42,38,0.08); }',
       '.tw-form input::placeholder { color: #b5b0aa; }',
       '.tw-choose { font-size: 0.82rem; font-weight: 600; color: #2d2a26; margin: 0.5rem 0 0.75rem; }',
-      '.tw-action-btn { display: block; padding: 1rem 1.15rem; border-radius: 12px; text-decoration: none; color: #2d2a26; border: 1px solid #e0ddd8; background: white; margin-bottom: 0.65rem; transition: border-color 0.15s, box-shadow 0.15s; }',
+      '.tw-action-btn { display: block; width: 100%; box-sizing: border-box; padding: 1rem 1.15rem; border-radius: 12px; text-decoration: none; color: #2d2a26; border: 1px solid #e0ddd8; background: white; margin-bottom: 0.65rem; transition: border-color 0.15s, box-shadow 0.15s; font-family: inherit; font-size: inherit; text-align: left; cursor: pointer; }',
       '.tw-action-btn:hover { border-color: #2d2a26; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }',
       '.tw-action-primary { border-color: #2d2a26; }',
       '.tw-action-title { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 0.15rem; }',
