@@ -4601,8 +4601,13 @@ body.dark-mode .revision-tip-popup a {
    ============================ */
 
 @keyframes sv-fade-up {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes sv-fade-up-damped {
+  0%   { opacity: 0; transform: translateY(28px); }
+  40%  { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes sv-fade-in {
@@ -4613,9 +4618,9 @@ body.dark-mode .revision-tip-popup a {
 /* Elements with .sv-reveal start hidden, animate when .sv-visible is added */
 .sv-reveal {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(24px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sv-reveal.sv-visible {
   opacity: 1;
@@ -4635,7 +4640,7 @@ body.dark-mode .revision-tip-popup a {
 
 /* Hero entrance — plays immediately on page load */
 .hero {
-  animation: sv-fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sv-fade-up-damped 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Home page card image zoom on hover */
@@ -4658,7 +4663,7 @@ body.dark-mode .revision-tip-popup a {
 
 /* Browse page — unit page header fade */
 .unit-page-header {
-  animation: sv-fade-in 0.4s ease both;
+  animation: sv-fade-up-damped 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Header entrance */
@@ -4712,8 +4717,8 @@ body.dark-mode .revision-tip-popup a {
 .study-notes > ol {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .study-notes > h2.sv-visible,
 .study-notes > p.sv-visible,
@@ -4732,8 +4737,8 @@ body.dark-mode .revision-tip-popup a {
 .lesson-sidebar {
   opacity: 0;
   transform: translateX(50px);
-  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.25s,
-              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.25s;
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.25s,
+              transform 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
 }
 .lesson-sidebar.sv-visible {
   opacity: 1;
@@ -4746,8 +4751,8 @@ body.dark-mode .revision-tip-popup a {
 .practice-section {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .exam-tip.sv-visible,
 .conclusion.sv-visible,
@@ -4759,27 +4764,33 @@ body.dark-mode .revision-tip-popup a {
 /* Lesson prev/next nav */
 .lesson-nav {
   opacity: 0;
-  transition: opacity 0.4s ease 0.1s;
+  transform: translateY(16px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
 }
 .lesson-nav.sv-visible {
   opacity: 1;
+  transform: translateY(0);
 }
 
 /* Narration player — subtle fade */
 .narration-player {
   opacity: 0;
-  transition: opacity 0.4s ease 0.15s;
+  transform: translateY(10px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
 }
 .narration-player.sv-visible {
   opacity: 1;
+  transform: translateY(0);
 }
 
 /* Guide hub — guide cards stagger */
 .guide-hub .guide-card {
   opacity: 0;
-  transform: translateY(16px);
-  transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(24px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .guide-hub .guide-card.sv-visible {
   opacity: 1;
@@ -4798,7 +4809,7 @@ body.dark-mode .revision-tip-popup a {
 
 /* Guide individual page — content fade */
 #guide-content .lesson-page {
-  animation: sv-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: sv-fade-up-damped 1s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Respect reduced-motion preference */
@@ -4834,18 +4845,9 @@ body.dark-mode .revision-tip-popup a {
   .lesson-card { transition: none; }
 }
 
-/* Mobile — slightly reduced but still noticeable */
+/* Mobile — slightly reduced but same damped feel */
 @media (max-width: 768px) {
   .sv-reveal,
-  .lesson-header .lesson-number,
-  .lesson-header h1 {
-    transform: translateY(-30px);
-    transition-duration: 0.55s;
-  }
-  .lesson-hero-image {
-    transform: translateX(-40px);
-    transition-duration: 0.6s;
-  }
   .study-notes > h2,
   .study-notes > p,
   .study-notes > .key-fact,
@@ -4860,11 +4862,20 @@ body.dark-mode .revision-tip-popup a {
   .practice-section,
   .guide-hub .guide-card {
     transform: translateY(20px);
-    transition-duration: 0.45s;
+  }
+  /* Title still drops from top on mobile */
+  .lesson-header .lesson-number {
+    transform: translateY(-30px);
+  }
+  .lesson-header h1 {
+    transform: translateY(-40px);
+  }
+  /* Hero slides from left on mobile too */
+  .lesson-hero-image {
+    transform: translateX(-40px);
   }
   /* Sidebar stacks below on mobile — slide up not sideways */
   .lesson-sidebar {
-    transform: translateY(30px);
-    transition-duration: 0.5s;
+    transform: translateY(30px) translateX(0);
   }
 }
