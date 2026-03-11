@@ -141,6 +141,10 @@
             '<span class="tw-action-title">Edit Lessons</span>' +
             '<span class="tw-action-desc">Review and edit lesson content for your subject</span>' +
           '</a>' +
+          '<a class="tw-action-btn" id="tw-go-guides" href="/admin/editor-guide">' +
+            '<span class="tw-action-title">Edit Guides</span>' +
+            '<span class="tw-action-desc">Edit exam technique and revision technique guides</span>' +
+          '</a>' +
           '<a class="tw-action-btn" id="tw-go-images" href="/admin/images">' +
             '<span class="tw-action-title">Manage Images</span>' +
             '<span class="tw-action-desc">Check hero images and diagram positioning</span>' +
@@ -155,12 +159,14 @@
     var subjectSelect = document.getElementById('tw-subject');
     var actionsDiv = document.getElementById('tw-actions');
     var editorLink = document.getElementById('tw-go-editor');
+    var guidesLink = document.getElementById('tw-go-guides');
     var imagesLink = document.getElementById('tw-go-images');
 
     function checkReady() {
       if (nameInput.value.trim() && subjectSelect.value) {
         actionsDiv.style.display = '';
         editorLink.href = '/admin/editor?subject=' + subjectSelect.value;
+        guidesLink.href = '/admin/editor-guide?subject=' + subjectSelect.value;
         imagesLink.href = '/admin/images?subject=' + subjectSelect.value;
       } else {
         actionsDiv.style.display = 'none';
@@ -181,6 +187,7 @@
     }
 
     editorLink.addEventListener('click', saveAndGo);
+    guidesLink.addEventListener('click', saveAndGo);
     imagesLink.addEventListener('click', saveAndGo);
   }
 
@@ -258,7 +265,18 @@
 
   function renderUnitCards(units, subjectSlug) {
     var container = document.getElementById('tw-units');
-    var html = '<div class="tw-unit-grid">';
+
+    // Subject-level guides link (guides are per-subject, not per-unit)
+    var html =
+      '<div class="tw-unit-card" style="margin-bottom: 0.75rem;">' +
+        '<div class="tw-unit-name">Guides</div>' +
+        '<div class="tw-unit-links">' +
+          '<a href="/admin/editor-guide?subject=' + subjectSlug + '&type=exam-technique" class="tw-unit-link tw-unit-link-primary">Exam Technique</a>' +
+          '<a href="/admin/editor-guide?subject=' + subjectSlug + '&type=revision-technique" class="tw-unit-link">Revision Technique</a>' +
+        '</div>' +
+      '</div>';
+
+    html += '<div class="tw-unit-grid">';
 
     units.forEach(function (u) {
       var editorUrl = '/admin/editor?subject=' + subjectSlug + '&unit=' + u.slug;
