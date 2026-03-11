@@ -1253,6 +1253,8 @@ function initRevealAnimations() {
 
   // Lesson page elements (content blocks, sidebar, hero, sections)
   var lessonSelectors = [
+    '.lesson-header .lesson-number',
+    '.lesson-header h1',
     '.lesson-hero-image',
     '.study-notes > h2',
     '.study-notes > p',

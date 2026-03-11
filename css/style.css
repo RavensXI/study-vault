@@ -4666,16 +4666,38 @@ body.dark-mode .revision-tip-popup a {
   animation: sv-fade-in 0.35s ease both;
 }
 
-/* Lesson page — hero image fade + rise */
+/* Lesson page — title drops down from top (soft-close damping) */
+.lesson-header .lesson-number {
+  opacity: 0;
+  transform: translateY(-40px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.lesson-header h1 {
+  opacity: 0;
+  transform: translateY(-50px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.08s,
+              transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.08s;
+}
+.lesson-header .lesson-number.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.lesson-header h1.sv-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Lesson page — hero image slides in from left (soft-close damping) */
 .lesson-hero-image {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateX(-60px);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.15s,
+              transform 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.15s;
 }
 .lesson-hero-image.sv-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
 }
 
 /* Lesson page — content blocks reveal on scroll */
@@ -4782,6 +4804,8 @@ body.dark-mode .revision-tip-popup a {
 /* Respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
   .sv-reveal,
+  .lesson-header .lesson-number,
+  .lesson-header h1,
   .lesson-hero-image,
   .study-notes > h2,
   .study-notes > p,
@@ -4813,7 +4837,15 @@ body.dark-mode .revision-tip-popup a {
 /* Mobile — slightly reduced but still noticeable */
 @media (max-width: 768px) {
   .sv-reveal,
-  .lesson-hero-image,
+  .lesson-header .lesson-number,
+  .lesson-header h1 {
+    transform: translateY(-30px);
+    transition-duration: 0.55s;
+  }
+  .lesson-hero-image {
+    transform: translateX(-40px);
+    transition-duration: 0.6s;
+  }
   .study-notes > h2,
   .study-notes > p,
   .study-notes > .key-fact,
