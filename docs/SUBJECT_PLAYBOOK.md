@@ -30,19 +30,28 @@ python scripts/pipeline_generate.py text <job_id>
 
 Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create the lesson plan and pipeline steps in Supabase.
 
+### Phase 1b: Activation BEFORE Content (T=30s)
+
+**CRITICAL — run the CSS + subject activation agent FIRST**, before launching content agents. This agent creates the units in Supabase with their accent colours. The content generation script (`pipeline_api_generate.py generate`) reads unit accents from the DB to include in diagram prompts. If units don't exist yet, diagrams default to grey.
+
+| Agent | Depends on | Count |
+|-------|-----------|-------|
+| CSS + subject activation agent | Subject slug + colour | 1 |
+
+Wait for this to complete (~30 seconds), then proceed to Phase 2.
+
 ### Phase 2: Maximum Parallel Launch (T=1 min)
 
 **Launch ALL of the following as parallel background agents in a SINGLE message:**
 
 | Agent | Depends on | Count |
 |-------|-----------|-------|
-| Lesson content agents (one per lesson) | Plan | 10-30 |
+| Lesson content agents (one per lesson) | Plan + unit accents in DB | 10-30 |
 | Exam technique guides agent | Question types from plan | 1 |
 | Revision technique guides agent | Subject name only | 1 |
-| CSS + subject activation agent | Subject slug + colour | 1 |
 | getGuideUrl mapping agent | Question type strings | 1 |
 
-**Why this works:** Guides, CSS, and mappings do NOT depend on lesson content. They only need the plan (question types, subject slug, colour). Launch them at the same time as content generation.
+**Why this works:** Guides and mappings do NOT depend on lesson content. They only need the plan (question types, subject slug). Launch them at the same time as content generation.
 
 Each lesson content agent uses the **Write tool** (not bash heredocs) to create its temp JSON, then runs `pipeline_generate.py write`. The Write tool handles all escaping natively.
 
@@ -286,6 +295,7 @@ View progress: `pipeline_generate.py status <job_id>` or `/admin/pipeline` UI.
 | Wrong Gemini model | `gemini-3.1-flash-image-preview` (Nano Banana 2) |
 | Windows encoding crashes | `sys.stdout.reconfigure(encoding='utf-8')` in all scripts |
 | Missing diagram_prompt | Validate JSON output includes diagram_prompt before writing |
+| Grey/wrong diagram colours | Run activation agent BEFORE content generation so unit accents are in DB. `pipeline_api_generate.py` reads accents from `units` table. If not found, falls back to grey `#6b7280` |
 | Empty hero_keywords | Derive from lesson title as fallback — script handles this |
 | Diagrams clustered at top | Content HTML must include `<!-- DIAGRAM -->` at content-relevant spot |
 | Diagram inside collapsible | Placeholder must be between sections, not inside collapsibles |

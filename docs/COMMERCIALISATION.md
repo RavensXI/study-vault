@@ -44,7 +44,7 @@ Start low to build market share and word of mouth, then raise prices for new sch
 - **Teachers talk to each other** — subject networks, TeachMeet events, edu Twitter/X. One enthusiastic Head of History is worth more than any marketing spend. Give them a price they'll rave about.
 - **Early adopters take the most risk** — trying an unproven product from a new company. Reward that with a locked-in price that builds fierce loyalty.
 - **Schools hate price surprises** — grandfathering is expected in education SaaS. "Your price never goes up" is a genuine selling point.
-- **Margins can absorb it** — at ~48p/lesson generation cost, even £100/subject/year is 85% margin year 1 and 99%+ from year 2 onwards.
+- **Margins can absorb it** — at ~54p/lesson generation cost, even £100/subject/year is 83% margin year 1 and 99%+ from year 2 onwards.
 
 ### Pricing Phases
 
@@ -139,15 +139,15 @@ Ads are simultaneously revenue AND a sales tool. Every ad impression is a micro-
 | Component | Cost per lesson | 26 lessons |
 |-----------|----------------|------------|
 | Claude API (content + guides + media) | £0.39 | £10.14 |
-| Gemini diagram | £0.05 | £1.30 |
-| Azure narration | £0.04 | £1.04 |
+| Gemini diagram | £0.09 | £2.34 |
+| Azure narration | £0.06 | £1.56 |
 | Hero images (Unsplash/Wikimedia) | Free | Free |
-| **Total** | **~£0.48** | **~£12.48** |
+| **Total** | **~£0.54** | **~£14.04** |
 
 Notes:
 - Claude API cost includes prompt caching (~60% saving vs list price)
-- Actual API balance drop: $12.63 (£9.97) for Claude, ~$1.74 (£1.37) Gemini, ~$1.28 (£1.01) Azure
-- Smaller subjects (10 lessons) cost ~£5–6 total; larger subjects (40 lessons) cost ~£20–25
+- Diagram/narration estimates updated Mar 2026 to include QA regenerations (RE actuals: £0.11/lesson diagrams, £0.06/lesson narration). Previous estimates (£0.05/£0.04) were first-pass only.
+- Smaller subjects (10 lessons) cost ~£6–7 total; larger subjects (40 lessons) cost ~£22–28
 - Guides and media are per-subject (not per-lesson), so per-lesson cost drops slightly with more lessons
 
 ### Margins by Phase

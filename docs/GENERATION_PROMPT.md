@@ -158,11 +158,15 @@ GLOSSARY TERMS:
 - Include every term that appears as a <dfn> in the content_html.
 
 DIAGRAM PROMPT (required — used by generate_diagrams.py):
-- A complete, self-contained prompt for Gemini to generate a pictorial isotype diagram.
-- Include the lesson topic, what data/concepts to illustrate, and style instructions.
-- COLOUR: You MUST use the UNIT ACCENT COLOUR provided in the user message as the diagram's primary colour. Never default to teal or any other colour. State the hex code explicitly in the prompt (e.g. "Use #be185d as the primary colour").
+- Identify the ONE concept in the lesson that would benefit most from a visual representation. This should be a specific idea, comparison, process, or relationship — not the whole lesson.
+- Write a prompt that tells Gemini WHAT to visualise and WHY, but NOT exactly how to lay it out. Give Gemini creative freedom to choose the most effective visual approach.
+- Include enough context for Gemini to understand the concept (a sentence or two explaining it).
+- COLOUR: You MUST use the UNIT ACCENT COLOUR provided in the user message. State the hex code explicitly (e.g. "Use #be185d as the primary colour").
+- End with: "Style: pictorial isotype, clean, educational, white background, not too busy, suitable for GCSE students aged 15-16. Choose the most effective visual layout to make this concept clear and memorable."
+- Do NOT dictate specific icons, exact positions, grid layouts, or decorative elements. Do NOT specify pixel dimensions. Let Gemini be creative.
+- BAD: "LEFT SIDE shows a speech bubble for dialogue, a radio icon, footsteps. RIGHT SIDE shows orchestra, microphone..."
+- GOOD: "Explain the difference between diegetic sound (heard by characters — dialogue, radios, footsteps) and non-diegetic sound (audience only — underscore, voiceover). Use #7c3aed as the primary colour. Style: pictorial isotype, clean..."
 - The script sends this prompt directly to Gemini — it must be fully specified with no placeholders.
-- See DIAGRAM_PIPELINE.md for the standard prompt template and style rules.
 
 HERO KEYWORDS (required — used by download_heroes.py):
 - Array of 3-4 Wikimedia Commons search terms: primary query first, then fallbacks.
@@ -405,6 +409,7 @@ const QUESTION_SPECS = {
   'OCR': '6 questions: 1x Identify (1 mark), 1x State (2), 1x Describe (3), 1x Explain (4), 1x Extended response (6), 1x Discuss (8, QWC)',
   'OCR Drama': '6 questions matching the actual exam paper format — see question_type_names from the planning step',
   'WJEC': '6 questions: 1x Identify (1 mark), 1x Describe (2), 1x Explain (4), 1x Explain (6), 1x Assess (8), 1x Extended (12)',
+  'AQA RS': '6 questions: 1x Multiple Choice (1 mark), 1x Give/Name (1 mark), 1x Explain Influence OR Explain Similarities & Differences (4 marks — see unit type), 1x Explain with Sources of Authority (6 marks), 1x Evaluate a Statement (12 marks), plus 1 additional from any type',
 };
 
 // Exact type name strings — MUST match getGuideUrl() mappings in main.js
@@ -420,6 +425,20 @@ const QUESTION_TYPE_NAMES = {
     '8 marks — Extended Explanation',
     '8 marks — Set Design',
     '30 marks — Section B Essay',
+  ],
+  'AQA RS Beliefs': [
+    '1 mark — Multiple Choice',
+    '1 mark — Give/Name',
+    '4 marks — Explain Influence',
+    '6 marks — Explain with Sources',
+    '12 marks — Evaluate a Statement',
+  ],
+  'AQA RS Practices/Themes': [
+    '1 mark — Multiple Choice',
+    '1 mark — Give/Name',
+    '4 marks — Explain Similarities & Differences',
+    '6 marks — Explain with Sources',
+    '12 marks — Evaluate a Statement',
   ],
   // Add per subject as new subjects are built
 };
@@ -441,6 +460,7 @@ Run after every lesson is generated, before writing to Supabase:
  At least 3 <dfn class="term"> in content_html
  Exactly one <!-- DIAGRAM --> placeholder in content_html (at a content-relevant location, not near the top)
  diagram_prompt includes the unit accent hex colour (not a default/generic colour)
+ diagram_prompt is concept-focused (not the whole lesson) and does NOT dictate layout/icons
  Exactly 6 practice_questions with fields: text, type, marks (all strings)
  Every practice question "type" matches a registered question_type_name
  Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)

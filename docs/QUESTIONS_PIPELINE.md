@@ -45,6 +45,14 @@ Real past paper questions are tagged with `pastPaper` property (displays gold ba
 **Sport Science (OCR) — same mix every lesson:**
 - 1x Identify (1 mark), 1x State (2), 1x Describe (3), 1x Explain (4), 1x Extended response (6), 1x Discuss* (8, QWC assessed)
 
+**Religious Education (AQA 8062) — updated for 2026 exams:**
+- 1x Multiple Choice (1 mark), 1x Give/Name (1 mark), 1x Explain Influence (4 marks — Beliefs only) OR Explain Similarities & Differences (4 marks — Practices/Themes), 1x Explain with Sources of Authority (6 marks), 1x Evaluate a Statement (12 marks), plus 1 additional question from any type
+- *Beliefs units* (christianity-beliefs, islam-beliefs): 4-mark question is always **Explain Influence** (AO1.2 — how a belief impacts believers' lives)
+- *Practices units* (christianity-practices, islam-practices): 4-mark question is always **Explain Differences** (AO1.3)
+- *Theme units* (theme-a through theme-e): 4-mark question can be **similarities or differences** (AO1.3)
+- 6-mark marking: First belief (1–2) + Second belief (1–2) + Source of authority named and applied (1–2)
+- Source: AQA Teaching Guide v1.0 (March 2025) for exams from 2026
+
 ---
 
 ## Exam Technique Guide Mapping
@@ -75,6 +83,17 @@ Real past paper questions are tagged with `pastPaper` property (displays gold ba
 | `'Describe'` | `describe.html` | Sport Science, Geography |
 | `'Explain'` | `explain.html` | Sport Science, Geography, Business |
 | `'Discuss'` | `discuss.html` | Sport Science, Business |
+
+**Religious Education (AQA 8062) — 2026 spec:**
+
+| Type String | Guide File | Notes |
+|------------|-----------|-------|
+| `'1 mark — Multiple Choice'` | `multiple-choice-1-mark.html` | All papers |
+| `'1 mark — Give/Name'` | `give-name-1-mark.html` | All papers |
+| `'4 marks — Explain Influence'` | `explain-influence-4-marks.html` | Beliefs only |
+| `'4 marks — Explain Similarities & Differences'` | `explain-similarities-differences-4-marks.html` | Practices + Themes |
+| `'6 marks — Explain with Sources'` | `explain-sources-6-marks.html` | All papers |
+| `'12 marks — Evaluate a Statement'` | `evaluate-statement-12-marks.html` | All papers |
 
 When adding a new subject, check whether existing entries already match its question types. Only add new entries if no existing substring matches. Place subject-specific entries before generic ones.
 

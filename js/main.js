@@ -274,6 +274,14 @@ function initPracticeQuestions() {
       ['4 marks \u2014 Explain Similarities & Differences', 'explain-similarities-differences-4-marks.html'],
       ['6 marks \u2014 Explain with Sources', 'explain-sources-6-marks.html'],
       ['12 marks \u2014 Evaluate a Statement', 'evaluate-statement-12-marks.html'],
+      // English Literature (AQA 8702)
+      ['Quote Analysis', 'quote-analysis.html'],
+      ['Extract Analysis', 'extract-analysis.html'],
+      ['Extended Response', 'extended-response.html'],
+      ['Essay with SPaG', 'essay-response.html'],
+      ['Anthology Comparison', 'anthology-comparison.html'],
+      ['Unseen Poetry Analysis', 'unseen-poetry-analysis.html'],
+      ['Unseen Poetry Comparison', 'unseen-poetry-comparison.html'],
       // Music (Eduqas C660U)
       ['Multiple Choice', 'multiple-choice.html'],
       ['Identification', 'identification.html'],
@@ -1716,6 +1724,11 @@ function initRevisionTips() {
       { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
       { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each musical element.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Listen to an example piece and try to identify each element discussed inside.', link: 'active-listening.html', label: 'Active Listening', maxPerPage: 1 }
+    ],
+    'english-literature': [
+      { selector: '.key-fact', text: 'Turn this into a quote flashcard \u2014 the quote on one side, analysis and context on the other.', link: 'quote-flashcards.html', label: 'Quote Flashcards' },
+      { selector: 'figure.diagram', text: 'Recreate this as a character or theme map from memory, adding your own textual evidence.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Use the points inside to write a timed practice paragraph \u2014 aim for 10 minutes.', link: 'timed-exam-practice.html', label: 'Timed Exam Practice', maxPerPage: 1 }
     ]
   };
 

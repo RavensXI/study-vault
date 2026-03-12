@@ -365,6 +365,20 @@ def cmd_generate(job_id, lesson_filter=None, unit_filter=None, dry_run=False):
     print(f"Generating {total} lesson{'s' if total != 1 else ''}...")
     print()
 
+    # Pre-fetch unit accent colours from Supabase (source of truth after activation)
+    subject_slug = plan.get("subject_slug", job.get("subject_slug"))
+    subj_row = sb.table("subjects").select("id").eq("slug", subject_slug).execute()
+    db_accents = {}
+    if subj_row.data:
+        db_units = sb.table("units").select("slug,accent").eq("subject_id", subj_row.data[0]["id"]).execute()
+        for u in (db_units.data or []):
+            if u.get("accent"):
+                db_accents[u["slug"]] = u["accent"]
+    if db_accents:
+        print(f"Unit accents from DB: {db_accents}")
+    else:
+        print("WARNING: No unit accents found in DB — will use config/plan colours")
+
     # Check which are already done
     steps = sb.table("pipeline_steps").select("unit_slug,lesson_number,content_done").eq("job_id", job_id).execute()
     done_set = set()
@@ -395,10 +409,15 @@ def cmd_generate(job_id, lesson_filter=None, unit_filter=None, dry_run=False):
         # Extract source text for this lesson
         source_text = extract_source_for_lesson(extracted_text, lesson)
 
-        # Get unit accent colour
-        colors = config.get("colors", {})
-        unit_index = next((i for i, u in enumerate(plan.get("units", [])) if u["slug"] == unit_slug), 0)
-        accent = unit.get("accent") or colors.get(f"color{unit_index + 1}", colors.get("color1", "#6b7280"))
+        # Get unit accent colour: DB (source of truth) > plan > config > error
+        accent = db_accents.get(unit_slug)
+        if not accent:
+            colors = config.get("colors", {})
+            unit_index = next((i for i, u in enumerate(plan.get("units", [])) if u["slug"] == unit_slug), 0)
+            accent = unit.get("accent") or colors.get(f"color{unit_index + 1}", colors.get("color1", ""))
+        if not accent:
+            print(f"  WARNING: No accent colour for {unit_slug} — diagrams will use wrong colours!")
+            accent = "#6b7280"  # grey fallback — should not happen if activation ran first
 
         # Total lessons in this unit
         total_in_unit = len(unit.get("lessons", []))

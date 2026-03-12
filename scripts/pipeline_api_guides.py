@@ -216,12 +216,11 @@ In the sidebar Other Guides section, link to the revision technique hub:
 
     sb.table("guide_pages").upsert({
         "subject_id": subject_id,
-        "type": "exam-technique",
+        "guide_type": "exam-technique",
         "slug": "index",
         "title": "Exam Technique Guides",
         "content_html": content_html,
-        "status": "live",
-    }, on_conflict="subject_id,type,slug").execute()
+    }, on_conflict="subject_id,guide_type,slug").execute()
     guides_written += 1
     print(f"    {elapsed:.1f}s, {usage.input_tokens:,} in / {usage.output_tokens:,} out, ${cost:.4f}")
 
@@ -376,12 +375,11 @@ In the sidebar Other Guides section, link to the exam technique hub:
 
     sb.table("guide_pages").upsert({
         "subject_id": subject_id,
-        "type": "revision-technique",
+        "guide_type": "revision-technique",
         "slug": "index",
         "title": "Revision Technique Guides",
         "content_html": content_html,
-        "status": "live",
-    }, on_conflict="subject_id,type,slug").execute()
+    }, on_conflict="subject_id,guide_type,slug").execute()
     guides_written += 1
     print(f"    {elapsed:.1f}s, {usage.input_tokens:,} in / {usage.output_tokens:,} out, ${cost:.4f}")
 
