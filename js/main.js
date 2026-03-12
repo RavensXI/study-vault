@@ -1036,36 +1036,32 @@ function initGlossary() {
     if (activeTerm === term) activeTerm = null;
   }
 
-  var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
   terms.forEach(term => {
-    if (isTouch) {
-      // Mobile: use touchend for instant response (no double-tap)
-      var touchMoved = false;
-      term.addEventListener('touchstart', () => { touchMoved = false; }, { passive: true });
-      term.addEventListener('touchmove', () => { touchMoved = true; }, { passive: true });
-      term.addEventListener('touchend', (e) => {
-        if (touchMoved) return; // was a scroll, not a tap
-        e.preventDefault();
-        if (term.classList.contains('term-visible')) {
-          hideTerm(term);
-        } else {
-          showTerm(term);
-        }
-      });
-    } else {
-      // Desktop: hover to show, click to toggle
-      term.addEventListener('mouseenter', () => showTerm(term));
-      term.addEventListener('mouseleave', () => hideTerm(term));
-      term.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (term.classList.contains('term-visible')) {
-          hideTerm(term);
-        } else {
-          showTerm(term);
-        }
-      });
-    }
+    // Touch: tap to toggle (for phones, tablets, touchscreen laptops)
+    var touchMoved = false;
+    term.addEventListener('touchstart', () => { touchMoved = false; }, { passive: true });
+    term.addEventListener('touchmove', () => { touchMoved = true; }, { passive: true });
+    term.addEventListener('touchend', (e) => {
+      if (touchMoved) return; // was a scroll, not a tap
+      e.preventDefault();
+      if (term.classList.contains('term-visible')) {
+        hideTerm(term);
+      } else {
+        showTerm(term);
+      }
+    });
+
+    // Mouse: hover to show, click to toggle (always bind — touchscreen laptops have mice too)
+    term.addEventListener('mouseenter', () => showTerm(term));
+    term.addEventListener('mouseleave', () => hideTerm(term));
+    term.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (term.classList.contains('term-visible')) {
+        hideTerm(term);
+      } else {
+        showTerm(term);
+      }
+    });
   });
 
   // Close on tap elsewhere
