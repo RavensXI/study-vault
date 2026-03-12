@@ -1074,6 +1074,7 @@ function initGlossary() {
   });
 
   // Close on tap elsewhere
+  var isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   document.addEventListener(isTouch ? 'touchend' : 'click', (e) => {
     if (activeTerm && !e.target.closest('.term')) {
       hideTerm(activeTerm);
