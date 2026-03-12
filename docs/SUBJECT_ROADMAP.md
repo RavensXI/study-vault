@@ -1,6 +1,6 @@
 # Subject Roadmap
 
-## Live (9 subjects, 270 lessons)
+## Live (10 subjects, 300 lessons)
 
 | Subject | Exam Board | Lessons | Units |
 |---------|-----------|---------|-------|
@@ -13,11 +13,12 @@
 | Religious Studies | AQA | 40 | 8 |
 | Music | Eduqas (WJEC) | 26 | 6 |
 | English Literature | AQA | 42 | 5 |
+| English Language | AQA | 30 | 4 |
 
 ## To Build
 
 ### Core
-- [ ] English Language — AQA
+- [x] English Language — AQA
 - [x] English Literature — AQA
 - [ ] Mathematics — Pearson Edexcel
 

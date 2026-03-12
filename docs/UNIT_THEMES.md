@@ -35,3 +35,7 @@
 | Eng Lit Animal Farm | `unit-english-literature-3` | `#4d7c0f` (green) |
 | Eng Lit Power & Conflict | `unit-english-literature-4` | `#9333ea` (purple) |
 | Eng Lit Unseen Poetry | `unit-english-literature-5` | `#b45309` (amber) |
+| Eng Lang Paper 1 Reading | `unit-english-language-1` | `#1e40af` (blue) |
+| Eng Lang Paper 1 Writing | `unit-english-language-2` | `#059669` (emerald) |
+| Eng Lang Paper 2 Reading | `unit-english-language-3` | `#b45309` (amber) |
+| Eng Lang Paper 2 Writing | `unit-english-language-4` | `#0891b2` (cyan) |

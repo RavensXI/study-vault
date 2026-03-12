@@ -477,7 +477,7 @@ Generate the complete lesson as a JSON object."""
         try:
             response = client.messages.create(
                 model=MODEL,
-                max_tokens=8192,
+                max_tokens=12000,
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_message}],
             )

@@ -495,4 +495,76 @@ GCSE revision lessons that need a NotebookLM podcast-style video overview.
 
 ---
 
-**Total: 194 lessons need video overviews**
+## English Language (AQA 8700)
+
+### Paper 1 Reading: Analysing Fiction (8 lessons)
+- [ ] **L1:** Explicit and Implicit Information
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/1
+- [ ] **L2:** The 'Big 5' Language Techniques
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/2
+- [ ] **L3:** Writing a Language Analysis Response
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/3
+- [ ] **L4:** Structural Features and the 'Big 5' for Structure
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/4
+- [ ] **L5:** Writing a Structure Analysis Response
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/5
+- [ ] **L6:** Evaluation — The Synoptic Question
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/6
+- [ ] **L7:** Writing an Evaluation Response
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/7
+- [ ] **L8:** Paper 1 Reading Practice — Full Section A
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/8
+
+### Paper 1 Writing: Creative Writing (7 lessons)
+- [ ] **L1:** The Power of Observation and Descriptive Writing
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/1
+- [ ] **L2:** Setting the Tone Through Vocabulary
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/2
+- [ ] **L3:** Punctuation for Effect — The Semicolon Split
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/3
+- [ ] **L4:** Sensory Language, Verbs and Show Don't Tell
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/4
+- [ ] **L5:** Crafting Similes and Figurative Language
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/5
+- [ ] **L6:** Narrative Structure — Drop, Shift, Zoom, Link
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/6
+- [ ] **L7:** Creative Writing Mastery — Countdown Narratives and Exam Practice
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-writing/7
+
+### Paper 2 Reading: Non-Fiction Analysis (8 lessons)
+- [ ] **L1:** True or False — Identifying Statements
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/1
+- [ ] **L2:** Inference and Summary Skills
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/2
+- [ ] **L3:** Inference Writing — Extending Your Analysis
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/3
+- [ ] **L4:** Language Analysis in Non-Fiction
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/4
+- [ ] **L5:** Writing a Non-Fiction Language Analysis
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/5
+- [ ] **L6:** Perspective and Comparison Skills
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/6
+- [ ] **L7:** Writing a Comparison Response
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/7
+- [ ] **L8:** Paper 2 Reading Practice — Full Section A
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-reading/8
+
+### Paper 2 Writing: Transactional Writing (7 lessons)
+- [ ] **L1:** Introduction to Rhetoric — Ethos, Logos, Pathos
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/1
+- [ ] **L2:** Rhetorical Devices in Action
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/2
+- [ ] **L3:** Structuring an Argument
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/3
+- [ ] **L4:** Writing Letters and Articles
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/4
+- [ ] **L5:** Writing Speeches and Essays
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/5
+- [ ] **L6:** Technical Accuracy — Vocabulary, Sentences and Punctuation
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/6
+- [ ] **L7:** Transactional Writing Practice — Full Response
+  - https://study-vault-alpha.vercel.app/lesson/english-language/paper-2-writing/7
+
+---
+
+**Total: 224 lessons need video overviews**

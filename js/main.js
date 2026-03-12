@@ -282,6 +282,15 @@ function initPracticeQuestions() {
       ['Anthology Comparison', 'anthology-comparison.html'],
       ['Unseen Poetry Analysis', 'unseen-poetry-analysis.html'],
       ['Unseen Poetry Comparison', 'unseen-poetry-comparison.html'],
+      // English Language (AQA 8700)
+      ['4 marks — Retrieval', 'retrieval.html'],
+      ['8 marks — Language Analysis', 'language-analysis.html'],
+      ['8 marks — Structure Analysis', 'structure-analysis.html'],
+      ['8 marks — Summary', 'summary.html'],
+      ['16 marks — Comparison', 'comparison.html'],
+      ['20 marks — Evaluation', 'evaluation.html'],
+      ['40 marks — Creative Writing', 'creative-writing.html'],
+      ['40 marks — Transactional Writing', 'transactional-writing.html'],
       // Music (Eduqas C660U)
       ['Multiple Choice', 'multiple-choice.html'],
       ['Identification', 'identification.html'],
@@ -1725,6 +1734,11 @@ function initRevisionTips() {
       { selector: '.key-fact', text: 'Turn this into a quote flashcard \u2014 the quote on one side, analysis and context on the other.', link: 'quote-flashcards.html', label: 'Quote Flashcards' },
       { selector: 'figure.diagram', text: 'Recreate this as a character or theme map from memory, adding your own textual evidence.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Use the points inside to write a timed practice paragraph \u2014 aim for 10 minutes.', link: 'timed-exam-practice.html', label: 'Timed Exam Practice', maxPerPage: 1 }
+    ],
+    'english-language': [
+      { selector: '.key-fact', text: 'Use retrieval practice to memorise key terminology and mark scheme criteria', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: '.timeline', text: 'Try dual coding to visualise language and structure techniques', link: 'dual-coding.html', label: 'Dual Coding' },
+      { selector: '.collapsible', text: 'Use elaborative interrogation to deepen your analysis of writer\u2019s methods', link: 'elaborative-interrogation.html', label: 'Elaborative Interrogation', maxPerPage: 1 }
     ]
   };
 
