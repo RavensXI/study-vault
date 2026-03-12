@@ -1622,6 +1622,7 @@ function initNavIcons() {
     'Revision Techniques': 'nav-revision-techniques'
   };
   navLinks.forEach(function (link) {
+    if (link.querySelector('.nav-icon')) return; // already initialised
     var text = link.textContent.trim();
     if (icons[text]) {
       var span = document.createElement('span');
