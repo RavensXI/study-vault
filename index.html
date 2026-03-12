@@ -13,19 +13,56 @@
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="apple-touch-icon" href="/images/icon-192.png">
   <style>
-    .home-tagline { text-align: center; color: #6b6560; font-size: 1rem; margin: 0.5rem 0 0; font-weight: 400; }
+    /* --- Home page --- */
     .home-subjects { max-width: 840px; margin: 0 auto; padding: 2rem 1.5rem 1rem; }
-    .home-subjects h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: #2d2a26; margin-bottom: 1.25rem; text-align: center; }
+    .home-section-header { display: flex; align-items: center; justify-content: center; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .home-section-header h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin: 0; }
+    .home-change-btn { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); background: none; border: 1px solid var(--border-light); border-radius: 999px; padding: 0.3em 0.85em; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
+    .home-change-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
     .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
-    .home-card { display: block; background: white; border-radius: 14px; overflow: hidden; text-decoration: none; color: #2d2a26; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+    .home-card { display: block; background: var(--bg-card); border-radius: 14px; overflow: hidden; text-decoration: none; color: var(--text-primary); box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
     .home-card-img { width: 100%; height: 140px; object-fit: cover; display: block; }
     .home-card-body { padding: 1rem 1.15rem 1.15rem; border-top: 3px solid var(--card-accent, #7c3aed); }
     .home-card h3 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.1rem; font-weight: 700; margin: 0 0 0.3rem; }
-    .home-card-board { font-size: 0.78rem; color: #6b6560; margin: 0 0 0.15rem; }
-    .home-card-detail { font-size: 0.78rem; color: #9a938c; margin: 0; }
-    body.dark-mode .home-card { background: var(--bg-card); }
-    body.dark-mode .home-card-body { border-top-color: var(--card-accent, #7c3aed); }
-    body.dark-mode .home-tagline { color: var(--text-muted); }
+    .home-card-board { font-size: 0.78rem; color: var(--text-secondary); margin: 0 0 0.15rem; }
+    .home-card-detail { font-size: 0.78rem; color: var(--text-muted); margin: 0; }
+
+    /* All subjects (secondary section when personalised) */
+    .home-all-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-lighter); }
+    .home-all-section h2 { font-size: 1.1rem; color: var(--text-secondary); }
+    .home-all-section .home-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 0.85rem; }
+    .home-all-section .home-card-img { height: 100px; }
+    .home-all-section .home-card-body { padding: 0.75rem 1rem 0.85rem; }
+    .home-all-section .home-card h3 { font-size: 0.95rem; }
+
+    /* --- Subject picker modal --- */
+    .picker-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    .picker-overlay.open { display: flex; align-items: center; justify-content: center; animation: sv-fade-in 0.2s ease both; }
+    .picker-modal { background: var(--bg-card); border-radius: 20px; max-width: 560px; width: calc(100% - 2rem); max-height: calc(100vh - 3rem); overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.18); animation: kc-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .picker-header { padding: 2rem 2rem 0.5rem; text-align: center; }
+    .picker-header h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.5rem; font-weight: 700; margin: 0 0 0.3rem; color: var(--text-primary); }
+    .picker-header p { font-size: 0.9rem; color: var(--text-secondary); margin: 0; line-height: 1.5; }
+    .picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem; padding: 1.25rem 2rem; }
+    .picker-item { position: relative; border: 2px solid var(--border-light); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s; background: var(--bg-card); }
+    .picker-item:hover { border-color: var(--text-muted); }
+    .picker-item.selected { border-color: var(--picker-accent, #2d2a26); box-shadow: 0 0 0 3px color-mix(in srgb, var(--picker-accent) 18%, transparent); }
+    .picker-item:active { transform: scale(0.97); }
+    .picker-item-img { width: 100%; height: 80px; object-fit: cover; display: block; }
+    .picker-item-label { padding: 0.55rem 0.7rem; font-family: 'Source Serif 4', Georgia, serif; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
+    .picker-check { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--picker-accent, #2d2a26); color: white; display: none; align-items: center; justify-content: center; }
+    .picker-item.selected .picker-check { display: flex; }
+    .picker-footer { padding: 0.75rem 2rem 1.75rem; text-align: center; }
+    .picker-done { font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; color: white; background: var(--text-primary); border: none; border-radius: 10px; padding: 0.75em 2em; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
+    .picker-done:hover { opacity: 0.85; }
+    .picker-done:active { transform: scale(0.97); }
+    .picker-done:disabled { opacity: 0.35; cursor: not-allowed; }
+    .picker-disclaimer { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; line-height: 1.5; }
+
+    @media (max-width: 480px) {
+      .picker-grid { grid-template-columns: repeat(2, 1fr); padding: 1rem 1.25rem; }
+      .picker-header { padding: 1.5rem 1.25rem 0.5rem; }
+      .picker-footer { padding: 0.75rem 1.25rem 1.5rem; }
+    }
   </style>
 </head>
 <body>
@@ -36,10 +73,13 @@
   </section>
 
   <!-- Subjects -->
-  <section class="home-subjects">
-    <h2 class="sv-reveal">Choose a subject</h2>
-    <div class="home-grid sv-stagger">
-      <a href="/browse/history" class="home-card sv-reveal" style="--card-accent: #c44536">
+  <section class="home-subjects" id="home-subjects">
+    <!-- JS will split this into "Your subjects" / "All subjects" if picker has been used -->
+    <div class="home-section-header" id="home-section-header">
+      <h2>Choose a subject</h2>
+    </div>
+    <div class="home-grid sv-stagger" id="home-grid">
+      <a href="/browse/history" class="home-card sv-reveal" data-subject="history" style="--card-accent: #c44536">
         <img class="home-card-img" src="/images/subject-history.jpg" alt="History" width="500" height="435" decoding="async">
         <div class="home-card-body">
           <h3>History</h3>
@@ -47,7 +87,7 @@
           <p class="home-card-detail">4 units &middot; 60 lessons</p>
         </div>
       </a>
-      <a href="/browse/business" class="home-card sv-reveal" style="--card-accent: #0891b2">
+      <a href="/browse/business" class="home-card sv-reveal" data-subject="business" style="--card-accent: #0891b2">
         <img class="home-card-img" src="/images/subject-business.jpg" alt="Business" width="500" height="278" decoding="async">
         <div class="home-card-body">
           <h3>Business</h3>
@@ -55,7 +95,7 @@
           <p class="home-card-detail">2 themes &middot; 30 lessons</p>
         </div>
       </a>
-      <a href="/browse/geography" class="home-card sv-reveal" style="--card-accent: #059669">
+      <a href="/browse/geography" class="home-card sv-reveal" data-subject="geography" style="--card-accent: #059669">
         <img class="home-card-img" src="/images/subject-geography.jpg" alt="Geography" width="500" height="500" decoding="async">
         <div class="home-card-body">
           <h3>Geography</h3>
@@ -63,7 +103,7 @@
           <p class="home-card-detail">2 papers &middot; 40 lessons</p>
         </div>
       </a>
-      <a href="/browse/sport-science" class="home-card sv-reveal" style="--card-accent: #ea580c">
+      <a href="/browse/sport-science" class="home-card sv-reveal" data-subject="sport-science" style="--card-accent: #ea580c">
         <img class="home-card-img" src="/images/subject-sport-science.jpg" alt="Sport Science" width="500" height="754" loading="lazy" decoding="async">
         <div class="home-card-body">
           <h3>Sport Science</h3>
@@ -71,7 +111,7 @@
           <p class="home-card-detail">1 unit &middot; 10 lessons</p>
         </div>
       </a>
-      <a href="/browse/drama" class="home-card sv-reveal" style="--card-accent: #7c3aed">
+      <a href="/browse/drama" class="home-card sv-reveal" data-subject="drama" style="--card-accent: #7c3aed">
         <img class="home-card-img" src="/images/subject-drama.jpg" alt="Drama" width="500" height="333" loading="lazy" decoding="async">
         <div class="home-card-body">
           <h3>Drama</h3>
@@ -79,7 +119,7 @@
           <p class="home-card-detail">2 units &middot; 12 lessons</p>
         </div>
       </a>
-      <a href="/browse/food-technology" class="home-card sv-reveal" style="--card-accent: #0d9488">
+      <a href="/browse/food-technology" class="home-card sv-reveal" data-subject="food-technology" style="--card-accent: #0d9488">
         <img class="home-card-img" src="/images/subject-food.jpg" alt="Food Preparation and Nutrition" width="500" height="358" loading="lazy" decoding="async">
         <div class="home-card-body">
           <h3>Food Preparation &amp; Nutrition</h3>
@@ -87,7 +127,7 @@
           <p class="home-card-detail">1 unit &middot; 10 lessons</p>
         </div>
       </a>
-      <a href="/browse/religious-education" class="home-card sv-reveal" style="--card-accent: #1e40af">
+      <a href="/browse/religious-education" class="home-card sv-reveal" data-subject="religious-education" style="--card-accent: #1e40af">
         <img class="home-card-img" src="/images/subject-religious-studies.jpg" alt="Religious Studies" width="500" height="353" loading="lazy" decoding="async">
         <div class="home-card-body">
           <h3>Religious Studies</h3>
@@ -95,7 +135,7 @@
           <p class="home-card-detail">8 units &middot; 40 lessons</p>
         </div>
       </a>
-      <a href="/browse/gcse-music" class="home-card sv-reveal" style="--card-accent: #9333ea">
+      <a href="/browse/gcse-music" class="home-card sv-reveal" data-subject="gcse-music" style="--card-accent: #9333ea">
         <img class="home-card-img" src="/images/subject-music.jpg" alt="Music" width="500" height="235" loading="lazy" decoding="async">
         <div class="home-card-body">
           <h3>Music</h3>
@@ -105,6 +145,62 @@
       </a>
     </div>
   </section>
+
+  <!-- Subject Picker Modal -->
+  <div class="picker-overlay" id="picker-overlay">
+    <div class="picker-modal">
+      <div class="picker-header">
+        <h2>Pick your subjects</h2>
+        <p>Select the subjects you're studying so we can personalise your homepage.</p>
+      </div>
+      <div class="picker-grid" id="picker-grid">
+        <div class="picker-item" data-subject="history" style="--picker-accent: #c44536">
+          <img class="picker-item-img" src="/images/subject-history.jpg" alt="History" decoding="async">
+          <div class="picker-item-label">History</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="business" style="--picker-accent: #0891b2">
+          <img class="picker-item-img" src="/images/subject-business.jpg" alt="Business" decoding="async">
+          <div class="picker-item-label">Business</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="geography" style="--picker-accent: #059669">
+          <img class="picker-item-img" src="/images/subject-geography.jpg" alt="Geography" decoding="async">
+          <div class="picker-item-label">Geography</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="sport-science" style="--picker-accent: #ea580c">
+          <img class="picker-item-img" src="/images/subject-sport-science.jpg" alt="Sport Science" decoding="async">
+          <div class="picker-item-label">Sport Science</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="drama" style="--picker-accent: #7c3aed">
+          <img class="picker-item-img" src="/images/subject-drama.jpg" alt="Drama" decoding="async">
+          <div class="picker-item-label">Drama</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="food-technology" style="--picker-accent: #0d9488">
+          <img class="picker-item-img" src="/images/subject-food.jpg" alt="Food Tech" decoding="async">
+          <div class="picker-item-label">Food Tech</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="religious-education" style="--picker-accent: #1e40af">
+          <img class="picker-item-img" src="/images/subject-religious-studies.jpg" alt="Religious Studies" decoding="async">
+          <div class="picker-item-label">Religious Studies</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="gcse-music" style="--picker-accent: #9333ea">
+          <img class="picker-item-img" src="/images/subject-music.jpg" alt="Music" decoding="async">
+          <div class="picker-item-label">Music</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+      </div>
+      <div class="picker-footer">
+        <button class="picker-done" id="picker-done" disabled>Done</button>
+        <p class="picker-disclaimer">Your choices are saved in this browser. Clearing your browsing data will reset this, and you'll be asked to pick again.</p>
+      </div>
+    </div>
+  </div>
 
   <footer class="site-footer">
     <div class="site-footer-inner">
@@ -121,5 +217,138 @@
   <script src="js/main.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
+  <script>
+  (function() {
+    'use strict';
+
+    var STORAGE_KEY = 'studyvault-subjects';
+    var overlay = document.getElementById('picker-overlay');
+    var doneBtn = document.getElementById('picker-done');
+    var pickerGrid = document.getElementById('picker-grid');
+    var subjectsSection = document.getElementById('home-subjects');
+    var headerEl = document.getElementById('home-section-header');
+    var gridEl = document.getElementById('home-grid');
+
+    // --- Read saved subjects ---
+    function getSaved() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch(e) { return null; }
+    }
+
+    function save(subjects) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(subjects));
+    }
+
+    // --- Picker modal ---
+    function openPicker() {
+      // Pre-select any already-saved subjects
+      var saved = getSaved() || [];
+      pickerGrid.querySelectorAll('.picker-item').forEach(function(item) {
+        item.classList.toggle('selected', saved.indexOf(item.dataset.subject) !== -1);
+      });
+      updateDoneBtn();
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closePicker() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function updateDoneBtn() {
+      var count = pickerGrid.querySelectorAll('.picker-item.selected').length;
+      doneBtn.disabled = count === 0;
+      doneBtn.textContent = count === 0 ? 'Pick at least one' : 'Done' + (count > 0 ? ' (' + count + ')' : '');
+    }
+
+    // Toggle selection on click
+    pickerGrid.addEventListener('click', function(e) {
+      var item = e.target.closest('.picker-item');
+      if (!item) return;
+      item.classList.toggle('selected');
+      updateDoneBtn();
+    });
+
+    // Done button
+    doneBtn.addEventListener('click', function() {
+      var selected = [];
+      pickerGrid.querySelectorAll('.picker-item.selected').forEach(function(item) {
+        selected.push(item.dataset.subject);
+      });
+      if (selected.length === 0) return;
+      save(selected);
+      closePicker();
+      renderPersonalised(selected);
+    });
+
+    // Close on overlay click (not modal)
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        // Only allow close if subjects already saved (not first-time)
+        if (getSaved()) closePicker();
+      }
+    });
+
+    // Close on Escape (only if subjects already saved)
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay.classList.contains('open') && getSaved()) {
+        closePicker();
+      }
+    });
+
+    // --- Render personalised homepage ---
+    function renderPersonalised(subjects) {
+      var allCards = Array.from(gridEl.querySelectorAll('.home-card'));
+      var yourCards = [];
+      var otherCards = [];
+
+      allCards.forEach(function(card) {
+        if (subjects.indexOf(card.dataset.subject) !== -1) {
+          yourCards.push(card);
+        } else {
+          otherCards.push(card);
+        }
+      });
+
+      // Update header
+      headerEl.innerHTML = '<h2>Your subjects</h2><button class="home-change-btn" id="change-subjects-btn">Change</button>';
+      document.getElementById('change-subjects-btn').addEventListener('click', openPicker);
+
+      // Move your cards to top grid
+      gridEl.innerHTML = '';
+      yourCards.forEach(function(card) { gridEl.appendChild(card); });
+
+      // Build "All subjects" section if there are others
+      var existingAll = subjectsSection.querySelector('.home-all-section');
+      if (existingAll) existingAll.remove();
+
+      if (otherCards.length > 0) {
+        var allSection = document.createElement('div');
+        allSection.className = 'home-all-section';
+        allSection.innerHTML = '<div class="home-section-header"><h2>All subjects</h2></div>';
+        var allGrid = document.createElement('div');
+        allGrid.className = 'home-grid';
+        otherCards.forEach(function(card) { allGrid.appendChild(card); });
+        allSection.appendChild(allGrid);
+        subjectsSection.appendChild(allSection);
+      }
+
+      // Re-trigger reveal animations
+      if (typeof initRevealAnimations === 'function') initRevealAnimations();
+    }
+
+    // --- Init ---
+    var saved = getSaved();
+    if (!saved) {
+      // First visit: show picker after a short delay (let page animate in)
+      setTimeout(openPicker, 600);
+    } else {
+      renderPersonalised(saved);
+    }
+  })();
+  </script>
 </body>
 </html>
