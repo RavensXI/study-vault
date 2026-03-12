@@ -46,16 +46,21 @@ function initLessonFeatures() {
 window.initLessonFeatures = initLessonFeatures;
 window.initNavIcons = initNavIcons;
 
-/* --- Scroll Progress Bar --- */
+/* --- Scroll Progress Bar + Header Elevation --- */
 function initScrollProgress() {
   const bar = document.querySelector('.scroll-progress');
-  if (!bar) return;
+  const header = document.querySelector('.page-header');
 
   function updateProgress() {
     const scrollTop = window.scrollY;
-    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
-    bar.style.width = Math.min(pct, 100) + '%';
+    if (bar) {
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      bar.style.width = Math.min(pct, 100) + '%';
+    }
+    if (header) {
+      header.classList.toggle('scrolled', scrollTop > 8);
+    }
   }
 
   window.addEventListener('scroll', updateProgress, { passive: true });
@@ -564,6 +569,7 @@ function initNarration() {
   var audio = playerEl.querySelector('.narration-audio');
   var playBtn = playerEl.querySelector('.narration-play');
   var progressFill = playerEl.querySelector('.narration-progress-fill');
+  var progressBar = playerEl.querySelector('.narration-progress');
   var timeEl = playerEl.querySelector('.narration-time');
   var speedBtn = playerEl.querySelector('.narration-speed');
 
@@ -750,6 +756,7 @@ function initNarration() {
     var gt = globalTime();
     var pct = (gt / totalDuration * 100) + '%';
     progressFill.style.width = pct;
+    if (progressBar) progressBar.style.setProperty('--progress-pct', pct);
     timeEl.textContent = fmtTime(gt) + ' / ' + fmtTime(totalDuration);
     fabFill.style.width = pct;
     fabTime.textContent = fmtTime(gt);
