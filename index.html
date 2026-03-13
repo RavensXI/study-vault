@@ -47,6 +47,9 @@
     .picker-item:hover { border-color: var(--text-muted); }
     .picker-item.selected { border-color: var(--picker-accent, #2d2a26); box-shadow: 0 0 0 3px color-mix(in srgb, var(--picker-accent) 18%, transparent); }
     .picker-item:active { transform: scale(0.97); }
+    .picker-item.locked { cursor: default; opacity: 0.85; }
+    .picker-item.locked .picker-check { background: var(--text-muted); }
+    .picker-item.locked::after { content: 'Core'; position: absolute; bottom: 6px; right: 6px; font-size: 0.62rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-family: 'Inter', sans-serif; }
     .picker-item-img { width: 100%; height: 80px; object-fit: cover; display: block; }
     .picker-item-label { padding: 0.55rem 0.7rem; font-family: 'Source Serif 4', Georgia, serif; font-size: 0.88rem; font-weight: 700; color: var(--text-primary); }
     .picker-check { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--picker-accent, #2d2a26); color: white; display: none; align-items: center; justify-content: center; }
@@ -274,12 +277,19 @@
     'use strict';
 
     var STORAGE_KEY = 'studyvault-subjects';
+    var LOCKED_SUBJECTS = ['english-literature', 'english-language', 'science'];
     var overlay = document.getElementById('picker-overlay');
     var doneBtn = document.getElementById('picker-done');
     var pickerGrid = document.getElementById('picker-grid');
     var subjectsSection = document.getElementById('home-subjects');
     var headerEl = document.getElementById('home-section-header');
     var gridEl = document.getElementById('home-grid');
+
+    // Mark locked subjects in picker
+    LOCKED_SUBJECTS.forEach(function(slug) {
+      var item = pickerGrid.querySelector('[data-subject="' + slug + '"]');
+      if (item) { item.classList.add('selected', 'locked'); }
+    });
 
     // --- Read saved subjects ---
     function getSaved() {
@@ -295,10 +305,11 @@
 
     // --- Picker modal ---
     function openPicker() {
-      // Pre-select any already-saved subjects
+      // Pre-select any already-saved subjects (locked are always selected)
       var saved = getSaved() || [];
       pickerGrid.querySelectorAll('.picker-item').forEach(function(item) {
-        item.classList.toggle('selected', saved.indexOf(item.dataset.subject) !== -1);
+        var isLocked = LOCKED_SUBJECTS.indexOf(item.dataset.subject) !== -1;
+        item.classList.toggle('selected', isLocked || saved.indexOf(item.dataset.subject) !== -1);
       });
       updateDoneBtn();
       overlay.classList.add('open');
@@ -316,10 +327,11 @@
       doneBtn.textContent = count === 0 ? 'Pick at least one' : 'Done' + (count > 0 ? ' (' + count + ')' : '');
     }
 
-    // Toggle selection on click
+    // Toggle selection on click (locked subjects can't be deselected)
     pickerGrid.addEventListener('click', function(e) {
       var item = e.target.closest('.picker-item');
       if (!item) return;
+      if (item.classList.contains('locked')) return;
       item.classList.toggle('selected');
       updateDoneBtn();
     });
@@ -329,6 +341,10 @@
       var selected = [];
       pickerGrid.querySelectorAll('.picker-item.selected').forEach(function(item) {
         selected.push(item.dataset.subject);
+      });
+      // Ensure locked subjects are always included
+      LOCKED_SUBJECTS.forEach(function(slug) {
+        if (selected.indexOf(slug) === -1) selected.push(slug);
       });
       if (selected.length === 0) return;
       save(selected);
@@ -398,6 +414,12 @@
       // First visit: show picker after a short delay (let page animate in)
       setTimeout(openPicker, 600);
     } else {
+      // Ensure locked subjects are in saved list (covers existing users)
+      var updated = false;
+      LOCKED_SUBJECTS.forEach(function(slug) {
+        if (saved.indexOf(slug) === -1) { saved.push(slug); updated = true; }
+      });
+      if (updated) save(saved);
       renderPersonalised(saved);
     }
   })();
