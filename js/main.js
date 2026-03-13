@@ -1026,10 +1026,12 @@ function initGlossary() {
       popup.style.opacity = '';
       popup.style.pointerEvents = '';
 
-      // Calculate clamped position
+      // Calculate clamped position — use content container, not full viewport
+      const contentEl = term.closest('.lesson-content') || term.closest('main') || document.body;
+      const contentRight = contentEl.getBoundingClientRect().right;
       const termCentre = rect.left + rect.width / 2;
       let popupLeft = termCentre - popupWidth / 2;
-      popupLeft = Math.max(8, Math.min(popupLeft, window.innerWidth - popupWidth - 8));
+      popupLeft = Math.max(8, Math.min(popupLeft, contentRight - popupWidth - 8));
 
       popup.style.left = (popupLeft - rect.left) + 'px';
       popup.style.transform = 'none';
