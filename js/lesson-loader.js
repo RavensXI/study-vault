@@ -204,10 +204,14 @@
     if (lesson.youtube_video_id) {
       var videoSection = document.getElementById('sidebar-video-section');
       var iframe = document.getElementById('sidebar-video-iframe');
+      var isGDrive = lesson.youtube_video_id.indexOf('drive.google.com') !== -1;
       iframe.src = lesson.youtube_video_id.startsWith('http')
         ? lesson.youtube_video_id
         : 'https://www.youtube.com/embed/' + lesson.youtube_video_id;
       iframe.title = lesson.title;
+      if (isGDrive) {
+        iframe.closest('.sidebar-video').classList.add('sidebar-video--gdrive');
+      }
       videoSection.style.display = '';
     }
 
