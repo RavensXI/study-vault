@@ -1007,14 +1007,15 @@ function initGlossary() {
 
     const rects = term.getClientRects();
     const rect = term.getBoundingClientRect();
-    // Use first line fragment for positioning when term wraps across lines
-    const posRect = rects.length > 0 ? rects[0] : rect;
     const popup = term.querySelector('.term-popup');
+    // For wrapped inline elements, absolute positioning is relative to the
+    // first line fragment, not the bounding box — use that as our reference
+    const refLeft = rects.length > 1 ? rects[0].left : rect.left;
 
     // Vertical: flip below if near top of viewport
     term.classList.toggle('term-flip', rect.top < 100);
 
-    // Horizontal: position popup within viewport
+    // Horizontal: position popup within content area
     if (popup) {
       // Reset to default positioning first so we can measure natural width
       popup.style.left = '';
@@ -1029,15 +1030,15 @@ function initGlossary() {
       popup.style.opacity = '';
       popup.style.pointerEvents = '';
 
-      // Calculate clamped position — use content container, not full viewport
-      // posRect targets the first line fragment so wrapped terms don't drift
+      // Centre over the term (or first fragment if wrapped), clamp to content area
       const contentEl = term.closest('.lesson-content') || term.closest('main') || document.body;
       const contentRight = contentEl.getBoundingClientRect().right;
-      const termCentre = posRect.left + posRect.width / 2;
+      const anchorRect = rects.length > 1 ? rects[0] : rect;
+      const termCentre = anchorRect.left + anchorRect.width / 2;
       let popupLeft = termCentre - popupWidth / 2;
       popupLeft = Math.max(8, Math.min(popupLeft, contentRight - popupWidth - 8));
 
-      popup.style.left = (popupLeft - rect.left) + 'px';
+      popup.style.left = (popupLeft - refLeft) + 'px';
       popup.style.transform = 'none';
       term.classList.add('term-visible');
     } else {
