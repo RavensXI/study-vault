@@ -200,11 +200,13 @@
     window.practiceQuestions = lesson.practice_questions || [];
     window.knowledgeCheck = lesson.knowledge_checks || [];
 
-    // YouTube video
+    // Video overview (YouTube ID or full embed URL e.g. Google Drive)
     if (lesson.youtube_video_id) {
       var videoSection = document.getElementById('sidebar-video-section');
       var iframe = document.getElementById('sidebar-video-iframe');
-      iframe.src = 'https://www.youtube.com/embed/' + lesson.youtube_video_id;
+      iframe.src = lesson.youtube_video_id.startsWith('http')
+        ? lesson.youtube_video_id
+        : 'https://www.youtube.com/embed/' + lesson.youtube_video_id;
       iframe.title = lesson.title;
       videoSection.style.display = '';
     }
