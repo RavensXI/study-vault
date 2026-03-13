@@ -297,6 +297,13 @@ function initPracticeQuestions() {
       ['Short Feature Identification', 'short-feature-identification.html'],
       ['Extended Listening Response', 'extended-listening-response.html'],
       ['Prepared Extract', 'prepared-extract.html'],
+      // AQA Science (Combined + Separate)
+      ['1 mark \u2014 Recall', 'recall-1-mark.html'],
+      ['2 marks \u2014 Describe', 'describe-2-marks.html'],
+      ['2 marks \u2014 Calculate', 'calculate-2-marks.html'],
+      ['3 marks \u2014 Explain', 'explain-3-marks.html'],
+      ['4 marks \u2014 Compare', 'compare-and-explain-4-marks.html'],
+      ['6 marks \u2014 Extended', 'extended-response-6-marks.html'],
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],
@@ -1741,6 +1748,16 @@ function initRevisionTips() {
       { selector: '.key-fact', text: 'Use retrieval practice to memorise key terminology and mark scheme criteria', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
       { selector: '.timeline', text: 'Try dual coding to visualise language and structure techniques', link: 'dual-coding.html', label: 'Dual Coding' },
       { selector: '.collapsible', text: 'Use elaborative interrogation to deepen your analysis of writer\u2019s methods', link: 'elaborative-interrogation.html', label: 'Elaborative Interrogation', maxPerPage: 1 }
+    ],
+    'science': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each part and adding the key equations.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Turn the facts inside into a set of flashcards \u2014 question on one side, answer on the other.', link: 'active-recall-flashcards.html', label: 'Active Recall', maxPerPage: 1 }
+    ],
+    'separate-sciences': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each part and adding the key equations.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Turn the facts inside into a set of flashcards \u2014 question on one side, answer on the other.', link: 'active-recall-flashcards.html', label: 'Active Recall', maxPerPage: 1 }
     ]
   };
 

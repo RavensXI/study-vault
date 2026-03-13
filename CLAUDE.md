@@ -13,7 +13,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, password-gated admin/teacher areas, 10 subjects.
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, password-gated admin/teacher areas, 12 subjects.
 
 ## Subjects (all complete, all on Vercel)
 
@@ -29,15 +29,17 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 |
 | English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 1/42 |
 | English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 1/30 |
-| **Total** | | **300** | **35** | **66/300** |
+| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 0/48 |
+| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 |
+| **Total** | | **370** | **44** | **66/370** |
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~9,500 MP3s on R2), Gemini diagrams, hero images, exam technique guides, revision technique guides, related media.
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~11,700 MP3s on R2), Gemini diagrams, hero images, exam technique guides, revision technique guides, related media.
 
 ## Dynamic Architecture (LIVE on Vercel)
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **300 lessons** + **162 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`).
+- **370 lessons** + **194 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth:** Public content (no login for students). Admin pages gated by `ADMIN_PASSWORD` env var, teacher pages by `TEACHER_PASSWORD` — via `js/auth-gate.js` + `api/auth/login.js`. Teacher setup flow in `js/teacher-setup.js` (name + subject + unit picker). Microsoft SSO still pending Entra admin consent.
@@ -48,9 +50,10 @@ All content served from Supabase. Static HTML files remain as backup.
 ## Active TODO
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **NotebookLM videos**: 222 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
+- **NotebookLM videos**: 292 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
+- **LaTeX formulae (KaTeX)**: Add KaTeX library for proper maths/science equation rendering. Convert existing HTML entity equations (sub/sup/&times;) to LaTeX across Science, Separate Sciences, and any other subjects with formulae. Update generation prompt to output LaTeX for equations.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
 
 ## API Keys
