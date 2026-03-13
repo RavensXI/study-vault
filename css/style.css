@@ -1183,15 +1183,99 @@ body[class*="overlay-"] .sidebar-section {
   overflow: hidden;
 }
 
-/* Google Drive embed: block pop-out click */
-.sidebar-video--gdrive::after {
-  content: '';
+/* Google Drive embed: thumbnail + play button in sidebar */
+.sidebar-video--gdrive {
+  cursor: pointer;
+}
+.sidebar-video-thumb {
   position: absolute;
   top: 0;
-  right: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.sidebar-video-play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 52px;
-  height: 48px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.sidebar-video-play svg {
+  width: 22px;
+  height: 22px;
+  margin-left: 3px;
+}
+.sidebar-video--gdrive:hover .sidebar-video-play {
+  background: var(--accent, rgba(0, 0, 0, 0.8));
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* Video modal overlay */
+.video-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+.video-modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.video-modal-container {
+  position: relative;
+  width: 90vw;
+  max-width: 960px;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #000;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  transform: scale(0.92);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.video-modal-overlay.active .video-modal-container {
+  transform: scale(1);
+}
+.video-modal-iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.video-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  line-height: 1;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
   z-index: 1;
+}
+.video-modal-close:hover {
+  opacity: 1;
 }
 
 /* --- Sidebar Collapsible Media --- */

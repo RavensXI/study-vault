@@ -205,12 +205,34 @@
       var videoSection = document.getElementById('sidebar-video-section');
       var iframe = document.getElementById('sidebar-video-iframe');
       var isGDrive = lesson.youtube_video_id.indexOf('drive.google.com') !== -1;
-      iframe.src = lesson.youtube_video_id.startsWith('http')
+      var embedSrc = lesson.youtube_video_id.startsWith('http')
         ? lesson.youtube_video_id
         : 'https://www.youtube.com/embed/' + lesson.youtube_video_id;
-      iframe.title = lesson.title;
+
       if (isGDrive) {
-        iframe.closest('.sidebar-video').classList.add('sidebar-video--gdrive');
+        // Google Drive: show thumbnail with play button, open modal on click
+        var container = iframe.closest('.sidebar-video');
+        container.classList.add('sidebar-video--gdrive');
+        iframe.remove();
+
+        // Extract file ID for thumbnail
+        var fileIdMatch = lesson.youtube_video_id.match(/\/d\/([^/]+)/);
+        var thumbUrl = fileIdMatch
+          ? 'https://drive.google.com/thumbnail?id=' + fileIdMatch[1] + '&sz=w600'
+          : '';
+
+        container.innerHTML =
+          '<img class="sidebar-video-thumb" src="' + thumbUrl + '" alt="Video overview">' +
+          '<button class="sidebar-video-play" aria-label="Play video overview">' +
+            '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>' +
+          '</button>';
+
+        container.addEventListener('click', function () {
+          openVideoModal(embedSrc, lesson.title);
+        });
+      } else {
+        iframe.src = embedSrc;
+        iframe.title = lesson.title;
       }
       videoSection.style.display = '';
     }
@@ -352,6 +374,48 @@
 
   function escapeAttr(str) {
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // ---- Video modal (Google Drive) ----
+  function openVideoModal(src, title) {
+    // Create overlay if it doesn't exist yet
+    var overlay = document.getElementById('video-modal-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'video-modal-overlay';
+      overlay.className = 'video-modal-overlay';
+      overlay.innerHTML =
+        '<button class="video-modal-close" aria-label="Close">&times;</button>' +
+        '<div class="video-modal-container">' +
+          '<iframe class="video-modal-iframe" src="" title="" allow="autoplay; fullscreen" allowfullscreen></iframe>' +
+        '</div>';
+      document.body.appendChild(overlay);
+
+      overlay.querySelector('.video-modal-close').addEventListener('click', closeVideoModal);
+      overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeVideoModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && overlay.classList.contains('active')) closeVideoModal();
+      });
+    }
+
+    var iframe = overlay.querySelector('.video-modal-iframe');
+    iframe.src = src;
+    iframe.title = title || 'Video overview';
+    requestAnimationFrame(function () {
+      overlay.classList.add('active');
+    });
+  }
+
+  function closeVideoModal() {
+    var overlay = document.getElementById('video-modal-overlay');
+    if (!overlay) return;
+    overlay.classList.remove('active');
+    // Stop playback after transition
+    setTimeout(function () {
+      overlay.querySelector('.video-modal-iframe').src = '';
+    }, 300);
   }
 
   // ---- Main ----
