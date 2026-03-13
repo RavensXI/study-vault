@@ -39,8 +39,11 @@ module.exports = async function handler(req, res) {
   };
 
   // If text was parsed client-side, store it directly
+  // For chunked uploads, initialise as empty string (chunks appended via upload-chunk.js)
   if (extracted_text) {
     record.extracted_text = extracted_text;
+  } else if (chunked) {
+    record.extracted_text = '';
   }
   // School from form dropdown (preferred), falling back to auth profile
   record.school_id = body_school_id || auth.profile.school_id || null;
