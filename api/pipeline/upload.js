@@ -18,8 +18,10 @@ module.exports = async function handler(req, res) {
 
   // Client-side parsing: extracted_text provided → skip straight to 'parsed'
   // Legacy server-side parsing: storage_path provided → start at 'uploaded'
-  if (!extracted_text && !storage_path) {
-    return res.status(400).json({ error: 'Either extracted_text or storage_path is required' });
+  // Chunked upload: chunked=true → create job with no text, chunks sent via upload-chunk.js
+  const chunked = req.body.chunked;
+  if (!extracted_text && !storage_path && !chunked) {
+    return res.status(400).json({ error: 'Either extracted_text, storage_path, or chunked flag is required' });
   }
 
   // Generate a slug from the subject name
@@ -33,7 +35,7 @@ module.exports = async function handler(req, res) {
     subject_slug,
     subject_config: { subject_name, exam_board, spec_code },
     ppt_storage_path: storage_path || null,
-    current_phase: extracted_text ? 'parsed' : 'uploaded',
+    current_phase: extracted_text ? 'parsed' : chunked ? 'uploading_chunks' : 'uploaded',
   };
 
   // If text was parsed client-side, store it directly

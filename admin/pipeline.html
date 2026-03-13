@@ -391,8 +391,9 @@
         });
       }
 
-      // Duplicate detection: same name + same size = exact duplicate, auto-exclude extras
-      // Same name but different size = flag as duplicate but let teacher decide
+      // Duplicate detection:
+      // 1. Same name + same size = exact duplicate → auto-exclude extras
+      // 2. Same name + different size = keep largest, auto-exclude smaller copies
       var dupeMap = {};
       for (var d = 0; d < scanned.length; d++) {
         var key = scanned[d].name.toLowerCase();
@@ -409,23 +410,47 @@
             if (!sizeGroups[sz]) sizeGroups[sz] = [];
             sizeGroups[sz].push(indices[di]);
           }
+
+          // Within each size group, keep first and exclude rest (exact duplicates)
           for (var sz in sizeGroups) {
             var group = sizeGroups[sz];
             if (group.length > 1) {
-              // Exact duplicates (same name + same size): keep first, auto-exclude rest
               for (var gi = 1; gi < group.length; gi++) {
                 scanned[group[gi]].isDuplicate = true;
-                if (!scanned[group[gi]].autoExcluded) {
-                  scanned[group[gi]].autoExcluded = true;
-                  scanned[group[gi]].included = false;
-                  scanned[group[gi]].excludeReason = 'Exact duplicate';
-                  scanned[group[gi]].category = 'duplicate';
+                scanned[group[gi]].autoExcluded = true;
+                scanned[group[gi]].included = false;
+                scanned[group[gi]].excludeReason = 'Exact duplicate';
+                scanned[group[gi]].category = 'duplicate';
+              }
+              scanned[group[0]].isDuplicate = false;
+            }
+          }
+
+          // Across different size groups (same name, different size):
+          // keep the largest file, auto-exclude the rest
+          var sizeKeys = Object.keys(sizeGroups);
+          if (sizeKeys.length > 1) {
+            // Find which size group has the largest file
+            var largestSize = 0;
+            for (var sk = 0; sk < sizeKeys.length; sk++) {
+              var s = parseInt(sizeKeys[sk], 10);
+              if (s > largestSize) largestSize = s;
+            }
+            for (var sk2 = 0; sk2 < sizeKeys.length; sk2++) {
+              var sz2 = parseInt(sizeKeys[sk2], 10);
+              var group2 = sizeGroups[sizeKeys[sk2]];
+              if (sz2 < largestSize) {
+                // Smaller version — exclude all copies
+                for (var gi2 = 0; gi2 < group2.length; gi2++) {
+                  if (!scanned[group2[gi2]].autoExcluded) {
+                    scanned[group2[gi2]].isDuplicate = true;
+                    scanned[group2[gi2]].autoExcluded = true;
+                    scanned[group2[gi2]].included = false;
+                    scanned[group2[gi2]].excludeReason = 'Smaller duplicate (' + formatFileSize(sz2) + ' vs ' + formatFileSize(largestSize) + ')';
+                    scanned[group2[gi2]].category = 'duplicate';
+                  }
                 }
               }
-              scanned[group[0]].isDuplicate = false; // first copy is not flagged
-            } else {
-              // Same name, different size: flag but don't auto-exclude
-              scanned[group[0]].isDuplicate = true;
             }
           }
         }
@@ -662,6 +687,7 @@
             '<li><strong>.pdf</strong> works but loses formatting</li>' +
             '<li>Legacy <strong>.ppt</strong> / <strong>.doc</strong> files need re-saving as .pptx / .docx first</li>' +
             '<li>Max <strong>5 GB</strong> per file</li>' +
+            '<li>Recommended: under <strong>500 files</strong> and <strong>2 GB total</strong> per upload for reliable browser parsing. For larger uploads, use <code>parse_job_local.js</code></li>' +
           '</ul>' +
           '<h4>Folder uploads</h4>' +
           '<ul>' +
@@ -1463,14 +1489,52 @@
 
         var extractedText = allText.join('\n\n\n');
 
-        var job = await apiCall('/api/pipeline/upload', {
-          subject_name: formValues.subject_name,
-          exam_board: formValues.exam_board,
-          spec_code: formValues.spec_code,
-          school_id: formValues.school_id || null,
-          filename: filenames.join(', '),
-          extracted_text: extractedText
-        });
+        // Chunked upload if text exceeds 3 MB (safe margin under Vercel's 4.5 MB body limit)
+        var CHUNK_THRESHOLD = 3 * 1024 * 1024;
+        var job;
+
+        if (extractedText.length > CHUNK_THRESHOLD) {
+          // Create job without text first
+          job = await apiCall('/api/pipeline/upload', {
+            subject_name: formValues.subject_name,
+            exam_board: formValues.exam_board,
+            spec_code: formValues.spec_code,
+            school_id: formValues.school_id || null,
+            filename: filenames.join(', '),
+            chunked: true
+          });
+
+          // Send text in 2 MB chunks
+          var CHUNK_SIZE = 2 * 1024 * 1024;
+          var totalChunks = Math.ceil(extractedText.length / CHUNK_SIZE);
+
+          for (var ci = 0; ci < totalChunks; ci++) {
+            var chunkText = extractedText.slice(ci * CHUNK_SIZE, (ci + 1) * CHUNK_SIZE);
+            var isLast = ci === totalChunks - 1;
+
+            renderParseProgress(included.length, included.length,
+              'Uploading text\u2026 chunk ' + (ci + 1) + '/' + totalChunks +
+              ' (' + formatFileSize(extractedText.length) + ' total)');
+
+            await apiCall('/api/pipeline/upload-chunk', {
+              job_id: job.job_id,
+              chunk: chunkText,
+              chunk_index: ci,
+              total_chunks: totalChunks,
+              is_last: isLast
+            });
+          }
+        } else {
+          // Standard single-request upload
+          job = await apiCall('/api/pipeline/upload', {
+            subject_name: formValues.subject_name,
+            exam_board: formValues.exam_board,
+            spec_code: formValues.spec_code,
+            school_id: formValues.school_id || null,
+            filename: filenames.join(', '),
+            extracted_text: extractedText
+          });
+        }
 
         var status = await apiCall('/api/pipeline/status?job_id=' + job.job_id);
         currentJob = status.job;
