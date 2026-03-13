@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     subject_slug,
     subject_config: { subject_name, exam_board, spec_code },
     ppt_storage_path: storage_path || null,
-    current_phase: extracted_text ? 'parsed' : chunked ? 'uploading_chunks' : 'uploaded',
+    current_phase: extracted_text ? 'parsed' : 'uploaded',
   };
 
   // If text was parsed client-side, store it directly
