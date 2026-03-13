@@ -396,7 +396,7 @@ GCSE revision lessons that need a NotebookLM podcast-style video overview.
 
 ### Macbeth
 
-- [ ] **L1:** Context & the Supernatural
+- [x] **L1:** Context & the Supernatural *(Google Drive)*
   - https://study-vault-alpha.vercel.app/lesson/english-literature/macbeth/1
 - [ ] **L2:** Ambition & the Prophecies
   - https://study-vault-alpha.vercel.app/lesson/english-literature/macbeth/2
@@ -498,7 +498,7 @@ GCSE revision lessons that need a NotebookLM podcast-style video overview.
 ## English Language (AQA 8700)
 
 ### Paper 1 Reading: Analysing Fiction (8 lessons)
-- [ ] **L1:** Explicit and Implicit Information
+- [x] **L1:** Explicit and Implicit Information *(Google Drive)*
   - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/1
 - [ ] **L2:** The 'Big 5' Language Techniques
   - https://study-vault-alpha.vercel.app/lesson/english-language/paper-1-reading/2
@@ -567,4 +567,4 @@ GCSE revision lessons that need a NotebookLM podcast-style video overview.
 
 ---
 
-**Total: 224 lessons need video overviews**
+**Total: 222 lessons need video overviews**

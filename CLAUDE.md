@@ -27,9 +27,9 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 1/10 |
 | Religious Education | AQA 8062 | 40 | 8 | 1/40 |
 | Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 |
-| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 |
-| English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 0/30 |
-| **Total** | | **300** | **35** | **64/300** |
+| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 1/42 |
+| English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 1/30 |
+| **Total** | | **300** | **35** | **66/300** |
 
 Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~9,500 MP3s on R2), Gemini diagrams, hero images, exam technique guides, revision technique guides, related media.
 
@@ -48,7 +48,7 @@ All content served from Supabase. Static HTML files remain as backup.
 ## Active TODO
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **NotebookLM videos**: 224 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
+- **NotebookLM videos**: 222 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
@@ -109,4 +109,10 @@ All in environment variables — never commit.
 
 ## Sidebar Structure
 
-Three sections: **Knowledge Check** (button → modal), **Related Media** (collapsible categories), **Video** (YouTube embed). Do NOT add a "Key Facts" section. See `docs/RELATED_MEDIA_PIPELINE.md` for media curation.
+Three sections: **Knowledge Check** (button → modal), **Related Media** (collapsible categories), **Video** (YouTube embed or Google Drive modal). Do NOT add a "Key Facts" section. See `docs/RELATED_MEDIA_PIPELINE.md` for media curation.
+
+## Video Embeds
+
+- **YouTube:** Store YouTube video ID in `lessons.youtube_video_id`. Renders inline iframe in sidebar.
+- **Google Drive:** Store full Google Drive `/preview` URL in `lessons.youtube_video_id` (e.g. `https://drive.google.com/file/d/{FILE_ID}/preview`). `lesson-loader.js` detects `drive.google.com`, shows thumbnail + play button in sidebar, opens video in a large modal overlay on click. CSS class `sidebar-video--gdrive`.
+- **Sharing:** Google Drive files must be set to "Anyone with the link can view" for embed to work.
