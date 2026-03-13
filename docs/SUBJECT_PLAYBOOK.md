@@ -80,6 +80,17 @@ While agents run, actively monitor:
 When all flags are green (or all automated ones — media may still be running):
 ```bash
 python scripts/pipeline_generate.py status <job_id>   # Verify flags
+```
+
+**Set unit images** — each unit needs an `image_url` for the browse page cards. Use lesson 1's hero image:
+```python
+for unit in units:
+    l1 = sb.table('lessons').select('hero_image_url').eq('unit_id', unit['id']).eq('lesson_number', 1).single().execute()
+    sb.table('units').update({'image_url': l1.data['hero_image_url']}).eq('id', unit['id']).execute()
+```
+
+Then commit and deploy:
+```bash
 git add / commit / push                                # Deploy to Vercel
 ```
 

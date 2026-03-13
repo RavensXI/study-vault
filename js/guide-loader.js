@@ -227,6 +227,18 @@
     if (typeof window.initRevealAnimations === 'function') {
       window.initRevealAnimations();
     }
+
+    // Render LaTeX equations via KaTeX (if loaded)
+    if (typeof renderMathInElement === 'function') {
+      renderMathInElement(contentEl, {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\(', right: '\\)', display: false },
+        ],
+        throwOnError: false
+      });
+    }
   }
 
   // ---- Main ----

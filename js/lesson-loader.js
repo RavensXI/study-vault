@@ -267,6 +267,18 @@
     if (typeof window.initRevealAnimations === 'function') {
       window.initRevealAnimations();
     }
+
+    // Render LaTeX equations via KaTeX (if loaded)
+    if (typeof renderMathInElement === 'function') {
+      renderMathInElement(document.getElementById('study-notes'), {
+        delimiters: [
+          { left: '$$', right: '$$', display: true },
+          { left: '\\[', right: '\\]', display: true },
+          { left: '\\(', right: '\\)', display: false },
+        ],
+        throwOnError: false
+      });
+    }
   }
 
   // ---- Render related media sidebar ----
