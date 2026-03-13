@@ -1005,7 +1005,10 @@ function initGlossary() {
   function showTerm(term) {
     if (activeTerm && activeTerm !== term) hideTerm(activeTerm);
 
+    const rects = term.getClientRects();
     const rect = term.getBoundingClientRect();
+    // Use first line fragment for positioning when term wraps across lines
+    const posRect = rects.length > 0 ? rects[0] : rect;
     const popup = term.querySelector('.term-popup');
 
     // Vertical: flip below if near top of viewport
@@ -1027,9 +1030,10 @@ function initGlossary() {
       popup.style.pointerEvents = '';
 
       // Calculate clamped position — use content container, not full viewport
+      // posRect targets the first line fragment so wrapped terms don't drift
       const contentEl = term.closest('.lesson-content') || term.closest('main') || document.body;
       const contentRight = contentEl.getBoundingClientRect().right;
-      const termCentre = rect.left + rect.width / 2;
+      const termCentre = posRect.left + posRect.width / 2;
       let popupLeft = termCentre - popupWidth / 2;
       popupLeft = Math.max(8, Math.min(popupLeft, contentRight - popupWidth - 8));
 
