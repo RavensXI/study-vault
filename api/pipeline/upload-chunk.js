@@ -5,6 +5,9 @@ const { supabase } = require('./_lib/supabase');
  * Append a chunk of extracted text to an existing upload job.
  * Used when the total extracted text exceeds Vercel's 4.5 MB body limit.
  *
+ * Uses Supabase RPC function append_extracted_text() to concatenate
+ * directly in Postgres — the Vercel function never reads the full text.
+ *
  * POST { job_id, chunk, chunk_index, total_chunks, is_last }
  */
 module.exports = async function handler(req, res) {
@@ -21,43 +24,34 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields: job_id, chunk, chunk_index' });
   }
 
-  // Fetch current extracted_text
-  const { data: job, error: fetchErr } = await supabase
-    .from('upload_jobs')
-    .select('id, extracted_text, current_phase')
-    .eq('id', job_id)
-    .single();
+  // Append chunk directly in Postgres (no read-modify-write cycle)
+  const { error: rpcErr } = await supabase.rpc('append_extracted_text', {
+    job_uuid: job_id,
+    chunk_text: chunk,
+  });
 
-  if (fetchErr || !job) {
-    return res.status(404).json({ error: 'Job not found' });
+  if (rpcErr) {
+    console.error('Failed to append chunk:', rpcErr);
+    return res.status(500).json({ error: 'Failed to append chunk', detail: rpcErr.message });
   }
-
-  // Append chunk to existing text
-  const currentText = job.extracted_text || '';
-  const updatedText = currentText + chunk;
-
-  const update = { extracted_text: updatedText };
 
   // Mark as parsed when final chunk arrives
   if (is_last) {
-    update.current_phase = 'parsed';
-  }
+    const { error: updateErr } = await supabase
+      .from('upload_jobs')
+      .update({ current_phase: 'parsed' })
+      .eq('id', job_id);
 
-  const { error: updateErr } = await supabase
-    .from('upload_jobs')
-    .update(update)
-    .eq('id', job_id);
-
-  if (updateErr) {
-    console.error('Failed to append chunk:', updateErr);
-    return res.status(500).json({ error: 'Failed to append chunk', detail: updateErr.message });
+    if (updateErr) {
+      console.error('Failed to update phase:', updateErr);
+      return res.status(500).json({ error: 'Failed to finalise job', detail: updateErr.message });
+    }
   }
 
   return res.status(200).json({
     job_id,
     chunk_index,
     total_chunks: total_chunks || null,
-    text_length: updatedText.length,
-    phase: update.current_phase || job.current_phase,
+    phase: is_last ? 'parsed' : 'uploaded',
   });
 };
