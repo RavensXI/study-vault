@@ -629,6 +629,7 @@ function initNarration() {
   if (podcastUrl && tabBar) {
     tabBar.style.display = '';
     var tabs = tabBar.querySelectorAll('.audio-tab');
+    var tabTrack = tabBar.querySelector('.audio-tab-track');
     tabs.forEach(function(tab) {
       tab.addEventListener('click', function() {
         var mode = tab.dataset.mode;
@@ -641,9 +642,10 @@ function initNarration() {
         playBtn.classList.remove('playing');
         playBtn.setAttribute('aria-label', 'Play ' + mode);
 
-        // Switch active tab
+        // Switch active tab + slide indicator
         tabs.forEach(function(t) { t.classList.remove('active'); });
         tab.classList.add('active');
+        tabTrack.classList.toggle('podcast-active', mode === 'podcast');
         playerMode = mode;
 
         if (mode === 'podcast') {
@@ -654,7 +656,6 @@ function initNarration() {
           progressFill.style.width = '0%';
           timeEl.textContent = '0:00 / 0:00';
           speedBtn.textContent = speeds[speedIndex] + 'x';
-          // Hide speed button label change if needed
         } else {
           // Switch back to narration mode
           audio.src = '';

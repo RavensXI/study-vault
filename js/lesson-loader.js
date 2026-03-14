@@ -314,15 +314,27 @@
 
     var html = '<div class="sidebar-section-title">Related Media</div>';
 
+    var hasPodcastTab = !!window.podcastUrl;
+
     categories.forEach(function (cat) {
+      var categoryName = cat.category;
+      var items = cat.items;
+
+      // If lesson podcast is in the player tabs, rename category and filter it out
+      if (hasPodcastTab && (categoryName || '').toLowerCase() === 'podcasts') {
+        items = items.filter(function(item) { return item.title !== 'Lesson Podcast'; });
+        if (items.length === 0) return; // skip empty category entirely
+        categoryName = 'Other Podcasts';
+      }
+
       html += '<div class="sidebar-collapsible">';
       html += '<button class="sidebar-collapsible-toggle" aria-expanded="false">';
-      html += '<span>' + (cat.emoji ? cat.emoji + ' ' : '') + escapeHtml(cat.category) + '</span>';
+      html += '<span>' + (cat.emoji ? cat.emoji + ' ' : '') + escapeHtml(categoryName) + '</span>';
       html += '<svg class="sidebar-collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
       html += '</button>';
       html += '<div class="sidebar-collapsible-content">';
 
-      cat.items.forEach(function (item) {
+      items.forEach(function (item) {
         html += '<a href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
         html += '<strong>' + escapeHtml(item.title) + '</strong>';
         if (item.description) {
