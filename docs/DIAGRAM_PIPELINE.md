@@ -136,33 +136,28 @@ DESIGN RULES:
 - Include all data points explicitly in the prompt — don't rely on Gemini reading them from the matplotlib image
 - Name the exact colours to use (hex codes)
 
-### Step 4: QC agent review
+### Step 4: Automated QA (built into `generate_diagrams.py`)
 
-Spin up dedicated QC agents (one per image) to carefully inspect each Gemini output. Each agent gets:
+QA is now **automatic** — after each Gemini generation, the image is sent to Claude Sonnet for review. If QA fails, the prompt is wrapped with anti-garbling guardrails and regenerated. Up to 3 attempts per diagram. Only uploads to R2 when QA passes.
 
-- The generated image to inspect
-- The original matplotlib backup for data comparison
-- The prompt that was used
-- A structured checklist
+**QA module:** `scripts/lib/claude_qa.py` — requires `ANTHROPIC_API_KEY` env var.
 
-**QC checklist:**
-1. **Text accuracy** — any misspellings, garbled text, or duplicated labels?
-2. **Data accuracy** — do all numbers match the original data? Are items in the correct order?
-3. **Label duplication** — are labels appearing both above AND below icons (a common Gemini artefact)?
-4. **AI artifacts** — any visual glitches, blurry text, or nonsensical elements?
-5. **Readability** — can a 15-year-old clearly read all text at normal zoom?
-6. **Layout** — is the composition balanced? Is anything cut off or cramped?
+**QA checklist (checked by Claude Sonnet):**
+1. **Text accuracy** — any misspellings, garbled text, truncated words, or nonsensical text?
+2. **Duplicate labels** — any text label appearing more than once when it shouldn't?
+3. **Arrow/flow issues** — arrows pointing wrong directions, excessive/redundant arrows?
+4. **Content accuracy** — is the scientific content accurate and relevant?
+5. **Visual quality** — any AI artifacts, blurry areas, cut-off elements?
+6. **Prompt leaks** — any visible hex codes, "GCSE", "aged 15-16", or other meta-text?
+7. **Colour scheme** — does the diagram use the unit's accent colour?
 
-**If issues are found:**
-- Agent writes a corrected prompt (referencing specific issues to fix)
-- Regenerates using `scripts/gemini_regen.py` helper script
-- Max 3 iterations per image
-- If still failing after 3 attempts, keep the matplotlib version
+**Guardrails applied on retry:** Anti-garbling prefix added to prompt on attempts 2+. Instructs Gemini to spell-check all text, avoid rendering meta-instructions, avoid duplicate labels, and use the correct accent colour.
 
-**File management after QC:**
-- Final Gemini version → `diagram_name.jpg` (this is what the lesson HTML references)
-- Matplotlib backup → `diagram_name_matplotlib.jpg`
-- Update alt text in the lesson HTML to describe the pictorial format
+**To skip QA** (e.g. for speed during testing): `--skip-qa` flag.
+
+**Manual QA scripts** (for retroactive checks on existing diagrams):
+- `scripts/qa_pull_diagrams.py` — download all diagrams for a subject from R2
+- `scripts/qa_regen_diagrams.py` — regenerate specific failing diagrams
 
 ---
 

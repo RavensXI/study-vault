@@ -53,7 +53,6 @@ All content served from Supabase. Static HTML files remain as backup.
 - **NotebookLM videos**: 292 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
-- **LaTeX formulae (KaTeX)**: Add KaTeX library for proper maths/science equation rendering. Convert existing HTML entity equations (sub/sup/&times;) to LaTeX across Science, Separate Sciences, and any other subjects with formulae. Update generation prompt to output LaTeX for equations.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
 
 ## API Keys
@@ -80,6 +79,7 @@ All in environment variables — never commit.
 - **Content:** 6 practice questions + 5 knowledge checks per lesson. Readability for GCSE age 15-16.
 - **Narration:** Azure Speech, Ollie (odd lessons) / Bella (even), MP3 96kbps 24kHz mono
 - **PPTs:** Read with `python -m markitdown "filepath"` (.pptx only)
+- **Equations (KaTeX):** Maths/science equations use KaTeX auto-render. Inline: `\(...\)`, display: `$$...$$`. CDN loaded on `lesson.html` and `guide.html`. `docs/GENERATION_PROMPT.md` instructs future content to output LaTeX (not HTML entities). Conversion script: `scripts/convert_equations_to_katex.py`.
 - **Animations:** Soft-close damping `cubic-bezier(0.16, 1, 0.3, 1)` on all entrance animations. `.sv-reveal` / `.sv-stagger` CSS classes + IntersectionObserver. Split timing: fast opacity (~0.5s), slow transform glide (~1-1.3s). `prefers-reduced-motion` respected. Browse page unit cards have no scroll reveal (all visible immediately so students don't miss units below the fold).
 
 ## Reference Docs (read on demand)
@@ -90,6 +90,7 @@ All in environment variables — never commit.
 | `docs/QUESTIONS_PIPELINE.md` | Writing questions for any subject |
 | `docs/DIAGRAM_PIPELINE.md` | Creating or updating diagrams |
 | `docs/NARRATION_PIPELINE.md` | TTS narration work |
+| `docs/VIDEO_PIPELINE.md` | NotebookLM cinematic videos & podcasts |
 | `docs/RELATED_MEDIA_PIPELINE.md` | Adding sidebar media |
 | `docs/GENERATION_PROMPT.md` | Content generation (inject-at-call-time prompt) |
 | `docs/PIPELINE_ARCHITECTURE.md` | Full pipeline architecture |

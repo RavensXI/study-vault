@@ -17,6 +17,9 @@ AUDIO_PUBLIC_URL = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev"
 IMAGES_BUCKET = "studyvault-images"
 IMAGES_PUBLIC_URL = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev"
 
+VIDEO_BUCKET = "studyvault-video"
+VIDEO_PUBLIC_URL = "https://pub-157a3979382e4f98b51f7f868078e5a3.r2.dev"
+
 
 # ── Client ──────────────────────────────────────────────────────────────
 
