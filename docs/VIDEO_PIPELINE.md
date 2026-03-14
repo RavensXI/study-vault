@@ -59,34 +59,46 @@ python scripts/generate_cinematic_videos.py --download --cleanup
 
 ### Subject Order (smallest first)
 
-1. Sport Science (10) — DONE
-2. Food Technology (10) — 8/10 done
-3. Drama (12)
-4. Separate Sciences (22)
-5. Music (26)
-6. Business (30)
-7. English Language (30)
-8. Religious Education (40)
-9. Geography (40)
-10. English Literature (42)
-11. Science (48)
-12. History (60)
+Each daily batch generates **both** cinematic video + lesson podcast from the same notebook. Videos are the bottleneck (20/day limit); podcasts have a 200/day limit so they ride for free.
 
-At 20/day = ~19 days for all 370 lessons.
+| Day | Date | Lessons | Subject(s) | Running Total |
+|-----|------|---------|------------|---------------|
+| 1 | 14 Mar | 16 | **Sport Science** (9) + **Food Tech** (7) | 16 |
+| 2 | 15 Mar | 20 | Food Tech (2) + **Drama** (12) + Sep Sciences (6) | 36 |
+| 3 | 16 Mar | 20 | Sep Sciences (16) + Music (4) | 56 |
+| 4 | 17 Mar | 20 | Music (20) | 76 |
+| 5 | 18 Mar | 20 | Music (2) + **Business** (18) | 96 |
+| 6 | 19 Mar | 20 | Business (12) + Eng Language (8) | 116 |
+| 7 | 20 Mar | 20 | Eng Language (20) | 136 |
+| 8 | 21 Mar | 20 | Eng Language (2) + **RE** (18) | 156 |
+| 9 | 22 Mar | 20 | RE (20) | 176 |
+| 10 | 23 Mar | 20 | RE (2) + **Geography** (18) | 196 |
+| 11 | 24 Mar | 20 | Geography (20) | 216 |
+| 12 | 25 Mar | 20 | Geography (2) + **Eng Lit** (18) | 236 |
+| 13 | 26 Mar | 20 | Eng Lit (20) | 256 |
+| 14 | 27 Mar | 20 | Eng Lit (4) + **Science** (16) | 276 |
+| 15 | 28 Mar | 20 | Science (20) | 296 |
+| 16 | 29 Mar | 20 | Science (12) + **History** (8) | 316 |
+| 17 | 30 Mar | 20 | History (20) | 336 |
+| 18 | 31 Mar | 20 | History (20) | 356 |
+| 19 | 1 Apr | 14 | History (12) | **370** |
+
+**Completed by April 1st.** All 370 lessons get both a cinematic video and a lesson podcast.
 
 ### How It Works
 
-For each lesson:
+For each lesson (video + podcast in parallel from the same notebook):
 
 1. **Export content** — strips HTML to clean text, saves to temp file
 2. **Create notebook** — `nlm notebook create "{Subject} - {Unit} - L{nn} - {Title}"`
 3. **Add source** — `nlm source add {notebook_id} --file {temp_file} --title "Lesson Material"`
 4. **Generate video** — `nlm video create {notebook_id} --format cinematic --focus "{prompt}"`
-5. **Poll status** — `nlm studio status {notebook_id}` (renders take 30-60 mins)
-6. **Download** — `nlm download video {notebook_id} --id {artifact_id}`
-7. **Upload to R2** — stored at `{subject}/{unit}/cinematic_{l_nn}.mp4` in `studyvault-images` bucket
-8. **Update Supabase** — sets `lessons.youtube_video_id` to the R2 URL
-9. **Cleanup** — deletes the NotebookLM notebook (unless keeping for podcast generation)
+5. **Generate podcast** — `nlm audio create {notebook_id} --focus "{prompt}" --confirm`
+6. **Poll status** — `nlm studio status {notebook_id}` (videos take 30-60 mins, podcasts ~5 mins)
+7. **Download both** — `nlm download video` + `nlm download audio`
+8. **Upload to R2** — video to `studyvault-video`, podcast to `studyvault-audio`
+9. **Update Supabase** — video URL in `lessons.youtube_video_id`, podcast URL in `related_media`
+10. **Cleanup** — deletes the NotebookLM notebook
 
 ### Video Player
 
@@ -122,19 +134,15 @@ know for their exams. Explain and define these where appropriate.
 
 ---
 
-## Podcast Pipeline (planned)
+## Podcast Integration
 
-Same notebooks can generate audio podcasts. **Do not delete notebooks with `--cleanup` if you also need podcasts.**
+Podcasts are generated in the same batch as cinematic videos — same notebook, same source, same focus prompt. The script fires off both `nlm video create` and `nlm audio create` from each notebook.
 
-```bash
-# Generate podcast from existing notebook
-nlm audio create {notebook_id} --focus "{prompt}" --confirm
+**Storage:** Podcast MP3s uploaded to R2 `studyvault-audio` at `{subject}/{unit}/podcast_l{nn}.mp3`.
 
-# Download
-nlm download audio {notebook_id} --id {artifact_id}
-```
+**Supabase:** Podcast URL stored in the lesson's `related_media` JSON under the "Podcasts" category with title "Lesson Podcast".
 
-Podcasts are stored in lesson `related_media` under the "Podcasts" category with title "Lesson Podcast". The player is integrated into the narration player as a tabbed interface (Narration / Podcast) — see `feature/tabbed-player` branch.
+**Player:** Integrated into the narration player as a tabbed pill toggle (Narration / Lesson Podcast). Tabs only appear when a lesson has both narration and a podcast. When podcast tab is active, the player switches to single-file mode with progress bar seeking. When "Podcasts" category appears in sidebar Related Media, it's renamed to "Other Podcasts" and the "Lesson Podcast" item is filtered out (since it's in the player).
 
 ---
 

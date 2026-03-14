@@ -273,25 +273,34 @@ def cmd_generate(args):
             print(f"  SKIP: Video already in progress for this notebook")
             continue
 
-        # 7. Build focus prompt and create cinematic video
+        # 7. Build focus prompt and create cinematic video + podcast
         focus = build_focus_prompt(lesson, entry["subject_name"], entry["unit_name"], entry["exam_board"])
 
         try:
             nlm_run(["video", "create", notebook_id, "--format", "cinematic", "--focus", focus, "--confirm"], timeout=60)
-        except Exception as e:
-            # May crash on encoding but still succeed
+        except Exception:
             pass
 
         time.sleep(2)
 
-        # 8. Get artifact ID
+        # Also generate podcast audio from the same notebook
+        try:
+            nlm_run(["audio", "create", notebook_id, "--focus", focus, "--confirm"], timeout=60)
+        except Exception:
+            pass
+
+        time.sleep(2)
+
+        # 8. Get artifact IDs (video + audio)
         status = nlm_json(["studio", "status", notebook_id])
-        artifact_id = None
+        video_artifact_id = None
+        audio_artifact_id = None
         if status:
             for s in status:
-                if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
-                    artifact_id = s["id"]
-                    break
+                if s.get("type") == "video" and s.get("status") in ("in_progress", "completed") and not video_artifact_id:
+                    video_artifact_id = s["id"]
+                elif s.get("type") == "audio" and s.get("status") in ("in_progress", "completed") and not audio_artifact_id:
+                    audio_artifact_id = s["id"]
 
         # 9. Save to state
         job = {
@@ -300,7 +309,8 @@ def cmd_generate(args):
             "label": label,
             "notebook_id": notebook_id,
             "notebook_title": notebook_title,
-            "artifact_id": artifact_id,
+            "artifact_id": video_artifact_id,
+            "audio_artifact_id": audio_artifact_id,
             "status": "in_progress",
         }
         state["jobs"].append(job)
@@ -338,30 +348,43 @@ def cmd_status(args):
             still_going += 1
             continue
 
-        # Find our artifact
-        art = next((s for s in status if s.get("id") == job.get("artifact_id")), None)
-        if not art:
-            # Try any completed video
-            art = next((s for s in status if s.get("type") == "video" and s.get("status") == "completed"), None)
+        # Find video artifact
+        vid = next((s for s in status if s.get("id") == job.get("artifact_id")), None)
+        if not vid:
+            vid = next((s for s in status if s.get("type") == "video" and s.get("status") == "completed"), None)
 
-        if art and art.get("status") == "completed":
+        # Find audio artifact
+        aud = next((s for s in status if s.get("id") == job.get("audio_artifact_id")), None)
+        if not aud:
+            aud = next((s for s in status if s.get("type") == "audio" and s.get("status") == "completed"), None)
+
+        vid_done = vid and vid.get("status") == "completed"
+        aud_done = aud and aud.get("status") == "completed"
+
+        # Update artifact IDs if found
+        if vid and not job.get("artifact_id"):
+            job["artifact_id"] = vid["id"]
+        if aud and not job.get("audio_artifact_id"):
+            job["audio_artifact_id"] = aud["id"]
+
+        # Mark complete only when both are done (or audio wasn't requested)
+        if vid_done and (aud_done or not job.get("audio_artifact_id")):
             job["status"] = "completed"
-            if not job.get("artifact_id"):
-                job["artifact_id"] = art["id"]
             completed += 1
-            print(f"  {job['label']}: COMPLETED")
+            print(f"  {job['label']}: COMPLETED (video + podcast)")
         else:
             still_going += 1
-            art_status = art.get("status", "unknown") if art else "unknown"
-            print(f"  {job['label']}: {art_status}")
+            vid_status = vid.get("status", "unknown") if vid else "unknown"
+            aud_status = aud.get("status", "unknown") if aud else "n/a"
+            print(f"  {job['label']}: video={vid_status}, podcast={aud_status}")
 
     save_state(state)
     print(f"\nCompleted: {completed}, Still in progress: {still_going}")
 
 
 def cmd_download(args):
-    """Download completed videos, upload to R2, and update Supabase."""
-    from lib.r2 import get_r2_client, VIDEO_BUCKET, VIDEO_PUBLIC_URL
+    """Download completed videos + podcasts, upload to R2, and update Supabase."""
+    from lib.r2 import get_r2_client, VIDEO_BUCKET, VIDEO_PUBLIC_URL, AUDIO_BUCKET, AUDIO_PUBLIC_URL
 
     state = load_state()
     sb = get_client()
@@ -371,7 +394,7 @@ def cmd_download(args):
         print("No completed jobs to download. Run --status first.")
         return
 
-    print(f"Processing {len(completed)} completed videos...\n")
+    print(f"Processing {len(completed)} completed jobs...\n")
 
     download_dir = os.path.join(SCRIPT_DIR, "_cinematic_videos")
     os.makedirs(download_dir, exist_ok=True)
@@ -385,59 +408,108 @@ def cmd_download(args):
             continue
 
         label = job["label"]
-        filename = f"{label.replace('/', '_')}_cinematic.mp4"
-        output_path = os.path.join(download_dir, filename)
+        parts = label.split("/")
+        lesson_id = job["lesson_id"]
 
-        # Step 1: Download from NotebookLM
-        if not (os.path.exists(output_path) and os.path.getsize(output_path) > 0):
-            print(f"  {label}: Downloading from NotebookLM...")
+        # ── Video ──────────────────────────────────────────────
+        video_filename = f"{label.replace('/', '_')}_cinematic.mp4"
+        video_path = os.path.join(download_dir, video_filename)
+
+        if not (os.path.exists(video_path) and os.path.getsize(video_path) > 0):
+            print(f"  {label}: Downloading video...")
             try:
                 nlm_run([
                     "download", "video", job["notebook_id"],
                     "--id", job["artifact_id"],
-                    "--output", output_path,
+                    "--output", video_path,
                     "--no-progress",
                 ], timeout=300)
             except Exception:
                 pass
 
-        if not (os.path.exists(output_path) and os.path.getsize(output_path) > 0):
-            print(f"  {label}: Download failed — skipping")
-            continue
+        if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
+            size_mb = os.path.getsize(video_path) / (1024 * 1024)
+            print(f"  {label}: Video downloaded ({size_mb:.1f} MB)")
 
-        size_mb = os.path.getsize(output_path) / (1024 * 1024)
-        print(f"  {label}: Downloaded ({size_mb:.1f} MB)")
+            r2_key = f"{parts[0]}/{parts[1]}/cinematic_{parts[2].lower()}.mp4"
+            print(f"  {label}: Uploading video to R2...")
+            with open(video_path, "rb") as f:
+                r2_client.put_object(Bucket=VIDEO_BUCKET, Key=r2_key, Body=f.read(), ContentType="video/mp4")
+            video_r2_url = f"{VIDEO_PUBLIC_URL}/{r2_key}"
 
-        # Step 2: Upload to R2
-        # Key format: {subject}/{unit}/cinematic_L{nn}.mp4
-        parts = label.split("/")
-        r2_key = f"{parts[0]}/{parts[1]}/cinematic_{parts[2].lower()}.mp4"
-        print(f"  {label}: Uploading to R2 ({r2_key})...")
+            sb.table("lessons").update({"youtube_video_id": video_r2_url}).eq("id", lesson_id).execute()
+            print(f"  {label}: Video published")
+            job["r2_url"] = video_r2_url
+        else:
+            print(f"  {label}: Video download failed")
 
-        with open(output_path, "rb") as f:
-            video_bytes = f.read()
+        # ── Podcast ────────────────────────────────────────────
+        audio_artifact_id = job.get("audio_artifact_id")
+        if audio_artifact_id:
+            audio_filename = f"{label.replace('/', '_')}_podcast.mp3"
+            audio_path = os.path.join(download_dir, audio_filename)
 
-        # Upload directly (no compression for video)
-        r2_client.put_object(
-            Bucket=VIDEO_BUCKET,
-            Key=r2_key,
-            Body=video_bytes,
-            ContentType="video/mp4",
-        )
-        r2_url = f"{VIDEO_PUBLIC_URL}/{r2_key}"
-        print(f"  {label}: R2 URL: {r2_url}")
+            if not (os.path.exists(audio_path) and os.path.getsize(audio_path) > 0):
+                print(f"  {label}: Downloading podcast...")
+                try:
+                    nlm_run([
+                        "download", "audio", job["notebook_id"],
+                        "--id", audio_artifact_id,
+                        "--output", audio_path,
+                        "--no-progress",
+                    ], timeout=300)
+                except Exception:
+                    pass
 
-        # Step 3: Update Supabase
-        lesson_id = job["lesson_id"]
-        sb.table("lessons").update({
-            "youtube_video_id": r2_url,
-        }).eq("id", lesson_id).execute()
-        print(f"  {label}: Supabase updated")
+            if os.path.exists(audio_path) and os.path.getsize(audio_path) > 0:
+                size_mb = os.path.getsize(audio_path) / (1024 * 1024)
+                print(f"  {label}: Podcast downloaded ({size_mb:.1f} MB)")
+
+                audio_r2_key = f"{parts[0]}/{parts[1]}/podcast_{parts[2].lower()}.mp3"
+                print(f"  {label}: Uploading podcast to R2...")
+                with open(audio_path, "rb") as f:
+                    r2_client.put_object(Bucket=AUDIO_BUCKET, Key=audio_r2_key, Body=f.read(), ContentType="audio/mpeg")
+                podcast_r2_url = f"{AUDIO_PUBLIC_URL}/{audio_r2_key}"
+
+                # Update related_media — set Lesson Podcast URL
+                lesson = sb.table("lessons").select("related_media").eq("id", lesson_id).single().execute()
+                media = lesson.data.get("related_media") or [] if lesson.data else []
+
+                # Find or create Podcasts category
+                podcast_cat = None
+                for cat in media:
+                    if (cat.get("category") or "").lower() == "podcasts":
+                        podcast_cat = cat
+                        break
+
+                if not podcast_cat:
+                    podcast_cat = {"emoji": "\U0001f3a7", "category": "Podcasts", "items": []}
+                    media.append(podcast_cat)
+
+                # Find or create Lesson Podcast item
+                lp_item = None
+                for item in podcast_cat.get("items", []):
+                    if item.get("title") == "Lesson Podcast":
+                        lp_item = item
+                        break
+
+                if lp_item:
+                    lp_item["url"] = podcast_r2_url
+                else:
+                    podcast_cat["items"].insert(0, {
+                        "title": "Lesson Podcast",
+                        "url": podcast_r2_url,
+                        "description": "AI-generated podcast overview of this lesson",
+                    })
+
+                sb.table("lessons").update({"related_media": media}).eq("id", lesson_id).execute()
+                print(f"  {label}: Podcast published")
+                job["podcast_r2_url"] = podcast_r2_url
+            else:
+                print(f"  {label}: Podcast download failed")
 
         job["published"] = True
-        job["r2_url"] = r2_url
         job["downloaded"] = True
-        job["local_path"] = output_path
         save_state(state)
 
         # Clean up notebook
@@ -455,7 +527,7 @@ def cmd_download(args):
 
     print(f"\n{'=' * 60}")
     print(f"Published: {processed}/{len(completed)}")
-    print(f"Videos on R2 and lessons updated in Supabase.")
+    print(f"Videos + podcasts on R2, lessons updated in Supabase.")
 
 
 def main():
