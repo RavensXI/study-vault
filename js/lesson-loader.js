@@ -200,35 +200,43 @@
     window.practiceQuestions = lesson.practice_questions || [];
     window.knowledgeCheck = lesson.knowledge_checks || [];
 
-    // Video overview (YouTube ID or full embed URL e.g. Google Drive)
+    // Video overview (YouTube ID, Google Drive URL, or direct MP4 URL)
     if (lesson.youtube_video_id) {
       var videoSection = document.getElementById('sidebar-video-section');
       var iframe = document.getElementById('sidebar-video-iframe');
-      var isGDrive = lesson.youtube_video_id.indexOf('drive.google.com') !== -1;
-      var embedSrc = lesson.youtube_video_id.startsWith('http')
-        ? lesson.youtube_video_id
-        : 'https://www.youtube.com/embed/' + lesson.youtube_video_id;
+      var videoId = lesson.youtube_video_id;
+      var isGDrive = videoId.indexOf('drive.google.com') !== -1;
+      var isDirectVideo = /\.(mp4|webm)(\?|$)/i.test(videoId) || videoId.indexOf('r2.dev/') !== -1;
+      var embedSrc = videoId.startsWith('http')
+        ? videoId
+        : 'https://www.youtube.com/embed/' + videoId;
 
-      if (isGDrive) {
-        // Google Drive: show thumbnail with play button, open modal on click
+      if (isGDrive || isDirectVideo) {
+        // Google Drive or direct video: show thumbnail with play button, open modal on click
         var container = iframe.closest('.sidebar-video');
         container.classList.add('sidebar-video--gdrive');
         iframe.remove();
 
-        // Extract file ID for thumbnail
-        var fileIdMatch = lesson.youtube_video_id.match(/\/d\/([^/]+)/);
-        var thumbUrl = fileIdMatch
-          ? 'https://drive.google.com/thumbnail?id=' + fileIdMatch[1] + '&sz=w600'
-          : '';
+        // Thumbnail: Google Drive has its own, direct video uses a generic play card
+        var thumbHtml = '';
+        if (isGDrive) {
+          var fileIdMatch = videoId.match(/\/d\/([^/]+)/);
+          var thumbUrl = fileIdMatch
+            ? 'https://drive.google.com/thumbnail?id=' + fileIdMatch[1] + '&sz=w600'
+            : '';
+          thumbHtml = '<img class="sidebar-video-thumb" src="' + thumbUrl + '" alt="Video overview">';
+        } else {
+          thumbHtml = '<div class="sidebar-video-thumb sidebar-video-thumb--generic"><span>Cinematic Overview</span></div>';
+        }
 
         container.innerHTML =
-          '<img class="sidebar-video-thumb" src="' + thumbUrl + '" alt="Video overview">' +
+          thumbHtml +
           '<button class="sidebar-video-play" aria-label="Play video overview">' +
             '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>' +
           '</button>';
 
         container.addEventListener('click', function () {
-          openVideoModal(embedSrc, lesson.title);
+          openVideoModal(embedSrc, lesson.title, isDirectVideo);
         });
       } else {
         iframe.src = embedSrc;
@@ -389,7 +397,7 @@
   }
 
   // ---- Video modal (Google Drive) ----
-  function openVideoModal(src, title) {
+  function openVideoModal(src, title, isDirectVideo) {
     // Create overlay if it doesn't exist yet
     var overlay = document.getElementById('video-modal-overlay');
     if (!overlay) {
@@ -398,9 +406,7 @@
       overlay.className = 'video-modal-overlay';
       overlay.innerHTML =
         '<button class="video-modal-close" aria-label="Close">&times;</button>' +
-        '<div class="video-modal-container">' +
-          '<iframe class="video-modal-iframe" src="" title="" allow="autoplay; fullscreen" allowfullscreen></iframe>' +
-        '</div>';
+        '<div class="video-modal-container"></div>';
       document.body.appendChild(overlay);
 
       overlay.querySelector('.video-modal-close').addEventListener('click', closeVideoModal);
@@ -412,9 +418,21 @@
       });
     }
 
-    var iframe = overlay.querySelector('.video-modal-iframe');
-    iframe.src = src;
-    iframe.title = title || 'Video overview';
+    var container = overlay.querySelector('.video-modal-container');
+
+    if (isDirectVideo) {
+      // Direct MP4/video: use native <video> element
+      container.innerHTML =
+        '<video class="video-modal-player" controls preload="metadata">' +
+          '<source src="' + src + '" type="video/mp4">' +
+          'Your browser does not support video playback.' +
+        '</video>';
+    } else {
+      // Google Drive / YouTube: use iframe
+      container.innerHTML =
+        '<iframe class="video-modal-iframe" src="' + src + '" title="' + (title || 'Video overview') + '" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+    }
+
     requestAnimationFrame(function () {
       overlay.classList.add('active');
     });
@@ -426,7 +444,8 @@
     overlay.classList.remove('active');
     // Stop playback after transition
     setTimeout(function () {
-      overlay.querySelector('.video-modal-iframe').src = '';
+      var container = overlay.querySelector('.video-modal-container');
+      container.innerHTML = '';
     }, 300);
   }
 
