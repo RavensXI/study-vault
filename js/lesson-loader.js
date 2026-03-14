@@ -200,6 +200,21 @@
     window.practiceQuestions = lesson.practice_questions || [];
     window.knowledgeCheck = lesson.knowledge_checks || [];
 
+    // Extract podcast URL from related_media (if present)
+    window.podcastUrl = null;
+    var relMedia = lesson.related_media || [];
+    for (var mi = 0; mi < relMedia.length; mi++) {
+      if ((relMedia[mi].category || '').toLowerCase() === 'podcasts') {
+        var items = relMedia[mi].items || [];
+        for (var mj = 0; mj < items.length; mj++) {
+          if (items[mj].title === 'Lesson Podcast' && items[mj].url && items[mj].url !== '#') {
+            window.podcastUrl = items[mj].url;
+            break;
+          }
+        }
+      }
+    }
+
     // Video overview (YouTube ID, Google Drive URL, or direct MP4 URL)
     if (lesson.youtube_video_id) {
       var videoSection = document.getElementById('sidebar-video-section');

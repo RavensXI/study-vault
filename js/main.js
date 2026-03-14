@@ -620,6 +620,52 @@ function initNarration() {
   var autoScrollEnabled = true;
   var lastProgrammaticScroll = 0;
 
+  // --- Podcast tab support ---
+  var podcastUrl = window.podcastUrl || null;
+  var playerMode = 'narration'; // 'narration' or 'podcast'
+  var tabBar = document.querySelector('.audio-player-tabs');
+  var podcastDuration = 0;
+
+  if (podcastUrl && tabBar) {
+    tabBar.style.display = '';
+    var tabs = tabBar.querySelectorAll('.audio-tab');
+    tabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var mode = tab.dataset.mode;
+        if (mode === playerMode) return;
+
+        // Stop current playback
+        audio.pause();
+        clearHighlight();
+        isPlaying = false;
+        playBtn.classList.remove('playing');
+        playBtn.setAttribute('aria-label', 'Play ' + mode);
+
+        // Switch active tab
+        tabs.forEach(function(t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        playerMode = mode;
+
+        if (mode === 'podcast') {
+          // Switch to single-file podcast mode
+          audio.src = podcastUrl;
+          audio.load();
+          currentIndex = -1;
+          progressFill.style.width = '0%';
+          timeEl.textContent = '0:00 / 0:00';
+          speedBtn.textContent = speeds[speedIndex] + 'x';
+          // Hide speed button label change if needed
+        } else {
+          // Switch back to narration mode
+          audio.src = '';
+          currentIndex = -1;
+          progressFill.style.width = '0%';
+          timeEl.textContent = '0:00 / ' + fmtTime(totalDuration);
+        }
+      });
+    });
+  }
+
   // --- Floating mini-player ---
   var fab = document.createElement('div');
   fab.className = 'narration-fab';
@@ -750,21 +796,29 @@ function initNarration() {
   // --- Play / Pause ---
 
   playBtn.addEventListener('click', function() {
-    if (audio.paused) { startPlayback(); } else { audio.pause(); }
+    if (playerMode === 'podcast') {
+      if (audio.paused) { audio.play(); } else { audio.pause(); }
+    } else {
+      if (audio.paused) { startPlayback(); } else { audio.pause(); }
+    }
   });
 
   fabPlay.addEventListener('click', function() {
-    if (audio.paused) { startPlayback(); } else { audio.pause(); }
+    if (playerMode === 'podcast') {
+      if (audio.paused) { audio.play(); } else { audio.pause(); }
+    } else {
+      if (audio.paused) { startPlayback(); } else { audio.pause(); }
+    }
   });
 
   audio.addEventListener('play', function() {
     isPlaying = true;
     audioStarted = true;
     playBtn.classList.add('playing');
-    playBtn.setAttribute('aria-label', 'Pause narration');
+    playBtn.setAttribute('aria-label', 'Pause ' + playerMode);
     fabPlay.classList.add('playing');
     fab.classList.toggle('visible', !mainPlayerVisible);
-    if (currentIndex >= 0) setHighlight(manifest[currentIndex].id);
+    if (playerMode === 'narration' && currentIndex >= 0) setHighlight(manifest[currentIndex].id);
   });
 
   audio.addEventListener('pause', function() {
@@ -777,19 +831,38 @@ function initNarration() {
   // --- Progress ---
 
   audio.addEventListener('timeupdate', function() {
-    var gt = globalTime();
-    var pct = (gt / totalDuration * 100) + '%';
-    progressFill.style.width = pct;
-    if (progressBar) progressBar.style.setProperty('--progress-pct', pct);
-    timeEl.textContent = fmtTime(gt) + ' / ' + fmtTime(totalDuration);
-    fabFill.style.width = pct;
-    fabTime.textContent = fmtTime(gt);
+    if (playerMode === 'podcast') {
+      var dur = audio.duration || 0;
+      var cur = audio.currentTime || 0;
+      var pct = dur > 0 ? (cur / dur * 100) + '%' : '0%';
+      progressFill.style.width = pct;
+      if (progressBar) progressBar.style.setProperty('--progress-pct', pct);
+      timeEl.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
+      fabFill.style.width = pct;
+      fabTime.textContent = fmtTime(cur);
+    } else {
+      var gt = globalTime();
+      var pct = (gt / totalDuration * 100) + '%';
+      progressFill.style.width = pct;
+      if (progressBar) progressBar.style.setProperty('--progress-pct', pct);
+      timeEl.textContent = fmtTime(gt) + ' / ' + fmtTime(totalDuration);
+      fabFill.style.width = pct;
+      fabTime.textContent = fmtTime(gt);
+    }
   });
 
   // --- Clip ended — advance or finish ---
 
   audio.addEventListener('ended', function() {
-    if (currentIndex + 1 < manifest.length) {
+    if (playerMode === 'podcast') {
+      // Podcast is a single file — just reset
+      isPlaying = false;
+      progressFill.style.width = '100%';
+      playBtn.classList.remove('playing');
+      playBtn.setAttribute('aria-label', 'Play podcast');
+      fabPlay.classList.remove('playing');
+      fab.classList.remove('visible');
+    } else if (currentIndex + 1 < manifest.length) {
       loadClip(currentIndex + 1);
       audio.play();
     } else {
@@ -805,6 +878,18 @@ function initNarration() {
     }
   });
 
+  // --- Progress bar seek (podcast mode) ---
+
+  progressBar.addEventListener('click', function(e) {
+    if (playerMode !== 'podcast') return;
+    var rect = progressBar.getBoundingClientRect();
+    var pct = (e.clientX - rect.left) / rect.width;
+    if (audio.duration) {
+      audio.currentTime = pct * audio.duration;
+    }
+  });
+  progressBar.style.cursor = 'pointer';
+
   // --- Speed toggle ---
 
   speedBtn.addEventListener('click', function() {
@@ -819,8 +904,9 @@ function initNarration() {
   if (!isTouchDevice) {
     document.querySelectorAll('[data-narration-id]').forEach(function(el) {
       el.addEventListener('click', function(e) {
-        // Don't hijack glossary term clicks
+        // Don't hijack glossary term clicks or work in podcast mode
         if (e.target.closest('dfn, .glossary-popup')) return;
+        if (playerMode === 'podcast') return;
         var id = el.dataset.narrationId;
         for (var i = 0; i < manifest.length; i++) {
           if (manifest[i].id === id) { loadClip(i); audio.play(); break; }

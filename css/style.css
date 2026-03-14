@@ -1875,12 +1875,66 @@ body.dark-mode .kc-blank.incorrect {
   border-color: #991b1b;
 }
 
+/* Audio player tabs (Narration / Podcast) */
+.audio-player-wrapper {
+  margin: 0 0 2rem;
+}
+.audio-player-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: -1px;
+  position: relative;
+  z-index: 1;
+}
+.audio-tab {
+  flex: 1;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--border-lighter);
+  background: var(--bg-page);
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.audio-tab:first-child {
+  border-radius: var(--radius) 0 0 0;
+}
+.audio-tab:last-child {
+  border-radius: 0 var(--radius) 0 0;
+  border-left: none;
+}
+.audio-tab.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-bottom-color: var(--bg-card);
+}
+.audio-tab:not(.active):hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+.audio-player-wrapper .narration-player {
+  margin: 0;
+  border-radius: 0 0 var(--radius) var(--radius);
+}
+.audio-player-tabs + .narration-player {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+/* When no tabs, keep normal radius */
+.audio-player-tabs[style*="display:none"] + .narration-player,
+.audio-player-tabs[style*="display: none"] + .narration-player {
+  border-radius: var(--radius);
+  margin-bottom: 0;
+}
+
 .narration-player {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   padding: 0.65rem 1rem;
-  margin: 0 0 2rem;
   background: var(--bg-card);
   border: 1px solid var(--border-lighter);
   border-radius: var(--radius);
