@@ -226,7 +226,7 @@
             : '';
           thumbHtml = '<img class="sidebar-video-thumb" src="' + thumbUrl + '" alt="Video overview">';
         } else {
-          thumbHtml = '<div class="sidebar-video-thumb sidebar-video-thumb--generic"><span>Cinematic Overview</span></div>';
+          thumbHtml = '<div class="sidebar-video-thumb sidebar-video-thumb--generic"></div>';
         }
 
         container.innerHTML =
