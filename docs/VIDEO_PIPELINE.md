@@ -109,9 +109,11 @@ For each lesson (video + podcast in parallel from the same notebook):
 
 ---
 
-## Focus Prompt Template
+## Focus Prompt Templates
 
-Used for both cinematic videos and podcasts. Adapted per lesson.
+Video and podcast use different prompts. Video is simpler; podcast includes unit context so the AI hosts know what students have and haven't covered.
+
+### Cinematic Video Prompt
 
 ```
 This is an overview of the {ordinal} GCSE revision lesson for students
@@ -121,6 +123,38 @@ as not to confuse or overwhelm students. Keep language easy to understand
 but maintain the key subject-specific terms that students will need to
 know for their exams. Explain and define these where appropriate.
 ```
+
+### Lesson Podcast Prompt
+
+```
+This is a lesson podcast for the {ordinal} of {total_lessons} GCSE revision
+lessons in the {unit_name} unit, for students studying {exam_board}
+{subject_name}. The lesson is called "{title}".
+
+UNIT CONTEXT — here is where this lesson sits in the sequence:
+1. The Peacemakers & the 14 Points (covered)
+2. The Treaty of Versailles (covered)
+3. Reactions to the Treaty <-- THIS LESSON
+4. The Wider Peace Settlement (upcoming)
+5. The League of Nations (upcoming)
+...
+
+The source titled "Lesson Material" is the focus of this podcast. The hosts
+should treat lessons before this one as things students have already covered,
+and lessons after it as things still to come. They can reference earlier
+topics as assumed knowledge and tease future ones briefly, but should not
+teach content from other lessons in detail — that is what those lessons are
+for.
+
+TONE AND LANGUAGE:
+- Two hosts having a natural, engaging conversation — not a lecture.
+- Keep language accessible for 15-16 year olds but preserve the key
+  subject-specific terms students need for exams. Define and explain these
+  when first introduced.
+- Use relatable analogies or everyday examples to make concepts stick.
+```
+
+The lesson list is generated automatically from the unit's lessons in Supabase.
 
 **Fields:**
 - `{ordinal}` — "1st", "2nd", "3rd", etc.

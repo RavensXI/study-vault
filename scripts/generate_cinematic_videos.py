@@ -108,17 +108,14 @@ def strip_html(content_html):
     return '\n'.join(lines).strip()
 
 
-def build_focus_prompt(lesson, subject_name, unit_name, exam_board):
-    """Build the NotebookLM focus prompt from the template."""
-    # Get ordinal
+def build_video_prompt(lesson, subject_name, unit_name, exam_board):
+    """Build the NotebookLM focus prompt for cinematic video."""
     n = lesson["lesson_number"]
     ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(n, f"{n}th")
 
-    # Build topic summary from h2 headings in the content
     headings = re.findall(r'<h2[^>]*>(.*?)</h2>', lesson.get("content_html", ""))
     if headings:
-        topic_list = ", ".join(headings[:6])
-        topic_summary = f"the key topics covered include {topic_list}"
+        topic_summary = "the key topics covered include " + ", ".join(headings[:6])
     else:
         topic_summary = f"the lesson titled '{lesson['title']}'"
 
@@ -130,6 +127,51 @@ def build_focus_prompt(lesson, subject_name, unit_name, exam_board):
         f"overwhelm students. Keep language easy to understand but maintain the key "
         f"subject-specific terms that students will need to know for their exams. "
         f"Explain and define these where appropriate."
+    )
+
+
+def build_podcast_prompt(lesson, subject_name, unit_name, exam_board, unit_lessons):
+    """Build the NotebookLM focus prompt for lesson podcast.
+
+    Includes unit context (lesson sequence with covered/upcoming markers)
+    so the AI hosts know what students have already learned and what's
+    still to come.
+    """
+    n = lesson["lesson_number"]
+    total = len(unit_lessons)
+    ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(n, f"{n}th")
+
+    # Build lesson list with marker
+    lesson_list_lines = []
+    for ul in unit_lessons:
+        num = ul["lesson_number"]
+        title = ul["title"]
+        if num < n:
+            lesson_list_lines.append(f"{num}. {title} (covered)")
+        elif num == n:
+            lesson_list_lines.append(f"{num}. {title} <-- THIS LESSON")
+        else:
+            lesson_list_lines.append(f"{num}. {title} (upcoming)")
+    lesson_list = "\n".join(lesson_list_lines)
+
+    return (
+        f'This is a lesson podcast for the {ordinal} of {total} GCSE revision '
+        f'lessons in the {unit_name} unit, for students studying {exam_board} '
+        f'{subject_name}. The lesson is called "{lesson["title"]}".\n\n'
+        f'UNIT CONTEXT — here is where this lesson sits in the sequence:\n'
+        f'{lesson_list}\n\n'
+        f'The source titled "Lesson Material" is the focus of this podcast. The hosts '
+        f'should treat lessons before this one as things students have already covered, '
+        f'and lessons after it as things still to come. They can reference earlier '
+        f'topics as assumed knowledge and tease future ones briefly, but should not '
+        f'teach content from other lessons in detail — that is what those lessons are '
+        f'for.\n\n'
+        f'TONE AND LANGUAGE:\n'
+        f'- Two hosts having a natural, engaging conversation — not a lecture.\n'
+        f'- Keep language accessible for 15-16 year olds but preserve the key '
+        f'subject-specific terms students need for exams. Define and explain these '
+        f'when first introduced.\n'
+        f'- Use relatable analogies or everyday examples to make concepts stick.'
     )
 
 
@@ -167,10 +209,13 @@ def get_pending_lessons(sb, limit, subject_filter=None):
         ).order("sort_order").execute()
 
         for unit in (units.data or []):
-            # Get lessons without video
+            # Get ALL lessons in unit (for podcast context), not just pending
             lessons = sb.table("lessons").select(
                 "id, title, lesson_number, content_html, youtube_video_id"
             ).eq("unit_id", unit["id"]).order("lesson_number").execute()
+
+            # Build unit lesson list for podcast prompt context
+            unit_lessons = [{"lesson_number": l["lesson_number"], "title": l["title"]} for l in (lessons.data or [])]
 
             for lesson in (lessons.data or []):
                 # Skip if already has a video
@@ -185,6 +230,7 @@ def get_pending_lessons(sb, limit, subject_filter=None):
                     "unit_name": unit["name"],
                     "accent": unit.get("accent", "#666"),
                     "exam_board": subject.get("exam_board", "AQA"),
+                    "unit_lessons": unit_lessons,
                 })
 
         if len(all_pending) >= limit:
@@ -273,19 +319,23 @@ def cmd_generate(args):
             print(f"  SKIP: Video already in progress for this notebook")
             continue
 
-        # 7. Build focus prompt and create cinematic video + podcast
-        focus = build_focus_prompt(lesson, entry["subject_name"], entry["unit_name"], entry["exam_board"])
+        # 7. Build focus prompts and create cinematic video + podcast
+        video_focus = build_video_prompt(lesson, entry["subject_name"], entry["unit_name"], entry["exam_board"])
+        podcast_focus = build_podcast_prompt(
+            lesson, entry["subject_name"], entry["unit_name"],
+            entry["exam_board"], entry.get("unit_lessons", []),
+        )
 
         try:
-            nlm_run(["video", "create", notebook_id, "--format", "cinematic", "--focus", focus, "--confirm"], timeout=60)
+            nlm_run(["video", "create", notebook_id, "--format", "cinematic", "--focus", video_focus, "--confirm"], timeout=60)
         except Exception:
             pass
 
         time.sleep(2)
 
-        # Also generate podcast audio from the same notebook
+        # Also generate podcast audio from the same notebook (with unit context prompt)
         try:
-            nlm_run(["audio", "create", notebook_id, "--focus", focus, "--confirm"], timeout=60)
+            nlm_run(["audio", "create", notebook_id, "--focus", podcast_focus, "--confirm"], timeout=60)
         except Exception:
             pass
 
