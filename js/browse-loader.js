@@ -54,11 +54,22 @@
 
   // ---- Render subject landing page (unit cards) ----
   async function renderSubjectLanding(subjectSlug) {
-    var subjectResult = await sb
+    var schoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
+      ? SchoolSession.getSchoolId()
+      : null;
+
+    var subjectQuery = sb
       .from('subjects')
       .select('id, slug, name, exam_board, spec_code, color, image_url, settings')
-      .eq('slug', subjectSlug)
-      .single();
+      .eq('slug', subjectSlug);
+
+    if (schoolId) {
+      subjectQuery = subjectQuery.eq('school_id', schoolId);
+    } else {
+      subjectQuery = subjectQuery.is('school_id', null);
+    }
+
+    var subjectResult = await subjectQuery.single();
 
     if (subjectResult.error || !subjectResult.data) {
       showError('Subject not found', 'No subject found with slug "' + subjectSlug + '"');
@@ -137,12 +148,23 @@
 
   // ---- Render unit index page (lesson cards) ----
   async function renderUnitIndex(subjectSlug, unitSlug) {
-    var unitResult = await sb
+    var schoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
+      ? SchoolSession.getSchoolId()
+      : null;
+
+    var unitQuery = sb
       .from('units')
-      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name)')
+      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id)')
       .eq('slug', unitSlug)
-      .eq('subjects.slug', subjectSlug)
-      .single();
+      .eq('subjects.slug', subjectSlug);
+
+    if (schoolId) {
+      unitQuery = unitQuery.eq('subjects.school_id', schoolId);
+    } else {
+      unitQuery = unitQuery.is('subjects.school_id', null);
+    }
+
+    var unitResult = await unitQuery.single();
 
     if (unitResult.error || !unitResult.data) {
       showError('Unit not found', 'No unit found.');

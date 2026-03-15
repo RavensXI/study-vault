@@ -64,12 +64,24 @@
   async function fetchLesson(params) {
     // Join through units -> subjects to get the lesson
     // First, get the unit
-    var unitResult = await sb
+    // Determine school scope: school students see their school's content, free users see generic
+    var schoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
+      ? SchoolSession.getSchoolId()
+      : null;
+
+    var unitQuery = sb
       .from('units')
       .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
       .eq('slug', params.unitSlug)
-      .eq('subjects.slug', params.subjectSlug)
-      .single();
+      .eq('subjects.slug', params.subjectSlug);
+
+    if (schoolId) {
+      unitQuery = unitQuery.eq('subjects.school_id', schoolId);
+    } else {
+      unitQuery = unitQuery.is('subjects.school_id', null);
+    }
+
+    var unitResult = await unitQuery.single();
 
     if (unitResult.error || !unitResult.data) {
       return { error: 'Unit not found' };
@@ -274,6 +286,26 @@
     // Show the page
     loadingEl.style.display = 'none';
     pageEl.style.display = '';
+
+    // Inject ad placeholders for free users only
+    if (typeof FreeUser !== 'undefined' && FreeUser.isActive() && !SchoolSession.isActive()) {
+      // Sidebar ad — above related media
+      var sidebarMedia = document.getElementById('sidebar-media');
+      if (sidebarMedia) {
+        var sidebarAd = document.createElement('div');
+        sidebarAd.className = 'ad-placeholder ad-placeholder--sidebar';
+        sidebarAd.textContent = 'Ad';
+        sidebarMedia.parentElement.insertBefore(sidebarAd, sidebarMedia);
+      }
+      // Inline ad — before the conclusion
+      var conclusion = document.querySelector('.conclusion');
+      if (conclusion) {
+        var inlineAd = document.createElement('div');
+        inlineAd.className = 'ad-placeholder ad-placeholder--inline';
+        inlineAd.textContent = 'Ad';
+        conclusion.parentElement.insertBefore(inlineAd, conclusion);
+      }
+    }
 
     // Init lesson features from main.js (Phase 2 functions)
     // Wrapped in its own try/catch so a feature init failure doesn't
