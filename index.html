@@ -66,6 +66,21 @@
       .picker-header { padding: 1.5rem 1.25rem 0.5rem; }
       .picker-footer { padding: 0.75rem 1.25rem 1.5rem; }
     }
+    /* --- School code gate --- */
+    .school-gate { display: none; max-width: 400px; margin: 0 auto; padding: 2rem 1.5rem 3rem; text-align: center; }
+    .school-gate.visible { display: block; }
+    .school-gate h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.5rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.5rem; }
+    .school-gate p { font-size: 0.9rem; color: var(--text-secondary); margin: 0 0 1.5rem; line-height: 1.5; }
+    .school-gate-input { width: 100%; padding: 0.75rem 1rem; border: 1px solid var(--border-light); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 1rem; background: var(--bg-card); color: var(--text-primary); outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+    .school-gate-input:focus { border-color: var(--text-secondary); }
+    .school-gate-btn { width: 100%; margin-top: 0.75rem; padding: 0.7rem; border: none; border-radius: 10px; background: #2d2a26; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+    .school-gate-btn:hover { opacity: 0.85; }
+    .school-gate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .school-gate-error { color: #dc2626; font-size: 0.85rem; margin-top: 0.75rem; display: none; }
+    .school-gate-error.visible { display: block; }
+    .school-name-badge { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: -0.25rem; margin-bottom: 1rem; text-align: center; }
+    .school-name-badge.visible { display: block; }
+    .school-name-badge button { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; font-size: 0.82rem; font-family: 'Inter', sans-serif; margin-left: 0.5rem; }
   </style>
 </head>
 <body>
@@ -75,8 +90,23 @@
     <h1>StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></h1>
   </section>
 
-  <!-- Subjects -->
-  <section class="home-subjects" id="home-subjects">
+  <!-- School code gate (visible when no school session) -->
+  <div class="school-gate" id="school-gate">
+    <h2>Welcome to StudyVault</h2>
+    <p>Enter your school code to access your revision materials.</p>
+    <input type="text" class="school-gate-input" id="school-code-input" placeholder="Enter your school code" autocomplete="off" spellcheck="false">
+    <button class="school-gate-btn" id="school-code-btn">Continue</button>
+    <p class="school-gate-error" id="school-gate-error">That code didn't work. Check with your teacher and try again.</p>
+  </div>
+
+  <!-- School name badge (visible when logged in) -->
+  <div class="school-name-badge" id="school-name-badge">
+    <span id="school-name-text"></span>
+    <button id="school-logout-btn">Change school</button>
+  </div>
+
+  <!-- Subjects (hidden until school session active) -->
+  <section class="home-subjects" id="home-subjects" style="display:none">
     <!-- JS will split this into "Your subjects" / "All subjects" if picker has been used -->
     <div class="home-section-header" id="home-section-header">
       <h2>Choose a subject</h2>
@@ -269,6 +299,7 @@
     </div>
   </footer>
 
+  <script src="js/school-session.js"></script>
   <script src="js/main.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
@@ -276,12 +307,75 @@
   (function() {
     'use strict';
 
+    // --- School gate logic ---
+    var gate = document.getElementById('school-gate');
+    var codeInput = document.getElementById('school-code-input');
+    var codeBtn = document.getElementById('school-code-btn');
+    var gateError = document.getElementById('school-gate-error');
+    var subjectsSection = document.getElementById('home-subjects');
+    var schoolBadge = document.getElementById('school-name-badge');
+    var schoolNameText = document.getElementById('school-name-text');
+    var logoutBtn = document.getElementById('school-logout-btn');
+
+    if (SchoolSession.isActive()) {
+      // Already logged in — show subjects, hide gate
+      subjectsSection.style.display = '';
+      gate.style.display = 'none';
+      var session = SchoolSession.get();
+      schoolNameText.textContent = session.school_name;
+      schoolBadge.classList.add('visible');
+    } else {
+      // No session — show gate, hide subjects
+      gate.classList.add('visible');
+      subjectsSection.style.display = 'none';
+    }
+
+    function submitCode() {
+      var code = codeInput.value.trim();
+      if (!code) return;
+      codeBtn.disabled = true;
+      codeBtn.textContent = 'Checking...';
+      gateError.classList.remove('visible');
+
+      fetch('/api/auth/student-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code }),
+      })
+      .then(function(res) { return res.json().then(function(data) { return { ok: res.ok, data: data }; }); })
+      .then(function(result) {
+        if (result.ok) {
+          SchoolSession.set(result.data);
+          window.location.reload();
+        } else {
+          gateError.classList.add('visible');
+          codeBtn.disabled = false;
+          codeBtn.textContent = 'Continue';
+        }
+      })
+      .catch(function() {
+        gateError.classList.add('visible');
+        codeBtn.disabled = false;
+        codeBtn.textContent = 'Continue';
+      });
+    }
+
+    codeBtn.addEventListener('click', submitCode);
+    codeInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitCode();
+    });
+
+    logoutBtn.addEventListener('click', function() {
+      SchoolSession.clear();
+      window.location.reload();
+    });
+
     var STORAGE_KEY = 'studyvault-subjects';
     var LOCKED_SUBJECTS = ['english-literature', 'english-language', 'science'];
     var overlay = document.getElementById('picker-overlay');
     var doneBtn = document.getElementById('picker-done');
     var pickerGrid = document.getElementById('picker-grid');
-    var subjectsSection = document.getElementById('home-subjects');
+    // subjectsSection already declared above (school gate)
     var headerEl = document.getElementById('home-section-header');
     var gridEl = document.getElementById('home-grid');
 
