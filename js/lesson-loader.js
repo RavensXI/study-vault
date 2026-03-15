@@ -295,7 +295,7 @@
       if (sidebar && knowledgeCheck) {
         var sidebarAd = document.createElement('div');
         sidebarAd.className = 'ad-placeholder ad-placeholder--sidebar';
-        sidebarAd.textContent = 'Ad';
+        sidebarAd.innerHTML = '<img src="https://placehold.co/300x250/f0f0f0/999?text=Ad+%E2%80%93+300x250" alt="Ad placeholder" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;">';
         knowledgeCheck.insertAdjacentElement('afterend', sidebarAd);
       }
       // Inline ad — before the conclusion (inside study-notes content)
@@ -303,7 +303,7 @@
       if (conclusion) {
         var inlineAd = document.createElement('div');
         inlineAd.className = 'ad-placeholder ad-placeholder--inline';
-        inlineAd.textContent = 'Ad';
+        inlineAd.innerHTML = '<img src="https://placehold.co/728x90/f0f0f0/999?text=Ad+%E2%80%93+728x90" alt="Ad placeholder" style="width:100%;height:100%;object-fit:contain;border-radius:inherit;">';
         conclusion.parentElement.insertBefore(inlineAd, conclusion);
       }
     }
