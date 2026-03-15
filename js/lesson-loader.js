@@ -289,14 +289,13 @@
 
     // Inject ad placeholders for free users only
     if (typeof FreeUser !== 'undefined' && FreeUser.isActive() && !SchoolSession.isActive()) {
-      // Sidebar ad — below knowledge check, above video/media
-      var sidebar = document.querySelector('.lesson-sidebar');
-      var knowledgeCheck = document.querySelector('.sidebar-knowledge-check');
-      if (sidebar && knowledgeCheck) {
+      // Sidebar ad — after knowledge check + video, before related media
+      var sidebarMedia = document.getElementById('sidebar-media');
+      if (sidebarMedia) {
         var sidebarAd = document.createElement('div');
         sidebarAd.className = 'ad-placeholder ad-placeholder--sidebar';
         sidebarAd.innerHTML = '<img src="/images/sample-ad-300x250.png" alt="Ad" style="width:100%;height:auto;border-radius:inherit;">';
-        knowledgeCheck.insertAdjacentElement('afterend', sidebarAd);
+        sidebarMedia.parentElement.insertBefore(sidebarAd, sidebarMedia);
       }
       // Inline ad — before the conclusion (inside study-notes content)
       var conclusion = document.querySelector('#study-notes .conclusion');
