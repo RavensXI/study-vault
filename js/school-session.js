@@ -60,8 +60,8 @@
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      // Position at far top-left of the page, outside header container
-      document.body.appendChild(img);
+      // Insert after the unit/lesson pills (end of brand area)
+      brand.appendChild(img);
     }
   };
 
