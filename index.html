@@ -81,6 +81,59 @@
     .school-name-badge { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: -0.25rem; margin-bottom: 1rem; text-align: center; }
     .school-name-badge.visible { display: block; }
     .school-name-badge button { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; font-size: 0.82rem; font-family: 'Inter', sans-serif; margin-left: 0.5rem; }
+
+    /* --- Free user gate divider --- */
+    .school-gate-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; color: var(--text-muted); font-size: 0.82rem; }
+    .school-gate-divider::before, .school-gate-divider::after { content: ''; flex: 1; height: 1px; background: var(--border-lighter); }
+    .school-gate-free-btn { width: 100%; padding: 0.7rem; border: 1px solid var(--border-light); border-radius: 10px; background: transparent; color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.2s, color 0.2s; }
+    .school-gate-free-btn:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+
+    /* --- Free wizard modal --- */
+    .free-wizard-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
+    .free-wizard-overlay.open { display: flex; align-items: center; justify-content: center; }
+    .free-wizard-modal { background: var(--bg-card); border-radius: 20px; max-width: 600px; width: calc(100% - 2rem); max-height: calc(100vh - 3rem); overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.18); padding: 2rem; }
+    .free-wizard-modal h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.35rem; font-weight: 700; margin: 0 0 0.5rem; text-align: center; }
+    .free-wizard-modal p.subtitle { font-size: 0.88rem; color: var(--text-secondary); text-align: center; margin: 0 0 1.25rem; }
+    .free-wizard-step { display: none; }
+    .free-wizard-step.active { display: block; }
+
+    .fw-subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .fw-card { border: 2px solid var(--border-light); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; background: var(--bg-card); }
+    .fw-card.selected { border-color: #2d2a26; box-shadow: 0 0 0 3px rgba(45,42,38,0.12); }
+    .fw-card-img { width: 100%; height: 80px; object-fit: cover; }
+    .fw-card-label { padding: 0.5rem 0.75rem; font-size: 0.85rem; font-weight: 600; }
+    .fw-card-check { display: none; position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; background: #2d2a26; border-radius: 50%; color: #fff; font-size: 12px; line-height: 20px; text-align: center; }
+    .fw-card.selected .fw-card-check { display: block; }
+    .fw-card { position: relative; }
+
+    .fw-board-section { margin-bottom: 1rem; }
+    .fw-board-section h3 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.5rem; }
+    .fw-board-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .fw-board-btn { padding: 0.45rem 1rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .fw-board-btn.selected { background: #2d2a26; color: #fff; border-color: #2d2a26; }
+    .fw-board-btn.greyed { opacity: 0.45; cursor: pointer; }
+    .fw-board-btn.greyed:hover { opacity: 0.65; }
+    .fw-board-btn.requested { opacity: 0.45; border-style: dashed; }
+
+    .fw-text-section { margin-bottom: 1rem; }
+    .fw-text-section h3 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.4rem; }
+    .fw-text-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .fw-text-btn { padding: 0.4rem 0.85rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .fw-text-btn.selected { background: #2d2a26; color: #fff; border-color: #2d2a26; }
+    .fw-text-btn.greyed { opacity: 0.45; cursor: pointer; }
+    .fw-text-btn.requested { opacity: 0.45; border-style: dashed; }
+
+    .fw-continue { width: 100%; padding: 0.7rem; border: none; border-radius: 10px; background: #2d2a26; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; transition: opacity 0.2s; }
+    .fw-continue:hover { opacity: 0.85; }
+    .fw-continue:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .fw-toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #2d2a26; color: #fff; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.82rem; font-weight: 500; z-index: 3000; animation: sv-fade-in 0.2s ease; }
+    .fw-toast.visible { display: block; }
+
+    /* --- Free user badge --- */
+    .free-user-badge { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: -0.25rem; margin-bottom: 1rem; text-align: center; }
+    .free-user-badge.visible { display: block; }
+    .free-user-badge button { background: none; border: none; color: var(--text-muted); text-decoration: underline; cursor: pointer; font-size: 0.82rem; font-family: 'Inter', sans-serif; margin: 0 0.25rem; }
   </style>
 </head>
 <body>
@@ -97,6 +150,8 @@
     <input type="text" class="school-gate-input" id="school-code-input" placeholder="Enter your school code" autocomplete="off" spellcheck="false">
     <button class="school-gate-btn" id="school-code-btn">Continue</button>
     <p class="school-gate-error" id="school-gate-error">That code didn't work. Check with your teacher and try again.</p>
+    <p class="school-gate-divider"><span>or</span></p>
+    <button class="school-gate-free-btn" id="free-browse-btn">Browse free revision content</button>
   </div>
 
   <!-- School name badge (visible when logged in) -->
@@ -106,7 +161,99 @@
     <button id="school-logout-btn">Change school</button>
   </div>
 
-  <!-- Subjects (hidden until school session active) -->
+  <!-- Free user badge -->
+  <div class="free-user-badge" id="free-user-badge">
+    Free account <button id="free-change-btn">Change subjects</button> <button id="free-school-btn">Enter school code</button>
+  </div>
+
+  <!-- Free wizard modal -->
+  <div class="free-wizard-overlay" id="free-wizard-overlay">
+    <div class="free-wizard-modal">
+      <!-- Step 1: Subject selection -->
+      <div class="free-wizard-step active" id="fw-step-1">
+        <h2>What are you revising?</h2>
+        <p class="subtitle">Select the subjects you're studying</p>
+        <div class="fw-subject-grid" id="fw-subject-grid">
+          <div class="fw-card selected" data-slug="maths">
+            <img class="fw-card-img" src="/images/subject-maths.jpg" alt="Maths">
+            <div class="fw-card-label">Maths</div>
+            <div class="fw-card-check">&#10003;</div>
+          </div>
+          <div class="fw-card selected" data-slug="english-language">
+            <img class="fw-card-img" src="/images/subject-english-lang.jpg" alt="English Language">
+            <div class="fw-card-label">English Language</div>
+            <div class="fw-card-check">&#10003;</div>
+          </div>
+          <div class="fw-card selected" data-slug="english-literature">
+            <img class="fw-card-img" src="/images/subject-english-lit.jpg" alt="English Literature">
+            <div class="fw-card-label">English Literature</div>
+            <div class="fw-card-check">&#10003;</div>
+          </div>
+          <div class="fw-card selected" data-slug="science">
+            <img class="fw-card-img" src="/images/subject-science.jpg" alt="Combined Science">
+            <div class="fw-card-label">Combined Science</div>
+            <div class="fw-card-check">&#10003;</div>
+          </div>
+        </div>
+        <button class="fw-continue" id="fw-step1-next">Continue</button>
+      </div>
+
+      <!-- Step 2: Exam board picker -->
+      <div class="free-wizard-step" id="fw-step-2">
+        <h2>Which exam boards?</h2>
+        <p class="subtitle">Select the board for each subject</p>
+        <div id="fw-boards-container"></div>
+        <button class="fw-continue" id="fw-step2-next">Continue</button>
+      </div>
+
+      <!-- Step 3: English Lit text picker -->
+      <div class="free-wizard-step" id="fw-step-3">
+        <h2>Which texts are you studying?</h2>
+        <p class="subtitle">Pick one from each category</p>
+
+        <div class="fw-text-section">
+          <h3>Shakespeare</h3>
+          <div class="fw-text-options" data-group="shakespeare">
+            <button class="fw-text-btn" data-value="macbeth">Macbeth</button>
+            <button class="fw-text-btn" data-value="romeo-and-juliet">Romeo &amp; Juliet</button>
+            <button class="fw-text-btn greyed" data-value="the-tempest">The Tempest</button>
+            <button class="fw-text-btn greyed" data-value="merchant-of-venice">Merchant of Venice</button>
+            <button class="fw-text-btn greyed" data-value="much-ado">Much Ado About Nothing</button>
+          </div>
+        </div>
+
+        <div class="fw-text-section">
+          <h3>19th Century Novel</h3>
+          <div class="fw-text-options" data-group="nineteenth-century">
+            <button class="fw-text-btn" data-value="a-christmas-carol">A Christmas Carol</button>
+            <button class="fw-text-btn" data-value="jekyll-and-hyde">Jekyll &amp; Hyde</button>
+            <button class="fw-text-btn greyed" data-value="frankenstein">Frankenstein</button>
+            <button class="fw-text-btn greyed" data-value="pride-and-prejudice">Pride &amp; Prejudice</button>
+            <button class="fw-text-btn greyed" data-value="jane-eyre">Jane Eyre</button>
+            <button class="fw-text-btn greyed" data-value="great-expectations">Great Expectations</button>
+          </div>
+        </div>
+
+        <div class="fw-text-section">
+          <h3>Modern Text</h3>
+          <div class="fw-text-options" data-group="modern">
+            <button class="fw-text-btn" data-value="an-inspector-calls">An Inspector Calls</button>
+            <button class="fw-text-btn" data-value="animal-farm">Animal Farm</button>
+            <button class="fw-text-btn greyed" data-value="lord-of-the-flies">Lord of the Flies</button>
+            <button class="fw-text-btn greyed" data-value="blood-brothers">Blood Brothers</button>
+            <button class="fw-text-btn greyed" data-value="curious-incident">The Curious Incident...</button>
+            <button class="fw-text-btn greyed" data-value="pigeon-english">Pigeon English</button>
+          </div>
+        </div>
+
+        <button class="fw-continue" id="fw-step3-done">Start revising</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="fw-toast" id="fw-toast">Request recorded — we'll prioritise popular specs</div>
+
+  <!-- Subjects (hidden until school session or free user active) -->
   <section class="home-subjects" id="home-subjects" style="display:none">
     <!-- JS will split this into "Your subjects" / "All subjects" if picker has been used -->
     <div class="home-section-header" id="home-section-header">
@@ -301,6 +448,7 @@
   </footer>
 
   <script src="js/school-session.js"></script>
+  <script src="js/free-user.js"></script>
   <script src="js/main.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
@@ -333,6 +481,12 @@
         badgeLogo.alt = session.school_name;
         badgeLogo.style.display = '';
       }
+    } else if (FreeUser.isActive()) {
+      // Free user returning — show subjects, hide gate, show free badge
+      subjectsSection.style.display = '';
+      gate.style.display = 'none';
+      var freeBadge = document.getElementById('free-user-badge');
+      freeBadge.classList.add('visible');
     } else {
       // No session — show gate, hide subjects
       gate.classList.add('visible');
@@ -377,6 +531,163 @@
     logoutBtn.addEventListener('click', function() {
       SchoolSession.clear();
       window.location.reload();
+    });
+
+    // --- Free user flow ---
+    var freeWizardOverlay = document.getElementById('free-wizard-overlay');
+    var freeBrowseBtn = document.getElementById('free-browse-btn');
+    var freeChangeBtn = document.getElementById('free-change-btn');
+    var freeSchoolBtn = document.getElementById('free-school-btn');
+    var fwToast = document.getElementById('fw-toast');
+
+    // Available boards per subject (true = content available, false = greyed/request)
+    var boardConfig = {
+      'maths': { 'Edexcel': true, 'AQA': false, 'OCR': false },
+      'english-language': { 'AQA': true, 'Edexcel': false, 'OCR': false },
+      'english-literature': { 'AQA': true, 'Edexcel': false, 'OCR': false },
+      'science': { 'AQA': true, 'Edexcel': false, 'OCR': false },
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {} };
+
+    freeBrowseBtn.addEventListener('click', function () {
+      freeWizardOverlay.classList.add('open');
+    });
+
+    freeChangeBtn.addEventListener('click', function () {
+      freeWizardOverlay.classList.add('open');
+    });
+
+    freeSchoolBtn.addEventListener('click', function () {
+      FreeUser.clear();
+      window.location.reload();
+    });
+
+    // Step 1: Subject toggle
+    document.getElementById('fw-subject-grid').addEventListener('click', function (e) {
+      var card = e.target.closest('.fw-card');
+      if (!card) return;
+      card.classList.toggle('selected');
+    });
+
+    // Step 1 → Step 2
+    document.getElementById('fw-step1-next').addEventListener('click', function () {
+      var selected = document.querySelectorAll('#fw-subject-grid .fw-card.selected');
+      wizardState.subjects = [];
+      selected.forEach(function (card) { wizardState.subjects.push(card.dataset.slug); });
+      if (!wizardState.subjects.length) return;
+
+      // Build board picker for selected subjects
+      var container = document.getElementById('fw-boards-container');
+      container.innerHTML = '';
+      wizardState.subjects.forEach(function (slug) {
+        var boards = boardConfig[slug] || {};
+        var displayName = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science' }[slug] || slug;
+
+        var section = document.createElement('div');
+        section.className = 'fw-board-section';
+        section.innerHTML = '<h3>' + displayName + '</h3><div class="fw-board-options" data-subject="' + slug + '"></div>';
+        var opts = section.querySelector('.fw-board-options');
+
+        Object.keys(boards).forEach(function (board) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-board-btn' + (boards[board] ? '' : ' greyed');
+          btn.textContent = board;
+          btn.dataset.board = board.toLowerCase();
+          btn.dataset.available = boards[board] ? 'true' : 'false';
+
+          if (boards[board]) {
+            // Auto-select the available board
+            btn.classList.add('selected');
+            wizardState.boards[slug] = board.toLowerCase();
+          }
+
+          btn.addEventListener('click', function () {
+            if (btn.dataset.available === 'true') {
+              opts.querySelectorAll('.fw-board-btn').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              wizardState.boards[slug] = btn.dataset.board;
+            } else if (!btn.classList.contains('requested')) {
+              btn.classList.add('requested');
+              btn.textContent = board + ' (requested)';
+              fwToast.classList.add('visible');
+              setTimeout(function () { fwToast.classList.remove('visible'); }, 2500);
+              // TODO: increment counter in Supabase
+            }
+          });
+          opts.appendChild(btn);
+        });
+        container.appendChild(section);
+      });
+
+      document.getElementById('fw-step-1').classList.remove('active');
+      document.getElementById('fw-step-2').classList.add('active');
+    });
+
+    // Step 2 → Step 3 (or finish)
+    document.getElementById('fw-step2-next').addEventListener('click', function () {
+      if (wizardState.subjects.indexOf('english-literature') !== -1) {
+        document.getElementById('fw-step-2').classList.remove('active');
+        document.getElementById('fw-step-3').classList.add('active');
+      } else {
+        finishWizard();
+      }
+    });
+
+    // Step 3: Text selection
+    document.querySelectorAll('.fw-text-options').forEach(function (group) {
+      group.addEventListener('click', function (e) {
+        var btn = e.target.closest('.fw-text-btn');
+        if (!btn) return;
+
+        if (btn.classList.contains('greyed') && !btn.classList.contains('requested')) {
+          btn.classList.add('requested');
+          btn.textContent = btn.textContent + ' (requested)';
+          fwToast.classList.add('visible');
+          setTimeout(function () { fwToast.classList.remove('visible'); }, 2500);
+          return;
+        }
+
+        if (btn.classList.contains('greyed')) return;
+
+        // Select this text, deselect others in group
+        group.querySelectorAll('.fw-text-btn').forEach(function (b) {
+          if (!b.classList.contains('greyed')) b.classList.remove('selected');
+        });
+        btn.classList.add('selected');
+        wizardState.texts[group.dataset.group] = btn.dataset.value;
+      });
+    });
+
+    // Step 3 → Finish
+    document.getElementById('fw-step3-done').addEventListener('click', function () {
+      finishWizard();
+    });
+
+    function finishWizard() {
+      var subjectNames = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science' };
+      var prefs = { subjects: [] };
+
+      wizardState.subjects.forEach(function (slug) {
+        var entry = {
+          slug: slug,
+          examBoard: wizardState.boards[slug] || 'aqa',
+          display: subjectNames[slug] + ' (' + (wizardState.boards[slug] || 'AQA').toUpperCase() + ')',
+        };
+        if (slug === 'english-literature') {
+          entry.texts = wizardState.texts;
+        }
+        prefs.subjects.push(entry);
+      });
+
+      FreeUser.set(prefs);
+      freeWizardOverlay.classList.remove('open');
+      window.location.reload();
+    }
+
+    // Close wizard on overlay click
+    freeWizardOverlay.addEventListener('click', function (e) {
+      if (e.target === freeWizardOverlay) freeWizardOverlay.classList.remove('open');
     });
 
     var STORAGE_KEY = 'studyvault-subjects';
