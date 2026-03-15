@@ -60,14 +60,8 @@
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      // Insert as its own flex item between brand and nav
-      var headerInner = brand.parentElement;
-      var nav = headerInner.querySelector('.header-nav');
-      if (nav) {
-        headerInner.insertBefore(img, nav);
-      } else {
-        headerInner.appendChild(img);
-      }
+      // Insert left of the StudyVault logo
+      brand.insertBefore(img, brand.firstChild);
     }
   };
 
