@@ -55,15 +55,14 @@
       var logoUrl = logos[session.school_slug];
       if (!logoUrl) return;
 
-      var divider = document.createElement('span');
-      divider.className = 'header-divider';
       var img = document.createElement('img');
       img.className = 'school-logo';
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      brand.appendChild(divider);
-      brand.appendChild(img);
+      // Insert before the StudyVault brand (far left of header)
+      var headerInner = brand.parentElement;
+      headerInner.insertBefore(img, brand);
     }
   };
 
