@@ -60,9 +60,8 @@
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      // Insert before the StudyVault brand (far left of header)
-      var headerInner = brand.parentElement;
-      headerInner.insertBefore(img, brand);
+      // Position at far top-left of the page, outside header container
+      document.body.appendChild(img);
     }
   };
 
