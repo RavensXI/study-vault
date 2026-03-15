@@ -11,11 +11,15 @@ module.exports = async (req, res) => {
   }
 
   // Look up school by student_code in settings jsonb
-  const { data, error } = await supabase
+  const { data: schools, error } = await supabase
     .from('schools')
-    .select('id, name, slug')
-    .eq('settings->>student_code', code.toLowerCase().trim())
-    .single();
+    .select('id, name, slug, settings');
+
+  const match = (schools || []).find(function(s) {
+    return s.settings && s.settings.student_code === code.toLowerCase().trim();
+  });
+
+  const data = match || null;
 
   if (error || !data) {
     return res.status(401).json({ error: 'Invalid school code' });
