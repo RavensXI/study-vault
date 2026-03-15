@@ -60,8 +60,14 @@
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      // Insert after the unit/lesson pills (end of brand area)
-      brand.appendChild(img);
+      // Insert as its own flex item between brand and nav
+      var headerInner = brand.parentElement;
+      var nav = headerInner.querySelector('.header-nav');
+      if (nav) {
+        headerInner.insertBefore(img, nav);
+      } else {
+        headerInner.appendChild(img);
+      }
     }
   };
 
