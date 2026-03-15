@@ -39,6 +39,40 @@
         return true;
       }
       return false;
+    },
+
+    /** Inject school logo into the page header brand area. */
+    injectLogo: function () {
+      if (!this.isActive()) return;
+      var session = this.get();
+      var brand = document.querySelector('.header-brand');
+      if (!brand || brand.querySelector('.school-logo')) return;
+
+      // School logo URLs keyed by slug (local images)
+      var logos = {
+        'unity-college': '/images/unity-college-logo.png'
+      };
+      var logoUrl = logos[session.school_slug];
+      if (!logoUrl) return;
+
+      var divider = document.createElement('span');
+      divider.className = 'header-divider';
+      var img = document.createElement('img');
+      img.className = 'school-logo';
+      img.src = logoUrl;
+      img.alt = session.school_name;
+
+      brand.appendChild(divider);
+      brand.appendChild(img);
     }
   };
+
+  // Auto-inject logo on DOMContentLoaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function () {
+      SchoolSession.injectLogo();
+    });
+  } else {
+    SchoolSession.injectLogo();
+  }
 })();

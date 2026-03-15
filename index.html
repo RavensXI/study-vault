@@ -101,6 +101,7 @@
 
   <!-- School name badge (visible when logged in) -->
   <div class="school-name-badge" id="school-name-badge">
+    <img id="school-badge-logo" class="school-logo" src="" alt="" style="display:none; height:22px; vertical-align:middle; margin-right:0.4rem;">
     <span id="school-name-text"></span>
     <button id="school-logout-btn">Change school</button>
   </div>
@@ -324,6 +325,14 @@
       var session = SchoolSession.get();
       schoolNameText.textContent = session.school_name;
       schoolBadge.classList.add('visible');
+      // Show school logo in badge
+      var logos = { 'unity-college': '/images/unity-college-logo.png' };
+      var badgeLogo = document.getElementById('school-badge-logo');
+      if (logos[session.school_slug] && badgeLogo) {
+        badgeLogo.src = logos[session.school_slug];
+        badgeLogo.alt = session.school_name;
+        badgeLogo.style.display = '';
+      }
     } else {
       // No session — show gate, hide subjects
       gate.classList.add('visible');
