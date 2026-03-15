@@ -295,7 +295,7 @@
       if (sidebar && knowledgeCheck) {
         var sidebarAd = document.createElement('div');
         sidebarAd.className = 'ad-placeholder ad-placeholder--sidebar';
-        sidebarAd.innerHTML = '<img src="https://samplelib.com/lib/preview/png/sample-ad-300x250.png" alt="Ad" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+        sidebarAd.innerHTML = '<img src="/images/sample-ad-300x250.png" alt="Ad" style="width:100%;height:auto;border-radius:inherit;">';
         knowledgeCheck.insertAdjacentElement('afterend', sidebarAd);
       }
       // Inline ad — before the conclusion (inside study-notes content)
@@ -303,7 +303,7 @@
       if (conclusion) {
         var inlineAd = document.createElement('div');
         inlineAd.className = 'ad-placeholder ad-placeholder--inline';
-        inlineAd.innerHTML = '<img src="https://samplelib.com/lib/preview/png/sample-ad-728x90.png" alt="Ad" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">';
+        inlineAd.innerHTML = '<img src="/images/sample-ad-728x90.png" alt="Ad" style="width:100%;height:auto;border-radius:inherit;">';
         conclusion.parentElement.insertBefore(inlineAd, conclusion);
       }
     }
