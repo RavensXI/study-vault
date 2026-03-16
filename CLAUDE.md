@@ -29,9 +29,9 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 | 26/26 |
 | English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 | 11/42 |
 | English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 0/30 | 30/30 |
-| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 0/48 | 7/48 |
-| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 22/22 |
-| **Subtotal** | | **370** | **44** | **16/370** | **~295/370** |
+| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 20/48 | 48/48 |
+| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 20/22 |
+| **Subtotal** | | **370** | **44** | **36/370** | **~363/370** |
 
 ## Subjects — Free Tier (school_id NULL, generic content)
 
@@ -39,9 +39,10 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 |---------|-----------|---------|-------|
 | Maths | Edexcel 1MA1 | 37 | TBC |
 | Science (generic) | AQA 8464 | 48 | 6 |
+| Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 |
 | English Language (generic) | AQA 8700 | 30 | 4 |
 | English Literature (generic) | AQA 8702 | 70 | TBC (extra texts beyond Unity's 42) |
-| **Subtotal** | | **185** | |
+| **Subtotal** | | **207** | |
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -51,25 +52,27 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **555 lessons** (370 school + 185 generic) + **194 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **577 lessons** (370 school + 207 generic) + **226 guide pages** (194 school + 32 generic) in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (3 tiers):**
   - **Free users:** No login. Generic content (school_id NULL) + ads. Prefs stored in localStorage via `js/free-user.js`.
-  - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees school-specific content, no ads.
+  - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees only subscribed subjects (restricted mode via `school_subscriptions` table), no ads.
   - **Teachers/Admin:** `ADMIN_PASSWORD` / `TEACHER_PASSWORD` via `js/auth-gate.js`. Teacher setup flow in `js/teacher-setup.js`.
   - **Microsoft SSO:** Still pending Entra admin consent.
 - **Admin pages:** `/admin/pipeline` (upload/generate), `/admin/review` (QC), `/admin/images` (image QA), `/admin/editor` (lesson editor), `/admin/editor-guide` (guide editor)
-- **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
+- **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, school_subscriptions, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
 - **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`), `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`)
 - **Cookie consent:** Banner on all pages via `js/cookie-consent.js`. Privacy policy at `/privacy.html`.
 - **Business email:** studyvault.info@gmail.com
 
 ## Active TODO
+- **Severn Vale demo LIVE** — school code `vale2026`, subscribes to Science + Separate Sciences. Generic content (school_id NULL).
+- **Editor school scoping (BLOCKER):** Lesson/guide editors have NO school_id scoping — dangerous with duplicate subject slugs across schools. Must fix before teacher onboarding.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **Cinematic videos**: 16/370 done (Sport Science + Food Tech partial). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts**: ~295/370 done. 200/day limit, generated alongside videos.
+- **Cinematic videos**: 36/370 done (Sport Science 9 + Food Tech 7 + Science 20). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
+- **Podcasts**: ~363/370 done. Science 48/48, Sep Sci 20/22 (2 regenerating). See `docs/VIDEO_PIPELINE.md`.
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
@@ -128,7 +131,7 @@ All in environment variables — never commit.
 **Phase 1** (DOMContentLoaded): scroll progress, mobile nav, accessibility toolbar, page transitions, `initRevealAnimations()` (scroll-triggered entrance animations)
 **Phase 2** (`window.initLessonFeatures()`, called after content injection): collapsibles, visited tracking, practice questions, narration, glossary tooltips, knowledge check, lightbox, revision tips, nav icons, lesson pill
 
-**Dynamic loaders:** `lesson-loader.js`, `browse-loader.js`, `guide-loader.js` — auth check → Supabase fetch → populate template → init features
+**Dynamic loaders:** `lesson-loader.js`, `browse-loader.js`, `guide-loader.js` — auth check → Supabase fetch → populate template → init features. `guide-loader.js` has school_id scoping (fetches school-specific guides when logged in as school student).
 
 ## Sidebar Structure
 

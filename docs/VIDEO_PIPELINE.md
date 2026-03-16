@@ -64,25 +64,25 @@ python scripts/generate_cinematic_videos.py --download --cleanup
 Videos and podcasts generated together from the same notebook. Videos are the bottleneck (20/day limit); podcasts ride free (200/day). In practice, `--podcast-only` was used to front-load podcasts for subjects, then `--video-only` to backfill videos later.
 
 **Status as of 16 Mar 2026:**
-- **Cinematic videos on R2:** 16/370 (Sport Science 9 + Food Tech 7)
-- **Podcasts on R2:** ~295/370 (see table below)
-- **Remaining:** 354 videos, ~75 podcasts (Eng Lit, Science, Geography partial)
+- **Cinematic videos on R2:** 36/370 (Sport Science 9 + Food Tech 7 + Science 20)
+- **Podcasts on R2:** ~363/370 (see table below)
+- **Remaining:** 334 videos, ~7 podcasts (Sep Sci 2 regenerating, Eng Lit 5)
 
 | Subject | Lessons | Videos Done | Podcasts Done |
 |---------|---------|-------------|---------------|
 | Sport Science | 10 | 9 (L02-L10) | 10 |
 | Food Technology | 10 | 7 (L02-L08) | 10 |
 | Drama | 12 | 0 | 12 |
-| Separate Sciences | 22 | 0 | 22 |
+| Separate Sciences | 22 | 0 | 20 (2 regenerating) |
 | Music | 26 | 0 | 26 |
 | Business | 30 | 0 | 30 |
 | English Language | 30 | 0 | 30 |
 | Geography | 40 | 0 | 37 |
 | Religious Education | 40 | 0 | 40 |
 | English Literature | 42 | 0 | 11 |
-| Science | 48 | 0 | 7 |
+| Science | 48 | 20 | 48 |
 | History | 60 | 0 | 60 |
-| **Total** | **370** | **16** | **~295** |
+| **Total** | **370** | **36** | **~363** |
 
 **Target:** Complete all 370 by ~April 1st at 20 videos/day.
 
