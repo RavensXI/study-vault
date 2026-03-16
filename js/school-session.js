@@ -74,7 +74,8 @@
 
       // School logo URLs keyed by slug (local images)
       var logos = {
-        'unity-college': '/images/unity-college-logo.png'
+        'unity-college': '/images/unity-college-logo.png',
+        'severn-vale': '/images/severn-vale-logo.png'
       };
       var logoUrl = logos[session.school_slug];
       if (!logoUrl) return;
