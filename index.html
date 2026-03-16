@@ -20,6 +20,7 @@
     .home-change-btn { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); background: none; border: 1px solid var(--border-light); border-radius: 999px; padding: 0.3em 0.85em; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
     .home-change-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
     .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
+    .home-grid--few { grid-template-columns: repeat(auto-fit, minmax(230px, 300px)); justify-content: center; }
     .home-card { display: block; background: var(--bg-card); border-radius: 14px; overflow: hidden; text-decoration: none; color: var(--text-primary); box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
     .home-card-img { width: 100%; height: 140px; object-fit: cover; display: block; }
     .home-card-body { padding: 1rem 1.15rem 1.15rem; border-top: 3px solid var(--card-accent, #7c3aed); }
@@ -543,6 +544,7 @@
           cardsHtml += '</div></a>';
         });
         gridEl.innerHTML = cardsHtml;
+        if (schoolSubjects.length <= 3) gridEl.classList.add('home-grid--few');
       }
     } else if (FreeUser.isActive()) {
       // Free user returning — build subject cards from their prefs, hide gate
