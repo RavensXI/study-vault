@@ -130,6 +130,18 @@
     .fw-toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #2d2a26; color: #fff; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.82rem; font-weight: 500; z-index: 3000; animation: sv-fade-in 0.2s ease; }
     .fw-toast.visible { display: block; }
 
+    .fw-school-search { position: relative; margin-bottom: 1rem; }
+    .fw-school-input { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-light); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.92rem; background: var(--bg-card); color: var(--text-primary); outline: none; box-sizing: border-box; }
+    .fw-school-input:focus { border-color: var(--text-secondary); }
+    .fw-school-results { display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-light); border-top: none; border-radius: 0 0 10px 10px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .fw-school-results.open { display: block; }
+    .fw-school-result { padding: 0.55rem 1rem; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid var(--border-lighter); }
+    .fw-school-result:hover { background: var(--accent-light, #f0f0f0); }
+    .fw-school-result small { color: var(--text-muted); margin-left: 0.4rem; }
+    .fw-school-selected { font-size: 0.9rem; color: var(--text-primary); font-weight: 600; text-align: center; margin: 0.75rem 0; }
+    .fw-skip { width: 100%; padding: 0.55rem; border: none; background: transparent; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.82rem; cursor: pointer; margin-top: 0.5rem; text-decoration: underline; }
+    .fw-skip:hover { color: var(--text-secondary); }
+
     /* --- Free user badge --- */
     .free-user-badge { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: -0.25rem; margin-bottom: 1rem; text-align: center; }
     .free-user-badge.visible { display: block; }
@@ -246,7 +258,20 @@
           </div>
         </div>
 
-        <button class="fw-continue" id="fw-step3-done">Start revising</button>
+        <button class="fw-continue" id="fw-step3-done">Continue</button>
+      </div>
+
+      <!-- Step 4: School picker (optional) -->
+      <div class="free-wizard-step" id="fw-step-4">
+        <h2>Which school are you at?</h2>
+        <p class="subtitle">Optional — helps us bring StudyVault to your school</p>
+        <div class="fw-school-search">
+          <input type="text" class="fw-school-input" id="fw-school-input" placeholder="Start typing your school name..." autocomplete="off" spellcheck="false">
+          <div class="fw-school-results" id="fw-school-results"></div>
+        </div>
+        <p class="fw-school-selected" id="fw-school-selected" style="display:none"></p>
+        <button class="fw-continue" id="fw-step4-done">Start revising</button>
+        <button class="fw-skip" id="fw-step4-skip">Skip — I'd rather not say</button>
       </div>
     </div>
   </div>
@@ -691,8 +716,93 @@
       });
     });
 
-    // Step 3 → Finish
+    // Step 3 → Step 4 (school picker)
     document.getElementById('fw-step3-done').addEventListener('click', function () {
+      document.getElementById('fw-step-3').classList.remove('active');
+      document.getElementById('fw-step-4').classList.add('active');
+    });
+
+    // Step 2 → Step 4 (if no English Lit, skip step 3)
+    // (already handled — step2-next goes to finishWizard if no lit, but now should go to step 4)
+
+    // Update step 2 next to go to step 4 when no English Lit
+    var originalStep2Next = document.getElementById('fw-step2-next');
+    var step2Clone = originalStep2Next.cloneNode(true);
+    originalStep2Next.parentNode.replaceChild(step2Clone, originalStep2Next);
+    step2Clone.addEventListener('click', function () {
+      if (wizardState.subjects.indexOf('english-literature') !== -1) {
+        document.getElementById('fw-step-2').classList.remove('active');
+        document.getElementById('fw-step-3').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.remove('active');
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    // Step 4: School search
+    var schoolInput = document.getElementById('fw-school-input');
+    var schoolResults = document.getElementById('fw-school-results');
+    var schoolSelected = document.getElementById('fw-school-selected');
+    var schoolsData = null;
+
+    schoolInput.addEventListener('input', function () {
+      var query = schoolInput.value.trim().toLowerCase();
+      if (query.length < 2) {
+        schoolResults.classList.remove('open');
+        return;
+      }
+      // Lazy-load schools data
+      if (!schoolsData) {
+        fetch('/data/schools.json')
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            schoolsData = data;
+            showResults(query);
+          });
+      } else {
+        showResults(query);
+      }
+    });
+
+    function showResults(query) {
+      var matches = schoolsData.filter(function (s) {
+        return s.name.toLowerCase().indexOf(query) !== -1;
+      }).slice(0, 8);
+
+      if (matches.length === 0) {
+        schoolResults.innerHTML = '<div class="fw-school-result" data-custom="true">Can\'t find it? Use: <strong>' + schoolInput.value + '</strong></div>';
+      } else {
+        schoolResults.innerHTML = matches.map(function (s) {
+          return '<div class="fw-school-result" data-name="' + s.name.replace(/"/g, '&quot;') + '">' + s.name + '<small>' + s.town + '</small></div>';
+        }).join('');
+      }
+      schoolResults.classList.add('open');
+    }
+
+    schoolResults.addEventListener('click', function (e) {
+      var result = e.target.closest('.fw-school-result');
+      if (!result) return;
+      var name = result.dataset.custom ? schoolInput.value.trim() : result.dataset.name;
+      wizardState.school = name;
+      schoolInput.value = name;
+      schoolResults.classList.remove('open');
+      schoolSelected.textContent = name;
+      schoolSelected.style.display = '';
+    });
+
+    // Close results on click outside
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.fw-school-search')) {
+        schoolResults.classList.remove('open');
+      }
+    });
+
+    // Step 4 → Finish
+    document.getElementById('fw-step4-done').addEventListener('click', function () {
+      finishWizard();
+    });
+    document.getElementById('fw-step4-skip').addEventListener('click', function () {
+      wizardState.school = null;
       finishWizard();
     });
 
@@ -711,6 +821,10 @@
         }
         prefs.subjects.push(entry);
       });
+
+      if (wizardState.school) {
+        prefs.school = wizardState.school;
+      }
 
       FreeUser.set(prefs);
       freeWizardOverlay.classList.remove('open');
