@@ -484,11 +484,41 @@
         badgeLogo.style.display = '';
       }
     } else if (FreeUser.isActive()) {
-      // Free user returning — show subjects, hide gate, show free badge
-      subjectsSection.style.display = '';
+      // Free user returning — build subject cards from their prefs, hide gate
       gate.style.display = 'none';
+      subjectsSection.style.display = '';
       var freeBadge = document.getElementById('free-user-badge');
       freeBadge.classList.add('visible');
+
+      // Replace hardcoded Unity cards with free user's selected subjects
+      var freePrefs = FreeUser.get();
+      var gridEl = document.getElementById('home-grid');
+      var headerEl = document.getElementById('home-section-header');
+
+      var freeSubjectMeta = {
+        'maths': { name: 'Mathematics', board: 'Edexcel', image: '/images/subject-maths.jpg', accent: '#2563eb', detail: '6 units' },
+        'english-language': { name: 'English Language', board: 'AQA', image: '/images/subject-english-lang.jpg', accent: '#1e40af', detail: '4 units' },
+        'english-literature': { name: 'English Literature', board: 'AQA', image: '/images/subject-english-lit.jpg', accent: '#991b1b', detail: '8 texts' },
+        'science': { name: 'Combined Science', board: 'AQA', image: '/images/subject-science.jpg', accent: '#16a34a', detail: '6 papers' },
+      };
+
+      if (freePrefs && freePrefs.subjects && freePrefs.subjects.length > 0) {
+        headerEl.innerHTML = '<h2>Your subjects</h2>';
+        var cardsHtml = '';
+        freePrefs.subjects.forEach(function (s) {
+          var meta = freeSubjectMeta[s.slug] || { name: s.slug, board: '', image: '', accent: '#666', detail: '' };
+          cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" style="--card-accent: ' + meta.accent + '">';
+          if (meta.image) {
+            cardsHtml += '<img class="home-card-img" src="' + meta.image + '" alt="' + meta.name + '" width="500" height="300" loading="lazy" decoding="async">';
+          }
+          cardsHtml += '<div class="home-card-body">';
+          cardsHtml += '<h3>' + meta.name + '</h3>';
+          cardsHtml += '<p class="home-card-board">' + meta.board + '</p>';
+          cardsHtml += '<p class="home-card-detail">' + meta.detail + '</p>';
+          cardsHtml += '</div></a>';
+        });
+        gridEl.innerHTML = cardsHtml;
+      }
     } else {
       // No session — show gate, hide subjects
       gate.classList.add('visible');
