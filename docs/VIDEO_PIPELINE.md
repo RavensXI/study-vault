@@ -8,7 +8,7 @@ Automated generation of NotebookLM cinematic video overviews and lesson podcasts
 
 - **Google AI Ultra subscription** (£120/mo intro, £235/mo after) — required for cinematic video overviews (20/day limit)
 - **notebooklm-mcp-cli** — unofficial CLI tool for programmatic NotebookLM access
-- **Auth cookies** expire frequently — re-run `nlm login` if you get auth errors
+- **Auth cookies** expire frequently — the script auto-detects expiry and re-runs `nlm login` (see Auto-Reauth below)
 
 ### Installation
 
@@ -48,42 +48,43 @@ python scripts/generate_cinematic_videos.py --download --cleanup
 ```
 
 **Options:**
-- `--limit N` — max lessons to process (default: 20, the daily cap)
+- `--limit N` — max lessons to process (default: 20 for video, 200 for podcast-only)
 - `--subject slug` — only process a specific subject
 - `--dry-run` — show what would be generated without doing it
 - `--status` — check in-progress jobs
 - `--download` — download completed videos, upload to R2, update Supabase
 - `--cleanup` — delete NotebookLM notebooks after downloading
+- `--podcast-only` — generate only podcasts (keeps notebooks for later video generation)
+- `--video-only` — add videos to existing notebooks from a prior podcast-only run
 
 **State file:** `scripts/_cinematic_state.json` — tracks all in-progress and completed jobs across runs.
 
-### Subject Order (smallest first)
+### Progress & Subject Order
 
-Each daily batch generates **both** cinematic video + lesson podcast from the same notebook. Videos are the bottleneck (20/day limit); podcasts have a 200/day limit so they ride for free.
+Videos and podcasts generated together from the same notebook. Videos are the bottleneck (20/day limit); podcasts ride free (200/day). In practice, `--podcast-only` was used to front-load podcasts for subjects, then `--video-only` to backfill videos later.
 
-| Day | Date | Lessons | Subject(s) | Running Total |
-|-----|------|---------|------------|---------------|
-| 1 | 14 Mar | 16 | **Sport Science** (9) + **Food Tech** (7) | 16 |
-| 2 | 15 Mar | 20 | Food Tech (2) + **Drama** (12) + Sep Sciences (6) | 36 |
-| 3 | 16 Mar | 20 | Sep Sciences (16) + Music (4) | 56 |
-| 4 | 17 Mar | 20 | Music (20) | 76 |
-| 5 | 18 Mar | 20 | Music (2) + **Business** (18) | 96 |
-| 6 | 19 Mar | 20 | Business (12) + Eng Language (8) | 116 |
-| 7 | 20 Mar | 20 | Eng Language (20) | 136 |
-| 8 | 21 Mar | 20 | Eng Language (2) + **RE** (18) | 156 |
-| 9 | 22 Mar | 20 | RE (20) | 176 |
-| 10 | 23 Mar | 20 | RE (2) + **Geography** (18) | 196 |
-| 11 | 24 Mar | 20 | Geography (20) | 216 |
-| 12 | 25 Mar | 20 | Geography (2) + **Eng Lit** (18) | 236 |
-| 13 | 26 Mar | 20 | Eng Lit (20) | 256 |
-| 14 | 27 Mar | 20 | Eng Lit (4) + **Science** (16) | 276 |
-| 15 | 28 Mar | 20 | Science (20) | 296 |
-| 16 | 29 Mar | 20 | Science (12) + **History** (8) | 316 |
-| 17 | 30 Mar | 20 | History (20) | 336 |
-| 18 | 31 Mar | 20 | History (20) | 356 |
-| 19 | 1 Apr | 14 | History (12) | **370** |
+**Status as of 16 Mar 2026:**
+- **Cinematic videos on R2:** 16/370 (Sport Science 9 + Food Tech 7)
+- **Podcasts on R2:** ~295/370 (see table below)
+- **Remaining:** 354 videos, ~75 podcasts (Eng Lit, Science, Geography partial)
 
-**Completed by April 1st.** All 370 lessons get both a cinematic video and a lesson podcast.
+| Subject | Lessons | Videos Done | Podcasts Done |
+|---------|---------|-------------|---------------|
+| Sport Science | 10 | 9 (L02-L10) | 10 |
+| Food Technology | 10 | 7 (L02-L08) | 10 |
+| Drama | 12 | 0 | 12 |
+| Separate Sciences | 22 | 0 | 22 |
+| Music | 26 | 0 | 26 |
+| Business | 30 | 0 | 30 |
+| English Language | 30 | 0 | 30 |
+| Geography | 40 | 0 | 37 |
+| Religious Education | 40 | 0 | 40 |
+| English Literature | 42 | 0 | 11 |
+| Science | 48 | 0 | 7 |
+| History | 60 | 0 | 60 |
+| **Total** | **370** | **16** | **~295** |
+
+**Target:** Complete all 370 by ~April 1st at 20 videos/day.
 
 ### How It Works
 
@@ -99,6 +100,24 @@ For each lesson (video + podcast in parallel from the same notebook):
 8. **Upload to R2** — video to `studyvault-video`, podcast to `studyvault-audio`
 9. **Update Supabase** — video URL in `lessons.youtube_video_id`, podcast URL in `related_media`
 10. **Cleanup** — deletes the NotebookLM notebook
+
+### Auto-Reauth
+
+NotebookLM auth cookies expire frequently mid-batch. The script handles this automatically:
+
+- `nlm_run()` wraps all CLI calls and checks stdout/stderr for "Authentication expired" or "Authentication Error"
+- On detection, `_reauth()` runs `nlm login` (browser-based) and retries the failed command once
+- The `NLM_ENV` dict sets `NO_COLOR=1 PYTHONUTF8=1 PYTHONIOENCODING=utf-8` to prevent Windows encoding crashes
+
+### R2 Storage
+
+Videos are uploaded to the dedicated `studyvault-video` R2 bucket (not `studyvault-images`):
+- **Bucket:** `studyvault-video`
+- **Public URL:** `https://pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`
+- **Path pattern:** `{subject}/{unit}/cinematic_l{nn}.mp4`
+- **Podcasts** go to `studyvault-audio` at `{subject}/{unit}/podcast_l{nn}.mp3`
+
+Note: Some early videos (Sport Science, partial Food Tech) were uploaded to `studyvault-images` before the dedicated video bucket was created. These still work fine.
 
 ### Video Player
 

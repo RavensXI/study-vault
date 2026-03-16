@@ -13,44 +13,63 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, password-gated admin/teacher areas, 12 subjects.
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 16 subjects (12 school-specific + 4 generic free-tier).
 
-## Subjects (all complete, all on Vercel)
+## Subjects — Unity College (school_id set, all on Vercel)
 
-| Subject | Exam Board | Lessons | Units | Videos |
-|---------|-----------|---------|-------|--------|
-| History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 60/60 |
-| Business Studies | Edexcel 1BS0 | 30 | 2 themes | 0/30 |
-| Geography | AQA 8035 | 40 | 2 papers | 0/40 |
-| Sport Science | OCR R180 | 10 | 1 (R180) | 1/10 |
-| Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 1/12 |
-| Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 1/10 |
-| Religious Education | AQA 8062 | 40 | 8 | 1/40 |
-| Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 |
-| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 1/42 |
-| English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 1/30 |
-| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 0/48 |
-| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 |
-| **Total** | | **370** | **44** | **66/370** |
+| Subject | Exam Board | Lessons | Units | Cinematic Videos | Podcasts |
+|---------|-----------|---------|-------|-----------------|----------|
+| History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 0/60 | 60/60 |
+| Business Studies | Edexcel 1BS0 | 30 | 2 themes | 0/30 | 30/30 |
+| Geography | AQA 8035 | 40 | 2 papers | 0/40 | 37/40 |
+| Sport Science | OCR R180 | 10 | 1 (R180) | 9/10 | 10/10 |
+| Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 0/12 | 12/12 |
+| Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 7/10 | 10/10 |
+| Religious Education | AQA 8062 | 40 | 8 | 0/40 | 40/40 |
+| Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 | 26/26 |
+| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 | 11/42 |
+| English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 0/30 | 30/30 |
+| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 0/48 | 7/48 |
+| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 22/22 |
+| **Subtotal** | | **370** | **44** | **16/370** | **~295/370** |
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~11,700 MP3s on R2), Gemini diagrams, hero images, exam technique guides, revision technique guides, related media.
+## Subjects — Free Tier (school_id NULL, generic content)
+
+| Subject | Exam Board | Lessons | Units |
+|---------|-----------|---------|-------|
+| Maths | Edexcel 1MA1 | 37 | TBC |
+| Science (generic) | AQA 8464 | 48 | 6 |
+| English Language (generic) | AQA 8700 | 30 | 4 |
+| English Literature (generic) | AQA 8702 | 70 | TBC (extra texts beyond Unity's 42) |
+| **Subtotal** | | **185** | |
+
+**Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
+
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~11,700 MP3s on R2), Gemini diagrams (automated QA via Claude Sonnet), hero images, exam technique guides, revision technique guides, related media.
 
 ## Dynamic Architecture (LIVE on Vercel)
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **370 lessons** + **194 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`).
+- **555 lessons** (370 school + 185 generic) + **194 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
-- **Auth:** Public content (no login for students). Admin pages gated by `ADMIN_PASSWORD` env var, teacher pages by `TEACHER_PASSWORD` — via `js/auth-gate.js` + `api/auth/login.js`. Teacher setup flow in `js/teacher-setup.js` (name + subject + unit picker). Microsoft SSO still pending Entra admin consent.
+- **Auth (3 tiers):**
+  - **Free users:** No login. Generic content (school_id NULL) + ads. Prefs stored in localStorage via `js/free-user.js`.
+  - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees school-specific content, no ads.
+  - **Teachers/Admin:** `ADMIN_PASSWORD` / `TEACHER_PASSWORD` via `js/auth-gate.js`. Teacher setup flow in `js/teacher-setup.js`.
+  - **Microsoft SSO:** Still pending Entra admin consent.
 - **Admin pages:** `/admin/pipeline` (upload/generate), `/admin/review` (QC), `/admin/images` (image QA), `/admin/editor` (lesson editor), `/admin/editor-guide` (guide editor)
 - **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
-- **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`)
+- **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`), `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`)
+- **Cookie consent:** Banner on all pages via `js/cookie-consent.js`. Privacy policy at `/privacy.html`.
+- **Business email:** studyvault.info@gmail.com
 
 ## Active TODO
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **NotebookLM videos**: 292 lessons remaining (task list: `NOTEBOOKLM_VIDEO_TASKLIST.md`)
+- **Cinematic videos**: 16/370 done (Sport Science + Food Tech partial). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
+- **Podcasts**: ~295/370 done. 200/day limit, generated alongside videos.
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
@@ -119,4 +138,5 @@ Three sections: **Knowledge Check** (button → modal), **Related Media** (colla
 
 - **YouTube:** Store YouTube video ID in `lessons.youtube_video_id`. Renders inline iframe in sidebar.
 - **Google Drive:** Store full Google Drive `/preview` URL in `lessons.youtube_video_id` (e.g. `https://drive.google.com/file/d/{FILE_ID}/preview`). `lesson-loader.js` detects `drive.google.com`, shows thumbnail + play button in sidebar, opens video in a large modal overlay on click. CSS class `sidebar-video--gdrive`.
+- **R2 Video:** Store R2 URL (containing `r2.dev/` or ending `.mp4`) in `lessons.youtube_video_id`. Renders dark thumbnail card with play button in sidebar, opens native `<video>` element in modal overlay (`preload="metadata"`, no autoplay). Bucket: `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`).
 - **Sharing:** Google Drive files must be set to "Anyone with the link can view" for embed to work.
