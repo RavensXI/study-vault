@@ -57,6 +57,12 @@
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
 
+    // School students can only access subscribed or bespoke subjects
+    if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive() && !hasBespoke && !SchoolSession.isSubscribed(subjectSlug)) {
+      showError('Subject not available', 'Your school does not currently subscribe to this subject.');
+      return;
+    }
+
     var subjectQuery = sb
       .from('subjects')
       .select('id, slug, name, exam_board, spec_code, color, image_url, settings')
