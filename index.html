@@ -881,14 +881,30 @@
       if (e.target === freeWizardOverlay) freeWizardOverlay.classList.remove('open');
     });
 
+    // --- Subject picker (only for schools with bespoke content, e.g. Unity) ---
+    // Skip entirely for: free users (have their own wizard), blended schools (show generic grid)
+    var _skipPicker = false;
+    if (FreeUser.isActive()) _skipPicker = true;
+    if (SchoolSession.isActive()) {
+      var _s = SchoolSession.get();
+      if (!_s.bespoke_subjects || _s.bespoke_subjects.length === 0) _skipPicker = true;
+    }
+    if (!SchoolSession.isActive() && !FreeUser.isActive()) _skipPicker = true; // gate visible, no picker needed
+
     var STORAGE_KEY = 'studyvault-subjects';
     var LOCKED_SUBJECTS = ['english-literature', 'english-language', 'science'];
     var overlay = document.getElementById('picker-overlay');
     var doneBtn = document.getElementById('picker-done');
     var pickerGrid = document.getElementById('picker-grid');
-    // subjectsSection already declared above (school gate)
     var headerEl = document.getElementById('home-section-header');
     var gridEl = document.getElementById('home-grid');
+
+    if (_skipPicker) {
+      // Hide the picker overlay and change button entirely
+      if (overlay) overlay.style.display = 'none';
+      var changeBtn = document.querySelector('.home-change-btn');
+      if (changeBtn) changeBtn.style.display = 'none';
+    }
 
     // Mark locked subjects in picker
     LOCKED_SUBJECTS.forEach(function(slug) {
@@ -1014,18 +1030,20 @@
     }
 
     // --- Init ---
-    var saved = getSaved();
-    if (!saved) {
-      // First visit: show picker after a short delay (let page animate in)
-      setTimeout(openPicker, 600);
-    } else {
-      // Ensure locked subjects are in saved list (covers existing users)
-      var updated = false;
-      LOCKED_SUBJECTS.forEach(function(slug) {
-        if (saved.indexOf(slug) === -1) { saved.push(slug); updated = true; }
-      });
-      if (updated) save(saved);
-      renderPersonalised(saved);
+    if (!_skipPicker) {
+      var saved = getSaved();
+      if (!saved) {
+        // First visit: show picker after a short delay (let page animate in)
+        setTimeout(openPicker, 600);
+      } else {
+        // Ensure locked subjects are in saved list (covers existing users)
+        var updated = false;
+        LOCKED_SUBJECTS.forEach(function(slug) {
+          if (saved.indexOf(slug) === -1) { saved.push(slug); updated = true; }
+        });
+        if (updated) save(saved);
+        renderPersonalised(saved);
+      }
     }
   })();
   </script>
