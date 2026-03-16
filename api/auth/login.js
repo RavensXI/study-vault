@@ -18,11 +18,19 @@ module.exports = async (req, res) => {
     );
 
     if (match) {
+      // Check if school has bespoke subjects (school_id set on subjects table)
+      const { data: bespokeSubjects } = await supabase
+        .from('subjects')
+        .select('slug')
+        .eq('school_id', match.id);
+
       return res.json({
         role: 'student',
         school_id: match.id,
         school_name: match.name,
         school_slug: match.slug,
+        subscribed_subjects: (match.settings && match.settings.subscribed_subjects) || [],
+        bespoke_subjects: (bespokeSubjects || []).map(s => s.slug),
       });
     }
     return res.status(401).json({ error: 'Invalid school code' });

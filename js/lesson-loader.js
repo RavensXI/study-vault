@@ -63,11 +63,8 @@
   // ---- Fetch lesson data ----
   async function fetchLesson(params) {
     // Join through units -> subjects to get the lesson
-    // First, get the unit
-    // Determine school scope: school students see their school's content, free users see generic
-    var schoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
-      ? SchoolSession.getSchoolId()
-      : null;
+    // Determine content source: bespoke (school-specific) or generic (school_id NULL)
+    var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(params.subjectSlug));
 
     var unitQuery = sb
       .from('units')
@@ -75,8 +72,8 @@
       .eq('slug', params.unitSlug)
       .eq('subjects.slug', params.subjectSlug);
 
-    if (schoolId) {
-      unitQuery = unitQuery.eq('subjects.school_id', schoolId);
+    if (hasBespoke) {
+      unitQuery = unitQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
     } else {
       unitQuery = unitQuery.is('subjects.school_id', null);
     }
@@ -287,8 +284,12 @@
     loadingEl.style.display = 'none';
     pageEl.style.display = '';
 
-    // Inject ad placeholders for free users only
-    if (typeof FreeUser !== 'undefined' && FreeUser.isActive() && !SchoolSession.isActive()) {
+    // Inject ad placeholders — show for free users and school students on non-subscribed subjects
+    var subjectSlug = params.subjectSlug;
+    var shouldShowAds = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
+      ? SchoolSession.showAds(subjectSlug)
+      : true;  // Free users always see ads
+    if (shouldShowAds) {
       // Sidebar ad — after knowledge check + video, before related media
       var sidebarMedia = document.getElementById('sidebar-media');
       if (sidebarMedia) {

@@ -32,6 +32,30 @@
       return s ? s.school_id : null;
     },
 
+    /** Check if the school has bespoke content for a subject slug. */
+    hasBespoke: function (subjectSlug) {
+      var s = this.get();
+      if (!s || !s.bespoke_subjects) return false;
+      return s.bespoke_subjects.indexOf(subjectSlug) !== -1;
+    },
+
+    /** Check if the school subscribes to a subject (ad-free generic). */
+    isSubscribed: function (subjectSlug) {
+      var s = this.get();
+      if (!s) return false;
+      // Bespoke subjects are implicitly subscribed
+      if (s.bespoke_subjects && s.bespoke_subjects.indexOf(subjectSlug) !== -1) return true;
+      if (s.subscribed_subjects && s.subscribed_subjects.indexOf(subjectSlug) !== -1) return true;
+      return false;
+    },
+
+    /** Check if ads should show for a given subject. */
+    showAds: function (subjectSlug) {
+      if (!this.isActive()) return true;  // Free user — show ads
+      if (this.isSubscribed(subjectSlug)) return false;  // Subscribed — no ads
+      return true;  // School student but subject not subscribed — show ads
+    },
+
     /** Redirect to homepage if no school session. Returns true if redirected. */
     requireOrRedirect: function () {
       if (!this.isActive()) {

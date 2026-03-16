@@ -508,6 +508,34 @@
         badgeLogo.alt = session.school_name;
         badgeLogo.style.display = '';
       }
+
+      // Blended experience: if school has NO bespoke subjects, show generic cards
+      // with subscribed subjects badged
+      if (!session.bespoke_subjects || session.bespoke_subjects.length === 0) {
+        var gridEl = document.getElementById('home-grid');
+        var headerEl = document.getElementById('home-section-header');
+        var allGenericSubjects = [
+          { slug: 'maths', name: 'Mathematics', board: 'Edexcel', image: '/images/subject-maths.jpg', accent: '#2563eb', detail: '6 units · 37 lessons' },
+          { slug: 'english-language', name: 'English Language', board: 'AQA', image: '/images/subject-english-lang.jpg', accent: '#1e40af', detail: '4 units · 30 lessons' },
+          { slug: 'english-literature', name: 'English Literature', board: 'AQA', image: '/images/subject-english-lit.jpg', accent: '#991b1b', detail: '8 texts · 70 lessons' },
+          { slug: 'science', name: 'Combined Science', board: 'AQA', image: '/images/subject-science.jpg', accent: '#16a34a', detail: '6 papers · 48 lessons' },
+          { slug: 'separate-sciences', name: 'Separate Sciences', board: 'AQA', image: '/images/subject-separate-sciences.jpg', accent: '#15803d', detail: '3 papers · 22 lessons' },
+        ];
+        var subscribedSlugs = session.subscribed_subjects || [];
+        headerEl.innerHTML = '<h2>Your subjects</h2>';
+        var cardsHtml = '';
+        allGenericSubjects.forEach(function (s) {
+          var isSubscribed = subscribedSlugs.indexOf(s.slug) !== -1;
+          cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" style="--card-accent: ' + s.accent + '">';
+          cardsHtml += '<img class="home-card-img" src="' + s.image + '" alt="' + s.name + '" width="500" height="300" loading="lazy" decoding="async">';
+          cardsHtml += '<div class="home-card-body">';
+          cardsHtml += '<h3>' + s.name + (isSubscribed ? ' <span style="font-size:0.65em;font-weight:500;color:var(--accent);vertical-align:middle;">Your school</span>' : '') + '</h3>';
+          cardsHtml += '<p class="home-card-board">' + s.board + '</p>';
+          cardsHtml += '<p class="home-card-detail">' + s.detail + '</p>';
+          cardsHtml += '</div></a>';
+        });
+        gridEl.innerHTML = cardsHtml;
+      }
     } else if (FreeUser.isActive()) {
       // Free user returning — build subject cards from their prefs, hide gate
       gate.style.display = 'none';

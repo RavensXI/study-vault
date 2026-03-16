@@ -54,17 +54,16 @@
 
   // ---- Render subject landing page (unit cards) ----
   async function renderSubjectLanding(subjectSlug) {
-    var schoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
-      ? SchoolSession.getSchoolId()
-      : null;
+    // Determine content source: bespoke (school-specific) or generic (school_id NULL)
+    var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
 
     var subjectQuery = sb
       .from('subjects')
       .select('id, slug, name, exam_board, spec_code, color, image_url, settings')
       .eq('slug', subjectSlug);
 
-    if (schoolId) {
-      subjectQuery = subjectQuery.eq('school_id', schoolId);
+    if (hasBespoke) {
+      subjectQuery = subjectQuery.eq('school_id', SchoolSession.getSchoolId());
     } else {
       subjectQuery = subjectQuery.is('school_id', null);
     }
@@ -148,9 +147,7 @@
 
   // ---- Render unit index page (lesson cards) ----
   async function renderUnitIndex(subjectSlug, unitSlug) {
-    var schoolId = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
-      ? SchoolSession.getSchoolId()
-      : null;
+    var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
 
     var unitQuery = sb
       .from('units')
@@ -158,8 +155,8 @@
       .eq('slug', unitSlug)
       .eq('subjects.slug', subjectSlug);
 
-    if (schoolId) {
-      unitQuery = unitQuery.eq('subjects.school_id', schoolId);
+    if (hasBespoke) {
+      unitQuery = unitQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
     } else {
       unitQuery = unitQuery.is('subjects.school_id', null);
     }
