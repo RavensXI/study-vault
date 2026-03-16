@@ -68,11 +68,17 @@
     var guideType = params.guideType;
 
     // Get the hub index page (slug = 'index')
-    var subjectResult = await sb
+    var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
+    var subjectQuery = sb
       .from('subjects')
       .select('id, name')
-      .eq('slug', subjectSlug)
-      .single();
+      .eq('slug', subjectSlug);
+    if (hasBespoke) {
+      subjectQuery = subjectQuery.eq('school_id', SchoolSession.getSchoolId());
+    } else {
+      subjectQuery = subjectQuery.is('school_id', null);
+    }
+    var subjectResult = await subjectQuery.single();
 
     if (subjectResult.error || !subjectResult.data) {
       showError('Subject not found', 'No subject "' + subjectSlug + '"');
@@ -148,11 +154,17 @@
     var guideType = params.guideType;
     var slug = params.slug;
 
-    var subjectResult = await sb
+    var hasBespoke2 = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
+    var subjectQuery2 = sb
       .from('subjects')
       .select('id, name')
-      .eq('slug', subjectSlug)
-      .single();
+      .eq('slug', subjectSlug);
+    if (hasBespoke2) {
+      subjectQuery2 = subjectQuery2.eq('school_id', SchoolSession.getSchoolId());
+    } else {
+      subjectQuery2 = subjectQuery2.is('school_id', null);
+    }
+    var subjectResult = await subjectQuery2.single();
 
     if (subjectResult.error || !subjectResult.data) {
       showError('Subject not found', 'No subject "' + subjectSlug + '"');
