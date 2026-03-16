@@ -28,6 +28,9 @@
     .home-card-detail { font-size: 0.78rem; color: var(--text-muted); margin: 0; }
     .home-card-premium { position: absolute; top: 0.6rem; right: 0.6rem; display: flex; align-items: center; gap: 0.3rem; font-family: 'Source Serif 4', Georgia, serif; font-size: 0.72rem; font-weight: 700; color: #2d2a26; background: rgba(250, 248, 245, 0.92); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); padding: 0.3em 0.7em 0.3em 0.55em; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
     .home-card { position: relative; }
+    .home-premium-explainer { display: flex; align-items: center; gap: 0.4rem; font-family: 'Inter', sans-serif; font-size: 0.8rem; color: var(--text-muted); margin: 1rem 0 0; line-height: 1.5; }
+    .home-premium-explainer strong { color: var(--text-secondary); }
+    .home-premium-explainer svg { flex-shrink: 0; color: var(--text-muted); }
 
     /* All subjects (secondary section when personalised) */
     .home-all-section { margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border-lighter); }
@@ -540,6 +543,14 @@
           cardsHtml += '</div></a>';
         });
         gridEl.innerHTML = cardsHtml;
+
+        // Add explainer below the grid if there are subscribed subjects
+        if (subscribedSlugs.length > 0) {
+          var explainer = document.createElement('p');
+          explainer.className = 'home-premium-explainer';
+          explainer.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> <strong>Premium</strong> subjects are provided ad-free by your school. Other subjects use our free revision content.';
+          gridEl.insertAdjacentElement('afterend', explainer);
+        }
       }
     } else if (FreeUser.isActive()) {
       // Free user returning — build subject cards from their prefs, hide gate
