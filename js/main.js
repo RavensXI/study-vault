@@ -69,7 +69,24 @@ function initScrollProgress() {
 
 /* --- Collapsible Sections --- */
 function initCollapsibles() {
+  var hintsKnown = !!localStorage.getItem('sv_collapsible_hint');
+
   document.querySelectorAll('.collapsible-toggle').forEach(btn => {
+    // Inject hint + wrapper around icon if not already present
+    var icon = btn.querySelector('.collapsible-icon');
+    if (icon && !btn.querySelector('.collapsible-toggle-right')) {
+      var wrapper = document.createElement('span');
+      wrapper.className = 'collapsible-toggle-right';
+      if (!hintsKnown) {
+        var hint = document.createElement('span');
+        hint.className = 'collapsible-hint';
+        hint.textContent = 'Tap to expand';
+        wrapper.appendChild(hint);
+      }
+      icon.parentNode.insertBefore(wrapper, icon);
+      wrapper.appendChild(icon);
+    }
+
     btn.addEventListener('click', () => {
       const section = btn.closest('.collapsible');
       const content = section.querySelector('.collapsible-content');
@@ -93,6 +110,14 @@ function initCollapsibles() {
           content.removeEventListener('transitionend', onEnd);
         };
         content.addEventListener('transitionend', onEnd);
+
+        // After first expand, hide all hints and remember
+        if (!localStorage.getItem('sv_collapsible_hint')) {
+          localStorage.setItem('sv_collapsible_hint', '1');
+          document.querySelectorAll('.collapsible-hint').forEach(h => {
+            h.classList.add('sv-hint-hidden');
+          });
+        }
       }
 
       // Update aria
