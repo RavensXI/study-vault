@@ -25,8 +25,14 @@ Build a reusable, tagged bank of generated diagrams and hero images. When a new 
 
 **Key benefit at scale:** Gemini diagram generation is the most expensive and error-prone pipeline step. Reusing QA'd diagrams across schools on the same exam board eliminates repeated generation costs and the regenerate-until-right QA cycle. Bank grows organically — every new subject/school enriches it for future runs.
 
+## Card & Browse Page Design Refresh
+Current unit/subject/lesson cards use a side-by-side image + text layout with coloured left accent bars — functional but generic-looking. Explored editorial full-bleed overlays with stacked card deck effect (Mar 2026) — looked good in isolation but text readability suffered with varied hero image brightness, and the stacked effect wasn't clear enough to justify the complexity. Revisit with a designer eye: consider image-top stacked layout, better colour integration without left-bar cliché, and a stronger visual identity that feels intentionally designed rather than template-generated. See `card-options.html` for the prototypes explored. Key constraint: must work across 44 units with varied hero images without manual curation.
+
 ## Teacher Data Dashboard
 Major upgrade from current demo/hardcoded state. Needs real Supabase queries for progress tracking, engagement metrics, class-level insights. Key for selling to SLT — should be visually compelling and data-rich. Dedicated session to design and build.
+
+## Legacy File Format Support (.ppt / .doc)
+Current pipeline only parses modern Office formats (.pptx, .docx) which are XML-based and can be unzipped in the browser. Legacy binary formats (.ppt, .doc) are auto-excluded with a "save as .pptx" message. For the commercial product, accept legacy formats and convert server-side using LibreOffice headless (`libreoffice --headless --convert-to pptx`), then parse the converted files as normal. Free, reliable, runs on Linux. Alternative: cloud conversion APIs (CloudConvert, Zamzar) but they cost per file. Many teachers have years of resources in legacy formats — this removes friction at onboarding.
 
 ## Direct-to-Storage Uploads (Commercial)
 Current upload flow parses PPTs in the browser and sends extracted text via a JSON POST to a Vercel serverless function. This hits Vercel's 4.5 MB body limit for very large uploads (e.g. 2000+ science PPTs). Chunked upload added as a workaround (splits text into 2 MB chunks sent sequentially). For the commercial product, implement direct-to-storage uploads: browser uploads files straight to Supabase storage via presigned URLs, then a background worker parses them. No serverless function body limits involved. Standard pattern for large file handling at scale.
