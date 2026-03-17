@@ -116,13 +116,38 @@
       html += subject.settings.quote_ticker_html;
     }
 
-    // Unit grid — uses same .unit-card structure as static pages
+    // Unit grid — editorial overlay cards with stacked lesson images behind
     html += '<div class="unit-grid' + (units.length === 1 ? ' single-unit' : '') + '">';
 
     // Get image positions from subject settings
     var imgPositions = (subject.settings && subject.settings.unit_image_positions) || {};
 
+    // Fetch first 2 lesson hero images per unit for the stack effect
+    var unitIds = units.map(function(u) { return u.id; });
+    var stackImages = {};
+    try {
+      var heroResult = await sb.from('lessons')
+        .select('unit_id, hero_image')
+        .in('unit_id', unitIds)
+        .not('hero_image', 'is', null)
+        .order('lesson_number')
+        .limit(100);
+      (heroResult.data || []).forEach(function(l) {
+        if (!stackImages[l.unit_id]) stackImages[l.unit_id] = [];
+        if (stackImages[l.unit_id].length < 2) stackImages[l.unit_id].push(l.hero_image);
+      });
+    } catch(e) { /* stack images are optional */ }
+
     units.forEach(function (unit) {
+      var heroes = stackImages[unit.id] || [];
+      html += '<div class="unit-card-wrap">';
+      // Stack cards (back to front: stack-2 then stack-1)
+      if (heroes.length > 1) {
+        html += '<div class="unit-card-stack unit-card-stack-2" style="background-image: url(\'' + esc(heroes[1]) + '\');"></div>';
+      }
+      if (heroes.length > 0) {
+        html += '<div class="unit-card-stack unit-card-stack-1" style="background-image: url(\'' + esc(heroes[0]) + '\');"></div>';
+      }
       html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
@@ -138,6 +163,7 @@
       html += '<span class="unit-meta">0 of ' + unit.lesson_count + ' lessons visited</span>';
       html += '<div class="progress-bar-track"><div class="progress-bar-fill"></div></div>';
       html += '</div></a>';
+      html += '</div>';
     });
 
     html += '</div>';
