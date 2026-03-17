@@ -127,14 +127,14 @@
     var stackImages = {};
     try {
       var heroResult = await sb.from('lessons')
-        .select('unit_id, hero_image')
+        .select('unit_id, hero_image_url')
         .in('unit_id', unitIds)
-        .not('hero_image', 'is', null)
+        .not('hero_image_url', 'is', null)
         .order('lesson_number')
         .limit(100);
       (heroResult.data || []).forEach(function(l) {
         if (!stackImages[l.unit_id]) stackImages[l.unit_id] = [];
-        if (stackImages[l.unit_id].length < 2) stackImages[l.unit_id].push(l.hero_image);
+        if (stackImages[l.unit_id].length < 2) stackImages[l.unit_id].push(l.hero_image_url);
       });
     } catch(e) { /* stack images are optional */ }
 
