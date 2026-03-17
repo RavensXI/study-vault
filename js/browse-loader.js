@@ -127,9 +127,10 @@
     var stackImages = {};
     try {
       var heroResult = await sb.from('lessons')
-        .select('unit_id, hero_image_url')
+        .select('unit_id, lesson_number, hero_image_url')
         .in('unit_id', unitIds)
         .not('hero_image_url', 'is', null)
+        .gt('lesson_number', 2)
         .order('lesson_number')
         .limit(100);
       (heroResult.data || []).forEach(function(l) {
