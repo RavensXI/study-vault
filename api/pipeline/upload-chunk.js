@@ -24,10 +24,13 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Missing required fields: job_id, chunk, chunk_index' });
   }
 
+  // Strip null bytes that PostgreSQL rejects
+  const cleanChunk = chunk.replace(/\u0000/g, '').replace(/\\u0000/g, '');
+
   // Append chunk directly in Postgres (no read-modify-write cycle)
   const { error: rpcErr } = await supabase.rpc('append_extracted_text', {
     job_uuid: job_id,
-    chunk_text: chunk,
+    chunk_text: cleanChunk,
   });
 
   if (rpcErr) {
