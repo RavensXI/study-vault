@@ -1016,20 +1016,9 @@
       gridEl.innerHTML = '';
       yourCards.forEach(function(card) { gridEl.appendChild(card); });
 
-      // Build "All subjects" section if there are others
+      // Remove any existing "All subjects" section — students can use the picker to add subjects
       var existingAll = subjectsSection.querySelector('.home-all-section');
       if (existingAll) existingAll.remove();
-
-      if (otherCards.length > 0) {
-        var allSection = document.createElement('div');
-        allSection.className = 'home-all-section';
-        allSection.innerHTML = '<div class="home-section-header"><h2>All subjects</h2></div>';
-        var allGrid = document.createElement('div');
-        allGrid.className = 'home-grid';
-        otherCards.forEach(function(card) { allGrid.appendChild(card); });
-        allSection.appendChild(allGrid);
-        subjectsSection.appendChild(allSection);
-      }
 
       // Re-trigger reveal animations
       if (typeof initRevealAnimations === 'function') initRevealAnimations();
