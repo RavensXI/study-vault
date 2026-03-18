@@ -41,7 +41,8 @@ module.exports = async function handler(req, res) {
   // If text was parsed client-side, store it directly
   // For chunked uploads, initialise as empty string (chunks appended via upload-chunk.js)
   if (extracted_text) {
-    record.extracted_text = extracted_text;
+    // Strip null bytes and invalid Unicode escapes that PostgreSQL rejects
+    record.extracted_text = extracted_text.replace(/\u0000/g, '').replace(/\\u0000/g, '');
   } else if (chunked) {
     record.extracted_text = '';
   }
