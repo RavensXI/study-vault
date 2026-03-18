@@ -31,7 +31,6 @@ async function requireTeacher(req, res) {
 
   // 2. Try admin/teacher password (header or body)
   const adminPw = req.headers['x-admin-password'] || (req.body && req.body._admin_password);
-  console.log('[AUTH DEBUG] adminPw present:', !!adminPw, 'ADMIN_PASSWORD env present:', !!process.env.ADMIN_PASSWORD, 'match:', adminPw === process.env.ADMIN_PASSWORD);
   if (adminPw) {
     let role = null;
     if (process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD) role = 'platform_admin';

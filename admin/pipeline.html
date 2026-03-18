@@ -611,6 +611,10 @@
       var opts = { headers: headers };
       if (body !== undefined) {
         opts.method = 'POST';
+        // Include password in body as fallback (header may be stripped by proxy)
+        if (adminPassword && !accessToken) {
+          body._admin_password = adminPassword;
+        }
         opts.body = JSON.stringify(body);
       }
       var resp = await fetch(endpoint, opts);

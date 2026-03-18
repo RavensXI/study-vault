@@ -47,8 +47,10 @@ module.exports = async function handler(req, res) {
   }
   // School from form dropdown (preferred), falling back to auth profile
   record.school_id = body_school_id || auth.profile.school_id || null;
-  // Only set uploaded_by if it's a valid UUID (not a demo username)
-  if (auth.profile.id && auth.profile.id.length > 10) record.uploaded_by = auth.profile.id;
+  // Only set uploaded_by if it's a valid UUID
+  if (auth.profile.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(auth.profile.id)) {
+    record.uploaded_by = auth.profile.id;
+  }
 
   const { data: job, error } = await supabase
     .from('upload_jobs')
