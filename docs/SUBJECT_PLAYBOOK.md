@@ -38,6 +38,16 @@ Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create th
 |-------|-----------|-------|
 | CSS + subject activation agent | Subject slug + colour | 1 |
 
+**The activation agent MUST do ALL of the following:**
+1. Create subject + units + empty lesson shells in Supabase
+2. Add CSS body class variables (`.unit-{subject}-N`) for light + dark mode in `css/style.css`
+3. **Add the subject card to `index.html`** — both the `.home-card` in the subject grid AND the `.picker-item` in the subject picker modal. Download a subject image from Unsplash to `images/subject-{slug}.jpg`.
+4. Set `subjects.settings` (quote ticker HTML, unit_image_positions)
+
+**Quote ticker notes for MFL subjects:** Quotes should be in the target language WITH an English translation after a slash (e.g. "El que lee mucho, sabe mucho" / "He who reads a lot, knows a lot" — Cervantes). Mix proverbs with quotes from famous figures from that language's culture (authors, artists, scientists, athletes). Students need to understand the quotes, and famous figures add cultural knowledge.
+
+If any of these are missed, the subject won't appear on the homepage even though lessons exist in Supabase.
+
 Wait for this to complete (~30 seconds), then proceed to Phase 2.
 
 ### Phase 2: Maximum Parallel Launch (T=1 min)
@@ -50,6 +60,13 @@ Wait for this to complete (~30 seconds), then proceed to Phase 2.
 | Exam technique guides agent | Question types from plan | 1 |
 | Revision technique guides agent | Subject name only | 1 |
 | getGuideUrl mapping agent | Question type strings | 1 |
+
+**CRITICAL guide rules:**
+- Guides MUST be split into TWO separate agents (exam + revision). A single combined agent hits the 32k output token limit and fails.
+- Each guide agent MUST create a hub/index page (slug `index`, sort_order 0) that links to all individual guide pages. Without the hub page, guide-loader shows "No hub page found".
+- Hub pages MUST match the existing template format — look at another subject's hub (e.g. History or Science) as a reference. Revision hubs use THREE `guide-paper` sections: "Foundation Techniques", "[Subject]-Specific Techniques", and "Exam Preparation", each containing `guide-question-card` links. Do NOT invent a new layout.
+- The subject-specific section should contain techniques unique to that subject (e.g. for MFL: vocab building, grammar drilling, listening/speaking practice; for Science: equation practice, required practicals).
+- **Guide hub colours are FIXED across all subjects:** Revision technique hubs always use green (`--paper-accent: #16a34a; --paper-light: #f0fdf4;`) for ALL sections. Exam technique hubs always use purple (`--paper-accent: #7c3aed; --paper-light: #f5f3ff;`) for ALL sections. These do NOT vary by subject.
 
 **Why this works:** Guides and mappings do NOT depend on lesson content. They only need the plan (question types, subject slug). Launch them at the same time as content generation.
 
