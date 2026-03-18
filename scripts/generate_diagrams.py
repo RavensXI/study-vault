@@ -269,9 +269,19 @@ def main():
         return
 
     # Fetch subject + unit metadata for QA context
-    job = sb.table("upload_jobs").select("subject_id").eq("id", args.job_id).single().execute()
-    subject_id = job.data["subject_id"] if job.data else None
+    job = sb.table("upload_jobs").select("school_id, subject_slug").eq("id", args.job_id).single().execute()
+    school_id = job.data.get("school_id") if job.data else None
+    subject_id = None
     subject_name = subject_slug
+    # Look up subject_id from subjects table
+    subj_query = sb.table("subjects").select("id, name").eq("slug", subject_slug)
+    if school_id:
+        subj_query = subj_query.eq("school_id", school_id)
+    else:
+        subj_query = subj_query.is_("school_id", "null")
+    subj_result = subj_query.execute()
+    if subj_result.data:
+        subject_id = subj_result.data[0]["id"]
     unit_map = {}
     if subject_id:
         subject_row = sb.table("subjects").select("name").eq("id", subject_id).single().execute()
