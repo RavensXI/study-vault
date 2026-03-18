@@ -30,6 +30,8 @@ python scripts/pipeline_generate.py text <job_id>
 
 Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create the lesson plan and pipeline steps in Supabase.
 
+**The spec is the authority, not the teacher resources.** The lesson plan MUST cover every topic and theme in the exam spec, even if the teacher's uploaded resources don't include material for all of them. Teacher resources are the primary source for content and emphasis, but if the spec lists a topic and there are no PPTs for it, the lesson must still be generated using the spec as the source. Students need full coverage of the spec to revise effectively — gaps in teacher uploads cannot become gaps in the revision content.
+
 ### Phase 1b: Activation BEFORE Content (T=30s)
 
 **CRITICAL — run the CSS + subject activation agent FIRST**, before launching content agents. This agent creates the units in Supabase with their accent colours. The content generation script (`pipeline_api_generate.py generate`) reads unit accents from the DB to include in diagram prompts. If units don't exist yet, diagrams default to grey.
