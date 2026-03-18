@@ -1007,9 +1007,12 @@
       }
     });
 
+    // Store all cards once at init so they survive re-renders
+    var _allCardsCache = Array.from(gridEl.querySelectorAll('.home-card'));
+
     // --- Render personalised homepage ---
     function renderPersonalised(subjects) {
-      var allCards = Array.from(gridEl.querySelectorAll('.home-card'));
+      var allCards = _allCardsCache;
       var yourCards = [];
       var otherCards = [];
 
