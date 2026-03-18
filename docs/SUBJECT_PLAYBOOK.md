@@ -64,11 +64,16 @@ Wait for this to complete (~30 seconds), then proceed to Phase 2.
 | getGuideUrl mapping agent | Question type strings | 1 |
 
 **CRITICAL guide rules:**
-- Guides MUST be split into TWO separate agents (exam + revision). A single combined agent hits the 32k output token limit and fails.
+- Guides MUST be split into separate agents. A single agent for too many guides hits the 32k output token limit. Split as: (1) exam technique hub + guides, (2) revision hub + foundation guides (3-4 pages), (3) revision subject-specific + exam prep guides (4-5 pages). Max ~5 guide pages per agent.
 - Each guide agent MUST create a hub/index page (slug `index`, sort_order 0) that links to all individual guide pages. Without the hub page, guide-loader shows "No hub page found".
 - Hub pages MUST match the existing template format — look at another subject's hub (e.g. History or Science) as a reference. Revision hubs use THREE `guide-paper` sections: "Foundation Techniques", "[Subject]-Specific Techniques", and "Exam Preparation", each containing `guide-question-card` links. Do NOT invent a new layout.
 - The subject-specific section should contain techniques unique to that subject (e.g. for MFL: vocab building, grammar drilling, listening/speaking practice; for Science: equation practice, required practicals).
 - **Guide hub colours are FIXED across all subjects:** Revision technique hubs always use green (`--paper-accent: #16a34a; --paper-light: #f0fdf4;`) for ALL sections. Exam technique hubs always use purple (`--paper-accent: #7c3aed; --paper-light: #f5f3ff;`) for ALL sections. These do NOT vary by subject.
+- **Individual exam technique guide pages MUST include these sidebar elements** (see History's `write-an-account` guide as the gold standard):
+  1. **Quick Reference card** (`guide-quick-ref`) — coloured timing bar (`guide-quick-ref-bar` with `<span>` segments), total time, and numbered structure steps (`guide-quick-ref-steps`)
+  2. **Video placeholder** (`guide-video-placeholder`) — "Video walkthrough coming soon" with play icon SVG
+  3. **Other Guides collapsible** — sidebar collapsible listing all other exam technique guides with links and mark allocations
+- Always use `<main>` + `<aside class="lesson-sidebar">` structure. Look at an existing History exam guide for the exact HTML.
 
 **Why this works:** Guides and mappings do NOT depend on lesson content. They only need the plan (question types, subject slug). Launch them at the same time as content generation.
 
@@ -76,7 +81,7 @@ Each lesson content agent uses the **Write tool** (not bash heredocs) to create 
 
 ### Phase 3: Per-Lesson Streaming (T=1+ min, as each content agent completes)
 
-**Do NOT wait for all content to finish. As each lesson's content agent completes, IMMEDIATELY launch that lesson's downstream work:**
+**Assets can be launched early** — `run-all-assets` now auto-detects new lessons that arrive while it's running and re-runs heroes + diagrams for them. No need to wait for all content agents to finish before starting assets.
 
 For each completed lesson, launch in parallel:
 - `generate_diagrams.py --job-id <id> --lessons <N>` (background)

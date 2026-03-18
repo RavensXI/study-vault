@@ -359,6 +359,29 @@ def cmd_run_all_assets(job_id):
         status = "OK" if rc == 0 else f"FAILED (exit {rc})"
         print(f"\n  {name}: {status}")
 
+    # Step 1b: Re-check — if new lessons arrived during step 1, re-run heroes + diagrams
+    summary2 = get_progress_summary(sb, job_id)
+    if summary2["heroes"] < summary2["total"] or summary2["diagrams"] < summary2["total"]:
+        print(f"\nStep 1b: New lessons detected ({summary2['total']} total, was {summary['total']}). Re-running heroes + diagrams.")
+        print("=" * 50)
+        procs2 = []
+        if summary2["heroes"] < summary2["total"]:
+            p_hero2 = subprocess.Popen(
+                [python, os.path.join(SCRIPT_DIR, "download_heroes.py"), "--job-id", job_id],
+                stdout=sys.stdout, stderr=sys.stderr,
+            )
+            procs2.append(("heroes", p_hero2))
+        if summary2["diagrams"] < summary2["total"]:
+            p_diag2 = subprocess.Popen(
+                [python, os.path.join(SCRIPT_DIR, "generate_diagrams.py"), "--job-id", job_id],
+                stdout=sys.stdout, stderr=sys.stderr,
+            )
+            procs2.append(("diagrams", p_diag2))
+        for name, proc in procs2:
+            rc = proc.wait()
+            status = "OK" if rc == 0 else f"FAILED (exit {rc})"
+            print(f"\n  {name} (pass 2): {status}")
+
     # Step 2: Run narration (after diagrams — placement can shift narration IDs)
     print(f"\nStep 2: Narration (sequential)")
     print("=" * 50)
