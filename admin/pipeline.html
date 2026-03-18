@@ -460,7 +460,7 @@
     }
 
     var accessToken = null;
-    var demoUser = null;
+    var adminPassword = null;
     var currentJob = null;
     var pollTimer = null;
     var allSchools = [];
@@ -472,19 +472,19 @@
       if (result.data.session) {
         accessToken = result.data.session.access_token;
       } else {
-        // 2. Try demo user from localStorage
+        // 2. Try admin/teacher password from sessionStorage (set by auth-gate.js)
         try {
-          var stored = localStorage.getItem('studyvault-user');
+          var stored = sessionStorage.getItem('studyvault-auth');
           if (stored) {
-            var u = JSON.parse(stored);
-            if (u && u.isDemo && u.id) {
-              demoUser = u.id;
+            var s = JSON.parse(stored);
+            if (s && s.pw) {
+              adminPassword = s.pw;
             }
           }
         } catch (e) {}
       }
 
-      if (!accessToken && !demoUser) {
+      if (!accessToken && !adminPassword) {
         contentEl.innerHTML = '<div class="error-msg">Not logged in. <a href="/">Go to login</a> first, then come back here.</div>';
         return;
       }
@@ -605,8 +605,8 @@
       var headers = { 'Content-Type': 'application/json' };
       if (accessToken) {
         headers['Authorization'] = 'Bearer ' + accessToken;
-      } else if (demoUser) {
-        headers['X-Demo-User'] = demoUser;
+      } else if (adminPassword) {
+        headers['X-Admin-Password'] = adminPassword;
       }
       var opts = { headers: headers };
       if (body !== undefined) {

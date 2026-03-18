@@ -29,11 +29,31 @@ async function requireTeacher(req, res) {
     }
   }
 
-  // 2. Try demo auth (X-Demo-User header — temporary for testing)
+  // 2. Try admin/teacher password (X-Admin-Password header)
+  const adminPw = req.headers['x-admin-password'];
+  if (adminPw) {
+    let role = null;
+    if (process.env.ADMIN_PASSWORD && adminPw === process.env.ADMIN_PASSWORD) role = 'platform_admin';
+    if (process.env.TEACHER_PASSWORD && adminPw === process.env.TEACHER_PASSWORD) role = 'teacher';
+
+    if (role) {
+      // Look up the school_id for Unity College (default school for admin/teacher)
+      const { data: school } = await supabase
+        .from('schools')
+        .select('id')
+        .eq('slug', 'unity-college')
+        .single();
+      return {
+        user: { id: role },
+        profile: { id: role, full_name: role === 'platform_admin' ? 'Admin' : 'Teacher', role, school_id: school?.id || null }
+      };
+    }
+  }
+
+  // 3. Legacy demo auth (X-Demo-User header — kept for backwards compat)
   const demoUser = req.headers['x-demo-user'];
   if (demoUser && DEMO_ADMINS[demoUser]) {
     const profile = DEMO_ADMINS[demoUser];
-    // Look up the school_id for Unity College
     const { data: school } = await supabase
       .from('schools')
       .select('id')
