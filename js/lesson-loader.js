@@ -250,7 +250,7 @@
             : '';
           thumbHtml = '<img class="sidebar-video-thumb" src="' + thumbUrl + '" alt="Video overview">';
         } else {
-          thumbHtml = '<div class="sidebar-video-thumb sidebar-video-thumb--generic"></div>';
+          thumbHtml = '<div class="sidebar-video-thumb sidebar-video-thumb--generic"><span class="sv-video-label">StudyVault</span><span class="sv-video-sublabel">Video Overview</span></div>';
         }
 
         container.innerHTML =
