@@ -1947,20 +1947,24 @@ function initLessonProgress() {
   function saveState(s) { localStorage.setItem(storageKey, JSON.stringify(s)); }
 
   var tasks = [];
-  if (document.querySelector('.narration-player')) {
-    tasks.push({ id: 'narration', label: 'Listen to narration', auto: false });
-  }
-  var hasPodcast = false;
-  sidebar.querySelectorAll('.sidebar-media-item strong, .sidebar-media-item').forEach(function(item) {
-    if (item.textContent.toLowerCase().indexOf('podcast') !== -1) hasPodcast = true;
-  });
-  if (hasPodcast) tasks.push({ id: 'podcast', label: 'Listen to podcast', auto: false });
 
+  // Check for podcast — look in all sidebar content including collapsibles
+  var sidebarHTML = sidebar.innerHTML.toLowerCase();
+  if (sidebarHTML.indexOf('lesson podcast') !== -1 || sidebarHTML.indexOf('podcast') !== -1) {
+    tasks.push({ id: 'podcast', label: 'Listen to podcast', auto: false });
+  }
+
+  // Check for video
   var videoSection = document.getElementById('sidebar-video-section');
   if (videoSection && videoSection.style.display !== 'none') {
     tasks.push({ id: 'video', label: 'Watch the video', auto: false });
   }
+
+  // Knowledge check
   tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', auto: true });
+
+  // Revision task
+  tasks.push({ id: 'revision-task', label: 'Completed a revision task', auto: false });
 
   if (tasks.length === 0) return;
 
