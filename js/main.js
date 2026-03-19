@@ -40,6 +40,7 @@ function initLessonFeatures() {
   initRevisionTips();
   initLogoLink();
   initLessonPill();
+  initLessonProgress();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
@@ -1928,4 +1929,96 @@ function initRevisionTips() {
       openPopup = null;
     }
   });
+}
+
+/* --- Lesson Progress Tracker --- */
+function initLessonProgress() {
+  var sidebar = document.querySelector('.lesson-sidebar');
+  if (!sidebar) return;
+
+  var pathMatch = location.pathname.match(/^\/lesson\/([^/]+)\/([^/]+)\/(\d+)/);
+  if (!pathMatch) return;
+
+  var storageKey = 'sv_progress_' + pathMatch[1] + '_' + pathMatch[2] + '_' + pathMatch[3];
+
+  function getState() {
+    try { return JSON.parse(localStorage.getItem(storageKey)) || {}; } catch(e) { return {}; }
+  }
+  function saveState(s) { localStorage.setItem(storageKey, JSON.stringify(s)); }
+
+  var tasks = [];
+  if (document.querySelector('.narration-player')) {
+    tasks.push({ id: 'narration', label: 'Listen to narration', auto: false });
+  }
+  var hasPodcast = false;
+  sidebar.querySelectorAll('.sidebar-media-item strong, .sidebar-media-item').forEach(function(item) {
+    if (item.textContent.toLowerCase().indexOf('podcast') !== -1) hasPodcast = true;
+  });
+  if (hasPodcast) tasks.push({ id: 'podcast', label: 'Listen to podcast', auto: false });
+
+  var videoSection = document.getElementById('sidebar-video-section');
+  if (videoSection && videoSection.style.display !== 'none') {
+    tasks.push({ id: 'video', label: 'Watch the video', auto: false });
+  }
+  tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', auto: true });
+
+  if (tasks.length === 0) return;
+
+  var state = getState();
+  var checkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  var section = document.createElement('div');
+  section.className = 'sidebar-section';
+  var html = '<div class="sidebar-section-title">Lesson Progress</div><div class="lesson-progress-card">';
+
+  tasks.forEach(function(task) {
+    var done = state[task.id] ? ' completed' : '';
+    html += '<div class="lesson-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + '>';
+    html += '<div class="lesson-progress-check">' + checkSVG + '</div>';
+    html += '<span class="lesson-progress-label">' + task.label + '</span></div>';
+  });
+
+  var completed = tasks.filter(function(t) { return state[t.id]; }).length;
+  var pct = Math.round((completed / tasks.length) * 100);
+  html += '<div class="lesson-progress-bar"><div class="lesson-progress-bar-fill" style="width:' + pct + '%"></div></div>';
+  html += '<div class="lesson-progress-summary">' + completed + ' of ' + tasks.length + ' complete</div></div>';
+  section.innerHTML = html;
+
+  var firstSection = sidebar.querySelector('.sidebar-section');
+  sidebar.insertBefore(section, firstSection);
+
+  section.querySelectorAll('.lesson-progress-item:not([data-auto])').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var taskId = item.dataset.task;
+      state[taskId] = !state[taskId];
+      saveState(state);
+      item.classList.toggle('completed', state[taskId]);
+      updateProg();
+    });
+  });
+
+  function updateProg() {
+    var done = tasks.filter(function(t) { return state[t.id]; }).length;
+    var p = Math.round((done / tasks.length) * 100);
+    section.querySelector('.lesson-progress-bar-fill').style.width = p + '%';
+    section.querySelector('.lesson-progress-summary').textContent = done + ' of ' + tasks.length + ' complete';
+  }
+
+  // Auto-tick knowledge check on completion
+  var kcModal = document.getElementById('kc-modal');
+  if (kcModal) {
+    new MutationObserver(function(muts) {
+      muts.forEach(function(m) {
+        m.addedNodes.forEach(function(n) {
+          if (n.nodeType === 1 && (n.classList.contains('kc-result') || (n.querySelector && n.querySelector('.kc-result')))) {
+            state['knowledge-check'] = true;
+            saveState(state);
+            var kcItem = section.querySelector('[data-task="knowledge-check"]');
+            if (kcItem) kcItem.classList.add('completed');
+            updateProg();
+          }
+        });
+      });
+    }).observe(kcModal, { childList: true, subtree: true });
+  }
 }

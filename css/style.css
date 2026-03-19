@@ -1529,6 +1529,91 @@ body[class*="overlay-"] .sidebar-section {
   background: rgba(255, 255, 255, 0.7);
 }
 
+/* --- Lesson Progress Tracker --- */
+.lesson-progress-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.lesson-progress-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+  user-select: none;
+}
+.lesson-progress-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-light));
+}
+.lesson-progress-item.completed {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+body.dark-mode .lesson-progress-item.completed {
+  border-color: #16a34a;
+  background: #0a2618;
+}
+.lesson-progress-check {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.lesson-progress-item.completed .lesson-progress-check {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
+}
+.lesson-progress-check svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.lesson-progress-item.completed .lesson-progress-check svg {
+  opacity: 1;
+}
+.lesson-progress-label {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  flex: 1;
+}
+.lesson-progress-item.completed .lesson-progress-label {
+  color: #16a34a;
+}
+.lesson-progress-summary {
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  padding-top: 0.25rem;
+}
+.lesson-progress-bar {
+  height: 4px;
+  background: var(--border-lighter);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.lesson-progress-bar-fill {
+  height: 100%;
+  background: #16a34a;
+  border-radius: 2px;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  width: 0%;
+}
+
 /* Dark mode + overlay: keep containers dark instead of white */
 body.dark-mode[class*="overlay-"] .key-fact,
 body.dark-mode[class*="overlay-"] .exam-tip,
