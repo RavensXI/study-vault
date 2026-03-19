@@ -1948,23 +1948,30 @@ function initLessonProgress() {
 
   var tasks = [];
 
-  // Check for podcast — look in all sidebar content including collapsibles
+  var icons = {
+    podcast: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+    video: '<svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><polygon points="5,3 19,12 5,21"/></svg>',
+    kc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    revision: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
+  };
+
+  // Check for podcast
   var sidebarHTML = sidebar.innerHTML.toLowerCase();
   if (sidebarHTML.indexOf('lesson podcast') !== -1 || sidebarHTML.indexOf('podcast') !== -1) {
-    tasks.push({ id: 'podcast', label: 'Listen to podcast', auto: false });
+    tasks.push({ id: 'podcast', label: 'Listen to podcast', icon: icons.podcast, auto: false });
   }
 
   // Check for video
   var videoSection = document.getElementById('sidebar-video-section');
   if (videoSection && videoSection.style.display !== 'none') {
-    tasks.push({ id: 'video', label: 'Watch the video', auto: false });
+    tasks.push({ id: 'video', label: 'Watch the video', icon: icons.video, auto: false });
   }
 
   // Knowledge check
-  tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', auto: true });
+  tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', icon: icons.kc, auto: true });
 
-  // Revision task — with lightbulb hint
-  tasks.push({ id: 'revision-task', label: 'Completed a revision task', hint: 'Look for the <svg class="lp-bulb-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg> icons in the lesson', auto: false });
+  // Revision task
+  tasks.push({ id: 'revision-task', label: 'Completed a revision task', icon: icons.revision, auto: false });
 
   if (tasks.length === 0) return;
 
@@ -1978,8 +1985,9 @@ function initLessonProgress() {
   tasks.forEach(function(task) {
     var done = state[task.id] ? ' completed' : '';
     html += '<div class="lesson-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + '>';
+    html += '<div class="lesson-progress-icon">' + (task.icon || '') + '</div>';
     html += '<div class="lesson-progress-check">' + checkSVG + '</div>';
-    html += '<span class="lesson-progress-label">' + task.label + (task.hint ? '<span class="lesson-progress-hint">' + task.hint + '</span>' : '') + '</span></div>';
+    html += '<span class="lesson-progress-label">' + task.label + '</span></div>';
   });
 
   var completed = tasks.filter(function(t) { return state[t.id]; }).length;
