@@ -1958,20 +1958,20 @@ function initLessonProgress() {
   // Check for podcast
   var sidebarHTML = sidebar.innerHTML.toLowerCase();
   if (sidebarHTML.indexOf('lesson podcast') !== -1 || sidebarHTML.indexOf('podcast') !== -1) {
-    tasks.push({ id: 'podcast', label: 'Listen to podcast', icon: icons.podcast, auto: false });
+    tasks.push({ id: 'podcast', label: 'Listen to podcast', icon: icons.podcast, iconClass: 'lesson-progress-icon--podcast', auto: false });
   }
 
   // Check for video
   var videoSection = document.getElementById('sidebar-video-section');
   if (videoSection && videoSection.style.display !== 'none') {
-    tasks.push({ id: 'video', label: 'Watch the video', icon: icons.video, auto: false });
+    tasks.push({ id: 'video', label: 'Watch the video', icon: icons.video, iconClass: 'lesson-progress-icon--video', auto: false });
   }
 
   // Knowledge check
-  tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', icon: icons.kc, auto: true });
+  tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', icon: icons.kc, iconClass: 'lesson-progress-icon--kc', auto: true });
 
   // Revision task
-  tasks.push({ id: 'revision-task', label: 'Completed a revision task', icon: icons.revision, auto: false });
+  tasks.push({ id: 'revision-task', label: 'Completed a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
 
   if (tasks.length === 0) return;
 
@@ -1985,7 +1985,7 @@ function initLessonProgress() {
   tasks.forEach(function(task) {
     var done = state[task.id] ? ' completed' : '';
     html += '<div class="lesson-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + '>';
-    html += '<div class="lesson-progress-icon">' + (task.icon || '') + '</div>';
+    html += '<div class="lesson-progress-icon ' + (task.iconClass || '') + '">' + (task.icon || '') + '</div>';
     html += '<div class="lesson-progress-check">' + checkSVG + '</div>';
     html += '<span class="lesson-progress-label">' + task.label + '</span></div>';
   });
