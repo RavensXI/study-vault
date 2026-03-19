@@ -53,6 +53,10 @@ SUBJECT_ORDER = [
     "english-literature",
     "science",
     "history",
+    "spanish",
+    "german",
+    "french",
+    "creative-imedia",
 ]
 
 # ── CLI env to avoid Windows encoding crashes ───────────────────────────
@@ -219,10 +223,11 @@ def _has_podcast(lesson):
     return False
 
 
-def get_pending_lessons(sb, limit, subject_filter=None, mode="both"):
+def get_pending_lessons(sb, limit, subject_filter=None, mode="both", generic=False):
     """Get lessons needing media, ordered by subject priority.
 
     mode: 'both' = needs video, 'podcast-only' = needs podcast, 'video-only' = needs video
+    generic: if True, target school_id IS NULL subjects only
     """
     all_pending = []
 
@@ -230,7 +235,12 @@ def get_pending_lessons(sb, limit, subject_filter=None, mode="both"):
         if subject_filter and subject_slug != subject_filter:
             continue
 
-        subj = sb.table("subjects").select("id, name, exam_board").eq("slug", subject_slug).execute()
+        query = sb.table("subjects").select("id, name, exam_board").eq("slug", subject_slug)
+        if generic:
+            query = query.is_("school_id", "null")
+        else:
+            query = query.not_.is_("school_id", "null")
+        subj = query.execute()
         if not subj.data:
             continue
         subject = subj.data[0]
@@ -298,11 +308,20 @@ def cmd_generate(args):
         print(f"WARNING: {len(active)} jobs still in progress. Run --status to check or --download to complete them first.")
         print("Continuing with new jobs anyway...\n")
 
+    # Build set of lesson IDs already tracked in state (prevents duplicate notebooks)
+    tracked_lesson_ids = {j["lesson_id"] for j in state["jobs"]}
+
     # For video-only mode, reuse existing notebooks from state
     if args.video_only:
         pending = _get_video_only_pending(state, limit)
     else:
-        pending = get_pending_lessons(sb, limit, args.subject, mode)
+        pending = get_pending_lessons(sb, limit, args.subject, mode, generic=args.generic)
+        # Filter out lessons already in state to prevent creating duplicate notebooks
+        before = len(pending)
+        pending = [p for p in pending if p["lesson"]["id"] not in tracked_lesson_ids]
+        skipped = before - len(pending)
+        if skipped:
+            print(f"Skipped {skipped} lessons already tracked in state file")
 
     if not pending:
         label = {"both": "video+podcast", "podcast-only": "podcast", "video-only": "video"}[mode]
@@ -368,9 +387,10 @@ def cmd_generate(args):
             created += 1
             continue
 
-        # Export content
+        # Export content — unique temp file per lesson to prevent cross-contamination
         content = strip_html(lesson["content_html"])
-        temp_path = os.path.join(SCRIPT_DIR, "_temp_nlm_source.txt")
+        safe_label = label.replace("/", "_")
+        temp_path = os.path.join(SCRIPT_DIR, f"_temp_nlm_source_{safe_label}.txt")
         with open(temp_path, "w", encoding="utf-8") as f:
             f.write(content)
 
@@ -398,6 +418,12 @@ def cmd_generate(args):
         try:
             nlm_run(["source", "add", notebook_id, "--file", temp_path, "--title", "Lesson Material", "--wait"], timeout=60)
         except Exception:
+            pass
+
+        # Clean up temp file immediately
+        try:
+            os.remove(temp_path)
+        except OSError:
             pass
         time.sleep(2)
 
@@ -529,8 +555,8 @@ def cmd_status(args):
             print(f"  {job['label']}: COMPLETED ({' + '.join(parts)})")
         else:
             still_going += 1
-            vid_status = vid.get("status", "n/a") if video_expected else "n/a"
-            aud_status = aud.get("status", "unknown") if podcast_expected else "n/a"
+            vid_status = vid.get("status", "n/a") if (video_expected and vid) else "n/a"
+            aud_status = aud.get("status", "unknown") if (podcast_expected and aud) else "n/a"
             print(f"  {job['label']}: video={vid_status}, podcast={aud_status}")
 
     save_state(state)
@@ -698,8 +724,19 @@ def main():
     parser.add_argument("--download", action="store_true", help="Download completed videos + podcasts")
     parser.add_argument("--cleanup", action="store_true", help="Delete notebooks after downloading")
     parser.add_argument("--podcast-only", action="store_true", help="Generate only podcasts (keeps notebooks for later video)")
+    parser.add_argument("--generic", action="store_true", help="Target generic (school_id NULL) subjects instead of school-specific")
     parser.add_argument("--video-only", action="store_true", help="Add videos to existing notebooks (from prior podcast-only run)")
+    parser.add_argument("--reset-subject", help="Remove all state entries for a subject slug (allows clean regeneration)")
     args = parser.parse_args()
+
+    if args.reset_subject:
+        state = load_state()
+        before = len(state["jobs"])
+        state["jobs"] = [j for j in state["jobs"] if not j["label"].startswith(args.reset_subject + "/")]
+        removed = before - len(state["jobs"])
+        save_state(state)
+        print(f"Removed {removed} state entries for '{args.reset_subject}'. Run again to regenerate.")
+        return
 
     if args.status:
         cmd_status(args)

@@ -45,6 +45,7 @@ Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create th
 2. Add CSS body class variables (`.unit-{subject}-N`) for light + dark mode in `css/style.css`
 3. **Add the subject card to `index.html`** — both the `.home-card` in the subject grid AND the `.picker-item` in the subject picker modal. Download a subject image from Unsplash to `images/subject-{slug}.jpg`.
 4. Set `subjects.settings` (quote ticker HTML, unit_image_positions)
+5. **Add the subject slug to `SUBJECT_ORDER`** in `scripts/generate_cinematic_videos.py` — without this, the podcast/video script can't find the subject.
 
 **Quote ticker notes for MFL subjects:** Quotes should be in the target language WITH an English translation after a slash (e.g. "El que lee mucho, sabe mucho" / "He who reads a lot, knows a lot" — Cervantes). Mix proverbs with quotes from famous figures from that language's culture (authors, artists, scientists, athletes). Students need to understand the quotes, and famous figures add cultural knowledge.
 

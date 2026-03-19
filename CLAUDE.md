@@ -13,7 +13,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 20 subjects (15 school-specific + 5 generic free-tier).
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 21 subjects (16 school-specific + 5 generic free-tier).
 
 ## Subjects — Unity College (school_id set, all on Vercel)
 
@@ -29,23 +29,24 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 | 26/26 |
 | English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 | 42/42 |
 | English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 0/30 | 30/30 |
-| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 20/48 | 0/48 |
-| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 0/22 |
-| Spanish | AQA 8692 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 0/26 |
-| German | AQA 8662 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 0/26 |
-| French | AQA 8652 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 0/26 |
-| **Subtotal** | | **448** | **53** | **36/448** | **300/448** |
+| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 20/48 | 48/48 |
+| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 22/22 |
+| Spanish | AQA 8692 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 26/26 |
+| German | AQA 8662 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 26/26 |
+| French | AQA 8652 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 26/26 |
+| Creative iMedia | OCR J834 | 23 | 4 (Media Industry, Product Design, Pre-Production, Distribution) | 0/23 | 23/23 |
+| **Subtotal** | | **471** | **57** | **36/471** | **471/471** |
 
 ## Subjects — Free Tier (school_id NULL, generic content)
 
 | Subject | Exam Board | Lessons | Units | Cinematic Videos | Podcasts |
 |---------|-----------|---------|-------|-----------------|----------|
 | Maths | Edexcel 1MA1 | 37 | TBC | 0/37 | 0/37 |
-| Science (generic) | AQA 8464 | 48 | 6 | 24/48 | 47/48 |
+| Science (generic) | AQA 8464 | 48 | 6 | 39/48 | 48/48 |
 | Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 | 0/22 | 22/22 |
 | English Language (generic) | AQA 8700 | 30 | 4 | 0/30 | 30/30 |
 | English Literature (generic) | AQA 8702 | 70 | TBC | 0/70 | 0/70 |
-| **Subtotal** | | **207** | | **24/207** | **99/207** |
+| **Subtotal** | | **207** | | **39/207** | **100/207** |
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -55,7 +56,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **577 lessons** (370 school + 207 generic) + **226 guide pages** (194 school + 32 generic) in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **678 lessons** (471 school + 207 generic) + **292 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (3 tiers):**
@@ -74,17 +75,24 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Editor school scoping (BLOCKER):** Lesson/guide editors have NO school_id scoping — dangerous with duplicate subject slugs across schools. Must fix before teacher onboarding.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **Cinematic videos**: 60/577 done (Sport Science 9 + Food Tech 7 + Generic Science 24 + History 20 YouTube). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts (Unity)**: 300/370 done. Science 0/48 + Sep Sci 0/22 remaining (deliberately paused — must NOT copy from generic). See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts (Generic)**: 99/207 done. Science 47/48, Sep Sci 22/22, Eng Lang 30/30. Eng Lit 0/70 + Maths 0/37 remaining.
+- **Cinematic videos**: 75/678 done (Sport Science 9 + Food Tech 7 + Generic Science 39 + History 20 YouTube). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
+- **Podcasts (Unity)**: 471/471 done. ALL school-specific subjects have podcasts.
+- **Podcasts (Generic)**: 100/207 done. Science 48/48, Sep Sci 22/22, Eng Lang 30/30. Eng Lit 0/70 + Maths 0/37 remaining.
+- **Lesson Progress Tracker**: Sidebar widget on every lesson — Listen to podcast, Watch video, Complete knowledge check, Complete a revision task. KC auto-ticks. State in localStorage. Icons: purple headphones, red play, unit-colour question mark, green lightbulb.
+- **Content-specific revision tips**: `data-revision-tip` attribute on elements overrides generic lightbulb tips. Prototyped on History C&T L01. Future: generate at content creation time for all lessons.
+- **Lesson header declutter**: "Lesson X of Y" moved to header pill, inline label hidden. Content visible sooner.
+- **Dark mode + overlay fix**: Containers no longer turn white when overlay colour is active in dark mode.
+- **Upload auth fix**: Admin password sent via `X-Admin-Password` header + body fallback. No more demo user dependency.
+- **Upload null byte fix**: Strips `\u0000` from uploaded text (PPT extraction artefact).
 - **Collapsible UX**: Tinted background + "Tap to expand" hint (dismissed after first click via localStorage). Lightbulb no longer overlaps chevron.
-- **Card design refresh**: Explored editorial overlay + stacked deck designs. Reverted — readability issues with varied hero images. Noted in FUTURE_FEATURES.md for later iteration.
-- **Notification sound**: Beep plays after every Claude response via `Stop` hook in `~/.claude/settings.json`.
+- **Video thumbnail**: Branded "StudyVault / Video Overview" card instead of black box for R2 videos.
+- **Subject picker fix**: Cards persist after re-rendering (cached at init).
 - **Remotion promo video**: Prototype at `studyvault-promo/`. Slot machine opener, 8 scenes, school-targeted pitch. Needs music + iteration.
 - **Niche exam board targeting**: Initial school list at `scripts/niche-board-schools.csv`. See `memory/exam-board-market-share.md` + FUTURE_FEATURES.md.
-- **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
-- **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
-- Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
+- **Remaining subjects to build**: Computer Science (OCR), Design & Technology (AQA), bespoke Maths (awaiting teacher resources)
+- **Parents' evening print view**: Dashboard section with quick-print option per class
+- **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing
+- Role detection (teacher vs student), retire static HTML
 
 ## API Keys
 
