@@ -1955,9 +1955,8 @@ function initLessonProgress() {
     revision: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
   };
 
-  // Check for podcast
-  var sidebarHTML = sidebar.innerHTML.toLowerCase();
-  if (sidebarHTML.indexOf('lesson podcast') !== -1 || sidebarHTML.indexOf('podcast') !== -1) {
+  // Check for podcast — either in the tabbed player or in sidebar media
+  if (window.podcastUrl || sidebar.innerHTML.toLowerCase().indexOf('podcast') !== -1) {
     tasks.push({ id: 'podcast', label: 'Listen to podcast', icon: icons.podcast, iconClass: 'lesson-progress-icon--podcast', auto: false });
   }
 
