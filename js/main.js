@@ -1903,7 +1903,9 @@ function initRevisionTips() {
       const popup = document.createElement('div');
       popup.className = 'revision-tip-popup';
       var tipHref = basePath + (basePath.startsWith('/guide/') ? tip.link.replace('.html', '') : tip.link);
-      popup.innerHTML = '<p>' + tip.text + '</p><a href="' + tipHref + '">' + tip.label + ' \u2192</a>';
+      // Use content-specific tip if present, otherwise fall back to generic
+      var tipText = el.getAttribute('data-revision-tip') || tip.text;
+      popup.innerHTML = '<p>' + tipText + '</p><a href="' + tipHref + '">' + tip.label + ' \u2192</a>';
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
