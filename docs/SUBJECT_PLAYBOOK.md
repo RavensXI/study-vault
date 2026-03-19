@@ -64,7 +64,7 @@ Wait for this to complete (~30 seconds), then proceed to Phase 2.
 | getGuideUrl mapping agent | Question type strings | 1 |
 
 **CRITICAL guide rules:**
-- Guides MUST be split into separate agents. A single agent for too many guides hits the 32k output token limit. Split as: (1) exam technique hub + guides, (2) revision hub + foundation guides (3-4 pages), (3) revision subject-specific + exam prep guides (4-5 pages). Max ~5 guide pages per agent.
+- Guides MUST be split into separate agents. Max ~5 guide pages per agent (including hub). Split as: (1) exam hub + first 4 guides, (2) remaining 4 exam guides, (3) revision hub + 3 foundation guides, (4) 5 remaining revision guides (subject-specific + exam prep). That's 4 guide agents total for MFL subjects.
 - Each guide agent MUST create a hub/index page (slug `index`, sort_order 0) that links to all individual guide pages. Without the hub page, guide-loader shows "No hub page found".
 - Hub pages MUST match the existing template format — look at another subject's hub (e.g. History or Science) as a reference. Revision hubs use THREE `guide-paper` sections: "Foundation Techniques", "[Subject]-Specific Techniques", and "Exam Preparation", each containing `guide-question-card` links. Do NOT invent a new layout.
 - The subject-specific section should contain techniques unique to that subject (e.g. for MFL: vocab building, grammar drilling, listening/speaking practice; for Science: equation practice, required practicals).
@@ -82,6 +82,8 @@ Each lesson content agent uses the **Write tool** (not bash heredocs) to create 
 ### Phase 3: Per-Lesson Streaming (T=1+ min, as each content agent completes)
 
 **Assets can be launched early** — `run-all-assets` now auto-detects new lessons that arrive while it's running and re-runs heroes + diagrams for them. No need to wait for all content agents to finish before starting assets.
+
+**After diagrams complete, ALWAYS run diagram QA** — download all diagrams and visually review them using the Read tool. Check for: correct accent colour, accurate text/labels, readable layout, relevant to lesson topic. Flag any that need regeneration. Do NOT skip this step. The API-based QA (`claude_qa.py`) is disabled — QA must be done by Claude Code reviewing the images directly.
 
 For each completed lesson, launch in parallel:
 - `generate_diagrams.py --job-id <id> --lessons <N>` (background)
