@@ -1963,8 +1963,8 @@ function initLessonProgress() {
   // Knowledge check
   tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', auto: true });
 
-  // Revision task
-  tasks.push({ id: 'revision-task', label: 'Completed a revision task', auto: false });
+  // Revision task — with lightbulb hint
+  tasks.push({ id: 'revision-task', label: 'Completed a revision task', hint: 'Look for the <svg class="lp-bulb-icon" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg> icons in the lesson', auto: false });
 
   if (tasks.length === 0) return;
 
@@ -1979,7 +1979,7 @@ function initLessonProgress() {
     var done = state[task.id] ? ' completed' : '';
     html += '<div class="lesson-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + '>';
     html += '<div class="lesson-progress-check">' + checkSVG + '</div>';
-    html += '<span class="lesson-progress-label">' + task.label + '</span></div>';
+    html += '<span class="lesson-progress-label">' + task.label + (task.hint ? '<span class="lesson-progress-hint">' + task.hint + '</span>' : '') + '</span></div>';
   });
 
   var completed = tasks.filter(function(t) { return state[t.id]; }).length;
