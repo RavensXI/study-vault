@@ -170,6 +170,8 @@
     // Lesson header
     document.getElementById('lesson-number').textContent =
       'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
+    // Put "Lesson X of Y" in the header pill instead of the inline label
+    window._lessonOfTotal = { num: lesson.lesson_number, total: data.totalLessons };
     document.getElementById('lesson-title').textContent = lesson.title;
 
     // Hero image

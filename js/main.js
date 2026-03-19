@@ -1789,7 +1789,9 @@ function initLessonPill() {
   if (!unitLabel) return;
   var pill = document.createElement('span');
   pill.className = 'header-lesson-label';
-  pill.textContent = 'Lesson ' + parseInt(match[1], 10);
+  var num = parseInt(match[1], 10);
+  var total = window._lessonOfTotal ? window._lessonOfTotal.total : null;
+  pill.textContent = total ? 'Lesson ' + num + ' of ' + total : 'Lesson ' + num;
   unitLabel.parentNode.insertBefore(pill, unitLabel.nextSibling);
 }
 
