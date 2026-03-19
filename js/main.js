@@ -1972,7 +1972,7 @@ function initLessonProgress() {
   tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', icon: icons.kc, iconClass: 'lesson-progress-icon--kc', auto: true });
 
   // Revision task
-  tasks.push({ id: 'revision-task', label: 'Completed a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
+  tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
 
   if (tasks.length === 0) return;
 
