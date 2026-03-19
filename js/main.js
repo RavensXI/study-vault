@@ -2008,21 +2008,19 @@ function initLessonProgress() {
     section.querySelector('.lesson-progress-summary').textContent = done + ' of ' + tasks.length + ' complete';
   }
 
-  // Auto-tick knowledge check on completion
-  var kcModal = document.getElementById('kc-modal');
-  if (kcModal) {
-    new MutationObserver(function(muts) {
-      muts.forEach(function(m) {
-        m.addedNodes.forEach(function(n) {
-          if (n.nodeType === 1 && (n.classList.contains('kc-result') || (n.querySelector && n.querySelector('.kc-result')))) {
-            state['knowledge-check'] = true;
-            saveState(state);
-            var kcItem = section.querySelector('[data-task="knowledge-check"]');
-            if (kcItem) kcItem.classList.add('completed');
-            updateProg();
-          }
-        });
+  // Auto-tick knowledge check on completion — watch document.body for the kc-result
+  new MutationObserver(function(muts) {
+    muts.forEach(function(m) {
+      m.addedNodes.forEach(function(n) {
+        if (n.nodeType !== 1) return;
+        if (n.classList.contains('kc-result') || (n.querySelector && n.querySelector('.kc-result'))) {
+          state['knowledge-check'] = true;
+          saveState(state);
+          var kcItem = section.querySelector('[data-task="knowledge-check"]');
+          if (kcItem) kcItem.classList.add('completed');
+          updateProg();
+        }
       });
-    }).observe(kcModal, { childList: true, subtree: true });
-  }
+    });
+  }).observe(document.body, { childList: true, subtree: true });
 }
