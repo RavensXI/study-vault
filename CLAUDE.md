@@ -13,7 +13,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 16 subjects (12 school-specific + 4 generic free-tier).
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 20 subjects (15 school-specific + 5 generic free-tier).
 
 ## Subjects — Unity College (school_id set, all on Vercel)
 
@@ -21,28 +21,31 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 |---------|-----------|---------|-------|-----------------|----------|
 | History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 0/60 | 60/60 |
 | Business Studies | Edexcel 1BS0 | 30 | 2 themes | 0/30 | 30/30 |
-| Geography | AQA 8035 | 40 | 2 papers | 0/40 | 37/40 |
+| Geography | AQA 8035 | 40 | 2 papers | 0/40 | 40/40 |
 | Sport Science | OCR R180 | 10 | 1 (R180) | 9/10 | 10/10 |
 | Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 0/12 | 12/12 |
 | Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 7/10 | 10/10 |
 | Religious Education | AQA 8062 | 40 | 8 | 0/40 | 40/40 |
 | Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 | 26/26 |
-| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 | 11/42 |
+| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 | 42/42 |
 | English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 0/30 | 30/30 |
-| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 20/48 | 48/48 |
-| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 20/22 |
-| **Subtotal** | | **370** | **44** | **36/370** | **~363/370** |
+| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 20/48 | 0/48 |
+| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 0/22 |
+| Spanish | AQA 8692 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 0/26 |
+| German | AQA 8662 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 0/26 |
+| French | AQA 8652 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 0/26 |
+| **Subtotal** | | **448** | **53** | **36/448** | **300/448** |
 
 ## Subjects — Free Tier (school_id NULL, generic content)
 
-| Subject | Exam Board | Lessons | Units |
-|---------|-----------|---------|-------|
-| Maths | Edexcel 1MA1 | 37 | TBC |
-| Science (generic) | AQA 8464 | 48 | 6 |
-| Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 |
-| English Language (generic) | AQA 8700 | 30 | 4 |
-| English Literature (generic) | AQA 8702 | 70 | TBC (extra texts beyond Unity's 42) |
-| **Subtotal** | | **207** | |
+| Subject | Exam Board | Lessons | Units | Cinematic Videos | Podcasts |
+|---------|-----------|---------|-------|-----------------|----------|
+| Maths | Edexcel 1MA1 | 37 | TBC | 0/37 | 0/37 |
+| Science (generic) | AQA 8464 | 48 | 6 | 24/48 | 47/48 |
+| Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 | 0/22 | 22/22 |
+| English Language (generic) | AQA 8700 | 30 | 4 | 0/30 | 30/30 |
+| English Literature (generic) | AQA 8702 | 70 | TBC | 0/70 | 0/70 |
+| **Subtotal** | | **207** | | **24/207** | **99/207** |
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -71,8 +74,14 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Editor school scoping (BLOCKER):** Lesson/guide editors have NO school_id scoping — dangerous with duplicate subject slugs across schools. Must fix before teacher onboarding.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **Cinematic videos**: 36/370 done (Sport Science 9 + Food Tech 7 + Science 20). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts**: ~363/370 done. Science 48/48, Sep Sci 20/22 (2 regenerating). See `docs/VIDEO_PIPELINE.md`.
+- **Cinematic videos**: 60/577 done (Sport Science 9 + Food Tech 7 + Generic Science 24 + History 20 YouTube). Daily limit 20/day. See `docs/VIDEO_PIPELINE.md`.
+- **Podcasts (Unity)**: 300/370 done. Science 0/48 + Sep Sci 0/22 remaining (deliberately paused — must NOT copy from generic). See `docs/VIDEO_PIPELINE.md`.
+- **Podcasts (Generic)**: 99/207 done. Science 47/48, Sep Sci 22/22, Eng Lang 30/30. Eng Lit 0/70 + Maths 0/37 remaining.
+- **Collapsible UX**: Tinted background + "Tap to expand" hint (dismissed after first click via localStorage). Lightbulb no longer overlaps chevron.
+- **Card design refresh**: Explored editorial overlay + stacked deck designs. Reverted — readability issues with varied hero images. Noted in FUTURE_FEATURES.md for later iteration.
+- **Notification sound**: Beep plays after every Claude response via `Stop` hook in `~/.claude/settings.json`.
+- **Remotion promo video**: Prototype at `studyvault-promo/`. Slot machine opener, 8 scenes, school-targeted pitch. Needs music + iteration.
+- **Niche exam board targeting**: Initial school list at `scripts/niche-board-schools.csv`. See `memory/exam-board-market-share.md` + FUTURE_FEATURES.md.
 - **Parents' evening print view**: Dashboard section with quick-print option per class — key stats and data summary for parents' evening conversations
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing. Adds push notifications. Requires Apple Developer account (£79/yr) + Google Play ($25 one-off). Tom handles account signup + store submissions; Claude does code/config.
 - Role detection (teacher vs student), remove demo accounts once SSO works, retire static HTML
