@@ -117,6 +117,8 @@ for unit in units:
     sb.table('units').update({'image_url': l1.data['hero_image_url']}).eq('id', unit['id']).execute()
 ```
 
+**Content-specific revision tips** — every `<div class="key-fact">` must have a `data-revision-tip` attribute with a specific recall task tailored to that key fact's content. This should be generated during content creation (in the lesson JSON). If not generated at creation time, run the batch tip script afterwards. Generic tips like "Cover this and recall" are NOT acceptable — each tip must reference the actual content.
+
 Then commit and deploy:
 ```bash
 git add / commit / push                                # Deploy to Vercel
