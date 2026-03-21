@@ -57,6 +57,7 @@ SUBJECT_ORDER = [
     "german",
     "french",
     "creative-imedia",
+    "maths",
 ]
 
 # ── CLI env to avoid Windows encoding crashes ───────────────────────────

@@ -77,7 +77,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
 - **Cinematic videos**: 84/678 done (Sport Science 10 + Food Tech 10 + Generic Science 48 + History 20 YouTube — generic science COMPLETE). Daily limit 20/day. Video generation blocked on most subjects due to `video_done=True` in state from podcast-only runs — needs state reset before next batch. See `docs/VIDEO_PIPELINE.md`.
 - **Podcasts (Unity)**: 471/471 done. ALL school-specific subjects have podcasts.
-- **Podcasts (Generic)**: 100/207 done. Science 48/48, Sep Sci 22/22, Eng Lang 30/30. Eng Lit 0/70 + Maths 0/37 remaining.
+- **Podcasts (Generic)**: 155/225 done. Science 48/48, Sep Sci 22/22, Eng Lang 30/30, Maths 55/55. Eng Lit 0/70 remaining.
 - **Lesson Progress Tracker**: Sidebar widget on every lesson — Listen to podcast, Watch video, Complete knowledge check, Complete a revision task. KC auto-ticks. State in localStorage. Icons: purple headphones, red play, unit-colour question mark, green lightbulb.
 - **Content-specific revision tips**: `data-revision-tip` attribute on key facts overrides generic lightbulb tips. ~1,824 tips generated across all 678 lessons (20 Mar 2026). Future content generation should include these at creation time.
 - **Lesson header declutter**: "Lesson X of Y" moved to header pill, inline label hidden. Content visible sooner.
