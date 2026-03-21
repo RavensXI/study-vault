@@ -327,8 +327,8 @@ def cmd_run_all_assets(job_id):
 
     python = sys.executable
 
-    # Step 1: Run diagrams and heroes in parallel
-    print("Step 1: Diagrams + Heroes (parallel)")
+    # Run all three asset types in parallel — no dependencies between them
+    print("All assets (parallel): Heroes + Diagrams + Narration")
     print("=" * 50)
 
     procs = []
@@ -353,49 +353,60 @@ def cmd_run_all_assets(job_id):
     else:
         print("  Heroes: all done, skipping")
 
-    # Wait for parallel processes
+    if summary["narration"] < summary["total"]:
+        print("  Starting narration generation...")
+        p_narr = subprocess.Popen(
+            [python, os.path.join(SCRIPT_DIR, "generate_narration.py"), "--job-id", job_id],
+            stdout=sys.stdout, stderr=sys.stderr,
+        )
+        procs.append(("narration", p_narr))
+    else:
+        print("  Narration: all done, skipping")
+
+    # Wait for all parallel processes
     for name, proc in procs:
         rc = proc.wait()
         status = "OK" if rc == 0 else f"FAILED (exit {rc})"
         print(f"\n  {name}: {status}")
 
-    # Step 1b: Re-check — if new lessons arrived during step 1, re-run heroes + diagrams
+    # Re-check — if new lessons arrived during the run, do a second pass
     summary2 = get_progress_summary(sb, job_id)
-    if summary2["heroes"] < summary2["total"] or summary2["diagrams"] < summary2["total"]:
-        print(f"\nStep 1b: New lessons detected ({summary2['total']} total, was {summary['total']}). Re-running heroes + diagrams.")
+    needs_rerun = []
+    if summary2["heroes"] < summary2["total"]: needs_rerun.append("heroes")
+    if summary2["diagrams"] < summary2["total"]: needs_rerun.append("diagrams")
+    if summary2["narration"] < summary2["total"]: needs_rerun.append("narration")
+
+    if needs_rerun:
+        print(f"\nPass 2: {', '.join(needs_rerun)} still incomplete ({summary2['total']} total lessons)")
         print("=" * 50)
         procs2 = []
-        if summary2["heroes"] < summary2["total"]:
-            p_hero2 = subprocess.Popen(
+        if "heroes" in needs_rerun:
+            procs2.append(("heroes", subprocess.Popen(
                 [python, os.path.join(SCRIPT_DIR, "download_heroes.py"), "--job-id", job_id],
-                stdout=sys.stdout, stderr=sys.stderr,
-            )
-            procs2.append(("heroes", p_hero2))
-        if summary2["diagrams"] < summary2["total"]:
-            p_diag2 = subprocess.Popen(
+                stdout=sys.stdout, stderr=sys.stderr)))
+        if "diagrams" in needs_rerun:
+            procs2.append(("diagrams", subprocess.Popen(
                 [python, os.path.join(SCRIPT_DIR, "generate_diagrams.py"), "--job-id", job_id],
-                stdout=sys.stdout, stderr=sys.stderr,
-            )
-            procs2.append(("diagrams", p_diag2))
+                stdout=sys.stdout, stderr=sys.stderr)))
+        if "narration" in needs_rerun:
+            procs2.append(("narration", subprocess.Popen(
+                [python, os.path.join(SCRIPT_DIR, "generate_narration.py"), "--job-id", job_id],
+                stdout=sys.stdout, stderr=sys.stderr)))
         for name, proc in procs2:
             rc = proc.wait()
             status = "OK" if rc == 0 else f"FAILED (exit {rc})"
             print(f"\n  {name} (pass 2): {status}")
 
-    # Step 2: Run narration (after diagrams — placement can shift narration IDs)
-    print(f"\nStep 2: Narration (sequential)")
-    print("=" * 50)
-
-    # Re-check progress after parallel step
+    # Final narration check (kept for safety — narration is now parallel but verify)
     summary = get_progress_summary(sb, job_id)
     if summary["narration"] < summary["total"]:
-        print("  Starting narration generation...")
+        print("\nNarration catchup...")
         rc = subprocess.call(
             [python, os.path.join(SCRIPT_DIR, "generate_narration.py"), "--job-id", job_id],
             stdout=sys.stdout, stderr=sys.stderr,
         )
         status = "OK" if rc == 0 else f"FAILED (exit {rc})"
-        print(f"\n  narration: {status}")
+        print(f"\n  narration (catchup): {status}")
     else:
         print("  Narration: all done, skipping")
 
