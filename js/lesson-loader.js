@@ -64,6 +64,8 @@
   async function fetchLesson(params) {
     // Join through units -> subjects to get the lesson
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
+    // Staff with Supabase auth can view any lesson — no school_id filter
+    var isStaff = !!localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token');
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(params.subjectSlug));
 
     var unitQuery = sb
@@ -72,13 +74,27 @@
       .eq('slug', params.unitSlug)
       .eq('subjects.slug', params.subjectSlug);
 
-    if (hasBespoke) {
+    if (isStaff) {
+      // Staff: don't filter by school_id — try bespoke first, fall back to generic
+      unitQuery = unitQuery.not('subjects.school_id', 'is', null);
+    } else if (hasBespoke) {
       unitQuery = unitQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
     } else {
       unitQuery = unitQuery.is('subjects.school_id', null);
     }
 
-    var unitResult = await unitQuery.single();
+    var unitResult = await unitQuery.maybeSingle();
+
+    // Staff fallback: if no bespoke found, try generic
+    if (isStaff && (!unitResult.data)) {
+      unitResult = await sb
+        .from('units')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
+        .eq('slug', params.unitSlug)
+        .eq('subjects.slug', params.subjectSlug)
+        .is('subjects.school_id', null)
+        .maybeSingle();
+    }
 
     if (unitResult.error || !unitResult.data) {
       return { error: 'Unit not found' };
