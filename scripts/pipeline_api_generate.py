@@ -619,7 +619,7 @@ def _write_lesson(sb, job_id, job, plan, config, unit_slug, lesson_number, lesso
         "practice_questions": lesson_data.get("practice_questions", []),
         "knowledge_checks": lesson_data.get("knowledge_checks", []),
         "glossary_terms": lesson_data.get("glossary_terms", []),
-        "status": "live",
+        "status": "pending_review",
     }
     if lesson_data.get("description"):
         lesson_record["description"] = lesson_data["description"]
