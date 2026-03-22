@@ -355,7 +355,7 @@
       try {
         // Query the teacher_invitations table to validate the token
         var resp = await sb.from('teacher_invitations')
-          .select('id, email, school_id, status, expires_at, schools(name)')
+          .select('id, email, school_id, accepted_at, expires_at, schools(name)')
           .eq('token', token)
           .single();
 
@@ -367,7 +367,7 @@
         var inv = resp.data;
 
         // Check if already used
-        if (inv.status !== 'pending') {
+        if (inv.accepted_at) {
           errorViewMsg.textContent = 'This invitation has already been used. Please sign in with your existing account.';
           showView(errorView);
           return;
