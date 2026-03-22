@@ -320,10 +320,25 @@
       html += '<h1>Content Review</h1>';
       html += '</div>';
 
+      // Filter summary cards by school
+      var filteredSummary = summaryCache.filter(function (s) {
+        if (!currentSchoolFilter) return true;
+        if (currentSchoolFilter === 'generic') return !s.school_id;
+        return s.school_id === currentSchoolFilter;
+      });
+
+      // Recalculate tab counts from filtered summaries
+      var filteredCounts = { pending_review: 0, ready_for_teacher: 0, live: 0 };
+      filteredSummary.forEach(function (s) {
+        filteredCounts.pending_review += (s.pending_review || 0);
+        filteredCounts.ready_for_teacher += (s.ready_for_teacher || 0);
+        filteredCounts.live += (s.live || 0);
+      });
+
       // Subject summary cards
-      if (summaryCache.length > 0) {
+      if (filteredSummary.length > 0) {
         html += '<div class="subject-summary">';
-        summaryCache.forEach(function (s) {
+        filteredSummary.forEach(function (s) {
           var isActive = currentSubjectId === s.id;
           var schoolLabel = s.school_id ? '' : ' (Generic)';
           html += '<div class="summary-card' + (isActive ? ' active' : '') + '" data-subject-id="' + s.id + '">';
@@ -344,12 +359,12 @@
       // Controls bar: status tabs + subject filter + select all
       html += '<div class="review-controls">';
 
-      // Status tabs
+      // Status tabs — use filtered counts
       html += '<div class="review-tabs">';
       var tabs = [
-        { key: 'pending_review', label: 'Pending Review', count: countsCache.pending_review || 0 },
-        { key: 'ready_for_teacher', label: 'Ready for Teacher', count: countsCache.ready_for_teacher || 0 },
-        { key: 'live', label: 'Live', count: countsCache.live || 0 },
+        { key: 'pending_review', label: 'Pending Review', count: filteredCounts.pending_review },
+        { key: 'ready_for_teacher', label: 'Ready for Teacher', count: filteredCounts.ready_for_teacher },
+        { key: 'live', label: 'Live', count: filteredCounts.live },
         { key: 'all', label: 'All', count: null }
       ];
       tabs.forEach(function (t) {
