@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Teacher Sign In — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #faf8f5;
+      --bg-card: #ffffff;
+      --text: #2d2a26;
+      --text-muted: #6b6560;
+      --text-light: #9a938c;
+      --border: #e8e4df;
+      --border-light: #f0ece7;
+      --accent: #7c3aed;
+      --green: #16a34a;
+      --red: #dc2626;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      background: #1e293b;
+      padding: 0 2rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-logo {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #fff;
+      text-decoration: none;
+    }
+    .header-logo svg { width: 18px; height: 18px; vertical-align: -2px; margin-left: 1px; }
+    .header-home {
+      font-size: 0.82rem;
+      color: #94a3b8;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .header-home:hover { color: #f1f5f9; }
+
+    /* Main */
+    .main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Card */
+    .card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      padding: 2.5rem 2rem 2rem;
+      max-width: 400px;
+      width: 100%;
+      box-shadow: 0 2px 12px rgba(45,42,38,0.07);
+    }
+
+    .card-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 0.25rem;
+    }
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 1rem; }
+    .form-label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+    .form-input {
+      width: 100%;
+      padding: 0.7rem 0.85rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg-card);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
+    }
+
+    .form-error {
+      color: var(--red);
+      font-size: 0.82rem;
+      margin-bottom: 0.75rem;
+      display: none;
+      text-align: center;
+    }
+    .form-error.visible { display: block; }
+
+    .form-success {
+      color: var(--green);
+      font-size: 0.82rem;
+      margin-bottom: 0.75rem;
+      display: none;
+      text-align: center;
+    }
+    .form-success.visible { display: block; }
+
+    .form-btn {
+      width: 100%;
+      padding: 0.7rem;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s;
+      margin-top: 0.25rem;
+    }
+    .form-btn:hover { background: #1a1816; }
+    .form-btn:disabled { opacity: 0.6; cursor: wait; }
+
+    .forgot-link {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .forgot-link:hover { color: var(--text); }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+      color: var(--text-light);
+      font-size: 0.78rem;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light);
+    }
+
+    .signup-link {
+      display: block;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .signup-link a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .signup-link a:hover { text-decoration: underline; }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: var(--text-light);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--text-muted); }
+
+    @media (max-width: 480px) {
+      .card { padding: 2rem 1.5rem 1.75rem; }
+      .header { padding: 0 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <a href="/" class="header-logo">StudyVault<svg viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></a>
+    <a href="/" class="header-home">Back to StudyVault</a>
+  </header>
+
+  <main class="main">
+    <div class="card">
+      <h1 class="card-title">Teacher Sign In</h1>
+      <p class="card-subtitle">Sign in to your teacher account</p>
+
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="email">Email address</label>
+          <input class="form-input" id="email" type="email" placeholder="you@school.ac.uk" autocomplete="email" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" id="password" type="password" placeholder="Your password" autocomplete="current-password" required>
+        </div>
+
+        <div class="form-error" id="errorMsg"></div>
+        <div class="form-success" id="successMsg"></div>
+
+        <button type="submit" class="form-btn" id="submitBtn">Sign in</button>
+      </form>
+
+      <a class="forgot-link" id="forgotLink">Forgot password?</a>
+
+      <div class="divider">or</div>
+
+      <p class="signup-link">Been invited? <a href="/teacher/signup">Sign up here</a></p>
+
+      <a href="/" class="back-link">Back to StudyVault</a>
+    </div>
+  </main>
+
+  <script>
+  (function () {
+    var SB_URL = 'https://baipckgywpnwapobwtsy.supabase.co';
+    var SB_KEY = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+    var sb = window.supabase.createClient(SB_URL, SB_KEY);
+
+    var form = document.getElementById('loginForm');
+    var emailInput = document.getElementById('email');
+    var passwordInput = document.getElementById('password');
+    var errorMsg = document.getElementById('errorMsg');
+    var successMsg = document.getElementById('successMsg');
+    var submitBtn = document.getElementById('submitBtn');
+    var forgotLink = document.getElementById('forgotLink');
+
+    // Check for signup success message in URL
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('signup') === 'success') {
+      showSuccess('Account created successfully. Please sign in.');
+    }
+
+    // Check if already logged in
+    sb.auth.getSession().then(function (res) {
+      if (res.data.session) {
+        verifyTeacher(res.data.session.user.id);
+      }
+    });
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('visible');
+      successMsg.classList.remove('visible');
+    }
+
+    function showSuccess(msg) {
+      successMsg.textContent = msg;
+      successMsg.classList.add('visible');
+      errorMsg.classList.remove('visible');
+    }
+
+    function clearMessages() {
+      errorMsg.classList.remove('visible');
+      successMsg.classList.remove('visible');
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      submitBtn.textContent = loading ? 'Signing in...' : 'Sign in';
+    }
+
+    async function verifyTeacher(userId) {
+      var resp = await sb.from('profiles').select('role, school_id, full_name').eq('id', userId).single();
+      if (resp.data && (resp.data.role === 'teacher' || resp.data.role === 'platform_admin')) {
+        // Store session info for auth-gate compatibility
+        sessionStorage.setItem('studyvault-auth', JSON.stringify({
+          role: resp.data.role,
+          teacher_id: userId,
+          school_id: resp.data.school_id,
+          full_name: resp.data.full_name
+        }));
+        window.location.href = '/teacher/dashboard';
+        return true;
+      }
+      return false;
+    }
+
+    form.addEventListener('submit', async function (e) {
+      e.preventDefault();
+      clearMessages();
+      setLoading(true);
+
+      var email = emailInput.value.trim();
+      var password = passwordInput.value;
+
+      if (!email || !password) {
+        showError('Please enter your email and password.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        var result = await sb.auth.signInWithPassword({ email: email, password: password });
+
+        if (result.error) {
+          showError(result.error.message);
+          setLoading(false);
+          passwordInput.select();
+          return;
+        }
+
+        // Verify they have a teacher or admin role
+        var profile = await sb.from('profiles').select('role, school_id, full_name').eq('id', result.data.user.id).single();
+
+        if (!profile.data || (profile.data.role !== 'teacher' && profile.data.role !== 'platform_admin')) {
+          showError('This account is not a teacher account.');
+          await sb.auth.signOut();
+          setLoading(false);
+          return;
+        }
+
+        // Store session info for auth-gate compatibility
+        sessionStorage.setItem('studyvault-auth', JSON.stringify({
+          role: profile.data.role,
+          teacher_id: result.data.user.id,
+          school_id: profile.data.school_id,
+          full_name: profile.data.full_name
+        }));
+
+        window.location.href = '/teacher/dashboard';
+      } catch (err) {
+        showError('Connection error. Please try again.');
+        setLoading(false);
+      }
+    });
+
+    // Forgot password
+    forgotLink.addEventListener('click', async function () {
+      clearMessages();
+      var email = emailInput.value.trim();
+
+      if (!email) {
+        showError('Enter your email address above, then click "Forgot password?"');
+        emailInput.focus();
+        return;
+      }
+
+      forgotLink.style.pointerEvents = 'none';
+      forgotLink.style.opacity = '0.5';
+      forgotLink.textContent = 'Sending...';
+
+      try {
+        var result = await sb.auth.resetPasswordForEmail(email, {
+          redirectTo: window.location.origin + '/teacher/login'
+        });
+
+        if (result.error) {
+          showError(result.error.message);
+        } else {
+          showSuccess('Password reset email sent. Check your inbox.');
+        }
+      } catch (err) {
+        showError('Could not send reset email. Try again.');
+      }
+
+      forgotLink.style.pointerEvents = '';
+      forgotLink.style.opacity = '';
+      forgotLink.textContent = 'Forgot password?';
+    });
+  })();
+  </script>
+
+</body>
+</html>

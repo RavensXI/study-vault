@@ -46,7 +46,13 @@ module.exports = async (req, res) => {
   }
 
   if (process.env.TEACHER_PASSWORD && password === process.env.TEACHER_PASSWORD) {
-    return res.json({ role: 'teacher' });
+    // Look up default school for shared teacher password (Unity College)
+    const { data: school } = await supabase
+      .from('schools')
+      .select('id')
+      .eq('slug', 'unity-college')
+      .single();
+    return res.json({ role: 'teacher', school_id: school ? school.id : null });
   }
 
   return res.status(401).json({ error: 'Incorrect password' });

@@ -306,15 +306,79 @@
     }
 
     // ================================================================
+    //  AUTH CONTEXT — school_id scoping for editors
+    // ================================================================
+    var _authContext = null;
+    async function getAuthContext() {
+      if (_authContext) return _authContext;
+
+      // 1. Check for Supabase Auth session (teacher email/password login)
+      var sessionResult = await sb.auth.getSession();
+      if (sessionResult.data.session) {
+        var userId = sessionResult.data.session.user.id;
+        var profileResult = await sb.from('profiles')
+          .select('id, role, school_id')
+          .eq('id', userId)
+          .single();
+        var profile = profileResult.data;
+        if (profile) {
+          var tsResult = await sb.from('teacher_subjects')
+            .select('subject_id')
+            .eq('teacher_id', profile.id);
+          var subjectIds = (tsResult.data || []).map(function (ts) { return ts.subject_id; });
+          _authContext = {
+            type: 'supabase',
+            role: profile.role,
+            school_id: profile.school_id,
+            subject_ids: subjectIds,
+            is_admin: profile.role === 'platform_admin'
+          };
+          return _authContext;
+        }
+      }
+
+      // 2. Fall back to sessionStorage (shared password auth via auth-gate)
+      var stored = {};
+      try { stored = JSON.parse(sessionStorage.getItem('studyvault-auth') || '{}'); } catch (e) {}
+      _authContext = {
+        type: 'legacy',
+        role: stored.role || 'unknown',
+        school_id: stored.school_id || null,
+        subject_ids: [],
+        is_admin: stored.role === 'admin'
+      };
+      return _authContext;
+    }
+
+    // ================================================================
     //  LESSON PICKER
     // ================================================================
     async function loadSubjects() {
       await getAuth();
-      var result = await sb.from('subjects').select('id, slug, name').eq('status', 'live').order('name');
+      var auth = await getAuthContext();
+      var query = sb.from('subjects').select('id, slug, name, school_id').eq('status', 'live');
+
+      if (auth.is_admin) {
+        // Admin sees everything — no filter
+      } else if (auth.school_id) {
+        // Teacher sees their school's subjects + generic (school_id NULL)
+        query = query.or('school_id.eq.' + auth.school_id + ',school_id.is.null');
+      }
+
+      // If teacher has specific subject assignments, further restrict
+      if (!auth.is_admin && auth.subject_ids.length > 0) {
+        query = query.in('id', auth.subject_ids);
+      }
+
+      var result = await query.order('name');
       var subjects = result.data || [];
       pickSubject.innerHTML = '<option value="">Subject...</option>';
       subjects.forEach(function (s) {
-        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + esc(s.name) + '</option>';
+        var label = esc(s.name);
+        // Show school scope hint for admins when subjects appear from multiple schools
+        if (auth.is_admin && s.school_id) label += ' (school)';
+        else if (auth.is_admin && !s.school_id) label += ' (generic)';
+        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + label + '</option>';
       });
       // Auto-select from URL params
       var params = new URLSearchParams(window.location.search);
