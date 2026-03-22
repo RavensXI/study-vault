@@ -232,7 +232,7 @@ Each object MUST have `category` (string), `emoji` (HTML entity), and `items` (a
 - Podcasts (search Spotify for specific episodes, not just channels).
 - Don't settle for only BBC Bitesize + Seneca + YouTube — push for varied, engaging content.
 
-**Hero images:** Alt text should be descriptive (not just the lesson title). `download_heroes.py` now cleans the Wikimedia filename into a readable caption.
+**Hero images:** `download_heroes.py` checks the hero image index (`data/hero-image-index.json`) first for reusable images before searching Unsplash/Wikimedia. Matches scoring ≥4 are reused directly (no download). New images are automatically added to the index after upload. Use `--no-reuse` to force fresh searches. Alt text should be descriptive (not just the lesson title).
 
 **Diagrams:** No figcaption needed — alt text is sufficient. `generate_diagrams.py` no longer adds captions.
 
@@ -241,7 +241,7 @@ Each object MUST have `category` (string), `emoji` (HTML entity), and `items` (a
 ### Manual Scripts (for individual reruns)
 ```bash
 python scripts/generate_diagrams.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
-python scripts/download_heroes.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
+python scripts/download_heroes.py --job-id <uuid> [--lessons 1,2,3] [--dry-run] [--no-reuse]
 python scripts/generate_narration.py --job-id <uuid> [--lessons 1,2,3] [--dry-run]
 ```
 
@@ -260,6 +260,16 @@ This means:
 - Do NOT write generic revision content — students can get that anywhere
 
 If a lesson's source material is thin, flag it rather than padding with generic content.
+
+### Language Subjects (French, German, Spanish)
+
+Language subject content has an additional requirement: **all foreign-language text MUST be wrapped in `<em>` or `<strong>` HTML tags**. This is how the narration pipeline auto-detects phrases that need SSML `<lang>` wrapping for correct pronunciation.
+
+- Use `<em>` for foreign sentences and phrases (e.g. `<em>Je m'appelle Claude</em>`)
+- Use `<strong>` for individual vocabulary words (e.g. `<strong>le chien</strong>`)
+- The `generate_narration.py` script checks the subject slug against `SUBJECT_LANG_CODES` in `scripts/lib/narration.py` and automatically applies the correct language code (`fr-FR`, `de-DE`, `es-ES`)
+- No manual SSML editing is needed — the pipeline handles everything if the HTML tags are correct
+- Content agents generating language lessons must be explicitly told to use `<em>` and `<strong>` for foreign text
 
 ---
 

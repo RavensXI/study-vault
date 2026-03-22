@@ -58,6 +58,8 @@ SUBJECT_ORDER = [
     "french",
     "creative-imedia",
     "maths",
+    "health-social-care",
+    "hospitality-catering",
 ]
 
 # ── CLI env to avoid Windows encoding crashes ───────────────────────────

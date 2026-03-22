@@ -1,14 +1,16 @@
 """
 Subject-agnostic hero image downloader.
 
-Queries pipeline_steps for lessons needing hero images, searches Wikimedia
-Commons using hero_keywords, downloads + compresses, uploads to R2, and
-updates Supabase lesson records.
+Queries pipeline_steps for lessons needing hero images. First checks the
+hero image index for reusable existing images; if no match, searches
+Unsplash/Wikimedia Commons, downloads + compresses, uploads to R2, updates
+Supabase, and adds the new image to the index for future reuse.
 
 Usage:
     python scripts/download_heroes.py --job-id <uuid>
     python scripts/download_heroes.py --job-id <uuid> --lessons 1,2,3
     python scripts/download_heroes.py --job-id <uuid> --dry-run
+    python scripts/download_heroes.py --job-id <uuid> --no-reuse   # skip index lookup
 """
 
 import argparse
@@ -53,17 +55,24 @@ from lib.pipeline import (
     get_job_subject_slug,
     get_progress_summary,
 )
+from lib.hero_index import search_heroes, add_to_index
+
+# Minimum index score to consider a reuse match (avoids weak single-word matches)
+REUSE_MIN_SCORE = 4
 
 
-def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
-    """Process a single lesson: search Wikimedia, download, compress, upload, update DB.
+def process_lesson(sb, r2_client, step, subject_slug, dry_run=False, allow_reuse=True):
+    """Process a single lesson: check index for reuse, else search Unsplash/Wikimedia,
+    download, compress, upload, update DB, and add to index.
 
     Returns True on success, False on failure.
     """
     lesson_id = step["lesson_id"]
     unit_slug = step["unit_slug"]
+    unit_name = step.get("unit_name", unit_slug)
     lesson_number = step["lesson_number"]
     lesson_title = step["lesson_title"]
+    lesson_description = step.get("lesson_description", "")
     label = f"{subject_slug}/{unit_slug}/lesson-{lesson_number:02d}"
 
     print(f"\n{'=' * 60}")
@@ -77,7 +86,35 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
         hero_keywords = [lesson_title]
         print(f"  No hero_keywords stored — using lesson title as search query")
 
-    # Search for hero image — try Unsplash first (higher quality), Wikimedia fallback
+    # --- Step 1: Check hero image index for reusable match ---
+    if allow_reuse:
+        reuse_query = " ".join(hero_keywords)
+        reuse_results = search_heroes(reuse_query, limit=3, min_score=REUSE_MIN_SCORE)
+        if reuse_results:
+            best = reuse_results[0]
+            print(f"  INDEX MATCH (score {best['score']}): {best['title']} ({best['subject']}/{best['unit']})")
+            print(f"    URL: {best['hero_url'][:80]}...")
+
+            if dry_run:
+                print(f"  [DRY RUN] Would reuse existing image")
+                return True
+
+            # Reuse the existing image URL directly — no download needed
+            alt_text = f"{lesson_title}"
+            caption = f"Image from {best['title']}"
+
+            print(f"  Reusing existing hero image — no download needed")
+            sb.table("lessons").update({
+                "hero_image_url": best["hero_url"],
+                "hero_image_alt": alt_text,
+                "hero_image_caption": caption,
+            }).eq("id", lesson_id).execute()
+            print(f"  Done! (reused from {best['subject']}/{best['unit']})")
+            return True
+        else:
+            print(f"  No reusable image in index (best score < {REUSE_MIN_SCORE})")
+
+    # --- Step 2: Search Unsplash / Wikimedia ---
     chosen = None
     for i, query in enumerate(hero_keywords):
         if i > 0:
@@ -176,7 +213,22 @@ def process_lesson(sb, r2_client, step, subject_slug, dry_run=False):
             "hero_image_alt": alt_text,
             "hero_image_caption": caption,
         }).eq("id", lesson_id).execute()
-        print(f"  Done!")
+
+        # Add to hero image index for future reuse
+        # Look up subject name for better tags
+        subj_result = sb.table("subjects").select("name").eq("slug", subject_slug).limit(1).execute()
+        subject_name = subj_result.data[0]["name"] if subj_result.data else subject_slug
+        add_to_index(
+            title=lesson_title,
+            description=lesson_description,
+            subject_slug=subject_slug,
+            subject_name=subject_name,
+            unit_slug=unit_slug,
+            unit_name=unit_name,
+            lesson_slug=step.get("lesson_slug", ""),
+            hero_url=r2_url,
+        )
+        print(f"  Done! (added to hero index)")
 
     return True
 
@@ -186,6 +238,7 @@ def main():
     parser.add_argument("--job-id", required=True, help="Upload job UUID")
     parser.add_argument("--lessons", help="Comma-separated lesson numbers to process (default: all pending)")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be processed without downloading")
+    parser.add_argument("--no-reuse", action="store_true", help="Skip hero index lookup, always search fresh")
     args = parser.parse_args()
 
     sb = get_client()
@@ -217,7 +270,7 @@ def main():
 
     for step in pending:
         try:
-            ok = process_lesson(sb, r2_client, step, subject_slug, args.dry_run)
+            ok = process_lesson(sb, r2_client, step, subject_slug, args.dry_run, allow_reuse=not args.no_reuse)
             if ok:
                 success += 1
                 if not args.dry_run:

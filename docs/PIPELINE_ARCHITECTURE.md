@@ -86,11 +86,17 @@ Diagram is placed at a content-relevant location in the HTML (not always at the 
 
 **Input:** Lesson title, topic keywords
 **Output:** One hero image per lesson (JPEG on R2)
-**Source:** Wikimedia Commons API (real photographs only, never AI-generated)
-**Duration:** ~10-20s per lesson (download + compress)
+**Source:** Hero image index (reuse) → Unsplash → Wikimedia Commons fallback
+**Duration:** ~0s per reuse, ~10-20s per fresh download
 **Runs in parallel with:** Diagrams, related media
 
-Search Wikimedia for landscape photographs relevant to the lesson topic. Download with User-Agent header, 3-5s delays between requests. Verify >50KB. Save attribution. Default position: `object-position: center 50%`. ~30% will need manual position tweaks by Tom during QA.
+**Reuse-first strategy:** Before searching externally, the script checks `data/hero-image-index.json` — a tagged index of all 696+ existing hero images. If a match scores ≥4 (multiple keyword hits), the existing URL is reused directly with no download. This saves API calls and ensures visual consistency across related subjects.
+
+If no reuse match, search Unsplash first (higher quality), then Wikimedia Commons as fallback. Download with User-Agent header, 3-5s delays between requests. Verify >50KB. Save attribution. After uploading a new image to R2, it's automatically added to the hero index with auto-generated keyword tags for future reuse.
+
+**Index library:** `scripts/lib/hero_index.py` — `search_heroes(query)`, `add_to_index(...)`.
+**Flag:** `--no-reuse` skips index lookup and always searches fresh.
+Default position: `object-position: center 50%`. ~30% will need manual position tweaks by Tom during QA.
 
 ### Step 5: Related Media
 
