@@ -88,10 +88,11 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user_created
 -- 5. ADD QA TRACKING COLUMNS TO lessons
 -- ============================================================
 
-ALTER TABLE lessons ADD COLUMN IF NOT EXISTS reviewed_by   uuid REFERENCES profiles(id);
-ALTER TABLE lessons ADD COLUMN IF NOT EXISTS reviewed_at   timestamptz;
-ALTER TABLE lessons ADD COLUMN IF NOT EXISTS published_by  uuid REFERENCES profiles(id);
-ALTER TABLE lessons ADD COLUMN IF NOT EXISTS published_at  timestamptz;
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS reviewed_by      uuid REFERENCES profiles(id);
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS reviewed_at      timestamptz;
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS published_by     uuid REFERENCES profiles(id);
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS published_at     timestamptz;
+ALTER TABLE lessons ADD COLUMN IF NOT EXISTS rejection_notes  text;
 
 -- ============================================================
 -- 6. HELPER FUNCTIONS

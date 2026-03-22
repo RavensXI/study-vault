@@ -98,6 +98,22 @@
       return { error: 'Lesson not found' };
     }
 
+    // Block non-live lessons for students (admins/teachers can preview)
+    if (lessonResult.data.status !== 'live') {
+      var isStaff = false;
+      try {
+        var authSession = JSON.parse(sessionStorage.getItem('studyvault-auth'));
+        if (authSession && ['platform_admin', 'teacher', 'school_admin'].indexOf(authSession.role) !== -1) {
+          isStaff = true;
+        }
+      } catch (e) {}
+      if (!isStaff) {
+        return { error: 'This lesson is not yet available' };
+      }
+      // Mark as preview for staff
+      lessonResult.data._isPreview = true;
+    }
+
     // Get prev/next lessons
     var siblingsResult = await sb
       .from('lessons')
@@ -285,6 +301,17 @@
     // Show the page
     loadingEl.style.display = 'none';
     pageEl.style.display = '';
+
+    // Show preview banner for non-live lessons (staff only)
+    if (lesson._isPreview) {
+      var statusLabel = lesson.status === 'pending_review' ? 'Pending Review'
+        : lesson.status === 'ready_for_teacher' ? 'Ready for Teacher'
+        : lesson.status || 'Draft';
+      var banner = document.createElement('div');
+      banner.style.cssText = 'position:sticky;top:56px;z-index:999;background:#fef3c7;color:#92400e;padding:0.6rem 1.25rem;font-size:0.85rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.08);';
+      banner.textContent = 'Preview Mode \u2014 Status: ' + statusLabel + ' (not visible to students)';
+      pageEl.insertBefore(banner, pageEl.firstChild);
+    }
 
     // Inject ad placeholders — show for free users and school students on non-subscribed subjects
     var subjectSlug = params.subjectSlug;

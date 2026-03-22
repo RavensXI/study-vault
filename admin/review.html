@@ -8,54 +8,121 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
-  <script src="/js/auth-gate.js" data-role="admin"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/auth-gate.js" data-role="admin,teacher" data-auth="teacher"></script>
   <style>
-    .review-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
-    .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .review-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
-    .review-stats { display: flex; gap: 1.5rem; font-size: 0.875rem; color: var(--text-muted); }
-    .review-stat { display: flex; align-items: center; gap: 0.35rem; }
-    .review-stat-num { font-weight: 700; font-size: 1.1rem; color: var(--text-color); }
+    :root { --bg-warm: #faf8f5; --text-color: #2d2a26; --text-muted: #6b6560; }
 
-    .review-filters { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
-    .review-filter { padding: 0.4rem 1rem; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.82rem; transition: all 0.15s; }
-    .review-filter.active { background: var(--text-color); color: white; border-color: var(--text-color); }
+    .review-layout { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.5rem 6rem; }
 
-    .review-queue { display: flex; flex-direction: column; gap: 1rem; }
-    .review-card { background: white; border-radius: 12px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); overflow: hidden; transition: box-shadow 0.15s; }
-    .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
-    .review-card-header { padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f0ede8; }
-    .review-card-info h3 { font-family: 'Source Serif 4', serif; font-size: 1.05rem; margin: 0 0 0.25rem; }
-    .review-card-meta { font-size: 0.78rem; color: var(--text-muted); }
-    .review-card-actions { display: flex; gap: 0.5rem; }
+    /* ---- Header ---- */
+    .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
+    .review-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; color: var(--text-color); }
 
-    .review-btn { padding: 0.4rem 1rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.82rem; font-weight: 600; transition: all 0.15s; }
-    .review-btn--preview { background: #eef2ff; color: #4f46e5; }
-    .review-btn--preview:hover { background: #e0e7ff; }
-    .review-btn--approve { background: #dcfce7; color: #16a34a; }
-    .review-btn--approve:hover { background: #bbf7d0; }
-    .review-btn--reject { background: #fef2f2; color: #dc2626; }
-    .review-btn--reject:hover { background: #fee2e2; }
+    /* ---- Subject Summary Cards ---- */
+    .subject-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .summary-card { background: white; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; border: 2px solid transparent; }
+    .summary-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
+    .summary-card.active { border-color: var(--text-color); }
+    .summary-card-name { font-weight: 600; font-size: 0.85rem; color: var(--text-color); }
+    .summary-card-school { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .summary-card-counts { display: flex; gap: 0.6rem; font-size: 0.72rem; }
+    .summary-count { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
+    .summary-count-num { font-weight: 700; font-size: 0.95rem; }
+    .summary-count-label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.6rem; }
+    .summary-count--pending .summary-count-num { color: #d97706; }
+    .summary-count--ready .summary-count-num { color: #2563eb; }
+    .summary-count--live .summary-count-num { color: #16a34a; }
 
-    .status-badge { display: inline-block; padding: 0.15rem 0.6rem; border-radius: 10px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    /* ---- Filters Bar ---- */
+    .review-controls { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
+    .review-tabs { display: flex; gap: 0.35rem; }
+    .review-tab { padding: 0.4rem 0.9rem; border-radius: 20px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.15s; font-family: inherit; }
+    .review-tab.active { background: var(--text-color); color: white; border-color: var(--text-color); }
+    .review-tab:hover:not(.active) { background: #f5f3ff; border-color: #c4b5fd; }
+    .review-tab .tab-count { font-weight: 700; margin-left: 0.2rem; }
+
+    .subject-filter { padding: 0.4rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.8rem; font-family: inherit; background: white; cursor: pointer; }
+    .subject-filter:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.12); }
+
+    .review-select-all { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--text-muted); cursor: pointer; margin-left: auto; }
+    .review-select-all input { cursor: pointer; }
+
+    /* ---- Lesson Grid ---- */
+    .review-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.85rem; }
+    .review-card { background: white; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); overflow: hidden; transition: box-shadow 0.15s, border-color 0.15s; border: 2px solid transparent; position: relative; }
+    .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
+    .review-card.selected { border-color: #7c3aed; background: #faf8ff; }
+
+    .review-card-hero { width: 100%; height: 120px; object-fit: cover; display: block; background: #f0ede8; }
+    .review-card-hero--placeholder { display: flex; align-items: center; justify-content: center; color: #c4b5a8; font-size: 0.75rem; height: 120px; background: linear-gradient(135deg, #f5f0eb 0%, #ede8e2 100%); }
+
+    .review-card-body { padding: 0.75rem 0.9rem 0.85rem; }
+    .review-card-title { font-family: 'Source Serif 4', serif; font-size: 0.95rem; font-weight: 600; margin: 0 0 0.3rem; color: var(--text-color); line-height: 1.3; }
+    .review-card-meta { font-size: 0.72rem; color: var(--text-muted); display: flex; flex-wrap: wrap; gap: 0.3rem; align-items: center; }
+    .review-card-meta .dot { opacity: 0.4; }
+
+    .review-card-footer { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0.9rem; border-top: 1px solid #f0ede8; }
+    .review-card-actions { display: flex; gap: 0.35rem; }
+
+    .review-card-check { position: absolute; top: 8px; left: 8px; z-index: 2; width: 20px; height: 20px; cursor: pointer; accent-color: #7c3aed; }
+
+    /* ---- Status Badges ---- */
+    .status-badge { display: inline-block; padding: 0.12rem 0.55rem; border-radius: 10px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    .status-pending_review { background: #fef3c7; color: #92400e; }
+    .status-ready_for_teacher { background: #dbeafe; color: #1e40af; }
+    .status-live { background: #dcfce7; color: #166534; }
     .status-draft { background: #f3f4f6; color: #6b7280; }
     .status-review { background: #fef3c7; color: #92400e; }
     .status-approved { background: #d1fae5; color: #065f46; }
-    .status-live { background: #dbeafe; color: #1d4ed8; }
 
+    /* ---- Buttons ---- */
+    .btn { padding: 0.35rem 0.75rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.15s; font-family: inherit; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-sm { padding: 0.25rem 0.6rem; font-size: 0.7rem; }
+    .btn-preview { background: #eef2ff; color: #4f46e5; }
+    .btn-preview:hover:not(:disabled) { background: #e0e7ff; }
+    .btn-approve { background: #dcfce7; color: #16a34a; }
+    .btn-approve:hover:not(:disabled) { background: #bbf7d0; }
+    .btn-publish { background: #dbeafe; color: #1d4ed8; }
+    .btn-publish:hover:not(:disabled) { background: #bfdbfe; }
+    .btn-reject { background: #fef2f2; color: #dc2626; }
+    .btn-reject:hover:not(:disabled) { background: #fee2e2; }
+    .btn-edit { background: #f5f3ff; color: #7c3aed; }
+    .btn-edit:hover:not(:disabled) { background: #ede9fe; }
+
+    /* ---- Batch Action Bar ---- */
+    .batch-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 2px solid #e5e7eb; padding: 0.75rem 1.5rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; z-index: 100; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
+    .batch-bar.visible { transform: translateY(0); }
+    .batch-bar-count { font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
+    .batch-bar-count span { color: #7c3aed; }
+
+    /* ---- Empty State ---- */
     .review-empty { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
     .review-empty svg { width: 48px; height: 48px; margin-bottom: 1rem; opacity: 0.3; }
+    .review-empty p { font-size: 0.9rem; }
 
-    .review-preview-banner { background: #fef3c7; color: #92400e; padding: 0.75rem 1.25rem; font-size: 0.875rem; font-weight: 600; text-align: center; border-bottom: 2px solid #f59e0b; }
+    /* ---- Reject Modal ---- */
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-box { background: white; border-radius: 16px; padding: 1.75rem; max-width: 480px; width: 90%; box-shadow: 0 8px 30px rgba(0,0,0,0.15); }
+    .modal-box h3 { margin: 0 0 0.75rem; font-family: 'Source Serif 4', serif; font-size: 1.15rem; }
+    .modal-box p { font-size: 0.82rem; color: var(--text-muted); margin: 0 0 0.75rem; }
+    .modal-box textarea { width: 100%; min-height: 100px; padding: 0.65rem; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.85rem; resize: vertical; box-sizing: border-box; }
+    .modal-box textarea:focus { outline: none; border-color: #7c3aed; box-shadow: 0 0 0 2px rgba(124,58,237,0.12); }
+    .modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
 
-    .reject-modal { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-    .reject-modal-inner { background: white; border-radius: 16px; padding: 2rem; max-width: 480px; width: 90%; }
-    .reject-modal h3 { margin: 0 0 1rem; font-family: 'Source Serif 4', serif; }
-    .reject-modal textarea { width: 100%; min-height: 100px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-family: inherit; font-size: 0.875rem; resize: vertical; }
-    .reject-modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }
+    /* ---- Loading ---- */
+    .review-loading { text-align: center; padding: 4rem; color: var(--text-muted); font-size: 0.9rem; }
 
-    .review-loading { text-align: center; padding: 4rem; color: var(--text-muted); }
+    /* ---- Toast ---- */
+    .toast { position: fixed; bottom: 5.5rem; left: 50%; transform: translateX(-50%); background: var(--text-color); color: white; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.82rem; font-weight: 600; z-index: 200; box-shadow: 0 4px 16px rgba(0,0,0,0.15); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+    .toast.visible { opacity: 1; }
+
+    @media (max-width: 640px) {
+      .review-grid { grid-template-columns: 1fr; }
+      .subject-summary { grid-template-columns: 1fr 1fr; }
+      .review-header { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
@@ -80,8 +147,20 @@
   </header>
 
   <div class="review-layout" id="review-app">
-    <div class="review-loading" id="review-loading">Loading review queue...</div>
+    <div class="review-loading" id="review-loading">Loading review dashboard...</div>
   </div>
+
+  <!-- Batch action bar (hidden by default) -->
+  <div class="batch-bar" id="batch-bar">
+    <span class="batch-bar-count"><span id="batch-count">0</span> selected</span>
+    <button class="btn btn-approve" id="batch-approve">Approve Selected</button>
+    <button class="btn btn-publish" id="batch-publish">Publish Selected</button>
+    <button class="btn btn-reject" id="batch-reject">Reject Selected</button>
+    <button class="btn" id="batch-clear" style="background:#f3f4f6;color:var(--text-muted)">Clear</button>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
 
   <script>
   (function () {
@@ -93,217 +172,532 @@
     );
 
     var app = document.getElementById('review-app');
-    var loadingEl = document.getElementById('review-loading');
-    var currentFilter = 'review';
-    var accessToken = null;
-    var demoUser = null;
+    var batchBar = document.getElementById('batch-bar');
+    var toastEl = document.getElementById('toast');
+
+    // State
+    var currentStatus = 'pending_review';
+    var currentSubjectId = '';
+    var selectedIds = new Set();
+    var lessonsCache = [];
+    var subjectsCache = [];
+    var summaryCache = [];
+    var countsCache = {};
 
     // ---- Auth ----
-    async function checkAdmin() {
-      var result = await sb.auth.getSession();
-      if (result.data.session) {
-        accessToken = result.data.session.access_token;
-        return true;
+    function getAuthHeaders() {
+      var headers = { 'Content-Type': 'application/json' };
+      // Check for admin password in sessionStorage
+      var session = null;
+      try { session = JSON.parse(sessionStorage.getItem('studyvault-auth')); } catch (e) {}
+      if (session && session.pw) {
+        headers['X-Admin-Password'] = session.pw;
       }
-      try {
-        var stored = localStorage.getItem('studyvault-user');
-        if (stored) {
-          var u = JSON.parse(stored);
-          if (u && u.isDemo && (u.id === 'emma' || u.id === 'jake')) {
-            demoUser = u.id;
-            return true;
-          }
-        }
-      } catch (e) {}
-      return false;
+      return headers;
     }
 
-    // ---- API helper (uses service key server-side, bypasses RLS) ----
-    async function apiCall(endpoint, body) {
-      var headers = { 'Content-Type': 'application/json' };
-      if (accessToken) {
-        headers['Authorization'] = 'Bearer ' + accessToken;
-      } else if (demoUser) {
-        headers['X-Demo-User'] = demoUser;
-      }
-      var opts = { headers: headers };
-      if (body !== undefined) {
-        opts.method = 'POST';
-        opts.body = JSON.stringify(body);
-      }
-      var resp = await fetch(endpoint, opts);
+    async function getAccessToken() {
+      var result = await sb.auth.getSession();
+      if (result.data.session) return result.data.session.access_token;
+      return null;
+    }
+
+    // ---- API helpers ----
+    async function apiGet(params) {
+      var headers = getAuthHeaders();
+      var token = await getAccessToken();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      var qs = new URLSearchParams(params).toString();
+      var resp = await fetch('/api/pipeline/review?' + qs, { headers: headers });
       var data = await resp.json();
       if (!resp.ok) throw new Error(data.error || 'API error');
       return data;
     }
 
-    // ---- Fetch review queue + counts via API ----
-    async function fetchData(statusFilter) {
-      var url = '/api/pipeline/review?filter=' + (statusFilter || 'review');
-      return await apiCall(url);
+    async function apiPost(body) {
+      var headers = getAuthHeaders();
+      var token = await getAccessToken();
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      var resp = await fetch('/api/pipeline/review', {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+      });
+      var data = await resp.json();
+      if (!resp.ok) throw new Error(data.error || 'API error');
+      return data;
     }
 
-    // ---- Approve lesson via API ----
-    async function approveLessonAction(lessonId) {
-      await apiCall('/api/pipeline/review', { lesson_id: lessonId, action: 'approve' });
-      await renderApp();
+    // ---- Toast ----
+    var toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('visible');
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove('visible'); }, 3000);
     }
 
-    // ---- Reject lesson via API ----
-    async function rejectLessonAction(lessonId, notes) {
-      await apiCall('/api/pipeline/review', { lesson_id: lessonId, action: 'reject', notes: notes });
-      await renderApp();
+    // ---- Selection ----
+    function updateBatchBar() {
+      var count = selectedIds.size;
+      document.getElementById('batch-count').textContent = count;
+
+      // Show/hide specific buttons based on what's selected
+      var statuses = new Set();
+      lessonsCache.forEach(function (l) {
+        if (selectedIds.has(l.id)) statuses.add(l.status);
+      });
+
+      document.getElementById('batch-approve').style.display =
+        statuses.has('pending_review') ? '' : 'none';
+      document.getElementById('batch-publish').style.display =
+        statuses.has('ready_for_teacher') ? '' : 'none';
+      document.getElementById('batch-reject').style.display =
+        (statuses.has('ready_for_teacher') || statuses.has('pending_review')) ? '' : 'none';
+
+      if (count > 0) {
+        batchBar.classList.add('visible');
+      } else {
+        batchBar.classList.remove('visible');
+      }
     }
 
-    // ---- Show reject modal ----
-    function showRejectModal(lessonId, title) {
+    function toggleSelection(id) {
+      if (selectedIds.has(id)) {
+        selectedIds.delete(id);
+      } else {
+        selectedIds.add(id);
+      }
+      updateBatchBar();
+      // Update checkbox state
+      var cb = document.querySelector('.review-card-check[data-id="' + id + '"]');
+      if (cb) cb.checked = selectedIds.has(id);
+      var card = cb ? cb.closest('.review-card') : null;
+      if (card) card.classList.toggle('selected', selectedIds.has(id));
+    }
+
+    function selectAll(checked) {
+      lessonsCache.forEach(function (l) {
+        if (checked) {
+          selectedIds.add(l.id);
+        } else {
+          selectedIds.delete(l.id);
+        }
+      });
+      document.querySelectorAll('.review-card-check').forEach(function (cb) {
+        cb.checked = checked;
+        var card = cb.closest('.review-card');
+        if (card) card.classList.toggle('selected', checked);
+      });
+      updateBatchBar();
+    }
+
+    // ---- Fetch data ----
+    async function fetchData() {
+      var params = {};
+      if (currentStatus && currentStatus !== 'all') params.status = currentStatus;
+      if (currentSubjectId) params.subject_id = currentSubjectId;
+
+      var data = await apiGet(params);
+      lessonsCache = data.lessons || [];
+      subjectsCache = data.subjects || [];
+      summaryCache = data.subjectSummary || [];
+      countsCache = data.counts || {};
+      return data;
+    }
+
+    // ---- Render ----
+    function renderDashboard() {
+      var html = '';
+
+      // Header
+      html += '<div class="review-header">';
+      html += '<h1>Content Review</h1>';
+      html += '</div>';
+
+      // Subject summary cards
+      if (summaryCache.length > 0) {
+        html += '<div class="subject-summary">';
+        summaryCache.forEach(function (s) {
+          var isActive = currentSubjectId === s.id;
+          var schoolLabel = s.school_id ? '' : ' (Generic)';
+          html += '<div class="summary-card' + (isActive ? ' active' : '') + '" data-subject-id="' + s.id + '">';
+          html += '<div>';
+          html += '<div class="summary-card-name">' + esc(s.name) + '</div>';
+          if (schoolLabel) html += '<div class="summary-card-school">' + schoolLabel + '</div>';
+          html += '</div>';
+          html += '<div class="summary-card-counts">';
+          html += '<div class="summary-count summary-count--pending"><span class="summary-count-num">' + (s.pending_review || 0) + '</span><span class="summary-count-label">Pending</span></div>';
+          html += '<div class="summary-count summary-count--ready"><span class="summary-count-num">' + (s.ready_for_teacher || 0) + '</span><span class="summary-count-label">Ready</span></div>';
+          html += '<div class="summary-count summary-count--live"><span class="summary-count-num">' + (s.live || 0) + '</span><span class="summary-count-label">Live</span></div>';
+          html += '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      // Controls bar: status tabs + subject filter + select all
+      html += '<div class="review-controls">';
+
+      // Status tabs
+      html += '<div class="review-tabs">';
+      var tabs = [
+        { key: 'pending_review', label: 'Pending Review', count: countsCache.pending_review || 0 },
+        { key: 'ready_for_teacher', label: 'Ready for Teacher', count: countsCache.ready_for_teacher || 0 },
+        { key: 'live', label: 'Live', count: countsCache.live || 0 },
+        { key: 'all', label: 'All', count: null }
+      ];
+      tabs.forEach(function (t) {
+        var active = currentStatus === t.key ? ' active' : '';
+        var countHtml = t.count !== null ? '<span class="tab-count">(' + t.count + ')</span>' : '';
+        html += '<button class="review-tab' + active + '" data-status="' + t.key + '">' + t.label + countHtml + '</button>';
+      });
+      html += '</div>';
+
+      // Subject filter dropdown
+      html += '<select class="subject-filter" id="subject-filter">';
+      html += '<option value="">All Subjects</option>';
+      subjectsCache.forEach(function (s) {
+        var sel = currentSubjectId === s.id ? ' selected' : '';
+        var schoolLabel = s.school_id ? '' : ' (Generic)';
+        html += '<option value="' + s.id + '"' + sel + '>' + esc(s.name) + schoolLabel + '</option>';
+      });
+      html += '</select>';
+
+      // Batch approve all button (for current status + subject)
+      if (currentStatus === 'pending_review') {
+        var approveLabel = currentSubjectId ? 'Approve All in Subject' : 'Approve All Pending';
+        html += '<button class="btn btn-approve" id="approve-all-btn">' + approveLabel + '</button>';
+      }
+      if (currentStatus === 'ready_for_teacher') {
+        var publishLabel = currentSubjectId ? 'Publish All in Subject' : 'Publish All Ready';
+        html += '<button class="btn btn-publish" id="publish-all-btn">' + publishLabel + '</button>';
+      }
+
+      // Select all
+      html += '<label class="review-select-all"><input type="checkbox" id="select-all-cb"> Select all</label>';
+      html += '</div>';
+
+      // Lesson grid
+      if (lessonsCache.length === 0) {
+        html += '<div class="review-empty">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        html += '<p>No lessons with this status' + (currentSubjectId ? ' for the selected subject' : '') + '</p>';
+        html += '</div>';
+      } else {
+        html += '<div class="review-grid">';
+        lessonsCache.forEach(function (lesson) {
+          var unit = lesson.units || {};
+          var subject = unit.subjects || {};
+          var previewUrl = '/lesson/' + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number;
+          var editUrl = '/admin/editor?subject=' + encodeURIComponent(subject.slug) + '&unit=' + encodeURIComponent(unit.slug) + '&lesson=' + lesson.lesson_number;
+          var isSelected = selectedIds.has(lesson.id);
+          var statusLabel = formatStatus(lesson.status);
+
+          html += '<div class="review-card' + (isSelected ? ' selected' : '') + '" data-id="' + lesson.id + '">';
+
+          // Checkbox
+          html += '<input type="checkbox" class="review-card-check" data-id="' + lesson.id + '"' + (isSelected ? ' checked' : '') + '>';
+
+          // Hero image
+          if (lesson.hero_image_url) {
+            html += '<img class="review-card-hero" src="' + escAttr(lesson.hero_image_url) + '" alt="" loading="lazy">';
+          } else {
+            html += '<div class="review-card-hero--placeholder">No hero image</div>';
+          }
+
+          // Body
+          html += '<div class="review-card-body">';
+          html += '<div class="review-card-title">Lesson ' + lesson.lesson_number + ': ' + esc(lesson.title) + '</div>';
+          html += '<div class="review-card-meta">';
+          html += '<span>' + esc(subject.name) + '</span>';
+          html += '<span class="dot">&middot;</span>';
+          html += '<span>' + esc(unit.name) + '</span>';
+          html += '<span class="dot">&middot;</span>';
+          html += '<span class="status-badge status-' + lesson.status + '">' + statusLabel + '</span>';
+          if (lesson.reviewed_at) {
+            html += '<span class="dot">&middot;</span>';
+            html += '<span>Reviewed ' + formatDate(lesson.reviewed_at) + '</span>';
+          }
+          if (lesson.published_at) {
+            html += '<span class="dot">&middot;</span>';
+            html += '<span>Published ' + formatDate(lesson.published_at) + '</span>';
+          }
+          html += '</div>';
+
+          if (lesson.rejection_notes) {
+            html += '<div style="margin-top:0.35rem;font-size:0.72rem;color:#dc2626;font-style:italic;">Rejection note: ' + esc(lesson.rejection_notes) + '</div>';
+          }
+          html += '</div>';
+
+          // Footer actions
+          html += '<div class="review-card-footer">';
+          html += '<div class="review-card-actions">';
+          html += '<a href="' + previewUrl + '" target="_blank" class="btn btn-sm btn-preview">View</a>';
+          html += '<a href="' + editUrl + '" target="_blank" class="btn btn-sm btn-edit">Edit</a>';
+
+          if (lesson.status === 'pending_review') {
+            html += '<button class="btn btn-sm btn-approve" data-action="approve" data-id="' + lesson.id + '">Approve</button>';
+            html += '<button class="btn btn-sm btn-reject" data-action="reject" data-id="' + lesson.id + '" data-title="' + escAttr(lesson.title) + '">Reject</button>';
+          }
+          if (lesson.status === 'ready_for_teacher') {
+            html += '<button class="btn btn-sm btn-publish" data-action="publish" data-id="' + lesson.id + '">Publish</button>';
+            html += '<button class="btn btn-sm btn-reject" data-action="reject" data-id="' + lesson.id + '" data-title="' + escAttr(lesson.title) + '">Send Back</button>';
+          }
+
+          html += '</div>';
+          html += '<span style="font-size:0.68rem;color:var(--text-muted)">' + formatDate(lesson.updated_at) + '</span>';
+          html += '</div>';
+
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+
+      app.innerHTML = html;
+      bindEvents();
+    }
+
+    // ---- Bind events after render ----
+    function bindEvents() {
+      // Status tab clicks
+      app.querySelectorAll('.review-tab').forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          currentStatus = tab.dataset.status;
+          selectedIds.clear();
+          updateBatchBar();
+          loadAndRender();
+        });
+      });
+
+      // Subject filter
+      var subjectFilter = document.getElementById('subject-filter');
+      if (subjectFilter) {
+        subjectFilter.addEventListener('change', function () {
+          currentSubjectId = this.value;
+          selectedIds.clear();
+          updateBatchBar();
+          loadAndRender();
+        });
+      }
+
+      // Subject summary card clicks
+      app.querySelectorAll('.summary-card').forEach(function (card) {
+        card.addEventListener('click', function () {
+          var sid = card.dataset.subjectId;
+          currentSubjectId = (currentSubjectId === sid) ? '' : sid;
+          // Sync the dropdown
+          var dropdown = document.getElementById('subject-filter');
+          if (dropdown) dropdown.value = currentSubjectId;
+          selectedIds.clear();
+          updateBatchBar();
+          loadAndRender();
+        });
+      });
+
+      // Select all checkbox
+      var selectAllCb = document.getElementById('select-all-cb');
+      if (selectAllCb) {
+        selectAllCb.addEventListener('change', function () {
+          selectAll(this.checked);
+        });
+      }
+
+      // Individual checkboxes
+      app.querySelectorAll('.review-card-check').forEach(function (cb) {
+        cb.addEventListener('change', function (e) {
+          e.stopPropagation();
+          toggleSelection(cb.dataset.id);
+        });
+      });
+
+      // Card click to toggle selection (if clicking the card body, not a button/link)
+      app.querySelectorAll('.review-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+          // Don't toggle if clicking a button, link, or checkbox
+          if (e.target.closest('button') || e.target.closest('a') || e.target.closest('input')) return;
+          toggleSelection(card.dataset.id);
+        });
+      });
+
+      // Individual action buttons
+      app.querySelectorAll('[data-action="approve"]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          performAction('approve', [btn.dataset.id]);
+        });
+      });
+
+      app.querySelectorAll('[data-action="publish"]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          performAction('publish', [btn.dataset.id]);
+        });
+      });
+
+      app.querySelectorAll('[data-action="reject"]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          showRejectModal([btn.dataset.id], btn.dataset.title);
+        });
+      });
+
+      // Approve All button
+      var approveAllBtn = document.getElementById('approve-all-btn');
+      if (approveAllBtn) {
+        approveAllBtn.addEventListener('click', function () {
+          performBulkAction('approve_all');
+        });
+      }
+
+      // Publish All button
+      var publishAllBtn = document.getElementById('publish-all-btn');
+      if (publishAllBtn) {
+        publishAllBtn.addEventListener('click', function () {
+          performBulkAction('publish_all');
+        });
+      }
+    }
+
+    // ---- Actions ----
+    async function performAction(action, ids, notes) {
+      try {
+        var body = { action: action, lesson_ids: ids };
+        if (notes) body.notes = notes;
+        var result = await apiPost(body);
+        var count = result.updated || result.published || result.approved || result.rejected || 0;
+        showToast(capitalize(action) + (action === 'approve' ? 'd' : action === 'publish' ? 'ed' : 'ed') + ' ' + count + ' lesson' + (count !== 1 ? 's' : ''));
+        selectedIds.clear();
+        updateBatchBar();
+        await loadAndRender();
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      }
+    }
+
+    async function performBulkAction(action) {
+      try {
+        var body = { action: action };
+        if (currentSubjectId) body.subject_id = currentSubjectId;
+        var result = await apiPost(body);
+        var count = result.approved || result.published || 0;
+        var verb = action === 'approve_all' ? 'Approved' : 'Published';
+        showToast(verb + ' ' + count + ' lesson' + (count !== 1 ? 's' : ''));
+        selectedIds.clear();
+        updateBatchBar();
+        await loadAndRender();
+      } catch (err) {
+        showToast('Error: ' + err.message);
+      }
+    }
+
+    function showRejectModal(ids, title) {
       var modal = document.createElement('div');
-      modal.className = 'reject-modal';
+      modal.className = 'modal-overlay';
       modal.innerHTML =
-        '<div class="reject-modal-inner">' +
+        '<div class="modal-box">' +
           '<h3>Request Changes</h3>' +
-          '<p style="font-size: 0.875rem; color: var(--text-muted); margin-bottom: 0.75rem;">Lesson: ' + escapeHtml(title) + '</p>' +
+          '<p>' + (title ? 'Lesson: ' + esc(title) : ids.length + ' lesson' + (ids.length !== 1 ? 's' : '') + ' selected') + '</p>' +
           '<textarea id="reject-notes" placeholder="What needs to change? (optional)"></textarea>' +
-          '<div class="reject-modal-actions">' +
-            '<button class="review-btn" onclick="this.closest(\'.reject-modal\').remove()">Cancel</button>' +
-            '<button class="review-btn review-btn--reject" id="reject-confirm">Send back to draft</button>' +
+          '<div class="modal-actions">' +
+            '<button class="btn" id="reject-cancel" style="background:#f3f4f6">Cancel</button>' +
+            '<button class="btn btn-reject" id="reject-confirm">Send Back</button>' +
           '</div>' +
         '</div>';
 
       document.body.appendChild(modal);
+
+      modal.querySelector('#reject-cancel').addEventListener('click', function () { modal.remove(); });
       modal.querySelector('#reject-confirm').addEventListener('click', function () {
         var notes = modal.querySelector('#reject-notes').value;
         modal.remove();
-        rejectLessonAction(lessonId, notes);
+        performAction('reject', ids, notes);
       });
       modal.addEventListener('click', function (e) {
         if (e.target === modal) modal.remove();
       });
     }
 
-    // ---- Render ----
-    async function renderApp() {
-      var data = await fetchData(currentFilter);
-      var counts = data.counts || {};
-      var lessons = data.lessons || [];
-
-      var totalReview = counts.review || 0;
-
-      var html = '<div class="review-header">';
-      html += '<h1>Content Review</h1>';
-      html += '<div class="review-stats">';
-      html += '<div class="review-stat"><span class="review-stat-num">' + totalReview + '</span> awaiting review</div>';
-      html += '<div class="review-stat"><span class="review-stat-num">' + (counts.live || 0) + '</span> live</div>';
-      html += '<div class="review-stat"><span class="review-stat-num">' + (counts.draft || 0) + '</span> drafts</div>';
-      html += '</div></div>';
-
-      if (totalReview > 0) {
-        html += '<div style="margin-bottom:1rem"><button class="review-btn review-btn--approve" id="approve-all-btn" style="padding:0.5rem 1.25rem">Approve All in Review (' + totalReview + ')</button></div>';
-      }
-
-      // Filters
-      html += '<div class="review-filters">';
-      ['review', 'draft', 'live', 'all'].forEach(function (f) {
-        var label = f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1);
-        var count = f === 'all' ? '' : ' (' + (counts[f] || 0) + ')';
-        html += '<button class="review-filter' + (currentFilter === f ? ' active' : '') + '" data-filter="' + f + '">' + label + count + '</button>';
+    // ---- Batch bar button handlers ----
+    document.getElementById('batch-approve').addEventListener('click', function () {
+      var ids = Array.from(selectedIds).filter(function (id) {
+        return lessonsCache.some(function (l) { return l.id === id && l.status === 'pending_review'; });
       });
-      html += '</div>';
+      if (ids.length > 0) performAction('approve', ids);
+    });
 
-      // Queue
-      if (lessons.length === 0) {
-        html += '<div class="review-empty">';
-        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-        html += '<p>No lessons with status "' + currentFilter + '"</p>';
-        html += '</div>';
-      } else {
-        html += '<div class="review-queue">';
-        lessons.forEach(function (lesson) {
-          var unit = lesson.units;
-          var subject = unit.subjects;
-          var previewUrl = '/lesson/' + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number;
+    document.getElementById('batch-publish').addEventListener('click', function () {
+      var ids = Array.from(selectedIds).filter(function (id) {
+        return lessonsCache.some(function (l) { return l.id === id && l.status === 'ready_for_teacher'; });
+      });
+      if (ids.length > 0) performAction('publish', ids);
+    });
 
-          html += '<div class="review-card">';
-          html += '<div class="review-card-header">';
-          html += '<div class="review-card-info">';
-          html += '<h3>Lesson ' + lesson.lesson_number + ': ' + escapeHtml(lesson.title) + '</h3>';
-          html += '<div class="review-card-meta">';
-          html += escapeHtml(subject.name) + ' &rarr; ' + escapeHtml(unit.name);
-          html += ' &middot; <span class="status-badge status-' + lesson.status + '">' + lesson.status + '</span>';
-          html += ' &middot; ' + new Date(lesson.updated_at).toLocaleDateString('en-GB');
-          html += '</div></div>';
-
-          html += '<div class="review-card-actions">';
-          html += '<a href="' + previewUrl + '" target="_blank" class="review-btn review-btn--preview">Preview</a>';
-          html += '<a href="/admin/editor?subject=' + encodeURIComponent(subject.slug) + '&unit=' + encodeURIComponent(unit.slug) + '&lesson=' + lesson.lesson_number + '" class="review-btn review-btn--preview" style="background:#f5f3ff;color:#7c3aed">Edit</a>';
-          if (lesson.status === 'review') {
-            html += '<button class="review-btn review-btn--approve" data-action="approve" data-id="' + lesson.id + '">Approve</button>';
-            html += '<button class="review-btn review-btn--reject" data-action="reject" data-id="' + lesson.id + '" data-title="' + escapeAttr(lesson.title) + '">Request Changes</button>';
-          }
-          html += '</div></div></div>';
-        });
-        html += '</div>';
-      }
-
-      app.innerHTML = html;
-
-      // Bind approve-all button
-      var approveAllBtn = document.getElementById('approve-all-btn');
-      if (approveAllBtn) {
-        approveAllBtn.addEventListener('click', async function () {
-          this.disabled = true;
-          this.textContent = 'Approving...';
-          try {
-            var result = await apiCall('/api/pipeline/review', { action: 'approve_all' });
-            this.textContent = 'Approved ' + (result.approved || 0) + ' lessons';
-            setTimeout(function () { renderApp(); }, 1000);
-          } catch (err) {
-            this.textContent = 'Error: ' + err.message;
-            this.disabled = false;
-          }
-        });
-      }
-
-      // Bind filter clicks
-      app.querySelectorAll('.review-filter').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          currentFilter = btn.dataset.filter;
-          renderApp();
+    document.getElementById('batch-reject').addEventListener('click', function () {
+      var ids = Array.from(selectedIds).filter(function (id) {
+        return lessonsCache.some(function (l) {
+          return l.id === id && (l.status === 'pending_review' || l.status === 'ready_for_teacher');
         });
       });
+      if (ids.length > 0) showRejectModal(ids);
+    });
 
-      // Bind action buttons
-      app.querySelectorAll('[data-action="approve"]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          approveLessonAction(btn.dataset.id);
-        });
-      });
+    document.getElementById('batch-clear').addEventListener('click', function () {
+      selectedIds.clear();
+      document.querySelectorAll('.review-card-check').forEach(function (cb) { cb.checked = false; });
+      document.querySelectorAll('.review-card.selected').forEach(function (c) { c.classList.remove('selected'); });
+      var selectAllCb = document.getElementById('select-all-cb');
+      if (selectAllCb) selectAllCb.checked = false;
+      updateBatchBar();
+    });
 
-      app.querySelectorAll('[data-action="reject"]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          showRejectModal(btn.dataset.id, btn.dataset.title);
-        });
-      });
-    }
-
-    function escapeHtml(str) {
+    // ---- Helpers ----
+    function esc(str) {
       var div = document.createElement('div');
       div.textContent = str || '';
       return div.innerHTML;
     }
 
-    function escapeAttr(str) {
-      return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+    function escAttr(str) {
+      return (str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function formatStatus(status) {
+      var map = {
+        'pending_review': 'Pending Review',
+        'ready_for_teacher': 'Ready for Teacher',
+        'live': 'Live',
+        'draft': 'Draft',
+        'review': 'Review',
+        'approved': 'Approved'
+      };
+      return map[status] || status;
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      return new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // ---- Load + render ----
+    async function loadAndRender() {
+      try {
+        await fetchData();
+        renderDashboard();
+      } catch (err) {
+        app.innerHTML = '<div class="review-empty"><p>Failed to load: ' + esc(err.message) + '</p></div>';
+      }
     }
 
     // ---- Init ----
     async function init() {
-      var isAdmin = await checkAdmin();
-      if (!isAdmin) {
-        app.innerHTML = '<div class="review-empty"><h2>Access Denied</h2><p>This page is restricted to platform administrators.</p><a href="/">Back to Dashboard</a></div>';
-        return;
-      }
-      await renderApp();
+      await loadAndRender();
     }
 
     if (document.readyState === 'loading') {
