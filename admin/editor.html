@@ -382,7 +382,18 @@
       });
       // Auto-select from URL params
       var params = new URLSearchParams(window.location.search);
-      if (params.get('subject')) {
+      if (params.get('subject_id')) {
+        // Match by subject ID (avoids slug collision for same-slug different-school subjects)
+        var targetId = params.get('subject_id');
+        var opts = pickSubject.querySelectorAll('option[data-id]');
+        for (var i = 0; i < opts.length; i++) {
+          if (opts[i].dataset.id === targetId) {
+            opts[i].selected = true;
+            break;
+          }
+        }
+        pickSubject.dispatchEvent(new Event('change'));
+      } else if (params.get('subject')) {
         pickSubject.value = params.get('subject');
         pickSubject.dispatchEvent(new Event('change'));
       }
