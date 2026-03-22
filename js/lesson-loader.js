@@ -64,8 +64,9 @@
   async function fetchLesson(params) {
     // Join through units -> subjects to get the lesson
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
-    // Staff with Supabase auth can view any lesson — no school_id filter
-    var isStaff = !!localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token');
+    // Staff with teacher/admin session can view any lesson — no school_id filter
+    var isStaff = false;
+    try { var _a = JSON.parse(sessionStorage.getItem('studyvault-auth')); isStaff = _a && (_a.role === 'admin' || _a.role === 'teacher'); } catch(e) {}
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(params.subjectSlug));
 
     var unitQuery = sb
