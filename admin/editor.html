@@ -359,7 +359,7 @@
     async function loadSubjects() {
       await getAuth();
       var auth = await getAuthContext();
-      var query = sb.from('subjects').select('id, slug, name, school_id, schools(name)').eq('status', 'live');
+      var query = sb.from('subjects').select('id, slug, name, school_id').eq('status', 'live');
 
       if (auth.is_admin) {
         // Admin sees everything
@@ -376,16 +376,14 @@
 
       // Build school dropdown (admin only)
       if (auth.is_admin) {
-        var schools = {};
-        allSubjectsCache.forEach(function (s) {
-          var key = s.school_id || 'generic';
-          var label = (s.schools && s.schools.name) ? s.schools.name : 'Generic';
-          if (!schools[key]) schools[key] = label;
-        });
-        pickSchool.innerHTML = '<option value="">All Schools</option>';
-        Object.keys(schools).forEach(function (key) {
-          pickSchool.innerHTML += '<option value="' + key + '">' + esc(schools[key]) + '</option>';
-        });
+        pickSchool.innerHTML = '<option value="">All Schools</option><option value="generic">Generic</option>';
+        try {
+          var resp = await fetch('/api/pipeline/schools');
+          var schoolData = await resp.json();
+          (schoolData.schools || []).forEach(function (s) {
+            pickSchool.innerHTML += '<option value="' + s.id + '">' + esc(s.name) + '</option>';
+          });
+        } catch(e) {}
         pickSchool.style.display = '';
       } else {
         // Teachers: hide school dropdown (they only see their school)
