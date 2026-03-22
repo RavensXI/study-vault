@@ -94,15 +94,12 @@
     // Free user English Lit: filter to only selected texts + compulsory units
     if (subjectSlug === 'english-literature' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeSubj = FreeUser.getSubject('english-literature');
-      console.log('[browse] Free user eng-lit entry:', freeSubj);
       if (freeSubj && freeSubj.texts && Object.keys(freeSubj.texts).length > 0) {
         var selectedSlugs = Object.values(freeSubj.texts);
         var compulsory = ['power-and-conflict', 'unseen-poetry'];
-        console.log('[browse] Filtering units to:', selectedSlugs, '+ compulsory:', compulsory);
         units = units.filter(function (u) {
           return selectedSlugs.indexOf(u.slug) !== -1 || compulsory.indexOf(u.slug) !== -1;
         });
-        console.log('[browse] Filtered units:', units.map(function(u) { return u.slug; }));
       }
     }
 
