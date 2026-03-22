@@ -75,6 +75,8 @@
     .btn-reject:hover:not(:disabled) { background: #fee2e2; }
     .btn-edit { background: #f5f3ff; color: #7c3aed; }
     .btn-edit:hover:not(:disabled) { background: #ede9fe; }
+    .btn-apply { background: #2d2a26; color: white; padding: 0.4rem 1rem; }
+    .btn-apply:hover { background: #1a1816; }
 
     /* ---- Batch Action Bar ---- */
     .batch-bar { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 2px solid #e5e7eb; padding: 0.75rem 1.5rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; z-index: 100; box-shadow: 0 -4px 16px rgba(0,0,0,0.08); transform: translateY(100%); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -305,11 +307,14 @@
       html += '<h1>Content Review</h1>';
       html += '</div>';
 
-      // Filter summary cards by school
+      // Filter summaries by school + subject
       var filteredSummary = summaryCache.filter(function (s) {
-        if (!currentSchoolFilter) return true;
-        if (currentSchoolFilter === 'generic') return !s.school_id;
-        return s.school_id === currentSchoolFilter;
+        if (currentSchoolFilter) {
+          if (currentSchoolFilter === 'generic' && s.school_id) return false;
+          if (currentSchoolFilter !== 'generic' && s.school_id !== currentSchoolFilter) return false;
+        }
+        if (currentSubjectId && s.id !== currentSubjectId) return false;
+        return true;
       });
 
       // Recalculate tab counts from filtered summaries
@@ -379,6 +384,9 @@
       }
       html += '</select>';
 
+      // Apply filters button
+      html += '<button class="btn btn-apply" id="apply-filters-btn">Apply</button>';
+
       // Batch approve all button (for current status + subject)
       if (currentStatus === 'pending_review') {
         var approveLabel = currentSubjectId ? 'Approve All in Subject' : 'Approve All Pending';
@@ -393,13 +401,20 @@
       html += '<label class="review-select-all"><input type="checkbox" id="select-all-cb"> Select all</label>';
       html += '</div>';
 
-      // Lesson grid — filter by unit if set
-      var displayLessons = lessonsCache;
+      // Lesson grid — filter by unit, sort by lesson_number
+      var displayLessons = lessonsCache.slice();
       if (currentUnitFilter) {
-        displayLessons = lessonsCache.filter(function (l) {
+        displayLessons = displayLessons.filter(function (l) {
           return l.unit_id === currentUnitFilter;
         });
       }
+      displayLessons.sort(function (a, b) {
+        // Sort by unit name first, then lesson_number
+        var unitA = (a.units || {}).name || '';
+        var unitB = (b.units || {}).name || '';
+        if (unitA !== unitB) return unitA.localeCompare(unitB);
+        return (a.lesson_number || 0) - (b.lesson_number || 0);
+      });
 
       if (displayLessons.length === 0) {
         html += '<div class="review-empty">';
@@ -492,50 +507,46 @@
         });
       });
 
-      // School filter
-      var schoolFilter = document.getElementById('school-filter');
-      if (schoolFilter) {
-        schoolFilter.addEventListener('change', function () {
-          currentSchoolFilter = this.value;
-          currentSubjectId = '';
-          currentUnitFilter = '';
-          unitsCache = [];
-          selectedIds.clear();
-          updateBatchBar();
-          loadAndRender();
-        });
-      }
-
-      // Subject filter
+      // Subject dropdown change — dynamically load units (no API call, just populates unit dropdown)
       var subjectFilter = document.getElementById('subject-filter');
       if (subjectFilter) {
         subjectFilter.addEventListener('change', function () {
-          currentSubjectId = this.value;
-          currentUnitFilter = '';
-          selectedIds.clear();
-          updateBatchBar();
-          if (currentSubjectId) {
-            // Load units for this subject
-            sb.from('units').select('id, slug, name, sort_order').eq('subject_id', currentSubjectId).order('sort_order')
+          var unitDd = document.getElementById('unit-filter');
+          if (!unitDd) return;
+          var sid = this.value;
+          if (sid) {
+            unitDd.disabled = true;
+            unitDd.innerHTML = '<option value="">Loading\u2026</option>';
+            sb.from('units').select('id, slug, name, sort_order').eq('subject_id', sid).order('sort_order')
               .then(function (result) {
                 unitsCache = result.data || [];
-                loadAndRender();
+                unitDd.innerHTML = '<option value="">All Units</option>';
+                unitsCache.forEach(function (u) {
+                  unitDd.innerHTML += '<option value="' + u.id + '">' + esc(u.name) + '</option>';
+                });
+                unitDd.disabled = false;
               });
           } else {
             unitsCache = [];
-            loadAndRender();
+            unitDd.innerHTML = '<option value="">All Units</option>';
+            unitDd.disabled = true;
           }
         });
       }
 
-      // Unit filter
-      var unitFilter = document.getElementById('unit-filter');
-      if (unitFilter) {
-        unitFilter.addEventListener('change', function () {
-          currentUnitFilter = this.value;
+      // Apply filters button
+      var applyBtn = document.getElementById('apply-filters-btn');
+      if (applyBtn) {
+        applyBtn.addEventListener('click', function () {
+          var schoolDd = document.getElementById('school-filter');
+          var subjectDd = document.getElementById('subject-filter');
+          var unitDd = document.getElementById('unit-filter');
+          currentSchoolFilter = schoolDd ? schoolDd.value : '';
+          currentSubjectId = subjectDd ? subjectDd.value : '';
+          currentUnitFilter = unitDd ? unitDd.value : '';
           selectedIds.clear();
           updateBatchBar();
-          render();
+          loadAndRender();
         });
       }
 
