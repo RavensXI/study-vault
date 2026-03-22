@@ -218,10 +218,20 @@ def save_state(state):
 
 def _has_podcast(lesson):
     """Check if a lesson already has a real podcast URL in related_media."""
-    for cat in (lesson.get("related_media") or []):
-        if (cat.get("category") or "").lower() == "podcasts":
+    rm = lesson.get("related_media") or []
+    # Handle both dict {"categories": [...]} and flat list formats
+    if isinstance(rm, dict):
+        cats = rm.get("categories", [])
+    else:
+        cats = rm
+    for cat in cats:
+        if not isinstance(cat, dict):
+            continue
+        cat_name = (cat.get("category") or cat.get("title") or "").lower()
+        if cat_name == "podcasts":
             for item in cat.get("items", []):
-                if item.get("title") == "Lesson Podcast" and item.get("url") and item["url"] != "#":
+                url = item.get("url") or ""
+                if url and url != "#":
                     return True
     return False
 
@@ -478,7 +488,7 @@ def cmd_generate(args):
             "exam_board": entry.get("exam_board", "AQA"),
             "launched_at": timestamp,
             "podcast_done": False,
-            "video_done": not do_video,  # True if we're not generating video (podcast-only)
+            "video_done": False,  # Only set True when a video is actually downloaded
         }
         state["jobs"].append(job)
         save_state(state)
