@@ -728,6 +728,71 @@ def cmd_download(args):
     print(f"Videos + podcasts on R2, lessons updated in Supabase.")
 
 
+def cmd_rebuild_state(args):
+    """Rebuild the state file from Supabase — the database is the source of truth."""
+    from lib.supabase_client import get_client
+    sb = get_client()
+
+    print("Rebuilding state from Supabase...")
+
+    # Get all subjects + units + lessons
+    subjects_result = sb.table("subjects").select("id, slug, name, exam_board, school_id").eq("status", "live").order("name").execute()
+    subjects = subjects_result.data or []
+
+    # Filter by --generic or --subject if specified
+    if args.generic:
+        subjects = [s for s in subjects if not s.get("school_id")]
+    elif not args.subject:
+        subjects = [s for s in subjects if s.get("school_id")]
+
+    if args.subject:
+        subjects = [s for s in subjects if s["slug"] == args.subject]
+
+    new_jobs = []
+    for subject in subjects:
+        units_result = sb.table("units").select("id, slug, name").eq("subject_id", subject["id"]).order("sort_order").execute()
+        for unit in (units_result.data or []):
+            lessons_result = sb.table("lessons").select("id, lesson_number, title, podcast_url, youtube_video_id").eq("unit_id", unit["id"]).eq("status", "live").order("lesson_number").execute()
+            for lesson in (lessons_result.data or []):
+                label = f"{subject['slug']}/{unit['slug']}/L{lesson['lesson_number']:02d}"
+                has_podcast = bool(lesson.get("podcast_url"))
+                has_video = bool(lesson.get("youtube_video_id") and ("r2.dev" in str(lesson["youtube_video_id"]) or lesson["youtube_video_id"].startswith("http")))
+
+                job = {
+                    "lesson_id": lesson["id"],
+                    "lesson_title": lesson["title"],
+                    "label": label,
+                    "notebook_id": None,
+                    "notebook_title": None,
+                    "status": "completed" if (has_podcast or has_video) else "pending",
+                    "subject_name": subject["name"],
+                    "unit_name": unit["name"],
+                    "exam_board": subject.get("exam_board", ""),
+                    "podcast_done": has_podcast,
+                    "video_done": has_video,
+                }
+                if has_podcast and lesson.get("podcast_url"):
+                    job["podcast_url"] = lesson["podcast_url"]
+                if has_video and lesson.get("youtube_video_id"):
+                    job["video_url"] = lesson["youtube_video_id"]
+                new_jobs.append(job)
+
+    state = {"jobs": new_jobs}
+    save_state(state)
+
+    # Summary
+    total = len(new_jobs)
+    podcasts = sum(1 for j in new_jobs if j["podcast_done"])
+    videos = sum(1 for j in new_jobs if j["video_done"])
+    pending_podcast = sum(1 for j in new_jobs if not j["podcast_done"])
+    pending_video = sum(1 for j in new_jobs if not j["video_done"])
+
+    print(f"\nRebuilt state with {total} lessons:")
+    print(f"  Podcasts: {podcasts} done, {pending_podcast} pending")
+    print(f"  Videos:   {videos} done, {pending_video} pending")
+    print(f"\nState file saved. Ready for --podcast-only or --video-only runs.")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Generate cinematic video overviews + podcasts via NotebookLM CLI")
     parser.add_argument("--limit", type=int, default=20, help="Max lessons to process (default: 20 for video, 200 for podcast-only)")
@@ -740,7 +805,12 @@ def main():
     parser.add_argument("--generic", action="store_true", help="Target generic (school_id NULL) subjects instead of school-specific")
     parser.add_argument("--video-only", action="store_true", help="Add videos to existing notebooks (from prior podcast-only run)")
     parser.add_argument("--reset-subject", help="Remove all state entries for a subject slug (allows clean regeneration)")
+    parser.add_argument("--rebuild-state", action="store_true", help="Rebuild state file from Supabase (fixes stale/incorrect state)")
     args = parser.parse_args()
+
+    if args.rebuild_state:
+        cmd_rebuild_state(args)
+        return
 
     if args.reset_subject:
         state = load_state()
