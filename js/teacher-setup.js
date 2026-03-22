@@ -36,7 +36,12 @@
   // ---- Admin users skip the welcome ----
   if (auth.role === 'admin') return;
 
-  // ---- Teacher already set up ----
+  // ---- Supabase Auth teachers skip the welcome (name + subjects already known) ----
+  if (auth.teacher_id && auth.full_name) {
+    return; // Supabase-authenticated teacher — page loads normally, editor handles subject scoping
+  }
+
+  // ---- Teacher already set up (legacy shared password flow) ----
   var teacher = getTeacher();
   if (teacher && teacher.name && teacher.subject) {
     var params = new URLSearchParams(window.location.search);
