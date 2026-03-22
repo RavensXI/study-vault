@@ -29,6 +29,32 @@
     return; // Valid session — page renders normally
   }
 
+  // For teacher auth mode, also check for existing Supabase session
+  if (isTeacherAuth && window.supabase) {
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+    sb.auth.getSession().then(function (result) {
+      if (result.data.session) {
+        var userId = result.data.session.user.id;
+        sb.from('profiles').select('role, school_id, full_name').eq('id', userId).single()
+          .then(function (profileResult) {
+            var profile = profileResult.data;
+            if (profile && allowedRoles.indexOf(profile.role) !== -1) {
+              sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+                role: profile.role,
+                teacher_id: userId,
+                school_id: profile.school_id,
+                full_name: profile.full_name
+              }));
+              location.reload();
+            }
+          });
+      }
+    });
+  }
+
   // ---- Not authenticated — hide page and show login ----
 
   // Inject CSS immediately (before body parses)
