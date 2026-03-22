@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
     // Fetch all subjects (for filter dropdown + summary)
     let subjectsQuery = supabase
       .from('subjects')
-      .select('id, slug, name, school_id')
+      .select('id, slug, name, school_id, schools(name)')
       .order('name');
 
     // Teachers only see their school's subjects + generic

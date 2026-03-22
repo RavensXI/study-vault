@@ -178,6 +178,9 @@
     // State
     var currentStatus = 'pending_review';
     var currentSubjectId = '';
+    var currentSchoolFilter = '';
+    var currentUnitFilter = '';
+    var unitsCache = [];
     var selectedIds = new Set();
     var lessonsCache = [];
     var subjectsCache = [];
@@ -356,14 +359,45 @@
       });
       html += '</div>';
 
-      // Subject filter dropdown
+      // School filter dropdown
+      var schools = {};
+      subjectsCache.forEach(function (s) {
+        var key = s.school_id || 'generic';
+        var label = (s.schools && s.schools.name) ? s.schools.name : (s.school_id ? 'School' : 'Generic');
+        if (!schools[key]) schools[key] = label;
+      });
+      html += '<select class="subject-filter" id="school-filter">';
+      html += '<option value="">All Schools</option>';
+      Object.keys(schools).forEach(function (key) {
+        var sel = currentSchoolFilter === key ? ' selected' : '';
+        html += '<option value="' + key + '"' + sel + '>' + esc(schools[key]) + '</option>';
+      });
+      html += '</select>';
+
+      // Subject filter dropdown (filtered by school if set)
+      var filteredSubjects = subjectsCache.filter(function (s) {
+        if (!currentSchoolFilter) return true;
+        if (currentSchoolFilter === 'generic') return !s.school_id;
+        return s.school_id === currentSchoolFilter;
+      });
       html += '<select class="subject-filter" id="subject-filter">';
       html += '<option value="">All Subjects</option>';
-      subjectsCache.forEach(function (s) {
+      filteredSubjects.forEach(function (s) {
         var sel = currentSubjectId === s.id ? ' selected' : '';
         var schoolLabel = s.school_id ? '' : ' (Generic)';
         html += '<option value="' + s.id + '"' + sel + '>' + esc(s.name) + schoolLabel + '</option>';
       });
+      html += '</select>';
+
+      // Unit filter dropdown (only if a subject is selected)
+      html += '<select class="subject-filter" id="unit-filter"' + (!currentSubjectId ? ' disabled' : '') + '>';
+      html += '<option value="">All Units</option>';
+      if (currentSubjectId && unitsCache.length > 0) {
+        unitsCache.forEach(function (u) {
+          var sel = currentUnitFilter === u.id ? ' selected' : '';
+          html += '<option value="' + u.id + '"' + sel + '>' + esc(u.name) + '</option>';
+        });
+      }
       html += '</select>';
 
       // Batch approve all button (for current status + subject)
@@ -380,15 +414,22 @@
       html += '<label class="review-select-all"><input type="checkbox" id="select-all-cb"> Select all</label>';
       html += '</div>';
 
-      // Lesson grid
-      if (lessonsCache.length === 0) {
+      // Lesson grid — filter by unit if set
+      var displayLessons = lessonsCache;
+      if (currentUnitFilter) {
+        displayLessons = lessonsCache.filter(function (l) {
+          return l.unit_id === currentUnitFilter;
+        });
+      }
+
+      if (displayLessons.length === 0) {
         html += '<div class="review-empty">';
         html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
-        html += '<p>No lessons with this status' + (currentSubjectId ? ' for the selected subject' : '') + '</p>';
+        html += '<p>No lessons with this status' + (currentSubjectId ? ' for the selected filters' : '') + '</p>';
         html += '</div>';
       } else {
         html += '<div class="review-grid">';
-        lessonsCache.forEach(function (lesson) {
+        displayLessons.forEach(function (lesson) {
           var unit = lesson.units || {};
           var subject = unit.subjects || {};
           var previewUrl = '/lesson/' + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number;
@@ -472,14 +513,50 @@
         });
       });
 
+      // School filter
+      var schoolFilter = document.getElementById('school-filter');
+      if (schoolFilter) {
+        schoolFilter.addEventListener('change', function () {
+          currentSchoolFilter = this.value;
+          currentSubjectId = '';
+          currentUnitFilter = '';
+          unitsCache = [];
+          selectedIds.clear();
+          updateBatchBar();
+          loadAndRender();
+        });
+      }
+
       // Subject filter
       var subjectFilter = document.getElementById('subject-filter');
       if (subjectFilter) {
         subjectFilter.addEventListener('change', function () {
           currentSubjectId = this.value;
+          currentUnitFilter = '';
           selectedIds.clear();
           updateBatchBar();
-          loadAndRender();
+          if (currentSubjectId) {
+            // Load units for this subject
+            sb.from('units').select('id, slug, name, sort_order').eq('subject_id', currentSubjectId).order('sort_order')
+              .then(function (result) {
+                unitsCache = result.data || [];
+                loadAndRender();
+              });
+          } else {
+            unitsCache = [];
+            loadAndRender();
+          }
+        });
+      }
+
+      // Unit filter
+      var unitFilter = document.getElementById('unit-filter');
+      if (unitFilter) {
+        unitFilter.addEventListener('change', function () {
+          currentUnitFilter = this.value;
+          selectedIds.clear();
+          updateBatchBar();
+          render();
         });
       }
 
