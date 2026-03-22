@@ -39,8 +39,8 @@
     .review-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.09); }
     .review-card.selected { border-color: #7c3aed; background: #faf8ff; }
 
-    .review-card-hero { width: 100%; height: 120px; object-fit: cover; display: block; background: #f0ede8; }
-    .review-card-hero--placeholder { display: flex; align-items: center; justify-content: center; color: #c4b5a8; font-size: 0.75rem; height: 120px; background: linear-gradient(135deg, #f5f0eb 0%, #ede8e2 100%); }
+    .review-card-hero { width: 100%; height: 160px; object-fit: cover; object-position: center top; display: block; background: #f0ede8; border-radius: 10px 10px 0 0; }
+    .review-card-hero--placeholder { display: flex; align-items: center; justify-content: center; color: #c4b5a8; font-size: 0.75rem; height: 160px; background: linear-gradient(135deg, #f5f0eb 0%, #ede8e2 100%); border-radius: 10px 10px 0 0; }
 
     .review-card-body { padding: 0.75rem 0.9rem 0.85rem; }
     .review-card-title { font-family: 'Source Serif 4', serif; font-size: 0.95rem; font-weight: 600; margin: 0 0 0.3rem; color: var(--text-color); line-height: 1.3; }
@@ -436,9 +436,10 @@
           // Checkbox
           html += '<input type="checkbox" class="review-card-check" data-id="' + lesson.id + '"' + (isSelected ? ' checked' : '') + '>';
 
-          // Hero image
+          // Hero image (with position matching lesson page)
           if (lesson.hero_image_url) {
-            html += '<img class="review-card-hero" src="' + escAttr(lesson.hero_image_url) + '" alt="" loading="lazy">';
+            var posStyle = lesson.hero_image_position ? ' style="object-position:' + escAttr(lesson.hero_image_position) + '"' : '';
+            html += '<img class="review-card-hero" src="' + escAttr(lesson.hero_image_url) + '"' + posStyle + ' alt="" loading="lazy">';
           } else {
             html += '<div class="review-card-hero--placeholder">No hero image</div>';
           }
@@ -507,7 +508,38 @@
         });
       });
 
-      // Subject dropdown change — dynamically load units (no API call, just populates unit dropdown)
+      // School dropdown change — filter subject dropdown immediately
+      var schoolFilter = document.getElementById('school-filter');
+      if (schoolFilter) {
+        schoolFilter.addEventListener('change', function () {
+          var schoolVal = this.value;
+          var subjectDd = document.getElementById('subject-filter');
+          var unitDd = document.getElementById('unit-filter');
+          if (!subjectDd) return;
+
+          // Filter subjects by school
+          var filtered = subjectsCache.filter(function (s) {
+            if (!schoolVal) return true;
+            if (schoolVal === 'generic') return !s.school_id;
+            return s.school_id === schoolVal;
+          });
+
+          subjectDd.innerHTML = '<option value="">All Subjects</option>';
+          filtered.forEach(function (s) {
+            var schoolLabel = s.school_id ? '' : ' (Generic)';
+            subjectDd.innerHTML += '<option value="' + s.id + '">' + esc(s.name) + schoolLabel + '</option>';
+          });
+
+          // Reset unit dropdown
+          if (unitDd) {
+            unitDd.innerHTML = '<option value="">All Units</option>';
+            unitDd.disabled = true;
+          }
+          unitsCache = [];
+        });
+      }
+
+      // Subject dropdown change — populate unit dropdown immediately
       var subjectFilter = document.getElementById('subject-filter');
       if (subjectFilter) {
         subjectFilter.addEventListener('change', function () {
