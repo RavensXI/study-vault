@@ -133,6 +133,7 @@
    <div class="editor-main">
     <!-- Lesson Picker -->
     <div class="editor-picker">
+      <select id="pick-school"><option value="">School...</option></select>
       <select id="pick-subject"><option value="">Subject...</option></select>
       <select id="pick-unit" disabled><option value="">Unit...</option></select>
       <select id="pick-lesson" disabled><option value="">Lesson...</option></select>
@@ -255,9 +256,11 @@
     var allLessons = [];         // lessons in current unit (for prev/next)
 
     // DOM refs
+    var pickSchool = document.getElementById('pick-school');
     var pickSubject = document.getElementById('pick-subject');
     var pickUnit = document.getElementById('pick-unit');
     var pickLesson = document.getElementById('pick-lesson');
+    var allSubjectsCache = [];
     var loadBtn = document.getElementById('load-btn');
     var prevBtn = document.getElementById('prev-btn');
     var nextBtn = document.getElementById('next-btn');
@@ -356,35 +359,53 @@
     async function loadSubjects() {
       await getAuth();
       var auth = await getAuthContext();
-      var query = sb.from('subjects').select('id, slug, name, school_id').eq('status', 'live');
+      var query = sb.from('subjects').select('id, slug, name, school_id, schools(name)').eq('status', 'live');
 
       if (auth.is_admin) {
-        // Admin sees everything — no filter
+        // Admin sees everything
       } else if (auth.school_id) {
-        // Teacher sees their school's subjects + generic (school_id NULL)
         query = query.or('school_id.eq.' + auth.school_id + ',school_id.is.null');
       }
 
-      // If teacher has specific subject assignments, further restrict
       if (!auth.is_admin && auth.subject_ids.length > 0) {
         query = query.in('id', auth.subject_ids);
       }
 
       var result = await query.order('name');
-      var subjects = result.data || [];
-      pickSubject.innerHTML = '<option value="">Subject...</option>';
-      subjects.forEach(function (s) {
-        var label = esc(s.name);
-        // Show school scope hint for admins when subjects appear from multiple schools
-        if (auth.is_admin && s.school_id) label += ' (school)';
-        else if (auth.is_admin && !s.school_id) label += ' (generic)';
-        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + label + '</option>';
-      });
+      allSubjectsCache = result.data || [];
+
+      // Build school dropdown (admin only)
+      if (auth.is_admin) {
+        var schools = {};
+        allSubjectsCache.forEach(function (s) {
+          var key = s.school_id || 'generic';
+          var label = (s.schools && s.schools.name) ? s.schools.name : 'Generic';
+          if (!schools[key]) schools[key] = label;
+        });
+        pickSchool.innerHTML = '<option value="">All Schools</option>';
+        Object.keys(schools).forEach(function (key) {
+          pickSchool.innerHTML += '<option value="' + key + '">' + esc(schools[key]) + '</option>';
+        });
+        pickSchool.style.display = '';
+      } else {
+        // Teachers: hide school dropdown (they only see their school)
+        pickSchool.style.display = 'none';
+      }
+
+      populateSubjects();
+
       // Auto-select from URL params
       var params = new URLSearchParams(window.location.search);
       if (params.get('subject_id')) {
-        // Match by subject ID (avoids slug collision for same-slug different-school subjects)
         var targetId = params.get('subject_id');
+        // Auto-select the school dropdown if admin
+        if (auth.is_admin) {
+          var targetSubject = allSubjectsCache.find(function (s) { return s.id === targetId; });
+          if (targetSubject) {
+            pickSchool.value = targetSubject.school_id || 'generic';
+            populateSubjects();
+          }
+        }
         var opts = pickSubject.querySelectorAll('option[data-id]');
         for (var i = 0; i < opts.length; i++) {
           if (opts[i].dataset.id === targetId) {
@@ -398,6 +419,27 @@
         pickSubject.dispatchEvent(new Event('change'));
       }
     }
+
+    function populateSubjects() {
+      var schoolVal = pickSchool.value;
+      var filtered = allSubjectsCache.filter(function (s) {
+        if (!schoolVal) return true;
+        if (schoolVal === 'generic') return !s.school_id;
+        return s.school_id === schoolVal;
+      });
+      pickSubject.innerHTML = '<option value="">Subject...</option>';
+      filtered.forEach(function (s) {
+        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + esc(s.name) + '</option>';
+      });
+      pickUnit.innerHTML = '<option value="">Unit...</option>';
+      pickUnit.disabled = true;
+      pickLesson.innerHTML = '<option value="">Lesson...</option>';
+      pickLesson.disabled = true;
+    }
+
+    pickSchool.addEventListener('change', function () {
+      populateSubjects();
+    });
 
     pickSubject.addEventListener('change', async function () {
       pickUnit.innerHTML = '<option value="">Unit...</option>';
