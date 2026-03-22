@@ -66,7 +66,7 @@
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
     // Staff with teacher/admin session can view any lesson — no school_id filter
     var isStaff = false;
-    try { var _a = JSON.parse(sessionStorage.getItem('studyvault-auth')); isStaff = _a && (_a.role === 'admin' || _a.role === 'teacher'); } catch(e) {}
+    try { var _a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')); isStaff = _a && (_a.role === 'admin' || _a.role === 'teacher'); } catch(e) {}
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(params.subjectSlug));
 
     var unitQuery = sb

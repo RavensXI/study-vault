@@ -21,7 +21,30 @@
   var SESSION_KEY = 'studyvault-auth';
 
   function getSession() {
-    try { return JSON.parse(sessionStorage.getItem(SESSION_KEY)); } catch (e) { return null; }
+    try {
+      var s = sessionStorage.getItem(SESSION_KEY);
+      if (s) return JSON.parse(s);
+      // Also check localStorage (persists across tabs for staff)
+      var l = localStorage.getItem(SESSION_KEY);
+      if (l) {
+        var parsed = JSON.parse(l);
+        // Only restore staff sessions, not student ones
+        if (parsed.role === 'admin' || parsed.role === 'teacher') {
+          sessionStorage.setItem(SESSION_KEY, l);
+          return parsed;
+        }
+      }
+      return null;
+    } catch (e) { return null; }
+  }
+
+  function saveSession(data) {
+    var json = JSON.stringify(data);
+    sessionStorage.setItem(SESSION_KEY, json);
+    // Staff sessions also persist to localStorage for cross-tab access
+    if (data.role === 'admin' || data.role === 'teacher') {
+      localStorage.setItem(SESSION_KEY, json);
+    }
   }
 
   var isTeacherAuth = authMode === 'teacher';
@@ -55,12 +78,12 @@
             .then(function (profileResult) {
               var profile = profileResult.data;
               if (profile && allowedRoles.indexOf(profile.role) !== -1) {
-                sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+                saveSession({
                   role: profile.role,
                   teacher_id: userId,
                   school_id: profile.school_id,
                   full_name: profile.full_name
-                }));
+                });
                 // Remove hide style and admit
                 var ls = document.getElementById('auth-gate-loading');
                 if (ls) ls.remove();
@@ -203,12 +226,12 @@
                   }
 
                   // Store session
-                  sessionStorage.setItem(SESSION_KEY, JSON.stringify({
+                  saveSession({
                     role: profile.role,
                     teacher_id: result.data.user.id,
                     school_id: profile.school_id,
                     full_name: profile.full_name
-                  }));
+                  });
                   location.reload();
                 });
             })
@@ -258,7 +281,7 @@
             if (allowedRoles.indexOf(res.data.role) !== -1) {
               var sessionData = { role: res.data.role, pw: input.value };
               if (res.data.school_id) sessionData.school_id = res.data.school_id;
-              sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+              saveSession(sessionData);
               location.reload();
             } else {
               error.textContent = 'You don\u2019t have access to this page.';
