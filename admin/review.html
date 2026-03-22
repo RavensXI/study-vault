@@ -795,6 +795,32 @@
       showLoading();
       try {
         await fetchData();
+
+        // Auto-select first tab with results if current tab is empty
+        if (currentStatus !== 'all' && lessonsCache.length === 0) {
+          var priority = ['pending_review', 'ready_for_teacher', 'live'];
+          for (var i = 0; i < priority.length; i++) {
+            if (priority[i] !== currentStatus) {
+              // Check filtered counts for this status
+              var count = 0;
+              var filt = summaryCache.filter(function (s) {
+                if (currentSchoolFilter) {
+                  if (currentSchoolFilter === 'generic' && s.school_id) return false;
+                  if (currentSchoolFilter !== 'generic' && s.school_id !== currentSchoolFilter) return false;
+                }
+                if (currentSubjectId && s.id !== currentSubjectId) return false;
+                return true;
+              });
+              filt.forEach(function (s) { count += (s[priority[i]] || 0); });
+              if (count > 0) {
+                currentStatus = priority[i];
+                await fetchData();
+                break;
+              }
+            }
+          }
+        }
+
         renderDashboard();
       } catch (err) {
         app.innerHTML = '<div class="review-empty"><p>Failed to load: ' + esc(err.message) + '</p></div>';
