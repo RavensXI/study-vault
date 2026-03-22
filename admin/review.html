@@ -19,21 +19,6 @@
     .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.75rem; }
     .review-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; color: var(--text-color); }
 
-    /* ---- Subject Summary Cards ---- */
-    .subject-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
-    .summary-card { background: white; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: box-shadow 0.15s, border-color 0.15s; border: 2px solid transparent; }
-    .summary-card:hover { box-shadow: 0 3px 12px rgba(0,0,0,0.08); }
-    .summary-card.active { border-color: var(--text-color); }
-    .summary-card-name { font-weight: 600; font-size: 0.85rem; color: var(--text-color); }
-    .summary-card-school { font-size: 0.68rem; color: var(--text-muted); margin-top: 0.1rem; }
-    .summary-card-counts { display: flex; gap: 0.6rem; font-size: 0.72rem; }
-    .summary-count { display: flex; flex-direction: column; align-items: center; gap: 0.1rem; }
-    .summary-count-num { font-weight: 700; font-size: 0.95rem; }
-    .summary-count-label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.03em; font-size: 0.6rem; }
-    .summary-count--pending .summary-count-num { color: #d97706; }
-    .summary-count--ready .summary-count-num { color: #2563eb; }
-    .summary-count--live .summary-count-num { color: #16a34a; }
-
     /* ---- Filters Bar ---- */
     .review-controls { display: flex; gap: 0.75rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; }
     .review-tabs { display: flex; gap: 0.35rem; }
@@ -335,28 +320,7 @@
         filteredCounts.live += (s.live || 0);
       });
 
-      // Subject summary cards
-      if (filteredSummary.length > 0) {
-        html += '<div class="subject-summary">';
-        filteredSummary.forEach(function (s) {
-          var isActive = currentSubjectId === s.id;
-          var schoolLabel = s.school_id ? '' : ' (Generic)';
-          html += '<div class="summary-card' + (isActive ? ' active' : '') + '" data-subject-id="' + s.id + '">';
-          html += '<div>';
-          html += '<div class="summary-card-name">' + esc(s.name) + '</div>';
-          if (schoolLabel) html += '<div class="summary-card-school">' + schoolLabel + '</div>';
-          html += '</div>';
-          html += '<div class="summary-card-counts">';
-          html += '<div class="summary-count summary-count--pending"><span class="summary-count-num">' + (s.pending_review || 0) + '</span><span class="summary-count-label">Pending</span></div>';
-          html += '<div class="summary-count summary-count--ready"><span class="summary-count-num">' + (s.ready_for_teacher || 0) + '</span><span class="summary-count-label">Ready</span></div>';
-          html += '<div class="summary-count summary-count--live"><span class="summary-count-num">' + (s.live || 0) + '</span><span class="summary-count-label">Live</span></div>';
-          html += '</div>';
-          html += '</div>';
-        });
-        html += '</div>';
-      }
-
-      // Controls bar: status tabs + subject filter + select all
+      // Controls bar: status tabs + filters
       html += '<div class="review-controls">';
 
       // Status tabs — use filtered counts
@@ -575,20 +539,6 @@
         });
       }
 
-      // Subject summary card clicks
-      app.querySelectorAll('.summary-card').forEach(function (card) {
-        card.addEventListener('click', function () {
-          var sid = card.dataset.subjectId;
-          currentSubjectId = (currentSubjectId === sid) ? '' : sid;
-          // Sync the dropdown
-          var dropdown = document.getElementById('subject-filter');
-          if (dropdown) dropdown.value = currentSubjectId;
-          selectedIds.clear();
-          updateBatchBar();
-          loadAndRender();
-        });
-      });
-
       // Select all checkbox
       var selectAllCb = document.getElementById('select-all-cb');
       if (selectAllCb) {
@@ -778,12 +728,35 @@
     }
 
     // ---- Load + render ----
+    function showLoading() {
+      // Keep existing content visible but dim it, show spinner overlay
+      app.style.opacity = '0.5';
+      app.style.pointerEvents = 'none';
+      if (!document.getElementById('review-spinner')) {
+        var spinner = document.createElement('div');
+        spinner.id = 'review-spinner';
+        spinner.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:100;background:white;padding:1rem 1.5rem;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,0.12);font-size:0.85rem;color:#6b6560;font-family:Inter,sans-serif;';
+        spinner.textContent = 'Loading\u2026';
+        document.body.appendChild(spinner);
+      }
+    }
+
+    function hideLoading() {
+      app.style.opacity = '';
+      app.style.pointerEvents = '';
+      var spinner = document.getElementById('review-spinner');
+      if (spinner) spinner.remove();
+    }
+
     async function loadAndRender() {
+      showLoading();
       try {
         await fetchData();
         renderDashboard();
       } catch (err) {
         app.innerHTML = '<div class="review-empty"><p>Failed to load: ' + esc(err.message) + '</p></div>';
+      } finally {
+        hideLoading();
       }
     }
 
