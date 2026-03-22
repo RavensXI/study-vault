@@ -37,16 +37,18 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Creative iMedia | OCR J834 | 23 | 4 (Media Industry, Product Design, Pre-Production, Distribution) | 0/23 | 23/23 |
 | **Subtotal** | | **471** | **57** | **36/471** | **471/471** |
 
+**Total across site: 696 lessons, 696/696 podcasts.**
+
 ## Subjects — Free Tier (school_id NULL, generic content)
 
 | Subject | Exam Board | Lessons | Units | Cinematic Videos | Podcasts |
 |---------|-----------|---------|-------|-----------------|----------|
-| Maths | Edexcel 1MA1 | 37 | TBC | 0/37 | 0/37 |
-| Science (generic) | AQA 8464 | 48 | 6 | 39/48 | 48/48 |
+| Maths | Edexcel 1MA1 | 55 | 6 (Number, Algebra, Ratio, Geometry, Probability, Statistics) | 0/55 | 55/55 |
+| Science (generic) | AQA 8464 | 48 | 6 | 48/48 | 48/48 |
 | Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 | 0/22 | 22/22 |
 | English Language (generic) | AQA 8700 | 30 | 4 | 0/30 | 30/30 |
-| English Literature (generic) | AQA 8702 | 70 | TBC | 0/70 | 0/70 |
-| **Subtotal** | | **207** | | **39/207** | **100/207** |
+| English Literature (generic) | AQA 8702 | 70 | TBC | 0/70 | 70/70 |
+| **Subtotal** | | **225** | | **48/225** | **225/225** |
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -56,7 +58,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **678 lessons** (471 school + 207 generic) + **292 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **696 lessons** (471 school + 225 generic) + **306 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (3 tiers):**
@@ -76,8 +78,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
 - **Cinematic videos**: 84/678 done (Sport Science 10 + Food Tech 10 + Generic Science 48 + History 20 YouTube — generic science COMPLETE). Daily limit 20/day. Video generation blocked on most subjects due to `video_done=True` in state from podcast-only runs — needs state reset before next batch. See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts (Unity)**: 471/471 done. ALL school-specific subjects have podcasts.
-- **Podcasts (Generic)**: 155/225 done. Science 48/48, Sep Sci 22/22, Eng Lang 30/30, Maths 55/55. Eng Lit 0/70 remaining.
+- **Podcasts: 696/696 — COMPLETE.** Every lesson across every subject (school + generic) has a podcast.
 - **Lesson Progress Tracker**: Sidebar widget on every lesson — Listen to podcast, Watch video, Complete knowledge check, Complete a revision task. KC auto-ticks. State in localStorage. Icons: purple headphones, red play, unit-colour question mark, green lightbulb.
 - **Content-specific revision tips**: `data-revision-tip` attribute on key facts overrides generic lightbulb tips. ~1,824 tips generated across all 678 lessons (20 Mar 2026). Future content generation should include these at creation time.
 - **Lesson header declutter**: "Lesson X of Y" moved to header pill, inline label hidden. Content visible sooner.
@@ -116,7 +117,7 @@ All in environment variables — never commit.
 - **Design:** Background `#faf8f5`, text `#2d2a26`, Inter + Source Serif 4, `border-radius: 16px`, soft shadows
 - **Images:** Heroes max 1200px, diagrams max 1000px, JPEG quality 82
 - **Content:** 6 practice questions + 5 knowledge checks per lesson. Readability for GCSE age 15-16.
-- **Narration:** Azure Speech, Ollie (odd lessons) / Bella (even), MP3 96kbps 24kHz mono
+- **Narration:** Azure Speech, Ollie (odd lessons) / Ada (even — replaced Bella 21 Mar 2026), MP3 96kbps 24kHz mono. Language subjects (French/German/Spanish) use multilingual voices (`OllieMultilingualNeural` + `AdaMultilingualNeural`) with SSML `<lang>` tags for foreign phrases. Foreign text must be in `<em>` or `<strong>` tags for auto-detection. See `docs/NARRATION_PIPELINE.md`.
 - **PPTs:** Read with `python -m markitdown "filepath"` (.pptx only)
 - **Equations (KaTeX):** Maths/science equations use KaTeX auto-render. Inline: `\(...\)`, display: `$$...$$`. CDN loaded on `lesson.html` and `guide.html`. `docs/GENERATION_PROMPT.md` instructs future content to output LaTeX (not HTML entities). Conversion script: `scripts/convert_equations_to_katex.py`.
 - **Animations:** Soft-close damping `cubic-bezier(0.16, 1, 0.3, 1)` on all entrance animations. `.sv-reveal` / `.sv-stagger` CSS classes + IntersectionObserver. Split timing: fast opacity (~0.5s), slow transform glide (~1-1.3s). `prefers-reduced-motion` respected. Browse page unit cards have no scroll reveal (all visible immediately so students don't miss units below the fold).
