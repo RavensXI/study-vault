@@ -319,7 +319,7 @@
 
     .flashcard.flipped .flashcard-back .flashcard-text::after {
       width: 100%;
-      transition: width 2s linear;
+      transition: width var(--read-duration, 2s) linear;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1174,8 +1174,23 @@
     var answerUnlockTimer = null;
     var answersEnabled = false;
 
+    function getReadDuration(text) {
+      // ~4 words per second reading pace, min 1.5s, max 6s
+      var words = (text || '').trim().split(/\s+/).length;
+      var seconds = Math.max(1.5, Math.min(words / 4, 6));
+      return Math.round(seconds * 100) / 100;
+    }
+
     function flipAndDelay() {
       if (flashcard.classList.contains('flipped')) return;
+
+      // Calculate reading duration from answer text
+      var answerText = document.getElementById('card-back-text').textContent || '';
+      var duration = getReadDuration(answerText);
+
+      // Set CSS variable for underline animation
+      flashcard.style.setProperty('--read-duration', duration + 's');
+
       flashcard.classList.add('flipped');
       answerBtns.classList.add('visible');
       answerBtns.classList.remove('enabled');
@@ -1184,12 +1199,12 @@
       // Add waiting state to buttons
       answerBtns.querySelectorAll('.answer-btn').forEach(function (b) { b.classList.add('waiting'); });
 
-      // Enable after 2 seconds
+      // Enable when underline finishes
       answerUnlockTimer = setTimeout(function () {
         answerBtns.classList.add('enabled');
         answersEnabled = true;
         answerBtns.querySelectorAll('.answer-btn').forEach(function (b) { b.classList.remove('waiting'); });
-      }, 2000);
+      }, duration * 1000);
     }
 
     flashcard.addEventListener('click', flipAndDelay);
