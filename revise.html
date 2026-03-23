@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcard Revision - StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2d2a26">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* ---- Revise page ---- */
+
+    .revise-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .revise-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-align: center;
+      margin: 0 0 0.25rem;
+    }
+
+    .revise-subtitle {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      text-align: center;
+      margin: 0 0 2rem;
+      line-height: 1.5;
+    }
+
+    /* --- Picker --- */
+    .revise-picker { display: block; }
+    .revise-picker.hidden { display: none; }
+
+    .picker-field {
+      margin-bottom: 1rem;
+    }
+
+    .picker-field label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 0.35rem;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .picker-field select {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      background: var(--bg-card);
+      color: var(--text-primary);
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%236b6560' viewBox='0 0 16 16'%3E%3Cpath d='M4.5 6l3.5 4 3.5-4z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.8rem center;
+      background-size: 16px;
+      padding-right: 2.5rem;
+    }
+
+    .picker-field select:focus {
+      border-color: var(--text-secondary);
+    }
+
+    .picker-field select:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* --- Quick filter pills --- */
+    .quick-filters {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 1.25rem;
+    }
+
+    .quick-filter {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.45em 1em;
+      border: 1px solid var(--border-light);
+      border-radius: 999px;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .quick-filter:hover {
+      border-color: var(--text-muted);
+      color: var(--text-primary);
+    }
+
+    .quick-filter.active {
+      background: var(--text-primary);
+      border-color: var(--text-primary);
+      color: #fff;
+    }
+
+    /* --- Card count & Start --- */
+    .card-count {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-bottom: 1.25rem;
+      min-height: 1.4em;
+    }
+
+    .card-count strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .revise-start-btn {
+      display: block;
+      width: 100%;
+      padding: 0.8rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: var(--text-primary);
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .revise-start-btn:hover { opacity: 0.85; }
+    .revise-start-btn:active { transform: scale(0.98); }
+    .revise-start-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* --- Streak badge on picker --- */
+    .streak-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 1.25rem;
+    }
+
+    .streak-badge strong {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .streak-flame {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      color: #f59e0b;
+    }
+
+    /* ---- Session view ---- */
+    .revise-session { display: none; }
+    .revise-session.active { display: block; }
+
+    .session-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+
+    .session-btn-text {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.3em 0;
+      transition: color 0.2s;
+    }
+
+    .session-btn-text:hover { color: var(--text-primary); }
+
+    .session-counter {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    /* --- Progress bar --- */
+    .session-progress {
+      height: 4px;
+      background: var(--border-lighter);
+      border-radius: 2px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+
+    .session-progress-fill {
+      height: 100%;
+      background: var(--accent, #2d2a26);
+      border-radius: 2px;
+      transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      width: 0%;
+    }
+
+    /* --- Flashcard --- */
+    .flashcard-container {
+      perspective: 900px;
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    .flashcard {
+      position: relative;
+      width: 100%;
+      min-height: 280px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .flashcard.flipped {
+      transform: rotateY(180deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flashcard { transition: none; }
+      .session-progress-fill { transition: none; }
+    }
+
+    .flashcard-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.75rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      text-align: center;
+    }
+
+    .flashcard-front {
+      background: var(--bg-card);
+    }
+
+    .flashcard-back {
+      background: #f8f6f2;
+      transform: rotateY(180deg);
+    }
+
+    .flashcard-badge {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.3em 0.7em;
+      border-radius: 6px;
+      background: var(--accent-badge, #e8e4df);
+      color: var(--accent, #2d2a26);
+    }
+
+    .flashcard-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.5;
+      max-width: 400px;
+    }
+
+    .flashcard-back .flashcard-text {
+      font-weight: 400;
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+    }
+
+    .flashcard-hint {
+      position: absolute;
+      bottom: 1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* --- Answer buttons --- */
+    .answer-buttons {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .answer-buttons.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .answer-btn {
+      flex: 1;
+      max-width: 200px;
+      padding: 0.75rem 1rem;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .answer-btn:hover { opacity: 0.85; }
+    .answer-btn:active { transform: scale(0.97); }
+
+    .answer-btn--wrong {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
+    }
+
+    .answer-btn--right {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    /* ---- End screen ---- */
+    .revise-end { display: none; }
+    .revise-end.active { display: block; }
+
+    .end-card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 2.5rem 2rem;
+      text-align: center;
+      max-width: 440px;
+      margin: 0 auto;
+    }
+
+    .end-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0 0 0.3rem;
+    }
+
+    .end-accuracy {
+      font-family: 'Inter', sans-serif;
+      font-size: 2.4rem;
+      font-weight: 700;
+      color: var(--accent, #2d2a26);
+      margin: 0.5rem 0 0.25rem;
+    }
+
+    .end-accuracy-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin: 0 0 1.25rem;
+    }
+
+    .end-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .end-stat {
+      text-align: center;
+    }
+
+    .end-stat-value {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .end-stat-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.15rem;
+    }
+
+    .end-stat--correct .end-stat-value { color: #16a34a; }
+    .end-stat--wrong .end-stat-value { color: #dc2626; }
+    .end-stat--skipped .end-stat-value { color: var(--text-muted); }
+
+    .end-streak {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 1.5rem;
+    }
+
+    .end-streak strong {
+      color: var(--text-primary);
+    }
+
+    .end-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .end-btn {
+      display: block;
+      width: 100%;
+      padding: 0.7rem;
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      text-align: center;
+    }
+
+    .end-btn:hover { opacity: 0.85; }
+
+    .end-btn--primary {
+      background: var(--text-primary);
+      color: #fff;
+      border: none;
+    }
+
+    .end-btn--secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-light);
+    }
+
+    /* ---- Loading / empty ---- */
+    .revise-loading {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .revise-empty {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.5;
+    }
+
+    /* ---- Responsive ---- */
+    @media (max-width: 500px) {
+      .revise-wrap { padding: 1.25rem 1rem 3rem; }
+      .revise-title { font-size: 1.35rem; }
+      .flashcard { min-height: 240px; }
+      .flashcard-text { font-size: 1.05rem; }
+      .flashcard-back .flashcard-text { font-size: 0.95rem; }
+      .end-breakdown { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress"></div>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+        <span class="header-unit-label" id="header-unit-label">Flashcard Revision</span>
+      </a>
+
+      <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      <nav class="header-nav" id="header-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile overlay -->
+  <div class="mobile-overlay"></div>
+
+  <!-- Main content -->
+  <div class="revise-wrap">
+
+    <!-- ===== STATE 1: PICKER ===== -->
+    <div class="revise-picker" id="revise-picker">
+      <h1 class="revise-title">Flashcard Revision</h1>
+      <p class="revise-subtitle">Test your recall with spaced-repetition flashcards</p>
+
+      <div class="picker-field">
+        <label for="pick-subject">Subject</label>
+        <select id="pick-subject" disabled>
+          <option value="">Loading subjects...</option>
+        </select>
+      </div>
+
+      <div class="picker-field">
+        <label for="pick-unit">Unit</label>
+        <select id="pick-unit" disabled>
+          <option value="">Select a subject first</option>
+        </select>
+      </div>
+
+      <div class="picker-field">
+        <label for="pick-lesson">Lesson (optional)</label>
+        <select id="pick-lesson" disabled>
+          <option value="">All lessons in unit</option>
+        </select>
+      </div>
+
+      <div class="quick-filters">
+        <button class="quick-filter active" data-filter="all">All Cards</button>
+        <button class="quick-filter" data-filter="due">Due for Review</button>
+        <button class="quick-filter" data-filter="struggling">Struggling</button>
+      </div>
+
+      <div class="card-count" id="card-count"></div>
+
+      <button class="revise-start-btn" id="revise-start" disabled>Revise</button>
+
+      <div class="streak-badge" id="streak-badge" style="display: none;">
+        <svg class="streak-flame" viewBox="0 0 24 24" fill="currentColor"><path d="M12 23c-4.97 0-8-3.58-8-7.5 0-3.07 1.99-5.77 3.15-7.17.34-.41.97-.15.93.39-.18 2.22.59 3.83 1.7 4.89.15.15.4.04.38-.17-.33-3.71 2.13-7.77 5.4-9.37.46-.23.97.2.8.68-.83 2.29-.33 4.2.98 5.71.33.38.93.12.93-.37 0-1.62.6-3.2 1.73-4.59.28-.34.82-.18.88.25C21.63 10.87 20 14.5 20 15.5c0 3.92-3.03 7.5-8 7.5z"/></svg>
+        <span id="streak-text"></span>
+      </div>
+    </div>
+
+    <!-- ===== STATE 2: SESSION ===== -->
+    <div class="revise-session" id="revise-session">
+      <div class="session-top-bar">
+        <button class="session-btn-text" id="session-exit">Exit</button>
+        <span class="session-counter" id="session-counter"></span>
+        <button class="session-btn-text" id="session-skip">Skip</button>
+      </div>
+
+      <div class="session-progress">
+        <div class="session-progress-fill" id="session-progress-fill"></div>
+      </div>
+
+      <div class="flashcard-container">
+        <div class="flashcard" id="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <span class="flashcard-badge" id="card-badge"></span>
+            <div class="flashcard-text" id="card-front-text"></div>
+            <span class="flashcard-hint">Tap to reveal</span>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <span class="flashcard-badge" id="card-badge-back"></span>
+            <div class="flashcard-text" id="card-back-text"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="answer-buttons" id="answer-buttons">
+        <button class="answer-btn answer-btn--wrong" id="btn-wrong">Got it wrong</button>
+        <button class="answer-btn answer-btn--right" id="btn-right">Got it right</button>
+      </div>
+    </div>
+
+    <!-- ===== STATE 3: END SCREEN ===== -->
+    <div class="revise-end" id="revise-end">
+      <div class="end-card">
+        <h2 class="end-title">Session Complete</h2>
+        <div class="end-accuracy" id="end-accuracy">0%</div>
+        <div class="end-accuracy-label">accuracy</div>
+
+        <div class="end-breakdown">
+          <div class="end-stat end-stat--correct">
+            <span class="end-stat-value" id="end-correct">0</span>
+            <span class="end-stat-label">correct</span>
+          </div>
+          <div class="end-stat end-stat--wrong">
+            <span class="end-stat-value" id="end-wrong">0</span>
+            <span class="end-stat-label">incorrect</span>
+          </div>
+          <div class="end-stat end-stat--skipped">
+            <span class="end-stat-value" id="end-skipped">0</span>
+            <span class="end-stat-label">skipped</span>
+          </div>
+        </div>
+
+        <div class="end-streak" id="end-streak" style="display: none;"></div>
+
+        <div class="end-actions">
+          <button class="end-btn end-btn--primary" id="end-again">Study Again</button>
+          <button class="end-btn end-btn--secondary" id="end-change">Change Cards</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span class="site-footer-brand">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+      <span class="site-footer-copy">&copy; 2026 StudyVault</span>
+    </div>
+  </footer>
+
+  <script src="/js/school-session.js"></script>
+  <script src="/js/free-user.js"></script>
+  <script src="/js/cookie-consent.js"></script>
+  <script>(function(){try{var a=JSON.parse(sessionStorage.getItem('studyvault-auth'))||JSON.parse(localStorage.getItem('studyvault-auth'));if(a&&(a.role==='admin'||a.role==='teacher'))return}catch(e){}if(!SchoolSession.isActive()&&!FreeUser.isActive()){window.location.href='/'}})();</script>
+  <script src="/js/main.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* =============================================
+       StudyVault — Flashcard Revision Engine
+       ============================================= */
+
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    // ---- Leitner storage ----
+    var STORAGE_KEY = 'sv-flashcard-progress';
+    var BOX_INTERVALS = [0, 1, 2, 4, 7, 14]; // box 0 unused; box 1 = 1 day, box 5 = 14 days
+
+    function loadProgress() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return { cards: {}, streak: { current: 0, lastStudy: null } };
+    }
+
+    function saveProgress(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function getCardKey(lessonId, idx) {
+      return lessonId + ':' + idx;
+    }
+
+    function todayStr() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function isDue(cardProgress) {
+      if (!cardProgress || !cardProgress.nextReview) return true;
+      return cardProgress.nextReview <= todayStr();
+    }
+
+    function computeNextReview(box) {
+      var d = new Date();
+      d.setDate(d.getDate() + BOX_INTERVALS[box]);
+      return d.toISOString().slice(0, 10);
+    }
+
+    // ---- DOM refs ----
+    var pickerEl = document.getElementById('revise-picker');
+    var sessionEl = document.getElementById('revise-session');
+    var endEl = document.getElementById('revise-end');
+
+    var subjectSel = document.getElementById('pick-subject');
+    var unitSel = document.getElementById('pick-unit');
+    var lessonSel = document.getElementById('pick-lesson');
+    var cardCountEl = document.getElementById('card-count');
+    var startBtn = document.getElementById('revise-start');
+    var streakBadge = document.getElementById('streak-badge');
+    var streakText = document.getElementById('streak-text');
+
+    var sessionCounter = document.getElementById('session-counter');
+    var progressFill = document.getElementById('session-progress-fill');
+    var flashcard = document.getElementById('flashcard');
+    var frontText = document.getElementById('card-front-text');
+    var backText = document.getElementById('card-back-text');
+    var frontBadge = document.getElementById('card-badge');
+    var backBadge = document.getElementById('card-badge-back');
+    var answerBtns = document.getElementById('answer-buttons');
+    var btnWrong = document.getElementById('btn-wrong');
+    var btnRight = document.getElementById('btn-right');
+    var exitBtn = document.getElementById('session-exit');
+    var skipBtn = document.getElementById('session-skip');
+
+    // ---- State ----
+    var subjects = [];
+    var units = [];
+    var lessons = [];
+    var allCards = [];
+    var sessionCards = [];
+    var currentFilter = 'all';
+    var currentIdx = 0;
+    var results = { correct: 0, wrong: 0, skipped: 0 };
+    var lastSessionCards = [];
+    var currentAccent = null;
+
+    // ---- Helpers ----
+    function esc(str) {
+      var d = document.createElement('div');
+      d.textContent = str || '';
+      return d.innerHTML;
+    }
+
+    function shuffle(arr) {
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      }
+      return arr;
+    }
+
+    // ---- Streak ----
+    function updateStreak() {
+      var prog = loadProgress();
+      var today = todayStr();
+      var yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday = yesterday.toISOString().slice(0, 10);
+
+      if (prog.streak.lastStudy === today) {
+        // Already studied today, no change
+      } else if (prog.streak.lastStudy === yesterday) {
+        prog.streak.current++;
+        prog.streak.lastStudy = today;
+      } else {
+        prog.streak.current = 1;
+        prog.streak.lastStudy = today;
+      }
+      saveProgress(prog);
+      return prog.streak;
+    }
+
+    function renderStreak() {
+      var prog = loadProgress();
+      var streak = prog.streak || { current: 0, lastStudy: null };
+      if (streak.current > 0 && streak.lastStudy) {
+        var today = todayStr();
+        var yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday = yesterday.toISOString().slice(0, 10);
+        if (streak.lastStudy === today || streak.lastStudy === yesterday) {
+          streakBadge.style.display = '';
+          streakText.innerHTML = '<strong>' + streak.current + '-day</strong> study streak';
+        } else {
+          streakBadge.style.display = 'none';
+        }
+      } else {
+        streakBadge.style.display = 'none';
+      }
+    }
+
+    // ---- Determine auth context (same pattern as browse-loader) ----
+    function isStaff() {
+      try {
+        var a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+        return a && (a.role === 'admin' || a.role === 'teacher');
+      } catch (e) { return false; }
+    }
+
+    function getSchoolId() {
+      if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive()) {
+        return SchoolSession.getSchoolId();
+      }
+      return null;
+    }
+
+    function hasBespoke(slug) {
+      return typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(slug);
+    }
+
+    function isSubscribed(slug) {
+      return typeof SchoolSession !== 'undefined' && SchoolSession.isSubscribed(slug);
+    }
+
+    // ---- Load subjects ----
+    async function loadSubjects() {
+      var schoolId = getSchoolId();
+      var query;
+
+      if (schoolId) {
+        // School student: fetch bespoke + subscribed generic subjects
+        // Bespoke subjects for this school
+        var bespokeRes = await sb
+          .from('subjects')
+          .select('id, slug, name, exam_board, color, settings')
+          .eq('school_id', schoolId)
+          .order('name');
+        var bespoke = bespokeRes.data || [];
+
+        // Generic subjects this school subscribes to (but doesn't have bespoke)
+        var bespokeSlugs = bespoke.map(function (s) { return s.slug; });
+        var genericRes = await sb
+          .from('subjects')
+          .select('id, slug, name, exam_board, color, settings')
+          .is('school_id', null)
+          .order('name');
+        var generic = genericRes.data || [];
+
+        // Merge: bespoke first, then generic that the school subscribes to but doesn't have bespoke for
+        subjects = bespoke.slice();
+        generic.forEach(function (g) {
+          if (bespokeSlugs.indexOf(g.slug) === -1 && isSubscribed(g.slug)) {
+            subjects.push(g);
+          }
+        });
+      } else if (typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+        // Free user: show only their selected generic subjects
+        var selectedSlugs = FreeUser.getSubjectSlugs();
+        if (selectedSlugs.length > 0) {
+          var res = await sb
+            .from('subjects')
+            .select('id, slug, name, exam_board, color, settings')
+            .is('school_id', null)
+            .in('slug', selectedSlugs)
+            .order('name');
+          subjects = res.data || [];
+        }
+      } else if (isStaff()) {
+        // Staff: show all
+        var res = await sb
+          .from('subjects')
+          .select('id, slug, name, exam_board, color, settings')
+          .order('name');
+        subjects = res.data || [];
+      }
+
+      // Populate dropdown
+      subjectSel.innerHTML = '<option value="">Choose a subject</option>';
+      subjects.forEach(function (s) {
+        var opt = document.createElement('option');
+        opt.value = s.id;
+        opt.textContent = s.name + (s.exam_board ? ' (' + s.exam_board + ')' : '');
+        opt.dataset.slug = s.slug;
+        subjectSel.appendChild(opt);
+      });
+      subjectSel.disabled = false;
+    }
+
+    // ---- Load units ----
+    async function loadUnits(subjectId) {
+      unitSel.innerHTML = '<option value="">Loading...</option>';
+      unitSel.disabled = true;
+      lessonSel.innerHTML = '<option value="">All lessons in unit</option>';
+      lessonSel.disabled = true;
+      allCards = [];
+      updateCardCount();
+
+      var res = await sb
+        .from('units')
+        .select('id, slug, name, accent, accent_light, accent_badge, body_class, sort_order')
+        .eq('subject_id', subjectId)
+        .order('sort_order');
+
+      units = res.data || [];
+
+      unitSel.innerHTML = '<option value="">Choose a unit</option>';
+      units.forEach(function (u) {
+        var opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.name;
+        opt.dataset.slug = u.slug;
+        opt.dataset.accent = u.accent || '';
+        opt.dataset.accentLight = u.accent_light || '';
+        opt.dataset.accentBadge = u.accent_badge || '';
+        opt.dataset.bodyClass = u.body_class || '';
+        unitSel.appendChild(opt);
+      });
+      unitSel.disabled = false;
+    }
+
+    // ---- Load lessons ----
+    async function loadLessons(unitId) {
+      lessonSel.innerHTML = '<option value="">Loading...</option>';
+      lessonSel.disabled = true;
+
+      var res = await sb
+        .from('lessons')
+        .select('id, lesson_number, title, glossary_terms, knowledge_checks')
+        .eq('unit_id', unitId)
+        .eq('status', 'live')
+        .order('lesson_number');
+
+      lessons = res.data || [];
+
+      lessonSel.innerHTML = '<option value="">All lessons in unit</option>';
+      lessons.forEach(function (l) {
+        var opt = document.createElement('option');
+        opt.value = l.id;
+        opt.textContent = 'Lesson ' + l.lesson_number + ': ' + l.title;
+        lessonSel.appendChild(opt);
+      });
+      lessonSel.disabled = false;
+
+      // Build cards for all lessons in unit
+      buildCards(lessons);
+    }
+
+    // ---- Build flashcards from lesson data ----
+    function buildCards(lessonList) {
+      allCards = [];
+
+      lessonList.forEach(function (lesson) {
+        // Glossary terms -> flashcards
+        var glossary = lesson.glossary_terms || [];
+        glossary.forEach(function (t, i) {
+          allCards.push({
+            lessonId: lesson.id,
+            index: 'g' + i,
+            front: t.term,
+            back: t.definition,
+            type: 'glossary',
+            badgeLabel: 'Term'
+          });
+        });
+
+        // Knowledge checks -> flashcards
+        var kcs = lesson.knowledge_checks || [];
+        kcs.forEach(function (kc, i) {
+          if (kc.type === 'mcq' && kc.options && typeof kc.correct === 'number') {
+            allCards.push({
+              lessonId: lesson.id,
+              index: 'k' + i,
+              front: kc.q,
+              back: kc.options[kc.correct],
+              type: 'question',
+              badgeLabel: 'Question'
+            });
+          } else if (kc.type === 'fill' && kc.options && typeof kc.correct === 'number') {
+            allCards.push({
+              lessonId: lesson.id,
+              index: 'f' + i,
+              front: kc.q,
+              back: kc.options[kc.correct],
+              type: 'fill',
+              badgeLabel: 'Fill in the blank'
+            });
+          }
+        });
+      });
+
+      updateCardCount();
+    }
+
+    // ---- Filter cards ----
+    function getFilteredCards() {
+      var prog = loadProgress();
+      var today = todayStr();
+
+      if (currentFilter === 'all') {
+        return allCards.slice();
+      }
+
+      if (currentFilter === 'due') {
+        return allCards.filter(function (c) {
+          var key = getCardKey(c.lessonId, c.index);
+          var cp = prog.cards[key];
+          return isDue(cp);
+        });
+      }
+
+      if (currentFilter === 'struggling') {
+        return allCards.filter(function (c) {
+          var key = getCardKey(c.lessonId, c.index);
+          var cp = prog.cards[key];
+          return cp && cp.box === 1;
+        });
+      }
+
+      return allCards.slice();
+    }
+
+    function updateCardCount() {
+      var filtered = getFilteredCards();
+      if (allCards.length === 0) {
+        cardCountEl.textContent = '';
+        startBtn.disabled = true;
+      } else if (filtered.length === 0) {
+        cardCountEl.innerHTML = 'No cards match this filter';
+        startBtn.disabled = true;
+      } else {
+        cardCountEl.innerHTML = '<strong>' + filtered.length + '</strong> card' + (filtered.length === 1 ? '' : 's') + ' ready';
+        startBtn.disabled = false;
+      }
+    }
+
+    // ---- Apply accent colour from selected unit ----
+    function applyAccent() {
+      var opt = unitSel.options[unitSel.selectedIndex];
+      if (opt && opt.dataset.accent) {
+        currentAccent = opt.dataset.accent;
+        document.documentElement.style.setProperty('--accent', opt.dataset.accent);
+        if (opt.dataset.accentLight) document.documentElement.style.setProperty('--accent-light', opt.dataset.accentLight);
+        if (opt.dataset.accentBadge) document.documentElement.style.setProperty('--accent-badge', opt.dataset.accentBadge);
+        if (opt.dataset.bodyClass) document.body.classList.add(opt.dataset.bodyClass);
+      }
+    }
+
+    // ---- Events: Picker ----
+    subjectSel.addEventListener('change', function () {
+      var id = subjectSel.value;
+      if (id) {
+        loadUnits(id);
+      } else {
+        unitSel.innerHTML = '<option value="">Select a subject first</option>';
+        unitSel.disabled = true;
+        lessonSel.innerHTML = '<option value="">All lessons in unit</option>';
+        lessonSel.disabled = true;
+        allCards = [];
+        updateCardCount();
+      }
+    });
+
+    unitSel.addEventListener('change', function () {
+      var id = unitSel.value;
+      if (id) {
+        loadLessons(id);
+        applyAccent();
+      } else {
+        lessonSel.innerHTML = '<option value="">All lessons in unit</option>';
+        lessonSel.disabled = true;
+        allCards = [];
+        updateCardCount();
+      }
+    });
+
+    lessonSel.addEventListener('change', function () {
+      var id = lessonSel.value;
+      if (id) {
+        // Filter to single lesson
+        var single = lessons.filter(function (l) { return String(l.id) === id; });
+        buildCards(single);
+      } else {
+        // All lessons in unit
+        buildCards(lessons);
+      }
+    });
+
+    // Quick filter buttons
+    document.querySelectorAll('.quick-filter').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.quick-filter').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentFilter = btn.dataset.filter;
+        updateCardCount();
+      });
+    });
+
+    // ---- Start session ----
+    startBtn.addEventListener('click', function () {
+      var filtered = getFilteredCards();
+      if (filtered.length === 0) return;
+
+      sessionCards = shuffle(filtered.slice());
+      lastSessionCards = sessionCards.slice();
+      currentIdx = 0;
+      results = { correct: 0, wrong: 0, skipped: 0 };
+
+      pickerEl.classList.add('hidden');
+      endEl.classList.remove('active');
+      sessionEl.classList.add('active');
+
+      showCard();
+    });
+
+    // ---- Show card ----
+    function showCard() {
+      if (currentIdx >= sessionCards.length) {
+        endSession();
+        return;
+      }
+
+      var card = sessionCards[currentIdx];
+      var total = sessionCards.length;
+
+      // Update counter & progress
+      sessionCounter.textContent = 'Card ' + (currentIdx + 1) + ' of ' + total;
+      progressFill.style.width = ((currentIdx / total) * 100) + '%';
+
+      // Set card content
+      frontText.textContent = card.front;
+      backText.textContent = card.back;
+      frontBadge.textContent = card.badgeLabel;
+      backBadge.textContent = card.badgeLabel;
+
+      // Reset flip state
+      flashcard.classList.remove('flipped');
+      answerBtns.classList.remove('visible');
+
+      // Set card height dynamically based on content
+      setCardHeight();
+    }
+
+    function setCardHeight() {
+      // Measure both faces and set container to tallest
+      var faces = flashcard.querySelectorAll('.flashcard-face');
+      var maxH = 280;
+      faces.forEach(function (f) {
+        f.style.position = 'relative';
+        var h = f.scrollHeight;
+        if (h > maxH) maxH = h;
+        f.style.position = '';
+      });
+      flashcard.style.height = maxH + 'px';
+    }
+
+    // ---- Flip ----
+    flashcard.addEventListener('click', function () {
+      if (!flashcard.classList.contains('flipped')) {
+        flashcard.classList.add('flipped');
+        answerBtns.classList.add('visible');
+      }
+    });
+
+    // Keyboard support
+    document.addEventListener('keydown', function (e) {
+      if (!sessionEl.classList.contains('active')) return;
+
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        if (!flashcard.classList.contains('flipped')) {
+          flashcard.classList.add('flipped');
+          answerBtns.classList.add('visible');
+        }
+      } else if (e.key === 'ArrowLeft' || e.key === '1') {
+        if (flashcard.classList.contains('flipped')) {
+          markCard(false);
+        }
+      } else if (e.key === 'ArrowRight' || e.key === '2') {
+        if (flashcard.classList.contains('flipped')) {
+          markCard(true);
+        }
+      } else if (e.key === 's' || e.key === 'S') {
+        skipCard();
+      } else if (e.key === 'Escape') {
+        exitSession();
+      }
+    });
+
+    // ---- Mark card ----
+    function markCard(correct) {
+      var card = sessionCards[currentIdx];
+      var key = getCardKey(card.lessonId, card.index);
+      var prog = loadProgress();
+
+      if (!prog.cards[key]) {
+        prog.cards[key] = { box: 1, nextReview: todayStr(), attempts: 0, correct: 0 };
+      }
+
+      var cp = prog.cards[key];
+      cp.attempts++;
+
+      if (correct) {
+        cp.correct++;
+        cp.box = Math.min(cp.box + 1, 5);
+        results.correct++;
+      } else {
+        cp.box = 1;
+        results.wrong++;
+      }
+
+      cp.nextReview = computeNextReview(cp.box);
+      saveProgress(prog);
+
+      currentIdx++;
+      showCard();
+    }
+
+    btnWrong.addEventListener('click', function () { markCard(false); });
+    btnRight.addEventListener('click', function () { markCard(true); });
+
+    // ---- Skip ----
+    function skipCard() {
+      results.skipped++;
+      currentIdx++;
+      showCard();
+    }
+
+    skipBtn.addEventListener('click', skipCard);
+
+    // ---- Exit ----
+    function exitSession() {
+      sessionEl.classList.remove('active');
+      pickerEl.classList.remove('hidden');
+      updateCardCount();
+      renderStreak();
+    }
+
+    exitBtn.addEventListener('click', exitSession);
+
+    // ---- End session ----
+    function endSession() {
+      sessionEl.classList.remove('active');
+
+      var streak = updateStreak();
+
+      // Calc accuracy
+      var answered = results.correct + results.wrong;
+      var accuracy = answered > 0 ? Math.round((results.correct / answered) * 100) : 0;
+
+      document.getElementById('end-accuracy').textContent = accuracy + '%';
+      document.getElementById('end-correct').textContent = results.correct;
+      document.getElementById('end-wrong').textContent = results.wrong;
+      document.getElementById('end-skipped').textContent = results.skipped;
+
+      var endStreakEl = document.getElementById('end-streak');
+      if (streak.current > 1) {
+        endStreakEl.innerHTML = 'You\'re on a <strong>' + streak.current + '-day</strong> study streak. Keep it going!';
+        endStreakEl.style.display = '';
+      } else if (streak.current === 1) {
+        endStreakEl.innerHTML = 'Day 1 of your study streak. Come back tomorrow to keep it going!';
+        endStreakEl.style.display = '';
+      } else {
+        endStreakEl.style.display = 'none';
+      }
+
+      // Complete progress bar
+      progressFill.style.width = '100%';
+
+      endEl.classList.add('active');
+    }
+
+    // ---- End screen actions ----
+    document.getElementById('end-again').addEventListener('click', function () {
+      // Re-run same selection
+      sessionCards = shuffle(lastSessionCards.slice());
+      currentIdx = 0;
+      results = { correct: 0, wrong: 0, skipped: 0 };
+
+      endEl.classList.remove('active');
+      sessionEl.classList.add('active');
+      showCard();
+    });
+
+    document.getElementById('end-change').addEventListener('click', function () {
+      endEl.classList.remove('active');
+      pickerEl.classList.remove('hidden');
+      updateCardCount();
+      renderStreak();
+    });
+
+    // ---- Init ----
+    async function init() {
+      try {
+        await loadSubjects();
+        renderStreak();
+      } catch (err) {
+        console.error('Revise init error:', err);
+        cardCountEl.textContent = 'Failed to load subjects. Please refresh.';
+      }
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
+<script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>
