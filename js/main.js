@@ -1972,6 +1972,9 @@ function initLessonProgress() {
   // Knowledge check
   tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', icon: icons.kc, iconClass: 'lesson-progress-icon--kc', auto: true });
 
+  // Flashcards
+  tasks.push({ id: 'flashcards', label: 'Revise with flashcards', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="2" y="4" width="16" height="14" rx="2"/><rect x="6" y="6" width="16" height="14" rx="2"/></svg>', iconClass: 'lesson-progress-icon--flashcards', auto: true });
+
   // Revision task
   tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
 
@@ -2033,6 +2036,15 @@ function initLessonProgress() {
       });
     });
   }).observe(document.body, { childList: true, subtree: true });
+
+  // Auto-tick flashcards on completion
+  document.addEventListener('flashcards-completed', function () {
+    state['flashcards'] = true;
+    saveState(state);
+    var fcItem = section.querySelector('[data-task="flashcards"]');
+    if (fcItem) fcItem.classList.add('completed');
+    updateProg();
+  });
 }
 
 /* --- Flashcard Modal (inline revision overlay on lesson page) --- */
@@ -2417,6 +2429,9 @@ function openFlashcardModal() {
 
     progressFill.style.width = '100%';
     endEl.style.display = '';
+
+    // Dispatch event for lesson progress tracker auto-tick
+    document.dispatchEvent(new CustomEvent('flashcards-completed'));
   }
 
   // ---- End screen actions ----
