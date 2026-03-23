@@ -301,6 +301,32 @@
       font-weight: 400;
       font-size: 1.05rem;
       color: var(--text-secondary);
+      position: relative;
+      display: inline-block;
+    }
+
+    .flashcard-back .flashcard-text::after {
+      content: '';
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      height: 2px;
+      width: 0;
+      background: var(--accent, #2d2a26);
+      opacity: 0.3;
+      border-radius: 1px;
+    }
+
+    .flashcard.flipped .flashcard-back .flashcard-text::after {
+      width: 100%;
+      transition: width 2s linear;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .flashcard.flipped .flashcard-back .flashcard-text::after {
+        width: 100%;
+        transition: none;
+      }
     }
 
     .flashcard-hint {
