@@ -323,7 +323,15 @@
 
     .answer-buttons.visible {
       opacity: 1;
+    }
+
+    .answer-buttons.enabled {
       pointer-events: auto;
+    }
+
+    .answer-btn.waiting {
+      opacity: 0.4;
+      cursor: not-allowed;
     }
 
     .answer-btn {
@@ -1115,6 +1123,9 @@
       // Reset flip state
       flashcard.classList.remove('flipped');
       answerBtns.classList.remove('visible');
+      answerBtns.classList.remove('enabled');
+      answersEnabled = false;
+      if (answerUnlockTimer) { clearTimeout(answerUnlockTimer); answerUnlockTimer = null; }
 
       // Set card height dynamically based on content
       setCardHeight();
@@ -1134,12 +1145,28 @@
     }
 
     // ---- Flip ----
-    flashcard.addEventListener('click', function () {
-      if (!flashcard.classList.contains('flipped')) {
-        flashcard.classList.add('flipped');
-        answerBtns.classList.add('visible');
-      }
-    });
+    var answerUnlockTimer = null;
+    var answersEnabled = false;
+
+    function flipAndDelay() {
+      if (flashcard.classList.contains('flipped')) return;
+      flashcard.classList.add('flipped');
+      answerBtns.classList.add('visible');
+      answerBtns.classList.remove('enabled');
+      answersEnabled = false;
+
+      // Add waiting state to buttons
+      answerBtns.querySelectorAll('.answer-btn').forEach(function (b) { b.classList.add('waiting'); });
+
+      // Enable after 2 seconds
+      answerUnlockTimer = setTimeout(function () {
+        answerBtns.classList.add('enabled');
+        answersEnabled = true;
+        answerBtns.querySelectorAll('.answer-btn').forEach(function (b) { b.classList.remove('waiting'); });
+      }, 2000);
+    }
+
+    flashcard.addEventListener('click', flipAndDelay);
 
     // Keyboard support
     document.addEventListener('keydown', function (e) {
@@ -1147,16 +1174,13 @@
 
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        if (!flashcard.classList.contains('flipped')) {
-          flashcard.classList.add('flipped');
-          answerBtns.classList.add('visible');
-        }
+        flipAndDelay();
       } else if (e.key === 'ArrowLeft' || e.key === '1') {
-        if (flashcard.classList.contains('flipped')) {
+        if (flashcard.classList.contains('flipped') && answersEnabled) {
           markCard(false);
         }
       } else if (e.key === 'ArrowRight' || e.key === '2') {
-        if (flashcard.classList.contains('flipped')) {
+        if (flashcard.classList.contains('flipped') && answersEnabled) {
           markCard(true);
         }
       } else if (e.key === 's' || e.key === 'S') {
