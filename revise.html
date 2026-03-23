@@ -512,6 +512,107 @@
       line-height: 1.5;
     }
 
+    /* --- Box distribution bar --- */
+    .box-distribution {
+      margin-bottom: 1.25rem;
+    }
+
+    .box-bar {
+      display: flex;
+      height: 22px;
+      border-radius: 6px;
+      overflow: hidden;
+      background: var(--border-lighter);
+    }
+
+    .box-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fff;
+      min-width: 0;
+      transition: flex 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .box-segment.box-1 { background: #ef4444; }
+    .box-segment.box-2 { background: #f97316; }
+    .box-segment.box-3 { background: #eab308; }
+    .box-segment.box-4 { background: #3b82f6; }
+    .box-segment.box-5 { background: #22c55e; }
+
+    .box-labels {
+      display: flex;
+      justify-content: space-between;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      padding: 0 0.1rem;
+    }
+
+    .box-distribution--empty {
+      display: none;
+    }
+
+    /* --- Shuffle toggle --- */
+    .shuffle-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      margin-bottom: 1.25rem;
+      user-select: none;
+    }
+
+    .shuffle-toggle input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    /* --- Speaker (TTS) button on cards --- */
+    .flashcard-speak {
+      position: absolute;
+      top: 0.85rem;
+      right: 0.85rem;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid var(--border-lighter);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      z-index: 2;
+      padding: 0;
+    }
+
+    .flashcard-speak:hover {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+      background: var(--bg-card);
+    }
+
+    .flashcard-speak.speaking {
+      color: var(--accent, #2d2a26);
+      border-color: var(--accent, #2d2a26);
+    }
+
+    .flashcard-speak svg {
+      width: 16px;
+      height: 16px;
+    }
+
     /* ---- Responsive ---- */
     @media (max-width: 500px) {
       .revise-wrap { padding: 1.25rem 1rem 3rem; }
@@ -520,6 +621,7 @@
       .flashcard-text { font-size: 1.05rem; }
       .flashcard-back .flashcard-text { font-size: 0.95rem; }
       .end-breakdown { gap: 1rem; }
+      .box-labels { font-size: 0.6rem; }
     }
   </style>
 </head>
@@ -586,6 +688,17 @@
 
       <div class="card-count" id="card-count"></div>
 
+      <div class="box-distribution box-distribution--empty" id="box-distribution">
+        <div class="box-bar" id="box-bar"></div>
+        <div class="box-labels">
+          <span>New</span><span>Learning</span><span>Reviewing</span><span>Familiar</span><span>Mastered</span>
+        </div>
+      </div>
+
+      <label class="shuffle-toggle">
+        <input type="checkbox" id="shuffle-toggle" checked> Shuffle cards
+      </label>
+
       <button class="revise-start-btn" id="revise-start" disabled>Revise</button>
 
       <div class="streak-badge" id="streak-badge" style="display: none;">
@@ -610,11 +723,17 @@
         <div class="flashcard" id="flashcard">
           <div class="flashcard-face flashcard-front">
             <span class="flashcard-badge" id="card-badge"></span>
+            <button class="flashcard-speak" id="speak-front" aria-label="Read aloud" title="Read aloud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            </button>
             <div class="flashcard-text" id="card-front-text"></div>
             <span class="flashcard-hint">Tap to reveal</span>
           </div>
           <div class="flashcard-face flashcard-back">
             <span class="flashcard-badge" id="card-badge-back"></span>
+            <button class="flashcard-speak" id="speak-back" aria-label="Read aloud" title="Read aloud">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            </button>
             <div class="flashcard-text" id="card-back-text"></div>
           </div>
         </div>
@@ -758,6 +877,10 @@
     var lastSessionCards = [];
     var currentAccent = null;
 
+    var shuffleToggle = document.getElementById('shuffle-toggle');
+    var boxDistEl = document.getElementById('box-distribution');
+    var boxBarEl = document.getElementById('box-bar');
+
     // ---- Helpers ----
     function esc(str) {
       var d = document.createElement('div');
@@ -765,13 +888,61 @@
       return d.innerHTML;
     }
 
-    function shuffle(arr) {
+    function fisherYatesShuffle(arr) {
       for (var i = arr.length - 1; i > 0; i--) {
         var j = Math.floor(Math.random() * (i + 1));
         var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
       }
       return arr;
     }
+
+    // Keep original for backward compat — uses toggle state
+    function shuffle(arr) {
+      return fisherYatesShuffle(arr);
+    }
+
+    function orderCards(cards) {
+      if (shuffleToggle.checked) {
+        return fisherYatesShuffle(cards);
+      }
+      // Sequential: sort by lessonId then card index
+      return cards.sort(function (a, b) {
+        if (a.lessonNumber !== b.lessonNumber) return a.lessonNumber - b.lessonNumber;
+        return String(a.index).localeCompare(String(b.index));
+      });
+    }
+
+    // ---- Speech synthesis ----
+    function speakText(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'en-GB';
+        utterance.rate = 0.9;
+
+        // Highlight speaking state
+        var btns = document.querySelectorAll('.flashcard-speak');
+        btns.forEach(function (b) { b.classList.add('speaking'); });
+        utterance.onend = function () {
+          btns.forEach(function (b) { b.classList.remove('speaking'); });
+        };
+        utterance.onerror = function () {
+          btns.forEach(function (b) { b.classList.remove('speaking'); });
+        };
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // TTS button listeners (stopPropagation so tap doesn't flip card)
+    document.getElementById('speak-front').addEventListener('click', function (e) {
+      e.stopPropagation();
+      speakText(frontText.textContent);
+    });
+    document.getElementById('speak-back').addEventListener('click', function (e) {
+      e.stopPropagation();
+      speakText(backText.textContent);
+    });
 
     // ---- Streak ----
     function updateStreak() {
@@ -969,6 +1140,7 @@
         glossary.forEach(function (t, i) {
           allCards.push({
             lessonId: lesson.id,
+            lessonNumber: lesson.lesson_number,
             index: 'g' + i,
             front: t.term,
             back: t.definition,
@@ -983,6 +1155,7 @@
           if (kc.type === 'mcq' && kc.options && typeof kc.correct === 'number') {
             allCards.push({
               lessonId: lesson.id,
+              lessonNumber: lesson.lesson_number,
               index: 'k' + i,
               front: kc.q,
               back: kc.options[kc.correct],
@@ -992,6 +1165,7 @@
           } else if (kc.type === 'fill' && kc.options && typeof kc.correct === 'number') {
             allCards.push({
               lessonId: lesson.id,
+              lessonNumber: lesson.lesson_number,
               index: 'f' + i,
               front: kc.q,
               back: kc.options[kc.correct],
@@ -1003,6 +1177,57 @@
       });
 
       updateCardCount();
+    }
+
+    // ---- Box distribution bar ----
+    function renderBoxDistribution() {
+      var prog = loadProgress();
+      var filtered = getFilteredCards();
+
+      if (filtered.length === 0) {
+        boxDistEl.classList.add('box-distribution--empty');
+        return;
+      }
+
+      // Count cards per box (1-5); unseen cards go in box 0 (displayed as "New")
+      var counts = [0, 0, 0, 0, 0, 0]; // index 0 = new/unseen, 1-5 = boxes
+      filtered.forEach(function (c) {
+        var key = getCardKey(c.lessonId, c.index);
+        var cp = prog.cards[key];
+        if (!cp) {
+          counts[0]++;
+        } else {
+          counts[cp.box] = (counts[cp.box] || 0) + 1;
+        }
+      });
+
+      // Map: new(0) -> box-1 display, box 1 -> box-1, box 2 -> box-2, etc.
+      // Combine "new" (unseen) with box 1 as both are "New/Learning"
+      var boxCounts = [
+        counts[0] + counts[1], // Box 1: New
+        counts[2],              // Box 2: Learning
+        counts[3],              // Box 3: Reviewing
+        counts[4],              // Box 4: Familiar
+        counts[5]               // Box 5: Mastered
+      ];
+
+      var hasAny = boxCounts.some(function (c) { return c > 0; });
+      if (!hasAny) {
+        boxDistEl.classList.add('box-distribution--empty');
+        return;
+      }
+
+      boxDistEl.classList.remove('box-distribution--empty');
+
+      var html = '';
+      var boxClasses = ['box-1', 'box-2', 'box-3', 'box-4', 'box-5'];
+      boxCounts.forEach(function (count, i) {
+        if (count > 0) {
+          html += '<span class="box-segment ' + boxClasses[i] + '" style="flex:' + count + '">' + count + '</span>';
+        }
+      });
+
+      boxBarEl.innerHTML = html;
     }
 
     // ---- Filter cards ----
@@ -1045,6 +1270,7 @@
         cardCountEl.innerHTML = '<strong>' + filtered.length + '</strong> card' + (filtered.length === 1 ? '' : 's') + ' ready';
         startBtn.disabled = false;
       }
+      renderBoxDistribution();
     }
 
     // ---- Apply accent colour from selected unit ----
@@ -1114,7 +1340,7 @@
       var filtered = getFilteredCards();
       if (filtered.length === 0) return;
 
-      sessionCards = shuffle(filtered.slice());
+      sessionCards = orderCards(filtered.slice());
       lastSessionCards = sessionCards.slice();
       currentIdx = 0;
       results = { correct: 0, wrong: 0, skipped: 0 };
@@ -1122,6 +1348,9 @@
       pickerEl.classList.add('hidden');
       endEl.classList.remove('active');
       sessionEl.classList.add('active');
+
+      // Cancel any ongoing speech when starting
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
 
       showCard();
     });
@@ -1274,6 +1503,7 @@
 
     // ---- Exit ----
     function exitSession() {
+      cancelSpeech();
       sessionEl.classList.remove('active');
       pickerEl.classList.remove('hidden');
       updateCardCount();
@@ -1284,6 +1514,7 @@
 
     // ---- End session ----
     function endSession() {
+      cancelSpeech();
       sessionEl.classList.remove('active');
 
       var streak = updateStreak();
@@ -1317,12 +1548,13 @@
     // ---- End screen actions ----
     document.getElementById('end-again').addEventListener('click', function () {
       // Re-run same selection
-      sessionCards = shuffle(lastSessionCards.slice());
+      sessionCards = orderCards(lastSessionCards.slice());
       currentIdx = 0;
       results = { correct: 0, wrong: 0, skipped: 0 };
 
       endEl.classList.remove('active');
       sessionEl.classList.add('active');
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
       showCard();
     });
 
@@ -1333,11 +1565,75 @@
       renderStreak();
     });
 
+    // ---- URL param auto-selection ----
+    async function autoSelectFromParams() {
+      var params = new URLSearchParams(window.location.search);
+      var subjectSlug = params.get('subject');
+      var unitSlug = params.get('unit');
+      var lessonNum = params.get('lesson');
+
+      if (!subjectSlug) return;
+
+      // Find and select the subject by slug
+      var subjectOpt = null;
+      for (var i = 0; i < subjectSel.options.length; i++) {
+        if (subjectSel.options[i].dataset && subjectSel.options[i].dataset.slug === subjectSlug) {
+          subjectOpt = subjectSel.options[i];
+          break;
+        }
+      }
+      if (!subjectOpt) return;
+
+      subjectSel.value = subjectOpt.value;
+      await loadUnits(subjectOpt.value);
+
+      if (!unitSlug) return;
+
+      // Find and select the unit by slug
+      var unitOpt = null;
+      for (var i = 0; i < unitSel.options.length; i++) {
+        if (unitSel.options[i].dataset && unitSel.options[i].dataset.slug === unitSlug) {
+          unitOpt = unitSel.options[i];
+          break;
+        }
+      }
+      if (!unitOpt) return;
+
+      unitSel.value = unitOpt.value;
+      applyAccent();
+      await loadLessons(unitOpt.value);
+
+      if (lessonNum) {
+        // Find and select the lesson by number
+        var targetNum = parseInt(lessonNum, 10);
+        for (var i = 0; i < lessons.length; i++) {
+          if (lessons[i].lesson_number === targetNum) {
+            lessonSel.value = lessons[i].id;
+            var single = [lessons[i]];
+            buildCards(single);
+            break;
+          }
+        }
+      }
+
+      // Auto-start the session if cards are available
+      var filtered = getFilteredCards();
+      if (filtered.length > 0) {
+        startBtn.click();
+      }
+    }
+
+    // ---- Cancel speech on exit / change ----
+    function cancelSpeech() {
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+    }
+
     // ---- Init ----
     async function init() {
       try {
         await loadSubjects();
         renderStreak();
+        await autoSelectFromParams();
       } catch (err) {
         console.error('Revise init error:', err);
         cardCountEl.textContent = 'Failed to load subjects. Please refresh.';

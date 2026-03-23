@@ -304,6 +304,27 @@
       videoSection.style.display = '';
     }
 
+    // Flashcard revision link in sidebar
+    (function () {
+      var kcSection = document.querySelector('.sidebar-knowledge-check');
+      if (kcSection) {
+        var flashcardSection = document.createElement('div');
+        flashcardSection.className = 'sidebar-section sidebar-flashcard-section';
+        flashcardSection.innerHTML =
+          '<a href="/revise?subject=' + encodeURIComponent(subjectSlug) +
+          '&unit=' + encodeURIComponent(unitSlug) +
+          '&lesson=' + lesson.lesson_number +
+          '" class="sidebar-flashcard-link">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0">' +
+              '<rect x="2" y="4" width="14" height="12" rx="2"/>' +
+              '<rect x="8" y="8" width="14" height="12" rx="2"/>' +
+            '</svg>' +
+            '<span>Revise with Flashcards</span>' +
+          '</a>';
+        kcSection.parentElement.insertBefore(flashcardSection, kcSection.nextSibling);
+      }
+    })();
+
     // Related media
     renderRelatedMedia(lesson.related_media || []);
 
