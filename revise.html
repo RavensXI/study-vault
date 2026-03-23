@@ -1206,7 +1206,7 @@
 
       var res = await sb
         .from('lessons')
-        .select('id, lesson_number, title, glossary_terms, knowledge_checks')
+        .select('id, lesson_number, title, glossary_terms, flashcard_questions')
         .eq('unit_id', unitId)
         .eq('status', 'live')
         .order('lesson_number');
@@ -1245,30 +1245,18 @@
           });
         });
 
-        // Knowledge checks -> flashcards
-        var kcs = lesson.knowledge_checks || [];
-        kcs.forEach(function (kc, i) {
-          if (kc.type === 'mcq' && kc.options && typeof kc.correct === 'number') {
-            allCards.push({
-              lessonId: lesson.id,
-              lessonNumber: lesson.lesson_number,
-              index: 'k' + i,
-              front: kc.q,
-              back: kc.options[kc.correct],
-              type: 'question',
-              badgeLabel: 'Question'
-            });
-          } else if (kc.type === 'fill' && kc.options && typeof kc.correct === 'number') {
-            allCards.push({
-              lessonId: lesson.id,
-              lessonNumber: lesson.lesson_number,
-              index: 'f' + i,
-              front: kc.q,
-              back: kc.options[kc.correct],
-              type: 'fill',
-              badgeLabel: 'Fill in the blank'
-            });
-          }
+        // Flashcard-specific questions (separate from knowledge checks)
+        var fcqs = lesson.flashcard_questions || [];
+        fcqs.forEach(function (item, i) {
+          allCards.push({
+            lessonId: lesson.id,
+            lessonNumber: lesson.lesson_number,
+            index: 'q' + i,
+            front: item.q || item.question,
+            back: item.a || item.answer,
+            type: 'question',
+            badgeLabel: 'Question'
+          });
         });
       });
 

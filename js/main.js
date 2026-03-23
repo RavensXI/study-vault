@@ -2083,26 +2083,17 @@ function openFlashcardModal() {
     });
   });
 
-  kc.forEach(function (item, i) {
-    if (item.type === 'mcq' && item.options && typeof item.correct === 'number') {
-      allCards.push({
-        lessonId: lessonId,
-        index: 'k' + i,
-        front: item.q,
-        back: item.options[item.correct],
-        type: 'question',
-        badgeLabel: 'Question'
-      });
-    } else if (item.type === 'fill' && item.options && typeof item.correct === 'number') {
-      allCards.push({
-        lessonId: lessonId,
-        index: 'f' + i,
-        front: item.q,
-        back: item.options[item.correct],
-        type: 'fill',
-        badgeLabel: 'Fill in the blank'
-      });
-    }
+  // Flashcard-specific questions (separate from knowledge checks)
+  var fcQuestions = window._lessonFlashcardQuestions || [];
+  fcQuestions.forEach(function (item, i) {
+    allCards.push({
+      lessonId: lessonId,
+      index: 'q' + i,
+      front: item.q || item.question,
+      back: item.a || item.answer,
+      type: 'question',
+      badgeLabel: 'Question'
+    });
   });
 
   if (allCards.length === 0) return;

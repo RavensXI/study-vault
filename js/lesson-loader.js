@@ -244,6 +244,7 @@
     window.practiceQuestions = lesson.practice_questions || [];
     window.knowledgeCheck = lesson.knowledge_checks || [];
     window._lessonGlossary = lesson.glossary_terms || [];
+    window._lessonFlashcardQuestions = lesson.flashcard_questions || [];
     window._lessonId = lesson.id;
 
     // Extract podcast URL from related_media (if present)
