@@ -323,6 +323,8 @@
     if (lesson._isPreview) {
       var statusLabel = lesson.status === 'pending_review' ? 'Pending Review'
         : lesson.status === 'ready_for_teacher' ? 'Ready for Teacher'
+        : lesson.status === 'publishing' ? 'Publishing (Assets Generating)'
+        : lesson.status === 'awaiting_qa' ? 'Awaiting QA'
         : lesson.status || 'Draft';
       var banner = document.createElement('div');
       banner.style.cssText = 'position:sticky;top:56px;z-index:999;background:#fef3c7;color:#92400e;padding:0.6rem 1.25rem;font-size:0.85rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.08);';

@@ -60,6 +60,8 @@
     .status-draft { background: #f3f4f6; color: #6b7280; }
     .status-review { background: #fef3c7; color: #92400e; }
     .status-approved { background: #d1fae5; color: #065f46; }
+    .status-publishing { background: #fed7aa; color: #c2410c; }
+    .status-awaiting_qa { background: #fef3c7; color: #92400e; }
 
     /* ---- Buttons ---- */
     .btn { padding: 0.35rem 0.75rem; border-radius: 8px; border: none; cursor: pointer; font-size: 0.75rem; font-weight: 600; transition: all 0.15s; font-family: inherit; }
@@ -318,10 +320,12 @@
       });
 
       // Recalculate tab counts from filtered summaries
-      var filteredCounts = { pending_review: 0, ready_for_teacher: 0, live: 0 };
+      var filteredCounts = { pending_review: 0, ready_for_teacher: 0, publishing: 0, awaiting_qa: 0, live: 0 };
       filteredSummary.forEach(function (s) {
         filteredCounts.pending_review += (s.pending_review || 0);
         filteredCounts.ready_for_teacher += (s.ready_for_teacher || 0);
+        filteredCounts.publishing += (s.publishing || 0);
+        filteredCounts.awaiting_qa += (s.awaiting_qa || 0);
         filteredCounts.live += (s.live || 0);
       });
 
@@ -333,6 +337,8 @@
       var tabs = [
         { key: 'pending_review', label: 'Pending Review', count: filteredCounts.pending_review },
         { key: 'ready_for_teacher', label: 'Ready for Teacher', count: filteredCounts.ready_for_teacher },
+        { key: 'publishing', label: 'Publishing', count: filteredCounts.publishing },
+        { key: 'awaiting_qa', label: 'Awaiting QA', count: filteredCounts.awaiting_qa },
         { key: 'live', label: 'Live', count: filteredCounts.live },
         { key: 'all', label: 'All', count: null }
       ];
@@ -482,6 +488,12 @@
             html += '<button class="btn btn-sm btn-publish" data-action="publish" data-id="' + lesson.id + '">Publish</button>';
             html += '<button class="btn btn-sm btn-reject" data-action="reject" data-id="' + lesson.id + '" data-title="' + escAttr(lesson.title) + '">Send Back</button>';
           }
+          if (lesson.status === 'publishing') {
+            html += '<span style="font-size:0.7rem;color:#c2410c;font-weight:600;">Generating assets\u2026</span>';
+          }
+          if (lesson.status === 'awaiting_qa') {
+            html += '<button class="btn btn-sm btn-approve" data-action="complete_qa" data-id="' + lesson.id + '">Approve Live</button>';
+          }
 
           html += '</div>';
           html += '<span style="font-size:0.68rem;color:var(--text-muted)">' + formatDate(lesson.updated_at) + '</span>';
@@ -622,6 +634,13 @@
         });
       });
 
+      app.querySelectorAll('[data-action="complete_qa"]').forEach(function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.stopPropagation();
+          performAction('complete_qa', [btn.dataset.id]);
+        });
+      });
+
       app.querySelectorAll('[data-action="reject"]').forEach(function (btn) {
         btn.addEventListener('click', function (e) {
           e.stopPropagation();
@@ -653,7 +672,13 @@
         if (notes) body.notes = notes;
         var result = await apiPost(body);
         var count = result.updated || result.published || result.approved || result.rejected || 0;
-        showToast(capitalize(action) + (action === 'approve' ? 'd' : action === 'publish' ? 'ed' : 'ed') + ' ' + count + ' lesson' + (count !== 1 ? 's' : ''));
+        if (action === 'publish') {
+          showToast('Submitted for publishing \u2014 assets will be generated and reviewed. Typically live within 24 hours.');
+        } else if (action === 'complete_qa') {
+          showToast('Approved ' + count + ' lesson' + (count !== 1 ? 's' : '') + ' \u2014 now live!');
+        } else {
+          showToast(capitalize(action) + (action === 'approve' ? 'd' : 'ed') + ' ' + count + ' lesson' + (count !== 1 ? 's' : ''));
+        }
         selectedIds.clear();
         updateBatchBar();
         await loadAndRender();
@@ -668,8 +693,11 @@
         if (currentSubjectId) body.subject_id = currentSubjectId;
         var result = await apiPost(body);
         var count = result.approved || result.published || 0;
-        var verb = action === 'approve_all' ? 'Approved' : 'Published';
-        showToast(verb + ' ' + count + ' lesson' + (count !== 1 ? 's' : ''));
+        if (action === 'publish_all') {
+          showToast('Submitted ' + count + ' lesson' + (count !== 1 ? 's' : '') + ' for publishing \u2014 assets will be generated and reviewed.');
+        } else {
+          showToast('Approved ' + count + ' lesson' + (count !== 1 ? 's' : ''));
+        }
         selectedIds.clear();
         updateBatchBar();
         await loadAndRender();
@@ -753,6 +781,8 @@
       var map = {
         'pending_review': 'Pending Review',
         'ready_for_teacher': 'Ready for Teacher',
+        'publishing': 'Publishing',
+        'awaiting_qa': 'Awaiting QA',
         'live': 'Live',
         'draft': 'Draft',
         'review': 'Review',
@@ -798,7 +828,7 @@
 
         // Auto-select first tab with results if current tab is empty
         if (currentStatus !== 'all' && lessonsCache.length === 0) {
-          var priority = ['pending_review', 'ready_for_teacher', 'live'];
+          var priority = ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live'];
           for (var i = 0; i < priority.length; i++) {
             if (priority[i] !== currentStatus) {
               // Check filtered counts for this status

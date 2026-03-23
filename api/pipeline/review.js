@@ -49,7 +49,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Fetch counts by status (scoped to visible subjects)
-    const statuses = ['pending_review', 'ready_for_teacher', 'live', 'draft', 'review', 'approved'];
+    const statuses = ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live', 'draft', 'review', 'approved'];
     const counts = {};
     for (const s of statuses) {
       let countQuery = supabase
@@ -77,7 +77,7 @@ module.exports = async function handler(req, res) {
       if (uids.length === 0) continue;
 
       const summary = { id: subject.id, slug: subject.slug, name: subject.name, school_id: subject.school_id };
-      for (const s of ['pending_review', 'ready_for_teacher', 'live']) {
+      for (const s of ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live']) {
         const { count } = await supabase
           .from('lessons')
           .select('id', { count: 'exact', head: true })
@@ -86,7 +86,7 @@ module.exports = async function handler(req, res) {
         summary[s] = count || 0;
       }
       // Only include subjects that have at least one lesson
-      if (summary.pending_review + summary.ready_for_teacher + summary.live > 0) {
+      if (summary.pending_review + summary.ready_for_teacher + summary.publishing + summary.awaiting_qa + summary.live > 0) {
         subjectSummary.push(summary);
       }
     }
@@ -265,9 +265,11 @@ module.exports = async function handler(req, res) {
       const { data, error } = await supabase
         .from('lessons')
         .update({
-          status: 'live',
+          status: 'publishing',
           published_by: changedBy !== 'platform_admin' ? changedBy : null,
-          published_at: now
+          published_at: now,
+          enrichment_started_at: null,
+          enrichment_error: null
         })
         .in('id', ids)
         .eq('status', 'ready_for_teacher')
@@ -282,9 +284,9 @@ module.exports = async function handler(req, res) {
         await supabase.from('content_pipeline_logs').insert({
           lesson_id: row.id,
           from_status: 'ready_for_teacher',
-          to_status: 'live',
+          to_status: 'publishing',
           changed_by: changedBy !== 'platform_admin' ? changedBy : null,
-          notes: notes || 'Published via review dashboard'
+          notes: notes || 'Submitted for publishing via review dashboard'
         });
       }
 
@@ -313,9 +315,11 @@ module.exports = async function handler(req, res) {
       let publishQuery = supabase
         .from('lessons')
         .update({
-          status: 'live',
+          status: 'publishing',
           published_by: changedBy !== 'platform_admin' ? changedBy : null,
-          published_at: now
+          published_at: now,
+          enrichment_started_at: null,
+          enrichment_error: null
         })
         .eq('status', 'ready_for_teacher');
 
@@ -343,13 +347,91 @@ module.exports = async function handler(req, res) {
         await supabase.from('content_pipeline_logs').insert({
           lesson_id: row.id,
           from_status: 'ready_for_teacher',
-          to_status: 'live',
+          to_status: 'publishing',
           changed_by: changedBy !== 'platform_admin' ? changedBy : null,
-          notes: notes || 'Bulk published via review dashboard'
+          notes: notes || 'Bulk submitted for publishing via review dashboard'
         });
       }
 
       return res.status(200).json({ ok: true, published: (data || []).length });
+    }
+
+    // ---- complete_enrichment: publishing → awaiting_qa (Phase 2 script or admin) ----
+    if (action === 'complete_enrichment') {
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only admins can complete enrichment' });
+      }
+
+      const ids = lesson_ids || (lesson_id ? [lesson_id] : []);
+      if (ids.length === 0) {
+        return res.status(400).json({ error: 'Missing lesson_ids or lesson_id' });
+      }
+
+      const { data, error } = await supabase
+        .from('lessons')
+        .update({
+          status: 'awaiting_qa',
+          enrichment_completed_at: now
+        })
+        .in('id', ids)
+        .eq('status', 'publishing')
+        .select('id');
+
+      if (error) {
+        return res.status(500).json({ error: 'Failed to complete enrichment', detail: error.message });
+      }
+
+      // Log transitions
+      for (const row of (data || [])) {
+        await supabase.from('content_pipeline_logs').insert({
+          lesson_id: row.id,
+          from_status: 'publishing',
+          to_status: 'awaiting_qa',
+          changed_by: changedBy !== 'platform_admin' ? changedBy : null,
+          notes: notes || 'Enrichment complete — awaiting QA'
+        });
+      }
+
+      return res.status(200).json({ ok: true, updated: (data || []).length });
+    }
+
+    // ---- complete_qa: awaiting_qa → live (admin only) ----
+    if (action === 'complete_qa') {
+      if (!isAdmin) {
+        return res.status(403).json({ error: 'Only admins can complete QA' });
+      }
+
+      const ids = lesson_ids || (lesson_id ? [lesson_id] : []);
+      if (ids.length === 0) {
+        return res.status(400).json({ error: 'Missing lesson_ids or lesson_id' });
+      }
+
+      const { data, error } = await supabase
+        .from('lessons')
+        .update({
+          status: 'live',
+          published_at: now
+        })
+        .in('id', ids)
+        .eq('status', 'awaiting_qa')
+        .select('id');
+
+      if (error) {
+        return res.status(500).json({ error: 'Failed to complete QA', detail: error.message });
+      }
+
+      // Log transitions
+      for (const row of (data || [])) {
+        await supabase.from('content_pipeline_logs').insert({
+          lesson_id: row.id,
+          from_status: 'awaiting_qa',
+          to_status: 'live',
+          changed_by: changedBy !== 'platform_admin' ? changedBy : null,
+          notes: notes || 'QA approved — lesson is now live'
+        });
+      }
+
+      return res.status(200).json({ ok: true, updated: (data || []).length });
     }
 
     // ---- reject: send back to pending_review with a note (admin only) ----
