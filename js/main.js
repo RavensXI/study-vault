@@ -2295,6 +2295,7 @@ function openFlashcardModal() {
     backBadge.textContent = card.badgeLabel;
 
     cardEl.classList.remove('flipped');
+    cardEl.style.transform = '';
     answerBtns.classList.remove('visible', 'enabled');
     answersEnabled = false;
     if (answerUnlockTimer) { clearTimeout(answerUnlockTimer); answerUnlockTimer = null; }
@@ -2474,8 +2475,70 @@ function openFlashcardModal() {
     if (e.target === overlay) closeModal();
   });
 
+  // ---- Touch swipe gestures ----
+  var touchStartX = 0;
+  var touchStartY = 0;
+
+  cardEl.addEventListener('touchstart', function (e) {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  cardEl.addEventListener('touchmove', function (e) {
+    if (!cardEl.classList.contains('flipped') || !answersEnabled) return;
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var rotation = Math.max(-15, Math.min(15, dx / 10));
+    cardEl.style.transform = 'rotateY(180deg) rotate(' + rotation + 'deg)';
+  }, { passive: true });
+
+  cardEl.addEventListener('touchend', function (e) {
+    // Reset transform back to flipped state
+    if (cardEl.classList.contains('flipped')) {
+      cardEl.style.transform = 'rotateY(180deg)';
+    }
+    if (!cardEl.classList.contains('flipped') || !answersEnabled) return;
+    var dx = e.changedTouches[0].screenX - touchStartX;
+    var dy = e.changedTouches[0].screenY - touchStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 0) markCard(true);
+      else markCard(false);
+    }
+  }, { passive: true });
+
+  // ---- First-time tutorial ----
+  function showTutorialIfNeeded() {
+    if (localStorage.getItem('sv-flashcard-tutorial-done')) return;
+
+    var container = overlay.querySelector('.fc-card-container');
+    if (!container) return;
+    container.style.position = 'relative';
+
+    var tut = document.createElement('div');
+    tut.className = 'fc-tutorial-overlay';
+    tut.innerHTML =
+      '<div class="fc-tutorial-card">' +
+        '<h3>How to use Flashcards</h3>' +
+        '<ul>' +
+          '<li>Tap the card or press <kbd>Enter</kbd> to flip it</li>' +
+          '<li>Swipe left or press <kbd>&larr;</kbd> if you got it wrong</li>' +
+          '<li>Swipe right or press <kbd>&rarr;</kbd> if you got it right</li>' +
+          '<li>Tap the speaker icon to hear it read aloud</li>' +
+        '</ul>' +
+        '<button class="fc-tutorial-btn">Got it</button>' +
+      '</div>';
+
+    container.appendChild(tut);
+
+    tut.querySelector('.fc-tutorial-btn').addEventListener('click', function (e) {
+      e.stopPropagation();
+      localStorage.setItem('sv-flashcard-tutorial-done', '1');
+      tut.remove();
+    });
+  }
+
   // ---- Start session ----
   showCard();
+  showTutorialIfNeeded();
 }
 
 // Expose globally so lesson-loader can call it
