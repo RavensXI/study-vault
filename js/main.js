@@ -41,6 +41,7 @@ function initLessonFeatures() {
   initLogoLink();
   initLessonPill();
   initLessonProgress();
+  initFlashcardModal();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
@@ -2033,3 +2034,449 @@ function initLessonProgress() {
     });
   }).observe(document.body, { childList: true, subtree: true });
 }
+
+/* --- Flashcard Modal (inline revision overlay on lesson page) --- */
+function initFlashcardModal() {
+  var btn = document.getElementById('sidebar-flashcard-btn');
+  if (!btn) return;
+
+  btn.addEventListener('click', function () {
+    openFlashcardModal();
+  });
+}
+
+function openFlashcardModal() {
+  var lessonId = window._lessonId;
+  var glossary = window._lessonGlossary || [];
+  var kc = window.knowledgeCheck || [];
+
+  // ---- Build cards ----
+  var allCards = [];
+
+  glossary.forEach(function (t, i) {
+    allCards.push({
+      lessonId: lessonId,
+      index: 'g' + i,
+      front: t.term,
+      back: t.definition,
+      type: 'glossary',
+      badgeLabel: 'Term'
+    });
+  });
+
+  kc.forEach(function (item, i) {
+    if (item.type === 'mcq' && item.options && typeof item.correct === 'number') {
+      allCards.push({
+        lessonId: lessonId,
+        index: 'k' + i,
+        front: item.q,
+        back: item.options[item.correct],
+        type: 'question',
+        badgeLabel: 'Question'
+      });
+    } else if (item.type === 'fill' && item.options && typeof item.correct === 'number') {
+      allCards.push({
+        lessonId: lessonId,
+        index: 'f' + i,
+        front: item.q,
+        back: item.options[item.correct],
+        type: 'fill',
+        badgeLabel: 'Fill in the blank'
+      });
+    }
+  });
+
+  if (allCards.length === 0) return;
+
+  // ---- Leitner storage (shared with /revise page) ----
+  var STORAGE_KEY = 'sv-flashcard-progress';
+  var BOX_INTERVALS = [0, 1, 2, 4, 7, 14];
+
+  function loadProgress() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return { cards: {}, streak: { current: 0, lastStudy: null } };
+  }
+
+  function saveProgress(data) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function getCardKey(lid, idx) {
+    return lid + ':' + idx;
+  }
+
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function computeNextReview(box) {
+    var d = new Date();
+    d.setDate(d.getDate() + BOX_INTERVALS[box]);
+    return d.toISOString().slice(0, 10);
+  }
+
+  function updateStreak() {
+    var prog = loadProgress();
+    var today = todayStr();
+    var yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday = yesterday.toISOString().slice(0, 10);
+
+    if (prog.streak.lastStudy === today) {
+      // Already studied today
+    } else if (prog.streak.lastStudy === yesterday) {
+      prog.streak.current++;
+      prog.streak.lastStudy = today;
+    } else {
+      prog.streak.current = 1;
+      prog.streak.lastStudy = today;
+    }
+    saveProgress(prog);
+    return prog.streak;
+  }
+
+  // ---- Shuffle ----
+  function fisherYatesShuffle(arr) {
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+
+  // ---- Escape ----
+  function esc(str) {
+    var d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  // ---- Reading duration (for underline animation) ----
+  function getReadDuration(text) {
+    var words = (text || '').trim().split(/\s+/).length;
+    var seconds = Math.max(1.5, Math.min(words / 4, 6));
+    return Math.round(seconds * 100) / 100;
+  }
+
+  // ---- TTS ----
+  function speakText(text) {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      var utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-GB';
+      utterance.rate = 0.9;
+      var btns = overlay.querySelectorAll('.fc-modal-speak');
+      btns.forEach(function (b) { b.classList.add('speaking'); });
+      utterance.onend = function () {
+        btns.forEach(function (b) { b.classList.remove('speaking'); });
+      };
+      utterance.onerror = function () {
+        btns.forEach(function (b) { b.classList.remove('speaking'); });
+      };
+      window.speechSynthesis.speak(utterance);
+    }
+  }
+
+  function cancelSpeech() {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }
+
+  // ---- Session state ----
+  var sessionCards = fisherYatesShuffle(allCards.slice());
+  var currentIdx = 0;
+  var results = { correct: 0, wrong: 0, skipped: 0 };
+  var answersEnabled = false;
+  var answerUnlockTimer = null;
+
+  // ---- Build modal DOM ----
+  var overlay = document.createElement('div');
+  overlay.className = 'fc-modal-overlay';
+  overlay.innerHTML =
+    '<div class="fc-modal">' +
+      '<div class="fc-modal-header">' +
+        '<span class="fc-modal-title">Flashcard Revision</span>' +
+        '<span class="fc-modal-count" id="fc-counter">' + allCards.length + ' cards</span>' +
+        '<button class="fc-modal-close" aria-label="Close flashcard revision">&times;</button>' +
+      '</div>' +
+      '<div class="fc-modal-progress"><div class="fc-modal-progress-fill" id="fc-progress-fill"></div></div>' +
+      '<div class="fc-modal-body" id="fc-modal-body">' +
+        /* Session view */
+        '<div class="fc-session" id="fc-session">' +
+          '<div class="fc-session-topbar">' +
+            '<span class="fc-session-counter" id="fc-session-counter"></span>' +
+            '<button class="fc-session-skip" id="fc-skip">Skip</button>' +
+          '</div>' +
+          '<div class="fc-card-container">' +
+            '<div class="fc-card" id="fc-card">' +
+              '<div class="fc-card-face fc-card-front">' +
+                '<span class="fc-card-badge" id="fc-badge-front"></span>' +
+                '<button class="fc-modal-speak" id="fc-speak-front" aria-label="Read aloud" title="Read aloud">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>' +
+                '</button>' +
+                '<div class="fc-card-text" id="fc-front-text"></div>' +
+                '<span class="fc-card-hint">Tap to reveal</span>' +
+              '</div>' +
+              '<div class="fc-card-face fc-card-back">' +
+                '<span class="fc-card-badge" id="fc-badge-back"></span>' +
+                '<button class="fc-modal-speak" id="fc-speak-back" aria-label="Read aloud" title="Read aloud">' +
+                  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>' +
+                '</button>' +
+                '<div class="fc-card-text" id="fc-back-text"></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="fc-answer-buttons" id="fc-answer-buttons">' +
+            '<button class="fc-answer-btn fc-answer-btn--wrong" id="fc-btn-wrong">Got it wrong</button>' +
+            '<button class="fc-answer-btn fc-answer-btn--right" id="fc-btn-right">Got it right</button>' +
+          '</div>' +
+        '</div>' +
+        /* End screen */
+        '<div class="fc-end" id="fc-end" style="display:none">' +
+          '<div class="fc-end-card">' +
+            '<h2 class="fc-end-title">Session Complete</h2>' +
+            '<div class="fc-end-accuracy" id="fc-end-accuracy">0%</div>' +
+            '<div class="fc-end-accuracy-label">accuracy</div>' +
+            '<div class="fc-end-breakdown">' +
+              '<div class="fc-end-stat fc-end-stat--correct"><span class="fc-end-stat-value" id="fc-end-correct">0</span><span class="fc-end-stat-label">correct</span></div>' +
+              '<div class="fc-end-stat fc-end-stat--wrong"><span class="fc-end-stat-value" id="fc-end-wrong">0</span><span class="fc-end-stat-label">incorrect</span></div>' +
+              '<div class="fc-end-stat fc-end-stat--skipped"><span class="fc-end-stat-value" id="fc-end-skipped">0</span><span class="fc-end-stat-label">skipped</span></div>' +
+            '</div>' +
+            '<div class="fc-end-streak" id="fc-end-streak" style="display:none"></div>' +
+            '<div class="fc-end-actions">' +
+              '<button class="fc-end-btn fc-end-btn--primary" id="fc-end-again">Study Again</button>' +
+              '<button class="fc-end-btn fc-end-btn--secondary" id="fc-end-close">Back to Lesson</button>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
+
+  // Prevent body scroll while modal open
+  document.body.style.overflow = 'hidden';
+
+  // ---- Animate in ----
+  requestAnimationFrame(function () {
+    overlay.classList.add('active');
+  });
+
+  // ---- DOM refs inside modal ----
+  var progressFill = overlay.querySelector('#fc-progress-fill');
+  var sessionCounter = overlay.querySelector('#fc-session-counter');
+  var cardEl = overlay.querySelector('#fc-card');
+  var frontText = overlay.querySelector('#fc-front-text');
+  var backText = overlay.querySelector('#fc-back-text');
+  var frontBadge = overlay.querySelector('#fc-badge-front');
+  var backBadge = overlay.querySelector('#fc-badge-back');
+  var answerBtns = overlay.querySelector('#fc-answer-buttons');
+  var sessionEl = overlay.querySelector('#fc-session');
+  var endEl = overlay.querySelector('#fc-end');
+
+  // ---- Show card ----
+  function showCard() {
+    if (currentIdx >= sessionCards.length) {
+      endSession();
+      return;
+    }
+
+    var card = sessionCards[currentIdx];
+    var total = sessionCards.length;
+
+    sessionCounter.textContent = 'Card ' + (currentIdx + 1) + ' of ' + total;
+    progressFill.style.width = ((currentIdx / total) * 100) + '%';
+
+    frontText.textContent = card.front;
+    backText.textContent = card.back;
+    frontBadge.textContent = card.badgeLabel;
+    backBadge.textContent = card.badgeLabel;
+
+    cardEl.classList.remove('flipped');
+    answerBtns.classList.remove('visible', 'enabled');
+    answersEnabled = false;
+    if (answerUnlockTimer) { clearTimeout(answerUnlockTimer); answerUnlockTimer = null; }
+
+    setCardHeight();
+  }
+
+  function setCardHeight() {
+    var faces = cardEl.querySelectorAll('.fc-card-face');
+    var maxH = 240;
+    faces.forEach(function (f) {
+      f.style.position = 'relative';
+      var h = f.scrollHeight;
+      if (h > maxH) maxH = h;
+    });
+    faces.forEach(function (f) {
+      f.style.position = '';
+    });
+    cardEl.style.height = maxH + 'px';
+  }
+
+  // ---- Flip ----
+  function flipCard() {
+    if (cardEl.classList.contains('flipped')) return;
+
+    var answerText = backText.textContent || '';
+    var duration = getReadDuration(answerText);
+    cardEl.style.setProperty('--read-duration', duration + 's');
+    cardEl.classList.add('flipped');
+    answerBtns.classList.add('visible');
+    answerBtns.classList.remove('enabled');
+    answersEnabled = false;
+    answerBtns.querySelectorAll('.fc-answer-btn').forEach(function (b) { b.classList.add('waiting'); });
+
+    answerUnlockTimer = setTimeout(function () {
+      answerBtns.classList.add('enabled');
+      answersEnabled = true;
+      answerBtns.querySelectorAll('.fc-answer-btn').forEach(function (b) { b.classList.remove('waiting'); });
+    }, duration * 1000);
+  }
+
+  cardEl.addEventListener('click', function (e) {
+    if (e.target.closest('.fc-modal-speak')) return;
+    flipCard();
+  });
+
+  // ---- Mark card ----
+  function markCard(correct) {
+    var card = sessionCards[currentIdx];
+    var key = getCardKey(card.lessonId, card.index);
+    var prog = loadProgress();
+
+    if (!prog.cards[key]) {
+      prog.cards[key] = { box: 1, nextReview: todayStr(), attempts: 0, correct: 0 };
+    }
+
+    var cp = prog.cards[key];
+    cp.attempts++;
+
+    if (correct) {
+      cp.correct++;
+      cp.box = Math.min(cp.box + 1, 5);
+      results.correct++;
+    } else {
+      cp.box = 1;
+      results.wrong++;
+    }
+
+    cp.nextReview = computeNextReview(cp.box);
+    saveProgress(prog);
+
+    currentIdx++;
+    showCard();
+  }
+
+  overlay.querySelector('#fc-btn-wrong').addEventListener('click', function () { if (answersEnabled) markCard(false); });
+  overlay.querySelector('#fc-btn-right').addEventListener('click', function () { if (answersEnabled) markCard(true); });
+
+  // ---- Skip ----
+  function skipCard() {
+    results.skipped++;
+    currentIdx++;
+    showCard();
+  }
+
+  overlay.querySelector('#fc-skip').addEventListener('click', skipCard);
+
+  // ---- End session ----
+  function endSession() {
+    cancelSpeech();
+    sessionEl.style.display = 'none';
+
+    var streak = updateStreak();
+    var answered = results.correct + results.wrong;
+    var accuracy = answered > 0 ? Math.round((results.correct / answered) * 100) : 0;
+
+    overlay.querySelector('#fc-end-accuracy').textContent = accuracy + '%';
+    overlay.querySelector('#fc-end-correct').textContent = results.correct;
+    overlay.querySelector('#fc-end-wrong').textContent = results.wrong;
+    overlay.querySelector('#fc-end-skipped').textContent = results.skipped;
+
+    var streakEl = overlay.querySelector('#fc-end-streak');
+    if (streak.current > 1) {
+      streakEl.innerHTML = 'You\'re on a <strong>' + streak.current + '-day</strong> study streak!';
+      streakEl.style.display = '';
+    } else if (streak.current === 1) {
+      streakEl.innerHTML = 'Day 1 of your study streak. Come back tomorrow!';
+      streakEl.style.display = '';
+    } else {
+      streakEl.style.display = 'none';
+    }
+
+    progressFill.style.width = '100%';
+    endEl.style.display = '';
+  }
+
+  // ---- End screen actions ----
+  overlay.querySelector('#fc-end-again').addEventListener('click', function () {
+    sessionCards = fisherYatesShuffle(allCards.slice());
+    currentIdx = 0;
+    results = { correct: 0, wrong: 0, skipped: 0 };
+    endEl.style.display = 'none';
+    sessionEl.style.display = '';
+    cancelSpeech();
+    showCard();
+  });
+
+  overlay.querySelector('#fc-end-close').addEventListener('click', closeModal);
+
+  // ---- TTS buttons ----
+  overlay.querySelector('#fc-speak-front').addEventListener('click', function (e) {
+    e.stopPropagation();
+    speakText(frontText.textContent);
+  });
+  overlay.querySelector('#fc-speak-back').addEventListener('click', function (e) {
+    e.stopPropagation();
+    speakText(backText.textContent);
+  });
+
+  // ---- Keyboard ----
+  function handleKey(e) {
+    if (e.key === 'Escape') {
+      closeModal();
+      return;
+    }
+    // Only handle keys when session is visible
+    if (sessionEl.style.display === 'none') return;
+
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      flipCard();
+    } else if (e.key === 'ArrowLeft' || e.key === '1') {
+      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(false);
+    } else if (e.key === 'ArrowRight' || e.key === '2') {
+      if (cardEl.classList.contains('flipped') && answersEnabled) markCard(true);
+    } else if (e.key === 's' || e.key === 'S') {
+      skipCard();
+    }
+  }
+
+  document.addEventListener('keydown', handleKey);
+
+  // ---- Close ----
+  function closeModal() {
+    cancelSpeech();
+    if (answerUnlockTimer) clearTimeout(answerUnlockTimer);
+    document.removeEventListener('keydown', handleKey);
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+    setTimeout(function () {
+      if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+    }, 300);
+  }
+
+  overlay.querySelector('.fc-modal-close').addEventListener('click', closeModal);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  // ---- Start session ----
+  showCard();
+}
+
+// Expose globally so lesson-loader can call it
+window.openFlashcardModal = openFlashcardModal;
