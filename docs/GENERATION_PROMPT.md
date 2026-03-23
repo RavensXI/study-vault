@@ -63,6 +63,7 @@ Return a single JSON object with these exact keys:
   "practice_questions": [...],
   "knowledge_checks": [...],
   "glossary_terms": [...],
+  "flashcard_questions": [{ "q": "short question", "a": "short answer" }, ...],
   "diagram_prompt": "Full Gemini prompt for this lesson's pictorial isotype diagram (see DIAGRAM_PIPELINE.md for style rules)",
   "hero_keywords": ["primary search term", "fallback 1", "fallback 2"],
   "diagram_style": "gemini_only"
@@ -116,6 +117,47 @@ CONTENT HTML RULES:
 - Do NOT include <h1> tags — the lesson title is rendered separately by the template.
 - Aim for 800-1500 words of content (excluding HTML tags).
 
+EQUATIONS AND FORMULAE (Maths / Science / any subject with formulae):
+- Use KaTeX LaTeX delimiters — NOT HTML entities or <sub>/<sup> tags for equations.
+- Inline equations: wrap in \( ... \) delimiters. Example: <p data-narration-id="n3">The equation is \(F = m \times a\).</p>
+- Display (block) equations: wrap in $$ ... $$ delimiters on their own line inside a <p>.
+- Common conversions:
+    Subscript: H<sub>2</sub>O → \(H_2O\) or \(\text{H}_2\text{O}\)
+    Superscript: x<sup>2</sup> → \(x^2\)
+    Fractions: &frac12; → \(\frac{1}{2}\)
+    Multiplication: &times; → \(\times\)
+    Division: &divide; → \(\div\)
+    Arrows: &rarr; → \(\rightarrow\), &#8652; → \(\rightleftharpoons\)
+    Greek: &Delta; → \(\Delta\), &theta; → \(\theta\), &lambda; → \(\lambda\), &rho; → \(\rho\), &Omega; → \(\Omega\)
+    Degrees: &deg; → \(^{\circ}\)
+- For chemical equations, use plain LaTeX (not \ce{}): \(2H_2 + O_2 \rightarrow 2H_2O\)
+- Wrap multi-word text labels in \text{}: \(\text{speed} = \frac{\text{distance}}{\text{time}}\)
+- Keep equation content inside <strong> tags if emphasising: <strong>\(E = mc^2\)</strong>
+- Do NOT use HTML entities (&times;, &divide;, &frac12;, &sup2;, etc.) or <sub>/<sup> for mathematical/scientific notation. Always use LaTeX.
+- Plain text that happens to contain numbers or simple units (e.g. "100 g", "25°C") does NOT need LaTeX — only use it for actual equations, formulae, and mathematical expressions.
+
+LANGUAGE SUBJECTS (French / German / Spanish):
+- All foreign-language phrases MUST be wrapped in <em> or <strong> HTML tags. The narration pipeline uses these tags to detect text that needs SSML <lang> wrapping for correct pronunciation.
+- Use <em> for foreign sentences and phrases: <em>Je m'appelle Claude</em>, <em>Ich wohne in Berlin</em>
+- Use <strong> for individual vocabulary words: <strong>le chien</strong>, <strong>der Hund</strong>, <strong>el perro</strong>
+- Do NOT leave foreign text as plain untagged text — it will be read with English pronunciation.
+- English translations/explanations should NOT be in <em> or <strong> (they stay as plain text or use other formatting).
+- This applies to all content_html, exam_tip_html, and conclusion_html.
+- VOCABULARY LAYOUT — CRITICAL FOR NARRATION QUALITY:
+  Do NOT write dense vocabulary lists with rapid language switching like:
+  BAD: <strong>freundlich</strong> — friendly | <strong>hilfsbereit</strong> — helpful | <strong>großzügig</strong> — generous
+  This causes the TTS voice to bleed foreign pronunciation into the English translations.
+  INSTEAD, present vocabulary in a list with each word-translation pair on its own line:
+  GOOD:
+  <ul>
+    <li data-narration-id="nX"><strong>freundlich</strong> — friendly</li>
+    <li data-narration-id="nY"><strong>hilfsbereit</strong> — helpful</li>
+    <li data-narration-id="nZ"><strong>großzügig</strong> — generous</li>
+  </ul>
+  Each <li> gets its own narration ID, so each word-translation pair is a separate audio clip with a clean language switch. This prevents bleed-over between languages.
+  Alternatively, weave vocabulary into sentences:
+  ALSO GOOD: <p data-narration-id="nX">The word <strong>freundlich</strong> means friendly. If someone is <strong>hilfsbereit</strong>, they are helpful.</p>
+
 EXAM TIP HTML:
 - A short paragraph of exam-specific advice for this topic.
 - Wrap in: <p data-narration-id="nX">Advice here.</p>
@@ -156,6 +198,15 @@ KNOWLEDGE CHECKS:
 GLOSSARY TERMS:
 - Array of { "term": "word", "definition": "Single sentence definition." }
 - Include every term that appears as a <dfn> in the content_html.
+
+FLASHCARD QUESTIONS (required — used by the /revise flashcard page):
+- Array of 5 objects: { "q": "short question", "a": "short answer" }
+- These are for rapid recall flashcards — NOT the same as knowledge_checks.
+- Questions should test factual recall from the lesson content.
+- Answers should be concise (1-2 sentences max, ideally a few words).
+- Good formats: "What is...?", "Name two...", "When did...?", "What caused...?"
+- Do NOT duplicate knowledge_check questions — these must be different.
+- Focus on key facts, dates, names, definitions, and cause-effect relationships.
 
 DIAGRAM PROMPT (required — used by generate_diagrams.py):
 - Identify the ONE concept in the lesson that would benefit most from a visual representation. This should be a specific idea, comparison, process, or relationship — not the whole lesson.
@@ -334,6 +385,21 @@ Generate a guide page as HTML (no JSON wrapper — just content_html) that inclu
 
 Use the same HTML components as lessons: <h2>, <p>, <div class="key-fact">, <div class="collapsible">, etc.
 Do NOT include data-narration-id attributes (guides don't have narration).
+
+SIDEBAR STRUCTURE (required — return as separate sidebar_html):
+Every exam technique guide MUST include a sidebar with these sections:
+
+1. QUICK REFERENCE CARD (guide-quick-ref):
+   - Coloured timing bar at the top (guide-quick-ref-bar) with <span> segments showing time allocation. Each span has a title attribute with the label and style with background colour + width percentage.
+   - Total time summary below the bar (guide-quick-ref-total)
+   - Numbered structure steps (guide-quick-ref-steps) — the key steps as a checklist
+
+2. OTHER GUIDES (sidebar-collapsible):
+   - A collapsible sidebar section listing all other exam technique guides for this subject
+   - Each link uses the sidebar-media-item class with the guide title and mark allocation
+   - Must link to the correct guide URLs
+
+Look at an existing History or Religious Education exam guide sidebar as the gold standard. The timing bar and other-guides navigation MUST be in the sidebar, not in the main content area.
 ```
 
 ---
@@ -467,6 +533,7 @@ Run after every lesson is generated, before writing to Supabase:
  All glossary_terms match <dfn> elements in content_html
  No <h1> tags in content_html
  HTML entities used correctly (&amp; &mdash; &rsquo; &ldquo; &rdquo;)
+ Equations use KaTeX LaTeX (\(...\) inline, $$...$$ display) — no &times; &frac12; <sub>/<sup> for maths/science
  Word count 800-1500 (excluding HTML tags)
 ```
 
@@ -498,7 +565,7 @@ Everything that must be generated for a complete subject. Steps reference their 
 - [ ] Diagram (see DIAGRAM_PIPELINE.md)
 
 **Per-lesson narration (after content + diagrams — see NARRATION_PIPELINE.md):**
-- [ ] TTS clips for every narration ID (Azure Speech, Ollie odd / Bella even)
+- [ ] TTS clips for every narration ID (Azure Speech, Ollie odd / Ada even)
 - [ ] MP3s uploaded to R2
 - [ ] Narration manifest with R2 URLs and durations
 
