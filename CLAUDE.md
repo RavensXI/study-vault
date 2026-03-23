@@ -13,7 +13,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 21 subjects (16 school-specific + 5 generic free-tier).
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 25 subjects (16 school-specific + 9 generic free-tier).
 
 ## Subjects — Unity College (school_id set, all on Vercel)
 
@@ -37,7 +37,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Creative iMedia | OCR J834 | 23 | 4 (Media Industry, Product Design, Pre-Production, Distribution) | 0/23 | 23/23 |
 | **Subtotal** | | **471** | **57** | **36/471** | **471/471** |
 
-**Total across site: 696 lessons, 696/696 podcasts.**
+**Total across site: 782 lessons, 782/782 podcasts.**
 
 ## Subjects — Free Tier (school_id NULL, generic content)
 
@@ -48,37 +48,45 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 | 0/22 | 22/22 |
 | English Language (generic) | AQA 8700 | 30 | 4 | 0/30 | 30/30 |
 | English Literature (generic) | AQA 8702 | 70 | TBC | 0/70 | 70/70 |
-| **Subtotal** | | **225** | | **48/225** | **225/225** |
+| Health & Social Care | Pearson Edexcel | 12 | 1 (Health and Wellbeing) | 0/12 | 12/12 |
+| History (generic) | Edexcel 1HI0 | 36 | 4 (Medicine, Cold War, Anglo-Saxon, Weimar) | 0/36 | 36/36 |
+| Religious Education (generic) | AQA 8062 | 28 | 8 | 0/28 | 28/28 |
+| Hospitality & Catering | WJEC 5409 | 10 | 1 (The H&C Industry) | 0/10 | 10/10 |
+| **Subtotal** | | **311** | | **48/311** | **311/311** |
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, ~11,700 MP3s on R2), Gemini diagrams (automated QA via Claude Sonnet), hero images, exam technique guides, revision technique guides, related media.
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, MP3s on R2), Gemini diagrams (automated QA via Claude Sonnet), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts).
 
 ## Dynamic Architecture (LIVE on Vercel)
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **696 lessons** (471 school + 225 generic) + **306 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **782 lessons** (471 school + 311 generic) + **306 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
-- **Auth (3 tiers):**
+- **Auth (4 tiers):**
   - **Free users:** No login. Generic content (school_id NULL) + ads. Prefs stored in localStorage via `js/free-user.js`.
   - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees only subscribed subjects (restricted mode via `school_subscriptions` table), no ads.
-  - **Teachers/Admin:** `ADMIN_PASSWORD` / `TEACHER_PASSWORD` via `js/auth-gate.js`. Teacher setup flow in `js/teacher-setup.js`.
+  - **Teachers:** Individual Supabase Auth accounts (email + password). Invited by admin, sign up at `/teacher/signup?token=...`. Login at `/teacher/login`. Scoped to their school + assigned subjects via `teacher_subjects` table. Session stored in both sessionStorage and localStorage (cross-tab). Auth-gate supports `data-auth="teacher"` mode.
+  - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`. Sees all schools/subjects. Shared password still works alongside Supabase Auth.
   - **Microsoft SSO:** Still pending Entra admin consent.
 - **Admin pages:** `/admin/pipeline` (upload/generate), `/admin/review` (QC), `/admin/images` (image QA), `/admin/editor` (lesson editor), `/admin/editor-guide` (guide editor)
-- **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, school_subscriptions, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members
+- **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, school_subscriptions, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members, teacher_invitations, teacher_subjects, notifications
 - **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`), `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`)
 - **Cookie consent:** Banner on all pages via `js/cookie-consent.js`. Privacy policy at `/privacy.html`.
 - **Business email:** studyvault.info@gmail.com
 
 ## Active TODO
 - **Severn Vale demo LIVE** — school code `vale2026`, subscribes to Science + Separate Sciences. Generic content (school_id NULL).
-- **Editor school scoping (BLOCKER):** Lesson/guide editors have NO school_id scoping — dangerous with duplicate subject slugs across schools. Must fix before teacher onboarding.
+- **Editor school scoping: FIXED** (22 Mar 2026) — editors now scope by school_id via `getAuthContext()`. Admin sees all with school dropdown, teachers see only their school's subjects.
+- **Teacher accounts: LIVE** (22 Mar 2026) — individual Supabase Auth accounts. Invite → signup → login flow. API routes: `/api/auth/teacher-login`, `/api/auth/teacher-signup`, `/api/auth/invite-teacher`, `/api/auth/me`. DB tables: `teacher_invitations`, `teacher_subjects`, `notifications`.
+- **QA review workflow: LIVE** (22 Mar 2026) — `/admin/review` dashboard with school/subject/unit filters, batch approve/publish/reject. Status flow: `pending_review` → `ready_for_teacher` → `live`. Pipeline now generates content as `pending_review`. Staff can view all lessons across tabs.
+- **Pipeline split TODO**: Content generates first (Phase 1), assets (diagrams, narration, podcasts) should generate after teacher publishes (Phase 2). See `memory/project_pipeline_split.md`.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries
 - **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **Cinematic videos**: 84/678 done (Sport Science 10 + Food Tech 10 + Generic Science 48 + History 20 YouTube — generic science COMPLETE). Daily limit 20/day. Video generation blocked on most subjects due to `video_done=True` in state from podcast-only runs — needs state reset before next batch. See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts: 696/696 — COMPLETE.** Every lesson across every subject (school + generic) has a podcast.
+- **Cinematic videos**: State rebuilt from Supabase (22 Mar 2026). 81/471 Unity videos exist. Daily limit 20/day. Generating: Sport Science L1, Food Tech L1/L9/L10, Drama L1-12, English Language L1-4. `--rebuild-state` command fixes stale state. `--podcast-only` no longer sets `video_done=True` (bug fixed). See `docs/VIDEO_PIPELINE.md`.
+- **Podcasts: 782/782 — COMPLETE.** Every lesson across every subject (school + generic) has a podcast.
 - **Lesson Progress Tracker**: Sidebar widget on every lesson — Listen to podcast, Watch video, Complete knowledge check, Complete a revision task. KC auto-ticks. State in localStorage. Icons: purple headphones, red play, unit-colour question mark, green lightbulb.
 - **Content-specific revision tips**: `data-revision-tip` attribute on key facts overrides generic lightbulb tips. ~1,824 tips generated across all 678 lessons (20 Mar 2026). Future content generation should include these at creation time.
 - **Lesson header declutter**: "Lesson X of Y" moved to header pill, inline label hidden. Content visible sooner.
@@ -90,7 +98,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Subject picker fix**: Cards persist after re-rendering (cached at init).
 - **Remotion promo video**: Prototype at `studyvault-promo/`. Slot machine opener, 8 scenes, school-targeted pitch. Needs music + iteration.
 - **Niche exam board targeting**: Initial school list at `scripts/niche-board-schools.csv`. See `memory/exam-board-market-share.md` + FUTURE_FEATURES.md.
-- **Remaining subjects to build**: Computer Science (OCR), Design & Technology (AQA), bespoke Maths (awaiting teacher resources)
+- **Remaining subjects to build**: Computer Science (OCR), Design & Technology (AQA), bespoke Maths (awaiting teacher resources). Lacey's 4 subjects (HSC, History Edexcel, RE generic, H&C) COMPLETE — see `memory/project_lacey_subjects.md`.
 - **Parents' evening print view**: Dashboard section with quick-print option per class
 - **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing
 - Role detection (teacher vs student), retire static HTML
