@@ -2046,6 +2046,13 @@ function initFlashcardModal() {
 }
 
 function openFlashcardModal() {
+  // Blur any focused element (prevents Space from triggering narration play button)
+  if (document.activeElement) document.activeElement.blur();
+
+  // Pause narration if playing
+  var narrationAudio = document.querySelector('.narration-audio');
+  if (narrationAudio && !narrationAudio.paused) narrationAudio.pause();
+
   var lessonId = window._lessonId;
   var glossary = window._lessonGlossary || [];
   var kc = window.knowledgeCheck || [];
@@ -2446,12 +2453,16 @@ function openFlashcardModal() {
 
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
+      e.stopImmediatePropagation();
       flipCard();
     } else if (e.key === 'ArrowLeft' || e.key === '1') {
+      e.stopImmediatePropagation();
       if (cardEl.classList.contains('flipped') && answersEnabled) markCard(false);
     } else if (e.key === 'ArrowRight' || e.key === '2') {
+      e.stopImmediatePropagation();
       if (cardEl.classList.contains('flipped') && answersEnabled) markCard(true);
     } else if (e.key === 's' || e.key === 'S') {
+      e.stopImmediatePropagation();
       skipCard();
     }
   }
