@@ -73,17 +73,36 @@ def generate_questions_from_content(title, content_text, glossary_terms, existin
             key_sentences.append(s)
 
     # Create fill-in-blank style questions from key sentences
+    # Words that should never be blanked (generic/structural, not subject-specific)
+    BLANK_BLOCKLIST = {
+        'fact', 'facts', 'example', 'examples', 'note', 'notes', 'point', 'points',
+        'this', 'that', 'these', 'those', 'there', 'here', 'where', 'when', 'what',
+        'which', 'some', 'many', 'most', 'each', 'every', 'both', 'such', 'very',
+        'also', 'just', 'even', 'only', 'much', 'more', 'less', 'well', 'still',
+        'however', 'therefore', 'although', 'because', 'since', 'while', 'after',
+        'before', 'during', 'between', 'about', 'around', 'through', 'within',
+        'another', 'other', 'first', 'second', 'third', 'last', 'next', 'final',
+        'main', 'major', 'minor', 'important', 'significant', 'different', 'similar',
+        'overall', 'total', 'general', 'specific', 'particular', 'certain', 'common',
+        'good', 'better', 'best', 'great', 'large', 'small', 'high', 'higher',
+        'lower', 'long', 'short', 'new', 'old', 'young', 'early', 'late',
+        'means', 'shows', 'includes', 'involves', 'requires', 'allows', 'provides',
+        'helps', 'makes', 'takes', 'gives', 'uses', 'needs', 'keeps', 'leads',
+        'startup', 'section', 'chapter', 'table', 'figure', 'diagram', 'image',
+        'people', 'person', 'students', 'teachers', 'children', 'adults',
+        'government', 'country', 'world', 'society', 'system', 'process',
+    }
+
     for s in key_sentences:
         if len(questions) >= 5:
             break
-        # Find a key term to blank out
         words = s.split()
         if len(words) < 5:
             continue
-        # Find capitalised words or numbers as candidates for blanking
+        # Find a subject-specific term to blank out (skip generic words)
         for i, w in enumerate(words):
             clean = re.sub(r'[^a-zA-Z0-9]', '', w)
-            if len(clean) > 3 and (clean[0].isupper() or re.match(r'\d+', clean)):
+            if len(clean) > 3 and clean.lower() not in BLANK_BLOCKLIST and (clean[0].isupper() or re.match(r'\d+', clean)):
                 blanked = ' '.join(words[:i] + ['_____'] + words[i+1:])
                 questions.append({
                     'q': blanked,
@@ -116,6 +135,7 @@ def main():
     parser.add_argument("--subject", help="Only process a specific subject slug")
     parser.add_argument("--limit", type=int, help="Max lessons to process")
     parser.add_argument("--dry-run", action="store_true", help="Preview without writing")
+    parser.add_argument("--force", action="store_true", help="Regenerate even if questions exist")
     parser.add_argument("--school-only", action="store_true", help="Only school-specific subjects")
     parser.add_argument("--generic-only", action="store_true", help="Only generic subjects")
     args = parser.parse_args()
@@ -151,9 +171,9 @@ def main():
 
                 total += 1
 
-                # Skip if already has flashcard questions
+                # Skip if already has flashcard questions (unless --force)
                 existing = lesson.get("flashcard_questions") or []
-                if isinstance(existing, list) and len(existing) >= 5:
+                if not args.force and isinstance(existing, list) and len(existing) >= 5:
                     skipped += 1
                     continue
 
