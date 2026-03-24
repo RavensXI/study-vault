@@ -2172,7 +2172,7 @@ function initLessonProgress() {
   // ---- Build gutter version (fixed left rail on wide desktops) ----
   var gutter = document.createElement('div');
   gutter.className = 'gutter-progress';
-  var gutterHtml = '';
+  var gutterHtml = '<div class="gutter-progress-title">Lesson Checklist</div>';
 
   tasks.forEach(function(task) {
     var done = state[task.id] ? ' completed' : '';

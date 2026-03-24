@@ -1701,21 +1701,29 @@ body.dark-mode .lesson-progress-item.completed {
     gap: calc((100vw - var(--page-max, 1160px)) / 2 * 0.06);
     position: fixed;
     top: 120px;
-    /* Fill the left gutter with padding */
-    left: 1.5rem;
-    width: calc((100vw - var(--page-max, 1160px)) / 2 - 3rem);
+    /* Centre in left gutter */
+    left: calc((100vw - var(--page-max, 1160px)) / 4);
+    transform: translateX(-50%);
+    width: auto;
     max-width: 200px;
-    padding: calc((100vw - var(--page-max, 1160px)) / 2 * 0.08) 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
     z-index: 100;
     transition: opacity 0.3s ease;
   }
 
-  body.dark-mode .gutter-progress {
-    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  .gutter-progress-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
   }
 }
 
@@ -1852,35 +1860,43 @@ body.dark-mode .gutter-progress-item.completed {
   position: absolute;
   right: 0;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translateY(-50%) rotate(-6deg);
   font-family: 'Inter', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: #fff;
-  background: var(--accent, #16a34a);
-  background-image: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 50%, rgba(0,0,0,0.1) 100%);
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   letter-spacing: -0.01em;
-  clip-path: polygon(
-    50% 0%, 63% 5%, 75% 0%, 80% 13%, 93% 12%,
-    90% 25%, 100% 35%, 92% 45%, 100% 55%,
-    92% 63%, 95% 75%, 85% 78%, 80% 90%,
-    70% 85%, 60% 95%, 50% 88%, 40% 95%,
-    30% 85%, 20% 90%, 15% 78%, 5% 75%,
-    8% 63%, 0% 55%, 8% 45%, 0% 35%,
-    10% 25%, 7% 12%, 20% 13%, 25% 0%, 37% 5%
-  );
-  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  /* Organic blobby wax shape */
+  border-radius: 60% 40% 55% 45% / 50% 60% 40% 55%;
+  /* Rich wax-like gradient with depth */
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255,255,255,0.2) 0%, transparent 50%),
+    radial-gradient(circle at 65% 70%, rgba(0,0,0,0.15) 0%, transparent 50%),
+    var(--accent, #7c3aed);
+  box-shadow:
+    0 2px 8px rgba(0,0,0,0.2),
+    inset 0 2px 4px rgba(255,255,255,0.15),
+    inset 0 -2px 6px rgba(0,0,0,0.2);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+/* Inner ring like a real wax seal */
+.lesson-progress-pct::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255,255,255,0.15);
+  pointer-events: none;
 }
 @media (max-width: 500px) {
   .lesson-progress-pct {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     font-size: 0.62rem;
   }
 }
