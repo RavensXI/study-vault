@@ -2206,14 +2206,41 @@ function initLessonProgress() {
     lessonHeader.parentNode.insertBefore(inlineBar, lessonHeader.nextSibling);
   }
 
-  // ---- Shared click handlers for manual tasks ----
+  // ---- Toast for auto-tick items ----
+  function showAutoTickToast(label) {
+    var existing = document.getElementById('progress-toast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'progress-toast';
+    toast.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d2a26;color:#fff;font-family:Inter,sans-serif;font-size:0.82rem;padding:0.6rem 1.2rem;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.15);z-index:9999;opacity:0;transition:opacity 0.3s ease;pointer-events:none;text-align:center;max-width:320px;';
+    toast.textContent = 'This ticks automatically when you ' + label.toLowerCase() + '.';
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () { toast.style.opacity = '1'; });
+    setTimeout(function () {
+      toast.style.opacity = '0';
+      setTimeout(function () { toast.remove(); }, 300);
+    }, 2500);
+  }
+
+  // ---- Shared click handlers ----
   function bindClicks(container, itemClass) {
+    // Manual tasks: toggle on click
     container.querySelectorAll(itemClass + ':not([data-auto])').forEach(function(item) {
       item.addEventListener('click', function() {
         var taskId = item.dataset.task;
         state[taskId] = !state[taskId];
         saveState(state);
         syncAll();
+      });
+    });
+    // Auto tasks: show toast on click
+    container.querySelectorAll(itemClass + '[data-auto]').forEach(function(item) {
+      item.addEventListener('click', function() {
+        if (!state[item.dataset.task]) {
+          var label = item.getAttribute('title') || item.querySelector('.lesson-progress-label');
+          label = typeof label === 'string' ? label : (label ? label.textContent : 'complete this task');
+          showAutoTickToast(label);
+        }
       });
     });
   }
