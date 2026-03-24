@@ -2182,13 +2182,29 @@ function initLessonProgress() {
     gutterHtml += '</div>';
   });
 
-  // Vertical progress bar
-  var barPct = pct;
-  gutterHtml += '<div class="gutter-progress-bar"><div class="gutter-progress-bar-fill" style="height:' + barPct + '%"></div></div>';
-  gutterHtml += '<div class="gutter-progress-count">' + completed + '/' + tasks.length + '</div>';
-
   gutter.innerHTML = gutterHtml;
   document.body.appendChild(gutter);
+
+  // ---- Build inline progress bar (between title and hero) ----
+  var lessonHeader = document.querySelector('.lesson-header');
+  var heroFigure = document.getElementById('hero-figure');
+  if (lessonHeader) {
+    // Add % counter next to the title
+    var titleEl = document.getElementById('lesson-title');
+    if (titleEl) {
+      var pctBadge = document.createElement('span');
+      pctBadge.className = 'lesson-progress-pct';
+      pctBadge.id = 'lesson-progress-pct';
+      pctBadge.textContent = pct + '%';
+      titleEl.appendChild(pctBadge);
+    }
+
+    // Add horizontal progress bar after the header
+    var inlineBar = document.createElement('div');
+    inlineBar.className = 'lesson-progress-inline';
+    inlineBar.innerHTML = '<div class="lesson-progress-inline-fill" id="lesson-progress-inline-fill" style="width:' + pct + '%"></div>';
+    lessonHeader.parentNode.insertBefore(inlineBar, lessonHeader.nextSibling);
+  }
 
   // ---- Shared click handlers for manual tasks ----
   function bindClicks(container, itemClass) {
@@ -2223,8 +2239,12 @@ function initLessonProgress() {
       var el = gutter.querySelector('.gutter-progress-item[data-task="' + t.id + '"]');
       if (el) el.classList.toggle('completed', !!state[t.id]);
     });
-    gutter.querySelector('.gutter-progress-bar-fill').style.height = p + '%';
-    gutter.querySelector('.gutter-progress-count').textContent = done + '/' + tasks.length;
+
+    // Inline bar + title badge
+    var inlineFill = document.getElementById('lesson-progress-inline-fill');
+    if (inlineFill) inlineFill.style.width = p + '%';
+    var pctEl = document.getElementById('lesson-progress-pct');
+    if (pctEl) pctEl.textContent = p + '%';
   }
 
   // Auto-tick knowledge check on completion — watch document.body for the kc-result
