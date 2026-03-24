@@ -244,9 +244,11 @@ UNIT: {unit_name} — {unit_subtitle}
 UNIT ACCENT COLOUR: {unit_accent_hex} — use this as the primary colour in the diagram_prompt
 LESSON {lesson_number} of {total_lessons}: {lesson_title}
 
-EXAM SPECIFICATION (relevant extract):
+EXAM SPECIFICATION (from specs/{board}/{slug}-{code}.md):
 <spec>
-{spec_extract — the section of the spec that maps to this lesson's content}
+{spec_extract — the section of the spec that maps to this lesson's content.
+ Loaded from the spec database: specs/index.json maps board + subject to the markdown file.
+ The full spec is in specs/{board}/{slug}-{code}.md with YAML frontmatter.}
 </spec>
 
 QUESTION TYPES FOR THIS EXAM BOARD:

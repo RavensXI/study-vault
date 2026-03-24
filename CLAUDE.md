@@ -56,7 +56,17 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), TTS narration (Azure Speech, MP3s on R2), Gemini diagrams (automated QA via Claude Sonnet), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts).
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), flashcard questions (5/lesson), TTS narration (Azure Speech, MP3s on R2), Gemini diagrams (automated QA via Claude Sonnet), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts).
+
+## Specification Database
+
+193 GCSE specifications from all 4 exam boards, converted to markdown with YAML frontmatter. Used by the content generation pipeline as the authoritative source for each subject.
+
+- **Location:** `specs/{board}/{slug}-{code}.md` — indexed by `specs/index.json`
+- **Boards:** AQA (48), Edexcel (37), OCR (42), WJEC (32), Eduqas (34)
+- **Script:** `python scripts/download_specs.py` — downloads PDFs from exam board websites, converts via `markitdown`, adds frontmatter
+- **Usage:** Pipeline matches teacher's exam board + subject to the right spec file. Content agents receive the spec markdown as context.
+- **Frontmatter:** `board`, `subject`, `spec_code`, `slug`
 
 ## Dynamic Architecture (LIVE on Vercel)
 

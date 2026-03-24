@@ -28,7 +28,9 @@ python scripts/pipeline_generate.py info <job_id>
 python scripts/pipeline_generate.py text <job_id>
 ```
 
-Read the spec from `Spec and Materials/` (use `python -m markitdown`). Create the lesson plan and pipeline steps in Supabase.
+Look up the spec from the **spec database** (`specs/index.json`). Match by exam board + subject/spec code. The markdown spec files are in `specs/{board}/{slug}-{code}.md` with YAML frontmatter. If the spec isn't in the database, read it from `Spec and Materials/` (use `python -m markitdown`).
+
+To add new specs: `python scripts/download_specs.py` downloads all GCSE specs from AQA, Edexcel, OCR, WJEC/Eduqas and converts to markdown. 193 specs currently indexed.
 
 **The spec is the authority, not the teacher resources.** The lesson plan MUST cover every topic and theme in the exam spec, even if the teacher's uploaded resources don't include material for all of them. Teacher resources are the primary source for content and emphasis, but if the spec lists a topic and there are no PPTs for it, the lesson must still be generated using the spec as the source. Students need full coverage of the spec to revise effectively — gaps in teacher uploads cannot become gaps in the revision content.
 
