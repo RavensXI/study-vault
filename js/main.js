@@ -1644,7 +1644,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
   overlay.innerHTML =
     '<div class="kc-modal">' +
       '<div class="kc-header">' +
-        '<span class="kc-title">Knowledge Check</span>' +
+        '<span class="kc-title">Quick Quiz</span>' +
         '<span class="kc-step" id="kc-step"></span>' +
       '</div>' +
       '<div class="kc-body" id="kc-body"></div>' +
@@ -2134,7 +2134,7 @@ function initLessonProgress() {
   }
 
   // Knowledge check
-  tasks.push({ id: 'knowledge-check', label: 'Complete knowledge check', icon: icons.kc, iconClass: 'lesson-progress-icon--kc', auto: true });
+  tasks.push({ id: 'knowledge-check', label: 'Complete quick quiz', icon: icons.kc, iconClass: 'lesson-progress-icon--kc', auto: true });
 
   // Flashcards
   tasks.push({ id: 'flashcards', label: 'Revise with flashcards', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="2" y="4" width="16" height="14" rx="2"/><rect x="6" y="6" width="16" height="14" rx="2"/></svg>', iconClass: 'lesson-progress-icon--flashcards', auto: true });
@@ -2176,7 +2176,7 @@ function initLessonProgress() {
 
   tasks.forEach(function(task) {
     var done = state[task.id] ? ' completed' : '';
-    gutterHtml += '<div class="gutter-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + ' title="' + task.label + '">';
+    gutterHtml += '<div class="gutter-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + ' data-label="' + task.label + '">';
     gutterHtml += '<div class="gutter-progress-icon ' + (task.iconClass || '') + '">' + (task.icon || '') + '</div>';
     gutterHtml += '<div class="gutter-progress-check">' + checkSVG + '</div>';
     gutterHtml += '</div>';
@@ -2237,7 +2237,7 @@ function initLessonProgress() {
     container.querySelectorAll(itemClass + '[data-auto]').forEach(function(item) {
       item.addEventListener('click', function() {
         if (!state[item.dataset.task]) {
-          var label = item.getAttribute('title') || item.querySelector('.lesson-progress-label');
+          var label = item.getAttribute('data-label') || item.querySelector('.lesson-progress-label');
           label = typeof label === 'string' ? label : (label ? label.textContent : 'complete this task');
           showAutoTickToast(label);
         }
