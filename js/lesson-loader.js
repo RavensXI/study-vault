@@ -388,6 +388,32 @@
       }
     }
 
+    // Beta banner + report button for generic content (school_id NULL)
+    if (!subject.school_id) {
+      // Beta banner below the progress bar
+      var progressBar = document.querySelector('.lesson-progress-inline-wrap') || document.querySelector('.lesson-progress-inline');
+      var betaBanner = document.createElement('div');
+      betaBanner.className = 'beta-banner';
+      betaBanner.innerHTML = '<span class="beta-badge">BETA</span> This content is AI-generated from the exam specification. It has been verified against the spec but may contain errors.';
+      var insertAfter = progressBar || document.querySelector('.lesson-header');
+      if (insertAfter && insertAfter.parentNode) {
+        insertAfter.parentNode.insertBefore(betaBanner, insertAfter.nextSibling);
+      }
+
+      // Report error button at the bottom of the lesson content
+      var studyNotes = document.getElementById('study-notes');
+      if (studyNotes) {
+        var reportBtn = document.createElement('div');
+        reportBtn.className = 'report-error-section';
+        var reportSubject = encodeURIComponent(subject.name + ' - L' + lesson.lesson_number + ': ' + lesson.title);
+        var reportBody = encodeURIComponent('I found an error in this lesson:\n\nSubject: ' + subject.name + ' (' + (subject.exam_board || '') + ')\nLesson: ' + lesson.lesson_number + ' - ' + lesson.title + '\nURL: ' + window.location.href + '\n\nError description:\n');
+        reportBtn.innerHTML = '<a href="mailto:studyvault.info@gmail.com?subject=Error%20Report%3A%20' + reportSubject + '&body=' + reportBody + '" class="report-error-btn">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>' +
+          ' Spotted an error? Let us know</a>';
+        studyNotes.appendChild(reportBtn);
+      }
+    }
+
     // Trigger scroll reveal animations on lesson content
     if (typeof window.initRevealAnimations === 'function') {
       window.initRevealAnimations();
