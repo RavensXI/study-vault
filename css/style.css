@@ -1682,6 +1682,190 @@ body.dark-mode .lesson-progress-item.completed {
   width: 0%;
 }
 
+/* --- Gutter Progress Widget (left rail on wide desktops) --- */
+.gutter-progress {
+  display: none; /* hidden by default, shown via media query */
+}
+
+@media (min-width: 1400px) {
+  /* Hide sidebar version when gutter is visible */
+  .sidebar-progress-section {
+    display: none !important;
+  }
+
+  .gutter-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    position: fixed;
+    top: 120px;
+    /* Centre in the left gutter: gutter = (100vw - page-max) / 2 */
+    left: calc((100vw - var(--page-max, 1160px)) / 2 / 2 - 26px);
+    width: 52px;
+    padding: 10px 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    z-index: 100;
+    transition: opacity 0.3s ease;
+  }
+
+  body.dark-mode .gutter-progress {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+  }
+}
+
+.gutter-progress-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  position: relative;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.gutter-progress-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border-light));
+  transform: scale(1.08);
+}
+
+/* Tooltip on hover */
+.gutter-progress-item::after {
+  content: attr(title);
+  position: absolute;
+  left: calc(100% + 10px);
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #fff;
+  background: #2d2a26;
+  padding: 4px 10px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+  z-index: 200;
+}
+
+body.dark-mode .gutter-progress-item::after {
+  background: #e8e4df;
+  color: #2d2a26;
+}
+
+.gutter-progress-item:hover::after {
+  opacity: 1;
+}
+
+.gutter-progress-item.completed {
+  border-color: #16a34a;
+  background: #f0fdf4;
+}
+body.dark-mode .gutter-progress-item.completed {
+  border-color: #16a34a;
+  background: #0a2618;
+}
+
+.gutter-progress-icon {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.gutter-progress-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.gutter-progress-check {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  background: var(--bg-card);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.gutter-progress-item.completed .gutter-progress-check {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #fff;
+}
+
+.gutter-progress-check svg {
+  width: 8px;
+  height: 8px;
+  opacity: 0;
+}
+.gutter-progress-item.completed .gutter-progress-check svg {
+  opacity: 1;
+}
+.gutter-progress-check svg polyline {
+  stroke-dasharray: 24;
+  stroke-dashoffset: -24;
+}
+.gutter-progress-item.completed .gutter-progress-check svg polyline {
+  animation: drawTick 0.35s ease-out 0.08s forwards;
+}
+
+/* Vertical progress bar */
+.gutter-progress-bar {
+  width: 4px;
+  height: 36px;
+  background: var(--border-lighter);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+  /* Flip to fill bottom-to-top */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.gutter-progress-bar-fill {
+  width: 100%;
+  background: #16a34a;
+  border-radius: 2px;
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  height: 0%;
+}
+
+.gutter-progress-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1;
+}
+
+/* Overlay tinting for gutter */
+body[class*="overlay-"] .gutter-progress {
+  background: rgba(255, 255, 255, 0.7);
+}
+body.dark-mode[class*="overlay-"] .gutter-progress {
+  background: rgba(0, 0, 0, 0.35);
+}
+
 /* Dark mode + overlay: keep containers dark instead of white */
 body.dark-mode[class*="overlay-"] .key-fact,
 body.dark-mode[class*="overlay-"] .exam-tip,

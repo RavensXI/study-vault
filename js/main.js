@@ -2147,8 +2147,9 @@ function initLessonProgress() {
   var state = getState();
   var checkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
+  // ---- Build sidebar version (shown on narrow screens / mobile panel) ----
   var section = document.createElement('div');
-  section.className = 'sidebar-section';
+  section.className = 'sidebar-section sidebar-progress-section';
   var html = '<div class="sidebar-section-title">Lesson Progress</div><div class="lesson-progress-card">';
 
   tasks.forEach(function(task) {
@@ -2168,21 +2169,62 @@ function initLessonProgress() {
   var firstSection = sidebar.querySelector('.sidebar-section');
   sidebar.insertBefore(section, firstSection);
 
-  section.querySelectorAll('.lesson-progress-item:not([data-auto])').forEach(function(item) {
-    item.addEventListener('click', function() {
-      var taskId = item.dataset.task;
-      state[taskId] = !state[taskId];
-      saveState(state);
-      item.classList.toggle('completed', state[taskId]);
-      updateProg();
-    });
+  // ---- Build gutter version (fixed left rail on wide desktops) ----
+  var gutter = document.createElement('div');
+  gutter.className = 'gutter-progress';
+  var gutterHtml = '';
+
+  tasks.forEach(function(task) {
+    var done = state[task.id] ? ' completed' : '';
+    gutterHtml += '<div class="gutter-progress-item' + done + '" data-task="' + task.id + '"' + (task.auto ? ' data-auto="1"' : '') + ' title="' + task.label + '">';
+    gutterHtml += '<div class="gutter-progress-icon ' + (task.iconClass || '') + '">' + (task.icon || '') + '</div>';
+    gutterHtml += '<div class="gutter-progress-check">' + checkSVG + '</div>';
+    gutterHtml += '</div>';
   });
 
-  function updateProg() {
+  // Vertical progress bar
+  var barPct = pct;
+  gutterHtml += '<div class="gutter-progress-bar"><div class="gutter-progress-bar-fill" style="height:' + barPct + '%"></div></div>';
+  gutterHtml += '<div class="gutter-progress-count">' + completed + '/' + tasks.length + '</div>';
+
+  gutter.innerHTML = gutterHtml;
+  document.body.appendChild(gutter);
+
+  // ---- Shared click handlers for manual tasks ----
+  function bindClicks(container, itemClass) {
+    container.querySelectorAll(itemClass + ':not([data-auto])').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var taskId = item.dataset.task;
+        state[taskId] = !state[taskId];
+        saveState(state);
+        syncAll();
+      });
+    });
+  }
+
+  bindClicks(section, '.lesson-progress-item');
+  bindClicks(gutter, '.gutter-progress-item');
+
+  // ---- Sync both widgets after any state change ----
+  function syncAll() {
     var done = tasks.filter(function(t) { return state[t.id]; }).length;
     var p = Math.round((done / tasks.length) * 100);
+
+    // Sidebar version
+    tasks.forEach(function(t) {
+      var el = section.querySelector('.lesson-progress-item[data-task="' + t.id + '"]');
+      if (el) el.classList.toggle('completed', !!state[t.id]);
+    });
     section.querySelector('.lesson-progress-bar-fill').style.width = p + '%';
     section.querySelector('.lesson-progress-summary').textContent = done + ' of ' + tasks.length + ' complete';
+
+    // Gutter version
+    tasks.forEach(function(t) {
+      var el = gutter.querySelector('.gutter-progress-item[data-task="' + t.id + '"]');
+      if (el) el.classList.toggle('completed', !!state[t.id]);
+    });
+    gutter.querySelector('.gutter-progress-bar-fill').style.height = p + '%';
+    gutter.querySelector('.gutter-progress-count').textContent = done + '/' + tasks.length;
   }
 
   // Auto-tick knowledge check on completion — watch document.body for the kc-result
@@ -2193,9 +2235,7 @@ function initLessonProgress() {
         if (n.classList.contains('kc-result') || (n.querySelector && n.querySelector('.kc-result'))) {
           state['knowledge-check'] = true;
           saveState(state);
-          var kcItem = section.querySelector('[data-task="knowledge-check"]');
-          if (kcItem) kcItem.classList.add('completed');
-          updateProg();
+          syncAll();
         }
       });
     });
@@ -2205,9 +2245,7 @@ function initLessonProgress() {
   document.addEventListener('flashcards-completed', function () {
     state['flashcards'] = true;
     saveState(state);
-    var fcItem = section.querySelector('[data-task="flashcards"]');
-    if (fcItem) fcItem.classList.add('completed');
-    updateProg();
+    syncAll();
   });
 }
 
