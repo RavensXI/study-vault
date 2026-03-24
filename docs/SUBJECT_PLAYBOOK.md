@@ -6,13 +6,83 @@ For the pipeline architecture, see `PIPELINE_ARCHITECTURE.md`. For prompt detail
 
 ---
 
+## Two Build Modes
+
+### Mode 1: Bespoke (teacher uploads resources)
+Teacher provides PPTs/resources → pipeline generates content tailored to their teaching materials + the spec. Result: school-specific content with `school_id` set.
+
+### Mode 2: Generic (spec-only, no teacher resources)
+Pipeline generates content directly from the exam specification. No teacher input needed. Result: free-tier content with `school_id = NULL`. This is how we build content at scale for every GCSE subject.
+
+---
+
+## Automated Lesson Planning (Generic Mode)
+
+When building from a spec with no teacher resources, the pipeline must determine lesson count and unit structure automatically.
+
+### Step 1: Identify exam vs coursework components
+Read the spec and determine which components are externally examined. **Only generate revision content for examined components.** Coursework/NEA/controlled assessment components are excluded — students don't revise for those in the same way.
+
+### Step 2: Scale lesson count by exam weight and subject type
+
+| Subject type | Exam weight | Lesson range | Examples |
+|-------------|------------|--------------|---------|
+| Core subjects | 100% | 40-55 lessons | Maths, English Lang, English Lit, Combined Science |
+| Full GCSE options (100% exam) | 100% | 25-35 lessons | History, Geography, RE, Languages, Business |
+| GCSE with coursework | 50-60% exam | 15-25 lessons | Art & Design, D&T, Food, Drama, Music, PE |
+| Vocational (BTEC/Cambridge Nat) | 40% exam | 10-15 lessons | H&SC, Sport Science, Creative iMedia, H&C |
+
+Core subjects get more content because:
+- They carry more weight in Progress 8 and school accountability
+- Students have more teaching time allocated (typically 7-8 hours/fortnight vs 4-5 for options)
+- The exams are longer and cover more content
+
+### Step 3: Structure units from the spec
+- Each exam paper or major spec section becomes a unit
+- Topics within each paper become lessons
+- Aim for 5-10 lessons per unit (too few = sparse, too many = overwhelming)
+- If a paper has 15+ topics, group related topics into combined lessons
+
+### Step 4: Propose the plan
+Present the unit/lesson breakdown to Tom for review before generating. Format:
+```
+Subject: {name} ({board} {code})
+Exam weight: {X}%
+Proposed: {N} lessons across {M} units
+
+Unit 1: {name} ({X} lessons)
+  L1: {title}
+  L2: {title}
+  ...
+```
+
+Tom reviews and adjusts if needed ("too many", "combine these", "split this"). Then generate.
+
+---
+
 ## Prerequisites
 
-Before starting a build, the teacher MUST provide:
-
+### Bespoke builds (Mode 1):
 1. **Subject name, exam board & spec code** (e.g. "Religious Studies, AQA 8062")
 2. **Source material** — teacher PPTs, textbook extracts, or spec documents. Upload via `/admin/pipeline`.
 3. **Colour theme** — one accent colour per unit/paper
+
+### Generic builds (Mode 2):
+1. **Subject name, exam board & spec code** only
+2. Spec loaded from `specs/{board}/{slug}-{code}.md` (193 specs pre-indexed)
+3. Colour theme chosen by the activation agent
+
+---
+
+## Specification Database
+
+193 GCSE specifications from all 4 exam boards, pre-converted to markdown with YAML frontmatter.
+
+- **Location:** `specs/{board}/{slug}-{code}.md`
+- **Index:** `specs/index.json` — maps board + subject + spec_code to file path
+- **Boards:** AQA (48), Edexcel (37), OCR (42), WJEC (32), Eduqas (34)
+- **Script:** `python scripts/download_specs.py` — re-downloads and converts all specs
+- **Usage:** Look up by exam board + subject slug or spec code. The full spec markdown is fed to content generation agents as context.
 
 ---
 
@@ -22,15 +92,15 @@ Before starting a build, the teacher MUST provide:
 
 ### Phase 1: Setup (T=0)
 
-Teacher uploads PPTs via `/admin/pipeline`. Claude Code finds the job:
+**Bespoke:** Teacher uploads PPTs via `/admin/pipeline`. Claude Code finds the job:
 ```bash
 python scripts/pipeline_generate.py info <job_id>
 python scripts/pipeline_generate.py text <job_id>
 ```
 
-Look up the spec from the **spec database** (`specs/index.json`). Match by exam board + subject/spec code. The markdown spec files are in `specs/{board}/{slug}-{code}.md` with YAML frontmatter. If the spec isn't in the database, read it from `Spec and Materials/` (use `python -m markitdown`).
+**Generic:** No upload needed. Read the spec directly from the database.
 
-To add new specs: `python scripts/download_specs.py` downloads all GCSE specs from AQA, Edexcel, OCR, WJEC/Eduqas and converts to markdown. 193 specs currently indexed.
+Look up the spec from `specs/index.json`. Match by exam board + subject/spec code. The markdown spec files are in `specs/{board}/{slug}-{code}.md` with YAML frontmatter. If the spec isn't in the database, download it with `python scripts/download_specs.py --board {board}`.
 
 **The spec is the authority, not the teacher resources.** The lesson plan MUST cover every topic and theme in the exam spec, even if the teacher's uploaded resources don't include material for all of them. Teacher resources are the primary source for content and emphasis, but if the spec lists a topic and there are no PPTs for it, the lesson must still be generated using the spec as the source. Students need full coverage of the spec to revise effectively — gaps in teacher uploads cannot become gaps in the revision content.
 

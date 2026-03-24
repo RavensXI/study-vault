@@ -67,6 +67,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 - **Script:** `python scripts/download_specs.py` — downloads PDFs from exam board websites, converts via `markitdown`, adds frontmatter
 - **Usage:** Pipeline matches teacher's exam board + subject to the right spec file. Content agents receive the spec markdown as context.
 - **Frontmatter:** `board`, `subject`, `spec_code`, `slug`
+- **Two build modes:** Bespoke (teacher uploads resources + spec) or Generic (spec-only, no teacher input). Generic mode enables building every GCSE subject at scale. See `docs/SUBJECT_PLAYBOOK.md` for automated lesson planning rules (exam weight scaling, unit structure, lesson count ranges).
 
 ## Dynamic Architecture (LIVE on Vercel)
 
