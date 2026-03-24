@@ -2511,9 +2511,19 @@ function openFlashcardModal() {
     var opacity = Math.max(0.3, 1 - Math.abs(dx) / 400);
     swipeTarget.style.transform = 'translateX(' + dx + 'px) rotate(' + rotation + 'deg)';
     swipeTarget.style.opacity = opacity;
+    // Colour glow: green for right, red for left
+    var intensity = Math.min(0.35, Math.abs(dx) / 300);
+    if (dx > 10) {
+      cardEl.style.boxShadow = '0 0 ' + Math.round(intensity * 60) + 'px rgba(22,163,74,' + intensity + ')';
+    } else if (dx < -10) {
+      cardEl.style.boxShadow = '0 0 ' + Math.round(intensity * 60) + 'px rgba(220,38,38,' + intensity + ')';
+    } else {
+      cardEl.style.boxShadow = '';
+    }
   }, { passive: true });
 
   cardEl.addEventListener('touchend', function (e) {
+    cardEl.style.boxShadow = '';
     swipeTarget.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
     var dx = e.changedTouches[0].screenX - touchStartX;
     var dy = e.changedTouches[0].screenY - touchStartY;
