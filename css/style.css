@@ -851,7 +851,8 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
 
 /* Lesson title area */
 .lesson-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 0.75rem;
+  position: relative;
 }
 
 .lesson-number {
@@ -1837,7 +1838,7 @@ body.dark-mode .gutter-progress-item.completed {
   background: var(--accent-light, #f0ece7);
   border-radius: 3px;
   overflow: hidden;
-  margin: 0.35rem 0 0.35rem;
+  margin: 0.75rem 0;
 }
 .lesson-progress-inline-fill {
   height: 100%;
@@ -1846,19 +1847,33 @@ body.dark-mode .gutter-progress-item.completed {
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ---- % badge next to title ---- */
+/* ---- % completion badge (positioned right of title) ---- */
 .lesson-progress-pct {
-  display: inline-block;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
   font-family: 'Inter', sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: var(--accent, #16a34a);
   background: var(--accent-light, #f0fdf4);
-  padding: 0.15em 0.5em;
-  border-radius: 6px;
-  margin-left: 0.6rem;
-  vertical-align: middle;
-  letter-spacing: 0.02em;
+  border: 2px solid var(--accent, #16a34a);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.01em;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+@media (max-width: 500px) {
+  .lesson-progress-pct {
+    width: 38px;
+    height: 38px;
+    font-size: 0.65rem;
+  }
 }
 
 /* Overlay tinting for gutter */

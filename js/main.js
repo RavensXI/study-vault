@@ -2196,7 +2196,7 @@ function initLessonProgress() {
       pctBadge.className = 'lesson-progress-pct';
       pctBadge.id = 'lesson-progress-pct';
       pctBadge.textContent = pct + '%';
-      titleEl.appendChild(pctBadge);
+      lessonHeader.appendChild(pctBadge);
     }
 
     // Add horizontal progress bar after the header
