@@ -42,6 +42,7 @@ function initLessonFeatures() {
   initLessonPill();
   initLessonProgress();
   initFlashcardModal();
+  initSidebarPanel();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
@@ -581,13 +582,17 @@ function initMobileNav() {
   const overlay = document.querySelector('.mobile-overlay');
   if (!btn || !nav) return;
 
+  // --- Default (non-lesson) mobile nav ---
   function toggleMenu() {
+    // If sidebar panel mode is active, skip default nav toggle
+    if (document.body.classList.contains('sidebar-panel-mode')) return;
     const isOpen = nav.classList.toggle('open');
     btn.setAttribute('aria-expanded', isOpen);
     if (overlay) overlay.classList.toggle('open', isOpen);
   }
 
   function closeMenu() {
+    if (document.body.classList.contains('sidebar-panel-mode')) return;
     nav.classList.remove('open');
     btn.setAttribute('aria-expanded', 'false');
     if (overlay) overlay.classList.remove('open');
@@ -599,17 +604,176 @@ function initMobileNav() {
     overlay.addEventListener('click', closeMenu);
   }
 
-  // Close when clicking a nav link
   nav.querySelectorAll('a').forEach(link => {
     link.addEventListener('click', closeMenu);
   });
 
-  // Close on Escape key
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && nav.classList.contains('open')) {
       closeMenu();
     }
   });
+}
+
+/* --- Sidebar Panel (mobile lesson pages) --- */
+function initSidebarPanel() {
+  var sidebar = document.querySelector('.lesson-sidebar');
+  if (!sidebar) return; // Not a lesson page
+
+  var btn = document.querySelector('.mobile-menu-btn');
+  var overlay = document.querySelector('.mobile-overlay');
+  var nav = document.querySelector('.header-nav');
+  if (!btn) return;
+
+  // Check if we are at mobile breakpoint
+  var mql = window.matchMedia('(max-width: 768px)');
+  var panelReady = false;
+
+  function setupPanel() {
+    if (panelReady) return;
+    panelReady = true;
+
+    // Add panel-mode class to body
+    document.body.classList.add('sidebar-panel-mode');
+
+    // Create close button + title at top of sidebar
+    var closeRow = document.createElement('div');
+    closeRow.className = 'sidebar-panel-close';
+    closeRow.innerHTML =
+      '<span class="sidebar-panel-close-title">Lesson Tools</span>' +
+      '<button class="sidebar-panel-close-btn" aria-label="Close panel">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+          '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>' +
+        '</svg>' +
+      '</button>';
+    sidebar.insertBefore(closeRow, sidebar.firstChild);
+
+    // Create nav links section from the header nav
+    var panelNav = document.createElement('div');
+    panelNav.className = 'sidebar-panel-nav';
+    var headerLinks = nav ? nav.querySelectorAll('a') : [];
+    var navIcons = {
+      'Home': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+      'Unit Overview': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>',
+      'Exam Technique': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+      'Revision Techniques': '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>'
+    };
+    headerLinks.forEach(function (a) {
+      // Skip hidden prev/next lesson links and lesson pill
+      if (a.style.display === 'none' || a.classList.contains('nav-lesson-pill')) return;
+      var clone = document.createElement('a');
+      clone.href = a.href;
+      clone.textContent = a.textContent.trim();
+      var icon = navIcons[clone.textContent] || '';
+      if (icon) clone.innerHTML = icon + '<span>' + clone.textContent + '</span>';
+      clone.addEventListener('click', function () { closeSidebar(); });
+      panelNav.appendChild(clone);
+    });
+    // Insert nav after close button
+    sidebar.insertBefore(panelNav, closeRow.nextSibling);
+
+    // Close button handler
+    closeRow.querySelector('.sidebar-panel-close-btn').addEventListener('click', closeSidebar);
+
+    // Swipe-to-close support
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var swiping = false;
+
+    sidebar.addEventListener('touchstart', function (e) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      swiping = true;
+    }, { passive: true });
+
+    sidebar.addEventListener('touchmove', function (e) {
+      if (!swiping) return;
+      var dx = e.touches[0].clientX - touchStartX;
+      var dy = Math.abs(e.touches[0].clientY - touchStartY);
+      // If mostly horizontal swipe to the right (> 60px, angle < 30deg)
+      if (dx > 60 && dy < dx * 0.6) {
+        closeSidebar();
+        swiping = false;
+      }
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', function () {
+      swiping = false;
+    }, { passive: true });
+  }
+
+  function teardownPanel() {
+    if (!panelReady) return;
+    panelReady = false;
+    document.body.classList.remove('sidebar-panel-mode', 'sidebar-open');
+    var closeRow = sidebar.querySelector('.sidebar-panel-close');
+    if (closeRow) closeRow.remove();
+    var panelNav = sidebar.querySelector('.sidebar-panel-nav');
+    if (panelNav) panelNav.remove();
+  }
+
+  function openSidebar() {
+    document.body.classList.add('sidebar-open');
+    btn.setAttribute('aria-expanded', 'true');
+    if (overlay) overlay.classList.add('open');
+  }
+
+  function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+    btn.setAttribute('aria-expanded', 'false');
+    if (overlay) overlay.classList.remove('open');
+    // Also close the header nav in case it was open
+    if (nav) nav.classList.remove('open');
+  }
+
+  function handleToggle() {
+    if (!panelReady) return; // Let default nav handler run
+    if (document.body.classList.contains('sidebar-open')) {
+      closeSidebar();
+    } else {
+      openSidebar();
+    }
+  }
+
+  // Override the hamburger click on lesson pages at mobile breakpoint
+  btn.addEventListener('click', function () {
+    if (panelReady) {
+      handleToggle();
+    }
+  });
+
+  // Overlay closes panel
+  if (overlay) {
+    overlay.addEventListener('click', function () {
+      if (panelReady) closeSidebar();
+    });
+  }
+
+  // Escape key closes panel
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && panelReady && document.body.classList.contains('sidebar-open')) {
+      closeSidebar();
+    }
+  });
+
+  // React to breakpoint changes
+  function onBreakpoint(e) {
+    if (e.matches) {
+      setupPanel();
+    } else {
+      teardownPanel();
+    }
+  }
+
+  if (mql.matches) setupPanel();
+  if (mql.addEventListener) {
+    mql.addEventListener('change', onBreakpoint);
+  } else if (mql.addListener) {
+    mql.addListener(onBreakpoint);
+  }
+
+  // Expose close for other code
+  window._closeSidebarPanel = closeSidebar;
 }
 
 /* --- Narration Player --- */
