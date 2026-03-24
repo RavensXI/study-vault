@@ -1847,12 +1847,18 @@ body.dark-mode .gutter-progress-item.completed {
 
 /* Vertical progress bar */
 /* ---- Inline progress bar (between title and hero) ---- */
+.lesson-progress-inline-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.75rem 0;
+}
 .lesson-progress-inline {
+  flex: 1;
   height: 6px;
   background: var(--accent-light, #f0ece7);
   border-radius: 3px;
   overflow: hidden;
-  margin: 0.75rem 0;
 }
 .lesson-progress-inline-fill {
   height: 100%;
@@ -1860,34 +1866,19 @@ body.dark-mode .gutter-progress-item.completed {
   border-radius: 3px;
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
-
-/* ---- % completion badge ---- */
-.lesson-progress-pct {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
+.lesson-progress-inline-pct {
   font-family: 'Inter', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  color: var(--accent, #16a34a);
-  background: var(--accent-light, #f0fdf4);
-  border: 2px solid var(--accent, #16a34a);
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: -0.01em;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  color: var(--accent, #6b6560);
+  white-space: nowrap;
+  min-width: 2.2rem;
+  text-align: right;
 }
-@media (max-width: 500px) {
-  .lesson-progress-pct {
-    width: 38px;
-    height: 38px;
-    font-size: 0.62rem;
-  }
+
+/* ---- % completion text (inline with progress bar) ---- */
+.lesson-progress-pct {
+  display: none;
 }
 
 /* Overlay tinting for gutter */
@@ -2220,31 +2211,42 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
   width: 100%;
   padding: 0.65rem 1rem;
   border-radius: var(--radius-sm, 8px);
-  background: var(--bg-card, #fff);
-  border: 1px solid var(--border-light, #e8e4df);
+  background: #f8f6f2;
+  border: 1px solid #e0dbd5;
   font-family: 'Inter', sans-serif;
   font-size: 0.88rem;
   font-weight: 600;
-  color: var(--text-secondary, #6b6560);
+  color: #4a4540;
   text-decoration: none;
   text-align: left;
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
 }
 
 .sidebar-flashcard-link:hover {
-  border-color: var(--accent, #2d2a26);
-  color: var(--accent, #2d2a26);
-  background: var(--accent-badge, #f3f1ed);
+  border-color: #c4beb6;
+  color: #2d2a26;
+  background: #f3efe9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .sidebar-flashcard-link svg {
-  color: var(--text-muted, #a09a93);
+  color: #9a938c;
   transition: color 0.2s;
 }
 
 .sidebar-flashcard-link:hover svg {
-  color: var(--accent, #2d2a26);
+  color: #2d2a26;
+}
+
+body.dark-mode .sidebar-flashcard-link {
+  background: rgba(255,255,255,0.06);
+  border-color: rgba(255,255,255,0.1);
+  color: #b5b0aa;
+}
+body.dark-mode .sidebar-flashcard-link:hover {
+  background: rgba(255,255,255,0.1);
+  color: #e8e4df;
 }
 
 /* --- Flashcard Modal Overlay --- */

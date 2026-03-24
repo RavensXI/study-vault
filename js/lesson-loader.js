@@ -319,7 +319,7 @@
               '<rect x="2" y="4" width="14" height="12" rx="2"/>' +
               '<rect x="8" y="8" width="14" height="12" rx="2"/>' +
             '</svg>' +
-            '<span>Revise with Flashcards</span>' +
+            '<span>Flashcards</span>' +
           '</button>';
         kcSection.parentElement.insertBefore(flashcardSection, kcSection.nextSibling);
       }

@@ -2199,11 +2199,13 @@ function initLessonProgress() {
       lessonHeader.appendChild(pctBadge);
     }
 
-    // Add horizontal progress bar after the header
-    var inlineBar = document.createElement('div');
-    inlineBar.className = 'lesson-progress-inline';
-    inlineBar.innerHTML = '<div class="lesson-progress-inline-fill" id="lesson-progress-inline-fill" style="width:' + pct + '%"></div>';
-    lessonHeader.parentNode.insertBefore(inlineBar, lessonHeader.nextSibling);
+    // Add horizontal progress bar + percentage after the header
+    var inlineWrap = document.createElement('div');
+    inlineWrap.className = 'lesson-progress-inline-wrap';
+    inlineWrap.innerHTML =
+      '<div class="lesson-progress-inline"><div class="lesson-progress-inline-fill" id="lesson-progress-inline-fill" style="width:' + pct + '%"></div></div>' +
+      '<span class="lesson-progress-inline-pct" id="lesson-progress-inline-pct">' + pct + '%</span>';
+    lessonHeader.parentNode.insertBefore(inlineWrap, lessonHeader.nextSibling);
   }
 
   // ---- Toast for auto-tick items ----
@@ -2267,9 +2269,11 @@ function initLessonProgress() {
       if (el) el.classList.toggle('completed', !!state[t.id]);
     });
 
-    // Inline bar + title badge
+    // Inline bar + percentage text
     var inlineFill = document.getElementById('lesson-progress-inline-fill');
     if (inlineFill) inlineFill.style.width = p + '%';
+    var inlinePct = document.getElementById('lesson-progress-inline-pct');
+    if (inlinePct) inlinePct.textContent = p + '%';
     var pctEl = document.getElementById('lesson-progress-pct');
     if (pctEl) pctEl.textContent = p + '%';
   }
