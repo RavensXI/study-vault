@@ -2493,54 +2493,45 @@ function openFlashcardModal() {
   });
 
   // ---- Touch swipe gestures (Tinder-style fling) ----
+  // Apply swipe to the container, not the card (avoids rotateY inversion)
+  var swipeTarget = cardEl.parentElement; // .fc-card-container
   var touchStartX = 0;
   var touchStartY = 0;
-  var swiping = false;
 
   cardEl.addEventListener('touchstart', function (e) {
     touchStartX = e.changedTouches[0].screenX;
     touchStartY = e.changedTouches[0].screenY;
-    swiping = false;
-    cardEl.style.transition = 'none';
+    swipeTarget.style.transition = 'none';
   }, { passive: true });
 
   cardEl.addEventListener('touchmove', function (e) {
     if (!cardEl.classList.contains('flipped') || !answersEnabled) return;
     var dx = e.changedTouches[0].screenX - touchStartX;
-    var dy = e.changedTouches[0].screenY - touchStartY;
-    if (Math.abs(dx) > 10) swiping = true;
-    // Translate sideways + slight rotation from bottom corner (Tinder effect)
-    var rotation = dx / 20; // subtle angle
+    var rotation = dx / 20;
     var opacity = Math.max(0.3, 1 - Math.abs(dx) / 400);
-    cardEl.style.transform = 'rotateY(180deg) translateX(' + dx + 'px) rotate(' + rotation + 'deg)';
-    cardEl.style.opacity = opacity;
+    swipeTarget.style.transform = 'translateX(' + dx + 'px) rotate(' + rotation + 'deg)';
+    swipeTarget.style.opacity = opacity;
   }, { passive: true });
 
   cardEl.addEventListener('touchend', function (e) {
-    cardEl.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    swipeTarget.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
     var dx = e.changedTouches[0].screenX - touchStartX;
     var dy = e.changedTouches[0].screenY - touchStartY;
 
     if (cardEl.classList.contains('flipped') && answersEnabled && Math.abs(dx) > 80 && Math.abs(dx) > Math.abs(dy)) {
-      // Fling off screen
       var direction = dx > 0 ? 1 : -1;
-      cardEl.style.transform = 'rotateY(180deg) translateX(' + (direction * 600) + 'px) rotate(' + (direction * 30) + 'deg)';
-      cardEl.style.opacity = '0';
+      swipeTarget.style.transform = 'translateX(' + (direction * 600) + 'px) rotate(' + (direction * 30) + 'deg)';
+      swipeTarget.style.opacity = '0';
       setTimeout(function () {
-        cardEl.style.transition = 'none';
-        cardEl.style.transform = '';
-        cardEl.style.opacity = '';
+        swipeTarget.style.transition = 'none';
+        swipeTarget.style.transform = '';
+        swipeTarget.style.opacity = '';
         if (dx > 0) markCard(true);
         else markCard(false);
       }, 250);
     } else {
-      // Snap back
-      if (cardEl.classList.contains('flipped')) {
-        cardEl.style.transform = 'rotateY(180deg)';
-      } else {
-        cardEl.style.transform = '';
-      }
-      cardEl.style.opacity = '';
+      swipeTarget.style.transform = '';
+      swipeTarget.style.opacity = '';
     }
   }, { passive: true });
 
