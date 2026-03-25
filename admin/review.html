@@ -555,7 +555,14 @@
           subjectDd.innerHTML = '<option value="">All Subjects</option>';
           filtered.forEach(function (s) {
             var schoolLabel = s.school_id ? '' : ' (Generic)';
-            subjectDd.innerHTML += '<option value="' + s.id + '">' + esc(s.name) + schoolLabel + '</option>';
+            var bl = '';
+            if (!s.school_id && s.slug) {
+              var _sm2 = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
+              var _em2 = { 'maths': ' — Edexcel', 'english-language': ' — AQA', 'english-literature': ' — AQA', 'science': ' — AQA', 'separate-sciences': ' — AQA' };
+              if (_em2[s.slug]) { bl = _em2[s.slug]; }
+              else { for (var _k in _sm2) { if (s.slug.endsWith(_k)) { bl = _sm2[_k]; break; } } }
+            }
+            subjectDd.innerHTML += '<option value="' + s.id + '">' + esc(s.name) + bl + schoolLabel + '</option>';
           });
 
           // Reset unit dropdown
