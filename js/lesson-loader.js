@@ -174,9 +174,13 @@
     document.title = 'Lesson ' + lesson.lesson_number + ': ' + lesson.title + ' - StudyVault';
 
     // Set body class for unit theming (preserve existing classes like a11y)
-    document.body.classList.add(unit.body_class);
+    if (unit.body_class) document.body.classList.add(unit.body_class);
     document.body.dataset.unit = unit.slug;
     document.body.dataset.lesson = lesson.slug;
+    // Set accent CSS variables directly from DB (works for all units, no CSS class needed)
+    if (unit.accent) document.documentElement.style.setProperty('--accent', unit.accent);
+    if (unit.accent_light) document.documentElement.style.setProperty('--accent-light', unit.accent_light);
+    if (unit.accent_badge) document.documentElement.style.setProperty('--accent-badge', unit.accent_badge);
 
     // Header unit label
     document.getElementById('header-unit-label').textContent = unit.name;
