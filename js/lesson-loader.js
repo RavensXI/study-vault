@@ -352,7 +352,7 @@
         : lesson.status === 'awaiting_qa' ? 'Awaiting QA'
         : lesson.status || 'Draft';
       var banner = document.createElement('div');
-      banner.style.cssText = 'position:sticky;top:56px;z-index:999;background:#fef3c7;color:#92400e;padding:0.6rem 1.25rem;font-size:0.85rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.08);';
+      banner.style.cssText = 'position:sticky;top:56px;z-index:999;background:#fef3c7;color:#92400e;padding:0.6rem 1.25rem;font-size:0.85rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.08);grid-column:1/-1;';
       banner.textContent = 'Preview Mode \u2014 Status: ' + statusLabel + ' (not visible to students)';
       pageEl.insertBefore(banner, pageEl.firstChild);
     }
