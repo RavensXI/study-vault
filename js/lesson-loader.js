@@ -117,14 +117,14 @@
 
     // Block non-live lessons for students (admins/teachers can preview)
     if (lessonResult.data.status !== 'live') {
-      var isStaff = false;
+      var isStaffCheck = false;
       try {
-        var authSession = JSON.parse(sessionStorage.getItem('studyvault-auth'));
-        if (authSession && ['platform_admin', 'teacher', 'school_admin'].indexOf(authSession.role) !== -1) {
-          isStaff = true;
+        var authSession = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+        if (authSession && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(authSession.role) !== -1) {
+          isStaffCheck = true;
         }
       } catch (e) {}
-      if (!isStaff) {
+      if (!isStaffCheck) {
         return { error: 'This lesson is not yet available' };
       }
       // Mark as preview for staff

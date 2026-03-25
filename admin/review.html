@@ -375,7 +375,15 @@
       filteredSubjects.forEach(function (s) {
         var sel = currentSubjectId === s.id ? ' selected' : '';
         var schoolLabel = s.school_id ? '' : ' (Generic)';
-        html += '<option value="' + s.id + '"' + sel + '>' + esc(s.name) + schoolLabel + '</option>';
+        // Derive exam board from slug suffix to disambiguate duplicates
+        var boardLabel = '';
+        if (!s.school_id && s.slug) {
+          var boardMap = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
+          for (var suffix in boardMap) {
+            if (s.slug.endsWith(suffix)) { boardLabel = boardMap[suffix]; break; }
+          }
+        }
+        html += '<option value="' + s.id + '"' + sel + '>' + esc(s.name) + boardLabel + schoolLabel + '</option>';
       });
       html += '</select>';
 
@@ -454,7 +462,13 @@
           html += '<div class="review-card-body">';
           html += '<div class="review-card-title">Lesson ' + lesson.lesson_number + ': ' + esc(lesson.title) + '</div>';
           html += '<div class="review-card-meta">';
-          html += '<span>' + esc(subject.name) + '</span>';
+          // Derive exam board from slug suffix for display
+          var cardBoard = '';
+          if (!subject.school_id && subject.slug) {
+            var _bm = { '-aqa': ' (AQA)', '-edexcel': ' (Edexcel)', '-ocr': ' (OCR)', '-eduqas': ' (Eduqas)' };
+            for (var _sf in _bm) { if (subject.slug.endsWith(_sf)) { cardBoard = _bm[_sf]; break; } }
+          }
+          html += '<span>' + esc(subject.name) + cardBoard + '</span>';
           html += '<span class="dot">&middot;</span>';
           html += '<span>' + esc(unit.name) + '</span>';
           html += '<span class="dot">&middot;</span>';

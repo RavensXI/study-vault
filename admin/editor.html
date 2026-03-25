@@ -428,7 +428,12 @@
       });
       pickSubject.innerHTML = '<option value="">Subject...</option>';
       filtered.forEach(function (s) {
-        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + esc(s.name) + '</option>';
+        var boardLabel = '';
+        if (!s.school_id && s.slug) {
+          var _bm = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
+          for (var _sf in _bm) { if (s.slug.endsWith(_sf)) { boardLabel = _bm[_sf]; break; } }
+        }
+        pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + esc(s.name) + boardLabel + '</option>';
       });
       pickUnit.innerHTML = '<option value="">Unit...</option>';
       pickUnit.disabled = true;
