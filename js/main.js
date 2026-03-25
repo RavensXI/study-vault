@@ -1635,6 +1635,20 @@ function initKnowledgeCheck() {
   btn.addEventListener('click', () => openKnowledgeCheck(questions, storageKey, scoreEl));
 }
 
+// Re-render KaTeX inside a container (for dynamically injected content)
+function renderKaTeX(el) {
+  if (typeof renderMathInElement === 'function' && el) {
+    renderMathInElement(el, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '\\[', right: '\\]', display: true },
+        { left: '\\(', right: '\\)', display: false },
+      ],
+      throwOnError: false
+    });
+  }
+}
+
 function openKnowledgeCheck(questions, storageKey, scoreEl) {
   let current = 0;
   let score = 0;
@@ -1690,6 +1704,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       case 'fill': renderFill(q); break;
       case 'match': renderMatch(q); break;
     }
+    renderKaTeX(getBody());
   }
 
   // --- Multiple Choice ---
@@ -1705,7 +1720,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     q.options.forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.className = 'kc-option';
-      btn.textContent = opt;
+      btn.innerHTML = opt;
       btn.addEventListener('click', () => {
         if (btn.classList.contains('locked')) return;
         grid.querySelectorAll('.kc-option').forEach(b => b.classList.remove('selected'));
@@ -1748,13 +1763,13 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     indices.forEach(i => {
       const btn = document.createElement('button');
       btn.className = 'kc-fill-btn';
-      btn.textContent = q.options[i];
+      btn.innerHTML = q.options[i];
       btn.addEventListener('click', () => {
         if (btn.classList.contains('locked')) return;
         opts.querySelectorAll('.kc-fill-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selected = i;
-        body.querySelector('#kc-blank').textContent = q.options[i];
+        body.querySelector('#kc-blank').innerHTML = q.options[i];
         body.querySelector('#kc-blank').classList.add('filled');
         footer.querySelector('#kc-check').disabled = false;
       });
@@ -1799,14 +1814,14 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       row.className = 'kc-match-row';
       const label = document.createElement('span');
       label.className = 'kc-match-left';
-      label.textContent = left;
+      label.innerHTML = left;
       const sel = document.createElement('select');
       sel.className = 'kc-match-select';
       sel.innerHTML = '<option value="">Select\u2026</option>';
       shuffled.forEach(s => {
         const opt = document.createElement('option');
         opt.value = s.idx;
-        opt.textContent = s.text;
+        opt.innerHTML = s.text;
         sel.appendChild(opt);
       });
       sel.addEventListener('change', checkAllSelected);
@@ -2552,8 +2567,10 @@ function openFlashcardModal() {
     sessionCounter.textContent = 'Card ' + (currentIdx + 1) + ' of ' + total;
     progressFill.style.width = ((currentIdx / total) * 100) + '%';
 
-    frontText.textContent = card.front;
-    backText.textContent = card.back;
+    frontText.innerHTML = card.front;
+    backText.innerHTML = card.back;
+    renderKaTeX(frontText);
+    renderKaTeX(backText);
     frontBadge.textContent = card.badgeLabel;
     backBadge.textContent = card.badgeLabel;
 
