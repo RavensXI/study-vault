@@ -375,13 +375,13 @@
       filteredSubjects.forEach(function (s) {
         var sel = currentSubjectId === s.id ? ' selected' : '';
         var schoolLabel = s.school_id ? '' : ' (Generic)';
-        // Derive exam board from slug suffix to disambiguate duplicates
+        // Derive exam board from slug to disambiguate duplicates
         var boardLabel = '';
         if (!s.school_id && s.slug) {
-          var boardMap = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
-          for (var suffix in boardMap) {
-            if (s.slug.endsWith(suffix)) { boardLabel = boardMap[suffix]; break; }
-          }
+          var suffixMap = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
+          var exactMap = { 'maths': ' — Edexcel', 'english-language': ' — AQA', 'english-literature': ' — AQA', 'science': ' — AQA', 'separate-sciences': ' — AQA' };
+          if (exactMap[s.slug]) { boardLabel = exactMap[s.slug]; }
+          else { for (var sf in suffixMap) { if (s.slug.endsWith(sf)) { boardLabel = suffixMap[sf]; break; } } }
         }
         html += '<option value="' + s.id + '"' + sel + '>' + esc(s.name) + boardLabel + schoolLabel + '</option>';
       });
@@ -465,8 +465,10 @@
           // Derive exam board from slug suffix for display
           var cardBoard = '';
           if (!subject.school_id && subject.slug) {
-            var _bm = { '-aqa': ' (AQA)', '-edexcel': ' (Edexcel)', '-ocr': ' (OCR)', '-eduqas': ' (Eduqas)' };
-            for (var _sf in _bm) { if (subject.slug.endsWith(_sf)) { cardBoard = _bm[_sf]; break; } }
+            var _sm = { '-aqa': ' (AQA)', '-edexcel': ' (Edexcel)', '-ocr': ' (OCR)', '-eduqas': ' (Eduqas)' };
+            var _em = { 'maths': ' (Edexcel)', 'english-language': ' (AQA)', 'english-literature': ' (AQA)', 'science': ' (AQA)', 'separate-sciences': ' (AQA)' };
+            if (_em[subject.slug]) { cardBoard = _em[subject.slug]; }
+            else { for (var _sf in _sm) { if (subject.slug.endsWith(_sf)) { cardBoard = _sm[_sf]; break; } } }
           }
           html += '<span>' + esc(subject.name) + cardBoard + '</span>';
           html += '<span class="dot">&middot;</span>';

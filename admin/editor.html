@@ -430,8 +430,10 @@
       filtered.forEach(function (s) {
         var boardLabel = '';
         if (!s.school_id && s.slug) {
-          var _bm = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
-          for (var _sf in _bm) { if (s.slug.endsWith(_sf)) { boardLabel = _bm[_sf]; break; } }
+          var _sm = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
+          var _em = { 'maths': ' — Edexcel', 'english-language': ' — AQA', 'english-literature': ' — AQA', 'science': ' — AQA', 'separate-sciences': ' — AQA' };
+          if (_em[s.slug]) { boardLabel = _em[s.slug]; }
+          else { for (var _sf in _sm) { if (s.slug.endsWith(_sf)) { boardLabel = _sm[_sf]; break; } } }
         }
         pickSubject.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + esc(s.name) + boardLabel + '</option>';
       });
