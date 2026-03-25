@@ -131,7 +131,7 @@ Wait for this to complete (~30 seconds), then proceed to Phase 2.
 
 | Agent | Depends on | Count |
 |-------|-----------|-------|
-| Lesson content agents (one per lesson) | Plan + unit accents in DB | 10-30 |
+| Lesson content agents (**max 10 lessons per agent**) | Plan + unit accents in DB | varies |
 | Exam technique guides agent | Question types from plan | 1 |
 | Revision technique guides agent | Subject name only | 1 |
 | getGuideUrl mapping agent | Question type strings | 1 |
@@ -218,6 +218,7 @@ T=12   Commit, push, live.
 3. **Use the Write tool for JSON files** — not bash heredocs (shell escaping issues)
 4. **Maximise parallelism** — if task B doesn't depend on task A's output, run them together
 5. **Media runs alongside assets, not after** — this saves ~10 minutes
+6. **STRICT: Maximum 10 lessons per content agent.** Agents generating more than ~15 lessons in a single batch produce thin/templated content for later lessons. Split into batches of 8-10 and run in parallel instead. Quality > speed.
 
 ### Model Selection
 
