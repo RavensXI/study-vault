@@ -26,7 +26,7 @@
     .sidebar-divider { border: none; border-top: 1px solid #e5e7eb; margin: 0.5rem 0; }
 
     /* Mobile hamburger for sidebar */
-    .editor-mobile-toggle { display: none; position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 200; width: 52px; height: 52px; border-radius: 50%; background: #7c3aed; color: white; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(124,58,237,0.35); font-size: 1.3rem; }
+    .editor-mobile-toggle { display: none !important; position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 200; width: 52px; height: 52px; border-radius: 50%; background: #7c3aed; color: white; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(124,58,237,0.35); font-size: 1.3rem; }
     .editor-mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; }
     .editor-mobile-overlay.open { display: block; }
 
@@ -37,7 +37,7 @@
       .editor-sidebar-inner { padding: 0; border: none; box-shadow: none; background: none; }
       .editor-sidebar-inner .btn { padding: 0.65rem 1rem; font-size: 0.9rem; }
       .sidebar-status { font-size: 0.85rem; margin-bottom: 0.85rem; }
-      .editor-mobile-toggle { display: flex; align-items: center; justify-content: center; }
+      .editor-mobile-toggle:not([hidden]) { display: flex !important; align-items: center; justify-content: center; position: fixed; bottom: 1.25rem; right: 1.25rem; }
       .editor-picker { gap: 0.35rem; }
       .editor-picker select { flex: 1; min-width: 0; font-size: 0.78rem; padding: 0.5rem 0.5rem; }
       .editor-picker .picker-nav { margin-left: 0; }
@@ -221,7 +221,7 @@
 
   <!-- Mobile FAB + overlay (outside layout so position:fixed works) -->
   <div class="editor-mobile-overlay" id="editor-mobile-overlay"></div>
-  <button class="editor-mobile-toggle" id="editor-mobile-toggle" title="Actions" style="display:none">
+  <button class="editor-mobile-toggle" id="editor-mobile-toggle" title="Actions" hidden>
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
   </button>
 
@@ -610,7 +610,7 @@
       editorSidebar.classList.add('visible');
       // Show mobile FAB
       var mobileFab = document.getElementById('editor-mobile-toggle');
-      if (mobileFab) mobileFab.style.display = '';
+      if (mobileFab) mobileFab.removeAttribute('hidden');
       sidebarStatus.textContent = 'No changes';
       sidebarStatus.className = 'sidebar-status saved';
       sidebarSaveBtn.disabled = true;
