@@ -23,10 +23,12 @@
     var path = window.location.pathname;
     var match = path.match(/^\/lesson\/([^/]+)\/([^/]+)\/(\d+)\/?$/);
     if (!match) return null;
+    var urlParams = new URLSearchParams(window.location.search);
     return {
       subjectSlug: match[1],
       unitSlug: match[2],
-      lessonNumber: parseInt(match[3], 10)
+      lessonNumber: parseInt(match[3], 10),
+      subjectId: urlParams.get('sid') || null
     };
   }
 
@@ -75,7 +77,10 @@
       .eq('slug', params.unitSlug)
       .eq('subjects.slug', params.subjectSlug);
 
-    if (isStaff) {
+    if (params.subjectId) {
+      // Explicit subject ID from review dashboard — use it directly
+      unitQuery = unitQuery.eq('subject_id', params.subjectId);
+    } else if (isStaff) {
       // Staff: don't filter by school_id — try bespoke first, fall back to generic
       unitQuery = unitQuery.not('subjects.school_id', 'is', null);
     } else if (hasBespoke) {
