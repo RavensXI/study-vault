@@ -25,6 +25,25 @@
     .sidebar-status.error { color: #dc2626; }
     .sidebar-divider { border: none; border-top: 1px solid #e5e7eb; margin: 0.5rem 0; }
 
+    /* Mobile hamburger for sidebar */
+    .editor-mobile-toggle { display: none; position: fixed; bottom: 1.25rem; right: 1.25rem; z-index: 200; width: 52px; height: 52px; border-radius: 50%; background: #7c3aed; color: white; border: none; cursor: pointer; box-shadow: 0 4px 16px rgba(124,58,237,0.35); font-size: 1.3rem; }
+    .editor-mobile-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 300; }
+    .editor-mobile-overlay.open { display: block; }
+
+    @media (max-width: 768px) {
+      .editor-layout { flex-direction: column; padding: 1rem 0.75rem 5rem; }
+      .editor-sidebar { display: none !important; width: 100%; position: fixed; bottom: 0; left: 0; right: 0; top: auto; z-index: 400; background: white; border-top: 2px solid #e5e7eb; border-radius: 16px 16px 0 0; box-shadow: 0 -4px 20px rgba(0,0,0,0.12); padding: 1.25rem; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+      .editor-sidebar.mobile-open { display: block !important; transform: translateY(0); }
+      .editor-sidebar-inner { padding: 0; border: none; box-shadow: none; background: none; }
+      .editor-sidebar-inner .btn { padding: 0.65rem 1rem; font-size: 0.9rem; }
+      .sidebar-status { font-size: 0.85rem; margin-bottom: 0.85rem; }
+      .editor-mobile-toggle { display: flex; align-items: center; justify-content: center; }
+      .editor-picker { gap: 0.35rem; }
+      .editor-picker select { flex: 1; min-width: 0; font-size: 0.78rem; padding: 0.5rem 0.5rem; }
+      .editor-picker .picker-nav { margin-left: 0; }
+      .editor-toolbar { top: 0; border-radius: 0; margin: 0 -0.75rem 0.75rem; padding: 0.35rem 0.75rem; }
+    }
+
     /* ---- Lesson Picker ---- */
     .editor-picker { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; }
     .editor-picker select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; background: white; }
@@ -187,6 +206,12 @@
       Select a subject, unit, and lesson above to start editing.
     </div>
    </div><!-- /.editor-main -->
+
+   <!-- Mobile overlay + FAB toggle -->
+   <div class="editor-mobile-overlay" id="editor-mobile-overlay"></div>
+   <button class="editor-mobile-toggle" id="editor-mobile-toggle" title="Actions" style="display:none">
+     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+   </button>
 
    <!-- Sticky Sidebar -->
    <div class="editor-sidebar" id="editor-sidebar">
@@ -583,6 +608,9 @@
       saveBtn.disabled = true;
       discardBtn.disabled = true;
       editorSidebar.classList.add('visible');
+      // Show mobile FAB
+      var mobileFab = document.getElementById('editor-mobile-toggle');
+      if (mobileFab) mobileFab.style.display = '';
       sidebarStatus.textContent = 'No changes';
       sidebarStatus.className = 'sidebar-status saved';
       sidebarSaveBtn.disabled = true;
@@ -1033,6 +1061,28 @@
     //  INIT
     // ================================================================
     loadSubjects();
+
+    // Mobile sidebar toggle
+    var mobileToggle = document.getElementById('editor-mobile-toggle');
+    var mobileOverlay = document.getElementById('editor-mobile-overlay');
+    function closeMobileSidebar() {
+      editorSidebar.classList.remove('mobile-open');
+      mobileOverlay.classList.remove('open');
+    }
+    if (mobileToggle) {
+      mobileToggle.addEventListener('click', function () {
+        var isOpen = editorSidebar.classList.contains('mobile-open');
+        if (isOpen) { closeMobileSidebar(); }
+        else { editorSidebar.classList.add('mobile-open'); mobileOverlay.classList.add('open'); }
+      });
+    }
+    if (mobileOverlay) {
+      mobileOverlay.addEventListener('click', closeMobileSidebar);
+    }
+    // Close mobile sidebar after save/discard
+    [sidebarSaveBtn, sidebarDiscardBtn].forEach(function (btn) {
+      if (btn) btn.addEventListener('click', function () { setTimeout(closeMobileSidebar, 300); });
+    });
   })();
   </script>
 </body>
