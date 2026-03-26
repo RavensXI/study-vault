@@ -332,6 +332,54 @@ function initPracticeQuestions() {
       ['3 marks \u2014 Explain', 'explain-3-marks.html'],
       ['4 marks \u2014 Compare', 'compare-and-explain-4-marks.html'],
       ['6 marks \u2014 Extended', 'extended-response-6-marks.html'],
+      // Edexcel Science
+      ['1 mark \u2014 State/Give', 'state-give-1-mark.html'],
+      ['4 marks \u2014 Compare', 'compare-4-marks.html'],
+      // OCR Science
+      ['1 mark \u2014 State/Name', 'state-name-1-mark.html'],
+      ['4 marks \u2014 Compare/Suggest', 'compare-suggest-4-marks.html'],
+      // AQA English Lit (8702)
+      ['30+4 marks \u2014 Shakespeare Essay', 'shakespeare-extract-essay.html'],
+      ['30 marks \u2014 19th Century Essay', 'nineteenth-century-extract.html'],
+      ['30+4 marks \u2014 Modern Text Essay', 'modern-text-essay.html'],
+      ['30 marks \u2014 Poetry Comparison', 'poetry-comparison.html'],
+      ['24 marks \u2014 Unseen Poetry', 'unseen-poetry.html'],
+      ['8 marks \u2014 Unseen Poetry Comparison', 'unseen-poetry.html'],
+      ['30 marks \u2014 Essay', 'modern-text-essay.html'],
+      // Edexcel English Lit (1ET0)
+      ['15 marks \u2014 Extract Response', 'shakespeare-extract.html'],
+      ['25 marks \u2014 Essay Response', 'shakespeare-extract.html'],
+      ['40 marks \u2014 Post-1914 Essay', 'post-1914-essay.html'],
+      ['20 marks \u2014 Extract Analysis', 'nineteenth-century-two-part.html'],
+      ['20 marks \u2014 Poetry Comparison', 'poetry-comparison.html'],
+      ['20 marks \u2014 Unseen Poetry', 'unseen-poetry.html'],
+      // OCR English Lit (J352)
+      ['20 marks \u2014 Extract Comparison', 'extract-comparison.html'],
+      ['20 marks \u2014 Whole Text Essay', 'whole-text-essay.html'],
+      ['40 marks \u2014 Shakespeare Essay', 'shakespeare-essay.html'],
+      ['40 marks \u2014 Poetry Comparison', 'poetry-across-time.html'],
+      // Eduqas English Lit (C720U)
+      ['20 marks \u2014 Wider Text Response', 'post-1914-two-part.html'],
+      ['40 marks \u2014 19th Century Essay', 'nineteenth-century-essay.html'],
+      // English Language (Edexcel 1EN0)
+      ['1 mark \u2014 Identify', 'identify-1-mark.html'],
+      ['5 marks \u2014 Summarise', 'summarise-5-marks.html'],
+      ['10 marks \u2014 Analyse Language', 'analyse-language-10-marks.html'],
+      ['15 marks \u2014 Evaluate', 'evaluate-15-marks.html'],
+      ['40 marks \u2014 Extended Writing', 'extended-writing-40-marks.html'],
+      // English Language (OCR J351)
+      ['2 marks \u2014 Identify', 'identify-2-marks.html'],
+      ['8 marks \u2014 Analyse Language', 'analyse-language-8-marks.html'],
+      ['12 marks \u2014 Evaluate', 'evaluate-12-marks.html'],
+      // English Language (Eduqas C700U)
+      ['2 marks \u2014 Select', 'select-2-marks.html'],
+      ['10 marks \u2014 Compare Writers', 'compare-writers-10-marks.html'],
+      // Maths (AQA/OCR/Eduqas)
+      ['1 mark \u2014 Write Down', 'short-answer.html'],
+      ['2 marks \u2014 Calculate', 'calculate-work-out.html'],
+      ['3 marks \u2014 Show That', 'show-that-prove.html'],
+      ['4 marks \u2014 Multi-Step', 'multi-step-problems.html'],
+      ['5 marks \u2014 Problem Solving', 'problem-solving.html'],
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],
@@ -2042,14 +2090,14 @@ function initRevisionTips() {
       { selector: '.collapsible', text: 'Listen to an example piece and try to identify each element discussed inside.', link: 'active-listening.html', label: 'Active Listening', maxPerPage: 1 }
     ],
     'english-literature': [
-      { selector: '.key-fact', text: 'Turn this into a quote flashcard \u2014 the quote on one side, analysis and context on the other.', link: 'quote-flashcards.html', label: 'Quote Flashcards' },
-      { selector: 'figure.diagram', text: 'Recreate this as a character or theme map from memory, adding your own textual evidence.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
-      { selector: '.collapsible', text: 'Use the points inside to write a timed practice paragraph \u2014 aim for 10 minutes.', link: 'timed-exam-practice.html', label: 'Timed Exam Practice', maxPerPage: 1 }
+      { selector: '.key-fact', text: 'Turn this into a quote flashcard \u2014 the quote on one side, analysis and context on the other.', link: 'quote-memorisation.html', label: 'Quote Memorisation' },
+      { selector: 'figure.diagram', text: 'Recreate this as a character or theme map from memory, adding your own textual evidence.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Use the points inside to write a timed practice paragraph \u2014 aim for 10 minutes.', link: 'timed-practice-questions.html', label: 'Timed Practice', maxPerPage: 1 }
     ],
     'english-language': [
-      { selector: '.key-fact', text: 'Use retrieval practice to memorise key terminology and mark scheme criteria', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
-      { selector: '.timeline', text: 'Try dual coding to visualise language and structure techniques', link: 'dual-coding.html', label: 'Dual Coding' },
-      { selector: '.collapsible', text: 'Use elaborative interrogation to deepen your analysis of writer\u2019s methods', link: 'elaborative-interrogation.html', label: 'Elaborative Interrogation', maxPerPage: 1 }
+      { selector: '.key-fact', text: 'Cover this box and recall the key terminology and mark scheme criteria from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Recreate this as a mind map, connecting the techniques to their effects.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Use the model inside as a template \u2014 write your own version on a different text.', link: 'essay-planning.html', label: 'Essay Planning', maxPerPage: 1 }
     ],
     'science': [
       { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
@@ -2060,10 +2108,22 @@ function initRevisionTips() {
       { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
       { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each part and adding the key equations.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Turn the facts inside into a set of flashcards \u2014 question on one side, answer on the other.', link: 'active-recall-flashcards.html', label: 'Active Recall', maxPerPage: 1 }
+    ],
+    'maths': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every formula and method from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each step of the method.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Work through the example inside, then close it and try a similar problem from memory.', link: 'worked-examples.html', label: 'Worked Examples', maxPerPage: 1 }
     ]
   };
 
-  const tips = subjectTips[subject] || defaultTips;
+  // Match board-specific slugs to their base subject tips
+  // e.g. 'english-literature-edexcel' → 'english-literature', 'maths-aqa' → 'maths', 'science-ocr' → 'science'
+  var tipsSubject = subject;
+  if (!subjectTips[tipsSubject]) {
+    var baseSlug = subject.replace(/-(?:aqa|edexcel|ocr|eduqas|wjec)$/, '');
+    if (subjectTips[baseSlug]) tipsSubject = baseSlug;
+  }
+  const tips = subjectTips[tipsSubject] || defaultTips;
 
   let openPopup = null;
 
