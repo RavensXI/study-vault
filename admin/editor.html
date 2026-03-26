@@ -608,9 +608,11 @@
       saveBtn.disabled = true;
       discardBtn.disabled = true;
       editorSidebar.classList.add('visible');
-      // Show mobile FAB (only on small screens)
+      // Show mobile FAB (only on small screens) — inline styles to guarantee fixed positioning
       var mobileFab = document.getElementById('editor-mobile-toggle');
-      if (mobileFab && window.innerWidth <= 768) mobileFab.classList.add('active');
+      if (mobileFab && window.innerWidth <= 768) {
+        mobileFab.setAttribute('style', 'display:flex !important;align-items:center;justify-content:center;position:fixed;bottom:1.25rem;right:1.25rem;z-index:9999;width:52px;height:52px;border-radius:50%;background:#7c3aed;color:white;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,0.35);');
+      }
       sidebarStatus.textContent = 'No changes';
       sidebarStatus.className = 'sidebar-status saved';
       sidebarSaveBtn.disabled = true;
