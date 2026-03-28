@@ -49,8 +49,34 @@
 
   var isTeacherAuth = authMode === 'teacher';
 
+  function addLogoutButton() {
+    var nav = document.querySelector('.header-nav');
+    if (!nav) return;
+    var btn = document.createElement('a');
+    btn.href = '#';
+    btn.textContent = 'Sign out';
+    btn.style.cssText = 'color:#dc2626;font-weight:600;';
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      // Clear Supabase Auth session too
+      if (window.supabase) {
+        var sb = window.supabase.createClient(
+          document.querySelector('script[src*="supabase"]') ? 'https://baipckgywpnwapobwtsy.supabase.co' : '',
+          'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+        );
+        sb.auth.signOut().finally(function () { location.reload(); });
+      } else {
+        location.reload();
+      }
+    });
+    nav.appendChild(btn);
+  }
+
   var session = getSession();
   if (session && allowedRoles.indexOf(session.role) !== -1) {
+    addLogoutButton();
     return; // Valid session — page renders normally
   }
 
@@ -91,6 +117,7 @@
                 if (cs) cs.remove();
                 var ov = document.querySelector('.auth-gate-overlay');
                 if (ov) ov.remove();
+                addLogoutButton();
                 return; // Admitted
               }
             });
