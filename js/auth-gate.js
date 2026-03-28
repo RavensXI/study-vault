@@ -50,11 +50,14 @@
   var isTeacherAuth = authMode === 'teacher';
 
   function addLogoutButton() {
-    var nav = document.querySelector('.header-nav');
-    if (!nav) return;
+    function inject() {
+      var nav = document.querySelector('.header-nav');
+      if (!nav) return;
+      if (nav.querySelector('.auth-logout-btn')) return;
     var btn = document.createElement('a');
     btn.href = '#';
     btn.textContent = 'Sign out';
+    btn.className = 'auth-logout-btn';
     btn.style.cssText = 'color:#dc2626;font-weight:600;';
     btn.addEventListener('click', function (e) {
       e.preventDefault();
@@ -63,7 +66,7 @@
       // Clear Supabase Auth session too
       if (window.supabase) {
         var sb = window.supabase.createClient(
-          document.querySelector('script[src*="supabase"]') ? 'https://baipckgywpnwapobwtsy.supabase.co' : '',
+          'https://baipckgywpnwapobwtsy.supabase.co',
           'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
         );
         sb.auth.signOut().finally(function () { location.reload(); });
@@ -72,6 +75,13 @@
       }
     });
     nav.appendChild(btn);
+    }
+    // Run now if DOM ready, otherwise wait
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', inject);
+    } else {
+      inject();
+    }
   }
 
   var session = getSession();
