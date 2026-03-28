@@ -10,84 +10,88 @@ module.exports = async function handler(req, res) {
 
   // GET — fetch review queue, counts, and subject summary
   if (req.method === 'GET') {
-    const { status, subject_id } = req.query;
+    const { status, subject_id, lessons_only } = req.query;
 
-    // Fetch all subjects (for filter dropdown + summary)
-    let subjectsQuery = supabase
-      .from('subjects')
-      .select('id, slug, name, school_id, schools(name)')
-      .order('name');
+    // Fast path: if lessons_only=1, skip the expensive summary queries
+    let subjects = [];
+    let counts = {};
+    let subjectSummary = [];
 
-    // Teachers only see their school's subjects + generic
-    if (isTeacher && !isAdmin) {
-      // Get subjects this teacher manages
-      const { data: teacherSubjects } = await supabase
-        .from('teacher_subjects')
-        .select('subject_id')
-        .eq('teacher_id', auth.profile.id || auth.user.id);
+    if (!lessons_only) {
+      // Fetch all subjects (for filter dropdown + summary)
+      let subjectsQuery = supabase
+        .from('subjects')
+        .select('id, slug, name, school_id, schools(name)')
+        .order('name');
 
-      const teacherSubjectIds = (teacherSubjects || []).map(ts => ts.subject_id);
+      // Teachers only see their school's subjects + generic
+      if (isTeacher && !isAdmin) {
+        const { data: teacherSubjects } = await supabase
+          .from('teacher_subjects')
+          .select('subject_id')
+          .eq('teacher_id', auth.profile.id || auth.user.id);
 
-      if (teacherSubjectIds.length > 0) {
-        subjectsQuery = subjectsQuery.in('id', teacherSubjectIds);
-      } else if (auth.profile.school_id) {
-        subjectsQuery = subjectsQuery.eq('school_id', auth.profile.school_id);
-      }
-    }
+        const teacherSubjectIds = (teacherSubjects || []).map(ts => ts.subject_id);
 
-    const { data: subjects } = await subjectsQuery;
-    const subjectIds = (subjects || []).map(s => s.id);
-
-    // Get unit IDs for scoping (if not admin)
-    let scopedUnitIds = null;
-    if (!isAdmin && subjectIds.length > 0) {
-      const { data: scopedUnits } = await supabase
-        .from('units')
-        .select('id')
-        .in('subject_id', subjectIds);
-      scopedUnitIds = (scopedUnits || []).map(u => u.id);
-    }
-
-    // Fetch counts by status (scoped to visible subjects)
-    const statuses = ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live', 'draft', 'review', 'approved'];
-    const counts = {};
-    for (const s of statuses) {
-      let countQuery = supabase
-        .from('lessons')
-        .select('id', { count: 'exact', head: true })
-        .eq('status', s);
-
-      if (scopedUnitIds && scopedUnitIds.length > 0) {
-        countQuery = countQuery.in('unit_id', scopedUnitIds);
+        if (teacherSubjectIds.length > 0) {
+          subjectsQuery = subjectsQuery.in('id', teacherSubjectIds);
+        } else if (auth.profile.school_id) {
+          subjectsQuery = subjectsQuery.eq('school_id', auth.profile.school_id);
+        }
       }
 
-      const { count } = await countQuery;
-      counts[s] = count || 0;
-    }
+      const subjectsResult = await subjectsQuery;
+      subjects = subjectsResult.data || [];
+      const subjectIds = subjects.map(s => s.id);
 
-    // Fetch per-subject counts for summary cards
-    const subjectSummary = [];
-    for (const subject of (subjects || [])) {
-      const { data: unitIds } = await supabase
-        .from('units')
-        .select('id')
-        .eq('subject_id', subject.id);
+      // Get unit IDs for scoping (if not admin)
+      let scopedUnitIds = null;
+      if (!isAdmin && subjectIds.length > 0) {
+        const { data: scopedUnits } = await supabase
+          .from('units')
+          .select('id')
+          .in('subject_id', subjectIds);
+        scopedUnitIds = (scopedUnits || []).map(u => u.id);
+      }
 
-      const uids = (unitIds || []).map(u => u.id);
-      if (uids.length === 0) continue;
-
-      const summary = { id: subject.id, slug: subject.slug, name: subject.name, school_id: subject.school_id };
-      for (const s of ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live']) {
-        const { count } = await supabase
+      // Fetch counts by status (scoped to visible subjects)
+      const statuses = ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live', 'draft', 'review', 'approved'];
+      for (const s of statuses) {
+        let countQuery = supabase
           .from('lessons')
           .select('id', { count: 'exact', head: true })
-          .eq('status', s)
-          .in('unit_id', uids);
-        summary[s] = count || 0;
+          .eq('status', s);
+
+        if (scopedUnitIds && scopedUnitIds.length > 0) {
+          countQuery = countQuery.in('unit_id', scopedUnitIds);
+        }
+
+        const { count } = await countQuery;
+        counts[s] = count || 0;
       }
-      // Only include subjects that have at least one lesson
-      if (summary.pending_review + summary.ready_for_teacher + summary.publishing + summary.awaiting_qa + summary.live > 0) {
-        subjectSummary.push(summary);
+
+      // Fetch per-subject counts for summary cards
+      for (const subject of subjects) {
+        const { data: unitIds } = await supabase
+          .from('units')
+          .select('id')
+          .eq('subject_id', subject.id);
+
+        const uids = (unitIds || []).map(u => u.id);
+        if (uids.length === 0) continue;
+
+        const summary = { id: subject.id, slug: subject.slug, name: subject.name, school_id: subject.school_id };
+        for (const s of ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live']) {
+          const { count } = await supabase
+            .from('lessons')
+            .select('id', { count: 'exact', head: true })
+            .eq('status', s)
+            .in('unit_id', uids);
+          summary[s] = count || 0;
+        }
+        if (summary.pending_review + summary.ready_for_teacher + summary.publishing + summary.awaiting_qa + summary.live > 0) {
+          subjectSummary.push(summary);
+        }
       }
     }
 

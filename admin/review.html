@@ -287,16 +287,26 @@
     }
 
     // ---- Fetch data ----
+    var _summaryLoaded = false;
+
     async function fetchData() {
       var params = {};
       if (currentStatus && currentStatus !== 'all') params.status = currentStatus;
       if (currentSubjectId) params.subject_id = currentSubjectId;
 
+      // After first load, only fetch lessons (skip the slow summary queries)
+      if (_summaryLoaded) params.lessons_only = '1';
+
       var data = await apiGet(params);
       lessonsCache = data.lessons || [];
-      subjectsCache = data.subjects || [];
-      summaryCache = data.subjectSummary || [];
-      countsCache = data.counts || {};
+
+      // Only update summary caches on first load
+      if (!_summaryLoaded) {
+        subjectsCache = data.subjects || [];
+        summaryCache = data.subjectSummary || [];
+        countsCache = data.counts || {};
+        _summaryLoaded = true;
+      }
       return data;
     }
 
