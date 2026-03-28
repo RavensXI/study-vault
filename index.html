@@ -610,6 +610,23 @@
         badgeLogo.style.display = '';
       }
 
+      // Hide subject cards that this school doesn't offer
+      if (session.bespoke_subjects && session.bespoke_subjects.length > 0) {
+        var allowedSlugs = (session.bespoke_subjects || []).concat(session.subscribed_subjects || []);
+        document.querySelectorAll('.home-card[data-subject]').forEach(function (card) {
+          if (allowedSlugs.indexOf(card.dataset.subject) === -1) {
+            card.style.display = 'none';
+          }
+        });
+        // Also hide from free-user subject grid/picker
+        document.querySelectorAll('.fw-card[data-slug]').forEach(function (card) {
+          if (allowedSlugs.indexOf(card.dataset.slug) === -1) card.style.display = 'none';
+        });
+        document.querySelectorAll('.picker-item[data-subject]').forEach(function (card) {
+          if (allowedSlugs.indexOf(card.dataset.subject) === -1) card.style.display = 'none';
+        });
+      }
+
       // Blended experience: if school has NO bespoke subjects, show generic cards
       // with subscribed subjects badged
       if (!session.bespoke_subjects || session.bespoke_subjects.length === 0) {
