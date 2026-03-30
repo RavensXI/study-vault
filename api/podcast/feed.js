@@ -98,7 +98,17 @@ module.exports = async (req, res) => {
   const showTitle = 'StudyVault: ' + subject.name + ' (' + subject.exam_board + ')';
   const showDesc = 'GCSE ' + subject.name + ' revision podcasts from StudyVault. Covering the full ' +
     subject.exam_board + ' specification across ' + units.length + ' units.';
-  const imageUrl = siteUrl + '/images/subject-' + slug + '.jpg';
+  // Map subject slugs to actual image filenames where they differ
+  const imageMap = {
+    'food-technology': 'food',
+    'religious-education': 'religious-studies',
+    'english-literature': 'english-lit',
+    'english-language': 'english-lang',
+    'music-technology': 'music-tech',
+    'gcse-music': 'music',
+  };
+  const imgSlug = imageMap[slug] || slug;
+  const imageUrl = siteUrl + '/images/subject-' + imgSlug + '.jpg';
   const feedUrl = siteUrl + '/api/podcast/feed?subject=' + slug;
 
   // Build RSS XML — assign sequential pubDates so podcast apps order correctly
