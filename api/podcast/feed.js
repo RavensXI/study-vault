@@ -101,17 +101,29 @@ module.exports = async (req, res) => {
   const imageUrl = siteUrl + '/images/subject-' + slug + '.jpg';
   const feedUrl = siteUrl + '/api/podcast/feed?subject=' + slug;
 
-  // Build RSS XML
-  let items = '';
-  let episodeNum = 0;
+  // Build RSS XML — assign sequential pubDates so podcast apps order correctly
+  // Episode 1 = oldest date, last episode = newest. Apps show newest first by default.
+  let allEpisodes = [];
   for (const u of units) {
     const unitLessons = lessons.filter(l => l.unit_id === u.id);
     for (const l of unitLessons) {
       const podcastUrl = getPodcastUrl(l.related_media);
       if (!podcastUrl) continue;
+      allEpisodes.push({ unit: u, lesson: l, podcastUrl });
+    }
+  }
+
+  let items = '';
+  let episodeNum = 0;
+  for (const ep of allEpisodes) {
+    const u = ep.unit;
+    const l = ep.lesson;
 
       episodeNum++;
-      const pubDate = new Date(l.created_at || '2026-01-01').toUTCString();
+      // Sequential dates: episode 1 = base date, each subsequent +1 day
+      const baseDate = new Date('2026-01-01T12:00:00Z');
+      baseDate.setDate(baseDate.getDate() + (episodeNum - 1));
+      const pubDate = baseDate.toUTCString();
       const episodeTitle = u.name + ' \u2014 ' + l.title;
       const desc = l.description || l.title;
       const lessonUrl = siteUrl + '/lesson/' + slug + '/' + u.slug + '/' + l.lesson_number;
@@ -123,12 +135,11 @@ module.exports = async (req, res) => {
       <link>${lessonUrl}</link>
       <guid isPermaLink="false">${slug}-${u.slug}-${l.lesson_number}</guid>
       <pubDate>${pubDate}</pubDate>
-      <enclosure url="${escXml(podcastUrl)}" type="audio/mpeg" length="0"/>
+      <enclosure url="${escXml(ep.podcastUrl)}" type="audio/mpeg" length="0"/>
       <itunes:episode>${episodeNum}</itunes:episode>
       <itunes:title>${escXml(episodeTitle)}</itunes:title>
       <itunes:summary>${escXml(desc)}</itunes:summary>
     </item>`;
-    }
   }
 
   if (episodeNum === 0) {
