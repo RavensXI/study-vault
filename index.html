@@ -605,6 +605,10 @@
         badgeLogo.style.display = '';
       }
 
+      // Hide the "Free GCSE revision..." tagline for school students
+      var heroTagline = document.querySelector('.hero-tagline');
+      if (heroTagline) heroTagline.style.display = 'none';
+
       // Hide subject cards that this school doesn't offer
       if (session.bespoke_subjects && session.bespoke_subjects.length > 0) {
         var allowedSlugs = (session.bespoke_subjects || []).concat(session.subscribed_subjects || []);
@@ -751,6 +755,8 @@
       .then(function(result) {
         if (result.ok) {
           SchoolSession.set(result.data);
+          // Clear stale free-user prefs (shouldn't be both free + school)
+          localStorage.removeItem('studyvault-free-prefs');
           window.location.reload();
         } else {
           modalError.classList.add('visible');
@@ -1120,7 +1126,11 @@
     if (FreeUser.isActive()) _skipPicker = true;
     if (SchoolSession.isActive()) {
       var _s = SchoolSession.get();
-      if (!_s.bespoke_subjects || _s.bespoke_subjects.length === 0) _skipPicker = true;
+      if (!_s.bespoke_subjects || _s.bespoke_subjects.length === 0) {
+        _skipPicker = true;
+      } else {
+        _skipPicker = false; // school with bespoke subjects always gets picker
+      }
     }
     if (!SchoolSession.isActive() && !FreeUser.isActive()) _skipPicker = true; // first-time visitor, no picker needed
 
