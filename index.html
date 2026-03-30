@@ -961,7 +961,7 @@
       wizardState.texts = {};
 
       Object.keys(texts).forEach(function (category) {
-        var groupKey = category.toLowerCase().replace(/[^a-z]+/g, '-');
+        var groupKey = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
         var section = document.createElement('div');
         section.className = 'fw-text-section';
         section.innerHTML = '<h3>' + category + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
@@ -1068,17 +1068,34 @@
       finishWizard();
     });
 
+    // Map (base subject slug, board) → actual Supabase subject slug
+    var slugMap = {
+      'english-language': { 'aqa': 'english-language', 'edexcel': 'english-language-edexcel', 'ocr': 'english-language-ocr', 'eduqas': 'english-language-eduqas' },
+      'english-literature': { 'aqa': 'english-literature', 'edexcel': 'english-literature-edexcel', 'ocr': 'english-literature-ocr', 'eduqas': 'english-literature-eduqas' },
+      'maths': { 'edexcel': 'maths', 'aqa': 'maths-aqa', 'ocr': 'maths-ocr', 'eduqas': 'maths-eduqas' },
+      'science': { 'aqa': 'science', 'edexcel': 'science-edexcel', 'ocr': 'science-ocr' },
+    };
+
+    function resolveSlug(baseSlug, board) {
+      var map = slugMap[baseSlug];
+      if (map && map[board]) return map[board];
+      return baseSlug; // single-board subjects keep their slug
+    }
+
     function finishWizard() {
       var subjectNames = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'separate-sciences': 'Separate Sciences', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies' };
       var prefs = { subjects: [] };
 
-      wizardState.subjects.forEach(function (slug) {
+      wizardState.subjects.forEach(function (baseSlug) {
+        var board = wizardState.boards[baseSlug] || 'aqa';
+        var actualSlug = resolveSlug(baseSlug, board);
         var entry = {
-          slug: slug,
-          examBoard: wizardState.boards[slug] || 'aqa',
-          display: subjectNames[slug] + ' (' + (wizardState.boards[slug] || 'AQA').toUpperCase() + ')',
+          slug: actualSlug,
+          baseSlug: baseSlug,
+          examBoard: board,
+          display: subjectNames[baseSlug] + ' (' + board.toUpperCase() + ')',
         };
-        if (slug === 'english-literature') {
+        if (baseSlug === 'english-literature') {
           entry.texts = wizardState.texts;
         }
         prefs.subjects.push(entry);

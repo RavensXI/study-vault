@@ -38,7 +38,8 @@
     getSubject: function (slug) {
       var prefs = this.get();
       if (!prefs || !prefs.subjects) return null;
-      return prefs.subjects.find(function (s) { return s.slug === slug; }) || null;
+      // Match by exact slug or by baseSlug (for multi-board subjects)
+      return prefs.subjects.find(function (s) { return s.slug === slug || s.baseSlug === slug; }) || null;
     }
   };
 })();
