@@ -902,6 +902,15 @@ function initNarration() {
           progressFill.style.width = '0%';
           timeEl.textContent = '0:00 / 0:00';
           speedBtn.textContent = speeds[speedIndex] + 'x';
+          // Resume from saved position
+          var podcastKey = 'sv-podcast-pos-' + location.pathname;
+          var saved = parseFloat(localStorage.getItem(podcastKey));
+          if (saved > 0) {
+            audio.addEventListener('loadedmetadata', function resumeOnce() {
+              audio.removeEventListener('loadedmetadata', resumeOnce);
+              if (saved < audio.duration - 2) audio.currentTime = saved;
+            });
+          }
         } else {
           // Switch back to narration mode
           audio.src = '';
@@ -1077,6 +1086,7 @@ function initNarration() {
 
   // --- Progress ---
 
+  var podcastSaveCounter = 0;
   audio.addEventListener('timeupdate', function() {
     if (playerMode === 'podcast') {
       var dur = audio.duration || 0;
@@ -1087,6 +1097,10 @@ function initNarration() {
       timeEl.textContent = fmtTime(cur) + ' / ' + fmtTime(dur);
       fabFill.style.width = pct;
       fabTime.textContent = fmtTime(cur);
+      // Save podcast position every ~5 seconds
+      if (++podcastSaveCounter % 20 === 0 && cur > 1) {
+        localStorage.setItem('sv-podcast-pos-' + location.pathname, cur.toFixed(1));
+      }
     } else {
       var gt = globalTime();
       var pct = (gt / totalDuration * 100) + '%';
@@ -1109,6 +1123,8 @@ function initNarration() {
       playBtn.setAttribute('aria-label', 'Play podcast');
       fabPlay.classList.remove('playing');
       fab.classList.remove('visible');
+      // Clear saved position — they finished the episode
+      localStorage.removeItem('sv-podcast-pos-' + location.pathname);
     } else if (currentIndex + 1 < manifest.length) {
       loadClip(currentIndex + 1);
       audio.play();
@@ -1122,6 +1138,13 @@ function initNarration() {
       playBtn.setAttribute('aria-label', 'Play narration');
       fabPlay.classList.remove('playing');
       fab.classList.remove('visible');
+    }
+  });
+
+  // Save podcast position when leaving the page
+  window.addEventListener('beforeunload', function() {
+    if (playerMode === 'podcast' && audio.currentTime > 1 && !audio.ended) {
+      localStorage.setItem('sv-podcast-pos-' + location.pathname, audio.currentTime.toFixed(1));
     }
   });
 
