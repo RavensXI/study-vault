@@ -123,6 +123,7 @@
     <div class="qa-header">
       <h1>Image QA</h1>
       <div class="qa-controls">
+        <select id="school-select"><option value="">All Schools</option></select>
         <select id="subject-select"><option value="">Loading...</option></select>
         <select id="unit-select"><option value="">All units</option></select>
       </div>
@@ -153,11 +154,13 @@
 
     var contentEl = document.getElementById('qa-content');
     var diagramsContentEl = document.getElementById('diagrams-content');
+    var schoolSelect = document.getElementById('school-select');
     var subjectSelect = document.getElementById('subject-select');
     var unitSelect = document.getElementById('unit-select');
     var demoUser = null;
     var accessToken = null;
     var activeTab = 'hero';
+    var allSubjects = [];
 
     // Track loaded state per tab so switching tabs re-fetches if needed
     var heroLoaded = false;
@@ -221,12 +224,23 @@
     // ---- Load subjects ----
     async function loadSubjects() {
       await getAuth();
-      var result = await sb.from('subjects').select('id, slug, name').eq('status', 'live').order('name');
-      var subjects = result.data || [];
-      subjectSelect.innerHTML = '<option value="">Select subject...</option>';
-      subjects.forEach(function (s) {
-        subjectSelect.innerHTML += '<option value="' + s.slug + '">' + s.name + '</option>';
+      var result = await sb.from('subjects').select('id, slug, name, school_id, schools(name)').eq('status', 'live').order('name');
+      allSubjects = result.data || [];
+
+      // Build school dropdown
+      var schools = {};
+      allSubjects.forEach(function (s) {
+        var key = s.school_id || 'generic';
+        var label = (s.schools && s.schools.name) ? s.schools.name : (s.school_id ? 'School' : 'Generic');
+        if (!schools[key]) schools[key] = label;
       });
+      schoolSelect.innerHTML = '<option value="">All Schools</option>';
+      Object.keys(schools).sort(function (a, b) { return schools[a].localeCompare(schools[b]); }).forEach(function (key) {
+        schoolSelect.innerHTML += '<option value="' + key + '">' + schools[key] + '</option>';
+      });
+
+      populateSubjects();
+
       // Auto-select from URL params
       var params = new URLSearchParams(window.location.search);
       if (params.get('subject')) {
@@ -235,8 +249,37 @@
       }
     }
 
+    function populateSubjects() {
+      var schoolVal = schoolSelect.value;
+      var filtered = allSubjects.filter(function (s) {
+        if (!schoolVal) return true;
+        if (schoolVal === 'generic') return !s.school_id;
+        return s.school_id === schoolVal;
+      });
+      subjectSelect.innerHTML = '<option value="">Select subject...</option>';
+      filtered.forEach(function (s) {
+        var boardLabel = '';
+        if (!s.school_id && s.slug) {
+          var _sm = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
+          var _em = { 'maths': ' — Edexcel', 'english-language': ' — AQA', 'english-literature': ' — AQA', 'science': ' — AQA', 'separate-sciences': ' — AQA' };
+          if (_em[s.slug]) { boardLabel = _em[s.slug]; }
+          else { for (var _sf in _sm) { if (s.slug.endsWith(_sf)) { boardLabel = _sm[_sf]; break; } } }
+        }
+        var schoolLabel = s.school_id ? '' : ' (Generic)';
+        subjectSelect.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + s.name + boardLabel + schoolLabel + '</option>';
+      });
+    }
+
+    schoolSelect.addEventListener('change', function () {
+      populateSubjects();
+      unitSelect.innerHTML = '<option value="">All units</option>';
+      contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+    });
+
     subjectSelect.addEventListener('change', async function () {
       var slug = this.value;
+      var opt = this.options[this.selectedIndex];
+      var subjectId = opt ? opt.dataset.id : null;
       heroLoaded = false;
       diagramsLoaded = false;
       if (!slug) {
@@ -245,13 +288,11 @@
         return;
       }
       if (activeTab === 'hero') {
-        await loadUnitsAndLessons(slug);
-        // Pre-load diagrams in background
-        loadDiagrams(slug);
+        await loadUnitsAndLessons(slug, subjectId);
+        loadDiagrams(slug, subjectId);
       } else {
-        await loadDiagrams(slug);
-        // Pre-load hero in background
-        loadUnitsAndLessons(slug);
+        await loadDiagrams(slug, subjectId);
+        loadUnitsAndLessons(slug, subjectId);
       }
     });
 
@@ -272,13 +313,17 @@
     //  HERO IMAGES TAB
     // ================================================================
 
-    async function loadUnitsAndLessons(subjectSlug) {
+    async function loadUnitsAndLessons(subjectSlug, subjectId) {
       contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
 
-      var subjectResult = await sb.from('subjects').select('id').eq('slug', subjectSlug).single();
-      if (!subjectResult.data) { contentEl.innerHTML = '<div class="loading-msg">Subject not found.</div>'; return; }
+      var sid = subjectId;
+      if (!sid) {
+        var subjectResult = await sb.from('subjects').select('id').eq('slug', subjectSlug).single();
+        if (!subjectResult.data) { contentEl.innerHTML = '<div class="loading-msg">Subject not found.</div>'; return; }
+        sid = subjectResult.data.id;
+      }
 
-      var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', subjectResult.data.id).order('sort_order');
+      var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', sid).order('sort_order');
       var units = unitsResult.data || [];
 
       // Populate unit dropdown (only from hero tab load or first load)
@@ -708,13 +753,17 @@
     //  DIAGRAMS TAB
     // ================================================================
 
-    async function loadDiagrams(subjectSlug) {
+    async function loadDiagrams(subjectSlug, subjectId) {
       diagramsContentEl.innerHTML = '<div class="loading-msg">Loading diagrams...</div>';
 
-      var subjectResult = await sb.from('subjects').select('id').eq('slug', subjectSlug).single();
-      if (!subjectResult.data) { diagramsContentEl.innerHTML = '<div class="loading-msg">Subject not found.</div>'; return; }
+      var sid = subjectId;
+      if (!sid) {
+        var subjectResult = await sb.from('subjects').select('id').eq('slug', subjectSlug).single();
+        if (!subjectResult.data) { diagramsContentEl.innerHTML = '<div class="loading-msg">Subject not found.</div>'; return; }
+        sid = subjectResult.data.id;
+      }
 
-      var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', subjectResult.data.id).order('sort_order');
+      var unitsResult = await sb.from('units').select('id, slug, name, sort_order').eq('subject_id', sid).order('sort_order');
       var units = unitsResult.data || [];
 
       // Populate unit dropdown if diagrams tab triggered the load
