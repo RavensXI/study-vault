@@ -120,9 +120,9 @@ module.exports = async (req, res) => {
     const l = ep.lesson;
 
       episodeNum++;
-      // Sequential dates: episode 1 = base date, each subsequent +1 day
+      // Reverse dates: episode 1 gets the latest date so it appears first in "newest first" apps
       const baseDate = new Date('2026-01-01T12:00:00Z');
-      baseDate.setDate(baseDate.getDate() + (episodeNum - 1));
+      baseDate.setDate(baseDate.getDate() + (allEpisodes.length - episodeNum));
       const pubDate = baseDate.toUTCString();
       const episodeTitle = u.name + ' \u2014 ' + l.title;
       const desc = l.description || l.title;
