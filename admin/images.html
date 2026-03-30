@@ -208,6 +208,13 @@
       var h = { 'Content-Type': 'application/json' };
       if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
       else if (demoUser) h['X-Demo-User'] = demoUser;
+      else {
+        // Fall back to admin/teacher password from auth-gate session
+        try {
+          var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+          if (session && session.pw) h['X-Admin-Password'] = session.pw;
+        } catch (e) {}
+      }
       return h;
     }
 
