@@ -6,29 +6,48 @@ module.exports = async (req, res) => {
     return res.status(400).send('Missing ?subject= parameter');
   }
 
-  // Find the school-specific subject first (bespoke), fall back to generic
+  // Resolve school — accept UUID or school code
   let schoolId = req.query.school || null;
-  let subjectQuery = supabase
-    .from('subjects')
-    .select('id, name, exam_board, slug');
-
-  if (schoolId) {
-    subjectQuery = subjectQuery.eq('slug', slug).eq('school_id', schoolId);
-  } else {
-    subjectQuery = subjectQuery.eq('slug', slug).is('school_id', null);
+  if (schoolId && !/^[0-9a-f-]{36}$/.test(schoolId)) {
+    // Treat as school code — look up the school
+    const { data: schools } = await supabase
+      .from('schools')
+      .select('id, settings')
+      .limit(100);
+    const match = (schools || []).find(s =>
+      s.settings && s.settings.student_code === schoolId.toLowerCase().trim()
+    );
+    schoolId = match ? match.id : null;
   }
 
-  let { data: subject } = await subjectQuery.single();
-
-  // Fall back to any subject with this slug
+  // Find subject — school-specific first, then generic
+  let subject = null;
+  if (schoolId) {
+    const { data } = await supabase
+      .from('subjects')
+      .select('id, name, exam_board, slug')
+      .eq('slug', slug)
+      .eq('school_id', schoolId)
+      .single();
+    subject = data;
+  }
   if (!subject) {
-    const fallback = await supabase
+    const { data } = await supabase
+      .from('subjects')
+      .select('id, name, exam_board, slug')
+      .eq('slug', slug)
+      .is('school_id', null)
+      .single();
+    subject = data;
+  }
+  if (!subject) {
+    const { data } = await supabase
       .from('subjects')
       .select('id, name, exam_board, slug')
       .eq('slug', slug)
       .limit(1)
       .single();
-    subject = fallback.data;
+    subject = data;
   }
 
   if (!subject) {

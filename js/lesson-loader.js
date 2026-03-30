@@ -487,6 +487,10 @@
     // Add podcast feed subscribe button if this subject has a podcast
     if (hasPodcastTab) {
       var feedUrl = '/api/podcast/feed?subject=' + (window._subjectSlug || '');
+      if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive()) {
+        var sess = SchoolSession.get();
+        if (sess && sess.school_id) feedUrl += '&school=' + sess.school_id;
+      }
       html += '<div class="sidebar-podcast-feed">';
       html += '<a href="' + feedUrl + '" target="_blank" class="sidebar-podcast-feed-btn" title="Copy this link and paste into your podcast app">';
       html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>';
