@@ -229,6 +229,11 @@
             <div class="fw-card-label">Combined Science</div>
             <div class="fw-card-check">&#10003;</div>
           </div>
+          <div class="fw-card" data-slug="separate-sciences">
+            <img class="fw-card-img" src="/images/subject-separate-sciences.jpg" alt="Separate Sciences">
+            <div class="fw-card-label">Separate Sciences</div>
+            <div class="fw-card-check">&#10003;</div>
+          </div>
           <div class="fw-card" data-slug="health-social-care">
             <img class="fw-card-img" src="/images/subject-health-social-care.jpg" alt="Health &amp; Social Care">
             <div class="fw-card-label">Health &amp; Social Care</div>
@@ -261,46 +266,11 @@
         <button class="fw-continue" id="fw-step2-next">Continue</button>
       </div>
 
-      <!-- Step 3: English Lit text picker -->
+      <!-- Step 3: English Lit text picker (built dynamically per board) -->
       <div class="free-wizard-step" id="fw-step-3">
         <h2>Which texts are you studying?</h2>
         <p class="subtitle">Pick one from each category</p>
-
-        <div class="fw-text-section">
-          <h3>Shakespeare</h3>
-          <div class="fw-text-options" data-group="shakespeare">
-            <button class="fw-text-btn" data-value="macbeth">Macbeth</button>
-            <button class="fw-text-btn" data-value="romeo-and-juliet">Romeo &amp; Juliet</button>
-            <button class="fw-text-btn greyed" data-value="the-tempest">The Tempest</button>
-            <button class="fw-text-btn greyed" data-value="merchant-of-venice">Merchant of Venice</button>
-            <button class="fw-text-btn greyed" data-value="much-ado">Much Ado About Nothing</button>
-          </div>
-        </div>
-
-        <div class="fw-text-section">
-          <h3>19th Century Novel</h3>
-          <div class="fw-text-options" data-group="nineteenth-century">
-            <button class="fw-text-btn" data-value="a-christmas-carol">A Christmas Carol</button>
-            <button class="fw-text-btn" data-value="jekyll-and-hyde">Jekyll &amp; Hyde</button>
-            <button class="fw-text-btn greyed" data-value="frankenstein">Frankenstein</button>
-            <button class="fw-text-btn greyed" data-value="pride-and-prejudice">Pride &amp; Prejudice</button>
-            <button class="fw-text-btn greyed" data-value="jane-eyre">Jane Eyre</button>
-            <button class="fw-text-btn greyed" data-value="great-expectations">Great Expectations</button>
-          </div>
-        </div>
-
-        <div class="fw-text-section">
-          <h3>Modern Text</h3>
-          <div class="fw-text-options" data-group="modern">
-            <button class="fw-text-btn" data-value="an-inspector-calls">An Inspector Calls</button>
-            <button class="fw-text-btn" data-value="animal-farm">Animal Farm</button>
-            <button class="fw-text-btn greyed" data-value="lord-of-the-flies">Lord of the Flies</button>
-            <button class="fw-text-btn greyed" data-value="blood-brothers">Blood Brothers</button>
-            <button class="fw-text-btn greyed" data-value="curious-incident">The Curious Incident...</button>
-            <button class="fw-text-btn greyed" data-value="pigeon-english">Pigeon English</button>
-          </div>
-        </div>
-
+        <div id="fw-texts-container"></div>
         <button class="fw-continue" id="fw-step3-done">Continue</button>
       </div>
 
@@ -690,28 +660,30 @@
       var headerEl = document.getElementById('home-section-header');
 
       var freeSubjectMeta = {
-        'maths': { name: 'Mathematics', board: 'Edexcel', image: '/images/subject-maths.jpg', accent: '#2563eb', detail: '6 units' },
-        'english-language': { name: 'English Language', board: 'AQA', image: '/images/subject-english-lang.jpg', accent: '#1e40af', detail: '4 units' },
-        'english-literature': { name: 'English Literature', board: 'AQA', image: '/images/subject-english-lit.jpg', accent: '#991b1b', detail: '8 texts' },
-        'science': { name: 'Combined Science', board: 'AQA', image: '/images/subject-science.jpg', accent: '#16a34a', detail: '6 papers' },
-        'health-social-care': { name: 'Health & Social Care', board: 'Edexcel', image: '/images/subject-health-social-care.jpg', accent: '#e11d48', detail: '1 unit' },
-        'hospitality-catering': { name: 'Hospitality & Catering', board: 'WJEC', image: '/images/subject-hospitality-catering.jpg', accent: '#d97706', detail: '1 unit' },
-        'history': { name: 'History', board: 'Edexcel', image: '/images/subject-history.jpg', accent: '#c44536', detail: '4 papers' },
-        'religious-education': { name: 'Religious Studies', board: 'AQA', image: '/images/subject-religious-studies.jpg', accent: '#1e40af', detail: '8 units' },
+        'maths': { name: 'Mathematics', image: '/images/subject-maths.jpg', accent: '#2563eb', detail: '6 units' },
+        'english-language': { name: 'English Language', image: '/images/subject-english-lang.jpg', accent: '#1e40af', detail: '4 units' },
+        'english-literature': { name: 'English Literature', image: '/images/subject-english-lit.jpg', accent: '#991b1b', detail: '8 texts' },
+        'science': { name: 'Combined Science', image: '/images/subject-science.jpg', accent: '#16a34a', detail: '6 papers' },
+        'separate-sciences': { name: 'Separate Sciences', image: '/images/subject-separate-sciences.jpg', accent: '#15803d', detail: '3 papers' },
+        'health-social-care': { name: 'Health & Social Care', image: '/images/subject-health-social-care.jpg', accent: '#e11d48', detail: '1 unit' },
+        'hospitality-catering': { name: 'Hospitality & Catering', image: '/images/subject-hospitality-catering.jpg', accent: '#d97706', detail: '1 unit' },
+        'history': { name: 'History', image: '/images/subject-history.jpg', accent: '#c44536', detail: '4 papers' },
+        'religious-education': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#1e40af', detail: '8 units' },
       };
 
       if (freePrefs && freePrefs.subjects && freePrefs.subjects.length > 0) {
         headerEl.innerHTML = '<h2>Your subjects</h2>';
         var cardsHtml = '';
         freePrefs.subjects.forEach(function (s) {
-          var meta = freeSubjectMeta[s.slug] || { name: s.slug, board: '', image: '', accent: '#666', detail: '' };
+          var meta = freeSubjectMeta[s.slug] || { name: s.slug, image: '', accent: '#666', detail: '' };
+          var boardLabel = (s.examBoard || '').toUpperCase();
           cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" style="--card-accent: ' + meta.accent + '">';
           if (meta.image) {
             cardsHtml += '<img class="home-card-img" src="' + meta.image + '" alt="' + meta.name + '" width="500" height="300" loading="lazy" decoding="async">';
           }
           cardsHtml += '<div class="home-card-body">';
           cardsHtml += '<h3>' + meta.name + '</h3>';
-          cardsHtml += '<p class="home-card-board">' + meta.board + '</p>';
+          cardsHtml += '<p class="home-card-board">' + boardLabel + '</p>';
           cardsHtml += '<p class="home-card-detail">' + meta.detail + '</p>';
           cardsHtml += '</div></a>';
         });
@@ -811,16 +783,95 @@
     var freeSchoolBtn = document.getElementById('free-school-btn');
     var fwToast = document.getElementById('fw-toast');
 
-    // Available boards per subject (true = content available, false = greyed/request)
+    // Available boards per subject (true = content available)
     var boardConfig = {
-      'maths': { 'Edexcel': true, 'AQA': false, 'OCR': false },
-      'english-language': { 'AQA': true, 'Edexcel': false, 'OCR': false },
-      'english-literature': { 'AQA': true, 'Edexcel': false, 'OCR': false },
-      'science': { 'AQA': true, 'Edexcel': false, 'OCR': false },
+      'maths': { 'Edexcel': true, 'AQA': true, 'OCR': true, 'Eduqas': true },
+      'english-language': { 'AQA': true, 'Edexcel': true, 'OCR': true, 'Eduqas': true },
+      'english-literature': { 'AQA': true, 'Edexcel': true, 'OCR': true, 'Eduqas': true },
+      'science': { 'AQA': true, 'Edexcel': true, 'OCR': true },
+      'separate-sciences': { 'AQA': true },
       'health-social-care': { 'Edexcel': true },
       'hospitality-catering': { 'WJEC': true },
-      'history': { 'Edexcel': true, 'AQA': false, 'OCR': false },
-      'religious-education': { 'AQA': true, 'Edexcel': false },
+      'history': { 'Edexcel': true },
+      'religious-education': { 'AQA': true },
+    };
+
+    // English Lit texts per board, grouped by category
+    var litTexts = {
+      'aqa': {
+        'Shakespeare': [
+          { slug: 'macbeth', name: 'Macbeth' }, { slug: 'romeo-and-juliet', name: 'Romeo & Juliet' },
+          { slug: 'the-tempest', name: 'The Tempest' }, { slug: 'the-merchant-of-venice', name: 'The Merchant of Venice' },
+          { slug: 'much-ado-about-nothing', name: 'Much Ado About Nothing' }, { slug: 'julius-caesar', name: 'Julius Caesar' }
+        ],
+        '19th Century Novel': [
+          { slug: 'a-christmas-carol', name: 'A Christmas Carol' }, { slug: 'jekyll-and-hyde', name: 'Jekyll & Hyde' },
+          { slug: 'frankenstein', name: 'Frankenstein' }, { slug: 'pride-and-prejudice', name: 'Pride & Prejudice' },
+          { slug: 'jane-eyre', name: 'Jane Eyre' }, { slug: 'great-expectations', name: 'Great Expectations' },
+          { slug: 'the-sign-of-four', name: 'The Sign of Four' }
+        ],
+        'Modern Text': [
+          { slug: 'an-inspector-calls', name: 'An Inspector Calls' }, { slug: 'animal-farm', name: 'Animal Farm' },
+          { slug: 'lord-of-the-flies', name: 'Lord of the Flies' }, { slug: 'blood-brothers', name: 'Blood Brothers' },
+          { slug: 'the-curious-incident', name: 'The Curious Incident...' }, { slug: 'pigeon-english', name: 'Pigeon English' },
+          { slug: 'dna', name: 'DNA' }, { slug: 'the-history-boys', name: 'The History Boys' },
+          { slug: 'never-let-me-go', name: 'Never Let Me Go' }, { slug: 'anita-and-me', name: 'Anita and Me' }
+        ]
+      },
+      'edexcel': {
+        'Shakespeare': [
+          { slug: 'macbeth', name: 'Macbeth' }, { slug: 'romeo-and-juliet', name: 'Romeo & Juliet' },
+          { slug: 'the-tempest', name: 'The Tempest' }, { slug: 'the-merchant-of-venice', name: 'The Merchant of Venice' },
+          { slug: 'much-ado-about-nothing', name: 'Much Ado About Nothing' }, { slug: 'twelfth-night', name: 'Twelfth Night' }
+        ],
+        '19th Century Novel': [
+          { slug: 'a-christmas-carol', name: 'A Christmas Carol' }, { slug: 'dr-jekyll-and-mr-hyde', name: 'Jekyll & Hyde' },
+          { slug: 'frankenstein', name: 'Frankenstein' }, { slug: 'pride-and-prejudice', name: 'Pride & Prejudice' },
+          { slug: 'jane-eyre', name: 'Jane Eyre' }, { slug: 'great-expectations', name: 'Great Expectations' },
+          { slug: 'silas-marner', name: 'Silas Marner' }
+        ],
+        'Modern Text': [
+          { slug: 'an-inspector-calls', name: 'An Inspector Calls' }, { slug: 'animal-farm', name: 'Animal Farm' },
+          { slug: 'lord-of-the-flies', name: 'Lord of the Flies' }, { slug: 'blood-brothers', name: 'Blood Brothers' },
+          { slug: 'hobsons-choice', name: "Hobson's Choice" }, { slug: 'journeys-end', name: "Journey's End" },
+          { slug: 'anita-and-me', name: 'Anita and Me' }, { slug: 'the-woman-in-black', name: 'The Woman in Black' }
+        ]
+      },
+      'ocr': {
+        'Shakespeare': [
+          { slug: 'macbeth', name: 'Macbeth' }, { slug: 'romeo-and-juliet', name: 'Romeo & Juliet' },
+          { slug: 'the-merchant-of-venice', name: 'The Merchant of Venice' }, { slug: 'much-ado-about-nothing', name: 'Much Ado About Nothing' }
+        ],
+        '19th Century Novel': [
+          { slug: 'a-christmas-carol', name: 'A Christmas Carol' }, { slug: 'dr-jekyll-and-mr-hyde', name: 'Jekyll & Hyde' },
+          { slug: 'great-expectations', name: 'Great Expectations' }, { slug: 'pride-and-prejudice', name: 'Pride & Prejudice' },
+          { slug: 'jane-eyre', name: 'Jane Eyre' }, { slug: 'war-of-the-worlds', name: 'The War of the Worlds' }
+        ],
+        'Modern Text': [
+          { slug: 'an-inspector-calls', name: 'An Inspector Calls' }, { slug: 'animal-farm', name: 'Animal Farm' },
+          { slug: 'never-let-me-go', name: 'Never Let Me Go' }, { slug: 'anita-and-me', name: 'Anita and Me' },
+          { slug: 'dna', name: 'DNA' }, { slug: 'leave-taking', name: 'Leave Taking' }
+        ]
+      },
+      'eduqas': {
+        'Shakespeare': [
+          { slug: 'macbeth', name: 'Macbeth' }, { slug: 'romeo-and-juliet', name: 'Romeo & Juliet' },
+          { slug: 'the-merchant-of-venice', name: 'The Merchant of Venice' }, { slug: 'much-ado-about-nothing', name: 'Much Ado About Nothing' },
+          { slug: 'othello', name: 'Othello' }, { slug: 'henry-v', name: 'Henry V' }
+        ],
+        '19th Century Novel': [
+          { slug: 'a-christmas-carol', name: 'A Christmas Carol' }, { slug: 'dr-jekyll-and-mr-hyde', name: 'Jekyll & Hyde' },
+          { slug: 'pride-and-prejudice', name: 'Pride & Prejudice' }, { slug: 'jane-eyre', name: 'Jane Eyre' },
+          { slug: 'silas-marner', name: 'Silas Marner' }, { slug: 'war-of-the-worlds', name: 'The War of the Worlds' }
+        ],
+        'Modern Text': [
+          { slug: 'an-inspector-calls', name: 'An Inspector Calls' }, { slug: 'lord-of-the-flies', name: 'Lord of the Flies' },
+          { slug: 'blood-brothers', name: 'Blood Brothers' }, { slug: 'anita-and-me', name: 'Anita and Me' },
+          { slug: 'never-let-me-go', name: 'Never Let Me Go' }, { slug: 'the-woman-in-black', name: 'The Woman in Black' },
+          { slug: 'the-history-boys', name: 'The History Boys' }, { slug: 'the-curious-incident', name: 'The Curious Incident...' },
+          { slug: 'a-taste-of-honey', name: 'A Taste of Honey' }
+        ]
+      }
     };
 
     var wizardState = { subjects: [], boards: {}, texts: {} };
@@ -856,13 +907,14 @@
       container.innerHTML = '';
       wizardState.subjects.forEach(function (slug) {
         var boards = boardConfig[slug] || {};
-        var displayName = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies' }[slug] || slug;
+        var displayName = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'separate-sciences': 'Separate Sciences', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies' }[slug] || slug;
 
         var section = document.createElement('div');
         section.className = 'fw-board-section';
         section.innerHTML = '<h3>' + displayName + '</h3><div class="fw-board-options" data-subject="' + slug + '"></div>';
         var opts = section.querySelector('.fw-board-options');
 
+        var firstSelected = false;
         Object.keys(boards).forEach(function (board) {
           var btn = document.createElement('button');
           btn.className = 'fw-board-btn' + (boards[board] ? '' : ' greyed');
@@ -870,10 +922,11 @@
           btn.dataset.board = board.toLowerCase();
           btn.dataset.available = boards[board] ? 'true' : 'false';
 
-          if (boards[board]) {
-            // Auto-select the available board
+          if (boards[board] && !firstSelected) {
+            // Auto-select first available board
             btn.classList.add('selected');
             wizardState.boards[slug] = board.toLowerCase();
+            firstSelected = true;
           }
 
           btn.addEventListener('click', function () {
@@ -898,62 +951,54 @@
       document.getElementById('fw-step-2').classList.add('active');
     });
 
-    // Step 2 → Step 3 (or finish)
+    // Build text picker dynamically for the selected Eng Lit board
+    function buildTextPicker() {
+      var board = wizardState.boards['english-literature'] || 'aqa';
+      var texts = litTexts[board];
+      if (!texts) return;
+      var container = document.getElementById('fw-texts-container');
+      container.innerHTML = '';
+      wizardState.texts = {};
+
+      Object.keys(texts).forEach(function (category) {
+        var groupKey = category.toLowerCase().replace(/[^a-z]+/g, '-');
+        var section = document.createElement('div');
+        section.className = 'fw-text-section';
+        section.innerHTML = '<h3>' + category + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var opts = section.querySelector('.fw-text-options');
+
+        texts[category].forEach(function (text) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = text.name;
+          btn.dataset.value = text.slug;
+          btn.addEventListener('click', function () {
+            opts.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.texts[groupKey] = text.slug;
+          });
+          opts.appendChild(btn);
+        });
+        container.appendChild(section);
+      });
+    }
+
+    // Step 2 → Step 3 or Step 4
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       if (wizardState.subjects.indexOf('english-literature') !== -1) {
-        document.getElementById('fw-step-2').classList.remove('active');
-        document.getElementById('fw-step-3').classList.add('active');
-      } else {
-        finishWizard();
-      }
-    });
-
-    // Step 3: Text selection
-    document.querySelectorAll('.fw-text-options').forEach(function (group) {
-      group.addEventListener('click', function (e) {
-        var btn = e.target.closest('.fw-text-btn');
-        if (!btn) return;
-
-        if (btn.classList.contains('greyed') && !btn.classList.contains('requested')) {
-          btn.classList.add('requested');
-          btn.textContent = btn.textContent + ' (requested)';
-          fwToast.classList.add('visible');
-          setTimeout(function () { fwToast.classList.remove('visible'); }, 2500);
-          return;
-        }
-
-        if (btn.classList.contains('greyed')) return;
-
-        // Select this text, deselect others in group
-        group.querySelectorAll('.fw-text-btn').forEach(function (b) {
-          if (!b.classList.contains('greyed')) b.classList.remove('selected');
-        });
-        btn.classList.add('selected');
-        wizardState.texts[group.dataset.group] = btn.dataset.value;
-      });
-    });
-
-    // Step 3 → Step 4 (school picker)
-    document.getElementById('fw-step3-done').addEventListener('click', function () {
-      document.getElementById('fw-step-3').classList.remove('active');
-      document.getElementById('fw-step-4').classList.add('active');
-    });
-
-    // Step 2 → Step 4 (if no English Lit, skip step 3)
-    // (already handled — step2-next goes to finishWizard if no lit, but now should go to step 4)
-
-    // Update step 2 next to go to step 4 when no English Lit
-    var originalStep2Next = document.getElementById('fw-step2-next');
-    var step2Clone = originalStep2Next.cloneNode(true);
-    originalStep2Next.parentNode.replaceChild(step2Clone, originalStep2Next);
-    step2Clone.addEventListener('click', function () {
-      if (wizardState.subjects.indexOf('english-literature') !== -1) {
+        buildTextPicker();
         document.getElementById('fw-step-2').classList.remove('active');
         document.getElementById('fw-step-3').classList.add('active');
       } else {
         document.getElementById('fw-step-2').classList.remove('active');
         document.getElementById('fw-step-4').classList.add('active');
       }
+    });
+
+    // Step 3 → Step 4
+    document.getElementById('fw-step3-done').addEventListener('click', function () {
+      document.getElementById('fw-step-3').classList.remove('active');
+      document.getElementById('fw-step-4').classList.add('active');
     });
 
     // Step 4: School search
@@ -1024,7 +1069,7 @@
     });
 
     function finishWizard() {
-      var subjectNames = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies' };
+      var subjectNames = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'separate-sciences': 'Separate Sciences', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies' };
       var prefs = { subjects: [] };
 
       wizardState.subjects.forEach(function (slug) {
