@@ -137,16 +137,12 @@ Wait for this to complete (~30 seconds), then proceed to Phase 2.
 | getGuideUrl mapping agent | Question type strings | 1 |
 
 **CRITICAL guide rules:**
+- **USE THE TEMPLATES:** Guide agents MUST use `docs/EXAM_TECHNIQUE_TEMPLATE.md` and `docs/REVISION_TECHNIQUE_TEMPLATE.md` as their HTML structure. Agents fill in `{{PLACEHOLDER}}` values with subject-specific content. They do NOT invent their own HTML structure, class names, or layouts. This prevents the formatting drift that occurs when agents generate HTML from scratch.
 - Guides MUST be split into separate agents. Max ~5 guide pages per agent (including hub). Split as: (1) exam hub + first 4 guides, (2) remaining 4 exam guides, (3) revision hub + 3 foundation guides, (4) 5 remaining revision guides (subject-specific + exam prep). That's 4 guide agents total for MFL subjects.
 - Each guide agent MUST create a hub/index page (slug `index`, sort_order 0) that links to all individual guide pages. Without the hub page, guide-loader shows "No hub page found".
-- Hub pages MUST match the existing template format — look at another subject's hub (e.g. History or Science) as a reference. Revision hubs use THREE `guide-paper` sections: "Foundation Techniques", "[Subject]-Specific Techniques", and "Exam Preparation", each containing `guide-question-card` links. Do NOT invent a new layout.
 - The subject-specific section should contain techniques unique to that subject (e.g. for MFL: vocab building, grammar drilling, listening/speaking practice; for Science: equation practice, required practicals).
 - **Guide hub colours are FIXED across all subjects:** Revision technique hubs always use green (`--paper-accent: #16a34a; --paper-light: #f0fdf4;`) for ALL sections. Exam technique hubs always use purple (`--paper-accent: #7c3aed; --paper-light: #f5f3ff;`) for ALL sections. These do NOT vary by subject.
 - **All guide page links MUST use full absolute paths** — e.g. `/guide/spanish/exam-technique/dictation`, NOT bare slugs like `dictation.html` or `dictation`. Bare slugs resolve incorrectly with the guide-loader URL scheme. Never use `{subject}` or `{slug}` placeholders — use the actual subject slug.
-- **Individual exam technique guide pages MUST include these sidebar elements** (see History's `write-an-account` guide as the gold standard):
-  1. **Quick Reference card** (`guide-quick-ref`) — coloured timing bar (`guide-quick-ref-bar` with `<span>` segments), total time, and numbered structure steps (`guide-quick-ref-steps`)
-  2. **Video placeholder** (`guide-video-placeholder`) — "Video walkthrough coming soon" with play icon SVG
-  3. **Other Guides collapsible** — sidebar collapsible listing all other exam technique guides with links and mark allocations
 - Always use `<main>` + `<aside class="lesson-sidebar">` structure. Look at an existing History exam guide for the exact HTML.
 
 **Why this works:** Guides and mappings do NOT depend on lesson content. They only need the plan (question types, subject slug). Launch them at the same time as content generation.
