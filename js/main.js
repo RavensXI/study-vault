@@ -380,13 +380,6 @@ function initPracticeQuestions() {
       ['3 marks \u2014 Show That', 'show-that-prove.html'],
       ['4 marks \u2014 Multi-Step', 'multi-step-problems.html'],
       ['5 marks \u2014 Problem Solving', 'problem-solving.html'],
-      // Music Technology (NCFE 603/7008/7)
-      ['1 mark \u2014 Multiple Choice', 'multiple-choice-1-mark.html'],
-      ['2 marks \u2014 Identify', 'identify-2-marks.html'],
-      ['3 marks \u2014 Describe', 'describe-3-marks.html'],
-      ['4 marks \u2014 Explain', 'explain-4-marks.html'],
-      ['6 marks \u2014 Analyse', 'analyse-6-marks.html'],
-      ['8 marks \u2014 Extended Response', 'extended-response-8-marks.html'],
       // Generic — matched last
       ['Define', 'define.html'],
       ['Outline', 'outline.html'],
@@ -2120,11 +2113,6 @@ function initRevisionTips() {
       { selector: '.key-fact', text: 'Cover this box and try to recall every formula and method from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
       { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each step of the method.', link: 'mind-maps-diagrams.html', label: 'Mind Maps & Diagrams', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Work through the example inside, then close it and try a similar problem from memory.', link: 'worked-examples.html', label: 'Worked Examples', maxPerPage: 1 }
-    ],
-    'music-technology': [
-      { selector: '.key-fact', text: 'Cover this box and try to recall every technical detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
-      { selector: 'figure.diagram', text: 'Redraw this signal flow or diagram from memory, labelling each component.', link: 'signal-flow-diagrams.html', label: 'Signal Flow Diagrams', maxPerPage: 1 },
-      { selector: '.collapsible', text: 'After reading, ask yourself: why does this technology work this way? What problem does it solve?', link: 'elaborative-interrogation.html', label: 'Elaborative Interrogation', maxPerPage: 1 }
     ]
   };
 

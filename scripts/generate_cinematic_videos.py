@@ -1,10 +1,8 @@
 """Generate cinematic video overviews for all lessons via NotebookLM CLI.
 
-Supabase is the source of truth. Lessons with youtube_video_id IS NULL need
-videos. The sessions file (_cinematic_sessions.json) is a temporary scratch
-pad that maps active NotebookLM renders to lesson IDs. If it gets deleted,
-nothing is lost — the next run re-queries Supabase and re-generates anything
-missing.
+Pulls lessons from Supabase that don't have video overviews yet,
+creates NotebookLM notebooks, adds lesson content, generates cinematic
+videos, downloads them, and updates the lesson record.
 
 Usage:
     python scripts/generate_cinematic_videos.py --limit 20
@@ -15,6 +13,7 @@ Usage:
 """
 
 import argparse
+import io
 import json
 import os
 import re
@@ -22,7 +21,6 @@ import subprocess
 import sys
 import time
 import html as html_mod
-from datetime import datetime
 
 if sys.platform == "win32":
     os.environ.setdefault("PYTHONIOENCODING", "utf-8")
@@ -38,11 +36,8 @@ sys.path.insert(0, SCRIPT_DIR)
 
 from lib.supabase_client import get_client
 
-# ── Sessions file — tracks active in-progress renders only ───────────────
-SESSIONS_FILE = os.path.join(SCRIPT_DIR, "_cinematic_sessions.json")
-
-# ── Legacy state file — no longer used, kept for reference ───────────────
-LEGACY_STATE_FILE = os.path.join(SCRIPT_DIR, "_cinematic_state.json")
+# ── State file — tracks in-progress jobs across runs ─────────────────────
+STATE_FILE = os.path.join(SCRIPT_DIR, "_cinematic_state.json")
 
 # ── Subject order (smallest first) ──────────────────────────────────────
 SUBJECT_ORDER = [
@@ -53,30 +48,18 @@ SUBJECT_ORDER = [
     "gcse-music",
     "business",
     "english-language",
-    "english-language-edexcel",
-    "english-language-ocr",
-    "english-language-eduqas",
     "religious-education",
     "geography",
     "english-literature",
-    "english-literature-edexcel",
-    "english-literature-ocr",
-    "english-literature-eduqas",
     "science",
-    "science-edexcel",
-    "science-ocr",
     "history",
     "spanish",
     "german",
     "french",
     "creative-imedia",
     "maths",
-    "maths-aqa",
-    "maths-ocr",
-    "maths-eduqas",
     "health-social-care",
     "hospitality-catering",
-    "music-technology",
 ]
 
 # ── CLI env to avoid Windows encoding crashes ───────────────────────────
@@ -174,71 +157,91 @@ def build_video_prompt(lesson, subject_name, unit_name, exam_board):
     )
 
 
-# ── Sessions file helpers ────────────────────────────────────────────────
+def build_podcast_prompt(lesson, subject_name, unit_name, exam_board, unit_lessons):
+    """Build the NotebookLM focus prompt for lesson podcast.
 
-def load_sessions():
-    """Load the active sessions scratch pad."""
-    if os.path.exists(SESSIONS_FILE):
-        with open(SESSIONS_FILE, encoding="utf-8") as f:
-            data = json.load(f)
-        return data.get("sessions", [])
-    return []
+    Includes unit context (lesson sequence with covered/upcoming markers)
+    so the AI hosts know what students have already learned and what's
+    still to come.
+    """
+    n = lesson["lesson_number"]
+    total = len(unit_lessons)
+    ordinal = {1: "1st", 2: "2nd", 3: "3rd"}.get(n, f"{n}th")
 
+    # Build lesson list with marker
+    lesson_list_lines = []
+    for ul in unit_lessons:
+        num = ul["lesson_number"]
+        title = ul["title"]
+        if num < n:
+            lesson_list_lines.append(f"{num}. {title} (covered)")
+        elif num == n:
+            lesson_list_lines.append(f"{num}. {title} <-- THIS LESSON")
+        else:
+            lesson_list_lines.append(f"{num}. {title} (upcoming)")
+    lesson_list = "\n".join(lesson_list_lines)
 
-def save_sessions(sessions):
-    """Save the active sessions scratch pad."""
-    with open(SESSIONS_FILE, "w", encoding="utf-8") as f:
-        json.dump({"sessions": sessions}, f, indent=2, ensure_ascii=False)
-
-
-def prune_completed_sessions(sessions, sb):
-    """Remove sessions whose lesson already has a youtube_video_id in Supabase."""
-    if not sessions:
-        return sessions
-
-    lesson_ids = [s["lesson_id"] for s in sessions]
-    # Query in batches of 50 to stay within URL length limits
-    completed_ids = set()
-    for i in range(0, len(lesson_ids), 50):
-        batch = lesson_ids[i:i + 50]
-        result = sb.table("lessons").select("id, youtube_video_id").in_("id", batch).execute()
-        for row in (result.data or []):
-            if row.get("youtube_video_id"):
-                completed_ids.add(row["id"])
-
-    if completed_ids:
-        before = len(sessions)
-        sessions = [s for s in sessions if s["lesson_id"] not in completed_ids]
-        pruned = before - len(sessions)
-        if pruned:
-            print(f"Auto-pruned {pruned} sessions already completed in Supabase")
-
-    return sessions
-
-
-def _parse_timestamp(ts_str):
-    """Parse a session timestamp (DD/MM/YYYY HH:MM) to datetime, or None."""
-    if not ts_str:
-        return None
-    try:
-        return datetime.strptime(ts_str, "%d/%m/%Y %H:%M")
-    except (ValueError, TypeError):
-        return None
+    return (
+        f'This is a lesson podcast for the {ordinal} of {total} GCSE revision '
+        f'lessons in the {unit_name} unit, for students studying {exam_board} '
+        f'{subject_name}. The lesson is called "{lesson["title"]}".\n\n'
+        f'UNIT CONTEXT — here is where this lesson sits in the sequence:\n'
+        f'{lesson_list}\n\n'
+        f'The source titled "Lesson Material" is the focus of this podcast. The hosts '
+        f'should treat lessons before this one as things students have already covered, '
+        f'and lessons after it as things still to come. They can reference earlier '
+        f'topics as assumed knowledge and tease future ones briefly, but should not '
+        f'teach content from other lessons in detail — that is what those lessons are '
+        f'for.\n\n'
+        f'TONE AND LANGUAGE:\n'
+        f'- Two hosts having a natural, engaging conversation — not a lecture.\n'
+        f'- Keep language accessible for 15-16 year olds but preserve the key '
+        f'subject-specific terms students need for exams. Define and explain these '
+        f'when first introduced.\n'
+        f'- Use relatable analogies or everyday examples to make concepts stick.'
+    )
 
 
-def _session_age_hours(session):
-    """Return how many hours ago the session was launched, or None if unknown."""
-    ts = _parse_timestamp(session.get("launched_at"))
-    if not ts:
-        return None
-    delta = datetime.now() - ts
-    return delta.total_seconds() / 3600
+def load_state():
+    """Load in-progress job state."""
+    if os.path.exists(STATE_FILE):
+        with open(STATE_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    return {"jobs": []}
 
 
-# ── Core: get pending lessons from Supabase ──────────────────────────────
+def save_state(state):
+    """Save in-progress job state."""
+    with open(STATE_FILE, "w", encoding="utf-8") as f:
+        json.dump(state, f, indent=2, ensure_ascii=False)
 
-def get_pending_lessons(sb, limit, subject_filter=None, generic=False):
-    """Get lessons needing videos (youtube_video_id IS NULL), ordered by SUBJECT_ORDER."""
+
+def _has_podcast(lesson):
+    """Check if a lesson already has a real podcast URL in related_media."""
+    rm = lesson.get("related_media") or []
+    # Handle both dict {"categories": [...]} and flat list formats
+    if isinstance(rm, dict):
+        cats = rm.get("categories", [])
+    else:
+        cats = rm
+    for cat in cats:
+        if not isinstance(cat, dict):
+            continue
+        cat_name = (cat.get("category") or cat.get("title") or "").lower()
+        if cat_name == "podcasts":
+            for item in cat.get("items", []):
+                url = item.get("url") or ""
+                if url and url != "#":
+                    return True
+    return False
+
+
+def get_pending_lessons(sb, limit, subject_filter=None, mode="both", generic=False):
+    """Get lessons needing media, ordered by subject priority.
+
+    mode: 'both' = needs video, 'podcast-only' = needs podcast, 'video-only' = needs video
+    generic: if True, target school_id IS NULL subjects only
+    """
     all_pending = []
 
     for subject_slug in SUBJECT_ORDER:
@@ -261,10 +264,21 @@ def get_pending_lessons(sb, limit, subject_filter=None, generic=False):
 
         for unit in (units.data or []):
             lessons = sb.table("lessons").select(
-                "id, title, lesson_number, content_html, youtube_video_id"
-            ).eq("unit_id", unit["id"]).is_("youtube_video_id", "null").order("lesson_number").execute()
+                "id, title, lesson_number, content_html, youtube_video_id, related_media"
+            ).eq("unit_id", unit["id"]).order("lesson_number").execute()
+
+            unit_lessons = [{"lesson_number": l["lesson_number"], "title": l["title"]} for l in (lessons.data or [])]
 
             for lesson in (lessons.data or []):
+                # Determine if this lesson is pending based on mode
+                if mode == "podcast-only":
+                    if _has_podcast(lesson):
+                        continue
+                else:
+                    # both or video-only: skip if already has video
+                    if lesson.get("youtube_video_id"):
+                        continue
+
                 all_pending.append({
                     "lesson": lesson,
                     "subject_slug": subject_slug,
@@ -273,6 +287,7 @@ def get_pending_lessons(sb, limit, subject_filter=None, generic=False):
                     "unit_name": unit["name"],
                     "accent": unit.get("accent", "#666"),
                     "exam_board": subject.get("exam_board", "AQA"),
+                    "unit_lessons": unit_lessons,
                 })
 
         if len(all_pending) >= limit:
@@ -281,50 +296,107 @@ def get_pending_lessons(sb, limit, subject_filter=None, generic=False):
     return all_pending[:limit]
 
 
-# ── Commands ─────────────────────────────────────────────────────────────
+def _get_video_only_pending(state, limit):
+    """Find jobs that have podcasts done but no video — reuse their notebooks."""
+    pending = []
+    for job in state["jobs"]:
+        if job.get("podcast_done") and not job.get("video_done") and not job.get("notebook_deleted"):
+            pending.append(job)
+        if len(pending) >= limit:
+            break
+    return pending
+
 
 def cmd_generate(args):
-    """Generate cinematic videos for pending lessons (Supabase is source of truth)."""
+    """Generate cinematic videos and/or podcasts for pending lessons."""
     sb = get_client()
+    state = load_state()
 
-    # Load and prune sessions
-    sessions = load_sessions()
-    sessions = prune_completed_sessions(sessions, sb)
-    save_sessions(sessions)
+    mode = "podcast-only" if args.podcast_only else "video-only" if args.video_only else "both"
+    limit = args.limit if args.limit != 20 else (200 if mode == "podcast-only" else 20)
 
-    # Build set of lesson IDs already in active sessions (prevents duplicate notebooks)
-    active_lesson_ids = {s["lesson_id"] for s in sessions}
-    if active_lesson_ids:
-        print(f"{len(active_lesson_ids)} active sessions in progress\n")
+    # Check for already in-progress jobs
+    active = [j for j in state["jobs"] if j["status"] == "in_progress"]
+    if active:
+        print(f"WARNING: {len(active)} jobs still in progress. Run --status to check or --download to complete them first.")
+        print("Continuing with new jobs anyway...\n")
 
-    # Query Supabase for lessons needing videos
-    pending = get_pending_lessons(sb, args.limit, args.subject, generic=args.generic)
+    # Build set of lesson IDs already tracked in state (prevents duplicate notebooks)
+    tracked_lesson_ids = {j["lesson_id"] for j in state["jobs"]}
 
-    # Filter out lessons already in active sessions
-    before = len(pending)
-    pending = [p for p in pending if p["lesson"]["id"] not in active_lesson_ids]
-    skipped = before - len(pending)
-    if skipped:
-        print(f"Skipped {skipped} lessons already in active sessions")
+    # For video-only mode, reuse existing notebooks from state
+    if args.video_only:
+        pending = _get_video_only_pending(state, limit)
+    else:
+        pending = get_pending_lessons(sb, limit, args.subject, mode, generic=args.generic)
+        # Filter out lessons already in state to prevent creating duplicate notebooks
+        before = len(pending)
+        pending = [p for p in pending if p["lesson"]["id"] not in tracked_lesson_ids]
+        skipped = before - len(pending)
+        if skipped:
+            print(f"Skipped {skipped} lessons already tracked in state file")
 
     if not pending:
-        print("No lessons pending video generation!")
+        label = {"both": "video+podcast", "podcast-only": "podcast", "video-only": "video"}[mode]
+        print(f"No lessons pending {label} generation!")
         return
 
-    print(f"Generating videos for {len(pending)} lessons")
+    print(f"Generating {mode.upper()} for {len(pending)} lessons")
     print("=" * 60)
 
     timestamp = time.strftime("%d/%m/%Y %H:%M")
-    created = 0
+    do_video = mode in ("both", "video-only")
+    do_podcast = mode in ("both", "podcast-only")
 
+    created = 0
     for entry in pending:
+        # video-only mode reuses existing jobs (entry IS the job dict)
+        if args.video_only:
+            job = entry
+            label = job["label"]
+            notebook_id = job["notebook_id"]
+            lesson = {"lesson_number": int(label.split("/L")[1]), "title": job["lesson_title"]}
+            print(f"\n  {label}: {job['lesson_title']}")
+
+            if args.dry_run:
+                print(f"  [DRY RUN] Would add video to existing notebook")
+                created += 1
+                continue
+
+            video_focus = build_video_prompt(
+                {"lesson_number": lesson["lesson_number"], "title": lesson["title"],
+                 "content_html": ""},  # content already in notebook
+                job.get("subject_name", ""), job.get("unit_name", ""), job.get("exam_board", "AQA"),
+            )
+            try:
+                nlm_run(["video", "create", notebook_id, "--format", "cinematic", "--focus", video_focus, "--confirm"], timeout=60)
+            except Exception:
+                pass
+            time.sleep(2)
+
+            status = nlm_json(["studio", "status", notebook_id])
+            if status:
+                for s in status:
+                    if s.get("type") == "video" and s.get("status") in ("in_progress", "completed") and not job.get("artifact_id"):
+                        job["artifact_id"] = s["id"]
+
+            job["status"] = "in_progress"
+            job["video_launched"] = True
+            job["video_launched_at"] = timestamp
+            save_state(state)
+            created += 1
+            print(f"  LAUNCHED video (artifact: {job.get('artifact_id')})")
+            time.sleep(3)
+            continue
+
+        # Normal mode (both or podcast-only): create notebook + source
         lesson = entry["lesson"]
         label = f"{entry['subject_slug']}/{entry['unit_slug']}/L{lesson['lesson_number']:02d}"
 
         print(f"\n  {label}: {lesson['title']}")
 
         if args.dry_run:
-            print(f"  [DRY RUN] Would create notebook + generate video")
+            print(f"  [DRY RUN] Would create notebook + generate {mode}")
             created += 1
             continue
 
@@ -368,41 +440,66 @@ def cmd_generate(args):
             pass
         time.sleep(2)
 
-        # Generate video
-        video_focus = build_video_prompt(lesson, entry["subject_name"], entry["unit_name"], entry["exam_board"])
-        try:
-            nlm_run(["video", "create", notebook_id, "--format", "cinematic", "--focus", video_focus, "--confirm"], timeout=60)
-        except Exception:
-            pass
-        time.sleep(2)
+        video_artifact_id = None
+        audio_artifact_id = None
 
-        # Get artifact ID
-        artifact_id = None
+        # Generate video (if not podcast-only)
+        if do_video:
+            video_focus = build_video_prompt(lesson, entry["subject_name"], entry["unit_name"], entry["exam_board"])
+            try:
+                nlm_run(["video", "create", notebook_id, "--format", "cinematic", "--focus", video_focus, "--confirm"], timeout=60)
+            except Exception:
+                pass
+            time.sleep(2)
+
+        # Generate podcast (if not video-only)
+        if do_podcast:
+            podcast_focus = build_podcast_prompt(
+                lesson, entry["subject_name"], entry["unit_name"],
+                entry["exam_board"], entry.get("unit_lessons", []),
+            )
+            try:
+                nlm_run(["audio", "create", notebook_id, "--focus", podcast_focus, "--confirm"], timeout=60)
+            except Exception:
+                pass
+            time.sleep(2)
+
+        # Get artifact IDs
         status = nlm_json(["studio", "status", notebook_id])
         if status:
             for s in status:
-                if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
-                    artifact_id = s["id"]
-                    break
+                if s.get("type") == "video" and s.get("status") in ("in_progress", "completed") and not video_artifact_id:
+                    video_artifact_id = s["id"]
+                elif s.get("type") == "audio" and s.get("status") in ("in_progress", "completed") and not audio_artifact_id:
+                    audio_artifact_id = s["id"]
 
-        # Save session
-        session = {
+        # Save to state
+        job = {
             "lesson_id": lesson["id"],
+            "lesson_title": lesson["title"],
             "label": label,
             "notebook_id": notebook_id,
-            "artifact_id": artifact_id,
+            "notebook_title": notebook_title,
+            "artifact_id": video_artifact_id,
+            "audio_artifact_id": audio_artifact_id,
+            "status": "in_progress",
             "subject_name": entry["subject_name"],
             "unit_name": entry["unit_name"],
             "exam_board": entry.get("exam_board", "AQA"),
-            "lesson_title": lesson["title"],
             "launched_at": timestamp,
+            "podcast_done": False,
+            "video_done": False,  # Only set True when a video is actually downloaded
         }
-        sessions.append(session)
-        save_sessions(sessions)
+        state["jobs"].append(job)
+        save_state(state)
 
         created += 1
-        aid_str = f" (artifact: {artifact_id[:8]})" if artifact_id else ""
-        print(f"  LAUNCHED video{aid_str}")
+        launched = []
+        if video_artifact_id:
+            launched.append(f"video:{video_artifact_id[:8]}")
+        if audio_artifact_id:
+            launched.append(f"podcast:{audio_artifact_id[:8]}")
+        print(f"  LAUNCHED ({', '.join(launched)})")
 
         time.sleep(3)
 
@@ -412,194 +509,136 @@ def cmd_generate(args):
 
 
 def cmd_status(args):
-    """Check status of active sessions."""
-    sb = get_client()
-    sessions = load_sessions()
-    sessions = prune_completed_sessions(sessions, sb)
+    """Check status of in-progress jobs."""
+    state = load_state()
+    active = [j for j in state["jobs"] if j["status"] == "in_progress"]
 
-    if not sessions:
-        print("No active sessions.")
-        save_sessions(sessions)
+    if not active:
+        print("No in-progress jobs.")
         return
 
-    print(f"Checking {len(sessions)} active sessions...\n")
+    print(f"Checking {len(active)} in-progress jobs...\n")
 
     completed = 0
     still_going = 0
-    removed = 0
-    remaining = []
 
-    for session in sessions:
-        label = session["label"]
-        notebook_id = session.get("notebook_id")
-
-        if not notebook_id:
-            print(f"  {label}: No notebook ID — removing")
-            removed += 1
-            continue
-
-        status = nlm_json(["studio", "status", notebook_id])
-
+    for job in active:
+        status = nlm_json(["studio", "status", job["notebook_id"]])
         if not status:
-            # Notebook may have expired — check age
-            age_h = _session_age_hours(session)
-            if age_h is not None and age_h > 3:
-                print(f"  {label}: EXPIRED (no response, {age_h:.1f}h old) — will be re-queued on next run")
-                removed += 1
-                continue
-            else:
-                print(f"  {label}: Could not check status (will retry)")
-                remaining.append(session)
-                still_going += 1
-                continue
+            print(f"  {job['label']}: Could not check status")
+            still_going += 1
+            continue
 
         # Find video artifact
-        vid = None
-        if session.get("artifact_id"):
-            vid = next((s for s in status if s.get("id") == session["artifact_id"]), None)
+        vid = next((s for s in status if s.get("id") == job.get("artifact_id")), None)
         if not vid:
-            vid = next((s for s in status if s.get("type") == "video"), None)
+            vid = next((s for s in status if s.get("type") == "video" and s.get("status") == "completed"), None)
 
-        if not vid:
-            print(f"  {label}: No video artifact found — removing")
-            removed += 1
-            continue
+        # Find audio artifact
+        aud = next((s for s in status if s.get("id") == job.get("audio_artifact_id")), None)
+        if not aud:
+            aud = next((s for s in status if s.get("type") == "audio" and s.get("status") == "completed"), None)
 
-        # Update artifact ID if we found one
-        if vid and not session.get("artifact_id"):
-            session["artifact_id"] = vid["id"]
+        vid_done = vid and vid.get("status") == "completed"
+        aud_done = aud and aud.get("status") == "completed"
 
-        vid_status = vid.get("status", "unknown")
+        # Update artifact IDs if found
+        if vid and not job.get("artifact_id"):
+            job["artifact_id"] = vid["id"]
+        if aud and not job.get("audio_artifact_id"):
+            job["audio_artifact_id"] = aud["id"]
 
-        if vid_status == "completed":
+        # Check if video/podcast were even expected
+        video_expected = job.get("artifact_id") or not job.get("video_done", False)
+        podcast_expected = job.get("audio_artifact_id") is not None
+
+        video_ok = vid_done if video_expected else True
+        podcast_ok = aud_done if podcast_expected else True
+
+        if video_ok and podcast_ok:
+            job["status"] = "completed"
+            if aud_done:
+                job["podcast_done"] = True
+            if vid_done:
+                job["video_done"] = True
             completed += 1
-            remaining.append(session)
-            print(f"  {label}: COMPLETED — ready for download")
-        elif vid_status == "failed":
-            print(f"  {label}: FAILED — will be re-queued on next run")
-            removed += 1
+            parts = []
+            if vid_done: parts.append("video")
+            if aud_done: parts.append("podcast")
+            print(f"  {job['label']}: COMPLETED ({' + '.join(parts)})")
         else:
             still_going += 1
-            remaining.append(session)
-            print(f"  {label}: {vid_status}")
+            vid_status = vid.get("status", "n/a") if (video_expected and vid) else "n/a"
+            aud_status = aud.get("status", "unknown") if (podcast_expected and aud) else "n/a"
+            print(f"  {job['label']}: video={vid_status}, podcast={aud_status}")
 
-    save_sessions(remaining)
-
-    summary = f"\nCompleted: {completed}, Still rendering: {still_going}"
-    if removed:
-        summary += f", Removed: {removed} (will be re-queued automatically)"
-    print(summary)
+    save_state(state)
+    print(f"\nCompleted: {completed}, Still in progress: {still_going}")
 
 
 def cmd_download(args):
-    """Download completed videos, upload to R2, and update Supabase."""
+    """Download completed videos + podcasts, upload to R2, and update Supabase."""
     from lib.r2 import get_r2_client, VIDEO_BUCKET, VIDEO_PUBLIC_URL, AUDIO_BUCKET, AUDIO_PUBLIC_URL
 
+    state = load_state()
     sb = get_client()
-    sessions = load_sessions()
-    sessions = prune_completed_sessions(sessions, sb)
 
-    if not sessions:
-        print("No active sessions. Run --status first or generate new videos.")
-        save_sessions(sessions)
+    completed = [j for j in state["jobs"] if j["status"] == "completed"]
+    if not completed:
+        print("No completed jobs to download. Run --status first.")
         return
 
-    print(f"Checking {len(sessions)} sessions for completed videos...\n")
+    print(f"Processing {len(completed)} completed jobs...\n")
 
     download_dir = os.path.join(SCRIPT_DIR, "_cinematic_videos")
     os.makedirs(download_dir, exist_ok=True)
 
     r2_client = get_r2_client()
-    downloaded = 0
-    still_rendering = 0
-    removed = 0
-    remaining = []
+    processed = 0
 
-    for session in sessions:
-        label = session["label"]
+    for job in completed:
+        if job.get("published"):
+            print(f"  {job['label']}: Already published, skipping")
+            continue
+
+        label = job["label"]
         parts = label.split("/")
-        lesson_id = session["lesson_id"]
-        notebook_id = session.get("notebook_id")
+        lesson_id = job["lesson_id"]
 
-        if not notebook_id:
-            print(f"  {label}: No notebook ID — removing")
-            removed += 1
-            continue
-
-        # Check notebook status
-        try:
-            nb_status = nlm_json(["studio", "status", notebook_id])
-        except Exception:
-            nb_status = None
-
-        if not nb_status:
-            age_h = _session_age_hours(session)
-            if age_h is not None and age_h > 3:
-                print(f"  {label}: Notebook expired — will be re-queued on next run")
-                removed += 1
-            else:
-                print(f"  {label}: Could not check — keeping for retry")
-                remaining.append(session)
-            continue
-
-        # Find video artifact
-        vid = None
-        if session.get("artifact_id"):
-            vid = next((s for s in nb_status if s.get("id") == session["artifact_id"]), None)
-        if not vid:
-            vid = next((s for s in nb_status if s.get("type") == "video" and s.get("status") == "completed"), None)
-
-        if not vid or vid.get("status") != "completed":
-            vid_status = vid.get("status", "not found") if vid else "not found"
-            print(f"  {label}: Video {vid_status} — skipping")
-            remaining.append(session)
-            still_rendering += 1
-            continue
-
-        # Update artifact ID if needed
-        if vid and not session.get("artifact_id"):
-            session["artifact_id"] = vid["id"]
-
-        # ── Download video ──────────────────────────────────────
+        # ── Video ──────────────────────────────────────────────
         video_filename = f"{label.replace('/', '_')}_cinematic.mp4"
         video_path = os.path.join(download_dir, video_filename)
 
-        # Always delete stale cached file to prevent uploading wrong content
-        if os.path.exists(video_path):
-            os.remove(video_path)
-
-        print(f"  {label}: Downloading video...")
-        try:
-            nlm_run([
-                "download", "video", notebook_id,
-                "--id", session["artifact_id"],
-                "--output", video_path,
-                "--no-progress",
-            ], timeout=300)
-        except Exception:
-            pass
-
         if not (os.path.exists(video_path) and os.path.getsize(video_path) > 0):
-            print(f"  {label}: Video download failed — keeping for retry")
-            remaining.append(session)
-            continue
+            print(f"  {label}: Downloading video...")
+            try:
+                nlm_run([
+                    "download", "video", job["notebook_id"],
+                    "--id", job["artifact_id"],
+                    "--output", video_path,
+                    "--no-progress",
+                ], timeout=300)
+            except Exception:
+                pass
 
-        size_mb = os.path.getsize(video_path) / (1024 * 1024)
-        print(f"  {label}: Video downloaded ({size_mb:.1f} MB)")
+        if os.path.exists(video_path) and os.path.getsize(video_path) > 0:
+            size_mb = os.path.getsize(video_path) / (1024 * 1024)
+            print(f"  {label}: Video downloaded ({size_mb:.1f} MB)")
 
-        # ── Upload to R2 ────────────────────────────────────────
-        r2_key = f"{parts[0]}/{parts[1]}/cinematic_{parts[2].lower()}.mp4"
-        print(f"  {label}: Uploading video to R2...")
-        with open(video_path, "rb") as f:
-            r2_client.put_object(Bucket=VIDEO_BUCKET, Key=r2_key, Body=f.read(), ContentType="video/mp4")
-        video_r2_url = f"{VIDEO_PUBLIC_URL}/{r2_key}"
+            r2_key = f"{parts[0]}/{parts[1]}/cinematic_{parts[2].lower()}.mp4"
+            print(f"  {label}: Uploading video to R2...")
+            with open(video_path, "rb") as f:
+                r2_client.put_object(Bucket=VIDEO_BUCKET, Key=r2_key, Body=f.read(), ContentType="video/mp4")
+            video_r2_url = f"{VIDEO_PUBLIC_URL}/{r2_key}"
 
-        # ── Update Supabase ─────────────────────────────────────
-        sb.table("lessons").update({"youtube_video_id": video_r2_url}).eq("id", lesson_id).execute()
-        print(f"  {label}: Published ({video_r2_url})")
+            sb.table("lessons").update({"youtube_video_id": video_r2_url}).eq("id", lesson_id).execute()
+            print(f"  {label}: Video published")
+            job["r2_url"] = video_r2_url
+        else:
+            print(f"  {label}: Video download failed")
 
-        # ── Handle podcast artifact if present (legacy) ─────────
-        audio_artifact_id = session.get("audio_artifact_id")
+        # ── Podcast ────────────────────────────────────────────
+        audio_artifact_id = job.get("audio_artifact_id")
         if audio_artifact_id:
             audio_filename = f"{label.replace('/', '_')}_podcast.mp3"
             audio_path = os.path.join(download_dir, audio_filename)
@@ -608,7 +647,7 @@ def cmd_download(args):
                 print(f"  {label}: Downloading podcast...")
                 try:
                     nlm_run([
-                        "download", "audio", notebook_id,
+                        "download", "audio", job["notebook_id"],
                         "--id", audio_artifact_id,
                         "--output", audio_path,
                         "--no-progress",
@@ -627,9 +666,10 @@ def cmd_download(args):
                 podcast_r2_url = f"{AUDIO_PUBLIC_URL}/{audio_r2_key}"
 
                 # Update related_media — set Lesson Podcast URL
-                lesson_row = sb.table("lessons").select("related_media").eq("id", lesson_id).single().execute()
-                media = lesson_row.data.get("related_media") or [] if lesson_row.data else []
+                lesson = sb.table("lessons").select("related_media").eq("id", lesson_id).single().execute()
+                media = lesson.data.get("related_media") or [] if lesson.data else []
 
+                # Find or create Podcasts category
                 podcast_cat = None
                 for cat in media:
                     if (cat.get("category") or "").lower() == "podcasts":
@@ -640,6 +680,7 @@ def cmd_download(args):
                     podcast_cat = {"emoji": "\U0001f3a7", "category": "Podcasts", "items": []}
                     media.append(podcast_cat)
 
+                # Find or create Lesson Podcast item
                 lp_item = None
                 for item in podcast_cat.get("items", []):
                     if item.get("title") == "Lesson Podcast":
@@ -657,48 +698,128 @@ def cmd_download(args):
 
                 sb.table("lessons").update({"related_media": media}).eq("id", lesson_id).execute()
                 print(f"  {label}: Podcast published")
+                job["podcast_r2_url"] = podcast_r2_url
+            else:
+                print(f"  {label}: Podcast download failed")
 
-        # ── Clean up notebook ───────────────────────────────────
+        # Only mark published if at least one asset was successfully uploaded
+        video_ok = job.get("r2_url") or not job.get("artifact_id")
+        podcast_ok = job.get("podcast_r2_url") or not job.get("audio_artifact_id")
+        if video_ok and podcast_ok:
+            job["published"] = True
+            job["downloaded"] = True
+        save_state(state)
+
+        # Clean up notebook
         if args.cleanup:
             try:
-                nlm_run(["notebook", "delete", notebook_id, "--confirm"], timeout=30)
+                nlm_run(["notebook", "delete", job["notebook_id"], "--confirm"], timeout=30)
                 print(f"  {label}: Notebook deleted")
+                job["notebook_deleted"] = True
+                save_state(state)
             except Exception:
                 pass
 
-        # Session complete — do NOT add to remaining
-        downloaded += 1
+        processed += 1
         time.sleep(2)
 
-    save_sessions(remaining)
-
     print(f"\n{'=' * 60}")
-    print(f"Downloaded & published: {downloaded}")
-    if still_rendering:
-        print(f"Still rendering: {still_rendering}")
-    if removed:
-        print(f"Removed (expired/invalid): {removed}")
-    remaining_count = len(remaining)
-    if remaining_count:
-        print(f"Sessions remaining: {remaining_count}")
-    print(f"Videos on R2, lessons updated in Supabase.")
+    print(f"Published: {processed}/{len(completed)}")
+    print(f"Videos + podcasts on R2, lessons updated in Supabase.")
 
 
-# ── Main ─────────────────────────────────────────────────────────────────
+def cmd_rebuild_state(args):
+    """Rebuild the state file from Supabase — the database is the source of truth."""
+    from lib.supabase_client import get_client
+    sb = get_client()
+
+    print("Rebuilding state from Supabase...")
+
+    # Get all subjects + units + lessons
+    subjects_result = sb.table("subjects").select("id, slug, name, exam_board, school_id").eq("status", "live").order("name").execute()
+    subjects = subjects_result.data or []
+
+    # Filter by --generic or --subject if specified
+    if args.generic:
+        subjects = [s for s in subjects if not s.get("school_id")]
+    elif not args.subject:
+        subjects = [s for s in subjects if s.get("school_id")]
+
+    if args.subject:
+        subjects = [s for s in subjects if s["slug"] == args.subject]
+
+    new_jobs = []
+    for subject in subjects:
+        units_result = sb.table("units").select("id, slug, name").eq("subject_id", subject["id"]).order("sort_order").execute()
+        for unit in (units_result.data or []):
+            lessons_result = sb.table("lessons").select("id, lesson_number, title, podcast_url, youtube_video_id").eq("unit_id", unit["id"]).eq("status", "live").order("lesson_number").execute()
+            for lesson in (lessons_result.data or []):
+                label = f"{subject['slug']}/{unit['slug']}/L{lesson['lesson_number']:02d}"
+                has_podcast = bool(lesson.get("podcast_url"))
+                has_video = bool(lesson.get("youtube_video_id") and ("r2.dev" in str(lesson["youtube_video_id"]) or lesson["youtube_video_id"].startswith("http")))
+
+                job = {
+                    "lesson_id": lesson["id"],
+                    "lesson_title": lesson["title"],
+                    "label": label,
+                    "notebook_id": None,
+                    "notebook_title": None,
+                    "status": "completed" if (has_podcast or has_video) else "pending",
+                    "subject_name": subject["name"],
+                    "unit_name": unit["name"],
+                    "exam_board": subject.get("exam_board", ""),
+                    "podcast_done": has_podcast,
+                    "video_done": has_video,
+                }
+                if has_podcast and lesson.get("podcast_url"):
+                    job["podcast_url"] = lesson["podcast_url"]
+                if has_video and lesson.get("youtube_video_id"):
+                    job["video_url"] = lesson["youtube_video_id"]
+                new_jobs.append(job)
+
+    state = {"jobs": new_jobs}
+    save_state(state)
+
+    # Summary
+    total = len(new_jobs)
+    podcasts = sum(1 for j in new_jobs if j["podcast_done"])
+    videos = sum(1 for j in new_jobs if j["video_done"])
+    pending_podcast = sum(1 for j in new_jobs if not j["podcast_done"])
+    pending_video = sum(1 for j in new_jobs if not j["video_done"])
+
+    print(f"\nRebuilt state with {total} lessons:")
+    print(f"  Podcasts: {podcasts} done, {pending_podcast} pending")
+    print(f"  Videos:   {videos} done, {pending_video} pending")
+    print(f"\nState file saved. Ready for --podcast-only or --video-only runs.")
+
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Generate cinematic video overviews via NotebookLM CLI. "
-        "Supabase is the source of truth — lessons with no youtube_video_id are queued automatically."
-    )
-    parser.add_argument("--limit", type=int, default=20, help="Max lessons to process (default: 20)")
+    parser = argparse.ArgumentParser(description="Generate cinematic video overviews + podcasts via NotebookLM CLI")
+    parser.add_argument("--limit", type=int, default=20, help="Max lessons to process (default: 20 for video, 200 for podcast-only)")
     parser.add_argument("--subject", help="Only process a specific subject slug")
     parser.add_argument("--dry-run", action="store_true", help="Show what would be generated without doing it")
-    parser.add_argument("--status", action="store_true", help="Check status of active sessions")
-    parser.add_argument("--download", action="store_true", help="Download completed videos")
+    parser.add_argument("--status", action="store_true", help="Check status of in-progress jobs")
+    parser.add_argument("--download", action="store_true", help="Download completed videos + podcasts")
     parser.add_argument("--cleanup", action="store_true", help="Delete notebooks after downloading")
+    parser.add_argument("--podcast-only", action="store_true", help="Generate only podcasts (keeps notebooks for later video)")
     parser.add_argument("--generic", action="store_true", help="Target generic (school_id NULL) subjects instead of school-specific")
+    parser.add_argument("--video-only", action="store_true", help="Add videos to existing notebooks (from prior podcast-only run)")
+    parser.add_argument("--reset-subject", help="Remove all state entries for a subject slug (allows clean regeneration)")
+    parser.add_argument("--rebuild-state", action="store_true", help="Rebuild state file from Supabase (fixes stale/incorrect state)")
     args = parser.parse_args()
+
+    if args.rebuild_state:
+        cmd_rebuild_state(args)
+        return
+
+    if args.reset_subject:
+        state = load_state()
+        before = len(state["jobs"])
+        state["jobs"] = [j for j in state["jobs"] if not j["label"].startswith(args.reset_subject + "/")]
+        removed = before - len(state["jobs"])
+        save_state(state)
+        print(f"Removed {removed} state entries for '{args.reset_subject}'. Run again to regenerate.")
+        return
 
     if args.status:
         cmd_status(args)
