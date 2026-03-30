@@ -116,6 +116,16 @@
         </div>
       </div>
 
+      <!-- Tier Toggle (shown only for tiered subjects like Maths, Science, Languages) -->
+      <div class="tier-toggle" id="tier-toggle" style="display:none">
+        <span class="tier-toggle-label">Tier:</span>
+        <div class="tier-toggle-track">
+          <button class="tier-btn active" data-tier="higher">Higher</button>
+          <button class="tier-btn" data-tier="foundation">Foundation</button>
+          <div class="tier-toggle-indicator"></div>
+        </div>
+      </div>
+
       <!-- Audio Player (Narration + Podcast tabs) -->
       <div class="audio-player-wrapper">
         <div class="audio-player-tabs" style="display:none">
@@ -233,6 +243,61 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
   <script src="/js/lesson-loader.js"></script>
+  <script>
+  // ── Tier toggle (Foundation / Higher) ──
+  (function() {
+    var TIERED_SUBJECTS = ['maths','mathematics','science','separate-sciences','french','german','spanish',
+      'maths-aqa','maths-ocr','maths-eduqas','mathematics-aqa','mathematics-ocr','mathematics-eduqas',
+      'science-edexcel','science-ocr','separate-sciences-edexcel','separate-sciences-ocr',
+      'french-edexcel','french-ocr','french-eduqas','german-edexcel','german-ocr','german-eduqas',
+      'spanish-edexcel','spanish-ocr','spanish-eduqas'];
+    var STORAGE_KEY = 'studyvault-tier';
+
+    // Wait for lesson-loader to set window._subjectSlug
+    var _origInit = window.initLessonFeatures;
+    window.initLessonFeatures = function() {
+      if (_origInit) _origInit();
+      initTierToggle();
+    };
+
+    function initTierToggle() {
+      var slug = window._subjectSlug || '';
+      // Check if this subject (or its base) is tiered
+      var base = slug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+      if (TIERED_SUBJECTS.indexOf(slug) === -1 && TIERED_SUBJECTS.indexOf(base) === -1) return;
+
+      // Check if page actually has higher-only content
+      if (!document.querySelector('.higher-only')) return;
+
+      var toggle = document.getElementById('tier-toggle');
+      if (!toggle) return;
+      toggle.style.display = '';
+
+      var track = toggle.querySelector('.tier-toggle-track');
+      var btns = toggle.querySelectorAll('.tier-btn');
+      var saved = localStorage.getItem(STORAGE_KEY) || 'higher';
+
+      applyTier(saved);
+
+      btns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          applyTier(btn.dataset.tier);
+          localStorage.setItem(STORAGE_KEY, btn.dataset.tier);
+        });
+      });
+
+      function applyTier(tier) {
+        btns.forEach(function(b) { b.classList.toggle('active', b.dataset.tier === tier); });
+        track.dataset.active = tier;
+        if (tier === 'foundation') {
+          document.body.classList.add('tier-foundation');
+        } else {
+          document.body.classList.remove('tier-foundation');
+        }
+      }
+    }
+  })();
+  </script>
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
 <script defer src="/_vercel/insights/script.js"></script>
 </body>
