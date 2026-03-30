@@ -181,11 +181,13 @@
 
         // Reload content for the new tab if a subject is selected
         var slug = subjectSelect.value;
+        var _opt = subjectSelect.options[subjectSelect.selectedIndex];
+        var _sid = _opt ? _opt.dataset.id : null;
         if (slug) {
           if (target === 'hero' && !heroLoaded) {
-            loadUnitsAndLessons(slug);
+            loadUnitsAndLessons(slug, _sid);
           } else if (target === 'diagrams' && !diagramsLoaded) {
-            loadDiagrams(slug);
+            loadDiagrams(slug, _sid);
           }
         }
       });
@@ -305,14 +307,16 @@
 
     unitSelect.addEventListener('change', function () {
       if (!subjectSelect.value) return;
+      var opt = subjectSelect.options[subjectSelect.selectedIndex];
+      var subjectId = opt ? opt.dataset.id : null;
       heroLoaded = false;
       diagramsLoaded = false;
       if (activeTab === 'hero') {
-        loadUnitsAndLessons(subjectSelect.value);
-        loadDiagrams(subjectSelect.value);
+        loadUnitsAndLessons(subjectSelect.value, subjectId);
+        loadDiagrams(subjectSelect.value, subjectId);
       } else {
-        loadDiagrams(subjectSelect.value);
-        loadUnitsAndLessons(subjectSelect.value);
+        loadDiagrams(subjectSelect.value, subjectId);
+        loadUnitsAndLessons(subjectSelect.value, subjectId);
       }
     });
 
