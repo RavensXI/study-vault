@@ -92,11 +92,14 @@
     var units = unitsResult.data || [];
 
     // Free user English Lit: filter to only selected texts + compulsory units
-    if (subjectSlug === 'english-literature' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeSubj = FreeUser.getSubject('english-literature');
+    if (subjectSlug.indexOf('english-literature') === 0 && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeSubj = FreeUser.getSubject(subjectSlug);
       if (freeSubj && freeSubj.texts && Object.keys(freeSubj.texts).length > 0) {
         var selectedSlugs = Object.values(freeSubj.texts);
-        var compulsory = ['power-and-conflict', 'unseen-poetry'];
+        // Compulsory poetry/unseen units (slug varies by board)
+        var compulsory = ['power-and-conflict', 'unseen-poetry', 'love-and-relationships',
+          'poetry-relationships', 'poetry-conflict', 'poetry-time-and-place', 'poetry-belonging',
+          'poetry-love-and-relationships', 'poetry-youth-and-age'];
         units = units.filter(function (u) {
           return selectedSlugs.indexOf(u.slug) !== -1 || compulsory.indexOf(u.slug) !== -1;
         });
@@ -112,9 +115,10 @@
       '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>' +
       '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
 
-    // Apply colour theme from first unit's body class
-    if (units.length > 0 && units[0].body_class) {
-      document.body.classList.add(units[0].body_class);
+    // Apply colour theme from first unit
+    if (units.length > 0) {
+      if (units[0].body_class) document.body.classList.add(units[0].body_class);
+      if (units[0].accent) document.documentElement.style.setProperty('--accent', units[0].accent);
     }
 
     // Build HTML matching static landing page structure
@@ -199,7 +203,10 @@
     var lessons = lessonsResult.data || [];
 
     document.title = unit.name + ' - StudyVault';
-    document.body.classList.add(unit.body_class);
+    if (unit.body_class) document.body.classList.add(unit.body_class);
+    if (unit.accent) document.documentElement.style.setProperty('--accent', unit.accent);
+    if (unit.accent_light) document.documentElement.style.setProperty('--accent-light', unit.accent_light);
+    if (unit.accent_badge) document.documentElement.style.setProperty('--accent-badge', unit.accent_badge);
     document.body.dataset.unit = unit.slug;
     document.getElementById('header-unit-label').textContent = unit.name;
 
