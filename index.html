@@ -740,9 +740,14 @@
       codeInput.focus();
     }
 
-    function closeSchoolModal() {
+    function closeSchoolModal(launchWizard) {
       schoolModalOverlay.classList.remove('open');
       localStorage.setItem(DISMISSED_KEY, '1');
+      // First-time visitors who aren't a free user yet → open the subject wizard
+      if (launchWizard && !FreeUser.isActive()) {
+        var freeWiz = document.getElementById('free-wizard-overlay');
+        if (freeWiz) freeWiz.classList.add('open');
+      }
     }
 
     // Show modal on first visit (no school session, no free prefs, not previously dismissed)
@@ -750,10 +755,10 @@
       openSchoolModal();
     }
 
-    schoolModalClose.addEventListener('click', closeSchoolModal);
-    schoolModalDismiss.addEventListener('click', closeSchoolModal);
+    schoolModalClose.addEventListener('click', function () { closeSchoolModal(true); });
+    schoolModalDismiss.addEventListener('click', function () { closeSchoolModal(true); });
     schoolModalOverlay.addEventListener('click', function (e) {
-      if (e.target === schoolModalOverlay) closeSchoolModal();
+      if (e.target === schoolModalOverlay) closeSchoolModal(true);
     });
     if (navSchoolLink) {
       navSchoolLink.addEventListener('click', openSchoolModal);
