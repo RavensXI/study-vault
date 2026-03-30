@@ -224,15 +224,22 @@
     // ---- Load subjects ----
     async function loadSubjects() {
       await getAuth();
-      var result = await sb.from('subjects').select('id, slug, name, school_id, schools(name)').eq('status', 'live').order('name');
+      var result = await sb.from('subjects').select('id, slug, name, school_id').eq('status', 'live').order('name');
       allSubjects = result.data || [];
+
+      // Fetch school names via the pipeline API (uses service key)
+      var schoolNames = { 'generic': 'Generic' };
+      try {
+        var schoolResp = await fetch('/api/pipeline/schools', { headers: authHeaders() });
+        var schoolData = await schoolResp.json();
+        (schoolData.schools || []).forEach(function (s) { schoolNames[s.id] = s.name; });
+      } catch (e) {}
 
       // Build school dropdown
       var schools = {};
       allSubjects.forEach(function (s) {
         var key = s.school_id || 'generic';
-        var label = (s.schools && s.schools.name) ? s.schools.name : (s.school_id ? 'School' : 'Generic');
-        if (!schools[key]) schools[key] = label;
+        if (!schools[key]) schools[key] = schoolNames[key] || 'School';
       });
       schoolSelect.innerHTML = '<option value="">All Schools</option>';
       Object.keys(schools).sort(function (a, b) { return schools[a].localeCompare(schools[b]); }).forEach(function (key) {
