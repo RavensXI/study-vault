@@ -28,6 +28,9 @@ Build a reusable, tagged bank of generated diagrams and hero images. When a new 
 ## Card & Browse Page Design Refresh
 Current unit/subject/lesson cards use a side-by-side image + text layout with coloured left accent bars — functional but generic-looking. Explored editorial full-bleed overlays with stacked card deck effect (Mar 2026) — looked good in isolation but text readability suffered with varied hero image brightness, and the stacked effect wasn't clear enough to justify the complexity. Revisit with a designer eye: consider image-top stacked layout, better colour integration without left-bar cliché, and a stronger visual identity that feels intentionally designed rather than template-generated. See `card-options.html` for the prototypes explored. Key constraint: must work across 44 units with varied hero images without manual curation.
 
+## Spotify Podcast Distribution — Unity Only
+Submit Unity's 17 subjects as individual Spotify shows via RSS import in Spotify for Creators. Each show uses the feed URL `https://www.studyvault.co.uk/api/podcast/feed?subject={slug}&school=unitypassionrespect`. Spotify auto-checks the feed periodically so new episodes appear without manual upload. Generic/multi-board subjects rely on the self-hosted RSS feed + podcast app approach only — too many to manage on Spotify manually.
+
 ## Teacher Data Dashboard
 Major upgrade from current demo/hardcoded state. Needs real Supabase queries for progress tracking, engagement metrics, class-level insights. Key for selling to SLT — should be visually compelling and data-rich. Dedicated session to design and build.
 
@@ -59,3 +62,14 @@ Add KaTeX (CDN) for rendering equations, formulae, and chemical notation in Math
 
 ## More Subjects
 14 subjects remaining. Full list with exam boards: `docs/SUBJECT_ROADMAP.md`.
+
+## Niche Exam Board School Targeting
+Build a database of which schools study which exam boards, focusing on underserved boards (Eduqas, OCR, etc.). Schools on niche boards are the most likely to need a bespoke revision platform — mainstream platforms like Seneca focus on AQA/Edexcel and leave these schools underserved. This is a sales wedge: pitch directly to schools where no competitor covers their spec.
+
+**Data sources to explore:**
+- Scrape school websites — most list exam boards on curriculum/options pages
+- DfE Compare School Performance data downloads (may imply boards from qualification codes)
+- FOI request to Ofqual for centre-level entries by awarding organisation (they hold this data)
+- Ofqual published entry data at national level (confirms market share but not per-school)
+
+**Commercial rationale:** Since our pipeline can generate any spec in a day or two, covering every board is low-effort but high-value. Target the ~20% of schools on non-AQA/Edexcel boards as early adopters, then expand. See `memory/exam-board-market-share.md` for market share data.

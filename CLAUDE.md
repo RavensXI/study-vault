@@ -36,7 +36,8 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | French | AQA 8652 | 26 | 3 | 26/26 |
 | Creative iMedia | OCR J834 | 23 | 4 | 23/23 |
 | Mathematics | Edexcel 1MA1 | 55 | 6 (copied from generic) | 55/55 |
-| **Subtotal** | | **526** | | **526/526** |
+| Music Technology | NCFE 603/7008/7 | 15 | 5 (subscribed from generic, last year — remove Sept 2026) | 15/15 |
+| **Subtotal** | | **541** | | **541/541** |
 
 ## Subjects — Severn Vale School (school_id set)
 
@@ -68,9 +69,10 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 | History | Edexcel 1HI0 | 36 |
 | Religious Education | AQA 8062 | 28 |
 | Hospitality & Catering | WJEC 5409 | 10 |
-| **Other total** | | **108** |
+| Music Technology | NCFE 603/7008/7 | 15 |
+| **Other total** | | **123** |
 
-**Grand total: ~1,971 lessons across all subjects and boards.**
+**Grand total: ~1,986 lessons across all subjects and boards.**
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -91,7 +93,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **~1,971 lessons** (526 Unity + 48 Severn Vale + ~1,445 generic) + **~520 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **~1,986 lessons** (541 Unity + 48 Severn Vale + ~1,460 generic) + **~535 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (4 tiers):**
@@ -113,11 +115,16 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Teacher URLs LIVE** (26 Mar 2026) — `/teacher/review`, `/teacher/editor`, `/teacher/upload` rewrite to admin pages. School-scoped via `getAuthContext()`.
 - **Sign out button LIVE** (28 Mar 2026) — Red "Sign out" in header nav on all auth-gated pages. Clears sessionStorage, localStorage, and Supabase Auth.
 - **Review page optimised** (28 Mar 2026) — First load fetches full summary, subsequent Apply clicks use `lessons_only=1` to skip expensive count queries.
-- **Image QA page** — School filter dropdown added. Subject/unit filters scope by subject_id to handle duplicate slugs across schools.
+- **Music Technology LIVE** (30 Mar 2026) — NCFE 603/7008/7. 15 lessons, 5 units, generic (school_id NULL) + Unity subscription. First non-standard board (NCFE). All assets complete. **Remove Unity subscription Sept 2026** (last year taught).
+- **Podcast RSS feeds LIVE** (30 Mar 2026) — API route at `/api/podcast/feed?subject={slug}&school={id_or_code}`. Generates valid RSS XML with all podcast episodes in curriculum order. School-aware (passes school_id for bespoke subjects). Subscribe modal on lesson pages with copy-to-clipboard. Works with Pocket Casts, Apple Podcasts, Overcast, etc. Image slug mapping handles mismatched filenames.
+- **Podcast resume LIVE** (30 Mar 2026) — Saves podcast playback position to localStorage every ~5 seconds + on page unload. Resumes from saved position when student returns. Clears on episode completion.
+- **Guide page templates** (30 Mar 2026) — `docs/EXAM_TECHNIQUE_TEMPLATE.md` and `docs/REVISION_TECHNIQUE_TEMPLATE.md` provide fixed HTML structures for guide agents to fill in. Prevents formatting drift from agents generating HTML from scratch. Playbook updated to require template usage.
+- **Image QA page** — School filter dropdown added. Subject/unit filters scope by subject_id to handle duplicate slugs across schools. Unit filter persistence fixed (was resetting on reload).
 - **KaTeX in modals FIXED** (25 Mar 2026) — Quick Quiz and Flashcard modals now call `renderKaTeX()` after injecting content. Maths equations render properly.
 - **Preview banner grid fix** (25 Mar 2026) — `grid-column: 1/-1` on preview banner prevents it breaking the two-column layout.
 - **Accent CSS variables from DB** (25 Mar 2026) — `lesson-loader.js` sets `--accent`/`--accent-light`/`--accent-badge` via `style.setProperty` from unit DB values. No CSS body class needed for new units.
 - **RLS fix** (25 Mar 2026) — Added `Public read access on lessons` SELECT policy so anon key can read all lessons (content is revision material, not sensitive). JS handles status visibility.
+- **Cinematic video overviews** — 20/day via NotebookLM. `scripts/generate_cinematic_videos.py` (rewritten 27 Mar 2026): Supabase is the source of truth (no state file). Queries for lessons with no `youtube_video_id`, creates notebook, generates video, downloads to R2, updates Supabase. Sessions file (`_cinematic_sessions.json`) is ephemeral scratch for active renders only. Unity progress: 187/526 (6 subjects complete: Drama, English Language, English Literature, Food Tech, Science, Sport Science. History 35/60 in progress). ~17 days remaining at 20/day.
 - **Podcasts in progress** — 200/day via NotebookLM. `scripts/batch_podcasts.py` handles create → poll → download → R2 upload → Supabase update. ~200 done for Science + Eng Lang, ~955 remaining (mostly Eng Lit). Prompt includes unit context (covered/upcoming lessons) and varied opening instructions (no more "imagine").
 - **Diagrams not yet generated** for new multi-board content (Gemini generation pending).
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries.
@@ -168,6 +175,8 @@ All in environment variables — never commit.
 | `docs/GENERATION_PROMPT.md` | Content generation (inject-at-call-time prompt) |
 | `docs/PIPELINE_ARCHITECTURE.md` | Full pipeline architecture |
 | `docs/SUBJECT_PLAYBOOK.md` | Running the one-shot pipeline for a new subject |
+| `docs/EXAM_TECHNIQUE_TEMPLATE.md` | HTML template for exam technique guide pages |
+| `docs/REVISION_TECHNIQUE_TEMPLATE.md` | HTML template for revision technique guide pages |
 | `docs/UNIT_THEMES.md` | Unit body classes and accent colours |
 | `docs/FUTURE_FEATURES.md` | Planned features and wishlist |
 | `docs/SUBJECT_ROADMAP.md` | Subjects built and still to build (14 remaining) |
