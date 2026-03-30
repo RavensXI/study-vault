@@ -486,21 +486,69 @@
 
     // Add podcast feed subscribe button if this subject has a podcast
     if (hasPodcastTab) {
-      var feedUrl = '/api/podcast/feed?subject=' + (window._subjectSlug || '');
+      var feedUrl = window.location.origin + '/api/podcast/feed?subject=' + (window._subjectSlug || '');
       if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive()) {
         var sess = SchoolSession.get();
         if (sess && sess.school_id) feedUrl += '&school=' + sess.school_id;
       }
+      window._podcastFeedUrl = feedUrl;
       html += '<div class="sidebar-podcast-feed">';
-      html += '<a href="' + feedUrl + '" target="_blank" class="sidebar-podcast-feed-btn" title="Copy this link and paste into your podcast app">';
+      html += '<button type="button" class="sidebar-podcast-feed-btn" onclick="window._showPodcastModal()">';
       html += '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>';
       html += ' Subscribe in podcast app';
-      html += '</a>';
+      html += '</button>';
       html += '</div>';
     }
 
     container.innerHTML = html;
   }
+
+  // ---- Podcast subscribe modal ----
+  window._showPodcastModal = function () {
+    var url = window._podcastFeedUrl;
+    if (!url) return;
+
+    // Remove existing modal if any
+    var old = document.getElementById('podcast-feed-modal');
+    if (old) old.remove();
+
+    var overlay = document.createElement('div');
+    overlay.id = 'podcast-feed-modal';
+    overlay.className = 'podcast-feed-overlay';
+    overlay.innerHTML =
+      '<div class="podcast-feed-modal">' +
+        '<button class="podcast-feed-close" aria-label="Close">&times;</button>' +
+        '<h3>Listen on your podcast app</h3>' +
+        '<p class="podcast-feed-intro">Take these revision podcasts with you. Listen on the bus, walking to school, or anywhere.</p>' +
+        '<div class="podcast-feed-steps">' +
+          '<div class="podcast-feed-step"><span class="podcast-feed-step-num">1</span><div>Open your podcast app<br><span class="podcast-feed-step-hint">Apple Podcasts, Pocket Casts, Overcast, Castro, etc.</span></div></div>' +
+          '<div class="podcast-feed-step"><span class="podcast-feed-step-num">2</span><div>Find "Add by URL" or "Subscribe by RSS"<br><span class="podcast-feed-step-hint">Usually in Search or Settings</span></div></div>' +
+          '<div class="podcast-feed-step"><span class="podcast-feed-step-num">3</span><div>Paste the link you copied below</div></div>' +
+        '</div>' +
+        '<div class="podcast-feed-url-row">' +
+          '<input type="text" class="podcast-feed-url" value="' + url.replace(/"/g, '&quot;') + '" readonly onclick="this.select()">' +
+          '<button type="button" class="podcast-feed-copy-btn">Copy link</button>' +
+        '</div>' +
+        '<p class="podcast-feed-note">All episodes will appear in order. New lessons are added automatically.</p>' +
+      '</div>';
+
+    document.body.appendChild(overlay);
+
+    // Close handlers
+    overlay.querySelector('.podcast-feed-close').addEventListener('click', function () { overlay.remove(); });
+    overlay.addEventListener('click', function (e) { if (e.target === overlay) overlay.remove(); });
+
+    // Copy handler
+    overlay.querySelector('.podcast-feed-copy-btn').addEventListener('click', function () {
+      var input = overlay.querySelector('.podcast-feed-url');
+      navigator.clipboard.writeText(input.value).then(function () {
+        var btn = overlay.querySelector('.podcast-feed-copy-btn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function () { btn.textContent = 'Copy link'; btn.classList.remove('copied'); }, 2000);
+      });
+    });
+  };
 
   // ---- Render prev/next navigation ----
   function renderLessonNav(data, subjectSlug, unitSlug) {
