@@ -4,7 +4,7 @@ Multi-subject GCSE revision site. Repo: https://github.com/RavensXI/study-vault
 
 ### Deployments
 - **GitHub Pages** (`main`): https://ravensxi.github.io/study-vault/ — History only, no login
-- **Vercel** (`platform`): https://study-vault-alpha.vercel.app/ — full platform, public content, admin/teacher login
+- **Vercel** (`platform`): https://www.studyvault.co.uk/ (custom domain, also accessible at study-vault-alpha.vercel.app) — full platform, public content, admin/teacher login
 
 ### Owner
 Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
@@ -13,50 +13,68 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 
 ## Branches
 - **`main`** — History at root level. Single-subject, no login.
-- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas, 25 subjects (16 school-specific + 9 generic free-tier).
+- **`platform`** (current) — multi-subject. History under `history/`. Public content, school login for students, password-gated admin/teacher areas.
 
 ## Subjects — Unity College (school_id set, all on Vercel)
 
-| Subject | Exam Board | Lessons | Units | Cinematic Videos | Podcasts |
-|---------|-----------|---------|-------|-----------------|----------|
-| History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 0/60 | 60/60 |
-| Business Studies | Edexcel 1BS0 | 30 | 2 themes | 0/30 | 30/30 |
-| Geography | AQA 8035 | 40 | 2 papers | 0/40 | 40/40 |
-| Sport Science | OCR R180 | 10 | 1 (R180) | 9/10 | 10/10 |
-| Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 0/12 | 12/12 |
-| Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 7/10 | 10/10 |
-| Religious Education | AQA 8062 | 40 | 8 | 0/40 | 40/40 |
-| Music | Eduqas C660U | 26 | 6 (Elements, Forms, Ensemble, Popular, Film, Toto Africa) | 0/26 | 26/26 |
-| English Literature | AQA 8702 | 42 | 5 (Macbeth, A Christmas Carol, Animal Farm, Power & Conflict, Unseen Poetry) | 0/42 | 42/42 |
-| English Language | AQA 8700 | 30 | 4 (P1 Reading, P1 Writing, P2 Reading, P2 Writing) | 0/30 | 30/30 |
-| Science | AQA 8464 | 48 | 6 (Bio P1, Bio P2, Chem P1, Chem P2, Phys P1, Phys P2) | 20/48 | 48/48 |
-| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 (Biology, Chemistry, Physics) | 0/22 | 22/22 |
-| Spanish | AQA 8692 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 26/26 |
-| German | AQA 8662 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 26/26 |
-| French | AQA 8652 | 26 | 3 (People & Lifestyle, Popular Culture, Communication & World) | 0/26 | 26/26 |
-| Creative iMedia | OCR J834 | 23 | 4 (Media Industry, Product Design, Pre-Production, Distribution) | 0/23 | 23/23 |
-| **Subtotal** | | **471** | **57** | **36/471** | **471/471** |
+| Subject | Exam Board | Lessons | Units | Podcasts |
+|---------|-----------|---------|-------|----------|
+| History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 60/60 |
+| Business Studies | Edexcel 1BS0 | 30 | 2 themes | 30/30 |
+| Geography | AQA 8035 | 40 | 2 papers | 40/40 |
+| Sport Science | OCR R180 | 10 | 1 (R180) | 10/10 |
+| Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 12/12 |
+| Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 10/10 |
+| Religious Education | AQA 8062 | 40 | 8 | 40/40 |
+| Music | Eduqas C660U | 26 | 6 | 26/26 |
+| English Literature | AQA 8702 | 42 | 5 | 42/42 |
+| English Language | AQA 8700 | 30 | 4 | 30/30 |
+| Science | AQA 8464 | 48 | 6 | 48/48 |
+| Separate Sciences | AQA 8461/8462/8463 | 22 | 3 | 22/22 |
+| Spanish | AQA 8692 | 26 | 3 | 26/26 |
+| German | AQA 8662 | 26 | 3 | 26/26 |
+| French | AQA 8652 | 26 | 3 | 26/26 |
+| Creative iMedia | OCR J834 | 23 | 4 | 23/23 |
+| Mathematics | Edexcel 1MA1 | 55 | 6 (copied from generic) | 55/55 |
+| **Subtotal** | | **526** | | **526/526** |
 
-**Total across site: 782 lessons, 782/782 podcasts.**
+## Subjects — Severn Vale School (school_id set)
+
+| Subject | Exam Board | Lessons | Units | Podcasts |
+|---------|-----------|---------|-------|----------|
+| Combined Science (Biology) | AQA 8464 | 16 | 2 (Bio P1, Bio P2) — bespoke from teacher PPTs | 1/16 |
+| + Chemistry & Physics | AQA 8464 | 32 | 4 (copied from generic) | 0/32 |
+
+Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale2026`.
 
 ## Subjects — Free Tier (school_id NULL, generic content)
 
-| Subject | Exam Board | Lessons | Units | Cinematic Videos | Podcasts |
-|---------|-----------|---------|-------|-----------------|----------|
-| Maths | Edexcel 1MA1 | 55 | 6 (Number, Algebra, Ratio, Geometry, Probability, Statistics) | 0/55 | 55/55 |
-| Science (generic) | AQA 8464 | 48 | 6 | 48/48 | 48/48 |
-| Separate Sciences (generic) | AQA 8461/8462/8463 | 22 | 3 | 0/22 | 22/22 |
-| English Language (generic) | AQA 8700 | 30 | 4 | 0/30 | 30/30 |
-| English Literature (generic) | AQA 8702 | 70 | TBC | 0/70 | 70/70 |
-| Health & Social Care | Pearson Edexcel | 12 | 1 (Health and Wellbeing) | 0/12 | 12/12 |
-| History (generic) | Edexcel 1HI0 | 36 | 4 (Medicine, Cold War, Anglo-Saxon, Weimar) | 0/36 | 36/36 |
-| Religious Education (generic) | AQA 8062 | 28 | 8 | 0/28 | 28/28 |
-| Hospitality & Catering | WJEC 5409 | 10 | 1 (The H&C Industry) | 0/10 | 10/10 |
-| **Subtotal** | | **311** | | **48/311** | **311/311** |
+### Core subjects across all exam boards (NEW — Mar 2026)
+
+| Subject | AQA | Edexcel | OCR | Eduqas | Total |
+|---------|-----|---------|-----|--------|-------|
+| English Language | 30 | 50 | 50 | 50 | 180 |
+| English Literature | 197 | 215 | 156 | 182 | 750 |
+| Mathematics | — | 55 | 58 | 50 | 213 (+50 AQA) |
+| Combined Science | 48 | 48 | 48 | — | 144 |
+| **Core total** | | | | | **1,337** |
+
+### Other generic subjects
+
+| Subject | Exam Board | Lessons |
+|---------|-----------|---------|
+| Separate Sciences | AQA 8461/8462/8463 | 22 |
+| Health & Social Care | Pearson Edexcel | 12 |
+| History | Edexcel 1HI0 | 36 |
+| Religious Education | AQA 8062 | 28 |
+| Hospitality & Catering | WJEC 5409 | 10 |
+| **Other total** | | **108** |
+
+**Grand total: ~1,971 lessons across all subjects and boards.**
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), flashcard questions (5/lesson), TTS narration (Azure Speech, MP3s on R2), Gemini diagrams (automated QA via Claude Sonnet), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts).
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), flashcard questions (5/lesson), TTS narration (Azure Speech, MP3s on R2), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts). Gemini diagrams only on older subjects — new multi-board content pending.
 
 ## Specification Database
 
@@ -73,7 +91,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **782 lessons** (471 school + 311 generic) + **306 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **~1,971 lessons** (526 Unity + 48 Severn Vale + ~1,445 generic) + **~520 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (4 tiers):**
@@ -82,38 +100,32 @@ All content served from Supabase. Static HTML files remain as backup.
   - **Teachers:** Individual Supabase Auth accounts (email + password). Invited by admin, sign up at `/teacher/signup?token=...`. Login at `/teacher/login`. Scoped to their school + assigned subjects via `teacher_subjects` table. Session stored in both sessionStorage and localStorage (cross-tab). Auth-gate supports `data-auth="teacher"` mode.
   - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`. Sees all schools/subjects. Shared password still works alongside Supabase Auth.
   - **Microsoft SSO:** Still pending Entra admin consent.
-- **Admin pages:** `/admin/pipeline` (upload/generate), `/admin/review` (QC), `/admin/images` (image QA), `/admin/editor` (lesson editor), `/admin/editor-guide` (guide editor)
+- **Admin pages:** `/admin/pipeline` (upload/generate), `/admin/review` (QC), `/admin/images` (image QA with school filter), `/admin/editor` (lesson editor), `/admin/editor-guide` (guide editor)
+- **Teacher pages:** `/teacher/login`, `/teacher/signup`, `/teacher/dashboard` (demo data), `/teacher/review` → review.html, `/teacher/editor` → editor.html, `/teacher/upload` → pipeline.html
 - **Supabase tables:** schools, profiles, subjects, units, lessons, guide_pages, school_subscriptions, user_selected_subjects, lesson_visits, knowledge_check_scores, content_pipeline_logs, upload_jobs, pipeline_steps, classes, class_members, teacher_invitations, teacher_subjects, notifications
 - **R2 buckets:** `studyvault-audio` (`pub-f7b76d81365b4b2f954567763694a24e.r2.dev`), `studyvault-images` (`pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev`), `studyvault-video` (`pub-157a3979382e4f98b51f7f868078e5a3.r2.dev`)
 - **Cookie consent:** Banner on all pages via `js/cookie-consent.js`. Privacy policy at `/privacy.html`.
 - **Business email:** studyvault.info@gmail.com
 
 ## Active TODO
-- **Severn Vale demo LIVE** — school code `vale2026`, subscribes to Science + Separate Sciences. Generic content (school_id NULL).
-- **Editor school scoping: FIXED** (22 Mar 2026) — editors now scope by school_id via `getAuthContext()`. Admin sees all with school dropdown, teachers see only their school's subjects.
-- **Teacher accounts: LIVE** (22 Mar 2026) — individual Supabase Auth accounts. Invite → signup → login flow. API routes: `/api/auth/teacher-login`, `/api/auth/teacher-signup`, `/api/auth/invite-teacher`, `/api/auth/me`. DB tables: `teacher_invitations`, `teacher_subjects`, `notifications`.
-- **QA review workflow: LIVE** (22 Mar 2026) — `/admin/review` dashboard with school/subject/unit filters, batch approve/publish/reject. Status flow: `pending_review` → `ready_for_teacher` → `live`. Pipeline now generates content as `pending_review`. Staff can view all lessons across tabs.
-- **Pipeline split TODO**: Content generates first (Phase 1), assets (diagrams, narration, podcasts) should generate after teacher publishes (Phase 2). See `memory/project_pipeline_split.md`.
-- **Dashboard progress**: Hardcoded demo data — need real Supabase queries
-- **Microsoft SSO activation**: network manager grants Entra admin consent → test on Vercel
-- **Cinematic videos**: State rebuilt from Supabase (22 Mar 2026). 81/471 Unity videos exist. Daily limit 20/day. Generating: Sport Science L1, Food Tech L1/L9/L10, Drama L1-12, English Language L1-4. `--rebuild-state` command fixes stale state. `--podcast-only` no longer sets `video_done=True` (bug fixed). See `docs/VIDEO_PIPELINE.md`.
-- **Podcasts: 782/782 — COMPLETE.** Every lesson across every subject (school + generic) has a podcast.
-- **Lesson Progress Tracker**: Sidebar widget on every lesson — Listen to podcast, Watch video, Complete knowledge check, Complete a revision task. KC auto-ticks. State in localStorage. Icons: purple headphones, red play, unit-colour question mark, green lightbulb.
-- **Flashcard system: LIVE** (23 Mar 2026) — `/revise` standalone page + inline modal on every lesson. Leitner 5-box spaced repetition, study streaks, 3D flip cards, mobile swipe, Web Speech API TTS. Cards from glossary terms + 5 dedicated flashcard_questions per lesson (3,910 Q&A pairs across 782 lessons). Progress in localStorage (`sv-flashcard-progress`). Auto-ticks lesson progress tracker. Tutorial popup on first use. `generate_flashcard_questions.py` for batch generation. Future content generation includes `flashcard_questions` in JSON output.
-- **Content-specific revision tips**: `data-revision-tip` attribute on key facts overrides generic lightbulb tips. ~1,824 tips generated across all 678 lessons (20 Mar 2026). Future content generation should include these at creation time.
-- **Lesson header declutter**: "Lesson X of Y" moved to header pill, inline label hidden. Content visible sooner.
-- **Dark mode + overlay fix**: Containers no longer turn white when overlay colour is active in dark mode.
-- **Upload auth fix**: Admin password sent via `X-Admin-Password` header + body fallback. No more demo user dependency.
-- **Upload null byte fix**: Strips `\u0000` from uploaded text (PPT extraction artefact).
-- **Collapsible UX**: Tinted background + "Tap to expand" hint (dismissed after first click via localStorage). Lightbulb no longer overlaps chevron.
-- **Video thumbnail**: Branded "StudyVault / Video Overview" card instead of black box for R2 videos.
-- **Subject picker fix**: Cards persist after re-rendering (cached at init).
-- **Remotion promo video**: Prototype at `studyvault-promo/`. Slot machine opener, 8 scenes, school-targeted pitch. Needs music + iteration.
-- **Niche exam board targeting**: Initial school list at `scripts/niche-board-schools.csv`. See `memory/exam-board-market-share.md` + FUTURE_FEATURES.md.
-- **Remaining subjects to build**: Computer Science (OCR), Design & Technology (AQA), bespoke Maths (awaiting teacher resources). Lacey's 4 subjects (HSC, History Edexcel, RE generic, H&C) COMPLETE — see `memory/project_lacey_subjects.md`.
-- **Parents' evening print view**: Dashboard section with quick-print option per class
-- **Mobile app (Capacitor)**: Wrap existing PWA with Capacitor for App Store + Google Play listing
-- Role detection (teacher vs student), retire static HTML
+- **Multi-board core subjects COMPLETE** (30 Mar 2026) — English Language (4 boards, 180 lessons), English Literature (4 boards, 750 lessons), Maths (4 boards, 213 lessons), Combined Science (3 boards, 144 lessons). All have: content, heroes, narration, related media, guide pages (exam technique + revision technique). All `pending_review` status.
+- **Severn Vale School LIVE** — school code `vale2026`. Bespoke Biology (16 lessons from teacher PPTs) + generic Chem/Physics. Teacher: Alex Cameron (individual Supabase Auth account). Upload page at `/teacher/upload`.
+- **Teacher URLs LIVE** (26 Mar 2026) — `/teacher/review`, `/teacher/editor`, `/teacher/upload` rewrite to admin pages. School-scoped via `getAuthContext()`.
+- **Sign out button LIVE** (28 Mar 2026) — Red "Sign out" in header nav on all auth-gated pages. Clears sessionStorage, localStorage, and Supabase Auth.
+- **Review page optimised** (28 Mar 2026) — First load fetches full summary, subsequent Apply clicks use `lessons_only=1` to skip expensive count queries.
+- **Image QA page** — School filter dropdown added. Subject/unit filters scope by subject_id to handle duplicate slugs across schools.
+- **KaTeX in modals FIXED** (25 Mar 2026) — Quick Quiz and Flashcard modals now call `renderKaTeX()` after injecting content. Maths equations render properly.
+- **Preview banner grid fix** (25 Mar 2026) — `grid-column: 1/-1` on preview banner prevents it breaking the two-column layout.
+- **Accent CSS variables from DB** (25 Mar 2026) — `lesson-loader.js` sets `--accent`/`--accent-light`/`--accent-badge` via `style.setProperty` from unit DB values. No CSS body class needed for new units.
+- **RLS fix** (25 Mar 2026) — Added `Public read access on lessons` SELECT policy so anon key can read all lessons (content is revision material, not sensitive). JS handles status visibility.
+- **Podcasts in progress** — 200/day via NotebookLM. `scripts/batch_podcasts.py` handles create → poll → download → R2 upload → Supabase update. ~200 done for Science + Eng Lang, ~955 remaining (mostly Eng Lit). Prompt includes unit context (covered/upcoming lessons) and varied opening instructions (no more "imagine").
+- **Diagrams not yet generated** for new multi-board content (Gemini generation pending).
+- **Dashboard progress**: Hardcoded demo data — need real Supabase queries.
+- **Homepage subject filtering LIVE** (28 Mar 2026) — School students only see bespoke + subscribed subjects. Maths added as locked core subject alongside English and Science.
+- **Mobile editor LIVE** (26 Mar 2026) — Floating action button (bottom-right) opens slide-up sidebar with Save/Discard/Preview. Body `transform: none` override fixes `position: fixed`.
+- **Remaining subjects to build**: Computer Science (OCR), Design & Technology (AQA).
+- **Parents' evening print view**: Dashboard section with quick-print option per class.
+- **Mobile app (Capacitor)**: Wrap existing PWA for App Store + Google Play.
 
 ## API Keys
 
@@ -130,7 +142,8 @@ All in environment variables — never commit.
 | Unsplash | `UNSPLASH_ACCESS_KEY` | Hero image search |
 | ElevenLabs | `ELEVENLABS_API_KEY` | TTS fallback (unused) |
 | Admin auth | `ADMIN_PASSWORD` | Gates `/admin/pipeline`, `/admin/review`, `/admin/images` |
-| Teacher auth | `TEACHER_PASSWORD` | Gates `/admin/editor`, `/admin/editor-guide` |
+| Teacher auth | `TEACHER_PASSWORD` | Shared password fallback (Unity-scoped). Individual teacher accounts preferred. |
+| Azure Speech | `AZURE_SPEECH_KEY` | Region: `uksouth`. Pay-as-you-go (upgraded from free tier 27 Mar 2026). |
 
 ## Key Conventions
 
