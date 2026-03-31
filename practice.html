@@ -1,0 +1,1646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loading... - StudyVault Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2d2a26">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    /* ============================================
+       Practice Page — Maths-First Format
+       ============================================ */
+
+    /* Override page transition for standalone */
+    body { opacity: 1; animation: none; }
+
+    /* Practice tier colours */
+    :root {
+      --bronze: #b45309;
+      --bronze-light: #fffbeb;
+      --bronze-badge: #fef3c7;
+      --silver: #64748b;
+      --silver-light: #f1f5f9;
+      --silver-badge: #e2e8f0;
+      --gold: #d97706;
+      --gold-light: #fefce8;
+      --gold-badge: #fef9c3;
+      --success: #16a34a;
+      --success-light: #f0fdf4;
+      --error: #dc2626;
+      --error-light: #fef2f2;
+    }
+
+    /* Practice page layout */
+    .practice-page {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* Page title */
+    .practice-header {
+      margin-bottom: 2rem;
+    }
+
+    .practice-header .lesson-number {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+      background: var(--accent-badge, #dbeafe);
+      padding: 0.3em 0.85em;
+      border-radius: 999px;
+      margin-bottom: 0.75rem;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+    }
+
+    .practice-header h1 {
+      font-size: 2rem;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    .practice-header .subtitle {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      margin-bottom: 0;
+    }
+
+    /* Format badge */
+    .format-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      padding: 0.3em 0.75em;
+      border-radius: 999px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+    .format-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    /* ===== A. METHOD CARD ===== */
+    .method-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .method-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent, #2563eb), #60a5fa);
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .method-card-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent, #2563eb);
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .method-card-label svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .method-card h2 {
+      font-size: 1.35rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .method-card p {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin-bottom: 0.75rem;
+    }
+
+    .method-card p:last-child {
+      margin-bottom: 0;
+    }
+
+    .method-steps {
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 1.25rem;
+      counter-reset: method-step;
+    }
+
+    .method-steps li {
+      counter-increment: method-step;
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+      padding: 0.5rem 0;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      border-bottom: 1px solid var(--border-lighter);
+    }
+
+    .method-steps li:last-child {
+      border-bottom: none;
+    }
+
+    .method-steps li::before {
+      content: counter(method-step);
+      flex-shrink: 0;
+      width: 1.6rem;
+      height: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border-radius: 50%;
+    }
+
+    /* Worked example inside method card */
+    .method-example {
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .method-example-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent, #2563eb);
+      margin-bottom: 0.75rem;
+    }
+
+    .method-example .katex-line {
+      margin: 0.4rem 0;
+      font-size: 1.1rem;
+    }
+
+    .method-example .solution-note {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    /* ===== B. WORKED EXAMPLES ===== */
+    .worked-section {
+      margin-bottom: 3rem;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-heading h2 {
+      margin-bottom: 0;
+      font-size: 1.45rem;
+    }
+
+    .section-heading .section-icon {
+      width: 2.2rem;
+      height: 2.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-light, #eff6ff);
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    .section-heading .section-icon svg {
+      width: 1.1rem;
+      height: 1.1rem;
+      color: var(--accent, #2563eb);
+    }
+
+    .worked-example {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      margin-bottom: 1.25rem;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .worked-example-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.15rem 1.5rem;
+      border-bottom: 1px solid var(--border-lighter);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .worked-example-header:hover {
+      background: var(--accent-light, #eff6ff);
+    }
+
+    .worked-example.active .worked-example-header {
+      background: var(--accent-light, #eff6ff);
+    }
+
+    .worked-example-number {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent, #2563eb);
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .worked-example-question {
+      flex: 1;
+      margin: 0 1rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+
+    .worked-example-difficulty {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2em 0.6em;
+      border-radius: 999px;
+    }
+
+    .difficulty-bronze {
+      color: var(--bronze);
+      background: var(--bronze-badge);
+    }
+
+    .difficulty-silver {
+      color: var(--silver);
+      background: var(--silver-badge);
+    }
+
+    .difficulty-gold {
+      color: var(--gold);
+      background: var(--gold-badge);
+    }
+
+    .worked-example-toggle {
+      color: var(--text-muted);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .worked-example.active .worked-example-toggle {
+      transform: rotate(180deg);
+    }
+
+    .worked-example-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .worked-example.active .worked-example-body {
+      max-height: 800px;
+    }
+
+    .worked-steps {
+      padding: 0 1.5rem 1.5rem;
+    }
+
+    .worked-step {
+      padding: 0.75rem 0;
+      border-bottom: 1px dashed var(--border-lighter);
+    }
+
+    .worked-step:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .step-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .step-content {
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    .step-hidden {
+      display: none;
+    }
+
+    .step-reveal-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      padding: 0.4em 0.85em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .step-reveal-btn:hover {
+      background: var(--accent-badge, #dbeafe);
+      border-color: var(--accent, #2563eb);
+    }
+
+    .step-reveal-btn svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .step-revealed {
+      animation: step-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes step-fade-in {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .step-answer {
+      background: var(--success-light);
+      border: 1px solid #bbf7d0;
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      margin-top: 0.5rem;
+    }
+
+    .step-answer .step-label {
+      color: var(--success);
+    }
+
+    /* ===== C. PRACTICE PROBLEMS ===== */
+    .practice-problems {
+      margin-bottom: 3rem;
+      opacity: 1 !important;
+      transform: none !important;
+    }
+
+    .tier-section {
+      margin-bottom: 2.5rem;
+    }
+
+    .tier-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 2px solid var(--border-lighter);
+    }
+
+    .tier-icon {
+      width: 2rem;
+      height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .tier-icon svg {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    .tier-bronze .tier-icon { background: var(--bronze-badge); color: var(--bronze); }
+    .tier-silver .tier-icon { background: var(--silver-badge); color: var(--silver); }
+    .tier-gold .tier-icon { background: var(--gold-badge); color: var(--gold); }
+
+    .tier-header h3 {
+      flex: 1;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0;
+    }
+
+    .tier-bronze h3 { color: var(--bronze); }
+    .tier-silver h3 { color: var(--silver); }
+    .tier-gold h3 { color: var(--gold); }
+
+    .tier-score {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .tier-description {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      padding-left: 2.75rem;
+    }
+
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 600px) {
+      .problem-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .problem-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 1.15rem 1.25rem;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .problem-card:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .problem-card.correct {
+      border-color: #86efac;
+      background: var(--success-light);
+    }
+
+    .problem-card.incorrect {
+      border-color: #fca5a5;
+      background: var(--error-light);
+    }
+
+    .problem-number {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 0.5rem;
+    }
+
+    .problem-equation {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      min-height: 1.8rem;
+    }
+
+    .problem-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .problem-inputs label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .problem-input {
+      width: 4.5rem;
+      padding: 0.4rem 0.6rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 500;
+      text-align: center;
+      border: 1.5px solid var(--border-light);
+      border-radius: 8px;
+      background: var(--bg-body);
+      color: var(--text-primary);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .problem-input:focus {
+      border-color: var(--accent, #2563eb);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .problem-input.input-correct {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+
+    .problem-input.input-incorrect {
+      border-color: var(--error);
+      background: var(--error-light);
+    }
+
+    .problem-input-separator {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .problem-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .check-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent, #2563eb);
+      border: none;
+      padding: 0.45em 1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+    }
+
+    .check-btn:hover {
+      filter: brightness(0.9);
+    }
+
+    .check-btn:active {
+      transform: scale(0.97);
+    }
+
+    .check-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .problem-feedback {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .problem-feedback.visible {
+      opacity: 1;
+    }
+
+    .problem-feedback.feedback-correct {
+      color: var(--success);
+    }
+
+    .problem-feedback.feedback-incorrect {
+      color: var(--error);
+    }
+
+    .problem-feedback svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .correct-answer-reveal {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      margin-top: 0.5rem;
+      animation: step-fade-in 0.3s ease forwards;
+    }
+
+    .misconception-tip {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      padding: 0.6rem 0.85rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 0.4rem;
+      line-height: 1.55;
+      color: var(--text-primary);
+    }
+
+    .misconception-tip strong {
+      color: #b45309;
+    }
+
+    /* ===== D. PROGRESS SUMMARY ===== */
+    .progress-summary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 1.75rem 2rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 2rem;
+    }
+
+    .progress-summary h2 {
+      font-size: 1.3rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .progress-overall {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--border-lighter);
+    }
+
+    .progress-score {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--accent, #2563eb);
+      line-height: 1;
+    }
+
+    .progress-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .progress-tiers {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .progress-tier {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .progress-tier-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      width: 4.5rem;
+      flex-shrink: 0;
+    }
+
+    .tier-bronze .progress-tier-label { color: var(--bronze); }
+    .tier-silver .progress-tier-label { color: var(--silver); }
+    .tier-gold .progress-tier-label { color: var(--gold); }
+
+    .progress-bar-track {
+      flex: 1;
+      height: 10px;
+      background: var(--border-lighter);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      min-width: 0;
+    }
+
+    .tier-bronze .progress-bar-fill { background: var(--bronze); }
+    .tier-silver .progress-bar-fill { background: var(--silver); }
+    .tier-gold .progress-bar-fill { background: var(--gold); }
+
+    .progress-tier-count {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      width: 2.5rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .progress-message {
+      text-align: center;
+      margin-top: 1.25rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border-lighter);
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+    }
+
+    .progress-message strong {
+      color: var(--accent, #2563eb);
+    }
+
+    /* ===== GLOBAL SCORE BAR (sticky) ===== */
+    .score-bar {
+      position: sticky;
+      top: 3.5rem;
+      z-index: 800;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-lighter);
+      padding: 0.5rem 1.5rem;
+      margin: 0 -1.5rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+    }
+
+    .score-bar-item {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .score-bar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .score-bar-dot.dot-bronze { background: var(--bronze); }
+    .score-bar-dot.dot-silver { background: var(--silver); }
+    .score-bar-dot.dot-gold { background: var(--gold); }
+    .score-bar-dot.dot-total { background: var(--accent, #2563eb); }
+
+    /* ===== NARRATION PLAYER (practice page) ===== */
+    .practice-narration {
+      margin-bottom: 2rem;
+    }
+
+    /* ===== LESSON NAV ===== */
+    .practice-nav {
+      display: flex;
+      gap: 1rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    .practice-nav a {
+      flex: 1;
+      display: block;
+      padding: 1rem 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text-primary);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .practice-nav a:hover {
+      box-shadow: var(--shadow-md);
+      border-color: var(--accent, #2563eb);
+    }
+    .practice-nav-direction {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent, #2563eb);
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    .practice-nav-title {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      display: block;
+    }
+    .practice-nav a.nav-next { text-align: right; }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+      .practice-page {
+        padding: 1.25rem 1rem 3rem;
+      }
+
+      .practice-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .method-card {
+        padding: 1.25rem 1.25rem;
+      }
+
+      .worked-example-header {
+        padding: 1rem 1.15rem;
+      }
+
+      .worked-steps {
+        padding: 0 1.15rem 1.15rem;
+      }
+
+      .problem-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-bar {
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        justify-content: space-around;
+      }
+
+      .progress-summary {
+        padding: 1.25rem 1.25rem;
+      }
+
+      .practice-nav {
+        flex-direction: column;
+      }
+      .practice-nav a.nav-next { text-align: left; }
+    }
+
+    @media (max-width: 480px) {
+      .format-badge {
+        display: none;
+      }
+
+      .worked-example-difficulty {
+        display: none;
+      }
+
+      .problem-inputs {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .problem-input {
+        width: 100%;
+      }
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      .page-header, .score-bar, .check-btn, .step-reveal-btn, .progress-summary { display: none; }
+      .problem-card { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Scroll Progress Bar -->
+  <div class="scroll-progress"></div>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+        <span class="header-unit-label" id="header-unit-label"></span>
+      </a>
+
+      <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+
+      <nav class="header-nav" id="header-nav">
+        <a href="/">Home</a>
+        <a href="#" id="nav-unit-overview">Unit Overview</a>
+        <a href="#" id="nav-exam-technique">Exam Technique</a>
+        <a href="#" id="nav-revision-technique">Revision Techniques</a>
+        <a href="#" id="nav-prev-lesson" style="display:none">&larr; Previous Lesson</a>
+        <a href="#" id="nav-next-lesson" style="display:none">Next Lesson &rarr;</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mobile overlay -->
+  <div class="mobile-overlay"></div>
+
+  <!-- ===== LOADING STATE ===== -->
+  <div id="practice-loading" class="practice-page">
+    <div class="skeleton-loading" style="padding: 2rem 0;">
+      <div class="skeleton-line w-40" style="height: 12px; margin-bottom: 0.5rem;"></div>
+      <div class="skeleton-line w-80" style="height: 28px; margin-bottom: 1.5rem;"></div>
+      <div class="skeleton-hero" style="height: 180px; margin-bottom: 1.5rem;"></div>
+      <div class="skeleton-line w-80"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line w-60"></div>
+    </div>
+  </div>
+
+  <!-- ===== ERROR STATE ===== -->
+  <div id="practice-error" style="display: none; text-align: center; padding: 4rem 2rem;">
+    <h2 id="error-title">Lesson not found</h2>
+    <p id="error-message">The practice lesson you're looking for doesn't exist or you don't have access.</p>
+    <a href="/" class="back-link" style="display: inline-block; margin-top: 1rem;">&larr; Back to Dashboard</a>
+  </div>
+
+  <!-- ===== PRACTICE CONTENT (populated by JS) ===== -->
+  <div id="practice-page" class="practice-page" style="display: none;">
+
+    <!-- Page Title -->
+    <div class="practice-header">
+      <span class="lesson-number" id="lesson-number"></span>
+      <h1 id="lesson-title">
+        <span class="format-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Practice Mode
+        </span>
+      </h1>
+      <p class="subtitle" id="lesson-subtitle">Learn the method, study the worked examples, then test yourself on graded problems.</p>
+    </div>
+
+    <!-- Narration Player -->
+    <div class="practice-narration audio-player-wrapper" id="narration-wrapper" style="display:none;">
+      <div class="narration-player">
+        <button class="narration-play" aria-label="Play narration">
+          <svg class="narration-icon-play" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg class="narration-icon-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <div class="narration-progress">
+          <div class="narration-progress-fill"></div>
+        </div>
+        <span class="narration-time">0:00 / 0:00</span>
+        <button class="narration-speed">1x</button>
+        <audio class="narration-audio" preload="none">
+          <source src="" type="audio/mpeg">
+        </audio>
+      </div>
+    </div>
+
+    <!-- ===== A. METHOD CARD (populated by loader) ===== -->
+    <div class="method-card" id="method-card" style="display:none;">
+      <div class="method-card-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Method Card
+      </div>
+      <h2 id="method-title"></h2>
+      <div id="method-content"></div>
+      <div id="method-steps-container"></div>
+      <div id="method-example-container"></div>
+    </div>
+
+    <!-- ===== B. WORKED EXAMPLES (populated by loader) ===== -->
+    <div class="worked-section" id="worked-section" style="display:none;">
+      <div class="section-heading">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        </div>
+        <h2>Worked Examples</h2>
+      </div>
+      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">Try each step yourself on paper first, then reveal to check your working.</p>
+      <div id="worked-examples-container"></div>
+    </div>
+
+    <!-- ===== STICKY SCORE BAR ===== -->
+    <div class="score-bar" id="score-bar" style="display: none;">
+      <div class="score-bar-item">
+        <span class="score-bar-dot dot-total"></span>
+        <span id="score-total">0/0</span>
+      </div>
+      <div class="score-bar-item">
+        <span class="score-bar-dot dot-bronze"></span>
+        <span id="score-bronze">0/0</span>
+      </div>
+      <div class="score-bar-item">
+        <span class="score-bar-dot dot-silver"></span>
+        <span id="score-silver">0/0</span>
+      </div>
+      <div class="score-bar-item">
+        <span class="score-bar-dot dot-gold"></span>
+        <span id="score-gold">0/0</span>
+      </div>
+    </div>
+
+    <!-- ===== C. PRACTICE PROBLEMS (populated by JS from window._problemBank) ===== -->
+    <div class="practice-problems" id="practice-problems" style="display:none;">
+      <div class="section-heading">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h2>Practice Problems</h2>
+      </div>
+
+      <!-- BRONZE tier -->
+      <div class="tier-section" id="tier-bronze">
+        <div class="tier-header tier-bronze">
+          <div class="tier-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          </div>
+          <h3>Bronze</h3>
+          <span class="tier-score" id="bronze-score">0/0 correct</span>
+        </div>
+        <p class="tier-description" id="bronze-description"></p>
+        <div class="problem-grid" id="bronze-grid"></div>
+      </div>
+
+      <!-- SILVER tier -->
+      <div class="tier-section" id="tier-silver">
+        <div class="tier-header tier-silver">
+          <div class="tier-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          </div>
+          <h3>Silver</h3>
+          <span class="tier-score" id="silver-score">0/0 correct</span>
+        </div>
+        <p class="tier-description" id="silver-description"></p>
+        <div class="problem-grid" id="silver-grid"></div>
+      </div>
+
+      <!-- GOLD tier -->
+      <div class="tier-section" id="tier-gold">
+        <div class="tier-header tier-gold">
+          <div class="tier-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          </div>
+          <h3>Gold</h3>
+          <span class="tier-score" id="gold-score">0/0 correct</span>
+        </div>
+        <p class="tier-description" id="gold-description"></p>
+        <div class="problem-grid" id="gold-grid"></div>
+      </div>
+    </div>
+
+    <!-- ===== D. PROGRESS SUMMARY ===== -->
+    <div class="progress-summary" id="progress-summary">
+      <h2>Your Progress</h2>
+      <div class="progress-overall">
+        <div class="progress-score" id="progress-score-display">0/0</div>
+        <div class="progress-label">problems correct</div>
+      </div>
+      <div class="progress-tiers">
+        <div class="progress-tier tier-bronze">
+          <span class="progress-tier-label">Bronze</span>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-bronze" style="width: 0%"></div>
+          </div>
+          <span class="progress-tier-count" id="progress-bronze-count">0/0</span>
+        </div>
+        <div class="progress-tier tier-silver">
+          <span class="progress-tier-label">Silver</span>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-silver" style="width: 0%"></div>
+          </div>
+          <span class="progress-tier-count" id="progress-silver-count">0/0</span>
+        </div>
+        <div class="progress-tier tier-gold">
+          <span class="progress-tier-label">Gold</span>
+          <div class="progress-bar-track">
+            <div class="progress-bar-fill" id="progress-gold" style="width: 0%"></div>
+          </div>
+          <span class="progress-tier-count" id="progress-gold-count">0/0</span>
+        </div>
+      </div>
+      <div class="progress-message" id="progress-message">
+        Answer your first problem to get started.
+      </div>
+    </div>
+
+    <!-- Prev/Next Navigation -->
+    <nav class="practice-nav" id="practice-nav"></nav>
+
+    <!-- Back to unit -->
+    <a href="#" class="back-link" id="back-link">&larr; Back to unit</a>
+
+  </div><!-- /#practice-page -->
+
+  <script src="/js/school-session.js"></script>
+  <script src="/js/free-user.js"></script>
+  <script src="/js/cookie-consent.js"></script>
+  <script>(function(){try{var a=JSON.parse(sessionStorage.getItem('studyvault-auth'))||JSON.parse(localStorage.getItem('studyvault-auth'));if(a&&(a.role==='admin'||a.role==='teacher'))return}catch(e){}if(!SchoolSession.isActive()&&!FreeUser.isActive()){window.location.href='/'}})();</script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  <script src="/js/practice-loader.js"></script>
+
+  <!-- ===== Practice interactivity (reads from window._problemBank set by loader) ===== -->
+  <script>
+    /* ============================================
+       Practice Page — Interactivity JS
+       Runs after practice-loader.js has set:
+         window._problemBank  = { bronze: [...], silver: [...], gold: [...] }
+         window._practiceReady = true  (signalled after render)
+       ============================================ */
+
+    // ===== STATE =====
+    var practiceState = {
+      bronze: { correct: 0, attempted: 0 },
+      silver: { correct: 0, attempted: 0 },
+      gold: { correct: 0, attempted: 0 },
+      answered: {}
+    };
+
+    // ===== RENDER PROBLEMS =====
+    function renderProblems() {
+      var bank = window._problemBank;
+      if (!bank) return;
+
+      var tiers = ['bronze', 'silver', 'gold'];
+      for (var t = 0; t < tiers.length; t++) {
+        var tier = tiers[t];
+        var items = bank[tier] || [];
+        var grid = document.getElementById(tier + '-grid');
+        if (!grid) continue;
+        grid.innerHTML = '';
+
+        for (var i = 0; i < items.length; i++) {
+          var p = items[i];
+          var id = tier + '-' + i;
+          var card = document.createElement('div');
+          card.className = 'problem-card';
+          card.id = 'card-' + id;
+          var hintHtml = p.hint ? '<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;font-style:italic;">' + escapeHtml(p.hint) + '</div>' : '';
+          card.innerHTML =
+            '<div class="problem-number">Q' + (i + 1) + '</div>' +
+            '<div class="problem-equation">' + (p.display || '') + '</div>' +
+            hintHtml +
+            '<div class="problem-inputs">' +
+              '<label>x =</label>' +
+              '<input type="text" class="problem-input" id="input-' + id + '-a" inputmode="numeric" autocomplete="off" placeholder="?">' +
+              '<span class="problem-input-separator">or</span>' +
+              '<label>x =</label>' +
+              '<input type="text" class="problem-input" id="input-' + id + '-b" inputmode="numeric" autocomplete="off" placeholder="?">' +
+            '</div>' +
+            '<div class="problem-actions">' +
+              '<button class="check-btn" id="btn-' + id + '" data-tier="' + tier + '" data-index="' + i + '">Check</button>' +
+              '<div class="problem-feedback" id="feedback-' + id + '"></div>' +
+            '</div>' +
+            '<div id="reveal-' + id + '"></div>';
+          grid.appendChild(card);
+
+          // Bind check button
+          (function(aTier, aIndex) {
+            var btn = card.querySelector('.check-btn');
+            btn.addEventListener('click', function() { checkAnswer(aTier, aIndex); });
+            // Enter key on inputs
+            var inputs = card.querySelectorAll('.problem-input');
+            for (var j = 0; j < inputs.length; j++) {
+              inputs[j].addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') checkAnswer(aTier, aIndex);
+              });
+            }
+          })(tier, i);
+        }
+      }
+    }
+
+    // ===== MISCONCEPTION DETECTION =====
+    function detectMisconception(given, expected, problem) {
+      var g = given.slice().sort(function(a, b) { return a - b; });
+      var e = expected.slice().sort(function(a, b) { return a - b; });
+
+      // Sign swap
+      var negated = [-e[1], -e[0]].sort(function(a, b) { return a - b; });
+      if (g[0] === negated[0] && g[1] === negated[1]) {
+        return {
+          type: 'sign-swap',
+          message: 'You found the right numbers for the brackets, but the signs flip when you solve. ' +
+            'If the bracket is \\((x + 5)\\), setting it to zero gives \\(x = -5\\), not \\(x = 5\\). ' +
+            'The sign always reverses.'
+        };
+      }
+
+      // Only one correct
+      if (g.indexOf(e[0]) !== -1 || g.indexOf(e[1]) !== -1) {
+        var correct = g.indexOf(e[0]) !== -1 ? e[0] : e[1];
+        return {
+          type: 'one-correct',
+          message: 'You got \\(x = ' + correct + '\\) right, but the other solution is wrong. ' +
+            'Check your factor pair \u2014 both numbers must multiply to give the constant AND add to give the coefficient of \\(x\\).'
+        };
+      }
+
+      // Same value twice
+      if (g[0] === g[1]) {
+        return {
+          type: 'repeated',
+          message: 'You gave the same value twice. Quadratic equations usually have two different solutions \u2014 ' +
+            'check that you found two different factor pairs.'
+        };
+      }
+
+      // Gave the factors of c instead of the solutions
+      if (g[0] > 0 && g[1] > 0 && e[0] < 0 && e[1] < 0) {
+        return {
+          type: 'factors-not-solutions',
+          message: 'It looks like you gave the factor pair rather than the solutions. ' +
+            'The factors go inside the brackets, but to find \\(x\\) you set each bracket equal to zero \u2014 ' +
+            'which flips the signs. If the factors are 2 and 3, the solutions are \\(x = -2\\) and \\(x = -3\\).'
+        };
+      }
+
+      // Forgot to rearrange (Gold tier)
+      if (problem.hint && problem.hint.indexOf('Rearrange') !== -1) {
+        return {
+          type: 'not-rearranged',
+          message: 'Did you rearrange to get everything on one side first? ' +
+            'You need \\(= 0\\) on the right before you can factorise. Move all terms to one side, then find the factor pair.'
+        };
+      }
+
+      // Default
+      return {
+        type: 'unknown',
+        message: 'Check your working. Find two numbers that multiply to give the constant term and add to give the coefficient of \\(x\\), ' +
+          'then set each bracket equal to zero to find the solutions.'
+      };
+    }
+
+    // ===== CHECK ANSWER =====
+    function checkAnswer(tier, index) {
+      var id = tier + '-' + index;
+      if (practiceState.answered[id]) return;
+
+      var bank = window._problemBank;
+      if (!bank || !bank[tier] || !bank[tier][index]) return;
+
+      var inputA = document.getElementById('input-' + id + '-a');
+      var inputB = document.getElementById('input-' + id + '-b');
+      var valA = parseFloat(inputA.value.trim());
+      var valB = parseFloat(inputB.value.trim());
+
+      if (isNaN(valA) || isNaN(valB)) {
+        [inputA, inputB].forEach(function(inp) {
+          if (isNaN(parseFloat(inp.value.trim()))) {
+            inp.style.borderColor = 'var(--error)';
+            setTimeout(function() { inp.style.borderColor = ''; }, 800);
+          }
+        });
+        return;
+      }
+
+      var expected = bank[tier][index].solutions.slice().sort(function(a, b) { return a - b; });
+      var given = [valA, valB].sort(function(a, b) { return a - b; });
+      var isCorrect = expected[0] === given[0] && expected[1] === given[1];
+
+      practiceState.answered[id] = true;
+      practiceState[tier].attempted++;
+
+      var card = document.getElementById('card-' + id);
+      var btn = document.getElementById('btn-' + id);
+      var feedback = document.getElementById('feedback-' + id);
+      var reveal = document.getElementById('reveal-' + id);
+
+      btn.disabled = true;
+      inputA.disabled = true;
+      inputB.disabled = true;
+
+      if (isCorrect) {
+        practiceState[tier].correct++;
+        card.classList.add('correct');
+        inputA.classList.add('input-correct');
+        inputB.classList.add('input-correct');
+        feedback.className = 'problem-feedback visible feedback-correct';
+        feedback.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Correct';
+      } else {
+        card.classList.add('incorrect');
+        inputA.classList.add('input-incorrect');
+        inputB.classList.add('input-incorrect');
+        feedback.className = 'problem-feedback visible feedback-incorrect';
+        feedback.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Not quite';
+
+        var sols = bank[tier][index].solutions;
+        var misconception = detectMisconception([valA, valB], sols, bank[tier][index]);
+
+        reveal.innerHTML = '<div class="correct-answer-reveal">' +
+          '<div class="misconception-tip">' +
+            '<strong>What went wrong:</strong> ' + misconception.message +
+          '</div>' +
+          '<div style="margin-top:0.5rem;font-weight:600;">Correct answer: x = ' + sols[0] + ' or x = ' + sols[1] + '</div>' +
+        '</div>';
+
+        // Render KaTeX in the misconception message
+        if (typeof renderMathInElement === 'function') {
+          renderMathInElement(reveal, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\(', right: '\\)', display: false },
+            ],
+            throwOnError: false,
+          });
+        }
+      }
+
+      updateProgress();
+    }
+
+    // ===== UPDATE PROGRESS =====
+    function updateProgress() {
+      var bank = window._problemBank || {};
+      var bCount = (bank.bronze || []).length;
+      var sCount = (bank.silver || []).length;
+      var gCount = (bank.gold || []).length;
+      var totalCount = bCount + sCount + gCount;
+
+      var b = practiceState.bronze.correct;
+      var s = practiceState.silver.correct;
+      var g = practiceState.gold.correct;
+      var total = b + s + g;
+      var attempted = practiceState.bronze.attempted + practiceState.silver.attempted + practiceState.gold.attempted;
+
+      // Score bar
+      var scoreBar = document.getElementById('score-bar');
+      if (attempted > 0) scoreBar.style.display = 'flex';
+      document.getElementById('score-total').textContent = total + '/' + totalCount;
+      document.getElementById('score-bronze').textContent = b + '/' + bCount;
+      document.getElementById('score-silver').textContent = s + '/' + sCount;
+      document.getElementById('score-gold').textContent = g + '/' + gCount;
+
+      // Tier scores
+      document.getElementById('bronze-score').textContent = b + '/' + bCount + ' correct';
+      document.getElementById('silver-score').textContent = s + '/' + sCount + ' correct';
+      document.getElementById('gold-score').textContent = g + '/' + gCount + ' correct';
+
+      // Progress bars
+      document.getElementById('progress-bronze').style.width = (bCount > 0 ? (b / bCount) * 100 : 0) + '%';
+      document.getElementById('progress-silver').style.width = (sCount > 0 ? (s / sCount) * 100 : 0) + '%';
+      document.getElementById('progress-gold').style.width = (gCount > 0 ? (g / gCount) * 100 : 0) + '%';
+      document.getElementById('progress-bronze-count').textContent = b + '/' + bCount;
+      document.getElementById('progress-silver-count').textContent = s + '/' + sCount;
+      document.getElementById('progress-gold-count').textContent = g + '/' + gCount;
+      document.getElementById('progress-score-display').textContent = total + '/' + totalCount;
+
+      // Message
+      var msgEl = document.getElementById('progress-message');
+      if (attempted === 0) {
+        msgEl.innerHTML = 'Answer your first problem to get started.';
+      } else if (total === totalCount) {
+        msgEl.innerHTML = '<strong>Perfect score!</strong> You have mastered this topic.';
+      } else if (total >= totalCount * 0.8) {
+        msgEl.innerHTML = '<strong>Excellent work!</strong> You clearly understand the method. Try the ones you missed again.';
+      } else if (total >= totalCount * 0.5) {
+        msgEl.innerHTML = '<strong>Good progress.</strong> Review the worked examples for the types you found tricky.';
+      } else if (attempted >= totalCount * 0.5) {
+        msgEl.innerHTML = 'Keep going. Scroll back to the <strong>method card</strong> and worked examples if you need a refresher.';
+      } else {
+        msgEl.innerHTML = 'You\'re just getting started. Take your time with each problem.';
+      }
+
+      // Save progress to localStorage
+      try {
+        var key = 'sv-practice-' + window.location.pathname;
+        localStorage.setItem(key, JSON.stringify({
+          total: total,
+          totalCount: totalCount,
+          bronze: b,
+          silver: s,
+          gold: g,
+          attempted: attempted,
+          ts: Date.now()
+        }));
+      } catch(e) { /* ignore */ }
+    }
+
+    // ===== WORKED EXAMPLES =====
+    window.toggleWorkedExample = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var wasActive = el.classList.contains('active');
+      // Close all
+      var all = document.querySelectorAll('.worked-example');
+      for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
+      // Open if wasn't active
+      if (!wasActive) {
+        el.classList.add('active');
+        setTimeout(function() { practiceRenderKaTeX(el); }, 50);
+      }
+    };
+
+    window.revealStep = function(btn) {
+      var step = btn.previousElementSibling;
+      if (!step) return;
+      step.classList.remove('step-hidden');
+      step.classList.add('step-revealed');
+      btn.style.display = 'none';
+      setTimeout(function() { practiceRenderKaTeX(step); }, 50);
+    };
+
+    // ===== KaTeX HELPER =====
+    function practiceRenderKaTeX(el) {
+      if (typeof renderMathInElement === 'function') {
+        renderMathInElement(el || document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '\\(', right: '\\)', display: false },
+            { left: '\\[', right: '\\]', display: true },
+          ],
+          throwOnError: false,
+        });
+      }
+    }
+
+    // ===== SCROLL PROGRESS =====
+    function initScrollProgress() {
+      var bar = document.querySelector('.scroll-progress');
+      if (!bar) return;
+      window.addEventListener('scroll', function() {
+        var scrollTop = window.scrollY;
+        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = docHeight > 0 ? (scrollTop / docHeight) * 100 + '%' : '0%';
+      });
+    }
+
+    // ===== MOBILE NAV =====
+    function initMobileNav() {
+      var btn = document.querySelector('.mobile-menu-btn');
+      var nav = document.getElementById('header-nav');
+      var overlay = document.querySelector('.mobile-overlay');
+      if (!btn || !nav) return;
+      btn.addEventListener('click', function() {
+        var open = nav.classList.toggle('open');
+        btn.setAttribute('aria-expanded', open);
+        if (overlay) overlay.classList.toggle('open', open);
+      });
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          nav.classList.remove('open');
+          btn.setAttribute('aria-expanded', 'false');
+          overlay.classList.remove('open');
+        });
+      }
+    }
+
+    // ===== HEADER SCROLL EFFECT =====
+    function initHeaderScroll() {
+      var header = document.querySelector('.page-header');
+      if (!header) return;
+      var sentinel = document.createElement('div');
+      sentinel.style.height = '1px';
+      document.body.prepend(sentinel);
+      var observer = new IntersectionObserver(
+        function(entries) { header.classList.toggle('scrolled', !entries[0].isIntersecting); },
+        { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
+      );
+      observer.observe(sentinel);
+    }
+
+    // ===== NARRATION PLAYER =====
+    function initNarrationPlayer() {
+      var manifest = window.narrationManifest;
+      if (!manifest || !manifest.length) return;
+
+      var wrapper = document.getElementById('narration-wrapper');
+      if (!wrapper) return;
+
+      var audioEl = wrapper.querySelector('.narration-audio');
+      var source = audioEl.querySelector('source');
+      var playBtn = wrapper.querySelector('.narration-play');
+      var progressBar = wrapper.querySelector('.narration-progress');
+      var progressFill = wrapper.querySelector('.narration-progress-fill');
+      var timeEl = wrapper.querySelector('.narration-time');
+      var speedBtn = wrapper.querySelector('.narration-speed');
+
+      // Build playlist from manifest
+      var playlist = [];
+      for (var i = 0; i < manifest.length; i++) {
+        if (manifest[i].url) playlist.push(manifest[i].url);
+      }
+      if (!playlist.length) return;
+
+      wrapper.style.display = '';
+      var currentTrack = 0;
+      var speeds = [1, 1.25, 1.5, 0.75];
+      var speedIndex = 0;
+
+      function loadTrack(idx) {
+        source.src = playlist[idx];
+        audioEl.load();
+      }
+
+      function formatTime(s) {
+        var m = Math.floor(s / 60);
+        var sec = Math.floor(s % 60);
+        return m + ':' + (sec < 10 ? '0' : '') + sec;
+      }
+
+      loadTrack(0);
+
+      playBtn.addEventListener('click', function() {
+        if (audioEl.paused) {
+          audioEl.play();
+          wrapper.classList.add('playing');
+        } else {
+          audioEl.pause();
+          wrapper.classList.remove('playing');
+        }
+      });
+
+      audioEl.addEventListener('timeupdate', function() {
+        if (!audioEl.duration) return;
+        var pct = (audioEl.currentTime / audioEl.duration) * 100;
+        progressFill.style.width = pct + '%';
+        timeEl.textContent = formatTime(audioEl.currentTime) + ' / ' + formatTime(audioEl.duration);
+      });
+
+      audioEl.addEventListener('ended', function() {
+        currentTrack++;
+        if (currentTrack < playlist.length) {
+          loadTrack(currentTrack);
+          audioEl.play();
+        } else {
+          wrapper.classList.remove('playing');
+          currentTrack = 0;
+          loadTrack(0);
+        }
+      });
+
+      progressBar.addEventListener('click', function(e) {
+        if (!audioEl.duration) return;
+        var rect = progressBar.getBoundingClientRect();
+        var pct = (e.clientX - rect.left) / rect.width;
+        audioEl.currentTime = pct * audioEl.duration;
+      });
+
+      speedBtn.addEventListener('click', function() {
+        speedIndex = (speedIndex + 1) % speeds.length;
+        audioEl.playbackRate = speeds[speedIndex];
+        speedBtn.textContent = speeds[speedIndex] + 'x';
+      });
+    }
+
+    // ===== UTILITY =====
+    function escapeHtml(str) {
+      var div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    // ===== INIT PRACTICE FEATURES =====
+    // Called by practice-loader.js after content is injected
+    window.initPracticeFeatures = function() {
+      try { renderProblems(); } catch(e) { console.error('renderProblems failed:', e); }
+      try { initNarrationPlayer(); } catch(e) { console.warn('narrationPlayer:', e); }
+      try { updateProgress(); } catch(e) { console.warn('updateProgress:', e); }
+
+      // Wait for KaTeX then render
+      var waitForKaTeX = setInterval(function() {
+        if (typeof renderMathInElement === 'function') {
+          clearInterval(waitForKaTeX);
+          practiceRenderKaTeX(document.body);
+        }
+      }, 100);
+    };
+
+    // Init basic UI features immediately
+    try { initScrollProgress(); } catch(e) { console.warn('scrollProgress:', e); }
+    try { initMobileNav(); } catch(e) { console.warn('mobileNav:', e); }
+    try { initHeaderScroll(); } catch(e) { console.warn('headerScroll:', e); }
+  </script>
+
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
+</body>
+</html>

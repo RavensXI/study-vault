@@ -193,7 +193,7 @@
 
     var unitQuery = sb
       .from('units')
-      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id)')
+      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id, settings)')
       .eq('slug', unitSlug)
       .eq('subjects.slug', subjectSlug);
 
@@ -274,8 +274,11 @@
     // Lesson grid
     html += '<div class="lesson-grid sv-stagger">';
 
+    var isPractice = subject.settings && subject.settings.format === 'practice';
+    var lessonPrefix = isPractice ? '/practice/' : '/lesson/';
+
     lessons.forEach(function (lesson) {
-      var url = '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
+      var url = lessonPrefix + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
       html += '<a href="' + url + '" class="lesson-card sv-reveal" data-lesson="' + esc(lesson.slug) + '">';
       html += '<span class="lesson-card-number">Lesson ' + lesson.lesson_number + '</span>';
       html += '<h3>' + esc(lesson.title) + '</h3>';
