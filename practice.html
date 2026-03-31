@@ -40,132 +40,17 @@
       --practice-ease: cubic-bezier(0.16, 1, 0.3, 1);
       --panel-bg: #f5f2ed;
       --panel-width: 360px;
+      --header-height: 60px;
     }
 
-    /* ===== TOP BAR ===== */
-    .practice-topbar {
+    /* ===== HEADER OVERRIDES FOR PRACTICE LAYOUT ===== */
+    .page-header {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       z-index: 900;
-      height: 52px;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      display: flex;
-      align-items: center;
-      padding: 0 1.5rem;
-      border-bottom: 2px solid var(--accent, #2563eb);
-    }
-
-    .topbar-left {
-      flex: 1;
-      min-width: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .topbar-brand {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--accent, #2563eb);
-      text-decoration: none;
-      flex-shrink: 0;
-    }
-
-    .topbar-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--border-light, #ddd);
-      flex-shrink: 0;
-    }
-
-    .topbar-title {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-primary, #2d2a26);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .topbar-unit {
-      font-weight: 400;
-      color: var(--text-muted, #8a8580);
-      margin-left: 0.35rem;
-    }
-
-    .topbar-centre {
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .topbar-tier-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 0.3em 0.85em;
-      border-radius: 999px;
-      transition: all 0.3s var(--practice-ease);
-    }
-
-    .topbar-tier-badge.tier-is-bronze { color: var(--bronze); background: var(--bronze-badge); }
-    .topbar-tier-badge.tier-is-silver { color: var(--silver); background: var(--silver-badge); }
-    .topbar-tier-badge.tier-is-gold   { color: var(--gold); background: var(--gold-badge); }
-
-    .topbar-tier-badge svg {
-      width: 12px;
-      height: 12px;
-    }
-
-    .topbar-right {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      min-width: 0;
-    }
-
-    .topbar-score {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--accent, #2563eb);
-    }
-
-    .topbar-streak {
-      display: none;
-      align-items: center;
-      gap: 0.25rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #ea580c;
-      background: #fff7ed;
-      border: 1px solid #fed7aa;
-      padding: 0.2em 0.65em;
-      border-radius: 999px;
-      animation: streak-pulse 0.4s var(--practice-ease);
-    }
-
-    .topbar-streak.visible { display: inline-flex; }
-
-    @keyframes streak-pulse {
-      0% { transform: scale(0.8); opacity: 0; }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); opacity: 1; }
+      padding: 0.75rem 1.5rem;
     }
 
     /* Panel toggle button (mobile) */
@@ -181,6 +66,7 @@
       cursor: pointer;
       color: var(--text-secondary, #5a5651);
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     .panel-toggle-btn svg {
@@ -193,7 +79,7 @@
       display: flex;
       height: 100vh;
       height: 100dvh;
-      padding-top: 52px;
+      padding-top: var(--header-height);
     }
 
     /* ===== LEFT PANEL ===== */
@@ -384,6 +270,31 @@
       line-height: 1.3;
     }
 
+    /* View worked examples link in sidebar */
+    .panel-learn-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent, #2563eb);
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0.5rem 0 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .panel-learn-link:hover {
+      opacity: 0.75;
+    }
+
+    .panel-learn-link svg {
+      width: 13px;
+      height: 13px;
+    }
+
     /* Topic pills */
     .topic-links-group {
       margin-bottom: 0.6rem;
@@ -437,54 +348,111 @@
       background: #faf8f5;
     }
 
-    /* Mode tabs */
-    .mode-tabs {
+    /* ===== SCORE/STREAK BAR (replaces topbar centre/right) ===== */
+    .practice-score-bar {
       display: flex;
       align-items: center;
-      gap: 0;
-      padding: 0.65rem 2rem 0;
+      gap: 0.75rem;
+      padding: 0.6rem 2rem;
       border-bottom: 1px solid var(--border-light, #e8e4df);
       background: #fff;
       flex-shrink: 0;
     }
 
-    .mode-tab {
+    .score-bar-tier-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.3em 0.85em;
+      border-radius: 999px;
+      transition: all 0.3s var(--practice-ease);
+    }
+
+    .score-bar-tier-badge.tier-is-bronze { color: var(--bronze); background: var(--bronze-badge); }
+    .score-bar-tier-badge.tier-is-silver { color: var(--silver); background: var(--silver-badge); }
+    .score-bar-tier-badge.tier-is-gold   { color: var(--gold); background: var(--gold-badge); }
+
+    .score-bar-tier-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .score-bar-divider {
+      width: 1px;
+      height: 18px;
+      background: var(--border-light, #e8e4df);
+      flex-shrink: 0;
+    }
+
+    .score-bar-score {
       font-family: 'Inter', sans-serif;
       font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text-muted, #8a8580);
-      background: none;
-      border: none;
-      padding: 0.6rem 1.25rem;
-      cursor: pointer;
-      position: relative;
-      transition: color 0.2s ease;
-    }
-
-    .mode-tab:hover {
-      color: var(--text-primary, #2d2a26);
-    }
-
-    .mode-tab.active {
+      font-weight: 700;
       color: var(--accent, #2563eb);
     }
 
-    .mode-tab.active::after {
-      content: '';
-      position: absolute;
-      bottom: -1px;
-      left: 0.5rem;
-      right: 0.5rem;
-      height: 2px;
-      background: var(--accent, #2563eb);
-      border-radius: 2px 2px 0 0;
+    .score-bar-streak {
+      display: none;
+      align-items: center;
+      gap: 0.25rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ea580c;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      padding: 0.2em 0.65em;
+      border-radius: 999px;
+      animation: streak-pulse 0.4s var(--practice-ease);
     }
 
-    .mode-tab svg {
-      width: 14px;
-      height: 14px;
-      vertical-align: -2px;
-      margin-right: 0.35rem;
+    .score-bar-streak.visible { display: inline-flex; }
+
+    @keyframes streak-pulse {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .score-bar-spacer {
+      flex: 1;
+    }
+
+    /* ===== TIER RULES TOAST ===== */
+    .tier-rules-toast {
+      margin: 0 2rem;
+      padding: 0.65rem 1rem;
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      border-radius: 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      color: var(--text-primary, #2d2a26);
+      line-height: 1.5;
+      text-align: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: opacity 0.5s ease, max-height 0.5s var(--practice-ease), margin 0.5s ease, padding 0.5s ease;
+      overflow: hidden;
+      margin-top: 0.75rem;
+    }
+
+    .tier-rules-toast strong {
+      color: var(--accent, #2563eb);
+    }
+
+    .tier-rules-toast.fade-out {
+      opacity: 0;
+      max-height: 0;
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-top: 0;
+      padding-bottom: 0;
     }
 
     /* ===== CONTENT VIEWPORT (holds learn + practice views) ===== */
@@ -623,7 +591,7 @@
       margin-top: 1.5rem;
     }
 
-    .learn-reveal-btn, .learn-next-btn {
+    .learn-reveal-btn, .learn-next-btn, .learn-back-btn {
       font-family: 'Inter', sans-serif;
       font-size: 0.85rem;
       font-weight: 600;
@@ -662,6 +630,17 @@
 
     .learn-next-btn:active {
       transform: scale(0.97);
+    }
+
+    .learn-back-btn {
+      color: var(--text-muted, #8a8580);
+      background: transparent;
+      border: 1px solid var(--border-light, #e8e4df);
+      font-size: 0.78rem;
+    }
+
+    .learn-back-btn:hover {
+      background: var(--panel-bg);
     }
 
     /* ===== PRACTICE MODE ===== */
@@ -1238,6 +1217,271 @@
       }
     }
 
+    /* ===== METHOD MODAL ===== */
+    .method-modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 1.5rem;
+    }
+
+    .method-modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .method-modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 2.5rem 2rem;
+      max-width: 560px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      transform: scale(1);
+      opacity: 1;
+      transition: transform 0.4s var(--practice-ease), opacity 0.3s ease;
+      transform-origin: top left;
+    }
+
+    .method-modal-overlay.dismissing .method-modal {
+      transform: scale(0.15) translate(-50%, -30%);
+      opacity: 0;
+    }
+
+    .method-modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border-light, #e8e4df);
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted, #8a8580);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .method-modal-close:hover {
+      background: var(--panel-bg);
+      color: var(--text-primary, #2d2a26);
+    }
+
+    .method-modal-close svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .method-modal-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-primary, #2d2a26);
+      margin-bottom: 1rem;
+      padding-right: 2rem;
+      line-height: 1.3;
+    }
+
+    .method-modal-content {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text-secondary, #5a5651);
+      margin-bottom: 1.25rem;
+    }
+
+    .method-modal-steps-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted, #8a8580);
+      margin-bottom: 0.5rem;
+    }
+
+    .method-modal-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.25rem;
+      counter-reset: modal-step;
+    }
+
+    .method-modal-steps li {
+      counter-increment: modal-step;
+      display: flex;
+      align-items: baseline;
+      gap: 0.65rem;
+      padding: 0.5rem 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-primary, #2d2a26);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .method-modal-steps li:last-child {
+      border-bottom: none;
+    }
+
+    .method-modal-steps li::before {
+      content: counter(modal-step);
+      flex-shrink: 0;
+      width: 1.5rem;
+      height: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border-radius: 50%;
+    }
+
+    .method-modal-example {
+      background: var(--panel-bg);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .method-modal-example-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted, #8a8580);
+      margin-bottom: 0.5rem;
+    }
+
+    .method-modal-example-content {
+      font-size: 0.88rem;
+      line-height: 1.7;
+      color: var(--text-primary, #2d2a26);
+    }
+
+    .method-modal-go-btn {
+      display: block;
+      width: 100%;
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      background: var(--accent, #2563eb);
+      border: none;
+      padding: 0.85em 1.5em;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: filter 0.2s ease, transform 0.1s ease;
+    }
+
+    .method-modal-go-btn:hover {
+      filter: brightness(0.92);
+    }
+
+    .method-modal-go-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ===== MODE PROMPT ===== */
+    .mode-prompt-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1050;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 1.5rem;
+    }
+
+    .mode-prompt-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .mode-prompt {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 2.5rem 2rem;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      text-align: center;
+      transform: translateY(20px);
+      opacity: 0;
+      transition: transform 0.4s var(--practice-ease), opacity 0.35s ease;
+    }
+
+    .mode-prompt-overlay.active .mode-prompt {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .mode-prompt-question {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-primary, #2d2a26);
+      line-height: 1.4;
+      margin-bottom: 1.5rem;
+    }
+
+    .mode-prompt-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .mode-prompt-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.65em 1.5em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .mode-prompt-btn-learn {
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+    }
+
+    .mode-prompt-btn-learn:hover {
+      background: var(--accent-badge, #dbeafe);
+    }
+
+    .mode-prompt-btn-practice {
+      color: #fff;
+      background: var(--accent, #2563eb);
+    }
+
+    .mode-prompt-btn-practice:hover {
+      filter: brightness(0.92);
+    }
+
     /* ===== LOADING STATE ===== */
     .practice-loading-wrap {
       display: flex;
@@ -1269,7 +1513,7 @@
     @media (max-width: 900px) {
       .practice-panel {
         position: fixed;
-        top: 52px;
+        top: var(--header-height);
         left: 0;
         bottom: 0;
         z-index: 850;
@@ -1322,20 +1566,21 @@
         padding: 1.25rem;
       }
 
-      .mode-tabs {
-        padding: 0.5rem 1rem 0;
+      .practice-score-bar {
+        padding: 0.5rem 1rem;
+      }
+
+      .tier-rules-toast {
+        margin-left: 1rem;
+        margin-right: 1rem;
+      }
+
+      .method-modal {
+        padding: 2rem 1.5rem 1.5rem;
       }
     }
 
     @media (max-width: 480px) {
-      .topbar-title {
-        font-size: 0.72rem;
-      }
-
-      .topbar-unit {
-        display: none;
-      }
-
       .problem-inputs {
         flex-direction: column;
         gap: 0.5rem;
@@ -1356,7 +1601,7 @@
 
     /* ===== PRINT ===== */
     @media print {
-      .practice-topbar, .practice-panel, .mode-tabs, .problem-check-btn, .problem-next-btn, .learn-actions { display: none; }
+      .page-header, .practice-panel, .practice-score-bar, .problem-check-btn, .problem-next-btn, .learn-actions { display: none; }
       .practice-layout { height: auto; padding-top: 0; }
       .content-viewport { position: static; }
       .content-view { position: static; padding: 1rem; }
@@ -1398,33 +1643,63 @@
       <p id="lesson-subtitle"></p>
     </div>
 
-    <!-- TOP BAR -->
-    <div class="practice-topbar" id="practice-topbar">
-      <div class="topbar-left">
-        <a href="/" class="topbar-brand">StudyVault</a>
-        <div class="topbar-divider"></div>
-        <span class="topbar-title">
-          <span id="topbar-lesson-title"></span>
-          <span class="topbar-unit" id="topbar-unit-name"></span>
-        </span>
-      </div>
-      <div class="topbar-centre">
-        <span class="topbar-tier-badge tier-is-bronze" id="topbar-tier-badge">
-          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-          <span id="topbar-tier-text">Bronze 0/0</span>
-        </span>
-      </div>
-      <div class="topbar-right">
-        <span class="topbar-score" id="topbar-score">0/0</span>
-        <span class="topbar-streak" id="topbar-streak">&#x1F525; <span id="topbar-streak-count">0</span></span>
-        <button class="panel-toggle-btn" id="panel-toggle-btn" aria-label="Toggle reference panel">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+    <!-- Standard StudyVault Header (from lesson.html) -->
+    <header class="page-header">
+      <div class="page-header-inner">
+        <a href="/" class="header-brand">
+          <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
+          <span class="header-unit-label" id="header-unit-label"></span>
+        </a>
+
+        <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
         </button>
+
+        <nav class="header-nav" id="header-nav">
+          <a href="/">Home</a>
+          <a href="#" id="nav-unit-overview">Unit Overview</a>
+          <a href="#" id="nav-exam-technique">Exam Technique</a>
+          <a href="#" id="nav-revision-technique">Revision Techniques</a>
+          <a href="#" id="nav-prev-lesson" style="display:none">&larr; Previous Lesson</a>
+          <a href="#" id="nav-next-lesson" style="display:none">Next Lesson &rarr;</a>
+        </nav>
       </div>
-    </div>
+    </header>
+
+    <!-- Mobile overlay -->
+    <div class="mobile-overlay"></div>
 
     <!-- Mobile panel overlay -->
     <div class="panel-overlay" id="panel-overlay"></div>
+
+    <!-- METHOD MODAL (shown on first load) -->
+    <div class="method-modal-overlay" id="method-modal-overlay">
+      <div class="method-modal" id="method-modal">
+        <button class="method-modal-close" id="method-modal-close" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <div class="method-modal-title" id="method-modal-title"></div>
+        <div class="method-modal-content" id="method-modal-content"></div>
+        <div class="method-modal-steps-label">Steps</div>
+        <ol class="method-modal-steps" id="method-modal-steps"></ol>
+        <div class="method-modal-example" id="method-modal-example" style="display:none;">
+          <div class="method-modal-example-label">Worked Example</div>
+          <div class="method-modal-example-content" id="method-modal-example-content"></div>
+        </div>
+        <button class="method-modal-go-btn" id="method-modal-go-btn">Got it, let's practise!</button>
+      </div>
+    </div>
+
+    <!-- MODE PROMPT (shown after method modal) -->
+    <div class="mode-prompt-overlay" id="mode-prompt-overlay">
+      <div class="mode-prompt">
+        <div class="mode-prompt-question">Would you like to try some worked examples first, or jump straight to practice?</div>
+        <div class="mode-prompt-actions">
+          <button class="mode-prompt-btn mode-prompt-btn-learn" id="mode-prompt-learn">Worked Examples</button>
+          <button class="mode-prompt-btn mode-prompt-btn-practice" id="mode-prompt-practice">Start Practice</button>
+        </div>
+      </div>
+    </div>
 
     <!-- LAYOUT -->
     <div class="practice-layout">
@@ -1440,9 +1715,12 @@
           </div>
           <div class="panel-method-title" id="panel-method-title"></div>
           <ol class="panel-method-steps" id="panel-method-steps"></ol>
+          <button class="panel-learn-link" id="panel-learn-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            View worked examples
+          </button>
         </div>
 
-        <!-- Exam context -->
         <!-- Exam context removed — risk of encouraging topic-skipping -->
 
         <!-- Related Videos (collapsible, matching lesson page pattern) -->
@@ -1488,16 +1766,24 @@
       <!-- MAIN AREA -->
       <main class="practice-main" id="practice-main">
 
-        <!-- Mode Tabs -->
-        <div class="mode-tabs">
-          <button class="mode-tab" id="tab-learn" data-mode="learn">
+        <!-- Score/Streak bar -->
+        <div class="practice-score-bar" id="practice-score-bar">
+          <span class="score-bar-tier-badge tier-is-bronze" id="score-bar-tier-badge">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+            <span id="score-bar-tier-text">Bronze 0/0</span>
+          </span>
+          <div class="score-bar-divider"></div>
+          <span class="score-bar-score" id="score-bar-score">0/0</span>
+          <span class="score-bar-streak" id="score-bar-streak">&#x1F525; <span id="score-bar-streak-count">0</span></span>
+          <div class="score-bar-spacer"></div>
+          <button class="panel-toggle-btn" id="panel-toggle-btn" aria-label="Toggle reference panel">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            Learn
           </button>
-          <button class="mode-tab active" id="tab-practice" data-mode="practice">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Practice
-          </button>
+        </div>
+
+        <!-- Tier rules toast -->
+        <div class="tier-rules-toast" id="tier-rules-toast" style="display:none;">
+          Pass each tier by getting <strong>4 in a row</strong> correct, or <strong>75%</strong> overall. You've got this!
         </div>
 
         <!-- Content viewport -->
@@ -1518,6 +1804,7 @@
                   Show Next Step
                 </button>
                 <button class="learn-next-btn" id="learn-next-btn" style="display:none;">Next Example &rarr;</button>
+                <button class="learn-back-btn" id="learn-back-practice-btn" style="display:none;">Back to Practice</button>
               </div>
             </div>
           </div>
@@ -1747,8 +2034,8 @@
       // Update tier progress bar
       updateTierProgress();
 
-      // Update topbar tier badge
-      updateTopbarTier();
+      // Update score bar tier badge
+      updateScoreBarTier();
 
       // Render KaTeX
       requestAnimationFrame(function() {
@@ -1772,34 +2059,34 @@
       label.textContent = attempted + '/' + total;
     }
 
-    // ===== UPDATE TOPBAR =====
-    function updateTopbarTier() {
+    // ===== UPDATE SCORE BAR =====
+    function updateScoreBarTier() {
       var tier = practiceState.currentTier;
       var counts = getTierCounts();
-      var badge = document.getElementById('topbar-tier-badge');
-      badge.className = 'topbar-tier-badge tier-is-' + tier;
+      var badge = document.getElementById('score-bar-tier-badge');
+      badge.className = 'score-bar-tier-badge tier-is-' + tier;
       var text = tier.charAt(0).toUpperCase() + tier.slice(1) + ' ' +
         practiceState[tier].attempted + '/' + counts[tier];
-      document.getElementById('topbar-tier-text').textContent = text;
+      document.getElementById('score-bar-tier-text').textContent = text;
     }
 
-    function updateTopbarScore() {
+    function updateScoreBarScore() {
       var counts = getTierCounts();
       var total = counts.bronze + counts.silver + counts.gold;
       var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
-      document.getElementById('topbar-score').textContent = correct + '/' + total;
+      document.getElementById('score-bar-score').textContent = correct + '/' + total;
 
       // Streak
-      var streakEl = document.getElementById('topbar-streak');
+      var streakEl = document.getElementById('score-bar-streak');
       if (practiceState.streak >= 3) {
-        document.getElementById('topbar-streak-count').textContent = practiceState.streak;
-        streakEl.className = 'topbar-streak visible';
+        document.getElementById('score-bar-streak-count').textContent = practiceState.streak;
+        streakEl.className = 'score-bar-streak visible';
         // Re-trigger animation
         streakEl.style.animation = 'none';
         streakEl.offsetHeight;
         streakEl.style.animation = '';
       } else {
-        streakEl.className = 'topbar-streak';
+        streakEl.className = 'score-bar-streak';
       }
     }
 
@@ -1952,8 +2239,8 @@
 
       // Update scores
       updateTierProgress();
-      updateTopbarTier();
-      updateTopbarScore();
+      updateScoreBarTier();
+      updateScoreBarScore();
 
       // Save progress
       saveProgress();
@@ -2065,9 +2352,9 @@
       } else if (pct >= 0.8) {
         msgEl.innerHTML = '<strong>Excellent work!</strong> You clearly understand the method. Review the ones you missed and try again.';
       } else if (pct >= 0.5) {
-        msgEl.innerHTML = '<strong>Good progress.</strong> Head back to the Learn tab and review the worked examples for the tricky parts.';
+        msgEl.innerHTML = '<strong>Good progress.</strong> Try the worked examples in the sidebar for the tricky parts, then have another go.';
       } else {
-        msgEl.innerHTML = 'Keep going \u2014 switch to the <strong>Learn</strong> tab to study the worked examples, then try again.';
+        msgEl.innerHTML = 'Keep going \u2014 try the <strong>worked examples</strong> from the sidebar to study the method, then try again.';
       }
 
       document.getElementById('summary-overlay').classList.add('active');
@@ -2084,15 +2371,15 @@
     function retryAll() {
       practiceState.currentTier = 'bronze';
       practiceState.currentIndex = 0;
-      practiceState.bronze = { correct: 0, attempted: 0 };
-      practiceState.silver = { correct: 0, attempted: 0 };
-      practiceState.gold = { correct: 0, attempted: 0 };
+      practiceState.bronze = { correct: 0, attempted: 0, streak: 0 };
+      practiceState.silver = { correct: 0, attempted: 0, streak: 0 };
+      practiceState.gold = { correct: 0, attempted: 0, streak: 0 };
       practiceState.streak = 0;
       practiceState.answered = false;
       practiceState.allDone = false;
 
       document.getElementById('summary-overlay').classList.remove('active');
-      updateTopbarScore();
+      updateScoreBarScore();
       renderCurrentProblem();
     }
 
@@ -2161,9 +2448,11 @@
       // Buttons
       var revealBtn = document.getElementById('learn-reveal-btn');
       var nextBtn = document.getElementById('learn-next-btn');
+      var backBtn = document.getElementById('learn-back-practice-btn');
       revealBtn.style.display = '';
       revealBtn.textContent = steps.length > 0 ? 'Show Step 1' : 'No steps';
       nextBtn.style.display = 'none';
+      backBtn.style.display = '';
 
       if (idx >= we.length - 1) {
         nextBtn.textContent = 'Back to first example';
@@ -2218,25 +2507,16 @@
     // ===== MODE SWITCHING =====
     function switchMode(mode) {
       practiceState.mode = mode;
-      var tabLearn = document.getElementById('tab-learn');
-      var tabPractice = document.getElementById('tab-practice');
       var learnView = document.getElementById('learn-view');
       var practiceView = document.getElementById('practice-view');
 
       if (mode === 'learn') {
-        tabLearn.classList.add('active');
-        tabPractice.classList.remove('active');
         learnView.className = 'content-view';
         practiceView.className = 'content-view hidden';
       } else {
-        tabPractice.classList.add('active');
-        tabLearn.classList.remove('active');
         practiceView.className = 'content-view';
         learnView.className = 'content-view hidden-left';
       }
-
-      // Persist
-      try { localStorage.setItem('sv-practice-mode', mode); } catch(e) {}
     }
 
     // ===== PANEL TOGGLE (mobile) =====
@@ -2250,6 +2530,45 @@
     function closePanel() {
       document.getElementById('practice-panel').classList.remove('panel-open');
       document.getElementById('panel-overlay').classList.remove('visible');
+    }
+
+    // ===== METHOD MODAL =====
+    function showMethodModal() {
+      var overlay = document.getElementById('method-modal-overlay');
+      overlay.classList.add('active');
+      overlay.classList.remove('dismissing');
+    }
+
+    function dismissMethodModal(callback) {
+      var overlay = document.getElementById('method-modal-overlay');
+      overlay.classList.add('dismissing');
+      setTimeout(function() {
+        overlay.classList.remove('active', 'dismissing');
+        if (callback) callback();
+      }, 400);
+    }
+
+    // ===== MODE PROMPT =====
+    function showModePrompt() {
+      document.getElementById('mode-prompt-overlay').classList.add('active');
+    }
+
+    function hideModePrompt() {
+      document.getElementById('mode-prompt-overlay').classList.remove('active');
+    }
+
+    // ===== TIER RULES TOAST =====
+    function showTierRulesToast() {
+      var toast = document.getElementById('tier-rules-toast');
+      toast.style.display = '';
+      // Auto-fade after 5 seconds
+      setTimeout(function() {
+        toast.classList.add('fade-out');
+      }, 5000);
+      // Dismiss on click
+      toast.addEventListener('click', function() {
+        toast.classList.add('fade-out');
+      });
     }
 
     // ===== KaTeX HELPER =====
@@ -2275,10 +2594,6 @@
 
     // ===== INIT =====
     window.initPracticeFeatures = function() {
-      // Bind mode tabs
-      document.getElementById('tab-learn').addEventListener('click', function() { switchMode('learn'); });
-      document.getElementById('tab-practice').addEventListener('click', function() { switchMode('practice'); });
-
       // Bind check button
       document.getElementById('problem-check-btn').addEventListener('click', checkAnswer);
 
@@ -2303,6 +2618,23 @@
       document.getElementById('learn-reveal-btn').addEventListener('click', revealNextLearnStep);
       document.getElementById('learn-next-btn').addEventListener('click', nextLearnExample);
 
+      // Back to practice from learn mode
+      document.getElementById('learn-back-practice-btn').addEventListener('click', function() {
+        switchMode('practice');
+      });
+
+      // Sidebar learn link
+      var panelLearnLink = document.getElementById('panel-learn-link');
+      if (panelLearnLink) {
+        panelLearnLink.addEventListener('click', function() {
+          closePanel(); // close mobile panel if open
+          switchMode('learn');
+          if (window._workedExamples && window._workedExamples.length) {
+            renderLearnExample();
+          }
+        });
+      }
+
       // Panel toggle (mobile)
       document.getElementById('panel-toggle-btn').addEventListener('click', togglePanel);
       document.getElementById('panel-overlay').addEventListener('click', closePanel);
@@ -2310,16 +2642,32 @@
       // Retry button
       document.getElementById('summary-retry-btn').addEventListener('click', retryAll);
 
-      // Restore mode preference
-      try {
-        var savedMode = localStorage.getItem('sv-practice-mode');
-        if (savedMode === 'learn') switchMode('learn');
-      } catch(e) {}
+      // Method modal close
+      document.getElementById('method-modal-close').addEventListener('click', function() {
+        dismissMethodModal(function() { showModePrompt(); });
+      });
+      document.getElementById('method-modal-go-btn').addEventListener('click', function() {
+        dismissMethodModal(function() { showModePrompt(); });
+      });
+
+      // Mode prompt buttons
+      document.getElementById('mode-prompt-learn').addEventListener('click', function() {
+        hideModePrompt();
+        switchMode('learn');
+        if (window._workedExamples && window._workedExamples.length) {
+          renderLearnExample();
+        }
+      });
+      document.getElementById('mode-prompt-practice').addEventListener('click', function() {
+        hideModePrompt();
+        switchMode('practice');
+        showTierRulesToast();
+      });
 
       // Render first problem
       if (window._problemBank) {
         var counts = getTierCounts();
-        document.getElementById('topbar-score').textContent = '0/' + (counts.bronze + counts.silver + counts.gold);
+        document.getElementById('score-bar-score').textContent = '0/' + (counts.bronze + counts.silver + counts.gold);
         renderCurrentProblem();
       }
 
@@ -2327,7 +2675,53 @@
       if (window._workedExamples && window._workedExamples.length) {
         renderLearnExample();
       }
+
+      // Check if we should show the method modal
+      var lessonId = window._practiceLoadLessonId || window.location.pathname;
+      var introKey = 'sv-practice-intro-' + lessonId;
+      var mc = window._practiceMethodCard;
+      if (mc && mc.title && !localStorage.getItem(introKey)) {
+        // First visit — show method modal
+        showMethodModal();
+        localStorage.setItem(introKey, '1');
+      } else if (mc && mc.title) {
+        // Return visit — show mode prompt directly (skip modal)
+        showModePrompt();
+      } else {
+        // No method card — go straight to practice with toast
+        showTierRulesToast();
+      }
     };
+
+    // ===== MOBILE MENU HANDLER (standard header) =====
+    (function() {
+      var menuBtn = document.querySelector('.mobile-menu-btn');
+      var headerNav = document.querySelector('.header-nav');
+      var mobileOverlay = document.querySelector('.mobile-overlay');
+      if (!menuBtn || !headerNav) return;
+
+      function toggleMenu() {
+        var isOpen = headerNav.classList.toggle('open');
+        menuBtn.setAttribute('aria-expanded', isOpen);
+        if (mobileOverlay) mobileOverlay.classList.toggle('active', isOpen);
+        document.body.style.overflow = isOpen ? 'hidden' : '';
+      }
+
+      function closeMenu() {
+        headerNav.classList.remove('open');
+        menuBtn.setAttribute('aria-expanded', 'false');
+        if (mobileOverlay) mobileOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+
+      menuBtn.addEventListener('click', toggleMenu);
+      if (mobileOverlay) mobileOverlay.addEventListener('click', closeMenu);
+
+      // Close on nav link click
+      headerNav.querySelectorAll('a').forEach(function(link) {
+        link.addEventListener('click', closeMenu);
+      });
+    })();
   </script>
 
 </body>

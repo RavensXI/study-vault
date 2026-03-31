@@ -135,9 +135,17 @@
     return '/practice/' + subjectSlug + '/' + unitSlug + '/' + lessonNumber;
   }
 
+  function lessonUrl(subjectSlug, unitSlug, lessonNumber) {
+    return '/lesson/' + subjectSlug + '/' + unitSlug + '/' + lessonNumber;
+  }
+
   function browseUrl(subjectSlug, unitSlug) {
     if (unitSlug) return '/browse/' + subjectSlug + '/' + unitSlug;
     return '/browse/' + subjectSlug;
+  }
+
+  function guideUrl(subjectSlug, type) {
+    return '/guide/' + subjectSlug + '/' + type;
   }
 
   // ---- Render lesson ----
@@ -164,12 +172,57 @@
     var subjectSlug = params.subjectSlug;
     var unitSlug = params.unitSlug;
 
-    // ===== TOP BAR =====
-    var topbarTitle = document.getElementById('topbar-lesson-title');
-    if (topbarTitle) topbarTitle.textContent = lesson.title;
+    // ===== STANDARD HEADER =====
+    // Unit label pill
+    var headerUnitLabel = document.getElementById('header-unit-label');
+    if (headerUnitLabel) {
+      headerUnitLabel.textContent = unit.name;
+      if (unit.accent) {
+        headerUnitLabel.style.color = unit.accent;
+        headerUnitLabel.style.background = unit.accent_light || '';
+      }
+    }
 
-    var topbarUnit = document.getElementById('topbar-unit-name');
-    if (topbarUnit) topbarUnit.textContent = '\u2014 ' + unit.name;
+    // Nav: Unit Overview
+    var navUnitOverview = document.getElementById('nav-unit-overview');
+    if (navUnitOverview) {
+      navUnitOverview.href = browseUrl(subjectSlug, unitSlug);
+      navUnitOverview.textContent = unit.name;
+    }
+
+    // Nav: Exam Technique
+    var navExamTechnique = document.getElementById('nav-exam-technique');
+    if (navExamTechnique) {
+      navExamTechnique.href = guideUrl(subjectSlug, 'exam-technique');
+    }
+
+    // Nav: Revision Techniques
+    var navRevisionTechnique = document.getElementById('nav-revision-technique');
+    if (navRevisionTechnique) {
+      navRevisionTechnique.href = guideUrl(subjectSlug, 'revision-technique');
+    }
+
+    // Nav: Prev lesson
+    var navPrevLesson = document.getElementById('nav-prev-lesson');
+    if (navPrevLesson) {
+      if (data.prevLesson) {
+        navPrevLesson.href = practiceUrl(subjectSlug, unitSlug, data.prevLesson.lesson_number);
+        navPrevLesson.style.display = '';
+      } else {
+        navPrevLesson.style.display = 'none';
+      }
+    }
+
+    // Nav: Next lesson
+    var navNextLesson = document.getElementById('nav-next-lesson');
+    if (navNextLesson) {
+      if (data.nextLesson) {
+        navNextLesson.href = practiceUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number);
+        navNextLesson.style.display = '';
+      } else {
+        navNextLesson.style.display = 'none';
+      }
+    }
 
     // Legacy hidden elements (for compatibility)
     var lessonNumberEl = document.getElementById('lesson-number');
@@ -202,6 +255,47 @@
           panelSteps.appendChild(li);
         }
       }
+
+      // ===== METHOD MODAL =====
+      // Store method card data for initPracticeFeatures
+      window._practiceMethodCard = mc;
+      window._practiceLoadLessonId = lesson.id;
+
+      var modalTitle = document.getElementById('method-modal-title');
+      if (modalTitle) modalTitle.textContent = mc.title || '';
+
+      var modalContent = document.getElementById('method-modal-content');
+      if (modalContent) modalContent.innerHTML = mc.content || mc.explanation || '';
+
+      var modalSteps = document.getElementById('method-modal-steps');
+      if (mc.steps && mc.steps.length && modalSteps) {
+        modalSteps.innerHTML = '';
+        for (var msi = 0; msi < mc.steps.length; msi++) {
+          var mli = document.createElement('li');
+          mli.innerHTML = mc.steps[msi];
+          modalSteps.appendChild(mli);
+        }
+      }
+
+      // Worked example in modal (use first worked example if available)
+      var we = pd.worked_examples;
+      if (we && we.length) {
+        var exampleEl = document.getElementById('method-modal-example');
+        var exampleContentEl = document.getElementById('method-modal-example-content');
+        if (exampleEl && exampleContentEl) {
+          var firstExample = we[0];
+          var exHtml = '<strong>' + escapeHtml(firstExample.question || '') + '</strong>';
+          if (firstExample.steps && firstExample.steps.length) {
+            var lastStep = firstExample.steps[firstExample.steps.length - 1];
+            exHtml += '<br>' + (lastStep.content || '');
+          }
+          exampleContentEl.innerHTML = exHtml;
+          exampleEl.style.display = '';
+        }
+      }
+    } else {
+      // No method card — hide modal elements
+      window._practiceMethodCard = null;
     }
 
     // ===== LEFT PANEL: EXAM CONTEXT =====
@@ -222,9 +316,9 @@
     }
 
     // ===== WORKED EXAMPLES (stored for learn mode) =====
-    var we = pd.worked_examples;
-    if (we && we.length) {
-      window._workedExamples = we;
+    var we2 = pd.worked_examples;
+    if (we2 && we2.length) {
+      window._workedExamples = we2;
     } else {
       window._workedExamples = [];
     }
@@ -266,7 +360,7 @@
         : lesson.status === 'awaiting_qa' ? 'Awaiting QA'
         : lesson.status || 'Draft';
       var banner = document.createElement('div');
-      banner.style.cssText = 'position:fixed;top:52px;left:0;right:0;z-index:999;background:#fef3c7;color:#92400e;padding:0.5rem 1.25rem;font-size:0.82rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;';
+      banner.style.cssText = 'position:fixed;top:' + 'var(--header-height)' + ';left:0;right:0;z-index:999;background:#fef3c7;color:#92400e;padding:0.5rem 1.25rem;font-size:0.82rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;';
       banner.textContent = 'Preview Mode \u2014 Status: ' + statusLabel + ' (not visible to students)';
       pageEl.appendChild(banner);
     }
