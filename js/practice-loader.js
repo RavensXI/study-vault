@@ -173,10 +173,11 @@
     var unitSlug = params.unitSlug;
 
     // ===== STANDARD HEADER =====
-    // Unit label pill
+    // Lesson number + unit pill in header
     var headerUnitLabel = document.getElementById('header-unit-label');
     if (headerUnitLabel) {
-      headerUnitLabel.textContent = unit.name;
+      headerUnitLabel.className = 'header-lesson-pill';
+      headerUnitLabel.textContent = 'L' + lesson.lesson_number + ' \u00b7 ' + unit.name;
       if (unit.accent) {
         headerUnitLabel.style.color = unit.accent;
         headerUnitLabel.style.background = unit.accent_light || '';
@@ -188,18 +189,6 @@
     if (navUnitOverview) {
       navUnitOverview.href = browseUrl(subjectSlug, unitSlug);
       navUnitOverview.textContent = unit.name;
-    }
-
-    // Nav: Exam Technique
-    var navExamTechnique = document.getElementById('nav-exam-technique');
-    if (navExamTechnique) {
-      navExamTechnique.href = guideUrl(subjectSlug, 'exam-technique');
-    }
-
-    // Nav: Revision Techniques
-    var navRevisionTechnique = document.getElementById('nav-revision-technique');
-    if (navRevisionTechnique) {
-      navRevisionTechnique.href = guideUrl(subjectSlug, 'revision-technique');
     }
 
     // Nav: Prev lesson
@@ -277,22 +266,7 @@
         }
       }
 
-      // Worked example in modal (use first worked example if available)
-      var we = pd.worked_examples;
-      if (we && we.length) {
-        var exampleEl = document.getElementById('method-modal-example');
-        var exampleContentEl = document.getElementById('method-modal-example-content');
-        if (exampleEl && exampleContentEl) {
-          var firstExample = we[0];
-          var exHtml = '<strong>' + escapeHtml(firstExample.question || '') + '</strong>';
-          if (firstExample.steps && firstExample.steps.length) {
-            var lastStep = firstExample.steps[firstExample.steps.length - 1];
-            exHtml += '<br>' + (lastStep.content || '');
-          }
-          exampleContentEl.innerHTML = exHtml;
-          exampleEl.style.display = '';
-        }
-      }
+      // (Worked example removed from modal — students see it in Learn mode instead)
     } else {
       // No method card — hide modal elements
       window._practiceMethodCard = null;
