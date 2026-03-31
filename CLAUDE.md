@@ -35,7 +35,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | German | AQA 8662 | 26 | 3 | 26/26 |
 | French | AQA 8652 | 26 | 3 | 26/26 |
 | Creative iMedia | OCR J834 | 23 | 4 | 23/23 |
-| Mathematics | Edexcel 1MA1 | 55 | 6 (copied from generic) | 55/55 |
+| Mathematics | Edexcel 1MA1 | 48 (practice-first) | 6 | No narration — practice format |
 | Music Technology | NCFE 603/7008/7 | 15 | 5 (subscribed from generic, last year — remove Sept 2026) | 15/15 |
 | **Subtotal** | | **541** | | **541/541** |
 
@@ -56,7 +56,7 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 |---------|-----|---------|-----|--------|-------|
 | English Language | 30 | 50 | 50 | 50 | 180 |
 | English Literature | 197 | 215 | 156 | 182 | 750 |
-| Mathematics | — | 55 | 58 | 50 | 213 (+50 AQA) |
+| Mathematics | — | 48 (Edexcel only, practice-first rebuild) | — | — | 48 |
 | Combined Science | 48 | 48 | 48 | — | 144 |
 | **Core total** | | | | | **1,337** |
 
@@ -76,7 +76,7 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
-Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), flashcard questions (5/lesson), TTS narration (Azure Speech, MP3s on R2), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts). Gemini diagrams only on older subjects — new multi-board content pending.
+Every subject has: content, practice questions (6/lesson), knowledge checks (5/lesson), flashcard questions (5/lesson), TTS narration (Azure Speech, MP3s on R2), hero images, exam technique guides, revision technique guides, related media (curated YouTube, study tools, documentaries, podcasts). Gemini diagrams only on older subjects — new multi-board content pending. **Exception: Maths** uses practice-first format (`practice.html` + `practice-loader.js`) with method cards, worked examples, graded problem banks with misconception detection. No narration, podcasts, flashcards, or knowledge checks.
 
 ## Specification Database
 
@@ -94,8 +94,8 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 All content served from Supabase. Static HTML files remain as backup.
 
 - **~1,986 lessons** (541 Unity + 48 Severn Vale + ~1,460 generic) + **~535 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
-- **Templates:** `lesson.html`, `browse.html`, `guide.html` with JS loaders
-- **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
+- **Templates:** `lesson.html`, `browse.html`, `guide.html`, `practice.html` with JS loaders
+- **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (4 tiers):**
   - **Free users:** No login. Generic content (school_id NULL) + ads. Prefs stored in localStorage via `js/free-user.js`.
   - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees only subscribed subjects (restricted mode via `school_subscriptions` table), no ads.
@@ -110,7 +110,8 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Business email:** studyvault.info@gmail.com
 
 ## Active TODO
-- **Multi-board core subjects COMPLETE** (30 Mar 2026) — English Language (4 boards, 180 lessons), English Literature (4 boards, 750 lessons), Maths (4 boards, 213 lessons), Combined Science (3 boards, 144 lessons). All have: content, heroes, narration, related media, guide pages (exam technique + revision technique). All `pending_review` status.
+- **Multi-board core subjects COMPLETE** (30 Mar 2026) — English Language (4 boards, 180 lessons), English Literature (4 boards, 750 lessons), Combined Science (3 boards, 144 lessons). All have: content, heroes, narration, related media, guide pages (exam technique + revision technique). All `pending_review` status.
+- **Maths REBUILT as practice-first format** (31 Mar 2026) — Old multi-board content deleted (296 lessons). Rebuilding Edexcel 1MA1 only: 48 lessons (30 Foundation, 18 Higher) across 6 units. Practice format: method card modal, worked examples with step reveals, 20 graded problems (Bronze/Silver/Gold) with misconception detection. Tier pass: 4-in-a-row or 75%. No narration/podcasts/flashcards/KCs. Template: `practice.html` + `practice-loader.js`. Data: `practice_data` JSONB column. Test lesson live: `/practice/maths/algebra/7`. Other boards (OCR, AQA, Eduqas) to follow after Edexcel validated.
 - **Severn Vale School LIVE** — school code `vale2026`. Bespoke Biology (16 lessons from teacher PPTs) + generic Chem/Physics. Teacher: Alex Cameron (individual Supabase Auth account). Upload page at `/teacher/upload`.
 - **Teacher URLs LIVE** (26 Mar 2026) — `/teacher/review`, `/teacher/editor`, `/teacher/upload` rewrite to admin pages. School-scoped via `getAuthContext()`.
 - **Sign out button LIVE** (28 Mar 2026) — Red "Sign out" in header nav on all auth-gated pages. Clears sessionStorage, localStorage, and Supabase Auth.
