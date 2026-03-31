@@ -146,6 +146,7 @@
     var unit = data.unit;
     var subject = data.subject || {};
     var pd = lesson.practice_data || {};
+    if (typeof pd === 'string') { try { pd = JSON.parse(pd); } catch(e) { pd = {}; } }
 
     // Set page title
     document.title = 'Practice ' + lesson.lesson_number + ': ' + lesson.title + ' - StudyVault';
