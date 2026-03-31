@@ -1565,26 +1565,26 @@
       observer.observe(sentinel);
     }
 
-    // ===== INIT =====
-    document.addEventListener('DOMContentLoaded', function() {
-      try {
-        renderProblems();
-      } catch(e) {
-        console.error('renderProblems failed:', e);
-        document.getElementById('bronze-grid').textContent = 'Error loading problems: ' + e.message;
-      }
-      try { initScrollProgress(); } catch(e) { console.warn(e); }
-      try { initMobileNav(); } catch(e) { console.warn(e); }
-      try { initHeaderScroll(); } catch(e) { console.warn(e); }
+    // ===== INIT (run immediately — script is at end of body) =====
+    console.log('Practice JS starting...');
+    try {
+      renderProblems();
+      console.log('renderProblems done');
+    } catch(e) {
+      console.error('renderProblems failed:', e);
+      document.getElementById('bronze-grid').textContent = 'Error loading problems: ' + e.message;
+    }
+    try { initScrollProgress(); } catch(e) { console.warn('scrollProgress:', e); }
+    try { initMobileNav(); } catch(e) { console.warn('mobileNav:', e); }
+    try { initHeaderScroll(); } catch(e) { console.warn('headerScroll:', e); }
 
-      // Wait for KaTeX auto-render to load, then render
-      var waitForKaTeX = setInterval(function() {
-        if (typeof renderMathInElement === 'function') {
-          clearInterval(waitForKaTeX);
-          renderKaTeX(document.body);
-        }
-      }, 100);
-    });
+    // Wait for KaTeX auto-render to load, then render
+    var waitForKaTeX = setInterval(function() {
+      if (typeof renderMathInElement === 'function') {
+        clearInterval(waitForKaTeX);
+        renderKaTeX(document.body);
+      }
+    }, 100);
   </script>
 
 </body>
