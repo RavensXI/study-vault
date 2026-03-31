@@ -186,7 +186,7 @@
       nextLink.style.display = '';
     }
 
-    // Lesson header
+    // Lesson header (legacy — hidden, but still populated for data)
     document.getElementById('lesson-number').textContent =
       unit.name + ' \u2014 Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
 
@@ -198,6 +198,20 @@
     // Subtitle
     if (lesson.description) {
       document.getElementById('lesson-subtitle').textContent = lesson.description;
+    }
+
+    // ===== COLOURED BANNER =====
+    var bannerLessonPill = document.getElementById('banner-lesson-pill');
+    if (bannerLessonPill) {
+      bannerLessonPill.textContent = 'Lesson ' + lesson.lesson_number;
+    }
+    var bannerTitle = document.getElementById('banner-title');
+    if (bannerTitle) {
+      bannerTitle.textContent = lesson.title;
+    }
+    var bannerUnit = document.getElementById('banner-unit');
+    if (bannerUnit) {
+      bannerUnit.textContent = unit.name + (unit.subtitle ? ' \u2014 ' + unit.subtitle : '');
     }
 
     // ===== A. METHOD CARD =====
@@ -234,6 +248,41 @@
         exDiv.className = 'method-example';
         exDiv.innerHTML = '<div class="method-example-label">Worked Example</div>' + mc.example;
         exContainer.appendChild(exDiv);
+      }
+
+      // ===== SIDEBAR QUICK REFERENCE (condensed steps) =====
+      if (mc.steps && mc.steps.length) {
+        var qrSection = document.getElementById('sidebar-quick-ref');
+        var qrList = document.getElementById('sidebar-method-steps');
+        if (qrSection && qrList) {
+          qrList.innerHTML = '';
+          for (var qi = 0; qi < mc.steps.length; qi++) {
+            var qrLi = document.createElement('li');
+            // Strip HTML tags for condensed view, keep plain text
+            var tempDiv = document.createElement('div');
+            tempDiv.innerHTML = mc.steps[qi];
+            qrLi.textContent = tempDiv.textContent;
+            qrList.appendChild(qrLi);
+          }
+          qrSection.style.display = '';
+        }
+      }
+    }
+
+    // ===== SIDEBAR EXAM CONTEXT (from practice_data or hardcoded defaults) =====
+    var examCtx = pd.exam_context;
+    if (examCtx) {
+      if (examCtx.paper) {
+        var paperEl = document.getElementById('exam-context-paper');
+        if (paperEl) paperEl.textContent = examCtx.paper;
+      }
+      if (examCtx.marks) {
+        var marksEl = document.getElementById('exam-context-marks');
+        if (marksEl) marksEl.textContent = examCtx.marks;
+      }
+      if (examCtx.frequency) {
+        var freqEl = document.getElementById('exam-context-frequency');
+        if (freqEl) freqEl.textContent = examCtx.frequency;
       }
     }
 

@@ -39,16 +39,90 @@
       --error-light: #fef2f2;
     }
 
-    /* Practice page layout */
+    /* Practice page layout — two-column */
     .practice-page {
-      max-width: 840px;
+      max-width: 1160px;
       margin: 0 auto;
-      padding: 2rem 1.5rem 4rem;
+      padding: 0 1.5rem 4rem;
     }
 
-    /* Page title */
+    .practice-two-col {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 2.5rem;
+      align-items: start;
+    }
+
+    .practice-main {
+      min-width: 0;
+    }
+
+    /* ===== COLOURED UNIT HEADER BANNER ===== */
+    .practice-banner {
+      background: var(--accent, #2563eb);
+      padding: 2rem 2.5rem 1.75rem;
+      border-radius: 0 0 var(--radius) var(--radius);
+      margin: 0 -1.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .practice-banner::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 40%;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.06) 100%);
+      pointer-events: none;
+    }
+
+    .practice-banner-pills {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .practice-banner-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #fff;
+      background: rgba(255,255,255,0.18);
+      padding: 0.3em 0.75em;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .practice-banner-pill svg {
+      width: 11px;
+      height: 11px;
+    }
+
+    .practice-banner h1 {
+      font-size: 2rem;
+      line-height: 1.2;
+      color: #fff;
+      margin-bottom: 0.35rem;
+    }
+
+    .practice-banner .banner-unit {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.75);
+    }
+
+    /* Legacy header (hidden, kept for loader compat) */
     .practice-header {
-      margin-bottom: 2rem;
+      display: none;
     }
 
     .practice-header .lesson-number {
@@ -96,6 +170,357 @@
     .format-badge svg {
       width: 12px;
       height: 12px;
+    }
+
+    /* ===== SIDEBAR ===== */
+    .practice-sidebar {
+      position: sticky;
+      top: 5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-height: calc(100vh - 6rem);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      transition: scrollbar-color 0.3s;
+    }
+    .practice-sidebar:hover {
+      scrollbar-color: var(--accent) transparent;
+    }
+    .practice-sidebar::-webkit-scrollbar { width: 4px; }
+    .practice-sidebar::-webkit-scrollbar-track { background: transparent; }
+    .practice-sidebar::-webkit-scrollbar-thumb {
+      background: transparent;
+      border-radius: 2px;
+    }
+    .practice-sidebar:hover::-webkit-scrollbar-thumb { background: var(--accent); }
+
+    .practice-sidebar-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius);
+      padding: 1.15rem;
+      overflow: hidden;
+    }
+
+    .practice-sidebar-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    /* Sticky method quick reference */
+    .sidebar-quick-ref {
+      border-top: 3px solid var(--accent, #2563eb);
+    }
+
+    .sidebar-quick-ref ol {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: qr-step;
+    }
+
+    .sidebar-quick-ref ol li {
+      counter-increment: qr-step;
+      display: flex;
+      align-items: baseline;
+      gap: 0.6rem;
+      padding: 0.35rem 0;
+      font-size: 0.82rem;
+      line-height: 1.5;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-lighter);
+    }
+
+    .sidebar-quick-ref ol li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .sidebar-quick-ref ol li::before {
+      content: counter(qr-step);
+      flex-shrink: 0;
+      width: 1.35rem;
+      height: 1.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border-radius: 50%;
+    }
+
+    /* Exam context card */
+    .exam-context-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.45;
+    }
+
+    .exam-context-icon {
+      flex-shrink: 0;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent, #2563eb);
+    }
+
+    .exam-context-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* Related Videos */
+    .sidebar-video-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      padding: 0.55rem 0;
+      text-decoration: none;
+      color: var(--text-primary);
+      border-bottom: 1px solid var(--border-lighter);
+      transition: color 0.2s ease;
+    }
+
+    .sidebar-video-link:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .sidebar-video-link:hover {
+      color: var(--accent, #2563eb);
+    }
+
+    .sidebar-video-icon {
+      flex-shrink: 0;
+      width: 1.6rem;
+      height: 1.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fee2e2;
+      border-radius: 6px;
+      margin-top: 0.1rem;
+    }
+
+    .sidebar-video-icon svg {
+      width: 12px;
+      height: 12px;
+      color: #dc2626;
+    }
+
+    .sidebar-video-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sidebar-video-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.35;
+      display: block;
+    }
+
+    .sidebar-video-channel {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.1rem;
+    }
+
+    /* Topic links / pills */
+    .topic-links-group {
+      margin-bottom: 0.75rem;
+    }
+
+    .topic-links-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .topic-links-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .topic-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+
+    .topic-pill {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      padding: 0.25em 0.65em;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .topic-pill:hover {
+      background: var(--accent-badge, #dbeafe);
+      color: var(--accent, #2563eb);
+    }
+
+    /* ===== PROGRESS RING ===== */
+    .progress-ring-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .progress-ring-wrapper {
+      position: relative;
+      width: 100px;
+      height: 100px;
+    }
+
+    .progress-ring-svg {
+      transform: rotate(-90deg);
+      width: 100px;
+      height: 100px;
+    }
+
+    .progress-ring-track {
+      fill: none;
+      stroke: var(--border-lighter, #e8e4df);
+      stroke-width: 8;
+    }
+
+    .progress-ring-fill {
+      fill: none;
+      stroke: var(--accent, #2563eb);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .progress-ring-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+
+    .progress-ring-value {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--accent, #2563eb);
+      line-height: 1;
+      display: block;
+    }
+
+    .progress-ring-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+      display: block;
+    }
+
+    /* ===== TIER SECTION BACKGROUNDS ===== */
+    .tier-section.tier-bronze-bg {
+      background: rgba(180, 83, 9, 0.03);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .tier-section.tier-silver-bg {
+      background: rgba(100, 116, 139, 0.03);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .tier-section.tier-gold-bg {
+      background: rgba(217, 119, 6, 0.03);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.5rem;
+    }
+
+    /* ===== TIER COMPLETE BADGE ===== */
+    .tier-complete-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--success);
+      background: var(--success-light);
+      border: 1px solid #bbf7d0;
+      padding: 0.25em 0.7em;
+      border-radius: 999px;
+      margin-left: 0.5rem;
+      animation: tier-complete-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .tier-complete-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    @keyframes tier-complete-pop {
+      0% {
+        opacity: 0;
+        transform: scale(0.6);
+      }
+      60% {
+        transform: scale(1.1);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    /* ===== STREAK COUNTER ===== */
+    .streak-counter {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #ea580c;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      padding: 0.2em 0.65em;
+      border-radius: 999px;
+      animation: streak-pulse 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes streak-pulse {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     /* ===== A. METHOD CARD ===== */
@@ -895,12 +1320,38 @@
     .practice-nav a.nav-next { text-align: right; }
 
     /* ===== RESPONSIVE ===== */
-    @media (max-width: 768px) {
-      .practice-page {
-        padding: 1.25rem 1rem 3rem;
+    @media (max-width: 960px) {
+      .practice-two-col {
+        grid-template-columns: 1fr;
+        gap: 0;
       }
 
-      .practice-header h1 {
+      .practice-sidebar {
+        position: static;
+        max-height: none;
+        overflow-y: visible;
+        margin-bottom: 2rem;
+        /* On mobile, sidebar appears between method card and worked examples */
+        order: 0;
+      }
+
+      .practice-main {
+        order: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .practice-page {
+        padding: 0 1rem 3rem;
+      }
+
+      .practice-banner {
+        margin: 0 -1rem 1.5rem;
+        padding: 1.5rem 1.25rem 1.25rem;
+        border-radius: 0 0 12px 12px;
+      }
+
+      .practice-banner h1 {
         font-size: 1.5rem;
       }
 
@@ -953,11 +1404,16 @@
       .problem-input {
         width: 100%;
       }
+
+      .practice-banner-pills {
+        gap: 0.35rem;
+      }
     }
 
     /* ===== PRINT ===== */
     @media print {
-      .page-header, .score-bar, .check-btn, .step-reveal-btn, .progress-summary { display: none; }
+      .page-header, .score-bar, .check-btn, .step-reveal-btn, .progress-summary, .practice-sidebar, .practice-banner { display: none; }
+      .practice-two-col { grid-template-columns: 1fr; }
       .problem-card { break-inside: avoid; }
     }
   </style>
@@ -1015,8 +1471,8 @@
   <!-- ===== PRACTICE CONTENT (populated by JS) ===== -->
   <div id="practice-page" class="practice-page" style="display: none;">
 
-    <!-- Page Title -->
-    <div class="practice-header">
+    <!-- Hidden legacy header (kept for loader to populate, data read by banner JS) -->
+    <div class="practice-header" style="display:none;">
       <span class="lesson-number" id="lesson-number"></span>
       <h1 id="lesson-title">
         <span class="format-badge">
@@ -1027,143 +1483,266 @@
       <p class="subtitle" id="lesson-subtitle">Learn the method, study the worked examples, then test yourself on graded problems.</p>
     </div>
 
-    <!-- Narration Player -->
-    <!-- Narration removed for maths — practice format doesn't need it -->
+    <!-- ===== COLOURED UNIT BANNER ===== -->
+    <div class="practice-banner" id="practice-banner">
+      <div class="practice-banner-pills">
+        <span class="practice-banner-pill" id="banner-lesson-pill"></span>
+        <span class="practice-banner-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Practice Mode
+        </span>
+      </div>
+      <h1 id="banner-title"></h1>
+      <span class="banner-unit" id="banner-unit"></span>
     </div>
 
-    <!-- ===== A. METHOD CARD (populated by loader) ===== -->
-    <div class="method-card" id="method-card" style="display:none;">
-      <div class="method-card-label">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-        Method Card
-      </div>
-      <h2 id="method-title"></h2>
-      <div id="method-content"></div>
-      <div id="method-steps-container"></div>
-      <div id="method-example-container"></div>
-    </div>
+    <!-- ===== TWO-COLUMN LAYOUT ===== -->
+    <div class="practice-two-col">
 
-    <!-- ===== B. WORKED EXAMPLES (populated by loader) ===== -->
-    <div class="worked-section" id="worked-section" style="display:none;">
-      <div class="section-heading">
-        <div class="section-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-        </div>
-        <h2>Worked Examples</h2>
-      </div>
-      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">Try each step yourself on paper first, then reveal to check your working.</p>
-      <div id="worked-examples-container"></div>
-    </div>
+      <!-- LEFT: Main content -->
+      <div class="practice-main">
 
-    <!-- ===== STICKY SCORE BAR ===== -->
-    <div class="score-bar" id="score-bar" style="display: none;">
-      <div class="score-bar-item">
-        <span class="score-bar-dot dot-total"></span>
-        <span id="score-total">0/0</span>
-      </div>
-      <div class="score-bar-item">
-        <span class="score-bar-dot dot-bronze"></span>
-        <span id="score-bronze">0/0</span>
-      </div>
-      <div class="score-bar-item">
-        <span class="score-bar-dot dot-silver"></span>
-        <span id="score-silver">0/0</span>
-      </div>
-      <div class="score-bar-item">
-        <span class="score-bar-dot dot-gold"></span>
-        <span id="score-gold">0/0</span>
-      </div>
-    </div>
-
-    <!-- ===== C. PRACTICE PROBLEMS (populated by JS from window._problemBank) ===== -->
-    <div class="practice-problems" id="practice-problems" style="display:none;">
-      <div class="section-heading">
-        <div class="section-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
-        <h2>Practice Problems</h2>
-      </div>
-
-      <!-- BRONZE tier -->
-      <div class="tier-section" id="tier-bronze">
-        <div class="tier-header tier-bronze">
-          <div class="tier-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        <!-- ===== A. METHOD CARD (populated by loader) ===== -->
+        <div class="method-card" id="method-card" style="display:none;">
+          <div class="method-card-label">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Method Card
           </div>
-          <h3>Bronze</h3>
-          <span class="tier-score" id="bronze-score">0/0 correct</span>
+          <h2 id="method-title"></h2>
+          <div id="method-content"></div>
+          <div id="method-steps-container"></div>
+          <div id="method-example-container"></div>
         </div>
-        <p class="tier-description" id="bronze-description"></p>
-        <div class="problem-grid" id="bronze-grid"></div>
-      </div>
 
-      <!-- SILVER tier -->
-      <div class="tier-section" id="tier-silver">
-        <div class="tier-header tier-silver">
-          <div class="tier-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        <!-- ===== B. WORKED EXAMPLES (populated by loader) ===== -->
+        <div class="worked-section" id="worked-section" style="display:none;">
+          <div class="section-heading">
+            <div class="section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+            </div>
+            <h2>Worked Examples</h2>
           </div>
-          <h3>Silver</h3>
-          <span class="tier-score" id="silver-score">0/0 correct</span>
+          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">Try each step yourself on paper first, then reveal to check your working.</p>
+          <div id="worked-examples-container"></div>
         </div>
-        <p class="tier-description" id="silver-description"></p>
-        <div class="problem-grid" id="silver-grid"></div>
-      </div>
 
-      <!-- GOLD tier -->
-      <div class="tier-section" id="tier-gold">
-        <div class="tier-header tier-gold">
-          <div class="tier-icon">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+        <!-- ===== STICKY SCORE BAR ===== -->
+        <div class="score-bar" id="score-bar" style="display: none;">
+          <div class="score-bar-item">
+            <span class="score-bar-dot dot-total"></span>
+            <span id="score-total">0/0</span>
           </div>
-          <h3>Gold</h3>
-          <span class="tier-score" id="gold-score">0/0 correct</span>
+          <div class="score-bar-item">
+            <span class="score-bar-dot dot-bronze"></span>
+            <span id="score-bronze">0/0</span>
+          </div>
+          <div class="score-bar-item">
+            <span class="score-bar-dot dot-silver"></span>
+            <span id="score-silver">0/0</span>
+          </div>
+          <div class="score-bar-item">
+            <span class="score-bar-dot dot-gold"></span>
+            <span id="score-gold">0/0</span>
+          </div>
+          <div class="score-bar-item" id="streak-container" style="display:none;">
+            <span class="streak-counter" id="streak-display"></span>
+          </div>
         </div>
-        <p class="tier-description" id="gold-description"></p>
-        <div class="problem-grid" id="gold-grid"></div>
-      </div>
-    </div>
 
-    <!-- ===== D. PROGRESS SUMMARY ===== -->
-    <div class="progress-summary" id="progress-summary">
-      <h2>Your Progress</h2>
-      <div class="progress-overall">
-        <div class="progress-score" id="progress-score-display">0/0</div>
-        <div class="progress-label">problems correct</div>
-      </div>
-      <div class="progress-tiers">
-        <div class="progress-tier tier-bronze">
-          <span class="progress-tier-label">Bronze</span>
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progress-bronze" style="width: 0%"></div>
+        <!-- ===== C. PRACTICE PROBLEMS (populated by JS from window._problemBank) ===== -->
+        <div class="practice-problems" id="practice-problems" style="display:none;">
+          <div class="section-heading">
+            <div class="section-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h2>Practice Problems</h2>
           </div>
-          <span class="progress-tier-count" id="progress-bronze-count">0/0</span>
-        </div>
-        <div class="progress-tier tier-silver">
-          <span class="progress-tier-label">Silver</span>
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progress-silver" style="width: 0%"></div>
-          </div>
-          <span class="progress-tier-count" id="progress-silver-count">0/0</span>
-        </div>
-        <div class="progress-tier tier-gold">
-          <span class="progress-tier-label">Gold</span>
-          <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progress-gold" style="width: 0%"></div>
-          </div>
-          <span class="progress-tier-count" id="progress-gold-count">0/0</span>
-        </div>
-      </div>
-      <div class="progress-message" id="progress-message">
-        Answer your first problem to get started.
-      </div>
-    </div>
 
-    <!-- Prev/Next Navigation -->
-    <nav class="practice-nav" id="practice-nav"></nav>
+          <!-- BRONZE tier -->
+          <div class="tier-section tier-bronze-bg" id="tier-bronze">
+            <div class="tier-header tier-bronze">
+              <div class="tier-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              </div>
+              <h3>Bronze</h3>
+              <span class="tier-score" id="bronze-score">0/0 correct</span>
+            </div>
+            <p class="tier-description" id="bronze-description"></p>
+            <div class="problem-grid" id="bronze-grid"></div>
+          </div>
 
-    <!-- Back to unit -->
-    <a href="#" class="back-link" id="back-link">&larr; Back to unit</a>
+          <!-- SILVER tier -->
+          <div class="tier-section tier-silver-bg" id="tier-silver">
+            <div class="tier-header tier-silver">
+              <div class="tier-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              </div>
+              <h3>Silver</h3>
+              <span class="tier-score" id="silver-score">0/0 correct</span>
+            </div>
+            <p class="tier-description" id="silver-description"></p>
+            <div class="problem-grid" id="silver-grid"></div>
+          </div>
+
+          <!-- GOLD tier -->
+          <div class="tier-section tier-gold-bg" id="tier-gold">
+            <div class="tier-header tier-gold">
+              <div class="tier-icon">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+              </div>
+              <h3>Gold</h3>
+              <span class="tier-score" id="gold-score">0/0 correct</span>
+            </div>
+            <p class="tier-description" id="gold-description"></p>
+            <div class="problem-grid" id="gold-grid"></div>
+          </div>
+        </div>
+
+        <!-- ===== D. PROGRESS SUMMARY (with ring) ===== -->
+        <div class="progress-summary" id="progress-summary">
+          <h2>Your Progress</h2>
+
+          <!-- Progress Ring -->
+          <div class="progress-ring-container">
+            <div class="progress-ring-wrapper">
+              <svg class="progress-ring-svg" viewBox="0 0 100 100">
+                <circle class="progress-ring-track" cx="50" cy="50" r="42"/>
+                <circle class="progress-ring-fill" id="progress-ring-circle" cx="50" cy="50" r="42"
+                  stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+              </svg>
+              <div class="progress-ring-text">
+                <span class="progress-ring-value" id="progress-ring-value">0%</span>
+                <span class="progress-ring-label">complete</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-overall">
+            <div class="progress-score" id="progress-score-display">0/0</div>
+            <div class="progress-label">problems correct</div>
+          </div>
+          <div class="progress-tiers">
+            <div class="progress-tier tier-bronze">
+              <span class="progress-tier-label">Bronze</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progress-bronze" style="width: 0%"></div>
+              </div>
+              <span class="progress-tier-count" id="progress-bronze-count">0/0</span>
+            </div>
+            <div class="progress-tier tier-silver">
+              <span class="progress-tier-label">Silver</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progress-silver" style="width: 0%"></div>
+              </div>
+              <span class="progress-tier-count" id="progress-silver-count">0/0</span>
+            </div>
+            <div class="progress-tier tier-gold">
+              <span class="progress-tier-label">Gold</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" id="progress-gold" style="width: 0%"></div>
+              </div>
+              <span class="progress-tier-count" id="progress-gold-count">0/0</span>
+            </div>
+          </div>
+          <div class="progress-message" id="progress-message">
+            Answer your first problem to get started.
+          </div>
+        </div>
+
+        <!-- Prev/Next Navigation -->
+        <nav class="practice-nav" id="practice-nav"></nav>
+
+        <!-- Back to unit -->
+        <a href="#" class="back-link" id="back-link">&larr; Back to unit</a>
+
+      </div><!-- /.practice-main -->
+
+      <!-- RIGHT: Sidebar -->
+      <aside class="practice-sidebar" id="practice-sidebar">
+
+        <!-- 1. Quick Reference (sticky method steps) -->
+        <div class="practice-sidebar-section sidebar-quick-ref" id="sidebar-quick-ref" style="display:none;">
+          <div class="practice-sidebar-title">Quick Reference</div>
+          <ol id="sidebar-method-steps"></ol>
+        </div>
+
+        <!-- 2. Exam Context -->
+        <div class="practice-sidebar-section" id="sidebar-exam-context">
+          <div class="practice-sidebar-title">Exam Context</div>
+          <div class="exam-context-item">
+            <span class="exam-context-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </span>
+            <span id="exam-context-paper">Paper 1 &amp; 2 (Calculator &amp; Non-Calculator)</span>
+          </div>
+          <div class="exam-context-item">
+            <span class="exam-context-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </span>
+            <span id="exam-context-marks">Typically 4-6 marks</span>
+          </div>
+          <div class="exam-context-item">
+            <span class="exam-context-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            </span>
+            <span id="exam-context-frequency">Appears almost every year</span>
+          </div>
+        </div>
+
+        <!-- 3. Related Videos -->
+        <div class="practice-sidebar-section" id="sidebar-related-videos">
+          <div class="practice-sidebar-title">Related Videos</div>
+          <a href="https://www.youtube.com/watch?v=gIwMiSJfVAM" target="_blank" rel="noopener" class="sidebar-video-link">
+            <span class="sidebar-video-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </span>
+            <span class="sidebar-video-info">
+              <span class="sidebar-video-name">Solving Quadratics by Factorising</span>
+              <span class="sidebar-video-channel">Corbett Maths</span>
+            </span>
+          </a>
+          <a href="https://www.youtube.com/watch?v=dOxFHq4anDQ" target="_blank" rel="noopener" class="sidebar-video-link">
+            <span class="sidebar-video-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </span>
+            <span class="sidebar-video-info">
+              <span class="sidebar-video-name">Factorising Quadratics</span>
+              <span class="sidebar-video-channel">MathsGenie</span>
+            </span>
+          </a>
+          <a href="https://www.youtube.com/watch?v=xPJ9dpj0MdA" target="_blank" rel="noopener" class="sidebar-video-link">
+            <span class="sidebar-video-icon">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </span>
+            <span class="sidebar-video-info">
+              <span class="sidebar-video-name">GCSE Maths - Quadratic Equations</span>
+              <span class="sidebar-video-channel">Cognito</span>
+            </span>
+          </a>
+        </div>
+
+        <!-- 4. Topic Links -->
+        <div class="practice-sidebar-section" id="sidebar-topic-links">
+          <div class="practice-sidebar-title">Topic Links</div>
+          <div class="topic-links-group">
+            <div class="topic-links-label">Before this topic</div>
+            <div class="topic-pills">
+              <a href="#" class="topic-pill">Expanding Brackets</a>
+              <a href="#" class="topic-pill">Factorising</a>
+            </div>
+          </div>
+          <div class="topic-links-group">
+            <div class="topic-links-label">After this topic</div>
+            <div class="topic-pills">
+              <a href="#" class="topic-pill">Quadratic Formula</a>
+              <a href="#" class="topic-pill">Simultaneous Equations</a>
+            </div>
+          </div>
+        </div>
+
+      </aside><!-- /.practice-sidebar -->
+
+    </div><!-- /.practice-two-col -->
 
   </div><!-- /#practice-page -->
 
@@ -1189,7 +1768,9 @@
       bronze: { correct: 0, attempted: 0 },
       silver: { correct: 0, attempted: 0 },
       gold: { correct: 0, attempted: 0 },
-      answered: {}
+      answered: {},
+      streak: 0,
+      tierComplete: { bronze: false, silver: false, gold: false }
     };
 
     // ===== RENDER PROBLEMS =====
@@ -1349,12 +1930,14 @@
 
       if (isCorrect) {
         practiceState[tier].correct++;
+        practiceState.streak++;
         card.classList.add('correct');
         inputA.classList.add('input-correct');
         inputB.classList.add('input-correct');
         feedback.className = 'problem-feedback visible feedback-correct';
         feedback.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Correct';
       } else {
+        practiceState.streak = 0;
         card.classList.add('incorrect');
         inputA.classList.add('input-incorrect');
         inputB.classList.add('input-incorrect');
@@ -1421,6 +2004,51 @@
       document.getElementById('progress-silver-count').textContent = s + '/' + sCount;
       document.getElementById('progress-gold-count').textContent = g + '/' + gCount;
       document.getElementById('progress-score-display').textContent = total + '/' + totalCount;
+
+      // Progress ring
+      var ringCircle = document.getElementById('progress-ring-circle');
+      var ringValue = document.getElementById('progress-ring-value');
+      if (ringCircle && ringValue) {
+        var circumference = 2 * Math.PI * 42; // ~263.9
+        var pct = attempted > 0 ? (total / totalCount) : 0;
+        ringCircle.setAttribute('stroke-dashoffset', circumference * (1 - pct));
+        ringValue.textContent = Math.round(pct * 100) + '%';
+      }
+
+      // Streak counter
+      var streakContainer = document.getElementById('streak-container');
+      var streakDisplay = document.getElementById('streak-display');
+      if (streakContainer && streakDisplay) {
+        if (practiceState.streak >= 3) {
+          streakDisplay.innerHTML = '\uD83D\uDD25 ' + practiceState.streak + ' streak';
+          streakContainer.style.display = '';
+          // Re-trigger animation
+          streakDisplay.style.animation = 'none';
+          streakDisplay.offsetHeight; // force reflow
+          streakDisplay.style.animation = '';
+        } else {
+          streakContainer.style.display = 'none';
+        }
+      }
+
+      // Tier completion badges
+      var tierNames = ['bronze', 'silver', 'gold'];
+      var tierCounts = { bronze: bCount, silver: sCount, gold: gCount };
+      for (var ti = 0; ti < tierNames.length; ti++) {
+        var tn = tierNames[ti];
+        var tierCorrect = practiceState[tn].correct;
+        var tierTotal = tierCounts[tn];
+        if (tierTotal > 0 && tierCorrect === tierTotal && !practiceState.tierComplete[tn]) {
+          practiceState.tierComplete[tn] = true;
+          var tierHeader = document.querySelector('#tier-' + tn + ' .tier-header');
+          if (tierHeader && !tierHeader.querySelector('.tier-complete-badge')) {
+            var badge = document.createElement('span');
+            badge.className = 'tier-complete-badge';
+            badge.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Tier Complete!';
+            tierHeader.appendChild(badge);
+          }
+        }
+      }
 
       // Message
       var msgEl = document.getElementById('progress-message');
