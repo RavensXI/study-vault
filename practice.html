@@ -2640,17 +2640,10 @@
       var overlay = document.getElementById('method-modal-overlay');
       overlay.classList.add('dismissing');
       setTimeout(function() {
+        overlay.style.display = 'none';
         overlay.classList.remove('active', 'dismissing');
-        // Flash the sidebar method card to draw attention
-        var panelMethod = document.getElementById('panel-method');
-        if (panelMethod && panelMethod.style.display !== 'none') {
-          panelMethod.classList.add('flash-highlight');
-          panelMethod.addEventListener('animationend', function() {
-            panelMethod.classList.remove('flash-highlight');
-          }, { once: true });
-        }
         if (callback) callback();
-      }, 280);
+      }, 300);
     }
 
     // ===== MODE PROMPT =====
@@ -2800,8 +2793,8 @@
     function showTutorialTooltips() {
       var tooltipSteps = [
         { targetId: 'panel-method', text: 'Refer back to the method card if you get stuck.', btnText: 'Next', preferSide: 'right' },
-        { targetId: 'panel-topic-links', text: 'If this topic is too hard, try these first.', btnText: 'Next', preferSide: 'right' },
-        { targetId: 'panel-related-videos', text: 'Watch video tutorials for extra help.', btnText: 'Got it', preferSide: 'right' }
+        { targetId: 'panel-related-videos', text: 'Watch video tutorials for extra help.', btnText: 'Next', preferSide: 'right' },
+        { targetId: 'panel-topic-links', text: 'Struggling? These topics might help.', btnText: 'Got it', preferSide: 'right' }
       ];
 
       var currentStep = 0;

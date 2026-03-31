@@ -176,11 +176,14 @@
     // Lesson number + unit pill in header
     var headerUnitLabel = document.getElementById('header-unit-label');
     if (headerUnitLabel) {
-      headerUnitLabel.className = 'header-lesson-pill';
-      headerUnitLabel.textContent = 'L' + lesson.lesson_number + ' \u00b7 ' + unit.name;
+      headerUnitLabel.textContent = unit.name;
       if (unit.accent) {
         headerUnitLabel.style.color = unit.accent;
-        headerUnitLabel.style.background = unit.accent_light || '';
+        headerUnitLabel.style.background = unit.accent_badge || '';
+        headerUnitLabel.style.padding = '0.15rem 0.6rem';
+        headerUnitLabel.style.borderRadius = '6px';
+        headerUnitLabel.style.fontSize = '0.75rem';
+        headerUnitLabel.style.fontWeight = '600';
       }
     }
 
@@ -215,7 +218,7 @@
 
     // Legacy hidden elements (for compatibility)
     var lessonNumberEl = document.getElementById('lesson-number');
-    if (lessonNumberEl) lessonNumberEl.textContent = unit.name + ' \u2014 Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
+    if (lessonNumberEl) lessonNumberEl.textContent = 'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
 
     var titleEl = document.getElementById('lesson-title');
     if (titleEl) {
