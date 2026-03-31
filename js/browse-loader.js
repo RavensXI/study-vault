@@ -91,6 +91,20 @@
 
     var units = unitsResult.data || [];
 
+    // Tier filtering for subject overview — get actual filtered counts per unit
+    var TIERED_OVERVIEW = ['maths', 'science', 'separate-sciences'];
+    var savedTiersOverview = {};
+    try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
+    var overviewTier = savedTiersOverview[subjectSlug] || 'higher';
+    if (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation') {
+      // Fetch filtered lesson counts per unit
+      for (var i = 0; i < units.length; i++) {
+        var countResult = await sb.from('lessons').select('id', { count: 'exact', head: true })
+          .eq('unit_id', units[i].id).eq('status', 'live').neq('tier', 'higher');
+        units[i]._filteredCount = countResult.count || 0;
+      }
+    }
+
     // Free user English Lit: filter to only selected texts + compulsory units
     if (subjectSlug.indexOf('english-literature') === 0 && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeSubj = FreeUser.getSubject(subjectSlug);
@@ -125,7 +139,12 @@
     var html = '';
 
     // Hero
-    html += '<section class="hero"><h1>' + esc(subject.name) + '</h1></section>';
+    html += '<section class="hero"><h1>' + esc(subject.name) + '</h1>';
+    if (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1) {
+      var tierBadgeLabel = overviewTier === 'foundation' ? 'Foundation' : 'Higher';
+      html += '<p style="font-family:Inter,sans-serif;font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin:0.5rem 0 0;letter-spacing:0.03em">' + tierBadgeLabel + ' tier</p>';
+    }
+    html += '</section>';
 
     // Quote ticker — between title and unit cards
     if (subject.settings && subject.settings.quote_ticker_html) {
@@ -139,7 +158,8 @@
     var imgPositions = (subject.settings && subject.settings.unit_image_positions) || {};
 
     units.forEach(function (unit) {
-      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unit.lesson_count + '" style="--card-accent: ' + unit.accent + ';">';
+      var unitLessonCount = unit._filteredCount != null ? unit._filteredCount : unit.lesson_count;
+      html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unitLessonCount + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
         var imgStyle = imgPositions[unit.slug] ? ' style="object-position: ' + imgPositions[unit.slug] + '"' : '';
@@ -151,7 +171,7 @@
       if (unit.subtitle) {
         html += '<p class="unit-subtitle">' + esc(unit.subtitle) + '</p>';
       }
-      html += '<span class="unit-meta">0 of ' + unit.lesson_count + ' lessons visited</span>';
+      html += '<span class="unit-meta">0 of ' + unitLessonCount + ' lessons visited</span>';
       html += '<div class="progress-bar-track"><div class="progress-bar-fill"></div></div>';
       html += '</div></a>';
     });
