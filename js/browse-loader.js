@@ -195,12 +195,20 @@
 
     var lessonsResult = await sb
       .from('lessons')
-      .select('id, lesson_number, slug, title, description, status')
+      .select('id, lesson_number, slug, title, description, status, tier')
       .eq('unit_id', unit.id)
       .eq('status', 'live')
       .order('lesson_number');
 
     var lessons = lessonsResult.data || [];
+
+    // Filter by tier if student has a Foundation preference for this subject
+    var savedTiers = {};
+    try { savedTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
+    var subjectTier = savedTiers[subjectSlug] || 'higher';
+    if (subjectTier === 'foundation') {
+      lessons = lessons.filter(function(l) { return l.tier !== 'higher'; });
+    }
 
     document.title = unit.name + ' - StudyVault';
     if (unit.body_class) document.body.classList.add(unit.body_class);
@@ -226,11 +234,20 @@
     if (unit.subtitle) {
       html += '<p>' + esc(unit.subtitle) + '</p>';
     }
+    // Tier indicator for tiered subjects
+    var TIERED = ['maths', 'science', 'separate-sciences'];
+    if (TIERED.indexOf(subjectSlug) !== -1) {
+      var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
+      html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';
+      html += '<span style="font-family:Inter,sans-serif;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.15);padding:0.25rem 0.75rem;border-radius:6px;display:inline-block">';
+      html += tierLabel + ' tier</span></div>';
+    }
     html += '</div></div>';
 
-    // Progress bar
+    // Progress bar — use filtered count so Foundation students see correct total
+    var displayCount = lessons.length;
     html += '<div class="unit-progress">';
-    html += '<div class="unit-progress-label">0 of ' + unit.lesson_count + ' lessons visited</div>';
+    html += '<div class="unit-progress-label">0 of ' + displayCount + ' lessons visited</div>';
     html += '<div class="progress-bar-track"><div class="progress-bar-fill"></div></div>';
     html += '</div>';
 

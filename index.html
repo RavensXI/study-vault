@@ -66,6 +66,16 @@
     .picker-done:active { transform: scale(0.97); }
     .picker-done:disabled { opacity: 0.35; cursor: not-allowed; }
     .picker-disclaimer { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.75rem; line-height: 1.5; }
+    /* Tier selection step */
+    .picker-tier-step { padding: 1.5rem 2rem 1rem; }
+    .picker-tier-list { display: flex; flex-direction: column; gap: 1rem; padding: 1rem 0; }
+    .picker-tier-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: var(--bg-body); border-radius: 12px; }
+    .picker-tier-name { font-family: 'Source Serif 4', Georgia, serif; font-weight: 700; font-size: 0.95rem; flex: 1; }
+    .picker-tier-toggle { display: flex; position: relative; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 8px; overflow: hidden; }
+    .picker-tier-btn { position: relative; z-index: 1; padding: 0.4rem 1rem; border: none; background: transparent; color: var(--text-secondary); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: color 0.25s; }
+    .picker-tier-btn.active { color: #fff; }
+    .picker-tier-indicator { position: absolute; top: 2px; left: 2px; height: calc(100% - 4px); width: calc(50% - 2px); background: var(--text-primary); border-radius: 6px; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+    .picker-tier-toggle[data-tier="foundation"] .picker-tier-indicator { transform: translateX(100%); }
 
     @media (max-width: 700px) {
       .picker-grid { grid-template-columns: repeat(3, 1fr); }
@@ -558,6 +568,18 @@
       <div class="picker-footer">
         <button class="picker-done" id="picker-done" disabled>Done</button>
         <p class="picker-disclaimer">Your choices are saved in this browser. Clearing your browsing data will reset this, and you'll be asked to pick again.</p>
+      </div>
+
+      <!-- Tier selection step (shown after subject pick for tiered subjects) -->
+      <div class="picker-tier-step" id="picker-tier-step" style="display:none">
+        <div class="picker-header">
+          <h2>Foundation or Higher?</h2>
+          <p>For each subject below, tell us which tier you&rsquo;re studying. This controls which lessons you see.</p>
+        </div>
+        <div class="picker-tier-list" id="picker-tier-list"></div>
+        <div class="picker-footer">
+          <button class="picker-done" id="picker-tier-done">Save &amp; Go</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1200,6 +1222,13 @@
       updateDoneBtn();
     });
 
+    // Subjects that have Foundation/Higher tiers
+    var TIERED_SUBJECTS = ['maths', 'science', 'separate-sciences'];
+    var TIERED_LABELS = { 'maths': 'Mathematics', 'science': 'Combined Science', 'separate-sciences': 'Triple Science' };
+    var tierStepEl = document.getElementById('picker-tier-step');
+    var tierListEl = document.getElementById('picker-tier-list');
+    var tierDoneBtn = document.getElementById('picker-tier-done');
+
     // Done button
     doneBtn.addEventListener('click', function() {
       var selected = [];
@@ -1211,10 +1240,72 @@
         if (selected.indexOf(slug) === -1) selected.push(slug);
       });
       if (selected.length === 0) return;
-      save(selected);
-      closePicker();
-      renderPersonalised(selected);
+
+      // Check if any tiered subjects are selected
+      var tieredPicks = selected.filter(function(s) { return TIERED_SUBJECTS.indexOf(s) !== -1; });
+      if (tieredPicks.length > 0) {
+        // Show tier selection step
+        showTierStep(selected, tieredPicks);
+      } else {
+        // No tiered subjects — save and close immediately
+        save(selected);
+        closePicker();
+        renderPersonalised(selected);
+      }
     });
+
+    function showTierStep(allSelected, tieredPicks) {
+      pickerGrid.style.display = 'none';
+      document.querySelector('.picker-grid + .picker-footer').style.display = 'none';
+      document.querySelector('.picker-header').style.display = 'none';
+      tierStepEl.style.display = '';
+
+      var savedTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
+      var html = '';
+      tieredPicks.forEach(function(slug) {
+        var label = TIERED_LABELS[slug] || slug;
+        var current = savedTiers[slug] || 'higher';
+        html += '<div class="picker-tier-row">';
+        html += '<span class="picker-tier-name">' + label + '</span>';
+        html += '<div class="picker-tier-toggle" data-subject="' + slug + '" data-tier="' + current + '">';
+        html += '<button class="picker-tier-btn' + (current === 'higher' ? ' active' : '') + '" data-t="higher">Higher</button>';
+        html += '<button class="picker-tier-btn' + (current === 'foundation' ? ' active' : '') + '" data-t="foundation">Foundation</button>';
+        html += '<div class="picker-tier-indicator"></div>';
+        html += '</div></div>';
+      });
+      tierListEl.innerHTML = html;
+
+      // Toggle clicks
+      tierListEl.querySelectorAll('.picker-tier-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          var toggle = btn.closest('.picker-tier-toggle');
+          var tier = btn.dataset.t;
+          toggle.dataset.tier = tier;
+          toggle.querySelectorAll('.picker-tier-btn').forEach(function(b) {
+            b.classList.toggle('active', b.dataset.t === tier);
+          });
+        });
+      });
+
+      // Save & Go
+      tierDoneBtn.onclick = function() {
+        var tiers = {};
+        tierListEl.querySelectorAll('.picker-tier-toggle').forEach(function(toggle) {
+          tiers[toggle.dataset.subject] = toggle.dataset.tier;
+        });
+        localStorage.setItem('studyvault-tiers', JSON.stringify(tiers));
+        save(allSelected);
+
+        // Reset picker UI state for next open
+        pickerGrid.style.display = '';
+        document.querySelector('.picker-grid + .picker-footer').style.display = '';
+        document.querySelector('.picker-header').style.display = '';
+        tierStepEl.style.display = 'none';
+
+        closePicker();
+        renderPersonalised(allSelected);
+      };
+    }
 
     // Close on overlay click (not modal)
     overlay.addEventListener('click', function(e) {
