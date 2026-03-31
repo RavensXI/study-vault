@@ -1469,24 +1469,16 @@
           </div>
         </div>
 
-        <!-- Topic Links -->
+        <!-- Prerequisite Topics -->
         <div class="panel-section" id="panel-topic-links">
           <div class="panel-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Topic Links
+            Struggling? Revise these first
           </div>
           <div class="topic-links-group">
-            <div class="topic-links-label">Before this topic</div>
             <div class="topic-pills">
               <a href="#" class="topic-pill">Expanding Brackets</a>
               <a href="#" class="topic-pill">Factorising</a>
-            </div>
-          </div>
-          <div class="topic-links-group">
-            <div class="topic-links-label">After this topic</div>
-            <div class="topic-pills">
-              <a href="#" class="topic-pill">Quadratic Formula</a>
-              <a href="#" class="topic-pill">Simultaneous Equations</a>
             </div>
           </div>
         </div>
@@ -1640,9 +1632,9 @@
       // Practice state
       currentTier: 'bronze',             // current tier
       currentIndex: 0,                   // index within current tier
-      bronze: { correct: 0, attempted: 0 },
-      silver: { correct: 0, attempted: 0 },
-      gold: { correct: 0, attempted: 0 },
+      bronze: { correct: 0, attempted: 0, streak: 0 },
+      silver: { correct: 0, attempted: 0, streak: 0 },
+      gold: { correct: 0, attempted: 0, streak: 0 },
       streak: 0,
       answered: false,                   // is current problem answered?
       allDone: false,
@@ -1917,6 +1909,7 @@
 
       if (isCorrect) {
         practiceState[tier].correct++;
+        practiceState[tier].streak++;
         practiceState.streak++;
         card.classList.add('card-correct');
         inputA.classList.add('input-correct');
@@ -1931,6 +1924,7 @@
             '</div>' +
           '</div>';
       } else {
+        practiceState[tier].streak = 0;
         practiceState.streak = 0;
         card.classList.add('card-incorrect');
         inputA.classList.add('input-incorrect');
@@ -1966,15 +1960,25 @@
     }
 
     // ===== NEXT PROBLEM =====
+    function isTierPassed(tier) {
+      var t = practiceState[tier];
+      var counts = getTierCounts();
+      var total = counts[tier];
+      // Pass condition: 4 correct in a row OR 75% correct (minimum 3 attempted)
+      if (t.streak >= 4) return true;
+      if (t.attempted >= 3 && (t.correct / t.attempted) >= 0.75) return true;
+      // Also pass if all problems done
+      if (t.attempted >= total) return true;
+      return false;
+    }
+
     function nextProblem() {
       var tier = practiceState.currentTier;
       var counts = getTierCounts();
       var tierTotal = counts[tier];
-      var tierAttempted = practiceState[tier].attempted;
 
-      // Check if tier just completed
-      if (tierAttempted >= tierTotal) {
-        // Show celebration, then advance
+      // Check if tier is passed (4 in a row, 75%, or all done)
+      if (isTierPassed(tier)) {
         showTierCelebration(tier, function() {
           if (tier === 'bronze') {
             practiceState.currentTier = 'silver';
@@ -1989,6 +1993,10 @@
           }
           animateToNextProblem();
         });
+      } else if (practiceState.currentIndex + 1 >= tierTotal) {
+        // Ran out of problems without passing — show summary anyway
+        practiceState.allDone = true;
+        showSummary();
       } else {
         practiceState.currentIndex++;
         animateToNextProblem();

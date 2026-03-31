@@ -198,10 +198,7 @@
         panelSteps.innerHTML = '';
         for (var si = 0; si < mc.steps.length; si++) {
           var li = document.createElement('li');
-          // Strip HTML for compact panel view
-          var tempDiv = document.createElement('div');
-          tempDiv.innerHTML = mc.steps[si];
-          li.textContent = tempDiv.textContent;
+          li.innerHTML = mc.steps[si];
           panelSteps.appendChild(li);
         }
       }
