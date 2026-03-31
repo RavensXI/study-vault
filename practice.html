@@ -678,10 +678,24 @@
 
     .correct-answer-reveal {
       font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
+      font-size: 0.82rem;
       color: var(--text-secondary);
-      margin-top: 0.35rem;
+      margin-top: 0.5rem;
       animation: step-fade-in 0.3s ease forwards;
+    }
+
+    .misconception-tip {
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      padding: 0.6rem 0.85rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 0.4rem;
+      line-height: 1.55;
+      color: var(--text-primary);
+    }
+
+    .misconception-tip strong {
+      color: #b45309;
     }
 
     /* ===== D. PROGRESS SUMMARY ===== */
@@ -1381,6 +1395,80 @@
       });
     }
 
+    // ===== MISCONCEPTION DETECTION =====
+    function detectMisconception(given, expected, problem) {
+      const g = given.slice().sort((a, b) => a - b);
+      const e = expected.slice().sort((a, b) => a - b);
+
+      // Sign swap — student gave the negated solutions (forgot signs flip when solving brackets)
+      const negated = [-e[1], -e[0]].sort((a, b) => a - b);
+      if (g[0] === negated[0] && g[1] === negated[1]) {
+        return {
+          type: 'sign-swap',
+          message: 'You found the right numbers for the brackets, but the signs flip when you solve. ' +
+            'If the bracket is \\((x + 5)\\), setting it to zero gives \\(x = -5\\), not \\(x = 5\\). ' +
+            'The sign always reverses.'
+        };
+      }
+
+      // Only one correct — student got one right and one wrong
+      if (g.indexOf(e[0]) !== -1 || g.indexOf(e[1]) !== -1) {
+        const correct = g.indexOf(e[0]) !== -1 ? e[0] : e[1];
+        const wrong = g[0] === correct ? g[1] : g[0];
+        return {
+          type: 'one-correct',
+          message: 'You got \\(x = ' + correct + '\\) right, but the other solution is wrong. ' +
+            'Check your factor pair — both numbers must multiply to give the constant AND add to give the coefficient of \\(x\\).'
+        };
+      }
+
+      // Swapped signs on one — got one right, negated the other
+      if ((g[0] === e[0] && g[1] === -e[1]) || (g[1] === e[1] && g[0] === -e[0]) ||
+          (g[0] === -e[0] && g[1] === e[1]) || (g[0] === e[1] && g[1] === -e[0])) {
+        return {
+          type: 'partial-sign',
+          message: 'One of your solutions has the wrong sign. Remember: if the bracket is \\((x - 3)\\), ' +
+            'then \\(x - 3 = 0\\) gives \\(x = +3\\) (positive). The sign in the solution is opposite to the sign in the bracket.'
+        };
+      }
+
+      // Same value twice
+      if (g[0] === g[1]) {
+        return {
+          type: 'repeated',
+          message: 'You gave the same value twice. Quadratic equations usually have two different solutions — ' +
+            'check that you found two different factor pairs.'
+        };
+      }
+
+      // Gave the factors of c instead of the solutions (e.g. for x²+5x+6, gave 2,3 instead of -2,-3)
+      // This is similar to sign-swap but specifically for all-positive-bracket cases
+      if (g[0] > 0 && g[1] > 0 && e[0] < 0 && e[1] < 0) {
+        return {
+          type: 'factors-not-solutions',
+          message: 'It looks like you gave the factor pair rather than the solutions. ' +
+            'The factors go inside the brackets, but to find \\(x\\) you set each bracket equal to zero — ' +
+            'which flips the signs. If the factors are 2 and 3, the solutions are \\(x = -2\\) and \\(x = -3\\).'
+        };
+      }
+
+      // Forgot to rearrange (Gold tier — gave solutions to the un-rearranged equation)
+      if (problem.hint && problem.hint.indexOf('Rearrange') !== -1) {
+        return {
+          type: 'not-rearranged',
+          message: 'Did you rearrange to get everything on one side first? ' +
+            'You need \\(= 0\\) on the right before you can factorise. Move all terms to one side, then find the factor pair.'
+        };
+      }
+
+      // Default — no specific pattern matched
+      return {
+        type: 'unknown',
+        message: 'Check your working. Find two numbers that multiply to give the constant term and add to give the coefficient of \\(x\\), ' +
+          'then set each bracket equal to zero to find the solutions.'
+      };
+    }
+
     // ===== CHECK ANSWER =====
     function checkAnswer(tier, index) {
       const id = `${tier}-${index}`;
@@ -1392,7 +1480,6 @@
       const valB = parseFloat(inputB.value.trim());
 
       if (isNaN(valA) || isNaN(valB)) {
-        // Shake the inputs briefly
         [inputA, inputB].forEach(inp => {
           if (isNaN(parseFloat(inp.value.trim()))) {
             inp.style.borderColor = 'var(--error)';
@@ -1431,8 +1518,27 @@
         inputB.classList.add('input-incorrect');
         feedback.className = 'problem-feedback visible feedback-incorrect';
         feedback.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Not quite';
+
         const sols = problems[tier][index].solutions;
-        reveal.innerHTML = `<div class="correct-answer-reveal">Correct answer: x = ${sols[0]} or x = ${sols[1]}</div>`;
+        const misconception = detectMisconception([valA, valB], sols, problems[tier][index]);
+
+        reveal.innerHTML = '<div class="correct-answer-reveal">' +
+          '<div class="misconception-tip">' +
+            '<strong>What went wrong:</strong> ' + misconception.message +
+          '</div>' +
+          '<div style="margin-top:0.5rem;font-weight:600;">Correct answer: x = ' + sols[0] + ' or x = ' + sols[1] + '</div>' +
+        '</div>';
+
+        // Render KaTeX in the misconception message
+        if (typeof renderMathInElement === 'function') {
+          renderMathInElement(reveal, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\(', right: '\\)', display: false },
+            ],
+            throwOnError: false,
+          });
+        }
       }
 
       updateProgress();
