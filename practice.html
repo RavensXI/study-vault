@@ -16,11 +16,11 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ============================================
-       Practice Page — Maths-First Format
+       Practice Page — Horizontal Single-Problem Layout
        ============================================ */
 
     /* Override page transition for standalone */
-    body { opacity: 1; animation: none; }
+    body { opacity: 1; animation: none; margin: 0; }
 
     /* Practice tier colours */
     :root {
@@ -37,475 +37,118 @@
       --success-light: #f0fdf4;
       --error: #dc2626;
       --error-light: #fef2f2;
+      --practice-ease: cubic-bezier(0.16, 1, 0.3, 1);
+      --panel-bg: #f5f2ed;
+      --panel-width: 300px;
     }
 
-    /* Practice page layout — two-column */
-    .practice-page {
-      max-width: 1160px;
-      margin: 0 auto;
-      padding: 0 1.5rem 4rem;
-    }
-
-    .practice-two-col {
-      display: grid;
-      grid-template-columns: 1fr 280px;
-      gap: 2.5rem;
-      align-items: start;
-    }
-
-    .practice-main {
-      min-width: 0;
-    }
-
-    /* ===== COLOURED UNIT HEADER BANNER ===== */
-    .practice-banner {
-      background: var(--accent, #2563eb);
-      padding: 2rem 2.5rem 1.75rem;
-      border-radius: 0 0 var(--radius) var(--radius);
-      margin: 0 -1.5rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .practice-banner::after {
-      content: '';
-      position: absolute;
+    /* ===== TOP BAR ===== */
+    .practice-topbar {
+      position: fixed;
       top: 0;
+      left: 0;
       right: 0;
-      bottom: 0;
-      width: 40%;
-      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.06) 100%);
-      pointer-events: none;
-    }
-
-    .practice-banner-pills {
+      z-index: 900;
+      height: 52px;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
-      flex-wrap: wrap;
+      padding: 0 1.5rem;
+      border-bottom: 2px solid var(--accent, #2563eb);
     }
 
-    .practice-banner-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.3rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: #fff;
-      background: rgba(255,255,255,0.18);
-      padding: 0.3em 0.75em;
-      border-radius: 999px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .practice-banner-pill svg {
-      width: 11px;
-      height: 11px;
-    }
-
-    .practice-banner h1 {
-      font-size: 2rem;
-      line-height: 1.2;
-      color: #fff;
-      margin-bottom: 0.35rem;
-    }
-
-    .practice-banner .banner-unit {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      font-weight: 500;
-      color: rgba(255,255,255,0.75);
-    }
-
-    /* Legacy header (hidden, kept for loader compat) */
-    .practice-header {
-      display: none;
-    }
-
-    .practice-header .lesson-number {
-      display: inline-block;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--accent, #2563eb);
-      background: var(--accent-badge, #dbeafe);
-      padding: 0.3em 0.85em;
-      border-radius: 999px;
-      margin-bottom: 0.75rem;
-      letter-spacing: 0.03em;
-      text-transform: uppercase;
-    }
-
-    .practice-header h1 {
-      font-size: 2rem;
-      line-height: 1.2;
-      margin-bottom: 0.4rem;
-    }
-
-    .practice-header .subtitle {
-      font-size: 0.95rem;
-      color: var(--text-secondary);
-      margin-bottom: 0;
-    }
-
-    /* Format badge */
-    .format-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--accent, #2563eb);
-      background: var(--accent-light, #eff6ff);
-      border: 1px solid var(--accent-badge, #dbeafe);
-      padding: 0.3em 0.75em;
-      border-radius: 999px;
-      margin-left: 0.5rem;
-      vertical-align: middle;
-    }
-    .format-badge svg {
-      width: 12px;
-      height: 12px;
-    }
-
-    /* ===== SIDEBAR ===== */
-    .practice-sidebar {
-      position: sticky;
-      top: 5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      max-height: calc(100vh - 6rem);
-      overflow-y: auto;
-      scrollbar-width: thin;
-      scrollbar-color: transparent transparent;
-      transition: scrollbar-color 0.3s;
-    }
-    .practice-sidebar:hover {
-      scrollbar-color: var(--accent) transparent;
-    }
-    .practice-sidebar::-webkit-scrollbar { width: 4px; }
-    .practice-sidebar::-webkit-scrollbar-track { background: transparent; }
-    .practice-sidebar::-webkit-scrollbar-thumb {
-      background: transparent;
-      border-radius: 2px;
-    }
-    .practice-sidebar:hover::-webkit-scrollbar-thumb { background: var(--accent); }
-
-    .practice-sidebar-section {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      padding: 1.15rem;
-      overflow: hidden;
-    }
-
-    .practice-sidebar-title {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--text-muted);
-      margin-bottom: 0.75rem;
-    }
-
-    /* Sticky method quick reference */
-    .sidebar-quick-ref {
-      border-top: 3px solid var(--accent, #2563eb);
-    }
-
-    .sidebar-quick-ref ol {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      counter-reset: qr-step;
-    }
-
-    .sidebar-quick-ref ol li {
-      counter-increment: qr-step;
-      display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
-      padding: 0.35rem 0;
-      font-size: 0.82rem;
-      line-height: 1.5;
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border-lighter);
-    }
-
-    .sidebar-quick-ref ol li:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .sidebar-quick-ref ol li::before {
-      content: counter(qr-step);
-      flex-shrink: 0;
-      width: 1.35rem;
-      height: 1.35rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      color: var(--accent, #2563eb);
-      background: var(--accent-light, #eff6ff);
-      border-radius: 50%;
-    }
-
-    /* Exam context card */
-    .exam-context-item {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.3rem 0;
-      font-size: 0.82rem;
-      color: var(--text-secondary);
-      line-height: 1.45;
-    }
-
-    .exam-context-icon {
-      flex-shrink: 0;
-      width: 1.25rem;
-      height: 1.25rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--accent, #2563eb);
-    }
-
-    .exam-context-icon svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    /* Related Videos */
-    .sidebar-video-link {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      padding: 0.55rem 0;
-      text-decoration: none;
-      color: var(--text-primary);
-      border-bottom: 1px solid var(--border-lighter);
-      transition: color 0.2s ease;
-    }
-
-    .sidebar-video-link:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .sidebar-video-link:hover {
-      color: var(--accent, #2563eb);
-    }
-
-    .sidebar-video-icon {
-      flex-shrink: 0;
-      width: 1.6rem;
-      height: 1.6rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #fee2e2;
-      border-radius: 6px;
-      margin-top: 0.1rem;
-    }
-
-    .sidebar-video-icon svg {
-      width: 12px;
-      height: 12px;
-      color: #dc2626;
-    }
-
-    .sidebar-video-info {
+    .topbar-left {
       flex: 1;
       min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
     }
 
-    .sidebar-video-name {
+    .topbar-brand {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    .topbar-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--border-light, #ddd);
+      flex-shrink: 0;
+    }
+
+    .topbar-title {
+      font-family: 'Inter', sans-serif;
       font-size: 0.82rem;
       font-weight: 600;
-      line-height: 1.35;
-      display: block;
+      color: var(--text-primary, #2d2a26);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
-    .sidebar-video-channel {
-      font-size: 0.72rem;
-      color: var(--text-muted);
-      display: block;
-      margin-top: 0.1rem;
+    .topbar-unit {
+      font-weight: 400;
+      color: var(--text-muted, #8a8580);
+      margin-left: 0.35rem;
     }
 
-    /* Topic links / pills */
-    .topic-links-group {
-      margin-bottom: 0.75rem;
-    }
-
-    .topic-links-group:last-child {
-      margin-bottom: 0;
-    }
-
-    .topic-links-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      margin-bottom: 0.4rem;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-
-    .topic-pills {
+    .topbar-centre {
+      flex-shrink: 0;
       display: flex;
-      flex-wrap: wrap;
-      gap: 0.35rem;
-    }
-
-    .topic-pill {
-      display: inline-block;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.75rem;
-      font-weight: 500;
-      color: var(--accent, #2563eb);
-      background: var(--accent-light, #eff6ff);
-      border: 1px solid var(--accent-badge, #dbeafe);
-      padding: 0.25em 0.65em;
-      border-radius: 999px;
-      text-decoration: none;
-      transition: background 0.2s ease, color 0.2s ease;
-    }
-
-    .topic-pill:hover {
-      background: var(--accent-badge, #dbeafe);
-      color: var(--accent, #2563eb);
-    }
-
-    /* ===== PROGRESS RING ===== */
-    .progress-ring-container {
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      margin-bottom: 1rem;
+      gap: 0.5rem;
     }
 
-    .progress-ring-wrapper {
-      position: relative;
-      width: 100px;
-      height: 100px;
-    }
-
-    .progress-ring-svg {
-      transform: rotate(-90deg);
-      width: 100px;
-      height: 100px;
-    }
-
-    .progress-ring-track {
-      fill: none;
-      stroke: var(--border-lighter, #e8e4df);
-      stroke-width: 8;
-    }
-
-    .progress-ring-fill {
-      fill: none;
-      stroke: var(--accent, #2563eb);
-      stroke-width: 8;
-      stroke-linecap: round;
-      transition: stroke-dashoffset 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .progress-ring-text {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      text-align: center;
-    }
-
-    .progress-ring-value {
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--accent, #2563eb);
-      line-height: 1;
-      display: block;
-    }
-
-    .progress-ring-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      margin-top: 0.15rem;
-      display: block;
-    }
-
-    /* ===== TIER SECTION BACKGROUNDS ===== */
-    .tier-section.tier-bronze-bg {
-      background: rgba(180, 83, 9, 0.03);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-    }
-
-    .tier-section.tier-silver-bg {
-      background: rgba(100, 116, 139, 0.03);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-    }
-
-    .tier-section.tier-gold-bg {
-      background: rgba(217, 119, 6, 0.03);
-      border-radius: var(--radius);
-      padding: 1.25rem 1.5rem;
-    }
-
-    /* ===== TIER COMPLETE BADGE ===== */
-    .tier-complete-badge {
+    .topbar-tier-badge {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
       font-family: 'Inter', sans-serif;
       font-size: 0.72rem;
       font-weight: 700;
-      color: var(--success);
-      background: var(--success-light);
-      border: 1px solid #bbf7d0;
-      padding: 0.25em 0.7em;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.3em 0.85em;
       border-radius: 999px;
-      margin-left: 0.5rem;
-      animation: tier-complete-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      transition: all 0.3s var(--practice-ease);
     }
 
-    .tier-complete-badge svg {
+    .topbar-tier-badge.tier-is-bronze { color: var(--bronze); background: var(--bronze-badge); }
+    .topbar-tier-badge.tier-is-silver { color: var(--silver); background: var(--silver-badge); }
+    .topbar-tier-badge.tier-is-gold   { color: var(--gold); background: var(--gold-badge); }
+
+    .topbar-tier-badge svg {
       width: 12px;
       height: 12px;
     }
 
-    @keyframes tier-complete-pop {
-      0% {
-        opacity: 0;
-        transform: scale(0.6);
-      }
-      60% {
-        transform: scale(1.1);
-      }
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
+    .topbar-right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      min-width: 0;
     }
 
-    /* ===== STREAK COUNTER ===== */
-    .streak-counter {
-      display: inline-flex;
+    .topbar-score {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+    }
+
+    .topbar-streak {
+      display: none;
       align-items: center;
-      gap: 0.3rem;
+      gap: 0.25rem;
       font-family: 'Inter', sans-serif;
       font-size: 0.78rem;
       font-weight: 700;
@@ -514,8 +157,10 @@
       border: 1px solid #fed7aa;
       padding: 0.2em 0.65em;
       border-radius: 999px;
-      animation: streak-pulse 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: streak-pulse 0.4s var(--practice-ease);
     }
+
+    .topbar-streak.visible { display: inline-flex; }
 
     @keyframes streak-pulse {
       0% { transform: scale(0.8); opacity: 0; }
@@ -523,217 +168,368 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
-    /* ===== A. METHOD CARD ===== */
-    .method-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      padding: 1.75rem 2rem;
-      margin-bottom: 2.5rem;
-      box-shadow: var(--shadow-sm);
+    /* Panel toggle button (mobile) */
+    .panel-toggle-btn {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border-light, #ddd);
+      background: #fff;
+      cursor: pointer;
+      color: var(--text-secondary, #5a5651);
+      flex-shrink: 0;
+    }
+
+    .panel-toggle-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    /* ===== FULL-VIEWPORT LAYOUT ===== */
+    .practice-layout {
+      display: flex;
+      height: 100vh;
+      height: 100dvh;
+      padding-top: 52px;
+    }
+
+    /* ===== LEFT PANEL ===== */
+    .practice-panel {
+      width: var(--panel-width);
+      flex-shrink: 0;
+      background: var(--panel-bg);
+      border-right: 1px solid var(--border-light, #e8e4df);
+      overflow-y: auto;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      transition: scrollbar-color 0.3s;
+    }
+
+    .practice-panel:hover {
+      scrollbar-color: var(--accent, #2563eb) transparent;
+    }
+
+    .practice-panel::-webkit-scrollbar { width: 4px; }
+    .practice-panel::-webkit-scrollbar-track { background: transparent; }
+    .practice-panel::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
+    .practice-panel:hover::-webkit-scrollbar-thumb { background: var(--accent, #2563eb); }
+
+    .panel-section {
+      background: #fff;
+      border: 1px solid var(--border-light, #e8e4df);
+      border-radius: 12px;
+      padding: 1rem;
+    }
+
+    .panel-section-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted, #8a8580);
+      margin-bottom: 0.65rem;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .panel-section-title svg {
+      width: 12px;
+      height: 12px;
+      color: var(--accent, #2563eb);
+    }
+
+    /* Method steps in panel */
+    .panel-method-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-primary, #2d2a26);
+      margin-bottom: 0.65rem;
+      line-height: 1.3;
+    }
+
+    .panel-method-steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      counter-reset: panel-step;
+    }
+
+    .panel-method-steps li {
+      counter-increment: panel-step;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding: 0.3rem 0;
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--text-primary, #2d2a26);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .panel-method-steps li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .panel-method-steps li::before {
+      content: counter(panel-step);
+      flex-shrink: 0;
+      width: 1.2rem;
+      height: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border-radius: 50%;
+    }
+
+    /* Exam context */
+    .exam-context-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.25rem 0;
+      font-size: 0.78rem;
+      color: var(--text-secondary, #5a5651);
+      line-height: 1.4;
+    }
+
+    .exam-context-icon {
+      flex-shrink: 0;
+      color: var(--accent, #2563eb);
+    }
+
+    .exam-context-icon svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    /* Related videos */
+    .panel-video-link {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.45rem 0;
+      text-decoration: none;
+      color: var(--text-primary, #2d2a26);
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+      transition: color 0.2s ease;
+    }
+
+    .panel-video-link:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .panel-video-link:hover {
+      color: var(--accent, #2563eb);
+    }
+
+    .panel-video-icon {
+      flex-shrink: 0;
+      width: 1.4rem;
+      height: 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fee2e2;
+      border-radius: 5px;
+      margin-top: 0.1rem;
+    }
+
+    .panel-video-icon svg {
+      width: 10px;
+      height: 10px;
+      color: #dc2626;
+    }
+
+    .panel-video-name {
+      font-size: 0.78rem;
+      font-weight: 600;
+      line-height: 1.3;
+      display: block;
+    }
+
+    .panel-video-channel {
+      font-size: 0.68rem;
+      color: var(--text-muted, #8a8580);
+      display: block;
+      margin-top: 0.05rem;
+    }
+
+    /* Topic pills */
+    .topic-links-group {
+      margin-bottom: 0.6rem;
+    }
+
+    .topic-links-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .topic-links-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: var(--text-muted, #8a8580);
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .topic-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
+    .topic-pill {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 500;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      padding: 0.2em 0.55em;
+      border-radius: 999px;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .topic-pill:hover {
+      background: var(--accent-badge, #dbeafe);
+    }
+
+    /* ===== MAIN AREA ===== */
+    .practice-main {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: #faf8f5;
+    }
+
+    /* Mode tabs */
+    .mode-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 0.65rem 2rem 0;
+      border-bottom: 1px solid var(--border-light, #e8e4df);
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .mode-tab {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted, #8a8580);
+      background: none;
+      border: none;
+      padding: 0.6rem 1.25rem;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s ease;
+    }
+
+    .mode-tab:hover {
+      color: var(--text-primary, #2d2a26);
+    }
+
+    .mode-tab.active {
+      color: var(--accent, #2563eb);
+    }
+
+    .mode-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0.5rem;
+      right: 0.5rem;
+      height: 2px;
+      background: var(--accent, #2563eb);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .mode-tab svg {
+      width: 14px;
+      height: 14px;
+      vertical-align: -2px;
+      margin-right: 0.35rem;
+    }
+
+    /* ===== CONTENT VIEWPORT (holds learn + practice views) ===== */
+    .content-viewport {
+      flex: 1;
       position: relative;
       overflow: hidden;
     }
 
-    .method-card::before {
-      content: '';
+    .content-view {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--accent, #2563eb), #60a5fa);
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-
-    .method-card-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent, #2563eb);
-      margin-bottom: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .method-card-label svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .method-card h2 {
-      font-size: 1.35rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .method-card p {
-      font-size: 0.95rem;
-      line-height: 1.7;
-      color: var(--text-primary);
-      margin-bottom: 0.75rem;
-    }
-
-    .method-card p:last-child {
-      margin-bottom: 0;
-    }
-
-    .method-steps {
-      list-style: none;
-      padding: 0;
-      margin: 1rem 0 1.25rem;
-      counter-reset: method-step;
-    }
-
-    .method-steps li {
-      counter-increment: method-step;
-      display: flex;
-      align-items: baseline;
-      gap: 0.75rem;
-      padding: 0.5rem 0;
-      font-size: 0.95rem;
-      line-height: 1.6;
-      border-bottom: 1px solid var(--border-lighter);
-    }
-
-    .method-steps li:last-child {
-      border-bottom: none;
-    }
-
-    .method-steps li::before {
-      content: counter(method-step);
-      flex-shrink: 0;
-      width: 1.6rem;
-      height: 1.6rem;
+      inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--accent, #2563eb);
-      background: var(--accent-light, #eff6ff);
-      border-radius: 50%;
+      padding: 2rem;
+      transition: opacity 0.35s ease, transform 0.5s var(--practice-ease);
     }
 
-    /* Worked example inside method card */
-    .method-example {
-      background: var(--accent-light, #eff6ff);
-      border: 1px solid var(--accent-badge, #dbeafe);
-      border-radius: var(--radius-sm);
-      padding: 1.25rem 1.5rem;
-      margin-top: 1rem;
+    .content-view.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(30px);
     }
 
-    .method-example-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: var(--accent, #2563eb);
-      margin-bottom: 0.75rem;
+    .content-view.hidden-left {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(-30px);
     }
 
-    .method-example .katex-line {
-      margin: 0.4rem 0;
-      font-size: 1.1rem;
+    /* ===== LEARN MODE ===== */
+    .learn-card {
+      background: #fff;
+      border: 1px solid var(--border-light, #e8e4df);
+      border-radius: 16px;
+      padding: 2.5rem 3rem;
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+      position: relative;
     }
 
-    .method-example .solution-note {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-top: 0.5rem;
-      font-style: italic;
-    }
-
-    /* ===== B. WORKED EXAMPLES ===== */
-    .worked-section {
-      margin-bottom: 3rem;
-    }
-
-    .section-heading {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .section-heading h2 {
-      margin-bottom: 0;
-      font-size: 1.45rem;
-    }
-
-    .section-heading .section-icon {
-      width: 2.2rem;
-      height: 2.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--accent-light, #eff6ff);
-      border-radius: 10px;
-      flex-shrink: 0;
-    }
-
-    .section-heading .section-icon svg {
-      width: 1.1rem;
-      height: 1.1rem;
-      color: var(--accent, #2563eb);
-    }
-
-    .worked-example {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      margin-bottom: 1.25rem;
-      overflow: hidden;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .worked-example-header {
+    .learn-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 1.15rem 1.5rem;
-      border-bottom: 1px solid var(--border-lighter);
-      cursor: pointer;
-      transition: background 0.2s ease;
+      margin-bottom: 1.25rem;
     }
 
-    .worked-example-header:hover {
-      background: var(--accent-light, #eff6ff);
-    }
-
-    .worked-example.active .worked-example-header {
-      background: var(--accent-light, #eff6ff);
-    }
-
-    .worked-example-number {
+    .learn-counter {
       font-family: 'Inter', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #fff;
-      background: var(--accent, #2563eb);
-      width: 1.5rem;
-      height: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .worked-example-question {
-      flex: 1;
-      margin: 0 1rem;
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.05rem;
+      font-size: 0.72rem;
       font-weight: 600;
+      color: var(--text-muted, #8a8580);
     }
 
-    .worked-example-difficulty {
+    .learn-difficulty {
       font-family: 'Inter', sans-serif;
       font-size: 0.65rem;
       font-weight: 600;
@@ -743,276 +539,227 @@
       border-radius: 999px;
     }
 
-    .difficulty-bronze {
-      color: var(--bronze);
-      background: var(--bronze-badge);
+    .learn-difficulty.diff-bronze { color: var(--bronze); background: var(--bronze-badge); }
+    .learn-difficulty.diff-silver { color: var(--silver); background: var(--silver-badge); }
+    .learn-difficulty.diff-gold   { color: var(--gold); background: var(--gold-badge); }
+
+    .learn-question {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      line-height: 1.3;
+      color: var(--text-primary, #2d2a26);
+      margin-bottom: 1.5rem;
+      text-align: center;
     }
 
-    .difficulty-silver {
-      color: var(--silver);
-      background: var(--silver-badge);
+    .learn-steps-area {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
 
-    .difficulty-gold {
-      color: var(--gold);
-      background: var(--gold-badge);
-    }
-
-    .worked-example-toggle {
-      color: var(--text-muted);
-      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .worked-example.active .worked-example-toggle {
-      transform: rotate(180deg);
-    }
-
-    .worked-example-body {
-      max-height: 0;
+    .learn-step {
       overflow: hidden;
-      transition: max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.5s var(--practice-ease), opacity 0.4s ease, padding 0.3s ease;
+      padding: 0 0.75rem;
+      border-left: 3px solid transparent;
     }
 
-    .worked-example.active .worked-example-body {
-      max-height: 800px;
-    }
-
-    .worked-steps {
-      padding: 0 1.5rem 1.5rem;
-    }
-
-    .worked-step {
-      padding: 0.75rem 0;
-      border-bottom: 1px dashed var(--border-lighter);
-    }
-
-    .worked-step:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-
-    .step-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
+    .learn-step.revealed {
+      max-height: 200px;
+      opacity: 1;
+      padding: 0.65rem 0.75rem;
+      border-left-color: var(--accent-badge, #dbeafe);
       margin-bottom: 0.35rem;
     }
 
-    .step-content {
-      font-size: 1rem;
-      line-height: 1.65;
-    }
-
-    .step-hidden {
-      display: none;
-    }
-
-    .step-reveal-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--accent, #2563eb);
-      background: var(--accent-light, #eff6ff);
-      border: 1px solid var(--accent-badge, #dbeafe);
-      padding: 0.4em 0.85em;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .step-reveal-btn:hover {
-      background: var(--accent-badge, #dbeafe);
-      border-color: var(--accent, #2563eb);
-    }
-
-    .step-reveal-btn svg {
-      width: 12px;
-      height: 12px;
-    }
-
-    .step-revealed {
-      animation: step-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-
-    @keyframes step-fade-in {
-      from {
-        opacity: 0;
-        transform: translateY(6px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .step-answer {
+    .learn-step.is-answer.revealed {
       background: var(--success-light);
-      border: 1px solid #bbf7d0;
-      border-radius: var(--radius-sm);
-      padding: 0.75rem 1rem;
-      margin-top: 0.5rem;
+      border-left-color: #86efac;
+      border-radius: 0 10px 10px 0;
     }
 
-    .step-answer .step-label {
+    .learn-step-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #8a8580);
+      margin-bottom: 0.2rem;
+    }
+
+    .learn-step.is-answer .learn-step-label {
       color: var(--success);
     }
 
-    /* ===== C. PRACTICE PROBLEMS ===== */
-    .practice-problems {
-      margin-bottom: 3rem;
-      opacity: 1 !important;
-      transform: none !important;
+    .learn-step-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-primary, #2d2a26);
     }
 
-    .tier-section {
-      margin-bottom: 2.5rem;
-    }
-
-    .tier-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 2px solid var(--border-lighter);
-    }
-
-    .tier-icon {
-      width: 2rem;
-      height: 2rem;
+    .learn-actions {
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .tier-icon svg {
-      width: 1rem;
-      height: 1rem;
-    }
-
-    .tier-bronze .tier-icon { background: var(--bronze-badge); color: var(--bronze); }
-    .tier-silver .tier-icon { background: var(--silver-badge); color: var(--silver); }
-    .tier-gold .tier-icon { background: var(--gold-badge); color: var(--gold); }
-
-    .tier-header h3 {
-      flex: 1;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      margin-bottom: 0;
-    }
-
-    .tier-bronze h3 { color: var(--bronze); }
-    .tier-silver h3 { color: var(--silver); }
-    .tier-gold h3 { color: var(--gold); }
-
-    .tier-score {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--text-muted);
-    }
-
-    .tier-description {
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-bottom: 1rem;
-      padding-left: 2.75rem;
-    }
-
-    .problem-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
+      margin-top: 1.5rem;
     }
 
-    @media (max-width: 600px) {
-      .problem-grid {
-        grid-template-columns: 1fr;
-      }
+    .learn-reveal-btn, .learn-next-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.6em 1.5em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+
+    .learn-reveal-btn {
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+    }
+
+    .learn-reveal-btn:hover {
+      background: var(--accent-badge, #dbeafe);
+    }
+
+    .learn-reveal-btn svg {
+      width: 14px;
+      height: 14px;
+      vertical-align: -2px;
+      margin-right: 0.3rem;
+    }
+
+    .learn-next-btn {
+      color: #fff;
+      background: var(--accent, #2563eb);
+    }
+
+    .learn-next-btn:hover {
+      filter: brightness(0.92);
+    }
+
+    .learn-next-btn:active {
+      transform: scale(0.97);
+    }
+
+    /* ===== PRACTICE MODE ===== */
+    .problem-stage {
+      max-width: 560px;
+      width: 100%;
+      position: relative;
     }
 
     .problem-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-sm);
-      padding: 1.15rem 1.25rem;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      background: #fff;
+      border: 1px solid var(--border-light, #e8e4df);
+      border-radius: 16px;
+      padding: 2.5rem 2.5rem 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      transition: border-color 0.4s ease, box-shadow 0.4s ease;
     }
 
-    .problem-card:hover {
-      box-shadow: var(--shadow-md);
-    }
-
-    .problem-card.correct {
+    .problem-card.card-correct {
       border-color: #86efac;
-      background: var(--success-light);
+      box-shadow: 0 4px 20px rgba(22,163,74,0.08);
     }
 
-    .problem-card.incorrect {
+    .problem-card.card-incorrect {
       border-color: #fca5a5;
-      background: var(--error-light);
+      box-shadow: 0 4px 20px rgba(220,38,38,0.08);
     }
 
-    .problem-number {
+    .problem-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.25rem;
+    }
+
+    .problem-number-label {
       font-family: 'Inter', sans-serif;
-      font-size: 0.65rem;
+      font-size: 0.68rem;
       font-weight: 700;
-      color: var(--text-muted);
+      color: var(--text-muted, #8a8580);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin-bottom: 0.5rem;
     }
+
+    .problem-tier-pill {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.2em 0.6em;
+      border-radius: 999px;
+    }
+
+    .problem-tier-pill.pill-bronze { color: var(--bronze); background: var(--bronze-badge); }
+    .problem-tier-pill.pill-silver { color: var(--silver); background: var(--silver-badge); }
+    .problem-tier-pill.pill-gold   { color: var(--gold); background: var(--gold-badge); }
 
     .problem-equation {
       font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 0.75rem;
-      min-height: 1.8rem;
+      font-size: 1.75rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      min-height: 2.5rem;
+      line-height: 1.4;
+    }
+
+    .problem-hint {
+      font-size: 0.82rem;
+      color: var(--text-muted, #8a8580);
+      font-style: italic;
+      text-align: center;
+      margin-bottom: 1rem;
     }
 
     .problem-inputs {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.65rem;
+      justify-content: center;
+      gap: 0.65rem;
+      margin: 1.25rem 0;
       flex-wrap: wrap;
     }
 
     .problem-inputs label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.8rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.1rem;
       font-weight: 600;
-      color: var(--text-secondary);
+      color: var(--text-secondary, #5a5651);
     }
 
     .problem-input {
-      width: 4.5rem;
-      padding: 0.4rem 0.6rem;
+      width: 5.5rem;
+      padding: 0.55rem 0.65rem;
       font-family: 'Inter', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 500;
+      font-size: 1.05rem;
+      font-weight: 600;
       text-align: center;
-      border: 1.5px solid var(--border-light);
-      border-radius: 8px;
-      background: var(--bg-body);
-      color: var(--text-primary);
+      border: 2px solid var(--border-light, #e8e4df);
+      border-radius: 10px;
+      background: var(--panel-bg);
+      color: var(--text-primary, #2d2a26);
       outline: none;
-      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
     }
 
     .problem-input:focus {
       border-color: var(--accent, #2563eb);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      background: #fff;
     }
 
     .problem-input.input-correct {
@@ -1027,648 +774,667 @@
 
     .problem-input-separator {
       font-family: 'Inter', sans-serif;
-      font-size: 0.8rem;
-      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-muted, #8a8580);
     }
 
-    .problem-actions {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .check-btn {
+    .problem-check-btn {
+      display: block;
+      width: 100%;
+      max-width: 240px;
+      margin: 0 auto;
       font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
+      font-size: 1rem;
+      font-weight: 700;
       color: #fff;
       background: var(--accent, #2563eb);
       border: none;
-      padding: 0.45em 1em;
-      border-radius: 8px;
+      padding: 0.75em 1.5em;
+      border-radius: 12px;
       cursor: pointer;
-      transition: background 0.2s ease, transform 0.1s ease;
+      transition: filter 0.2s ease, transform 0.1s ease;
     }
 
-    .check-btn:hover {
-      filter: brightness(0.9);
+    .problem-check-btn:hover {
+      filter: brightness(0.92);
     }
 
-    .check-btn:active {
+    .problem-check-btn:active {
       transform: scale(0.97);
     }
 
-    .check-btn:disabled {
-      opacity: 0.5;
+    .problem-check-btn:disabled {
+      opacity: 0.4;
       cursor: not-allowed;
     }
 
-    .problem-feedback {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
+    /* Feedback area */
+    .problem-feedback-area {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s var(--practice-ease);
+    }
+
+    .problem-feedback-area.shown {
+      max-height: 400px;
+    }
+
+    .feedback-box {
+      margin-top: 1.25rem;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.65rem;
+    }
+
+    .feedback-box.feedback-correct {
+      background: var(--success-light);
+      border: 1px solid #bbf7d0;
+    }
+
+    .feedback-box.feedback-incorrect {
+      background: var(--error-light);
+      border: 1px solid #fecaca;
+    }
+
+    .feedback-icon {
+      flex-shrink: 0;
+      width: 1.75rem;
+      height: 1.75rem;
       display: flex;
       align-items: center;
-      gap: 0.35rem;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      justify-content: center;
+      border-radius: 50%;
     }
 
-    .problem-feedback.visible {
-      opacity: 1;
-    }
-
-    .problem-feedback.feedback-correct {
+    .feedback-correct .feedback-icon {
+      background: #dcfce7;
       color: var(--success);
     }
 
-    .problem-feedback.feedback-incorrect {
+    .feedback-incorrect .feedback-icon {
+      background: #fee2e2;
       color: var(--error);
     }
 
-    .problem-feedback svg {
+    .feedback-icon svg {
       width: 14px;
       height: 14px;
     }
 
-    .correct-answer-reveal {
+    .feedback-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .feedback-title {
       font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .feedback-correct .feedback-title { color: var(--success); }
+    .feedback-incorrect .feedback-title { color: var(--error); }
+
+    .feedback-text {
       font-size: 0.82rem;
-      color: var(--text-secondary);
-      margin-top: 0.5rem;
-      animation: step-fade-in 0.3s ease forwards;
+      line-height: 1.55;
+      color: var(--text-primary, #2d2a26);
     }
 
     .misconception-tip {
       background: #fef3c7;
       border-left: 3px solid #f59e0b;
-      padding: 0.6rem 0.85rem;
+      padding: 0.55rem 0.8rem;
       border-radius: 0 8px 8px 0;
-      margin-bottom: 0.4rem;
-      line-height: 1.55;
-      color: var(--text-primary);
+      margin-top: 0.5rem;
+      font-size: 0.8rem;
+      line-height: 1.5;
+      color: var(--text-primary, #2d2a26);
     }
 
     .misconception-tip strong {
       color: #b45309;
     }
 
-    /* ===== D. PROGRESS SUMMARY ===== */
-    .progress-summary {
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      padding: 1.75rem 2rem;
-      box-shadow: var(--shadow-sm);
-      margin-bottom: 2rem;
-    }
-
-    .progress-summary h2 {
-      font-size: 1.3rem;
-      margin-bottom: 1.25rem;
-    }
-
-    .progress-overall {
-      text-align: center;
-      margin-bottom: 1.5rem;
-      padding-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-lighter);
-    }
-
-    .progress-score {
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 2.5rem;
-      font-weight: 800;
-      color: var(--accent, #2563eb);
-      line-height: 1;
-    }
-
-    .progress-label {
+    .correct-answer-text {
+      margin-top: 0.5rem;
       font-family: 'Inter', sans-serif;
-      font-size: 0.85rem;
-      color: var(--text-secondary);
-      margin-top: 0.25rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary, #5a5651);
     }
 
-    .progress-tiers {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
+    /* Next button (appears after checking) */
+    .problem-next-area {
+      text-align: center;
+      margin-top: 1rem;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s var(--practice-ease);
     }
 
-    .progress-tier {
+    .problem-next-area.shown {
+      max-height: 80px;
+    }
+
+    .problem-next-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+      padding: 0.55em 2em;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .problem-next-btn:hover {
+      background: var(--accent-badge, #dbeafe);
+    }
+
+    /* Tier progress bar (below card) */
+    .tier-progress {
+      margin-top: 1.25rem;
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
     }
 
-    .progress-tier-label {
-      font-family: 'Inter', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      width: 4.5rem;
-      flex-shrink: 0;
-    }
-
-    .tier-bronze .progress-tier-label { color: var(--bronze); }
-    .tier-silver .progress-tier-label { color: var(--silver); }
-    .tier-gold .progress-tier-label { color: var(--gold); }
-
-    .progress-bar-track {
+    .tier-progress-track {
       flex: 1;
-      height: 10px;
-      background: var(--border-lighter);
+      height: 8px;
+      background: var(--border-lighter, #e8e4df);
       border-radius: 999px;
       overflow: hidden;
     }
 
-    .progress-bar-fill {
+    .tier-progress-fill {
       height: 100%;
       border-radius: 999px;
-      transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: width 0.5s var(--practice-ease);
       min-width: 0;
     }
 
-    .tier-bronze .progress-bar-fill { background: var(--bronze); }
-    .tier-silver .progress-bar-fill { background: var(--silver); }
-    .tier-gold .progress-bar-fill { background: var(--gold); }
+    .tier-progress-fill.fill-bronze { background: var(--bronze); }
+    .tier-progress-fill.fill-silver { background: var(--silver); }
+    .tier-progress-fill.fill-gold   { background: var(--gold); }
 
-    .progress-tier-count {
+    .tier-progress-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted, #8a8580);
+      flex-shrink: 0;
+      min-width: 3rem;
+      text-align: right;
+    }
+
+    /* ===== TIER TRANSITION CELEBRATION ===== */
+    .tier-celebration {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .tier-celebration.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .celebration-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      padding: 1rem 2.5rem;
+      border-radius: 16px;
+      animation: celebration-pop 0.6s var(--practice-ease) forwards;
+    }
+
+    .celebration-badge.cele-bronze { color: var(--bronze); background: var(--bronze-badge); }
+    .celebration-badge.cele-silver { color: var(--silver); background: var(--silver-badge); }
+    .celebration-badge.cele-gold   { color: var(--gold); background: var(--gold-badge); }
+
+    .celebration-badge svg {
+      width: 28px;
+      height: 28px;
+    }
+
+    .celebration-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      color: var(--text-muted, #8a8580);
+      margin-top: 0.75rem;
+      animation: celebration-fade 0.5s 0.3s ease forwards;
+      opacity: 0;
+    }
+
+    @keyframes celebration-pop {
+      0% { opacity: 0; transform: scale(0.5); }
+      60% { transform: scale(1.08); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @keyframes celebration-fade {
+      to { opacity: 1; }
+    }
+
+    /* ===== FINAL SUMMARY OVERLAY ===== */
+    .summary-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+      padding: 1.5rem;
+    }
+
+    .summary-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .summary-modal {
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 3rem;
+      max-width: 440px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      text-align: center;
+      animation: summary-in 0.5s var(--practice-ease) forwards;
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    .summary-overlay.active .summary-modal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @keyframes summary-in {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .summary-score {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--accent, #2563eb);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-secondary, #5a5651);
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-tiers {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-tier-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .summary-tier-name {
       font-family: 'Inter', sans-serif;
       font-size: 0.78rem;
       font-weight: 600;
-      color: var(--text-muted);
-      width: 2.5rem;
+      width: 3.5rem;
       text-align: right;
       flex-shrink: 0;
     }
 
-    .progress-message {
-      text-align: center;
-      margin-top: 1.25rem;
-      padding-top: 1.25rem;
-      border-top: 1px solid var(--border-lighter);
-      font-size: 0.9rem;
-      color: var(--text-secondary);
+    .summary-tier-name.stn-bronze { color: var(--bronze); }
+    .summary-tier-name.stn-silver { color: var(--silver); }
+    .summary-tier-name.stn-gold   { color: var(--gold); }
+
+    .summary-tier-bar {
+      flex: 1;
+      height: 10px;
+      background: var(--border-lighter, #e8e4df);
+      border-radius: 999px;
+      overflow: hidden;
     }
 
-    .progress-message strong {
-      color: var(--accent, #2563eb);
+    .summary-tier-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.6s var(--practice-ease);
     }
 
-    /* ===== GLOBAL SCORE BAR (sticky) ===== */
-    .score-bar {
-      position: sticky;
-      top: 3.5rem;
-      z-index: 800;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border-lighter);
-      padding: 0.5rem 1.5rem;
-      margin: 0 -1.5rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-    }
+    .summary-tier-fill.stf-bronze { background: var(--bronze); }
+    .summary-tier-fill.stf-silver { background: var(--silver); }
+    .summary-tier-fill.stf-gold   { background: var(--gold); }
 
-    .score-bar-item {
+    .summary-tier-count {
       font-family: 'Inter', sans-serif;
       font-size: 0.78rem;
       font-weight: 600;
+      color: var(--text-muted, #8a8580);
+      width: 2.5rem;
+      flex-shrink: 0;
+    }
+
+    .summary-message {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-secondary, #5a5651);
+      margin-bottom: 1.5rem;
+    }
+
+    .summary-message strong {
+      color: var(--accent, #2563eb);
+    }
+
+    .summary-actions {
       display: flex;
       align-items: center;
-      gap: 0.35rem;
+      justify-content: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
     }
 
-    .score-bar-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-
-    .score-bar-dot.dot-bronze { background: var(--bronze); }
-    .score-bar-dot.dot-silver { background: var(--silver); }
-    .score-bar-dot.dot-gold { background: var(--gold); }
-    .score-bar-dot.dot-total { background: var(--accent, #2563eb); }
-
-    /* ===== NARRATION PLAYER (practice page) ===== */
-    .practice-narration {
-      margin-bottom: 2rem;
-    }
-    .practice-narration .narration-player {
-      background: var(--bg-card);
-      border: 1px solid var(--border-lighter);
-      border-radius: 12px;
-      padding: 0.65rem 1rem;
-    }
-    .practice-narration .narration-play {
-      background: var(--accent, #2563eb);
-    }
-    .practice-narration .narration-time {
-      color: var(--text-muted, #8a8580);
-    }
-    .practice-narration .narration-speed {
-      color: var(--text-secondary, #5a5651);
-      border: 1px solid var(--border-lighter, #e8e4df);
-    }
-    .practice-narration .narration-progress {
-      background: var(--border-lighter, #e8e4df);
-    }
-    .practice-narration .narration-progress-fill {
-      background: var(--accent, #2563eb);
-    }
-
-    /* ===== LESSON NAV ===== */
-    .practice-nav {
-      display: flex;
-      gap: 1rem;
-      margin-top: 2rem;
-      margin-bottom: 1rem;
-    }
-    .practice-nav a {
-      flex: 1;
-      display: block;
-      padding: 1rem 1.25rem;
-      background: var(--bg-card);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      text-decoration: none;
-      color: var(--text-primary);
-      transition: box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-    .practice-nav a:hover {
-      box-shadow: var(--shadow-md);
-      border-color: var(--accent, #2563eb);
-    }
-    .practice-nav-direction {
+    .summary-btn {
       font-family: 'Inter', sans-serif;
-      font-size: 0.72rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--accent, #2563eb);
-      display: block;
-      margin-bottom: 0.25rem;
+      padding: 0.6em 1.5em;
+      border-radius: 10px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
     }
-    .practice-nav-title {
-      font-size: 0.9rem;
-      color: var(--text-secondary);
-      display: block;
-    }
-    .practice-nav a.nav-next { text-align: right; }
 
-    /* ===== RESPONSIVE ===== */
-    @media (max-width: 960px) {
-      .practice-two-col {
-        grid-template-columns: 1fr;
-        gap: 0;
+    .summary-btn-primary {
+      color: #fff;
+      background: var(--accent, #2563eb);
+    }
+
+    .summary-btn-primary:hover {
+      filter: brightness(0.92);
+    }
+
+    .summary-btn-secondary {
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      border: 1px solid var(--accent-badge, #dbeafe);
+    }
+
+    .summary-btn-secondary:hover {
+      background: var(--accent-badge, #dbeafe);
+    }
+
+    /* ===== PROBLEM SLIDE TRANSITIONS ===== */
+    .problem-card.slide-out-left {
+      animation: slideOutLeft 0.35s var(--practice-ease) forwards;
+    }
+
+    .problem-card.slide-in-right {
+      animation: slideInRight 0.4s var(--practice-ease) forwards;
+    }
+
+    @keyframes slideOutLeft {
+      to {
+        opacity: 0;
+        transform: translateX(-60px);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(60px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* ===== LOADING STATE ===== */
+    .practice-loading-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+    }
+
+    .practice-loading-inner {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    /* ===== ERROR STATE ===== */
+    .practice-error-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* Hidden elements for loader compatibility */
+    .legacy-hidden { display: none !important; }
+
+    /* ===== MOBILE RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      .practice-panel {
+        position: fixed;
+        top: 52px;
+        left: 0;
+        bottom: 0;
+        z-index: 850;
+        transform: translateX(-100%);
+        transition: transform 0.35s var(--practice-ease);
+        box-shadow: none;
       }
 
-      .practice-sidebar {
-        position: static;
-        max-height: none;
-        overflow-y: visible;
-        margin-bottom: 2rem;
-        /* On mobile, sidebar appears between method card and worked examples */
-        order: 0;
+      .practice-panel.panel-open {
+        transform: translateX(0);
+        box-shadow: 4px 0 20px rgba(0,0,0,0.12);
+      }
+
+      .panel-toggle-btn {
+        display: flex;
+      }
+
+      .panel-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 840;
+        background: rgba(0,0,0,0.3);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .panel-overlay.visible {
+        opacity: 1;
+        pointer-events: auto;
       }
 
       .practice-main {
-        order: 0;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .practice-page {
-        padding: 0 1rem 3rem;
+        width: 100%;
       }
 
-      .practice-banner {
-        margin: 0 -1rem 1.5rem;
-        padding: 1.5rem 1.25rem 1.25rem;
-        border-radius: 0 0 12px 12px;
+      .learn-card {
+        padding: 1.75rem 1.5rem;
       }
 
-      .practice-banner h1 {
-        font-size: 1.5rem;
+      .problem-card {
+        padding: 1.75rem 1.5rem 1.5rem;
       }
 
-      .method-card {
-        padding: 1.25rem 1.25rem;
+      .problem-equation {
+        font-size: 1.35rem;
       }
 
-      .worked-example-header {
-        padding: 1rem 1.15rem;
+      .content-view {
+        padding: 1.25rem;
       }
 
-      .worked-steps {
-        padding: 0 1.15rem 1.15rem;
+      .mode-tabs {
+        padding: 0.5rem 1rem 0;
       }
-
-      .problem-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .score-bar {
-        gap: 0.75rem;
-        flex-wrap: wrap;
-        justify-content: space-around;
-      }
-
-      .progress-summary {
-        padding: 1.25rem 1.25rem;
-      }
-
-      .practice-nav {
-        flex-direction: column;
-      }
-      .practice-nav a.nav-next { text-align: left; }
     }
 
     @media (max-width: 480px) {
-      .format-badge {
-        display: none;
+      .topbar-title {
+        font-size: 0.72rem;
       }
 
-      .worked-example-difficulty {
+      .topbar-unit {
         display: none;
       }
 
       .problem-inputs {
         flex-direction: column;
-        align-items: stretch;
+        gap: 0.5rem;
       }
 
       .problem-input {
         width: 100%;
       }
 
-      .practice-banner-pills {
-        gap: 0.35rem;
+      .problem-input-separator {
+        display: none;
+      }
+
+      .summary-modal {
+        padding: 2rem 1.5rem;
       }
     }
 
     /* ===== PRINT ===== */
     @media print {
-      .page-header, .score-bar, .check-btn, .step-reveal-btn, .progress-summary, .practice-sidebar, .practice-banner { display: none; }
-      .practice-two-col { grid-template-columns: 1fr; }
-      .problem-card { break-inside: avoid; }
+      .practice-topbar, .practice-panel, .mode-tabs, .problem-check-btn, .problem-next-btn, .learn-actions { display: none; }
+      .practice-layout { height: auto; padding-top: 0; }
+      .content-viewport { position: static; }
+      .content-view { position: static; padding: 1rem; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Scroll Progress Bar -->
-  <div class="scroll-progress"></div>
-
-  <!-- Page Header -->
-  <header class="page-header">
-    <div class="page-header-inner">
-      <a href="/" class="header-brand">
-        <span class="header-logo">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></span>
-        <span class="header-unit-label" id="header-unit-label"></span>
-      </a>
-
-      <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      </button>
-
-      <nav class="header-nav" id="header-nav">
-        <a href="/">Home</a>
-        <a href="#" id="nav-unit-overview">Unit Overview</a>
-        <a href="#" id="nav-exam-technique">Exam Technique</a>
-        <a href="#" id="nav-revision-technique">Revision Techniques</a>
-        <a href="#" id="nav-prev-lesson" style="display:none">&larr; Previous Lesson</a>
-        <a href="#" id="nav-next-lesson" style="display:none">Next Lesson &rarr;</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Mobile overlay -->
-  <div class="mobile-overlay"></div>
-
   <!-- ===== LOADING STATE ===== -->
-  <div id="practice-loading" class="practice-page">
-    <div class="skeleton-loading" style="padding: 2rem 0;">
-      <div class="skeleton-line w-40" style="height: 12px; margin-bottom: 0.5rem;"></div>
-      <div class="skeleton-line w-80" style="height: 28px; margin-bottom: 1.5rem;"></div>
-      <div class="skeleton-hero" style="height: 180px; margin-bottom: 1.5rem;"></div>
-      <div class="skeleton-line w-80"></div>
-      <div class="skeleton-line"></div>
-      <div class="skeleton-line w-60"></div>
+  <div id="practice-loading" class="practice-loading-wrap">
+    <div class="practice-loading-inner">
+      <div class="skeleton-loading" style="padding: 2rem 0;">
+        <div class="skeleton-line w-40" style="height: 12px; margin-bottom: 0.5rem;"></div>
+        <div class="skeleton-line w-80" style="height: 28px; margin-bottom: 1.5rem;"></div>
+        <div class="skeleton-hero" style="height: 180px; margin-bottom: 1.5rem;"></div>
+        <div class="skeleton-line w-80"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line w-60"></div>
+      </div>
     </div>
   </div>
 
   <!-- ===== ERROR STATE ===== -->
-  <div id="practice-error" style="display: none; text-align: center; padding: 4rem 2rem;">
-    <h2 id="error-title">Lesson not found</h2>
-    <p id="error-message">The practice lesson you're looking for doesn't exist or you don't have access.</p>
-    <a href="/" class="back-link" style="display: inline-block; margin-top: 1rem;">&larr; Back to Dashboard</a>
+  <div id="practice-error" class="practice-error-wrap" style="display: none;">
+    <div>
+      <h2 id="error-title">Lesson not found</h2>
+      <p id="error-message">The practice lesson you're looking for doesn't exist or you don't have access.</p>
+      <a href="/" style="display: inline-block; margin-top: 1rem; color: var(--accent, #2563eb);">&larr; Back to Dashboard</a>
+    </div>
   </div>
 
-  <!-- ===== PRACTICE CONTENT (populated by JS) ===== -->
-  <div id="practice-page" class="practice-page" style="display: none;">
+  <!-- ===== PRACTICE PAGE (populated by JS) ===== -->
+  <div id="practice-page" style="display: none;">
 
-    <!-- Hidden legacy header (kept for loader to populate, data read by banner JS) -->
-    <div class="practice-header" style="display:none;">
-      <span class="lesson-number" id="lesson-number"></span>
-      <h1 id="lesson-title">
-        <span class="format-badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Practice Mode
-        </span>
-      </h1>
-      <p class="subtitle" id="lesson-subtitle">Learn the method, study the worked examples, then test yourself on graded problems.</p>
+    <!-- Hidden legacy elements for loader compatibility -->
+    <div class="legacy-hidden">
+      <span id="lesson-number"></span>
+      <h1 id="lesson-title"><span class="format-badge">Practice Mode</span></h1>
+      <p id="lesson-subtitle"></p>
     </div>
 
-    <!-- ===== COLOURED UNIT BANNER ===== -->
-    <div class="practice-banner" id="practice-banner">
-      <div class="practice-banner-pills">
-        <span class="practice-banner-pill" id="banner-lesson-pill"></span>
-        <span class="practice-banner-pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          Practice Mode
+    <!-- TOP BAR -->
+    <div class="practice-topbar" id="practice-topbar">
+      <div class="topbar-left">
+        <a href="/" class="topbar-brand">StudyVault</a>
+        <div class="topbar-divider"></div>
+        <span class="topbar-title">
+          <span id="topbar-lesson-title"></span>
+          <span class="topbar-unit" id="topbar-unit-name"></span>
         </span>
       </div>
-      <h1 id="banner-title"></h1>
-      <span class="banner-unit" id="banner-unit"></span>
+      <div class="topbar-centre">
+        <span class="topbar-tier-badge tier-is-bronze" id="topbar-tier-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+          <span id="topbar-tier-text">Bronze 0/0</span>
+        </span>
+      </div>
+      <div class="topbar-right">
+        <span class="topbar-score" id="topbar-score">0/0</span>
+        <span class="topbar-streak" id="topbar-streak">&#x1F525; <span id="topbar-streak-count">0</span></span>
+        <button class="panel-toggle-btn" id="panel-toggle-btn" aria-label="Toggle reference panel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </button>
+      </div>
     </div>
 
-    <!-- ===== TWO-COLUMN LAYOUT ===== -->
-    <div class="practice-two-col">
+    <!-- Mobile panel overlay -->
+    <div class="panel-overlay" id="panel-overlay"></div>
 
-      <!-- LEFT: Main content -->
-      <div class="practice-main">
+    <!-- LAYOUT -->
+    <div class="practice-layout">
 
-        <!-- ===== A. METHOD CARD (populated by loader) ===== -->
-        <div class="method-card" id="method-card" style="display:none;">
-          <div class="method-card-label">
+      <!-- LEFT PANEL -->
+      <aside class="practice-panel" id="practice-panel">
+
+        <!-- Method card -->
+        <div class="panel-section" id="panel-method" style="display:none;">
+          <div class="panel-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
             Method Card
           </div>
-          <h2 id="method-title"></h2>
-          <div id="method-content"></div>
-          <div id="method-steps-container"></div>
-          <div id="method-example-container"></div>
+          <div class="panel-method-title" id="panel-method-title"></div>
+          <ol class="panel-method-steps" id="panel-method-steps"></ol>
         </div>
 
-        <!-- ===== B. WORKED EXAMPLES (populated by loader) ===== -->
-        <div class="worked-section" id="worked-section" style="display:none;">
-          <div class="section-heading">
-            <div class="section-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-            </div>
-            <h2>Worked Examples</h2>
+        <!-- Exam context -->
+        <div class="panel-section" id="panel-exam-context">
+          <div class="panel-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Exam Context
           </div>
-          <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">Try each step yourself on paper first, then reveal to check your working.</p>
-          <div id="worked-examples-container"></div>
-        </div>
-
-        <!-- ===== STICKY SCORE BAR ===== -->
-        <div class="score-bar" id="score-bar" style="display: none;">
-          <div class="score-bar-item">
-            <span class="score-bar-dot dot-total"></span>
-            <span id="score-total">0/0</span>
-          </div>
-          <div class="score-bar-item">
-            <span class="score-bar-dot dot-bronze"></span>
-            <span id="score-bronze">0/0</span>
-          </div>
-          <div class="score-bar-item">
-            <span class="score-bar-dot dot-silver"></span>
-            <span id="score-silver">0/0</span>
-          </div>
-          <div class="score-bar-item">
-            <span class="score-bar-dot dot-gold"></span>
-            <span id="score-gold">0/0</span>
-          </div>
-          <div class="score-bar-item" id="streak-container" style="display:none;">
-            <span class="streak-counter" id="streak-display"></span>
-          </div>
-        </div>
-
-        <!-- ===== C. PRACTICE PROBLEMS (populated by JS from window._problemBank) ===== -->
-        <div class="practice-problems" id="practice-problems" style="display:none;">
-          <div class="section-heading">
-            <div class="section-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <h2>Practice Problems</h2>
-          </div>
-
-          <!-- BRONZE tier -->
-          <div class="tier-section tier-bronze-bg" id="tier-bronze">
-            <div class="tier-header tier-bronze">
-              <div class="tier-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              </div>
-              <h3>Bronze</h3>
-              <span class="tier-score" id="bronze-score">0/0 correct</span>
-            </div>
-            <p class="tier-description" id="bronze-description"></p>
-            <div class="problem-grid" id="bronze-grid"></div>
-          </div>
-
-          <!-- SILVER tier -->
-          <div class="tier-section tier-silver-bg" id="tier-silver">
-            <div class="tier-header tier-silver">
-              <div class="tier-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              </div>
-              <h3>Silver</h3>
-              <span class="tier-score" id="silver-score">0/0 correct</span>
-            </div>
-            <p class="tier-description" id="silver-description"></p>
-            <div class="problem-grid" id="silver-grid"></div>
-          </div>
-
-          <!-- GOLD tier -->
-          <div class="tier-section tier-gold-bg" id="tier-gold">
-            <div class="tier-header tier-gold">
-              <div class="tier-icon">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-              </div>
-              <h3>Gold</h3>
-              <span class="tier-score" id="gold-score">0/0 correct</span>
-            </div>
-            <p class="tier-description" id="gold-description"></p>
-            <div class="problem-grid" id="gold-grid"></div>
-          </div>
-        </div>
-
-        <!-- ===== D. PROGRESS SUMMARY (with ring) ===== -->
-        <div class="progress-summary" id="progress-summary">
-          <h2>Your Progress</h2>
-
-          <!-- Progress Ring -->
-          <div class="progress-ring-container">
-            <div class="progress-ring-wrapper">
-              <svg class="progress-ring-svg" viewBox="0 0 100 100">
-                <circle class="progress-ring-track" cx="50" cy="50" r="42"/>
-                <circle class="progress-ring-fill" id="progress-ring-circle" cx="50" cy="50" r="42"
-                  stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
-              </svg>
-              <div class="progress-ring-text">
-                <span class="progress-ring-value" id="progress-ring-value">0%</span>
-                <span class="progress-ring-label">complete</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="progress-overall">
-            <div class="progress-score" id="progress-score-display">0/0</div>
-            <div class="progress-label">problems correct</div>
-          </div>
-          <div class="progress-tiers">
-            <div class="progress-tier tier-bronze">
-              <span class="progress-tier-label">Bronze</span>
-              <div class="progress-bar-track">
-                <div class="progress-bar-fill" id="progress-bronze" style="width: 0%"></div>
-              </div>
-              <span class="progress-tier-count" id="progress-bronze-count">0/0</span>
-            </div>
-            <div class="progress-tier tier-silver">
-              <span class="progress-tier-label">Silver</span>
-              <div class="progress-bar-track">
-                <div class="progress-bar-fill" id="progress-silver" style="width: 0%"></div>
-              </div>
-              <span class="progress-tier-count" id="progress-silver-count">0/0</span>
-            </div>
-            <div class="progress-tier tier-gold">
-              <span class="progress-tier-label">Gold</span>
-              <div class="progress-bar-track">
-                <div class="progress-bar-fill" id="progress-gold" style="width: 0%"></div>
-              </div>
-              <span class="progress-tier-count" id="progress-gold-count">0/0</span>
-            </div>
-          </div>
-          <div class="progress-message" id="progress-message">
-            Answer your first problem to get started.
-          </div>
-        </div>
-
-        <!-- Prev/Next Navigation -->
-        <nav class="practice-nav" id="practice-nav"></nav>
-
-        <!-- Back to unit -->
-        <a href="#" class="back-link" id="back-link">&larr; Back to unit</a>
-
-      </div><!-- /.practice-main -->
-
-      <!-- RIGHT: Sidebar -->
-      <aside class="practice-sidebar" id="practice-sidebar">
-
-        <!-- 1. Quick Reference (sticky method steps) -->
-        <div class="practice-sidebar-section sidebar-quick-ref" id="sidebar-quick-ref" style="display:none;">
-          <div class="practice-sidebar-title">Quick Reference</div>
-          <ol id="sidebar-method-steps"></ol>
-        </div>
-
-        <!-- 2. Exam Context -->
-        <div class="practice-sidebar-section" id="sidebar-exam-context">
-          <div class="practice-sidebar-title">Exam Context</div>
           <div class="exam-context-item">
             <span class="exam-context-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -1689,41 +1455,47 @@
           </div>
         </div>
 
-        <!-- 3. Related Videos -->
-        <div class="practice-sidebar-section" id="sidebar-related-videos">
-          <div class="practice-sidebar-title">Related Videos</div>
-          <a href="https://www.youtube.com/watch?v=gIwMiSJfVAM" target="_blank" rel="noopener" class="sidebar-video-link">
-            <span class="sidebar-video-icon">
+        <!-- Related Videos -->
+        <div class="panel-section" id="panel-related-videos">
+          <div class="panel-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            Related Videos
+          </div>
+          <a href="https://www.youtube.com/watch?v=gIwMiSJfVAM" target="_blank" rel="noopener" class="panel-video-link">
+            <span class="panel-video-icon">
               <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </span>
-            <span class="sidebar-video-info">
-              <span class="sidebar-video-name">Solving Quadratics by Factorising</span>
-              <span class="sidebar-video-channel">Corbett Maths</span>
+            <span>
+              <span class="panel-video-name">Solving Quadratics by Factorising</span>
+              <span class="panel-video-channel">Corbett Maths</span>
             </span>
           </a>
-          <a href="https://www.youtube.com/watch?v=dOxFHq4anDQ" target="_blank" rel="noopener" class="sidebar-video-link">
-            <span class="sidebar-video-icon">
+          <a href="https://www.youtube.com/watch?v=dOxFHq4anDQ" target="_blank" rel="noopener" class="panel-video-link">
+            <span class="panel-video-icon">
               <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </span>
-            <span class="sidebar-video-info">
-              <span class="sidebar-video-name">Factorising Quadratics</span>
-              <span class="sidebar-video-channel">MathsGenie</span>
+            <span>
+              <span class="panel-video-name">Factorising Quadratics</span>
+              <span class="panel-video-channel">MathsGenie</span>
             </span>
           </a>
-          <a href="https://www.youtube.com/watch?v=xPJ9dpj0MdA" target="_blank" rel="noopener" class="sidebar-video-link">
-            <span class="sidebar-video-icon">
+          <a href="https://www.youtube.com/watch?v=xPJ9dpj0MdA" target="_blank" rel="noopener" class="panel-video-link">
+            <span class="panel-video-icon">
               <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             </span>
-            <span class="sidebar-video-info">
-              <span class="sidebar-video-name">GCSE Maths - Quadratic Equations</span>
-              <span class="sidebar-video-channel">Cognito</span>
+            <span>
+              <span class="panel-video-name">GCSE Maths - Quadratic Equations</span>
+              <span class="panel-video-channel">Cognito</span>
             </span>
           </a>
         </div>
 
-        <!-- 4. Topic Links -->
-        <div class="practice-sidebar-section" id="sidebar-topic-links">
-          <div class="practice-sidebar-title">Topic Links</div>
+        <!-- Topic Links -->
+        <div class="panel-section" id="panel-topic-links">
+          <div class="panel-section-title">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Topic Links
+          </div>
           <div class="topic-links-group">
             <div class="topic-links-label">Before this topic</div>
             <div class="topic-pills">
@@ -1740,9 +1512,132 @@
           </div>
         </div>
 
-      </aside><!-- /.practice-sidebar -->
+      </aside><!-- /.practice-panel -->
 
-    </div><!-- /.practice-two-col -->
+      <!-- MAIN AREA -->
+      <main class="practice-main" id="practice-main">
+
+        <!-- Mode Tabs -->
+        <div class="mode-tabs">
+          <button class="mode-tab" id="tab-learn" data-mode="learn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            Learn
+          </button>
+          <button class="mode-tab active" id="tab-practice" data-mode="practice">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            Practice
+          </button>
+        </div>
+
+        <!-- Content viewport -->
+        <div class="content-viewport" id="content-viewport">
+
+          <!-- LEARN VIEW -->
+          <div class="content-view hidden-left" id="learn-view">
+            <div class="learn-card" id="learn-card">
+              <div class="learn-card-header">
+                <span class="learn-counter" id="learn-counter">Example 1 of 4</span>
+                <span class="learn-difficulty diff-bronze" id="learn-difficulty">Bronze</span>
+              </div>
+              <div class="learn-question" id="learn-question"></div>
+              <div class="learn-steps-area" id="learn-steps-area"></div>
+              <div class="learn-actions" id="learn-actions">
+                <button class="learn-reveal-btn" id="learn-reveal-btn">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Show Next Step
+                </button>
+                <button class="learn-next-btn" id="learn-next-btn" style="display:none;">Next Example &rarr;</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- PRACTICE VIEW -->
+          <div class="content-view" id="practice-view">
+            <div class="problem-stage" id="problem-stage">
+
+              <!-- Problem card (single problem at a time) -->
+              <div class="problem-card" id="current-problem-card">
+                <div class="problem-card-header">
+                  <span class="problem-number-label" id="problem-number-label">Q1</span>
+                  <span class="problem-tier-pill pill-bronze" id="problem-tier-pill">Bronze</span>
+                </div>
+                <div class="problem-equation" id="problem-equation"></div>
+                <div class="problem-hint" id="problem-hint" style="display:none;"></div>
+                <div class="problem-inputs">
+                  <label>x =</label>
+                  <input type="text" class="problem-input" id="problem-input-a" inputmode="numeric" autocomplete="off" placeholder="?">
+                  <span class="problem-input-separator">or</span>
+                  <label>x =</label>
+                  <input type="text" class="problem-input" id="problem-input-b" inputmode="numeric" autocomplete="off" placeholder="?">
+                </div>
+                <button class="problem-check-btn" id="problem-check-btn">Check Answer</button>
+
+                <!-- Feedback (slides in) -->
+                <div class="problem-feedback-area" id="problem-feedback-area">
+                  <div id="problem-feedback-content"></div>
+                </div>
+
+                <!-- Next button (slides in) -->
+                <div class="problem-next-area" id="problem-next-area">
+                  <button class="problem-next-btn" id="problem-next-btn">Next Problem &rarr;</button>
+                </div>
+              </div>
+
+              <!-- Tier progress bar -->
+              <div class="tier-progress" id="tier-progress">
+                <div class="tier-progress-track">
+                  <div class="tier-progress-fill fill-bronze" id="tier-progress-fill" style="width: 0%;"></div>
+                </div>
+                <span class="tier-progress-label" id="tier-progress-label">0/0</span>
+              </div>
+
+              <!-- Tier celebration (overlays problem area briefly) -->
+              <div class="tier-celebration" id="tier-celebration">
+                <div class="celebration-badge cele-bronze" id="celebration-badge">
+                  <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
+                  <span id="celebration-text">Bronze Complete!</span>
+                </div>
+                <div class="celebration-sub" id="celebration-sub">Moving to Silver tier...</div>
+              </div>
+
+            </div>
+          </div>
+
+        </div><!-- /.content-viewport -->
+
+      </main><!-- /.practice-main -->
+
+    </div><!-- /.practice-layout -->
+
+    <!-- FINAL SUMMARY OVERLAY -->
+    <div class="summary-overlay" id="summary-overlay">
+      <div class="summary-modal">
+        <div class="summary-score" id="summary-score">0/0</div>
+        <div class="summary-label">problems correct</div>
+        <div class="summary-tiers">
+          <div class="summary-tier-row">
+            <span class="summary-tier-name stn-bronze">Bronze</span>
+            <div class="summary-tier-bar"><div class="summary-tier-fill stf-bronze" id="summary-bronze-fill" style="width:0%;"></div></div>
+            <span class="summary-tier-count" id="summary-bronze-count">0/0</span>
+          </div>
+          <div class="summary-tier-row">
+            <span class="summary-tier-name stn-silver">Silver</span>
+            <div class="summary-tier-bar"><div class="summary-tier-fill stf-silver" id="summary-silver-fill" style="width:0%;"></div></div>
+            <span class="summary-tier-count" id="summary-silver-count">0/0</span>
+          </div>
+          <div class="summary-tier-row">
+            <span class="summary-tier-name stn-gold">Gold</span>
+            <div class="summary-tier-bar"><div class="summary-tier-fill stf-gold" id="summary-gold-fill" style="width:0%;"></div></div>
+            <span class="summary-tier-count" id="summary-gold-count">0/0</span>
+          </div>
+        </div>
+        <div class="summary-message" id="summary-message"></div>
+        <div class="summary-actions">
+          <button class="summary-btn summary-btn-primary" id="summary-retry-btn">Try Again</button>
+          <a class="summary-btn summary-btn-secondary" id="summary-next-link" href="#">Next Topic &rarr;</a>
+        </div>
+      </div>
+    </div>
 
   </div><!-- /#practice-page -->
 
@@ -1757,73 +1652,183 @@
   <!-- ===== Practice interactivity (reads from window._problemBank set by loader) ===== -->
   <script>
     /* ============================================
-       Practice Page — Interactivity JS
-       Runs after practice-loader.js has set:
-         window._problemBank  = { bronze: [...], silver: [...], gold: [...] }
-         window._practiceReady = true  (signalled after render)
+       Practice Page — Single-Problem Interactivity
        ============================================ */
 
     // ===== STATE =====
     var practiceState = {
+      mode: 'practice',                  // 'learn' or 'practice'
+      // Practice state
+      currentTier: 'bronze',             // current tier
+      currentIndex: 0,                   // index within current tier
       bronze: { correct: 0, attempted: 0 },
       silver: { correct: 0, attempted: 0 },
       gold: { correct: 0, attempted: 0 },
-      answered: {},
       streak: 0,
-      tierComplete: { bronze: false, silver: false, gold: false }
+      answered: false,                   // is current problem answered?
+      allDone: false,
+      // Learn state
+      learnIndex: 0,                     // current worked example index
+      learnStepRevealed: 0              // how many steps revealed
     };
 
-    // ===== RENDER PROBLEMS =====
-    function renderProblems() {
+    // Flatten all problems in order
+    function getAllProblems() {
+      var bank = window._problemBank || {};
+      var all = [];
+      var tiers = ['bronze', 'silver', 'gold'];
+      for (var t = 0; t < tiers.length; t++) {
+        var items = bank[tiers[t]] || [];
+        for (var i = 0; i < items.length; i++) {
+          all.push({ tier: tiers[t], index: i, problem: items[i] });
+        }
+      }
+      return all;
+    }
+
+    function getTierCounts() {
+      var bank = window._problemBank || {};
+      return {
+        bronze: (bank.bronze || []).length,
+        silver: (bank.silver || []).length,
+        gold: (bank.gold || []).length
+      };
+    }
+
+    // ===== RENDER CURRENT PROBLEM =====
+    function renderCurrentProblem() {
       var bank = window._problemBank;
       if (!bank) return;
 
-      var tiers = ['bronze', 'silver', 'gold'];
-      for (var t = 0; t < tiers.length; t++) {
-        var tier = tiers[t];
-        var items = bank[tier] || [];
-        var grid = document.getElementById(tier + '-grid');
-        if (!grid) continue;
-        grid.innerHTML = '';
+      var tier = practiceState.currentTier;
+      var idx = practiceState.currentIndex;
+      var items = bank[tier] || [];
 
-        for (var i = 0; i < items.length; i++) {
-          var p = items[i];
-          var id = tier + '-' + i;
-          var card = document.createElement('div');
-          card.className = 'problem-card';
-          card.id = 'card-' + id;
-          var hintHtml = p.hint ? '<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;font-style:italic;">' + escapeHtml(p.hint) + '</div>' : '';
-          card.innerHTML =
-            '<div class="problem-number">Q' + (i + 1) + '</div>' +
-            '<div class="problem-equation">' + (p.display || '') + '</div>' +
-            hintHtml +
-            '<div class="problem-inputs">' +
-              '<label>x =</label>' +
-              '<input type="text" class="problem-input" id="input-' + id + '-a" inputmode="numeric" autocomplete="off" placeholder="?">' +
-              '<span class="problem-input-separator">or</span>' +
-              '<label>x =</label>' +
-              '<input type="text" class="problem-input" id="input-' + id + '-b" inputmode="numeric" autocomplete="off" placeholder="?">' +
-            '</div>' +
-            '<div class="problem-actions">' +
-              '<button class="check-btn" id="btn-' + id + '" data-tier="' + tier + '" data-index="' + i + '">Check</button>' +
-              '<div class="problem-feedback" id="feedback-' + id + '"></div>' +
-            '</div>' +
-            '<div id="reveal-' + id + '"></div>';
-          grid.appendChild(card);
-
-          // Bind check button
-          (function(aTier, aIndex) {
-            var btn = card.querySelector('.check-btn');
-            btn.addEventListener('click', function() { checkAnswer(aTier, aIndex); });
-            // Enter key on inputs
-            var inputs = card.querySelectorAll('.problem-input');
-            for (var j = 0; j < inputs.length; j++) {
-              inputs[j].addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') checkAnswer(aTier, aIndex);
-              });
-            }
-          })(tier, i);
+      if (idx >= items.length) {
+        // Move to next tier
+        if (tier === 'bronze') {
+          practiceState.currentTier = 'silver';
+          practiceState.currentIndex = 0;
+        } else if (tier === 'silver') {
+          practiceState.currentTier = 'gold';
+          practiceState.currentIndex = 0;
+        } else {
+          // All done
+          practiceState.allDone = true;
+          showSummary();
+          return;
         }
+        renderCurrentProblem();
+        return;
+      }
+
+      var p = items[idx];
+      practiceState.answered = false;
+
+      // Card elements
+      var card = document.getElementById('current-problem-card');
+      card.className = 'problem-card slide-in-right';
+
+      // Number label — compute overall Q number
+      var counts = getTierCounts();
+      var qNum = idx + 1;
+      if (tier === 'silver') qNum += counts.bronze;
+      if (tier === 'gold') qNum += counts.bronze + counts.silver;
+      document.getElementById('problem-number-label').textContent = 'Q' + qNum;
+
+      // Tier pill
+      var pill = document.getElementById('problem-tier-pill');
+      pill.className = 'problem-tier-pill pill-' + tier;
+      pill.textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
+
+      // Equation
+      document.getElementById('problem-equation').innerHTML = p.display || '';
+
+      // Hint
+      var hintEl = document.getElementById('problem-hint');
+      if (p.hint) {
+        hintEl.textContent = p.hint;
+        hintEl.style.display = '';
+      } else {
+        hintEl.style.display = 'none';
+      }
+
+      // Reset inputs
+      var inputA = document.getElementById('problem-input-a');
+      var inputB = document.getElementById('problem-input-b');
+      inputA.value = '';
+      inputB.value = '';
+      inputA.disabled = false;
+      inputB.disabled = false;
+      inputA.className = 'problem-input';
+      inputB.className = 'problem-input';
+
+      // Reset check button
+      var checkBtn = document.getElementById('problem-check-btn');
+      checkBtn.disabled = false;
+      checkBtn.style.display = '';
+
+      // Reset feedback
+      document.getElementById('problem-feedback-area').className = 'problem-feedback-area';
+      document.getElementById('problem-feedback-content').innerHTML = '';
+      document.getElementById('problem-next-area').className = 'problem-next-area';
+
+      // Update tier progress bar
+      updateTierProgress();
+
+      // Update topbar tier badge
+      updateTopbarTier();
+
+      // Render KaTeX
+      requestAnimationFrame(function() {
+        practiceRenderKaTeX(card);
+        // Focus first input after animation
+        setTimeout(function() { inputA.focus(); }, 400);
+      });
+    }
+
+    // ===== UPDATE TIER PROGRESS BAR =====
+    function updateTierProgress() {
+      var tier = practiceState.currentTier;
+      var counts = getTierCounts();
+      var total = counts[tier] || 0;
+      var attempted = practiceState[tier].attempted;
+      var fill = document.getElementById('tier-progress-fill');
+      var label = document.getElementById('tier-progress-label');
+
+      fill.className = 'tier-progress-fill fill-' + tier;
+      fill.style.width = total > 0 ? (attempted / total * 100) + '%' : '0%';
+      label.textContent = attempted + '/' + total;
+    }
+
+    // ===== UPDATE TOPBAR =====
+    function updateTopbarTier() {
+      var tier = practiceState.currentTier;
+      var counts = getTierCounts();
+      var badge = document.getElementById('topbar-tier-badge');
+      badge.className = 'topbar-tier-badge tier-is-' + tier;
+      var text = tier.charAt(0).toUpperCase() + tier.slice(1) + ' ' +
+        practiceState[tier].attempted + '/' + counts[tier];
+      document.getElementById('topbar-tier-text').textContent = text;
+    }
+
+    function updateTopbarScore() {
+      var counts = getTierCounts();
+      var total = counts.bronze + counts.silver + counts.gold;
+      var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
+      document.getElementById('topbar-score').textContent = correct + '/' + total;
+
+      // Streak
+      var streakEl = document.getElementById('topbar-streak');
+      if (practiceState.streak >= 3) {
+        document.getElementById('topbar-streak-count').textContent = practiceState.streak;
+        streakEl.className = 'topbar-streak visible';
+        // Re-trigger animation
+        streakEl.style.animation = 'none';
+        streakEl.offsetHeight;
+        streakEl.style.animation = '';
+      } else {
+        streakEl.className = 'topbar-streak';
       }
     }
 
@@ -1890,15 +1895,16 @@
     }
 
     // ===== CHECK ANSWER =====
-    function checkAnswer(tier, index) {
-      var id = tier + '-' + index;
-      if (practiceState.answered[id]) return;
+    function checkAnswer() {
+      if (practiceState.answered) return;
 
       var bank = window._problemBank;
-      if (!bank || !bank[tier] || !bank[tier][index]) return;
+      var tier = practiceState.currentTier;
+      var idx = practiceState.currentIndex;
+      if (!bank || !bank[tier] || !bank[tier][idx]) return;
 
-      var inputA = document.getElementById('input-' + id + '-a');
-      var inputB = document.getElementById('input-' + id + '-b');
+      var inputA = document.getElementById('problem-input-a');
+      var inputB = document.getElementById('problem-input-b');
       var valA = parseFloat(inputA.value.trim());
       var valB = parseFloat(inputB.value.trim());
 
@@ -1912,198 +1918,352 @@
         return;
       }
 
-      var expected = bank[tier][index].solutions.slice().sort(function(a, b) { return a - b; });
+      var problem = bank[tier][idx];
+      var expected = problem.solutions.slice().sort(function(a, b) { return a - b; });
       var given = [valA, valB].sort(function(a, b) { return a - b; });
       var isCorrect = expected[0] === given[0] && expected[1] === given[1];
 
-      practiceState.answered[id] = true;
+      practiceState.answered = true;
       practiceState[tier].attempted++;
 
-      var card = document.getElementById('card-' + id);
-      var btn = document.getElementById('btn-' + id);
-      var feedback = document.getElementById('feedback-' + id);
-      var reveal = document.getElementById('reveal-' + id);
+      var card = document.getElementById('current-problem-card');
+      var checkBtn = document.getElementById('problem-check-btn');
+      var feedbackArea = document.getElementById('problem-feedback-area');
+      var feedbackContent = document.getElementById('problem-feedback-content');
+      var nextArea = document.getElementById('problem-next-area');
 
-      btn.disabled = true;
+      checkBtn.disabled = true;
       inputA.disabled = true;
       inputB.disabled = true;
 
       if (isCorrect) {
         practiceState[tier].correct++;
         practiceState.streak++;
-        card.classList.add('correct');
+        card.classList.add('card-correct');
         inputA.classList.add('input-correct');
         inputB.classList.add('input-correct');
-        feedback.className = 'problem-feedback visible feedback-correct';
-        feedback.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Correct';
+
+        feedbackContent.innerHTML =
+          '<div class="feedback-box feedback-correct">' +
+            '<span class="feedback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+            '<div class="feedback-body">' +
+              '<div class="feedback-title">Correct!</div>' +
+              '<div class="feedback-text">Well done. The solutions are x = ' + expected[0] + ' and x = ' + expected[1] + '.</div>' +
+            '</div>' +
+          '</div>';
       } else {
         practiceState.streak = 0;
-        card.classList.add('incorrect');
+        card.classList.add('card-incorrect');
         inputA.classList.add('input-incorrect');
         inputB.classList.add('input-incorrect');
-        feedback.className = 'problem-feedback visible feedback-incorrect';
-        feedback.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Not quite';
 
-        var sols = bank[tier][index].solutions;
-        var misconception = detectMisconception([valA, valB], sols, bank[tier][index]);
+        var misconception = detectMisconception([valA, valB], problem.solutions, problem);
 
-        reveal.innerHTML = '<div class="correct-answer-reveal">' +
-          '<div class="misconception-tip">' +
-            '<strong>What went wrong:</strong> ' + misconception.message +
-          '</div>' +
-          '<div style="margin-top:0.5rem;font-weight:600;">Correct answer: x = ' + sols[0] + ' or x = ' + sols[1] + '</div>' +
-        '</div>';
-
-        // Render KaTeX in the misconception message
-        if (typeof renderMathInElement === 'function') {
-          renderMathInElement(reveal, {
-            delimiters: [
-              { left: '$$', right: '$$', display: true },
-              { left: '\\(', right: '\\)', display: false },
-            ],
-            throwOnError: false,
-          });
-        }
+        feedbackContent.innerHTML =
+          '<div class="feedback-box feedback-incorrect">' +
+            '<span class="feedback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>' +
+            '<div class="feedback-body">' +
+              '<div class="feedback-title">Not quite</div>' +
+              '<div class="misconception-tip"><strong>What went wrong:</strong> ' + misconception.message + '</div>' +
+              '<div class="correct-answer-text">Correct answer: x = ' + problem.solutions[0] + ' or x = ' + problem.solutions[1] + '</div>' +
+            '</div>' +
+          '</div>';
       }
 
-      updateProgress();
+      feedbackArea.className = 'problem-feedback-area shown';
+      nextArea.className = 'problem-next-area shown';
+      checkBtn.style.display = 'none';
+
+      // Render KaTeX in feedback
+      practiceRenderKaTeX(feedbackContent);
+
+      // Update scores
+      updateTierProgress();
+      updateTopbarTier();
+      updateTopbarScore();
+
+      // Save progress
+      saveProgress();
     }
 
-    // ===== UPDATE PROGRESS =====
-    function updateProgress() {
-      var bank = window._problemBank || {};
-      var bCount = (bank.bronze || []).length;
-      var sCount = (bank.silver || []).length;
-      var gCount = (bank.gold || []).length;
-      var totalCount = bCount + sCount + gCount;
+    // ===== NEXT PROBLEM =====
+    function nextProblem() {
+      var tier = practiceState.currentTier;
+      var counts = getTierCounts();
+      var tierTotal = counts[tier];
+      var tierAttempted = practiceState[tier].attempted;
 
-      var b = practiceState.bronze.correct;
-      var s = practiceState.silver.correct;
-      var g = practiceState.gold.correct;
-      var total = b + s + g;
-      var attempted = practiceState.bronze.attempted + practiceState.silver.attempted + practiceState.gold.attempted;
-
-      // Score bar
-      var scoreBar = document.getElementById('score-bar');
-      if (attempted > 0) scoreBar.style.display = 'flex';
-      document.getElementById('score-total').textContent = total + '/' + totalCount;
-      document.getElementById('score-bronze').textContent = b + '/' + bCount;
-      document.getElementById('score-silver').textContent = s + '/' + sCount;
-      document.getElementById('score-gold').textContent = g + '/' + gCount;
-
-      // Tier scores
-      document.getElementById('bronze-score').textContent = b + '/' + bCount + ' correct';
-      document.getElementById('silver-score').textContent = s + '/' + sCount + ' correct';
-      document.getElementById('gold-score').textContent = g + '/' + gCount + ' correct';
-
-      // Progress bars
-      document.getElementById('progress-bronze').style.width = (bCount > 0 ? (b / bCount) * 100 : 0) + '%';
-      document.getElementById('progress-silver').style.width = (sCount > 0 ? (s / sCount) * 100 : 0) + '%';
-      document.getElementById('progress-gold').style.width = (gCount > 0 ? (g / gCount) * 100 : 0) + '%';
-      document.getElementById('progress-bronze-count').textContent = b + '/' + bCount;
-      document.getElementById('progress-silver-count').textContent = s + '/' + sCount;
-      document.getElementById('progress-gold-count').textContent = g + '/' + gCount;
-      document.getElementById('progress-score-display').textContent = total + '/' + totalCount;
-
-      // Progress ring
-      var ringCircle = document.getElementById('progress-ring-circle');
-      var ringValue = document.getElementById('progress-ring-value');
-      if (ringCircle && ringValue) {
-        var circumference = 2 * Math.PI * 42; // ~263.9
-        var pct = attempted > 0 ? (total / totalCount) : 0;
-        ringCircle.setAttribute('stroke-dashoffset', circumference * (1 - pct));
-        ringValue.textContent = Math.round(pct * 100) + '%';
-      }
-
-      // Streak counter
-      var streakContainer = document.getElementById('streak-container');
-      var streakDisplay = document.getElementById('streak-display');
-      if (streakContainer && streakDisplay) {
-        if (practiceState.streak >= 3) {
-          streakDisplay.innerHTML = '\uD83D\uDD25 ' + practiceState.streak + ' streak';
-          streakContainer.style.display = '';
-          // Re-trigger animation
-          streakDisplay.style.animation = 'none';
-          streakDisplay.offsetHeight; // force reflow
-          streakDisplay.style.animation = '';
-        } else {
-          streakContainer.style.display = 'none';
-        }
-      }
-
-      // Tier completion badges
-      var tierNames = ['bronze', 'silver', 'gold'];
-      var tierCounts = { bronze: bCount, silver: sCount, gold: gCount };
-      for (var ti = 0; ti < tierNames.length; ti++) {
-        var tn = tierNames[ti];
-        var tierCorrect = practiceState[tn].correct;
-        var tierTotal = tierCounts[tn];
-        if (tierTotal > 0 && tierCorrect === tierTotal && !practiceState.tierComplete[tn]) {
-          practiceState.tierComplete[tn] = true;
-          var tierHeader = document.querySelector('#tier-' + tn + ' .tier-header');
-          if (tierHeader && !tierHeader.querySelector('.tier-complete-badge')) {
-            var badge = document.createElement('span');
-            badge.className = 'tier-complete-badge';
-            badge.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Tier Complete!';
-            tierHeader.appendChild(badge);
+      // Check if tier just completed
+      if (tierAttempted >= tierTotal) {
+        // Show celebration, then advance
+        showTierCelebration(tier, function() {
+          if (tier === 'bronze') {
+            practiceState.currentTier = 'silver';
+            practiceState.currentIndex = 0;
+          } else if (tier === 'silver') {
+            practiceState.currentTier = 'gold';
+            practiceState.currentIndex = 0;
+          } else {
+            practiceState.allDone = true;
+            showSummary();
+            return;
           }
-        }
+          animateToNextProblem();
+        });
+      } else {
+        practiceState.currentIndex++;
+        animateToNextProblem();
       }
+    }
+
+    function animateToNextProblem() {
+      var card = document.getElementById('current-problem-card');
+      card.classList.add('slide-out-left');
+      card.classList.remove('slide-in-right', 'card-correct', 'card-incorrect');
+      setTimeout(function() {
+        renderCurrentProblem();
+      }, 300);
+    }
+
+    // ===== TIER CELEBRATION =====
+    function showTierCelebration(tier, callback) {
+      var celebration = document.getElementById('tier-celebration');
+      var badge = document.getElementById('celebration-badge');
+      var text = document.getElementById('celebration-text');
+      var sub = document.getElementById('celebration-sub');
+
+      badge.className = 'celebration-badge cele-' + tier;
+      var tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      text.textContent = tierName + ' Complete!';
+
+      if (tier === 'bronze') {
+        sub.textContent = 'Moving to Silver tier...';
+      } else if (tier === 'silver') {
+        sub.textContent = 'Moving to Gold tier...';
+      } else {
+        sub.textContent = 'All tiers complete!';
+      }
+
+      celebration.classList.add('active');
+
+      setTimeout(function() {
+        celebration.classList.remove('active');
+        if (callback) callback();
+      }, 1500);
+    }
+
+    // ===== FINAL SUMMARY =====
+    function showSummary() {
+      var counts = getTierCounts();
+      var total = counts.bronze + counts.silver + counts.gold;
+      var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
+
+      document.getElementById('summary-score').textContent = correct + '/' + total;
+
+      // Tier bars
+      function setTierBar(tier, tierCorrect, tierTotal) {
+        var pct = tierTotal > 0 ? (tierCorrect / tierTotal * 100) : 0;
+        document.getElementById('summary-' + tier + '-fill').style.width = pct + '%';
+        document.getElementById('summary-' + tier + '-count').textContent = tierCorrect + '/' + tierTotal;
+      }
+      setTierBar('bronze', practiceState.bronze.correct, counts.bronze);
+      setTierBar('silver', practiceState.silver.correct, counts.silver);
+      setTierBar('gold', practiceState.gold.correct, counts.gold);
 
       // Message
-      var msgEl = document.getElementById('progress-message');
-      if (attempted === 0) {
-        msgEl.innerHTML = 'Answer your first problem to get started.';
-      } else if (total === totalCount) {
-        msgEl.innerHTML = '<strong>Perfect score!</strong> You have mastered this topic.';
-      } else if (total >= totalCount * 0.8) {
-        msgEl.innerHTML = '<strong>Excellent work!</strong> You clearly understand the method. Try the ones you missed again.';
-      } else if (total >= totalCount * 0.5) {
-        msgEl.innerHTML = '<strong>Good progress.</strong> Review the worked examples for the types you found tricky.';
-      } else if (attempted >= totalCount * 0.5) {
-        msgEl.innerHTML = 'Keep going. Scroll back to the <strong>method card</strong> and worked examples if you need a refresher.';
+      var msgEl = document.getElementById('summary-message');
+      var pct = total > 0 ? correct / total : 0;
+      if (pct === 1) {
+        msgEl.innerHTML = '<strong>Perfect score!</strong> You have fully mastered this topic. Incredible work.';
+      } else if (pct >= 0.8) {
+        msgEl.innerHTML = '<strong>Excellent work!</strong> You clearly understand the method. Review the ones you missed and try again.';
+      } else if (pct >= 0.5) {
+        msgEl.innerHTML = '<strong>Good progress.</strong> Head back to the Learn tab and review the worked examples for the tricky parts.';
       } else {
-        msgEl.innerHTML = 'You\'re just getting started. Take your time with each problem.';
+        msgEl.innerHTML = 'Keep going \u2014 switch to the <strong>Learn</strong> tab to study the worked examples, then try again.';
       }
 
-      // Save progress to localStorage
+      document.getElementById('summary-overlay').classList.add('active');
+
+      // Delay bar animations
+      setTimeout(function() {
+        setTierBar('bronze', practiceState.bronze.correct, counts.bronze);
+        setTierBar('silver', practiceState.silver.correct, counts.silver);
+        setTierBar('gold', practiceState.gold.correct, counts.gold);
+      }, 100);
+    }
+
+    // ===== RETRY =====
+    function retryAll() {
+      practiceState.currentTier = 'bronze';
+      practiceState.currentIndex = 0;
+      practiceState.bronze = { correct: 0, attempted: 0 };
+      practiceState.silver = { correct: 0, attempted: 0 };
+      practiceState.gold = { correct: 0, attempted: 0 };
+      practiceState.streak = 0;
+      practiceState.answered = false;
+      practiceState.allDone = false;
+
+      document.getElementById('summary-overlay').classList.remove('active');
+      updateTopbarScore();
+      renderCurrentProblem();
+    }
+
+    // ===== SAVE PROGRESS =====
+    function saveProgress() {
       try {
+        var counts = getTierCounts();
+        var total = counts.bronze + counts.silver + counts.gold;
+        var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
+        var attempted = practiceState.bronze.attempted + practiceState.silver.attempted + practiceState.gold.attempted;
         var key = 'sv-practice-' + window.location.pathname;
         localStorage.setItem(key, JSON.stringify({
-          total: total,
-          totalCount: totalCount,
-          bronze: b,
-          silver: s,
-          gold: g,
+          total: correct,
+          totalCount: total,
+          bronze: practiceState.bronze.correct,
+          silver: practiceState.silver.correct,
+          gold: practiceState.gold.correct,
           attempted: attempted,
           ts: Date.now()
         }));
       } catch(e) { /* ignore */ }
     }
 
-    // ===== WORKED EXAMPLES =====
-    window.toggleWorkedExample = function(id) {
-      var el = document.getElementById(id);
-      if (!el) return;
-      var wasActive = el.classList.contains('active');
-      // Close all
-      var all = document.querySelectorAll('.worked-example');
-      for (var i = 0; i < all.length; i++) all[i].classList.remove('active');
-      // Open if wasn't active
-      if (!wasActive) {
-        el.classList.add('active');
-        setTimeout(function() { practiceRenderKaTeX(el); }, 50);
+    // ===== LEARN MODE =====
+    function renderLearnExample() {
+      var we = window._workedExamples;
+      if (!we || !we.length) {
+        document.getElementById('learn-question').textContent = 'No worked examples available for this lesson.';
+        document.getElementById('learn-actions').style.display = 'none';
+        return;
       }
-    };
 
-    window.revealStep = function(btn) {
-      var step = btn.previousElementSibling;
-      if (!step) return;
-      step.classList.remove('step-hidden');
-      step.classList.add('step-revealed');
-      btn.style.display = 'none';
-      setTimeout(function() { practiceRenderKaTeX(step); }, 50);
-    };
+      var idx = practiceState.learnIndex;
+      if (idx >= we.length) idx = we.length - 1;
+      var example = we[idx];
+
+      practiceState.learnStepRevealed = 0;
+
+      document.getElementById('learn-counter').textContent = 'Example ' + (idx + 1) + ' of ' + we.length;
+
+      // Difficulty
+      var diffEl = document.getElementById('learn-difficulty');
+      var diff = (example.difficulty || 'bronze').toLowerCase();
+      diffEl.className = 'learn-difficulty diff-' + diff;
+      diffEl.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
+
+      // Question
+      document.getElementById('learn-question').innerHTML = example.question || '';
+
+      // Steps
+      var stepsArea = document.getElementById('learn-steps-area');
+      stepsArea.innerHTML = '';
+      var steps = example.steps || [];
+      for (var i = 0; i < steps.length; i++) {
+        var step = steps[i];
+        var isLast = i === steps.length - 1;
+        var div = document.createElement('div');
+        div.className = 'learn-step' + (isLast ? ' is-answer' : '');
+        div.setAttribute('data-step-index', i);
+        div.innerHTML =
+          '<div class="learn-step-label">' + escapeHtml(step.label || (isLast ? 'Answer' : 'Step ' + (i + 1))) + '</div>' +
+          '<div class="learn-step-content">' + (step.content || '') + '</div>';
+        stepsArea.appendChild(div);
+      }
+
+      // Buttons
+      var revealBtn = document.getElementById('learn-reveal-btn');
+      var nextBtn = document.getElementById('learn-next-btn');
+      revealBtn.style.display = '';
+      revealBtn.textContent = steps.length > 0 ? 'Show Step 1' : 'No steps';
+      nextBtn.style.display = 'none';
+
+      if (idx >= we.length - 1) {
+        nextBtn.textContent = 'Back to first example';
+      } else {
+        nextBtn.textContent = 'Next Example \u2192';
+      }
+
+      // Render KaTeX
+      requestAnimationFrame(function() {
+        practiceRenderKaTeX(document.getElementById('learn-card'));
+      });
+    }
+
+    function revealNextLearnStep() {
+      var we = window._workedExamples;
+      if (!we || !we.length) return;
+      var example = we[practiceState.learnIndex];
+      var steps = example.steps || [];
+      var idx = practiceState.learnStepRevealed;
+
+      if (idx >= steps.length) return;
+
+      var stepEls = document.getElementById('learn-steps-area').children;
+      if (stepEls[idx]) {
+        stepEls[idx].classList.add('revealed');
+        practiceRenderKaTeX(stepEls[idx]);
+      }
+
+      practiceState.learnStepRevealed++;
+
+      var revealBtn = document.getElementById('learn-reveal-btn');
+      var nextBtn = document.getElementById('learn-next-btn');
+
+      if (practiceState.learnStepRevealed >= steps.length) {
+        revealBtn.style.display = 'none';
+        nextBtn.style.display = '';
+      } else {
+        var isNext = practiceState.learnStepRevealed === steps.length - 1;
+        revealBtn.innerHTML =
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ' +
+          (isNext ? 'Show Answer' : 'Show Step ' + (practiceState.learnStepRevealed + 1));
+      }
+    }
+
+    function nextLearnExample() {
+      var we = window._workedExamples || [];
+      practiceState.learnIndex++;
+      if (practiceState.learnIndex >= we.length) practiceState.learnIndex = 0;
+      renderLearnExample();
+    }
+
+    // ===== MODE SWITCHING =====
+    function switchMode(mode) {
+      practiceState.mode = mode;
+      var tabLearn = document.getElementById('tab-learn');
+      var tabPractice = document.getElementById('tab-practice');
+      var learnView = document.getElementById('learn-view');
+      var practiceView = document.getElementById('practice-view');
+
+      if (mode === 'learn') {
+        tabLearn.classList.add('active');
+        tabPractice.classList.remove('active');
+        learnView.className = 'content-view';
+        practiceView.className = 'content-view hidden';
+      } else {
+        tabPractice.classList.add('active');
+        tabLearn.classList.remove('active');
+        practiceView.className = 'content-view';
+        learnView.className = 'content-view hidden-left';
+      }
+
+      // Persist
+      try { localStorage.setItem('sv-practice-mode', mode); } catch(e) {}
+    }
+
+    // ===== PANEL TOGGLE (mobile) =====
+    function togglePanel() {
+      var panel = document.getElementById('practice-panel');
+      var overlay = document.getElementById('panel-overlay');
+      var isOpen = panel.classList.toggle('panel-open');
+      overlay.classList.toggle('visible', isOpen);
+    }
+
+    function closePanel() {
+      document.getElementById('practice-panel').classList.remove('panel-open');
+      document.getElementById('panel-overlay').classList.remove('visible');
+    }
 
     // ===== KaTeX HELPER =====
     function practiceRenderKaTeX(el) {
@@ -2119,135 +2279,6 @@
       }
     }
 
-    // ===== SCROLL PROGRESS =====
-    function initScrollProgress() {
-      var bar = document.querySelector('.scroll-progress');
-      if (!bar) return;
-      window.addEventListener('scroll', function() {
-        var scrollTop = window.scrollY;
-        var docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        bar.style.width = docHeight > 0 ? (scrollTop / docHeight) * 100 + '%' : '0%';
-      });
-    }
-
-    // ===== MOBILE NAV =====
-    function initMobileNav() {
-      var btn = document.querySelector('.mobile-menu-btn');
-      var nav = document.getElementById('header-nav');
-      var overlay = document.querySelector('.mobile-overlay');
-      if (!btn || !nav) return;
-      btn.addEventListener('click', function() {
-        var open = nav.classList.toggle('open');
-        btn.setAttribute('aria-expanded', open);
-        if (overlay) overlay.classList.toggle('open', open);
-      });
-      if (overlay) {
-        overlay.addEventListener('click', function() {
-          nav.classList.remove('open');
-          btn.setAttribute('aria-expanded', 'false');
-          overlay.classList.remove('open');
-        });
-      }
-    }
-
-    // ===== HEADER SCROLL EFFECT =====
-    function initHeaderScroll() {
-      var header = document.querySelector('.page-header');
-      if (!header) return;
-      var sentinel = document.createElement('div');
-      sentinel.style.height = '1px';
-      document.body.prepend(sentinel);
-      var observer = new IntersectionObserver(
-        function(entries) { header.classList.toggle('scrolled', !entries[0].isIntersecting); },
-        { threshold: [1], rootMargin: '-1px 0px 0px 0px' }
-      );
-      observer.observe(sentinel);
-    }
-
-    // ===== NARRATION PLAYER =====
-    function initNarrationPlayer() {
-      var manifest = window.narrationManifest;
-      if (!manifest || !manifest.length) return;
-
-      var wrapper = document.getElementById('narration-wrapper');
-      if (!wrapper) return;
-
-      var audioEl = wrapper.querySelector('.narration-audio');
-      var source = audioEl.querySelector('source');
-      var playBtn = wrapper.querySelector('.narration-play');
-      var progressBar = wrapper.querySelector('.narration-progress');
-      var progressFill = wrapper.querySelector('.narration-progress-fill');
-      var timeEl = wrapper.querySelector('.narration-time');
-      var speedBtn = wrapper.querySelector('.narration-speed');
-
-      // Build playlist from manifest
-      var playlist = [];
-      for (var i = 0; i < manifest.length; i++) {
-        if (manifest[i].url) playlist.push(manifest[i].url);
-      }
-      if (!playlist.length) return;
-
-      wrapper.style.display = '';
-      var currentTrack = 0;
-      var speeds = [1, 1.25, 1.5, 0.75];
-      var speedIndex = 0;
-
-      function loadTrack(idx) {
-        source.src = playlist[idx];
-        audioEl.load();
-      }
-
-      function formatTime(s) {
-        var m = Math.floor(s / 60);
-        var sec = Math.floor(s % 60);
-        return m + ':' + (sec < 10 ? '0' : '') + sec;
-      }
-
-      loadTrack(0);
-
-      playBtn.addEventListener('click', function() {
-        if (audioEl.paused) {
-          audioEl.play();
-          wrapper.classList.add('playing');
-        } else {
-          audioEl.pause();
-          wrapper.classList.remove('playing');
-        }
-      });
-
-      audioEl.addEventListener('timeupdate', function() {
-        if (!audioEl.duration) return;
-        var pct = (audioEl.currentTime / audioEl.duration) * 100;
-        progressFill.style.width = pct + '%';
-        timeEl.textContent = formatTime(audioEl.currentTime) + ' / ' + formatTime(audioEl.duration);
-      });
-
-      audioEl.addEventListener('ended', function() {
-        currentTrack++;
-        if (currentTrack < playlist.length) {
-          loadTrack(currentTrack);
-          audioEl.play();
-        } else {
-          wrapper.classList.remove('playing');
-          currentTrack = 0;
-          loadTrack(0);
-        }
-      });
-
-      progressBar.addEventListener('click', function(e) {
-        if (!audioEl.duration) return;
-        var rect = progressBar.getBoundingClientRect();
-        var pct = (e.clientX - rect.left) / rect.width;
-        audioEl.currentTime = pct * audioEl.duration;
-      });
-
-      speedBtn.addEventListener('click', function() {
-        speedIndex = (speedIndex + 1) % speeds.length;
-        audioEl.playbackRate = speeds[speedIndex];
-        speedBtn.textContent = speeds[speedIndex] + 'x';
-      });
-    }
-
     // ===== UTILITY =====
     function escapeHtml(str) {
       var div = document.createElement('div');
@@ -2255,28 +2286,62 @@
       return div.innerHTML;
     }
 
-    // ===== INIT PRACTICE FEATURES =====
-    // Called by practice-loader.js after content is injected
+    // ===== INIT =====
     window.initPracticeFeatures = function() {
-      try { renderProblems(); } catch(e) { console.error('renderProblems failed:', e); }
-      try { initNarrationPlayer(); } catch(e) { console.warn('narrationPlayer:', e); }
-      try { updateProgress(); } catch(e) { console.warn('updateProgress:', e); }
+      // Bind mode tabs
+      document.getElementById('tab-learn').addEventListener('click', function() { switchMode('learn'); });
+      document.getElementById('tab-practice').addEventListener('click', function() { switchMode('practice'); });
 
-      // Wait for KaTeX then render
-      var waitForKaTeX = setInterval(function() {
-        if (typeof renderMathInElement === 'function') {
-          clearInterval(waitForKaTeX);
-          practiceRenderKaTeX(document.body);
+      // Bind check button
+      document.getElementById('problem-check-btn').addEventListener('click', checkAnswer);
+
+      // Bind next button
+      document.getElementById('problem-next-btn').addEventListener('click', nextProblem);
+
+      // Enter key on inputs
+      document.getElementById('problem-input-a').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          if (practiceState.answered) nextProblem();
+          else checkAnswer();
         }
-      }, 100);
-    };
+      });
+      document.getElementById('problem-input-b').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          if (practiceState.answered) nextProblem();
+          else checkAnswer();
+        }
+      });
 
-    // Init basic UI features immediately
-    try { initScrollProgress(); } catch(e) { console.warn('scrollProgress:', e); }
-    try { initMobileNav(); } catch(e) { console.warn('mobileNav:', e); }
-    try { initHeaderScroll(); } catch(e) { console.warn('headerScroll:', e); }
+      // Learn mode buttons
+      document.getElementById('learn-reveal-btn').addEventListener('click', revealNextLearnStep);
+      document.getElementById('learn-next-btn').addEventListener('click', nextLearnExample);
+
+      // Panel toggle (mobile)
+      document.getElementById('panel-toggle-btn').addEventListener('click', togglePanel);
+      document.getElementById('panel-overlay').addEventListener('click', closePanel);
+
+      // Retry button
+      document.getElementById('summary-retry-btn').addEventListener('click', retryAll);
+
+      // Restore mode preference
+      try {
+        var savedMode = localStorage.getItem('sv-practice-mode');
+        if (savedMode === 'learn') switchMode('learn');
+      } catch(e) {}
+
+      // Render first problem
+      if (window._problemBank) {
+        var counts = getTierCounts();
+        document.getElementById('topbar-score').textContent = '0/' + (counts.bronze + counts.silver + counts.gold);
+        renderCurrentProblem();
+      }
+
+      // Render first worked example
+      if (window._workedExamples && window._workedExamples.length) {
+        renderLearnExample();
+      }
+    };
   </script>
 
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
 </body>
 </html>

@@ -161,115 +161,53 @@
     if (unit.accent_light) document.documentElement.style.setProperty('--accent-light', unit.accent_light);
     if (unit.accent_badge) document.documentElement.style.setProperty('--accent-badge', unit.accent_badge);
 
-    // Header unit label
-    var headerLabel = document.getElementById('header-unit-label');
-    headerLabel.textContent = unit.name + ' Practice';
-    if (unit.accent) headerLabel.style.color = unit.accent;
-    if (unit.accent_badge) headerLabel.style.background = unit.accent_badge;
-
-    // Navigation links
     var subjectSlug = params.subjectSlug;
     var unitSlug = params.unitSlug;
-    document.getElementById('nav-unit-overview').href = browseUrl(subjectSlug, unitSlug);
-    document.getElementById('nav-exam-technique').href = '/guide/' + subjectSlug + '/exam-technique';
-    document.getElementById('nav-revision-technique').href = '/guide/' + subjectSlug + '/revision-technique';
 
-    if (data.prevLesson) {
-      var prevLink = document.getElementById('nav-prev-lesson');
-      prevLink.href = practiceUrl(subjectSlug, unitSlug, data.prevLesson.lesson_number);
-      prevLink.style.display = '';
-    }
+    // ===== TOP BAR =====
+    var topbarTitle = document.getElementById('topbar-lesson-title');
+    if (topbarTitle) topbarTitle.textContent = lesson.title;
 
-    if (data.nextLesson) {
-      var nextLink = document.getElementById('nav-next-lesson');
-      nextLink.href = practiceUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number);
-      nextLink.style.display = '';
-    }
+    var topbarUnit = document.getElementById('topbar-unit-name');
+    if (topbarUnit) topbarUnit.textContent = '\u2014 ' + unit.name;
 
-    // Lesson header (legacy — hidden, but still populated for data)
-    document.getElementById('lesson-number').textContent =
-      unit.name + ' \u2014 Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
+    // Legacy hidden elements (for compatibility)
+    var lessonNumberEl = document.getElementById('lesson-number');
+    if (lessonNumberEl) lessonNumberEl.textContent = unit.name + ' \u2014 Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
 
-    // Insert title text before the format badge
     var titleEl = document.getElementById('lesson-title');
-    var badge = titleEl.querySelector('.format-badge');
-    titleEl.insertBefore(document.createTextNode(lesson.title + ' '), badge);
-
-    // Subtitle
-    if (lesson.description) {
-      document.getElementById('lesson-subtitle').textContent = lesson.description;
+    if (titleEl) {
+      var badge = titleEl.querySelector('.format-badge');
+      if (badge) titleEl.insertBefore(document.createTextNode(lesson.title + ' '), badge);
     }
 
-    // ===== COLOURED BANNER =====
-    var bannerLessonPill = document.getElementById('banner-lesson-pill');
-    if (bannerLessonPill) {
-      bannerLessonPill.textContent = 'Lesson ' + lesson.lesson_number;
-    }
-    var bannerTitle = document.getElementById('banner-title');
-    if (bannerTitle) {
-      bannerTitle.textContent = lesson.title;
-    }
-    var bannerUnit = document.getElementById('banner-unit');
-    if (bannerUnit) {
-      bannerUnit.textContent = unit.name + (unit.subtitle ? ' \u2014 ' + unit.subtitle : '');
-    }
+    var subtitleEl = document.getElementById('lesson-subtitle');
+    if (subtitleEl && lesson.description) subtitleEl.textContent = lesson.description;
 
-    // ===== A. METHOD CARD =====
+    // ===== LEFT PANEL: METHOD CARD =====
     var mc = pd.method_card;
     if (mc) {
-      var methodCard = document.getElementById('method-card');
-      methodCard.style.display = '';
+      var panelMethod = document.getElementById('panel-method');
+      panelMethod.style.display = '';
 
-      document.getElementById('method-title').textContent = mc.title || '';
+      var panelMethodTitle = document.getElementById('panel-method-title');
+      if (panelMethodTitle) panelMethodTitle.textContent = mc.title || '';
 
-      // Content paragraphs
-      var contentEl = document.getElementById('method-content');
-      if (mc.content) {
-        contentEl.innerHTML = mc.content; // HTML with KaTeX
-      }
-
-      // Steps
-      var stepsContainer = document.getElementById('method-steps-container');
-      if (mc.steps && mc.steps.length) {
-        var ol = document.createElement('ol');
-        ol.className = 'method-steps';
+      var panelSteps = document.getElementById('panel-method-steps');
+      if (mc.steps && mc.steps.length && panelSteps) {
+        panelSteps.innerHTML = '';
         for (var si = 0; si < mc.steps.length; si++) {
           var li = document.createElement('li');
-          li.innerHTML = mc.steps[si];
-          ol.appendChild(li);
-        }
-        stepsContainer.appendChild(ol);
-      }
-
-      // Example
-      var exContainer = document.getElementById('method-example-container');
-      if (mc.example) {
-        var exDiv = document.createElement('div');
-        exDiv.className = 'method-example';
-        exDiv.innerHTML = '<div class="method-example-label">Worked Example</div>' + mc.example;
-        exContainer.appendChild(exDiv);
-      }
-
-      // ===== SIDEBAR QUICK REFERENCE (condensed steps) =====
-      if (mc.steps && mc.steps.length) {
-        var qrSection = document.getElementById('sidebar-quick-ref');
-        var qrList = document.getElementById('sidebar-method-steps');
-        if (qrSection && qrList) {
-          qrList.innerHTML = '';
-          for (var qi = 0; qi < mc.steps.length; qi++) {
-            var qrLi = document.createElement('li');
-            // Strip HTML tags for condensed view, keep plain text
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = mc.steps[qi];
-            qrLi.textContent = tempDiv.textContent;
-            qrList.appendChild(qrLi);
-          }
-          qrSection.style.display = '';
+          // Strip HTML for compact panel view
+          var tempDiv = document.createElement('div');
+          tempDiv.innerHTML = mc.steps[si];
+          li.textContent = tempDiv.textContent;
+          panelSteps.appendChild(li);
         }
       }
     }
 
-    // ===== SIDEBAR EXAM CONTEXT (from practice_data or hardcoded defaults) =====
+    // ===== LEFT PANEL: EXAM CONTEXT =====
     var examCtx = pd.exam_context;
     if (examCtx) {
       if (examCtx.paper) {
@@ -286,103 +224,40 @@
       }
     }
 
-    // ===== B. WORKED EXAMPLES =====
+    // ===== WORKED EXAMPLES (stored for learn mode) =====
     var we = pd.worked_examples;
     if (we && we.length) {
-      var weSection = document.getElementById('worked-section');
-      weSection.style.display = '';
-
-      var weContainer = document.getElementById('worked-examples-container');
-      for (var wi = 0; wi < we.length; wi++) {
-        var example = we[wi];
-        var weId = 'we-' + (wi + 1);
-        var diffClass = example.difficulty ? 'difficulty-' + example.difficulty.toLowerCase() : '';
-
-        var weHtml = '<div class="worked-example" id="' + weId + '">';
-        weHtml += '<div class="worked-example-header" onclick="toggleWorkedExample(\'' + weId + '\')">';
-        weHtml += '<span class="worked-example-number">' + (wi + 1) + '</span>';
-        weHtml += '<span class="worked-example-question">' + escapeHtml(example.question || '') + '</span>';
-        if (example.difficulty) {
-          weHtml += '<span class="worked-example-difficulty ' + diffClass + '">' + escapeHtml(example.difficulty) + '</span>';
-        }
-        weHtml += '<svg class="worked-example-toggle" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
-        weHtml += '</div>';
-        weHtml += '<div class="worked-example-body"><div class="worked-steps">';
-
-        var steps = example.steps || [];
-        for (var si2 = 0; si2 < steps.length; si2++) {
-          var step = steps[si2];
-          var isLast = si2 === steps.length - 1;
-          var stepClass = isLast ? 'step-content step-hidden step-answer' : 'step-content step-hidden';
-          var btnLabel = isLast ? 'Show answer' : 'Show step';
-
-          weHtml += '<div class="worked-step">';
-          weHtml += '<div class="step-label">' + escapeHtml(step.label || ('Step ' + (si2 + 1))) + '</div>';
-          weHtml += '<div class="' + stepClass + '" data-step="' + (si2 + 1) + '">';
-          if (isLast) weHtml += '<div class="step-label">Answer</div>';
-          weHtml += step.content || '';
-          weHtml += '</div>';
-          weHtml += '<button class="step-reveal-btn" onclick="revealStep(this)">';
-          weHtml += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-          weHtml += ' ' + btnLabel;
-          weHtml += '</button>';
-          weHtml += '</div>';
-        }
-
-        weHtml += '</div></div></div>';
-        weContainer.innerHTML += weHtml;
-      }
+      window._workedExamples = we;
+    } else {
+      window._workedExamples = [];
     }
 
-    // ===== C. PROBLEM BANK =====
+    // ===== PROBLEM BANK =====
     var pb = pd.problem_bank;
     if (pb) {
-      // Store in window for the interactivity script
       window._problemBank = {
         bronze: pb.bronze || [],
         silver: pb.silver || [],
         gold: pb.gold || []
       };
-
-      var problemsSection = document.getElementById('practice-problems');
-      problemsSection.style.display = '';
-
-      // Set tier descriptions
-      if (pb.bronze_description) document.getElementById('bronze-description').textContent = pb.bronze_description;
-      if (pb.silver_description) document.getElementById('silver-description').textContent = pb.silver_description;
-      if (pb.gold_description) document.getElementById('gold-description').textContent = pb.gold_description;
-
-      // Set initial score labels with correct counts
-      var bCount = (pb.bronze || []).length;
-      var sCount = (pb.silver || []).length;
-      var gCount = (pb.gold || []).length;
-      var totalCount = bCount + sCount + gCount;
-
-      document.getElementById('score-total').textContent = '0/' + totalCount;
-      document.getElementById('score-bronze').textContent = '0/' + bCount;
-      document.getElementById('score-silver').textContent = '0/' + sCount;
-      document.getElementById('score-gold').textContent = '0/' + gCount;
-      document.getElementById('bronze-score').textContent = '0/' + bCount + ' correct';
-      document.getElementById('silver-score').textContent = '0/' + sCount + ' correct';
-      document.getElementById('gold-score').textContent = '0/' + gCount + ' correct';
-      document.getElementById('progress-score-display').textContent = '0/' + totalCount;
-      document.getElementById('progress-bronze-count').textContent = '0/' + bCount;
-      document.getElementById('progress-silver-count').textContent = '0/' + sCount;
-      document.getElementById('progress-gold-count').textContent = '0/' + gCount;
     }
 
     // ===== NARRATION =====
     window.narrationManifest = lesson.narration_manifest || [];
 
-    // ===== PREV/NEXT NAV =====
-    renderLessonNav(data, subjectSlug, unitSlug);
+    // ===== NEXT TOPIC LINK (for summary overlay) =====
+    var nextLink = document.getElementById('summary-next-link');
+    if (nextLink) {
+      if (data.nextLesson) {
+        nextLink.href = practiceUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number);
+        nextLink.textContent = 'Next: ' + escapeHtml(data.nextLesson.title) + ' \u2192';
+      } else {
+        nextLink.href = browseUrl(subjectSlug, unitSlug);
+        nextLink.textContent = 'Back to ' + escapeHtml(unit.name) + ' \u2192';
+      }
+    }
 
-    // Back link
-    var backLink = document.getElementById('back-link');
-    backLink.href = browseUrl(subjectSlug, unitSlug);
-    backLink.innerHTML = '&larr; Back to ' + escapeHtml(unit.name);
-
-    // Show the page
+    // Show the page, hide loading
     loadingEl.style.display = 'none';
     pageEl.style.display = '';
 
@@ -394,12 +269,12 @@
         : lesson.status === 'awaiting_qa' ? 'Awaiting QA'
         : lesson.status || 'Draft';
       var banner = document.createElement('div');
-      banner.style.cssText = 'position:sticky;top:56px;z-index:999;background:#fef3c7;color:#92400e;padding:0.6rem 1.25rem;font-size:0.85rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;box-shadow:0 2px 8px rgba(0,0,0,0.08);';
+      banner.style.cssText = 'position:fixed;top:52px;left:0;right:0;z-index:999;background:#fef3c7;color:#92400e;padding:0.5rem 1.25rem;font-size:0.82rem;font-weight:600;text-align:center;border-bottom:2px solid #f59e0b;';
       banner.textContent = 'Preview Mode \u2014 Status: ' + statusLabel + ' (not visible to students)';
-      pageEl.insertBefore(banner, pageEl.firstChild);
+      pageEl.appendChild(banner);
     }
 
-    // Init the practice interactivity (problems, narration, etc.)
+    // Init the practice interactivity
     if (typeof window.initPracticeFeatures === 'function') {
       try {
         window.initPracticeFeatures();
@@ -419,28 +294,6 @@
         throwOnError: false
       });
     }
-  }
-
-  // ---- Render prev/next navigation ----
-  function renderLessonNav(data, subjectSlug, unitSlug) {
-    var nav = document.getElementById('practice-nav');
-    var html = '';
-
-    if (data.prevLesson) {
-      html += '<a href="' + practiceUrl(subjectSlug, unitSlug, data.prevLesson.lesson_number) + '">';
-      html += '<span class="practice-nav-direction">&larr; Previous Lesson</span>';
-      html += '<span class="practice-nav-title">' + escapeHtml(data.prevLesson.title) + '</span>';
-      html += '</a>';
-    }
-
-    if (data.nextLesson) {
-      html += '<a href="' + practiceUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number) + '" class="nav-next">';
-      html += '<span class="practice-nav-direction">Next Lesson &rarr;</span>';
-      html += '<span class="practice-nav-title">' + escapeHtml(data.nextLesson.title) + '</span>';
-      html += '</a>';
-    }
-
-    nav.innerHTML = html;
   }
 
   // ---- Show error ----
