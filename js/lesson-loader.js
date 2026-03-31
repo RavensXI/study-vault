@@ -431,13 +431,17 @@
 
     // Render LaTeX equations via KaTeX (if loaded)
     if (typeof renderMathInElement === 'function') {
-      renderMathInElement(document.getElementById('study-notes'), {
+      var katexOpts = {
         delimiters: [
           { left: '$$', right: '$$', display: true },
           { left: '\\[', right: '\\]', display: true },
           { left: '\\(', right: '\\)', display: false },
         ],
         throwOnError: false
+      };
+      ['study-notes', 'conclusion', 'exam-tip'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) renderMathInElement(el, katexOpts);
       });
     }
   }

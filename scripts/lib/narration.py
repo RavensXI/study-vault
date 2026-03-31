@@ -20,15 +20,208 @@ AZURE_REGION = "uksouth"
 AZURE_TTS_URL = f"https://{AZURE_REGION}.tts.speech.microsoft.com/cognitiveservices/v1"
 
 VOICE_ODD = "en-GB-OllieMultilingualNeural"   # Odd lessons
-VOICE_EVEN = "en-GB-BellaNeural"               # Even lessons
+VOICE_EVEN = "en-GB-AdaMultilingualNeural"     # Even lessons
+
+# Language codes for multilingual SSML <lang> tags
+SUBJECT_LANG_CODES = {
+    "french": "fr-FR",
+    "german": "de-DE",
+    "spanish": "es-ES",
+}
+
+
+# ── LaTeX to spoken English ────────────────────────────────────────────
+
+def _repair_latex_escapes(text):
+    """Repair damaged LaTeX escape sequences in text.
+
+    When content was stored via Python/JSON without raw strings, sequences
+    like \\frac became form-feed+'rac', \\neq became newline+'eq', etc.
+    This restores the original LaTeX commands.
+    """
+    # Direct character replacements (safe — these chars don't belong in HTML text)
+    text = text.replace("\x0c", "\\f")   # form feed → \f (\frac, \forall)
+    text = text.replace("\x08", "\\b")   # backspace → \b (\beta, \bar, \binom)
+
+    # Tab and newline are trickier — they exist as real whitespace in HTML.
+    # Only repair inside LaTeX delimiters where they indicate damaged commands.
+    def _repair_region(m):
+        region = m.group(0)
+        region = region.replace("\t", "\\t")  # \times, \theta, \tan, \text, \to
+        region = region.replace("\n", "\\n")  # \neq, \ne, \nu, \nabla, \not
+        region = region.replace("\r", "\\r")  # \rightarrow, \rho
+        return region
+
+    # Repair inside inline math \(...\)
+    text = re.sub(r"\\\(.*?\\\)", _repair_region, text, flags=re.DOTALL)
+    # Repair inside display math $$...$$
+    text = re.sub(r"\$\$.*?\$\$", _repair_region, text, flags=re.DOTALL)
+    # Repair inside display math \[...\]
+    text = re.sub(r"\\\[.*?\\\]", _repair_region, text, flags=re.DOTALL)
+
+    return text
+
+
+def latex_to_spoken(text):
+    """Convert LaTeX math notation embedded in text to spoken English.
+
+    Handles inline \\(...\\), display $$...$$ and \\[...\\] regions.
+    Converts common GCSE-level LaTeX to natural spoken maths.
+    First repairs damaged escape sequences from storage.
+    """
+    text = _repair_latex_escapes(text)
+
+    def _convert_math(latex):
+        s = latex.strip()
+
+        # Strip \left / \right (keep the bracket)
+        s = re.sub(r"\\left\s*([(\[{|.])", r"\1", s)
+        s = re.sub(r"\\right\s*([)\]}|.])", r"\1", s)
+
+        # \text{...}, \textbf{...}, \mathrm{...} → plain text
+        s = re.sub(r"\\(?:text|textbf|mathrm|mathbf)\{([^{}]*)\}", r"\1", s)
+
+        # Iteratively resolve nested structures (innermost braces first)
+        for _ in range(12):
+            prev = s
+
+            # \frac{a}{b} → (a over b)
+            s = re.sub(
+                r"\\frac\{([^{}]*)\}\{([^{}]*)\}",
+                lambda m: f"({m.group(1).strip()} over {m.group(2).strip()})",
+                s,
+            )
+
+            # \sqrt[n]{x} → nth root of x
+            s = re.sub(
+                r"\\sqrt\[([^\]]*)\]\{([^{}]*)\}",
+                lambda m: f"{m.group(1)}th root of {m.group(2).strip()}",
+                s,
+            )
+
+            # \sqrt{x} → square root of x
+            s = re.sub(
+                r"\\sqrt\{([^{}]*)\}",
+                lambda m: f"square root of {m.group(1).strip()}",
+                s,
+            )
+
+            # Superscripts: x^{2} → x squared, x^{3} → x cubed
+            s = re.sub(r"\^\{2\}", " squared", s)
+            s = re.sub(r"\^2(?![0-9])", " squared", s)
+            s = re.sub(r"\^\{3\}", " cubed", s)
+            s = re.sub(r"\^3(?![0-9])", " cubed", s)
+            s = re.sub(r"\^\{([^{}]*)\}", r" to the power of \1", s)
+
+            # Subscripts: x_{n} → x sub n
+            s = re.sub(r"_\{([^{}]*)\}", r" sub \1", s)
+
+            if s == prev:
+                break
+
+        # Single-char subscripts: x_n → x sub n (after braces removed)
+        s = re.sub(r"_([a-zA-Z0-9])", r" sub \1", s)
+
+        # Symbol replacements (order matters — longer commands first)
+        _SYMBOLS = [
+            (r"\rightarrow", "gives"),
+            (r"\therefore", "therefore"),
+            (r"\overline", ""),
+            (r"\approx", "approximately equals"),
+            (r"\propto", "is proportional to"),
+            (r"\equiv", "is equivalent to"),
+            (r"\infty", "infinity"),
+            (r"\times", " times "),
+            (r"\cdot", " times "),
+            (r"\qquad", " "),
+            (r"\theta", "theta"),
+            (r"\alpha", "alpha"),
+            (r"\gamma", "gamma"),
+            (r"\delta", "delta"),
+            (r"\sigma", "sigma"),
+            (r"\omega", "omega"),
+            (r"\lambda", "lambda"),
+            (r"\prime", " prime"),
+            (r"\angle", "angle "),
+            (r"\quad", " "),
+            (r"\beta", "beta"),
+            (r"\neq", " is not equal to "),
+            (r"\leq", " is less than or equal to "),
+            (r"\geq", " is greater than or equal to "),
+            (r"\div", " divided by "),
+            (r"\cos", "cosine"),
+            (r"\sin", "sine"),
+            (r"\tan", "tangent"),
+            (r"\log", "log"),
+            (r"\vec", "vector "),
+            (r"\hat", ""),
+            (r"\bar", ""),
+            (r"\pm", " plus or minus "),
+            (r"\mp", " minus or plus "),
+            (r"\ne", " is not equal to "),
+            (r"\le", " is less than or equal to "),
+            (r"\ge", " is greater than or equal to "),
+            (r"\pi", "pi"),
+            (r"\mu", "mu"),
+            (r"\ln", "natural log"),
+            (r"\to", " to "),
+            (r"\,", " "),
+            (r"\;", " "),
+            (r"\!", ""),
+            (r"\ ", " "),
+        ]
+        for cmd, spoken in _SYMBOLS:
+            s = s.replace(cmd, spoken)
+
+        # Remove any remaining backslash commands
+        s = re.sub(r"\\[a-zA-Z]+", "", s)
+
+        # Strip braces
+        s = s.replace("{", "").replace("}", "")
+
+        # Equals sign → "equals"
+        s = s.replace("=", " equals ")
+
+        # Clean up whitespace and stray punctuation
+        s = re.sub(r"\s+", " ", s).strip()
+        return s
+
+    # Replace display math $$...$$ (greedy-safe with DOTALL)
+    text = re.sub(
+        r"\$\$(.*?)\$\$",
+        lambda m: _convert_math(m.group(1)),
+        text,
+        flags=re.DOTALL,
+    )
+    # Replace display math \[...\]
+    text = re.sub(
+        r"\\\[(.*?)\\\]",
+        lambda m: _convert_math(m.group(1)),
+        text,
+        flags=re.DOTALL,
+    )
+    # Replace inline math \(...\)
+    text = re.sub(
+        r"\\\((.*?)\\\)",
+        lambda m: _convert_math(m.group(1)),
+        text,
+        flags=re.DOTALL,
+    )
+    # Clean up double spaces
+    text = re.sub(r"\s+", " ", text)
+    return text
 
 
 # ── HTML Parser ─────────────────────────────────────────────────────────
 
 class NarrationExtractor(HTMLParser):
-    """Extract text from elements with data-narration-id attributes."""
+    """Extract text from elements with data-narration-id attributes.
 
-    def __init__(self):
+    When lang_code is set (e.g. 'fr-FR'), <em> content is wrapped in
+    {{LANG_START}} / {{LANG_END}} markers so SSML can insert <lang> tags.
+    """
+
+    def __init__(self, lang_code=None):
         super().__init__()
         self.chunks = []
         self._current_id = None
@@ -36,6 +229,9 @@ class NarrationExtractor(HTMLParser):
         self._current_text = []
         self._skip_depth = 0
         self._tag_depth = 0
+        self._lang_code = lang_code
+        self._in_foreign = False
+        self._foreign_depth = 0
 
     def handle_starttag(self, tag, attrs):
         attrs_dict = dict(attrs)
@@ -52,10 +248,25 @@ class NarrationExtractor(HTMLParser):
         # Skip content inside these tags
         if tag in ("svg", "button", "script", "style"):
             self._skip_depth += 1
+        # Track <em> and <strong> for foreign language marking
+        if tag in ("em", "strong") and self._lang_code and self._current_id:
+            if not self._in_foreign:
+                self._in_foreign = True
+                self._foreign_depth = 1
+                self._current_text.append("{{LANG_START}}")
+            else:
+                self._foreign_depth += 1
 
     def handle_endtag(self, tag):
         if tag in ("svg", "button", "script", "style"):
             self._skip_depth = max(0, self._skip_depth - 1)
+        # Close foreign language marker
+        if tag in ("em", "strong") and self._in_foreign:
+            self._foreign_depth -= 1
+            if self._foreign_depth <= 0:
+                self._current_text.append("{{LANG_END}}")
+                self._in_foreign = False
+                self._foreign_depth = 0
         if not self._current_id:
             return
         if tag == self._current_tag:
@@ -72,6 +283,7 @@ class NarrationExtractor(HTMLParser):
         if self._current_id:
             text = " ".join(self._current_text).strip()
             text = re.sub(r"\s+", " ", text)
+            text = latex_to_spoken(text)
             if text:
                 self.chunks.append((self._current_id, text))
         self._current_id = None
@@ -107,9 +319,16 @@ class NarrationExtractor(HTMLParser):
                 pass
 
 
-def extract_narration_chunks(html_content):
-    """Parse HTML and return list of (narration_id, text) tuples."""
-    parser = NarrationExtractor()
+def extract_narration_chunks(html_content, lang_code=None):
+    """Parse HTML and return list of (narration_id, text) tuples.
+
+    If lang_code is set (e.g. 'fr-FR'), <em> content is marked with
+    {{LANG_START}}/{{LANG_END}} for SSML language switching.
+    """
+    # Repair damaged LaTeX escapes BEFORE the HTML parser sees the content,
+    # because handle_data().strip() removes form feed / tab / newline chars.
+    html_content = _repair_latex_escapes(html_content)
+    parser = NarrationExtractor(lang_code=lang_code)
     parser.feed(html_content)
     parser._flush_chunk()
     return parser.chunks
@@ -129,14 +348,49 @@ def xml_escape(text):
 
 # ── Azure Speech REST API ───────────────────────────────────────────────
 
-def generate_audio_rest(text, voice_name):
+def _build_ssml_body(text, lang_code=None):
+    """Build SSML body text, converting {{LANG_START}}/{{LANG_END}} markers
+    to proper <lang> + <break> + <prosody> SSML tags.
+
+    If no markers present or lang_code is None, returns plain xml-escaped text.
+    """
+    if not lang_code or "{{LANG_START}}" not in text:
+        return xml_escape(text)
+
+    # Split on markers and build SSML with language switches
+    parts = []
+    remaining = text
+    while "{{LANG_START}}" in remaining:
+        before, _, rest = remaining.partition("{{LANG_START}}")
+        foreign, _, remaining = rest.partition("{{LANG_END}}")
+        if before.strip():
+            parts.append(xml_escape(before.strip()))
+        parts.append(
+            f'<break time="500ms"/>'
+            f'<lang xml:lang="{lang_code}">'
+            f'<prosody rate="-8%">{xml_escape(foreign.strip())}</prosody>'
+            f'</lang>'
+            f'<break time="300ms"/>'
+        )
+    if remaining.strip():
+        parts.append(xml_escape(remaining.strip()))
+
+    return " ".join(parts)
+
+
+def generate_audio_rest(text, voice_name, lang_code=None):
     """Generate MP3 bytes from text using Azure Speech REST API.
+
+    If lang_code is set, {{LANG_START}}/{{LANG_END}} markers in text
+    are converted to SSML <lang> tags with a 500ms pause and -15% speed.
 
     Returns MP3 bytes on success, None on failure.
     """
+    body = _build_ssml_body(text, lang_code)
     ssml = (
-        f"<speak version='1.0' xml:lang='en-GB'>"
-        f"<voice name='{voice_name}'>{xml_escape(text)}</voice>"
+        f"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' "
+        f"xmlns:mstts='http://www.w3.org/2001/mstts' xml:lang='en-GB'>"
+        f"<voice name='{voice_name}'>{body}</voice>"
         f"</speak>"
     )
 
@@ -210,7 +464,7 @@ def get_mp3_duration(mp3_bytes):
 # ── Voice assignment ────────────────────────────────────────────────────
 
 def get_voice_for_lesson(lesson_number):
-    """Return (voice_name, label) for a lesson number. Odd=Ollie, Even=Bella."""
+    """Return (voice_name, label) for a lesson number. Odd=Ollie, Even=Ada."""
     if lesson_number % 2 == 1:
         return VOICE_ODD, "Ollie"
-    return VOICE_EVEN, "Bella"
+    return VOICE_EVEN, "Ada"
