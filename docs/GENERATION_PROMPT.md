@@ -84,11 +84,29 @@ CONTENT HTML RULES:
   Paragraphs:
   <p data-narration-id="n2">Text here.</p>
 
-  Key Facts (at least 2 per lesson):
-  <div class="key-fact" data-narration-id="nX">
+  Key Facts (at least 2 per lesson, MUST include data-revision-tip):
+  <div class="key-fact" data-narration-id="nX" data-revision-tip="Cover this and recall: [specific self-test question based on the fact]">
     <div class="key-fact-label">Key Fact</div>
     <p>Important information the student must remember.</p>
   </div>
+
+  REVISION TIP RULES (data-revision-tip attribute on every key-fact div):
+  - This is a self-test task shown when the student clicks the lightbulb icon.
+  - MUST be an actionable task the student can DO in 30-60 seconds.
+  - MUST start with an action verb: "Cover this and recall...", "Close this box and list...", "Test yourself: write down...", "Write from memory...", "Draw a quick mind map of...", "Explain to someone..."
+  - MUST relate directly to the key fact content — test recall of the specific information.
+  - MUST NOT be exam advice ("In the exam, do X"), analytical commentary, or generic study tips.
+  - Keep under 150 characters.
+
+  GOOD examples:
+  - "Cover this and recall: What three things does Lady Macbeth say to manipulate Macbeth in Act 1 Scene 7?"
+  - "Close this and name the two key quotations that show Scrooge's transformation."
+  - "Test yourself: write down three effects of the Gunpowder Plot on Shakespeare's audience."
+
+  BAD examples (DO NOT use these styles):
+  - "In the exam, explore this duality: she is both a villain and a victim." (exam advice, not a task)
+  - "Link Priestley's socialism to the Inspector's speech for AO3." (exam advice)
+  - "Remember this quotation for your essay." (not specific, not a task)
 
   Collapsible sections (at least 2 per lesson):
   <div class="collapsible">
@@ -135,6 +153,33 @@ EQUATIONS AND FORMULAE (Maths / Science / any subject with formulae):
 - Keep equation content inside <strong> tags if emphasising: <strong>\(E = mc^2\)</strong>
 - Do NOT use HTML entities (&times;, &divide;, &frac12;, &sup2;, etc.) or <sub>/<sup> for mathematical/scientific notation. Always use LaTeX.
 - Plain text that happens to contain numbers or simple units (e.g. "100 g", "25°C") does NOT need LaTeX — only use it for actual equations, formulae, and mathematical expressions.
+
+PRACTICE-FORMAT SUBJECTS (Maths):
+Maths uses a practice-first format instead of the standard article format. Practice lessons are stored in `practice_data` JSONB (not `content_html`). They have: method card, worked examples with step reveals, and a graded problem bank (Bronze/Silver/Gold) with misconception detection. No narration, no podcasts, no flashcards, no knowledge checks. See the practice lesson plan for structure details. Practice lessons use `/practice/{subject}/{unit}/{number}` URLs and the `practice.html` template.
+
+FOUNDATION / HIGHER TIER SPLIT (Maths, Science, Separate Sciences):
+When regenerating mixed Foundation/Higher lessons, the lesson is SPLIT into two separate lessons:
+
+1. FOUNDATION VERSION (tier: "both" — seen by all students):
+   - Contains ONLY Foundation-tier content from the spec.
+   - Must be completely self-contained — no references to Higher methods, no "at Higher tier you would also..." asides.
+   - Practice questions, knowledge checks, and flashcard questions test Foundation content ONLY.
+   - If the original lesson title still fits (e.g. "Solving Quadratic Equations"), keep it.
+
+2. HIGHER EXTENSION (tier: "higher" — seen only by Higher students):
+   - Contains the Higher-only extension content that was removed from the Foundation version.
+   - CAN reference the Foundation lesson: "Building on your knowledge of factorising from the previous lesson..."
+   - Must still be a complete, standalone lesson (800-1500 words, 6 questions, 5 KCs, 5 flashcards).
+   - Gets a new title and slug (e.g. "Quadratic Formula & Completing the Square").
+   - Practice questions test Higher-only content.
+
+Add "tier" to the JSON output:
+{
+  "tier": "both" or "higher",
+  ... (all other fields as normal)
+}
+
+The exam spec marks Higher-only content explicitly. Use the spec as the source of truth for what belongs in each version.
 
 LANGUAGE SUBJECTS (French / German / Spanish):
 - All foreign-language phrases MUST be wrapped in <em> or <strong> HTML tags. The narration pipeline uses these tags to detect text that needs SSML <lang> wrapping for correct pronunciation.
