@@ -1566,14 +1566,19 @@
     }
 
     // ===== INIT =====
-    document.addEventListener('DOMContentLoaded', () => {
-      renderProblems();
-      initScrollProgress();
-      initMobileNav();
-      initHeaderScroll();
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        renderProblems();
+      } catch(e) {
+        console.error('renderProblems failed:', e);
+        document.getElementById('bronze-grid').textContent = 'Error loading problems: ' + e.message;
+      }
+      try { initScrollProgress(); } catch(e) { console.warn(e); }
+      try { initMobileNav(); } catch(e) { console.warn(e); }
+      try { initHeaderScroll(); } catch(e) { console.warn(e); }
 
       // Wait for KaTeX auto-render to load, then render
-      const waitForKaTeX = setInterval(() => {
+      var waitForKaTeX = setInterval(function() {
         if (typeof renderMathInElement === 'function') {
           clearInterval(waitForKaTeX);
           renderKaTeX(document.body);
