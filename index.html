@@ -1300,6 +1300,7 @@
 
         closePicker();
         renderPersonalised(allSelected);
+        if (typeof window.updateTieredLessonCounts === 'function') window.updateTieredLessonCounts();
       };
     }
 
@@ -1370,12 +1371,11 @@
   })();
 
   // ── Dynamic lesson counts for tiered subjects ──
-  (function() {
+  var FOUNDATION_COUNTS = { 'maths': 30, 'science': null, 'separate-sciences': null };
+  var TOTAL_COUNTS = { 'maths': 48 };
+  window.updateTieredLessonCounts = function() {
     var tiers = {};
     try { tiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
-    // Foundation lesson counts (excluding Higher-only) — pre-calculated
-    var FOUNDATION_COUNTS = { 'maths': 30, 'science': null, 'separate-sciences': null };
-    var TOTAL_COUNTS = { 'maths': 48 };
     Object.keys(FOUNDATION_COUNTS).forEach(function(slug) {
       if (!FOUNDATION_COUNTS[slug]) return;
       var card = document.querySelector('.home-card[data-subject="' + slug + '"]');
@@ -1388,7 +1388,8 @@
         detail.textContent = detail.textContent.replace(/\d+ lessons/, count + ' lessons');
       }
     });
-  })();
+  };
+  window.updateTieredLessonCounts();
   </script>
 </body>
 </html>
