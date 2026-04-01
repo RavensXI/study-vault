@@ -1863,40 +1863,28 @@
 
         <!-- Exam context removed — risk of encouraging topic-skipping -->
 
-        <!-- Related Videos (collapsible, matching lesson page pattern) -->
-        <div class="panel-section" id="panel-related-videos">
+        <!-- Related Videos (populated by loader from practice_data.related_videos) -->
+        <div class="panel-section" id="panel-related-videos" style="display:none">
           <div class="sidebar-collapsible">
             <button class="sidebar-collapsible-toggle" aria-expanded="false" onclick="this.parentElement.classList.toggle('open')">
               <span>&#127909; Related Videos</span>
               <svg class="sidebar-collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
-            <div class="sidebar-collapsible-content">
-              <a href="https://www.youtube.com/watch?v=gIwMiSJfVAM" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">
-                <strong>Solving Quadratics by Factorising</strong>
-                <span>Corbett Maths</span>
-              </a>
-              <a href="https://www.youtube.com/watch?v=dOxFHq4anDQ" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">
-                <strong>Factorising Quadratics</strong>
-                <span>MathsGenie</span>
-              </a>
-              <a href="https://www.youtube.com/watch?v=xPJ9dpj0MdA" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">
-                <strong>GCSE Maths - Quadratic Equations</strong>
-                <span>Cognito</span>
-              </a>
+            <div class="sidebar-collapsible-content" id="panel-videos-content">
+              <!-- Populated by practice-loader.js -->
             </div>
           </div>
         </div>
 
-        <!-- Prerequisite Topics -->
-        <div class="panel-section" id="panel-topic-links">
+        <!-- Prerequisite Topics (populated by loader from practice_data.topic_links) -->
+        <div class="panel-section" id="panel-topic-links" style="display:none">
           <div class="panel-section-title">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
             Struggling? Revise these first
           </div>
           <div class="topic-links-group">
-            <div class="topic-pills">
-              <a href="#" class="topic-pill">Expanding Brackets</a>
-              <a href="#" class="topic-pill">Factorising</a>
+            <div class="topic-pills" id="panel-topic-pills">
+              <!-- Populated by practice-loader.js -->
             </div>
           </div>
         </div>
@@ -2466,10 +2454,9 @@
       var t = practiceState[tier];
       var counts = getTierCounts();
       var total = counts[tier];
-      // Pass condition: 4 correct in a row OR 75% correct (minimum 3 attempted)
+      // Fast pass: 4 correct in a row at any point
       if (t.streak >= 4) return true;
-      if (t.attempted >= 3 && (t.correct / t.attempted) >= 0.75) return true;
-      // Also pass if all problems done
+      // All questions attempted: pass at 75%, otherwise fail the tier
       if (t.attempted >= total) return true;
       return false;
     }

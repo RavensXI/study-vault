@@ -310,8 +310,41 @@
       };
     }
 
-    // ===== NARRATION =====
-    window.narrationManifest = lesson.narration_manifest || [];
+    // ===== RELATED VIDEOS (from practice_data) =====
+    var videos = pd.related_videos;
+    if (videos && videos.length) {
+      var videosSection = document.getElementById('panel-related-videos');
+      var videosContent = document.getElementById('panel-videos-content');
+      if (videosSection && videosContent) {
+        var vhtml = '';
+        for (var vi = 0; vi < videos.length; vi++) {
+          var v = videos[vi];
+          vhtml += '<a href="' + escapeHtml(v.url || '#') + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
+          vhtml += '<strong>' + escapeHtml(v.title || '') + '</strong>';
+          if (v.channel) vhtml += '<span>' + escapeHtml(v.channel) + '</span>';
+          vhtml += '</a>';
+        }
+        videosContent.innerHTML = vhtml;
+        videosSection.style.display = '';
+      }
+    }
+
+    // ===== TOPIC LINKS / PREREQUISITES (from practice_data) =====
+    var topicLinks = pd.topic_links;
+    if (topicLinks && topicLinks.prerequisites && topicLinks.prerequisites.length) {
+      var topicSection = document.getElementById('panel-topic-links');
+      var topicPills = document.getElementById('panel-topic-pills');
+      if (topicSection && topicPills) {
+        var thtml = '';
+        for (var ti = 0; ti < topicLinks.prerequisites.length; ti++) {
+          var tl = topicLinks.prerequisites[ti];
+          var href = tl.slug ? ('/practice/' + subjectSlug + '/' + tl.slug) : '#';
+          thtml += '<a href="' + href + '" class="topic-pill">' + escapeHtml(tl.title || '') + '</a>';
+        }
+        topicPills.innerHTML = thtml;
+        topicSection.style.display = '';
+      }
+    }
 
     // ===== NEXT TOPIC LINK (for summary overlay) =====
     var nextLink = document.getElementById('summary-next-link');
