@@ -847,6 +847,114 @@
       color: var(--text-muted, #8a8580);
     }
 
+    /* Fraction input */
+    .fraction-input {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 auto;
+    }
+    .fraction-input .fraction-label {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-secondary, #5a5651);
+    }
+    .fraction-input .fraction-stack {
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .fraction-num, .fraction-den {
+      width: 4rem;
+      padding: 0.35rem 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      text-align: center;
+      border: 1.5px solid var(--border-light, #e0dcd7);
+      border-radius: 8px;
+      background: var(--bg-body, #faf8f5);
+      color: var(--text-primary, #2d2a26);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .fraction-num:focus, .fraction-den:focus {
+      border-color: var(--accent, #7c3aed);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+      background: #fff;
+    }
+    .fraction-num.input-correct, .fraction-den.input-correct {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+    .fraction-num.input-incorrect, .fraction-den.input-incorrect {
+      border-color: var(--error);
+      background: var(--error-light);
+    }
+    .fraction-line {
+      width: 4.5rem;
+      height: 2px;
+      background: var(--text-primary, #2d2a26);
+      margin: 2px 0;
+    }
+
+    /* Standard form input */
+    .standard-form-input {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0.3rem;
+      margin: 0 auto;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.2rem;
+    }
+    .sf-a {
+      width: 4rem;
+      padding: 0.35rem 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 500;
+      text-align: center;
+      border: 1.5px solid var(--border-light, #e0dcd7);
+      border-radius: 8px;
+      background: var(--bg-body, #faf8f5);
+      color: var(--text-primary, #2d2a26);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .sf-multiply {
+      color: var(--text-primary, #2d2a26);
+      font-weight: 500;
+    }
+    .sf-n {
+      width: 2.5rem;
+      padding: 0.25rem 0.4rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 500;
+      text-align: center;
+      border: 1.5px solid var(--border-light, #e0dcd7);
+      border-radius: 6px;
+      background: var(--bg-body, #faf8f5);
+      color: var(--text-primary, #2d2a26);
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .sf-a:focus, .sf-n:focus {
+      border-color: var(--accent, #7c3aed);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+      background: #fff;
+    }
+    .sf-a.input-correct, .sf-n.input-correct {
+      border-color: var(--success);
+      background: var(--success-light);
+    }
+    .sf-a.input-incorrect, .sf-n.input-incorrect {
+      border-color: var(--error);
+      background: var(--error-light);
+    }
+
     .problem-check-btn {
       display: block;
       width: 100%;
@@ -1754,6 +1862,20 @@
         display: none;
       }
 
+      .fraction-num, .fraction-den {
+        width: 3.5rem;
+      }
+      .fraction-line {
+        width: 4rem;
+      }
+
+      .sf-a {
+        width: 3.5rem;
+      }
+      .sf-n {
+        width: 2.2rem;
+      }
+
       .summary-modal {
         padding: 2rem 1.5rem;
       }
@@ -2167,6 +2289,20 @@
           inputHtml += '<button class="mc-option" data-idx="' + oi + '" onclick="selectMcOption(this)">' + options[oi] + '</button>';
         }
         inputHtml += '</div><input type="hidden" id="problem-input-a" value="">';
+      } else if (inputType === 'fraction') {
+        inputHtml = '<div class="fraction-input">' +
+          '<span class="fraction-label">= </span>' +
+          '<div class="fraction-stack">' +
+          '<input type="text" class="fraction-num problem-input" id="problem-input-num" inputmode="numeric" autocomplete="off" placeholder="?">' +
+          '<div class="fraction-line"></div>' +
+          '<input type="text" class="fraction-den problem-input" id="problem-input-den" inputmode="numeric" autocomplete="off" placeholder="?">' +
+          '</div></div>';
+      } else if (inputType === 'standard_form') {
+        inputHtml = '<div class="standard-form-input">' +
+          '<input type="text" class="sf-a problem-input" id="problem-input-sf-a" inputmode="decimal" autocomplete="off" placeholder="A">' +
+          '<span class="sf-multiply">\u00d7 10</span>' +
+          '<sup><input type="text" class="sf-n problem-input" id="problem-input-sf-n" inputmode="numeric" autocomplete="off" placeholder="n"></sup>' +
+          '</div>';
       } else {
         // single_value
         inputHtml = '<label>Answer =</label>' +
@@ -2372,6 +2508,35 @@
         isCorrect = expected[0] === selectedIdx;
         correctText = problem.options ? problem.options[expected[0]] : 'Option ' + (expected[0] + 1);
 
+      } else if (inputType === 'fraction') {
+        var fracNum = parseInt(document.getElementById('problem-input-num').value.trim());
+        var fracDen = parseInt(document.getElementById('problem-input-den').value.trim());
+        var fracNumEl = document.getElementById('problem-input-num');
+        var fracDenEl = document.getElementById('problem-input-den');
+        if (isNaN(fracNum) || isNaN(fracDen) || fracDen === 0) {
+          if (isNaN(fracNum)) { fracNumEl.style.borderColor = 'var(--error)'; setTimeout(function() { fracNumEl.style.borderColor = ''; }, 800); }
+          if (isNaN(fracDen) || fracDen === 0) { fracDenEl.style.borderColor = 'var(--error)'; setTimeout(function() { fracDenEl.style.borderColor = ''; }, 800); }
+          return;
+        }
+        given = [fracNum, fracDen];
+        // Cross-multiply to check equivalence (handles unsimplified fractions)
+        isCorrect = (fracNum * expected[1] === expected[0] * fracDen);
+        correctText = expected[0] + '/' + expected[1];
+
+      } else if (inputType === 'standard_form') {
+        var sfA = parseFloat(document.getElementById('problem-input-sf-a').value.trim());
+        var sfN = parseInt(document.getElementById('problem-input-sf-n').value.trim());
+        var sfAEl = document.getElementById('problem-input-sf-a');
+        var sfNEl = document.getElementById('problem-input-sf-n');
+        if (isNaN(sfA) || isNaN(sfN)) {
+          if (isNaN(sfA)) { sfAEl.style.borderColor = 'var(--error)'; setTimeout(function() { sfAEl.style.borderColor = ''; }, 800); }
+          if (isNaN(sfN)) { sfNEl.style.borderColor = 'var(--error)'; setTimeout(function() { sfNEl.style.borderColor = ''; }, 800); }
+          return;
+        }
+        given = [sfA, sfN];
+        isCorrect = Math.abs(sfA - expected[0]) < 0.01 && sfN === expected[1];
+        correctText = expected[0] + ' \u00d7 10^' + expected[1];
+
       } else {
         // single_value
         var val = parseFloat(inputA.value.trim());
@@ -2406,6 +2571,16 @@
         card.classList.add('card-correct');
         if (inputA) inputA.classList.add('input-correct');
         if (inputB) inputB.classList.add('input-correct');
+        // Fraction inputs
+        var fracNumC = document.getElementById('problem-input-num');
+        var fracDenC = document.getElementById('problem-input-den');
+        if (fracNumC) fracNumC.classList.add('input-correct');
+        if (fracDenC) fracDenC.classList.add('input-correct');
+        // Standard form inputs
+        var sfAC = document.getElementById('problem-input-sf-a');
+        var sfNC = document.getElementById('problem-input-sf-n');
+        if (sfAC) sfAC.classList.add('input-correct');
+        if (sfNC) sfNC.classList.add('input-correct');
 
         feedbackContent.innerHTML =
           '<div class="feedback-box feedback-correct">' +
@@ -2421,6 +2596,16 @@
         card.classList.add('card-incorrect');
         if (inputA) inputA.classList.add('input-incorrect');
         if (inputB) inputB.classList.add('input-incorrect');
+        // Fraction inputs
+        var fracNumI = document.getElementById('problem-input-num');
+        var fracDenI = document.getElementById('problem-input-den');
+        if (fracNumI) fracNumI.classList.add('input-incorrect');
+        if (fracDenI) fracDenI.classList.add('input-incorrect');
+        // Standard form inputs
+        var sfAI = document.getElementById('problem-input-sf-a');
+        var sfNI = document.getElementById('problem-input-sf-n');
+        if (sfAI) sfAI.classList.add('input-incorrect');
+        if (sfNI) sfNI.classList.add('input-incorrect');
 
         // Try misconception detection for two_solutions, generic message for others
         var misconceptionMsg = '';
