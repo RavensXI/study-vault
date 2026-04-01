@@ -125,9 +125,13 @@
 
     // Add nav links
     var nav = document.getElementById('header-nav');
-    nav.innerHTML = '<a href="/">Home</a>' +
-      '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>' +
-      '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
+    var isPracticeSubject = subject.settings && subject.settings.format === 'practice';
+    var navHtml = '<a href="/">Home</a>';
+    if (!isPracticeSubject) {
+      navHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
+      navHtml += '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
+    }
+    nav.innerHTML = navHtml;
 
     // Apply colour theme from first unit
     if (units.length > 0) {
@@ -240,10 +244,14 @@
 
     // Nav links
     var nav = document.getElementById('header-nav');
-    nav.innerHTML = '<a href="/">Home</a>' +
-      '<a href="/browse/' + subjectSlug + '">Subject Home</a>' +
-      '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>' +
-      '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
+    var isPracticeUnit = subject.settings && subject.settings.format === 'practice';
+    var unitNavHtml = '<a href="/">Home</a>' +
+      '<a href="/browse/' + subjectSlug + '">Subject Home</a>';
+    if (!isPracticeUnit) {
+      unitNavHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
+      unitNavHtml += '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
+    }
+    nav.innerHTML = unitNavHtml;
 
     var html = '';
 
