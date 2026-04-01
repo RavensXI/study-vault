@@ -176,7 +176,7 @@
     // Lesson number + unit pill in header
     var headerUnitLabel = document.getElementById('header-unit-label');
     if (headerUnitLabel) {
-      headerUnitLabel.textContent = unit.name;
+      headerUnitLabel.textContent = 'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
       if (unit.accent) {
         headerUnitLabel.style.color = unit.accent;
         headerUnitLabel.style.background = unit.accent_badge || '';
@@ -191,7 +191,7 @@
     var navUnitOverview = document.getElementById('nav-unit-overview');
     if (navUnitOverview) {
       navUnitOverview.href = browseUrl(subjectSlug, unitSlug);
-      navUnitOverview.textContent = unit.name;
+      navUnitOverview.textContent = 'Unit Overview';
     }
 
     // Nav: Prev lesson
@@ -237,6 +237,11 @@
 
       var panelMethodTitle = document.getElementById('panel-method-title');
       if (panelMethodTitle) panelMethodTitle.textContent = mc.title || '';
+
+      var panelMethodContent = document.getElementById('panel-method-content');
+      if (panelMethodContent && mc.content) {
+        panelMethodContent.innerHTML = mc.content;
+      }
 
       var panelSteps = document.getElementById('panel-method-steps');
       if (mc.steps && mc.steps.length && panelSteps) {
