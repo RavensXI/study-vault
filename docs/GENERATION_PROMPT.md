@@ -155,7 +155,18 @@ EQUATIONS AND FORMULAE (Maths / Science / any subject with formulae):
 - Plain text that happens to contain numbers or simple units (e.g. "100 g", "25°C") does NOT need LaTeX — only use it for actual equations, formulae, and mathematical expressions.
 
 PRACTICE-FORMAT SUBJECTS (Maths):
-Maths uses a practice-first format instead of the standard article format. Practice lessons are stored in `practice_data` JSONB (not `content_html`). They have: method card, worked examples with step reveals, and a graded problem bank (Bronze/Silver/Gold) with misconception detection. No narration, no podcasts, no flashcards, no knowledge checks. See the practice lesson plan for structure details. Practice lessons use `/practice/{subject}/{unit}/{number}` URLs and the `practice.html` template.
+Maths uses a practice-first format. See `memory/project_maths_practice_rebuild.md` for the FULL reference including JSON structure, input types, and generation rules. Key points:
+- Data stored in `practice_data` JSONB (not `content_html`)
+- 20 problems per lesson: 8 Bronze, 7 Silver, 5 Gold
+- 5 input types: single_value, two_solutions, fraction, standard_form, multiple_choice
+- EVERY problem needs: display, input_type, solutions (numeric/array, NEVER strings), calculator (true/false), misconceptions (2-4 per problem)
+- Use multiple_choice for algebraic expressions, factorisations, coordinates, inequalities
+- Use fraction for fraction answers: solutions = [numerator, denominator]
+- Use standard_form for "write in standard form": solutions = [A, n]
+- Chart problems use Chart.js config in `chart` field (tooltips disabled, nice round numbers)
+- Each lesson needs: related_videos (2-3 verified YouTube URLs), topic_links.prerequisites
+- No narration, no podcasts, no flashcards, no knowledge checks
+- Pass practice_data as Python dict to Supabase, NOT json.dumps
 
 FOUNDATION / HIGHER TIER SPLIT (Maths, Science, Separate Sciences):
 When regenerating mixed Foundation/Higher lessons, the lesson is SPLIT into two separate lessons:
