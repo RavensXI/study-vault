@@ -199,6 +199,7 @@
     if (navPrevLesson) {
       if (data.prevLesson) {
         navPrevLesson.href = practiceUrl(subjectSlug, unitSlug, data.prevLesson.lesson_number);
+        navPrevLesson.classList.add('nav-lesson-pill');
         navPrevLesson.style.display = '';
       } else {
         navPrevLesson.style.display = 'none';
@@ -210,6 +211,7 @@
     if (navNextLesson) {
       if (data.nextLesson) {
         navNextLesson.href = practiceUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number);
+        navNextLesson.classList.add('nav-lesson-pill');
         navNextLesson.style.display = '';
       } else {
         navNextLesson.style.display = 'none';
