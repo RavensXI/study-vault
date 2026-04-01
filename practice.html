@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4/build/index.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous">
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#2d2a26">
@@ -1890,6 +1892,20 @@
       }
     }
 
+    /* ===== CHART.JS CONTAINER ===== */
+    .problem-chart-container {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto 1rem;
+      padding: 1rem;
+      background: #fff;
+      border: 1px solid var(--border-lighter, #e8e4df);
+      border-radius: 12px;
+    }
+    .problem-chart-container canvas {
+      width: 100% !important;
+    }
+
     /* ===== PRINT ===== */
     @media print {
       .page-header, .practice-panel, .practice-score-bar, .problem-check-btn, .problem-next-btn, .learn-actions { display: none; }
@@ -2091,6 +2107,9 @@
                   <span class="problem-number-label" id="problem-number-label">Q1</span>
                   <span class="problem-tier-pill pill-bronze" id="problem-tier-pill">Bronze</span>
                 </div>
+                <div class="problem-chart-container" id="problem-chart-container" style="display:none;">
+                  <!-- Chart.js canvas rendered here dynamically -->
+                </div>
                 <div class="problem-equation" id="problem-equation"></div>
                 <div class="problem-hint" id="problem-hint" style="display:none;"></div>
                 <div class="problem-inputs" id="problem-inputs-area">
@@ -2269,6 +2288,29 @@
 
       // Equation
       document.getElementById('problem-equation').innerHTML = p.display || '';
+
+      // Render chart if present
+      var chartContainer = document.getElementById('problem-chart-container');
+      if (p.chart) {
+        chartContainer.style.display = '';
+        chartContainer.innerHTML = '<canvas id="problem-chart" style="max-height:280px;"></canvas>';
+        var ctx = document.getElementById('problem-chart').getContext('2d');
+        // Destroy previous chart if exists
+        if (window._currentChart) { window._currentChart.destroy(); }
+        window._currentChart = new Chart(ctx, {
+          type: p.chart.type,
+          data: p.chart.data,
+          options: Object.assign({
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: { duration: 400 },
+            plugins: { legend: { display: p.chart.showLegend || false } }
+          }, p.chart.options || {})
+        });
+      } else {
+        chartContainer.style.display = 'none';
+        if (window._currentChart) { window._currentChart.destroy(); window._currentChart = null; }
+      }
 
       // Hint
       var hintEl = document.getElementById('problem-hint');
@@ -2705,6 +2747,8 @@
     }
 
     function animateToNextProblem() {
+      // Destroy chart before transition to prevent memory leaks
+      if (window._currentChart) { window._currentChart.destroy(); window._currentChart = null; }
       var card = document.getElementById('current-problem-card');
       card.classList.add('slide-out-left');
       card.classList.remove('slide-in-right', 'card-correct', 'card-incorrect');
