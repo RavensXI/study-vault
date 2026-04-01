@@ -360,7 +360,8 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow-y: auto;
+      overflow-x: hidden;
       background: #faf8f5;
     }
 
@@ -1895,15 +1896,17 @@
     /* ===== CHART.JS CONTAINER ===== */
     .problem-chart-container {
       width: 100%;
-      max-width: 500px;
-      margin: 0 auto 1rem;
-      padding: 1rem;
+      max-width: 400px;
+      max-height: 200px;
+      margin: 0 auto 0.75rem;
+      padding: 0.75rem;
       background: #fff;
       border: 1px solid var(--border-lighter, #e8e4df);
       border-radius: 12px;
     }
     .problem-chart-container canvas {
       width: 100% !important;
+      max-height: 180px !important;
     }
 
     /* ===== PRINT ===== */
@@ -2293,18 +2296,20 @@
       var chartContainer = document.getElementById('problem-chart-container');
       if (p.chart) {
         chartContainer.style.display = '';
-        chartContainer.innerHTML = '<canvas id="problem-chart" style="max-height:280px;"></canvas>';
+        chartContainer.innerHTML = '<canvas id="problem-chart" style="max-height:180px;"></canvas>';
         var ctx = document.getElementById('problem-chart').getContext('2d');
-        // Destroy previous chart if exists
         if (window._currentChart) { window._currentChart.destroy(); }
         window._currentChart = new Chart(ctx, {
           type: p.chart.type,
           data: p.chart.data,
           options: Object.assign({
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             animation: { duration: 400 },
-            plugins: { legend: { display: p.chart.showLegend || false } }
+            plugins: {
+              legend: { display: p.chart.showLegend || false },
+              tooltip: { enabled: false }
+            }
           }, p.chart.options || {})
         });
       } else {
