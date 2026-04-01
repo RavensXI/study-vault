@@ -1060,6 +1060,15 @@
       line-height: 1.55;
       color: var(--text-primary, #2d2a26);
     }
+    .feedback-simplify {
+      font-size: 0.78rem;
+      margin-top: 0.4rem;
+      padding: 0.4rem 0.6rem;
+      background: #fef3c7;
+      border-left: 3px solid #f59e0b;
+      border-radius: 0 6px 6px 0;
+      color: var(--text-primary, #2d2a26);
+    }
 
     .misconception-tip {
       background: #fef3c7;
@@ -2521,6 +2530,7 @@
         given = [fracNum, fracDen];
         // Cross-multiply to check equivalence (handles unsimplified fractions)
         isCorrect = (fracNum * expected[1] === expected[0] * fracDen);
+        var isUnsimplified = isCorrect && (fracNum !== expected[0] || fracDen !== expected[1]);
         correctText = expected[0] + '/' + expected[1];
 
       } else if (inputType === 'standard_form') {
@@ -2582,12 +2592,17 @@
         if (sfAC) sfAC.classList.add('input-correct');
         if (sfNC) sfNC.classList.add('input-correct');
 
+        var simplifyNote = isUnsimplified
+          ? '<div class="feedback-simplify">Your answer is correct, but remember to simplify to its lowest terms: <strong>' + correctText + '</strong></div>'
+          : '';
+
         feedbackContent.innerHTML =
           '<div class="feedback-box feedback-correct">' +
             '<span class="feedback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
             '<div class="feedback-body">' +
               '<div class="feedback-title">Correct!</div>' +
               '<div class="feedback-text">The answer is ' + correctText + '.</div>' +
+              simplifyNote +
             '</div>' +
           '</div>';
       } else {
