@@ -730,6 +730,23 @@
       border-radius: 999px;
     }
 
+    .problem-calc-pill {
+      font-size: 0.65rem;
+      font-weight: 600;
+      padding: 0.15em 0.5em;
+      border-radius: 999px;
+      white-space: nowrap;
+      letter-spacing: 0.02em;
+    }
+    .problem-calc-pill.calc-no {
+      color: #b45309;
+      background: #fef3c7;
+    }
+    .problem-calc-pill.calc-yes {
+      color: #0f766e;
+      background: #ccfbf1;
+    }
+
     .problem-tier-pill.pill-bronze { color: var(--bronze); background: var(--bronze-badge); }
     .problem-tier-pill.pill-silver { color: var(--silver); background: var(--silver-badge); }
     .problem-tier-pill.pill-gold   { color: var(--gold); background: var(--gold-badge); }
@@ -2108,6 +2125,7 @@
               <div class="problem-card" id="current-problem-card">
                 <div class="problem-card-header">
                   <span class="problem-number-label" id="problem-number-label">Q1</span>
+                  <span class="problem-calc-pill" id="problem-calc-pill"></span>
                   <span class="problem-tier-pill pill-bronze" id="problem-tier-pill">Bronze</span>
                 </div>
                 <div class="problem-chart-container" id="problem-chart-container" style="display:none;">
@@ -2283,6 +2301,20 @@
       if (tier === 'silver') qNum += counts.bronze;
       if (tier === 'gold') qNum += counts.bronze + counts.silver;
       document.getElementById('problem-number-label').textContent = 'Q' + qNum;
+
+      // Calculator pill
+      var calcPill = document.getElementById('problem-calc-pill');
+      if (p.calculator === false) {
+        calcPill.className = 'problem-calc-pill calc-no';
+        calcPill.textContent = 'No Calculator';
+        calcPill.style.display = '';
+      } else if (p.calculator === true) {
+        calcPill.className = 'problem-calc-pill calc-yes';
+        calcPill.textContent = 'Calculator';
+        calcPill.style.display = '';
+      } else {
+        calcPill.style.display = 'none';
+      }
 
       // Tier pill
       var pill = document.getElementById('problem-tier-pill');
