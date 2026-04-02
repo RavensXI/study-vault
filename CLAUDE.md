@@ -56,9 +56,9 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 |---------|-----|---------|-----|--------|-------|
 | English Language | 30 | 50 | 50 | 50 | 180 |
 | English Literature | 197 | 215 | 156 | 182 | 750 |
-| Mathematics | — | 48 (Edexcel only, practice-first rebuild) | — | — | 48 |
+| Mathematics | 48 | 48 | 48 | 48 | 192 |
 | Combined Science | 48 | 48 | 48 | — | 144 |
-| **Core total** | | | | | **1,337** |
+| **Core total** | | | | | **1,266** |
 
 ### Other generic subjects
 
@@ -72,7 +72,7 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 | Music Technology | NCFE 603/7008/7 | 15 |
 | **Other total** | | **123** |
 
-**Grand total: ~1,986 lessons across all subjects and boards.**
+**Grand total: ~2,130 lessons across all subjects and boards.**
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -93,7 +93,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **~1,986 lessons** (541 Unity + 48 Severn Vale + ~1,460 generic) + **~535 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **~2,130 lessons** (541 Unity + 48 Severn Vale + ~1,460 generic) + **~535 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html`, `practice.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (4 tiers):**
@@ -111,7 +111,7 @@ All content served from Supabase. Static HTML files remain as backup.
 
 ## Active TODO
 - **Multi-board core subjects COMPLETE** (30 Mar 2026) — English Language (4 boards, 180 lessons), English Literature (4 boards, 750 lessons), Combined Science (3 boards, 144 lessons). All have: content, heroes, narration, related media, guide pages (exam technique + revision technique). All `pending_review` status.
-- **Maths REBUILT as practice-first format** (31 Mar 2026) — Old multi-board content deleted (296 lessons). Rebuilding Edexcel 1MA1 only: 48 lessons (30 Foundation, 18 Higher) across 6 units. Practice format: method card modal, worked examples with step reveals, 20 graded problems (Bronze/Silver/Gold) with misconception detection. Tier pass: 4-in-a-row or 75%. No narration/podcasts/flashcards/KCs. Template: `practice.html` + `practice-loader.js`. Data: `practice_data` JSONB column. Test lesson live: `/practice/maths/algebra/7`. Other boards (OCR, AQA, Eduqas) to follow after Edexcel validated.
+- **Maths COMPLETE — practice-first format, all 4 boards** (2 Apr 2026) — 192 lessons (48 per board × 4: Edexcel, AQA, OCR, Eduqas), 3,833 problems. Practice format: method card modal, worked examples with step reveals, 20 graded problems (Bronze/Silver/Gold) with misconception detection. 5 input types: single_value, two_solutions, fraction, standard_form, multiple_choice. Calculator/non-calculator flags on every problem. Chart.js data visualisation (bar, pie, scatter, line, boxplot, histogram). Tier pass: 4-in-a-row or 75%. No narration/podcasts/flashcards/KCs. Template: `practice.html` + `practice-loader.js`. Data: `practice_data` JSONB column. Foundation/Higher tier filtering.
 - **Severn Vale School LIVE** — school code `vale2026`. Bespoke Biology (16 lessons from teacher PPTs) + generic Chem/Physics. Teacher: Alex Cameron (individual Supabase Auth account). Upload page at `/teacher/upload`.
 - **Teacher URLs LIVE** (26 Mar 2026) — `/teacher/review`, `/teacher/editor`, `/teacher/upload` rewrite to admin pages. School-scoped via `getAuthContext()`.
 - **Sign out button LIVE** (28 Mar 2026) — Red "Sign out" in header nav on all auth-gated pages. Clears sessionStorage, localStorage, and Supabase Auth.
