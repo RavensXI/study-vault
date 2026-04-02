@@ -387,6 +387,17 @@
       }
     }
 
+    // Apply Foundation tier body class if student selected Foundation
+    // Hides .higher-only content via CSS
+    try {
+      var tiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
+      var subjectBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+      var tier = tiers[params.subjectSlug] || tiers[subjectBase] || 'higher';
+      if (tier === 'foundation') {
+        document.body.classList.add('tier-foundation');
+      }
+    } catch(e) {}
+
     // Init lesson features from main.js (Phase 2 functions)
     // Wrapped in its own try/catch so a feature init failure doesn't
     // block visit tracking or show a misleading "could not load" error
