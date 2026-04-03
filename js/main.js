@@ -465,8 +465,9 @@ function initPracticeQuestions() {
     // Escape HTML
     const esc = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-    // Split into paragraphs on double newline
-    const blocks = esc.split(/\n\n+/);
+    // Insert double newline before Level headings so they become separate blocks
+    const normalized = esc.replace(/\n(Level\s+\d)/gi, '\n\n$1');
+    const blocks = normalized.split(/\n\n+/);
 
     let html = '';
     blocks.forEach(block => {
