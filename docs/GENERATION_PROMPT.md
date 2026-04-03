@@ -2,6 +2,8 @@
 
 The prompt for content generation (Steps 1 and 2 of the pipeline). Other pipeline steps use their own specialist docs as prompts — see the assembly table below.
 
+**CRITICAL: After generating lessons, you MUST also create:** unit images, quote ticker, homepage card, picker item, related media, guide pages. See the MANDATORY CHECKLIST in `docs/SUBJECT_PLAYBOOK.md`. Agents consistently forget these — do NOT skip them.
+
 **Lessons learned from Drama test run (March 2026):** This prompt was significantly expanded after the first end-to-end pipeline test. The original version missed: lesson descriptions for browse cards, past paper extraction, hero image captions, related media deduplication, exam/revision technique guide generation, question type to guide page mapping, and subject activation steps. All of these are now included.
 
 ---

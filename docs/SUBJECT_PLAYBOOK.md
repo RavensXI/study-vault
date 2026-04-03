@@ -6,6 +6,28 @@ For the pipeline architecture, see `PIPELINE_ARCHITECTURE.md`. For prompt detail
 
 ---
 
+## MANDATORY CHECKLIST — every new subject must have ALL of these
+
+Before marking a subject as complete, verify every item:
+
+- [ ] **Subject created** in Supabase with correct slug, exam_board, spec_code, school_id, settings
+- [ ] **Units created** with slug, name, subtitle, body_class, accent colours, lesson_count, sort_order
+- [ ] **All lessons generated** with content_html, practice_questions (6), knowledge_checks (5), flashcard_questions (5), glossary_terms
+- [ ] **Hero images** on every lesson (Unsplash → R2 → `lessons.hero_image_url`)
+- [ ] **Unit images** on every unit (`units.image_url` — use Unsplash or copy from first lesson hero)
+- [ ] **Quote ticker** in `subjects.settings.quote_ticker_html` (5-6 subject-relevant quotes, full HTML structure)
+- [ ] **Narration** on every lesson (Azure TTS → R2 → `lessons.narration_manifest`). Exception: Maths practice format has no narration.
+- [ ] **Podcasts** on every lesson (NotebookLM → R2 → `lessons.podcast_url` or related_media)
+- [ ] **Related media** on every lesson (2-3 verified YouTube URLs in `lessons.related_media`)
+- [ ] **Guide pages** — exam technique + revision technique (in `guide_pages` table)
+- [ ] **Homepage card** in `index.html` with subject image, accent colour, lesson count
+- [ ] **Picker item** in `index.html` (for school subjects shown in the subject picker)
+- [ ] **Foundation/Higher wrapping** if tiered subject (Science, Languages, Maths) — `<div class="higher-only">` on HT sections
+
+This checklist exists because agents consistently forget unit images, quote tickers, and homepage cards. Do NOT skip these steps.
+
+---
+
 ## Two Build Modes
 
 ### Mode 1: Bespoke (teacher uploads resources)
