@@ -26,6 +26,15 @@ Before marking a subject as complete, verify every item:
 
 This checklist exists because agents consistently forget unit images, quote tickers, and homepage cards. Do NOT skip these steps.
 
+**Agent parallelisation — split the work sensibly:**
+- Agent 1: Create subject + units + generate lesson content (per unit or batch of ~7)
+- Agent 2: Hero images + narration (needs lesson content to exist first)
+- Agent 3: Related media ONLY — dedicated agent for thorough video/resource curation (5-6 items per lesson across multiple categories: YouTube tutorials, study tools, documentaries, revision sites)
+- Agent 4: Guide pages (exam technique + revision technique)
+- Agent 5: Podcasts via NotebookLM (batch_podcasts.py)
+
+Do NOT combine related media with other tasks — it gets rushed. A dedicated agent produces much richer results.
+
 **Common agent mistakes to avoid:**
 - Narration manifest entries must use key `src` (NOT `url`). Format: `{"id": "n1", "src": "https://...mp3", "duration": 3.33}`
 - `subjects.settings` must be a dict, NOT `json.dumps(dict)` — double-serialisation breaks the quote ticker
