@@ -235,13 +235,18 @@
     var studyNotes = document.getElementById('study-notes');
     studyNotes.innerHTML = lesson.content_html || '';
 
-    // Execute any inline scripts injected via innerHTML (e.g. Chart.js diagrams)
-    studyNotes.querySelectorAll('script').forEach(function(oldScript) {
-      var newScript = document.createElement('script');
-      if (oldScript.src) { newScript.src = oldScript.src; }
-      else { newScript.textContent = oldScript.textContent; }
-      oldScript.parentNode.replaceChild(newScript, oldScript);
-    });
+    // Render Chart.js diagrams embedded in content
+    // Charts are stored as JSON in data-chart attribute on canvas elements
+    if (typeof Chart !== 'undefined') {
+      studyNotes.querySelectorAll('canvas[data-chart]').forEach(function(canvas) {
+        try {
+          var config = JSON.parse(canvas.getAttribute('data-chart'));
+          new Chart(canvas, config);
+        } catch(e) {
+          console.warn('Chart render error:', e);
+        }
+      });
+    }
 
     // Exam tip
     if (lesson.exam_tip_html) {
