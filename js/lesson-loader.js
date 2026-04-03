@@ -237,15 +237,29 @@
 
     // Render Chart.js diagrams embedded in content
     // Charts are stored as JSON in data-chart attribute on canvas elements
-    if (typeof Chart !== 'undefined') {
-      studyNotes.querySelectorAll('canvas[data-chart]').forEach(function(canvas) {
-        try {
-          var config = JSON.parse(canvas.getAttribute('data-chart'));
-          new Chart(canvas, config);
-        } catch(e) {
-          console.warn('Chart render error:', e);
+    var chartCanvases = studyNotes.querySelectorAll('canvas[data-chart]');
+    if (chartCanvases.length > 0) {
+      // Delay slightly to ensure canvas is laid out in the DOM
+      setTimeout(function() {
+        if (typeof Chart === 'undefined') {
+          console.warn('Chart.js not loaded — diagrams will not render');
+          return;
         }
-      });
+        chartCanvases.forEach(function(canvas) {
+          try {
+            // Ensure canvas has dimensions
+            if (!canvas.style.width) canvas.style.width = '100%';
+            if (!canvas.style.height) canvas.style.height = '300px';
+            var config = JSON.parse(canvas.getAttribute('data-chart'));
+            config.options = config.options || {};
+            config.options.responsive = true;
+            config.options.maintainAspectRatio = false;
+            new Chart(canvas, config);
+          } catch(e) {
+            console.warn('Chart render error:', e);
+          }
+        });
+      }, 100);
     }
 
     // Exam tip
