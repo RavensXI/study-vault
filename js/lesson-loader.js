@@ -232,7 +232,16 @@
     }
 
     // Content HTML
-    document.getElementById('study-notes').innerHTML = lesson.content_html || '';
+    var studyNotes = document.getElementById('study-notes');
+    studyNotes.innerHTML = lesson.content_html || '';
+
+    // Execute any inline scripts injected via innerHTML (e.g. Chart.js diagrams)
+    studyNotes.querySelectorAll('script').forEach(function(oldScript) {
+      var newScript = document.createElement('script');
+      if (oldScript.src) { newScript.src = oldScript.src; }
+      else { newScript.textContent = oldScript.textContent; }
+      oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
 
     // Exam tip
     if (lesson.exam_tip_html) {
