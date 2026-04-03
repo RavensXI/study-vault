@@ -36,8 +36,10 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | French | AQA 8652 | 26 | 3 | 26/26 |
 | Creative iMedia | OCR J834 | 23 | 4 | 23/23 |
 | Mathematics | Edexcel 1MA1 | 48 (practice-first) | 6 | No narration — practice format |
+| Computer Science | OCR J277 | 23 | 2 (Computer Systems, Computational Thinking) | 23/23 |
+| Design & Technology | AQA 8552 | 20 | 3 (Core Technical, Specialist Technical, Designing & Making) | 20/20 |
 | Music Technology | NCFE 603/7008/7 | 15 | 5 (subscribed from generic, last year — remove Sept 2026) | 15/15 |
-| **Subtotal** | | **541** | | **541/541** |
+| **Subtotal** | | **584** | | **584/584** |
 
 ## Subjects — Severn Vale School (school_id set)
 
@@ -132,7 +134,8 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries.
 - **Homepage subject filtering LIVE** (28 Mar 2026) — School students only see bespoke + subscribed subjects. Maths added as locked core subject alongside English and Science.
 - **Mobile editor LIVE** (26 Mar 2026) — Floating action button (bottom-right) opens slide-up sidebar with Save/Discard/Preview. Body `transform: none` override fixes `position: fixed`.
-- **Remaining subjects to build**: Computer Science (OCR), Design & Technology (AQA).
+- **Computer Science COMPLETE** (3 Apr 2026) — OCR J277, Unity College. 23 lessons, 2 units (Computer Systems + Computational Thinking). Full pipeline: content, heroes, narration, podcasts, 95 curated videos, 15 guide pages.
+- **Design & Technology COMPLETE** (3 Apr 2026) — AQA 8552, Unity College. 20 lessons, 3 units (Core Technical + Specialist Technical + Designing & Making). Full pipeline: content, heroes, narration, podcasts, curated videos, 14 guide pages. All material categories covered broadly.
 - **Parents' evening print view**: Dashboard section with quick-print option per class.
 - **Mobile app (Capacitor)**: Wrap existing PWA for App Store + Google Play.
 
