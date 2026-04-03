@@ -2188,6 +2188,13 @@ function initRevisionTips() {
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
+        // Auto-expand parent collapsible if collapsed
+        var collapsible = el.closest('.collapsible');
+        if (collapsible && !collapsible.classList.contains('open')) {
+          collapsible.classList.add('open');
+          var toggle = collapsible.querySelector('.collapsible-toggle');
+          if (toggle) toggle.setAttribute('aria-expanded', 'true');
+        }
         if (openPopup && openPopup !== popup) {
           openPopup.classList.remove('is-open');
         }
