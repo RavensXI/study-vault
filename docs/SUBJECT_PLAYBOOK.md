@@ -26,6 +26,14 @@ Before marking a subject as complete, verify every item:
 
 This checklist exists because agents consistently forget unit images, quote tickers, and homepage cards. Do NOT skip these steps.
 
+**Common agent mistakes to avoid:**
+- Narration manifest entries must use key `src` (NOT `url`). Format: `{"id": "n1", "src": "https://...mp3", "duration": 3.33}`
+- `subjects.settings` must be a dict, NOT `json.dumps(dict)` — double-serialisation breaks the quote ticker
+- `related_media` must be a flat list of category dicts, NOT a nested dict
+- Practice questions use keys `question`, `mark_scheme`, `marks`
+- Knowledge checks use keys `question`, `options`, `correct`, `explanation`
+- Flashcard questions use keys `question`, `answer`
+
 ---
 
 ## Two Build Modes
