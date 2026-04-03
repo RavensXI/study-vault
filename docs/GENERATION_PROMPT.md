@@ -168,29 +168,25 @@ Maths uses a practice-first format. See `memory/project_maths_practice_rebuild.m
 - No narration, no podcasts, no flashcards, no knowledge checks
 - Pass practice_data as Python dict to Supabase, NOT json.dumps
 
-FOUNDATION / HIGHER TIER SPLIT (Maths, Science, Separate Sciences):
-When regenerating mixed Foundation/Higher lessons, the lesson is SPLIT into two separate lessons:
+FOUNDATION / HIGHER TIER SPLIT (Science, Separate Sciences, Languages):
+Subjects with Foundation and Higher tiers use IN-CONTENT TAGGING, not separate lessons. Higher-only content is wrapped in `<div class="higher-only">` within the same lesson. The CSS hides these sections for Foundation students (via `body.tier-foundation .higher-only { display: none }`). Higher students see everything with a purple "Higher Tier" badge on wrapped sections.
 
-1. FOUNDATION VERSION (tier: "both" — seen by all students):
-   - Contains ONLY Foundation-tier content from the spec.
-   - Must be completely self-contained — no references to Higher methods, no "at Higher tier you would also..." asides.
-   - Practice questions, knowledge checks, and flashcard questions test Foundation content ONLY.
-   - If the original lesson title still fits (e.g. "Solving Quadratic Equations"), keep it.
+When generating NEW lessons for tiered subjects:
+1. Write the full lesson including both Foundation and Higher content
+2. Wrap Higher-only sections in `<div class="higher-only">...</div>`
+3. Foundation content MUST read coherently on its own when Higher sections are hidden — no dangling references like "as we saw above" pointing to hidden content
+4. Place Higher sections AFTER the related Foundation content, not interleaved within Foundation paragraphs
+5. Use the exam spec's "(HT only)" or bold markers as the source of truth for what is Higher-only
 
-2. HIGHER EXTENSION (tier: "higher" — seen only by Higher students):
-   - Contains the Higher-only extension content that was removed from the Foundation version.
-   - CAN reference the Foundation lesson: "Building on your knowledge of factorising from the previous lesson..."
-   - Must still be a complete, standalone lesson (800-1500 words, 6 questions, 5 KCs, 5 flashcards).
-   - Gets a new title and slug (e.g. "Quadratic Formula & Completing the Square").
-   - Practice questions test Higher-only content.
+What counts as Higher-only:
+- **Science:** Topics explicitly marked "(HT only)" in AQA/Edexcel/OCR specs (e.g., moles, momentum, Le Chatelier's, Fleming's LHR, bond energy calculations)
+- **Languages:** Grammar structures listed in the Higher tier grammar annex but NOT in Foundation (e.g., conditional tense, passive voice, complex pronouns, subjunctive, relative clauses beyond qui/que)
+- **Maths:** Uses practice-first format with separate tier filtering — see `memory/project_maths_practice_rebuild.md`
 
-Add "tier" to the JSON output:
-{
-  "tier": "both" or "higher",
-  ... (all other fields as normal)
-}
+Do NOT create separate Foundation and Higher lesson variants. One lesson per topic, with Higher content wrapped.
 
-The exam spec marks Higher-only content explicitly. Use the spec as the source of truth for what belongs in each version.
+FOUNDATION / HIGHER TIER SPLIT (Maths — practice-first format):
+Maths handles tiers differently — whole lessons are tagged `tier: "both"` or `tier: "higher"` in the database. Foundation students don't see Higher-only lessons at all. Mixed content within lessons uses the same `<div class="higher-only">` approach. See `memory/project_maths_practice_rebuild.md` for full details.
 
 LANGUAGE SUBJECTS (French / German / Spanish):
 - All foreign-language phrases MUST be wrapped in <em> or <strong> HTML tags. The narration pipeline uses these tags to detect text that needs SSML <lang> wrapping for correct pronunciation.
