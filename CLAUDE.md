@@ -74,7 +74,7 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 | Music Technology | NCFE 603/7008/7 | 15 |
 | **Other total** | | **123** |
 
-**Grand total: ~2,130 lessons across all subjects and boards.**
+**Grand total: ~1,951 lessons across all subjects and boards.**
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -95,7 +95,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **~2,130 lessons** (541 Unity + 48 Severn Vale + ~1,460 generic) + **~535 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **~1,951 lessons** (514 Unity + 48 Severn Vale + 1,389 generic) + **557 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html`, `practice.html` with JS loaders
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
 - **Auth (4 tiers):**
@@ -130,7 +130,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **RLS fix** (25 Mar 2026) — Added `Public read access on lessons` SELECT policy so anon key can read all lessons (content is revision material, not sensitive). JS handles status visibility.
 - **Cinematic video overviews** — 20/day via NotebookLM. `scripts/generate_cinematic_videos.py` (rewritten 27 Mar 2026): Supabase is the source of truth (no state file). Queries for lessons with no `youtube_video_id`, creates notebook, generates video, downloads to R2, updates Supabase. Sessions file (`_cinematic_sessions.json`) is ephemeral scratch for active renders only. Unity progress: 187/526 (6 subjects complete: Drama, English Language, English Literature, Food Tech, Science, Sport Science. History 35/60 in progress). ~17 days remaining at 20/day.
 - **Podcasts in progress** — 200/day via NotebookLM. `scripts/batch_podcasts.py` handles create → poll → download → R2 upload → Supabase update. ~200 done for Science + Eng Lang, ~955 remaining (mostly Eng Lit). Prompt includes unit context (covered/upcoming lessons) and varied opening instructions (no more "imagine").
-- **Diagrams not yet generated** for new multi-board content (Gemini generation pending).
+- **Diagrams:** Gemini-generated for CS (19) and D&T (14), plus Chart.js interactive charts for 7 data-visualisation lessons. Chart.js loaded on `lesson.html` via CDN; charts stored as `data-chart` JSON attribute on `<canvas>` elements, rendered by `lesson-loader.js`. Multi-board content diagrams still pending.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries.
 - **Homepage subject filtering LIVE** (28 Mar 2026) — School students only see bespoke + subscribed subjects. Maths added as locked core subject alongside English and Science.
 - **Mobile editor LIVE** (26 Mar 2026) — Floating action button (bottom-right) opens slide-up sidebar with Save/Discard/Preview. Body `transform: none` override fixes `position: fixed`.
