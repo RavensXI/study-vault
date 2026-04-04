@@ -1926,6 +1926,52 @@
       max-height: 180px !important;
     }
 
+    /* ===== MAP LIGHTBOX ===== */
+    .map-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      cursor: zoom-out;
+      padding: 1.5rem;
+    }
+    .map-lightbox.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .map-lightbox img {
+      max-width: 95vw;
+      max-height: 92vh;
+      border-radius: 8px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+      object-fit: contain;
+    }
+    .map-lightbox-close {
+      position: fixed;
+      top: 1rem;
+      right: 1.5rem;
+      background: rgba(255,255,255,0.9);
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 1.3rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2001;
+    }
+    .problem-equation img {
+      cursor: zoom-in;
+    }
+
     /* ===== PRINT ===== */
     @media print {
       .page-header, .practice-panel, .practice-score-bar, .problem-check-btn, .problem-next-btn, .learn-actions { display: none; }
@@ -3283,6 +3329,36 @@
       createTooltip();
       showStep(0);
     }
+
+    // ===== MAP IMAGE LIGHTBOX =====
+    (function() {
+      var lightbox = document.createElement('div');
+      lightbox.className = 'map-lightbox';
+      lightbox.innerHTML = '<button class="map-lightbox-close" aria-label="Close">&times;</button><img src="" alt="Map">';
+      document.body.appendChild(lightbox);
+
+      var lbImg = lightbox.querySelector('img');
+      var lbClose = lightbox.querySelector('.map-lightbox-close');
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+      }
+
+      lightbox.addEventListener('click', closeLightbox);
+      lbClose.addEventListener('click', function(e) { e.stopPropagation(); closeLightbox(); });
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeLightbox();
+      });
+
+      // Delegate click on map images inside problem-equation
+      document.addEventListener('click', function(e) {
+        var img = e.target.closest('.problem-equation img');
+        if (img) {
+          lbImg.src = img.src;
+          lightbox.classList.add('active');
+        }
+      });
+    })();
 
     // ===== MOBILE MENU HANDLER (standard header) =====
     (function() {
