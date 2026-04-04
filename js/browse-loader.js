@@ -244,7 +244,8 @@
 
     // Nav links
     var nav = document.getElementById('header-nav');
-    var isPracticeUnit = subject.settings && subject.settings.format === 'practice';
+    var isPracticeUnit = (subject.settings && subject.settings.format === 'practice') ||
+      (subject.settings && subject.settings.practice_units && subject.settings.practice_units.indexOf(unitSlug) !== -1);
     var unitNavHtml = '<a href="/">Home</a>' +
       '<a href="/browse/' + subjectSlug + '">Subject Home</a>';
     if (!isPracticeUnit) {
@@ -282,7 +283,8 @@
     // Lesson grid
     html += '<div class="lesson-grid sv-stagger">';
 
-    var isPractice = subject.settings && subject.settings.format === 'practice';
+    var isPractice = (subject.settings && subject.settings.format === 'practice') ||
+      (subject.settings && subject.settings.practice_units && subject.settings.practice_units.indexOf(unitSlug) !== -1);
     var lessonPrefix = isPractice ? '/practice/' : '/lesson/';
 
     lessons.forEach(function (lesson) {
