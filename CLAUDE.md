@@ -21,7 +21,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 |---------|-----------|---------|-------|----------|
 | History | AQA | 60 | 4 (Conflict, Health, Elizabethan, America) | 60/60 |
 | Business Studies | Edexcel 1BS0 | 30 | 2 themes | 30/30 |
-| Geography | AQA 8035 | 40 | 2 papers | 40/40 |
+| Geography | AQA 8035 | 54 | 3 (Paper 1, Paper 2, Geographical Skills) | 40/40 |
 | Sport Science | OCR R180 | 10 | 1 (R180) | 10/10 |
 | Drama | OCR J316 | 12 | 2 (Blood Brothers, Rise Up) | 12/12 |
 | Food Technology | AQA 8585 | 10 | 1 (Nutrition & Health) | 10/10 |
@@ -39,7 +39,7 @@ Tom Shaun — `t.shaun@unity.lancs.sch.uk` / git: `tomshaun90@gmail.com`
 | Computer Science | OCR J277 | 23 | 2 (Computer Systems, Computational Thinking) | 23/23 |
 | Design & Technology | AQA 8552 | 20 | 3 (Core Technical, Specialist Technical, Designing & Making) | 20/20 |
 | Music Technology | NCFE 603/7008/7 | 15 | 5 (subscribed from generic, last year — remove Sept 2026) | 15/15 |
-| **Subtotal** | | **584** | | **584/584** |
+| **Subtotal** | | **598** | | **584/584** |
 
 ## Subjects — Severn Vale School (school_id set)
 
@@ -74,7 +74,7 @@ Teacher account: Alex Cameron (acameron@severnvaleschool.com), school code `vale
 | Music Technology | NCFE 603/7008/7 | 15 |
 | **Other total** | | **123** |
 
-**Grand total: ~1,951 lessons across all subjects and boards.**
+**Grand total: ~1,965 lessons across all subjects and boards.**
 
 **Architecture:** `school_id = NULL` rows are generic/public content visible to free users. `school_id` set = school-specific bespoke content. Both tiers share the same templates and loaders.
 
@@ -95,9 +95,10 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 
 All content served from Supabase. Static HTML files remain as backup.
 
-- **~1,951 lessons** (514 Unity + 48 Severn Vale + 1,389 generic) + **557 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
+- **~1,965 lessons** (514 Unity + 48 Severn Vale + 1,389 generic) + **557 guide pages** in Supabase. Images on R2 (`studyvault-images`), audio on R2 (`studyvault-audio`), cinematic videos on R2 (`studyvault-video`).
 - **Templates:** `lesson.html`, `browse.html`, `guide.html`, `practice.html` with JS loaders
-- **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
+- **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths + geography skills), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`
+- **Mixed-format subjects:** `subjects.settings.practice_units` array lists which units use `/practice/` URLs. `browse-loader.js` checks this per unit. Example: Geography has article units (Paper 1, Paper 2) + practice unit (Geographical Skills).
 - **Auth (4 tiers):**
   - **Free users:** No login. Generic content (school_id NULL) + ads. Prefs stored in localStorage via `js/free-user.js`.
   - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees only subscribed subjects (restricted mode via `school_subscriptions` table), no ads.
@@ -130,12 +131,19 @@ All content served from Supabase. Static HTML files remain as backup.
 - **RLS fix** (25 Mar 2026) — Added `Public read access on lessons` SELECT policy so anon key can read all lessons (content is revision material, not sensitive). JS handles status visibility.
 - **Cinematic video overviews** — 20/day via NotebookLM. `scripts/generate_cinematic_videos.py` (rewritten 27 Mar 2026): Supabase is the source of truth (no state file). Queries for lessons with no `youtube_video_id`, creates notebook, generates video, downloads to R2, updates Supabase. Sessions file (`_cinematic_sessions.json`) is ephemeral scratch for active renders only. Unity progress: 187/526 (6 subjects complete: Drama, English Language, English Literature, Food Tech, Science, Sport Science. History 35/60 in progress). ~17 days remaining at 20/day.
 - **Podcasts in progress** — 200/day via NotebookLM. `scripts/batch_podcasts.py` handles create → poll → download → R2 upload → Supabase update. ~200 done for Science + Eng Lang, ~955 remaining (mostly Eng Lit). Prompt includes unit context (covered/upcoming lessons) and varied opening instructions (no more "imagine").
-- **Diagrams:** Gemini-generated for CS (19) and D&T (14), plus Chart.js interactive charts for 7 data-visualisation lessons. Chart.js loaded on `lesson.html` via CDN; charts stored as `data-chart` JSON attribute on `<canvas>` elements, rendered by `lesson-loader.js`. Multi-board content diagrams still pending.
+- **Diagrams:** Gemini-generated for CS (19) and D&T (14), plus Chart.js interactive charts for 7 data-visualisation lessons + 57 geography chart problems. Chart.js loaded on `lesson.html` + `practice.html` via CDN; lesson diagrams stored as `data-chart` JSON attribute on `<canvas>` elements, rendered by `lesson-loader.js` (100ms setTimeout for DOM layout). Practice page charts rendered inline. Multi-board content diagrams still pending.
+- **OS Map Skills** (4 Apr 2026) — 28 real OS OpenData map images with contour overlays from OS Terrain 50. Maps captured programmatically from os.openstreetmap.org tiles at zoom 15 and 16. Grid lines with numbered eastings/northings overlaid via PIL. Contours at 10m intervals (50m index contours labelled). All free under Open Government Licence with attribution. Images at `images/os-maps/` and R2 `geography/os-maps/`. Map viewer tool at `test-os-viewer.html`.
 - **Dashboard progress**: Hardcoded demo data — need real Supabase queries.
 - **Homepage subject filtering LIVE** (28 Mar 2026) — School students only see bespoke + subscribed subjects. Maths added as locked core subject alongside English and Science.
 - **Mobile editor LIVE** (26 Mar 2026) — Floating action button (bottom-right) opens slide-up sidebar with Save/Discard/Preview. Body `transform: none` override fixes `position: fixed`.
-- **Computer Science COMPLETE** (3 Apr 2026) — OCR J277, Unity College. 23 lessons, 2 units (Computer Systems + Computational Thinking). Full pipeline: content, heroes, narration, podcasts, 95 curated videos, 15 guide pages.
-- **Design & Technology COMPLETE** (3 Apr 2026) — AQA 8552, Unity College. 20 lessons, 3 units (Core Technical + Specialist Technical + Designing & Making). Full pipeline: content, heroes, narration, podcasts, curated videos, 14 guide pages. All material categories covered broadly.
+- **Computer Science COMPLETE** (3 Apr 2026) — OCR J277, Unity College. 23 lessons, 2 units (Computer Systems + Computational Thinking). Full pipeline: content, heroes, narration, podcasts, 95 curated videos, 15 guide pages, 33 diagrams (19 Gemini + 7 Chart.js). QA'd.
+- **Design & Technology COMPLETE** (3 Apr 2026) — AQA 8552, Unity College. 20 lessons, 3 units (Core Technical + Specialist Technical + Designing & Making). Full pipeline: content, heroes, narration, podcasts, 136 curated media items, 14 guide pages, 17 diagrams (14 Gemini + 3 Chart.js). QA'd. All material categories covered broadly.
+- **Geography Skills unit COMPLETE** (4 Apr 2026) — 14 practice lessons added to Unity Geography (AQA 8035). L1-L10: graph/chart/statistics skills (200 problems, 57 Chart.js charts). L11-L14: OS map skills using real OS OpenData maps with contour overlays from OS Terrain 50. 28 map images (14 areas × 2 zoom levels) captured programmatically and uploaded to R2. Mixed-format subject: article lessons (Paper 1 & 2) + practice lessons (Skills unit) via `practice_units` setting.
+- **Interactive skills prototypes** (4 Apr 2026) — Three working prototypes at repo root:
+  - `test-highlight.html` — text highlighting for English Language (identify techniques by selecting text)
+  - `test-image-hotspot.html` — image zone clicking for History source analysis (click on propaganda poster features)
+  - `test-ai-writing.html` — AI-marked creative writing via Groq API (write a simile/metaphor/etc, get instant feedback)
+  - Production plan: new input types in practice.html, Groq API route at `/api/ai-mark` with rate limiting
 - **Parents' evening print view**: Dashboard section with quick-print option per class.
 - **Mobile app (Capacitor)**: Wrap existing PWA for App Store + Google Play.
 
