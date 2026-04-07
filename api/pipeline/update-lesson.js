@@ -9,7 +9,8 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { lesson_id, content_html, exam_tip_html, conclusion_html } = req.body;
+  const { lesson_id, content_html, exam_tip_html, conclusion_html,
+          practice_questions, knowledge_checks, flashcard_questions, glossary_terms } = req.body;
 
   if (!lesson_id) {
     return res.status(400).json({ error: 'Missing lesson_id' });
@@ -19,6 +20,10 @@ module.exports = async function handler(req, res) {
   if (content_html !== undefined) updates.content_html = content_html;
   if (exam_tip_html !== undefined) updates.exam_tip_html = exam_tip_html;
   if (conclusion_html !== undefined) updates.conclusion_html = conclusion_html;
+  if (practice_questions !== undefined) updates.practice_questions = practice_questions;
+  if (knowledge_checks !== undefined) updates.knowledge_checks = knowledge_checks;
+  if (flashcard_questions !== undefined) updates.flashcard_questions = flashcard_questions;
+  if (glossary_terms !== undefined) updates.glossary_terms = glossary_terms;
 
   if (Object.keys(updates).length === 0) {
     return res.status(400).json({ error: 'No fields to update' });
