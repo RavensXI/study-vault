@@ -363,7 +363,17 @@
       overflow-y: auto;
       overflow-x: hidden;
       background: #faf8f5;
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      transition: scrollbar-color 0.3s;
     }
+    .practice-main:hover {
+      scrollbar-color: var(--accent, #2563eb) transparent;
+    }
+    .practice-main::-webkit-scrollbar { width: 4px; }
+    .practice-main::-webkit-scrollbar-track { background: transparent; }
+    .practice-main::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
+    .practice-main:hover::-webkit-scrollbar-thumb { background: var(--accent, #2563eb); }
 
     /* ===== SCORE/STREAK BAR (replaces topbar centre/right) ===== */
     .practice-score-bar {
@@ -506,7 +516,16 @@
       padding: 2rem;
       overflow-y: auto;
       transition: opacity 0.35s ease, transform 0.5s var(--practice-ease);
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
     }
+    .content-view:hover {
+      scrollbar-color: var(--accent, #2563eb) transparent;
+    }
+    .content-view::-webkit-scrollbar { width: 4px; }
+    .content-view::-webkit-scrollbar-track { background: transparent; }
+    .content-view::-webkit-scrollbar-thumb { background: transparent; border-radius: 2px; }
+    .content-view:hover::-webkit-scrollbar-thumb { background: var(--accent, #2563eb); }
 
     .content-view.hidden {
       opacity: 0;
@@ -1463,7 +1482,12 @@
       position: relative;
       opacity: 1;
       transition: opacity 0.25s ease;
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent, #2563eb) transparent;
     }
+    .method-modal::-webkit-scrollbar { width: 4px; }
+    .method-modal::-webkit-scrollbar-track { background: transparent; }
+    .method-modal::-webkit-scrollbar-thumb { background: var(--accent, #2563eb); border-radius: 2px; }
 
     .method-modal-overlay.dismissing .method-modal {
       opacity: 0;
@@ -3114,6 +3138,12 @@
       // Render KaTeX in feedback
       practiceRenderKaTeX(feedbackContent);
 
+      // Scroll next button into view after feedback expands
+      setTimeout(function() {
+        var nb = document.getElementById('problem-next-btn');
+        if (nb) nb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 350);
+
       // Update scores
       updateTierProgress();
       updateScoreBarTier();
@@ -4204,6 +4234,12 @@
       // Disable check, show next
       document.getElementById('problem-check-btn').style.display='none';
       document.getElementById('problem-next-area').className = 'problem-next-area shown';
+
+      // Scroll next button into view after feedback expands
+      setTimeout(function() {
+        var nb = document.getElementById('problem-next-btn');
+        if (nb) nb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }, 350);
 
       // Update progress
       updateTierProgress();
