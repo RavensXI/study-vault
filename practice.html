@@ -3612,7 +3612,12 @@
       area.classList.toggle('dyslexia-font',on);
       var btn=document.getElementById('passage-dyslexia-btn');if(btn)btn.setAttribute('aria-pressed',String(on));
       var prefs=engLoadA11y();prefs.dyslexia=on;engSaveA11y(prefs);
-      setTimeout(engFitPassageText,100);
+      // Wait for font to load before measuring
+      if(on && document.fonts && document.fonts.load){
+        document.fonts.load('1rem OpenDyslexic').then(function(){engFitPassageText();}).catch(function(){engFitPassageText();});
+      } else {
+        setTimeout(engFitPassageText,200);
+      }
     };
     window.engSetOverlay = function(btn){
       var area=document.getElementById('practice-passage-area');if(!area)return;
@@ -3926,19 +3931,31 @@
       var card=document.getElementById('current-problem-card');
       card.classList.add(isCorrect?'card-correct':'card-incorrect');
 
-      // Feedback
+      // Feedback — match production template structure
       var feedArea=document.getElementById('problem-feedback-area');
       var feedContent=document.getElementById('problem-feedback-content');
-      feedArea.className='problem-feedback-area '+(isCorrect?'feedback-correct':'feedback-incorrect');
-      feedContent.innerHTML='<div class="problem-feedback-icon">'+(isCorrect?'\u2714':'\u2718')+'</div><div class="problem-feedback-text">'+(isCorrect?'<strong>Correct!</strong>':'<strong>Not quite right</strong>')+'</div>'+feedHtml;
+      var icon = isCorrect
+        ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+        : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+      feedContent.innerHTML =
+        '<div class="feedback-box '+(isCorrect?'feedback-correct':'feedback-incorrect')+'">' +
+          '<span class="feedback-icon">'+icon+'</span>' +
+          '<div class="feedback-body">' +
+            '<div class="feedback-title">'+(isCorrect?'Correct!':'Not quite right')+'</div>' +
+            feedHtml +
+          '</div>' +
+        '</div>';
+      feedArea.className = 'problem-feedback-area shown';
 
       // Disable check, show next
       document.getElementById('problem-check-btn').style.display='none';
-      document.getElementById('problem-next-area').className='problem-next-area visible';
+      document.getElementById('problem-next-area').className = 'problem-next-area shown';
 
       // Update progress
       updateTierProgress();
       updateScoreBarTier();
+      if (typeof updateScoreBarScore === 'function') updateScoreBarScore();
+      if (typeof saveProgress === 'function') saveProgress();
 
       // Check for tier pass (4 in a row)
       if(practiceState[tier].streak>=4){
