@@ -2049,6 +2049,8 @@
     .practice-columns{display:flex;flex:1;overflow:hidden}
     .practice-passage-area{flex:1;min-width:0;overflow:hidden;background:#f9f6f0;border-right:1px solid #d6cfc4;display:flex;flex-direction:column}
     .passage-a11y-bar{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1.25rem;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;background:rgba(0,0,0,0.02);flex-wrap:wrap;justify-content:center}
+    .passage-a11y-mobile{display:none}
+    @media(max-width:900px){.passage-a11y-mobile{display:flex}}
     .passage-a11y-btn{display:flex;align-items:center;gap:0.3rem;padding:0.25rem 0.55rem;border:1px solid #d6cfc4;border-radius:6px;background:white;cursor:pointer;color:#5a5651;font-size:0.72rem;font-weight:600;font-family:inherit;transition:all 0.15s}
     .passage-a11y-btn:hover{border-color:var(--accent);color:var(--accent)}
     .passage-a11y-btn[aria-pressed="true"]{background:var(--accent);color:white;border-color:var(--accent)}
@@ -3818,6 +3820,18 @@
         _currentPassageId = problem.passage_id||problem.passage;
         if (_passageTtsActive) {speechSynthesis.cancel();_passageTtsActive=false;}
         area.innerHTML =
+          '<div class="passage-a11y-bar passage-a11y-mobile">' +
+          '<button class="passage-a11y-btn" onclick="engToggleTTS()" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg> Read aloud</button>' +
+          '<button class="passage-a11y-btn" id="passage-dyslexia-btn-m" onclick="engToggleDyslexia()" title="Dyslexia font"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg> Dyslexia</button>' +
+          '<div class="passage-overlay-group">' +
+          '<button class="passage-overlay-btn active" data-overlay="" onclick="engSetOverlay(this)" title="None"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg></button>' +
+          '<button class="passage-overlay-btn" data-overlay="yellow" onclick="engSetOverlay(this)" title="Yellow" style="background:#fef9c3"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="blue" onclick="engSetOverlay(this)" title="Blue" style="background:#dbeafe"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="pink" onclick="engSetOverlay(this)" title="Pink" style="background:#fce7f3"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="green" onclick="engSetOverlay(this)" title="Green" style="background:#dcfce7"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="peach" onclick="engSetOverlay(this)" title="Peach" style="background:#fed7aa"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="aqua" onclick="engSetOverlay(this)" title="Aqua" style="background:#cffafe"></button>' +
+          '</div></div>' +
           '<div class="passage-header"><span class="passage-header-label">' + (passage.label||'Source Extract') + '</span><span class="passage-header-badge" id="passage-q-badge"></span></div>' +
           '<div class="passage-body"><div class="passage-text" id="passage-text">' + passage.text + '</div></div>' +
           '<div class="passage-footer">Source Extract</div>';
@@ -4017,7 +4031,8 @@
       var area=document.getElementById('practice-passage-area');if(!area)return;
       var on=!area.classList.contains('dyslexia-font');
       area.classList.toggle('dyslexia-font',on);
-      var btn=document.getElementById('passage-dyslexia-btn');if(btn)btn.setAttribute('aria-pressed',String(on));
+      // Sync both desktop and mobile buttons
+      ['passage-dyslexia-btn','passage-dyslexia-btn-m'].forEach(function(id){var b=document.getElementById(id);if(b)b.setAttribute('aria-pressed',String(on));});
       var prefs=engLoadA11y();prefs.dyslexia=on;engSaveA11y(prefs);
       // Refit multiple times to handle font loading delay
       engFitPassageText();
@@ -4038,7 +4053,10 @@
     function engRestoreA11y(){
       var area=document.getElementById('practice-passage-area');if(!area)return;
       var prefs=engLoadA11y();
-      if(prefs.dyslexia){area.classList.add('dyslexia-font');var btn=document.getElementById('passage-dyslexia-btn');if(btn)btn.setAttribute('aria-pressed','true');}
+      if(prefs.dyslexia){
+        area.classList.add('dyslexia-font');
+        ['passage-dyslexia-btn','passage-dyslexia-btn-m'].forEach(function(id){var b=document.getElementById(id);if(b)b.setAttribute('aria-pressed','true');});
+      }
       if(prefs.overlay){area.classList.add('overlay-'+prefs.overlay);document.querySelectorAll('.passage-overlay-btn').forEach(function(b){b.classList.toggle('active',b.dataset.overlay===prefs.overlay);});}
     }
 
