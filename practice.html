@@ -501,9 +501,10 @@
       position: absolute;
       inset: 0;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       padding: 2rem;
+      overflow-y: auto;
       transition: opacity 0.35s ease, transform 0.5s var(--practice-ease);
     }
 
@@ -3492,6 +3493,8 @@
 
     // ===== ENGLISH LANGUAGE INPUT TYPES =====
     var ENGLISH_INPUT_TYPES = ['traffic_light','highlight_evidence','connotation_picker','evidence_match','ai_mark','misleading_summary','ai_write','improve_sentence','spot_error','reorder'];
+    // Preload OpenDyslexic font so it's ready when toggled
+    if(document.fonts&&document.fonts.load){document.fonts.load('1rem OpenDyslexic').catch(function(){});}
     var _engState = {tl:{},em:{activeClaim:-1,pairs:{}},emShuffled:[],tlShuffled:[],hlDragging:false,hlStart:-1,reorderOrder:[]};
     var _currentPassageId = null;
     var _passageTtsActive = false;
@@ -3612,12 +3615,11 @@
       area.classList.toggle('dyslexia-font',on);
       var btn=document.getElementById('passage-dyslexia-btn');if(btn)btn.setAttribute('aria-pressed',String(on));
       var prefs=engLoadA11y();prefs.dyslexia=on;engSaveA11y(prefs);
-      // Wait for font to load before measuring
-      if(on && document.fonts && document.fonts.load){
-        document.fonts.load('1rem OpenDyslexic').then(function(){engFitPassageText();}).catch(function(){engFitPassageText();});
-      } else {
-        setTimeout(engFitPassageText,200);
-      }
+      // Refit multiple times to handle font loading delay
+      engFitPassageText();
+      setTimeout(engFitPassageText,150);
+      setTimeout(engFitPassageText,400);
+      setTimeout(engFitPassageText,800);
     };
     window.engSetOverlay = function(btn){
       var area=document.getElementById('practice-passage-area');if(!area)return;
