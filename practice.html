@@ -451,6 +451,13 @@
 
     .score-bar-streak.visible { display: inline-flex; }
 
+    .score-bar-a11y {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-shrink: 0;
+    }
+
     .score-bar-examples-btn {
       font-family: 'Inter', sans-serif;
       font-size: 0.72rem;
@@ -1914,6 +1921,10 @@
         padding: 0.5rem 1rem;
       }
 
+      .score-bar-a11y {
+        display: none !important;
+      }
+
       .tier-rules-toast {
         margin-left: 1rem;
         margin-right: 1rem;
@@ -2458,6 +2469,21 @@
 
         <!-- Score/Streak bar -->
         <div class="practice-score-bar" id="practice-score-bar">
+          <!-- A11y tools (shown when passage is active) -->
+          <div class="score-bar-a11y" id="score-bar-a11y" style="display:none">
+            <button class="passage-a11y-btn" id="passage-tts-btn" onclick="engToggleTTS()" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg> Read aloud</button>
+            <button class="passage-a11y-btn" id="passage-dyslexia-btn" onclick="engToggleDyslexia()" title="Dyslexia font"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg> Dyslexia</button>
+            <div class="passage-overlay-group">
+              <button class="passage-overlay-btn active" data-overlay="" onclick="engSetOverlay(this)" title="None"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg></button>
+              <button class="passage-overlay-btn" data-overlay="yellow" onclick="engSetOverlay(this)" title="Yellow" style="background:#fef9c3"></button>
+              <button class="passage-overlay-btn" data-overlay="blue" onclick="engSetOverlay(this)" title="Blue" style="background:#dbeafe"></button>
+              <button class="passage-overlay-btn" data-overlay="pink" onclick="engSetOverlay(this)" title="Pink" style="background:#fce7f3"></button>
+              <button class="passage-overlay-btn" data-overlay="green" onclick="engSetOverlay(this)" title="Green" style="background:#dcfce7"></button>
+              <button class="passage-overlay-btn" data-overlay="peach" onclick="engSetOverlay(this)" title="Peach" style="background:#fed7aa"></button>
+              <button class="passage-overlay-btn" data-overlay="aqua" onclick="engSetOverlay(this)" title="Aqua" style="background:#cffafe"></button>
+            </div>
+            <div class="passage-a11y-sep"></div>
+          </div>
           <div class="score-bar-spacer"></div>
           <span class="score-bar-tier-badge tier-is-bronze" id="score-bar-tier-badge">
             <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
@@ -3766,6 +3792,8 @@
         area.style.display = 'none';
         _currentPassageId = null;
         updateMobileTabsVisibility(false);
+        var a11yBar = document.getElementById('score-bar-a11y');
+        if (a11yBar) a11yBar.style.display = 'none';
         return;
       }
 
@@ -3779,23 +3807,12 @@
         _currentPassageId = problem.passage_id||problem.passage;
         if (_passageTtsActive) {speechSynthesis.cancel();_passageTtsActive=false;}
         area.innerHTML =
-          '<div class="passage-a11y-bar">' +
-          '<button class="passage-a11y-btn" id="passage-tts-btn" onclick="engToggleTTS()" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg> Read aloud</button>' +
-          '<div class="passage-a11y-sep"></div>' +
-          '<button class="passage-a11y-btn" id="passage-dyslexia-btn" onclick="engToggleDyslexia()" title="Dyslexia font"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg> Dyslexia font</button>' +
-          '<div class="passage-a11y-sep"></div>' +
-          '<div class="passage-overlay-group"><span class="passage-overlay-label">Overlay:</span>' +
-          '<button class="passage-overlay-btn active" data-overlay="" onclick="engSetOverlay(this)" title="None"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg></button>' +
-          '<button class="passage-overlay-btn" data-overlay="yellow" onclick="engSetOverlay(this)" title="Yellow" style="background:#fef9c3"></button>' +
-          '<button class="passage-overlay-btn" data-overlay="blue" onclick="engSetOverlay(this)" title="Blue" style="background:#dbeafe"></button>' +
-          '<button class="passage-overlay-btn" data-overlay="pink" onclick="engSetOverlay(this)" title="Pink" style="background:#fce7f3"></button>' +
-          '<button class="passage-overlay-btn" data-overlay="green" onclick="engSetOverlay(this)" title="Green" style="background:#dcfce7"></button>' +
-          '<button class="passage-overlay-btn" data-overlay="peach" onclick="engSetOverlay(this)" title="Peach" style="background:#fed7aa"></button>' +
-          '<button class="passage-overlay-btn" data-overlay="aqua" onclick="engSetOverlay(this)" title="Aqua" style="background:#cffafe"></button>' +
-          '</div></div>' +
           '<div class="passage-header"><span class="passage-header-label">' + (passage.label||'Source Extract') + '</span><span class="passage-header-badge" id="passage-q-badge"></span></div>' +
           '<div class="passage-body"><div class="passage-text" id="passage-text">' + passage.text + '</div></div>' +
           '<div class="passage-footer">Source Extract</div>';
+        // Show a11y tools in score bar
+        var a11yBar = document.getElementById('score-bar-a11y');
+        if (a11yBar) a11yBar.style.display = '';
         engRestoreA11y();
       }
       // Update question badge
