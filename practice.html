@@ -1972,6 +1972,132 @@
       cursor: zoom-in;
     }
 
+    /* ===== ENGLISH LANGUAGE: PASSAGE PANEL ===== */
+    @font-face{font-family:'OpenDyslexic';src:url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+    @font-face{font-family:'OpenDyslexic';src:url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+    @font-face{font-family:'OpenDyslexic';src:url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Italic.woff2') format('woff2');font-weight:400;font-style:italic;font-display:swap}
+
+    .practice-columns{display:flex;flex:1;overflow:hidden}
+    .practice-passage-area{flex:1;min-width:0;overflow:hidden;background:#f9f6f0;border-right:1px solid #d6cfc4;display:flex;flex-direction:column}
+    .passage-a11y-bar{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1.25rem;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;background:rgba(0,0,0,0.02);flex-wrap:wrap}
+    .passage-a11y-btn{display:flex;align-items:center;gap:0.3rem;padding:0.25rem 0.55rem;border:1px solid #d6cfc4;border-radius:6px;background:white;cursor:pointer;color:#5a5651;font-size:0.72rem;font-weight:600;font-family:inherit;transition:all 0.15s}
+    .passage-a11y-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .passage-a11y-btn[aria-pressed="true"]{background:var(--accent);color:white;border-color:var(--accent)}
+    .passage-a11y-btn svg{width:13px;height:13px}
+    .passage-a11y-sep{width:1px;height:18px;background:#d6cfc4}
+    .passage-overlay-group{display:flex;align-items:center;gap:0.3rem}
+    .passage-overlay-label{font-size:0.62rem;color:#a89e93;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+    .passage-overlay-btn{width:22px;height:22px;border-radius:50%;border:2px solid #d6cfc4;cursor:pointer;padding:0;transition:border-color 0.2s,transform 0.1s;display:flex;align-items:center;justify-content:center;background:white}
+    .passage-overlay-btn:hover{transform:scale(1.15)}
+    .passage-overlay-btn.active{border-color:#2d2a26;box-shadow:0 0 0 2px white,0 0 0 3.5px #2d2a26}
+    .passage-overlay-btn svg{width:12px;height:12px;color:#999}
+    .passage-header{padding:1rem 1.5rem 0.5rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .passage-header-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#8a7e72}
+    .passage-header-badge{font-size:0.62rem;font-weight:600;color:var(--accent);background:var(--accent-light,#f5f3ff);padding:0.15em 0.55em;border-radius:999px}
+    .passage-body{padding:1.25rem 2rem 1.5rem;flex:1;overflow:hidden}
+    .passage-body .passage-text{font-family:'Source Serif 4',serif;font-size:1rem;line-height:2;color:#3d3630;font-style:italic;transition:font-size 0.3s ease}
+    .passage-body .passage-text::first-letter{font-size:1.4em;font-weight:600;color:#5a5651}
+    .passage-footer{padding:0.5rem 1.5rem 0.75rem;font-size:0.65rem;color:#a89e93;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;text-align:right}
+    /* Dyslexia + overlays on passage */
+    .practice-passage-area.dyslexia-font .passage-text{font-family:'OpenDyslexic',sans-serif!important;font-style:normal!important;letter-spacing:0.02em;word-spacing:0.08em}
+    .practice-passage-area.overlay-yellow{background-color:#fef9c3}
+    .practice-passage-area.overlay-blue{background-color:#dbeafe}
+    .practice-passage-area.overlay-pink{background-color:#fce7f3}
+    .practice-passage-area.overlay-green{background-color:#dcfce7}
+    .practice-passage-area.overlay-peach{background-color:#fed7aa}
+    .practice-passage-area.overlay-aqua{background-color:#cffafe}
+    @media(max-width:900px){
+      .practice-columns{flex-direction:column}
+      .practice-passage-area{width:100%!important;max-height:38vh;border-right:none;border-bottom:1px solid #d6cfc4;flex:none}
+      .passage-body{padding:0.5rem 1rem 1rem}
+    }
+
+    /* ===== ENGLISH LANGUAGE: INPUT TYPES ===== */
+    /* Traffic Light */
+    .tl-statements{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem}
+    .tl-stmt{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:0.82rem;transition:all 0.15s}
+    .tl-stmt .stmt-text{flex:1}
+    .tl-btns{display:flex;gap:0.25rem}
+    .tl-btn{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;background:white;cursor:pointer;font-size:0;transition:all 0.15s;flex-shrink:0}
+    .tl-btn:hover{transform:scale(1.1)}
+    .tl-btn.green:hover,.tl-btn.green.selected{background:var(--success);border-color:var(--success)}
+    .tl-btn.amber:hover,.tl-btn.amber.selected{background:#f59e0b;border-color:#f59e0b}
+    .tl-btn.red:hover,.tl-btn.red.selected{background:var(--error);border-color:var(--error)}
+    .tl-stmt.result-correct{border-color:var(--success);background:var(--success-light)}
+    .tl-stmt.result-incorrect{border-color:var(--error);background:var(--error-light)}
+    .tl-legend{display:flex;gap:1rem;margin-bottom:0.5rem;font-size:0.72rem;color:#8a8580}
+    .tl-legend span{display:flex;align-items:center;gap:0.3rem}
+    .tl-legend .dot{width:12px;height:12px;border-radius:50%}
+    .tl-legend .dot.g{background:var(--success)}.tl-legend .dot.a{background:#f59e0b}.tl-legend .dot.r{background:var(--error)}
+    /* Highlight Evidence */
+    .hl-passage{line-height:2;font-family:'Source Serif 4',serif;font-size:0.92rem;user-select:none;-webkit-user-select:none}
+    .hw{cursor:pointer;padding:1px 0;border-radius:2px;transition:background 0.1s}
+    .hw:hover{background:rgba(124,58,237,0.08)}
+    .hw.selected{background:rgba(124,58,237,0.2);border-bottom:2px solid var(--accent,#7c3aed)}
+    .hw.correct{background:rgba(22,163,74,0.2);border-bottom:2px solid var(--success)}
+    .hw.incorrect{background:rgba(220,38,38,0.15);border-bottom:2px solid var(--error)}
+    .hw.was-answer{border-bottom:2px dashed var(--success)}
+    /* Connotation Picker */
+    .cp-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem}
+    .cp-chip{padding:0.4rem 0.85rem;border:2px solid #e5e7eb;border-radius:20px;cursor:pointer;font-size:0.82rem;font-weight:500;background:white;transition:all 0.15s;user-select:none}
+    .cp-chip:hover{border-color:#c4b5fd}
+    .cp-chip.selected{border-color:var(--accent,#7c3aed);background:var(--accent-light,#f5f3ff);color:var(--accent,#7c3aed)}
+    .cp-chip.result-correct{border-color:var(--success);background:var(--success-light);color:#166534}
+    .cp-chip.result-incorrect{border-color:var(--error);background:var(--error-light);color:#991b1b}
+    .cp-chip.result-missed{border-color:#f59e0b;background:#fffbeb;color:#92400e}
+    /* Evidence Match */
+    .em-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .em-col-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:#8a8580;margin-bottom:0.4rem}
+    .em-item{padding:0.5rem 0.75rem;border:2px solid #e5e7eb;border-radius:10px;font-size:0.78rem;cursor:pointer;transition:all 0.15s;margin-bottom:0.4rem;position:relative}
+    .em-item:hover{border-color:#c4b5fd}
+    .em-item.active{border-color:var(--accent,#7c3aed);background:var(--accent-light,#f5f3ff)}
+    .em-item.paired{opacity:0.85}
+    .em-pair-badge{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;color:white;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+    .em-item.result-correct{border-color:var(--success);background:var(--success-light)}
+    .em-item.result-incorrect{border-color:var(--error);background:var(--error-light)}
+    .pair-c-0{background:#7c3aed}.pair-c-1{background:#0891b2}.pair-c-2{background:#ea580c}.pair-c-3{background:#16a34a}
+    /* AI Mark / AI Write */
+    .rs-quote{font-family:'Source Serif 4',serif;font-style:italic;font-size:1rem;padding:0.75rem 1rem;background:var(--accent-light,#f5f3ff);border-left:3px solid var(--accent,#7c3aed);border-radius:0 8px 8px 0;margin-bottom:0.75rem}
+    .rs-textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:0.65rem 0.85rem;font-size:0.88rem;font-family:inherit;resize:vertical;min-height:80px;transition:border-color 0.15s;box-sizing:border-box}
+    .rs-textarea:focus{outline:none;border-color:#c4b5fd;box-shadow:0 0 0 2px rgba(124,58,237,0.08)}
+    .ai-badge{font-size:0.65rem;color:#8a8580;margin-top:0.35rem;font-style:italic}
+    .ai-spinner{display:inline-block;width:14px;height:14px;border:2px solid #e5e7eb;border-top-color:var(--accent,#7c3aed);border-radius:50%;animation:aispin 0.6s linear infinite;vertical-align:-2px;margin-right:0.3rem}
+    @keyframes aispin{to{transform:rotate(360deg)}}
+    /* Misleading Summary */
+    .ms-summary{font-size:0.85rem;line-height:1.7;background:#f9fafb;border:1px solid var(--border-light,#e8e4df);border-radius:12px;padding:1rem 1.25rem;margin-top:0.5rem}
+    .ms-instructions{font-size:0.78rem;color:#8a8580;margin-bottom:0.25rem}
+    .ms-span{text-decoration:underline;text-decoration-color:#c4b5fd;text-underline-offset:3px;cursor:pointer;padding:1px 2px;border-radius:3px;transition:all 0.15s}
+    .ms-span:hover{background:rgba(124,58,237,0.06)}
+    .ms-span.flagged{background:rgba(220,38,38,0.1);text-decoration-color:var(--error)}
+    .ms-span.result-correct-flag{background:rgba(22,163,74,0.15);text-decoration-color:var(--success)}
+    .ms-span.result-missed{background:rgba(245,158,11,0.15);text-decoration-color:#f59e0b}
+    .ms-span.result-wrong-flag{background:rgba(220,38,38,0.1);text-decoration-color:var(--error)}
+    /* Reorder */
+    .reorder-items{display:flex;flex-direction:column;gap:0.4rem}
+    .reorder-item{display:flex;align-items:center;gap:0.5rem;padding:0.55rem 0.75rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:0.82rem;cursor:pointer;transition:all 0.15s;user-select:none}
+    .reorder-item:hover{border-color:#c4b5fd}
+    .reorder-num{width:22px;height:22px;border-radius:50%;background:#e5e7eb;color:#8a8580;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all 0.15s}
+    .reorder-item.numbered .reorder-num{background:var(--accent,#7c3aed);color:white}
+    .reorder-item.result-correct{border-color:var(--success);background:var(--success-light)}
+    .reorder-item.result-incorrect{border-color:var(--error);background:var(--error-light)}
+    /* Improve Sentence */
+    .improve-original{font-family:'Source Serif 4',serif;font-style:italic;padding:0.75rem 1rem;background:#fef2f2;border-left:3px solid var(--error);border-radius:0 8px 8px 0;margin-bottom:0.75rem;font-size:0.95rem}
+    /* Spot Error */
+    .spot-text{font-size:0.88rem;line-height:1.8;margin-top:0.5rem}
+    .spot-token{cursor:pointer;padding:1px 2px;border-radius:3px;transition:all 0.15s}
+    .spot-token:hover{background:rgba(124,58,237,0.06)}
+    .spot-token.flagged{background:rgba(220,38,38,0.12);text-decoration:line-through;text-decoration-color:var(--error)}
+    .spot-token.result-correct{background:rgba(22,163,74,0.15)}
+    .spot-token.result-missed{background:rgba(245,158,11,0.15)}
+    .spot-token.result-wrong{background:rgba(220,38,38,0.1)}
+    /* Question text (vs maths equation) */
+    .problem-question-text{font-family:'Inter',sans-serif!important;font-size:1rem!important;font-weight:600!important;text-align:left!important;line-height:1.5!important}
+    .problem-question-hint{font-size:0.78rem;color:#8a8580;margin-bottom:0.5rem;font-style:italic}
+    @media(max-width:600px){
+      .em-grid{grid-template-columns:1fr}
+      .tl-legend{flex-wrap:wrap;gap:0.5rem}
+    }
+
     /* ===== PRINT ===== */
     @media print {
       .page-header, .practice-panel, .practice-score-bar, .problem-check-btn, .problem-next-btn, .learn-actions { display: none; }
@@ -2140,6 +2266,12 @@
           Pass each tier by getting <strong>4 in a row</strong> correct, or <strong>75%</strong> overall. You've got this!
         </div>
 
+        <!-- Passage + Content columns (passage hidden by default — English Language only) -->
+        <div class="practice-columns" id="practice-columns">
+
+        <!-- Passage Panel (populated by JS when problems have passage data) -->
+        <div class="practice-passage-area" id="practice-passage-area" style="display:none"></div>
+
         <!-- Content viewport -->
         <div class="content-viewport" id="content-viewport">
 
@@ -2216,6 +2348,8 @@
           </div>
 
         </div><!-- /.content-viewport -->
+
+        </div><!-- /.practice-columns -->
 
       </main><!-- /.practice-main -->
 
@@ -2367,8 +2501,22 @@
       pill.className = 'problem-tier-pill pill-' + tier;
       pill.textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
 
-      // Equation
-      document.getElementById('problem-equation').innerHTML = p.display || '';
+      // Handle passage panel (English Language types)
+      handlePassagePanel(p);
+
+      // Equation / Question text
+      var eqEl = document.getElementById('problem-equation');
+      if (p.question) {
+        eqEl.innerHTML = p.question;
+        eqEl.className = 'problem-equation problem-question-text';
+        // Add hint if present
+        if (p.question_hint) {
+          eqEl.innerHTML += '<div class="problem-question-hint">' + p.question_hint + '</div>';
+        }
+      } else {
+        eqEl.innerHTML = p.display || '';
+        eqEl.className = 'problem-equation';
+      }
 
       // Render chart if present
       var chartContainer = document.getElementById('problem-chart-container');
@@ -2437,12 +2585,17 @@
           '<span class="sf-multiply">\u00d7 10</span>' +
           '<sup><input type="text" class="sf-n problem-input" id="problem-input-sf-n" inputmode="numeric" autocomplete="off" placeholder="n"></sup>' +
           '</div>';
+      } else if (ENGLISH_INPUT_TYPES.indexOf(inputType) !== -1) {
+        inputHtml = renderEnglishInput(p, inputType);
+        inputsArea.innerHTML = inputHtml;
+        initEnglishInput(p, inputType, inputsArea);
+        // Skip the rest of maths-specific input setup
       } else {
         // single_value
         inputHtml = '<label>Answer =</label>' +
           '<input type="text" class="problem-input problem-input-wide" id="problem-input-a" inputmode="numeric" autocomplete="off" placeholder="?">';
       }
-      inputsArea.innerHTML = inputHtml;
+      if (ENGLISH_INPUT_TYPES.indexOf(inputType) === -1) inputsArea.innerHTML = inputHtml;
 
       // Attach Enter key handlers to new inputs
       var newInputs = inputsArea.querySelectorAll('input[type="text"]');
@@ -2605,6 +2758,13 @@
 
       var problem = bank[tier][idx];
       var inputType = problem.input_type || 'single_value';
+
+      // English Language input types — delegate to separate handler
+      if (ENGLISH_INPUT_TYPES.indexOf(inputType) !== -1) {
+        checkEnglishAnswer(problem, inputType, tier, idx);
+        return;
+      }
+
       var inputA = document.getElementById('problem-input-a');
       var inputB = document.getElementById('problem-input-b');
       var isCorrect = false;
@@ -3328,6 +3488,462 @@
 
       createTooltip();
       showStep(0);
+    }
+
+    // ===== ENGLISH LANGUAGE INPUT TYPES =====
+    var ENGLISH_INPUT_TYPES = ['traffic_light','highlight_evidence','connotation_picker','evidence_match','ai_mark','misleading_summary','ai_write','improve_sentence','spot_error','reorder'];
+    var _engState = {tl:{},em:{activeClaim:-1,pairs:{}},emShuffled:[],tlShuffled:[],hlDragging:false,hlStart:-1,reorderOrder:[]};
+    var _currentPassageId = null;
+    var _passageTtsActive = false;
+
+    // ---- Shuffle utility ----
+    function engShuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+
+    // ---- Passage Panel ----
+    function handlePassagePanel(problem) {
+      var area = document.getElementById('practice-passage-area');
+      if (!area) return;
+      var passages = window._practicePassages || [];
+      var hasPassage = problem.passage_id || problem.passage;
+      // highlight_evidence renders passage inline
+      if (problem.input_type === 'highlight_evidence') hasPassage = false;
+
+      if (!hasPassage) {
+        area.style.display = 'none';
+        _currentPassageId = null;
+        return;
+      }
+
+      var passage = problem.passage_id
+        ? passages.find(function(p){return p.id===problem.passage_id;})
+        : {text:problem.passage, label:'Source Text'};
+      if (!passage) {area.style.display='none';return;}
+
+      if (_currentPassageId !== (problem.passage_id||problem.passage)) {
+        _currentPassageId = problem.passage_id||problem.passage;
+        if (_passageTtsActive) {speechSynthesis.cancel();_passageTtsActive=false;}
+        area.innerHTML =
+          '<div class="passage-a11y-bar">' +
+          '<button class="passage-a11y-btn" id="passage-tts-btn" onclick="engToggleTTS()" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg> Read aloud</button>' +
+          '<div class="passage-a11y-sep"></div>' +
+          '<button class="passage-a11y-btn" id="passage-dyslexia-btn" onclick="engToggleDyslexia()" title="Dyslexia font"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg> Dyslexia font</button>' +
+          '<div class="passage-a11y-sep"></div>' +
+          '<div class="passage-overlay-group"><span class="passage-overlay-label">Overlay:</span>' +
+          '<button class="passage-overlay-btn active" data-overlay="" onclick="engSetOverlay(this)" title="None"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg></button>' +
+          '<button class="passage-overlay-btn" data-overlay="yellow" onclick="engSetOverlay(this)" title="Yellow" style="background:#fef9c3"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="blue" onclick="engSetOverlay(this)" title="Blue" style="background:#dbeafe"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="pink" onclick="engSetOverlay(this)" title="Pink" style="background:#fce7f3"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="green" onclick="engSetOverlay(this)" title="Green" style="background:#dcfce7"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="peach" onclick="engSetOverlay(this)" title="Peach" style="background:#fed7aa"></button>' +
+          '<button class="passage-overlay-btn" data-overlay="aqua" onclick="engSetOverlay(this)" title="Aqua" style="background:#cffafe"></button>' +
+          '</div></div>' +
+          '<div class="passage-header"><span class="passage-header-label">' + (passage.label||'Source Extract') + '</span><span class="passage-header-badge" id="passage-q-badge"></span></div>' +
+          '<div class="passage-body"><div class="passage-text" id="passage-text">' + passage.text + '</div></div>' +
+          '<div class="passage-footer">Source Extract</div>';
+        engRestoreA11y();
+      }
+      // Update question badge
+      var badge = document.getElementById('passage-q-badge');
+      if (badge) {
+        var bank = window._problemBank;
+        var tier = practiceState.currentTier;
+        var probs = bank[tier]||[];
+        var pid = problem.passage_id||problem.passage;
+        var total = probs.filter(function(q){return (q.passage_id||q.passage)===pid;}).length;
+        var sofar = probs.slice(0,practiceState.currentIndex+1).filter(function(q){return (q.passage_id||q.passage)===pid;}).length;
+        badge.textContent = 'Q '+sofar+' of '+total;
+      }
+      area.style.display = 'flex';
+      setTimeout(engFitPassageText,50);
+    }
+
+    // ---- Passage fit text ----
+    function engFitPassageText(){
+      var area = document.getElementById('practice-passage-area');
+      if (!area || area.style.display==='none') return;
+      var body = area.querySelector('.passage-body');
+      var text = area.querySelector('.passage-text');
+      if (!body||!text) return;
+      text.style.fontSize='1rem';text.style.lineHeight='2';
+      var clone = text.cloneNode(true);
+      clone.style.position='absolute';clone.style.visibility='hidden';
+      clone.style.width=(body.clientWidth-64)+'px';clone.style.height='auto';clone.style.overflow='visible';
+      if (area.classList.contains('dyslexia-font')){
+        clone.style.fontFamily='OpenDyslexic,sans-serif';clone.style.fontStyle='normal';
+        clone.style.letterSpacing='0.02em';clone.style.wordSpacing='0.08em';
+      }
+      document.body.appendChild(clone);
+      var footer = area.querySelector('.passage-footer');
+      var footerH = footer?footer.offsetHeight:0;
+      var containerH = body.clientHeight-footerH-10;
+      var lo=0.85,hi=1.8,best=0.85;
+      for(var i=0;i<12;i++){
+        var mid=(lo+hi)/2;
+        clone.style.fontSize=mid+'rem';
+        clone.style.lineHeight=String(Math.max(1.6,2.0-(mid-0.85)*0.3));
+        if(clone.scrollHeight<=containerH){best=mid;lo=mid;}else{hi=mid;}
+      }
+      document.body.removeChild(clone);
+      text.style.fontSize=best+'rem';
+      text.style.lineHeight=String(Math.max(1.6,2.0-(best-0.85)*0.3));
+    }
+    window.addEventListener('resize',function(){var a=document.getElementById('practice-passage-area');if(a&&a.style.display!=='none')engFitPassageText();});
+    if(window.ResizeObserver){
+      var _passageObs;
+      var _passageEl=document.getElementById('practice-passage-area');
+      if(_passageEl){_passageObs=new ResizeObserver(function(){engFitPassageText();});_passageObs.observe(_passageEl);}
+    }
+
+    // ---- Passage A11y ----
+    window.engToggleTTS = function(){
+      var btn=document.getElementById('passage-tts-btn');
+      if(_passageTtsActive){speechSynthesis.cancel();_passageTtsActive=false;if(btn)btn.setAttribute('aria-pressed','false');return;}
+      var text=document.getElementById('passage-text');
+      if(!text)return;
+      var u=new SpeechSynthesisUtterance(text.textContent);u.lang='en-GB';u.rate=0.9;
+      var voices=speechSynthesis.getVoices();var gb=voices.find(function(v){return v.lang==='en-GB';});
+      if(gb)u.voice=gb;
+      u.onend=function(){_passageTtsActive=false;if(btn)btn.setAttribute('aria-pressed','false');};
+      speechSynthesis.speak(u);_passageTtsActive=true;if(btn)btn.setAttribute('aria-pressed','true');
+    };
+    window.engToggleDyslexia = function(){
+      var area=document.getElementById('practice-passage-area');if(!area)return;
+      var on=!area.classList.contains('dyslexia-font');
+      area.classList.toggle('dyslexia-font',on);
+      var btn=document.getElementById('passage-dyslexia-btn');if(btn)btn.setAttribute('aria-pressed',String(on));
+      var prefs=engLoadA11y();prefs.dyslexia=on;engSaveA11y(prefs);
+      setTimeout(engFitPassageText,100);
+    };
+    window.engSetOverlay = function(btn){
+      var area=document.getElementById('practice-passage-area');if(!area)return;
+      var colour=btn.dataset.overlay;
+      area.className=area.className.replace(/\boverlay-\S+/g,'').trim();
+      if(colour)area.classList.add('overlay-'+colour);
+      document.querySelectorAll('.passage-overlay-btn').forEach(function(b){b.classList.toggle('active',b.dataset.overlay===colour);});
+      var prefs=engLoadA11y();prefs.overlay=colour;engSaveA11y(prefs);
+    };
+    function engLoadA11y(){try{return JSON.parse(localStorage.getItem('studyvault-a11y'))||{};}catch(e){return {};}}
+    function engSaveA11y(p){localStorage.setItem('studyvault-a11y',JSON.stringify(p));}
+    function engRestoreA11y(){
+      var area=document.getElementById('practice-passage-area');if(!area)return;
+      var prefs=engLoadA11y();
+      if(prefs.dyslexia){area.classList.add('dyslexia-font');var btn=document.getElementById('passage-dyslexia-btn');if(btn)btn.setAttribute('aria-pressed','true');}
+      if(prefs.overlay){area.classList.add('overlay-'+prefs.overlay);document.querySelectorAll('.passage-overlay-btn').forEach(function(b){b.classList.toggle('active',b.dataset.overlay===prefs.overlay);});}
+    }
+
+    // ---- Render English Input ----
+    function renderEnglishInput(p, type) {
+      if (type==='traffic_light') return renderTL(p);
+      if (type==='highlight_evidence') return renderHL(p);
+      if (type==='connotation_picker') return renderCP(p);
+      if (type==='evidence_match') return renderEM(p);
+      if (type==='ai_mark'||type==='ai_write') return renderAI(p);
+      if (type==='misleading_summary') return renderMS(p);
+      if (type==='improve_sentence') return renderImprove(p);
+      if (type==='spot_error') return renderSpotError(p);
+      if (type==='reorder') return renderReorder(p);
+      return '';
+    }
+    function initEnglishInput(p, type, container) {
+      if (type==='highlight_evidence') initHL(p, container);
+    }
+
+    // ---- Traffic Light ----
+    function renderTL(p){
+      _engState.tl={};_engState.tlShuffled=engShuffle(p.statements);
+      var h='<div class="tl-legend"><span><span class="dot g"></span> Explicit</span><span><span class="dot a"></span> Implicit</span><span><span class="dot r"></span> Not supported</span></div><div class="tl-statements">';
+      _engState.tlShuffled.forEach(function(s,i){
+        h+='<div class="tl-stmt" data-idx="'+i+'"><span class="stmt-text">'+s.text+'</span><div class="tl-btns">';
+        h+='<button class="tl-btn green" title="Explicit" onclick="engTlSel('+i+',\'explicit\')"></button>';
+        h+='<button class="tl-btn amber" title="Implicit" onclick="engTlSel('+i+',\'implicit\')"></button>';
+        h+='<button class="tl-btn red" title="Not supported" onclick="engTlSel('+i+',\'unsupported\')"></button>';
+        h+='</div></div>';
+      });
+      return h+'</div>';
+    }
+    window.engTlSel = function(i,cat){
+      if(practiceState.answered)return;
+      _engState.tl[i]=cat;
+      var m={explicit:'green',implicit:'amber',unsupported:'red'};
+      document.querySelectorAll('.tl-stmt[data-idx="'+i+'"] .tl-btn').forEach(function(b){b.classList.remove('selected');});
+      document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.'+m[cat]).classList.add('selected');
+    };
+
+    // ---- Highlight Evidence ----
+    function renderHL(p){
+      var passages=window._practicePassages||[];
+      var passage=p.passage_id?passages.find(function(x){return x.id===p.passage_id;}):null;
+      var text=passage?passage.text:(p.passage||'');
+      return '<div class="problem-question-hint">Click or drag to highlight the relevant words.</div><div class="hl-passage" id="hl-passage-area">'+text+'</div>';
+    }
+    function initHL(p,container){
+      var el=container.querySelector('#hl-passage-area');if(!el)return;
+      var rawText=el.textContent;
+      var words=rawText.split(/(\s+)/);
+      el.innerHTML='';_engState.hlDragging=false;_engState.hlStart=-1;
+      var wi=0;
+      words.forEach(function(w){
+        if(/^\s+$/.test(w)){el.appendChild(document.createTextNode(w));return;}
+        var s=document.createElement('span');s.className='hw';s.dataset.idx=wi++;s.textContent=w;
+        s.addEventListener('mousedown',function(e){e.preventDefault();if(!practiceState.answered){_engState.hlDragging=true;_engState.hlStart=parseInt(s.dataset.idx);el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});s.classList.add('selected');}});
+        s.addEventListener('mouseover',function(){if(!_engState.hlDragging||practiceState.answered)return;var cur=parseInt(s.dataset.idx);var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);el.querySelectorAll('.hw').forEach(function(x){var idx=parseInt(x.dataset.idx);if(idx>=lo&&idx<=hi)x.classList.add('selected');else x.classList.remove('selected');});});
+        s.addEventListener('touchstart',function(){if(practiceState.answered)return;_engState.hlDragging=true;_engState.hlStart=parseInt(s.dataset.idx);el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});s.classList.add('selected');},{passive:true});
+        el.appendChild(s);
+      });
+      el.addEventListener('touchmove',function(e){if(!_engState.hlDragging||practiceState.answered)return;var touch=e.touches[0];var t=document.elementFromPoint(touch.clientX,touch.clientY);if(t&&t.classList.contains('hw')){var cur=parseInt(t.dataset.idx);var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);el.querySelectorAll('.hw').forEach(function(x){var idx=parseInt(x.dataset.idx);if(idx>=lo&&idx<=hi)x.classList.add('selected');else x.classList.remove('selected');});}},{passive:true});
+      document.addEventListener('mouseup',function(){_engState.hlDragging=false;});
+      document.addEventListener('touchend',function(){_engState.hlDragging=false;});
+    }
+
+    // ---- Connotation Picker ----
+    function renderCP(p){
+      var h='<div class="problem-question-hint">Select all connotations that apply. There may be more than one.</div><div class="cp-chips">';
+      p.chips.forEach(function(c,i){h+='<div class="cp-chip" data-idx="'+i+'" onclick="engCpTog(this)">'+c.text+'</div>';});
+      return h+'</div>';
+    }
+    window.engCpTog = function(el){if(!practiceState.answered)el.classList.toggle('selected');};
+
+    // ---- Evidence Match ----
+    function renderEM(p){
+      _engState.em={activeClaim:-1,pairs:{}};
+      var indexed=p.quotes.map(function(q,i){return{quote:q,origIdx:i};});
+      _engState.emShuffled=engShuffle(indexed);
+      var h='<div class="problem-question-hint">Click a claim, then click the quote that supports it. <button style="padding:0.2rem 0.5rem;font-size:0.7rem;border:1px solid #ddd;border-radius:6px;background:white;cursor:pointer;margin-left:0.5rem" onclick="engEmClear()">Clear all</button></div>';
+      h+='<div class="em-grid"><div><div class="em-col-label">Claims</div>';
+      p.claims.forEach(function(c,i){h+='<div class="em-item em-claim" data-idx="'+i+'" onclick="engEmClaim('+i+')">'+c+'</div>';});
+      h+='</div><div><div class="em-col-label">Evidence</div>';
+      _engState.emShuffled.forEach(function(sq,i){h+='<div class="em-item em-quote" data-idx="'+i+'" onclick="engEmQuote('+i+')">'+sq.quote.text+'</div>';});
+      return h+'</div></div>';
+    }
+    window.engEmClaim=function(i){if(practiceState.answered)return;document.querySelectorAll('.em-claim').forEach(function(el){el.classList.remove('active');});_engState.em.activeClaim=i;document.querySelector('.em-claim[data-idx="'+i+'"]').classList.add('active');};
+    window.engEmQuote=function(qi){
+      if(practiceState.answered||_engState.em.activeClaim<0)return;
+      var ci=_engState.em.activeClaim;
+      Object.keys(_engState.em.pairs).forEach(function(k){if(_engState.em.pairs[k]===qi)delete _engState.em.pairs[k];});
+      _engState.em.pairs[ci]=qi;_engState.em.activeClaim=-1;
+      var COLS=['pair-c-0','pair-c-1','pair-c-2','pair-c-3'];
+      document.querySelectorAll('.em-item').forEach(function(el){el.classList.remove('active','paired');var b=el.querySelector('.em-pair-badge');if(b)b.remove();});
+      var pi=0;Object.keys(_engState.em.pairs).forEach(function(ck){
+        var qk=_engState.em.pairs[ck];var ce=document.querySelector('.em-claim[data-idx="'+ck+'"]');var qe=document.querySelector('.em-quote[data-idx="'+qk+'"]');
+        if(ce&&qe){ce.classList.add('paired');qe.classList.add('paired');[ce,qe].forEach(function(el){var b=document.createElement('div');b.className='em-pair-badge '+COLS[pi%4];b.textContent=pi+1;el.appendChild(b);});pi++;}
+      });
+    };
+    window.engEmClear=function(){if(practiceState.answered)return;_engState.em={activeClaim:-1,pairs:{}};document.querySelectorAll('.em-item').forEach(function(el){el.classList.remove('active','paired');var b=el.querySelector('.em-pair-badge');if(b)b.remove();});};
+
+    // ---- AI Mark / AI Write ----
+    function renderAI(p){
+      var h='';
+      if(p.quote) h+='<div class="rs-quote">'+p.quote+'</div>';
+      if(p.brief) h+='<div class="rs-quote" style="border-left-color:#0891b2;background:#f0fdfa">'+p.brief+'</div>';
+      h+='<textarea class="rs-textarea" id="eng-ai-input" placeholder="Write your answer here..."></textarea>';
+      h+='<div class="ai-badge">Marked by AI tutor</div>';
+      return h;
+    }
+
+    // ---- Misleading Summary ----
+    function renderMS(p){
+      var h='<div class="ms-instructions">Click on the underlined phrases that misinterpret the text. Not all underlined phrases are wrong.</div>';
+      h+='<div class="ms-summary">';
+      p.summaryParts.forEach(function(sp,i){
+        if(sp.wrong!==undefined) h+='<span class="ms-span" data-idx="'+i+'" onclick="engMsTog(this)">'+sp.text+'</span>';
+        else h+=sp.text;
+      });
+      return h+'</div>';
+    }
+    window.engMsTog=function(el){if(!practiceState.answered)el.classList.toggle('flagged');};
+
+    // ---- Improve Sentence ----
+    function renderImprove(p){
+      var h='<div class="improve-original">'+p.original+'</div>';
+      h+='<div class="problem-question-hint">Rewrite this sentence to improve it.</div>';
+      h+='<textarea class="rs-textarea" id="eng-ai-input" placeholder="Write your improved version..."></textarea>';
+      h+='<div class="ai-badge">Marked by AI tutor</div>';
+      return h;
+    }
+
+    // ---- Spot Error ----
+    function renderSpotError(p){
+      var h='<div class="problem-question-hint">Click on the words or phrases that contain errors.</div><div class="spot-text">';
+      (p.tokens||[]).forEach(function(t,i){
+        if(t.error) h+='<span class="spot-token" data-idx="'+i+'" onclick="engSpotTog(this)">'+t.text+'</span>';
+        else h+=t.text;
+      });
+      return h+'</div>';
+    }
+    window.engSpotTog=function(el){if(!practiceState.answered)el.classList.toggle('flagged');};
+
+    // ---- Reorder ----
+    function renderReorder(p){
+      _engState.reorderOrder=[];
+      var shuffled=engShuffle(p.items.map(function(item,i){return{text:item,origIdx:i};}));
+      _engState.reorderItems=shuffled;
+      var h='<div class="problem-question-hint">Click items in the correct order.</div><div class="reorder-items">';
+      shuffled.forEach(function(item,i){
+        h+='<div class="reorder-item" data-idx="'+i+'" onclick="engReorderClick('+i+')"><span class="reorder-num" id="reorder-num-'+i+'"></span><span>'+item.text+'</span></div>';
+      });
+      h+='</div><button style="margin-top:0.5rem;padding:0.2rem 0.5rem;font-size:0.7rem;border:1px solid #ddd;border-radius:6px;background:white;cursor:pointer" onclick="engReorderClear()">Clear order</button>';
+      return h;
+    }
+    window.engReorderClick=function(i){
+      if(practiceState.answered)return;
+      if(_engState.reorderOrder.indexOf(i)!==-1)return;
+      _engState.reorderOrder.push(i);
+      var num=document.getElementById('reorder-num-'+i);
+      if(num){num.textContent=_engState.reorderOrder.length;num.parentElement.classList.add('numbered');}
+    };
+    window.engReorderClear=function(){
+      if(practiceState.answered)return;
+      _engState.reorderOrder=[];
+      document.querySelectorAll('.reorder-item').forEach(function(el){el.classList.remove('numbered');el.querySelector('.reorder-num').textContent='';});
+    };
+
+    // ---- Check English Answer ----
+    function checkEnglishAnswer(problem, type, tier, idx) {
+      var isCorrect=false,feedHtml='';
+
+      if(type==='traffic_light'){
+        var tot=_engState.tlShuffled.length,right=0;
+        _engState.tlShuffled.forEach(function(s,i){
+          var el=document.querySelector('.tl-stmt[data-idx="'+i+'"]');
+          if(_engState.tl[i]===s.correct){right++;el.classList.add('result-correct');}
+          else el.classList.add('result-incorrect');
+        });
+        isCorrect=right>=tot-1;
+        feedHtml='<div style="font-size:0.82rem;line-height:1.5">';
+        _engState.tlShuffled.forEach(function(s,i){feedHtml+='<p>'+(_engState.tl[i]===s.correct?'\u2714':'\u2718')+' <strong>'+s.text+'</strong> \u2014 '+s.explain+'</p>';});
+        feedHtml+='</div>';
+      }
+      else if(type==='highlight_evidence'){
+        var sel=[];document.querySelectorAll('.hw.selected').forEach(function(el){sel.push(el.textContent);});
+        var selT=sel.join(' ').replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+        var ansT=(problem.answer_text||problem.answerText||'').replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+        if(selT&&(selT.includes(ansT)||ansT.includes(selT))){
+          isCorrect=true;document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add('correct');});
+        }else{document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add('incorrect');});}
+        var aw=(problem.answer_text||problem.answerText||'').toLowerCase().split(/\s+/);
+        document.querySelectorAll('.hw').forEach(function(w){if(aw.some(function(a){return w.textContent.toLowerCase().replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'')===a.replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'');}))if(!w.classList.contains('correct'))w.classList.add('was-answer');});
+        feedHtml='<div style="font-size:0.82rem"><p><strong>Correct answer:</strong> \u201c'+(problem.answer_text||problem.answerText)+'\u201d</p><p>'+(problem.explanation||'')+'</p></div>';
+      }
+      else if(type==='connotation_picker'){
+        var chips=document.querySelectorAll('.cp-chip'),rc=0,wc=0,tc=0;
+        problem.chips.forEach(function(c,i){var ch=chips[i],s=ch.classList.contains('selected');if(c.correct)tc++;if(s&&c.correct){rc++;ch.classList.add('result-correct');}else if(s&&!c.correct){wc++;ch.classList.add('result-incorrect');}else if(!s&&c.correct)ch.classList.add('result-missed');});
+        isCorrect=rc>=Math.ceil(tc*0.5)&&wc<=1;
+        feedHtml='<div style="font-size:0.82rem"><p>'+rc+' of '+tc+' correct connotations'+(wc?' ('+wc+' incorrect)':', well done!')+'</p></div>';
+      }
+      else if(type==='evidence_match'){
+        var r=0;feedHtml='<div style="font-size:0.82rem">';
+        problem.claims.forEach(function(c,ci){
+          var qi=_engState.em.pairs[ci];var ce=document.querySelector('.em-claim[data-idx="'+ci+'"]');
+          var correctShuffledIdx=_engState.emShuffled.findIndex(function(sq){return sq.quote.correctClaim===ci;});
+          var correctQuote=problem.quotes.find(function(q){return q.correctClaim===ci;});
+          if(qi===correctShuffledIdx){r++;if(ce)ce.classList.add('result-correct');feedHtml+='<p>\u2714 <strong>'+c+'</strong> \u2192 '+correctQuote.text+'</p>';}
+          else{if(ce)ce.classList.add('result-incorrect');var yours=(qi!==undefined&&_engState.emShuffled[qi])?_engState.emShuffled[qi].quote.text:'not matched';feedHtml+='<p>\u2718 <strong>'+c+'</strong> \u2014 you chose: '+yours+'<br><span style="color:var(--success)">\u2192 Correct: '+correctQuote.text+'</span></p>';}
+        });
+        feedHtml+='</div>';isCorrect=r>=problem.claims.length-1;
+      }
+      else if(type==='ai_mark'||type==='ai_write'||type==='improve_sentence'){
+        engCheckAI(problem,type,tier,idx);return;
+      }
+      else if(type==='misleading_summary'){
+        var wrongs=problem.summaryParts.filter(function(s){return s.wrong===true;}),rf=0,wf=0;
+        document.querySelectorAll('.ms-span').forEach(function(el){
+          var si=parseInt(el.dataset.idx),sp=problem.summaryParts[si],fl=el.classList.contains('flagged');
+          if(fl&&sp.wrong){rf++;el.className='ms-span result-correct-flag';}else if(fl&&!sp.wrong){wf++;el.className='ms-span result-wrong-flag';}else if(!fl&&sp.wrong)el.className='ms-span result-missed';
+        });
+        isCorrect=rf===wrongs.length&&wf===0;
+        feedHtml='<div style="font-size:0.82rem"><p>'+rf+' of '+wrongs.length+' misinterpretation'+(wrongs.length>1?'s':'')+' identified'+(wf?' ('+wf+' incorrectly flagged)':'')+'.</p>';
+        problem.summaryParts.forEach(function(sp,si){if(!sp.wrong)return;var el=document.querySelector('.ms-span[data-idx="'+si+'"]');var wasFlagged=el&&el.classList.contains('result-correct-flag');
+          if(wasFlagged)feedHtml+='<p>\u2714 \u201c'+sp.text.trim()+'\u201d \u2014 '+sp.explain+'</p>';
+          else feedHtml+='<p style="color:var(--error)">\u2718 Missed: \u201c'+sp.text.trim()+'\u201d \u2014 '+sp.explain+'</p>';
+        });
+        feedHtml+='</div>';
+      }
+      else if(type==='spot_error'){
+        var tokens=problem.tokens||[],sf=0,mf=0,wef=0;
+        document.querySelectorAll('.spot-token').forEach(function(el){
+          var si=parseInt(el.dataset.idx),t=tokens[si],fl=el.classList.contains('flagged');
+          if(fl&&t.error){sf++;el.className='spot-token result-correct';}else if(fl&&!t.error){wef++;el.className='spot-token result-wrong';}else if(!fl&&t.error){mf++;el.className='spot-token result-missed';}
+        });
+        var totalErrors=tokens.filter(function(t){return t.error;}).length;
+        isCorrect=sf===totalErrors&&wef===0;
+        feedHtml='<div style="font-size:0.82rem"><p>'+sf+' of '+totalErrors+' errors found'+(wef?' ('+wef+' false flags)':'')+'.</p></div>';
+      }
+      else if(type==='reorder'){
+        var order=_engState.reorderOrder;var items=_engState.reorderItems;
+        if(order.length<items.length){alert('Click all items in order first.');return;}
+        var correct=true;
+        order.forEach(function(shuffIdx,pos){
+          var el=document.querySelector('.reorder-item[data-idx="'+shuffIdx+'"]');
+          if(items[shuffIdx].origIdx===problem.correct_order[pos]){el.classList.add('result-correct');}
+          else{el.classList.add('result-incorrect');correct=false;}
+        });
+        isCorrect=correct;
+        feedHtml='<div style="font-size:0.82rem"><p>'+(isCorrect?'Perfect order!':'Not quite right. The correct order is: '+problem.items.map(function(_,i){return problem.items[problem.correct_order[i]];}).join(' \u2192 '))+'</p></div>';
+      }
+
+      engFinishAnswer(isCorrect, feedHtml, tier);
+    }
+
+    // ---- AI Check (async) ----
+    async function engCheckAI(problem, type, tier, idx) {
+      var input=document.getElementById('eng-ai-input');
+      if(!input||!input.value.trim()){alert('Write your answer first.');return;}
+      var checkBtn=document.getElementById('problem-check-btn');
+      checkBtn.innerHTML='<span class="ai-spinner"></span> Marking...';checkBtn.disabled=true;
+      var marks=problem.marks||4;
+      var systemPrompt=problem.ai_system_prompt||((window._aiMarkingPrompts||{})[problem.ai_prompt_key])||'You are a GCSE English Language examiner. Mark the student response. Be encouraging but honest. Respond in JSON: {"quality":"excellent|good|needs_work|not_valid","feedback":"2-3 sentences","improvement":"optional suggestion"}';
+      var userPrompt='';
+      if(problem.quote)userPrompt+='Quote: '+problem.quote+'\n\n';
+      if(problem.brief)userPrompt+='Brief: '+problem.brief+'\n\n';
+      if(problem.context||problem.aiContext)userPrompt+='Context: '+(problem.context||problem.aiContext)+'\n\n';
+      userPrompt+='Student answer: '+input.value.trim();
+      try{
+        var resp=await fetch('/api/ai-mark',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({marks:marks,system:systemPrompt,prompt:userPrompt})});
+        var data=await resp.json();
+        if(!resp.ok)throw new Error(data.error||'Marking failed');
+        var content=data.result;
+        var json;try{json=JSON.parse(content.match(/\{[\s\S]*\}/)[0]);}catch(e){json={quality:'good',feedback:content};}
+        var ok=json.quality==='excellent'||json.quality==='good';
+        var feedHtml='<div style="font-size:0.82rem"><p>'+json.feedback+'</p>';
+        if(json.improvement)feedHtml+='<p style="color:var(--accent);font-weight:600">Tip: '+json.improvement+'</p>';
+        feedHtml+='</div>';
+        checkBtn.textContent='Check Answer';checkBtn.disabled=false;
+        engFinishAnswer(ok,feedHtml,tier);
+      }catch(e){
+        checkBtn.textContent='Check Answer';checkBtn.disabled=false;
+        alert('AI marking failed: '+e.message);
+      }
+    }
+
+    // ---- Finish English Answer (shared) ----
+    function engFinishAnswer(isCorrect, feedHtml, tier) {
+      practiceState.answered=true;
+      practiceState[tier].attempted++;
+      if(isCorrect){practiceState[tier].correct++;practiceState[tier].streak++;practiceState.streak++;}
+      else{practiceState[tier].streak=0;practiceState.streak=0;}
+
+      // Card border
+      var card=document.getElementById('current-problem-card');
+      card.classList.add(isCorrect?'card-correct':'card-incorrect');
+
+      // Feedback
+      var feedArea=document.getElementById('problem-feedback-area');
+      var feedContent=document.getElementById('problem-feedback-content');
+      feedArea.className='problem-feedback-area '+(isCorrect?'feedback-correct':'feedback-incorrect');
+      feedContent.innerHTML='<div class="problem-feedback-icon">'+(isCorrect?'\u2714':'\u2718')+'</div><div class="problem-feedback-text">'+(isCorrect?'<strong>Correct!</strong>':'<strong>Not quite right</strong>')+'</div>'+feedHtml;
+
+      // Disable check, show next
+      document.getElementById('problem-check-btn').style.display='none';
+      document.getElementById('problem-next-area').className='problem-next-area visible';
+
+      // Update progress
+      updateTierProgress();
+      updateScoreBarTier();
+
+      // Check for tier pass (4 in a row)
+      if(practiceState[tier].streak>=4){
+        setTimeout(function(){celebrateTier(tier);},600);
+      }
     }
 
     // ===== MAP IMAGE LIGHTBOX =====

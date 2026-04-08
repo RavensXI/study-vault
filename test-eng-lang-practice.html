@@ -1,0 +1,1239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Explicit &amp; Implicit Information — Practice Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#faf8f5;color:#2d2a26;overflow:hidden;height:100vh;height:100dvh}
+
+:root{
+  --accent:#7c3aed;--accent-light:#f5f3ff;--accent-badge:#e8e0f5;
+  --bronze:#b45309;--bronze-light:#fffbeb;--bronze-badge:#fef3c7;
+  --silver:#64748b;--silver-light:#f1f5f9;--silver-badge:#e2e8f0;
+  --gold:#d97706;--gold-light:#fefce8;--gold-badge:#fef9c3;
+  --success:#16a34a;--success-light:#f0fdf4;
+  --error:#dc2626;--error-light:#fef2f2;
+  --border:#e8e4df;--text-muted:#8a8580;
+  --panel-bg:#f5f2ed;--panel-width:340px;--header-h:56px;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ===== HEADER ===== */
+.header{height:var(--header-h);background:#2d2a26;color:white;display:flex;align-items:center;padding:0 1.5rem;gap:0.75rem;flex-shrink:0}
+.header-logo{font-family:'Source Serif 4',serif;font-weight:700;font-size:1rem;color:white;text-decoration:none}
+.header-divider{width:1px;height:20px;background:rgba(255,255,255,0.2)}
+.header-title{font-size:0.78rem;color:rgba(255,255,255,0.7)}
+.header-spacer{flex:1}
+.panel-toggle{display:none;width:34px;height:34px;border-radius:8px;border:1px solid rgba(255,255,255,0.2);background:none;color:white;cursor:pointer;align-items:center;justify-content:center}
+
+/* ===== LAYOUT ===== */
+.layout{display:flex;height:calc(100vh - var(--header-h));height:calc(100dvh - var(--header-h))}
+
+/* ===== LEFT PANEL ===== */
+.panel{width:var(--panel-width);flex-shrink:0;background:var(--panel-bg);border-right:1px solid var(--border);overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1rem;scrollbar-width:thin;scrollbar-color:transparent transparent}
+.panel:hover{scrollbar-color:var(--accent) transparent}
+.panel-section{background:white;border:1px solid var(--border);border-radius:12px;padding:1rem}
+.panel-section-title{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.65rem;display:flex;align-items:center;gap:0.35rem}
+.panel-section-title svg{width:12px;height:12px;color:var(--accent)}
+.panel-method-title{font-family:'Source Serif 4',serif;font-size:1rem;font-weight:700;margin-bottom:0.65rem;line-height:1.3}
+.panel-method-content{font-size:0.75rem;line-height:1.6;color:#5a5651;margin-bottom:0.6rem;padding-bottom:0.6rem;border-bottom:1px solid rgba(0,0,0,0.06)}
+.panel-method-steps{list-style:none;padding:0;counter-reset:ps}
+.panel-method-steps li{counter-increment:ps;display:flex;align-items:baseline;gap:0.5rem;padding:0.3rem 0;font-size:0.78rem;line-height:1.5;border-bottom:1px solid rgba(0,0,0,0.05)}
+.panel-method-steps li:last-child{border-bottom:none}
+.panel-method-steps li::before{content:counter(ps);flex-shrink:0;width:1.2rem;height:1.2rem;display:flex;align-items:center;justify-content:center;font-size:0.6rem;font-weight:700;color:var(--accent);background:var(--accent-light);border-radius:50%}
+.exam-context-item{display:flex;align-items:center;gap:0.45rem;padding:0.25rem 0;font-size:0.78rem;color:#5a5651}
+.exam-context-item svg{width:13px;height:13px;color:var(--accent);flex-shrink:0}
+.panel-learn-link{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.72rem;font-weight:600;color:var(--accent);cursor:pointer;background:none;border:none;padding:0.5rem 0 0;font-family:inherit}
+.panel-learn-link:hover{opacity:0.7}
+.panel-learn-link svg{width:13px;height:13px;flex-shrink:0}
+.panel-traps{font-size:0.75rem;color:#5a5651;line-height:1.5}
+.panel-traps li{margin-bottom:0.35rem}
+
+/* ===== MAIN AREA ===== */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:hidden}
+
+/* Score bar */
+.score-bar{display:flex;align-items:center;gap:0.75rem;padding:0.6rem 2rem;border-bottom:1px solid var(--border);background:white;flex-shrink:0}
+.tier-badge{display:inline-flex;align-items:center;gap:0.35rem;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;padding:0.3em 0.85em;border-radius:999px}
+.tier-badge.is-bronze{color:var(--bronze);background:var(--bronze-badge)}
+.tier-badge.is-silver{color:var(--silver);background:var(--silver-badge)}
+.tier-badge.is-gold{color:var(--gold);background:var(--gold-badge)}
+.score-divider{width:1px;height:18px;background:var(--border)}
+.score-text{font-size:0.82rem;font-weight:700;color:var(--accent)}
+.streak-badge{display:none;align-items:center;gap:0.25rem;font-size:0.78rem;font-weight:700;color:#ea580c;background:#fff7ed;border:1px solid #fed7aa;padding:0.2em 0.65em;border-radius:999px;animation:pulse 0.4s var(--ease)}
+.streak-badge.visible{display:inline-flex}
+@keyframes pulse{0%{transform:scale(0.8);opacity:0}50%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.score-spacer{flex:1}
+.score-examples-btn{font-size:0.72rem;font-weight:600;color:var(--accent);background:none;border:1px solid var(--accent);border-radius:6px;padding:0.25rem 0.6rem;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.score-examples-btn:hover{background:var(--accent);color:white}
+
+/* Tier toast */
+.tier-toast{margin:0.75rem 2rem 0;padding:0.65rem 1rem;background:var(--accent-light);border:1px solid var(--accent-badge);border-radius:10px;font-size:0.78rem;text-align:center;flex-shrink:0;transition:all 0.5s var(--ease);overflow:hidden}
+.tier-toast strong{color:var(--accent)}
+.tier-toast.fade{opacity:0;max-height:0;margin:0;padding:0}
+
+/* Two-column: source insert left, answer space right */
+.practice-columns{display:flex;flex:1;overflow:hidden}
+#passage-area{flex:1;min-width:0;overflow-y:auto;background:#f9f6f0;border-right:1px solid #d6cfc4;display:flex;flex-direction:column}
+/* OpenDyslexic font */
+@font-face{font-family:'OpenDyslexic';src:url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Regular.woff2') format('woff2'),url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Regular.woff') format('woff');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'OpenDyslexic';src:url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Bold.woff2') format('woff2'),url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Bold.woff') format('woff');font-weight:700;font-style:normal;font-display:swap}
+@font-face{font-family:'OpenDyslexic';src:url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Italic.woff2') format('woff2'),url('fonts/opendyslexic-0.91.12/compiled/OpenDyslexic-Italic.woff') format('woff');font-weight:400;font-style:italic;font-display:swap}
+
+/* Accessibility bar */
+.a11y-bar{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 1.25rem;border-bottom:1px solid rgba(0,0,0,0.06);flex-shrink:0;background:rgba(0,0,0,0.02);flex-wrap:wrap}
+.a11y-btn{display:flex;align-items:center;gap:0.3rem;padding:0.25rem 0.55rem;border:1px solid #d6cfc4;border-radius:6px;background:white;cursor:pointer;color:#5a5651;font-size:0.72rem;font-weight:600;font-family:inherit;transition:all 0.15s}
+.a11y-btn:hover{border-color:var(--accent);color:var(--accent)}
+.a11y-btn[aria-pressed="true"],.a11y-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+.a11y-btn svg{width:13px;height:13px}
+.a11y-sep{width:1px;height:18px;background:#d6cfc4}
+.a11y-overlay-group{display:flex;align-items:center;gap:0.3rem}
+.a11y-overlay-label{font-size:0.62rem;color:#a89e93;font-weight:600;text-transform:uppercase;letter-spacing:0.04em}
+.a11y-overlay{width:22px;height:22px;border-radius:50%;border:2px solid #d6cfc4;cursor:pointer;padding:0;transition:border-color 0.2s,transform 0.1s;display:flex;align-items:center;justify-content:center;background:white}
+.a11y-overlay:hover{transform:scale(1.15)}
+.a11y-overlay.active{border-color:#2d2a26;box-shadow:0 0 0 2px white,0 0 0 3.5px #2d2a26}
+.a11y-overlay svg{width:12px;height:12px;color:#999}
+
+/* Dyslexia font applied to passage */
+#passage-area.dyslexia-font .passage-text{font-family:'OpenDyslexic',sans-serif!important;font-style:normal!important;letter-spacing:0.02em;word-spacing:0.08em}
+
+/* Overlays applied to passage area */
+#passage-area.overlay-yellow{background-color:#fef9c3}
+#passage-area.overlay-blue{background-color:#dbeafe}
+#passage-area.overlay-pink{background-color:#fce7f3}
+#passage-area.overlay-green{background-color:#dcfce7}
+#passage-area.overlay-peach{background-color:#fed7aa}
+#passage-area.overlay-aqua{background-color:#cffafe}
+
+/* Font size steps */
+#passage-area.font-up-1 .passage-text{font-size:1.15rem!important}
+#passage-area.font-up-2 .passage-text{font-size:1.3rem!important}
+#passage-area.font-down-1 .passage-text{font-size:0.82rem!important}
+
+.passage-header{padding:1rem 1.5rem 0.5rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.passage-header-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#8a7e72}
+.passage-header-badge{font-size:0.62rem;font-weight:600;color:var(--accent);background:var(--accent-light);padding:0.15em 0.55em;border-radius:999px}
+.passage-body{padding:1.25rem 2rem 1.5rem;flex:1;overflow:hidden}
+.passage-body .passage-text{font-family:'Source Serif 4',serif;font-size:1rem;line-height:2;color:#3d3630;font-style:italic;transition:font-size 0.3s ease}
+.passage-body .passage-text::first-letter{font-size:1.4em;font-weight:600;color:#5a5651}
+.passage-footer{padding:0.5rem 1.5rem 0.75rem;font-size:0.65rem;color:#a89e93;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;text-align:right}
+
+/* Content viewport */
+.viewport{flex:1;min-width:0;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem;overflow-y:auto;transition:opacity 0.35s,transform 0.5s var(--ease)}
+
+@media(max-width:900px){
+  .practice-columns{flex-direction:column}
+  #passage-area{width:100%;max-height:38vh;border-right:none;border-bottom:1px solid #d6cfc4}
+  .passage-body{padding:0.5rem 1rem 1rem}
+}
+/* (view rule defined above with align-items:center) */
+.view.hidden{opacity:0;pointer-events:none;transform:translateX(30px)}
+.view.hidden-left{opacity:0;pointer-events:none;transform:translateX(-30px)}
+
+/* ===== LEARN MODE ===== */
+.learn-card{background:white;border:1px solid var(--border);border-radius:16px;padding:2.5rem 3rem;max-width:640px;width:100%;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+.learn-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.learn-counter{font-size:0.72rem;font-weight:600;color:var(--text-muted)}
+.learn-diff{font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;padding:0.2em 0.6em;border-radius:999px}
+.learn-diff.d-bronze{color:var(--bronze);background:var(--bronze-badge)}
+.learn-diff.d-silver{color:var(--silver);background:var(--silver-badge)}
+.learn-question{font-family:'Source Serif 4',serif;font-size:1.3rem;font-weight:700;line-height:1.4;margin-bottom:0.75rem}
+.learn-passage{background:#fef9ef;border-left:4px solid var(--accent);font-family:'Source Serif 4',serif;font-style:italic;line-height:1.8;padding:1rem 1.25rem;border-radius:0 12px 12px 0;margin-bottom:1rem;font-size:0.9rem}
+.learn-step{overflow:hidden;max-height:0;opacity:0;transition:max-height 0.5s var(--ease),opacity 0.4s,padding 0.3s;padding:0 0.75rem;border-left:3px solid transparent}
+.learn-step.revealed{max-height:200px;opacity:1;padding:0.65rem 0.75rem;border-left-color:var(--accent-badge);margin-bottom:0.35rem}
+.learn-step.is-answer.revealed{background:var(--success-light);border-left-color:#86efac;border-radius:0 10px 10px 0}
+.learn-step-label{font-size:0.65rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:0.2rem}
+.learn-step.is-answer .learn-step-label{color:var(--success)}
+.learn-step-content{font-size:0.9rem;line-height:1.6}
+.learn-actions{display:flex;align-items:center;justify-content:center;gap:0.75rem;margin-top:1.5rem}
+.learn-btn{font-family:inherit;font-size:0.85rem;font-weight:600;padding:0.6em 1.5em;border-radius:10px;cursor:pointer;border:none;transition:all 0.2s}
+.learn-reveal{color:var(--accent);background:var(--accent-light);border:1px solid var(--accent-badge)}
+.learn-reveal:hover{background:var(--accent-badge)}
+.learn-next{color:white;background:var(--accent)}
+.learn-next:hover{filter:brightness(0.92)}
+.learn-back{color:var(--text-muted);background:none;border:1px solid var(--border);font-size:0.78rem}
+
+/* ===== PROBLEM CARD ===== */
+.problem-stage{max-width:700px;width:100%}
+.problem-card{background:white;border:1px solid var(--border);border-radius:16px;padding:2rem 2rem 1.5rem;box-shadow:0 4px 20px rgba(0,0,0,0.05);transition:border-color 0.4s,box-shadow 0.4s}
+.problem-card.card-correct{border-color:#86efac;box-shadow:0 4px 20px rgba(22,163,74,0.08)}
+.problem-card.card-incorrect{border-color:#fca5a5;box-shadow:0 4px 20px rgba(220,38,38,0.08)}
+
+/* Passage */
+.passage-card{background:#fef9ef;border-left:4px solid var(--accent);font-family:'Source Serif 4',serif;font-style:italic;line-height:1.8;padding:1rem 1.25rem;border-radius:0 12px 12px 0;margin-bottom:1rem;font-size:0.9rem}
+.passage-card .source-label{font-family:'Inter',sans-serif;font-style:normal;font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent);margin-bottom:0.4rem}
+.question-text{font-weight:600;font-size:0.88rem;margin-bottom:0.75rem}
+.question-hint{font-size:0.78rem;color:var(--text-muted);margin-bottom:0.5rem;font-style:italic}
+
+/* Buttons */
+.btn{padding:0.55rem 1.25rem;border-radius:10px;border:none;cursor:pointer;font-size:0.82rem;font-weight:600;font-family:inherit;transition:all 0.15s}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+.btn-primary{background:var(--accent);color:white}
+.btn-primary:hover:not(:disabled){background:#6d28d9}
+.btn-success{background:var(--success);color:white}
+.btn-outline{background:white;border:1px solid #ddd;color:#2d2a26}
+.action-row{display:flex;gap:0.5rem;margin-top:1rem}
+
+/* Feedback */
+.feedback{border-radius:12px;padding:1rem 1.25rem;margin-top:1rem;animation:fadeSlide 0.3s ease}
+.feedback.correct{background:var(--success-light);border:1px solid #bbf7d0;color:#166534}
+.feedback.partial{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+.feedback.incorrect{background:var(--error-light);border:1px solid #fecaca;color:#991b1b}
+.feedback-title{font-weight:700;font-size:0.88rem;margin-bottom:0.35rem;display:flex;align-items:center;gap:0.4rem}
+.feedback-body{font-size:0.82rem;line-height:1.5}
+.feedback-body p{margin-bottom:0.4rem}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* Traffic Light */
+.tl-statements{display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem}
+.tl-stmt{display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:#f9fafb;border:1px solid #e5e7eb;border-radius:10px;font-size:0.82rem;transition:all 0.15s}
+.tl-stmt .stmt-text{flex:1}
+.tl-btns{display:flex;gap:0.25rem}
+.tl-btn{width:28px;height:28px;border-radius:50%;border:2px solid #ddd;background:white;cursor:pointer;font-size:0;transition:all 0.15s;flex-shrink:0}
+.tl-btn:hover{transform:scale(1.1)}
+.tl-btn.green:hover,.tl-btn.green.selected{background:#16a34a;border-color:#16a34a}
+.tl-btn.amber:hover,.tl-btn.amber.selected{background:#f59e0b;border-color:#f59e0b}
+.tl-btn.red:hover,.tl-btn.red.selected{background:#dc2626;border-color:#dc2626}
+.tl-stmt.result-correct{border-color:#16a34a;background:var(--success-light)}
+.tl-stmt.result-incorrect{border-color:#dc2626;background:var(--error-light)}
+.tl-legend{display:flex;gap:1rem;margin-bottom:0.5rem;font-size:0.72rem;color:var(--text-muted)}
+.tl-legend span{display:flex;align-items:center;gap:0.3rem}
+.tl-legend .dot{width:12px;height:12px;border-radius:50%}
+.tl-legend .dot.g{background:#16a34a}.tl-legend .dot.a{background:#f59e0b}.tl-legend .dot.r{background:#dc2626}
+
+/* Highlight */
+.hl-passage{line-height:2;font-family:'Source Serif 4',serif;font-size:0.92rem;user-select:none;-webkit-user-select:none}
+.hw{cursor:pointer;padding:1px 0;border-radius:2px;transition:background 0.1s}
+.hw:hover{background:rgba(124,58,237,0.08)}
+.hw.selected{background:rgba(124,58,237,0.2);border-bottom:2px solid var(--accent)}
+.hw.correct{background:rgba(22,163,74,0.2);border-bottom:2px solid var(--success)}
+.hw.incorrect{background:rgba(220,38,38,0.15);border-bottom:2px solid var(--error)}
+.hw.was-answer{border-bottom:2px dashed var(--success)}
+
+/* Connotation */
+.cp-chips{display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.5rem}
+.cp-chip{padding:0.4rem 0.85rem;border:2px solid #e5e7eb;border-radius:20px;cursor:pointer;font-size:0.82rem;font-weight:500;background:white;transition:all 0.15s;user-select:none}
+.cp-chip:hover{border-color:#c4b5fd}
+.cp-chip.selected{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.cp-chip.result-correct{border-color:var(--success);background:var(--success-light);color:#166534}
+.cp-chip.result-incorrect{border-color:var(--error);background:var(--error-light);color:#991b1b}
+.cp-chip.result-missed{border-color:#f59e0b;background:#fffbeb;color:#92400e}
+
+/* Evidence Match */
+.em-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.em-col-label{font-size:0.65rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted);margin-bottom:0.4rem}
+.em-item{padding:0.5rem 0.75rem;border:2px solid #e5e7eb;border-radius:10px;font-size:0.78rem;cursor:pointer;transition:all 0.15s;margin-bottom:0.4rem;position:relative}
+.em-item:hover{border-color:#c4b5fd}
+.em-item.active{border-color:var(--accent);background:var(--accent-light)}
+.em-item.paired{opacity:0.85}
+.em-pair-badge{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;color:white;font-size:0.65rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.em-item.result-correct{border-color:var(--success);background:var(--success-light)}
+.em-item.result-incorrect{border-color:var(--error);background:var(--error-light)}
+.pair-c-0{background:#7c3aed}.pair-c-1{background:#0891b2}.pair-c-2{background:#ea580c}.pair-c-3{background:#16a34a}
+
+/* Rewrite Subtext */
+.rs-quote{font-family:'Source Serif 4',serif;font-style:italic;font-size:1rem;padding:0.75rem 1rem;background:var(--accent-light);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;margin-bottom:0.75rem}
+.rs-textarea{width:100%;border:1px solid #ddd;border-radius:10px;padding:0.65rem 0.85rem;font-size:0.88rem;font-family:inherit;resize:vertical;min-height:80px;transition:border-color 0.15s}
+.rs-textarea:focus{outline:none;border-color:#c4b5fd;box-shadow:0 0 0 2px rgba(124,58,237,0.08)}
+.ai-badge{font-size:0.65rem;color:var(--text-muted);margin-top:0.35rem;font-style:italic}
+.api-row{margin-bottom:0.5rem;font-size:0.78rem}
+.api-row input{padding:0.35rem 0.6rem;border:1px solid #ddd;border-radius:6px;font-size:0.78rem;font-family:inherit;width:260px;max-width:100%}
+.api-row label{font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.15rem}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid #e5e7eb;border-top-color:var(--accent);border-radius:50%;animation:spin 0.6s linear infinite;vertical-align:-2px;margin-right:0.3rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Misleading Summary */
+.ms-summary{font-size:0.85rem;line-height:1.7;background:#f9fafb;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-top:0.5rem}
+.ms-instructions{font-size:0.78rem;color:var(--text-muted);margin-bottom:0.25rem}
+.ms-span{text-decoration:underline;text-decoration-color:#c4b5fd;text-underline-offset:3px;cursor:pointer;padding:1px 2px;border-radius:3px;transition:all 0.15s}
+.ms-span:hover{background:rgba(124,58,237,0.06)}
+.ms-span.flagged{background:rgba(220,38,38,0.1);text-decoration-color:#dc2626}
+.ms-span.result-correct-flag{background:rgba(22,163,74,0.15);text-decoration-color:#16a34a}
+.ms-span.result-missed{background:rgba(245,158,11,0.15);text-decoration-color:#f59e0b}
+.ms-span.result-wrong-flag{background:rgba(220,38,38,0.1);text-decoration-color:#dc2626}
+
+/* Tier celebration modal */
+.cele-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;animation:fadeIn 0.3s}
+.cele-overlay.hidden{display:none}
+.cele-card{background:white;border-radius:20px;padding:2.5rem;text-align:center;max-width:380px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.2);animation:celebounce 0.5s var(--ease)}
+.cele-icon{font-size:2.5rem;margin-bottom:0.75rem}
+.cele-title{font-family:'Source Serif 4',serif;font-size:1.3rem;font-weight:700;margin-bottom:0.5rem}
+.cele-body{font-size:0.85rem;color:#5a5651;margin-bottom:1.25rem;line-height:1.5}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes celebounce{0%{transform:scale(0.8);opacity:0}50%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+
+/* Summary */
+.summary-card{background:white;border:1px solid var(--border);border-radius:16px;padding:2.5rem;max-width:480px;width:100%;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.05)}
+.summary-card h2{font-family:'Source Serif 4',serif;margin-bottom:0.75rem}
+.summary-score{font-size:3rem;font-weight:700;color:var(--accent)}
+.summary-label{font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem}
+.tier-results{display:flex;justify-content:center;gap:2rem;margin-bottom:1.5rem}
+.tier-result{text-align:center}
+.tier-result-name{font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-muted)}
+.tier-result-score{font-size:1.3rem;font-weight:700}
+.tier-result-score.good{color:var(--success)}.tier-result-score.ok{color:#f59e0b}.tier-result-score.low{color:var(--error)}
+
+/* Mobile */
+@media(max-width:900px){
+  .panel{display:none;position:fixed;top:var(--header-h);left:0;bottom:0;z-index:100;width:300px;box-shadow:4px 0 20px rgba(0,0,0,0.15)}
+  .panel.open{display:flex}
+  .panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:99;display:none}
+  .panel-overlay.open{display:block}
+  .panel-toggle{display:flex}
+  .score-bar{padding:0.5rem 1rem}
+  .view{padding:1rem}
+  .learn-card{padding:1.5rem}
+  .problem-card{padding:1.25rem}
+  .em-grid{grid-template-columns:1fr}
+}
+@media(max-width:500px){
+  .tl-legend{flex-wrap:wrap;gap:0.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a class="header-logo" href="/">StudyVault</a>
+  <div class="header-divider"></div>
+  <span class="header-title">English Language &mdash; Paper 1 Reading</span>
+  <div class="header-spacer"></div>
+  <button class="panel-toggle" id="panel-toggle" onclick="togglePanel()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+</div>
+
+<div class="layout">
+<!-- Panel overlay (mobile) -->
+<div class="panel-overlay" id="panel-overlay" onclick="togglePanel()"></div>
+
+<!-- Left Panel -->
+<div class="panel" id="panel">
+  <div class="panel-section">
+    <div class="panel-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> Method Card</div>
+    <div class="panel-method-title">Explicit &amp; Implicit Information</div>
+    <div class="panel-method-content">
+      <p><strong>Explicit</strong> = stated directly. You can underline the exact words.</p>
+      <p><strong>Implicit</strong> = suggested through clues. You must infer the meaning.</p>
+    </div>
+    <ol class="panel-method-steps">
+      <li>Read the specified lines carefully</li>
+      <li>Ask: <em>&ldquo;Can I point to the exact words?&rdquo;</em></li>
+      <li>Yes &rarr; <strong>explicit</strong></li>
+      <li>No, but evidence suggests it &rarr; <strong>implicit</strong></li>
+      <li>No evidence at all &rarr; <strong>not supported</strong></li>
+    </ol>
+  </div>
+
+  <div class="panel-section">
+    <div class="panel-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Exam Context</div>
+    <div class="exam-context-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Paper 1, Question 1</div>
+    <div class="exam-context-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 4 marks &mdash; 5 minutes max</div>
+    <div class="exam-context-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> Underpins all Paper 1 questions</div>
+    <button class="panel-learn-link" onclick="showLearn()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      View worked examples
+    </button>
+  </div>
+
+  <div class="panel-section">
+    <div class="panel-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Common Traps</div>
+    <ul class="panel-traps">
+      <li><strong>Opposite meaning:</strong> uses a word from the text but reverses it</li>
+      <li><strong>Plausible but unsupported:</strong> sounds right, no evidence</li>
+      <li><strong>Paraphrasing that distorts:</strong> changes meaning while sounding similar</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <div class="score-bar">
+    <span class="tier-badge is-bronze" id="tier-badge">Bronze</span>
+    <div class="score-divider"></div>
+    <span class="score-text" id="score-text">Problem 1 of 4</span>
+    <span class="streak-badge" id="streak-badge">&#x1F525; 0</span>
+    <div class="score-spacer"></div>
+    <button class="score-examples-btn" onclick="showLearn()">Worked Examples</button>
+  </div>
+  <div class="tier-toast" id="tier-toast">Pass this tier: get <strong>4 in a row</strong> correct, or complete all problems with <strong>75%+</strong> accuracy.</div>
+  <div class="practice-columns">
+    <div id="passage-area" style="display:none"></div>
+    <div class="viewport">
+      <div class="view" id="learn-view" style="display:none"></div>
+      <div class="view" id="practice-view"></div>
+      <div class="view" id="summary-view" style="display:none"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Method Card Modal -->
+<div class="cele-overlay" id="method-modal">
+  <div class="cele-card" style="max-width:520px;text-align:left">
+    <div style="text-align:center;margin-bottom:0.75rem"><span style="font-size:2rem">&#x1F4D6;</span></div>
+    <div class="cele-title" style="text-align:center">Explicit &amp; Implicit Information</div>
+    <p style="font-size:0.85rem;line-height:1.6;margin:0.75rem 0"><strong>Explicit</strong> information is stated directly &mdash; you can underline the exact words. <strong>Implicit</strong> information is suggested through clues &mdash; you must infer the meaning.</p>
+    <p style="font-size:0.85rem;line-height:1.6;margin-bottom:0.75rem">Ask yourself: <em>&ldquo;Can I point to the exact words that prove this?&rdquo;</em></p>
+    <ul style="font-size:0.82rem;line-height:1.6;padding-left:1.25rem;margin-bottom:0.75rem">
+      <li><strong>Yes</strong> &rarr; explicit</li>
+      <li><strong>No, but evidence suggests it</strong> &rarr; implicit (inference)</li>
+      <li><strong>No evidence at all</strong> &rarr; not supported</li>
+    </ul>
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem">Paper 1 Q1: 4 marks, 5 minutes. But this skill underpins every question on the paper.</p>
+    <button class="btn btn-primary" onclick="dismissMethodModal()" style="width:100%">Got it &mdash; show me some examples</button>
+  </div>
+</div>
+
+<!-- Tier celebration -->
+<div class="cele-overlay hidden" id="cele-overlay">
+  <div class="cele-card">
+    <div class="cele-icon" id="cele-icon"></div>
+    <div class="cele-title" id="cele-title"></div>
+    <div class="cele-body" id="cele-body"></div>
+    <button class="btn btn-primary" onclick="dismissCele()" style="width:100%">Continue</button>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+// ============================================================
+//  PASSAGES
+// ============================================================
+var P = [
+"The corridor was empty. Marcus pressed his back against the cold wall and listened. Somewhere above him, a door slammed. He flinched. His hands were trembling, and he shoved them deep into his pockets, curling his fingers around the crumpled note his mother had given him that morning. \u201cYou\u2019ll be fine,\u201d she had said, smoothing down his collar with hands that shook as much as his did now. He hadn\u2019t believed her then. He certainly didn\u2019t believe her now. The fluorescent light above him flickered once, twice, then settled into a low, persistent hum. He took a breath and stepped forward.",
+"Gran\u2019s kitchen always smelled of flour and something sweet. She moved between the counter and the stove with a practised rhythm, humming a tune that belonged to another decade. \u201cPass me the sugar, love,\u201d she said, without turning around. Her hands were dusted white, the skin paper-thin over blue veins, but her grip on the wooden spoon was firm and sure. Through the window, the garden stretched out in lazy afternoon light. A blackbird sat on the fence, watching them both with one bright, curious eye. For a moment, everything was exactly as it had always been.",
+"The house had been quiet for three days now. Ellen moved through the rooms like a visitor in a museum, careful not to disturb anything. His coat still hung on the back of the door, one sleeve longer than the other where the lining had come loose. She\u2019d meant to fix it. She\u2019d always meant to fix it. In the kitchen, the calendar showed last Tuesday, and she couldn\u2019t bring herself to tear off the page because his handwriting was there \u2014 \u201cdentist 2pm\u201d \u2014 in that cramped, impatient scrawl she\u2019d teased him about for forty years. She filled the kettle and stood at the window, watching the rain flatten the daffodils he had planted in October.",
+"The bus shelter offered no real protection. Rain drove sideways through the open sides, speckling Aisha\u2019s school bag and the half-eaten sandwich she\u2019d given up on. Two older boys leaned against the far panel, their hoods up, voices low. One of them glanced at her and she looked away quickly, fixing her eyes on the timetable as though she hadn\u2019t already memorised every departure. The 42 was late. It was always late. She shifted her weight from one foot to the other and pulled her blazer tighter, though the thin fabric did nothing against the November cold. Across the road, the chippy\u2019s windows glowed warm and golden, and the smell of vinegar drifted across like a promise she couldn\u2019t afford.",
+"The sea was not the same sea he remembered. As a boy, it had roared \u2014 a vast, breathing thing that swallowed the horizon and threw stones at his feet like gifts. Now it lay flat and grey beneath a colourless sky, barely troubling the shore. He stood where the concrete ended and the sand began, his shoes sinking slightly, and thought about how the coastline had retreated since his last visit. Twenty feet, perhaps more. The caf\u00e9 where his father had bought him ice cream was rubble now, claimed by a winter storm three years ago. Nobody had rebuilt it. The seagulls still circled overhead, but their cries sounded less like laughter and more like complaint.",
+"\u201cIt\u2019s fine,\u201d said Laura, setting her fork down with exaggerated care. Across the table, Daniel continued eating, his eyes fixed on something beyond her left shoulder. The pasta was overcooked \u2014 she\u2019d known it the moment she\u2019d drained it \u2014 but neither of them had mentioned it. The kitchen clock ticked with the steady patience of something that had outlasted every argument in this house. She thought about the text message she\u2019d seen that morning, the one he\u2019d deleted before she\u2019d finished reading it. \u201cHow was work?\u201d she asked, and the words landed between them like a stone dropped into still water. He looked up. Smiled. \u201cFine,\u201d he said. The clock ticked on."
+];
+
+// ============================================================
+//  PROBLEMS
+// ============================================================
+var PROBLEMS = [
+// ---- BRONZE: Marcus (P0) x3, then Gran (P1) x1 ----
+{id:'b1',tier:'bronze',type:'traffic_light',passage:0,question:'Sort each statement into the correct category.',statements:[
+  {text:'Marcus is standing in a corridor.',correct:'explicit',explain:'The text states \u201cThe corridor was empty\u201d directly.'},
+  {text:'His hands were trembling.',correct:'explicit',explain:'\u201cHis hands were trembling\u201d is stated word-for-word.'},
+  {text:'Marcus is nervous about a new experience.',correct:'implicit',explain:'Trembling, flinching, and his mother\u2019s reassurance suggest nervousness, but the word isn\u2019t used.'},
+  {text:'His mother is also worried about him.',correct:'implicit',explain:'Her hands \u201cshook as much as his\u201d implies shared anxiety.'},
+  {text:'Marcus is being chased by someone.',correct:'unsupported',explain:'Nothing suggests he\u2019s being chased. The door slam is above him.'},
+  {text:'The building is a hospital.',correct:'unsupported',explain:'A corridor and fluorescent light could be anywhere \u2014 the building is never identified.'}
+]},
+{id:'b2',tier:'bronze',type:'highlight_evidence',passage:0,question:'Highlight the phrase that shows Marcus received something from his mother.',answerText:'the crumpled note his mother had given him that morning',explanation:'This explicitly states his mother gave him a note.'},
+{id:'b3',tier:'bronze',type:'connotation_picker',passage:0,question:'The word \u201ccrumpled\u201d describes the note Marcus is holding. Which connotations are relevant in this context?',highlightWord:'crumpled',highlightContext:'curling his fingers around the crumpled note',chips:[
+  {text:'Anxiety or nervousness',correct:true},{text:'Carelessness or disrespect',correct:false},
+  {text:'Something repeatedly touched or gripped',correct:true},{text:'Age or decay',correct:false},
+  {text:'Comfort from holding something familiar',correct:true},{text:'Anger or frustration',correct:false}
+]},
+{id:'b4',tier:'bronze',type:'highlight_evidence',passage:1,question:'Highlight the phrase that shows the grandmother is elderly.',answerText:'the skin paper-thin over blue veins',explanation:'This physical description explicitly shows age through thin skin and visible veins.'},
+// ---- SILVER: Aisha (P3) x2, then Ellen (P2) x2 ----
+{id:'s1',tier:'silver',type:'traffic_light',passage:3,question:'Sort each statement \u2014 be careful, some are designed to trick you.',statements:[
+  {text:'Aisha is waiting at a bus shelter.',correct:'explicit',explain:'Directly stated: \u201cThe bus shelter offered no real protection.\u201d'},
+  {text:'It is raining.',correct:'explicit',explain:'\u201cRain drove sideways\u201d is directly stated.'},
+  {text:'Aisha feels intimidated by the older boys.',correct:'implicit',explain:'She \u201clooked away quickly\u201d suggests discomfort, but \u201cintimidated\u201d is never used.'},
+  {text:'Aisha cannot afford to buy food from the chip shop.',correct:'implicit',explain:'\u201cA promise she couldn\u2019t afford\u201d implies financial limitation through metaphor.'},
+  {text:'The older boys are planning to rob her.',correct:'unsupported',explain:'Hoods up and low voices might seem threatening, but nothing suggests criminal intent.'},
+  {text:'Aisha has been waiting for over an hour.',correct:'unsupported',explain:'The bus is late, but no time frame is given.'}
+]},
+{id:'s2',tier:'silver',type:'connotation_picker',passage:3,question:'The smell of vinegar is described as \u201ca promise she couldn\u2019t afford.\u201d Which connotations of \u201cpromise\u201d are relevant here?',highlightWord:'promise',highlightContext:'the smell of vinegar drifted across like a promise she couldn\u2019t afford',chips:[
+  {text:'Something desirable but out of reach',correct:true},{text:'Warmth and comfort',correct:true},
+  {text:'A binding agreement',correct:false},{text:'Temptation',correct:true},
+  {text:'Hope that may be unfulfilled',correct:true},{text:'Danger or threat',correct:false}
+]},
+{id:'s3',tier:'silver',type:'evidence_match',passage:2,question:'Match each claim about Ellen to the quote that supports it.',claims:['Ellen is grieving.','She feels guilty about something undone.','She is struggling to move forward.','She still feels connected to him.'],quotes:[
+  {text:'\u201cThe house had been quiet for three days now\u201d',correctClaim:0},
+  {text:'\u201cShe\u2019d meant to fix it. She\u2019d always meant to fix it.\u201d',correctClaim:1},
+  {text:'\u201cshe couldn\u2019t bring herself to tear off the page\u201d',correctClaim:2},
+  {text:'\u201cwatching the rain flatten the daffodils he had planted\u201d',correctClaim:3},
+  {text:'\u201cEllen moved through the rooms like a visitor\u201d',correctClaim:-1}
+]},
+{id:'s4',tier:'silver',type:'rewrite_subtext',passage:2,question:'What is Ellen really thinking or feeling in this moment?',quote:'\u201cShe\u2019d meant to fix it. She\u2019d always meant to fix it.\u201d',aiContext:'Ellen is looking at her deceased partner\u2019s coat with a loose lining. The repeated \u201cmeant to\u201d suggests regret about small, everyday things left undone. Good answers will identify guilt, regret, or the painful weight of missed opportunities.'},
+// ---- GOLD: Sea (P4) x1, then Laura/Daniel (P5) x3 ----
+{id:'g1',tier:'gold',type:'misleading_summary',passage:4,question:'A student wrote this summary. Click on the underlined phrases that misinterpret the text.',summaryParts:[
+  {text:'The narrator returns to a seaside town he visited as a child. ',wrong:false},
+  {text:'He remembers the sea being exciting and full of life. ',wrong:false},
+  {text:'He is pleased to see that nothing has changed since his childhood. ',wrong:true,explain:'The text shows the opposite \u2014 the sea is \u201cflat and grey,\u201d the coastline has retreated, the caf\u00e9 is rubble.'},
+  {text:'The caf\u00e9 has been replaced by a new building. ',wrong:true,explain:'\u201cNobody had rebuilt it.\u201d The text explicitly says it has NOT been replaced.'},
+  {text:'The seagulls\u2019 cries no longer sound joyful to him. ',wrong:false},
+  {text:'The narrator feels a deep sense of loss.',wrong:false}
+]},
+{id:'g2',tier:'gold',type:'evidence_match',passage:5,question:'Match each claim about Laura and Daniel to the quote that supports it. One quote is a distractor.',claims:['Laura is suspicious of Daniel.','There is hidden tension between them.','Daniel is hiding something.','The relationship has a long history of conflict.'],quotes:[
+  {text:'\u201cthe text message she\u2019d seen\u2026 the one he\u2019d deleted\u201d',correctClaim:0},
+  {text:'\u201cthe words landed between them like a stone dropped into still water\u201d',correctClaim:1},
+  {text:'He looked up. Smiled. \u201cFine,\u201d he said.',correctClaim:2},
+  {text:'\u201cthe steady patience of something that had outlasted every argument\u201d',correctClaim:3},
+  {text:'\u201cThe pasta was overcooked\u201d',correctClaim:-1}
+]},
+{id:'g3',tier:'gold',type:'rewrite_subtext',passage:5,question:'What is Laura really thinking or feeling when she asks this?',quote:'\u201cHow was work?\u201d she asked, and the words landed between them like a stone dropped into still water.',aiContext:'Laura has seen a deleted text. Her question isn\u2019t about work \u2014 it\u2019s a test. The simile \u201cstone dropped into still water\u201d suggests disrupting fragile calm. Good answers identify suspicion, the gap between said and meant, or testing Daniel\u2019s honesty.'},
+{id:'g4',tier:'gold',type:'misleading_summary',passage:5,question:'A student wrote this summary. Click on the underlined phrases that misinterpret the text.',summaryParts:[
+  {text:'Laura and Daniel are having dinner together. ',wrong:false},
+  {text:'Laura is upset because the pasta is overcooked and Daniel hasn\u2019t complimented her cooking. ',wrong:true,explain:'Neither mentions the pasta. Laura\u2019s tension comes from the deleted text message, not the food.'},
+  {text:'Daniel seems relaxed and comfortable during the meal. ',wrong:true,explain:'His eyes avoid hers, and his one-word \u201cFine\u201d is a performance, not genuine comfort.'},
+  {text:'Laura asks about work as a way of testing Daniel\u2019s honesty. ',wrong:false},
+  {text:'The clock suggests time passing uncomfortably.',wrong:false}
+]}
+];
+
+// ============================================================
+//  WORKED EXAMPLES
+// ============================================================
+var EXAMPLES = [
+{difficulty:'bronze',question:'Is this information explicit or implicit?',statement:'\u201cThe grandmother is cooking in her kitchen.\u201d',passage:'Gran\u2019s kitchen always smelled of flour and something sweet. She moved between the counter and the stove with a practised rhythm, humming a tune that belonged to another decade.',steps:[
+  {label:'Step 1',content:'Can I underline exact words? Yes \u2014 \u201cShe moved between the counter and the stove\u201d directly shows she is cooking.'},
+  {label:'Step 2',content:'\u201cKitchen\u201d is explicitly named. \u201cFlour\u201d confirms cooking.'},
+  {label:'Answer',content:'This is EXPLICIT \u2014 the text states it directly. You can point to the exact words.',isAnswer:true}
+]},
+{difficulty:'silver',question:'Is this information explicit or implicit?',statement:'\u201cMarcus is anxious about being in this building.\u201d',passage:'Marcus pressed his back against the cold wall and listened. His hands were trembling, and he shoved them deep into his pockets, curling his fingers around the crumpled note his mother had given him that morning.',steps:[
+  {label:'Step 1',content:'Can I underline \u201canxious\u201d? No \u2014 the word isn\u2019t in the text.'},
+  {label:'Step 2',content:'But there are clues: \u201ctrembling\u201d hands, pressing against the wall, listening carefully. These suggest nervousness.'},
+  {label:'Step 3',content:'The \u201ccrumpled note\u201d implies he\u2019s been gripping it \u2014 a physical sign of worry.'},
+  {label:'Answer',content:'This is IMPLICIT \u2014 the text suggests anxiety through physical details, but never states it directly.',isAnswer:true}
+]}
+];
+
+// ============================================================
+//  STATE
+// ============================================================
+var TIERS = ['bronze','silver','gold'];
+var tierProblems = {bronze:[],silver:[],gold:[]};
+PROBLEMS.forEach(function(p){ tierProblems[p.tier].push(p); });
+
+var state = {
+  tier:0, idx:0, answered:false, streak:0,
+  scores:{bronze:{c:0,t:0},silver:{c:0,t:0},gold:{c:0,t:0}},
+  learnIdx:0, learnStep:0, mode:'practice', currentPassage:-1
+};
+var tlSelections = {};
+var emState = {activeClaim:-1,pairs:{}};
+
+// ============================================================
+//  DOM
+// ============================================================
+var practiceView = document.getElementById('practice-view');
+var learnView = document.getElementById('learn-view');
+var summaryView = document.getElementById('summary-view');
+var passageArea = document.getElementById('passage-area');
+
+// ============================================================
+//  PANEL
+// ============================================================
+window.togglePanel = function(){
+  document.getElementById('panel').classList.toggle('open');
+  document.getElementById('panel-overlay').classList.toggle('open');
+};
+
+// ============================================================
+//  SCORE BAR
+// ============================================================
+function updateScoreBar(){
+  var t = TIERS[state.tier];
+  var probs = tierProblems[t];
+  var badge = document.getElementById('tier-badge');
+  badge.className = 'tier-badge is-' + t;
+  badge.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+  document.getElementById('score-text').textContent = 'Problem ' + (state.idx+1) + ' of ' + probs.length;
+  var sb = document.getElementById('streak-badge');
+  if(state.streak >= 2){ sb.classList.add('visible'); sb.innerHTML = '&#x1F525; ' + state.streak + ' streak'; }
+  else{ sb.classList.remove('visible'); }
+}
+
+// ============================================================
+//  LEARN MODE
+// ============================================================
+window.showLearn = function(){
+  state.mode = 'learn'; state.learnIdx = 0; state.learnStep = 0;
+  practiceView.style.display = 'none';
+  summaryView.style.display = 'none';
+  passageArea.style.display = 'none';
+  learnView.style.display = '';
+  renderLearnCard();
+};
+function renderLearnCard(){
+  var ex = EXAMPLES[state.learnIdx];
+  var html = '<div class="learn-card"><div class="learn-header">';
+  html += '<span class="learn-counter">Example ' + (state.learnIdx+1) + ' of ' + EXAMPLES.length + '</span>';
+  html += '<span class="learn-diff d-' + ex.difficulty + '">' + ex.difficulty + '</span></div>';
+  html += '<div class="learn-question">' + ex.question + '</div>';
+  html += '<p style="font-size:0.88rem;margin-bottom:0.5rem"><strong>Statement:</strong> ' + ex.statement + '</p>';
+  html += '<div class="learn-passage">' + ex.passage + '</div>';
+  ex.steps.forEach(function(s,i){
+    html += '<div class="learn-step' + (s.isAnswer?' is-answer':'') + '" id="ls-'+i+'">';
+    html += '<div class="learn-step-label">' + s.label + '</div>';
+    html += '<div class="learn-step-content">' + s.content + '</div></div>';
+  });
+  html += '<div class="learn-actions">';
+  html += '<button class="learn-btn learn-reveal" id="learn-reveal-btn" onclick="revealStep()">Show Step 1</button>';
+  if(state.learnIdx < EXAMPLES.length - 1)
+    html += '<button class="learn-btn learn-next" id="learn-next-btn" onclick="nextExample()" style="display:none">Next Example \u2192</button>';
+  var backLabel = state.scores.bronze.t > 0 ? 'Back to Practice' : 'Skip to Practice';
+  html += '<button class="learn-btn learn-back" onclick="backToPractice()">' + backLabel + '</button>';
+  html += '</div></div>';
+  learnView.innerHTML = html;
+  state.learnStep = 0;
+}
+window.revealStep = function(){
+  var ex = EXAMPLES[state.learnIdx];
+  if(state.learnStep >= ex.steps.length) return;
+  document.getElementById('ls-' + state.learnStep).classList.add('revealed');
+  state.learnStep++;
+  var btn = document.getElementById('learn-reveal-btn');
+  if(state.learnStep >= ex.steps.length){
+    btn.style.display = 'none';
+    var nb = document.getElementById('learn-next-btn');
+    if(nb) nb.style.display = '';
+  } else {
+    btn.textContent = 'Show ' + ex.steps[state.learnStep].label;
+  }
+};
+window.nextExample = function(){ state.learnIdx++; state.learnStep = 0; renderLearnCard(); };
+window.backToPractice = function(){
+  state.mode = 'practice';
+  learnView.style.display = 'none';
+  practiceView.style.display = '';
+  state.currentPassage = -1; // force passage re-render
+  renderProblem();
+};
+
+// ============================================================
+//  RENDER PROBLEM
+// ============================================================
+function renderProblem(){
+  state.answered = false; tlSelections = {}; emState = {activeClaim:-1,pairs:{}};
+  var t = TIERS[state.tier];
+  var probs = tierProblems[t];
+  if(state.idx >= probs.length){ checkTierPass(); return; }
+  var p = probs[state.idx];
+  updateScoreBar();
+
+  // Passage names for the header
+  var PASSAGE_NAMES = ['Extract A \u2014 Marcus','Extract B \u2014 Gran\u2019s Kitchen','Extract C \u2014 Ellen','Extract D \u2014 Aisha','Extract E \u2014 The Coastline','Extract F \u2014 Laura & Daniel'];
+
+  // Count how many questions use this passage in current tier
+  var questionsOnPassage = probs.filter(function(q){return q.passage===p.passage;}).length;
+  var questionIdxOnPassage = probs.slice(0,state.idx+1).filter(function(q){return q.passage===p.passage;}).length;
+
+  // Update passage area (only if passage changed)
+  var showPassagePanel = p.type !== 'highlight_evidence';
+  if(showPassagePanel){
+    if(p.passage !== state.currentPassage){
+      stopTTS();
+      state.currentPassage = p.passage;
+      passageArea.innerHTML = '<div class="a11y-bar">' +
+        '<button class="a11y-btn" id="tts-btn" onclick="toggleTTS()" title="Read aloud"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 010 7.07"/><path d="M19.07 4.93a10 10 0 010 14.14"/></svg> Read aloud</button>' +
+        '<div class="a11y-sep"></div>' +
+        '<button class="a11y-btn" id="dyslexia-btn" onclick="a11yDyslexia()" title="Dyslexia-friendly font"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg> Dyslexia font</button>' +
+        '<div class="a11y-sep"></div>' +
+        '<div class="a11y-overlay-group">' +
+        '<span class="a11y-overlay-label">Overlay:</span>' +
+        '<button class="a11y-overlay active" data-overlay="" onclick="a11yOverlay(this)" title="None"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4" y1="4" x2="20" y2="20"/></svg></button>' +
+        '<button class="a11y-overlay" data-overlay="yellow" onclick="a11yOverlay(this)" title="Yellow" style="background:#fef9c3"></button>' +
+        '<button class="a11y-overlay" data-overlay="blue" onclick="a11yOverlay(this)" title="Blue" style="background:#dbeafe"></button>' +
+        '<button class="a11y-overlay" data-overlay="pink" onclick="a11yOverlay(this)" title="Pink" style="background:#fce7f3"></button>' +
+        '<button class="a11y-overlay" data-overlay="green" onclick="a11yOverlay(this)" title="Green" style="background:#dcfce7"></button>' +
+        '<button class="a11y-overlay" data-overlay="peach" onclick="a11yOverlay(this)" title="Peach" style="background:#fed7aa"></button>' +
+        '<button class="a11y-overlay" data-overlay="aqua" onclick="a11yOverlay(this)" title="Aqua" style="background:#cffafe"></button>' +
+        '</div>' +
+        '</div>' +
+        '<div class="passage-header"><span class="passage-header-label">' + PASSAGE_NAMES[p.passage] + '</span><span class="passage-header-badge">Q ' + questionIdxOnPassage + ' of ' + questionsOnPassage + '</span></div><div class="passage-body"><div class="passage-text" id="passage-text">' + P[p.passage] + '</div></div><div class="passage-footer">AQA English Language \u2014 Paper 1 Source Insert</div>';
+      // Restore a11y prefs
+      restoreA11y();
+    } else {
+      // Just update the question counter badge
+      var badge = passageArea.querySelector('.passage-header-badge');
+      if(badge) badge.textContent = 'Q ' + questionIdxOnPassage + ' of ' + questionsOnPassage;
+    }
+    passageArea.style.display = 'flex';
+    setTimeout(fitPassageText, 50);
+  } else {
+    passageArea.style.display = 'none';
+    state.currentPassage = -1;
+  }
+
+  var html = '<div class="problem-stage"><div class="problem-card" id="problem-card">';
+  html += '<div class="question-text">' + p.question + '</div>';
+
+  if(p.type==='traffic_light') html += renderTL(p);
+  else if(p.type==='highlight_evidence') html += renderHL(p);
+  else if(p.type==='connotation_picker') html += renderCP(p);
+  else if(p.type==='evidence_match') html += renderEM(p);
+  else if(p.type==='rewrite_subtext') html += renderRS(p);
+  else if(p.type==='misleading_summary') html += renderMS(p);
+
+  html += '<div class="action-row">';
+  html += '<button class="btn btn-primary" id="btn-check" onclick="checkAnswer()">Check Answer</button>';
+  html += '<button class="btn btn-success" id="btn-next" onclick="nextProblem()" style="display:none">Next \u2192</button>';
+  html += '</div><div id="fb"></div>';
+  html += '</div></div>';
+  practiceView.innerHTML = html;
+
+  if(p.type==='highlight_evidence') initHL(p);
+  // Fade out toast after first problem
+  if(state.idx > 0 || state.tier > 0){
+    var toast = document.getElementById('tier-toast');
+    if(toast) toast.classList.add('fade');
+  }
+}
+
+// ---- Shuffle utility ----
+function shuffle(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+  return a;
+}
+
+// ---- Traffic Light ----
+var tlShuffled = []; // shuffled statements for current problem
+function renderTL(p){
+  tlShuffled = shuffle(p.statements);
+  var h = '<div class="tl-legend"><span><span class="dot g"></span> Explicit</span><span><span class="dot a"></span> Implicit</span><span><span class="dot r"></span> Not supported</span></div><div class="tl-statements">';
+  tlShuffled.forEach(function(s,i){
+    h += '<div class="tl-stmt" data-idx="'+i+'"><span class="stmt-text">'+s.text+'</span><div class="tl-btns">';
+    h += '<button class="tl-btn green" title="Explicit" onclick="tlSel('+i+',\'explicit\')"></button>';
+    h += '<button class="tl-btn amber" title="Implicit" onclick="tlSel('+i+',\'implicit\')"></button>';
+    h += '<button class="tl-btn red" title="Not supported" onclick="tlSel('+i+',\'unsupported\')"></button>';
+    h += '</div></div>';
+  });
+  return h + '</div>';
+}
+window.tlSel = function(i,cat){
+  if(state.answered) return;
+  tlSelections[i] = cat;
+  var m = {explicit:'green',implicit:'amber',unsupported:'red'};
+  document.querySelectorAll('.tl-stmt[data-idx="'+i+'"] .tl-btn').forEach(function(b){b.classList.remove('selected');});
+  document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.'+m[cat]).classList.add('selected');
+};
+
+// ---- Highlight ----
+function renderHL(p){
+  return '<div class="question-hint">Click or drag to highlight the relevant words in the passage below.</div><div class="hl-passage" id="hl-passage"></div>';
+}
+var hlDragging = false, hlStart = -1;
+function initHL(p){
+  var c = document.getElementById('hl-passage');
+  var words = P[p.passage].split(/(\s+)/);
+  c.innerHTML = '';
+  var wi = 0;
+  words.forEach(function(w){
+    if(/^\s+$/.test(w)){c.appendChild(document.createTextNode(w));return;}
+    var s = document.createElement('span'); s.className='hw'; s.dataset.idx=wi++; s.textContent=w;
+    s.addEventListener('mousedown',function(e){
+      e.preventDefault();
+      if(state.answered) return;
+      hlDragging = true;
+      hlStart = parseInt(s.dataset.idx);
+      // Clear previous selection
+      c.querySelectorAll('.hw.selected').forEach(function(el){el.classList.remove('selected');});
+      s.classList.add('selected');
+    });
+    s.addEventListener('mouseover',function(){
+      if(!hlDragging || state.answered) return;
+      var cur = parseInt(s.dataset.idx);
+      var lo = Math.min(hlStart, cur), hi = Math.max(hlStart, cur);
+      c.querySelectorAll('.hw').forEach(function(el){
+        var idx = parseInt(el.dataset.idx);
+        if(idx >= lo && idx <= hi) el.classList.add('selected');
+        else el.classList.remove('selected');
+      });
+    });
+    // Touch support
+    s.addEventListener('touchstart',function(e){
+      if(state.answered) return;
+      hlDragging = true;
+      hlStart = parseInt(s.dataset.idx);
+      c.querySelectorAll('.hw.selected').forEach(function(el){el.classList.remove('selected');});
+      s.classList.add('selected');
+    },{passive:true});
+    c.appendChild(s);
+  });
+  // Touch move needs to find which word is under the finger
+  c.addEventListener('touchmove',function(e){
+    if(!hlDragging || state.answered) return;
+    var touch = e.touches[0];
+    var el = document.elementFromPoint(touch.clientX, touch.clientY);
+    if(el && el.classList.contains('hw')){
+      var cur = parseInt(el.dataset.idx);
+      var lo = Math.min(hlStart, cur), hi = Math.max(hlStart, cur);
+      c.querySelectorAll('.hw').forEach(function(w){
+        var idx = parseInt(w.dataset.idx);
+        if(idx >= lo && idx <= hi) w.classList.add('selected');
+        else w.classList.remove('selected');
+      });
+    }
+  },{passive:true});
+  document.addEventListener('mouseup',function(){hlDragging=false;});
+  document.addEventListener('touchend',function(){hlDragging=false;});
+}
+
+// ---- Connotation ----
+function renderCP(p){
+  var h = '<div class="question-hint">Select all connotations that apply. There may be more than one.</div><div class="cp-chips">';
+  p.chips.forEach(function(c,i){ h += '<div class="cp-chip" data-idx="'+i+'" onclick="cpTog(this)">'+c.text+'</div>'; });
+  return h + '</div>';
+}
+window.cpTog = function(el){ if(!state.answered) el.classList.toggle('selected'); };
+
+// ---- Evidence Match ----
+var emShuffledQuotes = []; // shuffled quotes with original index tracked
+function renderEM(p){
+  // Shuffle quotes but track original indices for answer checking
+  var indexed = p.quotes.map(function(q,i){ return {quote:q, origIdx:i}; });
+  emShuffledQuotes = shuffle(indexed);
+  var h = '<div class="question-hint">Click a claim, then click the quote that supports it. <button class="btn btn-outline" style="padding:0.2rem 0.5rem;font-size:0.7rem;margin-left:0.5rem" onclick="emClear()">Clear all</button></div>';
+  h += '<div class="em-grid"><div><div class="em-col-label">Claims</div>';
+  p.claims.forEach(function(c,i){ h += '<div class="em-item em-claim" data-idx="'+i+'" onclick="emClaim('+i+')">'+c+'</div>'; });
+  h += '</div><div><div class="em-col-label">Evidence</div>';
+  emShuffledQuotes.forEach(function(sq,i){ h += '<div class="em-item em-quote" data-idx="'+i+'" onclick="emQuote('+i+')">'+sq.quote.text+'</div>'; });
+  return h + '</div></div>';
+}
+window.emClear = function(){
+  if(state.answered) return;
+  emState = {activeClaim:-1,pairs:{}};
+  document.querySelectorAll('.em-item').forEach(function(el){
+    el.classList.remove('active','paired');
+    var b = el.querySelector('.em-pair-badge'); if(b) b.remove();
+  });
+};
+window.emClaim = function(i){
+  if(state.answered) return;
+  document.querySelectorAll('.em-claim').forEach(function(el){el.classList.remove('active');});
+  emState.activeClaim = i;
+  document.querySelector('.em-claim[data-idx="'+i+'"]').classList.add('active');
+};
+window.emQuote = function(qi){
+  if(state.answered||emState.activeClaim<0) return;
+  var ci = emState.activeClaim;
+  Object.keys(emState.pairs).forEach(function(k){if(emState.pairs[k]===qi)delete emState.pairs[k];});
+  emState.pairs[ci] = qi;
+  emState.activeClaim = -1;
+  var COLS = ['pair-c-0','pair-c-1','pair-c-2','pair-c-3'];
+  document.querySelectorAll('.em-item').forEach(function(el){el.classList.remove('active','paired');var b=el.querySelector('.em-pair-badge');if(b)b.remove();});
+  var pi = 0;
+  Object.keys(emState.pairs).forEach(function(ck){
+    var qk=emState.pairs[ck];
+    var ce=document.querySelector('.em-claim[data-idx="'+ck+'"]');
+    var qe=document.querySelector('.em-quote[data-idx="'+qk+'"]');
+    if(ce&&qe){ce.classList.add('paired');qe.classList.add('paired');
+      [ce,qe].forEach(function(el){var b=document.createElement('div');b.className='em-pair-badge '+COLS[pi%4];b.textContent=pi+1;el.appendChild(b);});pi++;}
+  });
+};
+
+// ---- Rewrite Subtext ----
+function renderRS(p){
+  var h = '<div class="rs-quote">'+p.quote+'</div>';
+  h += '<div class="api-row"><label>Groq API Key (free at console.groq.com)</label><input type="text" id="groq-key" placeholder="gsk_..."></div>';
+  h += '<textarea class="rs-textarea" id="rs-input" placeholder="Write your inference in one or two sentences..."></textarea>';
+  h += '<div class="ai-badge">Marked by AI tutor</div>';
+  return h;
+}
+
+// ---- Misleading Summary ----
+function renderMS(p){
+  var h = '<div class="ms-instructions">Click on the underlined phrases that misinterpret the text. Not all underlined phrases are wrong.</div>';
+  h += '<div class="ms-summary">';
+  p.summaryParts.forEach(function(sp,i){
+    if(sp.wrong !== undefined) h += '<span class="ms-span" data-idx="'+i+'" onclick="msTog(this)">'+sp.text+'</span>';
+    else h += sp.text;
+  });
+  return h + '</div>';
+}
+window.msTog = function(el){ if(!state.answered) el.classList.toggle('flagged'); };
+
+// ============================================================
+//  CHECK ANSWER
+// ============================================================
+window.checkAnswer = function(){
+  if(state.answered) return;
+  state.answered = true;
+  var t = TIERS[state.tier];
+  var p = tierProblems[t][state.idx];
+  var correct = false, feedHtml = '';
+
+  if(p.type==='traffic_light'){
+    var tot=tlShuffled.length,right=0;
+    tlShuffled.forEach(function(s,i){
+      var el=document.querySelector('.tl-stmt[data-idx="'+i+'"]');
+      if(tlSelections[i]===s.correct){right++;el.classList.add('result-correct');}
+      else el.classList.add('result-incorrect');
+    });
+    correct = right >= tot - 1;
+    feedHtml = '<div class="feedback-body">';
+    tlShuffled.forEach(function(s,i){
+      feedHtml += '<p>'+(tlSelections[i]===s.correct?'\u2714':'\u2718')+' <strong>'+s.text+'</strong> \u2014 '+s.explain+'</p>';
+    });
+    feedHtml += '</div>';
+  }
+  else if(p.type==='highlight_evidence'){
+    var sel=[]; document.querySelectorAll('.hw.selected').forEach(function(el){sel.push(el.textContent);});
+    var selT=sel.join(' ').replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+    var ansT=p.answerText.replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'').replace(/\s+/g,' ').trim().toLowerCase();
+    if(selT&&(selT.includes(ansT)||ansT.includes(selT))){
+      correct=true; document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add('correct');});
+    } else {
+      document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add('incorrect');});
+    }
+    var aw=p.answerText.toLowerCase().split(/\s+/);
+    document.querySelectorAll('.hw').forEach(function(w){
+      if(aw.some(function(a){return w.textContent.toLowerCase().replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'')===a.replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'');}))
+        if(!w.classList.contains('correct'))w.classList.add('was-answer');
+    });
+    feedHtml='<div class="feedback-body"><p><strong>Correct answer:</strong> \u201c'+p.answerText+'\u201d</p><p>'+p.explanation+'</p></div>';
+  }
+  else if(p.type==='connotation_picker'){
+    var chips=document.querySelectorAll('.cp-chip'),rc=0,wc=0,tc=0;
+    p.chips.forEach(function(c,i){
+      var ch=chips[i],s=ch.classList.contains('selected');
+      if(c.correct)tc++;
+      if(s&&c.correct){rc++;ch.classList.add('result-correct');}
+      else if(s&&!c.correct){wc++;ch.classList.add('result-incorrect');}
+      else if(!s&&c.correct)ch.classList.add('result-missed');
+    });
+    correct = rc >= Math.ceil(tc*0.5) && wc <= 1;
+    feedHtml='<div class="feedback-body"><p>'+rc+' of '+tc+' correct connotations'+(wc?' ('+wc+' incorrect selection'+(wc>1?'s':'')+')</p>':'.</p>')+'</div>';
+  }
+  else if(p.type==='evidence_match'){
+    var r=0;
+    feedHtml='<div class="feedback-body">';
+    p.claims.forEach(function(c,ci){
+      var qi=emState.pairs[ci]; // shuffled index the student picked
+      var ce=document.querySelector('.em-claim[data-idx="'+ci+'"]');
+      // Find which shuffled index has the correct original quote
+      var correctShuffledIdx = emShuffledQuotes.findIndex(function(sq){ return sq.quote.correctClaim === ci; });
+      var correctQuote = p.quotes.find(function(q){ return q.correctClaim === ci; });
+      if(qi === correctShuffledIdx){
+        r++;
+        if(ce)ce.classList.add('result-correct');
+        feedHtml+='<p>\u2714 <strong>'+c+'</strong> \u2192 '+correctQuote.text+'</p>';
+      } else {
+        if(ce)ce.classList.add('result-incorrect');
+        var yourAnswer = (qi!==undefined && emShuffledQuotes[qi]) ? emShuffledQuotes[qi].quote.text : 'not matched';
+        feedHtml+='<p>\u2718 <strong>'+c+'</strong> \u2014 you chose: '+yourAnswer+'<br><span style="color:var(--success)">\u2192 Correct: '+correctQuote.text+'</span></p>';
+      }
+    });
+    feedHtml+='</div>';
+    correct = r >= p.claims.length - 1;
+  }
+  else if(p.type==='rewrite_subtext'){ checkAI(p); return; }
+  else if(p.type==='misleading_summary'){
+    var wrongs=p.summaryParts.filter(function(s){return s.wrong===true;}),rf=0,wf=0,missed=0;
+    document.querySelectorAll('.ms-span').forEach(function(el){
+      var idx=parseInt(el.dataset.idx),sp=p.summaryParts[idx],fl=el.classList.contains('flagged');
+      if(fl&&sp.wrong){rf++;el.className='ms-span result-correct-flag';}
+      else if(fl&&!sp.wrong){wf++;el.className='ms-span result-wrong-flag';}
+      else if(!fl&&sp.wrong){missed++;el.className='ms-span result-missed';}
+    });
+    correct = rf === wrongs.length && wf === 0;
+    feedHtml='<div class="feedback-body">';
+    feedHtml+='<p>You correctly identified '+rf+' of '+wrongs.length+' misinterpretation'+(wrongs.length>1?'s':'');
+    if(wf>0) feedHtml+=', but incorrectly flagged '+wf+' accurate phrase'+(wf>1?'s':'');
+    feedHtml+='.</p>';
+    p.summaryParts.forEach(function(sp,i){
+      if(!sp.wrong) return;
+      // Check if student flagged this one
+      var el = document.querySelector('.ms-span[data-idx="'+i+'"]');
+      var wasFlagged = el && el.classList.contains('result-correct-flag');
+      if(wasFlagged){
+        feedHtml+='<p>\u2714 <strong>\u201c'+sp.text.trim()+'\u201d</strong> \u2014 '+sp.explain+'</p>';
+      } else {
+        feedHtml+='<p style="color:var(--error)">\u2718 <strong>Missed: \u201c'+sp.text.trim()+'\u201d</strong> \u2014 '+sp.explain+'</p>';
+      }
+    });
+    feedHtml+='</div>';
+  }
+  showFeedback(correct, feedHtml);
+};
+
+// ---- AI Check ----
+async function checkAI(p){
+  var input=document.getElementById('rs-input').value.trim();
+  if(!input){alert('Write your inference first.');state.answered=false;return;}
+  var key=document.getElementById('groq-key').value.trim();
+  if(!key){alert('Enter a Groq API key (free at console.groq.com)');state.answered=false;return;}
+  var btn=document.getElementById('btn-check');
+  btn.innerHTML='<span class="spinner"></span> Marking...';btn.disabled=true;
+  try{
+    var resp=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+      headers:{'Authorization':'Bearer '+key,'Content-Type':'application/json'},
+      body:JSON.stringify({model:'llama-3.3-70b-versatile',messages:[
+        {role:'system',content:'You are a GCSE English Language examiner. A student read a quote and inferred what the character is really thinking/feeling. Mark their inference. Be encouraging but honest. Respond in JSON: {"quality":"excellent|good|needs_work|not_valid","feedback":"2-3 sentences","improvement":"optional suggestion"}'},
+        {role:'user',content:'Quote: '+p.quote+'\n\nContext: '+p.aiContext+'\n\nStudent answer: '+input}
+      ],temperature:0.3,max_tokens:300})});
+    var data=await resp.json();
+    var content=data.choices[0].message.content;
+    var json;try{json=JSON.parse(content.match(/\{[\s\S]*\}/)[0]);}catch(e){json={quality:'good',feedback:content};}
+    var ok=json.quality==='excellent'||json.quality==='good';
+    var cls=ok?'correct':json.quality==='needs_work'?'partial':'incorrect';
+    var icon=ok?'\u2714':json.quality==='needs_work'?'\u223c':'\u2718';
+    var label={excellent:'Excellent inference!',good:'Good inference',needs_work:'Needs development',not_valid:'Not quite right'}[json.quality]||'Feedback';
+    var fh='<div class="feedback-body"><p>'+json.feedback+'</p>';
+    if(json.improvement)fh+='<p style="color:var(--accent);font-weight:600">Tip: '+json.improvement+'</p>';
+    fh+='</div>';
+    showFeedback(ok, fh, cls, icon, label);
+  }catch(e){btn.innerHTML='Check Answer';btn.disabled=false;state.answered=false;alert('AI marking failed: '+e.message);}
+}
+
+// ============================================================
+//  FEEDBACK + PROGRESSION
+// ============================================================
+function showFeedback(correct, bodyHtml, cls, icon, label){
+  if(!cls) cls = correct ? 'correct' : 'incorrect';
+  if(!icon) icon = correct ? '\u2714' : '\u2718';
+  if(!label) label = correct ? 'Correct!' : 'Not quite right';
+  var t = TIERS[state.tier];
+  state.scores[t].t++;
+  if(correct){ state.scores[t].c++; state.streak++; } else { state.streak = 0; }
+  var card = document.getElementById('problem-card');
+  card.classList.add(correct ? 'card-correct' : 'card-incorrect');
+  document.getElementById('fb').innerHTML = '<div class="feedback '+cls+'"><div class="feedback-title">'+icon+' '+label+'</div>'+bodyHtml+'</div>';
+  document.getElementById('btn-check').style.display = 'none';
+  document.getElementById('btn-next').style.display = '';
+  updateScoreBar();
+  // Check for streak pass
+  if(state.streak >= 4) {
+    setTimeout(function(){ showTierCelebration(t); }, 600);
+  }
+}
+
+window.nextProblem = function(){
+  state.idx++;
+  var t = TIERS[state.tier];
+  if(state.idx >= tierProblems[t].length){ checkTierPass(); }
+  else renderProblem();
+};
+
+function checkTierPass(){
+  var t = TIERS[state.tier];
+  var s = state.scores[t];
+  if(s.t === 0){ advanceTier(); return; }
+  var pct = s.c / s.t;
+  if(pct >= 0.75 || state.streak >= 4){ showTierCelebration(t); }
+  else { advanceTier(); } // advance anyway but no celebration
+}
+
+function showTierCelebration(t){
+  var icons = {bronze:'\u26f0\ufe0f',silver:'\u2b50',gold:'\ud83c\udfc6'};
+  var titles = {bronze:'Bronze Complete!',silver:'Silver Complete!',gold:'Gold Complete!'};
+  var next = TIERS[state.tier + 1];
+  var body = next ? 'Great work! Moving on to <strong>' + next.charAt(0).toUpperCase()+next.slice(1) + '</strong> tier.' : 'You\u2019ve completed all tiers!';
+  document.getElementById('cele-icon').textContent = icons[t] || '\u2714';
+  document.getElementById('cele-title').textContent = titles[t] || 'Tier Complete!';
+  document.getElementById('cele-body').innerHTML = state.scores[t].c + '/' + state.scores[t].t + ' correct. ' + body;
+  document.getElementById('cele-overlay').classList.remove('hidden');
+}
+
+window.dismissCele = function(){
+  document.getElementById('cele-overlay').classList.add('hidden');
+  advanceTier();
+};
+
+function advanceTier(){
+  state.tier++; state.idx = 0; state.streak = 0;
+  if(state.tier >= TIERS.length){ showSummary(); return; }
+  // Reset toast
+  var toast = document.getElementById('tier-toast');
+  if(toast){toast.classList.remove('fade');toast.textContent='';
+    var t=TIERS[state.tier];
+    toast.innerHTML='Now on <strong>'+t.charAt(0).toUpperCase()+t.slice(1)+'</strong>. Get <strong>4 in a row</strong> correct or <strong>75%+</strong> to pass.';}
+  renderProblem();
+}
+
+function showSummary(){
+  practiceView.style.display='none';
+  passageArea.style.display='none';
+  summaryView.style.display='';
+  var tc=state.scores.bronze.c+state.scores.silver.c+state.scores.gold.c;
+  var tt=state.scores.bronze.t+state.scores.silver.t+state.scores.gold.t;
+  var pct=tt?Math.round(tc/tt*100):0;
+  var h='<div class="summary-card"><h2>Practice Complete!</h2>';
+  h+='<div class="summary-score">'+pct+'%</div>';
+  h+='<div class="summary-label">'+tc+' of '+tt+' correct</div>';
+  h+='<div class="tier-results">';
+  TIERS.forEach(function(t){
+    var s=state.scores[t],p=s.t?Math.round(s.c/s.t*100):0;
+    var cls=p>=75?'good':p>=50?'ok':'low';
+    h+='<div class="tier-result"><div class="tier-result-name">'+t+'</div><div class="tier-result-score '+cls+'">'+s.c+'/'+s.t+'</div></div>';
+  });
+  h+='</div><button class="btn btn-primary" onclick="restart()" style="width:100%">Try Again</button></div>';
+  summaryView.innerHTML=h;
+}
+
+window.restart = function(){
+  state={tier:0,idx:0,answered:false,streak:0,scores:{bronze:{c:0,t:0},silver:{c:0,t:0},gold:{c:0,t:0}},learnIdx:0,learnStep:0,mode:'practice',currentPassage:-1};
+  summaryView.style.display='none';
+  practiceView.style.display='';
+  var toast=document.getElementById('tier-toast');
+  if(toast){toast.classList.remove('fade');toast.innerHTML='Pass this tier: get <strong>4 in a row</strong> correct, or complete all problems with <strong>75%+</strong> accuracy.';}
+  renderProblem();
+};
+
+// ============================================================
+//  ACCESSIBILITY: TTS, FONT SIZE, DYSLEXIA, OVERLAYS
+// ============================================================
+var ttsActive = false;
+var A11Y_KEY = 'studyvault-a11y';
+
+function loadA11y(){ try{return JSON.parse(localStorage.getItem(A11Y_KEY))||{};}catch(e){return {};} }
+function saveA11y(p){ localStorage.setItem(A11Y_KEY, JSON.stringify(p)); }
+
+window.toggleTTS = function(){
+  var btn = document.getElementById('tts-btn');
+  if(ttsActive){
+    speechSynthesis.cancel(); ttsActive = false;
+    if(btn) btn.setAttribute('aria-pressed','false');
+    return;
+  }
+  var text = document.getElementById('passage-text');
+  if(!text) return;
+  var utterance = new SpeechSynthesisUtterance(text.textContent);
+  utterance.lang = 'en-GB'; utterance.rate = 0.9;
+  var voices = speechSynthesis.getVoices();
+  var gbVoice = voices.find(function(v){return v.lang==='en-GB';});
+  if(gbVoice) utterance.voice = gbVoice;
+  utterance.onend = function(){ ttsActive=false; if(btn) btn.setAttribute('aria-pressed','false'); };
+  speechSynthesis.speak(utterance);
+  ttsActive = true;
+  if(btn) btn.setAttribute('aria-pressed','true');
+};
+
+window.a11yFontSize = function(dir){
+  var prefs = loadA11y();
+  var step = Math.max(-1, Math.min(2, (prefs.fontSize||0) + dir));
+  prefs.fontSize = step;
+  saveA11y(prefs);
+  applyFontSize(step);
+};
+
+function applyFontSize(step){
+  passageArea.className = passageArea.className.replace(/\bfont-(up|down)-\d/g,'').trim();
+  if(step === -1) passageArea.classList.add('font-down-1');
+  else if(step === 1) passageArea.classList.add('font-up-1');
+  else if(step === 2) passageArea.classList.add('font-up-2');
+  fitPassageText();
+}
+
+window.a11yDyslexia = function(){
+  var on = !passageArea.classList.contains('dyslexia-font');
+  passageArea.classList.toggle('dyslexia-font', on);
+  var btn = document.getElementById('dyslexia-btn');
+  if(btn) btn.setAttribute('aria-pressed', String(on));
+  var prefs = loadA11y(); prefs.dyslexia = on; saveA11y(prefs);
+  // Delay refit so the font swap renders first
+  setTimeout(fitPassageText, 100);
+};
+
+window.a11yOverlay = function(btn){
+  var colour = btn.dataset.overlay;
+  passageArea.className = passageArea.className.replace(/\boverlay-\S+/g,'').trim();
+  if(colour) passageArea.classList.add('overlay-'+colour);
+  document.querySelectorAll('.a11y-overlay').forEach(function(b){
+    b.classList.toggle('active', b.dataset.overlay === colour);
+  });
+  var prefs = loadA11y(); prefs.overlay = colour; saveA11y(prefs);
+};
+
+function restoreA11y(){
+  var prefs = loadA11y();
+  if(prefs.dyslexia){
+    passageArea.classList.add('dyslexia-font');
+    var btn = document.getElementById('dyslexia-btn');
+    if(btn) btn.setAttribute('aria-pressed','true');
+  }
+  if(prefs.overlay){
+    passageArea.classList.add('overlay-'+prefs.overlay);
+    document.querySelectorAll('.a11y-overlay').forEach(function(b){
+      b.classList.toggle('active', b.dataset.overlay === prefs.overlay);
+    });
+  }
+  if(typeof prefs.fontSize === 'number' && prefs.fontSize !== 0) applyFontSize(prefs.fontSize);
+}
+
+function stopTTS(){
+  if(ttsActive){ speechSynthesis.cancel(); ttsActive = false; }
+}
+
+// ============================================================
+//  FIT PASSAGE TEXT TO CONTAINER
+// ============================================================
+function fitPassageText(){
+  var body = passageArea.querySelector('.passage-body');
+  var text = passageArea.querySelector('.passage-text');
+  if(!body || !text) return;
+
+  // Reset text to base size first so body width is recalculated at natural size
+  text.style.fontSize = '1rem';
+  text.style.lineHeight = '2';
+
+  // Use a temporary off-screen clone to measure without layout thrash
+  var clone = text.cloneNode(true);
+  clone.style.position = 'absolute';
+  clone.style.visibility = 'hidden';
+  clone.style.width = body.clientWidth - 64 + 'px'; // body width minus padding
+  clone.style.height = 'auto';
+  clone.style.overflow = 'visible';
+  // Inherit dyslexia font if active
+  if(passageArea.classList.contains('dyslexia-font')){
+    clone.style.fontFamily = 'OpenDyslexic, sans-serif';
+    clone.style.fontStyle = 'normal';
+    clone.style.letterSpacing = '0.02em';
+    clone.style.wordSpacing = '0.08em';
+  }
+  document.body.appendChild(clone);
+
+  var footer = passageArea.querySelector('.passage-footer');
+  var footerH = footer ? footer.offsetHeight : 0;
+  var containerH = body.clientHeight - footerH - 10;
+  var lo = 0.85, hi = 1.8, best = 0.85;
+
+  for(var i = 0; i < 12; i++){
+    var mid = (lo + hi) / 2;
+    clone.style.fontSize = mid + 'rem';
+    clone.style.lineHeight = String(Math.max(1.6, 2.0 - (mid - 0.85) * 0.3));
+    if(clone.scrollHeight <= containerH){
+      best = mid;
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+
+  document.body.removeChild(clone);
+  text.style.fontSize = best + 'rem';
+  text.style.lineHeight = String(Math.max(1.6, 2.0 - (best - 0.85) * 0.3));
+}
+// Refit on resize, zoom, and orientation change
+var fitTimer = null;
+function debouncedFit(){ clearTimeout(fitTimer); fitTimer = setTimeout(function(){ if(passageArea.style.display !== 'none') fitPassageText(); }, 100); }
+window.addEventListener('resize', debouncedFit);
+window.visualViewport && window.visualViewport.addEventListener('resize', debouncedFit);
+// Also observe the passage container itself for size changes
+if(window.ResizeObserver){
+  new ResizeObserver(debouncedFit).observe(passageArea);
+}
+
+// ============================================================
+//  METHOD MODAL
+// ============================================================
+window.dismissMethodModal = function(){
+  document.getElementById('method-modal').classList.add('hidden');
+  showLearn();
+};
+
+// ============================================================
+//  INIT
+// ============================================================
+// Don't render practice yet — method modal is showing, then Learn mode
+// Practice renders when user clicks "Back to Practice" from Learn mode
+
+})();
+</script>
+</body>
+</html>

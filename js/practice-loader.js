@@ -317,6 +317,14 @@
       };
     }
 
+    // ===== PASSAGES + AI MARKING (from practice_data) =====
+    if (pd.passages && pd.passages.length) {
+      window._practicePassages = pd.passages;
+    }
+    if (pd.ai_marking_prompts) {
+      window._aiMarkingPrompts = pd.ai_marking_prompts;
+    }
+
     // ===== RELATED VIDEOS (from practice_data) =====
     var videos = pd.related_videos;
     if (videos && videos.length) {
