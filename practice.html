@@ -3372,8 +3372,12 @@
       diffEl.className = 'learn-difficulty diff-' + diff;
       diffEl.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
 
-      // Question
-      document.getElementById('learn-question').innerHTML = example.question || '';
+      // Question + passage quote
+      var questionHtml = example.question || '';
+      if (example.passage) {
+        questionHtml += '<div class="rs-quote" style="margin-top:1rem;">' + escapeHtml(example.passage) + '</div>';
+      }
+      document.getElementById('learn-question').innerHTML = questionHtml;
 
       // Steps
       var stepsArea = document.getElementById('learn-steps-area');
