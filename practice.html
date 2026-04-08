@@ -4034,12 +4034,24 @@
     // ---- Traffic Light ----
     function renderTL(p){
       _engState.tl={};_engState.tlShuffled=engShuffle(p.statements);
-      var h='<div class="tl-legend"><span><span class="dot g"></span> Explicit</span><span><span class="dot a"></span> Implicit</span><span><span class="dot r"></span> Not supported</span></div><div class="tl-statements">';
+      // Extract unique categories from statements
+      var cats=[];
+      p.statements.forEach(function(s){if(cats.indexOf(s.correct)===-1)cats.push(s.correct);});
+      // Pad to 3 if fewer (shouldn't happen but safety)
+      while(cats.length<3)cats.push('other');
+      _engState.tlCats=cats;
+      var colors=['green','amber','red'];
+      var dotClasses=['g','a','r'];
+      var h='<div class="tl-legend">';
+      for(var c=0;c<cats.length;c++){
+        h+='<span><span class="dot '+dotClasses[c]+'"></span> '+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'</span>';
+      }
+      h+='</div><div class="tl-statements">';
       _engState.tlShuffled.forEach(function(s,i){
         h+='<div class="tl-stmt" data-idx="'+i+'"><span class="stmt-text">'+s.text+'</span><div class="tl-btns">';
-        h+='<button class="tl-btn green" title="Explicit" onclick="engTlSel('+i+',\'explicit\')"></button>';
-        h+='<button class="tl-btn amber" title="Implicit" onclick="engTlSel('+i+',\'implicit\')"></button>';
-        h+='<button class="tl-btn red" title="Not supported" onclick="engTlSel('+i+',\'unsupported\')"></button>';
+        for(var c=0;c<cats.length;c++){
+          h+='<button class="tl-btn '+colors[c]+'" title="'+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'" onclick="engTlSel('+i+',\''+cats[c].replace(/'/g,"\\'")+'\')"></button>';
+        }
         h+='</div></div>';
       });
       return h+'</div>';
@@ -4047,9 +4059,12 @@
     window.engTlSel = function(i,cat){
       if(practiceState.answered)return;
       _engState.tl[i]=cat;
-      var m={explicit:'green',implicit:'amber',unsupported:'red'};
+      var cats=_engState.tlCats||[];
+      var colors=['green','amber','red'];
+      var m={};cats.forEach(function(c,idx){m[c]=colors[idx];});
       document.querySelectorAll('.tl-stmt[data-idx="'+i+'"] .tl-btn').forEach(function(b){b.classList.remove('selected');});
-      document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.'+m[cat]).classList.add('selected');
+      var sel=document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.'+m[cat]);
+      if(sel)sel.classList.add('selected');
     };
 
     // ---- Highlight Evidence ----
