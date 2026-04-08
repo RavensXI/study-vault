@@ -83,7 +83,7 @@
     // Fetch the lesson — select practice-specific fields
     var lessonResult = await sb
       .from('lessons')
-      .select('id, lesson_number, slug, title, description, tier, status, practice_data, hero_image_url, hero_image_alt, hero_image_caption, hero_image_position, narration_manifest')
+      .select('id, lesson_number, slug, title, description, tier, status, practice_data, related_media, hero_image_url, hero_image_alt, hero_image_caption, hero_image_position, narration_manifest')
       .eq('unit_id', unit.id)
       .eq('lesson_number', params.lessonNumber)
       .single();
@@ -325,23 +325,43 @@
       window._aiMarkingPrompts = pd.ai_marking_prompts;
     }
 
-    // ===== RELATED VIDEOS (from practice_data) =====
-    var videos = pd.related_videos;
-    if (videos && videos.length) {
-      var videosSection = document.getElementById('panel-related-videos');
-      var videosContent = document.getElementById('panel-videos-content');
-      if (videosSection && videosContent) {
-        var vhtml = '';
-        for (var vi = 0; vi < videos.length; vi++) {
-          var v = videos[vi];
-          vhtml += '<a href="' + escapeHtml(v.url || '#') + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
-          vhtml += '<strong>' + escapeHtml(v.title || '') + '</strong>';
-          if (v.channel) vhtml += '<span>' + escapeHtml(v.channel) + '</span>';
-          vhtml += '</a>';
+    // ===== RELATED MEDIA (from lesson row, fallback to practice_data.related_videos) =====
+    // ===== RELATED MEDIA (from lesson row, fallback to practice_data.related_videos) =====
+    var relatedMedia = lesson.related_media;
+    var mediaSection = document.getElementById('panel-related-videos');
+    if (relatedMedia && relatedMedia.length && mediaSection) {
+      var rmhtml = '';
+      for (var ci = 0; ci < relatedMedia.length; ci++) {
+        var cat = relatedMedia[ci];
+        if (!cat.items || !cat.items.length) continue;
+        rmhtml += '<div class="sidebar-collapsible">';
+        rmhtml += '<button class="sidebar-collapsible-toggle" aria-expanded="false" onclick="this.parentElement.classList.toggle(\'open\')">';
+        rmhtml += '<span>' + (cat.emoji || '') + ' ' + escapeHtml(cat.category || '') + '</span>';
+        rmhtml += '<svg class="sidebar-collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
+        rmhtml += '</button><div class="sidebar-collapsible-content">';
+        for (var ii = 0; ii < cat.items.length; ii++) {
+          var item = cat.items[ii];
+          rmhtml += '<a href="' + escapeHtml(item.url || '#') + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
+          rmhtml += '<strong>' + escapeHtml(item.title || '') + '</strong>';
+          if (item.description) rmhtml += '<span>' + escapeHtml(item.description) + '</span>';
+          rmhtml += '</a>';
         }
-        videosContent.innerHTML = vhtml;
-        videosSection.style.display = '';
+        rmhtml += '</div></div>';
       }
+      mediaSection.innerHTML = rmhtml;
+      mediaSection.style.display = '';
+    } else if (pd.related_videos && pd.related_videos.length && mediaSection) {
+      var vhtml = '<div class="sidebar-collapsible"><button class="sidebar-collapsible-toggle" aria-expanded="false" onclick="this.parentElement.classList.toggle(\'open\')"><span>&#127909; Related Videos</span><svg class="sidebar-collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button><div class="sidebar-collapsible-content">';
+      for (var vi = 0; vi < pd.related_videos.length; vi++) {
+        var v = pd.related_videos[vi];
+        vhtml += '<a href="' + escapeHtml(v.url || '#') + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
+        vhtml += '<strong>' + escapeHtml(v.title || '') + '</strong>';
+        if (v.channel) vhtml += '<span>' + escapeHtml(v.channel) + '</span>';
+        vhtml += '</a>';
+      }
+      vhtml += '</div></div>';
+      mediaSection.innerHTML = vhtml;
+      mediaSection.style.display = '';
     }
 
     // ===== TOPIC LINKS / PREREQUISITES (from practice_data) =====
