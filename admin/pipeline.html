@@ -645,6 +645,10 @@
         '<div class="upload-card">' +
           '<h2>Add Teaching Resources</h2>' +
           '<p style="color:var(--text-muted);font-size:0.82rem;margin-bottom:1rem">Select PPTs, Word docs, and PDFs. Text is extracted in your browser \u2014 no files leave your device.</p>' +
+          '<div class="pipeline-copyright-warning" style="background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.82rem;color:#991b1b">' +
+            '<strong>Do not upload:</strong> exam board past papers, mark schemes, published textbook pages, or examiner reports.<br>' +
+            '<strong>OK to upload:</strong> your own slides, department worksheets, handouts you have authored.' +
+          '</div>' +
           '<div class="dropzone" id="dropzone">' +
             '<p>Drag and drop files or a folder here</p>' +
             '<div style="display:flex;gap:0.5rem;justify-content:center;margin-top:0.5rem">' +
@@ -668,6 +672,12 @@
             '</div>' +
             '<div class="form-group"><label>Spec Code</label><input type="text" id="spec-code" placeholder="e.g. J309"></div>' +
             '<div class="form-group"><label>Unit Colour</label><input type="color" id="color1" value="#7c3aed"></div>' +
+          '</div>' +
+          '<div class="form-group full-width" style="margin-bottom:0.75rem">' +
+            '<label style="display:flex;align-items:flex-start;gap:0.5rem;font-weight:400;font-size:0.82rem;cursor:pointer">' +
+              '<input type="checkbox" id="teacher-attestation" style="margin-top:2px;flex-shrink:0">' +
+              '<span>I confirm these materials are my own work or materials I have the right to share. I understand that exam board past papers, mark schemes, and published textbook content must not be uploaded.</span>' +
+            '</label>' +
           '</div>' +
           '<button class="btn btn-primary" id="upload-btn" disabled>Review Files</button>' +
         '</div>' +
@@ -712,6 +722,7 @@
       var fileInput = document.getElementById('file-input');
       var folderInput = document.getElementById('folder-input');
       var uploadBtn = document.getElementById('upload-btn');
+      var attestationCheck = document.getElementById('teacher-attestation');
 
       function updateDropzoneDisplay() {
         if (selectedFiles.length === 0) return;
@@ -748,7 +759,7 @@
           uploadBtn.disabled = true;
         });
         var hasSchool = !allSchools.length || document.getElementById('school-id').value;
-        uploadBtn.disabled = !document.getElementById('subject-name').value || supportedCount === 0 || !hasSchool;
+        uploadBtn.disabled = !document.getElementById('subject-name').value || supportedCount === 0 || !hasSchool || !attestationCheck.checked;
       }
 
       function collectFiles(fileList) {
@@ -830,10 +841,11 @@
       });
       function checkUploadReady() {
         var hasSchool = !allSchools.length || document.getElementById('school-id').value;
-        uploadBtn.disabled = !document.getElementById('subject-name').value || selectedFiles.length === 0 || !hasSchool;
+        uploadBtn.disabled = !document.getElementById('subject-name').value || selectedFiles.length === 0 || !hasSchool || !attestationCheck.checked;
       }
       document.getElementById('subject-name').addEventListener('input', checkUploadReady);
       document.getElementById('school-id').addEventListener('change', checkUploadReady);
+      attestationCheck.addEventListener('change', function() { checkUploadReady(); updateDropzoneDisplay(); });
 
       uploadBtn.addEventListener('click', function () {
         if (selectedFiles.length === 0) return;
@@ -1505,7 +1517,8 @@
             spec_code: formValues.spec_code,
             school_id: formValues.school_id || null,
             filename: filenames.join(', '),
-            chunked: true
+            chunked: true,
+            teacher_attestation: true
           });
 
           // Send text in 2 MB chunks
@@ -1536,7 +1549,8 @@
             spec_code: formValues.spec_code,
             school_id: formValues.school_id || null,
             filename: filenames.join(', '),
-            extracted_text: extractedText
+            extracted_text: extractedText,
+            teacher_attestation: true
           });
         }
 

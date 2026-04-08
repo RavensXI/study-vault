@@ -10,7 +10,7 @@ module.exports = async function handler(req, res) {
   const auth = await requireTeacher(req, res);
   if (!auth) return;
 
-  const { subject_name, exam_board, spec_code, storage_path, filename, file_hash, school_id: body_school_id, extracted_text } = req.body;
+  const { subject_name, exam_board, spec_code, storage_path, filename, file_hash, school_id: body_school_id, extracted_text, teacher_attestation } = req.body;
 
   if (!subject_name || !exam_board || !filename) {
     return res.status(400).json({ error: 'Missing required fields: subject_name, exam_board, filename' });
@@ -36,6 +36,8 @@ module.exports = async function handler(req, res) {
     subject_config: { subject_name, exam_board, spec_code },
     ppt_storage_path: storage_path || null,
     current_phase: extracted_text ? 'parsed' : 'uploaded',
+    teacher_attestation: teacher_attestation || false,
+    teacher_attestation_at: teacher_attestation ? new Date().toISOString() : null,
   };
 
   // If text was parsed client-side, store it directly
