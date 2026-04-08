@@ -434,16 +434,8 @@ function initPracticeQuestions() {
 
     const q = questions[currentIndex];
     typeEl.textContent = q.type;
-    var existingTag = typeEl.parentNode.querySelector('.practice-past-paper-tag');
-    if (existingTag) existingTag.remove();
     var existingGuide = typeEl.parentNode.querySelector('.practice-guide-link');
     if (existingGuide) existingGuide.remove();
-    if (q.pastPaper) {
-      var tag = document.createElement('span');
-      tag.className = 'practice-past-paper-tag';
-      tag.textContent = 'Past paper';
-      typeEl.after(tag);
-    }
     var guideUrl = getGuideUrl(q.type);
     if (guideUrl) {
       var guideLink = document.createElement('a');
@@ -452,8 +444,7 @@ function initPracticeQuestions() {
       guideLink.target = '_blank';
       guideLink.rel = 'noopener noreferrer';
       guideLink.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>How do I answer this?';
-      var insertAfter = typeEl.parentNode.querySelector('.practice-past-paper-tag') || typeEl;
-      insertAfter.after(guideLink);
+      typeEl.after(guideLink);
     }
     textEl.textContent = q.text;
     marksEl.innerHTML = formatMarkScheme(q.marks);

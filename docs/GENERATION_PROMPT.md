@@ -4,7 +4,7 @@ The prompt for content generation (Steps 1 and 2 of the pipeline). Other pipelin
 
 **CRITICAL: After generating lessons, you MUST also create:** unit images, quote ticker, homepage card, picker item, related media, guide pages. See the MANDATORY CHECKLIST in `docs/SUBJECT_PLAYBOOK.md`. Agents consistently forget these — do NOT skip them.
 
-**Lessons learned from Drama test run (March 2026):** This prompt was significantly expanded after the first end-to-end pipeline test. The original version missed: lesson descriptions for browse cards, past paper extraction, hero image captions, related media deduplication, exam/revision technique guide generation, question type to guide page mapping, and subject activation steps. All of these are now included.
+**Lessons learned from Drama test run (March 2026):** This prompt was significantly expanded after the first end-to-end pipeline test. The original version missed: lesson descriptions for browse cards, question style analysis, hero image captions, related media deduplication, exam/revision technique guide generation, question type to guide page mapping, and subject activation steps. All of these are now included.
 
 ---
 
@@ -12,7 +12,7 @@ The prompt for content generation (Steps 1 and 2 of the pipeline). Other pipelin
 
 Each pipeline step assembles its prompt by combining:
 1. The step-specific prompt (this file, or the relevant specialist doc)
-2. The source material (PPT text, spec, past papers) from Supabase
+2. The source material (PPT text, spec, past paper styles) from Supabase
 3. A structural example (existing lesson HTML)
 
 The orchestration code (API route or Claude Code) reads the `.md` files from disk and injects them into the API message. The model sees the full context — it cannot read files itself.
@@ -22,12 +22,12 @@ The orchestration code (API route or Claude Code) reads the `.md` files from dis
 | Step | System prompt source | Also injected |
 |------|---------------------|---------------|
 | Plan | GENERATION_PROMPT.md (Planning section) | Spec, PPT text |
-| Content | GENERATION_PROMPT.md (Content section) | LESSON_TEMPLATE.md, QUESTIONS_PIPELINE.md, spec extract, PPT extract, past papers |
+| Content | GENERATION_PROMPT.md (Content section) | LESSON_TEMPLATE.md, QUESTIONS_PIPELINE.md, spec extract, PPT extract, past paper styles (reference only) |
 | Diagrams | DIAGRAM_PIPELINE.md | Lesson content summary |
 | Hero Images | (no prompt — Wikimedia API search) | — |
 | Related Media | RELATED_MEDIA_PIPELINE.md | Lesson title + topic |
 | Narration | (no prompt — Azure Speech API) | NARRATION_PIPELINE.md for config |
-| Exam Technique Guides | GENERATION_PROMPT.md (Exam Technique section) | Past paper mark schemes |
+| Exam Technique Guides | GENERATION_PROMPT.md (Exam Technique section) | Mark allocation patterns (style reference only) |
 | Revision Technique Guides | GENERATION_PROMPT.md (Revision Technique section) | — |
 
 ### Specialist docs (single source of truth)
@@ -45,14 +45,14 @@ Do NOT duplicate content from these docs into this file. Reference them by name.
 ## System Prompt
 
 ```
-You are a GCSE revision content generator for StudyVault, a revision website used by students aged 15-16. Your job is to turn teacher resources, exam board specifications, and past papers into polished, exam-focused revision lessons.
+You are a GCSE revision content generator for StudyVault, a revision website used by students aged 15-16. Your job is to turn teacher resources and exam board specifications into polished, exam-focused revision lessons.
 
 QUALITY STANDARDS:
 - Every fact, date, name, case study, and statistic MUST come from the source material or the exam spec. Never invent content.
 - Write at GCSE reading level: short sentences, active voice, concrete examples. Aim for age 15-16 comprehension.
 - Content must be bespoke to the exam board's spec — not generic revision notes a student could find anywhere.
 - Map every lesson to specific spec references so students know exactly what they're revising and why.
-- Where past papers are provided in the source material, extract REAL exam questions and use them (tagged with pastPaper). Do not ignore past papers.
+- DO NOT reproduce real exam questions from past papers. Write ORIGINAL questions that test the same skills and content areas.
 
 OUTPUT FORMAT:
 Return a single JSON object with these exact keys:
@@ -226,19 +226,17 @@ PRACTICE QUESTIONS:
 - Exactly 6 questions matching the exam board's question types and mark allocations.
 - Format: { "text": "Question text", "type": "X marks — Type Name", "marks": "Full mark scheme text with levels/examples" }
 - The "text" field is the QUESTION TEXT (never use "question" as the key name).
-- The "marks" field is the MARK SCHEME as a STRING (never a number). Include level descriptors or bullet points showing what earns marks.
+- The "marks" field is the MARK SCHEME as a STRING (never a number). Include bullet points showing what earns marks, using StudyVault's own rubric phrasing (Top band / Mid band / Lower band). DO NOT use exam board level descriptor templates like "Level 4 (7-8 marks): Complex explanation...". Use StudyVault's own rubric phrasing.
 - The "type" field MUST use one of the registered question type names for this exam board (see QUESTION TYPE MAPPING below). Never invent new type names — the type string is used to link to exam technique guide pages.
 - Questions must test content from THIS specific lesson.
 - See QUESTIONS_PIPELINE.md (injected separately) for full question format rules, mark allocations per exam board, and getGuideUrl() mapping.
 
-  PAST PAPER QUESTIONS:
-  If past papers are provided in the source material, you MUST:
-  1. Search the past papers for questions relevant to this lesson's topic.
-  2. Use the REAL question wording (not paraphrased).
-  3. Use the REAL mark scheme from the corresponding mark scheme document.
-  4. Add a "pastPaper" field: { "text": "...", "type": "...", "marks": "...", "pastPaper": "OCR June 2024" }
-  5. Fill remaining slots (up to 6 total) with original questions in the same style.
-  6. Aim for at least 2 past paper questions per lesson where available.
+  PAST PAPER QUESTIONS — COPYRIGHT PROHIBITION:
+  All practice questions MUST be original StudyVault content. Do NOT reproduce, copy, or closely paraphrase real exam questions from past papers, even if past papers are provided in the source material.
+  1. Study past papers only to understand the exam board's question STYLES, mark allocations, and command words.
+  2. Write ALL 6 questions as original compositions in the exam board's style.
+  3. Do NOT include a "pastPaper" field — this field is deprecated.
+  4. Mark schemes must use StudyVault's own rubric format (Top band / Mid band / Lower band), not exam board level descriptor templates.
 
 KNOWLEDGE CHECKS:
 - Exactly 5, testing factual recall from the lesson:
@@ -316,9 +314,9 @@ SOURCE MATERIAL FROM TEACHER:
 {extracted_ppt_text — the slides/pages relevant to this lesson}
 </source>
 
-PAST PAPERS AND MARK SCHEMES (extract real questions where relevant):
+PAST PAPERS AND MARK SCHEMES (use for style reference only — do NOT copy questions):
 <past_papers>
-{extracted past paper text — question papers and mark schemes from the source material}
+{extracted past paper text — use ONLY to understand question styles and mark allocations. Do NOT reproduce any exam questions or level descriptors.}
 </past_papers>
 
 STRUCTURAL REFERENCE (an existing lesson from StudyVault for format guidance):
@@ -350,7 +348,7 @@ EXAM BOARD: {exam_board} ({spec_code})
 </source_material>
 
 <past_papers>
-{extracted past paper and mark scheme text}
+{extracted past paper and mark scheme text — for question style reference only, do NOT reproduce questions or level descriptors}
 </past_papers>
 
 Create a lesson plan that:
@@ -380,7 +378,7 @@ Create a lesson plan that:
 
 4. USES THE SOURCE MATERIAL: Map each lesson to specific slides/pages from the teacher's resources. Include ppt_section_markers for each lesson.
 
-5. IDENTIFIES PAST PAPER COVERAGE: Note which past paper questions are relevant to each lesson.
+5. IDENTIFIES PAST PAPER STYLES: Note which question types and mark allocations from past papers are relevant to each lesson (for style reference only — do NOT copy questions).
 
 Return a JSON object:
 {
@@ -401,7 +399,7 @@ Return a JSON object:
           "description": "One sentence for browse card (60-100 chars)",
           "ppt_section_markers": ["keywords to locate relevant PPT content"],
           "spec_references": ["spec section numbers or topic names"],
-          "relevant_past_papers": ["OCR June 2024 Q1", "OCR November 2021 Q3"]
+          "relevant_past_paper_styles": ["4-mark explain question", "8-mark extended response"]
         }
       ]
     }
@@ -425,13 +423,13 @@ QUESTION TYPE: {question_type_name} [{marks} marks]
 SET TEXT / CONTEXT: {set_text_or_context}
 
 <mark_scheme_examples>
-{real mark scheme level descriptors from past papers for this question type}
+{mark allocation patterns for this question type — use as style reference only. Rephrase all criteria in StudyVault's own language.}
 </mark_scheme_examples>
 
 Generate a guide page as HTML (no JSON wrapper — just content_html) that includes:
 
 1. WHAT THE QUESTION ASKS: Explain what this question type requires in plain language.
-2. HOW MARKS ARE ALLOCATED: Include real level descriptors from the mark scheme.
+2. HOW MARKS ARE ALLOCATED: Explain how marks are allocated using StudyVault's own wording (Top band / Mid band / Lower band). DO NOT copy exam board level descriptor templates.
 3. STEP-BY-STEP METHOD: Numbered steps for answering this question type.
 4. TIMING: How long to spend on this question in the exam.
 5. MODEL ANSWER: A strong example answer (in a collapsible section).
@@ -508,11 +506,11 @@ Related media curation is handled by `RELATED_MEDIA_PIPELINE.md`. That document 
 |-------|-----------------|---------------|
 | System prompt — quality standards | Readability target, source fidelity rules | Edit this file |
 | System prompt — output format | HTML components, narration IDs, word count targets | Edit this file |
-| System prompt — question rules | Mark scheme format, question count, past paper extraction | Edit this file or QUESTIONS_PIPELINE.md |
+| System prompt — question rules | Mark scheme format, question count, original question generation | Edit this file or QUESTIONS_PIPELINE.md |
 | Planning prompt — lesson structure | How lessons are grouped, weighted, and named | Edit this file |
 | User message — spec extract | What spec content is fed per lesson | Improve spec mapping in the planning step |
 | User message — source material | Which PPT slides map to which lesson | Improve the planning step's section markers |
-| User message — past papers | Which past paper questions are fed per lesson | Improve past paper to lesson mapping |
+| User message — past papers | Which past paper styles are referenced per lesson (style only, never copied) | Improve past paper to lesson mapping |
 | User message — structural example | Which existing lesson is used as format reference | Pick a different exemplar lesson |
 | Question type config | Mark allocations per exam board | Edit the QUESTION_SPECS and QUESTION_TYPE_NAMES configs |
 | Diagram generation | Pictorial style, colour palettes, QC process | Edit DIAGRAM_PIPELINE.md |
@@ -535,7 +533,7 @@ const QUESTION_SPECS = {
 };
 
 // Exact type name strings — MUST match getGuideUrl() mappings in main.js
-// These are generated during the planning step from the spec and past papers
+// These are generated during the planning step from the spec and past paper style analysis
 const QUESTION_TYPE_NAMES = {
   'OCR Drama': [
     '4 marks — Costume Design',
@@ -601,14 +599,14 @@ Everything that must be generated for a complete subject. Steps reference their 
 
 **Planning:**
 - [ ] Spec downloaded/loaded from library
-- [ ] Lesson plan created with spec references, PPT markers, past paper mapping
+- [ ] Lesson plan created with spec references, PPT markers, question style mapping
 - [ ] Lesson plan includes unit subtitles and lesson descriptions
 - [ ] Question type names defined and registered in getGuideUrl()
 - [ ] CSS colour classes added to style.css (light + dark mode)
 
 **Per-lesson content (this file's prompts):**
 - [ ] Content HTML with narration IDs
-- [ ] Practice questions (with past paper tags where available)
+- [ ] Practice questions (all original, in exam board style)
 - [ ] Knowledge checks (2 MCQ + 2 fill + 1 match)
 - [ ] Glossary terms
 - [ ] Exam tip

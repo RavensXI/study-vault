@@ -59,7 +59,7 @@ Each individual exam technique guide page follows this exact structure.
 <div class="guide-section">
 <h2>What the Examiner Wants</h2>
 <p>{{EXAMINER_EXPLANATION — what this question tests, what AOs it targets}}</p>
-<h3>Level Descriptors (Simplified)</h3>
+<h3>Assessment Criteria (StudyVault Rubric)</h3>
 <table class="guide-levels">
 <thead><tr><th>Marks</th><th>What You Need</th></tr></thead>
 <tbody>

@@ -18,15 +18,14 @@ window.practiceQuestions = [
     type: "8 marks \u2014 Write an account",
     question: "Write an account of...",
     marks: 8,
-    answer: "Students may include:\n\u2022 Point one\n\u2022 Point two\n\u2022 Point three",
-    pastPaper: "AQA June 2019"   // optional — adds gold badge
+    answer: "Students may include:\n\u2022 Point one\n\u2022 Point two\n\u2022 Point three"
   }
 ];
 ```
 
 Use unicode escapes in JS: `\u2014` (em dash), `\u2013` (en dash), `\u2019`/`\u2018` (smart quotes).
 
-Real past paper questions are tagged with `pastPaper` property (displays gold badge). Fill remaining with original questions in the exam board's style.
+All practice questions must be original StudyVault content. Do not reproduce real exam questions even if past papers are provided in source material.
 
 ### Question Types by Subject
 
@@ -123,10 +122,10 @@ Best score saved to `studyvault-kc-{data-unit}/{data-lesson}` in localStorage.
 ## Sourcing Questions
 
 ### Practice questions
-1. Check exam board past papers first — real exam questions are always preferred
-2. Tag with `pastPaper: "Board Month Year"` (e.g. `"AQA June 2019"`, `"OCR January 2024"`)
-3. Fill remaining slots with original questions written in the exam board's style
-4. Mark schemes should list 3–6 bullet points students might include
+1. Write ORIGINAL questions aligned to the exam board's question types and mark allocations
+2. All 6 questions per lesson must be original StudyVault content — do NOT reproduce real exam questions even if past papers are provided in source material
+3. Use past papers only to understand question styles, command words, and mark allocations
+4. Mark schemes should list 3–6 bullet points students might include, using StudyVault's own rubric format (Top band / Mid band / Lower band)
 5. For essay-type questions, include structure guidance (e.g. "both sides of the argument")
 
 ### Knowledge checks
