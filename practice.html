@@ -4387,9 +4387,13 @@
         var data=await resp.json();
         if(!resp.ok)throw new Error(data.error||'Marking failed');
         var content=data.result;
-        var json;try{json=JSON.parse(content.match(/\{[\s\S]*\}/)[0]);}catch(e){json={quality:'good',feedback:content};}
+        // Strip markdown code fences if present
+        var cleaned=content.replace(/```json\s*/gi,'').replace(/```\s*/g,'').trim();
+        var json;try{json=JSON.parse(cleaned.match(/\{[\s\S]*\}/)[0]);}catch(e){json={quality:'good',feedback:cleaned};}
+        // Validate quality field
+        if(['excellent','good','needs_work','not_valid'].indexOf(json.quality)===-1)json.quality='good';
         var ok=json.quality==='excellent'||json.quality==='good';
-        var feedHtml='<div style="font-size:0.82rem"><p>'+json.feedback+'</p>';
+        var feedHtml='<div style="font-size:0.82rem"><p>'+(json.feedback||'')+'</p>';
         if(json.improvement)feedHtml+='<p style="color:var(--accent);font-weight:600">Tip: '+json.improvement+'</p>';
         feedHtml+='</div>';
         checkBtn.textContent='Check Answer';checkBtn.disabled=false;
