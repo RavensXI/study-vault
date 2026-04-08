@@ -1044,7 +1044,7 @@
     }
 
     .problem-feedback-area.shown {
-      max-height: 400px;
+      max-height: 800px;
     }
 
     .feedback-box {
@@ -4280,7 +4280,11 @@
         });
         isCorrect=right>=tot-1;
         feedHtml='<div style="font-size:0.82rem;line-height:1.5">';
-        _engState.tlShuffled.forEach(function(s,i){feedHtml+='<p>'+(_engState.tl[i]===s.correct?'\u2714':'\u2718')+' <strong>'+s.text+'</strong> \u2014 '+s.explain+'</p>';});
+        _engState.tlShuffled.forEach(function(s,i){
+          var got=_engState.tl[i]===s.correct;
+          if(got) feedHtml+='<p>\u2714 '+s.text+'</p>';
+          else feedHtml+='<p>\u2718 <strong>'+s.text+'</strong> \u2014 '+s.explain+'</p>';
+        });
         feedHtml+='</div>';
       }
       else if(type==='highlight_evidence'){
