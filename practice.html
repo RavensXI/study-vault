@@ -4050,25 +4050,74 @@
       var passages=window._practicePassages||[];
       var passage=p.passage_id?passages.find(function(x){return x.id===p.passage_id;}):null;
       var text=passage?passage.text:(p.passage||'');
-      return '<div class="problem-question-hint">Click or drag to highlight the relevant words.</div><div class="hl-passage" id="hl-passage-area">'+text+'</div>';
+      var hlHint = window.innerWidth <= 900
+        ? 'Press and hold a word, then drag to highlight the relevant phrase.'
+        : 'Click or drag to highlight the relevant words.';
+      return '<div class="problem-question-hint">'+hlHint+'</div><div class="hl-passage" id="hl-passage-area">'+text+'</div>';
     }
     function initHL(p,container){
       var el=container.querySelector('#hl-passage-area');if(!el)return;
       var rawText=el.textContent;
       var words=rawText.split(/(\s+)/);
       el.innerHTML='';_engState.hlDragging=false;_engState.hlStart=-1;
+      var _hlLongPressTimer=null;
+      var _hlTouchActive=false;
       var wi=0;
       words.forEach(function(w){
         if(/^\s+$/.test(w)){el.appendChild(document.createTextNode(w));return;}
         var s=document.createElement('span');s.className='hw';s.dataset.idx=wi++;s.textContent=w;
+        // Desktop: mousedown starts immediately
         s.addEventListener('mousedown',function(e){e.preventDefault();if(!practiceState.answered){_engState.hlDragging=true;_engState.hlStart=parseInt(s.dataset.idx);el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});s.classList.add('selected');}});
         s.addEventListener('mouseover',function(){if(!_engState.hlDragging||practiceState.answered)return;var cur=parseInt(s.dataset.idx);var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);el.querySelectorAll('.hw').forEach(function(x){var idx=parseInt(x.dataset.idx);if(idx>=lo&&idx<=hi)x.classList.add('selected');else x.classList.remove('selected');});});
-        s.addEventListener('touchstart',function(){if(practiceState.answered)return;_engState.hlDragging=true;_engState.hlStart=parseInt(s.dataset.idx);el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});s.classList.add('selected');},{passive:true});
+        // Mobile: long-press (250ms) to start selection, then drag
+        s.addEventListener('touchstart',function(e){
+          if(practiceState.answered)return;
+          var idx=parseInt(s.dataset.idx);
+          _hlLongPressTimer=setTimeout(function(){
+            _hlTouchActive=true;
+            _engState.hlDragging=true;
+            _engState.hlStart=idx;
+            el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});
+            s.classList.add('selected');
+            // Haptic feedback if available
+            if(navigator.vibrate)navigator.vibrate(30);
+          },250);
+        },{passive:true});
         el.appendChild(s);
       });
-      el.addEventListener('touchmove',function(e){if(!_engState.hlDragging||practiceState.answered)return;var touch=e.touches[0];var t=document.elementFromPoint(touch.clientX,touch.clientY);if(t&&t.classList.contains('hw')){var cur=parseInt(t.dataset.idx);var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);el.querySelectorAll('.hw').forEach(function(x){var idx=parseInt(x.dataset.idx);if(idx>=lo&&idx<=hi)x.classList.add('selected');else x.classList.remove('selected');});}},{passive:true});
+      // Mobile: drag to extend selection, prevent scroll when selecting
+      el.addEventListener('touchmove',function(e){
+        if(!_hlTouchActive){
+          // Haven't started selecting yet — cancel long-press, allow scroll
+          if(_hlLongPressTimer){clearTimeout(_hlLongPressTimer);_hlLongPressTimer=null;}
+          return;
+        }
+        // Selection active — prevent scroll and extend highlight
+        e.preventDefault();
+        if(practiceState.answered)return;
+        var touch=e.touches[0];
+        var t=document.elementFromPoint(touch.clientX,touch.clientY);
+        if(t&&t.classList.contains('hw')){
+          var cur=parseInt(t.dataset.idx);
+          var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);
+          el.querySelectorAll('.hw').forEach(function(x){
+            var idx=parseInt(x.dataset.idx);
+            if(idx>=lo&&idx<=hi)x.classList.add('selected');
+            else x.classList.remove('selected');
+          });
+        }
+      },{passive:false});
       document.addEventListener('mouseup',function(){_engState.hlDragging=false;});
-      document.addEventListener('touchend',function(){_engState.hlDragging=false;});
+      document.addEventListener('touchend',function(){
+        if(_hlLongPressTimer){clearTimeout(_hlLongPressTimer);_hlLongPressTimer=null;}
+        _engState.hlDragging=false;
+        _hlTouchActive=false;
+      });
+      document.addEventListener('touchcancel',function(){
+        if(_hlLongPressTimer){clearTimeout(_hlLongPressTimer);_hlLongPressTimer=null;}
+        _engState.hlDragging=false;
+        _hlTouchActive=false;
+      });
     }
 
     // ---- Connotation Picker ----
