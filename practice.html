@@ -3827,8 +3827,19 @@
         if(selT&&(selT.includes(ansT)||ansT.includes(selT))){
           isCorrect=true;document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add('correct');});
         }else{document.querySelectorAll('.hw.selected').forEach(function(el){el.classList.add('incorrect');});}
-        var aw=(problem.answer_text||problem.answerText||'').toLowerCase().split(/\s+/);
-        document.querySelectorAll('.hw').forEach(function(w){if(aw.some(function(a){return w.textContent.toLowerCase().replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'')===a.replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'');}))if(!w.classList.contains('correct'))w.classList.add('was-answer');});
+        // Show correct answer as dashed underline — find the contiguous phrase, not individual words
+        if(!isCorrect){
+          var allWords=document.querySelectorAll('.hw');
+          var ansWords=(problem.answer_text||problem.answerText||'').toLowerCase().split(/\s+/).map(function(w){return w.replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'');});
+          for(var wi=0;wi<=allWords.length-ansWords.length;wi++){
+            var match=true;
+            for(var ai=0;ai<ansWords.length;ai++){
+              var wt=allWords[wi+ai].textContent.toLowerCase().replace(/[.,;:!?"'\u2019\u201d\u2014\-]/g,'');
+              if(wt!==ansWords[ai]){match=false;break;}
+            }
+            if(match){for(var ai2=0;ai2<ansWords.length;ai2++){allWords[wi+ai2].classList.add('was-answer');}break;}
+          }
+        }
         feedHtml='<div style="font-size:0.82rem"><p><strong>Correct answer:</strong> \u201c'+(problem.answer_text||problem.answerText)+'\u201d</p><p>'+(problem.explanation||'')+'</p></div>';
       }
       else if(type==='connotation_picker'){
