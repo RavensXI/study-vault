@@ -4051,7 +4051,7 @@
       var passage=p.passage_id?passages.find(function(x){return x.id===p.passage_id;}):null;
       var text=passage?passage.text:(p.passage||'');
       var hlHint = window.innerWidth <= 900
-        ? 'Press and hold a word, then drag to highlight the relevant phrase.'
+        ? 'Hold a word to start, then drag or tap another word to highlight the phrase.'
         : 'Click or drag to highlight the relevant words.';
       return '<div class="problem-question-hint">'+hlHint+'</div><div class="hl-passage" id="hl-passage-area">'+text+'</div>';
     }
@@ -4062,54 +4062,73 @@
       el.innerHTML='';_engState.hlDragging=false;_engState.hlStart=-1;
       var _hlLongPressTimer=null;
       var _hlTouchActive=false;
+      var _hlWaitingForEnd=false; // tap-to-set-endpoint mode
       var wi=0;
+
+      function hlSelectRange(startIdx, endIdx) {
+        var lo=Math.min(startIdx,endIdx),hi=Math.max(startIdx,endIdx);
+        el.querySelectorAll('.hw').forEach(function(x){
+          var idx=parseInt(x.dataset.idx);
+          if(idx>=lo&&idx<=hi)x.classList.add('selected');
+          else x.classList.remove('selected');
+        });
+      }
+
       words.forEach(function(w){
         if(/^\s+$/.test(w)){el.appendChild(document.createTextNode(w));return;}
         var s=document.createElement('span');s.className='hw';s.dataset.idx=wi++;s.textContent=w;
         // Desktop: mousedown starts immediately
         s.addEventListener('mousedown',function(e){e.preventDefault();if(!practiceState.answered){_engState.hlDragging=true;_engState.hlStart=parseInt(s.dataset.idx);el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});s.classList.add('selected');}});
-        s.addEventListener('mouseover',function(){if(!_engState.hlDragging||practiceState.answered)return;var cur=parseInt(s.dataset.idx);var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);el.querySelectorAll('.hw').forEach(function(x){var idx=parseInt(x.dataset.idx);if(idx>=lo&&idx<=hi)x.classList.add('selected');else x.classList.remove('selected');});});
-        // Mobile: long-press (250ms) to start selection, then drag
+        s.addEventListener('mouseover',function(){if(!_engState.hlDragging||practiceState.answered)return;hlSelectRange(_engState.hlStart,parseInt(s.dataset.idx));});
+        // Mobile: long-press (250ms) to start, then drag OR tap endpoint
         s.addEventListener('touchstart',function(e){
           if(practiceState.answered)return;
           var idx=parseInt(s.dataset.idx);
+          // If waiting for endpoint tap, complete the range immediately
+          if(_hlWaitingForEnd){
+            e.preventDefault();
+            hlSelectRange(_engState.hlStart, idx);
+            _hlWaitingForEnd=false;
+            if(navigator.vibrate)navigator.vibrate(20);
+            return;
+          }
           _hlLongPressTimer=setTimeout(function(){
             _hlTouchActive=true;
             _engState.hlDragging=true;
             _engState.hlStart=idx;
             el.querySelectorAll('.hw.selected').forEach(function(x){x.classList.remove('selected');});
             s.classList.add('selected');
-            // Haptic feedback if available
             if(navigator.vibrate)navigator.vibrate(30);
           },250);
-        },{passive:true});
+        },{passive:false});
         el.appendChild(s);
       });
       // Mobile: drag to extend selection, prevent scroll when selecting
       el.addEventListener('touchmove',function(e){
         if(!_hlTouchActive){
-          // Haven't started selecting yet — cancel long-press, allow scroll
           if(_hlLongPressTimer){clearTimeout(_hlLongPressTimer);_hlLongPressTimer=null;}
           return;
         }
-        // Selection active — prevent scroll and extend highlight
         e.preventDefault();
         if(practiceState.answered)return;
         var touch=e.touches[0];
         var t=document.elementFromPoint(touch.clientX,touch.clientY);
         if(t&&t.classList.contains('hw')){
-          var cur=parseInt(t.dataset.idx);
-          var lo=Math.min(_engState.hlStart,cur),hi=Math.max(_engState.hlStart,cur);
-          el.querySelectorAll('.hw').forEach(function(x){
-            var idx=parseInt(x.dataset.idx);
-            if(idx>=lo&&idx<=hi)x.classList.add('selected');
-            else x.classList.remove('selected');
-          });
+          hlSelectRange(_engState.hlStart,parseInt(t.dataset.idx));
         }
       },{passive:false});
       document.addEventListener('mouseup',function(){_engState.hlDragging=false;});
       document.addEventListener('touchend',function(){
         if(_hlLongPressTimer){clearTimeout(_hlLongPressTimer);_hlLongPressTimer=null;}
+        // If we were actively dragging, selection is done
+        if(_hlTouchActive){
+          // Check if only the start word is selected (no drag happened)
+          var selectedCount=el.querySelectorAll('.hw.selected').length;
+          if(selectedCount<=1){
+            // Single word selected — enter tap-to-set-endpoint mode
+            _hlWaitingForEnd=true;
+          }
+        }
         _engState.hlDragging=false;
         _hlTouchActive=false;
       });
@@ -4117,6 +4136,7 @@
         if(_hlLongPressTimer){clearTimeout(_hlLongPressTimer);_hlLongPressTimer=null;}
         _engState.hlDragging=false;
         _hlTouchActive=false;
+        _hlWaitingForEnd=false;
       });
     }
 
