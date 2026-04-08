@@ -2644,25 +2644,23 @@
 
       fill.className = 'tier-progress-fill fill-' + tier;
       fill.style.width = total > 0 ? (attempted / total * 100) + '%' : '0%';
-      label.textContent = attempted + '/' + total;
+      label.textContent = practiceState[tier].correct + '/' + attempted;
     }
 
     // ===== UPDATE SCORE BAR =====
     function updateScoreBarTier() {
       var tier = practiceState.currentTier;
-      var counts = getTierCounts();
       var badge = document.getElementById('score-bar-tier-badge');
       badge.className = 'score-bar-tier-badge tier-is-' + tier;
       var text = tier.charAt(0).toUpperCase() + tier.slice(1) + ' ' +
-        practiceState[tier].attempted + '/' + counts[tier];
+        practiceState[tier].correct + '/' + practiceState[tier].attempted;
       document.getElementById('score-bar-tier-text').textContent = text;
     }
 
     function updateScoreBarScore() {
-      var counts = getTierCounts();
-      var total = counts.bronze + counts.silver + counts.gold;
+      var attempted = practiceState.bronze.attempted + practiceState.silver.attempted + practiceState.gold.attempted;
       var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
-      document.getElementById('score-bar-score').textContent = correct + '/' + total;
+      document.getElementById('score-bar-score').textContent = correct + '/' + attempted;
 
       // Streak
       var streakEl = document.getElementById('score-bar-streak');
@@ -3030,25 +3028,24 @@
 
     // ===== FINAL SUMMARY =====
     function showSummary() {
-      var counts = getTierCounts();
-      var total = counts.bronze + counts.silver + counts.gold;
+      var attempted = practiceState.bronze.attempted + practiceState.silver.attempted + practiceState.gold.attempted;
       var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
 
-      document.getElementById('summary-score').textContent = correct + '/' + total;
+      document.getElementById('summary-score').textContent = correct + '/' + attempted;
 
-      // Tier bars
-      function setTierBar(tier, tierCorrect, tierTotal) {
-        var pct = tierTotal > 0 ? (tierCorrect / tierTotal * 100) : 0;
+      // Tier bars — based on attempted, not total in bank
+      function setTierBar(tier, tierCorrect, tierAttempted) {
+        var pct = tierAttempted > 0 ? (tierCorrect / tierAttempted * 100) : 0;
         document.getElementById('summary-' + tier + '-fill').style.width = pct + '%';
-        document.getElementById('summary-' + tier + '-count').textContent = tierCorrect + '/' + tierTotal;
+        document.getElementById('summary-' + tier + '-count').textContent = tierCorrect + '/' + tierAttempted;
       }
-      setTierBar('bronze', practiceState.bronze.correct, counts.bronze);
-      setTierBar('silver', practiceState.silver.correct, counts.silver);
-      setTierBar('gold', practiceState.gold.correct, counts.gold);
+      setTierBar('bronze', practiceState.bronze.correct, practiceState.bronze.attempted);
+      setTierBar('silver', practiceState.silver.correct, practiceState.silver.attempted);
+      setTierBar('gold', practiceState.gold.correct, practiceState.gold.attempted);
 
       // Message
       var msgEl = document.getElementById('summary-message');
-      var pct = total > 0 ? correct / total : 0;
+      var pct = attempted > 0 ? correct / attempted : 0;
       if (pct === 1) {
         msgEl.innerHTML = '<strong>Perfect score!</strong> You have fully mastered this topic. Incredible work.';
       } else if (pct >= 0.8) {
@@ -3063,9 +3060,9 @@
 
       // Delay bar animations
       setTimeout(function() {
-        setTierBar('bronze', practiceState.bronze.correct, counts.bronze);
-        setTierBar('silver', practiceState.silver.correct, counts.silver);
-        setTierBar('gold', practiceState.gold.correct, counts.gold);
+        setTierBar('bronze', practiceState.bronze.correct, practiceState.bronze.attempted);
+        setTierBar('silver', practiceState.silver.correct, practiceState.silver.attempted);
+        setTierBar('gold', practiceState.gold.correct, practiceState.gold.attempted);
       }, 100);
     }
 
@@ -3088,17 +3085,18 @@
     // ===== SAVE PROGRESS =====
     function saveProgress() {
       try {
-        var counts = getTierCounts();
-        var total = counts.bronze + counts.silver + counts.gold;
         var correct = practiceState.bronze.correct + practiceState.silver.correct + practiceState.gold.correct;
         var attempted = practiceState.bronze.attempted + practiceState.silver.attempted + practiceState.gold.attempted;
         var key = 'sv-practice-' + window.location.pathname;
         localStorage.setItem(key, JSON.stringify({
           total: correct,
-          totalCount: total,
+          totalCount: attempted,
           bronze: practiceState.bronze.correct,
+          bronzeAttempted: practiceState.bronze.attempted,
           silver: practiceState.silver.correct,
+          silverAttempted: practiceState.silver.attempted,
           gold: practiceState.gold.correct,
+          goldAttempted: practiceState.gold.attempted,
           attempted: attempted,
           ts: Date.now()
         }));
