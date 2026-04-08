@@ -2054,10 +2054,21 @@
     .practice-passage-area.overlay-green{background-color:#dcfce7}
     .practice-passage-area.overlay-peach{background-color:#fed7aa}
     .practice-passage-area.overlay-aqua{background-color:#cffafe}
+    /* Mobile passage tab toggle */
+    .mobile-passage-tabs{display:none}
     @media(max-width:900px){
-      .practice-columns{flex-direction:column}
-      .practice-passage-area{width:100%!important;max-height:50vh;border-right:none;border-bottom:1px solid #d6cfc4;flex:none;overflow-y:auto}
-      .passage-body{padding:0.5rem 1rem 1rem;overflow-y:auto}
+      .mobile-passage-tabs{display:flex;gap:0;border-bottom:1px solid var(--border-light,#e8e4df);background:#fff;flex-shrink:0}
+      .mobile-passage-tab{flex:1;padding:0.55rem 0;font-family:'Inter',sans-serif;font-size:0.78rem;font-weight:600;text-align:center;background:none;border:none;border-bottom:2.5px solid transparent;color:var(--text-muted,#8a8580);cursor:pointer;transition:color 0.2s,border-color 0.2s;position:relative}
+      .mobile-passage-tab.active{color:var(--accent,#2563eb);border-bottom-color:var(--accent,#2563eb)}
+      .mobile-passage-tab-dot{position:absolute;top:6px;right:calc(50% - 28px);width:7px;height:7px;border-radius:50%;background:var(--accent,#7c3aed);display:none}
+      .mobile-passage-tab-dot.visible{display:block;animation:tab-dot-pulse 1s ease-in-out 2}
+      @keyframes tab-dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(1.4)}}
+      body.dark-mode .mobile-passage-tabs{background:#2a2826;border-color:#3a3836}
+      .practice-columns{flex-direction:column;overflow:hidden}
+      .practice-passage-area{width:100%!important;border-right:none;border-bottom:none;flex:1;overflow-y:auto}
+      .practice-columns.mobile-tab-question .practice-passage-area{display:none!important}
+      .practice-columns.mobile-tab-extract .content-viewport{display:none!important}
+      .passage-body{padding:0.75rem 1rem 1rem;overflow-y:auto}
     }
 
     /* ===== ENGLISH LANGUAGE: INPUT TYPES ===== */
@@ -2468,6 +2479,12 @@
         <!-- Tier rules toast -->
         <div class="tier-rules-toast" id="tier-rules-toast" style="display:none;">
           Pass each tier by getting <strong>4 in a row</strong> correct, or <strong>75%</strong> overall. You've got this!
+        </div>
+
+        <!-- Mobile tab toggle (visible on mobile when passage is active) -->
+        <div class="mobile-passage-tabs" id="mobile-passage-tabs" style="display:none">
+          <button class="mobile-passage-tab active" id="mobile-tab-extract" onclick="switchMobileTab('extract')">Extract<span class="mobile-passage-tab-dot" id="mobile-tab-dot"></span></button>
+          <button class="mobile-passage-tab" id="mobile-tab-question" onclick="switchMobileTab('question')">Question</button>
         </div>
 
         <!-- Passage + Content columns (passage hidden by default — English Language only) -->
@@ -3741,6 +3758,7 @@
       if (!hasPassage) {
         area.style.display = 'none';
         _currentPassageId = null;
+        updateMobileTabsVisibility(false);
         return;
       }
 
@@ -3749,7 +3767,8 @@
         : {text:problem.passage, label:'Source Text'};
       if (!passage) {area.style.display='none';return;}
 
-      if (_currentPassageId !== (problem.passage_id||problem.passage)) {
+      var _isNewPassage = _currentPassageId !== (problem.passage_id||problem.passage);
+      if (_isNewPassage) {
         _currentPassageId = problem.passage_id||problem.passage;
         if (_passageTtsActive) {speechSynthesis.cancel();_passageTtsActive=false;}
         area.innerHTML =
@@ -3788,6 +3807,14 @@
 
       // Highlight quoted section in passage if problem has a quote field
       highlightQuoteInPassage(problem);
+
+      // Mobile tabs: show tabs, handle quote dot
+      updateMobileTabsVisibility(true);
+      showMobileQuoteDot(!!problem.quote);
+      // New passage → show extract first so student reads it; same passage → show question
+      if (window.innerWidth <= 900) {
+        switchMobileTab(_isNewPassage ? 'extract' : 'question');
+      }
     }
 
     function highlightQuoteInPassage(problem) {
@@ -3851,6 +3878,8 @@
 
     // ---- Passage fit text ----
     function engFitPassageText(){
+      // Skip auto-fit on mobile — passage scrolls naturally
+      if (window.innerWidth <= 900) return;
       var area = document.getElementById('practice-passage-area');
       if (!area || area.style.display==='none') return;
       var body = area.querySelector('.passage-body');
@@ -3879,11 +3908,62 @@
       text.style.fontSize=best+'rem';
       text.style.lineHeight=String(Math.max(1.6,2.0-(best-0.85)*0.3));
     }
-    window.addEventListener('resize',function(){var a=document.getElementById('practice-passage-area');if(a&&a.style.display!=='none')engFitPassageText();});
+    window.addEventListener('resize',function(){
+      var a=document.getElementById('practice-passage-area');
+      if(a&&a.style.display!=='none'){
+        engFitPassageText();
+        updateMobileTabsVisibility(true);
+      } else {
+        updateMobileTabsVisibility(false);
+      }
+    });
     if(window.ResizeObserver){
       var _passageObs;
       var _passageEl=document.getElementById('practice-passage-area');
       if(_passageEl){_passageObs=new ResizeObserver(function(){engFitPassageText();});_passageObs.observe(_passageEl);}
+    }
+
+    // ---- Mobile Tab Toggle ----
+    window.switchMobileTab = function(tab) {
+      var cols = document.getElementById('practice-columns');
+      var tabExtract = document.getElementById('mobile-tab-extract');
+      var tabQuestion = document.getElementById('mobile-tab-question');
+      if (!cols || !tabExtract || !tabQuestion) return;
+      if (tab === 'extract') {
+        cols.classList.remove('mobile-tab-question');
+        cols.classList.add('mobile-tab-extract');
+        tabExtract.classList.add('active');
+        tabQuestion.classList.remove('active');
+      } else {
+        cols.classList.remove('mobile-tab-extract');
+        cols.classList.add('mobile-tab-question');
+        tabQuestion.classList.add('active');
+        tabExtract.classList.remove('active');
+      }
+    };
+
+    function updateMobileTabsVisibility(hasPassage) {
+      var tabs = document.getElementById('mobile-passage-tabs');
+      var cols = document.getElementById('practice-columns');
+      if (!tabs || !cols) return;
+      if (hasPassage && window.innerWidth <= 900) {
+        tabs.style.display = '';
+        // Default to question tab (student reads extract, switches to question)
+        // But on first load of a new passage, show extract first
+        if (!cols.classList.contains('mobile-tab-extract') && !cols.classList.contains('mobile-tab-question')) {
+          switchMobileTab('extract');
+        }
+      } else {
+        tabs.style.display = 'none';
+        cols.classList.remove('mobile-tab-extract', 'mobile-tab-question');
+      }
+    }
+
+    function showMobileQuoteDot(show) {
+      var dot = document.getElementById('mobile-tab-dot');
+      if (dot) {
+        dot.classList.toggle('visible', show);
+      }
     }
 
     // ---- Passage A11y ----
