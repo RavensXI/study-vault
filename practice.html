@@ -1998,7 +1998,7 @@
     .passage-body{padding:1.25rem 2rem 1.5rem;flex:1;overflow:hidden}
     .passage-body .passage-text{font-family:'Source Serif 4',serif;font-size:1rem;line-height:2;color:#3d3630;font-style:italic;transition:font-size 0.3s ease}
     .passage-body .passage-text::first-letter{font-size:1.4em;font-weight:600;color:#5a5651}
-    .passage-quote-highlight{background:rgba(124,58,237,0.12);border-bottom:2px solid var(--accent,#7c3aed);padding:1px 0;border-radius:2px}
+    .passage-quote-highlight{background:rgba(124,58,237,0.18);border-bottom:2px solid var(--accent,#7c3aed);padding:1px 2px;border-radius:3px;box-shadow:0 0 0 2px rgba(124,58,237,0.1);box-decoration-break:clone;-webkit-box-decoration-break:clone}
     .passage-footer{padding:0.5rem 1.5rem 0.75rem;font-size:0.65rem;color:#a89e93;border-top:1px solid rgba(0,0,0,0.06);flex-shrink:0;text-align:right}
     /* Dyslexia + overlays on passage */
     .practice-passage-area.dyslexia-font .passage-text{font-family:'OpenDyslexic',sans-serif!important;font-style:normal!important;letter-spacing:0.02em;word-spacing:0.08em}
@@ -3571,20 +3571,22 @@
       });
       var quote = problem.quote;
       if (!quote) return;
-      // Clean the quote of smart quotes and dashes for matching
-      var cleanQuote = quote.replace(/[\u201c\u201d\u201e\u201f]/g, '"').replace(/[\u2018\u2019\u201a\u201b]/g, "'").replace(/[\u2014]/g, '—').replace(/[\u2026]/g, '...').trim();
-      // Also try without leading/trailing quote marks
-      var matchText = cleanQuote.replace(/^["'\u201c\u201d\u2018\u2019]+/, '').replace(/["'\u201c\u201d\u2018\u2019]+$/, '').trim();
-      if (matchText.length < 10) return; // too short to match reliably
-      var html = textEl.innerHTML;
-      // Try to find the match text in the HTML (search in text content, wrap in span)
+
       var textContent = textEl.textContent;
+      // Try raw match first (preserving smart quotes)
+      var matchText = quote.trim();
+      // Strip only outer wrapping quote marks (the ones we added for display, not ones in the text)
+      if (/^[\u201c"']/.test(matchText) && /[\u201d"']$/.test(matchText)) {
+        matchText = matchText.slice(1, -1).trim();
+      }
       var idx = textContent.indexOf(matchText);
-      if (idx === -1) {
-        // Try with first 40 chars as a partial match
-        var partial = matchText.substring(0, Math.min(40, matchText.length));
-        idx = textContent.indexOf(partial);
-        if (idx !== -1) matchText = partial;
+      // If no match, try progressively shorter substrings from the start
+      if (idx === -1 && matchText.length > 20) {
+        for (var tryLen = Math.min(60, matchText.length); tryLen >= 20; tryLen -= 10) {
+          var partial = matchText.substring(0, tryLen);
+          idx = textContent.indexOf(partial);
+          if (idx !== -1) { matchText = partial; break; }
+        }
       }
       if (idx === -1) return;
       // Build new HTML by finding the range in text nodes
