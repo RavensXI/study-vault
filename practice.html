@@ -2111,7 +2111,16 @@
     .tl-legend{display:flex;gap:1rem;margin-bottom:0.5rem;font-size:0.72rem;color:#8a8580}
     .tl-legend span{display:flex;align-items:center;gap:0.3rem}
     .tl-legend .dot{width:12px;height:12px;border-radius:50%}
-    .tl-legend .dot.g{background:var(--success)}.tl-legend .dot.a{background:#f59e0b}.tl-legend .dot.r{background:var(--error)}
+    .tl-legend .dot.g,.tl-legend .dot-green{background:var(--success)}.tl-legend .dot.a,.tl-legend .dot-amber{background:#f59e0b}.tl-legend .dot.r,.tl-legend .dot-red{background:var(--error)}
+    .tl-legend .dot-blue{background:#2563eb}.tl-legend .dot-purple{background:#7c3aed}.tl-legend .dot-teal{background:#0d9488}.tl-legend .dot-orange{background:#ea580c}.tl-legend .dot-pink{background:#db2777}
+    .tl-btn.tl-c-green:hover,.tl-btn.tl-c-green.selected{background:var(--success);border-color:var(--success)}
+    .tl-btn.tl-c-amber:hover,.tl-btn.tl-c-amber.selected{background:#f59e0b;border-color:#f59e0b}
+    .tl-btn.tl-c-red:hover,.tl-btn.tl-c-red.selected{background:var(--error);border-color:var(--error)}
+    .tl-btn.tl-c-blue:hover,.tl-btn.tl-c-blue.selected{background:#2563eb;border-color:#2563eb}
+    .tl-btn.tl-c-purple:hover,.tl-btn.tl-c-purple.selected{background:#7c3aed;border-color:#7c3aed}
+    .tl-btn.tl-c-teal:hover,.tl-btn.tl-c-teal.selected{background:#0d9488;border-color:#0d9488}
+    .tl-btn.tl-c-orange:hover,.tl-btn.tl-c-orange.selected{background:#ea580c;border-color:#ea580c}
+    .tl-btn.tl-c-pink:hover,.tl-btn.tl-c-pink.selected{background:#db2777;border-color:#db2777}
     /* Highlight Evidence */
     .hl-passage{line-height:2;font-family:'Source Serif 4',serif;font-size:0.92rem;user-select:none;-webkit-user-select:none}
     .hw{cursor:pointer;padding:1px 0;border-radius:2px;transition:background 0.1s}
@@ -4103,25 +4112,22 @@
     }
 
     // ---- Traffic Light ----
+    var TL_COLORS=['green','amber','red','blue','purple','teal','orange','pink'];
     function renderTL(p){
       _engState.tl={};_engState.tlShuffled=engShuffle(p.statements);
       // Extract unique categories from statements
       var cats=[];
       p.statements.forEach(function(s){if(cats.indexOf(s.correct)===-1)cats.push(s.correct);});
-      // Pad to 3 if fewer (shouldn't happen but safety)
-      while(cats.length<3)cats.push('other');
       _engState.tlCats=cats;
-      var colors=['green','amber','red'];
-      var dotClasses=['g','a','r'];
       var h='<div class="tl-legend">';
       for(var c=0;c<cats.length;c++){
-        h+='<span><span class="dot '+dotClasses[c]+'"></span> '+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'</span>';
+        h+='<span><span class="dot dot-'+TL_COLORS[c%TL_COLORS.length]+'"></span> '+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'</span>';
       }
       h+='</div><div class="tl-statements">';
       _engState.tlShuffled.forEach(function(s,i){
         h+='<div class="tl-stmt" data-idx="'+i+'"><span class="stmt-text">'+s.text+'</span><div class="tl-btns">';
         for(var c=0;c<cats.length;c++){
-          h+='<button class="tl-btn '+colors[c]+'" title="'+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'" onclick="engTlSel('+i+',\''+cats[c].replace(/'/g,"\\'")+'\')"></button>';
+          h+='<button class="tl-btn tl-c-'+TL_COLORS[c%TL_COLORS.length]+'" title="'+cats[c].charAt(0).toUpperCase()+cats[c].slice(1)+'" onclick="engTlSel('+i+',\''+cats[c].replace(/'/g,"\\'")+'\')"></button>';
         }
         h+='</div></div>';
       });
@@ -4131,10 +4137,9 @@
       if(practiceState.answered)return;
       _engState.tl[i]=cat;
       var cats=_engState.tlCats||[];
-      var colors=['green','amber','red'];
-      var m={};cats.forEach(function(c,idx){m[c]=colors[idx];});
+      var m={};cats.forEach(function(c,idx){m[c]=TL_COLORS[idx%TL_COLORS.length];});
       document.querySelectorAll('.tl-stmt[data-idx="'+i+'"] .tl-btn').forEach(function(b){b.classList.remove('selected');});
-      var sel=document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.'+m[cat]);
+      var sel=document.querySelector('.tl-stmt[data-idx="'+i+'"] .tl-btn.tl-c-'+m[cat]);
       if(sel)sel.classList.add('selected');
     };
 
