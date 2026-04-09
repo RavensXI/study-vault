@@ -3835,6 +3835,11 @@
           '<div class="passage-header"><span class="passage-header-label">' + (passage.label||'Source Extract') + '</span><span class="passage-header-badge" id="passage-q-badge"></span></div>' +
           '<div class="passage-body"><div class="passage-text" id="passage-text">' + passage.text + '</div></div>' +
           '<div class="passage-footer">Source Extract</div>';
+        // Set audio URL for pre-recorded narration
+        window._currentPassageAudioUrl = passage.audio_url || null;
+        // Stop any playing audio when passage changes
+        if (_passageAudio) { _passageAudio.pause(); _passageAudio.currentTime = 0; }
+        _passageTtsActive = false;
         // Show a11y tools in score bar
         var a11yBar = document.getElementById('score-bar-a11y');
         if (a11yBar) a11yBar.style.display = '';
@@ -4016,9 +4021,29 @@
     }
 
     // ---- Passage A11y ----
+    var _passageAudio = null;
     window.engToggleTTS = function(){
       var btn=document.getElementById('passage-tts-btn');
-      if(_passageTtsActive){speechSynthesis.cancel();_passageTtsActive=false;if(btn)btn.setAttribute('aria-pressed','false');return;}
+      // Stop if playing
+      if(_passageTtsActive){
+        if(_passageAudio){_passageAudio.pause();_passageAudio.currentTime=0;}
+        else{speechSynthesis.cancel();}
+        _passageTtsActive=false;
+        if(btn)btn.setAttribute('aria-pressed','false');
+        return;
+      }
+      // Check for pre-recorded audio URL on current passage
+      var audioUrl = window._currentPassageAudioUrl;
+      if(audioUrl){
+        if(!_passageAudio||_passageAudio.src!==audioUrl){
+          _passageAudio=new Audio(audioUrl);
+        }
+        _passageAudio.onended=function(){_passageTtsActive=false;if(btn)btn.setAttribute('aria-pressed','false');};
+        _passageAudio.play();
+        _passageTtsActive=true;if(btn)btn.setAttribute('aria-pressed','true');
+        return;
+      }
+      // Fallback to Web Speech API
       var text=document.getElementById('passage-text');
       if(!text)return;
       var u=new SpeechSynthesisUtterance(text.textContent);u.lang='en-GB';u.rate=0.9;
