@@ -4163,8 +4163,8 @@
       if (/median|q1|q3|quartile|interquartile|order/.test(q) && problem.input_type === 'single_value') return 'sorter';
       // Mode → tally counter
       if (/mode|modal/.test(q) && !(/model/.test(q))) return 'tally';
-      // Mean / running total
-      if (/mean|average/.test(q) && problem.calculator && problem.input_type === 'single_value') return 'running';
+      // Mean / calculator (let students do the adding themselves)
+      if (/mean|average/.test(q) && problem.calculator && problem.input_type === 'single_value') return 'calculator';
       // Percentage / range / other calculator problems
       if (problem.calculator && problem.input_type === 'single_value') return 'calculator';
       return null;
@@ -4185,7 +4185,7 @@
 
       var h = '<div class="stats-tool">' +
         '<div class="stats-tool-title">Number Sorter</div>' +
-        '<div class="stats-tool-hint">Drag or tap to reorder from smallest to largest.</div>' +
+        '<div class="stats-tool-hint">Drag to reorder from smallest to largest.</div>' +
         '<div class="sorter-chips" id="sorter-drop">';
       shuffled.forEach(function(n, i) {
         h += '<div class="sorter-chip" draggable="true" data-val="' + n + '" data-idx="' + i + '">' + n + '</div>';
@@ -4195,10 +4195,14 @@
         '</div>';
       area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Working Out</span></div>' + h;
 
-      // Drag & drop + tap-to-swap logic
       var container = document.getElementById('sorter-drop');
       var sorted = nums.slice().sort(function(a, b) { return a - b; });
       var dragSrc = null;
+      var indicator = document.createElement('div');
+      indicator.className = 'sorter-indicator';
+      indicator.style.cssText = 'width:2px;height:36px;background:var(--accent,#2563eb);border-radius:2px;flex-shrink:0;pointer-events:none;display:none;';
+
+      function clearIndicator() { indicator.style.display = 'none'; if (indicator.parentNode) indicator.parentNode.removeChild(indicator); }
 
       function updateResult() {
         var chips = container.querySelectorAll('.sorter-chip');
@@ -4207,26 +4211,14 @@
         var resultEl = document.getElementById('sorter-result');
         if (isCorrect) {
           chips.forEach(function(c) { c.classList.add('placed'); });
-          var mid = Math.floor(sorted.length / 2);
-          var median = sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
-          var info = 'Sorted! Median = ' + median;
-          if (sorted.length >= 4) {
-            var lower = sorted.slice(0, mid);
-            var upper = sorted.slice(sorted.length % 2 === 1 ? mid + 1 : mid);
-            var q1Mid = Math.floor(lower.length / 2);
-            var q3Mid = Math.floor(upper.length / 2);
-            var q1 = lower.length % 2 === 1 ? lower[q1Mid] : (lower[q1Mid - 1] + lower[q1Mid]) / 2;
-            var q3 = upper.length % 2 === 1 ? upper[q3Mid] : (upper[q3Mid - 1] + upper[q3Mid]) / 2;
-            info += ' &middot; Q1 = ' + q1 + ' &middot; Q3 = ' + q3 + ' &middot; IQR = ' + (q3 - q1);
-          }
-          resultEl.innerHTML = info;
+          resultEl.textContent = 'Sorted! Now find your answer.';
         } else {
           chips.forEach(function(c) { c.classList.remove('placed'); });
           resultEl.textContent = '';
         }
       }
 
-      // Desktop drag
+      // Desktop drag with insertion indicator
       container.addEventListener('dragstart', function(e) {
         if (e.target.classList.contains('sorter-chip')) {
           dragSrc = e.target;
@@ -4234,26 +4226,37 @@
           e.dataTransfer.effectAllowed = 'move';
         }
       });
-      container.addEventListener('dragover', function(e) { e.preventDefault(); container.classList.add('drag-over'); });
-      container.addEventListener('dragleave', function() { container.classList.remove('drag-over'); });
+      container.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        if (!dragSrc) return;
+        var target = e.target.closest('.sorter-chip');
+        if (!target || target === dragSrc) { clearIndicator(); return; }
+        var rect = target.getBoundingClientRect();
+        var midX = rect.left + rect.width / 2;
+        indicator.style.display = '';
+        if (e.clientX < midX) {
+          container.insertBefore(indicator, target);
+        } else {
+          container.insertBefore(indicator, target.nextSibling);
+        }
+      });
+      container.addEventListener('dragleave', function(e) {
+        if (!container.contains(e.relatedTarget)) clearIndicator();
+      });
       container.addEventListener('drop', function(e) {
         e.preventDefault();
-        container.classList.remove('drag-over');
-        var target = e.target.closest('.sorter-chip');
-        if (target && dragSrc && target !== dragSrc) {
-          var allChips = [].slice.call(container.querySelectorAll('.sorter-chip'));
-          var srcIdx = allChips.indexOf(dragSrc);
-          var tgtIdx = allChips.indexOf(target);
-          if (srcIdx < tgtIdx) container.insertBefore(dragSrc, target.nextSibling);
-          else container.insertBefore(dragSrc, target);
-          updateResult();
+        if (dragSrc && indicator.parentNode === container) {
+          container.insertBefore(dragSrc, indicator);
         }
+        clearIndicator();
+        updateResult();
       });
       container.addEventListener('dragend', function(e) {
         if (e.target.classList.contains('sorter-chip')) e.target.classList.remove('dragging');
+        clearIndicator();
       });
 
-      // Touch / tap-to-swap
+      // Tap-to-swap fallback (mobile + click)
       var tapFirst = null;
       container.addEventListener('click', function(e) {
         var chip = e.target.closest('.sorter-chip');
@@ -4264,13 +4267,11 @@
         } else {
           tapFirst.style.outline = '';
           if (chip !== tapFirst) {
-            // Swap positions
-            var parent = container;
             var placeholder = document.createElement('div');
-            parent.insertBefore(placeholder, tapFirst);
-            parent.insertBefore(tapFirst, chip);
-            parent.insertBefore(chip, placeholder);
-            parent.removeChild(placeholder);
+            container.insertBefore(placeholder, tapFirst);
+            container.insertBefore(tapFirst, chip);
+            container.insertBefore(chip, placeholder);
+            container.removeChild(placeholder);
             updateResult();
           }
           tapFirst = null;
