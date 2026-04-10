@@ -2009,6 +2009,253 @@
       max-height: 100%;
     }
 
+    /* ===== STATISTICS TOOLS (passage panel) ===== */
+    .stats-tool {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 1.25rem 1.5rem;
+      overflow-y: auto;
+      gap: 0.75rem;
+    }
+    .stats-tool-title {
+      font-family: 'Source Serif 4', serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2d2a26;
+      margin-bottom: 0.25rem;
+    }
+    .stats-tool-hint {
+      font-size: 0.78rem;
+      color: #8a8580;
+      line-height: 1.4;
+    }
+
+    /* Number Sorter */
+    .sorter-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      min-height: 48px;
+      padding: 0.75rem;
+      background: #fff;
+      border: 2px dashed #d6cfc4;
+      border-radius: 12px;
+      transition: border-color 0.2s;
+    }
+    .sorter-chips.drag-over { border-color: var(--accent, #2563eb); }
+    .sorter-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      padding: 0.5rem 0.75rem;
+      background: #f5f0ea;
+      border: 1px solid #d6cfc4;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #2d2a26;
+      cursor: grab;
+      user-select: none;
+      transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .sorter-chip:active, .sorter-chip.dragging {
+      cursor: grabbing;
+      transform: scale(1.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      background: #fff;
+      z-index: 10;
+    }
+    .sorter-chip.placed { background: #dcfce7; border-color: #86efac; }
+    .sorter-markers {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 0.75rem;
+      font-size: 0.7rem;
+      color: #8a8580;
+      margin-top: -0.25rem;
+    }
+    .sorter-result {
+      text-align: center;
+      padding: 0.5rem;
+      background: #f0f9ff;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      color: #1e40af;
+      font-weight: 500;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Running Total */
+    .running-values {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .running-val {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      padding: 0.45rem 0.6rem;
+      background: #f5f0ea;
+      border: 1px solid #d6cfc4;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #2d2a26;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+    }
+    .running-val:hover { background: #ede8e0; }
+    .running-val.added {
+      background: #dcfce7;
+      border-color: #86efac;
+      color: #166534;
+    }
+    .running-val.added:hover { background: #bbf7d0; }
+    .running-display {
+      background: #fff;
+      border: 1px solid #d6cfc4;
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: center;
+    }
+    .running-sum {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d2a26;
+      font-family: 'Source Serif 4', serif;
+    }
+    .running-meta {
+      font-size: 0.78rem;
+      color: #8a8580;
+      margin-top: 0.2rem;
+    }
+    .running-divide-btn {
+      display: block;
+      width: 100%;
+      padding: 0.6rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--accent, #2563eb);
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .running-divide-btn:hover { opacity: 0.85; }
+    .running-divide-btn:disabled { opacity: 0.4; cursor: default; }
+    .running-result {
+      text-align: center;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #166534;
+      padding: 0.4rem;
+    }
+
+    /* Tally Counter */
+    .tally-items {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .tally-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      background: #fff;
+      border: 1px solid #e8e4df;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.1s;
+    }
+    .tally-row:hover { background: #f9f6f0; }
+    .tally-row.is-max { background: #dcfce7; border-color: #86efac; }
+    .tally-label {
+      flex: 1;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #2d2a26;
+    }
+    .tally-marks {
+      font-size: 0.82rem;
+      color: #8a8580;
+      min-width: 40px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .tally-count {
+      min-width: 28px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--accent, #2563eb);
+    }
+    .tally-result {
+      text-align: center;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      color: #1e40af;
+      font-weight: 500;
+      background: #f0f9ff;
+      border-radius: 8px;
+    }
+
+    /* Calculator */
+    .calc-display {
+      background: #fff;
+      border: 1px solid #d6cfc4;
+      border-radius: 10px;
+      padding: 0.75rem;
+      text-align: right;
+      font-family: 'Source Serif 4', serif;
+      min-height: 3.5rem;
+    }
+    .calc-expr {
+      font-size: 0.78rem;
+      color: #8a8580;
+      min-height: 1.2em;
+      word-break: break-all;
+    }
+    .calc-value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #2d2a26;
+    }
+    .calc-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.35rem;
+    }
+    .calc-btn {
+      padding: 0.65rem 0;
+      border: 1px solid #d6cfc4;
+      border-radius: 8px;
+      background: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #2d2a26;
+      cursor: pointer;
+      transition: background 0.1s;
+      text-align: center;
+    }
+    .calc-btn:hover { background: #f5f0ea; }
+    .calc-btn:active { background: #ede8e0; }
+    .calc-btn.calc-op { background: #f5f0ea; color: var(--accent, #2563eb); }
+    .calc-btn.calc-op:hover { background: #ede8e0; }
+    .calc-btn.calc-eq { background: var(--accent, #2563eb); color: #fff; border-color: transparent; }
+    .calc-btn.calc-eq:hover { opacity: 0.85; }
+    .calc-btn.calc-clear { color: #dc2626; }
+
     /* ===== MAP LIGHTBOX ===== */
     .map-lightbox {
       position: fixed;
@@ -3905,6 +4152,374 @@
       }
     }
 
+    // ---- Statistics Tools ----
+    var _statsToolActive = false;
+
+    function detectStatsTool(problem) {
+      // Only for problems without chart or passage
+      if (problem.chart || problem.passage_id || problem.passage) return null;
+      var q = (problem.display || problem.question || '').toLowerCase();
+      // Median / quartile → number sorter
+      if (/median|q1|q3|quartile|interquartile|order/.test(q) && problem.input_type === 'single_value') return 'sorter';
+      // Mode → tally counter
+      if (/mode|modal/.test(q) && !(/model/.test(q))) return 'tally';
+      // Mean / running total
+      if (/mean|average/.test(q) && problem.calculator && problem.input_type === 'single_value') return 'running';
+      // Percentage / range / other calculator problems
+      if (problem.calculator && problem.input_type === 'single_value') return 'calculator';
+      return null;
+    }
+
+    function extractNumbers(text) {
+      // Pull the data values from the question text (comma/space-separated numbers)
+      var m = text.match(/:\s*([\d.,\s\-]+)\./);
+      if (!m) m = text.match(/((?:\d+\.?\d*[,\s]+){2,}\d+\.?\d*)/);
+      if (!m) return [];
+      return m[1].split(/[,\s]+/).map(Number).filter(function(n) { return !isNaN(n); });
+    }
+
+    function renderSorterTool(problem, area) {
+      var nums = extractNumbers(problem.display || '');
+      if (nums.length === 0) return false;
+      var shuffled = nums.slice().sort(function() { return Math.random() - 0.5; });
+
+      var h = '<div class="stats-tool">' +
+        '<div class="stats-tool-title">Number Sorter</div>' +
+        '<div class="stats-tool-hint">Drag or tap to reorder from smallest to largest.</div>' +
+        '<div class="sorter-chips" id="sorter-drop">';
+      shuffled.forEach(function(n, i) {
+        h += '<div class="sorter-chip" draggable="true" data-val="' + n + '" data-idx="' + i + '">' + n + '</div>';
+      });
+      h += '</div>' +
+        '<div class="sorter-result" id="sorter-result"></div>' +
+        '</div>';
+      area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Working Out</span></div>' + h;
+
+      // Drag & drop + tap-to-swap logic
+      var container = document.getElementById('sorter-drop');
+      var sorted = nums.slice().sort(function(a, b) { return a - b; });
+      var dragSrc = null;
+
+      function updateResult() {
+        var chips = container.querySelectorAll('.sorter-chip');
+        var current = [].map.call(chips, function(c) { return parseFloat(c.dataset.val); });
+        var isCorrect = current.length === sorted.length && current.every(function(v, i) { return v === sorted[i]; });
+        var resultEl = document.getElementById('sorter-result');
+        if (isCorrect) {
+          chips.forEach(function(c) { c.classList.add('placed'); });
+          var mid = Math.floor(sorted.length / 2);
+          var median = sorted.length % 2 === 1 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+          var info = 'Sorted! Median = ' + median;
+          if (sorted.length >= 4) {
+            var lower = sorted.slice(0, mid);
+            var upper = sorted.slice(sorted.length % 2 === 1 ? mid + 1 : mid);
+            var q1Mid = Math.floor(lower.length / 2);
+            var q3Mid = Math.floor(upper.length / 2);
+            var q1 = lower.length % 2 === 1 ? lower[q1Mid] : (lower[q1Mid - 1] + lower[q1Mid]) / 2;
+            var q3 = upper.length % 2 === 1 ? upper[q3Mid] : (upper[q3Mid - 1] + upper[q3Mid]) / 2;
+            info += ' &middot; Q1 = ' + q1 + ' &middot; Q3 = ' + q3 + ' &middot; IQR = ' + (q3 - q1);
+          }
+          resultEl.innerHTML = info;
+        } else {
+          chips.forEach(function(c) { c.classList.remove('placed'); });
+          resultEl.textContent = '';
+        }
+      }
+
+      // Desktop drag
+      container.addEventListener('dragstart', function(e) {
+        if (e.target.classList.contains('sorter-chip')) {
+          dragSrc = e.target;
+          e.target.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+        }
+      });
+      container.addEventListener('dragover', function(e) { e.preventDefault(); container.classList.add('drag-over'); });
+      container.addEventListener('dragleave', function() { container.classList.remove('drag-over'); });
+      container.addEventListener('drop', function(e) {
+        e.preventDefault();
+        container.classList.remove('drag-over');
+        var target = e.target.closest('.sorter-chip');
+        if (target && dragSrc && target !== dragSrc) {
+          var allChips = [].slice.call(container.querySelectorAll('.sorter-chip'));
+          var srcIdx = allChips.indexOf(dragSrc);
+          var tgtIdx = allChips.indexOf(target);
+          if (srcIdx < tgtIdx) container.insertBefore(dragSrc, target.nextSibling);
+          else container.insertBefore(dragSrc, target);
+          updateResult();
+        }
+      });
+      container.addEventListener('dragend', function(e) {
+        if (e.target.classList.contains('sorter-chip')) e.target.classList.remove('dragging');
+      });
+
+      // Touch / tap-to-swap
+      var tapFirst = null;
+      container.addEventListener('click', function(e) {
+        var chip = e.target.closest('.sorter-chip');
+        if (!chip) return;
+        if (!tapFirst) {
+          tapFirst = chip;
+          chip.style.outline = '2px solid var(--accent, #2563eb)';
+        } else {
+          tapFirst.style.outline = '';
+          if (chip !== tapFirst) {
+            // Swap positions
+            var parent = container;
+            var placeholder = document.createElement('div');
+            parent.insertBefore(placeholder, tapFirst);
+            parent.insertBefore(tapFirst, chip);
+            parent.insertBefore(chip, placeholder);
+            parent.removeChild(placeholder);
+            updateResult();
+          }
+          tapFirst = null;
+        }
+      });
+
+      return true;
+    }
+
+    function renderRunningTotalTool(problem, area) {
+      var nums = extractNumbers(problem.display || '');
+      if (nums.length === 0) return false;
+
+      var h = '<div class="stats-tool">' +
+        '<div class="stats-tool-title">Running Total</div>' +
+        '<div class="stats-tool-hint">Tap each value to add it. Then divide to find the mean.</div>' +
+        '<div class="running-values" id="running-values">';
+      nums.forEach(function(n, i) {
+        h += '<div class="running-val" data-val="' + n + '" data-idx="' + i + '">' + n + '</div>';
+      });
+      h += '</div>' +
+        '<div class="running-display">' +
+          '<div class="running-sum" id="running-sum">0</div>' +
+          '<div class="running-meta" id="running-meta">Tap values to add them</div>' +
+        '</div>' +
+        '<button class="running-divide-btn" id="running-divide" disabled>÷ Divide by count</button>' +
+        '<div class="running-result" id="running-result"></div>' +
+        '</div>';
+      area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Working Out</span></div>' + h;
+
+      var state = { sum: 0, count: 0, total: nums.length };
+      var container = document.getElementById('running-values');
+      container.addEventListener('click', function(e) {
+        var val = e.target.closest('.running-val');
+        if (!val) return;
+        var n = parseFloat(val.dataset.val);
+        if (val.classList.contains('added')) {
+          val.classList.remove('added');
+          state.sum -= n;
+          state.count--;
+        } else {
+          val.classList.add('added');
+          state.sum += n;
+          state.count++;
+        }
+        state.sum = Math.round(state.sum * 1000) / 1000;
+        document.getElementById('running-sum').textContent = state.sum;
+        document.getElementById('running-meta').textContent = state.count + ' of ' + state.total + ' values added — sum = ' + state.sum;
+        var btn = document.getElementById('running-divide');
+        btn.disabled = state.count === 0;
+        btn.textContent = state.count > 0 ? '÷ ' + state.count + ' = ?' : '÷ Divide by count';
+        document.getElementById('running-result').textContent = '';
+      });
+      document.getElementById('running-divide').addEventListener('click', function() {
+        if (state.count === 0) return;
+        var mean = Math.round((state.sum / state.count) * 100) / 100;
+        document.getElementById('running-result').textContent = state.sum + ' ÷ ' + state.count + ' = ' + mean;
+      });
+
+      return true;
+    }
+
+    function renderTallyTool(problem, area) {
+      var q = problem.display || '';
+      // Extract the list of items (after the colon)
+      var m = q.match(/:\s*(.+?)\.?\s*(?:What|Find|Identify|Which|The)/i);
+      if (!m) m = q.match(/:\s*(.+?)\.?\s*$/i);
+      if (!m) return false;
+      var items = m[1].split(/,\s*/);
+      if (items.length < 3) return false;
+
+      // Count unique values
+      var counts = {};
+      items.forEach(function(item) {
+        var key = item.trim().toLowerCase();
+        if (!counts[key]) counts[key] = { label: item.trim(), count: 0 };
+      });
+
+      var h = '<div class="stats-tool">' +
+        '<div class="stats-tool-title">Tally Counter</div>' +
+        '<div class="stats-tool-hint">Tap each unique value to count how many times it appears. Find the mode (most frequent).</div>' +
+        '<div class="tally-items" id="tally-items">';
+      var keys = Object.keys(counts);
+      keys.forEach(function(key) {
+        h += '<div class="tally-row" data-key="' + key + '">' +
+          '<span class="tally-label">' + counts[key].label + '</span>' +
+          '<span class="tally-marks" data-marks></span>' +
+          '<span class="tally-count">0</span>' +
+          '</div>';
+      });
+      h += '</div>' +
+        '<div class="tally-result" id="tally-result"></div>' +
+        '</div>';
+      area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Working Out</span></div>' + h;
+
+      var tallyContainer = document.getElementById('tally-items');
+      tallyContainer.addEventListener('click', function(e) {
+        var row = e.target.closest('.tally-row');
+        if (!row) return;
+        var key = row.dataset.key;
+        counts[key].count++;
+        var countEl = row.querySelector('.tally-count');
+        countEl.textContent = counts[key].count;
+        // Update tally marks
+        var marks = row.querySelector('[data-marks]');
+        var t = '';
+        for (var i = 0; i < counts[key].count; i++) {
+          t += (i > 0 && i % 5 === 0) ? ' ' : '';
+          t += '|';
+        }
+        marks.textContent = t;
+        // Highlight max
+        var maxCount = Math.max.apply(null, keys.map(function(k) { return counts[k].count; }));
+        tallyContainer.querySelectorAll('.tally-row').forEach(function(r) {
+          r.classList.toggle('is-max', parseInt(r.querySelector('.tally-count').textContent) === maxCount && maxCount > 0);
+        });
+        // Show mode
+        var modes = keys.filter(function(k) { return counts[k].count === maxCount; });
+        var total = keys.reduce(function(s, k) { return s + counts[k].count; }, 0);
+        var resultEl = document.getElementById('tally-result');
+        if (total >= items.length) {
+          resultEl.textContent = 'Mode = ' + modes.map(function(k) { return counts[k].label; }).join(', ') + ' (' + maxCount + ' times)';
+        } else {
+          resultEl.textContent = total + ' of ' + items.length + ' items counted';
+        }
+      });
+
+      return true;
+    }
+
+    function renderCalculatorTool(problem, area) {
+      var h = '<div class="stats-tool">' +
+        '<div class="stats-tool-title">Calculator</div>' +
+        '<div class="calc-display"><div class="calc-expr" id="calc-expr"></div><div class="calc-value" id="calc-value">0</div></div>' +
+        '<div class="calc-grid">' +
+          '<button class="calc-btn calc-clear" onclick="calcClear()">C</button>' +
+          '<button class="calc-btn calc-clear" onclick="calcBack()">⌫</button>' +
+          '<button class="calc-btn calc-op" onclick="calcOp(\'%\')">%</button>' +
+          '<button class="calc-btn calc-op" onclick="calcOp(\'/\')">÷</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'7\')">7</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'8\')">8</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'9\')">9</button>' +
+          '<button class="calc-btn calc-op" onclick="calcOp(\'*\')">×</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'4\')">4</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'5\')">5</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'6\')">6</button>' +
+          '<button class="calc-btn calc-op" onclick="calcOp(\'-\')">−</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'1\')">1</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'2\')">2</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'3\')">3</button>' +
+          '<button class="calc-btn calc-op" onclick="calcOp(\'+\')">+</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'0\')">0</button>' +
+          '<button class="calc-btn" onclick="calcDigit(\'.\')">.</button>' +
+          '<button class="calc-btn" onclick="calcNeg()">±</button>' +
+          '<button class="calc-btn calc-eq" onclick="calcEq()">=</button>' +
+        '</div></div>';
+      area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Calculator</span></div>' + h;
+
+      // Calculator state
+      window._calc = { expr: '', current: '0', op: null, prev: null, newEntry: true };
+      window.calcDigit = function(d) {
+        var c = window._calc;
+        if (c.newEntry) { c.current = d === '.' ? '0.' : d; c.newEntry = false; }
+        else { if (d === '.' && c.current.indexOf('.') >= 0) return; c.current += d; }
+        document.getElementById('calc-value').textContent = c.current;
+      };
+      window.calcOp = function(op) {
+        var c = window._calc;
+        if (c.prev !== null && !c.newEntry) calcEq();
+        c.prev = parseFloat(c.current);
+        c.op = op;
+        c.expr = c.current + ' ' + op.replace('/', '÷').replace('*', '×') + ' ';
+        document.getElementById('calc-expr').textContent = c.expr;
+        c.newEntry = true;
+      };
+      window.calcEq = function() {
+        var c = window._calc;
+        if (c.prev === null || !c.op) return;
+        var cur = parseFloat(c.current);
+        var result;
+        if (c.op === '+') result = c.prev + cur;
+        else if (c.op === '-') result = c.prev - cur;
+        else if (c.op === '*') result = c.prev * cur;
+        else if (c.op === '/') result = cur === 0 ? 'Error' : c.prev / cur;
+        else if (c.op === '%') result = c.prev * (cur / 100);
+        if (typeof result === 'number') result = Math.round(result * 1000000) / 1000000;
+        document.getElementById('calc-expr').textContent = c.expr + c.current + ' =';
+        document.getElementById('calc-value').textContent = result;
+        c.current = String(result);
+        c.prev = null;
+        c.op = null;
+        c.newEntry = true;
+      };
+      window.calcClear = function() {
+        window._calc = { expr: '', current: '0', op: null, prev: null, newEntry: true };
+        document.getElementById('calc-value').textContent = '0';
+        document.getElementById('calc-expr').textContent = '';
+      };
+      window.calcBack = function() {
+        var c = window._calc;
+        if (c.newEntry) return;
+        c.current = c.current.length > 1 ? c.current.slice(0, -1) : '0';
+        document.getElementById('calc-value').textContent = c.current;
+      };
+      window.calcNeg = function() {
+        var c = window._calc;
+        if (c.current === '0') return;
+        c.current = c.current.charAt(0) === '-' ? c.current.slice(1) : '-' + c.current;
+        document.getElementById('calc-value').textContent = c.current;
+      };
+
+      return true;
+    }
+
+    function renderStatsTool(problem, area) {
+      var tool = detectStatsTool(problem);
+      if (!tool) { _statsToolActive = false; return false; }
+
+      var rendered = false;
+      if (tool === 'sorter') rendered = renderSorterTool(problem, area);
+      else if (tool === 'running') rendered = renderRunningTotalTool(problem, area);
+      else if (tool === 'tally') rendered = renderTallyTool(problem, area);
+      else if (tool === 'calculator') rendered = renderCalculatorTool(problem, area);
+
+      if (!rendered) { _statsToolActive = false; return false; }
+
+      _statsToolActive = true;
+      area.style.display = 'flex';
+
+      // Hide a11y bar
+      var a11yBar = document.getElementById('score-bar-a11y');
+      if (a11yBar) a11yBar.style.display = 'none';
+
+      // Mobile tab
+      var tabExtract = document.getElementById('mobile-tab-extract');
+      if (tabExtract) {
+        var dot = tabExtract.querySelector('.mobile-passage-tab-dot');
+        tabExtract.textContent = 'Tools';
+        if (dot) tabExtract.appendChild(dot);
+      }
+      updateMobileTabsVisibility(true);
+      showMobileQuoteDot(false);
+      if (window.innerWidth <= 900) {
+        switchMobileTab('question');
+      }
+
+      return true;
+    }
+
     function handlePassagePanel(problem) {
       var area = document.getElementById('practice-passage-area');
       if (!area) return;
@@ -3915,14 +4530,19 @@
       var hasChart = !!problem.chart && !hasPassage;
 
       if (!hasPassage && !hasChart) {
-        area.style.display = 'none';
+        // Try statistics tools before hiding
         _currentPassageId = null;
         destroyPanelChart();
+        if (renderStatsTool(problem, area)) return;
+        _statsToolActive = false;
+        area.style.display = 'none';
         updateMobileTabsVisibility(false);
         var a11yBar = document.getElementById('score-bar-a11y');
         if (a11yBar) a11yBar.style.display = 'none';
         return;
       }
+
+      _statsToolActive = false;
 
       // Chart panel (Geography Skills etc.)
       if (hasChart) {
