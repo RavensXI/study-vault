@@ -4497,11 +4497,16 @@
 
     function renderTallyTool(problem, area) {
       var q = problem.display || '';
-      // Extract the list of items (after the colon)
-      var m = q.match(/:\s*(.+?)\.?\s*(?:What|Find|Identify|Which|The)/i);
+      // Extract the list of items (after the colon, stopping at sentence boundary before a keyword)
+      var m = q.match(/:\s*(.+?)\.?\s*(?:What|Find|Identify|Which|The|Calculate|Determine|State|Give|Work)/i);
+      if (!m) m = q.match(/:\s*(.+?)\.\s/);
       if (!m) m = q.match(/:\s*(.+?)\.?\s*$/i);
       if (!m) return false;
-      var items = m[1].split(/,\s*/);
+      // Clean trailing period and whitespace from the matched list
+      var raw = m[1].replace(/\.\s*$/, '').trim();
+      var items = raw.split(/,\s*/);
+      // Remove any item that contains leftover sentence fragments (no digits = not data)
+      items = items.filter(function(item) { return item.trim().length > 0; });
       if (items.length < 3) return false;
 
       // Count unique values
