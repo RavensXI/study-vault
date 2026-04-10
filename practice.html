@@ -3840,7 +3840,8 @@
         _currentChartKey = chartKey;
         _currentPassageId = null;
         if (_passageTtsActive) { speechSynthesis.cancel(); _passageTtsActive = false; }
-        destroyPanelChart();
+        // Destroy previous panel chart instance (but keep _currentChartKey)
+        if (_panelChart) { _panelChart.destroy(); _panelChart = null; }
 
         area.innerHTML =
           '<div class="passage-header">' +
