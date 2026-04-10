@@ -1995,6 +1995,20 @@
       max-height: 180px !important;
     }
 
+    /* Chart in passage panel (Geography Skills etc.) */
+    .chart-panel-body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem 1.5rem;
+      flex: 1;
+      overflow: hidden;
+    }
+    .chart-panel-body canvas {
+      max-width: 100%;
+      max-height: 100%;
+    }
+
     /* ===== MAP LIGHTBOX ===== */
     .map-lightbox {
       position: fixed;
@@ -2807,26 +2821,33 @@
         eqEl.className = 'problem-equation';
       }
 
-      // Render chart if present
+      // Render chart if present (skip inline if chart is in the panel)
       var chartContainer = document.getElementById('problem-chart-container');
       if (p.chart) {
-        chartContainer.style.display = '';
-        chartContainer.innerHTML = '<canvas id="problem-chart" style="max-height:180px;"></canvas>';
-        var ctx = document.getElementById('problem-chart').getContext('2d');
-        if (window._currentChart) { window._currentChart.destroy(); }
-        window._currentChart = new Chart(ctx, {
-          type: p.chart.type,
-          data: p.chart.data,
-          options: Object.assign({
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: { duration: 400 },
-            plugins: {
-              legend: { display: p.chart.showLegend || false },
-              tooltip: { enabled: false }
-            }
-          }, p.chart.options || {})
-        });
+        if (_currentChartKey) {
+          // Chart is in the passage panel — hide inline container
+          chartContainer.style.display = 'none';
+          if (window._currentChart) { window._currentChart.destroy(); window._currentChart = null; }
+        } else {
+          // Fallback: render inline (e.g. maths or when passage takes priority)
+          chartContainer.style.display = '';
+          chartContainer.innerHTML = '<canvas id="problem-chart" style="max-height:180px;"></canvas>';
+          var ctx = document.getElementById('problem-chart').getContext('2d');
+          if (window._currentChart) { window._currentChart.destroy(); }
+          window._currentChart = new Chart(ctx, {
+            type: p.chart.type,
+            data: p.chart.data,
+            options: Object.assign({
+              responsive: true,
+              maintainAspectRatio: false,
+              animation: { duration: 400 },
+              plugins: {
+                legend: { display: p.chart.showLegend || false },
+                tooltip: { enabled: false }
+              }
+            }, p.chart.options || {})
+          });
+        }
       } else {
         chartContainer.style.display = 'none';
         if (window._currentChart) { window._currentChart.destroy(); window._currentChart = null; }
@@ -3283,8 +3304,9 @@
     }
 
     function animateToNextProblem() {
-      // Destroy chart before transition to prevent memory leaks
+      // Destroy charts before transition to prevent memory leaks
       if (window._currentChart) { window._currentChart.destroy(); window._currentChart = null; }
+      destroyPanelChart();
       var card = document.getElementById('current-problem-card');
       card.classList.add('slide-out-left');
       card.classList.remove('slide-in-right', 'card-correct', 'card-incorrect');
@@ -3802,6 +3824,86 @@
     function engShuffle(arr){var a=arr.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
 
     // ---- Passage Panel ----
+    var _currentChartKey = null;
+    var _panelChart = null;
+
+    function destroyPanelChart() {
+      if (_panelChart) { _panelChart.destroy(); _panelChart = null; }
+      _currentChartKey = null;
+    }
+
+    function renderChartPanel(problem, area) {
+      var chartKey = JSON.stringify(problem.chart.data);
+      var isNewChart = (_currentChartKey !== chartKey);
+
+      if (isNewChart) {
+        _currentChartKey = chartKey;
+        _currentPassageId = null;
+        if (_passageTtsActive) { speechSynthesis.cancel(); _passageTtsActive = false; }
+        destroyPanelChart();
+
+        area.innerHTML =
+          '<div class="passage-header">' +
+            '<span class="passage-header-label">Data</span>' +
+            '<span class="passage-header-badge" id="passage-q-badge"></span>' +
+          '</div>' +
+          '<div class="chart-panel-body">' +
+            '<canvas id="panel-chart-canvas"></canvas>' +
+          '</div>';
+
+        // Small delay to let flex layout settle before Chart.js reads dimensions
+        setTimeout(function() {
+          var canvas = document.getElementById('panel-chart-canvas');
+          if (!canvas) return;
+          var ctx = canvas.getContext('2d');
+          _panelChart = new Chart(ctx, {
+            type: problem.chart.type,
+            data: problem.chart.data,
+            options: Object.assign({
+              responsive: true,
+              maintainAspectRatio: true,
+              animation: { duration: 400 },
+              plugins: {
+                legend: { display: problem.chart.showLegend || false },
+                tooltip: { enabled: true }
+              }
+            }, problem.chart.options || {})
+          });
+        }, 60);
+
+        // Hide a11y bar (Read Aloud / Dyslexia don't apply to charts)
+        var a11yBar = document.getElementById('score-bar-a11y');
+        if (a11yBar) a11yBar.style.display = 'none';
+      }
+
+      // Update question badge
+      var badge = document.getElementById('passage-q-badge');
+      if (badge) {
+        var bank = window._problemBank;
+        var tier = practiceState.currentTier;
+        var probs = bank[tier] || [];
+        var cKey = chartKey;
+        var total = probs.filter(function(q) { return q.chart && JSON.stringify(q.chart.data) === cKey; }).length;
+        var sofar = probs.slice(0, practiceState.currentIndex + 1).filter(function(q) { return q.chart && JSON.stringify(q.chart.data) === cKey; }).length;
+        badge.textContent = 'Q ' + sofar + ' of ' + total;
+      }
+
+      area.style.display = 'flex';
+
+      // Update mobile tab label to "Chart" and show tabs
+      var tabExtract = document.getElementById('mobile-tab-extract');
+      if (tabExtract) {
+        var dot = tabExtract.querySelector('.mobile-passage-tab-dot');
+        tabExtract.textContent = 'Chart';
+        if (dot) tabExtract.appendChild(dot);
+      }
+      updateMobileTabsVisibility(true);
+      showMobileQuoteDot(false);
+      if (window.innerWidth <= 900) {
+        switchMobileTab(isNewChart ? 'extract' : 'question');
+      }
+    }
+
     function handlePassagePanel(problem) {
       var area = document.getElementById('practice-passage-area');
       if (!area) return;
@@ -3809,14 +3911,32 @@
       var hasPassage = problem.passage_id || problem.passage;
       // highlight_evidence renders passage inline
       if (problem.input_type === 'highlight_evidence') hasPassage = false;
+      var hasChart = !!problem.chart && !hasPassage;
 
-      if (!hasPassage) {
+      if (!hasPassage && !hasChart) {
         area.style.display = 'none';
         _currentPassageId = null;
+        destroyPanelChart();
         updateMobileTabsVisibility(false);
         var a11yBar = document.getElementById('score-bar-a11y');
         if (a11yBar) a11yBar.style.display = 'none';
         return;
+      }
+
+      // Chart panel (Geography Skills etc.)
+      if (hasChart) {
+        _currentPassageId = null;
+        renderChartPanel(problem, area);
+        return;
+      }
+
+      // Passage panel (English Language) — restore mobile tab label
+      destroyPanelChart();
+      var tabExtract = document.getElementById('mobile-tab-extract');
+      if (tabExtract) {
+        var dot = tabExtract.querySelector('.mobile-passage-tab-dot');
+        tabExtract.textContent = 'Extract';
+        if (dot) tabExtract.appendChild(dot);
       }
 
       var passage = problem.passage_id
