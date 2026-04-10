@@ -4713,8 +4713,9 @@
       // highlight_evidence renders passage inline
       if (problem.input_type === 'highlight_evidence') hasPassage = false;
       var hasChart = !!problem.chart && !hasPassage;
+      var hasImage = !!problem.image && !hasPassage && !hasChart;
 
-      if (!hasPassage && !hasChart) {
+      if (!hasPassage && !hasChart && !hasImage) {
         // Try statistics tools before hiding
         _currentPassageId = null;
         destroyPanelChart();
@@ -4728,6 +4729,28 @@
       }
 
       _statsToolActive = false;
+
+      // Image panel (maps, diagrams etc.)
+      if (hasImage) {
+        _currentPassageId = null;
+        destroyPanelChart();
+        area.innerHTML =
+          '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
+          '<div class="chart-panel-body" style="padding:0.75rem"><img src="' + problem.image + '" alt="Map" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px"></div>';
+        area.style.display = 'flex';
+        var a11yBar = document.getElementById('score-bar-a11y');
+        if (a11yBar) a11yBar.style.display = 'none';
+        var tabExtract = document.getElementById('mobile-tab-extract');
+        if (tabExtract) {
+          var dot = tabExtract.querySelector('.mobile-passage-tab-dot');
+          tabExtract.textContent = 'Map';
+          if (dot) tabExtract.appendChild(dot);
+        }
+        updateMobileTabsVisibility(true);
+        showMobileQuoteDot(false);
+        if (window.innerWidth <= 900) switchMobileTab('extract');
+        return;
+      }
 
       // Chart panel (Geography Skills etc.)
       if (hasChart) {
