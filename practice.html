@@ -2035,6 +2035,7 @@
     .sorter-chips {
       display: flex;
       flex-wrap: wrap;
+      justify-content: space-evenly;
       gap: 0.5rem;
       min-height: 48px;
       padding: 0.75rem;
@@ -2084,10 +2085,12 @@
       font-size: 0.85rem;
       color: #1e40af;
       font-weight: 500;
-      min-height: 2rem;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
+    }
+    .sorter-result.visible {
+      display: flex;
     }
 
     /* Running Total */
@@ -4313,9 +4316,11 @@
         if (isCorrect) {
           chips.forEach(function(c) { c.classList.add('placed'); });
           resultEl.textContent = 'Sorted! Now find your answer.';
+          resultEl.classList.add('visible');
         } else {
           chips.forEach(function(c) { c.classList.remove('placed'); });
           resultEl.textContent = '';
+          resultEl.classList.remove('visible');
         }
       }
 
