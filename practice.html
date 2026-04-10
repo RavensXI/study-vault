@@ -4248,14 +4248,14 @@
       var q = (problem.display || problem.question || '').toLowerCase();
       // Median / quartile → number sorter
       if (/median|q1|q3|quartile|interquartile|order/.test(q) && problem.input_type === 'single_value') return 'sorter';
-      // Mode → tally counter
-      if (/mode|modal/.test(q) && !(/model/.test(q))) return 'tally';
+      // Mode → tally counter (single_value only — MC questions get calculator)
+      if (/mode|modal/.test(q) && !(/model/.test(q)) && problem.input_type === 'single_value') return 'tally';
       // Range → range finder (pick highest & lowest)
       if (/\brange\b/.test(q) && problem.input_type === 'single_value') return 'range';
       // Mean / calculator (let students do the adding themselves)
-      if (/mean|average/.test(q) && problem.calculator && problem.input_type === 'single_value') return 'calculator';
+      if (/mean|average/.test(q) && problem.calculator) return 'calculator';
       // Percentage / range / other calculator problems
-      if (problem.calculator && problem.input_type === 'single_value') return 'calculator';
+      if (problem.calculator) return 'calculator';
       return null;
     }
 
