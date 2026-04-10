@@ -4378,8 +4378,8 @@
         '<div class="stats-tool-title">Range Finder</div>' +
         '<div class="stats-tool-hint">Select which value is highest and which is lowest.</div>' +
         '<div class="range-mode-btns">' +
-          '<button class="range-mode-btn active-high" id="range-mode-high" onclick="rangeSetMode(\'high\')">Selecting: Highest</button>' +
-          '<button class="range-mode-btn" id="range-mode-low" onclick="rangeSetMode(\'low\')">Selecting: Lowest</button>' +
+          '<button class="range-mode-btn active-low" id="range-mode-low" onclick="rangeSetMode(\'low\')">Selecting: Lowest</button>' +
+          '<button class="range-mode-btn" id="range-mode-high" onclick="rangeSetMode(\'high\')">Selecting: Highest</button>' +
         '</div>' +
         '<div class="range-values" id="range-values">';
       nums.forEach(function(n, i) {
@@ -4387,14 +4387,14 @@
       });
       h += '</div>' +
         '<div class="range-slots">' +
-          '<div class="range-slot"><div class="range-slot-label high">Highest</div><div class="range-slot-value" id="range-high-val">—</div></div>' +
           '<div class="range-slot"><div class="range-slot-label low">Lowest</div><div class="range-slot-value" id="range-low-val">—</div></div>' +
+          '<div class="range-slot"><div class="range-slot-label high">Highest</div><div class="range-slot-value" id="range-high-val">—</div></div>' +
         '</div>' +
         '<div class="range-calc" id="range-calc"></div>' +
         '</div>';
       area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Working Out</span></div>' + h;
 
-      var state = { mode: 'high', high: null, highIdx: null, low: null, lowIdx: null };
+      var state = { mode: 'low', high: null, highIdx: null, low: null, lowIdx: null };
 
       window.rangeSetMode = function(mode) {
         state.mode = mode;
@@ -4434,8 +4434,8 @@
         }
 
         // Auto-switch mode after selecting
-        if (state.mode === 'high' && state.low === null) {
-          rangeSetMode('low');
+        if (state.mode === 'low' && state.high === null) {
+          rangeSetMode('high');
         }
       });
 
