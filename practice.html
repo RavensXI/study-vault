@@ -3081,9 +3081,11 @@
     // ===== FORMAT DISPLAY TEXT =====
     function formatDisplay(text) {
       if (!text) return '';
-      // 1. Line break before instruction sentences (Explain, Calculate, Find, etc.)
+      // 1. Data series on its own line: break after colon before numbers
+      text = text.replace(/:\s*([\d\-])/g, ':<br>$1');
+      // 2. Line break before instruction sentences (Explain, Calculate, Find, etc.)
       text = text.replace(/\.\s+(Explain|Calculate|Find|State|Describe|Compare|Suggest|Evaluate|Identify|Give|Work out|Determine|Using|What|Which|How|Why)\b/g, '.<br><br>$1');
-      // 2. Keep data pairs together: "mean = 12°C" → non-breaking spaces
+      // 3. Keep data pairs together: "mean = 12°C" → non-breaking spaces
       text = text.replace(/(\w+)\s*=\s*([\d.]+)/g, '$1\u00a0=\u00a0$2');
       return text;
     }
