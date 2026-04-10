@@ -4230,15 +4230,15 @@
         e.preventDefault();
         if (!dragSrc) return;
         var target = e.target.closest('.sorter-chip');
-        if (!target || target === dragSrc) { clearIndicator(); return; }
+        if (!target || target === dragSrc) return;
         var rect = target.getBoundingClientRect();
         var midX = rect.left + rect.width / 2;
+        var insertBefore = e.clientX < midX;
+        var ref = insertBefore ? target : target.nextSibling;
+        // Only move indicator if position actually changed
+        if (indicator.nextSibling === ref && indicator.parentNode === container) return;
         indicator.style.display = '';
-        if (e.clientX < midX) {
-          container.insertBefore(indicator, target);
-        } else {
-          container.insertBefore(indicator, target.nextSibling);
-        }
+        container.insertBefore(indicator, ref);
       });
       container.addEventListener('dragleave', function(e) {
         if (!container.contains(e.relatedTarget)) clearIndicator();
