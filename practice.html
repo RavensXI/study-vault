@@ -2256,6 +2256,93 @@
     .calc-btn.calc-eq:hover { opacity: 0.85; }
     .calc-btn.calc-clear { color: #dc2626; }
 
+    /* Range Finder */
+    .range-values {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .range-val {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+      padding: 0.5rem 0.75rem;
+      background: #f5f0ea;
+      border: 1.5px solid #d6cfc4;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #2d2a26;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .range-val:hover { background: #ede8e0; }
+    .range-val.is-high { background: #fee2e2; border-color: #f87171; color: #991b1b; }
+    .range-val.is-low { background: #dbeafe; border-color: #60a5fa; color: #1e3a5f; }
+    .range-slots {
+      display: flex;
+      gap: 0.75rem;
+      align-items: stretch;
+    }
+    .range-slot {
+      flex: 1;
+      text-align: center;
+      padding: 0.6rem;
+      background: #fff;
+      border: 1.5px solid #d6cfc4;
+      border-radius: 10px;
+    }
+    .range-slot-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 0.3rem;
+    }
+    .range-slot-label.high { color: #dc2626; }
+    .range-slot-label.low { color: #2563eb; }
+    .range-slot-value {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d2a26;
+      font-family: 'Source Serif 4', serif;
+      min-height: 1.5em;
+    }
+    .range-calc {
+      text-align: center;
+      padding: 0.6rem;
+      background: #f0f9ff;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e40af;
+      min-height: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .range-mode-btns {
+      display: flex;
+      gap: 0.4rem;
+    }
+    .range-mode-btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1.5px solid #d6cfc4;
+      border-radius: 8px;
+      background: #fff;
+      font-weight: 600;
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .range-mode-btn:hover { background: #f5f0ea; }
+    .range-mode-btn.active-high { background: #fee2e2; border-color: #f87171; color: #991b1b; }
+    .range-mode-btn.active-low { background: #dbeafe; border-color: #60a5fa; color: #1e3a5f; }
+
     /* ===== MAP LIGHTBOX ===== */
     .map-lightbox {
       position: fixed;
@@ -4163,6 +4250,8 @@
       if (/median|q1|q3|quartile|interquartile|order/.test(q) && problem.input_type === 'single_value') return 'sorter';
       // Mode → tally counter
       if (/mode|modal/.test(q) && !(/model/.test(q))) return 'tally';
+      // Range → range finder (pick highest & lowest)
+      if (/\brange\b/.test(q) && problem.input_type === 'single_value') return 'range';
       // Mean / calculator (let students do the adding themselves)
       if (/mean|average/.test(q) && problem.calculator && problem.input_type === 'single_value') return 'calculator';
       // Percentage / range / other calculator problems
@@ -4275,6 +4364,78 @@
             updateResult();
           }
           tapFirst = null;
+        }
+      });
+
+      return true;
+    }
+
+    function renderRangeTool(problem, area) {
+      var nums = extractNumbers(problem.display || '');
+      if (nums.length === 0) return false;
+
+      var h = '<div class="stats-tool">' +
+        '<div class="stats-tool-title">Range Finder</div>' +
+        '<div class="stats-tool-hint">Select which value is highest and which is lowest.</div>' +
+        '<div class="range-mode-btns">' +
+          '<button class="range-mode-btn active-high" id="range-mode-high" onclick="rangeSetMode(\'high\')">Selecting: Highest</button>' +
+          '<button class="range-mode-btn" id="range-mode-low" onclick="rangeSetMode(\'low\')">Selecting: Lowest</button>' +
+        '</div>' +
+        '<div class="range-values" id="range-values">';
+      nums.forEach(function(n, i) {
+        h += '<div class="range-val" data-val="' + n + '" data-idx="' + i + '">' + n + '</div>';
+      });
+      h += '</div>' +
+        '<div class="range-slots">' +
+          '<div class="range-slot"><div class="range-slot-label high">Highest</div><div class="range-slot-value" id="range-high-val">—</div></div>' +
+          '<div class="range-slot"><div class="range-slot-label low">Lowest</div><div class="range-slot-value" id="range-low-val">—</div></div>' +
+        '</div>' +
+        '<div class="range-calc" id="range-calc"></div>' +
+        '</div>';
+      area.innerHTML = '<div class="passage-header"><span class="passage-header-label">Working Out</span></div>' + h;
+
+      var state = { mode: 'high', high: null, highIdx: null, low: null, lowIdx: null };
+
+      window.rangeSetMode = function(mode) {
+        state.mode = mode;
+        document.getElementById('range-mode-high').className = 'range-mode-btn' + (mode === 'high' ? ' active-high' : '');
+        document.getElementById('range-mode-low').className = 'range-mode-btn' + (mode === 'low' ? ' active-low' : '');
+      };
+
+      var valContainer = document.getElementById('range-values');
+      valContainer.addEventListener('click', function(e) {
+        var chip = e.target.closest('.range-val');
+        if (!chip) return;
+        var val = parseFloat(chip.dataset.val);
+        var idx = parseInt(chip.dataset.idx);
+
+        // Clear previous selection of this mode
+        valContainer.querySelectorAll('.range-val').forEach(function(c) {
+          if (state.mode === 'high' && c.classList.contains('is-high')) c.classList.remove('is-high');
+          if (state.mode === 'low' && c.classList.contains('is-low')) c.classList.remove('is-low');
+        });
+
+        // Apply new selection
+        chip.classList.add(state.mode === 'high' ? 'is-high' : 'is-low');
+        if (state.mode === 'high') { state.high = val; state.highIdx = idx; }
+        else { state.low = val; state.lowIdx = idx; }
+
+        // Update slot display
+        document.getElementById('range-high-val').textContent = state.high !== null ? state.high : '—';
+        document.getElementById('range-low-val').textContent = state.low !== null ? state.low : '—';
+
+        // Show calculation when both selected
+        var calcEl = document.getElementById('range-calc');
+        if (state.high !== null && state.low !== null) {
+          var result = Math.round((state.high - state.low) * 1000) / 1000;
+          calcEl.textContent = state.high + ' − ' + state.low + ' = ' + result;
+        } else {
+          calcEl.textContent = '';
+        }
+
+        // Auto-switch mode after selecting
+        if (state.mode === 'high' && state.low === null) {
+          rangeSetMode('low');
         }
       });
 
@@ -4492,6 +4653,7 @@
 
       var rendered = false;
       if (tool === 'sorter') rendered = renderSorterTool(problem, area);
+      else if (tool === 'range') rendered = renderRangeTool(problem, area);
       else if (tool === 'running') rendered = renderRunningTotalTool(problem, area);
       else if (tool === 'tally') rendered = renderTallyTool(problem, area);
       else if (tool === 'calculator') rendered = renderCalculatorTool(problem, area);
