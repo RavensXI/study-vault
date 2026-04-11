@@ -2071,10 +2071,8 @@
       pointer-events: none;
       white-space: nowrap;
     }
-    .ruler-reset {
+    .ruler-btn {
       position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
       background: rgba(45,42,38,0.85);
       color: #fff;
       border: none;
@@ -2083,9 +2081,10 @@
       padding: 0.3rem 0.6rem;
       border-radius: 6px;
       cursor: pointer;
-      display: none;
     }
-    .ruler-reset:hover { background: rgba(45,42,38,1); }
+    .ruler-btn:hover { background: rgba(45,42,38,1); }
+    .ruler-reset { top: 0.5rem; right: 0.5rem; display: none; }
+    .ruler-fullscreen { top: 0.5rem; left: 0.5rem; }
 
     /* ===== STATISTICS TOOLS (passage panel) ===== */
     .stats-tool {
@@ -4833,7 +4832,8 @@
               '<svg class="ruler-svg" id="ruler-svg"></svg>' +
               '<div class="ruler-badge" id="ruler-badge" style="display:none"></div>' +
               '<div class="ruler-hint" id="ruler-hint">Click your start point on the map</div>' +
-              '<button class="ruler-reset" id="ruler-reset" onclick="rulerReset()">Reset</button>' +
+              '<button class="ruler-btn ruler-fullscreen" onclick="rulerFullscreen()">&#x26F6; Fullscreen</button>' +
+              '<button class="ruler-btn ruler-reset" id="ruler-reset" onclick="rulerReset()">Reset</button>' +
             '</div>';
           initRuler(problem.ruler);
         } else {
@@ -5731,6 +5731,14 @@
       if (badge) badge.style.display = 'none';
       if (hint) hint.textContent = 'Click your start point on the map';
       if (resetBtn) resetBtn.style.display = 'none';
+    };
+
+    window.rulerFullscreen = function() {
+      var img = document.getElementById('ruler-img');
+      if (!img) return;
+      var lightbox = document.querySelector('.map-lightbox');
+      var lbImg = lightbox.querySelector('img');
+      if (lbImg) { lbImg.src = img.src; lightbox.classList.add('active'); }
     };
 
     // Redraw ruler on resize
