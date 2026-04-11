@@ -310,10 +310,24 @@
     // ===== PROBLEM BANK =====
     var pb = pd.problem_bank;
     if (pb) {
+      // Filter out higher_only problems for Foundation students
+      var isFoundation = false;
+      try {
+        var tiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
+        var subjectBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+        var studentTier = tiers[params.subjectSlug] || tiers[subjectBase] || 'higher';
+        isFoundation = studentTier === 'foundation';
+      } catch(e) {}
+
+      function filterTier(problems) {
+        if (!isFoundation) return problems;
+        return problems.filter(function(p) { return !p.higher_only; });
+      }
+
       window._problemBank = {
-        bronze: pb.bronze || [],
-        silver: pb.silver || [],
-        gold: pb.gold || []
+        bronze: filterTier(pb.bronze || []),
+        silver: filterTier(pb.silver || []),
+        gold: filterTier(pb.gold || [])
       };
     }
 
