@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sentence Builder — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf8f5; color: #2d2a26;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  .meta { max-width: 600px; width: 100%; margin-bottom: 1.5rem; }
+  .meta h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta p { color: #6b6560; font-size: 0.9rem; }
+
+  .card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px; width: 100%; overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header { background: #dc2626; color: #fff; padding: 1.25rem 1.5rem; }
+  .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+  .card-body { padding: 1.5rem; }
+
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .badge-silver { background: #e2e8f0; color: #64748b; }
+  .badge-gold { background: #fef9c3; color: #d97706; }
+
+  .instruction {
+    font-size: 0.85rem; color: #6b6560; margin-bottom: 1rem;
+    padding: 0.75rem 1rem; background: #faf8f5; border-radius: 10px;
+  }
+
+  .english-prompt {
+    font-size: 1.05rem; font-weight: 500; line-height: 1.5;
+    padding: 0.75rem 1rem;
+    background: #eff6ff; border-radius: 10px;
+    border-left: 4px solid #1d4ed8;
+    color: #1e40af;
+    margin-bottom: 1.25rem;
+  }
+
+  /* Answer zone */
+  .answer-zone {
+    min-height: 60px;
+    padding: 0.75rem;
+    border: 2px dashed #d4cfc9;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+    transition: border-color 0.15s;
+  }
+  .answer-zone.active { border-color: #dc2626; background: #fffbfa; }
+  .answer-zone.correct-zone { border-color: #16a34a; border-style: solid; background: #f0fdf4; }
+  .answer-zone.wrong-zone { border-color: #dc2626; border-style: solid; background: #fef2f2; }
+  .answer-zone .placeholder {
+    color: #c5bfb8; font-size: 0.9rem; font-style: italic;
+  }
+
+  /* Tile bank */
+  .tile-bank {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background: #faf8f5;
+    border-radius: 12px;
+    min-height: 50px;
+  }
+
+  /* Tiles */
+  .tile {
+    padding: 0.55rem 0.9rem;
+    background: #fff;
+    border: 2px solid #e8e4df;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: all 0.15s ease;
+    position: relative;
+  }
+  .tile:hover { border-color: #dc2626; background: #fef2f2; transform: translateY(-1px); }
+  .tile:active { transform: scale(0.95); }
+  .tile.in-answer {
+    background: #fef2f2;
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+  .tile.used {
+    opacity: 0.25;
+    pointer-events: none;
+    transform: none;
+  }
+  .tile.distractor-reveal {
+    border-color: #f59e0b;
+    background: #fef3c7;
+    color: #92400e;
+    position: relative;
+  }
+  .tile.distractor-reveal::after {
+    content: 'distractor';
+    position: absolute;
+    top: -8px; right: -4px;
+    font-size: 0.6rem;
+    background: #f59e0b;
+    color: #fff;
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-weight: 700;
+  }
+  .tile.correct-tile { border-color: #16a34a; background: #f0fdf4; color: #16a34a; }
+  .tile.wrong-tile { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+
+  .btn {
+    padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: #dc2626; color: #fff; }
+  .btn-primary:hover { background: #b91c1c; }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+  .btn-outline {
+    background: #fff; color: #6b6560; border: 2px solid #e8e4df;
+    margin-right: 0.5rem;
+  }
+  .btn-outline:hover { border-color: #c5bfb8; }
+
+  .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .feedback {
+    margin-top: 1rem; padding: 0.75rem 1rem;
+    border-radius: 10px; font-size: 0.9rem;
+    display: none; animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .feedback.wrong { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .correct-sentence {
+    font-size: 0.9rem; margin-top: 0.5rem;
+    color: #16a34a; font-weight: 600;
+  }
+  .translation {
+    font-size: 0.85rem; color: #9a938b; font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <h1>sentence_builder</h1>
+  <p>Build a Spanish sentence from word tiles. Watch out for distractors — wrong forms are mixed in!</p>
+</div>
+
+<!-- Problem 1: Silver (no distractors, simpler) -->
+<div class="card" id="p1">
+  <div class="card-header">
+    <h2>Build the sentence</h2>
+    <p>Lesson 1 — Holidays and Travel Plans</p>
+  </div>
+  <div class="card-body" data-prob="0">
+    <span class="badge badge-silver">SILVER</span>
+    <div class="english-prompt">"Yesterday I went to the beach with my family."</div>
+    <div class="instruction">Tap words in the correct order. Tap a placed word to remove it.</div>
+
+    <div class="answer-zone" id="zone0">
+      <span class="placeholder">Tap tiles to build your sentence...</span>
+    </div>
+    <div class="tile-bank" id="bank0"></div>
+    <div class="actions">
+      <button class="btn btn-outline" id="clear0">Clear</button>
+      <button class="btn btn-primary" id="check0" disabled>Check</button>
+    </div>
+    <div class="feedback" id="fb0"></div>
+  </div>
+</div>
+
+<!-- Problem 2: Gold (with distractors) -->
+<div class="card" id="p2">
+  <div class="card-header">
+    <h2>Build the sentence</h2>
+    <p>Lesson 2 — Family and Describing People</p>
+  </div>
+  <div class="card-body" data-prob="1">
+    <span class="badge badge-gold">GOLD — With distractors</span>
+    <div class="english-prompt">"My sister is very hard-working and has brown eyes."</div>
+    <div class="instruction">Some tiles are wrong forms (wrong gender, wrong conjugation). Choose carefully!</div>
+
+    <div class="answer-zone" id="zone1">
+      <span class="placeholder">Tap tiles to build your sentence...</span>
+    </div>
+    <div class="tile-bank" id="bank1"></div>
+    <div class="actions">
+      <button class="btn btn-outline" id="clear1">Clear</button>
+      <button class="btn btn-primary" id="check1" disabled>Check</button>
+    </div>
+    <div class="feedback" id="fb1"></div>
+  </div>
+</div>
+
+<!-- Problem 3: Gold (complex, conditional) -->
+<div class="card" id="p3">
+  <div class="card-header">
+    <h2>Build the sentence</h2>
+    <p>Lesson 8 — Environment and Global Issues</p>
+  </div>
+  <div class="card-body" data-prob="2">
+    <span class="badge badge-gold">GOLD — With distractors</span>
+    <div class="english-prompt">"I would like to visit Spain because the weather is very hot."</div>
+    <div class="instruction">Choose the right verb forms and word order. Distractors included.</div>
+
+    <div class="answer-zone" id="zone2">
+      <span class="placeholder">Tap tiles to build your sentence...</span>
+    </div>
+    <div class="tile-bank" id="bank2"></div>
+    <div class="actions">
+      <button class="btn btn-outline" id="clear2">Clear</button>
+      <button class="btn btn-primary" id="check2" disabled>Check</button>
+    </div>
+    <div class="feedback" id="fb2"></div>
+  </div>
+</div>
+
+<script>
+const PROBLEMS = [
+  {
+    correct: ['Ayer', 'fui', 'a', 'la', 'playa', 'con', 'mi', 'familia.'],
+    tiles: ['Ayer', 'fui', 'a', 'la', 'playa', 'con', 'mi', 'familia.'],
+    distractors: [],
+    translation: '"Yesterday I went to the beach with my family."'
+  },
+  {
+    correct: ['Mi', 'hermana', 'es', 'muy', 'trabajadora', 'y', 'tiene', 'los', 'ojos', 'marrones.'],
+    tiles: ['Mi', 'hermana', 'es', 'muy', 'trabajadora', 'y', 'tiene', 'los', 'ojos', 'marrones.'],
+    distractors: ['trabajador', 'tiene', 'son'],
+    distractorLabels: { 'trabajador': 'wrong gender (masc)', 'son': 'wrong verb (ser plural)' },
+    translation: '"My sister is very hard-working and has brown eyes."'
+  },
+  {
+    correct: ['Me', 'gustaría', 'visitar', 'España', 'porque', 'el', 'clima', 'es', 'muy', 'caluroso.'],
+    tiles: ['Me', 'gustaría', 'visitar', 'España', 'porque', 'el', 'clima', 'es', 'muy', 'caluroso.'],
+    distractors: ['gusta', 'calurosa', 'está'],
+    distractorLabels: { 'gusta': 'wrong form (no conditional)', 'calurosa': 'wrong gender (clima is masc)', 'está': 'wrong verb (ser not estar for permanent)' },
+    translation: '"I would like to visit Spain because the weather is very hot."'
+  }
+];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+PROBLEMS.forEach((prob, idx) => {
+  const bank = document.getElementById(`bank${idx}`);
+  const zone = document.getElementById(`zone${idx}`);
+  const checkBtn = document.getElementById(`check${idx}`);
+  const clearBtn = document.getElementById(`clear${idx}`);
+  const fb = document.getElementById(`fb${idx}`);
+
+  const allTiles = shuffle([...prob.tiles, ...prob.distractors]);
+  const placed = [];
+  const tileEls = [];
+  // Deduplicate: if a distractor duplicates a correct tile word, mark it
+  // We need unique IDs
+  let tileId = 0;
+
+  allTiles.forEach(word => {
+    const el = document.createElement('span');
+    el.className = 'tile';
+    el.textContent = word;
+    el.dataset.word = word;
+    el.dataset.id = tileId++;
+    el.dataset.isDistractor = prob.distractors.includes(word) && !prob.tiles.includes(word) ? 'true' : 'false';
+
+    el.addEventListener('click', () => {
+      if (el.classList.contains('used')) return;
+      // Add to answer zone
+      el.classList.add('used');
+      placed.push(el);
+
+      const answerTile = document.createElement('span');
+      answerTile.className = 'tile in-answer';
+      answerTile.textContent = word;
+      answerTile.dataset.bankId = el.dataset.id;
+      answerTile.addEventListener('click', () => {
+        // Remove from answer
+        answerTile.remove();
+        el.classList.remove('used');
+        const i = placed.indexOf(el);
+        if (i > -1) placed.splice(i, 1);
+        updateZone();
+      });
+      zone.appendChild(answerTile);
+      updateZone();
+    });
+
+    bank.appendChild(el);
+    tileEls.push(el);
+  });
+
+  function updateZone() {
+    const placeholder = zone.querySelector('.placeholder');
+    const answerTiles = zone.querySelectorAll('.tile');
+    if (answerTiles.length === 0) {
+      if (!placeholder) {
+        const p = document.createElement('span');
+        p.className = 'placeholder';
+        p.textContent = 'Tap tiles to build your sentence...';
+        zone.appendChild(p);
+      }
+      checkBtn.disabled = true;
+    } else {
+      if (placeholder) placeholder.remove();
+      checkBtn.disabled = answerTiles.length < prob.correct.length;
+    }
+  }
+
+  clearBtn.addEventListener('click', () => {
+    zone.querySelectorAll('.tile').forEach(t => t.remove());
+    tileEls.forEach(t => t.classList.remove('used'));
+    placed.length = 0;
+    updateZone();
+    fb.classList.remove('show');
+    zone.classList.remove('correct-zone', 'wrong-zone');
+  });
+
+  checkBtn.addEventListener('click', () => {
+    const answerTiles = zone.querySelectorAll('.tile');
+    const studentWords = [...answerTiles].map(t => t.textContent);
+    const isCorrect = studentWords.length === prob.correct.length &&
+                      studentWords.every((w, i) => w === prob.correct[i]);
+
+    if (isCorrect) {
+      zone.classList.add('correct-zone');
+      answerTiles.forEach(t => { t.classList.remove('in-answer'); t.classList.add('correct-tile'); });
+      fb.className = 'feedback correct show';
+      fb.innerHTML = `Correct! <span class="translation">${prob.translation}</span>`;
+    } else {
+      zone.classList.add('wrong-zone');
+      // Highlight which tiles are in wrong position
+      answerTiles.forEach((t, i) => {
+        if (i < prob.correct.length && t.textContent === prob.correct[i]) {
+          t.classList.add('correct-tile');
+          t.classList.remove('in-answer');
+        } else {
+          t.classList.add('wrong-tile');
+          t.classList.remove('in-answer');
+        }
+      });
+
+      // Reveal distractors in the bank
+      tileEls.forEach(t => {
+        if (prob.distractors.includes(t.dataset.word) && !prob.tiles.includes(t.dataset.word)) {
+          t.classList.remove('used');
+          t.classList.add('distractor-reveal');
+        }
+      });
+
+      fb.className = 'feedback wrong show';
+      let html = `Not quite.<br><span class="correct-sentence">Correct: ${prob.correct.join(' ')}</span><br><span class="translation">${prob.translation}</span>`;
+      if (prob.distractorLabels) {
+        html += '<br><br><strong>Distractors explained:</strong><ul style="margin:0.25rem 0 0 1.25rem;font-size:0.85rem">';
+        for (const [word, reason] of Object.entries(prob.distractorLabels)) {
+          html += `<li><em>${word}</em> — ${reason}</li>`;
+        }
+        html += '</ul>';
+      }
+      fb.innerHTML = html;
+    }
+    checkBtn.disabled = true;
+    clearBtn.disabled = true;
+  });
+});
+</script>
+</body>
+</html>

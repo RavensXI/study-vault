@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Translate — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf8f5; color: #2d2a26;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  .meta { max-width: 600px; width: 100%; margin-bottom: 1.5rem; }
+  .meta h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta p { color: #6b6560; font-size: 0.9rem; }
+
+  .card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px; width: 100%; overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header { background: #dc2626; color: #fff; padding: 1.25rem 1.5rem; }
+  .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+  .card-body { padding: 1.5rem; }
+
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .badge-bronze { background: #fef3c7; color: #b45309; }
+  .badge-silver { background: #e2e8f0; color: #64748b; }
+  .badge-gold { background: #fef9c3; color: #d97706; }
+
+  .direction {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .direction .flag {
+    width: 28px; height: 20px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; color: #fff;
+  }
+  .flag-es { background: #dc2626; }
+  .flag-en { background: #1d4ed8; }
+  .direction .arrow-dir { color: #9a938b; font-size: 1.1rem; }
+
+  .source-text {
+    font-size: 1.15rem; font-weight: 500; line-height: 1.6;
+    padding: 1rem 1.25rem;
+    background: #faf8f5; border-radius: 10px;
+    margin-bottom: 1rem;
+    border-left: 4px solid #dc2626;
+  }
+  .source-text.en-source { border-left-color: #1d4ed8; }
+
+  .hint-toggle {
+    font-size: 0.8rem; color: #dc2626; font-weight: 600;
+    cursor: pointer; margin-bottom: 0.75rem;
+    display: inline-block;
+    user-select: none;
+  }
+  .hint-toggle:hover { text-decoration: underline; }
+  .hints {
+    display: none; padding: 0.5rem 0.75rem;
+    background: #fef3c7; border-radius: 8px;
+    font-size: 0.85rem; color: #92400e;
+    margin-bottom: 1rem;
+  }
+  .hints.visible { display: block; }
+
+  .answer-area {
+    margin-bottom: 1rem;
+  }
+  .answer-area textarea {
+    width: 100%; min-height: 80px; padding: 0.75rem 1rem;
+    border: 2px solid #e8e4df; border-radius: 10px;
+    font-family: inherit; font-size: 1rem; line-height: 1.5;
+    resize: vertical; outline: none; transition: border-color 0.15s;
+  }
+  .answer-area textarea:focus { border-color: #dc2626; }
+
+  .accent-bar {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+  .accent-btn {
+    width: 36px; height: 36px;
+    border: 2px solid #e8e4df; border-radius: 8px;
+    background: #fff; font-family: inherit;
+    font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s ease;
+  }
+  .accent-btn:hover { border-color: #dc2626; background: #fef2f2; }
+  .accent-btn:active { transform: scale(0.92); }
+
+  .btn {
+    padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: #dc2626; color: #fff; }
+  .btn-primary:hover { background: #b91c1c; }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+  .model-answer {
+    display: none; margin-top: 1rem;
+    padding: 1rem 1.25rem; border-radius: 10px;
+    border: 1px solid #bbf7d0; background: #f0fdf4;
+  }
+  .model-answer.show { display: block; animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .model-answer h4 { font-size: 0.85rem; color: #16a34a; font-weight: 600; margin-bottom: 0.5rem; }
+  .model-answer .primary { font-size: 1rem; margin-bottom: 0.35rem; }
+  .model-answer .alt {
+    font-size: 0.85rem; color: #6b6560; font-style: italic;
+  }
+  .model-answer .note {
+    font-size: 0.8rem; color: #6b6560; margin-top: 0.75rem;
+    padding-top: 0.5rem; border-top: 1px solid #dcfce7;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .ai-note {
+    margin-top: 1rem; padding: 0.75rem 1rem;
+    background: #f5f3ff; border: 1px solid #e0d9fc;
+    border-radius: 10px; font-size: 0.8rem; color: #6d28d9;
+  }
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <h1>translate</h1>
+  <p>Translate sentences between Spanish and English. Three tiers of difficulty.</p>
+</div>
+
+<!-- Problem 1: Spanish → English (Bronze) -->
+<div class="card" id="p1">
+  <div class="card-body">
+    <span class="badge badge-bronze">BRONZE</span>
+    <div class="direction">
+      <span class="flag flag-es">ES</span>
+      <span class="arrow-dir">&rarr;</span>
+      <span class="flag flag-en">EN</span>
+      <span style="font-size:0.85rem; color:#6b6560; margin-left:0.5rem">Translate to English</span>
+    </div>
+
+    <div class="source-text">
+      Me gusta mucho ir de vacaciones a España con mi familia.
+    </div>
+
+    <div class="answer-area">
+      <textarea id="ans1" placeholder="Type your English translation..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="check1">Check</button>
+
+    <div class="model-answer" id="model1">
+      <h4>Model answer</h4>
+      <div class="primary">"I really like going on holiday to Spain with my family."</div>
+      <div class="alt">Also accepted: "I like a lot to go on holidays to Spain with my family."</div>
+      <div class="note"><strong>Key vocab:</strong> me gusta mucho = I really like, ir de vacaciones = to go on holiday, con = with</div>
+    </div>
+  </div>
+</div>
+
+<!-- Problem 2: English → Spanish with hints (Silver) -->
+<div class="card" id="p2">
+  <div class="card-body">
+    <span class="badge badge-silver">SILVER</span>
+    <div class="direction">
+      <span class="flag flag-en">EN</span>
+      <span class="arrow-dir">&rarr;</span>
+      <span class="flag flag-es">ES</span>
+      <span style="font-size:0.85rem; color:#6b6560; margin-left:0.5rem">Translate to Spanish</span>
+    </div>
+
+    <div class="source-text en-source">
+      I went to the beach yesterday with my friends and we swam in the sea.
+    </div>
+
+    <span class="hint-toggle" id="hintToggle2">Show vocab hints</span>
+    <div class="hints" id="hints2">
+      <strong>beach</strong> = la playa &nbsp;&bull;&nbsp;
+      <strong>yesterday</strong> = ayer &nbsp;&bull;&nbsp;
+      <strong>friends</strong> = amigos/as &nbsp;&bull;&nbsp;
+      <strong>to swim</strong> = nadar &nbsp;&bull;&nbsp;
+      <strong>sea</strong> = el mar
+    </div>
+
+    <div class="accent-bar" id="accents2">
+      <button class="accent-btn" data-char="á">á</button>
+      <button class="accent-btn" data-char="é">é</button>
+      <button class="accent-btn" data-char="í">í</button>
+      <button class="accent-btn" data-char="ó">ó</button>
+      <button class="accent-btn" data-char="ú">ú</button>
+      <button class="accent-btn" data-char="ñ">ñ</button>
+      <button class="accent-btn" data-char="¿">¿</button>
+      <button class="accent-btn" data-char="¡">¡</button>
+    </div>
+
+    <div class="answer-area">
+      <textarea id="ans2" placeholder="Type your Spanish translation..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="check2">Check</button>
+
+    <div class="model-answer" id="model2">
+      <h4>Model answer</h4>
+      <div class="primary">"Ayer fui a la playa con mis amigos y nadamos en el mar."</div>
+      <div class="alt">Also accepted: "Fui a la playa ayer con mis amigos y nadamos en el mar."</div>
+      <div class="note"><strong>Grammar:</strong> fui (ir, preterite, yo) • nadamos (nadar, preterite, nosotros) • mis amigos (possessive plural)</div>
+    </div>
+  </div>
+</div>
+
+<!-- Problem 3: English → Spanish, no hints (Gold) -->
+<div class="card" id="p3">
+  <div class="card-body">
+    <span class="badge badge-gold">GOLD</span>
+    <div class="direction">
+      <span class="flag flag-en">EN</span>
+      <span class="arrow-dir">&rarr;</span>
+      <span class="flag flag-es">ES</span>
+      <span style="font-size:0.85rem; color:#6b6560; margin-left:0.5rem">Translate to Spanish — no hints</span>
+    </div>
+
+    <div class="source-text en-source">
+      If I had more money, I would travel to South America because I would like to learn about different cultures.
+    </div>
+
+    <div class="accent-bar" id="accents3">
+      <button class="accent-btn" data-char="á">á</button>
+      <button class="accent-btn" data-char="é">é</button>
+      <button class="accent-btn" data-char="í">í</button>
+      <button class="accent-btn" data-char="ó">ó</button>
+      <button class="accent-btn" data-char="ú">ú</button>
+      <button class="accent-btn" data-char="ñ">ñ</button>
+      <button class="accent-btn" data-char="¿">¿</button>
+      <button class="accent-btn" data-char="¡">¡</button>
+    </div>
+
+    <div class="answer-area">
+      <textarea id="ans3" placeholder="Type your Spanish translation..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="check3">Check</button>
+
+    <div class="model-answer" id="model3">
+      <h4>Model answer</h4>
+      <div class="primary">"Si tuviera más dinero, viajaría a Sudamérica porque me gustaría aprender sobre diferentes culturas."</div>
+      <div class="alt">Also accepted: "Si yo tuviese más dinero, viajaría a América del Sur porque me gustaría conocer culturas diferentes."</div>
+      <div class="note"><strong>Higher grammar:</strong> si + imperfect subjunctive (tuviera/tuviese) + conditional (viajaría, gustaría). This sentence tests three tenses — a top-band response.</div>
+    </div>
+
+    <div class="ai-note">
+      <strong>In production:</strong> This would be AI-marked by Claude. The AI accepts any valid translation, gives partial credit, and provides specific grammar feedback (e.g., "Good use of the conditional, but <em>tuviera</em> needs the subjunctive, not <em>tenía</em>").
+    </div>
+  </div>
+</div>
+
+<script>
+// Accent insertion
+document.querySelectorAll('.accent-bar').forEach(bar => {
+  const textarea = bar.nextElementSibling.querySelector('textarea');
+  bar.querySelectorAll('.accent-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      textarea.value = val.slice(0, start) + btn.dataset.char + val.slice(end);
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
+      textarea.focus();
+    });
+  });
+});
+
+// Hint toggle
+document.getElementById('hintToggle2').addEventListener('click', function() {
+  const hints = document.getElementById('hints2');
+  hints.classList.toggle('visible');
+  this.textContent = hints.classList.contains('visible') ? 'Hide vocab hints' : 'Show vocab hints';
+});
+
+// Check buttons — just reveal model answer in prototype
+[1,2,3].forEach(n => {
+  document.getElementById(`check${n}`).addEventListener('click', function() {
+    document.getElementById(`model${n}`).classList.add('show');
+    this.disabled = true;
+  });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spot &amp; Correct — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf8f5; color: #2d2a26;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  .meta { max-width: 600px; width: 100%; margin-bottom: 1.5rem; }
+  .meta h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta p { color: #6b6560; font-size: 0.9rem; }
+
+  .card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px; width: 100%; overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header {
+    background: #dc2626; color: #fff; padding: 1.25rem 1.5rem;
+  }
+  .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+  .card-body { padding: 1.5rem; }
+
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .badge-silver { background: #e2e8f0; color: #64748b; }
+  .badge-gold { background: #fef9c3; color: #d97706; }
+
+  .instruction {
+    font-size: 0.85rem; color: #6b6560; margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem; background: #faf8f5; border-radius: 10px;
+  }
+
+  .sentence-words {
+    display: flex; flex-wrap: wrap; gap: 0.4rem;
+    font-size: 1.2rem; line-height: 2;
+    margin-bottom: 1.5rem;
+  }
+  .word {
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 2px solid transparent;
+    user-select: none;
+  }
+  .word:hover { background: #f5f1ec; }
+  .word.selected {
+    border-color: #dc2626;
+    background: #fef2f2;
+  }
+  .word.error-found {
+    border-color: #dc2626;
+    background: #fef2f2;
+    color: #dc2626;
+    text-decoration: line-through;
+    font-weight: 600;
+  }
+  .word.correct-word {
+    border-color: #16a34a;
+    background: #f0fdf4;
+    color: #16a34a;
+    font-weight: 600;
+  }
+  .word.wrong-pick {
+    animation: shake 0.4s ease;
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-5px); }
+    40% { transform: translateX(5px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+
+  .correction-area {
+    display: none;
+    margin-bottom: 1.5rem;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .correction-area.visible { display: block; }
+  .correction-area label {
+    display: block; font-size: 0.85rem; font-weight: 600;
+    color: #6b6560; margin-bottom: 0.5rem;
+  }
+  .correction-input {
+    width: 100%; padding: 0.65rem 1rem;
+    border: 2px solid #e8e4df; border-radius: 10px;
+    font-family: inherit; font-size: 1rem;
+    outline: none; transition: border-color 0.15s;
+  }
+  .correction-input:focus { border-color: #dc2626; }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn {
+    padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: #dc2626; color: #fff; }
+  .btn-primary:hover { background: #b91c1c; }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+  .feedback {
+    margin-top: 1rem; padding: 0.75rem 1rem;
+    border-radius: 10px; font-size: 0.9rem;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.correct { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .feedback.wrong { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+  .feedback strong { font-weight: 700; }
+
+  .error-tag {
+    display: inline-block; padding: 0.15rem 0.5rem;
+    background: #fef3c7; color: #b45309;
+    border-radius: 5px; font-size: 0.75rem; font-weight: 600;
+    margin-left: 0.5rem;
+  }
+
+  .translation {
+    font-size: 0.85rem; color: #9a938b; font-style: italic;
+    margin-top: 0.75rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <h1>spot_correct</h1>
+  <p>Find the grammatical error in the sentence, then type the correction.</p>
+</div>
+
+<!-- Problem 1: Gender agreement -->
+<div class="card">
+  <div class="card-header">
+    <h2>Find and fix the error</h2>
+    <p>Lesson 2 — Family and Describing People</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-silver">SILVER</span>
+    <div class="instruction">Tap the word that contains a grammatical error, then type the correct form.</div>
+
+    <div class="sentence-words" id="words1"></div>
+    <div class="correction-area" id="correction1">
+      <label>Type the correct form:</label>
+      <input class="correction-input" id="corrInput1" placeholder="Type correction..." autocomplete="off">
+    </div>
+    <button class="btn btn-primary" id="check1" disabled>Check</button>
+    <div class="feedback" id="fb1"></div>
+    <div class="translation" id="trans1" style="display:none"></div>
+  </div>
+</div>
+
+<!-- Problem 2: Verb conjugation -->
+<div class="card">
+  <div class="card-header">
+    <h2>Find and fix the error</h2>
+    <p>Lesson 1 — Holidays and Travel Plans</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-silver">SILVER</span>
+    <div class="instruction">Tap the word that contains a grammatical error, then type the correct form.</div>
+
+    <div class="sentence-words" id="words2"></div>
+    <div class="correction-area" id="correction2">
+      <label>Type the correct form:</label>
+      <input class="correction-input" id="corrInput2" placeholder="Type correction..." autocomplete="off">
+    </div>
+    <button class="btn btn-primary" id="check2" disabled>Check</button>
+    <div class="feedback" id="fb2"></div>
+    <div class="translation" id="trans2" style="display:none"></div>
+  </div>
+</div>
+
+<!-- Problem 3: Word order / article -->
+<div class="card">
+  <div class="card-header">
+    <h2>Find and fix the error</h2>
+    <p>Lesson 3 — Free-Time Activities</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-gold">GOLD</span>
+    <div class="instruction">This one is trickier. Find the error and correct it.</div>
+
+    <div class="sentence-words" id="words3"></div>
+    <div class="correction-area" id="correction3">
+      <label>Type the correct form:</label>
+      <input class="correction-input" id="corrInput3" placeholder="Type correction..." autocomplete="off">
+    </div>
+    <button class="btn btn-primary" id="check3" disabled>Check</button>
+    <div class="feedback" id="fb3"></div>
+    <div class="translation" id="trans3" style="display:none"></div>
+  </div>
+</div>
+
+<script>
+const PROBLEMS = [
+  {
+    sentence: 'Mi hermano es muy simpática y tiene los ojos verdes.',
+    errorWord: 'simpática',
+    correction: 'simpático',
+    errorType: 'Gender agreement',
+    explanation: '"Hermano" is masculine, so the adjective must end in <strong>-o</strong>, not <strong>-a</strong>. <em>simpática</em> → <em>simpático</em>.',
+    translation: '"My brother is very nice and has green eyes."'
+  },
+  {
+    sentence: 'El año pasado yo fue a España con mi familia.',
+    errorWord: 'fue',
+    correction: 'fui',
+    errorType: 'Verb conjugation',
+    explanation: 'With <strong>yo</strong> (I), the preterite of <em>ir</em> is <strong>fui</strong>, not <em>fue</em> (which is él/ella). First person: fui. Third person: fue.',
+    translation: '"Last year I went to Spain with my family."'
+  },
+  {
+    sentence: 'Me gusta jugar el fútbol los fines de semana.',
+    errorWord: 'el',
+    correction: 'al',
+    errorType: 'Preposition + article',
+    explanation: 'After <em>jugar</em>, Spanish uses <strong>jugar al</strong> (a + el = al) for sports. The preposition <em>a</em> is required and contracts with <em>el</em>.',
+    translation: '"I like playing football at weekends."'
+  }
+];
+
+PROBLEMS.forEach((prob, i) => {
+  const n = i + 1;
+  const container = document.getElementById(`words${n}`);
+  const correctionArea = document.getElementById(`correction${n}`);
+  const corrInput = document.getElementById(`corrInput${n}`);
+  const checkBtn = document.getElementById(`check${n}`);
+  const fb = document.getElementById(`fb${n}`);
+  const trans = document.getElementById(`trans${n}`);
+
+  const words = prob.sentence.split(/(\s+)/);
+  let selectedEl = null;
+  let foundError = false;
+
+  words.forEach(w => {
+    if (/^\s+$/.test(w)) return; // skip whitespace
+    const span = document.createElement('span');
+    span.className = 'word';
+    span.textContent = w.replace(/[.,!?;]$/, '');
+    const punct = w.match(/[.,!?;]$/)?.[0] || '';
+    if (punct) span.dataset.punct = punct;
+    span.addEventListener('click', () => {
+      if (foundError) return;
+      // Deselect previous
+      if (selectedEl) selectedEl.classList.remove('selected');
+
+      const cleanWord = span.textContent.toLowerCase();
+      const target = prob.errorWord.toLowerCase();
+
+      if (cleanWord === target) {
+        span.classList.add('selected');
+        selectedEl = span;
+        correctionArea.classList.add('visible');
+        corrInput.focus();
+        checkBtn.disabled = false;
+        foundError = true;
+      } else {
+        span.classList.add('wrong-pick');
+        setTimeout(() => span.classList.remove('wrong-pick'), 400);
+      }
+    });
+    container.appendChild(span);
+  });
+
+  checkBtn.addEventListener('click', () => {
+    const val = corrInput.value.trim().toLowerCase();
+    const isCorrect = val === prob.correction.toLowerCase();
+
+    if (isCorrect) {
+      selectedEl.classList.remove('selected');
+      selectedEl.classList.add('error-found');
+      corrInput.style.borderColor = '#16a34a';
+      corrInput.style.color = '#16a34a';
+      fb.className = 'feedback correct show';
+      fb.innerHTML = `<span class="error-tag">${prob.errorType}</span><br>${prob.explanation}`;
+    } else {
+      corrInput.style.borderColor = '#dc2626';
+      corrInput.style.color = '#dc2626';
+      fb.className = 'feedback wrong show';
+      fb.innerHTML = `Not quite. The correction is <strong>${prob.correction}</strong>.<br><span class="error-tag">${prob.errorType}</span> ${prob.explanation}`;
+    }
+    trans.style.display = 'block';
+    trans.textContent = prob.translation;
+    checkBtn.disabled = true;
+    corrInput.readOnly = true;
+  });
+
+  corrInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !checkBtn.disabled) checkBtn.click();
+  });
+});
+</script>
+</body>
+</html>

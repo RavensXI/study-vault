@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Role Play — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf8f5; color: #2d2a26;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  .meta { max-width: 600px; width: 100%; margin-bottom: 1.5rem; }
+  .meta h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta p { color: #6b6560; font-size: 0.9rem; }
+  .meta .note {
+    font-size: 0.8rem; color: #6d28d9; margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem; background: #f5f3ff; border-radius: 8px;
+  }
+
+  .card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px; width: 100%; overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header { background: #dc2626; color: #fff; padding: 1.25rem 1.5rem; }
+  .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+  .card-body { padding: 1.5rem; }
+
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .badge-gold { background: #fef9c3; color: #d97706; }
+
+  /* Scenario card */
+  .scenario {
+    padding: 1.25rem;
+    background: linear-gradient(135deg, #faf8f5 0%, #f5f1ec 100%);
+    border-radius: 12px;
+    border: 1px solid #e8e4df;
+    margin-bottom: 1.5rem;
+  }
+  .scenario-header {
+    display: flex; align-items: center; gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .scenario-icon {
+    width: 36px; height: 36px;
+    background: #dc2626; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .scenario-header h3 { font-size: 0.95rem; font-weight: 600; }
+  .scenario-context {
+    font-size: 0.95rem; line-height: 1.6; color: #4a4540;
+    margin-bottom: 0.75rem;
+  }
+  .scenario-instruction {
+    font-size: 0.8rem; color: #9a938b; font-style: italic;
+  }
+
+  /* Bullet tasks */
+  .bullet-tasks { display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .bullet-task {
+    padding: 1rem 1.25rem;
+    background: #faf8f5;
+    border-radius: 12px;
+    border: 1px solid #e8e4df;
+    transition: border-color 0.15s;
+  }
+  .bullet-task.task-correct { border-color: #16a34a; background: #f0fdf4; }
+  .bullet-task.task-partial { border-color: #f59e0b; background: #fffbeb; }
+  .bullet-task.task-wrong { border-color: #dc2626; background: #fef2f2; }
+
+  .bullet-number {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 24px; height: 24px;
+    background: #dc2626; color: #fff;
+    border-radius: 50%; font-size: 0.75rem; font-weight: 700;
+    margin-right: 0.5rem; flex-shrink: 0;
+  }
+  .bullet-number.done { background: #16a34a; }
+  .bullet-prompt {
+    font-size: 0.9rem; font-weight: 500; color: #2d2a26;
+    margin-bottom: 0.75rem;
+    display: flex; align-items: flex-start;
+  }
+  .bullet-prompt span { flex: 1; }
+
+  .bullet-input {
+    width: 100%; padding: 0.6rem 0.75rem;
+    border: 2px solid #e8e4df; border-radius: 8px;
+    font-family: inherit; font-size: 0.95rem;
+    outline: none; transition: border-color 0.15s;
+  }
+  .bullet-input:focus { border-color: #dc2626; }
+  .bullet-input.correct { border-color: #16a34a; color: #16a34a; }
+  .bullet-input.wrong { border-color: #dc2626; }
+
+  .accent-row {
+    display: flex; flex-wrap: wrap; gap: 0.25rem;
+    margin-top: 0.5rem;
+  }
+  .accent-sm {
+    width: 30px; height: 30px;
+    border: 1.5px solid #e8e4df; border-radius: 6px;
+    background: #fff; font-family: inherit; font-size: 0.9rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s ease;
+  }
+  .accent-sm:hover { border-color: #dc2626; background: #fef2f2; }
+
+  .model-reveal {
+    margin-top: 0.75rem; display: none;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .model-reveal.show { display: block; }
+  .model-label {
+    font-size: 0.75rem; font-weight: 600; color: #16a34a;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    margin-bottom: 0.25rem;
+  }
+  .model-text {
+    font-size: 0.9rem; color: #15803d; font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    background: #dcfce7; border-radius: 8px;
+  }
+  .model-note {
+    font-size: 0.8rem; color: #6b6560; margin-top: 0.35rem;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn {
+    padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+    margin-top: 1.25rem;
+    width: 100%;
+  }
+  .btn-primary { background: #dc2626; color: #fff; }
+  .btn-primary:hover { background: #b91c1c; }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+  .overall-result {
+    display: none; margin-top: 1rem;
+    padding: 1rem 1.25rem; border-radius: 12px;
+    text-align: center;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .overall-result.show { display: block; }
+  .overall-result h3 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .overall-result p { font-size: 0.85rem; }
+  .result-good { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+  .result-ok { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+  .result-poor { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <h1>role_play</h1>
+  <p>Respond to a scenario in Spanish — just like AQA Paper 2 Task 1. Each bullet point is a separate response.</p>
+  <div class="note">In production, each response would be AI-marked for communication + grammar accuracy. This prototype shows model answers for comparison.</div>
+</div>
+
+<!-- Role Play 1: Restaurant -->
+<div class="card">
+  <div class="card-header">
+    <h2>Role Play</h2>
+    <p>Lesson 5 — Food and Eating Out</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-gold">GOLD</span>
+
+    <div class="scenario">
+      <div class="scenario-header">
+        <div class="scenario-icon">🍽️</div>
+        <h3>At a restaurant in Spain</h3>
+      </div>
+      <div class="scenario-context">
+        You are on holiday in Spain and go to a restaurant for dinner with your family. The waiter comes to your table. Respond to each situation below <strong>in Spanish</strong>.
+      </div>
+      <div class="scenario-instruction">You may use any appropriate vocabulary and structures. Try to be accurate!</div>
+    </div>
+
+    <div class="bullet-tasks" id="tasks1">
+      <div class="bullet-task" data-idx="0">
+        <div class="bullet-prompt">
+          <span class="bullet-number">1</span>
+          <span>Greet the waiter and ask for a table for four people.</span>
+        </div>
+        <input class="bullet-input" placeholder="Type your response in Spanish..." data-idx="0">
+        <div class="accent-row" data-idx="0">
+          <button class="accent-sm" data-char="á">á</button>
+          <button class="accent-sm" data-char="é">é</button>
+          <button class="accent-sm" data-char="í">í</button>
+          <button class="accent-sm" data-char="ó">ó</button>
+          <button class="accent-sm" data-char="ú">ú</button>
+          <button class="accent-sm" data-char="ñ">ñ</button>
+          <button class="accent-sm" data-char="¿">¿</button>
+          <button class="accent-sm" data-char="¡">¡</button>
+        </div>
+        <div class="model-reveal" data-idx="0">
+          <div class="model-label">Model answer</div>
+          <div class="model-text">¡Buenas tardes! ¿Tiene una mesa para cuatro personas, por favor?</div>
+          <div class="model-note"><strong>Key:</strong> greeting + ¿Tiene...? (polite request) + para cuatro personas</div>
+        </div>
+      </div>
+
+      <div class="bullet-task" data-idx="1">
+        <div class="bullet-prompt">
+          <span class="bullet-number">2</span>
+          <span>Order a still water and ask to see the menu.</span>
+        </div>
+        <input class="bullet-input" placeholder="Type your response in Spanish..." data-idx="1">
+        <div class="accent-row" data-idx="1">
+          <button class="accent-sm" data-char="á">á</button>
+          <button class="accent-sm" data-char="é">é</button>
+          <button class="accent-sm" data-char="í">í</button>
+          <button class="accent-sm" data-char="ó">ó</button>
+          <button class="accent-sm" data-char="ú">ú</button>
+          <button class="accent-sm" data-char="ñ">ñ</button>
+          <button class="accent-sm" data-char="¿">¿</button>
+          <button class="accent-sm" data-char="¡">¡</button>
+        </div>
+        <div class="model-reveal" data-idx="1">
+          <div class="model-label">Model answer</div>
+          <div class="model-text">Me gustaría un agua sin gas, por favor. ¿Puedo ver la carta?</div>
+          <div class="model-note"><strong>Key:</strong> me gustaría (conditional = polite) + agua sin gas + ¿Puedo ver...?</div>
+        </div>
+      </div>
+
+      <div class="bullet-task" data-idx="2">
+        <div class="bullet-prompt">
+          <span class="bullet-number">3</span>
+          <span>Say what you ate and give your opinion on the food.</span>
+        </div>
+        <input class="bullet-input" placeholder="Type your response in Spanish..." data-idx="2">
+        <div class="accent-row" data-idx="2">
+          <button class="accent-sm" data-char="á">á</button>
+          <button class="accent-sm" data-char="é">é</button>
+          <button class="accent-sm" data-char="í">í</button>
+          <button class="accent-sm" data-char="ó">ó</button>
+          <button class="accent-sm" data-char="ú">ú</button>
+          <button class="accent-sm" data-char="ñ">ñ</button>
+          <button class="accent-sm" data-char="¿">¿</button>
+          <button class="accent-sm" data-char="¡">¡</button>
+        </div>
+        <div class="model-reveal" data-idx="2">
+          <div class="model-label">Model answer</div>
+          <div class="model-text">Comí la paella y estaba muy rica. ¡Me encantó!</div>
+          <div class="model-note"><strong>Key:</strong> comí (preterite) + estaba (imperfect for description) + opinion phrase. Two past tenses = top marks.</div>
+        </div>
+      </div>
+
+      <div class="bullet-task" data-idx="3">
+        <div class="bullet-prompt">
+          <span class="bullet-number">4</span>
+          <span>Ask for the bill and say you will come back next year.</span>
+        </div>
+        <input class="bullet-input" placeholder="Type your response in Spanish..." data-idx="3">
+        <div class="accent-row" data-idx="3">
+          <button class="accent-sm" data-char="á">á</button>
+          <button class="accent-sm" data-char="é">é</button>
+          <button class="accent-sm" data-char="í">í</button>
+          <button class="accent-sm" data-char="ó">ó</button>
+          <button class="accent-sm" data-char="ú">ú</button>
+          <button class="accent-sm" data-char="ñ">ñ</button>
+          <button class="accent-sm" data-char="¿">¿</button>
+          <button class="accent-sm" data-char="¡">¡</button>
+        </div>
+        <div class="model-reveal" data-idx="3">
+          <div class="model-label">Model answer</div>
+          <div class="model-text">¿Me puede traer la cuenta, por favor? Volveremos el año que viene.</div>
+          <div class="model-note"><strong>Key:</strong> la cuenta (the bill) + volveremos (future tense, nosotros). Using future = three tenses across the role play.</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="checkAll">Check all responses</button>
+    <div class="overall-result" id="overall"></div>
+  </div>
+</div>
+
+<script>
+// Accent buttons
+document.querySelectorAll('.accent-row').forEach(row => {
+  const idx = row.dataset.idx;
+  const input = document.querySelector(`.bullet-input[data-idx="${idx}"]`);
+  row.querySelectorAll('.accent-sm').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = input.selectionStart;
+      const end = input.selectionEnd;
+      const val = input.value;
+      input.value = val.slice(0, start) + btn.dataset.char + val.slice(end);
+      input.selectionStart = input.selectionEnd = start + 1;
+      input.focus();
+    });
+  });
+});
+
+// Check all
+document.getElementById('checkAll').addEventListener('click', function() {
+  const inputs = document.querySelectorAll('.bullet-input');
+  let answered = 0;
+
+  inputs.forEach(input => {
+    const idx = input.dataset.idx;
+    const task = input.closest('.bullet-task');
+    const model = task.querySelector('.model-reveal');
+    const num = task.querySelector('.bullet-number');
+
+    if (input.value.trim().length > 0) {
+      answered++;
+      task.classList.add('task-correct'); // In production, AI would grade this
+      num.classList.add('done');
+      input.readOnly = true;
+    } else {
+      task.classList.add('task-wrong');
+    }
+    model.classList.add('show');
+  });
+
+  const overall = document.getElementById('overall');
+  overall.classList.add('show');
+
+  if (answered === 4) {
+    overall.className = 'overall-result show result-good';
+    overall.innerHTML = '<h3>All 4 responses given</h3><p>In production, AI would mark each for communication (did you convey the message?) and accuracy (grammar, spelling). Compare your answers with the model answers above.</p>';
+  } else if (answered >= 2) {
+    overall.className = 'overall-result show result-ok';
+    overall.innerHTML = `<h3>${answered}/4 responses</h3><p>You left ${4-answered} blank. In the speaking exam, silence scores zero — always attempt every bullet point, even with simple language.</p>`;
+  } else {
+    overall.className = 'overall-result show result-poor';
+    overall.innerHTML = `<h3>${answered}/4 responses</h3><p>Try to respond to every bullet point. Even a simple "Hola" or "Por favor" scores some communication marks.</p>`;
+  }
+
+  this.disabled = true;
+});
+</script>
+</body>
+</html>

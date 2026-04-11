@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gap Fill — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf8f5; color: #2d2a26;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  .meta { max-width: 600px; width: 100%; margin-bottom: 1.5rem; }
+  .meta h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta p { color: #6b6560; font-size: 0.9rem; }
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .badge-bronze { background: #fef3c7; color: #b45309; }
+  .badge-silver { background: #e2e8f0; color: #64748b; }
+
+  .card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px; width: 100%; overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header { background: #dc2626; color: #fff; padding: 1.25rem 1.5rem; }
+  .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+  .card-body { padding: 1.5rem; }
+
+  .instruction {
+    font-size: 0.85rem; color: #6b6560; margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem; background: #faf8f5; border-radius: 10px;
+  }
+
+  .english-prompt {
+    font-size: 0.95rem; font-weight: 500; line-height: 1.5;
+    padding: 0.75rem 1rem;
+    background: #eff6ff; border-radius: 10px;
+    border-left: 4px solid #1d4ed8;
+    color: #1e40af;
+    margin-bottom: 1.25rem;
+  }
+  .english-prompt .label {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em;
+    color: #6b7280; font-weight: 600; display: block; margin-bottom: 0.25rem;
+  }
+
+  .sentence {
+    font-size: 1.15rem; line-height: 2.2; margin-bottom: 1.5rem;
+  }
+  .sentence .gap {
+    display: inline-block;
+    min-width: 120px;
+    border-bottom: 2px dashed #c5bfb8;
+    padding: 0.15rem 0.5rem;
+    margin: 0 0.15rem;
+    text-align: center;
+    font-weight: 600;
+    transition: all 0.2s ease;
+    border-radius: 6px;
+    vertical-align: baseline;
+    cursor: pointer;
+  }
+  .sentence .gap.selected {
+    border-bottom-color: #dc2626;
+    background: #fef2f2;
+  }
+  .sentence .gap.filled {
+    border-bottom-color: #dc2626;
+    background: #fef2f2;
+    color: #dc2626;
+  }
+  .sentence .gap.correct {
+    border-bottom-color: #16a34a;
+    background: #f0fdf4;
+    color: #16a34a;
+    cursor: default;
+  }
+  .sentence .gap.wrong {
+    border-bottom-color: #dc2626;
+    background: #fef2f2;
+    color: #dc2626;
+    text-decoration: line-through;
+    cursor: default;
+  }
+
+  .word-bank {
+    display: flex; flex-wrap: wrap; gap: 0.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .word-bank .chip {
+    padding: 0.5rem 1rem;
+    background: #f5f1ec;
+    border: 2px solid #e8e4df;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .word-bank .chip:hover { border-color: #dc2626; background: #fef2f2; }
+  .word-bank .chip.used {
+    opacity: 0.35; pointer-events: none;
+    text-decoration: line-through;
+  }
+
+  /* No word bank mode */
+  .gap-input {
+    display: inline-block;
+    width: 140px;
+    border: none;
+    border-bottom: 2px dashed #c5bfb8;
+    font-family: inherit;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-align: center;
+    padding: 0.2rem 0.5rem;
+    background: transparent;
+    outline: none;
+    color: #2d2a26;
+    vertical-align: baseline;
+    transition: border-color 0.2s;
+  }
+  .gap-input:focus { border-bottom-color: #dc2626; }
+  .gap-input.correct { border-bottom-color: #16a34a; color: #16a34a; background: #f0fdf4; border-radius: 6px; }
+  .gap-input.wrong { border-bottom-color: #dc2626; color: #dc2626; background: #fef2f2; border-radius: 6px; }
+
+  .accent-bar {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+  .accent-btn {
+    width: 36px; height: 36px;
+    border: 2px solid #e8e4df; border-radius: 8px;
+    background: #fff; font-family: inherit; font-size: 1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s ease;
+  }
+  .accent-btn:hover { border-color: #dc2626; background: #fef2f2; }
+
+  .btn {
+    padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: #dc2626; color: #fff; }
+  .btn-primary:hover { background: #b91c1c; }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+  .actions { display: flex; gap: 0.75rem; align-items: center; }
+
+  /* Feedback panels */
+  .feedback {
+    margin-top: 1rem; border-radius: 10px; font-size: 0.9rem;
+    display: none;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .feedback.show { display: block; }
+
+  .gap-feedback {
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    display: flex; gap: 0.75rem; align-items: flex-start;
+  }
+  .gap-feedback.gap-correct {
+    background: #f0fdf4; border: 1px solid #bbf7d0;
+  }
+  .gap-feedback.gap-wrong {
+    background: #fef2f2; border: 1px solid #fecaca;
+  }
+  .gap-feedback .icon {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  }
+  .gap-feedback.gap-correct .icon { background: #16a34a; color: #fff; }
+  .gap-feedback.gap-wrong .icon { background: #dc2626; color: #fff; }
+  .gap-feedback .detail { flex: 1; }
+  .gap-feedback .answer-line {
+    font-weight: 600; font-size: 0.9rem; margin-bottom: 0.25rem;
+  }
+  .gap-feedback.gap-correct .answer-line { color: #15803d; }
+  .gap-feedback.gap-wrong .answer-line { color: #dc2626; }
+  .gap-feedback .explain {
+    font-size: 0.8rem; color: #4a4540; line-height: 1.5;
+  }
+  .gap-feedback .explain em { color: #dc2626; font-style: normal; font-weight: 600; }
+  .gap-feedback .explain strong { color: #16a34a; }
+
+  .rule-tag {
+    display: inline-block; padding: 0.1rem 0.4rem;
+    background: #f5f1ec; color: #6b6560;
+    border-radius: 4px; font-size: 0.7rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.03em;
+    margin-bottom: 0.25rem;
+  }
+
+  .translation {
+    font-size: 0.85rem; color: #9a938b; font-style: italic;
+    margin-top: 0.5rem; padding-top: 0.5rem;
+    border-top: 1px solid #f0ece7;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <h1>gap_fill</h1>
+  <p>Fill in the missing word(s). Structured grammar feedback on every answer — no AI needed.</p>
+</div>
+
+<!-- Problem 1: Word bank with feedback -->
+<div class="card" id="problem1">
+  <div class="card-header">
+    <h2>Complete the sentence</h2>
+    <p>Lesson 1 — Holidays and Travel Plans</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-bronze">BRONZE — Word bank</span>
+    <div class="instruction">Choose the correct word from the bank to complete each gap.</div>
+
+    <div class="sentence" id="sentence1">
+      Ayer <span class="gap" data-answer="fui" data-index="0"></span> a la playa con mi familia y <span class="gap" data-answer="tomamos" data-index="1"></span> el sol todo el día.
+    </div>
+
+    <div class="word-bank" id="bank1"></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="check1" disabled>Check</button>
+    </div>
+    <div class="feedback" id="feedback1"></div>
+  </div>
+</div>
+
+<!-- Problem 2: No word bank, with English prompt -->
+<div class="card" id="problem2">
+  <div class="card-header">
+    <h2>Complete the sentence</h2>
+    <p>Lesson 2 — Family and Describing People</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-silver">SILVER — No word bank</span>
+
+    <div class="english-prompt">
+      <span class="label">English translation</span>
+      "My sister <strong>is</strong> very nice and <strong>has</strong> green eyes."
+    </div>
+
+    <div class="instruction">Type the correct Spanish word in each gap. Use the English above as a guide — the bolded words are the gaps.</div>
+
+    <div class="accent-bar" id="accents2">
+      <button class="accent-btn" data-char="á">á</button>
+      <button class="accent-btn" data-char="é">é</button>
+      <button class="accent-btn" data-char="í">í</button>
+      <button class="accent-btn" data-char="ó">ó</button>
+      <button class="accent-btn" data-char="ú">ú</button>
+      <button class="accent-btn" data-char="ñ">ñ</button>
+    </div>
+
+    <div class="sentence" id="sentence2">
+      Mi hermana <input class="gap-input" data-index="0" id="input2a" placeholder="..." autocomplete="off"> muy simpática y <input class="gap-input" data-index="1" id="input2b" placeholder="..." autocomplete="off"> los ojos verdes.
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="check2">Check</button>
+    </div>
+    <div class="feedback" id="feedback2"></div>
+  </div>
+</div>
+
+<!-- Problem 3: Word bank, gender focus -->
+<div class="card" id="problem3">
+  <div class="card-header">
+    <h2>Complete the sentence</h2>
+    <p>Lesson 5 — Healthy Living</p>
+  </div>
+  <div class="card-body">
+    <span class="badge badge-bronze">BRONZE — Word bank</span>
+    <div class="instruction">Select the correct article for each noun. Think about gender!</div>
+
+    <div class="sentence" id="sentence3">
+      Para desayunar como <span class="gap" data-answer="una" data-index="0"></span> tostada con <span class="gap" data-answer="un" data-index="1"></span> zumo de naranja y <span class="gap" data-answer="una" data-index="2"></span> manzana.
+    </div>
+
+    <div class="word-bank" id="bank3"></div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="check3" disabled>Check</button>
+    </div>
+    <div class="feedback" id="feedback3"></div>
+  </div>
+</div>
+
+<script>
+/*
+ * All feedback is baked into the problem data at generation time.
+ * Each gap has: answer, rule category, correct_explain, and a map
+ * of wrong→explanation. Zero runtime AI cost.
+ */
+
+const PROBLEMS = {
+  1: {
+    type: 'bank',
+    translation: '"Yesterday I went to the beach with my family and we sunbathed all day."',
+    chips: ['fui', 'fue', 'tomamos', 'tomaron', 'ir'],
+    gaps: [
+      {
+        answer: 'fui',
+        rule: 'Verb conjugation',
+        correct_explain: '<strong>fui</strong> is the <strong>yo</strong> form of <em>ir</em> (to go) in the preterite tense.',
+        wrong: {
+          'fue': '<em>fue</em> is the <strong>él/ella/usted</strong> form. The subject here is <strong>yo</strong> (I) — first person needs <strong>fui</strong>.',
+          'ir': '<em>ir</em> is the infinitive (to go). You need the preterite past tense here because of <em>ayer</em> (yesterday).',
+        }
+      },
+      {
+        answer: 'tomamos',
+        rule: 'Verb conjugation',
+        correct_explain: '<strong>tomamos</strong> is the <strong>nosotros</strong> form of <em>tomar</em>. "Mi familia y yo" = we.',
+        wrong: {
+          'tomaron': '<em>tomaron</em> is the <strong>ellos/ellas</strong> form (they). But "mi familia y yo" means <strong>we</strong> — use the nosotros form <strong>tomamos</strong>.',
+        }
+      }
+    ]
+  },
+  2: {
+    type: 'input',
+    gaps: [
+      {
+        answer: 'es',
+        accept: ['es'],
+        rule: 'Ser vs Estar',
+        correct_explain: '<strong>es</strong> is from <em>ser</em> — used for permanent characteristics like personality. "Simpática" (nice) is a character trait, so use <em>ser</em>.',
+        wrong: {
+          'está': '<em>está</em> is from <em>estar</em>, used for temporary states and locations. Personality traits like <em>simpática</em> are permanent — use <strong>es</strong> (from <em>ser</em>).',
+          'tiene': '<em>tiene</em> means "has" — you need "is" here. <em>ser</em> describes what someone <strong>is</strong> like.',
+          'era': '<em>era</em> is the imperfect past of <em>ser</em>. This sentence describes her now (present tense), so use <strong>es</strong>.',
+        }
+      },
+      {
+        answer: 'tiene',
+        accept: ['tiene'],
+        rule: 'Tener for features',
+        correct_explain: '<strong>tiene</strong> is from <em>tener</em> (to have). Spanish uses "has green eyes" (<em>tiene los ojos verdes</em>), not "is with green eyes".',
+        wrong: {
+          'es': '<em>es</em> means "is". In Spanish you <strong>have</strong> eyes, not "are" them — use <strong>tiene</strong> (has).',
+          'hay': '<em>hay</em> means "there is/are". To say someone <strong>has</strong> a feature, use <strong>tiene</strong> from <em>tener</em>.',
+        }
+      }
+    ]
+  },
+  3: {
+    type: 'bank',
+    translation: '"For breakfast I eat a piece of toast with an orange juice and an apple."',
+    chips: ['un', 'una', 'una', 'el', 'los'],
+    gaps: [
+      {
+        answer: 'una',
+        rule: 'Gender — articles',
+        correct_explain: '<strong>una</strong> because <em>tostada</em> is <strong>feminine</strong> (ends in -a). Feminine nouns take <em>una</em>.',
+        wrong: {
+          'un': '<em>un</em> is masculine. <em>tostada</em> ends in <strong>-a</strong>, making it feminine — use <strong>una</strong>.',
+          'el': '<em>el</em> is the definite masculine article (the). You need the indefinite feminine article (a) — <strong>una</strong>.',
+          'los': '<em>los</em> is the definite masculine plural (the). You need a singular indefinite article — <strong>una</strong> (feminine, matching <em>tostada</em>).',
+        }
+      },
+      {
+        answer: 'un',
+        rule: 'Gender — articles',
+        correct_explain: '<strong>un</strong> because <em>zumo</em> is <strong>masculine</strong> (ends in -o). Masculine nouns take <em>un</em>.',
+        wrong: {
+          'una': '<em>una</em> is feminine. <em>zumo</em> ends in <strong>-o</strong>, making it masculine — use <strong>un</strong>.',
+          'el': '<em>el</em> means "the" (definite). Here you need "a/an" (indefinite) — <strong>un</strong>.',
+          'los': '<em>los</em> is definite masculine plural. You need the singular indefinite — <strong>un</strong>.',
+        }
+      },
+      {
+        answer: 'una',
+        rule: 'Gender — articles',
+        correct_explain: '<strong>una</strong> because <em>manzana</em> is <strong>feminine</strong> (ends in -a). Feminine nouns take <em>una</em>.',
+        wrong: {
+          'un': '<em>un</em> is masculine. <em>manzana</em> ends in <strong>-a</strong>, making it feminine — use <strong>una</strong>.',
+          'el': '<em>el</em> is masculine definite. You need the feminine indefinite article — <strong>una</strong>.',
+          'los': '<em>los</em> is masculine plural definite. You need a singular feminine indefinite — <strong>una</strong>.',
+        }
+      }
+    ]
+  }
+};
+
+/* ---- Build word bank chips ---- */
+function buildBank(problemNum) {
+  const data = PROBLEMS[problemNum];
+  if (data.type !== 'bank') return;
+  const bankEl = document.getElementById(`bank${problemNum}`);
+  data.chips.forEach((word, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.textContent = word;
+    chip.dataset.word = word;
+    chip.dataset.chipIdx = i;
+    bankEl.appendChild(chip);
+  });
+}
+
+/* ---- Word bank mode ---- */
+function initWordBank(problemNum) {
+  const data = PROBLEMS[problemNum];
+  buildBank(problemNum);
+
+  const gaps = document.querySelectorAll(`#sentence${problemNum} .gap`);
+  const chips = document.querySelectorAll(`#bank${problemNum} .chip`);
+  const checkBtn = document.getElementById(`check${problemNum}`);
+  let activeGap = null;
+  let filled = 0;
+
+  gaps.forEach(gap => {
+    gap.addEventListener('click', () => {
+      if (gap.classList.contains('correct') || gap.classList.contains('wrong')) return;
+      if (gap.classList.contains('filled')) {
+        const word = gap.textContent;
+        const chipIdx = gap.dataset.chipUsed;
+        gap.textContent = '';
+        gap.classList.remove('filled');
+        delete gap.dataset.chipUsed;
+        filled--;
+        if (chipIdx !== undefined) {
+          const c = document.querySelector(`#bank${problemNum} .chip[data-chip-idx="${chipIdx}"]`);
+          if (c) c.classList.remove('used');
+        }
+        checkBtn.disabled = true;
+      }
+      gaps.forEach(g => g.classList.remove('selected'));
+      gap.classList.add('selected');
+      activeGap = gap;
+    });
+  });
+
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.classList.contains('used')) return;
+      if (!activeGap) {
+        activeGap = [...gaps].find(g => !g.classList.contains('filled'));
+        if (!activeGap) return;
+        activeGap.classList.add('selected');
+      }
+      activeGap.textContent = chip.dataset.word;
+      activeGap.classList.add('filled');
+      activeGap.classList.remove('selected');
+      activeGap.dataset.chipUsed = chip.dataset.chipIdx;
+      chip.classList.add('used');
+      filled++;
+      activeGap = null;
+
+      const nextEmpty = [...gaps].find(g => !g.classList.contains('filled'));
+      if (nextEmpty) {
+        nextEmpty.classList.add('selected');
+        activeGap = nextEmpty;
+      }
+      checkBtn.disabled = filled < gaps.length;
+    });
+  });
+
+  checkBtn.addEventListener('click', () => {
+    const fb = document.getElementById(`feedback${problemNum}`);
+    let html = '';
+    let allCorrect = true;
+
+    gaps.forEach((gap, i) => {
+      const gapData = data.gaps[i];
+      const studentWord = gap.textContent.trim().toLowerCase();
+      const isCorrect = studentWord === gapData.answer.toLowerCase();
+
+      gap.classList.remove('selected');
+      gap.classList.add(isCorrect ? 'correct' : 'wrong');
+      if (!isCorrect) allCorrect = false;
+
+      if (isCorrect) {
+        html += `<div class="gap-feedback gap-correct">
+          <div class="icon">&#10003;</div>
+          <div class="detail">
+            <span class="rule-tag">${gapData.rule}</span>
+            <div class="answer-line">${gapData.answer} &#10003;</div>
+            <div class="explain">${gapData.correct_explain}</div>
+          </div>
+        </div>`;
+      } else {
+        const wrongExplain = gapData.wrong[studentWord] || `The correct answer is <strong>${gapData.answer}</strong>.`;
+        html += `<div class="gap-feedback gap-wrong">
+          <div class="icon">&#10007;</div>
+          <div class="detail">
+            <span class="rule-tag">${gapData.rule}</span>
+            <div class="answer-line">You chose "${studentWord}" — correct answer: ${gapData.answer}</div>
+            <div class="explain">${wrongExplain}</div>
+          </div>
+        </div>`;
+      }
+    });
+
+    html += `<div class="translation">${data.translation}</div>`;
+    fb.innerHTML = html;
+    fb.classList.add('show');
+    checkBtn.disabled = true;
+  });
+}
+
+/* ---- Free input mode (Problem 2) ---- */
+function initFreeInput() {
+  const data = PROBLEMS[2];
+  const checkBtn = document.getElementById('check2');
+  const inputs = document.querySelectorAll('#sentence2 .gap-input');
+
+  // Accent buttons target the last-focused input
+  let lastFocused = inputs[0];
+  inputs.forEach(inp => {
+    inp.addEventListener('focus', () => { lastFocused = inp; });
+  });
+  document.querySelectorAll('#accents2 .accent-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = lastFocused.selectionStart;
+      const end = lastFocused.selectionEnd;
+      const val = lastFocused.value;
+      lastFocused.value = val.slice(0, start) + btn.dataset.char + val.slice(end);
+      lastFocused.selectionStart = lastFocused.selectionEnd = start + 1;
+      lastFocused.focus();
+    });
+  });
+
+  checkBtn.addEventListener('click', () => {
+    const fb = document.getElementById('feedback2');
+    let html = '';
+
+    inputs.forEach(input => {
+      const i = parseInt(input.dataset.index);
+      const gapData = data.gaps[i];
+      const val = input.value.trim().toLowerCase();
+      const isCorrect = gapData.accept.includes(val);
+
+      input.classList.add(isCorrect ? 'correct' : 'wrong');
+      input.readOnly = true;
+
+      if (isCorrect) {
+        html += `<div class="gap-feedback gap-correct">
+          <div class="icon">&#10003;</div>
+          <div class="detail">
+            <span class="rule-tag">${gapData.rule}</span>
+            <div class="answer-line">${gapData.answer} &#10003;</div>
+            <div class="explain">${gapData.correct_explain}</div>
+          </div>
+        </div>`;
+      } else {
+        const wrongExplain = gapData.wrong[val] || `The correct answer is <strong>${gapData.answer}</strong>. ${gapData.correct_explain}`;
+        html += `<div class="gap-feedback gap-wrong">
+          <div class="icon">&#10007;</div>
+          <div class="detail">
+            <span class="rule-tag">${gapData.rule}</span>
+            <div class="answer-line">You wrote "${val || '(empty)'}" — correct answer: ${gapData.answer}</div>
+            <div class="explain">${wrongExplain}</div>
+          </div>
+        </div>`;
+      }
+    });
+
+    fb.innerHTML = html;
+    fb.classList.add('show');
+    checkBtn.disabled = true;
+  });
+}
+
+initWordBank(1);
+initFreeInput();
+initWordBank(3);
+</script>
+</body>
+</html>

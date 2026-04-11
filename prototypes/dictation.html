@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dictation — Prototype</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #faf8f5; color: #2d2a26;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 2rem 1rem;
+  }
+  .meta { max-width: 600px; width: 100%; margin-bottom: 1.5rem; }
+  .meta h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+  .meta p { color: #6b6560; font-size: 0.9rem; }
+  .meta .note { font-size: 0.8rem; color: #9a938b; margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: #f5f3ff; border-radius: 8px; }
+
+  .card {
+    background: #fff; border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px; width: 100%; overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header { background: #dc2626; color: #fff; padding: 1.25rem 1.5rem; }
+  .card-header h2 { font-size: 1.1rem; font-weight: 600; }
+  .card-header p { font-size: 0.85rem; opacity: 0.85; margin-top: 0.25rem; }
+  .card-body { padding: 1.5rem; }
+
+  .badge {
+    display: inline-block; padding: 0.2rem 0.6rem;
+    border-radius: 6px; font-size: 0.75rem; font-weight: 600; margin-bottom: 0.75rem;
+  }
+  .badge-bronze { background: #fef3c7; color: #b45309; }
+  .badge-silver { background: #e2e8f0; color: #64748b; }
+  .badge-gold { background: #fef9c3; color: #d97706; }
+
+  .instruction {
+    font-size: 0.85rem; color: #6b6560; margin-bottom: 1.25rem;
+    padding: 0.75rem 1rem; background: #faf8f5; border-radius: 10px;
+  }
+
+  .audio-area {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 1rem; margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: #faf8f5; border-radius: 12px;
+  }
+
+  .play-btn {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: #dc2626; border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px rgba(220,38,38,0.25);
+    position: relative;
+  }
+  .play-btn:hover { transform: scale(1.06); box-shadow: 0 6px 20px rgba(220,38,38,0.35); }
+  .play-btn:active { transform: scale(0.96); }
+  .play-btn:disabled { opacity: 0.35; cursor: default; transform: none; box-shadow: none; }
+  .play-btn svg { width: 28px; height: 28px; fill: #fff; margin-left: 3px; }
+  .play-btn.playing svg { margin-left: 0; }
+
+  .play-count {
+    font-size: 0.8rem; color: #9a938b; font-weight: 500;
+  }
+  .play-count span { color: #dc2626; font-weight: 700; }
+
+  .speed-toggle {
+    display: flex; gap: 0.4rem;
+  }
+  .speed-btn {
+    padding: 0.3rem 0.7rem;
+    border: 1.5px solid #e8e4df; border-radius: 6px;
+    background: #fff; font-family: inherit; font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; transition: all 0.1s ease; color: #6b6560;
+  }
+  .speed-btn.active { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+
+  .answer-area {
+    margin-bottom: 1rem;
+  }
+  .answer-area textarea {
+    width: 100%; min-height: 70px; padding: 0.75rem 1rem;
+    border: 2px solid #e8e4df; border-radius: 10px;
+    font-family: inherit; font-size: 1rem; line-height: 1.5;
+    resize: none; outline: none; transition: border-color 0.15s;
+  }
+  .answer-area textarea:focus { border-color: #dc2626; }
+
+  .accent-bar {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    margin-bottom: 1rem;
+  }
+  .accent-btn {
+    width: 36px; height: 36px;
+    border: 2px solid #e8e4df; border-radius: 8px;
+    background: #fff; font-family: inherit; font-size: 1rem;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.1s ease;
+  }
+  .accent-btn:hover { border-color: #dc2626; background: #fef2f2; }
+
+  .btn {
+    padding: 0.65rem 1.5rem; border: none; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; transition: all 0.15s ease;
+  }
+  .btn-primary { background: #dc2626; color: #fff; }
+  .btn-primary:hover { background: #b91c1c; }
+  .btn-primary:disabled { opacity: 0.4; cursor: default; }
+
+  .diff-result {
+    display: none; margin-top: 1rem;
+    padding: 1rem 1.25rem; border-radius: 10px;
+    font-size: 1.05rem; line-height: 1.8;
+    animation: slideDown 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .diff-result.show { display: block; }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .diff-result .diff-label {
+    font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; display: block;
+  }
+
+  .diff-word { padding: 0.1rem 0.3rem; border-radius: 4px; }
+  .diff-word.correct { background: #dcfce7; color: #16a34a; }
+  .diff-word.wrong { background: #fecaca; color: #dc2626; text-decoration: line-through; }
+  .diff-word.missing { background: #fef3c7; color: #b45309; font-style: italic; }
+
+  .score-line {
+    margin-top: 0.75rem; font-size: 0.85rem; font-weight: 600; color: #6b6560;
+  }
+  .score-line span { color: #16a34a; }
+
+  .correct-text {
+    margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid #e8e4df;
+    font-size: 0.9rem; color: #6b6560;
+  }
+  .correct-text strong { color: #2d2a26; }
+
+  .translation {
+    font-size: 0.85rem; color: #9a938b; font-style: italic;
+    margin-top: 0.5rem;
+  }
+</style>
+</head>
+<body>
+
+<div class="meta">
+  <h1>dictation</h1>
+  <p>Listen to the Spanish sentence, then type exactly what you hear. Mirrors AQA Paper 1 Section B.</p>
+  <div class="note">This prototype uses the browser's built-in speech synthesis. In production, we'd use pre-generated Azure TTS audio clips with native-quality multilingual voices.</div>
+</div>
+
+<!-- Problem 1: Bronze (short) -->
+<div class="card" id="p1">
+  <div class="card-body">
+    <span class="badge badge-bronze">BRONZE — Short sentence</span>
+    <div class="instruction">Listen carefully, then type the sentence in Spanish. You can play it twice.</div>
+
+    <div class="audio-area">
+      <button class="play-btn" id="playBtn1">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+      <div class="play-count">Plays remaining: <span id="plays1">2</span></div>
+      <div class="speed-toggle">
+        <button class="speed-btn active" data-speed="normal" data-prob="1">Normal</button>
+        <button class="speed-btn" data-speed="slow" data-prob="1">Slow</button>
+      </div>
+    </div>
+
+    <div class="accent-bar" data-prob="1">
+      <button class="accent-btn" data-char="á">á</button>
+      <button class="accent-btn" data-char="é">é</button>
+      <button class="accent-btn" data-char="í">í</button>
+      <button class="accent-btn" data-char="ó">ó</button>
+      <button class="accent-btn" data-char="ú">ú</button>
+      <button class="accent-btn" data-char="ñ">ñ</button>
+    </div>
+
+    <div class="answer-area">
+      <textarea id="ans1" placeholder="Type what you hear..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="check1">Check</button>
+    <div class="diff-result" id="diff1"></div>
+  </div>
+</div>
+
+<!-- Problem 2: Silver (medium) -->
+<div class="card" id="p2">
+  <div class="card-body">
+    <span class="badge badge-silver">SILVER — Longer sentence</span>
+    <div class="instruction">This sentence is longer. Listen carefully for verb endings and accents.</div>
+
+    <div class="audio-area">
+      <button class="play-btn" id="playBtn2">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+      <div class="play-count">Plays remaining: <span id="plays2">2</span></div>
+      <div class="speed-toggle">
+        <button class="speed-btn active" data-speed="normal" data-prob="2">Normal</button>
+        <button class="speed-btn" data-speed="slow" data-prob="2">Slow</button>
+      </div>
+    </div>
+
+    <div class="accent-bar" data-prob="2">
+      <button class="accent-btn" data-char="á">á</button>
+      <button class="accent-btn" data-char="é">é</button>
+      <button class="accent-btn" data-char="í">í</button>
+      <button class="accent-btn" data-char="ó">ó</button>
+      <button class="accent-btn" data-char="ú">ú</button>
+      <button class="accent-btn" data-char="ñ">ñ</button>
+    </div>
+
+    <div class="answer-area">
+      <textarea id="ans2" placeholder="Type what you hear..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="check2">Check</button>
+    <div class="diff-result" id="diff2"></div>
+  </div>
+</div>
+
+<!-- Problem 3: Gold (complex) -->
+<div class="card" id="p3">
+  <div class="card-body">
+    <span class="badge badge-gold">GOLD — Multi-clause</span>
+    <div class="instruction">A complex sentence with multiple clauses. Accents must be correct at Gold tier.</div>
+
+    <div class="audio-area">
+      <button class="play-btn" id="playBtn3">
+        <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+      <div class="play-count">Plays remaining: <span id="plays3">2</span></div>
+      <div class="speed-toggle">
+        <button class="speed-btn active" data-speed="normal" data-prob="3">Normal</button>
+        <button class="speed-btn" data-speed="slow" data-prob="3">Slow</button>
+      </div>
+    </div>
+
+    <div class="accent-bar" data-prob="3">
+      <button class="accent-btn" data-char="á">á</button>
+      <button class="accent-btn" data-char="é">é</button>
+      <button class="accent-btn" data-char="í">í</button>
+      <button class="accent-btn" data-char="ó">ó</button>
+      <button class="accent-btn" data-char="ú">ú</button>
+      <button class="accent-btn" data-char="ñ">ñ</button>
+    </div>
+
+    <div class="answer-area">
+      <textarea id="ans3" placeholder="Type what you hear..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" id="check3">Check</button>
+    <div class="diff-result" id="diff3"></div>
+  </div>
+</div>
+
+<script>
+const SENTENCES = [
+  {
+    text: 'Fui de vacaciones a España el verano pasado.',
+    translation: '"I went on holiday to Spain last summer."',
+    tier: 'bronze'
+  },
+  {
+    text: 'Mi hermana mayor es muy simpática y tiene los ojos azules.',
+    translation: '"My older sister is very nice and has blue eyes."',
+    tier: 'silver'
+  },
+  {
+    text: 'Si tuviera más dinero, viajaría a Sudamérica porque me gustaría aprender sobre diferentes culturas.',
+    translation: '"If I had more money, I would travel to South America because I would like to learn about different cultures."',
+    tier: 'gold'
+  }
+];
+
+const state = [
+  { plays: 2, speed: 1 },
+  { plays: 2, speed: 1 },
+  { plays: 2, speed: 1 }
+];
+
+// TTS using browser speech synthesis
+function speak(text, speed, callback) {
+  if (!('speechSynthesis' in window)) {
+    alert('Speech synthesis not supported in this browser. In production, pre-recorded Azure TTS audio would be used.');
+    return;
+  }
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.lang = 'es-ES';
+  utter.rate = speed === 'slow' ? 0.65 : 0.9;
+  utter.pitch = 1;
+
+  // Try to find a Spanish voice
+  const voices = speechSynthesis.getVoices();
+  const esVoice = voices.find(v => v.lang.startsWith('es'));
+  if (esVoice) utter.voice = esVoice;
+
+  utter.onend = callback;
+  speechSynthesis.speak(utter);
+}
+
+// Ensure voices are loaded
+if ('speechSynthesis' in window) {
+  speechSynthesis.getVoices();
+  speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices();
+}
+
+// Play buttons
+[1,2,3].forEach(n => {
+  const i = n - 1;
+  const playBtn = document.getElementById(`playBtn${n}`);
+  const playsEl = document.getElementById(`plays${n}`);
+
+  playBtn.addEventListener('click', () => {
+    if (state[i].plays <= 0) return;
+    state[i].plays--;
+    playsEl.textContent = state[i].plays;
+    playBtn.disabled = true;
+    playBtn.classList.add('playing');
+
+    const speed = state[i].speed === 0.65 ? 'slow' : 'normal';
+    speak(SENTENCES[i].text, speed, () => {
+      playBtn.classList.remove('playing');
+      if (state[i].plays > 0) playBtn.disabled = false;
+    });
+  });
+});
+
+// Speed toggles
+document.querySelectorAll('.speed-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const prob = parseInt(btn.dataset.prob) - 1;
+    btn.parentElement.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state[prob].speed = btn.dataset.speed === 'slow' ? 0.65 : 1;
+  });
+});
+
+// Accent buttons
+document.querySelectorAll('.accent-bar').forEach(bar => {
+  const prob = bar.dataset.prob;
+  const textarea = document.getElementById(`ans${prob}`);
+  bar.querySelectorAll('.accent-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const val = textarea.value;
+      textarea.value = val.slice(0, start) + btn.dataset.char + val.slice(end);
+      textarea.selectionStart = textarea.selectionEnd = start + 1;
+      textarea.focus();
+    });
+  });
+});
+
+// Normalize for comparison
+function normalize(str, strict) {
+  let s = str.trim().toLowerCase().replace(/[.,!?¿¡;:]/g, '');
+  if (!strict) {
+    // Remove accents for lenient comparison (Bronze)
+    s = s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  }
+  return s;
+}
+
+// Diff comparison
+function diffWords(correct, student, strict) {
+  const cWords = correct.split(/\s+/);
+  const sWords = student.split(/\s+/).filter(w => w.length > 0);
+  let html = '';
+  let score = 0;
+
+  const maxLen = Math.max(cWords.length, sWords.length);
+  for (let i = 0; i < maxLen; i++) {
+    const cw = cWords[i] || '';
+    const sw = sWords[i] || '';
+    const cwNorm = normalize(cw, strict);
+    const swNorm = normalize(sw, strict);
+
+    if (!sw && cw) {
+      html += `<span class="diff-word missing">${cw}</span> `;
+    } else if (cwNorm === swNorm) {
+      // Check accents at Gold
+      if (strict && cw.toLowerCase().replace(/[.,!?¿¡;:]/g, '') !== sw.toLowerCase().replace(/[.,!?¿¡;:]/g, '')) {
+        html += `<span class="diff-word wrong" title="Accent error">${sw}</span> `;
+      } else {
+        html += `<span class="diff-word correct">${sw}</span> `;
+        score++;
+      }
+    } else {
+      html += `<span class="diff-word wrong">${sw}</span> `;
+    }
+  }
+
+  return { html, score, total: cWords.length };
+}
+
+// Check buttons
+[1,2,3].forEach(n => {
+  const i = n - 1;
+  document.getElementById(`check${n}`).addEventListener('click', function() {
+    const student = document.getElementById(`ans${n}`).value;
+    const strict = SENTENCES[i].tier === 'gold';
+    const { html, score, total } = diffWords(SENTENCES[i].text, student, strict);
+
+    const diffEl = document.getElementById(`diff${n}`);
+    const pct = Math.round((score / total) * 100);
+    const bg = pct >= 80 ? '#f0fdf4' : pct >= 50 ? '#fef3c7' : '#fef2f2';
+    const border = pct >= 80 ? '#bbf7d0' : pct >= 50 ? '#fde68a' : '#fecaca';
+
+    diffEl.style.background = bg;
+    diffEl.style.border = `1px solid ${border}`;
+    diffEl.innerHTML = `
+      <span class="diff-label">Your answer vs. correct:</span>
+      ${html}
+      <div class="score-line"><span>${score}/${total}</span> words correct (${pct}%)</div>
+      <div class="correct-text"><strong>Correct:</strong> ${SENTENCES[i].text}</div>
+      <div class="translation">${SENTENCES[i].translation}</div>
+    `;
+    diffEl.classList.add('show');
+    this.disabled = true;
+  });
+});
+</script>
+</body>
+</html>
