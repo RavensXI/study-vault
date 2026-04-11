@@ -6501,7 +6501,7 @@
         var inp = document.getElementById('rp-input-' + i);
         var val = inp ? inp.value.trim() : '';
         if (!val) anyEmpty = true;
-        userPrompt += 'Bullet ' + (i + 1) + ': "' + b.prompt + '" \u2192 Student: "' + val + '"\n';
+        userPrompt += 'Bullet ' + (i + 1) + ': "' + b.prompt + '" (Model: ' + b.model_answer + ') \u2192 Student: "' + val + '"\n';
       });
       if (anyEmpty) { alert('Answer all bullet points first.'); return; }
       var checkBtn = document.getElementById('problem-check-btn');
@@ -6768,6 +6768,18 @@
       var marks=problem.marks||4;
       var systemPrompt=problem.ai_system_prompt||((window._aiMarkingPrompts||{})[problem.ai_prompt_key])||'You are a GCSE English Language examiner. Mark the student response. Be encouraging but honest. Respond in JSON: {"quality":"excellent|good|needs_work|not_valid","feedback":"2-3 sentences","improvement":"optional suggestion"}';
       var userPrompt='';
+      // Translation-specific context
+      if(problem.source_text)userPrompt+='Source text to translate: '+problem.source_text+'\n\n';
+      if(problem.model_answers&&problem.model_answers.length)userPrompt+='Model answer(s): '+problem.model_answers.join(' / ')+'\n\n';
+      if(problem.direction)userPrompt+='Direction: '+(problem.direction==='to_english'?'Target language → English':'English → Target language')+'\n\n';
+      // Role play context
+      if(problem.scenario)userPrompt+='Scenario: '+problem.scenario+'\n\n';
+      if(problem.bullets&&problem.bullets.length){
+        userPrompt+='Tasks and model answers:\n';
+        problem.bullets.forEach(function(b,i){userPrompt+=(i+1)+'. '+b.prompt+' (Model: '+b.model_answer+')\n';});
+        userPrompt+='\n';
+      }
+      // Standard fields
       if(problem.quote)userPrompt+='Quote: '+problem.quote+'\n\n';
       if(problem.brief)userPrompt+='Brief: '+problem.brief+'\n\n';
       if(problem.context||problem.aiContext)userPrompt+='Context: '+(problem.context||problem.aiContext)+'\n\n';
