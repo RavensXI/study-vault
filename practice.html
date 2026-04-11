@@ -5583,10 +5583,14 @@
     }
 
     // ===== RULER TOOL =====
-    var _ruler = { pxPerKm: 0, points: [], imgNatW: 0, imgNatH: 0 };
+    // ruler config: { pxPerKm, cmPerKm } — pxPerKm is image pixels per real km,
+    // cmPerKm is how many cm on the map = 1km (e.g. 4 for 1:25000, 2 for 1:50000)
+    var _ruler = { pxPerKm: 0, cmPerKm: 4, points: [], imgNatW: 0, imgNatH: 0 };
 
-    function initRuler(pxPerKm) {
-      _ruler = { pxPerKm: pxPerKm, points: [], imgNatW: 0, imgNatH: 0 };
+    function initRuler(rulerConfig) {
+      var pxPerKm = typeof rulerConfig === 'number' ? rulerConfig : rulerConfig.pxPerKm;
+      var cmPerKm = typeof rulerConfig === 'number' ? 4 : (rulerConfig.cmPerKm || 4);
+      _ruler = { pxPerKm: pxPerKm, cmPerKm: cmPerKm, points: [], imgNatW: 0, imgNatH: 0 };
       var container = document.getElementById('ruler-container');
       var img = document.getElementById('ruler-img');
       if (!container || !img) return;
@@ -5688,22 +5692,25 @@
         var sx2 = toSvgX(pts[1].pctX), sy2 = toSvgY(pts[1].pctY);
         svgContent += '<line class="ruler-line" x1="' + sx1 + '" y1="' + sy1 + '" x2="' + sx2 + '" y2="' + sy2 + '" stroke="#2d2a26" stroke-width="2"/>';
 
-        // Distance in natural pixels
+        // Distance in natural pixels → convert to cm on the map
         var dx = pts[1].natX - pts[0].natX;
         var dy = pts[1].natY - pts[0].natY;
         var pxDist = Math.sqrt(dx * dx + dy * dy);
         var kmDist = pxDist / _ruler.pxPerKm;
-        var rounded = Math.round(kmDist * 10) / 10;
+        var cmDist = kmDist * _ruler.cmPerKm;
+        var roundedCm = Math.round(cmDist * 10) / 10;
+        var scaleRatio = Math.round(100000 / _ruler.cmPerKm);
+        var scaleStr = '1:' + scaleRatio.toLocaleString();
 
         // Position badge at midpoint
         var midSvgX = (sx1 + sx2) / 2;
         var midSvgY = Math.min(sy1, sy2) - 15;
-        badge.textContent = rounded + ' km';
+        badge.textContent = roundedCm + ' cm on map';
         badge.style.left = midSvgX + 'px';
         badge.style.top = midSvgY + 'px';
         badge.style.display = '';
 
-        hint.textContent = rounded + ' km (straight line)';
+        hint.textContent = roundedCm + ' cm on map · Scale ' + scaleStr + ' (' + _ruler.cmPerKm + ' cm = 1 km)';
         resetBtn.style.display = '';
       } else if (pts.length === 1) {
         hint.textContent = 'Now click your end point';
