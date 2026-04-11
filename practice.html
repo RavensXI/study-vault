@@ -3502,9 +3502,20 @@
           return;
         }
         given = [val];
-        // Allow small floating point tolerance
-        isCorrect = Math.abs(val - expected[0]) < 0.01;
-        correctText = '' + expected[0];
+        // Six-figure grid references: allow ±1 on each half (easting and northing)
+        var exp = expected[0];
+        if (rawVal.length === 6 && String(Math.round(exp)).length === 6) {
+          var givenE = parseInt(rawVal.substring(0, 3));
+          var givenN = parseInt(rawVal.substring(3, 6));
+          var expStr = String(Math.round(exp));
+          var expE = parseInt(expStr.substring(0, 3));
+          var expN = parseInt(expStr.substring(3, 6));
+          isCorrect = Math.abs(givenE - expE) <= 1 && Math.abs(givenN - expN) <= 1;
+        } else {
+          // Allow small floating point tolerance for non-GR answers
+          isCorrect = Math.abs(val - exp) < 0.01;
+        }
+        correctText = '' + exp;
       }
 
       practiceState.answered = true;
