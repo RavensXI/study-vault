@@ -3493,8 +3493,9 @@
         correctText = expected[0] + ' \u00d7 10^' + expected[1];
 
       } else {
-        // single_value
-        var val = parseFloat(inputA.value.trim());
+        // single_value — strip spaces/commas to handle grid references like "842 324" or "842,324"
+        var rawVal = inputA.value.trim().replace(/[\s,]+/g, '');
+        var val = parseFloat(rawVal);
         if (isNaN(val)) {
           inputA.style.borderColor = 'var(--error)';
           setTimeout(function() { inputA.style.borderColor = ''; }, 800);
