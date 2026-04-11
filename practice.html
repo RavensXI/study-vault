@@ -2012,6 +2012,81 @@
       cursor: zoom-in;
     }
 
+    /* ===== RULER TOOL ===== */
+    .ruler-container {
+      position: relative;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem;
+      overflow: hidden;
+    }
+    .ruler-container img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+      cursor: crosshair !important;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+    .ruler-svg {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    .ruler-point {
+      cursor: pointer;
+      pointer-events: all;
+    }
+    .ruler-line {
+      stroke-dasharray: 6 4;
+    }
+    .ruler-badge {
+      position: absolute;
+      background: #2d2a26;
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      pointer-events: none;
+      white-space: nowrap;
+      transform: translate(-50%, -100%);
+      margin-top: -8px;
+    }
+    .ruler-hint {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(45,42,38,0.85);
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+    .ruler-reset {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: rgba(45,42,38,0.85);
+      color: #fff;
+      border: none;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: none;
+    }
+    .ruler-reset:hover { background: rgba(45,42,38,1); }
+
     /* ===== STATISTICS TOOLS (passage panel) ===== */
     .stats-tool {
       flex: 1;
@@ -4749,9 +4824,23 @@
       if (hasImage) {
         _currentPassageId = null;
         destroyPanelChart();
-        area.innerHTML =
-          '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
-          '<div class="chart-panel-body" style="padding:0.75rem"><img src="' + problem.image + '" alt="Map" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px"></div>';
+        var hasRuler = !!problem.ruler;
+        if (hasRuler) {
+          area.innerHTML =
+            '<div class="passage-header"><span class="passage-header-label">Map — click two points to measure</span></div>' +
+            '<div class="ruler-container" id="ruler-container">' +
+              '<img src="' + problem.image + '" alt="Map" id="ruler-img" draggable="false">' +
+              '<svg class="ruler-svg" id="ruler-svg"></svg>' +
+              '<div class="ruler-badge" id="ruler-badge" style="display:none"></div>' +
+              '<div class="ruler-hint" id="ruler-hint">Click your start point on the map</div>' +
+              '<button class="ruler-reset" id="ruler-reset" onclick="rulerReset()">Reset</button>' +
+            '</div>';
+          initRuler(problem.ruler);
+        } else {
+          area.innerHTML =
+            '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
+            '<div class="chart-panel-body" style="padding:0.75rem"><img src="' + problem.image + '" alt="Map" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px"></div>';
+        }
         area.style.display = 'flex';
         var a11yBar = document.getElementById('score-bar-a11y');
         if (a11yBar) a11yBar.style.display = 'none';
@@ -5493,6 +5582,155 @@
       }
     }
 
+    // ===== RULER TOOL =====
+    var _ruler = { pxPerKm: 0, points: [], imgNatW: 0, imgNatH: 0 };
+
+    function initRuler(pxPerKm) {
+      _ruler = { pxPerKm: pxPerKm, points: [], imgNatW: 0, imgNatH: 0 };
+      var container = document.getElementById('ruler-container');
+      var img = document.getElementById('ruler-img');
+      if (!container || !img) return;
+
+      img.onload = function() {
+        _ruler.imgNatW = img.naturalWidth;
+        _ruler.imgNatH = img.naturalHeight;
+      };
+      if (img.complete) {
+        _ruler.imgNatW = img.naturalWidth;
+        _ruler.imgNatH = img.naturalHeight;
+      }
+
+      container.addEventListener('click', function(e) {
+        if (e.target.closest('.ruler-reset')) return;
+        if (_ruler.points.length >= 2) return;
+
+        var img = document.getElementById('ruler-img');
+        var rect = img.getBoundingClientRect();
+        // Calculate click position relative to the image (accounting for object-fit: contain)
+        var imgAspect = _ruler.imgNatW / _ruler.imgNatH;
+        var boxAspect = rect.width / rect.height;
+        var imgDisplayW, imgDisplayH, offsetX, offsetY;
+        if (imgAspect > boxAspect) {
+          imgDisplayW = rect.width;
+          imgDisplayH = rect.width / imgAspect;
+          offsetX = 0;
+          offsetY = (rect.height - imgDisplayH) / 2;
+        } else {
+          imgDisplayH = rect.height;
+          imgDisplayW = rect.height * imgAspect;
+          offsetX = (rect.width - imgDisplayW) / 2;
+          offsetY = 0;
+        }
+
+        var clickX = e.clientX - rect.left - offsetX;
+        var clickY = e.clientY - rect.top - offsetY;
+        // Ignore clicks outside the actual image
+        if (clickX < 0 || clickX > imgDisplayW || clickY < 0 || clickY > imgDisplayH) return;
+
+        // Convert to percentage of image for responsive positioning
+        var pctX = clickX / imgDisplayW * 100;
+        var pctY = clickY / imgDisplayH * 100;
+        // Convert to natural image pixels for distance calc
+        var natX = clickX / imgDisplayW * _ruler.imgNatW;
+        var natY = clickY / imgDisplayH * _ruler.imgNatH;
+
+        _ruler.points.push({ pctX: pctX, pctY: pctY, natX: natX, natY: natY });
+        drawRuler();
+      });
+    }
+
+    function drawRuler() {
+      var svg = document.getElementById('ruler-svg');
+      var badge = document.getElementById('ruler-badge');
+      var hint = document.getElementById('ruler-hint');
+      var resetBtn = document.getElementById('ruler-reset');
+      var img = document.getElementById('ruler-img');
+      if (!svg || !img) return;
+
+      var rect = img.getBoundingClientRect();
+      var container = document.getElementById('ruler-container');
+      var containerRect = container.getBoundingClientRect();
+      // Image position within container
+      var imgAspect = _ruler.imgNatW / _ruler.imgNatH;
+      var boxAspect = rect.width / rect.height;
+      var imgDisplayW, imgDisplayH, offsetX, offsetY;
+      if (imgAspect > boxAspect) {
+        imgDisplayW = rect.width;
+        imgDisplayH = rect.width / imgAspect;
+        offsetX = (containerRect.width - imgDisplayW) / 2;
+        offsetY = (containerRect.height - imgDisplayH) / 2;
+      } else {
+        imgDisplayH = rect.height;
+        imgDisplayW = rect.height * imgAspect;
+        offsetX = (containerRect.width - imgDisplayW) / 2;
+        offsetY = (containerRect.height - imgDisplayH) / 2;
+      }
+
+      function toSvgX(pct) { return offsetX + pct / 100 * imgDisplayW; }
+      function toSvgY(pct) { return offsetY + pct / 100 * imgDisplayH; }
+
+      var svgContent = '';
+      var pts = _ruler.points;
+
+      // Draw points
+      for (var i = 0; i < pts.length; i++) {
+        var sx = toSvgX(pts[i].pctX);
+        var sy = toSvgY(pts[i].pctY);
+        var label = i === 0 ? 'A' : 'B';
+        var col = i === 0 ? '#dc2626' : '#2563eb';
+        svgContent += '<circle class="ruler-point" cx="' + sx + '" cy="' + sy + '" r="7" fill="' + col + '" stroke="white" stroke-width="2"/>';
+        svgContent += '<text x="' + (sx + 12) + '" y="' + (sy + 5) + '" fill="' + col + '" font-size="14" font-weight="bold" font-family="sans-serif" stroke="white" stroke-width="3" paint-order="stroke">' + label + '</text>';
+      }
+
+      // Draw line and calculate distance
+      if (pts.length === 2) {
+        var sx1 = toSvgX(pts[0].pctX), sy1 = toSvgY(pts[0].pctY);
+        var sx2 = toSvgX(pts[1].pctX), sy2 = toSvgY(pts[1].pctY);
+        svgContent += '<line class="ruler-line" x1="' + sx1 + '" y1="' + sy1 + '" x2="' + sx2 + '" y2="' + sy2 + '" stroke="#2d2a26" stroke-width="2"/>';
+
+        // Distance in natural pixels
+        var dx = pts[1].natX - pts[0].natX;
+        var dy = pts[1].natY - pts[0].natY;
+        var pxDist = Math.sqrt(dx * dx + dy * dy);
+        var kmDist = pxDist / _ruler.pxPerKm;
+        var rounded = Math.round(kmDist * 10) / 10;
+
+        // Position badge at midpoint
+        var midSvgX = (sx1 + sx2) / 2;
+        var midSvgY = Math.min(sy1, sy2) - 15;
+        badge.textContent = rounded + ' km';
+        badge.style.left = midSvgX + 'px';
+        badge.style.top = midSvgY + 'px';
+        badge.style.display = '';
+
+        hint.textContent = rounded + ' km (straight line)';
+        resetBtn.style.display = '';
+      } else if (pts.length === 1) {
+        hint.textContent = 'Now click your end point';
+        badge.style.display = 'none';
+        resetBtn.style.display = '';
+      }
+
+      svg.innerHTML = svgContent;
+    }
+
+    window.rulerReset = function() {
+      _ruler.points = [];
+      var svg = document.getElementById('ruler-svg');
+      var badge = document.getElementById('ruler-badge');
+      var hint = document.getElementById('ruler-hint');
+      var resetBtn = document.getElementById('ruler-reset');
+      if (svg) svg.innerHTML = '';
+      if (badge) badge.style.display = 'none';
+      if (hint) hint.textContent = 'Click your start point on the map';
+      if (resetBtn) resetBtn.style.display = 'none';
+    };
+
+    // Redraw ruler on resize
+    window.addEventListener('resize', function() {
+      if (_ruler.points.length > 0) drawRuler();
+    });
+
     // ===== MAP IMAGE LIGHTBOX =====
     (function() {
       var lightbox = document.createElement('div');
@@ -5513,8 +5751,9 @@
         if (e.key === 'Escape') closeLightbox();
       });
 
-      // Delegate click on map images inside problem-equation or passage panel
+      // Delegate click on map images inside problem-equation or passage panel (not ruler)
       document.addEventListener('click', function(e) {
+        if (e.target.closest('.ruler-container')) return; // ruler handles its own clicks
         var img = e.target.closest('.problem-equation img, .chart-panel-body img');
         if (img) {
           lbImg.src = img.src;
