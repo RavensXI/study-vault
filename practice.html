@@ -818,6 +818,60 @@
       margin-bottom: 1rem;
     }
 
+    /* Equation hint toggle (science practice — recall equation reveal) */
+    .equation-hint-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: var(--accent, #2563eb);
+      background: none;
+      border: 1.5px dashed var(--accent, #2563eb);
+      border-radius: 8px;
+      padding: 0.3rem 0.75rem;
+      cursor: pointer;
+      margin: 0 auto 0.75rem;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: inherit;
+    }
+    .equation-hint-toggle:hover {
+      background: rgba(37, 99, 235, 0.06);
+    }
+    .equation-hint-toggle svg {
+      width: 14px; height: 14px;
+      transition: transform 0.25s ease;
+    }
+    .equation-hint-toggle.open svg {
+      transform: rotate(180deg);
+    }
+    .equation-hint-content {
+      display: none;
+      text-align: center;
+      font-size: 1.05rem;
+      color: var(--text-primary, #2d2a26);
+      background: rgba(37, 99, 235, 0.05);
+      border-radius: 8px;
+      padding: 0.5rem 1rem;
+      margin-bottom: 0.75rem;
+      animation: eqFadeIn 0.25s ease;
+    }
+    .equation-hint-content.visible { display: block; }
+    @keyframes eqFadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .dark-mode .equation-hint-toggle {
+      color: #60a5fa;
+      border-color: #60a5fa;
+    }
+    .dark-mode .equation-hint-toggle:hover {
+      background: rgba(96, 165, 250, 0.1);
+    }
+    .dark-mode .equation-hint-content {
+      background: rgba(96, 165, 250, 0.08);
+      color: #e5e5e5;
+    }
+
     .problem-inputs {
       display: flex;
       align-items: center;
@@ -3670,6 +3724,13 @@
                 </div>
                 <div class="problem-equation" id="problem-equation"></div>
                 <div class="problem-hint" id="problem-hint" style="display:none;"></div>
+                <div style="text-align:center" id="equation-hint-wrap" class="equation-hint-wrap" hidden>
+                  <button class="equation-hint-toggle" id="equation-hint-toggle" type="button">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    Show equation
+                  </button>
+                  <div class="equation-hint-content" id="equation-hint-content"></div>
+                </div>
                 <div class="problem-inputs" id="problem-inputs-area">
                   <!-- Dynamically populated by renderCurrentProblem based on input_type -->
                 </div>
@@ -3941,13 +4002,32 @@
         if (window._currentChart) { window._currentChart.destroy(); window._currentChart = null; }
       }
 
-      // Hint
+      // Hint (static text)
       var hintEl = document.getElementById('problem-hint');
       if (p.hint) {
         hintEl.textContent = p.hint;
         hintEl.style.display = '';
       } else {
         hintEl.style.display = 'none';
+      }
+
+      // Equation hint toggle (only bronze & silver — gold = full recall)
+      var eqWrap = document.getElementById('equation-hint-wrap');
+      var eqToggle = document.getElementById('equation-hint-toggle');
+      var eqContent = document.getElementById('equation-hint-content');
+      if (p.equation_hint && tier !== 'gold') {
+        eqWrap.hidden = false;
+        eqContent.innerHTML = p.equation_hint;
+        eqContent.classList.remove('visible');
+        eqToggle.classList.remove('open');
+        eqToggle.textContent = '';
+        eqToggle.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg> Show equation';
+        // Re-render KaTeX inside the hint content
+        requestAnimationFrame(function() { practiceRenderKaTeX(eqContent); });
+      } else {
+        eqWrap.hidden = true;
+        eqContent.classList.remove('visible');
+        eqToggle.classList.remove('open');
       }
 
       // Reset inputs
@@ -4723,6 +4803,16 @@
 
       // Bind next button
       document.getElementById('problem-next-btn').addEventListener('click', nextProblem);
+
+      // Equation hint toggle
+      document.getElementById('equation-hint-toggle').addEventListener('click', function() {
+        var content = document.getElementById('equation-hint-content');
+        var isOpen = content.classList.toggle('visible');
+        this.classList.toggle('open', isOpen);
+        var svgHtml = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg> ';
+        this.innerHTML = svgHtml + (isOpen ? 'Hide equation' : 'Show equation');
+        if (isOpen) practiceRenderKaTeX(content);
+      });
 
       // Enter key handlers are now attached dynamically in renderCurrentProblem
 
