@@ -695,12 +695,14 @@
       return exams;
     }
 
-    /* ── Detect clashes ── */
+    /* ── Detect clashes (different subjects in the same session) ── */
     function detectClashes(exams) {
       var clashSet = {};
       for (var i = 0; i < exams.length; i++) {
         for (var j = i + 1; j < exams.length; j++) {
-          if (exams[i].date === exams[j].date && exams[i].session === exams[j].session) {
+          if (exams[i].date === exams[j].date &&
+              exams[i].session === exams[j].session &&
+              exams[i].subject !== exams[j].subject) {
             clashSet[i] = true;
             clashSet[j] = true;
           }
