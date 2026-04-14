@@ -157,6 +157,8 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Practice page layout** (8 Apr 2026) — Sidebar extends to top of viewport with split header (sidebar colour left, solid white right). Score bar: a11y tools centred over left column, tier/score centred over right column. Static header (not fixed). Accent-coloured thin scrollbars. Related media from lesson `related_media` field (not duplicated in practice_data).
 - **Parents' evening print view**: Dashboard section with quick-print option per class.
 - **Mobile app (Capacitor)**: Wrap existing PWA for App Store + Google Play.
+- **Revision planner: school holiday awareness (Sep 2026)**: Planner currently schedules every day regardless of holidays. Before the next cohort starts in September, add per-school term dates (in `schools` table or `schools.settings`) so the planner can adjust intensity around half terms, Christmas, Easter. Open design question: should holidays mean MORE revision (students are free all day), LESS (they need a break), or a HYBRID (term time = light, holidays = medium, Easter = intensive)? Could also be a student toggle. See `memory/project_holiday_awareness.md` for full notes.
+- **Revision planner: update exam dates annually**: `data/exam-dates-2026.json` needs a new version each year extracted from the AQA/Edexcel/OCR/Eduqas timetable PDFs. The `unity_boards` mapping may also need updating if subjects change board.
 
 ## API Keys
 
