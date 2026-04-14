@@ -80,14 +80,14 @@ You must return a JSON object with exactly two keys:
 2. "daily_plan" — An object mapping EVERY date from ${today} to ${lastExamDate} (inclusive) to an array of revision tasks. Each task is: {"subject": "Subject Name", "focus": "Specific topic or activity"}.
 
 Rules for the daily plan:
-- On EXAM DAYS: include a task like {"subject": "English Literature", "focus": "EXAM — Paper 1 (AM). Light review of quotes only."}
-- The day BEFORE an exam: prioritise that subject with focused last-minute review
-- Use INTERLEAVING: don't just do one subject all day every day — mix 2-3 subjects per day
+- On EXAM DAYS: include a task like {"subject": "English Literature", "focus": "EXAM — Paper 1 (AM)"}
+- The day BEFORE an exam: prioritise that subject
+- Use INTERLEAVING: mix 2-3 subjects per day, don't just block one subject all week
 - Weight subjects by PROXIMITY: subjects with exams soon get more daily slots
-- Include 1-2 REST slots on Sundays: {"subject": "Rest", "focus": "Take a break — go for a walk or do something you enjoy"}
-- Each day should have 2-4 tasks (not more)
-- Be SPECIFIC about focus areas: "Practise circuit calculations (V=IR)" not just "Revise Physics"
-- For subjects with multiple papers, distinguish P1 and P2 content
+- SUNDAYS MUST BE REST DAYS: only include {"subject": "Rest", "focus": "Rest day"}. No revision on Sundays, no exceptions.
+- Weekdays and Saturdays should have 2-3 tasks each (not more)
+- The "focus" field must be SHORT — just the subject area or topic, max 5 words. Examples: "Energy equations", "Moles & Mr", "Act 1 quotes", "Listening practice", "Punnett squares". Do NOT write instructions like "Practise..." or "Revise..." — just name the topic.
+- For subjects with multiple papers, distinguish P1 and P2 content areas
 - The student's subjects are: ${subjects.join(', ')}
 
 Return ONLY valid JSON, no markdown fences, no explanation outside the JSON.`;
@@ -103,7 +103,7 @@ Return ONLY valid JSON, no markdown fences, no explanation outside the JSON.`;
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
+        model: 'claude-sonnet-4-6',
         max_tokens: 8192,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
