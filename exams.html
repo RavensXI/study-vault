@@ -1197,6 +1197,10 @@
       var lastDate = sortedDates[sortedDates.length - 1];
       if (!lastDate) return plan;
 
+      /* Calculate days until first exam — used for ramping intensity */
+      var firstExamDate = sortedDates[0];
+      var firstExamMs = new Date(firstExamDate + 'T00:00:00').getTime();
+
       var revisionDays = [];
       var d = new Date(todayStr + 'T00:00:00');
       var end = new Date(lastDate + 'T00:00:00');
@@ -1208,7 +1212,15 @@
         } else if (examDates[ds]) {
           plan[ds] = [];
         } else {
-          revisionDays.push({ date: ds, slots: dow === lighterDow ? 2 : 3 });
+          /* Ramp up intensity as exams approach:
+             > 120 days out → 1 topic/day (light, alongside classwork)
+             > 60 days out  → 2 topics/day (building up)
+             ≤ 60 days out  → 3 topics/day (intensive) */
+          var daysToFirstExam = Math.max(0, Math.ceil((firstExamMs - d.getTime()) / 86400000));
+          var baseSlots = daysToFirstExam > 120 ? 1 : daysToFirstExam > 60 ? 2 : 3;
+          /* Lighter weekend day gets one fewer slot (min 1) */
+          var slots = (dow === lighterDow) ? Math.max(1, baseSlots - 1) : baseSlots;
+          revisionDays.push({ date: ds, slots: slots });
         }
         d.setDate(d.getDate() + 1);
       }
@@ -1226,7 +1238,7 @@
         var dayMs = new Date(day.date + 'T00:00:00').getTime();
 
         var eligible = pools.filter(function (pool) {
-          return pool.examDate >= day.date && !pool._done;
+          return pool.examDate >= day.date;
         });
 
         if (eligible.length === 0) {
@@ -1262,7 +1274,8 @@
 
           var topic = pool.topics[pool._cursor];
           pool._cursor++;
-          if (pool._cursor >= pool.topics.length) pool._done = true;
+          /* Cycle back to start for spaced repetition */
+          if (pool._cursor >= pool.topics.length) pool._cursor = 0;
 
           usedSubjects[pool.subject] = true;
           pool._lastDay = dayIdx;
