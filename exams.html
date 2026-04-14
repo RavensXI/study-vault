@@ -1238,9 +1238,15 @@
           var daysUntil = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - dayMs) / 86400000));
           var remaining = pool.topics.length - pool._cursor;
           var urgency = remaining / Math.max(1, daysUntil);
-          var daysSinceLastSeen = dayIdx - pool._lastDay;
-          if (daysSinceLastSeen > MAX_GAP) {
-            urgency += 100 + daysSinceLastSeen;
+
+          /* Starvation boost — only for pools whose exam is within 21 days.
+             If the exam is further out, it's fine to wait — urgency will
+             naturally pick it up as the exam approaches. */
+          if (daysUntil <= 21) {
+            var daysSinceLastSeen = dayIdx - pool._lastDay;
+            if (daysSinceLastSeen > MAX_GAP) {
+              urgency += 100 + daysSinceLastSeen;
+            }
           }
           pool._score = urgency;
         });
