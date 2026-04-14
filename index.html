@@ -19,6 +19,9 @@
     .home-section-header h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.35rem; font-weight: 700; color: var(--text-primary); margin: 0; }
     .home-change-btn { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: var(--text-muted); background: none; border: 1px solid var(--border-light); border-radius: 999px; padding: 0.3em 0.85em; cursor: pointer; transition: color 0.2s, border-color 0.2s; }
     .home-change-btn:hover { color: var(--text-primary); border-color: var(--text-secondary); }
+    .home-exams-link { font-family: 'Inter', sans-serif; font-size: 0.78rem; font-weight: 600; color: #2563eb; background: none; border: 1px solid #bfdbfe; border-radius: 999px; padding: 0.3em 0.85em; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem; transition: background 0.2s, border-color 0.2s; }
+    .home-exams-link:hover { background: #eff6ff; border-color: #93c5fd; }
+    .home-exams-link svg { width: 13px; height: 13px; }
     .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
     .home-grid--few { grid-template-columns: repeat(auto-fit, minmax(230px, 300px)); justify-content: center; }
     .home-card { display: block; background: var(--bg-card); border-radius: 14px; overflow: hidden; text-decoration: none; color: var(--text-primary); box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
@@ -684,7 +687,7 @@
         var schoolSubjects = allGenericSubjects.filter(function (s) {
           return subscribedSlugs.indexOf(s.slug) !== -1;
         });
-        headerEl.innerHTML = '<h2>Your subjects</h2>';
+        headerEl.innerHTML = '<h2>Your subjects</h2><a href="/exams" class="home-exams-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>My Exam Timetable</a>';
         var cardsHtml = '';
         schoolSubjects.forEach(function (s) {
           cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" style="--card-accent: ' + s.accent + '">';
@@ -719,7 +722,7 @@
       };
 
       if (freePrefs && freePrefs.subjects && freePrefs.subjects.length > 0) {
-        headerEl.innerHTML = '<h2>Your subjects</h2>';
+        headerEl.innerHTML = '<h2>Your subjects</h2><a href="/exams" class="home-exams-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>My Exam Timetable</a>';
         var cardsHtml = '';
         freePrefs.subjects.forEach(function (s) {
           var meta = freeSubjectMeta[s.baseSlug] || freeSubjectMeta[s.slug] || { name: s.slug, image: '', accent: '#666', detail: '' };
@@ -1363,7 +1366,7 @@
       });
 
       // Update header
-      headerEl.innerHTML = '<h2>Your subjects</h2><button class="home-change-btn" id="change-subjects-btn">Change</button>';
+      headerEl.innerHTML = '<h2>Your subjects</h2><a href="/exams" class="home-exams-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>My Exam Timetable</a><button class="home-change-btn" id="change-subjects-btn">Change</button>';
       document.getElementById('change-subjects-btn').addEventListener('click', openPicker);
 
       // Move your cards to top grid
