@@ -628,7 +628,8 @@
       .exams-subtitle,
       .exams-title,
       .results-card,
-      .plan-loading {
+      .plan-loading,
+      .rest-day-picker {
         display: none !important;
       }
 
@@ -1526,6 +1527,10 @@
 
         /* Build topic pools */
         var topicPools = [];
+
+        /* Track round-robin index per subject for unmapped units */
+        var subjectRoundRobin = {};
+
         units.forEach(function (unit) {
           var subject = subjectById[unit.subject_id];
           if (!subject) return;
@@ -1546,6 +1551,22 @@
 
           /* Map unit to its exam paper */
           var paperName = matchUnitToPaper(unit.slug, subjectPapers);
+
+          /* If the unit defaulted to the first paper (no specific mapping found),
+             AND the subject has multiple papers, distribute units round-robin.
+             This prevents all Maths units going to Paper 1 only. */
+          if (paperName === subjectPapers[0].paper && subjectPapers.length > 1) {
+            var directMatch = UNIT_PAPER_MAP[unit.slug];
+            var slugHasP1 = /paper.?1|p1/i.test(unit.slug);
+            if (!directMatch && !slugHasP1) {
+              /* No explicit mapping — this was a default. Distribute round-robin. */
+              if (!subjectRoundRobin[examSlug]) subjectRoundRobin[examSlug] = 0;
+              var idx = subjectRoundRobin[examSlug] % subjectPapers.length;
+              paperName = subjectPapers[idx].paper;
+              subjectRoundRobin[examSlug]++;
+            }
+          }
+
           if (!paperName) return;
 
           /* Find the exam date for this paper */
