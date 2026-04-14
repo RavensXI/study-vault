@@ -982,8 +982,28 @@
         return aliases[base] || base;
       }
 
-      if (schoolSubjects) {
-        /* School student — always use their school subjects */
+      /* Read student's personal subject picks from homepage picker */
+      var HOMEPAGE_PICKS_KEY = 'studyvault-subjects';
+      var LOCKED_CORE = ['english-literature', 'english-language', 'science', 'maths'];
+      var homepagePicks = null;
+      try {
+        var raw = localStorage.getItem(HOMEPAGE_PICKS_KEY);
+        if (raw) homepagePicks = JSON.parse(raw);
+      } catch (e) {}
+
+      if (homepagePicks && homepagePicks.length > 0) {
+        /* Student has picked subjects on the homepage — use those + core */
+        selectedBoard = 'aqa';
+        var available = getAvailableSubjects(selectedBoard);
+        var allPicks = LOCKED_CORE.concat(homepagePicks);
+        allPicks.forEach(function (slug) {
+          var norm = normaliseSubjectSlug(slug);
+          if (available.indexOf(norm) !== -1) {
+            selectedSubjects[norm] = true;
+          }
+        });
+      } else if (schoolSubjects) {
+        /* School student without homepage picks — fall back to all school subjects */
         selectedBoard = 'aqa';
         var available = getAvailableSubjects(selectedBoard);
         schoolSubjects.forEach(function (slug) {
