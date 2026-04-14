@@ -92,7 +92,7 @@
       pill.style.opacity = '0';
       pill.style.transform = 'translateY(-4px)';
       setTimeout(function () { pill.remove(); }, 250);
-      localStorage.setItem(HIDE_KEY, 'true');
+      sessionStorage.setItem(HIDE_KEY, 'true');
     });
 
     return pill;
@@ -148,7 +148,7 @@
   }
 
   async function init() {
-    if (localStorage.getItem(HIDE_KEY) === 'true') return;
+    if (sessionStorage.getItem(HIDE_KEY) === 'true') return;
 
     var slug = getSubjectSlug();
     if (!slug) return;
