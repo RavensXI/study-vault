@@ -617,7 +617,12 @@
       return '';
     }
 
+    /* Only save exam prefs for anonymous users — school/free users
+       always derive subjects from their session/homepage picks */
+    var _hasSession = false;
+
     function savePrefs() {
+      if (_hasSession) return;
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           board: selectedBoard,
@@ -794,15 +799,17 @@
       html += 'Print Timetable</button>';
       html += '</div>';
 
-      /* Board selector */
-      html += '<div class="board-selector">';
-      html += '<span class="board-selector-label">Exam Board</span>';
-      html += '<div class="board-pills">';
-      BOARDS.forEach(function (b) {
-        var cls = b === selectedBoard ? ' active' : '';
-        html += '<button class="board-pill' + cls + '" data-board="' + b + '">' + BOARD_LABELS[b] + '</button>';
-      });
-      html += '</div></div>';
+      /* Board selector — hide for school students (fixed board) */
+      if (!_hasSession) {
+        html += '<div class="board-selector">';
+        html += '<span class="board-selector-label">Exam Board</span>';
+        html += '<div class="board-pills">';
+        BOARDS.forEach(function (b) {
+          var cls = b === selectedBoard ? ' active' : '';
+          html += '<button class="board-pill' + cls + '" data-board="' + b + '">' + BOARD_LABELS[b] + '</button>';
+        });
+        html += '</div></div>';
+      }
 
       /* Subject filter */
       var available = getAvailableSubjects(selectedBoard);
@@ -993,6 +1000,7 @@
 
       if (homepagePicks && homepagePicks.length > 0) {
         /* Student has picked subjects on the homepage — use those + core */
+        _hasSession = true;
         selectedBoard = 'aqa';
         var available = getAvailableSubjects(selectedBoard);
         var allPicks = LOCKED_CORE.concat(homepagePicks);
@@ -1004,6 +1012,7 @@
         });
       } else if (schoolSubjects) {
         /* School student without homepage picks — fall back to all school subjects */
+        _hasSession = true;
         selectedBoard = 'aqa';
         var available = getAvailableSubjects(selectedBoard);
         schoolSubjects.forEach(function (slug) {
@@ -1014,6 +1023,7 @@
         });
       } else if (freeSubjects) {
         /* Free user — use their homepage subject picks */
+        _hasSession = true;
         selectedBoard = 'aqa';
         var available = getAvailableSubjects(selectedBoard);
         freeSubjects.forEach(function (slug) {
