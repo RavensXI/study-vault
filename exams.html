@@ -1595,13 +1595,16 @@
          * Once a pool's cursor reaches the end of its topics, it's done (no repeats).
          */
 
-        /* Give each pool a cursor and compute urgency */
+        /* Give each pool a cursor and track last appearance */
+        var MAX_GAP = 3; /* no subject goes more than 3 revision days without appearing */
+
         topicPools.forEach(function (pool) {
           pool._cursor = 0;
           pool._done = false;
+          pool._lastDay = -999; /* revision day index of last appearance */
         });
 
-        revisionDays.forEach(function (day) {
+        revisionDays.forEach(function (day, dayIdx) {
           var dayMs = new Date(day.date + 'T00:00:00').getTime();
 
           /* Get eligible pools: exam not passed AND topics remaining */
@@ -1610,21 +1613,28 @@
           });
 
           if (eligible.length === 0) {
-            /* All pools exhausted or past — give a rest */
             if (!plan[day.date]) plan[day.date] = [];
             return;
           }
 
-          /* Score each pool: closer exams + more remaining topics = higher priority */
+          /* Score each pool: urgency + starvation bonus */
           eligible.forEach(function (pool) {
             var daysUntil = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - dayMs) / 86400000));
             var remaining = pool.topics.length - pool._cursor;
-            /* Urgency: inverse of days, scaled. Need to fit all remaining topics before the exam */
+            /* Base urgency: need to fit remaining topics before the exam */
             var urgency = remaining / Math.max(1, daysUntil);
+
+            /* Starvation bonus: if this pool hasn't appeared in MAX_GAP+ days, boost it */
+            var daysSinceLastSeen = dayIdx - pool._lastDay;
+            if (daysSinceLastSeen > MAX_GAP) {
+              /* Big boost — guaranteed to be picked if starved */
+              urgency += 100 + daysSinceLastSeen;
+            }
+
             pool._score = urgency;
           });
 
-          /* Sort by score descending — most urgent first */
+          /* Sort by score descending — starved pools first, then most urgent */
           eligible.sort(function (a, b) { return b._score - a._score; });
 
           /* Pick top 2-3 pools (different subjects), advance their cursors */
@@ -1640,6 +1650,7 @@
             if (pool._cursor >= pool.topics.length) pool._done = true;
 
             usedSubjects[pool.subject] = true;
+            pool._lastDay = dayIdx;
             dayTasks.push({ subject: pool.subjectName, focus: topic });
           }
 
