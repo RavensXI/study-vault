@@ -1426,17 +1426,26 @@
         });
         if (subjectSlugs.length === 0) return [];
 
-        /* Query subjects — get id, slug, name */
-        var subjectQuery = sb.from('subjects').select('id, slug, name');
-        if (schoolId) {
-          subjectQuery = subjectQuery.eq('school_id', schoolId);
-        } else {
-          subjectQuery = subjectQuery.is('school_id', null);
+        /* For separate-sciences students, also fetch combined science content */
+        var fetchSlugs = subjectSlugs.slice();
+        if (fetchSlugs.indexOf('separate-sciences') !== -1 && fetchSlugs.indexOf('science') === -1) {
+          fetchSlugs.push('science');
         }
-        subjectQuery = subjectQuery.in('slug', subjectSlugs);
-        var subjectRes = await subjectQuery;
-        if (subjectRes.error) throw new Error('Failed to load subjects');
-        var subjects = subjectRes.data || [];
+
+        /* Query subjects — first try school-specific (bespoke) */
+        var subjects = [];
+        if (schoolId) {
+          var bespokeRes = await sb.from('subjects').select('id, slug, name').eq('school_id', schoolId).in('slug', fetchSlugs);
+          if (bespokeRes.data) subjects = subjects.concat(bespokeRes.data);
+        }
+
+        /* Find any slugs we didn't get from bespoke — try generic (subscribed subjects like Maths) */
+        var foundSlugs = subjects.map(function (s) { return s.slug; });
+        var missingSlugs = fetchSlugs.filter(function (s) { return foundSlugs.indexOf(s) === -1; });
+        if (missingSlugs.length > 0) {
+          var genericRes = await sb.from('subjects').select('id, slug, name').is('school_id', null).in('slug', missingSlugs);
+          if (genericRes.data) subjects = subjects.concat(genericRes.data);
+        }
 
         if (subjects.length === 0) return [];
 
@@ -1487,10 +1496,15 @@
           var topics = lessonsByUnit[unit.id];
           if (!topics || topics.length === 0) return;
 
-          /* Get the exam papers for this subject */
-          var board = boardForSubject(subject.slug);
+          /* Get the exam papers for this subject.
+             Combined science content maps to separate-sciences exams if student takes sep sci */
+          var examSlug = subject.slug;
+          if (subject.slug === 'science' && selectedSubjects['separate-sciences']) {
+            examSlug = 'separate-sciences';
+          }
+          var board = boardForSubject(examSlug);
           var boardData = allDates[board] || allDates['aqa'] || {};
-          var subjectPapers = boardData[subject.slug] || [];
+          var subjectPapers = boardData[examSlug] || [];
           if (subjectPapers.length === 0) return;
 
           /* Map unit to its exam paper */
@@ -1574,63 +1588,59 @@
           d.setDate(d.getDate() + 1);
         }
 
-        /* Build a master list of tasks, repeating topics to fill slots.
-           Weight each pool by urgency and topic count. */
-        var totalSlots = revisionDays.reduce(function (sum, d) { return sum + d.slots; }, 0);
-        var totalWeight = 0;
-        var poolWeights = [];
+        /* ── Phase-based scheduling ──
+         * For each revision day, pick topics from pools whose exam hasn't passed.
+         * Each pool has a cursor that advances through its topics sequentially.
+         * On each day, pick from 2-3 different pools, prioritising by urgency.
+         * Once a pool's cursor reaches the end of its topics, it's done (no repeats).
+         */
 
+        /* Give each pool a cursor and compute urgency */
         topicPools.forEach(function (pool) {
-          var daysUntilExam = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - todayMs) / 86400000));
-          var urgency = daysUntilExam <= 14 ? 4 : daysUntilExam <= 28 ? 2 : 1;
-          var w = pool.topics.length * urgency;
-          poolWeights.push(w);
-          totalWeight += w;
+          pool._cursor = 0;
+          pool._done = false;
         });
 
-        /* Build master task list */
-        var masterList = [];
-        topicPools.forEach(function (pool, pi) {
-          var allocatedSlots = Math.max(1, Math.round((poolWeights[pi] / (totalWeight || 1)) * totalSlots));
-          for (var i = 0; i < allocatedSlots; i++) {
-            masterList.push({
-              subject: pool.subjectName,
-              focus: pool.topics[i % pool.topics.length],
-              examDate: pool.examDate,
-              subjectSlug: pool.subject
-            });
-          }
-        });
-
-        /* Seeded shuffle to interleave subjects (Fisher-Yates variant) */
-        for (var i = masterList.length - 1; i > 0; i--) {
-          var j = (i * 7 + 3) % (i + 1);
-          var tmp = masterList[i];
-          masterList[i] = masterList[j];
-          masterList[j] = tmp;
-        }
-
-        /* Deal out to revision days, respecting exam deadlines */
-        var cursor = 0;
         revisionDays.forEach(function (day) {
+          var dayMs = new Date(day.date + 'T00:00:00').getTime();
+
+          /* Get eligible pools: exam not passed AND topics remaining */
+          var eligible = topicPools.filter(function (pool) {
+            return pool.examDate >= day.date && !pool._done;
+          });
+
+          if (eligible.length === 0) {
+            /* All pools exhausted or past — give a rest */
+            if (!plan[day.date]) plan[day.date] = [];
+            return;
+          }
+
+          /* Score each pool: closer exams + more remaining topics = higher priority */
+          eligible.forEach(function (pool) {
+            var daysUntil = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - dayMs) / 86400000));
+            var remaining = pool.topics.length - pool._cursor;
+            /* Urgency: inverse of days, scaled. Need to fit all remaining topics before the exam */
+            var urgency = remaining / Math.max(1, daysUntil);
+            pool._score = urgency;
+          });
+
+          /* Sort by score descending — most urgent first */
+          eligible.sort(function (a, b) { return b._score - a._score; });
+
+          /* Pick top 2-3 pools (different subjects), advance their cursors */
           var dayTasks = [];
           var usedSubjects = {};
-          var attempts = 0;
-          var maxAttempts = masterList.length * 2;
 
-          while (dayTasks.length < day.slots && attempts < maxAttempts) {
-            if (cursor >= masterList.length) cursor = 0;
-            var item = masterList[cursor];
-            cursor++;
-            attempts++;
+          for (var i = 0; i < eligible.length && dayTasks.length < day.slots; i++) {
+            var pool = eligible[i];
+            if (usedSubjects[pool.subject]) continue; /* no duplicate subject per day */
 
-            /* Skip topics whose exam has already passed */
-            if (item.examDate < day.date) continue;
+            var topic = pool.topics[pool._cursor];
+            pool._cursor++;
+            if (pool._cursor >= pool.topics.length) pool._done = true;
 
-            /* No duplicate subjects per day */
-            if (usedSubjects[item.subjectSlug]) continue;
-            usedSubjects[item.subjectSlug] = true;
-            dayTasks.push({ subject: item.subject, focus: item.focus });
+            usedSubjects[pool.subject] = true;
+            dayTasks.push({ subject: pool.subjectName, focus: topic });
           }
 
           if (!plan[day.date]) plan[day.date] = [];
