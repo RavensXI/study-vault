@@ -91,6 +91,38 @@
       flex-shrink: 0;
     }
 
+    /* ── Rest day picker ── */
+    .rest-day-picker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .rest-day-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-secondary, #5a5651);
+    }
+    .rest-day-btn {
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 500;
+      padding: 0.3rem 0.85rem;
+      border-radius: 999px;
+      border: 1.5px solid #e7e5e4;
+      background: #fff;
+      color: #57534e;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .rest-day-btn:hover { border-color: #a8a29e; }
+    .rest-day-btn.active {
+      background: #2d2a26;
+      color: #fff;
+      border-color: #2d2a26;
+    }
+
     /* ── Loading state ── */
     .plan-loading { text-align: center; padding: 2rem; color: #78716c; font-size: 0.9rem; }
     .plan-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #e7e5e4; border-top-color: #16a34a; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
@@ -1186,6 +1218,11 @@
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
       html += 'Build Revision Plan</button>';
       html += '</div>';
+      html += '<div class="rest-day-picker">';
+      html += '<span class="rest-day-label">Rest day:</span>';
+      html += '<button class="rest-day-btn active" data-day="0" id="rest-sun">Sunday</button>';
+      html += '<button class="rest-day-btn" data-day="6" id="rest-sat">Saturday</button>';
+      html += '</div>';
       html += '<div id="plan-status"></div>';
 
       /* Board selector — hide for school students (fixed board) */
@@ -1556,10 +1593,14 @@
        * 4. Deal out round-robin across available days, 3 per weekday, 2 Saturday
        * 5. No duplicate subject on the same day
        */
-      function scheduleDailyPlan(examList, topicPools) {
+      function scheduleDailyPlan(examList, topicPools, restDow) {
         var plan = {};
         var todayStr = new Date().toISOString().split('T')[0];
         var todayMs = new Date(todayStr + 'T00:00:00').getTime();
+        if (restDow === undefined) restDow = 0; /* default Sunday */
+
+        /* The other weekend day gets 2 slots (lighter day) */
+        var lighterDow = (restDow === 0) ? 6 : 0; /* if rest=Sun, lighter=Sat; if rest=Sat, lighter=Sun */
 
         /* Build exam date set */
         var examDates = {};
@@ -1570,20 +1611,19 @@
         var lastDate = sortedDates[sortedDates.length - 1];
         if (!lastDate) return plan;
 
-        /* Build available revision days (not Sunday, not exam day) */
+        /* Build available revision days */
         var revisionDays = [];
         var d = new Date(todayStr + 'T00:00:00');
         var end = new Date(lastDate + 'T00:00:00');
         while (d <= end) {
           var ds = d.toISOString().split('T')[0];
           var dow = d.getDay();
-          if (dow === 0) {
+          if (dow === restDow) {
             plan[ds] = [{ subject: 'Rest', focus: 'Rest day' }];
           } else if (examDates[ds]) {
-            /* On exam days, add the exam subjects as tasks */
             plan[ds] = [];
           } else {
-            revisionDays.push({ date: ds, slots: dow === 6 ? 2 : 3 });
+            revisionDays.push({ date: ds, slots: dow === lighterDow ? 2 : 3 });
           }
           d.setDate(d.getDate() + 1);
         }
@@ -1689,7 +1729,11 @@
 
           statusEl.innerHTML = '';
 
-          var dailyPlan = scheduleDailyPlan(examList, topicPools);
+          /* Read selected rest day */
+          var restDayBtn = container.querySelector('.rest-day-btn.active');
+          var restDow = restDayBtn ? parseInt(restDayBtn.getAttribute('data-day'), 10) : 0;
+
+          var dailyPlan = scheduleDailyPlan(examList, topicPools, restDow);
           renderCalendar(examList, dailyPlan);
         } catch (err) {
           console.error('Revision plan error:', err);
@@ -1698,6 +1742,14 @@
 
         btn.disabled = false;
         btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Build Revision Plan';
+      });
+
+      /* Rest day toggle */
+      container.querySelectorAll('.rest-day-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          container.querySelectorAll('.rest-day-btn').forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+        });
       });
 
       /* Board pills */
