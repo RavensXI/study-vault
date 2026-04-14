@@ -123,8 +123,10 @@
       '.exam-cd-urgent{background:#fef2f2;border-color:#fca5a5}' +
       '.exam-cd-urgent .exam-cd-clock{color:#dc2626}' +
       '.exam-cd-urgent .exam-cd-days{color:#b91c1c}' +
-      /* Header placement (practice + lesson pages) */
+      /* Header placement (practice pages — left panel dead space) */
       '.exam-cd-header{position:absolute;left:1rem;top:50%;transform:translateY(-50%)}' +
+      /* Lesson page — above the title */
+      '.exam-cd-lesson{margin-bottom:0.5rem}' +
       /* Hero placement (browse pages) */
       '.exam-cd-hero{margin-top:0.75rem}' +
       /* Dark mode */
@@ -171,13 +173,20 @@
     injectStyles();
     var pill = renderPill(next);
 
-    if (pageType === 'practice' || pageType === 'lesson') {
-      // Place in header's left dead space
+    if (pageType === 'practice') {
+      // Practice page — header's left panel dead space
       pill.classList.add('exam-cd-header');
       var header = document.querySelector('.page-header');
       if (header) {
         header.style.position = 'relative';
         header.appendChild(pill);
+      }
+    } else if (pageType === 'lesson') {
+      // Article lesson — above the lesson title
+      pill.classList.add('exam-cd-lesson');
+      var lessonHeader = document.querySelector('.lesson-header');
+      if (lessonHeader) {
+        lessonHeader.insertBefore(pill, lessonHeader.firstChild);
       }
     } else {
       // Browse page — place inside hero section
