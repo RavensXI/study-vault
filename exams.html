@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Exam Timetable - StudyVault</title>
+  <title>My Revision Planner - StudyVault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -16,9 +16,14 @@
   <style>
     /* ── Page layout ── */
     .exams-container {
-      max-width: 700px;
+      max-width: 1100px;
       margin: 0 auto;
       padding: 2rem 1.5rem 4rem;
+    }
+
+    .exams-header {
+      text-align: center;
+      margin-bottom: 1.5rem;
     }
 
     .exams-title {
@@ -32,15 +37,23 @@
     .exams-subtitle {
       color: #78716c;
       font-size: 0.95rem;
-      margin: 0 0 1.75rem;
+      margin: 0;
     }
 
-    /* ── Action buttons row ── */
-    .exams-actions {
+    /* ── Toolbar ── */
+    .exams-toolbar {
       display: flex;
+      align-items: center;
+      justify-content: center;
       gap: 0.75rem;
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
       flex-wrap: wrap;
+    }
+
+    .exams-toolbar .toolbar-sep {
+      width: 1px;
+      height: 24px;
+      background: #e7e5e4;
     }
 
     .exams-btn {
@@ -77,27 +90,17 @@
       border: 1.5px solid #e7e5e4;
     }
 
-    .exams-btn--plan {
-      background: #16a34a;
-      color: #fff;
-      border: none;
-    }
-    .exams-btn--plan:hover { opacity: 0.9; }
-    .exams-btn--plan:disabled { opacity: 0.6; cursor: not-allowed; }
-
     .exams-btn svg {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
     }
 
-    /* ── Rest day picker ── */
+    /* ── Rest day picker (inline in toolbar) ── */
     .rest-day-picker {
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 0.5rem;
-      margin-bottom: 1.25rem;
     }
     .rest-day-label {
       font-size: 0.82rem;
@@ -124,250 +127,23 @@
     }
 
     /* ── Loading state ── */
-    .plan-loading { text-align: center; padding: 2rem; color: #78716c; font-size: 0.9rem; }
-    .plan-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #e7e5e4; border-top-color: #16a34a; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
+    .plan-loading {
+      text-align: center;
+      padding: 4rem 1rem;
+      color: #78716c;
+      font-size: 0.95rem;
+    }
+    .plan-loading .spinner {
+      display: block;
+      width: 32px;
+      height: 32px;
+      border: 3px solid #e7e5e4;
+      border-top-color: #16a34a;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto 1rem;
+    }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* ── Board selector ── */
-    .board-selector {
-      margin-bottom: 1.25rem;
-    }
-
-    .board-selector-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #78716c;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-
-    .board-pills {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .board-pill {
-      padding: 0.4rem 1rem;
-      border-radius: 999px;
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1.5px solid #d6d3d1;
-      background: #fff;
-      color: #57534e;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .board-pill:hover {
-      border-color: #a8a29e;
-    }
-
-    .board-pill.active {
-      background: #2d2a26;
-      color: #fff;
-      border-color: #2d2a26;
-    }
-
-    /* ── Subject filter bar ── */
-    .subject-filter {
-      margin-bottom: 2rem;
-    }
-
-    .subject-filter-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #78716c;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      margin-bottom: 0.5rem;
-      display: block;
-    }
-
-    .subject-pills {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
-
-    .subject-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.35rem;
-      padding: 0.4rem 0.85rem;
-      border-radius: 999px;
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-      border: 1.5px solid;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      user-select: none;
-    }
-
-    .subject-pill .pill-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    /* ── Exam list ── */
-    .exam-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    .exam-date-group {
-      animation: fadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-    }
-
-    .exam-date-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 0.75rem;
-    }
-
-    .exam-date-text {
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #2d2a26;
-    }
-
-    .exam-date-badge {
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.2rem 0.6rem;
-      border-radius: 999px;
-      background: #f0f7ff;
-      color: #1d4ed8;
-      white-space: nowrap;
-    }
-
-    .exam-date-badge--soon {
-      background: #fefce8;
-      color: #b45309;
-    }
-
-    .exam-date-badge--urgent {
-      background: #fef2f2;
-      color: #b91c1c;
-    }
-
-    .exam-date-badge--today {
-      background: #dc2626;
-      color: #fff;
-    }
-
-    .exam-date-badge--past {
-      background: #f5f5f4;
-      color: #a8a29e;
-    }
-
-    .exam-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-
-    .exam-card {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background: #fff;
-      border: 1px solid #e7e5e4;
-      border-radius: 16px;
-      padding: 1rem 1.25rem;
-      transition: box-shadow 0.2s, border-color 0.2s;
-    }
-
-    .exam-card:hover {
-      border-color: #d6d3d1;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-
-    .exam-card--highlight {
-      border-color: #fde68a;
-      background: #fffbeb;
-      box-shadow: 0 2px 12px rgba(251, 191, 36, 0.15);
-    }
-
-    .exam-card--past {
-      opacity: 0.5;
-    }
-
-    .exam-card-dot {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .exam-card-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .exam-card-subject {
-      font-weight: 700;
-      font-size: 0.9rem;
-      color: #2d2a26;
-    }
-
-    .exam-card-paper {
-      font-size: 0.82rem;
-      color: #78716c;
-      margin-top: 0.15rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .exam-card-right {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex-shrink: 0;
-    }
-
-    .exam-session-pill {
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      padding: 0.2rem 0.55rem;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.02em;
-    }
-
-    .exam-session-pill--am {
-      background: #ecfdf5;
-      color: #059669;
-    }
-
-    .exam-session-pill--pm {
-      background: #eff6ff;
-      color: #2563eb;
-    }
-
-    .exam-clash-badge {
-      font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.65rem;
-      font-weight: 700;
-      padding: 0.15rem 0.5rem;
-      border-radius: 999px;
-      background: #fff7ed;
-      color: #ea580c;
-      border: 1px solid #fed7aa;
-      white-space: nowrap;
-    }
 
     /* ── Empty state ── */
     .exams-empty {
@@ -387,85 +163,14 @@
       font-size: 0.95rem;
     }
 
-    /* ── Results day card ── */
-    .results-card {
-      margin-top: 2.5rem;
-      background: linear-gradient(135deg, #f0f7ff 0%, #ede9fe 100%);
-      border: 1px solid #c7d2fe;
-      border-radius: 16px;
-      padding: 1.5rem;
-      text-align: center;
+    /* ── Calendar (always visible on screen) ── */
+    .revision-calendar {
+      animation: fadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
-    .results-card-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #6366f1;
-      margin-bottom: 0.35rem;
-    }
-
-    .results-card-date {
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.3rem;
-      font-weight: 700;
-      color: #2d2a26;
-      margin-bottom: 0.25rem;
-    }
-
-    .results-card-days {
-      font-size: 0.85rem;
-      color: #6366f1;
-      font-weight: 600;
-    }
-
-    /* ── Stat summary bar ── */
-    .exams-summary {
-      display: flex;
-      gap: 1.5rem;
-      margin-bottom: 1.75rem;
-      flex-wrap: wrap;
-    }
-
-    .exams-stat {
-      display: flex;
-      flex-direction: column;
-      gap: 0.1rem;
-    }
-
-    .exams-stat-value {
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #2d2a26;
-    }
-
-    .exams-stat-label {
-      font-size: 0.75rem;
-      color: #78716c;
-      font-weight: 500;
-    }
-
-    /* ── Animations ── */
     @keyframes fadeSlideIn {
-      from {
-        opacity: 0;
-        transform: translateY(12px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* ── Print calendar (hidden on screen until plan generated) ── */
-    .print-calendar {
-      display: none;
-    }
-    .print-calendar--visible {
-      display: block;
-      margin-top: 1.5rem;
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .print-calendar-title {
@@ -495,23 +200,23 @@
 
     .cal-header-cell {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.04em;
       color: #57534e;
       text-align: center;
-      padding: 0.35rem 0.25rem;
+      padding: 0.5rem 0.25rem;
       border-right: 1px solid #d6d3d1;
       border-bottom: 2px solid #2d2a26;
       background: #f5f5f4;
     }
 
     .cal-cell {
-      min-height: 90px;
+      min-height: 110px;
       border-right: 1px solid #d6d3d1;
       border-bottom: 1px solid #d6d3d1;
-      padding: 0.25rem;
+      padding: 0.35rem;
       position: relative;
       vertical-align: top;
     }
@@ -531,12 +236,12 @@
 
     .cal-day-number {
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       font-weight: 700;
       color: #2d2a26;
       text-align: right;
       display: block;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.25rem;
     }
 
     .cal-exam-pill {
@@ -544,28 +249,28 @@
       align-items: center;
       gap: 3px;
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.55rem;
+      font-size: 0.65rem;
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.4;
+      line-height: 1.5;
       color: #2d2a26;
-      padding: 1px 2px;
+      padding: 2px 3px;
       border-radius: 3px;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
 
     .cal-exam-dot {
-      width: 6px;
-      height: 6px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       flex-shrink: 0;
       display: inline-block;
     }
 
     .cal-session-tag {
-      font-size: 0.5rem;
+      font-size: 0.55rem;
       font-weight: 700;
       color: #78716c;
       margin-left: 1px;
@@ -576,7 +281,7 @@
       background: #fef2f2;
       border: 1px solid #fca5a5;
       border-radius: 3px;
-      padding: 1px 3px;
+      padding: 2px 4px;
       color: #991b1b;
     }
     .cal-cell--exam-day {
@@ -588,12 +293,12 @@
       align-items: flex-start;
       gap: 3px;
       font-family: 'Inter', system-ui, sans-serif;
-      font-size: 0.5rem;
+      font-size: 0.6rem;
       font-weight: 400;
-      line-height: 1.3;
+      line-height: 1.4;
       color: #57534e;
       padding: 1px 2px;
-      margin-bottom: 1px;
+      margin-bottom: 2px;
     }
     .cal-revision-text {
       overflow: hidden;
@@ -616,25 +321,13 @@
     @page { size: landscape; margin: 1cm; }
     @media print {
       .page-header,
-      .exams-actions,
-      .subject-filter,
-      .board-selector,
+      .exams-toolbar,
+      .exams-header,
       .site-footer,
       .sv-legal-footer,
       .cookie-consent,
-      .exam-clash-badge,
-      .exam-list,
-      .exams-summary,
-      .exams-subtitle,
-      .exams-title,
-      .results-card,
-      .plan-loading,
-      .rest-day-picker {
+      .plan-loading {
         display: none !important;
-      }
-
-      .print-calendar {
-        display: block !important;
       }
 
       .print-calendar-title {
@@ -659,6 +352,10 @@
         page-break-after: always;
       }
 
+      .cal-cell {
+        min-height: 90px;
+      }
+
       .cal-cell--weekend {
         background: #f5f5f4 !important;
         -webkit-print-color-adjust: exact;
@@ -681,10 +378,17 @@
         -webkit-print-color-adjust: exact;
         print-color-adjust: exact;
       }
+
+      .cal-exam-pill, .cal-revision-pill {
+        font-size: 0.55rem;
+      }
+      .cal-day-number {
+        font-size: 0.7rem;
+      }
     }
 
     /* ── Responsive ── */
-    @media (max-width: 600px) {
+    @media (max-width: 900px) {
       .exams-container {
         padding: 1.25rem 1rem 3rem;
       }
@@ -693,20 +397,46 @@
         font-size: 1.5rem;
       }
 
-      .exam-card {
-        padding: 0.75rem 1rem;
+      .cal-cell {
+        min-height: 80px;
+        padding: 0.2rem;
       }
 
-      .exam-card-paper {
-        white-space: normal;
+      .cal-day-number {
+        font-size: 0.65rem;
       }
 
-      .exams-summary {
-        gap: 1rem;
+      .cal-exam-pill {
+        font-size: 0.55rem;
       }
 
-      .exams-stat-value {
-        font-size: 1.2rem;
+      .cal-revision-pill {
+        font-size: 0.5rem;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .exams-container {
+        padding: 1rem 0.5rem 3rem;
+      }
+
+      .cal-grid {
+        overflow-x: auto;
+        grid-template-columns: repeat(7, minmax(80px, 1fr));
+      }
+
+      .cal-cell {
+        min-height: 70px;
+        min-width: 80px;
+      }
+
+      .exams-toolbar {
+        gap: 0.5rem;
+      }
+
+      .exams-btn {
+        padding: 0.5rem 0.85rem;
+        font-size: 0.78rem;
       }
     }
   </style>
@@ -718,7 +448,7 @@
     <div class="page-header-inner">
       <a href="/" class="header-brand">
         <span class="header-logo">StudyVault</span>
-        <span class="header-unit-label">My Exams</span>
+        <span class="header-unit-label">Revision Planner</span>
       </a>
       <nav class="header-nav">
         <a href="/">Home</a>
@@ -1056,7 +786,7 @@
     /* ── Render calendar (May + June 2026) ── */
     /* dailyPlan is optional: { "2026-05-01": [{subject, focus}], ... } */
     function renderCalendar(exams, dailyPlan) {
-      var calDiv = document.getElementById('print-calendar');
+      var calDiv = document.getElementById('revision-calendar');
       if (!calDiv) return;
 
       /* Build lookup: 'YYYY-MM-DD' → [exam, exam, ...] */
@@ -1188,622 +918,391 @@
       calHtml += '<p class="cal-results-note">Results Day: Thursday 20 August 2026</p>';
 
       calDiv.innerHTML = calHtml;
-
-      /* If plan generated, show the calendar on screen too */
-      if (hasPlan) {
-        calDiv.classList.add('print-calendar--visible');
-      }
     }
 
-    /* ── Render the full page ── */
-    function render() {
-      var exams = gatherExams();
-      var clashSet = detectClashes(exams);
-      var activeCount = Object.keys(selectedSubjects).filter(function (k) { return selectedSubjects[k]; }).length;
+    /* ── Unit-to-paper mapping ── */
+    var SKIP_UNITS = ['physics-calculations', 'chemistry-calculations', 'biology-data-skills', 'higher-calculations'];
 
+    var UNIT_PAPER_MAP = {
+      /* Science (Combined) */
+      'biology-paper-1': 'Biology Paper 1',
+      'biology-paper-2': 'Biology Paper 2',
+      'chemistry-paper-1': 'Chemistry Paper 1',
+      'chemistry-paper-2': 'Chemistry Paper 2',
+      'physics-paper-1': 'Physics Paper 1',
+      'physics-paper-2': 'Physics Paper 2',
+      /* Separate Sciences */
+      'biology-separate': 'Biology Paper 2',
+      'chemistry-separate': 'Chemistry Paper 2',
+      'physics-separate': 'Physics Paper 2',
+      /* English Literature (AQA 8702) */
+      'macbeth': 'Paper 1: Shakespeare & 19th Century Novel',
+      'a-christmas-carol': 'Paper 1: Shakespeare & 19th Century Novel',
+      'animal-farm': 'Paper 2: Modern Texts & Poetry',
+      'power-and-conflict': 'Paper 2: Modern Texts & Poetry',
+      'unseen-poetry': 'Paper 2: Modern Texts & Poetry',
+      /* History (AQA) */
+      'conflict-tension': 'Paper 1: Understanding the Modern World',
+      'america': 'Paper 1: Understanding the Modern World',
+      'health-people': 'Paper 2: Shaping the Nation',
+      'elizabethan': 'Paper 2: Shaping the Nation',
+      /* English Language (AQA 8700) */
+      'reading-writing-fiction': 'Paper 1: Creative Reading & Writing',
+      'fiction-reading': 'Paper 1: Creative Reading & Writing',
+      'creative-writing': 'Paper 1: Creative Reading & Writing',
+      'imaginative-writing': 'Paper 1: Creative Reading & Writing',
+      'reading-writing-nonfiction': "Paper 2: Writers' Viewpoints & Perspectives",
+      'nonfiction-reading': "Paper 2: Writers' Viewpoints & Perspectives",
+      'transactional-writing': "Paper 2: Writers' Viewpoints & Perspectives",
+      'viewpoints-perspectives': "Paper 2: Writers' Viewpoints & Perspectives",
+      /* Geography (AQA 8035) */
+      'paper-1': 'Paper 1: Physical Environment',
+      'paper-2': 'Paper 2: Human Environment',
+      'geographical-skills': 'Paper 3: Geographical Applications',
+      /* French/Spanish/German — null = assign to earliest paper */
+      'people-and-lifestyle': null,
+      'popular-culture': null,
+      'communication-and-world': null
+    };
+
+    /* Match a unit slug to a paper name from the exam dates JSON */
+    function matchUnitToPaper(unitSlug, subjectPapers) {
+      if (unitSlug in UNIT_PAPER_MAP) {
+        var mapped = UNIT_PAPER_MAP[unitSlug];
+        if (mapped === null) {
+          return subjectPapers.length > 0 ? subjectPapers[0].paper : null;
+        }
+        for (var i = 0; i < subjectPapers.length; i++) {
+          if (subjectPapers[i].paper === mapped) return mapped;
+        }
+        for (var i = 0; i < subjectPapers.length; i++) {
+          if (subjectPapers[i].paper.indexOf(mapped) !== -1 || mapped.indexOf(subjectPapers[i].paper) !== -1) {
+            return subjectPapers[i].paper;
+          }
+        }
+      }
+      var paperMatch = unitSlug.match(/paper-(\d+)/);
+      if (paperMatch) {
+        var pNum = paperMatch[1];
+        for (var i = 0; i < subjectPapers.length; i++) {
+          if (subjectPapers[i].paper.match(new RegExp('Paper\\s*' + pNum, 'i'))) {
+            return subjectPapers[i].paper;
+          }
+        }
+      }
+      return subjectPapers.length > 0 ? subjectPapers[0].paper : null;
+    }
+
+    /* ── Fetch lesson topics from Supabase ── */
+    async function fetchTopicPools(examList) {
+      var SUPABASE_URL = 'https://baipckgywpnwapobwtsy.supabase.co';
+      var SUPABASE_KEY = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+      var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      var session = SchoolSession.get();
+      var schoolId = session ? session.school_id : null;
+
+      var subjectSlugs = [];
+      Object.keys(selectedSubjects).forEach(function (k) {
+        if (selectedSubjects[k]) subjectSlugs.push(k);
+      });
+      if (subjectSlugs.length === 0) return [];
+
+      var fetchSlugs = subjectSlugs.slice();
+      if (fetchSlugs.indexOf('separate-sciences') !== -1 && fetchSlugs.indexOf('science') === -1) {
+        fetchSlugs.push('science');
+      }
+
+      var subjects = [];
+      if (schoolId) {
+        var bespokeRes = await sb.from('subjects').select('id, slug, name').eq('school_id', schoolId).in('slug', fetchSlugs);
+        if (bespokeRes.data) subjects = subjects.concat(bespokeRes.data);
+      }
+
+      var foundSlugs = subjects.map(function (s) { return s.slug; });
+      var missingSlugs = fetchSlugs.filter(function (s) { return foundSlugs.indexOf(s) === -1; });
+      if (missingSlugs.length > 0) {
+        var genericRes = await sb.from('subjects').select('id, slug, name').is('school_id', null).in('slug', missingSlugs);
+        if (genericRes.data) subjects = subjects.concat(genericRes.data);
+      }
+
+      if (subjects.length === 0) return [];
+
+      var subjectById = {};
+      var subjectIds = [];
+      subjects.forEach(function (s) {
+        subjectById[s.id] = s;
+        subjectIds.push(s.id);
+      });
+
+      var unitRes = await sb.from('units').select('id, slug, name, sort_order, subject_id').in('subject_id', subjectIds).order('sort_order', { ascending: true });
+      if (unitRes.error) throw new Error('Failed to load units');
+      var units = unitRes.data || [];
+
+      units = units.filter(function (u) { return SKIP_UNITS.indexOf(u.slug) === -1; });
+
+      var unitIds = units.map(function (u) { return u.id; });
+      if (unitIds.length === 0) return [];
+
+      var lessonRes = await sb.from('lessons').select('lesson_number, title, unit_id').in('unit_id', unitIds).eq('status', 'live').order('lesson_number', { ascending: true });
+      if (lessonRes.error) throw new Error('Failed to load lessons');
+      var lessons = lessonRes.data || [];
+
+      var lessonsByUnit = {};
+      lessons.forEach(function (l) {
+        if (!lessonsByUnit[l.unit_id]) lessonsByUnit[l.unit_id] = [];
+        lessonsByUnit[l.unit_id].push(l.title);
+      });
+
+      var topicPools = [];
+      var subjectRoundRobin = {};
+
+      units.forEach(function (unit) {
+        var subject = subjectById[unit.subject_id];
+        if (!subject) return;
+
+        var topics = lessonsByUnit[unit.id];
+        if (!topics || topics.length === 0) return;
+
+        var examSlug = subject.slug;
+        if (subject.slug === 'science' && selectedSubjects['separate-sciences']) {
+          examSlug = 'separate-sciences';
+        }
+        var board = boardForSubject(examSlug);
+        var boardData = allDates[board] || allDates['aqa'] || {};
+        var subjectPapers = boardData[examSlug] || [];
+        if (subjectPapers.length === 0) return;
+
+        var paperName = matchUnitToPaper(unit.slug, subjectPapers);
+
+        if (paperName === subjectPapers[0].paper && subjectPapers.length > 1) {
+          var directMatch = UNIT_PAPER_MAP[unit.slug];
+          var slugHasP1 = /paper.?1|p1/i.test(unit.slug);
+          if (!directMatch && !slugHasP1) {
+            if (!subjectRoundRobin[examSlug]) subjectRoundRobin[examSlug] = 0;
+            var idx = subjectRoundRobin[examSlug] % subjectPapers.length;
+            paperName = subjectPapers[idx].paper;
+            subjectRoundRobin[examSlug]++;
+          }
+        }
+
+        if (!paperName) return;
+
+        var examDate = null;
+        for (var i = 0; i < subjectPapers.length; i++) {
+          if (subjectPapers[i].paper === paperName) {
+            examDate = subjectPapers[i].date;
+            break;
+          }
+        }
+        if (!examDate) examDate = subjectPapers[0].date;
+
+        var shortSubj = SUBJECT_SHORT[subject.slug] || subject.name;
+        var shortPaper = shortenPaper(paperName);
+        var label = shortSubj + ': ' + shortPaper;
+        var displayName = SUBJECT_NAMES[subject.slug] || subject.name;
+
+        topicPools.push({
+          label: label,
+          subject: subject.slug,
+          subjectName: displayName,
+          examDate: examDate,
+          paperName: paperName,
+          topics: topics
+        });
+      });
+
+      topicPools.sort(function (a, b) {
+        return a.examDate.localeCompare(b.examDate);
+      });
+
+      return topicPools;
+    }
+
+    /* ── Deterministic scheduler: distributes real lesson topics across days ── */
+    function scheduleDailyPlan(examList, topicPools, restDow) {
+      var plan = {};
+      function localDateStr(dt) {
+        return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+      }
+      var todayStr = localDateStr(new Date());
+      var todayMs = new Date(todayStr + 'T00:00:00').getTime();
+      if (restDow === undefined) restDow = 0;
+
+      var lighterDow = (restDow === 0) ? 6 : 0;
+
+      var examDates = {};
+      examList.forEach(function (e) { examDates[e.date] = true; });
+
+      var sortedDates = examList.map(function (e) { return e.date; }).sort();
+      var lastDate = sortedDates[sortedDates.length - 1];
+      if (!lastDate) return plan;
+
+      var revisionDays = [];
+      var d = new Date(todayStr + 'T00:00:00');
+      var end = new Date(lastDate + 'T00:00:00');
+      while (d <= end) {
+        var ds = localDateStr(d);
+        var dow = d.getDay();
+        if (dow === restDow) {
+          plan[ds] = [{ subject: 'Rest', focus: 'Rest day' }];
+        } else if (examDates[ds]) {
+          plan[ds] = [];
+        } else {
+          revisionDays.push({ date: ds, slots: dow === lighterDow ? 2 : 3 });
+        }
+        d.setDate(d.getDate() + 1);
+      }
+
+      var MAX_GAP = 3;
+
+      /* Deep-copy pools so re-runs with different rest day work correctly */
+      var pools = topicPools.map(function (p) {
+        return { label: p.label, subject: p.subject, subjectName: p.subjectName,
+                 examDate: p.examDate, paperName: p.paperName, topics: p.topics,
+                 _cursor: 0, _done: false, _lastDay: -999 };
+      });
+
+      revisionDays.forEach(function (day, dayIdx) {
+        var dayMs = new Date(day.date + 'T00:00:00').getTime();
+
+        var eligible = pools.filter(function (pool) {
+          return pool.examDate >= day.date && !pool._done;
+        });
+
+        if (eligible.length === 0) {
+          if (!plan[day.date]) plan[day.date] = [];
+          return;
+        }
+
+        eligible.forEach(function (pool) {
+          var daysUntil = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - dayMs) / 86400000));
+          var remaining = pool.topics.length - pool._cursor;
+          var urgency = remaining / Math.max(1, daysUntil);
+          var daysSinceLastSeen = dayIdx - pool._lastDay;
+          if (daysSinceLastSeen > MAX_GAP) {
+            urgency += 100 + daysSinceLastSeen;
+          }
+          pool._score = urgency;
+        });
+
+        eligible.sort(function (a, b) { return b._score - a._score; });
+
+        var dayTasks = [];
+        var usedSubjects = {};
+
+        for (var i = 0; i < eligible.length && dayTasks.length < day.slots; i++) {
+          var pool = eligible[i];
+          if (usedSubjects[pool.subject]) continue;
+
+          var topic = pool.topics[pool._cursor];
+          pool._cursor++;
+          if (pool._cursor >= pool.topics.length) pool._done = true;
+
+          usedSubjects[pool.subject] = true;
+          pool._lastDay = dayIdx;
+          dayTasks.push({ subject: pool.subjectName, focus: topic });
+        }
+
+        if (!plan[day.date]) plan[day.date] = [];
+        plan[day.date] = plan[day.date].concat(dayTasks);
+      });
+
+      return plan;
+    }
+
+    /* ── Cached data for rest-day re-renders ── */
+    var _cachedExamList = null;
+    var _cachedTopicPools = null;
+
+    /* ── Render the page shell (toolbar + calendar placeholder) ── */
+    function render() {
       var html = '';
 
-      /* Title */
-      html += '<h1 class="exams-title">My Exam Timetable</h1>';
-      html += '<p class="exams-subtitle">GCSE exams, May&ndash;June 2026</p>';
-
-      /* Action buttons */
-      html += '<div class="exams-actions">';
-      html += '<button class="exams-btn exams-btn--primary" id="btn-ics">';
-      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-      html += 'Download Calendar (.ics)</button>';
-      html += '<button class="exams-btn exams-btn--secondary" id="btn-print">';
-      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
-      html += 'Print Timetable</button>';
-      html += '<button class="exams-btn exams-btn--plan" id="btn-plan">';
-      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-      html += 'Build Revision Plan</button>';
+      /* Header */
+      html += '<div class="exams-header">';
+      html += '<h1 class="exams-title">My Revision Planner</h1>';
+      html += '<p class="exams-subtitle">GCSE revision plan, April&ndash;June 2026</p>';
       html += '</div>';
+
+      /* Toolbar: rest day toggle + action buttons */
+      html += '<div class="exams-toolbar">';
       html += '<div class="rest-day-picker">';
       html += '<span class="rest-day-label">Rest day:</span>';
       html += '<button class="rest-day-btn active" data-day="0" id="rest-sun">Sunday</button>';
       html += '<button class="rest-day-btn" data-day="6" id="rest-sat">Saturday</button>';
       html += '</div>';
-      html += '<div id="plan-status"></div>';
-
-      /* Board selector — hide for school students (fixed board) */
-      if (!_hasSession) {
-        html += '<div class="board-selector">';
-        html += '<span class="board-selector-label">Exam Board</span>';
-        html += '<div class="board-pills">';
-        BOARDS.forEach(function (b) {
-          var cls = b === selectedBoard ? ' active' : '';
-          html += '<button class="board-pill' + cls + '" data-board="' + b + '">' + BOARD_LABELS[b] + '</button>';
-        });
-        html += '</div></div>';
-      }
-
-      /* Subject filter — use all boards for mixed-board schools */
-      var available = Object.keys(subjectBoards).length > 0
-        ? getAllSubjectSlugs()
-        : getAvailableSubjects(selectedBoard);
-      html += '<div class="subject-filter">';
-      html += '<span class="subject-filter-label">Subjects</span>';
-      html += '<div class="subject-pills">';
-      available.forEach(function (slug) {
-        var colour = SUBJECT_COLOURS[slug] || '#78716c';
-        var name = SUBJECT_NAMES[slug] || slug;
-        var isActive = !!selectedSubjects[slug];
-        var bg = isActive ? colour : '#fff';
-        var fg = isActive ? '#fff' : colour;
-        var border = colour;
-        html += '<button class="subject-pill" data-subject="' + slug + '" style="background:' + bg + ';color:' + fg + ';border-color:' + border + '">';
-        if (!isActive) {
-          html += '<span class="pill-dot" style="background:' + colour + '"></span>';
-        }
-        html += name + '</button>';
-      });
-      html += '</div></div>';
-
-      /* Summary stats */
-      if (exams.length > 0) {
-        var futureExams = exams.filter(function (e) { return daysUntil(e.date) >= 0; });
-        var firstDate = futureExams.length > 0 ? futureExams[0].date : exams[0].date;
-        var lastDate = futureExams.length > 0 ? futureExams[futureExams.length - 1].date : exams[exams.length - 1].date;
-        var examDays = {};
-        exams.forEach(function (e) { examDays[e.date] = true; });
-
-        html += '<div class="exams-summary">';
-        html += '<div class="exams-stat"><span class="exams-stat-value">' + exams.length + '</span><span class="exams-stat-label">Exam papers</span></div>';
-        html += '<div class="exams-stat"><span class="exams-stat-value">' + Object.keys(examDays).length + '</span><span class="exams-stat-label">Exam days</span></div>';
-        html += '<div class="exams-stat"><span class="exams-stat-value">' + activeCount + '</span><span class="exams-stat-label">Subjects</span></div>';
-        if (futureExams.length > 0) {
-          var dFirst = daysUntil(firstDate);
-          html += '<div class="exams-stat"><span class="exams-stat-value">' + (dFirst <= 0 ? 'Today' : dFirst + 'd') + '</span><span class="exams-stat-label">Until first exam</span></div>';
-        }
-        html += '</div>';
-      }
-
-      /* Exam list grouped by date */
-      html += '<div class="exam-list" id="exam-list">';
-
-      if (exams.length === 0) {
-        html += '<div class="exams-empty">';
-        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
-        html += '<p>Select some subjects above to see your exam timetable.</p>';
-        html += '</div>';
-      } else {
-        /* Group by date */
-        var groups = [];
-        var currentDate = null;
-        var currentGroup = null;
-        exams.forEach(function (exam, idx) {
-          if (exam.date !== currentDate) {
-            currentDate = exam.date;
-            currentGroup = { date: exam.date, exams: [] };
-            groups.push(currentGroup);
-          }
-          currentGroup.exams.push({ exam: exam, idx: idx });
-        });
-
-        groups.forEach(function (group, gi) {
-          var d = daysUntil(group.date);
-          var badgeText = daysLabel(d);
-          var badgeCls = daysBadgeClass(d);
-          var isHighlight = d === 0 || d === 1;
-
-          html += '<div class="exam-date-group" style="animation-delay:' + (gi * 0.06) + 's">';
-          html += '<div class="exam-date-header">';
-          html += '<span class="exam-date-text">' + formatDateLong(group.date) + '</span>';
-          html += '<span class="exam-date-badge ' + badgeCls + '">' + badgeText + '</span>';
-          html += '</div>';
-          html += '<div class="exam-cards">';
-
-          group.exams.forEach(function (item) {
-            var exam = item.exam;
-            var idx = item.idx;
-            var colour = SUBJECT_COLOURS[exam.subject] || '#78716c';
-            var subjectName = SUBJECT_NAMES[exam.subject] || exam.subject;
-            var cardCls = 'exam-card';
-            if (isHighlight) cardCls += ' exam-card--highlight';
-            if (d < 0) cardCls += ' exam-card--past';
-
-            html += '<div class="' + cardCls + '">';
-            html += '<div class="exam-card-dot" style="background:' + colour + '"></div>';
-            html += '<div class="exam-card-info">';
-            html += '<div class="exam-card-subject">' + subjectName + '</div>';
-            html += '<div class="exam-card-paper">' + exam.paper + '</div>';
-            html += '</div>';
-            html += '<div class="exam-card-right">';
-            if (clashSet[idx]) {
-              html += '<span class="exam-clash-badge">Clash</span>';
-            }
-            var sessionCls = exam.session === 'am' ? 'exam-session-pill--am' : 'exam-session-pill--pm';
-            var sessionText = exam.session === 'am' ? 'Morning' : 'Afternoon';
-            html += '<span class="exam-session-pill ' + sessionCls + '">' + sessionText + '</span>';
-            html += '</div>';
-            html += '</div>';
-          });
-
-          html += '</div></div>';
-        });
-      }
-
+      html += '<span class="toolbar-sep"></span>';
+      html += '<button class="exams-btn exams-btn--secondary" id="btn-print">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
+      html += 'Print</button>';
+      html += '<button class="exams-btn exams-btn--primary" id="btn-ics">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+      html += 'Download .ics</button>';
       html += '</div>';
 
-      /* Results day */
-      var resultsDays = daysUntil(RESULTS_DAY);
-      html += '<div class="results-card">';
-      html += '<div class="results-card-label">Results Day</div>';
-      html += '<div class="results-card-date">' + formatDateLong(RESULTS_DAY) + '</div>';
-      html += '<div class="results-card-days">' + (resultsDays > 0 ? resultsDays + ' days to go' : resultsDays === 0 ? 'Today!' : 'Results are out!') + '</div>';
+      /* Calendar area — loading spinner initially */
+      html += '<div id="revision-calendar" class="revision-calendar">';
+      html += '<div class="plan-loading"><span class="spinner"></span>Building your revision plan...</div>';
       html += '</div>';
-
-      /* Print calendar (hidden on screen, shown when printing) */
-      html += '<div id="print-calendar" class="print-calendar"></div>';
 
       container.innerHTML = html;
 
-      /* Populate print calendar */
-      renderCalendar(exams);
-
-      /* Bind events */
+      /* Bind toolbar events */
       document.getElementById('btn-ics').addEventListener('click', downloadICS);
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
 
-      /* ── Unit-to-paper mapping ── */
-      var SKIP_UNITS = ['physics-calculations', 'chemistry-calculations', 'biology-data-skills', 'higher-calculations'];
-
-      var UNIT_PAPER_MAP = {
-        /* Science (Combined) */
-        'biology-paper-1': 'Biology Paper 1',
-        'biology-paper-2': 'Biology Paper 2',
-        'chemistry-paper-1': 'Chemistry Paper 1',
-        'chemistry-paper-2': 'Chemistry Paper 2',
-        'physics-paper-1': 'Physics Paper 1',
-        'physics-paper-2': 'Physics Paper 2',
-        /* Separate Sciences */
-        'biology-separate': 'Biology Paper 2',
-        'chemistry-separate': 'Chemistry Paper 2',
-        'physics-separate': 'Physics Paper 2',
-        /* English Literature (AQA 8702) */
-        'macbeth': 'Paper 1: Shakespeare & 19th Century Novel',
-        'a-christmas-carol': 'Paper 1: Shakespeare & 19th Century Novel',
-        'animal-farm': 'Paper 2: Modern Texts & Poetry',
-        'power-and-conflict': 'Paper 2: Modern Texts & Poetry',
-        'unseen-poetry': 'Paper 2: Modern Texts & Poetry',
-        /* History (AQA) */
-        'conflict-tension': 'Paper 1: Understanding the Modern World',
-        'america': 'Paper 1: Understanding the Modern World',
-        'health-people': 'Paper 2: Shaping the Nation',
-        'elizabethan': 'Paper 2: Shaping the Nation',
-        /* English Language (AQA 8700) */
-        'reading-writing-fiction': 'Paper 1: Creative Reading & Writing',
-        'fiction-reading': 'Paper 1: Creative Reading & Writing',
-        'creative-writing': 'Paper 1: Creative Reading & Writing',
-        'imaginative-writing': 'Paper 1: Creative Reading & Writing',
-        'reading-writing-nonfiction': "Paper 2: Writers' Viewpoints & Perspectives",
-        'nonfiction-reading': "Paper 2: Writers' Viewpoints & Perspectives",
-        'transactional-writing': "Paper 2: Writers' Viewpoints & Perspectives",
-        'viewpoints-perspectives': "Paper 2: Writers' Viewpoints & Perspectives",
-        /* Geography (AQA 8035) */
-        'paper-1': 'Paper 1: Physical Environment',
-        'paper-2': 'Paper 2: Human Environment',
-        'geographical-skills': 'Paper 3: Geographical Applications',
-        /* French/Spanish/German — null = assign to earliest paper */
-        'people-and-lifestyle': null,
-        'popular-culture': null,
-        'communication-and-world': null
-      };
-
-      /* Match a unit slug to a paper name from the exam dates JSON */
-      function matchUnitToPaper(unitSlug, subjectPapers) {
-        /* Direct lookup in UNIT_PAPER_MAP */
-        if (unitSlug in UNIT_PAPER_MAP) {
-          var mapped = UNIT_PAPER_MAP[unitSlug];
-          if (mapped === null) {
-            /* null = assign to earliest paper */
-            return subjectPapers.length > 0 ? subjectPapers[0].paper : null;
-          }
-          /* Find matching paper from the exam dates */
-          for (var i = 0; i < subjectPapers.length; i++) {
-            if (subjectPapers[i].paper === mapped) return mapped;
-          }
-          /* Partial match: look for overlap in paper names */
-          for (var i = 0; i < subjectPapers.length; i++) {
-            if (subjectPapers[i].paper.indexOf(mapped) !== -1 || mapped.indexOf(subjectPapers[i].paper) !== -1) {
-              return subjectPapers[i].paper;
-            }
-          }
-        }
-
-        /* Heuristic: try to match "paper-1", "paper-2" in the slug */
-        var paperMatch = unitSlug.match(/paper-(\d+)/);
-        if (paperMatch) {
-          var pNum = paperMatch[1];
-          for (var i = 0; i < subjectPapers.length; i++) {
-            if (subjectPapers[i].paper.match(new RegExp('Paper\\s*' + pNum, 'i'))) {
-              return subjectPapers[i].paper;
-            }
-          }
-        }
-
-        /* Default: assign to earliest paper */
-        return subjectPapers.length > 0 ? subjectPapers[0].paper : null;
-      }
-
-      /* ── Fetch lesson topics from Supabase ── */
-      async function fetchTopicPools(examList) {
-        var SUPABASE_URL = 'https://baipckgywpnwapobwtsy.supabase.co';
-        var SUPABASE_KEY = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
-        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        /* Determine school_id for querying */
-        var session = SchoolSession.get();
-        var schoolId = session ? session.school_id : null;
-
-        /* Get the set of selected subject slugs */
-        var subjectSlugs = [];
-        Object.keys(selectedSubjects).forEach(function (k) {
-          if (selectedSubjects[k]) subjectSlugs.push(k);
-        });
-        if (subjectSlugs.length === 0) return [];
-
-        /* For separate-sciences students, also fetch combined science content */
-        var fetchSlugs = subjectSlugs.slice();
-        if (fetchSlugs.indexOf('separate-sciences') !== -1 && fetchSlugs.indexOf('science') === -1) {
-          fetchSlugs.push('science');
-        }
-
-        /* Query subjects — first try school-specific (bespoke) */
-        var subjects = [];
-        if (schoolId) {
-          var bespokeRes = await sb.from('subjects').select('id, slug, name').eq('school_id', schoolId).in('slug', fetchSlugs);
-          if (bespokeRes.data) subjects = subjects.concat(bespokeRes.data);
-        }
-
-        /* Find any slugs we didn't get from bespoke — try generic (subscribed subjects like Maths) */
-        var foundSlugs = subjects.map(function (s) { return s.slug; });
-        var missingSlugs = fetchSlugs.filter(function (s) { return foundSlugs.indexOf(s) === -1; });
-        if (missingSlugs.length > 0) {
-          var genericRes = await sb.from('subjects').select('id, slug, name').is('school_id', null).in('slug', missingSlugs);
-          if (genericRes.data) subjects = subjects.concat(genericRes.data);
-        }
-
-        if (subjects.length === 0) return [];
-
-        /* Build subject ID map */
-        var subjectById = {};
-        var subjectIds = [];
-        subjects.forEach(function (s) {
-          subjectById[s.id] = s;
-          subjectIds.push(s.id);
-        });
-
-        /* Query all units for these subjects */
-        var unitRes = await sb.from('units').select('id, slug, name, sort_order, subject_id').in('subject_id', subjectIds).order('sort_order', { ascending: true });
-        if (unitRes.error) throw new Error('Failed to load units');
-        var units = unitRes.data || [];
-
-        /* Filter out skip units */
-        units = units.filter(function (u) { return SKIP_UNITS.indexOf(u.slug) === -1; });
-
-        var unitIds = units.map(function (u) { return u.id; });
-        if (unitIds.length === 0) return [];
-
-        /* Query all live lessons for these units */
-        var lessonRes = await sb.from('lessons').select('lesson_number, title, unit_id').in('unit_id', unitIds).eq('status', 'live').order('lesson_number', { ascending: true });
-        if (lessonRes.error) throw new Error('Failed to load lessons');
-        var lessons = lessonRes.data || [];
-
-        /* Group lessons by unit_id */
-        var lessonsByUnit = {};
-        lessons.forEach(function (l) {
-          if (!lessonsByUnit[l.unit_id]) lessonsByUnit[l.unit_id] = [];
-          lessonsByUnit[l.unit_id].push(l.title);
-        });
-
-        /* Build exam date lookup: paper name → date, per subject slug */
-        var examDateLookup = {};
-        examList.forEach(function (e) {
-          var key = e.subject + '||' + e.paper;
-          examDateLookup[key] = e.date;
-        });
-
-        /* Build topic pools */
-        var topicPools = [];
-
-        /* Track round-robin index per subject for unmapped units */
-        var subjectRoundRobin = {};
-
-        units.forEach(function (unit) {
-          var subject = subjectById[unit.subject_id];
-          if (!subject) return;
-
-          var topics = lessonsByUnit[unit.id];
-          if (!topics || topics.length === 0) return;
-
-          /* Get the exam papers for this subject.
-             Combined science content maps to separate-sciences exams if student takes sep sci */
-          var examSlug = subject.slug;
-          if (subject.slug === 'science' && selectedSubjects['separate-sciences']) {
-            examSlug = 'separate-sciences';
-          }
-          var board = boardForSubject(examSlug);
-          var boardData = allDates[board] || allDates['aqa'] || {};
-          var subjectPapers = boardData[examSlug] || [];
-          if (subjectPapers.length === 0) return;
-
-          /* Map unit to its exam paper */
-          var paperName = matchUnitToPaper(unit.slug, subjectPapers);
-
-          /* If the unit defaulted to the first paper (no specific mapping found),
-             AND the subject has multiple papers, distribute units round-robin.
-             This prevents all Maths units going to Paper 1 only. */
-          if (paperName === subjectPapers[0].paper && subjectPapers.length > 1) {
-            var directMatch = UNIT_PAPER_MAP[unit.slug];
-            var slugHasP1 = /paper.?1|p1/i.test(unit.slug);
-            if (!directMatch && !slugHasP1) {
-              /* No explicit mapping — this was a default. Distribute round-robin. */
-              if (!subjectRoundRobin[examSlug]) subjectRoundRobin[examSlug] = 0;
-              var idx = subjectRoundRobin[examSlug] % subjectPapers.length;
-              paperName = subjectPapers[idx].paper;
-              subjectRoundRobin[examSlug]++;
-            }
-          }
-
-          if (!paperName) return;
-
-          /* Find the exam date for this paper */
-          var examDate = null;
-          for (var i = 0; i < subjectPapers.length; i++) {
-            if (subjectPapers[i].paper === paperName) {
-              examDate = subjectPapers[i].date;
-              break;
-            }
-          }
-          if (!examDate) examDate = subjectPapers[0].date;
-
-          /* Build a short label: "Eng Lit: Paper 1" or "Bio P1" */
-          var shortSubj = SUBJECT_SHORT[subject.slug] || subject.name;
-          var shortPaper = shortenPaper(paperName);
-          var label = shortSubj + ': ' + shortPaper;
-
-          /* Use full subject name for calendar display */
-          var displayName = SUBJECT_NAMES[subject.slug] || subject.name;
-
-          topicPools.push({
-            label: label,
-            subject: subject.slug,
-            subjectName: displayName,
-            examDate: examDate,
-            paperName: paperName,
-            topics: topics
-          });
-        });
-
-        /* Sort pools by exam date (earliest first) */
-        topicPools.sort(function (a, b) {
-          return a.examDate.localeCompare(b.examDate);
-        });
-
-        return topicPools;
-      }
-
-      /* ── Deterministic scheduler: distributes real lesson topics across days ── */
-      /*
-       * Strategy:
-       * 1. Build available revision slots (days × 3, minus Sundays and exam days)
-       * 2. Each topicPool has an examDate — only schedule topics before their exam
-       * 3. Allocate slots per pool proportional to: topic count × urgency weight
-       * 4. Deal out round-robin across available days, 3 per weekday, 2 Saturday
-       * 5. No duplicate subject on the same day
-       */
-      function scheduleDailyPlan(examList, topicPools, restDow) {
-        var plan = {};
-        /* Use local date formatting to avoid BST/UTC offset bug */
-        function localDateStr(dt) {
-          return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
-        }
-        var todayStr = localDateStr(new Date());
-        var todayMs = new Date(todayStr + 'T00:00:00').getTime();
-        if (restDow === undefined) restDow = 0; /* default Sunday */
-
-        /* The other weekend day gets 2 slots (lighter day) */
-        var lighterDow = (restDow === 0) ? 6 : 0; /* if rest=Sun, lighter=Sat; if rest=Sat, lighter=Sun */
-
-        /* Build exam date set */
-        var examDates = {};
-        examList.forEach(function (e) { examDates[e.date] = true; });
-
-        /* Find last exam date */
-        var sortedDates = examList.map(function (e) { return e.date; }).sort();
-        var lastDate = sortedDates[sortedDates.length - 1];
-        if (!lastDate) return plan;
-
-        /* Build available revision days */
-        var revisionDays = [];
-        var d = new Date(todayStr + 'T00:00:00');
-        var end = new Date(lastDate + 'T00:00:00');
-        while (d <= end) {
-          var ds = localDateStr(d);
-          var dow = d.getDay();
-          if (dow === restDow) {
-            plan[ds] = [{ subject: 'Rest', focus: 'Rest day' }];
-          } else if (examDates[ds]) {
-            plan[ds] = [];
-          } else {
-            revisionDays.push({ date: ds, slots: dow === lighterDow ? 2 : 3 });
-          }
-          d.setDate(d.getDate() + 1);
-        }
-
-        /* ── Phase-based scheduling ──
-         * For each revision day, pick topics from pools whose exam hasn't passed.
-         * Each pool has a cursor that advances through its topics sequentially.
-         * On each day, pick from 2-3 different pools, prioritising by urgency.
-         * Once a pool's cursor reaches the end of its topics, it's done (no repeats).
-         */
-
-        /* Give each pool a cursor and track last appearance */
-        var MAX_GAP = 3; /* no subject goes more than 3 revision days without appearing */
-
-        topicPools.forEach(function (pool) {
-          pool._cursor = 0;
-          pool._done = false;
-          pool._lastDay = -999; /* revision day index of last appearance */
-        });
-
-        revisionDays.forEach(function (day, dayIdx) {
-          var dayMs = new Date(day.date + 'T00:00:00').getTime();
-
-          /* Get eligible pools: exam not passed AND topics remaining */
-          var eligible = topicPools.filter(function (pool) {
-            return pool.examDate >= day.date && !pool._done;
-          });
-
-          if (eligible.length === 0) {
-            if (!plan[day.date]) plan[day.date] = [];
-            return;
-          }
-
-          /* Score each pool: urgency + starvation bonus */
-          eligible.forEach(function (pool) {
-            var daysUntil = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - dayMs) / 86400000));
-            var remaining = pool.topics.length - pool._cursor;
-            /* Base urgency: need to fit remaining topics before the exam */
-            var urgency = remaining / Math.max(1, daysUntil);
-
-            /* Starvation bonus: if this pool hasn't appeared in MAX_GAP+ days, boost it */
-            var daysSinceLastSeen = dayIdx - pool._lastDay;
-            if (daysSinceLastSeen > MAX_GAP) {
-              /* Big boost — guaranteed to be picked if starved */
-              urgency += 100 + daysSinceLastSeen;
-            }
-
-            pool._score = urgency;
-          });
-
-          /* Sort by score descending — starved pools first, then most urgent */
-          eligible.sort(function (a, b) { return b._score - a._score; });
-
-          /* Pick top 2-3 pools (different subjects), advance their cursors */
-          var dayTasks = [];
-          var usedSubjects = {};
-
-          for (var i = 0; i < eligible.length && dayTasks.length < day.slots; i++) {
-            var pool = eligible[i];
-            if (usedSubjects[pool.subject]) continue; /* no duplicate subject per day */
-
-            var topic = pool.topics[pool._cursor];
-            pool._cursor++;
-            if (pool._cursor >= pool.topics.length) pool._done = true;
-
-            usedSubjects[pool.subject] = true;
-            pool._lastDay = dayIdx;
-            dayTasks.push({ subject: pool.subjectName, focus: topic });
-          }
-
-          if (!plan[day.date]) plan[day.date] = [];
-          plan[day.date] = plan[day.date].concat(dayTasks);
-        });
-
-        return plan;
-      }
-
-      /* ── Build Revision Plan — Supabase-powered ── */
-      document.getElementById('btn-plan').addEventListener('click', async function () {
-        var btn = this;
-        var statusEl = document.getElementById('plan-status');
-        if (btn.disabled) return;
-
-        var examList = gatherExams();
-        if (examList.length === 0) {
-          statusEl.innerHTML = '<p style="color:#78716c;font-size:0.9rem;text-align:center;padding:1rem;">Select some subjects first to build a revision plan.</p>';
-          return;
-        }
-
-        btn.disabled = true;
-        btn.textContent = 'Loading...';
-        statusEl.innerHTML = '<div class="plan-loading"><span class="spinner"></span>Loading your subjects...</div>';
-
-        try {
-          var topicPools = await fetchTopicPools(examList);
-
-          if (topicPools.length === 0) {
-            statusEl.innerHTML = '<p style="color:#78716c;font-size:0.9rem;text-align:center;padding:1rem;">No live lessons found for your selected subjects.</p>';
-            btn.disabled = false;
-            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Build Revision Plan';
-            return;
-          }
-
-          statusEl.innerHTML = '';
-
-          /* Read selected rest day */
-          var restDayBtn = container.querySelector('.rest-day-btn.active');
-          var restDow = restDayBtn ? parseInt(restDayBtn.getAttribute('data-day'), 10) : 0;
-
-          var dailyPlan = scheduleDailyPlan(examList, topicPools, restDow);
-          renderCalendar(examList, dailyPlan);
-        } catch (err) {
-          console.error('Revision plan error:', err);
-          statusEl.innerHTML = '<p style="color:#b91c1c;font-size:0.9rem;text-align:center;padding:1rem;">Something went wrong loading your revision plan. Please try again.</p>';
-        }
-
-        btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Build Revision Plan';
-      });
-
-      /* Rest day toggle */
+      /* Rest day toggle — re-run scheduler with cached data */
       container.querySelectorAll('.rest-day-btn').forEach(function (btn) {
         btn.addEventListener('click', function () {
           container.querySelectorAll('.rest-day-btn').forEach(function (b) { b.classList.remove('active'); });
           btn.classList.add('active');
-        });
-      });
 
-      /* Board pills */
-      var boardBtns = container.querySelectorAll('.board-pill');
-      boardBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          selectedBoard = btn.getAttribute('data-board');
-          /* Keep subjects that exist in new board, deselect those that don't */
-          var newAvailable = getAvailableSubjects(selectedBoard);
-          var newSelected = {};
-          newAvailable.forEach(function (slug) {
-            if (selectedSubjects[slug]) newSelected[slug] = true;
-          });
-          selectedSubjects = newSelected;
-          savePrefs();
-          render();
+          /* Re-build calendar if we have cached data */
+          if (_cachedExamList && _cachedTopicPools) {
+            var restDow = parseInt(btn.getAttribute('data-day'), 10);
+            var dailyPlan = scheduleDailyPlan(_cachedExamList, _cachedTopicPools, restDow);
+            renderCalendar(_cachedExamList, dailyPlan);
+          }
         });
       });
+    }
 
-      /* Subject pills */
-      var subjectBtns = container.querySelectorAll('.subject-pill');
-      subjectBtns.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          var slug = btn.getAttribute('data-subject');
-          selectedSubjects[slug] = !selectedSubjects[slug];
-          savePrefs();
-          render();
-        });
-      });
+    /* ── Auto-build revision plan after render ── */
+    async function autoBuildPlan() {
+      var calDiv = document.getElementById('revision-calendar');
+
+      var examList = gatherExams();
+      if (examList.length === 0) {
+        calDiv.innerHTML = '<div class="exams-empty">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
+          '<p>No subjects selected. Visit the <a href="/" style="color:#2563eb;text-decoration:underline;">homepage</a> to pick your subjects first.</p>' +
+          '</div>';
+        return;
+      }
+
+      try {
+        var topicPools = await fetchTopicPools(examList);
+
+        if (topicPools.length === 0) {
+          calDiv.innerHTML = '<div class="exams-empty"><p>No live lessons found for your selected subjects.</p></div>';
+          return;
+        }
+
+        /* Cache for rest-day toggle re-renders */
+        _cachedExamList = examList;
+        _cachedTopicPools = topicPools;
+
+        /* Read selected rest day */
+        var restDayBtn = container.querySelector('.rest-day-btn.active');
+        var restDow = restDayBtn ? parseInt(restDayBtn.getAttribute('data-day'), 10) : 0;
+
+        var dailyPlan = scheduleDailyPlan(examList, topicPools, restDow);
+        renderCalendar(examList, dailyPlan);
+      } catch (err) {
+        console.error('Revision plan error:', err);
+        calDiv.innerHTML = '<div class="exams-empty"><p style="color:#b91c1c;">Something went wrong loading your revision plan. Please try refreshing the page.</p></div>';
+      }
     }
 
     /* ── Init ── */
@@ -1897,6 +1396,7 @@
       }
 
       render();
+      autoBuildPlan();
     }
 
     if (document.readyState === 'loading') {
