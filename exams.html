@@ -964,54 +964,48 @@
         return;
       }
 
-      /* Determine initial subject selection */
-      var savedPrefs = loadPrefs();
-
-      /* Check school session for board hint */
+      /* Determine initial subject selection.
+         Priority: SchoolSession > FreeUser > savedPrefs (anonymous fallback) */
       var schoolSubjects = getSchoolSubjects();
       var freeSubjects = getFreeUserSubjects();
+      var savedPrefs = loadPrefs();
 
-      if (savedPrefs) {
-        /* Restore saved preferences */
-        selectedBoard = savedPrefs.board || 'aqa';
-        savedPrefs.subjects.forEach(function (s) { selectedSubjects[s] = true; });
-      } else if (schoolSubjects) {
-        /* School student — pre-select all their subjects */
+      function normaliseSubjectSlug(slug) {
+        var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
+        var aliases = {
+          'mathematics': 'maths',
+          'combined-science': 'science',
+          'religious-studies': 'religious-education',
+          'food-preparation-and-nutrition': 'food-technology',
+          'food': 'food-technology'
+        };
+        return aliases[base] || base;
+      }
+
+      if (schoolSubjects) {
+        /* School student — always use their school subjects */
         selectedBoard = 'aqa';
         var available = getAvailableSubjects(selectedBoard);
         schoolSubjects.forEach(function (slug) {
-          /* Normalise slug — strip board suffix */
-          var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
-          var aliases = {
-            'mathematics': 'maths',
-            'combined-science': 'science',
-            'religious-studies': 'religious-education',
-            'food-preparation-and-nutrition': 'food-technology',
-            'food': 'food-technology'
-          };
-          var norm = aliases[base] || base;
+          var norm = normaliseSubjectSlug(slug);
           if (available.indexOf(norm) !== -1) {
             selectedSubjects[norm] = true;
           }
         });
       } else if (freeSubjects) {
-        /* Free user — pre-select their chosen subjects */
+        /* Free user — use their homepage subject picks */
         selectedBoard = 'aqa';
         var available = getAvailableSubjects(selectedBoard);
         freeSubjects.forEach(function (slug) {
-          var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
-          var aliases = {
-            'mathematics': 'maths',
-            'combined-science': 'science',
-            'religious-studies': 'religious-education',
-            'food-preparation-and-nutrition': 'food-technology',
-            'food': 'food-technology'
-          };
-          var norm = aliases[base] || base;
+          var norm = normaliseSubjectSlug(slug);
           if (available.indexOf(norm) !== -1) {
             selectedSubjects[norm] = true;
           }
         });
+      } else if (savedPrefs && savedPrefs.subjects && savedPrefs.subjects.length > 0) {
+        /* Anonymous fallback — restore last saved selection */
+        selectedBoard = savedPrefs.board || 'aqa';
+        savedPrefs.subjects.forEach(function (s) { selectedSubjects[s] = true; });
       }
 
       render();
