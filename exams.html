@@ -12,6 +12,7 @@
   <meta name="theme-color" content="#2d2a26">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     /* ── Page layout ── */
     .exams-container {
@@ -76,12 +77,13 @@
       border: 1.5px solid #e7e5e4;
     }
 
-    .exams-btn--ai {
-      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    .exams-btn--plan {
+      background: #16a34a;
       color: #fff;
       border: none;
     }
-    .exams-btn--ai:hover { opacity: 0.9; }
+    .exams-btn--plan:hover { opacity: 0.9; }
+    .exams-btn--plan:disabled { opacity: 0.6; cursor: not-allowed; }
 
     .exams-btn svg {
       width: 16px;
@@ -89,26 +91,10 @@
       flex-shrink: 0;
     }
 
-    /* ── Strategy card ── */
-    .strategy-card {
-      background: #fff;
-      border-radius: 16px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-      border: 1px solid #e7e5e4;
-      animation: strategyIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    .strategy-card h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.1rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #2d2a26; }
-    .strategy-card h2:first-child { margin-top: 0; }
-    .strategy-card p { font-size: 0.88rem; line-height: 1.6; color: #44403c; margin: 0 0 0.5rem; }
-    .strategy-card ul { font-size: 0.88rem; line-height: 1.6; color: #44403c; margin: 0 0 0.75rem; padding-left: 1.25rem; }
-    .strategy-card li { margin-bottom: 0.3rem; }
-    .strategy-card strong { color: #2d2a26; }
-    .strategy-loading { text-align: center; padding: 2rem; color: #78716c; font-size: 0.9rem; }
-    .strategy-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #e7e5e4; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
+    /* ── Loading state ── */
+    .plan-loading { text-align: center; padding: 2rem; color: #78716c; font-size: 0.9rem; }
+    .plan-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #e7e5e4; border-top-color: #16a34a; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    @keyframes strategyIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── Board selector ── */
     .board-selector {
@@ -610,8 +596,7 @@
       .exams-subtitle,
       .exams-title,
       .results-card,
-      .strategy-card,
-      #strategy-container {
+      .plan-loading {
         display: none !important;
       }
 
@@ -1115,7 +1100,7 @@
             });
           }
 
-          /* Revision tasks for this date (from AI daily plan) */
+          /* Revision tasks for this date (from daily plan) */
           var dayTasks = plan[dateStr];
           if (dayTasks && dayTasks.length) {
             dayTasks.forEach(function (task) {
@@ -1197,11 +1182,11 @@
       html += '<button class="exams-btn exams-btn--secondary" id="btn-print">';
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
       html += 'Print Timetable</button>';
-      html += '<button class="exams-btn exams-btn--ai" id="btn-strategy">';
-      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.57-3.25 3.92L12 22"/><path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.57 3.25 3.92"/><path d="M8.5 8.5L3 11"/><path d="M15.5 8.5L21 11"/><path d="M7 14l-2 4"/><path d="M17 14l2 4"/></svg>';
-      html += 'Get Revision Strategy</button>';
+      html += '<button class="exams-btn exams-btn--plan" id="btn-plan">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+      html += 'Build Revision Plan</button>';
       html += '</div>';
-      html += '<div id="strategy-container"></div>';
+      html += '<div id="plan-status"></div>';
 
       /* Board selector — hide for school students (fixed board) */
       if (!_hasSession) {
@@ -1343,17 +1328,221 @@
       document.getElementById('btn-ics').addEventListener('click', downloadICS);
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
 
-      /* ── Deterministic scheduler: AI provides topics, code schedules days ── */
+      /* ── Unit-to-paper mapping ── */
+      var SKIP_UNITS = ['physics-calculations', 'chemistry-calculations', 'biology-data-skills', 'higher-calculations'];
+
+      var UNIT_PAPER_MAP = {
+        /* Science (Combined) */
+        'biology-paper-1': 'Biology Paper 1',
+        'biology-paper-2': 'Biology Paper 2',
+        'chemistry-paper-1': 'Chemistry Paper 1',
+        'chemistry-paper-2': 'Chemistry Paper 2',
+        'physics-paper-1': 'Physics Paper 1',
+        'physics-paper-2': 'Physics Paper 2',
+        /* Separate Sciences */
+        'biology-separate': 'Biology Paper 2',
+        'chemistry-separate': 'Chemistry Paper 2',
+        'physics-separate': 'Physics Paper 2',
+        /* English Literature (AQA 8702) */
+        'macbeth': 'Paper 1: Shakespeare & 19th Century Novel',
+        'a-christmas-carol': 'Paper 1: Shakespeare & 19th Century Novel',
+        'animal-farm': 'Paper 2: Modern Texts & Poetry',
+        'power-and-conflict': 'Paper 2: Modern Texts & Poetry',
+        'unseen-poetry': 'Paper 2: Modern Texts & Poetry',
+        /* History (AQA) */
+        'conflict-tension': 'Paper 1: Understanding the Modern World',
+        'america': 'Paper 1: Understanding the Modern World',
+        'health-people': 'Paper 2: Shaping the Nation',
+        'elizabethan': 'Paper 2: Shaping the Nation',
+        /* English Language (AQA 8700) */
+        'reading-writing-fiction': 'Paper 1: Creative Reading & Writing',
+        'fiction-reading': 'Paper 1: Creative Reading & Writing',
+        'creative-writing': 'Paper 1: Creative Reading & Writing',
+        'imaginative-writing': 'Paper 1: Creative Reading & Writing',
+        'reading-writing-nonfiction': "Paper 2: Writers' Viewpoints & Perspectives",
+        'nonfiction-reading': "Paper 2: Writers' Viewpoints & Perspectives",
+        'transactional-writing': "Paper 2: Writers' Viewpoints & Perspectives",
+        'viewpoints-perspectives': "Paper 2: Writers' Viewpoints & Perspectives",
+        /* Geography (AQA 8035) */
+        'paper-1': 'Paper 1: Physical Environment',
+        'paper-2': 'Paper 2: Human Environment',
+        'geographical-skills': 'Paper 3: Geographical Applications',
+        /* French/Spanish/German — null = assign to earliest paper */
+        'people-and-lifestyle': null,
+        'popular-culture': null,
+        'communication-and-world': null
+      };
+
+      /* Match a unit slug to a paper name from the exam dates JSON */
+      function matchUnitToPaper(unitSlug, subjectPapers) {
+        /* Direct lookup in UNIT_PAPER_MAP */
+        if (unitSlug in UNIT_PAPER_MAP) {
+          var mapped = UNIT_PAPER_MAP[unitSlug];
+          if (mapped === null) {
+            /* null = assign to earliest paper */
+            return subjectPapers.length > 0 ? subjectPapers[0].paper : null;
+          }
+          /* Find matching paper from the exam dates */
+          for (var i = 0; i < subjectPapers.length; i++) {
+            if (subjectPapers[i].paper === mapped) return mapped;
+          }
+          /* Partial match: look for overlap in paper names */
+          for (var i = 0; i < subjectPapers.length; i++) {
+            if (subjectPapers[i].paper.indexOf(mapped) !== -1 || mapped.indexOf(subjectPapers[i].paper) !== -1) {
+              return subjectPapers[i].paper;
+            }
+          }
+        }
+
+        /* Heuristic: try to match "paper-1", "paper-2" in the slug */
+        var paperMatch = unitSlug.match(/paper-(\d+)/);
+        if (paperMatch) {
+          var pNum = paperMatch[1];
+          for (var i = 0; i < subjectPapers.length; i++) {
+            if (subjectPapers[i].paper.match(new RegExp('Paper\\s*' + pNum, 'i'))) {
+              return subjectPapers[i].paper;
+            }
+          }
+        }
+
+        /* Default: assign to earliest paper */
+        return subjectPapers.length > 0 ? subjectPapers[0].paper : null;
+      }
+
+      /* ── Fetch lesson topics from Supabase ── */
+      async function fetchTopicPools(examList) {
+        var SUPABASE_URL = 'https://baipckgywpnwapobwtsy.supabase.co';
+        var SUPABASE_KEY = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+        var sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        /* Determine school_id for querying */
+        var session = SchoolSession.get();
+        var schoolId = session ? session.school_id : null;
+
+        /* Get the set of selected subject slugs */
+        var subjectSlugs = [];
+        Object.keys(selectedSubjects).forEach(function (k) {
+          if (selectedSubjects[k]) subjectSlugs.push(k);
+        });
+        if (subjectSlugs.length === 0) return [];
+
+        /* Query subjects — get id, slug, name */
+        var subjectQuery = sb.from('subjects').select('id, slug, name');
+        if (schoolId) {
+          subjectQuery = subjectQuery.eq('school_id', schoolId);
+        } else {
+          subjectQuery = subjectQuery.is('school_id', null);
+        }
+        subjectQuery = subjectQuery.in('slug', subjectSlugs);
+        var subjectRes = await subjectQuery;
+        if (subjectRes.error) throw new Error('Failed to load subjects');
+        var subjects = subjectRes.data || [];
+
+        if (subjects.length === 0) return [];
+
+        /* Build subject ID map */
+        var subjectById = {};
+        var subjectIds = [];
+        subjects.forEach(function (s) {
+          subjectById[s.id] = s;
+          subjectIds.push(s.id);
+        });
+
+        /* Query all units for these subjects */
+        var unitRes = await sb.from('units').select('id, slug, name, sort_order, subject_id').in('subject_id', subjectIds).order('sort_order', { ascending: true });
+        if (unitRes.error) throw new Error('Failed to load units');
+        var units = unitRes.data || [];
+
+        /* Filter out skip units */
+        units = units.filter(function (u) { return SKIP_UNITS.indexOf(u.slug) === -1; });
+
+        var unitIds = units.map(function (u) { return u.id; });
+        if (unitIds.length === 0) return [];
+
+        /* Query all live lessons for these units */
+        var lessonRes = await sb.from('lessons').select('lesson_number, title, unit_id').in('unit_id', unitIds).eq('status', 'live').order('lesson_number', { ascending: true });
+        if (lessonRes.error) throw new Error('Failed to load lessons');
+        var lessons = lessonRes.data || [];
+
+        /* Group lessons by unit_id */
+        var lessonsByUnit = {};
+        lessons.forEach(function (l) {
+          if (!lessonsByUnit[l.unit_id]) lessonsByUnit[l.unit_id] = [];
+          lessonsByUnit[l.unit_id].push(l.title);
+        });
+
+        /* Build exam date lookup: paper name → date, per subject slug */
+        var examDateLookup = {};
+        examList.forEach(function (e) {
+          var key = e.subject + '||' + e.paper;
+          examDateLookup[key] = e.date;
+        });
+
+        /* Build topic pools */
+        var topicPools = [];
+        units.forEach(function (unit) {
+          var subject = subjectById[unit.subject_id];
+          if (!subject) return;
+
+          var topics = lessonsByUnit[unit.id];
+          if (!topics || topics.length === 0) return;
+
+          /* Get the exam papers for this subject */
+          var board = boardForSubject(subject.slug);
+          var boardData = allDates[board] || allDates['aqa'] || {};
+          var subjectPapers = boardData[subject.slug] || [];
+          if (subjectPapers.length === 0) return;
+
+          /* Map unit to its exam paper */
+          var paperName = matchUnitToPaper(unit.slug, subjectPapers);
+          if (!paperName) return;
+
+          /* Find the exam date for this paper */
+          var examDate = null;
+          for (var i = 0; i < subjectPapers.length; i++) {
+            if (subjectPapers[i].paper === paperName) {
+              examDate = subjectPapers[i].date;
+              break;
+            }
+          }
+          if (!examDate) examDate = subjectPapers[0].date;
+
+          /* Build a short label: "Eng Lit: Paper 1" or "Bio P1" */
+          var shortSubj = SUBJECT_SHORT[subject.slug] || subject.name;
+          var shortPaper = shortenPaper(paperName);
+          var label = shortSubj + ': ' + shortPaper;
+
+          /* Use full subject name for calendar display */
+          var displayName = SUBJECT_NAMES[subject.slug] || subject.name;
+
+          topicPools.push({
+            label: label,
+            subject: subject.slug,
+            subjectName: displayName,
+            examDate: examDate,
+            paperName: paperName,
+            topics: topics
+          });
+        });
+
+        /* Sort pools by exam date (earliest first) */
+        topicPools.sort(function (a, b) {
+          return a.examDate.localeCompare(b.examDate);
+        });
+
+        return topicPools;
+      }
+
+      /* ── Deterministic scheduler: distributes real lesson topics across days ── */
       /*
        * Strategy:
-       * 1. Count available revision slots (days × 3, minus Sundays and exam days)
-       * 2. Allocate slots per subject proportional to: papers × urgency_weight
-       *    Urgency: exams in 1-14 days = 4×, 15-28 days = 2×, 29+ days = 1×
-       * 3. Build a master sequence of (subject, topic) pairs
-       * 4. Deal them out round-robin across available days, 3 per weekday, 2 Saturday
-       * 5. No subject appears twice on the same day
+       * 1. Build available revision slots (days × 3, minus Sundays and exam days)
+       * 2. Each topicPool has an examDate — only schedule topics before their exam
+       * 3. Allocate slots per pool proportional to: topic count × urgency weight
+       * 4. Deal out round-robin across available days, 3 per weekday, 2 Saturday
+       * 5. No duplicate subject on the same day
        */
-      function scheduleDailyPlan(examList, topics) {
+      function scheduleDailyPlan(examList, topicPools) {
         var plan = {};
         var todayStr = new Date().toISOString().split('T')[0];
         var todayMs = new Date(todayStr + 'T00:00:00').getTime();
@@ -1362,23 +1551,22 @@
         var examDates = {};
         examList.forEach(function (e) { examDates[e.date] = true; });
 
-        /* Find date range */
+        /* Find last exam date */
         var sortedDates = examList.map(function (e) { return e.date; }).sort();
         var lastDate = sortedDates[sortedDates.length - 1];
         if (!lastDate) return plan;
 
         /* Build available revision days (not Sunday, not exam day) */
         var revisionDays = [];
-        var allDays = [];
         var d = new Date(todayStr + 'T00:00:00');
         var end = new Date(lastDate + 'T00:00:00');
         while (d <= end) {
           var ds = d.toISOString().split('T')[0];
           var dow = d.getDay();
-          allDays.push(ds);
           if (dow === 0) {
             plan[ds] = [{ subject: 'Rest', focus: 'Rest day' }];
           } else if (examDates[ds]) {
+            /* On exam days, add the exam subjects as tasks */
             plan[ds] = [];
           } else {
             revisionDays.push({ date: ds, slots: dow === 6 ? 2 : 3 });
@@ -1386,64 +1574,49 @@
           d.setDate(d.getDate() + 1);
         }
 
+        /* Build a master list of tasks, repeating topics to fill slots.
+           Weight each pool by urgency and topic count. */
         var totalSlots = revisionDays.reduce(function (sum, d) { return sum + d.slots; }, 0);
-
-        /* Subject info: first exam date, paper count, urgency */
-        var subjectInfo = {};
-        examList.forEach(function (e) {
-          if (!subjectInfo[e.subject]) {
-            subjectInfo[e.subject] = { papers: 0, firstExam: e.date };
-          }
-          subjectInfo[e.subject].papers++;
-          if (e.date < subjectInfo[e.subject].firstExam) {
-            subjectInfo[e.subject].firstExam = e.date;
-          }
-        });
-
-        /* Calculate urgency weight */
-        var subjectNames = Object.keys(subjectInfo);
-        var rawWeights = {};
         var totalWeight = 0;
-        subjectNames.forEach(function (s) {
-          var daysUntil = Math.max(1, Math.ceil((new Date(subjectInfo[s].firstExam + 'T00:00:00').getTime() - todayMs) / 86400000));
-          var urgency = daysUntil <= 14 ? 4 : daysUntil <= 28 ? 2 : 1;
-          var w = subjectInfo[s].papers * urgency;
-          rawWeights[s] = w;
+        var poolWeights = [];
+
+        topicPools.forEach(function (pool) {
+          var daysUntilExam = Math.max(1, Math.ceil((new Date(pool.examDate + 'T00:00:00').getTime() - todayMs) / 86400000));
+          var urgency = daysUntilExam <= 14 ? 4 : daysUntilExam <= 28 ? 2 : 1;
+          var w = pool.topics.length * urgency;
+          poolWeights.push(w);
           totalWeight += w;
         });
 
-        /* Allocate slots per subject */
-        var subjectSlots = {};
-        subjectNames.forEach(function (s) {
-          subjectSlots[s] = Math.max(2, Math.round((rawWeights[s] / totalWeight) * totalSlots));
-        });
-
-        /* Build master sequence: each subject contributes its allocated slots with topics */
+        /* Build master task list */
         var masterList = [];
-        subjectNames.forEach(function (s) {
-          var topicList = topics[s] || [];
-          if (topicList.length === 0) return;
-          for (var i = 0; i < subjectSlots[s]; i++) {
-            masterList.push({ subject: s, focus: topicList[i % topicList.length] });
+        topicPools.forEach(function (pool, pi) {
+          var allocatedSlots = Math.max(1, Math.round((poolWeights[pi] / (totalWeight || 1)) * totalSlots));
+          for (var i = 0; i < allocatedSlots; i++) {
+            masterList.push({
+              subject: pool.subjectName,
+              focus: pool.topics[i % pool.topics.length],
+              examDate: pool.examDate,
+              subjectSlug: pool.subject
+            });
           }
         });
 
-        /* Shuffle master list to interleave subjects (Fisher-Yates) */
+        /* Seeded shuffle to interleave subjects (Fisher-Yates variant) */
         for (var i = masterList.length - 1; i > 0; i--) {
-          /* Use a seeded-ish shuffle based on index for consistency */
           var j = (i * 7 + 3) % (i + 1);
           var tmp = masterList[i];
           masterList[i] = masterList[j];
           masterList[j] = tmp;
         }
 
-        /* Deal out to revision days, avoiding same subject twice on one day */
+        /* Deal out to revision days, respecting exam deadlines */
         var cursor = 0;
         revisionDays.forEach(function (day) {
           var dayTasks = [];
           var usedSubjects = {};
           var attempts = 0;
-          var maxAttempts = masterList.length;
+          var maxAttempts = masterList.length * 2;
 
           while (dayTasks.length < day.slots && attempts < maxAttempts) {
             if (cursor >= masterList.length) cursor = 0;
@@ -1451,73 +1624,59 @@
             cursor++;
             attempts++;
 
-            if (usedSubjects[item.subject]) continue; /* no duplicate subjects per day */
-            usedSubjects[item.subject] = true;
-            dayTasks.push(item);
+            /* Skip topics whose exam has already passed */
+            if (item.examDate < day.date) continue;
+
+            /* No duplicate subjects per day */
+            if (usedSubjects[item.subjectSlug]) continue;
+            usedSubjects[item.subjectSlug] = true;
+            dayTasks.push({ subject: item.subject, focus: item.focus });
           }
 
-          plan[day.date] = dayTasks;
+          if (!plan[day.date]) plan[day.date] = [];
+          plan[day.date] = plan[day.date].concat(dayTasks);
         });
 
         return plan;
       }
 
-      /* AI revision strategy */
-      document.getElementById('btn-strategy').addEventListener('click', async function () {
+      /* ── Build Revision Plan — Supabase-powered ── */
+      document.getElementById('btn-plan').addEventListener('click', async function () {
         var btn = this;
-        var stratContainer = document.getElementById('strategy-container');
+        var statusEl = document.getElementById('plan-status');
         if (btn.disabled) return;
 
+        var examList = gatherExams();
+        if (examList.length === 0) {
+          statusEl.innerHTML = '<p style="color:#78716c;font-size:0.9rem;text-align:center;padding:1rem;">Select some subjects first to build a revision plan.</p>';
+          return;
+        }
+
         btn.disabled = true;
-        btn.textContent = 'Thinking...';
-        stratContainer.innerHTML = '<div class="strategy-loading"><span class="spinner"></span>Building your personalised revision plan...</div>';
-
-        var examList = gatherExams().map(function (e) {
-          return { subject: SUBJECT_NAMES[e.subject] || e.subject, paper: e.paper, date: e.date, session: e.session };
-        });
-
-        var todayStr = new Date().toISOString().split('T')[0];
+        btn.textContent = 'Loading...';
+        statusEl.innerHTML = '<div class="plan-loading"><span class="spinner"></span>Loading your subjects...</div>';
 
         try {
-          var resp = await fetch('/api/revision-strategy', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ exams: examList, today: todayStr })
-          });
+          var topicPools = await fetchTopicPools(examList);
 
-          if (!resp.ok) throw new Error('API error');
-          var data = await resp.json();
-
-          /* Render strategy overview */
-          var md = data.strategy || '';
-          if (md) {
-            var stratHtml = md
-              .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-              .replace(/^\- (.+)$/gm, '<li>$1</li>')
-              .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-              .replace(/\n\n/g, '</p><p>')
-              .replace(/^(?!<[hul])(.+)$/gm, '<p>$1</p>')
-              .replace(/<p><\/p>/g, '')
-              .replace(/<p>(<[hul])/g, '$1')
-              .replace(/(<\/[hul].*?>)<\/p>/g, '$1');
-            stratContainer.innerHTML = '<div class="strategy-card">' + stratHtml + '</div>';
-          } else {
-            stratContainer.innerHTML = '';
+          if (topicPools.length === 0) {
+            statusEl.innerHTML = '<p style="color:#78716c;font-size:0.9rem;text-align:center;padding:1rem;">No live lessons found for your selected subjects.</p>';
+            btn.disabled = false;
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Build Revision Plan';
+            return;
           }
 
-          /* Schedule topics into days deterministically */
-          var topics = data.topics || {};
-          if (Object.keys(topics).length > 0) {
-            var dailyPlan = scheduleDailyPlan(examList, topics);
-            renderCalendar(gatherExams(), dailyPlan);
-          }
+          statusEl.innerHTML = '';
+
+          var dailyPlan = scheduleDailyPlan(examList, topicPools);
+          renderCalendar(examList, dailyPlan);
         } catch (err) {
-          stratContainer.innerHTML = '<div class="strategy-card"><p>Sorry, couldn\'t generate a strategy right now. Try again in a moment.</p></div>';
+          console.error('Revision plan error:', err);
+          statusEl.innerHTML = '<p style="color:#b91c1c;font-size:0.9rem;text-align:center;padding:1rem;">Something went wrong loading your revision plan. Please try again.</p>';
         }
 
         btn.disabled = false;
-        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.57-3.25 3.92L12 22"/><path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.57 3.25 3.92"/><path d="M8.5 8.5L3 11"/><path d="M15.5 8.5L21 11"/><path d="M7 14l-2 4"/><path d="M17 14l2 4"/></svg>Get Revision Strategy';
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Build Revision Plan';
       });
 
       /* Board pills */
