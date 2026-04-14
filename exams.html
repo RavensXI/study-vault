@@ -576,7 +576,8 @@
     var STORAGE_KEY = 'studyvault-exam-prefs';
 
     var allDates = null;
-    var selectedBoard = 'aqa';
+    var selectedBoard = 'aqa'; /* default/fallback board */
+    var subjectBoards = {};    /* per-subject board override: { 'maths': 'edexcel', ... } */
     var selectedSubjects = {};
     var container = document.getElementById('exams-container');
 
@@ -661,13 +662,20 @@
       return Object.keys(set);
     }
 
+    /* ── Get the correct board for a subject ── */
+    function boardForSubject(slug) {
+      if (subjectBoards[slug]) return subjectBoards[slug];
+      return selectedBoard;
+    }
+
     /* ── Gather selected exams ── */
     function gatherExams() {
-      var boardData = allDates[selectedBoard];
-      if (!boardData) return [];
       var exams = [];
       Object.keys(selectedSubjects).forEach(function (slug) {
         if (!selectedSubjects[slug]) return;
+        var board = boardForSubject(slug);
+        var boardData = allDates[board];
+        if (!boardData) boardData = allDates['aqa'];
         var papers = boardData[slug];
         if (!papers) return;
         papers.forEach(function (p) {
@@ -811,8 +819,10 @@
         html += '</div></div>';
       }
 
-      /* Subject filter */
-      var available = getAvailableSubjects(selectedBoard);
+      /* Subject filter — use all boards for mixed-board schools */
+      var available = Object.keys(subjectBoards).length > 0
+        ? getAllSubjectSlugs()
+        : getAvailableSubjects(selectedBoard);
       html += '<div class="subject-filter">';
       html += '<span class="subject-filter-label">Subjects</span>';
       html += '<div class="subject-pills">';
@@ -977,6 +987,11 @@
       var freeSubjects = getFreeUserSubjects();
       var savedPrefs = loadPrefs();
 
+      /* Load per-subject board mapping (for schools with mixed boards) */
+      if (allDates.unity_boards && schoolSubjects) {
+        subjectBoards = allDates.unity_boards;
+      }
+
       function normaliseSubjectSlug(slug) {
         var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
         var aliases = {
@@ -998,11 +1013,14 @@
         if (raw) homepagePicks = JSON.parse(raw);
       } catch (e) {}
 
+      /* For mixed-board schools, check subjects across ALL boards */
+      var available = Object.keys(subjectBoards).length > 0
+        ? getAllSubjectSlugs()
+        : getAvailableSubjects(selectedBoard);
+
       if (homepagePicks && homepagePicks.length > 0) {
         /* Student has picked subjects on the homepage — use those + core */
         _hasSession = true;
-        selectedBoard = 'aqa';
-        var available = getAvailableSubjects(selectedBoard);
         var allPicks = LOCKED_CORE.concat(homepagePicks);
         allPicks.forEach(function (slug) {
           var norm = normaliseSubjectSlug(slug);
@@ -1013,8 +1031,6 @@
       } else if (schoolSubjects) {
         /* School student without homepage picks — fall back to all school subjects */
         _hasSession = true;
-        selectedBoard = 'aqa';
-        var available = getAvailableSubjects(selectedBoard);
         schoolSubjects.forEach(function (slug) {
           var norm = normaliseSubjectSlug(slug);
           if (available.indexOf(norm) !== -1) {
