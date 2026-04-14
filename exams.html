@@ -555,7 +555,14 @@
 
     .cal-exam-pill--exam {
       font-weight: 700;
-      background: rgba(0,0,0,0.04);
+      background: #fef2f2;
+      border: 1px solid #fca5a5;
+      border-radius: 3px;
+      padding: 1px 3px;
+      color: #991b1b;
+    }
+    .cal-cell--exam-day {
+      background: #fff8f8 !important;
     }
 
     .cal-revision-pill {
@@ -1076,8 +1083,10 @@
           var isWeekend = (dow === 0 || dow === 6);
           var isToday = (dateStr === todayStr);
 
+          var hasExam = !!examsByDate[dateStr];
           var cls = 'cal-cell';
-          if (isWeekend) cls += ' cal-cell--weekend';
+          if (hasExam) cls += ' cal-cell--exam-day';
+          else if (isWeekend) cls += ' cal-cell--weekend';
           if (isToday) cls += ' cal-cell--today';
 
           html += '<div class="' + cls + '">';

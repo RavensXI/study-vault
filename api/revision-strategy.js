@@ -84,9 +84,10 @@ Rules for the daily plan:
 - The day BEFORE an exam: prioritise that subject
 - Use INTERLEAVING: mix 2-3 subjects per day, don't just block one subject all week
 - Weight subjects by PROXIMITY: subjects with exams soon get more daily slots
-- SUNDAYS MUST BE REST DAYS: only include {"subject": "Rest", "focus": "Rest day"}. No revision on Sundays, no exceptions.
+- SUNDAYS MUST BE REST DAYS. Every single Sunday gets ONLY: [{"subject": "Rest", "focus": "Rest day"}]. No revision, no exceptions, not even before exams. This is non-negotiable.
+- Do NOT include tasks for exam days. Exams are already shown separately. If a date has an exam, leave the daily_plan for that date as an EMPTY ARRAY [].
 - Weekdays and Saturdays should have 2-3 tasks each (not more)
-- The "focus" field must be SHORT — just the subject area or topic, max 5 words. Examples: "Energy equations", "Moles & Mr", "Act 1 quotes", "Listening practice", "Punnett squares". Do NOT write instructions like "Practise..." or "Revise..." — just name the topic.
+- The "focus" field must be SHORT — max 4 words, just the topic. Examples: "Energy equations", "Moles & Mr", "Act 1 quotes", "Listening practice", "Punnett squares". No verbs like "Practise" or "Revise" — just the topic name.
 - For subjects with multiple papers, distinguish P1 and P2 content areas
 - The student's subjects are: ${subjects.join(', ')}
 
