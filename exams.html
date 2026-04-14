@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Exam Timetable - StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#2d2a26">
+  <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
+  <link rel="apple-touch-icon" href="/images/icon-192.png">
+  <style>
+    /* ── Page layout ── */
+    .exams-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .exams-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #2d2a26;
+      margin: 0 0 0.25rem;
+    }
+
+    .exams-subtitle {
+      color: #78716c;
+      font-size: 0.95rem;
+      margin: 0 0 1.75rem;
+    }
+
+    /* ── Action buttons row ── */
+    .exams-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .exams-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: 999px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s;
+    }
+
+    .exams-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .exams-btn:active {
+      transform: translateY(0);
+    }
+
+    .exams-btn--primary {
+      background: #2d2a26;
+      color: #fff;
+    }
+
+    .exams-btn--secondary {
+      background: #fff;
+      color: #2d2a26;
+      border: 1.5px solid #e7e5e4;
+    }
+
+    .exams-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* ── Board selector ── */
+    .board-selector {
+      margin-bottom: 1.25rem;
+    }
+
+    .board-selector-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #78716c;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .board-pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .board-pill {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #d6d3d1;
+      background: #fff;
+      color: #57534e;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .board-pill:hover {
+      border-color: #a8a29e;
+    }
+
+    .board-pill.active {
+      background: #2d2a26;
+      color: #fff;
+      border-color: #2d2a26;
+    }
+
+    /* ── Subject filter bar ── */
+    .subject-filter {
+      margin-bottom: 2rem;
+    }
+
+    .subject-filter-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #78716c;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .subject-pills {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .subject-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.85rem;
+      border-radius: 999px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+
+    .subject-pill .pill-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ── Exam list ── */
+    .exam-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .exam-date-group {
+      animation: fadeSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    .exam-date-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .exam-date-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #2d2a26;
+    }
+
+    .exam-date-badge {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      background: #f0f7ff;
+      color: #1d4ed8;
+      white-space: nowrap;
+    }
+
+    .exam-date-badge--soon {
+      background: #fefce8;
+      color: #b45309;
+    }
+
+    .exam-date-badge--urgent {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .exam-date-badge--today {
+      background: #dc2626;
+      color: #fff;
+    }
+
+    .exam-date-badge--past {
+      background: #f5f5f4;
+      color: #a8a29e;
+    }
+
+    .exam-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .exam-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #fff;
+      border: 1px solid #e7e5e4;
+      border-radius: 16px;
+      padding: 1rem 1.25rem;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .exam-card:hover {
+      border-color: #d6d3d1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .exam-card--highlight {
+      border-color: #fde68a;
+      background: #fffbeb;
+      box-shadow: 0 2px 12px rgba(251, 191, 36, 0.15);
+    }
+
+    .exam-card--past {
+      opacity: 0.5;
+    }
+
+    .exam-card-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .exam-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .exam-card-subject {
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: #2d2a26;
+    }
+
+    .exam-card-paper {
+      font-size: 0.82rem;
+      color: #78716c;
+      margin-top: 0.15rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .exam-card-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+    }
+
+    .exam-session-pill {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+
+    .exam-session-pill--am {
+      background: #ecfdf5;
+      color: #059669;
+    }
+
+    .exam-session-pill--pm {
+      background: #eff6ff;
+      color: #2563eb;
+    }
+
+    .exam-clash-badge {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+      background: #fff7ed;
+      color: #ea580c;
+      border: 1px solid #fed7aa;
+      white-space: nowrap;
+    }
+
+    /* ── Empty state ── */
+    .exams-empty {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #a8a29e;
+    }
+
+    .exams-empty svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 1rem;
+      color: #d6d3d1;
+    }
+
+    .exams-empty p {
+      font-size: 0.95rem;
+    }
+
+    /* ── Results day card ── */
+    .results-card {
+      margin-top: 2.5rem;
+      background: linear-gradient(135deg, #f0f7ff 0%, #ede9fe 100%);
+      border: 1px solid #c7d2fe;
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .results-card-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #6366f1;
+      margin-bottom: 0.35rem;
+    }
+
+    .results-card-date {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d2a26;
+      margin-bottom: 0.25rem;
+    }
+
+    .results-card-days {
+      font-size: 0.85rem;
+      color: #6366f1;
+      font-weight: 600;
+    }
+
+    /* ── Stat summary bar ── */
+    .exams-summary {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 1.75rem;
+      flex-wrap: wrap;
+    }
+
+    .exams-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.1rem;
+    }
+
+    .exams-stat-value {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #2d2a26;
+    }
+
+    .exams-stat-label {
+      font-size: 0.75rem;
+      color: #78716c;
+      font-weight: 500;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Print styles ── */
+    @media print {
+      .page-header,
+      .exams-actions,
+      .subject-filter,
+      .board-selector,
+      .site-footer,
+      .sv-legal-footer,
+      .cookie-consent,
+      .exam-clash-badge {
+        display: none !important;
+      }
+
+      body {
+        background: #fff !important;
+      }
+
+      .exams-container {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      .exams-title {
+        font-size: 1.5rem;
+      }
+
+      .exam-card {
+        border: 1px solid #d6d3d1;
+        box-shadow: none;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        padding: 0.6rem 1rem;
+      }
+
+      .exam-card--highlight {
+        background: #fff;
+        border-color: #d6d3d1;
+      }
+
+      .results-card {
+        background: #f5f5f4;
+        border: 1px solid #d6d3d1;
+        break-inside: avoid;
+      }
+
+      .exam-date-group {
+        break-inside: avoid;
+      }
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 600px) {
+      .exams-container {
+        padding: 1.25rem 1rem 3rem;
+      }
+
+      .exams-title {
+        font-size: 1.5rem;
+      }
+
+      .exam-card {
+        padding: 0.75rem 1rem;
+      }
+
+      .exam-card-paper {
+        white-space: normal;
+      }
+
+      .exams-summary {
+        gap: 1rem;
+      }
+
+      .exams-stat-value {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Page Header -->
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+        <span class="header-unit-label">My Exams</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="exams-container" id="exams-container">
+    <!-- Populated by JS -->
+  </main>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <span class="site-footer-brand">StudyVault</span>
+      <span class="site-footer-copy">&copy; 2026 StudyVault</span>
+    </div>
+  </footer>
+
+  <script src="/js/school-session.js"></script>
+  <script src="/js/free-user.js"></script>
+  <script src="/js/cookie-consent.js"></script>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Constants ── */
+    var SUBJECT_COLOURS = {
+      'science': '#16a34a',
+      'separate-sciences': '#16a34a',
+      'english-language': '#6366f1',
+      'english-literature': '#8b5cf6',
+      'maths': '#2563eb',
+      'geography': '#0d9488',
+      'history': '#b91c1c',
+      'religious-education': '#7c3aed',
+      'business': '#0891b2',
+      'spanish': '#e11d48',
+      'french': '#2563eb',
+      'german': '#dc2626',
+      'food-technology': '#0d9488',
+      'design-technology': '#d97706',
+      'computer-science': '#4f46e5',
+      'sport-science': '#ea580c',
+      'drama': '#7c3aed',
+      'music': '#a855f7',
+      'creative-imedia': '#0ea5e9'
+    };
+
+    var SUBJECT_NAMES = {
+      'science': 'Combined Science',
+      'separate-sciences': 'Separate Sciences',
+      'english-language': 'English Language',
+      'english-literature': 'English Literature',
+      'maths': 'Mathematics',
+      'geography': 'Geography',
+      'history': 'History',
+      'religious-education': 'Religious Education',
+      'business': 'Business Studies',
+      'spanish': 'Spanish',
+      'french': 'French',
+      'german': 'German',
+      'food-technology': 'Food Technology',
+      'design-technology': 'Design & Technology',
+      'computer-science': 'Computer Science',
+      'sport-science': 'Sport Science',
+      'drama': 'Drama',
+      'music': 'Music',
+      'creative-imedia': 'Creative iMedia'
+    };
+
+    var BOARDS = ['aqa', 'edexcel', 'ocr', 'eduqas'];
+    var BOARD_LABELS = { 'aqa': 'AQA', 'edexcel': 'Edexcel', 'ocr': 'OCR', 'eduqas': 'Eduqas' };
+    var RESULTS_DAY = '2026-08-20';
+    var STORAGE_KEY = 'studyvault-exam-prefs';
+
+    var allDates = null;
+    var selectedBoard = 'aqa';
+    var selectedSubjects = {};
+    var container = document.getElementById('exams-container');
+
+    /* ── Helpers ── */
+    function daysUntil(dateStr) {
+      var now = new Date();
+      now.setHours(0, 0, 0, 0);
+      var target = new Date(dateStr + 'T00:00:00');
+      return Math.ceil((target - now) / 86400000);
+    }
+
+    function formatDateLong(dateStr) {
+      var d = new Date(dateStr + 'T00:00:00');
+      var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+    }
+
+    function formatDateShort(dateStr) {
+      var d = new Date(dateStr + 'T00:00:00');
+      var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+      var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      return days[d.getDay()] + ' ' + d.getDate() + ' ' + months[d.getMonth()];
+    }
+
+    function daysLabel(n) {
+      if (n < 0) return 'Passed';
+      if (n === 0) return 'Today';
+      if (n === 1) return 'Tomorrow';
+      return n + ' days';
+    }
+
+    function daysBadgeClass(n) {
+      if (n < 0) return 'exam-date-badge--past';
+      if (n === 0) return 'exam-date-badge--today';
+      if (n <= 7) return 'exam-date-badge--urgent';
+      if (n <= 30) return 'exam-date-badge--soon';
+      return '';
+    }
+
+    function savePrefs() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          board: selectedBoard,
+          subjects: Object.keys(selectedSubjects).filter(function (k) { return selectedSubjects[k]; })
+        }));
+      } catch (e) {}
+    }
+
+    function loadPrefs() {
+      try {
+        var raw = localStorage.getItem(STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    /* ── Get available subjects for a board ── */
+    function getAvailableSubjects(board) {
+      if (!allDates || !allDates[board]) return [];
+      return Object.keys(allDates[board]).sort(function (a, b) {
+        var nameA = SUBJECT_NAMES[a] || a;
+        var nameB = SUBJECT_NAMES[b] || b;
+        return nameA.localeCompare(nameB);
+      });
+    }
+
+    /* ── Get all subjects across all boards ── */
+    function getAllSubjectSlugs() {
+      var set = {};
+      BOARDS.forEach(function (b) {
+        if (allDates[b]) {
+          Object.keys(allDates[b]).forEach(function (s) { set[s] = true; });
+        }
+      });
+      return Object.keys(set);
+    }
+
+    /* ── Gather selected exams ── */
+    function gatherExams() {
+      var boardData = allDates[selectedBoard];
+      if (!boardData) return [];
+      var exams = [];
+      Object.keys(selectedSubjects).forEach(function (slug) {
+        if (!selectedSubjects[slug]) return;
+        var papers = boardData[slug];
+        if (!papers) return;
+        papers.forEach(function (p) {
+          exams.push({
+            subject: slug,
+            paper: p.paper,
+            date: p.date,
+            session: p.session
+          });
+        });
+      });
+      exams.sort(function (a, b) {
+        if (a.date !== b.date) return a.date.localeCompare(b.date);
+        if (a.session !== b.session) return a.session === 'am' ? -1 : 1;
+        return (SUBJECT_NAMES[a.subject] || a.subject).localeCompare(SUBJECT_NAMES[b.subject] || b.subject);
+      });
+      return exams;
+    }
+
+    /* ── Detect clashes ── */
+    function detectClashes(exams) {
+      var clashSet = {};
+      for (var i = 0; i < exams.length; i++) {
+        for (var j = i + 1; j < exams.length; j++) {
+          if (exams[i].date === exams[j].date && exams[i].session === exams[j].session) {
+            clashSet[i] = true;
+            clashSet[j] = true;
+          }
+        }
+      }
+      return clashSet;
+    }
+
+    /* ── ICS export ── */
+    function generateICS(exams) {
+      var lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//StudyVault//Exam Timetable//EN',
+        'CALSCALE:GREGORIAN',
+        'METHOD:PUBLISH',
+        'X-WR-CALNAME:GCSE Exams 2026'
+      ];
+
+      exams.forEach(function (exam) {
+        var subjectName = SUBJECT_NAMES[exam.subject] || exam.subject;
+        var dateClean = exam.date.replace(/-/g, '');
+        var startTime, endTime;
+
+        if (exam.session === 'am') {
+          startTime = '090000';
+          endTime = '104500';
+        } else {
+          startTime = '133000';
+          endTime = '151500';
+        }
+
+        var uid = dateClean + '-' + exam.subject + '-' + exam.session + '@studyvault.co.uk';
+
+        lines.push('BEGIN:VEVENT');
+        lines.push('UID:' + uid);
+        lines.push('DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z');
+        lines.push('DTSTART:' + dateClean + 'T' + startTime);
+        lines.push('DTEND:' + dateClean + 'T' + endTime);
+        lines.push('SUMMARY:' + subjectName + ' — ' + exam.paper);
+        lines.push('DESCRIPTION:GCSE exam');
+        lines.push('LOCATION:School exam hall');
+        lines.push('STATUS:CONFIRMED');
+        lines.push('END:VEVENT');
+      });
+
+      lines.push('END:VCALENDAR');
+      return lines.join('\r\n');
+    }
+
+    function downloadICS() {
+      var exams = gatherExams();
+      if (exams.length === 0) return;
+      var icsContent = generateICS(exams);
+      var blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'gcse-exams-2026.ics';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    /* ── Pre-select subjects from school session ── */
+    function getSchoolSubjects() {
+      var session = SchoolSession.get();
+      if (!session) return null;
+      var slugs = [];
+      if (session.bespoke_subjects) slugs = slugs.concat(session.bespoke_subjects);
+      if (session.subscribed_subjects) {
+        session.subscribed_subjects.forEach(function (s) {
+          if (slugs.indexOf(s) === -1) slugs.push(s);
+        });
+      }
+      return slugs.length > 0 ? slugs : null;
+    }
+
+    function getFreeUserSubjects() {
+      if (!FreeUser.isActive()) return null;
+      return FreeUser.getSubjectSlugs();
+    }
+
+    /* ── Render the full page ── */
+    function render() {
+      var exams = gatherExams();
+      var clashSet = detectClashes(exams);
+      var activeCount = Object.keys(selectedSubjects).filter(function (k) { return selectedSubjects[k]; }).length;
+
+      var html = '';
+
+      /* Title */
+      html += '<h1 class="exams-title">My Exam Timetable</h1>';
+      html += '<p class="exams-subtitle">GCSE exams, May&ndash;June 2026</p>';
+
+      /* Action buttons */
+      html += '<div class="exams-actions">';
+      html += '<button class="exams-btn exams-btn--primary" id="btn-ics">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+      html += 'Download Calendar (.ics)</button>';
+      html += '<button class="exams-btn exams-btn--secondary" id="btn-print">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
+      html += 'Print Timetable</button>';
+      html += '</div>';
+
+      /* Board selector */
+      html += '<div class="board-selector">';
+      html += '<span class="board-selector-label">Exam Board</span>';
+      html += '<div class="board-pills">';
+      BOARDS.forEach(function (b) {
+        var cls = b === selectedBoard ? ' active' : '';
+        html += '<button class="board-pill' + cls + '" data-board="' + b + '">' + BOARD_LABELS[b] + '</button>';
+      });
+      html += '</div></div>';
+
+      /* Subject filter */
+      var available = getAvailableSubjects(selectedBoard);
+      html += '<div class="subject-filter">';
+      html += '<span class="subject-filter-label">Subjects</span>';
+      html += '<div class="subject-pills">';
+      available.forEach(function (slug) {
+        var colour = SUBJECT_COLOURS[slug] || '#78716c';
+        var name = SUBJECT_NAMES[slug] || slug;
+        var isActive = !!selectedSubjects[slug];
+        var bg = isActive ? colour : '#fff';
+        var fg = isActive ? '#fff' : colour;
+        var border = colour;
+        html += '<button class="subject-pill" data-subject="' + slug + '" style="background:' + bg + ';color:' + fg + ';border-color:' + border + '">';
+        if (!isActive) {
+          html += '<span class="pill-dot" style="background:' + colour + '"></span>';
+        }
+        html += name + '</button>';
+      });
+      html += '</div></div>';
+
+      /* Summary stats */
+      if (exams.length > 0) {
+        var futureExams = exams.filter(function (e) { return daysUntil(e.date) >= 0; });
+        var firstDate = futureExams.length > 0 ? futureExams[0].date : exams[0].date;
+        var lastDate = futureExams.length > 0 ? futureExams[futureExams.length - 1].date : exams[exams.length - 1].date;
+        var examDays = {};
+        exams.forEach(function (e) { examDays[e.date] = true; });
+
+        html += '<div class="exams-summary">';
+        html += '<div class="exams-stat"><span class="exams-stat-value">' + exams.length + '</span><span class="exams-stat-label">Exam papers</span></div>';
+        html += '<div class="exams-stat"><span class="exams-stat-value">' + Object.keys(examDays).length + '</span><span class="exams-stat-label">Exam days</span></div>';
+        html += '<div class="exams-stat"><span class="exams-stat-value">' + activeCount + '</span><span class="exams-stat-label">Subjects</span></div>';
+        if (futureExams.length > 0) {
+          var dFirst = daysUntil(firstDate);
+          html += '<div class="exams-stat"><span class="exams-stat-value">' + (dFirst <= 0 ? 'Today' : dFirst + 'd') + '</span><span class="exams-stat-label">Until first exam</span></div>';
+        }
+        html += '</div>';
+      }
+
+      /* Exam list grouped by date */
+      html += '<div class="exam-list" id="exam-list">';
+
+      if (exams.length === 0) {
+        html += '<div class="exams-empty">';
+        html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+        html += '<p>Select some subjects above to see your exam timetable.</p>';
+        html += '</div>';
+      } else {
+        /* Group by date */
+        var groups = [];
+        var currentDate = null;
+        var currentGroup = null;
+        exams.forEach(function (exam, idx) {
+          if (exam.date !== currentDate) {
+            currentDate = exam.date;
+            currentGroup = { date: exam.date, exams: [] };
+            groups.push(currentGroup);
+          }
+          currentGroup.exams.push({ exam: exam, idx: idx });
+        });
+
+        groups.forEach(function (group, gi) {
+          var d = daysUntil(group.date);
+          var badgeText = daysLabel(d);
+          var badgeCls = daysBadgeClass(d);
+          var isHighlight = d === 0 || d === 1;
+
+          html += '<div class="exam-date-group" style="animation-delay:' + (gi * 0.06) + 's">';
+          html += '<div class="exam-date-header">';
+          html += '<span class="exam-date-text">' + formatDateLong(group.date) + '</span>';
+          html += '<span class="exam-date-badge ' + badgeCls + '">' + badgeText + '</span>';
+          html += '</div>';
+          html += '<div class="exam-cards">';
+
+          group.exams.forEach(function (item) {
+            var exam = item.exam;
+            var idx = item.idx;
+            var colour = SUBJECT_COLOURS[exam.subject] || '#78716c';
+            var subjectName = SUBJECT_NAMES[exam.subject] || exam.subject;
+            var cardCls = 'exam-card';
+            if (isHighlight) cardCls += ' exam-card--highlight';
+            if (d < 0) cardCls += ' exam-card--past';
+
+            html += '<div class="' + cardCls + '">';
+            html += '<div class="exam-card-dot" style="background:' + colour + '"></div>';
+            html += '<div class="exam-card-info">';
+            html += '<div class="exam-card-subject">' + subjectName + '</div>';
+            html += '<div class="exam-card-paper">' + exam.paper + '</div>';
+            html += '</div>';
+            html += '<div class="exam-card-right">';
+            if (clashSet[idx]) {
+              html += '<span class="exam-clash-badge">Clash</span>';
+            }
+            var sessionCls = exam.session === 'am' ? 'exam-session-pill--am' : 'exam-session-pill--pm';
+            var sessionText = exam.session === 'am' ? 'Morning' : 'Afternoon';
+            html += '<span class="exam-session-pill ' + sessionCls + '">' + sessionText + '</span>';
+            html += '</div>';
+            html += '</div>';
+          });
+
+          html += '</div></div>';
+        });
+      }
+
+      html += '</div>';
+
+      /* Results day */
+      var resultsDays = daysUntil(RESULTS_DAY);
+      html += '<div class="results-card">';
+      html += '<div class="results-card-label">Results Day</div>';
+      html += '<div class="results-card-date">' + formatDateLong(RESULTS_DAY) + '</div>';
+      html += '<div class="results-card-days">' + (resultsDays > 0 ? resultsDays + ' days to go' : resultsDays === 0 ? 'Today!' : 'Results are out!') + '</div>';
+      html += '</div>';
+
+      container.innerHTML = html;
+
+      /* Bind events */
+      document.getElementById('btn-ics').addEventListener('click', downloadICS);
+      document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
+
+      /* Board pills */
+      var boardBtns = container.querySelectorAll('.board-pill');
+      boardBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          selectedBoard = btn.getAttribute('data-board');
+          /* Keep subjects that exist in new board, deselect those that don't */
+          var newAvailable = getAvailableSubjects(selectedBoard);
+          var newSelected = {};
+          newAvailable.forEach(function (slug) {
+            if (selectedSubjects[slug]) newSelected[slug] = true;
+          });
+          selectedSubjects = newSelected;
+          savePrefs();
+          render();
+        });
+      });
+
+      /* Subject pills */
+      var subjectBtns = container.querySelectorAll('.subject-pill');
+      subjectBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var slug = btn.getAttribute('data-subject');
+          selectedSubjects[slug] = !selectedSubjects[slug];
+          savePrefs();
+          render();
+        });
+      });
+    }
+
+    /* ── Init ── */
+    async function init() {
+      try {
+        var resp = await fetch('/data/exam-dates-2026.json');
+        if (!resp.ok) throw new Error('Failed to load exam dates');
+        allDates = await resp.json();
+      } catch (e) {
+        container.innerHTML = '<div class="exams-empty"><p>Could not load exam dates. Please try refreshing the page.</p></div>';
+        return;
+      }
+
+      /* Determine initial subject selection */
+      var savedPrefs = loadPrefs();
+
+      /* Check school session for board hint */
+      var schoolSubjects = getSchoolSubjects();
+      var freeSubjects = getFreeUserSubjects();
+
+      if (savedPrefs) {
+        /* Restore saved preferences */
+        selectedBoard = savedPrefs.board || 'aqa';
+        savedPrefs.subjects.forEach(function (s) { selectedSubjects[s] = true; });
+      } else if (schoolSubjects) {
+        /* School student — pre-select all their subjects */
+        selectedBoard = 'aqa';
+        var available = getAvailableSubjects(selectedBoard);
+        schoolSubjects.forEach(function (slug) {
+          /* Normalise slug — strip board suffix */
+          var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
+          var aliases = {
+            'mathematics': 'maths',
+            'combined-science': 'science',
+            'religious-studies': 'religious-education',
+            'food-preparation-and-nutrition': 'food-technology',
+            'food': 'food-technology'
+          };
+          var norm = aliases[base] || base;
+          if (available.indexOf(norm) !== -1) {
+            selectedSubjects[norm] = true;
+          }
+        });
+      } else if (freeSubjects) {
+        /* Free user — pre-select their chosen subjects */
+        selectedBoard = 'aqa';
+        var available = getAvailableSubjects(selectedBoard);
+        freeSubjects.forEach(function (slug) {
+          var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
+          var aliases = {
+            'mathematics': 'maths',
+            'combined-science': 'science',
+            'religious-studies': 'religious-education',
+            'food-preparation-and-nutrition': 'food-technology',
+            'food': 'food-technology'
+          };
+          var norm = aliases[base] || base;
+          if (available.indexOf(norm) !== -1) {
+            selectedSubjects[norm] = true;
+          }
+        });
+      }
+
+      render();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+  </script>
+
+  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
+  <div class="sv-legal-footer"><p>&copy; 2026 StudyVault. All questions and mark schemes are original content. StudyVault is not affiliated with or endorsed by any exam board. <a href="/copyright.html">Copyright &amp; IP</a> &middot; <a href="/privacy.html">Privacy</a></p></div>
+</body>
+</html>
