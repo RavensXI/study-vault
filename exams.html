@@ -76,11 +76,39 @@
       border: 1.5px solid #e7e5e4;
     }
 
+    .exams-btn--ai {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: #fff;
+      border: none;
+    }
+    .exams-btn--ai:hover { opacity: 0.9; }
+
     .exams-btn svg {
       width: 16px;
       height: 16px;
       flex-shrink: 0;
     }
+
+    /* ── Strategy card ── */
+    .strategy-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      border: 1px solid #e7e5e4;
+      animation: strategyIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .strategy-card h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.1rem; font-weight: 700; margin: 1.25rem 0 0.5rem; color: #2d2a26; }
+    .strategy-card h2:first-child { margin-top: 0; }
+    .strategy-card p { font-size: 0.88rem; line-height: 1.6; color: #44403c; margin: 0 0 0.5rem; }
+    .strategy-card ul { font-size: 0.88rem; line-height: 1.6; color: #44403c; margin: 0 0 0.75rem; padding-left: 1.25rem; }
+    .strategy-card li { margin-bottom: 0.3rem; }
+    .strategy-card strong { color: #2d2a26; }
+    .strategy-loading { text-align: center; padding: 2rem; color: #78716c; font-size: 0.9rem; }
+    .strategy-loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid #e7e5e4; border-top-color: #6366f1; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 0.5rem; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes strategyIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
     /* ── Board selector ── */
     .board-selector {
@@ -413,6 +441,123 @@
       }
     }
 
+    /* ── Print calendar (hidden on screen) ── */
+    .print-calendar {
+      display: none;
+    }
+
+    .print-calendar-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #2d2a26;
+      text-align: center;
+      margin: 0 0 1.5rem;
+    }
+
+    .cal-month-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #2d2a26;
+      margin: 0 0 0.5rem;
+    }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      border-top: 2px solid #2d2a26;
+      border-left: 2px solid #2d2a26;
+      margin-bottom: 1.5rem;
+    }
+
+    .cal-header-cell {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #57534e;
+      text-align: center;
+      padding: 0.35rem 0.25rem;
+      border-right: 1px solid #d6d3d1;
+      border-bottom: 2px solid #2d2a26;
+      background: #f5f5f4;
+    }
+
+    .cal-cell {
+      min-height: 80px;
+      border-right: 1px solid #d6d3d1;
+      border-bottom: 1px solid #d6d3d1;
+      padding: 0.25rem;
+      position: relative;
+      vertical-align: top;
+    }
+
+    .cal-cell--empty {
+      background: #fafaf9;
+    }
+
+    .cal-cell--weekend {
+      background: #f5f5f4;
+    }
+
+    .cal-cell--today {
+      outline: 2px solid #2563eb;
+      outline-offset: -2px;
+    }
+
+    .cal-day-number {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #2d2a26;
+      text-align: right;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .cal-exam-pill {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.55rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.4;
+      color: #2d2a26;
+      padding: 1px 2px;
+      border-radius: 3px;
+      margin-bottom: 1px;
+    }
+
+    .cal-exam-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-block;
+    }
+
+    .cal-session-tag {
+      font-size: 0.5rem;
+      font-weight: 700;
+      color: #78716c;
+      margin-left: 1px;
+    }
+
+    .cal-results-note {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.85rem;
+      color: #6366f1;
+      font-weight: 600;
+      text-align: center;
+      margin-top: 1rem;
+    }
+
     /* ── Print styles ── */
     @media print {
       .page-header,
@@ -422,8 +567,17 @@
       .site-footer,
       .sv-legal-footer,
       .cookie-consent,
-      .exam-clash-badge {
+      .exam-clash-badge,
+      .exam-list,
+      .exams-summary,
+      .exams-subtitle,
+      .exams-title,
+      .results-card {
         display: none !important;
+      }
+
+      .print-calendar {
+        display: block !important;
       }
 
       body {
@@ -435,31 +589,36 @@
         padding: 0;
       }
 
-      .exams-title {
-        font-size: 1.5rem;
-      }
-
-      .exam-card {
-        border: 1px solid #d6d3d1;
-        box-shadow: none;
+      .cal-month-block {
         break-inside: avoid;
         page-break-inside: avoid;
-        padding: 0.6rem 1rem;
       }
 
-      .exam-card--highlight {
-        background: #fff;
-        border-color: #d6d3d1;
+      .cal-month-block--may {
+        page-break-after: always;
       }
 
-      .results-card {
-        background: #f5f5f4;
-        border: 1px solid #d6d3d1;
-        break-inside: avoid;
+      .cal-cell--weekend {
+        background: #f5f5f4 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
 
-      .exam-date-group {
-        break-inside: avoid;
+      .cal-header-cell {
+        background: #f5f5f4 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .cal-exam-dot {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .cal-cell--today {
+        outline: 2px solid #2563eb;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
       }
     }
 
@@ -568,6 +727,28 @@
       'drama': 'Drama',
       'music': 'Music',
       'creative-imedia': 'Creative iMedia'
+    };
+
+    var SUBJECT_SHORT = {
+      'science': 'Sci',
+      'separate-sciences': 'Sci',
+      'english-language': 'Eng Lang',
+      'english-literature': 'Eng Lit',
+      'maths': 'Maths',
+      'geography': 'Geog',
+      'history': 'Hist',
+      'religious-education': 'RE',
+      'business': 'Bus',
+      'spanish': 'Spanish',
+      'french': 'French',
+      'german': 'German',
+      'food-technology': 'Food',
+      'design-technology': 'D&T',
+      'computer-science': 'CS',
+      'sport-science': 'Sport',
+      'drama': 'Drama',
+      'music': 'Music',
+      'creative-imedia': 'iMedia'
     };
 
     var BOARDS = ['aqa', 'edexcel', 'ocr', 'eduqas'];
@@ -787,6 +968,131 @@
       return FreeUser.getSubjectSlugs();
     }
 
+    /* ── Shorten paper name for calendar pills ── */
+    function shortenPaper(paper) {
+      /* "Biology Paper 1" → "Bio P1", "Paper 2: Non-Calculator" → "P2 Non-Calc" etc. */
+      var s = paper;
+      s = s.replace(/Paper\s*/gi, 'P');
+      s = s.replace(/Biology/gi, 'Bio');
+      s = s.replace(/Chemistry/gi, 'Chem');
+      s = s.replace(/Physics/gi, 'Phys');
+      s = s.replace(/Non-Calculator/gi, 'Non-Calc');
+      s = s.replace(/Calculator/gi, 'Calc');
+      s = s.replace(/Component\s*/gi, 'C');
+      s = s.replace(/Higher/gi, 'H');
+      s = s.replace(/Foundation/gi, 'F');
+      s = s.replace(/Listening/gi, 'Listening');
+      s = s.replace(/Speaking/gi, 'Speaking');
+      s = s.replace(/Reading/gi, 'Reading');
+      s = s.replace(/Writing/gi, 'Writing');
+      /* Trim trailing/leading whitespace and collapse double spaces */
+      s = s.replace(/\s+/g, ' ').trim();
+      /* Cap length */
+      if (s.length > 22) s = s.substring(0, 20) + '…';
+      return s;
+    }
+
+    /* ── Render print calendar (May + June 2026) ── */
+    function renderCalendar(exams) {
+      var calDiv = document.getElementById('print-calendar');
+      if (!calDiv) return;
+
+      /* Build lookup: 'YYYY-MM-DD' → [exam, exam, ...] */
+      var examsByDate = {};
+      exams.forEach(function (e) {
+        if (!examsByDate[e.date]) examsByDate[e.date] = [];
+        examsByDate[e.date].push(e);
+      });
+
+      var DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      var MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'];
+
+      var todayStr = (function () {
+        var d = new Date();
+        var mm = String(d.getMonth() + 1).padStart(2, '0');
+        var dd = String(d.getDate()).padStart(2, '0');
+        return d.getFullYear() + '-' + mm + '-' + dd;
+      })();
+
+      function buildMonth(year, month, extraClass) {
+        var html = '';
+        html += '<div class="cal-month-block ' + (extraClass || '') + '">';
+        html += '<h2 class="cal-month-title">' + MONTH_NAMES[month] + ' ' + year + '</h2>';
+        html += '<div class="cal-grid">';
+
+        /* Header row */
+        DAY_NAMES.forEach(function (d) {
+          html += '<div class="cal-header-cell">' + d + '</div>';
+        });
+
+        /* First day of month: JS getDay() 0=Sun, we need Mon=0 */
+        var firstDay = new Date(year, month, 1).getDay();
+        var startOffset = (firstDay === 0) ? 6 : firstDay - 1; /* Mon-based offset */
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        /* Leading empty cells */
+        for (var e = 0; e < startOffset; e++) {
+          html += '<div class="cal-cell cal-cell--empty"></div>';
+        }
+
+        /* Day cells */
+        for (var day = 1; day <= daysInMonth; day++) {
+          var dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(day).padStart(2, '0');
+          var dow = new Date(year, month, day).getDay(); /* 0=Sun, 6=Sat */
+          var isWeekend = (dow === 0 || dow === 6);
+          var isToday = (dateStr === todayStr);
+
+          var cls = 'cal-cell';
+          if (isWeekend) cls += ' cal-cell--weekend';
+          if (isToday) cls += ' cal-cell--today';
+
+          html += '<div class="' + cls + '">';
+          html += '<span class="cal-day-number">' + day + '</span>';
+
+          /* Exam pills for this date */
+          var dayExams = examsByDate[dateStr];
+          if (dayExams) {
+            dayExams.forEach(function (ex) {
+              var colour = SUBJECT_COLOURS[ex.subject] || '#78716c';
+              var shortSubj = SUBJECT_SHORT[ex.subject] || ex.subject;
+              var shortPaper = shortenPaper(ex.paper);
+              var sessionTag = ex.session === 'am' ? 'AM' : 'PM';
+
+              html += '<div class="cal-exam-pill">';
+              html += '<span class="cal-exam-dot" style="background:' + colour + ';border:1px solid ' + colour + '"></span>';
+              html += shortSubj + ' ' + shortPaper;
+              html += '<span class="cal-session-tag">' + sessionTag + '</span>';
+              html += '</div>';
+            });
+          }
+
+          html += '</div>';
+        }
+
+        /* Trailing empty cells to complete the grid row */
+        var totalCells = startOffset + daysInMonth;
+        var remainder = totalCells % 7;
+        if (remainder > 0) {
+          for (var t = 0; t < 7 - remainder; t++) {
+            html += '<div class="cal-cell cal-cell--empty"></div>';
+          }
+        }
+
+        html += '</div>'; /* .cal-grid */
+        html += '</div>'; /* .cal-month-block */
+        return html;
+      }
+
+      var calHtml = '';
+      calHtml += '<h1 class="print-calendar-title">My GCSE Exam Timetable &mdash; 2026</h1>';
+      calHtml += buildMonth(2026, 4, 'cal-month-block--may');  /* May = month 4 */
+      calHtml += buildMonth(2026, 5, 'cal-month-block--june'); /* June = month 5 */
+      calHtml += '<p class="cal-results-note">Results Day: Thursday 20 August 2026</p>';
+
+      calDiv.innerHTML = calHtml;
+    }
+
     /* ── Render the full page ── */
     function render() {
       var exams = gatherExams();
@@ -807,7 +1113,11 @@
       html += '<button class="exams-btn exams-btn--secondary" id="btn-print">';
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
       html += 'Print Timetable</button>';
+      html += '<button class="exams-btn exams-btn--ai" id="btn-strategy">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.57-3.25 3.92L12 22"/><path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.57 3.25 3.92"/><path d="M8.5 8.5L3 11"/><path d="M15.5 8.5L21 11"/><path d="M7 14l-2 4"/><path d="M17 14l2 4"/></svg>';
+      html += 'Get Revision Strategy</button>';
       html += '</div>';
+      html += '<div id="strategy-container"></div>';
 
       /* Board selector — hide for school students (fixed board) */
       if (!_hasSession) {
@@ -937,11 +1247,63 @@
       html += '<div class="results-card-days">' + (resultsDays > 0 ? resultsDays + ' days to go' : resultsDays === 0 ? 'Today!' : 'Results are out!') + '</div>';
       html += '</div>';
 
+      /* Print calendar (hidden on screen, shown when printing) */
+      html += '<div id="print-calendar" class="print-calendar"></div>';
+
       container.innerHTML = html;
+
+      /* Populate print calendar */
+      renderCalendar(exams);
 
       /* Bind events */
       document.getElementById('btn-ics').addEventListener('click', downloadICS);
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
+
+      /* AI revision strategy */
+      document.getElementById('btn-strategy').addEventListener('click', async function () {
+        var btn = this;
+        var stratContainer = document.getElementById('strategy-container');
+        if (btn.disabled) return;
+
+        btn.disabled = true;
+        btn.textContent = 'Thinking...';
+        stratContainer.innerHTML = '<div class="strategy-loading"><span class="spinner"></span>Building your personalised revision plan...</div>';
+
+        var examList = gatherExams().map(function (e) {
+          return { subject: SUBJECT_NAMES[e.subject] || e.subject, paper: e.paper, date: e.date, session: e.session };
+        });
+
+        try {
+          var resp = await fetch('/api/revision-strategy', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ exams: examList })
+          });
+
+          if (!resp.ok) throw new Error('API error');
+          var data = await resp.json();
+
+          /* Simple markdown to HTML */
+          var md = data.strategy || 'No strategy returned.';
+          var html = md
+            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+            .replace(/^\- (.+)$/gm, '<li>$1</li>')
+            .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\n\n/g, '</p><p>')
+            .replace(/^(?!<[hul])(.+)$/gm, '<p>$1</p>')
+            .replace(/<p><\/p>/g, '')
+            .replace(/<p>(<[hul])/g, '$1')
+            .replace(/(<\/[hul].*?>)<\/p>/g, '$1');
+
+          stratContainer.innerHTML = '<div class="strategy-card">' + html + '</div>';
+        } catch (err) {
+          stratContainer.innerHTML = '<div class="strategy-card"><p>Sorry, couldn\'t generate a strategy right now. Try again in a moment.</p></div>';
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4c0 1.95-1.4 3.57-3.25 3.92L12 22"/><path d="M12 2a4 4 0 0 0-4 4c0 1.95 1.4 3.57 3.25 3.92"/><path d="M8.5 8.5L3 11"/><path d="M15.5 8.5L21 11"/><path d="M7 14l-2 4"/><path d="M17 14l2 4"/></svg>Get Revision Strategy';
+      });
 
       /* Board pills */
       var boardBtns = container.querySelectorAll('.board-pill');
