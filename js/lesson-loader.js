@@ -284,6 +284,7 @@
     window._lessonFlashcardQuestions = lesson.flashcard_questions || [];
     window._lessonId = lesson.id;
     window._subjectSlug = params.subjectSlug;
+    window._examBoard = subject.exam_board || '';
 
     // Extract podcast URL from related_media (if present)
     window.podcastUrl = null;
@@ -301,7 +302,7 @@
     }
 
     // Video overview (YouTube ID, Google Drive URL, or direct MP4 URL)
-    if (lesson.youtube_video_id) {
+    if (lesson.youtube_video_id && lesson.youtube_video_id !== 'practice-only') {
       var videoSection = document.getElementById('sidebar-video-section');
       var iframe = document.getElementById('sidebar-video-iframe');
       var videoId = lesson.youtube_video_id;

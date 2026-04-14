@@ -329,6 +329,7 @@
         silver: filterTier(pb.silver || []),
         gold: filterTier(pb.gold || [])
       };
+      window._examBoard = subject.exam_board || '';
     }
 
     // ===== PASSAGES + AI MARKING (from practice_data) =====
