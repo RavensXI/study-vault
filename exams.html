@@ -1344,102 +1344,119 @@
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
 
       /* ── Deterministic scheduler: AI provides topics, code schedules days ── */
+      /*
+       * Strategy:
+       * 1. Count available revision slots (days × 3, minus Sundays and exam days)
+       * 2. Allocate slots per subject proportional to: papers × urgency_weight
+       *    Urgency: exams in 1-14 days = 4×, 15-28 days = 2×, 29+ days = 1×
+       * 3. Build a master sequence of (subject, topic) pairs
+       * 4. Deal them out round-robin across available days, 3 per weekday, 2 Saturday
+       * 5. No subject appears twice on the same day
+       */
       function scheduleDailyPlan(examList, topics) {
         var plan = {};
         var todayStr = new Date().toISOString().split('T')[0];
+        var todayMs = new Date(todayStr + 'T00:00:00').getTime();
 
         /* Build exam date set */
         var examDates = {};
         examList.forEach(function (e) { examDates[e.date] = true; });
 
-        /* Find last exam date */
-        var lastDate = examList.map(function (e) { return e.date; }).sort().pop();
+        /* Find date range */
+        var sortedDates = examList.map(function (e) { return e.date; }).sort();
+        var lastDate = sortedDates[sortedDates.length - 1];
         if (!lastDate) return plan;
 
-        /* Build all dates from today to last exam */
-        var dates = [];
+        /* Build available revision days (not Sunday, not exam day) */
+        var revisionDays = [];
+        var allDays = [];
         var d = new Date(todayStr + 'T00:00:00');
         var end = new Date(lastDate + 'T00:00:00');
         while (d <= end) {
-          dates.push(d.toISOString().split('T')[0]);
+          var ds = d.toISOString().split('T')[0];
+          var dow = d.getDay();
+          allDays.push(ds);
+          if (dow === 0) {
+            plan[ds] = [{ subject: 'Rest', focus: 'Rest day' }];
+          } else if (examDates[ds]) {
+            plan[ds] = [];
+          } else {
+            revisionDays.push({ date: ds, slots: dow === 6 ? 2 : 3 });
+          }
           d.setDate(d.getDate() + 1);
         }
 
-        /* Build subject exam schedule: [{subject, firstExamDate, daysUntil}, ...] sorted by proximity */
-        var subjectFirstExam = {};
+        var totalSlots = revisionDays.reduce(function (sum, d) { return sum + d.slots; }, 0);
+
+        /* Subject info: first exam date, paper count, urgency */
+        var subjectInfo = {};
         examList.forEach(function (e) {
-          if (!subjectFirstExam[e.subject] || e.date < subjectFirstExam[e.subject]) {
-            subjectFirstExam[e.subject] = e.date;
+          if (!subjectInfo[e.subject]) {
+            subjectInfo[e.subject] = { papers: 0, firstExam: e.date };
+          }
+          subjectInfo[e.subject].papers++;
+          if (e.date < subjectInfo[e.subject].firstExam) {
+            subjectInfo[e.subject].firstExam = e.date;
           }
         });
-        var subjectOrder = Object.keys(subjectFirstExam).sort(function (a, b) {
-          return subjectFirstExam[a].localeCompare(subjectFirstExam[b]);
+
+        /* Calculate urgency weight */
+        var subjectNames = Object.keys(subjectInfo);
+        var rawWeights = {};
+        var totalWeight = 0;
+        subjectNames.forEach(function (s) {
+          var daysUntil = Math.max(1, Math.ceil((new Date(subjectInfo[s].firstExam + 'T00:00:00').getTime() - todayMs) / 86400000));
+          var urgency = daysUntil <= 14 ? 4 : daysUntil <= 28 ? 2 : 1;
+          var w = subjectInfo[s].papers * urgency;
+          rawWeights[s] = w;
+          totalWeight += w;
         });
 
-        /* Build topic queues per subject (from AI) */
-        var queues = {};
-        subjectOrder.forEach(function (subj) {
-          queues[subj] = (topics[subj] || []).slice(); /* copy */
+        /* Allocate slots per subject */
+        var subjectSlots = {};
+        subjectNames.forEach(function (s) {
+          subjectSlots[s] = Math.max(2, Math.round((rawWeights[s] / totalWeight) * totalSlots));
         });
 
-        /* Schedule each day */
-        dates.forEach(function (dateStr) {
-          var dow = new Date(dateStr + 'T00:00:00').getDay(); /* 0=Sun */
-
-          /* Sundays = rest */
-          if (dow === 0) {
-            plan[dateStr] = [{ subject: 'Rest', focus: 'Rest day' }];
-            return;
+        /* Build master sequence: each subject contributes its allocated slots with topics */
+        var masterList = [];
+        subjectNames.forEach(function (s) {
+          var topicList = topics[s] || [];
+          if (topicList.length === 0) return;
+          for (var i = 0; i < subjectSlots[s]; i++) {
+            masterList.push({ subject: s, focus: topicList[i % topicList.length] });
           }
+        });
 
-          /* Exam days = empty (exams shown separately) */
-          if (examDates[dateStr]) {
-            plan[dateStr] = [];
-            return;
-          }
+        /* Shuffle master list to interleave subjects (Fisher-Yates) */
+        for (var i = masterList.length - 1; i > 0; i--) {
+          /* Use a seeded-ish shuffle based on index for consistency */
+          var j = (i * 7 + 3) % (i + 1);
+          var tmp = masterList[i];
+          masterList[i] = masterList[j];
+          masterList[j] = tmp;
+        }
 
-          /* Pick 2-3 subjects for this day, weighted by proximity */
-          var today_d = new Date(dateStr + 'T00:00:00');
-          var eligible = subjectOrder.filter(function (s) {
-            /* Only include subjects whose first exam hasn't passed yet */
-            return subjectFirstExam[s] >= dateStr && queues[s].length > 0;
-          });
-
-          if (eligible.length === 0) {
-            /* All nearby exams done — check for later subjects */
-            eligible = subjectOrder.filter(function (s) { return queues[s].length > 0; });
-          }
-
-          if (eligible.length === 0) {
-            plan[dateStr] = [{ subject: 'Rest', focus: 'Rest day' }];
-            return;
-          }
-
-          /* Weight: subjects with exams sooner get priority */
-          var weighted = eligible.map(function (s) {
-            var examDate = new Date(subjectFirstExam[s] + 'T00:00:00');
-            var daysUntil = Math.max(1, Math.ceil((examDate - today_d) / 86400000));
-            return { subject: s, weight: 1 / daysUntil };
-          });
-          weighted.sort(function (a, b) { return b.weight - a.weight; });
-
-          /* Take top 2-3 (Saturday 2, weekday 3) */
-          var slotsCount = (dow === 6) ? 2 : Math.min(3, weighted.length);
+        /* Deal out to revision days, avoiding same subject twice on one day */
+        var cursor = 0;
+        revisionDays.forEach(function (day) {
           var dayTasks = [];
+          var usedSubjects = {};
+          var attempts = 0;
+          var maxAttempts = masterList.length;
 
-          for (var i = 0; i < slotsCount && i < weighted.length; i++) {
-            var subj = weighted[i].subject;
-            var topic = queues[subj].shift();
-            if (topic) {
-              dayTasks.push({ subject: subj, focus: topic });
-            }
-            /* Cycle topic back if we've run out (repeat the list) */
-            if (queues[subj].length === 0 && topics[subj] && topics[subj].length > 0) {
-              queues[subj] = topics[subj].slice();
-            }
+          while (dayTasks.length < day.slots && attempts < maxAttempts) {
+            if (cursor >= masterList.length) cursor = 0;
+            var item = masterList[cursor];
+            cursor++;
+            attempts++;
+
+            if (usedSubjects[item.subject]) continue; /* no duplicate subjects per day */
+            usedSubjects[item.subject] = true;
+            dayTasks.push(item);
           }
 
-          plan[dateStr] = dayTasks;
+          plan[day.date] = dayTasks;
         });
 
         return plan;
