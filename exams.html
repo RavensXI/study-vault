@@ -1054,6 +1054,12 @@
         savedPrefs.subjects.forEach(function (s) { selectedSubjects[s] = true; });
       }
 
+      /* Separate Sciences supersedes Combined Science on the timetable —
+         students sit one or the other, not both (same dates, longer papers) */
+      if (selectedSubjects['separate-sciences']) {
+        delete selectedSubjects['science'];
+      }
+
       render();
     }
 
