@@ -1,11 +1,12 @@
 /**
  * AI Revision Strategy API Route
  *
- * Takes a student's exam timetable and returns:
- *   - strategy: markdown overview text
- *   - daily_plan: { "2026-04-15": [{subject, focus}], ... }
+ * The AI generates revision TOPICS per subject (the what).
+ * The client code schedules them into days (the when).
  *
- * Uses Haiku 4.5 for fast, cheap responses.
+ * Returns:
+ *   - strategy: markdown overview text
+ *   - topics: { "English Literature": ["Macbeth key quotes", "19th Century Novel themes", ...], ... }
  *
  * POST /api/revision-strategy
  * Body: { exams: [{subject, paper, date, session}, ...], today: "2026-04-14" }
@@ -34,66 +35,48 @@ module.exports = async function handler(req, res) {
 
   const today = clientToday || new Date().toISOString().split('T')[0];
 
-  // Find date range: today → last exam
-  const examDates = exams.map(e => e.date).sort();
-  const lastExamDate = examDates[examDates.length - 1];
-
-  // Build list of all dates from today to last exam
-  const allDates = [];
-  const d = new Date(today + 'T00:00:00');
-  const end = new Date(lastExamDate + 'T00:00:00');
-  while (d <= end) {
-    allDates.push(d.toISOString().split('T')[0]);
-    d.setDate(d.getDate() + 1);
-  }
-
-  // Build exam date lookup
-  const examsByDate = {};
-  exams.forEach(e => {
-    if (!examsByDate[e.date]) examsByDate[e.date] = [];
-    examsByDate[e.date].push(e);
-  });
-
   const timetableLines = exams.map(e => {
-    const dt = new Date(e.date + 'T00:00:00');
-    const days = Math.ceil((dt - new Date(today + 'T00:00:00')) / 86400000);
+    const d = new Date(e.date + 'T00:00:00');
+    const days = Math.ceil((d - new Date(today + 'T00:00:00')) / 86400000);
     const dayLabel = days <= 0 ? 'TODAY' : days === 1 ? 'TOMORROW' : `in ${days} days`;
     return `${e.date} (${e.session.toUpperCase()}) — ${e.subject}: ${e.paper} [${dayLabel}]`;
   }).join('\n');
 
   const subjects = [...new Set(exams.map(e => e.subject))];
 
+  // Count how many revision days each subject roughly needs
+  const subjectPapers = {};
+  exams.forEach(e => {
+    if (!subjectPapers[e.subject]) subjectPapers[e.subject] = 0;
+    subjectPapers[e.subject]++;
+  });
+
   const systemPrompt = `You are a GCSE revision coach. Today is ${today}. A student has these exams:
 
 ${timetableLines}
 
-You must return a JSON object with exactly two keys:
+Return a JSON object with exactly two keys:
 
-1. "strategy" — A short markdown overview (under 300 words) with these sections:
+1. "strategy" — A short markdown overview (under 250 words) with these sections:
    ## Priority Right Now
-   What to focus on this week.
+   What to focus on this week (reference specific subjects and dates).
    ## Smart Tips
-   3-4 bullet points about their specific timetable (clusters, gaps, interleaving opportunities).
+   3-4 bullet points about their specific timetable.
    ## You've Got This
    2 sentences of encouragement.
 
-2. "daily_plan" — An object mapping EVERY date from ${today} to ${lastExamDate} (inclusive) to an array of revision tasks. Each task is: {"subject": "Subject Name", "focus": "Specific topic or activity"}.
+2. "topics" — An object where each key is a subject name (exactly as listed above) and each value is an array of revision topic strings. These are the specific topics/areas the student should cover for that subject.
 
-Rules for the daily plan:
-- On EXAM DAYS: include a task like {"subject": "English Literature", "focus": "EXAM — Paper 1 (AM)"}
-- The day BEFORE an exam: prioritise that subject
-- Use INTERLEAVING: mix 2-3 subjects per day, don't just block one subject all week
-- Weight subjects by PROXIMITY: subjects with exams soon get more daily slots
-- SUNDAYS MUST BE REST DAYS. Every single Sunday gets ONLY: [{"subject": "Rest", "focus": "Rest day"}]. No revision, no exceptions, not even before exams. This is non-negotiable.
-- Do NOT include tasks for exam days. Exams are already shown separately. If a date has an exam, leave the daily_plan for that date as an EMPTY ARRAY [].
-- Weekdays and Saturdays should have 2-3 tasks each (not more)
-- The "focus" field must be SHORT — max 4 words, just the topic. Examples: "Energy equations", "Moles & Mr", "Act 1 quotes", "Listening practice", "Punnett squares". No verbs like "Practise" or "Revise" — just the topic name.
-- For subjects with multiple papers, distinguish P1 and P2 content areas
-- The student's subjects are: ${subjects.join(', ')}
+Rules for topics:
+- Each topic must be SHORT: 2-4 words max. Just the topic name. Examples: "Macbeth key quotes", "Cell division", "Algebra basics", "Listening practice"
+- For subjects with 2 papers: provide topics for BOTH papers, roughly in curriculum order
+- Number of topics per subject: roughly ${Object.entries(subjectPapers).map(([s, n]) => `${s}: ${n * 8} topics`).join(', ')}
+- Topics should cover the full breadth of the specification — don't just list 3 topics, give enough to fill multiple revision sessions
+- Do NOT include scheduling instructions — just list the topics
 
-Return ONLY valid JSON, no markdown fences, no explanation outside the JSON.`;
+Return ONLY valid JSON. No markdown fences, no explanation.`;
 
-  const userPrompt = `Generate my day-by-day revision plan as JSON.`;
+  const userPrompt = `Generate my revision topic lists as JSON.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -105,7 +88,7 @@ Return ONLY valid JSON, no markdown fences, no explanation outside the JSON.`;
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8192,
+        max_tokens: 4096,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
@@ -119,22 +102,19 @@ Return ONLY valid JSON, no markdown fences, no explanation outside the JSON.`;
 
     const data = await response.json();
     let text = (data.content?.[0]?.text || '').trim();
-
-    // Strip markdown code fences if present
     text = text.replace(/^```json?\s*\n?/, '').replace(/\n?```\s*$/, '');
 
     let result;
     try {
       result = JSON.parse(text);
     } catch (parseErr) {
-      console.error('Failed to parse AI response as JSON:', text.substring(0, 500));
-      // Fallback: return the raw text as strategy with no daily plan
-      return res.status(200).json({ strategy: text, daily_plan: {} });
+      console.error('Failed to parse AI response:', text.substring(0, 500));
+      return res.status(200).json({ strategy: text, topics: {} });
     }
 
     return res.status(200).json({
       strategy: result.strategy || '',
-      daily_plan: result.daily_plan || {}
+      topics: result.topics || {}
     });
   } catch (err) {
     console.error('Revision strategy error:', err);

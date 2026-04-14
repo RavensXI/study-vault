@@ -609,12 +609,18 @@
       .exams-summary,
       .exams-subtitle,
       .exams-title,
-      .results-card {
+      .results-card,
+      .strategy-card,
+      #strategy-container {
         display: none !important;
       }
 
       .print-calendar {
         display: block !important;
+      }
+
+      .print-calendar-title {
+        page-break-before: avoid;
       }
 
       body {
@@ -1126,9 +1132,10 @@
                   }
                 }
               }
+              var taskLabel = task.subject === 'Rest' ? task.focus : task.subject + ': ' + task.focus;
               html += '<div class="cal-revision-pill">';
               html += '<span class="cal-exam-dot" style="background:' + taskColour + ';border:1px solid ' + taskColour + '"></span>';
-              html += '<span class="cal-revision-text">' + (task.focus || task.subject) + '</span>';
+              html += '<span class="cal-revision-text">' + taskLabel + '</span>';
               html += '</div>';
             });
           }
@@ -1336,6 +1343,108 @@
       document.getElementById('btn-ics').addEventListener('click', downloadICS);
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
 
+      /* ── Deterministic scheduler: AI provides topics, code schedules days ── */
+      function scheduleDailyPlan(examList, topics) {
+        var plan = {};
+        var todayStr = new Date().toISOString().split('T')[0];
+
+        /* Build exam date set */
+        var examDates = {};
+        examList.forEach(function (e) { examDates[e.date] = true; });
+
+        /* Find last exam date */
+        var lastDate = examList.map(function (e) { return e.date; }).sort().pop();
+        if (!lastDate) return plan;
+
+        /* Build all dates from today to last exam */
+        var dates = [];
+        var d = new Date(todayStr + 'T00:00:00');
+        var end = new Date(lastDate + 'T00:00:00');
+        while (d <= end) {
+          dates.push(d.toISOString().split('T')[0]);
+          d.setDate(d.getDate() + 1);
+        }
+
+        /* Build subject exam schedule: [{subject, firstExamDate, daysUntil}, ...] sorted by proximity */
+        var subjectFirstExam = {};
+        examList.forEach(function (e) {
+          if (!subjectFirstExam[e.subject] || e.date < subjectFirstExam[e.subject]) {
+            subjectFirstExam[e.subject] = e.date;
+          }
+        });
+        var subjectOrder = Object.keys(subjectFirstExam).sort(function (a, b) {
+          return subjectFirstExam[a].localeCompare(subjectFirstExam[b]);
+        });
+
+        /* Build topic queues per subject (from AI) */
+        var queues = {};
+        subjectOrder.forEach(function (subj) {
+          queues[subj] = (topics[subj] || []).slice(); /* copy */
+        });
+
+        /* Schedule each day */
+        dates.forEach(function (dateStr) {
+          var dow = new Date(dateStr + 'T00:00:00').getDay(); /* 0=Sun */
+
+          /* Sundays = rest */
+          if (dow === 0) {
+            plan[dateStr] = [{ subject: 'Rest', focus: 'Rest day' }];
+            return;
+          }
+
+          /* Exam days = empty (exams shown separately) */
+          if (examDates[dateStr]) {
+            plan[dateStr] = [];
+            return;
+          }
+
+          /* Pick 2-3 subjects for this day, weighted by proximity */
+          var today_d = new Date(dateStr + 'T00:00:00');
+          var eligible = subjectOrder.filter(function (s) {
+            /* Only include subjects whose first exam hasn't passed yet */
+            return subjectFirstExam[s] >= dateStr && queues[s].length > 0;
+          });
+
+          if (eligible.length === 0) {
+            /* All nearby exams done — check for later subjects */
+            eligible = subjectOrder.filter(function (s) { return queues[s].length > 0; });
+          }
+
+          if (eligible.length === 0) {
+            plan[dateStr] = [{ subject: 'Rest', focus: 'Rest day' }];
+            return;
+          }
+
+          /* Weight: subjects with exams sooner get priority */
+          var weighted = eligible.map(function (s) {
+            var examDate = new Date(subjectFirstExam[s] + 'T00:00:00');
+            var daysUntil = Math.max(1, Math.ceil((examDate - today_d) / 86400000));
+            return { subject: s, weight: 1 / daysUntil };
+          });
+          weighted.sort(function (a, b) { return b.weight - a.weight; });
+
+          /* Take top 2-3 (Saturday 2, weekday 3) */
+          var slotsCount = (dow === 6) ? 2 : Math.min(3, weighted.length);
+          var dayTasks = [];
+
+          for (var i = 0; i < slotsCount && i < weighted.length; i++) {
+            var subj = weighted[i].subject;
+            var topic = queues[subj].shift();
+            if (topic) {
+              dayTasks.push({ subject: subj, focus: topic });
+            }
+            /* Cycle topic back if we've run out (repeat the list) */
+            if (queues[subj].length === 0 && topics[subj] && topics[subj].length > 0) {
+              queues[subj] = topics[subj].slice();
+            }
+          }
+
+          plan[dateStr] = dayTasks;
+        });
+
+        return plan;
+      }
+
       /* AI revision strategy */
       document.getElementById('btn-strategy').addEventListener('click', async function () {
         var btn = this;
@@ -1362,7 +1471,7 @@
           if (!resp.ok) throw new Error('API error');
           var data = await resp.json();
 
-          /* Simple markdown to HTML for strategy overview */
+          /* Render strategy overview */
           var md = data.strategy || '';
           if (md) {
             var stratHtml = md
@@ -1380,9 +1489,10 @@
             stratContainer.innerHTML = '';
           }
 
-          /* Re-render calendar with the daily plan */
-          var dailyPlan = data.daily_plan || {};
-          if (Object.keys(dailyPlan).length > 0) {
+          /* Schedule topics into days deterministically */
+          var topics = data.topics || {};
+          if (Object.keys(topics).length > 0) {
+            var dailyPlan = scheduleDailyPlan(examList, topics);
             renderCalendar(gatherExams(), dailyPlan);
           }
         } catch (err) {
