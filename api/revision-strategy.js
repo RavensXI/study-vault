@@ -1,11 +1,14 @@
 /**
  * AI Revision Strategy API Route
  *
- * Takes a student's exam timetable and returns personalised revision advice.
+ * Takes a student's exam timetable and returns:
+ *   - strategy: markdown overview text
+ *   - daily_plan: { "2026-04-15": [{subject, focus}], ... }
+ *
  * Uses Haiku 4.5 for fast, cheap responses.
  *
  * POST /api/revision-strategy
- * Body: { exams: [{subject, paper, date, session}, ...] }
+ * Body: { exams: [{subject, paper, date, session}, ...], today: "2026-04-14" }
  */
 
 module.exports = async function handler(req, res) {
@@ -18,7 +21,7 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { exams } = req.body || {};
+  const { exams, today: clientToday } = req.body || {};
 
   if (!exams || !Array.isArray(exams) || exams.length === 0) {
     return res.status(400).json({ error: 'Missing exams array' });
@@ -29,40 +32,67 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
-  // Build the timetable summary for the prompt
-  const today = new Date().toISOString().split('T')[0];
+  const today = clientToday || new Date().toISOString().split('T')[0];
+
+  // Find date range: today → last exam
+  const examDates = exams.map(e => e.date).sort();
+  const lastExamDate = examDates[examDates.length - 1];
+
+  // Build list of all dates from today to last exam
+  const allDates = [];
+  const d = new Date(today + 'T00:00:00');
+  const end = new Date(lastExamDate + 'T00:00:00');
+  while (d <= end) {
+    allDates.push(d.toISOString().split('T')[0]);
+    d.setDate(d.getDate() + 1);
+  }
+
+  // Build exam date lookup
+  const examsByDate = {};
+  exams.forEach(e => {
+    if (!examsByDate[e.date]) examsByDate[e.date] = [];
+    examsByDate[e.date].push(e);
+  });
+
   const timetableLines = exams.map(e => {
-    const d = new Date(e.date + 'T00:00:00');
-    const days = Math.ceil((d - new Date(today + 'T00:00:00')) / 86400000);
+    const dt = new Date(e.date + 'T00:00:00');
+    const days = Math.ceil((dt - new Date(today + 'T00:00:00')) / 86400000);
     const dayLabel = days <= 0 ? 'TODAY' : days === 1 ? 'TOMORROW' : `in ${days} days`;
     return `${e.date} (${e.session.toUpperCase()}) — ${e.subject}: ${e.paper} [${dayLabel}]`;
   }).join('\n');
 
-  const systemPrompt = `You are a friendly, encouraging GCSE revision coach. A Year 11 student has shared their exam timetable with you. Today is ${today}.
+  const subjects = [...new Set(exams.map(e => e.subject))];
 
-Give them a clear, personalised revision strategy. Be specific and practical — reference their actual subjects and dates.
+  const systemPrompt = `You are a GCSE revision coach. Today is ${today}. A student has these exams:
 
-Structure your response EXACTLY like this, using these headings with markdown:
+${timetableLines}
 
-## Priority Right Now
-What they should focus on this week based on which exam is closest. Be specific about the subject and topic areas.
+You must return a JSON object with exactly two keys:
 
-## Your Revision Schedule
-A week-by-week or phase-by-phase plan working through their exams in date order. For each phase, name the subject(s) to focus on and roughly how many days they have. Identify natural revision windows (gaps between exams).
+1. "strategy" — A short markdown overview (under 300 words) with these sections:
+   ## Priority Right Now
+   What to focus on this week.
+   ## Smart Tips
+   3-4 bullet points about their specific timetable (clusters, gaps, interleaving opportunities).
+   ## You've Got This
+   2 sentences of encouragement.
 
-## Smart Tips for Your Timetable
-3-4 specific observations about their timetable — things like:
-- Subjects that are close together (so they need to prep both early)
-- Long gaps they can use for deeper revision
-- Days with multiple exams where they should prepare in advance
-- Their last exam (so they know when they're done!)
+2. "daily_plan" — An object mapping EVERY date from ${today} to ${lastExamDate} (inclusive) to an array of revision tasks. Each task is: {"subject": "Subject Name", "focus": "Specific topic or activity"}.
 
-## You've Got This
-A short encouraging sign-off (2-3 sentences max). Be warm but not cheesy.
+Rules for the daily plan:
+- On EXAM DAYS: include a task like {"subject": "English Literature", "focus": "EXAM — Paper 1 (AM). Light review of quotes only."}
+- The day BEFORE an exam: prioritise that subject with focused last-minute review
+- Use INTERLEAVING: don't just do one subject all day every day — mix 2-3 subjects per day
+- Weight subjects by PROXIMITY: subjects with exams soon get more daily slots
+- Include 1-2 REST slots on Sundays: {"subject": "Rest", "focus": "Take a break — go for a walk or do something you enjoy"}
+- Each day should have 2-4 tasks (not more)
+- Be SPECIFIC about focus areas: "Practise circuit calculations (V=IR)" not just "Revise Physics"
+- For subjects with multiple papers, distinguish P1 and P2 content
+- The student's subjects are: ${subjects.join(', ')}
 
-Keep the whole response under 500 words. Use bullet points. Don't use generic advice — make every point reference their specific subjects and dates.`;
+Return ONLY valid JSON, no markdown fences, no explanation outside the JSON.`;
 
-  const userPrompt = `Here is my exam timetable:\n\n${timetableLines}\n\nPlease give me a personalised revision strategy.`;
+  const userPrompt = `Generate my day-by-day revision plan as JSON.`;
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -74,7 +104,7 @@ Keep the whole response under 500 words. Use bullet points. Don't use generic ad
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
+        max_tokens: 8192,
         system: systemPrompt,
         messages: [{ role: 'user', content: userPrompt }]
       })
@@ -87,9 +117,24 @@ Keep the whole response under 500 words. Use bullet points. Don't use generic ad
     }
 
     const data = await response.json();
-    const text = data.content?.[0]?.text || '';
+    let text = (data.content?.[0]?.text || '').trim();
 
-    return res.status(200).json({ strategy: text });
+    // Strip markdown code fences if present
+    text = text.replace(/^```json?\s*\n?/, '').replace(/\n?```\s*$/, '');
+
+    let result;
+    try {
+      result = JSON.parse(text);
+    } catch (parseErr) {
+      console.error('Failed to parse AI response as JSON:', text.substring(0, 500));
+      // Fallback: return the raw text as strategy with no daily plan
+      return res.status(200).json({ strategy: text, daily_plan: {} });
+    }
+
+    return res.status(200).json({
+      strategy: result.strategy || '',
+      daily_plan: result.daily_plan || {}
+    });
   } catch (err) {
     console.error('Revision strategy error:', err);
     return res.status(500).json({ error: 'Internal error' });

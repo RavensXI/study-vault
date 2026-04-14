@@ -441,9 +441,13 @@
       }
     }
 
-    /* ── Print calendar (hidden on screen) ── */
+    /* ── Print calendar (hidden on screen until plan generated) ── */
     .print-calendar {
       display: none;
+    }
+    .print-calendar--visible {
+      display: block;
+      margin-top: 1.5rem;
     }
 
     .print-calendar-title {
@@ -486,7 +490,7 @@
     }
 
     .cal-cell {
-      min-height: 80px;
+      min-height: 90px;
       border-right: 1px solid #d6d3d1;
       border-bottom: 1px solid #d6d3d1;
       padding: 0.25rem;
@@ -549,6 +553,31 @@
       margin-left: 1px;
     }
 
+    .cal-exam-pill--exam {
+      font-weight: 700;
+      background: rgba(0,0,0,0.04);
+    }
+
+    .cal-revision-pill {
+      display: flex;
+      align-items: flex-start;
+      gap: 3px;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 0.5rem;
+      font-weight: 400;
+      line-height: 1.3;
+      color: #57534e;
+      padding: 1px 2px;
+      margin-bottom: 1px;
+    }
+    .cal-revision-text {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+    }
+
     .cal-results-note {
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 0.85rem;
@@ -559,6 +588,7 @@
     }
 
     /* ── Print styles ── */
+    @page { size: landscape; margin: 1cm; }
     @media print {
       .page-header,
       .exams-actions,
@@ -992,8 +1022,9 @@
       return s;
     }
 
-    /* ── Render print calendar (May + June 2026) ── */
-    function renderCalendar(exams) {
+    /* ── Render calendar (May + June 2026) ── */
+    /* dailyPlan is optional: { "2026-05-01": [{subject, focus}], ... } */
+    function renderCalendar(exams, dailyPlan) {
       var calDiv = document.getElementById('print-calendar');
       if (!calDiv) return;
 
@@ -1003,6 +1034,8 @@
         if (!examsByDate[e.date]) examsByDate[e.date] = [];
         examsByDate[e.date].push(e);
       });
+
+      var plan = dailyPlan || {};
 
       var DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       var MONTH_NAMES = ['January', 'February', 'March', 'April', 'May', 'June',
@@ -1059,10 +1092,34 @@
               var shortPaper = shortenPaper(ex.paper);
               var sessionTag = ex.session === 'am' ? 'AM' : 'PM';
 
-              html += '<div class="cal-exam-pill">';
+              html += '<div class="cal-exam-pill cal-exam-pill--exam">';
               html += '<span class="cal-exam-dot" style="background:' + colour + ';border:1px solid ' + colour + '"></span>';
               html += shortSubj + ' ' + shortPaper;
               html += '<span class="cal-session-tag">' + sessionTag + '</span>';
+              html += '</div>';
+            });
+          }
+
+          /* Revision tasks for this date (from AI daily plan) */
+          var dayTasks = plan[dateStr];
+          if (dayTasks && dayTasks.length) {
+            dayTasks.forEach(function (task) {
+              /* Try to match subject name to a colour */
+              var taskColour = '#a8a29e';
+              var taskSubjLower = (task.subject || '').toLowerCase();
+              if (taskSubjLower === 'rest' || taskSubjLower === 'break') {
+                taskColour = '#16a34a';
+              } else {
+                for (var sk in SUBJECT_NAMES) {
+                  if (SUBJECT_NAMES[sk].toLowerCase() === taskSubjLower) {
+                    taskColour = SUBJECT_COLOURS[sk] || taskColour;
+                    break;
+                  }
+                }
+              }
+              html += '<div class="cal-revision-pill">';
+              html += '<span class="cal-exam-dot" style="background:' + taskColour + ';border:1px solid ' + taskColour + '"></span>';
+              html += '<span class="cal-revision-text">' + (task.focus || task.subject) + '</span>';
               html += '</div>';
             });
           }
@@ -1084,13 +1141,24 @@
         return html;
       }
 
+      var hasPlan = Object.keys(plan).length > 0;
       var calHtml = '';
-      calHtml += '<h1 class="print-calendar-title">My GCSE Exam Timetable &mdash; 2026</h1>';
+      calHtml += '<h1 class="print-calendar-title">' + (hasPlan ? 'My Revision Planner' : 'My GCSE Exam Timetable') + ' &mdash; 2026</h1>';
+
+      /* If we have a daily plan, also include April (remaining days) */
+      if (hasPlan) {
+        calHtml += buildMonth(2026, 3, 'cal-month-block--april'); /* April = month 3 */
+      }
       calHtml += buildMonth(2026, 4, 'cal-month-block--may');  /* May = month 4 */
       calHtml += buildMonth(2026, 5, 'cal-month-block--june'); /* June = month 5 */
       calHtml += '<p class="cal-results-note">Results Day: Thursday 20 August 2026</p>';
 
       calDiv.innerHTML = calHtml;
+
+      /* If plan generated, show the calendar on screen too */
+      if (hasPlan) {
+        calDiv.classList.add('print-calendar--visible');
+      }
     }
 
     /* ── Render the full page ── */
@@ -1273,30 +1341,41 @@
           return { subject: SUBJECT_NAMES[e.subject] || e.subject, paper: e.paper, date: e.date, session: e.session };
         });
 
+        var todayStr = new Date().toISOString().split('T')[0];
+
         try {
           var resp = await fetch('/api/revision-strategy', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ exams: examList })
+            body: JSON.stringify({ exams: examList, today: todayStr })
           });
 
           if (!resp.ok) throw new Error('API error');
           var data = await resp.json();
 
-          /* Simple markdown to HTML */
-          var md = data.strategy || 'No strategy returned.';
-          var html = md
-            .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-            .replace(/^\- (.+)$/gm, '<li>$1</li>')
-            .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\n\n/g, '</p><p>')
-            .replace(/^(?!<[hul])(.+)$/gm, '<p>$1</p>')
-            .replace(/<p><\/p>/g, '')
-            .replace(/<p>(<[hul])/g, '$1')
-            .replace(/(<\/[hul].*?>)<\/p>/g, '$1');
+          /* Simple markdown to HTML for strategy overview */
+          var md = data.strategy || '';
+          if (md) {
+            var stratHtml = md
+              .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+              .replace(/^\- (.+)$/gm, '<li>$1</li>')
+              .replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>')
+              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\n\n/g, '</p><p>')
+              .replace(/^(?!<[hul])(.+)$/gm, '<p>$1</p>')
+              .replace(/<p><\/p>/g, '')
+              .replace(/<p>(<[hul])/g, '$1')
+              .replace(/(<\/[hul].*?>)<\/p>/g, '$1');
+            stratContainer.innerHTML = '<div class="strategy-card">' + stratHtml + '</div>';
+          } else {
+            stratContainer.innerHTML = '';
+          }
 
-          stratContainer.innerHTML = '<div class="strategy-card">' + html + '</div>';
+          /* Re-render calendar with the daily plan */
+          var dailyPlan = data.daily_plan || {};
+          if (Object.keys(dailyPlan).length > 0) {
+            renderCalendar(gatherExams(), dailyPlan);
+          }
         } catch (err) {
           stratContainer.innerHTML = '<div class="strategy-card"><p>Sorry, couldn\'t generate a strategy right now. Try again in a moment.</p></div>';
         }
