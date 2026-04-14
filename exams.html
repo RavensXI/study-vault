@@ -1595,7 +1595,11 @@
        */
       function scheduleDailyPlan(examList, topicPools, restDow) {
         var plan = {};
-        var todayStr = new Date().toISOString().split('T')[0];
+        /* Use local date formatting to avoid BST/UTC offset bug */
+        function localDateStr(dt) {
+          return dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
+        }
+        var todayStr = localDateStr(new Date());
         var todayMs = new Date(todayStr + 'T00:00:00').getTime();
         if (restDow === undefined) restDow = 0; /* default Sunday */
 
@@ -1616,7 +1620,7 @@
         var d = new Date(todayStr + 'T00:00:00');
         var end = new Date(lastDate + 'T00:00:00');
         while (d <= end) {
-          var ds = d.toISOString().split('T')[0];
+          var ds = localDateStr(d);
           var dow = d.getDay();
           if (dow === restDow) {
             plan[ds] = [{ subject: 'Rest', focus: 'Rest day' }];
