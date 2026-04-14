@@ -126,6 +126,63 @@
       border-color: #2d2a26;
     }
 
+    /* ── ICS help card ── */
+    .ics-help {
+      margin-bottom: 1.25rem;
+      animation: icsHelpIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ics-help-inner {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .ics-help-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.75rem;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      color: #94a3b8;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .ics-help-close:hover { color: #475569; }
+    .ics-help-title {
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin: 0 0 0.75rem;
+    }
+    .ics-help-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0.6rem;
+    }
+    .ics-help-step {
+      font-family: Inter, system-ui, sans-serif;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      color: #334155;
+      background: #fff;
+      border-radius: 8px;
+      padding: 0.6rem 0.75rem;
+    }
+    .ics-help-step strong {
+      color: #1d4ed8;
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+    @keyframes icsHelpIn {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     /* ── Loading state ── */
     .plan-loading {
       text-align: center;
@@ -327,7 +384,8 @@
       .site-footer,
       .sv-legal-footer,
       .cookie-consent,
-      .plan-loading {
+      .plan-loading,
+      .ics-help {
         display: none !important;
       }
 
@@ -1241,6 +1299,16 @@
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
       html += 'Download .ics</button>';
       html += '</div>';
+      html += '<div class="ics-help" id="ics-help" hidden>';
+      html += '<div class="ics-help-inner">';
+      html += '<button class="ics-help-close" id="ics-help-close" aria-label="Close">&times;</button>';
+      html += '<p class="ics-help-title">File downloaded! Add it to your calendar:</p>';
+      html += '<div class="ics-help-steps">';
+      html += '<div class="ics-help-step"><strong>iPhone</strong><br>Tap the downloaded file &rarr; "Add All Events"</div>';
+      html += '<div class="ics-help-step"><strong>Android</strong><br>Tap the file &rarr; choose Google Calendar &rarr; "Import"</div>';
+      html += '<div class="ics-help-step"><strong>PC / Mac</strong><br>Double-click the file &rarr; opens in Outlook / Apple Calendar</div>';
+      html += '<div class="ics-help-step"><strong>Google Calendar</strong><br>Go to Settings &rarr; Import &amp; Export &rarr; Import the .ics file</div>';
+      html += '</div></div></div>';
 
       /* Calendar area — loading spinner initially */
       html += '<div id="revision-calendar" class="revision-calendar">';
@@ -1250,8 +1318,15 @@
       container.innerHTML = html;
 
       /* Bind toolbar events */
-      document.getElementById('btn-ics').addEventListener('click', downloadICS);
+      document.getElementById('btn-ics').addEventListener('click', function () {
+        downloadICS();
+        var help = document.getElementById('ics-help');
+        help.hidden = false;
+      });
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
+      document.getElementById('ics-help-close').addEventListener('click', function () {
+        document.getElementById('ics-help').hidden = true;
+      });
 
       /* Rest day toggle — re-run scheduler with cached data */
       container.querySelectorAll('.rest-day-btn').forEach(function (btn) {
