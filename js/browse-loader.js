@@ -92,7 +92,7 @@
     var units = unitsResult.data || [];
 
     // Tier filtering for subject overview — get actual filtered counts per unit
-    var TIERED_OVERVIEW = ['maths', 'science', 'separate-sciences'];
+    var TIERED_OVERVIEW = ['maths', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-edexcel', 'science-ocr', 'separate-sciences'];
     var savedTiersOverview = {};
     try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
     var overviewTier = savedTiersOverview[subjectSlug] || 'higher';
@@ -264,7 +264,7 @@
       html += '<p>' + esc(unit.subtitle) + '</p>';
     }
     // Tier indicator for tiered subjects
-    var TIERED = ['maths', 'science', 'separate-sciences'];
+    var TIERED = ['maths', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-edexcel', 'science-ocr', 'separate-sciences'];
     if (TIERED.indexOf(subjectSlug) !== -1) {
       var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';
