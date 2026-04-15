@@ -3811,7 +3811,6 @@
   <script>(function(){try{var p=JSON.parse(localStorage.getItem('studyvault-a11y'));if(p&&p.darkMode)document.body.classList.add('dark-mode')}catch(e){}})()</script>
   <script src="/js/school-session.js"></script>
   <script src="/js/free-user.js"></script>
-  <script src="/js/cookie-consent.js"></script>
   <script>(function(){try{var a=JSON.parse(sessionStorage.getItem('studyvault-auth'))||JSON.parse(localStorage.getItem('studyvault-auth'));if(a&&(a.role==='admin'||a.role==='teacher'))return}catch(e){}if(!SchoolSession.isActive()&&!FreeUser.isActive()){window.location.href='/'}})();</script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
@@ -6600,7 +6599,8 @@
       var marks = problem.marks || 10;
       var systemPrompt = problem.ai_system_prompt || 'You are a GCSE Modern Foreign Languages examiner. Mark each bullet for communication and accuracy. Respond in JSON: {"quality":"excellent|good|needs_work|not_valid","feedback":"2-3 sentences per bullet","improvement":"optional overall suggestion"}';
       try {
-        var resp = await fetch('/api/ai-mark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ marks: marks, system: systemPrompt, prompt: userPrompt }) });
+        var _isFree = typeof SchoolSession === 'undefined' || !SchoolSession.isActive();
+        var resp = await fetch('/api/ai-mark', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ marks: marks, system: systemPrompt, prompt: userPrompt, free_tier: _isFree }) });
         var data = await resp.json();
         if (!resp.ok) throw new Error(data.error || 'Marking failed');
         var content = data.result;
@@ -6876,7 +6876,8 @@
       if(problem.context||problem.aiContext)userPrompt+='Context: '+(problem.context||problem.aiContext)+'\n\n';
       userPrompt+='Student answer: '+input.value.trim();
       try{
-        var resp=await fetch('/api/ai-mark',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({marks:marks,system:systemPrompt,prompt:userPrompt})});
+        var _isFree2=typeof SchoolSession==='undefined'||!SchoolSession.isActive();
+        var resp=await fetch('/api/ai-mark',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({marks:marks,system:systemPrompt,prompt:userPrompt,free_tier:_isFree2})});
         var data=await resp.json();
         if(!resp.ok)throw new Error(data.error||'Marking failed');
         var content=data.result;

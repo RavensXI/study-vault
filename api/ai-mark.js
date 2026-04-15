@@ -30,15 +30,18 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { tier: requestedTier, marks, system, prompt } = req.body || {};
+  const { tier: requestedTier, marks, system, prompt, free_tier } = req.body || {};
 
   if (!prompt) {
     return res.status(400).json({ error: 'Missing prompt' });
   }
 
   // Determine tier: explicit > auto (from marks) > default quick
+  // Free tier users always get Haiku (quick) regardless of marks
   let tier;
-  if (requestedTier === 'quick' || requestedTier === 'exam') {
+  if (free_tier) {
+    tier = 'quick';
+  } else if (requestedTier === 'quick' || requestedTier === 'exam') {
     tier = requestedTier;
   } else if (typeof marks === 'number') {
     tier = marks > 8 ? 'exam' : 'quick';
