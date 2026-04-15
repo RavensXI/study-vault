@@ -4052,9 +4052,18 @@
           '<input type="text" class="problem-input" id="problem-input-b" inputmode="numeric" autocomplete="off" placeholder="?">';
       } else if (inputType === 'multiple_choice') {
         var options = p.options || [];
+        // Shuffle options so the correct answer isn't always first
+        var mcIndices = options.map(function(_, i) { return i; });
+        for (var si = mcIndices.length - 1; si > 0; si--) {
+          var sj = Math.floor(Math.random() * (si + 1));
+          var tmp = mcIndices[si]; mcIndices[si] = mcIndices[sj]; mcIndices[sj] = tmp;
+        }
+        // Build reverse map: original index → shuffled position
+        p._mcShuffleMap = {};
+        for (var mi = 0; mi < mcIndices.length; mi++) { p._mcShuffleMap[mcIndices[mi]] = mi; }
         inputHtml = '<div class="mc-options">';
-        for (var oi = 0; oi < options.length; oi++) {
-          inputHtml += '<button class="mc-option" data-idx="' + oi + '" onclick="selectMcOption(this)">' + options[oi] + '</button>';
+        for (var oi = 0; oi < mcIndices.length; oi++) {
+          inputHtml += '<button class="mc-option" data-idx="' + mcIndices[oi] + '" onclick="selectMcOption(this)">' + options[mcIndices[oi]] + '</button>';
         }
         inputHtml += '</div><input type="hidden" id="problem-input-a" value="">';
       } else if (inputType === 'fraction') {
