@@ -392,29 +392,8 @@
       pageEl.insertBefore(banner, pageEl.firstChild);
     }
 
-    // Inject ad placeholders — show for free users and school students on non-subscribed subjects
-    var subjectSlug = params.subjectSlug;
-    var shouldShowAds = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive())
-      ? SchoolSession.showAds(subjectSlug)
-      : true;  // Free users always see ads
-    if (shouldShowAds) {
-      // Sidebar ad — after knowledge check + video, before related media
-      var sidebarMedia = document.getElementById('sidebar-media');
-      if (sidebarMedia) {
-        var sidebarAd = document.createElement('div');
-        sidebarAd.className = 'ad-placeholder ad-placeholder--sidebar';
-        sidebarAd.innerHTML = '<img src="/images/sample-ad-300x250.png" alt="Ad" style="width:100%;height:auto;border-radius:inherit;">';
-        sidebarMedia.parentElement.insertBefore(sidebarAd, sidebarMedia);
-      }
-      // Inline ad — before the conclusion (inside study-notes content)
-      var conclusion = document.querySelector('#study-notes .conclusion');
-      if (conclusion) {
-        var inlineAd = document.createElement('div');
-        inlineAd.className = 'ad-placeholder ad-placeholder--inline';
-        inlineAd.innerHTML = '<img src="/images/sample-ad-728x90.png" alt="Ad" style="width:100%;height:auto;border-radius:inherit;">';
-        conclusion.parentElement.insertBefore(inlineAd, conclusion);
-      }
-    }
+    // Ad placeholders disabled — no ads on free tier for now
+    // Re-enable when ad strategy is decided (see docs/DPIA_SCREENING.md)
 
     // Apply Foundation tier body class if student selected Foundation
     // Hides .higher-only content via CSS
