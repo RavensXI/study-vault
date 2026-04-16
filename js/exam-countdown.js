@@ -32,7 +32,8 @@
       'combined-science': 'science',
       'religious-studies': 'religious-education',
       'food-preparation-and-nutrition': 'food-technology',
-      'food': 'food-technology'
+      'food': 'food-technology',
+      'gcse-music': 'music'
     };
     return aliases[base] || base;
   }
