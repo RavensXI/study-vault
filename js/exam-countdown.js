@@ -26,7 +26,7 @@
   }
 
   function normaliseSlug(slug) {
-    var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec)$/, '');
+    var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/, '');
     var aliases = {
       'mathematics': 'maths',
       'combined-science': 'science',
@@ -38,7 +38,7 @@
   }
 
   function detectBoard(slug) {
-    var suffixMatch = slug.match(/-(aqa|edexcel|ocr|eduqas|wjec)$/);
+    var suffixMatch = slug.match(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/);
     if (suffixMatch) return suffixMatch[1];
     var board = getExamBoard();
     if (board) return board;
