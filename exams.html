@@ -303,41 +303,38 @@
     }
 
     .cal-exam-pill {
-      display: flex;
-      align-items: center;
-      gap: 3px;
+      display: block;
       font-family: 'Inter', system-ui, sans-serif;
       font-size: 0.65rem;
       font-weight: 600;
-      white-space: nowrap;
-      line-height: 1.5;
+      line-height: 1.4;
       color: #2d2a26;
-      padding: 2px 3px;
+      padding: 2px 4px;
       border-radius: 3px;
       margin-bottom: 2px;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
     }
 
     .cal-exam-pill-label {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      min-width: 0;
-      flex: 1 1 auto;
+      /* inline so it wraps with the dot and session tag */
     }
 
     .cal-exam-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      flex-shrink: 0;
       display: inline-block;
+      vertical-align: middle;
+      margin-right: 3px;
     }
 
     .cal-session-tag {
       font-size: 0.55rem;
       font-weight: 700;
       color: #78716c;
-      margin-left: 1px;
-      flex-shrink: 0;
+      margin-left: 3px;
+      white-space: nowrap;
     }
 
     .cal-exam-pill--exam {
@@ -446,6 +443,12 @@
       .cal-exam-pill, .cal-revision-pill {
         font-size: 0.55rem;
       }
+
+      /* "Print exams only" mode — hide revision tasks, keep exams */
+      body.print-exams-only .cal-revision-pill {
+        display: none !important;
+      }
+
       .cal-day-number {
         font-size: 0.7rem;
       }
@@ -1318,6 +1321,9 @@
       html += '<button class="exams-btn exams-btn--secondary" id="btn-print">';
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
       html += 'Print</button>';
+      html += '<button class="exams-btn exams-btn--secondary" id="btn-print-exams">';
+      html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>';
+      html += 'Print exams only</button>';
       html += '<button class="exams-btn exams-btn--primary" id="btn-ics">';
       html += '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
       html += 'Download to Calendar</button>';
@@ -1347,6 +1353,13 @@
         help.hidden = false;
       });
       document.getElementById('btn-print').addEventListener('click', function () { window.print(); });
+      document.getElementById('btn-print-exams').addEventListener('click', function () {
+        document.body.classList.add('print-exams-only');
+        window.print();
+      });
+      window.addEventListener('afterprint', function () {
+        document.body.classList.remove('print-exams-only');
+      });
       document.getElementById('ics-help-close').addEventListener('click', function () {
         document.getElementById('ics-help').hidden = true;
       });
