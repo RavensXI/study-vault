@@ -1368,6 +1368,19 @@
       headerEl.innerHTML = '<h2>Your subjects</h2><a href="/exams" class="home-exams-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>My Exam Timetable</a><button class="home-change-btn" id="change-subjects-btn">Change</button>';
       document.getElementById('change-subjects-btn').addEventListener('click', openPicker);
 
+      // If student takes separate sciences, merge into science card
+      var hasSepSci = subjects.indexOf('separate-sciences') !== -1;
+      if (hasSepSci) {
+        // Remove sep sci card from the list — its content merges into Science
+        yourCards = yourCards.filter(function(c) { return c.dataset.subject !== 'separate-sciences'; });
+        // Update science card title
+        var sciCard = yourCards.find(function(c) { return c.dataset.subject === 'science'; });
+        if (sciCard) {
+          var titleEl = sciCard.querySelector('.home-card-name');
+          if (titleEl) titleEl.textContent = 'Science (Triple)';
+        }
+      }
+
       // Move your cards to top grid
       gridEl.innerHTML = '';
       yourCards.forEach(function(card) { gridEl.appendChild(card); });

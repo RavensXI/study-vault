@@ -102,6 +102,20 @@
         .maybeSingle();
     }
 
+    // Fallback: if viewing science and unit not found, try separate-sciences
+    if (!unitResult.data && (params.subjectSlug === 'science' || params.subjectSlug.indexOf('science-') === 0)) {
+      var sepQuery = sb.from('units')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
+        .eq('slug', params.unitSlug)
+        .eq('subjects.slug', 'separate-sciences');
+      if (hasBespoke) {
+        sepQuery = sepQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
+      } else {
+        sepQuery = sepQuery.is('subjects.school_id', null);
+      }
+      unitResult = await sepQuery.maybeSingle();
+    }
+
     if (unitResult.error || !unitResult.data) {
       return { error: 'Unit not found' };
     }

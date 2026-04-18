@@ -54,6 +54,12 @@
 
   // ---- Render subject landing page (unit cards) ----
   async function renderSubjectLanding(subjectSlug) {
+    // Redirect /browse/separate-sciences → /browse/science (units merge into science)
+    if (subjectSlug === 'separate-sciences') {
+      window.location.replace('/browse/science');
+      return;
+    }
+
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(subjectSlug));
 
@@ -90,6 +96,54 @@
       .order('sort_order');
 
     var units = unitsResult.data || [];
+
+    // Merge Separate Sciences units into Science when student takes triple
+    var isScienceSubject = subjectSlug === 'science' || subjectSlug.indexOf('science-') === 0;
+    var hasSepSci = false;
+    if (isScienceSubject) {
+      try {
+        var picks = JSON.parse(localStorage.getItem('studyvault-subjects') || '[]');
+        hasSepSci = picks.indexOf('separate-sciences') !== -1;
+      } catch(e) {}
+      // Also check free user prefs
+      if (!hasSepSci && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+        hasSepSci = FreeUser.getSubjectSlugs().indexOf('separate-sciences') !== -1;
+      }
+      if (hasSepSci) {
+        // Fetch the separate-sciences subject and merge its units
+        var sepQuery = sb.from('subjects').select('id').eq('slug', 'separate-sciences');
+        if (hasBespoke) {
+          sepQuery = sepQuery.eq('school_id', SchoolSession.getSchoolId());
+        } else {
+          sepQuery = sepQuery.is('school_id', null);
+        }
+        var sepResult = await sepQuery.maybeSingle();
+        if (sepResult.data) {
+          var sepUnitsResult = await sb.from('units')
+            .select('id, slug, name, subtitle, body_class, accent, image_url, lesson_count, sort_order')
+            .eq('subject_id', sepResult.data.id)
+            .order('sort_order');
+          var sepUnits = sepUnitsResult.data || [];
+          // Only add units that aren't already in the combined list (by slug)
+          var existingSlugs = units.map(function(u) { return u.slug; });
+          sepUnits.forEach(function(su) {
+            if (existingSlugs.indexOf(su.slug) === -1) {
+              su.sort_order = (units.length ? units[units.length - 1].sort_order : 0) + su.sort_order + 1;
+              su._isSeparateScience = true;
+              units.push(su);
+            }
+          });
+          // Also merge practice_units from sep sci settings
+          if (subject.settings && sepResult.data) {
+            var sepSubjResult = await sb.from('subjects').select('settings').eq('id', sepResult.data.id).single();
+            if (sepSubjResult.data && sepSubjResult.data.settings && sepSubjResult.data.settings.practice_units) {
+              subject.settings.practice_units = (subject.settings.practice_units || []).concat(sepSubjResult.data.settings.practice_units);
+            }
+          }
+        }
+      }
+    }
+
 
     // Tier filtering for subject overview — get actual filtered counts per unit
     var TIERED_OVERVIEW = ['maths', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-edexcel', 'science-ocr', 'separate-sciences'];
@@ -143,7 +197,8 @@
     var html = '';
 
     // Hero
-    html += '<section class="hero"><h1>' + esc(subject.name) + '</h1>';
+    var displayName = hasSepSci ? 'Science (Triple)' : subject.name;
+    html += '<section class="hero"><h1>' + esc(displayName) + '</h1>';
     if (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1) {
       var tierBadgeLabel = overviewTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<p style="font-family:Inter,sans-serif;font-size:0.8rem;font-weight:600;color:var(--text-secondary);margin:0.5rem 0 0;letter-spacing:0.03em">' + tierBadgeLabel + ' tier</p>';
@@ -207,9 +262,23 @@
       unitQuery = unitQuery.is('subjects.school_id', null);
     }
 
-    var unitResult = await unitQuery.single();
+    var unitResult = await unitQuery.maybeSingle();
 
-    if (unitResult.error || !unitResult.data) {
+    // Fallback: if viewing science and unit not found, try separate-sciences
+    if (!unitResult.data && (subjectSlug === 'science' || subjectSlug.indexOf('science-') === 0)) {
+      var sepQuery = sb.from('units')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, school_id, settings)')
+        .eq('slug', unitSlug)
+        .eq('subjects.slug', 'separate-sciences');
+      if (hasBespoke) {
+        sepQuery = sepQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
+      } else {
+        sepQuery = sepQuery.is('subjects.school_id', null);
+      }
+      unitResult = await sepQuery.maybeSingle();
+    }
+
+    if (!unitResult.data) {
       showError('Unit not found', 'No unit found.');
       return;
     }
