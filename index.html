@@ -723,15 +723,23 @@
       if (freePrefs && freePrefs.subjects && freePrefs.subjects.length > 0) {
         headerEl.innerHTML = '<h2>Your subjects</h2><a href="/exams" class="home-exams-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>My Exam Timetable</a>';
         var cardsHtml = '';
+        var freeSepSci = freePrefs.subjects.some(function(s) { return s.slug === 'separate-sciences' || s.baseSlug === 'separate-sciences'; });
         freePrefs.subjects.forEach(function (s) {
+          // Skip separate-sciences card — its content merges into Science
+          if (s.slug === 'separate-sciences' || s.baseSlug === 'separate-sciences') return;
           var meta = freeSubjectMeta[s.baseSlug] || freeSubjectMeta[s.slug] || { name: s.slug, image: '', accent: '#666', detail: '' };
+          // Rename Science to Science (Triple) when sep sci is selected
+          var cardName = meta.name;
+          if (freeSepSci && (s.slug === 'science' || s.baseSlug === 'science')) {
+            cardName = 'Science (Triple)';
+          }
           var boardLabel = (s.examBoard || '').toUpperCase();
           cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" style="--card-accent: ' + meta.accent + '">';
           if (meta.image) {
-            cardsHtml += '<img class="home-card-img" src="' + meta.image + '" alt="' + meta.name + '" width="500" height="300" loading="lazy" decoding="async">';
+            cardsHtml += '<img class="home-card-img" src="' + meta.image + '" alt="' + cardName + '" width="500" height="300" loading="lazy" decoding="async">';
           }
           cardsHtml += '<div class="home-card-body">';
-          cardsHtml += '<h3>' + meta.name + '</h3>';
+          cardsHtml += '<h3>' + cardName + '</h3>';
           cardsHtml += '<p class="home-card-board">' + boardLabel + '</p>';
           cardsHtml += '<p class="home-card-detail">' + meta.detail + '</p>';
           cardsHtml += '</div></a>';
@@ -1383,7 +1391,10 @@
 
       // Move your cards to top grid
       gridEl.innerHTML = '';
-      yourCards.forEach(function(card) { gridEl.appendChild(card); });
+      yourCards.forEach(function(card) {
+        card.style.display = '';  // clear any previous display:none
+        gridEl.appendChild(card);
+      });
 
       // Remove any existing "All subjects" section — students can use the picker to add subjects
       var existingAll = subjectsSection.querySelector('.home-all-section');
