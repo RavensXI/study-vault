@@ -540,9 +540,11 @@ function initPracticeQuestions() {
 
     const q = questions[currentIndex];
     const lessonTitle = document.querySelector('.lesson-header h1');
+    const board = window._examBoard || 'AQA';
+    const subject = window._subjectName || 'the subject';
     const prompt =
-      'You are an AQA GCSE History examiner. Mark the following student answer.\n\n' +
-      'TOPIC: ' + (lessonTitle ? lessonTitle.textContent : 'Conflict & Tension') + '\n\n' +
+      'You are a ' + board + ' GCSE ' + subject + ' examiner. Mark the following student answer.\n\n' +
+      'TOPIC: ' + (lessonTitle ? lessonTitle.textContent : '') + '\n\n' +
       'QUESTION (' + q.type + '):\n' + q.text + '\n\n' +
       'MARK SCHEME GUIDANCE:\n' + q.marks + '\n\n' +
       'STUDENT ANSWER:\n' + answer + '\n\n' +

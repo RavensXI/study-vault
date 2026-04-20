@@ -298,6 +298,7 @@
     window._lessonFlashcardQuestions = lesson.flashcard_questions || [];
     window._lessonId = lesson.id;
     window._subjectSlug = params.subjectSlug;
+    window._subjectName = subject.name || '';
     window._examBoard = subject.exam_board || '';
 
     // Extract podcast URL from related_media (if present)
