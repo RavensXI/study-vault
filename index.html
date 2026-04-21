@@ -123,56 +123,138 @@
     /* --- Free wizard modal --- */
     .free-wizard-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
     .free-wizard-overlay.open { display: flex; align-items: center; justify-content: center; }
-    .free-wizard-modal { background: var(--bg-card); border-radius: 20px; max-width: 600px; width: calc(100% - 2rem); max-height: calc(100vh - 3rem); overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.18); padding: 2rem; }
-    .free-wizard-modal h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.35rem; font-weight: 700; margin: 0 0 0.5rem; text-align: center; }
-    .free-wizard-modal p.subtitle { font-size: 0.88rem; color: var(--text-secondary); text-align: center; margin: 0 0 1.25rem; }
-    .free-wizard-step { display: none; }
-    .free-wizard-step.active { display: block; }
+    .free-wizard-modal { background: #faf8f5; border-radius: 20px; max-width: 720px; width: calc(100% - 2rem); max-height: calc(100vh - 3rem); box-shadow: 0 20px 60px rgba(45,42,38,0.18); display: flex; flex-direction: column; overflow: hidden; }
+    .free-wizard-step { display: none; flex-direction: column; overflow: hidden; min-height: 0; flex: 1; }
+    .free-wizard-step.active { display: flex; }
 
-    .fw-subject-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.25rem; }
-    .fw-card { border: 2px solid var(--border-light); border-radius: 12px; overflow: hidden; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; background: var(--bg-card); }
-    .fw-card.selected { border-color: #2d2a26; box-shadow: 0 0 0 3px rgba(45,42,38,0.12); }
-    .fw-card-img { width: 100%; height: 80px; object-fit: cover; }
-    .fw-card-label { padding: 0.5rem 0.75rem; font-size: 0.85rem; font-weight: 600; }
-    .fw-card-check { display: none; position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; background: #2d2a26; border-radius: 50%; color: #fff; font-size: 12px; line-height: 20px; text-align: center; }
-    .fw-card.selected .fw-card-check { display: block; }
-    .fw-card { position: relative; }
+    /* Step header */
+    .fw-header { padding: 1.5rem 1.75rem 1.25rem; border-bottom: 1px solid #e8e2d8; flex-shrink: 0; }
+    .fw-step-pill { display: inline-block; background: #fff1ea; color: #c15a3a; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; margin-bottom: 0.6rem; }
+    .fw-header h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.5rem; font-weight: 700; margin: 0 0 0.3rem; letter-spacing: -0.01em; }
+    .fw-header p { color: #6b645c; font-size: 0.85rem; margin: 0 0 1rem; line-height: 1.5; }
 
-    .fw-board-section { margin-bottom: 1rem; }
-    .fw-board-section h3 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.5rem; }
-    .fw-board-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .fw-board-btn { padding: 0.45rem 1rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-    .fw-board-btn.selected { background: #2d2a26; color: #fff; border-color: #2d2a26; }
-    .fw-board-btn.greyed { opacity: 0.45; cursor: pointer; }
-    .fw-board-btn.greyed:hover { opacity: 0.65; }
-    .fw-board-btn.requested { opacity: 0.45; border-style: dashed; }
+    /* Core subjects note */
+    .fw-core-note { background: #fff; border: 1px solid #e8e2d8; border-radius: 14px; padding: 0.85rem 1rem; font-size: 0.8rem; display: flex; gap: 0.75rem; align-items: flex-start; }
+    .fw-core-note svg { flex-shrink: 0; margin-top: 2px; color: #c15a3a; }
+    .fw-core-note strong { color: #2d2a26; font-weight: 600; }
+    .fw-core-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 0.5rem; }
+    .fw-core-chip { background: #faf8f5; border: 1px solid #e8e2d8; padding: 3px 9px; border-radius: 999px; font-size: 0.72rem; font-weight: 500; color: #2d2a26; }
 
-    .fw-text-section { margin-bottom: 1rem; }
+    /* Search */
+    .fw-search-wrap { position: relative; margin-top: 1rem; }
+    .fw-search-input { width: 100%; padding: 0.7rem 0.85rem 0.7rem 2.5rem; border: 1px solid #e8e2d8; border-radius: 12px; font-family: inherit; font-size: 0.85rem; background: #fff; color: #2d2a26; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
+    .fw-search-input::placeholder { color: #9a938a; }
+    .fw-search-input:focus { outline: none; border-color: #c15a3a; box-shadow: 0 0 0 3px rgba(193,90,58,0.1); }
+    .fw-search-icon { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); color: #6b645c; pointer-events: none; }
+    .fw-search-clear { position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; width: 26px; height: 26px; border-radius: 8px; display: none; align-items: center; justify-content: center; color: #6b645c; }
+    .fw-search-clear:hover { background: #faf8f5; color: #2d2a26; }
+    .fw-search-clear.visible { display: flex; }
+
+    /* Accordion body */
+    .fw-body { overflow-y: auto; padding: 0.25rem 1rem 0.5rem; flex: 1; min-height: 0; }
+    .fw-body::-webkit-scrollbar { width: 5px; }
+    .fw-body::-webkit-scrollbar-thumb { background: rgba(45,42,38,0.16); border-radius: 4px; }
+
+    /* Category accordion */
+    .fw-category { border-bottom: 1px solid #e8e2d8; }
+    .fw-category:last-child { border-bottom: none; }
+    .fw-cat-header { display: flex; justify-content: space-between; align-items: center; padding: 0.85rem 0.75rem; cursor: pointer; background: transparent; border: none; width: 100%; text-align: left; font-family: inherit; border-radius: 10px; transition: background 0.2s; }
+    .fw-cat-header:hover { background: rgba(193,90,58,0.04); }
+    .fw-cat-title { font-weight: 600; font-size: 0.88rem; display: flex; align-items: center; gap: 0.7rem; }
+    .fw-cat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .fw-cat-right { display: flex; gap: 0.6rem; align-items: center; }
+    .fw-cat-count { font-size: 0.72rem; color: #6b645c; font-weight: 500; background: #fff; border: 1px solid #e8e2d8; padding: 2px 8px; border-radius: 999px; min-width: 24px; text-align: center; }
+    .fw-cat-count.has-selected { background: #c15a3a; border-color: #c15a3a; color: #fff; }
+    .fw-cat-chevron { transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); color: #6b645c; }
+    .fw-category.open .fw-cat-chevron { transform: rotate(180deg); }
+    .fw-cat-body { max-height: 0; overflow: hidden; transition: max-height 0.45s cubic-bezier(0.16,1,0.3,1); }
+    .fw-category.open .fw-cat-body { max-height: 2000px; }
+    .fw-subj-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.5rem; padding: 0 0.75rem 0.85rem; }
+
+    /* Subject card (accordion item) */
+    .fw-subj-card { display: flex; align-items: center; gap: 0.6rem; padding: 0.7rem 0.85rem; background: #fff; border: 1.5px solid #e8e2d8; border-radius: 12px; cursor: pointer; transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s; font-size: 0.82rem; color: #2d2a26; text-align: left; font-family: inherit; font-weight: 500; width: 100%; }
+    .fw-subj-card:hover:not(.unavailable) { border-color: #c15a3a; transform: translateY(-1px); box-shadow: 0 1px 3px rgba(45,42,38,0.06); }
+    .fw-subj-card.selected { background: #fff1ea; border-color: #c15a3a; }
+    .fw-subj-card .fw-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+    .fw-subj-card .fw-label { flex: 1; line-height: 1.3; }
+    .fw-subj-card .fw-check { color: #c15a3a; opacity: 0; transform: scale(0.7); transition: opacity 0.2s, transform 0.3s; }
+    .fw-subj-card.selected .fw-check { opacity: 1; transform: scale(1); }
+    .fw-subj-card.unavailable { opacity: 0.5; cursor: default; }
+    .fw-soon-tag { font-size: 0.6rem; color: #6b645c; background: #faf8f5; padding: 2px 6px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+    /* Search results */
+    .fw-search-results { display: none; padding: 0.5rem 0.75rem 0.85rem; }
+    .fw-search-results.active { display: block; }
+    .fw-accordion-view.hidden { display: none; }
+    .fw-search-group-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b645c; font-weight: 600; margin: 0.85rem 0.1rem 0.5rem; }
+    .fw-no-results { text-align: center; color: #6b645c; padding: 2.5rem 1rem; font-size: 0.85rem; }
+
+    /* Footer */
+    .fw-footer { padding: 1rem 1.75rem; border-top: 1px solid #e8e2d8; background: #fff; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-shrink: 0; }
+    .fw-footer-count { font-size: 0.85rem; color: #6b645c; }
+    .fw-footer-count strong { color: #2d2a26; font-weight: 600; }
+    .fw-footer-btns { display: flex; gap: 0.5rem; }
+    .fw-btn { padding: 0.6rem 1.25rem; border-radius: 10px; border: 1px solid transparent; font-family: inherit; font-weight: 500; cursor: pointer; font-size: 0.85rem; transition: background 0.2s, transform 0.15s, border-color 0.2s; }
+    .fw-btn-ghost { background: transparent; color: #6b645c; border-color: #e8e2d8; }
+    .fw-btn-ghost:hover { color: #2d2a26; border-color: #2d2a26; }
+    .fw-btn-primary { background: #2d2a26; color: #fff; }
+    .fw-btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
+    .fw-btn-primary:disabled { background: #d6ccbf; cursor: not-allowed; opacity: 0.6; }
+
+    /* Step 2: Board picker rows */
+    .fw-board-row { background: #fff; border: 1px solid #e8e2d8; border-radius: 14px; padding: 0.85rem 1rem; margin-bottom: 0.5rem; }
+    .fw-board-row.resolved { border-color: #e2dcd1; }
+    .fw-board-row.unresolved { border-color: #ead3c9; background: #fff8f4; }
+    .fw-board-head { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; flex-wrap: wrap; }
+    .fw-board-name { display: flex; align-items: center; gap: 0.6rem; font-weight: 600; font-size: 0.88rem; }
+    .fw-board-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+    .fw-core-badge { font-size: 0.6rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; background: #fff1ea; color: #c15a3a; padding: 2px 7px; border-radius: 999px; }
+    .fw-board-status { font-size: 0.75rem; color: #6b645c; }
+    .fw-board-status.picked { color: #c15a3a; font-weight: 500; display: flex; align-items: center; gap: 3px; }
+    .fw-board-pills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .fw-board-pill { padding: 0.4rem 0.85rem; border-radius: 10px; border: 1.5px solid #e8e2d8; background: #faf8f5; color: #2d2a26; font-family: inherit; font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .fw-board-pill:hover { border-color: #c15a3a; background: #fff; }
+    .fw-board-pill.selected { background: #c15a3a; border-color: #c15a3a; color: #fff; }
+    .fw-board-pill.not-sure { border-style: dashed; color: #6b645c; }
+    .fw-board-pill.not-sure.selected { background: #6b645c; border-color: #6b645c; color: #fff; border-style: solid; }
+    .fw-board-pill.greyed { opacity: 0.45; cursor: pointer; }
+    .fw-board-pill.greyed:hover { opacity: 0.65; }
+    .fw-board-pill.requested { opacity: 0.45; border-style: dashed; }
+    .fw-board-help { font-size: 0.75rem; color: #6b645c; margin-top: 0.5rem; line-height: 1.4; display: none; }
+    .fw-board-help.visible { display: block; }
+    .fw-section-label { font-size: 0.66rem; text-transform: uppercase; letter-spacing: 0.08em; color: #6b645c; font-weight: 600; margin: 0.85rem 0.75rem 0.6rem; }
+
+    /* Eng Lit text picker + school picker (kept from original) */
+    .fw-text-section { margin-bottom: 1rem; padding: 0 1.75rem; }
     .fw-text-section h3 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.4rem; }
     .fw-text-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .fw-text-btn { padding: 0.4rem 0.85rem; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .fw-text-btn { padding: 0.4rem 0.85rem; border: 1px solid #e8e2d8; border-radius: 8px; background: #fff; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .fw-text-btn.selected { background: #2d2a26; color: #fff; border-color: #2d2a26; }
-    .fw-text-btn.greyed { opacity: 0.45; cursor: pointer; }
-    .fw-text-btn.requested { opacity: 0.45; border-style: dashed; }
-
-    .fw-continue { width: 100%; padding: 0.7rem; border: none; border-radius: 10px; background: #2d2a26; color: #fff; font-family: 'Inter', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; margin-top: 0.75rem; transition: opacity 0.2s; }
-    .fw-continue:hover { opacity: 0.85; }
-    .fw-continue:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .fw-toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #2d2a26; color: #fff; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.82rem; font-weight: 500; z-index: 3000; animation: sv-fade-in 0.2s ease; }
     .fw-toast.visible { display: block; }
 
-    .fw-school-search { position: relative; margin-bottom: 1rem; }
-    .fw-school-input { width: 100%; padding: 0.7rem 1rem; border: 1px solid var(--border-light); border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.92rem; background: var(--bg-card); color: var(--text-primary); outline: none; box-sizing: border-box; }
-    .fw-school-input:focus { border-color: var(--text-secondary); }
-    .fw-school-results { display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 200px; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--border-light); border-top: none; border-radius: 0 0 10px 10px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .fw-school-search { position: relative; margin-bottom: 1rem; padding: 0 1.75rem; }
+    .fw-school-input { width: 100%; padding: 0.7rem 1rem; border: 1px solid #e8e2d8; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 0.92rem; background: #fff; color: #2d2a26; outline: none; box-sizing: border-box; }
+    .fw-school-input:focus { border-color: #6b645c; }
+    .fw-school-results { display: none; position: absolute; top: 100%; left: 1.75rem; right: 1.75rem; max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #e8e2d8; border-top: none; border-radius: 0 0 10px 10px; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
     .fw-school-results.open { display: block; }
-    .fw-school-result { padding: 0.55rem 1rem; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid var(--border-lighter); }
-    .fw-school-result:hover { background: var(--accent-light, #f0f0f0); }
-    .fw-school-result small { color: var(--text-muted); margin-left: 0.4rem; }
-    .fw-school-selected { font-size: 0.9rem; color: var(--text-primary); font-weight: 600; text-align: center; margin: 0.75rem 0; }
-    .fw-skip { width: 100%; padding: 0.55rem; border: none; background: transparent; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.82rem; cursor: pointer; margin-top: 0.5rem; text-decoration: underline; }
-    .fw-skip:hover { color: var(--text-secondary); }
+    .fw-school-result { padding: 0.55rem 1rem; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f0ede8; }
+    .fw-school-result:hover { background: #faf8f5; }
+    .fw-school-result small { color: #6b645c; margin-left: 0.4rem; }
+    .fw-school-selected { font-size: 0.9rem; color: #2d2a26; font-weight: 600; text-align: center; margin: 0.75rem 0; }
+    .fw-skip { width: 100%; padding: 0.55rem; border: none; background: transparent; color: #6b645c; font-family: 'Inter', sans-serif; font-size: 0.82rem; cursor: pointer; margin-top: 0.5rem; text-decoration: underline; }
+    .fw-skip:hover { color: #2d2a26; }
+
+    @media (max-width: 640px) {
+      .free-wizard-modal { max-height: 100vh; border-radius: 0; width: 100%; }
+      .fw-header { padding: 1.25rem 1.25rem 1rem; }
+      .fw-header h2 { font-size: 1.3rem; }
+      .fw-body { padding: 0.15rem 0.6rem 0.4rem; }
+      .fw-subj-grid { grid-template-columns: 1fr 1fr; padding: 0 0.25rem 0.7rem; }
+      .fw-footer { padding: 0.75rem 1.25rem; flex-wrap: wrap; }
+      .fw-text-section, .fw-school-search { padding: 0 1.25rem; }
+    }
 
     /* --- Free user badge --- */
     .free-user-badge { display: none; font-size: 0.82rem; color: var(--text-muted); margin-top: -0.25rem; margin-bottom: 1rem; text-align: center; }
@@ -217,102 +299,102 @@
   <!-- Free wizard modal -->
   <div class="free-wizard-overlay" id="free-wizard-overlay">
     <div class="free-wizard-modal">
-      <!-- Step 1: Subject selection -->
+      <!-- Step 1: Subject selection (accordion) -->
       <div class="free-wizard-step active" id="fw-step-1">
-        <h2>What are you revising?</h2>
-        <p class="subtitle">Select the subjects you're studying</p>
-        <div class="fw-subject-grid" id="fw-subject-grid">
-          <div class="fw-card selected" data-slug="maths">
-            <img class="fw-card-img" src="/images/subject-maths.jpg" alt="Maths">
-            <div class="fw-card-label">Maths</div>
-            <div class="fw-card-check">&#10003;</div>
+        <div class="fw-header">
+          <span class="fw-step-pill">Step 1 of 2</span>
+          <h2>Add your subjects</h2>
+          <p>Pick the GCSEs you're studying. You'll choose your exam board on the next step.</p>
+          <div class="fw-core-note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <div>
+              <strong>Already included for you</strong>
+              <div class="fw-core-chips">
+                <span class="fw-core-chip">English Language</span>
+                <span class="fw-core-chip">English Literature</span>
+                <span class="fw-core-chip">Maths</span>
+                <span class="fw-core-chip">Combined Science</span>
+              </div>
+            </div>
           </div>
-          <div class="fw-card selected" data-slug="english-language">
-            <img class="fw-card-img" src="/images/subject-english-lang.jpg" alt="English Language">
-            <div class="fw-card-label">English Language</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card selected" data-slug="english-literature">
-            <img class="fw-card-img" src="/images/subject-english-lit.jpg" alt="English Literature">
-            <div class="fw-card-label">English Literature</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card selected" data-slug="science">
-            <img class="fw-card-img" src="/images/subject-science.jpg" alt="Combined Science">
-            <div class="fw-card-label">Combined Science</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="separate-sciences">
-            <img class="fw-card-img" src="/images/subject-separate-sciences.jpg" alt="Separate Sciences">
-            <div class="fw-card-label">Separate Sciences</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="health-social-care">
-            <img class="fw-card-img" src="/images/subject-health-social-care.jpg" alt="Health &amp; Social Care">
-            <div class="fw-card-label">Health &amp; Social Care</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="hospitality-catering">
-            <img class="fw-card-img" src="/images/subject-hospitality-catering.jpg" alt="Hospitality &amp; Catering">
-            <div class="fw-card-label">Hospitality &amp; Catering</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="history">
-            <img class="fw-card-img" src="/images/subject-history.jpg" alt="History">
-            <div class="fw-card-label">History</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="religious-education">
-            <img class="fw-card-img" src="/images/subject-religious-studies.jpg" alt="Religious Studies">
-            <div class="fw-card-label">Religious Studies</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="music-technology">
-            <img class="fw-card-img" src="/images/subject-music-tech.jpg" alt="Music Technology">
-            <div class="fw-card-label">Music Technology</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="computer-science">
-            <img class="fw-card-img" src="/images/subject-computer-science.jpg" alt="Computer Science">
-            <div class="fw-card-label">Computer Science</div>
-            <div class="fw-card-check">&#10003;</div>
-          </div>
-          <div class="fw-card" data-slug="design-technology">
-            <img class="fw-card-img" src="/images/subject-design-technology.jpg" alt="Design &amp; Technology">
-            <div class="fw-card-label">Design &amp; Technology</div>
-            <div class="fw-card-check">&#10003;</div>
+          <div class="fw-search-wrap">
+            <svg class="fw-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" class="fw-search-input" id="fw-search" placeholder="Search subjects" autocomplete="off">
+            <button class="fw-search-clear" id="fw-search-clear" aria-label="Clear search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
         </div>
-        <button class="fw-continue" id="fw-step1-next">Continue</button>
+        <div class="fw-body">
+          <div id="fw-accordion-view" class="fw-accordion-view"></div>
+          <div id="fw-search-results" class="fw-search-results">
+            <div id="fw-search-grid"></div>
+            <div class="fw-no-results" id="fw-no-results" style="display:none">No subjects match that search.</div>
+          </div>
+        </div>
+        <div class="fw-footer">
+          <div class="fw-footer-count"><strong id="fw-extra-count">0</strong> extra subjects added</div>
+          <div class="fw-footer-btns">
+            <button class="fw-btn fw-btn-ghost" id="fw-step1-skip">Skip</button>
+            <button class="fw-btn fw-btn-primary" id="fw-step1-next">Continue &rarr;</button>
+          </div>
+        </div>
       </div>
 
-      <!-- Step 2: Exam board picker -->
+      <!-- Step 2: Exam board picker (pill rows) -->
       <div class="free-wizard-step" id="fw-step-2">
-        <h2>Which exam boards?</h2>
-        <p class="subtitle">Select the board for each subject</p>
-        <div id="fw-boards-container"></div>
-        <button class="fw-continue" id="fw-step2-next">Continue</button>
+        <div class="fw-header">
+          <span class="fw-step-pill">Step 2 of 2</span>
+          <h2>Choose your exam boards</h2>
+          <p>Pick the board your school uses for each subject. Not sure? Ask your teacher or check your school's website.</p>
+        </div>
+        <div class="fw-body">
+          <div class="fw-section-label">Core subjects</div>
+          <div id="fw-core-boards"></div>
+          <div class="fw-section-label" id="fw-optional-label" style="display:none">Your other subjects</div>
+          <div id="fw-optional-boards"></div>
+        </div>
+        <div class="fw-footer">
+          <div class="fw-footer-count"><strong id="fw-board-progress">0 of 4</strong> boards picked</div>
+          <div class="fw-footer-btns">
+            <button class="fw-btn fw-btn-ghost" id="fw-step2-back">&larr; Back</button>
+            <button class="fw-btn fw-btn-primary" id="fw-step2-next">Continue &rarr;</button>
+          </div>
+        </div>
       </div>
 
       <!-- Step 3: English Lit text picker (built dynamically per board) -->
       <div class="free-wizard-step" id="fw-step-3">
-        <h2>Which texts are you studying?</h2>
-        <p class="subtitle">Pick one from each category</p>
-        <div id="fw-texts-container"></div>
-        <button class="fw-continue" id="fw-step3-done">Continue</button>
+        <div class="fw-header">
+          <h2>Which texts are you studying?</h2>
+          <p>Pick one from each category</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-texts-container"></div>
+        </div>
+        <div class="fw-footer">
+          <div></div>
+          <button class="fw-btn fw-btn-primary" id="fw-step3-done">Continue &rarr;</button>
+        </div>
       </div>
 
       <!-- Step 4: School picker (optional) -->
       <div class="free-wizard-step" id="fw-step-4">
-        <h2>Which school are you at?</h2>
-        <p class="subtitle">Optional — helps us bring StudyVault to your school</p>
-        <div class="fw-school-search">
-          <input type="text" class="fw-school-input" id="fw-school-input" placeholder="Start typing your school name..." autocomplete="off" spellcheck="false">
-          <div class="fw-school-results" id="fw-school-results"></div>
+        <div class="fw-header">
+          <h2>Which school are you at?</h2>
+          <p>Optional — helps us bring StudyVault to your school</p>
         </div>
-        <p class="fw-school-selected" id="fw-school-selected" style="display:none"></p>
-        <button class="fw-continue" id="fw-step4-done">Start revising</button>
-        <button class="fw-skip" id="fw-step4-skip">Skip — I'd rather not say</button>
+        <div class="fw-body">
+          <div class="fw-school-search">
+            <input type="text" class="fw-school-input" id="fw-school-input" placeholder="Start typing your school name..." autocomplete="off" spellcheck="false">
+            <div class="fw-school-results" id="fw-school-results"></div>
+          </div>
+          <p class="fw-school-selected" id="fw-school-selected" style="display:none"></p>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-skip" id="fw-step4-skip">Skip — I'd rather not say</button>
+          <button class="fw-btn fw-btn-primary" id="fw-step4-done">Start revising</button>
+        </div>
       </div>
     </div>
   </div>
@@ -982,67 +1064,316 @@
       });
     }
 
-    // Step 1: Subject toggle
-    document.getElementById('fw-subject-grid').addEventListener('click', function (e) {
-      var card = e.target.closest('.fw-card');
-      if (!card) return;
-      card.classList.toggle('selected');
+    // --- Step 1: Accordion subject picker ---
+    var CORE_SLUGS = ['maths', 'english-language', 'english-literature', 'science'];
+    var fwSelected = new Set();
+
+    var FW_CATEGORIES = [
+      { id: 'sciences', title: 'Sciences', dot: '#16a34a', subjects: [
+        { name: 'Separate Sciences', slug: 'separate-sciences', available: true }
+      ]},
+      { id: 'humanities', title: 'Humanities & Social Sciences', dot: '#6366f1', subjects: [
+        { name: 'History', slug: 'history', available: true },
+        { name: 'Religious Studies', slug: 'religious-education', available: true },
+        { name: 'Geography', slug: 'geography' },
+        { name: 'Psychology', slug: 'psychology' },
+        { name: 'Sociology', slug: 'sociology' },
+        { name: 'Citizenship Studies', slug: 'citizenship' }
+      ]},
+      { id: 'computing', title: 'Computing & Digital', dot: '#1e40af', subjects: [
+        { name: 'Computer Science', slug: 'computer-science', available: true },
+        { name: 'Creative iMedia', slug: 'creative-imedia' }
+      ]},
+      { id: 'design-tech', title: 'Design & Technology', dot: '#059669', subjects: [
+        { name: 'Design & Technology', slug: 'design-technology', available: true },
+        { name: 'Food Preparation & Nutrition', slug: 'food-technology' },
+        { name: 'Hospitality & Catering', slug: 'hospitality-catering', available: true },
+        { name: 'Engineering', slug: 'engineering' }
+      ]},
+      { id: 'creative-arts', title: 'Creative Arts', dot: '#8b5cf6', subjects: [
+        { name: 'Drama', slug: 'drama' },
+        { name: 'Music', slug: 'music' },
+        { name: 'Music Technology', slug: 'music-technology', available: true },
+        { name: 'Art & Design', slug: 'art-design' },
+        { name: 'Media Studies', slug: 'media-studies' },
+        { name: 'Film Studies', slug: 'film-studies' }
+      ]},
+      { id: 'languages', title: 'Modern Languages', dot: '#ec4899', subjects: [
+        { name: 'French', slug: 'french' },
+        { name: 'Spanish', slug: 'spanish' },
+        { name: 'German', slug: 'german' }
+      ]},
+      { id: 'pe-health', title: 'PE & Health', dot: '#ea580c', subjects: [
+        { name: 'Health & Social Care', slug: 'health-social-care', available: true },
+        { name: 'Sport Science', slug: 'sport-science' },
+        { name: 'Physical Education', slug: 'pe' }
+      ]},
+      { id: 'business', title: 'Business & Economics', dot: '#0369a1', subjects: [
+        { name: 'Business Studies', slug: 'business' },
+        { name: 'Economics', slug: 'economics' }
+      ]}
+    ];
+
+    function fwMakeCard(subject, dotColour) {
+      var card = document.createElement('button');
+      card.className = 'fw-subj-card' + (subject.available ? '' : ' unavailable');
+      card.dataset.slug = subject.slug;
+      card.dataset.name = subject.name;
+      card.type = 'button';
+      card.innerHTML = '<span class="fw-dot" style="background:' + dotColour + '"></span>' +
+        '<span class="fw-label">' + subject.name + '</span>' +
+        (subject.available
+          ? '<span class="fw-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>'
+          : '<span class="fw-soon-tag">Soon</span>');
+      if (subject.available) {
+        card.addEventListener('click', function () { fwToggle(subject.slug); });
+      }
+      if (fwSelected.has(subject.slug)) card.classList.add('selected');
+      return card;
+    }
+
+    function fwToggle(slug) {
+      if (fwSelected.has(slug)) fwSelected.delete(slug); else fwSelected.add(slug);
+      document.querySelectorAll('.fw-subj-card').forEach(function (c) {
+        if (c.dataset.slug === slug && !c.classList.contains('unavailable'))
+          c.classList.toggle('selected', fwSelected.has(slug));
+      });
+      fwUpdateCounts();
+    }
+
+    function fwUpdateCounts() {
+      document.getElementById('fw-extra-count').textContent = fwSelected.size;
+      FW_CATEGORIES.forEach(function (cat) {
+        var pill = document.querySelector('#fw-cat-' + cat.id + ' .fw-cat-count');
+        if (!pill) return;
+        var n = cat.subjects.filter(function (s) { return fwSelected.has(s.slug); }).length;
+        if (n > 0) { pill.textContent = n + ' / ' + cat.subjects.length; pill.classList.add('has-selected'); }
+        else { pill.textContent = cat.subjects.length; pill.classList.remove('has-selected'); }
+      });
+    }
+
+    function fwRenderAccordion() {
+      var view = document.getElementById('fw-accordion-view');
+      FW_CATEGORIES.forEach(function (cat) {
+        var el = document.createElement('div');
+        el.className = 'fw-category';
+        el.id = 'fw-cat-' + cat.id;
+        var header = document.createElement('button');
+        header.type = 'button';
+        header.className = 'fw-cat-header';
+        header.innerHTML = '<span class="fw-cat-title"><span class="fw-cat-dot" style="background:' + cat.dot + '"></span>' + cat.title + '</span>' +
+          '<span class="fw-cat-right"><span class="fw-cat-count">' + cat.subjects.length + '</span>' +
+          '<svg class="fw-cat-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg></span>';
+        header.addEventListener('click', function () { el.classList.toggle('open'); });
+        el.appendChild(header);
+        var body = document.createElement('div');
+        body.className = 'fw-cat-body';
+        var grid = document.createElement('div');
+        grid.className = 'fw-subj-grid';
+        cat.subjects.forEach(function (s) { grid.appendChild(fwMakeCard(s, cat.dot)); });
+        body.appendChild(grid);
+        el.appendChild(body);
+        view.appendChild(el);
+      });
+    }
+
+    // Search
+    var fwSearchInput = document.getElementById('fw-search');
+    var fwSearchClear = document.getElementById('fw-search-clear');
+    var fwAccordionView = document.getElementById('fw-accordion-view');
+    var fwSearchResults = document.getElementById('fw-search-results');
+    var fwSearchGrid = document.getElementById('fw-search-grid');
+    var fwNoResults = document.getElementById('fw-no-results');
+
+    function fwRunSearch(q) {
+      q = q.trim().toLowerCase();
+      fwSearchClear.classList.toggle('visible', !!q);
+      if (!q) { fwAccordionView.classList.remove('hidden'); fwSearchResults.classList.remove('active'); return; }
+      fwAccordionView.classList.add('hidden');
+      fwSearchResults.classList.add('active');
+      fwSearchGrid.innerHTML = '';
+      var total = 0;
+      FW_CATEGORIES.forEach(function (cat) {
+        var hits = cat.subjects.filter(function (s) { return s.name.toLowerCase().indexOf(q) !== -1; });
+        if (!hits.length) return;
+        var label = document.createElement('div');
+        label.className = 'fw-search-group-label';
+        label.textContent = cat.title;
+        fwSearchGrid.appendChild(label);
+        var grid = document.createElement('div');
+        grid.className = 'fw-subj-grid';
+        grid.style.padding = '0';
+        hits.forEach(function (s) { grid.appendChild(fwMakeCard(s, cat.dot)); });
+        fwSearchGrid.appendChild(grid);
+        total += hits.length;
+      });
+      fwNoResults.style.display = total === 0 ? 'block' : 'none';
+    }
+
+    fwSearchInput.addEventListener('input', function (e) { fwRunSearch(e.target.value); });
+    fwSearchClear.addEventListener('click', function () { fwSearchInput.value = ''; fwSearchInput.focus(); fwRunSearch(''); });
+
+    fwRenderAccordion();
+    fwUpdateCounts();
+    // Open first category by default
+    var firstCat = document.querySelector('.fw-category');
+    if (firstCat) firstCat.classList.add('open');
+
+    // Step 1 skip: just use cores
+    document.getElementById('fw-step1-skip').addEventListener('click', function () {
+      fwSelected.clear();
+      fwBuildStep2();
+      document.getElementById('fw-step-1').classList.remove('active');
+      document.getElementById('fw-step-2').classList.add('active');
     });
+
+    // Subject display names for boards step
+    var subjectDisplayNames = {
+      'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature',
+      'science': 'Combined Science', 'separate-sciences': 'Separate Sciences',
+      'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering',
+      'history': 'History', 'religious-education': 'Religious Studies', 'music-technology': 'Music Technology',
+      'computer-science': 'Computer Science', 'design-technology': 'Design & Technology'
+    };
+    // Dot colours per slug
+    var subjectDots = {
+      'maths': '#2563eb', 'english-language': '#1e40af', 'english-literature': '#991b1b',
+      'science': '#16a34a', 'separate-sciences': '#16a34a',
+      'history': '#6366f1', 'religious-education': '#6366f1',
+      'computer-science': '#1e40af', 'design-technology': '#059669',
+      'health-social-care': '#ea580c', 'hospitality-catering': '#059669',
+      'music-technology': '#8b5cf6'
+    };
+
+    function fwMakeBoardRow(slug, isCore) {
+      var displayName = subjectDisplayNames[slug] || slug;
+      var dot = subjectDots[slug] || '#6b645c';
+      var boards = boardConfig[slug] || {};
+      var boardKeys = Object.keys(boards);
+      var row = document.createElement('div');
+      row.className = 'fw-board-row unresolved';
+      row.dataset.subject = slug;
+
+      var head = document.createElement('div');
+      head.className = 'fw-board-head';
+      head.innerHTML = '<div class="fw-board-name"><span class="fw-board-dot" style="background:' + dot + '"></span>' +
+        (isCore ? '<span class="fw-core-badge">Core</span>' : '') +
+        '<span>' + displayName + '</span></div>' +
+        '<div class="fw-board-status">Pick a board</div>';
+      row.appendChild(head);
+
+      var pills = document.createElement('div');
+      pills.className = 'fw-board-pills';
+      var firstAvailable = null;
+      boardKeys.forEach(function (board) {
+        var available = boards[board];
+        if (available && !firstAvailable) firstAvailable = board;
+        var pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'fw-board-pill' + (available ? '' : ' greyed');
+        pill.textContent = board;
+        pill.dataset.board = board.toLowerCase();
+        pill.dataset.available = available ? 'true' : 'false';
+        pill.addEventListener('click', function () { fwPickBoard(slug, board, pill, false); });
+        pills.appendChild(pill);
+      });
+      // "Not sure" for multi-board subjects
+      if (boardKeys.length > 1) {
+        var notSure = document.createElement('button');
+        notSure.type = 'button';
+        notSure.className = 'fw-board-pill not-sure';
+        notSure.textContent = 'Not sure';
+        notSure.addEventListener('click', function () { fwPickBoard(slug, firstAvailable || boardKeys[0], notSure, true); });
+        pills.appendChild(notSure);
+      }
+      row.appendChild(pills);
+
+      var help = document.createElement('div');
+      help.className = 'fw-board-help';
+      row.appendChild(help);
+
+      // Auto-select first available board
+      if (firstAvailable) {
+        wizardState.boards[slug] = firstAvailable.toLowerCase();
+        // Find and select the pill
+        var firstPill = pills.querySelector('[data-board="' + firstAvailable.toLowerCase() + '"]');
+        if (firstPill) {
+          firstPill.classList.add('selected');
+          row.classList.remove('unresolved');
+          row.classList.add('resolved');
+          var status = row.querySelector('.fw-board-status');
+          status.className = 'fw-board-status picked';
+          status.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + firstAvailable;
+        }
+      }
+      return row;
+    }
+
+    function fwPickBoard(slug, board, clickedPill, isFallback) {
+      var available = clickedPill.dataset.available !== 'false';
+      if (!available && !clickedPill.classList.contains('not-sure')) {
+        if (!clickedPill.classList.contains('requested')) {
+          clickedPill.classList.add('requested');
+          clickedPill.textContent = board + ' (requested)';
+          fwToast.classList.add('visible');
+          setTimeout(function () { fwToast.classList.remove('visible'); }, 2500);
+        }
+        return;
+      }
+      wizardState.boards[slug] = board.toLowerCase();
+      var row = document.querySelector('.fw-board-row[data-subject="' + slug + '"]');
+      if (!row) return;
+      row.classList.remove('unresolved'); row.classList.add('resolved');
+      row.querySelectorAll('.fw-board-pill').forEach(function (p) {
+        var match = p.classList.contains('not-sure') ? isFallback : (p.dataset.board === board.toLowerCase());
+        p.classList.toggle('selected', !!match);
+      });
+      var status = row.querySelector('.fw-board-status');
+      status.className = 'fw-board-status picked';
+      status.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + board;
+      var help = row.querySelector('.fw-board-help');
+      if (isFallback) { help.textContent = 'Set to ' + board + ' for now. You can change this any time.'; help.classList.add('visible'); }
+      else { help.classList.remove('visible'); }
+      fwUpdateBoardProgress();
+    }
+
+    function fwUpdateBoardProgress() {
+      var all = CORE_SLUGS.concat(Array.from(fwSelected));
+      var picked = all.filter(function (s) { return wizardState.boards[s]; }).length;
+      document.getElementById('fw-board-progress').textContent = picked + ' of ' + all.length;
+    }
+
+    function fwBuildStep2() {
+      wizardState.subjects = CORE_SLUGS.concat(Array.from(fwSelected));
+      wizardState.boards = {};
+
+      var coreContainer = document.getElementById('fw-core-boards');
+      var optContainer = document.getElementById('fw-optional-boards');
+      var optLabel = document.getElementById('fw-optional-label');
+      coreContainer.innerHTML = '';
+      optContainer.innerHTML = '';
+
+      CORE_SLUGS.forEach(function (slug) { coreContainer.appendChild(fwMakeBoardRow(slug, true)); });
+      if (fwSelected.size > 0) {
+        optLabel.style.display = '';
+        fwSelected.forEach(function (slug) { optContainer.appendChild(fwMakeBoardRow(slug, false)); });
+      } else {
+        optLabel.style.display = 'none';
+      }
+      fwUpdateBoardProgress();
+    }
 
     // Step 1 → Step 2
     document.getElementById('fw-step1-next').addEventListener('click', function () {
-      var selected = document.querySelectorAll('#fw-subject-grid .fw-card.selected');
-      wizardState.subjects = [];
-      selected.forEach(function (card) { wizardState.subjects.push(card.dataset.slug); });
-      if (!wizardState.subjects.length) return;
-
-      // Build board picker for selected subjects
-      var container = document.getElementById('fw-boards-container');
-      container.innerHTML = '';
-      wizardState.subjects.forEach(function (slug) {
-        var boards = boardConfig[slug] || {};
-        var displayName = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'separate-sciences': 'Separate Sciences', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies', 'music-technology': 'Music Technology' }[slug] || slug;
-
-        var section = document.createElement('div');
-        section.className = 'fw-board-section';
-        section.innerHTML = '<h3>' + displayName + '</h3><div class="fw-board-options" data-subject="' + slug + '"></div>';
-        var opts = section.querySelector('.fw-board-options');
-
-        var firstSelected = false;
-        Object.keys(boards).forEach(function (board) {
-          var btn = document.createElement('button');
-          btn.className = 'fw-board-btn' + (boards[board] ? '' : ' greyed');
-          btn.textContent = board;
-          btn.dataset.board = board.toLowerCase();
-          btn.dataset.available = boards[board] ? 'true' : 'false';
-
-          if (boards[board] && !firstSelected) {
-            // Auto-select first available board
-            btn.classList.add('selected');
-            wizardState.boards[slug] = board.toLowerCase();
-            firstSelected = true;
-          }
-
-          btn.addEventListener('click', function () {
-            if (btn.dataset.available === 'true') {
-              opts.querySelectorAll('.fw-board-btn').forEach(function (b) { b.classList.remove('selected'); });
-              btn.classList.add('selected');
-              wizardState.boards[slug] = btn.dataset.board;
-            } else if (!btn.classList.contains('requested')) {
-              btn.classList.add('requested');
-              btn.textContent = board + ' (requested)';
-              fwToast.classList.add('visible');
-              setTimeout(function () { fwToast.classList.remove('visible'); }, 2500);
-              // TODO: increment counter in Supabase
-            }
-          });
-          opts.appendChild(btn);
-        });
-        container.appendChild(section);
-      });
-
+      fwBuildStep2();
       document.getElementById('fw-step-1').classList.remove('active');
       document.getElementById('fw-step-2').classList.add('active');
+    });
+
+    // Step 2 back
+    document.getElementById('fw-step2-back').addEventListener('click', function () {
+      document.getElementById('fw-step-2').classList.remove('active');
+      document.getElementById('fw-step-1').classList.add('active');
     });
 
     // Build text picker dynamically for the selected Eng Lit board
@@ -1177,7 +1508,7 @@
     }
 
     function finishWizard() {
-      var subjectNames = { 'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature', 'science': 'Combined Science', 'separate-sciences': 'Separate Sciences', 'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering', 'history': 'History', 'religious-education': 'Religious Studies' };
+      var subjectNames = subjectDisplayNames;
       var prefs = { subjects: [] };
 
       wizardState.subjects.forEach(function (baseSlug) {
