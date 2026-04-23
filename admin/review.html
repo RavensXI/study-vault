@@ -450,7 +450,10 @@
         displayLessons.forEach(function (lesson) {
           var unit = lesson.units || {};
           var subject = unit.subjects || {};
-          var previewUrl = '/lesson/' + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number + (subject.school_id ? '?sid=' + subject.id : '');
+          var practiceUnits = (subject.settings && subject.settings.practice_units) || [];
+          var isPractice = practiceUnits.indexOf(unit.slug) !== -1;
+          var pathBase = isPractice ? '/practice/' : '/lesson/';
+          var previewUrl = pathBase + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number + (subject.school_id ? '?sid=' + subject.id : '');
           var editUrl = '/admin/editor?subject_id=' + encodeURIComponent(subject.id) + '&unit=' + encodeURIComponent(unit.slug) + '&lesson=' + lesson.lesson_number;
           var isSelected = selectedIds.has(lesson.id);
           var statusLabel = formatStatus(lesson.status);

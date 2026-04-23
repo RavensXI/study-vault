@@ -98,7 +98,7 @@ module.exports = async function handler(req, res) {
     // Fetch lessons for the requested status filter
     let query = supabase
       .from('lessons')
-      .select('id, lesson_number, slug, title, status, updated_at, reviewed_at, published_at, hero_image_url, hero_image_position, rejection_notes, unit_id, units!inner(name, slug, subject_id, subjects!inner(id, name, slug, school_id))')
+      .select('id, lesson_number, slug, title, status, updated_at, reviewed_at, published_at, hero_image_url, hero_image_position, rejection_notes, unit_id, units!inner(name, slug, subject_id, subjects!inner(id, name, slug, school_id, settings))')
       .order('lesson_number', { ascending: true })
       .limit(200);
 
