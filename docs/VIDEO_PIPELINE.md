@@ -1,6 +1,10 @@
 # Video Pipeline — Cinematic Overviews & Podcasts
 
-Automated generation of NotebookLM cinematic video overviews and lesson podcasts for all 370 lessons.
+Automated generation of NotebookLM cinematic video overviews and lesson podcasts.
+
+**Cinematic video overviews are Unity-bespoke only.** The 20-cinematic-videos-per-day Google AI Ultra limit does not scale to the free-tier build-out (5,000+ lessons). Free-tier lessons leave `lessons.youtube_video_id` NULL. Practice-only lessons (Maths, English Language, Languages, Science calculation units, Geography Skills) use the sentinel `'practice-only'` — this tells `lesson-loader.js` not to render a video section at all.
+
+**Podcasts are produced for both tiers.** NotebookLM audio overview per lesson, 200/day limit is manageable. Podcast URLs are injected into `lessons.related_media` under category `Podcasts` with title `Lesson Podcast` — the tabbed narration player picks it up from there automatically.
 
 ---
 
@@ -61,30 +65,13 @@ python scripts/generate_cinematic_videos.py --download --cleanup
 
 ### Progress & Subject Order
 
-Videos and podcasts generated together from the same notebook. Videos are the bottleneck (20/day limit); podcasts ride free (200/day). In practice, `--podcast-only` was used to front-load podcasts for subjects, then `--video-only` to backfill videos later.
+Videos are the bottleneck (20 cinematic/day limit, Unity only). Podcasts are generated for both tiers via `scripts/batch_podcasts.py` (200/day limit).
 
-**Status as of 16 Mar 2026:**
-- **Cinematic videos on R2:** 36/370 (Sport Science 9 + Food Tech 7 + Science 20)
-- **Podcasts on R2:** ~363/370 (see table below)
-- **Remaining:** 334 videos, ~7 podcasts (Sep Sci 2 regenerating, Eng Lit 5)
+**Script behaviour (current):** `generate_cinematic_videos.py` queries Supabase directly for lessons with no `youtube_video_id`. The sessions file (`_cinematic_sessions.json`) tracks only active renders and is ephemeral — delete it at any time. Local cache files are always deleted before download to prevent stale uploads. The script filters to `UNITY_SCHOOL_ID` — do not remove this filter.
 
-| Subject | Lessons | Videos Done | Podcasts Done |
-|---------|---------|-------------|---------------|
-| Sport Science | 10 | 9 (L02-L10) | 10 |
-| Food Technology | 10 | 7 (L02-L08) | 10 |
-| Drama | 12 | 0 | 12 |
-| Separate Sciences | 22 | 0 | 20 (2 regenerating) |
-| Music | 26 | 0 | 26 |
-| Business | 30 | 0 | 30 |
-| English Language | 30 | 0 | 30 |
-| Geography | 40 | 0 | 37 |
-| Religious Education | 40 | 0 | 40 |
-| English Literature | 42 | 0 | 11 |
-| Science | 48 | 20 | 48 |
-| History | 60 | 0 | 60 |
-| **Total** | **370** | **36** | **~363** |
+**Unity video status:** Complete (552/552 = 439 R2 videos + 113 practice-only sentinels, finished 15 Apr 2026). See `memory/cinematic_video_log.md` for the full batch log.
 
-**Target:** Complete all 370 by ~April 1st at 20 videos/day.
+**Podcast status:** Unity complete. Free-tier podcast build-out is in progress — see `CLAUDE.md` Active TODO for current totals.
 
 ### How It Works
 

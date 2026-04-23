@@ -125,7 +125,7 @@ Best score saved to `studyvault-kc-{data-unit}/{data-lesson}` in localStorage.
 1. Write ORIGINAL questions aligned to the exam board's question types and mark allocations
 2. All 6 questions per lesson must be original StudyVault content — do NOT reproduce real exam questions even if past papers are provided in source material
 3. Use past papers only to understand question styles, command words, and mark allocations
-4. Mark schemes should list 3–6 bullet points students might include, using StudyVault's own rubric format (Top band / Mid band / Lower band)
+4. Mark schemes should list 3–6 bullet points students might include, using StudyVault's own rubric format (Mastering / Secure / Developing / Emerging). Do NOT use exam board level descriptor templates like "Level 4 (7-8 marks)".
 5. For essay-type questions, include structure guidance (e.g. "both sides of the argument")
 
 ### Knowledge checks

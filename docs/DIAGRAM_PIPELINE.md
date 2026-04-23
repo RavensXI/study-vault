@@ -1,10 +1,16 @@
 # Diagram Pipeline — Pictorial Isotype Infographics
 
-> **API Integration:** This document is read by the orchestration code and injected into the Gemini API call for diagram generation. It serves as both human documentation and machine-readable instructions.
+> **Unity-bespoke ONLY.** Free-tier lessons do not have Gemini diagrams — quality was too inconsistent at scale, and 299 existing Gemini figures were stripped from free-tier content on 22 Apr 2026. See the PIPELINE.md feature matrix.
 
-Subject-agnostic process for creating data-driven pictorial infographics for lesson pages. Established with Sport Science, reusable for all future subjects.
+> **GPT-image-2 replacement under evaluation.** OpenAI's image model produces significantly better diagrams (accurate text, scientific symbols, historical accuracy) at ~£0.12/image. Two-step pipeline planned: Claude agent decides if a diagram is genuinely additive, writes diagram type + content description, injected into a fixed template → GPT-image-2 generates. Parked pending QA completion. See `memory/gpt_image_2_evaluation.md` and `test-diagrams/`.
+
+> **API Integration:** This document is read by the orchestration code and injected into the Gemini API call for Unity diagram generation.
+
+Subject-agnostic process for creating data-driven pictorial infographics for Unity lesson pages. Established with Sport Science.
 
 > **Default approach: Gemini-only.** The diagram prompt (stored on `pipeline_steps.diagram_prompt`) is sent directly to Gemini without a matplotlib baseline. For data-driven subjects, Claude Code generates matplotlib code as a separate inline step before calling the Gemini script.
+
+> **Claude-API-based QA is DISABLED.** `scripts/lib/claude_qa.py` burned Anthropic API credits against Tom's separate account. Diagram QA is now done by Claude Code reviewing the generated images directly with the Read tool. Do not re-enable `claude_qa.py` without Tom's sign-off. See `memory/feedback_no_api_credits.md`.
 
 ---
 

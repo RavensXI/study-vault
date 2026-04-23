@@ -10,7 +10,7 @@ Process for generating text-to-speech narration for lesson pages.
 
 **Azure Speech** (cloud API) with two alternating British English voices:
 - **Odd lessons** (1, 3, 5, 7, 9...): `en-GB-OllieMultilingualNeural` (male)
-- **Even lessons** (2, 4, 6, 8, 10...): `en-GB-BellaNeural` (female)
+- **Even lessons** (2, 4, 6, 8, 10...): `en-GB-AdaMultilingualNeural` (female — replaced Bella 21 Mar 2026)
 
 Speed: ~49 clips per minute (near-instant). A full 10-lesson subject generates in under 10 minutes. All 130 History/Business/Geography lessons generated in ~20 minutes using 8 parallel agents.
 
@@ -22,21 +22,10 @@ Speed: ~49 clips per minute (near-instant). A full 10-lesson subject generates i
 
 ## Narration Progress
 
-**All 152 lessons fully narrated.** ~5,000 MP3 clips total, hosted on Cloudflare R2.
+All shipped lessons across every subject are fully narrated. See `CLAUDE.md` for current totals — they move with every subject build so this doc doesn't try to track them.
 
-| Unit | Lessons | Clips | Voice | Status |
-|------|---------|-------|-------|--------|
-| Conflict & Tension | 15/15 | ~450 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Health & People | 15/15 | ~450 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Elizabethan | 15/15 | ~450 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| America | 15/15 | ~450 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Business Theme 1 | 15/15 | ~500 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Business Theme 2 | 15/15 | ~450 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Geography Paper 1 | 20/20 | ~600 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Geography Paper 2 | 20/20 | ~600 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Sport Science R180 | 10/10 | 350 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Drama Blood Brothers | 6/6 | ~200 | Ollie (odd) + Bella (even) | Complete, on R2 |
-| Drama Rise Up | 6/6 | ~200 | Ollie (odd) + Bella (even) | Complete, on R2 |
+- **Voices:** Ollie (odd lessons) + Ada (even lessons). Earlier subjects used Bella for even lessons (not regenerated — Ada is the default going forward for all new content).
+- **Language subjects** (French, German, Spanish): Multilingual SSML `<lang>` tags wrapping foreign phrases detected by `<em>`/`<strong>` HTML tags. See the Multilingual Narration section below.
 
 ---
 
@@ -58,6 +47,9 @@ Audio file naming: `narration_lesson-NN_nX.mp3` (e.g. `narration_lesson-01_n1.mp
 
 **Subject-agnostic script (new, recommended):**
 - `scripts/generate_narration.py --job-id <uuid>` — processes any subject by querying `pipeline_steps` for pending lessons. Accepts `--lessons 1,2,3` filter and `--dry-run`. Uses shared library (`scripts/lib/`).
+
+**Language narration regen:**
+- `scripts/regen_language_narration.py` — regenerates narration for French/German/Spanish lessons with multilingual SSML. Queries Supabase for language subject lessons, re-extracts text with `{{LANG_START}}`/`{{LANG_END}}` markers, generates new MP3s with `<lang>` tags.
 
 **Per-subject scripts (deprecated, kept for reference):**
 - `scripts/generate_drama_narration.py` — Drama-specific (hardcoded lesson list)
@@ -146,11 +138,51 @@ Each lesson's `window.narrationManifest` contains entries like:
 
 ---
 
+## Multilingual Narration (Language Subjects)
+
+Language subjects (French, German, Spanish) mix English with foreign-language phrases. The narration pipeline auto-detects these and generates SSML with `<lang>` tags so Azure pronounces foreign text correctly.
+
+**How it works:**
+
+1. **Content requirement:** Foreign phrases MUST be in `<em>` (sentences/phrases) or `<strong>` (vocabulary) HTML tags in the lesson content. This is how the pipeline identifies text that needs a language switch.
+
+2. **Auto-detection:** `NarrationExtractor` in `scripts/lib/narration.py` checks the subject slug against `SUBJECT_LANG_CODES` (`french` → `fr-FR`, `german` → `de-DE`, `spanish` → `es-ES`). When a language code is active, `<em>` and `<strong>` tag content gets wrapped with `{{LANG_START}}`/`{{LANG_END}}` markers during text extraction.
+
+3. **SSML generation:** `_build_ssml_body()` converts the markers into SSML:
+   ```xml
+   <break time="500ms"/>
+   <lang xml:lang="fr-FR">
+     <prosody rate="-8%">phrase in French</prosody>
+   </lang>
+   <break time="300ms"/>
+   ```
+   - **500ms break** before the switch — gives students a beat before the language changes
+   - **`<lang>`** tag tells Azure to switch pronunciation to the target language
+   - **-8% prosody** slows foreign phrases subtly for clarity without sounding unnatural on single words
+   - **300ms trailing break** after switching back to English
+
+4. **Voice selection:** Both Ollie and Ada are multilingual neural voices — they handle code-switching natively. Non-language subjects use the same voices but skip the SSML `<lang>` wrapping.
+
+**Regen script:** `scripts/regen_language_narration.py` — regenerates narration for all language lessons. Used for the initial 78-lesson multilingual migration (21 Mar 2026): 26 French + 26 German + 26 Spanish, 2,483 clips, ~$9 Azure cost.
+
+### Known limitation: HTML-tag detection vs AI semantic tagging
+
+The current approach detects foreign text by HTML tags (`<em>` and `<strong>`). This has two failure modes:
+
+1. **False positives:** English words in `<strong>` tags (e.g. "masculine", "Important exception") get read with a foreign accent
+2. **Missed text:** Foreign words/phrases not wrapped in any tag are read with English pronunciation
+
+**Content structure matters:** Dense pipe-separated vocab lists like `<strong>freundlich</strong> — friendly | <strong>hilfsbereit</strong> — helpful` cause the voice to bleed foreign pronunciation into English translations. The generation prompt (GENERATION_PROMPT.md) now instructs content generators to use `<ul><li>` with one vocab pair per `<li>` (each gets its own narration chunk), or weave vocab into sentences. This prevents bleed-over.
+
+**Future enhancement — AI semantic tagging:** Instead of relying on HTML tags, send each plain-text narration chunk to an AI model (e.g. Claude Haiku or Gemini Flash) to semantically identify foreign-language phrases. The AI would return the text with `{{LANG_START}}`/`{{LANG_END}}` markers placed by language understanding rather than HTML structure. This eliminates both false positives and missed text. Tested manually on German L04 (22 Mar 2026) — quality was noticeably better. Not yet automated in the pipeline.
+
+---
+
 ## Models Tried
 
 | Model | Result | Notes |
 |-------|--------|-------|
-| **Azure Speech** (Ollie + Bella) | **Current approach** | Near-instant generation, consistent voices, deterministic output. British English. Cheap ($16–30/1M chars). |
+| **Azure Speech** (Ollie + Ada) | **Current approach** | Near-instant generation, consistent voices, deterministic output. British English. Cheap ($16–30/1M chars). Ada replaced Bella (21 Mar 2026) — sounds better, same multilingual capability. |
 | **Kokoro TTS v1.0** (local ONNX) | Too robotic | 82M params, very fast on CPU, British voices available (`bf_emma`, `bf_isabella`). Voice quality not warm enough for lesson narration. |
 | **Qwen3-TTS** (local AMD RX 6800) | Working but too slow | ~6x real-time on CPU. Acceptable voice quality with ICL voice cloning. Generated Conflict lessons 01–14 (legacy, since regenerated with Azure). |
 | **Qwen3-TTS** (RunPod RTX 4090) | Too slow | ~14x real-time. Stock `qwen-tts` barely uses GPU (3%). |

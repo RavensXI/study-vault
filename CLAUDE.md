@@ -89,7 +89,7 @@ Every subject has: content, practice questions (6/lesson), knowledge checks (5/l
 - **Script:** `python scripts/download_specs.py` — downloads PDFs from exam board websites, converts via `markitdown`, adds frontmatter
 - **Usage:** Pipeline matches teacher's exam board + subject to the right spec file. Content agents receive the spec markdown as context.
 - **Frontmatter:** `board`, `subject`, `spec_code`, `slug`
-- **Two build modes:** Bespoke (teacher uploads resources + spec) or Generic (spec-only, no teacher input). Generic mode enables building every GCSE subject at scale. See `docs/SUBJECT_PLAYBOOK.md` for automated lesson planning rules (exam weight scaling, unit structure, lesson count ranges).
+- **Two build modes:** Bespoke (teacher uploads resources + spec) or Generic (spec-only, no teacher input). Generic mode enables building every GCSE subject at scale. See `docs/PIPELINE.md` for the rebuilt master playbook and `docs/PLANNING_PROMPT.md` for lesson planning rules (exam weight scaling, unit structure, lesson count ranges, article-vs-practice mode decision).
 
 ## Dynamic Architecture (LIVE on Vercel)
 
@@ -113,6 +113,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **Business email:** studyvault.info@gmail.com
 
 ## Active TODO
+- **Pipeline rebuild v2 LIVE** (22 Apr 2026) — Full rewrite of content generation docs to support free-tier-at-scale with minimal QA. **Entry point is now `docs/PIPELINE.md`** — old `SUBJECT_PLAYBOOK.md` / `PIPELINE_ARCHITECTURE.md` / `GENERATION_PROMPT.md` archived to `docs/archive/`. Key changes: (1) exam technique guides removed entirely — copyright-adjacent; per-lesson `exam_tip_html` + practice mark schemes carry the load. Existing Unity subjects opt in via `subjects.settings.has_exam_guides: true` — backfilled for 38 existing subjects. (2) Revision technique guides now templated in `docs/REVISION_TECHNIQUES/` (7 canonical files, agent only fills `{{SUBJECT_EXAMPLE_1}}` / `{{SUBJECT_EXAMPLE_2}}`). (3) Planning agent now includes grounded web research step with whitelisted sources (exam board teacher support, examiner reports, EEF, Cambridge Assessment — NEVER Save My Exams, PMT, etc). (4) Article-vs-practice mode is a planning-agent decision per unit via explicit heuristic. (5) Reference lesson pinned by Supabase ID in `docs/REFERENCE_LESSONS.md` — article ref is RE L01 "Worship & Prayer" (`21447890-d512-42c6-85f9-90b4133c06e3`). (6) Free-tier content ships as `status: pending_review`, no Gemini diagrams, no cinematic videos. (7) Tracker spreadsheet rerun (`scripts/_gen_tracker.py`) is now the last step of every build. See `memory/pipeline_rebuild_v2.md`.
 - **Free tier subject picker v2 LIVE** (22 Apr 2026) — Rebuilt from image-card grid to scalable accordion layout. Eight subject categories (Sciences, Humanities, Computing, Design & Tech, Creative Arts, Modern Languages, PE & Health, Business), each with count badges and "Soon" tags for unbuilt subjects. Search filter across all categories. Core subjects (Eng Lang, Eng Lit, Maths, Combined Science) auto-included. Step 2 board picker rebuilt with pill rows, core/optional split, auto-selects first available board, "Not sure" option defaults to most common. All 12 subjects with built content are selectable: Separate Sciences, History, Religious Studies, Computer Science, Design & Technology, Music Technology, Health & Social Care, Hospitality & Catering + 4 cores.
 - **Gemini diagrams stripped from free tier** (22 Apr 2026) — 299 `<figure class="diagram">` / `<figure class="lesson-diagram">` blocks removed from content_html across 10 free tier subjects (English Lit, Science, Sep Sci, CS, D&T, History, RE, H&SC, H&C, Music Tech). Decision: quality too inconsistent to ship at scale. Unity content retains its Gemini diagrams. Replacement being evaluated (see GPT-image-2 entry below).
 - **Cinematic videos Unity-only policy** (22 Apr 2026) — 145 `youtube_video_id` values cleared from free tier lessons. NotebookLM's 20/day generation limit doesn't scale to ~5,400+ article lessons at full free-tier build-out. Unity retains all 439 R2 videos (552 total incl practice-only).
@@ -199,30 +200,36 @@ All in environment variables — never commit.
 - **Content:** 6 practice questions + 5 knowledge checks per lesson. Readability for GCSE age 15-16.
 - **Narration:** Azure Speech, Ollie (odd lessons) / Ada (even — replaced Bella 21 Mar 2026), MP3 96kbps 24kHz mono. Language subjects (French/German/Spanish) use multilingual voices (`OllieMultilingualNeural` + `AdaMultilingualNeural`) with SSML `<lang>` tags for foreign phrases. Foreign text must be in `<em>` or `<strong>` tags for auto-detection. See `docs/NARRATION_PIPELINE.md`.
 - **PPTs:** Read with `python -m markitdown "filepath"` (.pptx only)
-- **Equations (KaTeX):** Maths/science equations use KaTeX auto-render. Inline: `\(...\)`, display: `$$...$$`. CDN loaded on `lesson.html` and `guide.html`. `docs/GENERATION_PROMPT.md` instructs future content to output LaTeX (not HTML entities). Conversion script: `scripts/convert_equations_to_katex.py`.
+- **Equations (KaTeX):** Maths/science equations use KaTeX auto-render. Inline: `\(...\)`, display: `$$...$$`. CDN loaded on `lesson.html` and `guide.html`. `docs/CONTENT_PROMPT.md` instructs future content to output LaTeX (not HTML entities). Conversion script: `scripts/convert_equations_to_katex.py`.
 - **Animations:** Soft-close damping `cubic-bezier(0.16, 1, 0.3, 1)` on all entrance animations. `.sv-reveal` / `.sv-stagger` CSS classes + IntersectionObserver. Split timing: fast opacity (~0.5s), slow transform glide (~1-1.3s). `prefers-reduced-motion` respected. Browse page unit cards have no scroll reveal (all visible immediately so students don't miss units below the fold).
 
 ## Reference Docs (read on demand)
 
+**Start here for any new subject build:** `docs/PIPELINE.md` — master playbook covering both free-tier and Unity modes, both article and practice formats.
+
 | Doc | When to read |
 |-----|-------------|
-| `docs/LESSON_TEMPLATE.md` | Building or editing lesson content |
-| `docs/QUESTIONS_PIPELINE.md` | Writing questions for any subject |
-| `docs/DIAGRAM_PIPELINE.md` | Creating or updating diagrams |
-| `docs/NARRATION_PIPELINE.md` | TTS narration work |
-| `docs/VIDEO_PIPELINE.md` | NotebookLM cinematic videos & podcasts |
-| `docs/RELATED_MEDIA_PIPELINE.md` | Adding sidebar media |
-| `docs/GENERATION_PROMPT.md` | Content generation (inject-at-call-time prompt) |
-| `docs/PIPELINE_ARCHITECTURE.md` | Full pipeline architecture |
-| `docs/SUBJECT_PLAYBOOK.md` | Running the one-shot pipeline for a new subject |
-| `docs/EXAM_TECHNIQUE_TEMPLATE.md` | HTML template for exam technique guide pages |
-| `docs/REVISION_TECHNIQUE_TEMPLATE.md` | HTML template for revision technique guide pages |
+| `docs/PIPELINE.md` | **Entry point** — building a new subject. Replaces old `SUBJECT_PLAYBOOK.md` |
+| `docs/PLANNING_PROMPT.md` | Phase 1 — planning agent prompt (research + mode decision + plan JSON) |
+| `docs/CONTENT_PROMPT.md` | Phase 3 article — content agent system prompt + output schema |
+| `docs/PRACTICE_PIPELINE.md` | Phase 3 practice — factory stages for practice-format lessons |
+| `docs/REFERENCE_LESSONS.md` | Pinned Supabase IDs of structural example lessons |
+| `docs/REVISION_TECHNIQUES/` | 7 canonical technique templates (fill in subject examples only) |
+| `docs/LESSON_TEMPLATE.md` | HTML components reference for article lessons |
+| `docs/QUESTIONS_PIPELINE.md` | Practice question formats, mark allocations, `getGuideUrl()` mappings |
+| `docs/DIAGRAM_PIPELINE.md` | Unity-only: Gemini diagrams. GPT-image-2 replacement under evaluation |
+| `docs/NARRATION_PIPELINE.md` | TTS narration (Ollie/Ada, multilingual SSML) |
+| `docs/VIDEO_PIPELINE.md` | Unity-only: cinematic videos. Both tiers: podcasts (NotebookLM) |
+| `docs/RELATED_MEDIA_PIPELINE.md` | Related media agent prompt. Podcast-into-related-media contract |
 | `docs/UNIT_THEMES.md` | Unit body classes and accent colours |
 | `docs/FUTURE_FEATURES.md` | Planned features and wishlist |
-| `docs/SUBJECT_ROADMAP.md` | Subjects built and still to build (14 remaining) |
+| `docs/SUBJECT_ROADMAP.md` | Subjects built and still to build |
 | `docs/FILE_STRUCTURE.md` | Repo file/folder layout |
 | `docs/COMMERCIALISATION.md` | Pricing, cost model, commercial strategy |
-| `scripts/science-practice/SCIENCE_PRACTICE_SCHEMA.md` | Science practice data format, equation reference (recall vs given) |
+| `docs/archive/` | Superseded docs (pre-rebuild). Do not generate from these |
+| `scripts/science-practice/SCIENCE_PRACTICE_SCHEMA.md` | Science practice data format, equation reference |
+| `scripts/language-practice/PRACTICE_DATA_SCHEMA.md` | Language practice data format, 12 input types |
+| `scripts/factory/FACTORY_RULES.md` | English Language factory stage rules |
 | `data/exam-dates-2026.json` | All GCSE exam dates by board, plus Unity board mapping |
 | `{subject}/BUILD_PLAN.md` | Subject-specific lesson breakdown |
 | `tts-research-log.md` | TTS/voice cloning developments |

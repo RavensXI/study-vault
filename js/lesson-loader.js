@@ -73,7 +73,7 @@
 
     var unitQuery = sb
       .from('units')
-      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
+      .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
       .eq('slug', params.unitSlug)
       .eq('subjects.slug', params.subjectSlug);
 
@@ -95,7 +95,7 @@
     if (isStaff && (!unitResult.data)) {
       unitResult = await sb
         .from('units')
-        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
         .eq('slug', params.unitSlug)
         .eq('subjects.slug', params.subjectSlug)
         .is('subjects.school_id', null)
@@ -105,7 +105,7 @@
     // Fallback: if viewing science and unit not found, try separate-sciences
     if (!unitResult.data && (params.subjectSlug === 'science' || params.subjectSlug.indexOf('science-') === 0)) {
       var sepQuery = sb.from('units')
-        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id)')
+        .select('id, slug, name, subtitle, body_class, accent, accent_light, accent_badge, lesson_count, subject_id, subjects!inner(id, slug, name, exam_board, school_id, settings)')
         .eq('slug', params.unitSlug)
         .eq('subjects.slug', 'separate-sciences');
       if (hasBespoke) {
@@ -300,6 +300,9 @@
     window._subjectSlug = params.subjectSlug;
     window._subjectName = subject.name || '';
     window._examBoard = subject.exam_board || '';
+    // Exam technique guides are legacy — only Unity-bespoke subjects have them.
+    // Opt in via subjects.settings.has_exam_guides = true. Default false for new subjects.
+    window._hasExamGuides = !!(subject.settings && subject.settings.has_exam_guides);
 
     // Extract podcast URL from related_media (if present)
     window.podcastUrl = null;

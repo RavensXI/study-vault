@@ -51,8 +51,17 @@ QUALITY STANDARDS:
 - Every fact, date, name, case study, and statistic MUST come from the source material or the exam spec. Never invent content.
 - Write at GCSE reading level: short sentences, active voice, concrete examples. Aim for age 15-16 comprehension.
 - Content must be bespoke to the exam board's spec — not generic revision notes a student could find anywhere.
-- Map every lesson to specific spec references so students know exactly what they're revising and why.
 - DO NOT reproduce real exam questions from past papers. Write ORIGINAL questions that test the same skills and content areas.
+
+COPYRIGHT — MANDATORY RULES (exam board IP is aggressively enforced):
+- Do NOT include spec reference numbers in headings or body text (e.g. "(4.1.2.1–4.1.2.2)", "spec 5.3").
+- Do NOT include paper or component codes (e.g. "AQA 8145/1B/B", "OCR J316/01", "Eduqas C700U10").
+- Do NOT include exam board spec codes in student-facing text (e.g. "AQA 8700", "AQA 8062"). Use "the exam" or "the specification" instead.
+- Do NOT reproduce mark scheme level descriptors from exam boards (e.g. "Level 4 (7-8 marks): Perceptive, detailed analysis..."). Use StudyVault's rubric: Mastering / Secure / Developing / Emerging.
+- Do NOT reproduce or closely paraphrase real exam questions, even if past papers are in the source material.
+- Do NOT include a "pastPaper" field on any question.
+- Do NOT quote exam board rubric phrasing (e.g. AQA's "How does the writer use language here to describe..."). Write original question stems that test the same skills.
+- Descriptions should NOT reference specific sample papers (e.g. "using the 2026 AQA sample paper on Life of Pi").
 
 OUTPUT FORMAT:
 Return a single JSON object with these exact keys:
@@ -226,7 +235,7 @@ PRACTICE QUESTIONS:
 - Exactly 6 questions matching the exam board's question types and mark allocations.
 - Format: { "text": "Question text", "type": "X marks — Type Name", "marks": "Full mark scheme text with levels/examples" }
 - The "text" field is the QUESTION TEXT (never use "question" as the key name).
-- The "marks" field is the MARK SCHEME as a STRING (never a number). Include bullet points showing what earns marks, using StudyVault's own rubric phrasing (Top band / Mid band / Lower band). DO NOT use exam board level descriptor templates like "Level 4 (7-8 marks): Complex explanation...". Use StudyVault's own rubric phrasing.
+- The "marks" field is the MARK SCHEME as a STRING (never a number). Include bullet points showing what earns marks, using StudyVault's own rubric phrasing (Mastering / Secure / Developing / Emerging). DO NOT use exam board level descriptor templates like "Mastering: Complex explanation...". Use StudyVault's own rubric phrasing.
 - The "type" field MUST use one of the registered question type names for this exam board (see QUESTION TYPE MAPPING below). Never invent new type names — the type string is used to link to exam technique guide pages.
 - Questions must test content from THIS specific lesson.
 - See QUESTIONS_PIPELINE.md (injected separately) for full question format rules, mark allocations per exam board, and getGuideUrl() mapping.
@@ -236,7 +245,7 @@ PRACTICE QUESTIONS:
   1. Study past papers only to understand the exam board's question STYLES, mark allocations, and command words.
   2. Write ALL 6 questions as original compositions in the exam board's style.
   3. Do NOT include a "pastPaper" field — this field is deprecated.
-  4. Mark schemes must use StudyVault's own rubric format (Top band / Mid band / Lower band), not exam board level descriptor templates.
+  4. Mark schemes must use StudyVault's own rubric format (Mastering / Secure / Developing / Emerging), not exam board level descriptor templates.
 
 KNOWLEDGE CHECKS:
 - Exactly 5, testing factual recall from the lesson:
@@ -429,7 +438,7 @@ SET TEXT / CONTEXT: {set_text_or_context}
 Generate a guide page as HTML (no JSON wrapper — just content_html) that includes:
 
 1. WHAT THE QUESTION ASKS: Explain what this question type requires in plain language.
-2. HOW MARKS ARE ALLOCATED: Explain how marks are allocated using StudyVault's own wording (Top band / Mid band / Lower band). DO NOT copy exam board level descriptor templates.
+2. HOW MARKS ARE ALLOCATED: Explain how marks are allocated using StudyVault's own wording (Mastering / Secure / Developing / Emerging). DO NOT copy exam board level descriptor templates.
 3. STEP-BY-STEP METHOD: Numbered steps for answering this question type.
 4. TIMING: How long to spend on this question in the exam.
 5. MODEL ANSWER: A strong example answer (in a collapsible section).

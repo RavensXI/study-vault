@@ -266,6 +266,10 @@ function initPracticeQuestions() {
 
   function getGuideUrl(type) {
     if (!type) return null;
+    // Exam technique guides are legacy — only Unity-bespoke subjects have them.
+    // New subjects (free-tier) do not generate exam guides; the per-question mark scheme carries the load.
+    // Lesson-loader sets window._hasExamGuides = true only when subjects.settings.has_exam_guides is true.
+    if (!window._hasExamGuides) return null;
     var guides = [
       // History (AQA) — subject-specific, matched first
       ['Describe two', 'describe-two.html'],
