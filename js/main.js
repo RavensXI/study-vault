@@ -534,11 +534,65 @@ function initPracticeQuestions() {
   // New question button
   newBtn.addEventListener('click', showQuestion);
 
-  // AI Mark — copies prompt to clipboard
-  aiBtn.addEventListener('click', () => {
+  // ─── AI mark rate limiting (localStorage, per-device per-day) ─────────
+  // Free-tier: 5/day. Unity school students: 20/day. No login required.
+  // Server-side IP rate limit (60/hour quick tier) is an additional ceiling.
+  const aiDailyLimit = (() => {
+    try {
+      const session = window.SchoolSession && SchoolSession.get();
+      if (session && session.school_slug) return 20;
+    } catch (e) {}
+    return 5;
+  })();
+  const aiFreeTier = aiDailyLimit === 5;
+  const aiLimitEl = document.getElementById('practice-ai-limit');
+  const aiFeedback = document.getElementById('practice-ai-feedback');
+  const aiFeedbackBody = document.getElementById('practice-ai-feedback-body');
+  const aiFeedbackClose = document.getElementById('practice-ai-feedback-close');
+
+  function aiUsageKey() { return 'sv-ai-mark-usage-' + new Date().toISOString().slice(0, 10); }
+  function aiUsageToday() {
+    try { return parseInt(localStorage.getItem(aiUsageKey()) || '0', 10) || 0; }
+    catch (e) { return 0; }
+  }
+  function aiUsageIncrement() {
+    try { localStorage.setItem(aiUsageKey(), String(aiUsageToday() + 1)); } catch (e) {}
+  }
+  function aiUpdateLimitPill() {
+    if (!aiLimitEl) return;
+    const remaining = Math.max(0, aiDailyLimit - aiUsageToday());
+    aiLimitEl.textContent = remaining + '/' + aiDailyLimit + ' left today';
+    aiBtn.disabled = remaining === 0;
+  }
+  aiUpdateLimitPill();
+
+  if (aiFeedbackClose) {
+    aiFeedbackClose.addEventListener('click', () => {
+      aiFeedback.hidden = true;
+    });
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function formatAiResponse(text) {
+    // Light markdown: **bold**, numbered/bulleted lines, double-newline paragraphs
+    let h = escapeHtml(text);
+    h = h.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    h = h.replace(/^###\s+(.+)$/gm, '<h3>$1</h3>');
+    return h;
+  }
+
+  // AI Mark — calls /api/ai-mark, shows result inline. Clipboard is a last-resort fallback.
+  aiBtn.addEventListener('click', async () => {
     const answer = answerEl.value.trim();
     if (!answer) {
       showToast('Write an answer first!');
+      return;
+    }
+
+    if (aiUsageToday() >= aiDailyLimit) {
+      showToast('Daily AI mark limit (' + aiDailyLimit + ') reached. Reset at midnight.', 4500);
       return;
     }
 
@@ -546,35 +600,81 @@ function initPracticeQuestions() {
     const lessonTitle = document.querySelector('.lesson-header h1');
     const board = window._examBoard || 'AQA';
     const subject = window._subjectName || 'the subject';
-    const prompt =
-      'You are a ' + board + ' GCSE ' + subject + ' examiner. Mark the following student answer.\n\n' +
+    const marksMatch = (q.type.match(/\d+/) || ['4'])[0];
+
+    const systemPrompt =
+      'You are a supportive GCSE ' + subject + ' tutor marking a ' + board + ' practice answer. ' +
+      'Be encouraging and developmental — the student is revising, not sitting an exam. Reward insight ' +
+      'over rigid format. If they reference specific content without quote marks, that still counts as ' +
+      'evidence. Do not require formal PEE structure or embedded quotation. Give a mark out of ' + marksMatch +
+      ', then in 2-3 short sections: what worked, what to develop, and one concrete sentence-level suggestion.';
+
+    const userPrompt =
       'TOPIC: ' + (lessonTitle ? lessonTitle.textContent : '') + '\n\n' +
       'QUESTION (' + q.type + '):\n' + q.text + '\n\n' +
-      'MARK SCHEME GUIDANCE:\n' + q.marks + '\n\n' +
-      'STUDENT ANSWER:\n' + answer + '\n\n' +
-      'Please provide:\n' +
-      '1. A mark out of ' + q.type.match(/\d+/)[0] + (q.type.includes('SPaG') ? ' (plus SPaG out of 4)' : '') + '\n' +
-      '2. What the student did well (with specific quotes from their answer)\n' +
-      '3. What could be improved (with specific suggestions)\n' +
-      '4. A model paragraph showing how to improve the weakest part of their answer';
+      'MARK SCHEME GUIDANCE (StudyVault rubric — Mastering / Secure / Developing / Emerging):\n' + q.marks + '\n\n' +
+      'STUDENT ANSWER:\n' + answer;
 
-    navigator.clipboard.writeText(prompt).then(() => {
-      showToast('Copied! Paste into ChatGPT or Claude to get your mark.');
-    }).catch(() => {
-      // Fallback: select a hidden textarea
-      const ta = document.createElement('textarea');
-      ta.value = prompt;
-      ta.style.position = 'fixed';
-      ta.style.opacity = '0';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Copied! Paste into ChatGPT or Claude to get your mark.');
-    });
+    aiFeedback.hidden = false;
+    aiFeedback.classList.add('loading');
+    aiFeedbackBody.innerHTML = '';
+
+    try {
+      const resp = await fetch('/api/ai-mark', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier: 'quick',
+          marks: parseInt(marksMatch, 10),
+          system: systemPrompt,
+          prompt: userPrompt,
+          free_tier: aiFreeTier,
+        }),
+      });
+
+      aiFeedback.classList.remove('loading');
+
+      if (resp.status === 429) {
+        aiFeedbackBody.innerHTML =
+          '<p>This service is busy right now. Please try again in a minute, ' +
+          'or paste your answer into ChatGPT or Claude using the copy fallback below.</p>';
+        return;
+      }
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        aiFeedbackBody.innerHTML = '<p>Something went wrong — ' +
+          (err.detail || err.error || 'please try again') + '.</p>';
+        return;
+      }
+
+      const data = await resp.json();
+      aiFeedbackBody.innerHTML = formatAiResponse(data.result || '(no response)');
+      aiUsageIncrement();
+      aiUpdateLimitPill();
+      aiFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch (err) {
+      aiFeedback.classList.remove('loading');
+      aiFeedbackBody.innerHTML =
+        '<p>Couldn’t reach the AI mark service. Check your connection and try again, ' +
+        'or paste your answer into ChatGPT / Claude.</p>';
+    }
   });
 
-  // Send to teacher — try mailto, fallback to clipboard
+  // Send to teacher — only shown to Unity school students. Hidden otherwise
+  // (free-tier students have no teacher on file; other schools don’t have
+  // a default teacher email wired up yet).
+  (function () {
+    let schoolSlug = null;
+    try {
+      const s = window.SchoolSession && SchoolSession.get();
+      if (s) schoolSlug = s.school_slug;
+    } catch (e) {}
+    if (schoolSlug !== 'unity-college') {
+      sendBtn.style.display = 'none';
+      return;
+    }
+  })();
+
   sendBtn.addEventListener('click', () => {
     const answer = answerEl.value.trim();
     if (!answer) {
