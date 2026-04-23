@@ -133,14 +133,29 @@ def main():
     # Create units
     unit_ids = {}
     for u in all_units:
+        # Normalise accent_light / accent_badge to alpha-blended tints of accent.
+        # Planning agents have repeatedly returned saturated values for these,
+        # which breaks pill readability (saturated-bg + saturated-text).
+        # Unity convention: accent_light = accent+"22", accent_badge = accent+"33".
+        unit_accent = u.get("accent", accent_hex) or accent_hex
+        def to_tint(val, alpha_suffix):
+            # If already an alpha-blended tint (8 hex digits or already pale), keep it.
+            # If it's a 6-digit saturated hex, convert to alpha tint of unit_accent.
+            v = (val or "").strip()
+            if v.startswith("#") and len(v) == 9:
+                return v
+            # Empty or saturated 6-digit → derive from accent
+            if unit_accent.startswith("#") and len(unit_accent) == 7:
+                return unit_accent + alpha_suffix
+            return v
         unit_row = {
             "subject_id": subject_id,
             "slug": u["slug"],
             "name": u["name"],
             "subtitle": u.get("subtitle", ""),
-            "accent": u.get("accent", accent_hex),
-            "accent_light": u.get("accent_light", ""),
-            "accent_badge": u.get("accent_badge", ""),
+            "accent": unit_accent,
+            "accent_light": to_tint(u.get("accent_light"), "22"),
+            "accent_badge": to_tint(u.get("accent_badge"), "33"),
             "body_class": u.get("body_class", f"unit-{subject_slug}-{u.get('sort_order', 1)}"),
             "sort_order": u.get("sort_order", 1),
             "lesson_count": u.get("lesson_count", len(u.get("lessons", []))),
