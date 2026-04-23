@@ -378,7 +378,7 @@ SHEET_GROUPS = [
     ('Health & Social Care', ['health-social-care']),
     ('Hospitality & Catering', ['hospitality-catering']),
     ('Music Technology', ['music-technology']),
-    ('Business Studies', ['business-aqa', 'business-edexcel']),
+    ('Business Studies', ['business-aqa', 'business-edexcel', 'business-ocr']),
 ]
 
 hero_qa_total = 0
