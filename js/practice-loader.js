@@ -18,6 +18,27 @@
   var errorEl = document.getElementById('practice-error');
   var pageEl = document.getElementById('practice-page');
 
+  // ---- Method card: wrap vocab tables in a <details> so they don't overwhelm
+  //      the left panel. MFL method cards ship a 10-15 row vocab table which
+  //      fits better hidden behind a click.
+  function collapseVocabTables(container, openByDefault) {
+    if (!container) return;
+    var tables = container.querySelectorAll('table');
+    for (var i = 0; i < tables.length; i++) {
+      var t = tables[i];
+      if (t.closest('details')) continue; // already wrapped
+      var details = document.createElement('details');
+      details.className = 'method-card-vocab';
+      if (openByDefault) details.open = true;
+      var summary = document.createElement('summary');
+      var rowCount = t.querySelectorAll('tr').length;
+      summary.textContent = 'Vocabulary (' + Math.max(rowCount - 1, 0) + ' items)';
+      details.appendChild(summary);
+      t.parentNode.insertBefore(details, t);
+      details.appendChild(t);
+    }
+  }
+
   // ---- Parse URL ----
   // Expects: /practice/{subject}/{unit}/{number}
   function parseUrl() {
@@ -257,6 +278,7 @@
       var panelMethodContent = document.getElementById('panel-method-content');
       if (panelMethodContent && mc.content) {
         panelMethodContent.innerHTML = mc.content;
+        collapseVocabTables(panelMethodContent, false); // left panel: collapsed by default
       }
 
       var panelSteps = document.getElementById('panel-method-steps');
@@ -278,7 +300,10 @@
       if (modalTitle) modalTitle.textContent = mc.title || '';
 
       var modalContent = document.getElementById('method-modal-content');
-      if (modalContent) modalContent.innerHTML = mc.content || mc.explanation || '';
+      if (modalContent) {
+        modalContent.innerHTML = mc.content || mc.explanation || '';
+        collapseVocabTables(modalContent, true); // modal: expanded by default (user actively opened it)
+      }
 
       var modalSteps = document.getElementById('method-modal-steps');
       if (mc.steps && mc.steps.length && modalSteps) {
