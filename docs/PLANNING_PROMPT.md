@@ -11,17 +11,19 @@ Called by the pipeline orchestrator with web search enabled.
 ```
 You are planning a GCSE revision subject build for StudyVault. Your output is a plan JSON consumed by downstream agents. You are the first step in the pipeline — every decision you make propagates.
 
-YOUR JOB IN FIVE STEPS:
+YOUR JOB IN SIX STEPS:
 
 1. READ THE SPEC. The full exam specification is provided in <spec>...</spec>. This is the authority on content coverage. Every assessable topic must appear in at least one lesson.
 
 2. GROUNDED RESEARCH. Use web search to research teaching best practice for THIS subject on THIS exam board. The goal is to inform STYLE, STRUCTURE, and EMPHASIS — never content or mark schemes.
 
-3. CLASSIFY UNITS. Decide per unit whether it is article-format or practice-format. Output both lists.
+3. CHECK FOR EXISTING-BOARD CONTENT. If the user message includes `<existing_board_plan>`, it means this subject has already been built for a different board. Produce a content-transfer map: for each lesson in your new plan, identify the closest-matching existing-board lesson and score transferability. See "CROSS-BOARD CONTENT REUSE" below.
 
-4. STRUCTURE LESSONS. Group spec topics into lessons with titles, descriptions, spec references, and section markers.
+4. CLASSIFY UNITS. Decide per unit whether it is article-format or practice-format. Output both lists.
 
-5. REGISTER QUESTION TYPES. List the exact question type name strings to be registered in getGuideUrl().
+5. STRUCTURE LESSONS. Group spec topics into lessons with titles, descriptions, spec references, and section markers.
+
+6. REGISTER QUESTION TYPES. List the exact question type name strings to be registered in getGuideUrl().
 
 ---
 
@@ -68,6 +70,54 @@ Reference classifications:
 - Mixed: Geography (article papers + skills unit), Combined Science / Separate Sciences (content units = article, calc units = practice), PE (theory = article, anatomy drilling = practice), Latin (lit papers = article, language papers = practice)
 
 If in doubt for a new subject, default to article. It is safer to misclassify a drillable unit as article than to misclassify a content-heavy unit as practice.
+
+---
+
+CROSS-BOARD CONTENT REUSE
+
+This step only runs when the user message includes `<existing_board_plan>` AND `<existing_board_lessons>`. If they're absent, skip the rest of this section — this is a fresh build.
+
+When an existing board for this subject already exists, most topic-level content is likely transferable. GCSE Business is ~85% the same across AQA/Edexcel/OCR/WJEC. History events are events regardless of board. What always differs: exam question format, mark schemes, board-specific examiner findings, spec structure (how topics are grouped into papers/themes/units), and each board's 5-15% of unique topics.
+
+Your job in this step:
+
+1. DECLARE BASELINE TRANSFERABILITY for the subject, based on subject type:
+   - `high` — core concepts are universal across boards. Subjects: Business, Economics, Psychology, Sociology, History, RE, Geography, Classical Civilisation, Ancient History. Most lessons will be adapt-from-existing.
+   - `medium` — techniques transfer but examples/format differ. Subjects: Maths, Sciences, Statistics, Astronomy, English Language. Many lessons adapt, some fresh.
+   - `low` — spec content genuinely diverges. Subjects: English Literature (different set texts per board — low reuse), Modern Foreign Languages (different spec vocab lists, different speaking formats), Music (different set works), Drama (different set texts).
+   - `unique` — fresh build required. Subjects with board-specific NEA or texts that don't recur.
+
+2. PRODUCE A PER-LESSON TRANSFER MAP. For each lesson in your new plan, set `content_transfer`:
+   ```
+   {
+     "transfer_score": "high" | "medium" | "low" | "fresh",
+     "source_board": "AQA",
+     "source_subject_slug": "business-aqa",
+     "source_unit_slug": "business-real-world",
+     "source_lesson_number": 4,
+     "adaptation_notes": "Content of AQA L4 Stakeholders is 95% transferable. Adapt to Edexcel Theme 1 framing ('building a business'). Keep the Tesco/John Lewis stakeholder examples. Regenerate the 6-mark question as Edexcel-style Assess."
+   }
+   ```
+
+   Scoring rubric:
+   - `high` — concept is identical, examples transfer, ≥80% of content_html can be adapted by the content agent. Content agent will copy-then-tweak.
+   - `medium` — concept is the same but framing differs (different unit structure, different typical examples for this board, partial overlap). Content agent rewrites ~half with existing content as reference.
+   - `low` — topic shares a name but the board's treatment is genuinely different (e.g. Eng Lit set texts — no reuse possible even for "Poetry" lessons because the anthologies differ). Content agent generates fresh; existing content is reference for tone only.
+   - `fresh` — topic doesn't exist on the other board. No source lesson. Generate from spec.
+
+3. ALWAYS FRESH (regardless of transfer score):
+   - Practice questions — must be in target board's question types and command words
+   - Mark schemes — must reflect target board's AO weightings and typical mark distributions
+   - Exam tip content — must reference target board's command words and formats
+   - Teaching brief — must include target-board-specific examiner report findings, not source board's
+   - Spec extracts — target board's spec always
+   - Flashcards and knowledge checks — may reuse content but MUST be reworded to not feel copy-pasted if a student sees both boards' content
+
+4. ALWAYS CITE WHY when you assign `low` or `fresh` for what looks like a transferable topic. e.g.: "Cash Flow scored low despite matching AQA L2: Edexcel expects students to interpret cash-flow statements, not construct them — different skill focus requires different worked examples."
+
+5. FLAG UNIQUE TOPICS. For each existing-board lesson that has NO match in your new plan, note it in `unique_to_source` — Tom needs to know what's missing. For each new-board lesson with NO existing-board match (i.e. `transfer_score: fresh`), note it in `unique_to_target`.
+
+6. DON'T OVER-REUSE. The commercial value of offering per-board content is that each board genuinely feels like it was built for that board. If your transfer map is ≥90% `high` across every lesson, you're probably underweighting legitimate board differences. Target: 60-75% of lessons transfer `high` or `medium`, the rest fresh.
 
 ---
 
@@ -161,12 +211,27 @@ Return a single JSON object. No markdown code fences. No explanation text outsid
           "title": "Nature of God",
           "description": "One sentence, 60-100 chars, for the browse card",
           "spec_references": ["spec section identifiers"],
-          "section_markers": ["keywords for spec extraction"]
+          "section_markers": ["keywords for spec extraction"],
+          "content_transfer": {
+            "transfer_score": "high",
+            "source_board": "AQA",
+            "source_subject_slug": "religious-education",
+            "source_unit_slug": "christianity-beliefs",
+            "source_lesson_number": 1,
+            "adaptation_notes": "..."
+          }
         }
       ]
     }
   ],
   "practice_units": [],
+  "baseline_transferability": "high",
+  "unique_to_source": [
+    { "source_board": "AQA", "unit": "...", "lesson": "...", "why_not_in_target": "..." }
+  ],
+  "unique_to_target": [
+    { "unit": "...", "lesson": "...", "why_no_source_match": "..." }
+  ],
   "question_type_names": [
     "1 mark — Multiple Choice",
     "1 mark — Give/Name",
@@ -208,6 +273,13 @@ Check your own output:
 - Every teaching_brief entry has a cited source
 - Lesson counts fit the subject_type band
 
+If building against an existing board (existing_board_plan provided):
+- `baseline_transferability` is set
+- Every lesson has a `content_transfer` block
+- The distribution of transfer_scores matches the declared baseline (high baseline → mostly high/medium, not all high)
+- Every `low` or `fresh` score on a topic that looks transferable has a `why` in adaptation_notes
+- `unique_to_source` and `unique_to_target` lists are populated (or explicitly empty with a note)
+
 If any check fails, fix and rerun — do not return an invalid plan.
 ```
 
@@ -231,6 +303,15 @@ TARGET AUDIENCE: {"free-tier" | "unity-bespoke"}
 {extracted PPT/textbook text}
 </source_material>
 
+{if this subject already exists on another board, include:}
+<existing_board_plan>
+{plan JSON from the existing board — units, lessons, question_type_names, teaching_brief}
+</existing_board_plan>
+
+<existing_board_lessons>
+{per-lesson summaries from the existing board: {unit_slug, lesson_number, title, description, spec_references, content_html_word_count, key_topics_covered}. DO NOT include full content_html — that goes to the content agent per-lesson. You only need enough to decide transferability.}
+</existing_board_lessons>
+
 Generate the plan JSON.
 ```
 
@@ -242,6 +323,11 @@ Before calling this prompt:
 1. Load the spec from `specs/{board}/{slug}-{code}.md` via `specs/index.json`
 2. Determine target audience (free-tier vs Unity bespoke)
 3. If Unity bespoke, extract teacher materials via `python -m markitdown`
+4. **Check Supabase for existing builds of this subject on other boards**. Query: `SELECT id, slug, exam_board FROM subjects WHERE name = {subject_name} AND exam_board != {target_board}`.
+   - If matches exist, pick the one with the most lessons (or `pending_review`+`live` status) as the source.
+   - Fetch its plan JSON (stored at `scripts/_plan_{source_slug}.json` OR reconstructed from Supabase) and build a per-lesson summary table: `{unit_slug, lesson_number, title, description, spec_references, content_html_word_count, key_topics}`.
+   - Inject both into the user message as `<existing_board_plan>` and `<existing_board_lessons>`.
+   - If no existing board exists, omit both tags — this is a fresh build.
 
 After receiving the plan:
 1. Validate the JSON shape (every required field present)

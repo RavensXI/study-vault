@@ -32,6 +32,31 @@ The reference is the STRUCTURAL template, not a content source. Do not copy its 
 
 ---
 
+EXISTING-BOARD CONTENT (cross-board reuse)
+
+If this lesson has a `content_transfer` block in its spec AND the user message includes `<existing_board_content>`, this subject already exists on another board and the planning agent has identified content you should adapt rather than generate from scratch.
+
+Behaviour by transfer_score:
+
+- `high` — 80%+ of the existing-board content_html is reusable. Copy its structure, sections, examples, glossary terms, key facts. Then apply the `adaptation_notes` changes: adjust framing to target board's unit structure, swap in target-board-specific examples where the notes say to, reword the unit-reference language. DO NOT blindly paste — you must produce content that reads as a target-board lesson, not an obviously copied source-board lesson.
+
+- `medium` — concept overlaps but framing or emphasis differs. Use the source content_html as heavy inspiration for structure and tone, but rewrite roughly half to match target-board treatment. `adaptation_notes` will specify which sections to keep vs rewrite.
+
+- `low` — topic shares a name but treatment genuinely differs (e.g. Eng Lit set texts). Source is for tone reference only — do not reuse its content. Generate fresh from the spec.
+
+- `fresh` — no source exists. Generate entirely from the spec. Ignore any `<existing_board_content>` for this lesson.
+
+ALWAYS FRESH regardless of transfer_score (these are target-board-specific by nature):
+- `practice_questions` — in target board's question types and command words (from registered question_type_names)
+- All mark schemes — target board's AOs and mark distributions
+- `exam_tip_html` — target board's command words, timing, format
+- `knowledge_checks` — may share factual content with source but must not be verbatim copies
+- `flashcard_questions` — same — rewrite even if factual overlap
+
+If you adapt heavily from source content, your `content_html` word count, key-fact count, collapsible count, etc. must still meet THIS prompt's minima independently — don't inherit short-content bugs from the source.
+
+---
+
 ABSOLUTE BANS (PAST DRIFT — DO NOT REPEAT)
 
 These have all appeared in shipped content despite being forbidden. The generation agent kept producing them because the underlying structural examples were contaminated. With this prompt, anti-examples are explicit:
@@ -309,6 +334,21 @@ STRUCTURAL REFERENCE LESSON (match its patterns, not its content):
 <reference_lesson>
 {content_html from the pinned article reference — REFERENCE_LESSONS.md}
 </reference_lesson>
+
+{if this lesson has content_transfer with score high or medium, include:}
+CONTENT TRANSFER INSTRUCTIONS (from planning agent):
+<content_transfer>
+{
+  "transfer_score": "high",
+  "source_board": "AQA",
+  "source_lesson_title": "Stakeholders & Their Influence",
+  "adaptation_notes": "..."
+}
+</content_transfer>
+
+<existing_board_content>
+{full content JSON from the source lesson: content_html, exam_tip_html, conclusion_html, glossary_terms, flashcard_questions, knowledge_checks. NOT practice_questions — always regenerate those for the target board.}
+</existing_board_content>
 
 Generate the complete lesson as a JSON object.
 ```
