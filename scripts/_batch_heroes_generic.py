@@ -54,7 +54,13 @@ def find_or_download(keywords, subject_slug, unit_slug, lesson_number, no_reuse=
                 top = matches[0]
                 if top.get("score", 0) >= REUSE_MIN_SCORE:
                     print(f"      reuse: {top['hero_url'][:70]}...  (score {top['score']}, query '{query}')")
-                    return {"url": top["hero_url"], "alt": top.get("title", query), "reused": True}
+                    # Reuse caption: attribution only. If the index entry
+                    # carries "Photo: {name} / Unsplash" from a recent add,
+                    # use it; else generic "Photo via Unsplash".
+                    index_desc = top.get("description") or ""
+                    caption = index_desc if index_desc.startswith("Photo: ") else "Photo via Unsplash"
+                    return {"url": top["hero_url"], "alt": top.get("title", query),
+                            "caption": caption, "reused": True}
 
     if dry_run:
         return None
@@ -75,6 +81,12 @@ def find_or_download(keywords, subject_slug, unit_slug, lesson_number, no_reuse=
             pass
         image_url = top["url"]
         alt_text = top.get("title") or query
+        photographer = top.get("photographer") or ""
+        # Caption: attribution only. Unsplash alt_descriptions are often
+        # auto-generated nonsense and don't describe the image accurately;
+        # content-agent imagined captions don't match the downloaded image
+        # either. A plain attribution line is the honest baseline.
+        caption = f"Photo: {photographer} / Unsplash" if photographer else "Photo via Unsplash"
         # Download + compress + upload to R2
         try:
             import tempfile
@@ -88,11 +100,12 @@ def find_or_download(keywords, subject_slug, unit_slug, lesson_number, no_reuse=
                 r2.put_object(Bucket=IMAGES_BUCKET, Key=r2_key, Body=f.read(), ContentType="image/jpeg")
             os.unlink(tmp_src); os.unlink(tmp_dest)
             r2_url = f"https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/{r2_key}"
-            # Add to index
+            # Add to index — description stores photographer so future reuse
+                                # can carry attribution forward
             try:
                 add_to_index(
                     title=alt_text,
-                    description=alt_text,
+                    description=f"Photo: {photographer} / Unsplash",
                     subject_slug=subject_slug,
                     subject_name=subject_slug,
                     unit_slug=unit_slug,
@@ -102,7 +115,7 @@ def find_or_download(keywords, subject_slug, unit_slug, lesson_number, no_reuse=
                 )
             except Exception as e:
                 print(f"      index add error: {e}")
-            return {"url": r2_url, "alt": alt_text, "reused": False}
+            return {"url": r2_url, "alt": alt_text, "caption": caption, "reused": False}
         except Exception as e:
             print(f"      download/upload error for '{query}': {e}")
             continue
@@ -177,14 +190,18 @@ def main():
             print(f"      [DRY] would set hero_image_url={result['url']}")
             continue
 
+        # Caption: prefer what the download helper built from the Unsplash
+        # photographer data (accurate); for reused images from the hero
+        # index, fall back to the index description + generic attribution.
+        final_caption = result.get("caption") or f"{result['alt']} · Photo via Unsplash"
         sb.table("lessons").update({
             "hero_image_url": result["url"],
             "hero_image_alt": result["alt"],
-            "hero_image_caption": caption,
+            "hero_image_caption": final_caption,
             "hero_image_position": "center 50%",
         }).eq("id", lid).execute()
         tag = "reused" if result["reused"] else "downloaded"
-        print(f"      [OK] {tag}  caption={caption[:50] if caption else '(none)'}")
+        print(f"      [OK] {tag}  {final_caption[:80]}")
         time.sleep(1.0)  # rate-limit friendliness
 
 

@@ -135,6 +135,8 @@ def main():
                             r2.put_object(Bucket=IMAGES_BUCKET, Key=r2_key, Body=f.read(), ContentType="image/jpeg")
                         os.unlink(tmp_src); os.unlink(tmp_dest)
                         r2_url = f"https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/{r2_key}"
+                        photographer = top.get("photographer") or ""
+                        unsplash_caption = f"Photo: {photographer} / Unsplash" if photographer else "Photo via Unsplash"
                         alt = top.get("title") or q
                         try:
                             add_to_index(
@@ -146,7 +148,7 @@ def main():
                             )
                         except Exception as e:
                             print(f"      index err: {e}")
-                        found = {"url": r2_url, "alt": alt, "reused": False}
+                        found = {"url": r2_url, "alt": alt, "caption": unsplash_caption, "reused": False}
                         break
                     except Exception as e:
                         print(f"      download err '{q}': {e}")
@@ -161,6 +163,7 @@ def main():
             sb.table("lessons").update({
                 "hero_image_url": found["url"],
                 "hero_image_alt": found["alt"],
+                "hero_image_caption": found.get("caption") or "Photo via Unsplash",
                 "hero_image_position": "center 50%",
             }).eq("id", l["id"]).execute()
             tag = "reused" if found["reused"] else "downloaded"
