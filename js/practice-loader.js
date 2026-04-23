@@ -12,6 +12,8 @@
     'https://baipckgywpnwapobwtsy.supabase.co',
     'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
   );
+  // Expose for tier-attempt tracking in practice.html
+  window._practiceSupabaseClient = sb;
 
   // ---- DOM refs ----
   var loadingEl = document.getElementById('practice-loading');

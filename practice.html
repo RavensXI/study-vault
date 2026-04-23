@@ -1443,6 +1443,41 @@
       margin-bottom: 0.25rem;
     }
 
+    /* Tier-fail modal — reuses .summary-overlay + .summary-modal */
+    .tier-fail-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 3.5rem;
+      height: 3.5rem;
+      margin: 0 auto 0.85rem;
+      border-radius: 50%;
+      background: rgba(234, 88, 12, 0.12);
+      color: #c2410c;
+    }
+    .tier-fail-icon svg { width: 1.8rem; height: 1.8rem; }
+    .tier-fail-heading {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary, #2d2a26);
+      margin-bottom: 0.6rem;
+    }
+    .tier-fail-score {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #c2410c;
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+    .tier-fail-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      color: var(--text-secondary, #5a5651);
+      margin-bottom: 1.4rem;
+    }
+
     .summary-label {
       font-family: 'Inter', sans-serif;
       font-size: 0.9rem;
@@ -3822,6 +3857,21 @@
 
     </div><!-- /.practice-layout -->
 
+    <!-- TIER FAIL OVERLAY (shown when a tier is attempted fully but < 75% correct) -->
+    <div class="summary-overlay" id="tier-fail-overlay">
+      <div class="summary-modal">
+        <div class="tier-fail-icon" id="tier-fail-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>
+        </div>
+        <div class="tier-fail-heading" id="tier-fail-heading">Not quite &mdash; another go</div>
+        <div class="tier-fail-score"><span id="tier-fail-correct">0</span>/<span id="tier-fail-total">0</span></div>
+        <div class="tier-fail-sub" id="tier-fail-sub">You need 75% to move on. Attempt <span id="tier-fail-attempt">2</span> coming up.</div>
+        <div class="summary-actions">
+          <button class="summary-btn summary-btn-primary" id="tier-fail-retry-btn">Try This Tier Again</button>
+        </div>
+      </div>
+    </div>
+
     <!-- FINAL SUMMARY OVERLAY -->
     <div class="summary-overlay" id="summary-overlay">
       <div class="summary-modal">
@@ -3876,16 +3926,95 @@
       // Practice state
       currentTier: 'bronze',             // current tier
       currentIndex: 0,                   // index within current tier
-      bronze: { correct: 0, attempted: 0, streak: 0 },
-      silver: { correct: 0, attempted: 0, streak: 0 },
-      gold: { correct: 0, attempted: 0, streak: 0 },
+      bronze: { correct: 0, attempted: 0, streak: 0, attemptNumber: 1 },
+      silver: { correct: 0, attempted: 0, streak: 0, attemptNumber: 1 },
+      gold: { correct: 0, attempted: 0, streak: 0, attemptNumber: 1 },
       streak: 0,
       answered: false,                   // is current problem answered?
       allDone: false,
+      // History of completed tier attempts for this session (passed or failed)
+      // Each entry: { tier, attemptNumber, correct, attempted, passed, completedAt }
+      tierAttemptHistory: [],
       // Learn state
       learnIndex: 0,                     // current worked example index
       learnStepRevealed: 0              // how many steps revealed
     };
+
+    // ===== TIER ATTEMPT TRACKING =====
+    // Records each completed tier attempt (pass OR fail) to localStorage and
+    // attempts to persist to Supabase `practice_tier_attempts` table. If the
+    // table doesn't exist, silently falls back to localStorage only — once the
+    // migration runs, data flows automatically.
+    function recordTierAttempt(tier, passed) {
+      var t = practiceState[tier];
+      var counts = getTierCounts();
+      var record = {
+        tier: tier,
+        attemptNumber: t.attemptNumber,
+        correct: t.correct,
+        attempted: t.attempted,
+        tierTotal: counts[tier],
+        passed: passed,
+        completedAt: new Date().toISOString()
+      };
+      practiceState.tierAttemptHistory.push(record);
+
+      // localStorage: per-lesson history
+      try {
+        var lessonId = window._lessonId || window._practiceLoadLessonId;
+        if (lessonId) {
+          var key = 'sv-practice-attempts-' + lessonId;
+          var existing = JSON.parse(localStorage.getItem(key) || '[]');
+          existing.push(record);
+          // Cap at 50 records per lesson to avoid localStorage bloat
+          if (existing.length > 50) existing = existing.slice(-50);
+          localStorage.setItem(key, JSON.stringify(existing));
+        }
+      } catch (e) { /* quota / parse error — ignore */ }
+
+      // Supabase persistence (fire-and-forget)
+      try {
+        if (window.supabase && window._practiceSupabaseClient && (window._lessonId || window._practiceLoadLessonId)) {
+          var userId = null;
+          try {
+            var auth = JSON.parse(sessionStorage.getItem('studyvault-auth') || 'null')
+                    || JSON.parse(localStorage.getItem('studyvault-auth') || 'null');
+            if (auth) userId = auth.id || auth.user_id || auth.username || null;
+          } catch (e) {}
+          if (!userId) {
+            // Free-tier: derive a stable anonymous id for cohort analysis
+            userId = localStorage.getItem('sv-anon-user-id');
+            if (!userId) {
+              userId = 'anon-' + Math.random().toString(36).slice(2, 10) + '-' + Date.now();
+              localStorage.setItem('sv-anon-user-id', userId);
+            }
+          }
+          window._practiceSupabaseClient
+            .from('practice_tier_attempts')
+            .insert({
+              user_id: String(userId),
+              lesson_id: window._lessonId || window._practiceLoadLessonId,
+              tier: tier,
+              attempt_number: t.attemptNumber,
+              correct: t.correct,
+              attempted: t.attempted,
+              tier_total: counts[tier],
+              passed: passed
+            })
+            .then(function(){}, function(){}); // swallow errors (table may not exist yet)
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    // Reset a tier's counters so the student can retry it from problem 1.
+    // Bumps attemptNumber so the retry is distinguishable in tracking.
+    function resetTier(tier) {
+      var prevAttempt = practiceState[tier].attemptNumber;
+      practiceState[tier] = { correct: 0, attempted: 0, streak: 0, attemptNumber: prevAttempt + 1 };
+      practiceState.streak = 0;
+      practiceState.currentIndex = 0;
+      practiceState.answered = false;
+    }
 
     // ===== DARK MODE =====
     (function initDarkMode() {
@@ -4505,24 +4634,33 @@
     }
 
     // ===== NEXT PROBLEM =====
-    function isTierPassed(tier) {
+    // Returns 'pass' | 'fail' | 'continue'
+    //   pass     — student met the threshold (4 in a row, OR ≥75% once all done)
+    //   fail     — all problems attempted but score < 75% — retry the tier
+    //   continue — more problems still to attempt
+    var PASS_THRESHOLD = 0.75;
+
+    function evaluateTier(tier) {
       var t = practiceState[tier];
       var counts = getTierCounts();
       var total = counts[tier];
-      // Fast pass: 4 correct in a row at any point
-      if (t.streak >= 4) return true;
-      // All questions attempted: pass at 75%, otherwise fail the tier
-      if (t.attempted >= total) return true;
-      return false;
+      // Fast pass: 4 correct in a row
+      if (t.streak >= 4) return 'pass';
+      // All questions attempted: pass iff ≥ threshold, otherwise fail
+      if (t.attempted >= total) {
+        return (total > 0 && (t.correct / total) >= PASS_THRESHOLD) ? 'pass' : 'fail';
+      }
+      return 'continue';
     }
 
     function nextProblem() {
       var tier = practiceState.currentTier;
       var counts = getTierCounts();
       var tierTotal = counts[tier];
+      var verdict = evaluateTier(tier);
 
-      // Check if tier is passed (4 in a row, 75%, or all done)
-      if (isTierPassed(tier)) {
+      if (verdict === 'pass') {
+        recordTierAttempt(tier, true);
         showTierCelebration(tier, function() {
           if (tier === 'bronze') {
             practiceState.currentTier = 'silver';
@@ -4537,11 +4675,14 @@
           }
           animateToNextProblem();
         });
-      } else if (practiceState.currentIndex + 1 >= tierTotal) {
-        // Ran out of problems without passing — show summary anyway
-        practiceState.allDone = true;
-        showSummary();
+      } else if (verdict === 'fail') {
+        recordTierAttempt(tier, false);
+        showTierFailModal(tier, function() {
+          resetTier(tier);
+          animateToNextProblem();
+        });
       } else {
+        // continue
         practiceState.currentIndex++;
         animateToNextProblem();
       }
@@ -4584,6 +4725,31 @@
         celebration.classList.remove('active');
         if (callback) callback();
       }, 1500);
+    }
+
+    // ===== TIER FAIL MODAL =====
+    // Shown when a student completes all problems in a tier but scores below
+    // 75%. Requires click-through — student must retry the tier from problem 1.
+    function showTierFailModal(tier, onRetry) {
+      var overlay = document.getElementById('tier-fail-overlay');
+      var t = practiceState[tier];
+      var counts = getTierCounts();
+      var tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      document.getElementById('tier-fail-heading').textContent = tierName + ' — not quite';
+      document.getElementById('tier-fail-correct').textContent = t.correct;
+      document.getElementById('tier-fail-total').textContent = counts[tier];
+      document.getElementById('tier-fail-sub').textContent =
+        'You need 75% to move on. Attempt ' + (t.attemptNumber + 1) + ' coming up.';
+      overlay.classList.add('active');
+
+      var btn = document.getElementById('tier-fail-retry-btn');
+      // Replace the button to clear any previous listeners
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', function() {
+        overlay.classList.remove('active');
+        if (onRetry) onRetry();
+      });
     }
 
     // ===== FINAL SUMMARY =====
