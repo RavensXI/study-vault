@@ -2534,24 +2534,15 @@ function openFlashcardModal() {
   if (narrationAudio && !narrationAudio.paused) narrationAudio.pause();
 
   var lessonId = window._lessonId;
-  var glossary = window._lessonGlossary || [];
   var kc = window.knowledgeCheck || [];
 
   // ---- Build cards ----
+  // Glossary auto-import removed (Apr 2026 retrofit) — flashcard_questions are now
+  // properly curated per lesson following FLASHCARD_RULES.md. Showing glossary as
+  // extra cards created interference with the curated deck and inverted-definition
+  // cards (Rule 4 violations).
   var allCards = [];
 
-  glossary.forEach(function (t, i) {
-    allCards.push({
-      lessonId: lessonId,
-      index: 'g' + i,
-      front: t.term,
-      back: t.definition,
-      type: 'glossary',
-      badgeLabel: 'Term'
-    });
-  });
-
-  // Flashcard-specific questions (separate from knowledge checks)
   var fcQuestions = window._lessonFlashcardQuestions || [];
   fcQuestions.forEach(function (item, i) {
     allCards.push({

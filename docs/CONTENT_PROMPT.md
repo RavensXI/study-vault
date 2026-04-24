@@ -108,7 +108,7 @@ Return a single JSON object with these keys and nothing else:
   "conclusion_html": "...",
   "practice_questions": [ {...}, {...}, {...}, {...}, {...}, {...} ],
   "knowledge_checks": [ {...}, {...}, {...}, {...}, {...} ],
-  "flashcard_questions": [ {"q": "...", "a": "..."}, ... 5 total ],
+  "flashcard_questions": [ {"q": "...", "a": "..."}, ... 8-15 cards, per FLASHCARD_RULES.md ],
   "glossary_terms": [ {"term": "...", "definition": "..."}, ... ],
   "hero_keywords": ["primary", "fallback1", "fallback2"],
   "hero_image_caption": "Short descriptive caption, 5-15 words, used under the hero image."
@@ -272,12 +272,24 @@ MCQs: one correct answer, three plausible distractors.
 Fill: a sentence from the lesson with a key term removed.
 Match: pair terms with definitions, or concepts with examples.
 
-flashcard_questions (required, exactly 5)
-- Rapid-recall flashcards — NOT duplicates of knowledge_checks
-- Test factual recall: facts, dates, names, definitions, cause-effect
-- Short questions, concise 1-2 sentence answers
+flashcard_questions (required, 8-15 cards following FLASHCARD_RULES.md)
 
-Each: { "q": "short question", "a": "short answer" }
+Full rules + per-subject recipes + anti-examples live in `docs/FLASHCARD_RULES.md`. Read that before generating. Summary below — do not skip the full doc:
+
+- **8-15 cards per article lesson** (varies by subject — History/Science typically 12-18, lean lessons 8 minimum). Practice-format subjects get ZERO flashcards.
+- **Answer length: target ≤15 words, hard cap 30.** Longer → split into multiple cards.
+- **One fact per card.** No stuffing multiple facts into one answer.
+- **No enumerations** in answers. "Chase unpaid invoices and offer discounts" splits into two cards with different question framings.
+- **Context in the question.** "When was it fought?" is useless. "When was the Battle of Hastings?" or cloze form ("The Battle of Hastings was fought in ___") works.
+- **No interference.** Within the deck, no two card fronts should plausibly have the same answer.
+- **Subject-specific card types.** Don't default to term→def for everything. History gets event↔date, cause↔effect, person↔significance, cloze on dated statements. Eng Lit gets character↔quote, quote↔analysis, theme↔evidence. See FLASHCARD_RULES.md for full per-subject recipes.
+- **Evidence-based.** Each card must be something the student needs for the exam — not flavour terminology.
+- **No duplicates of knowledge_checks.** KCs and flashcards test different material.
+- **Glossary inclusion is selective, not automatic.** Not every `<dfn>` deserves a flashcard. Pick the ones that are genuinely exam-relevant; skip the rest. When you do include one, pick ONE direction (term→def for most subjects) and stick to it — never both directions in the same deck.
+
+Each card: `{ "q": "short question", "a": "short answer" }`
+
+Validator enforces the hard rules before insert — see FLASHCARD_RULES.md "Validator hard rules".
 
 glossary_terms (required)
 - One entry per <dfn> in content_html
@@ -374,7 +386,7 @@ Run automatically before writing to Supabase:
 ✓ Exactly 6 practice_questions, each with string text/type/marks fields
 ✓ Every practice question "type" string exists in registered question_type_names
 ✓ Exactly 5 knowledge_checks (2 mcq + 2 fill + 1 match)
-✓ Exactly 5 flashcard_questions, distinct from knowledge_checks
+✓ 8-15 flashcard_questions per FLASHCARD_RULES.md (answer length ≤30 words hard, ≤15 target; no enumerations; no interference within deck; distinct from knowledge_checks; subject-appropriate card-type mix)
 ✓ glossary_terms count matches <dfn> count
 ✓ hero_keywords length 3-4
 ```

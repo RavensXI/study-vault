@@ -1230,21 +1230,8 @@
       allCards = [];
 
       lessonList.forEach(function (lesson) {
-        // Glossary terms -> flashcards
-        var glossary = lesson.glossary_terms || [];
-        glossary.forEach(function (t, i) {
-          allCards.push({
-            lessonId: lesson.id,
-            lessonNumber: lesson.lesson_number,
-            index: 'g' + i,
-            front: t.term,
-            back: t.definition,
-            type: 'glossary',
-            badgeLabel: 'Term'
-          });
-        });
-
-        // Flashcard-specific questions (separate from knowledge checks)
+        // Glossary auto-import removed (Apr 2026 retrofit) — flashcard_questions
+        // are now properly curated per lesson following FLASHCARD_RULES.md.
         var fcqs = lesson.flashcard_questions || [];
         fcqs.forEach(function (item, i) {
           allCards.push({
