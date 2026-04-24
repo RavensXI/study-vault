@@ -178,6 +178,111 @@ for spec in sorted(specs, key=lambda s: (
         'htWrapping': (st.get('htWrapping', '') if st else '') if any(t in spec['subject'].lower() for t in TIERED_SUBJECTS) else 'N/A',
     })
 
+# ── Preservation: snapshot user-edited columns from existing xlsx ──
+# Each run wipes the workbook and regenerates it. Before that happens, read the
+# existing file and remember any user edits in the "Hero QA" / "Notes" / "QA
+# Status" / "Priority" columns so we can restore them into the rebuilt sheets.
+# Keyed by stable row identity so new/removed rows are handled cleanly.
+import os as _os
+OUT_PATH = 'data/gcse-subject-tracker.xlsx'
+user_snapshot = {}  # { sheet_name: { row_key: { col_name: (value, fill_rgb or None) } } }
+if _os.path.exists(OUT_PATH):
+    try:
+        existing = openpyxl.load_workbook(OUT_PATH)
+        # Main tracker — key by (Subject, Board, Spec Code)
+        main_sheet_name = 'GCSE Subject Tracker'
+        if main_sheet_name in existing.sheetnames:
+            ms = existing[main_sheet_name]
+            hdr = [ms.cell(row=1, column=c).value for c in range(1, ms.max_column + 1)]
+            try:
+                cQA = hdr.index('QA Status') + 1
+                cNotes = hdr.index('QA Notes') + 1
+                cPri = hdr.index('Priority') + 1
+            except ValueError:
+                cQA = cNotes = cPri = None
+            snap = {}
+            for r in range(2, ms.max_row + 1):
+                subj = ms.cell(row=r, column=1).value
+                board = ms.cell(row=r, column=2).value
+                code = ms.cell(row=r, column=3).value
+                key = (subj, board, code)
+                entry = {}
+                for label, idx in [('QA Status', cQA), ('QA Notes', cNotes), ('Priority', cPri)]:
+                    if not idx: continue
+                    cell = ms.cell(row=r, column=idx)
+                    fill_rgb = None
+                    if cell.fill and cell.fill.fgColor and cell.fill.fgColor.rgb:
+                        rgb = cell.fill.fgColor.rgb
+                        if rgb not in ('00000000', None):
+                            fill_rgb = rgb
+                    if cell.value or fill_rgb:
+                        entry[label] = (cell.value, fill_rgb)
+                if entry:
+                    snap[key] = entry
+            user_snapshot[main_sheet_name] = snap
+        # Eng Lit Texts — key by Text / Unit column
+        if 'English Lit Texts' in existing.sheetnames:
+            ls = existing['English Lit Texts']
+            hdr = [ls.cell(row=1, column=c).value for c in range(1, ls.max_column + 1)]
+            user_cols = ['AQA Hero QA', 'Edexcel Hero QA', 'OCR Hero QA', 'Eduqas Hero QA', 'Notes']
+            col_idx = {c: (hdr.index(c) + 1) for c in user_cols if c in hdr}
+            snap = {}
+            for r in range(2, ls.max_row + 1):
+                key = ls.cell(row=r, column=1).value
+                if not key: continue
+                entry = {}
+                for label, idx in col_idx.items():
+                    cell = ls.cell(row=r, column=idx)
+                    fill_rgb = None
+                    if cell.fill and cell.fill.fgColor and cell.fill.fgColor.rgb:
+                        rgb = cell.fill.fgColor.rgb
+                        if rgb not in ('00000000', None):
+                            fill_rgb = rgb
+                    if cell.value or fill_rgb:
+                        entry[label] = (cell.value, fill_rgb)
+                if entry:
+                    snap[key] = entry
+            user_snapshot['English Lit Texts'] = snap
+        # Hero QA per-subject sheets — key by (Board, Unit, Lesson #)
+        hero_qa_sheet_names = [
+            'Combined Science', 'Separate Sciences', 'History', 'Religious Education',
+            'Computer Science', 'Design & Technology', 'Health & Social Care',
+            'Hospitality & Catering', 'Music Technology', 'Business Studies',
+        ]
+        for sn in hero_qa_sheet_names:
+            if sn[:31] not in existing.sheetnames: continue
+            hs = existing[sn[:31]]
+            hdr = [hs.cell(row=1, column=c).value for c in range(1, hs.max_column + 1)]
+            try:
+                cHQA = hdr.index('Hero QA') + 1
+                cN = hdr.index('Notes') + 1
+            except ValueError:
+                continue
+            snap = {}
+            for r in range(2, hs.max_row + 1):
+                board = hs.cell(row=r, column=2).value
+                unit = hs.cell(row=r, column=3).value
+                lnum = hs.cell(row=r, column=4).value
+                key = (board, unit, lnum)
+                entry = {}
+                for label, idx in [('Hero QA', cHQA), ('Notes', cN)]:
+                    cell = hs.cell(row=r, column=idx)
+                    fill_rgb = None
+                    if cell.fill and cell.fill.fgColor and cell.fill.fgColor.rgb:
+                        rgb = cell.fill.fgColor.rgb
+                        if rgb not in ('00000000', None):
+                            fill_rgb = rgb
+                    if cell.value or fill_rgb:
+                        entry[label] = (cell.value, fill_rgb)
+                if entry:
+                    snap[key] = entry
+            user_snapshot[sn[:31]] = snap
+        _preserved_count = sum(len(v) for v in user_snapshot.values())
+        if _preserved_count:
+            print(f'[preservation] snapshotted {_preserved_count} user-edited rows across {len(user_snapshot)} sheets')
+    except Exception as e:
+        print(f'[preservation] WARNING: could not read existing xlsx: {e}')
+
 # ── Create Excel ──
 wb = openpyxl.Workbook()
 ws = wb.active
@@ -435,6 +540,70 @@ for sheet_name, slugs in SHEET_GROUPS:
         qa_ws.column_dimensions[get_column_letter(ci)].width = w
     qa_ws.freeze_panes = 'A2'
     qa_ws.auto_filter.ref = qa_ws.dimensions
+
+# ── Preservation: restore user-edited columns from snapshot ──
+# For each sheet we rebuilt, look up row keys and write preserved values
+# (and fill colour) back into the user-edit columns.
+_restored = 0
+
+def _restore_fill(cell, rgb):
+    if not rgb: return
+    try:
+        cell.fill = PatternFill(start_color=rgb, end_color=rgb, fill_type='solid')
+    except Exception:
+        pass
+
+# Main tracker sheet
+if 'GCSE Subject Tracker' in user_snapshot:
+    snap = user_snapshot['GCSE Subject Tracker']
+    hdr = [ws.cell(row=1, column=c).value for c in range(1, ws.max_column + 1)]
+    col_idx = {c: (hdr.index(c) + 1) for c in ['QA Status', 'QA Notes', 'Priority'] if c in hdr}
+    for r in range(2, ws.max_row + 1):
+        key = (ws.cell(row=r, column=1).value, ws.cell(row=r, column=2).value, ws.cell(row=r, column=3).value)
+        if key not in snap: continue
+        for label, (val, rgb) in snap[key].items():
+            if label not in col_idx: continue
+            cell = ws.cell(row=r, column=col_idx[label])
+            if val is not None: cell.value = val
+            _restore_fill(cell, rgb)
+            _restored += 1
+
+# Eng Lit Texts
+if 'English Lit Texts' in user_snapshot and 'English Lit Texts' in wb.sheetnames:
+    ls = wb['English Lit Texts']
+    snap = user_snapshot['English Lit Texts']
+    hdr = [ls.cell(row=1, column=c).value for c in range(1, ls.max_column + 1)]
+    col_idx = {c: (hdr.index(c) + 1) for c in ['AQA Hero QA', 'Edexcel Hero QA', 'OCR Hero QA', 'Eduqas Hero QA', 'Notes'] if c in hdr}
+    for r in range(2, ls.max_row + 1):
+        key = ls.cell(row=r, column=1).value
+        if key not in snap: continue
+        for label, (val, rgb) in snap[key].items():
+            if label not in col_idx: continue
+            cell = ls.cell(row=r, column=col_idx[label])
+            if val is not None: cell.value = val
+            _restore_fill(cell, rgb)
+            _restored += 1
+
+# Hero QA per-subject sheets
+for sn_full, _ in SHEET_GROUPS:
+    sn = sn_full[:31]
+    if sn not in user_snapshot or sn not in wb.sheetnames: continue
+    hs = wb[sn]
+    snap = user_snapshot[sn]
+    hdr = [hs.cell(row=1, column=c).value for c in range(1, hs.max_column + 1)]
+    col_idx = {c: (hdr.index(c) + 1) for c in ['Hero QA', 'Notes'] if c in hdr}
+    for r in range(2, hs.max_row + 1):
+        key = (hs.cell(row=r, column=2).value, hs.cell(row=r, column=3).value, hs.cell(row=r, column=4).value)
+        if key not in snap: continue
+        for label, (val, rgb) in snap[key].items():
+            if label not in col_idx: continue
+            cell = hs.cell(row=r, column=col_idx[label])
+            if val is not None: cell.value = val
+            _restore_fill(cell, rgb)
+            _restored += 1
+
+if _restored:
+    print(f'[preservation] restored {_restored} user-edited cells')
 
 wb.save('data/gcse-subject-tracker.xlsx')
 
