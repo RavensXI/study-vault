@@ -378,6 +378,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5: Tier picker (Maths Foundation/Higher, etc.) -->
+      <div class="free-wizard-step" id="fw-step-tier">
+        <div class="fw-header">
+          <h2>Foundation or Higher?</h2>
+          <p>Pick the tier you're sitting in each tiered subject. Not sure? Ask your teacher — most students sit Higher.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-tier-list"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-tier-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-tier-next">Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 4: School picker (optional) -->
       <div class="free-wizard-step" id="fw-step-4">
         <div class="fw-header">
@@ -1424,21 +1439,96 @@
       });
     }
 
-    // Step 2 → Step 3 or Step 4
+    // Tier picker: which subjects need a Foundation/Higher choice
+    var FW_TIERED_BASE = ['maths', 'science', 'separate-sciences', 'spanish', 'french', 'german'];
+
+    function fwGetTieredPicks() {
+      // Returns base slugs the user picked that have F/H tiers
+      return wizardState.subjects.filter(function (s) { return FW_TIERED_BASE.indexOf(s) !== -1; });
+    }
+
+    function buildTierPicker() {
+      var list = document.getElementById('fw-tier-list');
+      list.innerHTML = '';
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch (e) {}
+      var picks = fwGetTieredPicks();
+      picks.forEach(function (baseSlug) {
+        var board = wizardState.boards[baseSlug] || 'aqa';
+        var actualSlug = resolveSlug(baseSlug, board);
+        var current = saved[actualSlug] || 'higher';
+        var displayName = subjectDisplayNames[baseSlug] || baseSlug;
+        var row = document.createElement('div');
+        row.className = 'fw-board-row resolved';
+        row.dataset.subject = actualSlug;
+        row.dataset.tier = current;
+        row.innerHTML =
+          '<div class="fw-board-head">' +
+            '<div class="fw-board-name"><span>' + displayName + '</span></div>' +
+            '<div class="fw-board-status picked">' + current.charAt(0).toUpperCase() + current.slice(1) + '</div>' +
+          '</div>' +
+          '<div class="fw-board-pills">' +
+            '<button class="fw-board-pill ' + (current === 'foundation' ? 'selected' : '') + '" data-t="foundation">Foundation</button>' +
+            '<button class="fw-board-pill ' + (current === 'higher' ? 'selected' : '') + '" data-t="higher">Higher</button>' +
+          '</div>';
+        row.querySelectorAll('.fw-board-pill').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            row.dataset.tier = btn.dataset.t;
+            row.querySelectorAll('.fw-board-pill').forEach(function (b) {
+              b.classList.toggle('selected', b === btn);
+            });
+            row.querySelector('.fw-board-status').textContent = btn.dataset.t.charAt(0).toUpperCase() + btn.dataset.t.slice(1);
+          });
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function fwSaveTierPicks() {
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch (e) {}
+      document.querySelectorAll('#fw-tier-list .fw-board-row').forEach(function (row) {
+        saved[row.dataset.subject] = row.dataset.tier;
+      });
+      localStorage.setItem('studyvault-tiers', JSON.stringify(saved));
+    }
+
+    // Step 2 → Step 3 (lit) → Tier → Step 4 (school)
     document.getElementById('fw-step2-next').addEventListener('click', function () {
+      document.getElementById('fw-step-2').classList.remove('active');
       if (wizardState.subjects.indexOf('english-literature') !== -1) {
         buildTextPicker();
-        document.getElementById('fw-step-2').classList.remove('active');
         document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
       } else {
-        document.getElementById('fw-step-2').classList.remove('active');
         document.getElementById('fw-step-4').classList.add('active');
       }
     });
 
-    // Step 3 → Step 4
     document.getElementById('fw-step3-done').addEventListener('click', function () {
       document.getElementById('fw-step-3').classList.remove('active');
+      if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-tier-back').addEventListener('click', function () {
+      document.getElementById('fw-step-tier').classList.remove('active');
+      if (wizardState.subjects.indexOf('english-literature') !== -1) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-tier-next').addEventListener('click', function () {
+      fwSaveTierPicks();
+      document.getElementById('fw-step-tier').classList.remove('active');
       document.getElementById('fw-step-4').classList.add('active');
     });
 

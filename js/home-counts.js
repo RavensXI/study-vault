@@ -52,7 +52,7 @@
       var offset = 0;
       while (true) {
         var res = await sb.from('lessons')
-          .select('unit_id')
+          .select('unit_id, tier')
           .eq('status', 'live')
           .range(offset, offset + 999);
         var data = res.data || [];
@@ -104,8 +104,15 @@
         matchingUnitIds[u.id] = true;
         unitCount++;
       });
+
+      // Foundation users hide tier='higher' lessons (matches browse-loader behaviour)
+      var savedTiers = {};
+      try { savedTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch (e) {}
+      var thisTier = savedTiers[slug] || 'higher';
       lessons.forEach(function (l) {
-        if (matchingUnitIds[l.unit_id]) lessonCount++;
+        if (!matchingUnitIds[l.unit_id]) return;
+        if (thisTier === 'foundation' && l.tier === 'higher') return;
+        lessonCount++;
       });
 
       counts[slug] = { units: unitCount, lessons: lessonCount };
