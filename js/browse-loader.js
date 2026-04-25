@@ -159,15 +159,15 @@
       }
     }
 
-    // Free user English Lit: filter to only selected texts + compulsory units
+    // Free user English Lit: filter to only selected texts + universally-compulsory units.
+    // Anthology poetry clusters (Power & Conflict, Love & Relationships, Conflict,
+    // Youth and Age, Belonging, etc.) are STUDENT-CHOICE — must come from selectedSlugs.
+    // Only 'unseen-poetry' is universally compulsory across boards.
     if (subjectSlug.indexOf('english-literature') === 0 && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeSubj = FreeUser.getSubject(subjectSlug);
       if (freeSubj && freeSubj.texts && Object.keys(freeSubj.texts).length > 0) {
         var selectedSlugs = Object.values(freeSubj.texts);
-        // Compulsory poetry/unseen units (slug varies by board)
-        var compulsory = ['power-and-conflict', 'unseen-poetry', 'love-and-relationships',
-          'poetry-relationships', 'poetry-conflict', 'poetry-time-and-place', 'poetry-belonging',
-          'poetry-love-and-relationships', 'poetry-youth-and-age'];
+        var compulsory = ['unseen-poetry'];
         units = units.filter(function (u) {
           return selectedSlugs.indexOf(u.slug) !== -1 || compulsory.indexOf(u.slug) !== -1;
         });
