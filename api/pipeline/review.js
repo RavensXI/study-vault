@@ -146,7 +146,7 @@ module.exports = async function handler(req, res) {
     const changedBy = auth.profile.id || auth.user.id;
     const now = new Date().toISOString();
 
-    // ---- approve: pending_review → ready_for_teacher (admin only) ----
+    // ---- approve: pending_review → live (free-tier) or ready_for_teacher (school content) ----
     if (action === 'approve') {
       if (!isAdmin) {
         return res.status(403).json({ error: 'Only admins can approve content' });
@@ -157,77 +157,199 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: 'Missing lesson_ids or lesson_id' });
       }
 
-      const { data, error } = await supabase
+      // Look up each lesson's subject school_id to decide destination status.
+      // Free-tier (school_id NULL) → admin approval IS the publish step → 'live'.
+      // School-bespoke (school_id set) → still needs teacher review → 'ready_for_teacher'.
+      const { data: ctx } = await supabase
         .from('lessons')
-        .update({
-          status: 'ready_for_teacher',
-          reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
-          reviewed_at: now
-        })
-        .in('id', ids)
-        .eq('status', 'pending_review')
-        .select('id');
+        .select('id, units!inner(subjects!inner(school_id))')
+        .in('id', ids);
 
-      if (error) {
-        return res.status(500).json({ error: 'Failed to approve', detail: error.message });
+      const freeTierIds = [];
+      const schoolIds = [];
+      for (const row of (ctx || [])) {
+        if (row.units.subjects.school_id == null) freeTierIds.push(row.id);
+        else schoolIds.push(row.id);
+      }
+
+      let updatedCount = 0;
+      const transitions = [];
+
+      if (freeTierIds.length) {
+        const { data, error } = await supabase
+          .from('lessons')
+          .update({
+            status: 'live',
+            reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
+            reviewed_at: now,
+            published_by: changedBy !== 'platform_admin' ? changedBy : null,
+            published_at: now
+          })
+          .in('id', freeTierIds)
+          .eq('status', 'pending_review')
+          .select('id');
+        if (error) return res.status(500).json({ error: 'Failed to approve free-tier', detail: error.message });
+        updatedCount += (data || []).length;
+        for (const row of (data || [])) transitions.push({ id: row.id, to: 'live' });
+      }
+
+      if (schoolIds.length) {
+        const { data, error } = await supabase
+          .from('lessons')
+          .update({
+            status: 'ready_for_teacher',
+            reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
+            reviewed_at: now
+          })
+          .in('id', schoolIds)
+          .eq('status', 'pending_review')
+          .select('id');
+        if (error) return res.status(500).json({ error: 'Failed to approve school content', detail: error.message });
+        updatedCount += (data || []).length;
+        for (const row of (data || [])) transitions.push({ id: row.id, to: 'ready_for_teacher' });
       }
 
       // Log transitions
-      for (const row of (data || [])) {
+      for (const t of transitions) {
         await supabase.from('content_pipeline_logs').insert({
-          lesson_id: row.id,
+          lesson_id: t.id,
           from_status: 'pending_review',
-          to_status: 'ready_for_teacher',
+          to_status: t.to,
           changed_by: changedBy !== 'platform_admin' ? changedBy : null,
-          notes: notes || 'Approved via review dashboard'
+          notes: notes || (t.to === 'live' ? 'Free-tier: approved straight to live' : 'Approved via review dashboard')
         });
       }
 
-      return res.status(200).json({ ok: true, updated: (data || []).length });
+      return res.status(200).json({ ok: true, updated: updatedCount });
     }
 
-    // ---- approve_all: approve all pending_review for a subject (admin only) ----
+    // ---- approve_all: approve all pending_review for a subject (admin only).
+    // Free-tier subjects (school_id NULL) go straight to 'live'.
+    // School subjects go to 'ready_for_teacher' for the teacher to publish.
     if (action === 'approve_all') {
       if (!isAdmin) {
         return res.status(403).json({ error: 'Only admins can approve content' });
       }
 
-      let approveQuery = supabase
-        .from('lessons')
-        .update({
-          status: 'ready_for_teacher',
-          reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
-          reviewed_at: now
-        })
-        .eq('status', 'pending_review');
-
-      // Scope to subject if provided
+      // Determine target status by subject school_id
+      let isFreeTierSubject = false;
       if (subject_id) {
-        const { data: subjectUnits } = await supabase
-          .from('units')
-          .select('id')
-          .eq('subject_id', subject_id);
-
-        const unitIds = (subjectUnits || []).map(u => u.id);
-        if (unitIds.length > 0) {
-          approveQuery = approveQuery.in('unit_id', unitIds);
-        }
+        const { data: subj } = await supabase
+          .from('subjects')
+          .select('school_id')
+          .eq('id', subject_id)
+          .single();
+        isFreeTierSubject = subj && subj.school_id == null;
       }
 
-      const { data, error } = await approveQuery.select('id');
+      // If no subject_id, we have to split — fetch all pending lessons and bucket by school_id
+      let pendingIds = [];
+      if (subject_id) {
+        const { data: subjectUnits } = await supabase
+          .from('units').select('id').eq('subject_id', subject_id);
+        const unitIds = (subjectUnits || []).map(u => u.id);
+        if (unitIds.length > 0) {
+          const { data: pl } = await supabase
+            .from('lessons').select('id').eq('status', 'pending_review').in('unit_id', unitIds);
+          pendingIds = (pl || []).map(l => l.id);
+        }
+      } else {
+        const { data: pl } = await supabase
+          .from('lessons')
+          .select('id, units!inner(subjects!inner(school_id))')
+          .eq('status', 'pending_review');
+        // Bucket by school_id NULL vs set
+        const freeIds = [];
+        const schoolIds = [];
+        for (const r of (pl || [])) {
+          if (r.units.subjects.school_id == null) freeIds.push(r.id);
+          else schoolIds.push(r.id);
+        }
+        let total = 0;
+        if (freeIds.length) {
+          const { data, error } = await supabase
+            .from('lessons')
+            .update({
+              status: 'live',
+              reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
+              reviewed_at: now,
+              published_by: changedBy !== 'platform_admin' ? changedBy : null,
+              published_at: now
+            })
+            .in('id', freeIds)
+            .eq('status', 'pending_review')
+            .select('id');
+          if (error) return res.status(500).json({ error: 'Failed bulk free-tier approve', detail: error.message });
+          for (const row of (data || [])) {
+            await supabase.from('content_pipeline_logs').insert({
+              lesson_id: row.id, from_status: 'pending_review', to_status: 'live',
+              changed_by: changedBy !== 'platform_admin' ? changedBy : null,
+              notes: notes || 'Free-tier bulk approve → live'
+            });
+          }
+          total += (data || []).length;
+        }
+        if (schoolIds.length) {
+          const { data, error } = await supabase
+            .from('lessons')
+            .update({
+              status: 'ready_for_teacher',
+              reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
+              reviewed_at: now
+            })
+            .in('id', schoolIds)
+            .eq('status', 'pending_review')
+            .select('id');
+          if (error) return res.status(500).json({ error: 'Failed bulk school approve', detail: error.message });
+          for (const row of (data || [])) {
+            await supabase.from('content_pipeline_logs').insert({
+              lesson_id: row.id, from_status: 'pending_review', to_status: 'ready_for_teacher',
+              changed_by: changedBy !== 'platform_admin' ? changedBy : null,
+              notes: notes || 'Bulk approved via review dashboard'
+            });
+          }
+          total += (data || []).length;
+        }
+        return res.status(200).json({ ok: true, approved: total });
+      }
+
+      if (pendingIds.length === 0) {
+        return res.status(200).json({ ok: true, approved: 0 });
+      }
+
+      const targetStatus = isFreeTierSubject ? 'live' : 'ready_for_teacher';
+      const updatePayload = isFreeTierSubject
+        ? {
+            status: 'live',
+            reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
+            reviewed_at: now,
+            published_by: changedBy !== 'platform_admin' ? changedBy : null,
+            published_at: now
+          }
+        : {
+            status: 'ready_for_teacher',
+            reviewed_by: changedBy !== 'platform_admin' ? changedBy : null,
+            reviewed_at: now
+          };
+
+      const { data, error } = await supabase
+        .from('lessons')
+        .update(updatePayload)
+        .in('id', pendingIds)
+        .eq('status', 'pending_review')
+        .select('id');
 
       if (error) {
         return res.status(500).json({ error: 'Failed to bulk approve', detail: error.message });
       }
 
-      // Log transitions
       for (const row of (data || [])) {
         await supabase.from('content_pipeline_logs').insert({
           lesson_id: row.id,
           from_status: 'pending_review',
-          to_status: 'ready_for_teacher',
+          to_status: targetStatus,
           changed_by: changedBy !== 'platform_admin' ? changedBy : null,
-          notes: notes || 'Bulk approved via review dashboard'
+          notes: notes || (isFreeTierSubject ? 'Free-tier bulk approve → live' : 'Bulk approved via review dashboard')
         });
       }
 
