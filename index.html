@@ -720,6 +720,8 @@
 
   <script src="js/school-session.js"></script>
   <script src="js/free-user.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/home-counts.js"></script>
   <script src="js/main.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/service-worker.js');</script>
@@ -839,14 +841,16 @@
             cardName = 'Science (Triple)';
           }
           var boardLabel = (s.examBoard || '').toUpperCase();
-          cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" style="--card-accent: ' + meta.accent + '">';
+          cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" data-subject="' + s.slug + '" style="--card-accent: ' + meta.accent + '">';
           if (meta.image) {
             cardsHtml += '<img class="home-card-img" src="' + meta.image + '" alt="' + cardName + '" width="500" height="300" loading="lazy" decoding="async">';
           }
           cardsHtml += '<div class="home-card-body">';
           cardsHtml += '<h3>' + cardName + '</h3>';
           cardsHtml += '<p class="home-card-board">' + boardLabel + '</p>';
-          cardsHtml += '<p class="home-card-detail">' + meta.detail + '</p>';
+          // Detail is filled by home-counts.js once counts load; meta.detail is the fallback while we wait.
+          var liveDetail = (window.HomeCounts && window.HomeCounts.getDetail) ? window.HomeCounts.getDetail(s.slug) : '';
+          cardsHtml += '<p class="home-card-detail">' + (liveDetail || meta.detail) + '</p>';
           cardsHtml += '</div></a>';
         });
         gridEl.innerHTML = cardsHtml;
