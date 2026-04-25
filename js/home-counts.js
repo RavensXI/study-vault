@@ -27,9 +27,24 @@
     return slugs.concat(ENGLIT_COMPULSORY);
   }
 
+  // Determine which subject rows to count for the current viewer.
+  // - School student: school's bespoke + subscribed (anything the student can see)
+  // - Free user / anonymous: free-tier only (school_id NULL)
+  // Filter is applied at the SUBJECT level — count only lessons whose subject
+  // matches the viewer's tier.
+  function isVisibleSubject(subj) {
+    if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive()) {
+      // For school students, accept their own school's bespoke OR generic (NULL).
+      var sid = SchoolSession.getSchoolId && SchoolSession.getSchoolId();
+      return subj.school_id == null || subj.school_id === sid;
+    }
+    // Free user or anonymous → free-tier only
+    return subj.school_id == null;
+  }
+
   // Fetch all subjects + units + (paginated) live lessons in parallel.
   async function fetchCounts() {
-    var subjectsP = sb.from('subjects').select('id, slug');
+    var subjectsP = sb.from('subjects').select('id, slug, school_id');
     var unitsP = sb.from('units').select('id, slug, subject_id');
 
     async function fetchAllLessons() {
@@ -61,9 +76,10 @@
       unitIdToSlug[u.id] = u.slug;
     });
 
-    // Group subjects by slug so we can apply Eng Lit filtering per slug
+    // Group subjects by slug, restricted to ones visible to the current viewer.
     var subjectsBySlug = {};
     subjects.forEach(function (s) {
+      if (!isVisibleSubject(s)) return;
       if (!subjectsBySlug[s.slug]) subjectsBySlug[s.slug] = [];
       subjectsBySlug[s.slug].push(s);
     });
