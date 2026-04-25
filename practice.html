@@ -4155,6 +4155,7 @@
       pill.textContent = tier.charAt(0).toUpperCase() + tier.slice(1);
 
       // Handle passage panel (English Language types)
+      window._currentProblem = p;
       handlePassagePanel(p);
 
       // Equation / Question text
@@ -4883,21 +4884,25 @@
       }
       document.getElementById('learn-question').innerHTML = questionHtml;
 
-      // Steps
+      // Steps — strip inline <img> tags (image is shown larger in centre panel)
       var stepsArea = document.getElementById('learn-steps-area');
       stepsArea.innerHTML = '';
       var steps = example.steps || [];
       for (var i = 0; i < steps.length; i++) {
         var step = steps[i];
         var isLast = i === steps.length - 1;
+        var stepContent = (step.content || '').replace(/<img[^>]*>/gi, '');
         var div = document.createElement('div');
         div.className = 'learn-step' + (isLast ? ' is-answer' : '');
         div.setAttribute('data-step-index', i);
         div.innerHTML =
           '<div class="learn-step-label">' + escapeHtml(step.label || (isLast ? 'Answer' : 'Step ' + (i + 1))) + '</div>' +
-          '<div class="learn-step-content">' + (step.content || '') + '</div>';
+          '<div class="learn-step-content">' + stepContent + '</div>';
         stepsArea.appendChild(div);
       }
+
+      // If currently in learn mode, refresh the centre panel for the new example
+      if (practiceState.mode === 'learn') renderLearnExampleImagePanel();
 
       // Buttons
       var revealBtn = document.getElementById('learn-reveal-btn');
@@ -4970,10 +4975,74 @@
       if (mode === 'learn') {
         learnView.className = 'content-view';
         practiceView.className = 'content-view hidden';
+        renderLearnExampleImagePanel();
       } else {
         practiceView.className = 'content-view';
         learnView.className = 'content-view hidden-left';
+        // Restore passage panel based on current problem
+        var p = window._currentProblem;
+        if (p) handlePassagePanel(p);
+        else {
+          var area = document.getElementById('practice-passage-area');
+          if (area) area.style.display = 'none';
+        }
       }
+    }
+
+    // Pull the first <img> URL from a worked example's steps, render it large in
+    // the centre passage panel. If no image, hide the panel. Strips the inline
+    // <img> from step content so it isn't duplicated in the right-hand card.
+    function renderLearnExampleImagePanel() {
+      var area = document.getElementById('practice-passage-area');
+      if (!area) return;
+      var we = window._workedExamples || [];
+      var idx = practiceState.learnIndex || 0;
+      var ex = we[idx];
+      if (!ex) { area.style.display = 'none'; return; }
+
+      // Find first <img src="..."> in any step content
+      var imgUrl = null;
+      var imgAlt = '';
+      var steps = ex.steps || [];
+      for (var i = 0; i < steps.length; i++) {
+        var content = steps[i].content || '';
+        var m = content.match(/<img[^>]+src=["']([^"']+)["'][^>]*?(?:alt=["']([^"']*)["'])?[^>]*>/i);
+        if (m) { imgUrl = m[1]; imgAlt = m[2] || 'Worked example'; break; }
+      }
+
+      if (!imgUrl) {
+        area.style.display = 'none';
+        updateMobileTabsVisibility(false);
+        return;
+      }
+
+      area.innerHTML =
+        '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
+        '<div class="chart-panel-body" style="padding:0.75rem">' +
+          '<img src="' + imgUrl + '" alt="' + imgAlt + '" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;cursor:zoom-in" onclick="lightboxOpen(this.src)">' +
+        '</div>';
+      area.style.display = 'flex';
+      var a11yBar = document.getElementById('score-bar-a11y');
+      if (a11yBar) a11yBar.style.display = 'none';
+      var tabExtract = document.getElementById('mobile-tab-extract');
+      if (tabExtract) {
+        var dot = tabExtract.querySelector('.mobile-passage-tab-dot');
+        tabExtract.textContent = 'Map';
+        if (dot) tabExtract.appendChild(dot);
+      }
+      updateMobileTabsVisibility(true);
+    }
+
+    // Lightweight lightbox for click-to-zoom on worked example images
+    function lightboxOpen(src) {
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:zoom-out;padding:2rem;';
+      overlay.onclick = function(){ document.body.removeChild(overlay); };
+      var img = document.createElement('img');
+      img.src = src;
+      img.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;border-radius:8px;';
+      overlay.appendChild(img);
+      document.body.appendChild(overlay);
     }
 
     // ===== PANEL TOGGLE (mobile) =====
