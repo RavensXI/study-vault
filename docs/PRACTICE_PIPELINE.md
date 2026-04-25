@@ -86,6 +86,7 @@ Practice format uses input-type tags to determine how `practice-loader.js` rende
 ### Universal (all subjects)
 - `single_value` — numeric answer with optional unit and tolerance
 - `multiple_choice` — 4 options, `solutions: [correctIndex]`
+  - **Do not** prefix option strings with "A.", "B." etc. The renderer adds A/B/C/D letter badges automatically based on shuffled display position. Prefixing in the data would render as "A. A. London".
 
 ### Maths
 See `memory/project_maths_practice_rebuild.md`. Types: `single_value`, `two_solutions`, `fraction`, `standard_form`, `multiple_choice`. Chart.js data visualisations in the `chart` field on the problem.
