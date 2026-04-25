@@ -169,7 +169,7 @@
       subject: unit.subjects,
       prevLesson: currentIdx > 0 ? siblings[currentIdx - 1] : null,
       nextLesson: currentIdx < siblings.length - 1 ? siblings[currentIdx + 1] : null,
-      totalLessons: unit.lesson_count
+      totalLessons: siblings.length
     };
   }
 

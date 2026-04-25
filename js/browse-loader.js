@@ -145,19 +145,20 @@
     }
 
 
-    // Tier filtering for subject overview — get actual filtered counts per unit
+    // Always live-count lessons per unit (replaces stale unit.lesson_count column).
+    // Foundation users on tiered subjects get the count with tier='higher' excluded.
     var TIERED_OVERVIEW = ['maths', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-edexcel', 'science-ocr', 'separate-sciences'];
     var savedTiersOverview = {};
     try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
     var overviewTier = savedTiersOverview[subjectSlug] || 'higher';
-    if (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation') {
-      // Fetch filtered lesson counts per unit
-      for (var i = 0; i < units.length; i++) {
-        var countResult = await sb.from('lessons').select('id', { count: 'exact', head: true })
-          .eq('unit_id', units[i].id).eq('status', 'live').neq('tier', 'higher');
-        units[i]._filteredCount = countResult.count || 0;
-      }
-    }
+    var foundationFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation');
+    var countPromises = units.map(function (u) {
+      var q = sb.from('lessons').select('id', { count: 'exact', head: true })
+        .eq('unit_id', u.id).eq('status', 'live');
+      if (foundationFilter) q = q.neq('tier', 'higher');
+      return q.then(function (res) { u._filteredCount = res.count || 0; });
+    });
+    await Promise.all(countPromises);
 
     // Free user English Lit: filter to only selected texts + universally-compulsory units.
     // Anthology poetry clusters (Power & Conflict, Love & Relationships, Conflict,
