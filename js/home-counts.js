@@ -12,12 +12,26 @@
     'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
   );
 
+  // English Lit text-pick filtering: free users select 1 Shakespeare + 1
+  // 19th-C novel + 1 Modern + 1 Poetry cluster (per board). Mirror the
+  // browse-loader filter so home counts match what the student actually sees.
+  var ENGLIT_SLUGS = ['english-literature', 'english-literature-edexcel',
+                       'english-literature-ocr', 'english-literature-eduqas'];
+  var ENGLIT_COMPULSORY = ['unseen-poetry'];
+
+  function getFreeEngLitSelectedUnitSlugs(subjectSlug) {
+    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
+    var pref = FreeUser.getSubject(subjectSlug);
+    if (!pref || !pref.texts || !Object.keys(pref.texts).length) return null;
+    var slugs = Object.values(pref.texts);
+    return slugs.concat(ENGLIT_COMPULSORY);
+  }
+
   // Fetch all subjects + units + (paginated) live lessons in parallel.
   async function fetchCounts() {
     var subjectsP = sb.from('subjects').select('id, slug');
-    var unitsP = sb.from('units').select('id, subject_id');
+    var unitsP = sb.from('units').select('id, slug, subject_id');
 
-    // Lessons: paginate through live + non-higher-tier rows
     async function fetchAllLessons() {
       var rows = [];
       var offset = 0;
@@ -41,28 +55,44 @@
 
     // Build maps
     var unitIdToSubjectId = {};
-    var unitsBySubject = {};
+    var unitIdToSlug = {};
     units.forEach(function (u) {
       unitIdToSubjectId[u.id] = u.subject_id;
-      if (!unitsBySubject[u.subject_id]) unitsBySubject[u.subject_id] = 0;
-      unitsBySubject[u.subject_id]++;
-    });
-    var lessonsBySubject = {};
-    lessons.forEach(function (l) {
-      var sid = unitIdToSubjectId[l.unit_id];
-      if (!sid) return;
-      if (!lessonsBySubject[sid]) lessonsBySubject[sid] = 0;
-      lessonsBySubject[sid]++;
+      unitIdToSlug[u.id] = u.slug;
     });
 
-    // Build slug → {units, lessons}
-    // Multiple subjects may share a slug (Unity + free-tier). Sum across them
-    // so slugs like 'business' (Unity) + 'business-aqa/...' (free) work intuitively.
-    var counts = {};
+    // Group subjects by slug so we can apply Eng Lit filtering per slug
+    var subjectsBySlug = {};
     subjects.forEach(function (s) {
-      if (!counts[s.slug]) counts[s.slug] = { units: 0, lessons: 0 };
-      counts[s.slug].units += unitsBySubject[s.id] || 0;
-      counts[s.slug].lessons += lessonsBySubject[s.id] || 0;
+      if (!subjectsBySlug[s.slug]) subjectsBySlug[s.slug] = [];
+      subjectsBySlug[s.slug].push(s);
+    });
+
+    var counts = {};
+    Object.keys(subjectsBySlug).forEach(function (slug) {
+      var subjList = subjectsBySlug[slug];
+      var subjIds = subjList.map(function (s) { return s.id; });
+
+      // Eng Lit free-tier slugs: filter to selected texts + compulsory
+      var allowedUnitSlugs = null;
+      if (ENGLIT_SLUGS.indexOf(slug) !== -1) {
+        allowedUnitSlugs = getFreeEngLitSelectedUnitSlugs(slug);
+      }
+
+      var unitCount = 0;
+      var lessonCount = 0;
+      var matchingUnitIds = {};
+      units.forEach(function (u) {
+        if (subjIds.indexOf(u.subject_id) === -1) return;
+        if (allowedUnitSlugs && allowedUnitSlugs.indexOf(u.slug) === -1) return;
+        matchingUnitIds[u.id] = true;
+        unitCount++;
+      });
+      lessons.forEach(function (l) {
+        if (matchingUnitIds[l.unit_id]) lessonCount++;
+      });
+
+      counts[slug] = { units: unitCount, lessons: lessonCount };
     });
     return counts;
   }
