@@ -38,14 +38,31 @@ Find engaging external content that students aged 15-16 might enjoy, across thes
 3. Movies — feature films related to the topic (use JustWatch UK URLs)
 4. TV Shows — series related to the topic (use JustWatch UK URLs)
 5. Documentaries — factual programmes (use JustWatch UK URLs)
+6. Study Tools — BBC Bitesize hub or examspec page, exam board spec page, Seneca
 
-Guidelines:
+Required minimums (the build verifier enforces these — missing coverage fails):
+- ≥6 items total across all categories
+- ≥1 Podcast
+- ≥1 Video & Channel
+- ≥1 from Movies / TV Shows / Documentaries (collectively)
+- ≥1 Study Tool
+
+VERIFY EVERY URL before returning:
+- YouTube: hit https://www.youtube.com/oembed?url=...&format=json — a 404 there
+  means the video is dead. Do NOT trust curl HEAD; YouTube returns 200 for
+  deleted videos.
+- JustWatch UK: fetch the body and confirm <title> contains the film/show name.
+  The site returns 200 with a generic title for hallucinated slugs.
+- BBC Bitesize: only use /subjects/{slug} or /examspecs/{slug}/{spec} hub paths.
+  /topics/, /guides/, /examspec/ are dead since the BBC redesign.
+- Cool Geography (coolgeography.co.uk) is dead globally — never include it.
+
+Other guidelines:
 - Content should be tangentially relevant at minimum — it doesn't need to be exam-focused
 - Prefer UK-accessible content where possible
 - For podcasts, link to specific episodes (not just the show)
 - For movies/TV/docs, use JustWatch UK (justwatch.com/uk/) so students can find where to stream
-- Max 3 items per category — quality over quantity
-- Skip any category where nothing genuinely good exists
+- Max 3 items per category — quality over quantity within the required minimums
 - Include a one-line description that explains WHY this is relevant to the lesson
 
 Return results in this format:
@@ -61,6 +78,32 @@ Not everything agents find will be suitable. Check for:
 - **Age appropriateness** — some documentaries or movies may not be suitable for 15–16 year olds
 - **Genuine relevance** — a tangential connection is fine, but it should still make sense
 - **UK accessibility** — prefer content available on UK streaming platforms
+
+### URL verification — non-negotiable
+
+Agents must verify every link before returning it. Past builds have shipped dead videos and hallucinated film slugs because verification was lazy. The rules:
+
+- **YouTube — verify via oembed, NEVER `curl -I`.** YouTube returns 200 OK from HEAD requests even for deleted videos. The only reliable liveness signal is:
+  ```
+  https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v={ID}&format=json
+  ```
+  oembed returns a real 404 when a video is deleted. Treat any non-200 as dead.
+- **JustWatch UK — fetch the body, check `<title>` contains the actual film/show name.** The site returns 200 OK with a generic title for hallucinated slugs (`/uk/movie/some-slug-i-made-up`). Only the body content distinguishes a real entry from a soft-404.
+- **BBC Bitesize — only `/subjects/{slug}` or `/examspecs/{slug}/{spec}` paths.** The legacy `/topics/`, `/guides/`, and direct `/examspec/` URLs were retired in BBC's redesign and now redirect or 404. If you are not sure, hub paths are safe; specific topic paths are not.
+- **Cool Geography is dead globally** — DNS resolution fails. Do not include it in any subject.
+- Treat redirects (301/302) as suspicious — follow them and verify the destination, don't just trust the originating URL.
+
+### Required coverage per article lesson
+
+The `_verify_subject_build.py` script enforces these on every shipped subject. Missing any of these fails the verification:
+
+- **At least 6 items total** across all categories
+- **At least one** Podcast
+- **At least one** Video & Channel
+- **At least one** of Movies / TV Shows / Documentaries (collectively)
+- **At least one** Study Tool
+
+Practice-format units have looser rules — see `PRACTICE_PIPELINE.md`. For article units, do not ship until verifier passes.
 
 ### Step 3: Build the HTML
 

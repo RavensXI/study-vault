@@ -54,10 +54,10 @@ One activation agent, runs immediately after Phase 1 completes. Must run before 
 
 **The agent creates:**
 1. `subjects` row (slug, name, exam_board, spec_code, school_id, settings)
-2. `units` rows (slug, name, subtitle, body_class, accent/accent_light/accent_badge, lesson_count, sort_order)
+2. `units` rows (slug, name, subtitle, body_class, accent/accent_light/accent_badge, lesson_count, sort_order). **Every unit must have `image_url` set** before ship — naked units render as empty grey cards in the homepage browse grid. Default to reusing the unit's lesson 1 hero image; this is what `_verify_subject_build.py` expects.
 3. Empty `lessons` shells (one per planned lesson)
 4. `subjects.settings`:
-   - `quote_ticker_html` — 5–6 subject-relevant quotes (see `MANDATORY_CHECKLIST.md`); must be a dict, never `json.dumps(...)`
+   - `quote_ticker_html` — 5–6 subject-relevant quotes wrapped in the ticker structure (see below). Must be a dict, never `json.dumps(...)`.
    - `practice_units` — array of unit slugs that use practice format (empty array for article-only subjects)
    - `unit_image_positions` — map of unit slug → object-position for unit card image
 5. Homepage additions:
@@ -65,6 +65,16 @@ One activation agent, runs immediately after Phase 1 completes. Must run before 
    - Subject image at `images/subject-{slug}.jpg` (Unsplash)
 6. CSS in `css/style.css`: one `.unit-{slug}-{N}` rule per unit, light + dark mode accent vars. Body class is only needed for the dark-mode variant; accent CSS is set per-lesson via `lesson-loader.js` from DB values.
 7. Append subject slug to `SUBJECT_ORDER` in `scripts/generate_cinematic_videos.py` (for Unity only, but harmless for free tier).
+
+**Quote ticker structure** — the CSS animation requires the wrapping divs. Bare `<span class="quote">` elements alone will not animate (caught on OCR Geography in Apr 2026):
+
+```html
+<div class="quote-ticker"><div class="quote-ticker-track">
+  <span class="quote-item" style="--q-color: #1d4ed8;">Quote text. <em>&mdash; Author</em></span>
+  <span class="quote-item" style="--q-color: #be185d;">Another quote. <em>&mdash; Author</em></span>
+  <!-- duplicate the full sequence once more for a seamless scroll loop -->
+</div></div>
+```
 
 Practice-format subjects (`practice_units` populated) skip the `<!-- DIAGRAM -->` placeholder in content and skip cinematic video generation per the feature matrix above.
 
@@ -91,6 +101,16 @@ Agent output (JSON, written via Write tool — never bash heredocs):
 Validation runs before each lesson writes to Supabase. See `CONTENT_PROMPT.md` for the full post-generation checklist and the ban-list grep.
 
 **Agent limits:** max 10 lessons per agent. Beyond that, content thins and templates kick in. Split into parallel batches instead.
+
+**Lesson-notice modal — required where the generic-vs-school-specific distinction matters.** Free-tier content describes a generic version of a topic, but some lessons (notably fieldwork in Geography, but the rule generalises) describe an experience that is specific to each school. Those lessons must open with a hidden notice div that `lesson-loader.js` extracts and renders as a load-time modal the student must dismiss:
+
+```html
+<div class="lesson-notice" data-notice-title="Your school's fieldwork" hidden>
+  <p>This lesson covers the general fieldwork skills... your school will have done something different... refer to your teacher's notes...</p>
+</div>
+```
+
+Triggers for fieldwork specifically: any lesson title containing `fieldwork`, `enquiry`, or `investigation`. Other subjects may have their own triggers (e.g. exam-board-specific case studies). The verifier (`_verify_subject_build.py`) checks for the notice on fieldwork-keyword lessons; failing this check blocks ship.
 
 ### Practice units → factory stage pipeline
 
@@ -142,8 +162,9 @@ Guide HTML structure is `<main class="lesson-content">` + `<aside class="lesson-
 3. Confirm `subjects.settings` is a dict, not a JSON string (breaks quote ticker silently).
 4. Confirm every practice question `type` string is registered in `getGuideUrl()` mappings — no 404s.
 5. Confirm `youtube_video_id` convention: Unity lessons have R2 URLs, free-tier article lessons are NULL, free-tier practice lessons are the sentinel `'practice-only'`.
-6. Rerun `python scripts/_gen_tracker.py` — the subject tracker spreadsheet rebuilds from Supabase and now includes the new subject.
-7. Commit + push. Tom reviews `status: pending_review` lessons via `/admin/review` and flips them to `live` once satisfied.
+6. **Run `python scripts/_verify_subject_build.py {subject-slug}`.** This catches the recurring failure modes: missing unit images, malformed quote ticker, missing revision-technique guides, lessons missing description / hero / related_media, related_media coverage gaps, dead YouTube refs (oembed-verified), Gemini diagrams sneaking into free-tier content, fieldwork lessons missing the school-specific notice. Zero issues required to ship; warnings (e.g. youtube_video_id on a free-tier article) should be reviewed but do not block.
+7. Rerun `python scripts/_gen_tracker.py` — the subject tracker spreadsheet rebuilds from Supabase and now includes the new subject.
+8. Commit + push. Tom reviews `status: pending_review` lessons via `/admin/review` and flips them to `live` once satisfied.
 
 ---
 
@@ -184,4 +205,4 @@ Narration is the usual bottleneck — runs sequentially per lesson. Everything e
 | `REVISION_TECHNIQUES/` | 7 canonical technique templates |
 | `QUESTIONS_PIPELINE.md` | Practice question formats, mark allocations, `getGuideUrl()` |
 | `LESSON_TEMPLATE.md` | HTML components reference |
-| `MANDATORY_CHECKLIST.md` | Pre-ship verification (shares bullets with Phase 6) |
+| `scripts/_verify_subject_build.py` | Pre-ship verifier — run as last step of every build (replaces the old MANDATORY_CHECKLIST.md, which never existed as a separate doc) |

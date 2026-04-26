@@ -101,6 +101,18 @@ Full width, 720px max. Place at content-relevant locations, well away from other
 
 `object-fit: cover`, 280px desktop / 200px mobile. Use `?hero-edit` URL param to adjust position.
 
+### Lesson Notice (load-time modal)
+
+For lessons where the generic version of a topic differs from what each student actually experienced (most obviously: Geography fieldwork, but also exam-board-specific case studies in some subjects), put a hidden notice div as the **first element** of `content_html`. `lesson-loader.js` extracts it on render, removes it from the inline content, and shows it as a modal the student must click "Got it" to dismiss. Dismissal is sticky for the session.
+
+```html
+<div class="lesson-notice" data-notice-title="Your school's fieldwork" hidden>
+  <p>This lesson covers the general fieldwork skills, terminology, and exam-paper expectations that apply to every student. The specific sites, data, and methods your class actually used will be different — for the case study you'll write about in the exam, refer to your teacher's notes and the data you collected on the day.</p>
+</div>
+```
+
+The `hidden` attribute is required (so the block doesn't render inline if JS is disabled). `data-notice-title` becomes the modal heading; everything inside the div is the body. Mandatory for any free-tier lesson with `fieldwork`, `enquiry`, or `investigation` in the title — the build verifier blocks ship if missing. Other subjects may extend this pattern with their own triggers.
+
 ---
 
 ## Content Editing Conventions
