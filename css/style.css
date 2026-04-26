@@ -2298,8 +2298,15 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
 .sv-tutorial-tooltip-arrow.arrow-bottom { bottom: -7px; left: 50%; margin-left: -7px; }
 .sv-tutorial-tooltip-arrow.arrow-right { right: -7px; top: 50%; margin-top: -7px; }
 .sv-tutorial-spotlight {
-  position: relative;
-  z-index: 1100;
+  /* Subtle ring around the spotlighted target. We deliberately do NOT
+     touch position/z-index here — adding position:relative was breaking
+     fixed-positioned targets (the lesson-progress gutter was being
+     dropped into normal flow at the bottom of the page). The 4-panel
+     backdrop already creates the focus cutout, so no stacking is needed. */
+  outline: 3px solid rgba(124, 58, 237, 0.55);
+  outline-offset: 4px;
+  border-radius: inherit;
+  transition: outline-color 0.3s ease;
 }
 body.dark-mode .sv-tutorial-tooltip { background: #2a2826; }
 body.dark-mode .sv-tutorial-tooltip-arrow { background: #2a2826; }
