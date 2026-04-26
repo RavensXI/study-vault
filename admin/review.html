@@ -453,7 +453,10 @@
           var practiceUnits = (subject.settings && subject.settings.practice_units) || [];
           var isPractice = practiceUnits.indexOf(unit.slug) !== -1;
           var pathBase = isPractice ? '/practice/' : '/lesson/';
-          var previewUrl = pathBase + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number + (subject.school_id ? '?sid=' + subject.id : '');
+          // Always add ?sid= so the lesson-loader picks the exact subject row.
+          // Without it, staff sessions get the bespoke (Unity) lesson when a slug
+          // is shared between Unity + free-tier (e.g. 'geography', 'science').
+          var previewUrl = pathBase + subject.slug + '/' + unit.slug + '/' + lesson.lesson_number + '?sid=' + subject.id;
           var editUrl = '/admin/editor?subject_id=' + encodeURIComponent(subject.id) + '&unit=' + encodeURIComponent(unit.slug) + '&lesson=' + lesson.lesson_number;
           var isSelected = selectedIds.has(lesson.id);
           var statusLabel = formatStatus(lesson.status);
