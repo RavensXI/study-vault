@@ -722,7 +722,10 @@
     requestAnimationFrame(function () {
       overlay.classList.add('active');
       var btn = overlay.querySelector('.lesson-notice-dismiss');
-      if (btn) btn.focus();
+      if (btn) {
+        try { btn.focus({ preventScroll: true }); }
+        catch (e) { btn.focus(); }
+      }
     });
   }
 
