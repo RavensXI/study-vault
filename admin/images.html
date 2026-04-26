@@ -124,6 +124,7 @@
       <h1>Image QA</h1>
       <div class="qa-controls">
         <select id="school-select"><option value="">All Schools</option></select>
+        <select id="board-select"><option value="">All Boards</option></select>
         <select id="subject-select"><option value="">Loading...</option></select>
         <select id="unit-select"><option value="">All units</option></select>
       </div>
@@ -155,6 +156,7 @@
     var contentEl = document.getElementById('qa-content');
     var diagramsContentEl = document.getElementById('diagrams-content');
     var schoolSelect = document.getElementById('school-select');
+    var boardSelect = document.getElementById('board-select');
     var subjectSelect = document.getElementById('subject-select');
     var unitSelect = document.getElementById('unit-select');
     var demoUser = null;
@@ -226,7 +228,7 @@
     // ---- Load subjects ----
     async function loadSubjects() {
       await getAuth();
-      var result = await sb.from('subjects').select('id, slug, name, school_id').eq('status', 'live').order('name');
+      var result = await sb.from('subjects').select('id, slug, name, school_id, exam_board').eq('status', 'live').order('name');
       allSubjects = result.data || [];
 
       // Fetch school names via the pipeline API (uses service key)
@@ -248,6 +250,7 @@
         schoolSelect.innerHTML += '<option value="' + key + '">' + schools[key] + '</option>';
       });
 
+      populateBoards();
       populateSubjects();
 
       // Auto-select from URL params
@@ -258,28 +261,65 @@
       }
     }
 
-    function populateSubjects() {
+    function getBoardName(s) {
+      if (s.exam_board) return s.exam_board;
+      // Fallback for any subject missing the column — derive from slug
+      if (!s.slug) return null;
+      var slug = s.slug;
+      var _em = { 'maths': 'Edexcel', 'english-language': 'AQA', 'english-literature': 'AQA', 'science': 'AQA', 'separate-sciences': 'AQA' };
+      if (_em[slug]) return _em[slug];
+      var _sm = [['-aqa', 'AQA'], ['-edexcel-a', 'Edexcel'], ['-edexcel-b', 'Edexcel'], ['-edexcel', 'Edexcel'], ['-ocr', 'OCR'], ['-eduqas', 'Eduqas']];
+      for (var i = 0; i < _sm.length; i++) {
+        if (slug.endsWith(_sm[i][0])) return _sm[i][1];
+      }
+      return null;
+    }
+
+    function filterBySchool(subjects) {
       var schoolVal = schoolSelect.value;
-      var filtered = allSubjects.filter(function (s) {
+      return subjects.filter(function (s) {
         if (!schoolVal) return true;
         if (schoolVal === 'generic') return !s.school_id;
         return s.school_id === schoolVal;
       });
+    }
+
+    function populateBoards() {
+      var saved = boardSelect.value;
+      var schoolFiltered = filterBySchool(allSubjects);
+      var boards = {};
+      schoolFiltered.forEach(function (s) {
+        var b = getBoardName(s);
+        if (b) boards[b] = true;
+      });
+      boardSelect.innerHTML = '<option value="">All Boards</option>';
+      Object.keys(boards).sort().forEach(function (b) {
+        var sel = (saved === b) ? ' selected' : '';
+        boardSelect.innerHTML += '<option value="' + b + '"' + sel + '>' + b + '</option>';
+      });
+    }
+
+    function populateSubjects() {
+      var boardVal = boardSelect.value;
+      var filtered = filterBySchool(allSubjects).filter(function (s) {
+        if (!boardVal) return true;
+        return getBoardName(s) === boardVal;
+      });
       subjectSelect.innerHTML = '<option value="">Select subject...</option>';
       filtered.forEach(function (s) {
-        var boardLabel = '';
-        if (!s.school_id && s.slug) {
-          var _sm = { '-aqa': ' — AQA', '-edexcel': ' — Edexcel', '-ocr': ' — OCR', '-eduqas': ' — Eduqas' };
-          var _em = { 'maths': ' — Edexcel', 'english-language': ' — AQA', 'english-literature': ' — AQA', 'science': ' — AQA', 'separate-sciences': ' — AQA' };
-          if (_em[s.slug]) { boardLabel = _em[s.slug]; }
-          else { for (var _sf in _sm) { if (s.slug.endsWith(_sf)) { boardLabel = _sm[_sf]; break; } } }
-        }
         var schoolLabel = s.school_id ? '' : ' (Generic)';
-        subjectSelect.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + s.name + boardLabel + schoolLabel + '</option>';
+        subjectSelect.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + s.name + schoolLabel + '</option>';
       });
     }
 
     schoolSelect.addEventListener('change', function () {
+      populateBoards();
+      populateSubjects();
+      unitSelect.innerHTML = '<option value="">All units</option>';
+      contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+    });
+
+    boardSelect.addEventListener('change', function () {
       populateSubjects();
       unitSelect.innerHTML = '<option value="">All units</option>';
       contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
