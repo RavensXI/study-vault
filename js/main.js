@@ -2285,22 +2285,33 @@ function initRevisionTips() {
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
-        // If parent collapsible is closed, first click just opens it. The
-        // popup needs the collapsible expanded to position correctly; opening
-        // both at once anchors the popup to a zero-height region and it floats
-        // over surrounding content.
-        var collapsible = el.closest('.collapsible');
-        if (collapsible && !collapsible.classList.contains('open')) {
+        // If the lightbulb is on (or inside) a closed collapsible, expand it
+        // first then show the popup AFTER the open transition. Showing the
+        // popup synchronously anchors it to the still-collapsed box and the
+        // overflow paints over surrounding content.
+        var collapsible = el.classList.contains('collapsible')
+          ? el
+          : el.closest('.collapsible');
+        var wasClosed = collapsible && !collapsible.classList.contains('open');
+        if (wasClosed) {
           collapsible.classList.add('open');
           var toggle = collapsible.querySelector('.collapsible-toggle');
           if (toggle) toggle.setAttribute('aria-expanded', 'true');
-          return;
         }
-        if (openPopup && openPopup !== popup) {
-          openPopup.classList.remove('is-open');
+        var showPopup = function () {
+          if (openPopup && openPopup !== popup) {
+            openPopup.classList.remove('is-open');
+          }
+          popup.classList.toggle('is-open');
+          openPopup = popup.classList.contains('is-open') ? popup : null;
+        };
+        if (wasClosed) {
+          // Wait for the collapsible's CSS transition to finish so the popup
+          // anchors against the expanded layout.
+          setTimeout(showPopup, 360);
+        } else {
+          showPopup();
         }
-        popup.classList.toggle('is-open');
-        openPopup = popup.classList.contains('is-open') ? popup : null;
       });
 
       el.appendChild(btn);
