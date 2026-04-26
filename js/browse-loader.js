@@ -247,7 +247,21 @@
 
     // Add nav icons (pencil/lightbulb) to Exam Technique / Revision Techniques links
     if (typeof initNavIcons === 'function') initNavIcons();
-    if (typeof initRevealAnimations === 'function') initRevealAnimations();
+
+    // Deck-reveal on first visit to this subject — same animation as the
+    // homepage personalisation moment, gives a sense of the unit cards
+    // being assembled. Repeat visits skip straight to the static reveal
+    // animation so they feel snappy.
+    var seenKey = 'sv-browse-seen-' + subjectSlug;
+    var seenBefore = false;
+    try { seenBefore = !!localStorage.getItem(seenKey); } catch (e) {}
+    var unitGrid = contentEl.querySelector('.unit-grid');
+    if (!seenBefore && unitGrid && typeof window._svDeckReveal === 'function') {
+      window._svDeckReveal(unitGrid, { shimmerClass: 'unit-card-shimmer' });
+      try { localStorage.setItem(seenKey, '1'); } catch (e) {}
+    } else if (typeof initRevealAnimations === 'function') {
+      initRevealAnimations();
+    }
   }
 
   // ---- Render unit index page (lesson cards) ----

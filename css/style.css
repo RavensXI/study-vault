@@ -2102,6 +2102,98 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
 }
 
 /* Video modal overlay */
+/* ===== Deck-reveal animation (used after personalisation moments) ===== */
+/* Shimmer placeholder for home subject cards */
+.home-card-shimmer {
+  background: linear-gradient(135deg, #f0ede8 0%, #faf8f5 50%, #ede9fe 100%);
+  background-size: 220% 220%;
+  animation: deck-shimmer-bg 2.4s ease-in-out infinite;
+  border-radius: 14px;
+  overflow: hidden;
+  position: relative;
+  height: 232px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.home-card-shimmer::before {
+  content: '';
+  position: absolute; inset: 0 0 auto 0;
+  height: 140px;
+  background: linear-gradient(135deg, #e2dccf 0%, #ede9fe 50%, #fce7f3 100%);
+  background-size: 220% 220%;
+  animation: deck-shimmer-bg 2.4s ease-in-out infinite reverse;
+}
+.home-card-shimmer::after,
+.unit-card-shimmer::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%);
+  background-size: 220% 100%;
+  animation: deck-shimmer-sweep 1.8s ease-in-out infinite;
+}
+
+/* Shimmer placeholder for unit cards on the browse page */
+.unit-card-shimmer {
+  background: linear-gradient(135deg, #f0ede8 0%, #faf8f5 50%, #ede9fe 100%);
+  background-size: 220% 220%;
+  animation: deck-shimmer-bg 2.4s ease-in-out infinite;
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  min-height: 280px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+}
+.unit-card-shimmer::before {
+  content: '';
+  position: absolute; inset: 0 0 auto 0;
+  height: 180px;
+  background: linear-gradient(135deg, #e2dccf 0%, #ede9fe 50%, #fce7f3 100%);
+  background-size: 220% 220%;
+  animation: deck-shimmer-bg 2.4s ease-in-out infinite reverse;
+}
+
+@keyframes deck-shimmer-bg {
+  0%, 100% { background-position: 0% 0%; }
+  50% { background-position: 100% 100%; }
+}
+@keyframes deck-shimmer-sweep {
+  from { background-position: 220% 0; }
+  to { background-position: -120% 0; }
+}
+
+/* The flip-in keyframe used on real cards once they replace the shimmer */
+@keyframes deck-card-reveal {
+  0% {
+    opacity: 0;
+    transform: perspective(900px) rotateY(75deg) scale(0.88);
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+  }
+  55% {
+    opacity: 1;
+    transform: perspective(900px) rotateY(-6deg) scale(1.02);
+    box-shadow: 0 16px 40px rgba(45,42,38,0.18);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(900px) rotateY(0) scale(1);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+  }
+}
+.home-card.deck-reveal,
+.unit-card.deck-reveal {
+  animation: deck-card-reveal 0.65s cubic-bezier(0.2, 1, 0.4, 1) both;
+  transform-style: preserve-3d;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-card-shimmer,
+  .unit-card-shimmer,
+  .home-card-shimmer::before,
+  .unit-card-shimmer::before,
+  .home-card-shimmer::after,
+  .unit-card-shimmer::after { animation: none; }
+  .home-card.deck-reveal,
+  .unit-card.deck-reveal { animation: none; }
+}
+
 /* ===== Lesson tutorial tooltips (first-time onboarding) ===== */
 /* Backdrop: 4 fixed panels around the spotlighted target, forming a darkened frame.
    Using 4 panels rather than a single clip-path/box-shadow because it works

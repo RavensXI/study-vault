@@ -84,6 +84,22 @@
       subjectsBySlug[s.slug].push(s);
     });
 
+    // School students: when a slug has BOTH a bespoke (school-specific) row
+    // and a generic (school_id=null) row, only count the bespoke. Otherwise
+    // the homepage shows double the units/lessons (Unity History = 8 units
+    // 96 lessons instead of 4 / 60). Free users only see generic anyway,
+    // so this filter only affects school-logged-in viewers.
+    if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive()) {
+      var schoolId = SchoolSession.getSchoolId && SchoolSession.getSchoolId();
+      Object.keys(subjectsBySlug).forEach(function (slug) {
+        var list = subjectsBySlug[slug];
+        var hasBespoke = list.some(function (s) { return s.school_id === schoolId; });
+        if (hasBespoke) {
+          subjectsBySlug[slug] = list.filter(function (s) { return s.school_id === schoolId; });
+        }
+      });
+    }
+
     var counts = {};
     Object.keys(subjectsBySlug).forEach(function (slug) {
       var subjList = subjectsBySlug[slug];
