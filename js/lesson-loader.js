@@ -330,11 +330,14 @@
     window.podcastUrl = null;
     var relMedia = lesson.related_media || [];
     for (var mi = 0; mi < relMedia.length; mi++) {
-      if ((relMedia[mi].category || '').toLowerCase() === 'podcasts') {
-        var items = relMedia[mi].items || [];
+      var rmCat = relMedia[mi];
+      if (!rmCat) continue;
+      if ((rmCat.category || '').toLowerCase() === 'podcasts') {
+        var items = Array.isArray(rmCat.items) ? rmCat.items : [];
         for (var mj = 0; mj < items.length; mj++) {
-          if (items[mj].title === 'Lesson Podcast' && items[mj].url && items[mj].url !== '#') {
-            window.podcastUrl = items[mj].url;
+          var it = items[mj];
+          if (it && it.title === 'Lesson Podcast' && it.url && it.url !== '#') {
+            window.podcastUrl = it.url;
             break;
           }
         }
@@ -518,15 +521,20 @@
     var hasPodcastTab = !!window.podcastUrl;
 
     categories.forEach(function (cat) {
-      var categoryName = cat.category;
-      var items = cat.items;
+      if (!cat || typeof cat !== 'object') return;
+      var categoryName = cat.category || '';
+      // Defensive: items may be null/undefined/non-array on some legacy lessons
+      var items = Array.isArray(cat.items) ? cat.items : [];
 
       // If lesson podcast is in the player tabs, rename category and filter it out
-      if (hasPodcastTab && (categoryName || '').toLowerCase() === 'podcasts') {
-        items = items.filter(function(item) { return item.title !== 'Lesson Podcast'; });
+      if (hasPodcastTab && categoryName.toLowerCase() === 'podcasts') {
+        items = items.filter(function(item) { return item && item.title !== 'Lesson Podcast'; });
         if (items.length === 0) return; // skip empty category entirely
         categoryName = 'Other Podcasts';
       }
+
+      // Skip categories that ended up empty (null items, all filtered out, etc.)
+      if (items.length === 0) return;
 
       html += '<div class="sidebar-collapsible">';
       html += '<button class="sidebar-collapsible-toggle" aria-expanded="false">';
@@ -536,8 +544,9 @@
       html += '<div class="sidebar-collapsible-content">';
 
       items.forEach(function (item) {
+        if (!item || !item.url) return;
         html += '<a href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
-        html += '<strong>' + escapeHtml(item.title) + '</strong>';
+        html += '<strong>' + escapeHtml(item.title || '') + '</strong>';
         if (item.description) {
           html += '<span>' + escapeHtml(item.description) + '</span>';
         }
