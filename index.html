@@ -2089,10 +2089,10 @@
         });
       });
 
-      // Save & Go — wrap in try/finally so any downstream error never leaves
-      // the modal stranded with body.overflow hidden (was causing the "freeze"
-      // Unity students hit on the tier picker).
+      // Save & Go — close the modal SYNCHRONOUSLY first, then do the heavy work
+      // on a microtask. If renderPersonalised hangs, the user is already unstuck.
       tierDoneBtn.onclick = function() {
+        // Phase 1: collect + persist (fast, sync)
         try {
           var tiers = {};
           tierListEl.querySelectorAll('.picker-tier-toggle').forEach(function(toggle) {
@@ -2104,7 +2104,10 @@
           console.error('Tier picker save failed:', e);
         }
 
-        // Always reset picker UI + close, even if save threw
+        // Phase 2: close modal immediately — must happen before any expensive work
+        closePicker();
+
+        // Phase 3: reset picker UI for next open
         try {
           pickerGrid.style.display = '';
           var gridFooter = document.querySelector('.picker-grid + .picker-footer');
@@ -2116,16 +2119,18 @@
           console.error('Tier picker UI reset failed:', e);
         }
 
-        closePicker();
-
-        try {
-          renderPersonalised(allSelected);
-          if (typeof window.updateTieredLessonCounts === 'function') window.updateTieredLessonCounts();
-        } catch (e) {
-          console.error('Personalised render failed (tiers saved, page may need a refresh):', e);
-          // Force a reload as last resort so user is unstuck
-          setTimeout(function () { window.location.reload(); }, 100);
-        }
+        // Phase 4: render personalised on a deferred tick so the close paints first.
+        // If render hangs, the modal is already gone — user can interact with the
+        // (now correct) underlying page or refresh.
+        setTimeout(function () {
+          try {
+            renderPersonalised(allSelected);
+            if (typeof window.updateTieredLessonCounts === 'function') window.updateTieredLessonCounts();
+          } catch (e) {
+            console.error('Personalised render failed (tiers saved, page may need a refresh):', e);
+            window.location.reload();
+          }
+        }, 30);
       };
     }
 
