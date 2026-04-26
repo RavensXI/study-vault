@@ -44,6 +44,29 @@
     .home-all-section .home-card-body { padding: 0.75rem 1rem 0.85rem; }
     .home-all-section .home-card h3 { font-size: 0.95rem; }
 
+    /* --- Request a subject panel --- */
+    .request-panel { max-width: 640px; margin: 2.5rem auto 1.5rem; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; padding: 1.5rem 1.5rem 1.4rem; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    .request-panel h3 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--text-primary); }
+    .request-panel p { font-size: 0.92rem; color: var(--text-secondary); margin: 0 0 1rem; }
+    .request-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.75rem; }
+    .request-fields label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+    .request-fields label.full { grid-column: 1 / -1; }
+    .request-fields input, .request-fields select { font-family: inherit; font-size: 0.92rem; padding: 0.55rem 0.7rem; border: 1px solid var(--border-light); border-radius: 8px; background: #fff; color: var(--text-primary); }
+    .request-fields input:focus, .request-fields select:focus { outline: 2px solid color-mix(in srgb, var(--accent, #7c3aed) 35%, transparent); outline-offset: 1px; border-color: var(--accent, #7c3aed); }
+    .request-actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.95rem; }
+    .request-msg { font-size: 0.85rem; color: var(--text-secondary); }
+    .request-msg.error { color: #b91c1c; }
+    .request-msg.success { color: #15803d; font-weight: 600; }
+    .request-submit { background: #2d2a26; color: #fff; border: 0; border-radius: 10px; padding: 0.6rem 1.2rem; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
+    .request-submit:hover:not(:disabled) { background: #4a463f; }
+    .request-submit:disabled { opacity: 0.6; cursor: default; }
+    .request-panel--wizard { margin: 0.85rem 0 0; padding: 1rem 1.1rem 1.05rem; box-shadow: none; }
+    .request-panel--wizard h3 { font-size: 0.98rem; }
+    .request-panel--wizard p { font-size: 0.82rem; margin-bottom: 0.7rem; }
+    @media (max-width: 600px) {
+      .request-fields { grid-template-columns: 1fr; }
+    }
+
     /* --- Subject picker modal --- */
     .picker-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
     .picker-overlay.open { display: flex; align-items: center; justify-content: center; animation: sv-fade-in 0.2s ease both; }
@@ -331,6 +354,34 @@
             <div id="fw-search-grid"></div>
             <div class="fw-no-results" id="fw-no-results" style="display:none">No subjects match that search.</div>
           </div>
+          <section class="request-panel request-panel--wizard" id="request-panel-wizard" data-context="wizard">
+            <h3>Don't see your subject?</h3>
+            <p>Tell us what you'd like and we'll add it. Email is optional.</p>
+            <form class="request-form" id="request-form-wizard">
+              <div class="request-fields">
+                <label class="full">Subject
+                  <input type="text" name="subject_name" required maxlength="120" placeholder="e.g. Sociology, Photography">
+                </label>
+                <label>Exam board
+                  <select name="exam_board">
+                    <option value="">Not sure</option>
+                    <option value="AQA">AQA</option>
+                    <option value="Edexcel">Edexcel / Pearson</option>
+                    <option value="OCR">OCR</option>
+                    <option value="Eduqas">Eduqas / WJEC</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </label>
+                <label>Email <span style="font-weight:400;color:var(--text-muted)">(optional)</span>
+                  <input type="email" name="email" maxlength="200" placeholder="you@example.com">
+                </label>
+              </div>
+              <div class="request-actions">
+                <span class="request-msg" data-msg></span>
+                <button type="submit" class="request-submit">Send request</button>
+              </div>
+            </form>
+          </section>
         </div>
         <div class="fw-footer">
           <div class="fw-footer-count"><strong id="fw-extra-count">0</strong> extra subjects added</div>
@@ -600,6 +651,36 @@
         </div>
       </a>
     </div>
+  </section>
+
+  <!-- Request a subject -->
+  <section class="request-panel" id="request-panel" data-context="home">
+    <h3>Don't see your subject or exam board?</h3>
+    <p>Tell us what you'd like and we'll add it. Leave your email if you want a heads-up when it goes live.</p>
+    <form class="request-form" id="request-form">
+      <div class="request-fields">
+        <label class="full">Subject
+          <input type="text" name="subject_name" required maxlength="120" placeholder="e.g. Sociology, Photography, AS Maths">
+        </label>
+        <label>Exam board
+          <select name="exam_board">
+            <option value="">Not sure</option>
+            <option value="AQA">AQA</option>
+            <option value="Edexcel">Edexcel / Pearson</option>
+            <option value="OCR">OCR</option>
+            <option value="Eduqas">Eduqas / WJEC</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label>Your email <span style="font-weight:400;color:var(--text-muted)">(optional)</span>
+          <input type="email" name="email" maxlength="200" placeholder="you@example.com">
+        </label>
+      </div>
+      <div class="request-actions">
+        <span class="request-msg" data-msg></span>
+        <button type="submit" class="request-submit">Send request</button>
+      </div>
+    </form>
   </section>
 
   <!-- Subject Picker Modal -->
@@ -1918,6 +1999,53 @@
     });
   };
   window.updateTieredLessonCounts();
+
+  // ---- Subject request form ----
+  (function () {
+    function wireForm(form) {
+      if (!form || form._wired) return;
+      form._wired = true;
+      var msgEl = form.querySelector('[data-msg]');
+      var btn = form.querySelector('.request-submit');
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        if (msgEl) { msgEl.textContent = ''; msgEl.className = 'request-msg'; }
+        var data = new FormData(form);
+        var payload = {
+          subject_name: (data.get('subject_name') || '').toString().trim(),
+          exam_board: (data.get('exam_board') || '').toString(),
+          email: (data.get('email') || '').toString().trim(),
+        };
+        if (!payload.subject_name) {
+          if (msgEl) { msgEl.textContent = 'Subject name is required'; msgEl.className = 'request-msg error'; }
+          return;
+        }
+        if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+        try {
+          var resp = await fetch('/api/subject-request', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+          var json = {};
+          try { json = await resp.json(); } catch (e) {}
+          if (resp.ok && json.ok) {
+            form.reset();
+            if (msgEl) { msgEl.textContent = 'Thanks — request received.'; msgEl.className = 'request-msg success'; }
+          } else {
+            var err = (json && json.error) || 'Could not send right now. Please try again.';
+            if (msgEl) { msgEl.textContent = err; msgEl.className = 'request-msg error'; }
+          }
+        } catch (err) {
+          if (msgEl) { msgEl.textContent = 'Network error — please try again.'; msgEl.className = 'request-msg error'; }
+        } finally {
+          if (btn) { btn.disabled = false; btn.textContent = 'Send request'; }
+        }
+      });
+    }
+    wireForm(document.getElementById('request-form'));
+    wireForm(document.getElementById('request-form-wizard'));
+  })();
   </script>
 </body>
 </html>

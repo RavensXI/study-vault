@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subject Requests - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth-gate.js" data-role="admin"></script>
+  <style>
+    .req-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .req-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .req-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .req-controls select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+
+    .req-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .req-stat { background: white; border-radius: 10px; padding: 0.75rem 1.1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); font-size: 0.82rem; color: var(--text-muted); flex: 1; min-width: 130px; }
+    .req-stat strong { display: block; font-size: 1.4rem; color: var(--text-primary); font-family: 'Source Serif 4', serif; line-height: 1.2; margin-top: 0.15rem; }
+
+    .req-table { width: 100%; background: white; border-radius: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); border-collapse: collapse; overflow: hidden; }
+    .req-table th, .req-table td { padding: 0.75rem 1rem; text-align: left; vertical-align: top; border-bottom: 1px solid #f0ede8; font-size: 0.85rem; }
+    .req-table th { background: #f9fafb; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 600; }
+    .req-table tr:last-child td { border-bottom: 0; }
+    .req-table .req-name { font-weight: 600; color: var(--text-primary); font-family: 'Source Serif 4', serif; font-size: 0.95rem; }
+    .req-table .req-email a { color: #1d4ed8; text-decoration: none; }
+    .req-table .req-email a:hover { text-decoration: underline; }
+    .req-table .req-date { color: var(--text-muted); font-size: 0.78rem; }
+
+    .status-pill { display: inline-flex; align-items: center; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-building { background: #dbeafe; color: #1e40af; }
+    .status-live { background: #dcfce7; color: #15803d; }
+    .status-rejected { background: #fee2e2; color: #991b1b; }
+
+    .req-actions { display: flex; gap: 0.3rem; flex-wrap: wrap; }
+    .req-btn { padding: 0.3rem 0.7rem; border-radius: 6px; border: 1px solid #ddd; background: #fff; font-size: 0.74rem; font-weight: 600; cursor: pointer; color: var(--text-primary); transition: all 0.15s; }
+    .req-btn:hover { background: #f9fafb; }
+    .req-btn--danger { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+    .req-btn--danger:hover { background: #fee2e2; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .loading-msg { text-align: center; padding: 2rem; color: var(--text-muted); }
+
+    .req-csv-btn { background: #2d2a26; color: #fff; border: 0; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .req-csv-btn:hover { background: #4a463f; }
+
+    @media (max-width: 700px) {
+      .req-table thead { display: none; }
+      .req-table, .req-table tbody, .req-table tr, .req-table td { display: block; width: 100%; }
+      .req-table tr { border-bottom: 1px solid #e8e4df; padding: 0.5rem 0; }
+      .req-table td { padding: 0.35rem 1rem; border: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+        <span class="header-unit-label">Subject Requests</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review</a>
+        <a href="/admin/images">Images</a>
+        <a href="/admin/editor">Editor</a>
+        <a href="/admin/editor-guide">Guide Editor</a>
+        <a href="/admin/requests">Requests</a>
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="req-layout">
+    <div class="req-header">
+      <h1>Subject Requests</h1>
+      <div class="req-controls">
+        <select id="status-filter">
+          <option value="">All</option>
+          <option value="pending" selected>Pending</option>
+          <option value="building">Building</option>
+          <option value="live">Live</option>
+          <option value="rejected">Rejected</option>
+        </select>
+        <button class="req-csv-btn" id="export-csv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="req-stats" id="stats"></div>
+
+    <div id="content"><div class="loading-msg">Loading...</div></div>
+  </div>
+
+  <script>
+    var statusFilter = document.getElementById('status-filter');
+    var contentEl = document.getElementById('content');
+    var statsEl = document.getElementById('stats');
+    var exportBtn = document.getElementById('export-csv');
+
+    function authHeaders() {
+      try {
+        var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')) || {};
+        return { 'Content-Type': 'application/json', 'X-Admin-Password': session.pw || '' };
+      } catch (e) {
+        return { 'Content-Type': 'application/json' };
+      }
+    }
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return iso; }
+    }
+
+    var allRequests = [];
+
+    async function load() {
+      contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
+      var status = statusFilter.value;
+      try {
+        var url = '/api/admin/subject-requests' + (status ? '?status=' + status : '');
+        var resp = await fetch(url, { headers: authHeaders() });
+        if (!resp.ok) {
+          contentEl.innerHTML = '<div class="loading-msg">Failed to load (' + resp.status + ')</div>';
+          return;
+        }
+        var json = await resp.json();
+        allRequests = json.requests || [];
+        render();
+      } catch (e) {
+        contentEl.innerHTML = '<div class="loading-msg">Network error</div>';
+      }
+    }
+
+    async function loadStats() {
+      try {
+        var resp = await fetch('/api/admin/subject-requests', { headers: authHeaders() });
+        if (!resp.ok) return;
+        var json = await resp.json();
+        var counts = { pending: 0, building: 0, live: 0, rejected: 0, total: 0 };
+        (json.requests || []).forEach(function (r) {
+          counts.total += 1;
+          if (counts[r.status] != null) counts[r.status] += 1;
+        });
+        statsEl.innerHTML = ''
+          + '<div class="req-stat">All time<strong>' + counts.total + '</strong></div>'
+          + '<div class="req-stat">Pending<strong>' + counts.pending + '</strong></div>'
+          + '<div class="req-stat">Building<strong>' + counts.building + '</strong></div>'
+          + '<div class="req-stat">Live<strong>' + counts.live + '</strong></div>';
+      } catch (e) {}
+    }
+
+    function render() {
+      if (allRequests.length === 0) {
+        contentEl.innerHTML = '<div class="empty-state">No requests' + (statusFilter.value ? ' with this status' : ' yet') + '.</div>';
+        return;
+      }
+      var rows = allRequests.map(function (r) {
+        var emailHtml = r.email
+          ? '<a href="mailto:' + escHtml(r.email) + '">' + escHtml(r.email) + '</a>'
+          : '<span style="color:var(--text-muted)">—</span>';
+        return ''
+          + '<tr data-id="' + r.id + '">'
+            + '<td><div class="req-name">' + escHtml(r.subject_name) + '</div>'
+            +   (r.exam_board ? '<div style="color:var(--text-muted);font-size:0.78rem">' + escHtml(r.exam_board) + '</div>' : '')
+            + '</td>'
+            + '<td class="req-email">' + emailHtml + '</td>'
+            + '<td><span class="status-pill status-' + escHtml(r.status) + '">' + escHtml(r.status) + '</span></td>'
+            + '<td class="req-date">' + escHtml(formatDate(r.created_at)) + '</td>'
+            + '<td>'
+            +   '<div class="req-actions">'
+            +     '<button class="req-btn" data-act="building">Building</button>'
+            +     '<button class="req-btn" data-act="live">Live</button>'
+            +     '<button class="req-btn" data-act="rejected">Reject</button>'
+            +     '<button class="req-btn req-btn--danger" data-act="delete">Delete</button>'
+            +   '</div>'
+            + '</td>'
+          + '</tr>';
+      }).join('');
+      contentEl.innerHTML = ''
+        + '<table class="req-table">'
+        +   '<thead><tr><th>Subject</th><th>Email</th><th>Status</th><th>Submitted</th><th></th></tr></thead>'
+        +   '<tbody>' + rows + '</tbody>'
+        + '</table>';
+
+      contentEl.querySelectorAll('.req-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var tr = btn.closest('tr');
+          var id = tr.dataset.id;
+          var act = btn.dataset.act;
+          if (act === 'delete') {
+            if (!confirm('Delete this request? Cannot be undone.')) return;
+            doRequest('DELETE', { id: id });
+          } else {
+            doRequest('PATCH', { id: id, status: act });
+          }
+        });
+      });
+    }
+
+    async function doRequest(method, body) {
+      try {
+        var resp = await fetch('/api/admin/subject-requests', {
+          method: method,
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        });
+        if (!resp.ok) {
+          var json = await resp.json().catch(function () { return {}; });
+          alert('Error: ' + (json.error || resp.status));
+          return;
+        }
+        load();
+        loadStats();
+      } catch (e) {
+        alert('Network error');
+      }
+    }
+
+    exportBtn.addEventListener('click', function () {
+      if (allRequests.length === 0) return;
+      var headers = ['subject_name', 'exam_board', 'email', 'status', 'notes', 'created_at'];
+      var csv = headers.join(',') + '\n';
+      allRequests.forEach(function (r) {
+        var row = headers.map(function (h) {
+          var v = r[h] == null ? '' : String(r[h]);
+          if (v.indexOf(',') !== -1 || v.indexOf('"') !== -1 || v.indexOf('\n') !== -1) {
+            v = '"' + v.replace(/"/g, '""') + '"';
+          }
+          return v;
+        });
+        csv += row.join(',') + '\n';
+      });
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'subject-requests-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+    });
+
+    statusFilter.addEventListener('change', load);
+    load();
+    loadStats();
+  </script>
+</body>
+</html>
