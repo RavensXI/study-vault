@@ -45,33 +45,214 @@
     .home-all-section .home-card h3 { font-size: 0.95rem; }
 
     /* --- Request a subject panel --- */
-    .request-panel { max-width: 640px; margin: 2.5rem auto 1.5rem; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); overflow: hidden; }
-    .request-panel > summary { list-style: none; cursor: pointer; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.92rem; color: var(--text-primary); font-weight: 600; }
+    .request-panel {
+      max-width: 640px;
+      margin: 2.5rem auto 1.5rem;
+      background: #fff;
+      border: 1px solid #e8e4df;
+      border-radius: 18px;
+      box-shadow: 0 1px 12px rgba(45,42,38,0.04);
+      overflow: hidden;
+      transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .request-panel[open] {
+      border-color: #d8d2c6;
+      box-shadow: 0 8px 32px rgba(45,42,38,0.06);
+    }
+    .request-panel > summary {
+      list-style: none;
+      cursor: pointer;
+      padding: 1rem 1.35rem;
+      display: flex;
+      align-items: center;
+      gap: 0.95rem;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
     .request-panel > summary::-webkit-details-marker { display: none; }
-    .request-panel > summary:hover { background: rgba(0,0,0,0.02); }
-    .request-panel > summary .req-chevron { width: 18px; height: 18px; color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+    .request-panel > summary:hover { background: #faf8f5; }
+    .request-panel > summary .req-icon {
+      width: 36px; height: 36px;
+      flex-shrink: 0;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #ede9fe 0%, #f5f3ff 100%);
+      color: #7c3aed;
+      display: grid; place-items: center;
+    }
+    .request-panel > summary .req-icon svg { width: 17px; height: 17px; }
+    .request-panel > summary .req-title {
+      flex: 1;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #2d2a26;
+      line-height: 1.3;
+    }
+    .request-panel > summary .req-title small {
+      display: block;
+      font-family: 'Inter', sans-serif;
+      font-weight: 500;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+    .request-panel > summary .req-chevron {
+      width: 18px; height: 18px;
+      color: var(--text-muted);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      flex-shrink: 0;
+    }
     .request-panel[open] > summary .req-chevron { transform: rotate(180deg); }
-    .request-panel-body { padding: 0 1.25rem 1.25rem; }
-    .request-panel h3 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--text-primary); }
-    .request-panel p { font-size: 0.92rem; color: var(--text-secondary); margin: 0 0 1rem; }
-    .request-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.75rem; }
-    .request-fields label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.78rem; font-weight: 600; color: var(--text-secondary); }
+
+    .request-panel-body {
+      padding: 1.1rem 1.35rem 1.35rem;
+      border-top: 1px solid #f0ede8;
+      background: linear-gradient(180deg, #fdfbf7 0%, #fff 60%);
+      animation: req-fade-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    @keyframes req-fade-in {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .request-panel-body > p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      margin: 0 0 1.15rem;
+      line-height: 1.55;
+    }
+
+    .request-fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.95rem 0.85rem;
+    }
+    .request-fields label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.42rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #6b645c;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
     .request-fields label.full { grid-column: 1 / -1; }
-    .request-fields label > input, .request-fields label > select { margin-top: auto; }
-    .request-fields input, .request-fields select { font-family: inherit; font-size: 0.92rem; padding: 0.55rem 0.7rem; border: 1px solid var(--border-light); border-radius: 8px; background: #fff; color: var(--text-primary); }
-    .request-fields input:focus, .request-fields select:focus { outline: 2px solid color-mix(in srgb, var(--accent, #7c3aed) 35%, transparent); outline-offset: 1px; border-color: var(--accent, #7c3aed); }
-    .request-actions { display: flex; justify-content: flex-end; align-items: center; gap: 0.75rem; margin-top: 0.95rem; }
-    .request-msg { font-size: 0.85rem; color: var(--text-secondary); }
+    .request-fields .label-meta {
+      font-weight: 500;
+      text-transform: none;
+      letter-spacing: 0;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: 0.4rem;
+      white-space: nowrap;
+    }
+    .request-fields label > input,
+    .request-fields label > select {
+      margin-top: auto;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 400;
+      text-transform: none;
+      letter-spacing: 0;
+      padding: 0.65rem 0.85rem;
+      border: 1px solid #e0d9cc;
+      border-radius: 10px;
+      background: #fff;
+      color: #2d2a26;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .request-fields label > input::placeholder { color: #b8b1a6; }
+    .request-fields label > input:hover,
+    .request-fields label > select:hover { border-color: #c9c1b2; }
+    .request-fields label > input:focus,
+    .request-fields label > select:focus {
+      outline: 0;
+      border-color: #7c3aed;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.14);
+    }
+
+    .request-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      padding-top: 1rem;
+      border-top: 1px solid #f0ede8;
+    }
+    .request-msg { font-size: 0.85rem; color: var(--text-secondary); transition: color 0.2s; }
     .request-msg.error { color: #b91c1c; }
     .request-msg.success { color: #15803d; font-weight: 600; }
-    .request-submit { background: #2d2a26; color: #fff; border: 0; border-radius: 10px; padding: 0.6rem 1.2rem; font-size: 0.92rem; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-    .request-submit:hover:not(:disabled) { background: #4a463f; }
-    .request-submit:disabled { opacity: 0.6; cursor: default; }
-    .request-panel--wizard { margin: 0.85rem 0 0; padding: 1rem 1.1rem 1.05rem; box-shadow: none; }
-    .request-panel--wizard h3 { font-size: 0.98rem; }
-    .request-panel--wizard p { font-size: 0.82rem; margin-bottom: 0.7rem; }
+    .request-submit {
+      background: #2d2a26;
+      color: #fff;
+      border: 0;
+      border-radius: 10px;
+      padding: 0.65rem 1.25rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
+    }
+    .request-submit:hover:not(:disabled) { background: #4a463f; box-shadow: 0 4px 12px rgba(45,42,38,0.18); }
+    .request-submit:active:not(:disabled) { transform: scale(0.97); }
+    .request-submit:disabled { opacity: 0.55; cursor: default; }
+    .request-submit svg { width: 13px; height: 13px; transition: transform 0.2s ease; }
+    .request-submit:hover:not(:disabled) svg { transform: translateX(2px); }
+
+    /* Wizard variant — embedded inside the modal step, lighter weight */
+    .request-panel--wizard {
+      margin: 1rem 0 0;
+      border-radius: 12px;
+      border-color: #e8dfcf;
+      background: #fdfbf7;
+      box-shadow: none;
+      padding: 0.95rem 1.1rem 1.05rem;
+    }
+    .request-panel--wizard h3 {
+      margin: 0 0 0.25rem;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #2d2a26;
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+    .request-panel--wizard h3::before {
+      content: '';
+      width: 22px; height: 22px;
+      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 2 11 13'/><path d='M22 2l-7 20-4-9-9-4 20-7z'/></svg>") no-repeat center / 14px 14px,
+                  linear-gradient(135deg, #ede9fe, #f5f3ff);
+      border-radius: 7px;
+      flex-shrink: 0;
+    }
+    .request-panel--wizard p {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin: 0 0 0.85rem;
+      line-height: 1.45;
+    }
+    .request-panel--wizard .request-fields { gap: 0.7rem 0.7rem; }
+    .request-panel--wizard .request-actions {
+      margin-top: 0.95rem;
+      padding-top: 0.75rem;
+    }
+    .request-panel--wizard .request-submit {
+      padding: 0.55rem 1rem;
+      font-size: 0.85rem;
+    }
+
     @media (max-width: 600px) {
       .request-fields { grid-template-columns: 1fr; }
+      .request-actions { flex-direction: column-reverse; align-items: stretch; }
+      .request-submit { justify-content: center; }
     }
 
     /* --- Subject picker modal --- */
@@ -362,7 +543,7 @@
             <div class="fw-no-results" id="fw-no-results" style="display:none">No subjects match that search.</div>
           </div>
           <section class="request-panel request-panel--wizard" id="request-panel-wizard" data-context="wizard">
-            <h3>Don't see your subject?</h3>
+            <h3>Can't find your subject?</h3>
             <p>Tell us what you'd like and we'll add it. Email is optional.</p>
             <form class="request-form" id="request-form-wizard">
               <div class="request-fields">
@@ -379,13 +560,16 @@
                     <option value="Other">Other</option>
                   </select>
                 </label>
-                <label>Email <span style="font-weight:400;color:var(--text-muted)">(optional)</span>
+                <label>Email <span class="label-meta">optional</span>
                   <input type="email" name="email" maxlength="200" placeholder="you@example.com">
                 </label>
               </div>
               <div class="request-actions">
                 <span class="request-msg" data-msg></span>
-                <button type="submit" class="request-submit">Send request</button>
+                <button type="submit" class="request-submit">
+                  Send request
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </button>
               </div>
             </form>
           </section>
@@ -663,11 +847,17 @@
   <!-- Request a subject -->
   <details class="request-panel" id="request-panel" data-context="home">
     <summary>
-      <span>Don't see your subject or exam board? Request it</span>
+      <span class="req-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+      </span>
+      <span class="req-title">
+        Can't find your subject?
+        <small>Request a subject or exam board and we'll add it.</small>
+      </span>
       <svg class="req-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </summary>
     <div class="request-panel-body">
-      <p>Tell us what you'd like and we'll add it. Leave your email if you want a heads-up when it goes live.</p>
+      <p>Leave your email if you'd like a heads-up the moment it goes live. Otherwise just tell us what you're after.</p>
       <form class="request-form" id="request-form">
         <div class="request-fields">
           <label class="full">Subject
@@ -683,13 +873,16 @@
               <option value="Other">Other</option>
             </select>
           </label>
-          <label>Your email <span style="font-weight:400;color:var(--text-muted)">(optional)</span>
+          <label>Email <span class="label-meta">optional</span>
             <input type="email" name="email" maxlength="200" placeholder="you@example.com">
           </label>
         </div>
         <div class="request-actions">
           <span class="request-msg" data-msg></span>
-          <button type="submit" class="request-submit">Send request</button>
+          <button type="submit" class="request-submit">
+            Send request
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
         </div>
       </form>
     </div>
