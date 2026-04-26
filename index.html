@@ -253,6 +253,10 @@
     /* --- Subject picker modal --- */
     .picker-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
     .picker-overlay.open { display: flex; align-items: center; justify-content: center; animation: sv-fade-in 0.2s ease both; }
+    .picker-overlay.closing { animation: sv-fade-out 0.2s ease forwards; }
+    .picker-overlay.closing .picker-modal { animation: sv-modal-out 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes sv-fade-out { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes sv-modal-out { from { opacity: 1; transform: translateY(0) scale(1); } to { opacity: 0; transform: translateY(8px) scale(0.98); } }
     .picker-modal { background: var(--bg-card); border-radius: 20px; max-width: 780px; width: calc(100% - 2rem); max-height: calc(100vh - 3rem); overflow-y: auto; box-shadow: 0 16px 48px rgba(0,0,0,0.18); animation: kc-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
     .picker-header { padding: 2rem 2rem 0.5rem; text-align: center; }
     .picker-header h2 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.5rem; font-weight: 700; margin: 0 0 0.3rem; color: var(--text-primary); }
@@ -1998,8 +2002,16 @@
     }
 
     function closePicker() {
-      overlay.classList.remove('open');
-      document.body.style.overflow = '';
+      // Briefly play a fade-out before hiding so the close doesn't feel jarring
+      overlay.classList.add('closing');
+      setTimeout(function () {
+        overlay.classList.remove('open');
+        overlay.classList.remove('closing');
+        document.body.style.overflow = '';
+        // Scroll-anchoring sometimes lands the body at the bottom after the
+        // grid re-renders; reset to top so the user lands where they expect.
+        window.scrollTo(0, 0);
+      }, 180);
     }
 
     function updateDoneBtn() {
