@@ -2195,10 +2195,15 @@
         }
       }
 
-      // Move your cards to top grid
+      // Move your cards to top grid — strip prior sv-visible state and stagger
+      // them in so the personalisation feels intentional, not instant.
       gridEl.innerHTML = '';
-      yourCards.forEach(function(card) {
-        card.style.display = '';  // clear any previous display:none
+      yourCards.forEach(function(card, i) {
+        card.style.display = '';
+        card.classList.remove('sv-visible');
+        // Inline delay overrides the CSS nth-child cap at 8, so 17-subject
+        // schools (Unity) still see every card animate in.
+        card.style.transitionDelay = (i * 70) + 'ms';
         gridEl.appendChild(card);
       });
 
@@ -2206,8 +2211,23 @@
       var existingAll = subjectsSection.querySelector('.home-all-section');
       if (existingAll) existingAll.remove();
 
-      // Re-trigger reveal animations
-      if (typeof initRevealAnimations === 'function') initRevealAnimations();
+      // Force layout, then trigger the staggered reveal on the next frame.
+      // Reading offsetHeight forces the browser to commit the hidden state
+      // before we toggle .sv-visible — without this, the transition would
+      // skip entirely on cards that were already visible before the picker.
+      void gridEl.offsetHeight;
+      requestAnimationFrame(function () {
+        yourCards.forEach(function (card) {
+          card.classList.add('sv-visible');
+        });
+        // Clean up the inline delays after the longest card finishes so the
+        // stagger doesn't apply to any future hover/state transitions on the
+        // card. Longest card = (count - 1) * 70 + 1000ms transition window.
+        var totalMs = (yourCards.length - 1) * 70 + 1100;
+        setTimeout(function () {
+          yourCards.forEach(function (card) { card.style.transitionDelay = ''; });
+        }, totalMs);
+      });
     }
 
     // --- Init ---
