@@ -712,6 +712,9 @@
 
     var isMobile = window.innerWidth <= 768;
 
+    // Helper: is this element actually rendered (display !== none, etc.)?
+    function isVisible(el) { return !!(el && el.offsetParent !== null); }
+
     // Resolve targets that actually exist on this rendered page.
     // Steps with no target are auto-dropped.
     var studyNotes = document.getElementById('study-notes');
@@ -719,17 +722,25 @@
     var firstTip = studyNotes ? studyNotes.querySelector('.revision-tip-btn, .key-fact[data-revision-tip]') : null;
     var audioPlayer = document.querySelector('.audio-player-wrapper');
     var podcastTab = document.querySelector('.audio-tab[data-mode="podcast"]');
-    var podcastTabVisible = podcastTab && podcastTab.offsetParent !== null;
     var practiceSection = document.getElementById('practice');
     var kcBtn = document.getElementById('knowledge-check-btn');
     var flashcardBtn = document.querySelector('.sidebar-flashcard-section, .sidebar-flashcard-link');
-    var lessonProgress = document.querySelector('.lesson-progress-card');
+    // Lesson progress checklist has TWO renderings — the sidebar card on
+    // narrow viewports and the gutter rail on ≥1400px. Pick whichever is
+    // currently visible; targeting a display:none element gives a 0×0 rect.
+    var lessonProgress = null;
+    var gutter = document.querySelector('.gutter-progress');
+    var sidebarProgress = document.querySelector('.sidebar-progress-section');
+    if (isVisible(gutter)) lessonProgress = gutter;
+    else if (isVisible(sidebarProgress)) lessonProgress = sidebarProgress;
+    else lessonProgress = document.querySelector('.lesson-progress-card');
     var sidebarMedia = document.getElementById('sidebar-media');
     var hasMedia = sidebarMedia && sidebarMedia.children.length > 0;
     var podcastSubBtn = document.querySelector('.sidebar-podcast-feed-btn');
     var revisionNav = document.getElementById('nav-revision-technique');
-    var revisionNavVisible = revisionNav && revisionNav.offsetParent !== null;
+    var revisionNavVisible = isVisible(revisionNav);
     var hamburger = document.querySelector('.mobile-menu-btn');
+    var bugFab = document.querySelector('.bugr-fab');
 
     var rawSteps = [
       audioPlayer && {
@@ -737,7 +748,7 @@
         text: 'Listen to the lesson read aloud while you follow along. Tap to play, drag to scrub, or change speed.',
         side: 'bottom'
       },
-      podcastTabVisible && {
+      isVisible(podcastTab) && {
         target: podcastTab,
         text: 'Switch to the lesson podcast — a short audio summary you can listen to on the go.',
         side: 'bottom'
@@ -749,7 +760,7 @@
       },
       firstTip && {
         target: firstTip,
-        text: 'These lightbulbs are revision tasks woven through the lesson. Each one is slightly different — sometimes recall, sometimes a quick reflection, sometimes a mini quiz. Try them as you read.',
+        text: 'These lightbulbs are short retrieval tasks. Cover the answer, recall it from memory, then check yourself. Each one targets a different idea from the lesson.',
         side: 'right'
       },
       practiceSection && {
@@ -759,7 +770,7 @@
       },
       lessonProgress && {
         target: lessonProgress,
-        text: 'Your lesson checklist. Tick off the things you\'ve done — there\'s no required order.',
+        text: 'Your lesson checklist. There\'s no required order — work through it however you like. Completing the quick quiz and flashcards ticks them off automatically.',
         side: 'left'
       },
       kcBtn && {
@@ -779,7 +790,7 @@
       },
       podcastSubBtn && {
         target: podcastSubBtn,
-        text: 'Subscribe to the subject\'s lesson podcasts in your usual app — Apple Podcasts, Pocket Casts, Spotify, anywhere with a podcast feed.',
+        text: 'Subscribe to the subject\'s lesson podcasts in your usual app — Apple Podcasts, Pocket Casts, Overcast, or any other podcast app that supports adding a feed by URL.',
         side: 'left'
       },
       // Header nav step — on mobile the link is hidden behind the hamburger,
@@ -794,7 +805,12 @@
             target: hamburger,
             text: 'Open this menu to find the Revision Techniques guide — proven techniques like retrieval and spacing, with examples for this subject.',
             side: 'bottom'
-          }))
+          })),
+      bugFab && {
+        target: bugFab,
+        text: 'Spotted a mistake or something that doesn\'t work? Tap this to send a quick report — it includes a screenshot so we can see exactly what you saw.',
+        side: 'left'
+      }
     ];
     var steps = rawSteps.filter(Boolean);
     if (steps.length === 0) {
@@ -949,6 +965,13 @@
       window.removeEventListener('resize', repositionCurrent);
       window.removeEventListener('scroll', repositionCurrent, true);
       document.removeEventListener('keydown', onKey);
+      // Scroll back to the top of the lesson so the student starts where
+      // they would naturally read from. Smooth so it doesn't feel like a jump.
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        window.scrollTo(0, 0);
+      }
     }
     function repositionCurrent() {
       if (idx >= steps.length || !spotlightedEl) return;
