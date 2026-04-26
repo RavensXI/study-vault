@@ -2285,12 +2285,16 @@ function initRevisionTips() {
 
       btn.addEventListener('click', function (e) {
         e.stopPropagation();
-        // Auto-expand parent collapsible if collapsed
+        // If parent collapsible is closed, first click just opens it. The
+        // popup needs the collapsible expanded to position correctly; opening
+        // both at once anchors the popup to a zero-height region and it floats
+        // over surrounding content.
         var collapsible = el.closest('.collapsible');
         if (collapsible && !collapsible.classList.contains('open')) {
           collapsible.classList.add('open');
           var toggle = collapsible.querySelector('.collapsible-toggle');
           if (toggle) toggle.setAttribute('aria-expanded', 'true');
+          return;
         }
         if (openPopup && openPopup !== popup) {
           openPopup.classList.remove('is-open');
