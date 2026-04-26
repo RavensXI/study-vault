@@ -2026,26 +2026,33 @@
 
     // Done button
     doneBtn.addEventListener('click', function() {
-      var selected = [];
-      pickerGrid.querySelectorAll('.picker-item.selected').forEach(function(item) {
-        selected.push(item.dataset.subject);
-      });
-      // Ensure locked subjects are always included
-      LOCKED_SUBJECTS.forEach(function(slug) {
-        if (selected.indexOf(slug) === -1) selected.push(slug);
-      });
-      if (selected.length === 0) return;
+      try {
+        var selected = [];
+        pickerGrid.querySelectorAll('.picker-item.selected').forEach(function(item) {
+          selected.push(item.dataset.subject);
+        });
+        // Ensure locked subjects are always included
+        LOCKED_SUBJECTS.forEach(function(slug) {
+          if (selected.indexOf(slug) === -1) selected.push(slug);
+        });
+        if (selected.length === 0) return;
 
-      // Check if any tiered subjects are selected
-      var tieredPicks = selected.filter(function(s) { return TIERED_SUBJECTS.indexOf(s) !== -1; });
-      if (tieredPicks.length > 0) {
-        // Show tier selection step
-        showTierStep(selected, tieredPicks);
-      } else {
-        // No tiered subjects — save and close immediately
-        save(selected);
-        closePicker();
-        renderPersonalised(selected);
+        // Check if any tiered subjects are selected
+        var tieredPicks = selected.filter(function(s) { return TIERED_SUBJECTS.indexOf(s) !== -1; });
+        if (tieredPicks.length > 0) {
+          showTierStep(selected, tieredPicks);
+        } else {
+          save(selected);
+          closePicker();
+          renderPersonalised(selected);
+        }
+      } catch (e) {
+        console.error('Subject picker Done failed:', e);
+        // Don't leave the user stranded — close and reload so prefs from
+        // earlier in the flow can take effect.
+        try { closePicker(); } catch (_) {}
+        document.body.style.overflow = '';
+        setTimeout(function () { window.location.reload(); }, 100);
       }
     });
 
@@ -2082,24 +2089,43 @@
         });
       });
 
-      // Save & Go
+      // Save & Go — wrap in try/finally so any downstream error never leaves
+      // the modal stranded with body.overflow hidden (was causing the "freeze"
+      // Unity students hit on the tier picker).
       tierDoneBtn.onclick = function() {
-        var tiers = {};
-        tierListEl.querySelectorAll('.picker-tier-toggle').forEach(function(toggle) {
-          tiers[toggle.dataset.subject] = toggle.dataset.tier;
-        });
-        localStorage.setItem('studyvault-tiers', JSON.stringify(tiers));
-        save(allSelected);
+        try {
+          var tiers = {};
+          tierListEl.querySelectorAll('.picker-tier-toggle').forEach(function(toggle) {
+            tiers[toggle.dataset.subject] = toggle.dataset.tier;
+          });
+          localStorage.setItem('studyvault-tiers', JSON.stringify(tiers));
+          save(allSelected);
+        } catch (e) {
+          console.error('Tier picker save failed:', e);
+        }
 
-        // Reset picker UI state for next open
-        pickerGrid.style.display = '';
-        document.querySelector('.picker-grid + .picker-footer').style.display = '';
-        document.querySelector('.picker-header').style.display = '';
-        tierStepEl.style.display = 'none';
+        // Always reset picker UI + close, even if save threw
+        try {
+          pickerGrid.style.display = '';
+          var gridFooter = document.querySelector('.picker-grid + .picker-footer');
+          if (gridFooter) gridFooter.style.display = '';
+          var firstHeader = document.querySelector('.picker-header');
+          if (firstHeader) firstHeader.style.display = '';
+          tierStepEl.style.display = 'none';
+        } catch (e) {
+          console.error('Tier picker UI reset failed:', e);
+        }
 
         closePicker();
-        renderPersonalised(allSelected);
-        if (typeof window.updateTieredLessonCounts === 'function') window.updateTieredLessonCounts();
+
+        try {
+          renderPersonalised(allSelected);
+          if (typeof window.updateTieredLessonCounts === 'function') window.updateTieredLessonCounts();
+        } catch (e) {
+          console.error('Personalised render failed (tiers saved, page may need a refresh):', e);
+          // Force a reload as last resort so user is unstuck
+          setTimeout(function () { window.location.reload(); }, 100);
+        }
       };
     }
 
