@@ -458,10 +458,6 @@
         }
       } catch (e) {}
     }
-    // "Show tour" button in the sidebar — always available so students
-    // can replay the tour to remind themselves what something does
-    addSidebarTourButton();
-    wireReplayTourButton();
 
     // Init lesson features from main.js (Phase 2 functions)
     // Wrapped in its own try/catch so a feature init failure doesn't
@@ -473,6 +469,11 @@
         console.warn('Feature init error (non-fatal):', featureErr);
       }
     }
+
+    // "Show tour" button — must run AFTER initLessonFeatures so the gutter
+    // and sidebar lesson-progress section are in the DOM
+    addSidebarTourButton();
+    wireReplayTourButton();
 
     // Beta banner + report button for generic content (school_id NULL)
     if (!subject.school_id) {
