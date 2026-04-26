@@ -204,10 +204,28 @@ def main():
                 issues.append(f"{ctx} — related_media is empty")
             continue
 
+        # Structural validity — each category must have items as a list, not null.
+        # Catches the 'looks filled but items=null' shape that crashed lesson-loader
+        # in Apr 2026 on Geography free-tier lessons. Always fails ship, on any
+        # tier, even practice subjects.
+        for ci, c in enumerate(rm):
+            if not isinstance(c, dict):
+                issues.append(f"{ctx} — related_media[{ci}] is not an object")
+                continue
+            if "items" in c and c["items"] is None:
+                issues.append(f"{ctx} — related_media[{ci}] '{c.get('category','?')}' "
+                              "has items=null (must be a list, even if empty)")
+            elif "items" in c and not isinstance(c["items"], list):
+                issues.append(f"{ctx} — related_media[{ci}] '{c.get('category','?')}' "
+                              f"items must be a list, got {type(c['items']).__name__}")
+
         if is_practice:
             continue  # have media — that's enough; no coverage rules
 
-        total_items = sum(len(c.get("items") or []) for c in rm)
+        total_items = sum(
+            len(c["items"]) for c in rm
+            if isinstance(c, dict) and isinstance(c.get("items"), list)
+        )
         if total_items < MIN_TOTAL_ITEMS:
             issues.append(f"{ctx} — only {total_items} related_media items "
                           f"(min {MIN_TOTAL_ITEMS})")
