@@ -712,8 +712,15 @@
 
     var isMobile = window.innerWidth <= 768;
 
-    // Helper: is this element actually rendered (display !== none, etc.)?
-    function isVisible(el) { return !!(el && el.offsetParent !== null); }
+    // Helper: is this element actually rendered? offsetParent unreliable —
+    // returns null for position:fixed elements (broke the gutter target).
+    function isVisible(el) {
+      if (!el) return false;
+      var s = window.getComputedStyle(el);
+      if (s.display === 'none' || s.visibility === 'hidden') return false;
+      var r = el.getBoundingClientRect();
+      return r.width > 0 && r.height > 0;
+    }
 
     // Resolve targets that actually exist on this rendered page.
     // Steps with no target are auto-dropped.
@@ -727,23 +734,40 @@
     var flashcardBtn = document.querySelector('.sidebar-flashcard-section, .sidebar-flashcard-link');
     // Lesson progress checklist has TWO renderings — the sidebar card on
     // narrow viewports and the gutter rail on ≥1400px. Pick whichever is
-    // currently visible; targeting a display:none element gives a 0×0 rect.
+    // currently visible.
     var lessonProgress = null;
     var gutter = document.querySelector('.gutter-progress');
     var sidebarProgress = document.querySelector('.sidebar-progress-section');
     if (isVisible(gutter)) lessonProgress = gutter;
     else if (isVisible(sidebarProgress)) lessonProgress = sidebarProgress;
-    else lessonProgress = document.querySelector('.lesson-progress-card');
     var sidebarMedia = document.getElementById('sidebar-media');
-    var hasMedia = sidebarMedia && sidebarMedia.children.length > 0;
+    var hasMedia = sidebarMedia && sidebarMedia.children.length > 0 && isVisible(sidebarMedia);
     var podcastSubBtn = document.querySelector('.sidebar-podcast-feed-btn');
+    // Cinematic video sidebar — Unity only on the free tier (display:none
+    // when no youtube_video_id, so isVisible naturally drops the step there)
+    var videoSection = document.getElementById('sidebar-video-section');
     var revisionNav = document.getElementById('nav-revision-technique');
     var revisionNavVisible = isVisible(revisionNav);
     var hamburger = document.querySelector('.mobile-menu-btn');
     var bugFab = document.querySelector('.bugr-fab');
 
+    // Header step — on mobile the link is hidden behind the hamburger,
+    // so we anchor to the hamburger and rephrase.
+    var revisionNavStep = revisionNavVisible
+      ? {
+          target: revisionNav,
+          text: 'How to revise — proven techniques like retrieval, spacing, and dual coding, with examples for this subject.',
+          side: 'bottom'
+        }
+      : (hamburger ? {
+          target: hamburger,
+          text: 'Open this menu to find the Revision Techniques guide — proven techniques like retrieval and spacing, with examples for this subject.',
+          side: 'bottom'
+        } : null);
+
     var rawSteps = [
-      audioPlayer && {
+      revisionNavStep,
+      audioPlayer && isVisible(audioPlayer) && {
         target: audioPlayer,
         text: 'Listen to the lesson read aloud while you follow along. Tap to play, drag to scrub, or change speed.',
         side: 'bottom'
@@ -753,32 +777,32 @@
         text: 'Switch to the lesson podcast — a short audio summary you can listen to on the go.',
         side: 'bottom'
       },
-      firstTerm && {
+      isVisible(videoSection) && {
+        target: videoSection,
+        text: 'A short cinematic video overview of the lesson — perfect if you want to grasp the big picture before reading.',
+        side: 'left'
+      },
+      firstTerm && isVisible(firstTerm) && {
         target: firstTerm,
         text: 'Tap or hover any underlined word to see what it means without leaving the lesson.',
         side: 'bottom'
       },
-      firstTip && {
+      firstTip && isVisible(firstTip) && {
         target: firstTip,
-        text: 'These lightbulbs are short retrieval tasks. Cover the answer, recall it from memory, then check yourself. Each one targets a different idea from the lesson.',
+        text: 'Click any lightbulb to reveal a short revision task linked to that part of the lesson. Different prompts for different ideas — list, define, recall, apply.',
         side: 'right'
-      },
-      practiceSection && {
-        target: practiceSection.querySelector('.practice-card') || practiceSection,
-        text: 'Have a go at exam-style questions. You can mark your own answer or get AI feedback to compare.',
-        side: 'top'
       },
       lessonProgress && {
         target: lessonProgress,
         text: 'Your lesson checklist. There\'s no required order — work through it however you like. Completing the quick quiz and flashcards ticks them off automatically.',
         side: 'left'
       },
-      kcBtn && {
+      kcBtn && isVisible(kcBtn) && {
         target: kcBtn,
         text: 'A quick five-question quiz to check what stuck.',
         side: 'left'
       },
-      flashcardBtn && {
+      flashcardBtn && isVisible(flashcardBtn) && {
         target: flashcardBtn,
         text: 'Revise key ideas with flashcards — flip, mark right or wrong, repeat.',
         side: 'left'
@@ -788,31 +812,35 @@
         text: 'Genuinely good external content — podcasts, videos, films and study tools — for when you want to step away from revision but stay in the topic.',
         side: 'left'
       },
-      podcastSubBtn && {
+      podcastSubBtn && isVisible(podcastSubBtn) && {
         target: podcastSubBtn,
         text: 'Subscribe to the subject\'s lesson podcasts in your usual app — Apple Podcasts, Pocket Casts, Overcast, or any other podcast app that supports adding a feed by URL.',
         side: 'left'
       },
-      // Header nav step — on mobile the link is hidden behind the hamburger,
-      // so we anchor to the hamburger and rephrase. On desktop we anchor to the link.
-      (revisionNavVisible
-        ? {
-            target: revisionNav,
-            text: 'How to revise — proven techniques like retrieval, spacing, and dual coding, with examples for this subject.',
-            side: 'bottom'
-          }
-        : (hamburger && {
-            target: hamburger,
-            text: 'Open this menu to find the Revision Techniques guide — proven techniques like retrieval and spacing, with examples for this subject.',
-            side: 'bottom'
-          })),
+      practiceSection && {
+        target: practiceSection.querySelector('.practice-card') || practiceSection,
+        text: 'Have a go at exam-style questions. You can mark your own answer or get AI feedback to compare.',
+        side: 'top'
+      },
       bugFab && {
         target: bugFab,
         text: 'Spotted a mistake or something that doesn\'t work? Tap this to send a quick report — it includes a screenshot so we can see exactly what you saw.',
-        side: 'left'
+        side: 'left',
+        pinLast: true
       }
     ];
     var steps = rawSteps.filter(Boolean);
+
+    // Sort by visual document position (top-to-bottom) so the tour flows
+    // naturally without zig-zagging up and down. Pin bug FAB to the end
+    // since it's position:fixed (its rect.top is viewport-relative).
+    steps.forEach(function (s) {
+      if (s.pinLast) { s._sortKey = Number.MAX_VALUE; return; }
+      var r = s.target.getBoundingClientRect();
+      s._sortKey = r.top + window.scrollY;
+    });
+    steps.sort(function (a, b) { return a._sortKey - b._sortKey; });
+
     if (steps.length === 0) {
       try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
       return;
