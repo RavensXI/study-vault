@@ -24,6 +24,68 @@
     .home-exams-link svg { width: 13px; height: 13px; }
     .home-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 1rem; }
     .home-grid--few { grid-template-columns: repeat(auto-fit, minmax(230px, 300px)); justify-content: center; }
+
+    /* --- Deck-reveal: shimmer placeholders + staggered card flip-in --- */
+    .home-card-shimmer {
+      background: linear-gradient(135deg, #f0ede8 0%, #faf8f5 50%, #ede9fe 100%);
+      background-size: 220% 220%;
+      animation: deck-shimmer-bg 2.4s ease-in-out infinite;
+      border-radius: 14px;
+      overflow: hidden;
+      position: relative;
+      height: 232px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+    }
+    .home-card-shimmer::before {
+      content: '';
+      position: absolute; inset: 0 0 auto 0;
+      height: 140px;
+      background: linear-gradient(135deg, #e2dccf 0%, #ede9fe 50%, #fce7f3 100%);
+      background-size: 220% 220%;
+      animation: deck-shimmer-bg 2.4s ease-in-out infinite reverse;
+    }
+    .home-card-shimmer::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,0.55) 50%, transparent 65%);
+      background-size: 220% 100%;
+      animation: deck-shimmer-sweep 1.8s ease-in-out infinite;
+    }
+    @keyframes deck-shimmer-bg {
+      0%, 100% { background-position: 0% 0%; }
+      50% { background-position: 100% 100%; }
+    }
+    @keyframes deck-shimmer-sweep {
+      from { background-position: 220% 0; }
+      to { background-position: -120% 0; }
+    }
+
+    @keyframes deck-card-reveal {
+      0% {
+        opacity: 0;
+        transform: perspective(900px) rotateY(75deg) scale(0.88);
+        box-shadow: 0 0 0 rgba(0,0,0,0);
+      }
+      55% {
+        opacity: 1;
+        transform: perspective(900px) rotateY(-6deg) scale(1.02);
+        box-shadow: 0 16px 40px rgba(45,42,38,0.18);
+      }
+      100% {
+        opacity: 1;
+        transform: perspective(900px) rotateY(0) scale(1);
+        box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      }
+    }
+    .home-card.deck-reveal {
+      animation: deck-card-reveal 0.65s cubic-bezier(0.2, 1, 0.4, 1) both;
+      transform-style: preserve-3d;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .home-card-shimmer { animation: none; }
+      .home-card-shimmer::before, .home-card-shimmer::after { animation: none; }
+      .home-card.deck-reveal { animation: none; }
+    }
     .home-card { display: block; background: var(--bg-card); border-radius: 14px; overflow: hidden; text-decoration: none; color: var(--text-primary); box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
     .home-card-img { width: 100%; height: 140px; object-fit: cover; display: block; }
     .home-card-body { padding: 1rem 1.15rem 1.15rem; border-top: 3px solid var(--card-accent, #7c3aed); }
@@ -2195,39 +2257,43 @@
         }
       }
 
-      // Move your cards to top grid — strip prior sv-visible state and stagger
-      // them in so the personalisation feels intentional, not instant.
+      // Deck-reveal: shimmer placeholders fill the grid first, then each
+      // real card flips into its slot with a stagger. Personalisation
+      // should feel built rather than blinked into place.
       gridEl.innerHTML = '';
-      yourCards.forEach(function(card, i) {
+      var STAGGER = 110;        // ms between consecutive card reveals
+      var INITIAL_PAUSE = 280;  // ms shimmer-only before the first card lands
+
+      // Pre-clear any prior reveal state on the cached cards
+      yourCards.forEach(function (card) {
+        card.classList.remove('sv-visible', 'deck-reveal');
         card.style.display = '';
-        card.classList.remove('sv-visible');
-        // Inline delay overrides the CSS nth-child cap at 8, so 17-subject
-        // schools (Unity) still see every card animate in.
-        card.style.transitionDelay = (i * 70) + 'ms';
-        gridEl.appendChild(card);
+        card.style.transitionDelay = '';
+      });
+
+      // Phase 1: drop shimmers in every slot, marked with their target index
+      yourCards.forEach(function (card, i) {
+        var shim = document.createElement('div');
+        shim.className = 'home-card-shimmer';
+        shim.dataset.deckIdx = String(i);
+        gridEl.appendChild(shim);
+      });
+
+      // Phase 2: stagger-replace each shimmer with its real card
+      yourCards.forEach(function (card, i) {
+        setTimeout(function () {
+          var shim = gridEl.querySelector('[data-deck-idx="' + i + '"]');
+          if (!shim) return;
+          card.classList.add('deck-reveal');
+          shim.replaceWith(card);
+          // Strip the animation class once it lands so future hovers are unaffected
+          setTimeout(function () { card.classList.remove('deck-reveal'); }, 700);
+        }, INITIAL_PAUSE + i * STAGGER);
       });
 
       // Remove any existing "All subjects" section — students can use the picker to add subjects
       var existingAll = subjectsSection.querySelector('.home-all-section');
       if (existingAll) existingAll.remove();
-
-      // Force layout, then trigger the staggered reveal on the next frame.
-      // Reading offsetHeight forces the browser to commit the hidden state
-      // before we toggle .sv-visible — without this, the transition would
-      // skip entirely on cards that were already visible before the picker.
-      void gridEl.offsetHeight;
-      requestAnimationFrame(function () {
-        yourCards.forEach(function (card) {
-          card.classList.add('sv-visible');
-        });
-        // Clean up the inline delays after the longest card finishes so the
-        // stagger doesn't apply to any future hover/state transitions on the
-        // card. Longest card = (count - 1) * 70 + 1000ms transition window.
-        var totalMs = (yourCards.length - 1) * 70 + 1100;
-        setTimeout(function () {
-          yourCards.forEach(function (card) { card.style.transitionDelay = ''; });
-        }, totalMs);
-      });
     }
 
     // --- Init ---
