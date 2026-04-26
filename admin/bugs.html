@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bug Reports - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth-gate.js" data-role="admin"></script>
+  <style>
+    .bugs-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .bugs-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .bugs-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .bugs-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .bugs-controls select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+
+    .bugs-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .bugs-stat { background: white; border-radius: 10px; padding: 0.75rem 1.1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); font-size: 0.82rem; color: var(--text-muted); flex: 1; min-width: 130px; }
+    .bugs-stat strong { display: block; font-size: 1.4rem; color: var(--text-primary); font-family: 'Source Serif 4', serif; line-height: 1.2; margin-top: 0.15rem; }
+
+    .bug-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .bug-card-header {
+      padding: 0.85rem 1.15rem;
+      border-bottom: 1px solid #f0ede8;
+      display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
+    }
+    .bug-status {
+      display: inline-flex; align-items: center;
+      padding: 0.18rem 0.6rem; border-radius: 999px;
+      font-size: 0.7rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .bug-status-open { background: #fef3c7; color: #92400e; }
+    .bug-status-investigating { background: #dbeafe; color: #1e40af; }
+    .bug-status-fixed { background: #dcfce7; color: #15803d; }
+    .bug-status-wontfix { background: #f1f5f9; color: #475569; }
+    .bug-date { color: var(--text-muted); font-size: 0.78rem; }
+    .bug-page { color: var(--text-muted); font-size: 0.78rem; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bug-page a { color: #1d4ed8; text-decoration: none; }
+    .bug-page a:hover { text-decoration: underline; }
+
+    .bug-card-body { padding: 1rem 1.15rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    @media (max-width: 700px) { .bug-card-body { grid-template-columns: 1fr; } }
+    .bug-message { font-size: 0.92rem; line-height: 1.55; color: var(--text-primary); white-space: pre-wrap; }
+    .bug-meta { display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.78rem; color: var(--text-muted); }
+    .bug-meta-row strong { color: var(--text-primary); font-weight: 600; }
+    .bug-meta a { color: #1d4ed8; text-decoration: none; }
+    .bug-meta a:hover { text-decoration: underline; }
+    .bug-screenshot { display: block; max-width: 100%; border-radius: 10px; cursor: zoom-in; border: 1px solid #e8e4df; }
+    .bug-screenshot:hover { border-color: #c9c1b2; }
+
+    .bug-card-actions { padding: 0.65rem 1.15rem; background: #faf8f5; border-top: 1px solid #f0ede8; display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .bug-btn { padding: 0.35rem 0.8rem; border-radius: 7px; border: 1px solid #ddd; background: #fff; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--text-primary); transition: background 0.15s ease; }
+    .bug-btn:hover { background: #f9fafb; }
+    .bug-btn--danger { color: #dc2626; border-color: #fecaca; background: #fef2f2; }
+    .bug-btn--danger:hover { background: #fee2e2; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .loading-msg { text-align: center; padding: 2rem; color: var(--text-muted); }
+
+    .lightbox {
+      position: fixed; inset: 0; z-index: 9999;
+      background: rgba(0,0,0,0.88);
+      display: none; align-items: center; justify-content: center;
+      padding: 2rem; cursor: zoom-out;
+    }
+    .lightbox.active { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+        <span class="header-unit-label">Bug Reports</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review</a>
+        <a href="/admin/images">Images</a>
+        <a href="/admin/editor">Editor</a>
+        <a href="/admin/editor-guide">Guide Editor</a>
+        <a href="/admin/requests">Requests</a>
+        <a href="/admin/bugs">Bugs</a>
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="bugs-layout">
+    <div class="bugs-header">
+      <h1>Bug Reports</h1>
+      <div class="bugs-controls">
+        <select id="status-filter">
+          <option value="">All</option>
+          <option value="open" selected>Open</option>
+          <option value="investigating">Investigating</option>
+          <option value="fixed">Fixed</option>
+          <option value="wontfix">Won't fix</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="bugs-stats" id="stats"></div>
+
+    <div id="content"><div class="loading-msg">Loading...</div></div>
+  </div>
+
+  <div class="lightbox" id="lightbox"><img id="lightbox-img" alt=""></div>
+
+  <script>
+    var statusFilter = document.getElementById('status-filter');
+    var contentEl = document.getElementById('content');
+    var statsEl = document.getElementById('stats');
+    var lightbox = document.getElementById('lightbox');
+    var lightboxImg = document.getElementById('lightbox-img');
+
+    function authHeaders() {
+      try {
+        var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')) || {};
+        return { 'Content-Type': 'application/json', 'X-Admin-Password': session.pw || '' };
+      } catch (e) {
+        return { 'Content-Type': 'application/json' };
+      }
+    }
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return iso; }
+    }
+
+    function shortPage(url) {
+      if (!url) return '';
+      try {
+        var u = new URL(url);
+        return u.pathname + u.search;
+      } catch (e) { return url; }
+    }
+
+    var allReports = [];
+
+    async function load() {
+      contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
+      var status = statusFilter.value;
+      try {
+        var url = '/api/admin/bug-reports' + (status ? '?status=' + status : '');
+        var resp = await fetch(url, { headers: authHeaders() });
+        if (!resp.ok) {
+          contentEl.innerHTML = '<div class="loading-msg">Failed to load (' + resp.status + ')</div>';
+          return;
+        }
+        var json = await resp.json();
+        allReports = json.reports || [];
+        render();
+      } catch (e) {
+        contentEl.innerHTML = '<div class="loading-msg">Network error</div>';
+      }
+    }
+
+    async function loadStats() {
+      try {
+        var resp = await fetch('/api/admin/bug-reports', { headers: authHeaders() });
+        if (!resp.ok) return;
+        var json = await resp.json();
+        var counts = { open: 0, investigating: 0, fixed: 0, wontfix: 0, total: 0 };
+        (json.reports || []).forEach(function (r) {
+          counts.total += 1;
+          if (counts[r.status] != null) counts[r.status] += 1;
+        });
+        statsEl.innerHTML = ''
+          + '<div class="bugs-stat">All time<strong>' + counts.total + '</strong></div>'
+          + '<div class="bugs-stat">Open<strong>' + counts.open + '</strong></div>'
+          + '<div class="bugs-stat">Investigating<strong>' + counts.investigating + '</strong></div>'
+          + '<div class="bugs-stat">Fixed<strong>' + counts.fixed + '</strong></div>';
+      } catch (e) {}
+    }
+
+    function render() {
+      if (allReports.length === 0) {
+        contentEl.innerHTML = '<div class="empty-state">No reports' + (statusFilter.value ? ' with this status' : ' yet') + '.</div>';
+        return;
+      }
+      contentEl.innerHTML = allReports.map(function (r) {
+        var emailHtml = r.email
+          ? '<a href="mailto:' + escHtml(r.email) + '">' + escHtml(r.email) + '</a>'
+          : '<span style="color:var(--text-muted)">no email given</span>';
+        var pageHtml = r.page_url
+          ? '<a href="' + escHtml(r.page_url) + '" target="_blank" rel="noopener">' + escHtml(shortPage(r.page_url)) + '</a>'
+          : '';
+        var screenshotHtml = r.screenshot_url
+          ? '<img class="bug-screenshot" data-full="' + escHtml(r.screenshot_url) + '" src="' + escHtml(r.screenshot_url) + '" alt="Bug screenshot">'
+          : '<span style="color:var(--text-muted);font-size:0.82rem">No screenshot</span>';
+        return ''
+          + '<div class="bug-card" data-id="' + r.id + '">'
+            + '<div class="bug-card-header">'
+            +   '<span class="bug-status bug-status-' + escHtml(r.status) + '">' + escHtml(r.status) + '</span>'
+            +   '<span class="bug-page">' + pageHtml + '</span>'
+            +   '<span class="bug-date">' + escHtml(formatDate(r.created_at)) + '</span>'
+            + '</div>'
+            + '<div class="bug-card-body">'
+            +   '<div>'
+            +     '<div class="bug-message">' + escHtml(r.message) + '</div>'
+            +     '<div class="bug-meta" style="margin-top:0.85rem">'
+            +       '<div class="bug-meta-row">Reporter: ' + emailHtml + '</div>'
+            +       (r.viewport_size ? '<div class="bug-meta-row">Viewport: ' + escHtml(r.viewport_size) + '</div>' : '')
+            +       (r.user_agent ? '<div class="bug-meta-row" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="' + escHtml(r.user_agent) + '">UA: ' + escHtml(r.user_agent) + '</div>' : '')
+            +     '</div>'
+            +   '</div>'
+            +   '<div>' + screenshotHtml + '</div>'
+            + '</div>'
+            + '<div class="bug-card-actions">'
+            +   '<button class="bug-btn" data-act="investigating">Investigating</button>'
+            +   '<button class="bug-btn" data-act="fixed">Fixed</button>'
+            +   '<button class="bug-btn" data-act="wontfix">Won\'t fix</button>'
+            +   '<button class="bug-btn" data-act="open">Reopen</button>'
+            +   '<button class="bug-btn bug-btn--danger" data-act="delete" style="margin-left:auto">Delete</button>'
+            + '</div>'
+          + '</div>';
+      }).join('');
+
+      contentEl.querySelectorAll('.bug-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var card = btn.closest('.bug-card');
+          var id = card.dataset.id;
+          var act = btn.dataset.act;
+          if (act === 'delete') {
+            if (!confirm('Delete this bug report? Cannot be undone.')) return;
+            doRequest('DELETE', { id: id });
+          } else {
+            doRequest('PATCH', { id: id, status: act });
+          }
+        });
+      });
+
+      contentEl.querySelectorAll('.bug-screenshot').forEach(function (img) {
+        img.addEventListener('click', function () {
+          lightboxImg.src = img.dataset.full;
+          lightbox.classList.add('active');
+        });
+      });
+    }
+
+    lightbox.addEventListener('click', function () {
+      lightbox.classList.remove('active');
+      lightboxImg.src = '';
+    });
+
+    async function doRequest(method, body) {
+      try {
+        var resp = await fetch('/api/admin/bug-reports', {
+          method: method,
+          headers: authHeaders(),
+          body: JSON.stringify(body),
+        });
+        if (!resp.ok) {
+          var json = await resp.json().catch(function () { return {}; });
+          alert('Error: ' + (json.error || resp.status));
+          return;
+        }
+        load();
+        loadStats();
+      } catch (e) {
+        alert('Network error');
+      }
+    }
+
+    statusFilter.addEventListener('change', load);
+    load();
+    loadStats();
+  </script>
+</body>
+</html>
