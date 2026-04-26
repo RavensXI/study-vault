@@ -2286,8 +2286,14 @@
           if (!shim) return;
           card.classList.add('deck-reveal');
           shim.replaceWith(card);
-          // Strip the animation class once it lands so future hovers are unaffected
-          setTimeout(function () { card.classList.remove('deck-reveal'); }, 700);
+          // After the flip animation lands, swap the animation class for
+          // sv-visible so the card stays visible. Without this, the static
+          // .sv-reveal rule on every home-card (opacity 0) takes over and
+          // fades the card back out — the bug Tom hit on 2026-04-26.
+          setTimeout(function () {
+            card.classList.add('sv-visible');
+            card.classList.remove('deck-reveal');
+          }, 700);
         }, INITIAL_PAUSE + i * STAGGER);
       });
 
