@@ -257,6 +257,20 @@
     var studyNotes = document.getElementById('study-notes');
     studyNotes.innerHTML = lesson.content_html || '';
 
+    // Lesson notice modal — extract any <div class="lesson-notice"> from content
+    // and show as a load-time modal the student must dismiss.
+    var noticeEls = studyNotes.querySelectorAll('.lesson-notice');
+    if (noticeEls.length > 0) {
+      var noticeBodies = [];
+      var noticeTitle = '';
+      noticeEls.forEach(function (n) {
+        if (!noticeTitle && n.dataset.noticeTitle) noticeTitle = n.dataset.noticeTitle;
+        noticeBodies.push(n.innerHTML);
+        n.parentNode.removeChild(n);
+      });
+      showLessonNoticeModal(noticeTitle || 'Heads up', noticeBodies.join(''), lesson.id);
+    }
+
     // Render Chart.js diagrams embedded in content
     // Charts are stored as JSON in data-chart attribute on canvas elements
     var chartCanvases = studyNotes.querySelectorAll('canvas[data-chart]');
@@ -671,6 +685,45 @@
 
   function escapeAttr(str) {
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // ---- Lesson notice modal ----
+  function showLessonNoticeModal(title, bodyHtml, lessonId) {
+    var key = 'studyvault-lesson-notice-' + lessonId;
+    try { if (sessionStorage.getItem(key) === 'dismissed') return; } catch (e) {}
+
+    var overlay = document.createElement('div');
+    overlay.className = 'lesson-notice-overlay';
+    overlay.innerHTML =
+      '<div class="lesson-notice-modal" role="dialog" aria-modal="true" aria-labelledby="lesson-notice-title">' +
+        '<div class="lesson-notice-icon" aria-hidden="true">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>' +
+          '</svg>' +
+        '</div>' +
+        '<h2 id="lesson-notice-title" class="lesson-notice-title">' + title + '</h2>' +
+        '<div class="lesson-notice-body">' + bodyHtml + '</div>' +
+        '<button type="button" class="lesson-notice-dismiss">Got it</button>' +
+      '</div>';
+    document.body.appendChild(overlay);
+
+    function close() {
+      overlay.classList.remove('active');
+      try { sessionStorage.setItem(key, 'dismissed'); } catch (e) {}
+      setTimeout(function () { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }, 250);
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape' || e.key === 'Enter') { e.preventDefault(); close(); }
+    }
+    overlay.querySelector('.lesson-notice-dismiss').addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+
+    requestAnimationFrame(function () {
+      overlay.classList.add('active');
+      var btn = overlay.querySelector('.lesson-notice-dismiss');
+      if (btn) btn.focus();
+    });
   }
 
   // ---- Video modal (Google Drive) ----
