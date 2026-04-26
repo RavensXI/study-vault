@@ -45,7 +45,13 @@
     .home-all-section .home-card h3 { font-size: 0.95rem; }
 
     /* --- Request a subject panel --- */
-    .request-panel { max-width: 640px; margin: 2.5rem auto 1.5rem; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; padding: 1.5rem 1.5rem 1.4rem; box-shadow: 0 1px 8px rgba(0,0,0,0.04); }
+    .request-panel { max-width: 640px; margin: 2.5rem auto 1.5rem; background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px; box-shadow: 0 1px 8px rgba(0,0,0,0.04); overflow: hidden; }
+    .request-panel > summary { list-style: none; cursor: pointer; padding: 1rem 1.25rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; font-size: 0.92rem; color: var(--text-primary); font-weight: 600; }
+    .request-panel > summary::-webkit-details-marker { display: none; }
+    .request-panel > summary:hover { background: rgba(0,0,0,0.02); }
+    .request-panel > summary .req-chevron { width: 18px; height: 18px; color: var(--text-muted); transition: transform 0.2s ease; flex-shrink: 0; }
+    .request-panel[open] > summary .req-chevron { transform: rotate(180deg); }
+    .request-panel-body { padding: 0 1.25rem 1.25rem; }
     .request-panel h3 { font-family: 'Source Serif 4', Georgia, serif; font-size: 1.15rem; font-weight: 700; margin: 0 0 0.4rem; color: var(--text-primary); }
     .request-panel p { font-size: 0.92rem; color: var(--text-secondary); margin: 0 0 1rem; }
     .request-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem 0.75rem; }
@@ -655,34 +661,39 @@
   </section>
 
   <!-- Request a subject -->
-  <section class="request-panel" id="request-panel" data-context="home">
-    <h3>Don't see your subject or exam board?</h3>
-    <p>Tell us what you'd like and we'll add it. Leave your email if you want a heads-up when it goes live.</p>
-    <form class="request-form" id="request-form">
-      <div class="request-fields">
-        <label class="full">Subject
-          <input type="text" name="subject_name" required maxlength="120" placeholder="e.g. Sociology, Photography, AS Maths">
-        </label>
-        <label>Exam board
-          <select name="exam_board">
-            <option value="">Not sure</option>
-            <option value="AQA">AQA</option>
-            <option value="Edexcel">Edexcel / Pearson</option>
-            <option value="OCR">OCR</option>
-            <option value="Eduqas">Eduqas / WJEC</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
-        <label>Your email <span style="font-weight:400;color:var(--text-muted)">(optional)</span>
-          <input type="email" name="email" maxlength="200" placeholder="you@example.com">
-        </label>
-      </div>
-      <div class="request-actions">
-        <span class="request-msg" data-msg></span>
-        <button type="submit" class="request-submit">Send request</button>
-      </div>
-    </form>
-  </section>
+  <details class="request-panel" id="request-panel" data-context="home">
+    <summary>
+      <span>Don't see your subject or exam board? Request it</span>
+      <svg class="req-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </summary>
+    <div class="request-panel-body">
+      <p>Tell us what you'd like and we'll add it. Leave your email if you want a heads-up when it goes live.</p>
+      <form class="request-form" id="request-form">
+        <div class="request-fields">
+          <label class="full">Subject
+            <input type="text" name="subject_name" required maxlength="120" placeholder="e.g. Sociology, Photography, AS Maths">
+          </label>
+          <label>Exam board
+            <select name="exam_board">
+              <option value="">Not sure</option>
+              <option value="AQA">AQA</option>
+              <option value="Edexcel">Edexcel / Pearson</option>
+              <option value="OCR">OCR</option>
+              <option value="Eduqas">Eduqas / WJEC</option>
+              <option value="Other">Other</option>
+            </select>
+          </label>
+          <label>Your email <span style="font-weight:400;color:var(--text-muted)">(optional)</span>
+            <input type="email" name="email" maxlength="200" placeholder="you@example.com">
+          </label>
+        </div>
+        <div class="request-actions">
+          <span class="request-msg" data-msg></span>
+          <button type="submit" class="request-submit">Send request</button>
+        </div>
+      </form>
+    </div>
+  </details>
 
   <!-- Subject Picker Modal -->
   <div class="picker-overlay" id="picker-overlay">
