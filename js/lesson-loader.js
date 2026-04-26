@@ -458,6 +458,9 @@
         }
       } catch (e) {}
     }
+    // "Show tour" button in the a11y toolbar — always available so students
+    // can replay the tour to remind themselves what something does
+    wireReplayTourButton();
 
     // Init lesson features from main.js (Phase 2 functions)
     // Wrapped in its own try/catch so a feature init failure doesn't
@@ -979,7 +982,8 @@
     }
 
     var idx = 0;
-    function finish() {
+    function finish(opts) {
+      var skipToast = opts && opts.skipToast;
       tooltipEl.classList.remove('active');
       [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) { el.classList.remove('active'); });
       clearSpotlight();
@@ -999,6 +1003,10 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } catch (e) {
         window.scrollTo(0, 0);
+      }
+      // Toast — only when the student completes the tour, not when skipping
+      if (!skipToast) {
+        showTutorialToast('You\'re all set. Happy revising!');
       }
     }
     function repositionCurrent() {
@@ -1038,12 +1046,52 @@
     }
 
     btnEl.addEventListener('click', function () { showStep(idx + 1); });
-    skipEl.addEventListener('click', finish);
+    skipEl.addEventListener('click', function () { finish({ skipToast: true }); });
     window.addEventListener('resize', repositionCurrent);
     window.addEventListener('scroll', repositionCurrent, true);
     document.addEventListener('keydown', onKey);
 
     showStep(0);
+  }
+
+  // ---- Tutorial completion toast ----
+  function showTutorialToast(message) {
+    // Remove any prior toast still hanging around
+    var existing = document.getElementById('sv-tutorial-toast');
+    if (existing) existing.remove();
+    var toast = document.createElement('div');
+    toast.id = 'sv-tutorial-toast';
+    toast.textContent = message;
+    toast.style.cssText =
+      'position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%) translateY(8px);' +
+      'background:#2d2a26;color:#fff;font-family:Inter,sans-serif;font-size:0.92rem;' +
+      'font-weight:600;padding:0.85rem 1.4rem;border-radius:12px;' +
+      'box-shadow:0 8px 32px rgba(45,42,38,0.22);z-index:9999;' +
+      'opacity:0;transition:opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),' +
+      'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);pointer-events:none;' +
+      'max-width:calc(100vw - 2rem);text-align:center;';
+    document.body.appendChild(toast);
+    requestAnimationFrame(function () {
+      toast.style.opacity = '1';
+      toast.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    setTimeout(function () {
+      toast.style.opacity = '0';
+      toast.style.transform = 'translateX(-50%) translateY(8px)';
+      setTimeout(function () { if (toast.parentNode) toast.remove(); }, 350);
+    }, 3200);
+  }
+
+  // ---- Replay tour button (a11y toolbar) ----
+  // Wire after renderLesson finishes so the toolbar is in the DOM
+  function wireReplayTourButton() {
+    var btn = document.getElementById('replay-tour-btn');
+    if (!btn || btn._wired) return;
+    btn._wired = true;
+    btn.addEventListener('click', function () {
+      try { localStorage.removeItem('sv-lesson-tutorial-done'); } catch (e) {}
+      maybeStartLessonTutorial();
+    });
   }
 
   // ---- Lesson notice modal ----
