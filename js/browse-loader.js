@@ -181,9 +181,12 @@
     // Add nav links
     var nav = document.getElementById('header-nav');
     var isPracticeSubject = subject.settings && subject.settings.format === 'practice';
+    var hasExamGuides = !!(subject.settings && subject.settings.has_exam_guides);
     var navHtml = '<a href="/">Home</a>';
     if (!isPracticeSubject) {
-      navHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
+      if (hasExamGuides) {
+        navHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
+      }
       navHtml += '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
     }
     nav.innerHTML = navHtml;
@@ -316,10 +319,13 @@
     var nav = document.getElementById('header-nav');
     var isPracticeUnit = (subject.settings && subject.settings.format === 'practice') ||
       (subject.settings && subject.settings.practice_units && subject.settings.practice_units.indexOf(unitSlug) !== -1);
+    var unitHasExamGuides = !!(subject.settings && subject.settings.has_exam_guides);
     var unitNavHtml = '<a href="/">Home</a>' +
       '<a href="/browse/' + subjectSlug + '">Subject Home</a>';
     if (!isPracticeUnit) {
-      unitNavHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
+      if (unitHasExamGuides) {
+        unitNavHtml += '<a href="/guide/' + subjectSlug + '/exam-technique">Exam Technique</a>';
+      }
       unitNavHtml += '<a href="/guide/' + subjectSlug + '/revision-technique">Revision Techniques</a>';
     }
     nav.innerHTML = unitNavHtml;

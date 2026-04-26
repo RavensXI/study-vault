@@ -208,7 +208,15 @@
     var subjectSlug = params.subjectSlug;
     var unitSlug = params.unitSlug;
     document.getElementById('nav-unit-overview').href = browseUrl(subjectSlug, unitSlug);
-    document.getElementById('nav-exam-technique').href = '/guide/' + subjectSlug + '/exam-technique';
+    var examNav = document.getElementById('nav-exam-technique');
+    if (examNav) {
+      if (window._hasExamGuides) {
+        examNav.href = '/guide/' + subjectSlug + '/exam-technique';
+        examNav.style.display = '';
+      } else {
+        examNav.style.display = 'none';
+      }
+    }
     document.getElementById('nav-revision-technique').href = '/guide/' + subjectSlug + '/revision-technique';
 
     if (data.prevLesson) {
