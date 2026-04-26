@@ -1083,24 +1083,53 @@
     }, 3200);
   }
 
-  // ---- Sidebar tour-replay button ----
-  // Inserted at the bottom of the lesson sidebar, after Related Media (and
-  // its subscribe-in-podcast-app button if present). Mirrors the existing
-  // sidebar-flashcard-section pattern.
+  // ---- Tour-replay button ----
+  // Placed under the lesson checklist wherever it lives. On wide desktops
+  // (≥1400px) the checklist is the fixed-position gutter on the left, so the
+  // button goes inside the gutter as a small icon-only circle. On narrower
+  // viewports the checklist is in the right sidebar — the button becomes a
+  // full pill labelled "Show tour" right beneath that sidebar section.
+  function isElVisible(el) {
+    if (!el) return false;
+    var s = window.getComputedStyle(el);
+    if (s.display === 'none' || s.visibility === 'hidden') return false;
+    var r = el.getBoundingClientRect();
+    return r.width > 0 && r.height > 0;
+  }
+
   function addSidebarTourButton() {
-    var sidebar = document.querySelector('.lesson-sidebar');
-    if (!sidebar) return;
-    if (sidebar.querySelector('.sidebar-tour-section')) return; // already added
-    var section = document.createElement('div');
-    section.className = 'sidebar-section sidebar-tour-section';
-    section.innerHTML =
-      '<button type="button" class="sidebar-flashcard-link" id="replay-tour-btn">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0">' +
+    var gutter = document.querySelector('.gutter-progress');
+    var sidebarProgress = document.querySelector('.sidebar-progress-section');
+
+    // Clean any previous injection (could exist from a prior render)
+    document.querySelectorAll('.sidebar-tour-section, .gutter-tour-btn').forEach(function (el) { el.remove(); });
+
+    if (isElVisible(gutter)) {
+      // Wide desktop — small icon button inside the gutter, under the checklist
+      var btn = document.createElement('button');
+      btn.id = 'replay-tour-btn';
+      btn.type = 'button';
+      btn.className = 'gutter-tour-btn';
+      btn.title = 'Show the lesson tour again';
+      btn.setAttribute('aria-label', 'Show the lesson tour again');
+      btn.innerHTML =
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
           '<circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16 10 8"/>' +
-        '</svg>' +
-        '<span>Show tour</span>' +
-      '</button>';
-    sidebar.appendChild(section);
+        '</svg>';
+      gutter.appendChild(btn);
+    } else if (sidebarProgress) {
+      // Narrow — a full pill under the sidebar lesson-progress card
+      var section = document.createElement('div');
+      section.className = 'sidebar-section sidebar-tour-section';
+      section.innerHTML =
+        '<button type="button" class="sidebar-flashcard-link" id="replay-tour-btn">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0">' +
+            '<circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16 10 8"/>' +
+          '</svg>' +
+          '<span>Show tour</span>' +
+        '</button>';
+      sidebarProgress.parentNode.insertBefore(section, sidebarProgress.nextSibling);
+    }
   }
 
   function wireReplayTourButton() {
