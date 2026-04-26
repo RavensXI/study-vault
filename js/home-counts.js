@@ -136,7 +136,11 @@
       var detail = card.querySelector('.home-card-detail');
       if (!detail) return;
       var newText = formatDetail(c);
-      if (newText) detail.textContent = newText;
+      // Only assign if different — assigning the same value still triggers a
+      // DOM mutation, which would re-fire the MutationObserver below and loop
+      // forever (this caused the homepage freeze on 2026-04-26 after the
+      // tier picker re-rendered #home-grid).
+      if (newText && detail.textContent !== newText) detail.textContent = newText;
     });
   }
 
@@ -157,7 +161,16 @@
     // We listen for any future re-render via a MutationObserver on #home-grid.
     var grid = document.getElementById('home-grid');
     if (grid) {
-      var obs = new MutationObserver(function () { applyToStaticCards(counts); });
+      var applying = false;
+      var obs = new MutationObserver(function () {
+        if (applying) return;            // prevent infinite re-entry
+        applying = true;
+        try { applyToStaticCards(counts); }
+        finally {
+          // Drain any mutations triggered by our own writes before re-arming
+          setTimeout(function () { applying = false; }, 0);
+        }
+      });
       obs.observe(grid, { childList: true, subtree: true });
     }
     return counts;
