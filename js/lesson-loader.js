@@ -458,8 +458,9 @@
         }
       } catch (e) {}
     }
-    // "Show tour" button in the a11y toolbar — always available so students
+    // "Show tour" button in the sidebar — always available so students
     // can replay the tour to remind themselves what something does
+    addSidebarTourButton();
     wireReplayTourButton();
 
     // Init lesson features from main.js (Phase 2 functions)
@@ -1082,8 +1083,26 @@
     }, 3200);
   }
 
-  // ---- Replay tour button (a11y toolbar) ----
-  // Wire after renderLesson finishes so the toolbar is in the DOM
+  // ---- Sidebar tour-replay button ----
+  // Inserted at the bottom of the lesson sidebar, after Related Media (and
+  // its subscribe-in-podcast-app button if present). Mirrors the existing
+  // sidebar-flashcard-section pattern.
+  function addSidebarTourButton() {
+    var sidebar = document.querySelector('.lesson-sidebar');
+    if (!sidebar) return;
+    if (sidebar.querySelector('.sidebar-tour-section')) return; // already added
+    var section = document.createElement('div');
+    section.className = 'sidebar-section sidebar-tour-section';
+    section.innerHTML =
+      '<button type="button" class="sidebar-flashcard-link" id="replay-tour-btn">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:18px;height:18px;flex-shrink:0">' +
+          '<circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16 10 8"/>' +
+        '</svg>' +
+        '<span>Show tour</span>' +
+      '</button>';
+    sidebar.appendChild(section);
+  }
+
   function wireReplayTourButton() {
     var btn = document.getElementById('replay-tour-btn');
     if (!btn || btn._wired) return;
