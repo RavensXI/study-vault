@@ -172,10 +172,11 @@
         var emailHtml = r.email
           ? '<a href="mailto:' + escHtml(r.email) + '">' + escHtml(r.email) + '</a>'
           : '<span style="color:var(--text-muted)">—</span>';
+        var subBoardLine = [r.exam_board, r.topic].filter(Boolean).join(' · ');
         return ''
           + '<tr data-id="' + r.id + '">'
             + '<td><div class="req-name">' + escHtml(r.subject_name) + '</div>'
-            +   (r.exam_board ? '<div style="color:var(--text-muted);font-size:0.78rem">' + escHtml(r.exam_board) + '</div>' : '')
+            +   (subBoardLine ? '<div style="color:var(--text-muted);font-size:0.78rem;margin-top:0.15rem">' + escHtml(subBoardLine) + '</div>' : '')
             + '</td>'
             + '<td class="req-email">' + emailHtml + '</td>'
             + '<td><span class="status-pill status-' + escHtml(r.status) + '">' + escHtml(r.status) + '</span></td>'
@@ -232,7 +233,7 @@
 
     exportBtn.addEventListener('click', function () {
       if (allRequests.length === 0) return;
-      var headers = ['subject_name', 'exam_board', 'email', 'status', 'notes', 'created_at'];
+      var headers = ['subject_name', 'topic', 'exam_board', 'email', 'status', 'notes', 'created_at'];
       var csv = headers.join(',') + '\n';
       allRequests.forEach(function (r) {
         var row = headers.map(function (h) {

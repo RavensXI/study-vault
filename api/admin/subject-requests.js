@@ -14,7 +14,7 @@ module.exports = async (req, res) => {
     const status = req.query.status || '';
     let q = supabase
       .from('subject_requests')
-      .select('id, subject_name, exam_board, email, notes, status, user_agent, created_at, notified_at')
+      .select('id, subject_name, topic, exam_board, email, notes, status, user_agent, created_at, notified_at')
       .order('created_at', { ascending: false })
       .limit(500);
     if (status && ALLOWED_STATUS.includes(status)) q = q.eq('status', status);

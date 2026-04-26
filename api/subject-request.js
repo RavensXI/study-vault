@@ -9,6 +9,7 @@ module.exports = async (req, res) => {
 
   const body = req.body || {};
   const subject_name = String(body.subject_name || '').trim().slice(0, 120);
+  const topic = String(body.topic || '').trim().slice(0, 200);
   const exam_board = String(body.exam_board || '').trim().slice(0, 20);
   const email = String(body.email || '').trim().slice(0, 200);
   const notes = String(body.notes || '').trim().slice(0, 500);
@@ -44,6 +45,7 @@ module.exports = async (req, res) => {
 
   const { error } = await supabase.from('subject_requests').insert({
     subject_name,
+    topic: topic || null,
     exam_board: exam_board || null,
     email: email || null,
     notes: notes || null,
