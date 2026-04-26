@@ -449,6 +449,16 @@
       }
     } catch(e) {}
 
+    // First-time tutorial — runs once per device on first article-lesson visit
+    if (!lesson._isPreview) {
+      try {
+        if (!localStorage.getItem('sv-lesson-tutorial-done')) {
+          // Defer until layout settles + main.js's initLessonFeatures has wired up DOM
+          setTimeout(maybeStartLessonTutorial, 1500);
+        }
+      } catch (e) {}
+    }
+
     // Init lesson features from main.js (Phase 2 functions)
     // Wrapped in its own try/catch so a feature init failure doesn't
     // block visit tracking or show a misleading "could not load" error
@@ -694,6 +704,176 @@
 
   function escapeAttr(str) {
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // ---- First-time lesson tutorial ----
+  function maybeStartLessonTutorial() {
+    try { if (localStorage.getItem('sv-lesson-tutorial-done')) return; } catch (e) {}
+
+    // Build the steps from elements that actually exist on the rendered page.
+    // Skip steps whose target isn't there so we don't show empty arrows.
+    var studyNotes = document.getElementById('study-notes');
+    var firstTerm = studyNotes ? studyNotes.querySelector('dfn.term') : null;
+    var firstTip = studyNotes ? studyNotes.querySelector('.revision-tip-btn, .key-fact[data-revision-tip]') : null;
+    var audioPlayer = document.querySelector('.audio-player-wrapper');
+    var practiceSection = document.getElementById('practice');
+    var kcBtn = document.getElementById('knowledge-check-btn');
+
+    var rawSteps = [
+      audioPlayer && {
+        target: audioPlayer,
+        text: 'Listen to the lesson while you read along. Tap to play, drag to scrub, or change speed.',
+        side: 'bottom'
+      },
+      firstTerm && {
+        target: firstTerm,
+        text: 'Tap or hover any underlined word to see a quick definition.',
+        side: 'bottom'
+      },
+      firstTip && {
+        target: firstTip,
+        text: 'These lightbulbs are short retrieval tasks. Cover the answer, recall, then check.',
+        side: 'right'
+      },
+      practiceSection && {
+        target: practiceSection.querySelector('.practice-card') || practiceSection,
+        text: 'Try writing an answer to an exam-style question. Get AI feedback when you\'re ready.',
+        side: 'top'
+      },
+      kcBtn && {
+        target: kcBtn,
+        text: 'When you\'re done, take the quick knowledge check to lock in what you\'ve learned.',
+        side: 'left'
+      }
+    ];
+    var steps = rawSteps.filter(Boolean);
+    if (steps.length === 0) {
+      try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
+      return;
+    }
+
+    var tooltipEl = document.createElement('div');
+    tooltipEl.className = 'sv-tutorial-tooltip';
+    tooltipEl.innerHTML =
+      '<div class="sv-tutorial-tooltip-arrow"></div>' +
+      '<div class="sv-tutorial-tooltip-step"></div>' +
+      '<div class="sv-tutorial-tooltip-text"></div>' +
+      '<div class="sv-tutorial-tooltip-actions">' +
+        '<button type="button" class="sv-tutorial-tooltip-skip">Skip tour</button>' +
+        '<button type="button" class="sv-tutorial-tooltip-btn"></button>' +
+      '</div>';
+    document.body.appendChild(tooltipEl);
+
+    var stepEl = tooltipEl.querySelector('.sv-tutorial-tooltip-step');
+    var textEl = tooltipEl.querySelector('.sv-tutorial-tooltip-text');
+    var btnEl = tooltipEl.querySelector('.sv-tutorial-tooltip-btn');
+    var skipEl = tooltipEl.querySelector('.sv-tutorial-tooltip-skip');
+    var arrowEl = tooltipEl.querySelector('.sv-tutorial-tooltip-arrow');
+
+    var spotlightedEl = null;
+    function clearSpotlight() {
+      if (spotlightedEl) {
+        spotlightedEl.classList.remove('sv-tutorial-spotlight');
+        spotlightedEl = null;
+      }
+    }
+    function setSpotlight(el) {
+      clearSpotlight();
+      if (el && el.classList) {
+        el.classList.add('sv-tutorial-spotlight');
+        spotlightedEl = el;
+      }
+    }
+
+    function positionTooltip(target, preferSide) {
+      var rect = target.getBoundingClientRect();
+      var tw = tooltipEl.offsetWidth || 280;
+      var th = tooltipEl.offsetHeight || 120;
+      arrowEl.className = 'sv-tutorial-tooltip-arrow';
+
+      var spaceR = window.innerWidth - rect.right;
+      var spaceL = rect.left;
+      var spaceB = window.innerHeight - rect.bottom;
+      var spaceT = rect.top;
+
+      function placeRight() {
+        tooltipEl.style.left = (rect.right + 14) + 'px';
+        tooltipEl.style.top = Math.max(8, Math.min(rect.top + rect.height / 2 - th / 2, window.innerHeight - th - 8)) + 'px';
+        arrowEl.classList.add('arrow-left');
+      }
+      function placeBottom() {
+        tooltipEl.style.left = Math.max(8, Math.min(rect.left + rect.width / 2 - tw / 2, window.innerWidth - tw - 8)) + 'px';
+        tooltipEl.style.top = (rect.bottom + 14) + 'px';
+        arrowEl.classList.add('arrow-top');
+      }
+      function placeTop() {
+        tooltipEl.style.left = Math.max(8, Math.min(rect.left + rect.width / 2 - tw / 2, window.innerWidth - tw - 8)) + 'px';
+        tooltipEl.style.top = (rect.top - th - 14) + 'px';
+        arrowEl.classList.add('arrow-bottom');
+      }
+      function placeLeft() {
+        tooltipEl.style.left = Math.max(8, rect.left - tw - 14) + 'px';
+        tooltipEl.style.top = Math.max(8, Math.min(rect.top + rect.height / 2 - th / 2, window.innerHeight - th - 8)) + 'px';
+        arrowEl.classList.add('arrow-right');
+      }
+
+      // Try preferred side first, then fall back to whichever has most room.
+      var tried = {};
+      var order = [preferSide];
+      var byRoom = [['right', spaceR], ['bottom', spaceB], ['top', spaceT], ['left', spaceL]];
+      byRoom.sort(function (a, b) { return b[1] - a[1]; });
+      byRoom.forEach(function (p) { if (order.indexOf(p[0]) === -1) order.push(p[0]); });
+
+      for (var i = 0; i < order.length; i++) {
+        var side = order[i];
+        if (tried[side]) continue;
+        tried[side] = 1;
+        if (side === 'right' && spaceR >= tw + 16) { placeRight(); return; }
+        if (side === 'bottom' && spaceB >= th + 16) { placeBottom(); return; }
+        if (side === 'top' && spaceT >= th + 16) { placeTop(); return; }
+        if (side === 'left' && spaceL >= tw + 16) { placeLeft(); return; }
+      }
+      // Fallback — place wherever, prefer bottom (won't fit perfectly but readable)
+      placeBottom();
+    }
+
+    var idx = 0;
+    function finish() {
+      tooltipEl.classList.remove('active');
+      clearSpotlight();
+      try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
+      setTimeout(function () { if (tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl); }, 350);
+      window.removeEventListener('resize', repositionCurrent);
+      window.removeEventListener('scroll', repositionCurrent, true);
+    }
+    function repositionCurrent() {
+      if (idx >= steps.length || !spotlightedEl) return;
+      positionTooltip(steps[idx].target, steps[idx].side);
+    }
+    function showStep(i) {
+      idx = i;
+      if (i >= steps.length) { finish(); return; }
+      var step = steps[i];
+      stepEl.textContent = 'Step ' + (i + 1) + ' of ' + steps.length;
+      textEl.textContent = step.text;
+      btnEl.textContent = (i === steps.length - 1) ? 'Got it' : 'Next';
+      tooltipEl.classList.remove('active');
+
+      // Bring target into view, then position once layout settles
+      try { step.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+      setTimeout(function () {
+        setSpotlight(step.target);
+        positionTooltip(step.target, step.side);
+        tooltipEl.classList.add('active');
+      }, 350);
+    }
+
+    btnEl.addEventListener('click', function () { showStep(idx + 1); });
+    skipEl.addEventListener('click', finish);
+    window.addEventListener('resize', repositionCurrent);
+    window.addEventListener('scroll', repositionCurrent, true);
+
+    showStep(0);
   }
 
   // ---- Lesson notice modal ----
