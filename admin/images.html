@@ -124,8 +124,8 @@
       <h1>Image QA</h1>
       <div class="qa-controls">
         <select id="school-select"><option value="">All Schools</option></select>
-        <select id="board-select"><option value="">All Boards</option></select>
         <select id="subject-select"><option value="">Loading...</option></select>
+        <select id="board-select"><option value="">Pick a subject</option></select>
         <select id="unit-select"><option value="">All units</option></select>
       </div>
     </div>
@@ -181,11 +181,11 @@
         document.getElementById('panel-' + target).classList.add('active');
         activeTab = target;
 
-        // Reload content for the new tab if a subject is selected
-        var slug = subjectSelect.value;
-        var _opt = subjectSelect.options[subjectSelect.selectedIndex];
-        var _sid = _opt ? _opt.dataset.id : null;
-        if (slug) {
+        // Reload content for the new tab if an exam board (i.e. an actual subject) is selected
+        var _sid = boardSelect.value;
+        var _opt = boardSelect.options[boardSelect.selectedIndex];
+        var slug = _opt ? _opt.dataset.slug : null;
+        if (slug && _sid) {
           if (target === 'hero' && !heroLoaded) {
             loadUnitsAndLessons(slug, _sid);
           } else if (target === 'diagrams' && !diagramsLoaded) {
@@ -250,20 +250,29 @@
         schoolSelect.innerHTML += '<option value="' + key + '">' + schools[key] + '</option>';
       });
 
-      populateBoards();
       populateSubjects();
 
       // Auto-select from URL params
       var params = new URLSearchParams(window.location.search);
       if (params.get('subject')) {
-        subjectSelect.value = params.get('subject');
-        subjectSelect.dispatchEvent(new Event('change'));
+        // Direct subject slug deep-link: find its family and select board
+        var directSlug = params.get('subject');
+        var direct = allSubjects.find(function (s) { return s.slug === directSlug; });
+        if (direct) {
+          subjectSelect.value = getFamilyKey(direct);
+          subjectSelect.dispatchEvent(new Event('change'));
+          // After populateBoards has run, select the matching board
+          var board = getBoardName(direct);
+          if (board) {
+            boardSelect.value = direct.id;
+            boardSelect.dispatchEvent(new Event('change'));
+          }
+        }
       }
     }
 
     function getBoardName(s) {
       if (s.exam_board) return s.exam_board;
-      // Fallback for any subject missing the column — derive from slug
       if (!s.slug) return null;
       var slug = s.slug;
       var _em = { 'maths': 'Edexcel', 'english-language': 'AQA', 'english-literature': 'AQA', 'science': 'AQA', 'separate-sciences': 'AQA' };
@@ -275,6 +284,18 @@
       return null;
     }
 
+    function getFamilyKey(s) {
+      // Strip exam-board suffix from slug to get the subject family key.
+      // Subjects without a board suffix are their own family.
+      if (!s.slug) return null;
+      var slug = s.slug;
+      var suffixes = ['-edexcel-a', '-edexcel-b', '-edexcel', '-aqa', '-ocr', '-eduqas'];
+      for (var i = 0; i < suffixes.length; i++) {
+        if (slug.endsWith(suffixes[i])) return slug.slice(0, -suffixes[i].length);
+      }
+      return slug;
+    }
+
     function filterBySchool(subjects) {
       var schoolVal = schoolSelect.value;
       return subjects.filter(function (s) {
@@ -284,56 +305,77 @@
       });
     }
 
-    function populateBoards() {
-      var saved = boardSelect.value;
-      var schoolFiltered = filterBySchool(allSubjects);
-      var boards = {};
-      schoolFiltered.forEach(function (s) {
-        var b = getBoardName(s);
-        if (b) boards[b] = true;
-      });
-      boardSelect.innerHTML = '<option value="">All Boards</option>';
-      Object.keys(boards).sort().forEach(function (b) {
-        var sel = (saved === b) ? ' selected' : '';
-        boardSelect.innerHTML += '<option value="' + b + '"' + sel + '>' + b + '</option>';
-      });
-    }
+    // Map of family key -> { name, members: [subject, ...], allGeneric: bool }
+    var familiesByKey = {};
 
     function populateSubjects() {
-      var boardVal = boardSelect.value;
-      var filtered = filterBySchool(allSubjects).filter(function (s) {
-        if (!boardVal) return true;
-        return getBoardName(s) === boardVal;
+      familiesByKey = {};
+      filterBySchool(allSubjects).forEach(function (s) {
+        var key = getFamilyKey(s);
+        if (!key) return;
+        if (!familiesByKey[key]) familiesByKey[key] = { key: key, name: s.name, members: [], allGeneric: true };
+        familiesByKey[key].members.push(s);
+        if (s.school_id) familiesByKey[key].allGeneric = false;
       });
+      var fams = Object.keys(familiesByKey).map(function (k) { return familiesByKey[k]; });
+      fams.sort(function (a, b) { return a.name.localeCompare(b.name); });
       subjectSelect.innerHTML = '<option value="">Select subject...</option>';
-      filtered.forEach(function (s) {
-        var schoolLabel = s.school_id ? '' : ' (Generic)';
-        subjectSelect.innerHTML += '<option value="' + s.slug + '" data-id="' + s.id + '">' + s.name + schoolLabel + '</option>';
+      fams.forEach(function (f) {
+        var schoolLabel = f.allGeneric ? ' (Generic)' : '';
+        subjectSelect.innerHTML += '<option value="' + f.key + '">' + f.name + schoolLabel + '</option>';
       });
+      // Reset downstream selectors when subjects repopulate
+      boardSelect.innerHTML = '<option value="">Pick a subject</option>';
+      unitSelect.innerHTML = '<option value="">All units</option>';
+    }
+
+    function populateBoards() {
+      var familyKey = subjectSelect.value;
+      if (!familyKey || !familiesByKey[familyKey]) {
+        boardSelect.innerHTML = '<option value="">Pick a subject</option>';
+        return;
+      }
+      var members = familiesByKey[familyKey].members.slice();
+      // Sort by board name for consistent ordering
+      members.sort(function (a, b) {
+        return (getBoardName(a) || 'zzz').localeCompare(getBoardName(b) || 'zzz');
+      });
+      if (members.length === 1) {
+        // Only one variant — auto-select it (no user choice needed)
+        boardSelect.innerHTML = '<option value="' + members[0].id + '" data-slug="' + members[0].slug + '">' + (getBoardName(members[0]) || '—') + '</option>';
+      } else {
+        boardSelect.innerHTML = '<option value="">Select board...</option>';
+        members.forEach(function (s) {
+          var label = getBoardName(s) || s.slug;
+          boardSelect.innerHTML += '<option value="' + s.id + '" data-slug="' + s.slug + '">' + label + '</option>';
+        });
+      }
     }
 
     schoolSelect.addEventListener('change', function () {
+      populateSubjects();
+      contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+    });
+
+    subjectSelect.addEventListener('change', function () {
       populateBoards();
-      populateSubjects();
       unitSelect.innerHTML = '<option value="">All units</option>';
-      contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+      contentEl.innerHTML = '<div class="loading-msg">Select an exam board.</div>';
+      // Auto-trigger if there's only one board variant
+      if (boardSelect.options.length === 1 && boardSelect.options[0].value) {
+        boardSelect.dispatchEvent(new Event('change'));
+      }
     });
 
-    boardSelect.addEventListener('change', function () {
-      populateSubjects();
-      unitSelect.innerHTML = '<option value="">All units</option>';
-      contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
-    });
-
-    subjectSelect.addEventListener('change', async function () {
-      var slug = this.value;
+    boardSelect.addEventListener('change', async function () {
+      var subjectId = this.value;
       var opt = this.options[this.selectedIndex];
-      var subjectId = opt ? opt.dataset.id : null;
+      var slug = opt ? opt.dataset.slug : null;
       heroLoaded = false;
       diagramsLoaded = false;
-      if (!slug) {
-        contentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
-        diagramsContentEl.innerHTML = '<div class="loading-msg">Select a subject.</div>';
+      if (!subjectId || !slug) {
+        contentEl.innerHTML = '<div class="loading-msg">Select an exam board.</div>';
+        diagramsContentEl.innerHTML = '<div class="loading-msg">Select an exam board.</div>';
         return;
       }
       if (activeTab === 'hero') {
@@ -346,17 +388,19 @@
     });
 
     unitSelect.addEventListener('change', function () {
-      if (!subjectSelect.value) return;
-      var opt = subjectSelect.options[subjectSelect.selectedIndex];
-      var subjectId = opt ? opt.dataset.id : null;
+      if (!boardSelect.value) return;
+      var opt = boardSelect.options[boardSelect.selectedIndex];
+      var subjectId = boardSelect.value;
+      var slug = opt ? opt.dataset.slug : null;
+      if (!slug) return;
       heroLoaded = false;
       diagramsLoaded = false;
       if (activeTab === 'hero') {
-        loadUnitsAndLessons(subjectSelect.value, subjectId);
-        loadDiagrams(subjectSelect.value, subjectId);
+        loadUnitsAndLessons(slug, subjectId);
+        loadDiagrams(slug, subjectId);
       } else {
-        loadDiagrams(subjectSelect.value, subjectId);
-        loadUnitsAndLessons(subjectSelect.value, subjectId);
+        loadDiagrams(slug, subjectId);
+        loadUnitsAndLessons(slug, subjectId);
       }
     });
 
