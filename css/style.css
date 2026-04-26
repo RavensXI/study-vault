@@ -2103,35 +2103,43 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
 
 /* Video modal overlay */
 /* ===== Lesson tutorial tooltips (first-time onboarding) ===== */
+/* Backdrop: 4 fixed panels around the spotlighted target, forming a darkened frame.
+   Using 4 panels rather than a single clip-path/box-shadow because it works
+   through overflow:hidden ancestors (sidebar, header drawer) and on older browsers. */
+.sv-tutorial-backdrop {
+  position: fixed;
+  background: rgba(20, 18, 15, 0.55);
+  z-index: 1099;
+  pointer-events: none;
+  transition: opacity 0.25s ease, top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              height 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 0;
+}
+.sv-tutorial-backdrop.active { opacity: 1; }
+
 .sv-tutorial-tooltip {
   position: fixed;
   z-index: 1200;
   background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.16), 0 2px 8px rgba(0,0,0,0.08);
-  padding: 0.85rem 1rem;
-  max-width: 280px;
+  border-radius: 14px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 2px 10px rgba(0,0,0,0.1);
+  padding: 0.95rem 1.05rem 0.85rem;
+  max-width: 300px;
+  width: calc(100vw - 32px);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sv-tutorial-tooltip.active { opacity: 1; pointer-events: auto; }
-.sv-tutorial-tooltip-step {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.66rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--accent, #7c3aed);
-  margin-bottom: 0.35rem;
-}
 .sv-tutorial-tooltip-text {
   font-family: 'Inter', sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 500;
   color: var(--text-primary, #2d2a26);
   line-height: 1.5;
-  margin-bottom: 0.7rem;
+  margin: 0 0 0.85rem;
 }
 .sv-tutorial-tooltip-actions {
   display: flex;
@@ -2139,27 +2147,47 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
   justify-content: space-between;
   gap: 0.5rem;
 }
+.sv-tutorial-tooltip-progress {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.sv-tutorial-tooltip-progress span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.22);
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+.sv-tutorial-tooltip-progress span.current {
+  background: var(--accent, #7c3aed);
+  transform: scale(1.35);
+}
+.sv-tutorial-tooltip-progress span.done {
+  background: rgba(124, 58, 237, 0.55);
+}
+.sv-tutorial-tooltip-buttons { display: flex; gap: 0.45rem; align-items: center; }
 .sv-tutorial-tooltip-skip {
   font-family: 'Inter', sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 500;
   color: var(--text-muted, #6b645c);
   background: transparent;
   border: 0;
   cursor: pointer;
-  padding: 0.3em 0.4em;
+  padding: 0.4em 0.55em;
   border-radius: 6px;
-  transition: color 0.15s;
+  transition: color 0.15s, background 0.15s;
 }
-.sv-tutorial-tooltip-skip:hover { color: var(--text-primary, #2d2a26); }
+.sv-tutorial-tooltip-skip:hover { color: var(--text-primary, #2d2a26); background: #faf8f5; }
 .sv-tutorial-tooltip-btn {
   font-family: 'Inter', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 700;
   color: #fff;
   background: var(--accent, #7c3aed);
   border: none;
-  padding: 0.45em 1.1em;
+  padding: 0.5em 1.15em;
   border-radius: 8px;
   cursor: pointer;
   transition: filter 0.2s ease, transform 0.1s ease;
@@ -2168,26 +2196,27 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
 .sv-tutorial-tooltip-btn:active { transform: scale(0.97); }
 .sv-tutorial-tooltip-arrow {
   position: absolute;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   background: #fff;
   transform: rotate(45deg);
-  box-shadow: -2px -2px 4px rgba(0,0,0,0.04);
 }
-.sv-tutorial-tooltip-arrow.arrow-left { left: -6px; top: 50%; margin-top: -6px; }
-.sv-tutorial-tooltip-arrow.arrow-top { top: -6px; left: 50%; margin-left: -6px; }
-.sv-tutorial-tooltip-arrow.arrow-bottom { bottom: -6px; left: 50%; margin-left: -6px; box-shadow: 2px 2px 4px rgba(0,0,0,0.04); }
-.sv-tutorial-tooltip-arrow.arrow-right { right: -6px; top: 50%; margin-top: -6px; box-shadow: 2px -2px 4px rgba(0,0,0,0.04); }
+.sv-tutorial-tooltip-arrow.arrow-left { left: -7px; top: 50%; margin-top: -7px; }
+.sv-tutorial-tooltip-arrow.arrow-top { top: -7px; left: 50%; margin-left: -7px; }
+.sv-tutorial-tooltip-arrow.arrow-bottom { bottom: -7px; left: 50%; margin-left: -7px; }
+.sv-tutorial-tooltip-arrow.arrow-right { right: -7px; top: 50%; margin-top: -7px; }
 .sv-tutorial-spotlight {
   position: relative;
   z-index: 1100;
-  box-shadow: 0 0 0 4px rgba(124,58,237,0.18), 0 0 0 8px rgba(124,58,237,0.06);
-  border-radius: 10px;
-  transition: box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 body.dark-mode .sv-tutorial-tooltip { background: #2a2826; }
 body.dark-mode .sv-tutorial-tooltip-arrow { background: #2a2826; }
 body.dark-mode .sv-tutorial-tooltip-text { color: #f5f0eb; }
+body.dark-mode .sv-tutorial-tooltip-skip:hover { background: #1a1816; }
+@media (max-width: 600px) {
+  .sv-tutorial-tooltip { max-width: calc(100vw - 24px); padding: 0.85rem 0.95rem 0.75rem; }
+  .sv-tutorial-tooltip-text { font-size: 0.85rem; }
+}
 
 .video-modal-overlay {
   position: fixed;

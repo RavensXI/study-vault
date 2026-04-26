@@ -710,41 +710,91 @@
   function maybeStartLessonTutorial() {
     try { if (localStorage.getItem('sv-lesson-tutorial-done')) return; } catch (e) {}
 
-    // Build the steps from elements that actually exist on the rendered page.
-    // Skip steps whose target isn't there so we don't show empty arrows.
+    var isMobile = window.innerWidth <= 768;
+
+    // Resolve targets that actually exist on this rendered page.
+    // Steps with no target are auto-dropped.
     var studyNotes = document.getElementById('study-notes');
     var firstTerm = studyNotes ? studyNotes.querySelector('dfn.term') : null;
     var firstTip = studyNotes ? studyNotes.querySelector('.revision-tip-btn, .key-fact[data-revision-tip]') : null;
     var audioPlayer = document.querySelector('.audio-player-wrapper');
+    var podcastTab = document.querySelector('.audio-tab[data-mode="podcast"]');
+    var podcastTabVisible = podcastTab && podcastTab.offsetParent !== null;
     var practiceSection = document.getElementById('practice');
     var kcBtn = document.getElementById('knowledge-check-btn');
+    var flashcardBtn = document.querySelector('.sidebar-flashcard-section, .sidebar-flashcard-link');
+    var lessonProgress = document.querySelector('.lesson-progress-card');
+    var sidebarMedia = document.getElementById('sidebar-media');
+    var hasMedia = sidebarMedia && sidebarMedia.children.length > 0;
+    var podcastSubBtn = document.querySelector('.sidebar-podcast-feed-btn');
+    var revisionNav = document.getElementById('nav-revision-technique');
+    var revisionNavVisible = revisionNav && revisionNav.offsetParent !== null;
+    var hamburger = document.querySelector('.mobile-menu-btn');
 
     var rawSteps = [
       audioPlayer && {
         target: audioPlayer,
-        text: 'Listen to the lesson while you read along. Tap to play, drag to scrub, or change speed.',
+        text: 'Listen to the lesson read aloud while you follow along. Tap to play, drag to scrub, or change speed.',
+        side: 'bottom'
+      },
+      podcastTabVisible && {
+        target: podcastTab,
+        text: 'Switch to the lesson podcast — a short audio summary you can listen to on the go.',
         side: 'bottom'
       },
       firstTerm && {
         target: firstTerm,
-        text: 'Tap or hover any underlined word to see a quick definition.',
+        text: 'Tap or hover any underlined word to see what it means without leaving the lesson.',
         side: 'bottom'
       },
       firstTip && {
         target: firstTip,
-        text: 'These lightbulbs are short retrieval tasks. Cover the answer, recall, then check.',
+        text: 'These lightbulbs are revision tasks woven through the lesson. Each one is slightly different — sometimes recall, sometimes a quick reflection, sometimes a mini quiz. Try them as you read.',
         side: 'right'
       },
       practiceSection && {
         target: practiceSection.querySelector('.practice-card') || practiceSection,
-        text: 'Try writing an answer to an exam-style question. Get AI feedback when you\'re ready.',
+        text: 'Have a go at exam-style questions. You can mark your own answer or get AI feedback to compare.',
         side: 'top'
+      },
+      lessonProgress && {
+        target: lessonProgress,
+        text: 'Your lesson checklist. Tick off the things you\'ve done — there\'s no required order.',
+        side: 'left'
       },
       kcBtn && {
         target: kcBtn,
-        text: 'When you\'re done, take the quick knowledge check to lock in what you\'ve learned.',
+        text: 'A quick five-question quiz to check what stuck.',
         side: 'left'
-      }
+      },
+      flashcardBtn && {
+        target: flashcardBtn,
+        text: 'Revise key ideas with flashcards — flip, mark right or wrong, repeat.',
+        side: 'left'
+      },
+      hasMedia && {
+        target: sidebarMedia,
+        text: 'Genuinely good external content — podcasts, videos, films and study tools — for when you want to step away from revision but stay in the topic.',
+        side: 'left'
+      },
+      podcastSubBtn && {
+        target: podcastSubBtn,
+        text: 'Subscribe to the subject\'s lesson podcasts in your usual app — Apple Podcasts, Pocket Casts, Spotify, anywhere with a podcast feed.',
+        side: 'left'
+      },
+      // Header nav step — on mobile the link is hidden behind the hamburger,
+      // so we anchor to the hamburger and rephrase. On desktop we anchor to the link.
+      (revisionNavVisible
+        ? {
+            target: revisionNav,
+            text: 'How to revise — proven techniques like retrieval, spacing, and dual coding, with examples for this subject.',
+            side: 'bottom'
+          }
+        : (hamburger && {
+            target: hamburger,
+            text: 'Open this menu to find the Revision Techniques guide — proven techniques like retrieval and spacing, with examples for this subject.',
+            side: 'bottom'
+          }))
     ];
     var steps = rawSteps.filter(Boolean);
     if (steps.length === 0) {
@@ -752,23 +802,36 @@
       return;
     }
 
+    // ----- Build DOM -----
+    var backdropTop = document.createElement('div');
+    var backdropRight = document.createElement('div');
+    var backdropBottom = document.createElement('div');
+    var backdropLeft = document.createElement('div');
+    [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) {
+      el.className = 'sv-tutorial-backdrop';
+      document.body.appendChild(el);
+    });
+
     var tooltipEl = document.createElement('div');
     tooltipEl.className = 'sv-tutorial-tooltip';
+    var dotsHtml = steps.map(function () { return '<span></span>'; }).join('');
     tooltipEl.innerHTML =
       '<div class="sv-tutorial-tooltip-arrow"></div>' +
-      '<div class="sv-tutorial-tooltip-step"></div>' +
       '<div class="sv-tutorial-tooltip-text"></div>' +
       '<div class="sv-tutorial-tooltip-actions">' +
-        '<button type="button" class="sv-tutorial-tooltip-skip">Skip tour</button>' +
-        '<button type="button" class="sv-tutorial-tooltip-btn"></button>' +
+        '<div class="sv-tutorial-tooltip-progress">' + dotsHtml + '</div>' +
+        '<div class="sv-tutorial-tooltip-buttons">' +
+          '<button type="button" class="sv-tutorial-tooltip-skip">Skip tour</button>' +
+          '<button type="button" class="sv-tutorial-tooltip-btn"></button>' +
+        '</div>' +
       '</div>';
     document.body.appendChild(tooltipEl);
 
-    var stepEl = tooltipEl.querySelector('.sv-tutorial-tooltip-step');
     var textEl = tooltipEl.querySelector('.sv-tutorial-tooltip-text');
     var btnEl = tooltipEl.querySelector('.sv-tutorial-tooltip-btn');
     var skipEl = tooltipEl.querySelector('.sv-tutorial-tooltip-skip');
     var arrowEl = tooltipEl.querySelector('.sv-tutorial-tooltip-arrow');
+    var dotEls = tooltipEl.querySelectorAll('.sv-tutorial-tooltip-progress span');
 
     var spotlightedEl = null;
     function clearSpotlight() {
@@ -785,10 +848,26 @@
       }
     }
 
+    // ----- Backdrop frame around target rect -----
+    function paintBackdrop(target) {
+      var rect = target.getBoundingClientRect();
+      var pad = 8;
+      var x1 = Math.max(0, rect.left - pad);
+      var y1 = Math.max(0, rect.top - pad);
+      var x2 = Math.min(window.innerWidth, rect.right + pad);
+      var y2 = Math.min(window.innerHeight, rect.bottom + pad);
+
+      backdropTop.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:' + y1 + 'px;background:rgba(20,18,15,0.55);z-index:1099;pointer-events:none;';
+      backdropBottom.style.cssText = 'position:fixed;top:' + y2 + 'px;left:0;width:100vw;height:' + Math.max(0, window.innerHeight - y2) + 'px;background:rgba(20,18,15,0.55);z-index:1099;pointer-events:none;';
+      backdropLeft.style.cssText = 'position:fixed;top:' + y1 + 'px;left:0;width:' + x1 + 'px;height:' + (y2 - y1) + 'px;background:rgba(20,18,15,0.55);z-index:1099;pointer-events:none;';
+      backdropRight.style.cssText = 'position:fixed;top:' + y1 + 'px;left:' + x2 + 'px;width:' + Math.max(0, window.innerWidth - x2) + 'px;height:' + (y2 - y1) + 'px;background:rgba(20,18,15,0.55);z-index:1099;pointer-events:none;';
+      [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) { el.classList.add('active'); });
+    }
+
     function positionTooltip(target, preferSide) {
       var rect = target.getBoundingClientRect();
-      var tw = tooltipEl.offsetWidth || 280;
-      var th = tooltipEl.offsetHeight || 120;
+      var tw = tooltipEl.offsetWidth || 300;
+      var th = tooltipEl.offsetHeight || 130;
       arrowEl.className = 'sv-tutorial-tooltip-arrow';
 
       var spaceR = window.innerWidth - rect.right;
@@ -797,81 +876,121 @@
       var spaceT = rect.top;
 
       function placeRight() {
-        tooltipEl.style.left = (rect.right + 14) + 'px';
+        tooltipEl.style.left = Math.min(rect.right + 16, window.innerWidth - tw - 8) + 'px';
         tooltipEl.style.top = Math.max(8, Math.min(rect.top + rect.height / 2 - th / 2, window.innerHeight - th - 8)) + 'px';
         arrowEl.classList.add('arrow-left');
       }
       function placeBottom() {
         tooltipEl.style.left = Math.max(8, Math.min(rect.left + rect.width / 2 - tw / 2, window.innerWidth - tw - 8)) + 'px';
-        tooltipEl.style.top = (rect.bottom + 14) + 'px';
+        tooltipEl.style.top = Math.min(rect.bottom + 16, window.innerHeight - th - 8) + 'px';
         arrowEl.classList.add('arrow-top');
       }
       function placeTop() {
         tooltipEl.style.left = Math.max(8, Math.min(rect.left + rect.width / 2 - tw / 2, window.innerWidth - tw - 8)) + 'px';
-        tooltipEl.style.top = (rect.top - th - 14) + 'px';
+        tooltipEl.style.top = Math.max(8, rect.top - th - 16) + 'px';
         arrowEl.classList.add('arrow-bottom');
       }
       function placeLeft() {
-        tooltipEl.style.left = Math.max(8, rect.left - tw - 14) + 'px';
+        tooltipEl.style.left = Math.max(8, rect.left - tw - 16) + 'px';
         tooltipEl.style.top = Math.max(8, Math.min(rect.top + rect.height / 2 - th / 2, window.innerHeight - th - 8)) + 'px';
         arrowEl.classList.add('arrow-right');
       }
 
-      // Try preferred side first, then fall back to whichever has most room.
-      var tried = {};
-      var order = [preferSide];
-      var byRoom = [['right', spaceR], ['bottom', spaceB], ['top', spaceT], ['left', spaceL]];
-      byRoom.sort(function (a, b) { return b[1] - a[1]; });
-      byRoom.forEach(function (p) { if (order.indexOf(p[0]) === -1) order.push(p[0]); });
+      // Mobile: prefer bottom/top placement (sides are usually too narrow)
+      var order;
+      if (isMobile) {
+        order = ['bottom', 'top'];
+      } else {
+        var byRoom = [['right', spaceR], ['bottom', spaceB], ['top', spaceT], ['left', spaceL]];
+        byRoom.sort(function (a, b) { return b[1] - a[1]; });
+        order = [preferSide];
+        byRoom.forEach(function (p) { if (order.indexOf(p[0]) === -1) order.push(p[0]); });
+      }
 
       for (var i = 0; i < order.length; i++) {
         var side = order[i];
-        if (tried[side]) continue;
-        tried[side] = 1;
-        if (side === 'right' && spaceR >= tw + 16) { placeRight(); return; }
-        if (side === 'bottom' && spaceB >= th + 16) { placeBottom(); return; }
-        if (side === 'top' && spaceT >= th + 16) { placeTop(); return; }
-        if (side === 'left' && spaceL >= tw + 16) { placeLeft(); return; }
+        if (side === 'right' && spaceR >= tw + 24) { placeRight(); return; }
+        if (side === 'bottom' && spaceB >= th + 24) { placeBottom(); return; }
+        if (side === 'top' && spaceT >= th + 24) { placeTop(); return; }
+        if (side === 'left' && spaceL >= tw + 24) { placeLeft(); return; }
       }
-      // Fallback — place wherever, prefer bottom (won't fit perfectly but readable)
-      placeBottom();
+      // Best-effort fallback: place on whichever side has most space and let it sit close
+      var bestSide = isMobile
+        ? (spaceB >= spaceT ? 'bottom' : 'top')
+        : (Math.max(spaceR, spaceB, spaceT, spaceL) === spaceB ? 'bottom'
+            : Math.max(spaceR, spaceB, spaceT, spaceL) === spaceT ? 'top'
+            : Math.max(spaceR, spaceB, spaceT, spaceL) === spaceR ? 'right' : 'left');
+      if (bestSide === 'right') placeRight();
+      else if (bestSide === 'top') placeTop();
+      else if (bestSide === 'left') placeLeft();
+      else placeBottom();
+    }
+
+    function paintDots(i) {
+      for (var d = 0; d < dotEls.length; d++) {
+        dotEls[d].className = '';
+        if (d < i) dotEls[d].classList.add('done');
+        else if (d === i) dotEls[d].classList.add('current');
+      }
     }
 
     var idx = 0;
     function finish() {
       tooltipEl.classList.remove('active');
+      [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) { el.classList.remove('active'); });
       clearSpotlight();
       try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
-      setTimeout(function () { if (tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl); }, 350);
+      setTimeout(function () {
+        if (tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl);
+        [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        });
+      }, 350);
       window.removeEventListener('resize', repositionCurrent);
       window.removeEventListener('scroll', repositionCurrent, true);
+      document.removeEventListener('keydown', onKey);
     }
     function repositionCurrent() {
       if (idx >= steps.length || !spotlightedEl) return;
+      paintBackdrop(steps[idx].target);
       positionTooltip(steps[idx].target, steps[idx].side);
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') finish();
+      else if (e.key === 'Enter' || e.key === 'ArrowRight') { e.preventDefault(); showStep(idx + 1); }
+      else if (e.key === 'ArrowLeft' && idx > 0) { e.preventDefault(); showStep(idx - 1); }
     }
     function showStep(i) {
       idx = i;
       if (i >= steps.length) { finish(); return; }
       var step = steps[i];
-      stepEl.textContent = 'Step ' + (i + 1) + ' of ' + steps.length;
       textEl.textContent = step.text;
       btnEl.textContent = (i === steps.length - 1) ? 'Got it' : 'Next';
+      paintDots(i);
       tooltipEl.classList.remove('active');
 
-      // Bring target into view, then position once layout settles
-      try { step.target.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+      // Scroll target into view (mobile especially benefits from `start` block)
+      try {
+        step.target.scrollIntoView({
+          behavior: 'smooth',
+          block: isMobile ? 'center' : 'center',
+          inline: 'nearest'
+        });
+      } catch (e) {}
+
       setTimeout(function () {
         setSpotlight(step.target);
+        paintBackdrop(step.target);
         positionTooltip(step.target, step.side);
         tooltipEl.classList.add('active');
-      }, 350);
+      }, 380);
     }
 
     btnEl.addEventListener('click', function () { showStep(idx + 1); });
     skipEl.addEventListener('click', finish);
     window.addEventListener('resize', repositionCurrent);
     window.addEventListener('scroll', repositionCurrent, true);
+    document.addEventListener('keydown', onKey);
 
     showStep(0);
   }
