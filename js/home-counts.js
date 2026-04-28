@@ -27,6 +27,18 @@
     return slugs.concat(ENGLIT_COMPULSORY);
   }
 
+  // History option-pick filtering: free users pick 1 from each of 4 paper
+  // sections (Period · Wider World Depth · Thematic · British Depth). Mirror
+  // the browse-loader filter so the home card shows 4 units / N lessons.
+  var HISTORY_SLUGS = ['history-aqa', 'history-edexcel'];
+
+  function getFreeHistorySelectedUnitSlugs(subjectSlug) {
+    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
+    var pref = FreeUser.getSubject(subjectSlug);
+    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
+    return Object.values(pref.options);
+  }
+
   // Determine which subject rows to count for the current viewer.
   // - School student: school's bespoke + subscribed (anything the student can see)
   // - Free user / anonymous: free-tier only (school_id NULL)
@@ -109,6 +121,8 @@
       var allowedUnitSlugs = null;
       if (ENGLIT_SLUGS.indexOf(slug) !== -1) {
         allowedUnitSlugs = getFreeEngLitSelectedUnitSlugs(slug);
+      } else if (HISTORY_SLUGS.indexOf(slug) !== -1) {
+        allowedUnitSlugs = getFreeHistorySelectedUnitSlugs(slug);
       }
 
       var unitCount = 0;

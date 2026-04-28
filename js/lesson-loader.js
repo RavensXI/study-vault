@@ -32,6 +32,31 @@
     };
   }
 
+  // ---- One-time slug migration ----
+  // Free-tier History split: Edexcel renamed `history` → `history-edexcel`,
+  // AQA build now at `history-aqa`. Unity students still use `history`.
+  // Free-tier users with a saved Edexcel pref go to `history-edexcel`;
+  // anonymous and AQA-pref users default to `history-aqa`.
+  function chooseHistoryTargetSlug() {
+    if (typeof FreeUser !== 'undefined' && FreeUser.isActive && FreeUser.isActive()) {
+      var pref = FreeUser.getSubject('history') || FreeUser.getSubject('history-edexcel') || FreeUser.getSubject('history-aqa');
+      if (pref && pref.slug) return pref.slug;
+    }
+    return 'history-aqa';
+  }
+  function maybeRedirectOldHistorySlug(slug) {
+    if (slug !== 'history') return false;
+    var isUnity = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
+    if (isUnity) return false;
+    var target = chooseHistoryTargetSlug();
+    var newPath = window.location.pathname.replace(/^\/lesson\/history\//, '/lesson/' + target + '/');
+    if (newPath !== window.location.pathname) {
+      window.location.replace(newPath + (window.location.search || '') + (window.location.hash || ''));
+      return true;
+    }
+    return false;
+  }
+
   // ---- Auth check ----
   async function checkAuth() {
     // Try Supabase session first
@@ -1245,6 +1270,7 @@
       showError('Invalid URL', 'The lesson URL format should be /lesson/{subject}/{unit}/{number}');
       return;
     }
+    if (maybeRedirectOldHistorySlug(params.subjectSlug)) return;
 
     // Auth check (optional — for tracking, not gating)
     var user = await checkAuth();

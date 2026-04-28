@@ -34,6 +34,29 @@
     };
   }
 
+  // ---- One-time slug migration ----
+  // Free-tier History split: Edexcel renamed `history` → `history-edexcel`,
+  // AQA build now at `history-aqa`. Unity students still use `history`.
+  function chooseHistoryTargetSlug() {
+    if (typeof FreeUser !== 'undefined' && FreeUser.isActive && FreeUser.isActive()) {
+      var pref = FreeUser.getSubject('history') || FreeUser.getSubject('history-edexcel') || FreeUser.getSubject('history-aqa');
+      if (pref && pref.slug) return pref.slug;
+    }
+    return 'history-aqa';
+  }
+  function maybeRedirectOldHistorySlug(slug) {
+    if (slug !== 'history') return false;
+    var isUnity = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
+    if (isUnity) return false;
+    var target = chooseHistoryTargetSlug();
+    var newPath = window.location.pathname.replace(/^\/guide\/history\//, '/guide/' + target + '/');
+    if (newPath !== window.location.pathname) {
+      window.location.replace(newPath + (window.location.search || '') + (window.location.hash || ''));
+      return true;
+    }
+    return false;
+  }
+
   // ---- Auth check ----
   async function checkAuth() {
     var result = await sb.auth.getSession();
@@ -260,6 +283,7 @@
       showError('Invalid URL', 'Guide URL format: /guide/{subject}/exam-technique/{slug}');
       return;
     }
+    if (maybeRedirectOldHistorySlug(params.subjectSlug)) return;
 
     try {
       if (params.slug) {

@@ -626,6 +626,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5a: History options picker (1 from each of the 4 paper sections) -->
+      <div class="free-wizard-step" id="fw-step-history">
+        <div class="fw-header">
+          <h2>Which History options do you study?</h2>
+          <p>Your school picks one option from each of the four paper sections — pick the four you study.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-history-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-history-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-history-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5: Tier picker (Maths Foundation/Higher, etc.) -->
       <div class="free-wizard-step" id="fw-step-tier">
         <div class="fw-header">
@@ -1285,7 +1300,7 @@
       'separate-sciences': { 'AQA': true },
       'health-social-care': { 'Edexcel': true },
       'hospitality-catering': { 'WJEC': true },
-      'history': { 'Edexcel': true },
+      'history': { 'AQA': true, 'Edexcel': true },
       'religious-education': { 'AQA': true },
       'music-technology': { 'NCFE': true },
       'computer-science': { 'OCR': true },
@@ -1391,7 +1406,53 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {} };
+    // History options per board, grouped by paper section.
+    // Student picks one from each section. The four section keys are stable
+    // across boards so downstream filters can rely on them.
+    var historyOptions = {
+      'aqa': {
+        'Period Study': [
+          { slug: 'germany-democracy-dictatorship', name: 'Germany, 1890-1945' },
+          { slug: 'russia-tsardom-communism', name: 'Russia, 1894-1945' },
+          { slug: 'america-opportunity-inequality', name: 'America, 1920-1973' },
+          { slug: 'america-expansion-consolidation', name: 'America, 1840-1895' }
+        ],
+        'Wider World Depth': [
+          { slug: 'conflict-tension-inter-war', name: 'Inter-war Years 1918-39' },
+          { slug: 'conflict-tension-east-west', name: 'East and West, 1945-72' },
+          { slug: 'conflict-tension-first-world-war', name: 'First World War 1894-1918' },
+          { slug: 'conflict-tension-asia', name: 'Asia 1950-1975' },
+          { slug: 'conflict-tension-gulf-afghanistan', name: 'Gulf and Afghanistan 1990-2009' }
+        ],
+        'Thematic Study': [
+          { slug: 'britain-health-people', name: 'Health and the People' },
+          { slug: 'britain-power-people', name: 'Power and the People' },
+          { slug: 'britain-migration-empires', name: 'Migration, Empires and the People' }
+        ],
+        'British Depth Study': [
+          { slug: 'elizabethan-england', name: 'Elizabethan England' },
+          { slug: 'norman-england', name: 'Norman England' },
+          { slug: 'medieval-england-edward-i', name: 'Medieval England: Edward I' },
+          { slug: 'restoration-england', name: 'Restoration England' }
+        ]
+      },
+      'edexcel': {
+        'Period Study': [
+          { slug: 'weimar-nazi-germany', name: 'Weimar and Nazi Germany 1918-39' }
+        ],
+        'Wider World Depth': [
+          { slug: 'superpower-relations', name: 'Superpower Relations & Cold War' }
+        ],
+        'Thematic Study': [
+          { slug: 'medicine-in-britain', name: 'Medicine in Britain' }
+        ],
+        'British Depth Study': [
+          { slug: 'anglo-saxon-norman', name: 'Anglo-Saxon and Norman England' }
+        ]
+      }
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {} };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -1750,6 +1811,68 @@
       });
     }
 
+    // History picker — 4 sections, one selection from each.
+    // Section keys are stable across boards (Period Study, Wider World Depth,
+    // Thematic Study, British Depth Study) so the browse-loader can filter
+    // History units by Object.values(prefs.subjects[i].options) regardless
+    // of which board the student picked.
+    function fwHistoryRequiredSectionCount() {
+      var board = wizardState.boards['history'] || 'aqa';
+      var opts = historyOptions[board];
+      return opts ? Object.keys(opts).length : 0;
+    }
+
+    function fwUpdateHistoryDoneBtn() {
+      var btn = document.getElementById('fw-history-done');
+      if (!btn) return;
+      var picked = Object.keys(wizardState.history || {}).length;
+      var required = fwHistoryRequiredSectionCount();
+      btn.disabled = picked < required;
+    }
+
+    function buildHistoryPicker() {
+      var board = wizardState.boards['history'] || 'aqa';
+      var opts = historyOptions[board];
+      var container = document.getElementById('fw-history-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.history = {};
+      if (!opts) return;
+
+      Object.keys(opts).forEach(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML = '<h3>' + section + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        opts[section].forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = option.name;
+          btn.dataset.value = option.slug;
+          btn.addEventListener('click', function () {
+            optsEl.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.history[groupKey] = option.slug;
+            fwUpdateHistoryDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+
+        // Single-option sections (e.g. Edexcel free tier where only one unit
+        // is built per section): auto-select so the student can't get stuck.
+        if (opts[section].length === 1) {
+          var only = optsEl.querySelector('.fw-text-btn');
+          only.classList.add('selected');
+          wizardState.history[groupKey] = opts[section][0].slug;
+        }
+        container.appendChild(sectionEl);
+      });
+
+      fwUpdateHistoryDoneBtn();
+    }
+
     // Tier picker: which subjects need a Foundation/Higher choice
     var FW_TIERED_BASE = ['maths', 'science', 'separate-sciences', 'spanish', 'french', 'german'];
 
@@ -1804,10 +1927,34 @@
       localStorage.setItem('studyvault-tiers', JSON.stringify(saved));
     }
 
-    // Step 2 → Step 3 (lit) → Tier → Step 4 (school)
+    // Step 2 → History (if picked) → Eng Lit (if picked) → Tier → Step 4
+    function fwHasHistory() { return wizardState.subjects.indexOf('history') !== -1; }
+    function fwHasEngLit()  { return wizardState.subjects.indexOf('english-literature') !== -1; }
+
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
-      if (wizardState.subjects.indexOf('english-literature') !== -1) {
+      if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else if (fwHasEngLit()) {
+        buildTextPicker();
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-history-back').addEventListener('click', function () {
+      document.getElementById('fw-step-history').classList.remove('active');
+      document.getElementById('fw-step-2').classList.add('active');
+    });
+
+    document.getElementById('fw-history-done').addEventListener('click', function () {
+      document.getElementById('fw-step-history').classList.remove('active');
+      if (fwHasEngLit()) {
         buildTextPicker();
         document.getElementById('fw-step-3').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
@@ -1830,8 +1977,11 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (wizardState.subjects.indexOf('english-literature') !== -1) {
+      if (fwHasEngLit()) {
         document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
       } else {
         document.getElementById('fw-step-2').classList.add('active');
       }
@@ -1918,6 +2068,7 @@
       'science': { 'aqa': 'science', 'edexcel': 'science-edexcel', 'ocr': 'science-ocr' },
       'business': { 'aqa': 'business-aqa', 'edexcel': 'business-edexcel', 'ocr': 'business-ocr' },
       'geography': { 'aqa': 'geography', 'edexcel a': 'geography-edexcel-a', 'edexcel b': 'geography-edexcel-b', 'ocr': 'geography-ocr', 'eduqas': 'geography-eduqas' },
+      'history': { 'aqa': 'history-aqa', 'edexcel': 'history-edexcel' },
     };
 
     function resolveSlug(baseSlug, board) {
@@ -1941,6 +2092,9 @@
         };
         if (baseSlug === 'english-literature') {
           entry.texts = wizardState.texts;
+        }
+        if (baseSlug === 'history') {
+          entry.options = wizardState.history;
         }
         prefs.subjects.push(entry);
       });

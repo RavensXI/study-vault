@@ -5,11 +5,32 @@
 (function () {
   var KEY = 'studyvault-free-prefs';
 
+  // One-time slug migration applied on every read so it's idempotent and we
+  // don't have to ship a separate migration script. Free-tier History was
+  // renamed `history` → `history-edexcel` so the AQA build can take `history-aqa`.
+  // Existing free-tier users with `slug: 'history'` get rewritten + saved back.
+  function migrateHistorySlug(prefs) {
+    if (!prefs || !prefs.subjects) return prefs;
+    var changed = false;
+    prefs.subjects.forEach(function (s) {
+      if (s.slug === 'history') {
+        s.slug = 'history-edexcel';
+        if (!s.examBoard) s.examBoard = 'edexcel';
+        changed = true;
+      }
+    });
+    if (changed) {
+      try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (e) {}
+    }
+    return prefs;
+  }
+
   window.FreeUser = {
     get: function () {
       try {
         var raw = localStorage.getItem(KEY);
-        return raw ? JSON.parse(raw) : null;
+        if (!raw) return null;
+        return migrateHistorySlug(JSON.parse(raw));
       } catch (e) {
         return null;
       }

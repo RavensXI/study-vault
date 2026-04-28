@@ -28,6 +28,32 @@
     };
   }
 
+  // ---- One-time slug migration ----
+  // Free-tier History split: Edexcel renamed `history` → `history-edexcel`,
+  // AQA build now at `history-aqa`. Unity students still use `history`.
+  // Redirect non-Unity hits on the old slug — free-tier users with a saved
+  // Edexcel pref go to `history-edexcel`, otherwise default to `history-aqa`
+  // (the fuller / most-taught build).
+  function chooseHistoryTargetSlug() {
+    if (typeof FreeUser !== 'undefined' && FreeUser.isActive && FreeUser.isActive()) {
+      var pref = FreeUser.getSubject('history') || FreeUser.getSubject('history-edexcel') || FreeUser.getSubject('history-aqa');
+      if (pref && pref.slug) return pref.slug;
+    }
+    return 'history-aqa';
+  }
+  function maybeRedirectOldHistorySlug(slug) {
+    if (slug !== 'history') return false;
+    var isUnity = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
+    if (isUnity) return false;
+    var target = chooseHistoryTargetSlug();
+    var newPath = window.location.pathname.replace(/^\/browse\/history(\/|$)/, '/browse/' + target + '$1');
+    if (newPath !== window.location.pathname) {
+      window.location.replace(newPath + (window.location.search || '') + (window.location.hash || ''));
+      return true;
+    }
+    return false;
+  }
+
   // ---- Auth check ----
   async function checkAuth() {
     var result = await sb.auth.getSession();
@@ -171,6 +197,19 @@
         var compulsory = ['unseen-poetry'];
         units = units.filter(function (u) {
           return selectedSlugs.indexOf(u.slug) !== -1 || compulsory.indexOf(u.slug) !== -1;
+        });
+      }
+    }
+
+    // Free user History: filter to only the 4 picked options (one per paper section).
+    // AQA students pick 4 of 16, Edexcel students pick 4 of 4 (auto-selected).
+    if ((subjectSlug === 'history-aqa' || subjectSlug === 'history-edexcel') &&
+        typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeHist = FreeUser.getSubject(subjectSlug);
+      if (freeHist && freeHist.options && Object.keys(freeHist.options).length > 0) {
+        var pickedSlugs = Object.values(freeHist.options);
+        units = units.filter(function (u) {
+          return pickedSlugs.indexOf(u.slug) !== -1;
         });
       }
     }
@@ -412,6 +451,7 @@
       showError('Invalid URL', 'Browse URL format: /browse/{subject} or /browse/{subject}/{unit}');
       return;
     }
+    if (maybeRedirectOldHistorySlug(params.subjectSlug)) return;
 
     try {
       if (params.unitSlug) {
