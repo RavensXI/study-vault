@@ -26,7 +26,10 @@
   }
 
   function normaliseSlug(slug) {
-    var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/, '');
+    // Strip board suffix plus optional single-letter spec variant (e.g.
+    // "-edexcel-a", "-edexcel-b") so both Geography Edexcel A and B
+    // resolve to the same "geography" key in the exam-dates JSON.
+    var base = slug.replace(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)(-[a-z])?$/, '');
     var aliases = {
       'mathematics': 'maths',
       'combined-science': 'science',
@@ -39,7 +42,9 @@
   }
 
   function detectBoard(slug) {
-    var suffixMatch = slug.match(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)$/);
+    // Same regex as normaliseSlug — captures the board name even when a
+    // spec-variant letter follows (e.g. "geography-edexcel-a").
+    var suffixMatch = slug.match(/-(aqa|edexcel|ocr|eduqas|wjec|ncfe)(-[a-z])?$/);
     if (suffixMatch) return suffixMatch[1];
     var board = getExamBoard();
     if (board) return board;
