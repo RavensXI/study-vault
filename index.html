@@ -321,8 +321,47 @@
     .school-modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     .school-modal-error { color: #dc2626; font-size: 0.85rem; margin-top: 0.75rem; display: none; }
     .school-modal-error.visible { display: block; }
-    .school-modal-dismiss { display: block; margin: 1rem auto 0; background: none; border: none; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; text-decoration: underline; transition: color 0.2s; }
-    .school-modal-dismiss:hover { color: var(--text-secondary); }
+
+    /* Welcome modal — overrides the default centered .school-modal layout for the welcome view. */
+    .welcome-modal { max-width: 540px; padding: 2rem 1.9rem 1.65rem; text-align: left; }
+    .welcome-modal h2 { text-align: left; font-size: 1.45rem; margin: 0 0 0.55rem; }
+    .welcome-modal .welcome-intro { font-size: 0.92rem; line-height: 1.55; margin: 0 0 0.85rem; color: var(--text-secondary); text-align: left; }
+    .welcome-modal .welcome-intro strong { color: var(--text-primary); font-weight: 700; }
+    .welcome-modal .welcome-bug-info { font-size: 0.85rem; line-height: 1.55; margin: 0.85rem 0 0; color: var(--text-secondary); text-align: left; }
+    .welcome-modal .welcome-bug-info a { color: var(--text-primary); font-weight: 600; text-decoration: underline; }
+
+    .beta-pill { display: inline-block; background: #fef3c7; color: #92400e; font-family: 'Inter', sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 0.32rem 0.7rem; border-radius: 999px; margin: 0 0 0.95rem; }
+    body.dark-mode .beta-pill { background: rgba(245, 158, 11, 0.18); color: #fbbf24; }
+
+    .welcome-callout { display: flex; gap: 0.7rem; align-items: flex-start; background: #fffbeb; border: 1px solid #fde68a; border-left: 3px solid #f59e0b; border-radius: 10px; padding: 0.9rem 1rem; margin: 0.4rem 0 0.2rem; }
+    .welcome-callout-icon { font-size: 1.1rem; line-height: 1.4; flex-shrink: 0; color: #b45309; }
+    .welcome-callout p { font-size: 0.88rem; line-height: 1.55; margin: 0; color: var(--text-primary); text-align: left; }
+    .welcome-callout p strong { font-weight: 700; }
+    body.dark-mode .welcome-callout { background: rgba(245, 158, 11, 0.08); border-color: rgba(245, 158, 11, 0.3); }
+    body.dark-mode .welcome-callout-icon { color: #fbbf24; }
+
+    .welcome-choices { display: grid; grid-template-columns: 1.55fr 1fr; gap: 0.65rem; margin-top: 1.15rem; }
+    .welcome-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 0.18rem; padding: 0.85rem 1rem; border-radius: 12px; font-family: 'Inter', sans-serif; font-weight: 600; cursor: pointer; transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s, background 0.18s, border-color 0.18s; text-align: left; border: 1px solid transparent; line-height: 1.3; }
+    .welcome-choice-title { font-size: 0.95rem; }
+    .welcome-choice-sub { font-size: 0.74rem; font-weight: 400; opacity: 0.85; }
+    .welcome-choice-primary { background: #2d2a26; color: #fff; }
+    .welcome-choice-primary .welcome-choice-title::after { content: " \2192"; }
+    .welcome-choice-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18); }
+    body.dark-mode .welcome-choice-primary { background: #fbbf24; color: #1f1206; }
+    .welcome-choice-secondary { background: transparent; color: var(--text-primary); border-color: var(--border-light, #e5e7eb); }
+    .welcome-choice-secondary:hover { background: rgba(0, 0, 0, 0.04); border-color: var(--text-secondary); }
+    body.dark-mode .welcome-choice-secondary:hover { background: rgba(255, 255, 255, 0.06); }
+
+    .welcome-back-btn { background: none; border: none; color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.85rem; cursor: pointer; padding: 0; margin: 0 0 0.85rem; transition: color 0.2s; }
+    .welcome-back-btn:hover { color: var(--text-primary); }
+    .school-code-view h2 { text-align: left; }
+    .school-code-view p { text-align: left; }
+
+    @media (max-width: 480px) {
+      .welcome-modal { padding: 1.5rem 1.25rem 1.3rem; }
+      .welcome-modal h2 { font-size: 1.25rem; }
+      .welcome-choices { grid-template-columns: 1fr; }
+    }
 
     /* --- Header school code link --- */
     .hero-tagline { font-size: 1.05rem; color: var(--text-secondary); margin: 0.5rem auto 0; line-height: 1.6; }
@@ -485,16 +524,44 @@
     <p class="hero-tagline">Free GCSE revision for every subject and exam board. <button class="nav-school-link" id="nav-school-link">Enter school code</button></p>
   </section>
 
-  <!-- School code modal (dismissable popup for first-time visitors) -->
+  <!-- Welcome modal (shows on every visit until user makes a choice) -->
   <div class="school-modal-overlay" id="school-modal-overlay">
-    <div class="school-modal">
+    <div class="school-modal welcome-modal">
       <button class="school-modal-close" id="school-modal-close" aria-label="Close">&times;</button>
-      <h2>Does your school use StudyVault?</h2>
-      <p>Enter your school code to access your school's revision materials.</p>
-      <input type="text" class="school-modal-input" id="school-code-input" placeholder="Enter your school code" autocomplete="off" spellcheck="false">
-      <button class="school-modal-btn" id="school-code-btn">Continue</button>
-      <p class="school-modal-error" id="school-modal-error">That code didn't work. Check with your teacher and try again.</p>
-      <button class="school-modal-dismiss" id="school-modal-dismiss">No thanks, browse free content</button>
+
+      <!-- Welcome view (default) -->
+      <div class="welcome-view" id="welcome-view">
+        <div class="beta-pill">Beta &middot; still growing</div>
+        <h2>Welcome to StudyVault</h2>
+        <p class="welcome-intro">We&rsquo;re working towards <strong>every subject and every exam board</strong>, but we&rsquo;re not all the way there yet. Some subjects are fully built; others are still being added.</p>
+
+        <div class="welcome-callout">
+          <span class="welcome-callout-icon" aria-hidden="true">&#9733;</span>
+          <p><strong>Don&rsquo;t see your subject?</strong> Request it when you set up &mdash; we read every request and it directly shapes what we build next.</p>
+        </div>
+
+        <p class="welcome-bug-info">Spotted a bug? Tap the bug button (bottom-right of any page) or email <a href="mailto:studyvault.info@gmail.com">studyvault.info@gmail.com</a>.</p>
+
+        <div class="welcome-choices">
+          <button class="welcome-choice welcome-choice-primary" id="welcome-browse-btn" type="button">
+            <span class="welcome-choice-title">Browse free content</span>
+            <span class="welcome-choice-sub">Most students start here</span>
+          </button>
+          <button class="welcome-choice welcome-choice-secondary" id="welcome-school-btn" type="button">
+            <span class="welcome-choice-title">I have a school code</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- School-code sub-view (hidden until "I have a school code" clicked) -->
+      <div class="school-code-view" id="school-code-view" hidden>
+        <button class="welcome-back-btn" id="welcome-back-btn" type="button">&larr; Back</button>
+        <h2>Enter your school code</h2>
+        <p>Your teacher should have given you a code.</p>
+        <input type="text" class="school-modal-input" id="school-code-input" placeholder="Enter your school code" autocomplete="off" spellcheck="false">
+        <button class="school-modal-btn" id="school-code-btn">Continue</button>
+        <p class="school-modal-error" id="school-modal-error">That code didn&rsquo;t work. Check with your teacher and try again.</p>
+      </div>
     </div>
   </div>
 
@@ -1198,48 +1265,86 @@
     // (sv-just-personalised flag) and the Unity tier picker.
     // For first-time visitors (no session at all), subjects grid shows as-is with all cards
 
-    // --- School code modal ---
+    // --- Welcome modal ---
+    // Two views inside one overlay: (1) welcome with two choices, (2) school-code entry.
+    // Modal pops on every visit until the user makes an explicit choice
+    // (browse free OR enter a valid school code). The X / background click
+    // dismisses for the session only — the modal returns next visit.
     var schoolModalOverlay = document.getElementById('school-modal-overlay');
     var schoolModalClose = document.getElementById('school-modal-close');
-    var schoolModalDismiss = document.getElementById('school-modal-dismiss');
+    var welcomeView = document.getElementById('welcome-view');
+    var schoolCodeView = document.getElementById('school-code-view');
+    var welcomeBrowseBtn = document.getElementById('welcome-browse-btn');
+    var welcomeSchoolBtn = document.getElementById('welcome-school-btn');
+    var welcomeBackBtn = document.getElementById('welcome-back-btn');
     var codeInput = document.getElementById('school-code-input');
     var codeBtn = document.getElementById('school-code-btn');
     var modalError = document.getElementById('school-modal-error');
     var navSchoolLink = document.getElementById('nav-school-link');
-    var DISMISSED_KEY = 'sv-school-modal-dismissed';
+    var DECISION_KEY = 'sv-welcome-decision';
+    // Legacy key from before the welcome rework. Treat its presence as an
+    // already-made decision so existing visitors don't see the new modal again.
+    var LEGACY_DISMISSED_KEY = 'sv-school-modal-dismissed';
 
-    // Hide the school code link if already logged in
+    // Hide the inline "Enter school code" link in the hero if a school session is active
     if (SchoolSession.isActive() && navSchoolLink) {
       navSchoolLink.style.display = 'none';
     }
 
-    function openSchoolModal() {
-      schoolModalOverlay.classList.add('open');
-      codeInput.focus();
+    function showWelcomeView() {
+      welcomeView.hidden = false;
+      schoolCodeView.hidden = true;
+    }
+    function showSchoolCodeView() {
+      welcomeView.hidden = true;
+      schoolCodeView.hidden = false;
+      // Defer focus so the input is mounted before we focus it
+      setTimeout(function () { if (codeInput) codeInput.focus(); }, 50);
     }
 
-    function closeSchoolModal(launchWizard) {
+    function openWelcomeModal() {
+      schoolModalOverlay.classList.add('open');
+      showWelcomeView();
+    }
+    function openSchoolCodeModal() {
+      schoolModalOverlay.classList.add('open');
+      showSchoolCodeView();
+    }
+
+    function closeModal(makeDecision, launchWizard) {
       schoolModalOverlay.classList.remove('open');
-      localStorage.setItem(DISMISSED_KEY, '1');
-      // First-time visitors who aren't a free user yet → open the subject wizard
+      if (makeDecision) {
+        localStorage.setItem(DECISION_KEY, '1');
+      }
       if (launchWizard && !FreeUser.isActive()) {
         var freeWiz = document.getElementById('free-wizard-overlay');
         if (freeWiz) freeWiz.classList.add('open');
       }
     }
 
-    // Show modal on first visit (no school session, no free prefs, not previously dismissed)
-    if (!SchoolSession.isActive() && !FreeUser.isActive() && !localStorage.getItem(DISMISSED_KEY)) {
-      openSchoolModal();
+    var hasMadeDecision = !!(localStorage.getItem(DECISION_KEY) || localStorage.getItem(LEGACY_DISMISSED_KEY));
+    if (!SchoolSession.isActive() && !FreeUser.isActive() && !hasMadeDecision) {
+      openWelcomeModal();
     }
 
-    schoolModalClose.addEventListener('click', function () { closeSchoolModal(true); });
-    schoolModalDismiss.addEventListener('click', function () { closeSchoolModal(true); });
+    // X button + background click → close for this session only (decision NOT made)
+    schoolModalClose.addEventListener('click', function () { closeModal(false, false); });
     schoolModalOverlay.addEventListener('click', function (e) {
-      if (e.target === schoolModalOverlay) closeSchoolModal(true);
+      if (e.target === schoolModalOverlay) closeModal(false, false);
     });
+
+    // Browse free content → record decision, close modal, auto-open the personalisation wizard
+    welcomeBrowseBtn.addEventListener('click', function () { closeModal(true, true); });
+
+    // I have a school code → swap to sub-view (decision happens on successful code submission)
+    welcomeSchoolBtn.addEventListener('click', showSchoolCodeView);
+
+    // Back arrow inside school-code view → return to welcome view
+    welcomeBackBtn.addEventListener('click', showWelcomeView);
+
+    // Inline "Enter school code" link in hero → jump straight to school-code view
     if (navSchoolLink) {
-      navSchoolLink.addEventListener('click', openSchoolModal);
+      navSchoolLink.addEventListener('click', openSchoolCodeModal);
     }
 
     function submitCode() {
@@ -1260,6 +1365,7 @@
           SchoolSession.set(result.data);
           // Clear stale free-user prefs (shouldn't be both free + school)
           localStorage.removeItem('studyvault-free-prefs');
+          localStorage.setItem(DECISION_KEY, '1');
           window.location.reload();
         } else {
           modalError.classList.add('visible');
@@ -1281,7 +1387,8 @@
 
     logoutBtn.addEventListener('click', function() {
       SchoolSession.clear();
-      localStorage.removeItem(DISMISSED_KEY);
+      localStorage.removeItem(DECISION_KEY);
+      localStorage.removeItem(LEGACY_DISMISSED_KEY);
       window.location.reload();
     });
 
@@ -1437,17 +1544,33 @@
         ]
       },
       'edexcel': {
-        'Period Study': [
-          { slug: 'weimar-nazi-germany', name: 'Weimar and Nazi Germany 1918-39' }
-        ],
-        'Wider World Depth': [
-          { slug: 'superpower-relations', name: 'Superpower Relations & Cold War' }
-        ],
-        'Thematic Study': [
-          { slug: 'medicine-in-britain', name: 'Medicine in Britain' }
+        // Edexcel 1HI0 — section labels match Pearson's paper structure.
+        // Paper 1 = Thematic + Historic Environment, Paper 2 = British Depth + Period Study,
+        // Paper 3 = Modern Depth.
+        'Thematic Study + Historic Environment': [
+          { slug: 'medicine-in-britain', name: 'Medicine in Britain' },
+          { slug: 'crime-punishment-whitechapel', name: 'Crime and Punishment in Britain (Whitechapel)' },
+          { slug: 'migrants-in-britain', name: 'Migrants in Britain (Notting Hill)' },
+          { slug: 'warfare-british-society', name: 'Warfare and British Society (London 1939–45)' }
         ],
         'British Depth Study': [
-          { slug: 'anglo-saxon-norman', name: 'Anglo-Saxon and Norman England' }
+          { slug: 'anglo-saxon-norman', name: 'Anglo-Saxon and Norman England' },
+          { slug: 'early-elizabethan-england', name: 'Early Elizabethan England, 1558–88' },
+          { slug: 'henry-viii-ministers', name: 'Henry VIII and his Ministers, 1509–40' },
+          { slug: 'richard-i-king-john', name: 'Richard I and King John, 1189–1216' }
+        ],
+        'Period Study': [
+          { slug: 'superpower-relations', name: 'Superpower Relations & the Cold War' },
+          { slug: 'american-west', name: 'The American West, c1835–c1895' },
+          { slug: 'british-america', name: 'British America, 1713–83: Empire and Revolution' },
+          { slug: 'conflict-middle-east', name: 'Conflict in the Middle East, 1945–95' },
+          { slug: 'spain-new-world', name: "Spain and the 'New World', c1490–c1555" }
+        ],
+        'Modern Depth Study': [
+          { slug: 'weimar-nazi-germany', name: 'Weimar and Nazi Germany, 1918–39' },
+          { slug: 'usa-conflict-home-abroad', name: 'The USA, 1954–75: Conflict at Home and Abroad' },
+          { slug: 'russia-soviet-union', name: 'Russia and the Soviet Union, 1917–41' },
+          { slug: 'maos-china', name: "Mao's China, 1945–76" }
         ]
       }
     };
@@ -1462,7 +1585,7 @@
 
     if (freeSchoolBtn) {
       freeSchoolBtn.addEventListener('click', function () {
-        openSchoolModal();
+        openSchoolCodeModal();
       });
     }
 
