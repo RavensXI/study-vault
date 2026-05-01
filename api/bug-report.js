@@ -106,9 +106,11 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'Could not save report' });
   }
 
-  // Fire-and-forget admin email — don't block the response if the email
-  // service is down or the API key is missing.
-  notifyAdmin({
+  // Send admin email. Must await — Vercel serverless terminates the
+  // function process once the response is sent, killing any unfinished
+  // promises (and their console output). Worth the ~300-500ms latency.
+  try {
+    await notifyAdmin({
     subject: `[StudyVault Bug] ${message.slice(0, 60)}${message.length > 60 ? '...' : ''}`,
     text:
       `New bug report on StudyVault\n\n` +
@@ -129,7 +131,10 @@ module.exports = async (req, res) => {
       `</table>` +
       (screenshot_url ? `<p style="margin-top:1em"><img src="${escHtml(screenshot_url)}" alt="Bug screenshot" style="max-width:100%;border:1px solid #ddd;border-radius:6px"></p>` : '') +
       `<p style="margin-top:1.5em;font-family:sans-serif"><a href="https://www.studyvault.co.uk/admin/bugs" style="background:#2d2a26;color:#fff;padding:0.6em 1.2em;text-decoration:none;border-radius:6px;font-weight:600">Open admin triage &rarr;</a></p>`,
-  }).catch((e) => console.error('[bug-report] notify error:', e));
+    });
+  } catch (e) {
+    console.error('[bug-report] notify error:', e);
+  }
 
   return res.json({ ok: true });
 };
