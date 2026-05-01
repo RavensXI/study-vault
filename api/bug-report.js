@@ -1,4 +1,5 @@
 const { supabase } = require('./pipeline/_lib/supabase');
+const { notifyAdmin, escHtml } = require('./_lib/notify');
 const crypto = require('crypto');
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID;
@@ -104,6 +105,31 @@ module.exports = async (req, res) => {
     console.error('bug_report insert failed', error);
     return res.status(500).json({ error: 'Could not save report' });
   }
+
+  // Fire-and-forget admin email — don't block the response if the email
+  // service is down or the API key is missing.
+  notifyAdmin({
+    subject: `[StudyVault Bug] ${message.slice(0, 60)}${message.length > 60 ? '...' : ''}`,
+    text:
+      `New bug report on StudyVault\n\n` +
+      `Description:\n${message}\n\n` +
+      `Reporter email: ${email || '(not provided)'}\n` +
+      `Page: ${page_url || '(unknown)'}\n` +
+      `Viewport: ${viewport_size || '(unknown)'}\n` +
+      `Screenshot: ${screenshot_url || '(none)'}\n\n` +
+      `Triage at: https://www.studyvault.co.uk/admin/bugs`,
+    html:
+      `<h2 style="font-family:sans-serif;margin:0 0 0.5em">New bug report</h2>` +
+      `<p style="font-family:sans-serif;white-space:pre-wrap;background:#f6f6f6;padding:0.75em 1em;border-radius:6px;border-left:3px solid #f59e0b">${escHtml(message)}</p>` +
+      `<table style="font-family:sans-serif;font-size:0.9em;border-collapse:collapse;margin-top:1em">` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Reporter</td><td>${escHtml(email || '(not provided)')}</td></tr>` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Page</td><td>${escHtml(page_url || '(unknown)')}</td></tr>` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Viewport</td><td>${escHtml(viewport_size || '(unknown)')}</td></tr>` +
+      (screenshot_url ? `<tr><td style="padding:4px 12px 4px 0;color:#666">Screenshot</td><td><a href="${escHtml(screenshot_url)}">${escHtml(screenshot_url)}</a></td></tr>` : '') +
+      `</table>` +
+      (screenshot_url ? `<p style="margin-top:1em"><img src="${escHtml(screenshot_url)}" alt="Bug screenshot" style="max-width:100%;border:1px solid #ddd;border-radius:6px"></p>` : '') +
+      `<p style="margin-top:1.5em;font-family:sans-serif"><a href="https://www.studyvault.co.uk/admin/bugs" style="background:#2d2a26;color:#fff;padding:0.6em 1.2em;text-decoration:none;border-radius:6px;font-weight:600">Open admin triage &rarr;</a></p>`,
+  }).catch((e) => console.error('[bug-report] notify error:', e));
 
   return res.json({ ok: true });
 };

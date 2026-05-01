@@ -1,4 +1,5 @@
 const { supabase } = require('./pipeline/_lib/supabase');
+const { notifyAdmin, escHtml } = require('./_lib/notify');
 
 const ALLOWED_BOARDS = ['AQA', 'Edexcel', 'OCR', 'Eduqas', 'WJEC', 'NCFE', 'Other', ''];
 
@@ -56,6 +57,30 @@ module.exports = async (req, res) => {
     console.error('subject_request insert failed', error);
     return res.status(500).json({ error: 'Could not save request' });
   }
+
+  // Fire-and-forget admin email — don't block the response if the email
+  // service is down or the API key is missing.
+  notifyAdmin({
+    subject: `[StudyVault Request] ${subject_name}${exam_board ? ' (' + exam_board + ')' : ''}`,
+    text:
+      `New subject request on StudyVault\n\n` +
+      `Subject: ${subject_name}\n` +
+      `Topic: ${topic || '(not specified)'}\n` +
+      `Exam board: ${exam_board || '(not specified)'}\n` +
+      `Requester email: ${email || '(not provided)'}\n` +
+      `Notes: ${notes || '(none)'}\n\n` +
+      `Triage at: https://www.studyvault.co.uk/admin/requests`,
+    html:
+      `<h2 style="font-family:sans-serif;margin:0 0 0.5em">New subject request</h2>` +
+      `<table style="font-family:sans-serif;font-size:0.95em;border-collapse:collapse;margin-top:0.5em">` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Subject</td><td><strong>${escHtml(subject_name)}</strong></td></tr>` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Topic</td><td>${escHtml(topic || '(not specified)')}</td></tr>` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Exam board</td><td>${escHtml(exam_board || '(not specified)')}</td></tr>` +
+      `<tr><td style="padding:4px 12px 4px 0;color:#666">Requester</td><td>${escHtml(email || '(not provided)')}</td></tr>` +
+      (notes ? `<tr><td style="padding:4px 12px 4px 0;color:#666;vertical-align:top">Notes</td><td>${escHtml(notes)}</td></tr>` : '') +
+      `</table>` +
+      `<p style="margin-top:1.5em;font-family:sans-serif"><a href="https://www.studyvault.co.uk/admin/requests" style="background:#2d2a26;color:#fff;padding:0.6em 1.2em;text-decoration:none;border-radius:6px;font-weight:600">Open admin triage &rarr;</a></p>`,
+  }).catch((e) => console.error('[subject-request] notify error:', e));
 
   return res.json({ ok: true });
 };
