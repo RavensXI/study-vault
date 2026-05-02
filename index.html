@@ -468,8 +468,8 @@
     .fw-board-pill { padding: 0.4rem 0.85rem; border-radius: 10px; border: 1.5px solid #e8e2d8; background: #faf8f5; color: #2d2a26; font-family: inherit; font-size: 0.78rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .fw-board-pill:hover { border-color: #c15a3a; background: #fff; }
     .fw-board-pill.selected { background: #c15a3a; border-color: #c15a3a; color: #fff; }
-    .fw-board-pill.not-sure { border-style: dashed; color: #6b645c; }
-    .fw-board-pill.not-sure.selected { background: #6b645c; border-color: #6b645c; color: #fff; border-style: solid; }
+    .fw-board-pill.not-listed { border-style: dashed; color: #6b645c; }
+    .fw-board-pill.not-listed:hover { border-color: #7c3aed; color: #7c3aed; background: #faf5ff; }
     .fw-board-pill.greyed { opacity: 0.45; cursor: pointer; }
     .fw-board-pill.greyed:hover { opacity: 0.65; }
     .fw-board-pill.requested { opacity: 0.45; border-style: dashed; }
@@ -562,6 +562,35 @@
         <button class="school-modal-btn" id="school-code-btn">Continue</button>
         <p class="school-modal-error" id="school-modal-error">That code didn&rsquo;t work. Check with your teacher and try again.</p>
       </div>
+    </div>
+  </div>
+
+  <!-- "Board not listed?" request modal — opened from the wizard step-2 board picker -->
+  <div class="school-modal-overlay" id="board-request-overlay">
+    <div class="school-modal welcome-modal">
+      <button class="school-modal-close" id="board-request-close" aria-label="Close">&times;</button>
+      <div class="beta-pill">Subject request</div>
+      <h2>Exam board not listed?</h2>
+      <p class="welcome-intro">Tell us which board you&rsquo;re sitting <strong id="board-request-subject-name">your subject</strong> on, and we&rsquo;ll add it. We read every request and prioritise based on demand.</p>
+      <form class="request-form" id="request-form-board">
+        <input type="hidden" name="subject_name" id="board-request-subject-input" value="">
+        <input type="hidden" name="exam_board" value="Other">
+        <div class="request-fields">
+          <label class="full"><span class="label-text">Which exam board?</span>
+            <input type="text" name="board_text" required maxlength="60" placeholder="e.g. CCEA, SQA, IB, Cambridge International">
+          </label>
+          <label class="full"><span class="label-text">Email <span class="label-meta">(optional &mdash; we&rsquo;ll let you know when it&rsquo;s ready)</span></span>
+            <input type="email" name="email" maxlength="200" placeholder="you@example.com">
+          </label>
+        </div>
+        <div class="request-actions">
+          <span class="request-msg" data-msg></span>
+          <button type="submit" class="request-submit">
+            Send request
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -1761,8 +1790,10 @@
       document.getElementById('fw-step-2').classList.add('active');
     });
 
-    // Subject display names for boards step
-    var subjectDisplayNames = {
+    // Subject display names for boards step. Exposed on window so the
+    // "Board not listed?" modal (wired in a separate IIFE) can resolve a
+    // slug to a friendly subject name when prefilling the request form.
+    window.subjectDisplayNames = window.subjectDisplayNames || {
       'maths': 'Maths', 'english-language': 'English Language', 'english-literature': 'English Literature',
       'science': 'Combined Science', 'separate-sciences': 'Separate Sciences',
       'health-social-care': 'Health & Social Care', 'hospitality-catering': 'Hospitality & Catering',
@@ -1809,18 +1840,16 @@
         pill.textContent = board;
         pill.dataset.board = board.toLowerCase();
         pill.dataset.available = available ? 'true' : 'false';
-        pill.addEventListener('click', function () { fwPickBoard(slug, board, pill, false); });
+        pill.addEventListener('click', function () { fwPickBoard(slug, board, pill); });
         pills.appendChild(pill);
       });
-      // "Not sure" for multi-board subjects
-      if (boardKeys.length > 1) {
-        var notSure = document.createElement('button');
-        notSure.type = 'button';
-        notSure.className = 'fw-board-pill not-sure';
-        notSure.textContent = 'Not sure';
-        notSure.addEventListener('click', function () { fwPickBoard(slug, firstAvailable || boardKeys[0], notSure, true); });
-        pills.appendChild(notSure);
-      }
+      // "Board not listed?" — opens the request modal pre-filled with this subject
+      var notListed = document.createElement('button');
+      notListed.type = 'button';
+      notListed.className = 'fw-board-pill not-listed';
+      notListed.textContent = 'Board not listed?';
+      notListed.addEventListener('click', function () { openBoardRequestModal(slug); });
+      pills.appendChild(notListed);
       row.appendChild(pills);
 
       var help = document.createElement('div');
@@ -1844,9 +1873,9 @@
       return row;
     }
 
-    function fwPickBoard(slug, board, clickedPill, isFallback) {
+    function fwPickBoard(slug, board, clickedPill) {
       var available = clickedPill.dataset.available !== 'false';
-      if (!available && !clickedPill.classList.contains('not-sure')) {
+      if (!available) {
         if (!clickedPill.classList.contains('requested')) {
           clickedPill.classList.add('requested');
           clickedPill.textContent = board + ' (requested)';
@@ -1860,15 +1889,15 @@
       if (!row) return;
       row.classList.remove('unresolved'); row.classList.add('resolved');
       row.querySelectorAll('.fw-board-pill').forEach(function (p) {
-        var match = p.classList.contains('not-sure') ? isFallback : (p.dataset.board === board.toLowerCase());
-        p.classList.toggle('selected', !!match);
+        // Don't toggle selected on the "Board not listed?" pill — it's a modal trigger, not a state.
+        if (p.classList.contains('not-listed')) return;
+        p.classList.toggle('selected', p.dataset.board === board.toLowerCase());
       });
       var status = row.querySelector('.fw-board-status');
       status.className = 'fw-board-status picked';
       status.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> ' + board;
       var help = row.querySelector('.fw-board-help');
-      if (isFallback) { help.textContent = 'Set to ' + board + ' for now. You can change this any time.'; help.classList.add('visible'); }
-      else { help.classList.remove('visible'); }
+      if (help) help.classList.remove('visible');
       fwUpdateBoardProgress();
     }
 
@@ -2561,7 +2590,7 @@
 
   // ---- Subject request form ----
   (function () {
-    function wireForm(form) {
+    function wireForm(form, onSuccess) {
       if (!form || form._wired) return;
       form._wired = true;
       var msgEl = form.querySelector('[data-msg]');
@@ -2576,6 +2605,14 @@
           exam_board: (data.get('exam_board') || '').toString(),
           email: (data.get('email') || '').toString().trim(),
         };
+        // Board-not-listed modal carries `board_text` (the missing board name).
+        // Map it into `notes` so the admin email + /admin/requests row carry the detail.
+        var boardText = (data.get('board_text') || '').toString().trim();
+        if (boardText) {
+          payload.notes = 'Requested exam board: ' + boardText;
+        } else {
+          payload.notes = (data.get('notes') || '').toString().trim();
+        }
         if (!payload.subject_name) {
           if (msgEl) { msgEl.textContent = 'Subject name is required'; msgEl.className = 'request-msg error'; }
           return;
@@ -2592,6 +2629,7 @@
           if (resp.ok && json.ok) {
             form.reset();
             if (msgEl) { msgEl.textContent = 'Thanks — request received.'; msgEl.className = 'request-msg success'; }
+            if (typeof onSuccess === 'function') onSuccess();
           } else {
             var err = (json && json.error) || 'Could not send right now. Please try again.';
             if (msgEl) { msgEl.textContent = err; msgEl.className = 'request-msg error'; }
@@ -2605,6 +2643,41 @@
     }
     wireForm(document.getElementById('request-form'));
     wireForm(document.getElementById('request-form-wizard'));
+
+    // "Board not listed?" modal — opened from the wizard step-2 board picker.
+    var boardReqOverlay = document.getElementById('board-request-overlay');
+    var boardReqClose = document.getElementById('board-request-close');
+    var boardReqSubjectInput = document.getElementById('board-request-subject-input');
+    var boardReqSubjectName = document.getElementById('board-request-subject-name');
+    var boardReqForm = document.getElementById('request-form-board');
+
+    function closeBoardRequestModal() { boardReqOverlay.classList.remove('open'); }
+
+    wireForm(boardReqForm, function () {
+      // Auto-close ~1.5s after success so the student sees the confirmation message.
+      setTimeout(closeBoardRequestModal, 1400);
+    });
+
+    window.openBoardRequestModal = function (subjectSlug) {
+      var displayName = (window.subjectDisplayNames && window.subjectDisplayNames[subjectSlug]) || subjectSlug;
+      boardReqSubjectInput.value = displayName;
+      boardReqSubjectName.textContent = displayName;
+      var msgEl = boardReqForm && boardReqForm.querySelector('[data-msg]');
+      if (msgEl) { msgEl.textContent = ''; msgEl.className = 'request-msg'; }
+      var boardTextInput = boardReqForm && boardReqForm.querySelector('[name="board_text"]');
+      if (boardTextInput) boardTextInput.value = '';
+      var emailInput = boardReqForm && boardReqForm.querySelector('[name="email"]');
+      if (emailInput) emailInput.value = '';
+      boardReqOverlay.classList.add('open');
+      setTimeout(function () { if (boardTextInput) boardTextInput.focus(); }, 50);
+    };
+
+    if (boardReqClose) boardReqClose.addEventListener('click', closeBoardRequestModal);
+    if (boardReqOverlay) {
+      boardReqOverlay.addEventListener('click', function (e) {
+        if (e.target === boardReqOverlay) closeBoardRequestModal();
+      });
+    }
   })();
   </script>
 <div class="sv-legal-footer"><p>&copy; 2026 StudyVault. All questions and mark schemes are original content. StudyVault is not affiliated with or endorsed by any exam board. <a href="/about">About</a> &middot; <a href="/faq">FAQ</a> &middot; <a href="/copyright.html">Copyright &amp; IP</a> &middot; <a href="/privacy.html">Privacy</a></p></div>
