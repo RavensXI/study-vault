@@ -500,6 +500,12 @@
     addSidebarTourButton();
     wireReplayTourButton();
 
+    // Exam-countdown pill — explicit call after dynamic .lesson-header is
+    // rendered. The script's own DOMContentLoaded timer can race with
+    // the Supabase fetch on first visit; this guarantees the pill lands.
+    // Idempotent — duplicate from the timer is suppressed inside init().
+    if (typeof window.initExamCountdown === 'function') window.initExamCountdown();
+
     // Beta banner + report button for generic content (school_id NULL)
     if (!subject.school_id) {
       // Beta banner below the progress bar

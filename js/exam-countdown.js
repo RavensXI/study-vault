@@ -157,6 +157,10 @@
 
   async function init() {
     if (sessionStorage.getItem(HIDE_KEY) === 'true') return;
+    // Idempotency: if a pill is already in the DOM, do nothing. Lets the
+    // browse-loader call this after dynamic hero render without producing
+    // a duplicate pill alongside the one the page-load timer would create.
+    if (document.querySelector('.exam-cd')) return;
 
     var slug = getSubjectSlug();
     if (!slug) return;

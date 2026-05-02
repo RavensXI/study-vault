@@ -287,6 +287,13 @@
     // Add nav icons (pencil/lightbulb) to Exam Technique / Revision Techniques links
     if (typeof initNavIcons === 'function') initNavIcons();
 
+    // Render the exam-countdown pill now that the dynamic .hero section
+    // exists. The script also auto-fires 500ms after DOMContentLoaded, but
+    // that race can lose to slow Supabase fetches on first visit. Calling
+    // explicitly after render guarantees the pill appears on cold loads.
+    // Idempotent — a duplicate from the timer is suppressed.
+    if (typeof window.initExamCountdown === 'function') window.initExamCountdown();
+
     // Deck-reveal on first visit to this subject — same animation as the
     // homepage personalisation moment, gives a sense of the unit cards
     // being assembled. Repeat visits skip straight to the static reveal
