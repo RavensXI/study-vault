@@ -207,32 +207,32 @@
 
     /* Wizard variant — embedded inside the modal step, lighter weight */
     .request-panel--wizard {
+      max-width: none;
       margin: 1rem 0 0;
       border-radius: 12px;
       border-color: #e8dfcf;
       background: #fdfbf7;
       box-shadow: none;
+    }
+    .request-panel--wizard > summary {
+      padding: 0.75rem 0.95rem;
+      gap: 0.7rem;
+    }
+    .request-panel--wizard > summary .req-icon {
+      width: 28px; height: 28px;
+      border-radius: 8px;
+    }
+    .request-panel--wizard > summary .req-icon svg { width: 14px; height: 14px; }
+    .request-panel--wizard > summary .req-title {
+      font-size: 0.92rem;
+    }
+    .request-panel--wizard > summary .req-title small {
+      font-size: 0.74rem;
+    }
+    .request-panel--wizard .request-panel-body {
       padding: 0.95rem 1.1rem 1.05rem;
     }
-    .request-panel--wizard h3 {
-      margin: 0 0 0.25rem;
-      font-family: 'Source Serif 4', Georgia, serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #2d2a26;
-      display: flex;
-      align-items: center;
-      gap: 0.55rem;
-    }
-    .request-panel--wizard h3::before {
-      content: '';
-      width: 22px; height: 22px;
-      background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237c3aed' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M22 2 11 13'/><path d='M22 2l-7 20-4-9-9-4 20-7z'/></svg>") no-repeat center / 14px 14px,
-                  linear-gradient(135deg, #ede9fe, #f5f3ff);
-      border-radius: 7px;
-      flex-shrink: 0;
-    }
-    .request-panel--wizard p {
+    .request-panel--wizard .request-panel-body > p {
       font-size: 0.8rem;
       color: var(--text-secondary);
       margin: 0 0 0.85rem;
@@ -612,40 +612,51 @@
             <div id="fw-search-grid"></div>
             <div class="fw-no-results" id="fw-no-results" style="display:none">No subjects match that search.</div>
           </div>
-          <section class="request-panel request-panel--wizard" id="request-panel-wizard" data-context="wizard">
-            <h3>Can't find your subject?</h3>
-            <p>Tell us what you'd like and we'll add it. Email is optional.</p>
-            <form class="request-form" id="request-form-wizard">
-              <div class="request-fields">
-                <label class="full"><span class="label-text">Subject</span>
-                  <input type="text" name="subject_name" required maxlength="120" placeholder="e.g. Sociology, Photography">
-                </label>
-                <label class="full"><span class="label-text">Topic or unit <span class="label-meta">(optional)</span></span>
-                  <input type="text" name="topic" maxlength="200" placeholder="e.g. Norman England, Conflict 1894-1918">
-                </label>
-                <label><span class="label-text">Exam board</span>
-                  <select name="exam_board">
-                    <option value="">Not sure</option>
-                    <option value="AQA">AQA</option>
-                    <option value="Edexcel">Edexcel / Pearson</option>
-                    <option value="OCR">OCR</option>
-                    <option value="Eduqas">Eduqas / WJEC</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </label>
-                <label><span class="label-text">Email <span class="label-meta">(optional)</span></span>
-                  <input type="email" name="email" maxlength="200" placeholder="you@example.com">
-                </label>
-              </div>
-              <div class="request-actions">
-                <span class="request-msg" data-msg></span>
-                <button type="submit" class="request-submit">
-                  Send request
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-                </button>
-              </div>
-            </form>
-          </section>
+          <details class="request-panel request-panel--wizard" id="request-panel-wizard" data-context="wizard">
+            <summary>
+              <span class="req-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+              </span>
+              <span class="req-title">
+                Can&rsquo;t find your subject?
+                <small>Request a subject or exam board and we&rsquo;ll add it.</small>
+              </span>
+              <svg class="req-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div class="request-panel-body">
+              <p>Tell us what you&rsquo;d like and we&rsquo;ll add it. Email is optional.</p>
+              <form class="request-form" id="request-form-wizard">
+                <div class="request-fields">
+                  <label class="full"><span class="label-text">Subject</span>
+                    <input type="text" name="subject_name" required maxlength="120" placeholder="e.g. Sociology, Photography">
+                  </label>
+                  <label class="full"><span class="label-text">Topic or unit <span class="label-meta">(optional)</span></span>
+                    <input type="text" name="topic" maxlength="200" placeholder="e.g. Norman England, Conflict 1894-1918">
+                  </label>
+                  <label><span class="label-text">Exam board</span>
+                    <select name="exam_board">
+                      <option value="">Not sure</option>
+                      <option value="AQA">AQA</option>
+                      <option value="Edexcel">Edexcel / Pearson</option>
+                      <option value="OCR">OCR</option>
+                      <option value="Eduqas">Eduqas / WJEC</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </label>
+                  <label><span class="label-text">Email <span class="label-meta">(optional)</span></span>
+                    <input type="email" name="email" maxlength="200" placeholder="you@example.com">
+                  </label>
+                </div>
+                <div class="request-actions">
+                  <span class="request-msg" data-msg></span>
+                  <button type="submit" class="request-submit">
+                    Send request
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </details>
         </div>
         <div class="fw-footer">
           <div class="fw-footer-count"><strong id="fw-extra-count">0</strong> extra subjects added</div>
@@ -1740,9 +1751,7 @@
 
     fwRenderAccordion();
     fwUpdateCounts();
-    // Open first category by default
-    var firstCat = document.querySelector('.fw-category');
-    if (firstCat) firstCat.classList.add('open');
+    // All categories closed by default — students choose what to expand.
 
     // Step 1 skip: just use cores
     document.getElementById('fw-step1-skip').addEventListener('click', function () {
