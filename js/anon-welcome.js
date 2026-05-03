@@ -36,7 +36,62 @@
     try { localStorage.setItem(SEEN_KEY, '1'); } catch (e) {}
   }
 
+  // Detect which exam board the visitor is currently looking at, based on the
+  // URL slug. Returns a display name (e.g. "AQA", "Edexcel") or null when the
+  // page isn't a recognised content URL.
+  //
+  // Logic:
+  //   1. Suffixed slugs (e.g. "english-literature-edexcel") → board from suffix
+  //   2. Unsuffixed multi-board slugs → look up the default board (per the
+  //      slug map at index.html:2253)
+  //   3. Unknown subjects → return null; modal falls back to generic copy
+  function detectBoard() {
+    var match = window.location.pathname.match(/^\/(?:browse|lesson|practice)\/([^/]+)/);
+    if (!match) return null;
+    var slug = match[1];
+
+    var suffixes = [
+      ['-edexcel-a', 'Edexcel A'],
+      ['-edexcel-b', 'Edexcel B'],
+      ['-edexcel',   'Edexcel'],
+      ['-aqa',       'AQA'],
+      ['-ocr',       'OCR'],
+      ['-eduqas',    'Eduqas'],
+      ['-wjec',      'WJEC'],
+      ['-ncfe',      'NCFE'],
+    ];
+    for (var i = 0; i < suffixes.length; i++) {
+      if (slug.indexOf(suffixes[i][0], slug.length - suffixes[i][0].length) !== -1) {
+        return suffixes[i][1];
+      }
+    }
+
+    var defaults = {
+      'english-language':   'AQA',
+      'english-literature': 'AQA',
+      'maths':              'Edexcel',
+      'science':            'AQA',
+      'geography':          'AQA',
+      'history':            'AQA',
+      'religious-education':'AQA',
+      'separate-sciences':  'AQA',
+      'business':           'Edexcel',
+      'health-social-care': 'Pearson Edexcel',
+      'hospitality-catering':'WJEC',
+      'music':              'Eduqas',
+      'music-technology':   'NCFE',
+    };
+    return defaults[slug] || null;
+  }
+
   function buildModal() {
+    var board = detectBoard();
+    var leadParagraph = board
+      ? 'You\'re currently looking at the <strong>' + board + '</strong> version. '
+        + 'If your school uses a different exam board, tell us and we\'ll switch the content over.'
+      : 'You can keep browsing — but if you tell us your exam board, we\'ll show you '
+        + 'the right content for the subjects you actually take.';
+
     var overlay = document.createElement('div');
     overlay.className = 'anon-welcome-overlay';
     overlay.innerHTML = (
@@ -48,7 +103,7 @@
     +   '</div>'
     +   '<h2 class="anon-welcome-title" id="anon-welcome-title">First time at Study Vault?</h2>'
     +   '<div class="anon-welcome-body">'
-    +     '<p>You can keep browsing — but if you tell us your exam board, we\'ll show you the right content for the subjects you actually take.</p>'
+    +     '<p>' + leadParagraph + '</p>'
     +     '<p>Takes 30 seconds. Only do it once.</p>'
     +   '</div>'
     +   '<div class="anon-welcome-buttons">'
