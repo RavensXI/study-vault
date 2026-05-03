@@ -88,9 +88,23 @@
     }
 
     /* To-Build cards */
-    .bs-tobuild { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.85rem; }
+    .bs-tobuild { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.85rem; }
     .tobuild-card { background: white; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
-    .tobuild-card h3 { font-family: 'Source Serif 4', serif; font-size: 1rem; margin: 0 0 0.4rem; }
+    .tobuild-head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.25rem; }
+    .tobuild-head h3 { font-family: 'Source Serif 4', serif; font-size: 1rem; margin: 0; flex: 1; }
+    .tobuild-meta { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+
+    /* Tier rank badge — S/A/B/C/N */
+    .tier-rank { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 6px; font-size: 0.72rem; font-weight: 700; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; flex-shrink: 0; }
+    .tier-rank-S { background: #fef3c7; color: #92400e; }
+    .tier-rank-A { background: #dbeafe; color: #1e40af; }
+    .tier-rank-B { background: #ddd6fe; color: #5b21b6; }
+    .tier-rank-C { background: #f3f4f6; color: #4b5563; }
+    .tier-rank-N { background: #f3f4f6; color: #9ca3af; }
+
+    /* Subject-request bump badge */
+    .req-badge { font-size: 0.7rem; font-weight: 600; padding: 2px 7px; border-radius: 10px; background: #fef9c3; color: #854d0e; flex-shrink: 0; white-space: nowrap; }
+
     .board-pills { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
     .board-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 500; }
     .board-pill.built { background: #dcfce7; color: #166534; }
@@ -151,7 +165,7 @@
 
     <section class="bs-section">
       <h2>To Build</h2>
-      <p class="section-hint">Subjects in the spec catalogue (<code>specs/index.json</code>) with at least one board not yet on the free tier. Built boards shown in green; unbuilt in grey.</p>
+      <p class="section-hint">Subjects with at least one unbuilt board in the spec catalogue. Sorted by student requests, then by entry-volume tier (S = 400k+ entries, N = niche). Pure portfolio subjects (Art, Dance) are excluded — they have no written exam.</p>
       <div class="bs-tobuild" id="tobuild"></div>
     </section>
   </div>
@@ -169,7 +183,74 @@
       schools: {},
       lessonsBySubject: {},
       specs: [],
+      requestCounts: {},
     };
+
+    // Strip route/variant suffixes so all Geography variants ("Geography",
+    // "Geography A", "Geography A (Geographical Themes)") collapse into one
+    // family. Cambridge Nationals subjects keep their colon suffix because
+    // each variant is a genuinely different subject.
+    function subjectFamily(name) {
+      if (!name) return '';
+      var n = String(name).trim();
+      n = n.replace(/:\s*(Trilogy|Synergy)\s*$/i, '');     // Combined Science: Trilogy → Combined Science
+      n = n.replace(/\s*\([^)]*\)\s*$/, '');                // (Geographical Themes) etc.
+      n = n.replace(/\s+[AB]$/, '');                         // Geography A → Geography
+      return n.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    }
+
+    // Subject families with no meaningful written exam — pure portfolio /
+    // performance. Hidden from the To-Build section.
+    var EXCLUDED_FAMILIES = {
+      'art-and-design': true,
+      'dance': true,
+      'photography': true,
+    };
+
+    // Rough JCQ-2024 entry-volume tiers. Used to rank the To-Build list so
+    // high-uptake subjects bubble to the top.
+    // S: 400k+ entries  A: 100k-400k  B: 30k-100k  C: 10k-30k  N: <10k
+    var ENTRY_TIER = {
+      'mathematics': 'S', 'mathematics-and-numeracy': 'S',
+      'english-language': 'S', 'english-literature': 'S',
+      'combined-science': 'S',
+      'biology': 'A', 'chemistry': 'A', 'physics': 'A',
+      'geography': 'A', 'history': 'A',
+      'religious-studies': 'A', 'religious-education': 'A',
+      'spanish': 'A', 'french': 'A',
+      'physical-education': 'A',
+      'computer-science': 'B', 'business-studies': 'B', 'business': 'B',
+      'sociology': 'B', 'psychology': 'B',
+      'design-and-technology': 'B', 'food-preparation-and-nutrition': 'B', 'food-and-nutrition': 'B',
+      'music': 'B', 'drama': 'B', 'german': 'B',
+      'statistics': 'B', 'media-studies': 'B', 'film-studies': 'B',
+      'citizenship-studies': 'B',
+      'health-and-social-care': 'C', 'hospitality-and-catering': 'C',
+      'engineering': 'C', 'electronics': 'C',
+      'classical-civilisation': 'C', 'ancient-history': 'C',
+      'latin': 'C', 'astronomy': 'C', 'geology': 'C',
+      'italian': 'C',
+      'arabic': 'N', 'bengali': 'N', 'biblical-hebrew': 'N',
+      'chinese': 'N', 'chinese-mandarin': 'N',
+      'classical-greek': 'N', 'greek': 'N',
+      'gujarati': 'N', 'hebrew-modern': 'N',
+      'japanese': 'N', 'panjabi': 'N',
+      'persian': 'N', 'polish': 'N', 'portuguese': 'N',
+      'russian': 'N', 'turkish': 'N', 'urdu': 'N',
+      'welsh-language': 'N', 'welsh-literature': 'N', 'welsh-second-language': 'N',
+      'cambridge-nationals': 'C', // catch-all for Cambridge Nationals: ...
+      'level-1-2-vocational-award': 'C', // catch-all
+    };
+    var TIER_RANK = { S: 0, A: 1, B: 2, C: 3, N: 4 };
+    var TIER_LABEL = { S: 'Top tier', A: 'High uptake', B: 'Medium', C: 'Lower', N: 'Niche' };
+
+    function tierFor(family) {
+      if (ENTRY_TIER[family]) return ENTRY_TIER[family];
+      // Loose prefix match for vocational families
+      if (family.indexOf('cambridge-nationals') === 0) return 'C';
+      if (family.indexOf('level-1-2-vocational-award') === 0) return 'C';
+      return 'C';
+    }
 
     function escapeHtml(s) {
       if (s == null) return '';
@@ -208,7 +289,7 @@
 
     async function fetchAll() {
       // Subjects + schools
-      var subjectsRes = await sb.from('subjects').select('id, slug, name, exam_board, school_id, status, created_at').order('name');
+      var subjectsRes = await sb.from('subjects').select('id, slug, name, exam_board, spec_code, school_id, status, created_at').order('name');
       if (subjectsRes.error) throw subjectsRes.error;
       state.subjects = subjectsRes.data || [];
 
@@ -252,6 +333,22 @@
       var specsRes = await fetch('/specs/index.json');
       if (!specsRes.ok) throw new Error('Failed to load specs/index.json');
       state.specs = await specsRes.json();
+
+      // Subject requests — count by normalised subject name
+      try {
+        var reqRes = await sb.from('subject_requests').select('subject_name, exam_board, status, created_at');
+        if (reqRes.error) throw reqRes.error;
+        var counts = {};
+        (reqRes.data || []).forEach(function (r) {
+          var fam = subjectFamily(r.subject_name);
+          if (!fam) return;
+          counts[fam] = (counts[fam] || 0) + 1;
+        });
+        state.requestCounts = counts;
+      } catch (e) {
+        console.warn('Could not load subject_requests:', e.message);
+        state.requestCounts = {};
+      }
     }
 
     function hasPodcast(L) {
@@ -348,15 +445,16 @@
         '<div class="bs-stat"><div class="bs-stat-num">' + totalLessons + '</div><div class="bs-stat-label">Lessons</div></div>' +
         '<div class="bs-stat"><div class="bs-stat-num">' + specsBuilt + '/' + specsTotal + '</div><div class="bs-stat-label">Specs covered (free tier)</div></div>';
 
-      // Group subjects by name (so 'Business Studies' AQA/Edexcel/OCR roll up into one card)
+      // Group subjects by FAMILY (so all Geography variants — A, B, OCR routes —
+      // collapse into one card).
       var groups = {};
       subjects.forEach(function (s) {
-        var key = s.name || s.slug;
-        if (!groups[key]) groups[key] = [];
-        groups[key].push(s);
+        var fam = subjectFamily(s.name) || s.slug;
+        if (!groups[fam]) groups[fam] = { displayName: s.name, members: [] };
+        groups[fam].members.push(s);
       });
       var groupKeys = Object.keys(groups).sort(function (a, b) {
-        return a.localeCompare(b);
+        return groups[a].displayName.localeCompare(groups[b].displayName);
       });
 
       // Sum stats across all subjects in a group
@@ -389,8 +487,9 @@
         return '0';
       }
 
-      var groupHtml = groupKeys.map(function (name) {
-        var subs = groups[name].slice().sort(function (a, b) {
+      var groupHtml = groupKeys.map(function (fam) {
+        var displayName = groups[fam].displayName;
+        var subs = groups[fam].members.slice().sort(function (a, b) {
           return (a.exam_board || '').localeCompare(b.exam_board || '');
         });
         var agg = aggregateStats(subs);
@@ -437,7 +536,7 @@
           '<details class="subj-group">' +
             '<summary class="subj-summary">' +
               '<svg class="subj-chevron" viewBox="0 0 16 16" fill="currentColor"><path d="M5.7 12.3a1 1 0 010-1.4L8.6 8 5.7 5.1a1 1 0 011.4-1.4l3.6 3.6a1 1 0 010 1.4l-3.6 3.6a1 1 0 01-1.4 0z"/></svg>' +
-              '<span class="subj-title">' + escapeHtml(name) + '</span>' +
+              '<span class="subj-title">' + escapeHtml(displayName) + '</span>' +
               '<span class="subj-meta"><strong>' + agg.boardsTotal + '</strong> board' + (agg.boardsTotal !== 1 ? 's' : '') + ' · <strong>' + lessonsBreakdown(agg.articleTotal, agg.practiceTotal) + '</strong></span>' +
               summaryCoverage +
             '</summary>' +
@@ -472,55 +571,97 @@
     }
 
     function renderToBuild() {
-      // Build a map of subject -> { boards built (free tier only), boards available in specs }
-      var bySubject = {};
-
-      // What's in specs (canonical name from specs)
-      state.specs.forEach(function (sp) {
-        var key = normaliseSlug(sp.subject);
-        if (!bySubject[key]) {
-          bySubject[key] = { name: sp.subject, available: {}, built: {} };
-        }
-        bySubject[key].available[sp.board] = true;
-      });
-
-      // What's built on free tier
+      // Build a per-family map. Each spec lives under its subject family
+      // (Geography A → "geography", Combined Science: Trilogy → "combined-science").
+      // We match Supabase rows to specs by spec_code so route variants line up
+      // exactly even when names differ (Supabase "Geography" + board "Edexcel A"
+      // === specs "Geography A" + board "Edexcel" + code 1GA0).
+      var builtByCode = {};
       state.subjects.filter(function (s) { return !s.school_id; }).forEach(function (s) {
-        var key = normaliseSlug(s.name);
-        if (!bySubject[key]) {
-          bySubject[key] = { name: s.name, available: {}, built: {} };
-        }
-        bySubject[key].built[s.exam_board] = true;
+        if (s.spec_code) builtByCode[s.spec_code] = s;
       });
 
-      // Filter to only those with at least one available board not yet built
+      var families = {};
+      state.specs.forEach(function (sp) {
+        var fam = subjectFamily(sp.subject);
+        if (!fam || EXCLUDED_FAMILIES[fam]) return;
+        if (!families[fam]) {
+          families[fam] = { name: sp.subject.replace(/\s+[AB]$/, '').replace(/\s*\([^)]*\)\s*$/, '').replace(/:\s*(Trilogy|Synergy)\s*$/i, ''), specs: [] };
+        }
+        families[fam].specs.push(sp);
+      });
+
+      // Filter to only families with at least one unbuilt spec
       var cards = [];
-      Object.keys(bySubject).sort().forEach(function (key) {
-        var entry = bySubject[key];
-        var availableBoards = Object.keys(entry.available);
-        var unbuilt = availableBoards.filter(function (b) { return !entry.built[b]; });
+      Object.keys(families).forEach(function (fam) {
+        var entry = families[fam];
+        var unbuilt = entry.specs.filter(function (sp) { return !builtByCode[sp.spec_code]; });
         if (unbuilt.length === 0) return;
-        // Render only boards listed in specs (the canonical "available" list).
-        // Built boards from a non-spec source (e.g. Edexcel A vs Edexcel B) still get shown if also in specs.
-        var pillsHtml = availableBoards.map(function (b) {
-          var built = !!entry.built[b];
-          return '<span class="board-pill ' + (built ? 'built' : 'unbuilt') + '">' + escapeHtml(b) + (built ? ' ✓' : '') + '</span>';
+
+        var totalSpecs = entry.specs.length;
+        var builtSpecs = totalSpecs - unbuilt.length;
+        var tier = tierFor(fam);
+        var requestCount = state.requestCounts[fam] || 0;
+
+        // Sort specs within a family: built first (greyed), unbuilt second
+        var sortedSpecs = entry.specs.slice().sort(function (a, b) {
+          var aBuilt = !!builtByCode[a.spec_code];
+          var bBuilt = !!builtByCode[b.spec_code];
+          if (aBuilt !== bBuilt) return aBuilt ? -1 : 1;
+          return (a.board + a.subject).localeCompare(b.board + b.subject);
+        });
+
+        var pillsHtml = sortedSpecs.map(function (sp) {
+          var built = !!builtByCode[sp.spec_code];
+          var label = sp.board;
+          // Show route suffix if non-trivial (e.g. "Edexcel A", "OCR Themes")
+          var routeSuffix = sp.subject
+            .replace(new RegExp('^' + entry.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'), '')
+            .replace(/^[\s:]+/, '')
+            .replace(/^\(/, '').replace(/\)$/, '')
+            .trim();
+          if (routeSuffix && routeSuffix.length < 40) {
+            label += ' · ' + routeSuffix;
+          }
+          return '<span class="board-pill ' + (built ? 'built' : 'unbuilt') + '" title="' + escapeHtml(sp.spec_code) + '">' +
+            escapeHtml(label) + (built ? ' ✓' : '') + '</span>';
         }).join('');
-        cards.push(
-          '<div class="tobuild-card">' +
-            '<h3>' + escapeHtml(entry.name) + '</h3>' +
-            '<div style="font-size: 0.72rem; color: var(--text-muted);">' +
-              Object.keys(entry.built).length + ' of ' + availableBoards.length + ' boards built' +
+
+        var tierBadge = '<span class="tier-rank tier-rank-' + tier + '" title="' + TIER_LABEL[tier] + '">' + tier + '</span>';
+        var reqBadge = requestCount > 0
+          ? '<span class="req-badge" title="' + requestCount + ' student request' + (requestCount !== 1 ? 's' : '') + '">★ ' + requestCount + '</span>'
+          : '';
+
+        cards.push({
+          fam: fam,
+          tier: tier,
+          requestCount: requestCount,
+          builtSpecs: builtSpecs,
+          totalSpecs: totalSpecs,
+          name: entry.name,
+          html: '<div class="tobuild-card">' +
+            '<div class="tobuild-head">' +
+              tierBadge +
+              '<h3>' + escapeHtml(entry.name) + '</h3>' +
+              reqBadge +
             '</div>' +
+            '<div class="tobuild-meta">' + builtSpecs + ' of ' + totalSpecs + ' built · ' + TIER_LABEL[tier] + '</div>' +
             '<div class="board-pills">' + pillsHtml + '</div>' +
           '</div>'
-        );
+        });
+      });
+
+      // Sort: requested (most requests first) → tier rank → alphabetical
+      cards.sort(function (a, b) {
+        if (b.requestCount !== a.requestCount) return b.requestCount - a.requestCount;
+        if (TIER_RANK[a.tier] !== TIER_RANK[b.tier]) return TIER_RANK[a.tier] - TIER_RANK[b.tier];
+        return a.name.localeCompare(b.name);
       });
 
       var el = document.getElementById('tobuild');
       el.innerHTML = cards.length === 0
         ? '<div class="loading-msg" style="grid-column: 1/-1;">All catalogued specs are built.</div>'
-        : cards.join('');
+        : cards.map(function (c) { return c.html; }).join('');
     }
 
     async function init() {
