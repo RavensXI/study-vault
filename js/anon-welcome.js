@@ -78,8 +78,9 @@
       var action = e.target && e.target.dataset && e.target.dataset.action;
       if (action === 'personalise') {
         setSeen();
-        // Homepage wizard auto-fires for users without prefs.
-        window.location.href = '/';
+        // ?personalise=1 tells the homepage to skip the school welcome modal
+        // and open the free-tier subject picker directly.
+        window.location.href = '/?personalise=1';
         return;
       }
       if (action === 'dismiss' || e.target === overlay) {

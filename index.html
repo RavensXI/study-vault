@@ -1383,7 +1383,21 @@
     }
 
     var hasMadeDecision = !!(localStorage.getItem(DECISION_KEY) || localStorage.getItem(LEGACY_DISMISSED_KEY));
-    if (!SchoolSession.isActive() && !FreeUser.isActive() && !hasMadeDecision) {
+    // Anonymous deep-link visitors who clicked "Personalise" on the welcome modal
+    // arrive here with ?personalise=1 — skip the school welcome modal entirely
+    // and open the free-tier subject picker directly. They've already implicitly
+    // chosen the free flow; no need to ask again.
+    var wantsPersonalise = (new URLSearchParams(window.location.search)).get('personalise') === '1';
+    if (wantsPersonalise && !SchoolSession.isActive() && !FreeUser.isActive()) {
+      localStorage.setItem(DECISION_KEY, '1');
+      // Defer so the wizard DOM + handlers below are wired up before we open it.
+      setTimeout(function () {
+        var freeWiz = document.getElementById('free-wizard-overlay');
+        if (freeWiz) freeWiz.classList.add('open');
+      }, 50);
+      // Tidy the URL so a subsequent page reload doesn't loop the wizard open.
+      try { history.replaceState({}, '', window.location.pathname + window.location.hash); } catch (e) {}
+    } else if (!SchoolSession.isActive() && !FreeUser.isActive() && !hasMadeDecision) {
       openWelcomeModal();
     }
 
