@@ -1014,12 +1014,50 @@
       }
     }
 
+    // ----- Mobile drawer sync -----
+    // On mobile (≤768px), the lesson sidebar is a slide-in drawer hidden
+    // off-screen by default and only revealed when body has 'sidebar-open'.
+    // The header nav is similarly hidden behind the hamburger button. The
+    // tour highlights elements inside both — auto-manage the drawer state
+    // so the target is actually visible when we paint the backdrop.
+    function isInSidebar(el) { return !!(el && el.closest && el.closest('.lesson-sidebar')); }
+    function isInHeaderNav(el) { return !!(el && el.closest && el.closest('.header-nav')); }
+    function syncDrawerForTarget(target) {
+      if (!isMobile) return;
+      var inSidebar = isInSidebar(target);
+      var inHeaderNav = isInHeaderNav(target);
+      // Sidebar drawer
+      var overlay = document.querySelector('.mobile-overlay');
+      if (inSidebar) {
+        document.body.classList.add('sidebar-open');
+        if (overlay) overlay.classList.add('open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+        if (overlay) overlay.classList.remove('open');
+      }
+      // Header nav drawer
+      var nav = document.querySelector('.header-nav');
+      if (nav) {
+        if (inHeaderNav) nav.classList.add('open');
+        else nav.classList.remove('open');
+      }
+    }
+    function closeAllDrawers() {
+      if (!isMobile) return;
+      document.body.classList.remove('sidebar-open');
+      var overlay = document.querySelector('.mobile-overlay');
+      if (overlay) overlay.classList.remove('open');
+      var nav = document.querySelector('.header-nav');
+      if (nav) nav.classList.remove('open');
+    }
+
     var idx = 0;
     function finish(opts) {
       var skipToast = opts && opts.skipToast;
       tooltipEl.classList.remove('active');
       [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) { el.classList.remove('active'); });
       clearSpotlight();
+      closeAllDrawers();
       try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
       setTimeout(function () {
         if (tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl);
@@ -1060,6 +1098,11 @@
       btnEl.textContent = (i === steps.length - 1) ? 'Got it' : 'Next';
       paintDots(i);
       tooltipEl.classList.remove('active');
+
+      // Open / close mobile drawers so the target is actually on-screen
+      // before we measure its rect. Drawer transitions take ~350ms (matches
+      // the 380ms paint delay below).
+      syncDrawerForTarget(step.target);
 
       // Scroll target into view (mobile especially benefits from `start` block)
       try {

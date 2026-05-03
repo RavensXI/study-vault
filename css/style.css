@@ -2351,7 +2351,10 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
 .sv-tutorial-backdrop {
   position: fixed;
   background: rgba(20, 18, 15, 0.55);
-  z-index: 1099;
+  /* Above the mobile sidebar drawer (1500) and its overlay (1400) so the
+     tour UI is never hidden under the drawer when a sidebar element is
+     being highlighted. */
+  z-index: 1600;
   pointer-events: none;
   transition: opacity 0.25s ease, top 0.3s cubic-bezier(0.16, 1, 0.3, 1),
               left 0.3s cubic-bezier(0.16, 1, 0.3, 1),
@@ -2363,7 +2366,9 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
 
 .sv-tutorial-tooltip {
   position: fixed;
-  z-index: 1200;
+  /* Above the tutorial backdrop (1600) which is itself above the mobile
+     sidebar drawer (1500). */
+  z-index: 1700;
   background: #fff;
   border-radius: 14px;
   box-shadow: 0 12px 40px rgba(0,0,0,0.22), 0 2px 10px rgba(0,0,0,0.1);
