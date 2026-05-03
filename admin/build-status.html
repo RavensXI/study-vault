@@ -427,23 +427,23 @@
       subjects.forEach(function (s) { totalLessons += (state.lessonsBySubject[s.id] || []).length; });
       var liveCount = subjects.filter(function (s) { return s.status === 'live'; }).length;
 
-      // Specs coverage (only meaningful for free tier)
-      var specSlugSet = {};
-      state.subjects.filter(function (s) { return !s.school_id; }).forEach(function (s) {
-        specSlugSet[normaliseSlug(s.name) + '|' + (s.exam_board || '').toLowerCase()] = true;
+      // Specs coverage — match by spec_code (canonical), and count only the
+      // "in-scope" specs (i.e. excluding portfolio families that we'll never build).
+      var freeTierCodes = {};
+      state.subjects.filter(function (s) { return !s.school_id && s.spec_code; }).forEach(function (s) {
+        freeTierCodes[s.spec_code] = true;
       });
-      var specsTotal = state.specs.length;
-      var specsBuilt = 0;
-      state.specs.forEach(function (sp) {
-        var k = normaliseSlug(sp.subject) + '|' + (sp.board || '').toLowerCase();
-        if (specSlugSet[k]) specsBuilt++;
+      var inScopeSpecs = state.specs.filter(function (sp) {
+        return !EXCLUDED_FAMILIES[subjectFamily(sp.subject)];
       });
+      var specsTotal = inScopeSpecs.length;
+      var specsBuilt = inScopeSpecs.filter(function (sp) { return freeTierCodes[sp.spec_code]; }).length;
 
       document.getElementById('stats').innerHTML =
         '<div class="bs-stat"><div class="bs-stat-num">' + subjects.length + '</div><div class="bs-stat-label">Subjects shown</div></div>' +
         '<div class="bs-stat"><div class="bs-stat-num">' + liveCount + '</div><div class="bs-stat-label">Live</div></div>' +
         '<div class="bs-stat"><div class="bs-stat-num">' + totalLessons + '</div><div class="bs-stat-label">Lessons</div></div>' +
-        '<div class="bs-stat"><div class="bs-stat-num">' + specsBuilt + '/' + specsTotal + '</div><div class="bs-stat-label">Specs covered (free tier)</div></div>';
+        '<div class="bs-stat"><div class="bs-stat-num">' + specsBuilt + '/' + specsTotal + '</div><div class="bs-stat-label">Written-exam specs covered</div></div>';
 
       // Group subjects by FAMILY (so all Geography variants — A, B, OCR routes —
       // collapse into one card).
