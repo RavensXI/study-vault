@@ -163,7 +163,7 @@ Guide HTML structure is `<main class="lesson-content">` + `<aside class="lesson-
 4. Confirm every practice question `type` string is registered in `getGuideUrl()` mappings — no 404s.
 5. Confirm `youtube_video_id` convention: Unity lessons have R2 URLs, free-tier article lessons are NULL, free-tier practice lessons are the sentinel `'practice-only'`.
 6. **Run `python scripts/_verify_subject_build.py {subject-slug}`.** This catches the recurring failure modes: missing unit images, malformed quote ticker, missing revision-technique guides, lessons missing description / hero / related_media, related_media coverage gaps, dead YouTube refs (oembed-verified), Gemini diagrams sneaking into free-tier content, fieldwork lessons missing the school-specific notice. Zero issues required to ship; warnings (e.g. youtube_video_id on a free-tier article) should be reviewed but do not block.
-7. Rerun `python scripts/_gen_tracker.py` — the subject tracker spreadsheet rebuilds from Supabase and now includes the new subject.
+7. Visit `/admin/build-status` — live view of every subject in Supabase plus what's still to build from `specs/index.json`. The new subject should appear in the Built table; confirm asset coverage looks right.
 8. Commit + push. Tom reviews `status: pending_review` lessons via `/admin/review` and flips them to `live` once satisfied.
 
 ---

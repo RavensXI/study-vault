@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Build Status - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth-gate.js" data-role="admin,teacher"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <style>
+    .bs-layout { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .bs-header { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.5rem; }
+    .bs-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .bs-subtitle { color: var(--text-muted); font-size: 0.85rem; margin: 0 0 1.5rem; }
+    .bs-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .bs-controls label { font-size: 0.78rem; font-weight: 600; color: var(--text-muted); }
+    .bs-controls select, .bs-controls input { padding: 0.4rem 0.7rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+    .bs-controls button { padding: 0.4rem 0.85rem; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.78rem; font-weight: 600; font-family: inherit; }
+    .bs-controls button:hover { background: #f9fafb; }
+
+    .bs-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .bs-stat { background: white; border-radius: 12px; padding: 0.85rem 1.25rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .bs-stat-num { font-family: 'Source Serif 4', serif; font-size: 1.5rem; font-weight: 700; line-height: 1; }
+    .bs-stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.04em; }
+
+    .bs-section { margin-top: 2rem; }
+    .bs-section h2 { font-family: 'Source Serif 4', serif; font-size: 1.3rem; margin: 0 0 0.85rem; }
+    .bs-section .section-hint { color: var(--text-muted); font-size: 0.82rem; margin: -0.5rem 0 1rem; }
+
+    /* Built table */
+    .bs-table-wrap { overflow-x: auto; background: white; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .bs-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    .bs-table th { text-align: left; background: #f9fafb; padding: 0.65rem 0.85rem; border-bottom: 1px solid #f0ede8; font-weight: 600; color: var(--text-muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .bs-table td { padding: 0.65rem 0.85rem; border-bottom: 1px solid #f5f3ee; vertical-align: middle; }
+    .bs-table tr:last-child td { border-bottom: none; }
+    .bs-table tr:hover td { background: #fcfbf8; }
+    .bs-table .subj-name { font-weight: 600; color: var(--text-color); }
+    .bs-table .subj-slug { font-size: 0.7rem; color: var(--text-muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .bs-table a.subj-link { color: inherit; text-decoration: none; }
+    .bs-table a.subj-link:hover .subj-name { text-decoration: underline; color: #7c3aed; }
+    .tier-pill { display: inline-block; font-size: 0.66rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .tier-free { background: #dcfce7; color: #166534; }
+    .tier-unity { background: #ddd6fe; color: #5b21b6; }
+    .tier-vale { background: #fed7aa; color: #c2410c; }
+
+    .status-pill { display: inline-block; font-size: 0.66rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; }
+    .status-live { background: #dcfce7; color: #166534; }
+    .status-pending_review { background: #fef3c7; color: #92400e; }
+    .status-draft { background: #e5e7eb; color: #374151; }
+
+    /* Asset coverage cell */
+    .cov { display: inline-flex; align-items: center; gap: 0.35rem; min-width: 75px; }
+    .cov-bar { flex: 1; height: 6px; background: #f0ede8; border-radius: 3px; overflow: hidden; min-width: 40px; }
+    .cov-bar-fill { height: 100%; background: #16a34a; transition: width 0.3s; }
+    .cov-bar-fill.partial { background: #f59e0b; }
+    .cov-bar-fill.empty { background: #e5e7eb; }
+    .cov-text { font-size: 0.7rem; color: var(--text-muted); white-space: nowrap; }
+    .cov-text.full { color: #166534; font-weight: 600; }
+
+    /* To-Build cards */
+    .bs-tobuild { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 0.85rem; }
+    .tobuild-card { background: white; border-radius: 12px; padding: 0.85rem 1rem; box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+    .tobuild-card h3 { font-family: 'Source Serif 4', serif; font-size: 1rem; margin: 0 0 0.4rem; }
+    .board-pills { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.4rem; }
+    .board-pill { font-size: 0.7rem; padding: 2px 8px; border-radius: 12px; font-weight: 500; }
+    .board-pill.built { background: #dcfce7; color: #166534; }
+    .board-pill.unbuilt { background: #f3f4f6; color: #6b7280; border: 1px dashed #d1d5db; }
+
+    .loading-msg { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .loading-msg.error { color: #dc2626; }
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+        <span class="header-unit-label">Build Status</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review</a>
+        <a href="/admin/images">Images</a>
+        <a href="/admin/editor">Editor</a>
+        <a href="/admin/editor-guide">Guide Editor</a>
+        <a href="/admin/requests">Requests</a>
+        <a href="/admin/bugs">Bugs</a>
+        <a href="/admin/build-status">Build</a>
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="bs-layout">
+    <header class="bs-header">
+      <h1>Build Status</h1>
+      <div style="font-size: 0.75rem; color: var(--text-muted);" id="last-updated"></div>
+    </header>
+    <p class="bs-subtitle">Live view of every subject in Supabase, plus what's still to build from the spec catalogue.</p>
+
+    <div class="bs-controls">
+      <label for="tier-filter">Tier:</label>
+      <select id="tier-filter">
+        <option value="free">Free tier</option>
+        <option value="all">All</option>
+        <option value="unity">Unity College</option>
+        <option value="vale">Severn Vale</option>
+      </select>
+      <input id="search" type="search" placeholder="Search subject or board…" style="margin-left: 0.5rem;">
+      <button id="refresh-btn" style="margin-left: auto;">Refresh</button>
+    </div>
+
+    <div class="bs-stats" id="stats"></div>
+
+    <section class="bs-section">
+      <h2>Built</h2>
+      <div class="section-hint" id="built-hint">Loading…</div>
+      <div class="bs-table-wrap" id="built-wrap" style="display: none;">
+        <table class="bs-table" id="built-table">
+          <thead>
+            <tr>
+              <th>Subject</th>
+              <th>Board</th>
+              <th>Tier</th>
+              <th>Lessons</th>
+              <th>Content</th>
+              <th>Heroes</th>
+              <th>Narration</th>
+              <th>Podcasts</th>
+              <th>Rel. Media</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="built-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="bs-section">
+      <h2>To Build</h2>
+      <p class="section-hint">Subjects in the spec catalogue (<code>specs/index.json</code>) with at least one board not yet on the free tier. Built boards shown in green; unbuilt in grey.</p>
+      <div class="bs-tobuild" id="tobuild"></div>
+    </section>
+  </div>
+
+  <script>
+    'use strict';
+
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    var state = {
+      subjects: [],
+      schools: {},
+      lessonsBySubject: {},
+      specs: [],
+    };
+
+    function escapeHtml(s) {
+      if (s == null) return '';
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function covCell(have, total) {
+      if (total === 0) return '<span class="cov-text">—</span>';
+      var pct = Math.round((have / total) * 100);
+      var cls = pct === 100 ? '' : (pct === 0 ? 'empty' : 'partial');
+      var textCls = pct === 100 ? 'full' : '';
+      return (
+        '<span class="cov">' +
+          '<span class="cov-bar"><span class="cov-bar-fill ' + cls + '" style="width: ' + pct + '%"></span></span>' +
+          '<span class="cov-text ' + textCls + '">' + have + '/' + total + '</span>' +
+        '</span>'
+      );
+    }
+
+    function tierPill(tier) {
+      var label = tier === 'free' ? 'Free' : (tier === 'unity' ? 'Unity' : (tier === 'vale' ? 'Severn Vale' : tier));
+      return '<span class="tier-pill tier-' + tier + '">' + label + '</span>';
+    }
+
+    function tierOf(subject) {
+      if (!subject.school_id) return 'free';
+      var school = state.schools[subject.school_id];
+      if (!school) return 'school';
+      var name = (school.name || '').toLowerCase();
+      if (name.indexOf('unity') !== -1) return 'unity';
+      if (name.indexOf('vale') !== -1 || name.indexOf('severn') !== -1) return 'vale';
+      return 'school';
+    }
+
+    async function fetchAll() {
+      // Subjects + schools
+      var subjectsRes = await sb.from('subjects').select('id, slug, name, exam_board, school_id, status, created_at').order('name');
+      if (subjectsRes.error) throw subjectsRes.error;
+      state.subjects = subjectsRes.data || [];
+
+      var schoolsRes = await sb.from('schools').select('id, name, slug');
+      if (schoolsRes.error) throw schoolsRes.error;
+      (schoolsRes.data || []).forEach(function (s) { state.schools[s.id] = s; });
+
+      // Units (slim)
+      var unitsRes = await sb.from('units').select('id, subject_id');
+      if (unitsRes.error) throw unitsRes.error;
+      var unitToSubject = {};
+      (unitsRes.data || []).forEach(function (u) { unitToSubject[u.id] = u.subject_id; });
+
+      // Lessons — paginate to bypass 1000-row default cap
+      var lessons = [];
+      var page = 0;
+      while (true) {
+        var from = page * 1000;
+        var to = from + 999;
+        var r = await sb.from('lessons')
+          .select('id, unit_id, status, content_html, hero_image_url, narration_manifest, related_media')
+          .range(from, to);
+        if (r.error) throw r.error;
+        lessons = lessons.concat(r.data || []);
+        if (!r.data || r.data.length < 1000) break;
+        page++;
+        if (page > 20) break; // safety
+      }
+
+      // Bucket lessons by subject
+      var bySubject = {};
+      lessons.forEach(function (L) {
+        var sid = unitToSubject[L.unit_id];
+        if (!sid) return;
+        if (!bySubject[sid]) bySubject[sid] = [];
+        bySubject[sid].push(L);
+      });
+      state.lessonsBySubject = bySubject;
+
+      // Specs catalogue
+      var specsRes = await fetch('/specs/index.json');
+      if (!specsRes.ok) throw new Error('Failed to load specs/index.json');
+      state.specs = await specsRes.json();
+    }
+
+    function hasPodcast(L) {
+      var rm = L.related_media;
+      if (!Array.isArray(rm)) return false;
+      for (var i = 0; i < rm.length; i++) {
+        var cat = rm[i];
+        if (!cat || cat.category !== 'Podcasts') continue;
+        var items = cat.items || [];
+        for (var j = 0; j < items.length; j++) {
+          var t = (items[j] && items[j].title) || '';
+          if (t === 'Lesson Podcast') return true;
+        }
+      }
+      return false;
+    }
+
+    function statsForSubject(subject) {
+      var lessons = state.lessonsBySubject[subject.id] || [];
+      var total = lessons.length;
+      var content = 0, heroes = 0, narration = 0, podcasts = 0, relmedia = 0;
+      lessons.forEach(function (L) {
+        if (L.content_html) content++;
+        if (L.hero_image_url) heroes++;
+        if (L.narration_manifest) narration++;
+        if (hasPodcast(L)) podcasts++;
+        if (Array.isArray(L.related_media) && L.related_media.length > 0) relmedia++;
+      });
+      return { total: total, content: content, heroes: heroes, narration: narration, podcasts: podcasts, relmedia: relmedia };
+    }
+
+    function render() {
+      var tierFilter = document.getElementById('tier-filter').value;
+      var search = (document.getElementById('search').value || '').toLowerCase().trim();
+
+      var subjects = state.subjects.filter(function (s) {
+        var t = tierOf(s);
+        if (tierFilter !== 'all' && tierFilter !== t) return false;
+        if (search) {
+          var hay = (s.name + ' ' + s.exam_board + ' ' + s.slug).toLowerCase();
+          if (hay.indexOf(search) === -1) return false;
+        }
+        return true;
+      });
+
+      // Stats
+      var totalLessons = 0;
+      subjects.forEach(function (s) { totalLessons += (state.lessonsBySubject[s.id] || []).length; });
+      var liveCount = subjects.filter(function (s) { return s.status === 'live'; }).length;
+
+      // Specs coverage (only meaningful for free tier)
+      var specSlugSet = {};
+      state.subjects.filter(function (s) { return !s.school_id; }).forEach(function (s) {
+        specSlugSet[normaliseSlug(s.name) + '|' + (s.exam_board || '').toLowerCase()] = true;
+      });
+      var specsTotal = state.specs.length;
+      var specsBuilt = 0;
+      state.specs.forEach(function (sp) {
+        var k = normaliseSlug(sp.subject) + '|' + (sp.board || '').toLowerCase();
+        if (specSlugSet[k]) specsBuilt++;
+      });
+
+      document.getElementById('stats').innerHTML =
+        '<div class="bs-stat"><div class="bs-stat-num">' + subjects.length + '</div><div class="bs-stat-label">Subjects shown</div></div>' +
+        '<div class="bs-stat"><div class="bs-stat-num">' + liveCount + '</div><div class="bs-stat-label">Live</div></div>' +
+        '<div class="bs-stat"><div class="bs-stat-num">' + totalLessons + '</div><div class="bs-stat-label">Lessons</div></div>' +
+        '<div class="bs-stat"><div class="bs-stat-num">' + specsBuilt + '/' + specsTotal + '</div><div class="bs-stat-label">Specs covered (free tier)</div></div>';
+
+      // Built table
+      var rows = subjects.map(function (s) {
+        var stats = statsForSubject(s);
+        var tier = tierOf(s);
+        var browseUrl = !s.school_id ? '/browse/' + s.slug : null;
+        var subjectCell = browseUrl
+          ? '<a class="subj-link" href="' + browseUrl + '" target="_blank"><div class="subj-name">' + escapeHtml(s.name) + '</div><div class="subj-slug">' + escapeHtml(s.slug) + '</div></a>'
+          : '<div><div class="subj-name">' + escapeHtml(s.name) + '</div><div class="subj-slug">' + escapeHtml(s.slug) + '</div></div>';
+        return (
+          '<tr>' +
+            '<td>' + subjectCell + '</td>' +
+            '<td>' + escapeHtml(s.exam_board || '—') + '</td>' +
+            '<td>' + tierPill(tier) + '</td>' +
+            '<td>' + stats.total + '</td>' +
+            '<td>' + covCell(stats.content, stats.total) + '</td>' +
+            '<td>' + covCell(stats.heroes, stats.total) + '</td>' +
+            '<td>' + covCell(stats.narration, stats.total) + '</td>' +
+            '<td>' + covCell(stats.podcasts, stats.total) + '</td>' +
+            '<td>' + covCell(stats.relmedia, stats.total) + '</td>' +
+            '<td><span class="status-pill status-' + (s.status || 'draft') + '">' + escapeHtml(s.status || '—') + '</span></td>' +
+          '</tr>'
+        );
+      }).join('');
+
+      var hint = document.getElementById('built-hint');
+      var wrap = document.getElementById('built-wrap');
+      if (subjects.length === 0) {
+        hint.textContent = 'No subjects match the current filter.';
+        hint.style.display = '';
+        wrap.style.display = 'none';
+      } else {
+        hint.style.display = 'none';
+        wrap.style.display = '';
+        document.getElementById('built-body').innerHTML = rows;
+      }
+
+      // To-Build section
+      renderToBuild();
+
+      // Last updated
+      var now = new Date();
+      document.getElementById('last-updated').textContent = 'Updated ' + now.toLocaleTimeString();
+    }
+
+    function normaliseSlug(s) {
+      return (s || '').toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+
+    function renderToBuild() {
+      // Build a map of subject -> { boards built (free tier only), boards available in specs }
+      var bySubject = {};
+
+      // What's in specs (canonical name from specs)
+      state.specs.forEach(function (sp) {
+        var key = normaliseSlug(sp.subject);
+        if (!bySubject[key]) {
+          bySubject[key] = { name: sp.subject, available: {}, built: {} };
+        }
+        bySubject[key].available[sp.board] = true;
+      });
+
+      // What's built on free tier
+      state.subjects.filter(function (s) { return !s.school_id; }).forEach(function (s) {
+        var key = normaliseSlug(s.name);
+        if (!bySubject[key]) {
+          bySubject[key] = { name: s.name, available: {}, built: {} };
+        }
+        bySubject[key].built[s.exam_board] = true;
+      });
+
+      // Filter to only those with at least one available board not yet built
+      var cards = [];
+      Object.keys(bySubject).sort().forEach(function (key) {
+        var entry = bySubject[key];
+        var availableBoards = Object.keys(entry.available);
+        var unbuilt = availableBoards.filter(function (b) { return !entry.built[b]; });
+        if (unbuilt.length === 0) return;
+        // Render only boards listed in specs (the canonical "available" list).
+        // Built boards from a non-spec source (e.g. Edexcel A vs Edexcel B) still get shown if also in specs.
+        var pillsHtml = availableBoards.map(function (b) {
+          var built = !!entry.built[b];
+          return '<span class="board-pill ' + (built ? 'built' : 'unbuilt') + '">' + escapeHtml(b) + (built ? ' ✓' : '') + '</span>';
+        }).join('');
+        cards.push(
+          '<div class="tobuild-card">' +
+            '<h3>' + escapeHtml(entry.name) + '</h3>' +
+            '<div style="font-size: 0.72rem; color: var(--text-muted);">' +
+              Object.keys(entry.built).length + ' of ' + availableBoards.length + ' boards built' +
+            '</div>' +
+            '<div class="board-pills">' + pillsHtml + '</div>' +
+          '</div>'
+        );
+      });
+
+      var el = document.getElementById('tobuild');
+      el.innerHTML = cards.length === 0
+        ? '<div class="loading-msg" style="grid-column: 1/-1;">All catalogued specs are built.</div>'
+        : cards.join('');
+    }
+
+    async function init() {
+      try {
+        await fetchAll();
+        render();
+        document.getElementById('tier-filter').addEventListener('change', render);
+        document.getElementById('search').addEventListener('input', render);
+        document.getElementById('refresh-btn').addEventListener('click', function () {
+          document.getElementById('built-hint').textContent = 'Refreshing…';
+          document.getElementById('built-hint').style.display = '';
+          document.getElementById('built-wrap').style.display = 'none';
+          fetchAll().then(render).catch(function (err) {
+            document.getElementById('built-hint').textContent = 'Refresh failed: ' + err.message;
+            document.getElementById('built-hint').classList.add('error');
+          });
+        });
+      } catch (err) {
+        var hint = document.getElementById('built-hint');
+        hint.textContent = 'Failed to load: ' + err.message;
+        hint.classList.add('error');
+        console.error(err);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
