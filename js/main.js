@@ -2517,6 +2517,9 @@ function initLessonProgress() {
           state['knowledge-check'] = true;
           saveState(state);
           syncAll();
+          // Notify other modules (e.g. install prompt) that the student
+          // hit a positive engagement moment.
+          try { document.dispatchEvent(new CustomEvent('kc-completed')); } catch (e) {}
         }
       });
     });
