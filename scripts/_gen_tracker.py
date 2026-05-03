@@ -47,6 +47,9 @@ NAME_MAP = {
     ('WJEC', 'history'): None,
     ('WJEC', 'level 1/2 vocational award in hospitality and catering'): 'hospitality-catering',
     ('Eduqas', 'level 1/2 vocational award in hospitality and catering'): 'hospitality-catering',
+    ('AQA', 'spanish'): 'spanish-aqa',
+    ('AQA', 'french'): 'french-aqa',
+    ('AQA', 'german'): 'german-aqa',
 }
 
 status_by_slug = {s['slug']: s for s in status}
