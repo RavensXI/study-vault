@@ -2164,6 +2164,93 @@ body.dark-mode[class*="overlay-"] .sidebar-section {
   outline-offset: 2px;
 }
 
+/* Anonymous welcome modal — first-visit nudge for deep-link traffic */
+.anon-welcome-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  background: rgba(45, 42, 38, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+.anon-welcome-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+.anon-welcome-modal {
+  background: #fffaf3;
+  border-left: 4px solid #c44536;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  padding: 1.75rem 1.75rem 1.5rem;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.18);
+  transform: translateY(12px) scale(0.98);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.anon-welcome-overlay.active .anon-welcome-modal {
+  transform: translateY(0) scale(1);
+}
+.anon-welcome-icon {
+  width: 34px;
+  height: 34px;
+  color: #c44536;
+  margin-bottom: 0.5rem;
+  display: inline-block;
+}
+.anon-welcome-title {
+  margin: 0 0 0.6rem;
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #2d2a26;
+}
+.anon-welcome-body {
+  color: #4a463f;
+  line-height: 1.55;
+  font-size: 1rem;
+}
+.anon-welcome-body p { margin: 0 0 0.6rem; }
+.anon-welcome-body p:last-child { margin-bottom: 0; }
+.anon-welcome-buttons {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+  flex-wrap: wrap;
+}
+.anon-welcome-btn {
+  flex: 1 1 auto;
+  border-radius: 10px;
+  padding: 0.7rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  border: 1px solid transparent;
+  font-family: inherit;
+}
+.anon-welcome-btn--primary {
+  background: #2d2a26;
+  color: #fff;
+}
+.anon-welcome-btn--primary:hover { background: #1a1816; }
+.anon-welcome-btn--ghost {
+  background: transparent;
+  color: #2d2a26;
+  border-color: rgba(45, 42, 38, 0.22);
+}
+.anon-welcome-btn--ghost:hover { background: rgba(45, 42, 38, 0.06); }
+.anon-welcome-btn:active { transform: scale(0.97); }
+.anon-welcome-btn:focus-visible {
+  outline: 3px solid #fdba74;
+  outline-offset: 2px;
+}
+
 /* Video modal overlay */
 /* ===== Deck-reveal animation (used after personalisation moments) ===== */
 /* Shimmer placeholder for home subject cards */
