@@ -74,7 +74,7 @@
     .subj-coverage-item { display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem; min-width: 70px; }
     .subj-coverage-item .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); }
     .subj-boards { padding: 0; border-top: 1px solid #f0ede8; }
-    .board-row { display: grid; grid-template-columns: 180px 80px 70px repeat(5, 1fr) 100px; gap: 0.85rem; padding: 0.55rem 1rem 0.55rem 2.4rem; align-items: center; font-size: 0.78rem; border-bottom: 1px solid #f5f3ee; }
+    .board-row { display: grid; grid-template-columns: 180px 80px 90px repeat(6, 1fr) 100px; gap: 0.7rem; padding: 0.55rem 1rem 0.55rem 2.4rem; align-items: center; font-size: 0.78rem; border-bottom: 1px solid #f5f3ee; }
     .board-row:last-child { border-bottom: none; }
     .board-row:hover { background: #fcfbf8; }
     .board-row .board-label { font-weight: 600; }
@@ -229,7 +229,7 @@
         var from = page * 1000;
         var to = from + 999;
         var r = await sb.from('lessons')
-          .select('id, unit_id, status, content_html, hero_image_url, narration_manifest, related_media')
+          .select('id, unit_id, status, content_html, hero_image_url, narration_manifest, related_media, practice_data')
           .range(from, to);
         if (r.error) throw r.error;
         lessons = lessons.concat(r.data || []);
@@ -269,18 +269,46 @@
       return false;
     }
 
+    function isPracticeLesson(L) {
+      // Practice lessons populate the JSONB practice_data column.
+      // Article lessons leave it null.
+      var pd = L.practice_data;
+      if (pd == null) return false;
+      if (typeof pd === 'object' && !Array.isArray(pd) && Object.keys(pd).length === 0) return false;
+      return true;
+    }
+
     function statsForSubject(subject) {
       var lessons = state.lessonsBySubject[subject.id] || [];
-      var total = lessons.length;
+      var articleLessons = lessons.filter(function (L) { return !isPracticeLesson(L); });
+      var practiceLessons = lessons.filter(isPracticeLesson);
+
+      // Asset coverage is only meaningful for the lessons that should HAVE that asset.
+      // Heroes, narration, podcasts, related-media: article-only by convention.
+      // Content: article uses content_html; practice uses practice_data — counted separately.
       var content = 0, heroes = 0, narration = 0, podcasts = 0, relmedia = 0;
-      lessons.forEach(function (L) {
+      articleLessons.forEach(function (L) {
         if (L.content_html) content++;
         if (L.hero_image_url) heroes++;
         if (L.narration_manifest) narration++;
         if (hasPodcast(L)) podcasts++;
         if (Array.isArray(L.related_media) && L.related_media.length > 0) relmedia++;
       });
-      return { total: total, content: content, heroes: heroes, narration: narration, podcasts: podcasts, relmedia: relmedia };
+
+      // Practice data fill — for practice lessons only.
+      var practiceFilled = practiceLessons.filter(isPracticeLesson).length;
+
+      return {
+        total: lessons.length,
+        articleTotal: articleLessons.length,
+        practiceTotal: practiceLessons.length,
+        content: content,
+        heroes: heroes,
+        narration: narration,
+        podcasts: podcasts,
+        relmedia: relmedia,
+        practice: practiceFilled,
+      };
     }
 
     function render() {
@@ -333,18 +361,32 @@
 
       // Sum stats across all subjects in a group
       function aggregateStats(subs) {
-        var agg = { total: 0, content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, boardsTotal: subs.length, boardsLive: 0 };
+        var agg = {
+          total: 0, articleTotal: 0, practiceTotal: 0,
+          content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0,
+          boardsTotal: subs.length, boardsLive: 0
+        };
         subs.forEach(function (sub) {
           var st = statsForSubject(sub);
           agg.total += st.total;
+          agg.articleTotal += st.articleTotal;
+          agg.practiceTotal += st.practiceTotal;
           agg.content += st.content;
           agg.heroes += st.heroes;
           agg.narration += st.narration;
           agg.podcasts += st.podcasts;
           agg.relmedia += st.relmedia;
+          agg.practice += st.practice;
           if (sub.status === 'live') agg.boardsLive++;
         });
         return agg;
+      }
+
+      function lessonsBreakdown(art, prac) {
+        if (art && prac) return art + ' article + ' + prac + ' practice';
+        if (art) return art + ' article';
+        if (prac) return prac + ' practice';
+        return '0';
       }
 
       var groupHtml = groupKeys.map(function (name) {
@@ -353,14 +395,19 @@
         });
         var agg = aggregateStats(subs);
 
-        var summaryCoverage =
-          '<div class="subj-coverage">' +
-            '<div class="subj-coverage-item"><span class="label">Content</span>' + covCell(agg.content, agg.total) + '</div>' +
-            '<div class="subj-coverage-item"><span class="label">Heroes</span>' + covCell(agg.heroes, agg.total) + '</div>' +
-            '<div class="subj-coverage-item"><span class="label">Narration</span>' + covCell(agg.narration, agg.total) + '</div>' +
-            '<div class="subj-coverage-item"><span class="label">Podcasts</span>' + covCell(agg.podcasts, agg.total) + '</div>' +
-            '<div class="subj-coverage-item"><span class="label">Rel.&nbsp;Media</span>' + covCell(agg.relmedia, agg.total) + '</div>' +
-          '</div>';
+        // Build coverage items — only render columns whose denominator > 0
+        var covItems = [];
+        if (agg.articleTotal > 0) {
+          covItems.push('<div class="subj-coverage-item"><span class="label">Content</span>' + covCell(agg.content, agg.articleTotal) + '</div>');
+          covItems.push('<div class="subj-coverage-item"><span class="label">Heroes</span>' + covCell(agg.heroes, agg.articleTotal) + '</div>');
+          covItems.push('<div class="subj-coverage-item"><span class="label">Narration</span>' + covCell(agg.narration, agg.articleTotal) + '</div>');
+          covItems.push('<div class="subj-coverage-item"><span class="label">Podcasts</span>' + covCell(agg.podcasts, agg.articleTotal) + '</div>');
+          covItems.push('<div class="subj-coverage-item"><span class="label">Rel.&nbsp;Media</span>' + covCell(agg.relmedia, agg.articleTotal) + '</div>');
+        }
+        if (agg.practiceTotal > 0) {
+          covItems.push('<div class="subj-coverage-item"><span class="label">Practice</span>' + covCell(agg.practice, agg.practiceTotal) + '</div>');
+        }
+        var summaryCoverage = '<div class="subj-coverage">' + covItems.join('') + '</div>';
 
         var boardRowsHtml = subs.map(function (sub) {
           var st = statsForSubject(sub);
@@ -369,16 +416,18 @@
           var boardLabel = browseUrl
             ? '<a href="' + browseUrl + '" target="_blank"><span class="board-label">' + escapeHtml(sub.exam_board || '—') + '</span><span class="board-slug">' + escapeHtml(sub.slug) + '</span></a>'
             : '<span class="board-label">' + escapeHtml(sub.exam_board || '—') + '</span><span class="board-slug">' + escapeHtml(sub.slug) + '</span>';
+          var lessonsText = lessonsBreakdown(st.articleTotal, st.practiceTotal);
           return (
             '<div class="board-row">' +
               '<div>' + boardLabel + '</div>' +
               '<div>' + tierPill(tier) + '</div>' +
-              '<div><span class="col-label">Lessons</span>' + st.total + '</div>' +
-              '<div><span class="col-label">Content</span>' + covCell(st.content, st.total) + '</div>' +
-              '<div><span class="col-label">Heroes</span>' + covCell(st.heroes, st.total) + '</div>' +
-              '<div><span class="col-label">Narration</span>' + covCell(st.narration, st.total) + '</div>' +
-              '<div><span class="col-label">Podcasts</span>' + covCell(st.podcasts, st.total) + '</div>' +
-              '<div><span class="col-label">Rel. Media</span>' + covCell(st.relmedia, st.total) + '</div>' +
+              '<div><span class="col-label">Lessons</span>' + lessonsText + '</div>' +
+              '<div><span class="col-label">Content</span>' + covCell(st.content, st.articleTotal) + '</div>' +
+              '<div><span class="col-label">Heroes</span>' + covCell(st.heroes, st.articleTotal) + '</div>' +
+              '<div><span class="col-label">Narration</span>' + covCell(st.narration, st.articleTotal) + '</div>' +
+              '<div><span class="col-label">Podcasts</span>' + covCell(st.podcasts, st.articleTotal) + '</div>' +
+              '<div><span class="col-label">Rel. Media</span>' + covCell(st.relmedia, st.articleTotal) + '</div>' +
+              '<div><span class="col-label">Practice</span>' + covCell(st.practice, st.practiceTotal) + '</div>' +
               '<div><span class="status-pill status-' + (sub.status || 'draft') + '">' + escapeHtml(sub.status || '—') + '</span></div>' +
             '</div>'
           );
@@ -389,7 +438,7 @@
             '<summary class="subj-summary">' +
               '<svg class="subj-chevron" viewBox="0 0 16 16" fill="currentColor"><path d="M5.7 12.3a1 1 0 010-1.4L8.6 8 5.7 5.1a1 1 0 011.4-1.4l3.6 3.6a1 1 0 010 1.4l-3.6 3.6a1 1 0 01-1.4 0z"/></svg>' +
               '<span class="subj-title">' + escapeHtml(name) + '</span>' +
-              '<span class="subj-meta"><strong>' + agg.boardsTotal + '</strong> board' + (agg.boardsTotal !== 1 ? 's' : '') + ' · <strong>' + agg.total + '</strong> lessons</span>' +
+              '<span class="subj-meta"><strong>' + agg.boardsTotal + '</strong> board' + (agg.boardsTotal !== 1 ? 's' : '') + ' · <strong>' + lessonsBreakdown(agg.articleTotal, agg.practiceTotal) + '</strong></span>' +
               summaryCoverage +
             '</summary>' +
             '<div class="subj-boards">' + boardRowsHtml + '</div>' +
