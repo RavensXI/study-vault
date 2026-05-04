@@ -214,6 +214,19 @@
       }
     }
 
+    // Free user Drama: filter to only the picked set play unit + universal
+    // units (theatre roles, practitioners, live theatre review).
+    if (subjectSlug === 'drama-aqa' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeDrama = FreeUser.getSubject(subjectSlug);
+      if (freeDrama && freeDrama.options && Object.keys(freeDrama.options).length > 0) {
+        var DRAMA_UNIVERSAL = ['theatre-roles-stagecraft', 'practitioners-styles', 'live-theatre-review'];
+        var pickedDramaSlugs = Object.values(freeDrama.options);
+        units = units.filter(function (u) {
+          return DRAMA_UNIVERSAL.indexOf(u.slug) !== -1 || pickedDramaSlugs.indexOf(u.slug) !== -1;
+        });
+      }
+    }
+
     // Free user Film Studies: filter at LESSON level (each unit contains
     // multiple selectable films; student has picked one per section).
     // Universal units (film-form, foundations, developments) keep all

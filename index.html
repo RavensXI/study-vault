@@ -751,6 +751,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5c: Drama picker (1 set play of 9) -->
+      <div class="free-wizard-step" id="fw-step-drama">
+        <div class="fw-header">
+          <h2>Which set play are you studying?</h2>
+          <p>Pick the one play your class is studying for the written exam.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-drama-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-drama-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-drama-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5b: Film Studies picker (1 from each of the 5 spec sections) -->
       <div class="free-wizard-step" id="fw-step-film-studies">
         <div class="fw-header">
@@ -1758,7 +1773,25 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {} };
+    // Drama options. 9 set plays — student picks 1. Slugs match Supabase
+    // unit slugs so browse-loader can filter at unit level.
+    var dramaOptions = {
+      'aqa': {
+        'Set Play': [
+          { slug: 'the-crucible', name: 'The Crucible (Arthur Miller)' },
+          { slug: 'blood-brothers', name: 'Blood Brothers (Willy Russell)' },
+          { slug: 'noughts-and-crosses', name: 'Noughts and Crosses (Blackman / Cooke)' },
+          { slug: 'around-the-world-80-days', name: 'Around the World in 80 Days (Verne / Eason)' },
+          { slug: 'things-i-know-to-be-true', name: 'Things I Know to Be True (Andrew Bovell)' },
+          { slug: 'romeo-and-juliet', name: 'Romeo and Juliet (Shakespeare)' },
+          { slug: 'a-taste-of-honey', name: 'A Taste of Honey (Shelagh Delaney)' },
+          { slug: 'the-great-wave', name: 'The Great Wave (Francis Turnly)' },
+          { slug: 'the-empress', name: 'The Empress (Tanika Gupta)' }
+        ]
+      }
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {} };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -2238,6 +2271,47 @@
       fwUpdateFilmStudiesDoneBtn();
     }
 
+    // Drama picker — 1 set play from 9 options.
+    function fwUpdateDramaDoneBtn() {
+      var btn = document.getElementById('fw-drama-done');
+      if (!btn) return;
+      btn.disabled = !wizardState.drama || !wizardState.drama['set-play'];
+    }
+
+    function buildDramaPicker() {
+      var opts = dramaOptions['aqa'];
+      var container = document.getElementById('fw-drama-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.drama = {};
+      if (!opts) return;
+
+      Object.keys(opts).forEach(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML = '<h3>' + section + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        opts[section].forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = option.name;
+          btn.dataset.value = option.slug;
+          btn.addEventListener('click', function () {
+            optsEl.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.drama[groupKey] = option.slug;
+            fwUpdateDramaDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      });
+
+      fwUpdateDramaDoneBtn();
+    }
+
     // Tier picker: which subjects need a Foundation/Higher choice
     var FW_TIERED_BASE = ['maths', 'science', 'separate-sciences', 'spanish', 'french', 'german'];
 
@@ -2292,10 +2366,11 @@
       localStorage.setItem('studyvault-tiers', JSON.stringify(saved));
     }
 
-    // Step 2 → History (if picked) → Eng Lit (if picked) → Film Studies (if picked) → Tier → Step 4
+    // Step 2 → History → Eng Lit → Film Studies → Drama → Tier → Step 4
     function fwHasHistory()      { return wizardState.subjects.indexOf('history') !== -1; }
     function fwHasEngLit()       { return wizardState.subjects.indexOf('english-literature') !== -1; }
     function fwHasFilmStudies()  { return wizardState.subjects.indexOf('film-studies') !== -1; }
+    function fwHasDrama()        { return wizardState.subjects.indexOf('drama') !== -1; }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
@@ -2308,6 +2383,9 @@
       } else if (fwHasFilmStudies()) {
         buildFilmStudiesPicker();
         document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasDrama()) {
+        buildDramaPicker();
+        document.getElementById('fw-step-drama').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2329,6 +2407,9 @@
       } else if (fwHasFilmStudies()) {
         buildFilmStudiesPicker();
         document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasDrama()) {
+        buildDramaPicker();
+        document.getElementById('fw-step-drama').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2342,6 +2423,9 @@
       if (fwHasFilmStudies()) {
         buildFilmStudiesPicker();
         document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasDrama()) {
+        buildDramaPicker();
+        document.getElementById('fw-step-drama').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2364,6 +2448,33 @@
 
     document.getElementById('fw-film-studies-done').addEventListener('click', function () {
       document.getElementById('fw-step-film-studies').classList.remove('active');
+      if (fwHasDrama()) {
+        buildDramaPicker();
+        document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-drama-back').addEventListener('click', function () {
+      document.getElementById('fw-step-drama').classList.remove('active');
+      if (fwHasFilmStudies()) {
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasEngLit()) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-drama-done').addEventListener('click', function () {
+      document.getElementById('fw-step-drama').classList.remove('active');
       if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2374,7 +2485,9 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (fwHasFilmStudies()) {
+      if (fwHasDrama()) {
+        document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasFilmStudies()) {
         document.getElementById('fw-step-film-studies').classList.add('active');
       } else if (fwHasEngLit()) {
         document.getElementById('fw-step-3').classList.add('active');
@@ -2504,6 +2617,9 @@
         }
         if (baseSlug === 'film-studies') {
           entry.films = wizardState.filmStudies;
+        }
+        if (baseSlug === 'drama') {
+          entry.options = wizardState.drama;
         }
         prefs.subjects.push(entry);
       });
