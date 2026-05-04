@@ -534,10 +534,10 @@
       (subject.settings && subject.settings.practice_units && subject.settings.practice_units.indexOf(unitSlug) !== -1);
     var lessonPrefix = isPractice ? '/practice/' : '/lesson/';
 
-    lessons.forEach(function (lesson) {
+    lessons.forEach(function (lesson, idx) {
       var url = lessonPrefix + subjectSlug + '/' + unitSlug + '/' + lesson.lesson_number;
       html += '<a href="' + url + '" class="lesson-card sv-reveal" data-lesson="' + esc(lesson.slug) + '">';
-      html += '<span class="lesson-card-number">Lesson ' + lesson.lesson_number + '</span>';
+      html += '<span class="lesson-card-number">Lesson ' + (idx + 1) + '</span>';
       html += '<h3>' + esc(lesson.title) + '</h3>';
       if (lesson.description) {
         html += '<p>' + esc(lesson.description) + '</p>';
