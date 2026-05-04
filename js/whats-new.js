@@ -66,19 +66,26 @@
     el.setAttribute('aria-label', "What's new on StudyVault");
 
     var itemsHtml = subjects.map(function (s) {
-      var board = s.exam_board ? ' (' + s.exam_board + ')' : '';
       var when = relativeDate(s.created_at);
+      var accent = s.color || '#7c3aed';
+      var board = s.exam_board || '';
       return (
-        '<a class="sv-whats-new-item" href="/browse/' + s.slug + '">' +
-          '<span class="sv-whats-new-item-name">' + escapeHtml(s.name) + escapeHtml(board) + '</span>' +
-          '<span class="sv-whats-new-item-when">' + when + '</span>' +
+        '<a class="sv-whats-new-item" href="/browse/' + s.slug + '" style="--item-accent: ' + escapeHtml(accent) + '">' +
+          '<span class="sv-whats-new-item-name">' + escapeHtml(s.name) + '</span>' +
+          '<span class="sv-whats-new-item-meta">' +
+            (board ? '<span class="sv-whats-new-item-board">' + escapeHtml(board) + '</span>' : '') +
+            '<span class="sv-whats-new-item-when">' + when + '</span>' +
+          '</span>' +
         '</a>'
       );
     }).join('');
 
     el.innerHTML =
       '<div class="sv-whats-new-head">' +
-        '<span class="sv-whats-new-title">Recently added</span>' +
+        '<div class="sv-whats-new-title-wrap">' +
+          '<span class="sv-whats-new-eyebrow">New on StudyVault</span>' +
+          '<span class="sv-whats-new-title">Recently added</span>' +
+        '</div>' +
         '<button type="button" class="sv-whats-new-close" aria-label="Dismiss">×</button>' +
       '</div>' +
       '<div class="sv-whats-new-body">' + itemsHtml + '</div>';
@@ -112,7 +119,7 @@
     var sb = getSupabase();
     if (!sb) return;
     sb.from('subjects')
-      .select('name, slug, exam_board, created_at')
+      .select('name, slug, exam_board, color, created_at')
       .is('school_id', null)
       .eq('status', 'live')
       .order('created_at', { ascending: false })
