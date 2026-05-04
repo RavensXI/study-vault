@@ -214,6 +214,63 @@
       }
     }
 
+    // Free user Film Studies: filter at LESSON level (each unit contains
+    // multiple selectable films; student has picked one per section).
+    // Universal units (film-form, foundations, developments) keep all
+    // their lessons; only the set-film units have their lessons trimmed
+    // to show overviews + the student's picked film.
+    if (subjectSlug === 'film-studies-eduqas' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeFilm = FreeUser.getSubject(subjectSlug);
+      if (freeFilm && freeFilm.films && Object.keys(freeFilm.films).length > 0) {
+        var pickedFilmSlugs = new Set(Object.values(freeFilm.films));
+        // Slugs that are SELECTABLE (one of 25 set-film options across the 5 sections).
+        // Lessons whose slug is in this set but NOT picked are filtered out.
+        // Lessons NOT in this set (overviews, comparative-method, specialist-writing,
+        // generic film form, etc.) always show.
+        var FILM_SELECTABLE = new Set([
+          'dracula-and-the-lost-boys-vampires-across-eras',
+          'singin-in-the-rain-and-grease-the-hollywood-musical',
+          'pillow-talk-and-when-harry-met-sally-the-romantic-comedy',
+          'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion',
+          'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety',
+          'juno-tonal-comedy-and-the-indie-voice',
+          'whiplash-cutting-sound-and-pursuit-of-greatness',
+          'lady-bird-coming-of-age-and-greta-gerwigs-direction',
+          'the-hurt-locker-and-the-hate-u-give-issue-led-indies',
+          'the-hate-u-give-and-issue-led-indie',
+          'slumdog-millionaire-narrative-and-mumbai',
+          'district-9-narrative-and-segregation-allegory',
+          'the-babadook-narrative-and-grief-as-monster',
+          'the-breadwinner-narrative-and-animation-under-occupation',
+          'jojo-rabbit-narrative-and-comic-distance',
+          'tsotsi-representation-and-johannesburg',
+          'the-wave-representation-and-conformity',
+          'wadjda-representation-and-saudi-girlhood',
+          'girlhood-representation-and-paris-banlieue',
+          'the-farewell-representation-and-diaspora-grief',
+          'submarine-aesthetic-and-adolescent-imagination',
+          'attack-the-block-aesthetic-and-genre-mixing',
+          'skyfall-aesthetic-and-bond-cinematography',
+          'blinded-by-the-light-aesthetic-and-musical-realism',
+          'rocks-aesthetic-and-multicultural-london'
+        ]);
+        // Replace per-unit count fetch with per-unit filtered count
+        var filmCountPromises = units.map(function (u) {
+          return sb.from('lessons').select('slug, tier').eq('unit_id', u.id).eq('status', 'live')
+            .then(function (res) {
+              var rows = res.data || [];
+              if (foundationFilter) rows = rows.filter(function (r) { return r.tier !== 'higher'; });
+              rows = rows.filter(function (r) {
+                if (FILM_SELECTABLE.has(r.slug)) return pickedFilmSlugs.has(r.slug);
+                return true;
+              });
+              u._filteredCount = rows.length;
+            });
+        });
+        await Promise.all(filmCountPromises);
+      }
+    }
+
     document.title = subject.name + ' - StudyVault';
     document.getElementById('header-unit-label').textContent = subject.name;
 
@@ -365,6 +422,47 @@
     var subjectTier = savedTiers[subjectSlug] || 'higher';
     if (subjectTier === 'foundation') {
       lessons = lessons.filter(function(l) { return l.tier !== 'higher'; });
+    }
+
+    // Free user Film Studies: trim set-film lessons within this unit to only
+    // the student's picked film (if any of the 5 picks falls in this unit).
+    // Overviews, comparative-method, specialist-writing etc. keep showing.
+    if (subjectSlug === 'film-studies-eduqas' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeFilm = FreeUser.getSubject(subjectSlug);
+      if (freeFilm && freeFilm.films && Object.keys(freeFilm.films).length > 0) {
+        var pickedFilmSlugs2 = new Set(Object.values(freeFilm.films));
+        var FILM_SELECTABLE2 = new Set([
+          'dracula-and-the-lost-boys-vampires-across-eras',
+          'singin-in-the-rain-and-grease-the-hollywood-musical',
+          'pillow-talk-and-when-harry-met-sally-the-romantic-comedy',
+          'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion',
+          'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety',
+          'juno-tonal-comedy-and-the-indie-voice',
+          'whiplash-cutting-sound-and-pursuit-of-greatness',
+          'lady-bird-coming-of-age-and-greta-gerwigs-direction',
+          'the-hurt-locker-and-the-hate-u-give-issue-led-indies',
+          'the-hate-u-give-and-issue-led-indie',
+          'slumdog-millionaire-narrative-and-mumbai',
+          'district-9-narrative-and-segregation-allegory',
+          'the-babadook-narrative-and-grief-as-monster',
+          'the-breadwinner-narrative-and-animation-under-occupation',
+          'jojo-rabbit-narrative-and-comic-distance',
+          'tsotsi-representation-and-johannesburg',
+          'the-wave-representation-and-conformity',
+          'wadjda-representation-and-saudi-girlhood',
+          'girlhood-representation-and-paris-banlieue',
+          'the-farewell-representation-and-diaspora-grief',
+          'submarine-aesthetic-and-adolescent-imagination',
+          'attack-the-block-aesthetic-and-genre-mixing',
+          'skyfall-aesthetic-and-bond-cinematography',
+          'blinded-by-the-light-aesthetic-and-musical-realism',
+          'rocks-aesthetic-and-multicultural-london'
+        ]);
+        lessons = lessons.filter(function (l) {
+          if (FILM_SELECTABLE2.has(l.slug)) return pickedFilmSlugs2.has(l.slug);
+          return true;
+        });
+      }
     }
 
     document.title = unit.name + ' - StudyVault';

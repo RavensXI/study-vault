@@ -751,6 +751,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5b: Film Studies picker (1 from each of the 5 spec sections) -->
+      <div class="free-wizard-step" id="fw-step-film-studies">
+        <div class="fw-header">
+          <h2>Which Film Studies options do you study?</h2>
+          <p>Your school picks one film from each of the five sections — pick the five you study.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-film-studies-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-film-studies-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-film-studies-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5: Tier picker (Maths Foundation/Higher, etc.) -->
       <div class="free-wizard-step" id="fw-step-tier">
         <div class="fw-header">
@@ -1699,7 +1714,50 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {}, history: {} };
+    // Film Studies options. Eduqas C670QS and WJEC 3670QS are identical specs;
+    // both route to film-studies-eduqas. Five sections, one pick from each.
+    // Slug values match Supabase lessons.slug so browse-loader can filter.
+    var filmStudiesOptions = {
+      'eduqas': {
+        'Mainstream Pair (Section A)': [
+          { slug: 'dracula-and-the-lost-boys-vampires-across-eras', name: 'Dracula & The Lost Boys' },
+          { slug: 'singin-in-the-rain-and-grease-the-hollywood-musical', name: "Singin' in the Rain & Grease" },
+          { slug: 'pillow-talk-and-when-harry-met-sally-the-romantic-comedy', name: 'Pillow Talk & When Harry Met Sally' },
+          { slug: 'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion', name: "Rebel Without a Cause & Ferris Bueller's Day Off" },
+          { slug: 'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety', name: 'Invasion of the Body Snatchers & E.T.' }
+        ],
+        'US Independent Film (Section B)': [
+          { slug: 'juno-tonal-comedy-and-the-indie-voice', name: 'Juno' },
+          { slug: 'whiplash-cutting-sound-and-pursuit-of-greatness', name: 'Whiplash' },
+          { slug: 'lady-bird-coming-of-age-and-greta-gerwigs-direction', name: 'Lady Bird' },
+          { slug: 'the-hurt-locker-and-the-hate-u-give-issue-led-indies', name: 'The Hurt Locker' },
+          { slug: 'the-hate-u-give-and-issue-led-indie', name: 'The Hate U Give' }
+        ],
+        'Global English-Language Film': [
+          { slug: 'slumdog-millionaire-narrative-and-mumbai', name: 'Slumdog Millionaire' },
+          { slug: 'district-9-narrative-and-segregation-allegory', name: 'District 9' },
+          { slug: 'the-babadook-narrative-and-grief-as-monster', name: 'The Babadook' },
+          { slug: 'the-breadwinner-narrative-and-animation-under-occupation', name: 'The Breadwinner' },
+          { slug: 'jojo-rabbit-narrative-and-comic-distance', name: 'Jojo Rabbit' }
+        ],
+        'Global Non-English-Language Film': [
+          { slug: 'tsotsi-representation-and-johannesburg', name: 'Tsotsi' },
+          { slug: 'the-wave-representation-and-conformity', name: 'The Wave' },
+          { slug: 'wadjda-representation-and-saudi-girlhood', name: 'Wadjda' },
+          { slug: 'girlhood-representation-and-paris-banlieue', name: 'Girlhood' },
+          { slug: 'the-farewell-representation-and-diaspora-grief', name: 'The Farewell' }
+        ],
+        'Contemporary UK Film': [
+          { slug: 'submarine-aesthetic-and-adolescent-imagination', name: 'Submarine' },
+          { slug: 'attack-the-block-aesthetic-and-genre-mixing', name: 'Attack the Block' },
+          { slug: 'skyfall-aesthetic-and-bond-cinematography', name: 'Skyfall' },
+          { slug: 'blinded-by-the-light-aesthetic-and-musical-realism', name: 'Blinded by the Light' },
+          { slug: 'rocks-aesthetic-and-multicultural-london', name: 'Rocks' }
+        ]
+      }
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {} };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -2128,6 +2186,57 @@
       fwUpdateHistoryDoneBtn();
     }
 
+    // Film Studies picker — 5 sections, one selection from each.
+    // Section keys are stable: mainstream-pair-section-a, us-independent-film-section-b,
+    // global-english-language-film, global-non-english-language-film, contemporary-uk-film.
+    // Both Eduqas and WJEC use the same options (specs are identical).
+    function fwFilmStudiesRequiredSectionCount() {
+      var opts = filmStudiesOptions['eduqas'];
+      return opts ? Object.keys(opts).length : 0;
+    }
+
+    function fwUpdateFilmStudiesDoneBtn() {
+      var btn = document.getElementById('fw-film-studies-done');
+      if (!btn) return;
+      var picked = Object.keys(wizardState.filmStudies || {}).length;
+      var required = fwFilmStudiesRequiredSectionCount();
+      btn.disabled = picked < required;
+    }
+
+    function buildFilmStudiesPicker() {
+      var opts = filmStudiesOptions['eduqas'];
+      var container = document.getElementById('fw-film-studies-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.filmStudies = {};
+      if (!opts) return;
+
+      Object.keys(opts).forEach(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML = '<h3>' + section + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        opts[section].forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = option.name;
+          btn.dataset.value = option.slug;
+          btn.addEventListener('click', function () {
+            optsEl.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.filmStudies[groupKey] = option.slug;
+            fwUpdateFilmStudiesDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      });
+
+      fwUpdateFilmStudiesDoneBtn();
+    }
+
     // Tier picker: which subjects need a Foundation/Higher choice
     var FW_TIERED_BASE = ['maths', 'science', 'separate-sciences', 'spanish', 'french', 'german'];
 
@@ -2182,9 +2291,10 @@
       localStorage.setItem('studyvault-tiers', JSON.stringify(saved));
     }
 
-    // Step 2 → History (if picked) → Eng Lit (if picked) → Tier → Step 4
-    function fwHasHistory() { return wizardState.subjects.indexOf('history') !== -1; }
-    function fwHasEngLit()  { return wizardState.subjects.indexOf('english-literature') !== -1; }
+    // Step 2 → History (if picked) → Eng Lit (if picked) → Film Studies (if picked) → Tier → Step 4
+    function fwHasHistory()      { return wizardState.subjects.indexOf('history') !== -1; }
+    function fwHasEngLit()       { return wizardState.subjects.indexOf('english-literature') !== -1; }
+    function fwHasFilmStudies()  { return wizardState.subjects.indexOf('film-studies') !== -1; }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
@@ -2194,6 +2304,9 @@
       } else if (fwHasEngLit()) {
         buildTextPicker();
         document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasFilmStudies()) {
+        buildFilmStudiesPicker();
+        document.getElementById('fw-step-film-studies').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2212,6 +2325,9 @@
       if (fwHasEngLit()) {
         buildTextPicker();
         document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasFilmStudies()) {
+        buildFilmStudiesPicker();
+        document.getElementById('fw-step-film-studies').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2222,6 +2338,31 @@
 
     document.getElementById('fw-step3-done').addEventListener('click', function () {
       document.getElementById('fw-step-3').classList.remove('active');
+      if (fwHasFilmStudies()) {
+        buildFilmStudiesPicker();
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-film-studies-back').addEventListener('click', function () {
+      document.getElementById('fw-step-film-studies').classList.remove('active');
+      if (fwHasEngLit()) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-film-studies-done').addEventListener('click', function () {
+      document.getElementById('fw-step-film-studies').classList.remove('active');
       if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2232,7 +2373,9 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (fwHasEngLit()) {
+      if (fwHasFilmStudies()) {
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasEngLit()) {
         document.getElementById('fw-step-3').classList.add('active');
       } else if (fwHasHistory()) {
         buildHistoryPicker();
@@ -2357,6 +2500,9 @@
         }
         if (baseSlug === 'history') {
           entry.options = wizardState.history;
+        }
+        if (baseSlug === 'film-studies') {
+          entry.films = wizardState.filmStudies;
         }
         prefs.subjects.push(entry);
       });
