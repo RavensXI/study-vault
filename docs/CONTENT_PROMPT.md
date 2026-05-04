@@ -90,6 +90,14 @@ BANNED — past paper descriptions:
 - DO NOT WRITE: "using the 2026 AQA sample paper on Life of Pi"
 - Don't reference specific sample papers at all.
 
+BANNED — Eduqas/WJEC board name in prose for dual-board subjects:
+- For Eduqas-or-WJEC subjects (Film Studies, Drama, RS, Media, Sociology, RE, PE, Languages, vocational awards), the same Supabase row serves both boards via slugMap aliasing. Naming the board in prose forces a re-edit and narration regen if the other board's students arrive.
+- DO NOT WRITE: "Eduqas Film Studies (C670QS)" / "WJEC Drama" / "the Eduqas exam"
+- DO NOT WRITE: "Eduqas examiners reward..." / "in your WJEC paper..."
+- INSTEAD: "GCSE Film Studies" / "your exam" / "this paper" / "examiners"
+- Spec code citations are already banned (above). The board NAME is also off-limits in prose for these subjects.
+- Exception: AQA, OCR, Edexcel-only subjects can name the board in prose since there's no cross-board re-use risk. (Even then, prefer "your exam" — but if board name aids clarity, fine.)
+
 BANNED — "pastPaper" field:
 - Never include this field on practice questions. It is deprecated.
 
@@ -126,11 +134,33 @@ No other top-level keys. No markdown code fences around the JSON. No explanation
 
 FIELD RULES
 
+PLAIN-TEXT vs HTML-RENDERED FIELDS — READ THIS FIRST
+
+The browser renders some fields as HTML (innerHTML) and others as plain text (textContent / JS string). Get this wrong and `&rsquo;` shows up as literal characters to students instead of an apostrophe.
+
+USE PLAIN UNICODE CHARACTERS (apostrophe `'`, em-dash `—`, quotes `"` `"`, ampersand `&`, accented letters `é í ñ á ó ú É`, pound `£`, etc.) in these fields:
+- description
+- hero_image_caption
+- practice_questions[].text, .type, .marks
+- knowledge_checks[].q, .options[], .left[], .right[]
+- flashcard_questions[].q, .a
+- glossary_terms[].term, .definition
+- related_media[].items[].title, .description (when present)
+
+USE HTML ENTITIES (`&amp; &mdash; &lsquo; &rsquo; &ldquo; &rdquo; &eacute; &pound;`) ONLY in these HTML-rendered fields:
+- content_html
+- exam_tip_html
+- conclusion_html
+- glossary <dfn data-def="..."> inline (the data-def attribute IS rendered as HTML)
+
+Mixing these up has shipped multiple times. The rule is: **if the field name ends in `_html`, use entities; otherwise use plain unicode.**
+
 description (required)
 - 60-100 characters
 - Browse card copy — what the student sees before clicking in
 - Student-friendly language
-- Example: "How the cyclical structure creates dramatic irony and why the ending is revealed at the start."
+- **Plain unicode** (no HTML entities — see rule above)
+- Example: "How the cyclical structure creates dramatic irony and why the ending's revealed at the start."
 
 content_html (required)
 - 800-1500 words of content (excluding HTML tags)
