@@ -39,6 +39,56 @@
     return Object.values(pref.options);
   }
 
+  // Drama: free users pick 1 set play from 9 options. Universal units
+  // (theatre roles, practitioners, live theatre review) always show.
+  var DRAMA_SLUGS = ['drama-aqa'];
+  var DRAMA_UNIVERSAL = ['theatre-roles-stagecraft', 'practitioners-styles', 'live-theatre-review'];
+
+  function getFreeDramaSelectedUnitSlugs(subjectSlug) {
+    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
+    var pref = FreeUser.getSubject(subjectSlug);
+    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
+    return Object.values(pref.options).concat(DRAMA_UNIVERSAL);
+  }
+
+  // Film Studies: free users pick 1 film from each of 5 sections. Filtering
+  // is at LESSON level (each unit contains multiple selectable films).
+  var FILM_STUDIES_SLUGS = ['film-studies-eduqas'];
+  var FILM_SELECTABLE = {
+    'dracula-and-the-lost-boys-vampires-across-eras': true,
+    'singin-in-the-rain-and-grease-the-hollywood-musical': true,
+    'pillow-talk-and-when-harry-met-sally-the-romantic-comedy': true,
+    'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion': true,
+    'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety': true,
+    'juno-tonal-comedy-and-the-indie-voice': true,
+    'whiplash-cutting-sound-and-pursuit-of-greatness': true,
+    'lady-bird-coming-of-age-and-greta-gerwigs-direction': true,
+    'the-hurt-locker-and-the-hate-u-give-issue-led-indies': true,
+    'the-hate-u-give-and-issue-led-indie': true,
+    'slumdog-millionaire-narrative-and-mumbai': true,
+    'district-9-narrative-and-segregation-allegory': true,
+    'the-babadook-narrative-and-grief-as-monster': true,
+    'the-breadwinner-narrative-and-animation-under-occupation': true,
+    'jojo-rabbit-narrative-and-comic-distance': true,
+    'tsotsi-representation-and-johannesburg': true,
+    'the-wave-representation-and-conformity': true,
+    'wadjda-representation-and-saudi-girlhood': true,
+    'girlhood-representation-and-paris-banlieue': true,
+    'the-farewell-representation-and-diaspora-grief': true,
+    'submarine-aesthetic-and-adolescent-imagination': true,
+    'attack-the-block-aesthetic-and-genre-mixing': true,
+    'skyfall-aesthetic-and-bond-cinematography': true,
+    'blinded-by-the-light-aesthetic-and-musical-realism': true,
+    'rocks-aesthetic-and-multicultural-london': true
+  };
+
+  function getFreeFilmStudiesPickedFilmSlugs(subjectSlug) {
+    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
+    var pref = FreeUser.getSubject(subjectSlug);
+    if (!pref || !pref.films || !Object.keys(pref.films).length) return null;
+    return Object.values(pref.films);
+  }
+
   // Determine which subject rows to count for the current viewer.
   // - School student: school's bespoke + subscribed (anything the student can see)
   // - Free user / anonymous: free-tier only (school_id NULL)
@@ -64,7 +114,7 @@
       var offset = 0;
       while (true) {
         var res = await sb.from('lessons')
-          .select('unit_id, tier')
+          .select('unit_id, tier, slug')
           .eq('status', 'live')
           .range(offset, offset + 999);
         var data = res.data || [];
@@ -117,12 +167,21 @@
       var subjList = subjectsBySlug[slug];
       var subjIds = subjList.map(function (s) { return s.id; });
 
-      // Eng Lit free-tier slugs: filter to selected texts + compulsory
+      // Eng Lit / History / Drama free-tier slugs: filter to selected unit slugs.
       var allowedUnitSlugs = null;
       if (ENGLIT_SLUGS.indexOf(slug) !== -1) {
         allowedUnitSlugs = getFreeEngLitSelectedUnitSlugs(slug);
       } else if (HISTORY_SLUGS.indexOf(slug) !== -1) {
         allowedUnitSlugs = getFreeHistorySelectedUnitSlugs(slug);
+      } else if (DRAMA_SLUGS.indexOf(slug) !== -1) {
+        allowedUnitSlugs = getFreeDramaSelectedUnitSlugs(slug);
+      }
+
+      // Film Studies: lesson-level filter (each unit has overviews + multiple
+      // selectable films; student picks one per section).
+      var pickedFilmSlugs = null;
+      if (FILM_STUDIES_SLUGS.indexOf(slug) !== -1) {
+        pickedFilmSlugs = getFreeFilmStudiesPickedFilmSlugs(slug);
       }
 
       var unitCount = 0;
@@ -132,18 +191,26 @@
         if (subjIds.indexOf(u.subject_id) === -1) return;
         if (allowedUnitSlugs && allowedUnitSlugs.indexOf(u.slug) === -1) return;
         matchingUnitIds[u.id] = true;
-        unitCount++;
       });
 
       // Foundation users hide tier='higher' lessons (matches browse-loader behaviour)
       var savedTiers = {};
       try { savedTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch (e) {}
       var thisTier = savedTiers[slug] || 'higher';
+      var unitsWithVisibleLessons = {};
       lessons.forEach(function (l) {
         if (!matchingUnitIds[l.unit_id]) return;
         if (thisTier === 'foundation' && l.tier === 'higher') return;
+        // Film Studies lesson-level filter: drop selectable lessons not in picks
+        if (pickedFilmSlugs && FILM_SELECTABLE[l.slug] && pickedFilmSlugs.indexOf(l.slug) === -1) return;
         lessonCount++;
+        unitsWithVisibleLessons[l.unit_id] = true;
       });
+
+      // Unit count = units that have at least one visible lesson after filters.
+      // (For unit-level filters this matches matchingUnitIds, so it's a no-op.
+      // For Film Studies' lesson-level filter, units with all-hidden lessons drop out.)
+      Object.keys(unitsWithVisibleLessons).forEach(function () { unitCount++; });
 
       counts[slug] = { units: unitCount, lessons: lessonCount };
     });
