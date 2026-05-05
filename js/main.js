@@ -2207,7 +2207,22 @@ function initRevisionTips() {
       { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each nutritional concept.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Explain the content inside to someone else in your own words.', link: 'teach-back.html', label: 'Teach Back', maxPerPage: 1 }
     ],
+    // Unity bespoke renamed `food-technology` → `food-preparation-and-nutrition`.
+    // Free-tier Eduqas slug is `food-preparation-and-nutrition-eduqas` (caught
+    // via the board-suffix strip below).
+    'food-preparation-and-nutrition': [
+      { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
+      { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each nutritional concept.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Explain the content inside to someone else in your own words.', link: 'teach-back.html', label: 'Teach Back', maxPerPage: 1 }
+    ],
     'religious-education': [
+      { selector: '.key-fact', text: 'Turn this into a flashcard \u2014 the key teaching on one side, its source and meaning on the other.', link: 'quote-flashcards.html', label: 'Quote Flashcards' },
+      { selector: 'figure.diagram', text: 'Create a comparison table from this diagram showing similarities and differences.', link: 'comparison-tables.html', label: 'Comparison Tables', maxPerPage: 1 },
+      { selector: '.collapsible', text: 'Use the points inside to plan both sides of a 12-mark evaluation answer.', link: 'argument-planning.html', label: 'Argument Planning', maxPerPage: 1 }
+    ],
+    // Unity bespoke renamed `religious-education` \u2192 `religious-studies`.
+    // Free-tier slug `religious-studies-aqa` strips to `religious-studies`.
+    'religious-studies': [
       { selector: '.key-fact', text: 'Turn this into a flashcard \u2014 the key teaching on one side, its source and meaning on the other.', link: 'quote-flashcards.html', label: 'Quote Flashcards' },
       { selector: 'figure.diagram', text: 'Create a comparison table from this diagram showing similarities and differences.', link: 'comparison-tables.html', label: 'Comparison Tables', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Use the points inside to plan both sides of a 12-mark evaluation answer.', link: 'argument-planning.html', label: 'Argument Planning', maxPerPage: 1 }

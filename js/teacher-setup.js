@@ -117,8 +117,8 @@
       { slug: 'geography', name: 'Geography' },
       { slug: 'sport-science', name: 'Sport Science' },
       { slug: 'drama', name: 'Drama' },
-      { slug: 'food-technology', name: 'Food Preparation & Nutrition' },
-      { slug: 'religious-education', name: 'Religious Studies' },
+      { slug: 'food-preparation-and-nutrition', name: 'Food Preparation & Nutrition' },
+      { slug: 'religious-studies', name: 'Religious Studies' },
       { slug: 'gcse-music', name: 'Music' }
     ];
 
@@ -216,6 +216,10 @@
       'geography': 'Geography',
       'sport-science': 'Sport Science',
       'drama': 'Drama',
+      'food-preparation-and-nutrition': 'Food Preparation & Nutrition',
+      'religious-studies': 'Religious Studies',
+      // Legacy aliases — teacher accounts saved before slug refactor still
+      // use these in sessionStorage; resolve to the same display name.
       'food-technology': 'Food Preparation & Nutrition',
       'religious-education': 'Religious Studies',
       'gcse-music': 'Music'

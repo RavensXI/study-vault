@@ -29,29 +29,170 @@
   }
 
   // ---- One-time slug migration ----
-  // Free-tier History split: Edexcel renamed `history` → `history-edexcel`,
-  // AQA build now at `history-aqa`. Unity students still use `history`.
-  // Redirect non-Unity hits on the old slug — free-tier users with a saved
-  // Edexcel pref go to `history-edexcel`, otherwise default to `history-aqa`
-  // (the fuller / most-taught build).
-  function chooseHistoryTargetSlug() {
+  // Old free-tier slugs that have been renamed for consistency. For Unity
+  // students (school session active), most of these still map to the bespoke
+  // version of the same slug — don't redirect them. For free / anonymous
+  // users, redirect to the suffixed equivalent and preserve any pref-based
+  // board choice.
+  //
+  // History (Apr 2026): `history` → `history-edexcel` so AQA could take `history-aqa`.
+  // Slug refactor (May 2026): every free-tier subject is now -{board} suffixed.
+  var OLD_TO_NEW_SLUGS = {
+    'history':             ['history-aqa', 'history-edexcel'],
+    'english-language':    ['english-language-aqa', 'english-language-edexcel', 'english-language-ocr', 'english-language-eduqas'],
+    'english-literature':  ['english-literature-aqa', 'english-literature-edexcel', 'english-literature-ocr', 'english-literature-eduqas'],
+    'maths':               ['maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas'],
+    'science':             ['science-aqa', 'science-edexcel', 'science-ocr'],
+    'religious-education': ['religious-studies-aqa'],
+    'geography':           ['geography-aqa', 'geography-edexcel-a', 'geography-edexcel-b', 'geography-ocr', 'geography-eduqas'],
+    'health-social-care':  ['health-social-care-edexcel', 'health-social-care-ocr'],
+    // food-technology renamed to food-preparation-and-nutrition for Unity bespoke;
+    // free users got food-preparation-and-nutrition-eduqas as the only built option.
+    'food-technology':     ['food-preparation-and-nutrition-eduqas']
+  };
+
+  function chooseRedirectTarget(oldSlug) {
+    var candidates = OLD_TO_NEW_SLUGS[oldSlug] || [];
+    if (!candidates.length) return null;
+    // Prefer a target the user has already picked
     if (typeof FreeUser !== 'undefined' && FreeUser.isActive && FreeUser.isActive()) {
-      var pref = FreeUser.getSubject('history') || FreeUser.getSubject('history-edexcel') || FreeUser.getSubject('history-aqa');
-      if (pref && pref.slug) return pref.slug;
+      for (var i = 0; i < candidates.length; i++) {
+        var c = candidates[i];
+        if (FreeUser.getSubject(c)) return c;
+      }
+      // Also check via baseSlug match (e.g. baseSlug='religious-studies' matches 'religious-studies-aqa')
+      var baseGuess = candidates[0].replace(/-(aqa|edexcel|edexcel-a|edexcel-b|ocr|eduqas)$/, '');
+      var byBase = FreeUser.getSubject(baseGuess);
+      if (byBase && byBase.slug) return byBase.slug;
     }
-    return 'history-aqa';
+    // Otherwise default to the first candidate (the AQA / Edexcel / dominant build)
+    return candidates[0];
   }
-  function maybeRedirectOldHistorySlug(slug) {
-    if (slug !== 'history') return false;
+
+  function maybeRedirectOldSlug(slug) {
+    if (!OLD_TO_NEW_SLUGS[slug]) return false;
+    // Unity students keep using bare slugs for their bespoke content (matches
+    // Supabase row scoped by school_id). Don't redirect them.
     var isUnity = (typeof SchoolSession !== 'undefined' && SchoolSession.isActive && SchoolSession.isActive());
     if (isUnity) return false;
-    var target = chooseHistoryTargetSlug();
-    var newPath = window.location.pathname.replace(/^\/browse\/history(\/|$)/, '/browse/' + target + '$1');
+    var target = chooseRedirectTarget(slug);
+    if (!target) return false;
+    var newPath = window.location.pathname.replace(
+      new RegExp('^/browse/' + slug.replace(/[-]/g, '\\-') + '(/|$)'),
+      '/browse/' + target + '$1'
+    );
     if (newPath !== window.location.pathname) {
       window.location.replace(newPath + (window.location.search || '') + (window.location.hash || ''));
       return true;
     }
     return false;
+  }
+  // Back-compat alias for any callers still using the old name
+  var maybeRedirectOldHistorySlug = maybeRedirectOldSlug;
+
+  // ---- baseSlug → board picker ----
+  // Some URLs are baseSlugs (e.g. /browse/physical-education) shared across
+  // multiple boards, no real Supabase row. When the lookup fails for these,
+  // render a small board-picker page instead of a 404.
+  // Mirrors slugMap in index.html — kept manually in sync. Each entry is the
+  // baseSlug → list of {board, slug, label} pairs we have built content for.
+  var BASE_SLUG_BOARDS = {
+    'english-language': [
+      { board: 'AQA', slug: 'english-language-aqa' },
+      { board: 'Edexcel', slug: 'english-language-edexcel' },
+      { board: 'OCR', slug: 'english-language-ocr' },
+      { board: 'Eduqas', slug: 'english-language-eduqas' }
+    ],
+    'english-literature': [
+      { board: 'AQA', slug: 'english-literature-aqa' },
+      { board: 'Edexcel', slug: 'english-literature-edexcel' },
+      { board: 'OCR', slug: 'english-literature-ocr' },
+      { board: 'Eduqas', slug: 'english-literature-eduqas' }
+    ],
+    'maths': [
+      { board: 'Edexcel', slug: 'maths-edexcel' },
+      { board: 'AQA', slug: 'maths-aqa' },
+      { board: 'OCR', slug: 'maths-ocr' },
+      { board: 'Eduqas', slug: 'maths-eduqas' }
+    ],
+    'science': [
+      { board: 'AQA', slug: 'science-aqa' },
+      { board: 'Edexcel', slug: 'science-edexcel' },
+      { board: 'OCR', slug: 'science-ocr' }
+    ],
+    'business': [
+      { board: 'AQA', slug: 'business-aqa' },
+      { board: 'Edexcel', slug: 'business-edexcel' },
+      { board: 'OCR', slug: 'business-ocr' }
+    ],
+    'geography': [
+      { board: 'AQA', slug: 'geography-aqa' },
+      { board: 'Edexcel A', slug: 'geography-edexcel-a' },
+      { board: 'Edexcel B', slug: 'geography-edexcel-b' },
+      { board: 'OCR', slug: 'geography-ocr' },
+      { board: 'Eduqas', slug: 'geography-eduqas' }
+    ],
+    'history': [
+      { board: 'AQA', slug: 'history-aqa' },
+      { board: 'Edexcel', slug: 'history-edexcel' }
+    ],
+    'physical-education': [
+      { board: 'AQA', slug: 'physical-education-aqa' },
+      { board: 'OCR', slug: 'physical-education-ocr' }
+    ],
+    'religious-studies': [
+      { board: 'AQA', slug: 'religious-studies-aqa' }
+      // eduqas to come
+    ],
+    'health-social-care': [
+      { board: 'Edexcel', slug: 'health-social-care-edexcel' },
+      { board: 'OCR', slug: 'health-social-care-ocr' }
+    ],
+    'food-preparation-and-nutrition': [
+      { board: 'Eduqas', slug: 'food-preparation-and-nutrition-eduqas' }
+      // aqa, ocr to come
+    ]
+  };
+
+  function renderBoardPicker(baseSlug) {
+    var boards = BASE_SLUG_BOARDS[baseSlug];
+    if (!boards || !boards.length) return false;
+
+    // Pretty subject name from baseSlug
+    var prettyName = baseSlug.split('-').map(function (w) {
+      return w.charAt(0).toUpperCase() + w.slice(1);
+    }).join(' ');
+
+    loadingEl.style.display = 'none';
+
+    // If only one board exists, just redirect there
+    if (boards.length === 1) {
+      window.location.replace('/browse/' + boards[0].slug + (window.location.search || '') + (window.location.hash || ''));
+      return true;
+    }
+
+    document.title = prettyName + ' — Pick exam board · StudyVault';
+    contentEl.style.display = '';
+
+    var html = '';
+    html += '<header class="subject-header" style="text-align:center; padding: 2rem 1rem 1.5rem;">';
+    html += '<h1 style="font-family:\'Source Serif 4\',Georgia,serif; font-size:2rem; font-weight:700; margin:0 0 0.4rem;">' + esc(prettyName) + '</h1>';
+    html += '<p style="color:#6b645c; font-size:1rem; margin:0;">Pick your exam board to get started.</p>';
+    html += '</header>';
+    html += '<div style="max-width:540px; margin:0 auto 2rem; padding:0 1rem; display:flex; flex-direction:column; gap:0.65rem;">';
+    boards.forEach(function (b) {
+      html += '<a href="/browse/' + esc(b.slug) + '" ';
+      html += 'style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; background:#fff; border:1.5px solid #e8e2d8; border-radius:14px; text-decoration:none; color:#2d2a26; font-weight:600; transition:border-color 0.2s, transform 0.15s;" ';
+      html += 'onmouseover="this.style.borderColor=\'#c15a3a\'; this.style.transform=\'translateY(-1px)\';" ';
+      html += 'onmouseout="this.style.borderColor=\'#e8e2d8\'; this.style.transform=\'translateY(0)\';">';
+      html += '<span>' + esc(b.board) + '</span>';
+      html += '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>';
+      html += '</a>';
+    });
+    html += '</div>';
+    html += '<p style="text-align:center; color:#9a938a; font-size:0.85rem; margin:0 1rem 2rem;">Don\'t see your board? <a href="/" style="color:#c15a3a;">Request it on the homepage</a>.</p>';
+    contentEl.innerHTML = html;
+    return true;
   }
 
   // ---- Auth check ----
@@ -106,9 +247,12 @@
       subjectQuery = subjectQuery.is('school_id', null);
     }
 
-    var subjectResult = await subjectQuery.single();
+    var subjectResult = await subjectQuery.maybeSingle();
 
     if (subjectResult.error || !subjectResult.data) {
+      // Before showing 404 — is this a baseSlug we have multiple boards for?
+      // If yes, render the board picker instead.
+      if (renderBoardPicker(subjectSlug)) return;
       showError('Subject not found', 'No subject found with slug "' + subjectSlug + '"');
       return;
     }
@@ -173,7 +317,7 @@
 
     // Always live-count lessons per unit (replaces stale unit.lesson_count column).
     // Foundation users on tiered subjects get the count with tier='higher' excluded.
-    var TIERED_OVERVIEW = ['maths', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-edexcel', 'science-ocr', 'separate-sciences'];
+    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'separate-sciences'];
     var savedTiersOverview = {};
     try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
     var overviewTier = savedTiersOverview[subjectSlug] || 'higher';
@@ -233,7 +377,9 @@
     // theme units = 8 total. Existing users without picks default to the
     // original 8 units that pre-dated the picker (Christianity + Islam +
     // Themes A/B/D/E) so they don't suddenly see all 20 unfiltered.
-    if (subjectSlug === 'religious-education' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+    // Both old (`religious-education`) and new (`religious-studies-aqa`)
+    // slugs accepted during the slug-refactor transition window.
+    if ((subjectSlug === 'religious-studies-aqa' || subjectSlug === 'religious-education') && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeRE = FreeUser.getSubject(subjectSlug);
       // Only apply the filter for users who actually have RE picked. Anyone
       // navigating directly without RE in their prefs sees all 20 units.
@@ -548,7 +694,7 @@
       html += '<p>' + esc(unit.subtitle) + '</p>';
     }
     // Tier indicator for tiered subjects
-    var TIERED = ['maths', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-edexcel', 'science-ocr', 'separate-sciences'];
+    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'separate-sciences'];
     if (TIERED.indexOf(subjectSlug) !== -1) {
       var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';

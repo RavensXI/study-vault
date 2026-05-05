@@ -101,9 +101,13 @@ module.exports = async (req, res) => {
   // Map subject slugs to actual image filenames where they differ
   const imageMap = {
     'food-technology': 'food',
+    'food-preparation-and-nutrition': 'food',
     'religious-education': 'religious-studies',
+    'religious-studies-aqa': 'religious-studies',
     'english-literature': 'english-lit',
+    'english-literature-aqa': 'english-lit',
     'english-language': 'english-lang',
+    'english-language-aqa': 'english-lang',
     'music-technology': 'music-tech',
     'gcse-music': 'music',
   };

@@ -15,7 +15,7 @@
   // English Lit text-pick filtering: free users select 1 Shakespeare + 1
   // 19th-C novel + 1 Modern + 1 Poetry cluster (per board). Mirror the
   // browse-loader filter so home counts match what the student actually sees.
-  var ENGLIT_SLUGS = ['english-literature', 'english-literature-edexcel',
+  var ENGLIT_SLUGS = ['english-literature', 'english-literature-aqa', 'english-literature-edexcel',
                        'english-literature-ocr', 'english-literature-eduqas'];
   var ENGLIT_COMPULSORY = ['unseen-poetry'];
 
@@ -54,7 +54,9 @@
   // Religious Studies (AQA): free users pick 2 of 7 religions (each gives
   // Beliefs + Practices) and 4 of 6 themes — visible set = 8 units. Legacy
   // users without picks fall back to the pre-gap-fill 8-unit set.
-  var RE_SLUGS = ['religious-education'];
+  // Both old (`religious-education`) and new (`religious-studies-aqa`) slugs
+  // listed for the slug-refactor transition window.
+  var RE_SLUGS = ['religious-studies-aqa', 'religious-education'];
   var RE_DEFAULT_UNITS = [
     'christianity-beliefs', 'christianity-practices',
     'islam-beliefs', 'islam-practices',
