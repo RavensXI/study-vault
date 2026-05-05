@@ -227,6 +227,43 @@
       }
     }
 
+    // Free user Religious Studies (AQA): filter to picked religions
+    // (Beliefs + Practices for each) + picked themes. Schools pick 2 of 7
+    // religions and 4 of 6 themes, so the visible set = 4 religion units + 4
+    // theme units = 8 total. Existing users without picks default to the
+    // original 8 units that pre-dated the picker (Christianity + Islam +
+    // Themes A/B/D/E) so they don't suddenly see all 20 unfiltered.
+    if (subjectSlug === 'religious-education' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeRE = FreeUser.getSubject(subjectSlug);
+      // Only apply the filter for users who actually have RE picked. Anyone
+      // navigating directly without RE in their prefs sees all 20 units.
+      if (freeRE) {
+        var allowedREUnitSlugs;
+        if ((freeRE.religions && freeRE.religions.length) || (freeRE.themes && freeRE.themes.length)) {
+          var rels = freeRE.religions || [];
+          var thms = freeRE.themes || [];
+          allowedREUnitSlugs = [];
+          rels.forEach(function (r) {
+            allowedREUnitSlugs.push(r + '-beliefs');
+            allowedREUnitSlugs.push(r + '-practices');
+          });
+          thms.forEach(function (t) { allowedREUnitSlugs.push(t); });
+        } else {
+          // Legacy free user (RE picked but no religion/theme data — pre-picker).
+          // Match the original 8-unit visible set so they don't suddenly see 20.
+          allowedREUnitSlugs = [
+            'christianity-beliefs', 'christianity-practices',
+            'islam-beliefs', 'islam-practices',
+            'theme-a-relationships', 'theme-b-religion-life',
+            'theme-d-peace-conflict', 'theme-e-crime-punishment'
+          ];
+        }
+        units = units.filter(function (u) {
+          return allowedREUnitSlugs.indexOf(u.slug) !== -1;
+        });
+      }
+    }
+
     // Free user Film Studies: filter at LESSON level (each unit contains
     // multiple selectable films; student has picked one per section).
     // Universal units (film-form, foundations, developments) keep all

@@ -51,6 +51,38 @@
     return Object.values(pref.options).concat(DRAMA_UNIVERSAL);
   }
 
+  // Religious Studies (AQA): free users pick 2 of 7 religions (each gives
+  // Beliefs + Practices) and 4 of 6 themes — visible set = 8 units. Legacy
+  // users without picks fall back to the pre-gap-fill 8-unit set.
+  var RE_SLUGS = ['religious-education'];
+  var RE_DEFAULT_UNITS = [
+    'christianity-beliefs', 'christianity-practices',
+    'islam-beliefs', 'islam-practices',
+    'theme-a-relationships', 'theme-b-religion-life',
+    'theme-d-peace-conflict', 'theme-e-crime-punishment'
+  ];
+
+  function getFreeRESelectedUnitSlugs(subjectSlug) {
+    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
+    var pref = FreeUser.getSubject(subjectSlug);
+    // Only filter for free users who actually have RE picked. Anonymous home
+    // visitors (no FreeUser session) get the unfiltered 20-unit total.
+    if (!pref) return null;
+    if ((pref.religions && pref.religions.length) || (pref.themes && pref.themes.length)) {
+      var rels = pref.religions || [];
+      var thms = pref.themes || [];
+      var slugs = [];
+      rels.forEach(function (r) {
+        slugs.push(r + '-beliefs');
+        slugs.push(r + '-practices');
+      });
+      thms.forEach(function (t) { slugs.push(t); });
+      return slugs;
+    }
+    // Legacy free user: RE picked but no religion/theme data — show default 8.
+    return RE_DEFAULT_UNITS.slice();
+  }
+
   // Film Studies: free users pick 1 film from each of 5 sections. Filtering
   // is at LESSON level (each unit contains multiple selectable films).
   var FILM_STUDIES_SLUGS = ['film-studies-eduqas'];
@@ -167,7 +199,7 @@
       var subjList = subjectsBySlug[slug];
       var subjIds = subjList.map(function (s) { return s.id; });
 
-      // Eng Lit / History / Drama free-tier slugs: filter to selected unit slugs.
+      // Eng Lit / History / Drama / RE free-tier slugs: filter to selected unit slugs.
       var allowedUnitSlugs = null;
       if (ENGLIT_SLUGS.indexOf(slug) !== -1) {
         allowedUnitSlugs = getFreeEngLitSelectedUnitSlugs(slug);
@@ -175,6 +207,8 @@
         allowedUnitSlugs = getFreeHistorySelectedUnitSlugs(slug);
       } else if (DRAMA_SLUGS.indexOf(slug) !== -1) {
         allowedUnitSlugs = getFreeDramaSelectedUnitSlugs(slug);
+      } else if (RE_SLUGS.indexOf(slug) !== -1) {
+        allowedUnitSlugs = getFreeRESelectedUnitSlugs(slug);
       }
 
       // Film Studies: lesson-level filter (each unit has overviews + multiple

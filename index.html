@@ -768,6 +768,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5d: Religious Studies picker (2 of 7 religions + 4 of 6 themes) -->
+      <div class="free-wizard-step" id="fw-step-re">
+        <div class="fw-header">
+          <h2>Which religions and themes are you studying?</h2>
+          <p>AQA Religious Studies schools pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-re-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-re-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-re-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5b: Film Studies picker (1 from each of the 5 spec sections) -->
       <div class="free-wizard-step" id="fw-step-film-studies">
         <div class="fw-header">
@@ -1799,6 +1814,32 @@
       }
     };
 
+    // Religious Studies options. AQA schools pick 2 religions (each spans
+    // Beliefs + Practices units) and 4 of 6 themes. Slugs match Supabase
+    // unit slugs so browse-loader can filter at unit level. Each religion
+    // here maps to a pair of unit slugs ({slug}-beliefs, {slug}-practices).
+    var religiousEducationOptions = {
+      'aqa': {
+        religions: [
+          { slug: 'buddhism', name: 'Buddhism' },
+          { slug: 'catholic-christianity', name: 'Catholic Christianity' },
+          { slug: 'christianity', name: 'Christianity' },
+          { slug: 'hinduism', name: 'Hinduism' },
+          { slug: 'islam', name: 'Islam' },
+          { slug: 'judaism', name: 'Judaism' },
+          { slug: 'sikhism', name: 'Sikhism' }
+        ],
+        themes: [
+          { slug: 'theme-a-relationships', name: 'Theme A — Relationships & Families' },
+          { slug: 'theme-b-religion-life', name: 'Theme B — Religion & Life' },
+          { slug: 'theme-c-existence-of-god', name: 'Theme C — Existence of God & Revelation' },
+          { slug: 'theme-d-peace-conflict', name: 'Theme D — Peace & Conflict' },
+          { slug: 'theme-e-crime-punishment', name: 'Theme E — Crime & Punishment' },
+          { slug: 'theme-f-human-rights-social-justice', name: 'Theme F — Human Rights & Social Justice' }
+        ]
+      }
+    };
+
     // Drama options. 9 set plays — student picks 1. Slugs match Supabase
     // unit slugs so browse-loader can filter at unit level.
     var dramaOptions = {
@@ -1817,7 +1858,7 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {} };
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, re: { religions: [], themes: [] } };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -2340,6 +2381,64 @@
       fwUpdateDramaDoneBtn();
     }
 
+    // Religious Studies picker — 2 of 7 religions + 4 of 6 themes (AQA).
+    // Multi-select with caps; Continue disabled until both quotas hit.
+    function fwUpdateREDoneBtn() {
+      var btn = document.getElementById('fw-re-done');
+      if (!btn) return;
+      var rels = (wizardState.re && wizardState.re.religions) || [];
+      var thms = (wizardState.re && wizardState.re.themes) || [];
+      btn.disabled = !(rels.length === 2 && thms.length === 4);
+    }
+
+    function buildREPicker() {
+      var opts = religiousEducationOptions['aqa'];
+      var container = document.getElementById('fw-re-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.re = { religions: [], themes: [] };
+      if (!opts) return;
+
+      function buildSection(heading, helper, items, stateKey, max) {
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML =
+          '<h3>' + heading + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helper + '</span></h3>' +
+          '<div class="fw-text-options" data-group="' + stateKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        items.forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = item.name;
+          btn.dataset.value = item.slug;
+          btn.addEventListener('click', function () {
+            var arr = wizardState.re[stateKey];
+            var idx = arr.indexOf(item.slug);
+            if (idx !== -1) {
+              arr.splice(idx, 1);
+              btn.classList.remove('selected');
+            } else {
+              if (arr.length >= max) {
+                // Cap reached — silently ignore extra clicks.
+                return;
+              }
+              arr.push(item.slug);
+              btn.classList.add('selected');
+            }
+            fwUpdateREDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      }
+
+      buildSection('Religions', '(pick 2 — you study Beliefs + Practices for each)', opts.religions, 'religions', 2);
+      buildSection('Themes', '(pick 4 of 6)', opts.themes, 'themes', 4);
+
+      fwUpdateREDoneBtn();
+    }
+
     // Tier picker: which subjects need a Foundation/Higher choice
     var FW_TIERED_BASE = ['maths', 'science', 'separate-sciences', 'spanish', 'french', 'german'];
 
@@ -2394,11 +2493,12 @@
       localStorage.setItem('studyvault-tiers', JSON.stringify(saved));
     }
 
-    // Step 2 → History → Eng Lit → Film Studies → Drama → Tier → Step 4
+    // Step 2 → History → Eng Lit → Film Studies → Drama → RE → Tier → Step 4
     function fwHasHistory()      { return wizardState.subjects.indexOf('history') !== -1; }
     function fwHasEngLit()       { return wizardState.subjects.indexOf('english-literature') !== -1; }
     function fwHasFilmStudies()  { return wizardState.subjects.indexOf('film-studies') !== -1; }
     function fwHasDrama()        { return wizardState.subjects.indexOf('drama') !== -1; }
+    function fwHasRE()           { return wizardState.subjects.indexOf('religious-education') !== -1; }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
@@ -2414,6 +2514,9 @@
       } else if (fwHasDrama()) {
         buildDramaPicker();
         document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2438,6 +2541,9 @@
       } else if (fwHasDrama()) {
         buildDramaPicker();
         document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2454,6 +2560,9 @@
       } else if (fwHasDrama()) {
         buildDramaPicker();
         document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2479,6 +2588,9 @@
       if (fwHasDrama()) {
         buildDramaPicker();
         document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2503,6 +2615,37 @@
 
     document.getElementById('fw-drama-done').addEventListener('click', function () {
       document.getElementById('fw-step-drama').classList.remove('active');
+      if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-re-back').addEventListener('click', function () {
+      document.getElementById('fw-step-re').classList.remove('active');
+      if (fwHasDrama()) {
+        buildDramaPicker();
+        document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasFilmStudies()) {
+        buildFilmStudiesPicker();
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasEngLit()) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-re-done').addEventListener('click', function () {
+      document.getElementById('fw-step-re').classList.remove('active');
       if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -2513,7 +2656,10 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (fwHasDrama()) {
+      if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasDrama()) {
         document.getElementById('fw-step-drama').classList.add('active');
       } else if (fwHasFilmStudies()) {
         document.getElementById('fw-step-film-studies').classList.add('active');
@@ -2650,6 +2796,10 @@
         }
         if (baseSlug === 'drama') {
           entry.options = wizardState.drama;
+        }
+        if (baseSlug === 'religious-education') {
+          entry.religions = (wizardState.re && wizardState.re.religions) || [];
+          entry.themes = (wizardState.re && wizardState.re.themes) || [];
         }
         prefs.subjects.push(entry);
       });
