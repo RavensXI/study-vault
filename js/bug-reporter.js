@@ -27,6 +27,13 @@
     .bugr-fab svg { width: 20px; height: 20px; }
     .bugr-fab[hidden] { display: none; }
     @media print { .bugr-fab { display: none !important; } }
+    /* Hide while a full-screen modal is open — the FAB sits in the same
+       tap zone as the modal's primary action button (e.g. wizard's Continue)
+       and the matching dark colour makes mistaps easy on mobile. Modals are
+       brief and dismissable; users who need to report a bug from inside one
+       can close it first. */
+    body:has(.free-wizard-overlay.open) .bugr-fab,
+    body:has(.school-modal-overlay.open) .bugr-fab { display: none; }
 
     .bugr-overlay {
       position: fixed; inset: 0; z-index: 9991;
