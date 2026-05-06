@@ -129,6 +129,10 @@
       { board: 'AQA', slug: 'french-aqa' },
       { board: 'Edexcel', slug: 'french-edexcel' }
     ],
+    'spanish': [
+      { board: 'AQA', slug: 'spanish-aqa' },
+      { board: 'Edexcel', slug: 'spanish-edexcel' }
+    ],
     'geography': [
       { board: 'AQA', slug: 'geography-aqa' },
       { board: 'Edexcel A', slug: 'geography-edexcel-a' },
