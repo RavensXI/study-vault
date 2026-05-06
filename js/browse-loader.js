@@ -125,6 +125,10 @@
       { board: 'Edexcel', slug: 'business-edexcel' },
       { board: 'OCR', slug: 'business-ocr' }
     ],
+    'french': [
+      { board: 'AQA', slug: 'french-aqa' },
+      { board: 'Edexcel', slug: 'french-edexcel' }
+    ],
     'geography': [
       { board: 'AQA', slug: 'geography-aqa' },
       { board: 'Edexcel A', slug: 'geography-edexcel-a' },
