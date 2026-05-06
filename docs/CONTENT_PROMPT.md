@@ -287,20 +287,29 @@ Each question:
 "text" is the question. "type" string must match a registered question_type_name from the plan. "marks" is the mark scheme as a string, never a number. No "pastPaper" field. No component codes in type.
 
 knowledge_checks (required, exactly 5: 2 MCQ + 2 fill + 1 match)
-Tests factual recall from the lesson:
+Tests factual recall from the lesson. **CANONICAL SHAPE — copy these key names exactly. Do not invent alternatives.**
 
-    // MCQ — correct is 0-based index
+    // MCQ — `correct` is a 0-based integer index into `options`
     { "type": "mcq", "q": "Question?", "options": ["A", "B", "C", "D"], "correct": 2 }
 
-    // Fill-in-blank — sentence from lesson with key term removed
+    // Fill-in-blank — sentence from lesson with key term removed; `correct` is a 0-based index into `options`
     { "type": "fill", "q": "Sentence with _____.", "options": ["w1", "w2", "w3", "w4"], "correct": 1 }
 
-    // Match-up — left[i] pairs with right[order[i]]
+    // Match-up — `left[i]` pairs with `right[order[i]]`
     { "type": "match", "q": "Match:", "left": ["A", "B", "C"], "right": ["1", "2", "3"], "order": [0, 1, 2] }
 
 MCQs: one correct answer, three plausible distractors.
 Fill: a sentence from the lesson with a key term removed.
 Match: pair terms with definitions, or concepts with examples.
+
+**FORBIDDEN shapes — the player at `js/main.js` does `selected === q.correct` and `q.left.forEach(...)`. These shapes silently break the quick-quiz (every answer reads as wrong, no correct answer revealed, can't advance):**
+
+    ❌ { "type": "mcq", "options": [...], "answers": ["text"] }                  // no `correct` index
+    ❌ { "type": "fill", "answers": ["socialisation"] }                           // no `options` array
+    ❌ { "type": "match", "pairs": [{"term": "...", "definition": "..."}, ...] }  // not `left`/`right`/`order`
+    ❌ { "type": "match", "pairs": [["Term", "Def"], ...] }                       // same problem
+
+The validator (`scripts/_validate_content_json.py`) blocks all four of these patterns. If you see a validation error mentioning `'answers'`, `'pairs'`, or "missing `'options'` list", convert to the canonical shape above before re-running.
 
 flashcard_questions (required, 8-15 cards following FLASHCARD_RULES.md)
 

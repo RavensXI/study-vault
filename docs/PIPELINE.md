@@ -93,7 +93,7 @@ Agent output (JSON, written via Write tool — never bash heredocs):
 - `content_html` — sequential `data-narration-id="nN"`, ≥2 key-facts with actionable `data-revision-tip`, ≥2 collapsibles, ≥3 `<dfn class="term">` inline glossary; higher-only wrapping for tiered subjects; KaTeX for equations; no `<h1>`; no `<!-- DIAGRAM -->` unless Unity bespoke
 - `exam_tip_html`, `conclusion_html` — both with narration IDs
 - `practice_questions` — exactly 6, type strings matching registered names, marks as StudyVault rubric string
-- `knowledge_checks` — exactly 5 (2 MCQ + 2 fill + 1 match)
+- `knowledge_checks` — exactly 5 (2 MCQ + 2 fill + 1 match). **Per-subject `_AGENT_PROMPT.md` files MUST inline the canonical KC schema from `CONTENT_PROMPT.md` verbatim — do NOT paraphrase as `"knowledge_checks": [...]`. Sociology AQA shipped broken because the prep agent summarised this away and the content agent invented `answers: [...]` / `pairs: [...]` keys the player doesn't understand.**
 - `flashcard_questions` — exactly 5, distinct from KCs
 - `glossary_terms` — one per `<dfn>` in content_html
 - `hero_keywords` — 3–4 Unsplash/Wikimedia search terms

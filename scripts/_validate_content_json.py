@@ -145,6 +145,34 @@ def validate_file(path):
     if not (60 <= len(desc) <= 120):
         violations.append(f"description length {len(desc)} (want 60-100, 120 tolerated)")
 
+    # HTML entities in plain-text fields — these get rendered as literal
+    # "&rsquo;" to students. Plain-text fields must use unicode characters.
+    ENTITY_PATTERN = re.compile(r'&(?:[a-zA-Z]+|#\d+|#x[0-9a-fA-F]+);')
+    plain_text_fields = ['description', 'hero_image_caption']
+    for f in plain_text_fields:
+        v = data.get(f) or ''
+        if isinstance(v, str) and ENTITY_PATTERN.search(v):
+            hits = set(ENTITY_PATTERN.findall(v))
+            violations.append(f"HTML entities in plain-text field '{f}': {hits} — use unicode characters")
+    # practice_questions / knowledge_checks / flashcard_questions / glossary_terms
+    nested_text_fields = {
+        'practice_questions': ['text', 'type', 'marks'],
+        'knowledge_checks': ['q'],
+        'flashcard_questions': ['q', 'a'],
+        'glossary_terms': ['term', 'definition'],
+    }
+    for arr_name, sub_fields in nested_text_fields.items():
+        arr = data.get(arr_name) or []
+        for i, item in enumerate(arr if isinstance(arr, list) else []):
+            if not isinstance(item, dict):
+                continue
+            for sf in sub_fields:
+                v = item.get(sf)
+                if isinstance(v, str) and ENTITY_PATTERN.search(v):
+                    hits = set(ENTITY_PATTERN.findall(v))
+                    violations.append(f"HTML entities in {arr_name}[{i}].{sf}: {hits} — use unicode")
+                    break  # one violation per item is enough
+
     # Counts
     pq = data.get('practice_questions', [])
     if len(pq) != 6:
@@ -169,6 +197,40 @@ def validate_file(path):
         violations.append(f"knowledge_checks fill count {kc_types.count('fill')}, want 2")
     if kc_types.count('match') != 1:
         violations.append(f"knowledge_checks match count {kc_types.count('match')}, want 1")
+
+    # KC shape — player at js/main.js expects canonical fields per type.
+    # See memory/feedback_kc_canonical_shape.md.
+    for i, item in enumerate(kc):
+        if not isinstance(item, dict):
+            continue
+        t = item.get('type')
+        if t in ('mcq', 'fill'):
+            opts = item.get('options')
+            correct = item.get('correct')
+            if not isinstance(opts, list) or len(opts) < 2:
+                violations.append(f"knowledge_checks[{i}] ({t}): missing or too-short 'options' list")
+            if not isinstance(correct, int):
+                violations.append(f"knowledge_checks[{i}] ({t}): 'correct' must be an integer index, not {type(correct).__name__}")
+            elif isinstance(opts, list) and not (0 <= correct < len(opts)):
+                violations.append(f"knowledge_checks[{i}] ({t}): 'correct' index {correct} out of range for {len(opts)} options")
+            if 'answers' in item:
+                violations.append(f"knowledge_checks[{i}] ({t}): uses forbidden 'answers' key — use 'correct: <index>' + 'options[]'")
+        elif t == 'match':
+            if 'pairs' in item:
+                violations.append(f"knowledge_checks[{i}] (match): uses forbidden 'pairs' key — use 'left[]' + 'right[]' + 'order[]'")
+            left = item.get('left')
+            right = item.get('right')
+            order = item.get('order')
+            if not isinstance(left, list) or len(left) < 2:
+                violations.append(f"knowledge_checks[{i}] (match): missing or too-short 'left' list")
+            if not isinstance(right, list) or len(right) < 2:
+                violations.append(f"knowledge_checks[{i}] (match): missing or too-short 'right' list")
+            if isinstance(left, list) and isinstance(right, list) and len(left) != len(right):
+                violations.append(f"knowledge_checks[{i}] (match): 'left' ({len(left)}) and 'right' ({len(right)}) must be equal length")
+            if not isinstance(order, list):
+                violations.append(f"knowledge_checks[{i}] (match): missing 'order' list")
+            elif isinstance(left, list) and len(order) != len(left):
+                violations.append(f"knowledge_checks[{i}] (match): 'order' length {len(order)} must match 'left' length {len(left)}")
 
     # Scan all text fields for banned patterns
     all_text_fields = ['description', 'content_html', 'exam_tip_html', 'conclusion_html', 'hero_image_caption']
