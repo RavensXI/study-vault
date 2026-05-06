@@ -1062,11 +1062,25 @@ function initNarration() {
     currentIndex = index;
     audio.src = manifest[index].src;
     audio.playbackRate = speeds[speedIndex];
-    // Preload next clip for gapless transition
-    if (index + 1 < manifest.length) {
-      var preload = new Audio();
-      preload.src = manifest[index + 1].src;
-      preload.preload = 'auto';
+    // Preload next clip for gapless transition. The <audio preload="auto">
+    // hint is often ignored on mobile browsers (esp. Chrome Android on
+    // cellular) — when the current clip is short (~1-3s) the prefetch
+    // hasn't completed before transition, causing audible gaps. Belt-and-
+    // braces: keep the Audio() preload AND fire fetch() to prime the
+    // browser's HTTP cache so audio.src loads from cache on transition.
+    // Bug report: Jekyll & Hyde L1 around 1:59 — clips n22 (1.2s) and n23
+    // (2.5s) trigger this on mobile. May 2026.
+    for (var i = 1; i <= 2; i++) {
+      var next = manifest[index + i];
+      if (next && next.src) {
+        try {
+          var p = new Audio();
+          p.src = next.src;
+          p.preload = 'auto';
+          // fetch() reliably populates HTTP cache where preload hint may not
+          fetch(next.src, { mode: 'cors' }).catch(function() {});
+        } catch (e) {}
+      }
     }
     return true;
   }
