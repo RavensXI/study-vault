@@ -138,8 +138,9 @@
       { board: 'Edexcel', slug: 'german-edexcel' }
     ],
     'sociology': [
-      { board: 'AQA', slug: 'sociology-aqa' }
-      // Eduqas/WJEC to come if requested
+      { board: 'AQA', slug: 'sociology-aqa' },
+      { board: 'Eduqas', slug: 'sociology-eduqas' },
+      { board: 'WJEC', slug: 'sociology-eduqas' }
     ],
     'geography': [
       { board: 'AQA', slug: 'geography-aqa' },

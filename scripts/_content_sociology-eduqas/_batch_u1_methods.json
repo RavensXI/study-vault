@@ -1,0 +1,1753 @@
+{
+  "batch_id": "u1_methods",
+  "subject": {
+    "name": "Sociology",
+    "slug": "sociology-eduqas",
+    "exam_board": "Eduqas / WJEC",
+    "spec_codes": [
+      "C200QS",
+      "3200QS"
+    ],
+    "target_audience": "free-tier",
+    "subject_id": "080a1223-8693-4289-a2ba-bd3d178c3870",
+    "subject_type": "full-gcse-100-exam",
+    "twin_build_note": "Path A twin build. Single Supabase row (slug sociology-eduqas) serves both Eduqas (C200QS, England) and WJEC (3200QS, Wales). The two specifications are byte-identical — same content, same named sociologists, same component structure. Use neutral phrasing throughout: 'your exam', 'this paper', 'GCSE Sociology' — never 'Eduqas says...' or 'WJEC requires...'. WJEC alias added to slugMap and boardConfig in index.html post-build (no narration regen needed if prose stays neutral)."
+  },
+  "unit": {
+    "name": "Cultural Transmission & Research Methods",
+    "slug": "cultural-transmission-research-methods",
+    "subtitle": "Key sociological concepts, the four perspectives, and the research methods used to investigate the social world.",
+    "body_class": "unit-sociology-eduqas-1",
+    "accent": "#7c3aed",
+    "accent_light": "#f5f3ff",
+    "accent_badge": "#7c3aed33",
+    "lesson_count": 6,
+    "sort_order": 1,
+    "unit_id": "9f9f61e1-fbc5-4262-a8e0-e2a3d7658b3a"
+  },
+  "spec_slice_path": "specs/eduqas/sociology-C200QS.md",
+  "reference_lesson_path": "scripts/_content_sociology-aqa/_reference_lesson.json",
+  "agent_prompt_path": "scripts/_content_sociology-eduqas/_AGENT_PROMPT.md",
+  "schema_path": "docs/CONTENT_PROMPT.md",
+  "subject_level_teaching_brief": {
+    "common_misconceptions": [
+      {
+        "topic": "Crime versus deviance",
+        "misconception": "Students treat crime and deviance as synonymous. The spec defines them as overlapping but distinct: crime breaks the law; deviance violates social norms (which may or may not be illegal). Some acts are deviant but not criminal (queue-jumping, talking loudly in a library); some are criminal but not seen as widely deviant (minor speeding). Spec section 6.1 explicitly requires students to explain 'social construction of crime and deviance'.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, section 6.1 — 'social construction of concepts of crime and deviance'."
+      },
+      {
+        "topic": "Sociological perspectives confused with each other",
+        "misconception": "Students collapse functionalism and consensus, and Marxism and any conflict view. Each has a precise position: functionalism = society as an integrated whole, institutions perform necessary functions; Marxism = society as class conflict between bourgeoisie and proletariat; feminism = society as patriarchal; interactionism = micro-level meanings, labels and interactions. The spec lists these four and requires students to compare and contrast them on every topic.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, recurring framing 'conflict versus consensus debate' across sections 2.4, 3.1, 5.1, 6.4."
+      },
+      {
+        "topic": "Common-sense answers instead of sociological terminology",
+        "misconception": "Examiner reports flag this as the single biggest discriminator between bands. Students write 'rich people don't get caught' instead of 'differential enforcement of the law'; 'girls behave better' instead of 'patriarchal control of women'. Generic synonyms cap an answer below the sociological-terminology mark band even if the substance is correct.",
+        "source": "Eduqas GCSE Sociology Examiners' Report Summer 2024 (eduqas.co.uk/media/ocvnygux/eduqas-gcse-sociology-final-report-s24-e.pdf) — 'Less successful answers were more commonsense in style and lacked the accurate use of terminology'."
+      },
+      {
+        "topic": "Hidden curriculum confused with the formal curriculum",
+        "misconception": "The 2024 Component 1 question 5c on the hidden curriculum was a low-scoring item. Students described what schools teach (subjects on the timetable) instead of the unwritten lessons of obedience, hierarchy, punctuality and gender norms transmitted alongside academic content. The spec names hidden curriculum in 3.2 — students must define it as the implicit, informal lessons, link to Bowles and Gintis correspondence theory, and give concrete examples.",
+        "source": "Eduqas GCSE Sociology Examiners' Report Summer 2024 (eduqas.co.uk/media/ocvnygux/eduqas-gcse-sociology-final-report-s24-e.pdf) — Component 1 question 5c challenge flagged."
+      },
+      {
+        "topic": "Studies attributed to the wrong sociologist",
+        "misconception": "Students confuse the named pairings: Parsons = primary socialisation; Oakley = conventional family; Willmott and Young = symmetrical family; Bowles and Gintis = correspondence principle; Willis = counter school cultures; Becker = labelling; Merton = anomie; Heidensohn = female conformity; Cohen = delinquent subcultures; Carlen = women, crime and poverty; Davis and Moore = functionalist stratification; Townsend = relative deprivation; Murray = underclass; Walby = patriarchy; Chambliss = differential law enforcement; Hargreaves = labelling in classrooms; Becky Francis = patriarchal schools; Devine = affluent worker; Rapoports = five types of diversity; Zaretsky = Marxist family; Delphy and Leonard = patriarchal family.",
+        "source": "Eduqas/WJEC GCSE Sociology specification — named theorist pairings throughout sections 2-6."
+      },
+      {
+        "topic": "Functionalists confused with conservatives on power and inequality",
+        "misconception": "The 2024 examiner report noted: 'Stronger candidates were able to identify that Functionalists accept that there are power differences in society, but that these are inevitable and necessary.' Weaker students assume functionalists deny inequality exists. The Davis and Moore position is that stratification is FUNCTIONAL — necessary, not invisible.",
+        "source": "Eduqas GCSE Sociology Examiners' Report Summer 2024 (eduqas.co.uk/media/ocvnygux/eduqas-gcse-sociology-final-report-s24-e.pdf) — explicit comment on the functionalist position on power."
+      },
+      {
+        "topic": "Official statistics treated as objective truth",
+        "misconception": "Students cite police-recorded crime figures or divorce statistics as definitive. The spec is explicit: official statistics have strengths AND weaknesses (4.1, 6.5). The dark figure of crime (6.5) is the spec's worked example of why official statistics under-represent crime. Always evaluate, don't just cite.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, sections 4.1 (sources of secondary data) and 6.5 (dark figure of crime, usefulness of data)."
+      },
+      {
+        "topic": "Confusing absolute and relative poverty",
+        "misconception": "Students treat 'poverty' as one concept. The spec needs the distinction — absolute (lacking resources for basic survival) vs relative (lacking what is normal in a given society). Townsend's relative deprivation (5.5) includes social participation, not just material need.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, section 5.5 — 'absolute and relative poverty, including the work of Townsend on relative deprivation'."
+      },
+      {
+        "topic": "Confusing types of authority",
+        "misconception": "Students mis-allocate examples to Weber's three types: traditional = legitimacy from custom (monarchy); charismatic = legitimacy from personal qualities (a magnetic political leader); rational-legal = legitimacy from formal rules and offices (an elected MP, a judge). Students often call any leader 'charismatic' and mis-tag elected officials as 'traditional'.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, section 5.2 — 'Weberian theory of authority: traditional, charismatic and rational-legal'."
+      },
+      {
+        "topic": "Medical and social models of disability collapsed into one",
+        "misconception": "Students describe disability as a single concept. The spec (5.3) demands the binary: medical model = disability is the impairment in the individual; social model = disability is created by societal barriers. Students must give one example of each (e.g. medical model: a wheelchair user is 'disabled' by their inability to walk; social model: a wheelchair user is 'disabled' by the absence of ramps).",
+        "source": "Eduqas/WJEC GCSE Sociology specification, section 5.3 — 'with specific reference to disability: medical and social models of disability'."
+      },
+      {
+        "topic": "Methods evaluation reduced to a generic list",
+        "misconception": "Students recite generic strengths and weaknesses of methods without applying them to a specific research context. The spec explicitly demands evaluation IN CONTEXT. A 12-mark methods Evaluate question expects 'why participant observation is risky for studying gangs specifically', not 'observation is time-consuming' in general.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, section 4.2 — 'value, practical application and strengths and weaknesses of different methods'."
+      },
+      {
+        "topic": "Ethical issues treated as a checklist",
+        "misconception": "Students list 'consent, confidentiality, harm' as boxes to tick rather than reasoning about which apply in a given study and how researchers address them. The spec explicitly requires 'strategies used by sociologists to address issues' (4.5) — students must propose practical solutions (anonymisation, debriefing, withdrawal rights), not just name the principle.",
+        "source": "Eduqas/WJEC GCSE Sociology specification, section 4.5 — 'strategies used by sociologists to address issues'."
+      }
+    ],
+    "student_errors_by_question_type": {
+      "1 mark — Multiple Choice": "Students leave items blank or guess without reading all four options. With 100 marks per paper, a single multiple choice mark is non-trivial. Read every distractor — plausible-sounding wrong answers are deliberately included to catch confusion of named sociologists or perspectives.",
+      "2 marks — Define": "Students give an example instead of a definition. A 'Define' question expects a meaning expressed in sociological language — 'patriarchy' is 'a system in which men hold power and women are disadvantaged', not 'when men are in charge of the family'. Each mark usually = one element of the definition.",
+      "3 marks — Identify and Describe": "Students identify a feature but fail to describe it. The structure expected is identify (1 mark) plus a developed description (2 marks). Two short sentences score lower than one developed point with sociological vocabulary.",
+      "4 marks — Describe": "Students describe one feature when 4 marks usually requires either two developed points or four discrete features. Linking to a named sociologist or concept lifts the answer into the higher mark band.",
+      "9 marks — Discuss": "Students give a one-sided answer or list points without judgement. 2024 examiner report is explicit: 'A common theme on these 9-mark questions is the need to evaluate and analyse.' Top answers present at least two perspectives by name and reach a supported conclusion.",
+      "12 marks — Evaluate": "Students recite knowledge without judgement. The 12-mark Evaluate is the most heavily AO3-weighted question. Top-band answers compare and contrast at least two named perspectives, cite at least two named sociologists, weigh evidence on each side, and arrive at a reasoned conclusion. AO3 is 20% of the qualification — students who skip evaluation cap below grade 7."
+    },
+    "topic_weighting_notes": [
+      "Two papers, 100 marks each, 50% of GCSE each. Component 1 = Cultural Transmission + Families + Education + Research Methods. Component 2 = Stratification + Crime & Deviance + Applied Methods of Sociological Enquiry. Equal weighting forces equal revision time. (Source: Eduqas/WJEC GCSE Sociology specification section 2.)",
+      "AO weighting is AO1 40%, AO2 40%, AO3 20% — same per component. Students often overweight AO1 (recall) at the expense of AO2 (application) and AO3 (evaluation). The 9-mark and 12-mark extended response questions are where AO3 is awarded — extended-response practice is non-negotiable. (Source: Eduqas/WJEC GCSE Sociology specification section 3.1.)",
+      "A minimum of 15% of the available marks in each examination series is awarded for knowledge and understanding in relation to Research Methods. This is a STANDING REQUIREMENT — research methods will appear on every paper, every year. Drill methods in topic context (methods on family research, methods on crime research). (Source: Eduqas/WJEC GCSE Sociology specification section 3.1.)",
+      "Component 2 contains a separate 'Applied Methods of Sociological Enquiry' strand (topic 7) that overlaps with research methods (topic 4) but is assessed differently — the applied strand demands students DESIGN a study and INTERPRET data, not just describe methods. Allocate revision time to scenario-led applied-methods practice, distinct from method-by-method drilling. (Source: Eduqas/WJEC GCSE Sociology specification section 2.2.)",
+      "Spec content is set in a UK context except where otherwise stated. UK-relevant examples (Crime Survey for England and Wales, ONS divorce statistics, UK education policy) are expected. Global examples are appropriate where the spec invites them — family forms (2.1, including 'one-child family policy in China', polygamy, arranged marriage) and 'impact of globalisation' on poverty (5.5). (Source: Eduqas/WJEC GCSE Sociology specification section 2 'study the content in a UK context except where otherwise stated'.)",
+      "Welsh-context note for WJEC variant: while the specifications are byte-identical, WJEC students sit in Wales. UK-wide examples remain valid for both. Where examples are genuinely English-only (English/Welsh divorce reform 2022 timing, Welsh policy on academies/free schools differing from England's), note jurisdictional scope explicitly without making it a board-specific statement. Lessons stay neutrally phrased."
+    ],
+    "current_spec_changes": [
+      "Eduqas/WJEC GCSE Sociology has been taught from September 2017, first awarded 2019, and has been in steady state since. Current published version is Version 2 January 2019. No spec content changes are scheduled for 2026 exams. (Source: Eduqas/WJEC GCSE Sociology specification cover page.)",
+      "Examination timetable for Summer 2026 is published by WJEC; the qualification is linear (all assessment at the end of the course, in the same series). (Source: WJEC and Eduqas Summer 2026 examination timetable, wjec.co.uk/media/ovdbnkhj/summer-2026-wales-and-eduqas-gcse-october-2025.pdf.)",
+      "The qualification is linear and contains no controlled assessment or coursework component. (Source: Eduqas/WJEC GCSE Sociology specification section 4.)",
+      "The 2024 examiner report flagged Component 1 question 5c (hidden curriculum) as the lowest-scoring item, with most candidates struggling to define hidden curriculum precisely. Future builds should foreground this concept in the education unit. (Source: Eduqas GCSE Sociology Examiners' Report Summer 2024.)"
+    ],
+    "pedagogical_notes": [
+      "EEF Improving Literacy in Secondary Schools — disciplinary literacy is critical. Sociology has dense specialist vocabulary. Teach a focused 6-8 term glossary at the start of every lesson and require precise use in extended responses. The 2024 examiner report explicitly flagged that 'less successful answers were more commonsense in style and lacked the accurate use of terminology' — generic synonyms cost marks. (Source: EEF Improving Literacy in Secondary Schools guidance report; Eduqas Examiners' Report Summer 2024.)",
+      "EEF Metacognition and Self-Regulated Learning (effect size +8 months) — explicitly model how to structure a 9-mark Discuss or 12-mark Evaluate response: argument for (cite a perspective and a named study), argument against (cite a contrasting perspective and study), supported judgement. Students do not do this automatically. Use shared-write worked examples before independent practice. (Source: EEF Metacognition and Self-Regulated Learning Guidance Report.)",
+      "Retrieval practice — the named sociologists and their key ideas form a finite list of about 20 pairings. Short, frequent low-stakes retrieval quizzes (study + concept + perspective) outperform single long revision sessions. Each lesson ends with a 5-question knowledge check for this reason. (Source: EEF Teaching and Learning Toolkit.)",
+      "Compare-and-contrast as a teaching frame — every spec topic asks students to compare perspectives. Build every lesson around a 4-column perspective grid (functionalist / Marxist / feminist / interactionist or New Right where relevant). Students who internalise the grid have an instant scaffold for any 12-mark Evaluate question. (Source: Eduqas/WJEC GCSE Sociology specification — recurring 'conflict versus consensus debate' framing across topics.)",
+      "Dual coding — pair every named sociologist with a labelled visual (Bowles and Gintis = school-to-workplace flow diagram showing the correspondence principle; Walby = the six structures of patriarchy as a hexagon). Pair the visual with a one-sentence verbal summary. Ask students to reproduce both halves from memory. (Source: EEF Teaching and Learning Toolkit.)",
+      "Sensitive topic handling — sociology covers contested issues (gender roles, ethnic inequality, family diversity, crime, religion, sexuality, disability). Present each as legitimate disagreement between named perspectives rather than as a single authorial line. Treat New Right, Marxist and feminist views with equal descriptive seriousness. This protects the impartiality required by the spec's debate-and-evaluate brief and supports DfE political-impartiality framework. (Source: Eduqas/WJEC GCSE Sociology specification section 1.1 'critically analyse information and use evidence to make informed arguments'; DfE Political impartiality in schools guidance 2022.)",
+      "Application as comprehension — many extended response questions are stem-led, presenting an extract or item that students must respond to. Train students to read the stem TWICE: once for content, once for the perspective hooks the examiner has signalled. Every paragraph in the response should reference the stem at least once. (Source: Eduqas/WJEC GCSE Sociology specification — 'reading and responding to extracts which illustrate the different views of sociologists'.)",
+      "Data interpretation as a discrete skill — Eduqas/WJEC topic 7.2 explicitly demands students interpret graphs, charts and tables. This is a unique requirement vs other boards. Practise reading data BEFORE moving to causes — present one set of attainment-gap data without explanation, get students to describe the pattern, only then explain. Mirrors the spec separation of patterns (3.3, 6.3) from factors (3.4-3.5, 6.4). (Source: Eduqas/WJEC GCSE Sociology specification sections 7.1, 7.2.)",
+      "Examiner-flagged concept: hidden curriculum. 2024 Component 1 5c was the lowest-scoring item — students confused hidden with formal curriculum. Future cohorts must drill the definition (unwritten, implicit lessons of conformity, hierarchy, punctuality, gender norms) and the named link to Bowles and Gintis correspondence theory. (Source: Eduqas GCSE Sociology Examiners' Report Summer 2024.)"
+    ]
+  },
+  "unit_level_teaching_brief": {},
+  "quote_ticker_html_for_unit": "<blockquote>&ldquo;The sociological imagination enables us to grasp history and biography and the relations between the two within society.&rdquo; <cite>&mdash; C. Wright Mills</cite></blockquote>\n<blockquote>&ldquo;Society does not consist of individuals but expresses the sum of interrelations, the relations within which these individuals stand.&rdquo; <cite>&mdash; Karl Marx</cite></blockquote>\n<blockquote>&ldquo;The first thing to know about poverty is that it is not the same as inequality.&rdquo; <cite>&mdash; Peter Townsend</cite></blockquote>\n<blockquote>&ldquo;We do not see things as they are. We see them as we are.&rdquo; <cite>&mdash; Anaïs Nin</cite></blockquote>\n<blockquote>&ldquo;Power is not a means; it is an end.&rdquo; <cite>&mdash; George Orwell</cite></blockquote>\n<blockquote>&ldquo;The personal is political.&rdquo; <cite>&mdash; Carol Hanisch</cite></blockquote>",
+  "registered_question_type_names": [
+    "1 mark — Multiple Choice",
+    "2 marks — Define",
+    "3 marks — Identify and Describe",
+    "4 marks — Describe",
+    "9 marks — Discuss",
+    "12 marks — Evaluate"
+  ],
+  "allowed_question_types_for_this_unit": [
+    "1 mark — Multiple Choice",
+    "2 marks — Define",
+    "3 marks — Identify and Describe",
+    "4 marks — Describe",
+    "9 marks — Discuss",
+    "12 marks — Evaluate"
+  ],
+  "named_sociologist_deltas": {
+    "summary": "Eduqas/WJEC and AQA name overlapping but not identical lists of sociologists. The deltas below tell content agents which named studies to add or swap when adapting from AQA source content.",
+    "shared_with_aqa": [
+      "Parsons (family + education)",
+      "Oakley (conventional family, conjugal roles)",
+      "Willmott and Young (symmetrical family)",
+      "Bowles and Gintis (correspondence theory)",
+      "Willis (counter school cultures, Learning to Labour)",
+      "Becker (labelling, deviant career)",
+      "Merton (anomie, strain theory)",
+      "Heidensohn (female conformity)",
+      "Albert Cohen (delinquent sub-cultures)",
+      "Carlen (women, crime and poverty)",
+      "Davis and Moore (functionalist stratification)",
+      "Townsend (relative deprivation)",
+      "Murray (underclass)",
+      "Walby (six structures of patriarchy)",
+      "Ball (teacher expectations + parental choice)",
+      "Halsey (class-based educational inequalities)"
+    ],
+    "named_in_eduqas_wjec_only": [
+      {
+        "sociologist": "Rapoports",
+        "concept": "Five types of family diversity",
+        "lesson": "families/lesson-2",
+        "note": "Spec-named in 2.2. AQA L2 Family Forms references the Rapoports — content is reusable, but Eduqas/WJEC content agent must NAME them as the spec requires."
+      },
+      {
+        "sociologist": "Zaretsky",
+        "concept": "Marxist family serving capitalism",
+        "lesson": "families/lesson-4",
+        "note": "Spec-named in 2.4. AQA names Zaretsky in L5 (Criticisms) — reposition into the perspectives lesson here."
+      },
+      {
+        "sociologist": "Delphy and Leonard",
+        "concept": "Feminist critique of patriarchal family",
+        "lesson": "families/lesson-4",
+        "note": "Spec-named in 2.4. AQA names them in L5 — reposition."
+      },
+      {
+        "sociologist": "Durkheim",
+        "concept": "Education as transmission of norms and values",
+        "lesson": "education/lesson-1",
+        "note": "Spec-named in 3.1. AQA names Durkheim in education L1 — direct match."
+      },
+      {
+        "sociologist": "Becky Francis",
+        "concept": "Patriarchal nature of schools (feminist education)",
+        "lesson": "education/lesson-1",
+        "note": "Spec-named in 3.1. NOT in AQA spec. Fresh paragraph required — cite her work on gendered classroom interaction and laddish behaviour."
+      },
+      {
+        "sociologist": "Hargreaves",
+        "concept": "Labelling deviant pupils",
+        "lesson": "education/lesson-2",
+        "note": "Spec-named in 3.2. NOT in AQA spec. Fresh paragraph required — cite 'Deviance in Classrooms' (1975)."
+      },
+      {
+        "sociologist": "Devine",
+        "concept": "Affluent worker revisited",
+        "lesson": "social-differentiation-stratification/lesson-3 and lesson-5",
+        "note": "Spec-named in 5.3. AQA mentions Devine briefly in stratification L3 — Eduqas/WJEC requires named treatment. Cite her 1992 restudy of Goldthorpe's 1968 affluent-worker study."
+      },
+      {
+        "sociologist": "Weber",
+        "concept": "Three types of authority (traditional / charismatic / rational-legal)",
+        "lesson": "social-differentiation-stratification/lesson-2",
+        "note": "Spec-named in 5.2. AQA names Weber's authority types in stratification L5 — direct match."
+      },
+      {
+        "sociologist": "Chambliss",
+        "concept": "Differential enforcement of the law (Saints and Roughnecks)",
+        "lesson": "crime-deviance/lesson-5",
+        "note": "Spec-named in 6.4. NOT in AQA spec. Fresh paragraph required — cite Saints and Roughnecks (1973) as the canonical Marxist criminological study."
+      }
+    ],
+    "named_in_aqa_only": [
+      {
+        "sociologist": "C. Wright Mills (sociological imagination)",
+        "note": "AQA Appendix A names sociological imagination. Eduqas/WJEC does not require — drop from content."
+      }
+    ],
+    "implication_for_content_agents": "When adapting an AQA source lesson, search-and-add the Eduqas/WJEC-only sociologists named for that lesson before generation. Do NOT remove AQA-named sociologists who happen to also fit Eduqas/WJEC content (Parsons, Marx, etc remain) — only those listed in 'named_in_aqa_only' should be dropped."
+  },
+  "unique_to_target": [
+    {
+      "unit": "cultural-transmission-research-methods",
+      "lesson": "Designing Sociological Research and Interpreting Data (L6)",
+      "why_no_source_match": "Eduqas/WJEC topic 7 'Applied Methods of Sociological Enquiry' is a separate spec strand demanding (a) original research design and (b) data-interpretation skills (graphs, charts, tables). AQA folds research design into general methods and has no equivalent data-interpretation requirement. Fresh lesson required. Foundational skill for both papers in Eduqas/WJEC."
+    },
+    {
+      "unit": "education",
+      "lesson": "Patterns of Educational Achievement (L3)",
+      "why_no_source_match": "Eduqas/WJEC 3.3 'Patterns of educational achievement' is a separate spec topic from 3.4-3.5 'Factors affecting achievement'. AQA combines both in one lesson. The split allows Eduqas/WJEC to test data-interpretation on attainment patterns as a discrete skill — students need to read tables and charts before they explain causes. Fresh data-driven lesson."
+    },
+    {
+      "unit": "social-differentiation-stratification",
+      "lesson": "Inequality: Age, Disability, Sexuality and Religion (L4)",
+      "why_no_source_match": "Eduqas/WJEC 5.3 explicitly names ageism, medical and social models of disability, homophobia, and religion/belief as required content with named driver concepts. AQA touches these in passing within Life Chances (L3) but never with the depth and explicit binary the Eduqas/WJEC spec requires (especially 'medical and social models of disability'). Fresh build."
+    },
+    {
+      "unit": "crime-deviance",
+      "lesson": "Patterns of Criminal and Deviant Behaviour (L3)",
+      "why_no_source_match": "Eduqas/WJEC 6.3 separates patterns from theory (6.4). AQA combines them in L5 'Factors Affecting Criminal Behaviour'. Same rationale as the education split — patterns lesson tests data-interpretation as a discrete skill before students reach explanatory theory."
+    },
+    {
+      "unit": "crime-deviance",
+      "lesson": "Applied Methods: Designing Sociological Research (L7)",
+      "why_no_source_match": "Eduqas/WJEC 7.1 demands a standalone applied-methods treatment — designing a study end-to-end. AQA has no equivalent named topic. Fresh scenario-led lesson."
+    },
+    {
+      "unit": "crime-deviance",
+      "lesson": "Applied Methods: Interpreting Data and Crime Research (L8)",
+      "why_no_source_match": "Eduqas/WJEC 7.2 'Interpreting data' is unique to this spec. AQA has no equivalent. Fresh lesson combining data-interpretation skills with crime-research application as a closing synoptic treatment."
+    }
+  ],
+  "unique_to_source": [
+    {
+      "source_board": "AQA",
+      "unit": "studying-society-research-methods",
+      "lesson": "Classical Sociologists: Durkheim, Marx and Weber (L2)",
+      "why_not_in_target": "Eduqas/WJEC does not require a standalone biographical/contextual treatment of the three classical sociologists. The named theorists (Durkheim, Marx, Weber) are introduced in context throughout — Durkheim in education (3.1), Marx in stratification (5.1), Weber in stratification (5.1) and authority (5.2). No spec section names 'classical sociologists' as a topic."
+    },
+    {
+      "source_board": "AQA",
+      "unit": "education",
+      "lesson": "Education and Capitalism: Bowles and Gintis (L3)",
+      "why_not_in_target": "Eduqas/WJEC 3.1 introduces Bowles and Gintis correspondence theory directly within the perspectives lesson rather than giving it a dedicated lesson. Hidden curriculum is explicit content but lives in the processes lesson (3.2). No standalone Bowles and Gintis lesson is needed."
+    },
+    {
+      "source_board": "AQA",
+      "unit": "crime-deviance",
+      "lesson": "Public Debates About Crime (L6)",
+      "why_not_in_target": "Eduqas/WJEC 6.4 names moral panics and media amplification but does not include a separate 'public debates' lesson on knife crime, sentencing, prisons. The media-amplification content is folded into the interactionist/moral-panics treatment in L5."
+    },
+    {
+      "source_board": "AQA",
+      "unit": "crime-deviance",
+      "lesson": "Social Control: Formal and Informal (Heidensohn placement)",
+      "why_not_in_target": "Heidensohn appears in AQA L4 (Social Control). In Eduqas/WJEC she is named in 6.4 (theories) — moved to the theories lesson here. Same content, different structural placement."
+    }
+  ],
+  "output_dir": "scripts/_content_sociology-eduqas/lessons",
+  "lessons_in_batch": [
+    {
+      "lesson_id": "66f707ce-626f-4bd0-a7a7-f61ab30d1af8",
+      "lesson_number": 1,
+      "slug": "key-sociological-concepts-and-the-sociological-approach",
+      "title": "Key Sociological Concepts and the Sociological Approach",
+      "description": "Culture, norms, values, roles, status, identity, sanctions and cultural diversity — and what it means to think sociologically.",
+      "spec_references": [
+        "1.1"
+      ],
+      "section_markers": [
+        "what is sociology",
+        "the sociological approach",
+        "culture",
+        "norms",
+        "values",
+        "roles",
+        "status",
+        "identity",
+        "sanctions",
+        "cultural diversity",
+        "consensus versus conflict",
+        "social structures",
+        "social processes",
+        "individual agency",
+        "society"
+      ],
+      "suggested_question_types": [
+        "1 mark — Multiple Choice",
+        "2 marks — Define",
+        "3 marks — Identify and Describe",
+        "4 marks — Describe",
+        "9 marks — Discuss",
+        "12 marks — Evaluate"
+      ],
+      "content_transfer": {
+        "transfer_score": "high",
+        "source_board": "AQA",
+        "source_subject_slug": "sociology-aqa",
+        "source_unit_slug": "studying-society-research-methods",
+        "source_lesson_number": 1,
+        "adaptation_notes": "AQA L1 'What Is Sociology?' covers the same concept set (norms, values, roles, culture, consensus vs conflict). Reuse 80% of the prose. Add explicit definitions of 'sanctions' and 'cultural diversity' (both named in Eduqas/WJEC 1.1 spec). Keep neutral phrasing — strip any 'AQA' framing. Practice questions and exam tip must be regenerated for Eduqas/WJEC question types."
+      },
+      "source": {
+        "_source_meta": {
+          "source_subject_slug": "sociology-aqa",
+          "source_unit_slug": "studying-society-research-methods",
+          "source_lesson_number": 1,
+          "source_lesson_id": "bd18b305-b3e9-4b51-96b8-80f63e4395d5",
+          "source_lesson_title": "What Is Sociology? The Sociological Approach"
+        },
+        "transfer_score": "high",
+        "content_html": "<h2 data-narration-id=\"n1\">What Is Sociology?</h2>\n<p data-narration-id=\"n2\"><dfn class=\"term\" data-def=\"The systematic study of human society, social structures, social processes and social issues.\">Sociology</dfn> is the disciplined study of how society works. Rather than explaining human behaviour through individual personality or biology, sociologists look at the social forces that shape people&rsquo;s lives &mdash; the groups they belong to, the rules they follow, and the inequalities built into the world around them. Sociology asks questions such as: why do some groups consistently achieve less in education? Why are some people more likely to be labelled criminal? What holds society together, and what tears it apart?</p>\n<p data-narration-id=\"n3\">Crucially, sociology is not common sense. Common sense might say that poverty is caused by laziness. Sociology investigates the <em>social structures</em> that distribute wealth unequally, the institutions that reproduce disadvantage, and the processes by which labels are attached to whole groups of people. The discipline demands evidence, theory and critical thinking.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Without looking, name three key concepts that sociology uses to explain how society shapes individuals. Give one example of each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The core concepts of sociology are <strong>society</strong>, <strong>socialisation</strong>, <strong>norms</strong>, <strong>values</strong>, <strong>roles</strong>, <strong>culture</strong>, <strong>power</strong> and <strong>authority</strong>. These eight concepts appear across every topic in your exam and underpin every sociological argument you will make.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Socialisation: How Society Gets Into People</h2>\n<p data-narration-id=\"n6\"><dfn class=\"term\" data-def=\"The lifelong process by which individuals learn and internalise the norms, values, roles and culture of their society.\">Socialisation</dfn> is the mechanism through which society reproduces itself in the next generation. Through socialisation, individuals learn what behaviours are expected of them, what counts as right and wrong, and how to perform the social roles assigned to them. Without socialisation, the shared understandings that allow society to function would collapse.</p>\n<p data-narration-id=\"n7\"><dfn class=\"term\" data-def=\"Early childhood socialisation, usually within the family, in which basic norms, values and language are first learned.\">Primary socialisation</dfn> happens in the family, in early childhood. It is here that children first learn language, basic rules of behaviour, emotional responses and a sense of who they are. Parsons, writing from a functionalist perspective, argued that the family is the irreplaceable site of primary socialisation because it transmits the core <dfn class=\"term\" data-def=\"Shared beliefs about what is good, desirable and important in society.\">values</dfn> of society to each new generation.</p>\n<p data-narration-id=\"n8\"><dfn class=\"term\" data-def=\"Socialisation that takes place beyond the family, through institutions such as schools, peer groups, workplaces and media.\">Secondary socialisation</dfn> occurs through agencies outside the family &mdash; schools, peer groups, workplaces and the mass media. Each of these agencies reinforces (or sometimes challenges) the values first taught in the home. Feminists such as Oakley have highlighted that secondary socialisation through toys, media and peer groups reinforces gendered expectations from a very young age.</p>\n\n<h2 data-narration-id=\"n9\">Norms, Values, Roles and Culture</h2>\n<p data-narration-id=\"n10\"><dfn class=\"term\" data-def=\"Unwritten rules that govern everyday social behaviour; standards of acceptable conduct in a given situation.\">Norms</dfn> are the unwritten rules of behaviour that tell people how to act in specific situations &mdash; how to greet a stranger, how to behave in a classroom, what to wear at a funeral. Unlike formal laws, norms are enforced informally through social approval or disapproval. Values are the deeper moral beliefs that lie beneath norms &mdash; for example, the norm of queuing in shops reflects an underlying value of fairness.</p>\n<p data-narration-id=\"n11\">A <strong>role</strong> is a set of expected behaviours attached to a social position. The teacher role, the parent role, the police officer role &mdash; each comes with a bundle of norms about how the person in that position should act. These roles exist independently of the individuals who fill them; a new teacher steps into a role that was there before them and will remain after they leave. Together, norms, values and roles make up <dfn class=\"term\" data-def=\"The shared way of life of a group or society, including their norms, values, beliefs, language, customs and material possessions.\">culture</dfn> &mdash; the entire shared way of life of a society.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Power and Authority</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n12\"><dfn class=\"term\" data-def=\"The ability to make others do what you want, with or without their agreement.\">Power</dfn> is the ability to get others to act in ways they might not otherwise choose. It can be exercised through force, persuasion or the control of resources. <strong>Authority</strong> is the legitimate exercise of power &mdash; power that others accept as rightful. Weber identified three types of authority: <strong>traditional</strong> (legitimacy from custom and inheritance, e.g. the monarchy), <strong>charismatic</strong> (legitimacy from a leader&rsquo;s personal qualities), and <strong>rational-legal</strong> (legitimacy from formal rules and elected offices, e.g. a judge or elected MP).</p>\n    <p data-narration-id=\"n13\">Different perspectives disagree on who holds power and why. Functionalists argue power is distributed through legitimate authority for the benefit of society as a whole. Marxists argue power is concentrated in the hands of the bourgeoisie (the capitalist class), who use it to maintain their dominance over the proletariat. Feminists argue that patriarchal structures give men disproportionate power over women in both public and private life. Interactionists are more interested in how power operates in micro-level face-to-face interactions &mdash; for instance, how labels imposed by powerful actors (teachers, police, doctors) can define and constrain less powerful individuals.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Consensus Versus Conflict: The Central Debate</h2>\n<p data-narration-id=\"n15\">One of the most important debates in sociology is between <strong>consensus</strong> and <strong>conflict</strong> perspectives on what holds society together. This debate runs through every topic you will study.</p>\n<p data-narration-id=\"n16\"><strong>Consensus perspectives</strong> &mdash; most notably functionalism &mdash; argue that society is held together by shared norms and values. Most people, most of the time, agree on the basic rules of social life. Institutions such as the family, education and religion serve positive functions by transmitting these shared values and maintaining social order. From this view, inequality, where it exists, reflects the different functional importance of different roles, not exploitation.</p>\n<p data-narration-id=\"n17\"><strong>Conflict perspectives</strong> &mdash; most notably Marxism and feminism &mdash; argue that society is characterised by fundamental divisions and inequalities. For Marxists, the key division is class: the bourgeoisie own the means of production and exploit the labour of the proletariat. For feminists, the key division is gender: patriarchal structures systematically disadvantage women. Both argue that the apparent consensus in society is not genuine agreement but the product of <dfn class=\"term\" data-def=\"Marx&rsquo;s term for the process by which the working class accepts ruling-class ideas and fails to recognise its own exploitation.\">false consciousness</dfn> or ideological control.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Misconception: Sociology Is Just Common Sense</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\">A frequent error is to treat sociological knowledge as &ldquo;just common sense.&rdquo; Sociology challenges common sense systematically. Common sense explanations are often ethnocentric (culture-bound), unreflective about their own assumptions, and unsupported by evidence. Sociology builds theories from evidence, tests them against data, and acknowledges that its own knowledge is socially produced and therefore open to critical scrutiny. The discipline asks: whose common sense? Common sense in 1950s Britain treated racial segregation as natural; sociology helped expose the social construction of race and the institutional processes that produced racial inequality.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n19\" data-revision-tip=\"Can you state the difference between a consensus perspective and a conflict perspective in one sentence? Then name one sociological perspective that fits each category.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Consensus perspectives (e.g. functionalism) argue society is held together by shared norms and values. Conflict perspectives (e.g. Marxism, feminism) argue society is divided by class, gender or other inequalities and that apparent harmony conceals exploitation or oppression.</p>\n</div>",
+        "exam_tip_html": "<p data-narration-id=\"n20\">On a <strong>2-mark Define</strong> question, give a <em>definition</em> &mdash; not an example. Students often write &ldquo;norms are like saying please and thank you&rdquo; when they should write &ldquo;norms are unwritten rules that govern expected behaviour in social situations.&rdquo; Each mark usually rewards one element of the definition, so a complete sociological definition earns both marks. On a <strong>12-mark Discuss</strong>, always state <em>which perspective you are describing before you describe it</em>. Writing &ldquo;Some people think&hellip;&rdquo; earns no marks. Writing &ldquo;From a functionalist perspective, Parsons argued that&hellip;&rdquo; immediately signals to the examiner that you understand the perspectives framework and are operating at the higher mark bands.</p>",
+        "conclusion_html": "<h3 data-narration-id=\"n21\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n22\">Sociology studies society through key concepts &mdash; socialisation, norms, values, roles, culture, power and authority &mdash; rather than reducing behaviour to individual biology or personality.</li>\n  <li data-narration-id=\"n23\">Primary socialisation (family) and secondary socialisation (school, peer groups, media) are the two main processes by which individuals learn the norms and values of their society.</li>\n  <li data-narration-id=\"n24\">The consensus vs conflict debate is fundamental: functionalists argue society is held together by shared values; Marxists and feminists argue it is divided by class or gender inequalities concealed by false consciousness or patriarchal ideology.</li>\n</ul>",
+        "practice_questions": [
+          {
+            "text": "Which one of the following best describes the concept of socialisation?\nA) The process by which individuals earn rewards for good behaviour\nB) The lifelong process by which individuals learn the norms and values of their society\nC) A type of formal education provided by the state\nD) The biological process of growing up",
+            "type": "1 mark — Multiple Choice",
+            "marks": "B) The lifelong process by which individuals learn the norms and values of their society [1 mark]"
+          },
+          {
+            "text": "Define the term 'norms' as used in sociology.",
+            "type": "2 marks — Define",
+            "marks": "1 mark for a reference to unwritten rules or standards of behaviour; 1 mark for indicating they govern conduct in specific social situations or are enforced informally. Example of a full answer: 'Norms are the unwritten rules that guide expected behaviour in social situations, enforced through informal approval or disapproval.'"
+          },
+          {
+            "text": "Identify one agency of secondary socialisation and describe how it helps to transmit norms and values.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for correctly identifying an agency of secondary socialisation (e.g. school, peer group, workplace, mass media). Up to 2 marks for a developed description of how that agency transmits norms and values. Example: identifying school (1 mark) and explaining that schools transmit the value of discipline and achievement through the hidden curriculum — the unstated rules about punctuality, obedience and competition that students learn alongside formal subjects (2 marks)."
+          },
+          {
+            "text": "Describe what sociologists mean by the consensus versus conflict debate in sociology.",
+            "type": "4 marks — Describe",
+            "marks": "Up to 2 marks for describing the consensus view: society is held together by shared norms and values; institutions perform positive functions; most sociologists associate this with functionalism. Up to 2 marks for describing the conflict view: society is divided by fundamental inequalities (e.g. class for Marxism, gender for feminism); apparent harmony conceals exploitation; inequality benefits the powerful. Credit linkage of perspectives to named positions (e.g. Parsons or Durkheim for consensus; Marx for conflict)."
+          },
+          {
+            "text": "Identify one form of primary socialisation and describe how it shapes an individual's understanding of social roles.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying a feature of primary socialisation (e.g. language acquisition, learning family norms, emotional responses modelled by parents). Up to 2 marks for a developed description of how this shapes understanding of social roles. Example: identifying that children observe and copy gender-role behaviour modelled by parents (1 mark) and explaining that this shapes their expectations of how men and women should behave in family and work settings, a process Oakley linked to the reproduction of gender inequality (2 marks)."
+          },
+          {
+            "text": "\"Sociology is little more than organised common sense.\" How far would sociologists agree with this view?",
+            "type": "12 marks — Discuss How Far Sociologists Would Agree",
+            "marks": "Mastering: The answer presents a balanced evaluation. Arguments that sociology goes beyond common sense include: it uses systematic evidence, theoretical frameworks, and named research to challenge taken-for-granted assumptions (e.g. Marxist analysis reveals false consciousness that prevents the working class from recognising exploitation; feminist sociology challenges norms about gender roles that common sense treats as natural). Arguments that sociology echoes common sense include: everyday observations do inform sociological questions; some findings confirm widely held beliefs. The answer cites at least two perspectives or named theorists, distinguishes between consensus and conflict approaches, and reaches a clear supported judgement about the status of sociological knowledge. Sustained sociological vocabulary throughout.\n\nSecure: Both sides of the debate are addressed. At least one named sociologist or perspective is cited. A judgement is reached but development may be uneven.\n\nDeveloping: Relevant points are made but the response is largely one-sided or descriptive. Some reference to a perspective. A conclusion is present but not substantiated.\n\nEmerging: Basic description of what sociology is. Little or no engagement with the common sense comparison. Few or no named sociologists. No clear judgement."
+          }
+        ],
+        "knowledge_checks": [
+          {
+            "q": "Which term describes the unwritten rules that govern expected behaviour in social situations?",
+            "type": "mcq",
+            "correct": 1,
+            "options": [
+              "Values",
+              "Norms",
+              "Roles",
+              "Culture"
+            ]
+          },
+          {
+            "q": "Which sociological perspective argues that society is held together by shared norms and values (a value consensus)?",
+            "type": "mcq",
+            "correct": 2,
+            "options": [
+              "Marxism",
+              "Feminism",
+              "Functionalism",
+              "Interactionism"
+            ]
+          },
+          {
+            "q": "The lifelong process by which individuals learn the norms and values of their society is called ______.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "stratification",
+              "socialisation",
+              "social control",
+              "social cohesion"
+            ]
+          },
+          {
+            "q": "Marx used the term '______ consciousness' to describe the process by which the working class accepts ruling-class ideas and fails to recognise its own exploitation.",
+            "type": "fill",
+            "correct": 0,
+            "options": [
+              "false",
+              "class",
+              "true",
+              "social"
+            ]
+          },
+          {
+            "q": "Match each concept to its correct definition.",
+            "left": [
+              "Primary socialisation",
+              "Secondary socialisation",
+              "Norms",
+              "Values"
+            ],
+            "type": "match",
+            "order": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "right": [
+              "Early socialisation within the family in which basic norms and values are first learned",
+              "Socialisation through institutions beyond the family, such as schools and peer groups",
+              "Unwritten rules governing expected behaviour in social situations",
+              "Shared beliefs about what is good and desirable in society"
+            ]
+          }
+        ],
+        "flashcard_questions": [
+          {
+            "a": "The systematic study of human society, social structures, social processes and social issues.",
+            "q": "What is sociology?"
+          },
+          {
+            "a": "The lifelong process by which individuals learn the norms, values and culture of their society.",
+            "q": "What is socialisation?"
+          },
+          {
+            "a": "Early childhood socialisation within the family, where basic norms and values are first learned.",
+            "q": "What is primary socialisation?"
+          },
+          {
+            "a": "Socialisation through institutions beyond the family, such as schools, peer groups and media.",
+            "q": "What is secondary socialisation?"
+          },
+          {
+            "a": "Unwritten rules governing expected behaviour in specific social situations.",
+            "q": "What are norms?"
+          },
+          {
+            "a": "Shared beliefs about what is morally desirable in a society, guiding people's goals and judgements.",
+            "q": "What are values in sociology?"
+          },
+          {
+            "a": "A set of expected behaviours attached to a particular social position, such as teacher or parent.",
+            "q": "What is a social role?"
+          },
+          {
+            "a": "Marx's term for the working class accepting ruling-class ideas and failing to recognise their own exploitation.",
+            "q": "What is false consciousness?"
+          },
+          {
+            "a": "Shared norms and values — institutions perform positive functions to maintain social order.",
+            "q": "Consensus perspective: what holds society together?"
+          },
+          {
+            "a": "Fundamental inequalities — class for Marxists, gender for feminists — concealed by ideology.",
+            "q": "Conflict perspective: what divides society?"
+          },
+          {
+            "a": "Traditional (custom), charismatic (personal qualities) and rational-legal (formal rules and offices).",
+            "q": "What are the three types of authority identified by Weber?"
+          },
+          {
+            "a": "The shared way of life of a group or society, including their norms, values, customs and beliefs.",
+            "q": "What is culture?"
+          }
+        ],
+        "glossary_terms": [
+          {
+            "term": "socialisation",
+            "definition": "The lifelong process by which individuals learn the norms, values, roles and culture of their society."
+          },
+          {
+            "term": "norms",
+            "definition": "Unwritten rules that govern expected behaviour in specific social situations, enforced through social approval or disapproval."
+          },
+          {
+            "term": "values",
+            "definition": "Shared beliefs about what is good, important and desirable in society, which underlie and give meaning to norms."
+          },
+          {
+            "term": "primary socialisation",
+            "definition": "The early socialisation of young children, usually within the family, in which basic norms, values and language are first learned."
+          },
+          {
+            "term": "secondary socialisation",
+            "definition": "Socialisation that takes place beyond the family through institutions such as schools, peer groups, workplaces and the mass media."
+          },
+          {
+            "term": "false consciousness",
+            "definition": "A Marxist term for the process by which the working class accepts ruling-class ideas and fails to recognise its own exploitation."
+          },
+          {
+            "term": "culture",
+            "definition": "The shared way of life of a group or society, encompassing their norms, values, beliefs, language and customs."
+          },
+          {
+            "term": "consensus",
+            "definition": "A general agreement within society on norms and values; functionalists argue this is what holds society together."
+          }
+        ],
+        "hero_image_caption": "Photo by Ryoji Iwata on Unsplash"
+      }
+    },
+    {
+      "lesson_id": "f1a54ade-af3e-4ff4-a493-b17efc049189",
+      "lesson_number": 2,
+      "slug": "socialisation-identity-and-agents-of-socialisation",
+      "title": "Socialisation, Identity and Agents of Socialisation",
+      "description": "Nature vs nurture, feral children, primary and secondary socialisation, and how family, education, media and peer group pass on culture.",
+      "spec_references": [
+        "1.2",
+        "1.3"
+      ],
+      "section_markers": [
+        "socialisation",
+        "primary socialisation",
+        "secondary socialisation",
+        "nature versus nurture",
+        "feral children",
+        "agents of socialisation",
+        "family as agent",
+        "education as agent",
+        "media as agent",
+        "peer group as agent",
+        "gender identity",
+        "class identity",
+        "ethnic identity",
+        "informal social control",
+        "formal social control",
+        "acquisition of identity"
+      ],
+      "suggested_question_types": [
+        "1 mark — Multiple Choice",
+        "2 marks — Define",
+        "3 marks — Identify and Describe",
+        "4 marks — Describe",
+        "9 marks — Discuss",
+        "12 marks — Evaluate"
+      ],
+      "content_transfer": {
+        "transfer_score": "medium",
+        "source_board": "AQA",
+        "source_subject_slug": "sociology-aqa",
+        "source_unit_slug": "studying-society-research-methods",
+        "source_lesson_number": 1,
+        "adaptation_notes": "AQA L1 covers socialisation but lighter on feral children and the named agents-of-socialisation list. Eduqas/WJEC 1.2-1.3 explicitly requires nature/nurture with feral children examples (e.g. Genie, Oxana Malaya — pick one well-documented public-domain case) AND the four agents of socialisation by name. Pull socialisation/identity prose from AQA L1 for the conceptual frame, then add a fresh section on feral children and a four-quadrant agents block. Practice questions fresh."
+      },
+      "source": {
+        "_source_meta": {
+          "source_subject_slug": "sociology-aqa",
+          "source_unit_slug": "studying-society-research-methods",
+          "source_lesson_number": 1,
+          "source_lesson_id": "bd18b305-b3e9-4b51-96b8-80f63e4395d5",
+          "source_lesson_title": "What Is Sociology? The Sociological Approach"
+        },
+        "transfer_score": "medium",
+        "content_html": "<h2 data-narration-id=\"n1\">What Is Sociology?</h2>\n<p data-narration-id=\"n2\"><dfn class=\"term\" data-def=\"The systematic study of human society, social structures, social processes and social issues.\">Sociology</dfn> is the disciplined study of how society works. Rather than explaining human behaviour through individual personality or biology, sociologists look at the social forces that shape people&rsquo;s lives &mdash; the groups they belong to, the rules they follow, and the inequalities built into the world around them. Sociology asks questions such as: why do some groups consistently achieve less in education? Why are some people more likely to be labelled criminal? What holds society together, and what tears it apart?</p>\n<p data-narration-id=\"n3\">Crucially, sociology is not common sense. Common sense might say that poverty is caused by laziness. Sociology investigates the <em>social structures</em> that distribute wealth unequally, the institutions that reproduce disadvantage, and the processes by which labels are attached to whole groups of people. The discipline demands evidence, theory and critical thinking.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Without looking, name three key concepts that sociology uses to explain how society shapes individuals. Give one example of each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The core concepts of sociology are <strong>society</strong>, <strong>socialisation</strong>, <strong>norms</strong>, <strong>values</strong>, <strong>roles</strong>, <strong>culture</strong>, <strong>power</strong> and <strong>authority</strong>. These eight concepts appear across every topic in your exam and underpin every sociological argument you will make.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Socialisation: How Society Gets Into People</h2>\n<p data-narration-id=\"n6\"><dfn class=\"term\" data-def=\"The lifelong process by which individuals learn and internalise the norms, values, roles and culture of their society.\">Socialisation</dfn> is the mechanism through which society reproduces itself in the next generation. Through socialisation, individuals learn what behaviours are expected of them, what counts as right and wrong, and how to perform the social roles assigned to them. Without socialisation, the shared understandings that allow society to function would collapse.</p>\n<p data-narration-id=\"n7\"><dfn class=\"term\" data-def=\"Early childhood socialisation, usually within the family, in which basic norms, values and language are first learned.\">Primary socialisation</dfn> happens in the family, in early childhood. It is here that children first learn language, basic rules of behaviour, emotional responses and a sense of who they are. Parsons, writing from a functionalist perspective, argued that the family is the irreplaceable site of primary socialisation because it transmits the core <dfn class=\"term\" data-def=\"Shared beliefs about what is good, desirable and important in society.\">values</dfn> of society to each new generation.</p>\n<p data-narration-id=\"n8\"><dfn class=\"term\" data-def=\"Socialisation that takes place beyond the family, through institutions such as schools, peer groups, workplaces and media.\">Secondary socialisation</dfn> occurs through agencies outside the family &mdash; schools, peer groups, workplaces and the mass media. Each of these agencies reinforces (or sometimes challenges) the values first taught in the home. Feminists such as Oakley have highlighted that secondary socialisation through toys, media and peer groups reinforces gendered expectations from a very young age.</p>\n\n<h2 data-narration-id=\"n9\">Norms, Values, Roles and Culture</h2>\n<p data-narration-id=\"n10\"><dfn class=\"term\" data-def=\"Unwritten rules that govern everyday social behaviour; standards of acceptable conduct in a given situation.\">Norms</dfn> are the unwritten rules of behaviour that tell people how to act in specific situations &mdash; how to greet a stranger, how to behave in a classroom, what to wear at a funeral. Unlike formal laws, norms are enforced informally through social approval or disapproval. Values are the deeper moral beliefs that lie beneath norms &mdash; for example, the norm of queuing in shops reflects an underlying value of fairness.</p>\n<p data-narration-id=\"n11\">A <strong>role</strong> is a set of expected behaviours attached to a social position. The teacher role, the parent role, the police officer role &mdash; each comes with a bundle of norms about how the person in that position should act. These roles exist independently of the individuals who fill them; a new teacher steps into a role that was there before them and will remain after they leave. Together, norms, values and roles make up <dfn class=\"term\" data-def=\"The shared way of life of a group or society, including their norms, values, beliefs, language, customs and material possessions.\">culture</dfn> &mdash; the entire shared way of life of a society.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Power and Authority</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n12\"><dfn class=\"term\" data-def=\"The ability to make others do what you want, with or without their agreement.\">Power</dfn> is the ability to get others to act in ways they might not otherwise choose. It can be exercised through force, persuasion or the control of resources. <strong>Authority</strong> is the legitimate exercise of power &mdash; power that others accept as rightful. Weber identified three types of authority: <strong>traditional</strong> (legitimacy from custom and inheritance, e.g. the monarchy), <strong>charismatic</strong> (legitimacy from a leader&rsquo;s personal qualities), and <strong>rational-legal</strong> (legitimacy from formal rules and elected offices, e.g. a judge or elected MP).</p>\n    <p data-narration-id=\"n13\">Different perspectives disagree on who holds power and why. Functionalists argue power is distributed through legitimate authority for the benefit of society as a whole. Marxists argue power is concentrated in the hands of the bourgeoisie (the capitalist class), who use it to maintain their dominance over the proletariat. Feminists argue that patriarchal structures give men disproportionate power over women in both public and private life. Interactionists are more interested in how power operates in micro-level face-to-face interactions &mdash; for instance, how labels imposed by powerful actors (teachers, police, doctors) can define and constrain less powerful individuals.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Consensus Versus Conflict: The Central Debate</h2>\n<p data-narration-id=\"n15\">One of the most important debates in sociology is between <strong>consensus</strong> and <strong>conflict</strong> perspectives on what holds society together. This debate runs through every topic you will study.</p>\n<p data-narration-id=\"n16\"><strong>Consensus perspectives</strong> &mdash; most notably functionalism &mdash; argue that society is held together by shared norms and values. Most people, most of the time, agree on the basic rules of social life. Institutions such as the family, education and religion serve positive functions by transmitting these shared values and maintaining social order. From this view, inequality, where it exists, reflects the different functional importance of different roles, not exploitation.</p>\n<p data-narration-id=\"n17\"><strong>Conflict perspectives</strong> &mdash; most notably Marxism and feminism &mdash; argue that society is characterised by fundamental divisions and inequalities. For Marxists, the key division is class: the bourgeoisie own the means of production and exploit the labour of the proletariat. For feminists, the key division is gender: patriarchal structures systematically disadvantage women. Both argue that the apparent consensus in society is not genuine agreement but the product of <dfn class=\"term\" data-def=\"Marx&rsquo;s term for the process by which the working class accepts ruling-class ideas and fails to recognise its own exploitation.\">false consciousness</dfn> or ideological control.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Misconception: Sociology Is Just Common Sense</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\">A frequent error is to treat sociological knowledge as &ldquo;just common sense.&rdquo; Sociology challenges common sense systematically. Common sense explanations are often ethnocentric (culture-bound), unreflective about their own assumptions, and unsupported by evidence. Sociology builds theories from evidence, tests them against data, and acknowledges that its own knowledge is socially produced and therefore open to critical scrutiny. The discipline asks: whose common sense? Common sense in 1950s Britain treated racial segregation as natural; sociology helped expose the social construction of race and the institutional processes that produced racial inequality.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n19\" data-revision-tip=\"Can you state the difference between a consensus perspective and a conflict perspective in one sentence? Then name one sociological perspective that fits each category.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Consensus perspectives (e.g. functionalism) argue society is held together by shared norms and values. Conflict perspectives (e.g. Marxism, feminism) argue society is divided by class, gender or other inequalities and that apparent harmony conceals exploitation or oppression.</p>\n</div>",
+        "exam_tip_html": "<p data-narration-id=\"n20\">On a <strong>2-mark Define</strong> question, give a <em>definition</em> &mdash; not an example. Students often write &ldquo;norms are like saying please and thank you&rdquo; when they should write &ldquo;norms are unwritten rules that govern expected behaviour in social situations.&rdquo; Each mark usually rewards one element of the definition, so a complete sociological definition earns both marks. On a <strong>12-mark Discuss</strong>, always state <em>which perspective you are describing before you describe it</em>. Writing &ldquo;Some people think&hellip;&rdquo; earns no marks. Writing &ldquo;From a functionalist perspective, Parsons argued that&hellip;&rdquo; immediately signals to the examiner that you understand the perspectives framework and are operating at the higher mark bands.</p>",
+        "conclusion_html": "<h3 data-narration-id=\"n21\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n22\">Sociology studies society through key concepts &mdash; socialisation, norms, values, roles, culture, power and authority &mdash; rather than reducing behaviour to individual biology or personality.</li>\n  <li data-narration-id=\"n23\">Primary socialisation (family) and secondary socialisation (school, peer groups, media) are the two main processes by which individuals learn the norms and values of their society.</li>\n  <li data-narration-id=\"n24\">The consensus vs conflict debate is fundamental: functionalists argue society is held together by shared values; Marxists and feminists argue it is divided by class or gender inequalities concealed by false consciousness or patriarchal ideology.</li>\n</ul>",
+        "practice_questions": [
+          {
+            "text": "Which one of the following best describes the concept of socialisation?\nA) The process by which individuals earn rewards for good behaviour\nB) The lifelong process by which individuals learn the norms and values of their society\nC) A type of formal education provided by the state\nD) The biological process of growing up",
+            "type": "1 mark — Multiple Choice",
+            "marks": "B) The lifelong process by which individuals learn the norms and values of their society [1 mark]"
+          },
+          {
+            "text": "Define the term 'norms' as used in sociology.",
+            "type": "2 marks — Define",
+            "marks": "1 mark for a reference to unwritten rules or standards of behaviour; 1 mark for indicating they govern conduct in specific social situations or are enforced informally. Example of a full answer: 'Norms are the unwritten rules that guide expected behaviour in social situations, enforced through informal approval or disapproval.'"
+          },
+          {
+            "text": "Identify one agency of secondary socialisation and describe how it helps to transmit norms and values.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for correctly identifying an agency of secondary socialisation (e.g. school, peer group, workplace, mass media). Up to 2 marks for a developed description of how that agency transmits norms and values. Example: identifying school (1 mark) and explaining that schools transmit the value of discipline and achievement through the hidden curriculum — the unstated rules about punctuality, obedience and competition that students learn alongside formal subjects (2 marks)."
+          },
+          {
+            "text": "Describe what sociologists mean by the consensus versus conflict debate in sociology.",
+            "type": "4 marks — Describe",
+            "marks": "Up to 2 marks for describing the consensus view: society is held together by shared norms and values; institutions perform positive functions; most sociologists associate this with functionalism. Up to 2 marks for describing the conflict view: society is divided by fundamental inequalities (e.g. class for Marxism, gender for feminism); apparent harmony conceals exploitation; inequality benefits the powerful. Credit linkage of perspectives to named positions (e.g. Parsons or Durkheim for consensus; Marx for conflict)."
+          },
+          {
+            "text": "Identify one form of primary socialisation and describe how it shapes an individual's understanding of social roles.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying a feature of primary socialisation (e.g. language acquisition, learning family norms, emotional responses modelled by parents). Up to 2 marks for a developed description of how this shapes understanding of social roles. Example: identifying that children observe and copy gender-role behaviour modelled by parents (1 mark) and explaining that this shapes their expectations of how men and women should behave in family and work settings, a process Oakley linked to the reproduction of gender inequality (2 marks)."
+          },
+          {
+            "text": "\"Sociology is little more than organised common sense.\" How far would sociologists agree with this view?",
+            "type": "12 marks — Discuss How Far Sociologists Would Agree",
+            "marks": "Mastering: The answer presents a balanced evaluation. Arguments that sociology goes beyond common sense include: it uses systematic evidence, theoretical frameworks, and named research to challenge taken-for-granted assumptions (e.g. Marxist analysis reveals false consciousness that prevents the working class from recognising exploitation; feminist sociology challenges norms about gender roles that common sense treats as natural). Arguments that sociology echoes common sense include: everyday observations do inform sociological questions; some findings confirm widely held beliefs. The answer cites at least two perspectives or named theorists, distinguishes between consensus and conflict approaches, and reaches a clear supported judgement about the status of sociological knowledge. Sustained sociological vocabulary throughout.\n\nSecure: Both sides of the debate are addressed. At least one named sociologist or perspective is cited. A judgement is reached but development may be uneven.\n\nDeveloping: Relevant points are made but the response is largely one-sided or descriptive. Some reference to a perspective. A conclusion is present but not substantiated.\n\nEmerging: Basic description of what sociology is. Little or no engagement with the common sense comparison. Few or no named sociologists. No clear judgement."
+          }
+        ],
+        "knowledge_checks": [
+          {
+            "q": "Which term describes the unwritten rules that govern expected behaviour in social situations?",
+            "type": "mcq",
+            "correct": 1,
+            "options": [
+              "Values",
+              "Norms",
+              "Roles",
+              "Culture"
+            ]
+          },
+          {
+            "q": "Which sociological perspective argues that society is held together by shared norms and values (a value consensus)?",
+            "type": "mcq",
+            "correct": 2,
+            "options": [
+              "Marxism",
+              "Feminism",
+              "Functionalism",
+              "Interactionism"
+            ]
+          },
+          {
+            "q": "The lifelong process by which individuals learn the norms and values of their society is called ______.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "stratification",
+              "socialisation",
+              "social control",
+              "social cohesion"
+            ]
+          },
+          {
+            "q": "Marx used the term '______ consciousness' to describe the process by which the working class accepts ruling-class ideas and fails to recognise its own exploitation.",
+            "type": "fill",
+            "correct": 0,
+            "options": [
+              "false",
+              "class",
+              "true",
+              "social"
+            ]
+          },
+          {
+            "q": "Match each concept to its correct definition.",
+            "left": [
+              "Primary socialisation",
+              "Secondary socialisation",
+              "Norms",
+              "Values"
+            ],
+            "type": "match",
+            "order": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "right": [
+              "Early socialisation within the family in which basic norms and values are first learned",
+              "Socialisation through institutions beyond the family, such as schools and peer groups",
+              "Unwritten rules governing expected behaviour in social situations",
+              "Shared beliefs about what is good and desirable in society"
+            ]
+          }
+        ],
+        "flashcard_questions": [
+          {
+            "a": "The systematic study of human society, social structures, social processes and social issues.",
+            "q": "What is sociology?"
+          },
+          {
+            "a": "The lifelong process by which individuals learn the norms, values and culture of their society.",
+            "q": "What is socialisation?"
+          },
+          {
+            "a": "Early childhood socialisation within the family, where basic norms and values are first learned.",
+            "q": "What is primary socialisation?"
+          },
+          {
+            "a": "Socialisation through institutions beyond the family, such as schools, peer groups and media.",
+            "q": "What is secondary socialisation?"
+          },
+          {
+            "a": "Unwritten rules governing expected behaviour in specific social situations.",
+            "q": "What are norms?"
+          },
+          {
+            "a": "Shared beliefs about what is morally desirable in a society, guiding people's goals and judgements.",
+            "q": "What are values in sociology?"
+          },
+          {
+            "a": "A set of expected behaviours attached to a particular social position, such as teacher or parent.",
+            "q": "What is a social role?"
+          },
+          {
+            "a": "Marx's term for the working class accepting ruling-class ideas and failing to recognise their own exploitation.",
+            "q": "What is false consciousness?"
+          },
+          {
+            "a": "Shared norms and values — institutions perform positive functions to maintain social order.",
+            "q": "Consensus perspective: what holds society together?"
+          },
+          {
+            "a": "Fundamental inequalities — class for Marxists, gender for feminists — concealed by ideology.",
+            "q": "Conflict perspective: what divides society?"
+          },
+          {
+            "a": "Traditional (custom), charismatic (personal qualities) and rational-legal (formal rules and offices).",
+            "q": "What are the three types of authority identified by Weber?"
+          },
+          {
+            "a": "The shared way of life of a group or society, including their norms, values, customs and beliefs.",
+            "q": "What is culture?"
+          }
+        ],
+        "glossary_terms": [
+          {
+            "term": "socialisation",
+            "definition": "The lifelong process by which individuals learn the norms, values, roles and culture of their society."
+          },
+          {
+            "term": "norms",
+            "definition": "Unwritten rules that govern expected behaviour in specific social situations, enforced through social approval or disapproval."
+          },
+          {
+            "term": "values",
+            "definition": "Shared beliefs about what is good, important and desirable in society, which underlie and give meaning to norms."
+          },
+          {
+            "term": "primary socialisation",
+            "definition": "The early socialisation of young children, usually within the family, in which basic norms, values and language are first learned."
+          },
+          {
+            "term": "secondary socialisation",
+            "definition": "Socialisation that takes place beyond the family through institutions such as schools, peer groups, workplaces and the mass media."
+          },
+          {
+            "term": "false consciousness",
+            "definition": "A Marxist term for the process by which the working class accepts ruling-class ideas and fails to recognise its own exploitation."
+          },
+          {
+            "term": "culture",
+            "definition": "The shared way of life of a group or society, encompassing their norms, values, beliefs, language and customs."
+          },
+          {
+            "term": "consensus",
+            "definition": "A general agreement within society on norms and values; functionalists argue this is what holds society together."
+          }
+        ],
+        "hero_image_caption": "Photo by Ryoji Iwata on Unsplash"
+      }
+    },
+    {
+      "lesson_id": "f1287282-dcd4-45aa-93e5-6da4bc9276cb",
+      "lesson_number": 3,
+      "slug": "the-four-sociological-perspectives",
+      "title": "The Four Sociological Perspectives",
+      "description": "Functionalism, Marxism, feminism and interactionism — what each perspective says about how society works and where they disagree.",
+      "spec_references": [
+        "1.1"
+      ],
+      "section_markers": [
+        "sociological perspectives",
+        "functionalism",
+        "consensus theory",
+        "social order",
+        "value consensus",
+        "Marxism",
+        "conflict theory",
+        "ruling class",
+        "feminism",
+        "patriarchy introduction",
+        "liberal feminism",
+        "Marxist feminism",
+        "radical feminism",
+        "interactionism",
+        "labelling theory",
+        "micro versus macro",
+        "New Right introduction"
+      ],
+      "suggested_question_types": [
+        "1 mark — Multiple Choice",
+        "2 marks — Define",
+        "3 marks — Identify and Describe",
+        "4 marks — Describe",
+        "9 marks — Discuss",
+        "12 marks — Evaluate"
+      ],
+      "content_transfer": {
+        "transfer_score": "high",
+        "source_board": "AQA",
+        "source_subject_slug": "sociology-aqa",
+        "source_unit_slug": "studying-society-research-methods",
+        "source_lesson_number": 3,
+        "adaptation_notes": "AQA L3 'The Four Sociological Perspectives' is essentially identical content. Reuse 90%. Add a brief New Right primer at the end — Eduqas/WJEC explicitly names New Right views in family (2.4) and Murray's underclass (5.5), so introducing it here saves repetition later. Practice questions fresh."
+      },
+      "source": {
+        "_source_meta": {
+          "source_subject_slug": "sociology-aqa",
+          "source_unit_slug": "studying-society-research-methods",
+          "source_lesson_number": 3,
+          "source_lesson_id": "4a17ddcc-6e82-4953-acbb-88934be0aea8",
+          "source_lesson_title": "The Four Sociological Perspectives"
+        },
+        "transfer_score": "high",
+        "content_html": "<h2 data-narration-id=\"n1\">Why Perspectives Matter</h2>\n<p data-narration-id=\"n2\">A <dfn class=\"term\" data-def=\"A theoretical framework or school of thought that offers a systematic explanation of how society works.\">sociological perspective</dfn> is a theoretical lens through which sociologists interpret the social world. No single perspective commands universal agreement; instead, sociology is a discipline of competing theoretical frameworks, each illuminating different aspects of society. The AQA specification names four perspectives that you must know, compare and apply to every topic: <strong>functionalism</strong>, <strong>Marxism</strong>, <strong>feminism</strong> and <strong>interactionism</strong>.</p>\n<p data-narration-id=\"n3\">A key skill in sociology is being able to describe <em>what each perspective argues</em>, <em>who the named sociologists are</em>, and <em>how each perspective differs from the others</em>. In your extended responses, stating the perspective before making a claim is essential: &ldquo;From a Marxist perspective&hellip;&rdquo; or &ldquo;Feminists argue that&hellip;&rdquo; signals to the examiner that you are operating at the level of sociological analysis rather than personal opinion.</p>\n\n<h2 data-narration-id=\"n4\">Functionalism: Society as a Working System</h2>\n<p data-narration-id=\"n5\"><dfn class=\"term\" data-def=\"A sociological perspective that sees society as a system of interrelated parts that work together to maintain social order and stability through shared values.\">Functionalism</dfn> is a consensus perspective. Functionalists argue that society resembles a biological organism: each institution (the family, education, religion, the economy) performs necessary <strong>functions</strong> that contribute to the survival and stability of the whole. Society is held together by <dfn class=\"term\" data-def=\"Functionalist concept: the agreement among members of society on core norms and values that enables society to function and maintain order.\">value consensus</dfn> &mdash; a broad shared agreement on core values that enables cooperation and social order.</p>\n<p data-narration-id=\"n6\">Durkheim is the founding functionalist thinker. Parsons extended this framework to argue that the family performs two irreplaceable functions: the primary socialisation of children and the stabilisation of adult personalities. For functionalists, social inequality, where it exists, can serve a functional purpose: Davis and Moore later argued that higher rewards for more demanding roles act as incentives for talented individuals to train for them, ensuring that important positions are filled effectively.</p>\n<p data-narration-id=\"n7\">Critics argue that functionalism is politically conservative: it tends to justify existing arrangements as functional and necessary, making it difficult to explain persistent inequality as anything other than a natural sorting mechanism. Marxists and feminists argue that functionalism ignores the role of power and conflict in shaping institutions that ostensibly serve &ldquo;society&rdquo; but in practice serve dominant groups.</p>\n\n<div class=\"key-fact\"><div class=\"key-fact-label\">Key Fact</div><p>Functionalism is a <strong>consensus</strong> perspective: it sees shared norms and values as the foundation of social order. Marxism, feminism and conflict perspectives argue instead that society is shaped by power and inequality that serves dominant groups.</p></div>\n\n<h2 data-narration-id=\"n8\">Marxism: Society as Class Conflict</h2>\n<p data-narration-id=\"n9\"><dfn class=\"term\" data-def=\"A conflict perspective, derived from Marx, that sees society as divided between a capitalist ruling class (bourgeoisie) and a working class (proletariat), whose exploitation generates inequality and social conflict.\">Marxism</dfn> is a conflict perspective. Marxists argue that capitalist society is fundamentally divided between the bourgeoisie (who own the means of production) and the proletariat (who must sell their labour). All major social institutions &mdash; the family, education, the law, religion &mdash; serve to reproduce and legitimate this exploitative relationship. The ruling class maintains control not only through economic power but through ideological control: promoting ideas (via the media, religion, education) that make the existing order appear natural and just.</p>\n<p data-narration-id=\"n10\">Marx argued that the dominant ideas of any age are the ideas of the dominant class. Workers are kept in a state of false consciousness, accepting their own subordination as inevitable. Bowles and Gintis later applied this framework to education, arguing that schools reproduce the workforce capitalism needs through the correspondence principle &mdash; matching attitudes and behaviours in school (obedience, punctuality, deference to authority) to those required in the workplace.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Functionalism vs Marxism: A Comparison</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n11\"><strong>Functionalism:</strong> Society is based on consensus; institutions perform functions for the benefit of society as a whole; inequality reflects functional necessity. Key thinkers: Durkheim, Parsons, Davis and Moore.<br><br><strong>Marxism:</strong> Society is based on class conflict; institutions serve the interests of the ruling class; inequality is the product of exploitation, not merit. Key thinkers: Marx, Bowles and Gintis, Zaretsky.<br><br>Both are <strong>macro</strong> (or <strong>structural</strong>) perspectives: they explain individual behaviour by reference to large-scale social structures. They differ on whether those structures are consensual or coercive.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">Feminism: Society as Patriarchal</h2>\n<p data-narration-id=\"n13\"><dfn class=\"term\" data-def=\"A range of perspectives that argue society is structured by patriarchy &mdash; a system in which men hold structural power and women are systematically disadvantaged.\">Feminism</dfn> is a conflict perspective that focuses on gender inequality. Feminists argue that society is <dfn class=\"term\" data-def=\"A system in which men hold structural power over women in both public life (work, politics, law) and private life (the family, domestic roles).\">patriarchal</dfn> &mdash; structured so that men hold structural power and women are systematically disadvantaged. Walby identified six structures of patriarchy: paid employment, household production, culture, sexuality, violence and the state. Together these operate across public and private life to maintain male dominance.</p>\n<p data-narration-id=\"n14\">Feminism is not a single perspective but a family of related arguments. <strong>Liberal feminism</strong> argues that legal reforms and changing attitudes can achieve gender equality. <strong>Marxist feminism</strong> (e.g. Zaretsky) argues that women&rsquo;s oppression is tied to capitalism: women provide unpaid domestic labour that sustains the workforce, benefiting the capitalist class. <strong>Radical feminism</strong> argues that patriarchy is an autonomous system of male domination that cannot be dismantled simply by legal or economic reform; it requires a fundamental reorganisation of social relations between men and women.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Without looking, name the three strands of feminism. For each one, state in one sentence what it argues is the main cause of gender inequality.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Feminism, Marxism and functionalism are all <strong>macro</strong> perspectives: they explain social behaviour through large-scale structures (patriarchy, class, value consensus). Interactionism is a <strong>micro</strong> perspective: it focuses on face-to-face interactions and the meanings individuals construct in everyday life.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Interactionism: Society as Meaning-Making</h2>\n<p data-narration-id=\"n17\"><dfn class=\"term\" data-def=\"A micro-level sociological perspective that focuses on face-to-face interactions and the subjective meanings individuals attach to social situations, including the effects of labelling.\">Interactionism</dfn> focuses on the small-scale, everyday interactions through which individuals construct and negotiate meaning. Rather than starting with large-scale structures, interactionists ask: what does this situation mean to the people in it? How do labels applied by powerful actors shape individuals&rsquo; self-concepts and behaviour?</p>\n<p data-narration-id=\"n18\">Becker&rsquo;s labelling theory (<em>Outsiders</em>, 1963) is the key interactionist contribution to crime and deviance. Becker argued that deviance is not an inherent quality of an act but a label applied by those with the power to define and enforce rules. A <strong>master status</strong> &mdash; such as &ldquo;criminal&rdquo; or &ldquo;truant&rdquo; &mdash; can come to override all other aspects of a person&rsquo;s identity, shaping how others see them and how they see themselves. If a student is labelled as a troublemaker, teachers may interpret all their behaviour through that lens, and the student may eventually internalise the label (the self-fulfilling prophecy).</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Misconception: Confusing Macro and Micro Perspectives</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n19\">Students often conflate interactionism with the other three perspectives. A clear distinction: functionalism, Marxism and feminism are all <strong>structural (macro)</strong> perspectives &mdash; they explain individual behaviour by reference to large-scale forces (value consensus, class, patriarchy). Interactionism is a <strong>micro</strong> perspective &mdash; it starts from the individual interaction and the meanings people construct. Both levels of analysis are valid and complementary: structural perspectives explain patterns (why working-class students underachieve on average); interactionist perspectives explain processes (how specific labels applied by specific teachers contribute to that pattern in practice).</p>\n  </div></div>\n</div>",
+        "exam_tip_html": "<p data-narration-id=\"n20\">The 12-mark Discuss question will often invite you to compare perspectives. The most common error is to describe all four perspectives without evaluating them &mdash; which caps you in the Developing tier. To reach Secure or Mastering, you must: <strong>compare</strong> (e.g. &ldquo;Unlike functionalists, who argue&hellip;, Marxists contend&hellip;&rdquo;), <strong>evaluate</strong> (e.g. &ldquo;A limitation of the functionalist view is that it ignores&hellip;&rdquo;), and <strong>judge</strong> (e.g. &ldquo;On balance, the feminist perspective is more convincing because&hellip;&rdquo;). Never describe all four perspectives as equally valid without explaining why you find one more or less convincing than another. The examiner is looking for a reasoned judgement, not a balanced description.</p>",
+        "conclusion_html": "<h3 data-narration-id=\"n21\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n22\">Functionalism (consensus, macro) argues society is held together by shared values and institutions perform necessary functions. Marxism (conflict, macro) argues society is divided by class exploitation and institutions serve the ruling class.</li>\n  <li data-narration-id=\"n23\">Feminism (conflict, macro) argues society is patriarchal &mdash; structured to maintain male power. Three strands: liberal (legal reform), Marxist (capitalism + gender oppression), radical (patriarchy as autonomous system, e.g. Walby&rsquo;s six structures).</li>\n  <li data-narration-id=\"n24\">Interactionism (micro) focuses on face-to-face interaction, labelling and the subjective meanings individuals construct. Becker&rsquo;s concept of master status (1963) is the key interactionist contribution to understanding how labels shape behaviour through the self-fulfilling prophecy.</li>\n</ul>",
+        "practice_questions": [
+          {
+            "text": "Which sociological perspective argues that society is held together by value consensus and that social institutions perform necessary functions?\nA) Marxism\nB) Feminism\nC) Interactionism\nD) Functionalism",
+            "type": "1 mark — Multiple Choice",
+            "marks": "D) Functionalism [1 mark]"
+          },
+          {
+            "text": "Define the term 'patriarchy' as used by sociologists.",
+            "type": "2 marks — Define",
+            "marks": "1 mark for identifying patriarchy as a system involving male power or dominance; 1 mark for indicating it is structural and disadvantages women systematically (in both public and private life). Example: 'Patriarchy is a social system in which men hold structural power over women, disadvantaging women in both public spheres such as work and politics, and private spheres such as the family.'"
+          },
+          {
+            "text": "Identify one feature of the interactionist perspective and describe how it differs from a structural perspective such as functionalism.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for correctly identifying an interactionist feature (e.g. focus on micro-level interactions, labelling, subjective meaning, master status, self-fulfilling prophecy). Up to 2 marks for a developed description of how it differs. Example: identifying the focus on labelling (1 mark) and describing that where functionalists explain educational underachievement by reference to the large-scale value system of meritocracy, interactionists focus on how specific labels applied by individual teachers can generate a self-fulfilling prophecy, explaining the same outcome through face-to-face processes rather than structural forces (2 marks)."
+          },
+          {
+            "text": "Describe the key ideas of the Marxist perspective on society.",
+            "type": "4 marks — Describe",
+            "marks": "Up to 2 marks for describing the class structure: society is divided between the bourgeoisie (who own the means of production) and the proletariat (who must sell their labour); the bourgeoisie exploit the proletariat by taking profit from workers' labour. Up to 2 marks for describing ideological control or false consciousness: the ruling class maintains dominance not only through economic power but by promoting ideas (through education, media, religion) that make exploitation appear natural; false consciousness prevents the working class from recognising their own position."
+          },
+          {
+            "text": "Identify one strand of feminism and describe what it argues about the causes of gender inequality.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for correctly identifying a strand of feminism (liberal, Marxist or radical). Up to 2 marks for a developed description. Example: identifying radical feminism (1 mark) and describing that radical feminists argue patriarchy is an autonomous system of male domination that pervades all areas of social life, from the family and sexuality to the state and paid work — Walby's six structures of patriarchy show how male power operates across both public and private spheres, and radical feminists argue this cannot be dismantled by legal reform alone (2 marks)."
+          },
+          {
+            "text": "\"The functionalist perspective gives the most accurate account of how society works.\" How far would sociologists agree with this view?",
+            "type": "12 marks — Discuss How Far Sociologists Would Agree",
+            "marks": "Mastering: The answer presents arguments for and against the functionalist view. Arguments in favour: functionalism explains social order, the role of socialisation and the positive functions institutions perform; value consensus explains widespread compliance with norms. Arguments against: Marxists argue functionalism ignores class exploitation and that institutions serve ruling-class interests rather than society as a whole; feminists argue functionalism normalises patriarchal family structures (e.g. Parsons' expressive/instrumental roles); interactionists argue it ignores agency, meaning and the effects of labelling. At least two contrasting perspectives and named sociologists are cited. A clear, supported judgement weighing the perspectives. Sustained sociological vocabulary.\n\nSecure: Both support and criticism of functionalism addressed. At least one named alternative perspective cited. A judgement reached.\n\nDeveloping: Mostly descriptive of functionalism. Some reference to criticism but undeveloped. Conclusion present but not substantiated.\n\nEmerging: Basic description of what functionalism is. Little comparison with other perspectives. No clear judgement."
+          }
+        ],
+        "knowledge_checks": [
+          {
+            "q": "Which perspective focuses on face-to-face interactions and the labels attached to individuals by powerful actors?",
+            "type": "mcq",
+            "correct": 3,
+            "options": [
+              "Functionalism",
+              "Marxism",
+              "Feminism",
+              "Interactionism"
+            ]
+          },
+          {
+            "q": "Walby's six structures of patriarchy belong to which sociological perspective?",
+            "type": "mcq",
+            "correct": 2,
+            "options": [
+              "Functionalism",
+              "Marxism",
+              "Feminism",
+              "Interactionism"
+            ]
+          },
+          {
+            "q": "Functionalists argue that society is held together by a '______ consensus' — shared agreement on core norms and values.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "moral",
+              "value",
+              "class",
+              "social"
+            ]
+          },
+          {
+            "q": "Becker's concept of '______ status' describes how a single label (e.g. 'criminal') can come to dominate all other aspects of a person's identity.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "deviant",
+              "master",
+              "primary",
+              "stigma"
+            ]
+          },
+          {
+            "q": "Match each perspective to its key claim about society.",
+            "left": [
+              "Functionalism",
+              "Marxism",
+              "Feminism",
+              "Interactionism"
+            ],
+            "type": "match",
+            "order": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "right": [
+              "Society is held together by shared values; institutions perform necessary functions",
+              "Society is divided by class conflict; institutions serve the ruling class",
+              "Society is patriarchal; institutions maintain male power over women",
+              "Social behaviour is shaped by labelling and the meanings individuals construct in interaction"
+            ]
+          }
+        ],
+        "flashcard_questions": [
+          {
+            "a": "Functionalist concept: the shared agreement on core norms and values that holds society together.",
+            "q": "What is value consensus?"
+          },
+          {
+            "a": "Each institution performs a necessary function contributing to the stability of society as a whole.",
+            "q": "Functionalist view of social institutions?"
+          },
+          {
+            "a": "Institutions serve the interests of the bourgeoisie and reproduce class exploitation.",
+            "q": "Marxist view of social institutions?"
+          },
+          {
+            "a": "A system in which men hold structural power and women are systematically disadvantaged in both public and private life.",
+            "q": "What is patriarchy?"
+          },
+          {
+            "a": "Household production: women perform domestic work largely unpaid, which benefits men structurally.",
+            "q": "In which sphere does Walby argue patriarchy is maintained through domestic labour?"
+          },
+          {
+            "a": "Becker's term: a label (e.g. 'criminal') that comes to dominate all other aspects of a person's social identity.",
+            "q": "What is a master status?"
+          },
+          {
+            "a": "When a label causes the labelled person to internalise it and act in ways that confirm the label.",
+            "q": "What is the self-fulfilling prophecy in interactionism?"
+          },
+          {
+            "a": "Macro perspectives (functionalism, Marxism, feminism) explain behaviour through large-scale structures; micro (interactionism) focuses on face-to-face interactions.",
+            "q": "Difference between macro and micro perspectives?"
+          },
+          {
+            "a": "Becker.",
+            "q": "Which sociologist wrote Outsiders (1963) on labelling?"
+          },
+          {
+            "a": "Discriminatory laws and attitudes; can be solved through legal reform and changing norms.",
+            "q": "Liberal feminism: cause of gender inequality?"
+          },
+          {
+            "a": "Patriarchy as an autonomous system of male domination across all areas of social life.",
+            "q": "Radical feminism: cause of gender inequality?"
+          },
+          {
+            "a": "Women's oppression is tied to capitalism; unpaid domestic labour benefits the ruling class.",
+            "q": "Marxist feminism: cause of gender inequality?"
+          }
+        ],
+        "glossary_terms": [
+          {
+            "term": "functionalism",
+            "definition": "A sociological perspective that sees society as a system of interrelated parts, each performing necessary functions to maintain stability through shared values."
+          },
+          {
+            "term": "value consensus",
+            "definition": "The functionalist concept of broad agreement among members of society on core norms and values, which enables cooperation and social order."
+          },
+          {
+            "term": "Marxism",
+            "definition": "A conflict perspective arguing that capitalist society is divided between the bourgeoisie and proletariat, with institutions serving to reproduce class exploitation."
+          },
+          {
+            "term": "feminism",
+            "definition": "A range of perspectives arguing that society is structured by patriarchy, systematically disadvantaging women in both public and private life."
+          },
+          {
+            "term": "patriarchy",
+            "definition": "A social system in which men hold structural power over women, operating across institutions such as the family, workplace and the state."
+          },
+          {
+            "term": "interactionism",
+            "definition": "A micro-level perspective focusing on face-to-face interactions and the subjective meanings individuals construct, including the effects of labelling."
+          },
+          {
+            "term": "master status",
+            "definition": "Becker's term for a label that overrides all other aspects of a person's identity and shapes how others interact with them."
+          }
+        ],
+        "hero_image_caption": " Photo by Markus Winkler on Unsplash"
+      }
+    },
+    {
+      "lesson_id": "6f85bf2e-50a4-4e31-a59b-ecdfb91c3404",
+      "lesson_number": 4,
+      "slug": "types-of-data-and-research-methods",
+      "title": "Types of Data and Research Methods",
+      "description": "Primary and secondary data, qualitative and quantitative methods — questionnaires, structured and unstructured interviews, and observation.",
+      "spec_references": [
+        "4.1",
+        "4.2"
+      ],
+      "section_markers": [
+        "primary data",
+        "secondary data",
+        "qualitative data",
+        "quantitative data",
+        "sources of secondary data",
+        "diaries as data",
+        "journals as data",
+        "official statistics",
+        "non-official statistics",
+        "questionnaires",
+        "closed questions",
+        "open questions",
+        "structured interview",
+        "unstructured interview",
+        "participant observation",
+        "non-participant observation",
+        "covert observation",
+        "overt observation",
+        "reliability",
+        "validity",
+        "ethics",
+        "representativeness",
+        "mixed methods approach",
+        "triangulation",
+        "value of methods"
+      ],
+      "suggested_question_types": [
+        "1 mark — Multiple Choice",
+        "2 marks — Define",
+        "3 marks — Identify and Describe",
+        "4 marks — Describe",
+        "9 marks — Discuss",
+        "12 marks — Evaluate"
+      ],
+      "content_transfer": {
+        "transfer_score": "high",
+        "source_board": "AQA",
+        "source_subject_slug": "sociology-aqa",
+        "source_unit_slug": "studying-society-research-methods",
+        "source_lesson_number": 5,
+        "adaptation_notes": "AQA L5 covers questionnaires, interviews and observation in identical depth. Merge in the data-types content from AQA L4 (primary/secondary, qualitative/quantitative, official statistics) — Eduqas/WJEC packages these with methods rather than research design. ~80% reusable. Drop AQA's mention of ethnography/case study/longitudinal as standalone — Eduqas/WJEC spec doesn't name them; mention briefly inside observation. Practice fresh."
+      },
+      "source": {
+        "_source_meta": {
+          "source_subject_slug": "sociology-aqa",
+          "source_unit_slug": "studying-society-research-methods",
+          "source_lesson_number": 5,
+          "source_lesson_id": "0c815e2b-3f95-4293-a269-08cf754dace6",
+          "source_lesson_title": "Research Methods: Questionnaires, Interviews and Observation"
+        },
+        "transfer_score": "high",
+        "content_html": "<h2 data-narration-id=\"n1\">Choosing a Research Method</h2>\n<p data-narration-id=\"n2\">Sociologists have a range of methods available when collecting primary data. The choice of method is never arbitrary &mdash; it is shaped by the research question, the population being studied, practical constraints such as time and cost, ethical considerations, and the theoretical perspective of the researcher. An interactionist studying how teachers construct expectations of pupils would choose a very different method from a positivist measuring national rates of educational achievement. This lesson covers the three main families of methods: questionnaires, interviews and observation.</p>\n\n<h2 data-narration-id=\"n3\">Questionnaires</h2>\n<p data-narration-id=\"n4\">A <dfn class=\"term\" data-def=\"A set of written questions given to respondents to answer, producing either quantitative (closed questions) or qualitative (open questions) data.\">questionnaire</dfn> is a standardised set of written questions distributed to a sample. <dfn class=\"term\" data-def=\"Questions that give respondents a fixed set of options to choose from, producing quantitative data that can be counted and compared.\">Closed questions</dfn> offer a fixed set of responses (e.g. yes/no, tick all that apply, a rating scale from 1 to 5) and produce quantitative data. <dfn class=\"term\" data-def=\"Questions that allow respondents to answer in their own words, producing qualitative data that explores meanings and opinions.\">Open questions</dfn> allow respondents to answer in their own words, producing qualitative data.</p>\n<p data-narration-id=\"n5\"><strong>Strengths of questionnaires:</strong> They can reach large samples quickly and cheaply, especially via online distribution. They allow statistical analysis and comparison across groups. Responses are anonymous, which may encourage honest answers on sensitive topics. They are standardised &mdash; all respondents answer the same questions &mdash; which improves reliability (the study could be replicated and compared). <strong>Weaknesses:</strong> Response rates can be low, introducing bias if non-respondents differ systematically from respondents. Closed questions impose the researcher&rsquo;s categories on respondents&rsquo; experience. Questionnaires cannot probe or follow up unexpected answers, and they assume all respondents interpret questions in the same way &mdash; which may not be the case across different social groups.</p>\n\n<div class=\"key-fact\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Questionnaires are high in reliability and allow statistical comparison across large samples, making them the preferred method for positivist sociologists. Their weakness is low validity &mdash; closed questions may not capture how respondents really think or feel.</p>\n</div>\n\n<h2 data-narration-id=\"n6\">Interviews</h2>\n<p data-narration-id=\"n7\">A <dfn class=\"term\" data-def=\"A face-to-face or telephone research conversation in which the interviewer asks questions and the respondent answers; can be structured, semi-structured or unstructured.\">sociological interview</dfn> involves a researcher asking questions directly of participants. The degree of structure varies significantly:</p>\n<ul>\n  <li data-narration-id=\"n8\"><strong>Structured interview:</strong> the interviewer follows a fixed schedule of questions in the same order and wording for every participant, much like a spoken questionnaire. This produces quantitative data that is easy to compare across respondents. The weakness is limited depth &mdash; no follow-up is possible.</li>\n  <li data-narration-id=\"n9\"><strong>Unstructured interview:</strong> the interviewer begins with an opening topic and allows the conversation to develop naturally. This resembles an informal conversation and can reveal unexpected themes and rich qualitative data. The weakness is that it is time-consuming, difficult to compare across participants, and the results may reflect the relationship between interviewer and respondent (interviewer effect).</li>\n  <li data-narration-id=\"n10\"><strong>Semi-structured interview:</strong> uses a list of key themes but allows the interviewer to probe and follow up. It combines some comparability with depth.</li>\n</ul>\n<p data-narration-id=\"n11\">A critical evaluative point: interviews can be affected by the <strong>interviewer effect</strong> &mdash; respondents may give socially desirable answers rather than honest ones, particularly on sensitive topics such as domestic violence, drug use or attitudes to ethnicity. They may adjust their answers depending on the perceived social characteristics of the interviewer (age, gender, ethnicity, accent).</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Choosing Between Interview Types</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n12\">A sociologist wants to investigate the experiences of women who have left violent relationships. A structured interview would be inappropriate: the fixed questions might miss the aspects of the experience that matter most to the participants, and the formal tone could feel clinical and discouraging for respondents discussing trauma. An unstructured interview would allow participants to lead the conversation, reveal their own frameworks of meaning, and build the rapport needed to discuss sensitive experiences honestly. The weakness is that the resulting data would be harder to compare systematically across participants. The researcher might use semi-structured interviews as a compromise: key themes guide the conversation but the interviewer follows up where the participant goes.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n13\">Observation: Participant and Non-Participant</h2>\n<p data-narration-id=\"n14\"><dfn class=\"term\" data-def=\"A research method in which the sociologist directly watches and records behaviour in its natural setting.\">Observation</dfn> involves directly watching people in their natural social setting. There are two main variants:</p>\n<p data-narration-id=\"n15\"><strong>Non-participant observation</strong> &mdash; the researcher watches without taking part. Strengths: the observer remains detached, reducing the risk of &ldquo;going native&rdquo; (over-identifying with the group). Weaknesses: the presence of an observer may alter participants&rsquo; behaviour (the Hawthorne effect); the observer cannot access the meanings and motivations behind the behaviour they see.</p>\n<p data-narration-id=\"n16\"><strong>Participant observation</strong> &mdash; the researcher joins the group and participates in their daily life, either overtly (with the group&rsquo;s knowledge) or covertly (without it). Willis&rsquo;s 1977 study <em>Learning to Labour</em> is a classic example: Willis spent time with twelve working-class boys (whom he called &ldquo;the lads&rdquo;) in their school and outside it, observing how they actively resisted school culture and produced their own counter-school subculture. This gave him qualitative depth that no survey could have produced. The strength of participant observation is <strong>validity</strong> &mdash; the data reflects real behaviour in natural settings. The weakness is that it is time-consuming, the researcher may influence the group (reactivity), and covert observation raises serious ethical concerns about deception.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n17\" data-revision-tip=\"Without looking, name one strength and one weakness of each method: questionnaire, unstructured interview, participant observation. Apply each strength and weakness to a specific research context.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The distinction between <strong>reliability</strong> (can the study be repeated with the same results?) and <strong>validity</strong> (does the study measure what it claims to, reflecting real behaviour?) is central to methods evaluation. Questionnaires tend to score well on reliability; participant observation tends to score well on validity. Many methods trade one off against the other.</p>\n</div>\n\n<h2 data-narration-id=\"n18\">Mixed Methods and Triangulation</h2>\n<p data-narration-id=\"n19\">Rather than choosing one method, many sociologists use a <dfn class=\"term\" data-def=\"A research approach that combines quantitative and qualitative methods to exploit their complementary strengths.\">mixed methods approach</dfn>. For example, a study of gender inequality in the workplace might begin with a large-scale questionnaire to identify patterns (quantitative), then follow up with in-depth interviews with selected participants to explore the meanings behind those patterns (qualitative). This strategy is sometimes called <dfn class=\"term\" data-def=\"Using two or more research methods or data sources to cross-check findings and improve confidence in the conclusions.\">triangulation</dfn> &mdash; using multiple methods or data sources so that the weaknesses of one approach are compensated for by the strengths of another.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Misconception: Methods Evaluation as a Generic List</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\">A critical mistake on methods questions is listing generic strengths and weaknesses without applying them to the specific research context. &ldquo;Observation is time-consuming&rdquo; earns limited credit. &ldquo;Participant observation would be particularly problematic for a study of gang violence because gaining covert access to a criminal network would put the researcher at significant personal risk and would require sustained deception, raising serious ethical concerns about informed consent&rdquo; earns full credit. The spec explicitly requires students to &ldquo;identify and explain the advantages and disadvantages, strengths and weaknesses of a particular method for a <em>specific area of research</em>.&rdquo; Every evaluation point must be anchored to the research topic.</p>\n  </div></div>\n</div>",
+        "exam_tip_html": "<p data-narration-id=\"n21\">For a <strong>12-mark Discuss</strong> on research methods, you are almost always asked to evaluate whether a particular method is appropriate for a specific type of research. The best answers structure their argument around three dimensions: <strong>practical</strong> (is it affordable and accessible?), <strong>ethical</strong> (does it protect participants?), and <strong>theoretical</strong> (does the method align with what the researcher wants to know &mdash; patterns vs meanings?). A Mastering-tier answer will use all three dimensions and anchor every point to the specific research context stated in the question. Avoid the trap of listing &ldquo;pros and cons&rdquo; symmetrically without making a judgement: the question asks &ldquo;how far&rdquo; would sociologists agree, so you must weigh the evidence and reach a supported conclusion.</p>",
+        "conclusion_html": "<h3 data-narration-id=\"n22\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n23\">Questionnaires are quick, large-scale and standardised (strengths: reliability, comparability) but may have low response rates and cannot probe answers (weaknesses). Closed questions give quantitative data; open questions give qualitative data.</li>\n  <li data-narration-id=\"n24\">Interviews range from structured (comparable, less depth) to unstructured (more depth, less comparable). All interviews risk the interviewer effect. Willis&rsquo;s participant observation study <em>Learning to Labour</em> (1977) shows the validity advantage of immersive qualitative research.</li>\n  <li data-narration-id=\"n25\">Reliability (replicability) and validity (truthfulness to real behaviour) are the key evaluative concepts. Mixed methods and triangulation combine methods to exploit their complementary strengths. All evaluation must be applied to the specific research context, not stated as generic lists.</li>\n</ul>",
+        "practice_questions": [
+          {
+            "text": "Which type of observation involves the researcher joining the group and participating in their daily life?\nA) Structured observation\nB) Non-participant observation\nC) Participant observation\nD) Documentary research",
+            "type": "1 mark — Multiple Choice",
+            "marks": "C) Participant observation [1 mark]"
+          },
+          {
+            "text": "Define the term 'triangulation' as used in sociological research.",
+            "type": "2 marks — Define",
+            "marks": "1 mark for indicating it involves using more than one method or data source; 1 mark for indicating the purpose is to cross-check findings or compensate for the weaknesses of individual methods, improving confidence in conclusions. Example: 'Triangulation involves using two or more research methods or sources of data in the same study so that the weaknesses of one approach can be compensated for by the strengths of another, increasing confidence in the validity of the findings.'"
+          },
+          {
+            "text": "Identify one advantage of using unstructured interviews and describe why this makes them suitable for studying sensitive social topics.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying an advantage of unstructured interviews (e.g. generates rich qualitative data, allows participants to raise unexpected themes, builds rapport, follows the participant's own framework of meaning). Up to 2 marks for describing why this suits sensitive topics. Example: identifying that unstructured interviews build rapport (1 mark) and explaining that for sensitive topics such as domestic abuse or bereavement, the conversational and non-directive format allows participants to feel more comfortable sharing personal experiences; the interviewer can adjust tone and pacing in response to emotional cues, producing more honest and valid data than a standardised questionnaire would (2 marks)."
+          },
+          {
+            "text": "Describe the strengths and weaknesses of questionnaires as a method of sociological research.",
+            "type": "4 marks — Describe",
+            "marks": "Up to 2 marks for strengths: questionnaires can reach a large sample quickly and at low cost; responses are standardised so data can be compared statistically; anonymity may increase honest responses on sensitive topics; the study can be replicated, improving reliability. Up to 2 marks for weaknesses: response rates may be low and non-respondents may differ from respondents in ways that bias the findings; closed questions impose the researcher's categories on complex experiences; questionnaires cannot probe or follow up answers; respondents from different social groups may interpret the same question differently, reducing validity."
+          },
+          {
+            "text": "Identify one difference between participant observation and non-participant observation, and describe how this difference affects the quality of data produced.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying a relevant difference (e.g. degree of researcher involvement; access to meanings vs detached counting; risk of 'going native' vs risk of Hawthorne effect). Up to 2 marks for developing the description. Example: identifying that participant observation gives the researcher access to the meanings participants attach to their behaviour (1 mark) and explaining that by joining the group, the sociologist can observe behaviour as it naturally occurs and ask participants directly what their actions mean to them — Willis's study of 'the lads' is an example of how participant observation revealed the active resistance and counter-school culture that survey data had not captured (2 marks)."
+          },
+          {
+            "text": "\"Participant observation is the most valuable method for sociological research.\" How far would sociologists agree with this view?",
+            "type": "12 marks — Discuss How Far Sociologists Would Agree",
+            "marks": "Mastering: Arguments in favour: participant observation produces highly valid data that captures real behaviour in natural settings; Willis (1977) reveals depth of counter-school culture not accessible by questionnaire; interactionists value it for accessing meanings. Arguments against: raises serious ethical concerns (deception in covert observation violates informed consent); researcher safety may be compromised studying criminal or dangerous groups; researcher may 'go native' (lose objectivity); extremely time-consuming; findings are not generalisable beyond the specific group; positivist/functionalist researchers argue low reliability (cannot be replicated). The answer evaluates both practical, ethical and theoretical dimensions, cites at least two sociological perspectives or named studies, and reaches a clear supported judgement about when and for whom participant observation is most valuable.\n\nSecure: Arguments for and against addressed. At least one named study or perspective cited. A judgement reached.\n\nDeveloping: Mostly one-sided or descriptive. Some evaluation but undeveloped. Conclusion present but not substantiated.\n\nEmerging: Basic description of participant observation. Little evaluation. No clear judgement."
+          }
+        ],
+        "knowledge_checks": [
+          {
+            "q": "Which research method involves the researcher directly watching behaviour without taking part in the group being studied?",
+            "type": "mcq",
+            "correct": 1,
+            "options": [
+              "Structured interview",
+              "Non-participant observation",
+              "Participant observation",
+              "Questionnaire"
+            ]
+          },
+          {
+            "q": "Which concept refers to the risk that respondents give socially desirable answers rather than honest ones when being interviewed?",
+            "type": "mcq",
+            "correct": 1,
+            "options": [
+              "Hawthorne effect",
+              "Interviewer effect",
+              "Going native",
+              "Dark figure"
+            ]
+          },
+          {
+            "q": "Willis's 1977 study '______ to Labour' used participant observation to study twelve working-class boys' counter-school culture.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "Resistance",
+              "Learning",
+              "Teaching",
+              "Working"
+            ]
+          },
+          {
+            "q": "Using two or more research methods to cross-check findings and compensate for individual weaknesses is called '______'.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "operationalisation",
+              "triangulation",
+              "replication",
+              "saturation"
+            ]
+          },
+          {
+            "q": "Match each method to its key strength.",
+            "left": [
+              "Questionnaire",
+              "Unstructured interview",
+              "Participant observation",
+              "Triangulation"
+            ],
+            "type": "match",
+            "order": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "right": [
+              "Can reach a large sample quickly and allows statistical comparison",
+              "Generates rich qualitative data and allows the researcher to probe unexpected answers",
+              "Produces highly valid data by observing real behaviour in natural settings",
+              "Compensates for weaknesses of individual methods by combining two or more approaches"
+            ]
+          }
+        ],
+        "flashcard_questions": [
+          {
+            "a": "A question with fixed response options that produces quantitative data.",
+            "q": "What is a closed question?"
+          },
+          {
+            "a": "A question that allows respondents to answer in their own words, producing qualitative data.",
+            "q": "What is an open question?"
+          },
+          {
+            "a": "When respondents give socially desirable answers because of the interviewer's presence or characteristics.",
+            "q": "What is the interviewer effect?"
+          },
+          {
+            "a": "A method in which the researcher joins a group and participates in their daily life to observe behaviour naturally.",
+            "q": "What is participant observation?"
+          },
+          {
+            "a": "Learning to Labour, 1977, participant observation with twelve working-class boys ('the lads').",
+            "q": "Willis's study: title, year, method?"
+          },
+          {
+            "a": "When people change their behaviour because they know they are being observed.",
+            "q": "What is the Hawthorne effect?"
+          },
+          {
+            "a": "The extent to which a study can be repeated and produce consistent results.",
+            "q": "What is reliability in sociological research?"
+          },
+          {
+            "a": "The extent to which a method measures what it claims to and reflects real behaviour accurately.",
+            "q": "What is validity in sociological research?"
+          },
+          {
+            "a": "Using two or more research methods or sources to cross-check findings and improve confidence in conclusions.",
+            "q": "What is triangulation?"
+          },
+          {
+            "a": "Questionnaires are standardised and replicable, making them suitable for collecting data from large samples efficiently.",
+            "q": "Why do positivist sociologists prefer questionnaires?"
+          },
+          {
+            "a": "Risk of going native (over-identifying with the group) and findings cannot be generalised.",
+            "q": "One weakness of participant observation?"
+          },
+          {
+            "a": "Combining quantitative and qualitative methods to exploit their complementary strengths.",
+            "q": "What is the mixed methods approach?"
+          }
+        ],
+        "glossary_terms": [
+          {
+            "term": "questionnaire",
+            "definition": "A standardised set of written questions given to respondents, producing quantitative data (closed questions) or qualitative data (open questions)."
+          },
+          {
+            "term": "structured interview",
+            "definition": "An interview following a fixed schedule of questions in the same order for all participants, producing quantitative data."
+          },
+          {
+            "term": "unstructured interview",
+            "definition": "A conversational interview with no fixed questions, allowing participants to lead the discussion and producing rich qualitative data."
+          },
+          {
+            "term": "participant observation",
+            "definition": "A research method in which the sociologist joins a group and participates in their daily life to observe behaviour in its natural setting."
+          },
+          {
+            "term": "triangulation",
+            "definition": "Using two or more research methods or data sources to cross-check findings and compensate for the weaknesses of individual methods."
+          },
+          {
+            "term": "reliability",
+            "definition": "The extent to which a study can be replicated and produce consistent results across different researchers or occasions."
+          },
+          {
+            "term": "validity",
+            "definition": "The extent to which a research method measures what it claims to and reflects real, naturally occurring behaviour."
+          }
+        ],
+        "hero_image_caption": "Research Methods: Questionnaires, Interviews and Observation"
+      }
+    },
+    {
+      "lesson_id": "ccab6a11-5120-4054-b377-0f5b5f4d7bf4",
+      "lesson_number": 5,
+      "slug": "sampling-practical-and-ethical-issues",
+      "title": "Sampling, Practical and Ethical Issues",
+      "description": "Representative and non-representative sampling techniques, plus the practical and ethical challenges that shape what sociologists can investigate.",
+      "spec_references": [
+        "4.3",
+        "4.4",
+        "4.5"
+      ],
+      "section_markers": [
+        "sampling",
+        "representative sampling",
+        "non-representative sampling",
+        "random sampling",
+        "systematic sampling",
+        "stratified sampling",
+        "quota sampling",
+        "snowball sampling",
+        "sampling frame",
+        "practical issues",
+        "access to research subjects",
+        "gatekeepers",
+        "time and cost of research",
+        "ethical issues",
+        "informed consent",
+        "confidentiality",
+        "harm to participants",
+        "deception",
+        "right to withdraw",
+        "BSA ethical guidelines",
+        "addressing ethical issues"
+      ],
+      "suggested_question_types": [
+        "1 mark — Multiple Choice",
+        "2 marks — Define",
+        "3 marks — Identify and Describe",
+        "4 marks — Describe",
+        "9 marks — Discuss",
+        "12 marks — Evaluate"
+      ],
+      "content_transfer": {
+        "transfer_score": "high",
+        "source_board": "AQA",
+        "source_subject_slug": "sociology-aqa",
+        "source_unit_slug": "studying-society-research-methods",
+        "source_lesson_number": 6,
+        "adaptation_notes": "AQA L6 covers practical and ethical issues; AQA L4 covers sampling. Combine into one Eduqas/WJEC lesson — the spec packages 4.3 (sampling) + 4.4 (practical) + 4.5 (ethical) as one cluster of three short topics. Reuse ~80% of content from AQA L4 (sampling section only) and AQA L6 (practical+ethical). Tighten — these are short spec topics that don't warrant two lessons. Practice fresh."
+      },
+      "source": {
+        "_source_meta": {
+          "source_subject_slug": "sociology-aqa",
+          "source_unit_slug": "studying-society-research-methods",
+          "source_lesson_number": 6,
+          "source_lesson_id": "1bdc2679-af74-47bb-a5d6-3e813ba102c6",
+          "source_lesson_title": "Practical and Ethical Issues in Research"
+        },
+        "transfer_score": "high",
+        "content_html": "<h2 data-narration-id=\"n1\">Why Practical and Ethical Issues Matter</h2>\n<p data-narration-id=\"n2\">Even the most theoretically sophisticated research design is worthless if it cannot be put into practice or if it causes harm to the people involved. The AQA specification requires students to understand two distinct categories of constraints on sociological research: <strong>practical issues</strong> (the real-world limitations of time, cost and access) and <strong>ethical issues</strong> (the moral obligations researchers owe to participants and to society). Crucially, the spec asks not only that students <em>identify</em> these issues but that they explain <em>how researchers address them</em>.</p>\n\n<h2 data-narration-id=\"n3\">Practical Issues: Time, Cost and Access</h2>\n<p data-narration-id=\"n4\"><strong>Time</strong> is a fundamental constraint. A longitudinal study tracking a cohort of children from birth to adulthood might take decades to produce findings &mdash; valuable, but beyond the resources of most researchers. A PhD student conducting a dissertation study has months, not years. The method must match the available timescale: participant observation is time-intensive; a self-completion questionnaire distributed via email is not.</p>\n<p data-narration-id=\"n5\"><strong>Cost</strong> constrains the scale and type of research. A large-scale national survey with a team of interviewers and a random sample of 5,000 households requires substantial funding. Academic sociologists apply to research councils; independent researchers may be limited to small local studies. Online questionnaires have dramatically reduced the cost of reaching large samples, but interviewer-led or observational methods remain expensive in labour time.</p>\n<p data-narration-id=\"n6\"><strong>Access</strong> is often the decisive practical constraint. Some groups are <dfn class=\"term\" data-def=\"Individuals or communities who are difficult for researchers to identify or contact, such as gang members, undocumented migrants or victims of hidden crimes.\">hard to reach</dfn>: gang members, people experiencing domestic abuse, children in care, undocumented migrants. <dfn class=\"term\" data-def=\"Individuals or organisations who control access to a population or setting and whose permission must be obtained before research can begin.\">Gatekeepers</dfn> &mdash; head teachers, prison governors, social workers, community leaders &mdash; must often be persuaded before the researcher can reach participants at all. Gatekeepers can improve access but can also limit it: a head teacher who restricts research to &ldquo;well-behaved&rdquo; pupils introduces sampling bias by excluding the most relevant participants for a study of school exclusion.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Without looking, name the three practical issues in sociological research. For each one, give a specific example of a research scenario where that constraint would be particularly significant.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The three practical issues are <strong>time</strong>, <strong>cost</strong> and <strong>access</strong>. All three affect which method is feasible and whether the resulting sample will be representative. Access is often the most sociologically interesting: the hardest populations to reach are frequently those whose experiences are most poorly understood and most important to study.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">Ethical Issues: Consent, Confidentiality and Harm</h2>\n<p data-narration-id=\"n9\">The British Sociological Association (BSA) publishes ethical guidelines that professional sociologists are expected to follow. At GCSE level, three ethical issues are named in the specification: <dfn class=\"term\" data-def=\"The principle that research participants must be given full, honest information about a study and must agree voluntarily to take part before data collection begins.\">informed consent</dfn>, <dfn class=\"term\" data-def=\"The principle that personal information provided by research participants must be kept private and not shared in ways that could identify individuals.\">confidentiality</dfn> and <strong>harm to participants</strong>.</p>\n<p data-narration-id=\"n10\"><strong>Informed consent</strong> means participants must be told &mdash; in plain language &mdash; what the study is about, how their data will be used, and that they can withdraw at any time without penalty. The &ldquo;informed&rdquo; element is crucial: obtaining permission for a vaguely described study is not genuine consent. The &ldquo;voluntary&rdquo; element is also critical: participants in a prison, a school or a workplace may feel unable to refuse without consequences, even if they are technically told they can.</p>\n<p data-narration-id=\"n11\"><strong>Confidentiality</strong> means that identifying information about participants must be protected. In practice, this means anonymising names and locations in published findings, storing data securely, and not sharing raw data in ways that allow individuals to be identified. Even where participants have consented to take part, they have a right to expect that personal details will not be disclosed to employers, family members or the authorities.</p>\n<p data-narration-id=\"n12\"><strong>Harm to participants</strong> covers a wide range of potential risks: psychological distress from discussing traumatic experiences, physical risk from studying dangerous settings, reputational damage from being identified in publications, or criminal liability from disclosing involvement in illegal activities. The researcher has a duty to anticipate and minimise these risks, not simply to note that they exist.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>How Researchers Address Ethical Issues in Practice</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n13\">The spec explicitly asks how ethical issues <em>can be addressed</em>. Students should know practical solutions, not just list the problems:</p>\n    <ul>\n      <li><strong>Informed consent:</strong> use a written consent form in plain English; for children, obtain parental consent as well; include a clear explanation of withdrawal rights at the start of every session.</li>\n      <li><strong>Confidentiality:</strong> anonymise all names and locations in transcripts and publications; use participant codes rather than names in data files; store data on password-protected systems; delete raw recordings after transcription.</li>\n      <li><strong>Harm:</strong> offer a debrief session after the research, particularly if sensitive topics were discussed; provide signposting to support services (e.g. domestic abuse helplines); have a clear protocol for stopping the research if a participant shows signs of distress; obtain ethics committee approval before beginning.</li>\n      <li><strong>Deception:</strong> covert research necessarily involves deception, which violates the BSA&rsquo;s informed consent principle. Researchers must justify covert methods by arguing that the social benefit of the knowledge justifies the ethical cost, and must debrief participants as soon as possible after completion.</li>\n    </ul>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">The Tension Between Research Goals and Ethics</h2>\n<p data-narration-id=\"n15\">Ethical requirements can directly conflict with research goals. Informed consent can alter participants&rsquo; behaviour (if people know they are being studied, they may act differently &mdash; the <strong>Hawthorne effect</strong>). Confidentiality limits what researchers can report. Harm avoidance may prevent researchers from accessing the most important settings. A sociologist wanting to study violence within prison gangs faces an almost irresolvable tension: the most valid data would come from covert observation or candid interviews, but gaining access covertly is deceptive and putting researchers in a violent environment raises serious safety concerns.</p>\n<p data-narration-id=\"n16\">Different sociological perspectives can also generate different ethical pressures. A feminist researcher studying violence against women may feel ethically obliged to empower participants rather than simply extract data from them &mdash; an approach sometimes called <strong>participatory research</strong>, in which participants are involved in shaping the research process. A positivist researcher, by contrast, may prioritise objectivity and distance, arguing that participant involvement would compromise validity.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Misconception: Ethics as a Checklist</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n17\">A persistent exam error is to list &ldquo;consent, confidentiality, harm&rdquo; as three boxes to tick without reasoning about which apply to the specific research scenario and how the researcher addresses them. For a study of attitudes to unemployment benefit, harm is a relatively minor concern; confidentiality is important but straightforwardly addressed through anonymisation. For a study of underage gang members using covert observation, harm (to participants and researcher), deception (violating informed consent), confidentiality (disclosures of criminal activity) and access (via gatekeepers or snowball sampling) are all live and interconnected problems that require specific, reasoned responses. The mark scheme rewards practical reasoning in context, not a generic list.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n18\" data-revision-tip=\"Think of a research scenario involving a vulnerable population (e.g. children, prisoners, domestic abuse survivors). For each of the three ethical principles, identify one specific problem it creates and one practical solution the researcher could apply.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Ethical issues in sociological research are not abstract principles but practical problems with practical solutions. Informed consent &rarr; written consent form + right to withdraw. Confidentiality &rarr; anonymisation + secure data storage. Harm &rarr; debrief + support signposting + ethics committee approval. Covert research violates informed consent but may be justified where the study could not be done otherwise and the social value is high.</p>\n</div>",
+        "exam_tip_html": "<p data-narration-id=\"n19\">On a <strong>3-mark Identify and Describe</strong> question on ethical issues, identify a specific issue (not just &ldquo;ethics&rdquo;) and describe both what the problem is and how a researcher would address it. The common error is to describe the problem at length without proposing a practical solution. For a <strong>12-mark Discuss</strong> on whether ethical constraints make certain research impossible or inadvisable, structure your argument around specific methods and contexts: e.g. covert participant observation of a criminal network is ethically problematic (deception violates informed consent, researcher safety) but may be the only method that produces valid data. A Mastering answer weighs the ethical cost against the research benefit and reaches a clear judgement, rather than simply listing both sides in parallel. Never treat the three ethical principles as a checklist &mdash; always apply them to the specific research scenario in the question.</p>",
+        "conclusion_html": "<h3 data-narration-id=\"n20\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n21\">Practical constraints on research are time (affects method choice), cost (limits scale) and access (gatekeepers control entry to populations; hard-to-reach groups require alternative sampling strategies such as snowball sampling).</li>\n  <li data-narration-id=\"n22\">Three ethical principles: informed consent (voluntary agreement after full information), confidentiality (protecting identifying information) and harm to participants (minimising psychological, physical and reputational risk). Each has practical solutions: consent forms, anonymisation, debrief sessions, ethics committee approval.</li>\n  <li data-narration-id=\"n23\">Ethics are not a checklist &mdash; they must be applied to the specific research context. Covert observation violates informed consent but may be justified for hard-to-access populations where the social benefit is high. The tension between research goals and ethical obligations is a real and ongoing feature of sociological practice.</li>\n</ul>",
+        "practice_questions": [
+          {
+            "text": "Which term describes individuals or organisations who control access to a research population and whose permission must be obtained before research begins?\nA) Respondents\nB) Gatekeepers\nC) Sampling frames\nD) Pilot participants",
+            "type": "1 mark — Multiple Choice",
+            "marks": "B) Gatekeepers [1 mark]"
+          },
+          {
+            "text": "Define the term 'informed consent' as used in sociological research ethics.",
+            "type": "2 marks — Define",
+            "marks": "1 mark for indicating consent requires participants to agree to take part; 1 mark for indicating they must be given full, honest information about the study and must agree voluntarily, with the right to withdraw. Example: 'Informed consent means that research participants must be given clear and honest information about the study, including its purpose and how their data will be used, and must voluntarily agree to take part before data collection begins.'"
+          },
+          {
+            "text": "Identify one practical issue that sociologists face when conducting research and describe how it can affect the quality of the data collected.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying a practical issue (time, cost or access). Up to 2 marks for describing how it affects data quality. Example: identifying access (1 mark) and describing that if a gatekeeper (such as a school head teacher) restricts access to certain participants — for example, excluding students with poor behaviour records from a study of school exclusion — the resulting sample will be biased and unrepresentative, meaning the findings cannot be generalised and the validity of the research is undermined (2 marks)."
+          },
+          {
+            "text": "Describe two ethical issues that a sociologist might face when conducting research with vulnerable participants, and explain how each can be addressed.",
+            "type": "4 marks — Describe",
+            "marks": "Up to 2 marks for the first ethical issue: e.g. harm to participants — discussing traumatic experiences (abuse, bereavement) may cause psychological distress; the researcher can address this by offering a debrief session after the interview, providing signposting to relevant support services, and having a clear protocol for stopping if the participant shows signs of distress (1 mark for identifying harm, 1 mark for an appropriate solution). Up to 2 marks for the second ethical issue: e.g. informed consent with children — children cannot legally give consent themselves; the researcher must obtain written consent from a parent or guardian as well as assent from the child, and must explain the research in age-appropriate language (1 mark for identifying the consent problem, 1 mark for the practical solution)."
+          },
+          {
+            "text": "Identify one ethical problem created by using covert observation as a research method and describe how a researcher might attempt to address it.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying an ethical problem specific to covert observation (e.g. deception violates informed consent; participants cannot withdraw because they do not know they are being studied; the researcher may observe illegal activity and face a legal or moral dilemma). Up to 2 marks for describing how it might be addressed. Example: identifying that covert observation involves deception, violating informed consent (1 mark) and explaining that some researchers address this by conducting a debrief as soon as the covert phase is complete — informing participants of the research, offering them the right to withdraw their data, and seeking retrospective consent — though critics argue this does not fully resolve the original deception (2 marks)."
+          },
+          {
+            "text": "\"Ethical guidelines make some of the most valuable sociological research impossible to conduct.\" How far would sociologists agree with this view?",
+            "type": "12 marks — Discuss How Far Sociologists Would Agree",
+            "marks": "Mastering: Arguments in favour: some research questions (studying gang violence, covert institutional racism, hidden drug networks) genuinely cannot be investigated ethically through fully consented, transparent methods; the Hawthorne effect means fully transparent research produces less valid data on sensitive behaviour; historical sociological research that violated consent (covert observation of private behaviour) produced findings that shaped policy. Arguments against: ethical guidelines protect vulnerable participants from exploitation; the BSA guidelines provide practical solutions (anonymisation, debriefs, ethics committees) that allow sensitive research to proceed; research that violates ethical principles is rejected by academic journals and ethics committees, and the findings lack credibility; feminist researchers argue participant-centred approaches produce richer and more valid data than covert extraction. At least two perspectives and named methods/examples cited. A clear supported judgement about where the balance lies.\n\nSecure: Both sides addressed. At least one named method or context. A judgement reached.\n\nDeveloping: Mostly one-sided or descriptive. Some relevant points. Conclusion present but not substantiated.\n\nEmerging: Basic description of ethical issues. Little evaluative engagement. No clear judgement."
+          }
+        ],
+        "knowledge_checks": [
+          {
+            "q": "Which ethical principle requires that participants be given full, honest information about a study and must voluntarily agree to take part?",
+            "type": "mcq",
+            "correct": 2,
+            "options": [
+              "Confidentiality",
+              "Triangulation",
+              "Informed consent",
+              "Harm avoidance"
+            ]
+          },
+          {
+            "q": "An organisation (such as a school or prison) that controls access to a research population is called a:",
+            "type": "mcq",
+            "correct": 1,
+            "options": [
+              "Sampling frame",
+              "Gatekeeper",
+              "Pilot study",
+              "Respondent"
+            ]
+          },
+          {
+            "q": "The ethical principle that personal information about participants must be kept private and not used to identify individuals is called '______'.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "anonymity",
+              "confidentiality",
+              "informed consent",
+              "harm prevention"
+            ]
+          },
+          {
+            "q": "The three practical issues sociologists face in research are time, cost and '______'.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "validity",
+              "access",
+              "reliability",
+              "bias"
+            ]
+          },
+          {
+            "q": "Match each ethical issue to its appropriate practical solution.",
+            "left": [
+              "Informed consent",
+              "Confidentiality",
+              "Harm to participants",
+              "Deception in covert research"
+            ],
+            "type": "match",
+            "order": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "right": [
+              "Provide a written consent form explaining the study and include the right to withdraw at any time",
+              "Anonymise all names and locations in published findings and store data securely",
+              "Offer a debrief session and signpost to support services after discussing sensitive topics",
+              "Debrief participants as soon as possible and offer retrospective withdrawal of data"
+            ]
+          }
+        ],
+        "flashcard_questions": [
+          {
+            "a": "Participants must receive full, honest information about the study and voluntarily agree to take part before it begins.",
+            "q": "What is informed consent?"
+          },
+          {
+            "a": "Personal information provided by participants must be protected and not used to identify them in publications.",
+            "q": "What is confidentiality in research?"
+          },
+          {
+            "a": "Any psychological, physical or reputational risk the research process poses to the people being studied.",
+            "q": "What is harm to participants?"
+          },
+          {
+            "a": "An individual or organisation that controls access to a research population and must grant permission for the study.",
+            "q": "What is a gatekeeper?"
+          },
+          {
+            "a": "Written consent from a parent or guardian, plus age-appropriate assent from the child themselves.",
+            "q": "How can informed consent be obtained from children?"
+          },
+          {
+            "a": "It involves deception: participants do not know they are being studied, so cannot give informed consent or withdraw.",
+            "q": "How does covert observation violate ethical principles?"
+          },
+          {
+            "a": "A debrief session with signposting to relevant support services.",
+            "q": "What practical solution addresses harm after a sensitive interview?"
+          },
+          {
+            "a": "When people alter their behaviour because they know they are being observed or studied.",
+            "q": "What is the Hawthorne effect?"
+          },
+          {
+            "a": "Longitudinal studies or ethnographic fieldwork can take years, limiting what most researchers can realistically undertake.",
+            "q": "Why is time a significant practical issue in sociological research?"
+          },
+          {
+            "a": "Replacing participants' real names and locations with codes or pseudonyms in published findings and data files.",
+            "q": "What does anonymisation involve?"
+          },
+          {
+            "a": "Gatekeepers may restrict entry and snowball sampling may produce biased, unrepresentative samples.",
+            "q": "Why is access a significant practical issue when studying hard-to-reach populations?"
+          },
+          {
+            "a": "The British Sociological Association (BSA).",
+            "q": "Name the professional body whose ethical guidelines UK sociologists follow."
+          }
+        ],
+        "glossary_terms": [
+          {
+            "term": "informed consent",
+            "definition": "The ethical principle that participants must receive full, honest information about a study and must voluntarily agree to take part before data collection begins."
+          },
+          {
+            "term": "confidentiality",
+            "definition": "The ethical principle that personal information provided by research participants must be kept private and not used to identify individuals."
+          },
+          {
+            "term": "harm to participants",
+            "definition": "Any psychological, physical, reputational or legal risk that the research process poses to the people being studied."
+          },
+          {
+            "term": "gatekeeper",
+            "definition": "An individual or organisation that controls access to a research population and whose permission must be obtained before the research can proceed."
+          },
+          {
+            "term": "hard to reach",
+            "definition": "A population that is difficult for researchers to identify or contact, such as undocumented migrants or members of criminal networks."
+          },
+          {
+            "term": "debrief",
+            "definition": "A post-research session in which participants are told the full purpose of the study and offered support if sensitive topics were discussed."
+          },
+          {
+            "term": "deception",
+            "definition": "Deliberately misleading research participants about the nature or purpose of a study; used in covert research and generally in violation of informed consent principles."
+          }
+        ],
+        "hero_image_caption": "Photo by Kelly Sikkema on Unsplash"
+      }
+    },
+    {
+      "lesson_id": "6097e20d-a972-4d64-b2da-36dd6ea550ba",
+      "lesson_number": 6,
+      "slug": "designing-sociological-research-and-interpreting-data",
+      "title": "Designing Sociological Research and Interpreting Data",
+      "description": "How sociologists plan a study from start to finish — choosing an area, setting an aim or hypothesis, running a pilot, analysing results and reading graphs and tables.",
+      "spec_references": [
+        "7.1",
+        "7.2"
+      ],
+      "section_markers": [
+        "research design",
+        "process of research",
+        "choosing a research area",
+        "establishing an aim",
+        "establishing a hypothesis",
+        "operationalisation",
+        "choosing a method",
+        "pilot study",
+        "selection of sampling techniques",
+        "analysis of data",
+        "usefulness of mixed methods approach",
+        "interpreting graphs",
+        "interpreting diagrams",
+        "interpreting charts",
+        "interpreting tables",
+        "patterns in data",
+        "trends in data",
+        "drawing conclusions from data"
+      ],
+      "suggested_question_types": [
+        "1 mark — Multiple Choice",
+        "2 marks — Define",
+        "3 marks — Identify and Describe",
+        "4 marks — Describe",
+        "9 marks — Discuss",
+        "12 marks — Evaluate"
+      ],
+      "content_transfer": {
+        "transfer_score": "medium",
+        "source_board": "AQA",
+        "source_subject_slug": "sociology-aqa",
+        "source_unit_slug": "studying-society-research-methods",
+        "source_lesson_number": 4,
+        "adaptation_notes": "AQA L4 'Research Design, Sampling and Types of Data' covers research design — reuse the design portion (~50% of AQA L4). Eduqas/WJEC topic 7 ('Applied Methods of Sociological Enquiry') is structurally separate from topic 4 (Research Methods) and explicitly demands data-interpretation skills (graphs, charts, tables). This is unique to Eduqas/WJEC — AQA folds it into general methods. Add a fresh interpretation block with a worked example of reading a bar chart and a frequency table. Practice questions should include at least one stem-led data-interpretation item."
+      },
+      "source": {
+        "_source_meta": {
+          "source_subject_slug": "sociology-aqa",
+          "source_unit_slug": "studying-society-research-methods",
+          "source_lesson_number": 4,
+          "source_lesson_id": "6d1cede4-2c08-4306-af26-d2aad40ba3bf",
+          "source_lesson_title": "Research Design, Sampling and Types of Data"
+        },
+        "transfer_score": "medium",
+        "content_html": "<h2 data-narration-id=\"n1\">Planning Research: Aims, Hypotheses and Pilot Studies</h2>\n<p data-narration-id=\"n2\">Before collecting a single piece of data, sociologists must make a series of decisions about what they want to find out and how. <dfn class=\"term\" data-def=\"A clear statement of what a piece of research sets out to investigate or achieve.\">Research aims</dfn> define the purpose of a study &mdash; for example, &ldquo;to investigate factors affecting GCSE attainment among students from different socioeconomic backgrounds.&rdquo; From the aim, the researcher usually develops a <dfn class=\"term\" data-def=\"A specific, testable statement that predicts a relationship between two or more variables, which the research will seek to support or refute.\">hypothesis</dfn> &mdash; a precise, testable prediction, such as &ldquo;students eligible for free school meals will achieve lower GCSE grades than those who are not.&rdquo; The hypothesis gives the research direction and allows the findings to be evaluated.</p>\n<p data-narration-id=\"n3\">A <dfn class=\"term\" data-def=\"A small-scale trial run of a research instrument (e.g. a questionnaire or interview schedule) before the main study, used to identify problems and improve the design.\">pilot study</dfn> is a small-scale test of the research instrument before the main study begins. Imagine a sociologist designing a questionnaire to study attitudes to arranged marriage among young adults in the East Midlands. Running the questionnaire with ten participants first might reveal that a key question is ambiguous, that the response options are too few, or that the time taken is longer than expected. Pilot studies save time and resources by identifying flaws before they contaminate the main data.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Without looking, give the difference between a research aim and a hypothesis. Then explain why a pilot study is valuable before the main research begins.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The research design process follows a sequence: <strong>aim</strong> (what do you want to find out?) &rarr; <strong>hypothesis</strong> (what do you predict?) &rarr; <strong>method choice</strong> (how will you gather data?) &rarr; <strong>sampling</strong> (who will you study?) &rarr; <strong>pilot study</strong> (test and refine) &rarr; <strong>main data collection</strong> &rarr; <strong>analysis</strong>.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Sampling: Who to Study?</h2>\n<p data-narration-id=\"n6\">Sociologists rarely study entire populations. Instead, they select a <dfn class=\"term\" data-def=\"A subset of a population selected for study, intended to represent the larger group.\">sample</dfn> from a <dfn class=\"term\" data-def=\"A complete list of all members of the population from which a sample is drawn.\">sampling frame</dfn> (a list of the population). The goal is usually a <strong>representative sample</strong> &mdash; one that accurately reflects the characteristics of the wider population, so that findings can be generalised beyond the sample itself.</p>\n\n<p data-narration-id=\"n7\">There are five main sampling methods you need to know:</p>\n<ul>\n  <li data-narration-id=\"n8\"><strong>Random sample</strong> &mdash; every member of the sampling frame has an equal chance of selection. This minimises bias but requires a complete list of the population.</li>\n  <li data-narration-id=\"n9\"><strong>Systematic sample</strong> &mdash; every nth person from the list is selected (e.g. every tenth name). Practical but may introduce bias if the list has a pattern at every nth interval.</li>\n  <li data-narration-id=\"n10\"><strong>Stratified sample</strong> &mdash; the population is divided into groups (strata) by relevant characteristics (e.g. social class, gender) and a proportional number is selected from each stratum. This ensures the sample mirrors the structure of the population.</li>\n  <li data-narration-id=\"n11\"><strong>Quota sample</strong> &mdash; the researcher sets quotas for particular groups (e.g. 50 working-class women, 50 middle-class women) and then selects participants non-randomly until quotas are filled. Quick and inexpensive but non-random, so technically not fully representative.</li>\n  <li data-narration-id=\"n12\"><strong>Snowball sample</strong> &mdash; initial participants recruit others from their networks. Useful for hidden or hard-to-reach populations (e.g. studying drug use, gang membership), but the sample is unlikely to be representative of a wider population.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Choosing a Sampling Method</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n13\">A sociologist wants to investigate attitudes to higher education among Year 11 students at a comprehensive school in South Yorkshire. The school has 200 Year 11 students. Using a <strong>stratified sample</strong>, the researcher identifies key strata (e.g. gender, eligibility for free school meals, ethnicity) and selects a proportional number from each group. This increases representativeness &mdash; if 30% of students are eligible for free school meals, approximately 30% of the sample will be too, ensuring the findings reflect the full diversity of the year group. A snowball sample would be inappropriate here because students are not a hard-to-reach population and the resulting sample would be biased towards social networks.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Types of Data: Quantitative and Qualitative</h2>\n<p data-narration-id=\"n15\"><dfn class=\"term\" data-def=\"Data expressed in numerical form, such as statistics, percentages and counts, which can be analysed statistically.\">Quantitative data</dfn> takes numerical form &mdash; percentages, rates, frequencies, scores. It allows comparisons across large samples, can be analysed statistically, and is associated with approaches that aim for objectivity and replicability. A national survey of 10,000 households can identify patterns and trends in family forms, income or crime rates with a precision no qualitative study can match.</p>\n<p data-narration-id=\"n16\"><dfn class=\"term\" data-def=\"Data expressed in words, descriptions, opinions and meanings, which explores depth of understanding rather than statistical patterns.\">Qualitative data</dfn> takes verbal form &mdash; the words, accounts, feelings and interpretations of research participants. It provides depth and texture, exploring the meanings behind behaviour. An in-depth interview with a family discussing domestic division of labour may reveal nuances about negotiation, resentment and expectation that a tick-box questionnaire would miss entirely.</p>\n<p data-narration-id=\"n17\">The choice between quantitative and qualitative approaches often reflects the sociologist&rsquo;s theoretical perspective. Positivists (associated with functionalism and some Marxist approaches) prefer quantitative data, arguing sociology should emulate natural science. Interpretivists (associated with interactionism) prefer qualitative data, arguing that understanding social behaviour requires grasping the subjective meanings of the participants. In practice, many researchers use mixed methods &mdash; combining both types to exploit their complementary strengths.</p>\n\n<h2 data-narration-id=\"n18\">Primary and Secondary Data; Official Statistics</h2>\n<p data-narration-id=\"n19\"><dfn class=\"term\" data-def=\"Data collected first-hand by the researcher specifically for the purposes of the current study, such as through questionnaires, interviews or observations.\">Primary data</dfn> is original data collected directly by the researcher. <dfn class=\"term\" data-def=\"Data already collected by others for different purposes, such as government statistics, documents, news reports or previous studies, which the researcher re-uses.\">Secondary data</dfn> is data already gathered by someone else that the researcher re-uses &mdash; government statistics, newspaper archives, historical records, published studies.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Misconception: Official Statistics as Objective Truth</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\">A very common error is to treat official statistics &mdash; figures produced by government departments such as ONS or the Home Office &mdash; as straightforward facts. Sociologists are trained to evaluate them critically. Official statistics have strengths: they are large-scale, nationally consistent, free to use, and allow trends to be tracked over time. However, they have important limitations. Crime statistics, for example, only count crimes that are reported to and recorded by the police; the &ldquo;dark figure&rdquo; of unreported and unrecorded crime means official figures systematically underestimate the true level of offending. Different perspectives also interpret the same statistics differently: a functionalist might see declining crime rates as evidence of effective social control; a Marxist might argue that statistics reflect selective policing of working-class communities; an interactionist might argue the statistics tell us more about police labelling practices than about actual behaviour. Always evaluate, never just cite.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n21\" data-revision-tip=\"Name the five sampling methods. For each one, think of a research situation where it would be the most appropriate choice, and one where it would be a poor choice.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The five sampling methods are: random, systematic, stratified, quota and snowball. Stratified sampling is best when the researcher wants the sample to mirror the social structure of the population. Snowball sampling is best for hard-to-reach populations where a sampling frame does not exist.</p>\n</div>",
+        "exam_tip_html": "<p data-narration-id=\"n22\">On a <strong>4-mark Describe</strong> about data types or sampling, avoid listing without explaining. A common exam error is to write &ldquo;quantitative data is numerical and qualitative data is words&rdquo; and stop there &mdash; that is two identifications, not two descriptions. For 4 marks you need to develop each point: explain what makes numerical data useful for sociological research (large-scale, statistically testable, comparable across groups) and what makes qualitative data useful (depth, explores meanings, reveals what statistics miss). Linking to a named method or theoretical perspective (e.g. &ldquo;positivists prefer quantitative data because&hellip;&rdquo;) lifts the answer further. On the 12-mark Discuss, evaluation of official statistics must be <em>in context</em> &mdash; not just &ldquo;statistics can be wrong&rdquo; but explaining exactly why the specific statistics are problematic for the research question.</p>",
+        "conclusion_html": "<h3 data-narration-id=\"n23\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n24\">Research design follows a sequence: aim &rarr; hypothesis &rarr; method &rarr; sampling &rarr; pilot study &rarr; data collection &rarr; analysis. Pilot studies test and refine instruments before the main study.</li>\n  <li data-narration-id=\"n25\">Five sampling methods: random (equal chance), systematic (every nth), stratified (proportional by group), quota (non-random quotas) and snowball (for hard-to-reach populations). The aim is a representative sample that allows findings to be generalised.</li>\n  <li data-narration-id=\"n26\">Quantitative data (numbers) suits large-scale pattern-finding; qualitative data (words) suits in-depth meaning. Official statistics are secondary data with both strengths (scale, consistency) and weaknesses (under-reporting, political production) that sociologists must always evaluate critically.</li>\n</ul>",
+        "practice_questions": [
+          {
+            "text": "Which sampling method involves selecting every tenth person from a list of the population?\nA) Random sample\nB) Quota sample\nC) Systematic sample\nD) Snowball sample",
+            "type": "1 mark — Multiple Choice",
+            "marks": "C) Systematic sample [1 mark]"
+          },
+          {
+            "text": "Define the term 'hypothesis' as used in sociological research.",
+            "type": "2 marks — Define",
+            "marks": "1 mark for indicating a hypothesis is a prediction or statement to be tested; 1 mark for indicating it predicts a relationship between variables and can be supported or refuted by evidence. Example: 'A hypothesis is a specific, testable prediction about a relationship between two or more variables, stated before data collection and either supported or refuted by the findings.'"
+          },
+          {
+            "text": "Identify one advantage of using a pilot study and describe how it would improve the quality of a sociological investigation.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying an advantage (e.g. identifies flaws in questions, reveals ambiguity, indicates how long the study will take, tests whether the sampling method is practical). Up to 2 marks for a developed description. Example: identifying that a pilot study identifies ambiguous questions (1 mark) and explaining that if a question is unclear to respondents, different participants will interpret it differently, reducing the validity and reliability of the data; revising the question after the pilot ensures all participants understand it in the same way (2 marks)."
+          },
+          {
+            "text": "Describe the difference between quantitative and qualitative data, and explain why sociologists might choose one over the other.",
+            "type": "4 marks — Describe",
+            "marks": "Up to 2 marks for describing the difference: quantitative data is numerical (percentages, rates, counts) and allows statistical analysis and large-scale comparison; qualitative data is verbal (words, accounts, meanings) and provides depth and insight into participants' experiences. Up to 2 marks for explaining a reason to choose one. Example: a sociologist studying national patterns of divorce might choose quantitative data (ONS statistics) because it allows trends over time to be identified across the whole population; a sociologist studying the experience of family breakdown for individual children might choose qualitative data (in-depth interviews) because the lived experience requires depth of understanding that statistics cannot provide."
+          },
+          {
+            "text": "Identify one limitation of using official statistics as a source of data in sociological research and describe how this affects the validity of conclusions drawn from them.",
+            "type": "3 marks — Identify and Describe",
+            "marks": "1 mark for identifying a limitation of official statistics (e.g. under-reporting, dark figure of crime, political production, recording inconsistencies between police forces, changing legal definitions). Up to 2 marks for developing the description. Example: identifying under-reporting (1 mark) and explaining that many crimes are never reported to the police — particularly domestic violence and sexual assault — so official crime statistics significantly undercount the true level of offending; any conclusions about crime patterns drawn from official statistics may therefore reflect reporting behaviour rather than actual crime, threatening the validity of the findings (2 marks)."
+          },
+          {
+            "text": "\"Official statistics are the most useful source of data for sociological research.\" How far would sociologists agree with this view?",
+            "type": "12 marks — Discuss How Far Sociologists Would Agree",
+            "marks": "Mastering: Arguments in favour include: official statistics cover the entire population, are free to access, allow long-term trend analysis, and carry the authority of consistent national collection (e.g. ONS, Crime Survey for England and Wales). Arguments against include: official statistics are produced by governments and may reflect political priorities; crime statistics are limited by the dark figure of unreported and unrecorded crime; different sociological perspectives interpret the same statistics differently (functionalist, Marxist and interactionist readings of crime data diverge significantly); qualitative data may offer insight that statistics obscure. The answer cites at least two sociological perspectives or contexts (e.g. crime vs family research), evaluates specific strengths and weaknesses in context, and reaches a clear supported judgement. Sustained sociological vocabulary.\n\nSecure: Both strengths and limitations addressed. At least one sociological perspective cited. A judgement reached.\n\nDeveloping: Mostly one-sided or descriptive. Some evaluation but undeveloped. Conclusion present but not substantiated.\n\nEmerging: Basic points about what statistics are. Little evaluation. No clear judgement."
+          }
+        ],
+        "knowledge_checks": [
+          {
+            "q": "Which sampling method divides the population into groups and selects a proportional number from each?",
+            "type": "mcq",
+            "correct": 2,
+            "options": [
+              "Snowball sample",
+              "Random sample",
+              "Stratified sample",
+              "Quota sample"
+            ]
+          },
+          {
+            "q": "Data collected first-hand by the researcher specifically for their study is called:",
+            "type": "mcq",
+            "correct": 3,
+            "options": [
+              "Secondary data",
+              "Qualitative data",
+              "Official statistics",
+              "Primary data"
+            ]
+          },
+          {
+            "q": "A small-scale trial run of a research instrument before the main study is called a '______ study'.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "longitudinal",
+              "pilot",
+              "case",
+              "cross-sectional"
+            ]
+          },
+          {
+            "q": "Data expressed in numerical form, such as percentages and statistics, is called '______ data'.",
+            "type": "fill",
+            "correct": 1,
+            "options": [
+              "qualitative",
+              "quantitative",
+              "primary",
+              "secondary"
+            ]
+          },
+          {
+            "q": "Match each sampling method to the research situation where it is most appropriate.",
+            "left": [
+              "Snowball sample",
+              "Stratified sample",
+              "Random sample",
+              "Pilot study"
+            ],
+            "type": "match",
+            "order": [
+              0,
+              1,
+              2,
+              3
+            ],
+            "right": [
+              "Studying a hard-to-reach population with no sampling frame (e.g. gang members)",
+              "Ensuring the sample mirrors key characteristics of the population (e.g. by class and gender)",
+              "Every member of a known population has an equal chance of being selected",
+              "Small-scale trial of the research instrument before the main data collection"
+            ]
+          }
+        ],
+        "flashcard_questions": [
+          {
+            "a": "A specific, testable prediction about a relationship between two or more variables.",
+            "q": "What is a hypothesis?"
+          },
+          {
+            "a": "A small-scale trial of the research instrument before the main study, used to identify and fix problems.",
+            "q": "What is a pilot study?"
+          },
+          {
+            "a": "A complete list of all members of the population from which the sample is drawn.",
+            "q": "What is a sampling frame?"
+          },
+          {
+            "a": "A sample in which every member of the population has an equal chance of selection.",
+            "q": "What is a random sample?"
+          },
+          {
+            "a": "A sample that divides the population into strata (groups) and selects a proportional number from each.",
+            "q": "What is a stratified sample?"
+          },
+          {
+            "a": "A sample in which initial participants recruit others from their networks; used for hard-to-reach populations.",
+            "q": "What is a snowball sample?"
+          },
+          {
+            "a": "Data expressed in numerical form (statistics, percentages, counts) that can be analysed statistically.",
+            "q": "What is quantitative data?"
+          },
+          {
+            "a": "Data expressed in words, accounts and descriptions that explores meanings and lived experience in depth.",
+            "q": "What is qualitative data?"
+          },
+          {
+            "a": "Data collected first-hand by the researcher for their specific study (e.g. questionnaires, interviews).",
+            "q": "What is primary data?"
+          },
+          {
+            "a": "Existing data collected by others for different purposes, re-used by the researcher (e.g. government statistics).",
+            "q": "What is secondary data?"
+          },
+          {
+            "a": "Large-scale, nationally consistent and allow long-term trend comparison.",
+            "q": "One strength of official statistics?"
+          },
+          {
+            "a": "Under-reporting means the dark figure of crime makes statistics undercount the true extent of offending.",
+            "q": "One limitation of official statistics?"
+          }
+        ],
+        "glossary_terms": [
+          {
+            "term": "hypothesis",
+            "definition": "A specific, testable prediction about a relationship between two or more variables, stated before data collection begins."
+          },
+          {
+            "term": "pilot study",
+            "definition": "A small-scale trial run of a research instrument before the main study, used to identify problems and improve design."
+          },
+          {
+            "term": "sampling frame",
+            "definition": "A complete list of all members of the population from which a sample is drawn."
+          },
+          {
+            "term": "representative sample",
+            "definition": "A sample that accurately reflects the characteristics of the wider population, allowing findings to be generalised."
+          },
+          {
+            "term": "quantitative data",
+            "definition": "Data expressed in numerical form, such as statistics and percentages, that can be analysed statistically."
+          },
+          {
+            "term": "qualitative data",
+            "definition": "Data expressed in words and descriptions that explores depth of meaning rather than statistical patterns."
+          },
+          {
+            "term": "primary data",
+            "definition": "Data collected first-hand by the researcher specifically for the purposes of their study."
+          },
+          {
+            "term": "secondary data",
+            "definition": "Data already collected by others for different purposes that the researcher re-uses, including official statistics and published studies."
+          }
+        ],
+        "hero_image_caption": "Photo by Markus Spiske on Unsplash"
+      }
+    }
+  ]
+}
