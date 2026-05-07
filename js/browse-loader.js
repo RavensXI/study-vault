@@ -553,6 +553,12 @@
     contentEl.innerHTML = html;
     contentEl.style.display = '';
 
+    // Apply localStorage visited counts to the freshly-rendered unit cards.
+    // Phase 1 ran updateHomepageProgress at DOMContentLoaded but the cards
+    // didn't exist yet (Supabase fetch is async), so the static "0 of N"
+    // labels need a manual second pass here.
+    if (typeof updateHomepageProgress === 'function') updateHomepageProgress();
+
     // Add nav icons (pencil/lightbulb) to Exam Technique / Revision Techniques links
     if (typeof initNavIcons === 'function') initNavIcons();
 
