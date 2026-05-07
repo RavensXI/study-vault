@@ -230,6 +230,13 @@ Use KaTeX LaTeX delimiters, NEVER HTML entities or <sub>/<sup> for maths:
 
 Plain text with numbers or simple units ("100 g", "25°C") does NOT need LaTeX.
 
+**Fractions in narrated prose: never write `1/1836` or similar `X/Y` patterns inline.** Azure TTS reads `1/1836` as the date "January 1836". Use one of:
+- LaTeX: `\(\frac{1}{1836}\)` (renders visually + the narration converter speaks it as "1 over 1836")
+- Natural English: "about 1 over 1836", "approximately one part in 1836"
+- Spelled-out ratio: "roughly 1 in 1836"
+
+The same rule applies to dates that look like fractions ("12/3", "9/11") — wrap in LaTeX or rewrite.
+
 content_html — language subjects (French/German/Spanish)
 
 ALL foreign-language text MUST be wrapped in HTML tags for narration pipeline detection:
