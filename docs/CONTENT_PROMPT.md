@@ -17,6 +17,14 @@ QUALITY BAR:
 - Content is bespoke to THIS exam board's spec — not generic revision notes a student could find anywhere.
 - Practice questions are ORIGINAL compositions in the exam board's style. Never reproduce real exam questions even if past papers are provided.
 
+NEVER FABRICATE A QUOTE OR CITATION (anti-hallucination):
+- For ANY direct quotation in quotation marks (poem line, scripture verse, character dialogue, named scholar quote), the quotation must be VERBATIM from a primary or authoritative source. If you cannot recall the exact wording with certainty, paraphrase WITHOUT quotation marks instead.
+- For ANY scripture citation (book/chapter/verse, Qur'an surah:verse, Talmud reference), verify both the wording AND the reference location. Common failure mode: a verse exists but the lesson cites the wrong reference for it (e.g. citing Qur'an 6:2 for "Allah breathes a soul" when 6:2 is actually about lifespan; the soul-breathing verse is 32:9). When in doubt, paraphrase the doctrinal point without naming a specific verse rather than guess.
+- For named productions, premieres, dates, and biographical facts (e.g. "Frantic Assembly's 2008 production of Romeo and Juliet"), the named work must exist as described. Do not invent productions, dates, or named events to support an analytical point.
+- For named scholars and theorists (Aquinas's Just War, Maimonides's principles, Anselm's satisfaction theory), verify the attribution. Common failure mode: attributing a later development to the earlier figure (e.g. "Aquinas's seven Just War criteria" when his Summa has only three; the seven-criteria framework is from CCC 2309).
+- For statistics in named case studies (production rates, census figures, casualty figures, market shares), use only figures explicitly given in your source material. If no figure is given, write a qualitative description rather than a fabricated number.
+- The Phase 6 fact-check pass (`scripts/_fact_check_subject.py`) will web-search every direct quote, scripture citation, named scholar attribution, and specific statistic against authoritative sources. Findings flagged `HIGH` block ship until corrected. Anything you fabricate WILL be caught — and creating an audit-and-fix cycle costs the platform more than getting it right first time.
+
 ---
 
 THE REFERENCE LESSON
