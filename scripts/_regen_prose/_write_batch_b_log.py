@@ -1,0 +1,100 @@
+import sys, os, json
+os.environ.setdefault('PYTHONIOENCODING', 'utf-8')
+try:
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+except:
+    pass
+
+batch_b_fixes = [
+    {'lesson_id': '9abb3b24-d5be-4a40-8fd8-7a44b8f14dd1', 'title': 'Harri World', 'fix': 'hutious flashcard: brilliant -> scary/frightening'},
+    {'lesson_id': '9a787fc6-cc7e-44ae-be65-02707260942b', 'title': 'NLMG Eduqas Donations', 'fix': 'deathbed confession -> car trip (Ch19); fabricated Tommy scream quote removed; unverified Ruth quote replaced; flashcard fixed'},
+    {'lesson_id': '6d00fe22-682b-4e5e-b917-555d1d4d80a4', 'title': 'NLMG OCR Donations', 'fix': 'flashcard deathbed -> corrected'},
+    {'lesson_id': 'e5d1b2fb-2b80-4796-bd1d-51d0524c8518', 'title': 'OANF Middle: Melanie', 'fix': 'Jeanette meets Melanie at fish stall (market), not at church'},
+    {'lesson_id': 'aeead3cf-ba43-42aa-8c0b-10e7574c0802', 'title': 'OANF Char Analysis', 'fix': 'Miss Jewsbury: explicitly lesbian (sleeps with Jeanette), not just hinted'},
+    {'lesson_id': 'f1a1ee08-e26b-4400-8229-7d63ad3d2424', 'title': 'OANF Later: Katy', 'fix': 'ice cream factory -> ice cream van driver'},
+    {'lesson_id': 'f0dced86-8f6c-48bc-8494-76fcdd5832f5', 'title': 'Othello L2', 'fix': 'almost damned in a fair wife: corrected attribution (Act 1 Sc1, Roderigo), meaning clarified'},
+    {'lesson_id': '493d4fb6-b6f1-4e0b-b6ab-bd1e49c8dcdd', 'title': 'Othello L3', 'fix': '3.3 longest in canon -> longest in Othello'},
+    {'lesson_id': 'bd72947a-c7ac-4147-b589-3d3441222f72', 'title': 'Othello L5', 'fix': 'Fabricated Charlot quote replaced: Go to! Charm your tongue'},
+    {'lesson_id': '08df9ca3-0f7f-4915-b11b-7753ff6cba66', 'title': 'P&P Wickham/Collins (a)', 'fix': 'against my will misattribution corrected; Darcy opens with In vain have I struggled'},
+    {'lesson_id': 'c0bbf9db-4dca-41eb-97d6-51f8899a99b2', 'title': 'P&P Wickham/Collins (b)', 'fix': 'In vain I have struggled -> In vain have I struggled'},
+    {'lesson_id': 'af6cb92a-853c-435c-8a35-ea416764c43b', 'title': 'P&P Resolution (a)', 'fix': 'three marriages -> four; against my will quote corrected'},
+    {'lesson_id': '0ad37b5a-7b3d-4028-aed8-7afa9f8f8546', 'title': 'P&P Resolution (b)', 'fix': 'Three marriages -> clarified four total'},
+    {'lesson_id': 'c675edcb-a2f3-4614-9732-9e15bf20342f', 'title': 'P&P Pemberley', 'fix': 'I was in the middle: attributed to Ch60 post-engagement'},
+    {'lesson_id': '0e7f5654-436c-4f36-883d-ac70d6f98f9f', 'title': 'Princess Act 2', 'fix': 'Added missing content: Lorna identity crisis, Margot, pageant costumes'},
+    {'lesson_id': '4855e4d8-6770-4c8a-8fa8-3c24d74ed914', 'title': 'Princess Act 3', 'fix': 'Added missing content: Princess missing/cuts hair/found at Margot'},
+    {'lesson_id': '773a5bb4-e635-4fd3-967b-2d20caced519', 'title': 'Princess Char Analysis', 'fix': 'Added Lorna + Margot sections; Wendell criminal past added'},
+    {'lesson_id': 'b2339ba5-bb13-471a-b044-1f3d60ac77d9', 'title': 'Princess Context', 'fix': 'Odimba wrote play in 2019 -> wrote 2017-18; premiered Feb 2019'},
+    {'lesson_id': 'ae813f5d-7729-4508-a3f9-078038e825f5', 'title': 'R&J L3', 'fix': 'Friar Lawrence herb speech: small flower -> weak flower'},
+    {'lesson_id': '81398411-6fb9-4ecb-a37e-3f182e395a06', 'title': 'SM Eduqas L3', 'fix': 'Dunsey theft: NOT during cataleptic fit; Silas was out fetching twine'},
+    {'lesson_id': '63a69daf-861c-40fe-908a-732ed0534b94', 'title': 'SM Eduqas L5', 'fix': 'Debts quote: Nancy -> Godfrey (Ch20); flashcard + KC updated'},
+    {'lesson_id': '5d279d79-2b1d-4765-bb63-47b411dd9548', 'title': 'SM Eduqas L8', 'fix': "Marley's chain (A Christmas Carol cross-contamination) removed; replaced with stone-pit"},
+    {'lesson_id': 'e399ba7d-e549-4177-9b75-a4430101cfcd', 'title': 'Empress L2', 'fix': 'Abdul NOT Rani husband; separate characters; Rani partner is Hari'},
+    {'lesson_id': '95a360b8-2d60-4a13-b5fb-c0d849d26d0a', 'title': 'Empress L4', 'fix': 'Naoroji margin 3->5 votes; Salisbury fire-worshipper clarified (he said a black man)'},
+    {'lesson_id': '8f454597-3f40-4e09-9c7a-eeb07530e296', 'title': 'Empress L5', 'fix': 'Victoria never appears -> appears throughout; Abdul corrected'},
+    {'lesson_id': '07fbff9e-80dd-47bf-aafe-9e68a796dc23', 'title': 'History Boys L1', 'fix': 'Comprehensive 1983 -> grammar school mid-to-late 1980s'},
+    {'lesson_id': '9997bec9-4e83-4072-abdf-d51b41a30947', 'title': 'History Boys L2', 'fix': 'Unverified Headmaster torture quote contextualised'},
+    {'lesson_id': '87bbfdbf-ee5c-4a64-8f1b-731bffae26ea', 'title': 'History Boys L3', 'fix': 'Rudge father college scout (not grandfather soldier); Posner Drummer Hodge not at interview'},
+    {'lesson_id': '934928db-efe0-4471-891f-8ce56fb720d4', 'title': 'History Boys L6', 'fix': 'French scene: brothel improvisation not Brief Encounter; Drummer Hodge not at interview'},
+    {'lesson_id': '5b04f46b-8147-4d8b-a200-6a36298d17aa', 'title': 'MoV Act 2-3', 'fix': 'Salarino -> Salerio in Act 3 Sc 1'},
+    {'lesson_id': '9be0e73a-e43e-41c7-9d46-4c2b0a36822c', 'title': 'MoV Shylock', 'fix': 'Hath not a Jew trigger: Jessica elopement, not Antonio fortunes'},
+    {'lesson_id': 'e2038a53-3989-4a9d-b9c2-3f7c3e4e6520', 'title': 'MoV Act 3', 'fix': 'Salarino -> Salerio in Act 3 Sc 1'},
+    {'lesson_id': '52c700c0-c927-44fd-a81a-9b3db805e478', 'title': 'SoF L3', 'fix': 'eliminate the impossible: clarified as Ch6, not Ch5'},
+    {'lesson_id': '478640fe-f89a-45b2-88e8-aee2e25ed9b4', 'title': 'SoF L5', 'fix': 'Battle of Maiwand: from A Study in Scarlet, not The Sign of Four'},
+    {'lesson_id': '36287b05-302c-486a-b220-ba277470eddb', 'title': 'Tempest L2', 'fix': 'Setebos corrected (god not father); dfn updated; Ariel fabricated quote replaced'},
+    {'lesson_id': 'b041353f-abf1-4fbe-b927-5cba965d2de4', 'title': 'WiB L3', 'fix': 'Nathaniel Drablow -> Nathaniel (novel only uses first name)'},
+    {'lesson_id': 'd83352a2-c79b-415a-85a6-4c28884c9e1f', 'title': 'WiB L4 (a)', 'fix': 'Deaths corrected: child killed instantly; Stella dies ten months later'},
+    {'lesson_id': 'f3c71406-f1e2-4a60-8086-5215e9846d56', 'title': 'WiB L4 (b)', 'fix': 'Deaths corrected; location: a fair not just a park'},
+    {'lesson_id': '95c6844f-afe8-492c-932e-afdde9a12347', 'title': 'TN L2', 'fix': 'Actaeon: transformed by Diana, not by his own desires'},
+    {'lesson_id': '64a2a08f-29f5-44d3-8d09-f5f79f88b94d', 'title': 'TN L5', 'fix': 'like conclusion -> upshot; Quinapalus attribution added'},
+    {'lesson_id': '2b21fbce-3bcf-4d8f-99df-58b65b3dab80', 'title': 'TN L6', 'fix': 'Malvolio: volio -> voglio'},
+]
+
+skipped = [
+    {'lesson_id': '3b2aecbd-8400-42d3-a42e-1d246da356fd', 'reason': 'Macbeth L3: incardnadine already correct in live DB'},
+    {'lesson_id': '13affe23-f79d-4839-a453-4fa348cb7fea', 'reason': 'Macbeth L8: incardnadine already correct in live DB'},
+    {'lesson_id': '1ce8bb53-1609-4416-8925-ed2ba513fbd2', 'reason': 'My Name is Leon Part 2: blank canonical truth'},
+    {'lesson_id': 'a5fca6b5-d4e2-4b62-a6e9-fb322805bef7', 'reason': 'My Name is Leon Char Analysis: blank canonical truth'},
+    {'lesson_id': 'c1a3f04e-1edd-4db4-b027-7b4dd0e514ba', 'reason': 'My Name is Leon Key Themes: Tufty not found in lesson; blank canonical'},
+    {'lesson_id': '0fab8d57-3827-4a21-a76d-2351066d26ba', 'reason': 'Refugee Boy L3 Ruth: blank canonical truth'},
+    {'lesson_id': 'a2033980-52f0-4011-8e44-25929700c4cb', 'reason': 'Refugee Boy L4 Mariam: blank canonical truth'},
+    {'lesson_id': 'e61d012f-4f0f-4e62-814a-74cdbc6953db', 'reason': 'Refugee Boy L5: blank canonical truths'},
+    {'lesson_id': '27f6d1fb-5ec9-43d5-8c07-456920a9fc15', 'reason': 'War of the Worlds L8: audit flagged as unverified'},
+    {'lesson_id': 'aad20898-d4c7-4b15-9ed3-a431d3d2499c', 'reason': 'Pigeon English: fixlist items appear misidentified (aad20898 is Char Analysis not The Ending); Batch A already fixed hutious/Jordan issues'},
+    {'lesson_id': 'af603814-9d9b-4c5d-abb4-3f00a87a0c1d', 'reason': 'Pigeon English Key Themes: hutious already correct in DB'},
+    {'lesson_id': '263021cb-1ef8-4ff0-a975-2049493a0bba', 'reason': 'Princess Act 1: all three issues already fixed by Batch A'},
+]
+
+modified_ids = sorted(set(f['lesson_id'] for f in batch_b_fixes))
+
+batch_b_log = {
+    'batch': 'B',
+    'lessons_modified_count': len(modified_ids),
+    'fixes_count': len(batch_b_fixes),
+    'skipped_count': len(skipped),
+    'lessons_modified': modified_ids,
+    'fixes': batch_b_fixes,
+    'skipped': skipped,
+    'narration_regen_needed': modified_ids,
+}
+
+batch_a_log_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_surgical_fix_log.json')
+
+if os.path.exists(batch_a_log_path):
+    with open(batch_a_log_path, 'r', encoding='utf-8') as f:
+        existing = json.load(f)
+    if isinstance(existing, dict) and 'batches' not in existing:
+        merged = {'batches': [{'batch': 'A_section_rewrites', 'data': existing}, batch_b_log]}
+    elif isinstance(existing, dict) and 'batches' in existing:
+        existing['batches'].append(batch_b_log)
+        merged = existing
+    else:
+        merged = {'batches': [batch_b_log]}
+else:
+    merged = {'batches': [batch_b_log]}
+
+with open(batch_a_log_path, 'w', encoding='utf-8') as f:
+    json.dump(merged, f, ensure_ascii=False, indent=2)
+
+print('Written to _surgical_fix_log.json')
+print('Batch B: ' + str(len(modified_ids)) + ' lessons modified, ' + str(len(batch_b_fixes)) + ' fixes, ' + str(len(skipped)) + ' skipped')
