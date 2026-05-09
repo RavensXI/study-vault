@@ -158,8 +158,9 @@
       { board: 'OCR', slug: 'physical-education-ocr' }
     ],
     'religious-studies': [
-      { board: 'AQA', slug: 'religious-studies-aqa' }
-      // eduqas to come
+      { board: 'AQA', slug: 'religious-studies-aqa' },
+      { board: 'Eduqas', slug: 'religious-studies-eduqas' },
+      { board: 'WJEC', slug: 'religious-studies-eduqas' }
     ],
     'health-social-care': [
       { board: 'Edexcel', slug: 'health-social-care-edexcel' },
