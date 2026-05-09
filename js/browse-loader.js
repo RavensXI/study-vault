@@ -428,6 +428,36 @@
       }
     }
 
+    // Eduqas RS filter — different unit structure (flatter; no -beliefs/-practices
+    // suffix; Route B includes Foundational + Applied Catholic Theology units
+    // that aren't separately tracked in the picker).
+    if (subjectSlug === 'religious-studies-eduqas' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeRE_eduqas = FreeUser.getSubject(subjectSlug);
+      if (freeRE_eduqas) {
+        var allowedEduqasSlugs;
+        if ((freeRE_eduqas.religions && freeRE_eduqas.religions.length) ||
+            (freeRE_eduqas.themes && freeRE_eduqas.themes.length)) {
+          allowedEduqasSlugs = (freeRE_eduqas.religions || []).slice();
+          (freeRE_eduqas.themes || []).forEach(function (t) {
+            allowedEduqasSlugs.push(t);
+          });
+          // Route B implicitly includes the two Foundational Catholic Theology
+          // units (Origins/Meaning + Good/Evil), which aren't surfaced in the
+          // picker but are part of every Route B syllabus.
+          if (freeRE_eduqas.route === 'b' ||
+              allowedEduqasSlugs.indexOf('catholic-christianity') !== -1) {
+            allowedEduqasSlugs.push('catholic-foundational-origins-and-meaning');
+            allowedEduqasSlugs.push('catholic-foundational-good-and-evil');
+          }
+        }
+        if (allowedEduqasSlugs) {
+          units = units.filter(function (u) {
+            return allowedEduqasSlugs.indexOf(u.slug) !== -1;
+          });
+        }
+      }
+    }
+
     // Free user Film Studies: filter at LESSON level (each unit contains
     // multiple selectable films; student has picked one per section).
     // Universal units (film-form, foundations, developments) keep all
