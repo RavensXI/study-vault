@@ -2503,11 +2503,9 @@
       body.innerHTML = '';
       var route = (wizardState.re && wizardState.re.route) || 'a';
 
-      // Toggle pill state
-      ['a', 'b'].forEach(function (r) {
-        var pill = document.querySelector('#fw-re-route-pills [data-route="' + r + '"]');
-        if (pill) pill.classList.toggle('selected', r === route);
-      });
+      // Slide the toggle indicator
+      var toggle = document.getElementById('fw-re-route-pills');
+      if (toggle) toggle.dataset.active = route;
 
       if (route === 'b') {
         // Route B summary card
@@ -2594,7 +2592,7 @@
       }
 
       buildSection('Partner religion', '(pick 1)', partnerOptions, 1, 'religions');
-      buildSection('Themes', '(pick 2 of 4)', themeOptions, 2, 'themes');
+      buildSection('Themes', '(pick 2)', themeOptions, 2, 'themes');
     }
 
     function buildREPicker() {
@@ -2607,31 +2605,26 @@
       var subhead = document.getElementById('fw-re-subhead');
 
       // ============================================================
-      // EDUQAS / WJEC — Route A/B pill toggle + dynamic body
+      // EDUQAS / WJEC — Route A/B sliding pill + dynamic body
       // ============================================================
       if (fwIsEduqasRE()) {
         if (subhead) {
           subhead.innerHTML = 'Eduqas/WJEC Religious Studies offers two routes. Pick yours below — your school will have told you which one.';
         }
 
-        // Route pill toggle
-        var pillRow = document.createElement('div');
-        pillRow.id = 'fw-re-route-pills';
-        pillRow.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap';
-        [
-          { route: 'a', label: 'Route A — Religious Studies', sub: 'Christianity + 1 partner + 2 themes' },
-          { route: 'b', label: 'Route B — Catholic Christianity', sub: 'Catholic schools — fixed path' }
-        ].forEach(function (cfg) {
-          var pill = document.createElement('button');
-          pill.className = 'fw-text-btn';
-          pill.dataset.route = cfg.route;
-          pill.style.cssText = 'flex:1;min-width:200px;padding:0.7rem 1rem;text-align:left;line-height:1.35';
-          pill.innerHTML = '<div style="font-weight:600">' + cfg.label + '</div>' +
-                           '<div style="font-size:0.8rem;color:#7a7068;font-weight:400;margin-top:0.15rem">' + cfg.sub + '</div>';
-          pill.addEventListener('click', function () { fwSetEduqasRoute(cfg.route); });
-          pillRow.appendChild(pill);
+        // Sliding-pill segmented toggle (animated indicator slides between A/B)
+        var toggle = document.createElement('div');
+        toggle.id = 'fw-re-route-pills';
+        toggle.className = 'fw-re-route-toggle';
+        toggle.dataset.active = 'a';
+        toggle.innerHTML =
+          '<div class="fw-re-route-indicator"></div>' +
+          '<button type="button" class="fw-re-route-opt" data-route="a">Route A — Religious Studies</button>' +
+          '<button type="button" class="fw-re-route-opt" data-route="b">Route B — Catholic Christianity</button>';
+        toggle.querySelectorAll('.fw-re-route-opt').forEach(function (btn) {
+          btn.addEventListener('click', function () { fwSetEduqasRoute(btn.dataset.route); });
         });
-        container.appendChild(pillRow);
+        container.appendChild(toggle);
 
         // Body div populated by fwRenderEduqasREBody()
         var body = document.createElement('div');
