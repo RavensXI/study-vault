@@ -53,7 +53,7 @@ FACT_CHECK_REQUIRED = {
     "english-literature-aqa", "english-literature-edexcel",
     "english-literature-ocr", "english-literature-eduqas",
     # Religious Studies / RE
-    "religious-studies-aqa", "religious-studies",
+    "religious-studies-aqa", "religious-studies", "religious-studies-eduqas",
     # History any board
     "history-aqa", "history-edexcel", "history-ocr", "history-eduqas",
     # Geography (case studies)
@@ -67,6 +67,8 @@ FACT_CHECK_REQUIRED = {
     "science-aqa", "science-edexcel", "science-ocr", "separate-sciences",
     # Sociology
     "sociology-aqa", "sociology-eduqas",
+    # Engineering (vocational — has named technologies/standards/dates that fabricate easily)
+    "engineering-eduqas",
     # PE
     "physical-education-aqa", "physical-education-ocr",
     # Citizenship
