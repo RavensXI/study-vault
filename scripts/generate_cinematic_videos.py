@@ -66,10 +66,12 @@ SUBJECT_ORDER = [
     "science-edexcel",
     "science-ocr",
     "history",
-    "spanish",
-    "german",
-    "french",
+    # "spanish",  # removed — no longer needs cinematic videos
+    # "german",   # removed — no longer needs cinematic videos
+    # "french",   # removed — no longer needs cinematic videos
+    "design-technology",
     "creative-imedia",
+    "computer-science",
     "maths",
     "maths-aqa",
     "maths-ocr",
@@ -77,6 +79,7 @@ SUBJECT_ORDER = [
     "health-social-care",
     "hospitality-catering",
     "music-technology",
+    "it-ocr",
 ]
 
 # ── CLI env to avoid Windows encoding crashes ───────────────────────────
@@ -237,6 +240,9 @@ def _session_age_hours(session):
 
 # ── Core: get pending lessons from Supabase ──────────────────────────────
 
+UNITY_SCHOOL_ID = "a5414d1c-8841-4bc5-8573-a9756752361b"
+
+
 def get_pending_lessons(sb, limit, subject_filter=None, generic=False):
     """Get lessons needing videos (youtube_video_id IS NULL), ordered by SUBJECT_ORDER."""
     all_pending = []
@@ -249,7 +255,7 @@ def get_pending_lessons(sb, limit, subject_filter=None, generic=False):
         if generic:
             query = query.is_("school_id", "null")
         else:
-            query = query.not_.is_("school_id", "null")
+            query = query.eq("school_id", UNITY_SCHOOL_ID)
         subj = query.execute()
         if not subj.data:
             continue

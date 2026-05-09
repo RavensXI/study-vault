@@ -69,6 +69,11 @@ FACT_CHECK_REQUIRED = {
     "sociology-aqa", "sociology-eduqas",
     # Engineering (vocational — has named technologies/standards/dates that fabricate easily)
     "engineering-eduqas",
+    # Computer Science (named scientists, dates, UK legislation, programming language history)
+    "computer-science-aqa",
+    # Information Technology (vocational — named legislation, AR/IoT examples,
+    # cyber-security cases that fabricate easily)
+    "it-ocr",
     # PE
     "physical-education-aqa", "physical-education-ocr",
     # Citizenship
