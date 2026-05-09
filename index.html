@@ -1840,6 +1840,10 @@
     // here maps to a pair of unit slugs ({slug}-beliefs, {slug}-practices).
     var religiousEducationOptions = {
       'aqa': {
+        religionsCap: 2,
+        religionsHelper: '(pick 2 — you study Beliefs + Practices for each)',
+        themesCap: 4,
+        themesHelper: '(pick 4 of 6)',
         religions: [
           { slug: 'buddhism', name: 'Buddhism' },
           { slug: 'catholic-christianity', name: 'Catholic Christianity' },
@@ -1856,6 +1860,31 @@
           { slug: 'theme-d-peace-conflict', name: 'Theme D — Peace & Conflict' },
           { slug: 'theme-e-crime-punishment', name: 'Theme E — Crime & Punishment' },
           { slug: 'theme-f-human-rights-social-justice', name: 'Theme F — Human Rights & Social Justice' }
+        ]
+      },
+      'eduqas': {
+        // Eduqas RS Route A: 2 religions × Beliefs/Practices + 2 themes from 4.
+        // Route B: Catholic Christianity in depth + Judaism + 2 themes — picking
+        // Catholic Christianity here triggers the Route B unit set on the
+        // browse page (handled by browse-loader unit filter).
+        religionsCap: 2,
+        religionsHelper: '(pick 2 — Christianity + 1 other for Route A, or Catholic Christianity + Judaism for Route B)',
+        themesCap: 2,
+        themesHelper: '(pick 2 of 4)',
+        religions: [
+          { slug: 'buddhism', name: 'Buddhism' },
+          { slug: 'catholic-christianity', name: 'Catholic Christianity (Route B in-depth)' },
+          { slug: 'christianity', name: 'Christianity' },
+          { slug: 'hinduism', name: 'Hinduism' },
+          { slug: 'islam', name: 'Islam' },
+          { slug: 'judaism', name: 'Judaism' },
+          { slug: 'sikhism', name: 'Sikhism' }
+        ],
+        themes: [
+          { slug: 'theme-life-and-death', name: 'Issues of Life and Death' },
+          { slug: 'theme-good-and-evil', name: 'Issues of Good and Evil' },
+          { slug: 'theme-relationships', name: 'Issues of Relationships' },
+          { slug: 'theme-human-rights', name: 'Issues of Human Rights' }
         ]
       }
     };
@@ -2403,18 +2432,26 @@
       fwUpdateDramaDoneBtn();
     }
 
-    // Religious Studies picker — 2 of 7 religions + 4 of 6 themes (AQA).
+    // Religious Studies picker — religion + theme caps vary by board.
+    // AQA: 2 of 7 religions + 4 of 6 themes.
+    // Eduqas: 2 of 7 religions + 2 of 4 themes.
     // Multi-select with caps; Continue disabled until both quotas hit.
+    function fwGetREOpts() {
+      var board = (wizardState.boards && wizardState.boards['religious-studies']) || 'aqa';
+      return religiousEducationOptions[board] || religiousEducationOptions['aqa'];
+    }
+
     function fwUpdateREDoneBtn() {
       var btn = document.getElementById('fw-re-done');
       if (!btn) return;
+      var opts = fwGetREOpts();
       var rels = (wizardState.re && wizardState.re.religions) || [];
       var thms = (wizardState.re && wizardState.re.themes) || [];
-      btn.disabled = !(rels.length === 2 && thms.length === 4);
+      btn.disabled = !(rels.length === opts.religionsCap && thms.length === opts.themesCap);
     }
 
     function buildREPicker() {
-      var opts = religiousEducationOptions['aqa'];
+      var opts = fwGetREOpts();
       var container = document.getElementById('fw-re-container');
       if (!container) return;
       container.innerHTML = '';
@@ -2455,8 +2492,8 @@
         container.appendChild(sectionEl);
       }
 
-      buildSection('Religions', '(pick 2 — you study Beliefs + Practices for each)', opts.religions, 'religions', 2);
-      buildSection('Themes', '(pick 4 of 6)', opts.themes, 'themes', 4);
+      buildSection('Religions', opts.religionsHelper, opts.religions, 'religions', opts.religionsCap);
+      buildSection('Themes', opts.themesHelper, opts.themes, 'themes', opts.themesCap);
 
       fwUpdateREDoneBtn();
     }
