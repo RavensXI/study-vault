@@ -2444,88 +2444,222 @@
       return religiousEducationOptions[board] || religiousEducationOptions['aqa'];
     }
 
-    // Eduqas/WJEC Route B is triggered when the user picks Catholic Christianity.
-    // Route B's themes are FIXED (Life and Death + Sin and Forgiveness as Applied
-    // Catholic Theology) — there is no theme choice to make. So when Catholic
-    // Christianity is selected we hide the theme picker and auto-set the themes.
+    // Eduqas/WJEC has two routes:
+    //   Route A — Religious Studies: Christianity (mandatory) + 1 partner religion + 2 of 4 themes.
+    //   Route B — Catholic Christianity: in-depth Catholic Christianity + Judaism + fixed Applied Catholic Theology.
+    // The wizard exposes this as a Route A/B pill toggle at the top of the
+    // RE step. Route choice swaps the picker content in place.
+    var ROUTE_B_FIXED_RELIGIONS = ['catholic-christianity', 'judaism'];
     var ROUTE_B_FIXED_THEMES = ['catholic-applied-life-and-death', 'catholic-applied-sin-and-forgiveness'];
 
-    function fwIsRouteB() {
-      var board = (wizardState.boards && wizardState.boards['religious-studies']) || 'aqa';
-      if (board !== 'eduqas' && board !== 'wjec') return false;
-      var rels = (wizardState.re && wizardState.re.religions) || [];
-      return rels.indexOf('catholic-christianity') !== -1;
+    function fwGetREBoard() {
+      return (wizardState.boards && wizardState.boards['religious-studies']) || 'aqa';
+    }
+
+    function fwIsEduqasRE() {
+      var b = fwGetREBoard();
+      return b === 'eduqas' || b === 'wjec';
     }
 
     function fwUpdateREDoneBtn() {
       var btn = document.getElementById('fw-re-done');
       if (!btn) return;
-      var opts = fwGetREOpts();
       var rels = (wizardState.re && wizardState.re.religions) || [];
       var thms = (wizardState.re && wizardState.re.themes) || [];
-      // Route B: themes are fixed, only need 2 religions
-      if (fwIsRouteB()) {
-        btn.disabled = rels.length !== opts.religionsCap;
-        return;
+      if (fwIsEduqasRE()) {
+        var route = (wizardState.re && wizardState.re.route) || 'a';
+        if (route === 'b') {
+          // Route B is fully determined — Continue is always enabled
+          btn.disabled = false;
+        } else {
+          // Route A: 1 partner religion (Christianity is implicit) + 2 themes
+          btn.disabled = !(rels.length === 2 && thms.length === 2);
+        }
+      } else {
+        var opts = fwGetREOpts();
+        btn.disabled = !(rels.length === opts.religionsCap && thms.length === opts.themesCap);
       }
-      btn.disabled = !(rels.length === opts.religionsCap && thms.length === opts.themesCap);
     }
 
-    function fwUpdateRouteBState() {
-      // Show or hide the theme picker section based on whether Catholic
-      // Christianity has been selected (Route B).
-      var themeSection = document.querySelector('#fw-re-container .fw-text-section[data-section="themes"]');
-      var routeBNotice = document.getElementById('fw-re-routeb-notice');
-      if (fwIsRouteB()) {
-        if (themeSection) themeSection.style.display = 'none';
-        if (routeBNotice) routeBNotice.style.display = '';
-        // Auto-set the fixed Route B themes
+    function fwSetEduqasRoute(route) {
+      // Switch between Route A and Route B in place. Resets picks.
+      wizardState.re.route = route;
+      if (route === 'b') {
+        wizardState.re.religions = ROUTE_B_FIXED_RELIGIONS.slice();
         wizardState.re.themes = ROUTE_B_FIXED_THEMES.slice();
       } else {
-        if (themeSection) themeSection.style.display = '';
-        if (routeBNotice) routeBNotice.style.display = 'none';
-        // If we just left Route B (user deselected Catholic Christianity),
-        // clear the auto-set themes so the user makes their own picks
-        if (wizardState.re.themes && wizardState.re.themes[0] === ROUTE_B_FIXED_THEMES[0]) {
-          wizardState.re.themes = [];
-          // Also unselect any visually-selected theme buttons
-          document.querySelectorAll('#fw-re-container [data-group="themes"] .fw-text-btn.selected').forEach(function (b) {
-            b.classList.remove('selected');
-          });
-        }
+        // Route A: Christianity is always studied, so set it implicitly.
+        // Partner religion + 2 themes will be populated by user clicks.
+        wizardState.re.religions = ['christianity'];
+        wizardState.re.themes = [];
       }
+      fwRenderEduqasREBody();
+      fwUpdateREDoneBtn();
+    }
+
+    function fwRenderEduqasREBody() {
+      var body = document.getElementById('fw-re-eduqas-body');
+      if (!body) return;
+      body.innerHTML = '';
+      var route = (wizardState.re && wizardState.re.route) || 'a';
+
+      // Toggle pill state
+      ['a', 'b'].forEach(function (r) {
+        var pill = document.querySelector('#fw-re-route-pills [data-route="' + r + '"]');
+        if (pill) pill.classList.toggle('selected', r === route);
+      });
+
+      if (route === 'b') {
+        // Route B summary card
+        var card = document.createElement('div');
+        card.style.cssText = 'background:#fef3c7;border:1px solid #fcd34d;border-radius:12px;padding:1.1rem 1.3rem;font-size:0.92rem;color:#78350f;line-height:1.55';
+        card.innerHTML =
+          '<div style="font-weight:700;margin-bottom:0.5rem;font-size:1rem">Route B — Catholic Christianity</div>' +
+          '<div>Your study path is fixed by the Eduqas Route B spec:</div>' +
+          '<ul style="margin:0.5rem 0 0;padding-left:1.2rem">' +
+            '<li>Catholic Christianity (Beliefs &amp; Teachings + Practices in depth)</li>' +
+            '<li>Judaism (Beliefs &amp; Teachings + Practices)</li>' +
+            '<li>Foundational Catholic Theology — Origins &amp; Meaning, Good &amp; Evil</li>' +
+            '<li>Applied Catholic Theology — Life &amp; Death, Sin &amp; Forgiveness</li>' +
+          '</ul>' +
+          '<div style="margin-top:0.6rem;color:#92400e;font-size:0.85rem">Click <strong>Continue</strong> when ready.</div>';
+        body.appendChild(card);
+        return;
+      }
+
+      // Route A — Christianity is implicit; pick partner religion + 2 themes.
+      var note = document.createElement('div');
+      note.style.cssText = 'font-size:0.85rem;color:#7a7068;margin-bottom:0.6rem';
+      note.innerHTML = 'Christianity is studied by all Route A students. Pick your <strong>partner religion</strong> and <strong>2 of 4 themes</strong>.';
+      body.appendChild(note);
+
+      var partnerOptions = [
+        { slug: 'buddhism', name: 'Buddhism' },
+        { slug: 'hinduism', name: 'Hinduism' },
+        { slug: 'islam', name: 'Islam' },
+        { slug: 'judaism', name: 'Judaism' },
+        { slug: 'sikhism', name: 'Sikhism' }
+      ];
+      var themeOptions = [
+        { slug: 'theme-life-and-death', name: 'Issues of Life and Death' },
+        { slug: 'theme-good-and-evil', name: 'Issues of Good and Evil' },
+        { slug: 'theme-relationships', name: 'Issues of Relationships' },
+        { slug: 'theme-human-rights', name: 'Issues of Human Rights' }
+      ];
+
+      function buildSection(title, helperText, options, max, group) {
+        var section = document.createElement('div');
+        section.className = 'fw-text-section';
+        section.innerHTML =
+          '<h3>' + title + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helperText + '</span></h3>' +
+          '<div class="fw-text-options" data-group="' + group + '"></div>';
+        var optsEl = section.querySelector('.fw-text-options');
+        options.forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = item.name;
+          btn.dataset.value = item.slug;
+          // Re-mark selected on render
+          if (group === 'religions' && (wizardState.re.religions || []).indexOf(item.slug) !== -1) {
+            btn.classList.add('selected');
+          }
+          if (group === 'themes' && (wizardState.re.themes || []).indexOf(item.slug) !== -1) {
+            btn.classList.add('selected');
+          }
+          btn.addEventListener('click', function () {
+            if (group === 'religions') {
+              // Single-select for partner: replace any existing partner.
+              // Christianity stays in religions[0].
+              wizardState.re.religions = ['christianity', item.slug];
+              section.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+            } else if (group === 'themes') {
+              var arr = wizardState.re.themes || [];
+              var idx = arr.indexOf(item.slug);
+              if (idx !== -1) {
+                arr.splice(idx, 1);
+                btn.classList.remove('selected');
+              } else {
+                if (arr.length >= max) return;
+                arr.push(item.slug);
+                btn.classList.add('selected');
+              }
+              wizardState.re.themes = arr;
+            }
+            fwUpdateREDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        body.appendChild(section);
+      }
+
+      buildSection('Partner religion', '(pick 1)', partnerOptions, 1, 'religions');
+      buildSection('Themes', '(pick 2 of 4)', themeOptions, 2, 'themes');
     }
 
     function buildREPicker() {
-      var opts = fwGetREOpts();
       var container = document.getElementById('fw-re-container');
       if (!container) return;
       container.innerHTML = '';
       wizardState.re = { religions: [], themes: [] };
-      if (!opts) return;
 
-      // Board-specific subhead so the user sees the right rules
+      var board = fwGetREBoard();
       var subhead = document.getElementById('fw-re-subhead');
-      if (subhead) {
-        var board = (wizardState.boards && wizardState.boards['religious-studies']) || 'aqa';
-        if (board === 'aqa') {
-          subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
-        } else if (board === 'eduqas' || board === 'wjec') {
-          subhead.innerHTML = 'Eduqas/WJEC Religious Studies — pick <strong>2 religions</strong>. Route A: Christianity + 1 other religion + 2 of 4 themes. Route B: Catholic Christianity + Judaism (themes are fixed).';
-        } else {
-          subhead.textContent = 'Pick the religions and themes covered by your school’s spec.';
+
+      // ============================================================
+      // EDUQAS / WJEC — Route A/B pill toggle + dynamic body
+      // ============================================================
+      if (fwIsEduqasRE()) {
+        if (subhead) {
+          subhead.innerHTML = 'Eduqas/WJEC Religious Studies offers two routes. Pick yours below — your school will have told you which one.';
         }
+
+        // Route pill toggle
+        var pillRow = document.createElement('div');
+        pillRow.id = 'fw-re-route-pills';
+        pillRow.style.cssText = 'display:flex;gap:0.5rem;margin-bottom:1rem;flex-wrap:wrap';
+        [
+          { route: 'a', label: 'Route A — Religious Studies', sub: 'Christianity + 1 partner + 2 themes' },
+          { route: 'b', label: 'Route B — Catholic Christianity', sub: 'Catholic schools — fixed path' }
+        ].forEach(function (cfg) {
+          var pill = document.createElement('button');
+          pill.className = 'fw-text-btn';
+          pill.dataset.route = cfg.route;
+          pill.style.cssText = 'flex:1;min-width:200px;padding:0.7rem 1rem;text-align:left;line-height:1.35';
+          pill.innerHTML = '<div style="font-weight:600">' + cfg.label + '</div>' +
+                           '<div style="font-size:0.8rem;color:#7a7068;font-weight:400;margin-top:0.15rem">' + cfg.sub + '</div>';
+          pill.addEventListener('click', function () { fwSetEduqasRoute(cfg.route); });
+          pillRow.appendChild(pill);
+        });
+        container.appendChild(pillRow);
+
+        // Body div populated by fwRenderEduqasREBody()
+        var body = document.createElement('div');
+        body.id = 'fw-re-eduqas-body';
+        container.appendChild(body);
+
+        // Default to Route A
+        fwSetEduqasRoute('a');
+        return;
       }
 
-      function buildSection(heading, helper, items, stateKey, max) {
+      // ============================================================
+      // AQA (and any other board) — original 2-of-N religions + N-of-M themes flow
+      // ============================================================
+      var opts = fwGetREOpts();
+      if (!opts) return;
+
+      if (subhead) {
+        subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
+      }
+
+      function buildAqaSection(heading, helper, items, stateKey, max) {
         var sectionEl = document.createElement('div');
         sectionEl.className = 'fw-text-section';
-        sectionEl.dataset.section = stateKey;
         sectionEl.innerHTML =
           '<h3>' + heading + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helper + '</span></h3>' +
           '<div class="fw-text-options" data-group="' + stateKey + '"></div>';
         var optsEl = sectionEl.querySelector('.fw-text-options');
-
         items.forEach(function (item) {
           var btn = document.createElement('button');
           btn.className = 'fw-text-btn';
@@ -2538,15 +2672,10 @@
               arr.splice(idx, 1);
               btn.classList.remove('selected');
             } else {
-              if (arr.length >= max) {
-                // Cap reached — silently ignore extra clicks.
-                return;
-              }
+              if (arr.length >= max) return;
               arr.push(item.slug);
               btn.classList.add('selected');
             }
-            // After religion changes, re-evaluate Route A vs Route B
-            if (stateKey === 'religions') fwUpdateRouteBState();
             fwUpdateREDoneBtn();
           });
           optsEl.appendChild(btn);
@@ -2554,22 +2683,9 @@
         container.appendChild(sectionEl);
       }
 
-      buildSection('Religions', opts.religionsHelper, opts.religions, 'religions', opts.religionsCap);
+      buildAqaSection('Religions', opts.religionsHelper, opts.religions, 'religions', opts.religionsCap);
+      buildAqaSection('Themes', opts.themesHelper, opts.themes, 'themes', opts.themesCap);
 
-      // Route B notice — appears when Catholic Christianity is picked. Hidden by default.
-      var routeBNotice = document.createElement('div');
-      routeBNotice.id = 'fw-re-routeb-notice';
-      routeBNotice.className = 'fw-text-section';
-      routeBNotice.style.display = 'none';
-      routeBNotice.innerHTML =
-        '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:0.85rem 1rem;font-size:0.88rem;color:#7c2d12">' +
-        '<strong>Route B detected.</strong> Your applied themes are <strong>Issues of Life and Death</strong> and <strong>Sin and Forgiveness</strong> — these are part of Applied Catholic Theology and are fixed by the spec, not chosen.' +
-        '</div>';
-      container.appendChild(routeBNotice);
-
-      buildSection('Themes', opts.themesHelper, opts.themes, 'themes', opts.themesCap);
-
-      fwUpdateRouteBState();
       fwUpdateREDoneBtn();
     }
 
