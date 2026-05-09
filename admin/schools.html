@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Schools - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/auth-gate.js" data-role="admin"></script>
+  <style>
+    .req-layout { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .req-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .req-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
+    .req-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .req-controls input { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; min-width: 200px; }
+    .req-controls .view-toggle { display: inline-flex; border: 1px solid #ddd; border-radius: 8px; overflow: hidden; }
+    .req-controls .view-toggle button { background: white; border: 0; padding: 0.45rem 0.85rem; font-size: 0.78rem; font-weight: 600; cursor: pointer; color: var(--text-muted); font-family: inherit; }
+    .req-controls .view-toggle button.active { background: #2d2a26; color: #fff; }
+
+    .req-stats { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .req-stat { background: white; border-radius: 10px; padding: 0.75rem 1.1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); font-size: 0.82rem; color: var(--text-muted); flex: 1; min-width: 130px; }
+    .req-stat strong { display: block; font-size: 1.4rem; color: var(--text-primary); font-family: 'Source Serif 4', serif; line-height: 1.2; margin-top: 0.15rem; }
+
+    .req-table { width: 100%; background: white; border-radius: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); border-collapse: collapse; overflow: hidden; }
+    .req-table th, .req-table td { padding: 0.75rem 1rem; text-align: left; vertical-align: top; border-bottom: 1px solid #f0ede8; font-size: 0.85rem; }
+    .req-table th { background: #f9fafb; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); font-weight: 600; }
+    .req-table tr:last-child td { border-bottom: 0; }
+    .req-table .sch-name { font-weight: 600; color: var(--text-primary); font-family: 'Source Serif 4', serif; font-size: 0.95rem; }
+    .req-table .sch-count { font-weight: 700; font-family: 'Source Serif 4', serif; font-size: 1.1rem; color: var(--text-primary); }
+    .req-table .sch-date { color: var(--text-muted); font-size: 0.78rem; white-space: nowrap; }
+    .req-table .sch-flag { display: inline-flex; padding: 0.18rem 0.55rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; background: #dcfce7; color: #15803d; }
+    .req-table .sch-flag--custom { background: #fef3c7; color: #92400e; }
+
+    .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    .empty-state h2 { font-family: 'Source Serif 4', serif; margin-bottom: 0.4rem; color: var(--text-primary); }
+    .loading-msg { text-align: center; padding: 2rem; color: var(--text-muted); }
+
+    .req-csv-btn { background: #2d2a26; color: #fff; border: 0; border-radius: 8px; padding: 0.5rem 1rem; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .req-csv-btn:hover { background: #4a463f; }
+
+    .privacy-note { background: #f9fafb; border-radius: 10px; padding: 0.85rem 1.1rem; font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem; line-height: 1.5; }
+    .privacy-note strong { color: var(--text-primary); }
+
+    @media (max-width: 700px) {
+      .req-table thead { display: none; }
+      .req-table, .req-table tbody, .req-table tr, .req-table td { display: block; width: 100%; }
+      .req-table tr { border-bottom: 1px solid #e8e4df; padding: 0.5rem 0; }
+      .req-table td { padding: 0.35rem 1rem; border: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+        <span class="header-unit-label">Schools</span>
+      </a>
+      <nav class="header-nav" id="header-nav">
+        <a href="/admin/pipeline">Pipeline</a>
+        <a href="/admin/review">Review</a>
+        <a href="/admin/images">Images</a>
+        <a href="/admin/editor">Editor</a>
+        <a href="/admin/editor-guide">Guide Editor</a>
+        <a href="/admin/requests">Requests</a>
+        <a href="/admin/bugs">Bugs</a>
+        <a href="/admin/schools">Schools</a>
+        <a href="/admin/build-status">Build</a>
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="req-layout">
+    <div class="req-header">
+      <h1>Schools</h1>
+      <div class="req-controls">
+        <input type="search" id="search" placeholder="Filter by name...">
+        <div class="view-toggle">
+          <button data-view="aggregated" class="active">Grouped</button>
+          <button data-view="raw">Raw rows</button>
+        </div>
+        <button class="req-csv-btn" id="export-csv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="privacy-note">
+      Free-tier students can optionally share their school on the last step of the picker.
+      <strong>No per-student data is captured</strong> — just the school string and a timestamp.
+      Use this list to spot schools with active interest for outreach.
+    </div>
+
+    <div class="req-stats" id="stats"></div>
+
+    <div id="content"><div class="loading-msg">Loading...</div></div>
+  </div>
+
+  <script>
+    var searchEl = document.getElementById('search');
+    var contentEl = document.getElementById('content');
+    var statsEl = document.getElementById('stats');
+    var exportBtn = document.getElementById('export-csv');
+    var viewButtons = document.querySelectorAll('.view-toggle button');
+    var currentView = 'aggregated';
+    var currentData = [];
+
+    function authHeaders() {
+      try {
+        var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')) || {};
+        return { 'Content-Type': 'application/json', 'X-Admin-Password': session.pw || '' };
+      } catch (e) {
+        return { 'Content-Type': 'application/json' };
+      }
+    }
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function formatDate(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      } catch (e) { return iso; }
+    }
+
+    function formatDateTime(iso) {
+      if (!iso) return '';
+      try {
+        var d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+          + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      } catch (e) { return iso; }
+    }
+
+    async function load() {
+      contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
+      try {
+        var resp = await fetch('/api/admin/school-submissions?view=' + currentView, { headers: authHeaders() });
+        if (!resp.ok) {
+          contentEl.innerHTML = '<div class="loading-msg">Failed to load (' + resp.status + ')</div>';
+          return;
+        }
+        var json = await resp.json();
+        currentData = currentView === 'aggregated' ? (json.schools || []) : (json.submissions || []);
+        renderStats(json);
+        render();
+      } catch (e) {
+        contentEl.innerHTML = '<div class="loading-msg">Network error</div>';
+      }
+    }
+
+    function renderStats(json) {
+      if (currentView === 'aggregated') {
+        var total = json.total_submissions || 0;
+        var schools = (json.schools || []).length;
+        statsEl.innerHTML = ''
+          + '<div class="req-stat">Distinct schools<strong>' + schools + '</strong></div>'
+          + '<div class="req-stat">All submissions<strong>' + total + '</strong></div>';
+      } else {
+        statsEl.innerHTML = '<div class="req-stat">Rows<strong>' + (json.submissions || []).length + '</strong></div>';
+      }
+    }
+
+    function render() {
+      var query = (searchEl.value || '').toLowerCase().trim();
+      var rows = currentData;
+      if (query) {
+        rows = rows.filter(function (r) {
+          return r.school_name.toLowerCase().indexOf(query) !== -1;
+        });
+      }
+      if (rows.length === 0) {
+        if (currentData.length === 0) {
+          contentEl.innerHTML = ''
+            + '<div class="empty-state">'
+            +   '<h2>No submissions yet</h2>'
+            +   '<p>When a free-tier student picks or types a school on the last step of the wizard, it\'ll show up here.</p>'
+            + '</div>';
+        } else {
+          contentEl.innerHTML = '<div class="empty-state">No matches for &ldquo;' + escHtml(query) + '&rdquo;</div>';
+        }
+        return;
+      }
+
+      if (currentView === 'aggregated') {
+        var html = ''
+          + '<table class="req-table">'
+          +   '<thead><tr><th>School</th><th>Submissions</th><th>First seen</th><th>Last seen</th><th>Source</th></tr></thead>'
+          +   '<tbody>'
+          +     rows.map(function (r) {
+                  var flag = r.any_directory_match
+                    ? '<span class="sch-flag">Directory</span>'
+                    : '<span class="sch-flag sch-flag--custom">Typed</span>';
+                  return ''
+                    + '<tr>'
+                    +   '<td><div class="sch-name">' + escHtml(r.school_name) + '</div></td>'
+                    +   '<td><span class="sch-count">' + r.submission_count + '</span></td>'
+                    +   '<td class="sch-date">' + escHtml(formatDate(r.first_seen)) + '</td>'
+                    +   '<td class="sch-date">' + escHtml(formatDate(r.last_seen)) + '</td>'
+                    +   '<td>' + flag + '</td>'
+                    + '</tr>';
+                }).join('')
+          +   '</tbody>'
+          + '</table>';
+        contentEl.innerHTML = html;
+      } else {
+        var html = ''
+          + '<table class="req-table">'
+          +   '<thead><tr><th>School</th><th>Source</th><th>Submitted</th></tr></thead>'
+          +   '<tbody>'
+          +     rows.map(function (r) {
+                  var flag = r.is_directory_match
+                    ? '<span class="sch-flag">Directory</span>'
+                    : '<span class="sch-flag sch-flag--custom">Typed</span>';
+                  return ''
+                    + '<tr>'
+                    +   '<td><div class="sch-name">' + escHtml(r.school_name) + '</div></td>'
+                    +   '<td>' + flag + '</td>'
+                    +   '<td class="sch-date">' + escHtml(formatDateTime(r.created_at)) + '</td>'
+                    + '</tr>';
+                }).join('')
+          +   '</tbody>'
+          + '</table>';
+        contentEl.innerHTML = html;
+      }
+    }
+
+    viewButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        viewButtons.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentView = btn.dataset.view;
+        load();
+      });
+    });
+
+    searchEl.addEventListener('input', render);
+
+    exportBtn.addEventListener('click', function () {
+      if (currentData.length === 0) return;
+      var headers, rows;
+      if (currentView === 'aggregated') {
+        headers = ['school_name', 'submission_count', 'first_seen', 'last_seen', 'any_directory_match'];
+      } else {
+        headers = ['school_name', 'is_directory_match', 'created_at'];
+      }
+      var csv = headers.join(',') + '\n';
+      currentData.forEach(function (r) {
+        var row = headers.map(function (h) {
+          var v = r[h] == null ? '' : String(r[h]);
+          if (v.indexOf(',') !== -1 || v.indexOf('"') !== -1 || v.indexOf('\n') !== -1) {
+            v = '"' + v.replace(/"/g, '""') + '"';
+          }
+          return v;
+        });
+        csv += row.join(',') + '\n';
+      });
+      var blob = new Blob([csv], { type: 'text/csv' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'schools-' + currentView + '-' + new Date().toISOString().slice(0, 10) + '.csv';
+      a.click();
+    });
+
+    load();
+  </script>
+</body>
+</html>

@@ -2965,8 +2965,10 @@
     schoolResults.addEventListener('click', function (e) {
       var result = e.target.closest('.fw-school-result');
       if (!result) return;
-      var name = result.dataset.custom ? schoolInput.value.trim() : result.dataset.name;
+      var isCustom = !!result.dataset.custom;
+      var name = isCustom ? schoolInput.value.trim() : result.dataset.name;
       wizardState.school = name;
+      wizardState.schoolFromDirectory = !isCustom;
       schoolInput.value = name;
       schoolResults.classList.remove('open');
       schoolSelected.textContent = name;
@@ -3055,6 +3057,20 @@
 
       if (wizardState.school) {
         prefs.school = wizardState.school;
+        // Fire-and-forget: log the school choice for sales-signal
+        // (no PII, just school name + match flag). Failure is silent
+        // so a flaky network never blocks the wizard from finishing.
+        try {
+          fetch('/api/school-submission', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              school_name: wizardState.school,
+              is_directory_match: !!wizardState.schoolFromDirectory,
+            }),
+            keepalive: true,
+          }).catch(function () {});
+        } catch (e) {}
       }
 
       FreeUser.set(prefs);
