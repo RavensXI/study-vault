@@ -85,6 +85,28 @@
     return RE_DEFAULT_UNITS.slice();
   }
 
+  // Eduqas / WJEC RS uses a flatter unit structure (no -beliefs/-practices
+  // suffix) and Route B has implicit Foundational Catholic Theology units
+  // not surfaced in the picker. Mirror browse-loader's filter exactly.
+  var RE_EDUQAS_SLUGS = ['religious-studies-eduqas'];
+
+  function getFreeREEduqasSelectedUnitSlugs(subjectSlug) {
+    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
+    var pref = FreeUser.getSubject(subjectSlug);
+    if (!pref) return null;
+    if ((pref.religions && pref.religions.length) || (pref.themes && pref.themes.length)) {
+      var slugs = (pref.religions || []).slice();
+      (pref.themes || []).forEach(function (t) { slugs.push(t); });
+      // Route B implicitly adds Foundational Catholic Theology units.
+      if (pref.route === 'b' || slugs.indexOf('catholic-christianity') !== -1) {
+        slugs.push('catholic-foundational-origins-and-meaning');
+        slugs.push('catholic-foundational-good-and-evil');
+      }
+      return slugs;
+    }
+    return null;
+  }
+
   // Film Studies: free users pick 1 film from each of 5 sections. Filtering
   // is at LESSON level (each unit contains multiple selectable films).
   var FILM_STUDIES_SLUGS = ['film-studies-eduqas'];
@@ -211,6 +233,8 @@
         allowedUnitSlugs = getFreeDramaSelectedUnitSlugs(slug);
       } else if (RE_SLUGS.indexOf(slug) !== -1) {
         allowedUnitSlugs = getFreeRESelectedUnitSlugs(slug);
+      } else if (RE_EDUQAS_SLUGS.indexOf(slug) !== -1) {
+        allowedUnitSlugs = getFreeREEduqasSelectedUnitSlugs(slug);
       }
 
       // Film Studies: lesson-level filter (each unit has overviews + multiple
