@@ -1370,6 +1370,7 @@
         'food-preparation-and-nutrition': { name: 'Food Preparation & Nutrition', image: '/images/subject-food.jpg', accent: '#0d9488', detail: '2 units · 16 lessons' },
         'food-preparation-and-nutrition-eduqas': { name: 'Food Preparation & Nutrition', image: '/images/subject-food.jpg', accent: '#0d9488', detail: '2 units · 16 lessons' },
         'hospitality-catering': { name: 'Hospitality & Catering', image: '/images/subject-hospitality-catering.jpg', accent: '#d97706', detail: '1 unit' },
+        'engineering-eduqas': { name: 'Engineering', image: 'https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/engineering-eduqas/engineering-achievements-and-environment/lesson-01-hero.jpg', accent: '#475569', detail: '4 units · 14 lessons' },
         'history': { name: 'History', image: '/images/subject-history.jpg', accent: '#c44536', detail: '4 papers' },
         'religious-education': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#1e40af', detail: '8 units' },
         'music-technology': { name: 'Music Technology', image: '/images/subject-music-tech.jpg', accent: '#4a6fa5', detail: '5 units' },
@@ -1615,6 +1616,7 @@
       'health-social-care': { 'Edexcel': true, 'OCR': true },
       'food-preparation-and-nutrition': { 'Eduqas': true },
       'hospitality-catering': { 'WJEC': true },
+      'engineering': { 'Eduqas': true, 'WJEC': true },
       'history': { 'AQA': true, 'Edexcel': true },
       'religious-studies': { 'AQA': true, 'Eduqas': true, 'WJEC': true },
       'music-technology': { 'NCFE': true },
@@ -1945,7 +1947,7 @@
         { name: 'Design & Technology', slug: 'design-technology', available: true },
         { name: 'Food Preparation & Nutrition', slug: 'food-preparation-and-nutrition', available: true },
         { name: 'Hospitality & Catering', slug: 'hospitality-catering', available: true },
-        { name: 'Engineering', slug: 'engineering' }
+        { name: 'Engineering', slug: 'engineering', available: true }
       ]},
       { id: 'creative-arts', title: 'Creative Arts', dot: '#8b5cf6', subjects: [
         { name: 'Drama', slug: 'drama', available: true },
@@ -2098,7 +2100,8 @@
       'drama': 'Drama',
       'film-studies': 'Film Studies',
       'food-preparation-and-nutrition': 'Food Preparation & Nutrition',
-      'sociology': 'Sociology'
+      'sociology': 'Sociology',
+      'engineering': 'Engineering'
     };
     // Dot colours per slug
     var subjectDots = {
@@ -2106,7 +2109,7 @@
       'science': '#16a34a', 'separate-sciences': '#16a34a',
       'history': '#6366f1', 'religious-studies': '#6366f1',
       'computer-science': '#1e40af', 'design-technology': '#059669',
-      'health-social-care': '#ea580c', 'hospitality-catering': '#059669',
+      'health-social-care': '#ea580c', 'hospitality-catering': '#059669', 'engineering': '#475569',
       'music-technology': '#8b5cf6', 'business': '#b45309', 'geography': '#059669',
       'spanish': '#dc2626', 'french': '#1d4ed8', 'german': '#d97706',
       'physical-education': '#be123c',
@@ -2441,13 +2444,56 @@
       return religiousEducationOptions[board] || religiousEducationOptions['aqa'];
     }
 
+    // Eduqas/WJEC Route B is triggered when the user picks Catholic Christianity.
+    // Route B's themes are FIXED (Life and Death + Sin and Forgiveness as Applied
+    // Catholic Theology) — there is no theme choice to make. So when Catholic
+    // Christianity is selected we hide the theme picker and auto-set the themes.
+    var ROUTE_B_FIXED_THEMES = ['catholic-applied-life-and-death', 'catholic-applied-sin-and-forgiveness'];
+
+    function fwIsRouteB() {
+      var board = (wizardState.boards && wizardState.boards['religious-studies']) || 'aqa';
+      if (board !== 'eduqas' && board !== 'wjec') return false;
+      var rels = (wizardState.re && wizardState.re.religions) || [];
+      return rels.indexOf('catholic-christianity') !== -1;
+    }
+
     function fwUpdateREDoneBtn() {
       var btn = document.getElementById('fw-re-done');
       if (!btn) return;
       var opts = fwGetREOpts();
       var rels = (wizardState.re && wizardState.re.religions) || [];
       var thms = (wizardState.re && wizardState.re.themes) || [];
+      // Route B: themes are fixed, only need 2 religions
+      if (fwIsRouteB()) {
+        btn.disabled = rels.length !== opts.religionsCap;
+        return;
+      }
       btn.disabled = !(rels.length === opts.religionsCap && thms.length === opts.themesCap);
+    }
+
+    function fwUpdateRouteBState() {
+      // Show or hide the theme picker section based on whether Catholic
+      // Christianity has been selected (Route B).
+      var themeSection = document.querySelector('#fw-re-container .fw-text-section[data-section="themes"]');
+      var routeBNotice = document.getElementById('fw-re-routeb-notice');
+      if (fwIsRouteB()) {
+        if (themeSection) themeSection.style.display = 'none';
+        if (routeBNotice) routeBNotice.style.display = '';
+        // Auto-set the fixed Route B themes
+        wizardState.re.themes = ROUTE_B_FIXED_THEMES.slice();
+      } else {
+        if (themeSection) themeSection.style.display = '';
+        if (routeBNotice) routeBNotice.style.display = 'none';
+        // If we just left Route B (user deselected Catholic Christianity),
+        // clear the auto-set themes so the user makes their own picks
+        if (wizardState.re.themes && wizardState.re.themes[0] === ROUTE_B_FIXED_THEMES[0]) {
+          wizardState.re.themes = [];
+          // Also unselect any visually-selected theme buttons
+          document.querySelectorAll('#fw-re-container [data-group="themes"] .fw-text-btn.selected').forEach(function (b) {
+            b.classList.remove('selected');
+          });
+        }
+      }
     }
 
     function buildREPicker() {
@@ -2465,7 +2511,7 @@
         if (board === 'aqa') {
           subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
         } else if (board === 'eduqas' || board === 'wjec') {
-          subhead.innerHTML = 'Eduqas/WJEC Religious Studies — pick <strong>2 religions</strong> (Christianity + 1 other for Route A, or Catholic Christianity + Judaism for Route B) and <strong>2 themes</strong> from the 4 options.';
+          subhead.innerHTML = 'Eduqas/WJEC Religious Studies — pick <strong>2 religions</strong>. Route A: Christianity + 1 other religion + 2 of 4 themes. Route B: Catholic Christianity + Judaism (themes are fixed).';
         } else {
           subhead.textContent = 'Pick the religions and themes covered by your school’s spec.';
         }
@@ -2474,6 +2520,7 @@
       function buildSection(heading, helper, items, stateKey, max) {
         var sectionEl = document.createElement('div');
         sectionEl.className = 'fw-text-section';
+        sectionEl.dataset.section = stateKey;
         sectionEl.innerHTML =
           '<h3>' + heading + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helper + '</span></h3>' +
           '<div class="fw-text-options" data-group="' + stateKey + '"></div>';
@@ -2498,6 +2545,8 @@
               arr.push(item.slug);
               btn.classList.add('selected');
             }
+            // After religion changes, re-evaluate Route A vs Route B
+            if (stateKey === 'religions') fwUpdateRouteBState();
             fwUpdateREDoneBtn();
           });
           optsEl.appendChild(btn);
@@ -2506,8 +2555,21 @@
       }
 
       buildSection('Religions', opts.religionsHelper, opts.religions, 'religions', opts.religionsCap);
+
+      // Route B notice — appears when Catholic Christianity is picked. Hidden by default.
+      var routeBNotice = document.createElement('div');
+      routeBNotice.id = 'fw-re-routeb-notice';
+      routeBNotice.className = 'fw-text-section';
+      routeBNotice.style.display = 'none';
+      routeBNotice.innerHTML =
+        '<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:0.85rem 1rem;font-size:0.88rem;color:#7c2d12">' +
+        '<strong>Route B detected.</strong> Your applied themes are <strong>Issues of Life and Death</strong> and <strong>Sin and Forgiveness</strong> — these are part of Applied Catholic Theology and are fixed by the spec, not chosen.' +
+        '</div>';
+      container.appendChild(routeBNotice);
+
       buildSection('Themes', opts.themesHelper, opts.themes, 'themes', opts.themesCap);
 
+      fwUpdateRouteBState();
       fwUpdateREDoneBtn();
     }
 
@@ -2829,6 +2891,7 @@
       'history': { 'aqa': 'history-aqa', 'edexcel': 'history-edexcel' },
       'health-social-care': { 'edexcel': 'health-social-care-edexcel', 'ocr': 'health-social-care-ocr' },
       'food-preparation-and-nutrition': { 'eduqas': 'food-preparation-and-nutrition-eduqas' },
+      'engineering': { 'eduqas': 'engineering-eduqas', 'wjec': 'engineering-eduqas' },
       'religious-studies': { 'aqa': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas' },
       'spanish': { 'aqa': 'spanish-aqa', 'edexcel': 'spanish-edexcel' },
       'french': { 'aqa': 'french-aqa', 'edexcel': 'french-edexcel' },
