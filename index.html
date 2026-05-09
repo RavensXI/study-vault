@@ -768,11 +768,11 @@
         </div>
       </div>
 
-      <!-- Step 3.5d: Religious Studies picker (2 of 7 religions + 4 of 6 themes) -->
+      <!-- Step 3.5d: Religious Studies picker (board-aware caps and themes) -->
       <div class="free-wizard-step" id="fw-step-re">
         <div class="fw-header">
           <h2>Which religions and themes are you studying?</h2>
-          <p>AQA Religious Studies schools pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.</p>
+          <p id="fw-re-subhead">Pick the religions and themes covered by your school's spec.</p>
         </div>
         <div class="fw-body">
           <div id="fw-re-container"></div>
@@ -2457,6 +2457,19 @@
       container.innerHTML = '';
       wizardState.re = { religions: [], themes: [] };
       if (!opts) return;
+
+      // Board-specific subhead so the user sees the right rules
+      var subhead = document.getElementById('fw-re-subhead');
+      if (subhead) {
+        var board = (wizardState.boards && wizardState.boards['religious-studies']) || 'aqa';
+        if (board === 'aqa') {
+          subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
+        } else if (board === 'eduqas' || board === 'wjec') {
+          subhead.innerHTML = 'Eduqas/WJEC Religious Studies — pick <strong>2 religions</strong> (Christianity + 1 other for Route A, or Catholic Christianity + Judaism for Route B) and <strong>2 themes</strong> from the 4 options.';
+        } else {
+          subhead.textContent = 'Pick the religions and themes covered by your school’s spec.';
+        }
+      }
 
       function buildSection(heading, helper, items, stateKey, max) {
         var sectionEl = document.createElement('div');
