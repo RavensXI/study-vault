@@ -65,6 +65,8 @@ FACT_CHECK_REQUIRED = {
     "drama-aqa", "drama-ocr", "drama-eduqas", "film-studies-eduqas",
     # Science
     "science-aqa", "science-edexcel", "science-ocr", "separate-sciences",
+    "separate-sciences-edexcel", "separate-sciences-ocr",
+    "science-ocr-b", "separate-sciences-ocr-b",
     # Sociology
     "sociology-aqa", "sociology-eduqas",
     # Engineering (vocational — has named technologies/standards/dates that fabricate easily)
@@ -74,6 +76,10 @@ FACT_CHECK_REQUIRED = {
     # Information Technology (vocational — named legislation, AR/IoT examples,
     # cyber-security cases that fabricate easily)
     "it-ocr",
+    # Media Studies (theorist attributions, regulator scopes, dated productions —
+    # very high fabrication risk; verify Hall, Mulvey, Propp, Todorov, Curran &
+    # Seaton, Gerbner, Blumler & Katz, BBFC/OFCOM/IPSO/ASA/PEGI scope)
+    "media-studies-aqa",
     # PE
     "physical-education-aqa", "physical-education-ocr",
     # Citizenship
