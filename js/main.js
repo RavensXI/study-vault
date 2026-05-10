@@ -943,9 +943,19 @@ function initNarration() {
 
   if (!audio) return;
 
-  // Manifest: [{ id: "n1", src: "narration_n1.wav", duration: 14.2 }, ...]
+  // Manifest: [{ id: "n1", src: "narration_n1.wav", duration: 14.2, tier: "higher"? }, ...]
   var manifest = window.narrationManifest || [];
   if (!manifest.length || !manifest[0].src) return;
+
+  // Skip Higher-Tier-only chunks for Foundation students. Body class
+  // tier-foundation is set by lesson-loader.js based on studyvault-tiers
+  // localStorage. The .higher-only divs around these elements are already
+  // CSS-hidden visually; this also drops them from the audio so Foundation
+  // students don't hear narration of content they can't see.
+  if (document.body.classList.contains('tier-foundation')) {
+    manifest = manifest.filter(function (entry) { return entry.tier !== 'higher'; });
+    if (!manifest.length) return;
+  }
 
   // Calculate total duration and cumulative start offsets
   var totalDuration = 0;

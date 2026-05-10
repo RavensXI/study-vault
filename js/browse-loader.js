@@ -335,10 +335,18 @@
 
     // Always live-count lessons per unit (replaces stale unit.lesson_count column).
     // Foundation users on tiered subjects get the count with tier='higher' excluded.
-    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'separate-sciences'];
+    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b'];
     var savedTiersOverview = {};
     try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
-    var overviewTier = savedTiersOverview[subjectSlug] || 'higher';
+    // Tier picker writes under the base slug (e.g. 'separate-sciences') but
+    // browse URLs use the board-specific slug (e.g. 'separate-sciences-edexcel').
+    // Fall back to base slug if the fully-qualified slug isn't set.
+    var overviewTier = savedTiersOverview[subjectSlug];
+    if (!overviewTier) {
+      var overviewBase = subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
+      overviewTier = savedTiersOverview[overviewBase];
+    }
+    overviewTier = overviewTier || 'higher';
     var foundationFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation');
     var countPromises = units.map(function (u) {
       var q = sb.from('lessons').select('id', { count: 'exact', head: true })
@@ -562,6 +570,8 @@
 
     units.forEach(function (unit) {
       var unitLessonCount = unit._filteredCount != null ? unit._filteredCount : unit.lesson_count;
+      // Skip units with no visible lessons (e.g. higher-only units for Foundation users)
+      if (unitLessonCount === 0) return;
       html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unitLessonCount + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
@@ -666,10 +676,17 @@
 
     var lessons = lessonsResult.data || [];
 
-    // Filter by tier if student has a Foundation preference for this subject
+    // Filter by tier if student has a Foundation preference for this subject.
+    // Tier picker writes under base slug; fall back if board-specific slug
+    // has no explicit value.
     var savedTiers = {};
     try { savedTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
-    var subjectTier = savedTiers[subjectSlug] || 'higher';
+    var subjectTier = savedTiers[subjectSlug];
+    if (!subjectTier) {
+      var subjectBase = subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
+      subjectTier = savedTiers[subjectBase];
+    }
+    subjectTier = subjectTier || 'higher';
     if (subjectTier === 'foundation') {
       lessons = lessons.filter(function(l) { return l.tier !== 'higher'; });
     }
@@ -748,7 +765,7 @@
       html += '<p>' + esc(unit.subtitle) + '</p>';
     }
     // Tier indicator for tiered subjects
-    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'separate-sciences'];
+    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b'];
     if (TIERED.indexOf(subjectSlug) !== -1) {
       var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';
