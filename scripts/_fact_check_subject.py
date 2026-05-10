@@ -85,7 +85,7 @@ FACT_CHECK_REQUIRED = {
     # Citizenship
     "citizenship-aqa",
     # Music
-    "gcse-music", "music",
+    "gcse-music", "music", "music-aqa",
 }
 
 # Subjects where fact-check is unnecessary (practice format / no factual claims).
