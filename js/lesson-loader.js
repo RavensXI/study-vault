@@ -170,7 +170,7 @@
       if (TIERED_DIRECT.indexOf(params.subjectSlug) !== -1) {
         try {
           var directTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
-          var directBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+          var directBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
           var directTier = directTiers[params.subjectSlug] || directTiers[directBase] || 'higher';
           if (directTier === 'foundation') {
             return { error: 'This lesson is Higher Tier only. Switch to Higher in your subject settings to view it.' };
@@ -204,7 +204,7 @@
     if (TIERED_FOR_NAV.indexOf(params.subjectSlug) !== -1) {
       try {
         var navTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
-        var navBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+        var navBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
         var navTier = navTiers[params.subjectSlug] || navTiers[navBase] || 'higher';
         navFoundationFilter = (navTier === 'foundation');
       } catch (e) {}
@@ -502,7 +502,7 @@
     // Hides .higher-only content via CSS
     try {
       var tiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
-      var subjectBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr|eduqas)$/, '');
+      var subjectBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
       var tier = tiers[params.subjectSlug] || tiers[subjectBase] || 'higher';
       if (tier === 'foundation') {
         document.body.classList.add('tier-foundation');
