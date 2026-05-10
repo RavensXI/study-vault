@@ -562,6 +562,8 @@
 
     units.forEach(function (unit) {
       var unitLessonCount = unit._filteredCount != null ? unit._filteredCount : unit.lesson_count;
+      // Skip units with no visible lessons (e.g. higher-only units for Foundation users)
+      if (unitLessonCount === 0) return;
       html += '<a href="/browse/' + subjectSlug + '/' + unit.slug + '" class="unit-card" data-unit="' + esc(unit.slug) + '" data-total-lessons="' + unitLessonCount + '" style="--card-accent: ' + unit.accent + ';">';
       html += '<div class="unit-card-image">';
       if (unit.image_url) {
