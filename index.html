@@ -1435,14 +1435,14 @@
         var cardsHtml = '';
         var freeSepSci = freePrefs.subjects.some(function(s) { return s.slug === 'separate-sciences' || s.baseSlug === 'separate-sciences'; });
         freePrefs.subjects.forEach(function (s) {
-          // Skip separate-sciences card — its content merges into Science
-          if (s.slug === 'separate-sciences' || s.baseSlug === 'separate-sciences') return;
+          // If user picked Triple Science, hide the Combined Science card —
+          // Triple is the complete revision pathway and Combined would duplicate.
+          // (Triple subjects have their own full subject row at separate-sciences,
+          // separate-sciences-edexcel, separate-sciences-ocr, separate-sciences-ocr-b
+          // so we keep that card and skip Combined.)
+          if (freeSepSci && (s.slug === 'science' || s.baseSlug === 'science')) return;
           var meta = freeSubjectMeta[s.baseSlug] || freeSubjectMeta[s.slug] || { name: s.slug, image: '', accent: '#666', detail: '' };
-          // Rename Science to Science (Triple) when sep sci is selected
           var cardName = meta.name;
-          if (freeSepSci && (s.slug === 'science' || s.baseSlug === 'science')) {
-            cardName = 'Science (Triple)';
-          }
           var boardLabel = (s.examBoard || '').toUpperCase();
           cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" data-subject="' + s.slug + '" style="--card-accent: ' + meta.accent + '">';
           if (meta.image) {
