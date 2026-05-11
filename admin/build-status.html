@@ -582,7 +582,18 @@
       // === specs "Geography A" + board "Edexcel" + code 1GA0).
       var builtByCode = {};
       state.subjects.filter(function (s) { return !s.school_id; }).forEach(function (s) {
-        if (s.spec_code) builtByCode[s.spec_code] = s;
+        if (!s.spec_code) return;
+        // Some subjects bundle multiple exam-board specs into one Supabase
+        // row — notably the Separate Sciences variants which combine biology
+        // + chemistry + physics specs as "8461/8462/8463" (AQA),
+        // "J247 / J248 / J249" (OCR), "1BI0 / 1CH0 / 1PH0" (Edexcel) etc.
+        // Split on "/" so each constituent spec_code resolves to the same
+        // subject row, otherwise the to-build list flags all three as
+        // unbuilt despite full coverage.
+        String(s.spec_code).split('/').forEach(function (code) {
+          code = code.trim();
+          if (code) builtByCode[code] = s;
+        });
       });
 
       var families = {};
