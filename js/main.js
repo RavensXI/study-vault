@@ -1948,7 +1948,20 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     const footer = getFooter();
     let selected = -1;
 
-    const sentence = q.q.replace('_____', '<span class="kc-blank" id="kc-blank">?</span>');
+    // Tolerate any run of 3+ underscores OR 3+ dots as the blank marker —
+    // content authors have shipped lessons with ___ or .... where the
+    // canonical _____ was expected. Without this, the click handler later
+    // crashes trying to update a #kc-blank that was never inserted, leaving
+    // the Check button permanently disabled and no Next button able to render.
+    var _blankRe = /_{3,}|\.{3,}/;
+    var sentence;
+    if (_blankRe.test(q.q)) {
+      sentence = q.q.replace(_blankRe, '<span class="kc-blank" id="kc-blank">?</span>');
+    } else {
+      // No blank marker at all — synthesise one at the end so the click
+      // handler still works. Authors should flag these for re-typing as MCQ.
+      sentence = q.q + ' <span class="kc-blank" id="kc-blank">?</span>';
+    }
     body.innerHTML = '<p class="kc-question kc-fill-sentence">' + sentence + '</p><div class="kc-fill-options" id="kc-fill-opts"></div>';
     footer.innerHTML = '<button class="kc-btn kc-btn-primary" id="kc-check" disabled>Check</button>';
 
@@ -1997,7 +2010,11 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     const body = getBody();
     const footer = getFooter();
 
-    body.innerHTML = '<p class="kc-question">' + q.q + '</p><div class="kc-match" id="kc-match"></div>';
+    // Defensive: many shipped match-type KCs omit the q field (it's the
+    // instruction header text). Fall back to a generic prompt so we never
+    // render the literal string "undefined" to students.
+    var _matchPrompt = q.q || 'Match each term on the left to the correct option on the right.';
+    body.innerHTML = '<p class="kc-question">' + _matchPrompt + '</p><div class="kc-match" id="kc-match"></div>';
     footer.innerHTML = '<button class="kc-btn kc-btn-primary" id="kc-check" disabled>Check</button>';
 
     const container = body.querySelector('#kc-match');
