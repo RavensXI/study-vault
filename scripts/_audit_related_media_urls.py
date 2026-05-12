@@ -102,6 +102,13 @@ def collect_urls(subject_slug, unit_sort_min=None):
                         continue
                     if is_youtube(url):
                         continue  # validated separately via oembed
+                    # Skip Lesson Podcast stubs — placeholder R2 URLs that
+                    # 404 until Tom uploads the NotebookLM podcast. By
+                    # convention the item title is exactly "Lesson Podcast"
+                    # and the URL points to studyvault-audio R2 with a
+                    # podcast_l-shaped path.
+                    if item.get("title") == "Lesson Podcast":
+                        continue
                     out.append({
                         "lesson_id": r["id"],
                         "lesson_slug": r["slug"],

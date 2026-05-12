@@ -38,7 +38,7 @@
   // History (Apr 2026): `history` → `history-edexcel` so AQA could take `history-aqa`.
   // Slug refactor (May 2026): every free-tier subject is now -{board} suffixed.
   var OLD_TO_NEW_SLUGS = {
-    'history':             ['history-aqa', 'history-edexcel'],
+    'history':             ['history-aqa', 'history-edexcel', 'history-ocr'],
     'english-language':    ['english-language-aqa', 'english-language-edexcel', 'english-language-ocr', 'english-language-eduqas'],
     'english-literature':  ['english-literature-aqa', 'english-literature-edexcel', 'english-literature-ocr', 'english-literature-eduqas'],
     'maths':               ['maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas'],
@@ -151,7 +151,8 @@
     ],
     'history': [
       { board: 'AQA', slug: 'history-aqa' },
-      { board: 'Edexcel', slug: 'history-edexcel' }
+      { board: 'Edexcel', slug: 'history-edexcel' },
+      { board: 'OCR', slug: 'history-ocr' }
     ],
     'physical-education': [
       { board: 'AQA', slug: 'physical-education-aqa' },

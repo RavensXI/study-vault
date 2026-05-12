@@ -55,7 +55,7 @@ FACT_CHECK_REQUIRED = {
     # Religious Studies / RE
     "religious-studies-aqa", "religious-studies", "religious-studies-eduqas",
     # History any board
-    "history-aqa", "history-edexcel", "history-ocr", "history-eduqas",
+    "history-aqa", "history-edexcel", "history-ocr", "history-ocr-b", "history-eduqas",
     # Geography (case studies)
     "geography-aqa", "geography-ocr", "geography-eduqas",
     "geography-edexcel-a", "geography-edexcel-b",
