@@ -124,6 +124,16 @@
       margin: 0 0 1.15rem;
       line-height: 1.55;
     }
+    .request-panel-body .update-note {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 0.65rem 0.85rem;
+      margin: 0 0 1rem;
+      font-size: 0.82rem;
+      color: #78350f;
+      line-height: 1.5;
+    }
 
     .request-fields {
       display: grid;
@@ -658,6 +668,7 @@
               <svg class="req-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
             </summary>
             <div class="request-panel-body">
+              <div class="update-note">A lot of new subjects, exam-board variants and 2027 spec updates are landing over the summer, ready for the September launch — so if yours isn&rsquo;t here yet, it&rsquo;s likely on the way.</div>
               <p>Tell us what you&rsquo;d like and we&rsquo;ll add it. Email is optional.</p>
               <form class="request-form" id="request-form-wizard">
                 <div class="request-fields">
@@ -1067,6 +1078,14 @@
           <p class="home-card-detail">1 unit &middot; 8 lessons</p>
         </div>
       </a>
+      <a href="/browse/history-ocr" class="home-card sv-reveal" data-subject="history-ocr" style="--card-accent: #581c87">
+        <img class="home-card-img" src="/images/subject-history-ocr.jpg" alt="History" width="500" height="435" loading="lazy" decoding="async">
+        <div class="home-card-body">
+          <h3>History</h3>
+          <p class="home-card-board">Cambridge OCR</p>
+          <p class="home-card-detail">12 units &middot; 117 lessons</p>
+        </div>
+      </a>
     </div>
   </section>
 
@@ -1083,6 +1102,7 @@
       <svg class="req-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
     </summary>
     <div class="request-panel-body">
+      <div class="update-note">A lot of new subjects, exam-board variants and 2027 spec updates are landing over the summer, ready for the September launch — so if yours isn&rsquo;t here yet, it&rsquo;s likely on the way.</div>
       <p>Leave your email if you'd like a heads-up the moment it goes live. Otherwise just tell us what you're after.</p>
       <form class="request-form" id="request-form">
         <div class="request-fields">
@@ -1244,6 +1264,11 @@
         <div class="picker-item" data-subject="media-studies-aqa" style="--picker-accent: #be185d">
           <img class="picker-item-img" src="/images/subject-media-studies-aqa.jpg" alt="Media Studies" decoding="async">
           <div class="picker-item-label">Media Studies</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
+        <div class="picker-item" data-subject="history-ocr" style="--picker-accent: #581c87">
+          <img class="picker-item-img" src="/images/subject-history-ocr.jpg" alt="History (OCR)" decoding="async">
+          <div class="picker-item-label">History (OCR)</div>
           <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
       </div>
@@ -1428,6 +1453,7 @@
         'sociology-aqa': { name: 'Sociology', image: '/images/subject-sociology.jpg', accent: '#7c3aed', detail: '5 units · 33 lessons' },
         'it-ocr': { name: 'Information Technology', image: '/images/subject-it-ocr.jpg', accent: '#1e40af', detail: '1 unit · 8 lessons' },
         'media-studies-aqa': { name: 'Media Studies', image: '/images/subject-media-studies-aqa.jpg', accent: '#be185d', detail: '4 units · 20 lessons' },
+        'history-ocr': { name: 'History', image: '/images/subject-history-ocr.jpg', accent: '#581c87', detail: '' },
       };
 
       if (freePrefs && freePrefs.subjects && freePrefs.subjects.length > 0) {
@@ -1650,7 +1676,7 @@
       'food-preparation-and-nutrition': { 'Eduqas': true },
       'hospitality-catering': { 'WJEC': true },
       'engineering': { 'Eduqas': true, 'WJEC': true },
-      'history': { 'AQA': true, 'Edexcel': true },
+      'history': { 'AQA': true, 'Edexcel': true, 'OCR': true },
       'religious-studies': { 'AQA': true, 'Eduqas': true, 'WJEC': true },
       'music-technology': { 'NCFE': true },
       'computer-science': { 'OCR': true, 'AQA': true },
@@ -1824,6 +1850,29 @@
           { slug: 'usa-conflict-home-abroad', name: 'The USA, 1954–75: Conflict at Home and Abroad' },
           { slug: 'russia-soviet-union', name: 'Russia and the Soviet Union, 1917–41' },
           { slug: 'maos-china', name: "Mao's China, 1945–76" }
+        ]
+      },
+      'ocr': {
+        // OCR A J410 — period study is fixed (International Relations
+        // 1918–1975, taken by every student) so it's auto-included by the
+        // browse-loader filter, not a user pick. Students choose one each
+        // from Non-British Depth, Thematic Study, and British Depth Study.
+        'Non-British Depth Study': [
+          { slug: 'china-people-state-1950-1981', name: 'China 1950–1981' },
+          { slug: 'germany-people-state-1925-1955', name: 'Germany 1925–1955' },
+          { slug: 'south-africa-people-state-1960-1994', name: 'South Africa 1960–1994' },
+          { slug: 'usa-people-state-1919-1948', name: 'USA 1919–1948' },
+          { slug: 'usa-people-state-1945-1974', name: 'USA 1945–1974' }
+        ],
+        'Thematic Study': [
+          { slug: 'migration-to-britain-1000-2010', name: 'Migration to Britain c.1000–2010' },
+          { slug: 'power-monarchy-democracy-1000-2014', name: 'Power: Monarchy & Democracy c.1000–2014' },
+          { slug: 'war-british-society-790-2010', name: 'War and British Society c.790–2010' }
+        ],
+        'British Depth Study': [
+          { slug: 'impact-empire-britain-1688-1730', name: 'Impact of Empire 1688–c.1730 (Spitalfields)' },
+          { slug: 'english-reformation-1520-1550', name: 'English Reformation 1520–1550 (Kenilworth)' },
+          { slug: 'personal-rule-restoration-1629-1660', name: 'Personal Rule to Restoration 1629–1660 (Kenilworth)' }
         ]
       }
     };
@@ -3038,7 +3087,7 @@
       'separate-sciences': { 'aqa': 'separate-sciences', 'edexcel': 'separate-sciences-edexcel', 'ocr': 'separate-sciences-ocr', 'ocr b': 'separate-sciences-ocr-b' },
       'business': { 'aqa': 'business-aqa', 'edexcel': 'business-edexcel', 'ocr': 'business-ocr' },
       'geography': { 'aqa': 'geography-aqa', 'edexcel a': 'geography-edexcel-a', 'edexcel b': 'geography-edexcel-b', 'ocr': 'geography-ocr', 'eduqas': 'geography-eduqas' },
-      'history': { 'aqa': 'history-aqa', 'edexcel': 'history-edexcel' },
+      'history': { 'aqa': 'history-aqa', 'edexcel': 'history-edexcel', 'ocr': 'history-ocr' },
       'health-social-care': { 'edexcel': 'health-social-care-edexcel', 'ocr': 'health-social-care-ocr' },
       'food-preparation-and-nutrition': { 'eduqas': 'food-preparation-and-nutrition-eduqas' },
       'engineering': { 'eduqas': 'engineering-eduqas', 'wjec': 'engineering-eduqas' },

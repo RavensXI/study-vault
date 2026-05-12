@@ -36,7 +36,13 @@
     if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
     var pref = FreeUser.getSubject(subjectSlug);
     if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
-    return Object.values(pref.options);
+    var slugs = Object.values(pref.options);
+    // OCR-A: International Relations 1918-1975 is the compulsory period
+    // study every J410 student takes — auto-include alongside user picks.
+    if (subjectSlug === 'history-ocr') {
+      slugs = slugs.concat(['international-relations-1918-1975']);
+    }
+    return slugs;
   }
 
   // Drama: free users pick 1 set play from 9 options. Universal units

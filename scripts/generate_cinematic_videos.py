@@ -81,6 +81,7 @@ SUBJECT_ORDER = [
     "music-technology",
     "it-ocr",
     "media-studies-aqa",
+    "history-ocr",
 ]
 
 # ── CLI env to avoid Windows encoding crashes ───────────────────────────
