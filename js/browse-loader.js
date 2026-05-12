@@ -38,7 +38,7 @@
   // History (Apr 2026): `history` → `history-edexcel` so AQA could take `history-aqa`.
   // Slug refactor (May 2026): every free-tier subject is now -{board} suffixed.
   var OLD_TO_NEW_SLUGS = {
-    'history':             ['history-aqa', 'history-edexcel', 'history-ocr'],
+    'history':             ['history-aqa', 'history-edexcel'],
     'english-language':    ['english-language-aqa', 'english-language-edexcel', 'english-language-ocr', 'english-language-eduqas'],
     'english-literature':  ['english-literature-aqa', 'english-literature-edexcel', 'english-literature-ocr', 'english-literature-eduqas'],
     'maths':               ['maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas'],
@@ -151,8 +151,7 @@
     ],
     'history': [
       { board: 'AQA', slug: 'history-aqa' },
-      { board: 'Edexcel', slug: 'history-edexcel' },
-      { board: 'OCR', slug: 'history-ocr' }
+      { board: 'Edexcel', slug: 'history-edexcel' }
     ],
     'physical-education': [
       { board: 'AQA', slug: 'physical-education-aqa' },
@@ -372,21 +371,13 @@
       }
     }
 
-    // Free user History: filter to only the picked options (one per paper section).
-    // AQA students pick 4 of 16, Edexcel students pick 4 of 4 (auto-selected),
-    // OCR-A students pick 3 (non-British depth + thematic + British depth) plus
-    // the fixed International Relations 1918–1975 period study that every J410
-    // student takes — auto-included alongside the user picks.
-    if ((subjectSlug === 'history-aqa' || subjectSlug === 'history-edexcel' || subjectSlug === 'history-ocr') &&
+    // Free user History: filter to only the 4 picked options (one per paper section).
+    // AQA students pick 4 of 16, Edexcel students pick 4 of 4 (auto-selected).
+    if ((subjectSlug === 'history-aqa' || subjectSlug === 'history-edexcel') &&
         typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeHist = FreeUser.getSubject(subjectSlug);
       if (freeHist && freeHist.options && Object.keys(freeHist.options).length > 0) {
         var pickedSlugs = Object.values(freeHist.options);
-        // OCR-A: International Relations is compulsory for every centre, so
-        // pin it in regardless of picks.
-        if (subjectSlug === 'history-ocr') {
-          pickedSlugs = pickedSlugs.concat(['international-relations-1918-1975']);
-        }
         units = units.filter(function (u) {
           return pickedSlugs.indexOf(u.slug) !== -1;
         });
@@ -569,6 +560,28 @@
     // Quote ticker — between title and unit cards
     if (subject.settings && subject.settings.quote_ticker_html) {
       html += subject.settings.quote_ticker_html;
+    }
+
+    // Subject notice — soft dismissible banner used to flag in-flight
+    // changes the user should know about (e.g. an upcoming spec change
+    // that we haven't built coverage for yet). Renders if the subject
+    // has `settings.subject_notice` populated; dismissed once per
+    // browser, keyed on the notice's `dismiss_key` so a new notice on
+    // the same subject re-appears.
+    if (subject.settings && subject.settings.subject_notice) {
+      var notice = subject.settings.subject_notice;
+      if (notice && notice.html) {
+        var dismissKey = 'sv-subject-notice-' + subjectSlug + '-' + (notice.dismiss_key || 'default');
+        var alreadyDismissed = false;
+        try { alreadyDismissed = localStorage.getItem(dismissKey) === '1'; } catch (e) {}
+        if (!alreadyDismissed) {
+          html += '<div class="subject-notice" id="subject-notice" style="max-width:760px; margin:1rem auto 0; padding:0.85rem 1.1rem; background:#fef3c7; border:1px solid #fcd34d; border-radius:12px; display:flex; gap:0.85rem; align-items:flex-start; font-size:0.9rem; color:#78350f; line-height:1.45;">';
+          html += '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:0.1rem;"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>';
+          html += '<div style="flex:1;">' + notice.html + '</div>';
+          html += '<button type="button" onclick="(function(b){try{localStorage.setItem(\'' + dismissKey + '\',\'1\');}catch(e){} var n=document.getElementById(\'subject-notice\'); if(n){n.style.display=\'none\';}})(this)" aria-label="Dismiss notice" style="background:none; border:none; cursor:pointer; color:#78350f; padding:0; line-height:1; flex-shrink:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>';
+          html += '</div>';
+        }
+      }
     }
 
     // Unit grid — uses same .unit-card structure as static pages
