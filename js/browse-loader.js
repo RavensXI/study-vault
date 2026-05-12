@@ -372,13 +372,21 @@
       }
     }
 
-    // Free user History: filter to only the 4 picked options (one per paper section).
-    // AQA students pick 4 of 16, Edexcel students pick 4 of 4 (auto-selected).
-    if ((subjectSlug === 'history-aqa' || subjectSlug === 'history-edexcel') &&
+    // Free user History: filter to only the picked options (one per paper section).
+    // AQA students pick 4 of 16, Edexcel students pick 4 of 4 (auto-selected),
+    // OCR-A students pick 3 (non-British depth + thematic + British depth) plus
+    // the fixed International Relations 1918–1975 period study that every J410
+    // student takes — auto-included alongside the user picks.
+    if ((subjectSlug === 'history-aqa' || subjectSlug === 'history-edexcel' || subjectSlug === 'history-ocr') &&
         typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeHist = FreeUser.getSubject(subjectSlug);
       if (freeHist && freeHist.options && Object.keys(freeHist.options).length > 0) {
         var pickedSlugs = Object.values(freeHist.options);
+        // OCR-A: International Relations is compulsory for every centre, so
+        // pin it in regardless of picks.
+        if (subjectSlug === 'history-ocr') {
+          pickedSlugs = pickedSlugs.concat(['international-relations-1918-1975']);
+        }
         units = units.filter(function (u) {
           return pickedSlugs.indexOf(u.slug) !== -1;
         });
