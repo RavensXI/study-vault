@@ -250,8 +250,29 @@
 
     // School students can only access subscribed or bespoke subjects
     if (typeof SchoolSession !== 'undefined' && SchoolSession.isActive() && !hasBespoke && !SchoolSession.isSubscribed(subjectSlug)) {
-      showError('Subject not available', 'Your school does not currently subscribe to this subject.');
-      return;
+      // Base-slug landing (e.g. /browse/maths) → if the school subscribes to a
+      // single board variant (e.g. maths-edexcel), redirect there. If more than
+      // one variant is subscribed, fall through to the standard board picker
+      // (the user can still pick). If none, show the not-subscribed error.
+      var variants = BASE_SLUG_BOARDS[subjectSlug];
+      if (variants) {
+        var subscribedVariants = variants.filter(function (v) {
+          return SchoolSession.isSubscribed(v.slug) || SchoolSession.hasBespoke(v.slug);
+        });
+        if (subscribedVariants.length === 1) {
+          window.location.replace('/browse/' + subscribedVariants[0].slug + (window.location.search || '') + (window.location.hash || ''));
+          return;
+        }
+        if (subscribedVariants.length > 1) {
+          // Multiple variants — let the standard flow render the picker.
+        } else {
+          showError('Subject not available', 'Your school does not currently subscribe to this subject.');
+          return;
+        }
+      } else {
+        showError('Subject not available', 'Your school does not currently subscribe to this subject.');
+        return;
+      }
     }
 
     var subjectQuery = sb
