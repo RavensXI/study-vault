@@ -526,23 +526,51 @@
     }, 10);
   }
 
+  // Capture-phase click handler runs BEFORE the narration jump-to-clip listener
+  // that main.js attaches to [data-narration-id] paragraphs. Two responsibilities:
+  // (1) open the popover when an existing highlight is clicked
+  // (2) suppress the click that follows a drag-selection so narration doesn't fire
   function onMarkClick(evt) {
     var mark = evt.target.closest('mark.sv-hl');
-    if (!mark) return;
-    evt.preventDefault();
-    evt.stopPropagation();
-    var hlId = mark.getAttribute('data-hl-id');
-    var lessonId = window._lessonId;
-    var list = getHighlights(lessonId);
-    var hl = null;
-    for (var i = 0; i < list.length; i++) {
-      if (list[i].id === hlId) { hl = list[i]; break; }
+    if (mark) {
+      evt.preventDefault();
+      evt.stopPropagation();
+      var hlId = mark.getAttribute('data-hl-id');
+      var lessonId = window._lessonId;
+      var list = getHighlights(lessonId);
+      var hl = null;
+      for (var i = 0; i < list.length; i++) {
+        if (list[i].id === hlId) { hl = list[i]; break; }
+      }
+      if (!hl) return;
+      activeHighlight = hl;
+      pendingRange = null;
+      pendingAnchor = null;
+      showPopoverAt(mark.getBoundingClientRect(), { canDelete: true, note: hl.note || '' });
+      return;
     }
-    if (!hl) return;
-    activeHighlight = hl;
-    pendingRange = null;
-    pendingAnchor = null;
-    showPopoverAt(mark.getBoundingClientRect(), { canDelete: true, note: hl.note || '' });
+    if (justDragged) {
+      var sel = window.getSelection();
+      if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) {
+        evt.stopPropagation();
+      }
+      justDragged = false;
+    }
+  }
+
+  // Drag-detection: only suppress narration on real selections, not bare clicks
+  var justDragged = false;
+  var mouseDownX = 0;
+  var mouseDownY = 0;
+  function onMouseDownTracker(evt) {
+    mouseDownX = evt.clientX;
+    mouseDownY = evt.clientY;
+    justDragged = false;
+  }
+  function onMouseMoveTracker(evt) {
+    if (Math.abs(evt.clientX - mouseDownX) > 3 || Math.abs(evt.clientY - mouseDownY) > 3) {
+      justDragged = true;
+    }
   }
 
   function onDocClick(evt) {
@@ -782,6 +810,8 @@
     refreshFab();
     rehydrate();
     var container = document.getElementById('study-notes');
+    container.addEventListener('mousedown', onMouseDownTracker, true);
+    container.addEventListener('mousemove', onMouseMoveTracker);
     container.addEventListener('mouseup', onMouseUp);
     // Touch support: long-press handled via native selection, then trigger on selectionchange
     container.addEventListener('touchend', onMouseUp);
