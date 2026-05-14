@@ -33,21 +33,41 @@
   }
 
   // ---------- constants ----------
-  var COLORS = [
-    { id: 'yellow', label: 'Yellow', bg: '#fef08a', mark: '#fef9c3' },
-    { id: 'green',  label: 'Green',  bg: '#bbf7d0', mark: '#dcfce7' },
-    { id: 'pink',   label: 'Pink',   bg: '#fbcfe8', mark: '#fce7f3' },
-    { id: 'blue',   label: 'Blue',   bg: '#bfdbfe', mark: '#dbeafe' }
+  // Categories drive both the cognitive choice ("what kind of thing is this?")
+  // and the visual colour. Forcing this single choice is the highest-value
+  // moment in the feature — even a basic Year 11 student is pulled into
+  // metacognition. Categories are cross-curricular by design.
+  var CATEGORIES = [
+    { id: 'fact',     label: 'Key fact', short: 'Fact',    color: 'yellow', bg: '#fef08a', mark: '#fef9c3', hint: 'Dates, names, terms, formulas, quotes — facts to memorise.' },
+    { id: 'why',      label: 'Why',      short: 'Why',     color: 'green',  bg: '#bbf7d0', mark: '#dcfce7', hint: "Causes, reasons, mechanisms, derivations, the writer's intent." },
+    { id: 'so-what',  label: 'So what',  short: 'So what', color: 'pink',   bg: '#fbcfe8', mark: '#fce7f3', hint: 'Consequences, applications, exam relevance, links to themes.' },
+    { id: 'question', label: 'Question', short: 'Q',       color: 'blue',   bg: '#bfdbfe', mark: '#dbeafe', hint: "Something I don't understand or want to follow up." }
   ];
-  var DEFAULT_COLOR = 'yellow';
+  var DEFAULT_CATEGORY = 'fact';
   var CONTEXT_LEN = 30;
   var STORAGE_PREFIX = 'sv-hl:';
   var INDEX_KEY = 'sv-hl-index';
 
-  function colorFor(id) {
-    for (var i = 0; i < COLORS.length; i++) if (COLORS[i].id === id) return COLORS[i];
-    return COLORS[0];
+  function categoryFor(id) {
+    for (var i = 0; i < CATEGORIES.length; i++) if (CATEGORIES[i].id === id) return CATEGORIES[i];
+    return CATEGORIES[0];
   }
+
+  // Legacy highlights only have `color`. Map back so they render & group
+  // correctly under the new system.
+  function categoryFromColor(color) {
+    if (color === 'green') return 'why';
+    if (color === 'pink') return 'so-what';
+    if (color === 'blue') return 'question';
+    return 'fact';
+  }
+
+  function getCategoryId(hl) {
+    return hl && hl.category ? hl.category : categoryFromColor(hl && hl.color);
+  }
+
+  // Back-compat: callers passing a legacy colour id still resolve to a category.
+  function colorFor(id) { return categoryFor(id); }
 
   // ---------- storage ----------
   function lessonKey(lessonId) { return STORAGE_PREFIX + lessonId; }
@@ -357,9 +377,12 @@
       // splitText returns the part AFTER s, so we then split at (e - s)
       if (e - s < middle.nodeValue.length) middle.splitText(e - s);
       var mark = document.createElement('mark');
-      mark.className = 'sv-hl sv-hl--' + hl.color;
+      var catId = getCategoryId(hl);
+      var catColor = hl.color || categoryFor(catId).color;
+      mark.className = 'sv-hl sv-hl--' + catColor;
       mark.setAttribute('data-hl-id', hl.id);
-      mark.setAttribute('data-hl-color', hl.color);
+      mark.setAttribute('data-hl-color', catColor);
+      mark.setAttribute('data-hl-category', catId);
       if (hl.note) mark.setAttribute('data-hl-has-note', '1');
       middle.parentNode.insertBefore(mark, middle);
       mark.appendChild(middle);
@@ -397,40 +420,41 @@
     popoverEl.setAttribute('role', 'dialog');
     popoverEl.setAttribute('aria-label', 'Highlight options');
     popoverEl.innerHTML =
-      '<div class="sv-hl-popover-row">' +
-        COLORS.map(function (c) {
-          return '<button class="sv-hl-swatch" data-color="' + c.id + '" ' +
-            'style="background:' + c.bg + '" title="' + c.label + '" aria-label="' + c.label + '"></button>';
+      '<div class="sv-hl-popover-prompt">What kind of highlight is this?</div>' +
+      '<div class="sv-hl-popover-cats">' +
+        CATEGORIES.map(function (c) {
+          return '<button class="sv-hl-cat sv-hl-cat--' + c.id + '" type="button" data-cat="' + c.id + '" aria-pressed="false" title="' + c.hint + '">' +
+            '<span class="sv-hl-cat-dot"></span>' +
+            '<span class="sv-hl-cat-label">' + c.label + '</span>' +
+          '</button>';
         }).join('') +
-        '<span class="sv-hl-divider"></span>' +
-        '<button class="sv-hl-icon-btn sv-hl-toggle-note" type="button" title="Add note">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>' +
-        '</button>' +
-        '<button class="sv-hl-icon-btn sv-hl-delete" type="button" title="Delete highlight" hidden>' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>' +
-        '</button>' +
       '</div>' +
       '<div class="sv-hl-note-row" hidden>' +
         '<textarea class="sv-hl-note" rows="3" maxlength="1000" placeholder="Add a note (optional)…"></textarea>' +
         '<div class="sv-hl-note-actions">' +
-          '<button class="sv-hl-btn sv-hl-cancel" type="button">Cancel</button>' +
-          '<button class="sv-hl-btn sv-hl-save sv-hl-btn--primary" type="button">Save</button>' +
+          '<button class="sv-hl-icon-btn sv-hl-delete" type="button" title="Delete highlight" hidden>' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>' +
+          '</button>' +
+          '<button class="sv-hl-btn sv-hl-cancel" type="button">Done</button>' +
+          '<button class="sv-hl-btn sv-hl-save sv-hl-btn--primary" type="button">Save note</button>' +
         '</div>' +
       '</div>';
     document.body.appendChild(popoverEl);
 
-    // Swatch click — apply color
-    popoverEl.querySelectorAll('.sv-hl-swatch').forEach(function (sw) {
-      sw.addEventListener('click', function () {
-        var color = sw.getAttribute('data-color');
-        applyOrUpdateColor(color);
+    // Category button click — create/update highlight + reveal note row
+    popoverEl.querySelectorAll('.sv-hl-cat').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var catId = btn.getAttribute('data-cat');
+        applyOrUpdateCategory(catId);
+        popoverEl.querySelectorAll('.sv-hl-cat').forEach(function (b) {
+          b.setAttribute('aria-pressed', b === btn ? 'true' : 'false');
+        });
+        var prompt = popoverEl.querySelector('.sv-hl-popover-prompt');
+        if (prompt) prompt.style.display = 'none';
+        var row = popoverEl.querySelector('.sv-hl-note-row');
+        row.hidden = false;
+        popoverEl.querySelector('.sv-hl-note').focus();
       });
-    });
-    // Toggle note row
-    popoverEl.querySelector('.sv-hl-toggle-note').addEventListener('click', function () {
-      var row = popoverEl.querySelector('.sv-hl-note-row');
-      row.hidden = !row.hidden;
-      if (!row.hidden) popoverEl.querySelector('.sv-hl-note').focus();
     });
     // Save note
     popoverEl.querySelector('.sv-hl-save').addEventListener('click', function () {
@@ -498,27 +522,30 @@
   }
 
   // ---------- create / update / delete flow ----------
-  function applyOrUpdateColor(color) {
+  function applyOrUpdateCategory(catId) {
     var lessonId = window._lessonId;
     if (!lessonId) return;
+    var cat = categoryFor(catId);
     if (activeHighlight) {
-      // Update existing
+      // Update existing — change category + matching colour
       var list = getHighlights(lessonId);
       for (var i = 0; i < list.length; i++) {
         if (list[i].id === activeHighlight.id) {
-          list[i].color = color;
+          list[i].category = cat.id;
+          list[i].color = cat.color;
           list[i].updatedAt = new Date().toISOString();
           activeHighlight = list[i];
           break;
         }
       }
       saveHighlights(lessonId, list);
-      // Re-render marks with new color
+      // Re-render marks: rotate the colour class
       var marks = document.querySelectorAll('mark.sv-hl[data-hl-id="' + cssEscape(activeHighlight.id) + '"]');
       marks.forEach(function (m) {
-        COLORS.forEach(function (c) { m.classList.remove('sv-hl--' + c.id); });
-        m.classList.add('sv-hl--' + color);
-        m.setAttribute('data-hl-color', color);
+        CATEGORIES.forEach(function (c) { m.classList.remove('sv-hl--' + c.color); });
+        m.classList.add('sv-hl--' + cat.color);
+        m.setAttribute('data-hl-color', cat.color);
+        m.setAttribute('data-hl-category', cat.id);
       });
       refreshFab();
     } else if (pendingRange && pendingAnchor) {
@@ -528,7 +555,8 @@
         text: pendingAnchor.text,
         prefix: pendingAnchor.prefix,
         suffix: pendingAnchor.suffix,
-        color: color,
+        category: cat.id,
+        color: cat.color,
         note: '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
