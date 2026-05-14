@@ -142,12 +142,40 @@
     return c ? cleanTextContent(c) : '';
   }
 
+  // Like range.toString(), but skips text inside excluded popups. Range.toString()
+  // is pure DOM concatenation and ignores user-select:none, so cross-element
+  // selections (e.g. a keyword + adjacent words) would otherwise glue the popup's
+  // definition into the middle of the snippet.
+  function cleanRangeText(range) {
+    if (!range || range.collapsed) return '';
+    var container = document.getElementById('study-notes');
+    if (!container) return range.toString();
+    var startNode = range.startContainer;
+    var endNode = range.endContainer;
+    var parts = [];
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        if (!range.intersectsNode(n)) return NodeFilter.FILTER_REJECT;
+        if (isExcludedTextNode(n)) return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n;
+    while ((n = walker.nextNode())) {
+      var text = n.nodeValue;
+      var s = (n === startNode) ? range.startOffset : 0;
+      var e = (n === endNode) ? range.endOffset : text.length;
+      if (e > s) parts.push(text.substring(s, e));
+    }
+    return parts.join('');
+  }
+
   // Build context anchor for a freshly-made selection
   function buildAnchor(range) {
     var container = document.getElementById('study-notes');
     if (!container || !container.contains(range.commonAncestorContainer)) return null;
     var fullText = cleanTextContent(container);
-    var selected = range.toString();
+    var selected = cleanRangeText(range);
     // Locate offset by walking text nodes and accumulating
     var offset = textOffsetOfRangeStart(container, range);
     if (offset < 0) return null;
@@ -175,7 +203,7 @@
       total += n.nodeValue.length;
     }
     // Fallback: search by clean text content
-    var snippet = range.toString();
+    var snippet = cleanRangeText(range);
     var idx = cleanTextContent(container).indexOf(snippet);
     return idx;
   }
