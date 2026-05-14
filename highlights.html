@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Highlights — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <meta name="theme-color" content="#2d2a26">
+  <style>
+    .hl-page{max-width:880px;margin:0 auto;padding:32px 20px 80px}
+    .hl-page-header{margin-bottom:32px}
+    .hl-page-header h1{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:2.2rem;margin:0 0 8px;color:#2d2a26}
+    .hl-page-header p{margin:0;color:#5d564b;font-size:1rem}
+    .hl-empty{text-align:center;padding:64px 20px;background:#fff;border-radius:16px;border:1px solid rgba(45,42,38,.06)}
+    .hl-empty h2{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.4rem;margin:0 0 8px;color:#2d2a26}
+    .hl-empty p{margin:0 0 6px;color:#5d564b;line-height:1.55}
+    .hl-empty p.muted{color:#7a7367;font-size:.92rem}
+    .hl-subject{margin-bottom:36px}
+    .hl-subject-name{font-size:.78rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:#7a7367;margin:0 0 10px}
+    .hl-lesson{background:#fff;border-radius:16px;border:1px solid rgba(45,42,38,.06);padding:20px 22px;margin-bottom:14px;box-shadow:0 2px 8px rgba(20,18,15,.04)}
+    .hl-lesson-header{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+    .hl-lesson-title{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.15rem;color:#2d2a26;margin:0;flex:1;min-width:200px}
+    .hl-lesson-meta{display:flex;align-items:center;gap:10px}
+    .hl-lesson-count{font-size:.82rem;color:#7a7367}
+    .hl-open-lesson{font-size:.85rem;color:#2d2a26;text-decoration:none;padding:5px 10px;border-radius:8px;border:1px solid rgba(45,42,38,.15);transition:background .15s ease}
+    .hl-open-lesson:hover{background:#faf8f5}
+    .hl-items{display:flex;flex-direction:column;gap:10px}
+    .hl-item{display:flex;flex-direction:column;gap:8px;padding:12px 14px;background:#faf8f5;border-radius:12px;border:1px solid rgba(45,42,38,.04)}
+    .hl-snippet{position:relative;padding:9px 12px 9px 16px;border-radius:10px;font-size:.95rem;line-height:1.5;color:#2d2a26}
+    .hl-snippet--yellow{background:#fef9c3}
+    .hl-snippet--green{background:#dcfce7}
+    .hl-snippet--pink{background:#fce7f3}
+    .hl-snippet--blue{background:#dbeafe}
+    .hl-snippet-bar{position:absolute;left:0;top:5px;bottom:5px;width:4px;border-radius:2px}
+    .hl-snippet-bar--yellow{background:#fef08a}
+    .hl-snippet-bar--green{background:#bbf7d0}
+    .hl-snippet-bar--pink{background:#fbcfe8}
+    .hl-snippet-bar--blue{background:#bfdbfe}
+    .hl-note{margin:0;padding:8px 12px;background:#fff;border-radius:10px;font-size:.92rem;color:#3d3a35;border-left:3px solid rgba(45,42,38,.25);line-height:1.5}
+    .hl-item-actions{display:flex;gap:8px;justify-content:flex-end}
+    .hl-item-jump,.hl-item-delete{padding:5px 11px;border-radius:8px;border:1px solid rgba(45,42,38,.15);background:#fff;font-family:inherit;font-size:.82rem;color:#2d2a26;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+    .hl-item-jump:hover{background:#faf8f5}
+    .hl-item-delete{color:#a14242;border-color:rgba(161,66,66,.25)}
+    .hl-item-delete:hover{background:#fbecec}
+    .hl-export-row{display:flex;gap:8px;justify-content:flex-end;margin-bottom:18px;flex-wrap:wrap}
+    .hl-export-btn{padding:7px 13px;border-radius:10px;border:1px solid rgba(45,42,38,.15);background:#fff;font-family:inherit;font-size:.85rem;color:#2d2a26;cursor:pointer}
+    .hl-export-btn:hover{background:#faf8f5}
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="hl-page">
+    <div class="hl-page-header">
+      <h1>My highlights</h1>
+      <p>Everything you've highlighted across StudyVault, in one place. Your highlights are saved on this device.</p>
+    </div>
+
+    <div class="hl-export-row" id="hl-export-row" style="display:none">
+      <button class="hl-export-btn" id="hl-export-json" type="button">Export as JSON</button>
+    </div>
+
+    <div id="hl-content"></div>
+  </main>
+
+  <script>
+  (function () {
+    var INDEX_KEY = 'sv-hl-index';
+    var STORAGE_PREFIX = 'sv-hl:';
+
+    function readIndex() {
+      try {
+        var raw = localStorage.getItem(INDEX_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+    function readHighlights(lessonId) {
+      try {
+        var raw = localStorage.getItem(STORAGE_PREFIX + lessonId);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+    function saveHighlights(lessonId, list) {
+      try {
+        if (list && list.length) {
+          localStorage.setItem(STORAGE_PREFIX + lessonId, JSON.stringify(list));
+        } else {
+          localStorage.removeItem(STORAGE_PREFIX + lessonId);
+          var idx = readIndex().filter(function (e) { return e.lesson_id !== lessonId; });
+          localStorage.setItem(INDEX_KEY, JSON.stringify(idx));
+        }
+      } catch (e) {}
+    }
+    function escapeHtml(s) {
+      return String(s || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function render() {
+      var index = readIndex();
+      // Drop entries with 0 highlights or no lesson_id
+      index = index.filter(function (e) { return e && e.lesson_id && e.count > 0; });
+      var content = document.getElementById('hl-content');
+      var exportRow = document.getElementById('hl-export-row');
+
+      if (!index.length) {
+        exportRow.style.display = 'none';
+        content.innerHTML =
+          '<div class="hl-empty">' +
+            '<h2>No highlights yet</h2>' +
+            '<p>Open any lesson, select some text, and pick a colour.</p>' +
+            '<p class="muted">Highlighting is a beta feature — enable it on a lesson by adding <code>?highlights=1</code> to the URL.</p>' +
+          '</div>';
+        return;
+      }
+      exportRow.style.display = '';
+
+      // Group by subject_name (fallback to "Other")
+      var bySubject = {};
+      index.forEach(function (entry) {
+        var key = entry.subject_name || 'Other';
+        if (!bySubject[key]) bySubject[key] = [];
+        bySubject[key].push(entry);
+      });
+
+      var html = '';
+      Object.keys(bySubject).sort().forEach(function (subj) {
+        html += '<section class="hl-subject">';
+        html += '<h2 class="hl-subject-name">' + escapeHtml(subj) + '</h2>';
+        var lessons = bySubject[subj].sort(function (a, b) {
+          return (b.last_updated || '').localeCompare(a.last_updated || '');
+        });
+        lessons.forEach(function (entry) {
+          var highlights = readHighlights(entry.lesson_id);
+          if (!highlights.length) return;
+          highlights.sort(function (a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
+          var lessonUrl = entry.lesson_url || '/';
+          var sep = lessonUrl.indexOf('?') >= 0 ? '&' : '?';
+          html += '<article class="hl-lesson">';
+          html +=   '<div class="hl-lesson-header">';
+          html +=     '<h3 class="hl-lesson-title">' + escapeHtml(entry.lesson_title || 'Untitled lesson') + '</h3>';
+          html +=     '<div class="hl-lesson-meta">';
+          html +=       '<span class="hl-lesson-count">' + highlights.length + ' highlight' + (highlights.length === 1 ? '' : 's') + '</span>';
+          html +=       '<a class="hl-open-lesson" href="' + escapeHtml(lessonUrl) + sep + 'highlights=1">Open lesson →</a>';
+          html +=     '</div>';
+          html +=   '</div>';
+          html +=   '<div class="hl-items">';
+          highlights.forEach(function (h) {
+            var color = h.color || 'yellow';
+            var noteHtml = h.note ? '<p class="hl-note">' + escapeHtml(h.note) + '</p>' : '';
+            html += '<div class="hl-item" data-hl-id="' + escapeHtml(h.id) + '" data-lesson-id="' + escapeHtml(entry.lesson_id) + '">';
+            html +=   '<div class="hl-snippet hl-snippet--' + escapeHtml(color) + '">';
+            html +=     '<span class="hl-snippet-bar hl-snippet-bar--' + escapeHtml(color) + '"></span>';
+            html +=     escapeHtml(h.text);
+            html +=   '</div>';
+            html +=   noteHtml;
+            html +=   '<div class="hl-item-actions">';
+            html +=     '<a class="hl-item-jump" href="' + escapeHtml(lessonUrl) + sep + 'highlights=1#' + escapeHtml(h.id) + '">Jump to</a>';
+            html +=     '<button class="hl-item-delete" type="button">Delete</button>';
+            html +=   '</div>';
+            html += '</div>';
+          });
+          html +=   '</div>';
+          html += '</article>';
+        });
+        html += '</section>';
+      });
+      content.innerHTML = html;
+
+      // Wire deletion
+      content.querySelectorAll('.hl-item-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var item = btn.closest('.hl-item');
+          var hlId = item.getAttribute('data-hl-id');
+          var lessonId = item.getAttribute('data-lesson-id');
+          var list = readHighlights(lessonId).filter(function (h) { return h.id !== hlId; });
+          saveHighlights(lessonId, list);
+          // Update index count
+          var idx = readIndex();
+          for (var i = 0; i < idx.length; i++) {
+            if (idx[i].lesson_id === lessonId) {
+              idx[i].count = list.length;
+              if (list.length === 0) idx.splice(i, 1);
+              break;
+            }
+          }
+          try { localStorage.setItem(INDEX_KEY, JSON.stringify(idx)); } catch (e) {}
+          render();
+        });
+      });
+    }
+
+    document.getElementById('hl-export-json').addEventListener('click', function () {
+      var index = readIndex();
+      var bundle = { exported_at: new Date().toISOString(), lessons: [] };
+      index.forEach(function (entry) {
+        bundle.lessons.push({
+          lesson_id: entry.lesson_id,
+          lesson_title: entry.lesson_title,
+          lesson_url: entry.lesson_url,
+          subject_name: entry.subject_name,
+          highlights: readHighlights(entry.lesson_id)
+        });
+      });
+      var blob = new Blob([JSON.stringify(bundle, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'studyvault-highlights-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    });
+
+    render();
+  })();
+  </script>
+</body>
+</html>

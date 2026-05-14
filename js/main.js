@@ -43,6 +43,7 @@ function initLessonFeatures() {
   initLessonProgress();
   initFlashcardModal();
   initSidebarPanel();
+  if (typeof window.initHighlightAnnotate === 'function') window.initHighlightAnnotate();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
