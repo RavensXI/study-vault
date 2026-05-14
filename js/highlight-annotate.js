@@ -106,20 +106,47 @@
   }
 
   // ---------- text normalization & anchoring ----------
+  // Glossary popups (.term-popup) are children of .term elements and contain
+  // the definition text. They're invisible (opacity:0) but live in the DOM,
+  // so range.toString() and container.textContent both include them. We must
+  // exclude them everywhere — otherwise selections leak the definition into
+  // the highlight, and marks end up wrapping text inside the popup (which
+  // gives an unreadable yellow-on-white when the popup pops up).
+  var EXCLUDED_FROM_HIGHLIGHT = '.term-popup';
+
   function normalize(s) {
     return (s || '').replace(/\s+/g, ' ').trim();
   }
 
+  function isExcludedTextNode(node) {
+    return !!(node.parentElement && node.parentElement.closest(EXCLUDED_FROM_HIGHLIGHT));
+  }
+
+  // Like Element.textContent, but skips text inside EXCLUDED_FROM_HIGHLIGHT
+  // selectors so the offsets we compute match what the user actually sees.
+  function cleanTextContent(container) {
+    if (!container) return '';
+    var parts = [];
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        return isExcludedTextNode(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n;
+    while ((n = walker.nextNode())) parts.push(n.nodeValue);
+    return parts.join('');
+  }
+
   function getContainerText() {
     var c = document.getElementById('study-notes');
-    return c ? c.textContent : '';
+    return c ? cleanTextContent(c) : '';
   }
 
   // Build context anchor for a freshly-made selection
   function buildAnchor(range) {
     var container = document.getElementById('study-notes');
     if (!container || !container.contains(range.commonAncestorContainer)) return null;
-    var fullText = container.textContent || '';
+    var fullText = cleanTextContent(container);
     var selected = range.toString();
     // Locate offset by walking text nodes and accumulating
     var offset = textOffsetOfRangeStart(container, range);
@@ -134,17 +161,22 @@
   }
 
   function textOffsetOfRangeStart(container, range) {
-    // Walk text nodes accumulating length until we reach the range's start node
-    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    // Walk text nodes (skipping excluded popup content) accumulating length
+    // until we reach the range's start node
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        return isExcludedTextNode(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
     var total = 0;
     var n;
     while ((n = walker.nextNode())) {
       if (n === range.startContainer) return total + range.startOffset;
       total += n.nodeValue.length;
     }
-    // Fallback: search by text content
+    // Fallback: search by clean text content
     var snippet = range.toString();
-    var idx = container.textContent.indexOf(snippet);
+    var idx = cleanTextContent(container).indexOf(snippet);
     return idx;
   }
 
@@ -152,7 +184,7 @@
   function findRangeForAnchor(anchor) {
     var container = document.getElementById('study-notes');
     if (!container) return null;
-    var normalizedFull = container.textContent;
+    var normalizedFull = cleanTextContent(container);
     var needle = anchor.text;
     if (!needle) return null;
     // Find candidate occurrences and disambiguate by prefix/suffix when possible
@@ -188,7 +220,11 @@
 
   // Build a Range from a character offset measured against textContent
   function rangeFromOffset(container, charOffset, length) {
-    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        return isExcludedTextNode(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
     var consumed = 0;
     var startNode = null, startNodeOffset = 0;
     var endNode = null, endNodeOffset = 0;
@@ -216,7 +252,11 @@
   function rangeFromCollapsedOffset(container, collapsedOffset, length) {
     // Walk text nodes, tracking BOTH the raw offset and the collapsed offset, so
     // we can re-anchor when DOM whitespace has changed since the highlight was made.
-    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null);
+    var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        return isExcludedTextNode(n) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
     var raw = 0, collapsed = 0;
     var startNode = null, startNodeOffset = 0;
     var endNode = null, endNodeOffset = 0;
@@ -264,6 +304,7 @@
     var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
       acceptNode: function (node) {
         if (!range.intersectsNode(node)) return NodeFilter.FILTER_REJECT;
+        if (isExcludedTextNode(node)) return NodeFilter.FILTER_REJECT;
         // Don't re-wrap text already inside another sv-hl mark
         var p = node.parentNode;
         while (p && p !== container) {
@@ -783,6 +824,9 @@
     var s = document.createElement('style');
     s.id = 'sv-hl-styles';
     s.textContent =
+      // Belt-and-braces: also tell the browser not to select glossary popups,
+      // so even if our JS misses, the native selection won't pick them up.
+      '.term-popup{user-select:none;-webkit-user-select:none}' +
       'mark.sv-hl{padding:0.05em 0;border-radius:3px;cursor:pointer;transition:filter .15s ease;color:inherit}' +
       'mark.sv-hl:hover{filter:brightness(.96)}' +
       'mark.sv-hl--yellow{background:#fef9c3}' +
