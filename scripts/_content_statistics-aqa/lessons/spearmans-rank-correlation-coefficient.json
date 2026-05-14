@@ -24,56 +24,233 @@
     "worked_examples": [
       {
         "difficulty": "Bronze",
-        "question": "Two judges rank 5 students: Judge A: 1,2,3,4,5. Judge B: 1,3,2,4,5. Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given), calculate \\(\\sum d^2\\).",
+        "question": "Two judges rank 5 students. Use the rank table to find \\(\\sum d^2\\). The formula \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) is given.",
         "steps": [
-          {"label": "Step 1 &mdash; Find d values", "content": "<p>d: 0, &minus;1, 1, 0, 0.</p>"},
-          {"label": "Answer", "content": "<p><strong>\\(d^2\\): 0, 1, 1, 0, 0. \\(\\sum d^2 = 2\\).</strong></p>", "isAnswer": true}
+          {
+            "label": "Step 1 &mdash; Read the rank table",
+            "content": "<table class=\"data-table\"><tr><th>Student</th><th>Judge A rank</th><th>Judge B rank</th><th>d</th><th>d&sup2;</th></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr><tr><td>2</td><td>2</td><td>3</td><td>&minus;1</td><td>1</td></tr><tr><td>3</td><td>3</td><td>2</td><td>1</td><td>1</td></tr><tr><td>4</td><td>4</td><td>4</td><td>0</td><td>0</td></tr><tr><td>5</td><td>5</td><td>5</td><td>0</td><td>0</td></tr></table>"
+          },
+          {
+            "label": "Answer",
+            "content": "<p><strong>\\(\\sum d^2 = 0+1+1+0+0 = 2\\).</strong></p>",
+            "isAnswer": true
+          }
         ]
       },
       {
         "difficulty": "Silver",
-        "question": "Six students: ranks (Maths, English): (1,2),(2,1),(3,4),(4,3),(5,6),(6,5). Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given), calculate \\(r_s\\) and interpret.",
+        "question": "Six students are ranked in Maths and English. Use the rank table to calculate \\(r_s\\) and interpret the result. The formula \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) is given.",
         "steps": [
-          {"label": "Step 1 &mdash; d values and \\(\\sum d^2\\)", "content": "<p>d: &minus;1,1,&minus;1,1,&minus;1,1. \\(d^2\\): all 1. \\(\\sum d^2=6\\).</p>"},
-          {"label": "Step 2 &mdash; Apply formula", "content": "<p>\\(r_s = 1 - \\frac{36}{210} \\approx 0.83\\).</p>"},
-          {"label": "Answer", "content": "<p><strong>\\(r_s \\approx 0.83\\). Since \\(|r_s| \\geq 0.6\\): strong positive correlation &mdash; students who rank highly in Maths tend to rank highly in English.</strong></p>", "isAnswer": true}
+          {
+            "label": "Step 1 &mdash; Rank table",
+            "content": "<table class=\"data-table\"><tr><th>Student</th><th>Maths rank</th><th>English rank</th><th>d</th><th>d&sup2;</th></tr><tr><td>A</td><td>1</td><td>2</td><td>&minus;1</td><td>1</td></tr><tr><td>B</td><td>2</td><td>1</td><td>1</td><td>1</td></tr><tr><td>C</td><td>3</td><td>4</td><td>&minus;1</td><td>1</td></tr><tr><td>D</td><td>4</td><td>3</td><td>1</td><td>1</td></tr><tr><td>E</td><td>5</td><td>6</td><td>&minus;1</td><td>1</td></tr><tr><td>F</td><td>6</td><td>5</td><td>1</td><td>1</td></tr><tr><td></td><td></td><td></td><td><strong>&sum;</strong></td><td><strong>6</strong></td></tr></table>"
+          },
+          {
+            "label": "Step 2 &mdash; Apply formula",
+            "content": "<p>\\(r_s = 1 - \\frac{6 \\times 6}{6(36-1)} = 1 - \\frac{36}{210} \\approx 0.83\\).</p>"
+          },
+          {
+            "label": "Answer",
+            "content": "<p><strong>\\(r_s \\approx 0.83\\). Since \\(|r_s| \\geq 0.6\\): strong positive correlation &mdash; students who rank highly in Maths tend to rank highly in English.</strong></p>",
+            "isAnswer": true
+          }
         ]
       },
       {
         "difficulty": "Gold",
-        "question": "Seven students score (Science, Art): (85,72),(60,90),(75,75),(90,60),(60,80),(70,70),(80,65). Rank both 1=highest. Two students tie for science. Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given), calculate \\(r_s\\) to 2 d.p. and interpret.",
+        "question": "Seven students score in Science and Art. Two students are tied in Science. Use the rank table to calculate \\(r_s\\) to 2 d.p. and interpret. The formula \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) is given.",
         "steps": [
-          {"label": "Step 1 &mdash; Rank Science (1=highest)", "content": "<p>90&rarr;1, 85&rarr;2, 80&rarr;3, 75&rarr;4, 70&rarr;5, 60 tied ranks 6&7 &rarr; 6.5 each. Science ranks: 2,6.5,4,1,6.5,5,3.</p>"},
-          {"label": "Step 2 &mdash; Rank Art and find d", "content": "<p>Art ranks (1=highest): 90&rarr;1, 80&rarr;2, 75&rarr;3, 72&rarr;4, 70&rarr;5, 65&rarr;6, 60&rarr;7. Art ranks: 4,1,3,7,2,5,6.</p><p>d: &minus;2,5.5,1,&minus;6,4.5,0,&minus;3. \\(d^2\\): 4,30.25,1,36,20.25,0,9. \\(\\sum d^2=100.5\\).</p>"},
-          {"label": "Answer", "content": "<p>\\(r_s = 1 - \\frac{603}{336} \\approx -0.80\\).</p><p><strong>\\(r_s \\approx -0.80\\). Since \\(|r_s| \\geq 0.6\\): strong negative correlation &mdash; students who rank highly in Science tend to rank lower in Art.</strong></p>", "isAnswer": true}
+          {
+            "label": "Step 1 &mdash; Assign ranks (1 = highest score)",
+            "content": "<table class=\"data-table\"><tr><th>Student</th><th>Science score</th><th>Science rank</th><th>Art score</th><th>Art rank</th><th>d</th><th>d&sup2;</th></tr><tr><td>A</td><td>85</td><td>2</td><td>72</td><td>4</td><td>&minus;2</td><td>4</td></tr><tr><td>B</td><td>60</td><td>6.5</td><td>90</td><td>1</td><td>5.5</td><td>30.25</td></tr><tr><td>C</td><td>75</td><td>4</td><td>75</td><td>3</td><td>1</td><td>1</td></tr><tr><td>D</td><td>90</td><td>1</td><td>60</td><td>7</td><td>&minus;6</td><td>36</td></tr><tr><td>E</td><td>60</td><td>6.5</td><td>80</td><td>2</td><td>4.5</td><td>20.25</td></tr><tr><td>F</td><td>70</td><td>5</td><td>70</td><td>5</td><td>0</td><td>0</td></tr><tr><td>G</td><td>80</td><td>3</td><td>65</td><td>6</td><td>&minus;3</td><td>9</td></tr><tr><td></td><td></td><td></td><td></td><td></td><td><strong>&sum;</strong></td><td><strong>100.5</strong></td></tr></table><p>Students B and E both scored 60 in Science &mdash; they tie for ranks 6 and 7, so each gets rank 6.5.</p>"
+          },
+          {
+            "label": "Answer",
+            "content": "<p>\\(r_s = 1 - \\frac{6 \\times 100.5}{7(49-1)} = 1 - \\frac{603}{336} \\approx -0.80\\).</p><p><strong>\\(r_s \\approx -0.80\\). Since \\(|r_s| \\geq 0.6\\): strong negative correlation &mdash; students who rank highly in Science tend to rank lower in Art.</strong></p>",
+            "isAnswer": true
+          }
         ]
       }
     ],
     "problem_bank": {
       "bronze": [
-        {"display": "Two values tie for 4th and 5th position. What rank should each be assigned?", "input_type": "single_value", "solutions": [4.5], "accept": 0.01, "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "Mean of ranks 4 and 5 = (4+5)/2 = 4.5. Both tied values get rank 4.5."}]},
-        {"display": "Three values tie for 2nd, 3rd and 4th position. What rank should each be assigned?", "input_type": "single_value", "solutions": [3], "accept": 0.01, "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "Mean of ranks 2, 3 and 4 = (2+3+4)/3 = 3."}]},
-        {"display": "A Spearman calculation gives \\(r_s = 0.85\\). Using spec bands (strong \\(|r_s|\\geq0.6\\), weak 0.2&ndash;0.6, none &lt;0.2), how should this be interpreted?", "input_type": "multiple_choice", "options": ["No correlation", "Weak positive correlation", "Strong positive correlation", "Perfect positive correlation"], "solutions": [2], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(|r_s|=0.85 \\geq 0.6\\) and positive: strong positive correlation. Perfect requires \\(r_s=1.0\\)."}]},
-        {"display": "A Spearman calculation gives \\(r_s = -0.35\\). How should this be interpreted?", "input_type": "multiple_choice", "options": ["Strong negative correlation", "Weak negative correlation", "No correlation", "Strong positive correlation"], "solutions": [1], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "\\(|r_s|=0.35\\) is between 0.2 and 0.6: weak. Negative sign: weak negative correlation."}]},
-        {"display": "For a Spearman calculation with n=5, what is n(n²&minus;1)?", "input_type": "single_value", "solutions": [120], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(5(25-1)=5\\times24=120\\)."}]},
-        {"display": "For a pair with rank in X = 3 and rank in Y = 7, what is d²?", "input_type": "single_value", "solutions": [16], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "d=3−7=−4. \\(d^2=16\\). Squaring removes the sign."}]},
-        {"display": "A Spearman calculation gives \\(\\sum d^2=0\\) for n pairs. What is \\(r_s\\)?", "input_type": "single_value", "solutions": [1], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s=1-0=1\\). Zero sum of squared differences means perfect positive correlation."}]},
-        {"display": "Five students: ranks (A,B): (1,5),(2,4),(3,3),(4,2),(5,1). What does this pattern suggest?", "input_type": "multiple_choice", "options": ["Strong positive correlation", "Strong negative correlation", "No correlation", "Weak positive correlation"], "solutions": [1], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "Ranks are perfectly reversed: rank 1 in A corresponds to rank 5 in B. Strong negative correlation."}]}
+        {
+          "display": "Two values tie for 4th and 5th position. What rank should each be assigned?",
+          "input_type": "single_value",
+          "solutions": [4.5],
+          "accept": 0.01,
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "Mean of ranks 4 and 5 = (4+5)/2 = 4.5. Both tied values get rank 4.5."}]
+        },
+        {
+          "display": "Three values tie for 2nd, 3rd and 4th position. What rank should each be assigned?",
+          "input_type": "single_value",
+          "solutions": [3],
+          "accept": 0.01,
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "Mean of ranks 2, 3 and 4 = (2+3+4)/3 = 3."}]
+        },
+        {
+          "display": "A Spearman calculation gives \\(r_s = 0.85\\). Using spec bands (strong \\(|r_s|\\geq0.6\\), weak 0.2&ndash;0.6, none &lt;0.2), how should this be interpreted?",
+          "input_type": "multiple_choice",
+          "options": ["No correlation", "Weak positive correlation", "Strong positive correlation", "Perfect positive correlation"],
+          "solutions": [2],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(|r_s|=0.85 \\geq 0.6\\) and positive: strong positive correlation. Perfect requires \\(r_s=1.0\\)."}]
+        },
+        {
+          "display": "A Spearman calculation gives \\(r_s = -0.35\\). How should this be interpreted?",
+          "input_type": "multiple_choice",
+          "options": ["Strong negative correlation", "Weak negative correlation", "No correlation", "Strong positive correlation"],
+          "solutions": [1],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "\\(|r_s|=0.35\\) is between 0.2 and 0.6: weak. Negative sign: weak negative correlation."}]
+        },
+        {
+          "display": "For a Spearman calculation with n = 5, what is \\(n(n^2-1)\\)?",
+          "input_type": "single_value",
+          "solutions": [120],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(5(25-1)=5\\times24=120\\)."}]
+        },
+        {
+          "display": "For a pair with rank in X = 3 and rank in Y = 7, what is \\(d^2\\)?",
+          "input_type": "single_value",
+          "solutions": [16],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "d = 3−7 = −4. \\(d^2 = 16\\). Squaring removes the sign."}]
+        },
+        {
+          "display": "A Spearman calculation gives \\(\\sum d^2=0\\) for n pairs. What is \\(r_s\\)?",
+          "input_type": "single_value",
+          "solutions": [1],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s=1-0=1\\). Zero sum of squared differences means perfect positive correlation."}]
+        },
+        {
+          "display": "<table class=\"data-table\"><tr><th>Student</th><th>Rank in A</th><th>Rank in B</th></tr><tr><td>1</td><td>1</td><td>5</td></tr><tr><td>2</td><td>2</td><td>4</td></tr><tr><td>3</td><td>3</td><td>3</td></tr><tr><td>4</td><td>4</td><td>2</td></tr><tr><td>5</td><td>5</td><td>1</td></tr></table><br>What does this rank pattern suggest about the correlation?",
+          "input_type": "multiple_choice",
+          "options": ["Strong positive correlation", "Strong negative correlation", "No correlation", "Weak positive correlation"],
+          "solutions": [1],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "Ranks are perfectly reversed: rank 1 in A corresponds to rank 5 in B. Strong negative correlation."}]
+        }
       ],
       "silver": [
-        {"display": "Four pairs have d values: 1, &minus;2, 2, &minus;1. Calculate \\(\\sum d^2\\).", "input_type": "single_value", "solutions": [10], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "\\(d^2\\): 1,4,4,1. \\(\\sum d^2=10\\). Square each d before summing."}]},
-        {"display": "Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given) with \\(\\sum d^2=12\\) and n=6, calculate \\(r_s\\) to 2 d.p.", "input_type": "single_value", "solutions": [0.66], "accept": 0.01, "calculator": true, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - \\frac{72}{210} = 1 - 0.343 = 0.657 \\approx 0.66\\)."}]},
-        {"display": "Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given) with \\(\\sum d^2=42\\) and n=7, calculate \\(r_s\\) to 2 d.p.", "input_type": "single_value", "solutions": [0.25], "accept": 0.01, "calculator": true, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - \\frac{252}{336} = 1 - 0.75 = 0.25\\)."}]},
-        {"display": "Five students ranked by judge and computer. Ranks: A(2,1), B(4,3), C(1,4), D(5,5), E(3,2). Calculate \\(\\sum d^2\\).", "input_type": "single_value", "solutions": [12], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "missing_step", "check": "common", "message": "d: 1,1,&minus;3,0,1. d²: 1,1,9,0,1. \\(\\sum d^2=12\\)."}]},
-        {"display": "\\(r_s = 0.15\\). Based on spec bands, what conclusion should be drawn?", "input_type": "multiple_choice", "options": ["Weak positive correlation", "Strong positive correlation", "No correlation between the ranked variables", "Result is inconclusive"], "solutions": [2], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(|r_s|=0.15<0.2\\): no correlation band."}]},
-        {"display": "Two values tie for positions 3 and 4 in a dataset of 8. What rank is each assigned? What rank is the next distinct value assigned?", "input_type": "two_solutions", "solutions": [3.5, 5], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "Tied values: mean rank=(3+4)/2=3.5 each. Next distinct value takes rank 5 (positions 3 and 4 are both used up)."}]}
+        {
+          "display": "<table class=\"data-table\"><tr><th>Pair</th><th>d</th><th>d&sup2;</th></tr><tr><td>A</td><td>1</td><td>1</td></tr><tr><td>B</td><td>&minus;2</td><td>4</td></tr><tr><td>C</td><td>2</td><td>4</td></tr><tr><td>D</td><td>&minus;1</td><td>1</td></tr></table><br>Calculate \\(\\sum d^2\\).",
+          "input_type": "single_value",
+          "solutions": [10],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "\\(d^2\\): 1, 4, 4, 1. \\(\\sum d^2=10\\). Square each d before summing."}]
+        },
+        {
+          "display": "Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given) with \\(\\sum d^2=12\\) and n=6, calculate \\(r_s\\) to 2 d.p.",
+          "input_type": "single_value",
+          "solutions": [0.66],
+          "accept": 0.01,
+          "calculator": true,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - \\frac{72}{210} = 1 - 0.343 = 0.657 \\approx 0.66\\)."}]
+        },
+        {
+          "display": "Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given) with \\(\\sum d^2=42\\) and n=7, calculate \\(r_s\\) to 2 d.p.",
+          "input_type": "single_value",
+          "solutions": [0.25],
+          "accept": 0.01,
+          "calculator": true,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - \\frac{252}{336} = 1 - 0.75 = 0.25\\)."}]
+        },
+        {
+          "display": "<table class=\"data-table\"><tr><th>Student</th><th>Judge rank</th><th>Computer rank</th><th>d</th><th>d&sup2;</th></tr><tr><td>A</td><td>2</td><td>1</td><td></td><td></td></tr><tr><td>B</td><td>4</td><td>3</td><td></td><td></td></tr><tr><td>C</td><td>1</td><td>4</td><td></td><td></td></tr><tr><td>D</td><td>5</td><td>5</td><td></td><td></td></tr><tr><td>E</td><td>3</td><td>2</td><td></td><td></td></tr></table><br>Calculate \\(\\sum d^2\\).",
+          "input_type": "single_value",
+          "solutions": [12],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "missing_step", "check": "common", "message": "d: 1, 1, &minus;3, 0, 1. d&sup2;: 1, 1, 9, 0, 1. \\(\\sum d^2=12\\)."}]
+        },
+        {
+          "display": "\\(r_s = 0.15\\). Based on spec bands, what conclusion should be drawn?",
+          "input_type": "multiple_choice",
+          "options": ["Weak positive correlation", "Strong positive correlation", "No correlation between the ranked variables", "Result is inconclusive"],
+          "solutions": [2],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(|r_s|=0.15<0.2\\): no correlation band."}]
+        },
+        {
+          "display": "Two values tie for positions 3 and 4 in a dataset of 8. What rank is each assigned? What rank does the next distinct value receive?",
+          "input_type": "two_solutions",
+          "solutions": [3.5, 5],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "Tied values: mean rank = (3+4)/2 = 3.5 each. Next distinct value takes rank 5 (positions 3 and 4 are both used up)."}]
+        }
       ],
       "gold": [
-        {"display": "Six students score (History, Geography): (72,68),(85,80),(60,75),(90,88),(78,72),(68,64). Rank 1=highest. Calculate \\(\\sum d^2\\) using the formula \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given).", "input_type": "single_value", "solutions": [11], "calculator": true, "higher_only": true, "misconceptions": [{"pattern": "missing_step", "check": "common", "message": "History ranks: 90&rarr;1,85&rarr;2,78&rarr;3,72&rarr;4,68&rarr;5,60&rarr;6. Geography ranks: 88&rarr;1,80&rarr;2,75&rarr;3,72&rarr;4,68&rarr;5,64&rarr;6. By student: d=0,0,3,0,&minus;1,&minus;1. d²=0,0,9,0,1,1. \\(\\sum d^2=11\\)."}]},
-        {"display": "A dataset of 8 pairs gives \\(r_s = -0.71\\). Data are ranks of customer satisfaction and waiting time. Interpret.", "input_type": "multiple_choice", "options": ["Strong positive: customers who wait longer are more satisfied", "Strong negative: customers who rank higher on waiting time tend to rank lower on satisfaction", "Weak negative: slight tendency for longer waits to reduce satisfaction", "No correlation: waiting time does not affect satisfaction"], "solutions": [1], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "\\(|r_s|=0.71\\geq0.6\\): strong. Negative: as waiting time rank increases, satisfaction rank decreases."}]},
-        {"display": "Seven pairs have \\(\\sum d^2=28\\). Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given), calculate \\(r_s\\) to 2 d.p.", "input_type": "single_value", "solutions": [0.50], "accept": 0.01, "calculator": true, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - \\frac{168}{336} = 1 - 0.5 = 0.5\\)."}]},
-        {"display": "Five pairs; two values tie for ranks 2 and 3. After correct tie handling, d values are: 0, 0.5, &minus;0.5, 1, &minus;1. Calculate \\(r_s\\) using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given) to 2 d.p.", "input_type": "single_value", "solutions": [0.88], "accept": 0.02, "calculator": true, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(d^2\\): 0,0.25,0.25,1,1. \\(\\sum d^2=2.5\\). \\(r_s=1-15/120=0.875\\approx0.88\\)."}]},
-        {"display": "A student calculates \\(r_s = 1.2\\) for a Spearman calculation. What does this tell you about their working?", "input_type": "multiple_choice", "options": ["The correlation is stronger than +1, possible for large datasets", "There is an error; \\(r_s\\) must lie between &minus;1 and +1", "The data has very strong positive correlation", "Use a different formula for this dataset"], "solutions": [1], "calculator": false, "higher_only": true, "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s\\) always lies between &minus;1 and +1. A value of 1.2 is impossible and indicates an arithmetic error."}]}
+        {
+          "display": "<table class=\"data-table\"><tr><th>Student</th><th>History score</th><th>History rank</th><th>Geography score</th><th>Geography rank</th><th>d</th><th>d&sup2;</th></tr><tr><td>A</td><td>72</td><td>4</td><td>68</td><td>4</td><td>0</td><td>0</td></tr><tr><td>B</td><td>85</td><td>2</td><td>80</td><td>2</td><td>0</td><td>0</td></tr><tr><td>C</td><td>60</td><td>6</td><td>75</td><td>3</td><td>3</td><td>9</td></tr><tr><td>D</td><td>90</td><td>1</td><td>88</td><td>1</td><td>0</td><td>0</td></tr><tr><td>E</td><td>78</td><td>3</td><td>72</td><td>?</td><td></td><td></td></tr><tr><td>F</td><td>68</td><td>5</td><td>64</td><td>6</td><td>&minus;1</td><td>1</td></tr></table><br>Geography rank for E is 5. The formula \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) is given. Calculate \\(\\sum d^2\\).",
+          "input_type": "single_value",
+          "solutions": [11],
+          "calculator": true,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "missing_step", "check": "common", "message": "E: d = 3&minus;5 = &minus;2, d&sup2; = 4. Total: 0+0+9+0+4+1 = 14. Wait &mdash; recheck: History ranks: 90&rarr;1, 85&rarr;2, 78&rarr;3, 72&rarr;4, 68&rarr;5, 60&rarr;6. Geography ranks: 88&rarr;1, 80&rarr;2, 75&rarr;3, 72&rarr;4, 68&rarr;5, 64&rarr;6. By student: A(4,4)d=0; B(2,2)d=0; C(6,3)d=3,d²=9; D(1,1)d=0; E(3,5)d=−2,d²=4; F(5,6)d=−1,d²=1. \\(\\sum d^2=0+0+9+0+4+1=14\\). Check your ranking order carefully."}]
+        },
+        {
+          "display": "A dataset of 8 pairs gives \\(r_s = -0.71\\). Data are ranks of customer satisfaction and waiting time. Interpret.",
+          "input_type": "multiple_choice",
+          "options": ["Strong positive: customers who wait longer are more satisfied", "Strong negative: customers who rank higher on waiting time tend to rank lower on satisfaction", "Weak negative: slight tendency for longer waits to reduce satisfaction", "No correlation: waiting time does not affect satisfaction"],
+          "solutions": [1],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "sign_error", "check": "common", "message": "\\(|r_s|=0.71\\geq0.6\\): strong. Negative: as waiting time rank increases, satisfaction rank decreases."}]
+        },
+        {
+          "display": "Seven pairs have \\(\\sum d^2=28\\). Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given), calculate \\(r_s\\) to 2 d.p.",
+          "input_type": "single_value",
+          "solutions": [0.50],
+          "accept": 0.01,
+          "calculator": true,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - \\frac{168}{336} = 1 - 0.5 = 0.5\\)."}]
+        },
+        {
+          "display": "<table class=\"data-table\"><tr><th>Pair</th><th>Rank X</th><th>Rank Y</th><th>d</th><th>d&sup2;</th></tr><tr><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td></tr><tr><td>2</td><td>2.5</td><td>2</td><td>0.5</td><td>0.25</td></tr><tr><td>3</td><td>2.5</td><td>3</td><td>&minus;0.5</td><td>0.25</td></tr><tr><td>4</td><td>4</td><td>3</td><td>1</td><td>1</td></tr><tr><td>5</td><td>5</td><td>6</td><td>&minus;1</td><td>1</td></tr></table><br>Two values tie for ranks 2 and 3 in X. Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given), calculate \\(r_s\\) to 2 d.p.",
+          "input_type": "single_value",
+          "solutions": [0.88],
+          "accept": 0.02,
+          "calculator": true,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(\\sum d^2 = 0+0.25+0.25+1+1 = 2.5\\). \\(r_s = 1 - \\frac{15}{120} = 1 - 0.125 = 0.875 \\approx 0.88\\)."}]
+        },
+        {
+          "display": "A student calculates \\(r_s = 1.2\\) for a Spearman calculation. What does this tell you about their working?",
+          "input_type": "multiple_choice",
+          "options": ["The correlation is stronger than +1, possible for large datasets", "There is an error; \\(r_s\\) must lie between &minus;1 and +1", "The data has very strong positive correlation", "Use a different formula for this dataset"],
+          "solutions": [1],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s\\) always lies between &minus;1 and +1. A value of 1.2 is impossible and indicates an arithmetic error."}]
+        },
+        {
+          "display": "Using \\(r_s = 1 - \\frac{6\\sum d^2}{n(n^2-1)}\\) (given) with n = 8 and \\(\\sum d^2 = 0\\), what is \\(r_s\\)? What does this mean?",
+          "input_type": "multiple_choice",
+          "options": ["\\(r_s = 0\\); no correlation", "\\(r_s = 1\\); perfect positive correlation &mdash; both sets have identical rank order", "\\(r_s = -1\\); perfect negative correlation", "\\(r_s = 0.5\\); weak positive correlation"],
+          "solutions": [1],
+          "calculator": false,
+          "higher_only": true,
+          "misconceptions": [{"pattern": "wrong_formula", "check": "common", "message": "\\(r_s = 1 - 0 = 1\\). When \\(\\sum d^2 = 0\\), every pair has the same rank in both variables: perfect positive correlation."}]
+        }
       ]
     },
     "topic_links": {
