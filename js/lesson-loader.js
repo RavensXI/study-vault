@@ -159,21 +159,23 @@
       return { error: 'Lesson not found' };
     }
 
-    // Block tier='higher' lessons for Foundation users on tiered subjects.
-    // The browse-loader already filters them from lists, but a direct URL
-    // (bookmark, search result) would otherwise render an empty page since
-    // every paragraph is inside .higher-only.
-    if (lessonResult.data.tier === 'higher') {
+    // Block tier-mismatched lessons reached via direct URL (bookmark, search).
+    // The browse-loader filters them from lists; this is the safety net.
+    if (lessonResult.data.tier === 'higher' || lessonResult.data.tier === 'foundation') {
       var TIERED_DIRECT = ['maths','maths-edexcel','maths-aqa','maths-ocr','maths-eduqas',
         'science','science-aqa','science-edexcel','science-ocr','science-ocr-b',
-        'separate-sciences','separate-sciences-edexcel','separate-sciences-ocr','separate-sciences-ocr-b'];
+        'separate-sciences','separate-sciences-edexcel','separate-sciences-ocr','separate-sciences-ocr-b',
+        'statistics','statistics-aqa'];
       if (TIERED_DIRECT.indexOf(params.subjectSlug) !== -1) {
         try {
           var directTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
           var directBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
           var directTier = directTiers[params.subjectSlug] || directTiers[directBase] || 'higher';
-          if (directTier === 'foundation') {
+          if (lessonResult.data.tier === 'higher' && directTier === 'foundation') {
             return { error: 'This lesson is Higher Tier only. Switch to Higher in your subject settings to view it.' };
+          }
+          if (lessonResult.data.tier === 'foundation' && directTier === 'higher') {
+            return { error: 'This lesson is Foundation Tier only. Switch to Foundation in your subject settings to view it.' };
           }
         } catch (e) {}
       }
@@ -195,18 +197,21 @@
       lessonResult.data._isPreview = true;
     }
 
-    // Get prev/next lessons. Foundation users on tiered subjects skip
-    // tier='higher' lessons so navigation doesn't dead-end at hidden lessons.
+    // Get prev/next lessons. Users on tiered subjects skip lessons in the
+    // opposite tier so navigation doesn't dead-end at hidden lessons.
     var TIERED_FOR_NAV = ['maths','maths-edexcel','maths-aqa','maths-ocr','maths-eduqas',
       'science','science-aqa','science-edexcel','science-ocr','science-ocr-b',
-      'separate-sciences','separate-sciences-edexcel','separate-sciences-ocr','separate-sciences-ocr-b'];
+      'separate-sciences','separate-sciences-edexcel','separate-sciences-ocr','separate-sciences-ocr-b',
+      'statistics','statistics-aqa'];
     var navFoundationFilter = false;
+    var navHigherFilter = false;
     if (TIERED_FOR_NAV.indexOf(params.subjectSlug) !== -1) {
       try {
         var navTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}');
         var navBase = params.subjectSlug.replace(/-(?:aqa|edexcel|ocr-b|ocr|eduqas)$/, '');
         var navTier = navTiers[params.subjectSlug] || navTiers[navBase] || 'higher';
         navFoundationFilter = (navTier === 'foundation');
+        navHigherFilter = (navTier === 'higher');
       } catch (e) {}
     }
     var siblingsQuery = sb
@@ -216,6 +221,7 @@
       .eq('status', 'live')
       .order('lesson_number');
     if (navFoundationFilter) siblingsQuery = siblingsQuery.neq('tier', 'higher');
+    else if (navHigherFilter) siblingsQuery = siblingsQuery.neq('tier', 'foundation');
     var siblingsResult = await siblingsQuery;
 
     var siblings = siblingsResult.data || [];

@@ -174,6 +174,9 @@
       { board: 'OCR', slug: 'computer-science' },
       { board: 'AQA', slug: 'computer-science-aqa' },
       { board: 'Edexcel', slug: 'computer-science-edexcel' }
+    ],
+    'statistics': [
+      { board: 'AQA', slug: 'statistics-aqa' }
     ]
   };
 
@@ -340,7 +343,7 @@
 
     // Always live-count lessons per unit (replaces stale unit.lesson_count column).
     // Foundation users on tiered subjects get the count with tier='higher' excluded.
-    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b'];
+    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b', 'statistics', 'statistics-aqa'];
     var savedTiersOverview = {};
     try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
     // Tier picker writes under the base slug (e.g. 'separate-sciences') but
@@ -353,10 +356,12 @@
     }
     overviewTier = overviewTier || 'higher';
     var foundationFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation');
+    var higherFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'higher');
     var countPromises = units.map(function (u) {
       var q = sb.from('lessons').select('id', { count: 'exact', head: true })
         .eq('unit_id', u.id).eq('status', 'live');
       if (foundationFilter) q = q.neq('tier', 'higher');
+      else if (higherFilter) q = q.neq('tier', 'foundation');
       return q.then(function (res) { u._filteredCount = res.count || 0; });
     });
     await Promise.all(countPromises);
@@ -517,6 +522,7 @@
             .then(function (res) {
               var rows = res.data || [];
               if (foundationFilter) rows = rows.filter(function (r) { return r.tier !== 'higher'; });
+              else if (higherFilter) rows = rows.filter(function (r) { return r.tier !== 'foundation'; });
               rows = rows.filter(function (r) {
                 if (FILM_SELECTABLE.has(r.slug)) return pickedFilmSlugs.has(r.slug);
                 return true;
@@ -716,6 +722,10 @@
     subjectTier = subjectTier || 'higher';
     if (subjectTier === 'foundation') {
       lessons = lessons.filter(function(l) { return l.tier !== 'higher'; });
+    } else if (subjectTier === 'higher') {
+      // Foundation-only lessons are hidden from Higher students. Lessons with
+      // tier=null (the vast majority on non-tiered subjects) are unaffected.
+      lessons = lessons.filter(function(l) { return l.tier !== 'foundation'; });
     }
 
     // Free user Film Studies: trim set-film lessons within this unit to only
@@ -792,7 +802,7 @@
       html += '<p>' + esc(unit.subtitle) + '</p>';
     }
     // Tier indicator for tiered subjects
-    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b'];
+    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b', 'statistics', 'statistics-aqa'];
     if (TIERED.indexOf(subjectSlug) !== -1) {
       var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';
