@@ -661,7 +661,11 @@
       if (!container || !container.contains(range.commonAncestorContainer)) { hidePill(); return; }
       var text = range.toString();
       if (!text || !text.trim()) { hidePill(); return; }
-      if (text.length > 600) { hidePill(); return; }
+      // Generous cap — paragraphs at GCSE 15/16 reading level often run
+      // 800-1200 chars, and selections spanning two paragraphs are a
+      // perfectly reasonable study highlight. Cap is just to stop a stray
+      // Ctrl+A from wrapping the entire lesson in one mark.
+      if (text.length > 5000) { hidePill(); return; }
       var anchor = buildAnchor(range);
       if (!anchor) { hidePill(); return; }
       pendingRange = range.cloneRange();
