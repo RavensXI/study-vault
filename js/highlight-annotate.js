@@ -457,6 +457,12 @@
     var noteEl = popoverEl.querySelector('.sv-hl-note');
     noteEl.value = opts.note || '';
     noteRow.hidden = !(opts.note && opts.note.length);
+    var activeCat = opts.category || '';
+    popoverEl.querySelectorAll('.sv-hl-cat').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.getAttribute('data-cat') === activeCat ? 'true' : 'false');
+    });
+    var prompt = popoverEl.querySelector('.sv-hl-popover-prompt');
+    if (prompt) prompt.style.display = activeCat ? 'none' : '';
     popoverEl.classList.remove('sv-hl-hidden');
     // Position above the selection if there's room, else below
     popoverEl.style.visibility = 'hidden';
@@ -696,7 +702,7 @@
       activeHighlight = hl;
       pendingRange = null;
       pendingAnchor = null;
-      showPopoverAt(mark.getBoundingClientRect(), { canDelete: true, note: hl.note || '' });
+      showPopoverAt(mark.getBoundingClientRect(), { canDelete: true, note: hl.note || '', category: getCategoryId(hl) });
       return;
     }
     if (justDragged) {
@@ -832,20 +838,23 @@
       body.innerHTML =
         '<div class="sv-hl-modal-empty">' +
           '<p>No highlights on this lesson yet.</p>' +
-          '<p class="sv-hl-modal-hint">Select any text in the lesson, choose a colour, and optionally write a note.</p>' +
+          '<p class="sv-hl-modal-hint">Select any text in the lesson, pick a category (Key fact, Why, So what, or Question), and optionally write a note.</p>' +
         '</div>';
       return;
     }
     // Newest first
     list.sort(function (a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
     body.innerHTML = list.map(function (h) {
-      var c = colorFor(h.color);
+      var cat = categoryFor(getCategoryId(h));
       var noteHtml = h.note
         ? '<p class="sv-hl-modal-note">' + escapeHtml(h.note) + '</p>'
         : '';
       return '<article class="sv-hl-modal-item" data-hl-id="' + escapeHtml(h.id) + '">' +
-          '<div class="sv-hl-modal-snippet" style="background:' + c.mark + '">' +
-            '<span class="sv-hl-modal-bar" style="background:' + c.bg + '"></span>' +
+          '<div class="sv-hl-modal-cat-row">' +
+            '<span class="sv-hl-modal-cat sv-hl-modal-cat--' + cat.id + '">' + escapeHtml(cat.label) + '</span>' +
+          '</div>' +
+          '<div class="sv-hl-modal-snippet" style="background:' + cat.mark + '">' +
+            '<span class="sv-hl-modal-bar" style="background:' + cat.bg + '"></span>' +
             '<span class="sv-hl-modal-text">' + escapeHtml(h.text) + '</span>' +
           '</div>' +
           noteHtml +
@@ -905,18 +914,31 @@
       'mark.sv-hl[data-hl-has-note]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;vertical-align:super;margin-left:2px;opacity:.5}' +
       'mark.sv-hl--flash{animation:sv-hl-flash 1.4s ease}' +
       '@keyframes sv-hl-flash{0%,100%{box-shadow:0 0 0 0 rgba(45,42,38,0)}30%{box-shadow:0 0 0 6px rgba(45,42,38,.25)}}' +
-      // Popover
-      '.sv-hl-popover{position:absolute;z-index:9000;background:#fff;border:1px solid rgba(45,42,38,.12);border-radius:14px;box-shadow:0 12px 30px rgba(20,18,15,.18);padding:8px;font-family:Inter,system-ui,sans-serif;color:#2d2a26;min-width:240px}' +
-      '.sv-hl-popover-row{display:flex;align-items:center;gap:6px}' +
-      '.sv-hl-swatch{width:28px;height:28px;border-radius:50%;border:2px solid rgba(45,42,38,.08);cursor:pointer;padding:0;transition:transform .12s ease,border-color .12s ease}' +
-      '.sv-hl-swatch:hover{transform:scale(1.08);border-color:rgba(45,42,38,.3)}' +
+      // Popover (category picker)
+      '.sv-hl-popover{position:absolute;z-index:9000;background:#fff;border:1px solid rgba(45,42,38,.12);border-radius:14px;box-shadow:0 12px 30px rgba(20,18,15,.18);padding:10px;font-family:Inter,system-ui,sans-serif;color:#2d2a26;min-width:260px;max-width:320px}' +
+      'body.dark-mode .sv-hl-popover{background:#3a3631;color:#f5f1ec;border-color:rgba(245,241,236,.12)}' +
+      '.sv-hl-popover-prompt{font-size:.72rem;color:#7a7367;text-align:center;margin-bottom:7px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}' +
+      'body.dark-mode .sv-hl-popover-prompt{color:#a59f95}' +
+      '.sv-hl-popover-cats{display:grid;grid-template-columns:1fr 1fr;gap:5px}' +
+      '.sv-hl-cat{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid rgba(45,42,38,.14);background:#fff;border-radius:9px;font-family:inherit;font-size:.84rem;font-weight:500;color:#2d2a26;cursor:pointer;text-align:left;transition:transform .1s ease,border-color .1s ease,background .1s ease}' +
+      '.sv-hl-cat:hover{transform:translateY(-1px);border-color:#2d2a26}' +
+      '.sv-hl-cat[aria-pressed="true"]{border-color:#2d2a26;background:#faf8f5;box-shadow:0 0 0 1px #2d2a26 inset}' +
+      'body.dark-mode .sv-hl-cat{background:#2a2826;color:#f5f1ec;border-color:rgba(245,241,236,.18)}' +
+      'body.dark-mode .sv-hl-cat:hover{border-color:#f5f1ec}' +
+      'body.dark-mode .sv-hl-cat[aria-pressed="true"]{background:#1f1c19;border-color:#f5f1ec;box-shadow:0 0 0 1px #f5f1ec inset}' +
+      '.sv-hl-cat-dot{width:11px;height:11px;border-radius:50%;flex-shrink:0;border:1px solid rgba(0,0,0,.06)}' +
+      '.sv-hl-cat--fact .sv-hl-cat-dot{background:#fef08a}' +
+      '.sv-hl-cat--why .sv-hl-cat-dot{background:#86efac}' +
+      '.sv-hl-cat--so-what .sv-hl-cat-dot{background:#f9a8d4}' +
+      '.sv-hl-cat--question .sv-hl-cat-dot{background:#93c5fd}' +
       '.sv-hl-divider{width:1px;height:22px;background:rgba(45,42,38,.12);margin:0 2px}' +
-      '.sv-hl-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:transparent;border:none;border-radius:8px;color:#5d564b;cursor:pointer}' +
-      '.sv-hl-icon-btn:hover{background:rgba(45,42,38,.06);color:#2d2a26}' +
-      '.sv-hl-note-row{margin-top:8px;display:flex;flex-direction:column;gap:6px}' +
+      '.sv-hl-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:transparent;border:none;border-radius:8px;color:#a14242;cursor:pointer}' +
+      '.sv-hl-icon-btn:hover{background:rgba(161,66,66,.1)}' +
+      '.sv-hl-note-row{margin-top:10px;display:flex;flex-direction:column;gap:6px}' +
       '.sv-hl-note{width:100%;border:1px solid rgba(45,42,38,.15);border-radius:10px;padding:8px 10px;font-family:inherit;font-size:.92rem;color:inherit;resize:vertical;min-height:64px}' +
       '.sv-hl-note:focus{outline:none;border-color:#2d2a26}' +
-      '.sv-hl-note-actions{display:flex;justify-content:flex-end;gap:6px}' +
+      '.sv-hl-note-actions{display:flex;align-items:center;justify-content:flex-end;gap:6px}' +
+      '.sv-hl-note-actions .sv-hl-icon-btn{margin-right:auto}' +
       '.sv-hl-btn{padding:6px 12px;border-radius:10px;border:1px solid rgba(45,42,38,.15);background:#fff;font-family:inherit;font-size:.86rem;color:#2d2a26;cursor:pointer}' +
       '.sv-hl-btn:hover{background:#faf8f5}' +
       '.sv-hl-btn--primary{background:#2d2a26;color:#faf8f5;border-color:#2d2a26}' +
@@ -956,7 +978,18 @@
       '.sv-hl-modal-empty p{margin:0 0 6px}' +
       '.sv-hl-modal-hint{font-size:.88rem;color:#7a7367}' +
       '.sv-hl-modal-item{display:flex;flex-direction:column;gap:8px;padding:14px;background:#fff;border-radius:12px;border:1px solid rgba(45,42,38,.06)}' +
-      '.sv-hl-modal-snippet{position:relative;padding:10px 12px 10px 16px;border-radius:10px;font-size:.95rem;line-height:1.5}' +
+      '.sv-hl-modal-snippet{position:relative;padding:10px 12px 10px 16px;border-radius:10px;font-size:.95rem;line-height:1.5;color:#2d2a26}' +
+      '.sv-hl-modal-cat-row{display:flex;gap:6px;margin-bottom:2px}' +
+      '.sv-hl-modal-cat{display:inline-flex;align-items:center;gap:5px;font-size:.7rem;font-weight:700;padding:2px 9px;border-radius:999px;letter-spacing:.05em;text-transform:uppercase}' +
+      '.sv-hl-modal-cat::before{content:"";width:7px;height:7px;border-radius:50%}' +
+      '.sv-hl-modal-cat--fact{background:#fef9c3;color:#854d0e}' +
+      '.sv-hl-modal-cat--fact::before{background:#eab308}' +
+      '.sv-hl-modal-cat--why{background:#dcfce7;color:#166534}' +
+      '.sv-hl-modal-cat--why::before{background:#22c55e}' +
+      '.sv-hl-modal-cat--so-what{background:#fce7f3;color:#9d174d}' +
+      '.sv-hl-modal-cat--so-what::before{background:#ec4899}' +
+      '.sv-hl-modal-cat--question{background:#dbeafe;color:#1e40af}' +
+      '.sv-hl-modal-cat--question::before{background:#3b82f6}' +
       '.sv-hl-modal-bar{position:absolute;left:0;top:6px;bottom:6px;width:4px;border-radius:2px}' +
       '.sv-hl-modal-note{margin:0;padding:8px 12px;background:#faf8f5;border-radius:10px;font-size:.92rem;color:#3d3a35;border-left:3px solid rgba(45,42,38,.25)}' +
       '.sv-hl-modal-actions{display:flex;gap:8px;justify-content:flex-end}' +
