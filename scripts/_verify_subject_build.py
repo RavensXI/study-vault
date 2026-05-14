@@ -186,9 +186,15 @@ def main():
             warnings.append(f"{ctx} — has youtube_video_id on free-tier article "
                             "(cinematic videos are Unity-only)")
 
-        # Fieldwork-notice — applies to article lessons only
+        # Fieldwork-notice — applies to article lessons in subjects that
+        # actually involve physical fieldwork (Geography, Biology, RS field
+        # studies). The keyword 'investigation' overlaps with statistical
+        # enquiries; skip subjects where the word doesn't carry a safeguarding
+        # implication.
+        FIELDWORK_SAFE_SUBJECTS = ("statistics-",)  # statistical investigations, not field trips
+        is_fieldwork_subject = not any(args.slug.startswith(p) for p in FIELDWORK_SAFE_SUBJECTS)
         title_l = (l.get("title") or "").lower()
-        if not is_practice and any(k in title_l for k in FIELDWORK_KEYWORDS) and ch:
+        if is_fieldwork_subject and not is_practice and any(k in title_l for k in FIELDWORK_KEYWORDS) and ch:
             head = ch[:400]
             if not NOTICE_RE.search(head):
                 issues.append(f"{ctx} — fieldwork-keyword lesson without "
