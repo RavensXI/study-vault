@@ -6,6 +6,103 @@ Your `batch_id` is provided in the user message. The batch input file is at `scr
 
 ---
 
+## CRITICAL: embed charts — never describe them
+
+Statistics exam papers always print charts. Your practice problems must do the same.
+
+**If a question refers to a data visualisation, the visualisation must appear in the same problem. Describing it in prose is wrong.**
+
+### Anti-examples (do not do this)
+
+**Pictogram described in prose — WRONG:**
+```json
+{
+  "display": "A pictogram uses one football to represent six goals. Liverpool: 4 footballs. Arsenal: 3 footballs. Chelsea: 2 and a half footballs. How many goals did Chelsea score?",
+  "input_type": "single_value",
+  "solutions": [15]
+}
+```
+
+**Right — embed the pictogram as inline SVG:**
+```json
+{
+  "display": "<svg class=\"pictogram\" viewBox=\"0 0 360 180\" width=\"100%\" xmlns=\"http://www.w3.org/2000/svg\"><text x=\"70\" y=\"35\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"13\">Liverpool</text><text x=\"70\" y=\"75\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"13\">Arsenal</text><text x=\"70\" y=\"115\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"13\">Chelsea</text><circle cx=\"90\" cy=\"28\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"115\" cy=\"28\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"140\" cy=\"28\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"165\" cy=\"28\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"90\" cy=\"68\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"115\" cy=\"68\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"140\" cy=\"68\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"90\" cy=\"108\" r=\"10\" fill=\"#1a1a1a\"/><circle cx=\"115\" cy=\"108\" r=\"10\" fill=\"#1a1a1a\"/><path d=\"M125,108 a10,10 0 0,1 0,-20 Z\" fill=\"#1a1a1a\"/><line x1=\"75\" y1=\"145\" x2=\"345\" y2=\"145\" stroke=\"#ccc\" stroke-width=\"1\"/><circle cx=\"90\" cy=\"158\" r=\"8\" fill=\"#1a1a1a\"/><text x=\"105\" y=\"163\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"#555\">= 6 goals</text></svg><br>How many goals did Chelsea score?",
+  "input_type": "single_value",
+  "solutions": [15]
+}
+```
+
+**Stem-and-leaf described in prose — WRONG:**
+```json
+{
+  "display": "A stem-and-leaf diagram shows: stem 2, leaves 3 5 7; stem 3, leaves 0 4 8; stem 4, leaves 2 6. Find the median.",
+  "input_type": "single_value"
+}
+```
+
+**Right — embed the table:**
+```json
+{
+  "display": "<table class=\"stem-leaf\"><tr><th>Stem</th><th>Leaves</th></tr><tr><td>2</td><td>3 5 7</td></tr><tr><td>3</td><td>0 4 8</td></tr><tr><td>4</td><td>2 6</td></tr></table><p class=\"stem-leaf-key\">Key: 2 | 3 means 23</p><br>Find the median.",
+  "input_type": "single_value",
+  "solutions": [34]
+}
+```
+
+**Bar chart mentioned but not shown — WRONG:**
+```json
+{
+  "display": "A bar chart shows monthly rainfall. January: 45 mm, February: 38 mm, March: 52 mm, April: 61 mm. What is the range?",
+  "input_type": "single_value"
+}
+```
+
+**Right — use the `chart` field:**
+```json
+{
+  "display": "The bar chart shows monthly rainfall (mm).<br>What is the range?",
+  "input_type": "single_value",
+  "solutions": [23],
+  "chart": {
+    "type": "bar",
+    "showLegend": false,
+    "data": {
+      "labels": ["January", "February", "March", "April"],
+      "datasets": [{ "label": "Rainfall (mm)", "data": [45, 38, 52, 61], "backgroundColor": "#3b82f6" }]
+    },
+    "options": {
+      "scales": {
+        "y": { "beginAtZero": true, "title": { "display": true, "text": "Rainfall (mm)" } }
+      }
+    }
+  }
+}
+```
+
+### Quick-reference: which mechanism per chart type
+
+| Chart type | Mechanism |
+|---|---|
+| Bar chart | `chart` field, `type:"bar"` |
+| Histogram | `chart` field, `type:"bar"` with `barPercentage:1, categoryPercentage:1`; y = frequency density |
+| Pie / sector chart | `chart` field, `type:"pie"`, `showLegend:true` |
+| Line / time series | `chart` field, `type:"line"` |
+| Frequency polygon | `chart` field, `type:"line"`, midpoints as x labels |
+| Cumulative frequency | `chart` field, `type:"line"`, x = upper class boundaries |
+| Scatter diagram | `chart` field, `type:"scatter"`, data as `{x,y}` pairs |
+| Box plot | `chart` field, `type:"boxplot"`, data as `{min,q1,median,q3,max}` |
+| Frequency / two-way table | `<table class="data-table">` inside `display` |
+| Stem-and-leaf (single) | `<table class="stem-leaf">` + `<p class="stem-leaf-key">` inside `display` |
+| Stem-and-leaf (back-to-back) | `<table class="stem-leaf stem-leaf--btb">` inside `display` |
+| Venn diagram | `<svg class="venn-diagram">` inside `display` |
+| Tree diagram | `<svg class="tree-diagram">` inside `display` |
+| Pictogram | `<svg class="pictogram">` inside `display` with key row |
+| Tally chart | `<table class="tally-chart">` inside `display` |
+
+Full HTML templates for every type above are in `docs/PRACTICE_PIPELINE.md` under "Chart embedding rules — never describe what you can show".
+
+---
+
 ## Files to read first (in this order)
 
 1. **`docs/PRACTICE_PIPELINE.md`** — practice format overview, output shape, 8-stage factory, universal quality rules.
