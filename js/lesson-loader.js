@@ -512,7 +512,12 @@
     // First-time tutorial — runs once per device on first article-lesson visit
     if (!lesson._isPreview) {
       try {
-        if (!localStorage.getItem('sv-lesson-tutorial-done')) {
+        var __td = localStorage.getItem('sv-lesson-tutorial-done');
+        var __htd = localStorage.getItem('sv-highlight-tutorial-done');
+        var __hon = localStorage.getItem('sv-hl-enabled') === '1';
+        // Run if first-time, OR returning student with highlight feature on
+        // who hasn't seen the highlight coachmark yet.
+        if (!__td || (__hon && !__htd)) {
           // Defer until layout settles + main.js's initLessonFeatures has wired up DOM
           setTimeout(maybeStartLessonTutorial, 1500);
         }
@@ -779,7 +784,17 @@
 
   // ---- First-time lesson tutorial ----
   function maybeStartLessonTutorial() {
-    try { if (localStorage.getItem('sv-lesson-tutorial-done')) return; } catch (e) {}
+    var fullTutorialDone = false;
+    var highlightTutorialDone = false;
+    var highlightFeatureOn = false;
+    try {
+      fullTutorialDone = localStorage.getItem('sv-lesson-tutorial-done') === '1';
+      highlightTutorialDone = localStorage.getItem('sv-highlight-tutorial-done') === '1';
+      highlightFeatureOn = localStorage.getItem('sv-hl-enabled') === '1';
+    } catch (e) {}
+    if (fullTutorialDone && (highlightTutorialDone || !highlightFeatureOn)) return;
+    // Returning students with the highlight feature on get a one-step mini-tour
+    var highlightOnlyMode = fullTutorialDone && highlightFeatureOn && !highlightTutorialDone;
 
     var isMobile = window.innerWidth <= 768;
 
@@ -856,7 +871,14 @@
       firstTerm && isVisible(firstTerm) && {
         target: firstTerm,
         text: 'Tap or hover any underlined word to see what it means without leaving the lesson.',
-        side: 'bottom'
+        side: 'bottom',
+        _id: 'glossary'
+      },
+      highlightFeatureOn && studyNotes && studyNotes.querySelector('p') && isVisible(studyNotes.querySelector('p')) && {
+        target: studyNotes.querySelector('p'),
+        text: 'Select any text in the lesson — a "Highlight" button will pop up so you can mark it and add a note. Find everything you\'ve highlighted in the Highlights button at the bottom right.',
+        side: 'bottom',
+        _id: 'highlight'
       },
       firstTip && isVisible(firstTip) && {
         target: firstTip,
@@ -902,6 +924,12 @@
     ];
     var steps = rawSteps.filter(Boolean);
 
+    // Returning students who've already seen the full tour only see the new
+    // highlight coachmark — narrow the steps array to just that one.
+    if (highlightOnlyMode) {
+      steps = steps.filter(function (s) { return s._id === 'highlight'; });
+    }
+
     // Sort by visual document position (top-to-bottom) so the tour flows
     // naturally without zig-zagging up and down. Pin bug FAB to the end
     // since it's position:fixed (its rect.top is viewport-relative).
@@ -913,7 +941,10 @@
     steps.sort(function (a, b) { return a._sortKey - b._sortKey; });
 
     if (steps.length === 0) {
-      try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
+      try {
+        localStorage.setItem('sv-lesson-tutorial-done', '1');
+        if (highlightFeatureOn) localStorage.setItem('sv-highlight-tutorial-done', '1');
+      } catch (e) {}
       return;
     }
 
@@ -1093,7 +1124,10 @@
       [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) { el.classList.remove('active'); });
       clearSpotlight();
       closeAllDrawers();
-      try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
+      try {
+        localStorage.setItem('sv-lesson-tutorial-done', '1');
+        if (highlightFeatureOn) localStorage.setItem('sv-highlight-tutorial-done', '1');
+      } catch (e) {}
       setTimeout(function () {
         if (tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl);
         [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) {

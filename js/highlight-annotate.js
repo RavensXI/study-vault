@@ -504,25 +504,84 @@
     refreshFab();
   }
 
+  // ---------- floating pill (selection affordance) ----------
+  // Two-step flow: drag-select shows a small "Highlight" pill → click it →
+  // colour/note popover opens. Stops the popover from ambushing students on
+  // every selection (read-aloud, copy-paste, screen reader) and gives a clear,
+  // discoverable affordance.
+  var pillEl = null;
+  var pillRect = null;
+
+  function buildPill() {
+    if (pillEl) return pillEl;
+    pillEl = document.createElement('button');
+    pillEl.type = 'button';
+    pillEl.className = 'sv-hl-pill';
+    pillEl.setAttribute('aria-label', 'Highlight selection');
+    pillEl.innerHTML =
+      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+      '<span>Highlight</span>';
+    pillEl.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    pillEl.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (!pendingRange || !pendingAnchor) { hidePill(); return; }
+      var rect = pillRect || pendingRange.getBoundingClientRect();
+      hidePill();
+      showPopoverAt(rect, { canDelete: false, note: '' });
+    });
+    document.body.appendChild(pillEl);
+    return pillEl;
+  }
+
+  function showPillAt(rect) {
+    buildPill();
+    pillRect = rect;
+    pillEl.style.visibility = 'hidden';
+    pillEl.style.display = 'inline-flex';
+    var ph = pillEl.offsetHeight;
+    var pw = pillEl.offsetWidth;
+    var spaceAbove = rect.top;
+    var top, left;
+    if (spaceAbove > ph + 12) top = window.scrollY + rect.top - ph - 8;
+    else top = window.scrollY + rect.bottom + 8;
+    left = window.scrollX + rect.left + (rect.width / 2) - (pw / 2);
+    var maxLeft = window.scrollX + document.documentElement.clientWidth - pw - 12;
+    var minLeft = window.scrollX + 12;
+    if (left > maxLeft) left = maxLeft;
+    if (left < minLeft) left = minLeft;
+    pillEl.style.top = top + 'px';
+    pillEl.style.left = left + 'px';
+    pillEl.style.visibility = 'visible';
+    pillEl.classList.add('sv-hl-pill--visible');
+  }
+
+  function hidePill() {
+    if (pillEl) {
+      pillEl.style.display = 'none';
+      pillEl.classList.remove('sv-hl-pill--visible');
+    }
+    pillRect = null;
+  }
+
   // ---------- selection handling ----------
   function onMouseUp(evt) {
     if (evt.target.closest && evt.target.closest('.sv-hl-popover')) return;
+    if (evt.target.closest && evt.target.closest('.sv-hl-pill')) return;
     setTimeout(function () {
       var sel = window.getSelection();
-      if (!sel || sel.isCollapsed) return;
+      if (!sel || sel.isCollapsed) { hidePill(); return; }
       var range = sel.getRangeAt(0);
       var container = document.getElementById('study-notes');
-      if (!container || !container.contains(range.commonAncestorContainer)) return;
+      if (!container || !container.contains(range.commonAncestorContainer)) { hidePill(); return; }
       var text = range.toString();
-      if (!text || !text.trim()) return;
-      // Refuse selections that are entirely whitespace or just inside an existing mark
-      if (text.length > 600) return; // soft cap
+      if (!text || !text.trim()) { hidePill(); return; }
+      if (text.length > 600) { hidePill(); return; }
       var anchor = buildAnchor(range);
-      if (!anchor) return;
+      if (!anchor) { hidePill(); return; }
       pendingRange = range.cloneRange();
       pendingAnchor = anchor;
       activeHighlight = null;
-      showPopoverAt(range.getBoundingClientRect(), { canDelete: false, note: '' });
+      showPillAt(range.getBoundingClientRect());
     }, 10);
   }
 
@@ -574,6 +633,9 @@
   }
 
   function onDocClick(evt) {
+    if (pillEl && pillEl.style.display !== 'none' && !pillEl.contains(evt.target)) {
+      hidePill();
+    }
     if (!popoverEl || popoverEl.style.display === 'none') return;
     if (popoverEl.contains(evt.target)) return;
     if (evt.target.closest && evt.target.closest('mark.sv-hl')) return;
@@ -581,7 +643,7 @@
   }
 
   function onKeyDown(evt) {
-    if (evt.key === 'Escape') hidePopover();
+    if (evt.key === 'Escape') { hidePill(); hidePopover(); }
   }
 
   // ---------- rehydrate marks on load ----------
@@ -746,6 +808,11 @@
       '.sv-hl-btn:hover{background:#faf8f5}' +
       '.sv-hl-btn--primary{background:#2d2a26;color:#faf8f5;border-color:#2d2a26}' +
       '.sv-hl-btn--primary:hover{background:#1f1c19}' +
+      // Selection pill (the discoverable affordance)
+      '.sv-hl-pill{position:absolute;z-index:9100;display:none;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;font-family:Inter,system-ui,sans-serif;font-size:.82rem;font-weight:500;box-shadow:0 8px 20px rgba(20,18,15,.28);opacity:0;transform:translateY(4px);transition:opacity .14s ease,transform .14s ease}' +
+      '.sv-hl-pill--visible{opacity:1;transform:translateY(0)}' +
+      '.sv-hl-pill:hover{background:#1f1c19}' +
+      '.sv-hl-pill svg{flex-shrink:0}' +
       // FAB
       '.sv-hl-fab{position:fixed;right:18px;bottom:18px;z-index:8000;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;box-shadow:0 10px 24px rgba(20,18,15,.25);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500}' +
       '.sv-hl-fab:hover{background:#1f1c19}' +
