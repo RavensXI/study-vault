@@ -227,6 +227,7 @@ content_html — equations (Maths/Science)
 Use KaTeX LaTeX delimiters, NEVER HTML entities or <sub>/<sup> for maths:
 - Inline: \( ... \)   e.g.  \(F = m \times a\)
 - Display (block): $$ ... $$   on its own line inside a <p>
+- **DO NOT use single-`$` delimiters** (e.g. `$F=ma$`). KaTeX auto-render is configured for `\(...\)` and `$$...$$` only — single-`$` renders as literal text and TTS reads the raw `$\text{...}$`.
 - Subscript: H<sub>2</sub>O → \(\text{H}_2\text{O}\)
 - Superscript: x<sup>2</sup> → \(x^2\)
 - Fractions: &frac12; → \(\frac{1}{2}\)
