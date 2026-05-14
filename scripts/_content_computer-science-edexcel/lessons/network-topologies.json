@@ -1,0 +1,244 @@
+{
+  "description": "Bus, star and mesh topologies: structure, advantages, disadvantages, and how to choose between them.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is a Network Topology?</h2>\n<p data-narration-id=\"n2\">A <dfn class=\"term\" data-def=\"The physical or logical arrangement of devices in a network, defining how they are connected to each other and how data flows between them.\">network topology</dfn> describes how the devices in a network are connected and how data travels between them. Choosing the right topology involves trade-offs: a design that minimises cabling cost may create a single point of failure; a design that is highly resilient may be expensive to install and maintain. The three topologies you must know are <strong>bus</strong>, <strong>star</strong> and <strong>mesh</strong>.</p>\n<p data-narration-id=\"n3\">Understanding topologies matters for designing reliable networks. A small business setting up a new office will consider cost and ease of adding new machines. A hospital designing its patient-records network will prioritise reliability and fault tolerance. The &ldquo;best&rdquo; topology depends entirely on what the network is for.</p>\n\n<h2 data-narration-id=\"n4\">Bus Topology</h2>\n<p data-narration-id=\"n5\">In a <dfn class=\"term\" data-def=\"A network topology in which all devices are connected to a single central cable called the backbone. Data travels along the backbone in both directions until it reaches its destination.\">bus topology</dfn>, all devices share one central cable &mdash; called the backbone or bus. When any device sends data, the signal travels along the backbone in both directions. Every device on the network receives the signal, but only the device with the matching address actually processes it. Terminators at each end of the backbone absorb signals so they do not bounce back.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Bus Topology &mdash; Advantages and Disadvantages</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n6\"><strong>Advantages:</strong></p>\n    <ul>\n      <li data-narration-id=\"n7\">Cheap to install &mdash; uses the least amount of cable of the three topologies, because all devices share one backbone.</li>\n      <li data-narration-id=\"n8\">Easy to add new devices &mdash; a new computer is simply connected to the backbone.</li>\n      <li data-narration-id=\"n9\">Simple to set up &mdash; no central switch or hub is required.</li>\n    </ul>\n    <p data-narration-id=\"n10\"><strong>Disadvantages:</strong></p>\n    <ul>\n      <li data-narration-id=\"n11\">A single point of failure &mdash; if the backbone cable breaks, the entire network fails because there is no alternative path for data.</li>\n      <li data-narration-id=\"n12\">Performance degrades as more devices are added &mdash; all devices share the same bandwidth, so collisions become more frequent on a busy network.</li>\n      <li data-narration-id=\"n13\">Difficult to fault-find &mdash; a fault anywhere on the backbone is hard to isolate.</li>\n      <li data-narration-id=\"n14\">Not suitable for large networks because of bandwidth sharing and reliability issues.</li>\n    </ul>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Cover this and state: what is the single point of failure in a bus topology, and what happens to the network if it fails?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>In a bus topology, the <dfn class=\"term\" data-def=\"A single cable that all devices in a bus topology connect to and share for transmitting data.\">backbone cable</dfn> is a <dfn class=\"term\" data-def=\"A component whose failure brings down the entire network or system. If a single point of failure fails, there is no alternative path for data.\">single point of failure</dfn>. If it breaks, the entire network stops because there is no alternative path for data. This makes bus topology unsuitable for environments where continuous network access is critical.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Star Topology</h2>\n<p data-narration-id=\"n17\">In a <dfn class=\"term\" data-def=\"A network topology in which all devices connect individually to a central switch or hub. Data from any device travels to the central switch, which forwards it to the correct destination.\">star topology</dfn>, each device has its own dedicated cable connecting it to a central switch (or hub). Data from any device travels to the switch, which reads the destination address and forwards the data only to the correct device. Modern networks almost universally use star topology for wired LANs.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Star Topology &mdash; Advantages and Disadvantages</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\"><strong>Advantages:</strong></p>\n    <ul>\n      <li data-narration-id=\"n19\">Failure of one cable only affects the device on that cable &mdash; the rest of the network continues to function normally.</li>\n      <li data-narration-id=\"n20\">Fast performance &mdash; each device has a dedicated connection to the switch, so bandwidth is not shared in the same way as a bus.</li>\n      <li data-narration-id=\"n21\">Easy to add new devices &mdash; simply run a new cable from the device to the switch, without disrupting any existing connections.</li>\n      <li data-narration-id=\"n22\">Easy to identify faults &mdash; if a specific device loses connection, the problem is isolated to that device&rsquo;s cable or connection.</li>\n    </ul>\n    <p data-narration-id=\"n23\"><strong>Disadvantages:</strong></p>\n    <ul>\n      <li data-narration-id=\"n24\">The central switch is a single point of failure &mdash; if it breaks down, the entire network is disrupted because all communication passes through it.</li>\n      <li data-narration-id=\"n25\">More cable required than bus topology &mdash; each device needs its own run of cable to the central switch, which increases installation cost.</li>\n      <li data-narration-id=\"n26\">Cost of the central switch &mdash; a high-quality managed switch is an additional expense.</li>\n    </ul>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n27\">Mesh Topology</h2>\n<p data-narration-id=\"n28\">In a <dfn class=\"term\" data-def=\"A network topology in which each device connects to multiple other devices, creating multiple redundant paths for data. A full mesh connects every device to every other device; a partial mesh connects most but not all.\">mesh topology</dfn>, devices are interconnected with multiple paths between them. In a <strong>full mesh</strong>, every device connects to every other device directly. In a <strong>partial mesh</strong>, most devices have multiple connections but not every possible connection exists. The internet&rsquo;s core infrastructure uses a partial mesh, which is why traffic can be re-routed around a failed link automatically.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Mesh Topology &mdash; Advantages and Disadvantages</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n29\"><strong>Advantages:</strong></p>\n    <ul>\n      <li data-narration-id=\"n30\">Highly resilient &mdash; if one link or device fails, data can be re-routed via alternative paths. There is no single point of failure (in a full mesh).</li>\n      <li data-narration-id=\"n31\">Fast data transfer &mdash; data can take the shortest or least congested path between any two devices.</li>\n      <li data-narration-id=\"n32\">Highly scalable for high-reliability environments such as core internet infrastructure, hospital networks or military communications.</li>\n    </ul>\n    <p data-narration-id=\"n33\"><strong>Disadvantages:</strong></p>\n    <ul>\n      <li data-narration-id=\"n34\">Very expensive to install &mdash; a full mesh of 10 devices requires 45 separate connections (the formula is n(n&minus;1)&divide;2 connections for n devices).</li>\n      <li data-narration-id=\"n35\">Complicated to manage and configure &mdash; every device must be set up to handle multiple connections and routing decisions.</li>\n      <li data-narration-id=\"n36\">Uses a large amount of cable (for wired mesh) or radio spectrum (for wireless mesh), which adds to cost and complexity.</li>\n    </ul>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n37\" data-revision-tip=\"Cover the table below and recall, for each topology: its single point of failure, relative cost, and one scenario where it is most appropriate.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Topology comparison at a glance: <strong>Bus</strong> &mdash; cheapest, backbone is a single point of failure, poor scalability. <strong>Star</strong> &mdash; moderate cost, switch is a single point of failure but individual cable faults are isolated, most common for modern LANs. <strong>Mesh</strong> &mdash; most expensive, no single point of failure (full mesh), used for critical infrastructure requiring high resilience.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Choosing a Topology</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n38\"><strong>Scenario:</strong> A small caf&eacute; wants to connect five computers and a printer with the lowest possible installation cost. A hospital wants to connect its patient-records servers so that no single cable break can interrupt access.</p>\n    <p data-narration-id=\"n39\"><strong>Caf&eacute;:</strong> Bus topology is the cheapest option &mdash; one backbone cable serves all five computers and the printer. The caf&eacute; accepts the risk that a backbone fault will take down everything, because the cost saving is the priority and the network is small and not mission-critical.</p>\n    <p data-narration-id=\"n40\"><strong>Hospital:</strong> Mesh (or star with redundant links) is appropriate. Patient records are mission-critical: any network downtime could affect patient safety. The higher cost of multiple links is justified by the need for resilience. A full mesh of five servers requires only 10 connections: 5 &times; 4 &divide; 2 = 10 &mdash; manageable for a small cluster of critical servers.</p>\n    <p data-narration-id=\"n41\"><strong>Typical school LAN:</strong> Star topology. Each classroom computer has its own cable run to a central switch. If one cable is damaged, only that one computer is affected. Adding new computers is straightforward &mdash; run a new cable to the switch. The central switch is the only point of failure but can be replaced without rewiring the whole building.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n42\">Topology questions often ask you to describe a topology (2 marks) or explain why a particular topology is suitable for a given scenario (4 marks). For describe questions, give the structure (how devices are connected) as well as at least one characteristic (advantage or disadvantage). For explain questions, link the topology&rsquo;s feature to the requirement in the scenario &mdash; for example, &ldquo;a star topology is appropriate because if one cable fails, only that device is affected, meaning the network remains operational for all other users.&rdquo; Name the specific topology &mdash; &ldquo;a network with a central switch&rdquo; will not score without identifying it as a star topology.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n43\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n44\">Bus topology: all devices share a single backbone cable. Cheapest but the backbone is a single point of failure and performance falls as devices are added.</li>\n  <li data-narration-id=\"n45\">Star topology: each device connects individually to a central switch. The most common modern LAN layout. A single cable failure only affects one device, but if the switch fails the whole network is disrupted.</li>\n  <li data-narration-id=\"n46\">Mesh topology: devices connect to multiple others via redundant paths. Highly resilient with no single point of failure (full mesh), but the most expensive and complex to install and manage.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following describes a bus topology?\nA) Every device connects to a central switch with its own dedicated cable\nB) All devices share a single central cable called the backbone\nC) Every device connects directly to every other device\nD) Devices are arranged in a ring with data travelling in one direction",
+      "type": "1 mark â€” Multiple Choice",
+      "marks": "B) All devices share a single central cable called the backbone [1 mark]"
+    },
+    {
+      "text": "Identify the single point of failure in a star topology.",
+      "type": "1 mark â€” Identify",
+      "marks": "The central switch (or hub). [1 mark]"
+    },
+    {
+      "text": "Describe the structure of a mesh topology.",
+      "type": "2 marks â€” Describe",
+      "marks": "Mastering: In a mesh topology, each device connects to multiple other devices, creating redundant paths for data. A full mesh connects every device to every other device; a partial mesh provides multiple paths but not every possible connection. If one link fails, data can travel via an alternative route.\nSecure: Multiple connections between devices and the concept of redundant paths identified.\nDeveloping: States devices connect to multiple others but does not mention redundancy or full/partial mesh.\nEmerging: Describes a topology with many connections but without accurate structural detail. [2 marks]"
+    },
+    {
+      "text": "Explain why a star topology is more suitable than a bus topology for a school computer lab.",
+      "type": "4 marks â€” Explain",
+      "marks": "Mastering: In a star topology, each computer has its own dedicated cable to the central switch. If one cable is damaged, only that computer loses its connection — the rest of the lab continues to work. In a bus topology, a single break in the backbone cable brings down the entire network. For a school environment where continuous access is important for lessons, the star topology’s fault isolation is a significant advantage. Adding new computers is also straightforward in a star (run a new cable to the switch) without disrupting existing connections.\nSecure: Star topology’s fault isolation correctly explained and contrasted with bus backbone failure.\nDeveloping: States star is better and gives a reason but does not explain the mechanism of fault isolation.\nEmerging: Names star topology as more suitable without explanation. [4 marks]"
+    },
+    {
+      "text": "Describe two disadvantages of using a mesh topology for a small business network.",
+      "type": "4 marks â€” Describe",
+      "marks": "Mastering: Any two of the following, each with detail: (1) Very high cabling and installation cost — a full mesh of n devices requires n(n-1)/2 connections, so adding each new device requires connecting it to every existing device. (2) Complex to configure and manage — each device must handle multiple connections and routing, requiring significant network administration expertise. (3) Uses a large amount of cable or wireless infrastructure, increasing both initial and ongoing costs.\nSecure: Two distinct disadvantages identified with some development.\nDeveloping: Two disadvantages stated without sufficient detail.\nEmerging: One disadvantage stated. [2 marks each]"
+    },
+    {
+      "text": "A company is setting up two networks: one connecting 20 office workstations for everyday tasks, and one connecting three mission-critical database servers that must remain accessible even if a link fails. Discuss which topology is most appropriate for each network.",
+      "type": "6 marks â€” Discuss",
+      "marks": "Mastering: Office workstations (star): each workstation has its own cable to a central switch. A single cable fault only affects one machine, keeping productivity loss minimal. The switch is the only single point of failure but is easy and inexpensive to replace. Cost is manageable (20 cable runs). Alternative view: mesh would give more resilience but is impractical for 20 office computers due to cost (190 connections needed). Database servers (mesh or partial mesh): three servers with full mesh requires only 3 connections but provides complete redundancy — any server or link can fail without losing access to the other servers. Small number of connections makes full mesh feasible here. Alternative view: star could work with a managed switch if the switch has a redundant power supply, but remains a single point of failure. Conclusion: star is most appropriate for the office (cost-effective, sufficient fault isolation); mesh is most appropriate for the servers (critical resilience requirement, small number of devices).\nSecure: Both networks analysed with correct topology recommendation and reasoning; both sides of the argument considered for at least one network.\nDeveloping: Both topologies correctly recommended with some reasoning; limited analysis of trade-offs.\nEmerging: One network correctly analysed; the other vague or missing. [6 marks]"
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In which topology does every device share a single backbone cable?",
+      "options": [
+        "Star",
+        "Mesh",
+        "Bus",
+        "Ring"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which topology is most resilient because it has no single point of failure when fully connected?",
+      "options": [
+        "Bus",
+        "Star",
+        "Mesh",
+        "Backbone"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In a star topology, all devices connect individually to a central _____.",
+      "options": [
+        "router",
+        "backbone cable",
+        "switch",
+        "modem"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Bus topology is the _____ of the three topologies to install because it uses the least amount of cable.",
+      "options": [
+        "most expensive",
+        "most complex",
+        "cheapest",
+        "most reliable"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each topology to its key feature:",
+      "left": [
+        "Bus",
+        "Star",
+        "Mesh"
+      ],
+      "right": [
+        "All devices share a single backbone cable",
+        "Each device has a dedicated cable to a central switch",
+        "Multiple redundant paths exist between devices"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is a network topology?",
+      "a": "The physical or logical arrangement of devices in a network and how data flows between them."
+    },
+    {
+      "q": "In a bus topology, what carries data between all devices?",
+      "a": "A single central backbone cable."
+    },
+    {
+      "q": "What is the main single point of failure in a bus topology?",
+      "a": "The backbone cable â€” if it breaks, the entire network fails."
+    },
+    {
+      "q": "In a star topology, where does all data travel before reaching its destination?",
+      "a": "Through the central switch."
+    },
+    {
+      "q": "In a star topology, if one cable breaks, how many devices lose connectivity?",
+      "a": "Only the device connected to that cable."
+    },
+    {
+      "q": "What is the single point of failure in a star topology?",
+      "a": "The central switch â€” if it fails, all devices lose connectivity."
+    },
+    {
+      "q": "What makes mesh topology more resilient than bus or star?",
+      "a": "Multiple redundant paths exist between devices, so data can be re-routed if a link fails."
+    },
+    {
+      "q": "Why is mesh topology the most expensive to install?",
+      "a": "Every device needs connections to multiple others, requiring a large amount of cable."
+    },
+    {
+      "q": "Which topology is cheapest to install and why?",
+      "a": "Bus â€” all devices share one backbone cable, so less cable is needed."
+    },
+    {
+      "q": "Which topology is most commonly used for modern wired LANs?",
+      "a": "Star topology."
+    },
+    {
+      "q": "How many connections does a full mesh of 5 devices require?",
+      "a": "10 connections (5 Ã— 4 Ã· 2)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "network topology",
+      "definition": "The physical or logical arrangement of devices in a network, defining how they are connected to each other and how data flows between them."
+    },
+    {
+      "term": "bus topology",
+      "definition": "A network topology in which all devices are connected to a single central cable called the backbone. Data travels along the backbone until it reaches its destination device."
+    },
+    {
+      "term": "star topology",
+      "definition": "A network topology in which all devices connect individually to a central switch or hub. Data from any device travels to the switch, which forwards it to the correct destination."
+    },
+    {
+      "term": "mesh topology",
+      "definition": "A network topology in which each device connects to multiple other devices, creating redundant paths for data. A full mesh connects every device to every other device."
+    },
+    {
+      "term": "backbone cable",
+      "definition": "A single cable that all devices in a bus topology connect to and share for transmitting data."
+    },
+    {
+      "term": "single point of failure",
+      "definition": "A component whose failure brings down the entire network or system, leaving no alternative path for data."
+    }
+  ],
+  "hero_keywords": [
+    "network diagram topology",
+    "server room switches",
+    "cables network infrastructure",
+    "data centre"
+  ],
+  "hero_image_caption": "A tangle of ethernet cables connected to network switches in a structured cabling installation.",
+  "_lesson_id": "21f7aeed-d70a-477f-9323-511d344dcce8",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Software Engineering Daily — Distributed Systems",
+          "url": "https://softwareengineeringdaily.com",
+          "description": "Engineers discuss network topology trade-offs — star vs mesh redundancy — in real-world distributed systems."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Lo and Behold: Reveries of the Connected World (2016)",
+          "url": "https://www.justwatch.com/uk/movie/lo-and-behold-reveries-of-the-connected-world",
+          "description": "Herzog's exploration of internet infrastructure — how physical topology decisions shaped the resilient mesh of the modern internet."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,245 @@
+{
+  "description": "Working with Python lists as 1D and 2D arrays, and dictionaries as records.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why We Need Structured Data</h2>\n<p data-narration-id=\"n2\">Storing one value at a time in separate variables works fine for a handful of items, but quickly becomes unmanageable. A school might need to store scores for 30 students &mdash; using 30 separate variables such as <code>score1</code>, <code>score2</code>... <code>score30</code> is impractical and makes looping impossible. Structured data types group multiple values together under a single name so they can be processed efficiently.</p>\n\n<h2 data-narration-id=\"n3\">One-Dimensional Arrays &mdash; Python Lists</h2>\n<p data-narration-id=\"n4\">In Python, a <dfn class=\"term\" data-def=\"An ordered collection of values stored under a single variable name, accessed by integer index starting at 0.\">list</dfn> is the standard implementation of a one-dimensional array. Items are written inside square brackets, separated by commas, and accessed by their <dfn class=\"term\" data-def=\"An integer that specifies the position of an element within a list, starting at 0 for the first element.\">index</dfn> (position), which starts at 0.</p>\n\n<pre data-narration-id=\"n5\">scores = [72, 85, 91, 64, 78]\nprint(scores[0])    # 72 (first element)\nprint(scores[2])    # 91 (third element)\nprint(scores[-1])   # 78 (last element, negative index)</pre>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and state: if a list has 5 elements, what are the valid index values? What does a negative index mean?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Python list indices start at <strong>0</strong>. A list with 5 elements has valid indices 0, 1, 2, 3, 4. Index 5 causes an <code>IndexError</code>. Negative indices count from the end: <code>scores[-1]</code> is the last element, <code>scores[-2]</code> the second to last.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Iterating Over a List</h2>\n<p data-narration-id=\"n8\">The most natural way to process every item in a list is with a <code>for</code> loop. You can iterate over the items directly, or use <code>range(len(list))</code> if you need the index:</p>\n\n<pre data-narration-id=\"n9\"># Direct iteration (when you don't need the index)\nfor score in scores:\n    print(score)\n\n# Index-based iteration (when you need to modify items)\nfor i in range(len(scores)):\n    scores[i] = scores[i] + 5    # Add 5 bonus marks to each</pre>\n\n<h2 data-narration-id=\"n10\">Appending to a List</h2>\n<p data-narration-id=\"n11\">Python lists are dynamic &mdash; you can add new items using the <dfn class=\"term\" data-def=\"A Python list method that adds a new item to the end of an existing list.\">append</dfn> method (<code>.append()</code>). This adds the item to the end of the list:</p>\n\n<pre data-narration-id=\"n12\">names = []\nfor i in range(3):\n    name = input(&quot;Enter name: &quot;)\n    names.append(name)\nprint(names)</pre>\n\n<p data-narration-id=\"n13\">Starting with an empty list <code>[]</code> and building it up with <code>.append()</code> inside a loop is a common pattern for collecting user input or building results dynamically.</p>\n\n<h2 data-narration-id=\"n14\">Two-Dimensional Arrays &mdash; Nested Lists</h2>\n<p data-narration-id=\"n15\">A <dfn class=\"term\" data-def=\"A list in which each element is itself a list, creating a grid or table of values accessed by two indices: row then column.\">two-dimensional array</dfn> is implemented in Python as a list of lists &mdash; also called a nested list. Think of it as a grid: the outer index selects the row, the inner index selects the column.</p>\n\n<pre data-narration-id=\"n16\"># A 3x3 grid of temperatures (rows = days, columns = times of day)\ntemps = [\n    [12, 15, 14],\n    [10, 18, 16],\n    [9,  20, 17]\n]\nprint(temps[0][1])   # 15 (row 0, column 1 = Monday noon)\nprint(temps[2][2])   # 17 (row 2, column 2 = Wednesday evening)</pre>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Traversing a 2D List with Nested Loops</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n17\">To visit every cell in a 2D list, use nested <code>for</code> loops &mdash; one for rows, one for columns:</p>\n    <pre data-narration-id=\"n18\">grid = [\n    [1, 2, 3],\n    [4, 5, 6],\n    [7, 8, 9]\n]\n\nfor row in grid:\n    for value in row:\n        print(value, end=&quot; &quot;)\n    print()    # New line after each row</pre>\n    <p data-narration-id=\"n19\"><strong>Output:</strong></p>\n    <pre data-narration-id=\"n20\">1 2 3\n4 5 6\n7 8 9</pre>\n    <p data-narration-id=\"n21\">The outer loop gives each row as a list; the inner loop processes each value within that row. This nested-loop pattern is one of the most frequently tested 2D-array skills in the exam.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n22\">Records &mdash; Python Dictionaries</h2>\n<p data-narration-id=\"n23\">A <dfn class=\"term\" data-def=\"A structured data type that groups related fields of different types together under one named structure; implemented in Python as a dictionary.\">record</dfn> groups related fields of potentially different types under a single name. In Python, records are implemented as <dfn class=\"term\" data-def=\"A Python data structure that stores key-value pairs, where each key is a unique label used to retrieve its associated value.\">dictionaries</dfn>. Instead of accessing fields by index number, you access them by a meaningful key name.</p>\n\n<pre data-narration-id=\"n24\"># A student record as a dictionary\nstudent = {\n    &quot;name&quot;: &quot;Priya Sharma&quot;,\n    &quot;age&quot;: 16,\n    &quot;score&quot;: 88.5,\n    &quot;passed&quot;: True\n}\n\nprint(student[&quot;name&quot;])    # &quot;Priya Sharma&quot;\nprint(student[&quot;score&quot;])   # 88.5</pre>\n\n<div class=\"key-fact\" data-narration-id=\"n25\" data-revision-tip=\"Close this and write from memory a Python dictionary representing a book record with title, author, year and available (Boolean) fields.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A dictionary maps <strong>keys</strong> (usually strings) to <strong>values</strong> (any data type). This is the Python equivalent of a record in a formal data model. Fields of different types can coexist in the same dictionary &mdash; just like a real record might hold a name (string), age (integer), price (real), and available (Boolean) in one structure.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; A List of Records</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n26\">A common pattern is a list of dictionaries &mdash; think of it as a simple table:</p>\n    <pre data-narration-id=\"n27\">students = [\n    {&quot;name&quot;: &quot;Ali&quot;, &quot;score&quot;: 72},\n    {&quot;name&quot;: &quot;Beth&quot;, &quot;score&quot;: 91},\n    {&quot;name&quot;: &quot;Carlos&quot;, &quot;score&quot;: 65}\n]\n\nfor student in students:\n    if student[&quot;score&quot;] &gt;= 70:\n        print(student[&quot;name&quot;], &quot;has passed&quot;)</pre>\n    <p data-narration-id=\"n28\"><strong>Output:</strong> Ali has passed / Beth has passed. Carlos (65) does not meet the threshold. This combines a list (outer structure), dictionaries (records), and a for loop with a conditional &mdash; exactly the kind of code that appears in exam &ldquo;Amend&rdquo; and &ldquo;Write&rdquo; questions.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n29\">For &ldquo;Complete a Trace Table&rdquo; questions involving 2D lists, carefully identify which index is the row and which is the column. For &ldquo;Write a Subprogram&rdquo; questions using dictionaries, use <code>record[&quot;key&quot;]</code> to access fields &mdash; not <code>record.key</code> (that&rsquo;s Python class attributes, not dictionaries). When appending to a list inside a loop, make sure the list is initialised as <code>[]</code> before the loop begins.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n30\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n31\">Python lists implement 1D arrays. Elements are accessed by zero-based index. Use <code>.append()</code> to add items and <code>for item in list</code> or <code>for i in range(len(list))</code> to iterate.</li>\n  <li data-narration-id=\"n32\">A 2D array is a list of lists. Access elements with <code>grid[row][col]</code>. Traverse with nested for loops &mdash; outer loop for rows, inner loop for columns.</li>\n  <li data-narration-id=\"n33\">Records are implemented as Python dictionaries. Fields are accessed by key name: <code>student[&quot;name&quot;]</code>. A list of dictionaries represents a simple table of records.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "State what is stored at temps[1][2] given:\ntemps = [[12, 15, 14], [10, 18, 16], [9, 20, 17]]",
+      "type": "1 mark — Give/State/Name",
+      "marks": "Mastering: 16 (1). Row 1 is [10, 18, 16]; column 2 is the third element, value 16.\nSecure: Correct.\nDeveloping: 18 (reads column 1 instead of column 2).\nEmerging: Counts rows/columns from 1 rather than 0."
+    },
+    {
+      "text": "Explain what a dictionary is in Python and why it is used to represent a record. Give an example dictionary with at least three fields of different data types.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: A dictionary stores key-value pairs (1); keys are typically strings that describe each field (1); different data types can coexist in one dictionary (1); example with three fields of different types, e.g. name (str), age (int), passed (bool) (1).\nSecure: Correct explanation with one field type wrong or missing.\nDeveloping: Describes key-value pairs without linking to the record concept.\nEmerging: Confuses dictionary with list."
+    },
+    {
+      "text": "Write Python code that creates a list of five exam scores entered by the user and then prints the total of all five scores.",
+      "type": "6 marks — Complete an Algorithm",
+      "marks": "Mastering: Empty list initialised (1); loop runs 5 times (1); input with int() conversion inside loop (1); .append() used to add each score (1); total calculated by looping or using sum() (1); print() outputs total (1).\nSecure: Correct structure with one conversion or append step missing.\nDeveloping: Loop present but list not built correctly.\nEmerging: No list used — five separate variables."
+    },
+    {
+      "text": "Complete a trace table for the following Python code. Show the values of row, value and the output at each step.\ngrid = [[1, 2], [3, 4]]\nfor row in grid:\n    for value in row:\n        print(value)",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: row=[1,2] value=1 output 1; row=[1,2] value=2 output 2; row=[3,4] value=3 output 3; row=[3,4] value=4 output 4. One mark per correct row (4 marks).\nSecure: Three rows correct.\nDeveloping: Two rows correct.\nEmerging: Does not understand nested iteration."
+    },
+    {
+      "text": "Identify the error in the following code, and write a corrected version.\nstudent = {\"name\": \"Amir\", \"score\": 78}\nprint(student.name)",
+      "type": "2 marks — Describe",
+      "marks": "Mastering: The error is using dot notation (student.name) instead of key access (1); corrected version: print(student[\"name\"]) (1).\nSecure: Error identified with partially correct fix.\nDeveloping: Identifies an error without specifying what it is.\nEmerging: No understanding of dictionary access syntax."
+    },
+    {
+      "text": "A programmer stores a class register as a list of dictionaries. Each record has a 'name' field (string) and a 'present' field (Boolean). Write Python code that prints the name of every student whose 'present' value is True.",
+      "type": "6 marks — Write a Subprogram",
+      "marks": "Mastering: Appropriate list of dictionaries defined or assumed as parameter (1); for loop iterating over each record (1); if statement accessing student['present'] (1); correct condition == True or just if student['present'] (1); print(student['name']) inside conditional block (1); meaningful identifier names used (1).\nSecure: Correct logic with one syntax or access error.\nDeveloping: Loop and conditional present but field access incorrect.\nEmerging: Does not use a list of dictionaries structure."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "A list called marks has 6 elements. What is the index of the last element?",
+      "options": [
+        "6",
+        "5",
+        "-1",
+        "4"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "Which Python method adds a new item to the end of a list?",
+      "options": [
+        ".insert()",
+        ".add()",
+        ".append()",
+        ".push()"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A Python dictionary stores _____ pairs, where each first part is used to look up its associated value.",
+      "options": [
+        "index-value",
+        "row-column",
+        "key-value",
+        "type-data"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In Python, a two-dimensional array is implemented as a list of _____.",
+      "options": [
+        "dictionaries",
+        "lists",
+        "tuples",
+        "records"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each structure to how it is accessed in Python.",
+      "left": [
+        "1D list element",
+        "2D list element",
+        "Dictionary field"
+      ],
+      "right": [
+        "record[\"key\"]",
+        "grid[row][col]",
+        "list[index]"
+      ],
+      "order": [
+        2,
+        1,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "Python list indices start at _____, so the first element is accessed with list[___].",
+      "a": "0 / 0."
+    },
+    {
+      "q": "What Python method adds a new item to the end of a list?",
+      "a": ".append()"
+    },
+    {
+      "q": "How do you access the element in row 2, column 1 of a 2D list called grid?",
+      "a": "grid[2][1]"
+    },
+    {
+      "q": "What data structure does Python use to implement a record?",
+      "a": "A dictionary — storing key-value pairs."
+    },
+    {
+      "q": "How do you access the 'score' field in a dictionary called student?",
+      "a": "student['score']"
+    },
+    {
+      "q": "What does this code produce: len([10, 20, 30])?",
+      "a": "3 — the list has three elements."
+    },
+    {
+      "q": "What pattern is used to loop over every value in a 2D list?",
+      "a": "Nested for loops — outer for rows, inner for columns."
+    },
+    {
+      "q": "What is the main advantage of a dictionary over a list for storing a record?",
+      "a": "Fields are accessed by a meaningful key name, not a numeric index."
+    },
+    {
+      "q": "An empty list is created in Python with _____.",
+      "a": "[] (square brackets with nothing inside)."
+    },
+    {
+      "q": "What error does Python raise if you access an index beyond the end of a list?",
+      "a": "IndexError."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "list",
+      "definition": "An ordered collection of values stored under a single variable name, accessed by integer index starting at 0."
+    },
+    {
+      "term": "two-dimensional array",
+      "definition": "A list in which each element is itself a list, creating a grid or table of values accessed by two indices: row then column."
+    },
+    {
+      "term": "record",
+      "definition": "A structured data type that groups related fields of different types together under one named structure; implemented in Python as a dictionary."
+    },
+    {
+      "term": "dictionary",
+      "definition": "A Python data structure that stores key-value pairs, where each key is a unique label used to retrieve its associated value."
+    },
+    {
+      "term": "index",
+      "definition": "An integer that specifies the position of an element within a list, starting at 0 for the first element."
+    },
+    {
+      "term": "append",
+      "definition": "A Python list method that adds a new item to the end of an existing list."
+    }
+  ],
+  "hero_keywords": [
+    "data structure programming",
+    "python list code",
+    "grid data",
+    "code on screen"
+  ],
+  "hero_image_caption": "Structured data in Python — lists, nested arrays and dictionary records.",
+  "_lesson_id": "14a021b1-84c9-44ec-9e87-cce840797a4e",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "CodeNewbie Podcast — Data Structures",
+          "url": "https://www.codenewbie.org/podcast",
+          "description": "Developers explain why choosing the right data structure — arrays, lists or records — makes programs cleaner and faster."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "freeCodeCamp — Data Structures Full Course",
+          "url": "https://www.youtube.com/@freecodecamp",
+          "description": "Comprehensive walkthrough of arrays, records and 2D data structures — directly covers this lesson's topics."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Hidden Figures (2016)",
+          "url": "https://www.justwatch.com/uk/movie/hidden-figures",
+          "description": "NASA's human computers solved orbital mechanics using nothing but arithmetic — the real-world origin of modern programming."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Replit — Browser Python Coding",
+          "url": "https://replit.com",
+          "description": "Run and test Python code in your browser with no install needed — ideal for practising exam-style programs."
+        },
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

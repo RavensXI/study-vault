@@ -1,0 +1,245 @@
+{
+  "description": "Writing if-elif-else, for and while loops in Python, including nested structures.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Three Programming Constructs</h2>\n<p data-narration-id=\"n2\">Every program, regardless of language, is built from three fundamental constructs: <dfn class=\"term\" data-def=\"The programming construct in which instructions are executed one after another in the order they appear in the code.\">sequence</dfn>, <dfn class=\"term\" data-def=\"The programming construct in which the program chooses between different execution paths based on a condition.\">selection</dfn>, and <dfn class=\"term\" data-def=\"The programming construct in which a block of instructions repeats, either a set number of times or while a condition holds.\">iteration</dfn>. Python implements all three. Any problem that can be solved by a computer can be solved using these three constructs alone &mdash; a theorem first proved in the 1960s and still the foundation of every language written since.</p>\n\n<h2 data-narration-id=\"n3\">Selection &mdash; if, elif, else</h2>\n<p data-narration-id=\"n4\">Selection lets a program make decisions. Python uses <code>if</code>, <code>elif</code> (else if), and <code>else</code> to branch between different blocks of code depending on conditions. Only the block whose condition is <code>True</code> executes; all others are skipped.</p>\n\n<pre data-narration-id=\"n5\"># Classify an exam score\nscore = int(input(&quot;Enter score: &quot;))\n\nif score &gt;= 70:\n    print(&quot;Distinction&quot;)\nelif score &gt;= 50:\n    print(&quot;Pass&quot;)\nelse:\n    print(&quot;Fail&quot;)</pre>\n\n<p data-narration-id=\"n6\">Python checks conditions from top to bottom and executes the first block whose condition is <code>True</code>. Once a match is found, the remaining branches are skipped. If no condition is true, the <code>else</code> block (if present) executes.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Close this and write from memory the Python syntax for an if-elif-else structure that grades a score: Distinction (70+), Pass (50-69), Fail (below 50).\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Python uses indentation (four spaces) to define code blocks &mdash; there are no <code>ENDIF</code> or <code>END</code> keywords. Each <code>if</code>, <code>elif</code>, and <code>else</code> line ends with a colon. Forgetting the colon or getting the indentation wrong causes a syntax error.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">Count-Controlled Iteration &mdash; for with range()</h2>\n<p data-narration-id=\"n9\"><dfn class=\"term\" data-def=\"A count-controlled loop that iterates a fixed number of times, with Python's range() function supplying the sequence of values.\">Definite iteration</dfn> uses a <code>for</code> loop with <code>range()</code>. You know in advance how many times the loop will run. The loop variable takes each value in the sequence, one at a time.</p>\n\n<pre data-narration-id=\"n10\"># Print the 3 times table from 1 to 10\nfor i in range(1, 11):\n    print(i, &quot;x 3 =&quot;, i * 3)</pre>\n\n<p data-narration-id=\"n11\"><code>range(1, 11)</code> produces the integers 1, 2, 3&hellip;10. The end value (11) is <strong>excluded</strong> &mdash; this is one of the most common mistakes students make. <code>range(5)</code> gives 0, 1, 2, 3, 4 (starting from 0). <code>range(1, 6)</code> gives 1, 2, 3, 4, 5.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Accumulator Pattern</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n12\">A <strong>running total</strong> (accumulator) is a variable that collects a sum inside a loop. Predict the output first, then trace through:</p>\n    <pre data-narration-id=\"n13\">total = 0\nfor i in range(1, 5):\n    total = total + i\nprint(total)</pre>\n    <p data-narration-id=\"n14\"><strong>Trace:</strong> i=1 &rarr; total=1; i=2 &rarr; total=3; i=3 &rarr; total=6; i=4 &rarr; total=10. Output: <code>10</code>. The loop adds 1+2+3+4 = 10. Notice that <code>total</code> must be initialised to 0 before the loop begins &mdash; otherwise Python raises a <code>NameError</code>.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n15\">Iterating Over a Collection</h2>\n<p data-narration-id=\"n16\">A <code>for</code> loop can also iterate directly over the items in a list or the characters in a string, without needing <code>range()</code>:</p>\n\n<pre data-narration-id=\"n17\">grades = [&quot;Pass&quot;, &quot;Fail&quot;, &quot;Pass&quot;, &quot;Distinction&quot;]\nfor grade in grades:\n    print(grade)</pre>\n\n<p data-narration-id=\"n18\">Each time the loop runs, <code>grade</code> takes the next value from the list. When all items have been processed, the loop ends automatically. This pattern is used constantly when working with lists of student records, sensor readings, or transaction histories.</p>\n\n<h2 data-narration-id=\"n19\">Condition-Controlled Iteration &mdash; while</h2>\n<p data-narration-id=\"n20\"><dfn class=\"term\" data-def=\"A condition-controlled loop that checks its condition before each iteration; if the condition is False from the start, the body never executes.\">Indefinite iteration</dfn> uses a <code>while</code> loop. The condition is tested <strong>before</strong> each pass. If the condition is <code>False</code> on first entry, the body never runs.</p>\n\n<pre data-narration-id=\"n21\"># Keep asking until a valid score is entered\nscore = -1\nwhile score &lt; 0 or score &gt; 100:\n    score = int(input(&quot;Enter a score between 0 and 100: &quot;))\nprint(&quot;Valid score:&quot;, score)</pre>\n\n<p data-narration-id=\"n22\">The number of iterations is not fixed &mdash; it depends entirely on what the user enters. This is <em>indefinite</em> iteration. A <code>while</code> loop is the right choice when you cannot know in advance how many passes will be needed.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n23\" data-revision-tip=\"Cover this and explain the infinite loop pitfall — what causes it and how do you prevent it in a while loop?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>An <strong>infinite loop</strong> occurs when the <code>while</code> condition never becomes <code>False</code>. This usually happens because the variable in the condition is never updated inside the loop body. Always check that something inside the loop will eventually make the condition fail.</p>\n</div>\n\n<h2 data-narration-id=\"n24\">Nested Structures</h2>\n<p data-narration-id=\"n25\"><dfn class=\"term\" data-def=\"A programming structure where one loop or selection construct is placed inside another, creating multiple levels of control flow.\">Nesting</dfn> means placing one construct inside another. Loops can be nested inside loops; if statements can be nested inside loops; and conditions can contain multiple levels of elif. Nested structures are used for processing 2D data, multi-condition menus, and grid operations.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Nested if Inside a for Loop</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n26\">Count how many scores in a list are above 60:</p>\n    <pre data-narration-id=\"n27\">scores = [45, 72, 88, 30, 65]\ncount = 0\nfor score in scores:\n    if score &gt; 60:\n        count = count + 1\nprint(&quot;Scores above 60:&quot;, count)</pre>\n    <p data-narration-id=\"n28\"><strong>Predict:</strong> The loop visits 45 (no), 72 (yes, count=1), 88 (yes, count=2), 30 (no), 65 (yes, count=3). Output: <code>Scores above 60: 3</code>. A common mistake is indenting the <code>print</code> inside the loop, which would print after every iteration instead of once at the end.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n29\">Single Entry and Exit Points</h2>\n<p data-narration-id=\"n30\">Well-structured code has a single entry point and a single exit point for each block. In Python, each loop or selection block has one entry (the first line) and one exit (when the condition fails or the block ends). Avoid designs that &ldquo;break out&rdquo; of the middle of multiple nested loops &mdash; these make code harder to trace, test and maintain.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Choosing Between for and while</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n31\"><strong>Use for when:</strong> you know the number of iterations in advance, or you are processing every item in a list or string. Examples: printing a times table up to 12, processing each student's score in a class list.</p>\n    <p data-narration-id=\"n32\"><strong>Use while when:</strong> the number of iterations depends on user input or a changing condition. Examples: a login prompt that repeats until the correct password is entered, a sensor loop that runs until a threshold is crossed.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n33\">For &ldquo;Complete an Algorithm&rdquo; questions, read the existing code carefully before writing anything &mdash; this is the &ldquo;Investigate&rdquo; step in the PRIMM approach. Check: does the loop need <code>range()</code> or direct iteration over a list? Is there an accumulator variable that needs initialising? For &ldquo;Write a Subprogram&rdquo; questions, identify inputs first, then write the loop or selection logic, then write the output or return value. A common error is placing the <code>print</code> inside the loop when it should be outside.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n34\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n35\">Python uses <code>if/elif/else</code> for selection. Conditions are tested top to bottom; the first <code>True</code> branch runs and the rest are skipped.</li>\n  <li data-narration-id=\"n36\">Use <code>for</code> with <code>range()</code> for count-controlled loops and <code>for item in collection</code> to iterate over a list or string. Use <code>while</code> when the number of repetitions is not known in advance.</li>\n  <li data-narration-id=\"n37\">An infinite loop happens when the <code>while</code> condition never becomes <code>False</code>. Always ensure the loop body can change the condition variable.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "State the difference between a for loop and a while loop in Python.",
+      "type": "2 marks — Describe",
+      "marks": "Mastering: A for loop is count-controlled and runs a fixed number of times known in advance (1); a while loop is condition-controlled and runs while a condition is True, so the number of iterations is not fixed (1).\nSecure: Both loops mentioned but the distinction is imprecise.\nDeveloping: One loop described correctly without comparison.\nEmerging: Both described as identical or neither correct."
+    },
+    {
+      "text": "Write Python code for a program that asks the user to enter a number between 1 and 10. The program should keep asking until a valid number is entered, then print the number.",
+      "type": "6 marks — Complete an Algorithm",
+      "marks": "Mastering: Variable initialised outside loop (1); while loop with correct condition e.g. num < 1 or num > 10 (1); input() with int() conversion inside loop (1); loop repeats correctly until valid input (1); print() after loop exits (1); meaningful identifier name (1).\nSecure: Loop structure correct; minor error in condition or conversion.\nDeveloping: Loop present but condition or conversion wrong.\nEmerging: No loop — sequential structure only."
+    },
+    {
+      "text": "Complete a trace table for the following Python code. Show the values of i, count and the final output.\ncount = 0\nfor i in range(1, 6):\n    if i % 2 == 0:\n        count = count + 1\nprint(count)",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: i=1 count=0 (odd); i=2 count=1 (even); i=3 count=1; i=4 count=2; i=5 count=2; output 2. Mark per correct iteration row (4 marks for correctly identifying the two even numbers and final count).\nSecure: Three iterations correct with correct final output.\nDeveloping: Two iterations correct.\nEmerging: Does not understand the modulus condition."
+    },
+    {
+      "text": "Explain why the following Python code will result in an infinite loop, and write a corrected version.\npassword = \"\"\nwhile password != \"secret\":\n    print(\"Access denied\")",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: The variable password is never updated inside the loop (1) so the condition password != 'secret' is always True (1); corrected version includes password = input() inside the loop (1); explanation that updating the variable allows the condition to eventually become False (1).\nSecure: Infinite loop identified with partial correction.\nDeveloping: Identifies a problem but does not explain why it loops forever.\nEmerging: No understanding of why the loop continues."
+    },
+    {
+      "text": "Describe what the following code does. Write your answer as a plain-English description of the purpose of the program.\nfor i in range(1, 11):\n    if i % 3 == 0:\n        print(i)",
+      "type": "2 marks — Describe",
+      "marks": "Mastering: The program prints every integer from 1 to 10 (1) that is divisible by 3, i.e. 3, 6, 9 (1).\nSecure: Correct in meaning with one detail missing.\nDeveloping: Identifies it loops from 1 to 10 but misunderstands the condition.\nEmerging: Describes what each line does individually rather than the overall purpose."
+    },
+    {
+      "text": "A programmer wants to write a program that reads exam scores for a class of 30 students and counts how many scored above 75. Discuss whether a for loop or a while loop is more appropriate for this task, and write the Python code.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: For loop identified as more appropriate (1); reason — 30 iterations known in advance (1); counter variable initialised to 0 (1); for loop with range(30) or equivalent (1); if score > 75 inside loop increments counter (1); print result after loop (1).\nSecure: Correct loop type with working code minus one element.\nDeveloping: Correct reasoning without complete code.\nEmerging: Wrong loop choice or no working code."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which Python statement would loop from 1 to 5 inclusive (i.e. 1, 2, 3, 4, 5)?",
+      "options": [
+        "for i in range(1, 5):",
+        "for i in range(1, 6):",
+        "for i in range(0, 5):",
+        "for i in range(5):"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "A while loop checks its condition _____.",
+      "options": [
+        "After the body runs",
+        "Before the body runs",
+        "During the first iteration only",
+        "After the last iteration only"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A for loop is an example of _____ iteration because the number of repetitions is fixed in advance.",
+      "options": [
+        "indefinite",
+        "definite",
+        "conditional",
+        "Boolean"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Placing one loop or selection construct inside another is called _____.",
+      "options": [
+        "iteration",
+        "sequence",
+        "nesting",
+        "recursion"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each construct to its Python keyword.",
+      "left": [
+        "Count-controlled loop",
+        "Condition-controlled loop",
+        "Decision branch"
+      ],
+      "right": [
+        "while",
+        "if/elif/else",
+        "for"
+      ],
+      "order": [
+        2,
+        0,
+        1
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What values does range(2, 7) produce?",
+      "a": "2, 3, 4, 5, 6 — the end value (7) is excluded."
+    },
+    {
+      "q": "What type of iteration does a while loop implement?",
+      "a": "Indefinite (condition-controlled) iteration."
+    },
+    {
+      "q": "What type of iteration does a for loop with range() implement?",
+      "a": "Definite (count-controlled) iteration."
+    },
+    {
+      "q": "A while loop checks its condition _____ the body runs.",
+      "a": "Before — the body may never execute if the condition is False from the start."
+    },
+    {
+      "q": "What causes an infinite loop in a while construct?",
+      "a": "The condition variable is never updated inside the loop body."
+    },
+    {
+      "q": "In Python, what marks the start of a code block inside an if or loop?",
+      "a": "A colon at the end of the header line and consistent indentation."
+    },
+    {
+      "q": "How do you iterate over every item in a list called scores without using range()?",
+      "a": "for score in scores: — the loop variable takes each value in turn."
+    },
+    {
+      "q": "What is the term for placing one loop inside another?",
+      "a": "Nesting."
+    },
+    {
+      "q": "An accumulator pattern requires initialising a variable to _____ before the loop.",
+      "a": "0 (zero) — otherwise Python raises a NameError."
+    },
+    {
+      "q": "How many branches can an if/elif/else chain have?",
+      "a": "Any number — one if, zero or more elif, and an optional else at the end."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "sequence",
+      "definition": "The programming construct in which instructions are executed one after another in the order they appear in the code."
+    },
+    {
+      "term": "selection",
+      "definition": "The programming construct in which the program chooses between different execution paths based on a condition."
+    },
+    {
+      "term": "iteration",
+      "definition": "The programming construct in which a block of instructions repeats, either a set number of times or while a condition holds."
+    },
+    {
+      "term": "definite iteration",
+      "definition": "A count-controlled loop that iterates a fixed number of times, with Python's range() function supplying the sequence of values."
+    },
+    {
+      "term": "indefinite iteration",
+      "definition": "A condition-controlled loop that checks its condition before each iteration; if the condition is False from the start, the body never executes."
+    },
+    {
+      "term": "nesting",
+      "definition": "A programming structure where one loop or selection construct is placed inside another, creating multiple levels of control flow."
+    }
+  ],
+  "hero_keywords": [
+    "python programming code",
+    "loop flowchart",
+    "code terminal",
+    "software developer screen"
+  ],
+  "hero_image_caption": "Python code on screen showing loops and conditional logic at work.",
+  "_lesson_id": "4d4be9cf-9a75-4aab-8f2b-447f304a0984",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "CodeNewbie Podcast — Control Flow",
+          "url": "https://www.codenewbie.org/podcast",
+          "description": "Experienced developers on how if/elif/else and loops are the core building blocks of every program they have ever written."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        },
+        {
+          "title": "Tech With Tim — Python If Statements and Loops",
+          "url": "https://www.youtube.com/@TechWithTim",
+          "description": "Practical tutorials on if/elif/else, for loops and while loops with exam-style worked examples."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Hidden Figures (2016)",
+          "url": "https://www.justwatch.com/uk/movie/hidden-figures",
+          "description": "NASA's human computers solved orbital mechanics using nothing but arithmetic — the real-world origin of modern programming."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Replit — Browser Python Coding",
+          "url": "https://replit.com",
+          "description": "Run and test Python code in your browser with no install needed — ideal for practising exam-style programs."
+        },
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

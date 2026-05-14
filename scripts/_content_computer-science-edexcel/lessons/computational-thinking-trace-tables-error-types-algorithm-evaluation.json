@@ -1,0 +1,246 @@
+{
+  "lesson_id": "01a5355a-1b40-48bb-afc2-b25f49d68581",
+  "description": "Tracing algorithms by hand, identifying error types, and judging efficiency and fitness for purpose.",
+  "content_html": "<h2 data-narration-id=\"n1\">Trace Tables &mdash; Following an Algorithm Step by Step</h2>\n<p data-narration-id=\"n2\">A <dfn class=\"term\" data-def=\"A table used to record the values of variables at each step of an algorithm's execution, with each column representing one variable or the output and each row showing the state after one step.\">trace table</dfn> lets you follow an algorithm manually, recording the value of every variable at each step. Each column in the table represents a variable (or the output); each row represents the state of the algorithm after one step has executed. Trace tables are the standard method for finding logic errors and for checking that an algorithm produces the correct result for a given set of input data.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and list the two most common errors students make when completing a trace table in an exam.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The two most common trace-table errors in exams are: (1)&nbsp;adding extra rows for iterations that did not actually happen, and (2)&nbsp;forgetting to update a counter variable on every iteration. One row per state change &mdash; no more, no less.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Trace Table Worked Example &mdash; Step by Step</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n4\">Consider this algorithm in plain-English pseudocode:</p>\n    <p data-narration-id=\"n5\">1. Set total to 0.<br/>\n    2. Set counter to 1.<br/>\n    3. While counter is less than or equal to 4:<br/>\n    &nbsp;&nbsp;&nbsp;a. Add counter to total.<br/>\n    &nbsp;&nbsp;&nbsp;b. Add 1 to counter.<br/>\n    4. Display total.</p>\n    <p data-narration-id=\"n6\">Trace table (columns: counter, total, output):</p>\n    <p data-narration-id=\"n7\"><strong>Before loop:</strong> counter = 1, total = 0.</p>\n    <p data-narration-id=\"n8\"><strong>Iteration 1:</strong> condition 1 &le; 4 is True. total = 0 + 1 = 1. counter = 2.</p>\n    <p data-narration-id=\"n9\"><strong>Iteration 2:</strong> condition 2 &le; 4 is True. total = 1 + 2 = 3. counter = 3.</p>\n    <p data-narration-id=\"n10\"><strong>Iteration 3:</strong> condition 3 &le; 4 is True. total = 3 + 3 = 6. counter = 4.</p>\n    <p data-narration-id=\"n11\"><strong>Iteration 4:</strong> condition 4 &le; 4 is True. total = 6 + 4 = 10. counter = 5.</p>\n    <p data-narration-id=\"n12\"><strong>Check condition:</strong> 5 &le; 4 is False. Loop ends. Output: 10.</p>\n    <p data-narration-id=\"n13\">The algorithm sums the integers from 1 to 4, producing 10. Its purpose: sum the integers from 1 to n (where n = 4).</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Three Types of Error</h2>\n<p data-narration-id=\"n15\">Three categories of error can occur in programs. Understanding exactly what each type means is important &mdash; examiners report that many students give vague definitions that could apply to more than one type.</p>\n<p data-narration-id=\"n16\">A <dfn class=\"term\" data-def=\"An error that occurs when the rules of a programming language have been broken, causing the program to be rejected before it can run.\">syntax error</dfn> occurs when the rules of the programming language have been broken. The program cannot run at all &mdash; the language processor detects the error before execution begins. A misspelled keyword or a missing bracket are syntax errors. The key definition, word for word: <strong>the rules of the programming language have been broken</strong>. Avoid saying &ldquo;a spelling mistake&rdquo; in isolation &mdash; this is too vague and could describe a logic error too.</p>\n<p data-narration-id=\"n17\">A <dfn class=\"term\" data-def=\"An error where the program runs without crashing but produces incorrect results because the algorithm's logic is wrong.\">logic error</dfn> occurs when the program runs without crashing but produces incorrect results. The syntax is valid; the code executes; but the outcome is wrong. A common example: using a greater-than sign (&gt;) where a greater-than-or-equal-to sign (&ge;) was intended, causing the program to exclude a boundary value.</p>\n<p data-narration-id=\"n18\">A <dfn class=\"term\" data-def=\"An error that occurs while a program is running, caused by an operation the processor cannot carry out, such as dividing by zero or accessing memory that does not exist.\">runtime error</dfn> occurs while the program is executing. The syntax is valid and the program starts running, but it encounters an operation it cannot complete &mdash; such as dividing a number by zero, or attempting to access an index position that does not exist in an array. The program crashes or is forced to stop.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Distinguishing the Three Error Types &mdash; Worked Examples</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n19\"><strong>Syntax error example:</strong> A student writes <code>dsiplay(score)</code> instead of <code>display(score)</code>. The language processor cannot recognise the keyword and refuses to run the program.</p>\n    <p data-narration-id=\"n20\"><strong>Logic error example:</strong> A grading program is intended to give a Merit to students scoring 70 or above. The developer writes the condition as &ldquo;if the score is greater than 70&rdquo; instead of &ldquo;greater than or equal to 70&rdquo;. The program runs without error, but a student with exactly 70 receives Pass instead of Merit &mdash; the result is wrong.</p>\n    <p data-narration-id=\"n21\"><strong>Runtime error example:</strong> A program divides a student&rsquo;s total marks by the number of assessments taken. If the student has taken zero assessments (perhaps they are a new enrolment), the program attempts to divide by zero &mdash; this is an operation the processor cannot complete, and the program crashes.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n22\">Fitness for Purpose and Algorithm Efficiency</h2>\n<p data-narration-id=\"n23\">An algorithm is <dfn class=\"term\" data-def=\"Describes an algorithm that correctly solves the problem it was designed for, producing the right output for all valid inputs including boundary cases.\">fit for purpose</dfn> if it correctly solves the intended problem for all valid inputs, including boundary values and edge cases. You can check fitness for purpose by using logical reasoning and by running the algorithm with carefully chosen test data.</p>\n<p data-narration-id=\"n24\">Even if an algorithm is correct, it may not be <em>efficient</em>. Your specification identifies three measures of <dfn class=\"term\" data-def=\"A measure of how well an algorithm uses computational resources, assessed by the number of comparisons, number of loop passes, and amount of memory used.\">efficiency</dfn>: the number of comparisons made, the number of passes through a loop, and the use of memory.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n25\" data-revision-tip=\"Cover this and write down the three efficiency measures from the specification. For each, give one example of an algorithm where that measure matters.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Efficiency is measured in three ways: (1)&nbsp;<strong>number of comparisons</strong> &mdash; how many times the algorithm checks a condition against a value (important in searching: binary search needs far fewer comparisons than linear search for large datasets); (2)&nbsp;<strong>number of passes through a loop</strong> &mdash; how many times a loop body executes (important in sorting: bubble sort may need many passes); (3)&nbsp;<strong>use of memory</strong> &mdash; how much storage the algorithm needs (important in sorting: merge sort needs extra memory for sub-lists; bubble sort does not).</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Evaluating an Algorithm &mdash; A Practical Approach</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n26\">To evaluate an algorithm, ask three questions:</p>\n    <p data-narration-id=\"n27\"><strong>1. Is it correct?</strong> Trace through the algorithm with a normal input, a boundary input (e.g. the minimum or maximum valid value), and an edge case (e.g. an empty list). Does the output match what was expected in every case?</p>\n    <p data-narration-id=\"n28\"><strong>2. Is it efficient?</strong> Count the number of comparisons and loop passes for a given input size. If the dataset doubles in size, does the algorithm take twice as long, or much longer? Bubble sort on a list of 100 items needs many more passes than on a list of 10 &mdash; the number of passes grows with the size of the problem.</p>\n    <p data-narration-id=\"n29\"><strong>3. Does it use memory wisely?</strong> Does the algorithm create large temporary structures (like the sub-lists in merge sort)? On a device with limited RAM &mdash; such as an embedded system in a medical device &mdash; high memory use could cause problems even if the algorithm is correct.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n30\">The most commonly lost marks on trace table questions are: adding too many rows (trace only steps that actually execute), and not updating every variable on each row. For error-type questions, the precise definition of a syntax error is &ldquo;the rules of the programming language have been broken&rdquo; &mdash; avoid writing &ldquo;a spelling mistake&rdquo; alone, as this is ambiguous. For a 4-mark <strong>Explain</strong> question on algorithm efficiency, state the measure (number of comparisons / passes / memory use) and then explain <em>why</em> that matters in the given scenario &mdash; a statement of fact alone earns only half the marks.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n31\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n32\">A trace table records the value of every variable at each step; one row per state change, no extras. It is the standard method for checking an algorithm's correctness and finding logic errors.</li>\n  <li data-narration-id=\"n33\">Three error types: syntax (rules broken, program won't run), logic (program runs but gives wrong results), runtime (program crashes during execution, e.g. division by zero).</li>\n  <li data-narration-id=\"n34\">Algorithm efficiency is measured by number of comparisons, number of loop passes, and use of memory. An algorithm must also be fit for purpose &mdash; correct for all valid inputs including boundary and edge cases.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Define the term 'syntax error'.",
+      "type": "2 marks — Define",
+      "marks": "Mastering: A syntax error occurs when the rules of a programming language have been broken (1), causing the program to be rejected before it can run (1).\nSecure: Correct idea but one part vague (e.g. 'a mistake in the code' without specifying language rules).\nDeveloping: 'A spelling mistake' in isolation — too vague and ambiguous.\nEmerging: Confuses syntax error with logic or runtime error."
+    },
+    {
+      "text": "Identify the type of error in the following situation: a program to calculate a student's average score divides the total by the number of subjects taken. When a student has taken zero subjects, the program crashes.",
+      "type": "1 mark — Identify",
+      "marks": "Mastering: Runtime error (1) — the program crashes while executing because division by zero cannot be performed.\nSecure: Runtime error stated without explanation.\nDeveloping: Logic error — incorrect type.\nEmerging: Syntax error — incorrect type."
+    },
+    {
+      "text": "Complete a trace table for the algorithm below. Show the values of i, result and any output after each step.\n1. Set result to 1.\n2. Set i to 1.\n3. Repeat while i is less than or equal to 3:\n   a. Set result to result multiplied by 2.\n   b. Add 1 to i.\n4. Display result.",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: Before loop: result=1, i=1. Iteration 1: result=2, i=2. Iteration 2: result=4, i=3. Iteration 3: result=8, i=4. Loop ends (4 > 3). Output: 8. All four rows correct (1 mark each, up to 4).\nSecure: Three rows correct.\nDeveloping: Two rows correct.\nEmerging: One row or fewer correct."
+    },
+    {
+      "text": "Explain what is meant by a logic error. Give one example of a logic error in a program that processes exam scores.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: A logic error means the program runs without crashing (1) but produces incorrect results because the algorithm's logic is flawed (1). Valid example: using 'greater than 70' instead of 'greater than or equal to 70' when assigning a grade, causing scores of exactly 70 to receive the wrong grade (1). Consequence stated: the output is wrong for this boundary value (1).\nSecure: Correct definition with a valid example but missing consequence.\nDeveloping: Example given without a clear definition.\nEmerging: Confuses logic error with syntax or runtime error."
+    },
+    {
+      "text": "Describe two ways in which the efficiency of a sorting algorithm can be measured.",
+      "type": "2 marks — Describe",
+      "marks": "Mastering: Any two of: number of comparisons made (1); number of passes through the loop (1); amount of memory used (1). 1 mark each up to 2.\nSecure: One measure correctly described with the second vague.\nDeveloping: One measure named but not described.\nEmerging: Describes 'speed' or 'time' without naming a measurable quantity."
+    },
+    {
+      "text": "A developer has written an algorithm to find the largest number in a list of 1,000 student scores. Discuss how you would evaluate this algorithm for fitness for purpose and efficiency.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Fitness for purpose — trace with normal data (a typical list) and edge cases (empty list, list with one item, all items the same) to verify correct output (2 marks). Efficiency — count comparisons: finding the largest requires checking every item, so 999 comparisons for 1,000 items (1 mark). Memory — algorithm only needs one variable to store the current largest value, so memory use is minimal (1 mark). Trade-off acknowledged: the algorithm must examine all items (no way to stop early), but memory cost is low (1 mark). Conclusion about whether this is acceptable (1 mark). 6 marks total.\nSecure: Fitness for purpose and one efficiency measure discussed. 4–5 marks.\nDeveloping: Fitness for purpose described without test data; efficiency vague. 2–3 marks.\nEmerging: One point. 1 mark."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "A program runs and produces the wrong output, but does not crash. Which type of error is this?",
+      "options": [
+        "Syntax error",
+        "Runtime error",
+        "Logic error",
+        "Compilation error"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which of the following best describes when a syntax error is detected?",
+      "options": [
+        "When the program produces wrong output",
+        "When the program crashes during execution",
+        "Before the program runs, when the language processor checks the code",
+        "After the user enters invalid data"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A trace table records the _____ of each variable after every step of an algorithm's execution.",
+      "options": [
+        "name",
+        "value",
+        "type",
+        "address"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A program crashes when attempting to divide a score by zero. This is a _____ error.",
+      "options": [
+        "syntax",
+        "logic",
+        "runtime",
+        "sequence"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each error type to its correct description.",
+      "left": [
+        "Syntax error",
+        "Logic error",
+        "Runtime error"
+      ],
+      "right": [
+        "The program runs but crashes during execution because an operation cannot be completed",
+        "The rules of the programming language have been broken; the program will not run",
+        "The program runs without crashing but produces incorrect results"
+      ],
+      "order": [
+        1,
+        2,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the precise definition of a syntax error?",
+      "a": "The rules of the programming language have been broken, so the program cannot run."
+    },
+    {
+      "q": "What is a logic error?",
+      "a": "The program runs without crashing but produces incorrect results because the logic is wrong."
+    },
+    {
+      "q": "What is a runtime error?",
+      "a": "An error that occurs during execution when the processor cannot complete an operation, causing a crash."
+    },
+    {
+      "q": "Give one example of a runtime error.",
+      "a": "Dividing by zero, or accessing an index that does not exist in an array."
+    },
+    {
+      "q": "What does each row in a trace table represent?",
+      "a": "The state of all variables after one step of the algorithm has executed."
+    },
+    {
+      "q": "Name the three efficiency measures used to compare algorithms.",
+      "a": "Number of comparisons, number of loop passes, and use of memory."
+    },
+    {
+      "q": "What does 'fit for purpose' mean for an algorithm?",
+      "a": "It correctly solves the problem for all valid inputs, including boundary and edge cases."
+    },
+    {
+      "q": "What two types of test data should you use when checking an algorithm's fitness for purpose?",
+      "a": "Normal data and boundary/edge-case data."
+    },
+    {
+      "q": "Why must a syntax error be fixed before a program can run?",
+      "a": "The language processor detects the broken rule and rejects the code before execution begins."
+    },
+    {
+      "q": "A student writes 'greater than 70' instead of 'greater than or equal to 70' in a grading algorithm. What type of error is this?",
+      "a": "Logic error — the program runs but gives wrong results for scores of exactly 70."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "trace table",
+      "definition": "A table used to record the values of variables at each step of an algorithm's execution, with each column representing one variable or the output and each row showing the state after one step."
+    },
+    {
+      "term": "syntax error",
+      "definition": "An error that occurs when the rules of a programming language have been broken, causing the program to be rejected before it can run."
+    },
+    {
+      "term": "logic error",
+      "definition": "An error where the program runs without crashing but produces incorrect results because the algorithm's logic is wrong."
+    },
+    {
+      "term": "runtime error",
+      "definition": "An error that occurs while a program is running, caused by an operation the processor cannot carry out, such as dividing by zero or accessing memory that does not exist."
+    },
+    {
+      "term": "fit for purpose",
+      "definition": "Describes an algorithm that correctly solves the problem it was designed for, producing the right output for all valid inputs including boundary cases."
+    },
+    {
+      "term": "efficiency",
+      "definition": "A measure of how well an algorithm uses computational resources, assessed by the number of comparisons, number of loop passes, and amount of memory used."
+    }
+  ],
+  "hero_keywords": [
+    "code debugging terminal",
+    "computer error screen",
+    "programmer laptop",
+    "data analysis"
+  ],
+  "hero_image_caption": "Tracing through an algorithm by hand is the most reliable way to find a hidden logic error.",
+  "_lesson_id": "01a5355a-1b40-48bb-afc2-b25f49d68581",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "The Changelog — Debugging Stories",
+          "url": "https://changelog.com/podcast",
+          "description": "Seasoned developers share debugging stories — why trace-based thinking is the core skill in professional software engineering."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Halt and Catch Fire (TV Series, 2014–2017)",
+          "url": "https://www.justwatch.com/uk/tv-series/halt-and-catch-fire",
+          "description": "Drama following engineers and entrepreneurs building PCs and networks in the 1980s — the context behind modern computing history."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        },
+        {
+          "title": "Replit — Browser Python Coding",
+          "url": "https://replit.com",
+          "description": "Run and test Python code in your browser with no install needed — ideal for practising exam-style programs."
+        }
+      ]
+    }
+  ]
+}

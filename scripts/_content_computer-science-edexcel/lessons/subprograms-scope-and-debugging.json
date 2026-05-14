@@ -1,0 +1,285 @@
+{
+  "description": "Writing procedures and functions in Python, using local variables, and finding program errors.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Break Code into Subprograms?</h2>\n<p data-narration-id=\"n2\">As programs grow longer, keeping everything in one flat block of code becomes unmanageable. A <dfn class=\"term\" data-def=\"A named, self-contained block of code that performs a specific task and can be called by name from anywhere in the program.\">subprogram</dfn> is a named block of code that does one clearly defined job. You call it by name whenever that job needs doing, rather than copying the code every time. Python supports two types of subprogram: <strong>procedures</strong> and <strong>functions</strong>. Edexcel is precise about the distinction &mdash; confusing them is one of the most penalised errors in exam answers.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and state the precise difference between a function and a procedure in Python — what does each one do or not do?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A <strong>function</strong> MUST return a value using <code>return</code>. A <strong>procedure</strong> does NOT return a value. Both may take parameters. Writing &ldquo;a function performs a task&rdquo; without mentioning the return value is an incomplete definition that loses marks.</p>\n</div>\n\n<h2 data-narration-id=\"n4\">Procedures in Python</h2>\n<p data-narration-id=\"n5\">A <dfn class=\"term\" data-def=\"A subprogram that performs a task but does not return a value to the calling code.\">procedure</dfn> is defined with <code>def</code>, may take parameters, performs its task, and then simply ends. It does not hand anything back to the line that called it.</p>\n\n<pre data-narration-id=\"n6\">def print_greeting(name):\n    print(&quot;Hello,&quot;, name, &quot;- welcome to the system!&quot;)\n\n# Calling the procedure\nprint_greeting(&quot;Priya&quot;)\nprint_greeting(&quot;Ali&quot;)</pre>\n\n<p data-narration-id=\"n7\">The procedure executes, produces output, and exits. The calling code receives nothing back. Good uses for procedures: printing a menu, displaying a result, writing a line to a file, sending a notification.</p>\n\n<h2 data-narration-id=\"n8\">Functions in Python</h2>\n<p data-narration-id=\"n9\">A <dfn class=\"term\" data-def=\"A subprogram that performs a task and returns a value to the calling code using the return statement.\">function</dfn> is also defined with <code>def</code>, but it uses <code>return</code> to send a result back. The returned value replaces the function call in the expression where it appears.</p>\n\n<pre data-narration-id=\"n10\">def calculate_area(length, width):\n    area = length * width\n    return area\n\n# Calling the function and using the returned value\nroom_area = calculate_area(5, 4)\nprint(&quot;Area:&quot;, room_area, &quot;square metres&quot;)\n\n# The return value can also be used directly in an expression:\nif calculate_area(3, 3) &gt; 8:\n    print(&quot;Room is large enough&quot;)</pre>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Function with Parameters and Return</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n11\">A function that checks if a student has passed (score &ge; 50) and returns a Boolean:</p>\n    <pre data-narration-id=\"n12\">def has_passed(score):\n    if score &gt;= 50:\n        return True\n    else:\n        return False\n\nresult = has_passed(72)\nprint(result)    # True\n\nresult2 = has_passed(40)\nprint(result2)   # False</pre>\n    <p data-narration-id=\"n13\"><strong>Predict the output:</strong> 72 &ge; 50 so the first call returns <code>True</code>. 40 &lt; 50 so the second returns <code>False</code>. The function&rsquo;s return value is captured in a variable and then printed. This predict-before-run habit is essential for trace table questions.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Parameters</h2>\n<p data-narration-id=\"n15\"><dfn class=\"term\" data-def=\"A variable listed in a subprogram definition that receives a value when the subprogram is called; the passed value is available inside the subprogram for the duration of the call.\">Parameters</dfn> are the input variables listed in the subprogram&rsquo;s definition. When you call the subprogram, you pass <strong>arguments</strong> &mdash; the actual values &mdash; which are assigned to the parameter names. The order must match: the first argument goes to the first parameter, and so on.</p>\n\n<pre data-narration-id=\"n16\">def greet_student(first_name, year_group):\n    print(&quot;Welcome, Year&quot;, year_group, &quot;student&quot;, first_name)\n\ngreet_student(&quot;Beth&quot;, 10)   # first_name = &quot;Beth&quot;, year_group = 10</pre>\n\n<h2 data-narration-id=\"n17\">Local and Global Variables &mdash; Scope</h2>\n<p data-narration-id=\"n18\"><dfn class=\"term\" data-def=\"The part of a program where a variable can be accessed; a variable's scope is determined by where it is declared.\">Scope</dfn> describes which parts of a program can read or change a variable. A <dfn class=\"term\" data-def=\"A variable declared inside a subprogram that only exists while the subprogram is running and cannot be accessed from code outside it.\">local variable</dfn> is declared inside a <code>def</code> block. It is created when the function is called and destroyed when it returns. Nothing outside the function can access it.</p>\n\n<pre data-narration-id=\"n19\">def calculate_tax(price):\n    tax_rate = 0.20    # local variable\n    tax = price * tax_rate\n    return tax\n\n# tax_rate and tax do NOT exist out here\nprint(calculate_tax(100))   # 20.0</pre>\n\n<p data-narration-id=\"n20\">A <dfn class=\"term\" data-def=\"A variable declared outside all subprograms, accessible from any part of the program.\">global variable</dfn> is declared at module level (outside all functions). It can be read anywhere in the program. To <strong>reassign</strong> it inside a function, you must use the <code>global</code> keyword; otherwise Python creates a new local variable with the same name instead.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Why Prefer Local Variables?</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\">Local variables reduce the risk of bugs. If a global variable called <code>score</code> is shared across ten functions, any one of them could accidentally overwrite it. A bug that corrupts the score could be anywhere in the program &mdash; finding it means checking all ten functions. If <code>score</code> is instead a local parameter, only that function can change it. The problem is isolated immediately.</p>\n    <p data-narration-id=\"n22\">Use global variables only for values that genuinely need to be shared across the whole program &mdash; for example, a configuration setting loaded once at start-up, or a game&rsquo;s running total score that every function needs to update.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n23\">Built-in and Library Subprograms</h2>\n<p data-narration-id=\"n24\">Python comes with many <dfn class=\"term\" data-def=\"A subprogram provided as part of the Python language itself, available without importing anything, such as print(), input(), len() and int().\">built-in subprograms</dfn> that are always available: <code>print()</code>, <code>input()</code>, <code>len()</code>, <code>int()</code>, <code>float()</code>, <code>str()</code>, <code>range()</code>. These are functions &mdash; most of them return a value. Python also has an extensive standard library of <dfn class=\"term\" data-def=\"A subprogram provided in a Python module that must be imported before use, such as functions from the math or random modules.\">library subprograms</dfn> that must be imported before use, such as <code>import math</code> and then <code>math.sqrt(25)</code>.</p>\n\n<h2 data-narration-id=\"n25\">Types of Program Error</h2>\n<p data-narration-id=\"n26\">When a program fails, the error falls into one of three categories. Understanding which type of error you are dealing with determines where to look for the fix.</p>\n<p data-narration-id=\"n27\">A <dfn class=\"term\" data-def=\"An error caused by code that breaks the rules of the Python language, preventing the program from running at all.\">syntax error</dfn> occurs when the code violates the rules of Python. The program will not run at all. Python reports the line number and type of problem. Common causes: missing colon at the end of an <code>if</code> or <code>def</code> line, misspelled keyword, unmatched brackets.</p>\n<p data-narration-id=\"n28\">A <dfn class=\"term\" data-def=\"An error that occurs while a program is running, causing it to crash; the code is syntactically valid but attempts an impossible operation.\">runtime error</dfn> occurs during execution. The syntax is correct, so Python starts running the program &mdash; but something goes wrong mid-execution. Examples: dividing by zero (<code>ZeroDivisionError</code>), using an index beyond the end of a list (<code>IndexError</code>), trying to convert &ldquo;hello&rdquo; to an integer (<code>ValueError</code>).</p>\n<p data-narration-id=\"n29\">A <dfn class=\"term\" data-def=\"An error where the program runs without crashing but produces incorrect results because the logic of the algorithm is flawed.\">logic error</dfn> is the most difficult to find. The program runs without crashing &mdash; but it produces the wrong answer. Examples: using <code>&gt;</code> when the condition should be <code>&gt;=</code>, updating a total inside a loop but printing it inside the loop instead of after it, or initialising an accumulator to 1 instead of 0.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n30\" data-revision-tip=\"Test yourself: give one example of each error type — syntax, runtime, and logic — in Python code.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Syntax error: program won&rsquo;t run at all &mdash; Python language rules broken. Runtime error: program starts but crashes during execution &mdash; impossible operation attempted. Logic error: program runs to completion but produces the wrong output &mdash; the algorithm itself is flawed. Only a logic error can be invisible to Python &mdash; the other two produce explicit error messages.</p>\n</div>\n\n<h2 data-narration-id=\"n31\">Test Data &mdash; Normal, Boundary and Erroneous</h2>\n<p data-narration-id=\"n32\">Testing requires choosing <strong>test data</strong> that exercises different parts of the program. Three categories of test data cover the essential cases for any input that must lie within a range.</p>\n<p data-narration-id=\"n33\"><dfn class=\"term\" data-def=\"Test data that represents typical, expected values that the program should process correctly.\">Normal test data</dfn> uses typical values well within the valid range. For an age input (0 to 120), normal data might be 25, 45, 67. <dfn class=\"term\" data-def=\"Test data that uses values at the exact edges of the valid range, to verify the boundary conditions of the program are handled correctly.\">Boundary test data</dfn> (also called edge data) tests the extreme limits: for the range 0&ndash;120, test 0, 1, 119, and 120. <dfn class=\"term\" data-def=\"Test data that is clearly outside the valid range or of the wrong type, used to verify the program handles invalid input gracefully.\">Erroneous test data</dfn> is deliberately invalid: -1, 121, or &ldquo;hello&rdquo; for an age field.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Trace Table with a Function</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n34\">Trace the output of the following function for the call <code>classify(73)</code>:</p>\n    <pre data-narration-id=\"n35\">def classify(score):\n    if score &gt;= 80:\n        return &quot;Distinction&quot;\n    elif score &gt;= 60:\n        return &quot;Merit&quot;\n    else:\n        return &quot;Pass&quot;\n\nresult = classify(73)\nprint(result)</pre>\n    <p data-narration-id=\"n36\"><strong>Trace:</strong> score = 73. Is 73 &ge; 80? No. Is 73 &ge; 60? Yes &rarr; return &ldquo;Merit&rdquo;. <code>result</code> = &ldquo;Merit&rdquo;. Output: <code>Merit</code>. When tracing a function, substitute the argument value for the parameter name and follow each condition in order.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n37\">The most common mark loss in &ldquo;Write a Subprogram&rdquo; questions is a function that forgets to include <code>return</code>, or a procedure that accidentally returns a value. Always write the signature first (<code>def name(parameters):</code>), then the body, then <code>return</code> at the end if it is a function. For error-type questions, be precise: a syntax error means Python language rules are broken; a logic error means the algorithm produces wrong results but runs without crashing. &ldquo;A mistake in the code&rdquo; is too vague for marks.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n38\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n39\">A function MUST return a value using <code>return</code>. A procedure does NOT return a value. Both are defined with <code>def</code> and may take parameters.</li>\n  <li data-narration-id=\"n40\">Local variables exist only inside the subprogram where they are defined; global variables are accessible everywhere. Prefer local variables to reduce bugs and improve maintainability.</li>\n  <li data-narration-id=\"n41\">Three error types: syntax (code breaks Python rules, won't run), runtime (crashes during execution), logic (runs but produces wrong results). Test with normal, boundary and erroneous data.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Define the difference between a function and a procedure in Python.",
+      "type": "2 marks — Define",
+      "marks": "Mastering: A function returns a value to the calling code using return (1); a procedure performs a task but does not return a value (1).\nSecure: One part correctly defined.\nDeveloping: States both are defined with def without identifying the return-value distinction.\nEmerging: Uses the terms interchangeably."
+    },
+    {
+      "text": "Identify the type of error in each of the following:\n(a) A program calculates the total of a list but initialises the total to 1 instead of 0, giving a result that is one too high.\n(b) A program crashes when the user enters 'quit' into a field that expects an integer.",
+      "type": "2 marks — Describe",
+      "marks": "Mastering: (a) Logic error (1) — the program runs but produces the wrong result due to a flawed algorithm; (b) Runtime error (1) — int('quit') raises a ValueError during execution.\nSecure: Both identified with imprecise explanation.\nDeveloping: One correct identification.\nEmerging: Both wrong or terms confused."
+    },
+    {
+      "text": "Complete a trace table for the following Python code. Show the values of n and result for each call.\ndef double_it(n):\n    result = n * 2\n    return result\n\nprint(double_it(5))\nprint(double_it(12))",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: Call 1: n=5, result=10, output 10 (1 per correct detail); Call 2: n=12, result=24, output 24 (1 per correct detail). 4 marks for all four values correct.\nSecure: Three values correct.\nDeveloping: Two values correct.\nEmerging: Does not trace parameter substitution."
+    },
+    {
+      "text": "Explain one advantage of using local variables rather than global variables in a Python subprogram.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Local variables can only be accessed within their subprogram (1) so they cannot be accidentally changed by other parts of the program (1); this makes bugs easier to locate (1) because if the variable has the wrong value, only that subprogram can be responsible (1).\nSecure: Correct advantage with partial explanation.\nDeveloping: States local variables are inside the function without explaining the benefit.\nEmerging: Confuses local and global scope."
+    },
+    {
+      "text": "Write a Python function called is_valid_age that takes an integer parameter age and returns True if the age is between 0 and 120 inclusive, and False otherwise.",
+      "type": "6 marks — Write a Subprogram",
+      "marks": "Mastering: def with correct function name and parameter (1); if condition checking age >= 0 and age <= 120 (1); return True in the valid branch (1); return False in the invalid branch (1); function called correctly with a test value (1); meaningful identifier names used (1).\nSecure: Correct logic with one structural error.\nDeveloping: Condition present but return values missing or wrong.\nEmerging: No return statement used."
+    },
+    {
+      "text": "A programmer is testing a function that only accepts scores from 0 to 100. Describe the normal, boundary and erroneous test data they should use.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Normal — typical values well within range, e.g. 50, 75 (1); explanation that normal data should produce correct expected output (1); boundary — values at the exact edges: 0, 1, 99, 100 (1); explanation that boundary tests verify edge conditions are handled correctly (1); erroneous — values outside the valid range or wrong type: -1, 101, 'hello' (1); explanation that erroneous data verifies the program handles invalid input gracefully (1).\nSecure: All three types named with partial explanation.\nDeveloping: Two types described.\nEmerging: One type or no clear distinction between categories."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which of the following correctly describes a function in Python?",
+      "options": [
+        "A block of code that performs a task and displays output",
+        "A block of code that performs a task and returns a value",
+        "A block of code with no parameters",
+        "A block of code that can only be called once"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "A program runs without crashing but outputs the wrong answer. What type of error is this?",
+      "options": [
+        "Syntax error",
+        "Runtime error",
+        "Logic error",
+        "Compile error"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A variable declared inside a Python function is called a _____ variable.",
+      "options": [
+        "global",
+        "local",
+        "parameter",
+        "constant"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Test data that uses values at the exact edges of the valid input range is called _____ test data.",
+      "options": [
+        "normal",
+        "erroneous",
+        "boundary",
+        "expected"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each error type to its description.",
+      "left": [
+        "Syntax error",
+        "Runtime error",
+        "Logic error"
+      ],
+      "right": [
+        "Program runs but produces wrong results",
+        "Program crashes during execution",
+        "Program won't run — language rules broken"
+      ],
+      "order": [
+        2,
+        1,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the key difference between a function and a procedure in Python?",
+      "a": "A function returns a value using return; a procedure does not."
+    },
+    {
+      "q": "A syntax error means _____.",
+      "a": "The code breaks the rules of the Python language and the program cannot run."
+    },
+    {
+      "q": "A runtime error occurs _____.",
+      "a": "While the program is executing — the syntax is valid but an impossible operation is attempted."
+    },
+    {
+      "q": "A logic error means _____.",
+      "a": "The program runs without crashing but produces incorrect results due to a flaw in the algorithm."
+    },
+    {
+      "q": "What does the return statement do in a Python function?",
+      "a": "Sends a value back to the calling code and exits the function."
+    },
+    {
+      "q": "Where does a local variable exist in Python?",
+      "a": "Inside the subprogram (def block) where it was declared — it cannot be accessed outside."
+    },
+    {
+      "q": "Give three examples of Python built-in subprograms.",
+      "a": "Any three of: print(), input(), len(), int(), float(), str(), range()."
+    },
+    {
+      "q": "What is boundary test data?",
+      "a": "Data at the exact edges of the valid input range, e.g. 0 and 100 for a 0–100 range."
+    },
+    {
+      "q": "What is erroneous test data?",
+      "a": "Data clearly outside the valid range or of the wrong type, used to test invalid-input handling."
+    },
+    {
+      "q": "What kind of variable is accessible from any function in a Python program?",
+      "a": "Global"
+    },
+    {
+      "q": "What Python keyword is used to define both functions and procedures?",
+      "a": "def"
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "subprogram",
+      "definition": "A named, self-contained block of code that performs a specific task and can be called by name from anywhere in the program."
+    },
+    {
+      "term": "procedure",
+      "definition": "A subprogram that performs a task but does not return a value to the calling code."
+    },
+    {
+      "term": "function",
+      "definition": "A subprogram that performs a task and returns a value to the calling code using the return statement."
+    },
+    {
+      "term": "parameters",
+      "definition": "Variables listed in a subprogram definition that receive values when the subprogram is called; the passed values are available inside the subprogram for the duration of the call."
+    },
+    {
+      "term": "scope",
+      "definition": "The part of a program where a variable can be accessed; a variable's scope is determined by where it is declared."
+    },
+    {
+      "term": "local variable",
+      "definition": "A variable declared inside a subprogram that only exists while the subprogram is running and cannot be accessed from code outside it."
+    },
+    {
+      "term": "global variable",
+      "definition": "A variable declared outside all subprograms, accessible from any part of the program."
+    },
+    {
+      "term": "built-in subprograms",
+      "definition": "Subprograms provided as part of the Python language itself, available without importing anything, such as print(), input(), len() and int()."
+    },
+    {
+      "term": "library subprograms",
+      "definition": "Subprograms provided in a Python module that must be imported before use, such as functions from the math or random modules."
+    },
+    {
+      "term": "syntax error",
+      "definition": "An error caused by code that breaks the rules of the Python language, preventing the program from running at all."
+    },
+    {
+      "term": "runtime error",
+      "definition": "An error that occurs while a program is running, causing it to crash; the code is syntactically valid but attempts an impossible operation."
+    },
+    {
+      "term": "logic error",
+      "definition": "An error where the program runs without crashing but produces incorrect results because the logic of the algorithm is flawed."
+    },
+    {
+      "term": "normal test data",
+      "definition": "Test data that represents typical, expected values that the program should process correctly."
+    },
+    {
+      "term": "boundary test data",
+      "definition": "Test data that uses values at the exact edges of the valid range, to verify the boundary conditions of the program are handled correctly."
+    },
+    {
+      "term": "erroneous test data",
+      "definition": "Test data that is clearly outside the valid range or of the wrong type, used to verify the program handles invalid input gracefully."
+    }
+  ],
+  "hero_keywords": [
+    "python debugging code",
+    "programming error terminal",
+    "code review screen",
+    "developer laptop"
+  ],
+  "hero_image_caption": "A developer tracing through Python code to locate and fix a logic error.",
+  "_lesson_id": "202ae7d4-d57d-49f8-a946-fbd106e3ef38",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "The Changelog — Functions and Clean Code",
+          "url": "https://changelog.com/podcast",
+          "description": "Software engineers on why well-named functions with local scope make programs easier to debug and maintain."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        },
+        {
+          "title": "Tech With Tim — Python Functions",
+          "url": "https://www.youtube.com/@TechWithTim",
+          "description": "Practical Python tutorials covering def, parameters, return values, local vs global scope and common debugging techniques."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Halt and Catch Fire (TV Series, 2014–2017)",
+          "url": "https://www.justwatch.com/uk/tv-series/halt-and-catch-fire",
+          "description": "Drama following engineers and entrepreneurs building PCs and networks in the 1980s — the context behind modern computing history."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Replit — Browser Python Coding",
+          "url": "https://replit.com",
+          "description": "Run and test Python code in your browser with no install needed — ideal for practising exam-style programs."
+        },
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

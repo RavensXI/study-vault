@@ -169,6 +169,11 @@
     'food-preparation-and-nutrition': [
       { board: 'Eduqas', slug: 'food-preparation-and-nutrition-eduqas' }
       // aqa, ocr to come
+    ],
+    'computer-science': [
+      { board: 'OCR', slug: 'computer-science' },
+      { board: 'AQA', slug: 'computer-science-aqa' },
+      { board: 'Edexcel', slug: 'computer-science-edexcel' }
     ]
   };
 

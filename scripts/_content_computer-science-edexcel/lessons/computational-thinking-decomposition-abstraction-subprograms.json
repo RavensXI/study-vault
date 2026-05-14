@@ -1,0 +1,241 @@
+{
+  "lesson_id": "cc006999-9c74-4cbc-8d13-b2212fd28ce0",
+  "description": "Breaking problems apart, hiding unnecessary detail and using subprograms to model the real world.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is Computational Thinking?</h2>\n<p data-narration-id=\"n2\"><dfn class=\"term\" data-def=\"A problem-solving approach that involves breaking down complex problems, removing unnecessary detail, and designing step-by-step solutions so they can be carried out systematically.\">Computational thinking</dfn> is a structured way of approaching problems so they can be solved clearly and efficiently. It is not about using a computer &mdash; it is about <em>thinking</em> in a way that makes complex problems manageable. Two of the most important techniques are <strong>decomposition</strong> and <strong>abstraction</strong>. Together, they form the foundation of everything you will study in GCSE Computer Science.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and recall the definitions of decomposition and abstraction. Write one sentence for each without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Decomposition and abstraction are two complementary techniques. Decomposition breaks a large problem into smaller sub-problems. Abstraction removes unnecessary detail so you can focus on what actually matters. Both are used by professional developers every time they start a new project.</p>\n</div>\n\n<h2 data-narration-id=\"n4\">Decomposition</h2>\n<p data-narration-id=\"n5\"><dfn class=\"term\" data-def=\"Breaking a complex problem down into a number of smaller sub-problems, each of which accomplishes an identifiable task that can be solved more easily on its own.\">Decomposition</dfn> means breaking a large, complex problem into smaller, more manageable sub-problems. Each sub-problem accomplishes a specific, identifiable task. Sub-problems can themselves be broken down further, creating a hierarchy of manageable tasks &mdash; a technique sometimes called <em>stepwise refinement</em>.</p>\n<p data-narration-id=\"n6\">Consider building a mobile banking app. At the top level it is one enormous problem. Decomposed, it becomes: user authentication, account balance display, payment processing, transaction history, and security alerts. Each of those can be decomposed further &mdash; payment processing breaks into input validation, fraud checks, bank transfer protocols, and confirmation messages. Each piece is now small enough for a single developer (or a team) to tackle independently.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Decomposition in Practice &mdash; An NHS Appointment System</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\">Suppose you are asked to design an online GP appointment booking system. Decomposing the problem gives at least four identifiable sub-problems:</p>\n    <ul>\n      <li data-narration-id=\"n8\"><strong>Patient login</strong> &mdash; verify the patient&rsquo;s identity securely</li>\n      <li data-narration-id=\"n9\"><strong>Show available slots</strong> &mdash; fetch free appointment times from the system</li>\n      <li data-narration-id=\"n10\"><strong>Book a slot</strong> &mdash; record the booking and prevent double-booking</li>\n      <li data-narration-id=\"n11\"><strong>Send confirmation</strong> &mdash; email or SMS reminder to the patient</li>\n    </ul>\n    <p data-narration-id=\"n12\">Each sub-problem is small enough to design, code and test independently. A team of four developers could work on all four sub-problems simultaneously, cutting development time.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n13\">Abstraction</h2>\n<p data-narration-id=\"n14\"><dfn class=\"term\" data-def=\"The process of removing unnecessary detail from a problem, keeping only the information that is relevant to solving it.\">Abstraction</dfn> means removing unnecessary detail so you can focus on the information that actually matters. It is not about making things simpler than they are &mdash; it is about identifying which details are relevant and filtering out everything else.</p>\n<p data-narration-id=\"n15\">The London Underground map is a classic example. Real tube lines curve, dip underground, and vary widely in the spacing of stations. A geographically accurate map would be too cluttered to use. The Underground map abstracts away distances and precise geography, keeping only the connections between stations and their order. That is all a passenger needs to plan a journey.</p>\n<p data-narration-id=\"n16\">In programming, abstraction happens constantly. A variable named <code>playerScore</code> hides the actual memory address where the value is stored. A subprogram called <code>sendPaymentConfirmation()</code> hides dozens of lines of networking and formatting code behind a single meaningful name. Programmers use abstraction to manage complexity at every level of a system.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n17\" data-revision-tip=\"Test yourself: Give one everyday example of abstraction and explain what detail has been removed and why it is not needed.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>When designing an algorithm, you make abstraction decisions: what are the <strong>inputs</strong>? What <strong>processing</strong> happens on them? What are the <strong>outputs</strong>? Everything else &mdash; the hardware, the user interface appearance, the storage format &mdash; is abstracted away from the algorithm itself.</p>\n</div>\n\n<h2 data-narration-id=\"n18\">Benefits of Using Subprograms</h2>\n<p data-narration-id=\"n19\">Decomposition naturally leads to <dfn class=\"term\" data-def=\"A named, self-contained block of code that performs a specific task and can be called from different points in a program.\">subprograms</dfn> &mdash; named, self-contained blocks of code that each solve one sub-problem. Your specification identifies four key benefits of structuring programs using subprograms.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>The Four Benefits of Subprograms &mdash; Explained</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\"><strong>1. <dfn class=\"term\" data-def=\"The ability to call a subprogram from multiple points in a program without rewriting the code it contains.\">Reusability</dfn>.</strong> A subprogram is written once but can be called from many different points in a program. A <code>validateEmail()</code> subprogram used in the registration form can be called again on the login page and on the password-reset page without rewriting the logic. This reduces the total amount of code and the likelihood of inconsistencies.</p>\n    <p data-narration-id=\"n21\"><strong>2. Testing in isolation.</strong> A subprogram can be tested on its own, with known input values, before the rest of the program is written. If <code>calculateDiscount()</code> is wrong, the bug is contained in one place and is straightforward to find and fix. Testing individual subprograms separately is far easier than trying to find an error in thousands of lines of combined code.</p>\n    <p data-narration-id=\"n22\"><strong>3. Reducing complexity.</strong> Breaking a program into subprograms means that any developer reading the code sees short, clearly-named blocks rather than one enormous sequence. The overall structure is immediately visible at a high level, and each detail is hidden inside its relevant subprogram.</p>\n    <p data-narration-id=\"n23\"><strong>4. Division of labour.</strong> A team can divide the subprograms between developers and work in parallel. One developer writes the payment-processing subprogram; another writes the notification subprogram. As long as both subprograms take the agreed inputs and return the agreed outputs, they can be developed simultaneously and integrated afterwards.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n24\">Modelling Real-World Problems</h2>\n<p data-narration-id=\"n25\">Decomposition and abstraction together allow programmers to build models of real-world systems. A <dfn class=\"term\" data-def=\"A simplified representation of a real-world system that captures its essential features and behaviours while ignoring irrelevant detail.\">model</dfn> captures the essential features of a system without representing every physical detail. A sat-nav models a road network as a graph of nodes (junctions) and edges (roads) &mdash; it abstracts away the width of the lane, the colour of the tarmac, and the trees at the roadside, retaining only distances, speed limits, and connectivity.</p>\n<p data-narration-id=\"n26\">The same principle applies at every scale. A school registration system models students as records containing a name, year group, and a set of attendance flags &mdash; the model does not need to know students&rsquo; heights or favourite subjects. Identifying what to include and what to leave out is an act of abstraction, and it is the first design decision in any software project.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Decomposing and Abstracting a Social Media Notification System</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n27\">Problem: build the part of a social media app that sends a notification when someone likes your post.</p>\n    <p data-narration-id=\"n28\"><strong>Decomposition:</strong> (1)&nbsp;Detect a like event on a post. (2)&nbsp;Look up the post owner&rsquo;s notification preferences. (3)&nbsp;Format the notification message. (4)&nbsp;Deliver the notification (push alert, email, or in-app badge). Each of these becomes a separate subprogram.</p>\n    <p data-narration-id=\"n29\"><strong>Abstraction applied:</strong> The &ldquo;detect like&rdquo; subprogram does not need to know the post&rsquo;s content, the liker&rsquo;s age, or what device the post owner is using. It only needs: the post&rsquo;s ID and the ID of the user who liked it. Everything else is irrelevant detail that can safely be abstracted away.</p>\n    <p data-narration-id=\"n30\"><strong>Inputs:</strong> post ID, liker&rsquo;s user ID. <strong>Processing:</strong> retrieve owner, check preferences, format message. <strong>Output:</strong> notification delivered to the post owner.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n31\">For a 4-mark <strong>Explain</strong> question, make sure every factual point is followed by a consequence or reason &mdash; examiners deduct marks for descriptions that simply state what happens without explaining <em>why</em> it matters. When a question asks you to describe the benefits of subprograms, identify each benefit by name (reusability, testing in isolation, reducing complexity, division of labour) and then explain how that benefit applies in the scenario given. For a 6-mark <strong>Discuss</strong> question, you must explore <em>both</em> sides &mdash; for example, subprograms are beneficial but they add an overhead of designing clear interfaces between them, which requires careful planning.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n32\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n33\">Decomposition breaks a complex problem into smaller sub-problems, each accomplishing an identifiable task that can be solved, coded and tested independently.</li>\n  <li data-narration-id=\"n34\">Abstraction removes unnecessary detail, keeping only the information relevant to solving the problem &mdash; inputs, processing and outputs are identified; everything else is filtered out.</li>\n  <li data-narration-id=\"n35\">Subprograms are named, self-contained blocks of code that deliver four key benefits: reusability, testing in isolation, reduced complexity, and division of labour across a development team.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Define the term 'decomposition' in the context of problem solving.",
+      "type": "2 marks — Define",
+      "marks": "Mastering: Breaking a complex problem (1) into smaller, more manageable sub-problems, each accomplishing an identifiable task (1). Both parts needed for 2 marks.\nSecure: Correct idea with one component missing or vague.\nDeveloping: Vague — e.g. 'splitting a problem up' without reference to sub-problems or identifiable tasks.\nEmerging: Confuses decomposition with abstraction."
+    },
+    {
+      "text": "A developer is building a school library management system. Identify two sub-problems that could be created by decomposing this problem.",
+      "type": "1 mark — Identify",
+      "marks": "Mastering: Any two valid sub-problems, each clearly identifiable and distinct, e.g. searching for a book, recording a loan, sending overdue reminders, managing member accounts, reserving books. 1 mark for each valid sub-problem (up to 2 marks for this question in exam context, but listed as 1-mark Identify type — accept any one clearly valid sub-problem for 1 mark).\nSecure: One valid sub-problem.\nDeveloping: Vague — e.g. 'looking up books'.\nEmerging: Describes a feature rather than a sub-problem."
+    },
+    {
+      "text": "Explain what is meant by abstraction and describe what is abstracted away when a sat-nav calculates a route.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Abstraction defined as removing unnecessary detail (1), keeping only information relevant to solving the problem (1). In a sat-nav, detail removed includes road surface conditions, lane width, tree locations, precise building positions (1). Only relevant data is retained: distances, speed limits, road connections (1).\nSecure: Correct definition with a valid example but explanation of what is removed is partial.\nDeveloping: Example given but definition missing or incorrect.\nEmerging: Confuses abstraction with decomposition."
+    },
+    {
+      "text": "Describe two benefits of structuring a program using subprograms.",
+      "type": "4 marks — Describe",
+      "marks": "Mastering: Two distinct benefits, each described with a supporting detail: e.g. reusability — written once, called from multiple places, reducing repeated code (2); testing in isolation — each subprogram tested independently with known inputs before integration (2). 2 marks per benefit.\nSecure: Two benefits named but supporting detail thin for one.\nDeveloping: One benefit described fully; second vague or missing.\nEmerging: Benefit named without any description."
+    },
+    {
+      "text": "A team of five developers is building a social media platform. Explain how decomposition would help them work on the project simultaneously.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Decomposition breaks the platform into sub-problems (1), each assignable to a different developer (1), so all five can work in parallel (1), reducing overall development time (1).\nSecure: Parallel working explained with two marks' worth of detail.\nDeveloping: Decomposition mentioned but link to parallel working vague.\nEmerging: Generic or off-topic."
+    },
+    {
+      "text": "Discuss the benefits and drawbacks of using subprograms when developing a large banking application. Consider reusability, testing, complexity and any trade-offs.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: At least three benefits identified and explained (reusability — same validation logic called across multiple screens; testing in isolation — each payment subprogram tested separately; reduced complexity — code is easier to read and maintain) (3 marks). At least one trade-off identified and explained (designing clear interfaces between subprograms requires upfront planning; poorly named subprograms can be confusing) (2 marks). Balanced conclusion (1 mark). 6 marks total.\nSecure: Two benefits and one trade-off with some reasoning. 4–5 marks.\nDeveloping: Two benefits listed with little explanation; no trade-off. 2–3 marks.\nEmerging: One point with no reasoning. 1 mark."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which of the following best describes decomposition?",
+      "options": [
+        "Removing unnecessary detail from a problem",
+        "Writing a program in multiple languages",
+        "Breaking a complex problem into smaller sub-problems",
+        "Converting an algorithm into a flowchart"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "A developer writes a subprogram once and calls it from three different parts of a program. Which benefit of subprograms does this demonstrate?",
+      "options": [
+        "Division of labour",
+        "Testing in isolation",
+        "Reducing complexity",
+        "Reusability"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "Abstraction involves removing _____ detail from a problem, keeping only what is needed to solve it.",
+      "options": [
+        "important",
+        "unnecessary",
+        "algorithmic",
+        "structural"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "When subprograms are used in a large project, different developers can work on different sub-problems at the same time — this benefit is called division of _____.",
+      "options": [
+        "code",
+        "testing",
+        "labour",
+        "abstraction"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description.",
+      "left": [
+        "Decomposition",
+        "Abstraction",
+        "Subprogram"
+      ],
+      "right": [
+        "A named, self-contained block of code that can be called from multiple places",
+        "Breaking a complex problem into smaller, identifiable sub-problems",
+        "Removing unnecessary detail and keeping only relevant information"
+      ],
+      "order": [
+        1,
+        2,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the precise definition of decomposition?",
+      "a": "Breaking a complex problem into smaller sub-problems, each with an identifiable task."
+    },
+    {
+      "q": "What is the precise definition of abstraction?",
+      "a": "Removing unnecessary detail, keeping only information relevant to solving the problem."
+    },
+    {
+      "q": "Give one real-world example of abstraction and state what detail is removed.",
+      "a": "The London Underground map removes real distances and geography, keeping only station connections."
+    },
+    {
+      "q": "What is a subprogram?",
+      "a": "A named, self-contained block of code that performs a specific task and can be called repeatedly."
+    },
+    {
+      "q": "Name the four benefits of using subprograms listed in the specification.",
+      "a": "Reusability, testing in isolation, reducing complexity, division of labour."
+    },
+    {
+      "q": "How does reusability benefit a subprogram compared to inline code?",
+      "a": "Written once, called from many places — no repeated code and fewer inconsistencies."
+    },
+    {
+      "q": "Why can subprograms be tested in isolation?",
+      "a": "Each subprogram can be tested independently with known inputs before the full program is built."
+    },
+    {
+      "q": "How does decomposition enable division of labour in a development team?",
+      "a": "Each sub-problem is assigned to a different developer, allowing parallel work."
+    },
+    {
+      "q": "In algorithm design, what three things does abstraction help you identify?",
+      "a": "Inputs, processing, and outputs — everything else is filtered out."
+    },
+    {
+      "q": "A sat-nav models roads as nodes and edges. What two pieces of real-world detail does it abstract away?",
+      "a": "Road surface conditions and lane width (any two: tree positions, building appearances, etc.)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "computational thinking",
+      "definition": "A problem-solving approach that involves breaking down complex problems, removing unnecessary detail, and designing step-by-step solutions so they can be carried out systematically."
+    },
+    {
+      "term": "decomposition",
+      "definition": "Breaking a complex problem down into a number of smaller sub-problems, each of which accomplishes an identifiable task that can be solved more easily on its own."
+    },
+    {
+      "term": "abstraction",
+      "definition": "The process of removing unnecessary detail from a problem, keeping only the information that is relevant to solving it."
+    },
+    {
+      "term": "subprogram",
+      "definition": "A named, self-contained block of code that performs a specific task and can be called from different points in a program."
+    },
+    {
+      "term": "model",
+      "definition": "A simplified representation of a real-world system that captures its essential features and behaviours while ignoring irrelevant detail."
+    },
+    {
+      "term": "reusability",
+      "definition": "The ability to call a subprogram from multiple points in a program without rewriting the code it contains."
+    }
+  ],
+  "hero_keywords": [
+    "circuit board closeup",
+    "code on screen",
+    "server room",
+    "abstract data network"
+  ],
+  "hero_image_caption": "Breaking a problem into parts is the first step in any software project.",
+  "_lesson_id": "cc006999-9c74-4cbc-8d13-b2212fd28ce0",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Software Engineering Daily — Architecture Episodes",
+          "url": "https://softwareengineeringdaily.com",
+          "description": "Engineers explain decomposition in real systems — how large codebases are broken into services and subprograms."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Fireship — 100 Seconds of Code",
+          "url": "https://www.youtube.com/@Fireship",
+          "description": "Rapid-fire explainers on programming concepts including abstraction, functions and how modern software is structured."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Halt and Catch Fire (TV Series, 2014–2017)",
+          "url": "https://www.justwatch.com/uk/tv-series/halt-and-catch-fire",
+          "description": "Drama following engineers and entrepreneurs building PCs and networks in the 1980s — the context behind modern computing history."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,249 @@
+{
+  "description": "High- and low-level languages compared, and how compilers and interpreters work.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Programming Languages Exist</h2>\n<p data-narration-id=\"n2\">A processor can only execute instructions written in <dfn class=\"term\" data-def=\"Binary instructions (patterns of 0s and 1s) that can be executed directly by a processor. Each processor family has its own specific machine code instruction set.\">machine code</dfn> &mdash; binary patterns of 0s and 1s. Writing programs directly in machine code is extraordinarily difficult: a single instruction such as &ldquo;add the value in register A to register B&rdquo; becomes a long binary string, and the programmer must track every memory address manually. Programming languages were invented to give developers a more readable and manageable way to express instructions, which must then be translated into machine code before the processor can run them.</p>\n\n<h2 data-narration-id=\"n3\">Low-Level Languages</h2>\n<p data-narration-id=\"n4\"><dfn class=\"term\" data-def=\"Programming languages that are close to machine code and provide little or no abstraction from the hardware. They give precise control over processor operations but are hard to read and write. Machine code and assembly language are both low-level languages.\">Low-level languages</dfn> are close to the hardware. They map almost directly onto the processor&rsquo;s instruction set. Two types are relevant to your exam:</p>\n<p data-narration-id=\"n5\"><strong>Machine code</strong> is the only language a processor can execute directly. It consists entirely of binary and is specific to a processor family &mdash; code written for one architecture will not run on a different one without modification.</p>\n<p data-narration-id=\"n6\"><dfn class=\"term\" data-def=\"A low-level programming language that uses short text codes called mnemonics (e.g. MOV, ADD, SUB) to represent machine code instructions. Each assembly instruction corresponds to exactly one machine code instruction.\">Assembly language</dfn> replaces raw binary with short, human-readable codes called <strong>mnemonics</strong> (for example, <code>MOV</code> to move data between locations, <code>ADD</code> to add two values, <code>SUB</code> to subtract). Each mnemonic maps directly to exactly one machine code instruction &mdash; this is called a <strong>one-to-one correspondence</strong>. Assembly language is still tightly bound to a specific processor&rsquo;s instruction set. It is used when a developer needs precise control over hardware, such as in firmware or embedded systems.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write two advantages and two disadvantages of low-level languages compared to high-level languages.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Low-level languages give <strong>precise hardware control</strong> and produce <strong>fast, memory-efficient</strong> programs &mdash; because the programmer decides exactly what the processor does. The disadvantages are that they are <strong>hard to read and write</strong>, <strong>processor-specific</strong> (not portable to different hardware), and take much longer to develop in than high-level alternatives.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">High-Level Languages</h2>\n<p data-narration-id=\"n9\"><dfn class=\"term\" data-def=\"Programming languages that use English-like syntax and are portable across different types of processor. They provide a high level of abstraction from hardware, making programs easier to read, write and maintain.\">High-level languages</dfn> use syntax that resembles natural language &mdash; words like <code>print</code>, <code>if</code>, <code>while</code> and <code>return</code>. One high-level instruction often corresponds to many machine code instructions, so much more is achieved with fewer lines of code. Python 3, the language assessed in the practical paper, is a high-level language.</p>\n<p data-narration-id=\"n10\">High-level languages are <strong>portable</strong>: the same Python program can run on a Windows PC, a Mac and a Linux server without modification &mdash; as long as the appropriate Python interpreter is installed. This is possible because the language abstracts away the hardware details; translation to machine code is handled by a compiler or interpreter for each platform.</p>\n<p data-narration-id=\"n11\">High-level languages are also much easier to debug. Meaningful variable names, structured control flow and comments make programs readable to any developer familiar with the language, not just the original author. This reduces the time needed to find and fix errors.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>High-Level vs Low-Level: A Side-by-Side Comparison</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n12\"><strong>Readability:</strong> High-level uses English-like keywords; low-level uses binary or mnemonics &mdash; much harder to interpret at a glance.</p>\n    <p data-narration-id=\"n13\"><strong>Portability:</strong> High-level programs can run on different hardware (with a suitable translator); low-level programs are tied to a specific processor instruction set.</p>\n    <p data-narration-id=\"n14\"><strong>Hardware control:</strong> Low-level gives precise control over every CPU register and memory address; high-level abstracts these details away.</p>\n    <p data-narration-id=\"n15\"><strong>Development speed:</strong> High-level is far faster to write and debug; low-level requires understanding of the processor architecture and is error-prone.</p>\n    <p data-narration-id=\"n16\"><strong>Execution efficiency:</strong> Low-level programs can be more memory-efficient and faster when optimised by a skilled programmer; high-level programs rely on the translator to produce efficient machine code.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n17\">Translators: Compilers and Interpreters</h2>\n<p data-narration-id=\"n18\">Because processors only understand machine code, programs written in high-level languages must be translated. There are two main types of translator: the <strong>compiler</strong> and the <strong>interpreter</strong>.</p>\n<p data-narration-id=\"n19\">A <dfn class=\"term\" data-def=\"A translator that converts an entire high-level language program into machine code in one go before execution, producing a standalone executable file that can be run without the compiler being present.\">compiler</dfn> reads the entire source code of a program and translates it all into machine code at once, before the program runs. The output is a standalone executable file. Once compiled, the program can be distributed and run on any compatible machine without the compiler being present. Errors are reported after the whole program has been analysed &mdash; the compiler lists all the problems it found, so the developer can fix them together before re-compiling.</p>\n<p data-narration-id=\"n20\">An <dfn class=\"term\" data-def=\"A translator that converts and executes a high-level program one statement at a time, without producing a standalone executable. The interpreter must be present every time the program runs.\">interpreter</dfn> translates and executes the program one statement at a time. It does not produce a machine code file; instead, it translates each statement and immediately runs it. If an error is encountered, execution stops at that line &mdash; making it immediately clear where the problem is. The interpreter must be present every time the program runs, and execution is generally slower because translation happens at run time rather than beforehand.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Compiler vs Interpreter for the Same Program</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\">Imagine a Python program with 200 lines. There is a bug on line 150.</p>\n    <p data-narration-id=\"n22\"><strong>With an interpreter:</strong> The program runs fine for the first 149 lines. When the interpreter reaches line 150, it stops and reports the error. The developer fixes line 150 and runs again. This makes finding the error easy &mdash; the interpreter shows exactly which line failed.</p>\n    <p data-narration-id=\"n23\"><strong>With a compiler:</strong> The compiler analyses all 200 lines before running anything. It reports all errors it finds (including line 150). The developer fixes every error, then compiles again. Once compiled successfully, the resulting executable runs quickly on any compatible machine &mdash; no Python interpreter is needed to run it.</p>\n    <p data-narration-id=\"n24\">Developers often use an interpreter during development (fast feedback, line-by-line error location) and compile for the final product (faster execution, no dependency on the interpreter).</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n25\" data-revision-tip=\"Cover this. Write three differences between a compiler and an interpreter: when translation happens, what output is produced, and how errors are reported.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><strong>Compiler</strong>: translates the whole program <em>before</em> execution, produces a standalone machine code executable, reports errors after analysing the whole program, runs faster (no run-time translation needed). <strong>Interpreter</strong>: translates one statement at a time <em>during</em> execution, produces no standalone executable (interpreter must always be present), stops at the first error (easier to locate), runs slower.</p>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n26\">The most common exam question on translators is a &lsquo;Describe&rsquo; or &lsquo;Explain&rsquo; comparing compiler and interpreter. Examiners look for three dimensions: <em>when</em> translation happens (all at once before execution vs line-by-line during execution), <em>what output</em> is produced (standalone executable vs no file), and <em>how errors</em> are handled (all errors listed after analysis vs stops at first error). Don&rsquo;t just say &ldquo;a compiler is faster&rdquo; &mdash; explain <em>why</em>: no run-time translation means the executable runs without the overhead of translating each line.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n27\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n28\">Low-level languages (machine code, assembly language) are close to hardware: fast and precise but hard to read, not portable, and processor-specific. High-level languages (e.g. Python) use English-like syntax, are portable across hardware, and are far easier to write and debug.</li>\n  <li data-narration-id=\"n29\">A compiler translates the entire program into machine code before execution, producing a standalone executable. Errors are all reported after analysis. Once compiled, no translator is needed to run the program.</li>\n  <li data-narration-id=\"n30\">An interpreter translates and executes one statement at a time during execution. It stops at the first error (easy to locate) but is slower than compiled code and the interpreter must be present every time the program runs.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Define the term high-level programming language.",
+      "type": "2 marks — Define",
+      "marks": "2 marks for: a programming language that uses English-like syntax (1 mark) and is portable across different processor types, providing a high level of abstraction from hardware (1 mark)."
+    },
+    {
+      "text": "Describe how a compiler translates a high-level language program.",
+      "type": "2 marks — Describe",
+      "marks": "2 marks for: a compiler reads and translates the entire program (1 mark) into machine code in one pass before execution, producing a standalone executable file (1 mark)."
+    },
+    {
+      "text": "Explain two differences between a compiler and an interpreter.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Any two of the following, each with justification. (1) Translation timing: a compiler translates the whole program before execution; an interpreter translates one statement at a time during execution. This means compiled code runs faster because no run-time translation is needed. (2) Output: a compiler produces a standalone machine code executable; an interpreter does not — the interpreter must be present every time the program runs. (3) Error reporting: a compiler reports all errors after analysing the whole program; an interpreter stops at the first error encountered, making the error location immediately clear. Each difference must include an explanation of the consequence or reason, not just a bare contrast.\nSecure: Two differences stated correctly with some justification for each.\nDeveloping: Two differences stated without justification, or one difference with justification.\nEmerging: One difference stated with little or no explanation."
+    },
+    {
+      "text": "Give one advantage of using assembly language rather than machine code.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "1 mark for: assembly language uses readable mnemonics (e.g. MOV, ADD) instead of binary, making it easier to read and write than machine code. Accept any reference to readability, human-readable codes, or the use of mnemonics."
+    },
+    {
+      "text": "Describe one advantage of using a high-level language rather than a low-level language when developing software for a school attendance management system.",
+      "type": "4 marks — Describe",
+      "marks": "Mastering: High-level languages use English-like syntax (e.g. Python), making the code much easier to read and understand. In a team environment, other developers can maintain or extend the system without needing to understand the underlying hardware architecture. Additionally, high-level languages are portable — the attendance system could be deployed on different hardware (Windows servers, Linux servers) without rewriting the code. Programmes can also be written and debugged much faster.\nSecure: States one advantage clearly (e.g. easier to read, portable) and links it to the scenario.\nDeveloping: States an advantage of high-level languages without linking to the school context.\nEmerging: Vague reference to high-level being easier."
+    },
+    {
+      "text": "Discuss the advantages and disadvantages of using an interpreter compared to a compiler for a developer who is writing and testing a new program. In your answer, consider both the development phase and the final product.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: During development, an interpreter is advantageous: it translates and runs one line at a time, stopping immediately at the first error and showing exactly which line failed, giving fast feedback. No compilation step is needed before each test run. However, once the program is finished, interpreted code runs more slowly than compiled code because translation happens at run time. The interpreter must also be installed on every machine that runs the program, adding a dependency. A compiler is slower to use during development (the whole program must be compiled before testing), but produces a standalone executable that runs faster and does not require the compiler to be present. Concludes: interpreters are more convenient during development; compilers produce better final products.\nSecure: Identifies interpreter’s advantage for error location during development and compiler’s advantage for speed and standalone execution; some evaluation of trade-offs.\nDeveloping: Describes one advantage of each without evaluating the development vs deployment distinction.\nEmerging: Simple statements about one translator with little comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which of the following correctly describes a compiler?",
+      "options": [
+        "Translates one line of code at a time and stops at the first error",
+        "Translates the entire program into machine code before execution and produces a standalone executable",
+        "Requires the translator to be present every time the program runs",
+        "Is used only for low-level languages"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "Which type of programming language uses English-like syntax and can run on different processor types without modification?",
+      "options": [
+        "Assembly language",
+        "Machine code",
+        "High-level language",
+        "Low-level language"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Assembly language uses short codes called _____ (e.g. MOV, ADD) to represent machine code instructions.",
+      "options": [
+        "variables",
+        "mnemonics",
+        "operators",
+        "functions"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "An interpreter must be present every time the program runs because it does not produce a standalone _____ file.",
+      "options": [
+        "source code",
+        "executable",
+        "compressed",
+        "encrypted"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each translator feature to the correct translator:",
+      "left": [
+        "Translates whole program before execution",
+        "Stops at first error during execution",
+        "Produces a standalone machine code file"
+      ],
+      "right": [
+        "Interpreter",
+        "Compiler",
+        "Compiler"
+      ],
+      "order": [
+        1,
+        0,
+        1
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the only language a processor can execute directly?",
+      "a": "Machine code (binary patterns of 0s and 1s)."
+    },
+    {
+      "q": "What is assembly language?",
+      "a": "A low-level language that uses mnemonics to represent machine code instructions."
+    },
+    {
+      "q": "What is a mnemonic in assembly language?",
+      "a": "A short text code (e.g. MOV, ADD) representing a single machine code instruction."
+    },
+    {
+      "q": "Give one advantage of a high-level language over a low-level language.",
+      "a": "Portable — the same program runs on different processor types without modification."
+    },
+    {
+      "q": "Give one advantage of a low-level language over a high-level language.",
+      "a": "Precise hardware control — the programmer decides exactly what the processor does."
+    },
+    {
+      "q": "When does a compiler translate a program?",
+      "a": "All at once before execution — the whole program is translated before it runs."
+    },
+    {
+      "q": "When does an interpreter translate a program?",
+      "a": "One statement at a time during execution."
+    },
+    {
+      "q": "Does a compiler produce a standalone executable file?",
+      "a": "Yes — the compiled executable runs without the compiler being present."
+    },
+    {
+      "q": "Does an interpreter produce a standalone executable file?",
+      "a": "No — the interpreter must be present every time the program runs."
+    },
+    {
+      "q": "How does an interpreter report errors compared to a compiler?",
+      "a": "It stops at the first error; a compiler reports all errors after analysing the whole program."
+    },
+    {
+      "q": "Why does compiled code typically run faster than interpreted code?",
+      "a": "Translation is done before execution, so no run-time translation overhead exists."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "machine code",
+      "definition": "Binary instructions (patterns of 0s and 1s) that can be executed directly by a processor. Each processor family has its own specific machine code instruction set."
+    },
+    {
+      "term": "low-level languages",
+      "definition": "Programming languages that are close to machine code and provide little or no abstraction from hardware. Machine code and assembly language are both low-level languages."
+    },
+    {
+      "term": "assembly language",
+      "definition": "A low-level programming language that uses short text codes called mnemonics (e.g. MOV, ADD) to represent machine code instructions, with a one-to-one correspondence."
+    },
+    {
+      "term": "high-level languages",
+      "definition": "Programming languages that use English-like syntax and are portable across different types of processor, providing a high level of abstraction from hardware."
+    },
+    {
+      "term": "compiler",
+      "definition": "A translator that converts an entire high-level language program into machine code in one pass before execution, producing a standalone executable file."
+    },
+    {
+      "term": "interpreter",
+      "definition": "A translator that converts and executes a high-level program one statement at a time during execution, without producing a standalone executable. The interpreter must be present every time the program runs."
+    }
+  ],
+  "hero_keywords": [
+    "programming code screen",
+    "software development terminal",
+    "code editor dark theme",
+    "binary code"
+  ],
+  "hero_image_caption": "Source code on a developer's screen, waiting to be translated into instructions a processor can run.",
+  "_lesson_id": "709eb07e-2bd9-49c3-8a01-da7f5cddb802",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Lex Fridman Podcast — Episode 219: Donald Knuth",
+          "url": "https://lexfridman.com/donald-knuth",
+          "description": "Knuth on programming languages, the history of compilers and what writing code close to the metal really means."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Low Level Learning — Assembly Language",
+          "url": "https://www.youtube.com/@LowLevelLearning",
+          "description": "Practical explainers on assembly mnemonics, machine code and what happens between your Python script and the CPU."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "The Imitation Game (2014)",
+          "url": "https://www.justwatch.com/uk/movie/the-imitation-game",
+          "description": "Benedict Cumberbatch as Alan Turing — the story behind the computer that cracked Enigma and defined modern computing."
+        },
+        {
+          "title": "Halt and Catch Fire (TV Series, 2014–2017)",
+          "url": "https://www.justwatch.com/uk/tv-series/halt-and-catch-fire",
+          "description": "Drama following engineers and entrepreneurs building PCs and networks in the 1980s — the context behind modern computing history."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "description": "Von Neumann model, CPU components, three buses and the fetch-decode-execute cycle.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Von Neumann Stored-Program Concept</h2>\n<p data-narration-id=\"n2\">Every computer you have used &mdash; from a school laptop to a smartphone &mdash; runs on the same fundamental idea: both the program instructions and the data those instructions act on are stored together in the same memory. This is the <dfn class=\"term\" data-def=\"A computer architecture in which program instructions and data are stored together in the same main memory, and the CPU fetches and executes instructions one at a time.\">von Neumann stored-program concept</dfn>, named after the mathematician John von Neumann, whose work in the 1940s described this model. Before this idea took hold, changing what a computer did meant physically rewiring it. The stored-program concept meant you could change a program simply by changing the data in memory &mdash; the same hardware could run any program.</p>\n<p data-narration-id=\"n3\"><dfn class=\"term\" data-def=\"Volatile primary storage that holds program instructions and data currently being used by the CPU. Contents are lost when power is removed.\">Main memory (RAM)</dfn> is where instructions and data live while the computer is running. The CPU reads instructions from RAM, processes them, and writes results back. Because RAM is directly accessible by the CPU, it is far faster than any secondary storage device. However, RAM is volatile &mdash; everything in it disappears when the power is switched off.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Cover this and recall: what are the five components the spec expects you to describe inside the CPU, plus the two types of memory the CPU works with?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The von Neumann model has five key CPU components: the <strong>control unit</strong>, the <strong>arithmetic logic unit (ALU)</strong>, <strong>registers</strong>, the <strong>clock</strong>, and the three <strong>buses</strong> (address, data, control). The CPU works directly with <strong>main memory (RAM)</strong>. Every instruction the CPU executes was stored in RAM as data.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Inside the CPU: Components and Their Roles</h2>\n<p data-narration-id=\"n6\">The <dfn class=\"term\" data-def=\"The part of the CPU that manages and coordinates all activity, directing data between components and controlling the fetch-decode-execute cycle.\">control unit</dfn> does not process data itself. Instead, it orchestrates everything else &mdash; sending signals to tell the ALU to calculate, instructing memory to send data, and directing results to the correct destination. During the fetch-decode-execute cycle, the control unit is in charge of every stage.</p>\n<p data-narration-id=\"n7\">The <dfn class=\"term\" data-def=\"Arithmetic Logic Unit &mdash; the part of the CPU that carries out arithmetic operations (e.g. addition, subtraction) and logical comparisons (e.g. greater than, AND, OR).\">ALU</dfn> is where all computation happens. Arithmetic operations include addition and subtraction. Logical operations include comparisons between values and Boolean operations. Every time a program checks a condition (is the score greater than 50?) or performs a calculation (total price &times; quantity), the ALU is doing the work.</p>\n<p data-narration-id=\"n8\"><dfn class=\"term\" data-def=\"Small, extremely fast storage locations built directly into the CPU. They temporarily hold data, addresses and instructions that the CPU is currently working with.\">Registers</dfn> are tiny storage areas on the processor chip itself. Because they are physically part of the CPU, they can be accessed far faster than RAM. They hold the data that the CPU is working with right now &mdash; for example, the result of the last calculation or the address of the next instruction to fetch. You do not need to know the names of specific registers for your exam.</p>\n<p data-narration-id=\"n9\">The <dfn class=\"term\" data-def=\"A component that generates regular electrical pulses to synchronise the activities of the CPU. Each pulse can trigger the start of a new operation. Clock speed is measured in hertz (Hz).\">clock</dfn> generates a continuous stream of electrical pulses. Each pulse can trigger the start of a new stage in the fetch-decode-execute cycle. The faster the clock, the more stages the CPU can complete per second. A modern CPU typically operates at several gigahertz (GHz) &mdash; billions of pulses per second.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>The Three Buses: Address, Data and Control</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n10\">A <dfn class=\"term\" data-def=\"A set of parallel wires along which binary signals are transmitted between the CPU and other components. Different buses carry different types of information.\">bus</dfn> is a collection of parallel wires. The CPU communicates with RAM (and other components) via three buses, each carrying a different type of signal:</p>\n    <p data-narration-id=\"n11\"><strong>Address bus</strong> &mdash; carries the memory address the CPU wants to read from or write to. It is one-directional: the CPU sends addresses out, but nothing sends addresses back to the CPU. The number of address lines determines how many distinct memory locations the CPU can access.</p>\n    <p data-narration-id=\"n12\"><strong>Data bus</strong> &mdash; carries the actual data or instruction being transferred. It is bidirectional: data travels from RAM to the CPU during a fetch, and from the CPU back to RAM when the CPU writes a result.</p>\n    <p data-narration-id=\"n13\"><strong>Control bus</strong> &mdash; carries control signals that coordinate the activity of all components. For example, it carries a signal telling RAM whether the current operation is a read (fetch data) or a write (store data). Without the control bus, components would not know when to act or in what direction data should flow.</p>\n    <p data-narration-id=\"n14\">Together, the three buses make up the <strong>system bus</strong> &mdash; the communication highway between the CPU and main memory.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n15\">The Fetch-Decode-Execute Cycle</h2>\n<p data-narration-id=\"n16\">The CPU operates by endlessly repeating a three-stage process for every instruction in a program. This is the <dfn class=\"term\" data-def=\"The continuous three-stage process by which the CPU processes instructions: fetch (retrieve from RAM), decode (interpret the instruction) and execute (carry it out).\">fetch-decode-execute cycle</dfn>. Each instruction is processed in strict sequence: fetch, then decode, then execute.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Each Stage in Detail &mdash; With the Buses Labelled</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n17\"><strong>Stage 1 &mdash; Fetch:</strong> The CPU needs to know which instruction to get. It places the address of the next instruction on the <em>address bus</em>. RAM responds by placing the instruction on the <em>data bus</em>. The <em>control bus</em> carries a &ldquo;read&rdquo; signal telling RAM that this is a fetch operation, not a write. The instruction arrives at the CPU and is held in a register ready for the next stage.</p>\n    <p data-narration-id=\"n18\"><strong>Stage 2 &mdash; Decode:</strong> The control unit examines the instruction and works out what operation is required. Different instructions mean different things &mdash; one might mean &ldquo;add two numbers&rdquo;, another might mean &ldquo;move data to a different memory location&rdquo;. The control unit figures out which components need to act and what data they need. No data moves along the buses during decode; this stage happens entirely inside the CPU.</p>\n    <p data-narration-id=\"n19\"><strong>Stage 3 &mdash; Execute:</strong> The instruction is carried out. If it is an arithmetic operation, the ALU performs the calculation. If data needs to be written to RAM, the CPU places the destination address on the address bus, the data on the data bus, and sends a &ldquo;write&rdquo; signal on the control bus. Once execution is complete, the cycle immediately begins again for the next instruction.</p>\n    <p data-narration-id=\"n20\">This cycle repeats billions of times per second. A common exam error is writing only two stages (&ldquo;fetch and execute&rdquo;). There are always <strong>three</strong> stages: fetch, decode and execute. Omitting decode loses a mark.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n21\" data-revision-tip=\"Close this and describe each of the three stages of the fetch-decode-execute cycle. For each stage, name which bus is active and what it carries.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>During <strong>Fetch</strong>: the address bus carries the address; the data bus carries the instruction back; the control bus signals a read. During <strong>Decode</strong>: the control unit interprets the instruction &mdash; no bus activity needed. During <strong>Execute</strong>: the ALU or memory handles the operation; the data bus may carry a result back to RAM via a write signal on the control bus.</p>\n</div>\n\n<h2 data-narration-id=\"n22\">Putting It Together: A Worked Example</h2>\n<p data-narration-id=\"n23\">Imagine a simple program instruction: &ldquo;Add the value stored at memory address 50 to the value stored at memory address 51 and store the result at address 52.&rdquo;</p>\n<p data-narration-id=\"n24\"><strong>Fetch:</strong> The address of this instruction (say, address 10) goes out on the address bus. RAM sends the instruction back on the data bus. The control bus signals &ldquo;read&rdquo;.</p>\n<p data-narration-id=\"n25\"><strong>Decode:</strong> The control unit reads the instruction. It identifies this as an &ldquo;add&rdquo; operation needing two source addresses (50 and 51) and a destination (52). It prepares the ALU.</p>\n<p data-narration-id=\"n26\"><strong>Execute:</strong> The CPU fetches the value at address 50 (using the address bus and data bus), then fetches the value at address 51. The ALU adds them together. The result is placed on the data bus; address 52 goes on the address bus; the control bus signals &ldquo;write&rdquo;. RAM stores the result. Cycle complete &mdash; on to the next instruction.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n27\">Your exam will test the three stages of the fetch-decode-execute cycle often, sometimes as a 4-mark &lsquo;Describe&rsquo; question. Always write all three stages by name and describe what happens in each. Never compress it to &lsquo;fetch and execute&rsquo; &mdash; examiners look for &lsquo;decode&rsquo; as a separate stage. When a question mentions &lsquo;buses&rsquo;, be specific: name which bus (address, data, or control) and what it carries for that particular step. If asked to &lsquo;Explain&rsquo;, add the consequence: e.g. &ldquo;the instruction is placed on the data bus so it can travel from RAM to the CPU.&rdquo;</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">The von Neumann stored-program concept means both instructions and data are held together in the same main memory (RAM), allowing the CPU to execute any program stored there.</li>\n  <li data-narration-id=\"n30\">The CPU contains the control unit (manages the cycle), ALU (performs calculations and comparisons), registers (fast on-chip storage), and clock (generates timing pulses). Three buses (address, data, control) connect the CPU to RAM.</li>\n  <li data-narration-id=\"n31\">The fetch-decode-execute cycle has exactly three stages: fetch the instruction from RAM using the buses, decode it in the control unit, then execute it (ALU or memory write). This repeats for every instruction, billions of times per second.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Describe the role of the control unit in the fetch-decode-execute cycle.",
+      "type": "4 marks — Describe",
+      "marks": "Mastering: The control unit manages and coordinates the entire fetch-decode-execute cycle. It sends signals to RAM via the control bus to indicate whether the operation is a read or write. During the decode stage, it interprets the instruction to determine which components must act and what data they need. It then directs the ALU, registers and memory accordingly during execute.\nSecure: States the control unit manages the cycle and decodes instructions, with some reference to directing other components.\nDeveloping: States the control unit manages the CPU or decodes instructions, but lacks supporting detail.\nEmerging: Vague reference to the control unit being involved in processing."
+    },
+    {
+      "text": "Explain the purpose of the address bus during the fetch stage of the fetch-decode-execute cycle.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: During fetch, the CPU places the address of the next instruction on the address bus. The address bus carries this address to RAM so RAM knows which memory location to access. The address bus is one-directional (CPU to RAM). This allows the correct instruction to be located and placed on the data bus to travel back to the CPU.\nSecure: States that the address bus carries the address of the instruction to RAM, with some explanation of why this is needed.\nDeveloping: States the address bus is used during fetch but does not explain its direction or purpose clearly.\nEmerging: Names the address bus without explaining its role."
+    },
+    {
+      "text": "State the three stages of the fetch-decode-execute cycle in the correct order.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "1 mark for all three correct and in order: fetch, decode, execute."
+    },
+    {
+      "text": "Name the component of the CPU that performs arithmetic and logical operations.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "1 mark: ALU (accept: arithmetic logic unit)."
+    },
+    {
+      "text": "Describe what happens during the decode stage of the fetch-decode-execute cycle.",
+      "type": "2 marks — Describe",
+      "marks": "2 marks for: the control unit (1 mark) examines or interprets the instruction to determine what operation is needed and which components must act / what data is required (1 mark). Accept references to the control unit identifying the operation type. No bus activity is required during decode."
+    },
+    {
+      "text": "Discuss whether increasing clock speed is always the best way to improve CPU performance. Consider the role of the clock and other factors that affect performance.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Identifies that a higher clock speed means more fetch-decode-execute cycles per second, improving throughput. However, increasing clock speed alone has diminishing returns: it generates more heat, can cause stability issues, and the CPU may still be bottlenecked by RAM access speeds (the bus transfers data at a fixed rate regardless of clock speed). Other factors also affect performance — for example, the number of cores allows parallel processing of independent tasks, and larger on-chip cache reduces the frequency of slow RAM accesses. Concludes that clock speed is one of several factors; the best improvement depends on the workload.\nSecure: Identifies clock speed as increasing cycles per second, notes at least one limitation, and mentions one other performance factor (e.g. cores or cache) with some explanation.\nDeveloping: Explains that faster clock means more operations per second; mentions one other factor without development.\nEmerging: States clock speed affects performance; little or no development."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which component of the CPU interprets an instruction during the decode stage?",
+      "options": [
+        "ALU",
+        "Clock",
+        "Control unit",
+        "Register"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "What is the correct order of the three stages in the fetch-decode-execute cycle?",
+      "options": [
+        "Decode, fetch, execute",
+        "Fetch, execute, decode",
+        "Execute, decode, fetch",
+        "Fetch, decode, execute"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "The _____ bus carries the memory address to RAM so the CPU can locate the next instruction.",
+      "options": [
+        "data",
+        "control",
+        "address",
+        "system"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In the von Neumann model, both program instructions and _____ are stored together in the same main memory.",
+      "options": [
+        "processors",
+        "buses",
+        "registers",
+        "data"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each bus to what it carries:",
+      "left": [
+        "Address bus",
+        "Data bus",
+        "Control bus"
+      ],
+      "right": [
+        "Memory addresses sent from CPU to RAM",
+        "Read/write signals to coordinate components",
+        "Instructions or data travelling between CPU and RAM"
+      ],
+      "order": [
+        0,
+        2,
+        1
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does the von Neumann stored-program concept state?",
+      "a": "Both program instructions and data are stored together in the same main memory."
+    },
+    {
+      "q": "What does ALU stand for?",
+      "a": "Arithmetic Logic Unit."
+    },
+    {
+      "q": "What is the role of the control unit in the CPU?",
+      "a": "Manages the fetch-decode-execute cycle and directs data between CPU components."
+    },
+    {
+      "q": "What does the clock do in a CPU?",
+      "a": "Generates regular electrical pulses to synchronise CPU operations."
+    },
+    {
+      "q": "Name the three stages of the fetch-decode-execute cycle in order.",
+      "a": "Fetch, decode, execute."
+    },
+    {
+      "q": "What travels along the address bus during the fetch stage?",
+      "a": "The memory address of the next instruction to be retrieved."
+    },
+    {
+      "q": "What travels along the data bus during the fetch stage?",
+      "a": "The instruction retrieved from RAM, travelling back to the CPU."
+    },
+    {
+      "q": "What is the role of the control bus?",
+      "a": "Carries control signals (e.g. read/write) to coordinate components."
+    },
+    {
+      "q": "What does the ALU do during the execute stage?",
+      "a": "Carries out arithmetic calculations or logical comparisons."
+    },
+    {
+      "q": "Why are registers faster to access than RAM?",
+      "a": "They are built directly onto the CPU chip, so no bus transfer is needed."
+    },
+    {
+      "q": "What is the function of main memory (RAM) in the von Neumann model?",
+      "a": "Holds the program instructions and data currently being used by the CPU."
+    },
+    {
+      "q": "The address bus is one-directional. In which direction does it carry signals?",
+      "a": "From the CPU to RAM (not back the other way)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "von Neumann stored-program concept",
+      "definition": "A computer architecture in which program instructions and data are stored together in the same main memory, and the CPU fetches and executes instructions one at a time."
+    },
+    {
+      "term": "main memory (RAM)",
+      "definition": "Volatile primary storage that holds program instructions and data currently being used by the CPU. Contents are lost when power is removed."
+    },
+    {
+      "term": "control unit",
+      "definition": "The part of the CPU that manages and coordinates all activity, directing data between components and controlling the fetch-decode-execute cycle."
+    },
+    {
+      "term": "ALU",
+      "definition": "Arithmetic Logic Unit — the part of the CPU that carries out arithmetic operations and logical comparisons."
+    },
+    {
+      "term": "registers",
+      "definition": "Small, extremely fast storage locations built directly into the CPU. They temporarily hold data, addresses and instructions that the CPU is currently working with."
+    },
+    {
+      "term": "clock",
+      "definition": "A component that generates regular electrical pulses to synchronise the activities of the CPU. Clock speed is measured in hertz (Hz)."
+    },
+    {
+      "term": "bus",
+      "definition": "A set of parallel wires along which binary signals are transmitted between the CPU and other components. Different buses carry different types of information."
+    },
+    {
+      "term": "fetch-decode-execute cycle",
+      "definition": "The continuous three-stage process by which the CPU processes instructions: fetch (retrieve from RAM), decode (interpret the instruction) and execute (carry it out)."
+    }
+  ],
+  "hero_keywords": [
+    "CPU processor chip",
+    "motherboard circuit board",
+    "server room hardware",
+    "computer components"
+  ],
+  "hero_image_caption": "Inside a modern processor: the silicon chip that runs every instruction.",
+  "_lesson_id": "8d71f060-8f86-4b97-89a2-5b992cb73d61",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Lex Fridman Podcast — Episode 219: Donald Knuth",
+          "url": "https://lexfridman.com/donald-knuth",
+          "description": "The father of algorithm analysis on the fetch-decode-execute cycle and how early CPUs were designed — fascinating historical context."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "The Imitation Game (2014)",
+          "url": "https://www.justwatch.com/uk/movie/the-imitation-game",
+          "description": "Benedict Cumberbatch as Alan Turing — the story behind the computer that cracked Enigma and defined modern computing."
+        },
+        {
+          "title": "Halt and Catch Fire (TV Series, 2014–2017)",
+          "url": "https://www.justwatch.com/uk/tv-series/halt-and-catch-fire",
+          "description": "Drama following engineers and entrepreneurs building PCs and networks in the 1980s — the context behind modern computing history."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

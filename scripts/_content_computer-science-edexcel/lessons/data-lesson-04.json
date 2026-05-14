@@ -1,0 +1,264 @@
+{
+  "description": "KiB to TiB binary multiples, file-size calculations, and lossy vs lossless compression.",
+  "content_html": "<h2 data-narration-id=\"n1\">Units of Data Storage</h2>\n<p data-narration-id=\"n2\">The smallest unit of data is a <dfn class=\"term\" data-def=\"A single binary digit, either 0 or 1. The smallest unit of data storage.\">bit</dfn>. Four bits make a <dfn class=\"term\" data-def=\"A group of 4 bits.\">nibble</dfn>. Eight bits make a <dfn class=\"term\" data-def=\"A group of 8 bits. The standard base unit of data storage.\">byte</dfn>. For larger quantities of data, binary multiples are used. These are based on powers of 1024 (which is \\(2^{10}\\)) &mdash; not powers of 1000.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and write the four binary multiples above byte from memory, with their full names and 1024-based values.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Binary multiples are based on 1024, not 1000:\n  <ul style=\"margin: 0.5em 0 0 1.25em\">\n    <li><strong>1 kibibyte (KiB)</strong> = 1,024 bytes</li>\n    <li><strong>1 mebibyte (MiB)</strong> = 1,024 KiB = 1,048,576 bytes</li>\n    <li><strong>1 gibibyte (GiB)</strong> = 1,024 MiB = 1,073,741,824 bytes</li>\n    <li><strong>1 tebibyte (TiB)</strong> = 1,024 GiB = 1,099,511,627,776 bytes</li>\n  </ul></p>\n</div>\n\n<h2 data-narration-id=\"n4\">Why 1024, Not 1000?</h2>\n<p data-narration-id=\"n5\">Computer memory and storage are built from circuits that operate in powers of 2. A memory chip with address lines can access \\(2^{10} = 1,024\\) locations, not 1,000. Binary multiples therefore reflect the actual architecture of digital storage. The prefix &ldquo;kibi&rdquo; means \\(2^{10}\\), &ldquo;mebi&rdquo; means \\(2^{20}\\), &ldquo;gibi&rdquo; means \\(2^{30}\\), and &ldquo;tebi&rdquo; means \\(2^{40}\\). A tebibyte is therefore \\(2^{40}\\) bytes, or exactly 1,099,511,627,776 bytes.</p>\n<p data-narration-id=\"n6\">Examiner reports highlight that many students confuse binary multiples with decimal SI prefixes (kB, MB, GB, TB, which use 1000-based steps) or cannot state how many bytes are in a tebibyte. Practise the 1024-step progression: bytes &rarr; KiB &rarr; MiB &rarr; GiB &rarr; TiB, each step multiplying by 1024.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Calculating File Sizes Using Binary Multiples</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\"><strong>Problem 1:</strong> A video file is 3,145,728 bytes. Express this in MiB.</p>\n    <p data-narration-id=\"n8\">Step 1: Convert bytes to KiB: 3,145,728 &divide; 1,024 = 3,072 KiB.<br>\n    Step 2: Convert KiB to MiB: 3,072 &divide; 1,024 = <strong>3 MiB</strong>.</p>\n    <p data-narration-id=\"n9\"><strong>Problem 2:</strong> A cloud storage server has 2 TiB of capacity. How many bytes is that?</p>\n    <p data-narration-id=\"n10\">Step 1: 1 TiB = 1,024 GiB, so 2 TiB = 2,048 GiB.<br>\n    Step 2: 1 GiB = 1,024 MiB, so 2,048 GiB = 2,097,152 MiB.<br>\n    Step 3: 1 MiB = 1,048,576 bytes, so 2 TiB = 2,097,152 &times; 1,048,576 = 2,199,023,255,552 bytes.<br>\n    Alternatively: 2 &times; \\(2^{40}\\) = \\(2^{41}\\) bytes.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n11\" data-revision-tip=\"Test yourself: how many KiB are in 1 MiB? How many MiB are in 1 GiB? How many GiB are in 1 TiB? Write the answers without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Every step up the binary multiple ladder multiplies by 1,024: 1,024 bytes = 1 KiB; 1,024 KiB = 1 MiB; 1,024 MiB = 1 GiB; 1,024 GiB = 1 TiB. A tebibyte is \\(2^{40}\\) bytes &mdash; over one trillion bytes.</p>\n</div>\n\n<h2 data-narration-id=\"n12\">Why Compression Is Needed</h2>\n<p data-narration-id=\"n13\"><dfn class=\"term\" data-def=\"The process of encoding data so that it takes up less storage space or can be transmitted more quickly over a network.\">Data compression</dfn> reduces the size of a file. Smaller files download faster, cost less to transmit and consume less storage. Without compression, a single high-definition video file could occupy several GiB &mdash; impractical for streaming at normal broadband speeds. A single uncompressed album of audio at CD quality would fill around 700 MiB; compressed to a common format it may occupy under 100 MiB.</p>\n\n<h2 data-narration-id=\"n14\">Lossless Compression</h2>\n<p data-narration-id=\"n15\"><dfn class=\"term\" data-def=\"A compression method that reduces file size without discarding any data, so the original file can be perfectly reconstructed from the compressed version.\">Lossless compression</dfn> reduces file size without throwing any data away. The compressed file is a mathematically equivalent representation of the original &mdash; decompressing it recovers the original exactly, with no differences whatsoever.</p>\n<p data-narration-id=\"n16\">Lossless compression is essential whenever data integrity matters. Examples include text documents, program code, spreadsheets, database backups and medical scan images. If even one bit of a program file is altered by lossy compression, the program could crash or malfunction. The file format ZIP is a common lossless container. Image format PNG uses lossless compression. Audio format FLAC is lossless.</p>\n\n<h2 data-narration-id=\"n17\">Lossy Compression</h2>\n<p data-narration-id=\"n18\"><dfn class=\"term\" data-def=\"A compression method that permanently removes some data to achieve a smaller file size. The original file cannot be perfectly reconstructed.\">Lossy compression</dfn> permanently removes some data to achieve a greater size reduction than lossless methods can deliver. The removed data is chosen to be the parts humans are least likely to notice &mdash; for images, this might mean merging similar colours; for audio, this might mean removing frequencies that the human ear struggles to detect at certain volumes.</p>\n<p data-narration-id=\"n19\">Because the removed data is gone permanently, the original file can never be recovered exactly. However, for media such as photographs, music and video, the human perception system is forgiving enough that a well-compressed lossy file is indistinguishable from the original for most listeners and viewers. JPEG is a lossy image format. MP3 and AAC are lossy audio formats. Most video streaming uses lossy compression.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Comparing Lossless and Lossy Compression</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\"><strong>Lossless:</strong></p>\n    <ul>\n      <li data-narration-id=\"n21\">No data is permanently removed.</li>\n      <li data-narration-id=\"n22\">Original file can be perfectly restored.</li>\n      <li data-narration-id=\"n23\">Typically achieves a smaller reduction in file size than lossy methods.</li>\n      <li data-narration-id=\"n24\">Essential for text, program code, medical data, databases.</li>\n      <li data-narration-id=\"n25\">Example formats: ZIP, PNG, FLAC.</li>\n    </ul>\n    <p data-narration-id=\"n26\"><strong>Lossy:</strong></p>\n    <ul>\n      <li data-narration-id=\"n27\">Data is permanently discarded.</li>\n      <li data-narration-id=\"n28\">Original cannot be exactly recovered.</li>\n      <li data-narration-id=\"n29\">Can achieve much greater size reductions than lossless.</li>\n      <li data-narration-id=\"n30\">Suitable for media (photos, music, video) where human perception fills gaps.</li>\n      <li data-narration-id=\"n31\">Example formats: JPEG, MP3, AAC, most streaming video.</li>\n    </ul>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n32\">Choosing Between Lossless and Lossy</h2>\n<p data-narration-id=\"n33\">The choice depends entirely on whether data integrity or file size is the priority. For a hospital storing patient scan images, lossless compression is mandatory &mdash; a lossy compression artefact could look like a clinical finding and lead to misdiagnosis. For a music streaming service, lossy compression is appropriate &mdash; the bandwidth saving is enormous and the quality loss is imperceptible at high bit rates.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n34\">For binary multiples, always use KiB/MiB/GiB/TiB (1024-based) &mdash; never kB/MB/GB/TB (1000-based). The examiner specifically awards marks for the correct unit abbreviation. For compression questions using the &lsquo;Discuss&rsquo; command word, cover both lossless and lossy &mdash; including what each method does to the data, when each is appropriate and the trade-off between quality and file size. One-sided answers cannot achieve full marks.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n35\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n36\">Binary multiples are based on 1024: 1 KiB = 1,024 bytes; 1 MiB = 1,024 KiB; 1 GiB = 1,024 MiB; 1 TiB = 1,024 GiB. A tebibyte is \\(2^{40}\\) bytes.</li>\n  <li data-narration-id=\"n37\">Lossless compression removes no data &mdash; the original can be perfectly restored. Essential for program code, text and medical data.</li>\n  <li data-narration-id=\"n38\">Lossy compression permanently discards data to achieve smaller files. Suitable for media where human perception does not detect the loss. The original cannot be recovered.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly shows the number of bytes in 1 KiB?\nA) 1,000\nB) 1,024\nC) 1,048\nD) 2,048",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 1,024 [1 mark]"
+    },
+    {
+      "text": "State the name of the binary multiple that equals 1,024 GiB.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "Tebibyte (TiB) [1 mark]"
+    },
+    {
+      "text": "A music file has a size of 10,485,760 bytes. Express this file size in MiB. Show your working.",
+      "type": "2 marks — Calculate",
+      "marks": "Step 1: Divide by 1,024 to get KiB: 10,485,760 ÷ 1,024 = 10,240 KiB [1 mark]\nStep 2: Divide by 1,024 to get MiB: 10,240 ÷ 1,024 = 10 MiB [1 mark]"
+    },
+    {
+      "text": "Define what is meant by lossless compression.",
+      "type": "2 marks — Define",
+      "marks": "Mastering: Lossless compression reduces file size (1) without removing any data, so the original file can be perfectly reconstructed (1).\nSecure: Correct idea with one element missing.\nDeveloping: Vague — 'the data is compressed without losing quality'.\nEmerging: Confuses lossless with lossy."
+    },
+    {
+      "text": "A software company stores its source code files on a cloud server. Explain why lossless rather than lossy compression must be used when compressing these files.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Lossless compression preserves all data exactly (1), so the source code can be perfectly restored from the compressed file (1). Lossy compression permanently removes some data (1), so the restored code would differ from the original — potentially introducing bugs or making it impossible to compile and run (1).\nSecure: Both types described with the consequence for code quality developed.\nDeveloping: Identifies lossless is needed but only partly explains why.\nEmerging: Vague reference to code needing to be accurate."
+    },
+    {
+      "text": "Discuss the use of lossless and lossy compression for storing and streaming video content. Refer to the trade-offs in quality, file size and suitability.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Lossless preserves every frame exactly — very large file sizes, appropriate for video editing masters where re-encoding must not degrade quality (1). Lossy can remove subtle differences between frames and colours the eye does not notice, achieving dramatic size reductions — essential for streaming where bandwidth is limited (1). Lossy quality loss is imperceptible at high bit rates for most viewers (1). For archiving or broadcast, lossless is preferred; for consumer streaming, lossy is standard (1). File size trade-off: lossy files may be 10× to 100× smaller than lossless for the same content (1). Conclusion: the choice depends on the intended use — streaming favours lossy; professional archiving favours lossless (1).\nSecure: Four or five points covering both types with clear trade-off.\nDeveloping: One type described fully, the other partially, with some mention of trade-off.\nEmerging: One type described without discussing the other."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "How many bytes are in 1 MiB?",
+      "options": [
+        "1,000,000",
+        "1,024,000",
+        "1,048,576",
+        "2,097,152"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which of the following is a correct description of lossy compression?",
+      "options": [
+        "File size is reduced and the original can be perfectly restored.",
+        "File size is reduced and some data is permanently removed.",
+        "File size is unchanged but the data loads faster.",
+        "The original data is encrypted to reduce its size."
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Each step up the binary multiple ladder multiplies the previous unit by _____.",
+      "options": [
+        "1,000",
+        "1,024",
+        "8",
+        "2"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Lossless compression is essential for program code because the original file must be _____ exactly.",
+      "options": [
+        "compressed",
+        "encrypted",
+        "restored",
+        "deleted"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each unit to its correct size.",
+      "left": [
+        "1 KiB",
+        "1 MiB",
+        "1 GiB"
+      ],
+      "right": [
+        "1,024 KiB",
+        "1,024 bytes",
+        "1,024 MiB"
+      ],
+      "order": [
+        1,
+        0,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "How many bytes are in 1 KiB?",
+      "a": "1,024 bytes."
+    },
+    {
+      "q": "How many KiB are in 1 MiB?",
+      "a": "1,024 KiB."
+    },
+    {
+      "q": "How many MiB are in 1 GiB?",
+      "a": "1,024 MiB."
+    },
+    {
+      "q": "How many GiB are in 1 TiB?",
+      "a": "1,024 GiB."
+    },
+    {
+      "q": "A tebibyte equals 2 to the power of how many bytes?",
+      "a": "2 to the power of 40 bytes."
+    },
+    {
+      "q": "What is data compression?",
+      "a": "Encoding data so it takes up less storage or transmits faster."
+    },
+    {
+      "q": "What makes lossless compression 'lossless'?",
+      "a": "No data is removed — the original file can be perfectly reconstructed."
+    },
+    {
+      "q": "What makes lossy compression 'lossy'?",
+      "a": "Data is permanently discarded — the original cannot be exactly restored."
+    },
+    {
+      "q": "Give one file type that uses lossless compression.",
+      "a": "PNG (or ZIP or FLAC)."
+    },
+    {
+      "q": "Give one file type that uses lossy compression.",
+      "a": "JPEG (or MP3 or AAC)."
+    },
+    {
+      "q": "Why must lossless compression be used for program source code?",
+      "a": "Any data loss would corrupt the code, causing bugs or preventing it from running."
+    },
+    {
+      "q": "What is the key trade-off between lossless and lossy compression?",
+      "a": "Lossless preserves all data but achieves less size reduction; lossy achieves greater reduction but discards data permanently."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "bit",
+      "definition": "A single binary digit, either 0 or 1. The smallest unit of data storage."
+    },
+    {
+      "term": "nibble",
+      "definition": "A group of 4 bits."
+    },
+    {
+      "term": "byte",
+      "definition": "A group of 8 bits. The standard base unit of data storage."
+    },
+    {
+      "term": "kibibyte",
+      "definition": "A binary unit of data storage equal to 1,024 bytes (2 to the power of 10 bytes). Abbreviated KiB."
+    },
+    {
+      "term": "mebibyte",
+      "definition": "A binary unit of data storage equal to 1,024 kibibytes. Abbreviated MiB."
+    },
+    {
+      "term": "gibibyte",
+      "definition": "A binary unit of data storage equal to 1,024 mebibytes. Abbreviated GiB."
+    },
+    {
+      "term": "tebibyte",
+      "definition": "A binary unit of data storage equal to 1,024 gibibytes, or 2 to the power of 40 bytes. Abbreviated TiB."
+    },
+    {
+      "term": "data compression",
+      "definition": "The process of encoding data so that it takes up less storage space or can be transmitted more quickly over a network."
+    },
+    {
+      "term": "lossless compression",
+      "definition": "A compression method that reduces file size without discarding any data, so the original file can be perfectly reconstructed from the compressed version."
+    },
+    {
+      "term": "lossy compression",
+      "definition": "A compression method that permanently removes some data to achieve a smaller file size. The original file cannot be perfectly reconstructed."
+    }
+  ],
+  "hero_keywords": [
+    "data centre server",
+    "cloud storage",
+    "binary data stream",
+    "network infrastructure"
+  ],
+  "hero_image_caption": "Data centre servers storing tebibytes of compressed digital content.",
+  "_lesson_id": "9dc2726f-afe0-4831-9516-586e429198a4",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Software Engineering Daily — Data Compression",
+          "url": "https://softwareengineeringdaily.com",
+          "description": "In-depth podcast episodes on lossless and lossy compression algorithms — the engineering behind KiB/MiB file sizing."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "AlphaGo (2017)",
+          "url": "https://www.justwatch.com/uk/movie/alphago",
+          "description": "Google DeepMind's AI plays Go — an enormous amount of compressed data had to be processed in real time, illustrating binary data at scale."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

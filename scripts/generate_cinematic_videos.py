@@ -72,6 +72,8 @@ SUBJECT_ORDER = [
     "design-technology",
     "creative-imedia",
     "computer-science",
+    "computer-science-aqa",
+    "computer-science-edexcel",
     "maths",
     "maths-aqa",
     "maths-ocr",

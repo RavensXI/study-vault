@@ -1,0 +1,256 @@
+{
+  "description": "Encoding text with 7-bit ASCII and representing bitmap images and sampled sound in binary.",
+  "content_html": "<h2 data-narration-id=\"n1\">How Computers Store Text</h2>\n<p data-narration-id=\"n2\">A computer stores everything as binary &mdash; including the letters you type. To do this, every character must be assigned a unique number, which is then stored as its binary equivalent. A <dfn class=\"term\" data-def=\"A defined list that assigns a unique numerical code to each character a computer can store or display, including letters, digits, punctuation and control codes.\">character set</dfn> is the agreed list that maps each character to its code. Without a shared standard, a file created on one system would display differently on another.</p>\n\n<h2 data-narration-id=\"n3\">7-Bit ASCII</h2>\n<p data-narration-id=\"n4\"><dfn class=\"term\" data-def=\"American Standard Code for Information Interchange. A 7-bit character encoding standard representing 128 characters including the English alphabet (upper and lower case), digits 0&ndash;9, punctuation and control characters.\">ASCII</dfn> (American Standard Code for Information Interchange) uses <strong>7 bits</strong> per character, allowing \\(2^7 = 128\\) unique codes (0 to 127). These 128 characters cover upper-case letters, lower-case letters, the digit characters 0&ndash;9, punctuation marks and control characters such as &ldquo;new line&rdquo;.</p>\n<p data-narration-id=\"n5\">The key principle is that codes are <strong>sequential within each group</strong>. Upper-case A&nbsp;=&nbsp;65, B&nbsp;=&nbsp;66, up to Z&nbsp;=&nbsp;90. Lower-case a&nbsp;=&nbsp;97, b&nbsp;=&nbsp;98, up to z&nbsp;=&nbsp;122. Digit character &lsquo;0&rsquo;&nbsp;=&nbsp;48, &lsquo;1&rsquo;&nbsp;=&nbsp;49, up to &lsquo;9&rsquo;&nbsp;=&nbsp;57. This sequential grouping means you can calculate any character&rsquo;s code if you know one code in the same group.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and recall from memory: what is the ASCII code for 'A'? For 'a'? For '0'? Now calculate the code for 'P' and for 'm'.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>In ASCII: upper-case A&nbsp;=&nbsp;65; lower-case a&nbsp;=&nbsp;97; digit character &lsquo;0&rsquo;&nbsp;=&nbsp;48. Codes are sequential: &lsquo;P&rsquo;&nbsp;=&nbsp;65&nbsp;+&nbsp;15&nbsp;=&nbsp;80; &lsquo;m&rsquo;&nbsp;=&nbsp;97&nbsp;+&nbsp;12&nbsp;=&nbsp;109. ASCII uses 7 bits and represents 128 characters.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; ASCII Code Calculations</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\"><strong>Example 1:</strong> Given A = 65, what is the code for K?<br>\n    K is the 11th letter. K = 65 + (11 &minus; 1) = 65 + 10 = <strong>75</strong>.</p>\n    <p data-narration-id=\"n8\"><strong>Example 2:</strong> A character has ASCII code 104. Given a = 97, what character is it?<br>\n    104 &minus; 97 = 7. Count 7 letters on from a: b, c, d, e, f, g, <strong>h</strong>.</p>\n    <p data-narration-id=\"n9\"><strong>Example 3:</strong> Given &lsquo;0&rsquo; = 48, what is the binary for the character &lsquo;5&rsquo;?<br>\n    &lsquo;5&rsquo; = 48 + 5 = 53. 53 in binary: 32 + 16 + 4 + 1 = <strong>0110101</strong>.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n10\">Bitmap Images</h2>\n<p data-narration-id=\"n11\">Every digital image is built from a grid of tiny coloured squares called <dfn class=\"term\" data-def=\"The smallest individual element of a digital image. Short for picture element.\">pixels</dfn>. Each pixel stores a single colour value in binary. The total number of pixels is determined by the image&rsquo;s <strong>resolution</strong> &mdash; its width in pixels multiplied by its height in pixels.</p>\n<p data-narration-id=\"n12\"><dfn class=\"term\" data-def=\"The number of bits used to represent the colour of each pixel. More bits means a greater range of possible colours.\">Colour depth</dfn> determines how many different colours are available per pixel. With 1-bit colour depth, only 2 colours are possible. With 8-bit depth, \\(2^8 = 256\\) colours are possible. With 24-bit depth, over 16 million distinct colours can be represented, appearing photorealistic to the human eye.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n13\" data-revision-tip=\"Write the image file size formula from memory. Then use it: a 1280 pixel by 720 pixel image at 24-bit colour depth. Give your answer in bytes.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Image file size (bits) = width (pixels) &times; height (pixels) &times; colour depth (bits). To convert to bytes, divide by 8. Always state the unit explicitly &mdash; exam questions may ask for bits, bytes, or larger units.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Calculating Image File Size</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\"><strong>Problem:</strong> A bitmap image is 640 pixels wide and 480 pixels tall with a colour depth of 24 bits per pixel. Calculate the file size in bytes.</p>\n    <p data-narration-id=\"n15\"><strong>Step 1</strong> &mdash; File size in bits = 640 &times; 480 &times; 24 = 7,372,800 bits.</p>\n    <p data-narration-id=\"n16\"><strong>Step 2</strong> &mdash; Convert to bytes: 7,372,800 &divide; 8 = <strong>921,600 bytes</strong>.</p>\n    <p data-narration-id=\"n17\"><strong>Common mistakes:</strong> (1) Forgetting to multiply by colour depth &mdash; the question asks for colour depth separately for a reason. (2) Leaving the answer in bits when bytes are asked for. (3) Not stating &lsquo;pixels&rsquo; as the unit for width and height &mdash; this is a marking point in its own right.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n18\">Sound Representation</h2>\n<p data-narration-id=\"n19\">Sound is an <dfn class=\"term\" data-def=\"A signal that varies continuously over time, such as the pressure wave of a sound.\">analogue signal</dfn> &mdash; a continuous wave of changing air pressure. Computers cannot store continuous signals directly. Instead, sound is digitised by taking regular measurements called <dfn class=\"term\" data-def=\"A measurement of the amplitude (volume level) of a sound wave taken at a single point in time, recorded as a binary number.\">samples</dfn>. Each sample captures the <strong>amplitude</strong> (volume level) at that instant.</p>\n\n<h2 data-narration-id=\"n20\">Sample Rate and Bit Depth</h2>\n<p data-narration-id=\"n21\"><dfn class=\"term\" data-def=\"The number of samples taken per second when digitising sound, measured in hertz (Hz).\">Sample rate</dfn> (also called sampling rate) is how many samples are taken per second, measured in hertz (Hz). A higher sample rate means more measurements per second, capturing the original wave more faithfully. The <strong>sample interval</strong> is the time between consecutive samples &mdash; it is the inverse of the sample rate. A sample rate of 44,100 Hz gives a sample interval of roughly 0.023 milliseconds.</p>\n<p data-narration-id=\"n22\"><dfn class=\"term\" data-def=\"The number of bits used to store each individual sound sample, also called sample resolution. More bits means more precise volume levels.\">Bit depth</dfn> (also called sample resolution) is the number of bits used to store each sample. More bits means more distinct amplitude levels can be recorded. At 16-bit depth, \\(2^{16} = 65,536\\) distinct volume levels are possible per sample.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n23\" data-revision-tip=\"Write the sound file size formula from memory, then calculate the size of a 5-second recording at 44,100 Hz and 16-bit depth. Give your answer in bytes.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Sound file size (bits) = sample rate (Hz) &times; bit depth (bits) &times; duration (seconds). To convert to bytes, divide by 8. Increasing either sample rate or bit depth improves quality but increases file size.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Calculating Sound File Size</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\"><strong>Problem:</strong> A 30-second audio clip is recorded at 22,050 Hz with a bit depth of 16 bits. Calculate the file size in bytes.</p>\n    <p data-narration-id=\"n25\"><strong>Step 1</strong> &mdash; Size (bits) = 22,050 &times; 16 &times; 30 = 10,584,000 bits.</p>\n    <p data-narration-id=\"n26\"><strong>Step 2</strong> &mdash; Convert to bytes: 10,584,000 &divide; 8 = <strong>1,323,000 bytes</strong>.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n27\">Limitations of Binary Representation</h2>\n<p data-narration-id=\"n28\">When the number of available bits is limited, binary representation becomes less precise. In images, fewer bits per pixel means fewer possible colours and visible banding or &ldquo;colour blocking&rdquo; in graduated tones. In sound, a lower bit depth means fewer amplitude levels, producing audible distortion known as quantisation noise. A reduced sample rate may miss rapid sound-wave variations, causing high-frequency detail to be lost.</p>\n<p data-narration-id=\"n29\">These limitations represent the fundamental trade-off in data representation: more bits always means greater fidelity, but larger file sizes. Real systems manage this by choosing an appropriate bit width for the task &mdash; a voice call needs far less fidelity than a recording studio session.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n30\">Image file-size calculations are a reliable source of marks &mdash; but read the question carefully. State width and height in <strong>pixels</strong> (not &ldquo;dots&rdquo; or &ldquo;points&rdquo;) because the examiner expects the unit. If asked for the number of colours from colour depth \\(d\\), the answer is \\(2^d\\). For ASCII code calculations, always use the group starting point (A=65, a=97, &lsquo;0&rsquo;=48) and count from there &mdash; never guess.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n31\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n32\">7-bit ASCII represents 128 characters. Codes are sequential: A=65, a=97, &lsquo;0&rsquo;=48. Calculate any code by counting from the group start.</li>\n  <li data-narration-id=\"n33\">Bitmap image file size (bits) = width &times; height &times; colour depth. Always state width and height in pixels.</li>\n  <li data-narration-id=\"n34\">Sound file size (bits) = sample rate &times; bit depth &times; duration. Higher values of either setting improve quality but increase file size. Fewer available bits reduce fidelity.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is the ASCII code for the character 'T', given that A = 65?\nA) 83\nB) 84\nC) 85\nD) 86",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 84 [1 mark]\nT is the 20th letter: 65 + 19 = 84."
+    },
+    {
+      "text": "State how many characters 7-bit ASCII can represent.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "128 [1 mark]"
+    },
+    {
+      "text": "A bitmap image is 500 pixels wide and 400 pixels tall with a colour depth of 8 bits.\nCalculate the file size in bytes. Show your working.",
+      "type": "3 marks — Calculate",
+      "marks": "Size (bits) = 500 × 400 × 8 = 1,600,000 bits [1 mark]\nDivide by 8: 200,000 bytes [1 mark]\nUnit correctly stated as bytes [1 mark]"
+    },
+    {
+      "text": "An audio recording is made at a sample rate of 44,100 Hz and a bit depth of 16 bits for a duration of 120 seconds.\nCalculate the file size in bytes. Show your working.",
+      "type": "3 marks — Calculate",
+      "marks": "Size (bits) = 44,100 × 16 × 120 = 84,672,000 bits [1 mark]\nDivide by 8: 10,584,000 bytes [1 mark]\nUnit correctly stated [1 mark]"
+    },
+    {
+      "text": "Explain how increasing the bit depth of a digital sound recording affects the quality and file size of the recording.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: A higher bit depth means more bits per sample (1), so more distinct amplitude levels can be recorded (1), producing more precise volume measurements and higher-quality sound with less quantisation noise (1). More bits per sample increases the total file size because more data is stored per second (1).\nSecure: Both effects described (quality improves, file size increases) with some supporting reason.\nDeveloping: States quality improves and size increases but gives no mechanistic reason.\nEmerging: One effect identified without explanation."
+    },
+    {
+      "text": "Explain why binary representation of data has limitations when the number of available bits is restricted. Give examples from both images and sound.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Fewer bits mean fewer distinct values can be represented (1). In images, a lower colour depth produces fewer possible colours and visible banding in gradual colour changes (1). In sound, a lower bit depth means fewer amplitude levels, causing audible distortion (quantisation noise) (1). A lower sample rate may also miss rapid changes in the sound wave, losing high-frequency detail (1).\nSecure: One medium (image or sound) explained with two correct points.\nDeveloping: Correct general idea (fewer bits = less accuracy) but no specific example developed.\nEmerging: Vague — 'it will not be as good quality'."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "How many characters can 7-bit ASCII represent?",
+      "options": [
+        "64",
+        "126",
+        "128",
+        "256"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "A bitmap image is 200 pixels wide and 100 pixels tall with a colour depth of 4 bits. What is the file size in bits?",
+      "options": [
+        "4,000",
+        "80,000",
+        "20,000",
+        "160,000"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "In ASCII, lower-case 'a' has the code _____.",
+      "options": [
+        "65",
+        "90",
+        "97",
+        "48"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Sound file size (bits) = sample rate × bit depth × _____.",
+      "options": [
+        "frequency",
+        "amplitude",
+        "duration",
+        "colour depth"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description.",
+      "left": [
+        "Pixel",
+        "Colour depth",
+        "Sample rate"
+      ],
+      "right": [
+        "Number of samples taken per second (Hz)",
+        "Smallest individual element of a digital image",
+        "Number of bits used to represent each pixel's colour"
+      ],
+      "order": [
+        1,
+        2,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "How many bits does 7-bit ASCII use per character?",
+      "a": "7 bits."
+    },
+    {
+      "q": "How many characters can ASCII represent?",
+      "a": "128"
+    },
+    {
+      "q": "What is the ASCII code for upper-case 'A'?",
+      "a": "65"
+    },
+    {
+      "q": "What is the ASCII code for lower-case 'a'?",
+      "a": "97"
+    },
+    {
+      "q": "What is the ASCII code for the digit character '0'?",
+      "a": "48"
+    },
+    {
+      "q": "Calculate the ASCII code for 'D', given that A = 65.",
+      "a": "68 (D is the 4th letter: 65 + 3 = 68)."
+    },
+    {
+      "q": "What does the image file size formula W × H × D calculate?",
+      "a": "File size in bits, where W = width in pixels, H = height in pixels, D = colour depth."
+    },
+    {
+      "q": "What is colour depth?",
+      "a": "The number of bits used to represent the colour of each pixel."
+    },
+    {
+      "q": "What is sample rate measured in?",
+      "a": "Hertz (Hz) — samples per second."
+    },
+    {
+      "q": "What is bit depth (sample resolution) in digital sound?",
+      "a": "The number of bits used to store each sound sample."
+    },
+    {
+      "q": "Sound file size (bits) = _____ × _____ × _____.",
+      "a": "Sample rate × bit depth × duration (seconds)."
+    },
+    {
+      "q": "Why must analogue sound be sampled to store it digitally?",
+      "a": "Sound is a continuous signal; computers can only store discrete binary values."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "character set",
+      "definition": "A defined list that assigns a unique numerical code to each character a computer can store or display, including letters, digits, punctuation and control codes."
+    },
+    {
+      "term": "ASCII",
+      "definition": "American Standard Code for Information Interchange. A 7-bit character encoding standard representing 128 characters including the English alphabet (upper and lower case), digits 0–9, punctuation and control characters."
+    },
+    {
+      "term": "pixel",
+      "definition": "The smallest individual element of a digital image. Short for picture element."
+    },
+    {
+      "term": "colour depth",
+      "definition": "The number of bits used to represent the colour of each pixel. More bits means a greater range of possible colours."
+    },
+    {
+      "term": "analogue signal",
+      "definition": "A signal that varies continuously over time, such as the pressure wave of a sound."
+    },
+    {
+      "term": "sample",
+      "definition": "A measurement of the amplitude of a sound wave taken at a single point in time, recorded as a binary number."
+    },
+    {
+      "term": "sample rate",
+      "definition": "The number of samples taken per second when digitising sound, measured in hertz (Hz)."
+    },
+    {
+      "term": "bit depth",
+      "definition": "The number of bits used to store each individual sound sample, also called sample resolution. More bits means more precise volume levels can be recorded."
+    }
+  ],
+  "hero_keywords": [
+    "digital audio waveform",
+    "bitmap image pixels",
+    "data encoding",
+    "technology screen"
+  ],
+  "hero_image_caption": "Digital waveforms and pixel grids — how computers store sound and images as binary.",
+  "_lesson_id": "7aad181f-1d6a-49d7-a7ef-823c7455d049",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "BBC Click — Digital Media (BBC Sounds)",
+          "url": "https://www.bbc.co.uk/sounds/brand/p002w6r2",
+          "description": "BBC Click covers image formats, compression and digital media encoding — directly relevant to this lesson on ASCII and bitmaps."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Print the Legend (2014)",
+          "url": "https://www.justwatch.com/uk/movie/print-the-legend",
+          "description": "Behind the scenes of 3D printing — pixel grids, bitmap representations and how digital data maps onto physical objects."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

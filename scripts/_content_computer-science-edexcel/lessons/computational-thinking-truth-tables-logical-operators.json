@@ -1,0 +1,237 @@
+{
+  "lesson_id": "3727bfd9-5903-4a81-87d0-909a98f22764",
+  "description": "Building truth tables with AND, OR and NOT for up to three inputs to solve real problems.",
+  "content_html": "<h2 data-narration-id=\"n1\">Logic in Computing</h2>\n<p data-narration-id=\"n2\">Every decision a computer makes &mdash; whether to grant access, whether a value is in range, whether to send a notification &mdash; is ultimately a logical operation. The three fundamental <dfn class=\"term\" data-def=\"Operators that combine or modify Boolean (True/False) conditions: AND, OR and NOT.\">logical operators</dfn> are AND, OR and NOT. A <dfn class=\"term\" data-def=\"A table that shows the output of a logical expression for every possible combination of True/False inputs.\">truth table</dfn> is the tool used to show exactly what output a logical expression produces for every possible combination of inputs. Your specification requires you to construct truth tables for expressions using AND, OR and NOT with up to three inputs.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and write out the truth table for AND, OR and NOT from memory. Check all rows.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>There are only three operators to know: <strong>AND</strong> returns True only when <em>both</em> inputs are True. <strong>OR</strong> returns True when <em>at least one</em> input is True. <strong>NOT</strong> flips a single input &mdash; True becomes False and False becomes True.</p>\n</div>\n\n<h2 data-narration-id=\"n4\">AND &mdash; Both Must Be True</h2>\n<p data-narration-id=\"n5\">The <dfn class=\"term\" data-def=\"A logical operator that returns True only when every input connected to it is True; returns False in all other cases.\">AND operator</dfn> requires every input to be True before the output is True. In real systems: a bank transfer is authorised only if the user is authenticated AND the account has sufficient funds. Both conditions must hold.</p>\n<p data-narration-id=\"n6\">Truth table for AND with two inputs A and B:</p>\n<p data-narration-id=\"n7\">A = False, B = False &rarr; Output = False<br/>\nA = False, B = True &rarr; Output = False<br/>\nA = True, B = False &rarr; Output = False<br/>\nA = True, B = True &rarr; Output = <strong>True</strong><br/>\nOnly the last row gives True. &ldquo;All or nothing.&rdquo;</p>\n\n<h2 data-narration-id=\"n8\">OR &mdash; At Least One Must Be True</h2>\n<p data-narration-id=\"n9\">The <dfn class=\"term\" data-def=\"A logical operator that returns True when at least one of its inputs is True; returns False only when all inputs are False.\">OR operator</dfn> returns True when at least one input is True. In real systems: a security alarm triggers if a door sensor is activated OR a motion sensor is activated. Either one is enough.</p>\n<p data-narration-id=\"n10\">Truth table for OR with two inputs A and B:</p>\n<p data-narration-id=\"n11\">A = False, B = False &rarr; Output = False<br/>\nA = False, B = True &rarr; Output = <strong>True</strong><br/>\nA = True, B = False &rarr; Output = <strong>True</strong><br/>\nA = True, B = True &rarr; Output = <strong>True</strong><br/>\nOnly the first row (both False) gives False. &ldquo;Anything works.&rdquo;</p>\n\n<h2 data-narration-id=\"n12\">NOT &mdash; Flip the Input</h2>\n<p data-narration-id=\"n13\">The <dfn class=\"term\" data-def=\"A logical operator that takes a single input and reverses its truth value: True becomes False and False becomes True.\">NOT operator</dfn> takes a single input and reverses it. In real systems: a smart light turns on if NOT(daylight) &mdash; meaning it is on only when daylight is False (i.e. it is dark).</p>\n<p data-narration-id=\"n14\">Truth table for NOT with input A:</p>\n<p data-narration-id=\"n15\">A = False &rarr; NOT A = <strong>True</strong><br/>\nA = True &rarr; NOT A = <strong>False</strong></p>\n\n<div class=\"key-fact\" data-narration-id=\"n16\" data-revision-tip=\"Test yourself: for two inputs A and B, how many rows does a truth table need? For three inputs A, B and C, how many rows?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The number of rows in a truth table is 2 raised to the power of the number of inputs. Two inputs: 2&sup2; = 4 rows. Three inputs: 2&sup3; = 8 rows. Always work through the rows systematically &mdash; a consistent pattern (e.g. alternating True/False for the last column, then pairs for the second, then groups of four for the first) ensures you never miss a combination.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Building a Two-Input Truth Table Systematically</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n17\">Expression: A AND (NOT B). This combines NOT with AND &mdash; first apply NOT to B, then AND the result with A.</p>\n    <p data-narration-id=\"n18\"><strong>Step 1:</strong> List all combinations of A and B (4 rows for 2 inputs). Use a systematic pattern &mdash; last column alternates T/F; first column alternates in pairs:<br/>\nRow 1: A=False, B=False<br/>\nRow 2: A=False, B=True<br/>\nRow 3: A=True, B=False<br/>\nRow 4: A=True, B=True</p>\n    <p data-narration-id=\"n19\"><strong>Step 2:</strong> Add a column for NOT B (flip B in each row):<br/>\nRow 1: NOT B = True<br/>\nRow 2: NOT B = False<br/>\nRow 3: NOT B = True<br/>\nRow 4: NOT B = False</p>\n    <p data-narration-id=\"n20\"><strong>Step 3:</strong> Apply AND to A and NOT B:<br/>\nRow 1: False AND True = False<br/>\nRow 2: False AND False = False<br/>\nRow 3: True AND True = <strong>True</strong><br/>\nRow 4: True AND False = False</p>\n    <p data-narration-id=\"n21\">The expression is True only in row 3 &mdash; when A is True and B is False. Reading this as a real decision: &ldquo;the feature is active only if option A is enabled AND option B is disabled.&rdquo;</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n22\">Three-Input Truth Tables</h2>\n<p data-narration-id=\"n23\">When an expression has three inputs (A, B and C), there are 2&sup3; = 8 possible combinations. The approach is exactly the same: list all 8 rows systematically, then evaluate any intermediate expressions column by column before arriving at the final output.</p>\n<p data-narration-id=\"n24\">Example expression: (A AND B) OR (NOT C). To evaluate this, you need three columns: one for A AND B, one for NOT C, and one for the whole expression using OR.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Three-Input Truth Table for (A AND B) OR (NOT C)</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n25\">All 8 rows with systematic input listing (C alternates T/F every row; B alternates every two rows; A alternates every four rows):</p>\n    <p data-narration-id=\"n26\"><strong>Row 1:</strong> A=F, B=F, C=F &rarr; A AND B = F; NOT C = T; F OR T = <strong>True</strong></p>\n    <p data-narration-id=\"n27\"><strong>Row 2:</strong> A=F, B=F, C=T &rarr; A AND B = F; NOT C = F; F OR F = <strong>False</strong></p>\n    <p data-narration-id=\"n28\"><strong>Row 3:</strong> A=F, B=T, C=F &rarr; A AND B = F; NOT C = T; F OR T = <strong>True</strong></p>\n    <p data-narration-id=\"n29\"><strong>Row 4:</strong> A=F, B=T, C=T &rarr; A AND B = F; NOT C = F; F OR F = <strong>False</strong></p>\n    <p data-narration-id=\"n30\"><strong>Row 5:</strong> A=T, B=F, C=F &rarr; A AND B = F; NOT C = T; F OR T = <strong>True</strong></p>\n    <p data-narration-id=\"n31\"><strong>Row 6:</strong> A=T, B=F, C=T &rarr; A AND B = F; NOT C = F; F OR F = <strong>False</strong></p>\n    <p data-narration-id=\"n32\"><strong>Row 7:</strong> A=T, B=T, C=F &rarr; A AND B = T; NOT C = T; T OR T = <strong>True</strong></p>\n    <p data-narration-id=\"n33\"><strong>Row 8:</strong> A=T, B=T, C=T &rarr; A AND B = T; NOT C = F; T OR F = <strong>True</strong></p>\n    <p data-narration-id=\"n34\">The output is True in five of the eight rows: rows 1, 3, 5, 7, and 8. Notice that whenever C is False, NOT C is True, making the OR output True regardless of A and B. The output is only False when A AND B is False <em>and</em> C is True.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n35\">Using Logic to Solve Real Problems</h2>\n<p data-narration-id=\"n36\">Truth tables are not just exam exercises &mdash; they describe the <dfn class=\"term\" data-def=\"A data type or value that can be only True or False, used as the input and output of logical operations.\">Boolean</dfn> logic that controls real systems. An e-commerce checkout might use: (item in stock AND payment verified) OR (pre-order enabled). A content filter might use: NOT(verified age) AND content is restricted. Constructing the truth table for any such expression tells you exactly when the output will be True, allowing a programmer to verify the logic before writing a single line of code.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n37\">For a <strong>Complete a Truth Table</strong> question, always work column by column rather than row by row &mdash; evaluate all intermediate expressions in their own columns first. Use a systematic input pattern: the last column alternates T/F every row, the second-to-last alternates every two rows, and so on. Never skip the intermediate columns for compound expressions &mdash; examiners award marks for intermediate working as well as the final output. Remember: AND returns True only when <em>all</em> inputs are True; OR returns True when <em>any</em> input is True; NOT simply flips the value.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n38\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n39\">AND returns True only when all inputs are True. OR returns True when at least one input is True. NOT reverses a single input. These three operators are the building blocks of all logical decisions in computing.</li>\n  <li data-narration-id=\"n40\">A truth table has 2 raised to the power of n rows, where n is the number of inputs. Two inputs give 4 rows; three inputs give 8 rows.</li>\n  <li data-narration-id=\"n41\">For compound expressions, add a column for each sub-expression and evaluate them in order before combining into the final output column.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "State the output of the expression: True AND False.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "Mastering: False (1). AND requires both inputs to be True; one is False so the output is False.\nSecure: Correct answer.\nDeveloping: Gives 'No' instead of 'False' — loses the mark.\nEmerging: Gives True."
+    },
+    {
+      "text": "Define the logical operator OR.",
+      "type": "2 marks — Define",
+      "marks": "Mastering: OR returns True when at least one of its inputs is True (1); it returns False only when all inputs are False (1).\nSecure: 'Returns True when one input is True' — correct but doesn't address the all-False case.\nDeveloping: Confuses OR with AND.\nEmerging: Blank or unrelated."
+    },
+    {
+      "text": "Complete the truth table for the expression NOT A.\n\nA | NOT A\nFalse | ___\nTrue | ___",
+      "type": "2 marks — Convert",
+      "marks": "Mastering: NOT False = True (1). NOT True = False (1).\nSecure: One row correct.\nDeveloping: Both reversed (True → True, False → False) — misunderstands NOT.\nEmerging: Blank."
+    },
+    {
+      "text": "Complete the full truth table for the expression A OR (NOT B). Show all rows and include an intermediate column for NOT B.",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: All 4 rows present with systematic inputs. NOT B column correct for all rows (1). Final OR column correct for all rows (1). Row 1 (F, F): NOT B=T, output T (1). Row 2 (F, T): NOT B=F, output F (1). Row 3 (T, F): NOT B=T, output T. Row 4 (T, T): NOT B=F, output T. All four outputs correct = 4 marks.\nSecure: Three rows correct.\nDeveloping: Two rows correct; intermediate column missing.\nEmerging: One row or method wrong throughout."
+    },
+    {
+      "text": "A smart home system locks the front door if: the owner is away (A) AND (the alarm is not set (B) OR a window is open (C)).\nWrite this as a logical expression and complete a truth table for it with inputs A, B and C.",
+      "type": "6 marks — Complete an Algorithm",
+      "marks": "Mastering: Correct expression: A AND (B OR C) — where B represents 'alarm not set' and C represents 'window open' (1). All 8 rows listed with systematic pattern (1). NOT already implicit in B's label — intermediate B OR C column correct for all 8 rows (2). Final A AND (B OR C) correct for all 8 rows (2). 6 marks total.\nSecure: Expression correct; 6–7 of 8 output rows correct. 4–5 marks.\nDeveloping: Expression correct; only partial table completed. 2–3 marks.\nEmerging: Expression wrong or no table. 1 mark."
+    },
+    {
+      "text": "Discuss how truth tables are used to verify the logic of a system before it is programmed. Use an example involving at least two logical operators to support your answer.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Truth tables list all possible input combinations (1) and show the exact output for each (1). This lets a designer check every possible scenario before writing code (1). Example provided with at least two operators, e.g. (A AND B) OR (NOT C) — example fully worked showing multiple rows (1). Benefit identified: errors in logic found cheaply before coding begins (1). Limitation acknowledged: number of rows doubles with each input — complex expressions with many inputs become impractical (1). 6 marks total.\nSecure: Good explanation with a worked example; limitation not discussed. 4–5 marks.\nDeveloping: Truth tables described correctly but example absent or incomplete. 2–3 marks.\nEmerging: Vague or single point. 1 mark."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the output of: True AND True?",
+      "options": [
+        "False",
+        "Neither",
+        "True",
+        "Undefined"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "How many rows does a truth table with three inputs require?",
+      "options": [
+        "3",
+        "6",
+        "8",
+        "16"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The OR operator returns True when _____ of its inputs is/are True.",
+      "options": [
+        "neither",
+        "both",
+        "at least one",
+        "none"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "NOT True = _____.",
+      "options": [
+        "True",
+        "False",
+        "Undefined",
+        "Zero"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each logical operator to its rule.",
+      "left": [
+        "AND",
+        "OR",
+        "NOT"
+      ],
+      "right": [
+        "Returns True when at least one input is True",
+        "Reverses the truth value of a single input",
+        "Returns True only when all inputs are True"
+      ],
+      "order": [
+        2,
+        0,
+        1
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "When does AND return True?",
+      "a": "Only when every input connected to it is True."
+    },
+    {
+      "q": "When does OR return False?",
+      "a": "Only when all of its inputs are False."
+    },
+    {
+      "q": "What does NOT do to its input?",
+      "a": "Reverses it — True becomes False and False becomes True."
+    },
+    {
+      "q": "A truth table with two inputs has how many rows?",
+      "a": "4 rows (2 squared)."
+    },
+    {
+      "q": "A truth table with three inputs has how many rows?",
+      "a": "8 rows (2 cubed)."
+    },
+    {
+      "q": "What is the output of: True AND False?",
+      "a": "False."
+    },
+    {
+      "q": "What is the output of: False OR True?",
+      "a": "True."
+    },
+    {
+      "q": "Why should you add intermediate columns when completing a truth table for a compound expression?",
+      "a": "To evaluate sub-expressions step by step before combining them into the final output."
+    },
+    {
+      "q": "State the systematic pattern for listing inputs in a truth table with three inputs A, B, C.",
+      "a": "C alternates every row; B alternates every two rows; A alternates every four rows."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "logical operators",
+      "definition": "Operators that combine or modify Boolean (True/False) conditions: AND, OR and NOT."
+    },
+    {
+      "term": "truth table",
+      "definition": "A table that shows the output of a logical expression for every possible combination of True/False inputs."
+    },
+    {
+      "term": "AND operator",
+      "definition": "A logical operator that returns True only when every input connected to it is True; returns False in all other cases."
+    },
+    {
+      "term": "OR operator",
+      "definition": "A logical operator that returns True when at least one of its inputs is True; returns False only when all inputs are False."
+    },
+    {
+      "term": "NOT operator",
+      "definition": "A logical operator that takes a single input and reverses its truth value: True becomes False and False becomes True."
+    },
+    {
+      "term": "Boolean",
+      "definition": "A data type or value that can be only True or False, used as the input and output of logical operations."
+    }
+  ],
+  "hero_keywords": [
+    "binary circuit board",
+    "digital logic diagram",
+    "computer chip closeup",
+    "data network"
+  ],
+  "hero_image_caption": "Every decision a computer makes traces back to the three fundamental logical operators.",
+  "_lesson_id": "3727bfd9-5903-4a81-87d0-909a98f22764",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Lex Fridman Podcast — Episodes with Computer Scientists",
+          "url": "https://lexfridman.com/podcast",
+          "description": "Conversations with Donald Knuth and others on Boolean algebra, logic and how the foundations of computing were built."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Inside Your Computer — TED-Ed",
+          "url": "https://www.youtube.com/watch?v=AkFi90lZmXA",
+          "description": "TED-Ed animation: how AND, OR and NOT gates combine to form the circuits inside every processor (5 min)."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "The Imitation Game (2014)",
+          "url": "https://www.justwatch.com/uk/movie/the-imitation-game",
+          "description": "Benedict Cumberbatch as Alan Turing — the story behind the computer that cracked Enigma and defined modern computing."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

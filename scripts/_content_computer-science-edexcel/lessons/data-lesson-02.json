@@ -1,0 +1,236 @@
+{
+  "description": "Adding binary numbers, applying logical and arithmetic shifts, and recognising overflow.",
+  "content_html": "<h2 data-narration-id=\"n1\">Binary Addition</h2>\n<p data-narration-id=\"n2\">Adding two binary numbers follows four simple rules. Applying these column by column from right to left gives the result:</p>\n<ul>\n  <li data-narration-id=\"n3\">0 + 0 = 0</li>\n  <li data-narration-id=\"n4\">1 + 0 = 1</li>\n  <li data-narration-id=\"n5\">1 + 1 = 10 (write 0, carry 1)</li>\n  <li data-narration-id=\"n6\">1 + 1 + 1 (carry) = 11 (write 1, carry 1)</li>\n</ul>\n<p data-narration-id=\"n7\">The carry bit moves one column to the left, just as it does in denary addition. Always work right to left, recording each sum digit and carrying any overflow to the next column.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Adding Two 8-Bit Binary Numbers</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">Add 01101100 (108) and 00110101 (53):</p>\n    <pre data-narration-id=\"n9\">  01101100\n+ 00110101\n----------</pre>\n    <p data-narration-id=\"n10\">Working right to left:<br>\n    Col 1 (1s): 0+1 = 1<br>\n    Col 2 (2s): 0+0 = 0<br>\n    Col 3 (4s): 1+1 = 0, carry 1<br>\n    Col 4 (8s): 1+0+carry1 = 0, carry 1<br>\n    Col 5 (16s): 0+1+carry1 = 0, carry 1<br>\n    Col 6 (32s): 1+1+carry1 = 1, carry 1<br>\n    Col 7 (64s): 1+0+carry1 = 0, carry 1<br>\n    Col 8 (128s): 0+0+carry1 = 1<br>\n    <strong>Result: 10100001</strong><br>\n    Check: 108 + 53 = 161; 10100001 = 128 + 32 + 1 = 161 &#10003;</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n11\" data-revision-tip=\"Cover this and write the four binary addition rules from memory. Then use them to add 01010101 and 00110011.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Binary addition rules: 0+0=0; 1+0=1; 1+1=0 carry 1; 1+1+1(carry)=1 carry 1. Always work right to left. Show the carry row clearly in your working &mdash; examiners award method marks for visible carries.</p>\n</div>\n\n<h2 data-narration-id=\"n12\">Overflow</h2>\n<p data-narration-id=\"n13\"><dfn class=\"term\" data-def=\"An error that occurs when the result of an arithmetic operation is too large to be stored in the available number of bits.\">Overflow</dfn> happens when the result of an addition exceeds the maximum value that can be stored in the available bit width. For 8-bit unsigned arithmetic, the maximum storable value is 255. If the addition produces a carry out from the leftmost (most significant) bit, the result cannot fit in 8 bits and overflow has occurred.</p>\n<p data-narration-id=\"n14\">For example, adding 11000000 (192) and 01000001 (65) produces a carry beyond the 8th bit. The 8-bit result is incorrect &mdash; the true total of 257 cannot be stored in 8 bits. In a real computer, this causes an error state or silent data corruption depending on the hardware design.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Test yourself: describe in one sentence what overflow is and when it occurs in 8-bit binary arithmetic.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Overflow occurs when an arithmetic result is too large for the number of bits available. In 8-bit unsigned addition, overflow happens when the true result exceeds 255 &mdash; a carry bit is produced beyond the eighth bit position and the stored result is incorrect.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Binary Shifts &mdash; Logical and Arithmetic</h2>\n<p data-narration-id=\"n17\">A <dfn class=\"term\" data-def=\"An operation that moves all bits in a binary number left or right by a stated number of positions.\">binary shift</dfn> moves every bit a stated number of positions left or right. There are two types: logical and arithmetic. Both left-shift by the same rules, but they differ when shifting right.</p>\n\n<h2 data-narration-id=\"n18\">Logical Shifts</h2>\n<p data-narration-id=\"n19\">In a <dfn class=\"term\" data-def=\"A binary shift that fills all vacated bit positions with 0, regardless of the sign of the number.\">logical shift</dfn>, every vacated bit position is filled with 0. A <strong>logical left shift by 1</strong> moves every bit one place to the left, fills the rightmost position with 0, and loses the leftmost bit. A <strong>logical right shift by 1</strong> moves every bit one place to the right, fills the leftmost position with 0, and loses the rightmost bit.</p>\n<p data-narration-id=\"n20\">Effect on value: a logical left shift by \\(n\\) places multiplies the number by \\(2^n\\). A logical right shift by \\(n\\) places divides the number by \\(2^n\\) (integer division &mdash; remainder is lost). Example: 00001100 (12) logical-left-shifted by 2 gives 00110000 = 48. Check: \\(12 \\times 4 = 48\\) &#10003;.</p>\n\n<h2 data-narration-id=\"n21\">Arithmetic Shifts</h2>\n<p data-narration-id=\"n22\">An <dfn class=\"term\" data-def=\"A binary shift used with signed (two's complement) numbers that preserves the sign bit when shifting right; vacated positions on the right are filled with 0.\">arithmetic shift</dfn> is designed for use with two&rsquo;s complement signed numbers. The key difference from a logical shift is in a <strong>right</strong> arithmetic shift: the sign bit (the most significant bit) is preserved &mdash; the vacated position on the left is filled with a copy of the sign bit, not with 0.</p>\n<p data-narration-id=\"n23\">An arithmetic <strong>left</strong> shift works identically to a logical left shift &mdash; vacated positions are filled with 0. For positive numbers (where the sign bit is 0), an arithmetic right shift and a logical right shift produce the same result. The difference only appears for negative numbers, where the sign bit is 1.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Comparing Logical and Arithmetic Right Shifts</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\">Start with the 8-bit pattern <strong>11110000</strong>. As a two&rsquo;s complement signed integer: &minus;128 + 64 + 32 + 16 = <strong>&minus;16</strong>.</p>\n    <p data-narration-id=\"n25\"><strong>Logical right shift by 2:</strong><br>\n    Vacated positions filled with 0: 00111100<br>\n    Denary value: 32 + 16 + 8 + 4 = 60<br>\n    Result is now positive &mdash; the sign has changed. The logical shift ignores the sign bit and treats the pattern as unsigned.</p>\n    <p data-narration-id=\"n26\"><strong>Arithmetic right shift by 2:</strong><br>\n    Sign bit is 1, so vacated positions on the left are filled with 1: 11111100<br>\n    Denary value: &minus;128 + 64 + 32 + 16 + 8 + 4 = <strong>&minus;4</strong><br>\n    Check: &minus;16 &divide; 4 = &minus;4 &#10003;. The arithmetic shift preserves the sign and correctly divides the signed value by \\(2^2\\).</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n27\" data-revision-tip=\"Cover this and explain the difference between a logical right shift and an arithmetic right shift. Why does it matter for negative numbers?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><strong>Logical right shift:</strong> always fills vacated positions with 0. Treats the number as unsigned. <strong>Arithmetic right shift:</strong> fills vacated positions with a copy of the sign bit (0 for positive, 1 for negative). Preserves the sign of two&rsquo;s complement numbers. Both left shifts work the same way &mdash; filling with 0.</p>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">When answering shift questions, always state whether the shift is logical or arithmetic and always show the vacated bit positions explicitly. For an arithmetic right shift on a negative number, remember the vacated positions fill with 1 (copying the sign bit), not with 0. Overflow questions will ask you to &lsquo;explain&rsquo; or &lsquo;describe&rsquo; &mdash; link the concept to the specific number of bits available and what happens when the result exceeds that limit.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">Binary addition uses four rules working right to left with carry bits. Show your carries clearly &mdash; method marks depend on visible working.</li>\n  <li data-narration-id=\"n31\">Overflow occurs when the result of an addition is too large for the available number of bits. In 8-bit unsigned arithmetic this means the result exceeds 255.</li>\n  <li data-narration-id=\"n32\">Logical shifts fill all vacated positions with 0. Arithmetic right shifts fill vacated positions with a copy of the sign bit, preserving the sign of two&rsquo;s complement numbers. Both left shifts fill with 0.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following describes the effect of a logical right shift by 1 on any 8-bit binary number?\nA) Divides the value by 2 and preserves the sign bit\nB) Multiplies the value by 2 and fills with 0 on the right\nC) Divides the value by 2 and fills the leftmost bit with 0\nD) Copies the sign bit into the rightmost vacated position",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) [1 mark]\nA logical right shift fills vacated positions with 0 — it does not preserve the sign bit."
+    },
+    {
+      "text": "State what is meant by overflow in binary arithmetic.",
+      "type": "2 marks — Define",
+      "marks": "Mastering: Overflow occurs when the result of an arithmetic operation (1) is too large to be stored in the available number of bits (1).\nSecure: Correct idea with one component missing.\nDeveloping: Vague — 'when the number is too big'.\nEmerging: Confuses overflow with underflow or a carry bit."
+    },
+    {
+      "text": "Add the two 8-bit binary numbers 01011011 and 00110110. Show your working and state the denary equivalent of the result.",
+      "type": "3 marks — Calculate",
+      "marks": "Working shown with carry row [1 mark]\nCorrect binary result: 10010001 [1 mark]\nCorrect denary: 145 [1 mark]\n(Check: 91 + 54 = 145)"
+    },
+    {
+      "text": "An 8-bit binary number is 10110100.\n(a) Apply a logical right shift of 2 places and write the result. [1 mark]\n(b) Apply an arithmetic right shift of 2 places and write the result. [1 mark]\n(c) Explain why the two results are different. [2 marks]",
+      "type": "4 marks — Explain",
+      "marks": "(a) 00101101 [1 mark]\n(b) 11101101 [1 mark]\n(c) The logical shift fills vacated positions with 0 (1). The arithmetic shift fills vacated positions with a copy of the sign bit, which is 1 for this negative two's complement number, so the sign is preserved (1)."
+    },
+    {
+      "text": "A computer uses 8-bit unsigned binary. Explain what happens when 11100000 (224) and 01000001 (65) are added together.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: The true mathematical result is 289 (1), which exceeds the maximum 8-bit value of 255 (1), so overflow occurs (1), the carry bit beyond the eighth bit position is lost and the stored 8-bit result is incorrect / does not represent the intended value (1).\nSecure: Identifies overflow and states the result is too large, with two points developed.\nDeveloping: Identifies overflow but explanation is incomplete.\nEmerging: Describes the addition without identifying overflow."
+    },
+    {
+      "text": "Discuss the difference between logical and arithmetic binary shifts. In your answer, refer to how each handles vacated bit positions and when each is appropriate.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Logical shift fills all vacated positions with 0 (1), treating the pattern as unsigned (1). Arithmetic right shift fills vacated positions with the sign bit (1), preserving the sign for two's complement values (1). Both left shifts fill with 0 (1). Arithmetic shifts are appropriate for signed (two's complement) arithmetic; logical shifts for unsigned patterns (1).\nSecure: Correct description of both types with at least four points.\nDeveloping: One type described fully, the other partially.\nEmerging: Describes shifts in general terms without distinguishing the two types."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the result of a logical left shift by 1 on the 8-bit number 00001100?",
+      "options": [
+        "00000110",
+        "00011000",
+        "10001100",
+        "00001101"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "In binary addition, what is the result of 1 + 1?",
+      "options": [
+        "1",
+        "2",
+        "0 carry 1",
+        "1 carry 1"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Overflow in binary arithmetic occurs when the result is too large to be stored in the available number of _____.",
+      "options": [
+        "bytes",
+        "bits",
+        "nibbles",
+        "hex digits"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "An arithmetic right shift fills vacated positions with a copy of the _____ bit.",
+      "options": [
+        "least significant",
+        "carry",
+        "sign",
+        "parity"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each shift type to its behaviour for vacated positions.",
+      "left": [
+        "Logical right shift",
+        "Arithmetic right shift",
+        "Logical left shift"
+      ],
+      "right": [
+        "Fills vacated positions with 0",
+        "Copies the sign bit into vacated positions on the left",
+        "Fills vacated positions with 0 on the right"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What are the four binary addition rules?",
+      "a": "0+0=0; 1+0=1; 1+1=0 carry 1; 1+1+carry1=1 carry 1."
+    },
+    {
+      "q": "What is overflow in binary arithmetic?",
+      "a": "When the result is too large to store in the available number of bits."
+    },
+    {
+      "q": "What does a logical left shift by 1 do to a binary number's value?",
+      "a": "Multiplies it by 2."
+    },
+    {
+      "q": "What does a logical right shift by 1 do to a binary number's value?",
+      "a": "Divides it by 2 (integer division)."
+    },
+    {
+      "q": "What fills the vacated positions in a logical shift?",
+      "a": "Zero."
+    },
+    {
+      "q": "What fills the vacated positions in an arithmetic right shift?",
+      "a": "A copy of the sign bit."
+    },
+    {
+      "q": "Why is an arithmetic shift used instead of a logical shift for signed numbers?",
+      "a": "It preserves the sign bit, keeping negative numbers negative after a right shift."
+    },
+    {
+      "q": "Apply a logical left shift by 2 to 00000011. What is the result?",
+      "a": "00001100 (value multiplies from 3 to 12)."
+    },
+    {
+      "q": "At what maximum value does overflow occur in 8-bit unsigned addition?",
+      "a": "When the result exceeds 255."
+    },
+    {
+      "q": "What is the carry rule when three 1s appear in the same column of a binary addition?",
+      "a": "Write 1, carry 1."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "overflow",
+      "definition": "An error that occurs when the result of an arithmetic operation is too large to be stored in the available number of bits."
+    },
+    {
+      "term": "binary shift",
+      "definition": "An operation that moves all bits in a binary number left or right by a stated number of positions."
+    },
+    {
+      "term": "logical shift",
+      "definition": "A binary shift that fills all vacated bit positions with 0, regardless of the sign of the number."
+    },
+    {
+      "term": "arithmetic shift",
+      "definition": "A binary shift used with signed numbers that preserves the sign bit when shifting right; vacated positions on the left are filled with a copy of the sign bit."
+    },
+    {
+      "term": "carry bit",
+      "definition": "A bit produced when a binary addition in one column results in a value of 2 or more, which is carried over to the next column to the left."
+    }
+  ],
+  "hero_keywords": [
+    "binary arithmetic",
+    "computer circuit",
+    "digital data processing",
+    "server room"
+  ],
+  "hero_image_caption": "Electronic circuits performing millions of binary additions every second.",
+  "_lesson_id": "8e7f6361-5dbe-4d55-b691-915c9fd00a97",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Computerphile Podcast — Binary Arithmetic",
+          "url": "https://www.bbc.co.uk/sounds",
+          "description": "BBC Sounds — search 'binary' for episodes explaining bit shifts and binary addition in computing."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        },
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "The Imitation Game (2014)",
+          "url": "https://www.justwatch.com/uk/movie/the-imitation-game",
+          "description": "Benedict Cumberbatch as Alan Turing — the story behind the computer that cracked Enigma and defined modern computing."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

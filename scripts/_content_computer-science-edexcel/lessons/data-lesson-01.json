@@ -1,0 +1,257 @@
+{
+  "description": "Positive and negative integers in binary, two's complement, and hexadecimal notation.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Computers Use Binary</h2>\n<p data-narration-id=\"n2\">Every piece of data inside a computer &mdash; text, images, sound, instructions &mdash; is stored and processed as a pattern of 1s and 0s. This is the <dfn class=\"term\" data-def=\"A number system that uses only two digits, 0 and 1. Every circuit in a computer is either on (1) or off (0).\">binary</dfn> (base-2) number system. A transistor in a chip is either conducting electricity or not &mdash; that two-state physical reality maps perfectly onto binary&rsquo;s two digits. A <dfn class=\"term\" data-def=\"A binary digit: the smallest unit of data in a computer, either 0 or 1.\">bit</dfn> is a single binary digit. Eight bits make one <dfn class=\"term\" data-def=\"A group of 8 bits, the standard unit of data storage.\">byte</dfn>.</p>\n<p data-narration-id=\"n3\">The number of distinct states that can be represented by a binary pattern of a given length is always a power of 2. One bit gives 2 states (0 or 1). Two bits give 4 states (00, 01, 10, 11). Eight bits give \\(2^8 = 256\\) states. In general, \\(n\\) bits can represent \\(2^n\\) different values.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Cover this and recall: what are the 8 place values in an 8-bit binary number, from left to right?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>An 8-bit binary number has place values <strong>128 &mdash; 64 &mdash; 32 &mdash; 16 &mdash; 8 &mdash; 4 &mdash; 2 &mdash; 1</strong> (left to right). To convert binary to denary, add up the place values where the digit is 1. The maximum unsigned 8-bit value is 11111111 = 255; the minimum is 00000000 = 0.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Converting Between Binary and Denary</h2>\n<p data-narration-id=\"n6\"><dfn class=\"term\" data-def=\"The standard base-10 number system using digits 0&ndash;9.\">Denary</dfn> (decimal) uses place values that are powers of 10. Binary uses powers of 2. Converting binary to denary means reading off the place values where a 1 appears and adding them together.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Binary to Denary and Denary to Binary</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\"><strong>Binary &rarr; Denary:</strong> Convert 10110101</p>\n    <p data-narration-id=\"n8\">Place values: 128&nbsp;&nbsp;64&nbsp;&nbsp;32&nbsp;&nbsp;16&nbsp;&nbsp;8&nbsp;&nbsp;4&nbsp;&nbsp;2&nbsp;&nbsp;1<br>\n    Bits:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;1<br>\n    Values that count: 128 + 32 + 16 + 4 + 1 = <strong>181</strong></p>\n    <p data-narration-id=\"n9\"><strong>Denary &rarr; Binary:</strong> Convert 203<br>\n    128 fits: 203 &minus; 128 = 75, write 1<br>\n    64 fits: 75 &minus; 64 = 11, write 1<br>\n    32 does not fit in 11, write 0<br>\n    16 does not fit in 11, write 0<br>\n    8 fits: 11 &minus; 8 = 3, write 1<br>\n    4 does not fit in 3, write 0<br>\n    2 fits: 3 &minus; 2 = 1, write 1<br>\n    1 fits: 1 &minus; 1 = 0, write 1<br>\n    <strong>Result: 11001011</strong><br>\n    Check: 128 + 64 + 8 + 2 + 1 = 203 &#10003;</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n10\">Two&rsquo;s Complement &mdash; Representing Negative Numbers</h2>\n<p data-narration-id=\"n11\">Unsigned binary can only represent positive integers and zero. To store <em>negative</em> integers, computers use <dfn class=\"term\" data-def=\"A method of representing signed (positive and negative) integers in binary, where the most significant bit carries a negative place value.\">two&rsquo;s complement</dfn>. In 8-bit two&rsquo;s complement, the most significant bit (leftmost bit) has a place value of &minus;128 instead of +128. The remaining seven bits retain their normal positive place values.</p>\n<p data-narration-id=\"n12\">This means 8-bit two&rsquo;s complement can represent integers from <strong>&minus;128 to +127</strong>. Positive numbers look the same as unsigned binary &mdash; the most significant bit is 0. Negative numbers have the most significant bit set to 1.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n13\" data-revision-tip=\"Cover this and recall: what is the range of 8-bit two's complement? Then convert 10010011 to a signed denary value.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>In 8-bit two&rsquo;s complement the place values are <strong>&minus;128, 64, 32, 16, 8, 4, 2, 1</strong>. The range is &minus;128 to +127. To convert a negative pattern to denary, treat the leftmost bit as &minus;128 and add the remaining place values as normal.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Encoding Negative Numbers with Two&rsquo;s Complement</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\"><strong>How to represent &minus;5 in 8-bit two&rsquo;s complement:</strong></p>\n    <p data-narration-id=\"n15\"><strong>Step 1</strong> &mdash; Write +5 in 8-bit binary: <code>00000101</code></p>\n    <p data-narration-id=\"n16\"><strong>Step 2</strong> &mdash; Invert all bits (flip every 0 to 1 and every 1 to 0): <code>11111010</code></p>\n    <p data-narration-id=\"n17\"><strong>Step 3</strong> &mdash; Add 1 to the result: <code>11111010 + 00000001 = 11111011</code></p>\n    <p data-narration-id=\"n18\"><strong>Check:</strong> Using place value &minus;128 + 64 + 32 + 16 + 8 + 2 + 1 = &minus;128 + 123 = <strong>&minus;5</strong> &#10003;</p>\n    <p data-narration-id=\"n19\"><strong>Converting 10010011 back to denary:</strong><br>\n    Place value of leftmost bit = &minus;128<br>\n    Remaining bits 0010011: 16 + 2 + 1 = 19<br>\n    Total: &minus;128 + 19 = <strong>&minus;109</strong></p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n20\">Hexadecimal</h2>\n<p data-narration-id=\"n21\"><dfn class=\"term\" data-def=\"A base-16 number system using digits 0&ndash;9 and letters A&ndash;F. Each hex digit represents exactly four binary bits.\">Hexadecimal</dfn> (hex, base-16) uses 16 symbols: digits 0&ndash;9 and letters A&ndash;F, where A&nbsp;=&nbsp;10, B&nbsp;=&nbsp;11, C&nbsp;=&nbsp;12, D&nbsp;=&nbsp;13, E&nbsp;=&nbsp;14, F&nbsp;=&nbsp;15. Hex is used because it is a compact shorthand for binary: every four bits (one <dfn class=\"term\" data-def=\"A group of 4 bits. One nibble converts directly to one hexadecimal digit.\">nibble</dfn>) maps to exactly one hex digit, making long binary strings much easier for humans to read.</p>\n<p data-narration-id=\"n22\">You will see hex everywhere in computing: web colour codes (#FF5500), MAC addresses on network cards, memory dump listings in diagnostic tools. The maximum 8-bit value is <strong>FF</strong> in hex (255 in denary). Computers do not process hex directly &mdash; it is a human convenience for working with binary patterns.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Converting Between Binary and Hexadecimal</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n23\"><strong>Binary &rarr; Hex:</strong> Convert 11010110<br>\n    Split into nibbles: 1101 | 0110<br>\n    1101 = 13 = D<br>\n    0110 = 6<br>\n    <strong>Result: D6</strong></p>\n    <p data-narration-id=\"n24\"><strong>Hex &rarr; Binary:</strong> Convert 3A<br>\n    3 = 0011<br>\n    A = 10 = 1010<br>\n    <strong>Result: 00111010</strong></p>\n    <p data-narration-id=\"n25\"><strong>Hex &rarr; Denary:</strong> Convert 3A<br>\n    (3 &times; 16) + 10 = 48 + 10 = <strong>58</strong></p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n26\" data-revision-tip=\"Test yourself: convert 10101100 to hex. Split into nibbles, convert each, write your two-digit hex answer.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>To convert binary to hex: split into groups of 4 bits (nibbles) from the right, then convert each nibble to its hex digit. To convert hex to denary: multiply the first digit by 16, add the second digit. Hexadecimal is used in computing because one hex digit represents exactly four binary bits &mdash; making large binary numbers compact and readable.</p>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n27\">For two&rsquo;s complement questions, always show three clear steps: write the positive binary, invert all bits, add 1. The examiner awards method marks for each step shown. When converting a two&rsquo;s complement pattern to denary, remember the leftmost bit has the place value &minus;128, not +128 &mdash; a very common error. For hex conversion, the command word will often be &lsquo;Convert&rsquo; (2 marks) &mdash; show the nibble split and both hex digits to secure full marks.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">Binary is base-2. An 8-bit number can represent \\(2^8 = 256\\) distinct values. Unsigned range is 0&ndash;255; two&rsquo;s complement signed range is &minus;128 to +127.</li>\n  <li data-narration-id=\"n30\">To represent a negative number in two&rsquo;s complement: write the positive version, invert all bits, add 1. The leftmost bit carries place value &minus;128.</li>\n  <li data-narration-id=\"n31\">Hexadecimal is base-16. Each hex digit represents exactly one nibble (4 bits). Convert binary to hex by splitting into nibbles and converting each group.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is the correct denary value for the 8-bit two's complement pattern 10001010?\nA) 138\nB) -118\nC) -10\nD) -128",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) -118 [1 mark]\nWorking: -128 + 8 + 2 = -118"
+    },
+    {
+      "text": "State the hexadecimal value that is equivalent to the 8-bit binary pattern 11110000.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "F0 [1 mark]"
+    },
+    {
+      "text": "Convert the denary number 73 to 8-bit binary. Show your working.",
+      "type": "2 marks — Convert",
+      "marks": "Correct method shown — subtracting place values in order [1 mark]\nCorrect result: 01001001 [1 mark]"
+    },
+    {
+      "text": "Show how the denary value -13 is represented in 8-bit two's complement. Show all three steps of your working.",
+      "type": "3 marks — Calculate",
+      "marks": "Step 1: Write +13 in binary: 00001101 [1 mark]\nStep 2: Invert all bits: 11110010 [1 mark]\nStep 3: Add 1: 11110011 [1 mark]\nAccept equivalent correct result from consistent working."
+    },
+    {
+      "text": "Convert the hexadecimal value B7 to binary. Show your working.",
+      "type": "2 marks — Convert",
+      "marks": "B = 1011 [1 mark]\n7 = 0111 [1 mark]\nFull answer: 10110111 [full marks only if both nibbles correct]"
+    },
+    {
+      "text": "Explain why hexadecimal notation is used when working with binary data. Include an example to support your answer.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: States that hex is a compact shorthand for binary (1), each hex digit represents exactly 4 bits / one nibble so conversion is straightforward (1), long binary strings are difficult for humans to read and write accurately (1), appropriate example given (e.g. MAC address, colour code, memory address shown in hex) (1).\nSecure: Two or three of the four points present with some development.\nDeveloping: States hex is shorter but no explanation of the nibble relationship.\nEmerging: Vague — 'hex is easier' with no development."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the denary value of the 8-bit binary number 00110101?",
+      "options": [
+        "43",
+        "51",
+        "53",
+        "55"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "In 8-bit two's complement, what is the range of values that can be represented?",
+      "options": [
+        "0 to 255",
+        "-127 to +127",
+        "-128 to +127",
+        "-128 to +128"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In two's complement, the leftmost bit of an 8-bit number has a place value of _____.",
+      "options": [
+        "+128",
+        "-127",
+        "-128",
+        "+64"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "To convert binary to hexadecimal, split the binary number into groups of _____ bits.",
+      "options": [
+        "8",
+        "2",
+        "3",
+        "4"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description.",
+      "left": [
+        "Bit",
+        "Nibble",
+        "Byte"
+      ],
+      "right": [
+        "A group of 8 bits",
+        "A single binary digit",
+        "A group of 4 bits"
+      ],
+      "order": [
+        1,
+        2,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What are the 8 place values of an 8-bit binary number, from left to right?",
+      "a": "128, 64, 32, 16, 8, 4, 2, 1."
+    },
+    {
+      "q": "What is the maximum value an 8-bit unsigned binary number can represent?",
+      "a": "255"
+    },
+    {
+      "q": "What is the range of values that 8-bit two's complement can represent?",
+      "a": "-128 to +127."
+    },
+    {
+      "q": "What place value does the leftmost bit carry in 8-bit two's complement?",
+      "a": "-128"
+    },
+    {
+      "q": "What are the three steps to convert a positive number to its two's complement negative?",
+      "a": "Write the positive binary, invert all bits, add 1."
+    },
+    {
+      "q": "Convert +5 to its 8-bit two's complement representation of -5.",
+      "a": "00000101 → 11111010 → 11111011."
+    },
+    {
+      "q": "How many distinct values can n bits represent?",
+      "a": "2 to the power of n."
+    },
+    {
+      "q": "How many bits are in one nibble?",
+      "a": "4"
+    },
+    {
+      "q": "What is the maximum 8-bit value in hexadecimal?",
+      "a": "FF"
+    },
+    {
+      "q": "How do you convert an 8-bit binary number to hexadecimal?",
+      "a": "Split into two nibbles of 4 bits; convert each nibble to one hex digit."
+    },
+    {
+      "q": "What is the denary value of hexadecimal F?",
+      "a": "15"
+    },
+    {
+      "q": "Why is hexadecimal used instead of binary by programmers?",
+      "a": "Each hex digit represents exactly 4 bits, making long binary patterns shorter and readable."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "binary",
+      "definition": "A number system that uses only two digits, 0 and 1, corresponding to the on/off states of electronic circuits."
+    },
+    {
+      "term": "bit",
+      "definition": "A binary digit: the smallest unit of data in a computer, either 0 or 1."
+    },
+    {
+      "term": "byte",
+      "definition": "A group of 8 bits, the standard unit of data storage."
+    },
+    {
+      "term": "denary",
+      "definition": "The standard base-10 number system using digits 0–9."
+    },
+    {
+      "term": "two's complement",
+      "definition": "A method of representing signed (positive and negative) integers in binary, where the most significant bit carries a negative place value."
+    },
+    {
+      "term": "hexadecimal",
+      "definition": "A base-16 number system using digits 0–9 and letters A–F. Each hex digit represents exactly four binary bits."
+    },
+    {
+      "term": "nibble",
+      "definition": "A group of 4 bits. One nibble converts directly to one hexadecimal digit."
+    }
+  ],
+  "hero_keywords": [
+    "binary code screen",
+    "computer circuit board",
+    "data binary",
+    "digital technology"
+  ],
+  "hero_image_caption": "Binary patterns on a screen — the language of every digital device.",
+  "_lesson_id": "7c98e396-38e1-40c1-94a5-88420ff1630b",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Lex Fridman Podcast — Computation and Mathematics",
+          "url": "https://lexfridman.com/podcast",
+          "description": "Guests including mathematicians and computer scientists explain the binary number system and how two's complement shaped hardware design."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        },
+        {
+          "title": "Computerphile — Channel",
+          "url": "https://www.youtube.com/@Computerphile",
+          "description": "Brady Haran's expert video channel: short, deep dives on the exact topics that appear in your CS exam."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "The Imitation Game (2014)",
+          "url": "https://www.justwatch.com/uk/movie/the-imitation-game",
+          "description": "Benedict Cumberbatch as Alan Turing — the story behind the computer that cracked Enigma and defined modern computing."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        },
+        {
+          "title": "VisualGo — Number Systems",
+          "url": "https://visualgo.net/en",
+          "description": "Interactive visualisations of binary arithmetic and number representations."
+        }
+      ]
+    }
+  ]
+}

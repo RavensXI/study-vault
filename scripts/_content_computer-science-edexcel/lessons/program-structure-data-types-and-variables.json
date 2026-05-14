@@ -1,0 +1,272 @@
+{
+  "description": "Learn Python's data types, variables, constants and how to write readable code.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Data Types Matter</h2>\n<p data-narration-id=\"n2\">Every value stored in a Python program has a <dfn class=\"term\" data-def=\"A classification that tells Python what kind of data is being stored, how much memory to allocate, and what operations are valid on it.\">data type</dfn>. Choosing the right type is not optional &mdash; it determines what you can do with the data. You cannot multiply two strings together arithmetically. You cannot store the word &ldquo;open&rdquo; as a Boolean. Getting the type wrong causes errors that are often tricky to diagnose. Python works with five primitive data types you must know, plus structured types for grouping data together.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and list all five primitive data types with one example Python value for each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The five primitive data types are: <strong>integer</strong> (whole number, e.g. <code>7</code> or <code>-3</code>), <strong>real</strong> (decimal number, e.g. <code>3.14</code> &mdash; Python calls this <code>float</code>), <strong>Boolean</strong> (<code>True</code> or <code>False</code>), <strong>char</strong> (a single character, e.g. <code>'A'</code>), and <strong>string</strong> (a sequence of characters, e.g. <code>&quot;hello&quot;</code>). In your exam, use the term <em>real</em> rather than <em>float</em> in written answers.</p>\n</div>\n\n<h2 data-narration-id=\"n4\">The Primitive Data Types in Python</h2>\n<p data-narration-id=\"n5\">An <dfn class=\"term\" data-def=\"A whole number with no decimal part, which can be positive, negative or zero.\">integer</dfn> stores a whole number. Examples include a player&rsquo;s score, the number of students in a class, or a person&rsquo;s age. In Python, you write: <code>age = 16</code>.</p>\n<p data-narration-id=\"n6\">A <dfn class=\"term\" data-def=\"A number that can include a decimal point; called 'float' in Python but referred to as 'real' in exam answers.\">real</dfn> stores values with a fractional part. Examples include a temperature reading (<code>36.7</code>), a price (<code>12.99</code>), or a percentage (<code>78.5</code>). In Python: <code>temperature = 36.7</code>.</p>\n<p data-narration-id=\"n7\">A <dfn class=\"term\" data-def=\"A data type that can hold only one of two values: True or False.\">Boolean</dfn> holds only one of two values: <code>True</code> or <code>False</code>. Note the capital first letter &mdash; Python is case-sensitive. Examples: whether a user is logged in, whether a door sensor is triggered, whether a password matches.</p>\n<p data-narration-id=\"n8\">A <dfn class=\"term\" data-def=\"A data type that holds exactly one character, such as a letter, digit or punctuation mark.\">char</dfn> stores exactly one symbol. In Python, characters are written in single quotes: <code>'A'</code>, <code>'9'</code>, <code>'!'</code>. A <dfn class=\"term\" data-def=\"A data type that holds a sequence of zero or more characters, used to store text such as names, messages and postcodes.\">string</dfn> is a sequence of characters &mdash; as long or short as needed, including an empty string <code>&quot;&quot;</code>. In Python: <code>name = &quot;Priya&quot;</code>.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Critical: The Input-Type Trap</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n9\">When a user types a number using <code>input()</code>, Python receives it as a <strong>string</strong> by default. Trying to add two such strings gives concatenation, not arithmetic. For example: <code>&quot;5&quot; + &quot;3&quot;</code> gives <code>&quot;53&quot;</code>, not <code>8</code>. You must convert the input before doing any maths:</p>\n    <pre data-narration-id=\"n10\">age = int(input(&quot;Enter your age: &quot;))\nyear_of_birth = 2026 - age\nprint(year_of_birth)</pre>\n    <p data-narration-id=\"n11\">Use <code>int()</code> for whole numbers and <code>float()</code> for decimals. This is one of the most common errors in exam answers &mdash; always check whether a variable storing user input has been converted to the right type.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">Variables and Constants</h2>\n<p data-narration-id=\"n13\">A <dfn class=\"term\" data-def=\"A named storage location in memory whose value can change while the program runs.\">variable</dfn> is a named location in memory whose value can change as the program executes. In Python, you create a variable simply by assigning a value to it: <code>score = 0</code>. Every variable has a <strong>name</strong> (its identifier), a <strong>value</strong>, and an implied data type.</p>\n<p data-narration-id=\"n14\">A <dfn class=\"term\" data-def=\"A named value that is set once and must not change during program execution; conventionally written in uppercase to signal that it should not be altered.\">constant</dfn> is a value that should stay fixed throughout the program. Python does not enforce constants with a keyword, but the convention is to write them in uppercase: <code>MAX_ATTEMPTS = 3</code>. Using a named constant makes maintenance far easier &mdash; if you later need to change the maximum to 5, you change it in one place rather than searching through every line of code for the number 3.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Test yourself: give one example of a poor identifier name and one good alternative for a variable storing the number of lives remaining in a game.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Meaningful <dfn class=\"term\" data-def=\"The name given to a variable, constant or subprogram in a program; should clearly describe its purpose.\">identifier</dfn> names make code readable and maintainable. <code>livesRemaining</code> is immediately clear; <code>x</code> or <code>temp</code> is not. Examiners award marks for meaningful identifiers when you write code &mdash; single-letter names (except conventional loop counters such as <code>i</code>) will cost marks.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Structured Data Types</h2>\n<p data-narration-id=\"n17\">Beyond the five primitives, Python supports structured types that group multiple values together. An <dfn class=\"term\" data-def=\"A structured data type that stores an ordered collection of values of the same type, accessed by position using an index.\">array</dfn> (implemented in Python as a list) holds an ordered sequence of values. A <dfn class=\"term\" data-def=\"A structured data type that groups related fields of different types together under one named structure, such as a student record holding a name, age and score.\">record</dfn> groups related fields of potentially different types &mdash; implemented in Python using a dictionary. These are covered in detail in a later lesson.</p>\n\n<h2 data-narration-id=\"n18\">Writing Readable Code</h2>\n<p data-narration-id=\"n19\">The specification requires you to write code that is easy for another programmer to read. Four techniques contribute to readability: meaningful identifier names (already covered), correct <strong>indentation</strong>, useful <strong>comments</strong>, and consistent use of <strong>white space</strong>.</p>\n<p data-narration-id=\"n20\">In Python, <strong>indentation</strong> is not optional &mdash; it defines code blocks. All statements inside an <code>if</code>, <code>for</code> or function body must be indented by the same amount (usually four spaces). Inconsistent indentation causes an <code>IndentationError</code>.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Readable vs Unreadable Code</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\"><strong>Hard to read (poor names, no comments, no spacing):</strong></p>\n    <pre data-narration-id=\"n22\">x=int(input(&quot;&quot;))\nif x&gt;=50:\n    print(&quot;P&quot;)\nelse:\n    print(&quot;F&quot;)</pre>\n    <p data-narration-id=\"n23\"><strong>Easy to read (meaningful names, comment at block level, spacing):</strong></p>\n    <pre data-narration-id=\"n24\"># Check whether a student has passed their exam\nscore = int(input(&quot;Enter exam score: &quot;))\n\nif score &gt;= 50:\n    print(&quot;Pass&quot;)\nelse:\n    print(&quot;Fail&quot;)</pre>\n    <p data-narration-id=\"n25\">Notice: the comment explains the <em>purpose</em> of the block, not what each individual line does. Over-commenting &mdash; adding a comment to every single line &mdash; makes code harder to read, not easier. A common mistake in exam answers is writing more comment text than code.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n26\">Initialisation and Assignment</h2>\n<p data-narration-id=\"n27\">Before you can use a variable, you must give it an initial value. This is called <strong>initialisation</strong>. For example, a score counter should start at zero: <code>score = 0</code>. Running total variables, list index counters and flag variables all need initialisation before a loop begins. Failing to initialise a variable causes a <code>NameError</code> in Python &mdash; the program tries to use a name it has never seen before.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>PRIMM &mdash; Predict Before You Run</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n28\">When you encounter new code, try to <strong>predict</strong> its output before you run it. Consider:</p>\n    <pre data-narration-id=\"n29\">total = 0\nfor i in range(1, 5):\n    total = total + i\nprint(total)</pre>\n    <p data-narration-id=\"n30\">Predict: <code>range(1, 5)</code> produces 1, 2, 3, 4. The loop adds each to <code>total</code>, giving 1, 3, 6, 10. The output is <code>10</code>. Then run it to verify. This predict-then-run habit is especially useful for tackling &ldquo;Complete a Trace Table&rdquo; questions in your exam.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n31\">For &ldquo;Define&rdquo; questions on data types, be precise: a char holds <em>exactly one</em> character; a string holds <em>a sequence</em> of characters. Examiners penalise vague answers such as &ldquo;it holds text.&rdquo; For &ldquo;Identify&rdquo; questions about which data type to use, pick the most specific type &mdash; if a value is always a whole number, choose integer rather than real. For &ldquo;Write&rdquo; questions, always use meaningful identifier names and add one block-level comment &mdash; not a comment on every line.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n32\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n33\">Python has five primitive data types: integer, real (float), Boolean, char and string. Use the term <em>real</em> in written exam answers.</li>\n  <li data-narration-id=\"n34\">Variables hold values that can change; constants (uppercase by convention) hold values that must not change. Both need meaningful identifier names.</li>\n  <li data-narration-id=\"n35\">Readable code uses meaningful identifiers, correct indentation, block-level comments (not per-line) and consistent white space.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "State the most appropriate data type for storing a student's date of birth in the format DD/MM/YYYY.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "Mastering: String (1). The format contains slashes and leading zeros — it cannot be stored as an integer or real without losing information.\nSecure: Correct with minor explanation gap.\nDeveloping: Character (a single symbol only — cannot hold the full date).\nEmerging: Integer or Boolean."
+    },
+    {
+      "text": "Define what is meant by a constant in a Python program. Give one reason why a programmer would use a constant rather than a variable.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: A constant is a named value (1) that is set once and should not change during execution (1); reason — if the value needs updating, it is changed in one place rather than in every occurrence in the code (1); example given, e.g. TAX_RATE or MAX_LIVES (1).\nSecure: Constant correctly defined with a weak reason.\nDeveloping: One part (definition or reason) correct.\nEmerging: Confuses constant with variable."
+    },
+    {
+      "text": "A Python program contains the line:\nscore = input(\"Enter score: \")\ntotal = score + 10\nExplain why this will cause an error, and write a corrected version of the second line.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: The input() function returns a string (1) so adding 10 (an integer) to a string is a type error (1); corrected line: total = int(score) + 10 (1); explanation that int() converts the string to an integer (1).\nSecure: Error correctly identified with partial correction.\nDeveloping: Identifies an error exists but misnames the type.\nEmerging: No understanding of type conversion."
+    },
+    {
+      "text": "Identify the data type of each of the following Python values: (a) True  (b) 3.14  (c) 'K'  (d) 42",
+      "type": "4 marks — Describe",
+      "marks": "Mastering: (a) Boolean (1), (b) real/float (1), (c) char (1), (d) integer (1).\nSecure: Three correct.\nDeveloping: Two correct.\nEmerging: One or none correct."
+    },
+    {
+      "text": "Complete a trace table for the following Python code. Show the value of total after each iteration.\ntotal = 0\nfor i in range(1, 4):\n    total = total + i\nprint(total)",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: i=1 total=1; i=2 total=3; i=3 total=6; output 6. One mark per correct row (3 rows + output).\nSecure: Two rows correct plus correct final output.\nDeveloping: One row correct.\nEmerging: No understanding of loop accumulation."
+    },
+    {
+      "text": "A programmer writes the following code:\nMAX_SIZE = 100\nstudentnumber = 0\nWrite a brief explanation of why MAX_SIZE follows good programming practice, and suggest an improvement to the identifier name for the second variable.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: MAX_SIZE is in uppercase — conventional for constants (1); its name clearly describes its purpose (1); it can be changed in one place if the limit changes (1); studentnumber could be improved to student_number or studentNumber (1); a better name describes the purpose more precisely, e.g. currentStudentNumber or studentCount (1); explanation of why the improvement matters for readability and maintenance (1).\nSecure: Three or four valid points with partial explanation.\nDeveloping: One or two points without full reasoning.\nEmerging: Vague or no understanding of naming conventions."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which data type should be used to store the value True or False in Python?",
+      "options": [
+        "Integer",
+        "String",
+        "Boolean",
+        "Char"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "A student types their age using input(). What data type does Python store this as by default?",
+      "options": [
+        "Integer",
+        "Real",
+        "String",
+        "Boolean"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A named value that is set once and must not change during program execution is called a _____.",
+      "options": [
+        "variable",
+        "constant",
+        "string",
+        "identifier"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "In Python, a number with a decimal point has a data type called _____ (in exam answers, use the spec term 'real').",
+      "options": [
+        "integer",
+        "Boolean",
+        "float",
+        "char"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each Python value to its data type.",
+      "left": [
+        "42",
+        "True",
+        "3.14",
+        "'Z'"
+      ],
+      "right": [
+        "Real",
+        "Char",
+        "Integer",
+        "Boolean"
+      ],
+      "order": [
+        2,
+        3,
+        0,
+        1
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "Which data type stores a number with a decimal point in Python?",
+      "a": "Real (Python calls it float; use 'real' in exam answers)."
+    },
+    {
+      "q": "What Python function converts a string input to a whole number?",
+      "a": "int() — e.g. int(input('Enter age: '))."
+    },
+    {
+      "q": "What is the term for a named storage location whose value can change during program execution?",
+      "a": "Variable."
+    },
+    {
+      "q": "What convention signals that an identifier is a constant in Python?",
+      "a": "Writing it in UPPERCASE, e.g. MAX_ATTEMPTS."
+    },
+    {
+      "q": "Why is MAX_SCORE better practice than the number 100 scattered through a program?",
+      "a": "Changing the value in one place updates the whole program."
+    },
+    {
+      "q": "A char holds _____ character(s); a string holds _____.",
+      "a": "One character / a sequence of zero or more characters."
+    },
+    {
+      "q": "Name the Python error raised when you reference a variable before assigning it a value.",
+      "a": "NameError"
+    },
+    {
+      "q": "What does over-commenting mean, and why is it a problem?",
+      "a": "Adding a comment to every line — it clutters code and reduces readability."
+    },
+    {
+      "q": "What does 'initialisation' mean for a variable?",
+      "a": "Giving the variable its first value before it is used in the program."
+    },
+    {
+      "q": "What are the two Python Boolean values? (Give exact syntax.)",
+      "a": "True and False — capital first letter required."
+    },
+    {
+      "q": "Cloze: In Python, indentation is _____ — it defines code blocks and inconsistency causes an IndentationError.",
+      "a": "Mandatory / required."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "data type",
+      "definition": "A classification that tells Python what kind of data is being stored, how much memory to allocate, and what operations are valid on it."
+    },
+    {
+      "term": "integer",
+      "definition": "A whole number with no decimal part, which can be positive, negative or zero."
+    },
+    {
+      "term": "real",
+      "definition": "A number that can include a decimal point; called float in Python but referred to as real in exam answers."
+    },
+    {
+      "term": "Boolean",
+      "definition": "A data type that can hold only one of two values: True or False."
+    },
+    {
+      "term": "char",
+      "definition": "A data type that holds exactly one character, such as a letter, digit or punctuation mark."
+    },
+    {
+      "term": "string",
+      "definition": "A data type that holds a sequence of zero or more characters, used to store text such as names, messages and postcodes."
+    },
+    {
+      "term": "variable",
+      "definition": "A named storage location in memory whose value can change while the program runs."
+    },
+    {
+      "term": "constant",
+      "definition": "A named value that is set once and must not change during program execution; conventionally written in uppercase to signal that it should not be altered."
+    },
+    {
+      "term": "identifier",
+      "definition": "The name given to a variable, constant or subprogram in a program; should clearly describe its purpose."
+    },
+    {
+      "term": "array",
+      "definition": "A structured data type that stores an ordered collection of values of the same type, accessed by position using an index."
+    },
+    {
+      "term": "record",
+      "definition": "A structured data type that groups related fields of different types together under one named structure, such as a student record holding a name, age and score."
+    }
+  ],
+  "hero_keywords": [
+    "python code editor",
+    "programming terminal",
+    "code on screen",
+    "laptop developer"
+  ],
+  "hero_image_caption": "Clean Python code on a screen — the foundation of every program.",
+  "_lesson_id": "b622aa4e-da0a-4842-86b6-9a4deb007cfb",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "CodeNewbie Podcast — Absolute Beginners",
+          "url": "https://www.codenewbie.org/podcast",
+          "description": "First-time programmers share how they understood variables, constants and data types — encouraging for GCSE students starting Python."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "Craig'n'Dave GCSE Computer Science",
+          "url": "https://www.youtube.com/@craigndave",
+          "description": "UK GCSE CS revision channel aligned to the Edexcel 1CP2 specification — lesson-by-lesson videos."
+        },
+        {
+          "title": "Tech With Tim — Python for Beginners",
+          "url": "https://www.youtube.com/@TechWithTim",
+          "description": "Step-by-step Python tutorials: variables, data types (int, float, string, Boolean), constants and basic input/output."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Hidden Figures (2016)",
+          "url": "https://www.justwatch.com/uk/movie/hidden-figures",
+          "description": "NASA's human computers solved orbital mechanics using nothing but arithmetic — the real-world origin of modern programming."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "Replit — Browser Python Coding",
+          "url": "https://replit.com",
+          "description": "Run and test Python code in your browser with no install needed — ideal for practising exam-style programs."
+        },
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    }
+  ]
+}

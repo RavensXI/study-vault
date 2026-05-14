@@ -1,0 +1,249 @@
+{
+  "lesson_id": "3c054d48-8148-436f-99a8-626a307e43d0",
+  "description": "How the four standard algorithms work, when each is appropriate and how to compare their efficiency.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Standard Algorithms Matter</h2>\n<p data-narration-id=\"n2\">Searching and sorting data are the most common operations in computing. Every time you look up a contact on your phone, find a track in a music library, or see a leaderboard ranked by score, a <dfn class=\"term\" data-def=\"A step-by-step process for locating a specific item within a collection of data.\">search algorithm</dfn> or <dfn class=\"term\" data-def=\"An algorithm that arranges data into a specified order, such as ascending numerical order or alphabetical order.\">sorting algorithm</dfn> is at work. Your specification requires you to know four standard algorithms: two for searching (linear search and binary search) and two for sorting (bubble sort and merge sort).</p>\n\n<h2 data-narration-id=\"n3\">Linear Search</h2>\n<p data-narration-id=\"n4\"><dfn class=\"term\" data-def=\"A search algorithm that checks each item in a list one by one, starting from the first, until the target item is found or the end of the list is reached.\">Linear search</dfn> is the simplest approach. Starting at the beginning of the list, it checks each item in turn: does this match the target? If yes, return its position. If no, move to the next item. If the end of the list is reached without a match, the target is not present.</p>\n<p data-narration-id=\"n5\">Linear search works on <strong>any</strong> list &mdash; sorted or unsorted. This makes it very flexible. You do not need to sort the data first, which is a significant advantage when you only need to search once or when the data changes frequently.</p>\n<p data-narration-id=\"n6\"><strong>Plain-English algorithm for linear search:</strong><br/>\n1. Set position to 0 (the start of the list).<br/>\n2. While position is less than the length of the list:<br/>\n&nbsp;&nbsp;&nbsp;a. If the item at position equals the target, display position and stop.<br/>\n&nbsp;&nbsp;&nbsp;b. Add 1 to position.<br/>\n3. If the loop finishes without a match, display &ldquo;Not found.&rdquo;</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and recall two advantages and two disadvantages of linear search.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><strong>Linear search advantages:</strong> Works on unsorted or sorted data; simple to implement. <strong>Disadvantages:</strong> Slow for large datasets &mdash; in the worst case, every item must be checked. A list of one million items may require up to one million comparisons.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">Binary Search</h2>\n<p data-narration-id=\"n9\"><dfn class=\"term\" data-def=\"A search algorithm that works only on sorted data by repeatedly halving the search area, comparing the target with the middle item and discarding the half that cannot contain it.\">Binary search</dfn> is far more efficient than linear search for large datasets, but it has one absolute requirement: <strong>the data must already be sorted</strong>. Binary search works by repeatedly halving the search space.</p>\n<p data-narration-id=\"n10\"><strong>The mechanics:</strong> find the middle item of the current search area. If it equals the target, the search is done. If the target is smaller, discard the right half and repeat on the left. If the target is larger, discard the left half and repeat on the right. Continue until found or the search area is empty.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Binary Search Trace &mdash; Searching for 23 in a Sorted List</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n11\">Sorted list: [3, 7, 11, 15, 19, 23, 27, 31, 35]. Target: 23.</p>\n    <p data-narration-id=\"n12\"><strong>Step 1:</strong> Search area is the whole list (9 items). Middle item (index 4) = 19. Is 23 equal to 19? No. Is 23 greater than 19? Yes. Discard left half. New search area: [23, 27, 31, 35].</p>\n    <p data-narration-id=\"n13\"><strong>Step 2:</strong> Search area has 4 items. Middle item (index 1 of new area) = 27. Is 23 equal to 27? No. Is 23 less than 27? Yes. Discard right half. New search area: [23].</p>\n    <p data-narration-id=\"n14\"><strong>Step 3:</strong> One item remains: 23. Match found. Done in 3 comparisons. Linear search on the same list would have needed 6 comparisons to reach position 5.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Test yourself: explain in your own words why binary search is faster than linear search, and state its one essential requirement.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Binary search halves the search area with every comparison. A sorted list of 1,000 items needs at most 10 comparisons with binary search, compared to up to 1,000 with linear search. A list of one million items needs at most 20 comparisons. <strong>The data must be sorted first &mdash; binary search cannot work on unsorted data.</strong></p>\n</div>\n\n<h2 data-narration-id=\"n16\">Bubble Sort</h2>\n<p data-narration-id=\"n17\"><dfn class=\"term\" data-def=\"A sorting algorithm that makes repeated passes through a list, comparing adjacent pairs and swapping them if they are in the wrong order. Each pass moves the largest unsorted item to its correct final position.\">Bubble sort</dfn> works by repeatedly comparing adjacent pairs of items and swapping them if they are in the wrong order. After the first pass, the largest item has &ldquo;bubbled&rdquo; to the final position. After the second pass, the second-largest is in place. The algorithm stops when a complete pass produces no swaps at all &mdash; the list is sorted.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Bubble Sort Trace &mdash; Sorting [5, 3, 8, 1, 4]</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\"><strong>Start:</strong> [5, 3, 8, 1, 4]</p>\n    <p data-narration-id=\"n19\"><strong>Pass 1:</strong> Compare 5 and 3 &rarr; swap &rarr; [3, 5, 8, 1, 4]. Compare 5 and 8 &rarr; no swap. Compare 8 and 1 &rarr; swap &rarr; [3, 5, 1, 8, 4]. Compare 8 and 4 &rarr; swap &rarr; [3, 5, 1, 4, 8]. Largest item (8) is now at the end.</p>\n    <p data-narration-id=\"n20\"><strong>Pass 2:</strong> [3, 5, 1, 4, 8] &rarr; swaps made &rarr; [3, 1, 4, 5, 8].</p>\n    <p data-narration-id=\"n21\"><strong>Pass 3:</strong> [3, 1, 4, 5, 8] &rarr; swap 3 and 1 &rarr; [1, 3, 4, 5, 8].</p>\n    <p data-narration-id=\"n22\"><strong>Pass 4:</strong> No swaps. List is fully sorted: [1, 3, 4, 5, 8]. Algorithm stops.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n23\">Merge Sort</h2>\n<p data-narration-id=\"n24\"><dfn class=\"term\" data-def=\"A sorting algorithm that uses a divide-and-conquer approach: repeatedly splitting a list in half until each sub-list has one item, then merging sub-lists back together in sorted order.\">Merge sort</dfn> uses a divide-and-conquer strategy. It repeatedly splits the list in half until every sub-list contains a single item (a list of one item is inherently sorted). Then it merges pairs of sub-lists back together, placing items in the correct order during each merge.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Comparison Table &mdash; All Four Standard Algorithms</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n25\"><strong>Linear search:</strong> Works on unsorted data. Simple. Slow for large lists (up to n comparisons for n items). Best for small or frequently changing datasets.</p>\n    <p data-narration-id=\"n26\"><strong>Binary search:</strong> Requires sorted data. More comparisons saved with each step. Very fast for large sorted datasets (at most log&sub;2;(n) comparisons). Best for large, stable, sorted datasets searched repeatedly.</p>\n    <p data-narration-id=\"n27\"><strong>Bubble sort:</strong> Simple to implement. Sorts in place &mdash; no extra memory needed. Can detect an already-sorted list early (zero swaps on first pass). Very slow for large datasets (many passes and comparisons). Best for small lists or teaching purposes.</p>\n    <p data-narration-id=\"n28\"><strong>Merge sort:</strong> Consistent and fast for large datasets. Uses divide-and-conquer. Requires extra memory for the sub-lists during merging. More complex to implement. Best for large datasets where speed is critical, even though extra memory is needed.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n29\">Choosing the Right Algorithm</h2>\n<p data-narration-id=\"n30\">The right choice depends on the situation. A music streaming platform with 80 million songs stored alphabetically benefits enormously from binary search &mdash; but only because the data is already sorted. A school register of 30 names that changes daily is better searched linearly &mdash; re-sorting after every change would cost more time than just scanning the list. For sorting a small list of class results, bubble sort is adequate and easy to trace. For sorting millions of bank transactions overnight, merge sort&rsquo;s consistent speed makes it far more appropriate despite needing extra memory.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n31\">For a 4-mark <strong>Describe</strong> question on how an algorithm works, include the specific mechanism &mdash; not just &ldquo;it sorts the list.&rdquo; For bubble sort: adjacent pairs, swap if wrong order, largest moves to end, stop when no swaps. For binary search: sorted data required, middle item compared, half discarded, repeat. For a 6-mark <strong>Discuss</strong> question comparing algorithms, explore both speed and memory trade-offs and reach a justified recommendation for the given scenario.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n32\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n33\">Linear search checks items one by one &mdash; works on unsorted data but is slow for large lists. Binary search halves the search area each time &mdash; very fast but requires sorted data.</li>\n  <li data-narration-id=\"n34\">Bubble sort compares adjacent pairs and swaps, repeating passes until no swaps occur &mdash; simple but slow for large datasets. Merge sort splits and merges &mdash; fast and consistent but needs extra memory.</li>\n  <li data-narration-id=\"n35\">The right algorithm depends on the context: size of data, whether it is sorted, whether extra memory is available, and how often the data changes.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "State one requirement of binary search that is not required by linear search.",
+      "type": "1 mark — Give/State/Name",
+      "marks": "Mastering: The data must be sorted (in order) before binary search can be used (1).\nSecure: Implied correctly but phrased vaguely.\nDeveloping: States 'the data must be in a list' — too vague.\nEmerging: Blank or names wrong requirement."
+    },
+    {
+      "text": "Describe how bubble sort works.",
+      "type": "2 marks — Describe",
+      "marks": "Mastering: Makes repeated passes through the list (1), comparing adjacent pairs and swapping them if they are in the wrong order, stopping when a complete pass produces no swaps (1).\nSecure: Correct idea with one component missing.\nDeveloping: 'Swaps items around' without mentioning adjacent pairs or the stopping condition.\nEmerging: Describes a different algorithm."
+    },
+    {
+      "text": "A sorted list of student names is: [Ahmed, Clarke, Frost, Green, Khan, Martin, Patel, Singh, Taylor, Wood]. Show the steps a binary search would take to find 'Patel'. State the middle item checked at each step.",
+      "type": "4 marks — Complete a Trace Table",
+      "marks": "Mastering: Step 1 — 10 items, middle index 4 = Khan. Patel > Khan alphabetically. Discard left half. Remaining: [Martin, Patel, Singh, Taylor, Wood]. Step 2 — 5 items, middle index 2 = Singh. Patel < Singh. Discard right. Remaining: [Martin, Patel]. Step 3 — 2 items, middle = Martin. Patel > Martin. Discard left. Remaining: [Patel]. Found in 4 comparisons or fewer, all steps shown (1 per correct step, up to 4).\nSecure: Correct method with minor indexing error.\nDeveloping: Correct first step only.\nEmerging: Uses linear search method instead."
+    },
+    {
+      "text": "Explain why merge sort is more suitable than bubble sort for sorting a database of 10 million customer records.",
+      "type": "4 marks — Explain",
+      "marks": "Mastering: Merge sort is more efficient for large datasets (1) because it divides and merges rather than making repeated full passes (1); bubble sort would require very many passes and comparisons on 10 million records, making it impractically slow (1); merge sort's performance scales much better as the dataset grows (1).\nSecure: Correct algorithm chosen with two clear reasons.\nDeveloping: Correct algorithm chosen but reasoning vague.\nEmerging: Wrong algorithm chosen or blank."
+    },
+    {
+      "text": "Describe the split phase and merge phase of merge sort. Use the list [7, 2, 9, 4] to illustrate your answer.",
+      "type": "4 marks — Describe",
+      "marks": "Mastering: Split — list divided in half: [7, 2] and [9, 4] (1). Further divided: [7], [2], [9], [4] (1). Merge — pairs merged in sorted order: [2, 7] and [4, 9] (1). Final merge: [2, 4, 7, 9] (1).\nSecure: Both phases described correctly with one detail missing.\nDeveloping: One phase described correctly.\nEmerging: Confuses merge sort with bubble sort."
+    },
+    {
+      "text": "Discuss the suitability of linear search and binary search for a social media platform's friend-search feature. The platform has 500 million user accounts stored alphabetically by username. Consider efficiency, any requirements of each algorithm, and any trade-offs.",
+      "type": "6 marks — Discuss",
+      "marks": "Mastering: Binary search is clearly more efficient (far fewer comparisons for 500 million items) (1). Binary search requires sorted data — data is alphabetical, so requirement met (1). Linear search would need up to 500 million comparisons in the worst case, making it too slow (1). Binary search needs at most about 29 comparisons for 500 million items (2 to the power of 29 exceeds 500 million) (1). Trade-off: if usernames change frequently, maintaining sorted order has a cost — but for a stable large dataset this is worthwhile (1). Conclusion: binary search is clearly the better choice here (1).\nSecure: Binary search recommended with three clear reasons. 4–5 marks.\nDeveloping: Binary search named with basic justification. 2–3 marks.\nEmerging: Linear search chosen or no reasoning. 1 mark."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "After the first complete pass of bubble sort, which item is guaranteed to be in its correct final position?",
+      "options": [
+        "The smallest item",
+        "The first item",
+        "The largest item",
+        "The middle item"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which of the following correctly states the requirement for binary search?",
+      "options": [
+        "The list must contain only numbers",
+        "The list must be sorted before searching",
+        "The list must contain fewer than 1,000 items",
+        "The target item must be in the first half of the list"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Bubble sort stops making passes when a complete pass produces _____ swaps.",
+      "options": [
+        "one",
+        "no",
+        "many",
+        "random"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Merge sort requires _____ memory than bubble sort because it creates temporary sub-lists during the merge phase.",
+      "options": [
+        "less",
+        "the same amount of",
+        "more",
+        "no"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each algorithm to its key characteristic.",
+      "left": [
+        "Linear search",
+        "Binary search",
+        "Bubble sort",
+        "Merge sort"
+      ],
+      "right": [
+        "Splits the list to single items then merges back in sorted order",
+        "Checks each item one by one; works on unsorted data",
+        "Requires sorted data; halves the search area each step",
+        "Compares adjacent pairs and swaps; stops when no swaps occur"
+      ],
+      "order": [
+        1,
+        2,
+        3,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the one essential requirement for binary search to work?",
+      "a": "The data must be sorted."
+    },
+    {
+      "q": "What does binary search do when the middle item is greater than the target?",
+      "a": "Discards the right half and searches the left half."
+    },
+    {
+      "q": "After each pass of bubble sort, which item moves to its correct final position?",
+      "a": "The largest unsorted item moves to the end of the unsorted portion."
+    },
+    {
+      "q": "How does bubble sort know the list is fully sorted?",
+      "a": "A complete pass produces zero swaps."
+    },
+    {
+      "q": "What extra resource does merge sort need that bubble sort does not?",
+      "a": "Extra memory to store temporary sub-lists during the merge phase."
+    },
+    {
+      "q": "What are the two phases of merge sort?",
+      "a": "Split phase (divide to single-item sub-lists) and merge phase (combine back in sorted order)."
+    },
+    {
+      "q": "A list has 1,000 items. Binary search needs at most how many comparisons?",
+      "a": "10 (because 2 to the power of 10 = 1,024, which exceeds 1,000)."
+    },
+    {
+      "q": "When would linear search be a better choice than binary search?",
+      "a": "When the list is small, unsorted, or changes frequently — sorting cost outweighs the search saving."
+    },
+    {
+      "q": "Why is bubble sort described as an in-place algorithm?",
+      "a": "It sorts within the original list without needing significant extra memory."
+    },
+    {
+      "q": "What is merge sort's divide-and-conquer approach?",
+      "a": "Repeatedly split the list in half until single items remain, then merge pairs in sorted order."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "search algorithm",
+      "definition": "A step-by-step process for locating a specific item within a collection of data."
+    },
+    {
+      "term": "sorting algorithm",
+      "definition": "An algorithm that arranges data into a specified order, such as ascending numerical order or alphabetical order."
+    },
+    {
+      "term": "linear search",
+      "definition": "A search algorithm that checks each item in a list one by one, starting from the first, until the target item is found or the end of the list is reached."
+    },
+    {
+      "term": "binary search",
+      "definition": "A search algorithm that works only on sorted data by repeatedly halving the search area, comparing the target with the middle item and discarding the half that cannot contain it."
+    },
+    {
+      "term": "bubble sort",
+      "definition": "A sorting algorithm that makes repeated passes through a list, comparing adjacent pairs and swapping them if they are in the wrong order. Each pass moves the largest unsorted item to its correct final position."
+    },
+    {
+      "term": "merge sort",
+      "definition": "A sorting algorithm that uses a divide-and-conquer approach: repeatedly splitting a list in half until each sub-list has one item, then merging sub-lists back together in sorted order."
+    }
+  ],
+  "hero_keywords": [
+    "data sorting visualisation",
+    "server room blue light",
+    "code terminal screen",
+    "network data flow"
+  ],
+  "hero_image_caption": "Choosing the right algorithm can reduce millions of comparisons to just a handful.",
+  "_lesson_id": "3c054d48-8148-436f-99a8-626a307e43d0",
+  "related_media": [
+    {
+      "category": "Podcasts",
+      "emoji": "🎙️",
+      "items": [
+        {
+          "title": "Hidden Brain — The Algorithm Episode",
+          "url": "https://hiddenbrain.org",
+          "description": "Shankar Vedantam on how sorting and searching algorithms shape recommendations and decisions in everyday life."
+        }
+      ]
+    },
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "3Blue1Brown — Sorting Visualisations",
+          "url": "https://www.youtube.com/@3blue1brown",
+          "description": "Visual explanations of how merge sort and binary search work — the clearest introduction to algorithm efficiency."
+        },
+        {
+          "title": "Crash Course Computer Science — Full Series",
+          "url": "https://www.youtube.com/@crashcourse",
+          "description": "Carrie Anne Philbin's 40-episode series covers every GCSE CS topic at exactly the right level — start from episode 1."
+        },
+        {
+          "title": "Tim Roughgarden — Algorithms Illuminated",
+          "url": "https://www.youtube.com/@algorithms-illuminated",
+          "description": "University lecture series on sorting and searching algorithms — excellent for students wanting depth beyond GCSE."
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "VisualGo — Algorithm Visualiser",
+          "url": "https://visualgo.net/en",
+          "description": "Interactive animations of sorting and searching algorithms — watch bubble sort, merge sort and binary search step by step."
+        },
+        {
+          "title": "Isaac Computer Science",
+          "url": "https://isaaccomputerscience.org",
+          "description": "DfE-funded free revision platform with practice questions, worked examples and interactive tools for every GCSE CS topic."
+        },
+        {
+          "title": "BBC Bitesize — Computer Science",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/z34k7ty",
+          "description": "BBC's GCSE Computer Science revision hub — theory, quizzes and revision cards covering the full specification."
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "Hidden Figures (2016)",
+          "url": "https://www.justwatch.com/uk/movie/hidden-figures",
+          "description": "NASA's human computers solved orbital mechanics using nothing but arithmetic — the real-world origin of modern programming."
+        }
+      ]
+    }
+  ]
+}
