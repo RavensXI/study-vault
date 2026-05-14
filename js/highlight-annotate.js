@@ -602,18 +602,27 @@
     return pillEl;
   }
 
-  function showPillAt(rect) {
+  function showPillAt(rect, cursorPoint) {
     buildPill();
     pillRect = rect;
     pillEl.style.visibility = 'hidden';
     pillEl.style.display = 'inline-flex';
     var ph = pillEl.offsetHeight;
     var pw = pillEl.offsetWidth;
-    var spaceAbove = rect.top;
     var top, left;
-    if (spaceAbove > ph + 12) top = window.scrollY + rect.top - ph - 8;
-    else top = window.scrollY + rect.bottom + 8;
-    left = window.scrollX + rect.left + (rect.width / 2) - (pw / 2);
+    if (cursorPoint) {
+      var belowOverflows = (cursorPoint.y + ph + 24) > window.innerHeight;
+      top = belowOverflows
+        ? window.scrollY + cursorPoint.y - ph - 12
+        : window.scrollY + cursorPoint.y + 12;
+      left = window.scrollX + cursorPoint.x - (pw / 2);
+    } else {
+      var spaceAbove = rect.top;
+      top = (spaceAbove > ph + 12)
+        ? window.scrollY + rect.top - ph - 8
+        : window.scrollY + rect.bottom + 8;
+      left = window.scrollX + rect.left + (rect.width / 2) - (pw / 2);
+    }
     var maxLeft = window.scrollX + document.documentElement.clientWidth - pw - 12;
     var minLeft = window.scrollX + 12;
     if (left > maxLeft) left = maxLeft;
@@ -636,6 +645,14 @@
   function onMouseUp(evt) {
     if (evt.target.closest && evt.target.closest('.sv-hl-popover')) return;
     if (evt.target.closest && evt.target.closest('.sv-hl-pill')) return;
+    var cursorX, cursorY;
+    if (evt.changedTouches && evt.changedTouches[0]) {
+      cursorX = evt.changedTouches[0].clientX;
+      cursorY = evt.changedTouches[0].clientY;
+    } else if (typeof evt.clientX === 'number') {
+      cursorX = evt.clientX;
+      cursorY = evt.clientY;
+    }
     setTimeout(function () {
       var sel = window.getSelection();
       if (!sel || sel.isCollapsed) { hidePill(); return; }
@@ -650,7 +667,8 @@
       pendingRange = range.cloneRange();
       pendingAnchor = anchor;
       activeHighlight = null;
-      showPillAt(range.getBoundingClientRect());
+      var cursorPoint = (typeof cursorX === 'number') ? { x: cursorX, y: cursorY } : null;
+      showPillAt(range.getBoundingClientRect(), cursorPoint);
     }, 10);
   }
 
@@ -744,22 +762,36 @@
     if (!fabEl) return;
     var n = getHighlights(window._lessonId).length;
     fabEl.querySelector('.sv-hl-fab-count').textContent = n;
-    fabEl.style.display = (n > 0) ? 'flex' : 'flex'; // always show; "0" prompts first highlight
+    fabEl.style.display = 'inline-flex';
     fabEl.classList.toggle('sv-hl-fab--empty', n === 0);
   }
 
   function buildFab() {
     if (fabEl) return fabEl;
+    var stack = document.createElement('div');
+    stack.className = 'sv-hl-fab-stack';
+
+    var allBtn = document.createElement('a');
+    allBtn.className = 'sv-hl-fab sv-hl-fab--all';
+    allBtn.href = '/highlights.html';
+    allBtn.setAttribute('aria-label', 'All highlights across lessons');
+    allBtn.innerHTML =
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>' +
+      '<span class="sv-hl-fab-label">All Highlights</span>';
+    stack.appendChild(allBtn);
+
     fabEl = document.createElement('button');
-    fabEl.className = 'sv-hl-fab';
+    fabEl.className = 'sv-hl-fab sv-hl-fab--lesson';
     fabEl.type = 'button';
-    fabEl.setAttribute('aria-label', 'My highlights');
+    fabEl.setAttribute('aria-label', 'Lesson highlights');
     fabEl.innerHTML =
-      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-      '<span class="sv-hl-fab-label">Highlights</span>' +
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+      '<span class="sv-hl-fab-label">Lesson Highlights</span>' +
       '<span class="sv-hl-fab-count">0</span>';
     fabEl.addEventListener('click', openModal);
-    document.body.appendChild(fabEl);
+    stack.appendChild(fabEl);
+
+    document.body.appendChild(stack);
     return fabEl;
   }
 
@@ -855,13 +887,18 @@
       // Belt-and-braces: also tell the browser not to select glossary popups,
       // so even if our JS misses, the native selection won't pick them up.
       '.term-popup{user-select:none;-webkit-user-select:none}' +
-      'mark.sv-hl{padding:0.05em 0;border-radius:3px;cursor:pointer;transition:filter .15s ease;color:inherit}' +
+      'mark.sv-hl{padding:0.05em 0;border-radius:3px;cursor:pointer;transition:filter .15s ease;color:#2d2a26}' +
       'mark.sv-hl:hover{filter:brightness(.96)}' +
       'mark.sv-hl--yellow{background:#fef9c3}' +
       'mark.sv-hl--green{background:#dcfce7}' +
       'mark.sv-hl--pink{background:#fce7f3}' +
       'mark.sv-hl--blue{background:#dbeafe}' +
-      'mark.sv-hl[data-hl-has-note]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#2d2a26;vertical-align:super;margin-left:2px;opacity:.6}' +
+      'body.dark-mode mark.sv-hl{color:#f5f1ec}' +
+      'body.dark-mode mark.sv-hl--yellow{background:rgba(234,179,8,.55)}' +
+      'body.dark-mode mark.sv-hl--green{background:rgba(34,197,94,.45)}' +
+      'body.dark-mode mark.sv-hl--pink{background:rgba(236,72,153,.45)}' +
+      'body.dark-mode mark.sv-hl--blue{background:rgba(59,130,246,.5)}' +
+      'mark.sv-hl[data-hl-has-note]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;vertical-align:super;margin-left:2px;opacity:.5}' +
       'mark.sv-hl--flash{animation:sv-hl-flash 1.4s ease}' +
       '@keyframes sv-hl-flash{0%,100%{box-shadow:0 0 0 0 rgba(45,42,38,0)}30%{box-shadow:0 0 0 6px rgba(45,42,38,.25)}}' +
       // Popover
@@ -885,12 +922,19 @@
       '.sv-hl-pill--visible{opacity:1;transform:translateY(0)}' +
       '.sv-hl-pill:hover{background:#1f1c19}' +
       '.sv-hl-pill svg{flex-shrink:0}' +
-      // FAB
-      '.sv-hl-fab{position:fixed;right:18px;bottom:18px;z-index:8000;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;box-shadow:0 10px 24px rgba(20,18,15,.25);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500}' +
+      // FAB stack — bottom-left so it doesn't collide with the bug-reporter FAB
+      '.sv-hl-fab-stack{position:fixed;left:18px;bottom:18px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
+      '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.25);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500}' +
       '.sv-hl-fab:hover{background:#1f1c19}' +
+      '.sv-hl-fab--all{padding:7px 12px;font-size:.82rem;background:#4a463f}' +
+      '.sv-hl-fab--all:hover{background:#3a3631}' +
       '.sv-hl-fab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#faf8f5;color:#2d2a26;font-size:.78rem;font-weight:600}' +
       '.sv-hl-fab--empty .sv-hl-fab-count{background:rgba(250,248,245,.22);color:#faf8f5}' +
-      '@media (max-width:640px){.sv-hl-fab-label{display:none}}' +
+      'body.dark-mode .sv-hl-fab{background:#3a3631;color:#f5f1ec}' +
+      'body.dark-mode .sv-hl-fab:hover{background:#4a463f}' +
+      'body.dark-mode .sv-hl-fab--all{background:#2a2826}' +
+      'body.dark-mode .sv-hl-fab-count{background:#f5f1ec;color:#2d2a26}' +
+      '@media (max-width:640px){.sv-hl-fab-label{display:none}.sv-hl-fab{padding:10px}.sv-hl-fab--all{padding:8px}}' +
       // Modal
       '.sv-hl-modal{position:fixed;inset:0;z-index:9500;display:none;align-items:flex-end;justify-content:center}' +
       '.sv-hl-modal--open{display:flex}' +
