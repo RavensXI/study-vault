@@ -67,13 +67,15 @@ TR_RE = re.compile(r'<tr\b[^>]*>(.*?)</tr>', re.IGNORECASE | re.DOTALL)
 TD_RE = re.compile(r'<td\b[^>]*>(.*?)</td>', re.IGNORECASE | re.DOTALL)
 
 
-def fix_tally_chart(html):
+def fix_tally_chart(html, problem_solution=None):
     """Find tally-chart tables and rewrite the 2nd <td> in each data row.
 
     Truth-source priority:
-      1. Frequency number in the 3rd <td> (if numeric). Tally SVG matches that.
-      2. Pipe count from the 2nd <td>. Used when the frequency is '?' (the
-         student answers by counting marks).
+      1. Frequency number in the 3rd <td> (if numeric).
+      2. If the frequency is '?' and a problem_solution is supplied, use that.
+      3. Otherwise fall back to pipe count (least reliable — agent's pipe
+         encoding doesn't account for the '5-group with strikethrough'
+         convention, e.g. '||||' means 5 not 4).
     """
     changes = 0
     def fix_row(tr_match):
@@ -99,7 +101,14 @@ def fix_tally_chart(html):
             except (ValueError, TypeError):
                 n = None
         if n is None:
-            # No frequency truth — fall back to pipe count or existing SVG count
+            # Freq cell is '?' — use the problem's solutions[0] if provided
+            if problem_solution is not None:
+                try:
+                    n = int(problem_solution)
+                except (ValueError, TypeError):
+                    n = None
+        if n is None:
+            # Last resort — pipe count or existing SVG count (least reliable)
             if has_text_tally:
                 n = count_pipes(unescape(inner))
             elif existing_svg_count_m:
@@ -124,7 +133,9 @@ def fix_practice_data(pd):
             disp = p.get('display') or ''
             if 'tally-chart' not in disp:
                 continue
-            new_disp, n = fix_tally_chart(disp)
+            sols = p.get('solutions') or []
+            sol = sols[0] if sols else None
+            new_disp, n = fix_tally_chart(disp, problem_solution=sol)
             if n:
                 p['display'] = new_disp
                 total += n
