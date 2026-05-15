@@ -760,6 +760,10 @@
           '</button>';
         }).join('') +
       '</div>' +
+      '<div class="sv-hl-popover-quick-header">' +
+        '<span class="sv-hl-popover-quick-dot"></span>' +
+        '<span class="sv-hl-popover-quick-text">Marked as <strong class="sv-hl-popover-quick-name">Key fact</strong> — add a note (optional)</span>' +
+      '</div>' +
       '<div class="sv-hl-note-row" hidden>' +
         '<textarea class="sv-hl-note" rows="3" maxlength="1000" placeholder="Add a note (optional)…"></textarea>' +
         '<div class="sv-hl-note-actions">' +
@@ -811,13 +815,24 @@
     var noteRow = popoverEl.querySelector('.sv-hl-note-row');
     var noteEl = popoverEl.querySelector('.sv-hl-note');
     noteEl.value = opts.note || '';
-    noteRow.hidden = !(opts.note && opts.note.length);
     var activeCat = opts.category || '';
     popoverEl.querySelectorAll('.sv-hl-cat').forEach(function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-cat') === activeCat ? 'true' : 'false');
     });
     var prompt = popoverEl.querySelector('.sv-hl-popover-prompt');
     if (prompt) prompt.style.display = activeCat ? 'none' : '';
+    // KO-quick mode: skip the category picker entirely, jump straight to note.
+    // CSS hides the prompt + cat picker, shows a small "Marked as X" header.
+    var koQuick = !!opts.koQuickMode;
+    popoverEl.classList.toggle('sv-hl-popover--ko-quick', koQuick);
+    if (koQuick) {
+      var qc = categoryFor(activeCat);
+      popoverEl.querySelector('.sv-hl-popover-quick-dot').setAttribute('data-cat', qc.id);
+      popoverEl.querySelector('.sv-hl-popover-quick-name').textContent = qc.label;
+      noteRow.hidden = false;
+    } else {
+      noteRow.hidden = !(opts.note && opts.note.length);
+    }
     popoverEl.classList.remove('sv-hl-hidden');
     // Position above the selection if there's room, else below
     popoverEl.style.visibility = 'hidden';
@@ -840,6 +855,10 @@
     popoverEl.style.top = top + 'px';
     popoverEl.style.left = left + 'px';
     popoverEl.style.visibility = 'visible';
+    if (koQuick) {
+      // Focus the note textarea so students can just start typing
+      setTimeout(function () { noteEl.focus(); }, 0);
+    }
   }
 
   function hidePopover() {
@@ -1036,6 +1055,22 @@
       pendingRange = range.cloneRange();
       pendingAnchor = anchor;
       activeHighlight = null;
+      // In KO mode, skip the pill + category picker entirely. The focus IS
+      // the choice — create the highlight in the focused colour immediately
+      // and pop the note textarea so the student just types.
+      if (isKoModeActive()) {
+        var rect = range.getBoundingClientRect();  // capture before pendingRange is cleared
+        var focusId = getKoFocus();
+        applyOrUpdateCategory(focusId);
+        hidePill();
+        showPopoverAt(rect, {
+          canDelete: true,
+          note: '',
+          category: focusId,
+          koQuickMode: true
+        });
+        return;
+      }
       var cursorPoint = (typeof cursorX === 'number') ? { x: cursorX, y: cursorY } : null;
       showPillAt(range.getBoundingClientRect(), cursorPoint);
     }, 10);
@@ -1290,6 +1325,19 @@
       '.sv-hl-cat--why .sv-hl-cat-dot{background:#86efac}' +
       '.sv-hl-cat--so-what .sv-hl-cat-dot{background:#f9a8d4}' +
       '.sv-hl-cat--question .sv-hl-cat-dot{background:#93c5fd}' +
+      // KO-quick popover: hide the category picker entirely, show a tiny
+      // "Marked as X" header instead, and force the note textarea visible.
+      '.sv-hl-popover-quick-header{display:none;align-items:center;gap:7px;padding:2px 4px 6px;font-size:.8rem;color:#5d564b}' +
+      '.sv-hl-popover-quick-header strong{font-weight:600;color:#2d2a26}' +
+      '.sv-hl-popover-quick-dot{width:9px;height:9px;border-radius:50%;background:#ccc;flex-shrink:0}' +
+      '.sv-hl-popover-quick-dot[data-cat="fact"]{background:#eab308}' +
+      '.sv-hl-popover-quick-dot[data-cat="why"]{background:#22c55e}' +
+      '.sv-hl-popover-quick-dot[data-cat="so-what"]{background:#ec4899}' +
+      '.sv-hl-popover-quick-dot[data-cat="question"]{background:#3b82f6}' +
+      'body.dark-mode .sv-hl-popover-quick-header{color:#c8c2ba}' +
+      'body.dark-mode .sv-hl-popover-quick-header strong{color:#f5f1ec}' +
+      '.sv-hl-popover--ko-quick .sv-hl-popover-prompt,.sv-hl-popover--ko-quick .sv-hl-popover-cats{display:none}' +
+      '.sv-hl-popover--ko-quick .sv-hl-popover-quick-header{display:flex}' +
       '.sv-hl-divider{width:1px;height:22px;background:rgba(45,42,38,.12);margin:0 2px}' +
       '.sv-hl-icon-btn{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;background:transparent;border:none;border-radius:8px;color:#a14242;cursor:pointer}' +
       '.sv-hl-icon-btn:hover{background:rgba(161,66,66,.1)}' +
