@@ -381,6 +381,8 @@
     window._lessonId = lesson.id;
     window._subjectSlug = params.subjectSlug;
     window._subjectName = subject.name || '';
+    window._unitSlug = unit.slug || params.unitSlug || '';
+    window._unitName = unit.name || '';
     window._examBoard = subject.exam_board || '';
     // Exam technique guides are legacy — only Unity-bespoke subjects have them.
     // Opt in via subjects.settings.has_exam_guides = true. Default false for new subjects.

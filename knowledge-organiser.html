@@ -35,8 +35,11 @@
     .ko-subline span:focus{background:rgba(45,42,38,.04);border-radius:4px;padding:0 4px}
 
     .ko-subject{margin-bottom:28px;page-break-inside:avoid}
-    .ko-subject-name{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:1.15rem;color:var(--text-primary,#2d2a26);margin:0 0 12px;padding-bottom:5px;border-bottom:1px solid rgba(45,42,38,.18)}
+    .ko-subject-name{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:1.2rem;color:var(--text-primary,#2d2a26);margin:0 0 14px;padding-bottom:5px;border-bottom:1px solid rgba(45,42,38,.18)}
     body.dark-mode .ko-subject-name{border-bottom-color:rgba(245,241,236,.2)}
+    .ko-unit{margin-bottom:22px}
+    .ko-unit-name{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.05rem;color:var(--text-primary,#2d2a26);margin:0 0 12px;letter-spacing:.005em}
+    body.dark-mode .ko-unit-name{color:#f5f1ec}
 
     .ko-lesson{margin-bottom:18px;page-break-inside:avoid}
     .ko-lesson-title{font-weight:600;font-size:.95rem;color:var(--text-secondary,#5d564b);margin:0 0 10px;font-style:italic}
@@ -133,7 +136,7 @@
 
     <article class="ko-paper">
       <header class="ko-header">
-        <h1 class="ko-title" contenteditable="true" spellcheck="false">My Knowledge Organiser</h1>
+        <h1 class="ko-title" contenteditable="true" spellcheck="false">Knowledge Organiser</h1>
         <div class="ko-subline">
           <span contenteditable="true" spellcheck="false" id="ko-name">Name: </span>
           <span contenteditable="true" spellcheck="false" id="ko-date"></span>
@@ -225,38 +228,54 @@
         return 'fact';
       }
 
+      // Render one lesson's grouped highlights — reused inside the unit loop.
+      function renderLesson(lesson) {
+        var groups = { fact: [], why: [], 'so-what': [], question: [] };
+        lesson.highlights.forEach(function (h) { groups[categoryOf(h)].push(h); });
+        var out = '<div class="ko-lesson">';
+        out +=     '<h4 class="ko-lesson-title">' + esc(lesson.lesson_title) + '</h4>';
+        CAT_ORDER.forEach(function (catId) {
+          var bucket = groups[catId];
+          if (!bucket || !bucket.length) return;
+          out += '<div class="ko-cat-section">';
+          out +=   '<h5 class="ko-cat-header ko-cat-header--' + esc(catId) + '">' + esc(CAT_LABEL[catId]) + '</h5>';
+          out +=   '<div class="ko-items">';
+          bucket.forEach(function (h) {
+            var color = h.color || (catId === 'why' ? 'green' : catId === 'so-what' ? 'pink' : catId === 'question' ? 'blue' : 'yellow');
+            out += '<div class="ko-item">';
+            out +=   '<div class="ko-snippet ko-snippet--' + esc(color) + '">';
+            out +=     '<span class="ko-snippet-bar ko-snippet-bar--' + esc(color) + '"></span>';
+            out +=     esc(h.text);
+            out +=   '</div>';
+            if (h.note) {
+              out += '<p class="ko-note">' + esc(h.note) + '</p>';
+            }
+            out += '</div>';
+          });
+          out +=   '</div>';
+          out += '</div>';
+        });
+        out += '</div>';
+        return out;
+      }
+
+      // Support both new 3-level payload (subject → units → lessons) and
+      // legacy 2-level (subject → lessons) just in case an older highlights
+      // page produced the data before this update shipped.
       var html = '';
       data.subjects.forEach(function (subj) {
         html += '<section class="ko-subject">';
         html +=   '<h2 class="ko-subject-name">' + esc(subj.name) + '</h2>';
-        subj.lessons.forEach(function (lesson) {
-          var groups = { fact: [], why: [], 'so-what': [], question: [] };
-          lesson.highlights.forEach(function (h) { groups[categoryOf(h)].push(h); });
-          html += '<div class="ko-lesson">';
-          html +=   '<h3 class="ko-lesson-title">' + esc(lesson.lesson_title) + '</h3>';
-          CAT_ORDER.forEach(function (catId) {
-            var bucket = groups[catId];
-            if (!bucket || !bucket.length) return;
-            html += '<div class="ko-cat-section">';
-            html +=   '<h4 class="ko-cat-header ko-cat-header--' + esc(catId) + '">' + esc(CAT_LABEL[catId]) + '</h4>';
-            html +=   '<div class="ko-items">';
-            bucket.forEach(function (h) {
-              var color = h.color || (catId === 'why' ? 'green' : catId === 'so-what' ? 'pink' : catId === 'question' ? 'blue' : 'yellow');
-              html += '<div class="ko-item">';
-              html +=   '<div class="ko-snippet ko-snippet--' + esc(color) + '">';
-              html +=     '<span class="ko-snippet-bar ko-snippet-bar--' + esc(color) + '"></span>';
-              html +=     esc(h.text);
-              html +=   '</div>';
-              if (h.note) {
-                html += '<p class="ko-note">' + esc(h.note) + '</p>';
-              }
-              html += '</div>';
-            });
-            html +=   '</div>';
+        if (subj.units && subj.units.length) {
+          subj.units.forEach(function (unit) {
+            html += '<div class="ko-unit">';
+            html +=   '<h3 class="ko-unit-name">' + esc(unit.name) + '</h3>';
+            unit.lessons.forEach(function (lesson) { html += renderLesson(lesson); });
             html += '</div>';
           });
-          html += '</div>';
-        });
+        } else if (subj.lessons) {
+          subj.lessons.forEach(function (lesson) { html += renderLesson(lesson); });
+        }
         html += '</section>';
       });
       content.innerHTML = html;

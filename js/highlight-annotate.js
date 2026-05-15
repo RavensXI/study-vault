@@ -446,6 +446,8 @@
           : '',
         subject_name: window._subjectName || '',
         subject_slug: window._subjectSlug || '',
+        unit_name: window._unitName || '',
+        unit_slug: window._unitSlug || '',
         lesson_url: window.location.pathname,
         count: count,
         last_updated: new Date().toISOString()

@@ -52,9 +52,21 @@
     .hl-subject-check:hover{background:#faf8f5}
     body.dark-mode .hl-subject-check:hover{background:#3a3631}
     .hl-subject-check input{margin:0}
-    .hl-subject-body{padding:0 18px 14px}
+    .hl-subject-body{padding:0 18px 14px;display:flex;flex-direction:column;gap:10px}
 
-    .hl-lesson{margin-bottom:10px;background:var(--bg-body,#faf8f5);border-radius:10px;border:1px solid rgba(45,42,38,.04);overflow:hidden}
+    /* Unit collapsible — sits between subject and lesson */
+    .hl-unit{background:var(--bg-body,#faf8f5);border-radius:12px;border:1px solid rgba(45,42,38,.05);overflow:hidden}
+    body.dark-mode .hl-unit{background:#2e2b27}
+    .hl-unit-summary{list-style:none;cursor:pointer;padding:12px 16px;display:flex;align-items:center;gap:10px}
+    .hl-unit-summary::-webkit-details-marker{display:none}
+    .hl-unit-summary::marker{display:none}
+    .hl-unit-chevron{transition:transform .2s ease;color:var(--text-secondary,#5d564b);flex-shrink:0;width:13px;height:13px}
+    details[open] > .hl-unit-summary .hl-unit-chevron{transform:rotate(90deg)}
+    .hl-unit-name{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.02rem;color:var(--text-primary,#2d2a26);flex:1;margin:0}
+    .hl-unit-meta{font-size:.78rem;color:var(--text-secondary,#7a7367)}
+    .hl-unit-body{padding:0 16px 12px;display:flex;flex-direction:column;gap:8px}
+
+    .hl-lesson{margin-bottom:0;background:var(--bg-card,#fff);border-radius:10px;border:1px solid rgba(45,42,38,.04);overflow:hidden}
     body.dark-mode .hl-lesson{background:#2a2826}
     .hl-lesson-summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px}
     .hl-lesson-summary::-webkit-details-marker{display:none}
@@ -245,6 +257,19 @@
       return 'fact';
     }
 
+    // Legacy fallback: highlights saved before we started capturing unit info
+    // don't have entry.unit_name. Pull it from the URL path (the unit slug)
+    // and title-case for display.
+    function deriveUnitFromUrl(url) {
+      if (!url) return '';
+      var match = url.match(/^\/lesson\/[^/]+\/([^/]+)\/\d+/);
+      if (!match) return '';
+      return match[1].replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+    function getUnitName(entry) {
+      return entry.unit_name || deriveUnitFromUrl(entry.lesson_url) || 'Other';
+    }
+
     var selection = new Set();
 
     function updateSelectionUI() {
@@ -283,11 +308,14 @@
         return;
       }
 
+      // Group: subject → unit → lessons (3-level)
       var bySubject = {};
       index.forEach(function (entry) {
-        var key = entry.subject_name || 'Other';
-        if (!bySubject[key]) bySubject[key] = [];
-        bySubject[key].push(entry);
+        var subj = entry.subject_name || 'Other';
+        var unit = getUnitName(entry);
+        if (!bySubject[subj]) bySubject[subj] = {};
+        if (!bySubject[subj][unit]) bySubject[subj][unit] = [];
+        bySubject[subj][unit].push(entry);
       });
 
       var subjectNames = Object.keys(bySubject).sort();
@@ -295,60 +323,87 @@
 
       var html = '';
       subjectNames.forEach(function (subj) {
-        var lessons = bySubject[subj].sort(function (a, b) {
-          return (b.last_updated || '').localeCompare(a.last_updated || '');
+        var unitMap = bySubject[subj];
+        var unitNames = Object.keys(unitMap).sort();
+        var onlyOneUnit = unitNames.length === 1;
+
+        var subjectTotal = 0;
+        var subjectLessonCount = 0;
+        unitNames.forEach(function (u) {
+          unitMap[u].forEach(function (l) {
+            subjectTotal += (l.count || 0);
+            subjectLessonCount += 1;
+          });
         });
-        var totalCount = 0;
-        lessons.forEach(function (l) { totalCount += (l.count || 0); });
 
         html += '<details class="hl-subject" data-subject="' + esc(subj) + '"' + (onlyOneSubject ? ' open' : '') + '>';
         html +=   '<summary class="hl-subject-summary">';
         html +=     '<svg class="hl-subject-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
         html +=     '<h2 class="hl-subject-name">' + esc(subj) + '</h2>';
-        html +=     '<span class="hl-subject-meta">' + totalCount + ' highlight' + (totalCount === 1 ? '' : 's') + ' &middot; ' + lessons.length + ' lesson' + (lessons.length === 1 ? '' : 's') + '</span>';
+        html +=     '<span class="hl-subject-meta">' + subjectTotal + ' highlight' + (subjectTotal === 1 ? '' : 's') + ' &middot; ' + unitNames.length + ' unit' + (unitNames.length === 1 ? '' : 's') + ' &middot; ' + subjectLessonCount + ' lesson' + (subjectLessonCount === 1 ? '' : 's') + '</span>';
         html +=     '<label class="hl-subject-check" onclick="event.stopPropagation()"><input type="checkbox" data-role="subject-toggle"> Select all</label>';
         html +=   '</summary>';
         html +=   '<div class="hl-subject-body">';
 
-        lessons.forEach(function (entry, lessonIdx) {
-          var highlights = readHighlights(entry.lesson_id);
-          if (!highlights.length) return;
-          highlights.sort(function (a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
-          var lessonOpen = (onlyOneSubject && lessonIdx === 0) || (!onlyOneSubject && lessons.length === 1);
-          var lessonUrl = entry.lesson_url || '/';
-          var sep = lessonUrl.indexOf('?') >= 0 ? '&' : '?';
-
-          html += '<details class="hl-lesson" data-lesson-id="' + esc(entry.lesson_id) + '"' + (lessonOpen ? ' open' : '') + '>';
-          html +=   '<summary class="hl-lesson-summary">';
-          html +=     '<svg class="hl-lesson-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
-          html +=     '<h3 class="hl-lesson-title">' + esc(entry.lesson_title || 'Untitled lesson') + '</h3>';
-          html +=     '<div class="hl-lesson-meta">';
-          html +=       '<span>' + highlights.length + '</span>';
-          html +=       '<a class="hl-open-lesson" href="' + esc(lessonUrl) + sep + 'highlights=1" onclick="event.stopPropagation()">Open &rarr;</a>';
-          html +=     '</div>';
-          html +=   '</summary>';
-          html +=   '<div class="hl-lesson-body">';
-          highlights.forEach(function (h) {
-            var color = h.color || 'yellow';
-            var catId = getCategoryId(h);
-            var catLabel = CATEGORY_LABEL[catId] || 'Key fact';
-            var noteHtml = h.note ? '<p class="hl-note">' + esc(h.note) + '</p>' : '';
-            html += '<div class="hl-item" data-hl-id="' + esc(h.id) + '" data-lesson-id="' + esc(entry.lesson_id) + '" data-subject="' + esc(subj) + '">';
-            html +=   '<label class="hl-item-check"><input type="checkbox" data-hl-id="' + esc(h.id) + '"></label>';
-            html +=   '<div class="hl-item-body">';
-            html +=     '<div class="hl-item-cat-row"><span class="hl-item-cat hl-item-cat--' + esc(catId) + '">' + esc(catLabel) + '</span></div>';
-            html +=     '<div class="hl-snippet hl-snippet--' + esc(color) + '">';
-            html +=       '<span class="hl-snippet-bar hl-snippet-bar--' + esc(color) + '"></span>';
-            html +=       esc(h.text);
-            html +=     '</div>';
-            html +=     noteHtml;
-            html +=     '<div class="hl-item-actions">';
-            html +=       '<a class="hl-item-jump" href="' + esc(lessonUrl) + sep + 'highlights=1#' + esc(h.id) + '">Jump to</a>';
-            html +=       '<button class="hl-item-delete" type="button">Delete</button>';
-            html +=     '</div>';
-            html +=   '</div>';
-            html += '</div>';
+        unitNames.forEach(function (unitName) {
+          var lessons = unitMap[unitName].sort(function (a, b) {
+            return (b.last_updated || '').localeCompare(a.last_updated || '');
           });
+          var unitTotal = 0;
+          lessons.forEach(function (l) { unitTotal += (l.count || 0); });
+          var unitOpen = onlyOneSubject && onlyOneUnit;
+
+          html += '<details class="hl-unit"' + (unitOpen ? ' open' : '') + '>';
+          html +=   '<summary class="hl-unit-summary">';
+          html +=     '<svg class="hl-unit-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+          html +=     '<h3 class="hl-unit-name">' + esc(unitName) + '</h3>';
+          html +=     '<span class="hl-unit-meta">' + unitTotal + ' &middot; ' + lessons.length + ' lesson' + (lessons.length === 1 ? '' : 's') + '</span>';
+          html +=   '</summary>';
+          html +=   '<div class="hl-unit-body">';
+
+          lessons.forEach(function (entry, lessonIdx) {
+            var highlights = readHighlights(entry.lesson_id);
+            if (!highlights.length) return;
+            highlights.sort(function (a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
+            var lessonOpen = unitOpen && lessons.length === 1;
+            var lessonUrl = entry.lesson_url || '/';
+            var sep = lessonUrl.indexOf('?') >= 0 ? '&' : '?';
+
+            html += '<details class="hl-lesson" data-lesson-id="' + esc(entry.lesson_id) + '"' + (lessonOpen ? ' open' : '') + '>';
+            html +=   '<summary class="hl-lesson-summary">';
+            html +=     '<svg class="hl-lesson-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+            html +=     '<h4 class="hl-lesson-title">' + esc(entry.lesson_title || 'Untitled lesson') + '</h4>';
+            html +=     '<div class="hl-lesson-meta">';
+            html +=       '<span>' + highlights.length + '</span>';
+            html +=       '<a class="hl-open-lesson" href="' + esc(lessonUrl) + sep + 'highlights=1" onclick="event.stopPropagation()">Open &rarr;</a>';
+            html +=     '</div>';
+            html +=   '</summary>';
+            html +=   '<div class="hl-lesson-body">';
+            highlights.forEach(function (h) {
+              var color = h.color || 'yellow';
+              var catId = getCategoryId(h);
+              var catLabel = CATEGORY_LABEL[catId] || 'Key fact';
+              var noteHtml = h.note ? '<p class="hl-note">' + esc(h.note) + '</p>' : '';
+              html += '<div class="hl-item" data-hl-id="' + esc(h.id) + '" data-lesson-id="' + esc(entry.lesson_id) + '" data-subject="' + esc(subj) + '">';
+              html +=   '<label class="hl-item-check"><input type="checkbox" data-hl-id="' + esc(h.id) + '"></label>';
+              html +=   '<div class="hl-item-body">';
+              html +=     '<div class="hl-item-cat-row"><span class="hl-item-cat hl-item-cat--' + esc(catId) + '">' + esc(catLabel) + '</span></div>';
+              html +=     '<div class="hl-snippet hl-snippet--' + esc(color) + '">';
+              html +=       '<span class="hl-snippet-bar hl-snippet-bar--' + esc(color) + '"></span>';
+              html +=       esc(h.text);
+              html +=     '</div>';
+              html +=     noteHtml;
+              html +=     '<div class="hl-item-actions">';
+              html +=       '<a class="hl-item-jump" href="' + esc(lessonUrl) + sep + 'highlights=1#' + esc(h.id) + '">Jump to</a>';
+              html +=       '<button class="hl-item-delete" type="button">Delete</button>';
+              html +=     '</div>';
+              html +=   '</div>';
+              html += '</div>';
+            });
+            html +=   '</div>';
+            html += '</details>';
+          });
+
           html +=   '</div>';
           html += '</details>';
         });
@@ -421,20 +476,31 @@
     document.getElementById('hl-build-btn').addEventListener('click', function () {
       if (!selection.size) return;
       var index = readIndex().filter(function (e) { return e && e.lesson_id && e.count > 0; });
+      // Build a 3-level payload: subject → unit → lessons → highlights
       var bySubject = {};
       index.forEach(function (entry) {
         var lessonHighlights = readHighlights(entry.lesson_id).filter(function (h) { return selection.has(h.id); });
         if (!lessonHighlights.length) return;
-        var key = entry.subject_name || 'Other';
-        if (!bySubject[key]) bySubject[key] = { name: key, lessons: [] };
-        bySubject[key].lessons.push({
+        var subj = entry.subject_name || 'Other';
+        var unit = getUnitName(entry);
+        if (!bySubject[subj]) bySubject[subj] = { name: subj, units: {} };
+        if (!bySubject[subj].units[unit]) bySubject[subj].units[unit] = { name: unit, lessons: [] };
+        bySubject[subj].units[unit].lessons.push({
           lesson_id: entry.lesson_id,
           lesson_title: entry.lesson_title || 'Untitled lesson',
           lesson_url: entry.lesson_url || '/',
+          unit_name: unit,
           highlights: lessonHighlights
         });
       });
-      var subjects = Object.keys(bySubject).sort().map(function (k) { return bySubject[k]; });
+      // Flatten the units object into a sorted array per subject
+      var subjects = Object.keys(bySubject).sort().map(function (k) {
+        var s = bySubject[k];
+        return {
+          name: s.name,
+          units: Object.keys(s.units).sort().map(function (uk) { return s.units[uk]; })
+        };
+      });
       try {
         sessionStorage.setItem(KO_DATA_KEY, JSON.stringify({ generated_at: new Date().toISOString(), subjects: subjects }));
         window.location.href = '/knowledge-organiser.html';
