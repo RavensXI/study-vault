@@ -254,7 +254,7 @@
     // Make sure the rest of the feature is wired up
     if (!bootstrapped) bootstrap();
     buildKoCard();
-    koCardEl.style.display = '';
+    koCardEl.style.display = 'block';
     koExplicitFocus = null;  // fresh entry — use auto-advancing default
     refreshKoCard();
     maybeShowKoTutorialOnFirstEntry();
@@ -1234,8 +1234,11 @@
       '.sv-hl-modal-cat--so-what::before{background:#ec4899}' +
       '.sv-hl-modal-cat--question{background:#dbeafe;color:#1e40af}' +
       '.sv-hl-modal-cat--question::before{background:#3b82f6}' +
-      // KO Mode — cursor, selection styling, floating card, tutorial modal
-      'body.sv-hl-ko-mode #study-notes{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      // KO Mode — cursor (applied to ALL descendants of #study-notes so the
+      // user-agent text-cursor on text content doesn't override us), selection
+      // tint, floating card, tutorial modal
+      'body.sv-hl-ko-mode #study-notes,body.sv-hl-ko-mode #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      'body.sv-hl-ko-mode #study-notes mark.sv-hl{cursor:pointer}' +
       'body.sv-hl-ko-mode #study-notes ::selection{background:#fef9c3;color:#2d2a26}' +
       'body.sv-hl-ko-mode #study-notes ::-moz-selection{background:#fef9c3;color:#2d2a26}' +
       // Hide the bottom-left FAB stack while in KO mode — the card duplicates those actions
@@ -1371,7 +1374,7 @@
     if (isKoModeActive()) {
       document.body.classList.add('sv-hl-ko-mode');
       buildKoCard();
-      koCardEl.style.display = '';
+      koCardEl.style.display = 'block';
       refreshKoCard();
     }
     var container = document.getElementById('study-notes');
