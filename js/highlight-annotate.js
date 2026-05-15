@@ -196,7 +196,84 @@
         setKoFocus(dot.getAttribute('data-cat-dot'));
       });
     });
+    // Drag-to-move via the header (desktop only — mobile uses CSS bottom snap)
+    koCardEl.querySelector('.sv-ko-card-header').addEventListener('mousedown', startKoDrag);
+    applyKoPos();
     return koCardEl;
+  }
+
+  // ---------- KO card drag-to-move ----------
+  var KO_POS_KEY = 'sv-ko-card-pos';
+  var koDragState = null;
+
+  function loadKoPos() {
+    try { return JSON.parse(localStorage.getItem(KO_POS_KEY)) || null; } catch (e) { return null; }
+  }
+  function saveKoPos(pos) {
+    try { localStorage.setItem(KO_POS_KEY, JSON.stringify(pos)); } catch (e) {}
+  }
+
+  // Clamp x/y so the card stays fully on-screen (8px margin on every side).
+  function clampKoPos(x, y) {
+    if (!koCardEl) return { x: x, y: y };
+    var maxX = window.innerWidth - koCardEl.offsetWidth - 8;
+    var maxY = window.innerHeight - koCardEl.offsetHeight - 8;
+    return {
+      x: Math.max(8, Math.min(x, maxX)),
+      y: Math.max(8, Math.min(y, maxY))
+    };
+  }
+
+  function applyKoPos() {
+    if (!koCardEl) return;
+    if (window.innerWidth <= 768) return;  // mobile: CSS handles positioning
+    var pos = loadKoPos();
+    if (!pos) return;
+    var c = clampKoPos(pos.x, pos.y);
+    koCardEl.style.left = c.x + 'px';
+    koCardEl.style.top = c.y + 'px';
+    koCardEl.style.right = 'auto';
+  }
+
+  function startKoDrag(evt) {
+    if (window.innerWidth <= 768) return;
+    // Don't start drag on the exit button or any other interactive child
+    if (evt.target.closest('button, a')) return;
+    evt.preventDefault();
+    var rect = koCardEl.getBoundingClientRect();
+    koDragState = {
+      offsetX: evt.clientX - rect.left,
+      offsetY: evt.clientY - rect.top
+    };
+    // Snap from right-anchored to left-anchored so we can drive position via left/top
+    koCardEl.style.left = rect.left + 'px';
+    koCardEl.style.top = rect.top + 'px';
+    koCardEl.style.right = 'auto';
+    koCardEl.classList.add('sv-ko-card--dragging');
+    document.addEventListener('mousemove', onKoDrag);
+    document.addEventListener('mouseup', endKoDrag);
+  }
+
+  function onKoDrag(evt) {
+    if (!koDragState) return;
+    var c = clampKoPos(
+      evt.clientX - koDragState.offsetX,
+      evt.clientY - koDragState.offsetY
+    );
+    koCardEl.style.left = c.x + 'px';
+    koCardEl.style.top = c.y + 'px';
+  }
+
+  function endKoDrag() {
+    if (!koDragState) return;
+    document.removeEventListener('mousemove', onKoDrag);
+    document.removeEventListener('mouseup', endKoDrag);
+    koCardEl.classList.remove('sv-ko-card--dragging');
+    saveKoPos({
+      x: parseFloat(koCardEl.style.left) || 0,
+      y: parseFloat(koCardEl.style.top) || 0
+    });
+    koDragState = null;
   }
 
   function refreshKoCard() {
@@ -1274,7 +1351,11 @@
       '.sv-ko-card{position:fixed;top:84px;right:18px;z-index:7600;width:280px;background:#fff;border:1px solid rgba(45,42,38,.1);border-radius:14px;box-shadow:0 12px 30px rgba(20,18,15,.16);padding:14px 14px 12px;font-family:Inter,system-ui,sans-serif;color:#2d2a26;display:none}' +
       'body.dark-mode .sv-ko-card{background:#2a2826;color:#f5f1ec;border-color:rgba(245,241,236,.1)}' +
       '@media (max-width:768px){.sv-ko-card{top:auto;bottom:80px;right:12px;left:12px;width:auto}}' +
-      '.sv-ko-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}' +
+      '.sv-ko-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px;cursor:grab;user-select:none;-webkit-user-select:none}' +
+      '.sv-ko-card-header button{cursor:pointer}' +
+      '.sv-ko-card--dragging,.sv-ko-card--dragging .sv-ko-card-header{cursor:grabbing}' +
+      '.sv-ko-card--dragging{box-shadow:0 24px 56px rgba(20,18,15,.32);transition:none}' +
+      '@media (max-width:768px){.sv-ko-card-header{cursor:default}}' +
       '.sv-ko-card-title{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#5d564b;flex:1}' +
       'body.dark-mode .sv-ko-card-title{color:#a59f95}' +
       '.sv-ko-card-exit{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:none;background:transparent;color:#7a7367;cursor:pointer;border-radius:6px}' +
