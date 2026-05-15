@@ -14,6 +14,24 @@
 (function () {
   'use strict';
 
+  // ---------- PREVIEW: hardcoded per-lesson category definitions ----------
+  // Stop-gap until the per-lesson generation pipeline runs (next session).
+  // The mechanism (window._lessonCategoryDefinitions) is the same one the
+  // real pipeline will populate from Supabase — once that's wired up, this
+  // block goes away and lesson-loader.js sets the global instead.
+  (function previewPerLessonDefinitions() {
+    var path = window.location.pathname || '';
+    // AQA English Literature — Julius Caesar — Lesson 5 (Characters)
+    if (path.indexOf('julius-caesar') !== -1 && /\/0?5\/?$/.test(path)) {
+      window._lessonCategoryDefinitions = {
+        fact: "Character names, relationships, traits, and the lines that establish who someone is. Direct quotations that show what kind of person they are.",
+        why: "What drives a character to act this way — and what Shakespeare wants the audience to feel about them.",
+        'so-what': "How a character's actions shape the plot or carry a theme. The effect they have on other characters or on the play's argument.",
+        question: "What the play leaves unclear about a character — their motives, contradictions, or things that stay unsaid. Worth asking your teacher."
+      };
+    }
+  })();
+
   // ---------- feature gating ----------
   function isEnabled() {
     try {
@@ -64,6 +82,15 @@
 
   function getCategoryId(hl) {
     return hl && hl.category ? hl.category : categoryFromColor(hl && hl.color);
+  }
+
+  // Per-lesson bespoke definitions when present, generic hint otherwise.
+  // Real pipeline will populate window._lessonCategoryDefinitions via
+  // lesson-loader.js from a settings.category_definitions JSONB column.
+  function getHintFor(catId) {
+    var defs = window._lessonCategoryDefinitions;
+    if (defs && defs[catId]) return defs[catId];
+    return categoryFor(catId).hint;
   }
 
   // Back-compat: callers passing a legacy colour id still resolve to a category.
@@ -190,7 +217,7 @@
     }
     // Update focus chip
     koCardEl.querySelector('.sv-ko-card-focus-name').textContent = focusCat.label;
-    koCardEl.querySelector('.sv-ko-card-focus-hint').textContent = focusCat.hint;
+    koCardEl.querySelector('.sv-ko-card-focus-hint').textContent = getHintFor(focusCat.id);
     var focusEl = koCardEl.querySelector('[data-focus-chip]');
     focusEl.className = 'sv-ko-card-focus sv-ko-card-focus--' + focusId;
     koCardEl.classList.toggle('sv-ko-card--complete', isLessonOrganised());
@@ -213,7 +240,7 @@
                        '<span class="sv-ko-tutorial-card-dot"></span>' +
                        '<span class="sv-ko-tutorial-card-name">' + c.label + '</span>' +
                      '</div>' +
-                     '<p class="sv-ko-tutorial-card-hint">' + c.hint + '</p>' +
+                     '<p class="sv-ko-tutorial-card-hint">' + getHintFor(c.id) + '</p>' +
                    '</div>';
           }).join('') +
         '</div>' +
