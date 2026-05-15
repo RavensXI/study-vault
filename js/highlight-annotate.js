@@ -70,12 +70,16 @@
   function colorFor(id) { return categoryFor(id); }
 
   // ---------- KO Mode (lesson-task scaffolding) ----------
-  // Optional mode the student opts into from the lesson checklist. Adds a
-  // sticky banner with per-category progress chips, a highlighter cursor,
-  // and a yellow ::selection. Completion is per-lesson (≥1 in each category).
-  // Mode itself is a global toggle (persists across lessons until exited).
+  // Optional mode the student opts into from the lesson checklist. Renders
+  // a small floating card in the top-right showing the current focus
+  // category (in colour), four clickable progress dots, and View all /
+  // Exit actions. Highlighter cursor + yellow ::selection on the article.
+  // Mode is global (persists across lesson navigation until exited).
   var KO_MODE_KEY = 'sv-hl-ko-mode';
-  var koBannerEl = null;
+  var KO_TUTORIAL_KEY = 'sv-ko-tutorial-done';
+  var koCardEl = null;
+  var koTutorialEl = null;
+  var koExplicitFocus = null;  // set when user clicks a dot to override default
 
   function isKoModeActive() {
     try { return localStorage.getItem(KO_MODE_KEY) === '1'; } catch (e) { return false; }
@@ -98,48 +102,149 @@
     return c.fact >= 1 && c.why >= 1 && c['so-what'] >= 1 && c.question >= 1;
   }
 
-  function buildKoBanner() {
-    if (koBannerEl) return koBannerEl;
-    koBannerEl = document.createElement('div');
-    koBannerEl.className = 'sv-hl-ko-banner';
-    koBannerEl.innerHTML =
-      '<div class="sv-hl-ko-banner-inner">' +
-        '<div class="sv-hl-ko-banner-title">' +
-          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
-          '<span>Building knowledge organiser</span>' +
-        '</div>' +
-        '<div class="sv-hl-ko-banner-chips">' +
-          CATEGORIES.map(function (c) {
-            return '<span class="sv-hl-ko-chip sv-hl-ko-chip--' + c.id + '" data-cat-chip="' + c.id + '">' +
-                     '<span class="sv-hl-ko-chip-label">' + c.label + '</span>' +
-                     '<span class="sv-hl-ko-chip-count">0</span>' +
-                   '</span>';
-          }).join('') +
-        '</div>' +
-        '<div class="sv-hl-ko-banner-actions">' +
-          '<a class="sv-hl-ko-banner-btn" href="/highlights.html">View all</a>' +
-          '<button class="sv-hl-ko-banner-btn sv-hl-ko-banner-exit" type="button">Exit mode</button>' +
-        '</div>' +
-      '</div>' +
-      '<div class="sv-hl-ko-banner-hint">Pick at least one highlight in each category. To revise: cover the snippets and recall from your notes.</div>';
-    document.body.appendChild(koBannerEl);
-    koBannerEl.querySelector('.sv-hl-ko-banner-exit').addEventListener('click', exitKoMode);
-    return koBannerEl;
-  }
-
-  function refreshKoBanner() {
-    if (!koBannerEl) return;
-    if (!window._lessonId) return;
+  // Resolve the currently-focused category: explicit user pick if set,
+  // otherwise the first category that's still empty on this lesson.
+  function getKoFocus() {
+    if (koExplicitFocus) return koExplicitFocus;
+    if (!window._lessonId) return 'fact';
     var counts = getCategoryCountsForLesson(window._lessonId);
     for (var i = 0; i < CATEGORIES.length; i++) {
-      var c = CATEGORIES[i];
-      var chip = koBannerEl.querySelector('[data-cat-chip="' + c.id + '"]');
-      if (!chip) continue;
-      var count = counts[c.id];
-      chip.querySelector('.sv-hl-ko-chip-count').textContent = count;
-      chip.classList.toggle('sv-hl-ko-chip--done', count >= 1);
+      if (counts[CATEGORIES[i].id] === 0) return CATEGORIES[i].id;
     }
-    koBannerEl.classList.toggle('sv-hl-ko-banner--complete', isLessonOrganised());
+    return 'fact';  // all full — default to fact for adding more
+  }
+
+  function setKoFocus(catId) {
+    koExplicitFocus = catId;
+    refreshKoCard();
+  }
+
+  function buildKoCard() {
+    if (koCardEl) return koCardEl;
+    koCardEl = document.createElement('div');
+    koCardEl.className = 'sv-ko-card';
+    koCardEl.innerHTML =
+      '<div class="sv-ko-card-header">' +
+        '<div class="sv-ko-card-title">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+          '<span>Knowledge organiser</span>' +
+        '</div>' +
+        '<button class="sv-ko-card-exit" type="button" aria-label="Exit mode" title="Exit mode">' +
+          '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+        '</button>' +
+      '</div>' +
+      '<div class="sv-ko-card-focus-label">Next up</div>' +
+      '<div class="sv-ko-card-focus" data-focus-chip>' +
+        '<span class="sv-ko-card-focus-dot"></span>' +
+        '<div class="sv-ko-card-focus-text">' +
+          '<div class="sv-ko-card-focus-name">Key fact</div>' +
+          '<div class="sv-ko-card-focus-hint">Dates, names, terms, formulas, quotes — facts to memorise.</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sv-ko-card-switch-label">Or pick another:</div>' +
+      '<div class="sv-ko-card-dots">' +
+        CATEGORIES.map(function (c) {
+          return '<button class="sv-ko-dot sv-ko-dot--' + c.id + '" type="button" data-cat-dot="' + c.id + '" title="' + c.label + '" aria-label="Focus on ' + c.label + '">' +
+                   '<span class="sv-ko-dot-swatch"></span>' +
+                   '<span class="sv-ko-dot-name">' + c.label + '</span>' +
+                   '<span class="sv-ko-dot-count">0</span>' +
+                 '</button>';
+        }).join('') +
+      '</div>' +
+      '<div class="sv-ko-card-actions">' +
+        '<button class="sv-ko-card-link sv-ko-card-view-lesson" type="button">View these</button>' +
+        '<a class="sv-ko-card-link" href="/highlights.html">All lessons →</a>' +
+      '</div>' +
+      '<div class="sv-ko-card-complete-banner">' +
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' +
+        'Lesson organised — well done.' +
+      '</div>';
+    document.body.appendChild(koCardEl);
+    koCardEl.querySelector('.sv-ko-card-exit').addEventListener('click', exitKoMode);
+    koCardEl.querySelector('.sv-ko-card-view-lesson').addEventListener('click', function () {
+      if (typeof openModal === 'function') openModal();
+    });
+    koCardEl.querySelectorAll('.sv-ko-dot').forEach(function (dot) {
+      dot.addEventListener('click', function () {
+        setKoFocus(dot.getAttribute('data-cat-dot'));
+      });
+    });
+    return koCardEl;
+  }
+
+  function refreshKoCard() {
+    if (!koCardEl) return;
+    if (!window._lessonId) return;
+    var counts = getCategoryCountsForLesson(window._lessonId);
+    var focusId = getKoFocus();
+    var focusCat = categoryFor(focusId);
+    // Update dots
+    for (var i = 0; i < CATEGORIES.length; i++) {
+      var c = CATEGORIES[i];
+      var dot = koCardEl.querySelector('[data-cat-dot="' + c.id + '"]');
+      if (!dot) continue;
+      var count = counts[c.id];
+      dot.querySelector('.sv-ko-dot-count').textContent = count;
+      dot.classList.toggle('sv-ko-dot--done', count >= 1);
+      dot.classList.toggle('sv-ko-dot--focus', c.id === focusId);
+    }
+    // Update focus chip
+    koCardEl.querySelector('.sv-ko-card-focus-name').textContent = focusCat.label;
+    koCardEl.querySelector('.sv-ko-card-focus-hint').textContent = focusCat.hint;
+    var focusEl = koCardEl.querySelector('[data-focus-chip]');
+    focusEl.className = 'sv-ko-card-focus sv-ko-card-focus--' + focusId;
+    koCardEl.classList.toggle('sv-ko-card--complete', isLessonOrganised());
+  }
+
+  // ---------- KO Mode tutorial (one-shot first-time modal) ----------
+  function buildKoTutorial() {
+    if (koTutorialEl) return koTutorialEl;
+    koTutorialEl = document.createElement('div');
+    koTutorialEl.className = 'sv-ko-tutorial';
+    koTutorialEl.innerHTML =
+      '<div class="sv-ko-tutorial-backdrop"></div>' +
+      '<div class="sv-ko-tutorial-panel" role="dialog" aria-modal="true" aria-labelledby="sv-ko-tutorial-title">' +
+        '<h2 id="sv-ko-tutorial-title" class="sv-ko-tutorial-heading">Building a knowledge organiser</h2>' +
+        '<p class="sv-ko-tutorial-intro">As you read this lesson, find at least one highlight for each of the four categories. The colour you pick is the cognitive move — what kind of thinking the highlight represents.</p>' +
+        '<div class="sv-ko-tutorial-cards">' +
+          CATEGORIES.map(function (c) {
+            return '<div class="sv-ko-tutorial-card sv-ko-tutorial-card--' + c.id + '">' +
+                     '<div class="sv-ko-tutorial-card-header">' +
+                       '<span class="sv-ko-tutorial-card-dot"></span>' +
+                       '<span class="sv-ko-tutorial-card-name">' + c.label + '</span>' +
+                     '</div>' +
+                     '<p class="sv-ko-tutorial-card-hint">' + c.hint + '</p>' +
+                   '</div>';
+          }).join('') +
+        '</div>' +
+        '<p class="sv-ko-tutorial-tip"><strong>Tip:</strong> when you select text, the popover lets you pick the category and add a short note. Your notes are what make this a revision aid you can actually study from.</p>' +
+        '<div class="sv-ko-tutorial-actions">' +
+          '<button class="sv-ko-tutorial-go" type="button">Got it — let me start</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(koTutorialEl);
+    koTutorialEl.querySelector('.sv-ko-tutorial-backdrop').addEventListener('click', hideKoTutorial);
+    koTutorialEl.querySelector('.sv-ko-tutorial-go').addEventListener('click', function () {
+      try { localStorage.setItem(KO_TUTORIAL_KEY, '1'); } catch (e) {}
+      hideKoTutorial();
+    });
+    return koTutorialEl;
+  }
+
+  function showKoTutorial() {
+    buildKoTutorial();
+    koTutorialEl.classList.add('sv-ko-tutorial--open');
+  }
+
+  function hideKoTutorial() {
+    if (koTutorialEl) koTutorialEl.classList.remove('sv-ko-tutorial--open');
+  }
+
+  function maybeShowKoTutorialOnFirstEntry() {
+    try {
+      if (localStorage.getItem(KO_TUTORIAL_KEY) === '1') return;
+    } catch (e) { return; }
+    setTimeout(showKoTutorial, 200);  // small defer so the card paints first
   }
 
   function enterKoMode() {
@@ -148,21 +253,23 @@
     document.body.classList.add('sv-hl-ko-mode');
     // Make sure the rest of the feature is wired up
     if (!bootstrapped) bootstrap();
-    buildKoBanner();
-    koBannerEl.style.display = 'block';
-    refreshKoBanner();
+    buildKoCard();
+    koCardEl.style.display = '';
+    koExplicitFocus = null;  // fresh entry — use auto-advancing default
+    refreshKoCard();
+    maybeShowKoTutorialOnFirstEntry();
   }
 
   function exitKoMode() {
     try { localStorage.removeItem(KO_MODE_KEY); } catch (e) {}
     document.body.classList.remove('sv-hl-ko-mode');
-    if (koBannerEl) koBannerEl.style.display = 'none';
+    if (koCardEl) koCardEl.style.display = 'none';
   }
 
   // Fired after any change to highlights. The lesson-progress checklist
   // listens for this to auto-tick the "Build a knowledge organiser" task.
   function notifyHighlightsChanged() {
-    refreshKoBanner();
+    refreshKoCard();
     try {
       document.dispatchEvent(new CustomEvent('sv-hl-changed', {
         detail: { lessonId: window._lessonId, isOrganised: isLessonOrganised() }
@@ -1127,32 +1234,100 @@
       '.sv-hl-modal-cat--so-what::before{background:#ec4899}' +
       '.sv-hl-modal-cat--question{background:#dbeafe;color:#1e40af}' +
       '.sv-hl-modal-cat--question::before{background:#3b82f6}' +
-      // KO Mode — banner, cursor, selection styling
+      // KO Mode — cursor, selection styling, floating card, tutorial modal
       'body.sv-hl-ko-mode #study-notes{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
       'body.sv-hl-ko-mode #study-notes ::selection{background:#fef9c3;color:#2d2a26}' +
       'body.sv-hl-ko-mode #study-notes ::-moz-selection{background:#fef9c3;color:#2d2a26}' +
-      '.sv-hl-ko-banner{position:fixed;left:0;right:0;top:0;z-index:7600;background:#2d2a26;color:#faf8f5;font-family:Inter,system-ui,sans-serif;box-shadow:0 4px 12px rgba(20,18,15,.22);display:none}' +
-      '.sv-hl-ko-banner--complete{background:#166534}' +
-      'body.sv-hl-ko-mode{padding-top:78px}' +
-      'body.sv-hl-ko-mode .page-header{top:78px !important}' +
-      '@media (max-width:720px){body.sv-hl-ko-mode{padding-top:110px}body.sv-hl-ko-mode .page-header{top:110px !important}}' +
-      '.sv-hl-ko-banner-inner{display:flex;align-items:center;gap:14px;padding:8px 18px;flex-wrap:wrap}' +
-      '.sv-hl-ko-banner-title{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600}' +
-      '.sv-hl-ko-banner-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center}' +
-      '.sv-hl-ko-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(250,248,245,.1);font-size:.78rem;font-weight:500;transition:background .15s ease,opacity .15s ease;opacity:.65}' +
-      '.sv-hl-ko-chip::before{content:"";width:8px;height:8px;border-radius:50%;flex-shrink:0}' +
-      '.sv-hl-ko-chip--fact::before{background:#fef08a}' +
-      '.sv-hl-ko-chip--why::before{background:#86efac}' +
-      '.sv-hl-ko-chip--so-what::before{background:#f9a8d4}' +
-      '.sv-hl-ko-chip--question::before{background:#93c5fd}' +
-      '.sv-hl-ko-chip--done{background:rgba(34,197,94,.35);opacity:1}' +
-      '.sv-hl-ko-chip-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgba(250,248,245,.18);font-size:.7rem;font-weight:700}' +
-      '.sv-hl-ko-chip--done .sv-hl-ko-chip-count{background:rgba(250,248,245,.28)}' +
-      '.sv-hl-ko-banner-actions{display:flex;gap:6px}' +
-      '.sv-hl-ko-banner-btn{display:inline-flex;align-items:center;padding:5px 12px;border-radius:8px;background:transparent;border:1px solid rgba(250,248,245,.25);color:inherit;font-family:inherit;font-size:.8rem;cursor:pointer;text-decoration:none}' +
-      '.sv-hl-ko-banner-btn:hover{background:rgba(250,248,245,.1)}' +
-      '.sv-hl-ko-banner-hint{padding:0 18px 8px;font-size:.74rem;color:rgba(250,248,245,.7);text-align:center}' +
-      '.sv-hl-ko-banner--complete .sv-hl-ko-banner-hint::before{content:"✓ Lesson organised — ";color:#bbf7d0;font-weight:600}' +
+      // Hide the bottom-left FAB stack while in KO mode — the card duplicates those actions
+      'body.sv-hl-ko-mode .sv-hl-fab-stack{display:none}' +
+      // Floating KO card — top-right, fixed, follows scroll
+      '.sv-ko-card{position:fixed;top:84px;right:18px;z-index:7600;width:280px;background:#fff;border:1px solid rgba(45,42,38,.1);border-radius:14px;box-shadow:0 12px 30px rgba(20,18,15,.16);padding:14px 14px 12px;font-family:Inter,system-ui,sans-serif;color:#2d2a26;display:none}' +
+      'body.dark-mode .sv-ko-card{background:#2a2826;color:#f5f1ec;border-color:rgba(245,241,236,.1)}' +
+      '@media (max-width:768px){.sv-ko-card{top:auto;bottom:80px;right:12px;left:12px;width:auto}}' +
+      '.sv-ko-card-header{display:flex;align-items:center;gap:8px;margin-bottom:10px}' +
+      '.sv-ko-card-title{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#5d564b;flex:1}' +
+      'body.dark-mode .sv-ko-card-title{color:#a59f95}' +
+      '.sv-ko-card-exit{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border:none;background:transparent;color:#7a7367;cursor:pointer;border-radius:6px}' +
+      '.sv-ko-card-exit:hover{background:rgba(45,42,38,.08);color:#2d2a26}' +
+      'body.dark-mode .sv-ko-card-exit:hover{background:rgba(245,241,236,.1);color:#f5f1ec}' +
+      '.sv-ko-card-focus-label{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#7a7367;margin-bottom:5px}' +
+      '.sv-ko-card-focus{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border-radius:10px;background:#fef9c3;color:#2d2a26;transition:background .2s ease}' +
+      '.sv-ko-card-focus--fact{background:#fef9c3}' +
+      '.sv-ko-card-focus--why{background:#dcfce7}' +
+      '.sv-ko-card-focus--so-what{background:#fce7f3}' +
+      '.sv-ko-card-focus--question{background:#dbeafe}' +
+      'body.dark-mode .sv-ko-card-focus--fact{background:rgba(234,179,8,.35);color:#fef9c3}' +
+      'body.dark-mode .sv-ko-card-focus--why{background:rgba(34,197,94,.3);color:#dcfce7}' +
+      'body.dark-mode .sv-ko-card-focus--so-what{background:rgba(236,72,153,.3);color:#fce7f3}' +
+      'body.dark-mode .sv-ko-card-focus--question{background:rgba(59,130,246,.35);color:#dbeafe}' +
+      '.sv-ko-card-focus-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px;background:rgba(0,0,0,.35)}' +
+      '.sv-ko-card-focus--fact .sv-ko-card-focus-dot{background:#854d0e}' +
+      '.sv-ko-card-focus--why .sv-ko-card-focus-dot{background:#166534}' +
+      '.sv-ko-card-focus--so-what .sv-ko-card-focus-dot{background:#9d174d}' +
+      '.sv-ko-card-focus--question .sv-ko-card-focus-dot{background:#1e40af}' +
+      '.sv-ko-card-focus-text{flex:1;min-width:0}' +
+      '.sv-ko-card-focus-name{font-size:.95rem;font-weight:700;line-height:1.2;margin-bottom:3px}' +
+      '.sv-ko-card-focus-hint{font-size:.78rem;line-height:1.4;opacity:.85}' +
+      '.sv-ko-card-switch-label{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#7a7367;margin:10px 0 5px}' +
+      '.sv-ko-card-dots{display:grid;grid-template-columns:1fr 1fr;gap:4px}' +
+      '.sv-ko-dot{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;background:transparent;border:1px solid rgba(45,42,38,.1);font-family:inherit;font-size:.78rem;color:#5d564b;cursor:pointer;text-align:left;transition:background .12s ease,border-color .12s ease}' +
+      '.sv-ko-dot:hover{background:#faf8f5;border-color:rgba(45,42,38,.2)}' +
+      '.sv-ko-dot--focus{background:#faf8f5;border-color:#2d2a26;color:#2d2a26;font-weight:600}' +
+      'body.dark-mode .sv-ko-dot{border-color:rgba(245,241,236,.15);color:#c8c2ba}' +
+      'body.dark-mode .sv-ko-dot:hover{background:#3a3631}' +
+      'body.dark-mode .sv-ko-dot--focus{background:#1f1c19;border-color:#f5f1ec;color:#f5f1ec}' +
+      '.sv-ko-dot-swatch{width:9px;height:9px;border-radius:50%;flex-shrink:0}' +
+      '.sv-ko-dot--fact .sv-ko-dot-swatch{background:#fef08a}' +
+      '.sv-ko-dot--why .sv-ko-dot-swatch{background:#86efac}' +
+      '.sv-ko-dot--so-what .sv-ko-dot-swatch{background:#f9a8d4}' +
+      '.sv-ko-dot--question .sv-ko-dot-swatch{background:#93c5fd}' +
+      '.sv-ko-dot-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}' +
+      '.sv-ko-dot-count{font-size:.7rem;font-weight:700;color:inherit;padding:1px 5px;border-radius:8px;background:rgba(45,42,38,.08)}' +
+      '.sv-ko-dot--done .sv-ko-dot-count{background:rgba(34,197,94,.25);color:#166534}' +
+      'body.dark-mode .sv-ko-dot--done .sv-ko-dot-count{background:rgba(34,197,94,.35);color:#bbf7d0}' +
+      '.sv-ko-card-actions{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(45,42,38,.08)}' +
+      'body.dark-mode .sv-ko-card-actions{border-top-color:rgba(245,241,236,.1)}' +
+      '.sv-ko-card-link{font-size:.8rem;color:#5d564b;text-decoration:none;background:transparent;border:none;font-family:inherit;cursor:pointer;padding:0}' +
+      '.sv-ko-card-link:hover{color:#2d2a26;text-decoration:underline}' +
+      'body.dark-mode .sv-ko-card-link{color:#c8c2ba}' +
+      'body.dark-mode .sv-ko-card-link:hover{color:#f5f1ec}' +
+      '.sv-ko-card-complete-banner{display:none;align-items:center;gap:6px;margin-top:10px;padding:7px 10px;background:#166534;color:#bbf7d0;border-radius:8px;font-size:.78rem;font-weight:600}' +
+      '.sv-ko-card--complete .sv-ko-card-complete-banner{display:flex}' +
+      // First-time tutorial modal
+      '.sv-ko-tutorial{position:fixed;inset:0;z-index:9700;display:none;align-items:center;justify-content:center;padding:20px}' +
+      '.sv-ko-tutorial--open{display:flex}' +
+      '.sv-ko-tutorial-backdrop{position:absolute;inset:0;background:rgba(20,18,15,.55);backdrop-filter:blur(3px)}' +
+      '.sv-ko-tutorial-panel{position:relative;background:#faf8f5;width:min(560px,100%);max-height:88vh;overflow-y:auto;border-radius:16px;padding:24px 26px;box-shadow:0 20px 50px rgba(20,18,15,.4);font-family:Inter,system-ui,sans-serif;color:#2d2a26}' +
+      'body.dark-mode .sv-ko-tutorial-panel{background:#2a2826;color:#f5f1ec}' +
+      '.sv-ko-tutorial-heading{font-family:"Source Serif 4",Georgia,serif;font-weight:700;font-size:1.5rem;margin:0 0 10px;color:inherit}' +
+      '.sv-ko-tutorial-intro{margin:0 0 18px;font-size:.95rem;line-height:1.55;color:inherit}' +
+      '.sv-ko-tutorial-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}' +
+      '@media (max-width:520px){.sv-ko-tutorial-cards{grid-template-columns:1fr}}' +
+      '.sv-ko-tutorial-card{padding:12px 14px;border-radius:12px}' +
+      '.sv-ko-tutorial-card--fact{background:#fef9c3;color:#2d2a26}' +
+      '.sv-ko-tutorial-card--why{background:#dcfce7;color:#2d2a26}' +
+      '.sv-ko-tutorial-card--so-what{background:#fce7f3;color:#2d2a26}' +
+      '.sv-ko-tutorial-card--question{background:#dbeafe;color:#2d2a26}' +
+      'body.dark-mode .sv-ko-tutorial-card--fact{background:rgba(234,179,8,.4);color:#fef9c3}' +
+      'body.dark-mode .sv-ko-tutorial-card--why{background:rgba(34,197,94,.35);color:#dcfce7}' +
+      'body.dark-mode .sv-ko-tutorial-card--so-what{background:rgba(236,72,153,.35);color:#fce7f3}' +
+      'body.dark-mode .sv-ko-tutorial-card--question{background:rgba(59,130,246,.4);color:#dbeafe}' +
+      '.sv-ko-tutorial-card-header{display:flex;align-items:center;gap:7px;margin-bottom:5px}' +
+      '.sv-ko-tutorial-card-dot{width:10px;height:10px;border-radius:50%;background:rgba(0,0,0,.4)}' +
+      '.sv-ko-tutorial-card--fact .sv-ko-tutorial-card-dot{background:#854d0e}' +
+      '.sv-ko-tutorial-card--why .sv-ko-tutorial-card-dot{background:#166534}' +
+      '.sv-ko-tutorial-card--so-what .sv-ko-tutorial-card-dot{background:#9d174d}' +
+      '.sv-ko-tutorial-card--question .sv-ko-tutorial-card-dot{background:#1e40af}' +
+      '.sv-ko-tutorial-card-name{font-size:.92rem;font-weight:700}' +
+      '.sv-ko-tutorial-card-hint{margin:0;font-size:.84rem;line-height:1.45}' +
+      '.sv-ko-tutorial-tip{margin:0 0 18px;padding:10px 12px;background:rgba(45,42,38,.04);border-radius:10px;font-size:.86rem;line-height:1.5}' +
+      'body.dark-mode .sv-ko-tutorial-tip{background:rgba(245,241,236,.06)}' +
+      '.sv-ko-tutorial-tip strong{font-weight:700}' +
+      '.sv-ko-tutorial-actions{display:flex;justify-content:flex-end}' +
+      '.sv-ko-tutorial-go{padding:10px 20px;border-radius:10px;background:#2d2a26;color:#faf8f5;border:none;font-family:inherit;font-size:.92rem;font-weight:600;cursor:pointer}' +
+      '.sv-ko-tutorial-go:hover{background:#1f1c19}' +
+      'body.dark-mode .sv-ko-tutorial-go{background:#f5f1ec;color:#2d2a26}' +
+      'body.dark-mode .sv-ko-tutorial-go:hover{background:#fff}' +
       '.sv-hl-modal-bar{position:absolute;left:0;top:6px;bottom:6px;width:4px;border-radius:2px}' +
       '.sv-hl-modal-note{margin:0;padding:8px 12px;background:#faf8f5;border-radius:10px;font-size:.92rem;color:#3d3a35;border-left:3px solid rgba(45,42,38,.25)}' +
       '.sv-hl-modal-actions{display:flex;gap:8px;justify-content:flex-end}' +
@@ -1186,7 +1361,7 @@
 
   var bootstrapped = false;
   function bootstrap() {
-    if (bootstrapped) { refreshFab(); refreshKoBanner(); return; }
+    if (bootstrapped) { refreshFab(); refreshKoCard(); return; }
     bootstrapped = true;
     injectStyles();
     buildFab();
@@ -1195,9 +1370,9 @@
     // Restore KO mode if it was active when the student last navigated
     if (isKoModeActive()) {
       document.body.classList.add('sv-hl-ko-mode');
-      buildKoBanner();
-      koBannerEl.style.display = 'block';
-      refreshKoBanner();
+      buildKoCard();
+      koCardEl.style.display = '';
+      refreshKoCard();
     }
     var container = document.getElementById('study-notes');
     container.addEventListener('mousedown', onMouseDownTracker, true);
