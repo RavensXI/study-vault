@@ -1408,8 +1408,17 @@
       'body.sv-hl-ko-focus-so-what #study-notes,body.sv-hl-ko-focus-so-what #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23f9a8d4" stroke="%239d174d" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%239d174d" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
       'body.sv-hl-ko-focus-question #study-notes,body.sv-hl-ko-focus-question #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%2393c5fd" stroke="%231e40af" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%231e40af" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
       'body.sv-hl-ko-mode #study-notes mark.sv-hl{cursor:pointer}' +
-      'body.sv-hl-ko-mode #study-notes ::selection{background:#fef9c3;color:#2d2a26}' +
-      'body.sv-hl-ko-mode #study-notes ::-moz-selection{background:#fef9c3;color:#2d2a26}' +
+      // Live selection (during drag, before release) recolours to the focused
+      // category so the highlight looks correct from the very first pixel —
+      // not just after the popover opens.
+      'body.sv-hl-ko-focus-fact #study-notes ::selection{background:#fef9c3;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-fact #study-notes ::-moz-selection{background:#fef9c3;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-why #study-notes ::selection{background:#dcfce7;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-why #study-notes ::-moz-selection{background:#dcfce7;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-so-what #study-notes ::selection{background:#fce7f3;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-so-what #study-notes ::-moz-selection{background:#fce7f3;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-question #study-notes ::selection{background:#dbeafe;color:#2d2a26}' +
+      'body.sv-hl-ko-focus-question #study-notes ::-moz-selection{background:#dbeafe;color:#2d2a26}' +
       // Hide the bottom-left FAB stack while in KO mode — the card duplicates those actions
       'body.sv-hl-ko-mode .sv-hl-fab-stack{display:none}' +
       // Floating KO card — top-right, fixed, follows scroll
