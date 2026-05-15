@@ -69,6 +69,113 @@
   // Back-compat: callers passing a legacy colour id still resolve to a category.
   function colorFor(id) { return categoryFor(id); }
 
+  // ---------- KO Mode (lesson-task scaffolding) ----------
+  // Optional mode the student opts into from the lesson checklist. Adds a
+  // sticky banner with per-category progress chips, a highlighter cursor,
+  // and a yellow ::selection. Completion is per-lesson (≥1 in each category).
+  // Mode itself is a global toggle (persists across lessons until exited).
+  var KO_MODE_KEY = 'sv-hl-ko-mode';
+  var koBannerEl = null;
+
+  function isKoModeActive() {
+    try { return localStorage.getItem(KO_MODE_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function getCategoryCountsForLesson(lessonId) {
+    var counts = { fact: 0, why: 0, 'so-what': 0, question: 0 };
+    var list = getHighlights(lessonId);
+    for (var i = 0; i < list.length; i++) {
+      var c = getCategoryId(list[i]);
+      if (counts.hasOwnProperty(c)) counts[c]++;
+    }
+    return counts;
+  }
+
+  function isLessonOrganised(lessonId) {
+    lessonId = lessonId || window._lessonId;
+    if (!lessonId) return false;
+    var c = getCategoryCountsForLesson(lessonId);
+    return c.fact >= 1 && c.why >= 1 && c['so-what'] >= 1 && c.question >= 1;
+  }
+
+  function buildKoBanner() {
+    if (koBannerEl) return koBannerEl;
+    koBannerEl = document.createElement('div');
+    koBannerEl.className = 'sv-hl-ko-banner';
+    koBannerEl.innerHTML =
+      '<div class="sv-hl-ko-banner-inner">' +
+        '<div class="sv-hl-ko-banner-title">' +
+          '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+          '<span>Building knowledge organiser</span>' +
+        '</div>' +
+        '<div class="sv-hl-ko-banner-chips">' +
+          CATEGORIES.map(function (c) {
+            return '<span class="sv-hl-ko-chip sv-hl-ko-chip--' + c.id + '" data-cat-chip="' + c.id + '">' +
+                     '<span class="sv-hl-ko-chip-label">' + c.label + '</span>' +
+                     '<span class="sv-hl-ko-chip-count">0</span>' +
+                   '</span>';
+          }).join('') +
+        '</div>' +
+        '<div class="sv-hl-ko-banner-actions">' +
+          '<a class="sv-hl-ko-banner-btn" href="/highlights.html">View all</a>' +
+          '<button class="sv-hl-ko-banner-btn sv-hl-ko-banner-exit" type="button">Exit mode</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="sv-hl-ko-banner-hint">Pick at least one highlight in each category. To revise: cover the snippets and recall from your notes.</div>';
+    document.body.appendChild(koBannerEl);
+    koBannerEl.querySelector('.sv-hl-ko-banner-exit').addEventListener('click', exitKoMode);
+    return koBannerEl;
+  }
+
+  function refreshKoBanner() {
+    if (!koBannerEl) return;
+    if (!window._lessonId) return;
+    var counts = getCategoryCountsForLesson(window._lessonId);
+    for (var i = 0; i < CATEGORIES.length; i++) {
+      var c = CATEGORIES[i];
+      var chip = koBannerEl.querySelector('[data-cat-chip="' + c.id + '"]');
+      if (!chip) continue;
+      var count = counts[c.id];
+      chip.querySelector('.sv-hl-ko-chip-count').textContent = count;
+      chip.classList.toggle('sv-hl-ko-chip--done', count >= 1);
+    }
+    koBannerEl.classList.toggle('sv-hl-ko-banner--complete', isLessonOrganised());
+  }
+
+  function enterKoMode() {
+    try { localStorage.setItem(KO_MODE_KEY, '1'); } catch (e) {}
+    try { localStorage.setItem('sv-hl-enabled', '1'); } catch (e) {}
+    document.body.classList.add('sv-hl-ko-mode');
+    // Make sure the rest of the feature is wired up
+    if (!bootstrapped) bootstrap();
+    buildKoBanner();
+    koBannerEl.style.display = 'block';
+    refreshKoBanner();
+  }
+
+  function exitKoMode() {
+    try { localStorage.removeItem(KO_MODE_KEY); } catch (e) {}
+    document.body.classList.remove('sv-hl-ko-mode');
+    if (koBannerEl) koBannerEl.style.display = 'none';
+  }
+
+  // Fired after any change to highlights. The lesson-progress checklist
+  // listens for this to auto-tick the "Build a knowledge organiser" task.
+  function notifyHighlightsChanged() {
+    refreshKoBanner();
+    try {
+      document.dispatchEvent(new CustomEvent('sv-hl-changed', {
+        detail: { lessonId: window._lessonId, isOrganised: isLessonOrganised() }
+      }));
+    } catch (e) {}
+  }
+
+  // Expose for the checklist & external triggers
+  window.svEnterKoMode = enterKoMode;
+  window.svExitKoMode = exitKoMode;
+  window.svIsLessonOrganised = isLessonOrganised;
+  window.svIsKoModeActive = isKoModeActive;
+
   // ---------- storage ----------
   function lessonKey(lessonId) { return STORAGE_PREFIX + lessonId; }
 
@@ -90,6 +197,8 @@
     } catch (e) {
       console.warn('[highlights] save failed', e);
     }
+    // Notify listeners (lesson checklist, KO banner). Defined later in the file.
+    if (typeof notifyHighlightsChanged === 'function') notifyHighlightsChanged();
   }
 
   function readIndex() {
@@ -1018,6 +1127,32 @@
       '.sv-hl-modal-cat--so-what::before{background:#ec4899}' +
       '.sv-hl-modal-cat--question{background:#dbeafe;color:#1e40af}' +
       '.sv-hl-modal-cat--question::before{background:#3b82f6}' +
+      // KO Mode — banner, cursor, selection styling
+      'body.sv-hl-ko-mode #study-notes{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      'body.sv-hl-ko-mode #study-notes ::selection{background:#fef9c3;color:#2d2a26}' +
+      'body.sv-hl-ko-mode #study-notes ::-moz-selection{background:#fef9c3;color:#2d2a26}' +
+      '.sv-hl-ko-banner{position:fixed;left:0;right:0;top:0;z-index:7600;background:#2d2a26;color:#faf8f5;font-family:Inter,system-ui,sans-serif;box-shadow:0 4px 12px rgba(20,18,15,.22);display:none}' +
+      '.sv-hl-ko-banner--complete{background:#166534}' +
+      'body.sv-hl-ko-mode{padding-top:78px}' +
+      'body.sv-hl-ko-mode .page-header{top:78px !important}' +
+      '@media (max-width:720px){body.sv-hl-ko-mode{padding-top:110px}body.sv-hl-ko-mode .page-header{top:110px !important}}' +
+      '.sv-hl-ko-banner-inner{display:flex;align-items:center;gap:14px;padding:8px 18px;flex-wrap:wrap}' +
+      '.sv-hl-ko-banner-title{display:inline-flex;align-items:center;gap:8px;font-size:.92rem;font-weight:600}' +
+      '.sv-hl-ko-banner-chips{display:flex;gap:6px;flex-wrap:wrap;flex:1;justify-content:center}' +
+      '.sv-hl-ko-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;background:rgba(250,248,245,.1);font-size:.78rem;font-weight:500;transition:background .15s ease,opacity .15s ease;opacity:.65}' +
+      '.sv-hl-ko-chip::before{content:"";width:8px;height:8px;border-radius:50%;flex-shrink:0}' +
+      '.sv-hl-ko-chip--fact::before{background:#fef08a}' +
+      '.sv-hl-ko-chip--why::before{background:#86efac}' +
+      '.sv-hl-ko-chip--so-what::before{background:#f9a8d4}' +
+      '.sv-hl-ko-chip--question::before{background:#93c5fd}' +
+      '.sv-hl-ko-chip--done{background:rgba(34,197,94,.35);opacity:1}' +
+      '.sv-hl-ko-chip-count{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:rgba(250,248,245,.18);font-size:.7rem;font-weight:700}' +
+      '.sv-hl-ko-chip--done .sv-hl-ko-chip-count{background:rgba(250,248,245,.28)}' +
+      '.sv-hl-ko-banner-actions{display:flex;gap:6px}' +
+      '.sv-hl-ko-banner-btn{display:inline-flex;align-items:center;padding:5px 12px;border-radius:8px;background:transparent;border:1px solid rgba(250,248,245,.25);color:inherit;font-family:inherit;font-size:.8rem;cursor:pointer;text-decoration:none}' +
+      '.sv-hl-ko-banner-btn:hover{background:rgba(250,248,245,.1)}' +
+      '.sv-hl-ko-banner-hint{padding:0 18px 8px;font-size:.74rem;color:rgba(250,248,245,.7);text-align:center}' +
+      '.sv-hl-ko-banner--complete .sv-hl-ko-banner-hint::before{content:"✓ Lesson organised — ";color:#bbf7d0;font-weight:600}' +
       '.sv-hl-modal-bar{position:absolute;left:0;top:6px;bottom:6px;width:4px;border-radius:2px}' +
       '.sv-hl-modal-note{margin:0;padding:8px 12px;background:#faf8f5;border-radius:10px;font-size:.92rem;color:#3d3a35;border-left:3px solid rgba(45,42,38,.25)}' +
       '.sv-hl-modal-actions{display:flex;gap:8px;justify-content:flex-end}' +
@@ -1051,12 +1186,19 @@
 
   var bootstrapped = false;
   function bootstrap() {
-    if (bootstrapped) { refreshFab(); return; }
+    if (bootstrapped) { refreshFab(); refreshKoBanner(); return; }
     bootstrapped = true;
     injectStyles();
     buildFab();
     refreshFab();
     rehydrate();
+    // Restore KO mode if it was active when the student last navigated
+    if (isKoModeActive()) {
+      document.body.classList.add('sv-hl-ko-mode');
+      buildKoBanner();
+      koBannerEl.style.display = 'block';
+      refreshKoBanner();
+    }
     var container = document.getElementById('study-notes');
     container.addEventListener('mousedown', onMouseDownTracker, true);
     container.addEventListener('mousemove', onMouseMoveTracker);
