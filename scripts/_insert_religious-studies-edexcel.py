@@ -12,7 +12,7 @@ from collections import defaultdict
 ARTICLE_KEYS = [
     "description", "content_html", "exam_tip_html", "conclusion_html",
     "practice_questions", "knowledge_checks", "flashcard_questions",
-    "glossary_terms", "hero_image_caption",
+    "glossary_terms", "hero_image_caption", "related_media",
 ]
 
 URL = os.environ['SUPABASE_URL']
