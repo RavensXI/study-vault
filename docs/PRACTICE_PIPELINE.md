@@ -122,6 +122,197 @@ Applied at validation across every practice subject:
 
 ---
 
+## Chart embedding rules — never describe what you can show
+
+**The rule:** if a problem references a data visualisation — bar chart, histogram, pictogram, scatter diagram, stem-and-leaf, frequency table, Venn diagram, tree diagram, box plot, pie chart, frequency polygon, cumulative frequency curve, population pyramid, choropleth, time series, or any other chart or table — it MUST embed the visualisation, not describe it in prose.
+
+A question stem that tells the student what a chart contains is not the same as showing the chart. GCSE Statistics exam papers always print the actual chart. The practice renderer must do the same.
+
+### Anti-examples
+
+**Bar chart** (wrong):
+> ❌ "The following bar chart shows the heights of students in a class. The bar for 150–160 cm reaches 8, the bar for 160–170 cm reaches 12..."
+
+**Right:** include the `chart` field with a Chart.js config. The student reads from the rendered chart.
+
+**Pictogram** (wrong):
+> ❌ "A pictogram uses one football to represent six goals. Liverpool: 4 footballs. Arsenal: 3 footballs. Chelsea: 2.5 footballs. What is Arsenal's total goal tally?"
+
+**Right:** embed the pictogram as inline SVG in the `display` field with a key. The student reads from the picture.
+
+**Stem-and-leaf** (wrong):
+> ❌ "The stem 3 has leaves 2, 5, 7. The stem 4 has leaves 0, 4, 8, 9..."
+
+**Right:** embed a `<table class="stem-leaf">` inside the `display` field.
+
+---
+
+### Per-chart-type rendering table
+
+| Chart type | Mechanism | Notes |
+|---|---|---|
+| Bar chart | `chart` field, `type:"bar"` | Set `options.scales.x.title` and `y.title` |
+| Histogram | `chart` field, `type:"bar"` with `barPercentage:1, categoryPercentage:1` | y-axis label = "Frequency density"; x labels = class boundaries |
+| Pie / sector | `chart` field, `type:"pie"`, `showLegend:true` | |
+| Line chart / time series | `chart` field, `type:"line"` | |
+| Frequency polygon | `chart` field, `type:"line"`, `fill:false`, midpoints as x labels | |
+| Cumulative frequency curve | `chart` field, `type:"line"` | x = upper class boundary, y = CF |
+| Scatter diagram | `chart` field, `type:"scatter"` | Data as `{x,y}` pairs |
+| Box plot | `chart` field, `type:"boxplot"` | Plugin loaded on `practice.html`; use pre-computed `{min,q1,median,q3,max}` objects |
+| Two-way table / frequency table | `<table class="data-table">` HTML inside `display` field | Full HTML is rendered via `innerHTML` — no sanitisation |
+| Stem-and-leaf (single) | `<table class="stem-leaf">` inside `display` field | See HTML template below |
+| Stem-and-leaf (back-to-back) | `<table class="stem-leaf stem-leaf--btb">` inside `display` field | See HTML template below |
+| Venn diagram | Inline `<svg class="venn-diagram" viewBox="0 0 300 180" width="100%">` inside `display` | 2 or 3 overlapping circles; label each region with its count |
+| Tree diagram | Inline `<svg class="tree-diagram" viewBox="0 0 400 260" width="100%">` inside `display` | Branch lines with probability labels at each branch |
+| Pictogram | Inline `<svg class="pictogram" viewBox="0 0 360 200" width="100%">` inside `display` | Symbol grid with a key row at the bottom |
+| Tally chart | `<table class="tally-chart">` inside `display` | Three columns: Category, Tally, Frequency |
+| Population pyramid / choropleth | Inline `<svg>` or descriptive `<table>` — case-by-case | Complex; prefer MCQ proxy when chart would be very large |
+
+**Note on `display` field HTML:** the renderer calls `eqEl.innerHTML = formatDisplay(p.display)` with no sanitisation. Full HTML — `<table>`, `<svg>`, `<pre>` — renders correctly. Inline KaTeX `\(...\)` is also supported alongside HTML.
+
+**Note on box plots:** `@sgratzl/chartjs-chart-boxplot@4` is loaded on `practice.html` (confirmed line 12). It is NOT loaded on `lesson.html` — article-format lessons must use inline SVG for box plots instead.
+
+**Note on `image` field:** there is no `image` field handler in the main problem-card renderer. Do not use it. Use `display`-embedded SVG for all static visual content.
+
+---
+
+### Stem-and-leaf HTML template
+
+Single dataset:
+
+```html
+<table class="stem-leaf">
+  <tr><th>Stem</th><th>Leaves</th></tr>
+  <tr><td>2</td><td>3 5 7</td></tr>
+  <tr><td>3</td><td>0 1 4 8</td></tr>
+  <tr><td>4</td><td>2 6 9</td></tr>
+</table>
+<p class="stem-leaf-key">Key: 2 | 3 means 23</p>
+```
+
+Back-to-back (comparison of two datasets — Group A leaves read right-to-left, Group B left-to-right):
+
+```html
+<table class="stem-leaf stem-leaf--btb">
+  <tr><th>Group A</th><th>Stem</th><th>Group B</th></tr>
+  <tr><td>9 7 3</td><td>2</td><td>1 4 6</td></tr>
+  <tr><td>8 5 1</td><td>3</td><td>0 2 7</td></tr>
+  <tr><td>6 4</td><td>4</td><td>3 5 8 9</td></tr>
+</table>
+<p class="stem-leaf-key">Key: 3 | 2 | 1 means Group A = 23, Group B = 21</p>
+```
+
+---
+
+### Tally chart HTML template
+
+```html
+<table class="tally-chart">
+  <tr><th>Colour</th><th>Tally</th><th>Frequency</th></tr>
+  <tr><td>Red</td><td>|||| |</td><td>6</td></tr>
+  <tr><td>Blue</td><td>||||</td><td>4</td></tr>
+  <tr><td>Green</td><td>|||</td><td>3</td></tr>
+</table>
+```
+
+Use `||||` (four vertical strokes) for groups of four and `||||` + space + `|` for five. Do not use Unicode tally characters — they render inconsistently across browsers. Plain ASCII `|` characters in a monospace-styled cell are fine.
+
+---
+
+### Pictogram SVG template
+
+Pictograms must include a key. AQA spec requires the key to appear with the diagram. Example (footballs representing goals, 1 symbol = 6 goals, half-symbol = 3):
+
+```html
+<svg class="pictogram" viewBox="0 0 360 180" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <!-- Row labels -->
+  <text x="70" y="35" text-anchor="end" font-family="Inter,sans-serif" font-size="13">Liverpool</text>
+  <text x="70" y="75" text-anchor="end" font-family="Inter,sans-serif" font-size="13">Arsenal</text>
+  <text x="70" y="115" text-anchor="end" font-family="Inter,sans-serif" font-size="13">Chelsea</text>
+  <!-- Symbols (circles as stand-in for footballs — replace with <use> if icon available) -->
+  <!-- Liverpool: 4 full symbols -->
+  <circle cx="90"  cy="28" r="10" fill="#1a1a1a"/>
+  <circle cx="115" cy="28" r="10" fill="#1a1a1a"/>
+  <circle cx="140" cy="28" r="10" fill="#1a1a1a"/>
+  <circle cx="165" cy="28" r="10" fill="#1a1a1a"/>
+  <!-- Arsenal: 3 full symbols -->
+  <circle cx="90"  cy="68" r="10" fill="#1a1a1a"/>
+  <circle cx="115" cy="68" r="10" fill="#1a1a1a"/>
+  <circle cx="140" cy="68" r="10" fill="#1a1a1a"/>
+  <!-- Chelsea: 2 full + 1 half (right semicircle) -->
+  <circle cx="90"  cy="108" r="10" fill="#1a1a1a"/>
+  <circle cx="115" cy="108" r="10" fill="#1a1a1a"/>
+  <path d="M125,108 a10,10 0 0,1 -10,-10 a10,10 0 0,1 10,10 Z" fill="#1a1a1a"/>
+  <!-- Key -->
+  <line x1="75" y1="150" x2="345" y2="150" stroke="#ccc" stroke-width="1"/>
+  <circle cx="90" cy="163" r="8" fill="#1a1a1a"/>
+  <text x="105" y="168" font-family="Inter,sans-serif" font-size="12" fill="#555">= 6 goals</text>
+</svg>
+```
+
+Adapt symbol shape and counts to the specific question. Always include the key line.
+
+---
+
+### Venn diagram SVG template (two sets)
+
+```html
+<svg class="venn-diagram" viewBox="0 0 300 160" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="110" cy="80" r="60" fill="#3b82f6" fill-opacity="0.25" stroke="#3b82f6" stroke-width="1.5"/>
+  <circle cx="190" cy="80" r="60" fill="#ef4444" fill-opacity="0.25" stroke="#ef4444" stroke-width="1.5"/>
+  <!-- Region counts -->
+  <text x="75"  y="85" text-anchor="middle" font-family="Inter,sans-serif" font-size="18" font-weight="600">8</text>
+  <text x="150" y="85" text-anchor="middle" font-family="Inter,sans-serif" font-size="18" font-weight="600">5</text>
+  <text x="225" y="85" text-anchor="middle" font-family="Inter,sans-serif" font-size="18" font-weight="600">12</text>
+  <!-- Labels -->
+  <text x="80"  y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" fill="#1e40af">Set A</text>
+  <text x="220" y="20" text-anchor="middle" font-family="Inter,sans-serif" font-size="12" fill="#b91c1c">Set B</text>
+</svg>
+```
+
+For three-set Venn diagrams, use three overlapping circles and label all seven regions (A only, B only, C only, A∩B, A∩C, B∩C, A∩B∩C).
+
+---
+
+### Tree diagram SVG template
+
+```html
+<svg class="tree-diagram" viewBox="0 0 400 220" width="100%" xmlns="http://www.w3.org/2000/svg">
+  <!-- Root point -->
+  <circle cx="40" cy="110" r="4" fill="#555"/>
+  <!-- First branches -->
+  <line x1="44" y1="110" x2="156" y2="55"  stroke="#555" stroke-width="1.5"/>
+  <line x1="44" y1="110" x2="156" y2="165" stroke="#555" stroke-width="1.5"/>
+  <!-- Branch probability labels -->
+  <text x="85"  y="72"  font-family="Inter,sans-serif" font-size="12" text-anchor="middle">0.4</text>
+  <text x="85"  y="148" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">0.6</text>
+  <!-- First-level nodes -->
+  <circle cx="160" cy="55"  r="4" fill="#555"/>
+  <circle cx="160" cy="165" r="4" fill="#555"/>
+  <!-- Labels -->
+  <text x="168" y="59"  font-family="Inter,sans-serif" font-size="13" fill="#1e40af">Red</text>
+  <text x="168" y="169" font-family="Inter,sans-serif" font-size="13" fill="#b91c1c">Blue</text>
+  <!-- Second branches from Red -->
+  <line x1="164" y1="55"  x2="276" y2="30"  stroke="#555" stroke-width="1.5"/>
+  <line x1="164" y1="55"  x2="276" y2="80"  stroke="#555" stroke-width="1.5"/>
+  <text x="215" y="33"  font-family="Inter,sans-serif" font-size="12" text-anchor="middle">0.3</text>
+  <text x="215" y="77"  font-family="Inter,sans-serif" font-size="12" text-anchor="middle">0.7</text>
+  <text x="284" y="34"  font-family="Inter,sans-serif" font-size="13" fill="#1e40af">Red</text>
+  <text x="284" y="84"  font-family="Inter,sans-serif" font-size="13" fill="#b91c1c">Blue</text>
+  <!-- Second branches from Blue -->
+  <line x1="164" y1="165" x2="276" y2="140" stroke="#555" stroke-width="1.5"/>
+  <line x1="164" y1="165" x2="276" y2="190" stroke="#555" stroke-width="1.5"/>
+  <text x="215" y="143" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">0.5</text>
+  <text x="215" y="187" font-family="Inter,sans-serif" font-size="12" text-anchor="middle">0.5</text>
+  <text x="284" y="144" font-family="Inter,sans-serif" font-size="13" fill="#1e40af">Red</text>
+  <text x="284" y="194" font-family="Inter,sans-serif" font-size="13" fill="#b91c1c">Blue</text>
+</svg>
+```
+
+Scale `viewBox` height to match the number of branches. Without-replacement problems must update branch probabilities at second stage accordingly (e.g. if 3 red + 5 blue and first draw was red: second-stage P(red) = 2/7).
+
+---
+
 ## Passage narration (passage-based subjects only)
 
 Applies to English Language, other reading-based practice subjects. Not needed for Maths, Science calcs, or Geography Skills.

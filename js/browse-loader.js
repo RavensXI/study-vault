@@ -169,6 +169,9 @@
     'food-preparation-and-nutrition': [
       { board: 'Eduqas', slug: 'food-preparation-and-nutrition-eduqas' }
       // aqa, ocr to come
+    ],
+    'statistics': [
+      { board: 'AQA', slug: 'statistics-aqa' }
     ]
   };
 
@@ -356,7 +359,7 @@
 
     // Always live-count lessons per unit (replaces stale unit.lesson_count column).
     // Foundation users on tiered subjects get the count with tier='higher' excluded.
-    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b'];
+    var TIERED_OVERVIEW = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b', 'statistics', 'statistics-aqa'];
     var savedTiersOverview = {};
     try { savedTiersOverview = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch(e) {}
     // Tier picker writes under the base slug (e.g. 'separate-sciences') but
@@ -808,7 +811,7 @@
       html += '<p>' + esc(unit.subtitle) + '</p>';
     }
     // Tier indicator for tiered subjects
-    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b'];
+    var TIERED = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b', 'statistics', 'statistics-aqa'];
     if (TIERED.indexOf(subjectSlug) !== -1) {
       var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';

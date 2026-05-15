@@ -69,6 +69,14 @@ ABSOLUTE BANS (PAST DRIFT — DO NOT REPEAT)
 
 These have all appeared in shipped content despite being forbidden. The generation agent kept producing them because the underlying structural examples were contaminated. With this prompt, anti-examples are explicit:
 
+BANNED — describing a chart that should be shown (practice lessons):
+- DO NOT WRITE: "A bar chart shows the following heights: 140–150 cm has 8 students, 150–160 cm has 12 students..."
+- DO NOT WRITE: "A pictogram uses one football to represent six goals. Liverpool: 4 footballs, Arsenal: 3 footballs..."
+- DO NOT WRITE: "The stem-and-leaf diagram below shows: stem 2 has leaves 3, 5, 7..."
+- INSTEAD: embed the visualisation. Use the practice schema's `chart` field (Chart.js config) for bar, line, scatter, pie, histogram, box plot; use `display`-embedded `<table class="stem-leaf">` for stem-and-leaf and frequency tables; use `display`-embedded inline `<svg>` for Venn diagrams, tree diagrams, and pictograms.
+- Rule: if the question stem says "the bar chart below shows…" or "this pictogram uses one symbol per…", there MUST be a chart or SVG in the same problem — never prose alone.
+- Full rendering table and copy-paste templates are in `docs/PRACTICE_PIPELINE.md` under "Chart embedding rules".
+
 BANNED — spec codes in any field:
 - DO NOT WRITE: "For OCR J352 Component 01..."
 - DO NOT WRITE: "The AQA 8062 specification requires..."
