@@ -276,12 +276,20 @@
     koDragState = null;
   }
 
+  function setKoFocusBodyClass(focusId) {
+    var b = document.body;
+    ['fact', 'why', 'so-what', 'question'].forEach(function (c) {
+      b.classList.toggle('sv-hl-ko-focus-' + c, c === focusId);
+    });
+  }
+
   function refreshKoCard() {
     if (!koCardEl) return;
     if (!window._lessonId) return;
     var counts = getCategoryCountsForLesson(window._lessonId);
     var focusId = getKoFocus();
     var focusCat = categoryFor(focusId);
+    setKoFocusBodyClass(focusId);
     // Update dots
     for (var i = 0; i < CATEGORIES.length; i++) {
       var c = CATEGORIES[i];
@@ -367,6 +375,9 @@
   function exitKoMode() {
     try { localStorage.removeItem(KO_MODE_KEY); } catch (e) {}
     document.body.classList.remove('sv-hl-ko-mode');
+    ['fact', 'why', 'so-what', 'question'].forEach(function (c) {
+      document.body.classList.remove('sv-hl-ko-focus-' + c);
+    });
     if (koCardEl) koCardEl.style.display = 'none';
   }
 
@@ -1338,10 +1349,16 @@
       '.sv-hl-modal-cat--so-what::before{background:#ec4899}' +
       '.sv-hl-modal-cat--question{background:#dbeafe;color:#1e40af}' +
       '.sv-hl-modal-cat--question::before{background:#3b82f6}' +
-      // KO Mode — cursor (applied to ALL descendants of #study-notes so the
-      // user-agent text-cursor on text content doesn't override us), selection
-      // tint, floating card, tutorial modal
-      'body.sv-hl-ko-mode #study-notes,body.sv-hl-ko-mode #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      // KO Mode — cursor varies by focused category so students get visual
+      // feedback about what they're currently highlighting AS. Applied to
+      // all descendants of #study-notes (the user-agent text-cursor on
+      // selectable text overrides cursor inheritance, so we have to be
+      // explicit). Each category has its own SVG cursor with matching fill
+      // and stroke colours.
+      'body.sv-hl-ko-focus-fact #study-notes,body.sv-hl-ko-focus-fact #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      'body.sv-hl-ko-focus-why #study-notes,body.sv-hl-ko-focus-why #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%2386efac" stroke="%23166534" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23166534" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      'body.sv-hl-ko-focus-so-what #study-notes,body.sv-hl-ko-focus-so-what #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23f9a8d4" stroke="%239d174d" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%239d174d" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
+      'body.sv-hl-ko-focus-question #study-notes,body.sv-hl-ko-focus-question #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%2393c5fd" stroke="%231e40af" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%231e40af" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
       'body.sv-hl-ko-mode #study-notes mark.sv-hl{cursor:pointer}' +
       'body.sv-hl-ko-mode #study-notes ::selection{background:#fef9c3;color:#2d2a26}' +
       'body.sv-hl-ko-mode #study-notes ::-moz-selection{background:#fef9c3;color:#2d2a26}' +
