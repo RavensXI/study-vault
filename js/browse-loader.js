@@ -492,12 +492,13 @@
       }
     }
 
-    // Edexcel RS (1RA0) filter — route-based: student picks Paper 1 + Paper 2
-    // religion. Paper 3 / Paper 4 are auto-derived from the Paper 1 choice.
-    // Mapping:
-    //   Catholic → paper-3-philosophy-ethics-catholic, paper-4-marks-gospel
-    //   Christianity → paper-3-philosophy-ethics-christianity, paper-4-marks-gospel
-    //   Islam → paper-3-philosophy-ethics-islam, paper-4-quran
+    // Edexcel RS (1RA0) filter. Student picks:
+    //   Paper 1 religion (Catholic / Christianity / Islam)
+    //   Paper 2 religion (different from Paper 1; spec also blocks
+    //     Catholic↔Christianity cross-picks)
+    //   Paper 3 OR Paper 4 (spec §271-288 — students sit one, not both)
+    //     Paper 3's religion = Paper 1's religion (spec §410).
+    //     Paper 4 = Mark's Gospel or the Qur'an — free pick (spec §440).
     // Show all 15 units if the user hasn't picked yet (navigated directly).
     if (subjectSlug === 'religious-studies-edexcel' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
       var freeRE_edexcel = FreeUser.getSubject(subjectSlug);
@@ -507,21 +508,20 @@
           'paper-1-christianity': 'paper-3-philosophy-ethics-christianity',
           'paper-1-islam': 'paper-3-philosophy-ethics-islam'
         };
-        var PAPER4_MAP = {
-          'paper-1-catholic-christianity': 'paper-4-marks-gospel',
-          'paper-1-christianity': 'paper-4-marks-gospel',
-          'paper-1-islam': 'paper-4-quran'
-        };
         var allowedEdexcelSlugs = [];
         if (freeRE_edexcel.paper1) {
           allowedEdexcelSlugs.push(freeRE_edexcel.paper1);
-          var p3 = PAPER3_MAP[freeRE_edexcel.paper1];
-          if (p3) allowedEdexcelSlugs.push(p3);
-          var p4 = PAPER4_MAP[freeRE_edexcel.paper1];
-          if (p4) allowedEdexcelSlugs.push(p4);
         }
         if (freeRE_edexcel.paper2) {
           allowedEdexcelSlugs.push(freeRE_edexcel.paper2);
+        }
+        // Either Paper 3 (derived from Paper 1) OR Paper 4 (user-picked text).
+        // Fall back to showing Paper 3 if examChoice is missing (older saved prefs).
+        if (freeRE_edexcel.examChoice === 'paper4' && freeRE_edexcel.paper4) {
+          allowedEdexcelSlugs.push(freeRE_edexcel.paper4);
+        } else if (freeRE_edexcel.paper1) {
+          var p3 = PAPER3_MAP[freeRE_edexcel.paper1];
+          if (p3) allowedEdexcelSlugs.push(p3);
         }
         units = units.filter(function (u) {
           return allowedEdexcelSlugs.indexOf(u.slug) !== -1;

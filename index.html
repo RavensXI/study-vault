@@ -496,6 +496,7 @@
     .fw-text-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .fw-text-btn { padding: 0.4rem 0.85rem; border: 1px solid #e8e2d8; border-radius: 8px; background: #fff; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .fw-text-btn.selected { background: #2d2a26; color: #fff; border-color: #2d2a26; }
+    .fw-text-btn:disabled { opacity: 0.35; cursor: not-allowed; background: #f5f1ea; color: #7a7068; }
 
     .fw-toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #2d2a26; color: #fff; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.82rem; font-weight: 500; z-index: 3000; animation: sv-fade-in 0.2s ease; }
     .fw-toast.visible { display: block; }
@@ -1992,13 +1993,18 @@
         ]
       },
       'edexcel': {
-        // Edexcel 1RA0: pick one Paper 1 religion (study in depth, inc Sources &
-        // Forms of Expression) and one different Paper 2 religion.
-        // Paper 3 / Paper 4 are derived from the Paper 1 choice and shown
-        // automatically — students don't pick them separately.
-        // Slugs are full Supabase unit slugs, not base slugs.
+        // Edexcel 1RA0:
+        //   Paper 1 — pick one religion in depth (3 options).
+        //   Paper 2 — pick a SECOND religion. Catholic and Christianity students
+        //     cannot pick either of those (spec §366-367), only Islam students get a free pick.
+        //   Students sit EITHER Paper 3 OR Paper 4, not both.
+        //   Paper 3 (Philosophy and Ethics) is auto-derived to match Paper 1's religion.
+        //   Paper 4 (Textual Studies) is a free choice between Mark's Gospel and the Qur'an —
+        //     independent of Paper 1 (e.g. an Islam student can sit Mark's Gospel).
         paper1Helper: '(Catholic Christianity, Christianity or Islam)',
-        paper2Helper: '(any religion different from your Paper 1 choice)',
+        paper2Helper: '(must differ from Paper 1 — Catholic/Christianity students must pick a non-Christian religion)',
+        examChoiceHelper: '(students sit either Paper 3 OR Paper 4 — pick the route your school teaches)',
+        paper4Helper: '(Mark’s Gospel or the Qur’an — your school decides, independent of Paper 1)',
         paper1Options: [
           { slug: 'paper-1-catholic-christianity', name: 'Catholic Christianity' },
           { slug: 'paper-1-christianity', name: 'Christianity' },
@@ -2012,6 +2018,10 @@
           { slug: 'paper-2-hinduism', name: 'Hinduism' },
           { slug: 'paper-2-judaism', name: 'Judaism' },
           { slug: 'paper-2-sikhism', name: 'Sikhism' }
+        ],
+        paper4Options: [
+          { slug: 'paper-4-marks-gospel', name: 'Mark’s Gospel' },
+          { slug: 'paper-4-quran', name: 'The Qur’an' }
         ]
       }
     };
@@ -2601,10 +2611,20 @@
       var rels = (wizardState.re && wizardState.re.religions) || [];
       var thms = (wizardState.re && wizardState.re.themes) || [];
       if (fwIsEdexcelRE()) {
-        // Edexcel: must pick exactly 1 Paper 1 religion and 1 Paper 2 religion
+        // Edexcel: Paper 1 + Paper 2 + (Paper 3 OR Paper 4 with text picked).
+        // Paper 2 must not be a religion blocked by the Paper 1 choice.
         var p1 = (wizardState.re && wizardState.re.paper1) || null;
         var p2 = (wizardState.re && wizardState.re.paper2) || null;
-        btn.disabled = !(p1 && p2);
+        var examChoice = (wizardState.re && wizardState.re.examChoice) || null;
+        var p4 = (wizardState.re && wizardState.re.paper4) || null;
+        var p2Blocked = false;
+        if (p1 === 'paper-1-catholic-christianity' || p1 === 'paper-1-christianity') {
+          p2Blocked = (p2 === 'paper-2-catholic-christianity' || p2 === 'paper-2-christianity');
+        } else if (p1 === 'paper-1-islam') {
+          p2Blocked = (p2 === 'paper-2-islam');
+        }
+        var examOk = (examChoice === 'paper3') || (examChoice === 'paper4' && !!p4);
+        btn.disabled = !(p1 && p2 && !p2Blocked && examOk);
       } else if (fwIsEduqasRE()) {
         var route = (wizardState.re && wizardState.re.route) || 'a';
         if (route === 'b') {
@@ -2738,21 +2758,64 @@
       var container = document.getElementById('fw-re-container');
       if (!container) return;
       container.innerHTML = '';
-      wizardState.re = { religions: [], themes: [], paper1: null, paper2: null };
+      wizardState.re = { religions: [], themes: [], paper1: null, paper2: null, examChoice: null, paper4: null };
 
       var board = fwGetREBoard();
       var subhead = document.getElementById('fw-re-subhead');
 
       // ============================================================
-      // EDEXCEL 1RA0 — two-stage: pick Paper 1 religion + Paper 2 religion
-      // Paper 3/4 derive from Paper 1 and are shown automatically on browse.
+      // EDEXCEL 1RA0 — Paper 1 + Paper 2 + (Paper 3 OR Paper 4).
+      // Paper 2 must not be the same religion as Paper 1, and (per spec §366)
+      // Catholic/Christianity Paper 1 students cannot pick either Catholic or
+      // Christianity for Paper 2. Paper 3 (Philosophy & Ethics) auto-derives
+      // its religion from Paper 1. Paper 4 (Textual Studies) is a free pick
+      // between Mark's Gospel and the Qur'an, independent of Paper 1.
       // ============================================================
       if (fwIsEdexcelRE()) {
         if (subhead) {
-          subhead.innerHTML = 'Edexcel Religious Studies — pick your <strong>Paper 1 religion</strong> (studied in depth) and your <strong>Paper 2 religion</strong> (second religion, must differ from Paper 1).';
+          subhead.innerHTML = 'Edexcel Religious Studies — pick your <strong>Paper 1 religion</strong>, your <strong>Paper 2 religion</strong>, and whether you sit <strong>Paper 3 (Philosophy &amp; Ethics)</strong> or <strong>Paper 4 (Textual Studies)</strong>.';
         }
         var opts = religiousEducationOptions['edexcel'];
         if (!opts) return;
+
+        // Religions blocked for Paper 2 given a Paper 1 choice.
+        // Catholic or Christianity at Paper 1 blocks BOTH at Paper 2.
+        function paper2BlockedSlugs(p1) {
+          if (p1 === 'paper-1-catholic-christianity' || p1 === 'paper-1-christianity') {
+            return ['paper-2-catholic-christianity', 'paper-2-christianity'];
+          }
+          if (p1 === 'paper-1-islam') return ['paper-2-islam'];
+          return [];
+        }
+
+        // Refs we'll need to update across sections.
+        var paper2OptsEl = null;
+        var paper4SectionEl = null;
+        var paper4OptsEl = null;
+
+        function refreshPaper2DisabledState() {
+          if (!paper2OptsEl) return;
+          var blocked = paper2BlockedSlugs(wizardState.re.paper1);
+          paper2OptsEl.querySelectorAll('.fw-text-btn').forEach(function (b) {
+            var isBlocked = blocked.indexOf(b.dataset.value) !== -1;
+            b.disabled = isBlocked;
+            if (isBlocked && b.classList.contains('selected')) {
+              b.classList.remove('selected');
+              wizardState.re.paper2 = null;
+            }
+          });
+        }
+
+        function setPaper4Visible(visible) {
+          if (!paper4SectionEl) return;
+          paper4SectionEl.style.display = visible ? '' : 'none';
+          if (!visible) {
+            wizardState.re.paper4 = null;
+            if (paper4OptsEl) {
+              paper4OptsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+            }
+          }
+        }
 
         function buildEdexcelSection(heading, helper, items, paperKey) {
           var sectionEl = document.createElement('div');
@@ -2767,19 +2830,54 @@
             btn.textContent = item.name;
             btn.dataset.value = item.slug;
             btn.addEventListener('click', function () {
-              // Deselect previous choice in this section
+              if (btn.disabled) return;
               optsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
               btn.classList.add('selected');
               wizardState.re[paperKey] = item.slug;
+              if (paperKey === 'paper1') refreshPaper2DisabledState();
               fwUpdateREDoneBtn();
             });
             optsEl.appendChild(btn);
           });
           container.appendChild(sectionEl);
+          return { sectionEl: sectionEl, optsEl: optsEl };
         }
 
         buildEdexcelSection('Paper 1 Religion', opts.paper1Helper, opts.paper1Options, 'paper1');
-        buildEdexcelSection('Paper 2 Religion', opts.paper2Helper, opts.paper2Options, 'paper2');
+        var paper2Refs = buildEdexcelSection('Paper 2 Religion', opts.paper2Helper, opts.paper2Options, 'paper2');
+        paper2OptsEl = paper2Refs.optsEl;
+
+        // Paper 3 / Paper 4 either-or pick.
+        var examChoiceSection = document.createElement('div');
+        examChoiceSection.className = 'fw-text-section';
+        examChoiceSection.innerHTML =
+          '<h3>Paper 3 or Paper 4 <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + opts.examChoiceHelper + '</span></h3>' +
+          '<div class="fw-text-options" data-group="examChoice"></div>';
+        var examChoiceOptsEl = examChoiceSection.querySelector('.fw-text-options');
+        [
+          { value: 'paper3', label: 'Paper 3 — Philosophy &amp; Ethics' },
+          { value: 'paper4', label: 'Paper 4 — Textual Studies' }
+        ].forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.innerHTML = item.label;
+          btn.dataset.value = item.value;
+          btn.addEventListener('click', function () {
+            examChoiceOptsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.re.examChoice = item.value;
+            setPaper4Visible(item.value === 'paper4');
+            fwUpdateREDoneBtn();
+          });
+          examChoiceOptsEl.appendChild(btn);
+        });
+        container.appendChild(examChoiceSection);
+
+        // Paper 4 sub-pick (hidden until examChoice === 'paper4').
+        var paper4Refs = buildEdexcelSection('Paper 4 Text', opts.paper4Helper, opts.paper4Options, 'paper4');
+        paper4SectionEl = paper4Refs.sectionEl;
+        paper4OptsEl = paper4Refs.optsEl;
+        paper4SectionEl.style.display = 'none';
 
         fwUpdateREDoneBtn();
         return;
@@ -3237,10 +3335,12 @@
           if (wizardState.re && wizardState.re.route) {
             entry.route = wizardState.re.route;
           }
-          // Edexcel: save paper1 + paper2 picks for browse-loader unit filter
+          // Edexcel: save paper1 + paper2 + Paper3-or-Paper4 picks for browse-loader unit filter
           if (board === 'edexcel') {
             entry.paper1 = (wizardState.re && wizardState.re.paper1) || null;
             entry.paper2 = (wizardState.re && wizardState.re.paper2) || null;
+            entry.examChoice = (wizardState.re && wizardState.re.examChoice) || null;
+            entry.paper4 = (wizardState.re && wizardState.re.paper4) || null;
           }
         }
         prefs.subjects.push(entry);
