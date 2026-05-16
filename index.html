@@ -1420,6 +1420,7 @@
         'science-aqa': { name: 'Combined Science', image: '/images/subject-science.jpg', accent: '#16a34a', detail: '6 papers' },
         'religious-studies-aqa': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#1e40af', detail: '8 units' },
         'religious-studies-eduqas': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '15 units · 53 lessons' },
+        'religious-studies-edexcel': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '15 units · 71 lessons' },
         'geography-aqa': { name: 'Geography', image: '/images/subject-geography.jpg', accent: '#059669', detail: '3 units' },
         'health-social-care-edexcel': { name: 'Health & Social Care', image: '/images/subject-health-social-care.jpg', accent: '#e11d48', detail: '1 unit · 12 lessons' },
         // Legacy keys retained so existing FreeUser localStorage entries (saved
@@ -1692,7 +1693,7 @@
       'hospitality-catering': { 'WJEC': true },
       'engineering': { 'Eduqas': true, 'WJEC': true },
       'history': { 'AQA': true, 'Edexcel': true, 'OCR': true },
-      'religious-studies': { 'AQA': true, 'Eduqas': true, 'WJEC': true },
+      'religious-studies': { 'AQA': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true },
       'music-technology': { 'NCFE': true },
       'computer-science': { 'OCR': true, 'AQA': true },
       'it': { 'OCR': true },
@@ -1987,6 +1988,29 @@
           { slug: 'theme-good-and-evil', name: 'Issues of Good and Evil' },
           { slug: 'theme-relationships', name: 'Issues of Relationships' },
           { slug: 'theme-human-rights', name: 'Issues of Human Rights' }
+        ]
+      },
+      'edexcel': {
+        // Edexcel 1RA0: pick one Paper 1 religion (study in depth, inc Sources &
+        // Forms of Expression) and one different Paper 2 religion.
+        // Paper 3 / Paper 4 are derived from the Paper 1 choice and shown
+        // automatically — students don't pick them separately.
+        // Slugs are full Supabase unit slugs, not base slugs.
+        paper1Helper: '(Catholic Christianity, Christianity or Islam)',
+        paper2Helper: '(any religion different from your Paper 1 choice)',
+        paper1Options: [
+          { slug: 'paper-1-catholic-christianity', name: 'Catholic Christianity' },
+          { slug: 'paper-1-christianity', name: 'Christianity' },
+          { slug: 'paper-1-islam', name: 'Islam' }
+        ],
+        paper2Options: [
+          { slug: 'paper-2-catholic-christianity', name: 'Catholic Christianity' },
+          { slug: 'paper-2-christianity', name: 'Christianity' },
+          { slug: 'paper-2-islam', name: 'Islam' },
+          { slug: 'paper-2-buddhism', name: 'Buddhism' },
+          { slug: 'paper-2-hinduism', name: 'Hinduism' },
+          { slug: 'paper-2-judaism', name: 'Judaism' },
+          { slug: 'paper-2-sikhism', name: 'Sikhism' }
         ]
       }
     };
@@ -2566,12 +2590,21 @@
       return b === 'eduqas' || b === 'wjec';
     }
 
+    function fwIsEdexcelRE() {
+      return fwGetREBoard() === 'edexcel';
+    }
+
     function fwUpdateREDoneBtn() {
       var btn = document.getElementById('fw-re-done');
       if (!btn) return;
       var rels = (wizardState.re && wizardState.re.religions) || [];
       var thms = (wizardState.re && wizardState.re.themes) || [];
-      if (fwIsEduqasRE()) {
+      if (fwIsEdexcelRE()) {
+        // Edexcel: must pick exactly 1 Paper 1 religion and 1 Paper 2 religion
+        var p1 = (wizardState.re && wizardState.re.paper1) || null;
+        var p2 = (wizardState.re && wizardState.re.paper2) || null;
+        btn.disabled = !(p1 && p2);
+      } else if (fwIsEduqasRE()) {
         var route = (wizardState.re && wizardState.re.route) || 'a';
         if (route === 'b') {
           // Route B is fully determined — Continue is always enabled
@@ -2704,10 +2737,52 @@
       var container = document.getElementById('fw-re-container');
       if (!container) return;
       container.innerHTML = '';
-      wizardState.re = { religions: [], themes: [] };
+      wizardState.re = { religions: [], themes: [], paper1: null, paper2: null };
 
       var board = fwGetREBoard();
       var subhead = document.getElementById('fw-re-subhead');
+
+      // ============================================================
+      // EDEXCEL 1RA0 — two-stage: pick Paper 1 religion + Paper 2 religion
+      // Paper 3/4 derive from Paper 1 and are shown automatically on browse.
+      // ============================================================
+      if (fwIsEdexcelRE()) {
+        if (subhead) {
+          subhead.innerHTML = 'Edexcel Religious Studies — pick your <strong>Paper 1 religion</strong> (studied in depth) and your <strong>Paper 2 religion</strong> (second religion, must differ from Paper 1).';
+        }
+        var opts = religiousEducationOptions['edexcel'];
+        if (!opts) return;
+
+        function buildEdexcelSection(heading, helper, items, paperKey) {
+          var sectionEl = document.createElement('div');
+          sectionEl.className = 'fw-text-section';
+          sectionEl.innerHTML =
+            '<h3>' + heading + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helper + '</span></h3>' +
+            '<div class="fw-text-options" data-group="' + paperKey + '"></div>';
+          var optsEl = sectionEl.querySelector('.fw-text-options');
+          items.forEach(function (item) {
+            var btn = document.createElement('button');
+            btn.className = 'fw-text-btn';
+            btn.textContent = item.name;
+            btn.dataset.value = item.slug;
+            btn.addEventListener('click', function () {
+              // Deselect previous choice in this section
+              optsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              wizardState.re[paperKey] = item.slug;
+              fwUpdateREDoneBtn();
+            });
+            optsEl.appendChild(btn);
+          });
+          container.appendChild(sectionEl);
+        }
+
+        buildEdexcelSection('Paper 1 Religion', opts.paper1Helper, opts.paper1Options, 'paper1');
+        buildEdexcelSection('Paper 2 Religion', opts.paper2Helper, opts.paper2Options, 'paper2');
+
+        fwUpdateREDoneBtn();
+        return;
+      }
 
       // ============================================================
       // EDUQAS / WJEC — Route A/B sliding pill + dynamic body
@@ -3110,7 +3185,7 @@
       'food-preparation-and-nutrition': { 'eduqas': 'food-preparation-and-nutrition-eduqas' },
       'engineering': { 'eduqas': 'engineering-eduqas', 'wjec': 'engineering-eduqas' },
       'computer-science': { 'ocr': 'computer-science', 'aqa': 'computer-science-aqa' },
-      'religious-studies': { 'aqa': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas' },
+      'religious-studies': { 'aqa': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas', 'edexcel': 'religious-studies-edexcel' },
       'spanish': { 'aqa': 'spanish-aqa', 'edexcel': 'spanish-edexcel' },
       'french': { 'aqa': 'french-aqa', 'edexcel': 'french-edexcel' },
       'german': { 'aqa': 'german-aqa', 'edexcel': 'german-edexcel' },
@@ -3160,6 +3235,11 @@
           entry.themes = (wizardState.re && wizardState.re.themes) || [];
           if (wizardState.re && wizardState.re.route) {
             entry.route = wizardState.re.route;
+          }
+          // Edexcel: save paper1 + paper2 picks for browse-loader unit filter
+          if (board === 'edexcel') {
+            entry.paper1 = (wizardState.re && wizardState.re.paper1) || null;
+            entry.paper2 = (wizardState.re && wizardState.re.paper2) || null;
           }
         }
         prefs.subjects.push(entry);

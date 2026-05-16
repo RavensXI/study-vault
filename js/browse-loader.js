@@ -159,6 +159,7 @@
     ],
     'religious-studies': [
       { board: 'AQA', slug: 'religious-studies-aqa' },
+      { board: 'Edexcel', slug: 'religious-studies-edexcel' },
       { board: 'Eduqas', slug: 'religious-studies-eduqas' },
       { board: 'WJEC', slug: 'religious-studies-eduqas' }
     ],
@@ -487,6 +488,43 @@
             return allowedEduqasSlugs.indexOf(u.slug) !== -1;
           });
         }
+      }
+    }
+
+    // Edexcel RS (1RA0) filter — route-based: student picks Paper 1 + Paper 2
+    // religion. Paper 3 / Paper 4 are auto-derived from the Paper 1 choice.
+    // Mapping:
+    //   Catholic → paper-3-philosophy-ethics-catholic, paper-4-marks-gospel
+    //   Christianity → paper-3-philosophy-ethics-christianity, paper-4-marks-gospel
+    //   Islam → paper-3-philosophy-ethics-islam, paper-4-quran
+    // Show all 15 units if the user hasn't picked yet (navigated directly).
+    if (subjectSlug === 'religious-studies-edexcel' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
+      var freeRE_edexcel = FreeUser.getSubject(subjectSlug);
+      if (freeRE_edexcel && (freeRE_edexcel.paper1 || freeRE_edexcel.paper2)) {
+        var PAPER3_MAP = {
+          'paper-1-catholic-christianity': 'paper-3-philosophy-ethics-catholic',
+          'paper-1-christianity': 'paper-3-philosophy-ethics-christianity',
+          'paper-1-islam': 'paper-3-philosophy-ethics-islam'
+        };
+        var PAPER4_MAP = {
+          'paper-1-catholic-christianity': 'paper-4-marks-gospel',
+          'paper-1-christianity': 'paper-4-marks-gospel',
+          'paper-1-islam': 'paper-4-quran'
+        };
+        var allowedEdexcelSlugs = [];
+        if (freeRE_edexcel.paper1) {
+          allowedEdexcelSlugs.push(freeRE_edexcel.paper1);
+          var p3 = PAPER3_MAP[freeRE_edexcel.paper1];
+          if (p3) allowedEdexcelSlugs.push(p3);
+          var p4 = PAPER4_MAP[freeRE_edexcel.paper1];
+          if (p4) allowedEdexcelSlugs.push(p4);
+        }
+        if (freeRE_edexcel.paper2) {
+          allowedEdexcelSlugs.push(freeRE_edexcel.paper2);
+        }
+        units = units.filter(function (u) {
+          return allowedEdexcelSlugs.indexOf(u.slug) !== -1;
+        });
       }
     }
 
