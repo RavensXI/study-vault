@@ -820,8 +820,28 @@
         }).join(', ');
         return label;
       }
-      if (sols.length === 1) return escHtml(String(sols[0]));
-      return sols.map(function (s) { return escHtml(String(s)); }).join(' | ');
+      // Render one solution value with type-awareness
+      function renderOne(s) {
+        if (s == null) return '';
+        if (typeof s === 'object') {
+          // {numerator, denominator} → "9/19 (or decimal 0.474)"
+          if ('numerator' in s && 'denominator' in s) {
+            var n = s.numerator, d = s.denominator;
+            var dec = (d !== 0) ? (n / d).toFixed(3).replace(/\.?0+$/, '') : '?';
+            return escHtml(n + '/' + d) + ' <span style="color:var(--text-muted);font-size:0.85em">(or ' + dec + ')</span>';
+          }
+          // {min, max} → "min–max"
+          if ('min' in s && 'max' in s) {
+            return escHtml(s.min + '–' + s.max);
+          }
+          // Generic object → JSON
+          try { return '<code>' + escHtml(JSON.stringify(s)) + '</code>'; }
+          catch (e) { return escHtml(String(s)); }
+        }
+        return escHtml(String(s));
+      }
+      if (sols.length === 1) return renderOne(sols[0]);
+      return sols.map(renderOne).join(' | ');
     }
 
     function initChartsForCurrentLesson() {
