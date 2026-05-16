@@ -450,9 +450,9 @@
       var pracUnitSlugs = (subject.settings && subject.settings.practice_units) || [];
       var r = await sb
         .from('units')
-        .select('id, slug, name, order_index')
+        .select('id, slug, name, sort_order')
         .eq('subject_id', subject.id)
-        .order('order_index');
+        .order('sort_order');
       if (r.error) {
         unitSelect.innerHTML = '<option value="">(error)</option>';
         return;
