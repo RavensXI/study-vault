@@ -780,10 +780,16 @@
           if (typeof m === 'string') {
             h += '<li>' + escHtml(m) + '</li>';
           } else {
-            // {trigger, response, feedback, ...}
+            // Supports two shapes:
+            //   {trigger, response, feedback, explanation}  ← legacy
+            //   {check, message, pattern}                   ← current (Maths/Sciences/Stats)
             var triggerStr = m.trigger != null ? String(m.trigger) : '';
-            var respStr = m.response || m.feedback || m.explanation || '';
-            h += '<li>' + (triggerStr ? '<code>' + escHtml(triggerStr) + '</code> → ' : '') + escHtml(respStr) + '</li>';
+            var patternStr = m.pattern || m.check || '';
+            var respStr = m.message || m.response || m.feedback || m.explanation || '';
+            var prefix = '';
+            if (triggerStr) prefix = '<code>' + escHtml(triggerStr) + '</code> → ';
+            else if (patternStr) prefix = '<code>' + escHtml(patternStr) + '</code> → ';
+            h += '<li>' + prefix + escHtml(respStr) + '</li>';
           }
         }
         h += '</ul></details>';
