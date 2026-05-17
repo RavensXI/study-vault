@@ -2429,22 +2429,16 @@ function initLessonProgress() {
   // Revision task
   tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
 
-  // Build a knowledge organiser — only shown if the highlight feature is
-  // enabled on this device. Clicking it puts the student into KO mode
-  // (sticky banner, highlighter cursor, per-category progress chips).
-  // Auto-ticks when the lesson has ≥1 highlight in each of the four categories.
-  var hlFeatureOn = false;
-  try { hlFeatureOn = localStorage.getItem('sv-hl-enabled') === '1'; } catch (e) {}
-  if (hlFeatureOn) {
-    tasks.push({
-      id: 'knowledge-organiser',
-      label: 'Build a knowledge organiser',
-      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
-      iconClass: 'lesson-progress-icon--ko',
-      auto: false,
-      koTask: true  // sentinel for the special click handler below
-    });
-  }
+  // Highlight mode — clicking enters mode (sets sv-hl-mode flag, switches
+  // cursor to a marker pen, lets the student drag-select to highlight).
+  // Always shown — clicking it also enables the feature on first use.
+  tasks.push({
+    id: 'highlight-mode',
+    label: 'Highlight mode',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+    iconClass: 'lesson-progress-icon--hl',
+    auto: false
+  });
 
   if (tasks.length === 0) return;
 
@@ -2530,15 +2524,16 @@ function initLessonProgress() {
 
   // ---- Shared click handlers ----
   function bindClicks(container, itemClass) {
-    // Manual tasks: toggle on click. The knowledge-organiser task is
-    // special-cased — clicking it enters KO Mode rather than toggling
-    // completion (completion comes from category coverage, not clicks).
+    // Manual tasks: toggle on click. The highlight-mode task is
+    // special-cased — clicking it enters Highlight Mode rather than
+    // toggling completion (auto-ticks once the student has highlighted
+    // anything on the lesson).
     container.querySelectorAll(itemClass + ':not([data-auto])').forEach(function(item) {
       item.addEventListener('click', function() {
         var taskId = item.dataset.task;
-        if (taskId === 'knowledge-organiser') {
-          if (typeof window.svEnterKoMode === 'function') {
-            window.svEnterKoMode();
+        if (taskId === 'highlight-mode') {
+          if (typeof window.svEnterHighlightMode === 'function') {
+            window.svEnterHighlightMode();
           }
           return;
         }
@@ -2562,25 +2557,25 @@ function initLessonProgress() {
   bindClicks(section, '.lesson-progress-item');
   bindClicks(gutter, '.gutter-progress-item');
 
-  // ---- Knowledge organiser auto-tick ----
-  // The highlight feature dispatches sv-hl-changed whenever the student
-  // adds, edits, deletes, or recategorises a highlight on this lesson.
-  // Tick when all four categories have ≥1; untick if they delete back below.
-  function refreshKoTask() {
-    if (!tasks.some(function (t) { return t.id === 'knowledge-organiser'; })) return;
-    var organised = (typeof window.svIsLessonOrganised === 'function')
-      ? window.svIsLessonOrganised()
+  // ---- Highlight mode auto-tick ----
+  // Tick when the student has any highlight on this lesson; untick if
+  // they delete back to zero. The highlight feature dispatches
+  // sv-hl-changed on any save/delete.
+  function refreshHighlightTask() {
+    if (!tasks.some(function (t) { return t.id === 'highlight-mode'; })) return;
+    var has = (typeof window.svLessonHasHighlights === 'function')
+      ? window.svLessonHasHighlights()
       : false;
-    if (!!state['knowledge-organiser'] !== organised) {
-      state['knowledge-organiser'] = organised;
+    if (!!state['highlight-mode'] !== has) {
+      state['highlight-mode'] = has;
       saveState(state);
       syncAll();
     }
   }
-  document.addEventListener('sv-hl-changed', refreshKoTask);
-  // Initial check — student may already have organised this lesson on
-  // a prior visit before the checklist task existed.
-  setTimeout(refreshKoTask, 100);
+  document.addEventListener('sv-hl-changed', refreshHighlightTask);
+  // Initial check — student may already have highlighted this lesson
+  // on a prior visit before the checklist task existed.
+  setTimeout(refreshHighlightTask, 100);
 
   // ---- Sync both widgets after any state change ----
   function syncAll() {

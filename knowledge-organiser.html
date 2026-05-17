@@ -44,14 +44,6 @@
     .ko-lesson{margin-bottom:18px;page-break-inside:avoid}
     .ko-lesson-title{font-weight:600;font-size:.95rem;color:var(--text-secondary,#5d564b);margin:0 0 10px;font-style:italic}
     body.dark-mode .ko-lesson-title{color:#c8c2ba}
-    .ko-cat-section{margin:0 0 12px}
-    .ko-cat-section:last-child{margin-bottom:0}
-    .ko-cat-header{display:flex;align-items:center;gap:7px;margin:0 0 6px;font-family:'Source Serif 4',Georgia,serif;font-size:.85rem;font-weight:700;color:var(--text-primary,#2d2a26);letter-spacing:.01em}
-    .ko-cat-header::before{content:'';width:8px;height:8px;border-radius:50%}
-    .ko-cat-header--fact::before{background:#eab308}
-    .ko-cat-header--why::before{background:#22c55e}
-    .ko-cat-header--so-what::before{background:#ec4899}
-    .ko-cat-header--question::before{background:#3b82f6}
 
     .ko-items{display:flex;flex-direction:column;gap:9px}
     .ko-item{padding:7px 0;break-inside:avoid;page-break-inside:avoid}
@@ -218,43 +210,24 @@
         return;
       }
 
-      var CAT_ORDER = ['fact', 'why', 'so-what', 'question'];
-      var CAT_LABEL = { fact: 'Key facts', why: 'Why', 'so-what': 'So what', question: 'Questions' };
-      function categoryOf(h) {
-        if (h && h.category) return h.category;
-        if (h && h.color === 'green') return 'why';
-        if (h && h.color === 'pink') return 'so-what';
-        if (h && h.color === 'blue') return 'question';
-        return 'fact';
-      }
-
-      // Render one lesson's grouped highlights — reused inside the unit loop.
+      // Render one lesson — flat list of highlights, no category grouping.
       function renderLesson(lesson) {
-        var groups = { fact: [], why: [], 'so-what': [], question: [] };
-        lesson.highlights.forEach(function (h) { groups[categoryOf(h)].push(h); });
         var out = '<div class="ko-lesson">';
         out +=     '<h4 class="ko-lesson-title">' + esc(lesson.lesson_title) + '</h4>';
-        CAT_ORDER.forEach(function (catId) {
-          var bucket = groups[catId];
-          if (!bucket || !bucket.length) return;
-          out += '<div class="ko-cat-section">';
-          out +=   '<h5 class="ko-cat-header ko-cat-header--' + esc(catId) + '">' + esc(CAT_LABEL[catId]) + '</h5>';
-          out +=   '<div class="ko-items">';
-          bucket.forEach(function (h) {
-            var color = h.color || (catId === 'why' ? 'green' : catId === 'so-what' ? 'pink' : catId === 'question' ? 'blue' : 'yellow');
-            out += '<div class="ko-item">';
-            out +=   '<div class="ko-snippet ko-snippet--' + esc(color) + '">';
-            out +=     '<span class="ko-snippet-bar ko-snippet-bar--' + esc(color) + '"></span>';
-            out +=     esc(h.text);
-            out +=   '</div>';
-            if (h.note) {
-              out += '<p class="ko-note">' + esc(h.note) + '</p>';
-            }
-            out += '</div>';
-          });
+        out +=     '<div class="ko-items">';
+        lesson.highlights.forEach(function (h) {
+          var color = h.color || 'yellow';
+          out += '<div class="ko-item">';
+          out +=   '<div class="ko-snippet ko-snippet--' + esc(color) + '">';
+          out +=     '<span class="ko-snippet-bar ko-snippet-bar--' + esc(color) + '"></span>';
+          out +=     esc(h.text);
           out +=   '</div>';
+          if (h.note) {
+            out += '<p class="ko-note">' + esc(h.note) + '</p>';
+          }
           out += '</div>';
         });
+        out +=     '</div>';
         out += '</div>';
         return out;
       }
