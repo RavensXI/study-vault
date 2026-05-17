@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Knowledge Organiser — StudyVault</title>
+  <title>Revision Notes — StudyVault</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
@@ -30,6 +30,10 @@
     body.ko-annotate-mode .ko-item{margin-bottom:24px;padding-bottom:14px;border-bottom:1px dashed rgba(45,42,38,.12)}
     body.dark-mode.ko-annotate-mode .ko-item{border-bottom-color:rgba(245,241,236,.15)}
     body.ko-annotate-mode .ko-item:last-child{border-bottom:none}
+    /* Ink saver — strip the full-bleed highlight background; keep only the
+       coloured edge bar so it's still obvious which colour each note was. */
+    body.ko-ink-saver .ko-snippet{background:transparent !important;padding-left:14px}
+    body.ko-ink-saver .ko-snippet-bar{width:4px}
 
     .ko-header{margin-bottom:24px;border-bottom:2px solid var(--text-primary,#2d2a26);padding-bottom:14px}
     body.dark-mode .ko-header{border-bottom-color:#f5f1ec}
@@ -81,6 +85,8 @@
     @media print {
       body.ko-annotate-mode .ko-paper { max-width: 14cm !important; }
       body.ko-annotate-mode .ko-item { margin-bottom: 1.4cm; padding-bottom: 0.6cm; border-bottom: 1px dashed #999; }
+      body.ko-ink-saver .ko-snippet { background: transparent !important; padding-left: 14px; }
+      body.ko-ink-saver .ko-snippet-bar { width: 4px; }
       html, body { background: #fff !important; color: #000 !important; }
       .no-print, .page-header, .ko-toolbar { display: none !important; }
       .ko-page { max-width: none; margin: 0; padding: 12mm 14mm; }
@@ -132,12 +138,13 @@
       <span class="ko-toolbar-sep"></span>
       <button id="ko-notes" type="button" aria-pressed="true" title="Include the notes you wrote alongside each highlight">Show notes</button>
       <button id="ko-annotate" type="button" aria-pressed="false" title="Narrow the page and add extra space between highlights so you can write annotations by hand">Annotation space</button>
+      <button id="ko-ink" type="button" aria-pressed="false" title="Strip the highlight backgrounds — saves ink when printing, keeps the coloured edge bar so you can still tell which colour each note was">Ink saver</button>
       <button class="ko-print-btn" id="ko-print" type="button">Print</button>
     </div>
 
     <article class="ko-paper">
       <header class="ko-header">
-        <h1 class="ko-title" contenteditable="true" spellcheck="false">Knowledge Organiser</h1>
+        <h1 class="ko-title" contenteditable="true" spellcheck="false">Revision Notes</h1>
         <div class="ko-subline">
           <span contenteditable="true" spellcheck="false" id="ko-name">Name: </span>
           <span contenteditable="true" spellcheck="false" id="ko-date"></span>
@@ -194,6 +201,12 @@
       document.body.classList.toggle('ko-annotate-mode', on);
     });
 
+    document.getElementById('ko-ink').addEventListener('click', function () {
+      var on = this.getAttribute('aria-pressed') !== 'true';
+      this.setAttribute('aria-pressed', on);
+      document.body.classList.toggle('ko-ink-saver', on);
+    });
+
     document.getElementById('ko-print').addEventListener('click', function () {
       window.print();
     });
@@ -220,23 +233,9 @@
         content.innerHTML =
           '<div class="ko-empty">' +
             '<h2>Nothing selected yet</h2>' +
-            '<p>Go back to <a href="/highlights.html">My Highlights</a>, tick the ones you want to bring forward, then click <strong>Build knowledge organiser</strong>.</p>' +
+            '<p>Go back to <a href="/highlights.html">My Highlights</a>, tick the ones you want to bring forward, then click <strong>Build revision notes</strong>.</p>' +
           '</div>';
         return;
-      }
-
-      // Smart default H1: if payload is a single subject/unit/lesson (the
-      // "Print these notes" path from a lesson modal), default to that
-      // lesson's title instead of the generic "Knowledge Organiser".
-      // Student can still edit it inline.
-      if (data.subjects.length === 1
-          && data.subjects[0].units && data.subjects[0].units.length === 1
-          && data.subjects[0].units[0].lessons.length === 1) {
-        var lesson = data.subjects[0].units[0].lessons[0];
-        var titleEl = document.querySelector('.ko-title');
-        if (titleEl && lesson && lesson.lesson_title) {
-          titleEl.textContent = lesson.lesson_title;
-        }
       }
 
       // Render one lesson — flat list of highlights, no category grouping.
