@@ -659,9 +659,14 @@ body.dark-mode .page-header.scrolled {
 /* On wide viewports (where the gutter checklist appears), pull just the
    StudyVault wordmark out of the centred header-inner and anchor it above
    the gutter column in the otherwise-empty top-left whitespace. The unit
-   pill stays in the header-inner flex flow where it was. */
+   pill stays in the header-inner flex flow where it was.
+
+   Scoped to headers WITHOUT .admin-nav — on admin pages the brand needs to
+   stay in the flex flow so the admin dropdown nav balances against it via
+   justify-content:space-between. Pulling the brand out left the admin nav
+   collapsed to the left edge of the header. */
 @media (min-width: 1400px) {
-  .header-brand {
+  .page-header-inner:not(:has(.admin-nav)) .header-brand {
     position: fixed;
     top: 0.75rem;
     left: calc((100vw - var(--page-max, 1160px)) / 4);
