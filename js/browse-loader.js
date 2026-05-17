@@ -381,201 +381,38 @@
     });
     await Promise.all(countPromises);
 
-    // Free user English Lit: filter to only selected texts + universally-compulsory units.
-    // Anthology poetry clusters (Power & Conflict, Love & Relationships, Conflict,
-    // Youth and Age, Belonging, etc.) are STUDENT-CHOICE — must come from selectedSlugs.
-    // Only 'unseen-poetry' is universally compulsory across boards.
-    if (subjectSlug.indexOf('english-literature') === 0 && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeSubj = FreeUser.getSubject(subjectSlug);
-      if (freeSubj && freeSubj.texts && Object.keys(freeSubj.texts).length > 0) {
-        var selectedSlugs = Object.values(freeSubj.texts);
-        var compulsory = ['unseen-poetry'];
+    // Free-user option filters (Eng Lit text picks, History options, Drama
+    // set play, RE-AQA religions/themes, RE-Eduqas Route A/B picks,
+    // RE-Edexcel Paper 1+2+(3-or-4)). Per-subject logic lives in
+    // js/free-user-filters.js so this filter and the homepage card counts
+    // share one allowlist source. To add a new option-route subject, add
+    // its handler to FreeUserFilters — no edits needed here.
+    if (typeof window.FreeUserFilters !== 'undefined') {
+      var allowedFreeUserSlugs = window.FreeUserFilters.getAllowedUnitSlugs(subjectSlug);
+      if (allowedFreeUserSlugs) {
         units = units.filter(function (u) {
-          return selectedSlugs.indexOf(u.slug) !== -1 || compulsory.indexOf(u.slug) !== -1;
+          return allowedFreeUserSlugs.indexOf(u.slug) !== -1;
         });
       }
     }
 
-    // Free user History: filter to only the 4 picked options (one per paper section).
-    // AQA students pick 4 of 16, Edexcel students pick 4 of 4 (auto-selected).
-    if ((subjectSlug === 'history-aqa' || subjectSlug === 'history-edexcel') &&
-        typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeHist = FreeUser.getSubject(subjectSlug);
-      if (freeHist && freeHist.options && Object.keys(freeHist.options).length > 0) {
-        var pickedSlugs = Object.values(freeHist.options);
-        units = units.filter(function (u) {
-          return pickedSlugs.indexOf(u.slug) !== -1;
-        });
-      }
-    }
-
-    // Free user Drama: filter to only the picked set play unit + universal
-    // units (theatre roles, practitioners, live theatre review).
-    if (subjectSlug === 'drama-aqa' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeDrama = FreeUser.getSubject(subjectSlug);
-      if (freeDrama && freeDrama.options && Object.keys(freeDrama.options).length > 0) {
-        var DRAMA_UNIVERSAL = ['theatre-roles-stagecraft', 'practitioners-styles', 'live-theatre-review'];
-        var pickedDramaSlugs = Object.values(freeDrama.options);
-        units = units.filter(function (u) {
-          return DRAMA_UNIVERSAL.indexOf(u.slug) !== -1 || pickedDramaSlugs.indexOf(u.slug) !== -1;
-        });
-      }
-    }
-
-    // Free user Religious Studies (AQA): filter to picked religions
-    // (Beliefs + Practices for each) + picked themes. Schools pick 2 of 7
-    // religions and 4 of 6 themes, so the visible set = 4 religion units + 4
-    // theme units = 8 total. Existing users without picks default to the
-    // original 8 units that pre-dated the picker (Christianity + Islam +
-    // Themes A/B/D/E) so they don't suddenly see all 20 unfiltered.
-    // Both old (`religious-education`) and new (`religious-studies-aqa`)
-    // slugs accepted during the slug-refactor transition window.
-    if ((subjectSlug === 'religious-studies-aqa' || subjectSlug === 'religious-education') && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeRE = FreeUser.getSubject(subjectSlug);
-      // Only apply the filter for users who actually have RE picked. Anyone
-      // navigating directly without RE in their prefs sees all 20 units.
-      if (freeRE) {
-        var allowedREUnitSlugs;
-        if ((freeRE.religions && freeRE.religions.length) || (freeRE.themes && freeRE.themes.length)) {
-          var rels = freeRE.religions || [];
-          var thms = freeRE.themes || [];
-          allowedREUnitSlugs = [];
-          rels.forEach(function (r) {
-            allowedREUnitSlugs.push(r + '-beliefs');
-            allowedREUnitSlugs.push(r + '-practices');
-          });
-          thms.forEach(function (t) { allowedREUnitSlugs.push(t); });
-        } else {
-          // Legacy free user (RE picked but no religion/theme data — pre-picker).
-          // Match the original 8-unit visible set so they don't suddenly see 20.
-          allowedREUnitSlugs = [
-            'christianity-beliefs', 'christianity-practices',
-            'islam-beliefs', 'islam-practices',
-            'theme-a-relationships', 'theme-b-religion-life',
-            'theme-d-peace-conflict', 'theme-e-crime-punishment'
-          ];
-        }
-        units = units.filter(function (u) {
-          return allowedREUnitSlugs.indexOf(u.slug) !== -1;
-        });
-      }
-    }
-
-    // Eduqas RS filter — different unit structure (flatter; no -beliefs/-practices
-    // suffix; Route B includes Foundational + Applied Catholic Theology units
-    // that aren't separately tracked in the picker).
-    if (subjectSlug === 'religious-studies-eduqas' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeRE_eduqas = FreeUser.getSubject(subjectSlug);
-      if (freeRE_eduqas) {
-        var allowedEduqasSlugs;
-        if ((freeRE_eduqas.religions && freeRE_eduqas.religions.length) ||
-            (freeRE_eduqas.themes && freeRE_eduqas.themes.length)) {
-          allowedEduqasSlugs = (freeRE_eduqas.religions || []).slice();
-          (freeRE_eduqas.themes || []).forEach(function (t) {
-            allowedEduqasSlugs.push(t);
-          });
-          // Route B implicitly includes the two Foundational Catholic Theology
-          // units (Origins/Meaning + Good/Evil), which aren't surfaced in the
-          // picker but are part of every Route B syllabus.
-          if (freeRE_eduqas.route === 'b' ||
-              allowedEduqasSlugs.indexOf('catholic-christianity') !== -1) {
-            allowedEduqasSlugs.push('catholic-foundational-origins-and-meaning');
-            allowedEduqasSlugs.push('catholic-foundational-good-and-evil');
-          }
-        }
-        if (allowedEduqasSlugs) {
-          units = units.filter(function (u) {
-            return allowedEduqasSlugs.indexOf(u.slug) !== -1;
-          });
-        }
-      }
-    }
-
-    // Edexcel RS (1RA0) filter. Student picks:
-    //   Paper 1 religion (Catholic / Christianity / Islam)
-    //   Paper 2 religion (different from Paper 1; spec also blocks
-    //     Catholic↔Christianity cross-picks)
-    //   Paper 3 OR Paper 4 (spec §271-288 — students sit one, not both)
-    //     Paper 3's religion = Paper 1's religion (spec §410).
-    //     Paper 4 = Mark's Gospel or the Qur'an — free pick (spec §440).
-    // Show all 15 units if the user hasn't picked yet (navigated directly).
-    if (subjectSlug === 'religious-studies-edexcel' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeRE_edexcel = FreeUser.getSubject(subjectSlug);
-      if (freeRE_edexcel && (freeRE_edexcel.paper1 || freeRE_edexcel.paper2)) {
-        var PAPER3_MAP = {
-          'paper-1-catholic-christianity': 'paper-3-philosophy-ethics-catholic',
-          'paper-1-christianity': 'paper-3-philosophy-ethics-christianity',
-          'paper-1-islam': 'paper-3-philosophy-ethics-islam'
-        };
-        var allowedEdexcelSlugs = [];
-        if (freeRE_edexcel.paper1) {
-          allowedEdexcelSlugs.push(freeRE_edexcel.paper1);
-        }
-        if (freeRE_edexcel.paper2) {
-          allowedEdexcelSlugs.push(freeRE_edexcel.paper2);
-        }
-        // Either Paper 3 (derived from Paper 1) OR Paper 4 (user-picked text).
-        // Fall back to showing Paper 3 if examChoice is missing (older saved prefs).
-        if (freeRE_edexcel.examChoice === 'paper4' && freeRE_edexcel.paper4) {
-          allowedEdexcelSlugs.push(freeRE_edexcel.paper4);
-        } else if (freeRE_edexcel.paper1) {
-          var p3 = PAPER3_MAP[freeRE_edexcel.paper1];
-          if (p3) allowedEdexcelSlugs.push(p3);
-        }
-        units = units.filter(function (u) {
-          return allowedEdexcelSlugs.indexOf(u.slug) !== -1;
-        });
-      }
-    }
-
-    // Free user Film Studies: filter at LESSON level (each unit contains
-    // multiple selectable films; student has picked one per section).
-    // Universal units (film-form, foundations, developments) keep all
-    // their lessons; only the set-film units have their lessons trimmed
-    // to show overviews + the student's picked film.
-    if (subjectSlug === 'film-studies-eduqas' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeFilm = FreeUser.getSubject(subjectSlug);
-      if (freeFilm && freeFilm.films && Object.keys(freeFilm.films).length > 0) {
-        var pickedFilmSlugs = new Set(Object.values(freeFilm.films));
-        // Slugs that are SELECTABLE (one of 25 set-film options across the 5 sections).
-        // Lessons whose slug is in this set but NOT picked are filtered out.
-        // Lessons NOT in this set (overviews, comparative-method, specialist-writing,
-        // generic film form, etc.) always show.
-        var FILM_SELECTABLE = new Set([
-          'dracula-and-the-lost-boys-vampires-across-eras',
-          'singin-in-the-rain-and-grease-the-hollywood-musical',
-          'pillow-talk-and-when-harry-met-sally-the-romantic-comedy',
-          'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion',
-          'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety',
-          'juno-tonal-comedy-and-the-indie-voice',
-          'whiplash-cutting-sound-and-pursuit-of-greatness',
-          'lady-bird-coming-of-age-and-greta-gerwigs-direction',
-          'the-hurt-locker-and-the-hate-u-give-issue-led-indies',
-          'the-hate-u-give-and-issue-led-indie',
-          'slumdog-millionaire-narrative-and-mumbai',
-          'district-9-narrative-and-segregation-allegory',
-          'the-babadook-narrative-and-grief-as-monster',
-          'the-breadwinner-narrative-and-animation-under-occupation',
-          'jojo-rabbit-narrative-and-comic-distance',
-          'tsotsi-representation-and-johannesburg',
-          'the-wave-representation-and-conformity',
-          'wadjda-representation-and-saudi-girlhood',
-          'girlhood-representation-and-paris-banlieue',
-          'the-farewell-representation-and-diaspora-grief',
-          'submarine-aesthetic-and-adolescent-imagination',
-          'attack-the-block-aesthetic-and-genre-mixing',
-          'skyfall-aesthetic-and-bond-cinematography',
-          'blinded-by-the-light-aesthetic-and-musical-realism',
-          'rocks-aesthetic-and-multicultural-london'
-        ]);
-        // Replace per-unit count fetch with per-unit filtered count
+    // Free user Film Studies: lesson-level filter (each unit has overviews
+    // plus multiple selectable films; student picks one per section).
+    // Universal units (film-form, foundations, developments) keep all their
+    // lessons; only the set-film units have their lessons trimmed. Selectable
+    // lesson slug set lives in FreeUserFilters.FILM_SELECTABLE.
+    if (typeof window.FreeUserFilters !== 'undefined') {
+      var pickedFilmList = window.FreeUserFilters.getPickedFilmSlugs(subjectSlug);
+      if (pickedFilmList) {
+        var pickedFilmSet = new Set(pickedFilmList);
+        var FILM_SELECTABLE_MAP = window.FreeUserFilters.FILM_SELECTABLE;
         var filmCountPromises = units.map(function (u) {
           return sb.from('lessons').select('slug, tier').eq('unit_id', u.id).eq('status', 'live')
             .then(function (res) {
               var rows = res.data || [];
               if (foundationFilter) rows = rows.filter(function (r) { return r.tier !== 'higher'; });
               rows = rows.filter(function (r) {
-                if (FILM_SELECTABLE.has(r.slug)) return pickedFilmSlugs.has(r.slug);
+                if (FILM_SELECTABLE_MAP[r.slug]) return pickedFilmSet.has(r.slug);
                 return true;
               });
               u._filteredCount = rows.length;
@@ -778,39 +615,14 @@
     // Free user Film Studies: trim set-film lessons within this unit to only
     // the student's picked film (if any of the 5 picks falls in this unit).
     // Overviews, comparative-method, specialist-writing etc. keep showing.
-    if (subjectSlug === 'film-studies-eduqas' && typeof FreeUser !== 'undefined' && FreeUser.isActive()) {
-      var freeFilm = FreeUser.getSubject(subjectSlug);
-      if (freeFilm && freeFilm.films && Object.keys(freeFilm.films).length > 0) {
-        var pickedFilmSlugs2 = new Set(Object.values(freeFilm.films));
-        var FILM_SELECTABLE2 = new Set([
-          'dracula-and-the-lost-boys-vampires-across-eras',
-          'singin-in-the-rain-and-grease-the-hollywood-musical',
-          'pillow-talk-and-when-harry-met-sally-the-romantic-comedy',
-          'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion',
-          'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety',
-          'juno-tonal-comedy-and-the-indie-voice',
-          'whiplash-cutting-sound-and-pursuit-of-greatness',
-          'lady-bird-coming-of-age-and-greta-gerwigs-direction',
-          'the-hurt-locker-and-the-hate-u-give-issue-led-indies',
-          'the-hate-u-give-and-issue-led-indie',
-          'slumdog-millionaire-narrative-and-mumbai',
-          'district-9-narrative-and-segregation-allegory',
-          'the-babadook-narrative-and-grief-as-monster',
-          'the-breadwinner-narrative-and-animation-under-occupation',
-          'jojo-rabbit-narrative-and-comic-distance',
-          'tsotsi-representation-and-johannesburg',
-          'the-wave-representation-and-conformity',
-          'wadjda-representation-and-saudi-girlhood',
-          'girlhood-representation-and-paris-banlieue',
-          'the-farewell-representation-and-diaspora-grief',
-          'submarine-aesthetic-and-adolescent-imagination',
-          'attack-the-block-aesthetic-and-genre-mixing',
-          'skyfall-aesthetic-and-bond-cinematography',
-          'blinded-by-the-light-aesthetic-and-musical-realism',
-          'rocks-aesthetic-and-multicultural-london'
-        ]);
+    // Selectable lesson set lives in FreeUserFilters.FILM_SELECTABLE.
+    if (typeof window.FreeUserFilters !== 'undefined') {
+      var pickedFilmListUnit = window.FreeUserFilters.getPickedFilmSlugs(subjectSlug);
+      if (pickedFilmListUnit) {
+        var pickedFilmSetUnit = new Set(pickedFilmListUnit);
+        var FILM_SELECTABLE_MAP_UNIT = window.FreeUserFilters.FILM_SELECTABLE;
         lessons = lessons.filter(function (l) {
-          if (FILM_SELECTABLE2.has(l.slug)) return pickedFilmSlugs2.has(l.slug);
+          if (FILM_SELECTABLE_MAP_UNIT[l.slug]) return pickedFilmSetUnit.has(l.slug);
           return true;
         });
       }

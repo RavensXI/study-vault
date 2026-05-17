@@ -3,6 +3,10 @@
    live counts from Supabase. Walks all .home-card[data-subject] elements
    and updates their .home-card-detail. Also exposes
    window.HomeCounts.getDetail(slug) for the free-user dynamic renderer.
+
+   Per-subject option filters live in js/free-user-filters.js — this file
+   is intentionally generic so adding a new option-route subject does not
+   require touching home-counts.js.
 */
 (function () {
   'use strict';
@@ -11,145 +15,6 @@
     'https://baipckgywpnwapobwtsy.supabase.co',
     'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
   );
-
-  // English Lit text-pick filtering: free users select 1 Shakespeare + 1
-  // 19th-C novel + 1 Modern + 1 Poetry cluster (per board). Mirror the
-  // browse-loader filter so home counts match what the student actually sees.
-  var ENGLIT_SLUGS = ['english-literature', 'english-literature-aqa', 'english-literature-edexcel',
-                       'english-literature-ocr', 'english-literature-eduqas'];
-  var ENGLIT_COMPULSORY = ['unseen-poetry'];
-
-  function getFreeEngLitSelectedUnitSlugs(subjectSlug) {
-    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
-    var pref = FreeUser.getSubject(subjectSlug);
-    if (!pref || !pref.texts || !Object.keys(pref.texts).length) return null;
-    var slugs = Object.values(pref.texts);
-    return slugs.concat(ENGLIT_COMPULSORY);
-  }
-
-  // History option-pick filtering: free users pick 1 from each of 4 paper
-  // sections (Period · Wider World Depth · Thematic · British Depth). Mirror
-  // the browse-loader filter so the home card shows 4 units / N lessons.
-  var HISTORY_SLUGS = ['history-aqa', 'history-edexcel'];
-
-  function getFreeHistorySelectedUnitSlugs(subjectSlug) {
-    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
-    var pref = FreeUser.getSubject(subjectSlug);
-    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
-    var slugs = Object.values(pref.options);
-    // OCR-A: International Relations 1918-1975 is the compulsory period
-    // study every J410 student takes — auto-include alongside user picks.
-    if (subjectSlug === 'history-ocr') {
-      slugs = slugs.concat(['international-relations-1918-1975']);
-    }
-    return slugs;
-  }
-
-  // Drama: free users pick 1 set play from 9 options. Universal units
-  // (theatre roles, practitioners, live theatre review) always show.
-  var DRAMA_SLUGS = ['drama-aqa'];
-  var DRAMA_UNIVERSAL = ['theatre-roles-stagecraft', 'practitioners-styles', 'live-theatre-review'];
-
-  function getFreeDramaSelectedUnitSlugs(subjectSlug) {
-    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
-    var pref = FreeUser.getSubject(subjectSlug);
-    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
-    return Object.values(pref.options).concat(DRAMA_UNIVERSAL);
-  }
-
-  // Religious Studies (AQA): free users pick 2 of 7 religions (each gives
-  // Beliefs + Practices) and 4 of 6 themes — visible set = 8 units. Legacy
-  // users without picks fall back to the pre-gap-fill 8-unit set.
-  // Both old (`religious-education`) and new (`religious-studies-aqa`) slugs
-  // listed for the slug-refactor transition window.
-  var RE_SLUGS = ['religious-studies-aqa', 'religious-education'];
-  var RE_DEFAULT_UNITS = [
-    'christianity-beliefs', 'christianity-practices',
-    'islam-beliefs', 'islam-practices',
-    'theme-a-relationships', 'theme-b-religion-life',
-    'theme-d-peace-conflict', 'theme-e-crime-punishment'
-  ];
-
-  function getFreeRESelectedUnitSlugs(subjectSlug) {
-    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
-    var pref = FreeUser.getSubject(subjectSlug);
-    // Only filter for free users who actually have RE picked. Anonymous home
-    // visitors (no FreeUser session) get the unfiltered 20-unit total.
-    if (!pref) return null;
-    if ((pref.religions && pref.religions.length) || (pref.themes && pref.themes.length)) {
-      var rels = pref.religions || [];
-      var thms = pref.themes || [];
-      var slugs = [];
-      rels.forEach(function (r) {
-        slugs.push(r + '-beliefs');
-        slugs.push(r + '-practices');
-      });
-      thms.forEach(function (t) { slugs.push(t); });
-      return slugs;
-    }
-    // Legacy free user: RE picked but no religion/theme data — show default 8.
-    return RE_DEFAULT_UNITS.slice();
-  }
-
-  // Eduqas / WJEC RS uses a flatter unit structure (no -beliefs/-practices
-  // suffix) and Route B has implicit Foundational Catholic Theology units
-  // not surfaced in the picker. Mirror browse-loader's filter exactly.
-  var RE_EDUQAS_SLUGS = ['religious-studies-eduqas'];
-
-  function getFreeREEduqasSelectedUnitSlugs(subjectSlug) {
-    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
-    var pref = FreeUser.getSubject(subjectSlug);
-    if (!pref) return null;
-    if ((pref.religions && pref.religions.length) || (pref.themes && pref.themes.length)) {
-      var slugs = (pref.religions || []).slice();
-      (pref.themes || []).forEach(function (t) { slugs.push(t); });
-      // Route B implicitly adds Foundational Catholic Theology units.
-      if (pref.route === 'b' || slugs.indexOf('catholic-christianity') !== -1) {
-        slugs.push('catholic-foundational-origins-and-meaning');
-        slugs.push('catholic-foundational-good-and-evil');
-      }
-      return slugs;
-    }
-    return null;
-  }
-
-  // Film Studies: free users pick 1 film from each of 5 sections. Filtering
-  // is at LESSON level (each unit contains multiple selectable films).
-  var FILM_STUDIES_SLUGS = ['film-studies-eduqas'];
-  var FILM_SELECTABLE = {
-    'dracula-and-the-lost-boys-vampires-across-eras': true,
-    'singin-in-the-rain-and-grease-the-hollywood-musical': true,
-    'pillow-talk-and-when-harry-met-sally-the-romantic-comedy': true,
-    'rebel-without-a-cause-and-ferris-buellers-day-off-teen-rebellion': true,
-    'invasion-of-the-body-snatchers-and-et-aliens-and-anxiety': true,
-    'juno-tonal-comedy-and-the-indie-voice': true,
-    'whiplash-cutting-sound-and-pursuit-of-greatness': true,
-    'lady-bird-coming-of-age-and-greta-gerwigs-direction': true,
-    'the-hurt-locker-and-the-hate-u-give-issue-led-indies': true,
-    'the-hate-u-give-and-issue-led-indie': true,
-    'slumdog-millionaire-narrative-and-mumbai': true,
-    'district-9-narrative-and-segregation-allegory': true,
-    'the-babadook-narrative-and-grief-as-monster': true,
-    'the-breadwinner-narrative-and-animation-under-occupation': true,
-    'jojo-rabbit-narrative-and-comic-distance': true,
-    'tsotsi-representation-and-johannesburg': true,
-    'the-wave-representation-and-conformity': true,
-    'wadjda-representation-and-saudi-girlhood': true,
-    'girlhood-representation-and-paris-banlieue': true,
-    'the-farewell-representation-and-diaspora-grief': true,
-    'submarine-aesthetic-and-adolescent-imagination': true,
-    'attack-the-block-aesthetic-and-genre-mixing': true,
-    'skyfall-aesthetic-and-bond-cinematography': true,
-    'blinded-by-the-light-aesthetic-and-musical-realism': true,
-    'rocks-aesthetic-and-multicultural-london': true
-  };
-
-  function getFreeFilmStudiesPickedFilmSlugs(subjectSlug) {
-    if (typeof FreeUser === 'undefined' || !FreeUser.isActive()) return null;
-    var pref = FreeUser.getSubject(subjectSlug);
-    if (!pref || !pref.films || !Object.keys(pref.films).length) return null;
-    return Object.values(pref.films);
-  }
 
   // Determine which subject rows to count for the current viewer.
   // - School student: school's bespoke + subscribed (anything the student can see)
@@ -224,34 +89,20 @@
       });
     }
 
+    var ff = window.FreeUserFilters;
     var counts = {};
     Object.keys(subjectsBySlug).forEach(function (slug) {
       var subjList = subjectsBySlug[slug];
       var subjIds = subjList.map(function (s) { return s.id; });
 
-      // Eng Lit / History / Drama / RE free-tier slugs: filter to selected unit slugs.
-      var allowedUnitSlugs = null;
-      if (ENGLIT_SLUGS.indexOf(slug) !== -1) {
-        allowedUnitSlugs = getFreeEngLitSelectedUnitSlugs(slug);
-      } else if (HISTORY_SLUGS.indexOf(slug) !== -1) {
-        allowedUnitSlugs = getFreeHistorySelectedUnitSlugs(slug);
-      } else if (DRAMA_SLUGS.indexOf(slug) !== -1) {
-        allowedUnitSlugs = getFreeDramaSelectedUnitSlugs(slug);
-      } else if (RE_SLUGS.indexOf(slug) !== -1) {
-        allowedUnitSlugs = getFreeRESelectedUnitSlugs(slug);
-      } else if (RE_EDUQAS_SLUGS.indexOf(slug) !== -1) {
-        allowedUnitSlugs = getFreeREEduqasSelectedUnitSlugs(slug);
-      }
+      // Unit-level option filter (Eng Lit / History / Drama / RE-AQA / RE-Eduqas / RE-Edexcel).
+      var allowedUnitSlugs = ff ? ff.getAllowedUnitSlugs(slug) : null;
 
-      // Film Studies: lesson-level filter (each unit has overviews + multiple
-      // selectable films; student picks one per section).
-      var pickedFilmSlugs = null;
-      if (FILM_STUDIES_SLUGS.indexOf(slug) !== -1) {
-        pickedFilmSlugs = getFreeFilmStudiesPickedFilmSlugs(slug);
-      }
+      // Lesson-level option filter (Film Studies — each unit has overviews
+      // plus multiple selectable films; student picks one per section).
+      var pickedFilmSlugs = ff ? ff.getPickedFilmSlugs(slug) : null;
+      var filmSelectable = ff ? ff.FILM_SELECTABLE : null;
 
-      var unitCount = 0;
-      var lessonCount = 0;
       var matchingUnitIds = {};
       units.forEach(function (u) {
         if (subjIds.indexOf(u.subject_id) === -1) return;
@@ -263,20 +114,20 @@
       var savedTiers = {};
       try { savedTiers = JSON.parse(localStorage.getItem('studyvault-tiers') || '{}'); } catch (e) {}
       var thisTier = savedTiers[slug] || 'higher';
+
+      var lessonCount = 0;
       var unitsWithVisibleLessons = {};
       lessons.forEach(function (l) {
         if (!matchingUnitIds[l.unit_id]) return;
         if (thisTier === 'foundation' && l.tier === 'higher') return;
         // Film Studies lesson-level filter: drop selectable lessons not in picks
-        if (pickedFilmSlugs && FILM_SELECTABLE[l.slug] && pickedFilmSlugs.indexOf(l.slug) === -1) return;
+        if (pickedFilmSlugs && filmSelectable && filmSelectable[l.slug] && pickedFilmSlugs.indexOf(l.slug) === -1) return;
         lessonCount++;
         unitsWithVisibleLessons[l.unit_id] = true;
       });
 
       // Unit count = units that have at least one visible lesson after filters.
-      // (For unit-level filters this matches matchingUnitIds, so it's a no-op.
-      // For Film Studies' lesson-level filter, units with all-hidden lessons drop out.)
-      Object.keys(unitsWithVisibleLessons).forEach(function () { unitCount++; });
+      var unitCount = Object.keys(unitsWithVisibleLessons).length;
 
       counts[slug] = { units: unitCount, lessons: lessonCount };
     });
