@@ -670,6 +670,23 @@ body.dark-mode .page-header.scrolled {
   }
 }
 
+/* On mobile the header has no proper layout — just the hamburger button
+   on the right and the brand. Centre the brand in the header so the
+   StudyVault wordmark anchors the page visually. Hamburger stays on
+   the right via the existing flex flow. */
+@media (max-width: 768px) {
+  .page-header-inner {
+    position: relative;
+    min-height: 2.5rem;
+  }
+  .header-brand {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .header-brand {
   display: flex;
   align-items: center;
@@ -1230,28 +1247,36 @@ body.dark-mode .header-tour-btn {
   flex-wrap: wrap;
 }
 
-/* Mobile: compress to 2 lines max. Hide button labels (keep icons),
-   hide separators + the "Overlay:" label, tighten padding. */
+/* Mobile: force exactly 2 lines. Row 1 = Dark mode / Dyslexia font /
+   A- / A+ (labels kept so each control is clear). Row 2 = overlay
+   swatches, forced onto its own line via flex-basis:100%.
+   Separators + overlay label hidden to save space. */
 @media (max-width: 640px) {
   .a11y-toolbar {
-    gap: 0.4rem 0.6rem;
-    padding: 0.5rem 0.6rem;
-    font-size: 0.7rem;
-  }
-  .a11y-toolbar .a11y-dark-toggle span,
-  .a11y-toolbar .a11y-dyslexia-toggle span {
-    display: none;
+    gap: 0.35rem 0.45rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.65rem;
   }
   .a11y-toolbar .a11y-separator,
   .a11y-toolbar .a11y-overlay-label {
     display: none;
   }
   .a11y-toolbar .a11y-btn {
-    padding: 0.35rem 0.5rem;
+    padding: 0.28rem 0.45rem;
+    gap: 0.25rem;
+  }
+  .a11y-toolbar .a11y-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  .a11y-toolbar .a11y-overlay-group {
+    flex-basis: 100%;
+    justify-content: center;
+    gap: 0.3rem;
   }
   .a11y-toolbar .a11y-overlay {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
   }
 }
 
