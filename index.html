@@ -496,6 +496,7 @@
     .fw-text-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .fw-text-btn { padding: 0.4rem 0.85rem; border: 1px solid #e8e2d8; border-radius: 8px; background: #fff; font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .fw-text-btn.selected { background: #2d2a26; color: #fff; border-color: #2d2a26; }
+    .fw-text-btn:disabled { opacity: 0.35; cursor: not-allowed; background: #f5f1ea; color: #7a7068; }
 
     .fw-toast { display: none; position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: #2d2a26; color: #fff; padding: 0.6rem 1.25rem; border-radius: 10px; font-size: 0.82rem; font-weight: 500; z-index: 3000; animation: sv-fade-in 0.2s ease; }
     .fw-toast.visible { display: block; }
@@ -1030,6 +1031,14 @@
           <p class="home-card-detail">4 units &middot; 20 lessons</p>
         </div>
       </a>
+      <a href="/browse/statistics" class="home-card sv-reveal" data-subject="statistics" style="--card-accent: #0369a1">
+        <img class="home-card-img" src="/images/subject-statistics.jpg" alt="Statistics" width="500" height="333" loading="lazy" decoding="async">
+        <div class="home-card-body">
+          <h3>Statistics</h3>
+          <p class="home-card-board">AQA</p>
+          <p class="home-card-detail">5 units &middot; 28 lessons</p>
+        </div>
+      </a>
       <a href="/browse/music-technology" class="home-card sv-reveal" data-subject="music-technology" style="--card-accent: #4a6fa5">
         <img class="home-card-img" src="/images/subject-music-tech.jpg" alt="Music Technology" width="500" height="333" loading="lazy" decoding="async">
         <div class="home-card-body">
@@ -1271,6 +1280,11 @@
           <div class="picker-item-label">History (OCR)</div>
           <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
+        <div class="picker-item" data-subject="statistics" style="--picker-accent: #0369a1">
+          <img class="picker-item-img" src="/images/subject-statistics.jpg" alt="Statistics" decoding="async">
+          <div class="picker-item-label">Statistics</div>
+          <div class="picker-check"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+        </div>
       </div>
       <div class="picker-footer">
         <button class="picker-done" id="picker-done" disabled>Done</button>
@@ -1305,6 +1319,7 @@
 
   <script src="js/school-session.js"></script>
   <script src="js/free-user.js"></script>
+  <script src="js/free-user-filters.js"></script>
   <script src="js/deck-reveal.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/home-counts.js"></script>
@@ -1407,6 +1422,7 @@
         'science-aqa': { name: 'Combined Science', image: '/images/subject-science.jpg', accent: '#16a34a', detail: '6 papers' },
         'religious-studies-aqa': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#1e40af', detail: '8 units' },
         'religious-studies-eduqas': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '15 units · 53 lessons' },
+        'religious-studies-edexcel': { name: 'Religious Studies', image: '/images/subject-religious-studies.jpg', accent: '#7c2d12', detail: '15 units · 71 lessons' },
         'geography-aqa': { name: 'Geography', image: '/images/subject-geography.jpg', accent: '#059669', detail: '3 units' },
         'health-social-care-edexcel': { name: 'Health & Social Care', image: '/images/subject-health-social-care.jpg', accent: '#e11d48', detail: '1 unit · 12 lessons' },
         // Legacy keys retained so existing FreeUser localStorage entries (saved
@@ -1454,6 +1470,8 @@
         'it-ocr': { name: 'Information Technology', image: '/images/subject-it-ocr.jpg', accent: '#1e40af', detail: '1 unit · 8 lessons' },
         'media-studies-aqa': { name: 'Media Studies', image: '/images/subject-media-studies-aqa.jpg', accent: '#be185d', detail: '4 units · 20 lessons' },
         'history-ocr': { name: 'History', image: '/images/subject-history-ocr.jpg', accent: '#581c87', detail: '' },
+        'statistics': { name: 'Statistics', image: '/images/subject-statistics.jpg', accent: '#0369a1', detail: '5 units · 28 lessons' },
+        'statistics-aqa': { name: 'Statistics', image: '/images/subject-statistics.jpg', accent: '#0369a1', detail: '5 units · 28 lessons' },
       };
 
       if (freePrefs && freePrefs.subjects && freePrefs.subjects.length > 0) {
@@ -1677,7 +1695,7 @@
       'hospitality-catering': { 'WJEC': true },
       'engineering': { 'Eduqas': true, 'WJEC': true },
       'history': { 'AQA': true, 'Edexcel': true, 'OCR': true },
-      'religious-studies': { 'AQA': true, 'Eduqas': true, 'WJEC': true },
+      'religious-studies': { 'AQA': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true },
       'music-technology': { 'NCFE': true },
       'computer-science': { 'OCR': true, 'AQA': true },
       'it': { 'OCR': true },
@@ -1693,6 +1711,7 @@
       'film-studies': { 'Eduqas': true, 'WJEC': true },
       'sociology': { 'AQA': true, 'Eduqas': true, 'WJEC': true },
       'media-studies': { 'AQA': true },
+      'statistics': { 'AQA': true },
     };
 
     // English Lit texts per board, grouped by category
@@ -1972,6 +1991,38 @@
           { slug: 'theme-relationships', name: 'Issues of Relationships' },
           { slug: 'theme-human-rights', name: 'Issues of Human Rights' }
         ]
+      },
+      'edexcel': {
+        // Edexcel 1RA0:
+        //   Paper 1 — pick one religion in depth (3 options).
+        //   Paper 2 — pick a SECOND religion. Catholic and Christianity students
+        //     cannot pick either of those (spec §366-367), only Islam students get a free pick.
+        //   Students sit EITHER Paper 3 OR Paper 4, not both.
+        //   Paper 3 (Philosophy and Ethics) is auto-derived to match Paper 1's religion.
+        //   Paper 4 (Textual Studies) is a free choice between Mark's Gospel and the Qur'an —
+        //     independent of Paper 1 (e.g. an Islam student can sit Mark's Gospel).
+        paper1Helper: '(Catholic Christianity, Christianity or Islam)',
+        paper2Helper: '(must differ from Paper 1 — Catholic/Christianity students must pick a non-Christian religion)',
+        examChoiceHelper: '(students sit either Paper 3 OR Paper 4 — pick the route your school teaches)',
+        paper4Helper: '(Mark’s Gospel or the Qur’an — your school decides, independent of Paper 1)',
+        paper1Options: [
+          { slug: 'paper-1-catholic-christianity', name: 'Catholic Christianity' },
+          { slug: 'paper-1-christianity', name: 'Christianity' },
+          { slug: 'paper-1-islam', name: 'Islam' }
+        ],
+        paper2Options: [
+          { slug: 'paper-2-catholic-christianity', name: 'Catholic Christianity' },
+          { slug: 'paper-2-christianity', name: 'Christianity' },
+          { slug: 'paper-2-islam', name: 'Islam' },
+          { slug: 'paper-2-buddhism', name: 'Buddhism' },
+          { slug: 'paper-2-hinduism', name: 'Hinduism' },
+          { slug: 'paper-2-judaism', name: 'Judaism' },
+          { slug: 'paper-2-sikhism', name: 'Sikhism' }
+        ],
+        paper4Options: [
+          { slug: 'paper-4-marks-gospel', name: 'Mark’s Gospel' },
+          { slug: 'paper-4-quran', name: 'The Qur’an' }
+        ]
       }
     };
 
@@ -2187,7 +2238,8 @@
       'food-preparation-and-nutrition': 'Food Preparation & Nutrition',
       'sociology': 'Sociology',
       'engineering': 'Engineering',
-      'media-studies': 'Media Studies'
+      'media-studies': 'Media Studies',
+      'statistics': 'Statistics'
     };
     // Dot colours per slug
     var subjectDots = {
@@ -2204,7 +2256,8 @@
       'film-studies': '#991b1b',
       'food-preparation-and-nutrition': '#0d9488',
       'sociology': '#7c3aed',
-      'media-studies': '#be185d'
+      'media-studies': '#be185d',
+      'statistics': '#0369a1'
     };
 
     function fwMakeBoardRow(slug, isCore) {
@@ -2548,12 +2601,31 @@
       return b === 'eduqas' || b === 'wjec';
     }
 
+    function fwIsEdexcelRE() {
+      return fwGetREBoard() === 'edexcel';
+    }
+
     function fwUpdateREDoneBtn() {
       var btn = document.getElementById('fw-re-done');
       if (!btn) return;
       var rels = (wizardState.re && wizardState.re.religions) || [];
       var thms = (wizardState.re && wizardState.re.themes) || [];
-      if (fwIsEduqasRE()) {
+      if (fwIsEdexcelRE()) {
+        // Edexcel: Paper 1 + Paper 2 + (Paper 3 OR Paper 4 with text picked).
+        // Paper 2 must not be a religion blocked by the Paper 1 choice.
+        var p1 = (wizardState.re && wizardState.re.paper1) || null;
+        var p2 = (wizardState.re && wizardState.re.paper2) || null;
+        var examChoice = (wizardState.re && wizardState.re.examChoice) || null;
+        var p4 = (wizardState.re && wizardState.re.paper4) || null;
+        var p2Blocked = false;
+        if (p1 === 'paper-1-catholic-christianity' || p1 === 'paper-1-christianity') {
+          p2Blocked = (p2 === 'paper-2-catholic-christianity' || p2 === 'paper-2-christianity');
+        } else if (p1 === 'paper-1-islam') {
+          p2Blocked = (p2 === 'paper-2-islam');
+        }
+        var examOk = (examChoice === 'paper3') || (examChoice === 'paper4' && !!p4);
+        btn.disabled = !(p1 && p2 && !p2Blocked && examOk);
+      } else if (fwIsEduqasRE()) {
         var route = (wizardState.re && wizardState.re.route) || 'a';
         if (route === 'b') {
           // Route B is fully determined — Continue is always enabled
@@ -2686,10 +2758,130 @@
       var container = document.getElementById('fw-re-container');
       if (!container) return;
       container.innerHTML = '';
-      wizardState.re = { religions: [], themes: [] };
+      wizardState.re = { religions: [], themes: [], paper1: null, paper2: null, examChoice: null, paper4: null };
 
       var board = fwGetREBoard();
       var subhead = document.getElementById('fw-re-subhead');
+
+      // ============================================================
+      // EDEXCEL 1RA0 — Paper 1 + Paper 2 + (Paper 3 OR Paper 4).
+      // Paper 2 must not be the same religion as Paper 1, and (per spec §366)
+      // Catholic/Christianity Paper 1 students cannot pick either Catholic or
+      // Christianity for Paper 2. Paper 3 (Philosophy & Ethics) auto-derives
+      // its religion from Paper 1. Paper 4 (Textual Studies) is a free pick
+      // between Mark's Gospel and the Qur'an, independent of Paper 1.
+      // ============================================================
+      if (fwIsEdexcelRE()) {
+        if (subhead) {
+          subhead.innerHTML = 'Edexcel Religious Studies — pick your <strong>Paper 1 religion</strong>, your <strong>Paper 2 religion</strong>, and whether you sit <strong>Paper 3 (Philosophy &amp; Ethics)</strong> or <strong>Paper 4 (Textual Studies)</strong>.';
+        }
+        var opts = religiousEducationOptions['edexcel'];
+        if (!opts) return;
+
+        // Religions blocked for Paper 2 given a Paper 1 choice.
+        // Catholic or Christianity at Paper 1 blocks BOTH at Paper 2.
+        function paper2BlockedSlugs(p1) {
+          if (p1 === 'paper-1-catholic-christianity' || p1 === 'paper-1-christianity') {
+            return ['paper-2-catholic-christianity', 'paper-2-christianity'];
+          }
+          if (p1 === 'paper-1-islam') return ['paper-2-islam'];
+          return [];
+        }
+
+        // Refs we'll need to update across sections.
+        var paper2OptsEl = null;
+        var paper4SectionEl = null;
+        var paper4OptsEl = null;
+
+        function refreshPaper2DisabledState() {
+          if (!paper2OptsEl) return;
+          var blocked = paper2BlockedSlugs(wizardState.re.paper1);
+          paper2OptsEl.querySelectorAll('.fw-text-btn').forEach(function (b) {
+            var isBlocked = blocked.indexOf(b.dataset.value) !== -1;
+            b.disabled = isBlocked;
+            if (isBlocked && b.classList.contains('selected')) {
+              b.classList.remove('selected');
+              wizardState.re.paper2 = null;
+            }
+          });
+        }
+
+        function setPaper4Visible(visible) {
+          if (!paper4SectionEl) return;
+          paper4SectionEl.style.display = visible ? '' : 'none';
+          if (!visible) {
+            wizardState.re.paper4 = null;
+            if (paper4OptsEl) {
+              paper4OptsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+            }
+          }
+        }
+
+        function buildEdexcelSection(heading, helper, items, paperKey) {
+          var sectionEl = document.createElement('div');
+          sectionEl.className = 'fw-text-section';
+          sectionEl.innerHTML =
+            '<h3>' + heading + ' <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + helper + '</span></h3>' +
+            '<div class="fw-text-options" data-group="' + paperKey + '"></div>';
+          var optsEl = sectionEl.querySelector('.fw-text-options');
+          items.forEach(function (item) {
+            var btn = document.createElement('button');
+            btn.className = 'fw-text-btn';
+            btn.textContent = item.name;
+            btn.dataset.value = item.slug;
+            btn.addEventListener('click', function () {
+              if (btn.disabled) return;
+              optsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              wizardState.re[paperKey] = item.slug;
+              if (paperKey === 'paper1') refreshPaper2DisabledState();
+              fwUpdateREDoneBtn();
+            });
+            optsEl.appendChild(btn);
+          });
+          container.appendChild(sectionEl);
+          return { sectionEl: sectionEl, optsEl: optsEl };
+        }
+
+        buildEdexcelSection('Paper 1 Religion', opts.paper1Helper, opts.paper1Options, 'paper1');
+        var paper2Refs = buildEdexcelSection('Paper 2 Religion', opts.paper2Helper, opts.paper2Options, 'paper2');
+        paper2OptsEl = paper2Refs.optsEl;
+
+        // Paper 3 / Paper 4 either-or pick.
+        var examChoiceSection = document.createElement('div');
+        examChoiceSection.className = 'fw-text-section';
+        examChoiceSection.innerHTML =
+          '<h3>Paper 3 or Paper 4 <span style="font-weight:400;color:#7a7068;font-size:0.8rem">' + opts.examChoiceHelper + '</span></h3>' +
+          '<div class="fw-text-options" data-group="examChoice"></div>';
+        var examChoiceOptsEl = examChoiceSection.querySelector('.fw-text-options');
+        [
+          { value: 'paper3', label: 'Paper 3 — Philosophy &amp; Ethics' },
+          { value: 'paper4', label: 'Paper 4 — Textual Studies' }
+        ].forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.innerHTML = item.label;
+          btn.dataset.value = item.value;
+          btn.addEventListener('click', function () {
+            examChoiceOptsEl.querySelectorAll('.fw-text-btn.selected').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.re.examChoice = item.value;
+            setPaper4Visible(item.value === 'paper4');
+            fwUpdateREDoneBtn();
+          });
+          examChoiceOptsEl.appendChild(btn);
+        });
+        container.appendChild(examChoiceSection);
+
+        // Paper 4 sub-pick (hidden until examChoice === 'paper4').
+        var paper4Refs = buildEdexcelSection('Paper 4 Text', opts.paper4Helper, opts.paper4Options, 'paper4');
+        paper4SectionEl = paper4Refs.sectionEl;
+        paper4OptsEl = paper4Refs.optsEl;
+        paper4SectionEl.style.display = 'none';
+
+        fwUpdateREDoneBtn();
+        return;
+      }
 
       // ============================================================
       // EDUQAS / WJEC — Route A/B sliding pill + dynamic body
@@ -3092,7 +3284,7 @@
       'food-preparation-and-nutrition': { 'eduqas': 'food-preparation-and-nutrition-eduqas' },
       'engineering': { 'eduqas': 'engineering-eduqas', 'wjec': 'engineering-eduqas' },
       'computer-science': { 'ocr': 'computer-science', 'aqa': 'computer-science-aqa' },
-      'religious-studies': { 'aqa': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas' },
+      'religious-studies': { 'aqa': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas', 'edexcel': 'religious-studies-edexcel' },
       'spanish': { 'aqa': 'spanish-aqa', 'edexcel': 'spanish-edexcel' },
       'french': { 'aqa': 'french-aqa', 'edexcel': 'french-edexcel' },
       'german': { 'aqa': 'german-aqa', 'edexcel': 'german-edexcel' },
@@ -3103,6 +3295,7 @@
       'film-studies': { 'eduqas': 'film-studies-eduqas', 'wjec': 'film-studies-eduqas' },
       'sociology': { 'aqa': 'sociology-aqa', 'eduqas': 'sociology-eduqas', 'wjec': 'sociology-eduqas' },
       'media-studies': { 'aqa': 'media-studies-aqa' },
+      'statistics': { 'aqa': 'statistics-aqa' },
     };
 
     function resolveSlug(baseSlug, board) {
@@ -3141,6 +3334,13 @@
           entry.themes = (wizardState.re && wizardState.re.themes) || [];
           if (wizardState.re && wizardState.re.route) {
             entry.route = wizardState.re.route;
+          }
+          // Edexcel: save paper1 + paper2 + Paper3-or-Paper4 picks for browse-loader unit filter
+          if (board === 'edexcel') {
+            entry.paper1 = (wizardState.re && wizardState.re.paper1) || null;
+            entry.paper2 = (wizardState.re && wizardState.re.paper2) || null;
+            entry.examChoice = (wizardState.re && wizardState.re.examChoice) || null;
+            entry.paper4 = (wizardState.re && wizardState.re.paper4) || null;
           }
         }
         prefs.subjects.push(entry);
@@ -3271,8 +3471,8 @@
     });
 
     // Subjects that have Foundation/Higher tiers
-    var TIERED_SUBJECTS = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b', 'spanish', 'french', 'german'];
-    var TIERED_LABELS = { 'maths': 'Mathematics', 'maths-edexcel': 'Mathematics', 'maths-aqa': 'Mathematics', 'maths-ocr': 'Mathematics', 'maths-eduqas': 'Mathematics', 'science': 'Combined Science', 'science-aqa': 'Combined Science', 'science-edexcel': 'Combined Science', 'science-ocr': 'Combined Science', 'science-ocr-b': 'Combined Science', 'separate-sciences': 'Triple Science', 'separate-sciences-edexcel': 'Triple Science', 'separate-sciences-ocr': 'Triple Science', 'separate-sciences-ocr-b': 'Triple Science', 'spanish': 'Spanish', 'spanish-aqa': 'Spanish', 'spanish-edexcel': 'Spanish', 'french': 'French', 'french-aqa': 'French', 'french-edexcel': 'French', 'german': 'German', 'german-aqa': 'German', 'german-edexcel': 'German' };
+    var TIERED_SUBJECTS = ['maths', 'maths-edexcel', 'maths-aqa', 'maths-ocr', 'maths-eduqas', 'science', 'science-aqa', 'science-edexcel', 'science-ocr', 'science-ocr-b', 'separate-sciences', 'separate-sciences-edexcel', 'separate-sciences-ocr', 'separate-sciences-ocr-b', 'spanish', 'french', 'german', 'statistics', 'statistics-aqa'];
+    var TIERED_LABELS = { 'maths': 'Mathematics', 'maths-edexcel': 'Mathematics', 'maths-aqa': 'Mathematics', 'maths-ocr': 'Mathematics', 'maths-eduqas': 'Mathematics', 'science': 'Combined Science', 'science-aqa': 'Combined Science', 'science-edexcel': 'Combined Science', 'science-ocr': 'Combined Science', 'science-ocr-b': 'Combined Science', 'separate-sciences': 'Triple Science', 'separate-sciences-edexcel': 'Triple Science', 'separate-sciences-ocr': 'Triple Science', 'separate-sciences-ocr-b': 'Triple Science', 'spanish': 'Spanish', 'spanish-aqa': 'Spanish', 'spanish-edexcel': 'Spanish', 'french': 'French', 'french-aqa': 'French', 'french-edexcel': 'French', 'german': 'German', 'german-aqa': 'German', 'german-edexcel': 'German', 'statistics': 'Statistics', 'statistics-aqa': 'Statistics' };
     var tierStepEl = document.getElementById('picker-tier-step');
     var tierListEl = document.getElementById('picker-tier-list');
     var tierDoneBtn = document.getElementById('picker-tier-done');

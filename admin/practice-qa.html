@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice QA - StudyVault Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@sgratzl/chartjs-chart-boxplot@4/build/index.umd.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/js/auth-gate.js" data-role="admin"></script>
+  <style>
+    :root { --bg-warm: #faf8f5; --text-color: #2d2a26; --text-muted: #6b6560; }
+    body { background: var(--bg-warm); }
+
+    .qa-layout { max-width: 1280px; margin: 0 auto; padding: 1.5rem 1.5rem 6rem; }
+    .qa-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
+    .qa-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; color: var(--text-color); }
+    .qa-header-meta { display: flex; gap: 1rem; align-items: center; font-size: 0.85rem; color: var(--text-muted); }
+    .qa-header-meta a { color: #4338ca; text-decoration: none; font-weight: 600; }
+    .qa-header-meta a:hover { text-decoration: underline; }
+
+    .qa-filter-bar { display: flex; gap: 0.6rem; margin-bottom: 1.25rem; flex-wrap: wrap; align-items: center; background: #fff; padding: 0.75rem 1rem; border-radius: 12px; box-shadow: 0 1px 6px rgba(0,0,0,0.05); }
+    .qa-filter-bar select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.85rem; font-family: inherit; background: white; cursor: pointer; min-width: 160px; }
+    .qa-filter-bar select:focus { outline: none; border-color: #4338ca; box-shadow: 0 0 0 2px rgba(67,56,202,0.12); }
+    .qa-filter-bar button { padding: 0.45rem 0.95rem; border-radius: 8px; border: 1px solid #ddd; background: white; cursor: pointer; font-size: 0.82rem; font-weight: 600; font-family: inherit; color: var(--text-color); }
+    .qa-filter-bar button:hover { background: #f5f3ff; border-color: #c4b5fd; }
+    .qa-filter-bar .qa-filter-spacer { flex: 1; }
+
+    .qa-loading-msg, .qa-empty-msg { text-align: center; padding: 3rem; color: var(--text-muted); font-size: 0.95rem; }
+    .qa-pick-prompt { background: #fff; border-radius: 14px; padding: 2rem; text-align: center; box-shadow: 0 1px 6px rgba(0,0,0,0.05); color: var(--text-muted); }
+
+    /* ---- QA Cards ---- */
+    .qa-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      margin-bottom: 1rem;
+      overflow: visible;
+      position: relative;
+    }
+    .qa-card-header {
+      padding: 0.8rem 1.15rem;
+      border-bottom: 1px solid #f0ede8;
+      display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
+      background: #faf8f5;
+      border-radius: 14px 14px 0 0;
+    }
+    .qa-card-title { font-family: 'Source Serif 4', serif; font-size: 1.05rem; margin: 0; font-weight: 600; color: var(--text-color); }
+    .qa-card-path { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.72rem; padding: 0.18rem 0.55rem; background: #ede9fe; color: #5b21b6; border-radius: 6px; }
+    .qa-card-flag-count { font-size: 0.72rem; padding: 0.18rem 0.55rem; background: #fef3c7; color: #92400e; border-radius: 6px; font-weight: 600; }
+    .qa-card-flag-count.qa-card-flag-count--zero { display: none; }
+    .qa-card-flag-btn {
+      margin-left: auto;
+      padding: 0.35rem 0.85rem; border-radius: 8px;
+      border: 1px solid #fecaca; background: #fef2f2; color: #b91c1c;
+      cursor: pointer; font-size: 0.78rem; font-weight: 600; font-family: inherit;
+      transition: background 0.15s;
+    }
+    .qa-card-flag-btn:hover { background: #fee2e2; }
+    .qa-card-body { padding: 1.15rem 1.25rem; }
+
+    /* ---- Section Heading ---- */
+    .qa-section-h { font-family: 'Source Serif 4', serif; font-size: 1.25rem; margin: 2rem 0 1rem; color: var(--text-color); border-bottom: 2px solid #e8e4df; padding-bottom: 0.4rem; }
+
+    /* ---- Tier Cards (worked examples, problem bank) ---- */
+    .qa-tier-bronze { border-left: 5px solid #b45309; }
+    .qa-tier-silver { border-left: 5px solid #64748b; }
+    .qa-tier-gold { border-left: 5px solid #d97706; }
+    .qa-tier-badge {
+      display: inline-block;
+      padding: 0.15rem 0.55rem; border-radius: 10px;
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .qa-tier-badge--bronze { background: #fef3c7; color: #92400e; }
+    .qa-tier-badge--silver { background: #e2e8f0; color: #475569; }
+    .qa-tier-badge--gold { background: #fef9c3; color: #a16207; }
+
+    /* ---- Problem Body ---- */
+    .qa-problem-display { font-size: 0.95rem; line-height: 1.6; color: var(--text-color); margin-bottom: 0.85rem; }
+    .qa-problem-display table { border-collapse: collapse; margin: 0.6rem 0; }
+    .qa-problem-display table th, .qa-problem-display table td { border: 1px solid #ddd; padding: 0.4rem 0.6rem; text-align: left; }
+    .qa-problem-display table th { background: #f5f3ff; font-weight: 600; }
+    .qa-problem-display svg { max-width: 100%; height: auto; }
+    .qa-problem-display canvas { max-width: 100%; }
+
+    .qa-chart-box { max-width: 480px; max-height: 280px; margin: 0.75rem 0; }
+    .qa-chart-box canvas { max-width: 100% !important; max-height: 280px !important; }
+
+    .qa-input-type {
+      display: inline-block; padding: 0.15rem 0.55rem;
+      background: #e0e7ff; color: #3730a3; border-radius: 6px;
+      font-size: 0.7rem; font-weight: 600; font-family: 'SFMono-Regular', Consolas, monospace;
+      margin-bottom: 0.5rem;
+    }
+
+    .qa-solution {
+      background: #f0fdf4; border-left: 3px solid #16a34a;
+      padding: 0.6rem 0.85rem; border-radius: 0 8px 8px 0;
+      margin: 0.65rem 0;
+      font-size: 0.9rem;
+    }
+    .qa-solution strong { color: #166534; }
+
+    .qa-misconceptions { margin-top: 0.65rem; }
+    .qa-misconceptions summary { cursor: pointer; font-size: 0.82rem; color: var(--text-muted); font-weight: 600; padding: 0.3rem 0; }
+    .qa-misconceptions summary:hover { color: var(--text-color); }
+    .qa-misconceptions ul { margin: 0.5rem 0 0; padding-left: 1.3rem; font-size: 0.85rem; color: var(--text-muted); }
+    .qa-misconceptions li { margin: 0.25rem 0; }
+
+    .qa-meta-row { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.35rem; }
+    .qa-meta-row strong { color: var(--text-color); }
+    .qa-confirm-msg { font-size: 0.78rem; color: #15803d; margin-top: 0.35rem; }
+
+    /* ---- Modal ---- */
+    .qa-modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); display: none;
+      align-items: center; justify-content: center;
+      z-index: 1000; padding: 1.5rem;
+    }
+    .qa-modal-overlay.active { display: flex; }
+    .qa-modal {
+      background: #fff; border-radius: 14px; padding: 1.5rem;
+      max-width: 480px; width: 100%;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.18);
+    }
+    .qa-modal h3 { margin: 0 0 0.5rem; font-family: 'Source Serif 4', serif; font-size: 1.15rem; }
+    .qa-modal-path {
+      display: inline-block;
+      font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.78rem;
+      padding: 0.15rem 0.55rem; background: #ede9fe; color: #5b21b6;
+      border-radius: 6px; margin-bottom: 0.85rem;
+    }
+    .qa-modal textarea {
+      width: 100%; min-height: 110px; padding: 0.65rem;
+      border: 1px solid #ddd; border-radius: 8px;
+      font-family: inherit; font-size: 0.9rem; box-sizing: border-box; resize: vertical;
+    }
+    .qa-modal textarea:focus { outline: none; border-color: #4338ca; box-shadow: 0 0 0 2px rgba(67,56,202,0.12); }
+    .qa-modal-charcount { font-size: 0.72rem; color: var(--text-muted); text-align: right; margin-top: 0.25rem; }
+    .qa-modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.85rem; }
+    .qa-modal-actions button {
+      padding: 0.5rem 1.1rem; border-radius: 8px; border: 1px solid #ddd;
+      cursor: pointer; font-size: 0.85rem; font-weight: 600; font-family: inherit;
+    }
+    .qa-modal-actions .qa-modal-save { background: #2d2a26; color: white; border-color: #2d2a26; }
+    .qa-modal-actions .qa-modal-save:hover { background: #1a1816; }
+    .qa-modal-actions .qa-modal-cancel { background: white; color: var(--text-color); }
+    .qa-modal-actions .qa-modal-cancel:hover { background: #f5f3ff; }
+
+    /* ---- Flags list view ---- */
+    .qa-flag-row {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+      padding: 0.85rem 1.1rem; margin-bottom: 0.65rem;
+      display: flex; gap: 1rem; align-items: flex-start; flex-wrap: wrap;
+    }
+    .qa-flag-status {
+      padding: 0.18rem 0.55rem; border-radius: 999px;
+      font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.04em; flex-shrink: 0;
+    }
+    .qa-flag-status--open { background: #fef3c7; color: #92400e; }
+    .qa-flag-status--fixed { background: #dcfce7; color: #15803d; }
+    .qa-flag-status--wontfix { background: #f1f5f9; color: #475569; }
+    .qa-flag-status--duplicate { background: #ede9fe; color: #5b21b6; }
+    .qa-flag-main { flex: 1; min-width: 240px; }
+    .qa-flag-breadcrumb { font-size: 0.85rem; font-weight: 600; color: var(--text-color); }
+    .qa-flag-breadcrumb .qa-flag-path { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.78rem; padding: 0.1rem 0.45rem; background: #ede9fe; color: #5b21b6; border-radius: 5px; }
+    .qa-flag-note { font-size: 0.85rem; color: var(--text-muted); margin-top: 0.3rem; line-height: 1.45; }
+    .qa-flag-meta { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem; }
+    .qa-flag-actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    .qa-flag-actions button, .qa-flag-actions a {
+      padding: 0.3rem 0.7rem; border-radius: 7px; border: 1px solid #ddd;
+      background: #fff; cursor: pointer; font-size: 0.74rem; font-weight: 600;
+      color: var(--text-color); text-decoration: none; font-family: inherit;
+      display: inline-block;
+    }
+    .qa-flag-actions button:hover, .qa-flag-actions a:hover { background: #f5f3ff; }
+    .qa-flag-actions .qa-flag-btn--danger { color: #b91c1c; border-color: #fecaca; background: #fef2f2; }
+    .qa-flag-actions .qa-flag-btn--danger:hover { background: #fee2e2; }
+    .qa-flag-actions .qa-flag-btn--open { color: #15803d; border-color: #bbf7d0; background: #f0fdf4; }
+    .qa-flag-actions .qa-flag-btn--open:hover { background: #dcfce7; }
+
+    .qa-no-practice {
+      background: #fffbeb; border: 1px solid #fde68a;
+      border-radius: 12px; padding: 1rem 1.25rem;
+      color: #92400e; font-size: 0.9rem;
+    }
+    .qa-no-practice a { color: #92400e; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+        <span class="header-unit-label">Practice QA</span>
+      </a>
+      <nav class="admin-nav" id="header-nav" role="navigation" aria-label="Admin">
+        <a href="/" class="admin-nav-home">Home</a>
+        <div class="admin-nav-group">
+          <button type="button" class="admin-nav-trigger" data-group="build" aria-haspopup="menu" aria-expanded="false">Build &#9662;</button>
+          <div class="admin-nav-menu" role="menu">
+            <a href="/admin/pipeline">Pipeline</a>
+            <a href="/admin/editor">Editor</a>
+            <a href="/admin/editor-guide">Guide Editor</a>
+            <a href="/admin/build-status">Build Status</a>
+          </div>
+        </div>
+        <div class="admin-nav-group">
+          <button type="button" class="admin-nav-trigger" data-group="qa" aria-haspopup="menu" aria-expanded="false">QA &#9662;</button>
+          <div class="admin-nav-menu" role="menu">
+            <a href="/admin/review">Review</a>
+            <a href="/admin/practice-qa">Practice QA</a>
+            <a href="/admin/images">Images</a>
+          </div>
+        </div>
+        <div class="admin-nav-group">
+          <button type="button" class="admin-nav-trigger" data-group="manage" aria-haspopup="menu" aria-expanded="false">Manage &#9662;</button>
+          <div class="admin-nav-menu" role="menu">
+            <a href="/admin/requests">Requests</a>
+            <a href="/admin/bugs">Bugs</a>
+            <a href="/admin/schools">Schools</a>
+          </div>
+        </div>
+      </nav>
+      <script src="/js/admin-nav.js" defer></script>
+    </div>
+  </header>
+
+  <div class="qa-layout">
+    <div class="qa-header">
+      <h1 id="page-title">Practice QA</h1>
+      <div class="qa-header-meta">
+        <a href="#" id="view-toggle-link">View all flags →</a>
+        <span id="open-flags-count"></span>
+      </div>
+    </div>
+
+    <!-- ========== Lesson view ========== -->
+    <div id="lesson-view">
+      <div class="qa-filter-bar">
+        <select id="subject-select"><option value="">Subject…</option></select>
+        <select id="unit-select"><option value="">Unit…</option></select>
+        <select id="lesson-select"><option value="">Lesson…</option></select>
+        <button id="reload-btn" type="button">Reload</button>
+        <div class="qa-filter-spacer"></div>
+      </div>
+
+      <div id="lesson-content">
+        <div class="qa-pick-prompt">
+          Pick a subject, unit, and lesson above to start QA.
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== Flags list view ========== -->
+    <div id="flags-view" style="display:none">
+      <div class="qa-filter-bar">
+        <select id="flags-status-filter">
+          <option value="open" selected>Open</option>
+          <option value="fixed">Fixed</option>
+          <option value="wontfix">Won't fix</option>
+          <option value="duplicate">Duplicate</option>
+          <option value="all">All</option>
+        </select>
+        <select id="flags-subject-filter">
+          <option value="">All subjects</option>
+        </select>
+        <button id="flags-reload-btn" type="button">Reload</button>
+        <div class="qa-filter-spacer"></div>
+      </div>
+      <div id="flags-content"><div class="qa-loading-msg">Loading…</div></div>
+    </div>
+  </div>
+
+  <!-- ========== Flag modal ========== -->
+  <div class="qa-modal-overlay" id="flag-modal">
+    <div class="qa-modal">
+      <h3>Flag this for QA</h3>
+      <div class="qa-modal-path" id="flag-modal-path"></div>
+      <textarea id="flag-modal-note" maxlength="500" placeholder="What's wrong? (max 500 chars)"></textarea>
+      <div class="qa-modal-charcount"><span id="flag-modal-count">0</span> / 500</div>
+      <div class="qa-modal-actions">
+        <button class="qa-modal-cancel" type="button" id="flag-modal-cancel">Cancel</button>
+        <button class="qa-modal-save" type="button" id="flag-modal-save">Save flag</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  /* ============================================
+     Practice QA admin page
+     ============================================ */
+  (function () {
+    'use strict';
+
+    // ---- Supabase client (public anon — same as practice-loader) ----
+    var sb = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+
+    // ---- Auth header ----
+    function authHeaders() {
+      try {
+        var session = JSON.parse(sessionStorage.getItem('studyvault-auth')) ||
+                      JSON.parse(localStorage.getItem('studyvault-auth')) || {};
+        return { 'Content-Type': 'application/json', 'X-Admin-Password': session.pw || '' };
+      } catch (e) {
+        return { 'Content-Type': 'application/json' };
+      }
+    }
+
+    function escHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function relTime(iso) {
+      if (!iso) return '';
+      var d = new Date(iso);
+      var diff = (Date.now() - d.getTime()) / 1000;
+      if (diff < 60) return Math.round(diff) + 's ago';
+      if (diff < 3600) return Math.round(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.round(diff / 3600) + 'h ago';
+      if (diff < 86400 * 14) return Math.round(diff / 86400) + 'd ago';
+      return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    // ---- View routing ----
+    var urlParams = new URLSearchParams(window.location.search);
+    var view = urlParams.get('view') || 'lesson';
+
+    var lessonViewEl = document.getElementById('lesson-view');
+    var flagsViewEl = document.getElementById('flags-view');
+    var pageTitleEl = document.getElementById('page-title');
+    var viewToggleEl = document.getElementById('view-toggle-link');
+    var openFlagsCountEl = document.getElementById('open-flags-count');
+
+    function setView(newView, pushHistory) {
+      view = newView;
+      if (newView === 'flags') {
+        lessonViewEl.style.display = 'none';
+        flagsViewEl.style.display = '';
+        pageTitleEl.textContent = 'Practice QA — Flags';
+        viewToggleEl.textContent = '← Back to lesson view';
+        viewToggleEl.onclick = function (e) { e.preventDefault(); setView('lesson', true); };
+        if (pushHistory) {
+          var u = new URL(window.location.href);
+          u.searchParams.set('view', 'flags');
+          history.pushState({}, '', u);
+        }
+        loadFlags();
+        loadSubjectsForFlagsFilter();
+      } else {
+        lessonViewEl.style.display = '';
+        flagsViewEl.style.display = 'none';
+        pageTitleEl.textContent = 'Practice QA';
+        viewToggleEl.textContent = 'View all flags →';
+        viewToggleEl.onclick = function (e) { e.preventDefault(); setView('flags', true); };
+        if (pushHistory) {
+          var u = new URL(window.location.href);
+          u.searchParams.delete('view');
+          history.pushState({}, '', u);
+        }
+      }
+    }
+
+    // ---- Open flags count badge (visible in both views) ----
+    async function refreshOpenFlagsCount() {
+      try {
+        var resp = await fetch('/api/admin/practice-qa-flags?status=open', { headers: authHeaders() });
+        if (!resp.ok) return;
+        var json = await resp.json();
+        var n = (json.flags || []).length;
+        openFlagsCountEl.textContent = n > 0
+          ? n + ' open flag' + (n === 1 ? '' : 's')
+          : 'No open flags';
+        openFlagsCountEl.style.color = n > 0 ? '#92400e' : 'var(--text-muted)';
+      } catch (e) {}
+    }
+
+    /* ============================================
+       LESSON VIEW
+       ============================================ */
+    var subjectSelect = document.getElementById('subject-select');
+    var unitSelect = document.getElementById('unit-select');
+    var lessonSelect = document.getElementById('lesson-select');
+    var reloadBtn = document.getElementById('reload-btn');
+    var lessonContentEl = document.getElementById('lesson-content');
+
+    var subjectsCache = [];   // [{id, slug, name, settings, school_id}]
+    var unitsCache = [];      // current subject's units
+    var lessonsCache = [];    // current unit's lessons
+    var currentLesson = null; // loaded practice lesson row
+    var currentLessonFlags = []; // open flags for the current lesson
+
+    var _chartInstances = []; // dispose between renders
+
+    function destroyAllCharts() {
+      for (var i = 0; i < _chartInstances.length; i++) {
+        try { _chartInstances[i].destroy(); } catch(e) {}
+      }
+      _chartInstances = [];
+    }
+
+    async function loadSubjects() {
+      var r = await sb
+        .from('subjects')
+        .select('id, slug, name, settings, school_id')
+        .order('name');
+      if (r.error) {
+        subjectSelect.innerHTML = '<option value="">(error)</option>';
+        return;
+      }
+      // Only show subjects with at least one practice unit configured
+      subjectsCache = (r.data || []).filter(function (s) {
+        return s.settings && Array.isArray(s.settings.practice_units) && s.settings.practice_units.length > 0;
+      });
+      var opts = '<option value="">Subject…</option>';
+      for (var i = 0; i < subjectsCache.length; i++) {
+        var s = subjectsCache[i];
+        var label = s.name + (s.school_id ? ' [school]' : '');
+        opts += '<option value="' + escHtml(s.slug) + '" data-id="' + s.id + '">' + escHtml(label) + '</option>';
+      }
+      subjectSelect.innerHTML = opts;
+    }
+
+    async function loadUnitsForSubject(subjectSlug) {
+      unitSelect.innerHTML = '<option value="">Loading…</option>';
+      lessonSelect.innerHTML = '<option value="">Lesson…</option>';
+      lessonsCache = [];
+      var subject = subjectsCache.find(function (s) { return s.slug === subjectSlug; });
+      if (!subject) {
+        unitSelect.innerHTML = '<option value="">(subject not found)</option>';
+        return;
+      }
+      var pracUnitSlugs = (subject.settings && subject.settings.practice_units) || [];
+      var r = await sb
+        .from('units')
+        .select('id, slug, name, sort_order')
+        .eq('subject_id', subject.id)
+        .order('sort_order');
+      if (r.error) {
+        unitSelect.innerHTML = '<option value="">(error)</option>';
+        return;
+      }
+      unitsCache = (r.data || []).filter(function (u) {
+        return pracUnitSlugs.indexOf(u.slug) !== -1;
+      });
+      if (unitsCache.length === 0) {
+        unitSelect.innerHTML = '<option value="">(no practice units on this subject)</option>';
+        return;
+      }
+      var opts = '<option value="">Unit…</option>';
+      for (var i = 0; i < unitsCache.length; i++) {
+        var u = unitsCache[i];
+        opts += '<option value="' + escHtml(u.slug) + '" data-id="' + u.id + '">' + escHtml(u.name) + '</option>';
+      }
+      unitSelect.innerHTML = opts;
+    }
+
+    async function loadLessonsForUnit(unitSlug) {
+      lessonSelect.innerHTML = '<option value="">Loading…</option>';
+      var unit = unitsCache.find(function (u) { return u.slug === unitSlug; });
+      if (!unit) {
+        lessonSelect.innerHTML = '<option value="">(unit not found)</option>';
+        return;
+      }
+      var r = await sb
+        .from('lessons')
+        .select('id, lesson_number, title, slug, status')
+        .eq('unit_id', unit.id)
+        .order('lesson_number');
+      if (r.error) {
+        lessonSelect.innerHTML = '<option value="">(error)</option>';
+        return;
+      }
+      lessonsCache = r.data || [];
+      var opts = '<option value="">Lesson…</option>';
+      for (var i = 0; i < lessonsCache.length; i++) {
+        var l = lessonsCache[i];
+        opts += '<option value="' + l.lesson_number + '" data-id="' + l.id + '">L' + l.lesson_number + ' — ' + escHtml(l.title) + '</option>';
+      }
+      lessonSelect.innerHTML = opts;
+    }
+
+    async function loadLesson(lessonNumber) {
+      destroyAllCharts();
+      lessonContentEl.innerHTML = '<div class="qa-loading-msg">Loading lesson…</div>';
+      var lessonRow = lessonsCache.find(function (l) {
+        return String(l.lesson_number) === String(lessonNumber);
+      });
+      if (!lessonRow) {
+        lessonContentEl.innerHTML = '<div class="qa-empty-msg">Lesson not found.</div>';
+        return;
+      }
+      var r = await sb
+        .from('lessons')
+        .select('id, lesson_number, title, slug, status, practice_data')
+        .eq('id', lessonRow.id)
+        .single();
+      if (r.error || !r.data) {
+        lessonContentEl.innerHTML = '<div class="qa-empty-msg">Could not load lesson.</div>';
+        return;
+      }
+      currentLesson = r.data;
+      // Parse JSON practice_data if it came back as a string
+      var pd = currentLesson.practice_data;
+      if (typeof pd === 'string') {
+        try { pd = JSON.parse(pd); } catch(e) { pd = null; }
+      }
+      currentLesson._pd = pd;
+
+      // Fetch flags for this lesson (so we can show per-card counts)
+      try {
+        var fResp = await fetch('/api/admin/practice-qa-flags?status=open&lesson_id=' + encodeURIComponent(currentLesson.id), { headers: authHeaders() });
+        var fJson = fResp.ok ? await fResp.json() : { flags: [] };
+        currentLessonFlags = fJson.flags || [];
+      } catch (e) {
+        currentLessonFlags = [];
+      }
+
+      renderLesson();
+    }
+
+    function flagsForPath(path) {
+      return currentLessonFlags.filter(function (f) { return f.problem_path === path; });
+    }
+
+    function renderLesson() {
+      var lesson = currentLesson;
+      var pd = lesson._pd;
+      if (!pd || typeof pd !== 'object') {
+        lessonContentEl.innerHTML =
+          '<div class="qa-no-practice">' +
+            'Not a practice lesson — practice_data is null. ' +
+            'Use <a href="/admin/review">/admin/review</a> for article QA.' +
+          '</div>';
+        return;
+      }
+
+      var html = '';
+
+      // ===== Method card =====
+      if (pd.method_card) {
+        html += renderCardShell({
+          path: 'method_card',
+          title: 'Method Card: ' + escHtml(pd.method_card.title || ''),
+          bodyHtml: renderMethodCardBody(pd.method_card)
+        });
+      }
+
+      // ===== Exam context =====
+      if (pd.exam_context) {
+        var ec = pd.exam_context;
+        var ecBody = '';
+        if (ec.paper) ecBody += '<div class="qa-meta-row"><strong>Paper:</strong> ' + escHtml(ec.paper) + '</div>';
+        if (ec.marks) ecBody += '<div class="qa-meta-row"><strong>Marks:</strong> ' + escHtml(ec.marks) + '</div>';
+        if (ec.frequency) ecBody += '<div class="qa-meta-row"><strong>Frequency:</strong> ' + escHtml(ec.frequency) + '</div>';
+        if (!ecBody) ecBody = '<em>Empty</em>';
+        html += renderCardShell({ path: 'exam_context', title: 'Exam Context', bodyHtml: ecBody });
+      }
+
+      // ===== Worked examples =====
+      if (pd.worked_examples && pd.worked_examples.length) {
+        html += '<h2 class="qa-section-h">Worked Examples</h2>';
+        var tiers = ['bronze', 'silver', 'gold'];
+        for (var ti = 0; ti < tiers.length; ti++) {
+          var tier = tiers[ti];
+          var we = pd.worked_examples.find(function (w) { return (w.tier || '').toLowerCase() === tier; });
+          if (!we) continue;
+          html += renderCardShell({
+            path: 'worked_examples.' + tier,
+            title: '<span class="qa-tier-badge qa-tier-badge--' + tier + '">' + tier.toUpperCase() + '</span> Worked Example',
+            extraClass: 'qa-tier-' + tier,
+            bodyHtml: renderWorkedExample(we)
+          });
+        }
+      }
+
+      // ===== Problem bank =====
+      if (pd.problem_bank) {
+        var tierKeys = ['bronze', 'silver', 'gold'];
+        var tierLabels = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold' };
+        var tierPrefix = { bronze: 'B', silver: 'S', gold: 'G' };
+        for (var t = 0; t < tierKeys.length; t++) {
+          var key = tierKeys[t];
+          var problems = pd.problem_bank[key] || [];
+          if (!problems.length) continue;
+          html += '<h2 class="qa-section-h">' + tierLabels[key] + ' problems (' + problems.length + ')</h2>';
+          for (var pi = 0; pi < problems.length; pi++) {
+            var path = 'problem_bank.' + key + '[' + pi + ']';
+            html += renderCardShell({
+              path: path,
+              title: '<span class="qa-tier-badge qa-tier-badge--' + key + '">' + tierPrefix[key] + (pi + 1) + '</span> ' + escHtml(problems[pi].question_short || problems[pi].topic || ''),
+              extraClass: 'qa-tier-' + key,
+              bodyHtml: renderProblem(problems[pi], path)
+            });
+          }
+        }
+      }
+
+      // ===== Topic links footer =====
+      if (pd.topic_links) {
+        var tl = pd.topic_links;
+        var tlBody = '';
+        if (tl.prerequisites && tl.prerequisites.length) {
+          tlBody += '<div class="qa-meta-row"><strong>Prerequisites:</strong> ' +
+            tl.prerequisites.map(function (p) { return escHtml(p.title || p.slug || ''); }).join(', ') +
+            '</div>';
+        }
+        if (tl.next_topics && tl.next_topics.length) {
+          tlBody += '<div class="qa-meta-row"><strong>Next topics:</strong> ' +
+            tl.next_topics.map(function (p) { return escHtml(p.title || p.slug || ''); }).join(', ') +
+            '</div>';
+        }
+        if (!tlBody) tlBody = '<em>Empty</em>';
+        html += renderCardShell({ path: 'topic_links', title: 'Topic Links', bodyHtml: tlBody });
+      }
+
+      var lessonHeader = '<h2 style="font-family:\'Source Serif 4\',serif;font-size:1.35rem;margin:0 0 1rem">' +
+        'L' + lesson.lesson_number + ' — ' + escHtml(lesson.title) +
+        ' <span style="font-size:0.78rem;color:var(--text-muted);font-weight:400;margin-left:0.5rem">' + escHtml(lesson.status || '') + '</span>' +
+        '</h2>';
+
+      lessonContentEl.innerHTML = lessonHeader + html;
+
+      // ---- Now: initialize Chart.js where each problem has a chart ----
+      // (innerHTML insertion above creates canvas placeholders we then bind to)
+      initChartsForCurrentLesson();
+
+      // KaTeX render
+      if (typeof renderMathInElement === 'function') {
+        try {
+          renderMathInElement(lessonContentEl, {
+            delimiters: [
+              { left: '$$', right: '$$', display: true },
+              { left: '\\[', right: '\\]', display: true },
+              { left: '\\(', right: '\\)', display: false }
+            ],
+            throwOnError: false
+          });
+        } catch (e) {}
+      }
+
+      // ---- Scroll to a deep-linked problem if URL hash present ----
+      if (window.location.hash) {
+        var target = document.getElementById(window.location.hash.slice(1));
+        if (target) {
+          setTimeout(function () { target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+        }
+      }
+    }
+
+    function cardId(path) { return 'qa-card-' + path.replace(/[^a-zA-Z0-9]+/g, '-'); }
+
+    function renderCardShell(opts) {
+      var fc = flagsForPath(opts.path).length;
+      var flagBadge = fc > 0 ? '<span class="qa-card-flag-count">' + fc + ' open flag' + (fc === 1 ? '' : 's') + '</span>' : '';
+      return '' +
+        '<div class="qa-card ' + (opts.extraClass || '') + '" id="' + cardId(opts.path) + '" data-path="' + escHtml(opts.path) + '">' +
+          '<div class="qa-card-header">' +
+            '<h3 class="qa-card-title">' + opts.title + '</h3>' +
+            '<span class="qa-card-path">' + escHtml(opts.path) + '</span>' +
+            flagBadge +
+            '<button class="qa-card-flag-btn" type="button" data-flag-path="' + escHtml(opts.path) + '">🚩 Flag</button>' +
+          '</div>' +
+          '<div class="qa-card-body">' + opts.bodyHtml + '</div>' +
+        '</div>';
+    }
+
+    function renderMethodCardBody(mc) {
+      var h = '';
+      if (mc.content) h += '<div class="qa-problem-display">' + mc.content + '</div>';
+      if (mc.steps && mc.steps.length) {
+        h += '<ol style="margin:0.5rem 0;padding-left:1.4rem">';
+        for (var i = 0; i < mc.steps.length; i++) {
+          h += '<li style="margin:0.3rem 0;line-height:1.5">' + mc.steps[i] + '</li>';
+        }
+        h += '</ol>';
+      }
+      if (!h) h = '<em>Empty method card</em>';
+      return h;
+    }
+
+    function renderWorkedExample(we) {
+      var h = '';
+      if (we.problem) h += '<div class="qa-problem-display"><strong>Problem:</strong> ' + we.problem + '</div>';
+      if (we.steps && we.steps.length) {
+        h += '<ol style="margin:0.5rem 0;padding-left:1.4rem">';
+        for (var i = 0; i < we.steps.length; i++) {
+          var s = we.steps[i];
+          if (typeof s === 'string') {
+            h += '<li style="margin:0.3rem 0;line-height:1.5">' + s + '</li>';
+          } else {
+            h += '<li style="margin:0.3rem 0;line-height:1.5">' +
+                 (s.text || s.explanation || '') +
+                 (s.working ? '<div style="font-family:Consolas,monospace;background:#f5f3ff;padding:0.4rem 0.6rem;border-radius:6px;margin:0.3rem 0;font-size:0.9rem">' + s.working + '</div>' : '') +
+                 '</li>';
+          }
+        }
+        h += '</ol>';
+      }
+      if (we.answer !== undefined) h += '<div class="qa-solution"><strong>Final answer:</strong> ' + escHtml(String(we.answer)) + '</div>';
+      if (!h) h = '<em>Empty worked example</em>';
+      return h;
+    }
+
+    function renderProblem(p, path) {
+      var h = '';
+
+      // Input type badge
+      if (p.input_type) {
+        h += '<div><span class="qa-input-type">' + escHtml(p.input_type) + '</span>';
+        if (p.calculator) h += '<span class="qa-input-type" style="background:#fef9c3;color:#a16207">calculator</span>';
+        if (p.higher_only) h += '<span class="qa-input-type" style="background:#fee2e2;color:#b91c1c">higher_only</span>';
+        h += '</div>';
+      }
+
+      // Question / display
+      if (p.question) {
+        h += '<div class="qa-problem-display"><strong>Question:</strong> ' + p.question + '</div>';
+      }
+      if (p.display) {
+        h += '<div class="qa-problem-display">' + p.display + '</div>';
+      }
+      if (p.question_hint) {
+        h += '<div class="qa-meta-row" style="font-style:italic">' + escHtml(p.question_hint) + '</div>';
+      }
+
+      // Passage / passage_id reference
+      if (p.passage_id) {
+        h += '<div class="qa-meta-row"><strong>References passage:</strong> ' + escHtml(p.passage_id) + '</div>';
+      }
+      if (p.passage) {
+        h += '<details style="margin:0.5rem 0"><summary style="cursor:pointer;font-size:0.8rem;color:var(--text-muted);font-weight:600">Inline passage</summary><div style="background:#f9fafb;padding:0.65rem;border-radius:6px;margin-top:0.4rem;font-size:0.88rem;line-height:1.55">' + p.passage + '</div></details>';
+      }
+
+      // Image (e.g. maps)
+      if (p.image) {
+        h += '<div style="margin:0.6rem 0"><img src="' + escHtml(p.image) + '" alt="problem image" style="max-width:480px;max-height:280px;border-radius:8px;border:1px solid #e8e4df"></div>';
+      }
+
+      // Chart placeholder (canvas bound later in initChartsForCurrentLesson)
+      if (p.chart) {
+        var chartCanvasId = 'qa-chart-' + path.replace(/[^a-zA-Z0-9]+/g, '-');
+        h += '<div class="qa-chart-box"><canvas id="' + chartCanvasId + '"></canvas></div>';
+      }
+
+      // Solutions
+      if (p.solutions && p.solutions.length) {
+        h += '<div class="qa-solution"><strong>Expected answer:</strong> ' + formatSolutions(p) + '</div>';
+      } else if (p.answer !== undefined) {
+        h += '<div class="qa-solution"><strong>Expected answer:</strong> ' + escHtml(String(p.answer)) + '</div>';
+      }
+
+      // Hint
+      if (p.hint) {
+        h += '<div class="qa-meta-row"><strong>Hint:</strong> ' + escHtml(p.hint) + '</div>';
+      }
+
+      // Misconceptions
+      if (p.misconceptions && p.misconceptions.length) {
+        h += '<details class="qa-misconceptions" open><summary>' + p.misconceptions.length + ' misconception' + (p.misconceptions.length === 1 ? '' : 's') + '</summary><ul>';
+        for (var mi = 0; mi < p.misconceptions.length; mi++) {
+          var m = p.misconceptions[mi];
+          if (typeof m === 'string') {
+            h += '<li>' + escHtml(m) + '</li>';
+          } else {
+            // Supports two shapes:
+            //   {trigger, response, feedback, explanation}  ← legacy
+            //   {check, message, pattern}                   ← current (Maths/Sciences/Stats)
+            var triggerStr = m.trigger != null ? String(m.trigger) : '';
+            var patternStr = m.pattern || m.check || '';
+            var respStr = m.message || m.response || m.feedback || m.explanation || '';
+            var prefix = '';
+            if (triggerStr) prefix = '<code>' + escHtml(triggerStr) + '</code> → ';
+            else if (patternStr) prefix = '<code>' + escHtml(patternStr) + '</code> → ';
+            h += '<li>' + prefix + escHtml(respStr) + '</li>';
+          }
+        }
+        h += '</ul></details>';
+      }
+
+      // Options (MCQ) — show for clarity
+      if (p.options && p.options.length) {
+        h += '<div class="qa-meta-row"><strong>Options:</strong><ol style="margin:0.3rem 0 0;padding-left:1.4rem;font-size:0.85rem">';
+        for (var oi = 0; oi < p.options.length; oi++) {
+          h += '<li>' + escHtml(String(p.options[oi])) + '</li>';
+        }
+        h += '</ol></div>';
+      }
+
+      return h || '<em>Empty problem</em>';
+    }
+
+    function formatSolutions(p) {
+      var sols = p.solutions;
+      // MCQ: solution is an index → map to options[index]
+      if (p.input_type === 'multiple_choice' || p.input_type === 'mcq') {
+        var label = sols.map(function (s) {
+          var idx = parseInt(s, 10);
+          if (!isNaN(idx) && p.options && p.options[idx] != null) {
+            return '[' + idx + '] ' + escHtml(String(p.options[idx]));
+          }
+          return escHtml(String(s));
+        }).join(', ');
+        return label;
+      }
+      // Render one solution value with type-awareness
+      function renderOne(s) {
+        if (s == null) return '';
+        if (typeof s === 'object') {
+          // {numerator, denominator} → "9/19 (or decimal 0.474)"
+          if ('numerator' in s && 'denominator' in s) {
+            var n = s.numerator, d = s.denominator;
+            var dec = (d !== 0) ? (n / d).toFixed(3).replace(/\.?0+$/, '') : '?';
+            return escHtml(n + '/' + d) + ' <span style="color:var(--text-muted);font-size:0.85em">(or ' + dec + ')</span>';
+          }
+          // {min, max} → "min–max"
+          if ('min' in s && 'max' in s) {
+            return escHtml(s.min + '–' + s.max);
+          }
+          // Generic object → JSON
+          try { return '<code>' + escHtml(JSON.stringify(s)) + '</code>'; }
+          catch (e) { return escHtml(String(s)); }
+        }
+        return escHtml(String(s));
+      }
+      if (sols.length === 1) return renderOne(sols[0]);
+      return sols.map(renderOne).join(' | ');
+    }
+
+    function initChartsForCurrentLesson() {
+      destroyAllCharts();
+      var pd = currentLesson && currentLesson._pd;
+      if (!pd || !pd.problem_bank) return;
+      var tierKeys = ['bronze', 'silver', 'gold'];
+      for (var t = 0; t < tierKeys.length; t++) {
+        var key = tierKeys[t];
+        var probs = pd.problem_bank[key] || [];
+        for (var i = 0; i < probs.length; i++) {
+          var p = probs[i];
+          if (!p.chart) continue;
+          var path = 'problem_bank.' + key + '[' + i + ']';
+          var canvasId = 'qa-chart-' + path.replace(/[^a-zA-Z0-9]+/g, '-');
+          var canvas = document.getElementById(canvasId);
+          if (!canvas) continue;
+          try {
+            var inst = new Chart(canvas.getContext('2d'), {
+              type: p.chart.type,
+              data: p.chart.data,
+              options: Object.assign({
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: false,
+                plugins: {
+                  legend: { display: p.chart.showLegend || false },
+                  tooltip: { enabled: true }
+                }
+              }, p.chart.options || {})
+            });
+            _chartInstances.push(inst);
+          } catch (e) {
+            console.warn('Chart init failed for', path, e);
+          }
+        }
+      }
+    }
+
+    /* ============================================
+       FLAG MODAL
+       ============================================ */
+    var modal = document.getElementById('flag-modal');
+    var modalPath = document.getElementById('flag-modal-path');
+    var modalNote = document.getElementById('flag-modal-note');
+    var modalCount = document.getElementById('flag-modal-count');
+    var modalCancel = document.getElementById('flag-modal-cancel');
+    var modalSave = document.getElementById('flag-modal-save');
+    var _modalCurrentPath = null;
+
+    function openFlagModal(path) {
+      _modalCurrentPath = path;
+      modalPath.textContent = path;
+      modalNote.value = '';
+      modalCount.textContent = '0';
+      modal.classList.add('active');
+      setTimeout(function () { modalNote.focus(); }, 50);
+    }
+    function closeFlagModal() {
+      modal.classList.remove('active');
+      _modalCurrentPath = null;
+    }
+    modalNote.addEventListener('input', function () {
+      modalCount.textContent = modalNote.value.length;
+    });
+    modalCancel.addEventListener('click', closeFlagModal);
+    modal.addEventListener('click', function (e) { if (e.target === modal) closeFlagModal(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('active')) closeFlagModal();
+    });
+
+    modalSave.addEventListener('click', async function () {
+      var note = modalNote.value.trim();
+      if (!note) { modalNote.focus(); return; }
+      if (!currentLesson || !currentLesson.id) { alert('No lesson loaded'); return; }
+      modalSave.disabled = true;
+      try {
+        var resp = await fetch('/api/admin/practice-qa-flags', {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({
+            lesson_id: currentLesson.id,
+            problem_path: _modalCurrentPath,
+            note: note
+          })
+        });
+        if (!resp.ok) {
+          var j = await resp.json().catch(function () { return {}; });
+          alert('Error saving flag: ' + (j.error || resp.status));
+          modalSave.disabled = false;
+          return;
+        }
+        var pathSaved = _modalCurrentPath;
+        closeFlagModal();
+        // Optimistically push a flag row into local state
+        currentLessonFlags.push({ problem_path: pathSaved, note: note, status: 'open' });
+        showInlineConfirm(pathSaved);
+        refreshOpenFlagsCount();
+      } catch (e) {
+        alert('Network error');
+      }
+      modalSave.disabled = false;
+    });
+
+    function showInlineConfirm(path) {
+      var card = document.getElementById(cardId(path));
+      if (!card) return;
+      var fc = flagsForPath(path).length;
+      // Update or insert the flag count badge
+      var header = card.querySelector('.qa-card-header');
+      var badge = header.querySelector('.qa-card-flag-count');
+      if (!badge) {
+        badge = document.createElement('span');
+        badge.className = 'qa-card-flag-count';
+        header.insertBefore(badge, header.querySelector('.qa-card-flag-btn'));
+      }
+      badge.textContent = fc + ' open flag' + (fc === 1 ? '' : 's');
+
+      // Add transient confirmation under the header
+      var existing = card.querySelector('.qa-confirm-msg');
+      if (existing) existing.remove();
+      var msg = document.createElement('div');
+      msg.className = 'qa-confirm-msg';
+      msg.textContent = 'Flagged ✓ — ' + fc + ' open flag' + (fc === 1 ? '' : 's') + ' on this card.';
+      msg.style.padding = '0 1.25rem 0.5rem';
+      card.appendChild(msg);
+      setTimeout(function () { msg.style.opacity = '0'; msg.style.transition = 'opacity 1s'; setTimeout(function () { msg.remove(); }, 1100); }, 3500);
+    }
+
+    // ---- Delegate flag-button clicks ----
+    lessonContentEl.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-flag-path]');
+      if (!btn) return;
+      openFlagModal(btn.dataset.flagPath);
+    });
+
+    /* ============================================
+       URL sync + selector wiring
+       ============================================ */
+    function pushUrlState() {
+      var u = new URL(window.location.href);
+      ['subject', 'unit', 'lesson'].forEach(function (k) { u.searchParams.delete(k); });
+      if (subjectSelect.value) u.searchParams.set('subject', subjectSelect.value);
+      if (unitSelect.value) u.searchParams.set('unit', unitSelect.value);
+      if (lessonSelect.value) u.searchParams.set('lesson', lessonSelect.value);
+      history.pushState({}, '', u);
+    }
+
+    subjectSelect.addEventListener('change', async function () {
+      lessonContentEl.innerHTML = '<div class="qa-pick-prompt">Pick a unit and lesson above.</div>';
+      currentLesson = null;
+      if (!subjectSelect.value) {
+        unitSelect.innerHTML = '<option value="">Unit…</option>';
+        lessonSelect.innerHTML = '<option value="">Lesson…</option>';
+        pushUrlState();
+        return;
+      }
+      await loadUnitsForSubject(subjectSelect.value);
+      pushUrlState();
+    });
+
+    unitSelect.addEventListener('change', async function () {
+      lessonContentEl.innerHTML = '<div class="qa-pick-prompt">Pick a lesson above.</div>';
+      currentLesson = null;
+      if (!unitSelect.value) {
+        lessonSelect.innerHTML = '<option value="">Lesson…</option>';
+        pushUrlState();
+        return;
+      }
+      await loadLessonsForUnit(unitSelect.value);
+      pushUrlState();
+    });
+
+    lessonSelect.addEventListener('change', function () {
+      if (!lessonSelect.value) {
+        lessonContentEl.innerHTML = '<div class="qa-pick-prompt">Pick a lesson above.</div>';
+        currentLesson = null;
+        pushUrlState();
+        return;
+      }
+      pushUrlState();
+      loadLesson(lessonSelect.value);
+    });
+
+    reloadBtn.addEventListener('click', function () {
+      if (lessonSelect.value) loadLesson(lessonSelect.value);
+      refreshOpenFlagsCount();
+    });
+
+    // Restore from URL params on initial load
+    async function restoreFromUrl() {
+      var subjectParam = urlParams.get('subject');
+      var unitParam = urlParams.get('unit');
+      var lessonParam = urlParams.get('lesson');
+      await loadSubjects();
+      if (subjectParam) {
+        subjectSelect.value = subjectParam;
+        if (subjectSelect.value !== subjectParam) return; // not found
+        await loadUnitsForSubject(subjectParam);
+        if (unitParam) {
+          unitSelect.value = unitParam;
+          if (unitSelect.value !== unitParam) return;
+          await loadLessonsForUnit(unitParam);
+          if (lessonParam) {
+            lessonSelect.value = lessonParam;
+            if (lessonSelect.value !== lessonParam) return;
+            await loadLesson(lessonParam);
+          }
+        }
+      }
+    }
+
+    /* ============================================
+       FLAGS LIST VIEW
+       ============================================ */
+    var flagsStatusFilter = document.getElementById('flags-status-filter');
+    var flagsSubjectFilter = document.getElementById('flags-subject-filter');
+    var flagsReloadBtn = document.getElementById('flags-reload-btn');
+    var flagsContentEl = document.getElementById('flags-content');
+
+    async function loadSubjectsForFlagsFilter() {
+      if (flagsSubjectFilter.options.length > 1) return;
+      if (subjectsCache.length === 0) {
+        // load subjects without filtering by practice_units so we don't miss any
+        var r = await sb.from('subjects').select('id, slug, name, settings, school_id').order('name');
+        if (!r.error) {
+          subjectsCache = (r.data || []).filter(function (s) {
+            return s.settings && Array.isArray(s.settings.practice_units) && s.settings.practice_units.length > 0;
+          });
+        }
+      }
+      for (var i = 0; i < subjectsCache.length; i++) {
+        var opt = document.createElement('option');
+        opt.value = subjectsCache[i].slug;
+        opt.textContent = subjectsCache[i].name;
+        flagsSubjectFilter.appendChild(opt);
+      }
+    }
+
+    async function loadFlags() {
+      flagsContentEl.innerHTML = '<div class="qa-loading-msg">Loading…</div>';
+      var status = flagsStatusFilter.value;
+      var subjectSlug = flagsSubjectFilter.value;
+      var qs = [];
+      if (status && status !== 'all') qs.push('status=' + encodeURIComponent(status));
+      if (subjectSlug) qs.push('subject_slug=' + encodeURIComponent(subjectSlug));
+      try {
+        var resp = await fetch('/api/admin/practice-qa-flags' + (qs.length ? '?' + qs.join('&') : ''), {
+          headers: authHeaders()
+        });
+        if (!resp.ok) {
+          flagsContentEl.innerHTML = '<div class="qa-empty-msg">Failed to load (' + resp.status + ').</div>';
+          return;
+        }
+        var json = await resp.json();
+        renderFlags(json.flags || []);
+      } catch (e) {
+        flagsContentEl.innerHTML = '<div class="qa-empty-msg">Network error.</div>';
+      }
+    }
+
+    function renderFlags(flags) {
+      if (flags.length === 0) {
+        flagsContentEl.innerHTML = '<div class="qa-empty-msg">No flags match the current filter.</div>';
+        return;
+      }
+      flagsContentEl.innerHTML = flags.map(function (f) {
+        var lesson = f.lessons || {};
+        var unit = lesson.units || {};
+        var subject = unit.subjects || {};
+        var breadcrumb =
+          (subject.name || subject.slug || '?') +
+          (subject.exam_board ? ' (' + subject.exam_board + ')' : '') +
+          ' / ' + (unit.name || unit.slug || '?') +
+          ' / L' + (lesson.lesson_number || '?') +
+          ' ' + (lesson.title || '');
+        var deepLinkHref = '/admin/practice-qa' +
+          '?subject=' + encodeURIComponent(subject.slug || '') +
+          '&unit=' + encodeURIComponent(unit.slug || '') +
+          '&lesson=' + encodeURIComponent(lesson.lesson_number || '') +
+          '#' + cardId(f.problem_path);
+
+        var noteShort = f.note.length > 120 ? f.note.slice(0, 120) + '…' : f.note;
+
+        return '' +
+          '<div class="qa-flag-row" data-id="' + f.id + '">' +
+            '<span class="qa-flag-status qa-flag-status--' + escHtml(f.status) + '">' + escHtml(f.status) + '</span>' +
+            '<div class="qa-flag-main">' +
+              '<div class="qa-flag-breadcrumb">' +
+                escHtml(breadcrumb) +
+                ' <span class="qa-flag-path">' + escHtml(f.problem_path) + '</span>' +
+              '</div>' +
+              '<div class="qa-flag-note" title="' + escHtml(f.note) + '">' + escHtml(noteShort) + '</div>' +
+              '<div class="qa-flag-meta">' +
+                'Flagged ' + escHtml(relTime(f.created_at)) +
+                (f.fixed_at ? ' · Fixed ' + escHtml(relTime(f.fixed_at)) : '') +
+              '</div>' +
+            '</div>' +
+            '<div class="qa-flag-actions">' +
+              (f.status === 'open'
+                ? '<button data-act="fixed">Mark fixed</button>' +
+                  '<button data-act="wontfix">Won\'t fix</button>'
+                : '<button data-act="open" class="qa-flag-btn--open">Reopen</button>') +
+              '<a href="' + escHtml(deepLinkHref) + '">Open lesson →</a>' +
+              '<button class="qa-flag-btn--danger" data-act="delete">Delete</button>' +
+            '</div>' +
+          '</div>';
+      }).join('');
+
+      flagsContentEl.querySelectorAll('.qa-flag-row').forEach(function (row) {
+        row.querySelectorAll('button[data-act]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var id = row.dataset.id;
+            var act = btn.dataset.act;
+            if (act === 'delete') {
+              if (!confirm('Delete this flag? Cannot be undone.')) return;
+              doFlagAction('DELETE', { id: id });
+            } else {
+              doFlagAction('PATCH', { id: id, status: act });
+            }
+          });
+        });
+      });
+    }
+
+    async function doFlagAction(method, body) {
+      try {
+        var resp = await fetch('/api/admin/practice-qa-flags', {
+          method: method,
+          headers: authHeaders(),
+          body: JSON.stringify(body)
+        });
+        if (!resp.ok) {
+          var j = await resp.json().catch(function () { return {}; });
+          alert('Error: ' + (j.error || resp.status));
+          return;
+        }
+        loadFlags();
+        refreshOpenFlagsCount();
+      } catch (e) {
+        alert('Network error');
+      }
+    }
+
+    flagsStatusFilter.addEventListener('change', loadFlags);
+    flagsSubjectFilter.addEventListener('change', loadFlags);
+    flagsReloadBtn.addEventListener('click', loadFlags);
+
+    /* ============================================
+       Boot
+       ============================================ */
+    setView(view, false);
+    restoreFromUrl();
+    refreshOpenFlagsCount();
+
+    // Back/forward nav
+    window.addEventListener('popstate', function () {
+      var u = new URLSearchParams(window.location.search);
+      setView(u.get('view') || 'lesson', false);
+    });
+  })();
+  </script>
+</body>
+</html>
