@@ -949,8 +949,9 @@
       // pair of equal "Lesson Highlights" + "Exit Highlight Mode" in mode.
       // On wide viewports (≥1400px) the stack centres under the gutter
       // checklist column so it feels like one visual unit with the rail.
-      '.sv-hl-fab-stack{position:fixed;left:18px;bottom:18px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
+      '.sv-hl-fab-stack{position:fixed;left:18px;bottom:48px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
       '@media (min-width:1400px){.sv-hl-fab-stack{left:calc((100vw - var(--page-max, 1160px)) / 4);transform:translateX(-50%);align-items:center}}' +
+      '@media (max-width:640px){.sv-hl-fab-stack{bottom:24px}}' +
       '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.18);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500;transition:filter .15s ease,transform .15s ease}' +
       '.sv-hl-fab:hover{filter:brightness(1.1);transform:translateY(-1px)}' +
       '.sv-hl-fab--exit{background:#2d2a26;color:#fff}' +

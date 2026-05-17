@@ -653,6 +653,23 @@ body.dark-mode .page-header.scrolled {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  position: relative;
+}
+
+/* On wide viewports (where the gutter checklist appears), pull the brand
+   out of the centred header-inner and anchor it above the gutter column,
+   in the otherwise-empty top-left whitespace. Nav stays right-aligned. */
+@media (min-width: 1400px) {
+  .header-brand {
+    position: fixed;
+    top: 0.75rem;
+    left: calc((100vw - var(--page-max, 1160px)) / 4);
+    transform: translateX(-50%);
+    z-index: 901;
+  }
+  .page-header-inner {
+    justify-content: flex-end;
+  }
 }
 
 .header-brand {
@@ -1023,17 +1040,42 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
 }
 
 /* --- Sidebar --- */
+/* Replay-tour button injected into the header on wide desktops */
+.header-tour-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(45, 42, 38, 0.15);
+  color: var(--text-secondary, #5d564b);
+  cursor: pointer;
+  margin-right: 4px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.header-tour-btn:hover {
+  background: var(--accent, #2d2a26);
+  color: #fff;
+  border-color: var(--accent, #2d2a26);
+}
+body.dark-mode .header-tour-btn {
+  border-color: rgba(245, 241, 236, 0.15);
+  color: rgba(245, 241, 236, 0.7);
+}
+
 .lesson-sidebar {
   position: sticky;
   top: 5rem; /* below sticky header */
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  /* Distribute sections evenly down the column so 2/3/4 visible blocks
-     all fill the available height. justify-content only kicks in when
-     content is SHORTER than the container — if sections overflow, the
-     overflow-y: auto + max-height take over and scrolling kicks in. */
-  justify-content: space-between;
+  /* Distribute sections evenly down the column with equal space at top,
+     bottom, and between. space-evenly is gentler than space-between —
+     items stay grouped in the visual centre rather than pulling to the
+     edges, but still adapt naturally as sections appear/disappear. */
+  justify-content: space-evenly;
   min-height: calc(100vh - 6rem);
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
