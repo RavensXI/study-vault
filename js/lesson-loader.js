@@ -788,11 +788,12 @@
   function maybeStartLessonTutorial() {
     var fullTutorialDone = false;
     var highlightTutorialDone = false;
-    var highlightFeatureOn = false;
+    // Feature is GA — default ON; only false if the student explicitly opted out.
+    var highlightFeatureOn = true;
     try {
       fullTutorialDone = localStorage.getItem('sv-lesson-tutorial-done') === '1';
       highlightTutorialDone = localStorage.getItem('sv-highlight-tutorial-done') === '1';
-      highlightFeatureOn = localStorage.getItem('sv-hl-enabled') === '1';
+      if (localStorage.getItem('sv-hl-enabled') === '0') highlightFeatureOn = false;
     } catch (e) {}
     if (fullTutorialDone && (highlightTutorialDone || !highlightFeatureOn)) return;
     // Returning students with the highlight feature on get a one-step mini-tour
@@ -876,10 +877,12 @@
         side: 'bottom',
         _id: 'glossary'
       },
-      highlightFeatureOn && studyNotes && studyNotes.querySelector('p') && isVisible(studyNotes.querySelector('p')) && {
-        target: studyNotes.querySelector('p'),
-        text: 'Select any text in the lesson — a "Highlight" button will pop up so you can mark it and add a note. Find everything you\'ve highlighted in the Highlights button at the bottom right.',
-        side: 'bottom',
+      highlightFeatureOn && document.querySelector('.sv-hl-fab--enter') && {
+        target: document.querySelector('.sv-hl-fab--enter'),
+        text: (window.innerWidth <= 768
+          ? 'Tap Highlight Mode to start. Then tap a word to mark where the highlight starts, and tap another word to finish it. You can add a colour and a note. Everything you save lives in this same corner.'
+          : 'Click Highlight Mode to start. Then drag across any text in the lesson to highlight it — pick a colour and add a note if you like. Everything you save lives in this same corner.'),
+        side: 'top',
         _id: 'highlight'
       },
       firstTip && isVisible(firstTip) && {
