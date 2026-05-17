@@ -16,13 +16,13 @@
     .bugr-fab {
       position: fixed; right: 16px; bottom: 16px; z-index: 9990;
       width: 44px; height: 44px; border-radius: 50%;
-      background: #2d2a26; color: #fff;
+      background: var(--accent, #2d2a26); color: #fff;
       border: 0; cursor: pointer;
       display: grid; place-items: center;
       box-shadow: 0 4px 14px rgba(45,42,38,0.22);
-      transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
     }
-    .bugr-fab:hover { background: #4a463f; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(45,42,38,0.28); }
+    .bugr-fab:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 18px rgba(45,42,38,0.28); }
     .bugr-fab:active { transform: translateY(0); }
     .bugr-fab svg { width: 20px; height: 20px; }
     .bugr-fab[hidden] { display: none; }

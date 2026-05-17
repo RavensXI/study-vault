@@ -939,18 +939,17 @@
       'body.dark-mode .sv-hl-btn--primary:hover{background:#fff}' +
       // FAB — bottom-left. Single "Highlight mode" button out of mode;
       // pair of equal "Lesson Highlights" + "Exit Highlight Mode" in mode.
+      // On wide viewports (≥1400px) the stack centres under the gutter
+      // checklist column so it feels like one visual unit with the rail.
       '.sv-hl-fab-stack{position:fixed;left:18px;bottom:18px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
-      '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.25);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500}' +
-      '.sv-hl-fab:hover{background:#1f1c19}' +
+      '@media (min-width:1400px){.sv-hl-fab-stack{left:calc((100vw - var(--page-max, 1160px)) / 4);transform:translateX(-50%);align-items:center}}' +
+      '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.18);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500;transition:filter .15s ease,transform .15s ease}' +
+      '.sv-hl-fab:hover{filter:brightness(1.1);transform:translateY(-1px)}' +
       '.sv-hl-fab--exit{background:#854d0e;color:#fef3c7}' +
-      '.sv-hl-fab--exit:hover{background:#713f0a}' +
-      '.sv-hl-fab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#faf8f5;color:#2d2a26;font-size:.78rem;font-weight:600}' +
-      '.sv-hl-fab--empty .sv-hl-fab-count{background:rgba(250,248,245,.22);color:#faf8f5}' +
-      'body.dark-mode .sv-hl-fab{background:#3a3631;color:#f5f1ec}' +
-      'body.dark-mode .sv-hl-fab:hover{background:#4a463f}' +
+      '.sv-hl-fab--exit:hover{filter:brightness(1.1)}' +
+      '.sv-hl-fab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:rgba(255,255,255,.95);color:#2d2a26;font-size:.78rem;font-weight:600}' +
+      '.sv-hl-fab--empty .sv-hl-fab-count{background:rgba(255,255,255,.22);color:#fff}' +
       'body.dark-mode .sv-hl-fab--exit{background:#7c3a09;color:#fef3c7}' +
-      'body.dark-mode .sv-hl-fab--exit:hover{background:#9a4d10}' +
-      'body.dark-mode .sv-hl-fab-count{background:#f5f1ec;color:#2d2a26}' +
       '@media (max-width:640px){.sv-hl-fab-label{display:none}.sv-hl-fab{padding:10px}}' +
       // Modal
       '.sv-hl-modal{position:fixed;inset:0;z-index:9500;display:none;align-items:flex-end;justify-content:center}' +
