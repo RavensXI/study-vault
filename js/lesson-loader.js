@@ -1246,23 +1246,25 @@
   function addSidebarTourButton() {
     var gutter = document.querySelector('.gutter-progress');
     var sidebarProgress = document.querySelector('.sidebar-progress-section');
+    var headerNav = document.getElementById('header-nav');
 
     // Clean any previous injection (could exist from a prior render)
     document.querySelectorAll('.sidebar-tour-section, .gutter-tour-btn, .header-tour-btn').forEach(function (el) { el.remove(); });
 
-    if (isElVisible(gutter)) {
-      // Wide desktop — small icon button inside the gutter, under the checklist
+    if (isElVisible(gutter) && headerNav) {
+      // Wide desktop — small icon button in the page header, alongside the
+      // nav links. Keeps the gutter clean and the tour control discoverable.
       var btn = document.createElement('button');
       btn.id = 'replay-tour-btn';
       btn.type = 'button';
-      btn.className = 'gutter-tour-btn';
+      btn.className = 'header-tour-btn';
       btn.title = 'Show the lesson tour again';
       btn.setAttribute('aria-label', 'Show the lesson tour again');
       btn.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">' +
           '<circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16 10 8"/>' +
         '</svg>';
-      gutter.appendChild(btn);
+      headerNav.insertBefore(btn, headerNav.firstChild);
     } else if (sidebarProgress) {
       // Narrow — a full pill under the sidebar lesson-progress card
       var section = document.createElement('div');
