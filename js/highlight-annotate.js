@@ -21,20 +21,23 @@
   'use strict';
 
   // ---------- feature gating ----------
+  // Feature is now generally available — default to ON. ?highlights=0 (or
+  // localStorage sv-hl-enabled='0') is kept as an explicit opt-out so we can
+  // disable the feature for a specific user / test session if needed.
   function isEnabled() {
     try {
       var url = new URL(window.location.href);
-      if (url.searchParams.get('highlights') === '1') {
-        try { localStorage.setItem('sv-hl-enabled', '1'); } catch (e) {}
-        return true;
-      }
       if (url.searchParams.get('highlights') === '0') {
-        try { localStorage.removeItem('sv-hl-enabled'); } catch (e) {}
+        try { localStorage.setItem('sv-hl-enabled', '0'); } catch (e) {}
         return false;
       }
-      return localStorage.getItem('sv-hl-enabled') === '1';
+      if (url.searchParams.get('highlights') === '1') {
+        try { localStorage.removeItem('sv-hl-enabled'); } catch (e) {}
+        return true;
+      }
+      return localStorage.getItem('sv-hl-enabled') !== '0';
     } catch (e) {
-      return false;
+      return true;
     }
   }
 
