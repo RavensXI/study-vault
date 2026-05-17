@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyVault Highlight Mode — Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ----------------------------------------------------------------------
+   StudyVault design tokens — keep in sync with css/style.css
+   ---------------------------------------------------------------------- */
+:root {
+  --bg-page: #faf8f5;
+  --bg-card: #ffffff;
+  --text-primary: #2d2a26;
+  --text-secondary: #5d564b;
+  --text-muted: #8a8276;
+  --border-lighter: rgba(45, 42, 38, 0.08);
+  --border-light: rgba(45, 42, 38, 0.12);
+  --shadow-sm: 0 1px 3px rgba(45, 42, 38, 0.06);
+  --shadow-md: 0 4px 12px rgba(45, 42, 38, 0.08);
+  --radius: 16px;
+  --accent: #c44536; /* History accent — change to taste */
+  --page-max: 1160px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Page header ---- */
+.page-header {
+  background: #fff;
+  border-bottom: 1px solid var(--border-lighter);
+  padding: 0.85rem 1.5rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.page-header-inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.header-brand {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 700;
+  font-size: 1.25rem;
+}
+.header-pills {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+}
+.header-pill {
+  background: rgba(196, 69, 54, 0.12);
+  color: #8a2d23;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+/* ---- Lesson layout ---- */
+.lesson-shell {
+  max-width: 760px;
+  margin: 2.5rem auto 5rem;
+  padding: 0 1.5rem;
+}
+.lesson-header {
+  margin-bottom: 1.5rem;
+}
+.lesson-header .lesson-number {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.lesson-header h1 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  color: var(--text-primary);
+}
+.lesson-header p {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* ---- Article body (this is what gets highlighted) ---- */
+#study-notes {
+  font-size: 1.05rem;
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+#study-notes h2 {
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-size: 1.45rem;
+  margin: 2rem 0 0.75rem;
+  color: var(--text-primary);
+}
+#study-notes p {
+  margin: 0 0 1.1rem;
+}
+#study-notes strong { color: var(--text-primary); font-weight: 700; }
+#study-notes em { font-style: italic; color: var(--text-primary); }
+.term {
+  border-bottom: 1px dotted rgba(45, 42, 38, 0.45);
+  cursor: help;
+}
+
+/* ---- Mini lesson-progress checklist (illustrative — not interactive) ---- */
+.lesson-checklist {
+  background: #fff;
+  border: 1px solid var(--border-lighter);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0 2rem;
+  box-shadow: var(--shadow-sm);
+}
+.lesson-checklist h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+.lesson-checklist ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.lesson-checklist li {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.92rem;
+  color: var(--text-secondary);
+}
+.lesson-checklist li::before {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-light);
+  flex-shrink: 0;
+}
+.lesson-checklist li.done::before {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+.lesson-checklist li.done {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+</style>
+</head>
+<body>
+
+<!-- Tiny header so the demo looks like a real lesson page -->
+<header class="page-header">
+  <div class="page-header-inner">
+    <a class="header-brand" href="#">StudyVault</a>
+    <div class="header-pills">
+      <span class="header-pill">Unit 2 · The Cold War</span>
+      <span class="header-pill">Lesson 4 of 12</span>
+    </div>
+  </div>
+</header>
+
+<main class="lesson-shell">
+
+  <div class="lesson-header">
+    <span class="lesson-number">Lesson 4</span>
+    <h1>The Berlin Wall: Building a Cold War Symbol</h1>
+    <p>How a wall of concrete became the most visible symbol of a divided Europe.</p>
+  </div>
+
+  <!-- Mini checklist (illustrative only — for visual context in the demo) -->
+  <div class="lesson-checklist">
+    <h3>Your lesson tasks</h3>
+    <ul>
+      <li class="done">Read the lesson</li>
+      <li>Highlight key facts and ideas</li>
+      <li>Try the quick quiz</li>
+      <li>Answer the exam question</li>
+    </ul>
+  </div>
+
+  <!-- THIS is the container the highlight feature targets.
+       Anything inside #study-notes is highlightable. -->
+  <article id="study-notes">
+
+    <p>On 13 August 1961, in the early hours of a Sunday morning, soldiers and police of the German Democratic Republic began rolling out barbed wire across the streets of Berlin. By dawn the city was split. Within weeks, the wire had been replaced with concrete, watchtowers, and a death strip. The <span class="term">Berlin Wall</span> would stand for twenty-eight years and become the most recognisable symbol of the <strong>Cold War</strong> in Europe.</p>
+
+    <h2>Why the Wall was built</h2>
+
+    <p>Between 1949 and 1961, around <strong>two and a half million East Germans</strong> fled west, most of them through Berlin. Many were young, educated, and skilled — exactly the people the East German economy could not afford to lose. The communist government called this haemorrhage of talent the <em>Republikflucht</em>, or "flight from the republic". Soviet leader <strong>Nikita Khrushchev</strong> and East German leader <strong>Walter Ulbricht</strong> agreed that something had to stop it.</p>
+
+    <p>Closing the border was risky. It would prove, dramatically and in public, that people had to be locked in rather than persuaded to stay. But the alternative was watching East Germany hollow out. In the end, Ulbricht's regime decided the political cost of a wall was lower than the economic cost of continued emigration.</p>
+
+    <h2>The night the city was split</h2>
+
+    <p>The operation began at midnight. Roads were torn up. Telephone and S-Bahn links between the two halves of the city were cut. Families who lived on opposite sides of a single street woke up to discover that they could no longer cross to see each other. The Western Allies — Britain, France and the United States — issued protests, but did nothing to physically intervene. <em>Khrushchev had gambled correctly</em>: the West would not start a war over Berlin.</p>
+
+    <p>In the months that followed, the wire was upgraded into a concrete wall up to <strong>3.6 metres tall</strong>, with a parallel inner wall, anti-vehicle trenches, and a wide patrolled "death strip" between them. Border guards were given orders to shoot anyone trying to cross. Over the wall's lifetime, at least <strong>140 people were killed</strong> attempting to escape.</p>
+
+    <h2>A symbol the West used</h2>
+
+    <p>For Western politicians the wall was a propaganda gift. When US President <strong>John F. Kennedy</strong> visited West Berlin in June 1963, he stood beside the wall and declared <em>"Ich bin ein Berliner"</em> — I am a Berliner. The line, broadcast worldwide, made plain that Western democracy stood with the city. The wall framed the Cold War as a moral contest: not just communism versus capitalism, but freedom versus an ideology that needed concrete to hold its own people in.</p>
+
+    <p>The wall did achieve what its builders wanted. After 1961, the flood of refugees slowed to a trickle. But the political damage to the East was enormous, and the image of a divided Berlin would shape Western thinking about the Soviet bloc for the rest of the Cold War — right up to the moment, on 9 November 1989, when the wall came down.</p>
+
+  </article>
+
+</main>
+
+<!-- ----------------------------------------------------------------------
+     Highlight Mode wiring
+     ----------------------------------------------------------------------
+     The feature script self-injects all its CSS, FAB, popover and modal.
+     We just need to:
+       1) declare the lesson-id / subject / unit globals (the real platform
+          loads these from Supabase)
+       2) call window.initHighlightAnnotate() once the DOM is ready
+     ---------------------------------------------------------------------- -->
+<script>
+  window._lessonId    = 'demo-berlin-wall';
+  window._subjectName = 'History';
+  window._unitName    = 'The Cold War';
+</script>
+<script src="./highlight-feature.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Open in Highlight Mode by default so the demo is one click away
+    // from showing the interaction. Comment this out if you want the
+    // out-of-mode "enter Highlight Mode" FAB as the starting state.
+    if (typeof window.initHighlightAnnotate === 'function') {
+      window.initHighlightAnnotate();
+    }
+  });
+</script>
+
+</body>
+</html>
