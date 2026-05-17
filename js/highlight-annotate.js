@@ -895,9 +895,10 @@
       '@keyframes sv-hl-flash{0%,100%{box-shadow:0 0 0 0 rgba(45,42,38,0)}30%{box-shadow:0 0 0 6px rgba(45,42,38,.25)}}' +
       // Highlight Mode — lift the article body off the page with a proper
       // card treatment: brighter background (white vs the cream page) and a
-      // real drop shadow. Everything else on the page stays untouched, so
-      // only the highlightable surface pops.
-      'body.sv-hl-mode #study-notes{background:#fff;border-radius:10px;box-shadow:0 12px 40px -8px rgba(45,42,38,.25), 0 2px 8px rgba(45,42,38,.08);transition:background-color .3s ease, box-shadow .3s ease}' +
+      // real drop shadow. Padding pushes the card boundary outward by 20px
+      // and the matching negative margin cancels the shift, so text stays
+      // exactly where it was — only the white card grows outward.
+      'body.sv-hl-mode #study-notes{background:#fff;border-radius:12px;padding:20px;margin:-20px;box-shadow:0 12px 40px -8px rgba(45,42,38,.25), 0 2px 8px rgba(45,42,38,.08);transition:background-color .3s ease, box-shadow .3s ease}' +
       'body.dark-mode.sv-hl-mode #study-notes{background:#2a2826;box-shadow:0 12px 40px -8px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.3)}' +
       // Highlight Mode — cursor + live selection match the last-used colour
       // (so the highlighter feels "loaded"). One pair per colour.
