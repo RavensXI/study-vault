@@ -2426,6 +2426,19 @@ function initLessonProgress() {
   // Flashcards
   tasks.push({ id: 'flashcards', label: 'Revise with flashcards', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="2" y="4" width="16" height="14" rx="2"/><rect x="6" y="6" width="16" height="14" rx="2"/></svg>', iconClass: 'lesson-progress-icon--flashcards', auto: true });
 
+  // Exam practice question — only if the lesson has practice questions.
+  // Auto-ticks when the student clicks the AI mark button (asks for feedback).
+  var practiceBtn = document.getElementById('practice-ai-mark');
+  if (practiceBtn && window.practiceQuestions && window.practiceQuestions.length > 0) {
+    tasks.push({
+      id: 'practice-question',
+      label: 'Answer an exam question',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
+      iconClass: 'lesson-progress-icon--practice',
+      auto: true
+    });
+  }
+
   // Revision task
   tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
 
@@ -2556,6 +2569,20 @@ function initLessonProgress() {
 
   bindClicks(section, '.lesson-progress-item');
   bindClicks(gutter, '.gutter-progress-item');
+
+  // ---- Practice-question auto-tick ----
+  // Tick when the student clicks "AI mark my answer" (asks for feedback).
+  // Capture phase so we fire before the button's own handler does anything
+  // that might prevent default propagation.
+  if (practiceBtn && tasks.some(function (t) { return t.id === 'practice-question'; })) {
+    practiceBtn.addEventListener('click', function () {
+      if (!state['practice-question']) {
+        state['practice-question'] = true;
+        saveState(state);
+        syncAll();
+      }
+    }, true);
+  }
 
   // ---- Highlight mode auto-tick ----
   // Tick when the student has any highlight on this lesson; untick if
