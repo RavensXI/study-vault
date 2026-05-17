@@ -656,9 +656,10 @@ body.dark-mode .page-header.scrolled {
   position: relative;
 }
 
-/* On wide viewports (where the gutter checklist appears), pull the brand
-   out of the centred header-inner and anchor it above the gutter column,
-   in the otherwise-empty top-left whitespace. Nav stays right-aligned. */
+/* On wide viewports (where the gutter checklist appears), pull just the
+   StudyVault wordmark out of the centred header-inner and anchor it above
+   the gutter column in the otherwise-empty top-left whitespace. The unit
+   pill stays in the header-inner flex flow where it was. */
 @media (min-width: 1400px) {
   .header-brand {
     position: fixed;
@@ -666,9 +667,6 @@ body.dark-mode .page-header.scrolled {
     left: calc((100vw - var(--page-max, 1160px)) / 4);
     transform: translateX(-50%);
     z-index: 901;
-  }
-  .page-header-inner {
-    justify-content: flex-end;
   }
 }
 
@@ -1070,18 +1068,22 @@ body.dark-mode .header-tour-btn {
   top: 5rem; /* below sticky header */
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  /* Distribute sections evenly down the column with equal space at top,
-     bottom, and between. space-evenly is gentler than space-between —
-     items stay grouped in the visual centre rather than pulling to the
-     edges, but still adapt naturally as sections appear/disappear. */
-  justify-content: space-evenly;
+  /* Tight base gap so Quick Quiz + Flashcards read as a paired group.
+     justify-content centres the whole stack vertically, giving equal
+     space above the first item and below the last. */
+  gap: 0.5rem;
+  justify-content: center;
   min-height: calc(100vh - 6rem);
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.3s;
+}
+/* Larger gap before Related Media so it reads as a distinct block from
+   the action buttons (Quick Quiz / Flashcards) that precede it. */
+.lesson-sidebar .sidebar-media {
+  margin-top: 1.5rem;
 }
 .lesson-sidebar:hover {
   scrollbar-color: var(--accent) transparent;
