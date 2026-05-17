@@ -893,11 +893,12 @@
       'mark.sv-hl[data-hl-has-note]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;vertical-align:super;margin-left:2px;opacity:.5}' +
       'mark.sv-hl--flash{animation:sv-hl-flash 1.4s ease}' +
       '@keyframes sv-hl-flash{0%,100%{box-shadow:0 0 0 0 rgba(45,42,38,0)}30%{box-shadow:0 0 0 6px rgba(45,42,38,.25)}}' +
-      // Highlight Mode — give #study-notes a soft drop shadow so it lifts
-      // off the page. Page background, header, gutter, sidebar all stay as
-      // they were — only the article you're actually highlighting pops.
-      'body.sv-hl-mode #study-notes{box-shadow:0 0 0 1px rgba(45,42,38,.05), 0 16px 44px -18px rgba(45,42,38,.22);border-radius:10px;transition:box-shadow .3s ease}' +
-      'body.dark-mode.sv-hl-mode #study-notes{box-shadow:0 0 0 1px rgba(245,241,236,.08), 0 16px 44px -18px rgba(0,0,0,.6)}' +
+      // Highlight Mode — lift the article body off the page with a proper
+      // card treatment: brighter background (white vs the cream page) and a
+      // real drop shadow. Everything else on the page stays untouched, so
+      // only the highlightable surface pops.
+      'body.sv-hl-mode #study-notes{background:#fff;border-radius:10px;box-shadow:0 12px 40px -8px rgba(45,42,38,.25), 0 2px 8px rgba(45,42,38,.08);transition:background-color .3s ease, box-shadow .3s ease}' +
+      'body.dark-mode.sv-hl-mode #study-notes{background:#2a2826;box-shadow:0 12px 40px -8px rgba(0,0,0,.6), 0 2px 8px rgba(0,0,0,.3)}' +
       // Highlight Mode — cursor + live selection match the last-used colour
       // (so the highlighter feels "loaded"). One pair per colour.
       'body.sv-hl-mode.sv-hl-color-yellow #study-notes,body.sv-hl-mode.sv-hl-color-yellow #study-notes *{cursor:url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="28" viewBox="0 0 24 28"><path d="M5 22h14v3H5z" fill="%232d2a26"/><path d="M5 22l1-7 6-12h0a3 3 0 0 1 5 0l1 7-6 12H5z" fill="%23fef08a" stroke="%23854d0e" stroke-width="1.2"/><path d="M11 4l5 3" stroke="%23854d0e" stroke-width="1.2" fill="none"/></svg>\') 2 26, text}' +
