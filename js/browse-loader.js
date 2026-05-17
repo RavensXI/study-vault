@@ -178,12 +178,6 @@
       { board: 'OCR', slug: 'computer-science' },
       { board: 'AQA', slug: 'computer-science-aqa' },
       { board: 'Edexcel', slug: 'computer-science-edexcel' }
-    ],
-    'separate-sciences': [
-      { board: 'AQA', slug: 'separate-sciences' },
-      { board: 'Edexcel', slug: 'separate-sciences-edexcel' },
-      { board: 'OCR', slug: 'separate-sciences-ocr' },
-      { board: 'OCR B', slug: 'separate-sciences-ocr-b' }
     ]
   };
 
