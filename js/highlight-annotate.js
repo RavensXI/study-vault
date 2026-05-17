@@ -402,8 +402,7 @@
         '<button class="sv-hl-icon-btn sv-hl-delete" type="button" title="Delete highlight" hidden>' +
           '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>' +
         '</button>' +
-        '<button class="sv-hl-btn sv-hl-cancel" type="button">Done</button>' +
-        '<button class="sv-hl-btn sv-hl-save sv-hl-btn--primary" type="button">Save note</button>' +
+        '<button class="sv-hl-btn sv-hl-done sv-hl-btn--primary" type="button">Done</button>' +
       '</div>';
     document.body.appendChild(popoverEl);
 
@@ -417,18 +416,7 @@
         });
       });
     });
-    popoverEl.querySelector('.sv-hl-save').addEventListener('click', function () {
-      var note = popoverEl.querySelector('.sv-hl-note').value;
-      saveNote(note);
-      hidePopover();
-    });
-    popoverEl.querySelector('.sv-hl-cancel').addEventListener('click', function () {
-      // Save whatever's typed before closing, in case the student typed a note
-      // but clicked Done out of habit. Empty notes are no-ops.
-      var note = popoverEl.querySelector('.sv-hl-note').value;
-      if (note && note.trim() && activeHighlight && !activeHighlight.note) saveNote(note);
-      hidePopover();
-    });
+    popoverEl.querySelector('.sv-hl-done').addEventListener('click', commitAndHide);
     popoverEl.querySelector('.sv-hl-delete').addEventListener('click', function () {
       if (activeHighlight) deleteHighlight(activeHighlight.id);
       hidePopover();
@@ -468,6 +456,17 @@
     activeHighlight = null;
     pendingRange = null;
     pendingAnchor = null;
+  }
+
+  // Save whatever's typed in the note textarea (if a highlight is active)
+  // and close. Used by Done, click-outside, and Escape — all paths through
+  // a single behaviour so students don't lose typed notes.
+  function commitAndHide() {
+    if (popoverEl && activeHighlight) {
+      var note = popoverEl.querySelector('.sv-hl-note').value;
+      saveNote(note);
+    }
+    hidePopover();
   }
 
   // ---------- create / update / delete ----------
@@ -664,11 +663,11 @@
     if (!popoverEl || popoverEl.style.display === 'none') return;
     if (popoverEl.contains(evt.target)) return;
     if (evt.target.closest && evt.target.closest('mark.sv-hl')) return;
-    hidePopover();
+    commitAndHide();
   }
 
   function onKeyDown(evt) {
-    if (evt.key === 'Escape') hidePopover();
+    if (evt.key === 'Escape') commitAndHide();
   }
 
   // ---------- rehydrate marks on load ----------
