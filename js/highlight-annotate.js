@@ -904,7 +904,6 @@
       // FAB — bottom-left. Single "Highlight mode" button out of mode;
       // pair of equal "Lesson Highlights" + "Exit Highlight Mode" in mode.
       '.sv-hl-fab-stack{position:fixed;left:18px;bottom:18px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
-      '.sv-hl-fab-stack--in-mode{flex-direction:row;align-items:stretch}' +
       '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.25);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500}' +
       '.sv-hl-fab:hover{background:#1f1c19}' +
       '.sv-hl-fab--exit{background:#854d0e;color:#fef3c7}' +
