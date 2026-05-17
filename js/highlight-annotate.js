@@ -687,60 +687,70 @@
     }
   }
 
-  // ---------- FAB (bottom-left stack) ----------
-  // Out of mode: [All Highlights] [Lesson Highlights (count)]
-  // In mode:     [All Highlights] [Lesson Highlights] [Exit highlight mode]
-  var fabEl = null;
-  var modalEl = null;
+  // ---------- FAB (bottom-left) ----------
+  // Out of mode: [Highlight mode]                    — single button, enters mode
+  // In mode:    [Lesson Highlights (N)] [Exit Mode]  — two equal buttons side-by-side
+  var fabStackEl = null;
+  var fabEnterEl = null;
+  var fabLessonEl = null;
   var fabExitEl = null;
+  var modalEl = null;
 
   function refreshFab() {
-    if (!fabEl) return;
+    if (!fabStackEl) return;
+    var inMode = isHighlightModeActive();
     var n = getHighlights(window._lessonId).length;
-    fabEl.querySelector('.sv-hl-fab-count').textContent = n;
-    fabEl.style.display = 'inline-flex';
-    fabEl.classList.toggle('sv-hl-fab--empty', n === 0);
-    if (fabExitEl) fabExitEl.style.display = isHighlightModeActive() ? 'inline-flex' : 'none';
+    fabStackEl.classList.toggle('sv-hl-fab-stack--in-mode', inMode);
+    fabEnterEl.style.display = inMode ? 'none' : 'inline-flex';
+    fabLessonEl.style.display = inMode ? 'inline-flex' : 'none';
+    fabExitEl.style.display = inMode ? 'inline-flex' : 'none';
+    fabLessonEl.querySelector('.sv-hl-fab-count').textContent = n;
+    fabLessonEl.classList.toggle('sv-hl-fab--empty', n === 0);
   }
 
   function buildFab() {
-    if (fabEl) return fabEl;
-    var stack = document.createElement('div');
-    stack.className = 'sv-hl-fab-stack';
+    if (fabStackEl) return fabStackEl;
+    fabStackEl = document.createElement('div');
+    fabStackEl.className = 'sv-hl-fab-stack';
 
-    var allBtn = document.createElement('a');
-    allBtn.className = 'sv-hl-fab sv-hl-fab--all';
-    allBtn.href = '/highlights.html';
-    allBtn.setAttribute('aria-label', 'All highlights across lessons');
-    allBtn.innerHTML =
-      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>' +
-      '<span class="sv-hl-fab-label">All Highlights</span>';
-    stack.appendChild(allBtn);
+    // Out-of-mode: single "Highlight mode" toggle
+    fabEnterEl = document.createElement('button');
+    fabEnterEl.className = 'sv-hl-fab sv-hl-fab--enter';
+    fabEnterEl.type = 'button';
+    fabEnterEl.setAttribute('aria-label', 'Enter highlight mode');
+    fabEnterEl.innerHTML =
+      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
+      '<span class="sv-hl-fab-label">Highlight mode</span>';
+    fabEnterEl.addEventListener('click', enterHighlightMode);
+    fabStackEl.appendChild(fabEnterEl);
 
-    fabEl = document.createElement('button');
-    fabEl.className = 'sv-hl-fab sv-hl-fab--lesson';
-    fabEl.type = 'button';
-    fabEl.setAttribute('aria-label', 'Lesson highlights');
-    fabEl.innerHTML =
+    // In-mode: Lesson Highlights modal opener
+    fabLessonEl = document.createElement('button');
+    fabLessonEl.className = 'sv-hl-fab sv-hl-fab--lesson';
+    fabLessonEl.type = 'button';
+    fabLessonEl.setAttribute('aria-label', 'Lesson highlights');
+    fabLessonEl.style.display = 'none';
+    fabLessonEl.innerHTML =
       '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' +
       '<span class="sv-hl-fab-label">Lesson Highlights</span>' +
       '<span class="sv-hl-fab-count">0</span>';
-    fabEl.addEventListener('click', openModal);
-    stack.appendChild(fabEl);
+    fabLessonEl.addEventListener('click', openModal);
+    fabStackEl.appendChild(fabLessonEl);
 
+    // In-mode: Exit button
     fabExitEl = document.createElement('button');
     fabExitEl.className = 'sv-hl-fab sv-hl-fab--exit';
     fabExitEl.type = 'button';
     fabExitEl.setAttribute('aria-label', 'Exit highlight mode');
     fabExitEl.style.display = 'none';
     fabExitEl.innerHTML =
-      '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
-      '<span class="sv-hl-fab-label">Exit highlight mode</span>';
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+      '<span class="sv-hl-fab-label">Exit Highlight Mode</span>';
     fabExitEl.addEventListener('click', exitHighlightMode);
-    stack.appendChild(fabExitEl);
+    fabStackEl.appendChild(fabExitEl);
 
-    document.body.appendChild(stack);
-    return fabEl;
+    document.body.appendChild(fabStackEl);
+    return fabStackEl;
   }
 
   // ---------- per-lesson modal ----------
@@ -892,21 +902,22 @@
       'body.dark-mode .sv-hl-btn:hover{background:#3a3631}' +
       'body.dark-mode .sv-hl-btn--primary{background:#f5f1ec;color:#2d2a26;border-color:#f5f1ec}' +
       'body.dark-mode .sv-hl-btn--primary:hover{background:#fff}' +
-      // FAB stack — bottom-left
+      // FAB — bottom-left. Single "Highlight mode" button out of mode;
+      // pair of equal "Lesson Highlights" + "Exit Highlight Mode" in mode.
       '.sv-hl-fab-stack{position:fixed;left:18px;bottom:18px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
+      '.sv-hl-fab-stack--in-mode{flex-direction:row;align-items:stretch}' +
       '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:#2d2a26;color:#faf8f5;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.25);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500}' +
       '.sv-hl-fab:hover{background:#1f1c19}' +
-      '.sv-hl-fab--all{padding:7px 12px;font-size:.82rem;background:#4a463f}' +
-      '.sv-hl-fab--all:hover{background:#3a3631}' +
-      '.sv-hl-fab--exit{padding:7px 12px;font-size:.82rem;background:#854d0e;color:#fef3c7}' +
+      '.sv-hl-fab--exit{background:#854d0e;color:#fef3c7}' +
       '.sv-hl-fab--exit:hover{background:#713f0a}' +
       '.sv-hl-fab-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:11px;background:#faf8f5;color:#2d2a26;font-size:.78rem;font-weight:600}' +
       '.sv-hl-fab--empty .sv-hl-fab-count{background:rgba(250,248,245,.22);color:#faf8f5}' +
       'body.dark-mode .sv-hl-fab{background:#3a3631;color:#f5f1ec}' +
       'body.dark-mode .sv-hl-fab:hover{background:#4a463f}' +
-      'body.dark-mode .sv-hl-fab--all{background:#2a2826}' +
+      'body.dark-mode .sv-hl-fab--exit{background:#7c3a09;color:#fef3c7}' +
+      'body.dark-mode .sv-hl-fab--exit:hover{background:#9a4d10}' +
       'body.dark-mode .sv-hl-fab-count{background:#f5f1ec;color:#2d2a26}' +
-      '@media (max-width:640px){.sv-hl-fab-label{display:none}.sv-hl-fab{padding:10px}.sv-hl-fab--all,.sv-hl-fab--exit{padding:8px}}' +
+      '@media (max-width:640px){.sv-hl-fab-label{display:none}.sv-hl-fab{padding:10px}}' +
       // Modal
       '.sv-hl-modal{position:fixed;inset:0;z-index:9500;display:none;align-items:flex-end;justify-content:center}' +
       '.sv-hl-modal--open{display:flex}' +
