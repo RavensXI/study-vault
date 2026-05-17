@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sv-v4';
+const CACHE_VERSION = 'sv-v5';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
@@ -10,6 +10,7 @@ const SHELL_ASSETS = [
   '/js/lesson-loader.js',
   '/js/browse-loader.js',
   '/js/guide-loader.js',
+  '/js/free-user-filters.js',
   '/lesson.html',
   '/browse.html',
   '/guide.html',
