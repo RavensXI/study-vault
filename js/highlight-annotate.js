@@ -510,6 +510,7 @@
       pendingRange = null;
       pendingAnchor = null;
       window.getSelection().removeAllRanges();
+      playSweep(marks2);
     }
     setLastColor(color);
     applyModeBodyClasses(color);
@@ -574,6 +575,7 @@
     try { localStorage.removeItem(HL_MODE_KEY); } catch (e) {}
     document.body.classList.remove('sv-hl-mode');
     COLORS.forEach(function (c) { document.body.classList.remove('sv-hl-color-' + c.id); });
+    if (typeof cancelTapStart === 'function') cancelTapStart();
     refreshFab();
   }
 
@@ -581,6 +583,24 @@
     lessonId = lessonId || window._lessonId;
     if (!lessonId) return false;
     return getHighlights(lessonId).length > 0;
+  }
+
+  // ---------- left-to-right sweep on commit ----------
+  // Visual flourish: each mark sweeps its colour in from left to right.
+  // Fires from both desktop drag-select and mobile tap-tap flows.
+  function playSweep(marks) {
+    if (!marks || !marks.length) return;
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+    marks.forEach(function (m, i) {
+      m.classList.add('sv-hl--sweep');
+      if (i > 0) m.style.animationDelay = (i * 45) + 'ms';
+      m.addEventListener('animationend', function onEnd() {
+        m.classList.remove('sv-hl--sweep');
+        m.style.animationDelay = '';
+        m.removeEventListener('animationend', onEnd);
+      });
+    });
   }
 
   // ---------- selection handling ----------
@@ -622,6 +642,173 @@
       applyOrUpdateColor(color);  // creates the highlight in last-used colour
       showPopoverAt(rect, { canDelete: true, note: '', color: color });
     }, 10);
+  }
+
+  // ---------- tap-to-start / tap-to-end (touch devices) ----------
+  // On phones and tablets, native long-press selection is fiddly and fights
+  // the OS callout menu. Instead: in Highlight Mode, the first tap on a word
+  // marks it as the start (faint outline + hint banner), the second tap
+  // commits a highlight spanning from start word to tapped word.
+  var tapStartRange = null;
+  var tapStartMarkerEls = null;
+  var tapHintEl = null;
+  var tapTouchStartX = 0;
+  var tapTouchStartY = 0;
+
+  function isCoarsePointer() {
+    return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+  }
+
+  function getWordRangeAtPoint(x, y) {
+    var node = null, offset = 0;
+    if (document.caretRangeFromPoint) {
+      var pos = document.caretRangeFromPoint(x, y);
+      if (!pos) return null;
+      node = pos.startContainer;
+      offset = pos.startOffset;
+    } else if (document.caretPositionFromPoint) {
+      var p2 = document.caretPositionFromPoint(x, y);
+      if (!p2) return null;
+      node = p2.offsetNode;
+      offset = p2.offset;
+    }
+    if (!node || node.nodeType !== 3) return null;
+    if (isExcludedTextNode(node)) return null;
+    var container = document.getElementById('study-notes');
+    if (!container || !container.contains(node)) return null;
+    var text = node.nodeValue;
+    if (!text) return null;
+    // Walk left/right from offset to nearest non-word boundary
+    var re = /\S/;
+    var start = offset;
+    while (start > 0 && re.test(text.charAt(start - 1))) start--;
+    var end = offset;
+    while (end < text.length && re.test(text.charAt(end))) end++;
+    if (end <= start) {
+      // The caret landed on whitespace — try the next non-whitespace span
+      var m = /\S+/.exec(text.slice(offset));
+      if (!m) return null;
+      start = offset + m.index;
+      end = start + m[0].length;
+    }
+    var r = document.createRange();
+    r.setStart(node, start);
+    r.setEnd(node, end);
+    return r;
+  }
+
+  function showTapStartMarker(range) {
+    clearTapStartMarker();
+    tapStartMarkerEls = [];
+    var rects = range.getClientRects();
+    for (var i = 0; i < rects.length; i++) {
+      var r = rects[i];
+      if (r.width === 0 || r.height === 0) continue;
+      var el = document.createElement('div');
+      el.className = 'sv-hl-tap-start';
+      el.style.left = (r.left + window.scrollX - 3) + 'px';
+      el.style.top = (r.top + window.scrollY - 2) + 'px';
+      el.style.width = (r.width + 6) + 'px';
+      el.style.height = (r.height + 4) + 'px';
+      document.body.appendChild(el);
+      tapStartMarkerEls.push(el);
+    }
+  }
+
+  function clearTapStartMarker() {
+    if (tapStartMarkerEls) {
+      tapStartMarkerEls.forEach(function (el) { el.remove(); });
+      tapStartMarkerEls = null;
+    }
+  }
+
+  function showTapHint() {
+    if (tapHintEl) return;
+    tapHintEl = document.createElement('div');
+    tapHintEl.className = 'sv-hl-tap-hint';
+    tapHintEl.textContent = 'Now tap the last word to highlight';
+    document.body.appendChild(tapHintEl);
+  }
+
+  function hideTapHint() {
+    if (tapHintEl) { tapHintEl.remove(); tapHintEl = null; }
+  }
+
+  function cancelTapStart() {
+    tapStartRange = null;
+    clearTapStartMarker();
+    hideTapHint();
+  }
+
+  function rangeFromTwoWordRanges(a, b) {
+    var aFirst = a.compareBoundaryPoints(Range.START_TO_START, b) <= 0;
+    var first = aFirst ? a : b;
+    var second = aFirst ? b : a;
+    var r = document.createRange();
+    r.setStart(first.startContainer, first.startOffset);
+    r.setEnd(second.endContainer, second.endOffset);
+    return r;
+  }
+
+  function onTapTouchStart(evt) {
+    if (!isHighlightModeActive()) return;
+    if (!evt.touches || evt.touches.length !== 1) return;
+    tapTouchStartX = evt.touches[0].clientX;
+    tapTouchStartY = evt.touches[0].clientY;
+  }
+
+  function onTapTouchEnd(evt) {
+    if (!isHighlightModeActive()) return;
+    if (!evt.changedTouches || evt.changedTouches.length !== 1) return;
+    var t = evt.changedTouches[0];
+    var dx = Math.abs(t.clientX - tapTouchStartX);
+    var dy = Math.abs(t.clientY - tapTouchStartY);
+    if (dx > 10 || dy > 10) return;  // user scrolled, not a tap
+    if (evt.target.closest) {
+      if (evt.target.closest('mark.sv-hl')) return;          // existing mark — onMarkClick handles it
+      if (evt.target.closest('.sv-hl-popover')) return;
+      if (evt.target.closest('.term-popup')) return;
+      if (evt.target.closest('a, button, input, textarea, select')) return;
+    }
+    // If a long-press already produced a real selection, let onMouseUp handle it.
+    var sel = window.getSelection();
+    if (sel && !sel.isCollapsed && sel.toString().trim().length > 0) return;
+
+    var wordRange = getWordRangeAtPoint(t.clientX, t.clientY);
+    if (!wordRange) return;
+
+    if (!tapStartRange) {
+      tapStartRange = wordRange;
+      showTapStartMarker(wordRange);
+      showTapHint();
+      if (evt.cancelable) evt.preventDefault();
+      return;
+    }
+
+    // Second tap: commit. Same-word taps cancel.
+    var sameWord = (
+      tapStartRange.startContainer === wordRange.startContainer &&
+      tapStartRange.startOffset === wordRange.startOffset &&
+      tapStartRange.endOffset === wordRange.endOffset
+    );
+    if (sameWord) { cancelTapStart(); return; }
+
+    var range = rangeFromTwoWordRanges(tapStartRange, wordRange);
+    cancelTapStart();
+    if (!range || range.collapsed) return;
+    var text = range.toString();
+    if (!text || !text.trim()) return;
+    if (text.length > 5000) return;
+    var anchor = buildAnchor(range);
+    if (!anchor) return;
+    pendingRange = range.cloneRange();
+    pendingAnchor = anchor;
+    activeHighlight = null;
+    var color = getLastColor();
+    var rect = range.getBoundingClientRect();
+    applyOrUpdateColor(color);
+    showPopoverAt(rect, { canDelete: true, note: '', color: color });
+    if (evt.cancelable) evt.preventDefault();
   }
 
   function onMarkClick(evt) {
@@ -893,6 +1080,27 @@
       'mark.sv-hl[data-hl-has-note]::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:currentColor;vertical-align:super;margin-left:2px;opacity:.5}' +
       'mark.sv-hl--flash{animation:sv-hl-flash 1.4s ease}' +
       '@keyframes sv-hl-flash{0%,100%{box-shadow:0 0 0 0 rgba(45,42,38,0)}30%{box-shadow:0 0 0 6px rgba(45,42,38,.25)}}' +
+      // Left-to-right sweep on commit. Each mark fills its colour in from
+      // the left; multi-mark highlights stagger ~45ms each via inline
+      // animation-delay set by playSweep().
+      '@keyframes sv-hl-sweep{from{background-size:0% 100%}to{background-size:100% 100%}}' +
+      'mark.sv-hl--sweep{background-color:transparent!important;background-repeat:no-repeat;background-size:0% 100%;animation:sv-hl-sweep 420ms cubic-bezier(0.4,0,0.2,1) forwards}' +
+      'mark.sv-hl--sweep.sv-hl--yellow{background-image:linear-gradient(#fef9c3,#fef9c3)}' +
+      'mark.sv-hl--sweep.sv-hl--green{background-image:linear-gradient(#dcfce7,#dcfce7)}' +
+      'mark.sv-hl--sweep.sv-hl--pink{background-image:linear-gradient(#fce7f3,#fce7f3)}' +
+      'mark.sv-hl--sweep.sv-hl--blue{background-image:linear-gradient(#dbeafe,#dbeafe)}' +
+      'body.dark-mode mark.sv-hl--sweep.sv-hl--yellow{background-image:linear-gradient(rgba(234,179,8,.55),rgba(234,179,8,.55))}' +
+      'body.dark-mode mark.sv-hl--sweep.sv-hl--green{background-image:linear-gradient(rgba(34,197,94,.45),rgba(34,197,94,.45))}' +
+      'body.dark-mode mark.sv-hl--sweep.sv-hl--pink{background-image:linear-gradient(rgba(236,72,153,.45),rgba(236,72,153,.45))}' +
+      'body.dark-mode mark.sv-hl--sweep.sv-hl--blue{background-image:linear-gradient(rgba(59,130,246,.5),rgba(59,130,246,.5))}' +
+      '@media (prefers-reduced-motion:reduce){mark.sv-hl--sweep{animation:none;background-size:100% 100%}}' +
+      // Tap-to-tap mobile highlight UX: faint outline on the first-tapped
+      // word, plus a hint banner explaining the next step.
+      '.sv-hl-tap-start{position:absolute;border:2px dashed var(--accent,#2d2a26);border-radius:5px;pointer-events:none;z-index:8500;background:rgba(45,42,38,.04);animation:sv-hl-pulse 1.2s ease-in-out infinite}' +
+      'body.dark-mode .sv-hl-tap-start{border-color:#f5f1ec;background:rgba(245,241,236,.05)}' +
+      '@keyframes sv-hl-pulse{0%,100%{opacity:.65}50%{opacity:1}}' +
+      '.sv-hl-tap-hint{position:fixed;top:72px;left:50%;transform:translateX(-50%);background:rgba(45,42,38,.92);color:#fff;padding:8px 14px;border-radius:999px;font-family:Inter,system-ui,sans-serif;font-size:.85rem;font-weight:500;z-index:8500;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.18);animation:sv-hl-hint-in .25s ease-out}' +
+      '@keyframes sv-hl-hint-in{from{opacity:0;transform:translate(-50%,-6px)}to{opacity:1;transform:translate(-50%,0)}}' +
       // Highlight Mode — lift the article body off the page with a proper
       // card treatment: brighter background (white vs the cream page) and a
       // real drop shadow. Horizontal padding + negative margin extends the
@@ -1029,8 +1237,18 @@
     container.addEventListener('mousedown', onMouseDownTracker, true);
     container.addEventListener('mousemove', onMouseMoveTracker);
     container.addEventListener('mouseup', onMouseUp);
-    container.addEventListener('touchend', onMouseUp);
     container.addEventListener('click', onMarkClick, true);
+    // Touch devices get tap-to-start / tap-to-end instead of drag-select +
+    // touchend-driven selection commit — native long-press selection on
+    // phones is too fiddly and fights the OS callout menu. The capture-phase
+    // touchstart/touchend handlers below run before the document-level
+    // listener that would otherwise close the popover.
+    if (isCoarsePointer()) {
+      container.addEventListener('touchstart', onTapTouchStart, { passive: true });
+      container.addEventListener('touchend', onTapTouchEnd);
+    } else {
+      container.addEventListener('touchend', onMouseUp);
+    }
     document.addEventListener('mousedown', onDocClick);
     document.addEventListener('keydown', onKeyDown);
     // If URL hash points at a specific highlight, scroll & flash it
