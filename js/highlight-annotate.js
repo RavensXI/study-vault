@@ -885,6 +885,8 @@
     // CSS hides the prompt + cat picker, shows a small "Marked as X" header.
     var koQuick = !!opts.koQuickMode;
     popoverEl.classList.toggle('sv-hl-popover--ko-quick', koQuick);
+    // Casual mode: strip the pedagogical framing — just four colour dots.
+    popoverEl.classList.toggle('sv-hl-popover--casual', !!opts.casualMode);
     if (koQuick) {
       var qc = categoryFor(activeCat);
       popoverEl.querySelector('.sv-hl-popover-quick-dot').setAttribute('data-cat', qc.id);
@@ -1040,7 +1042,10 @@
       if (!pendingRange || !pendingAnchor) { hidePill(); return; }
       var rect = pillRect || pendingRange.getBoundingClientRect();
       hidePill();
-      showPopoverAt(rect, { canDelete: false, note: '' });
+      // Casual mode = outside KO mode, fresh selection. Strip the pedagogical
+      // framing (prompt + category labels) — just show four colour dots.
+      // Editing an existing mark still uses the full labelled picker.
+      showPopoverAt(rect, { canDelete: false, note: '', casualMode: true });
     });
     document.body.appendChild(pillEl);
     return pillEl;
@@ -1385,6 +1390,15 @@
       '.sv-hl-cat--why .sv-hl-cat-dot{background:#86efac}' +
       '.sv-hl-cat--so-what .sv-hl-cat-dot{background:#f9a8d4}' +
       '.sv-hl-cat--question .sv-hl-cat-dot{background:#93c5fd}' +
+      // Casual mode — strip the "What kind of highlight" prompt and the
+      // category labels. Four colour dots in a single row. Hover titles
+      // preserved so curious students can still read the category name.
+      '.sv-hl-popover--casual .sv-hl-popover-prompt{display:none}' +
+      '.sv-hl-popover--casual .sv-hl-cat-label{display:none}' +
+      '.sv-hl-popover--casual .sv-hl-popover-cats{display:flex;justify-content:center;gap:8px}' +
+      '.sv-hl-popover--casual .sv-hl-cat{padding:6px;border-radius:50%;border:2px solid rgba(45,42,38,.1)}' +
+      '.sv-hl-popover--casual .sv-hl-cat[aria-pressed="true"]{box-shadow:none}' +
+      '.sv-hl-popover--casual .sv-hl-cat-dot{width:18px;height:18px;border:none}' +
       // KO-quick popover: hide the category picker entirely, show a tiny
       // "Marked as X" header instead, and force the note textarea visible.
       '.sv-hl-popover-quick-header{display:none;align-items:center;gap:7px;padding:2px 4px 6px;font-size:.8rem;color:#5d564b}' +
