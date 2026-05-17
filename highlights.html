@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Highlights — StudyVault</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <meta name="theme-color" content="#2d2a26">
+  <style>
+    .hl-page{max-width:920px;margin:0 auto;padding:32px 20px 80px}
+    .hl-page-header{margin-bottom:24px}
+    .hl-page-header h1{font-family:'Source Serif 4',Georgia,serif;font-weight:700;font-size:2.2rem;margin:0 0 8px;color:var(--text-primary,#2d2a26)}
+    .hl-page-header p{margin:0;color:var(--text-secondary,#5d564b);font-size:1rem;line-height:1.55;max-width:640px}
+
+    .hl-a11y-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 12px;margin-bottom:14px;background:var(--bg-card,#fff);border:1px solid rgba(45,42,38,.06);border-radius:12px;font-size:.86rem}
+    .hl-a11y-label{font-size:.78rem;color:var(--text-secondary,#7a7367);margin-right:4px;font-weight:500}
+    .hl-a11y-bar button{background:transparent;border:1px solid rgba(45,42,38,.12);color:var(--text-primary,#2d2a26);font-family:inherit;font-size:.82rem;padding:5px 10px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+    .hl-a11y-bar button:hover{background:#faf8f5}
+    .hl-a11y-bar button[aria-pressed="true"]{background:var(--text-primary,#2d2a26);color:var(--bg-body,#faf8f5);border-color:var(--text-primary,#2d2a26)}
+    body.dark-mode .hl-a11y-bar button:hover{background:#3a3631}
+    .hl-overlay-swatches{display:inline-flex;align-items:center;gap:4px;padding-left:6px;border-left:1px solid rgba(45,42,38,.1);margin-left:2px}
+    .hl-overlay-swatch{width:22px;height:22px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;display:inline-flex;align-items:center;justify-content:center}
+    .hl-overlay-swatch.active{border-color:var(--text-primary,#2d2a26)}
+    .hl-overlay-swatch--none{background:transparent;border-color:rgba(45,42,38,.25);position:relative}
+    .hl-overlay-swatch--none::after{content:'';position:absolute;top:50%;left:2px;right:2px;height:2px;background:rgba(45,42,38,.5);transform:rotate(-45deg)}
+
+    .hl-selection-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;margin-bottom:20px;background:var(--text-primary,#2d2a26);color:#faf8f5;border-radius:14px;position:sticky;top:12px;z-index:50;box-shadow:0 6px 18px rgba(20,18,15,.18)}
+    .hl-selection-count{font-weight:600;font-size:.95rem;flex:1;min-width:120px}
+    .hl-selection-bar button{background:transparent;color:inherit;border:1px solid rgba(250,248,245,.25);padding:6px 12px;border-radius:8px;font-family:inherit;font-size:.85rem;cursor:pointer}
+    .hl-selection-bar button:hover{background:rgba(250,248,245,.1)}
+    .hl-build-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:#faf8f5;color:#2d2a26 !important;border-radius:10px;text-decoration:none;font-weight:600;font-size:.9rem;transition:transform .15s ease;border:none;cursor:pointer;font-family:inherit}
+    .hl-build-btn:hover:not(:disabled){transform:translateY(-1px);background:#fff}
+    .hl-build-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+    .hl-empty{text-align:center;padding:64px 20px;background:var(--bg-card,#fff);border-radius:16px;border:1px solid rgba(45,42,38,.06)}
+    .hl-empty h2{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.4rem;margin:0 0 8px;color:var(--text-primary,#2d2a26)}
+    .hl-empty p{margin:0 0 6px;color:var(--text-secondary,#5d564b);line-height:1.55}
+    .hl-empty p.muted{color:#7a7367;font-size:.92rem}
+
+    .hl-subject{margin-bottom:14px;background:var(--bg-card,#fff);border-radius:14px;border:1px solid rgba(45,42,38,.06);overflow:hidden}
+    .hl-subject-summary{list-style:none;cursor:pointer;padding:16px 18px;display:flex;align-items:center;gap:12px}
+    .hl-subject-summary::-webkit-details-marker{display:none}
+    .hl-subject-summary::marker{display:none}
+    .hl-subject-chevron{transition:transform .2s ease;color:var(--text-secondary,#5d564b);flex-shrink:0}
+    details[open] > .hl-subject-summary .hl-subject-chevron{transform:rotate(90deg)}
+    .hl-subject-name{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.2rem;color:var(--text-primary,#2d2a26);flex:1;margin:0}
+    .hl-subject-meta{font-size:.82rem;color:var(--text-secondary,#7a7367)}
+    .hl-subject-check{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;color:var(--text-secondary,#7a7367);padding:4px 10px;border:1px solid rgba(45,42,38,.12);border-radius:999px;cursor:pointer}
+    .hl-subject-check:hover{background:#faf8f5}
+    body.dark-mode .hl-subject-check:hover{background:#3a3631}
+    .hl-subject-check input{margin:0}
+    .hl-subject-body{padding:0 18px 14px;display:flex;flex-direction:column;gap:10px}
+
+    /* Unit collapsible — sits between subject and lesson */
+    .hl-unit{background:var(--bg-body,#faf8f5);border-radius:12px;border:1px solid rgba(45,42,38,.05);overflow:hidden}
+    body.dark-mode .hl-unit{background:#2e2b27}
+    .hl-unit-summary{list-style:none;cursor:pointer;padding:12px 16px;display:flex;align-items:center;gap:10px}
+    .hl-unit-summary::-webkit-details-marker{display:none}
+    .hl-unit-summary::marker{display:none}
+    .hl-unit-chevron{transition:transform .2s ease;color:var(--text-secondary,#5d564b);flex-shrink:0;width:13px;height:13px}
+    details[open] > .hl-unit-summary .hl-unit-chevron{transform:rotate(90deg)}
+    .hl-unit-name{font-family:'Source Serif 4',Georgia,serif;font-weight:600;font-size:1.02rem;color:var(--text-primary,#2d2a26);flex:1;margin:0}
+    .hl-unit-meta{font-size:.78rem;color:var(--text-secondary,#7a7367)}
+    .hl-unit-body{padding:0 16px 12px;display:flex;flex-direction:column;gap:8px}
+
+    .hl-lesson{margin-bottom:0;background:var(--bg-card,#fff);border-radius:10px;border:1px solid rgba(45,42,38,.04);overflow:hidden}
+    body.dark-mode .hl-lesson{background:#2a2826}
+    .hl-lesson-summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;align-items:center;gap:10px}
+    .hl-lesson-summary::-webkit-details-marker{display:none}
+    .hl-lesson-summary::marker{display:none}
+    .hl-lesson-chevron{transition:transform .2s ease;color:var(--text-secondary,#7a7367);flex-shrink:0;width:14px;height:14px}
+    details[open] > .hl-lesson-summary .hl-lesson-chevron{transform:rotate(90deg)}
+    .hl-lesson-title{font-weight:600;font-size:.96rem;color:var(--text-primary,#2d2a26);flex:1;margin:0}
+    .hl-lesson-meta{display:flex;align-items:center;gap:10px;font-size:.78rem;color:var(--text-secondary,#7a7367)}
+    .hl-open-lesson{font-size:.78rem;color:var(--text-secondary,#5d564b);text-decoration:none;padding:3px 8px;border-radius:6px;border:1px solid rgba(45,42,38,.12)}
+    .hl-open-lesson:hover{background:#fff}
+    body.dark-mode .hl-open-lesson:hover{background:#3a3631}
+    .hl-lesson-body{padding:0 14px 12px;display:flex;flex-direction:column;gap:8px}
+
+    .hl-item{display:flex;gap:10px;padding:10px 12px;background:var(--bg-card,#fff);border-radius:10px;border:1px solid rgba(45,42,38,.04)}
+    body.dark-mode .hl-item{background:#3a3631}
+    .hl-item-check{flex-shrink:0;padding-top:2px}
+    .hl-item-check input{width:18px;height:18px;cursor:pointer;accent-color:#2d2a26}
+    .hl-item-body{flex:1;display:flex;flex-direction:column;gap:6px;min-width:0}
+    .hl-snippet{position:relative;padding:8px 10px 8px 14px;border-radius:8px;font-size:.92rem;line-height:1.5;color:#2d2a26}
+    .hl-snippet--yellow{background:#fef9c3}
+    .hl-snippet--green{background:#dcfce7}
+    .hl-snippet--pink{background:#fce7f3}
+    .hl-snippet--blue{background:#dbeafe}
+    body.dark-mode .hl-snippet{color:#f5f1ec}
+    body.dark-mode .hl-snippet--yellow{background:rgba(234,179,8,.55)}
+    body.dark-mode .hl-snippet--green{background:rgba(34,197,94,.45)}
+    body.dark-mode .hl-snippet--pink{background:rgba(236,72,153,.45)}
+    body.dark-mode .hl-snippet--blue{background:rgba(59,130,246,.5)}
+    .hl-snippet-bar{position:absolute;left:0;top:5px;bottom:5px;width:4px;border-radius:2px}
+    .hl-snippet-bar--yellow{background:#fef08a}
+    .hl-snippet-bar--green{background:#bbf7d0}
+    .hl-snippet-bar--pink{background:#fbcfe8}
+    .hl-snippet-bar--blue{background:#bfdbfe}
+    .hl-note{margin:0;padding:7px 10px;background:var(--bg-body,#faf8f5);border-radius:8px;font-size:.88rem;color:var(--text-primary,#3d3a35);border-left:3px solid rgba(45,42,38,.25);line-height:1.5}
+    body.dark-mode .hl-note{background:#2a2826;color:#e8e4df;border-left-color:rgba(245,241,236,.3)}
+    .hl-item-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:2px}
+    .hl-item-jump,.hl-item-delete{padding:4px 9px;border-radius:7px;border:1px solid rgba(45,42,38,.12);background:transparent;font-family:inherit;font-size:.78rem;color:var(--text-secondary,#5d564b);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}
+    .hl-item-jump:hover{background:#faf8f5}
+    body.dark-mode .hl-item-jump:hover{background:#3a3631}
+    .hl-item-delete{color:#a14242;border-color:rgba(161,66,66,.25)}
+    .hl-item-delete:hover{background:#fbecec}
+    body.dark-mode .hl-item-delete:hover{background:rgba(161,66,66,.15)}
+  </style>
+
+  <script>
+  (function () {
+    try {
+      var p = JSON.parse(localStorage.getItem('studyvault-a11y') || '{}');
+      var b = document.documentElement;
+      if (p.darkMode) b.classList.add('dark-mode');
+      if (p.dyslexia) b.classList.add('dyslexia-font');
+      if (p.fontSize === -1) b.classList.add('font-size-down-1');
+      else if (p.fontSize === 1) b.classList.add('font-size-up-1');
+      else if (p.fontSize === 2) b.classList.add('font-size-up-2');
+      if (p.overlay) b.classList.add('overlay-' + p.overlay);
+    } catch (e) {}
+  })();
+  </script>
+</head>
+<body>
+
+  <header class="page-header">
+    <div class="page-header-inner">
+      <a href="/" class="header-brand">
+        <span class="header-logo">StudyVault</span>
+      </a>
+      <nav class="header-nav">
+        <a href="/">Home</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="hl-page">
+    <div class="hl-page-header">
+      <h1>My Highlights</h1>
+      <p>Everything you've highlighted across StudyVault. Tick the ones you want to bring forward, then build them into revision notes you can study from or print.</p>
+    </div>
+
+    <div class="hl-a11y-bar" id="hl-a11y-bar">
+      <span class="hl-a11y-label">Reading:</span>
+      <button id="hl-a11y-dark" type="button" aria-pressed="false">Dark mode</button>
+      <button id="hl-a11y-dys" type="button" aria-pressed="false">Dyslexia font</button>
+      <button id="hl-a11y-font-down" type="button" title="Smaller text">A&minus;</button>
+      <button id="hl-a11y-font-up" type="button" title="Larger text">A+</button>
+      <span class="hl-overlay-swatches" role="group" aria-label="Colour overlay">
+        <button class="hl-overlay-swatch hl-overlay-swatch--none" data-overlay="" title="No overlay"></button>
+        <button class="hl-overlay-swatch" data-overlay="yellow" title="Yellow" style="background:#fef9c3"></button>
+        <button class="hl-overlay-swatch" data-overlay="blue" title="Blue" style="background:#dbeafe"></button>
+        <button class="hl-overlay-swatch" data-overlay="pink" title="Pink" style="background:#fce7f3"></button>
+        <button class="hl-overlay-swatch" data-overlay="green" title="Green" style="background:#dcfce7"></button>
+      </span>
+    </div>
+
+    <div class="hl-selection-bar" id="hl-selection-bar" style="display:none">
+      <span class="hl-selection-count"><span id="hl-selected-count">0</span> selected</span>
+      <button id="hl-select-all" type="button">Select all</button>
+      <button id="hl-clear-all" type="button">Clear</button>
+      <button class="hl-build-btn" id="hl-build-btn" type="button" disabled>Build revision notes &rarr;</button>
+    </div>
+
+    <div id="hl-content"></div>
+  </main>
+
+  <script>
+  (function () {
+    var A11Y_KEY = 'studyvault-a11y';
+    var INDEX_KEY = 'sv-hl-index';
+    var STORAGE_PREFIX = 'sv-hl:';
+    var KO_DATA_KEY = 'sv-ko-data';
+
+    function loadA11y() {
+      try { return JSON.parse(localStorage.getItem(A11Y_KEY) || '{}'); } catch (e) { return {}; }
+    }
+    function saveA11y(p) { localStorage.setItem(A11Y_KEY, JSON.stringify(p)); }
+    function applyA11y(p) {
+      var b = document.body;
+      b.classList.toggle('dark-mode', !!p.darkMode);
+      b.classList.toggle('dyslexia-font', !!p.dyslexia);
+      b.className = b.className.replace(/\bfont-size-\S+/g, '').trim();
+      if (p.fontSize === -1) b.classList.add('font-size-down-1');
+      else if (p.fontSize === 1) b.classList.add('font-size-up-1');
+      else if (p.fontSize === 2) b.classList.add('font-size-up-2');
+      b.className = b.className.replace(/\boverlay-\S+/g, '').trim();
+      if (p.overlay) b.classList.add('overlay-' + p.overlay);
+      document.getElementById('hl-a11y-dark').setAttribute('aria-pressed', !!p.darkMode);
+      document.getElementById('hl-a11y-dys').setAttribute('aria-pressed', !!p.dyslexia);
+      document.querySelectorAll('.hl-overlay-swatch').forEach(function (sw) {
+        sw.classList.toggle('active', (sw.dataset.overlay || '') === (p.overlay || ''));
+      });
+    }
+    function bindA11y() {
+      document.getElementById('hl-a11y-dark').addEventListener('click', function () {
+        var p = loadA11y(); p.darkMode = !p.darkMode; saveA11y(p); applyA11y(p);
+      });
+      document.getElementById('hl-a11y-dys').addEventListener('click', function () {
+        var p = loadA11y(); p.dyslexia = !p.dyslexia; saveA11y(p); applyA11y(p);
+      });
+      document.getElementById('hl-a11y-font-down').addEventListener('click', function () {
+        var p = loadA11y(); p.fontSize = Math.max(-1, ((typeof p.fontSize === 'number') ? p.fontSize : 0) - 1); saveA11y(p); applyA11y(p);
+      });
+      document.getElementById('hl-a11y-font-up').addEventListener('click', function () {
+        var p = loadA11y(); p.fontSize = Math.min(2, ((typeof p.fontSize === 'number') ? p.fontSize : 0) + 1); saveA11y(p); applyA11y(p);
+      });
+      document.querySelectorAll('.hl-overlay-swatch').forEach(function (sw) {
+        sw.addEventListener('click', function () {
+          var p = loadA11y(); p.overlay = sw.dataset.overlay || ''; saveA11y(p); applyA11y(p);
+        });
+      });
+    }
+
+    function readIndex() {
+      try { return JSON.parse(localStorage.getItem(INDEX_KEY) || '[]'); } catch (e) { return []; }
+    }
+    function readHighlights(lessonId) {
+      try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + lessonId) || '[]'); } catch (e) { return []; }
+    }
+    function saveHighlights(lessonId, list) {
+      try {
+        if (list && list.length) localStorage.setItem(STORAGE_PREFIX + lessonId, JSON.stringify(list));
+        else {
+          localStorage.removeItem(STORAGE_PREFIX + lessonId);
+          var idx = readIndex().filter(function (e) { return e.lesson_id !== lessonId; });
+          localStorage.setItem(INDEX_KEY, JSON.stringify(idx));
+        }
+      } catch (e) {}
+    }
+    function esc(s) {
+      return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    // Legacy fallback: highlights saved before we started capturing unit info
+    // don't have entry.unit_name. Pull it from the URL path (the unit slug)
+    // and title-case for display.
+    function deriveUnitFromUrl(url) {
+      if (!url) return '';
+      var match = url.match(/^\/lesson\/[^/]+\/([^/]+)\/\d+/);
+      if (!match) return '';
+      return match[1].replace(/-/g, ' ').replace(/\b\w/g, function (c) { return c.toUpperCase(); });
+    }
+    function getUnitName(entry) {
+      return entry.unit_name || deriveUnitFromUrl(entry.lesson_url) || 'Other';
+    }
+
+    var selection = new Set();
+
+    function updateSelectionUI() {
+      var bar = document.getElementById('hl-selection-bar');
+      var anyHighlights = readIndex().some(function (e) { return e && e.count > 0; });
+      bar.style.display = anyHighlights ? 'flex' : 'none';
+      document.getElementById('hl-selected-count').textContent = selection.size;
+      document.getElementById('hl-build-btn').disabled = selection.size === 0;
+      document.querySelectorAll('.hl-subject').forEach(function (sub) {
+        var allCb = sub.querySelector('.hl-subject-check input');
+        if (!allCb) return;
+        var itemCbs = sub.querySelectorAll('.hl-item-check input');
+        var allOn = itemCbs.length > 0;
+        var someOn = false;
+        itemCbs.forEach(function (cb) {
+          if (cb.checked) someOn = true;
+          else allOn = false;
+        });
+        allCb.checked = allOn;
+        allCb.indeterminate = !allOn && someOn;
+      });
+    }
+
+    function render() {
+      var index = readIndex().filter(function (e) { return e && e.lesson_id && e.count > 0; });
+      var content = document.getElementById('hl-content');
+
+      if (!index.length) {
+        content.innerHTML =
+          '<div class="hl-empty">' +
+            '<h2>No highlights yet</h2>' +
+            '<p>Open any lesson, select some text, and pick a colour.</p>' +
+            '<p class="muted">Highlighting is in beta — enable it on a lesson by adding <code>?highlights=1</code> to the URL.</p>' +
+          '</div>';
+        updateSelectionUI();
+        return;
+      }
+
+      // Group: subject → unit → lessons (3-level)
+      var bySubject = {};
+      index.forEach(function (entry) {
+        var subj = entry.subject_name || 'Other';
+        var unit = getUnitName(entry);
+        if (!bySubject[subj]) bySubject[subj] = {};
+        if (!bySubject[subj][unit]) bySubject[subj][unit] = [];
+        bySubject[subj][unit].push(entry);
+      });
+
+      var subjectNames = Object.keys(bySubject).sort();
+      var onlyOneSubject = subjectNames.length === 1;
+
+      var html = '';
+      subjectNames.forEach(function (subj) {
+        var unitMap = bySubject[subj];
+        var unitNames = Object.keys(unitMap).sort();
+        var onlyOneUnit = unitNames.length === 1;
+
+        var subjectTotal = 0;
+        var subjectLessonCount = 0;
+        unitNames.forEach(function (u) {
+          unitMap[u].forEach(function (l) {
+            subjectTotal += (l.count || 0);
+            subjectLessonCount += 1;
+          });
+        });
+
+        html += '<details class="hl-subject" data-subject="' + esc(subj) + '"' + (onlyOneSubject ? ' open' : '') + '>';
+        html +=   '<summary class="hl-subject-summary">';
+        html +=     '<svg class="hl-subject-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+        html +=     '<h2 class="hl-subject-name">' + esc(subj) + '</h2>';
+        html +=     '<span class="hl-subject-meta">' + subjectTotal + ' highlight' + (subjectTotal === 1 ? '' : 's') + ' &middot; ' + unitNames.length + ' unit' + (unitNames.length === 1 ? '' : 's') + ' &middot; ' + subjectLessonCount + ' lesson' + (subjectLessonCount === 1 ? '' : 's') + '</span>';
+        html +=     '<label class="hl-subject-check" onclick="event.stopPropagation()"><input type="checkbox" data-role="subject-toggle"> Select all</label>';
+        html +=   '</summary>';
+        html +=   '<div class="hl-subject-body">';
+
+        unitNames.forEach(function (unitName) {
+          var lessons = unitMap[unitName].sort(function (a, b) {
+            return (b.last_updated || '').localeCompare(a.last_updated || '');
+          });
+          var unitTotal = 0;
+          lessons.forEach(function (l) { unitTotal += (l.count || 0); });
+          var unitOpen = onlyOneSubject && onlyOneUnit;
+
+          html += '<details class="hl-unit"' + (unitOpen ? ' open' : '') + '>';
+          html +=   '<summary class="hl-unit-summary">';
+          html +=     '<svg class="hl-unit-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+          html +=     '<h3 class="hl-unit-name">' + esc(unitName) + '</h3>';
+          html +=     '<span class="hl-unit-meta">' + unitTotal + ' &middot; ' + lessons.length + ' lesson' + (lessons.length === 1 ? '' : 's') + '</span>';
+          html +=   '</summary>';
+          html +=   '<div class="hl-unit-body">';
+
+          lessons.forEach(function (entry, lessonIdx) {
+            var highlights = readHighlights(entry.lesson_id);
+            if (!highlights.length) return;
+            highlights.sort(function (a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
+            var lessonOpen = unitOpen && lessons.length === 1;
+            var lessonUrl = entry.lesson_url || '/';
+            var sep = lessonUrl.indexOf('?') >= 0 ? '&' : '?';
+
+            html += '<details class="hl-lesson" data-lesson-id="' + esc(entry.lesson_id) + '"' + (lessonOpen ? ' open' : '') + '>';
+            html +=   '<summary class="hl-lesson-summary">';
+            html +=     '<svg class="hl-lesson-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>';
+            html +=     '<h4 class="hl-lesson-title">' + esc(entry.lesson_title || 'Untitled lesson') + '</h4>';
+            html +=     '<div class="hl-lesson-meta">';
+            html +=       '<span>' + highlights.length + '</span>';
+            html +=       '<a class="hl-open-lesson" href="' + esc(lessonUrl) + sep + 'highlights=1" onclick="event.stopPropagation()">Open &rarr;</a>';
+            html +=     '</div>';
+            html +=   '</summary>';
+            html +=   '<div class="hl-lesson-body">';
+            highlights.forEach(function (h) {
+              var color = h.color || 'yellow';
+              var noteHtml = h.note ? '<p class="hl-note">' + esc(h.note) + '</p>' : '';
+              html += '<div class="hl-item" data-hl-id="' + esc(h.id) + '" data-lesson-id="' + esc(entry.lesson_id) + '" data-subject="' + esc(subj) + '">';
+              html +=   '<label class="hl-item-check"><input type="checkbox" data-hl-id="' + esc(h.id) + '"></label>';
+              html +=   '<div class="hl-item-body">';
+              html +=     '<div class="hl-snippet hl-snippet--' + esc(color) + '">';
+              html +=       '<span class="hl-snippet-bar hl-snippet-bar--' + esc(color) + '"></span>';
+              html +=       esc(h.text);
+              html +=     '</div>';
+              html +=     noteHtml;
+              html +=     '<div class="hl-item-actions">';
+              html +=       '<a class="hl-item-jump" href="' + esc(lessonUrl) + sep + 'highlights=1#' + esc(h.id) + '">Jump to</a>';
+              html +=       '<button class="hl-item-delete" type="button">Delete</button>';
+              html +=     '</div>';
+              html +=   '</div>';
+              html += '</div>';
+            });
+            html +=   '</div>';
+            html += '</details>';
+          });
+
+          html +=   '</div>';
+          html += '</details>';
+        });
+
+        html +=   '</div>';
+        html += '</details>';
+      });
+
+      content.innerHTML = html;
+      wireUp();
+      updateSelectionUI();
+    }
+
+    function wireUp() {
+      document.querySelectorAll('.hl-item-check input').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var id = cb.getAttribute('data-hl-id');
+          if (cb.checked) selection.add(id);
+          else selection.delete(id);
+          updateSelectionUI();
+        });
+      });
+      document.querySelectorAll('.hl-subject-check input').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+          var subject = cb.closest('.hl-subject');
+          var on = cb.checked;
+          subject.querySelectorAll('.hl-item-check input').forEach(function (item) {
+            var id = item.getAttribute('data-hl-id');
+            item.checked = on;
+            if (on) selection.add(id);
+            else selection.delete(id);
+          });
+          updateSelectionUI();
+        });
+      });
+      document.querySelectorAll('.hl-item-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var item = btn.closest('.hl-item');
+          var hlId = item.getAttribute('data-hl-id');
+          var lessonId = item.getAttribute('data-lesson-id');
+          var list = readHighlights(lessonId).filter(function (h) { return h.id !== hlId; });
+          saveHighlights(lessonId, list);
+          var idx = readIndex();
+          for (var i = 0; i < idx.length; i++) {
+            if (idx[i].lesson_id === lessonId) {
+              idx[i].count = list.length;
+              if (list.length === 0) idx.splice(i, 1);
+              break;
+            }
+          }
+          try { localStorage.setItem(INDEX_KEY, JSON.stringify(idx)); } catch (e) {}
+          selection.delete(hlId);
+          render();
+        });
+      });
+    }
+
+    document.getElementById('hl-select-all').addEventListener('click', function () {
+      document.querySelectorAll('.hl-item-check input').forEach(function (cb) {
+        cb.checked = true;
+        selection.add(cb.getAttribute('data-hl-id'));
+      });
+      updateSelectionUI();
+    });
+    document.getElementById('hl-clear-all').addEventListener('click', function () {
+      selection.clear();
+      document.querySelectorAll('.hl-item-check input').forEach(function (cb) { cb.checked = false; });
+      updateSelectionUI();
+    });
+    document.getElementById('hl-build-btn').addEventListener('click', function () {
+      if (!selection.size) return;
+      var index = readIndex().filter(function (e) { return e && e.lesson_id && e.count > 0; });
+      // Build a 3-level payload: subject → unit → lessons → highlights
+      var bySubject = {};
+      index.forEach(function (entry) {
+        var lessonHighlights = readHighlights(entry.lesson_id).filter(function (h) { return selection.has(h.id); });
+        if (!lessonHighlights.length) return;
+        var subj = entry.subject_name || 'Other';
+        var unit = getUnitName(entry);
+        if (!bySubject[subj]) bySubject[subj] = { name: subj, units: {} };
+        if (!bySubject[subj].units[unit]) bySubject[subj].units[unit] = { name: unit, lessons: [] };
+        bySubject[subj].units[unit].lessons.push({
+          lesson_id: entry.lesson_id,
+          lesson_title: entry.lesson_title || 'Untitled lesson',
+          lesson_url: entry.lesson_url || '/',
+          unit_name: unit,
+          highlights: lessonHighlights
+        });
+      });
+      // Flatten the units object into a sorted array per subject
+      var subjects = Object.keys(bySubject).sort().map(function (k) {
+        var s = bySubject[k];
+        return {
+          name: s.name,
+          units: Object.keys(s.units).sort().map(function (uk) { return s.units[uk]; })
+        };
+      });
+      try {
+        sessionStorage.setItem(KO_DATA_KEY, JSON.stringify({
+          generated_at: new Date().toISOString(),
+          source_url: '/highlights.html',
+          subjects: subjects
+        }));
+        window.location.href = '/knowledge-organiser.html';
+      } catch (e) {
+        alert('Could not open revision notes: ' + (e && e.message ? e.message : 'storage error'));
+      }
+    });
+
+    applyA11y(loadA11y());
+    bindA11y();
+    render();
+  })();
+  </script>
+</body>
+</html>

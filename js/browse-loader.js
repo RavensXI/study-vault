@@ -173,6 +173,11 @@
     ],
     'statistics': [
       { board: 'AQA', slug: 'statistics-aqa' }
+    ],
+    'computer-science': [
+      { board: 'OCR', slug: 'computer-science' },
+      { board: 'AQA', slug: 'computer-science-aqa' },
+      { board: 'Edexcel', slug: 'computer-science-edexcel' }
     ]
   };
 

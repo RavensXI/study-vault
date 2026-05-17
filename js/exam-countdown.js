@@ -155,56 +155,72 @@
     document.head.appendChild(s);
   }
 
+  var _initInFlight = false;
+
   async function init() {
     if (sessionStorage.getItem(HIDE_KEY) === 'true') return;
-    // Idempotency: if a pill is already in the DOM, do nothing. Lets the
-    // browse-loader call this after dynamic hero render without producing
-    // a duplicate pill alongside the one the page-load timer would create.
+    // Idempotency: if a pill is already in the DOM, do nothing.
     if (document.querySelector('.exam-cd')) return;
+    // Async race guard: prevents two concurrent init calls (e.g. the 500ms
+    // auto-fire + a loader's explicit call) from both passing the DOM check
+    // before either has rendered, then both rendering a pill after fetch
+    // resolves. Without this, dynamic pages reliably end up with two pills.
+    if (_initInFlight) return;
+    _initInFlight = true;
 
-    var slug = getSubjectSlug();
-    if (!slug) return;
-    var pageType = getPageType();
+    try {
+      var slug = getSubjectSlug();
+      if (!slug) return;
+      var pageType = getPageType();
 
-    var board = detectBoard(slug);
-    var normSlug = normaliseSlug(slug);
+      var board = detectBoard(slug);
+      var normSlug = normaliseSlug(slug);
 
-    var resp;
-    try { resp = await fetch(DATES_PATH); if (!resp.ok) return; } catch (e) { return; }
-    var allDates = await resp.json();
+      var resp;
+      try { resp = await fetch(DATES_PATH); if (!resp.ok) return; } catch (e) { return; }
+      var allDates = await resp.json();
 
-    var boardDates = allDates[board] || allDates['aqa'];
-    var exams = boardDates[normSlug];
-    if (!exams || exams.length === 0) return;
+      var boardDates = allDates[board] || allDates['aqa'];
+      var exams = boardDates[normSlug];
+      if (!exams || exams.length === 0) return;
 
-    var next = findNextExam(exams);
-    if (!next) return;
+      var next = findNextExam(exams);
+      if (!next) return;
 
-    injectStyles();
-    var pill = renderPill(next);
+      // Final defensive check before mutating the DOM. Even with the
+      // in-flight flag, if a previous init wrote a pill THEN finished
+      // (clearing the flag) and another init fires before we get here,
+      // we still want to bail rather than stack pills.
+      if (document.querySelector('.exam-cd')) return;
 
-    if (pageType === 'practice') {
-      // Practice page — header's left panel dead space
-      pill.classList.add('exam-cd-header');
-      var header = document.querySelector('.page-header');
-      if (header) {
-        header.style.position = 'relative';
-        header.appendChild(pill);
+      injectStyles();
+      var pill = renderPill(next);
+
+      if (pageType === 'practice') {
+        // Practice page — header's left panel dead space
+        pill.classList.add('exam-cd-header');
+        var header = document.querySelector('.page-header');
+        if (header) {
+          header.style.position = 'relative';
+          header.appendChild(pill);
+        }
+      } else if (pageType === 'lesson') {
+        // Article lesson — above the lesson title
+        pill.classList.add('exam-cd-lesson');
+        var lessonHeader = document.querySelector('.lesson-header');
+        if (lessonHeader) {
+          lessonHeader.insertBefore(pill, lessonHeader.firstChild);
+        }
+      } else {
+        // Browse page — place inside hero section
+        pill.classList.add('exam-cd-hero');
+        var hero = document.querySelector('.hero');
+        if (hero) {
+          hero.appendChild(pill);
+        }
       }
-    } else if (pageType === 'lesson') {
-      // Article lesson — above the lesson title
-      pill.classList.add('exam-cd-lesson');
-      var lessonHeader = document.querySelector('.lesson-header');
-      if (lessonHeader) {
-        lessonHeader.insertBefore(pill, lessonHeader.firstChild);
-      }
-    } else {
-      // Browse page — place inside hero section
-      pill.classList.add('exam-cd-hero');
-      var hero = document.querySelector('.hero');
-      if (hero) {
-        hero.appendChild(pill);
-      }
+    } finally {
+      _initInFlight = false;
     }
   }
 

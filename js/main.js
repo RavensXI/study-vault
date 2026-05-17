@@ -43,6 +43,7 @@ function initLessonFeatures() {
   initLessonProgress();
   initFlashcardModal();
   initSidebarPanel();
+  if (typeof window.initHighlightAnnotate === 'function') window.initHighlightAnnotate();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
@@ -2425,8 +2426,32 @@ function initLessonProgress() {
   // Flashcards
   tasks.push({ id: 'flashcards', label: 'Revise with flashcards', icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><rect x="2" y="4" width="16" height="14" rx="2"/><rect x="6" y="6" width="16" height="14" rx="2"/></svg>', iconClass: 'lesson-progress-icon--flashcards', auto: true });
 
+  // Exam practice question — only if the lesson has practice questions.
+  // Auto-ticks when the student clicks the AI mark button (asks for feedback).
+  var practiceBtn = document.getElementById('practice-ai-mark');
+  if (practiceBtn && window.practiceQuestions && window.practiceQuestions.length > 0) {
+    tasks.push({
+      id: 'practice-question',
+      label: 'Answer an exam question',
+      icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>',
+      iconClass: 'lesson-progress-icon--practice',
+      auto: true
+    });
+  }
+
   // Revision task
   tasks.push({ id: 'revision-task', label: 'Complete a revision task', icon: icons.revision, iconClass: 'lesson-progress-icon--revision', auto: false });
+
+  // Highlight mode — clicking enters mode (sets sv-hl-mode flag, switches
+  // cursor to a marker pen, lets the student drag-select to highlight).
+  // Always shown — clicking it also enables the feature on first use.
+  tasks.push({
+    id: 'highlight-mode',
+    label: 'Highlight notes',
+    icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>',
+    iconClass: 'lesson-progress-icon--hl',
+    auto: false
+  });
 
   if (tasks.length === 0) return;
 
@@ -2512,10 +2537,19 @@ function initLessonProgress() {
 
   // ---- Shared click handlers ----
   function bindClicks(container, itemClass) {
-    // Manual tasks: toggle on click
+    // Manual tasks: toggle on click. The highlight-mode task is
+    // special-cased — clicking it enters Highlight Mode rather than
+    // toggling completion (auto-ticks once the student has highlighted
+    // anything on the lesson).
     container.querySelectorAll(itemClass + ':not([data-auto])').forEach(function(item) {
       item.addEventListener('click', function() {
         var taskId = item.dataset.task;
+        if (taskId === 'highlight-mode') {
+          if (typeof window.svEnterHighlightMode === 'function') {
+            window.svEnterHighlightMode();
+          }
+          return;
+        }
         state[taskId] = !state[taskId];
         saveState(state);
         syncAll();
@@ -2535,6 +2569,40 @@ function initLessonProgress() {
 
   bindClicks(section, '.lesson-progress-item');
   bindClicks(gutter, '.gutter-progress-item');
+
+  // ---- Practice-question auto-tick ----
+  // Tick when the student clicks "AI mark my answer" (asks for feedback).
+  // Capture phase so we fire before the button's own handler does anything
+  // that might prevent default propagation.
+  if (practiceBtn && tasks.some(function (t) { return t.id === 'practice-question'; })) {
+    practiceBtn.addEventListener('click', function () {
+      if (!state['practice-question']) {
+        state['practice-question'] = true;
+        saveState(state);
+        syncAll();
+      }
+    }, true);
+  }
+
+  // ---- Highlight mode auto-tick ----
+  // Tick when the student has any highlight on this lesson; untick if
+  // they delete back to zero. The highlight feature dispatches
+  // sv-hl-changed on any save/delete.
+  function refreshHighlightTask() {
+    if (!tasks.some(function (t) { return t.id === 'highlight-mode'; })) return;
+    var has = (typeof window.svLessonHasHighlights === 'function')
+      ? window.svLessonHasHighlights()
+      : false;
+    if (!!state['highlight-mode'] !== has) {
+      state['highlight-mode'] = has;
+      saveState(state);
+      syncAll();
+    }
+  }
+  document.addEventListener('sv-hl-changed', refreshHighlightTask);
+  // Initial check — student may already have highlighted this lesson
+  // on a prior visit before the checklist task existed.
+  setTimeout(refreshHighlightTask, 100);
 
   // ---- Sync both widgets after any state change ----
   function syncAll() {

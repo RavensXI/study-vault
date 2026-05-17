@@ -653,6 +653,56 @@ body.dark-mode .page-header.scrolled {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  position: relative;
+}
+
+/* On wide viewports (where the gutter checklist appears), pull just the
+   StudyVault wordmark out of the centred header-inner and anchor it above
+   the gutter column in the otherwise-empty top-left whitespace. The unit
+   pill stays in the header-inner flex flow where it was.
+
+   Scoped to headers WITHOUT .admin-nav — on admin pages the brand needs to
+   stay in the flex flow so the admin dropdown nav balances against it via
+   justify-content:space-between. Pulling the brand out left the admin nav
+   collapsed to the left edge of the header. */
+@media (min-width: 1400px) {
+  .page-header-inner:not(:has(.admin-nav)) .header-brand {
+    position: fixed;
+    top: 0.75rem;
+    left: calc((100vw - var(--page-max, 1160px)) / 4);
+    transform: translateX(-50%);
+    z-index: 901;
+  }
+}
+
+/* On mobile the header has no proper layout — just the hamburger button
+   on the right and the brand. Centre the brand in the header so the
+   StudyVault wordmark anchors the page visually. Hamburger stays on
+   the right via the existing flex flow. Lesson header + exam countdown
+   pill also centred to match the centred logo above. */
+@media (max-width: 768px) {
+  .page-header-inner {
+    position: relative;
+    min-height: 2.5rem;
+  }
+  .header-brand {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .lesson-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .lesson-header h1 {
+    text-align: center;
+  }
+  .exam-cd-lesson {
+    align-self: center;
+  }
 }
 
 .header-brand {
@@ -1023,17 +1073,63 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
 }
 
 /* --- Sidebar --- */
+/* Unit pill + lesson pill grouped tightly together in the header so they
+   read as a single "you are here" label, instead of being split by the
+   page-header-inner's wider flex gap. Slight left nudge so the pills
+   line up with the lesson title / exam countdown in the content column,
+   not the narrower header-inner edge. */
+.header-pills {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  margin-left: 1.5rem;
+}
+
+/* Replay-tour button injected into the header on wide desktops */
+.header-tour-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1px solid rgba(45, 42, 38, 0.15);
+  color: var(--text-secondary, #5d564b);
+  cursor: pointer;
+  margin-right: 4px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.header-tour-btn:hover {
+  background: var(--accent, #2d2a26);
+  color: #fff;
+  border-color: var(--accent, #2d2a26);
+}
+body.dark-mode .header-tour-btn {
+  border-color: rgba(245, 241, 236, 0.15);
+  color: rgba(245, 241, 236, 0.7);
+}
+
 .lesson-sidebar {
   position: sticky;
   top: 5rem; /* below sticky header */
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  /* Tight base gap so Quick Quiz + Flashcards read as a paired group.
+     Items stack naturally from the top of the sidebar — no full-height
+     centring, since that pushed everything too far down the column. */
+  gap: 0.5rem;
   max-height: calc(100vh - 6rem);
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.3s;
+}
+/* Larger gap before Related Media so it reads as a distinct block from
+   the action buttons (Quick Quiz / Flashcards) that precede it. */
+.lesson-sidebar .sidebar-media {
+  margin-top: 1.5rem;
 }
 .lesson-sidebar:hover {
   scrollbar-color: var(--accent) transparent;
@@ -1167,6 +1263,39 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
   font-family: 'Inter', sans-serif;
   font-size: 0.78rem;
   flex-wrap: wrap;
+}
+
+/* Mobile: force exactly 2 lines. Row 1 = Dark mode / Dyslexia font /
+   A- / A+ (labels kept so each control is clear). Row 2 = overlay
+   swatches, forced onto its own line via flex-basis:100%.
+   Separators + overlay label hidden to save space. */
+@media (max-width: 640px) {
+  .a11y-toolbar {
+    gap: 0.35rem 0.45rem;
+    padding: 0.4rem 0.5rem;
+    font-size: 0.65rem;
+  }
+  .a11y-toolbar .a11y-separator,
+  .a11y-toolbar .a11y-overlay-label {
+    display: none;
+  }
+  .a11y-toolbar .a11y-btn {
+    padding: 0.28rem 0.45rem;
+    gap: 0.25rem;
+  }
+  .a11y-toolbar .a11y-btn svg {
+    width: 12px;
+    height: 12px;
+  }
+  .a11y-toolbar .a11y-overlay-group {
+    flex-basis: 100%;
+    justify-content: center;
+    gap: 0.3rem;
+  }
+  .a11y-toolbar .a11y-overlay {
+    width: 22px;
+    height: 22px;
+  }
 }
 
 .a11y-btn {
@@ -4104,9 +4233,14 @@ body.dark-mode .kc-blank.incorrect {
 }
 
 .narration-player {
-  display: flex;
+  display: grid;
+  /* 1fr spacers on each side centre the play + meta cluster on row 1;
+     progress spans all 4 columns on row 2 for a full-width timeline. */
+  grid-template-columns: 1fr auto auto 1fr;
+  grid-template-rows: auto auto;
+  column-gap: 0.85rem;
+  row-gap: 0.5rem;
   align-items: center;
-  gap: 0.75rem;
   padding: 0.65rem 1rem;
   background: var(--bg-card);
   border: 1px solid var(--border-lighter);
@@ -4115,6 +4249,8 @@ body.dark-mode .kc-blank.incorrect {
 }
 
 .narration-play {
+  grid-column: 2;
+  grid-row: 1;
   flex-shrink: 0;
   width: 36px;
   height: 36px;
@@ -4126,7 +4262,7 @@ body.dark-mode .kc-blank.incorrect {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, transform 0.1s;
+  transition: filter 0.15s, transform 0.1s;
 }
 
 .narration-play:hover {
@@ -4143,12 +4279,22 @@ body.dark-mode .kc-blank.incorrect {
   height: 16px;
 }
 
+.narration-meta {
+  grid-column: 3;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
 .narration-play .narration-icon-pause { display: none; }
 .narration-play.playing .narration-icon-play { display: none; }
 .narration-play.playing .narration-icon-pause { display: block; }
 
 .narration-progress {
-  flex: 1;
+  grid-column: 1 / 5;
+  grid-row: 2;
   height: 6px;
   background: var(--border-lighter);
   border-radius: 3px;
@@ -4364,8 +4510,9 @@ ol[data-narration-id].narration-active {
 @media (max-width: 768px) {
   .narration-fab {
     right: 0.75rem;
-    bottom: 0.75rem;
-    width: calc(100vw - 1.5rem);
+    left: 0.75rem;
+    bottom: 5rem;
+    width: auto;
     max-width: none;
     padding: 0.85rem 1.15rem;
     gap: 0.85rem;
@@ -4388,14 +4535,8 @@ ol[data-narration-id].narration-active {
   .narration-fab-time {
     font-size: 0.8rem;
   }
-  .narration-player {
-    flex-wrap: wrap;
-  }
-  .narration-progress {
-    order: 5;
-    flex-basis: 100%;
-    margin-top: 0.25rem;
-  }
+  /* Grid layout already handles wrap-equivalent stacking on mobile, no
+     extra overrides needed for .narration-player. */
 }
 
 /* --- Diagrams --- */
@@ -5056,6 +5197,7 @@ body.tier-foundation .higher-only {
   gap: 0.75rem;
   margin-top: 1rem;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* AI feedback panel — shown when the /api/ai-mark call returns */

@@ -381,6 +381,8 @@
     window._lessonId = lesson.id;
     window._subjectSlug = params.subjectSlug;
     window._subjectName = subject.name || '';
+    window._unitSlug = unit.slug || params.unitSlug || '';
+    window._unitName = unit.name || '';
     window._examBoard = subject.exam_board || '';
     // Exam technique guides are legacy — only Unity-bespoke subjects have them.
     // Opt in via subjects.settings.has_exam_guides = true. Default false for new subjects.
@@ -512,7 +514,12 @@
     // First-time tutorial — runs once per device on first article-lesson visit
     if (!lesson._isPreview) {
       try {
-        if (!localStorage.getItem('sv-lesson-tutorial-done')) {
+        var __td = localStorage.getItem('sv-lesson-tutorial-done');
+        var __htd = localStorage.getItem('sv-highlight-tutorial-done');
+        var __hon = localStorage.getItem('sv-hl-enabled') === '1';
+        // Run if first-time, OR returning student with highlight feature on
+        // who hasn't seen the highlight coachmark yet.
+        if (!__td || (__hon && !__htd)) {
           // Defer until layout settles + main.js's initLessonFeatures has wired up DOM
           setTimeout(maybeStartLessonTutorial, 1500);
         }
@@ -779,7 +786,17 @@
 
   // ---- First-time lesson tutorial ----
   function maybeStartLessonTutorial() {
-    try { if (localStorage.getItem('sv-lesson-tutorial-done')) return; } catch (e) {}
+    var fullTutorialDone = false;
+    var highlightTutorialDone = false;
+    var highlightFeatureOn = false;
+    try {
+      fullTutorialDone = localStorage.getItem('sv-lesson-tutorial-done') === '1';
+      highlightTutorialDone = localStorage.getItem('sv-highlight-tutorial-done') === '1';
+      highlightFeatureOn = localStorage.getItem('sv-hl-enabled') === '1';
+    } catch (e) {}
+    if (fullTutorialDone && (highlightTutorialDone || !highlightFeatureOn)) return;
+    // Returning students with the highlight feature on get a one-step mini-tour
+    var highlightOnlyMode = fullTutorialDone && highlightFeatureOn && !highlightTutorialDone;
 
     var isMobile = window.innerWidth <= 768;
 
@@ -856,7 +873,14 @@
       firstTerm && isVisible(firstTerm) && {
         target: firstTerm,
         text: 'Tap or hover any underlined word to see what it means without leaving the lesson.',
-        side: 'bottom'
+        side: 'bottom',
+        _id: 'glossary'
+      },
+      highlightFeatureOn && studyNotes && studyNotes.querySelector('p') && isVisible(studyNotes.querySelector('p')) && {
+        target: studyNotes.querySelector('p'),
+        text: 'Select any text in the lesson — a "Highlight" button will pop up so you can mark it and add a note. Find everything you\'ve highlighted in the Highlights button at the bottom right.',
+        side: 'bottom',
+        _id: 'highlight'
       },
       firstTip && isVisible(firstTip) && {
         target: firstTip,
@@ -902,6 +926,12 @@
     ];
     var steps = rawSteps.filter(Boolean);
 
+    // Returning students who've already seen the full tour only see the new
+    // highlight coachmark — narrow the steps array to just that one.
+    if (highlightOnlyMode) {
+      steps = steps.filter(function (s) { return s._id === 'highlight'; });
+    }
+
     // Sort by visual document position (top-to-bottom) so the tour flows
     // naturally without zig-zagging up and down. Pin bug FAB to the end
     // since it's position:fixed (its rect.top is viewport-relative).
@@ -913,7 +943,10 @@
     steps.sort(function (a, b) { return a._sortKey - b._sortKey; });
 
     if (steps.length === 0) {
-      try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
+      try {
+        localStorage.setItem('sv-lesson-tutorial-done', '1');
+        if (highlightFeatureOn) localStorage.setItem('sv-highlight-tutorial-done', '1');
+      } catch (e) {}
       return;
     }
 
@@ -1093,7 +1126,10 @@
       [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) { el.classList.remove('active'); });
       clearSpotlight();
       closeAllDrawers();
-      try { localStorage.setItem('sv-lesson-tutorial-done', '1'); } catch (e) {}
+      try {
+        localStorage.setItem('sv-lesson-tutorial-done', '1');
+        if (highlightFeatureOn) localStorage.setItem('sv-highlight-tutorial-done', '1');
+      } catch (e) {}
       setTimeout(function () {
         if (tooltipEl.parentNode) tooltipEl.parentNode.removeChild(tooltipEl);
         [backdropTop, backdropRight, backdropBottom, backdropLeft].forEach(function (el) {
@@ -1210,23 +1246,25 @@
   function addSidebarTourButton() {
     var gutter = document.querySelector('.gutter-progress');
     var sidebarProgress = document.querySelector('.sidebar-progress-section');
+    var headerNav = document.getElementById('header-nav');
 
     // Clean any previous injection (could exist from a prior render)
-    document.querySelectorAll('.sidebar-tour-section, .gutter-tour-btn').forEach(function (el) { el.remove(); });
+    document.querySelectorAll('.sidebar-tour-section, .gutter-tour-btn, .header-tour-btn').forEach(function (el) { el.remove(); });
 
-    if (isElVisible(gutter)) {
-      // Wide desktop — small icon button inside the gutter, under the checklist
+    if (isElVisible(gutter) && headerNav) {
+      // Wide desktop — small icon button in the page header, alongside the
+      // nav links. Keeps the gutter clean and the tour control discoverable.
       var btn = document.createElement('button');
       btn.id = 'replay-tour-btn';
       btn.type = 'button';
-      btn.className = 'gutter-tour-btn';
+      btn.className = 'header-tour-btn';
       btn.title = 'Show the lesson tour again';
       btn.setAttribute('aria-label', 'Show the lesson tour again');
       btn.innerHTML =
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16">' +
           '<circle cx="12" cy="12" r="10"/><polyline points="10 8 16 12 10 16 10 8"/>' +
         '</svg>';
-      gutter.appendChild(btn);
+      headerNav.insertBefore(btn, headerNav.firstChild);
     } else if (sidebarProgress) {
       // Narrow — a full pill under the sidebar lesson-progress card
       var section = document.createElement('div');
