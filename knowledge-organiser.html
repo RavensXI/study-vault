@@ -130,7 +130,7 @@
 
   <main class="ko-page">
     <div class="ko-toolbar no-print">
-      <a href="/highlights.html">← Back to highlights</a>
+      <a id="ko-back" href="/highlights.html">← Back to highlights</a>
       <span class="ko-toolbar-sep"></span>
       <span class="ko-toolbar-label">Reading:</span>
       <button id="ko-dark" type="button" aria-pressed="false">Dark mode</button>
@@ -228,6 +228,16 @@
       try { raw = sessionStorage.getItem(KO_DATA_KEY); } catch (e) {}
       var data = raw ? JSON.parse(raw) : null;
       var content = document.getElementById('ko-content');
+
+      // Back button: route to wherever the student came from (the lesson
+      // they hit "Print these notes" on, or /highlights.html if they used
+      // "Build revision notes" from there). Label varies to match.
+      var backEl = document.getElementById('ko-back');
+      if (backEl) {
+        var src = (data && data.source_url) ? data.source_url : '/highlights.html';
+        backEl.href = src;
+        backEl.textContent = /^\/lesson\//.test(src) ? '← Back to lesson' : '← Back to highlights';
+      }
 
       if (!data || !data.subjects || !data.subjects.length) {
         content.innerHTML =

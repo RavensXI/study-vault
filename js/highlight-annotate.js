@@ -787,6 +787,7 @@
     var lessonTitle = titleEl ? (titleEl.textContent || '').trim() : 'Lesson';
     var payload = {
       generated_at: new Date().toISOString(),
+      source_url: window.location.pathname + window.location.search,
       subjects: [{
         name: window._subjectName || 'Subject',
         units: [{
