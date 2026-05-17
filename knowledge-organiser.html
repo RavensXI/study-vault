@@ -22,8 +22,14 @@
     .ko-toolbar-sep{width:1px;height:22px;background:rgba(45,42,38,.1);margin:0 4px}
     .ko-toolbar-label{font-size:.78rem;color:var(--text-secondary,#7a7367);font-weight:500}
 
-    .ko-paper{background:#fff;border-radius:14px;padding:36px 40px;border:1px solid rgba(45,42,38,.06);box-shadow:0 4px 18px rgba(20,18,15,.05);min-height:60vh}
+    .ko-paper{background:#fff;border-radius:14px;padding:36px 40px;border:1px solid rgba(45,42,38,.06);box-shadow:0 4px 18px rgba(20,18,15,.05);min-height:60vh;transition:max-width .2s ease}
     body.dark-mode .ko-paper{background:#2a2826;border-color:rgba(245,241,236,.08)}
+    /* Annotation mode — narrow column + extra vertical gap so students have
+       room to write notes by hand around / between the highlights. */
+    body.ko-annotate-mode .ko-paper{max-width:560px;margin-left:auto;margin-right:auto}
+    body.ko-annotate-mode .ko-item{margin-bottom:24px;padding-bottom:14px;border-bottom:1px dashed rgba(45,42,38,.12)}
+    body.dark-mode.ko-annotate-mode .ko-item{border-bottom-color:rgba(245,241,236,.15)}
+    body.ko-annotate-mode .ko-item:last-child{border-bottom:none}
 
     .ko-header{margin-bottom:24px;border-bottom:2px solid var(--text-primary,#2d2a26);padding-bottom:14px}
     body.dark-mode .ko-header{border-bottom-color:#f5f1ec}
@@ -73,6 +79,8 @@
 
     /* --- Print stylesheet --- */
     @media print {
+      body.ko-annotate-mode .ko-paper { max-width: 14cm !important; }
+      body.ko-annotate-mode .ko-item { margin-bottom: 1.4cm; padding-bottom: 0.6cm; border-bottom: 1px dashed #999; }
       html, body { background: #fff !important; color: #000 !important; }
       .no-print, .page-header, .ko-toolbar { display: none !important; }
       .ko-page { max-width: none; margin: 0; padding: 12mm 14mm; }
@@ -123,6 +131,7 @@
       <button id="ko-dys" type="button" aria-pressed="false">Dyslexia font</button>
       <span class="ko-toolbar-sep"></span>
       <button id="ko-notes" type="button" aria-pressed="true" title="Include the notes you wrote alongside each highlight">Show notes</button>
+      <button id="ko-annotate" type="button" aria-pressed="false" title="Narrow the page and add extra space between highlights so you can write annotations by hand">Annotation space</button>
       <button class="ko-print-btn" id="ko-print" type="button">Print</button>
     </div>
 
@@ -179,6 +188,12 @@
       });
     });
 
+    document.getElementById('ko-annotate').addEventListener('click', function () {
+      var on = this.getAttribute('aria-pressed') !== 'true';
+      this.setAttribute('aria-pressed', on);
+      document.body.classList.toggle('ko-annotate-mode', on);
+    });
+
     document.getElementById('ko-print').addEventListener('click', function () {
       window.print();
     });
@@ -208,6 +223,20 @@
             '<p>Go back to <a href="/highlights.html">My Highlights</a>, tick the ones you want to bring forward, then click <strong>Build knowledge organiser</strong>.</p>' +
           '</div>';
         return;
+      }
+
+      // Smart default H1: if payload is a single subject/unit/lesson (the
+      // "Print these notes" path from a lesson modal), default to that
+      // lesson's title instead of the generic "Knowledge Organiser".
+      // Student can still edit it inline.
+      if (data.subjects.length === 1
+          && data.subjects[0].units && data.subjects[0].units.length === 1
+          && data.subjects[0].units[0].lessons.length === 1) {
+        var lesson = data.subjects[0].units[0].lessons[0];
+        var titleEl = document.querySelector('.ko-title');
+        if (titleEl && lesson && lesson.lesson_title) {
+          titleEl.textContent = lesson.lesson_title;
+        }
       }
 
       // Render one lesson — flat list of highlights, no category grouping.

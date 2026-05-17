@@ -762,7 +762,7 @@
         '<div class="sv-hl-modal-panel" role="dialog" aria-modal="true" aria-label="My highlights">' +
           '<header class="sv-hl-modal-header">' +
             '<h2>My highlights</h2>' +
-            '<a class="sv-hl-modal-allpages" href="/highlights.html">All lessons →</a>' +
+            '<button class="sv-hl-modal-allpages sv-hl-modal-print" type="button">Print these notes</button>' +
             '<button class="sv-hl-modal-close" aria-label="Close">×</button>' +
           '</header>' +
           '<div class="sv-hl-modal-body"></div>' +
@@ -770,9 +770,42 @@
       document.body.appendChild(modalEl);
       modalEl.querySelector('.sv-hl-modal-backdrop').addEventListener('click', closeModal);
       modalEl.querySelector('.sv-hl-modal-close').addEventListener('click', closeModal);
+      modalEl.querySelector('.sv-hl-modal-print').addEventListener('click', openPrintView);
     }
     renderModalBody();
     modalEl.classList.add('sv-hl-modal--open');
+  }
+
+  // Build a sv-ko-data payload from THIS lesson's highlights and navigate
+  // to the print page. Used from the lesson-highlights modal as the
+  // "Print these notes" action.
+  function openPrintView() {
+    var lessonId = window._lessonId;
+    var list = getHighlights(lessonId);
+    if (!list.length) return;
+    var titleEl = document.getElementById('lesson-title');
+    var lessonTitle = titleEl ? (titleEl.textContent || '').trim() : 'Lesson';
+    var payload = {
+      generated_at: new Date().toISOString(),
+      subjects: [{
+        name: window._subjectName || 'Subject',
+        units: [{
+          name: window._unitName || '',
+          lessons: [{
+            lesson_id: lessonId,
+            lesson_title: lessonTitle,
+            lesson_url: window.location.pathname,
+            highlights: list
+          }]
+        }]
+      }]
+    };
+    try {
+      sessionStorage.setItem('sv-ko-data', JSON.stringify(payload));
+      window.location.href = '/knowledge-organiser.html';
+    } catch (e) {
+      console.warn('[highlights] could not open print view', e);
+    }
   }
 
   function closeModal() {
@@ -782,6 +815,8 @@
   function renderModalBody() {
     var body = modalEl.querySelector('.sv-hl-modal-body');
     var list = getHighlights(window._lessonId);
+    var printBtn = modalEl.querySelector('.sv-hl-modal-print');
+    if (printBtn) printBtn.disabled = list.length === 0;
     if (!list.length) {
       body.innerHTML =
         '<div class="sv-hl-modal-empty">' +
@@ -924,8 +959,11 @@
       '@media (min-width:720px){.sv-hl-modal{align-items:center}.sv-hl-modal-panel{border-radius:16px}}' +
       '.sv-hl-modal-header{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid rgba(45,42,38,.08)}' +
       '.sv-hl-modal-header h2{margin:0;font-size:1.1rem;font-weight:600;flex:1}' +
-      '.sv-hl-modal-allpages{font-size:.85rem;color:#5d564b;text-decoration:none}' +
-      '.sv-hl-modal-allpages:hover{color:#2d2a26;text-decoration:underline}' +
+      '.sv-hl-modal-allpages{font-size:.85rem;color:#2d2a26;background:#fef9c3;border:1px solid #fde047;padding:5px 12px;border-radius:8px;font-family:inherit;font-weight:600;cursor:pointer}' +
+      '.sv-hl-modal-allpages:hover{background:#fef08a}' +
+      '.sv-hl-modal-allpages:disabled{opacity:.4;cursor:not-allowed;background:#faf8f5;border-color:rgba(45,42,38,.12);color:#7a7367}' +
+      'body.dark-mode .sv-hl-modal-allpages{background:rgba(234,179,8,.35);border-color:rgba(234,179,8,.6);color:#fef9c3}' +
+      'body.dark-mode .sv-hl-modal-allpages:hover{background:rgba(234,179,8,.5)}' +
       '.sv-hl-modal-close{background:transparent;border:none;font-size:1.5rem;line-height:1;color:#5d564b;cursor:pointer;padding:4px 8px;border-radius:8px}' +
       '.sv-hl-modal-close:hover{background:rgba(45,42,38,.06);color:#2d2a26}' +
       '.sv-hl-modal-body{padding:14px 22px 22px;overflow-y:auto;display:flex;flex-direction:column;gap:14px}' +
