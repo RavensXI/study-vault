@@ -29,6 +29,17 @@
         'so-what': "How a character's actions shape the plot or carry a theme. The effect they have on other characters or on the play's argument.",
         question: "What the play leaves unclear about a character — their motives, contradictions, or things that stay unsaid. Worth asking your teacher."
       };
+      return;
+    }
+    // AQA Science — any Biology lesson (subject-level framing)
+    if (/\/biology/i.test(path)) {
+      window._lessonCategoryDefinitions = {
+        fact: "Scientific terms, definitions, equations, units, names of organs, tissues, cells and organelles, and any numbers worth memorising.",
+        why: "How a biological process actually works — the mechanism, the cause of a condition, the reason behind an experimental result.",
+        'so-what': "Real-world applications — health, disease, agriculture, ecology. Links to required practicals or to 6-mark exam questions.",
+        question: "Something the lesson glosses over or that didn't click — a step in a mechanism, a confusing graph, a definition that contradicts another one. Worth asking your teacher."
+      };
+      return;
     }
   })();
 
@@ -308,7 +319,20 @@
     koCardEl.classList.toggle('sv-ko-card--complete', isLessonOrganised());
   }
 
-  // ---------- KO Mode tutorial (one-shot first-time modal) ----------
+  // ---------- KO Mode tutorial ----------
+  // Two related triggers, same modal:
+  //   1. First time ever (any subject) — gates on KO_TUTORIAL_KEY
+  //   2. First time on each NEW subject thereafter — gates on a per-subject
+  //      sv-ko-subject-seen-{slug} flag. Shows subject-specific framing.
+  // The modal's heading + intro change depending on which trigger fired; the
+  // four category cards always render with the current lesson's bespoke
+  // definitions (via getHintFor) so they're subject-appropriate either way.
+  function subjectOrientationKey() {
+    var slug = window._subjectSlug;
+    if (!slug) return null;
+    return 'sv-ko-subject-seen-' + slug;
+  }
+
   function buildKoTutorial() {
     if (koTutorialEl) return koTutorialEl;
     koTutorialEl = document.createElement('div');
@@ -318,18 +342,8 @@
       '<div class="sv-ko-tutorial-panel" role="dialog" aria-modal="true" aria-labelledby="sv-ko-tutorial-title">' +
         '<h2 id="sv-ko-tutorial-title" class="sv-ko-tutorial-heading">Building a knowledge organiser</h2>' +
         '<p class="sv-ko-tutorial-intro">As you read this lesson, find at least one highlight for each of the four categories. The colour you pick is the cognitive move — what kind of thinking the highlight represents.</p>' +
-        '<div class="sv-ko-tutorial-cards">' +
-          CATEGORIES.map(function (c) {
-            return '<div class="sv-ko-tutorial-card sv-ko-tutorial-card--' + c.id + '">' +
-                     '<div class="sv-ko-tutorial-card-header">' +
-                       '<span class="sv-ko-tutorial-card-dot"></span>' +
-                       '<span class="sv-ko-tutorial-card-name">' + c.label + '</span>' +
-                     '</div>' +
-                     '<p class="sv-ko-tutorial-card-hint">' + getHintFor(c.id) + '</p>' +
-                   '</div>';
-          }).join('') +
-        '</div>' +
-        '<p class="sv-ko-tutorial-tip"><strong>Tip:</strong> when you select text, the popover lets you pick the category and add a short note. Your notes are what make this a revision aid you can actually study from.</p>' +
+        '<div class="sv-ko-tutorial-cards"></div>' +
+        '<p class="sv-ko-tutorial-tip"><strong>Tip:</strong> when you select text in this mode, the highlight is created in the focused colour straight away and the note box pops up. Your notes are what make this a revision aid you can actually study from.</p>' +
         '<div class="sv-ko-tutorial-actions">' +
           '<button class="sv-ko-tutorial-go" type="button">Got it — let me start</button>' +
         '</div>' +
@@ -337,14 +351,50 @@
     document.body.appendChild(koTutorialEl);
     koTutorialEl.querySelector('.sv-ko-tutorial-backdrop').addEventListener('click', hideKoTutorial);
     koTutorialEl.querySelector('.sv-ko-tutorial-go').addEventListener('click', function () {
-      try { localStorage.setItem(KO_TUTORIAL_KEY, '1'); } catch (e) {}
+      try {
+        localStorage.setItem(KO_TUTORIAL_KEY, '1');
+        var sk = subjectOrientationKey();
+        if (sk) localStorage.setItem(sk, '1');
+      } catch (e) {}
       hideKoTutorial();
     });
     return koTutorialEl;
   }
 
+  // Re-render the four category cards with whatever definitions are current
+  // for this lesson (subject-specific if available, generic otherwise).
+  function refreshTutorialCards() {
+    if (!koTutorialEl) return;
+    var cards = koTutorialEl.querySelector('.sv-ko-tutorial-cards');
+    cards.innerHTML = CATEGORIES.map(function (c) {
+      return '<div class="sv-ko-tutorial-card sv-ko-tutorial-card--' + c.id + '">' +
+               '<div class="sv-ko-tutorial-card-header">' +
+                 '<span class="sv-ko-tutorial-card-dot"></span>' +
+                 '<span class="sv-ko-tutorial-card-name">' + c.label + '</span>' +
+               '</div>' +
+               '<p class="sv-ko-tutorial-card-hint">' + getHintFor(c.id) + '</p>' +
+             '</div>';
+    }).join('');
+  }
+
   function showKoTutorial() {
     buildKoTutorial();
+    // Heading + intro vary by trigger: first-time vs new-subject orientation
+    var firstTimeDone = false;
+    try { firstTimeDone = localStorage.getItem(KO_TUTORIAL_KEY) === '1'; } catch (e) {}
+    var subjectName = window._subjectName || '';
+    var headingEl = koTutorialEl.querySelector('.sv-ko-tutorial-heading');
+    var introEl = koTutorialEl.querySelector('.sv-ko-tutorial-intro');
+    if (firstTimeDone && subjectName) {
+      // Per-subject orientation
+      headingEl.textContent = subjectName + ' — knowledge organiser';
+      introEl.textContent = 'This is your first knowledge organiser for ' + subjectName + '. The four categories work a little differently in each subject — here\'s what each one means here:';
+    } else {
+      // First-time platform intro
+      headingEl.textContent = 'Building a knowledge organiser';
+      introEl.textContent = 'As you read this lesson, find at least one highlight for each of the four categories. The colour you pick is the cognitive move — what kind of thinking the highlight represents.';
+    }
+    refreshTutorialCards();
     koTutorialEl.classList.add('sv-ko-tutorial--open');
   }
 
@@ -353,9 +403,17 @@
   }
 
   function maybeShowKoTutorialOnFirstEntry() {
+    var firstTimeDone = false;
+    var subjectKey = null;
+    var subjectSeen = false;
     try {
-      if (localStorage.getItem(KO_TUTORIAL_KEY) === '1') return;
+      firstTimeDone = localStorage.getItem(KO_TUTORIAL_KEY) === '1';
+      subjectKey = subjectOrientationKey();
+      if (subjectKey) subjectSeen = localStorage.getItem(subjectKey) === '1';
     } catch (e) { return; }
+    // Nothing to show if both flags satisfied (or first-time done and we
+    // can't determine subject for per-subject tracking)
+    if (firstTimeDone && (subjectSeen || !subjectKey)) return;
     setTimeout(showKoTutorial, 200);  // small defer so the card paints first
   }
 
