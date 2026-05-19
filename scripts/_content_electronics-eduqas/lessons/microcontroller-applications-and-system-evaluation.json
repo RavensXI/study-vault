@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "e0c8a35d-f8e3-48e1-83ac-6347ff5387d0",
+  "_lesson_number": 10,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "microcontroller-applications-and-system-evaluation",
+  "description": "How microcontrollers control vehicles and appliances, and how to evaluate and improve a flowchart program.",
+  "content_html": "<h2 data-narration-id=\"n1\">Microcontrollers Everywhere</h2>\n<p data-narration-id=\"n2\">In the previous lesson you learned how a <dfn class=\"term\" data-def=\"A programmable integrated circuit containing a processor, memory and I/O ports, used to control electronic systems according to a stored program.\">microcontroller</dfn> is programmed using a flowchart. In this lesson you will see where microcontrollers are actually deployed &mdash; from the engine bay of a modern car to the drum cycle of a domestic washing machine &mdash; and develop the skill of evaluating and improving an existing flowchart program against a design specification.</p>\n<p data-narration-id=\"n3\">Modern vehicles and household appliances rely on dozens or even hundreds of microcontrollers working together. Understanding why engineers choose a programmable device over a hardwired circuit, and being able to spot where a given flowchart falls short of its specification, are both directly examinable skills.</p>\n\n<h2 data-narration-id=\"n4\">Vehicle Applications</h2>\n<p data-narration-id=\"n5\">Cars produced after about 1990 contain multiple microcontroller-based control units. Four key examples appear in the specification:</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Engine Management System</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n6\">An engine management system continuously monitors sensors for engine temperature, air mass flow, throttle position, oxygen content in the exhaust and crankshaft speed. The microcontroller processes these readings thousands of times per second and adjusts fuel injection timing, ignition advance and idle speed to maintain efficient combustion. Without a programmable device, matching all these variables simultaneously would require an impractically complex analogue circuit. The microcontroller can also store fault codes when a sensor reading goes out of range, allowing a technician to diagnose faults quickly.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>ABS Braking, Airbags and Climate Control</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\"><strong>Anti-lock braking (ABS)</strong> &mdash; wheel-speed sensors feed data to a microcontroller. If one wheel decelerates much faster than the others (the signature of a locked wheel), the microcontroller rapidly pulses the brake hydraulics at that wheel to restore rotation. This happens around 15 times per second, far faster than a human can pump the pedal.</p>\n    <p data-narration-id=\"n8\"><strong>Airbag deployment</strong> &mdash; accelerometers detect a sudden large deceleration that matches the pattern of a collision. The microcontroller must distinguish a crash from a pothole in milliseconds. If the deceleration exceeds the programmed threshold, it fires the airbag inflator. Speed is critical: the entire sequence from impact to full inflation takes around 30 milliseconds.</p>\n    <p data-narration-id=\"n9\"><strong>Climate control</strong> &mdash; temperature and humidity sensors feed a microcontroller that adjusts fan speed, heating element power and air distribution flaps to maintain the cabin at a set temperature. The microcontroller runs a continuous control loop, comparing the measured temperature to the target and correcting any difference.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n10\">Domestic Appliance Applications</h2>\n<p data-narration-id=\"n11\">The same technology that manages a car engine also controls everyday household devices:</p>\n<ul>\n  <li data-narration-id=\"n12\"><strong>Washing machine</strong> &mdash; a microcontroller sequences the wash cycle: filling the drum to a set water level (detected by a pressure sensor), heating the water to the correct temperature, rotating the drum at different speeds for wash and spin, and draining at the end. Different programs (cottons, delicates, quick wash) are simply different stored sequences &mdash; no hardware change needed.</li>\n  <li data-narration-id=\"n13\"><strong>Dishwasher</strong> &mdash; similar cycle control: water fill, heat, spray pump, drain and rinse, with a heated drying phase. Temperature sensors prevent over-heating; a turbidity sensor in some models detects how dirty the water is and adjusts the cycle length accordingly.</li>\n  <li data-narration-id=\"n14\"><strong>Central heating system</strong> &mdash; a thermostat microcontroller compares the room temperature from a sensor to the set-point temperature. If the room is too cold, it opens a valve and starts the boiler; when the set temperature is reached, it closes the valve. A time clock sub-program runs a heating schedule so the house is warm at the right times of day.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Cover this and list two vehicle applications and two domestic applications of microcontrollers from memory, giving one role of the microcontroller in each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Vehicle applications: engine management, ABS braking, airbag deployment, climate control. Domestic applications: washing machine, dishwasher, central heating. In every case the microcontroller reads sensor inputs, processes them against a stored program, and drives output devices &mdash; replacing the equivalent analogue or discrete-logic circuit.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Why Microcontrollers Replaced Discrete Circuits</h2>\n<p data-narration-id=\"n17\">Engineers switched to microcontrollers for four main reasons, all of which are examinable:</p>\n<ol>\n  <li data-narration-id=\"n18\"><strong>Flexibility and <dfn class=\"term\" data-def=\"The ability to change a microcontroller system's behaviour by updating its software without any hardware modifications or rewiring.\">reprogrammability</dfn></strong> &mdash; changing the system&rsquo;s behaviour requires only a software update, not a new circuit board. A car manufacturer can issue a &ldquo;recall&rdquo; software fix or add a feature to next year&rsquo;s model without redesigning hardware.</li>\n  <li data-narration-id=\"n19\"><strong>Lower cost at scale</strong> &mdash; a single microcontroller chip costs far less than an equivalent collection of discrete logic ICs, timers and counters. When millions of washing machines are produced each year, the savings are significant.</li>\n  <li data-narration-id=\"n20\"><strong>Smaller physical footprint</strong> &mdash; one chip replaces a circuit board full of components, reducing size and weight. In a car, this matters for packaging; in a domestic appliance, it allows more compact designs.</li>\n  <li data-narration-id=\"n21\"><strong>Ability to integrate sensors</strong> &mdash; many microcontrollers include built-in analogue-to-digital converters, timers, and communication interfaces on the same chip, reducing the number of external components further.</li>\n</ol>\n\n<div class=\"key-fact\" data-narration-id=\"n22\" data-revision-tip=\"Without looking, write down the four reasons engineers chose microcontrollers over discrete circuits, using only key words.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Four reasons microcontrollers replaced discrete circuits: <strong>reprogrammability</strong> (change software, not hardware), <strong>cost at scale</strong> (one chip cheaper than many ICs), <strong>smaller footprint</strong> (one chip replaces a board of components), and <strong>integrated peripherals</strong> (ADC, timers, comms on chip).</p>\n</div>\n\n<h2 data-narration-id=\"n23\">Evaluating a Flowchart Program</h2>\n<p data-narration-id=\"n24\">Exam questions regularly give you a partially correct flowchart and ask you to: (a) identify what it does correctly, (b) spot where it does not meet the specification, and (c) describe or draw the modification needed. This is the <dfn class=\"term\" data-def=\"The process of comparing a flowchart program's behaviour step-by-step against a written design specification to identify any differences or omissions.\">flowchart evaluation</dfn> technique. Use this three-step method:</p>\n<ol>\n  <li data-narration-id=\"n25\"><strong>Trace through the flowchart</strong> &mdash; follow the arrows step by step. Write down what the program actually does for a given set of input conditions. Be systematic: go through each branch of every decision diamond.</li>\n  <li data-narration-id=\"n26\"><strong>Compare to the specification</strong> &mdash; read the written specification line by line and check whether the flowchart implements each requirement. Common omissions: a missing decision diamond (condition never tested), a missing output block (action never taken), a loop arrow pointing to the wrong step, or a counter that is never reset.</li>\n  <li data-narration-id=\"n27\"><strong>Describe the modification</strong> &mdash; state precisely which block type to add or change and where to insert it in the flow. &ldquo;Add a decision diamond after the delay block asking &lsquo;Is count = 5?&rsquo; with YES leading to reset and NO looping back to the increment block&rdquo; is a complete answer. &ldquo;Add a counter somewhere&rdquo; is not.</li>\n</ol>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Evaluating a Central Heating Flowchart</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n28\">Specification: The boiler should turn on when the room temperature falls below 18 &deg;C. It should turn off when the temperature reaches 21 &deg;C. The system should repeat this cycle continuously.</p>\n    <p data-narration-id=\"n29\">Flowchart provided (with a fault):</p>\n    <ol>\n      <li data-narration-id=\"n30\">START &rarr; Read temperature sensor &rarr; Is temperature &lt; 18 &deg;C? YES: Turn boiler ON &rarr; loop back to &ldquo;Read temperature sensor&rdquo;. NO: Turn boiler OFF &rarr; loop back to &ldquo;Read temperature sensor&rdquo;.</li>\n    </ol>\n    <p data-narration-id=\"n31\"><strong>Fault identified:</strong> The flowchart turns the boiler OFF whenever temperature is 18 &deg;C or above, including at 19 &deg;C and 20 &deg;C. This means the boiler switches off before the room reaches 21 &deg;C, wasting energy. The specification requires the boiler to run until 21 &deg;C is reached.</p>\n    <p data-narration-id=\"n32\"><strong>Modification:</strong> When the YES branch turns the boiler ON, add a new decision diamond: &ldquo;Is temperature &ge; 21 &deg;C?&rdquo;. The NO exit loops back to &ldquo;Read temperature sensor&rdquo; (keeping the boiler on). The YES exit leads to &ldquo;Turn boiler OFF&rdquo; and then loops back to the first decision. This creates two separate thresholds, matching the specification.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n33\">The flowchart evaluation question (often the 8-mark QER) is one of the most accessible high-mark questions when you approach it systematically. Always trace the given flowchart line by line before writing anything &mdash; students who jump straight to &ldquo;describing what is wrong&rdquo; often describe something that the flowchart actually does correctly and miss the real fault. For modification questions, name the block type you are adding (decision, process, output), state where it goes in the flow, and give the exact label it should have (e.g. &ldquo;Is count = 3?&rdquo;). For the &ldquo;why use a microcontroller&rdquo; style question, always include reprogrammability &mdash; it is almost always credited &mdash; and try to link at least one other reason to the specific context given in the question (vehicle, appliance, etc.).</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n34\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n35\">Microcontrollers are used in vehicles (engine management, ABS, airbags, climate control) and domestic appliances (washing machines, dishwashers, central heating) because they are reprogrammable, compact, cost-effective at scale, and integrate multiple functions on one chip.</li>\n  <li data-narration-id=\"n36\">The four reasons for choosing a microcontroller over discrete circuits are: reprogrammability, lower cost at scale, smaller physical footprint, and integrated peripherals.</li>\n  <li data-narration-id=\"n37\">To evaluate a flowchart, trace it step by step against the specification; identify missing, misplaced or incorrectly labelled blocks; then describe the precise modification needed, naming the block type and its position in the flow.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is a reason why a microcontroller is used in a washing machine rather than a discrete logic circuit?\nA) A microcontroller runs at a higher voltage\nB) A microcontroller can be reprogrammed to change the wash cycle without rewiring\nC) A microcontroller generates its own AC mains supply\nD) A microcontroller does not need any input sensors",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) A microcontroller can be reprogrammed to change the wash cycle without rewiring [1 mark]"
+    },
+    {
+      "text": "State two domestic appliances that use a microcontroller and, for each one, name one sensor that provides an input to the microcontroller.",
+      "type": "2 marks — State / Define",
+      "marks": "One mark per appliance with a correct sensor: e.g. washing machine (water-level pressure sensor / temperature sensor) [1 mark]; central heating system (temperature sensor / thermostat) [1 mark]. Accept dishwasher (temperature sensor / turbidity sensor). Other sensible pairings credited."
+    },
+    {
+      "text": "A designer programs a microcontroller to control a car park barrier. The specification states:\n• The barrier arm rises when a valid ticket is detected.\n• The arm stays up for 8 seconds.\n• The arm then lowers and the system returns to its waiting state.\nA student's flowchart is given. It reads: START → 'Is ticket valid?' YES → 'Raise arm' → loop back to 'Is ticket valid?'. NO → loop back to 'Is ticket valid?'.\nIdentify two faults in the student's flowchart and describe the modification needed to correct each fault.",
+      "type": "6 marks — Analyse Circuit with Calculation",
+      "marks": "Fault 1: There is no time delay after raising the arm [1 mark]; add a process block 'Wait 8000 ms' after the 'Raise arm' output block [1 mark].\nFault 2: There is no block to lower the arm [1 mark]; add an output block 'Lower arm' after the delay block, before the arrow loops back to the 'Is ticket valid?' decision [1 mark].\nFull loop structure: the final arrow should return to 'Is ticket valid?' (not to 'Raise arm') [1 mark]; clear description of where each block is inserted and how the flow connects [1 mark]."
+    },
+    {
+      "text": "Give four reasons why engineers use a microcontroller rather than an equivalent circuit built from discrete logic gates and timers.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "One mark each for any four of: reprogrammability (behaviour changed by software update without hardware change) [1]; lower cost at scale (one chip cheaper than many discrete ICs when mass-produced) [1]; smaller physical size / footprint (one chip replaces a circuit board of components) [1]; integrated peripherals (ADC, timers, communication interfaces on one chip, fewer external components) [1]; ability to store and retrieve fault codes / data [1]. Maximum 4 marks."
+    },
+    {
+      "text": "Describe how the ABS braking system in a car uses a microcontroller to prevent wheel lock-up during heavy braking.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Wheel-speed sensors on each wheel send digital signals to the microcontroller [1 mark]; the microcontroller continuously compares wheel speeds during braking [1 mark]; if one wheel decelerates much faster than the others, indicating lock-up, the microcontroller pulses the brake hydraulics at that wheel [1 mark]; this releases and re-applies braking approximately 15 times per second to maintain rotation and steering control [1 mark]."
+    },
+    {
+      "text": "A microcontroller is used to control a greenhouse irrigation system. The specification states that a water pump should run for 30 seconds whenever the soil moisture sensor detects that the soil is dry (sensor output = LOW). After running, the pump must stay off for at least 60 seconds before the soil is checked again. Evaluate a candidate flowchart that correctly reads the sensor and turns the pump on, but immediately loops back to check the sensor again after switching the pump off. Identify the faults, justify why they fail the specification, and describe fully the modifications required.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Identifies two distinct faults: (1) missing 30-second run-time delay (pump switches off immediately, soil not watered adequately); (2) missing 60-second off-time delay (sensor re-checked instantly, failing the minimum off-time requirement). Justifies each fault by linking back to the exact specification clause. Describes precise modifications: add a process block 'Wait 30 000 ms' after the 'Turn pump ON' output block; add a process block 'Wait 60 000 ms' after the 'Turn pump OFF' output block before the arrow returns to the sensor-check decision. Flowchart loop structure correctly described. Notes that without these changes the pump could cycle on and off continuously, waterlogging the soil.\nSecure: Identifies both faults and describes the modifications needed, though the position of one modification block may be imprecisely stated. Links faults to specification.\nDeveloping: Identifies one fault with a correct modification; the second fault is missed or only vaguely described.\nEmerging: Recognises something is wrong with timing but cannot locate the fault precisely or describe the modification."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which vehicle system uses wheel-speed sensors and a microcontroller to pulse brake hydraulics up to 15 times per second?",
+      "options": [
+        "Engine management",
+        "Climate control",
+        "ABS braking",
+        "Airbag deployment"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which step comes first when evaluating a flowchart against a design specification?",
+      "options": [
+        "Describe the modifications needed",
+        "Count the number of decision blocks",
+        "Trace through the flowchart step by step for a set of inputs",
+        "Rewrite the flowchart from scratch"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "One reason engineers use microcontrollers rather than discrete circuits is that behaviour can be changed by a software update without any _____.",
+      "options": [
+        "sensors",
+        "rewiring",
+        "power supply",
+        "programming"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "In a central heating system, the microcontroller compares the room temperature from a sensor to a stored _____ and turns the boiler on or off accordingly.",
+      "options": [
+        "clock signal",
+        "analogue output",
+        "set-point temperature",
+        "motor speed"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each vehicle system to the microcontroller's key action:",
+      "left": [
+        "Engine management",
+        "Airbag deployment",
+        "ABS braking"
+      ],
+      "right": [
+        "Adjusts fuel injection and ignition timing thousands of times per second",
+        "Fires inflator if deceleration pattern matches a collision within milliseconds",
+        "Pulses brake hydraulics at a locked wheel to restore rotation"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "Name four vehicle systems that use a microcontroller.",
+      "a": "Engine management, ABS braking, airbag deployment, climate control."
+    },
+    {
+      "q": "What does the microcontroller do in an engine management system?",
+      "a": "Adjusts fuel injection timing, ignition advance and idle speed using sensor data."
+    },
+    {
+      "q": "How quickly must an airbag deploy from impact to full inflation?",
+      "a": "Around 30 milliseconds."
+    },
+    {
+      "q": "What sensor does an ABS system use to detect a locked wheel?",
+      "a": "A wheel-speed sensor on each wheel."
+    },
+    {
+      "q": "Name two domestic appliances controlled by a microcontroller.",
+      "a": "Washing machine and central heating system (also: dishwasher)."
+    },
+    {
+      "q": "What allows a washing machine to offer different wash programs without hardware changes?",
+      "a": "Each program is a different stored sequence in the microcontroller's memory."
+    },
+    {
+      "q": "What is reprogrammability as a reason to choose a microcontroller?",
+      "a": "Behaviour can be changed by updating software, without rewiring or replacing hardware."
+    },
+    {
+      "q": "Why is a microcontroller cheaper than discrete logic circuits when produced at scale?",
+      "a": "One chip costs less than an equivalent set of many discrete ICs, timers and counters."
+    },
+    {
+      "q": "What is flowchart evaluation?",
+      "a": "Comparing a flowchart program step-by-step against a specification to find differences or omissions."
+    },
+    {
+      "q": "What is the first step in evaluating a flowchart against a specification?",
+      "a": "Trace through the flowchart step by step for a given set of input conditions."
+    },
+    {
+      "q": "In a flowchart modification answer, what three things must you state?",
+      "a": "The block type to add, what label it carries, and where it is inserted in the flow."
+    },
+    {
+      "q": "Why does a microcontroller-based design typically need fewer external components than a discrete-logic design?",
+      "a": "Many peripherals (ADCs, timers, serial interfaces) are integrated on the chip itself."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "microcontroller",
+      "definition": "A programmable integrated circuit containing a processor, memory and I/O ports, used to control electronic systems according to a stored program."
+    },
+    {
+      "term": "flowchart evaluation",
+      "definition": "The process of comparing a flowchart program's behaviour step-by-step against a written design specification to identify any differences or omissions."
+    },
+    {
+      "term": "reprogrammability",
+      "definition": "The ability to change a microcontroller system's behaviour by updating its software without any hardware modifications or rewiring."
+    }
+  ],
+  "hero_keywords": [
+    "car engine management electronics",
+    "washing machine circuit board control",
+    "industrial microcontroller automation"
+  ],
+  "hero_image_caption": "Microcontroller systems manage everything from car engines to domestic washing machines."
+}

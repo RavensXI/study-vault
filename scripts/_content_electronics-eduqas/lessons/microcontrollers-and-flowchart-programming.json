@@ -1,0 +1,177 @@
+{
+  "_lesson_id": "71799ed1-228e-4da1-9a4c-78f045d56bd6",
+  "_lesson_number": 9,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "microcontrollers-and-flowchart-programming",
+  "description": "What a microcontroller is, how it connects to sensors and outputs, and how flowcharts program its behaviour.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is a Microcontroller?</h2>\n<p data-narration-id=\"n2\">A <dfn class=\"term\" data-def=\"A single programmable integrated circuit containing a processor, memory and input/output connections, used to control electronic systems according to a stored program.\">microcontroller</dfn> is a complete computer on a single chip. Unlike a general-purpose processor, it is designed to control a specific electronic system &mdash; reading sensor inputs, making decisions, and driving output devices, all according to a program stored in its internal memory. The PIC (Peripheral Interface Controller) family of microcontrollers is widely used in GCSE Electronics practical work, though the principles apply across any programmable device.</p>\n<p data-narration-id=\"n3\">Microcontrollers sit in the <strong>processing</strong> stage of an electronic system. They replace whole collections of discrete logic gates, timers and counters with a single chip that can be reprogrammed whenever the specification changes. This flexibility is one of the main reasons microcontrollers have displaced dedicated circuits in most consumer and industrial products.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Without looking, state three things a microcontroller contains on a single chip and explain why it replaced discrete circuits.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A microcontroller is a <strong>programmable integrated circuit</strong> containing a processor, memory and input/output ports on a single chip. It replaces multiple discrete components and can be reprogrammed to change the system&rsquo;s behaviour without rewiring.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Inputs and Outputs of a Microcontroller System</h2>\n<p data-narration-id=\"n6\">A microcontroller&rsquo;s pins are configured as either inputs or outputs under program control:</p>\n<ul>\n  <li data-narration-id=\"n7\"><strong>Input pins</strong> read digital signals from sensors. Because microcontroller inputs are digital, analogue sensor voltages must be converted first &mdash; usually via a <dfn class=\"term\" data-def=\"A circuit placed between an analogue sensor and a microcontroller input that converts a continuously-varying voltage into a clean HIGH or LOW digital signal.\">sensor interface</dfn> such as a Schmitt trigger (covered in the previous lesson) or a comparator circuit, or by using the microcontroller&rsquo;s own analogue-to-digital converter (ADC) pin if it has one.</li>\n  <li data-narration-id=\"n8\"><strong>Output pins</strong> drive loads. A microcontroller output pin can typically only supply a few milliamps &mdash; enough to light an LED directly, but not enough to drive a motor or relay. For higher-current loads, the output pin switches a transistor or MOSFET, which then drives the load. This is called an output driver stage.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Interfacing Sensors and Outputs: Signal Flow</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n9\">A typical microcontroller system follows this signal path:</p>\n    <p data-narration-id=\"n10\"><strong>Sensor &rarr; Interface circuit &rarr; Microcontroller input pin &rarr; Program &rarr; Output pin &rarr; Driver &rarr; Output device</strong></p>\n    <p data-narration-id=\"n11\">For example, a light-sensor circuit might have: LDR in a voltage divider &rarr; Schmitt inverter (produces clean HIGH/LOW) &rarr; microcontroller input pin. The program reads that pin, and if it is HIGH (dark detected), it sets an output pin HIGH &rarr; MOSFET gate &rarr; motor or lamp. Without the Schmitt inverter, a slowly-rising LDR voltage could put the input pin at an ambiguous logic level, causing unpredictable program behaviour.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">Programming with Flowcharts</h2>\n<p data-narration-id=\"n13\">Microcontrollers are programmed using a <dfn class=\"term\" data-def=\"A diagram using standardised shapes to represent the sequence of steps and decisions in a program, used to design and communicate the logic of a microcontroller program.\">flowchart</dfn> that describes, step by step, what the program does. Flowchart software (such as the Genie environment used with PIC microcontrollers) translates these diagrams directly into the machine code that the chip executes. Each shape in the flowchart has a specific meaning:</p>\n\n<table style=\"width:100%;border-collapse:collapse;font-size:0.9em\" data-narration-id=\"n14\">\n  <thead>\n    <tr style=\"background:#f0e8da\">\n      <th style=\"padding:8px;border:1px solid #ccc\">Symbol shape</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">Block type</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">What it represents</th>\n      <th style=\"padding:8px;border:1px solid #ccc\">Example</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td style=\"padding:8px;border:1px solid #ccc\">Rounded rectangle (oval)</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Terminator</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Start or End of the program</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;START&rdquo; / &ldquo;END&rdquo;</td>\n    </tr>\n    <tr style=\"background:#faf8f5\">\n      <td style=\"padding:8px;border:1px solid #ccc\">Parallelogram</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Input / Output</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Read an input pin or set an output pin</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;Read switch A&rdquo; / &ldquo;Turn LED on&rdquo;</td>\n    </tr>\n    <tr>\n      <td style=\"padding:8px;border:1px solid #ccc\">Rectangle</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Process</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Perform a calculation, count, time delay or arithmetic operation</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;Add 1 to count&rdquo; / &ldquo;Wait 500 ms&rdquo;</td>\n    </tr>\n    <tr style=\"background:#faf8f5\">\n      <td style=\"padding:8px;border:1px solid #ccc\">Diamond</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Decision</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">Test a condition; two exits labelled YES and NO (or TRUE/FALSE)</td>\n      <td style=\"padding:8px;border:1px solid #ccc\">&ldquo;Is switch pressed?&rdquo;</td>\n    </tr>\n  </tbody>\n</table>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Cover the table and draw the four flowchart symbols from memory, labelling each with its block type name.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Every flowchart uses exactly four standard block types: <strong>terminator</strong> (rounded rectangle &mdash; Start/End), <strong>input/output</strong> (parallelogram &mdash; read or set a pin), <strong>process</strong> (rectangle &mdash; calculate, count or wait), and <strong>decision</strong> (diamond &mdash; yes/no branch). Every flowchart must start and end with a terminator.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Key Flowchart Operations</h2>\n<p data-narration-id=\"n17\">Flowchart programs can implement six fundamental operations:</p>\n<ul>\n  <li data-narration-id=\"n18\"><strong>Input/Output</strong> &mdash; reading a sensor pin HIGH or LOW; setting an output pin to turn a device on or off.</li>\n  <li data-narration-id=\"n19\"><strong>Counting</strong> &mdash; a process block increments or decrements a variable each time the program passes through it; a decision block tests whether the count has reached a target value.</li>\n  <li data-narration-id=\"n20\"><strong>Branching</strong> &mdash; a decision diamond splits the flow into two paths depending on whether a condition is true or false; the two paths rejoin further down the flowchart or lead to different actions.</li>\n  <li data-narration-id=\"n21\"><strong>Testing a condition</strong> &mdash; asking &ldquo;Is the input HIGH?&rdquo; or &ldquo;Has the count reached 10?&rdquo; with YES/NO exits.</li>\n  <li data-narration-id=\"n22\"><strong>Time delay</strong> &mdash; a process block that pauses the program for a set number of milliseconds before moving to the next step; used to control flashing rates, wait for a motor to reach speed, or debounce inputs in software.</li>\n  <li data-narration-id=\"n23\"><strong>Loop</strong> &mdash; an arrow that leads back to an earlier point in the flowchart, causing the program to repeat. A loop back to &ldquo;START&rdquo; creates a program that runs forever; a conditional loop keeps repeating until a decision condition becomes true.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Designing a Pedestrian Crossing Flowchart</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\">Specification: when a push-button is pressed, a green LED turns off, a red LED turns on, and after a 5-second delay the green LED turns back on. Repeat forever.</p>\n    <p data-narration-id=\"n25\">Flowchart sequence:</p>\n    <ol>\n      <li data-narration-id=\"n26\"><strong>START</strong> (terminator)</li>\n      <li data-narration-id=\"n27\"><strong>Turn GREEN LED on</strong> (output block)</li>\n      <li data-narration-id=\"n28\"><strong>Is button pressed?</strong> (decision block) &mdash; NO loops back to the decision; YES continues.</li>\n      <li data-narration-id=\"n29\"><strong>Turn GREEN LED off / Turn RED LED on</strong> (output block)</li>\n      <li data-narration-id=\"n30\"><strong>Wait 5000 ms</strong> (process block)</li>\n      <li data-narration-id=\"n31\"><strong>Turn RED LED off</strong> (output block) &mdash; arrow loops back to step 2 (Turn GREEN LED on).</li>\n    </ol>\n    <p data-narration-id=\"n32\">This flowchart uses all four block types and demonstrates branching, time delay and a repeating loop. In the exam, read the specification carefully before drawing &mdash; every condition in the spec should map to a decision diamond and every action to an input/output or process block.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n33\">Subroutines</h2>\n<p data-narration-id=\"n34\">A <dfn class=\"term\" data-def=\"A named section of a flowchart program that can be called from multiple places in the main program, avoiding repetition of the same steps.\">subroutine</dfn> is a self-contained block of steps that can be called from several different points in the main flowchart. Instead of repeating the same sequence of blocks every time an action is needed (for example, &ldquo;flash the LED three times&rdquo;), the designer draws the sequence once as a subroutine and then calls it with a single block wherever it is needed. Subroutines make flowcharts shorter, easier to read, and simpler to modify. In the exam, if a description says &ldquo;the alarm sounds for 1 second&rdquo; and this happens in more than one place in the program, a subroutine is the cleaner solution.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n35\">The flowchart question appears on the exam every year and is one of the highest-scoring question types when students prepare for it. Three rules to follow: (1) always start and end with a terminator &mdash; forgetting the START or END oval costs marks immediately; (2) every decision diamond must have exactly two labelled exits (YES and NO); (3) read the specification carefully before drawing &mdash; every condition in the description becomes a decision diamond, every action becomes an input/output block. If the question asks you to modify an existing flowchart, identify which block type needs changing before you write &mdash; adding a counter means adding a process block (add 1) and a decision block (has count reached N?).</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n36\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n37\">A microcontroller is a programmable integrated circuit (processor + memory + I/O on one chip) that sits in the processing stage of a system and replaces multiple discrete components.</li>\n  <li data-narration-id=\"n38\">Flowcharts use four standard blocks: terminator (start/end), input/output (parallelogram), process (rectangle) and decision (diamond with YES/NO exits).</li>\n  <li data-narration-id=\"n39\">Key flowchart operations are: input/output, counting, branching, testing conditions, time delay, loops and subroutines &mdash; each maps directly to one or more of the four block types.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which flowchart block shape is used to represent a decision?\nA) Rectangle\nB) Parallelogram\nC) Rounded rectangle (oval)\nD) Diamond",
+      "type": "1 mark — Multiple Choice",
+      "marks": "D) Diamond [1 mark]"
+    },
+    {
+      "text": "State what is meant by a 'subroutine' in a flowchart program.",
+      "type": "2 marks — State / Define",
+      "marks": "A subroutine is a named, self-contained block of steps [1 mark] that can be called from multiple points in the main program to avoid repeating the same sequence [1 mark]."
+    },
+    {
+      "text": "A microcontroller system controls a greenhouse fan. The fan must turn on when a temperature sensor input goes HIGH. After 10 seconds the fan turns off and the program checks the sensor again.\nDraw a flowchart for this program. Use correct block types and label all exits from decision blocks.",
+      "type": "5 marks — Design a Sub-System",
+      "marks": "START terminator present [1 mark]; decision block 'Is temperature HIGH?' with YES/NO exits correctly labelled [1 mark]; output block turning fan ON on the YES path [1 mark]; process block 'Wait 10 000 ms' following the fan-on block [1 mark]; output block turning fan OFF, with arrow looping back to the decision block [1 mark]."
+    },
+    {
+      "text": "Explain why an analogue sensor cannot be connected directly to a microcontroller input pin without an interface circuit.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "A microcontroller input pin expects a clear digital HIGH or LOW [1 mark]; an analogue sensor produces a continuously varying voltage [1 mark]; without an interface, the slowly-changing voltage may fall between valid logic levels, causing undefined input behaviour [1 mark]; an interface such as a Schmitt trigger converts the analogue signal to a clean digital level before the microcontroller reads it [1 mark]."
+    },
+    {
+      "text": "A flowchart program for a vending machine must count how many coins have been inserted. When the count reaches 3, the machine dispenses an item and resets the count to zero.\nDescribe, in order, which flowchart block types you would use to implement the counting and dispensing stages of this program. State what each block does.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Input/output block to read each coin sensor input [1 mark]; process block to increment the counter variable by 1 each time a coin is detected [1 mark]; decision block 'Is count = 3?' with YES/NO exits [1 mark]; output block (on YES path) to dispense item and a process block to reset count to 0, with arrow returning to start [1 mark]."
+    },
+    {
+      "text": "Evaluate the use of a microcontroller to replace a circuit built from discrete logic gates in an automatic door-opening system. In your answer, discuss the advantages and any disadvantages of using a microcontroller.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Discusses reprogrammability (no rewiring to change behaviour), smaller physical footprint, lower cost when produced at scale, ability to implement complex sequences (timing, counting, decision logic) that would need many discrete ICs; acknowledges disadvantages such as need for programming skill and software tools, potential single point of failure, and that very simple circuits may be over-engineered by a microcontroller; reaches a justified conclusion referencing the specific context of automatic doors (multiple sensors, timing requirements favour microcontroller).\nSecure: Identifies at least three advantages (reprogrammability, compactness, replaces many ICs) and one disadvantage, with a clear conclusion.\nDeveloping: States two advantages with limited development; disadvantages or conclusion may be missing.\nEmerging: Names the microcontroller as better with one relevant point but little or no justification."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which block type in a flowchart is used to represent 'Wait 500 ms'?",
+      "options": [
+        "Terminator",
+        "Decision",
+        "Input/output",
+        "Process"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "mcq",
+      "q": "Why does a microcontroller output pin typically need a transistor or MOSFET driver to operate a motor?",
+      "options": [
+        "The output pin voltage is too low for digital logic",
+        "The output pin can only supply a few milliamps, which is insufficient for a motor",
+        "Motors require an AC supply",
+        "The microcontroller cannot generate a PWM signal"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Every flowchart must start and end with a _____ block, drawn as a rounded rectangle.",
+      "options": [
+        "decision",
+        "process",
+        "terminator",
+        "input/output"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A _____ is a self-contained section of a flowchart that can be called from multiple places in the main program to avoid repeating steps.",
+      "options": [
+        "loop",
+        "decision block",
+        "subroutine",
+        "process block"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each flowchart block type to its shape:",
+      "left": [
+        "Terminator",
+        "Decision",
+        "Input / Output"
+      ],
+      "right": [
+        "Rounded rectangle (oval)",
+        "Diamond",
+        "Parallelogram"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What three things does a microcontroller contain on a single chip?",
+      "a": "A processor, memory, and input/output ports."
+    },
+    {
+      "q": "A microcontroller sits in which stage of an electronic system?",
+      "a": "The processing stage."
+    },
+    {
+      "q": "What flowchart shape represents a START or END?",
+      "a": "A rounded rectangle (oval) — the terminator block."
+    },
+    {
+      "q": "What flowchart shape represents a decision?",
+      "a": "A diamond, with YES and NO exits."
+    },
+    {
+      "q": "What flowchart shape represents reading a sensor or setting an output?",
+      "a": "A parallelogram — the input/output block."
+    },
+    {
+      "q": "What flowchart shape represents a calculation, count or time delay?",
+      "a": "A rectangle — the process block."
+    },
+    {
+      "q": "What is a subroutine in a flowchart program?",
+      "a": "A named block of steps that can be called from multiple places in the main program."
+    },
+    {
+      "q": "Why can't an analogue sensor be connected directly to a microcontroller input without an interface?",
+      "a": "The slowly-changing analogue voltage may fall between valid digital logic levels."
+    },
+    {
+      "q": "What interface circuit converts a slow analogue sensor signal to a clean digital input for a microcontroller?",
+      "a": "A Schmitt trigger (or comparator)."
+    },
+    {
+      "q": "Why does a microcontroller output pin need a MOSFET driver to operate a motor?",
+      "a": "The output pin can only supply a few milliamps; a motor needs much more current."
+    },
+    {
+      "q": "What flowchart operation pauses the program for a set time before moving to the next step?",
+      "a": "A time delay, placed in a process (rectangle) block."
+    },
+    {
+      "q": "In a flowchart, what creates a program that repeats forever?",
+      "a": "An arrow looping back to the START or to an earlier step in the program."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "microcontroller",
+      "definition": "A single programmable integrated circuit containing a processor, memory and input/output connections, used to control electronic systems according to a stored program."
+    },
+    {
+      "term": "sensor interface",
+      "definition": "A circuit placed between an analogue sensor and a microcontroller input that converts a continuously-varying voltage into a clean HIGH or LOW digital signal."
+    },
+    {
+      "term": "flowchart",
+      "definition": "A diagram using standardised shapes to represent the sequence of steps and decisions in a program, used to design and communicate the logic of a microcontroller program."
+    },
+    {
+      "term": "subroutine",
+      "definition": "A named section of a flowchart program that can be called from multiple places in the main program, avoiding repetition of the same steps."
+    }
+  ],
+  "hero_keywords": [
+    "microcontroller circuit board programming",
+    "electronics chip integrated circuit",
+    "embedded systems PCB"
+  ],
+  "hero_image_caption": "A microcontroller chip on a circuit board, ready to be programmed and connected to sensors."
+}

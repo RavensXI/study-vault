@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "7cba0c7c-40ee-4493-ab15-a83f52533803",
+  "_lesson_number": 5,
+  "_unit_slug": "discovering-electronics",
+  "_lesson_slug": "sensing-circuits-and-voltage-dividers",
+  "description": "Build voltage-divider sensing circuits using LDRs, thermistors and other input transducers.",
+  "content_html": "<h2 data-narration-id=\"n1\">From Sensor to Signal</h2>\n<p data-narration-id=\"n2\">A sensor on its own produces a change in resistance, not a change in voltage. To turn a varying resistance into a varying voltage that a comparator or logic gate can read, you use a <dfn class=\"term\" data-def=\"A circuit of two resistors in series across a supply, where the output voltage is taken from the junction between them. The output depends on the ratio of the two resistances.\">voltage divider</dfn>. This is the most common input circuit in electronics and it appears on virtually every exam paper.</p>\n\n<h2 data-narration-id=\"n3\">How a Voltage Divider Works</h2>\n<p data-narration-id=\"n4\">Two resistors, R1 and R2, are placed in series across a supply voltage \\(V_{in}\\). The output voltage \\(V_{out}\\) is taken from the junction between them and is given by:</p>\n<p data-narration-id=\"n5\">$$V_{out} = V_{in} \\times \\frac{R_2}{R_1 + R_2}$$</p>\n<p data-narration-id=\"n6\">If R2 is much larger than R1, most of the supply voltage appears across R2, so \\(V_{out}\\) is high. If R2 is much smaller than R1, most of the voltage is dropped across R1 and \\(V_{out}\\) is low. Replacing one of the resistors with a sensor (LDR, thermistor, etc.) makes \\(V_{out}\\) change with the physical quantity being sensed.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write the voltage divider equation. Then state: if R2 increases, does V_out increase or decrease? Answer it without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Voltage divider: \\(V_{out} = V_{in} \\times \\dfrac{R_2}{R_1 + R_2}\\). \\(V_{out}\\) is taken across R2. If R2 increases relative to R1, \\(V_{out}\\) increases. If R2 decreases, \\(V_{out}\\) decreases.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">LDR Sensing Circuit &mdash; Light Level Detection</h2>\n<p data-narration-id=\"n9\">A <dfn class=\"term\" data-def=\"A resistor whose resistance decreases as the light intensity falling on it increases. Used in light-sensing voltage dividers.\">light-dependent resistor (LDR)</dfn> has a high resistance in the dark (hundreds of kilohms) and a low resistance in bright light (hundreds of ohms). In a voltage divider with the LDR as R1 and a fixed resistor as R2:</p>\n<ul>\n  <li data-narration-id=\"n10\"><strong>In the dark:</strong> LDR (R1) is large &rArr; most voltage drops across R1 &rArr; \\(V_{out}\\) is LOW.</li>\n  <li data-narration-id=\"n11\"><strong>In bright light:</strong> LDR (R1) falls &rArr; less voltage drops across R1 &rArr; \\(V_{out}\\) rises towards \\(V_{in}\\).</li>\n</ul>\n<p data-narration-id=\"n12\">Swapping the positions of the LDR and the fixed resistor (putting the LDR as R2 instead of R1) reverses the behaviour: \\(V_{out}\\) is HIGH in the dark and LOW in the light. The examiner has penalised this error repeatedly &mdash; always identify which resistor is connected to 0 V to determine what happens to \\(V_{out}\\).</p>\n\n<h2 data-narration-id=\"n13\">NTC Thermistor Sensing Circuit &mdash; Temperature Detection</h2>\n<p data-narration-id=\"n14\">An <dfn class=\"term\" data-def=\"A negative temperature coefficient thermistor: a resistor whose resistance decreases as temperature increases. Used in temperature-sensing voltage dividers.\">NTC thermistor</dfn> works on the same principle. Its resistance falls as temperature rises. In a divider with the thermistor as R1:</p>\n<ul>\n  <li data-narration-id=\"n15\"><strong>Cold:</strong> thermistor resistance is high &rArr; large voltage drop across thermistor &rArr; \\(V_{out}\\) is LOW.</li>\n  <li data-narration-id=\"n16\"><strong>Hot:</strong> thermistor resistance falls &rArr; smaller voltage drop across thermistor &rArr; \\(V_{out}\\) rises.</li>\n</ul>\n<p data-narration-id=\"n17\">If the circuit needs to trigger when it gets cold (e.g. a frost alarm), place the thermistor as R2 so \\(V_{out}\\) rises as temperature falls. This &ldquo;orientation&rdquo; decision is the main skill tested on exam questions about sensing circuits.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n18\" data-revision-tip=\"Without looking: in a divider where the NTC thermistor is R1 (top, connected to supply) and a fixed resistor is R2 (bottom, connected to 0V), does V_out rise or fall when temperature increases? State why.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Sensor orientation determines output behaviour. Sensor as R1 (top): \\(V_{out}\\) rises when sensor resistance falls (e.g. hotter, brighter). Sensor as R2 (bottom): \\(V_{out}\\) falls when sensor resistance falls. Getting this wrong produces the opposite output to what is wanted.</p>\n</div>\n\n<h2 data-narration-id=\"n19\">Other Sensing Types</h2>\n<p data-narration-id=\"n20\">The same voltage-divider principle applies to all resistive sensors in the specification:</p>\n<ul>\n  <li data-narration-id=\"n21\"><strong>Pressure sensor (force-sensitive resistor):</strong> resistance decreases under applied force. Used in electronic door mats and scales.</li>\n  <li data-narration-id=\"n22\"><strong>Moisture sensor:</strong> two copper tracks on a PCB; resistance falls when water bridges the gap between them. Used in plant-watering monitors.</li>\n  <li data-narration-id=\"n23\"><strong>Sound sensor (electret microphone + amplifier):</strong> produces a small AC voltage proportional to sound level. The signal is amplified before being fed into a comparator.</li>\n  <li data-narration-id=\"n24\"><strong>Potentiometer (variable resistor):</strong> a manually-adjusted voltage divider. The wiper provides a continuously variable \\(V_{out}\\) between 0 V and \\(V_{in}\\).</li>\n</ul>\n\n<h2 data-narration-id=\"n25\">Pulse Generator as an Input Sub-System</h2>\n<p data-narration-id=\"n26\">A <dfn class=\"term\" data-def=\"An oscillator circuit that produces a continuous stream of regular pulses, used as a timing input signal for counters, timers and edge-triggered circuits.\">pulse generator</dfn> produces a regular square wave. It is used as a timing input &mdash; for example, providing the clock pulses that advance a counter. The output of the pulse generator feeds the clock input of a processing circuit; it is never placed in the sensor position of a voltage divider.</p>\n<p data-narration-id=\"n27\">Pull-up and pull-down resistors are used with switches and other two-state inputs to ensure the logic level is well-defined when the switch is open. A pull-up resistor (connected between the input pin and the positive supply) holds the logic level HIGH when the switch is open; the switch itself pulls it LOW when closed. A pull-down resistor does the reverse.</p>\n\n<h2 data-narration-id=\"n28\">Sizing the LED Current-Limiting Resistor</h2>\n<p data-narration-id=\"n29\">When an LED is included in a sensing circuit output, a series resistor limits the current to a safe value. The LED has a typical forward voltage (given in the exam data: approximately 2 V for a red LED, 3 V for blue or white). The resistor takes the remaining voltage:</p>\n<p data-narration-id=\"n30\">$$R = \\frac{V_{supply} - V_{LED}}{I_{LED}}$$</p>\n<p data-narration-id=\"n31\">For a 9 V supply, a 2 V red LED and a target current of 10 mA: \\(R = (9 - 2)/0.010 = 700 \\text{ }\\Omega\\). The nearest E24 value above 700 &Omega; is 750 &Omega; &mdash; always round up to keep current at or below the target.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Voltage Divider Output Calculation</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n32\"><strong>Problem:</strong> A 9 V supply, a 10 k&Omega; fixed resistor (R1, top) and an LDR (R2, bottom). In daylight, the LDR resistance is 1 k&Omega;. Calculate \\(V_{out}\\).</p>\n    <p data-narration-id=\"n33\">\\(V_{out} = V_{in} \\times \\frac{R_2}{R_1 + R_2} = 9 \\times \\frac{1000}{10000 + 1000} = 9 \\times \\frac{1000}{11000} = 9 \\times 0.0909 = 0.82 \\text{ V}\\)</p>\n    <p data-narration-id=\"n34\">This LOW output voltage would not trigger a HIGH logic level. If the circuit is supposed to activate in daylight, the positions of R1 and R2 should be swapped.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Error: Getting Sensor Orientation Wrong</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n35\">The most common mistake in sensing circuit questions is drawing the resistor and sensor in the wrong order. A question might ask for a circuit that triggers when it is warm. If you place the thermistor as R1 (top) and the fixed resistor as R2 (bottom), \\(V_{out}\\) rises when the thermistor gets hot &mdash; that&rsquo;s correct. If you accidentally swap them, \\(V_{out}\\) falls when it gets hot, which is the opposite of what is required.</p>\n    <p data-narration-id=\"n36\">Always write a one-line logic check before drawing: &ldquo;Hot &rArr; thermistor resistance falls &rArr; if thermistor is R1, \\(V_{out}\\) rises &rArr; correct for triggering on warmth.&rdquo; This takes five seconds and prevents the most penalised error in sensing circuit questions.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n37\">For sensing circuit questions, always start by identifying whether you want \\(V_{out}\\) to be HIGH or LOW in the trigger condition. Then decide whether the sensor should be R1 (top) or R2 (bottom). Write a brief logic trace before drawing anything. For LED resistor calculations, remember the forward voltage drop is given in the exam &mdash; you just need to subtract it from the supply before dividing by the current. Always round resistor values up to the nearest E24 value to ensure current does not exceed the LED&rsquo;s safe limit.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n38\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n39\">A voltage divider converts a varying resistance into a varying voltage: \\(V_{out} = V_{in} \\times R_2/(R_1 + R_2)\\). Sensor orientation (top vs bottom) determines whether \\(V_{out}\\) rises or falls when the physical quantity increases.</li>\n  <li data-narration-id=\"n40\">LDR resistance falls in bright light; NTC thermistor resistance falls when temperature rises. Place the sensor as R1 or R2 to get the output polarity your circuit needs.</li>\n  <li data-narration-id=\"n41\">LED current-limiting resistor: \\(R = (V_{supply} - V_{LED})/I_{LED}\\). The LED forward voltage is provided in the exam; always round R up to the nearest E24 value.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes how an NTC thermistor behaves when temperature increases?\nA) Its resistance increases\nB) Its resistance stays constant\nC) Its resistance decreases\nD) Its capacitance increases",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) Its resistance decreases [1 mark]"
+    },
+    {
+      "text": "A voltage divider consists of a 10 kΩ resistor (R1, connected to the 9 V supply) and an LDR (R2, connected to 0 V). The LDR resistance in darkness is 50 kΩ. Calculate V_out in darkness.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(V_{out} = V_{in} \\times R_2/(R_1 + R_2) = 9 \\times 50000/(10000 + 50000) = 9 \\times 50000/60000\\) [1 mark for correct equation and substitution]\n\\(= 9 \\times 0.833 = 7.5 \\text{ V}\\) [1 mark for correct answer with unit]"
+    },
+    {
+      "text": "A designer wants a circuit that produces a HIGH output when a room is warm (above a threshold temperature). They plan to use an NTC thermistor in a voltage divider with a fixed resistor.\n(a) State whether the thermistor should be connected as R1 (top, to supply) or R2 (bottom, to 0 V) to give a HIGH output when warm. Justify your answer.\n(b) Name the processing sub-system component that should follow this voltage divider.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "(a) Thermistor as R1 (top) [1 mark]. Justification: when temperature rises, thermistor resistance falls; with thermistor as R1, less voltage drops across it, so V_out (across R2) rises towards HIGH [1 mark].\n(b) Comparator (voltage comparator IC) [1 mark]. Credit: transistor or MOSFET as transducer driver after the comparator [1 mark]."
+    },
+    {
+      "text": "A red LED (forward voltage 2 V) is connected in series with a resistor to a 9 V supply. The target LED current is 15 mA. Calculate the required resistance value and state the nearest suitable E24 value.",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "Voltage across resistor = 9 - 2 = 7 V [1 mark]\n\\(R = V/I = 7/0.015 = 466.7 \\text{ }\\Omega\\) [1 mark for correct substitution; 1 mark for correct value]\nNearest E24 value above 466.7 Ω is 470 Ω [1 mark — must round up, not down, to keep current ≤ 15 mA]"
+    },
+    {
+      "text": "Explain what is meant by a pull-up resistor and state the logic level it produces when no switch is pressed.",
+      "type": "2 marks — State / Define",
+      "marks": "A pull-up resistor is connected between a logic input pin and the positive supply [1 mark]. When the switch is open (not pressed), it holds the input at a HIGH logic level [1 mark]."
+    },
+    {
+      "text": "A moisture sensor circuit uses a voltage divider: a fixed 47 kΩ resistor (R1, top) and moisture-sensing tracks (R2, bottom) connected to a 9 V supply. When the soil is dry, R2 = 200 kΩ. When wet, R2 = 5 kΩ. A comparator with its reference set at 4.5 V follows the divider. Determine the output state of the comparator in both conditions and evaluate whether this circuit design will correctly activate a watering pump when the soil is dry.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Correctly calculate V_out (dry) = 9 × 200000/(47000 + 200000) = 9 × 200000/247000 = 9 × 0.810 = 7.29 V (above reference → comparator output HIGH). Correctly calculate V_out (wet) = 9 × 5000/(47000 + 5000) = 9 × 5000/52000 = 9 × 0.0962 = 0.87 V (below reference → comparator output LOW). Identify that the design gives HIGH output when dry and LOW when wet, which is correct for activating a pump on dry soil (comparator HIGH → transistor driver → pump on). Evaluate whether any output drive issue exists: comparator output alone may not supply enough current to run a pump, so a transistor or MOSFET driver is needed between the comparator and the pump. Justified conclusion: the sensing logic is correct; the circuit needs a transducer driver to work in practice.\nSecure: Both V_out values correctly calculated and compared to reference; output state correctly determined for both conditions; pump logic correct; driver need identified.\nDeveloping: One V_out calculated correctly; output state partially correct; some circuit evaluation present.\nEmerging: Voltage divider equation attempted; output determination incomplete or incorrect."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In a voltage divider, V_out is measured across which component?",
+      "options": [
+        "R1 (the top resistor connected to the supply)",
+        "R2 (the bottom resistor connected to 0 V)",
+        "The supply voltage source",
+        "Both resistors in series"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "A voltage divider has a thermistor as R2 (bottom) and a fixed resistor as R1 (top). What happens to V_out when temperature rises?",
+      "options": [
+        "V_out rises because thermistor resistance falls",
+        "V_out falls because thermistor resistance falls",
+        "V_out stays the same",
+        "V_out rises because thermistor resistance rises"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "The voltage divider formula is V_out = V_in × _____ / (R1 + R2), where V_out is taken across the bottom resistor.",
+      "options": [
+        "R1",
+        "V_in",
+        "R2",
+        "R1 + R2"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The equation for sizing an LED series resistor is R = (V_supply − V_LED) / _____.",
+      "options": [
+        "V_supply",
+        "I_LED",
+        "R_LED",
+        "P_LED"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each sensor to the physical quantity it detects:",
+      "left": [
+        "LDR",
+        "NTC thermistor",
+        "Moisture sensor tracks"
+      ],
+      "right": [
+        "Light intensity",
+        "Temperature",
+        "Presence of water"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "Write the voltage divider output equation (V_out across R2).",
+      "a": "V_out = V_in × R2 / (R1 + R2)."
+    },
+    {
+      "q": "What happens to an LDR's resistance when light intensity increases?",
+      "a": "It decreases (falls towards hundreds of ohms)."
+    },
+    {
+      "q": "What happens to an NTC thermistor's resistance when temperature increases?",
+      "a": "It decreases."
+    },
+    {
+      "q": "In a voltage divider with sensor as R1 (top), does V_out rise or fall when the sensor resistance decreases?",
+      "a": "V_out rises (less voltage drops across the smaller R1)."
+    },
+    {
+      "q": "In a voltage divider with sensor as R2 (bottom), does V_out rise or fall when the sensor resistance decreases?",
+      "a": "V_out falls (less voltage drops across the smaller R2)."
+    },
+    {
+      "q": "Write the equation for the LED current-limiting resistor.",
+      "a": "R = (V_supply − V_LED) / I_LED."
+    },
+    {
+      "q": "What typical forward voltage does a red LED have?",
+      "a": "Approximately 2 V."
+    },
+    {
+      "q": "What does a pull-up resistor do to a logic input when no switch is pressed?",
+      "a": "It holds the input at logic HIGH."
+    },
+    {
+      "q": "What type of waveform does a pulse generator produce?",
+      "a": "A regular square wave (clock pulses)."
+    },
+    {
+      "q": "Why must a resistor value for an LED always be rounded up (not down) to the nearest E24 value?",
+      "a": "Rounding down reduces resistance, increasing current above the safe limit for the LED."
+    },
+    {
+      "q": "Name the physical quantity detected by a moisture sensor made of two copper tracks.",
+      "a": "Presence of water (moisture/liquid bridging the tracks)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "voltage divider",
+      "definition": "A circuit of two resistors in series across a supply, where the output voltage is taken from the junction between them. The output depends on the ratio of the two resistances."
+    },
+    {
+      "term": "light-dependent resistor (LDR)",
+      "definition": "A resistor whose resistance decreases as the light intensity falling on it increases. Used in light-sensing voltage dividers."
+    },
+    {
+      "term": "NTC thermistor",
+      "definition": "A negative temperature coefficient thermistor: a resistor whose resistance decreases as temperature increases. Used in temperature-sensing voltage dividers."
+    },
+    {
+      "term": "pulse generator",
+      "definition": "An oscillator circuit that produces a continuous stream of regular pulses, used as a timing input signal for counters, timers and edge-triggered circuits."
+    }
+  ],
+  "hero_keywords": [
+    "LDR thermistor electronic sensor circuit",
+    "electronics sensor breadboard",
+    "electronic components temperature light sensor"
+  ],
+  "hero_image_caption": "Sensor components including LDR and thermistor used in voltage divider circuits"
+}

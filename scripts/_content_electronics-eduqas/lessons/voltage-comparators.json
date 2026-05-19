@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "47389eec-8abc-4500-92da-a1a93e7bcc42",
+  "_lesson_number": 7,
+  "_unit_slug": "discovering-electronics",
+  "_lesson_slug": "voltage-comparators",
+  "description": "How comparator ICs convert a continuous sensor voltage into a clean high or low digital output.",
+  "content_html": "<h2 data-narration-id=\"n1\">Bridging the Analogue and Digital Worlds</h2>\n<p data-narration-id=\"n2\">A sensor voltage divider produces a smoothly varying output &mdash; a continuous analogue signal that could sit at any value between 0 V and the supply. But a logic gate or microcontroller needs a clean binary signal: decisively HIGH or decisively LOW. A <dfn class=\"term\" data-def=\"An integrated circuit that compares two input voltages and outputs a digital HIGH or LOW depending on which input is larger.\">voltage comparator</dfn> is the bridge between these two worlds. It performs one simple operation: it compares two voltages and tells you which is bigger.</p>\n\n<h2 data-narration-id=\"n3\">How a Comparator Works</h2>\n<p data-narration-id=\"n4\">A comparator IC has two inputs and one output:</p>\n<ul>\n  <li data-narration-id=\"n5\"><strong>Non-inverting input (+):</strong> receives the sensor signal (the varying voltage from the transducer voltage divider).</li>\n  <li data-narration-id=\"n6\"><strong><dfn class=\"term\" data-def=\"The negative input of a comparator or op-amp, marked with a minus sign. In a comparator, this input typically receives the reference voltage.\">Inverting input (&minus;)</dfn>:</strong> receives the reference voltage &mdash; a fixed voltage set by a potential divider or potentiometer, representing the threshold at which the output should switch.</li>\n  <li data-narration-id=\"n7\"><strong>Output:</strong> switches to HIGH (close to the positive supply) when the non-inverting input is greater than the reference; switches to LOW (close to 0 V) when the non-inverting input is less than the reference.</li>\n</ul>\n<p data-narration-id=\"n8\">The rule is easy to remember: <strong>+&nbsp;>&nbsp;&minus; &rArr; output HIGH; +&nbsp;&lt;&nbsp;&minus; &rArr; output LOW</strong>. The output does not sit at an in-between voltage &mdash; because the comparator has an extremely high <dfn class=\"term\" data-def=\"The gain of an op-amp or comparator with no feedback, typically 100,000 or more. Even the tiniest difference between the inputs is amplified to drive the output to its supply rail.\">open-loop gain</dfn>, the tiniest difference between the inputs is amplified to drive the output rail-to-rail.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n9\" data-revision-tip=\"Cover this and write the two comparator output rules: what happens to the output when (+) &gt; (−), and what happens when (+) &lt; (−)?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Comparator output rule: if V(+) &gt; V(&minus;) then output = HIGH. If V(+) &lt; V(&minus;) then output = LOW. The output switches sharply because the open-loop gain is very large &mdash; it never sits midway.</p>\n</div>\n\n<h2 data-narration-id=\"n10\">The Inverting Input Gets the Reference &mdash; and Why</h2>\n<p data-narration-id=\"n11\">The convention for this specification is: the <strong>inverting (&minus;) input gets the reference voltage</strong> and the <strong>non-inverting (+) input gets the sensor signal</strong>. This means:</p>\n<ul>\n  <li data-narration-id=\"n12\">When the sensor signal exceeds the reference, the output goes HIGH. If the sensor is an LDR divider whose output rises in bright light, the output goes HIGH in bright light &mdash; which is what a light-activated relay circuit needs.</li>\n  <li data-narration-id=\"n13\">When the sensor signal drops below the reference, the output goes LOW. This LOW state can be used to signal an alarm condition or turn off a load.</li>\n</ul>\n<p data-narration-id=\"n14\">Swapping the inputs produces an inverted comparator that does the opposite. Be explicit about which input receives which signal in every circuit drawing and answer.</p>\n\n<h2 data-narration-id=\"n15\">Setting the Reference Voltage</h2>\n<p data-narration-id=\"n16\">The reference voltage is set by a second voltage divider (often a fixed resistor and a variable resistor or potentiometer) connected between the supply and 0 V. Adjusting the potentiometer changes the threshold &mdash; the point at which the comparator switches. For example, with a 9 V supply and a potentiometer set to give 4.5 V at the inverting input, the comparator switches its output when the sensor voltage crosses 4.5 V.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Comparator Output State from Given Inputs</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n17\"><strong>Circuit:</strong> 9 V supply. LDR voltage divider feeds the non-inverting (+) input. A potentiometer sets the inverting (&minus;) input to 4.5 V.</p>\n    <p data-narration-id=\"n18\"><strong>In bright light,</strong> the LDR resistance is low; \\(V(+) = 2 \\text{ V}\\). Since 2 V &lt; 4.5 V, the output is LOW.</p>\n    <p data-narration-id=\"n19\"><strong>In darkness,</strong> the LDR resistance is high; \\(V(+) = 7 \\text{ V}\\). Since 7 V &gt; 4.5 V, the output is HIGH.</p>\n    <p data-narration-id=\"n20\">This HIGH output could drive a transistor or MOSFET to switch on a street lamp. The sensor, comparator and transistor driver form the complete input &rarr; processing &rarr; output chain of the system.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n21\" data-revision-tip=\"Close this. Draw a comparator symbol from memory, label the two inputs and the output, and write which input gets the sensor signal in this specification's convention.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Convention: sensor signal &rarr; non-inverting input (+); reference voltage &rarr; inverting input (&minus;). Output HIGH when sensor exceeds reference; output LOW when sensor is below reference.</p>\n</div>\n\n<h2 data-narration-id=\"n22\">Output Drive Limitations</h2>\n<p data-narration-id=\"n23\">A comparator IC can directly drive a small LED (with a series current-limiting resistor), a logic gate input, or another comparator input. It <em>cannot</em> directly drive a motor, solenoid or lamp because these require more current than the comparator output can supply. A transistor or MOSFET transducer driver must be inserted between the comparator output and the high-current load. This is explicitly in the specification under the comparison of comparator, transistor and MOSFET drive capabilities.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Full Design: Night-Light Switching Circuit</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\">A night-light must switch on a 200 mA lamp when darkness falls. Here is the complete design chain:</p>\n    <p data-narration-id=\"n25\"><strong>Input:</strong> LDR (R1, top) and 10 k&Omega; fixed resistor (R2, bottom) in a voltage divider from 9 V. In darkness, LDR resistance rises &rArr; more voltage across LDR &rArr; less voltage across R2 &rArr; \\(V_{out}\\) is LOW. Wait &mdash; that means the sensor output is LOW in darkness. To get a HIGH output in darkness, swap: place LDR as R2 (bottom). Then in darkness, LDR resistance rises &rArr; more voltage across R2 &rArr; \\(V(+)\\) is HIGH in darkness.</p>\n    <p data-narration-id=\"n26\"><strong>Processing:</strong> Comparator with reference at 4.5 V on inverting (&minus;) input. In darkness \\(V(+)\\) rises above 4.5 V &rArr; output HIGH. In daylight \\(V(+)\\) falls below 4.5 V &rArr; output LOW.</p>\n    <p data-narration-id=\"n27\"><strong>Output:</strong> Comparator output &rarr; base resistor &rarr; npn transistor base. When comparator is HIGH, transistor saturates &rArr; lamp turns on. A 0.7 V \\(V_{BE}\\) is available from the comparator&rsquo;s HIGH output, which is typically close to the supply rail.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">For comparator questions, the most common mistake is failing to determine the output state when given specific input voltages. Always write &ldquo;V(+) = [value]&rdquo; and &ldquo;V(&minus;) = [reference]&rdquo; explicitly, then apply the rule: if + &gt; &minus;, output HIGH. If &minus; &gt; +, output LOW. Examiners explicitly note that students cannot apply this rule when input values are given &mdash; it costs two marks. Also remember: a comparator cannot drive a motor or lamp directly. If an output device needs more than a few milliamps, state that a transistor or MOSFET driver is required between the comparator output and the load.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">A comparator compares two voltages and outputs HIGH if V(+) &gt; V(&minus;), or LOW if V(+) &lt; V(&minus;). The output switches sharply because the open-loop gain is very large.</li>\n  <li data-narration-id=\"n31\">Convention: sensor signal connects to the non-inverting (+) input; reference voltage connects to the inverting (&minus;) input. Swapping these inputs inverts the output behaviour.</li>\n  <li data-narration-id=\"n32\">A comparator IC has limited output drive capability. High-current loads (motors, lamps, relays) need a transistor or MOSFET transducer driver between the comparator output and the load.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes the output state of a comparator when the voltage at the non-inverting (+) input is greater than the voltage at the inverting (−) input?\nA) Output is LOW (near 0 V)\nB) Output is mid-rail (half the supply voltage)\nC) Output is HIGH (near the positive supply)\nD) Output is undefined",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) Output is HIGH (near the positive supply) [1 mark]"
+    },
+    {
+      "text": "A comparator has its non-inverting input at 3.2 V and its inverting input set to a reference of 5 V. State the output condition and explain why.",
+      "type": "2 marks — State / Define",
+      "marks": "Output is LOW [1 mark]. Because V(+) = 3.2 V < V(−) = 5 V, the comparator drives its output to the LOW rail [1 mark]."
+    },
+    {
+      "text": "A comparator circuit uses a 9 V supply. An NTC thermistor (R1, top) and a 10 kΩ fixed resistor (R2, bottom) form the input voltage divider. The inverting input is connected to a reference of 4.5 V. At 20°C the thermistor resistance is 20 kΩ.\n(a) Calculate the voltage at the non-inverting (+) input at 20°C.\n(b) State the output of the comparator at 20°C.\n(c) State what happens to the output as the temperature increases significantly.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "(a) \\(V(+) = 9 \\times R_2/(R_1+R_2) = 9 \\times 10000/(20000+10000) = 9 \\times 10/30 = 3 \\text{ V}\\) [1 mark]\n(b) 3 V < 4.5 V (reference) ⇒ output LOW [1 mark]\n(c) As temperature rises, thermistor resistance falls; V(+) rises; when V(+) exceeds 4.5 V the output switches HIGH [1 mark for correct reasoning; 1 mark for identifying it switches HIGH when sensor voltage exceeds reference]."
+    },
+    {
+      "text": "A student designs a comparator circuit to switch on a 12 V motor (drawing 1.5 A) when a light level falls below a threshold. The comparator output is used directly to drive the motor. Identify the fault in this design and explain how it should be corrected.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Fault: the comparator output cannot supply the 1.5 A current required by the motor [1 mark]; the comparator output drive is limited to a few milliamperes, which is far below the motor's requirement [1 mark].\nCorrection: a transistor or MOSFET transducer driver must be placed between the comparator output and the motor [1 mark]; a reverse-bias protection diode should also be connected across the motor to absorb back-EMF when the motor is switched off [1 mark]."
+    },
+    {
+      "text": "State what is meant by the open-loop gain of a comparator and explain why it causes the output to switch sharply rather than vary gradually.",
+      "type": "2 marks — State / Define",
+      "marks": "Open-loop gain is the gain of the comparator with no feedback applied, typically 100,000 or more [1 mark]. Even the tiniest voltage difference between the inputs is multiplied by this enormous gain, driving the output immediately to its maximum or minimum rail voltage; the output cannot sit at an intermediate level [1 mark]."
+    },
+    {
+      "text": "Design and evaluate a comparator-based automatic street-light circuit that turns on a lamp when ambient light falls below a set level. In your answer, describe each sub-system (input, processing, output), explain the role of the reference voltage, state which input of the comparator receives the sensor signal, and evaluate the limitations of the circuit.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Input sub-system: LDR used as R2 (bottom) in a voltage divider with a fixed resistor R1 (top) so that V(+) rises in darkness (LDR resistance increases → more voltage across LDR as R2). Processing: comparator IC with sensor voltage on non-inverting (+) input and adjustable reference on inverting (−) input; when dark, V(+) rises above reference → output HIGH. Output: comparator output → transistor or MOSFET base/gate → lamp (with reverse-bias protection diode if a relay coil is used, not needed for lamp). Reference voltage: set by a second voltage divider or potentiometer to define the exact light level at which switching occurs; adjustable to tune the threshold for different ambient conditions. Evaluation of limitations: the comparator may flicker on and off near the threshold ('hunting') if the light level hovers near the reference — a solution is hysteresis (positive feedback), not required at GCSE but worth acknowledging. The comparator cannot drive the lamp directly; driver is essential. LED instead of lamp simplifies the output stage (comparator can drive an LED with a series resistor). Justified, balanced conclusion.\nSecure: All three sub-systems described with correct function; reference voltage role explained; comparator convention correct; transistor driver included; one limitation identified with comment.\nDeveloping: Two sub-systems correctly described; comparator rule stated; some limitation noted; driver may be missing.\nEmerging: Comparator mentioned; basic input or output described; limited analysis or evaluation."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In the specification's comparator convention, which input receives the sensor signal?",
+      "options": [
+        "The inverting (−) input",
+        "The non-inverting (+) input",
+        "Both inputs simultaneously",
+        "The output pin"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "A comparator has V(+) = 2.1 V and V(−) = 3.8 V. What is the output state?",
+      "options": [
+        "HIGH",
+        "Mid-rail",
+        "LOW",
+        "Oscillating"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A comparator output is HIGH when the non-inverting input voltage is _____ the inverting input voltage.",
+      "options": [
+        "equal to",
+        "less than",
+        "greater than",
+        "half of"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The very large _____ gain of a comparator causes the output to switch sharply between HIGH and LOW.",
+      "options": [
+        "current",
+        "open-loop",
+        "closed-loop",
+        "base"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each comparator input to what it connects to in this specification's convention:",
+      "left": [
+        "Non-inverting input (+)",
+        "Inverting input (−)",
+        "Output"
+      ],
+      "right": [
+        "Sensor signal from voltage divider",
+        "Reference voltage (potentiometer)",
+        "Transducer driver or logic circuit"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does a voltage comparator do?",
+      "a": "It compares two voltages and outputs HIGH or LOW depending on which input is larger."
+    },
+    {
+      "q": "Comparator output rule: V(+) > V(−) gives which output?",
+      "a": "HIGH (close to the positive supply rail)."
+    },
+    {
+      "q": "Comparator output rule: V(+) < V(−) gives which output?",
+      "a": "LOW (close to 0 V)."
+    },
+    {
+      "q": "In the specification convention, which comparator input receives the sensor signal?",
+      "a": "The non-inverting (+) input."
+    },
+    {
+      "q": "In the specification convention, which comparator input receives the reference voltage?",
+      "a": "The inverting (−) input."
+    },
+    {
+      "q": "What is open-loop gain, and what is its typical order of magnitude for a comparator?",
+      "a": "Gain with no feedback; typically 100,000 or more."
+    },
+    {
+      "q": "Why does a large open-loop gain cause the comparator output to switch sharply?",
+      "a": "Even the tiniest input difference is amplified to drive the output to its rail voltage."
+    },
+    {
+      "q": "Can a comparator IC directly drive a 200 mA lamp? Why or why not?",
+      "a": "No — its output drive is limited to a few milliamps; a transistor or MOSFET driver is needed."
+    },
+    {
+      "q": "What component is used to set the reference voltage threshold of a comparator?",
+      "a": "A potentiometer (variable resistor voltage divider)."
+    },
+    {
+      "q": "What happens to a comparator's output if the sensor voltage rises above the reference after being below it?",
+      "a": "The output switches from LOW to HIGH."
+    },
+    {
+      "q": "Name two types of load a comparator can drive directly (without a transistor driver).",
+      "a": "An LED (with series resistor) or a logic gate input."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "voltage comparator",
+      "definition": "An integrated circuit that compares two input voltages and outputs a digital HIGH or LOW depending on which input is larger."
+    },
+    {
+      "term": "inverting input",
+      "definition": "The negative input of a comparator or op-amp, marked with a minus sign. In a comparator, this input typically receives the reference voltage."
+    },
+    {
+      "term": "open-loop gain",
+      "definition": "The gain of an op-amp or comparator with no feedback, typically 100,000 or more. Even the tiniest difference between the inputs is amplified to drive the output to its supply rail."
+    }
+  ],
+  "hero_keywords": [
+    "operational amplifier comparator electronic circuit",
+    "electronics IC chip circuit board",
+    "electronic control circuit sensor"
+  ],
+  "hero_image_caption": "Comparator integrated circuit on a circuit board comparing sensor voltages"
+}

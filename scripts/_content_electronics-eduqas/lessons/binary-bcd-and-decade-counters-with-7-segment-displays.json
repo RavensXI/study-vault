@@ -1,0 +1,163 @@
+{
+  "_lesson_id": "65786ec8-4227-46ad-9267-8fd996575531",
+  "_lesson_number": 7,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "binary-bcd-and-decade-counters-with-7-segment-displays",
+  "description": "Binary vs BCD counters, decoder/driver ICs, and reading digits on a 7-segment display.",
+  "content_html": "<h2 data-narration-id=\"n1\">Beyond the 2-Bit Counter</h2>\n<p data-narration-id=\"n2\">The 2-bit counter in the previous lesson counts from 0 to 3 in binary. Extending to more flip-flop stages gives a longer count: 3 stages count 0&ndash;7, 4 stages count 0&ndash;15. These are general <dfn class=\"term\" data-def=\"A counter that counts upward in standard binary (base 2), using as many states as its flip-flop stages allow.\">binary counters</dfn>. However, humans read numbers in decimal (base 10). When the count needs to be displayed as a decimal digit, a <dfn class=\"term\" data-def=\"A counter that uses four bits (0000 to 1001) to represent the digits 0 to 9, then resets, matching one decimal digit per group.\">binary-coded decimal (BCD) counter</dfn> is used instead. A BCD counter counts from 0000 to 1001 in binary (0 to 9 in decimal) and then resets to 0000 automatically.</p>\n\n<h2 data-narration-id=\"n3\">The Decade Counter</h2>\n<p data-narration-id=\"n4\">A <dfn class=\"term\" data-def=\"A counter that counts 10 states (0 to 9) then resets to 0, matching one decimal digit per complete cycle.\">decade counter</dfn> is the most common type of BCD counter. It uses 4 flip-flop stages but resets after state 9 (binary 1001), skipping states 10&ndash;15. The reset is triggered automatically by internal logic: the moment the counter reaches the forbidden state above 9, a reset pulse clears all flip-flops back to 0000.</p>\n<p data-narration-id=\"n5\">The 4017 Johnson counter IC is specifically named in the specification. The 4017 produces ten sequential HIGH outputs (one at a time) as the clock runs, cycling through outputs Q0 to Q9 in order. It is widely used as a sequencer &mdash; for example, to light LEDs one at a time in sequence or to step a relay through ten positions. Pin 15 (MR, master reset) can be connected to a logic gate to force a reset at any desired count, creating a modulo-N counter for any N from 2 to 10.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and name the 4017 IC from memory. What is its main function, and how many sequential HIGH outputs does it produce before repeating?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The <strong>4017</strong> Johnson decade counter has 10 sequential output pins (Q0&ndash;Q9). On each rising clock edge, exactly one output goes HIGH and all others stay LOW. After Q9, the sequence repeats from Q0. Connecting a logic gate from a chosen Q output to the reset pin (MR) makes the counter reset early, creating a modulo-N counter for any count from 2 to 10.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Creating a Modulo-N Counter</h2>\n<p data-narration-id=\"n8\">To make the 4017 reset after counting N states (instead of 10), connect the Q\\(_{N}\\) output back to the reset pin (MR) via a logic gate. For example, to create a modulo-6 counter (counting 0&ndash;5 then resetting), connect Q6 to MR. When Q6 goes HIGH, it immediately resets the counter back to 0 &mdash; Q6 appears only as a very brief reset pulse and is not a usable output state.</p>\n<p data-narration-id=\"n9\">Examiner reports show that students often miss this reset pulse and continue drawing the count sequence past the reset point. In a timing diagram, the reset causes an immediate return to 0 mid-sequence. The output that triggers the reset is a glitch &mdash; it goes HIGH and immediately LOW as the reset clears it.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n9b\" data-revision-tip=\"Cover this and state the modulo of a 4017 whose Q4 output is connected to MR. Explain why the answer is 4, not 5.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>For a 4017 with output <strong>Q\\(_{N}\\)</strong> wired to the reset pin (MR), the modulo is <strong>N</strong> &mdash; the counter visits states 0 through N&minus;1 before resetting. The state at Q\\(_{N}\\) appears only as a fleeting glitch and does not count as a stable output.</p>\n</div>\n\n<h2 data-narration-id=\"n10\">The 7-Segment Display</h2>\n<p data-narration-id=\"n11\">A <dfn class=\"term\" data-def=\"A display component made of seven LED segments (labelled a to g) arranged so that different combinations of lit segments show decimal digits 0 to 9 and some letters.\">7-segment display</dfn> uses seven rectangular LED elements, labelled <strong>a</strong> through <strong>g</strong>, arranged to form the shape of a figure 8. By switching different segments on and off, the display shows decimal digits 0 to 9 and a selection of letters.</p>\n<p data-narration-id=\"n12\">The standard segment layout (as seen from the front of the display):</p>\n\n<table data-narration-id=\"n13\">\n  <thead><tr><th>Position</th><th>Segment</th><th>Controls</th></tr></thead>\n  <tbody>\n    <tr><td>Top horizontal</td><td>a</td><td>Top bar</td></tr>\n    <tr><td>Top-right vertical</td><td>b</td><td>Upper right side</td></tr>\n    <tr><td>Bottom-right vertical</td><td>c</td><td>Lower right side</td></tr>\n    <tr><td>Bottom horizontal</td><td>d</td><td>Bottom bar</td></tr>\n    <tr><td>Bottom-left vertical</td><td>e</td><td>Lower left side</td></tr>\n    <tr><td>Top-left vertical</td><td>f</td><td>Upper left side</td></tr>\n    <tr><td>Middle horizontal</td><td>g</td><td>Middle bar</td></tr>\n  </tbody>\n</table>\n\n<p data-narration-id=\"n14\">Digit patterns for 0&ndash;9:</p>\n\n<table data-narration-id=\"n15\">\n  <thead><tr><th>Digit</th><th>a</th><th>b</th><th>c</th><th>d</th><th>e</th><th>f</th><th>g</th></tr></thead>\n  <tbody>\n    <tr><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td></tr>\n    <tr><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>\n    <tr><td>2</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td></tr>\n    <tr><td>3</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td></tr>\n    <tr><td>4</td><td>0</td><td>1</td><td>1</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>\n    <tr><td>5</td><td>1</td><td>0</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>\n    <tr><td>6</td><td>1</td><td>0</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>\n    <tr><td>7</td><td>1</td><td>1</td><td>1</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>\n    <tr><td>8</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td><td>1</td></tr>\n    <tr><td>9</td><td>1</td><td>1</td><td>1</td><td>1</td><td>0</td><td>1</td><td>1</td></tr>\n  </tbody>\n</table>\n\n<h2 data-narration-id=\"n16\">Common-Cathode Displays</h2>\n<p data-narration-id=\"n17\">The specification requires knowledge of the <dfn class=\"term\" data-def=\"A 7-segment display where all segment cathodes share a common connection to 0 V; a segment lights when its anode is taken HIGH.\">common-cathode</dfn> configuration. In a common-cathode display, all seven LED cathodes connect together to 0 V. Each segment lights up when its individual anode pin is taken to a HIGH logic level. This means a logic &lsquo;1&rsquo; on any segment pin turns that segment ON.</p>\n\n<h2 data-narration-id=\"n18\">The Decoder/Driver IC</h2>\n<p data-narration-id=\"n19\">A BCD counter produces a 4-bit binary output. A 7-segment display needs up to 7 individual signal lines. A <dfn class=\"term\" data-def=\"An IC that converts a 4-bit BCD input from a counter into the 7-segment signals needed to drive a display, also supplying enough current for the LEDs.\">decoder/driver</dfn> IC sits between the two. It takes the 4-bit BCD count (inputs ABCD), converts it to the correct segment pattern for that digit, and provides enough current to light the LED segments. Without the decoder/driver, the low output current of a counter IC would be insufficient to drive the display LEDs.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Letters on a 7-Segment Display</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\">As well as digits 0&ndash;9, the 7-segment display can show certain letters. The specification lists the displayable characters: A, C, E, F, H, I, L, O, P, S, U, b, d, h, n. Note that some characters use uppercase (A, C, E, F) while others use lowercase (b, d, h, n) because the display geometry cannot clearly distinguish both cases for those letters.</p>\n    <p data-narration-id=\"n21\">In an exam, you may be asked to identify the digit or letter shown by a given combination of lit segments, or to state which segments light for a given character. For the letter A: segments a, b, c, e, f, g are ON; d is OFF. For the letter C: segments a, d, e, f are ON; b, c, g are OFF.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Decade Counter Reset Mid-Sequence &mdash; Exam Trap</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n22\">One of the most common errors in counter questions is failing to spot a reset mid-sequence. Consider a 4017 with Q5 connected to MR. The counter counts: 0, 1, 2, 3, 4 and then resets to 0 immediately when it reaches 5 (because Q5 going HIGH fires the reset before Q5 can be considered a stable state).</p>\n    <p data-narration-id=\"n23\">On a timing diagram, this looks like: four complete output HIGH pulses (Q0, Q1, Q2, Q3, Q4), then a very brief glitch at Q5 as it fires the reset, then the sequence starts again from Q0. Students who do not spot the reset draw the counter continuing to Q5, Q6, Q7 &mdash; this scores zero for the sequence.</p>\n    <p data-narration-id=\"n24\">Worked rule: if Q\\(_{N}\\) is connected to MR, the modulo of the counter is N (not N+1). A Q5-to-MR connection makes a modulo-5 counter (states 0, 1, 2, 3, 4 &mdash; five states).</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n25\">In decade counter questions, always check whether a reset pin is connected to an output &mdash; if so, the counter resets as soon as that output goes HIGH. The reset output never appears as a stable state in the sequence. When drawing a 7-segment display for a given digit, work systematically through segments a&ndash;g using the pattern table. Remember that in a common-cathode display, a logic 1 (HIGH) turns a segment ON. The decoder/driver is always needed between a BCD counter and the display.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n26\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n27\">A BCD/decade counter counts 0&ndash;9 then resets; the 4017 decade counter IC has 10 sequential output pins and a reset pin (MR) that can create modulo-N counters for any N from 2 to 10.</li>\n  <li data-narration-id=\"n28\">A 7-segment display uses segments labelled a&ndash;g; in common-cathode mode, a HIGH signal lights a segment. A decoder/driver converts 4-bit BCD to the 7-segment drive signals.</li>\n  <li data-narration-id=\"n29\">In counter timing diagrams, watch for reset mid-sequence: if Q\\(_{N}\\) connects to MR, the counter produces only N stable states (0 to N&minus;1) before resetting.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A 4017 decade counter has Q7 connected to its reset pin (MR). How many stable output states does the counter produce before it resets?\nA) 7\nB) 8\nC) 9\nD) 10",
+      "type": "1 mark — Multiple Choice",
+      "marks": "A) 7 [States 0, 1, 2, 3, 4, 5, 6 are stable; Q7 going HIGH fires the reset immediately] [1 mark]"
+    },
+    {
+      "text": "State what is meant by a common-cathode 7-segment display.",
+      "type": "2 marks — State / Define",
+      "marks": "All seven segment cathodes share a common connection to 0 V [1]; a segment lights when its anode is taken to a HIGH logic level [1]."
+    },
+    {
+      "text": "A 4017 decade counter receives a clock at 30 Hz. State the frequency at which the Q0 output produces a HIGH pulse.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "Q0 produces one HIGH pulse per complete count cycle [1]; frequency = 30 / 10 = 3 Hz [1]."
+    },
+    {
+      "text": "A 7-segment display shows the digit '3'. State which segments (a to g) are ON and which are OFF.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Segments ON: a, b, c, d, g [2 marks for all five correct, 1 mark for at least three correct]. Segments OFF: e, f [1 mark for both; 0 if wrong]. Minus one mark for each additional error beyond one [max 4 marks total]."
+    },
+    {
+      "text": "Design a modulo-6 counter using a 4017 decade counter IC. Describe how the reset is achieved and list the output states produced.",
+      "type": "5 marks — Design a Sub-System",
+      "marks": "Connect clock to CLK pin of 4017 [1]. Connect Q6 to the MR (master reset) pin [1]. Explanation: when the counter reaches state 6, Q6 goes HIGH which immediately resets the counter to 0 [1]. Stable output states produced: Q0, Q1, Q2, Q3, Q4, Q5 (states 0 to 5) [1]. Q6 is a reset trigger only and is not a stable state [1]."
+    },
+    {
+      "text": "A digital counting system uses a 4017 decade counter clocked at 20 Hz. Q5 is connected to the MR pin. The ten Q outputs are each connected to an LED.\n(a) State how many LEDs will light in sequence before the counter resets. [1 mark]\n(b) Calculate the flash rate of each LED. [2 marks]\n(c) A student claims that after the counter resets at Q5, the Q5 LED stays lit for one full clock cycle. Evaluate this claim. [3 marks]\n(d) Explain the purpose of the decoder/driver IC when a 4017 counter drives a 7-segment display. [2 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) 5 LEDs (Q0 to Q4); (b) each LED lights for 1 clock cycle and the sequence takes 5 clock cycles to complete, so each LED is lit for 1 out of 5 cycles = 20/5 = 4 Hz flash rate; (c) incorrect — Q5 going HIGH immediately fires MR which resets the counter before Q5 can remain HIGH for a full clock cycle; Q5 produces only a very brief glitch, not a full HIGH state; (d) the decoder/driver converts the 4-bit BCD output to the 7-segment signals (a–g) and provides sufficient current to drive the LED segments, which the counter output alone cannot supply.\nSecure: (a), (b) correct; (c) claim evaluated but reasoning on reset glitch incomplete; (d) decoder function stated.\nDeveloping: (a), (b) correct; (c) and (d) partially answered.\nEmerging: Only (a) correct; calculation for (b) absent or wrong."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In a common-cathode 7-segment display, what logic level turns a segment ON?",
+      "options": [
+        "Logic 0 (LOW)",
+        "Logic 1 (HIGH)",
+        "Either level",
+        "It depends on the decoder/driver"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "A 4017 decade counter has Q6 connected to MR. How many stable output states are produced?",
+      "options": [
+        "6",
+        "7",
+        "10",
+        "4"
+      ],
+      "correct": 0
+    },
+    {
+      "type": "fill",
+      "q": "A BCD counter represents decimal digits using _____ binary bits per digit.",
+      "options": ["2", "3", "4", "8"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The IC that converts a 4-bit BCD count into 7-segment display signals is called a _____.",
+      "options": ["monostable", "decoder/driver", "multiplexer", "preamplifier"],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description:",
+      "left": ["BCD counter", "4017 IC", "Common cathode"],
+      "right": [
+        "Counts 0 to 9 in binary then resets to 0",
+        "Johnson decade counter with 10 sequential outputs and a master reset pin",
+        "7-segment display type where all segment cathodes share a 0 V connection"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does BCD stand for?",
+      "a": "Binary-Coded Decimal"
+    },
+    {
+      "q": "What range does a BCD counter count through before resetting?",
+      "a": "0 to 9 (binary 0000 to 1001)"
+    },
+    {
+      "q": "What is the 4017 IC used for?",
+      "a": "A decade counter with 10 sequential outputs (Q0–Q9), one HIGH at a time."
+    },
+    {
+      "q": "A 4017 has Q7 connected to MR. How many stable states does it produce?",
+      "a": "7 (states 0 to 6; Q7 fires the reset)"
+    },
+    {
+      "q": "In a common-cathode 7-segment display, what voltage on an anode pin turns that segment ON?",
+      "a": "HIGH (logic 1)"
+    },
+    {
+      "q": "Which segments are ON to display the digit '1' on a 7-segment display?",
+      "a": "Segments b and c only."
+    },
+    {
+      "q": "Which segments are ON to display the digit '7' on a 7-segment display?",
+      "a": "Segments a, b, c."
+    },
+    {
+      "q": "What does a decoder/driver IC do between a BCD counter and a 7-segment display?",
+      "a": "Converts 4-bit BCD to 7-segment signals and provides current to drive the LEDs."
+    },
+    {
+      "q": "How many segments does a 7-segment display have?",
+      "a": "Seven (labelled a to g)."
+    },
+    {
+      "q": "What happens in a 4017 timing diagram when the reset pin is triggered mid-sequence?",
+      "a": "The counter immediately returns to 0; the triggering output appears as a brief glitch, not a full stable state."
+    },
+    {
+      "q": "Which 4017 output pin should be wired to MR to form a modulo-8 counter?",
+      "a": "Q8"
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "binary counter",
+      "definition": "A counter that counts upward in standard binary (base 2), using as many states as its flip-flop stages allow."
+    },
+    {
+      "term": "binary-coded decimal (BCD) counter",
+      "definition": "A counter that uses four bits (0000 to 1001) to represent the digits 0 to 9, then resets, matching one decimal digit per group."
+    },
+    {
+      "term": "decade counter",
+      "definition": "A counter that counts 10 states (0 to 9) then resets to 0, matching one decimal digit per complete cycle."
+    },
+    {
+      "term": "7-segment display",
+      "definition": "A display component made of seven LED segments (labelled a to g) arranged so that different combinations of lit segments show decimal digits 0 to 9 and some letters."
+    },
+    {
+      "term": "common-cathode",
+      "definition": "A 7-segment display where all segment cathodes share a common connection to 0 V; a segment lights when its anode is taken HIGH."
+    },
+    {
+      "term": "decoder/driver",
+      "definition": "An IC that converts a 4-bit BCD input from a counter into the 7-segment signals needed to drive a display, also supplying enough current for the LEDs."
+    }
+  ],
+  "hero_keywords": ["7-segment display digital counter electronics", "decade counter circuit LED", "binary counter 7-segment breadboard"],
+  "hero_image_caption": "A 7-segment display showing digits driven by a decade counter IC and decoder."
+}

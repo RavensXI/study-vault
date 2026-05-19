@@ -1,0 +1,181 @@
+{
+  "_lesson_id": "8daca76e-54cb-4154-a3c0-d8b17455b4b2",
+  "_lesson_number": 10,
+  "_unit_slug": "discovering-electronics",
+  "_lesson_slug": "designing-logic-systems-and-nand-only-implementations",
+  "description": "Design logic circuits from a written spec and convert any gate system to NAND gates only.",
+  "content_html": "<h2 data-narration-id=\"n1\">From Problem Statement to Logic Circuit</h2>\n<p data-narration-id=\"n2\">Logic design starts with a written specification &mdash; a statement describing exactly when the output should be Logic 1. Your job is to translate that statement into a truth table, extract a Boolean expression, and select the gates to build it. This three-step pipeline is tested in nearly every exam paper and is the foundation of all digital design work.</p>\n<p data-narration-id=\"n3\">Once you can design with standard gates, you will learn the most important conversion skill in this unit: replacing every gate in a circuit with <dfn class=\"term\" data-def=\"Replacing every standard logic gate in a circuit with an equivalent combination of NAND gates, so the circuit uses only NAND gates throughout.\">NAND-only implementation</dfn>. This matters because NAND gates are universal &mdash; any logic function can be built from them. In practice, a designer who needs only one type of IC can buy a single 4-NAND chip (such as the CMOS 4011) and implement any function without stocking multiple gate types.</p>\n\n<h2 data-narration-id=\"n4\">Step 1 &mdash; Design from a Specification</h2>\n<p data-narration-id=\"n5\">Consider a burglar alarm that should activate (output = 1) when the door sensor (A) is 1 <strong>and</strong> the motion sensor (B) is 1, <strong>or</strong> when the panic button (C) is pressed (1). The Boolean expression is \\(Q = A \\cdot B + C\\). The truth table has 8 rows (three inputs, \\(2^3 = 8\\) combinations). Rows where A=1 and B=1, or C=1, give Q=1.</p>\n<p data-narration-id=\"n6\">The gate realisation needs an AND gate (inputs A and B) feeding into an OR gate alongside input C. This is a standard <dfn class=\"term\" data-def=\"A Boolean expression written as the OR of one or more AND terms, each AND term being a product of input variables or their complements.\">sum of products</dfn> form. Most combinational logic specifications can be written as a sum of products, making the gate selection straightforward.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write down the three-step logic design process: from specification to truth table to Boolean expression to gate circuit.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The three steps for logic design: (1) write the truth table from the specification; (2) write the Boolean expression from the rows where Q=1; (3) select the gates that match the expression. Every logic design question on the exam follows this pipeline.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">NAND Equivalents for Each Gate</h2>\n<p data-narration-id=\"n9\">The conversion to NAND-only is systematic. There is a known NAND equivalent for every standard gate. Learn these four equivalents and the conversion becomes mechanical:</p>\n\n<table data-narration-id=\"n10\">\n  <caption>NAND equivalents for standard logic gates</caption>\n  <thead><tr><th>Standard gate</th><th>NAND-only equivalent</th><th>Boolean check</th></tr></thead>\n  <tbody>\n    <tr>\n      <td>NOT (A)</td>\n      <td>One NAND gate with both inputs tied to A</td>\n      <td>\\(\\overline{A \\cdot A} = \\overline{A}\\)</td>\n    </tr>\n    <tr>\n      <td>AND (A, B)</td>\n      <td>One NAND followed by a tied-input NOT-NAND on its output</td>\n      <td>\\(\\overline{\\overline{A \\cdot B}} = A \\cdot B\\)</td>\n    </tr>\n    <tr>\n      <td>OR (A, B)</td>\n      <td>NOT-NAND each input separately, then combine with a third NAND</td>\n      <td>\\(\\overline{\\overline{A} \\cdot \\overline{B}} = A + B\\)</td>\n    </tr>\n    <tr>\n      <td>NOR (A, B)</td>\n      <td>OR-equivalent (three NANDs) followed by a tied-input NOT-NAND</td>\n      <td>\\(\\overline{A + B}\\)</td>\n    </tr>\n  </tbody>\n</table>\n\n<div class=\"key-fact\" data-narration-id=\"n11\" data-revision-tip=\"Close this page and draw the NAND-only equivalents for NOT, AND and OR from memory &mdash; label each input and show where both inputs of the NOT-NAND connect.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The three most important NAND equivalents: NOT = one NAND with inputs tied together; AND = NAND followed by a tied-input NAND on its output; OR = NOT-NAND each input separately, then combine with a third NAND.</p>\n</div>\n\n<h2 data-narration-id=\"n12\">The Conversion Algorithm &mdash; Three Steps</h2>\n<p data-narration-id=\"n13\">When the exam asks you to convert a circuit to NAND only, follow this exact sequence:</p>\n<p data-narration-id=\"n14\"><strong>Step 1 &mdash; Redraw with NAND equivalents.</strong> Replace each gate in the original circuit with its NAND equivalent from the table above. The intermediate circuit will now contain only NAND gates &mdash; but it may have more gates than necessary.</p>\n<p data-narration-id=\"n15\"><strong>Step 2 &mdash; Identify back-to-back (double inversion) pairs.</strong> Scan the circuit for any point where a NAND output connects directly into the &ldquo;both-inputs-tied&rdquo; (NOT-configured) NAND input. Two inversions in a row cancel out: \\(\\overline{\\overline{X}} = X\\). Mark these pairs.</p>\n<p data-narration-id=\"n16\"><strong>Step 3 &mdash; Cancel the back-to-back pairs.</strong> Remove both back-to-back NANDs and connect the wire directly. This simplifies the circuit and reduces gate count. The resulting circuit is the minimal NAND-only implementation.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked example: converting AND-OR to NAND-only</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n17\">Original circuit: AND gate (inputs A, B) feeding an OR gate alongside input C. Boolean: \\(Q = AB + C\\).</p>\n    <p data-narration-id=\"n18\">Step 1 &mdash; Replace the AND gate with NAND(A,B) followed by a tied-input NAND on its output. Replace the OR gate with a NOT-NAND on each of its inputs, then combine those outputs with a third NAND. Intermediate circuit has 5 NAND gates.</p>\n    <p data-narration-id=\"n19\">Step 2 &mdash; The output of the tied-input NAND after the AND gate feeds directly into the tied-input NAND on the OR-equivalent side. These two are back-to-back &mdash; double inversion identified.</p>\n    <p data-narration-id=\"n20\">Step 3 &mdash; Cancel: remove those two back-to-back NANDs and connect the NAND(A,B) output directly to the input of the final NAND. Final circuit uses <strong>3 NAND gates</strong>: NAND(A,B), NOT-NAND(C,C), NAND of those two results. Boolean check: \\(\\overline{\\overline{AB} \\cdot \\overline{C}} = AB + C\\) &mdash; correct by De Morgan.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n21\">Double Inversion and De Morgan&rsquo;s Theorem</h2>\n<p data-narration-id=\"n22\"><dfn class=\"term\" data-def=\"The principle that two consecutive NOT operations cancel each other: double inversion of a signal returns the original value.\">Double inversion</dfn> is the key simplification step. Any time a signal passes through two inverters in a row (or two tied-input NANDs), both can be removed. This is the step that students most commonly miss in the exam &mdash; they draw a correct but bloated NAND circuit with redundant gate pairs still in place.</p>\n<p data-narration-id=\"n23\">De Morgan&rsquo;s theorem states \\(\\overline{A} \\cdot \\overline{B} = \\overline{A + B}\\), which rearranges to show that NAND of the complements equals the NOR, and \\(\\overline{\\overline{A} \\cdot \\overline{B}} = A + B\\), confirming the OR equivalent. You do not need to prove De Morgan in the exam &mdash; apply it to verify your NAND conversion is correct.</p>\n\n<h2 data-narration-id=\"n24\">Logic ICs: The CMOS 4000 Series</h2>\n<p data-narration-id=\"n25\">In practice, logic gates are packaged as <dfn class=\"term\" data-def=\"A family of CMOS integrated circuits, numbered 4000 onwards, containing two to four logic gates in a single package.\">CMOS 4000 series ICs</dfn>. Each IC package contains several identical gates sharing a power supply pin (V<sub>DD</sub>) and a ground pin (V<sub>SS</sub>). The 4011 contains four two-input NAND gates; the 4001 contains four two-input NOR gates. When using these ICs, unused inputs must be tied to Logic 0 or Logic 1 (not left floating) to prevent unpredictable switching.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Reading a CMOS 4000 series pin diagram</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n26\">A 14-pin dual in-line (DIL) package has 7 pins on each side. The notch or dot marks pin 1 (top left). Pins are numbered anticlockwise from pin 1. For a quad 2-input NAND (4011): pin 14 is V<sub>DD</sub> (supply), pin 7 is V<sub>SS</sub> (ground). The four gates share these supply pins &mdash; you only need to connect V<sub>DD</sub> and V<sub>SS</sub> once for all four gates.</p>\n    <p data-narration-id=\"n27\">In exam questions showing a pinout, identify the gate inputs and outputs by their pin numbers. A question might ask you to state which pins to connect to implement a specific logic function using available gates on the IC. Always check that you are using a gate that is on the IC &mdash; examiners have penalised students who used the wrong gate type for the IC shown.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">NAND-only conversion is worth 6 marks on the paper and is consistently the weakest-answered question every year. Use the three-step method every time: (1) replace each gate with its NAND equivalent; (2) mark back-to-back NANDs (double inversions); (3) cancel them. Drawing a bloated 5-gate answer when the correct answer is 3 gates drops you to a partial mark band. For logic design questions, write the truth table before attempting the Boolean expression &mdash; students who jump straight to the expression miss rows and get the wrong gate combination.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">Logic design follows three steps: write the truth table from the specification, extract the Boolean expression from the rows where Q=1, then select gates. Most expressions can be written in sum-of-products form.</li>\n  <li data-narration-id=\"n31\">Any standard gate can be replaced with NAND gates: NOT = tied-input NAND; AND = NAND then NOT-NAND; OR = two NOT-NANDs feeding a NAND. After substitution, cancel back-to-back (double-inversion) NAND pairs.</li>\n  <li data-narration-id=\"n32\">Logic ICs used in this course are CMOS 4000 series. Unused inputs must be tied to a defined logic level &mdash; never left floating. The supply pin V<sub>DD</sub> and ground pin V<sub>SS</sub> are shared by all gates in the package.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is the correct NAND-only equivalent of a NOT gate?\nA) A NAND gate with inputs A and B\nB) A NAND gate with both inputs tied together to signal A\nC) Two NAND gates in series, each with separate inputs\nD) A NAND gate with input A and input B permanently at Logic 0",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) A NAND gate with both inputs tied together to signal A [1 mark]"
+    },
+    {
+      "text": "State what is meant by 'double inversion' in a NAND-only circuit and explain why back-to-back NAND pairs can be removed.",
+      "type": "2 marks — State / Define",
+      "marks": "Double inversion is when a signal passes through two NOT operations (inverters) in succession. [1 mark]\nTwo inversions cancel because NOT(NOT(X)) = X, so the signal is unchanged and the two gates add no function to the circuit. [1 mark]"
+    },
+    {
+      "text": "A logic system has the Boolean expression Q = A AND B OR C (Q = AB + C).\n(a) Complete the truth table for this expression.\n(b) Identify the gates needed to implement this circuit directly.",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) Correct 8-row truth table with Q = 0, 1, 0, 1, 0, 1, 1, 1 for rows 000 through 111 [2 marks: 1 mark for 5 or more correct rows, 2 marks for all 8 correct]\n(b) One AND gate (inputs A and B) and one OR gate combining the AND output with C [2 marks: 1 per gate correctly identified]"
+    },
+    {
+      "text": "Convert the following circuit to a NAND-only implementation. The circuit consists of an AND gate (inputs A, B) whose output feeds an OR gate alongside input C. Show all steps: NAND equivalents, identification of double inversions, and the simplified circuit.",
+      "type": "6 marks — Convert to NAND-Only Implementation",
+      "marks": "Step 1 — Replace AND(A,B) with NAND(A,B) followed by tied-input NAND; replace OR with NOT-NANDs on each input then a combining NAND. [2 marks for correct equivalents shown]\nStep 2 — Identifies the tied-input NAND on the AND output is back-to-back with the tied-input NAND on the C-input side of the OR equivalent. [1 mark]\nStep 3 — Cancels the back-to-back pair, resulting in three NAND gates: NAND(A,B), NAND(C,C), NAND of those two outputs. [2 marks for correct simplified circuit]\nBoolean verification or correct gate count stated. [1 mark]"
+    },
+    {
+      "text": "Design a logic sub-system for a greenhouse alarm that outputs Logic 1 when the temperature sensor (T) is Logic 1 OR the humidity sensor (H) is Logic 1, but NOT when both are Logic 1 simultaneously. Write the truth table, Boolean expression, and specify the required gates.",
+      "type": "5 marks — Design a Sub-System",
+      "marks": "Truth table (4 rows): TH=00 Q=0; TH=01 Q=1; TH=10 Q=1; TH=11 Q=0. [1 mark]\nBoolean expression: Q = T.NOT(H) + NOT(T).H (exclusive OR expression). [1 mark]\nGates required: two NOT gates (one on T, one on H), two AND gates for each product term, one OR gate combining them. [2 marks: 1 per correct gate type identified]\nAlternatively accepts XOR gate with justification. [1 mark]"
+    },
+    {
+      "text": "A student converts a two-gate circuit (AND then OR) to NAND-only but does not cancel the back-to-back NAND pairs. Their final circuit has five NAND gates. A second student correctly cancels the double inversions and produces a three-gate circuit. Both circuits produce the same outputs. Evaluate which design is preferable for use in a real electronic product and explain why, with reference to IC gate count, cost, and any practical wiring considerations.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Clearly argues the three-gate design is preferable on multiple grounds. Each additional NAND gate requires IC pins; five gates may require a second IC while three gates fit on one 4011 with a spare gate. Fewer ICs means lower cost, smaller PCB footprint, fewer solder joints, and higher reliability. Notes that unused gates on a CMOS IC must have their inputs tied to a defined level, adding wiring complexity when a second IC is needed. Conclusion explicitly links fewer gates to lower cost and more reliable product.\nSecure: Identifies that fewer gates may fit on one IC versus two, gives a cost or reliability argument, mentions unused inputs needing to be tied. May omit PCB footprint or solder joint detail.\nDeveloping: Correctly states the three-gate design uses fewer components and is cheaper, but explanation of IC count or practical wiring is incomplete.\nEmerging: States the three-gate design is better without technical justification."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "How many NAND gates are needed to build a NAND-only equivalent of a two-input AND gate?",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "What should be done with unused inputs on a CMOS 4000 series logic IC?",
+      "options": [
+        "Left unconnected (floating)",
+        "Connected to the output of another gate",
+        "Tied to Logic 0 or Logic 1",
+        "Connected together in pairs"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "When converting to NAND-only, back-to-back NAND pairs can be removed because two consecutive _____ cancel each other out.",
+      "options": [
+        "AND operations",
+        "inversions (NOT operations)",
+        "OR operations",
+        "supply connections"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "The CMOS 4011 IC contains four two-input _____ gates in a single 14-pin package.",
+      "options": [
+        "NOR",
+        "OR",
+        "NAND",
+        "AND"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each standard gate to its NAND-only equivalent description:",
+      "left": [
+        "NOT gate",
+        "AND gate",
+        "OR gate"
+      ],
+      "right": [
+        "Two NOT-NANDs on each input, outputs combined by a third NAND",
+        "One NAND with both inputs tied to the same signal",
+        "One NAND followed by a tied-input NAND on its output"
+      ],
+      "order": [
+        1,
+        2,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What are the three steps of the logic design process?",
+      "a": "Write truth table, extract Boolean expression, select gates."
+    },
+    {
+      "q": "What is sum-of-products form in Boolean algebra?",
+      "a": "Output written as OR of AND terms, e.g. Q = AB + C."
+    },
+    {
+      "q": "How do you build a NOT gate from a single NAND gate?",
+      "a": "Tie both inputs of the NAND together to the same signal A."
+    },
+    {
+      "q": "How many NAND gates are needed to make an AND gate?",
+      "a": "Two: one NAND(A,B) followed by a tied-input NAND on its output."
+    },
+    {
+      "q": "How many NAND gates are needed to make an OR gate?",
+      "a": "Three: a NOT-NAND on each input, then a third NAND combining them."
+    },
+    {
+      "q": "What is double inversion?",
+      "a": "Two consecutive NOT operations on the same signal, which cancel to give the original."
+    },
+    {
+      "q": "Why can back-to-back NAND pairs be removed in a NAND-only circuit?",
+      "a": "Because NOT(NOT(X)) = X: the two inversions cancel each other."
+    },
+    {
+      "q": "What is the CMOS 4011 IC?",
+      "a": "A 14-pin IC containing four two-input NAND gates."
+    },
+    {
+      "q": "What must be done with unused gate inputs on a CMOS 4000 series IC?",
+      "a": "Tied to a defined logic level (Logic 0 or Logic 1) — never left floating."
+    },
+    {
+      "q": "Why is a NAND gate described as a universal gate?",
+      "a": "Because any logic function can be built using only NAND gates."
+    },
+    {
+      "q": "On a 14-pin CMOS IC, which pins are power supply (V_DD) and ground (V_SS)?",
+      "a": "Pin 14 is V_DD (supply); pin 7 is V_SS (ground)."
+    },
+    {
+      "q": "What does De Morgan's theorem say about NOT(A) AND NOT(B)?",
+      "a": "NOT(A) AND NOT(B) = NOT(A OR B): the NAND of complements equals the NOR."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "NAND-only implementation",
+      "definition": "Replacing every standard logic gate in a circuit with an equivalent combination of NAND gates, so the circuit uses only NAND gates throughout."
+    },
+    {
+      "term": "sum of products",
+      "definition": "A Boolean expression written as the OR of one or more AND terms, each AND term being a product of input variables or their complements."
+    },
+    {
+      "term": "double inversion",
+      "definition": "The principle that two consecutive NOT operations cancel each other: double inversion of a signal returns the original value."
+    },
+    {
+      "term": "CMOS 4000 series ICs",
+      "definition": "A family of CMOS integrated circuits, numbered 4000 onwards, containing two to four logic gates in a single package."
+    }
+  ],
+  "hero_keywords": [
+    "integrated circuit chip logic gates",
+    "CMOS microchip electronics",
+    "digital logic circuit board"
+  ],
+  "hero_image_caption": "CMOS integrated circuit chip containing logic gates on a circuit board"
+}

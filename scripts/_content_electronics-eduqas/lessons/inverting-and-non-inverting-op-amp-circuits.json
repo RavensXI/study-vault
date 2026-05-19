@@ -1,0 +1,181 @@
+{
+  "_lesson_id": "b8f50446-bc0c-45fa-a1d3-e741944db3da",
+  "_lesson_number": 2,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "inverting-and-non-inverting-op-amp-circuits",
+  "description": "Design inverting and non-inverting op-amp amplifiers and calculate gain from resistor ratios.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Operational Amplifier</h2>\n<p data-narration-id=\"n2\">An <dfn class=\"term\" data-def=\"An integrated circuit with two inputs and one output, used as the building block of precision amplifier circuits.\">operational amplifier</dfn> (op-amp) is an integrated circuit designed to amplify the difference between its two input voltages. It has an inverting input (marked &ldquo;&minus;&rdquo;), a non-inverting input (marked &ldquo;+&rdquo;), and a single output. Without external components, its open-loop gain is enormous &mdash; typically hundreds of thousands &mdash; which makes it unstable for most applications. In practice, resistors are connected around the op-amp to form a <dfn class=\"term\" data-def=\"A connection from the output of an amplifier back to its inverting input, used to set a stable, precise gain.\">negative feedback</dfn> loop that sets a stable, predictable gain.</p>\n\n<p data-narration-id=\"n3\">Two resistors define the gain in both configurations covered here: \\(R_1\\) (the input resistor, connected between the signal source and the op-amp input) and \\(R_f\\) (the feedback resistor, connected between the output and the inverting input). An important rule for your exam: both resistors must be at least 1 k&Omega; in any op-amp circuit design.</p>\n\n<h2 data-narration-id=\"n4\">The Inverting Amplifier</h2>\n<p data-narration-id=\"n5\">In an <dfn class=\"term\" data-def=\"An op-amp circuit where the input signal connects to the inverting (-) input via R1 and the feedback resistor Rf connects from output to inverting input; the output is phase-inverted relative to the input.\">inverting amplifier</dfn>, the input signal is applied through \\(R_1\\) to the &ldquo;&minus;&rdquo; input. The feedback resistor \\(R_f\\) connects from the output back to the same &ldquo;&minus;&rdquo; input. The &ldquo;+&rdquo; input is connected to 0 V (ground).</p>\n<p data-narration-id=\"n6\">Because the signal enters the inverting input, the output is 180&deg; out of phase with the input &mdash; if the input goes positive, the output goes negative. The voltage gain is:</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write the inverting amplifier gain formula from memory. Which resistor goes on top, and why does the gain have a negative sign?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Inverting amplifier voltage gain:</p>\n  <p>$$G = -\\frac{R_f}{R_1}$$</p>\n  <p>The negative sign indicates phase inversion. Only the magnitude \\(|G| = R_f / R_1\\) determines how much the voltage is multiplied.</p>\n</div>\n\n<p data-narration-id=\"n8\">The concept of a <dfn class=\"term\" data-def=\"The inverting input of an op-amp in a closed-loop circuit, which is held at approximately 0 V by the negative feedback even though it is not directly connected to ground.\">virtual earth</dfn> helps explain why the formula works. Negative feedback forces the voltage at the inverting input to be essentially 0 V, even though that point is not connected directly to ground. This means that \\(R_1\\) and \\(R_f\\) share the same voltage reference at the inverting pin, and Kirchhoff&rsquo;s current law gives the gain ratio.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Inverting Amplifier Gain</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n9\">An inverting amplifier uses \\(R_1 = 10\\) k&Omega; and \\(R_f = 100\\) k&Omega;. The input signal is a sine wave with a peak of 50 mV.</p>\n    <p data-narration-id=\"n10\">Step 1 &mdash; Calculate gain: \\(G = -R_f / R_1 = -100 / 10 = -10\\).</p>\n    <p data-narration-id=\"n11\">Step 2 &mdash; Calculate output peak: \\(V_{OUT} = G \\times V_{IN} = -10 \\times 50\\text{ mV} = -500\\text{ mV}\\).</p>\n    <p data-narration-id=\"n12\">The magnitude is 500 mV (0.5 V peak) and the output is inverted relative to the input. On a voltage&ndash;time graph, when the input sine wave is at its positive peak, the output is at its negative peak.</p>\n    <p data-narration-id=\"n13\">If you need to find \\(R_f\\) for a target gain: \\(R_f = |G| \\times R_1 = 10 \\times 10 = 100\\) k&Omega;. Always check that both resistors are &ge; 1 k&Omega;.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">The Non-Inverting Amplifier</h2>\n<p data-narration-id=\"n15\">In a <dfn class=\"term\" data-def=\"An op-amp circuit where the input signal connects to the non-inverting (+) input; the output is in phase with the input and the gain is always greater than 1.\">non-inverting amplifier</dfn>, the input signal connects to the &ldquo;+&rdquo; input. The feedback network (\\(R_f\\) and \\(R_1\\)) connects from the output back to the &ldquo;&minus;&rdquo; input, with \\(R_1\\) going from the inverting input to ground. The output is in phase with the input &mdash; positive input gives positive output.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n16\" data-revision-tip=\"Close this and write the non-inverting gain formula from memory. What is the minimum possible gain, and why can it never be zero?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Non-inverting amplifier voltage gain:</p>\n  <p>$$G = 1 + \\frac{R_f}{R_1}$$</p>\n  <p>The &ldquo;1 +&rdquo; means the minimum gain is always greater than 1 (since \\(R_f / R_1\\) is positive). There is no phase inversion.</p>\n</div>\n\n<p data-narration-id=\"n17\">The non-inverting configuration is one of the least well answered topics in recent exams. The key distinction from the inverting case is: the input goes to the &ldquo;+&rdquo; pin and the feedback still goes to the &ldquo;&minus;&rdquo; pin via \\(R_f\\). If you draw the circuit, \\(R_1\\) sits between the &ldquo;&minus;&rdquo; pin and ground, and \\(R_f\\) connects the output back to that same &ldquo;&minus;&rdquo; pin.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Non-Inverting Amplifier Design</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\">Design a non-inverting amplifier with a gain of 11. Choose \\(R_1 = 10\\) k&Omega;.</p>\n    <p data-narration-id=\"n19\">Rearrange: \\(R_f = (G - 1) \\times R_1 = (11 - 1) \\times 10 = 100\\) k&Omega;.</p>\n    <p data-narration-id=\"n20\">Check: \\(G = 1 + R_f / R_1 = 1 + 100/10 = 1 + 10 = 11\\). Correct. Both resistors are above 1 k&Omega;.</p>\n    <p data-narration-id=\"n21\">With \\(V_{IN} = 100\\) mV: \\(V_{OUT} = 11 \\times 0.1 = 1.1\\) V. The output is in phase with the input (positive input gives positive output).</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n22\">Comparing the Two Configurations</h2>\n<p data-narration-id=\"n23\">The table below summarises the key differences between the two op-amp circuits:</p>\n<table data-narration-id=\"n24\">\n  <thead><tr><th>Feature</th><th>Inverting</th><th>Non-inverting</th></tr></thead>\n  <tbody>\n    <tr><td>Input connects to</td><td>&minus; pin (via R1)</td><td>+ pin</td></tr>\n    <tr><td>Gain formula</td><td>\\(-R_f / R_1\\)</td><td>\\(1 + R_f / R_1\\)</td></tr>\n    <tr><td>Phase shift</td><td>180&deg; inversion</td><td>No inversion</td></tr>\n    <tr><td>Minimum gain</td><td>Can be &lt;1</td><td>Always &ge;1</td></tr>\n  </tbody>\n</table>\n<p data-narration-id=\"n25\">In both circuits, the output cannot exceed the supply rail voltage. Always check for clipping when the calculated output is close to the supply voltage.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n26\">The non-inverting amplifier has been cited as the least-successfully answered question in recent exams. Practise drawing it from memory: signal to the &ldquo;+&rdquo; pin, \\(R_1\\) from the &ldquo;&minus;&rdquo; pin to ground, \\(R_f\\) from output back to the &ldquo;&minus;&rdquo; pin. Do not drop the negative sign from the inverting gain formula &mdash; the examiner expects to see \\(G = -R_f / R_1\\) and will penalise a positive answer. Both resistors must be &ge; 1 k&Omega; in any design question.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n27\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n28\">Inverting amplifier: input to the &ldquo;&minus;&rdquo; pin via \\(R_1\\), feedback via \\(R_f\\); gain \\(G = -R_f / R_1\\); output is phase-inverted.</li>\n  <li data-narration-id=\"n29\">Non-inverting amplifier: input to the &ldquo;+&rdquo; pin; gain \\(G = 1 + R_f / R_1\\); output is in phase; minimum gain is always &gt; 1.</li>\n  <li data-narration-id=\"n30\">Both resistors must be &ge; 1 k&Omega; in exam design questions; always check the output against supply rails to identify clipping.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "An inverting amplifier has R1 = 22 kΩ and Rf = 220 kΩ. What is its voltage gain?\nA) −10\nB) +10\nC) −0.1\nD) +22",
+      "type": "1 mark — Multiple Choice",
+      "marks": "A) −10 [1 mark]"
+    },
+    {
+      "text": "State the difference in phase between the input and output of an inverting amplifier.",
+      "type": "2 marks — State / Define",
+      "marks": "The output is 180° out of phase with the input [1]; when the input is at a positive peak the output is at a negative peak [1]."
+    },
+    {
+      "text": "A non-inverting amplifier is required with a voltage gain of 21. The designer chooses R1 = 10 kΩ. Calculate the value of Rf needed.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(R_f = (G - 1) \\times R_1 = (21 - 1) \\times 10 = 200\\) kΩ [1 mark for correct rearrangement; 1 mark for correct answer with unit]."
+    },
+    {
+      "text": "A non-inverting amplifier has R1 = 47 kΩ and Rf = 470 kΩ. The input is a 200 mV peak sine wave and the supply is ±9 V.\n(a) Calculate the voltage gain. [1 mark]\n(b) Calculate the peak output voltage. [1 mark]\n(c) State whether clipping will occur and explain why. [2 marks]",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) \\(G = 1 + 470/47 = 1 + 10 = 11\\) [1].\n(b) \\(V_{OUT} = 11 \\times 0.2 = 2.2\\) V [1].\n(c) Clipping will not occur [1] because 2.2 V is less than the ±9 V supply rails [1]."
+    },
+    {
+      "text": "Describe how a non-inverting amplifier circuit is connected. Include the role of R1 and Rf in your answer.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "The input signal connects to the non-inverting (+) input of the op-amp [1]. R1 connects from the inverting (−) input to ground [1]. Rf connects from the output back to the inverting (−) input [1]. Together R1 and Rf form the negative feedback network that sets the gain to 1 + Rf/R1 [1]."
+    },
+    {
+      "text": "A student wants to amplify a sensor signal using an inverting amplifier. The sensor produces a peak signal of 80 mV and the system requires a peak output of 960 mV.\n(a) Calculate the required voltage gain magnitude. [1 mark]\n(b) The student chooses R1 = 10 kΩ. Calculate the value of Rf. [2 marks]\n(c) The amplifier supply is ±12 V. The student then connects a sensor that occasionally produces peaks of 160 mV. Analyse whether the output will be clipped and justify your answer. [3 marks]\n(d) Suggest one change to the circuit that would prevent clipping with the larger signal. [2 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: All parts correct with clear working: (a) G = 960/80 = 12; (b) Rf = 12 × 10 = 120 kΩ; (c) at 160 mV input, output = 12 × 160 = 1920 mV = 1.92 V — within ±12 V supply, so no clipping; (d) valid change: increase supply voltage, reduce R1/Rf ratio to lower gain, or add an input attenuator.\nSecure: Three parts correct; minor algebraic slip in one.\nDeveloping: Gain and Rf calculated correctly; clipping analysis incomplete.\nEmerging: Gain formula applied but Rf or clipping analysis incorrect."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In an inverting amplifier, where does the input signal connect?",
+      "options": [
+        "Directly to the output",
+        "To the non-inverting (+) input",
+        "To the inverting (−) input via R1",
+        "To the feedback resistor"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "What is the gain formula for a non-inverting amplifier?",
+      "options": [
+        "G = −Rf / R1",
+        "G = R1 / Rf",
+        "G = Rf / R1",
+        "G = 1 + Rf / R1"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "In a non-inverting amplifier, the minimum possible gain is always _____ than 1.",
+      "options": [
+        "less",
+        "equal to",
+        "greater",
+        "much less"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Negative feedback in an op-amp circuit connects the output back to the _____ input.",
+      "options": [
+        "non-inverting (+)",
+        "power supply",
+        "inverting (−)",
+        "ground"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each configuration to its gain formula:",
+      "left": [
+        "Inverting amplifier",
+        "Non-inverting amplifier",
+        "Virtual earth"
+      ],
+      "right": [
+        "G = −Rf / R1",
+        "G = 1 + Rf / R1",
+        "Inverting input held at approximately 0 V by feedback"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the gain formula for an inverting op-amp amplifier?",
+      "a": "G = −Rf / R1"
+    },
+    {
+      "q": "What is the gain formula for a non-inverting op-amp amplifier?",
+      "a": "G = 1 + Rf / R1"
+    },
+    {
+      "q": "In an inverting amplifier, the output is ___° out of phase with the input.",
+      "a": "180°"
+    },
+    {
+      "q": "In a non-inverting amplifier, is the output in phase or out of phase with the input?",
+      "a": "In phase (0° phase shift)."
+    },
+    {
+      "q": "What is the minimum voltage gain of a non-inverting amplifier?",
+      "a": "Greater than 1 (since Rf/R1 is always positive)."
+    },
+    {
+      "q": "What is the virtual earth in an inverting op-amp circuit?",
+      "a": "The inverting input, held at ~0 V by negative feedback despite not being grounded."
+    },
+    {
+      "q": "What is the minimum resistor value in an op-amp circuit design (exam rule)?",
+      "a": "1 kΩ"
+    },
+    {
+      "q": "What is the voltage gain of an inverting amplifier with R1 = 10 kΩ and Rf = 47 kΩ?",
+      "a": "−4.7"
+    },
+    {
+      "q": "A non-inverting amplifier needs a gain of 6. If R1 = 10 kΩ, what is Rf?",
+      "a": "50 kΩ (i.e. (6−1) × 10 = 50 kΩ)"
+    },
+    {
+      "q": "Where does the input signal connect in a non-inverting amplifier?",
+      "a": "To the non-inverting (+) input of the op-amp."
+    },
+    {
+      "q": "What connects from the output back to the inverting (−) input in both op-amp configurations?",
+      "a": "The feedback resistor Rf."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "operational amplifier",
+      "definition": "An integrated circuit with two inputs and one output, used as the building block of precision amplifier circuits."
+    },
+    {
+      "term": "negative feedback",
+      "definition": "A connection from the output of an amplifier back to its inverting input, used to set a stable, precise gain."
+    },
+    {
+      "term": "inverting amplifier",
+      "definition": "An op-amp circuit where the input signal connects to the inverting (−) input via R1 and the feedback resistor Rf connects from output to inverting input; the output is phase-inverted relative to the input."
+    },
+    {
+      "term": "virtual earth",
+      "definition": "The inverting input of an op-amp in a closed-loop circuit, which is held at approximately 0 V by the negative feedback even though it is not directly connected to ground."
+    },
+    {
+      "term": "non-inverting amplifier",
+      "definition": "An op-amp circuit where the input signal connects to the non-inverting (+) input; the output is in phase with the input and the gain is always greater than 1."
+    }
+  ],
+  "hero_keywords": [
+    "operational amplifier circuit breadboard",
+    "op-amp electronics components",
+    "electronic amplifier design"
+  ],
+  "hero_image_caption": "Op-amp IC mounted on a breadboard with feedback resistors in place."
+}

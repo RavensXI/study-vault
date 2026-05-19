@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "090205a2-1123-47a1-a185-16d8dd4de5c4",
+  "_lesson_number": 4,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "rc-time-delays-and-the-555-monostable",
+  "description": "Capacitor charging in an RC network and using a 555 timer in monostable mode for a timed pulse.",
+  "content_html": "<h2 data-narration-id=\"n1\">Timing in Electronic Systems</h2>\n<p data-narration-id=\"n2\">Many electronic systems need a controlled time delay: a car alarm that waits two seconds before triggering, a washing machine that holds a motor on for thirty minutes, a burglar-alarm sounder that turns off after ten minutes. The simplest way to generate a time delay in electronics is to let a capacitor charge through a resistor. This RC network forms the foundation of both simple delay circuits and the 555 timer.</p>\n\n<h2 data-narration-id=\"n3\">RC Networks and the Time Constant</h2>\n<p data-narration-id=\"n4\">When a capacitor is connected in series with a resistor and a voltage is applied, the capacitor does not charge instantly. It charges gradually &mdash; fast at first, then slower as the voltage builds up. The rate of charging is controlled by the <dfn class=\"term\" data-def=\"The time taken for a capacitor to charge to approximately 63% of the supply voltage in an RC circuit, equal to the product of resistance and capacitance (T = RC).\">time constant</dfn> of the circuit, given the symbol &tau; (tau):</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Cover this and write the time constant formula from memory, including the unit. Then state what fraction of the supply voltage the capacitor reaches after one time constant.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>$$\\tau = R \\times C$$</p>\n  <p>where \\(\\tau\\) is in seconds, \\(R\\) is in ohms, and \\(C\\) is in farads. After one time constant, the capacitor has charged to approximately 63% of the supply voltage. After five time constants, it is considered fully charged (over 99%).</p>\n</div>\n\n<p data-narration-id=\"n6\">The charging graph is an exponential curve &mdash; it starts steep and then levels off as the capacitor approaches the supply voltage. Discharging through a resistor follows the same shape in reverse: the voltage falls quickly at first and then decays slowly towards zero. You do not need to evaluate the exponential equation numerically, but you must be able to recognise the curve shape and read values from a charging or discharging graph.</p>\n\n<p data-narration-id=\"n7\">For example, with \\(R = 100\\) k&Omega; and \\(C = 10\\) &mu;F:</p>\n<p data-narration-id=\"n8\">$$\\tau = 100{,}000 \\times 10 \\times 10^{-6} = 1\\text{ s}$$</p>\n<p data-narration-id=\"n9\">After 1 s the capacitor has reached 63% of the supply. After 5 s it is essentially fully charged. This 1-second time constant is useful for human-timescale delays such as door-sensor delays or alarm hold times.</p>\n\n<h2 data-narration-id=\"n10\">Simple RC Delay Circuits</h2>\n<p data-narration-id=\"n11\">A simple <dfn class=\"term\" data-def=\"A circuit containing a resistor and a capacitor whose charging time provides a delay before a threshold voltage is reached.\">RC delay circuit</dfn> connects a resistor in series with a capacitor. The voltage across the capacitor rises exponentially. If a comparator or transistor switch is connected across the capacitor, the circuit will trigger once the capacitor voltage exceeds a threshold &mdash; creating a time delay from the moment the supply is applied.</p>\n<p data-narration-id=\"n12\">The weakness of a plain RC delay circuit is that its threshold can be uncertain and its output is not a clean logic level. For precise, stable timing, the <dfn class=\"term\" data-def=\"A versatile integrated circuit timer chip that can generate precise time delays (monostable) or oscillate continuously (astable).\">555 timer</dfn> is used instead. The 555 contains an internal comparator, a bistable latch, a discharge transistor, and a voltage divider &mdash; all inside a single 8-pin IC.</p>\n\n<h2 data-narration-id=\"n13\">The 555 Timer in Monostable Mode</h2>\n<p data-narration-id=\"n14\">In <dfn class=\"term\" data-def=\"A 555 timer operating mode that produces a single output pulse of fixed duration when triggered; it has one stable state and returns to it after the pulse ends.\">monostable</dfn> mode, the 555 produces a single output pulse of fixed duration each time it receives a trigger. The pulse duration depends on an external resistor \\(R\\) and capacitor \\(C\\). The trigger is normally a brief negative-going pulse applied to pin 2.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Close this and write the monostable 555 timer formula from memory. Then use it to calculate the pulse duration for R = 100 kΩ and C = 10 μF.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>555 monostable pulse duration:</p>\n  <p>$$T = 1.1 \\times R \\times C$$</p>\n  <p>where \\(T\\) is in seconds, \\(R\\) is in ohms, and \\(C\\) is in farads. The 1.1 factor reflects the internal threshold level of the 555 (the capacitor charges to two-thirds of the supply voltage before the output resets).</p>\n</div>\n\n<p data-narration-id=\"n16\">What happens during a monostable cycle, step by step:</p>\n<ol>\n  <li data-narration-id=\"n17\">Initially, the output (pin 3) is LOW and the internal discharge transistor holds the capacitor discharged (pin 7 to ground).</li>\n  <li data-narration-id=\"n18\">A trigger pulse takes pin 2 below one-third of the supply voltage. This flips the internal bistable and turns the output HIGH.</li>\n  <li data-narration-id=\"n19\">The discharge transistor turns off. The external capacitor \\(C\\) begins charging through \\(R\\) towards the supply voltage.</li>\n  <li data-narration-id=\"n20\">When the capacitor voltage reaches two-thirds of the supply voltage, the internal comparator resets the bistable. The output goes LOW and the discharge transistor turns on, rapidly discharging \\(C\\).</li>\n  <li data-narration-id=\"n21\">The circuit is back in its stable state, ready for the next trigger. The output pulse lasted for time \\(T = 1.1RC\\).</li>\n</ol>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Calculating R from a Target Delay</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n22\">A 555 monostable must produce a 5-second pulse. The designer has a 100 &mu;F capacitor. What value of R is needed?</p>\n    <p data-narration-id=\"n23\">Step 1 &mdash; Write the formula: \\(T = 1.1 RC\\).</p>\n    <p data-narration-id=\"n24\">Step 2 &mdash; Rearrange for \\(R\\): \\(R = \\frac{T}{1.1 \\times C}\\).</p>\n    <p data-narration-id=\"n25\">Step 3 &mdash; Substitute: \\(R = \\frac{5}{1.1 \\times 100 \\times 10^{-6}} = \\frac{5}{1.1 \\times 10^{-4}} \\approx 45{,}455\\) &Omega;.</p>\n    <p data-narration-id=\"n26\">The nearest E24 standard value above this is 47 k&Omega;. With \\(R = 47\\) k&Omega; the actual delay would be \\(T = 1.1 \\times 47{,}000 \\times 100 \\times 10^{-6} = 5.17\\) s.</p>\n    <p data-narration-id=\"n27\">If the question uses a variable resistor with a fixed series resistor, you must subtract the fixed resistor value before calculating the variable-resistor setting. For example, if the circuit has a fixed 10 k&Omega; in series with a variable resistor and the total \\(R\\) needed is 47 k&Omega;, the variable resistor must be set to \\(47{,}000 - 10{,}000 = 37\\) k&Omega;. Forgetting this subtraction is one of the most common exam errors.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Simple RC Delay vs 555 Monostable &mdash; Comparison</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n28\">A plain RC network charges a capacitor, but the voltage across it rises gradually and never produces a sharp logic-level transition on its own. The delay is approximate and sensitive to supply voltage.</p>\n    <p data-narration-id=\"n29\">The 555 monostable uses an RC network internally, but the 555&rsquo;s comparators and bistable latch convert the gradual capacitor curve into a clean digital output that switches sharply between LOW and HIGH at precisely \\(T = 1.1RC\\). It is also buffered &mdash; the output can source or sink up to 200 mA to drive LEDs, relays or other loads directly without additional transistor stages.</p>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n30\">The next lesson extends the 555 into astable mode, where it oscillates continuously without any trigger to produce a repeating pulse train.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n31\">Many candidates copy the 555 monostable formula incorrectly even when it appears on the formula sheet. Write it out clearly: \\(T = 1.1RC\\). When rearranging for \\(R\\), divide \\(T\\) by \\(1.1C\\) &mdash; do not forget the 1.1 factor. If the circuit uses a fixed resistor in series with a variable resistor, always subtract the fixed value to find the variable resistor setting. Unit handling is critical: if \\(C\\) is in &mu;F, multiply by \\(10^{-6}\\) before substituting into the formula.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n32\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n33\">The time constant of an RC circuit is \\(\\tau = RC\\); after one time constant the capacitor reaches 63% of the supply voltage. The charging graph is an exponential curve.</li>\n  <li data-narration-id=\"n34\">A 555 monostable produces a single output pulse of duration \\(T = 1.1RC\\) each time it is triggered; the output is a clean digital level, not a gradual slope.</li>\n  <li data-narration-id=\"n35\">When finding \\(R\\) for a target delay, rearrange to \\(R = T / (1.1C)\\); if a fixed resistor is in series with a variable resistor, subtract the fixed value to get the variable-resistor setting.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A 555 monostable circuit has R = 100 kΩ and C = 47 μF. What is the pulse duration?\nA) 0.052 s\nB) 5.17 s\nC) 4.70 s\nD) 1.10 s",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 5.17 s [\\(T = 1.1 \\times 100{,}000 \\times 47 \\times 10^{-6} = 5.17\\) s] [1 mark]"
+    },
+    {
+      "text": "State what is meant by the time constant of an RC circuit.",
+      "type": "2 marks — State / Define",
+      "marks": "The time constant is the product of resistance and capacitance [1] and equals the time taken for the capacitor to charge to approximately 63% of the supply voltage [1]."
+    },
+    {
+      "text": "A 555 monostable must produce a pulse of 3.3 seconds. A 100 μF capacitor is available. Calculate the value of R required.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(R = T / (1.1 \\times C) = 3.3 / (1.1 \\times 100 \\times 10^{-6}) = 3.3 / (1.1 \\times 10^{-4}) = 30{,}000\\) Ω = 30 kΩ [1 mark for correct rearrangement; 1 mark for 30 kΩ]."
+    },
+    {
+      "text": "A 555 monostable circuit includes a fixed resistor of 22 kΩ in series with a variable resistor. The capacitor is 47 μF. The circuit must produce delays adjustable from 2.42 s to 7.26 s.\n(a) Calculate the total resistance needed for a 2.42 s delay. [2 marks]\n(b) Calculate the total resistance needed for a 7.26 s delay. [2 marks]\n(c) Hence determine the range (minimum and maximum settings) of the variable resistor. [2 marks]",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) \\(R_{total} = 2.42 / (1.1 \\times 47 \\times 10^{-6}) = 46{,}840\\) Ω ≈ 47 kΩ [1 for formula; 1 for value].\n(b) \\(R_{total} = 7.26 / (1.1 \\times 47 \\times 10^{-6}) = 140{,}519\\) Ω ≈ 140 kΩ [1 for formula; 1 for value].\n(c) Variable resistor min = \\(47{,}000 - 22{,}000 = 25\\) kΩ; max = \\(140{,}000 - 22{,}000 = 118\\) kΩ [1 mark per correct subtraction]."
+    },
+    {
+      "text": "Describe the sequence of events in a 555 monostable circuit from the moment a trigger pulse is received until the output returns to its stable state.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "Trigger pulse takes pin 2 below one-third of supply [1]; output switches HIGH and discharge transistor turns off [1]; external capacitor C charges through R towards the supply [1]; when capacitor reaches two-thirds of supply, output resets LOW and discharge transistor turns on, rapidly discharging C [1]."
+    },
+    {
+      "text": "A security light uses a 555 monostable to keep a floodlight on for 60 seconds after a motion sensor triggers it. The circuit uses a fixed 10 kΩ resistor and a variable resistor, with a 470 μF capacitor.\n(a) Calculate the total resistance needed for a 60-second delay. [2 marks]\n(b) Determine the required setting of the variable resistor. [1 mark]\n(c) The designer realises a 60-second delay requires a very large resistor. Suggest one circuit change (other than changing C) that would allow the same delay with a smaller resistance value. [1 mark]\n(d) Explain why using a 555 monostable produces a better-quality output signal than a simple RC delay circuit connected to a transistor switch. [4 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) R = 60 / (1.1 × 470 × 10⁻⁶) = 60 / 5.17 × 10⁻⁴ ≈ 116 kΩ; (b) variable resistor = 116 − 10 = 106 kΩ; (c) use a larger capacitor; (d) plain RC circuit produces a gradual slope — the transistor switches imprecisely near the threshold; the 555 uses internal comparators to detect 2/3 supply precisely and the bistable produces a sharp digital transition; the 555 output is buffered and can drive loads directly.\nSecure: (a)/(b)/(d) largely correct; (c) vague.\nDeveloping: Timing calculation correct; qualitative comparison incomplete.\nEmerging: Formula applied but incorrect unit handling or subtraction omitted."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the 555 monostable pulse duration formula?",
+      "options": [
+        "T = RC",
+        "T = 0.7(R1 + R2)C",
+        "T = 1.1RC",
+        "T = 1.44 / (R1 + 2R2)C"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "After one time constant, what percentage of the supply voltage has the capacitor reached?",
+      "options": [
+        "37%",
+        "50%",
+        "63%",
+        "70%"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In a 555 monostable, the output pulse ends when the capacitor voltage reaches _____ of the supply voltage.",
+      "options": [
+        "half",
+        "one-third",
+        "two-thirds",
+        "full"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The time constant of an RC circuit equals _____ multiplied by capacitance.",
+      "options": [
+        "frequency",
+        "voltage",
+        "resistance",
+        "current"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its description:",
+      "left": [
+        "Time constant (τ)",
+        "Monostable",
+        "555 discharge pin"
+      ],
+      "right": [
+        "Time for capacitor to reach 63% of supply voltage",
+        "A circuit with one stable state that produces a single timed pulse",
+        "Connected to the capacitor to rapidly discharge it after the pulse ends"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the formula for the time constant of an RC circuit?",
+      "a": "τ = R × C (seconds, with R in ohms and C in farads)"
+    },
+    {
+      "q": "What percentage of the supply voltage does a capacitor reach after one time constant?",
+      "a": "63%"
+    },
+    {
+      "q": "What is the 555 monostable pulse duration formula?",
+      "a": "T = 1.1 × R × C"
+    },
+    {
+      "q": "What triggers the 555 monostable to start its timed pulse?",
+      "a": "A negative-going pulse on pin 2 (taking it below one-third of the supply)."
+    },
+    {
+      "q": "At what capacitor voltage does the 555 monostable reset its output to LOW?",
+      "a": "Two-thirds of the supply voltage."
+    },
+    {
+      "q": "A 555 monostable has R = 47 kΩ and C = 100 μF. What is the pulse duration?",
+      "a": "T = 1.1 × 47 000 × 100 × 10⁻⁶ = 5.17 s"
+    },
+    {
+      "q": "In a 555 monostable with a fixed 10 kΩ and variable resistor, total R needed is 60 kΩ. What is the variable resistor setting?",
+      "a": "50 kΩ (60 kΩ − 10 kΩ)"
+    },
+    {
+      "q": "Why is the 555 monostable output better than a plain RC delay circuit output?",
+      "a": "The 555 produces a sharp digital HIGH/LOW output; an RC circuit only gives a gradual voltage ramp."
+    },
+    {
+      "q": "How many stable states does a monostable circuit have?",
+      "a": "One"
+    },
+    {
+      "q": "After approximately how many time constants is a capacitor considered fully charged?",
+      "a": "Five time constants (over 99% charged)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "time constant",
+      "definition": "The time taken for a capacitor to charge to approximately 63% of the supply voltage in an RC circuit, equal to the product of resistance and capacitance."
+    },
+    {
+      "term": "RC delay circuit",
+      "definition": "A circuit containing a resistor and a capacitor whose charging time provides a delay before a threshold voltage is reached."
+    },
+    {
+      "term": "555 timer",
+      "definition": "A versatile integrated circuit timer chip that can generate precise time delays (monostable) or oscillate continuously (astable)."
+    },
+    {
+      "term": "monostable",
+      "definition": "A 555 timer operating mode that produces a single output pulse of fixed duration when triggered; it has one stable state and returns to it after the pulse ends."
+    }
+  ],
+  "hero_keywords": [
+    "555 timer circuit breadboard",
+    "RC capacitor charging electronics",
+    "timer circuit components"
+  ],
+  "hero_image_caption": "A 555 timer IC wired in monostable mode, with timing resistor and capacitor visible."
+}

@@ -1,0 +1,415 @@
+{
+  "batch_id": "b01",
+  "subject": {
+    "name": "Electronics",
+    "slug": "electronics-eduqas",
+    "exam_board": "Eduqas",
+    "spec_code": "C490QS",
+    "target_audience": "free-tier"
+  },
+  "unit": {
+    "name": "Discovering Electronics",
+    "slug": "discovering-electronics",
+    "subtitle": "The fundamental building blocks: systems thinking, circuit laws, resistive components, switching, diodes and combinational logic.",
+    "accent": "#0e7490",
+    "accent_light": "#0e749022",
+    "accent_badge": "#0e749033",
+    "body_class": "unit-electronics-eduqas-1",
+    "lesson_count": 10
+  },
+  "subject_level_teaching_brief": {
+    "common_misconceptions": [
+      {
+        "topic": "Voltage and current units",
+        "misconception": "Students mix up volts, amps and ohms when labelling readings and answers, especially when units are not printed on the question.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2024 Q3 and Summer 2025 Q3"
+      },
+      {
+        "topic": "Block diagram design",
+        "misconception": "Students cannot sort sub-system blocks into input, processing and output categories, leading to randomised block placement (e.g. inserting a pulse generator where the specification gives no reason for one).",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2024 Q2 and Summer 2025 Q4"
+      },
+      {
+        "topic": "Zener voltage regulator",
+        "misconception": "Students try to calculate current using the power dissipation in the zener and series resistor, and believe the regulated voltage changes when the supply voltage rises — the whole point of regulation is that it does not.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2024 Q8 and Summer 2025 Q5"
+      },
+      {
+        "topic": "Protection diodes",
+        "misconception": "Students add a reverse-bias protection diode around any output device, including lamps and resistive loads. The diode is only needed for ELECTROMAGNETIC loads — relays, solenoids and motors.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2025 QER question (Component 1)"
+      },
+      {
+        "topic": "Transistor switch design",
+        "misconception": "Students cannot work backwards from required output current to base current to determine whether VIN is sufficient to saturate the transistor.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2023 Q7, Summer 2024 Q7, Summer 2025 Q8"
+      },
+      {
+        "topic": "NAND equivalent circuits",
+        "misconception": "Students do not know that two NAND gates back-to-back cancel out (double inversion), so cannot identify or simplify NAND-only implementations of standard logic.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2023 Q6, Summer 2024 Q4, Summer 2025 Q2"
+      },
+      {
+        "topic": "NAND configured as NOT",
+        "misconception": "When a NAND gate has one input tied high or has only one connected input, students still treat it as a two-input NAND rather than as a NOT gate.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2025 Q1(b)"
+      },
+      {
+        "topic": "Oscilloscope amplitude reading",
+        "misconception": "Students confuse amplitude with peak-to-peak voltage, and give units of ms for amplitude (or V for period). This propagates into a wrong frequency calculation.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2024 Q7 and Summer 2025 Q2"
+      },
+      {
+        "topic": "555 astable formula multipliers",
+        "misconception": "Students cannot apply k (10³) and μ (10⁻⁶) multipliers correctly inside the f = 1.44/(R₁+2R₂)C formula, leading to answers off by factors of 10⁶ or 10⁹.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2024 Q7"
+      },
+      {
+        "topic": "Two-bit counter output frequencies",
+        "misconception": "Students do not realise each flip-flop stage divides the input clock frequency by 2, so cannot fill in expected frequencies for Q₀ and Q₁ outputs.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2025 Q6"
+      },
+      {
+        "topic": "Decade counter mid-sequence reset",
+        "misconception": "Students miss the reset pulse mid-sequence and either show the counter stopping or continue counting up past the reset.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2024 Q10 and Summer 2025 Q5"
+      },
+      {
+        "topic": "Sensing circuit orientation",
+        "misconception": "Students swap the positions of the resistor and the thermistor (or LDR) in a voltage divider, producing the opposite output-vs-temperature behaviour to what the specification asks for.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2025 Q6"
+      },
+      {
+        "topic": "Half-wave rectifier output graph",
+        "misconception": "When asked to complete a half-wave rectifier output graph for a sine wave input, students either leave the question blank or invert the wrong half-cycle.",
+        "source": "Eduqas GCSE Electronics examiner report Summer 2025 Q7"
+      }
+    ],
+    "student_errors_by_question_type": {
+      "8 marks — Extended Response: Circuit Analysis and Evaluation": "QER is the most-omitted question on both papers every year. Even when attempted, students focus on the wrong feature of the circuit (e.g. arguing about a protection diode when the question is about whether the transistor can supply enough current). Teach students to first identify which sub-system the question is testing, then which calculation route confirms or refutes whether the design meets the specification. (Eduqas examiner reports 2023, 2024, 2025).",
+      "6 marks — Convert to NAND-Only Implementation": "Students leave NAND back-to-back chains without cancelling the double inversion, producing a circuit with redundant gates. Drill the explicit 3-step algorithm: redraw with NAND equivalents → mark all back-to-back NANDs → cancel them. (Eduqas examiner reports 2023 Q6, 2024 Q4, 2025 Q2).",
+      "4 marks — Calculation: Multi-Step": "Students copy printed equations incorrectly even when they are on the facing page of the question. They also forget to subtract the fixed resistance when sizing a variable resistor in a 555 timer circuit. (Eduqas examiner reports 2024 Q2, 2025 Q1, 2025 Q3).",
+      "3 marks — Read Off Graph or Oscilloscope": "Students give amplitude in ms or period in V, then propagate the unit error into a frequency calculation. Always state the time-base and voltage-base of the trace before reading values. (Eduqas examiner reports 2024 Q7, 2025 Q2)."
+    },
+    "topic_weighting_notes": [
+      "Component 1 and Component 2 each carry 40% of the qualification (80 marks each). Coverage is balanced; do not over-weight Component 1 just because it is taught first.",
+      "Within each component, AO1 + AO2 = 88% of marks (44% each), AO3 = 12%. The AO3 marks come almost entirely from the 8-mark QER question and the 'design this sub-system' parts.",
+      "Mathematical content accounts for a minimum of 20% of the whole qualification — six lessons across the build are calculation-heavy (Ohm's law, voltage dividers, MOSFET equation, op-amp gain, 555 timing, current-limiting LED resistors).",
+      "Synoptic questions appear on BOTH papers — Component 1 will ask about Component 2 content and vice versa. Plan questions in the later lessons (Component 1 lesson 10, Component 2 lessons 8-10) that lean on the other unit's concepts.",
+      "Highest-scoring topics (2025): circuit analysis, sensing circuits, MOSFETs, inverting amplifiers, oscilloscope traces. Lowest-scoring: block-diagram system design, NAND-only implementations, non-inverting amplifiers, D-type two-bit counters, 555 astable. Allocate more practice questions to the low-scoring topics."
+    ],
+    "current_spec_changes": [
+      "Specification is unchanged in content from 2017; Version 5 (December 2025) only updated NEA submission logistics (electronic upload from 2026) and entry codes. Subject content in Components 1 and 2 is identical to the version taught from 2017. (Eduqas GCSE Electronics specification version 5)",
+      "From Summer 2026 NEA samples are uploaded electronically and moderated online. This does not affect Component 1 or Component 2 revision content but teachers should clearly annotate mark schemes for online moderation. (Eduqas GCSE Electronics examiner report Summer 2025, p.12)"
+    ],
+    "pedagogical_notes": [
+      "Practical work is intrinsic to this specification — most exam questions sit in a practical context. Where possible, anchor explanations to a concrete circuit on breadboard (LDR sensor light, 555 LED flasher, comparator night-light) rather than abstract symbol arithmetic. (Eduqas Guidance for Teaching p.1, p.4)",
+      "EEF cognitive science guidance: 'retrieval practice was described by the EEF cognitive science guidance review as a cheap, easy-to-implement way of recapping material that might strengthen pupils' long term ability to remember key concepts'. Use the per-lesson 5-question knowledge checks to retrieve the equation set (V=IR, P=VI, MOSFET, 555, op-amp gain) repeatedly across the build. (EEF blog: Why bother with retrieval?)",
+      "Cognitive load theory: keep intrinsic load at the right level and strip out extraneous load. Electronics questions often combine 3-4 concepts (e.g. voltage divider + comparator + MOSFET + LED resistor in one circuit). Each lesson should isolate ONE new concept, then practice questions can integrate it with previously-taught material. (Structural Learning, cognitive load theory)",
+      "Eduqas Guidance for Teaching recommends teaching Component 1 in Year 10 and Component 2 in Year 11, with practical work integrated throughout. Lesson order in this plan follows the spec sequence so a student revising in either year can jump to the right unit. (Eduqas GCSE Electronics Guidance for Teaching p.2)",
+      "The Eduqas GCSE Electronics eBook (free on the resources webpage) is the canonical exemplar resource — content agents should mirror its level of depth and worked-example style but never reproduce its specific problems or wording. (Eduqas examiner report 2025 'further support' section)"
+    ]
+  },
+  "question_type_names": [
+    "1 mark — Multiple Choice",
+    "1 mark — Identify Symbol or Component",
+    "2 marks — State / Define",
+    "2 marks — Calculation: Single Step",
+    "3 marks — Complete the Truth Table",
+    "3 marks — Read Off Graph or Oscilloscope",
+    "4 marks — Calculation: Multi-Step",
+    "4 marks — Describe Circuit Operation",
+    "5 marks — Design a Sub-System",
+    "6 marks — Analyse Circuit with Calculation",
+    "6 marks — Convert to NAND-Only Implementation",
+    "8 marks — Extended Response: Circuit Analysis and Evaluation"
+  ],
+  "allowed_question_types_for_this_unit": [
+    "1 mark — Multiple Choice",
+    "1 mark — Identify Symbol or Component",
+    "2 marks — State / Define",
+    "2 marks — Calculation: Single Step",
+    "3 marks — Complete the Truth Table",
+    "3 marks — Read Off Graph or Oscilloscope",
+    "4 marks — Calculation: Multi-Step",
+    "4 marks — Describe Circuit Operation",
+    "5 marks — Design a Sub-System",
+    "6 marks — Analyse Circuit with Calculation",
+    "6 marks — Convert to NAND-Only Implementation",
+    "8 marks — Extended Response: Circuit Analysis and Evaluation"
+  ],
+  "lessons_in_batch": [
+    {
+      "lesson_id": "71f97e37-39b4-4e2d-bc71-df15cbcd078f",
+      "number": 1,
+      "title": "Electronic Systems and Sub-Systems",
+      "slug": "electronic-systems-and-sub-systems",
+      "description": "How any electronic product can be broken down into input, processing and output sub-systems.",
+      "spec_references": [
+        "1.1(a)",
+        "1.1(b)",
+        "1.1(c)"
+      ],
+      "section_markers": [
+        "sensing units",
+        "light sensor",
+        "temperature sensor",
+        "magnetic field",
+        "pressure",
+        "moisture",
+        "sound",
+        "rotation",
+        "signal processing",
+        "logic gates",
+        "latch",
+        "time delay",
+        "comparator",
+        "output devices",
+        "lamp",
+        "buzzer",
+        "solenoid",
+        "LED",
+        "actuator",
+        "servo",
+        "motor",
+        "loudspeaker",
+        "transducer driver",
+        "block diagram"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. This is the foundational lesson that the rest of the course hangs off. Examiner reports flag repeatedly that students cannot sort components into input/processing/output and produce far-too-random block diagrams (2024 Q2, 2025 Q4). Hammer the three-block framework with worked examples. Make clear that the pulse generator is BOTH an input sub-system and a timing element — but is NEVER placed into a voltage divider (Eduqas Guidance for Teaching, p.7)."
+      },
+      "suggested_question_types": []
+    },
+    {
+      "lesson_id": "2d4d4195-a124-4ac7-b735-5a64b7ad7e82",
+      "number": 2,
+      "title": "Circuit Symbols, Voltage and Current Rules",
+      "slug": "circuit-symbols-voltage-and-current-rules",
+      "description": "Drawing circuits with standard symbols and applying the voltage and current rules in series and parallel.",
+      "spec_references": [
+        "1.2(a)",
+        "1.2(b)",
+        "1.2(c)"
+      ],
+      "section_markers": [
+        "circuit symbol",
+        "series circuit",
+        "parallel circuit",
+        "current at a junction",
+        "Kirchhoff",
+        "sum of voltages",
+        "multimeter",
+        "voltmeter",
+        "ammeter",
+        "logic probe",
+        "oscilloscope",
+        "I-V characteristic",
+        "signal generator",
+        "sine wave",
+        "square wave",
+        "triangular wave"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. Examiners flag this every year as the highest-impact weakness: students mix up units (volts/amps/ohms) and misapply current/voltage rules. Open the lesson with a units-and-quantities table and use it as the spine. Multimeter selection (range and units) is exam-relevant. Use Appendix D symbol set throughout — students lose marks for non-standard symbols."
+      },
+      "suggested_question_types": []
+    },
+    {
+      "lesson_id": "e85daafc-7f9f-4f88-9109-f7a3d80e0596",
+      "number": 3,
+      "title": "Ohm's Law, Power and Energy in Circuits",
+      "slug": "ohms-law-power-and-energy-in-circuits",
+      "description": "Calculating voltage, current, resistance, power and energy transfer using the four core circuit equations.",
+      "spec_references": [
+        "1.2(d)"
+      ],
+      "section_markers": [
+        "Ohm's law",
+        "V=IR",
+        "power",
+        "P=VI",
+        "P=I squared R",
+        "P=V squared over R",
+        "energy transfer",
+        "E=Pt",
+        "watt",
+        "joule",
+        "rearrange equation",
+        "significant figures",
+        "standard form"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. Calculation-heavy. Use worked examples for all four equations with rearrangement to make any variable the subject. Mathematical Skills 3b (changing the subject) is referenced explicitly here. E=Pt is restricted to time-on-load contexts per Guidance for Teaching. There is some overlap with the Electricity topic in the Separate Sciences Physics build, but Electronics treats current/voltage rules in a more applied, circuit-design framing — content agent should generate fresh rather than copy."
+      },
+      "suggested_question_types": []
+    },
+    {
+      "lesson_id": "7dabcc39-788c-4836-a5fd-f267ae05c09e",
+      "number": 4,
+      "title": "Resistors in Series and Parallel; the E24 Series",
+      "slug": "resistors-in-series-and-parallel-the-e24-series",
+      "description": "How resistance combines in networks, plus selecting resistors using the colour code, E24 values, tolerance and power rating.",
+      "spec_references": [
+        "1.3(a)",
+        "1.3(b)",
+        "1.3(c)"
+      ],
+      "section_markers": [
+        "resistors in series",
+        "resistors in parallel",
+        "resistor network",
+        "4-band colour code",
+        "E24 series",
+        "tolerance",
+        "5 percent",
+        "1 percent",
+        "power rating",
+        "preferred values"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. Examiner report 2024 + 2025 confirm the resistor colour code itself is well understood by candidates — the weak point is picking E24 values to MAKE a specified resistance from two resistors (Component 2 2025 Q3). Build that skill explicitly. Show a printed E24 table (12 values per decade — the spec doesn't list E24 explicitly; standard values are 10, 11, 12, 13, 15, 16, 18, 20, 22, 24, 27, 30, 33, 36, 39, 43, 47, 51, 56, 62, 68, 75, 82, 91)."
+      },
+      "suggested_question_types": []
+    },
+    {
+      "lesson_id": "7cba0c7c-40ee-4493-ab15-a83f52533803",
+      "number": 5,
+      "title": "Sensing Circuits and Voltage Dividers",
+      "slug": "sensing-circuits-and-voltage-dividers",
+      "description": "Building voltage-divider sensing circuits with LDRs, thermistors, pressure, moisture and sound sensors.",
+      "spec_references": [
+        "1.3(d)",
+        "1.3(e)",
+        "1.3(f)",
+        "1.3(g)",
+        "1.3(h)"
+      ],
+      "section_markers": [
+        "voltage divider",
+        "LDR",
+        "light-dependent resistor",
+        "NTC thermistor",
+        "pressure sensor",
+        "moisture sensor",
+        "sound sensor",
+        "microphone",
+        "potentiometer",
+        "pulse generator",
+        "pull-up resistor",
+        "pull-down resistor",
+        "logic level",
+        "edge-triggered",
+        "current-limiting resistor",
+        "LED forward voltage"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. Walk through resistor-and-thermistor orientation explicitly — 2025 Q6 specifically flagged 'a minority were unable to get the orientation of the resistor and thermistor correct'. Show how reversing the two changes whether output voltage rises or falls with temperature. The LED forward voltage drop is given in the exam (Guidance for Teaching p.7); the skill being tested is rearranging V=IR to size the dropper resistor."
+      },
+      "suggested_question_types": []
+    },
+    {
+      "lesson_id": "92ab1a18-181b-4e3f-8452-32b4f641526e",
+      "number": 6,
+      "title": "Transistor and MOSFET Switching Circuits",
+      "slug": "transistor-and-mosfet-switching-circuits",
+      "description": "Using n-channel MOSFETs and npn transistors as electronic switches, including the MOSFET threshold equation.",
+      "spec_references": [
+        "1.4(a)",
+        "1.4(b)",
+        "1.4(c)",
+        "1.4(e)",
+        "1.4(f)"
+      ],
+      "section_markers": [
+        "npn transistor",
+        "MOSFET",
+        "n-channel enhancement mode",
+        "gate threshold voltage",
+        "VGS",
+        "VGSth",
+        "drain current",
+        "transconductance",
+        "gm",
+        "MOSFET equation",
+        "current gain",
+        "hFE",
+        "base current",
+        "collector current",
+        "saturation",
+        "VBE",
+        "VCE",
+        "0.7 volts",
+        "data sheet",
+        "ID",
+        "IC"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. Examiner reports flag the transistor switch as 'still not well understood' in 2023, 2024 AND 2025. The killer skill is working BACKWARDS from lamp current → base current → VIN sufficiency (2025 Q8). Build worked examples in both directions. Threshold voltage VGSth is assumed to be 3 V in calculations per Guidance for Teaching p.8. Gate current is taken as zero. Be explicit that npn transistors are for low-power loads, MOSFETs for high-power."
+      },
+      "suggested_question_types": []
+    },
+    {
+      "lesson_id": "47389eec-8abc-4500-92da-a1a93e7bcc42",
+      "number": 7,
+      "title": "Voltage Comparators",
+      "slug": "voltage-comparators",
+      "description": "How comparator ICs convert continuous sensor signals into a clean high or low digital output.",
+      "spec_references": [
+        "1.4(d)",
+        "1.4(e)",
+        "1.4(f)"
+      ],
+      "section_markers": [
+        "voltage comparator",
+        "comparator IC",
+        "inverting input",
+        "non-inverting input",
+        "reference voltage",
+        "open-loop gain",
+        "saturation output",
+        "rail-to-rail",
+        "switching threshold"
+      ],
+      "content_transfer": {
+        "transfer_score": "fresh",
+        "source_board": null,
+        "source_subject_slug": null,
+        "source_unit_slug": null,
+        "source_lesson_number": null,
+        "adaptation_notes": "Fresh build. Eduqas convention: inverting input gets the reference voltage, non-inverting input gets the sensor (Guidance for Teaching p.8). Use this orientation in every diagram. Comparators have limited output drive — explicit comparison with MOSFETs and npns is in 1.4(e). 2024 Q5 examiner comment: 'when given specific conditions for the comparator inputs, could not determine the output' — drill the output-state-from-input-comparison skill."
+      },
+      "suggested_question_types": []
+    }
+  ]
+}

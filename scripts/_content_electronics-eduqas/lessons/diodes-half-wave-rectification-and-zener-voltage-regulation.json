@@ -1,0 +1,185 @@
+{
+  "_lesson_id": "1a7a7e2f-46ef-413f-9a9c-67ce84455904",
+  "_lesson_number": 8,
+  "_unit_slug": "discovering-electronics",
+  "_lesson_slug": "diodes-half-wave-rectification-and-zener-voltage-regulation",
+  "description": "I-V characteristics of silicon diodes, flyback protection, and zener voltage regulators.",
+  "content_html": "<h2 data-narration-id=\"n1\">How Diodes Control Current Direction</h2>\n<p data-narration-id=\"n2\">Diodes are two-terminal semiconductor devices that allow current to flow in one direction only. They sit at the heart of rectifier circuits and protection sub-systems, making them one of the most widely-used components in electronic design. In this lesson you will meet three roles the diode plays: passing current in a circuit, protecting inductive loads from voltage spikes, and maintaining a fixed output voltage in a regulator.</p>\n\n<h2 data-narration-id=\"n3\">The I-V Characteristic of a Silicon Diode</h2>\n<p data-narration-id=\"n4\">A <dfn class=\"term\" data-def=\"A semiconductor device that permits conventional current to flow in one direction only, from anode to cathode.\">silicon diode</dfn> has an anode (positive terminal) and a cathode (negative terminal). When the anode is more positive than the cathode, the diode is <dfn class=\"term\" data-def=\"The condition in which the anode of a diode is at a higher potential than the cathode, allowing current to flow.\">forward biased</dfn>. Current does not flow immediately; instead, the applied voltage must overcome the <strong>forward voltage drop</strong> before significant current passes. For a silicon diode this threshold is approximately 0.7&nbsp;V. Below 0.7&nbsp;V the diode behaves almost like an open circuit; above 0.7&nbsp;V it conducts freely and the voltage across it stays close to 0.7&nbsp;V regardless of how much current flows.</p>\n<p data-narration-id=\"n5\">When the anode is more negative than the cathode the diode is <strong>reverse biased</strong>. Virtually no current flows &mdash; the diode blocks it. This one-way behaviour is what makes diodes useful for rectification and protection.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and write down the forward voltage drop of a silicon diode, then explain what happens to that voltage as current through the diode doubles.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A forward-biased silicon diode drops approximately <strong>0.7&nbsp;V</strong> across it when conducting. This value stays nearly constant over a wide range of currents &mdash; it does not increase significantly as current rises.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Protection Diodes for Inductive Loads</h2>\n<p data-narration-id=\"n8\">When a <dfn class=\"term\" data-def=\"A component such as a relay coil, solenoid or motor whose magnetic field stores energy that is released as a voltage spike when current is switched off.\">inductive load</dfn> is switched off, the collapsing magnetic field induces a large reverse voltage spike. This spike can exceed the breakdown voltage of a transistor switch and destroy it in microseconds. A <strong>flyback diode</strong> (also called a freewheeling or protection diode) is connected in reverse bias across the inductive load. During normal operation the diode is reverse biased and does not conduct. When the load is switched off and the spike appears, the diode becomes forward biased and provides a low-resistance path that safely dissipates the stored energy.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Which loads need a flyback diode &mdash; and which do not</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n9\">A flyback diode is <strong>only needed for electromagnetic (inductive) loads</strong>: relay coils, solenoids, and motors. These devices store energy in a magnetic field.</p>\n    <p data-narration-id=\"n10\">A flyback diode is <strong>not needed for resistive loads</strong> such as lamps, heaters, or resistors. Resistors dissipate energy immediately and produce no voltage spike when switched off. A common exam error is placing a protection diode around a lamp &mdash; examiners specifically penalise this because it shows a misunderstanding of why the diode is there.</p>\n    <p data-narration-id=\"n11\">Signal path for a relay circuit with flyback protection: Supply (+) &rarr; Transistor collector &rarr; Relay coil &rarr; Supply (&minus;). Flyback diode: cathode to collector end of relay coil, anode to the supply (&minus;) end &mdash; so it is reverse biased during normal operation.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">Half-Wave Rectification</h2>\n<p data-narration-id=\"n13\">Mains electricity is alternating current (AC) &mdash; the voltage repeatedly swings positive then negative. Many electronic circuits require direct current (DC). A single diode converts AC to a pulsating DC by blocking the negative half-cycles and allowing only the positive half-cycles to pass. This is called <dfn class=\"term\" data-def=\"The conversion of alternating current to a pulsating direct current by allowing only the positive (or negative) half-cycles of the AC waveform to pass through a single diode.\">half-wave rectification</dfn>.</p>\n<p data-narration-id=\"n14\">The output of a half-wave rectifier is a series of positive pulses separated by gaps where the negative half-cycles were removed. The peak output voltage is the AC peak voltage minus the 0.7&nbsp;V diode forward drop. This pulsating DC is usually smoothed by a capacitor to give a steadier supply, though smoothing is covered in a later unit.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Sketch the shape of the output waveform from a half-wave rectifier from memory &mdash; show which half-cycles are present and which are absent, and mark the 0.7 V diode drop.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>In a half-wave rectifier, the diode passes the <strong>positive half-cycles</strong> and blocks the negative half-cycles. The output waveform shows repeated positive humps with gaps between them, not a continuous signal.</p>\n</div>\n\n<h2 data-narration-id=\"n16\">Zener Diodes and Voltage Regulation</h2>\n<p data-narration-id=\"n17\">A <dfn class=\"term\" data-def=\"A heavily doped semiconductor diode designed to operate in reverse breakdown at a precise voltage, used to maintain a stable output voltage in a regulator circuit.\">zener diode</dfn> is a special type of diode that is deliberately operated in reverse breakdown. It is connected in reverse bias across the output of a power supply. When the reverse voltage reaches the zener&rsquo;s <strong>breakdown voltage</strong> (also called the zener voltage, \\(V_Z\\)), the diode conducts in reverse and clamps the voltage at exactly \\(V_Z\\). Zener diodes are available in standard ratings &mdash; common values include 3.3&nbsp;V, 5.1&nbsp;V, 5.6&nbsp;V, 6.2&nbsp;V, 9.1&nbsp;V, 12&nbsp;V and 15&nbsp;V.</p>\n\n<h2 data-narration-id=\"n18\">How the Zener Regulator Works</h2>\n<p data-narration-id=\"n19\">The regulator circuit consists of a series resistor \\(R_S\\) connected between the unregulated supply \\(V_{in}\\) and the zener diode (cathode up to the supply, anode to 0&nbsp;V). The output is taken across the zener. The series resistor drops the &ldquo;spare&rdquo; voltage \\((V_{in} - V_Z)\\) and limits the current through the zener to a safe value.</p>\n<p data-narration-id=\"n20\">The crucial point &mdash; and the most common exam misconception &mdash; is this: <strong>if \\(V_{in}\\) rises, the output voltage across the zener stays at \\(V_Z\\)</strong>. The extra voltage is absorbed by the series resistor. The zener achieves regulation by automatically increasing its conduction current to accommodate the higher input, keeping \\(V_{out} = V_Z\\) constant. The output does <em>not</em> change when the supply fluctuates &mdash; that is the entire purpose of regulation.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked example: sizing a zener regulator</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\">A 5.1&nbsp;V zener diode is used to regulate a 9&nbsp;V unregulated supply. The maximum zener current allowed is 40&nbsp;mA. Calculate the minimum series resistance required.</p>\n    <p data-narration-id=\"n22\">Step 1 &mdash; find the voltage across the series resistor: $$V_{R_S} = V_{in} - V_Z = 9 - 5.1 = 3.9 \\text{ V}$$</p>\n    <p data-narration-id=\"n23\">Step 2 &mdash; apply Ohm&rsquo;s law. Use the maximum allowed current to find the minimum resistance: $$R_S = \\frac{V_{R_S}}{I_{Z(max)}} = \\frac{3.9}{0.040} = 97.5 \\text{ }\\Omega$$</p>\n    <p data-narration-id=\"n24\">The nearest standard E24 value at or above 97.5&nbsp;&Omega; is <strong>100&nbsp;&Omega;</strong>, which keeps the zener current within its rating. Note: never use the zener power rating to calculate current in a regulator question &mdash; use \\(I = V/R\\) with the series resistor.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common errors to avoid</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n25\"><strong>Error 1 &mdash; adding a flyback diode to a lamp:</strong> Protection diodes are for electromagnetic loads only. A lamp is resistive; it stores no energy in a magnetic field. Adding a diode around it scores no marks and shows a conceptual error.</p>\n    <p data-narration-id=\"n26\"><strong>Error 2 &mdash; thinking \\(V_{out}\\) changes when \\(V_{in}\\) changes:</strong> The whole purpose of a zener regulator is that \\(V_{out} = V_Z\\) stays constant. If \\(V_{in}\\) increases, more current flows through \\(R_S\\), but \\(V_{out}\\) remains unchanged.</p>\n    <p data-narration-id=\"n27\"><strong>Error 3 &mdash; drawing the half-wave rectifier output incorrectly:</strong> Only positive half-cycles appear at the output. The negative half-cycles are absent (not inverted). The positive humps are separated by flat periods at 0&nbsp;V, not by negative humps.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">On questions about the zener voltage regulator, examiners regularly award marks for stating that the output voltage stays constant when the input voltage increases &mdash; make this your opening sentence in any &lsquo;explain how the circuit works&rsquo; question. For half-wave rectifier output sketches, draw positive humps only and leave the negative half-cycle intervals flat at 0&nbsp;V (not inverted). For protection-diode questions, always start by identifying whether the load is inductive (relay, solenoid, motor) or resistive (lamp) before deciding whether a diode is needed.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">A silicon diode has a forward voltage drop of 0.7&nbsp;V and conducts in one direction only; reverse bias blocks current flow.</li>\n  <li data-narration-id=\"n31\">A flyback protection diode is placed in reverse bias across inductive loads (relay coils, solenoids, motors) to suppress voltage spikes when the load is switched off &mdash; it is not needed for resistive loads such as lamps.</li>\n  <li data-narration-id=\"n32\">A zener diode operates in reverse breakdown to clamp the output voltage at its rated \\(V_Z\\); if the input voltage rises, the output stays constant &mdash; the extra voltage drops across the series resistor.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes a forward-biased silicon diode?\nA) Current flows freely from cathode to anode\nB) The voltage across the diode is approximately 0.7 V\nC) The diode blocks all current flow\nD) The diode requires at least 3 V before it conducts",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) The voltage across the diode is approximately 0.7 V [1 mark]"
+    },
+    {
+      "text": "A student designs a transistor switch circuit to control a relay coil. State whether a flyback protection diode should be connected across the relay coil. Give a reason for your answer.",
+      "type": "2 marks — State / Define",
+      "marks": "Yes, a flyback diode is needed. [1 mark]\nThe relay coil is an inductive load; when switched off, the collapsing magnetic field produces a reverse voltage spike that could damage the transistor. The diode provides a safe path to dissipate this energy. [1 mark for correct reason]"
+    },
+    {
+      "text": "A half-wave rectifier has an AC input with a peak voltage of 12 V. Calculate the peak output voltage of the rectifier. Show your working.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "Peak output = 12 - 0.7 = 11.3 V [1 mark for correct subtraction, 1 mark for correct answer with unit]"
+    },
+    {
+      "text": "A zener voltage regulator uses a 6.2 V zener diode. The unregulated input supply is 12 V and the maximum zener current must not exceed 50 mA.\n(a) Calculate the voltage across the series resistor.\n(b) Calculate the minimum value of series resistance needed.",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) Voltage across series resistor = 12 - 6.2 = 5.8 V [1 mark]\n(b) R = V / I = 5.8 / 0.050 = 116 ohms [1 mark for correct substitution, 1 mark for answer]\nNearest standard E24 value at or above 116 ohms is 120 ohms [1 mark]"
+    },
+    {
+      "text": "A student builds a zener regulator with a 5.1 V zener diode. The input voltage is increased from 9 V to 12 V. Describe and explain the effect on the output voltage.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "The output voltage remains at 5.1 V (unchanged). [1 mark]\nThe zener diode operates in reverse breakdown and clamps the output at its rated breakdown voltage. [1 mark]\nThe increase in input voltage causes the voltage across the series resistor to increase. [1 mark]\nThe additional current drawn through the series resistor increases, but the zener maintains a constant output voltage. [1 mark]"
+    },
+    {
+      "text": "A circuit uses a transistor switch to drive a 9 V DC motor. The transistor has a maximum collector current of 200 mA and the motor requires 150 mA to run. Analyse whether a flyback protection diode is needed, and describe where it should be placed in the circuit. Justify your answer with reference to the type of load and the risk to the transistor.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Correctly identifies the motor as an inductive load that stores energy in its magnetic field. States clearly that when the transistor switches off, the collapsing field induces a back-EMF that appears as a reverse voltage spike across the transistor. Explains that the flyback diode must be connected in reverse bias across the motor (cathode to the positive supply rail, anode to the collector) so it is non-conducting during normal operation but conducts to clamp the spike when the motor is switched off. Notes that without the diode the spike could exceed the transistor breakdown voltage and destroy it. Conclusion states the diode is necessary and positions it correctly.\nSecure: Identifies the motor as inductive, states a voltage spike occurs on switch-off, explains the diode placement correctly, and gives a reason why protection is needed.\nDeveloping: Correctly identifies the motor needs a protection diode but placement or explanation of the spike mechanism is incomplete.\nEmerging: States a diode is needed but without correct reasoning about the load type or the spike."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the approximate forward voltage drop across a conducting silicon diode?",
+      "options": [
+        "0.3 V",
+        "0.7 V",
+        "1.4 V",
+        "3.3 V"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "A zener regulator has a 9.1 V zener diode. The input supply rises from 12 V to 15 V. What happens to the output voltage?",
+      "options": [
+        "It rises to 12.1 V",
+        "It stays at 9.1 V",
+        "It falls to 6 V",
+        "It equals the input voltage minus 0.7 V"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A flyback protection diode is needed across a relay coil because the coil is an _____ load that produces a voltage spike when switched off.",
+      "options": [
+        "resistive",
+        "capacitive",
+        "inductive",
+        "optical"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In a half-wave rectifier, the diode allows only the _____ half-cycles of the AC input to reach the output.",
+      "options": [
+        "negative",
+        "both",
+        "positive",
+        "alternating"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description:",
+      "left": [
+        "Forward voltage drop",
+        "Zener voltage",
+        "Half-wave rectification"
+      ],
+      "right": [
+        "The voltage at which a zener diode conducts in reverse breakdown",
+        "Converting AC to pulsating DC using a single diode",
+        "The 0.7 V drop across a conducting silicon diode"
+      ],
+      "order": [
+        2,
+        0,
+        1
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the forward voltage drop of a conducting silicon diode?",
+      "a": "Approximately 0.7 V."
+    },
+    {
+      "q": "In which direction does conventional current flow through a diode?",
+      "a": "From anode to cathode (positive to negative terminal)."
+    },
+    {
+      "q": "What is reverse bias in a diode?",
+      "a": "When the cathode is at a higher potential than the anode, blocking current flow."
+    },
+    {
+      "q": "Why must a flyback diode be placed across a relay coil?",
+      "a": "To provide a safe path for the voltage spike produced when the coil magnetic field collapses."
+    },
+    {
+      "q": "Does a lamp require a flyback protection diode when switched off?",
+      "a": "No — a lamp is a resistive load and produces no voltage spike."
+    },
+    {
+      "q": "Which three types of electromagnetic load require a flyback protection diode?",
+      "a": "Relay coils, solenoids, and motors."
+    },
+    {
+      "q": "What does half-wave rectification convert AC into?",
+      "a": "A pulsating DC signal with only positive half-cycles present."
+    },
+    {
+      "q": "A half-wave rectifier has a peak AC input of 10 V. What is the peak output voltage?",
+      "a": "9.3 V (10 minus the 0.7 V diode forward drop)."
+    },
+    {
+      "q": "What is the purpose of a zener diode in a regulator circuit?",
+      "a": "To maintain a constant output voltage equal to its breakdown (zener) voltage."
+    },
+    {
+      "q": "A zener regulator input voltage increases. What happens to the output voltage?",
+      "a": "It stays constant at the zener voltage; extra voltage drops across the series resistor."
+    },
+    {
+      "q": "In a zener regulator, which component drops the excess voltage above the zener voltage?",
+      "a": "The series resistor."
+    },
+    {
+      "q": "How is the minimum series resistance in a zener regulator calculated?",
+      "a": "R = (Vin minus Vz) divided by Iz max, using Ohm's law."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "silicon diode",
+      "definition": "A semiconductor device that permits conventional current to flow in one direction only, from anode to cathode."
+    },
+    {
+      "term": "forward biased",
+      "definition": "The condition in which the anode of a diode is at a higher potential than the cathode, allowing current to flow."
+    },
+    {
+      "term": "inductive load",
+      "definition": "A component such as a relay coil, solenoid or motor whose magnetic field stores energy that is released as a voltage spike when current is switched off."
+    },
+    {
+      "term": "half-wave rectification",
+      "definition": "The conversion of alternating current to a pulsating direct current by allowing only the positive (or negative) half-cycles of the AC waveform to pass through a single diode."
+    },
+    {
+      "term": "zener diode",
+      "definition": "A heavily doped semiconductor diode designed to operate in reverse breakdown at a precise voltage, used to maintain a stable output voltage in a regulator circuit."
+    }
+  ],
+  "hero_keywords": [
+    "silicon diode electronics component",
+    "electronic circuit board",
+    "semiconductor components"
+  ],
+  "hero_image_caption": "Silicon diodes and components on an electronics circuit board"
+}

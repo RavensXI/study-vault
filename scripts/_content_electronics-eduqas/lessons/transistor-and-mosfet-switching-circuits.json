@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "92ab1a18-181b-4e3f-8452-32b4f641526e",
+  "_lesson_number": 6,
+  "_unit_slug": "discovering-electronics",
+  "_lesson_slug": "transistor-and-mosfet-switching-circuits",
+  "description": "Use npn transistors and n-channel MOSFETs as electronic switches, with calculations.",
+  "content_html": "<h2 data-narration-id=\"n1\">Switching High Currents from Low-Power Signals</h2>\n<p data-narration-id=\"n2\">A logic gate or comparator output can drive only a few milliamperes &mdash; not nearly enough to light a lamp, spin a motor or click a relay. A transistor or MOSFET acts as a current amplifier and electronic switch, letting a small control signal turn a much larger load current on or off. Examiners report this is poorly understood every year, so this lesson builds the skill in both directions: forward (given a signal, will the device switch?) and backward (given a required load current, what control signal do I need?).</p>\n\n<h2 data-narration-id=\"n3\">The npn Bipolar Transistor as a Switch</h2>\n<p data-narration-id=\"n4\">An <dfn class=\"term\" data-def=\"A bipolar junction transistor with n-type collector and emitter and p-type base. A small base current controls a much larger collector current.\">npn transistor</dfn> has three terminals: base (B), collector (C) and emitter (E). In a switching circuit:</p>\n<ul>\n  <li data-narration-id=\"n5\">The <strong>load</strong> (lamp, relay coil, etc.) is connected between the positive supply and the collector.</li>\n  <li data-narration-id=\"n6\">The <strong>emitter</strong> connects to 0 V (ground).</li>\n  <li data-narration-id=\"n7\">A <strong>base resistor</strong> connects the control signal to the base, limiting the base current to a safe value.</li>\n</ul>\n<p data-narration-id=\"n8\">The transistor turns on (saturates) when a sufficient base current flows. The base-emitter voltage \\(V_{BE}\\) is approximately 0.7 V when the transistor is on. Any control voltage above about 0.7 V (after the base resistor voltage drop) will start to turn the transistor on. To ensure full saturation, the base current \\(I_B\\) must be at least \\(I_C / h_{FE}\\), where \\(I_C\\) is the required collector (load) current and \\(h_{FE}\\) is the transistor&rsquo;s DC current gain from its data sheet.</p>\n<p data-narration-id=\"n9\">$$I_B = \\frac{I_C}{h_{FE}}$$</p>\n\n<div class=\"key-fact\" data-narration-id=\"n10\" data-revision-tip=\"Cover this. Write down what V_BE equals when an npn transistor is on, and write the equation linking base current, collector current and current gain.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>npn transistor switch: \\(V_{BE} \\approx 0.7 \\text{ V}\\) when on. Current gain \\(h_{FE} = I_C / I_B\\). To saturate the transistor: \\(I_B \\geq I_C / h_{FE}\\).</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Sizing the npn Base Resistor</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n11\"><strong>Problem:</strong> A transistor with \\(h_{FE}\\) = 100 must switch a lamp drawing 200 mA. The control signal is 5 V. Find the minimum base current needed and a suitable base resistor value.</p>\n    <p data-narration-id=\"n12\"><strong>Step 1 &mdash; minimum base current:</strong> \\(I_B = I_C / h_{FE} = 200 / 100 = 2 \\text{ mA} = 0.002 \\text{ A}\\)</p>\n    <p data-narration-id=\"n13\"><strong>Step 2 &mdash; voltage across base resistor:</strong> \\(V_{RB} = V_{IN} - V_{BE} = 5 - 0.7 = 4.3 \\text{ V}\\)</p>\n    <p data-narration-id=\"n14\"><strong>Step 3 &mdash; base resistor:</strong> \\(R_B = V_{RB} / I_B = 4.3 / 0.002 = 2150 \\text{ }\\Omega\\). Nearest E24 value below 2150 &Omega; is 2.2 k&Omega; (rounding down keeps \\(I_B\\) at or above the minimum; 2.2 k&Omega; gives 4.3/2200 = 1.95 mA &mdash; just below; use 2 k&Omega; or accept 2.2 k&Omega; with a note that \\(I_B\\) is marginally insufficient; in practice, use \\(R_B\\) just below the calculated value). Check: is 1.95 mA sufficient? \\(h_{FE} \\times I_B = 100 \\times 0.00195 = 195 \\text{ mA}\\) &mdash; very close to 200 mA. For safety, choose a base resistor of 1.8 k&Omega; to give a comfortable margin.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n15\">The n-Channel Enhancement-Mode MOSFET</h2>\n<p data-narration-id=\"n16\">An <dfn class=\"term\" data-def=\"A voltage-controlled transistor that turns on when the gate-to-source voltage exceeds the threshold voltage. Gate current is effectively zero; used for high-current or high-speed switching.\">n-channel MOSFET</dfn> has three terminals: gate (G), drain (D) and source (S). Unlike the bipolar transistor, the MOSFET is voltage-controlled: almost no gate current flows, so the control circuit does not need to supply base current. This makes MOSFETs ideal for driving high-power loads.</p>\n<p data-narration-id=\"n17\">The MOSFET turns on when the gate-to-source voltage \\(V_{GS}\\) exceeds the threshold voltage \\(V_{GS(th)}\\). For calculations, the threshold is taken as 3 V. When fully on (in the linear region), the drain current \\(I_D\\) is controlled by the transconductance:</p>\n<p data-narration-id=\"n18\">$$I_D = g_m (V_{GS} - V_{GS(th)})$$</p>\n<p data-narration-id=\"n19\">where \\(g_m\\) is the <dfn class=\"term\" data-def=\"Transconductance: a measure of how effectively the gate voltage controls drain current in a MOSFET, in siemens (S) or amps per volt.\">transconductance</dfn> in siemens (S or A/V). In a typical exam question \\(g_m\\) is given; you substitute \\(V_{GS}\\) and \\(V_{GS(th)} = 3 \\text{ V}\\) to find \\(I_D\\).</p>\n\n<div class=\"key-fact\" data-narration-id=\"n20\" data-revision-tip=\"Without looking: write the MOSFET drain current equation. State the assumed value of V_GS(th) used in calculations and explain why gate current is taken as zero.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>MOSFET: \\(I_D = g_m(V_{GS} - V_{GS(th)})\\). Threshold \\(V_{GS(th)} = 3 \\text{ V}\\) (assumed). Gate current = 0. Turns on when \\(V_{GS} > 3 \\text{ V}\\).</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: MOSFET Drain Current Calculation</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\"><strong>Problem:</strong> An n-channel MOSFET has \\(g_m = 0.5 \\text{ S}\\) and \\(V_{GS(th)} = 3 \\text{ V}\\). The gate voltage is 7 V. Calculate the drain current.</p>\n    <p data-narration-id=\"n22\">\\(I_D = g_m(V_{GS} - V_{GS(th)}) = 0.5 \\times (7 - 3) = 0.5 \\times 4 = 2 \\text{ A}\\)</p>\n    <p data-narration-id=\"n23\">This 2 A drain current could drive a motor. A bipolar transistor base circuit would need \\(I_B = 2/h_{FE}\\) &mdash; at \\(h_{FE}\\) = 100, that&rsquo;s 20 mA just to bias the base, which overloads a logic gate output. The MOSFET avoids this entirely because its gate draws negligible current.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n24\">Choosing between npn and MOSFET</h2>\n<p data-narration-id=\"n25\">Use an npn bipolar transistor for low-to-medium current loads (up to around 100&ndash;200 mA) where the control circuit can supply a few milliamps of base current. Use an n-channel MOSFET for high-current loads (motors, solenoids) or where the control source (such as a logic gate output) cannot supply even a small base current. Both are placed between the processing sub-system and the output device as a transducer driver.</p>\n<p data-narration-id=\"n26\">Electromagnetic loads (relays, solenoids, motors) need a protection diode connected in <em>reverse bias</em> across the load. When the transistor or MOSFET switches off, the coil&rsquo;s collapsing magnetic field generates a large voltage spike (back-EMF) that can destroy the switch device. The diode clamps this spike. Note: a protection diode is only needed for electromagnetic loads, not for resistive loads like lamps.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n27\">The killer exam skill is working backwards: &ldquo;The lamp needs 300 mA; the transistor has \\(h_{FE}\\) = 150; the control signal is 5 V &mdash; is 5 V enough to saturate the transistor?&rdquo; Calculate \\(I_B = 300/150 = 2 \\text{ mA}\\), then find the base resistor \\(R_B = (5 - 0.7)/0.002 = 2150 \\text{ }\\Omega\\). If the question then asks &ldquo;will the transistor switch on?&rdquo;, check whether the base current through the chosen resistor exceeds \\(I_C / h_{FE}\\). Always show \\(V_{BE} = 0.7 \\text{ V}\\) explicitly &mdash; omitting it costs a mark. For MOSFET questions, state \\(V_{GS(th)} = 3 \\text{ V}\\) and use the \\(I_D = g_m(V_{GS} - V_{GS(th)})\\) equation directly &mdash; gate current = 0 is an assumption to state, not derive.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">npn transistor switch: \\(V_{BE} \\approx 0.7 \\text{ V}\\) when on; saturation needs \\(I_B \\geq I_C / h_{FE}\\). Base resistor: \\(R_B = (V_{IN} - 0.7) / I_B\\).</li>\n  <li data-narration-id=\"n30\">n-channel MOSFET: voltage-controlled (gate current = 0); turns on when \\(V_{GS} > V_{GS(th)} = 3 \\text{ V}\\); drain current \\(I_D = g_m(V_{GS} - V_{GS(th)})\\).</li>\n  <li data-narration-id=\"n31\">Use npn for low-power loads; use MOSFET for high-power loads or when the control source cannot supply base current. Electromagnetic loads always need a reverse-bias protection diode.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following statements correctly describes an n-channel enhancement-mode MOSFET?\nA) It requires a base current to turn on\nB) It turns on when V_GS exceeds the threshold voltage, with negligible gate current\nC) It uses a p-type channel to carry drain current\nD) It has a base-emitter voltage of 0.7 V when saturated",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) It turns on when V_GS exceeds the threshold voltage, with negligible gate current [1 mark]"
+    },
+    {
+      "text": "An npn transistor has a current gain h_FE of 120. The collector current required to switch a relay is 180 mA. Calculate the minimum base current needed to saturate the transistor.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(I_B = I_C / h_{FE} = 180 / 120 = 1.5 \\text{ mA}\\) [1 mark for equation; 1 mark for correct answer with unit]"
+    },
+    {
+      "text": "A transistor switching circuit uses a 5 V control signal and has a base resistor of 3.3 kΩ. V_BE = 0.7 V. The transistor has h_FE = 200 and the load requires 400 mA.\n(a) Calculate the actual base current through the 3.3 kΩ resistor.\n(b) Calculate the minimum base current needed to saturate the transistor.\n(c) Determine whether the transistor will fully saturate.",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) \\(V_{RB} = 5 - 0.7 = 4.3 \\text{ V}\\); \\(I_B = 4.3/3300 = 1.30 \\text{ mA}\\) [1 mark]\n(b) \\(I_{B(min)} = 400/200 = 2.0 \\text{ mA}\\) [1 mark]\n(c) 1.30 mA < 2.0 mA, so the transistor will NOT fully saturate; the base resistor is too large and must be reduced [1 mark for correct comparison; 1 mark for justified conclusion]"
+    },
+    {
+      "text": "An n-channel MOSFET has a transconductance g_m of 0.4 S and a threshold voltage V_GS(th) of 3 V. The gate is connected to a 9 V supply. Calculate the drain current.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(I_D = g_m(V_{GS} - V_{GS(th)}) = 0.4 \\times (9 - 3) = 0.4 \\times 6 = 2.4 \\text{ A}\\) [1 mark for equation; 1 mark for correct answer with unit]"
+    },
+    {
+      "text": "Explain why a reverse-bias protection diode is connected across the coil of a relay in a transistor switching circuit, but is not needed when the load is a lamp.",
+      "type": "2 marks — State / Define",
+      "marks": "When the transistor switches off, the relay coil's collapsing magnetic field generates a large back-EMF voltage spike [1 mark]. The diode clamps this spike, protecting the transistor; a lamp is resistive and produces no back-EMF, so no protection diode is needed [1 mark]."
+    },
+    {
+      "text": "A student designs a circuit to control a 12 V motor drawing 1.5 A using an npn transistor with h_FE = 100. The control signal is provided by a logic gate output that can supply a maximum of 10 mA. Evaluate whether the npn transistor is suitable for this application and, if not, suggest and justify an alternative switching device.",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: Calculate minimum base current required: I_B = I_C / h_FE = 1500/100 = 15 mA. The logic gate can supply only 10 mA. Since 10 mA < 15 mA, the transistor will not fully saturate — it cannot switch the full 1.5 A to the motor. This means the transistor operates in the active region, dissipating excessive power and potentially overheating or failing. Recommend an n-channel MOSFET: gate current is effectively zero, so the logic gate output easily drives the gate; the MOSFET will switch the full motor current without the gate control circuit being overloaded. Additional point: include a reverse-bias protection diode across the motor (electromagnetic load). Justified conclusion: npn transistor unsuitable due to base current mismatch; MOSFET is the correct device for this high-current, logic-driven application.\nSecure: Correct calculation showing 15 mA > 10 mA; conclusion that npn will not saturate; MOSFET recommended; protection diode mentioned.\nDeveloping: I_B calculation attempted with minor error; direction of unsuitability identified; MOSFET suggested without full justification.\nEmerging: Recognises a current problem exists but calculation incorrect or absent; some relevant engineering point made."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the approximate base-emitter voltage V_BE of an npn transistor when it is switched on (saturated)?",
+      "options": [
+        "0 V",
+        "0.3 V",
+        "0.7 V",
+        "1.4 V"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "An npn transistor has h_FE = 50 and needs to switch a load of 250 mA. What is the minimum base current required?",
+      "options": [
+        "500 mA",
+        "25 mA",
+        "5 mA",
+        "50 mA"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In a MOSFET, the gate-to-source voltage must exceed the _____ voltage for the device to turn on.",
+      "options": [
+        "collector",
+        "threshold",
+        "base-emitter",
+        "drain"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "The MOSFET drain current equation is I_D = g_m × (V_GS − _____).",
+      "options": [
+        "V_DS",
+        "V_GS(th)",
+        "V_BE",
+        "V_CC"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each transistor terminal to its function in a switching circuit:",
+      "left": [
+        "Base",
+        "Collector",
+        "Emitter"
+      ],
+      "right": [
+        "Receives the small control current (via base resistor)",
+        "Connected to the load and positive supply",
+        "Connected to 0 V (ground)"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the approximate V_BE of an npn transistor when switched on?",
+      "a": "0.7 V."
+    },
+    {
+      "q": "Write the equation linking collector current, base current and current gain for a bipolar transistor.",
+      "a": "h_FE = I_C / I_B (rearranged: I_B = I_C / h_FE)."
+    },
+    {
+      "q": "In a MOSFET switching circuit, what assumed value is used for V_GS(th) in calculations?",
+      "a": "3 V."
+    },
+    {
+      "q": "Write the MOSFET drain current equation.",
+      "a": "I_D = g_m × (V_GS − V_GS(th))."
+    },
+    {
+      "q": "Why is gate current taken as zero for a MOSFET?",
+      "a": "The gate is insulated from the channel, so no current flows through it."
+    },
+    {
+      "q": "Which load type requires a reverse-bias protection diode across it when switched by a transistor?",
+      "a": "Electromagnetic loads: relays, solenoids, motors."
+    },
+    {
+      "q": "Why does a motor need a protection diode but a lamp does not?",
+      "a": "A motor coil generates a back-EMF spike when switched off; a lamp is resistive and does not."
+    },
+    {
+      "q": "For which applications is an npn transistor preferred over a MOSFET?",
+      "a": "Low-to-medium current loads where the control circuit can supply a few mA of base current."
+    },
+    {
+      "q": "For which applications is a MOSFET preferred over an npn transistor?",
+      "a": "High-current loads or when the control source cannot supply base current."
+    },
+    {
+      "q": "An npn transistor has h_FE = 80 and must switch 160 mA. What minimum base current is needed?",
+      "a": "I_B = 160 / 80 = 2 mA."
+    },
+    {
+      "q": "Where is the load connected in an npn transistor switching circuit?",
+      "a": "Between the positive supply and the collector."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "npn transistor",
+      "definition": "A bipolar junction transistor with n-type collector and emitter and p-type base. A small base current controls a much larger collector current."
+    },
+    {
+      "term": "n-channel MOSFET",
+      "definition": "A voltage-controlled transistor that turns on when the gate-to-source voltage exceeds the threshold voltage. Gate current is effectively zero; used for high-current or high-speed switching."
+    },
+    {
+      "term": "transconductance",
+      "definition": "A measure of how effectively the gate voltage controls drain current in a MOSFET, in siemens (S) or amps per volt."
+    }
+  ],
+  "hero_keywords": [
+    "transistor MOSFET electronic switch circuit",
+    "electronics switching components",
+    "transistor circuit board electronic"
+  ],
+  "hero_image_caption": "Transistors and MOSFETs used as electronic switches on a circuit board"
+}

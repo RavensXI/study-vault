@@ -1,0 +1,151 @@
+{
+  "_lesson_id": "d80d1b60-25a2-412e-af77-5eb34eb4f1e5",
+  "_lesson_number": 6,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "d-type-flip-flops-latches-and-up-counters",
+  "description": "How rising-edge-triggered D-type flip-flops work as data latches and 1-bit and 2-bit binary counters.",
+  "content_html": "<h2 data-narration-id=\"n1\">Storing a Single Bit</h2>\n<p data-narration-id=\"n2\">Logic gates process information instantly &mdash; their output changes as soon as their inputs change. But digital systems also need to <em>store</em> information: a counter must remember its current count between clock pulses, and a memory circuit must hold data after the input is removed. The simplest storage element in digital electronics is the <dfn class=\"term\" data-def=\"A digital circuit that can store one bit of data; its output retains its last state until a clock edge causes it to sample its D input.\">D-type flip-flop</dfn>.</p>\n\n<h2 data-narration-id=\"n3\">The D-Type Flip-Flop</h2>\n<p data-narration-id=\"n4\">A D-type flip-flop has three inputs &mdash; D (data), CLK (clock) &mdash; and two complementary outputs, Q and \\(\\overline{Q}\\) (Q-bar). The key property is that it is <dfn class=\"term\" data-def=\"A flip-flop that only changes its outputs at the moment a clock signal transitions from LOW to HIGH (the rising edge), ignoring the D input at all other times.\">rising-edge triggered</dfn>: the flip-flop samples the D input <em>only</em> at the instant the clock signal transitions from LOW to HIGH. At all other times, changes on D have no effect.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Cover this and write the D-type rule in one sentence from memory: what happens at the rising edge, and what happens between clock edges?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>At every rising clock edge: Q copies the value of D. Between rising edges: Q holds its stored value regardless of what D does. \\(\\overline{Q}\\) is always the logical opposite of Q.</p>\n</div>\n\n<p data-narration-id=\"n6\">In symbol form, the D-type is drawn as a rectangle with D and CLK on the left, Q on the right, and \\(\\overline{Q}\\) on the right with a small circle (bubble) to indicate inversion. The clock input is marked with a small triangle to indicate edge-triggering.</p>\n\n<h2 data-narration-id=\"n7\">Timing Diagram for a D-Type Flip-Flop</h2>\n<p data-narration-id=\"n8\">A timing diagram shows the D, CLK, Q and \\(\\overline{Q}\\) signals plotted against time. Reading one systematically is a core exam skill.</p>\n<p data-narration-id=\"n9\">Consider the following sequence (read each rising clock edge left to right):</p>\n\n<table data-narration-id=\"n10\">\n  <thead><tr><th>Rising edge</th><th>D at that moment</th><th>Q after edge</th><th>Q-bar after edge</th></tr></thead>\n  <tbody>\n    <tr><td>1st</td><td>1</td><td>1</td><td>0</td></tr>\n    <tr><td>2nd</td><td>0</td><td>0</td><td>1</td></tr>\n    <tr><td>3rd</td><td>0</td><td>0</td><td>1</td></tr>\n    <tr><td>4th</td><td>1</td><td>1</td><td>0</td></tr>\n  </tbody>\n</table>\n<p data-narration-id=\"n11\">Between any two consecutive rising edges, Q stays constant &mdash; even if D changes. This is the &ldquo;latch&rdquo; behaviour: the flip-flop has stored the bit from the previous rising edge and holds it until the next one.</p>\n\n<h2 data-narration-id=\"n12\">The D-Type as a Data Latch</h2>\n<p data-narration-id=\"n13\">When a D-type flip-flop is used to hold a data bit so it can be read later, it is described as a <dfn class=\"term\" data-def=\"A D-type flip-flop used to store a single bit of data so that it remains available at the output after the input has changed.\">data latch</dfn>. The flip-flop &ldquo;latches on&rdquo; to the value of D at the rising clock edge and holds it. This is useful when a sensor produces a brief pulse that would otherwise be lost before a processor can act on it.</p>\n\n<h2 data-narration-id=\"n14\">Binary Counters from D-Type Flip-Flops</h2>\n<p data-narration-id=\"n15\">If the \\(\\overline{Q}\\) output of a D-type flip-flop is connected back to its own D input, the circuit divides the input clock frequency by 2. Each rising clock edge causes the flip-flop to toggle &mdash; the output alternates between 0 and 1 every clock cycle. This is a 1-bit <dfn class=\"term\" data-def=\"A circuit built from flip-flops that counts upward in binary, advancing by one step on each clock pulse.\">binary up-counter</dfn>.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n16\" data-revision-tip=\"Close this and explain: how do you connect a D-type flip-flop to make it divide the clock frequency by 2? Write the connection from memory.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>To make a 1-bit binary counter: connect \\(\\overline{Q}\\) back to D. Each rising clock edge causes Q to toggle. The output at Q has <strong>half the frequency</strong> of the clock input.</p>\n</div>\n\n<h2 data-narration-id=\"n17\">The 2-Bit Counter</h2>\n<p data-narration-id=\"n18\">Two D-type flip-flops connected in series form a 2-bit counter. The Q output of the first flip-flop (Q0) clocks the second flip-flop. Both flip-flops have their \\(\\overline{Q}\\) connected back to their own D input.</p>\n<p data-narration-id=\"n19\">The result: Q0 toggles on every rising edge of the external clock (CLK). Q1 toggles on every rising edge of Q0. So:</p>\n\n<table data-narration-id=\"n20\">\n  <thead><tr><th>Clock count</th><th>Q1</th><th>Q0</th><th>Binary value</th></tr></thead>\n  <tbody>\n    <tr><td>0</td><td>0</td><td>0</td><td>0</td></tr>\n    <tr><td>1</td><td>0</td><td>1</td><td>1</td></tr>\n    <tr><td>2</td><td>1</td><td>0</td><td>2</td></tr>\n    <tr><td>3</td><td>1</td><td>1</td><td>3</td></tr>\n    <tr><td>4</td><td>0</td><td>0</td><td>0 (reset)</td></tr>\n  </tbody>\n</table>\n<p data-narration-id=\"n21\">The counter cycles through 0, 1, 2, 3, then resets to 0 &mdash; a modulo-4 count. This is a 2-bit binary up-counter. Q0 is the least significant bit (LSB); Q1 is the most significant bit (MSB).</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Frequency Division: Worked Numerical Example</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n22\">A clock with a frequency of 4 Hz feeds a 2-bit counter made from two D-type flip-flops.</p>\n    <p data-narration-id=\"n23\">First flip-flop (Q0): toggles at every rising clock edge. Frequency of Q0 = \\(4 / 2 = 2\\) Hz.</p>\n    <p data-narration-id=\"n24\">Second flip-flop (Q1): toggles at every rising edge of Q0. Frequency of Q1 = \\(2 / 2 = 1\\) Hz.</p>\n    <p data-narration-id=\"n25\">The pattern: each stage divides the previous frequency by 2. If Q0 is connected to an LED, that LED flashes at 2 Hz. If Q1 is connected to an LED, it flashes at 1 Hz &mdash; half the rate of Q0&rsquo;s LED. This frequency-halving at each stage is the key fact examiners test.</p>\n    <p data-narration-id=\"n26\">If the exam asks for the expected frequency of Q0 and Q1 from a 12 Hz clock:\n    <br>Q0 = 12 / 2 = 6 Hz\n    <br>Q1 = 6 / 2 = 3 Hz</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Reading a 2-Bit Counter Timing Diagram</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n27\">A 2-bit counter timing diagram shows four waveforms stacked vertically: CLK (external clock), Q0 (fastest, half CLK frequency), Q1 (slowest, half Q0 frequency).</p>\n    <p data-narration-id=\"n28\">CLK: a square wave toggling continuously. Q0: toggles at each rising edge of CLK &mdash; its period is twice that of CLK. Q1: toggles at each rising edge of Q0 &mdash; its period is twice that of Q0 (four times CLK).</p>\n    <p data-narration-id=\"n29\">To check: count CLK pulses between rising edges of Q1. There should be exactly 4 CLK pulses per Q1 cycle. If you see 4, you have drawn the diagram correctly. Common error: drawing Q1 toggling on Q0&rsquo;s falling edge instead of its rising edge.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n30\">The 2-bit counter is one of the most poorly answered topics. Drill these two facts: (1) each D-type stage divides the frequency by 2; (2) the second flip-flop clocks from Q0, not from the external clock. In a timing diagram question, check that Q1 toggles only on the rising edges of Q0. If a question asks for the LED flash frequencies, state Q0 = CLK&divide;2 and Q1 = CLK&divide;4 clearly before substituting numbers.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n31\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n32\">A D-type flip-flop copies D to Q only at the rising clock edge; between edges Q holds its stored value. \\(\\overline{Q}\\) is always the opposite of Q.</li>\n  <li data-narration-id=\"n33\">Connecting \\(\\overline{Q}\\) back to D creates a 1-bit binary counter that divides the clock frequency by 2.</li>\n  <li data-narration-id=\"n34\">Two such flip-flops in series form a 2-bit counter: Q0 runs at CLK&divide;2 and Q1 at CLK&divide;4; the counter sequences through 0, 1, 2, 3 before repeating.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A D-type flip-flop has D = 1 when the clock rises. What is the state of Q immediately after the rising edge?\nA) 0\nB) Unchanged\nC) 1\nD) Depends on Q-bar",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) 1 [1 mark]"
+    },
+    {
+      "text": "State what is meant by saying a D-type flip-flop is 'rising-edge triggered'.",
+      "type": "2 marks — State / Define",
+      "marks": "The flip-flop only samples (or responds to) its D input [1] at the instant the clock signal transitions from LOW to HIGH [1]."
+    },
+    {
+      "text": "A D-type flip-flop has its Q-bar output connected back to its D input. The external clock runs at 8 Hz. State the frequency of the Q output and the frequency of the Q-bar output.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "Q frequency = 8 / 2 = 4 Hz [1]. Q-bar frequency = 4 Hz (Q-bar is the complement of Q and has the same frequency) [1]."
+    },
+    {
+      "text": "A 2-bit binary up-counter is clocked at 20 Hz.\n(a) State the frequency of the Q0 output. [1 mark]\n(b) State the frequency of the Q1 output. [1 mark]\n(c) Complete the count sequence: the counter cycles through states ___, ___, ___, ___ before repeating. [2 marks]",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "(a) Q0 = 20 / 2 = 10 Hz [1].\n(b) Q1 = 10 / 2 = 5 Hz [1].\n(c) 0 (Q1=0,Q0=0), 1 (Q1=0,Q0=1), 2 (Q1=1,Q0=0), 3 (Q1=1,Q0=1) [1 mark for first two; 1 mark for last two in correct order]."
+    },
+    {
+      "text": "Draw and complete the timing diagram for a 2-bit binary counter with a clock running at 4 Hz for 1 second. Show waveforms for CLK, Q0 and Q1. (Describe the waveform you would draw rather than producing an image.)",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "CLK: 4 complete cycles in 1 second (period = 0.25 s) [1]. Q0: 2 complete cycles in 1 second (period = 0.5 s), toggling on each rising edge of CLK [1]. Q1: 1 complete cycle in 1 second (period = 1 s), toggling on each rising edge of Q0 [1]. Q1 is HIGH for the second half of the 1-second interval (from the moment Q0 has its second rising edge) [1]."
+    },
+    {
+      "text": "A 2-bit binary counter is built from two D-type flip-flops. Two LEDs are connected, one to Q0 and one to Q1. The clock is provided by a 555 astable at approximately 10 Hz.\n(a) Calculate the expected flash rate of the Q0 LED. [1 mark]\n(b) Calculate the expected flash rate of the Q1 LED. [1 mark]\n(c) A student observes that the Q1 LED flashes at the same rate as the Q0 LED. Suggest a likely wiring fault and explain why it causes this behaviour. [3 marks]\n(d) Explain why it is important that the Q-bar output is connected back to the D input in each flip-flop stage, rather than the Q output. [3 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) 10/2 = 5 Hz; (b) 10/4 = 2.5 Hz; (c) Q1 LED flashes at the same rate as Q0 suggests the second flip-flop is being clocked directly from the external clock rather than from Q0 — both then divide the main clock by 2 and run at the same rate; (d) connecting Q-bar to D creates a toggle: at each rising edge, D is the opposite of current Q, so Q flips. If Q were connected back to D instead, D would always equal Q at the clock edge, so Q would never change (it would be stuck at its initial state).\nSecure: (a), (b) correct; (c) fault identified; (d) Q vs Q-bar logic explained but not fully.\nDeveloping: (a), (b) correct; qualitative parts incomplete.\nEmerging: Only (a) and (b) attempted."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "When does a rising-edge triggered D-type flip-flop transfer its D input to Q?",
+      "options": [
+        "Continuously while D is HIGH",
+        "At the falling edge of the clock",
+        "At the rising edge of the clock",
+        "Whenever Q-bar changes"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "A 2-bit binary counter is clocked at 16 Hz. What frequency does Q1 output?",
+      "options": [
+        "16 Hz",
+        "8 Hz",
+        "4 Hz",
+        "2 Hz"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In a D-type flip-flop configured as a 1-bit counter, the _____ output is connected back to the D input.",
+      "options": ["Q", "Q-bar", "CLK", "VCC"],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "Each D-type flip-flop stage in a binary counter divides the input clock frequency by _____.",
+      "options": ["4", "3", "2", "10"],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each signal in a 2-bit counter to its frequency relative to the clock:",
+      "left": ["CLK", "Q0 output", "Q1 output"],
+      "right": [
+        "Full clock frequency (e.g. 8 Hz)",
+        "Half clock frequency (e.g. 4 Hz)",
+        "Quarter clock frequency (e.g. 2 Hz)"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does a rising-edge-triggered D-type flip-flop do at the rising clock edge?",
+      "a": "It copies the value of D to Q."
+    },
+    {
+      "q": "What does Q hold between rising clock edges in a D-type flip-flop?",
+      "a": "Its previously stored value (it latches the last sampled bit)."
+    },
+    {
+      "q": "What is Q-bar always equal to in a D-type flip-flop?",
+      "a": "The logical opposite (complement) of Q."
+    },
+    {
+      "q": "How do you connect a D-type flip-flop to make a 1-bit binary counter?",
+      "a": "Connect Q-bar back to the D input."
+    },
+    {
+      "q": "A 1-bit binary counter is clocked at 10 Hz. What is the frequency of Q?",
+      "a": "5 Hz (each stage divides frequency by 2)."
+    },
+    {
+      "q": "In a 2-bit binary counter, what clocks the second flip-flop?",
+      "a": "The Q0 output of the first flip-flop."
+    },
+    {
+      "q": "A clock runs at 12 Hz. In a 2-bit counter, what frequencies do Q0 and Q1 produce?",
+      "a": "Q0 = 6 Hz; Q1 = 3 Hz."
+    },
+    {
+      "q": "A 2-bit binary counter counts through states: 00, 01, 10, 11, then ___.",
+      "a": "00 (resets back to 0)."
+    },
+    {
+      "q": "What is meant by a data latch?",
+      "a": "A D-type flip-flop used to store a bit so it remains available after the input changes."
+    },
+    {
+      "q": "Why would connecting Q (not Q-bar) back to D prevent a D-type from toggling?",
+      "a": "D would equal Q at every clock edge, so Q would never change — it gets stuck in its current state."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "D-type flip-flop",
+      "definition": "A digital circuit that can store one bit of data; its output retains its last state until a clock edge causes it to sample its D input."
+    },
+    {
+      "term": "rising-edge triggered",
+      "definition": "A flip-flop that only changes its outputs at the moment a clock signal transitions from LOW to HIGH, ignoring the D input at all other times."
+    },
+    {
+      "term": "data latch",
+      "definition": "A D-type flip-flop used to store a single bit of data so that it remains available at the output after the input has changed."
+    },
+    {
+      "term": "binary up-counter",
+      "definition": "A circuit built from flip-flops that counts upward in binary, advancing by one step on each clock pulse."
+    }
+  ],
+  "hero_keywords": ["digital logic counter circuit", "flip-flop IC electronics", "binary counter LED electronics"],
+  "hero_image_caption": "Digital counter ICs and LEDs on a breadboard, demonstrating binary counting sequences."
+}

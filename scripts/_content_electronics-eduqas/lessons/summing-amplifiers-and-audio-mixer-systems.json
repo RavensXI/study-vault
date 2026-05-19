@@ -1,0 +1,147 @@
+{
+  "_lesson_id": "33022f8c-875d-4b57-a9ac-d46038fb197b",
+  "_lesson_number": 3,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "summing-amplifiers-and-audio-mixer-systems",
+  "description": "Using a summing op-amp to combine multiple signals, and the full audio amplifier chain block diagram.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Combine Signals?</h2>\n<p data-narration-id=\"n2\">Many practical systems need to mix signals from several sources before amplifying them. A public address (PA) system, for example, might take input from a microphone, a keyboard and a guitar simultaneously, blend them into a single audio signal, and then boost it to drive loudspeakers. A single inverting op-amp with multiple input resistors performs this job &mdash; it is called a <dfn class=\"term\" data-def=\"An op-amp circuit with two or more input resistors that adds the input voltages (scaled by resistor ratios) and produces a single combined output.\">summing amplifier</dfn>.</p>\n\n<h2 data-narration-id=\"n3\">How a Summing Amplifier Works</h2>\n<p data-narration-id=\"n4\">The summing amplifier is an extension of the inverting amplifier. Instead of one input resistor \\(R_1\\), it has two or more: \\(R_1, R_2, R_3\\) and so on, each carrying a different input signal. All of these resistors connect to the same point &mdash; the inverting (&ldquo;&minus;&rdquo;) input of the op-amp, which the negative feedback holds at virtual earth (approximately 0 V). The feedback resistor \\(R_f\\) still runs from the output back to the inverting input.</p>\n<p data-narration-id=\"n5\">Because the inverting input is at virtual earth, each input resistor independently controls how much of its voltage appears in the output. The output is the inverted, weighted sum of all inputs. If all input resistors are equal (and equal to \\(R_f\\)), the output is simply the inverted sum of all input voltages.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and write the summing amplifier output equation for two equal inputs from memory. Then explain in one sentence why the output has a negative sign.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>For a summing amplifier with equal input resistors (all equal to \\(R\\)) and feedback resistor \\(R_f\\):</p>\n  <p>$$V_{OUT} = -\\frac{R_f}{R} \\left(V_1 + V_2 + V_3 + \\ldots \\right)$$</p>\n  <p>The output is the inverted, scaled sum of all inputs. The negative sign comes from the inverting input &mdash; the same phase inversion as a single inverting amplifier.</p>\n</div>\n\n<p data-narration-id=\"n7\">The specification requires a minimum of two input signals. Up to four inputs may be used. Each input can have a different resistor value to apply a different weighting (gain) to that channel &mdash; just as a mixing desk fader adjusts how loud each instrument is in the final mix.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Two-Input Summing Amplifier</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">A summing amplifier has \\(R_1 = R_2 = 10\\) k&Omega; and \\(R_f = 10\\) k&Omega;. Two inputs are applied: \\(V_1 = +0.3\\) V and \\(V_2 = +0.5\\) V.</p>\n    <p data-narration-id=\"n9\">Step 1 &mdash; Check that all resistors are equal and equal to \\(R_f\\):</p>\n    <p data-narration-id=\"n10\">Since \\(R_1 = R_2 = R_f = 10\\) k&Omega;, the gain per input is \\(-R_f / R_1 = -1\\).</p>\n    <p data-narration-id=\"n11\">Step 2 &mdash; Calculate the output:</p>\n    <p data-narration-id=\"n12\">$$V_{OUT} = -(V_1 + V_2) = -(0.3 + 0.5) = -0.8\\text{ V}$$</p>\n    <p data-narration-id=\"n13\">If instead \\(R_f = 22\\) k&Omega; (with \\(R_1 = R_2 = 10\\) k&Omega;), the gain per input becomes \\(-22/10 = -2.2\\):</p>\n    <p data-narration-id=\"n14\">$$V_{OUT} = -2.2 \\times (0.3 + 0.5) = -2.2 \\times 0.8 = -1.76\\text{ V}$$</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n15\">The Audio Amplifier Block Diagram</h2>\n<p data-narration-id=\"n16\">A <dfn class=\"term\" data-def=\"A diagram using labelled rectangles to show how subsystems connect together to form a complete system, without showing the internal circuitry of each block.\">block diagram</dfn> represents a complete system as a chain of labelled rectangles. Each block is a subsystem; arrows show the direction of signal flow. The signal chain for a PA system follows a logical sequence from transducer to output.</p>\n\n<p data-narration-id=\"n17\">The full signal path for a typical audio PA system looks like this:</p>\n\n<table data-narration-id=\"n18\">\n  <thead><tr><th>Stage</th><th>Block name</th><th>Function</th></tr></thead>\n  <tbody>\n    <tr><td>1</td><td>Microphone / instrument</td><td>Converts sound to a small electrical signal (typically 1&ndash;100 mV)</td></tr>\n    <tr><td>2</td><td><dfn class=\"term\" data-def=\"A low-noise amplifier stage that boosts a weak transducer signal to a level suitable for further processing.\">Preamplifier</dfn></td><td>Amplifies the weak signal to a usable level (e.g. 100 mV to 1 V)</td></tr>\n    <tr><td>3</td><td>Summing amplifier (mixer)</td><td>Combines signals from multiple preamplified sources into one</td></tr>\n    <tr><td>4</td><td>Power amplifier</td><td>Boosts current to drive the loudspeaker</td></tr>\n    <tr><td>5</td><td>Loudspeaker</td><td>Converts the electrical signal back to sound</td></tr>\n  </tbody>\n</table>\n\n<p data-narration-id=\"n19\">A common exam mistake is placing the mixer before the preamplifiers. This gives the wrong answer. The preamplifiers come first because the raw transducer signal is too weak to mix cleanly; preamplification brings each channel up to a similar level before the mixer combines them.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n20\" data-revision-tip=\"Close this and write the five-block audio chain in order, from microphone to loudspeaker, without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The audio amplifier chain order: <strong>Signal source &rarr; Preamplifier(s) &rarr; Summing amplifier (mixer) &rarr; Power amplifier &rarr; Loudspeaker.</strong> The summing amplifier always sits between the preamps and the power amp.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Errors in Block Diagram Questions</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n21\">Examiners have reported that block diagram questions are among the worst answered on both papers. The most common errors are:</p>\n    <ul>\n      <li data-narration-id=\"n22\">Placing the mixer (summing amplifier) before the preamplifiers &mdash; wrong because the signals are too weak to mix first.</li>\n      <li data-narration-id=\"n23\">Placing the power amplifier before the mixer &mdash; wrong because only one combined signal feeds the power amp.</li>\n      <li data-narration-id=\"n24\">Adding a block (such as a pulse generator) that has no purpose in an audio chain &mdash; read the specification carefully and only include blocks that are justified.</li>\n      <li data-narration-id=\"n25\">Forgetting to label each block clearly &mdash; &ldquo;amplifier&rdquo; alone is not sufficient if the question asks you to distinguish preamp from power amp.</li>\n    </ul>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n26\">Summing amplifiers appear across many practical systems beyond audio: data-acquisition circuits combine sensor readings; digital-to-analogue converters (DACs) sum binary-weighted voltages; automatic control systems blend error signals from different sensors. The key skill is recognising when multiple inputs need to be combined before the next processing stage.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n27\">For block diagram questions, list the signal chain in order before drawing it: source &rarr; preamp &rarr; mixer &rarr; power amp &rarr; speaker. Never swap the mixer and preamp positions. When asked to calculate summing amplifier output, remember the negative sign &mdash; the output is inverted. If the question gives different resistor values for different inputs, calculate each input&rsquo;s contribution separately using \\(-R_f / R_n \\times V_n\\) and then add the results.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">A summing amplifier uses two or more input resistors at the inverting (&ldquo;&minus;&rdquo;) input of an op-amp; the output is \\(V_{OUT} = -(R_f/R)(V_1 + V_2 + \\ldots)\\) when all input resistors are equal.</li>\n  <li data-narration-id=\"n30\">The audio chain order is: signal source &rarr; preamplifier(s) &rarr; summing amplifier (mixer) &rarr; power amplifier &rarr; loudspeaker.</li>\n  <li data-narration-id=\"n31\">The preamplifiers always come before the mixer &mdash; raw transducer signals are too weak to mix cleanly without prior amplification.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A summing amplifier has two equal input resistors R1 = R2 = 10 kΩ and a feedback resistor Rf = 10 kΩ. V1 = +0.4 V and V2 = +0.6 V. Calculate the output voltage.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(V_{OUT} = -(R_f/R)(V_1 + V_2) = -1 \\times (0.4 + 0.6) = -1\\) V [1 mark for correct formula application; 1 mark for −1 V with sign]."
+    },
+    {
+      "text": "State what is meant by a preamplifier in an audio system.",
+      "type": "2 marks — State / Define",
+      "marks": "A low-noise amplifier stage [1] that boosts the weak signal from a transducer to a level suitable for further processing [1]."
+    },
+    {
+      "text": "A student draws a block diagram for a two-microphone PA system in this order:\nMicrophone 1 → Summing amplifier → Preamplifier 1 → Power amplifier → Loudspeaker\nMicrophone 2 → Summing amplifier\nIdentify the error in this block diagram and explain why it is wrong.",
+      "type": "4 marks — Describe Circuit Operation",
+      "marks": "The preamplifiers are placed after the summing amplifier [1], which is incorrect [1]. The microphone signals are too weak to be mixed cleanly without preamplification first [1]. The correct order places the preamplifiers before the summing amplifier [1]."
+    },
+    {
+      "text": "A summing amplifier has three inputs. R1 = 10 kΩ, R2 = 20 kΩ, R3 = 10 kΩ, and Rf = 10 kΩ. The inputs are V1 = +0.5 V, V2 = +1.0 V, V3 = +0.3 V.\n(a) Calculate the contribution from each input to the output voltage. [3 marks]\n(b) Calculate the total output voltage. [1 mark]",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) Contribution from V1: \\(-(10/10) \\times 0.5 = -0.5\\) V [1]; from V2: \\(-(10/20) \\times 1.0 = -0.5\\) V [1]; from V3: \\(-(10/10) \\times 0.3 = -0.3\\) V [1].\n(b) Total: \\(V_{OUT} = -0.5 + (-0.5) + (-0.3) = -1.3\\) V [1]."
+    },
+    {
+      "text": "Design a summing amplifier that combines two audio signals with equal gain of magnitude 5. Choose suitable resistor values (minimum 1 kΩ). Describe the circuit connections.",
+      "type": "5 marks — Design a Sub-System",
+      "marks": "Choose R1 = R2 = 10 kΩ (or any value ≥ 1 kΩ) [1]. Choose Rf = 5 × R1 = 50 kΩ (or equivalent ratio) [1]. V1 connects through R1 to the inverting (−) input [1]; V2 connects through R2 to the same inverting (−) input [1]; Rf connects from the output back to the inverting (−) input; non-inverting (+) input connected to 0 V [1]."
+    },
+    {
+      "text": "A recording studio has three microphone channels, each preceded by a preamplifier with a gain of 20. The three preamplifier outputs feed into a summing amplifier with equal input resistors of 22 kΩ and a feedback resistor of 22 kΩ. The summing amplifier output feeds a power amplifier with a gain of 15.\n(a) Calculate the output of one preamplifier when its microphone produces 10 mV. [2 marks]\n(b) If all three preamplifiers produce the same output, calculate the summing amplifier output. [2 marks]\n(c) Calculate the final power amplifier output. [2 marks]\n(d) The power amplifier is supplied from ±15 V. Evaluate whether clipping will occur. [2 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: (a) 20 × 10 mV = 200 mV; (b) summing amp gain = −22/22 = −1 per input; output = −(0.2 + 0.2 + 0.2) = −0.6 V; (c) power amp output = 15 × 0.6 = 9 V; (d) 9 V < 15 V supply, so no clipping. All steps shown with correct signs.\nSecure: Three parts correct; minor sign error or missing unit in one part.\nDeveloping: (a) and (c) correct but summing calculation or clipping analysis flawed.\nEmerging: At least one multiplication correct but chain not followed through."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In a summing amplifier with equal input resistors, what is the output voltage when V1 = +0.2 V and V2 = +0.3 V (Rf = R)?",
+      "options": [
+        "+0.5 V",
+        "−0.5 V",
+        "+0.1 V",
+        "−0.1 V"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "In the correct audio amplifier signal chain, where does the summing amplifier (mixer) sit?",
+      "options": [
+        "Before the preamplifiers",
+        "After the power amplifier",
+        "Between the preamplifiers and the power amplifier",
+        "Between the microphones and the preamplifiers"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A summing amplifier is an extension of the _____ amplifier, so its output is always phase-inverted.",
+      "options": ["non-inverting", "differential", "inverting", "power"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In an audio PA system, the stage that converts sound into a small electrical signal is called the _____.",
+      "options": ["power amplifier", "loudspeaker", "preamplifier", "transducer (microphone)"],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each block to its role in the audio chain:",
+      "left": ["Preamplifier", "Summing amplifier", "Power amplifier"],
+      "right": [
+        "Boosts a weak transducer signal to a usable level",
+        "Combines multiple channel signals into one",
+        "Supplies high current to drive the loudspeaker"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does a summing amplifier do?",
+      "a": "It adds (and inverts) multiple input voltages into a single output signal."
+    },
+    {
+      "q": "A summing amplifier with R1 = R2 = Rf. V1 = 0.4 V, V2 = 0.6 V. What is V_OUT?",
+      "a": "−1.0 V"
+    },
+    {
+      "q": "Where in an audio chain does the summing amplifier (mixer) sit?",
+      "a": "After the preamplifiers, before the power amplifier."
+    },
+    {
+      "q": "Why must preamplifiers come before the mixer in an audio system?",
+      "a": "Transducer signals are too weak to mix cleanly without amplification first."
+    },
+    {
+      "q": "What is a preamplifier?",
+      "a": "A low-noise amplifier that boosts a weak transducer signal to a usable level."
+    },
+    {
+      "q": "What is the maximum number of inputs a summing amplifier may have in this specification?",
+      "a": "Four"
+    },
+    {
+      "q": "What does a block diagram use to represent each subsystem?",
+      "a": "A labelled rectangle with arrows showing signal flow."
+    },
+    {
+      "q": "In a summing amplifier, which input of the op-amp do all the input resistors connect to?",
+      "a": "The inverting (−) input."
+    },
+    {
+      "q": "Name the five stages of a PA system signal chain in order.",
+      "a": "Microphone → Preamplifier → Mixer (summing amp) → Power amp → Loudspeaker."
+    },
+    {
+      "q": "A summing amplifier has R1 = 10 kΩ, Rf = 30 kΩ, one input V1 = +0.2 V. What is V_OUT?",
+      "a": "−0.6 V (gain per input = −30/10 = −3)"
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "summing amplifier",
+      "definition": "An op-amp circuit with two or more input resistors that adds the input voltages (scaled by resistor ratios) and produces a single combined output."
+    },
+    {
+      "term": "block diagram",
+      "definition": "A diagram using labelled rectangles to show how subsystems connect together to form a complete system, without showing the internal circuitry of each block."
+    },
+    {
+      "term": "preamplifier",
+      "definition": "A low-noise amplifier stage that boosts a weak transducer signal to a level suitable for further processing."
+    }
+  ],
+  "hero_keywords": ["audio mixing desk studio electronics", "mixing console sound engineer", "electronic mixer circuit"],
+  "hero_image_caption": "A mixing console combines multiple audio channels before amplification — the summing amplifier in practice."
+}

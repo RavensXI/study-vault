@@ -1,0 +1,177 @@
+{
+  "_lesson_id": "ebe03127-fef9-4801-a66e-d5b326e943d5",
+  "_lesson_number": 1,
+  "_unit_slug": "application-of-electronics",
+  "_lesson_slug": "amplifiers-gain-bandwidth-and-clipping",
+  "description": "Gain, bandwidth and what clipping distortion looks like on a voltage-time trace.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Does an Amplifier Do?</h2>\n<p data-narration-id=\"n2\">An amplifier is a circuit that increases the power of a signal. Almost every electronic system contains one: a microphone produces a tiny voltage that must be boosted before it can drive a loudspeaker. In your exam you will meet two main types &mdash; <dfn class=\"term\" data-def=\"An amplifier stage that raises the voltage of a weak input signal before it reaches a power stage.\">voltage amplifier</dfn> and <dfn class=\"term\" data-def=\"An amplifier stage that supplies the high current needed to drive a loudspeaker or motor.\">power amplifier</dfn>. Voltage amplifiers deal with small signals; power amplifiers deliver the current needed to drive an output device.</p>\n\n<h2 data-narration-id=\"n3\">Voltage Gain</h2>\n<p data-narration-id=\"n4\">The key number for any amplifier is its <dfn class=\"term\" data-def=\"The ratio of output voltage to input voltage for an amplifier, often written as G or A_v.\">voltage gain</dfn>. It tells you how many times larger the output voltage is compared with the input voltage.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Cover this and write the voltage gain formula from memory, then state what each symbol means.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Voltage gain is defined as:</p>\n  <p>$$G = \\frac{V_{OUT}}{V_{IN}}$$</p>\n  <p>Gain has no units &mdash; it is a pure ratio. An amplifier with \\(G = 50\\) produces an output 50 times larger than its input.</p>\n</div>\n\n<p data-narration-id=\"n6\">If an amplifier receives an input of 20 mV and produces an output of 1 V, its voltage gain is:</p>\n<p data-narration-id=\"n7\">$$G = \\frac{1\\text{ V}}{0.02\\text{ V}} = 50$$</p>\n<p data-narration-id=\"n8\">You can rearrange the equation to find any missing quantity. To find the output voltage: \\(V_{OUT} = G \\times V_{IN}\\). To find the input voltage: \\(V_{IN} = \\frac{V_{OUT}}{G}\\).</p>\n\n<h2 data-narration-id=\"n9\">Bandwidth and the Gain&ndash;Frequency Graph</h2>\n<p data-narration-id=\"n10\">Real amplifiers do not work equally well at all frequencies. At very low and very high frequencies, the gain falls. A <dfn class=\"term\" data-def=\"A graph showing how an amplifier's gain changes as the input frequency is varied, used to find its bandwidth.\">gain&ndash;frequency graph</dfn> (also called a frequency response graph) shows this. The horizontal axis is frequency (often on a logarithmic scale) and the vertical axis is gain.</p>\n<p data-narration-id=\"n11\">The useful range of frequencies over which the amplifier works effectively is called the <dfn class=\"term\" data-def=\"The range of frequencies over which an amplifier's gain is at least 70% of its maximum value.\">bandwidth</dfn>. The bandwidth is defined between the two frequencies at which the gain drops to 70% of its maximum value. These points are sometimes called the &ldquo;half-power points&rdquo; or &ldquo;&minus;3 dB points.&rdquo;</p>\n\n<div class=\"key-fact\" data-narration-id=\"n12\" data-revision-tip=\"Close this and explain: how do you identify the bandwidth from a gain-frequency graph? Write the 70% rule in your own words.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Bandwidth is the range of frequencies between the lower and upper frequencies at which gain falls to <strong>70% of the maximum gain</strong>. It is measured in hertz (Hz) or kilohertz (kHz).</p>\n</div>\n\n<p data-narration-id=\"n13\">For example, if an amplifier has a maximum gain of 100 and the gain is at or above 70 between 200 Hz and 20 kHz, then the bandwidth is \\(20\\,000 - 200 = 19\\,800\\) Hz, or approximately 19.8 kHz. Audio amplifiers need a bandwidth covering at least 20 Hz to 20 kHz to reproduce the full range of human hearing faithfully.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>The Gain&ndash;Bandwidth Trade-off</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\">Amplifiers based on operational amplifiers have a fixed gain&ndash;bandwidth product. This means that if you increase the gain, the bandwidth automatically narrows, and vice versa. This trade-off is an important design constraint.</p>\n    <p data-narration-id=\"n15\">For example, if the gain&ndash;bandwidth product of an op-amp is 1 MHz:\n    <br>&bull; At a gain of 10, the bandwidth is 100 kHz.\n    <br>&bull; At a gain of 100, the bandwidth falls to 10 kHz.\n    <br>&bull; At a gain of 1000, the bandwidth is only 1 kHz.</p>\n    <p data-narration-id=\"n16\">This is why high-gain amplifiers are only used in applications that need a narrow band of frequencies, such as a single radio station. A general-purpose audio amplifier uses a lower gain to keep a wide enough bandwidth for all audio frequencies.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n17\">Signal Waveforms on a Voltage&ndash;Time Graph</h2>\n<p data-narration-id=\"n18\">An amplifier should reproduce the <em>shape</em> of its input signal, just with a larger amplitude. The most common waveforms you will see on a voltage&ndash;time graph are:</p>\n<ul>\n  <li data-narration-id=\"n19\"><strong>Sine wave</strong> &mdash; a smooth, continuously varying curve. Audio signals and AC mains are sine waves.</li>\n  <li data-narration-id=\"n20\"><strong>Square wave</strong> &mdash; alternates sharply between two voltage levels. Used in digital clocking circuits.</li>\n  <li data-narration-id=\"n21\"><strong>Triangular wave</strong> &mdash; rises and falls linearly between two levels. Used in some oscillator and waveform generator circuits.</li>\n</ul>\n\n<h2 data-narration-id=\"n22\">Clipping Distortion</h2>\n<p data-narration-id=\"n23\">Every amplifier is powered by a supply voltage &mdash; typically \\(+V_{CC}\\) and \\(-V_{CC}\\) for a dual-supply op-amp. The output cannot exceed these rails. When the mathematically correct output would be larger than the supply voltage, the top (or bottom) of the waveform is cut flat. This is called <dfn class=\"term\" data-def=\"A form of distortion where the peaks of the output waveform are flattened because the output has hit the supply voltage limits.\">clipping</dfn>.</p>\n<p data-narration-id=\"n24\">On a voltage&ndash;time graph, clipping is easy to spot: a sine wave that should have curved peaks instead has flat tops and/or flat bottoms at the supply rail voltage. For example, an amplifier running from &plusmn;10 V supplies will clip any output that tries to go above +10 V or below &minus;10 V. A common exam error is failing to spot this and drawing the output as a perfectly shaped but oversize sine wave &mdash; always check whether the output amplitude is within the supply rails.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Identifying Clipping</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n25\">An inverting amplifier has a gain of &minus;20 and is powered from &plusmn;10 V supplies. The input is a sine wave with a peak amplitude of 0.8 V.</p>\n    <p data-narration-id=\"n26\">Step 1 &mdash; Calculate the expected output peak: \\(V_{OUT,peak} = |G| \\times V_{IN,peak} = 20 \\times 0.8 = 16\\) V.</p>\n    <p data-narration-id=\"n27\">Step 2 &mdash; Compare with supply rails: the output would need &plusmn;16 V, but the supply is only &plusmn;10 V.</p>\n    <p data-narration-id=\"n28\">Step 3 &mdash; Conclusion: the output is clipped. On the voltage&ndash;time graph, the sine wave peaks are flattened at +10 V and &minus;10 V. The waveform resembles a square wave at the top and bottom, with the sinusoidal shape visible only in the middle portion where the output is within &plusmn;10 V.</p>\n    <p data-narration-id=\"n29\">How to prevent clipping: reduce the input amplitude, reduce the gain, or increase the supply voltage.</p>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n30\">Clipping introduces <dfn class=\"term\" data-def=\"Any unwanted change to the shape of a signal waveform that alters the signal&rsquo;s quality.\">distortion</dfn>. For audio, this produces a harsh, buzzing sound because the flat tops of the clipped wave contain many high-frequency harmonic components not present in the original sine wave. The next lesson explores how op-amp circuits control gain precisely through feedback resistors.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n31\">When a question asks you to draw or describe the output waveform, always check whether the calculated output amplitude exceeds the supply rails. If it does, draw flat tops and/or bottoms at the rail voltage &mdash; not a perfectly shaped sine wave. Examiners have specifically noted that candidates lose marks by omitting the clipping detail. Also, bandwidth is defined at 70% of maximum gain, not 50% &mdash; make sure you use 70% when reading off a gain&ndash;frequency graph.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n32\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n33\">Voltage gain \\(G = V_{OUT} / V_{IN}\\) is a unitless ratio. Rearrange it to find output voltage or input voltage as needed.</li>\n  <li data-narration-id=\"n34\">Bandwidth is the range of frequencies over which gain stays at or above 70% of its maximum value; increasing gain reduces bandwidth.</li>\n  <li data-narration-id=\"n35\">Clipping distortion occurs when the required output exceeds the supply rail &mdash; on a voltage&ndash;time graph the peaks are flattened at the supply voltage.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "An amplifier has an input voltage of 50 mV and an output voltage of 2 V. What is the voltage gain?\nA) 4\nB) 0.025\nC) 40\nD) 400",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) 40 [1 mark]"
+    },
+    {
+      "text": "State what is meant by the bandwidth of an amplifier.",
+      "type": "2 marks — State / Define",
+      "marks": "The range of frequencies [1] over which the gain is at or above 70% of the maximum gain [1]."
+    },
+    {
+      "text": "An amplifier has a voltage gain of 35. The input signal has a peak voltage of 120 mV. Calculate the peak output voltage.",
+      "type": "2 marks — Calculation: Single Step",
+      "marks": "\\(V_{OUT} = G \\times V_{IN} = 35 \\times 0.12\\) [1] \\(= 4.2\\) V [1]."
+    },
+    {
+      "text": "A non-inverting amplifier is powered from \\(\\pm 9\\) V supplies and has a gain of 40. The input is a 400 mV peak sine wave.\n(a) Calculate the expected output peak voltage. [2 marks]\n(b) Explain what happens to the output waveform and why. [2 marks]",
+      "type": "4 marks — Calculation: Multi-Step",
+      "marks": "(a) \\(V_{OUT} = 40 \\times 0.4 = 16\\) V [1]; expected peak is 16 V [1].\n(b) The output is clipped [1] because 16 V exceeds the \\(\\pm 9\\) V supply rails, so the peaks are flattened at \\(+9\\) V and \\(-9\\) V [1]."
+    },
+    {
+      "text": "A gain–frequency graph shows that an amplifier has a maximum gain of 80. The gain is above 56 between 150 Hz and 18 kHz.\n(a) Show that 56 is approximately 70% of the maximum gain. [1 mark]\n(b) State the bandwidth of this amplifier. [2 marks]",
+      "type": "3 marks — Read Off Graph or Oscilloscope",
+      "marks": "(a) \\(0.70 \\times 80 = 56\\) [1].\n(b) Bandwidth \\(= 18{,}000 - 150 = 17{,}850\\) Hz [1]; accept 17.85 kHz [1]."
+    },
+    {
+      "text": "An audio system uses two amplifier stages. The first stage has a gain of 10 and the second stage has a gain of 25. A technician measures the output of the second stage as 4.5 V peak.\n(a) Calculate the output of the first stage. [2 marks]\n(b) Calculate the input voltage to the first stage. [2 marks]\n(c) The power amplifier following these stages is powered from \\(\\pm 15\\) V supplies. Explain why clipping is not expected at this point. [2 marks]\n(d) Suggest two ways to eliminate clipping if it were observed. [2 marks]",
+      "type": "8 marks — Extended Response: Circuit Analysis and Evaluation",
+      "marks": "Mastering: All four parts answered correctly with clear working and reasoning: (a) \\(V_1 = 4.5 / 25 = 0.18\\) V; (b) \\(V_{IN} = 0.18 / 10 = 18\\) mV; (c) output (4.5 V) is well within the \\(\\pm 15\\) V supply, so clipping does not occur; (d) any two of: reduce input amplitude, reduce gain, increase supply voltage.\nSecure: Three parts correctly answered with minor errors in one.\nDeveloping: Two parts correctly answered; clipping explanation present but vague.\nEmerging: Only the multiplication steps attempted; no qualitative reasoning."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the formula for voltage gain?",
+      "options": [
+        "G = V_IN / V_OUT",
+        "G = V_OUT / V_IN",
+        "G = V_OUT × V_IN",
+        "G = V_IN + V_OUT"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "At what percentage of maximum gain is bandwidth measured?",
+      "options": [
+        "50%",
+        "63%",
+        "70%",
+        "90%"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Clipping occurs when the output voltage hits the _____ of the amplifier.",
+      "options": [
+        "input resistor",
+        "bandwidth limit",
+        "supply rail",
+        "gain curve"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "On a voltage–time graph, clipping makes the peaks of a sine wave appear _____.",
+      "options": [
+        "pointed",
+        "inverted",
+        "flattened",
+        "doubled"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description:",
+      "left": ["Voltage gain", "Bandwidth", "Clipping"],
+      "right": [
+        "The ratio of output voltage to input voltage",
+        "The frequency range over which gain stays above 70% of maximum",
+        "Distortion caused by the output reaching the supply rail"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the formula for voltage gain?",
+      "a": "G = V_OUT / V_IN"
+    },
+    {
+      "q": "Voltage gain has units of ___.",
+      "a": "None — it is a pure ratio."
+    },
+    {
+      "q": "At what fraction of maximum gain is bandwidth defined?",
+      "a": "70% of maximum gain."
+    },
+    {
+      "q": "What happens to bandwidth when gain is increased in an op-amp circuit?",
+      "a": "Bandwidth decreases (gain-bandwidth product is fixed)."
+    },
+    {
+      "q": "What causes clipping distortion in an amplifier?",
+      "a": "The required output voltage exceeds the supply rail voltage."
+    },
+    {
+      "q": "How does clipping appear on a voltage-time graph?",
+      "a": "The peaks of the waveform are flattened at the supply voltage level."
+    },
+    {
+      "q": "Name two ways to prevent clipping in an amplifier circuit.",
+      "a": "Reduce the gain, or reduce the input signal amplitude."
+    },
+    {
+      "q": "An amplifier has G = 30 and V_IN = 60 mV. What is V_OUT?",
+      "a": "1.8 V"
+    },
+    {
+      "q": "What is the function of a power amplifier (as distinct from a voltage amplifier)?",
+      "a": "It supplies the high current needed to drive an output device such as a loudspeaker."
+    },
+    {
+      "q": "A sine wave output is clipped. What does the waveform look like near its peaks?",
+      "a": "Flat tops and bottoms at the supply rail voltage, sinusoidal in between."
+    },
+    {
+      "q": "The gain-bandwidth product of an op-amp is 1 MHz. If gain is set to 50, what is the bandwidth?",
+      "a": "20 kHz"
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "voltage amplifier",
+      "definition": "An amplifier stage that raises the voltage of a weak input signal before it reaches a power stage."
+    },
+    {
+      "term": "power amplifier",
+      "definition": "An amplifier stage that supplies the high current needed to drive a loudspeaker or motor."
+    },
+    {
+      "term": "voltage gain",
+      "definition": "The ratio of output voltage to input voltage for an amplifier, often written as G or A_v."
+    },
+    {
+      "term": "gain-frequency graph",
+      "definition": "A graph showing how an amplifier's gain changes as the input frequency is varied, used to find its bandwidth."
+    },
+    {
+      "term": "bandwidth",
+      "definition": "The range of frequencies over which an amplifier's gain is at least 70% of its maximum value."
+    },
+    {
+      "term": "clipping",
+      "definition": "A form of distortion where the peaks of the output waveform are flattened because the output has hit the supply voltage limits."
+    },
+    {
+      "term": "distortion",
+      "definition": "Any unwanted change to the shape of a signal waveform that alters the signal's quality."
+    }
+  ],
+  "hero_keywords": ["audio amplifier circuit board", "electronics signal amplifier", "waveform oscilloscope display"],
+  "hero_image_caption": "An oscilloscope displaying a signal waveform — the basis of amplifier analysis."
+}
