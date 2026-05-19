@@ -242,6 +242,8 @@
       'art-and-design': true,
       'dance': true,
       'photography': true,
+      // 100% coursework — no written exam, no revision content possible.
+      'level-1-2-vocational-award-in-performing-arts': true,
     };
 
     // Rough JCQ-2024 entry-volume tiers. Used to rank the To-Build list so
@@ -562,8 +564,8 @@
         'J809':     { tag: 'build',   text: 'OCR J809: Real build needed but only R057 (40% exam) is genuinely revision-worthy — child health and well-being. R058/R059 are portfolio-only (skip from revision scope). Recommend ~10–12 lessons covering R057. Lower priority than core GCSE backlog.' }
       },
       'cambridge-nationals-creative-imedia': {
-        '_general': { tag: 'general', text: 'OCR-only. ALREADY BUILT bespoke for Unity (23 lessons covering R093 written exam + NEA units). Free-tier rollout is a port of Unity content with school_id stripped.' },
-        'J834':     { tag: 'port',    text: 'OCR J834: PORT — Unity already has 23 lessons against this exact spec code. New free-tier Supabase rows, school_id NULL, content reuse with bespoke teacher references stripped. R093 (externally assessed) is the revision-relevant focus; NEA units R094–R099 light coverage. Quick win.' }
+        '_general': { tag: 'general', text: 'OCR-only. Unity has a bespoke build (23 lessons) but Unity content was made with Unity-specific teacher resources baked in — NOT portable to free tier. Free-tier needs a fresh generic build.' },
+        'J834':     { tag: 'build',   text: 'OCR J834: Fresh BUILD needed (Unity content can\'t port — built around Unity teacher resources). R093 (externally assessed unit) is the revision-relevant focus; NEA units R094–R099 are portfolio so light coverage only. OCR-only, no aliasing possible. Mid priority.' }
       },
       'cambridge-nationals-engineering-design': {
         '_general': { tag: 'general', text: 'OCR-only. R038 (externally assessed) + R039 + R040 (NEA — CAD modelling, design work). Heavy CAD/portfolio bias; revision applies only to R038. Small UTC/technical-college cohort.' },
@@ -582,8 +584,8 @@
         'J837':     { tag: 'port',    text: 'OCR J837: PORT. R067 maps onto ~60–70% of content already in our Business free-tier builds — marketing mix, segmentation, finance basics, market research. New Supabase row needed but can lift heavily from existing Business lessons, restructured to R067 topic areas. R068/R069 portfolio (skip). Mid priority.' }
       },
       'cambridge-nationals-sport-science': {
-        '_general': { tag: 'general', text: 'OCR-only. R180 (externally assessed) + R181–R183 NEA. CRITICAL: R180 is the SAME unit code as our existing Unity Sport Science build (10 lessons). J828 is the wider qualification of which R180 is the exam unit — Unity content covers it almost entirely.' },
-        'J828':     { tag: 'port',    text: 'OCR J828: PORT — Unity already has 10 lessons on R180 (the J828 externally assessed unit). Free-tier rollout copies those rows with school_id NULL and Unity-specific framing stripped. R181–R183 are NEA portfolio. Effectively a re-key job, not a build. High value-per-effort.' }
+        '_general': { tag: 'general', text: 'OCR-only. R180 (externally assessed) + R181–R183 NEA. Unity has a bespoke R180 build (10 lessons) but Unity content is built around school-specific teacher resources — NOT portable to free tier. Fresh generic build needed.' },
+        'J828':     { tag: 'build',   text: 'OCR J828: Fresh BUILD needed (Unity content can\'t port — built around Unity teacher resources). R180 is the revision-relevant exam unit; R181–R183 are NEA portfolio (skip). OCR-only, no aliasing possible. Mid priority.' }
       },
       'cambridge-nationals-sport-studies': {
         '_general': { tag: 'general', text: 'OCR-only. R184 written exam (contemporary issues in sport) + R185–R187 NEA. Different qualification from Sport Science J828 — broader, more sociological. Sits alongside J828 in many schools.' },
@@ -605,20 +607,17 @@
         '5249QA':   { tag: 'build',   text: 'Eduqas/WJEC 5249QA H&SC: Real build needed. Despite the family-slug overlap with existing Edexcel/OCR H&SC, this is the WJEC/Eduqas spec — different content structure (2 units vs 3). Some terminology overlap supports modest reuse, but unit mapping is new. Mid-low priority. If both Eduqas and WJEC versions exist, alias under one spec code.' }
       },
       'level-1-2-vocational-award-in-hospitality-and-catering': {
-        '_general': { tag: 'general', text: 'CRITICAL: Eduqas 5409QA and WJEC 5409QA are the SAME WJEC CBAC document — true alias pair. We ALREADY HAVE this on free tier as Hospitality & Catering WJEC 5409 (10 lessons).' },
-        '5409QA':   { tag: 'alias',   text: 'Eduqas/WJEC 5409QA Hospitality and Catering: TRUE ALIAS. Same spec code as our existing WJEC 5409 build (10 lessons on free tier). Eduqas is just WJEC\'s England brand — identical CBAC document. Wire slugMap so the family with board=eduqas resolves to the WJEC Supabase row. Zero content build. Update FW_CATEGORIES + freeSubjectMeta + BASE_SLUG_BOARDS.' }
+        '_general': { tag: 'general', text: 'Eduqas 5409QA and WJEC 5409QA are the SAME WJEC CBAC document. Both now served from the existing free-tier Hospitality & Catering row (10 lessons) via slugMap aliasing — single Supabase row labelled "Eduqas / WJEC".' },
+        '5409QA':   { tag: 'alias',   text: 'Eduqas/WJEC 5409QA Hospitality and Catering: WIRED — Supabase row exam_board="Eduqas / WJEC", spec_code="5409QA / 5409QA". boardConfig + slugMap + BASE_SLUG_BOARDS all updated. Wizard now offers both Eduqas and WJEC routes, both pointing at the same 10-lesson build. Note: this row currently has only 10 lessons covering Unit 1 — full spec coverage would mean expanding Unit 2 content later.' }
       },
       'level-1-2-vocational-award-in-ict': {
         '5539QA':   { tag: 'skip',    text: 'Eduqas/WJEC 5539QA ICT: Park. Niche audience. Modest overlap with existing iMedia (J834) for digital media topics, and limited CS J277 overlap on data/security. Not enough reuse to justify the build for a small Eduqas/WJEC cohort. If built, alias Eduqas + WJEC if codes match.' }
-      },
-      'level-1-2-vocational-award-in-performing-arts': {
-        '5289QA':   { tag: 'skip',    text: 'Eduqas/WJEC 5289QA Performing Arts: SKIP — coursework-only qualification with zero written exam (30%+30%+40%, ALL controlled assessment). Revision content has effectively no purchase here; everything is practical performance and portfolio. Park indefinitely.' }
       },
       'level-1-2-vocational-award-in-retail-business': {
         '5299QA':   { tag: 'port',    text: 'Eduqas/WJEC 5299QA Retail Business: PORT. Unit 1 maps onto existing Business (AQA/Edexcel/OCR) free-tier content — market research, customer needs, retail business environment. ~50–60% lift available, restructured into Unit 1 topic areas. Niche cohort but build cost low given reuse. Mid-low priority. Alias Eduqas + WJEC if both exist with same spec code.' }
       },
       'level-1-2-vocational-award-in-sport-and-coaching-principles': {
-        '5259QA':   { tag: 'port',    text: 'Eduqas/WJEC 5259QA Sport and Coaching Principles: PORT (modest). Unit 1 (training principles, fitness components, coaching theory) has ~40–50% overlap with PE Edexcel training/physiology lessons and our R180 Sport Science Unity content. New Supabase row with coaching-specific reframing. Mid-low priority. Alias Eduqas + WJEC if same spec code.' }
+        '5259QA':   { tag: 'port',    text: 'Eduqas/WJEC 5259QA Sport and Coaching Principles: PORT (modest). Unit 1 (training principles, fitness components, coaching theory) has ~40–50% overlap with PE Edexcel training/physiology lessons. New Supabase row with coaching-specific reframing. Mid-low priority. Alias Eduqas + WJEC if same spec code.' }
       }
     };
 

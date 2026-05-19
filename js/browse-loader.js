@@ -182,6 +182,10 @@
     'film-studies': [
       { board: 'Eduqas', slug: 'film-studies-eduqas' },
       { board: 'WJEC', slug: 'film-studies-eduqas' }
+    ],
+    'hospitality-catering': [
+      { board: 'Eduqas', slug: 'hospitality-catering' },
+      { board: 'WJEC', slug: 'hospitality-catering' }
     ]
   };
 
