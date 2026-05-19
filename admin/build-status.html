@@ -123,6 +123,7 @@
     .tobuild-note .note-key { display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.7rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #e5e7eb; color: #374151; margin-right: 0.4rem; vertical-align: 1px; }
     .tobuild-note .note-key.general { background: #fef3c7; color: #92400e; }
     .tobuild-note .note-key.alias { background: #dcfce7; color: #166534; }
+    .tobuild-note .note-key.port { background: #fef3c7; color: #92400e; }
     .tobuild-note .note-key.skip { background: #fee2e2; color: #991b1b; }
     .tobuild-note .note-key.build { background: #dbeafe; color: #1e40af; }
 
@@ -288,8 +289,15 @@
     //
     // tag conventions:
     //   general — family-wide context (e.g. "Eduqas doesn't offer this")
-    //   build   — genuine buildable gap, real new content needed
-    //   alias   — could reuse existing content (subset, neutral phrasing)
+    //   build   — genuine buildable gap, real new content needed from scratch
+    //   alias   — zero-content alias: one Supabase row serves both boards via
+    //             slugMap wiring (e.g. Film Studies WJEC → Eduqas). No new
+    //             lessons, no narration regen. Only works when content is
+    //             genuinely identical between boards.
+    //   port    — NEW Supabase row but heavy content reuse from an existing
+    //             build. Lessons get restructured to fit the new spec's units,
+    //             but most of the underlying material carries over. Cheaper
+    //             than build, more work than alias.
     //   skip    — intentionally parked (Wales-only, low uptake, etc.)
     var BUILD_NOTES = {
       'combined-science': {
@@ -311,7 +319,7 @@
       'french': {
         '_general': { tag: 'general', text: 'OCR doesn\'t offer GCSE Modern Languages — no OCR pill needed.' },
         'C800QS':   { tag: 'build',   text: 'Eduqas French: genuine buildable gap. English-market spec, no Wales restrictions.' },
-        '3800QS':   { tag: 'alias',   text: 'WJEC French (NEW Made-for-Wales reform, first awarding 2027): broad/non-prescriptive themes — could alias from an Eduqas French build, but assessment structure differs (4 units, 30% NEA, different paper weights). Future cohort only — 2026 students don\'t sit this yet.' }
+        '3800QS':   { tag: 'port',    text: 'WJEC French (NEW Made-for-Wales reform, first awarding 2027): broad/non-prescriptive themes — could PORT from an Eduqas French build (new Supabase row, restructured into WJEC\'s 4 units, 30% NEA). NOT a zero-content alias because assessment structure differs. Future cohort only — 2026 students don\'t sit this yet.' }
       },
       'spanish': {
         '_general': { tag: 'general', text: 'OCR doesn\'t offer GCSE Modern Languages.' },
@@ -333,24 +341,32 @@
         '3100QS':   { tag: 'skip',    text: 'WJEC History: Unit 1 literally "Studies in Depth — Wales and the wider perspective". Mandatory Welsh history (Plas Mawr at Conwy, etc.). Wales-only spec. Park.' }
       },
       'physical-education': {
-        'C550QS':   { tag: 'alias',   text: 'Eduqas PE: standard 2-component structure. Content overlap with existing AQA/Edexcel/OCR PE is high (60–70% — PE theory is universal across boards). Re-shell unit structure rather than from-scratch build. Lower-priority because Eduqas PE is a minority board.' },
+        'C550QS':   { tag: 'port',    text: 'Eduqas PE: standard 2-component structure. PORT job (new Supabase row, restructured units) — content overlap with existing AQA/Edexcel/OCR PE is high (60–70% — anatomy/physiology/training/sport psychology are universal). NOT a zero-content alias. Lower-priority because Eduqas PE is a minority board.' },
         '3550QS':   { tag: 'skip',    text: 'WJEC PE: Wales-only, mandatory "Welsh perspective" throughout. Park with other Wales-only specs.' }
       },
       'religious-studies': {
-        '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): largely a subset of AQA Spec A (which we built) — 2 religions × Beliefs only + 2 themes. Could be served by existing AQA A content + a wizard "short course mode" flag. Tiny effort. Caveat: short course "Theme B: Religion, peace and conflict" needs a spec-compare to AQA A themes to confirm it maps to existing content.' },
+        '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): TRUE alias of AQA Spec A (which we built). 2 religions × Beliefs only + 2 themes — strict subset of existing content. Wizard "short course mode" flag routes students to a curated lesson subset. No new lessons. Caveat: short course "Theme B: Religion, peace and conflict" needs a spec-compare to AQA A themes to confirm it maps to existing content; if it doesn\'t, this becomes a small port instead.' },
         '8063':     { tag: 'skip',    text: 'AQA Spec B (Catholic-focused): Component 1 = Catholic Christianity in much greater depth than Spec A. Component 2 = perspectives on one other religion, or Textual Studies on Islam/Judaism. Catholic schools only, ~5–10% of AQA RS uptake. Low priority.' },
         'J625':     { tag: 'build',   text: 'OCR Religious Studies (Full Course): different structure from AQA/Edexcel/Eduqas. English-market, real ~40–60 lesson build.' },
-        'J125':     { tag: 'alias',   text: 'OCR Short Course: derives from J625 as a subset. Build OCR Full Course (J625) first, then a short-course mode serves J125 from the same content.' }
+        'J125':     { tag: 'alias',   text: 'OCR Short Course: TRUE alias derived from J625 as a subset. Build OCR Full Course (J625) first, then a short-course mode serves J125 from the same content. No new lessons.' }
+      },
+      'business-studies': {
+        'C510QS':   { tag: 'port',    text: 'Eduqas Business: 2-component structure (Business Dynamics + Business Considerations). PORT job — new Supabase row with restructured units, but content overlap with existing AQA/Edexcel/OCR Business is high (60–70% — pricing/marketing/finance/motivation/growth are universal GCSE concepts). NOT a zero-content alias. Lower priority — Eduqas Business is a minority board.' },
+        '3510QS':   { tag: 'skip',    text: 'WJEC Business: Wales-only ("not available to centres in England"). "Welsh perspective" required, references to Wales economy and Business Wales. Park with other Wales-only specs.' }
+      },
+      'business': {
+        'C510QS':   { tag: 'port',    text: 'Eduqas Business: 2-component structure. PORT job — new Supabase row with restructured units, ~60–70% content overlap with existing builds. NOT a zero-content alias. Lower priority (Eduqas minority board).' },
+        '3510QS':   { tag: 'skip',    text: 'WJEC Business: Wales-only. Park.' }
       },
       'religious-education': {
-        '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): largely a subset of AQA Spec A. See Religious Studies notes.' },
+        '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): TRUE alias of AQA Spec A. See Religious Studies notes.' },
         '8063':     { tag: 'skip',    text: 'AQA Spec B (Catholic-focused): low priority. See Religious Studies notes.' },
         'J625':     { tag: 'build',   text: 'OCR Religious Studies (Full Course): real ~40–60 lesson build.' },
-        'J125':     { tag: 'alias',   text: 'OCR Short Course: derives from OCR Full Course (J625).' }
+        'J125':     { tag: 'alias',   text: 'OCR Short Course: TRUE alias from OCR Full Course (J625) once built.' }
       }
     };
 
-    var TAG_LABEL = { general: 'note', build: 'BUILD', alias: 'ALIAS', skip: 'SKIP' };
+    var TAG_LABEL = { general: 'note', build: 'BUILD', alias: 'ALIAS', port: 'PORT', skip: 'SKIP' };
 
     function tierFor(family) {
       if (ENTRY_TIER[family]) return ENTRY_TIER[family];
