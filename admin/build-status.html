@@ -110,6 +110,22 @@
     .board-pill.built { background: #dcfce7; color: #166534; }
     .board-pill.unbuilt { background: #f3f4f6; color: #6b7280; border: 1px dashed #d1d5db; }
 
+    /* Expandable to-build cards (when build notes exist) */
+    details.tobuild-card { padding: 0; }
+    details.tobuild-card > summary { padding: 0.85rem 1rem 0.85rem 2rem; cursor: pointer; list-style: none; position: relative; border-radius: 12px; }
+    details.tobuild-card > summary::-webkit-details-marker { display: none; }
+    details.tobuild-card > summary::before { content: ''; position: absolute; left: 0.7rem; top: 1.05rem; width: 0; height: 0; border-left: 5px solid #9ca3af; border-top: 4px solid transparent; border-bottom: 4px solid transparent; transition: transform 0.15s; }
+    details.tobuild-card[open] > summary::before { transform: rotate(90deg); }
+    details.tobuild-card > summary:hover { background: #fcfbf8; }
+    .tobuild-notes { padding: 0.5rem 1rem 0.95rem; border-top: 1px solid #f0ede8; background: #fcfbf8; border-radius: 0 0 12px 12px; }
+    .tobuild-note { font-size: 0.78rem; line-height: 1.45; color: #374151; padding: 0.5rem 0; border-bottom: 1px dashed #f0ede8; }
+    .tobuild-note:last-child { border-bottom: none; }
+    .tobuild-note .note-key { display: inline-block; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.7rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; background: #e5e7eb; color: #374151; margin-right: 0.4rem; vertical-align: 1px; }
+    .tobuild-note .note-key.general { background: #fef3c7; color: #92400e; }
+    .tobuild-note .note-key.alias { background: #dcfce7; color: #166534; }
+    .tobuild-note .note-key.skip { background: #fee2e2; color: #991b1b; }
+    .tobuild-note .note-key.build { background: #dbeafe; color: #1e40af; }
+
     .loading-msg { text-align: center; padding: 3rem; color: var(--text-muted); }
     .loading-msg.error { color: #dc2626; }
   </style>
@@ -264,6 +280,77 @@
     };
     var TIER_RANK = { S: 0, A: 1, B: 2, C: 3, N: 4 };
     var TIER_LABEL = { S: 'Top tier', A: 'High uptake', B: 'Medium', C: 'Lower', N: 'Niche' };
+
+    // Build notes — persistent decisions about unbuilt specs. Keyed by family
+    // slug. Each entry has an optional `_general` family-wide note plus one
+    // note per unbuilt spec_code. Each note has a `tag` (general/build/alias/
+    // skip) that drives the coloured chip on the left.
+    //
+    // tag conventions:
+    //   general — family-wide context (e.g. "Eduqas doesn't offer this")
+    //   build   — genuine buildable gap, real new content needed
+    //   alias   — could reuse existing content (subset, neutral phrasing)
+    //   skip    — intentionally parked (Wales-only, low uptake, etc.)
+    var BUILD_NOTES = {
+      'combined-science': {
+        '_general': { tag: 'general', text: 'Eduqas doesn\'t offer Combined Science — no pill, not a gap.' },
+        '8465':     { tag: 'skip',    text: 'AQA Synergy: thematic alternative to Trilogy (which we built). Same total content, completely different unit/topic architecture — can\'t be aliased. Estimated <10% of AQA Combined Science uptake. Low priority.' }
+      },
+      'biology': {
+        '_general': { tag: 'general', text: 'Eduqas doesn\'t offer GCSE Biology / Chemistry / Physics standalone or combined. No pills for those.' },
+        '3400QS':   { tag: 'skip',    text: 'WJEC Biology: Wales-only ("not available to centres in England"). Welsh-curriculum content baked in. Park with other Wales-only specs.' }
+      },
+      'chemistry': {
+        '_general': { tag: 'general', text: 'Eduqas doesn\'t offer GCSE Biology / Chemistry / Physics.' },
+        '3410QS':   { tag: 'skip',    text: 'WJEC Chemistry: Wales-only ("not available to centres in England"). Park.' }
+      },
+      'physics': {
+        '_general': { tag: 'general', text: 'Eduqas doesn\'t offer GCSE Biology / Chemistry / Physics.' },
+        '3420QS':   { tag: 'skip',    text: 'WJEC Physics: Wales-only ("not available to centres in England"). Park.' }
+      },
+      'french': {
+        '_general': { tag: 'general', text: 'OCR doesn\'t offer GCSE Modern Languages — no OCR pill needed.' },
+        'C800QS':   { tag: 'build',   text: 'Eduqas French: genuine buildable gap. English-market spec, no Wales restrictions.' },
+        '3800QS':   { tag: 'alias',   text: 'WJEC French (NEW Made-for-Wales reform, first awarding 2027): broad/non-prescriptive themes — could alias from an Eduqas French build, but assessment structure differs (4 units, 30% NEA, different paper weights). Future cohort only — 2026 students don\'t sit this yet.' }
+      },
+      'spanish': {
+        '_general': { tag: 'general', text: 'OCR doesn\'t offer GCSE Modern Languages.' },
+        'C820QS':   { tag: 'build',   text: 'Eduqas Spanish: genuine buildable gap. English-market spec, no Wales restrictions.' },
+        '3820QS':   { tag: 'skip',    text: 'WJEC Spanish: "Wales and the World" is 1 of 3 core themes — Welsh-context vocab/dialogues required. NOT aliasable from Eduqas. Park.' }
+      },
+      'german': {
+        '_general': { tag: 'general', text: 'OCR doesn\'t offer GCSE Modern Languages. Eduqas offers French and Spanish only — no German spec, so no Eduqas pill for German.' },
+        '3810QS':   { tag: 'skip',    text: 'WJEC German: same "Wales and the World" core theme as Spanish — Welsh content required. NOT aliasable. Park.' }
+      },
+      'geography': {
+        'C112QS':   { tag: 'build',   text: 'Eduqas Geography B: problem-solving approach, 3 components incl. dedicated Problem Solving Geography paper. Different themes from Geography A (which we built). Genuine separate build ~30–40 lessons. Small market (Eduqas Geography is minority board).' },
+        'J384':     { tag: 'build',   text: 'OCR Geography B (Geography for Enquiring Minds): enquiry-led, completely different philosophy from OCR A (Geographical Themes, which we built). OCR B is more popular than OCR A in uptake — highest-value gap of the three.' },
+        '3111QS':   { tag: 'skip',    text: 'WJEC Geography: heavily Welsh-baked (mandatory "Distinctive landscapes in Wales" theme, Snowdonia, Welsh coastal case studies). Wales-only spec. Park.' }
+      },
+      'history': {
+        'C100QS':   { tag: 'build',   text: 'Eduqas History: English-market spec — Component 1 Studies in Depth + Component 2 Studies in Breadth. Multiple optional pathways. Clean separate build ~50–100 lessons. Most valuable English-market gap of the three.' },
+        'J411':     { tag: 'build',   text: 'OCR History B (Schools History Project): partnership with the SHP organisation, different topic options and question style from OCR A. Genuine separate build.' },
+        '3100QS':   { tag: 'skip',    text: 'WJEC History: Unit 1 literally "Studies in Depth — Wales and the wider perspective". Mandatory Welsh history (Plas Mawr at Conwy, etc.). Wales-only spec. Park.' }
+      },
+      'physical-education': {
+        'C550QS':   { tag: 'alias',   text: 'Eduqas PE: standard 2-component structure. Content overlap with existing AQA/Edexcel/OCR PE is high (60–70% — PE theory is universal across boards). Re-shell unit structure rather than from-scratch build. Lower-priority because Eduqas PE is a minority board.' },
+        '3550QS':   { tag: 'skip',    text: 'WJEC PE: Wales-only, mandatory "Welsh perspective" throughout. Park with other Wales-only specs.' }
+      },
+      'religious-studies': {
+        '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): largely a subset of AQA Spec A (which we built) — 2 religions × Beliefs only + 2 themes. Could be served by existing AQA A content + a wizard "short course mode" flag. Tiny effort. Caveat: short course "Theme B: Religion, peace and conflict" needs a spec-compare to AQA A themes to confirm it maps to existing content.' },
+        '8063':     { tag: 'skip',    text: 'AQA Spec B (Catholic-focused): Component 1 = Catholic Christianity in much greater depth than Spec A. Component 2 = perspectives on one other religion, or Textual Studies on Islam/Judaism. Catholic schools only, ~5–10% of AQA RS uptake. Low priority.' },
+        'J625':     { tag: 'build',   text: 'OCR Religious Studies (Full Course): different structure from AQA/Edexcel/Eduqas. English-market, real ~40–60 lesson build.' },
+        'J125':     { tag: 'alias',   text: 'OCR Short Course: derives from J625 as a subset. Build OCR Full Course (J625) first, then a short-course mode serves J125 from the same content.' }
+      },
+      'religious-education': {
+        '8061':     { tag: 'alias',   text: 'AQA Short Course (8061): largely a subset of AQA Spec A. See Religious Studies notes.' },
+        '8063':     { tag: 'skip',    text: 'AQA Spec B (Catholic-focused): low priority. See Religious Studies notes.' },
+        'J625':     { tag: 'build',   text: 'OCR Religious Studies (Full Course): real ~40–60 lesson build.' },
+        'J125':     { tag: 'alias',   text: 'OCR Short Course: derives from OCR Full Course (J625).' }
+      }
+    };
+
+    var TAG_LABEL = { general: 'note', build: 'BUILD', alias: 'ALIAS', skip: 'SKIP' };
 
     function tierFor(family) {
       if (ENTRY_TIER[family]) return ENTRY_TIER[family];
@@ -664,6 +751,44 @@
           ? '<span class="req-badge" title="' + requestCount + ' student request' + (requestCount !== 1 ? 's' : '') + '">★ ' + requestCount + '</span>'
           : '';
 
+        // Build notes — collect any notes that match this family and its
+        // unbuilt specs. Family-wide notes go under `_general`; per-spec notes
+        // are keyed by spec_code.
+        var famNotes = BUILD_NOTES[fam] || {};
+        var notes = [];
+        if (famNotes._general) {
+          notes.push({ key: 'all', tag: famNotes._general.tag, text: famNotes._general.text });
+        }
+        unbuilt.forEach(function (sp) {
+          var n = famNotes[sp.spec_code];
+          if (n) notes.push({ key: sp.spec_code, tag: n.tag, text: n.text });
+        });
+
+        var head =
+          '<div class="tobuild-head">' +
+            tierBadge +
+            '<h3>' + escapeHtml(entry.name) + '</h3>' +
+            reqBadge +
+          '</div>' +
+          '<div class="tobuild-meta">' + builtSpecs + ' of ' + totalSpecs + ' built · ' + TIER_LABEL[tier] + '</div>' +
+          '<div class="board-pills">' + pillsHtml + '</div>';
+
+        var cardHtml;
+        if (notes.length === 0) {
+          cardHtml = '<div class="tobuild-card">' + head + '</div>';
+        } else {
+          var notesHtml = notes.map(function (n) {
+            return '<div class="tobuild-note">' +
+              '<span class="note-key ' + n.tag + '">' + escapeHtml(n.key === 'all' ? TAG_LABEL[n.tag] : n.key) + '</span>' +
+              escapeHtml(n.text) +
+            '</div>';
+          }).join('');
+          cardHtml = '<details class="tobuild-card">' +
+            '<summary>' + head + '</summary>' +
+            '<div class="tobuild-notes">' + notesHtml + '</div>' +
+          '</details>';
+        }
+
         cards.push({
           fam: fam,
           tier: tier,
@@ -671,15 +796,7 @@
           builtSpecs: builtSpecs,
           totalSpecs: totalSpecs,
           name: entry.name,
-          html: '<div class="tobuild-card">' +
-            '<div class="tobuild-head">' +
-              tierBadge +
-              '<h3>' + escapeHtml(entry.name) + '</h3>' +
-              reqBadge +
-            '</div>' +
-            '<div class="tobuild-meta">' + builtSpecs + ' of ' + totalSpecs + ' built · ' + TIER_LABEL[tier] + '</div>' +
-            '<div class="board-pills">' + pillsHtml + '</div>' +
-          '</div>'
+          html: cardHtml
         });
       });
 
