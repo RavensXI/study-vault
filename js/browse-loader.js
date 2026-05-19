@@ -178,6 +178,10 @@
       { board: 'OCR', slug: 'computer-science' },
       { board: 'AQA', slug: 'computer-science-aqa' },
       { board: 'Edexcel', slug: 'computer-science-edexcel' }
+    ],
+    'film-studies': [
+      { board: 'Eduqas', slug: 'film-studies-eduqas' },
+      { board: 'WJEC', slug: 'film-studies-eduqas' }
     ]
   };
 
