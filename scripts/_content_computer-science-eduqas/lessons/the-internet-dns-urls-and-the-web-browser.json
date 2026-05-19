@@ -1,0 +1,181 @@
+{
+  "_lesson_id": "2afde60f-7264-47c7-b3c6-840c6be8ff22",
+  "_lesson_number": 5,
+  "_unit_slug": "networks-internet-cybersecurity",
+  "_lesson_slug": "the-internet-dns-urls-and-the-web-browser",
+  "description": "How DNS translates domain names to IP addresses, URL structure, and what a browser does.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Internet and the World Wide Web</h2>\n<p data-narration-id=\"n2\">The <dfn class=\"term\" data-def=\"A global network of interconnected networks that allows devices worldwide to communicate using the TCP/IP protocol suite.\">internet</dfn> is the global infrastructure of connected networks. The <strong>World Wide Web</strong> (web) is a service that runs on top of the internet &mdash; a collection of web pages stored on servers and accessed via browsers using HTTP or HTTPS. The internet also carries email, file transfers, video calls and many other services. The web is just one part of the internet, not the whole thing.</p>\n\n<h2 data-narration-id=\"n3\">IP Addresses and the Problem They Create</h2>\n<p data-narration-id=\"n4\">Every device connected to the internet has an <dfn class=\"term\" data-def=\"A unique numerical label assigned to each device on a network, used to identify the device and route data to it.\">IP address</dfn> &mdash; a unique numerical label such as 142.250.187.78. IP addresses allow routers to deliver data to the correct destination. However, humans cannot easily memorise long strings of numbers, which is why the Domain Name System exists.</p>\n\n<h2 data-narration-id=\"n5\">The Domain Name System (DNS)</h2>\n<p data-narration-id=\"n6\">The <dfn class=\"term\" data-def=\"A distributed system of servers that translates human-readable domain names (e.g. bbc.co.uk) into IP addresses that computers use to locate servers.\">Domain Name System (DNS)</dfn> works like a phone book for the internet. When you type a web address, your device does not know the IP address of that server &mdash; it asks a DNS server to look it up. DNS is distributed across millions of servers worldwide so that no single server needs to know every domain name.</p>\n<p data-narration-id=\"n7\">The DNS resolution process works in this sequence:</p>\n<ol>\n  <li data-narration-id=\"n8\"><strong>Browser cache check</strong> &mdash; the browser first checks its own cache. If you visited the site recently, the IP address is already stored locally.</li>\n  <li data-narration-id=\"n9\"><strong>Resolver (ISP&rsquo;s DNS server)</strong> &mdash; if not cached, the request goes to a DNS resolver, typically provided by your ISP. The resolver also has its own cache.</li>\n  <li data-narration-id=\"n10\"><strong>Root name server</strong> &mdash; if the resolver does not know the address, it contacts a root name server. The root server does not know the final IP address, but it knows which server handles the top-level domain (e.g. .co.uk or .com).</li>\n  <li data-narration-id=\"n11\"><strong>TLD (top-level domain) server</strong> &mdash; the root server directs the resolver to the relevant TLD server, which handles all domains ending in .co.uk, .com and so on.</li>\n  <li data-narration-id=\"n12\"><strong>Authoritative name server</strong> &mdash; the TLD server directs the resolver to the authoritative name server for the specific domain. This server holds the actual IP address record and returns it to the resolver.</li>\n  <li data-narration-id=\"n13\"><strong>Response</strong> &mdash; the resolver returns the IP address to your browser, which then makes a direct request to the web server at that IP address. The result is cached for future use.</li>\n</ol>\n\n<div class=\"key-fact\" data-narration-id=\"n14\" data-revision-tip=\"Cover this and write the DNS resolution sequence from memory in order: browser cache &rarr; resolver &rarr; ? &rarr; ? &rarr; authoritative server &rarr; browser.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>DNS resolution order: browser cache &rarr; resolver (ISP) &rarr; root name server &rarr; TLD server &rarr; authoritative name server &rarr; IP address returned to browser. Caching at each stage speeds up future requests for the same domain.</p>\n</div>\n\n<h2 data-narration-id=\"n15\">URL Structure</h2>\n<p data-narration-id=\"n16\">A <dfn class=\"term\" data-def=\"Uniform Resource Locator &mdash; the complete address used to locate a specific resource on the web, consisting of a protocol, domain name and optional path.\">URL</dfn> (Uniform Resource Locator) is the full address used to locate a resource on the web. Each part of a URL has a specific meaning:</p>\n<p data-narration-id=\"n17\">Consider the example URL: <code>https://www.studyvault.co.uk/lesson/computer-science/networks</code></p>\n<ul>\n  <li data-narration-id=\"n18\"><strong>Protocol: <code>https://</code></strong> &mdash; tells the browser which communication protocol to use. HTTPS indicates an encrypted, secure connection (HTTP without the S is unencrypted).</li>\n  <li data-narration-id=\"n19\"><strong>Subdomain: <code>www</code></strong> &mdash; the host within the domain, conventionally www for web servers.</li>\n  <li data-narration-id=\"n20\"><strong>Domain name: <code>studyvault.co.uk</code></strong> &mdash; identifies the organisation. The TLD (<code>.co.uk</code>) indicates a commercial UK site.</li>\n  <li data-narration-id=\"n21\"><strong>Path: <code>/lesson/computer-science/networks</code></strong> &mdash; the location of the specific resource on the server, like a folder path on a hard drive.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n22\" data-revision-tip=\"Write a URL from memory, then label each part: protocol, subdomain, domain, TLD and path.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A URL has four main parts: protocol (https://), subdomain (www), domain name (e.g. bbc.co.uk) and path (/news/technology). The protocol tells the browser how to communicate; the domain name identifies the server; the path specifies the exact resource.</p>\n</div>\n\n<h2 data-narration-id=\"n23\">What a Web Browser Does</h2>\n<p data-narration-id=\"n24\">A <dfn class=\"term\" data-def=\"Software that requests, retrieves and displays web pages by communicating with web servers using HTTP or HTTPS.\">web browser</dfn> is the software that fetches and displays web pages. When you enter a URL:</p>\n<ol>\n  <li data-narration-id=\"n25\">The browser resolves the domain name to an IP address using DNS.</li>\n  <li data-narration-id=\"n26\">The browser sends an <strong>HTTP GET request</strong> to the web server at that IP address, asking for the web page.</li>\n  <li data-narration-id=\"n27\">The server responds with the HTML, CSS and JavaScript files that make up the page.</li>\n  <li data-narration-id=\"n28\">The browser&rsquo;s <strong>rendering engine</strong> interprets the HTML structure, applies the CSS styling and executes the JavaScript to produce the page you see on screen.</li>\n</ol>\n<p data-narration-id=\"n29\">Browsers also manage cookies (small files that store session data and preferences), maintain a browsing history and cache previously visited pages to speed up future loads.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>HTTP vs HTTPS</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n30\"><strong>HTTP</strong> (Hypertext Transfer Protocol) transfers web page data between a client and server. It transmits data in plain text, meaning any attacker who intercepts the packets can read the content.</p>\n    <p data-narration-id=\"n31\"><strong>HTTPS</strong> (HTTP Secure) uses TLS (Transport Layer Security) to encrypt the connection. The server presents a digital certificate that proves its identity; the browser and server then negotiate an encryption key. All subsequent data is encrypted, so even if a packet is intercepted, the attacker sees only scrambled data. HTTPS is mandatory for any site handling passwords, payment details or personal information.</p>\n    <p data-narration-id=\"n32\">Browsers display a padlock icon in the address bar when HTTPS is in use. The presence of HTTPS alone does not guarantee a site is legitimate &mdash; a phishing site can use HTTPS too. However, a site without HTTPS is definitely not secure for sending sensitive data.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About DNS and the Web</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n33\"><strong>Misconception: &ldquo;The internet and the World Wide Web are the same thing.&rdquo;</strong> The internet is the network infrastructure; the web is one service that runs on it. Email, FTP and online gaming also use the internet but are not part of the web.</p>\n    <p data-narration-id=\"n34\"><strong>Misconception: &ldquo;DNS converts a URL into an IP address.&rdquo;</strong> DNS converts a <em>domain name</em> (e.g. bbc.co.uk) into an IP address. The full URL includes the protocol and path, which are not part of the DNS lookup &mdash; only the domain portion is sent to the DNS server.</p>\n    <p data-narration-id=\"n35\"><strong>Misconception: &ldquo;HTTPS means a website is safe to use.&rdquo;</strong> HTTPS encrypts the connection but says nothing about the trustworthiness of the site itself. A fraudulent site can and does use HTTPS.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n36\">DNS resolution is a common 3&ndash;4 mark &ldquo;describe&rdquo; question. Examiners expect you to sequence the steps correctly and mention caching. A weak answer lists the types of server without ordering them; a strong answer uses words like &ldquo;first&rdquo;, &ldquo;then&rdquo; and &ldquo;finally&rdquo; and explains what each server does before passing the request on. For URL structure questions, label each part separately &mdash; do not just write &ldquo;it shows where the website is.&rdquo;</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n37\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n38\">The internet is the global network; the web is one service running on it. DNS translates domain names into IP addresses using a chain of servers: resolver &rarr; root &rarr; TLD &rarr; authoritative, with caching at each stage.</li>\n  <li data-narration-id=\"n39\">A URL has four parts: protocol (https://), subdomain (www), domain name and path. HTTPS uses TLS encryption; HTTP transmits in plain text.</li>\n  <li data-narration-id=\"n40\">A web browser resolves the domain via DNS, sends an HTTP GET request to the server, receives HTML/CSS/JavaScript and renders the page. It also manages cookies and caches pages for faster future loading.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following best describes the purpose of the Domain Name System (DNS)?\nA) It encrypts data sent between a browser and a web server\nB) It translates domain names into IP addresses\nC) It stores web pages on a server for fast retrieval\nD) It assigns IP addresses to devices that join a network",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) It translates domain names into IP addresses [1 mark]"
+    },
+    {
+      "text": "Identify the protocol and the path in the following URL:\nhttps://www.example.co.uk/revision/networks",
+      "type": "1 mark — State/Identify",
+      "marks": "Protocol: https [0.5] / Path: /revision/networks [0.5] — award 1 mark if both correct. Accept https:// for protocol."
+    },
+    {
+      "text": "Define the term 'URL'.",
+      "type": "2 marks — Define",
+      "marks": "A URL (Uniform Resource Locator) is the complete address [1] used to locate a specific resource on the web, consisting of a protocol, domain name and optional path [1]. [2 marks]"
+    },
+    {
+      "text": "Describe the sequence of steps that occur when a user types 'https://bbc.co.uk' into a web browser for the first time, up to and including the browser receiving the IP address of the server.",
+      "type": "3 marks — Describe",
+      "marks": "Up to 3 marks:\n- The browser checks its own cache; since this is the first visit, no cached IP is found. [1]\n- The request is sent to a DNS resolver (typically the ISP's DNS server), which also checks its cache. [1]\n- The resolver contacts the root name server, which directs it to the relevant TLD server (.co.uk), which then directs it to the authoritative name server for bbc.co.uk, which returns the IP address. [1]"
+    },
+    {
+      "text": "Explain the difference between HTTP and HTTPS. In your answer, describe the security implications of using each protocol when logging in to an online account.",
+      "type": "4 marks — Explain",
+      "marks": "Up to 4 marks:\nHTTP:\n- HTTP transmits data in plain text, so any attacker who intercepts packets can read the contents. [1]\n- Using HTTP for a login would expose the username and password to anyone who intercepts the network traffic. [1]\nHTTPS:\n- HTTPS uses TLS encryption; the data is scrambled before transmission and can only be decrypted by the intended recipient. [1]\n- Even if a packet is intercepted, the attacker sees only unreadable encrypted data, protecting login credentials. [1]"
+    },
+    {
+      "text": "Discuss the impact of the World Wide Web on education and learning.\n\nIn your answer, consider both the benefits the web brings to students and teachers, and the problems it can cause.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Balanced argument with developed benefits (access to information, online learning platforms, teacher resources, collaboration tools, accessibility for remote learners) and developed problems (misinformation and unreliable sources, distraction and reduced concentration, digital divide where not all students have internet access, data privacy concerns); reasoned conclusion about net impact.\nSecure: At least two developed benefits and two developed problems; conclusion present.\nDeveloping: Arguments listed but not equally developed; conclusion limited.\nEmerging: Simple one-sided statements."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In the DNS resolution process, which server holds the actual IP address record for a specific domain name?",
+      "options": [
+        "The browser cache",
+        "The root name server",
+        "The TLD server",
+        "The authoritative name server"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "mcq",
+      "q": "What does the path in a URL specify?",
+      "options": [
+        "The protocol used to connect to the server",
+        "The organisation that owns the website",
+        "The location of the specific resource on the server",
+        "The country where the server is hosted"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "DNS stands for Domain Name _____, a distributed system that translates domain names into IP addresses.",
+      "options": [
+        "Security",
+        "System",
+        "Server",
+        "Service"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "HTTPS uses _____ encryption to scramble data sent between a browser and a web server so it cannot be read if intercepted.",
+      "options": [
+        "FTP",
+        "SMTP",
+        "TLS",
+        "UDP"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each part of a URL to its description:",
+      "left": [
+        "Protocol",
+        "Domain name",
+        "Path"
+      ],
+      "right": [
+        "Specifies how the browser communicates with the server (e.g. https://)",
+        "Identifies the organisation's server on the internet",
+        "Points to the specific resource within the server"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the difference between the internet and the World Wide Web?",
+      "a": "The internet is the global network infrastructure; the web is one service running on it."
+    },
+    {
+      "q": "What does DNS do?",
+      "a": "It translates human-readable domain names into IP addresses."
+    },
+    {
+      "q": "What is the correct order of servers in DNS resolution?",
+      "a": "Resolver (ISP) → root name server → TLD server → authoritative name server."
+    },
+    {
+      "q": "What does the authoritative name server hold?",
+      "a": "The actual IP address record for a specific domain name."
+    },
+    {
+      "q": "Why is DNS resolution faster on repeat visits to a website?",
+      "a": "The IP address is cached by the browser and/or resolver, so the full lookup chain is skipped."
+    },
+    {
+      "q": "What does URL stand for?",
+      "a": "Uniform Resource Locator."
+    },
+    {
+      "q": "What is the role of the protocol part of a URL?",
+      "a": "It tells the browser which communication method to use (e.g. HTTPS for encrypted web)."
+    },
+    {
+      "q": "What is the key security difference between HTTP and HTTPS?",
+      "a": "HTTPS encrypts data using TLS; HTTP transmits in plain text and can be intercepted."
+    },
+    {
+      "q": "What does a web browser do after DNS returns an IP address?",
+      "a": "It sends an HTTP GET request to the server at that IP address."
+    },
+    {
+      "q": "What three types of file does a web server typically return to a browser?",
+      "a": "HTML (structure), CSS (styling) and JavaScript (behaviour)."
+    },
+    {
+      "q": "Does an HTTPS padlock guarantee a website is safe to use?",
+      "a": "No — HTTPS only encrypts the connection; a fraudulent site can also use HTTPS."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "internet",
+      "definition": "A global network of interconnected networks that allows devices worldwide to communicate using the TCP/IP protocol suite."
+    },
+    {
+      "term": "IP address",
+      "definition": "A unique numerical label assigned to each device on a network, used to identify the device and route data to it."
+    },
+    {
+      "term": "Domain Name System (DNS)",
+      "definition": "A distributed system of servers that translates human-readable domain names (e.g. bbc.co.uk) into IP addresses that computers use to locate servers."
+    },
+    {
+      "term": "URL",
+      "definition": "Uniform Resource Locator — the complete address used to locate a specific resource on the web, consisting of a protocol, domain name and optional path."
+    },
+    {
+      "term": "web browser",
+      "definition": "Software that requests, retrieves and displays web pages by communicating with web servers using HTTP or HTTPS."
+    }
+  ],
+  "hero_keywords": [
+    "web browser internet address bar",
+    "DNS server network infrastructure",
+    "internet connection global web"
+  ],
+  "hero_image_caption": "A web browser requesting a page — the start of the DNS resolution process"
+}

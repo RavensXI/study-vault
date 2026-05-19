@@ -1,0 +1,193 @@
+{
+  "_lesson_id": "35fa0e17-57db-4a15-84b4-4a46deb2251e",
+  "_lesson_number": 1,
+  "_unit_slug": "hardware-and-systems",
+  "_lesson_slug": "the-cpu-and-von-neumann-architecture",
+  "description": "The purpose of the CPU and the role of the CU, ALU, registers, cache and main memory.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is the CPU?</h2>\n<p data-narration-id=\"n2\">The <dfn class=\"term\" data-def=\"The Central Processing Unit — the main chip in a computer responsible for executing program instructions.\">CPU</dfn> is the brain of any computer system. It carries out the instructions that make up every program you run &mdash; from loading a webpage to running a game. Without the CPU, no processing can happen. Every calculation, decision and data movement passes through this single chip.</p>\n<p data-narration-id=\"n3\">The design that almost every modern CPU is built on was described by mathematician John von Neumann in 1945. <dfn class=\"term\" data-def=\"A computer architecture in which both program instructions and data are stored together in the same main memory.\">Von Neumann architecture</dfn> states that a program&rsquo;s instructions and its data should be stored in the same memory, and that the CPU should fetch each instruction in sequence, decode it, and then execute it. This idea &mdash; so straightforward it seems obvious now &mdash; was revolutionary at the time and remains the foundation of almost every computer built today.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Cover this and name the two main sub-units inside a CPU, plus their individual jobs.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A CPU contains two main sub-units: the <strong>Control Unit (CU)</strong>, which manages the fetch-decode-execute cycle, and the <strong>Arithmetic Logic Unit (ALU)</strong>, which performs calculations and logical comparisons.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">The Control Unit</h2>\n<p data-narration-id=\"n6\">The <dfn class=\"term\" data-def=\"The part of the CPU that directs the fetch-decode-execute cycle, sending control signals to all other components.\">Control Unit (CU)</dfn> acts as the conductor of the CPU. It does not process data itself &mdash; instead it sends control signals that tell every other component what to do and when to do it. The CU reads the current instruction, works out what operation is needed, and then triggers the correct sequence of actions across the CPU, memory and input/output devices.</p>\n<p data-narration-id=\"n7\">Think of the CU as a traffic controller at a busy junction: it does not drive any of the vehicles, but without it the whole system would grind to a halt. Every time your computer opens a file or responds to a keystroke, the CU is orchestrating the response.</p>\n\n<h2 data-narration-id=\"n8\">The Arithmetic Logic Unit</h2>\n<p data-narration-id=\"n9\">The <dfn class=\"term\" data-def=\"The part of the CPU that performs arithmetic operations (add, subtract, multiply, divide) and logical comparisons (AND, OR, NOT, comparisons).\">Arithmetic Logic Unit (ALU)</dfn> is the calculator inside the CPU. It handles two types of operation. Arithmetic operations include addition, subtraction, multiplication and division &mdash; used whenever a program works with numbers. Logical operations include AND, OR, NOT and comparisons (is A greater than B? are two values equal?) &mdash; used every time a program makes a decision.</p>\n<p data-narration-id=\"n10\">When you sort a list of names alphabetically, the ALU is comparing characters thousands of times per second. When a game calculates a bullet&rsquo;s trajectory, the ALU is doing the maths. The ALU receives its inputs from registers (small, fast storage locations inside the CPU), performs the operation, and places the result back into a register.</p>\n\n<h2 data-narration-id=\"n11\">Registers</h2>\n<p data-narration-id=\"n12\">Registers are tiny storage locations built directly into the CPU chip. Because they sit so close to the processing circuits, they are the fastest storage in any computer system &mdash; far faster than even cache or RAM. The specification names five key registers you must know:</p>\n<ul>\n  <li data-narration-id=\"n13\"><strong>Program Counter (PC)</strong> &mdash; holds the memory address of the <em>next</em> instruction to be fetched. It increments automatically after each fetch so that instructions are processed in order (unless a jump instruction changes it).</li>\n  <li data-narration-id=\"n14\"><strong>Memory Address Register (MAR)</strong> &mdash; holds the address in memory that the CPU is about to read from or write to.</li>\n  <li data-narration-id=\"n15\"><strong>Memory Data Register (MDR)</strong> &mdash; holds the data that has just been read from memory, or the data that is about to be written to memory. It acts as a buffer between the CPU and RAM.</li>\n  <li data-narration-id=\"n16\"><strong>Current Instruction Register (CIR)</strong> &mdash; holds the instruction that is currently being decoded and executed. While the CIR is busy, the PC can already move on to the address of the next instruction.</li>\n  <li data-narration-id=\"n17\"><strong>Accumulator (ACC)</strong> &mdash; the register where the ALU stores the results of arithmetic and logical operations. When two numbers are added, the answer lands in the ACC.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n18\" data-revision-tip=\"Write each register name (PC, MAR, MDR, CIR, ACC) on a piece of paper and, for each, write one sentence describing its job without looking at your notes.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The five named registers are: <strong>PC</strong> (address of the next instruction), <strong>MAR</strong> (address being accessed in memory), <strong>MDR</strong> (data travelling to/from memory), <strong>CIR</strong> (the current instruction being executed) and <strong>ACC</strong> (the result of ALU calculations).</p>\n</div>\n\n<h2 data-narration-id=\"n19\">Cache Memory</h2>\n<p data-narration-id=\"n20\"><dfn class=\"term\" data-def=\"A small, very fast memory store built close to (or inside) the CPU that holds frequently used instructions and data to reduce wait time.\">Cache memory</dfn> sits between the CPU and main memory (RAM). Accessing RAM takes far longer than accessing the CPU&rsquo;s own circuits &mdash; if the CPU had to fetch every instruction directly from RAM, it would spend most of its time waiting. Cache solves this problem by storing copies of recently used or frequently needed instructions close to the processor.</p>\n<p data-narration-id=\"n21\">Cache is organised into levels. <strong>L1 cache</strong> is the smallest and fastest (typically 32&ndash;64 KB per core), built directly into the processor core. <strong>L2 cache</strong> is larger (256 KB&ndash;1 MB) and slightly slower. <strong>L3 cache</strong> is shared between cores and can reach 8&ndash;32 MB on modern chips. When the CPU needs data, it checks L1 first, then L2, then L3, and only falls back to RAM if all levels fail to supply it.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Main Memory (RAM) and Its Role in Von Neumann Systems</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n22\">In Von Neumann architecture, both the program being executed and the data it operates on are stored together in <dfn class=\"term\" data-def=\"Random Access Memory — the computer's main working memory, which stores currently running programs and data, but loses its contents when power is removed.\">RAM</dfn>. This is significant: it means a program can treat other programs as data and modify itself &mdash; the basis of all modern software.</p>\n    <p data-narration-id=\"n23\">RAM is <strong>volatile</strong>, meaning it loses all its contents the moment power is removed. This is why you must save a document before switching off your computer &mdash; anything in RAM that has not been written to a storage device is lost. The CPU reads instructions from RAM into the MDR, then passes them to the CIR for decoding. It also reads data values from RAM for the ALU to process, and writes results back to RAM when needed.</p>\n    <p data-narration-id=\"n24\">The amount of RAM a computer has directly affects how many programs it can run at once. If RAM fills up, the operating system must resort to <strong>virtual memory</strong> &mdash; using part of the secondary storage device as an overflow area. Because secondary storage is far slower than RAM, this causes a significant performance drop.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About CPU Components</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n25\"><strong>Misconception 1: The CU does calculations.</strong> It does not. The CU only controls and coordinates &mdash; all calculations go to the ALU. A common exam error is stating that the CU &ldquo;adds numbers together&rdquo; or &ldquo;processes data&rdquo;.</p>\n    <p data-narration-id=\"n26\"><strong>Misconception 2: Cache is the same as RAM.</strong> Cache is much smaller, much faster, and located on or very close to the CPU die. RAM is separate from the CPU and connects via the memory bus. They serve different purposes: cache reduces the time the CPU spends waiting; RAM stores all running programs and their data.</p>\n    <p data-narration-id=\"n27\"><strong>Misconception 3: The MAR stores the data, and the MDR stores the address.</strong> It&rsquo;s the other way round. <strong>MAR = address, MDR = data.</strong> A helpful reminder: Address goes in the Address register (MAR); Data goes in the Data register (MDR).</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">Questions about the CPU often ask you to &ldquo;describe the role of&rdquo; a specific component. Make sure you write about what that component <em>does</em>, not just what it <em>is</em>. For example, &ldquo;The ALU performs arithmetic and logical operations&rdquo; answers &lsquo;describe its role&rsquo; &mdash; but &ldquo;The ALU is a part of the CPU&rdquo; does not. For 4-mark explain questions about registers, name the register, state what it holds, and explain how it is used in the fetch-decode-execute sequence. In compare questions about the CU and ALU, each comparison point must explicitly contrast the two functions &mdash; not just list features side by side.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">The CPU carries out program instructions using two main sub-units: the Control Unit (CU), which manages the fetch-decode-execute cycle, and the Arithmetic Logic Unit (ALU), which performs calculations and logical comparisons.</li>\n  <li data-narration-id=\"n31\">Five named registers hold data during processing: PC (next instruction address), MAR (memory address being accessed), MDR (data from/to memory), CIR (current instruction), and ACC (ALU result).</li>\n  <li data-narration-id=\"n32\">Von Neumann architecture stores both instructions and data in the same RAM. Cache memory (L1, L2, L3) reduces the time the CPU waits for instructions by keeping frequently used data close to the processing circuits.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes the role of the Control Unit (CU)?\nA) It performs arithmetic and logical operations on data\nB) It stores the result of the most recent calculation\nC) It directs the fetch-decode-execute cycle and sends control signals to other components\nD) It holds the address of the next instruction to be fetched",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) It directs the fetch-decode-execute cycle and sends control signals to other components [1 mark]"
+    },
+    {
+      "text": "State the purpose of the Accumulator (ACC) in a CPU.",
+      "type": "1 mark — State/Identify",
+      "marks": "Any one of: holds the result of the most recent ALU operation / stores the output of arithmetic or logical calculations / acts as the working register for ALU results. [1 mark]"
+    },
+    {
+      "text": "Define the term 'Von Neumann architecture'.",
+      "type": "2 marks — Define",
+      "marks": "Award up to 2 marks: 1 mark for identifying that instructions and data are stored in the same memory; 1 mark for identifying that the CPU fetches, decodes and executes instructions in sequence from that shared memory. Do not award for a description that only mentions one of the two key points."
+    },
+    {
+      "text": "Explain the difference between the Memory Address Register (MAR) and the Memory Data Register (MDR). Use an example to support your answer.",
+      "type": "4 marks — Explain",
+      "marks": "Award up to 4 marks:\n• MAR holds the address in memory that the CPU is currently accessing (reading from or writing to). [1 mark]\n• MDR holds the actual data that has been fetched from that address, or the data about to be written to it. [1 mark]\n• Clear contrast: MAR contains an address (a location), MDR contains a value (the content of that location). [1 mark]\n• Relevant example, e.g. when fetching an instruction, the address of that instruction is placed in the MAR; the instruction itself is then copied into the MDR. [1 mark]"
+    },
+    {
+      "text": "Compare the roles of cache memory and RAM in a Von Neumann computer system.",
+      "type": "6 marks — Compare",
+      "marks": "Award up to 6 marks for explicit comparisons:\n• Unlike RAM, which stores all currently running programs and data, cache stores only a small subset of frequently used or recently accessed instructions. [1 mark per comparative point, up to 3 distinct comparisons]\n• Cache is faster than RAM because it is located on or very close to the CPU die; RAM is a separate component connected via the memory bus.\n• Cache is much smaller in capacity (L1: 32–64 KB; L3: up to ~32 MB) compared to typical RAM (8–32 GB on a modern PC).\n• Both are volatile — both lose their contents when power is removed.\n• Cache reduces CPU stall time by supplying instructions without requiring a RAM access; RAM cannot do this because of the slower access time over the memory bus.\nMastering: Four or more clearly stated contrasts with precise technical detail.\nSecure: Three clear contrasts with some technical detail.\nDeveloping: Two contrasts, one or both lacking precision.\nEmerging: Features of one component listed without comparison."
+    },
+    {
+      "text": "A student says: 'The Control Unit processes all data in a computer.' Explain why this statement is incorrect and describe which component carries out this role instead.",
+      "type": "4 marks — Explain",
+      "marks": "Award up to 4 marks:\n• The statement is incorrect because the CU does not process data. [1 mark]\n• The CU manages and coordinates the fetch-decode-execute cycle, sending control signals to other components. [1 mark]\n• Data processing (arithmetic and logical operations) is carried out by the ALU. [1 mark]\n• The ALU receives values from registers (e.g. the ACC), performs the required operation, and stores the result back in a register. [1 mark]"
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which register holds the address of the next instruction to be fetched?",
+      "options": [
+        "Memory Data Register (MDR)",
+        "Current Instruction Register (CIR)",
+        "Program Counter (PC)",
+        "Accumulator (ACC)"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which component of the CPU performs logical comparisons such as 'is A greater than B?'",
+      "options": [
+        "Control Unit",
+        "Program Counter",
+        "Cache memory",
+        "Arithmetic Logic Unit"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "In Von Neumann architecture, both program _____ and data are stored together in main memory.",
+      "options": [
+        "outputs",
+        "instructions",
+        "addresses",
+        "registers"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "The _____ register holds the data that has just been read from RAM or is about to be written to RAM.",
+      "options": [
+        "Program Counter",
+        "Accumulator",
+        "Memory Data Register",
+        "Current Instruction Register"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each CPU component to its function:",
+      "left": [
+        "Control Unit (CU)",
+        "Arithmetic Logic Unit (ALU)",
+        "Accumulator (ACC)"
+      ],
+      "right": [
+        "Manages the fetch-decode-execute cycle and sends control signals",
+        "Performs arithmetic and logical operations on data",
+        "Stores the result of the most recent ALU operation"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does a CPU do?",
+      "a": "It runs every program instruction in turn — fetching each one from memory, decoding what it means, then executing the operation."
+    },
+    {
+      "q": "What is Von Neumann architecture?",
+      "a": "A design in which instructions and data share the same main memory."
+    },
+    {
+      "q": "What is the role of the Control Unit?",
+      "a": "It manages the fetch-decode-execute cycle and sends control signals to other components."
+    },
+    {
+      "q": "What does the ALU do?",
+      "a": "Performs arithmetic operations and logical comparisons."
+    },
+    {
+      "q": "What does the Program Counter (PC) hold?",
+      "a": "The memory address of the next instruction to be fetched."
+    },
+    {
+      "q": "What does the MAR hold?",
+      "a": "The address in memory that the CPU is currently reading from or writing to."
+    },
+    {
+      "q": "What does the MDR hold?",
+      "a": "The data that has just been read from memory, or is about to be written to it."
+    },
+    {
+      "q": "What does the Current Instruction Register (CIR) hold?",
+      "a": "The instruction currently being decoded and executed."
+    },
+    {
+      "q": "What does the Accumulator (ACC) hold?",
+      "a": "The result of the most recent ALU arithmetic or logical operation."
+    },
+    {
+      "q": "Why does cache memory exist?",
+      "a": "To reduce CPU waiting time by storing frequently used instructions close to the processor."
+    },
+    {
+      "q": "Which cache level is the smallest and fastest?",
+      "a": "L1 cache, typically 32–64 KB, built directly into each processor core."
+    },
+    {
+      "q": "RAM is described as volatile. What does this mean?",
+      "a": "It loses all its contents when power is removed."
+    },
+    {
+      "q": "Which component processes data — the CU or the ALU?",
+      "a": "The ALU. The CU only manages and coordinates; it does not process data."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "CPU",
+      "definition": "The Central Processing Unit — the main chip in a computer responsible for executing program instructions."
+    },
+    {
+      "term": "Von Neumann architecture",
+      "definition": "A computer architecture in which both program instructions and data are stored together in the same main memory."
+    },
+    {
+      "term": "Control Unit (CU)",
+      "definition": "The part of the CPU that directs the fetch-decode-execute cycle, sending control signals to all other components."
+    },
+    {
+      "term": "Arithmetic Logic Unit (ALU)",
+      "definition": "The part of the CPU that performs arithmetic operations (add, subtract, multiply, divide) and logical comparisons (AND, OR, NOT, comparisons)."
+    },
+    {
+      "term": "cache memory",
+      "definition": "A small, very fast memory store built close to (or inside) the CPU that holds frequently used instructions and data to reduce wait time."
+    },
+    {
+      "term": "RAM",
+      "definition": "Random Access Memory — the computer's main working memory, which stores currently running programs and data, but loses its contents when power is removed."
+    }
+  ],
+  "hero_keywords": [
+    "computer processor chip",
+    "CPU microchip",
+    "computer hardware circuit board"
+  ],
+  "hero_image_caption": "A modern CPU chip on a circuit board — the brain of every computer system."
+}

@@ -1,0 +1,137 @@
+{
+  "_lesson_id": "b87315a4-2c74-424b-9c48-3de2a4033001",
+  "_lesson_number": 3,
+  "_unit_slug": "logic-data-os",
+  "_lesson_slug": "data-structures-arrays-records-and-file-design",
+  "description": "Design and use 1D arrays, 2D arrays and records, and choose the right structure.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Data Structures Matter</h2>\n<p data-narration-id=\"n2\">When a program needs to store more than a few values, single variables become unmanageable. Imagine tracking the scores of 30 students with 30 separate variables &mdash; the code would be enormous and impossible to loop over. <dfn class=\"term\" data-def=\"A way of organising and storing data in memory so that it can be accessed and manipulated efficiently.\">Data structures</dfn> solve this by grouping related data together under one name. The three structures you need to understand are one-dimensional arrays, two-dimensional arrays and records. Each suits a different kind of problem.</p>\n\n<h2 data-narration-id=\"n3\">One-Dimensional Arrays</h2>\n<p data-narration-id=\"n4\">A <dfn class=\"term\" data-def=\"A data structure that stores a fixed number of items of the same type in a single sequence, accessed by an index number.\">one-dimensional array</dfn> is a list of items of the same data type, stored in a row. Every item is accessed using an index. In Python, indexing starts at 0, so the first element of an array called <code>scores</code> is <code>scores[0]</code>.</p>\n\n<pre><code class=\"language-python\"># Declaring a 1D array of five exam scores\nscores = [72, 85, 61, 90, 78]\n\n# Accessing the third element (index 2)\nprint(scores[2])   # outputs 61\n\n# Changing an element\nscores[0] = 75\n\n# Looping over the whole array\nfor i in range(len(scores)):\n    print(scores[i])\n</code></pre>\n\n<p data-narration-id=\"n5\">Arrays store items of the <strong>same type</strong> &mdash; all integers, all strings, and so on. This is what makes them efficient: the computer knows the size of each element, so it can jump directly to any index in one step. You cannot mix data types in a single array.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and write a Python declaration for a 1D array of six temperatures. Then write the code to print the fourth element.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A 1D array stores a fixed set of same-type values in a single row. Access is by index number. In Python, the first index is 0, so an array of length 6 has valid indices 0 to 5.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Two-Dimensional Arrays</h2>\n<p data-narration-id=\"n8\">A <dfn class=\"term\" data-def=\"A data structure that stores data in a grid of rows and columns, accessed using two index numbers: one for the row and one for the column.\">two-dimensional array</dfn> is a grid &mdash; think of a table or a spreadsheet. Each element needs two indices: a row index and a column index. A seating plan for a hall with 5 rows and 8 columns could be stored as a 2D array with 40 elements.</p>\n\n<pre><code class=\"language-python\"># 2D array: 3 students, 4 test scores each\nresults = [\n    [72, 85, 61, 90],   # student 0\n    [55, 70, 80, 65],   # student 1\n    [88, 92, 76, 84]    # student 2\n]\n\n# Access student 1's third test score (row 1, column 2)\nprint(results[1][2])   # outputs 80\n\n# Loop over all scores\nfor row in range(len(results)):\n    for col in range(len(results[row])):\n        print(results[row][col])\n</code></pre>\n\n<p data-narration-id=\"n9\">The outer index selects the row; the inner index selects the column. A 2D array is ideal when data is naturally tabular &mdash; for example, a timetable or a grid-based game map. Like 1D arrays, all elements must be the same data type.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n10\" data-revision-tip=\"Write from memory: how do you access the element in row 2, column 3 of a 2D array called 'grid'? Write both the Python syntax and a sentence explaining what the two indices mean.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A 2D array uses two indices: <code>array[row][column]</code>. All elements must share the same data type. A 2D array of r rows and c columns holds r &times; c elements in total.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Records: Grouping Mixed Data Types</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n11\">Arrays require all elements to be the same type. But a student record typically contains a name (string), an age (integer), a registration number (string) and a grade (character) &mdash; all different types. A <dfn class=\"term\" data-def=\"A data structure that groups together a fixed set of named fields, which may be of different data types, to represent one entity.\">record</dfn> stores different data types together under one structured name. Each piece of information within a record is called a field.</p>\n    <p data-narration-id=\"n12\">In Python, a record is commonly modelled as a dictionary or a class. For GCSE purposes, describe a record by listing its fields, their data types and their purposes:</p>\n    <pre><code class=\"language-python\"># A student record with four fields\nstudent = {\n    \"name\": \"Aisha Patel\",    # string\n    \"age\": 16,                  # integer\n    \"reg_number\": \"24A017\",    # string\n    \"grade\": \"B\"                # character\n}\n\nprint(student[\"name\"])   # outputs Aisha Patel\n</code></pre>\n    <p data-narration-id=\"n13\">Each field in a record has a name and a data type. Fields can be strings, integers, booleans, dates &mdash; anything. This flexibility is the key difference between a record and an array.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>File Design: From Records to Files</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\">A file is a collection of related records stored on a secondary storage device (hard drive, SSD). A school database might store one record per student, with all records forming a file. When designing a file, you decide which fields each record needs and what data type and size each field should have.</p>\n    <p data-narration-id=\"n15\">A simple file design table for a student file might look like this:</p>\n    <table data-narration-id=\"n16\">\n      <thead><tr><th>Field name</th><th>Data type</th><th>Example value</th><th>Purpose</th></tr></thead>\n      <tbody>\n        <tr><td>StudentID</td><td>String</td><td>24A017</td><td>Unique identifier for each student</td></tr>\n        <tr><td>Surname</td><td>String</td><td>Patel</td><td>Student's family name</td></tr>\n        <tr><td>Forename</td><td>String</td><td>Aisha</td><td>Student's given name</td></tr>\n        <tr><td>YearGroup</td><td>Integer</td><td>11</td><td>Current school year</td></tr>\n        <tr><td>FreeSchoolMeals</td><td>Boolean</td><td>True</td><td>Entitlement flag for funding</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n17\">Good file design avoids storing the same data twice (redundancy) and keeps each field focused on one piece of information. For example, storing &ldquo;full name&rdquo; as a single field makes it harder to sort by surname &mdash; separate Surname and Forename fields are better design.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Choosing the Right Data Structure</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\">The rule is straightforward: if all your data is the same type and you need to loop over it numerically, use an array. If your data has mixed types and represents one real-world entity, use a record. If you need to store many records persistently on disk, you need a file.</p>\n    <p data-narration-id=\"n19\">Examples to practise:</p>\n    <ul>\n      <li data-narration-id=\"n20\">Monthly rainfall figures for 12 months &mdash; all the same type (real numbers), naturally sequential. Use a <strong>1D array</strong>.</li>\n      <li data-narration-id=\"n21\">Rainfall figures for 12 months across 5 cities &mdash; same type, two dimensions (city &times; month). Use a <strong>2D array</strong>.</li>\n      <li data-narration-id=\"n22\">Details about one patient (name, date of birth, blood group, NHS number) &mdash; mixed types, one entity. Use a <strong>record</strong>.</li>\n      <li data-narration-id=\"n23\">Details about thousands of patients stored permanently &mdash; many records. Use a <strong>file</strong> of patient records.</li>\n    </ul>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n24\">In &ldquo;describe&rdquo; or &ldquo;justify&rdquo; questions about data structures, always state <em>why</em> the structure suits the problem &mdash; not just which one to use. For a 1D array: &ldquo;because all 12 values are the same data type (integer) and can be accessed by a loop using a single index.&rdquo; For a record: &ldquo;because the fields have different data types (string for name, integer for age) representing one entity.&rdquo; One-word answers score zero; a reason earns the extra mark. When designing file fields, always include the data type alongside the field name.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n25\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n26\">A 1D array stores a fixed number of same-type items in a single sequence; a 2D array stores them in a grid accessed by two indices (row, then column).</li>\n  <li data-narration-id=\"n27\">A record groups fields of mixed data types to represent one real-world entity; a file is a collection of related records stored on secondary storage.</li>\n  <li data-narration-id=\"n28\">Choose arrays when data is all one type and looped numerically; choose records when fields have different types. Justify your choice by linking the structure to the data properties.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A programmer stores the daily temperatures for one week as seven real numbers. Which data structure is most appropriate?\nA) Record\nB) 2D array\nC) 1D array\nD) File",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) 1D array [1 mark] — seven values of the same type (real) stored in sequence."
+    },
+    {
+      "text": "State one difference between a 1D array and a record.",
+      "type": "1 mark — State/Identify",
+      "marks": "Any one of: a 1D array stores items of the same data type, whereas a record can store fields of different data types [1]; a 1D array is accessed by a single integer index, whereas a record's fields are accessed by name [1]."
+    },
+    {
+      "text": "A school stores the following information about each pupil: pupil ID (string), year group (integer), name (string), and whether they are eligible for free school meals (Boolean). Design a record structure for one pupil, showing the field name and data type for each field.",
+      "type": "3 marks — Describe",
+      "marks": "One mark per field correctly identified with its data type up to three marks:\n• PupilID — String [1]\n• YearGroup — Integer [1]\n• Name — String (or Surname + Forename as two fields, each String) [1]\n• FreeMeals / EligibleFSM — Boolean [1]\nThree marks total; accept equivalent field names."
+    },
+    {
+      "text": "A programmer uses a 2D array called results to store test scores for 4 students, each having 5 test results. Write Python code to:\n(a) declare the array with realistic values\n(b) print the score of student 2 (0-indexed) in test 4 (0-indexed)",
+      "type": "4 marks — Explain",
+      "marks": "(a) A valid 2D list with 4 rows and 5 columns, e.g. results = [[...],[...],[...],[...]] [2 — 1 for correct structure, 1 for correct dimensions]. (b) print(results[2][4]) [2 — 1 for correct syntax, 1 for correct indices]."
+    },
+    {
+      "text": "Explain why a record is a more appropriate data structure than a 1D array when storing information about a library book (title, ISBN, author, number of pages, available).",
+      "type": "4 marks — Explain",
+      "marks": "The fields have different data types: title and author are strings, ISBN is a string, number of pages is an integer, and available is a Boolean [1]. A 1D array can only store one data type [1], so it cannot hold all five fields together [1]. A record allows named fields of different types to represent one entity (one book) [1]."
+    },
+    {
+      "text": "A hospital needs to store medical records for 10,000 patients permanently. Each patient record contains: patient ID, surname, forename, date of birth, and blood type. Compare using a 2D array with using a file of records for this purpose.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: 2D array can only hold one data type — cannot store a mix of strings, dates and integers in the same structure; a file of records handles mixed types per patient [contrast made explicitly]; a 2D array is stored in RAM and lost when the program ends, unlike a file which persists on secondary storage; file supports individual record retrieval by ID without loading all data into RAM; conclusion that a file of records is the appropriate choice for permanent multi-type storage at scale.\nSecure: Two clear contrasting points made; both structures described correctly; minor omission in conclusion.\nDeveloping: One contrast correctly made (e.g. data types or persistence); second contrast weak or missing.\nEmerging: Describes one structure only; no explicit comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the correct Python syntax to access the element at row 1, column 3 of a 2D array called grid?",
+      "options": ["grid[3][1]", "grid(1, 3)", "grid[1][3]", "grid[1,3]"],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which data structure is best for storing a mix of data types (string, integer, Boolean) representing one real-world entity?",
+      "options": ["1D array", "2D array", "Record", "Stack"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A 1D array called scores has 8 elements. The valid index range is 0 to _____.",
+      "options": ["7", "8", "9", "1"],
+      "correct": 0
+    },
+    {
+      "type": "fill",
+      "q": "A file is a collection of related _____ stored on secondary storage.",
+      "options": ["arrays", "variables", "records", "indexes"],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each scenario to the most appropriate data structure:",
+      "left": ["12 monthly rainfall figures (real numbers)", "Name, age, blood group for one patient", "Test scores for 30 students across 6 tests"],
+      "right": ["1D array", "Record", "2D array"],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is a one-dimensional array?",
+      "a": "A list of fixed-size same-type items accessed by a single index number."
+    },
+    {
+      "q": "In Python, what is the index of the first element in an array?",
+      "a": "0 — Python arrays are zero-indexed."
+    },
+    {
+      "q": "A 2D array has 4 rows and 6 columns. How many elements does it hold?",
+      "a": "24 — multiply rows by columns."
+    },
+    {
+      "q": "What is the Python syntax to access row 2, column 5 of a 2D array called table?",
+      "a": "table[2][5]"
+    },
+    {
+      "q": "What is a record in data organisation?",
+      "a": "A structure grouping named fields of different data types to represent one entity."
+    },
+    {
+      "q": "Give one reason why a record is more suitable than a 1D array for storing pupil details.",
+      "a": "A record allows mixed data types (string, integer, Boolean); a 1D array requires all items to be the same type."
+    },
+    {
+      "q": "What is a file (in data organisation terms)?",
+      "a": "A collection of related records stored permanently on secondary storage."
+    },
+    {
+      "q": "Why should 'full name' be split into 'surname' and 'forename' fields in a file design?",
+      "a": "Separate fields allow sorting by surname and searching more efficiently."
+    },
+    {
+      "q": "Which data structure would you use for a 10×10 grid game board where each cell holds an integer?",
+      "a": "A 2D array — grid data of a single type accessed by row and column."
+    },
+    {
+      "q": "What must all elements in an array share?",
+      "a": "The same data type."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "data structure",
+      "definition": "A way of organising and storing data in memory so that it can be accessed and manipulated efficiently."
+    },
+    {
+      "term": "one-dimensional array",
+      "definition": "A data structure that stores a fixed number of items of the same type in a single sequence, accessed by an index number."
+    },
+    {
+      "term": "two-dimensional array",
+      "definition": "A data structure that stores data in a grid of rows and columns, accessed using two index numbers: one for the row and one for the column."
+    },
+    {
+      "term": "record",
+      "definition": "A data structure that groups together a fixed set of named fields, which may be of different data types, to represent one entity."
+    }
+  ],
+  "hero_keywords": ["database filing system records", "data organisation structured", "computer server database"],
+  "hero_image_caption": "Data structures organise information so programs can access and process it efficiently."
+}

@@ -1,0 +1,169 @@
+{
+  "_lesson_id": "5bbea093-c8d6-4346-a1ad-82e7e7239bf8",
+  "_lesson_number": 3,
+  "_unit_slug": "algorithms-programming-software",
+  "_lesson_slug": "searching-linear-and-binary",
+  "description": "How linear and binary search algorithms work, traced step by step on small datasets.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Searching Matters</h2>\n<p data-narration-id=\"n2\">Searching is one of the most fundamental operations in computing. Every time you look up a contact on your phone, query a database, or ask a search engine a question, a search algorithm is running in the background. Your exam covers two searching algorithms: <dfn class=\"term\" data-def=\"A search algorithm that checks every item in a list one by one from the start until the target is found or the list ends.\">linear search</dfn> and <dfn class=\"term\" data-def=\"A search algorithm that repeatedly halves a sorted list to home in on the target item, requiring the list to be sorted first.\">binary search</dfn>. Understanding when to use each one, and being able to trace them by hand, are core exam skills.</p>\n\n<h2 data-narration-id=\"n3\">Linear Search</h2>\n<p data-narration-id=\"n4\">Linear search (also called sequential search) is the simplest possible search algorithm. It checks each item in the list from the first to the last, one at a time, until it either finds the target or runs out of items. It works on any list &mdash; sorted or unsorted.</p>\n<p data-narration-id=\"n5\">Below is a linear search in pseudocode. It searches a list called <code>names</code> for the value stored in <code>target</code>:</p>\n<pre data-narration-id=\"n6\"><code>SET found = FALSE\nSET i = 0\nWHILE i &lt; LENGTH(names) AND found = FALSE\n  IF names[i] = target THEN\n    SET found = TRUE\n    OUTPUT &ldquo;Found at position &rdquo; &amp; i\n  END IF\n  SET i = i + 1\nEND WHILE\nIF found = FALSE THEN\n  OUTPUT &ldquo;Not found&rdquo;\nEND IF</code></pre>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write from memory: what is the worst-case number of comparisons for linear search on a list of n items? What about binary search?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Linear search may check every item in the list in the worst case &mdash; if the target is last or not present at all. For a list of <em>n</em> items, the worst case is <em>n</em> comparisons. Binary search, by halving the list each time, needs at most \\ (\\log_2 n \\) comparisons.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Traced Example: Linear Search</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">List: <code>[3, 7, 12, 5, 9]</code>. Target: <strong>12</strong>.</p>\n    <table>\n      <thead><tr><th>Step</th><th>Index checked</th><th>Value</th><th>Match?</th></tr></thead>\n      <tbody>\n        <tr><td>1</td><td>0</td><td>3</td><td>No</td></tr>\n        <tr><td>2</td><td>1</td><td>7</td><td>No</td></tr>\n        <tr><td>3</td><td>2</td><td>12</td><td>Yes &mdash; found!</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n9\">The algorithm stops after three comparisons. If the target were 99 (not in the list), it would check all five items before reporting &ldquo;Not found.&rdquo;</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n10\">Binary Search</h2>\n<p data-narration-id=\"n11\">Binary search is much faster than linear search on large lists, but it has one critical requirement: <strong>the list must be sorted before binary search can be applied.</strong> Binary search works by repeatedly halving the search space. It finds the middle item, compares it to the target, and discards the half of the list that cannot contain the target.</p>\n<p data-narration-id=\"n12\">Here is the binary search algorithm in pseudocode:</p>\n<pre data-narration-id=\"n13\"><code>SET low = 0\nSET high = LENGTH(list) - 1\nSET found = FALSE\nWHILE low &lt;= high AND found = FALSE\n  SET mid = (low + high) DIV 2\n  IF list[mid] = target THEN\n    OUTPUT &ldquo;Found at position &rdquo; &amp; mid\n    SET found = TRUE\n  ELSE IF target &lt; list[mid] THEN\n    SET high = mid - 1\n  ELSE\n    SET low = mid + 1\n  END IF\nEND WHILE\nIF found = FALSE THEN\n  OUTPUT &ldquo;Not found&rdquo;\nEND IF</code></pre>\n\n<div class=\"key-fact\" data-narration-id=\"n14\" data-revision-tip=\"Write from memory: what must be true about a list before binary search can work? Explain why in one sentence.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Binary search <strong>requires the list to be sorted</strong> in ascending (or descending) order. Without sorting, comparing the midpoint to the target gives no information about which half of the list to discard, so the halving strategy breaks down entirely.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Traced Example: Binary Search</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n15\">Sorted list (indices 0&ndash;6): <code>[2, 5, 8, 12, 16, 23, 38]</code>. Target: <strong>23</strong>.</p>\n    <table>\n      <thead><tr><th>Pass</th><th>low</th><th>high</th><th>mid</th><th>list[mid]</th><th>Action</th></tr></thead>\n      <tbody>\n        <tr><td>1</td><td>0</td><td>6</td><td>3</td><td>12</td><td>23 &gt; 12 &rarr; low = 4</td></tr>\n        <tr><td>2</td><td>4</td><td>6</td><td>5</td><td>23</td><td>Match! Found at index 5</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n16\">Only two comparisons were needed to find the target in a list of seven items. A linear search would have needed six comparisons to reach index 5.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n17\">Comparing Linear and Binary Search</h2>\n<p data-narration-id=\"n18\">The table below summarises the key differences. In exam &ldquo;compare&rdquo; questions, you must make explicit contrasts &mdash; say &ldquo;unlike linear search&hellip;&rdquo; rather than describing each in a separate paragraph.</p>\n<table data-narration-id=\"n19\">\n  <thead><tr><th>Feature</th><th>Linear search</th><th>Binary search</th></tr></thead>\n  <tbody>\n    <tr><td>List must be sorted?</td><td>No</td><td>Yes</td></tr>\n    <tr><td>Worst-case comparisons (n items)</td><td>n</td><td>log&#8322;n</td></tr>\n    <tr><td>Best-case comparisons</td><td>1 (target is first)</td><td>1 (target is midpoint)</td></tr>\n    <tr><td>Works on small lists?</td><td>Yes &mdash; often simpler</td><td>Yes, but overhead of sorting may not be worth it</td></tr>\n    <tr><td>Works on large lists?</td><td>Slow &mdash; may check millions of items</td><td>Fast &mdash; 30 comparisons suffices for 1 billion items</td></tr>\n  </tbody>\n</table>\n\n<h2 data-narration-id=\"n20\">Choosing Between Linear and Binary Search</h2>\n<p data-narration-id=\"n21\">The right algorithm depends entirely on two questions: is the list already sorted, and how often will you search it? If the data arrives in arbitrary order and only needs to be searched once, the cost of sorting first is wasted, so a linear search wins. If the same dataset is searched repeatedly, the one-off sorting cost is paid back many times over because every subsequent binary search runs in <dfn class=\"term\" data-def=\"An algorithmic time complexity that grows in proportion to the logarithm of the input size, meaning a doubling of input size adds only one extra step.\">logarithmic time</dfn>. Long-lived data structures &mdash; phone books, dictionaries, sorted database indexes &mdash; are designed around this trade-off.</p>\n<p data-narration-id=\"n22\">Binary search also assumes the data lives in a structure that supports random access, where any index can be inspected in constant time. Arrays satisfy this requirement, but linked lists do not &mdash; reaching the middle of a linked list itself takes linear time, which cancels the algorithm&rsquo;s headline advantage. When the spec asks why binary search is unsuitable in a particular scenario, an answer that mentions either &ldquo;the data is unsorted&rdquo; or &ldquo;the structure does not allow random access&rdquo; will earn the mark.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n20\">In &ldquo;compare&rdquo; questions about search algorithms, always make explicit contrasts &mdash; &ldquo;unlike linear search, which can work on unsorted lists, binary search requires the list to be sorted.&rdquo; State a concrete advantage for each direction of comparison. For trace-table questions on searching, show every pass: record the values of <em>low</em>, <em>high</em> and <em>mid</em> after each iteration, not just the final answer. Missing rows cost marks.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n21\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n22\">Linear search checks each item in order from the start; it works on unsorted lists but is slow for large datasets, with up to <em>n</em> comparisons in the worst case.</li>\n  <li data-narration-id=\"n23\">Binary search halves the search space each time, needing at most log&#8322;n comparisons &mdash; but the list must be sorted first.</li>\n  <li data-narration-id=\"n24\">For small or unsorted lists, linear search is simpler; for large sorted datasets, binary search is far more efficient.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which of the following is a requirement for binary search but NOT for linear search?\nA) The list must contain integers only\nB) The list must be sorted\nC) The list must have an odd number of items\nD) The list must be stored in a 2D array",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) The list must be sorted [1 mark]"
+    },
+    {
+      "text": "State the maximum number of comparisons needed to search a sorted list of 8 items using binary search.",
+      "type": "1 mark — State/Identify",
+      "marks": "3 comparisons [1 mark] (since log₂ 8 = 3). Accept 4 if working shown with rounding up."
+    },
+    {
+      "text": "Explain one advantage and one disadvantage of binary search compared to linear search.",
+      "type": "4 marks — Explain",
+      "marks": "Advantage: Binary search is much faster on large sorted lists / at most log₂n comparisons vs up to n for linear search [1 + 1 for development].\nDisadvantage: Binary search requires the list to be sorted first / if the list changes frequently, re-sorting adds overhead [1 + 1 for development].\nMastering: Both points with development and explicit comparison.\nSecure: Both points, one developed.\nDeveloping: One point with development.\nEmerging: One valid point."
+    },
+    {
+      "text": "The sorted list below is searched using binary search for the value 31.\n[4, 9, 15, 21, 27, 31, 38, 44]\n\nComplete a trace table showing the values of low, high and mid for each pass, until the target is found.",
+      "type": "4 marks — Trace an Algorithm",
+      "marks": "Pass 1: low=0, high=7, mid=3, list[3]=21, 31>21 so low=4 [1]\nPass 2: low=4, high=7, mid=5, list[5]=31, match! [1]\nFull trace with correct output 'Found at index 5' [1]\nAll mid calculations correct [1]\nMastering: All rows and output correct.\nSecure: 2 rows correct.\nDeveloping: 1 row correct.\nEmerging: Correct identification of algorithm type only."
+    },
+    {
+      "text": "Write a pseudocode algorithm for a linear search that searches a list called 'scores' (with 10 items, indices 0 to 9) for a target value entered by the user. Output the index if found or 'Not found' if not.",
+      "type": "6 marks — Write an Algorithm in Pseudocode",
+      "marks": "Mastering: RECEIVE target, initialise found/index, correct WHILE loop checking index < 10 AND found = FALSE, IF comparison inside loop, set found = TRUE and output index, post-loop check for not found — 5-6 marks.\nSecure: Logic correct, minor issue with loop boundary or keyword — 3-4 marks.\nDeveloping: Loop and IF present but incomplete — 2 marks.\nEmerging: RECEIVE and some loop structure — 1 mark."
+    },
+    {
+      "text": "A school database of 50,000 student records is searched frequently. The records are sorted alphabetically by surname. Discuss whether binary search or linear search would be more suitable, justifying your answer.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Argues binary search is suitable (sorted list meets prerequisite, log₂ 50000 ≈ 16 comparisons vs up to 50000 for linear), develops with efficiency argument, acknowledges linear search as simpler to implement / suitable for unsorted data, reaches a justified conclusion that binary search is preferable for a large, already-sorted dataset.\nSecure: Binary search recommended with efficiency justification and acknowledgement of at least one trade-off.\nDeveloping: Correct recommendation, basic efficiency point, limited development.\nEmerging: Identifies binary search as faster without justification."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which search algorithm works on both sorted and unsorted lists?",
+      "options": [
+        "Binary search",
+        "Merge search",
+        "Linear search",
+        "Hash search"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "In binary search, after comparing the target to the midpoint and finding the target is smaller, what happens next?",
+      "options": [
+        "The high pointer moves to mid + 1",
+        "The search restarts from the beginning",
+        "The high pointer moves to mid - 1",
+        "The low pointer moves to mid + 1"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Binary search halves the search space each time, giving a worst-case number of comparisons of _____ for a list of n items.",
+      "options": [
+        "n",
+        "n/2",
+        "n squared",
+        "log₂n"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "Linear search checks items _____ from the start until the target is found or the list ends.",
+      "options": [
+        "randomly",
+        "from the middle",
+        "one by one in order",
+        "in pairs"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each statement to the correct search algorithm:",
+      "left": [
+        "Requires a sorted list",
+        "Checks every item from index 0 upwards",
+        "Can find an item in log₂n steps"
+      ],
+      "right": [
+        "Linear search",
+        "Binary search",
+        "Binary search"
+      ],
+      "order": [
+        1,
+        0,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is linear search?",
+      "a": "A search that checks each item in order from the start until the target is found or the list ends."
+    },
+    {
+      "q": "What is binary search?",
+      "a": "A search that repeatedly halves a sorted list to home in on the target."
+    },
+    {
+      "q": "What must be true about a list before binary search can be applied?",
+      "a": "The list must be sorted in ascending or descending order."
+    },
+    {
+      "q": "What is the worst-case number of comparisons for binary search on a list of n items?",
+      "a": "log₂n comparisons."
+    },
+    {
+      "q": "What is the worst-case number of comparisons for linear search on a list of n items?",
+      "a": "n comparisons (every item may need to be checked)."
+    },
+    {
+      "q": "In binary search, what calculation finds the midpoint of the current search range?",
+      "a": "mid = (low + high) DIV 2."
+    },
+    {
+      "q": "After comparing the midpoint and finding the target is larger, what changes in binary search?",
+      "a": "The low pointer moves to mid + 1, discarding the lower half."
+    },
+    {
+      "q": "When is linear search preferred over binary search?",
+      "a": "When the list is small, unsorted, or changes frequently so re-sorting is costly."
+    },
+    {
+      "q": "How many comparisons does binary search need to search 1,024 items in the worst case?",
+      "a": "10 comparisons (log₂ 1024 = 10)."
+    },
+    {
+      "q": "Binary search on a list of 8 items needs at most _____ comparisons.",
+      "a": "3 comparisons (log₂ 8 = 3)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "linear search",
+      "definition": "A search algorithm that checks every item in a list one by one from the start until the target is found or the list ends."
+    },
+    {
+      "term": "binary search",
+      "definition": "A search algorithm that repeatedly halves a sorted list to home in on the target item, requiring the list to be sorted first."
+    },
+    {
+      "term": "logarithmic time",
+      "definition": "An algorithmic time complexity that grows in proportion to the logarithm of the input size, meaning a doubling of input size adds only one extra step."
+    }
+  ],
+  "hero_keywords": [
+    "data search database rows",
+    "binary search algorithm computer",
+    "sorted list computer science"
+  ],
+  "hero_image_caption": "Searching through rows of data records in a sorted database system"
+}

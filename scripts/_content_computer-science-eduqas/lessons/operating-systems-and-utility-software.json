@@ -1,0 +1,193 @@
+{
+  "_lesson_id": "d051294d-b76e-46e4-b594-ed37e1791ea4",
+  "_lesson_number": 4,
+  "_unit_slug": "logic-data-os",
+  "_lesson_slug": "operating-systems-and-utility-software",
+  "description": "What the OS manages — CPU, memory, peripherals, security — and common utility programs.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is an Operating System?</h2>\n<p data-narration-id=\"n2\">Every computer needs software that manages its hardware and gives applications a platform to run on. An <dfn class=\"term\" data-def=\"Software that manages computer hardware and software resources, providing common services for application programs and acting as an interface between the user and the hardware.\">operating system</dfn> (OS) sits between the hardware and the user-facing applications. Without an OS, every application would have to contain its own code for drawing text on screen, reading keyboard input and writing to disk &mdash; an enormous duplication of effort. The OS handles these common tasks so that applications can focus on their specific job.</p>\n\n<p data-narration-id=\"n3\">The core of the OS is the <dfn class=\"term\" data-def=\"The central component of an operating system that manages the CPU, memory, device drivers and system calls, and runs with the highest level of hardware privilege.\">kernel</dfn>. The kernel runs continuously in the background, managing resources and mediating between hardware and software. It is the most privileged piece of software on the system &mdash; it can access all hardware directly, while applications must go through the kernel via system calls.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Close this and list the six main responsibilities of an operating system from memory. Check your list against the lesson.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>An operating system manages six key areas: CPU scheduling, memory management, backing store (file system) management, peripheral management, the user interface, and security. Each area has dedicated OS components.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">CPU Management and Scheduling</h2>\n<p data-narration-id=\"n6\">A modern computer runs many processes at the same time &mdash; a web browser, a music player, background updates. The OS <dfn class=\"term\" data-def=\"The OS process that decides which program or process uses the CPU next and for how long, enabling apparent multi-tasking on a single processor.\">scheduler</dfn> decides which process gets CPU time and for how long. Because the CPU switches between processes so rapidly, it creates the illusion of true simultaneous execution even on a single-core processor.</p>\n\n<p data-narration-id=\"n7\">Two common scheduling algorithms are:</p>\n<ul>\n  <li data-narration-id=\"n8\"><strong>Round-robin scheduling:</strong> each process gets a fixed slice of CPU time (a quantum) in turn. When a process&rsquo;s quantum expires, the next process in the queue takes over, even if the first process hasn&rsquo;t finished. This ensures fairness &mdash; no single process can monopolise the CPU.</li>\n  <li data-narration-id=\"n9\"><strong>First-Come-First-Served (FCFS):</strong> processes run in the order they arrive in the queue. Simple to implement but unfair &mdash; a long process arriving first can block shorter ones for a long time.</li>\n</ul>\n\n<p data-narration-id=\"n10\"><dfn class=\"term\" data-def=\"A signal sent to the CPU by hardware or software to indicate that an event requires immediate attention, causing the CPU to pause its current task.\">Interrupts</dfn> allow the OS to respond to urgent events without waiting for the current process to finish. When a key is pressed or a network packet arrives, the hardware sends an interrupt signal. The CPU pauses its current task, saves its state, handles the interrupt, then resumes what it was doing. Without interrupts, a computer could not respond to user input while running a program.</p>\n\n<h2 data-narration-id=\"n11\">Memory Management</h2>\n<p data-narration-id=\"n12\">The OS controls how RAM is allocated between running programs. When more programs are open than RAM can hold, the OS uses <strong>paging</strong> &mdash; dividing memory into fixed-size blocks called pages. Inactive pages are moved to a reserved area of the hard drive called the <dfn class=\"term\" data-def=\"An area of secondary storage used by the OS to temporarily store memory pages that do not currently fit in RAM, extending the apparent size of main memory.\">backing store (virtual memory)</dfn>. When those pages are needed again, they are swapped back into RAM.</p>\n\n<p data-narration-id=\"n13\">Virtual memory allows a computer to run programs that collectively need more RAM than is physically installed. The trade-off is speed: swapping pages to and from secondary storage is much slower than RAM access. If too much paging occurs, the system slows dramatically in a state called &ldquo;thrashing.&rdquo;</p>\n\n<div class=\"key-fact\" data-narration-id=\"n14\" data-revision-tip=\"Write from memory: what is paging, what is the backing store, and why is virtual memory slower than RAM?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Paging divides RAM into fixed-size pages. Inactive pages are written to the backing store (virtual memory) on secondary storage. Accessing the backing store is slower than RAM, so excessive paging causes the system to slow down.</p>\n</div>\n\n<h2 data-narration-id=\"n15\">Peripheral and File System Management</h2>\n<p data-narration-id=\"n16\">Peripherals &mdash; printers, keyboards, mice, external drives &mdash; each speak a different communication protocol. The OS uses <strong>device drivers</strong>: small software modules that translate between the OS&rsquo;s generic commands and the specific signals each device understands. When you plug in a USB keyboard, the OS loads the relevant driver so that keystrokes reach the running application correctly.</p>\n\n<p data-narration-id=\"n17\">The OS also manages the file system &mdash; how files are organised, named, stored and retrieved on backing storage. It maintains a directory structure (folders and subfolders), controls which users can read or write which files, and handles the physical reading and writing of data to the storage medium. Common file systems include NTFS (Windows), ext4 (Linux) and APFS (macOS).</p>\n\n<h2 data-narration-id=\"n18\">User Interface and Security</h2>\n<p data-narration-id=\"n19\">The OS provides a user interface &mdash; the layer through which people interact with the computer. The two main types are the graphical user interface (GUI, which uses windows, icons and a pointer) and the command-line interface (CLI, which accepts typed commands). The OS also enforces security: user account authentication (logins and passwords), access permissions on files and folders, and software privilege levels that prevent applications from accessing each other&rsquo;s memory.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Utility Software: Tools That Keep the System Healthy</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\"><dfn class=\"term\" data-def=\"Software designed to help manage, maintain and optimise a computer's hardware and operating system, rather than to perform end-user tasks.\">Utility software</dfn> is system software that maintains and optimises the computer. Unlike applications (which do user tasks like word processing), utilities work on the system itself. You need to know the following utilities and what each one does:</p>\n    <ul>\n      <li data-narration-id=\"n21\"><strong>Anti-virus software:</strong> scans files and processes for known malicious patterns (virus signatures) and removes or quarantines threats. Relies on regular signature updates.</li>\n      <li data-narration-id=\"n22\"><strong>Backup software:</strong> makes copies of files to a separate location (external drive, cloud). Full backups copy everything; incremental backups copy only files changed since the last backup.</li>\n      <li data-narration-id=\"n23\"><strong>Disk defragmenter:</strong> on traditional hard drives, files become fragmented &mdash; stored in non-contiguous sectors. A defragmenter reorganises files into contiguous blocks, reducing read-head movement and improving access speed. (Not needed on SSDs.)</li>\n      <li data-narration-id=\"n24\"><strong>Disk compression:</strong> reduces the size of files on disk by encoding data more efficiently. Saves storage space at the cost of small processing overhead when reading and writing.</li>\n      <li data-narration-id=\"n25\"><strong>Data recovery software:</strong> attempts to retrieve files that have been accidentally deleted or corrupted. Works because &ldquo;deleting&rdquo; a file usually only removes the directory entry &mdash; the data often remains until overwritten.</li>\n      <li data-narration-id=\"n26\"><strong>File manager:</strong> provides a graphical or command-line interface to browse, copy, move, rename and delete files and folders. Windows Explorer and Finder are examples.</li>\n    </ul>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Additional Utility Software You Should Know</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n27\">Beyond the six main utilities above, the specification also references:</p>\n    <ul>\n      <li data-narration-id=\"n28\"><strong>Archiver / compression utility:</strong> packages multiple files into a single compressed archive (e.g. ZIP, RAR). Useful for sending groups of files and reducing download sizes.</li>\n      <li data-narration-id=\"n29\"><strong>Partition editor:</strong> divides a physical storage device into separate logical sections (partitions), each of which can hold a different file system or operating system.</li>\n      <li data-narration-id=\"n30\"><strong>Clipboard manager:</strong> extends the standard cut-and-paste clipboard to store a history of copied items, allowing users to paste earlier copied content.</li>\n      <li data-narration-id=\"n31\"><strong>System profiler / diagnostic tool:</strong> reports detailed information about hardware (CPU type, RAM installed, GPU) and software (driver versions, installed applications). Used to diagnose compatibility and performance issues.</li>\n      <li data-narration-id=\"n32\"><strong>Cryptographic utility:</strong> encrypts or decrypts files and communications using cryptographic algorithms, protecting sensitive data from unauthorised access.</li>\n      <li data-narration-id=\"n33\"><strong>Revision control (version control):</strong> tracks changes to files over time, allowing earlier versions to be restored. Essential in software development (e.g. Git). Useful even for individual documents.</li>\n    </ul>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>OS vs Application Software: Clearing Up the Confusion</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n34\">Students sometimes confuse the categories of software. The key distinction is purpose: the OS manages hardware resources and provides a platform; application software performs end-user tasks (word processing, gaming, browsing); utility software maintains the system. A word processor is not a utility; anti-virus software is not the OS. All three are software, but they serve distinct functions.</p>\n    <p data-narration-id=\"n35\">A second common confusion: utility software is part of system software (alongside the OS), but utility software is not the same as the OS. The OS kernel runs at the lowest level and starts first; utilities are higher-level tools that run on top of the OS and can be installed or removed independently.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n36\">In &ldquo;describe&rdquo; questions about the OS, name the specific function and explain what it does &mdash; &ldquo;the OS manages memory&rdquo; scores zero; &ldquo;the OS uses paging to divide RAM into fixed-size blocks and swaps inactive pages to the backing store when RAM is full&rdquo; scores full marks. For utility software questions, give the utility&rsquo;s name and a sentence on what it does and why. Compare questions often ask you to contrast two utilities or an OS function with a utility &mdash; always state what each one does before comparing. In discussion questions about impacts of technology, the 2024 examiners&rsquo; report noted that balanced answers (one-sided responses score lower) are needed.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n37\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n38\">The OS manages CPU scheduling (round-robin or FCFS), memory (paging and virtual memory via backing store), peripherals (via device drivers), the file system, the user interface, and security.</li>\n  <li data-narration-id=\"n39\">Interrupts let the CPU respond to urgent hardware or software events without waiting for the current process to finish.</li>\n  <li data-narration-id=\"n40\">Utility software maintains the system: key examples include anti-virus, backup, disk defragmenter, disk compression, data recovery, file manager, archiver, partition editor, clipboard manager, system profiler, cryptographic utility and revision control.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is the role of the OS kernel?\nA) To provide a user interface for browsing files\nB) To manage hardware resources with the highest level of system privilege\nC) To scan files for virus signatures\nD) To compress files into archives",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) To manage hardware resources with the highest level of system privilege [1 mark]"
+    },
+    {
+      "text": "State what is meant by a 'device driver'.",
+      "type": "1 mark — State/Identify",
+      "marks": "Software that allows the OS to communicate with a specific hardware peripheral / translates OS commands into device-specific signals [1 mark]."
+    },
+    {
+      "text": "Describe how the OS uses virtual memory when RAM is full.",
+      "type": "3 marks — Describe",
+      "marks": "The OS divides RAM into fixed-size blocks called pages [1]. Inactive pages are moved from RAM to an area of secondary storage called the backing store [1]. When those pages are needed again, they are swapped back into RAM, allowing programs to run even when their total memory demand exceeds installed RAM [1]."
+    },
+    {
+      "text": "Explain the difference between round-robin scheduling and First-Come-First-Served (FCFS) scheduling.",
+      "type": "4 marks — Explain",
+      "marks": "Round-robin gives each process a fixed time slice (quantum) in turn [1]; when the quantum expires the next process runs, ensuring no process monopolises the CPU [1]. FCFS runs each process to completion in the order it arrives [1]; a long process arriving first can delay all shorter processes behind it [1]."
+    },
+    {
+      "text": "Explain why a disk defragmenter is not needed on a solid-state drive (SSD).",
+      "type": "4 marks — Explain",
+      "marks": "Defragmentation reorganises fragmented files into contiguous sectors to reduce mechanical read-head movement [1]. SSDs have no moving parts — they use flash memory chips accessed electronically [1]. Access time is the same regardless of where data is stored on an SSD [1], so defragmentation provides no speed benefit and unnecessarily wears out the flash cells [1]."
+    },
+    {
+      "text": "Discuss the benefits and drawbacks of using backup software to protect personal data. In your answer, consider both full and incremental backups.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Benefits clearly developed — data can be restored after accidental deletion, hardware failure or ransomware attack; full backup guarantees a complete copy independent of prior backups; incremental backup saves storage space and time by copying only changed files. Drawbacks developed — full backup requires large storage and takes time; incremental relies on a chain of backups (if one is corrupted, later ones may fail); cloud backup requires bandwidth and raises privacy concerns if data is sensitive. Counter-argument considered: backups use storage resources and must be tested regularly to verify they work. Conclusion presents a reasoned judgement (e.g. the benefits outweigh the cost for critical data, but backup strategy must be tailored to data value and recovery needs).\nSecure: At least two benefits and two drawbacks given with development; conclusion present but not fully justified.\nDeveloping: One benefit and one drawback; minimal development; conclusion weak or missing.\nEmerging: Only benefits or only drawbacks listed without development."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the main purpose of an operating system?",
+      "options": [
+        "To run user applications such as word processors",
+        "To manage hardware resources and provide a platform for applications",
+        "To scan the computer for viruses",
+        "To compress files to save disk space"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "What does an interrupt allow the CPU to do?",
+      "options": [
+        "Run two processes at exactly the same time",
+        "Ignore low-priority background tasks permanently",
+        "Pause its current task to handle an urgent event, then resume",
+        "Copy inactive memory pages to secondary storage"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The OS moves inactive memory pages to the _____ on secondary storage when RAM is full.",
+      "options": [
+        "cache",
+        "kernel",
+        "backing store",
+        "clipboard"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Anti-virus software protects a computer by scanning for known malicious _____ and removing threats.",
+      "options": [
+        "drivers",
+        "partitions",
+        "signatures",
+        "archives"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each utility to its function:",
+      "left": [
+        "Disk defragmenter",
+        "Backup software",
+        "Partition editor"
+      ],
+      "right": [
+        "Reorganises fragmented files into contiguous sectors on a hard drive",
+        "Copies files to a separate location so they can be restored if lost",
+        "Divides a storage device into separate logical sections"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is an operating system?",
+      "a": "Software that manages hardware resources and provides a platform for applications to run."
+    },
+    {
+      "q": "What is the kernel in an OS?",
+      "a": "The core component that manages the CPU, memory and hardware with the highest system privilege."
+    },
+    {
+      "q": "What does round-robin CPU scheduling do?",
+      "a": "Gives each process a fixed time slice in turn so no single process monopolises the CPU."
+    },
+    {
+      "q": "What is an interrupt in the context of an OS?",
+      "a": "A signal that causes the CPU to pause its current task and handle an urgent hardware or software event."
+    },
+    {
+      "q": "What is paging in memory management?",
+      "a": "Dividing RAM into fixed-size blocks (pages) that can be swapped to secondary storage when RAM is full."
+    },
+    {
+      "q": "What is virtual memory (backing store) used for?",
+      "a": "Extending RAM by temporarily storing inactive memory pages on secondary storage."
+    },
+    {
+      "q": "What does a device driver do?",
+      "a": "Translates OS commands into the specific signals a hardware peripheral understands."
+    },
+    {
+      "q": "What does disk defragmentation do, and why is it not needed for SSDs?",
+      "a": "Reorganises fragmented files into contiguous blocks to reduce read-head movement; SSDs have no moving parts so benefit nothing."
+    },
+    {
+      "q": "What is the difference between a full backup and an incremental backup?",
+      "a": "Full: copies all files. Incremental: copies only files changed since the last backup."
+    },
+    {
+      "q": "What does data recovery software exploit to retrieve deleted files?",
+      "a": "Deletion removes the directory entry but data often remains until overwritten."
+    },
+    {
+      "q": "What is utility software?",
+      "a": "Software that maintains and optimises the computer system, rather than performing end-user tasks."
+    },
+    {
+      "q": "Name one task a partition editor performs.",
+      "a": "Divides a physical storage device into separate logical sections, each able to hold a different file system."
+    },
+    {
+      "q": "What does a cryptographic utility do?",
+      "a": "Encrypts or decrypts files to protect sensitive data from unauthorised access."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "operating system",
+      "definition": "Software that manages computer hardware and software resources, providing common services for application programs and acting as an interface between the user and the hardware."
+    },
+    {
+      "term": "kernel",
+      "definition": "The central component of an operating system that manages the CPU, memory, device drivers and system calls, and runs with the highest level of hardware privilege."
+    },
+    {
+      "term": "scheduler",
+      "definition": "The OS process that decides which program or process uses the CPU next and for how long, enabling apparent multi-tasking on a single processor."
+    },
+    {
+      "term": "interrupt",
+      "definition": "A signal sent to the CPU by hardware or software to indicate that an event requires immediate attention, causing the CPU to pause its current task."
+    },
+    {
+      "term": "backing store (virtual memory)",
+      "definition": "An area of secondary storage used by the OS to temporarily store memory pages that do not currently fit in RAM, extending the apparent size of main memory."
+    },
+    {
+      "term": "utility software",
+      "definition": "Software designed to help manage, maintain and optimise a computer's hardware and operating system, rather than to perform end-user tasks."
+    }
+  ],
+  "hero_keywords": [
+    "server room data centre cooling",
+    "computer operating system interface",
+    "technology hardware circuit"
+  ],
+  "hero_image_caption": "An operating system manages every interaction between software and the underlying hardware."
+}

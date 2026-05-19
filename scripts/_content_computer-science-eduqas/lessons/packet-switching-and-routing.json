@@ -1,0 +1,177 @@
+{
+  "_lesson_id": "ac72ff1c-d554-4493-b743-8c5933ebffb4",
+  "_lesson_number": 4,
+  "_unit_slug": "networks-internet-cybersecurity",
+  "_lesson_slug": "packet-switching-and-routing",
+  "description": "How packets are structured, how packet switching works, and how routers calculate routing costs.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is Packet Switching?</h2>\n<p data-narration-id=\"n2\">When you send a large file or load a web page, the data is not sent as one continuous stream. Instead it is broken into small chunks called <dfn class=\"term\" data-def=\"A small block of data transmitted across a network, consisting of a header containing addressing information and a payload containing the actual data.\">packets</dfn>. Each packet travels independently through the network and may take a different route to the same destination. At the destination, the packets are reassembled in the correct order. This approach is called <strong>packet switching</strong>.</p>\n<p data-narration-id=\"n3\">Packet switching was designed to be resilient: if one route through the network is congested or broken, packets are automatically sent via an alternative path. This makes it far more robust than <strong>circuit switching</strong>, which reserves a dedicated path for the entire duration of a call (as used in traditional telephone networks).</p>\n\n<h2 data-narration-id=\"n4\">The Structure of a TCP/IP Packet</h2>\n<p data-narration-id=\"n5\">A packet has two main sections: the <dfn class=\"term\" data-def=\"The section of a packet containing control information such as source IP address, destination IP address, packet number and error-checking data.\">packet header</dfn> and the <dfn class=\"term\" data-def=\"The section of a packet that carries the actual data being transmitted, such as a portion of a file or web page.\">packet payload</dfn>.</p>\n<p data-narration-id=\"n6\">The header contains:</p>\n<ul>\n  <li data-narration-id=\"n7\"><strong>Source IP address</strong> &mdash; the IP address of the sending device.</li>\n  <li data-narration-id=\"n8\"><strong>Destination IP address</strong> &mdash; the IP address of the receiving device.</li>\n  <li data-narration-id=\"n9\"><strong>Packet number / sequence number</strong> &mdash; used to reassemble packets in the correct order at the destination.</li>\n  <li data-narration-id=\"n10\"><strong>Time to Live (TTL)</strong> &mdash; a counter decremented by each router the packet passes through. When TTL reaches zero, the packet is discarded. This prevents packets looping forever if they get lost.</li>\n  <li data-narration-id=\"n11\"><strong>Error-checking data</strong> &mdash; a checksum value used by the destination to verify the packet arrived without corruption.</li>\n</ul>\n<p data-narration-id=\"n12\">The payload carries the actual content &mdash; a portion of the file, image or web page being transmitted. Most packets carry between 500 and 1,500 bytes of payload data.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n13\" data-revision-tip=\"Cover this and name five fields found in a packet header, then explain the purpose of each one in a single sentence.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A packet header contains: source IP address, destination IP address, sequence number (for reassembly), Time to Live (TTL, prevents endless looping) and a checksum (error checking). The payload holds the actual data being sent.</p>\n</div>\n\n<h2 data-narration-id=\"n14\">How Packet Switching Works</h2>\n<p data-narration-id=\"n15\">When data is sent:</p>\n<ol>\n  <li data-narration-id=\"n16\">The sending device breaks the data into packets and adds a header to each one.</li>\n  <li data-narration-id=\"n17\">Each packet is sent into the network independently. Packets do not have to travel together.</li>\n  <li data-narration-id=\"n18\">Each router the packet encounters reads the destination IP address in the header and forwards the packet towards its destination along the best available route.</li>\n  <li data-narration-id=\"n19\">Packets from the same file may arrive at the destination in a different order from the one in which they were sent.</li>\n  <li data-narration-id=\"n20\">The receiving device uses the sequence numbers in the headers to reassemble the packets in the correct order. If a packet is missing, TCP requests it to be resent.</li>\n</ol>\n<p data-narration-id=\"n21\">The advantage of this approach is that the network can route packets around failures and congestion in real time. The internet would not function at global scale without packet switching.</p>\n\n<h2 data-narration-id=\"n22\">Routing and Routing Cost Calculation</h2>\n<p data-narration-id=\"n23\">A <dfn class=\"term\" data-def=\"A numerical value assigned to a network link representing the &lsquo;cost&rsquo; of using that link, based on factors such as speed, bandwidth, congestion or hop count.\">routing cost</dfn> is a value assigned to each link between two routers. When a packet needs to travel from source to destination, the router calculates the total cost of each possible path and chooses the path with the lowest total cost.</p>\n<p data-narration-id=\"n24\">Routing cost can be based on different factors:</p>\n<ul>\n  <li data-narration-id=\"n25\"><strong>Hop count</strong> &mdash; the number of routers (hops) the packet must pass through. Fewer hops = lower cost.</li>\n  <li data-narration-id=\"n26\"><strong>Bandwidth</strong> &mdash; the capacity of the link. Higher bandwidth links are cheaper (faster).</li>\n  <li data-narration-id=\"n27\"><strong>Latency</strong> &mdash; the time taken for a packet to travel along the link. Lower latency = lower cost.</li>\n  <li data-narration-id=\"n28\"><strong>Congestion</strong> &mdash; a heavily used link has a higher cost.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Calculating Routing Cost</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n29\">Consider four routers: A, B, C and D. A packet needs to travel from A to D. The available links and their costs are:</p>\n    <table>\n      <thead>\n        <tr><th>Link</th><th>Cost</th></tr>\n      </thead>\n      <tbody>\n        <tr><td>A &rarr; B</td><td>4</td></tr>\n        <tr><td>A &rarr; C</td><td>2</td></tr>\n        <tr><td>B &rarr; D</td><td>3</td></tr>\n        <tr><td>C &rarr; D</td><td>6</td></tr>\n        <tr><td>C &rarr; B</td><td>1</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n30\">Possible paths from A to D:</p>\n    <ul>\n      <li data-narration-id=\"n31\"><strong>Path 1: A &rarr; B &rarr; D</strong> &mdash; total cost = 4 + 3 = <strong>7</strong></li>\n      <li data-narration-id=\"n32\"><strong>Path 2: A &rarr; C &rarr; D</strong> &mdash; total cost = 2 + 6 = <strong>8</strong></li>\n      <li data-narration-id=\"n33\"><strong>Path 3: A &rarr; C &rarr; B &rarr; D</strong> &mdash; total cost = 2 + 1 + 3 = <strong>6</strong></li>\n    </ul>\n    <p data-narration-id=\"n34\">The router would select <strong>Path 3 (A &rarr; C &rarr; B &rarr; D)</strong> with a total cost of 6 &mdash; the lowest. Note that this path goes through three hops, not two, but it is cheaper because the A&rarr;C and C&rarr;B links are low cost.</p>\n    <p data-narration-id=\"n35\">Exam tip: always write out all possible paths and add up their costs before identifying the lowest. Do not assume the path with fewest hops is always cheapest.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Static vs Dynamic Routing</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n36\">Routers use a <strong>routing table</strong> to look up the best path for each destination. There are two ways to populate this table:</p>\n    <p data-narration-id=\"n37\"><strong>Static routing</strong> &mdash; routes are manually configured by a network administrator. The path never changes unless an administrator updates it. Static routing is simple and predictable but cannot adapt to network failures automatically.</p>\n    <p data-narration-id=\"n38\"><strong>Dynamic routing</strong> &mdash; routers share information with each other using routing protocols and automatically update their tables when the network changes. If a link fails, dynamic routing finds an alternative path within seconds. Most large networks, including the internet, use dynamic routing.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n39\" data-revision-tip=\"Close this and write a worked example of routing cost calculation from memory: create three routers A, B, C, assign costs to each link, and identify the cheapest path.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>To calculate the cheapest route in a network, list all possible paths from source to destination, add up the costs of all links on each path, and select the path with the lowest total. The cheapest path is not always the one with the fewest hops.</p>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n40\">Routing cost calculation is an Eduqas-specific topic that other boards do not assess. In the exam, draw out the network, label each link with its cost, then systematically enumerate every path. Add up the costs for each path and clearly state which path you have selected and why. Show all working: marks are awarded for correct intermediate sums even if your final answer is wrong. Do not assume that a shorter path (fewer hops) is always the cheapest &mdash; the worked example in this lesson shows that a three-hop path can cost less than a two-hop path.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n41\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n42\">Packet switching breaks data into packets with headers (containing source/destination IP, sequence number, TTL, checksum) and payloads; packets travel independently and are reassembled at the destination.</li>\n  <li data-narration-id=\"n43\">Routing cost is a numerical value assigned to each network link; routers calculate the total cost of every possible path and forward packets along the path with the lowest total cost.</li>\n  <li data-narration-id=\"n44\">The cheapest route is not always the one with fewest hops &mdash; always enumerate all paths and sum their costs; dynamic routing updates routing tables automatically when the network changes.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following fields in a packet header prevents a packet from circulating the network indefinitely?\nA) Source IP address\nB) Sequence number\nC) Time to Live (TTL)\nD) Checksum",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) Time to Live (TTL) [1 mark]"
+    },
+    {
+      "text": "State two pieces of information stored in a packet header.",
+      "type": "1 mark — State/Identify",
+      "marks": "One mark for any two of: source IP address, destination IP address, sequence number, TTL, checksum. [1 mark for two correct fields named]"
+    },
+    {
+      "text": "Describe how packet switching allows a large file to be sent across a network.",
+      "type": "3 marks — Describe",
+      "marks": "Up to 3 marks:\n- The file is broken into smaller units called packets, each with a header containing addressing and sequencing information. [1]\n- Each packet travels independently through the network and may take a different route to the destination. [1]\n- At the destination, the packets are reassembled in the correct order using the sequence numbers in their headers. [1]"
+    },
+    {
+      "text": "A network has five routers: P, Q, R, S and T. A packet needs to travel from P to T. The link costs are:\nP to Q: 5\nP to R: 2\nQ to T: 3\nR to S: 4\nR to Q: 1\nS to T: 2\n\nCalculate the cost of each possible route from P to T and state which route a router would choose.",
+      "type": "4 marks — Explain",
+      "marks": "Routes and costs:\n- P → Q → T: 5 + 3 = 8 [1]\n- P → R → Q → T: 2 + 1 + 3 = 6 [1]\n- P → R → S → T: 2 + 4 + 2 = 8 [1]\nChosen route: P → R → Q → T with a total cost of 6 (lowest). [1]"
+    },
+    {
+      "text": "Explain the advantages of packet switching over circuit switching for sending data across a wide area network such as the internet.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Explicit comparison of packet switching and circuit switching across at least three dimensions (resilience/fault tolerance, efficient use of bandwidth, cost, scalability); includes specific examples and a conclusion about why packet switching suits the internet.\nSecure: At least two advantages of packet switching developed with comparison against circuit switching; conclusion present.\nDeveloping: Two advantages described but comparison is implicit; limited conclusion.\nEmerging: One advantage mentioned with no comparison."
+    },
+    {
+      "text": "Discuss the impact of the internet's use of packet switching on businesses and individuals.\n\nConsider both the benefits and the problems that arise.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Balanced argument with developed benefits (global communication, resilience, cost efficiency, scalability for e-commerce, remote working) and developed problems (packet loss causing quality issues, security vulnerabilities as packets can be intercepted, reliance on infrastructure, latency in time-critical applications); reasoned conclusion.\nSecure: At least two developed benefits and two developed problems; conclusion present.\nDeveloping: Arguments listed without equal development; limited conclusion.\nEmerging: Simple points on one side only."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What does the sequence number in a packet header allow the destination device to do?",
+      "options": [
+        "Encrypt the packet contents",
+        "Identify the source of the packet",
+        "Reassemble packets in the correct order",
+        "Calculate how many hops the packet has taken"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "A network has three paths from router A to router D with total costs of 10, 7, and 12. Which path would a router select?",
+      "options": [
+        "The path with cost 10",
+        "The path with cost 7",
+        "The path with cost 12",
+        "The path with the fewest hops, regardless of cost"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A packet header contains a _____ field that is reduced by 1 at each router; when it reaches zero, the packet is discarded.",
+      "options": [
+        "sequence number",
+        "checksum",
+        "Time to Live (TTL)",
+        "payload"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In packet switching, the data being transmitted (for example, a portion of a file) is carried in the packet _____.",
+      "options": [
+        "header",
+        "TTL field",
+        "checksum",
+        "payload"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each routing cost factor to its description:",
+      "left": [
+        "Hop count",
+        "Latency",
+        "Bandwidth"
+      ],
+      "right": [
+        "Number of routers a packet must pass through",
+        "Time taken for a packet to travel along a link",
+        "Capacity of the link — higher is cheaper"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is a packet in computer networking?",
+      "a": "A small block of data with a header containing addressing info and a payload of actual data."
+    },
+    {
+      "q": "What two main sections make up a packet?",
+      "a": "A header (control information) and a payload (the actual data)."
+    },
+    {
+      "q": "What does the sequence number in a packet header enable?",
+      "a": "Reassembling packets in the correct order at the destination."
+    },
+    {
+      "q": "What is the purpose of the TTL (Time to Live) field in a packet header?",
+      "a": "It prevents packets looping forever — decremented at each router, discarded when it reaches zero."
+    },
+    {
+      "q": "What is the purpose of the checksum in a packet header?",
+      "a": "It allows the destination to verify the packet arrived without corruption."
+    },
+    {
+      "q": "What is packet switching?",
+      "a": "Breaking data into packets that travel independently and are reassembled at the destination."
+    },
+    {
+      "q": "How does packet switching handle a failed network link?",
+      "a": "Packets are automatically rerouted through an alternative path."
+    },
+    {
+      "q": "What is routing cost?",
+      "a": "A numerical value assigned to a network link representing the cost of using it."
+    },
+    {
+      "q": "Name three factors that can affect routing cost.",
+      "a": "Hop count, latency, bandwidth (or congestion)."
+    },
+    {
+      "q": "What is the difference between static and dynamic routing?",
+      "a": "Static: routes are manually set and fixed. Dynamic: routers update tables automatically using routing protocols."
+    },
+    {
+      "q": "Why is the lowest-cost route not always the one with the fewest hops?",
+      "a": "Link costs vary — several cheap links can total less than one expensive direct link."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "packet",
+      "definition": "A small block of data transmitted across a network, consisting of a header containing addressing information and a payload containing the actual data."
+    },
+    {
+      "term": "packet header",
+      "definition": "The section of a packet containing control information such as source IP address, destination IP address, packet number and error-checking data."
+    },
+    {
+      "term": "packet payload",
+      "definition": "The section of a packet that carries the actual data being transmitted, such as a portion of a file or web page."
+    },
+    {
+      "term": "routing cost",
+      "definition": "A numerical value assigned to a network link representing the 'cost' of using that link, based on factors such as speed, bandwidth, congestion or hop count."
+    }
+  ],
+  "hero_keywords": [
+    "internet data packet routing",
+    "network router data centre",
+    "global internet infrastructure cables"
+  ],
+  "hero_image_caption": "Data packets travelling through internet infrastructure across continents"
+}

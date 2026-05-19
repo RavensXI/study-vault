@@ -1,0 +1,149 @@
+{
+  "_lesson_id": "8cdae523-2905-47c1-8a27-6693f152cc67",
+  "_lesson_number": 2,
+  "_unit_slug": "hardware-and-systems",
+  "_lesson_slug": "fetch-decode-execute-and-cpu-performance",
+  "description": "How the FDE cycle uses registers and what makes a CPU faster: clock speed, cores and cache.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Fetch-Decode-Execute Cycle</h2>\n<p data-narration-id=\"n2\">Every program your computer runs &mdash; from a simple calculator to a complex video game &mdash; is ultimately a list of instructions stored in memory. The <dfn class=\"term\" data-def=\"The continuous three-stage process by which a CPU retrieves an instruction from memory, works out what it means, and carries it out.\">Fetch-Decode-Execute (FDE) cycle</dfn> is the process a CPU uses to work through those instructions, one at a time, billions of times per second. Understanding the cycle also means understanding exactly which register does what during each stage.</p>\n\n<h2 data-narration-id=\"n3\">Stage 1 &mdash; Fetch</h2>\n<p data-narration-id=\"n4\">The cycle begins with the CPU needing to retrieve the next instruction from main memory (RAM). Here is the sequence of register operations during the fetch stage:</p>\n<ol>\n  <li data-narration-id=\"n5\">The <strong>Program Counter (PC)</strong> holds the address of the next instruction. This address is copied into the <strong>Memory Address Register (MAR)</strong>.</li>\n  <li data-narration-id=\"n6\">The PC is immediately incremented so it points to the address of the instruction after that &mdash; ready for the following cycle.</li>\n  <li data-narration-id=\"n7\">The CPU sends the address in the MAR along the address bus to RAM. RAM returns the instruction at that address along the data bus into the <strong>Memory Data Register (MDR)</strong>.</li>\n  <li data-narration-id=\"n8\">The instruction is copied from the MDR into the <strong>Current Instruction Register (CIR)</strong>, where it waits to be decoded.</li>\n</ol>\n\n<div class=\"key-fact\" data-narration-id=\"n9\" data-revision-tip=\"Close this and write out, in order, which registers are involved in the Fetch stage and what each one holds at each step.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>During the Fetch stage: PC holds the instruction&rsquo;s address &rarr; address copied to MAR &rarr; PC increments &rarr; instruction retrieved from RAM into MDR &rarr; instruction copied to CIR.</p>\n</div>\n\n<h2 data-narration-id=\"n10\">Stage 2 &mdash; Decode</h2>\n<p data-narration-id=\"n11\">With the instruction safely in the CIR, the <dfn class=\"term\" data-def=\"The stage of the FDE cycle in which the Control Unit interprets the instruction held in the CIR to determine what operation is required.\">Decode stage</dfn> begins. The Control Unit (CU) reads the instruction from the CIR and splits it into two parts: the <strong>opcode</strong>, which specifies the operation to perform (e.g. ADD, LOAD, STORE, JUMP), and the <strong>operand</strong>, which specifies the data or memory address involved.</p>\n<p data-narration-id=\"n12\">For example, an instruction might say &ldquo;ADD the value at memory address 200 to the Accumulator.&rdquo; The opcode is ADD, and the operand is the address 200. The CU then prepares the appropriate circuits and control signals for the execute stage.</p>\n\n<h2 data-narration-id=\"n13\">Stage 3 &mdash; Execute</h2>\n<p data-narration-id=\"n14\">The CU carries out the decoded instruction by sending control signals to the correct components. The exact actions depend on the instruction type:</p>\n<ul>\n  <li data-narration-id=\"n15\"><strong>Arithmetic or logic instruction</strong> (e.g. ADD, AND): the operand is passed to the <dfn class=\"term\" data-def=\"Arithmetic Logic Unit — the CPU component that performs arithmetic and logical operations.\">ALU</dfn>, which performs the operation and places the result in the Accumulator (ACC).</li>\n  <li data-narration-id=\"n16\"><strong>Load instruction</strong>: the operand&rsquo;s address is placed in the MAR, the data is fetched from RAM into the MDR, and then copied into the ACC.</li>\n  <li data-narration-id=\"n17\"><strong>Store instruction</strong>: the value in the ACC is placed in the MDR, the target address goes into the MAR, and the data is written from the MDR to RAM.</li>\n  <li data-narration-id=\"n18\"><strong>Jump instruction</strong>: the operand (a memory address) overwrites the PC, so the next fetch stage begins at a different location in the program. This is how loops and branches work.</li>\n</ul>\n<p data-narration-id=\"n19\">Once execution is complete, the cycle immediately repeats: the PC already holds the address of the next instruction, so the fetch stage begins again without any pause.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n20\" data-revision-tip=\"Test yourself: name three factors that affect CPU performance and, for each, explain in one sentence how increasing it makes the CPU faster.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Three factors affect CPU performance: <strong>clock speed</strong> (more cycles per second means more instructions executed per second), <strong>number of cores</strong> (more cores allow more instruction streams to be processed simultaneously), and <strong>cache size</strong> (more cache means fewer slow RAM accesses).</p>\n</div>\n\n<h2 data-narration-id=\"n21\">CPU Performance Factor 1 &mdash; Clock Speed</h2>\n<p data-narration-id=\"n22\"><dfn class=\"term\" data-def=\"The number of FDE cycles a CPU completes per second, measured in hertz (Hz). Modern CPUs operate at several gigahertz (GHz).\">Clock speed</dfn> is how many FDE cycles the CPU completes every second. It is measured in hertz (Hz), but modern processors run at several gigahertz (GHz) &mdash; billions of cycles per second. A 3.5 GHz processor completes 3,500,000,000 cycles every second.</p>\n<p data-narration-id=\"n23\">Increasing the clock speed means each instruction completes faster, so programs run more quickly. However, a higher clock speed generates more heat and uses more power. This is why processors come with cooling systems and why laptops throttle (reduce) their clock speed when they overheat.</p>\n\n<h2 data-narration-id=\"n24\">CPU Performance Factor 2 &mdash; Number of Cores</h2>\n<p data-narration-id=\"n25\">A <dfn class=\"term\" data-def=\"An independent processing unit within a CPU chip, each capable of running its own FDE cycle simultaneously.\">core</dfn> is a complete processing unit with its own CU, ALU and registers. A single-core CPU can only execute one instruction stream at a time. A multi-core CPU (dual-core, quad-core, octa-core) can run multiple instruction streams in parallel.</p>\n<p data-narration-id=\"n26\">If you have a quad-core processor, your computer can run four independent streams of instructions simultaneously &mdash; one per core. This is why modern computers run many applications at once without slowing to a crawl. However, software must be written to take advantage of multiple cores; a single-threaded program only ever uses one core, no matter how many are available.</p>\n\n<h2 data-narration-id=\"n27\">CPU Performance Factor 3 &mdash; Cache Size</h2>\n<p data-narration-id=\"n28\">Cache is the fastest memory available to the CPU, but it is very expensive to manufacture. A larger cache means the CPU can hold more instructions and data close at hand, reducing the number of times it must wait for a RAM access. When the CPU looks for data and finds it in cache (a &lsquo;cache hit&rsquo;), it can proceed immediately. When it does not find it (a &lsquo;cache miss&rsquo;), it must stall and wait for RAM &mdash; which can take 100 or more times longer than a cache access.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example &mdash; Tracing the FDE Cycle Step by Step</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n29\">Suppose the PC holds the value 100, meaning the next instruction is stored at memory address 100. Trace through the cycle:</p>\n    <ol>\n      <li data-narration-id=\"n30\"><strong>Fetch:</strong> Address 100 is copied from PC to MAR. PC increments to 101. The instruction at address 100 is fetched from RAM via the data bus into the MDR. The instruction is copied from MDR to CIR.</li>\n      <li data-narration-id=\"n31\"><strong>Decode:</strong> The CU reads the instruction in the CIR. Suppose the opcode is ADD and the operand is 50 (meaning &ldquo;add the value at address 50 to the ACC&rdquo;). The CU prepares the ALU and sets up address 50 for a memory read.</li>\n      <li data-narration-id=\"n32\"><strong>Execute:</strong> Address 50 is placed in the MAR. The value at address 50 is fetched into the MDR. The ALU adds this value to the current contents of the ACC. The result is placed back in the ACC. The cycle immediately repeats from PC = 101.</li>\n    </ol>\n    <p data-narration-id=\"n33\">This step-by-step register trace is exactly what exam questions ask you to produce in a &lsquo;trace the FDE cycle&rsquo; question. Practice following the data through each register in order.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Why More Cores Do Not Always Mean Proportionally Faster Performance</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n34\">Doubling the number of cores does not double the speed of every program. Amdahl&rsquo;s Law describes this: if 50% of a program must run sequentially (one instruction after another, with no parallelism), the maximum possible speedup from adding more cores is 2&times; &mdash; no matter how many cores you add.</p>\n    <p data-narration-id=\"n35\">Tasks that can be split into independent parallel chunks (e.g. rendering different sections of a 3D scene, running separate browser tabs) benefit greatly from more cores. Tasks that have strict dependencies between steps (e.g. calculating the next step in a physics simulation) benefit much less. This is why examiners expect you to qualify your answer when explaining cores as a performance factor: &ldquo;more cores improve performance <em>provided the software is written to use multiple threads</em>&rdquo;.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n36\">FDE cycle questions often ask you to &ldquo;describe what happens to each register during the fetch stage.&rdquo; Make sure you go through all four registers in order: PC &rarr; MAR, PC increments, MDR receives instruction from RAM, MDR &rarr; CIR. Writing the register names is not enough &mdash; you must state what each register <em>holds</em> at each step. For performance questions, always qualify multi-core answers: adding cores only helps when software uses multiple threads. Examiners penalise the sweeping claim that &ldquo;more cores always makes the computer faster&rdquo;.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n37\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n38\">The FDE cycle has three stages: Fetch (instruction retrieved from RAM via MAR/MDR/CIR), Decode (CU splits instruction into opcode and operand), Execute (CU triggers the correct action &mdash; ALU operation, memory read/write, or jump).</li>\n  <li data-narration-id=\"n39\">The Program Counter always holds the address of the next instruction and increments automatically during the fetch stage so the cycle can run continuously without interruption.</li>\n  <li data-narration-id=\"n40\">CPU performance depends on clock speed (FDE cycles per second), number of cores (parallel instruction streams) and cache size (fewer slow RAM accesses). Increasing any one of these can improve performance, but each has trade-offs &mdash; heat, cost, and software compatibility respectively.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes what happens to the Program Counter during the Fetch stage?\nA) It is reset to zero after each instruction\nB) It is incremented to point to the next instruction's address\nC) It is copied into the Accumulator\nD) It stores the instruction being decoded",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) It is incremented to point to the next instruction's address [1 mark]"
+    },
+    {
+      "text": "State the name of the register that holds the instruction currently being decoded.",
+      "type": "1 mark — State/Identify",
+      "marks": "Current Instruction Register (CIR). [1 mark — both expanded name and abbreviation acceptable]"
+    },
+    {
+      "text": "Describe what happens during the Fetch stage of the FDE cycle. Refer to the registers used in your answer.",
+      "type": "3 marks — Describe",
+      "marks": "Award 1 mark each for three of the following:\n• The address in the PC is copied into the MAR.\n• The PC is incremented (to point to the next instruction).\n• The instruction is retrieved from RAM (at the address held in the MAR) into the MDR.\n• The instruction is copied from the MDR into the CIR."
+    },
+    {
+      "text": "Explain how increasing the clock speed of a CPU improves its performance. Include one disadvantage of using a very high clock speed.",
+      "type": "4 marks — Explain",
+      "marks": "Award up to 4 marks:\n• Clock speed measures the number of FDE cycles per second. [1 mark]\n• A higher clock speed means more instructions are executed every second, so programs run faster. [1 mark]\n• Disadvantage: higher clock speed generates more heat, which requires more cooling and may cause the processor to throttle (reduce speed) to avoid damage. [1 mark]\n• Additional relevant point, e.g. higher clock speed increases power consumption. [1 mark]"
+    },
+    {
+      "text": "Compare the effect of increasing the number of CPU cores with increasing the clock speed as methods of improving CPU performance.",
+      "type": "6 marks — Compare",
+      "marks": "Award up to 6 marks for explicit, comparative points:\n• Both increasing clock speed and adding cores can improve overall processing throughput, but by different mechanisms.\n• Clock speed increases the rate at which each core processes instructions — all programs benefit regardless of how they are written.\n• Unlike clock speed, adding cores only benefits programs written to use multiple threads (parallel execution); a single-threaded program runs on one core only.\n• Increasing clock speed generates more heat; adding cores increases power consumption and chip area but less dramatically per core.\n• A processor with more cores may outperform a higher-clock-speed processor for multitasking (e.g. running many applications simultaneously) but underperform for a single demanding serial task.\nMastering: Four or more clearly contrasted comparative points with specific technical detail.\nSecure: Three clear contrasts.\nDeveloping: Two comparisons, one or both lacking precision.\nEmerging: Features of clock speed or cores listed without comparison."
+    },
+    {
+      "text": "Explain the role of cache memory in improving CPU performance. In your answer, explain what happens when a 'cache miss' occurs.",
+      "type": "4 marks — Explain",
+      "marks": "Award up to 4 marks:\n• Cache stores frequently used or recently accessed instructions and data close to the CPU. [1 mark]\n• When the CPU needs data it first checks cache (cache hit); if found, it can proceed immediately without waiting for RAM. [1 mark]\n• A cache miss occurs when the required data is not in cache; the CPU must fetch it from RAM, which is significantly slower. [1 mark]\n• This stall time reduces performance; a larger cache reduces the frequency of cache misses and so improves overall CPU speed. [1 mark]"
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "In what order do the stages of the FDE cycle occur?",
+      "options": ["Decode, Fetch, Execute", "Execute, Decode, Fetch", "Fetch, Decode, Execute", "Fetch, Execute, Decode"],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "A CPU has a clock speed of 3.2 GHz. How many FDE cycles does it complete per second?",
+      "options": ["3,200", "32,000,000", "3,200,000,000", "320,000,000"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "During the Fetch stage, the address of the next instruction is copied from the PC into the _____.",
+      "options": ["Accumulator", "CIR", "MAR", "MDR"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The _____ separates the instruction in the CIR into an opcode and an operand during the Decode stage.",
+      "options": ["ALU", "MDR", "Program Counter", "Control Unit"],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each FDE stage to what happens during it:",
+      "left": ["Fetch", "Decode", "Execute"],
+      "right": ["Instruction is retrieved from RAM into the MDR and then the CIR", "Control Unit identifies the opcode and operand from the CIR", "Control Unit triggers the ALU, memory read/write, or jump as required"],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What are the three stages of the FDE cycle, in order?",
+      "a": "Fetch, Decode, Execute."
+    },
+    {
+      "q": "During the Fetch stage, what happens to the Program Counter after the address is copied to the MAR?",
+      "a": "It is incremented to point to the next instruction's address."
+    },
+    {
+      "q": "Which register receives the instruction retrieved from RAM during the Fetch stage?",
+      "a": "First the MDR, then it is copied to the CIR."
+    },
+    {
+      "q": "What two parts does the Control Unit split an instruction into during the Decode stage?",
+      "a": "The opcode (operation to perform) and the operand (data or address involved)."
+    },
+    {
+      "q": "What happens to the PC when the CPU executes a Jump instruction?",
+      "a": "The operand (a new address) overwrites the PC, so the next fetch begins at that address."
+    },
+    {
+      "q": "What is clock speed and what unit is it measured in?",
+      "a": "The number of FDE cycles per second, measured in hertz (Hz) — modern CPUs use gigahertz (GHz)."
+    },
+    {
+      "q": "A CPU runs at 2.5 GHz. How many FDE cycles does it complete each second?",
+      "a": "2,500,000,000 (2.5 billion) cycles per second."
+    },
+    {
+      "q": "What is a CPU core?",
+      "a": "An independent processing unit within a CPU, each running its own FDE cycle simultaneously."
+    },
+    {
+      "q": "Why does adding more cores not always double performance?",
+      "a": "Software must be written to use multiple threads; single-threaded programs only use one core."
+    },
+    {
+      "q": "What is a cache hit?",
+      "a": "When the CPU finds the required data in cache, avoiding a slower RAM access."
+    },
+    {
+      "q": "What is a cache miss?",
+      "a": "When required data is not in cache and the CPU must fetch it from slower RAM."
+    },
+    {
+      "q": "Which of the three performance factors — clock speed, cores, cache — benefits all programs equally?",
+      "a": "Clock speed — every program runs faster regardless of thread count."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "Fetch-Decode-Execute (FDE) cycle",
+      "definition": "The continuous three-stage process by which a CPU retrieves an instruction from memory, works out what it means, and carries it out."
+    },
+    {
+      "term": "Decode stage",
+      "definition": "The stage of the FDE cycle in which the Control Unit interprets the instruction held in the CIR to determine what operation is required."
+    },
+    {
+      "term": "ALU",
+      "definition": "Arithmetic Logic Unit — the CPU component that performs arithmetic and logical operations."
+    },
+    {
+      "term": "clock speed",
+      "definition": "The number of FDE cycles a CPU completes per second, measured in hertz (Hz). Modern CPUs operate at several gigahertz (GHz)."
+    },
+    {
+      "term": "core",
+      "definition": "An independent processing unit within a CPU chip, each capable of running its own FDE cycle simultaneously."
+    }
+  ],
+  "hero_keywords": ["CPU processor cores", "computer chip silicon wafer", "microprocessor circuit"],
+  "hero_image_caption": "Close-up of a multi-core processor chip, each core running its own fetch-decode-execute cycle."
+}

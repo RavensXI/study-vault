@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "7b83fee7-2ad1-4004-a975-d56188f1ed4c",
+  "_lesson_number": 2,
+  "_unit_slug": "data-representation-storage",
+  "_lesson_slug": "signed-binary-addition-subtraction-and-shifts",
+  "description": "Two's complement, sign and magnitude, binary arithmetic, overflow and bit shifts.",
+  "content_html": "<h2 data-narration-id=\"n1\">Representing Negative Numbers in Binary</h2>\n<p data-narration-id=\"n2\">Unsigned binary can only store positive values. To represent negative integers, computers use a <dfn class=\"term\" data-def=\"A method of storing positive and negative integers in binary, where the leftmost bit is the sign bit (0 = positive, 1 = negative) and the remaining bits hold the magnitude.\">sign and magnitude</dfn> scheme or, more commonly, <dfn class=\"term\" data-def=\"A binary encoding for signed integers where negative numbers are found by inverting all bits and adding 1; the leading bit indicates sign (0 = positive, 1 = negative).\">two&rsquo;s complement</dfn>. Understanding both is required for your exam.</p>\n\n<h2 data-narration-id=\"n3\">Sign and Magnitude</h2>\n<p data-narration-id=\"n4\">In sign and magnitude, the most significant bit (MSB &mdash; the leftmost bit) is reserved as a <strong>sign bit</strong>: 0 means positive, 1 means negative. The remaining bits hold the number&rsquo;s size (magnitude) in ordinary binary.</p>\n<p data-narration-id=\"n5\">For an 8-bit system: <code>00000101</code> = +5, and <code>10000101</code> = &minus;5. The sign bit flips but the magnitude bits are identical. This is intuitive, but it causes a problem: there are two representations of zero (<code>00000000</code> = +0 and <code>10000000</code> = &minus;0), which complicates arithmetic circuits.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover this and write the 8-bit sign-and-magnitude representations of +12 and -12 from memory.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>In sign and magnitude, the MSB is the sign bit (0 = positive, 1 = negative). An 8-bit sign-and-magnitude number can represent values from &minus;127 to +127. There are two forms of zero, which is a weakness of this method.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Two&rsquo;s Complement</h2>\n<p data-narration-id=\"n8\">Two&rsquo;s complement is the method used by nearly all modern processors. It eliminates the double-zero problem and makes addition and subtraction use the same circuit.</p>\n<p data-narration-id=\"n9\">To find the two&rsquo;s complement of a number, follow two steps:</p>\n<ol>\n  <li data-narration-id=\"n10\"><strong>Invert</strong> all the bits (flip every 0 to 1 and every 1 to 0) &mdash; this gives the <em>one&rsquo;s complement</em>.</li>\n  <li data-narration-id=\"n11\"><strong>Add 1</strong> to the result.</li>\n</ol>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Finding Two&rsquo;s Complement of 19</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n12\">+19 in 8-bit binary: <code>00010011</code>.</p>\n    <p data-narration-id=\"n13\">Step 1 &mdash; invert all bits: <code>11101100</code>.</p>\n    <p data-narration-id=\"n14\">Step 2 &mdash; add 1: <code>11101100 + 00000001 = 11101101</code>.</p>\n    <p data-narration-id=\"n15\">So &minus;19 in 8-bit two&rsquo;s complement is <code>11101101</code>. The MSB is 1, confirming it is negative.</p>\n    <p data-narration-id=\"n16\">Verify: to decode <code>11101101</code>, invert &rarr; <code>00010010</code>, add 1 &rarr; <code>00010011</code> = 19. Confirmed.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n17\" data-revision-tip=\"Test yourself: write the 8-bit two's complement of -45. Invert +45 then add 1. Verify by reversing the process.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>In 8-bit two&rsquo;s complement, the range is <strong>&minus;128 to +127</strong>. The MSB has a place value of &minus;128 (not +128). Two&rsquo;s complement has only one zero (<code>00000000</code>), which is why processors prefer it over sign and magnitude.</p>\n</div>\n\n<h2 data-narration-id=\"n18\">Binary Addition</h2>\n<p data-narration-id=\"n19\">Binary addition follows the same column-by-column rules as denary, but the only digits are 0 and 1:</p>\n<ul>\n  <li data-narration-id=\"n20\">0 + 0 = 0</li>\n  <li data-narration-id=\"n21\">0 + 1 = 1</li>\n  <li data-narration-id=\"n22\">1 + 1 = 10 (write 0, carry 1)</li>\n  <li data-narration-id=\"n23\">1 + 1 + 1 (carry) = 11 (write 1, carry 1)</li>\n</ul>\n<p data-narration-id=\"n24\">Example: <code>01001011</code> + <code>00110101</code>. Working from right to left, carry as needed, gives <code>10000000</code> (128). Always check whether the result has caused an overflow.</p>\n\n<h2 data-narration-id=\"n25\">Binary Subtraction via Two&rsquo;s Complement</h2>\n<p data-narration-id=\"n26\">Rather than building a separate subtraction circuit, processors compute A &minus; B by adding A + (two&rsquo;s complement of B). This means subtraction becomes addition, which simplifies hardware enormously.</p>\n\n<h2 data-narration-id=\"n27\">Overflow and Underflow</h2>\n<p data-narration-id=\"n28\"><dfn class=\"term\" data-def=\"An error that occurs when the result of an arithmetic operation is too large (overflow) or too small (underflow) to be stored in the allocated number of bits.\">Overflow</dfn> occurs when the result of an addition exceeds the maximum value the bit width can hold. In 8-bit unsigned binary the maximum is 255; in 8-bit two&rsquo;s complement the maximum is 127. If the carry out of the MSB produces a result that wraps around to an incorrect sign, that is an overflow error. Underflow is the equivalent error in the negative direction.</p>\n\n<h2 data-narration-id=\"n29\">Arithmetic and Logical Shifts</h2>\n<p data-narration-id=\"n30\">A <strong>shift</strong> moves all bits in a register left or right by a given number of positions. There are two types relevant to your exam:</p>\n<ul>\n  <li data-narration-id=\"n31\"><strong>Arithmetic shift</strong> &mdash; preserves the sign bit. An arithmetic shift left multiplies by 2 (bits fall off the left end if they overflow). An arithmetic shift right divides by 2, and the sign bit is copied into the vacated MSB position to keep the sign correct.</li>\n  <li data-narration-id=\"n32\"><strong>Logical shift</strong> &mdash; does not preserve the sign. A logical shift right always inserts 0s into the MSB. This is used for unsigned binary manipulation.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Arithmetic Shifts</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n33\">Start: <code>00001100</code> = +12 (8-bit two&rsquo;s complement).</p>\n    <p data-narration-id=\"n34\">Arithmetic shift left by 1: <code>00011000</code> = +24. The value doubled.</p>\n    <p data-narration-id=\"n35\">Arithmetic shift right by 1 from +24 (<code>00011000</code>): <code>00001100</code> = +12. Value halved.</p>\n    <p data-narration-id=\"n36\">Now with a negative: <code>11110100</code> = &minus;12. Arithmetic shift right by 1: copy the sign bit (1) &rarr; <code>11111010</code> = &minus;6. Value halved, sign preserved.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n40\">Why Two's Complement Wins</h2>\n<p data-narration-id=\"n41\">Modern CPUs almost universally represent signed integers using two&rsquo;s complement rather than sign-and-magnitude, and the choice is not arbitrary. Two&rsquo;s complement has one important advantage that simplifies the arithmetic logic unit: addition and subtraction use the same circuit for both positive and negative numbers. A processor adding &minus;3 to +5 in two&rsquo;s complement performs exactly the same binary addition it would for any pair of positive values, then discards any carry beyond the sign bit. With sign-and-magnitude, the hardware would need to decide which sign each operand carried before choosing add or subtract, almost doubling the complexity for no benefit.</p>\n<p data-narration-id=\"n42\">There is also a uniqueness benefit. Sign-and-magnitude has two representations of zero &mdash; 0000 0000 and 1000 0000 &mdash; which means the hardware has to treat &ldquo;minus zero&rdquo; as equal to &ldquo;plus zero&rdquo; everywhere it compares values. Two&rsquo;s complement has only one zero, removing an entire class of compare-against-zero bugs. These design pressures are why every mainstream CPU since the 1970s has used two&rsquo;s complement for signed integer storage.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n37\">Two&rsquo;s complement questions often ask you to either convert a denary negative into binary, or decode a binary pattern with a leading 1. Show both steps (invert then add 1) clearly. For arithmetic shifts, state whether you are shifting left or right and by how many positions &mdash; then check whether the MSB has changed unexpectedly, which would signal overflow. Remember: a left shift multiplies by 2 per position; a right shift divides by 2 per position. These relationships are frequently tested in the &ldquo;Calculate&rdquo; and &ldquo;Explain&rdquo; question types.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n38\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n39\">Sign and magnitude uses the MSB as a sign bit but creates two zeros; two&rsquo;s complement eliminates this by encoding negatives as (invert + 1), giving a range of &minus;128 to +127 in 8 bits.</li>\n  <li data-narration-id=\"n40\">Binary addition uses carry bits (0+0=0, 0+1=1, 1+1=10); subtraction is performed by adding the two&rsquo;s complement of the second operand.</li>\n  <li data-narration-id=\"n41\">An arithmetic shift left doubles, and an arithmetic shift right halves; the arithmetic right shift copies the sign bit to preserve the sign of a negative two&rsquo;s complement number.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is the 8-bit two's complement representation of -13?\nA) 10001101\nB) 11110011\nC) 01110011\nD) 11110010",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 11110011. Working: +13 = 00001101, invert = 11110010, add 1 = 11110011. [1 mark]"
+    },
+    {
+      "text": "State what is meant by overflow in the context of binary addition.",
+      "type": "1 mark — State/Identify",
+      "marks": "Overflow occurs when the result of an addition is too large to be stored in the available number of bits [1 mark]. Accept: the result exceeds the maximum value the bit width can represent, causing the value to wrap around or be recorded incorrectly."
+    },
+    {
+      "text": "Convert the 8-bit two's complement number 11001010 to its denary value.",
+      "type": "2 marks — Convert (Binary/Hex/Denary)",
+      "marks": "MSB is 1, so the number is negative. Invert: 00110101. Add 1: 00110110 = 54. Therefore the denary value is -54. [2 marks: 1 mark for correct invert-and-add-1 process, 1 mark for correct answer -54.]"
+    },
+    {
+      "text": "Carry out the binary addition of 01011001 and 00110111. Show your working. State whether overflow has occurred if the result is to be stored as an 8-bit unsigned integer.",
+      "type": "4 marks — Explain",
+      "marks": "01011001 + 00110111: working column by column with carries gives 10010000 (144 in denary: 64+16+0+0+0+0+0+0 = wait, 10010000 = 128+16 = 144). [1 mark for correct carry work, 1 mark for result 10010000, 1 mark for correctly stating 144 is within 0-255 unsigned range, 1 mark for concluding no overflow in unsigned 8-bit.]"
+    },
+    {
+      "text": "The 8-bit binary value 00011000 is stored in a register. Show the result of an arithmetic right shift by 2 positions and state the denary value of the result.",
+      "type": "3 marks — Describe",
+      "marks": "00011000 shifted right 2 positions arithmetically (sign bit 0, so 0s fill from left): 00000110. [1 mark for correct shift direction with two positions, 1 mark for correct result 00000110, 1 mark for correct denary value 6.] Note: equivalent to dividing 24 by 4."
+    },
+    {
+      "text": "Compare sign and magnitude with two's complement as methods of representing negative integers in binary. In your answer, refer to the range of values each can represent and how each handles the representation of zero.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Accurate contrast of range (sign and magnitude: -127 to +127 in 8 bits; two's complement: -128 to +127 in 8 bits), clear explanation of the double-zero problem in sign and magnitude vs single zero in two's complement, and a comment on why two's complement is preferred by hardware (same addition circuit works for subtraction).\nSecure: Both representations described correctly, at least one contrast made explicitly (e.g. range or zero), some comment on hardware implications.\nDeveloping: One representation described well; the other partially correct; comparison implicit rather than explicit.\nEmerging: Some correct facts about one representation; little or no comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the 8-bit two's complement representation of -1?",
+      "options": [
+        "10000001",
+        "11111110",
+        "11111111",
+        "01111111"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "In 8-bit two's complement, what is the range of values that can be stored?",
+      "options": [
+        "-127 to +127",
+        "-128 to +128",
+        "-128 to +127",
+        "-255 to +255"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "To find the two's complement of a binary number, you first _____ all the bits, then add 1.",
+      "options": [
+        "double",
+        "halve",
+        "invert",
+        "shift"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "An arithmetic shift left by one position is equivalent to _____ a number by 2.",
+      "options": [
+        "dividing",
+        "multiplying",
+        "inverting",
+        "negating"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its description:",
+      "left": [
+        "Sign and magnitude",
+        "Two's complement",
+        "Overflow"
+      ],
+      "right": [
+        "Uses MSB as sign bit; has two zeros",
+        "Invert and add 1; single zero; preferred by hardware",
+        "Result too large to store in the available bits"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the 8-bit two's complement range?",
+      "a": "-128 to +127."
+    },
+    {
+      "q": "How do you find the two's complement of a binary number?",
+      "a": "Invert all bits, then add 1."
+    },
+    {
+      "q": "In sign and magnitude, what does the most significant bit represent?",
+      "a": "The sign: 0 = positive, 1 = negative."
+    },
+    {
+      "q": "Why is two's complement preferred over sign and magnitude by hardware?",
+      "a": "It has only one zero and allows subtraction using the same addition circuit."
+    },
+    {
+      "q": "What happens during an arithmetic right shift on a negative two's complement number?",
+      "a": "The sign bit (1) is copied into the vacated MSB, preserving the negative sign."
+    },
+    {
+      "q": "An arithmetic left shift by 1 position is equivalent to what arithmetic operation?",
+      "a": "Multiplying by 2."
+    },
+    {
+      "q": "An arithmetic right shift by 1 position is equivalent to what arithmetic operation?",
+      "a": "Dividing by 2 (integer division)."
+    },
+    {
+      "q": "What is overflow in binary arithmetic?",
+      "a": "When the result is too large to store in the allocated bits, causing an incorrect value."
+    },
+    {
+      "q": "What is the two's complement of 8-bit binary 00000001 (+1)?",
+      "a": "11111111 (-1)."
+    },
+    {
+      "q": "Sign and magnitude 8-bit: what is the weakness compared to two's complement?",
+      "a": "It has two representations of zero (+0 and -0), complicating arithmetic circuits."
+    },
+    {
+      "q": "In binary addition, what is 1 + 1?",
+      "a": "10 in binary (write 0, carry 1)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "sign and magnitude",
+      "definition": "A method of storing positive and negative integers in binary, where the leftmost bit is the sign bit (0 = positive, 1 = negative) and the remaining bits hold the magnitude."
+    },
+    {
+      "term": "two's complement",
+      "definition": "A binary encoding for signed integers where negative numbers are found by inverting all bits and adding 1; the leading bit indicates sign (0 = positive, 1 = negative)."
+    },
+    {
+      "term": "overflow",
+      "definition": "An error that occurs when the result of an arithmetic operation is too large (overflow) or too small (underflow) to be stored in the allocated number of bits."
+    }
+  ],
+  "hero_keywords": [
+    "binary computer arithmetic",
+    "digital circuits processor",
+    "computer science mathematics"
+  ],
+  "hero_image_caption": "Binary arithmetic underpins every calculation a processor performs"
+}

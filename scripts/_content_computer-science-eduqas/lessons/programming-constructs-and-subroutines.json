@@ -1,0 +1,197 @@
+{
+  "_lesson_id": "c93256c1-41d9-4584-a048-f8d4ed32d10c",
+  "_lesson_number": 2,
+  "_unit_slug": "algorithms-programming-software",
+  "_lesson_slug": "programming-constructs-and-subroutines",
+  "description": "Sequence, selection, iteration, subroutines, local and global variables and self-documenting code.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Three Constructs</h2>\n<p data-narration-id=\"n2\">Every program ever written &mdash; from a pocket calculator to a streaming platform &mdash; is built from just three <dfn class=\"term\" data-def=\"The basic building blocks used to control the flow of instructions in a program: sequence, selection and iteration.\">programming constructs</dfn>: sequence, selection and iteration. Understanding these is the foundation of computational thinking, and they appear in virtually every exam question about algorithms and code.</p>\n\n<h2 data-narration-id=\"n3\">Sequence</h2>\n<p data-narration-id=\"n4\"><dfn class=\"term\" data-def=\"Instructions that are executed one after another in the order they are written, with no branching or repetition.\">Sequence</dfn> is the simplest construct: instructions run one after another, top to bottom. Most programs combine all three constructs, but sequence is always the default &mdash; unless a selection or iteration construct changes the order of execution.</p>\n<pre data-narration-id=\"n5\"><code>RECEIVE length FROM (INTEGER)\nRECEIVE width FROM (INTEGER)\nSET area = length * width\nOUTPUT &ldquo;Area is &rdquo; &amp; area</code></pre>\n\n<h2 data-narration-id=\"n6\">Selection</h2>\n<p data-narration-id=\"n7\"><dfn class=\"term\" data-def=\"A programming construct where the program chooses between two or more paths based on a condition being true or false.\">Selection</dfn> lets a program make decisions. An <code>IF</code> statement tests a condition and branches to the matching block of code. Selection is how programs respond differently to different inputs &mdash; a login system, a grade boundary checker, a discount calculator all use selection at their core.</p>\n<pre data-narration-id=\"n8\"><code>RECEIVE grade FROM (INTEGER)\nIF grade >= 70 THEN\n  OUTPUT &ldquo;Merit&rdquo;\nELSE IF grade >= 50 THEN\n  OUTPUT &ldquo;Pass&rdquo;\nELSE\n  OUTPUT &ldquo;Fail&rdquo;\nEND IF</code></pre>\n\n<div class=\"key-fact\" data-narration-id=\"n9\" data-revision-tip=\"Cover this and write one pseudocode example for each of the three constructs from memory.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Sequence runs instructions in order; selection chooses between paths using IF/ELSE; iteration repeats a block of code using FOR, WHILE or REPEAT&hellip;UNTIL. Every program is built from these three constructs alone.</p>\n</div>\n\n<h2 data-narration-id=\"n10\">Iteration</h2>\n<p data-narration-id=\"n11\"><dfn class=\"term\" data-def=\"A programming construct that repeats a block of instructions, either a fixed number of times or until a condition is met.\">Iteration</dfn> repeats a block of code. There are two types of iteration loop:</p>\n<p data-narration-id=\"n12\"><strong>Count-controlled loops</strong> (FOR loops) repeat a fixed, known number of times. Use them when you know exactly how many repetitions are needed before the loop starts.</p>\n<pre data-narration-id=\"n13\"><code>FOR i = 1 TO 5\n  OUTPUT i\nNEXT i</code></pre>\n<p data-narration-id=\"n14\"><strong>Condition-controlled loops</strong> repeat until a condition becomes true (or while it remains true). Use WHILE when the check is at the top (pre-condition); use REPEAT&hellip;UNTIL when the check is at the bottom (post-condition &mdash; always executes at least once).</p>\n<pre data-narration-id=\"n15\"><code>SET password = &ldquo;&rdquo;\nREPEAT\n  RECEIVE password FROM (STRING)\nUNTIL password = &ldquo;secret123&rdquo;\nOUTPUT &ldquo;Access granted&rdquo;</code></pre>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Rogue Values (Sentinel Values)</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n16\">A <dfn class=\"term\" data-def=\"A special value entered by the user to signal that data entry should stop, also called a sentinel value.\">rogue value</dfn> (also called a sentinel value) is a data value agreed in advance to mean &ldquo;stop entering data.&rdquo; It is used with condition-controlled loops when you don&rsquo;t know in advance how many items the user will enter. A common rogue value is &minus;1 for a list of positive numbers, or a blank string for text input.</p>\n    <pre data-narration-id=\"n17\"><code>SET total = 0\nRECEIVE number FROM (INTEGER)\nWHILE number &lt;&gt; -1\n  SET total = total + number\n  RECEIVE number FROM (INTEGER)\nEND WHILE\nOUTPUT &ldquo;Total: &rdquo; &amp; total</code></pre>\n    <p data-narration-id=\"n18\">Here &minus;1 is the rogue value. When the user types &minus;1, the WHILE condition becomes false and the loop ends. The rogue value itself is never added to the total.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n19\">Subroutines: Procedures and Functions</h2>\n<p data-narration-id=\"n20\">A <dfn class=\"term\" data-def=\"A named, reusable block of code that can be called from anywhere in a program; includes both procedures and functions.\">subroutine</dfn> is a named block of code that can be called from elsewhere in the program. Subroutines reduce repetition and make programs easier to read, test and maintain. There are two kinds:</p>\n<p data-narration-id=\"n21\">A <strong>procedure</strong> carries out a task but does not return a value. A <strong>function</strong> carries out a task AND returns a value to the point where it was called. Think of a function like a maths function: you put something in, and a result comes back out.</p>\n<pre data-narration-id=\"n22\"><code>PROCEDURE greet(name)\n  OUTPUT &ldquo;Hello, &rdquo; &amp; name\nEND PROCEDURE\n\nFUNCTION square(n)\n  RETURN n * n\nEND FUNCTION\n\ncall greet(&ldquo;Alice&rdquo;)\nSET result = square(5)\nOUTPUT result</code></pre>\n\n<div class=\"key-fact\" data-narration-id=\"n23\" data-revision-tip=\"Write down the difference between a procedure and a function. Can you state which one uses RETURN and why?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A <strong>procedure</strong> performs an action but returns nothing. A <strong>function</strong> performs an action AND returns a value using <code>RETURN</code>. Functions are used when the calling code needs to use the result of the subroutine.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Local vs Global Variables and Self-Documenting Code</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\">A <dfn class=\"term\" data-def=\"A variable declared inside a subroutine that can only be used within that subroutine.\">local variable</dfn> exists only inside the subroutine where it was created. Once the subroutine finishes, the variable is destroyed. A <dfn class=\"term\" data-def=\"A variable declared outside all subroutines that can be accessed from anywhere in the program.\">global variable</dfn> exists for the entire lifetime of the program and can be read or changed from any subroutine. Using too many global variables makes programs harder to debug because any part of the code might change them unexpectedly.</p>\n    <p data-narration-id=\"n25\">Self-documenting code uses descriptive <dfn class=\"term\" data-def=\"A name given to a variable, procedure or function that clearly describes its purpose without needing a comment.\">identifiers</dfn> &mdash; names like <code>studentAge</code>, <code>calculateTotal</code> or <code>isValidEmail</code> &mdash; so that the code reads almost like plain English. This makes the code easier for other programmers (or your future self) to maintain. Alongside comments, self-documenting identifiers are a key good-practice technique.</p>\n    <p data-narration-id=\"n26\">Bad: <code>SET x = y * z</code>. Good: <code>SET totalCost = unitPrice * quantity</code>. Both produce the same result, but only the second version is self-documenting.</p>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Why Subroutines Matter in Practice</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n27\">Large real-world programs are split into hundreds or thousands of subroutines. Each subroutine is tested independently &mdash; a technique called <strong>unit testing</strong>. If a bug is found later, the programmer only needs to look inside the relevant subroutine rather than searching through thousands of lines. This is why professional code is almost never written as one long block &mdash; decomposing problems into subroutines is a core professional skill.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">When writing pseudocode, choose the right loop type: use <code>FOR</code> when you know the number of repetitions in advance, <code>WHILE</code> when the check is at the top, and <code>REPEAT&hellip;UNTIL</code> when the loop body must run at least once. A very common exam error is writing a <code>WHILE</code> loop when the question clearly states the loop must execute at least once &mdash; that needs <code>REPEAT&hellip;UNTIL</code>. Also, always use descriptive variable names in your pseudocode: <code>totalScore</code> not <code>x</code>.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">The three programming constructs are sequence (run in order), selection (IF/ELSE branching) and iteration (FOR, WHILE, REPEAT&hellip;UNTIL loops). Every algorithm uses these.</li>\n  <li data-narration-id=\"n31\">Subroutines (procedures and functions) break a program into reusable named blocks; functions return a value, procedures do not.</li>\n  <li data-narration-id=\"n32\">Local variables exist only inside their subroutine; global variables exist throughout the program. Self-documenting identifiers make code readable without relying on comments.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which construct is used when a block of code must be repeated a fixed, known number of times?\nA) Sequence\nB) Selection\nC) Count-controlled iteration\nD) Condition-controlled iteration",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) Count-controlled iteration [1 mark]"
+    },
+    {
+      "text": "State what is meant by a 'rogue value' in the context of a condition-controlled loop.",
+      "type": "1 mark — State/Identify",
+      "marks": "A special/agreed value entered by the user to signal that data entry should stop [1 mark]. Accept 'sentinel value'."
+    },
+    {
+      "text": "Explain the difference between a local variable and a global variable.",
+      "type": "4 marks — Explain",
+      "marks": "Local variable: declared inside a subroutine [1], only accessible within that subroutine / destroyed when the subroutine ends [1].\nGlobal variable: declared outside all subroutines [1], accessible from anywhere in the program / exists for the program's lifetime [1].\nMastering: Both definitions with scope clearly contrasted.\nSecure: Both definitions present, contrast implied.\nDeveloping: One correct definition.\nEmerging: Vague reference to variables without scope distinction."
+    },
+    {
+      "text": "Write a pseudocode algorithm that uses a WHILE loop to keep asking the user to enter a positive number until they enter -1 (the rogue value), then outputs the count of numbers entered (not including -1).",
+      "type": "6 marks — Write an Algorithm in Pseudocode",
+      "marks": "Mastering: Correct RECEIVE before loop, WHILE condition checking for -1, counter incremented inside loop, second RECEIVE inside loop, OUTPUT count after loop — 5-6 marks.\nSecure: Logic correct but minor issue (e.g. counter initialisation missing) — 3-4 marks.\nDeveloping: Loop structure present but condition or counter flawed — 2 marks.\nEmerging: Some relevant keywords used — 1 mark.\nModel:\nSET count = 0\nRECEIVE number FROM (INTEGER)\nWHILE number <> -1\n  SET count = count + 1\n  RECEIVE number FROM (INTEGER)\nEND WHILE\nOUTPUT count"
+    },
+    {
+      "text": "A student writes the following Python function:\n\ndef multiply(a, b):\n    result = a * b\n    return result\n\nIdentify whether 'result' is a local or global variable and explain why.",
+      "type": "4 marks — Explain",
+      "marks": "'result' is a local variable [1] because it is declared inside the function 'multiply' [1] and cannot be accessed from outside the function [1]. When the function finishes executing, 'result' is destroyed [1].\nMastering: Correct classification with two valid reasons.\nSecure: Correct classification with one reason.\nDeveloping: Correct classification without explanation.\nEmerging: Partial or incorrect response."
+    },
+    {
+      "text": "Compare the use of a WHILE loop and a REPEAT...UNTIL loop. Include in your answer when each type would be more appropriate to use.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: At least two explicit contrasts, each identifying the key difference (pre-condition vs post-condition) and linking it to an appropriate scenario — 5-6 marks.\nSecure: One explicit contrast with scenario, one further point — 3-4 marks.\nDeveloping: Correct description of one loop type — 2 marks.\nEmerging: A relevant point about loops — 1 mark.\nPoints may include:\n- WHILE checks condition before executing the body (pre-condition); if condition is already false, the body never runs. REPEAT...UNTIL checks after the body runs (post-condition), so the body always executes at least once.\n- WHILE is appropriate when the loop might not need to run at all (e.g. if the list is already empty). REPEAT...UNTIL is appropriate for input validation where you always need at least one prompt.\n- Both are condition-controlled; unlike FOR they do not need a known number of repetitions in advance."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "A program asks the user to enter numbers until they type -1. Which loop is most appropriate?",
+      "options": [
+        "FOR loop (count-controlled)",
+        "Sequence",
+        "WHILE loop (condition-controlled)",
+        "Selection"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "What is the key difference between a procedure and a function?",
+      "options": [
+        "A procedure can have parameters; a function cannot",
+        "A function returns a value; a procedure does not",
+        "A procedure is faster than a function",
+        "A function can only be used once"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A _____ variable can only be used inside the subroutine where it was declared.",
+      "options": [
+        "global",
+        "public",
+        "local",
+        "shared"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Using descriptive variable names such as studentAge instead of x is called writing _____ code.",
+      "options": [
+        "compiled",
+        "self-documenting",
+        "interpreted",
+        "sequential"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each construct to its description:",
+      "left": [
+        "Sequence",
+        "Selection",
+        "Iteration"
+      ],
+      "right": [
+        "Repeats a block of code until a condition is met",
+        "Runs instructions one after another in order",
+        "Chooses between paths based on a condition"
+      ],
+      "order": [
+        1,
+        2,
+        0
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What are the three programming constructs every algorithm is built from?",
+      "a": "Three structural building blocks that every program combines — sequence is execution in order, selection makes choices, iteration repeats steps."
+    },
+    {
+      "q": "What does a REPEAT...UNTIL loop guarantee that a WHILE loop does not?",
+      "a": "The loop body always executes at least once."
+    },
+    {
+      "q": "What is a rogue value (sentinel value)?",
+      "a": "A special agreed value that signals the end of data entry in a condition-controlled loop."
+    },
+    {
+      "q": "What pseudocode keyword is used in a count-controlled loop?",
+      "a": "FOR...NEXT (e.g. FOR i = 1 TO 10 / NEXT i)."
+    },
+    {
+      "q": "What is a subroutine?",
+      "a": "A named, reusable block of code that can be called from anywhere in the program."
+    },
+    {
+      "q": "What makes a function different from a procedure?",
+      "a": "A function returns a value using RETURN; a procedure does not."
+    },
+    {
+      "q": "What is a local variable?",
+      "a": "A variable declared inside a subroutine, only accessible within that subroutine."
+    },
+    {
+      "q": "What is a global variable?",
+      "a": "A variable declared outside all subroutines, accessible from anywhere in the program."
+    },
+    {
+      "q": "What does self-documenting code mean?",
+      "a": "Using descriptive variable and subroutine names that explain their purpose without comments."
+    },
+    {
+      "q": "When is a FOR loop preferred over a WHILE loop?",
+      "a": "When the number of repetitions is known before the loop starts."
+    },
+    {
+      "q": "The pseudocode keyword _____ ends a count-controlled loop.",
+      "a": "NEXT (e.g. NEXT i)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "programming constructs",
+      "definition": "The basic building blocks used to control the flow of instructions in a program: sequence, selection and iteration."
+    },
+    {
+      "term": "sequence",
+      "definition": "Instructions that are executed one after another in the order they are written, with no branching or repetition."
+    },
+    {
+      "term": "selection",
+      "definition": "A programming construct where the program chooses between two or more paths based on a condition being true or false."
+    },
+    {
+      "term": "iteration",
+      "definition": "A programming construct that repeats a block of instructions, either a fixed number of times or until a condition is met."
+    },
+    {
+      "term": "rogue value",
+      "definition": "A special value entered by the user to signal that data entry should stop, also called a sentinel value."
+    },
+    {
+      "term": "subroutine",
+      "definition": "A named, reusable block of code that can be called from anywhere in a program; includes both procedures and functions."
+    },
+    {
+      "term": "local variable",
+      "definition": "A variable declared inside a subroutine that can only be used within that subroutine."
+    },
+    {
+      "term": "global variable",
+      "definition": "A variable declared outside all subroutines that can be accessed from anywhere in the program."
+    },
+    {
+      "term": "identifiers",
+      "definition": "A name given to a variable, procedure or function that clearly describes its purpose without needing a comment."
+    }
+  ],
+  "hero_keywords": [
+    "python programming code screen",
+    "software developer coding laptop",
+    "computer science programming"
+  ],
+  "hero_image_caption": "Writing structured Python code using functions and loops on a laptop"
+}

@@ -1,0 +1,177 @@
+{
+  "_lesson_id": "743ab11a-e2a0-4cc5-a985-b1a7427cac7e",
+  "_lesson_number": 3,
+  "_unit_slug": "data-representation-storage",
+  "_lesson_slug": "characters-ascii-and-unicode",
+  "description": "How characters are stored as numbers and the trade-off between ASCII and Unicode.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Do Characters Need a Code?</h2>\n<p data-narration-id=\"n2\">Computers only store binary numbers. To store a letter like &lsquo;A&rsquo; or a symbol like &lsquo;&amp;&rsquo;, every possible character must be assigned a unique number, and that number is then stored in binary. The complete collection of characters a system can represent, together with the numeric codes assigned to each, is called a <dfn class=\"term\" data-def=\"A defined set of characters and the unique numeric codes assigned to each, used by a computer to store and display text.\">character set</dfn>. Without an agreed character set, text sent from one computer to another would be garbled.</p>\n\n<h2 data-narration-id=\"n3\">ASCII: The Original Standard</h2>\n<p data-narration-id=\"n4\"><dfn class=\"term\" data-def=\"American Standard Code for Information Interchange: a 7-bit character encoding standard that assigns numeric codes 0-127 to letters, digits, punctuation and control characters.\">ASCII</dfn> (American Standard Code for Information Interchange) was developed in the 1960s and became the dominant early standard. Standard ASCII uses <strong>7 bits</strong> per character, giving \\(2^7 = 128\\) possible codes (0 to 127). These 128 codes cover:</p>\n<ul>\n  <li data-narration-id=\"n5\">Upper-case letters A&ndash;Z (codes 65&ndash;90)</li>\n  <li data-narration-id=\"n6\">Lower-case letters a&ndash;z (codes 97&ndash;122)</li>\n  <li data-narration-id=\"n7\">Digits 0&ndash;9 (codes 48&ndash;57)</li>\n  <li data-narration-id=\"n8\">Punctuation and special symbols (e.g. space = 32, &lsquo;!&rsquo; = 33)</li>\n  <li data-narration-id=\"n9\">Control characters (e.g. newline, carriage return, tab &mdash; used by printers and early terminals)</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n10\" data-revision-tip=\"Cover this and recall from memory: ASCII 'A' = ?, 'a' = ?, '0' = ?. Write the three values without looking.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Three ASCII codes you must know: <strong>&lsquo;A&rsquo; = 65</strong>, <strong>&lsquo;a&rsquo; = 97</strong>, <strong>&lsquo;0&rsquo; = 48</strong>. Note that upper-case letters always have lower codes than their lower-case equivalents &mdash; there is a gap of exactly 32 between &lsquo;A&rsquo; (65) and &lsquo;a&rsquo; (97). The digit &lsquo;0&rsquo; is code 48, not 0.</p>\n</div>\n\n<h2 data-narration-id=\"n11\">Extended ASCII</h2>\n<p data-narration-id=\"n12\">As computers spread internationally, 128 codes proved insufficient. Extended ASCII uses <strong>8 bits</strong> (one full byte), giving \\(2^8 = 256\\) codes (0 to 255). The extra 128 codes (128&ndash;255) were used for accented letters, currency symbols and graphics characters. Different manufacturers implemented the upper range differently, which caused compatibility problems &mdash; the same code could mean a different character on different systems.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>ASCII in Practice &mdash; Worked Encoding Example</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n13\">To store the word &ldquo;Cat&rdquo; in memory using ASCII:</p>\n    <p data-narration-id=\"n14\">&lsquo;C&rsquo; = 67 = <code>01000011</code></p>\n    <p data-narration-id=\"n15\">&lsquo;a&rsquo; = 97 = <code>01100001</code></p>\n    <p data-narration-id=\"n16\">&lsquo;t&rsquo; = 116 = <code>01110100</code></p>\n    <p data-narration-id=\"n17\">Three bytes of storage are needed &mdash; one byte per character. The string &ldquo;Cat&rdquo; is stored as the sequence of binary codes <code>01000011 01100001 01110100</code>.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n18\">Unicode: A Global Solution</h2>\n<p data-narration-id=\"n19\"><dfn class=\"term\" data-def=\"An international character encoding standard that assigns a unique code point to every character in every language and symbol set in the world, supporting over a million characters.\">Unicode</dfn> was created to solve the limitations of ASCII. It assigns a unique <strong>code point</strong> to every character in every writing system in the world &mdash; Latin, Cyrillic, Arabic, Chinese, emoji and thousands more. Unicode currently defines over 140,000 characters (and the range can extend to over 1 million).</p>\n<p data-narration-id=\"n20\">Unicode itself is a standard, not an encoding. The encoding &mdash; how the code points are stored as bytes &mdash; is specified separately. Three common encodings are:</p>\n<ul>\n  <li data-narration-id=\"n21\"><strong>UTF-8:</strong> variable length, 1 to 4 bytes per character. ASCII characters use exactly 1 byte (backward compatible). The most widely used encoding on the web.</li>\n  <li data-narration-id=\"n22\"><strong>UTF-16:</strong> variable length, 2 or 4 bytes per character. Used internally by Windows and Java.</li>\n  <li data-narration-id=\"n23\"><strong>UTF-32:</strong> fixed 4 bytes per character. Simple but uses more storage than UTF-8 for mostly-ASCII text.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n24\" data-revision-tip=\"Close this and explain to someone why Unicode was needed and how UTF-8 remains backward compatible with ASCII.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Unicode uses more bits per character than ASCII, which means Unicode files are larger. However, <strong>UTF-8 is backward compatible with ASCII</strong>: the first 128 Unicode code points match the ASCII codes exactly, so any pure ASCII text file is also a valid UTF-8 file. This is why UTF-8 replaced ASCII without breaking existing systems.</p>\n</div>\n\n<h2 data-narration-id=\"n25\">Comparing ASCII and Unicode</h2>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>ASCII vs Unicode: Key Comparison</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <table data-narration-id=\"n26\">\n      <thead><tr><th>Feature</th><th>ASCII (7-bit)</th><th>Unicode (UTF-8)</th></tr></thead>\n      <tbody>\n        <tr><td>Number of characters</td><td>128 (standard); 256 (extended 8-bit)</td><td>Over 140,000 (extendable to 1 million+)</td></tr>\n        <tr><td>Bits per character</td><td>7 (or 8 for extended)</td><td>8 to 32 (variable in UTF-8)</td></tr>\n        <tr><td>Languages supported</td><td>English and basic Western symbols only</td><td>All world languages including emoji</td></tr>\n        <tr><td>File size</td><td>Smaller for English text</td><td>Larger for non-ASCII scripts; same as ASCII for English in UTF-8</td></tr>\n        <tr><td>Backward compatibility</td><td>N/A</td><td>UTF-8 fully compatible with ASCII for the first 128 codes</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n27\">The trade-off is clear: ASCII is compact but limited. Unicode is comprehensive but uses more storage for non-ASCII scripts. For modern software that must work in any language, Unicode is the only practical choice.</p>\n  </div></div>\n</div>\n\n<p data-narration-id=\"n28\">A key practical point: <dfn class=\"term\" data-def=\"The process of converting between different character set standards, for example from ASCII to Unicode, which can cause errors if characters outside the original set are present.\">character encoding</dfn> errors arise when a file saved in one encoding is opened assuming a different encoding. You have probably seen garbled symbols or question marks appear in a document &mdash; that is a mismatch between the encoding used to save and the encoding used to read.</p>\n\n<h2 data-narration-id=\"n29\">Why Encoding Choice Matters</h2>\n<p data-narration-id=\"n30\">An encoding is only useful if both the program writing the file and the program reading it agree on which scheme is in use. A file saved in UTF-8 but opened as Windows-1252 will display garbled symbols where multi-byte characters used to be. This is called <dfn class=\"term\" data-def=\"The corruption of text caused by interpreting bytes with the wrong character encoding, producing nonsense glyphs in place of intended characters.\">mojibake</dfn>, and it remains one of the most common bugs in software that handles text from multiple sources. Modern web standards address this by requiring documents to declare their encoding in the HTTP header or, for HTML, in the document head, so the browser always knows which scheme to apply.</p>\n<p data-narration-id=\"n31\">UTF-8 has become the dominant encoding on the web because it remains backward-compatible with ASCII while extending naturally to every script. A file containing only English text takes exactly the same number of bytes whether it is encoded in ASCII or in UTF-8, but the same encoding can also hold Greek, Japanese, emoji and historical scripts without further work. This combination of compatibility and reach is why nearly all new file formats, network protocols and source code now default to UTF-8 rather than ASCII alone.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n29\">Two common exam traps with character sets: first, the digit &lsquo;0&rsquo; has ASCII code 48, not 0 &mdash; students who write &ldquo;the character zero has code zero&rdquo; lose marks. Second, when asked to compare ASCII and Unicode, you must name a specific benefit of Unicode (international language support) AND a specific cost (larger file size for non-ASCII text) &mdash; a one-sided answer will not reach the higher mark bands. If asked to convert a character to its binary code, find the ASCII decimal value first, then convert that decimal to binary using your column method.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n30\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n31\">A character set assigns a unique numeric code to every character a computer can store. ASCII (7-bit, 128 characters) was the original standard; extended ASCII uses 8 bits for 256 characters.</li>\n  <li data-narration-id=\"n32\">Key ASCII codes: &lsquo;A&rsquo; = 65, &lsquo;a&rsquo; = 97, &lsquo;0&rsquo; = 48. Each character is stored as one byte of binary in memory.</li>\n  <li data-narration-id=\"n33\">Unicode supports over 140,000 characters from all world languages; UTF-8 is its most common encoding and is backward compatible with ASCII, making it the universal standard for modern software.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "What is the ASCII code for the capital letter 'A'?\nA) 48\nB) 65\nC) 97\nD) 64",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) 65 [1 mark]"
+    },
+    {
+      "text": "State what is meant by a character set.",
+      "type": "2 marks — Define",
+      "marks": "A character set is a defined collection of characters [1] together with the unique numeric codes assigned to each one, used by a computer to store and display text [1]."
+    },
+    {
+      "text": "The character 'Z' has the ASCII code 90. State the ASCII code for the character 'z' and explain how you arrived at your answer.",
+      "type": "3 marks — Describe",
+      "marks": "The ASCII code for 'z' is 122 [1]. The difference between a capital letter and its lower-case equivalent in ASCII is always 32 [1], so 90 + 32 = 122 [1]."
+    },
+    {
+      "text": "Explain two reasons why Unicode was developed to replace ASCII.",
+      "type": "4 marks — Explain",
+      "marks": "Award marks for points such as: ASCII only supports 128 characters (7-bit), which is sufficient for English but cannot represent characters from other languages such as Chinese, Arabic or Cyrillic [1], making it unsuitable for global software [1]. Extended ASCII introduced additional characters but different manufacturers used the extra 128 codes differently, causing incompatibility between systems [1]. Unicode assigns a unique code point to every character in every writing system, solving both problems with a single consistent standard [1]. Maximum 4 marks."
+    },
+    {
+      "text": "A student's name is stored in a computer system using ASCII. The name contains 8 characters. Calculate the number of bits needed to store the name.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "Each character uses 7 bits in ASCII (or 8 bits as one byte) [1]. Using 8-bit storage (one byte per character): 8 characters × 8 bits = 64 bits [1 mark for method, 1 mark for 64 bits]. If working in 7-bit ASCII: 8 × 7 = 56 bits — accept this with correct working."
+    },
+    {
+      "text": "Compare ASCII and Unicode as methods for storing characters in a computer system. In your answer you should consider the number of characters supported, storage requirements and compatibility.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Accurate contrast of character range (ASCII 128/256 vs Unicode 140,000+), explicit storage comparison (ASCII 1 byte per char; Unicode UTF-8 variable 1-4 bytes), clear statement that UTF-8 is backward compatible with ASCII (first 128 code points match), and a reasoned conclusion about which is preferable and when.\nSecure: Both encoding systems described correctly with at least two explicit contrasts; some reference to compatibility.\nDeveloping: One system described well; comparison is mainly implicit; may confuse Unicode the standard with a specific encoding.\nEmerging: Some correct facts about one system; little comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Standard 7-bit ASCII can represent how many different characters?",
+      "options": [
+        "64",
+        "128",
+        "256",
+        "512"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "Which Unicode encoding is backward compatible with ASCII?",
+      "options": [
+        "UTF-32",
+        "UTF-16",
+        "UTF-8",
+        "Extended ASCII"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "The ASCII code for the character '0' (zero) is _____, not 0.",
+      "options": [
+        "32",
+        "65",
+        "97",
+        "48"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "Unicode was developed to replace ASCII because ASCII could not represent characters from languages other than _____.",
+      "options": [
+        "French",
+        "German",
+        "English",
+        "Latin"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each character encoding term to its description:",
+      "left": [
+        "ASCII (7-bit)",
+        "Extended ASCII",
+        "Unicode"
+      ],
+      "right": [
+        "128 characters, covering English letters, digits and control codes",
+        "256 characters using 8 bits; upper range varied between manufacturers",
+        "Over 140,000 characters covering all world languages"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the ASCII code for capital 'A'?",
+      "a": "65"
+    },
+    {
+      "q": "What is the ASCII code for lower-case 'a'?",
+      "a": "97"
+    },
+    {
+      "q": "What is the ASCII code for the digit character '0'?",
+      "a": "48"
+    },
+    {
+      "q": "How many characters does standard 7-bit ASCII define?",
+      "a": "128 (codes 0 to 127)."
+    },
+    {
+      "q": "How many characters does 8-bit extended ASCII define?",
+      "a": "256 (codes 0 to 255)."
+    },
+    {
+      "q": "What is a character set?",
+      "a": "A defined collection of characters and the unique numeric codes assigned to each."
+    },
+    {
+      "q": "Why was Unicode developed to replace ASCII?",
+      "a": "ASCII only supports English characters; Unicode covers all world languages."
+    },
+    {
+      "q": "How many characters does Unicode currently define?",
+      "a": "Over 140,000 (extendable to more than 1 million)."
+    },
+    {
+      "q": "UTF-8 is backward compatible with ASCII — what does this mean?",
+      "a": "The first 128 UTF-8 code points match ASCII exactly, so ASCII files are valid UTF-8."
+    },
+    {
+      "q": "The difference in ASCII code between a capital letter and its lower-case version is ___.",
+      "a": "32 (e.g. 'A' = 65, 'a' = 97)."
+    },
+    {
+      "q": "What is character encoding?",
+      "a": "The process of converting characters to binary using an agreed character set standard."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "character set",
+      "definition": "A defined set of characters and the unique numeric codes assigned to each, used by a computer to store and display text."
+    },
+    {
+      "term": "ASCII",
+      "definition": "American Standard Code for Information Interchange: a 7-bit character encoding standard that assigns numeric codes 0-127 to letters, digits, punctuation and control characters."
+    },
+    {
+      "term": "Unicode",
+      "definition": "An international character encoding standard that assigns a unique code point to every character in every language and symbol set in the world, supporting over a million characters."
+    },
+    {
+      "term": "character encoding",
+      "definition": "The process of converting between different character set standards, for example from ASCII to Unicode, which can cause errors if characters outside the original set are present."
+    }
+  ],
+  "hero_keywords": [
+    "keyboard characters text encoding",
+    "digital text computer screen",
+    "computer science language"
+  ],
+  "hero_image_caption": "Every character on a keyboard is stored as a unique binary number in memory"
+}

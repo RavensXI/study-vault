@@ -1,0 +1,137 @@
+{
+  "_lesson_id": "19c7e0d8-2c32-44d8-9db7-078ca0fb61fc",
+  "_lesson_number": 5,
+  "_unit_slug": "data-representation-storage",
+  "_lesson_slug": "sound-sampling-and-file-size",
+  "description": "How sound is digitised, the effect of sampling rate and how to calculate sound file size.",
+  "content_html": "<h2 data-narration-id=\"n1\">From Sound Waves to Digital Data</h2>\n<p data-narration-id=\"n2\">Sound in the real world is an analogue signal &mdash; a continuous wave of air pressure that varies smoothly over time. Computers can only store discrete binary values, so to record sound digitally, the continuous wave must be converted into a series of snapshots. This process is called <dfn class=\"term\" data-def=\"The process of measuring an analogue sound wave at regular intervals and storing each measurement as a binary number.\">sampling</dfn>.</p>\n<p data-narration-id=\"n3\">An analogue-to-digital converter (ADC) is the hardware component that performs sampling. It reads the amplitude (height) of the sound wave at a fixed rate and stores each reading as a binary number. On playback, a digital-to-analogue converter (DAC) reconstructs the wave from those stored numbers. The reconstructed wave is an approximation &mdash; how close it is to the original depends on how often measurements are taken and how precisely each one is stored.</p>\n\n<h2 data-narration-id=\"n4\">Sample Rate (Sampling Frequency)</h2>\n<p data-narration-id=\"n5\">The <dfn class=\"term\" data-def=\"The number of samples taken per second when digitising an analogue signal, measured in hertz (Hz).\">sample rate</dfn> (or sampling frequency) is the number of samples taken every second, measured in hertz (Hz). A sample rate of 44,100 Hz (44.1 kHz) means 44,100 measurements are recorded every second &mdash; this is the standard for CD-quality audio.</p>\n<p data-narration-id=\"n6\">A higher sample rate captures more of the original wave shape, which means the reconstructed audio sounds closer to the original. Low sample rates &mdash; say 8,000 Hz used in some telephone systems &mdash; make audio sound &ldquo;tinny&rdquo; or robotic because the measurements are too sparse to faithfully reproduce high frequencies.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n7\" data-revision-tip=\"Cover this and write from memory: (1) the unit of sample rate, (2) the CD-quality sample rate, (3) what happens to quality if sample rate is halved.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><strong>CD-quality audio</strong> uses a sample rate of 44,100 Hz and a bit depth of 16 bits per sample. Common sample rates to know: <strong>8,000 Hz</strong> (telephone), <strong>22,050 Hz</strong> (radio quality), <strong>44,100 Hz</strong> (CD audio), <strong>48,000 Hz</strong> (professional video). Higher rates mean better quality but larger file sizes.</p>\n</div>\n\n<h2 data-narration-id=\"n8\">Bit Depth (Sample Resolution)</h2>\n<p data-narration-id=\"n9\">Each sample is stored as a binary number. The <dfn class=\"term\" data-def=\"The number of bits used to store each audio sample, determining the range of amplitude values that can be recorded.\">bit depth</dfn> (also called sample resolution) determines how many bits are used for each measurement. More bits means more possible amplitude values:</p>\n<ul>\n  <li data-narration-id=\"n10\"><strong>8-bit</strong> &mdash; \\(2^8 = 256\\) possible amplitude levels. Sufficient for voice recording but noticeably &ldquo;hissy&rdquo;.</li>\n  <li data-narration-id=\"n11\"><strong>16-bit</strong> &mdash; \\(2^{16} = 65{,}536\\) amplitude levels. Standard for CD audio.</li>\n  <li data-narration-id=\"n12\"><strong>24-bit</strong> &mdash; \\(2^{24} \\approx 16.7\\) million levels. Used in professional studio recording.</li>\n</ul>\n<p data-narration-id=\"n13\">A higher bit depth reduces <strong>quantisation error</strong> &mdash; the difference between the actual analogue amplitude and the nearest stored value. With only 8 bits, the &ldquo;staircase&rdquo; approximation is quite coarse; with 16 bits it is so fine the ear cannot detect the steps.</p>\n\n<h2 data-narration-id=\"n14\">Calculating Sound File Size</h2>\n<p data-narration-id=\"n15\">The formula for the uncompressed size of a digital audio file is:</p>\n<p data-narration-id=\"n16\"><strong>File size (bits) = sample rate (Hz) &times; bit depth (bits) &times; number of channels &times; duration (seconds)</strong></p>\n<p data-narration-id=\"n17\">Divide by 8 to get bytes, then by 1024 to get KiB, and so on. <em>Number of channels</em> is 1 for mono and 2 for stereo. Stereo doubles the file size compared to mono because two separate streams of samples are recorded simultaneously.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Calculating Audio File Size</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n18\">A 3-minute stereo recording at CD quality (44,100 Hz sample rate, 16-bit depth). Calculate the uncompressed file size in MiB.</p>\n    <p data-narration-id=\"n19\"><strong>Step 1:</strong> Convert duration to seconds: 3 &times; 60 = 180 seconds.</p>\n    <p data-narration-id=\"n20\"><strong>Step 2:</strong> Total bits = 44,100 &times; 16 &times; 2 (stereo) &times; 180 = 254,016,000 bits.</p>\n    <p data-narration-id=\"n21\"><strong>Step 3:</strong> Bytes = 254,016,000 &divide; 8 = 31,752,000 bytes.</p>\n    <p data-narration-id=\"n22\"><strong>Step 4:</strong> KiB = 31,752,000 &divide; 1024 = 31,007.8 KiB.</p>\n    <p data-narration-id=\"n23\"><strong>Step 5:</strong> MiB = 31,007.8 &divide; 1024 = <strong>30.3 MiB</strong> (approximately).</p>\n    <p data-narration-id=\"n24\">An MP3 file of the same track might be around 3&ndash;5 MiB &mdash; lossy compression reduces it to roughly one-tenth the size, at the cost of some quality.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n25\" data-revision-tip=\"Test yourself: write the audio file size formula, including the channel factor. Check you can identify which value to use for stereo vs mono.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The two key variables that affect audio quality are <strong>sample rate</strong> (how often per second the wave is measured) and <strong>bit depth</strong> (how precisely each measurement is stored). Increasing either improves quality but increases file size proportionally. A stereo file is always <strong>twice the size</strong> of the equivalent mono file.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About Digital Sound</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n26\"><strong>Misconception 1: &ldquo;Sample rate and bit depth are the same thing.&rdquo;</strong> &mdash; They are not. Sample rate is how often per second a measurement is taken (Hz). Bit depth is how precisely each individual measurement is stored (bits). They are independent: you could have a high sample rate with a low bit depth, or vice versa.</p>\n    <p data-narration-id=\"n27\"><strong>Misconception 2: &ldquo;Stereo doubles the quality.&rdquo;</strong> &mdash; Stereo doubles the <em>file size</em> by recording two channels simultaneously (left and right speaker). Quality (how faithfully the sound is captured per channel) is set by the sample rate and bit depth, which are the same for both channels.</p>\n    <p data-narration-id=\"n28\"><strong>Misconception 3: &ldquo;Higher sample rate always sounds better.&rdquo;</strong> &mdash; Human hearing tops out at around 20,000 Hz. The Nyquist theorem states that a sample rate of at least twice the highest frequency is needed to reproduce it. At 44,100 Hz, all frequencies up to around 22,050 Hz can be captured &mdash; above the human hearing limit. Increasing further has diminishing returns for human listeners.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n29\">The most common error in audio file size questions is forgetting to include the number of channels &mdash; if the question says &ldquo;stereo&rdquo; you must multiply by 2. Always show your working step by step and use base-2 division (1024 per step, not 1000) when converting to KiB, MiB etc. If a question asks you to &ldquo;explain the effect of increasing the sample rate on file size and quality&rdquo;, you need both: quality improves (more faithful reproduction) AND file size increases (more samples per second means more data). A one-sided answer will cap your marks.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n30\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n31\">Sampling converts an analogue sound wave into digital data by measuring the amplitude at regular intervals; the sample rate (Hz) determines how many measurements are taken per second.</li>\n  <li data-narration-id=\"n32\">Bit depth sets how precisely each sample is stored; CD quality uses 44,100 Hz and 16 bits. File size (bits) = sample rate &times; bit depth &times; channels &times; duration in seconds.</li>\n  <li data-narration-id=\"n33\">Higher sample rate and higher bit depth both improve audio quality and increase file size proportionally; a stereo recording is twice the size of the equivalent mono recording.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following describes the sample rate of a digital audio recording?\nA) The number of bits used to store each measurement of the sound wave\nB) The number of times per second the amplitude of the sound wave is measured\nC) The number of audio channels recorded simultaneously\nD) The total number of samples in the audio file",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) The number of times per second the amplitude of the sound wave is measured [1 mark]"
+    },
+    {
+      "text": "State the unit used to measure sample rate.",
+      "type": "1 mark — State/Identify",
+      "marks": "Hertz (Hz) [1 mark]. Accept kHz or kilohertz with correct conversion stated."
+    },
+    {
+      "text": "A mono audio recording is made at a sample rate of 22,050 Hz with a bit depth of 16 bits. The recording lasts 60 seconds. Calculate the uncompressed file size in KiB. Show all working.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "22,050 × 16 × 1 × 60 = 21,168,000 bits [1 mark]. ÷ 8 = 2,646,000 bytes [1 mark]. ÷ 1024 = 2,584.0 KiB (approximately 2,584 KiB) [1 mark — must use 1024 not 1000 for this mark]."
+    },
+    {
+      "text": "Explain how increasing the bit depth of a sound recording affects the quality of the audio and the size of the file.",
+      "type": "4 marks — Explain",
+      "marks": "Award marks for: Increasing bit depth means each sample stores more amplitude levels (e.g. 16-bit gives 65,536 levels vs 8-bit giving 256) [1]. This reduces quantisation error — the difference between the actual and stored amplitude values [1], producing a more accurate, higher-quality reproduction of the original sound [1]. More bits per sample means more data to store, so file size increases proportionally (a 16-bit file is twice the size of an 8-bit file at the same sample rate and duration) [1]. Maximum 4 marks."
+    },
+    {
+      "text": "A student records a 10-second stereo audio clip at 44,100 Hz with a bit depth of 16 bits. The student then records the same clip again in mono at the same settings. Compare the file sizes of the two recordings.",
+      "type": "4 marks — Explain",
+      "marks": "Stereo file: 44,100 × 16 × 2 × 10 = 14,112,000 bits [1]. Mono file: 44,100 × 16 × 1 × 10 = 7,056,000 bits [1]. The stereo file is exactly twice the size of the mono file [1], because stereo records two independent channels (left and right) simultaneously while mono records a single channel [1]. Maximum 4 marks."
+    },
+    {
+      "text": "Discuss the impact of increasing sample rate and bit depth on the quality and storage requirements of digital audio. In your answer, consider practical limits on quality improvement and storage trade-offs.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Balanced discussion of quality benefits (higher sample rate captures higher frequencies; higher bit depth reduces quantisation error), storage costs (both increase file size proportionally), practical limits (human hearing ceiling ~20 kHz means sample rates beyond ~44.1 kHz yield diminishing returns; similar argument for bit depth beyond 16-bit for consumer audio), and a reasoned conclusion about where the trade-off sits for different use cases (e.g. streaming vs professional studio work).\nSecure: Quality and storage impacts addressed for both variables; some attempt at a practical limit or trade-off; a conclusion reached.\nDeveloping: Both variables mentioned; impacts mostly correct but comparison is one-sided or limits not addressed.\nEmerging: One variable discussed; limited or no storage impact mentioned; no conclusion."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What sample rate is used for CD-quality audio?",
+      "options": ["8,000 Hz", "22,050 Hz", "44,100 Hz", "48,000 Hz"],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Why does a stereo audio file have a larger file size than a mono file of the same duration and settings?",
+      "options": ["Stereo uses a higher bit depth", "Stereo records two channels of audio simultaneously", "Stereo uses a higher sample rate", "Stereo files are always compressed"],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "The formula for audio file size in bits is: sample rate x bit depth x channels x _____ .",
+      "options": ["quality", "frequency", "duration in seconds", "compression ratio"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A higher _____ reduces the quantisation error in digital audio by storing amplitude values more precisely.",
+      "options": ["sample rate", "duration", "bit depth", "channel count"],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each audio concept to its correct description:",
+      "left": ["Sample rate", "Bit depth", "ADC"],
+      "right": ["Number of measurements taken per second, in Hz", "Number of bits used to store each amplitude measurement", "Hardware that converts an analogue sound wave to digital data"],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is sampling in the context of digital audio?",
+      "a": "Measuring the amplitude of an analogue sound wave at regular intervals and storing each as binary."
+    },
+    {
+      "q": "What unit is sample rate measured in?",
+      "a": "Hertz (Hz)."
+    },
+    {
+      "q": "What sample rate does CD-quality audio use?",
+      "a": "44,100 Hz (44.1 kHz)."
+    },
+    {
+      "q": "What is bit depth in digital audio?",
+      "a": "The number of bits used to store each audio sample, setting the range of amplitude values."
+    },
+    {
+      "q": "How many amplitude levels can a 16-bit audio sample store?",
+      "a": "65,536 (2 to the power 16)."
+    },
+    {
+      "q": "What does ADC stand for in the context of digital audio?",
+      "a": "Analogue-to-Digital Converter."
+    },
+    {
+      "q": "Give the formula for the uncompressed size of a digital audio file in bits.",
+      "a": "Sample rate x bit depth x channels x duration in seconds."
+    },
+    {
+      "q": "A stereo recording compared to mono at the same settings has what file size?",
+      "a": "Twice as large (stereo records two channels)."
+    },
+    {
+      "q": "What is quantisation error in digital audio?",
+      "a": "The difference between the actual analogue amplitude and the nearest stored binary value."
+    },
+    {
+      "q": "Higher sample rate improves audio quality — what is the practical upper limit for human hearing?",
+      "a": "Around 20,000 Hz (20 kHz); sample rates beyond ~44.1 kHz give diminishing returns."
+    },
+    {
+      "q": "An 8-bit audio sample can represent how many amplitude levels?",
+      "a": "256 (2 to the power 8)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "sampling",
+      "definition": "The process of measuring an analogue sound wave at regular intervals and storing each measurement as a binary number."
+    },
+    {
+      "term": "sample rate",
+      "definition": "The number of samples taken per second when digitising an analogue signal, measured in hertz (Hz)."
+    },
+    {
+      "term": "bit depth",
+      "definition": "The number of bits used to store each audio sample, determining the range of amplitude values that can be recorded."
+    }
+  ],
+  "hero_keywords": ["sound wave digital audio recording", "music production studio microphone", "audio waveform computer"],
+  "hero_image_caption": "A digital recording captures thousands of amplitude measurements every second"
+}

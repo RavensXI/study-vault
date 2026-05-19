@@ -1,0 +1,181 @@
+{
+  "_lesson_id": "a0e32c31-df29-482f-8bae-86b1b5b6b05a",
+  "_lesson_number": 1,
+  "_unit_slug": "data-representation-storage",
+  "_lesson_slug": "data-types-and-number-systems",
+  "description": "Integer, real, character, string and Boolean types plus binary and hex conversion.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Does Data Need a Type?</h2>\n<p data-narration-id=\"n2\">Every piece of data stored in a computer has a <dfn class=\"term\" data-def=\"A classification that tells a computer what kind of value a variable holds and how to store or process it.\">data type</dfn>. The type tells the computer how many bytes to reserve, which operations are allowed, and how the binary pattern in memory should be interpreted. A sequence of bits can mean a whole number, a fraction, a letter or a logical true/false value &mdash; the data type is what determines the meaning.</p>\n\n<h2 data-narration-id=\"n3\">The Five Core Data Types</h2>\n<p data-narration-id=\"n4\">Your exam requires you to know five data types:</p>\n<ul>\n  <li data-narration-id=\"n5\"><strong>Integer</strong> &mdash; a whole number, positive or negative, with no decimal point. Examples: 42, &minus;7, 0. Stored in a fixed number of bytes (often 2 or 4).</li>\n  <li data-narration-id=\"n6\"><strong>Real</strong> (also called <em>float</em>) &mdash; a number that can have a fractional part. Examples: 3.14, &minus;0.5, 100.0. Stored using a floating-point representation that can handle a vast range of values.</li>\n  <li data-narration-id=\"n7\"><strong>Character</strong> &mdash; a single symbol: a letter, digit, space or punctuation mark. Stored as a numeric code (see the lesson on ASCII and Unicode). Example: &lsquo;A&rsquo; is stored as the number 65.</li>\n  <li data-narration-id=\"n8\"><strong>String</strong> &mdash; a sequence of zero or more characters. Examples: &ldquo;hello&rdquo;, &ldquo;42&rdquo;, &ldquo;&rdquo; (empty string). Strings are stored as consecutive character codes in memory.</li>\n  <li data-narration-id=\"n9\"><strong>Boolean</strong> &mdash; a value that can only be <code>True</code> or <code>False</code>. Used in conditions and logic. Stored as a single bit (1 for True, 0 for False), though in practice a full byte is often reserved.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n10\" data-revision-tip=\"Cover this and write down the five data types from memory, then give one example value for each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The five data types you must know are: <strong>integer</strong> (whole number), <strong>real</strong> (decimal number), <strong>character</strong> (single symbol), <strong>string</strong> (sequence of characters) and <strong>Boolean</strong> (True or False). Choosing the wrong type wastes memory or causes errors.</p>\n</div>\n\n<h2 data-narration-id=\"n11\">Number Systems: Denary, Binary and Hexadecimal</h2>\n<p data-narration-id=\"n12\">Computers process everything in <dfn class=\"term\" data-def=\"The base-2 number system, using only the digits 0 and 1, which maps directly to the on/off states of electronic circuits.\">binary</dfn> (base 2), but humans normally count in <strong>denary</strong> (base 10, using digits 0&ndash;9). A third system, <dfn class=\"term\" data-def=\"The base-16 number system using digits 0&ndash;9 and letters A&ndash;F, used as a compact shorthand for binary.\">hexadecimal</dfn> (base 16, using 0&ndash;9 then A&ndash;F), gives programmers a compact way to read and write binary patterns. One hex digit always represents exactly four binary bits (a nibble).</p>\n\n<table data-narration-id=\"n13\">\n  <caption>Hex digit to denary and binary equivalents</caption>\n  <thead><tr><th>Denary</th><th>Hex</th><th>4-bit Binary</th></tr></thead>\n  <tbody>\n    <tr><td>0</td><td>0</td><td>0000</td></tr>\n    <tr><td>5</td><td>5</td><td>0101</td></tr>\n    <tr><td>10</td><td>A</td><td>1010</td></tr>\n    <tr><td>15</td><td>F</td><td>1111</td></tr>\n    <tr><td>16</td><td>10</td><td>0001 0000</td></tr>\n  </tbody>\n</table>\n\n<h2 data-narration-id=\"n14\">Converting Denary to Binary</h2>\n<p data-narration-id=\"n15\">The easiest method uses a column header table. Write the powers of 2 from right to left, then subtract each column value from the remaining total if possible, placing a 1 in that column, or 0 if not.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Converting 45 to Binary</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n16\">Column values (8-bit): 128, 64, 32, 16, 8, 4, 2, 1.</p>\n    <p data-narration-id=\"n17\">45 &lt; 128 &rarr; 0. 45 &lt; 64 &rarr; 0. 45 &ge; 32 &rarr; 1, remainder 13. 13 &lt; 16 &rarr; 0. 13 &ge; 8 &rarr; 1, remainder 5. 5 &ge; 4 &rarr; 1, remainder 1. 1 &lt; 2 &rarr; 0. 1 &ge; 1 &rarr; 1.</p>\n    <p data-narration-id=\"n18\">Result: <code>00101101</code>. Check: 32 + 8 + 4 + 1 = 45. Correct.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n19\">Converting Binary to Denary</h2>\n<p data-narration-id=\"n20\">Write the binary number under the column headers, then add up the column values where there is a 1. For example, <code>10110010</code>: columns with 1s are 128, 32, 16, 2 &rarr; 128 + 32 + 16 + 2 = <strong>178</strong>.</p>\n\n<h2 data-narration-id=\"n21\">Working with Hexadecimal</h2>\n<p data-narration-id=\"n22\">Because one hex digit = four binary bits, conversion between hex and binary is fast. To convert binary to hex, split the bits into groups of four (from the right), then replace each group with the matching hex digit. To convert hex to binary, reverse the process &mdash; expand each hex digit back into four bits.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Binary &#x2194; Hex and Hex &#x2194; Denary</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n23\"><strong>Binary to hex:</strong> <code>10111100</code> &rarr; split: <code>1011</code> and <code>1100</code> &rarr; B and C &rarr; hex <code>BC</code>.</p>\n    <p data-narration-id=\"n24\"><strong>Hex to denary:</strong> <code>BC</code> &rarr; B = 11, C = 12. Value = (11 &times; 16) + (12 &times; 1) = 176 + 12 = <strong>188</strong>.</p>\n    <p data-narration-id=\"n25\"><strong>Denary to hex:</strong> 188 &div; 16 = 11 remainder 12 &rarr; B remainder C &rarr; hex <code>BC</code>. Always verify your answer.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n26\" data-revision-tip=\"Test yourself: convert denary 200 to binary, then write the binary answer in hex. Check each step.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>One hex digit always represents exactly <strong>four binary bits</strong>. This makes hex a compact shorthand: 8-bit binary needs two hex digits, 16-bit needs four. Programmers use hex for memory addresses, colour codes and error messages because it is far shorter than writing raw binary.</p>\n</div>\n\n<p data-narration-id=\"n27\">A <dfn class=\"term\" data-def=\"A group of four binary bits, equivalent to one hexadecimal digit.\">nibble</dfn> is four bits. A byte is eight bits (two hex digits). Knowing the nibble boundary is what makes hex-to-binary conversion so quick: you never have to deal with the whole number at once, just one nibble at a time.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n28\">In a conversion question, always show the column header row (128, 64, 32, 16, 8, 4, 2, 1) and your working &mdash; the mark scheme may award a method mark even if your final answer is wrong. For binary-to-hex, remember to split into groups of <em>four bits from the right</em>, not from the left, or your groups will be incorrect. When choosing a data type in a programming question, &ldquo;real&rdquo; is the correct term rather than &ldquo;float&rdquo; &mdash; both may be accepted, but use the language of the specification to be safe.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n29\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n30\">The five data types are integer, real, character, string and Boolean &mdash; each tells the computer how to store and interpret a binary pattern.</li>\n  <li data-narration-id=\"n31\">Binary (base 2) is the language of hardware; hexadecimal (base 16) is a shorthand for binary where one hex digit equals four bits (a nibble).</li>\n  <li data-narration-id=\"n32\">To convert denary to binary, repeatedly subtract the largest power of 2 you can; to convert binary to hex, group bits in fours from the right.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following is the correct data type for the value 3.75?\nA) Integer\nB) Boolean\nC) Real\nD) Character",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) Real [1 mark]. 3.75 has a fractional part so it cannot be an integer; Boolean is only True/False; Character is a single symbol."
+    },
+    {
+      "text": "State the denary value of the binary number 01101010.",
+      "type": "2 marks — Convert (Binary/Hex/Denary)",
+      "marks": "64 + 32 + 8 + 2 = 106. [2 marks: 1 mark for correct method shown (column headers or repeated halving), 1 mark for correct answer 106. Accept answer-only for full marks if correct.]"
+    },
+    {
+      "text": "Convert the denary number 219 into hexadecimal. Show your working.",
+      "type": "2 marks — Convert (Binary/Hex/Denary)",
+      "marks": "219 = 13 × 16 + 11 = DB in hex. [2 marks: 1 mark for correct binary or correct individual nibble, 1 mark for correct final hex DB. Accept working via binary: 11011011 → 1101 1011 → D B.]"
+    },
+    {
+      "text": "A programmer needs to store a student's exam score out of 100, their name, and whether they passed or failed. Identify the most appropriate data type for each of the three values.",
+      "type": "3 marks — Describe",
+      "marks": "Exam score → Integer (whole number, no decimal needed). Name → String (sequence of characters). Passed/failed → Boolean (only two possible values: True or False). [1 mark each, 3 marks total.]"
+    },
+    {
+      "text": "Explain why hexadecimal is used by programmers as a shorthand for binary rather than denary.",
+      "type": "4 marks — Explain",
+      "marks": "Award marks for points such as: One hex digit represents exactly four binary bits (a nibble) [1], so conversion between hex and binary is fast and reliable without arithmetic [1]; an 8-bit byte needs only two hex digits, whereas the denary equivalent can be up to three digits and requires calculation to convert [1]; this makes hex useful for representing memory addresses, colour codes and error codes in a compact, readable form [1]. Maximum 4 marks."
+    },
+    {
+      "text": "Compare the integer and real data types. In your answer, refer to how each is stored and when each should be chosen.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Accurate contrast of storage (integer stored as fixed binary pattern; real stored using floating-point with sign, mantissa and exponent), clear examples of when each is appropriate (integer for counts/IDs; real for measurements/currency), and a comparison of storage efficiency (integer typically uses fewer bytes than real for the same range).\nSecure: Correct definitions of both types, at least one storage difference explained, and appropriate use cases given.\nDeveloping: Definitions correct but comparison is implicit (e.g. lists integer facts then real facts without explicitly contrasting them).\nEmerging: One type partially described; little or no comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which data type would be most appropriate for storing a temperature reading of 36.6?",
+      "options": [
+        "Integer",
+        "Boolean",
+        "Character",
+        "Real"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "mcq",
+      "q": "What is the denary value of the binary number 00110101?",
+      "options": [
+        "43",
+        "53",
+        "45",
+        "35"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "One hexadecimal digit represents exactly _____ binary bits.",
+      "options": [
+        "two",
+        "eight",
+        "four",
+        "sixteen"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A _____ is a data type that can only hold the value True or False.",
+      "options": [
+        "character",
+        "string",
+        "integer",
+        "Boolean"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each data type to an example value:",
+      "left": [
+        "Integer",
+        "Real",
+        "Boolean"
+      ],
+      "right": [
+        "-17",
+        "3.14",
+        "True"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is an integer data type?",
+      "a": "A whole number, positive or negative, with no fractional part."
+    },
+    {
+      "q": "What is a real (float) data type?",
+      "a": "A number that can have a decimal (fractional) part, such as 3.14 or -0.5."
+    },
+    {
+      "q": "What two values can a Boolean variable hold?",
+      "a": "True or False."
+    },
+    {
+      "q": "What is the difference between a character and a string?",
+      "a": "A character is a single symbol; a string is a sequence of zero or more characters."
+    },
+    {
+      "q": "How many binary bits does one hexadecimal digit represent?",
+      "a": "Four bits (one nibble)."
+    },
+    {
+      "q": "What is a nibble in binary terms?",
+      "a": "A group of four binary bits, equivalent to one hexadecimal digit."
+    },
+    {
+      "q": "Convert denary 45 to 8-bit binary.",
+      "a": "00101101"
+    },
+    {
+      "q": "What is the hexadecimal value of binary 10110100?",
+      "a": "B4"
+    },
+    {
+      "q": "Why do programmers use hexadecimal instead of writing raw binary?",
+      "a": "Hex is much shorter — two hex digits replace eight binary bits, reducing errors."
+    },
+    {
+      "q": "Which base does the denary number system use?",
+      "a": "Base 10 (digits 0 to 9)."
+    },
+    {
+      "q": "What digits does hexadecimal use beyond 9?",
+      "a": "The letters A to F, representing values 10 to 15."
+    },
+    {
+      "q": "The hex digit F has the denary value ___.",
+      "a": "15"
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "data type",
+      "definition": "A classification that tells a computer what kind of value a variable holds and how to store or process it."
+    },
+    {
+      "term": "binary",
+      "definition": "The base-2 number system, using only the digits 0 and 1, which maps directly to the on/off states of electronic circuits."
+    },
+    {
+      "term": "hexadecimal",
+      "definition": "The base-16 number system using digits 0-9 and letters A-F, used as a compact shorthand for binary."
+    },
+    {
+      "term": "nibble",
+      "definition": "A group of four binary bits, equivalent to one hexadecimal digit."
+    }
+  ],
+  "hero_keywords": [
+    "binary code computer screen",
+    "programming data types",
+    "computer science numbers"
+  ],
+  "hero_image_caption": "Binary and hexadecimal numbers form the foundation of digital data storage"
+}

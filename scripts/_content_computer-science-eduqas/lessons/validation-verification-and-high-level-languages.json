@@ -1,0 +1,154 @@
+{
+  "_lesson_id": "2ebd067a-8232-4a61-8729-4efc14c5be7e",
+  "_lesson_number": 5,
+  "_unit_slug": "algorithms-programming-software",
+  "_lesson_slug": "validation-verification-and-high-level-languages",
+  "description": "Why we validate and verify data, common techniques, and high vs low-level programming languages.",
+  "content_html": "<h2 data-narration-id=\"n1\">Data Quality in Programs</h2>\n<p data-narration-id=\"n2\">A program is only as good as the data it processes. If a user accidentally types their age as 300, or pastes an email address into a phone number field, the program can produce meaningless output or crash entirely. Two techniques guard against bad data: <dfn class=\"term\" data-def=\"A check performed by a program to ensure that data is reasonable, sensible, and in the correct format before it is accepted.\">validation</dfn> and <dfn class=\"term\" data-def=\"A process to ensure that data has been entered correctly, typically by checking for transcription errors such as double entry or proofreading.\">verification</dfn>. Students often confuse these two &mdash; understanding the distinction is worth marks every exam series.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n3\" data-revision-tip=\"Cover this and write one sentence distinguishing validation from verification. Can you give a real-world example of each?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p><strong>Validation</strong> checks that data is <em>sensible</em> &mdash; within expected bounds, correct format, the right type. A program does this automatically. <strong>Verification</strong> checks that data was <em>entered correctly</em> &mdash; that what the user typed matches what they intended. A human or a double-entry system does this.</p>\n</div>\n\n<h2 data-narration-id=\"n4\">Types of Validation Check</h2>\n<p data-narration-id=\"n5\">There are six main validation checks you need to know. Each one catches a different kind of invalid data:</p>\n\n<table data-narration-id=\"n6\">\n  <thead><tr><th>Validation check</th><th>What it tests</th><th>Example</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Range check</strong></td><td>Value falls within an allowed minimum and maximum</td><td>Age must be between 0 and 120</td></tr>\n    <tr><td><strong>Type check</strong></td><td>Data is of the correct data type</td><td>Phone number field must contain only digits</td></tr>\n    <tr><td><strong>Presence check</strong></td><td>A required field has not been left blank</td><td>Name field must not be empty</td></tr>\n    <tr><td><strong>Length check</strong></td><td>Input is not too short or too long</td><td>Password must be 8&ndash;20 characters</td></tr>\n    <tr><td><strong>Format check</strong></td><td>Input matches a required pattern or structure</td><td>Postcode must match the pattern XX00 0XX</td></tr>\n    <tr><td><strong>Check digit</strong></td><td>A calculated digit confirms the rest of the number is correct</td><td>ISBNs and barcodes use check digits</td></tr>\n  </tbody>\n</table>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Validation in Pseudocode: Range Check Example</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n7\">Below is a pseudocode routine that validates a student&rsquo;s percentage score. It combines a type check (implicit in <code>RECEIVE ... FROM (INTEGER)</code>) and a range check:</p>\n    <pre data-narration-id=\"n8\"><code>RECEIVE score FROM (INTEGER)\nWHILE score &lt; 0 OR score &gt; 100\n  OUTPUT &ldquo;Score must be between 0 and 100. Try again.&rdquo;\n  RECEIVE score FROM (INTEGER)\nEND WHILE\nOUTPUT &ldquo;Score accepted: &rdquo; &amp; score</code></pre>\n    <p data-narration-id=\"n9\">The WHILE loop keeps prompting until the score is valid. A single IF would only check once and could still accept invalid data on a subsequent entry.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n10\">Verification</h2>\n<p data-narration-id=\"n11\">Verification is about catching <strong>transcription errors</strong> &mdash; mistakes made while copying or typing data. A validated age of 23 might still be wrong if the user meant to type 32. There are two common verification techniques:</p>\n<p data-narration-id=\"n12\"><strong>Double entry:</strong> The user types the same data twice. The program compares both entries and only accepts them if they match. This is common for passwords and email addresses on registration forms.</p>\n<p data-narration-id=\"n13\"><strong>Proofreading:</strong> A human reads through entered data to check for errors. This is used in contexts where computer checking is impractical, such as checking a handwritten address against a database record.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n14\" data-revision-tip=\"Close this and explain in your own words: can validation catch a wrong-but-plausible value? Give an example to support your answer.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Validation cannot catch all errors. If a student&rsquo;s real age is 15 but they type 16, a range check (0&ndash;120) accepts 16 because it is within range and the correct type. Validation can only reject data that is clearly outside the rules &mdash; not data that is plausible but incorrect. Verification addresses this gap.</p>\n</div>\n\n<h2 data-narration-id=\"n15\">High-Level and Low-Level Languages</h2>\n<p data-narration-id=\"n16\">Every program written in a language such as Python must eventually be translated into the binary instructions that the processor understands. The level of a programming language describes how close it is to human language versus machine language.</p>\n<p data-narration-id=\"n17\">A <dfn class=\"term\" data-def=\"A programming language that is close to human language, with commands that resemble English words, and that is translated before or during execution.\">high-level language</dfn> (such as Python, Java or C++) is designed to be readable by people. It hides the underlying hardware detail &mdash; you do not need to know how the processor registers work to write a Python loop. High-level languages are portable: the same Python code can run on Windows, macOS and Linux with little or no modification.</p>\n<p data-narration-id=\"n18\">A <dfn class=\"term\" data-def=\"A programming language that is close to machine code or directly represents processor instructions, such as assembly language or machine code itself.\">low-level language</dfn> is closer to the hardware. <dfn class=\"term\" data-def=\"A low-level language that uses short mnemonic codes to represent processor instructions, translated to machine code by an assembler.\">Assembly language</dfn> uses short mnemonic codes (like <code>MOV</code>, <code>ADD</code>, <code>JMP</code>) for individual processor instructions. Machine code is the raw binary (0s and 1s) that the processor executes directly. Low-level languages give the programmer direct control over memory and processor behaviour &mdash; useful for device drivers, operating systems and embedded systems &mdash; but they are harder to write and not portable between different processor architectures.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Comparing High-Level and Low-Level Languages</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n19\">The table below summarises the key differences:</p>\n    <table>\n      <thead><tr><th>Feature</th><th>High-level language</th><th>Low-level language</th></tr></thead>\n      <tbody>\n        <tr><td>Readability</td><td>Easy &mdash; resembles English</td><td>Hard &mdash; cryptic mnemonics or binary</td></tr>\n        <tr><td>Portability</td><td>Runs on many platforms with little change</td><td>Tied to a specific processor architecture</td></tr>\n        <tr><td>Control over hardware</td><td>Abstract &mdash; hardware details are hidden</td><td>Direct control over memory and registers</td></tr>\n        <tr><td>Translation needed</td><td>Yes (compiler or interpreter)</td><td>Assembler for assembly language; machine code is already binary</td></tr>\n        <tr><td>Typical use</td><td>Web apps, data processing, games</td><td>Device drivers, OS kernels, embedded systems</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n20\">To run on a processor, every high-level program must be translated. A <strong>compiler</strong> translates the whole program at once; an <strong>interpreter</strong> translates and runs it line by line. An <strong>assembler</strong> translates assembly language into machine code. These translators are covered in detail in the next lesson.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n21\">The most common error on validation questions is confusing validation with verification &mdash; state clearly that validation checks <em>whether data is sensible</em>, while verification checks <em>whether it was entered correctly</em>. When asked to &ldquo;describe&rdquo; a validation check, name the check and give a specific example tied to the context in the question (for example, &ldquo;a range check would reject any age outside 0&ndash;120&rdquo;). For language questions, use the words &ldquo;portable&rdquo; and &ldquo;hardware control&rdquo; &mdash; they appear frequently in mark schemes.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n22\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n23\">Validation checks that data is sensible (range, type, presence, length, format, check digit); verification checks that data was entered correctly (double entry, proofreading) &mdash; they solve different problems.</li>\n  <li data-narration-id=\"n24\">High-level languages are readable and portable but need a translator; low-level languages give direct hardware control but are harder to write and not portable.</li>\n  <li data-narration-id=\"n25\">Assembly language uses mnemonics and is translated by an assembler; machine code is the raw binary the processor executes directly.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "A web form asks a user to enter their age. The age must be a whole number between 5 and 18. Which validation check would reject the value 200?\nA) Presence check\nB) Format check\nC) Length check\nD) Range check",
+      "type": "1 mark — Multiple Choice",
+      "marks": "D) Range check [1 mark]"
+    },
+    {
+      "text": "State the difference between validation and verification.",
+      "type": "2 marks — Define",
+      "marks": "Validation: checks that data is sensible / in the correct format / within expected bounds (done by the program) [1].\nVerification: checks that data was entered correctly / matches what was intended, e.g. double entry (done by a human or comparison system) [1]."
+    },
+    {
+      "text": "A student registers for a website. Describe two validation checks that could be applied to the password field, which must be 8 to 20 characters long and must not be empty.",
+      "type": "4 marks — Explain",
+      "marks": "Presence check: ensures the field is not left blank / rejects empty string [1 + 1 development].\nLength check: ensures the password is between 8 and 20 characters long / rejects passwords shorter than 8 or longer than 20 [1 + 1 development].\nMastering: Two distinct checks named and applied to the specific scenario.\nSecure: Two checks named, one applied to scenario.\nDeveloping: One check named and applied.\nEmerging: One check named only."
+    },
+    {
+      "text": "Write a pseudocode algorithm that asks the user to enter a month number (1 to 12). Keep asking until a valid number is entered, then output 'Valid month'.",
+      "type": "6 marks — Write an Algorithm in Pseudocode",
+      "marks": "Mastering: RECEIVE before loop, REPEAT...UNTIL or WHILE loop, correct condition (month < 1 OR month > 12), re-prompt inside loop, OUTPUT after loop — 5-6 marks.\nSecure: Logic correct but minor keyword issue — 3-4 marks.\nDeveloping: Loop present but condition or structure flawed — 2 marks.\nEmerging: Some keywords used — 1 mark.\nModel:\nRECEIVE month FROM (INTEGER)\nWHILE month < 1 OR month > 12\n  OUTPUT \"Enter a number between 1 and 12\"\n  RECEIVE month FROM (INTEGER)\nEND WHILE\nOUTPUT \"Valid month\""
+    },
+    {
+      "text": "Explain two advantages of using a high-level programming language over assembly language when developing a payroll application.",
+      "type": "4 marks — Explain",
+      "marks": "Up to 2 marks per advantage:\n- Readability: high-level code resembles English / easier for other programmers to maintain / faster to write and debug [1 + 1].\n- Portability: the same code can run on Windows, Mac and Linux with little modification / assembly code is tied to a specific processor architecture [1 + 1].\n- Productivity: high-level abstractions (e.g. built-in string operations, libraries) mean less code to write for the same task [1 + 1].\nMastering: Two distinct advantages, each developed with a contrast to assembly.\nSecure: Two advantages, one developed.\nDeveloping: One developed advantage.\nEmerging: One simple valid point."
+    },
+    {
+      "text": "A school database system is used to store student records. Discuss the importance of using both validation and verification to maintain data quality in the system.",
+      "type": "8 marks — Discuss Impacts",
+      "marks": "Mastering: Explains validation (at least two named checks applied to student records, e.g. range check on year group, presence check on name) AND verification (double entry for password or email; proofreading for imported records); acknowledges limitation of validation (cannot catch plausible-but-wrong data like a wrong year group); shows understanding that both are needed together; reaches a justified conclusion about combined use.\nSecure: Both techniques explained with examples from the context; one limitation acknowledged.\nDeveloping: Both techniques described without scenario application, or one technique well developed.\nEmerging: One technique identified."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "A user enters the value 'hello' into a field that should contain an integer. Which validation check would reject this input?",
+      "options": ["Range check", "Presence check", "Type check", "Length check"],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which of the following is an example of verification rather than validation?",
+      "options": [
+        "Checking that an age is between 0 and 120",
+        "Checking that a required field is not blank",
+        "Asking the user to type their email address twice and comparing both entries",
+        "Checking that a postcode matches the correct format"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A _____ check confirms that a value falls within an allowed minimum and maximum, such as a score between 0 and 100.",
+      "options": ["format", "type", "range", "presence"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "High-level programming languages are said to be _____ because the same code can run on different platforms with little or no modification.",
+      "options": ["efficient", "portable", "compiled", "sequential"],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each validation check to the type of error it catches:",
+      "left": ["Presence check", "Check digit", "Format check"],
+      "right": ["Input does not match a required pattern such as a postcode", "A required field has been left empty", "A barcode or ISBN number contains a transcription error"],
+      "order": [1, 2, 0]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is the purpose of validation in a program?",
+      "a": "To check that data entered is sensible, reasonable, and in the correct format."
+    },
+    {
+      "q": "What is the purpose of verification?",
+      "a": "To check that data was entered correctly, catching transcription errors."
+    },
+    {
+      "q": "What does a range check do?",
+      "a": "It confirms a value falls within an allowed minimum and maximum."
+    },
+    {
+      "q": "What does a presence check do?",
+      "a": "It confirms a required field has not been left blank."
+    },
+    {
+      "q": "What does a type check do?",
+      "a": "It confirms that the data entered is of the correct data type."
+    },
+    {
+      "q": "What does a length check do?",
+      "a": "It confirms the input is not too short or too long."
+    },
+    {
+      "q": "What does a format check do?",
+      "a": "It confirms input matches a required pattern or structure, such as a postcode."
+    },
+    {
+      "q": "What is a check digit used for?",
+      "a": "A calculated digit that confirms the rest of a number (e.g. a barcode) is correct."
+    },
+    {
+      "q": "What is double-entry verification?",
+      "a": "The user types the same data twice; the program only accepts it if both entries match."
+    },
+    {
+      "q": "Why can validation not catch all errors?",
+      "a": "Because a value may be within the allowed range but still wrong (e.g. entering 16 when the true age is 15)."
+    },
+    {
+      "q": "What is a high-level programming language?",
+      "a": "A language close to human language, hiding hardware detail, that must be translated before running."
+    },
+    {
+      "q": "What is assembly language?",
+      "a": "A low-level language using short mnemonic codes for processor instructions, translated by an assembler."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "validation",
+      "definition": "A check performed by a program to ensure that data is reasonable, sensible, and in the correct format before it is accepted."
+    },
+    {
+      "term": "verification",
+      "definition": "A process to ensure that data has been entered correctly, typically by checking for transcription errors such as double entry or proofreading."
+    },
+    {
+      "term": "high-level language",
+      "definition": "A programming language that is close to human language, with commands that resemble English words, and that is translated before or during execution."
+    },
+    {
+      "term": "low-level language",
+      "definition": "A programming language that is close to machine code or directly represents processor instructions, such as assembly language or machine code itself."
+    },
+    {
+      "term": "assembly language",
+      "definition": "A low-level language that uses short mnemonic codes to represent processor instructions, translated to machine code by an assembler."
+    }
+  ],
+  "hero_keywords": ["data entry form validation computer", "programming language code screen", "software security data quality"],
+  "hero_image_caption": "Data entry form on screen illustrating input validation and error checking"
+}

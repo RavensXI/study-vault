@@ -1,0 +1,145 @@
+{
+  "_lesson_id": "627db373-5629-4f40-b96d-20355c4a8d29",
+  "_lesson_number": 6,
+  "_unit_slug": "algorithms-programming-software",
+  "_lesson_slug": "ide-tools-translators-and-errors",
+  "description": "What an IDE provides, the role of compilers, interpreters and assemblers, and types of programming error.",
+  "content_html": "<h2 data-narration-id=\"n1\">The Integrated Development Environment</h2>\n<p data-narration-id=\"n2\">Professional programmers do not write code in a plain text editor. They use an <dfn class=\"term\" data-def=\"Software that combines a code editor, debugger, error checker and other tools into one application to help programmers write, test and fix programs.\">integrated development environment (IDE)</dfn>. An IDE brings together all the tools needed to write, run, test and debug a program in a single interface. Understanding what an IDE provides &mdash; and why each tool matters &mdash; is a key topic in your exam.</p>\n\n<h2 data-narration-id=\"n3\">Tools in an IDE</h2>\n<p data-narration-id=\"n4\">IDEs typically include the following tools. You need to know what each one does:</p>\n\n<table data-narration-id=\"n5\">\n  <thead><tr><th>Tool</th><th>What it does</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Code editor</strong></td><td>Where code is typed; usually provides syntax highlighting and auto-completion to reduce errors</td></tr>\n    <tr><td><strong>Syntax error detection</strong></td><td>Highlights invalid syntax in real time (e.g. a missing colon in Python) before the program is run</td></tr>\n    <tr><td><strong>Debugger</strong></td><td>Steps through the program one line at a time so the programmer can see exactly what each instruction does</td></tr>\n    <tr><td><strong>Breakpoint</strong></td><td>A marker placed on a line of code; the debugger pauses execution at that point so the programmer can inspect variable values</td></tr>\n    <tr><td><strong>Variable watch</strong></td><td>Displays the current value of selected variables as the program runs step by step &mdash; essential for spotting logic errors</td></tr>\n    <tr><td><strong>Memory inspector</strong></td><td>Shows what is stored in memory at runtime; useful for finding memory leaks or unexpected values in low-level work</td></tr>\n  </tbody>\n</table>\n\n<div class=\"key-fact\" data-narration-id=\"n6\" data-revision-tip=\"Cover the table and list four IDE tools from memory. For each one, write what it does in one sentence.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A breakpoint pauses program execution at a specific line; the variable watch then shows the current value of each variable at that point. Together these are the most powerful IDE debugging tools &mdash; they allow a programmer to inspect the program&rsquo;s internal state at any moment.</p>\n</div>\n\n<h2 data-narration-id=\"n7\">Translators: Compiler, Interpreter and Assembler</h2>\n<p data-narration-id=\"n8\">Every high-level or assembly language program must be translated into machine code before the processor can run it. There are three types of translator, each with a different method:</p>\n<p data-narration-id=\"n9\">A <dfn class=\"term\" data-def=\"A translator that converts an entire high-level program into machine code in one step before the program runs; the resulting executable does not need the compiler to run again.\">compiler</dfn> reads the entire source code, checks it for errors, and produces a standalone machine code file (an executable). Once compiled, the program can run without the compiler &mdash; and typically runs faster because translation is already done. Compilation errors are reported all at once after the whole program has been analysed.</p>\n<p data-narration-id=\"n10\">An <dfn class=\"term\" data-def=\"A translator that converts and executes a high-level program one line at a time; the source code must be present every time the program runs.\">interpreter</dfn> reads and executes the program one line at a time. Each line is translated then immediately run. If an error is found, execution stops at that line &mdash; which makes interpreters useful for debugging, because the programmer sees exactly which line caused the problem. However, interpreted programs run more slowly because translation happens every time.</p>\n<p data-narration-id=\"n11\">An <dfn class=\"term\" data-def=\"A translator that converts assembly language mnemonics into machine code, one instruction at a time.\">assembler</dfn> converts assembly language into machine code. Unlike a compiler or interpreter, an assembler works with low-level mnemonics rather than human-readable statements. One assembly instruction translates to one (or a small number of) machine code instructions.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Compiler vs Interpreter: Side-by-Side Comparison</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <table data-narration-id=\"n12\">\n      <thead><tr><th>Feature</th><th>Compiler</th><th>Interpreter</th></tr></thead>\n      <tbody>\n        <tr><td>Translates</td><td>Whole program at once</td><td>One line at a time</td></tr>\n        <tr><td>Output</td><td>A standalone executable file</td><td>No output file &mdash; runs directly</td></tr>\n        <tr><td>Error reporting</td><td>All errors after full translation</td><td>Stops at the first error found</td></tr>\n        <tr><td>Execution speed</td><td>Faster (already machine code)</td><td>Slower (translating at runtime)</td></tr>\n        <tr><td>Source code needed at runtime?</td><td>No</td><td>Yes</td></tr>\n        <tr><td>Typical use</td><td>C, C++ &mdash; final software release</td><td>Python &mdash; development and scripting</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n13\">Python uses an interpreter by default, which is why running a Python program always requires Python to be installed on the machine.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n14\">Compilation Stages</h2>\n<p data-narration-id=\"n15\">A compiler does not translate code in one magic step. It passes the source code through several distinct stages, each preparing it for the next:</p>\n\n<table data-narration-id=\"n16\">\n  <thead><tr><th>Stage</th><th>What happens</th></tr></thead>\n  <tbody>\n    <tr><td><strong>Lexical analysis</strong></td><td>Source code is broken into tokens (keywords, identifiers, operators). Comments and whitespace are removed.</td></tr>\n    <tr><td><strong>Syntax analysis</strong></td><td>Tokens are checked against the grammar rules of the language; a parse tree is built. Syntax errors are reported here.</td></tr>\n    <tr><td><strong>Semantic analysis</strong></td><td>The parse tree is checked for meaning: are variables declared before use? Do data types match? Semantic errors are caught here.</td></tr>\n    <tr><td><strong>Code generation</strong></td><td>The parse tree is translated into intermediate or machine code.</td></tr>\n    <tr><td><strong>Code optimisation</strong></td><td>The generated code is improved to run faster or use less memory, without changing what it does.</td></tr>\n  </tbody>\n</table>\n\n<div class=\"key-fact\" data-narration-id=\"n17\" data-revision-tip=\"Close this and list the five compilation stages in order from memory. Write one word to describe what each stage does.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The five compilation stages in order are: <strong>lexical analysis</strong> (tokenise), <strong>syntax analysis</strong> (grammar check), <strong>semantic analysis</strong> (meaning check), <strong>code generation</strong> (translate), and <strong>code optimisation</strong> (improve). Each stage must succeed for the next to begin.</p>\n</div>\n\n<h2 data-narration-id=\"n18\">Types of Programming Error</h2>\n<p data-narration-id=\"n19\">Errors in programs are classified by when and how they occur. Your exam includes several specific error types &mdash; know the definition and an example for each.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Error Types: Definitions and Examples</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n20\"><strong>Syntactical (syntax) error:</strong> The code breaks the grammar rules of the language. The translator cannot even parse the code. Example: missing a colon at the end of a Python <code>if</code> statement.</p>\n    <p data-narration-id=\"n21\"><strong>Logical error:</strong> The code runs without crashing but produces the wrong result. The programmer&rsquo;s reasoning is flawed. Example: writing <code>SET total = total - item</code> when addition was intended. Logic errors are the hardest to find because the program appears to work.</p>\n    <p data-narration-id=\"n22\"><strong>Runtime error:</strong> The code is syntactically and logically correct but something goes wrong during execution, causing the program to crash. Example: dividing by zero, or trying to open a file that does not exist.</p>\n    <p data-narration-id=\"n23\"><strong>Linking error:</strong> The program references an external library or module that cannot be found or does not match. Example: calling a function from a library that has not been installed or imported correctly.</p>\n    <p data-narration-id=\"n24\"><strong>Rounding error:</strong> A calculation loses precision because floating-point numbers cannot represent all decimal values exactly in binary. Example: in Python, <code>0.1 + 0.2</code> does not equal exactly <code>0.3</code> due to binary floating-point representation.</p>\n    <p data-narration-id=\"n25\"><strong>Truncation error:</strong> A number is shortened (truncated) rather than rounded, losing information beyond a certain point. Example: storing the result 7.9 as an integer gives 7, not 8 &mdash; the fractional part is discarded, not rounded.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n26\">In questions about translators, make an explicit contrast between compilers and interpreters &mdash; &ldquo;unlike a compiler, which translates the whole program before it runs, an interpreter translates and executes one line at a time.&rdquo; For compilation stages, give them in order: lexical &rarr; syntax &rarr; semantic &rarr; code generation &rarr; optimisation. For error types, the distinction between a runtime error (crashes during execution) and a logical error (wrong output, no crash) is a very common exam question &mdash; prepare a concrete example of each.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n27\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n28\">An IDE provides a code editor, syntax error detection, debugger, breakpoints, variable watch and memory inspector &mdash; all in one application to speed up development and testing.</li>\n  <li data-narration-id=\"n29\">A compiler translates the whole program at once; an interpreter works line by line. An assembler converts assembly language to machine code. The five compilation stages are: lexical analysis, syntax analysis, semantic analysis, code generation, optimisation.</li>\n  <li data-narration-id=\"n30\">Programming errors include syntactical (grammar), logical (wrong result), runtime (crash during execution), linking (missing library), rounding (floating-point imprecision) and truncation (fractional part discarded).</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which IDE tool pauses program execution at a specific line so the programmer can inspect variable values?\nA) Syntax error detection\nB) Memory inspector\nC) Breakpoint\nD) Code editor",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) Breakpoint [1 mark]"
+    },
+    {
+      "text": "State the difference between a compiler and an interpreter.",
+      "type": "2 marks — Define",
+      "marks": "Compiler: translates the entire program at once / produces a standalone executable [1].\nInterpreter: translates and executes the program one line at a time / requires source code at runtime [1]."
+    },
+    {
+      "text": "A student writes the following Python code:\n\nx = 10\ny = 0\nprint(x / y)\n\nIdentify the type of error this will produce and explain why.",
+      "type": "4 marks — Explain",
+      "marks": "Runtime error [1] because the code is syntactically correct and will pass translation [1], but dividing by zero causes the program to crash during execution [1]. A syntax or logic error would not apply here since the grammar is valid and the logic of dividing x by y is what was intended [1].\nMastering: Correct error type, explained with both why it is not syntax and why it occurs at runtime.\nSecure: Correct error type with one valid reason.\nDeveloping: Correct error type without explanation.\nEmerging: Partially correct."
+    },
+    {
+      "text": "Describe what happens during the lexical analysis and syntax analysis stages of compilation.",
+      "type": "3 marks — Describe",
+      "marks": "Lexical analysis: source code is broken into tokens (keywords, identifiers, operators) [1]; comments and whitespace are removed [1].\nSyntax analysis: tokens are checked against the grammar rules of the language [1]; a parse tree is built / syntax errors are identified and reported [1].\nAward up to 3 marks from the four marking points above."
+    },
+    {
+      "text": "Explain two advantages of using an IDE compared to a plain text editor when writing a program.",
+      "type": "4 marks — Explain",
+      "marks": "Up to 2 marks per advantage:\n- Syntax error detection highlights mistakes in real time / before running, saving time finding typos [1 + 1].\n- Debugger and breakpoints allow step-by-step execution / makes finding logical and runtime errors much faster than reading code manually [1 + 1].\n- Variable watch shows values at each step / removes need to add temporary print statements to inspect variables [1 + 1].\nMastering: Two distinct advantages, each developed.\nSecure: Two advantages, one developed.\nDeveloping: One developed advantage.\nEmerging: One simple relevant point."
+    },
+    {
+      "text": "Compare how a compiler and an interpreter handle errors. Discuss which approach is more useful when a programmer is still developing and testing their code.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Explicit contrast of error handling (compiler reports all errors after full translation; interpreter stops at the first error, identifying the exact line); argues interpreter is more useful during development (immediate feedback, easier to locate the specific error line, no recompile step); acknowledges compiler advantage for final release (faster execution, no source code needed); justified conclusion — 5-6 marks.\nSecure: One contrast and one argument for interpreter advantage, some development — 3-4 marks.\nDeveloping: Correct description of one translator's error handling — 2 marks.\nEmerging: A relevant point about one translator — 1 mark."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which compilation stage checks that tokens follow the grammar rules of the programming language?",
+      "options": ["Lexical analysis", "Code generation", "Semantic analysis", "Syntax analysis"],
+      "correct": 3
+    },
+    {
+      "type": "mcq",
+      "q": "A program runs but gives the wrong answer. No error message appears. What type of error is this?",
+      "options": ["Syntactical error", "Runtime error", "Logical error", "Linking error"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "An interpreter translates and executes a program _____ at a time, stopping if an error is encountered.",
+      "options": ["one module", "all at once", "one line", "one function"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A _____ error occurs when a program crashes during execution, such as when it tries to divide by zero.",
+      "options": ["logical", "syntactical", "linking", "runtime"],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each term to its correct description:",
+      "left": ["Breakpoint", "Lexical analysis", "Truncation error"],
+      "right": ["Fractional part of a number is discarded, losing information", "A marker that pauses execution so variables can be inspected", "First compilation stage: source code broken into tokens"],
+      "order": [1, 2, 0]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is an IDE?",
+      "a": "Software combining a code editor, debugger and other tools into one application for writing and testing programs."
+    },
+    {
+      "q": "What does a breakpoint do in an IDE?",
+      "a": "Pauses program execution at a specific line so the programmer can inspect variable values."
+    },
+    {
+      "q": "What does the variable watch tool show in an IDE?",
+      "a": "The current value of selected variables as the program runs step by step."
+    },
+    {
+      "q": "How does a compiler differ from an interpreter in the way it translates code?",
+      "a": "A compiler translates the whole program at once; an interpreter translates and runs it one line at a time."
+    },
+    {
+      "q": "Does a compiled program need the compiler to run again after compilation?",
+      "a": "No — it produces a standalone executable that runs without the compiler."
+    },
+    {
+      "q": "What does an assembler do?",
+      "a": "It translates assembly language mnemonics into machine code."
+    },
+    {
+      "q": "What is the first stage of compilation?",
+      "a": "Lexical analysis — source code is broken into tokens and whitespace/comments are removed."
+    },
+    {
+      "q": "Which compilation stage catches errors such as using a variable before it is declared?",
+      "a": "Semantic analysis — it checks the meaning and consistency of the code."
+    },
+    {
+      "q": "What is a syntactical error?",
+      "a": "An error where code breaks the grammar rules of the language, preventing translation."
+    },
+    {
+      "q": "What is a logical error?",
+      "a": "An error where the program runs without crashing but produces the wrong result."
+    },
+    {
+      "q": "What is the difference between a rounding error and a truncation error?",
+      "a": "Rounding loses precision due to floating-point limits; truncation discards the fractional part entirely."
+    },
+    {
+      "q": "What is a runtime error?",
+      "a": "An error that causes a program to crash during execution, such as dividing by zero."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "integrated development environment (IDE)",
+      "definition": "Software that combines a code editor, debugger, error checker and other tools into one application to help programmers write, test and fix programs."
+    },
+    {
+      "term": "compiler",
+      "definition": "A translator that converts an entire high-level program into machine code in one step before the program runs; the resulting executable does not need the compiler to run again."
+    },
+    {
+      "term": "interpreter",
+      "definition": "A translator that converts and executes a high-level program one line at a time; the source code must be present every time the program runs."
+    },
+    {
+      "term": "assembler",
+      "definition": "A translator that converts assembly language mnemonics into machine code, one instruction at a time."
+    }
+  ],
+  "hero_keywords": ["integrated development environment IDE screen", "programming debugger breakpoint code", "software compiler code editor"],
+  "hero_image_caption": "An IDE debugger showing breakpoints and variable values during program execution"
+}

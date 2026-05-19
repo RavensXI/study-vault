@@ -1,0 +1,153 @@
+{
+  "_lesson_id": "8b88e85a-490f-4cd0-a423-4f23a65b7475",
+  "_lesson_number": 6,
+  "_unit_slug": "data-representation-storage",
+  "_lesson_slug": "storage-units-capacity-and-compression",
+  "description": "Bit through petabyte (base-2), capacity calculation, lossy vs lossless compression and ratios.",
+  "content_html": "<h2 data-narration-id=\"n1\">Units of Digital Storage</h2>\n<p data-narration-id=\"n2\">Every piece of data in a computer is ultimately made of <dfn class=\"term\" data-def=\"The smallest unit of digital data, holding a single binary value: 0 or 1.\">bits</dfn>. Bits are grouped into larger units so that storage capacity can be expressed at a human-readable scale. Your exam uses <strong>base-2 (binary) prefixes</strong>, which are defined in powers of 2, not powers of 10. This distinction matters: answers using base-10 values will lose marks in storage calculation questions.</p>\n\n<table data-narration-id=\"n3\">\n  <caption>Storage units &mdash; base-2 (binary) prefix definitions</caption>\n  <thead><tr><th>Unit</th><th>Abbreviation</th><th>Exact value</th></tr></thead>\n  <tbody>\n    <tr><td>Bit</td><td>b</td><td>1 binary digit (0 or 1)</td></tr>\n    <tr><td>Nibble</td><td>&mdash;</td><td>4 bits = 1 hex digit</td></tr>\n    <tr><td>Byte</td><td>B</td><td>8 bits</td></tr>\n    <tr><td>Kibibyte</td><td>KiB</td><td>1024 bytes = \\(2^{10}\\) bytes</td></tr>\n    <tr><td>Mebibyte</td><td>MiB</td><td>1024 KiB = \\(2^{20}\\) bytes</td></tr>\n    <tr><td>Gibibyte</td><td>GiB</td><td>1024 MiB = \\(2^{30}\\) bytes</td></tr>\n    <tr><td>Tebibyte</td><td>TiB</td><td>1024 GiB = \\(2^{40}\\) bytes</td></tr>\n    <tr><td>Pebibyte</td><td>PiB</td><td>1024 TiB = \\(2^{50}\\) bytes</td></tr>\n  </tbody>\n</table>\n\n<p data-narration-id=\"n4\">In everyday consumer products, manufacturers often use the base-10 prefix KB (1000 bytes), MB (1,000,000 bytes), and so on &mdash; this is why a &ldquo;500 GB&rdquo; hard drive appears as around 465 GiB when formatted. Your exam uses the base-2 definitions: <strong>1 KiB = 1024 bytes, 1 MiB = 1024 KiB</strong> etc. Always use these in calculations.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Without looking, write the sequence: bit, nibble, byte, KiB, MiB, GiB, TiB, PiB. State how many bytes each step represents relative to the one before it.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Each step up the base-2 prefix scale multiplies by <strong>1024</strong>: 1 KiB = 1024 B, 1 MiB = 1024 KiB, 1 GiB = 1024 MiB, and so on. A <dfn class=\"term\" data-def=\"A group of four binary bits, equal to one hexadecimal digit, and half a byte.\">nibble</dfn> is 4 bits (half a byte) and is useful because it matches exactly one hexadecimal digit.</p>\n</div>\n\n<h2 data-narration-id=\"n6\">Calculating Storage Capacity</h2>\n<p data-narration-id=\"n7\">Storage capacity questions often involve converting between units or working out how many files fit in a given space. The general method is to express both the capacity and the file size in the same unit, then divide. Always work in base-2 (multiply or divide by 1024 at each prefix step).</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: How Many Files Fit?</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">A USB drive has a capacity of 8 GiB. Each audio file has an uncompressed size of 40 MiB. How many files fit on the drive?</p>\n    <p data-narration-id=\"n9\"><strong>Step 1:</strong> Convert the drive capacity to MiB: 8 GiB &times; 1024 = 8192 MiB.</p>\n    <p data-narration-id=\"n10\"><strong>Step 2:</strong> Divide: 8192 &divide; 40 = 204.8, so <strong>204 files</strong> fit (round down &mdash; you can&rsquo;t store a partial file).</p>\n    <p data-narration-id=\"n11\">If the same files were compressed to 4 MiB each (10:1 compression): 8192 &divide; 4 = 2048 files. Compression allows ten times as many files on the same drive.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n12\">What Is Compression?</h2>\n<p data-narration-id=\"n13\"><dfn class=\"term\" data-def=\"The process of encoding data using fewer bits than the original representation, reducing file size for storage or transmission.\">Compression</dfn> reduces file size by encoding data more efficiently. There are two fundamentally different types: <strong>lossy</strong> and <strong>lossless</strong>. The right choice depends on whether the exact original data must be recovered.</p>\n\n<h2 data-narration-id=\"n14\">Lossy Compression</h2>\n<p data-narration-id=\"n15\"><dfn class=\"term\" data-def=\"A compression method that permanently removes some data to achieve a smaller file size; the original cannot be perfectly reconstructed.\">Lossy compression</dfn> permanently discards some data to achieve a much smaller file. The algorithm exploits limits of human perception: it removes detail that the eye or ear is unlikely to notice. Common lossy formats are <strong>JPEG</strong> (images) and <strong>MP3</strong> (audio).</p>\n<p data-narration-id=\"n16\">A JPEG might store a photograph at one-tenth the size of an uncompressed bitmap by discarding subtle colour variations in smooth gradients. An MP3 removes audio frequencies below the threshold of human hearing and reduces detail in frequencies masked by louder sounds. The reduction in quality is &ldquo;lossy&rdquo; because you can never recover the removed data &mdash; each time a lossy file is re-compressed, more data is lost.</p>\n\n<h2 data-narration-id=\"n17\">Lossless Compression</h2>\n<p data-narration-id=\"n18\"><dfn class=\"term\" data-def=\"A compression method that reduces file size without discarding any data; the original can be perfectly reconstructed from the compressed file.\">Lossless compression</dfn> reduces file size without losing any information. When the file is decompressed, the output is <em>bit-for-bit identical</em> to the original. Common lossless formats include <strong>PNG</strong> (images) and <strong>FLAC</strong> (audio), as well as <strong>ZIP</strong> for general data.</p>\n<p data-narration-id=\"n19\">A simple lossless technique is <strong>run-length encoding (RLE)</strong>: instead of storing &ldquo;AAAAAABBB&rdquo; as 9 separate characters, RLE stores &ldquo;6A3B&rdquo; (6 copies of A, then 3 copies of B). The compressed version is shorter, and the original can be reconstructed exactly. Lossless compression works best when there is a lot of repeated or predictable data.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n20\" data-revision-tip=\"Cover this and give one example each of a lossy and a lossless image format. Then explain when you would choose each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Use <strong>lossy compression</strong> (JPEG, MP3) when a small file size matters more than perfect quality &mdash; for example, streaming video, social media images, downloaded music. Use <strong>lossless compression</strong> (PNG, FLAC, ZIP) when the original data must be reconstructed exactly &mdash; for example, text files, medical images, software executables, or master audio files. Using lossy compression on a text file would corrupt the text.</p>\n</div>\n\n<h2 data-narration-id=\"n21\">Compression Ratio</h2>\n<p data-narration-id=\"n22\">The <dfn class=\"term\" data-def=\"A measure of how much a compression algorithm has reduced a file's size, calculated as original size divided by compressed size.\">compression ratio</dfn> expresses how much smaller a compressed file is compared to the original:</p>\n<p data-narration-id=\"n23\"><strong>Compression ratio = original size &divide; compressed size</strong></p>\n<p data-narration-id=\"n24\">A ratio of 4:1 means the compressed file is one-quarter the size of the original. For example, if a 20 MiB WAV audio file is compressed to a 2 MiB MP3, the compression ratio is 20 &divide; 2 = <strong>10:1</strong>. A higher ratio means greater size reduction, which usually also means greater quality loss for lossy formats.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Lossy vs Lossless: When to Choose Each</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <table data-narration-id=\"n25\">\n      <thead><tr><th>Feature</th><th>Lossy (JPEG, MP3)</th><th>Lossless (PNG, FLAC, ZIP)</th></tr></thead>\n      <tbody>\n        <tr><td>Data recovery</td><td>Cannot recover removed data</td><td>Identical to original on decompression</td></tr>\n        <tr><td>File size reduction</td><td>Very large (often 10:1 or more)</td><td>Moderate (typically 2:1 to 5:1)</td></tr>\n        <tr><td>Quality</td><td>Reduced; worsens with each re-compression</td><td>No quality loss</td></tr>\n        <tr><td>Use case</td><td>Streaming, social media, casual listening</td><td>Text, software, medical images, master files</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n26\">A key exam point: when comparing lossy and lossless, you must always state which data <em>can</em> or <em>cannot</em> be recovered. Simply saying &ldquo;lossy loses quality&rdquo; is not sufficient &mdash; explain that the discarded data is permanently removed and the original cannot be reconstructed.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n27\">For storage unit questions, remember: base-2 prefixes step up by &times;1024 each time, not &times;1000. In a compare question on lossy vs lossless, you need explicit contrasts &mdash; do not just list the features of each separately. State &ldquo;unlike lossy compression, which permanently discards data, lossless compression allows the original file to be reconstructed exactly.&rdquo; For compression ratio calculations, confirm your ratio makes sense: a ratio less than 1 would mean the &ldquo;compressed&rdquo; file is larger than the original, which is clearly wrong. Always double-check by multiplying the compressed size by the ratio to verify you get back the original size.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">Storage units use base-2 prefixes: 1 KiB = 1024 B, 1 MiB = 1024 KiB, 1 GiB = 1024 MiB. Each step multiplies by 1024, not 1000.</li>\n  <li data-narration-id=\"n30\">Lossy compression (JPEG, MP3) permanently removes data for large file size reductions; lossless compression (PNG, FLAC, ZIP) reduces size without losing any data, allowing perfect reconstruction.</li>\n  <li data-narration-id=\"n31\">Compression ratio = original size &divide; compressed size. A 10:1 ratio means the file is ten times smaller; higher ratios in lossy formats usually mean greater quality loss.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly defines 1 KiB in a base-2 (binary) prefix system?\nA) 1000 bytes\nB) 1024 bits\nC) 1024 bytes\nD) 1000 bits",
+      "type": "1 mark — Multiple Choice",
+      "marks": "C) 1024 bytes [1 mark]. This specification uses base-2 prefixes; 1 KiB = 2^10 = 1024 bytes."
+    },
+    {
+      "text": "State the difference between lossy and lossless compression.",
+      "type": "2 marks — Define",
+      "marks": "Lossy compression permanently removes some data to reduce file size and the original cannot be fully recovered [1]. Lossless compression reduces file size without losing any data, allowing the original to be reconstructed exactly [1]."
+    },
+    {
+      "text": "A 150 MiB video file is compressed to 15 MiB using lossy compression. Calculate the compression ratio.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "Compression ratio = original size ÷ compressed size [1 mark for formula]. 150 ÷ 15 = 10 [1 mark for calculation]. Compression ratio = 10:1 [1 mark for expressing as a ratio]."
+    },
+    {
+      "text": "A hard drive has a capacity of 2 TiB. Convert this to GiB.",
+      "type": "2 marks — Convert (Binary/Hex/Denary)",
+      "marks": "1 TiB = 1024 GiB [1 mark]. 2 TiB = 2 × 1024 = 2048 GiB [1 mark]."
+    },
+    {
+      "text": "Explain why lossy compression is used for MP3 audio files but lossless compression is used for ZIP archives.",
+      "type": "4 marks — Explain",
+      "marks": "Lossy compression discards some audio data that the ear is unlikely to notice (such as very high or very low frequencies, or quieter sounds masked by louder ones) [1], producing a much smaller file that is acceptable for casual listening [1]. A ZIP archive contains text, software or other data where every bit must be preserved exactly — removing any data would corrupt the file or make software fail to execute [1], so lossless compression is used to reduce size while guaranteeing that the original can be perfectly reconstructed [1]. Maximum 4 marks."
+    },
+    {
+      "text": "Compare lossy and lossless compression techniques. In your answer, refer to how each works, the compression ratios typically achieved, and suitable use cases for each.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Accurate explanation of how each works (lossy discards perceptually unimportant data; lossless encodes patterns more efficiently e.g. run-length encoding), explicit comparison of typical ratios (lossy often 10:1 or more; lossless typically 2:1 to 5:1), correct use cases contrasted (lossy for streaming/social media; lossless for documents/software/master files), and a justified conclusion about when each is preferable.\nSecure: Both techniques explained correctly, at least two explicit contrasts, suitable use cases given.\nDeveloping: Both techniques defined but comparison is implicit; use cases may be partially correct.\nEmerging: One technique described; limited or no comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "How many bytes are in 1 MiB using base-2 prefixes?",
+      "options": ["1,000,000", "1,024,000", "1,048,576", "1,000,024"],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "Which of the following is an example of a lossless compression format for images?",
+      "options": ["JPEG", "MP3", "PNG", "MPEG"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Lossy compression permanently _____ some data to achieve a smaller file size.",
+      "options": ["duplicates", "recovers", "encrypts", "removes"],
+      "correct": 3
+    },
+    {
+      "type": "fill",
+      "q": "Compression ratio is calculated as original size _____ compressed size.",
+      "options": ["plus", "minus", "multiplied by", "divided by"],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each storage unit to its base-2 value in bytes:",
+      "left": ["1 KiB", "1 MiB", "1 GiB"],
+      "right": ["1024 bytes", "1,048,576 bytes", "1,073,741,824 bytes"],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is a bit in digital storage?",
+      "a": "The smallest unit of digital data, holding a single binary value: 0 or 1."
+    },
+    {
+      "q": "How many bits are in a byte?",
+      "a": "8 bits."
+    },
+    {
+      "q": "How many bytes are in 1 KiB (base-2)?",
+      "a": "1024 bytes."
+    },
+    {
+      "q": "What is a nibble?",
+      "a": "4 bits (half a byte), equal to one hexadecimal digit."
+    },
+    {
+      "q": "What is compression?",
+      "a": "Encoding data using fewer bits than the original, reducing file size."
+    },
+    {
+      "q": "What is lossy compression?",
+      "a": "A method that permanently removes data to reduce file size; the original cannot be reconstructed."
+    },
+    {
+      "q": "Give one example each of a lossy and a lossless image format.",
+      "a": "Lossy: JPEG. Lossless: PNG."
+    },
+    {
+      "q": "What is lossless compression?",
+      "a": "A method that reduces file size without losing any data; the original can be reconstructed exactly."
+    },
+    {
+      "q": "How is compression ratio calculated?",
+      "a": "Original size divided by compressed size (e.g. 20 MiB / 2 MiB = 10:1)."
+    },
+    {
+      "q": "Why must ZIP archives use lossless rather than lossy compression?",
+      "a": "Any data loss would corrupt files or make software fail to execute."
+    },
+    {
+      "q": "Each step up the base-2 prefix scale multiplies by ___ .",
+      "a": "1024"
+    },
+    {
+      "q": "What is run-length encoding (RLE)?",
+      "a": "A lossless technique that stores repeated values as a count and a value, e.g. 6A instead of AAAAAA."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "bit",
+      "definition": "The smallest unit of digital data, holding a single binary value: 0 or 1."
+    },
+    {
+      "term": "nibble",
+      "definition": "A group of four binary bits, equal to one hexadecimal digit, and half a byte."
+    },
+    {
+      "term": "compression",
+      "definition": "The process of encoding data using fewer bits than the original representation, reducing file size for storage or transmission."
+    },
+    {
+      "term": "lossy compression",
+      "definition": "A compression method that permanently removes some data to achieve a smaller file size; the original cannot be perfectly reconstructed."
+    },
+    {
+      "term": "lossless compression",
+      "definition": "A compression method that reduces file size without discarding any data; the original can be perfectly reconstructed from the compressed file."
+    },
+    {
+      "term": "compression ratio",
+      "definition": "A measure of how much a compression algorithm has reduced a file's size, calculated as original size divided by compressed size."
+    }
+  ],
+  "hero_keywords": ["data storage hard drive technology", "digital file compression storage", "computer storage capacity"],
+  "hero_image_caption": "Data storage capacity is measured in base-2 units from bits to petabytes"
+}

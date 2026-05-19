@@ -1,0 +1,173 @@
+{
+  "_lesson_id": "4d63c289-3a51-4f71-bc00-4f19be514fd2",
+  "_lesson_number": 4,
+  "_unit_slug": "algorithms-programming-software",
+  "_lesson_slug": "sorting-bubble-and-merge",
+  "description": "How bubble sort and merge sort work, with worked traces and a note on relative efficiency.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Sorting Matters</h2>\n<p data-narration-id=\"n2\">Sorting is one of the most studied problems in computer science. A sorted list unlocks binary search, makes data easier to present to users, and is a prerequisite for many other algorithms. Your exam covers two sorting algorithms: <dfn class=\"term\" data-def=\"A sorting algorithm that repeatedly steps through a list, comparing adjacent items and swapping them if they are in the wrong order, until no swaps are needed.\">bubble sort</dfn> and <dfn class=\"term\" data-def=\"A sorting algorithm that uses divide-and-conquer: it splits the list in half repeatedly, sorts each half recursively, then merges the sorted halves back together.\">merge sort</dfn>. You need to trace both by hand and compare their efficiency.</p>\n\n<h2 data-narration-id=\"n3\">Bubble Sort</h2>\n<p data-narration-id=\"n4\">Bubble sort gets its name because larger values &ldquo;bubble&rdquo; towards the end of the list with each pass. In each pass, the algorithm compares pairs of adjacent items and swaps them if they are in the wrong order. After each pass, the largest unsorted item is guaranteed to be in its correct position at the end.</p>\n<p data-narration-id=\"n5\">Here is bubble sort in pseudocode:</p>\n<pre data-narration-id=\"n6\"><code>SET n = LENGTH(list)\nFOR pass = 1 TO n - 1\n  FOR i = 0 TO n - pass - 1\n    IF list[i] &gt; list[i + 1] THEN\n      SET temp = list[i]\n      SET list[i] = list[i + 1]\n      SET list[i + 1] = temp\n    END IF\n  NEXT i\nNEXT pass</code></pre>\n<p data-narration-id=\"n7\">Notice the three-variable swap using <code>temp</code>. This is the classic pattern: you cannot swap two values directly without a temporary variable, or one value overwrites the other before it is saved.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Trace: Bubble Sort</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n8\">List to sort: <code>[5, 3, 8, 1, 4]</code></p>\n    <p data-narration-id=\"n9\"><strong>Pass 1:</strong> Compare pairs left to right.</p>\n    <table>\n      <thead><tr><th>Comparison</th><th>Swap?</th><th>List after</th></tr></thead>\n      <tbody>\n        <tr><td>5 vs 3</td><td>Yes</td><td>[3, 5, 8, 1, 4]</td></tr>\n        <tr><td>5 vs 8</td><td>No</td><td>[3, 5, 8, 1, 4]</td></tr>\n        <tr><td>8 vs 1</td><td>Yes</td><td>[3, 5, 1, 8, 4]</td></tr>\n        <tr><td>8 vs 4</td><td>Yes</td><td>[3, 5, 1, 4, 8]</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n10\">After Pass 1: <code>[3, 5, 1, 4, <strong>8</strong>]</code> &mdash; 8 is now in its final position.</p>\n    <p data-narration-id=\"n11\"><strong>Pass 2:</strong> Only compare the first four items.</p>\n    <table>\n      <thead><tr><th>Comparison</th><th>Swap?</th><th>List after</th></tr></thead>\n      <tbody>\n        <tr><td>3 vs 5</td><td>No</td><td>[3, 5, 1, 4, 8]</td></tr>\n        <tr><td>5 vs 1</td><td>Yes</td><td>[3, 1, 5, 4, 8]</td></tr>\n        <tr><td>5 vs 4</td><td>Yes</td><td>[3, 1, 4, 5, 8]</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n12\">After Pass 2: <code>[3, 1, 4, <strong>5</strong>, <strong>8</strong>]</code>. Continue until no swaps occur in a pass.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n13\" data-revision-tip=\"Cover this and write down bubble sort's worst-case complexity. Then explain why it is called O(n squared) using the number of comparisons in each pass.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Bubble sort has a worst-case time complexity of O(n&sup2;): for a list of <em>n</em> items, it may need up to approximately n&sup2; comparisons. This makes it slow for large lists. The best case is O(n) when the list is already sorted (one pass with no swaps confirms it is sorted).</p>\n</div>\n\n<h2 data-narration-id=\"n14\">Merge Sort</h2>\n<p data-narration-id=\"n15\">Merge sort is a <dfn class=\"term\" data-def=\"An algorithm design strategy that solves a problem by splitting it into smaller sub-problems, solving each, then combining the results.\">divide-and-conquer</dfn> algorithm. It works in two distinct phases: first it splits the list into halves repeatedly until every sub-list has just one item, then it merges the sub-lists back together in sorted order. A single-item list is always sorted by definition, which is why splitting all the way down works.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Trace: Merge Sort (Split then Merge)</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n16\">List: <code>[5, 3, 8, 1]</code></p>\n    <p data-narration-id=\"n17\"><strong>Split phase:</strong></p>\n    <p data-narration-id=\"n18\">Stage 1: <code>[5, 3]</code> &nbsp;|&nbsp; <code>[8, 1]</code></p>\n    <p data-narration-id=\"n19\">Stage 2: <code>[5]</code> &nbsp;|&nbsp; <code>[3]</code> &nbsp;|&nbsp; <code>[8]</code> &nbsp;|&nbsp; <code>[1]</code></p>\n    <p data-narration-id=\"n20\"><strong>Merge phase</strong> (compare and combine in order):</p>\n    <p data-narration-id=\"n21\">Merge <code>[5]</code> and <code>[3]</code>: compare 5 and 3 &rarr; take 3 first &rarr; <code>[3, 5]</code></p>\n    <p data-narration-id=\"n22\">Merge <code>[8]</code> and <code>[1]</code>: compare 8 and 1 &rarr; take 1 first &rarr; <code>[1, 8]</code></p>\n    <p data-narration-id=\"n23\">Merge <code>[3, 5]</code> and <code>[1, 8]</code>:</p>\n    <table>\n      <thead><tr><th>Left pointer</th><th>Right pointer</th><th>Smaller taken</th><th>Output so far</th></tr></thead>\n      <tbody>\n        <tr><td>3</td><td>1</td><td>1 (right)</td><td>[1]</td></tr>\n        <tr><td>3</td><td>8</td><td>3 (left)</td><td>[1, 3]</td></tr>\n        <tr><td>5</td><td>8</td><td>5 (left)</td><td>[1, 3, 5]</td></tr>\n        <tr><td>&mdash;</td><td>8</td><td>8 (right)</td><td>[1, 3, 5, 8]</td></tr>\n      </tbody>\n    </table>\n    <p data-narration-id=\"n24\">Result: <code>[1, 3, 5, 8]</code> &mdash; fully sorted.</p>\n  </div></div>\n</div>\n\n<div class=\"key-fact\" data-narration-id=\"n25\" data-revision-tip=\"Without looking, name the two phases of merge sort and explain what happens in each. Can you say the complexity in Big-O notation?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Merge sort has a worst-case time complexity of O(n log n). It splits the list in log n levels and does n comparisons per merge level. This is significantly more efficient than bubble sort&rsquo;s O(n&sup2;) for large datasets, which is why merge sort is used in many real-world applications.</p>\n</div>\n\n<h2 data-narration-id=\"n26\">Comparing Bubble Sort and Merge Sort</h2>\n<p data-narration-id=\"n27\">In exam &ldquo;compare&rdquo; questions, do not just describe each algorithm separately &mdash; make explicit contrasts using &ldquo;unlike&rdquo; or &ldquo;whereas.&rdquo;</p>\n<table data-narration-id=\"n28\">\n  <thead><tr><th>Feature</th><th>Bubble sort</th><th>Merge sort</th></tr></thead>\n  <tbody>\n    <tr><td>Worst-case complexity</td><td>O(n&sup2;)</td><td>O(n log n)</td></tr>\n    <tr><td>Strategy</td><td>Repeatedly swap adjacent items</td><td>Divide and conquer: split then merge</td></tr>\n    <tr><td>Memory use</td><td>In-place (little extra memory)</td><td>Needs extra memory for merged sub-lists</td></tr>\n    <tr><td>Ease of implementation</td><td>Simple to write and understand</td><td>More complex, especially the merge step</td></tr>\n    <tr><td>Performance on small lists</td><td>Acceptable</td><td>Overhead of splitting may not be worth it</td></tr>\n    <tr><td>Performance on large lists</td><td>Very slow</td><td>Much faster</td></tr>\n  </tbody>\n</table>",
+  "exam_tip_html": "<p data-narration-id=\"n29\">Trace-table questions on sorting are a regular mark sink. For bubble sort, show every comparison and swap within each pass &mdash; do not skip to the end of a pass. For merge sort, show both the split phase (all the way down to single items) and the merge phase (each comparison that produces a merged output). State the complexity of each algorithm &mdash; bubble sort: O(n&sup2;), merge sort: O(n log n) &mdash; and link complexity to list size when answering &ldquo;which sort is more suitable?&rdquo; questions.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n30\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n31\">Bubble sort repeatedly swaps adjacent items in each pass; it is simple to implement but has worst-case O(n&sup2;) complexity, making it slow for large lists.</li>\n  <li data-narration-id=\"n32\">Merge sort splits the list into single items then merges them in sorted order; its O(n log n) complexity makes it much faster on large datasets, though it uses more memory.</li>\n  <li data-narration-id=\"n33\">For exam traces, show every intermediate state &mdash; one mark per correct row &mdash; and use explicit contrasting language when comparing the two algorithms.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which of the following correctly describes the worst-case time complexity of bubble sort?\nA) O(log n)\nB) O(n)\nC) O(n log n)\nD) O(n²)",
+      "type": "1 mark — Multiple Choice",
+      "marks": "D) O(n²) [1 mark]"
+    },
+    {
+      "text": "State the two phases of the merge sort algorithm.",
+      "type": "1 mark — State/Identify",
+      "marks": "Split (divide) phase [0.5] and merge (combine) phase [0.5]. Award 1 mark for both named. Accept 'divide and conquer' as an alternative description."
+    },
+    {
+      "text": "The following list is to be sorted using bubble sort:\n[7, 2, 9, 4, 6]\n\nShow the state of the list after each pass of bubble sort until it is fully sorted. Clearly indicate any swaps made.",
+      "type": "4 marks — Trace an Algorithm",
+      "marks": "Pass 1: [2, 7, 4, 6, 9] — 7 swaps with 2; 9 swaps with 4 and 6 [1]\nPass 2: [2, 4, 6, 7, 9] — 7 swaps with 4; 7 swaps with 6 [1]\nPass 3: [2, 4, 6, 7, 9] — no swaps, list is sorted [1]\nCorrect identification that the algorithm terminates after Pass 3 [1]\nMastering: All passes correct with swaps noted.\nSecure: Two passes correct.\nDeveloping: One pass correct.\nEmerging: Some evidence of comparing adjacent items."
+    },
+    {
+      "text": "Explain how the merge phase of merge sort works, using the example of merging [3, 7] and [1, 5] into a single sorted list.",
+      "type": "4 marks — Explain",
+      "marks": "Compare the first item of each sub-list [1] — take the smaller (1 from right) [1]. Compare again (3 vs 5) — take 3 [1]. Take 5 then 7 — result [1, 3, 5, 7] [1].\nMastering: Complete merge trace with comparison at each step.\nSecure: Three out of four comparison steps correct.\nDeveloping: Process described but trace incomplete.\nEmerging: Some reference to comparing items from two lists."
+    },
+    {
+      "text": "A programmer needs to sort a list of 1,000,000 student records. Write an algorithm in pseudocode for bubble sort. Then explain why merge sort would be a more appropriate choice for this task.",
+      "type": "6 marks — Write an Algorithm in Pseudocode",
+      "marks": "Pseudocode (3 marks): Outer FOR loop (pass = 1 TO n-1) [1], inner FOR loop (i = 0 TO n-pass-1) [1], IF comparison and three-step swap using temp [1].\nExplanation (3 marks): Bubble sort is O(n²) / very slow for 1 million records [1]; merge sort is O(n log n) / significantly faster for large datasets [1]; merge sort's extra memory cost is outweighed by its speed advantage at this scale [1].\nMastering: Correct pseudocode and well-reasoned comparison referencing complexity.\nSecure: Correct pseudocode and basic efficiency comparison.\nDeveloping: Pseudocode with errors, or explanation without pseudocode.\nEmerging: Some pseudocode keywords or some relevant comparison."
+    },
+    {
+      "text": "Compare bubble sort and merge sort in terms of efficiency and memory use. In your answer, refer to the complexity of each algorithm.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: At least two explicit contrasts (efficiency and memory), complexity stated for both (O(n²) vs O(n log n)), scenario discussed (large vs small lists), concluding judgement — 5-6 marks.\nSecure: Two contrasts with at least one complexity notation, some context — 3-4 marks.\nDeveloping: One contrast with complexity or two contrasts without — 2 marks.\nEmerging: One relevant point — 1 mark.\nPoints may include: bubble sort O(n²) vs merge sort O(n log n) for large lists; bubble sort is in-place (little extra memory) whereas merge sort needs extra space for merged sub-lists; bubble sort is simpler to implement; merge sort is faster in practice for large datasets."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What is the time complexity of merge sort in the worst case?",
+      "options": [
+        "O(n²)",
+        "O(n)",
+        "O(log n)",
+        "O(n log n)"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "mcq",
+      "q": "In bubble sort, what guarantees that after each pass the list makes progress towards being sorted?",
+      "options": [
+        "The smallest item moves to the front",
+        "The largest unsorted item ends up in its correct position",
+        "The list is split into two halves",
+        "Items are inserted into a new list in order"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "In bubble sort, a temporary variable called _____ is needed to swap two adjacent items without losing either value.",
+      "options": [
+        "buffer",
+        "count",
+        "temp",
+        "swap"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Merge sort uses a _____ strategy: it splits the list into smaller parts, sorts them, then combines the results.",
+      "options": [
+        "linear",
+        "sequential",
+        "brute-force",
+        "divide-and-conquer"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each description to the correct sorting algorithm:",
+      "left": [
+        "Swaps adjacent items in repeated passes",
+        "Splits lists then merges them in order",
+        "Worst-case O(n²)"
+      ],
+      "right": [
+        "Merge sort",
+        "Bubble sort",
+        "Bubble sort"
+      ],
+      "order": [
+        1,
+        0,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is bubble sort?",
+      "a": "An algorithm that repeatedly swaps adjacent items in the wrong order until no swaps are needed."
+    },
+    {
+      "q": "What is the worst-case time complexity of bubble sort?",
+      "a": "O(n²) — approximately n² comparisons for a list of n items."
+    },
+    {
+      "q": "What is the best-case complexity of bubble sort, and when does it occur?",
+      "a": "O(n) — when the list is already sorted (one pass with no swaps confirms this)."
+    },
+    {
+      "q": "Why is a temporary variable needed to swap two items in bubble sort?",
+      "a": "To avoid overwriting one value before it is saved — the temp variable holds one value during the swap."
+    },
+    {
+      "q": "What is merge sort?",
+      "a": "A divide-and-conquer algorithm that splits a list into single items then merges them back in sorted order."
+    },
+    {
+      "q": "What is the worst-case time complexity of merge sort?",
+      "a": "O(n log n)."
+    },
+    {
+      "q": "What are the two phases of merge sort?",
+      "a": "Split phase (divide into single items) and merge phase (combine in sorted order)."
+    },
+    {
+      "q": "Why is merge sort faster than bubble sort on large datasets?",
+      "a": "Merge sort is O(n log n) while bubble sort is O(n²) — the gap grows rapidly as n increases."
+    },
+    {
+      "q": "What extra resource does merge sort require that bubble sort does not?",
+      "a": "Extra memory to hold the merged sub-lists during the merge phase."
+    },
+    {
+      "q": "In the merge phase of merge sort, how is each merged sub-list built?",
+      "a": "By comparing the front items of two sorted sub-lists and always taking the smaller one first."
+    },
+    {
+      "q": "After Pass 1 of bubble sort on a list of n items, what is guaranteed about the last item?",
+      "a": "The largest item has bubbled to the final position and is correctly placed."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "bubble sort",
+      "definition": "A sorting algorithm that repeatedly steps through a list, comparing adjacent items and swapping them if they are in the wrong order, until no swaps are needed."
+    },
+    {
+      "term": "merge sort",
+      "definition": "A sorting algorithm that uses divide-and-conquer: it splits the list in half repeatedly, sorts each half, then merges the sorted halves back together."
+    },
+    {
+      "term": "divide-and-conquer",
+      "definition": "An algorithm design strategy that solves a problem by splitting it into smaller sub-problems, solving each, then combining the results."
+    }
+  ],
+  "hero_keywords": [
+    "data sorting algorithm visualization",
+    "computer science bubble sort",
+    "merge sort divide conquer"
+  ],
+  "hero_image_caption": "Visualising how sorting algorithms arrange data into the correct order"
+}

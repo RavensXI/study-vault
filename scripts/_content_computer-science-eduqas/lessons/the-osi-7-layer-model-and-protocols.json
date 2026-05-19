@@ -1,0 +1,185 @@
+{
+  "_lesson_id": "fe5cd683-9aed-4a47-9a74-13f3882b4873",
+  "_lesson_number": 3,
+  "_unit_slug": "networks-internet-cybersecurity",
+  "_lesson_slug": "the-osi-7-layer-model-and-protocols",
+  "description": "All 7 OSI layers explained — what each layer does and which protocols belong where.",
+  "content_html": "<h2 data-narration-id=\"n1\">Why Layered Models Exist</h2>\n<p data-narration-id=\"n2\">Sending data across a network involves dozens of different tasks: converting a file to electrical signals, addressing packets, establishing connections, encrypting data, and presenting information on screen. The <dfn class=\"term\" data-def=\"A conceptual framework developed by the International Organisation for Standardisation that divides network communication into seven distinct layers, each with a specific responsibility.\">OSI model</dfn> (Open Systems Interconnection model) organises these tasks into seven separate layers. Each layer has a clearly defined job and only needs to communicate with the layers directly above and below it. This makes networks easier to design, troubleshoot and develop: engineers can update one layer without rewriting the rest.</p>\n<p data-narration-id=\"n3\">The 2024 examiners&rsquo; report highlighted OSI layer descriptions as a weak area &mdash; students could name layers but not describe what each one does. This lesson focusses on function, not just naming. A common mnemonic for the layers from bottom to top: <strong>Please Do Not Throw Sausage Pizza Away</strong> (Physical, Data Link, Network, Transport, Session, Presentation, Application).</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Cover this and write the seven OSI layers in order from layer 1 to layer 7, then add one word describing what each layer is responsible for.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The seven OSI layers from bottom to top are: Physical (1), Data Link (2), Network (3), Transport (4), Session (5), Presentation (6), Application (7). The mnemonic &ldquo;Please Do Not Throw Sausage Pizza Away&rdquo; helps you recall the correct order.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Layer 1 &mdash; Physical</h2>\n<p data-narration-id=\"n6\">The <strong>Physical layer</strong> is responsible for transmitting raw <strong>bits</strong> (0s and 1s) over a physical medium &mdash; copper cable, fibre-optic cable or radio waves. It defines the electrical signals, voltages, connector types and timing used to represent binary data. The Physical layer has no concept of structure or meaning; it simply transmits and receives signals.</p>\n<p data-narration-id=\"n7\">Protocols and standards at this layer include <strong>Ethernet (cabling)</strong> and <strong>IEEE 802.11 (Wi-Fi radio)</strong>. Hardware at this layer includes cables, repeaters and hubs.</p>\n\n<h2 data-narration-id=\"n8\">Layer 2 &mdash; Data Link</h2>\n<p data-narration-id=\"n9\">The <dfn class=\"term\" data-def=\"OSI layer 2, responsible for node-to-node delivery of frames within a network, using MAC addresses for addressing and error detection.\">Data Link layer</dfn> takes the raw bits from the Physical layer and organises them into <strong>frames</strong>. It handles node-to-node delivery within a single network segment, using <strong>MAC addresses</strong> to identify source and destination. The Data Link layer also performs basic error detection (not correction) to check whether a frame arrived without corruption.</p>\n<p data-narration-id=\"n10\">Protocols at this layer include <strong>Ethernet</strong> (the framing standard for wired LANs) and <strong>Wi-Fi (IEEE 802.11)</strong>. Hardware: switches and bridges operate at this layer.</p>\n\n<h2 data-narration-id=\"n11\">Layer 3 &mdash; Network</h2>\n<p data-narration-id=\"n12\">The <dfn class=\"term\" data-def=\"OSI layer 3, responsible for logical addressing and routing packets across multiple networks using IP addresses.\">Network layer</dfn> is responsible for routing data across multiple networks from source to destination. It uses <strong>IP addresses</strong> (logical addresses) to identify devices globally and selects the best path for each packet. The data unit at this layer is a <strong>packet</strong>.</p>\n<p data-narration-id=\"n13\">The key protocol at this layer is <strong>IP</strong> (Internet Protocol). Hardware: routers operate at this layer, reading IP addresses to decide where to forward each packet.</p>\n\n<h2 data-narration-id=\"n14\">Layer 4 &mdash; Transport</h2>\n<p data-narration-id=\"n15\">The <dfn class=\"term\" data-def=\"OSI layer 4, responsible for end-to-end communication between applications, providing reliable or unreliable delivery and managing flow control and error recovery.\">Transport layer</dfn> manages end-to-end communication between applications on different hosts. It breaks data into <strong>segments</strong> and ensures they are reassembled correctly at the destination. It also handles <strong>flow control</strong> (preventing a fast sender from overwhelming a slow receiver) and <strong>error recovery</strong> (requesting retransmission of lost segments).</p>\n<p data-narration-id=\"n16\">Two key protocols operate here:</p>\n<ul>\n  <li data-narration-id=\"n17\"><strong>TCP (Transmission Control Protocol)</strong> &mdash; connection-oriented. Before data is sent, TCP establishes a connection with a three-way handshake and guarantees delivery by acknowledging every segment. Used where accuracy matters: web pages (HTTP), email (SMTP), file transfer (FTP).</li>\n  <li data-narration-id=\"n18\"><strong>UDP (User Datagram Protocol)</strong> &mdash; connectionless. Segments are sent without acknowledgement, so UDP is faster but unreliable. Used where speed matters more than accuracy: video streaming, online gaming, voice calls.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n19\" data-revision-tip=\"Close this and explain in two sentences: what is the difference between TCP and UDP, and give one application that uses each.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>TCP (Transport layer) guarantees reliable, ordered delivery by acknowledging every segment &mdash; used by HTTP, SMTP and FTP. UDP sends segments without acknowledgement for speed &mdash; used by video streaming and online gaming. Both are Transport layer protocols.</p>\n</div>\n\n<h2 data-narration-id=\"n20\">Layer 5 &mdash; Session</h2>\n<p data-narration-id=\"n21\">The <strong>Session layer</strong> establishes, manages and terminates sessions (conversations) between applications. A session is an ongoing exchange: for example, a video call between two computers involves a session that keeps both sides synchronised. The Session layer also provides checkpointing &mdash; if a large data transfer fails midway, the transfer can resume from the last checkpoint rather than restarting from scratch.</p>\n\n<h2 data-narration-id=\"n22\">Layer 6 &mdash; Presentation</h2>\n<p data-narration-id=\"n23\">The <strong>Presentation layer</strong> is responsible for translating data between the format the application uses and the format the network requires. Its three main tasks are <strong>data translation</strong> (converting character encodings, for example between UTF-8 and ASCII), <strong>data compression</strong> (reducing size before transmission) and <strong>encryption</strong> (scrambling data for secure transmission). HTTPS encryption (TLS/SSL) is handled at this layer.</p>\n\n<h2 data-narration-id=\"n24\">Layer 7 &mdash; Application</h2>\n<p data-narration-id=\"n25\">The <dfn class=\"term\" data-def=\"OSI layer 7, the topmost layer, which provides network services directly to end-user applications such as web browsers and email clients.\">Application layer</dfn> is the topmost layer and the one users interact with directly. It provides the interface between the network and the software applications running on a device. This is where user-facing <strong>protocols</strong> operate.</p>\n<p data-narration-id=\"n26\">Key Application layer protocols:</p>\n<ul>\n  <li data-narration-id=\"n27\"><strong>HTTP</strong> (Hypertext Transfer Protocol) &mdash; transfers web pages between a server and a browser.</li>\n  <li data-narration-id=\"n28\"><strong>HTTPS</strong> (HTTP Secure) &mdash; HTTP with TLS encryption; used for secure web browsing and online transactions.</li>\n  <li data-narration-id=\"n29\"><strong>FTP</strong> (File Transfer Protocol) &mdash; transfers files between a client and a server.</li>\n  <li data-narration-id=\"n30\"><strong>SMTP</strong> (Simple Mail Transfer Protocol) &mdash; sends email from a client to a mail server or between mail servers.</li>\n  <li data-narration-id=\"n31\"><strong>POP3 / IMAP</strong> &mdash; retrieve email from a server. POP3 downloads and deletes from the server; IMAP keeps mail on the server and synchronises across devices.</li>\n  <li data-narration-id=\"n32\"><strong>DNS</strong> (Domain Name System) &mdash; translates human-readable domain names (e.g. studyvault.co.uk) into IP addresses.</li>\n  <li data-narration-id=\"n33\"><strong>DHCP</strong> (Dynamic Host Configuration Protocol) &mdash; automatically assigns IP addresses to devices joining a network.</li>\n</ul>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>OSI Layer Summary Table</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n34\">Use this table to review all seven layers before a practice exam:</p>\n    <table>\n      <thead>\n        <tr><th>Layer</th><th>Name</th><th>Responsibility</th><th>Key protocols / hardware</th></tr>\n      </thead>\n      <tbody>\n        <tr><td>7</td><td>Application</td><td>User-facing services</td><td>HTTP, HTTPS, FTP, SMTP, DNS, DHCP</td></tr>\n        <tr><td>6</td><td>Presentation</td><td>Translation, compression, encryption</td><td>TLS/SSL, JPEG, ASCII</td></tr>\n        <tr><td>5</td><td>Session</td><td>Start, manage and end sessions</td><td>NetBIOS, checkpointing</td></tr>\n        <tr><td>4</td><td>Transport</td><td>End-to-end delivery, flow control</td><td>TCP, UDP</td></tr>\n        <tr><td>3</td><td>Network</td><td>Routing packets across networks</td><td>IP &mdash; Routers</td></tr>\n        <tr><td>2</td><td>Data Link</td><td>Frame delivery within a network segment</td><td>Ethernet, Wi-Fi &mdash; Switches, Bridges</td></tr>\n        <tr><td>1</td><td>Physical</td><td>Transmit raw bits over a medium</td><td>Cables, Hubs, Repeaters</td></tr>\n      </tbody>\n    </table>\n  </div></div>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About the OSI Model</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n35\"><strong>Misconception 1: &ldquo;HTTP is at the Transport layer.&rdquo;</strong> HTTP is an Application layer protocol. The Transport layer is where TCP and UDP operate &mdash; HTTP runs on top of TCP at the Application layer.</p>\n    <p data-narration-id=\"n36\"><strong>Misconception 2: &ldquo;Routers work at the Data Link layer.&rdquo;</strong> Routers operate at the Network layer (layer 3), reading IP addresses. Switches operate at the Data Link layer (layer 2), reading MAC addresses.</p>\n    <p data-narration-id=\"n37\"><strong>Misconception 3: &ldquo;Encryption happens at the Application layer.&rdquo;</strong> Encryption is primarily a Presentation layer function (layer 6). TLS/SSL, used for HTTPS, is a Presentation layer service even though it is triggered by an Application layer protocol.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n38\">The most common OSI exam question asks you to &ldquo;describe the function of layer X&rdquo; or &ldquo;state which layer protocol Y operates at&rdquo;. Simply naming the layer scores partial credit; describing what it does scores full marks. Practise writing one sentence per layer that begins with a verb: &ldquo;The Transport layer manages end-to-end communication between applications, guaranteeing delivery (TCP) or trading reliability for speed (UDP).&rdquo; Also remember: routers = Network layer (IP); switches = Data Link layer (MAC). This distinction appears regularly.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n39\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n40\">The OSI model has seven layers (Physical, Data Link, Network, Transport, Session, Presentation, Application) &mdash; each has a specific responsibility, making networks easier to design and troubleshoot.</li>\n  <li data-narration-id=\"n41\">Key protocols by layer: IP at Network (3); TCP/UDP at Transport (4); HTTP, HTTPS, FTP, SMTP, DNS and DHCP at Application (7); Ethernet and Wi-Fi at Data Link (2).</li>\n  <li data-narration-id=\"n42\">TCP guarantees reliable, ordered delivery and is used by web and email protocols; UDP is faster but unreliable and is used for streaming and gaming.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which layer of the OSI model is responsible for routing packets across multiple networks using IP addresses?\nA) Layer 2 — Data Link\nB) Layer 3 — Network\nC) Layer 4 — Transport\nD) Layer 7 — Application",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) Layer 3 — Network [1 mark]"
+    },
+    {
+      "text": "State the layer of the OSI model at which TCP operates.",
+      "type": "1 mark — State/Identify",
+      "marks": "Layer 4 — Transport layer. [1 mark]"
+    },
+    {
+      "text": "Define the term 'protocol' in the context of computer networks.",
+      "type": "2 marks — Define",
+      "marks": "A protocol is an agreed set of rules [1] that determines how data is formatted and transmitted between devices on a network [1]. [2 marks]"
+    },
+    {
+      "text": "Describe the roles of the Presentation layer (layer 6) of the OSI model.",
+      "type": "3 marks — Describe",
+      "marks": "Up to 3 marks:\n- Data translation: converts data between different formats or character encodings so that both sender and receiver can interpret it correctly. [1]\n- Data compression: reduces the size of data before transmission to increase efficiency. [1]\n- Encryption: scrambles data (e.g. using TLS/SSL for HTTPS) so that it cannot be read if intercepted. [1]"
+    },
+    {
+      "text": "Explain the difference between TCP and UDP. Include in your answer an example of an application that uses each protocol and why that protocol is appropriate.",
+      "type": "4 marks — Explain",
+      "marks": "Up to 4 marks:\nTCP:\n- TCP is connection-oriented and guarantees reliable, ordered delivery by acknowledging every segment. [1]\n- Example: HTTP (web browsing) — accuracy is essential because a web page with missing data would be unreadable. [1]\nUDP:\n- UDP is connectionless and sends segments without acknowledgement, making it faster but unreliable. [1]\n- Example: video streaming — occasional lost packets cause brief quality drops but retransmitting them would cause buffering, so speed is preferred over perfect reliability. [1]"
+    },
+    {
+      "text": "The OSI model separates network communication into seven layers.\n\nCompare the roles of the Data Link layer (layer 2) and the Network layer (layer 3). In your answer, refer to the addressing method used by each layer and the hardware that operates at each layer.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Clear and explicit comparison of both layers across addressing (MAC vs IP), scope (within one network segment vs across multiple networks), data unit (frame vs packet) and hardware (switch/bridge vs router); language is precise and contrasting throughout.\nSecure: Accurate description of both layers with at least two explicit comparisons; may lack one dimension (e.g. hardware).\nDeveloping: Describes one layer well but the comparison is implicit or one-sided.\nEmerging: Names the layers or states a fact about one without comparison."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "Which OSI layer is responsible for translating data formats, compressing data and encrypting data before transmission?",
+      "options": [
+        "Layer 4 — Transport",
+        "Layer 5 — Session",
+        "Layer 6 — Presentation",
+        "Layer 7 — Application"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "mcq",
+      "q": "At which OSI layer do switches operate?",
+      "options": [
+        "Layer 1 — Physical",
+        "Layer 2 — Data Link",
+        "Layer 3 — Network",
+        "Layer 4 — Transport"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "The _____ layer (layer 3) of the OSI model routes packets across multiple networks using IP addresses.",
+      "options": [
+        "Transport",
+        "Data Link",
+        "Network",
+        "Session"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "HTTP, HTTPS, FTP and SMTP are all protocols that operate at the _____ layer of the OSI model.",
+      "options": [
+        "Presentation",
+        "Session",
+        "Transport",
+        "Application"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "match",
+      "q": "Match each OSI layer to its primary responsibility:",
+      "left": [
+        "Physical (layer 1)",
+        "Transport (layer 4)",
+        "Application (layer 7)"
+      ],
+      "right": [
+        "Transmit raw bits over a physical medium",
+        "End-to-end delivery with flow control (TCP/UDP)",
+        "Provide network services directly to user applications"
+      ],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What does OSI stand for?",
+      "a": "Open Systems Interconnection."
+    },
+    {
+      "q": "List the 7 OSI layers from bottom (layer 1) to top (layer 7).",
+      "a": "Physical, Data Link, Network, Transport, Session, Presentation, Application."
+    },
+    {
+      "q": "What is the mnemonic for OSI layers 1-7 (bottom to top)?",
+      "a": "Please Do Not Throw Sausage Pizza Away."
+    },
+    {
+      "q": "What type of address does the Data Link layer use to deliver frames?",
+      "a": "MAC addresses."
+    },
+    {
+      "q": "What type of address does the Network layer use to route packets?",
+      "a": "IP addresses."
+    },
+    {
+      "q": "Which OSI layer does a router operate at?",
+      "a": "Layer 3 — Network layer."
+    },
+    {
+      "q": "Which OSI layer does a switch operate at?",
+      "a": "Layer 2 — Data Link layer."
+    },
+    {
+      "q": "What is the key difference between TCP and UDP?",
+      "a": "TCP guarantees reliable delivery with acknowledgements; UDP is faster but unreliable."
+    },
+    {
+      "q": "Give one protocol that uses TCP and one that uses UDP.",
+      "a": "TCP: HTTP (web). UDP: video streaming or online gaming."
+    },
+    {
+      "q": "Which layer handles encryption (e.g. TLS for HTTPS)?",
+      "a": "Layer 6 — Presentation layer."
+    },
+    {
+      "q": "What does DHCP do, and at which OSI layer does it operate?",
+      "a": "DHCP automatically assigns IP addresses to devices; it operates at layer 7 (Application)."
+    },
+    {
+      "q": "What does FTP stand for, and what is it used for?",
+      "a": "File Transfer Protocol — used to transfer files between a client and a server."
+    },
+    {
+      "q": "What is the difference between POP3 and IMAP for retrieving email?",
+      "a": "POP3 downloads and deletes from the server; IMAP keeps mail on the server and syncs devices."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "OSI model",
+      "definition": "A conceptual framework developed by the International Organisation for Standardisation that divides network communication into seven distinct layers, each with a specific responsibility."
+    },
+    {
+      "term": "Data Link layer",
+      "definition": "OSI layer 2, responsible for node-to-node delivery of frames within a network, using MAC addresses for addressing and error detection."
+    },
+    {
+      "term": "Network layer",
+      "definition": "OSI layer 3, responsible for logical addressing and routing packets across multiple networks using IP addresses."
+    },
+    {
+      "term": "Transport layer",
+      "definition": "OSI layer 4, responsible for end-to-end communication between applications, providing reliable or unreliable delivery and managing flow control and error recovery."
+    },
+    {
+      "term": "Application layer",
+      "definition": "OSI layer 7, the topmost layer, which provides network services directly to end-user applications such as web browsers and email clients."
+    }
+  ],
+  "hero_keywords": [
+    "network layers data transmission",
+    "server room fibre optic cables",
+    "internet infrastructure routing"
+  ],
+  "hero_image_caption": "Data flowing through network layers — the foundation of internet communication"
+}

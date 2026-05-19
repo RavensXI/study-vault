@@ -1,0 +1,181 @@
+{
+  "_lesson_id": "e7e12162-ae99-4d77-8180-1c3d5adf3d08",
+  "_lesson_number": 4,
+  "_unit_slug": "data-representation-storage",
+  "_lesson_slug": "graphics-pixels-resolution-and-colour-depth",
+  "description": "How images are stored as bitmaps and how to calculate file size from dimensions and colour depth.",
+  "content_html": "<h2 data-narration-id=\"n1\">How Images Are Stored as Bitmaps</h2>\n<p data-narration-id=\"n2\">A digital image is made up of a grid of tiny coloured squares called <dfn class=\"term\" data-def=\"The smallest addressable element of a digital image; each pixel stores a colour value as a binary number.\">pixels</dfn> (short for &ldquo;picture elements&rdquo;). When a computer stores a <dfn class=\"term\" data-def=\"A type of digital image that stores colour information for each pixel individually as a grid of binary values.\">bitmap</dfn> image, it records the colour of every single pixel as a binary number. The whole image is then nothing more than a long sequence of binary codes &mdash; one for each pixel, row by row from top-left to bottom-right.</p>\n\n<p data-narration-id=\"n3\">A bitmap image file also includes <dfn class=\"term\" data-def=\"Additional data stored alongside the image content, such as image width, height, colour depth and creation date.\">metadata</dfn>: information about the image itself, such as its width in pixels, its height in pixels, its colour depth, and the date it was created. The metadata tells software how to interpret the stream of pixel data that follows it.</p>\n\n<h2 data-narration-id=\"n4\">Resolution</h2>\n<p data-narration-id=\"n5\">The <dfn class=\"term\" data-def=\"The number of pixels in an image, usually expressed as width x height (e.g. 1920 x 1080), or as pixels per inch (ppi) when printing.\">resolution</dfn> of an image describes how many pixels it contains. It is usually given as <strong>width &times; height</strong> in pixels (for example, 1920 &times; 1080). A higher resolution means more pixels and therefore more detail &mdash; but also a larger file size, because there is more pixel data to store.</p>\n<p data-narration-id=\"n6\">Resolution can also be expressed in pixels per inch (ppi) when describing how sharply an image will print. A higher ppi means smaller pixels printed more densely, producing a sharper result. However, on screen, the physical size of pixels is fixed by the display hardware, so ppi matters less for on-screen display than total pixel count.</p>\n\n<h2 data-narration-id=\"n7\">Colour Depth (Bit Depth)</h2>\n<p data-narration-id=\"n8\"><dfn class=\"term\" data-def=\"The number of bits used to represent the colour of a single pixel; more bits allow more distinct colours to be stored.\">Colour depth</dfn> (sometimes called bit depth) is the number of bits used to store the colour of each pixel. The more bits per pixel, the greater the number of possible colours:</p>\n<ul>\n  <li data-narration-id=\"n9\"><strong>1-bit</strong> &mdash; \\(2^1 = 2\\) colours (black or white only).</li>\n  <li data-narration-id=\"n10\"><strong>8-bit</strong> &mdash; \\(2^8 = 256\\) colours. Used in early graphics and GIF files.</li>\n  <li data-narration-id=\"n11\"><strong>24-bit</strong> &mdash; \\(2^{24} = 16{,}777{,}216\\) colours (&ldquo;true colour&rdquo;). Eight bits each for red, green and blue channels.</li>\n</ul>\n\n<div class=\"key-fact\" data-narration-id=\"n12\" data-revision-tip=\"Cover this and write the formula for bitmap file size in bits from memory. Then convert to bytes and KiB for a 200x150 pixel, 24-bit image.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The formula for the uncompressed size of a bitmap image is:<br>\n  <strong>File size (bits) = width (pixels) &times; height (pixels) &times; colour depth (bits per pixel)</strong><br>\n  To convert to bytes, divide by 8. To convert bytes to KiB (kibibytes), divide by 1024. Always use base-2 prefixes (KiB = 1024 bytes) in this course, not base-10 (KB = 1000 bytes).</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Worked Example: Calculating Image File Size</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n13\">An image is 640 &times; 480 pixels with a colour depth of 24 bits per pixel. Calculate its uncompressed file size in KiB.</p>\n    <p data-narration-id=\"n14\"><strong>Step 1 &mdash; total bits:</strong> 640 &times; 480 &times; 24 = 7,372,800 bits.</p>\n    <p data-narration-id=\"n15\"><strong>Step 2 &mdash; convert to bytes:</strong> 7,372,800 &divide; 8 = 921,600 bytes.</p>\n    <p data-narration-id=\"n16\"><strong>Step 3 &mdash; convert to KiB:</strong> 921,600 &divide; 1024 = <strong>900 KiB</strong>.</p>\n    <p data-narration-id=\"n17\">This is the uncompressed (raw bitmap) size. Saving as a JPEG would reduce this significantly through lossy compression, but some image quality would be lost.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n18\">Effect of Resolution and Colour Depth on Quality and File Size</h2>\n<p data-narration-id=\"n19\">Increasing either the resolution or the colour depth increases both image quality and file size. These relationships are directly proportional:</p>\n<ul>\n  <li data-narration-id=\"n20\">Double the width and height &rarr; four times the number of pixels &rarr; four times the file size.</li>\n  <li data-narration-id=\"n21\">Double the colour depth (e.g. from 8-bit to 16-bit) &rarr; file size doubles.</li>\n</ul>\n<p data-narration-id=\"n22\">Designers must balance quality against file size. A high-resolution 24-bit photograph looks stunning on screen but takes longer to download and uses more storage. A low-resolution 8-bit image loads quickly but may look pixelated or washed out.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n23\" data-revision-tip=\"Explain to someone: why does doubling both the width and height of an image quadruple the file size, not double it?\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A 24-bit colour image uses <strong>three bytes per pixel</strong> (8 bits for red + 8 for green + 8 for blue). This RGB model allows over 16 million colour combinations, which is enough that the human eye cannot distinguish individual gradations &mdash; hence the term &ldquo;true colour.&rdquo;</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Common Misconceptions About Image Storage</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n24\"><strong>Misconception 1: &ldquo;Resolution is the same as quality.&rdquo;</strong> &mdash; Resolution is the number of pixels; quality also depends on colour depth. A 4K image with 1-bit colour would look terrible.</p>\n    <p data-narration-id=\"n25\"><strong>Misconception 2: &ldquo;KiB and KB are the same.&rdquo;</strong> &mdash; They are not. 1 KiB = 1024 bytes (base-2, used in this specification). 1 KB = 1000 bytes (base-10, used in marketing). Using KB instead of KiB in a calculation question will cost you a mark.</p>\n    <p data-narration-id=\"n26\"><strong>Misconception 3: &ldquo;More colours always means a bigger file.&rdquo;</strong> &mdash; True for uncompressed bitmaps, but compression algorithms can reduce file size regardless of colour depth. Always check whether the question says &ldquo;uncompressed&rdquo;.</p>\n  </div></div>\n</div>",
+  "exam_tip_html": "<p data-narration-id=\"n27\">For the storage calculation question, show each step: (1) width &times; height &times; colour depth in bits, (2) divide by 8 to get bytes, (3) divide by 1024 to get KiB (not by 1000). Examiners commonly award a mark for the correct method even if your arithmetic slips. Note the key formula uses <em>colour depth in bits</em>, not in bytes &mdash; if you are given colour depth as a number of colours (e.g. 256 colours), you must first find the number of bits required (\\(\\log_2 256 = 8\\) bits) before plugging into the formula. Always use base-2 prefixes (KiB/MiB/GiB) throughout, not base-10 (KB/MB/GB).</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n28\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n29\">A bitmap image stores a colour value for every pixel as a binary number; metadata records the image dimensions and colour depth so software knows how to display it.</li>\n  <li data-narration-id=\"n30\">File size (bits) = width &times; height &times; colour depth. Divide by 8 for bytes, then by 1024 for KiB (base-2 prefix, not base-10).</li>\n  <li data-narration-id=\"n31\">Increasing resolution or colour depth improves image quality but increases file size proportionally; 24-bit &ldquo;true colour&rdquo; uses 8 bits each for red, green and blue channels.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes the term 'pixel'?\nA) The number of colours an image can contain\nB) The smallest addressable element of a digital image, each storing a colour value\nC) The file format used to store a bitmap\nD) The amount of memory an image uses",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) The smallest addressable element of a digital image, each storing a colour value [1 mark]"
+    },
+    {
+      "text": "State what is meant by the colour depth of a bitmap image.",
+      "type": "1 mark — State/Identify",
+      "marks": "The number of bits used to store the colour of a single pixel [1 mark]. Accept: the number of bits per pixel."
+    },
+    {
+      "text": "A bitmap image is 800 pixels wide and 600 pixels tall with a colour depth of 8 bits per pixel. Calculate the uncompressed file size of the image in KiB. Show all working.",
+      "type": "3 marks — Calculate Storage",
+      "marks": "Step 1: 800 × 600 × 8 = 3,840,000 bits [1 mark for correct multiplication]. Step 2: 3,840,000 ÷ 8 = 480,000 bytes [1 mark]. Step 3: 480,000 ÷ 1024 = 468.75 KiB [1 mark — must divide by 1024, not 1000, for this mark]. Accept 468.75 KiB or equivalent rounded value with correct method shown."
+    },
+    {
+      "text": "Explain how increasing the colour depth of a bitmap image affects both image quality and file size.",
+      "type": "4 marks — Explain",
+      "marks": "Award marks for: Increasing colour depth means more bits are used to represent each pixel [1], so more distinct colours can be stored (e.g. 8-bit gives 256 colours; 24-bit gives over 16 million) [1]. This allows smoother gradients and more accurate colour reproduction, improving image quality [1]. It also increases the file size because more data must be stored for each pixel — a 24-bit image uses three times as much storage as an 8-bit image at the same resolution [1]. Maximum 4 marks."
+    },
+    {
+      "text": "A student claims that a 1920 × 1080 image with 24-bit colour has a file size of 5,760 KB. Identify and correct the error in the student's calculation.",
+      "type": "4 marks — Explain",
+      "marks": "The student has used KB (base-10, 1000 bytes) instead of KiB (base-2, 1024 bytes) [1 mark for identifying the error]. Correct calculation: 1920 × 1080 × 24 = 49,766,400 bits [1]. ÷ 8 = 6,220,800 bytes [1]. ÷ 1024 = 6,075 KiB (approximately) [1 mark for correct final answer using base-2 division]. Accept 5,932.5 KiB if divided twice by 1024 to give MiB first then noted."
+    },
+    {
+      "text": "Compare the effect of increasing resolution and increasing colour depth on the storage requirements and visual quality of a bitmap image.",
+      "type": "6 marks — Compare",
+      "marks": "Mastering: Both resolution and colour depth increases raise storage proportionally; contrast of effect on quality (resolution affects sharpness/detail; colour depth affects colour accuracy and smoothness of gradients); example calculation values to illustrate; reasoned conclusion about which factor has more impact for a given use case.\nSecure: Both factors described correctly, at least one explicit comparison made, correct relationship between factor and file size.\nDeveloping: Both factors mentioned but comparison is implicit or one-sided.\nEmerging: One factor partially described."
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "A 24-bit colour image uses how many bits for each colour channel (red, green, blue)?",
+      "options": [
+        "24 bits each",
+        "4 bits each",
+        "16 bits each",
+        "8 bits each"
+      ],
+      "correct": 3
+    },
+    {
+      "type": "mcq",
+      "q": "An image is 100 x 100 pixels with 8-bit colour depth. What is its uncompressed file size in bytes?",
+      "options": [
+        "800",
+        "10,000",
+        "80,000",
+        "1,000"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "To calculate an image's file size in bits, multiply width x height x _____ .",
+      "options": [
+        "resolution",
+        "number of pixels",
+        "colour depth",
+        "bytes per pixel"
+      ],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "Information stored alongside image data — such as width, height and colour depth — is called _____.",
+      "options": [
+        "pixel data",
+        "metadata",
+        "bit depth",
+        "resolution"
+      ],
+      "correct": 1
+    },
+    {
+      "type": "match",
+      "q": "Match each colour depth to the number of possible colours:",
+      "left": [
+        "1-bit",
+        "8-bit",
+        "24-bit"
+      ],
+      "right": [
+        "2 colours",
+        "256 colours",
+        "16,777,216 colours"
+      ],
+      "order": [
+        0,
+        1,
+        2
+      ]
+    }
+  ],
+  "flashcard_questions": [
+    {
+      "q": "What is a pixel?",
+      "a": "The smallest addressable element of a digital image, storing a colour value as binary."
+    },
+    {
+      "q": "What is a bitmap image?",
+      "a": "An image that stores colour information for each pixel individually as a grid of binary values."
+    },
+    {
+      "q": "What formula gives the uncompressed size of a bitmap in bits?",
+      "a": "Width x height x colour depth (bits per pixel)."
+    },
+    {
+      "q": "How do you convert an image's size from bits to KiB?",
+      "a": "Divide by 8 (to get bytes), then divide by 1024 (to get KiB)."
+    },
+    {
+      "q": "How many colours can a 24-bit image represent?",
+      "a": "2 to the power 24 = 16,777,216 (over 16 million)."
+    },
+    {
+      "q": "Why is 24-bit colour called 'true colour'?",
+      "a": "It has over 16 million colours — more than the human eye can distinguish."
+    },
+    {
+      "q": "In a 24-bit RGB image, how many bits are used for each colour channel?",
+      "a": "24 bits total — 8 bits allocated to each colour channel of the RGB model."
+    },
+    {
+      "q": "What happens to file size when you double both the width and height of an image?",
+      "a": "File size quadruples (four times as many pixels)."
+    },
+    {
+      "q": "What is image metadata?",
+      "a": "Data stored alongside image content, such as width, height, colour depth and creation date."
+    },
+    {
+      "q": "Why must you divide by 1024 (not 1000) when converting bytes to KiB?",
+      "a": "KiB is a base-2 prefix: 1 KiB = 1024 bytes, not 1000 bytes."
+    },
+    {
+      "q": "An 8-bit colour image can store how many distinct colours?",
+      "a": "256 (2 to the power 8)."
+    }
+  ],
+  "glossary_terms": [
+    {
+      "term": "pixel",
+      "definition": "The smallest addressable element of a digital image; each pixel stores a colour value as a binary number."
+    },
+    {
+      "term": "bitmap",
+      "definition": "A type of digital image that stores colour information for each pixel individually as a grid of binary values."
+    },
+    {
+      "term": "resolution",
+      "definition": "The number of pixels in an image, usually expressed as width x height (e.g. 1920 x 1080), or as pixels per inch (ppi) when printing."
+    },
+    {
+      "term": "colour depth",
+      "definition": "The number of bits used to represent the colour of a single pixel; more bits allow more distinct colours to be stored."
+    },
+    {
+      "term": "metadata",
+      "definition": "Additional data stored alongside the image content, such as image width, height, colour depth and creation date."
+    }
+  ],
+  "hero_keywords": [
+    "digital photography pixels zoom",
+    "image resolution computer graphics",
+    "bitmap photo editing"
+  ],
+  "hero_image_caption": "A digital image is a grid of pixels, each storing a colour value in binary"
+}
