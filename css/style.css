@@ -1039,6 +1039,100 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
   min-width: 0; /* prevent grid blowout */
 }
 
+/* Default styling for bare <table> elements inside lesson content. Agents
+   sometimes emit plain <table> rather than <table class="data-table"> — give
+   them sensible defaults so they don't render as cramped browser-default
+   tables. Full-width, centred content, subtle card. */
+.lesson-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.25rem 0;
+  font-size: 0.92rem;
+  background: var(--bg-card, #fff);
+  border: 1px solid var(--border-light, #e8e4df);
+  border-radius: var(--radius-sm, 8px);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.lesson-content table th,
+.lesson-content table td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--border-lighter, #f0ede8);
+  text-align: center;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+.lesson-content table th {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  background: var(--bg-subtle, #fafaf8);
+  border-bottom: 2px solid var(--border-light, #e8e4df);
+}
+.lesson-content table tr:last-child td {
+  border-bottom: none;
+}
+body.dark-mode .lesson-content table {
+  background: #1e1c1a;
+  border-color: #2e2a25;
+}
+body.dark-mode .lesson-content table th {
+  background: #25221f;
+  color: #b0a99c;
+  border-bottom-color: #3a3530;
+}
+body.dark-mode .lesson-content table td,
+body.dark-mode .lesson-content table th {
+  border-bottom-color: #2e2a25;
+}
+
+/* Code blocks and inline code inside lesson content. Agents put pseudocode
+   examples in <pre><code>...</code></pre> blocks but the default browser
+   styling (no background, no padding) makes them blend into prose. Style
+   them as proper code blocks. Inline <code> gets a subtle background pill. */
+.lesson-content pre {
+  background: #1e1c1a;
+  color: #e8e4df;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius-sm, 8px);
+  margin: 1.1rem 0;
+  overflow-x: auto;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 2;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+.lesson-content pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+  border: none;
+}
+.lesson-content :not(pre) > code {
+  background: var(--bg-subtle, #f4f1ec);
+  color: var(--text-color, #2d2a26);
+  padding: 0.08em 0.35em;
+  border-radius: 3px;
+  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-size: 0.86em;
+  border: 1px solid var(--border-lighter, #ece8e2);
+}
+body.dark-mode .lesson-content pre {
+  background: #0f0d0a;
+  color: #e8e4df;
+}
+body.dark-mode .lesson-content :not(pre) > code {
+  background: #25221f;
+  color: #e8e4df;
+  border-color: #3a3530;
+}
+
 /* Legacy single-column fallback */
 .lesson-container {
   max-width: var(--content-max);
