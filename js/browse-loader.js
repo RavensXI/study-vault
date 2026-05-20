@@ -177,7 +177,22 @@
     'computer-science': [
       { board: 'OCR', slug: 'computer-science' },
       { board: 'AQA', slug: 'computer-science-aqa' },
-      { board: 'Edexcel', slug: 'computer-science-edexcel' }
+      { board: 'Edexcel', slug: 'computer-science-edexcel' },
+      { board: 'Eduqas', slug: 'computer-science-eduqas' },
+      { board: 'WJEC', slug: 'computer-science-eduqas' }
+    ],
+    'design-technology': [
+      { board: 'AQA', slug: 'design-technology' },
+      { board: 'Eduqas', slug: 'design-technology-eduqas' },
+      { board: 'WJEC', slug: 'design-technology-eduqas' }
+    ],
+    'electronics': [
+      { board: 'Eduqas', slug: 'electronics-eduqas' },
+      { board: 'WJEC', slug: 'electronics-eduqas' }
+    ],
+    'geology': [
+      { board: 'Eduqas', slug: 'geology-eduqas' },
+      { board: 'WJEC', slug: 'geology-eduqas' }
     ],
     'film-studies': [
       { board: 'Eduqas', slug: 'film-studies-eduqas' },
