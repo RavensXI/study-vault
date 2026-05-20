@@ -1726,7 +1726,7 @@
       'hospitality-catering': { 'Eduqas': true, 'WJEC': true },
       'engineering': { 'Eduqas': true, 'WJEC': true },
       'history': { 'AQA': true, 'Edexcel': true, 'OCR': true },
-      'religious-studies': { 'AQA': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true },
+      'religious-studies': { 'AQA': true, 'AQA Short Course': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true },
       'music-technology': { 'NCFE': true },
       'computer-science': { 'OCR': true, 'AQA': true, 'Edexcel': true, 'Eduqas': true, 'WJEC': true },
       'it': { 'OCR': true },
@@ -1998,6 +1998,30 @@
           { slug: 'theme-d-peace-conflict', name: 'Theme D — Peace & Conflict' },
           { slug: 'theme-e-crime-punishment', name: 'Theme E — Crime & Punishment' },
           { slug: 'theme-f-human-rights-social-justice', name: 'Theme F — Human Rights & Social Justice' }
+        ]
+      },
+      // AQA Religious Studies SHORT COURSE (8061): a strict subset of Spec A.
+      // Religions: pick 2 from 4 (Christianity / Islam / Judaism / Buddhism), BELIEFS ONLY.
+      // Themes: both Theme A (Relationships) and Spec A's Theme D (Peace & Conflict) are
+      // mandatory; the Short Course syllabus reletters Theme D as its own Theme B but
+      // the content + Supabase unit slug stays as `theme-d-peace-conflict`.
+      // Same Supabase row as Spec A (`religious-studies-aqa`) — the course_type='short'
+      // flag saved by the wizard tells the unit filter to skip the -practices units.
+      'aqa short course': {
+        religionsCap: 2,
+        religionsHelper: '(pick 2 — Beliefs only, no Practices)',
+        themesCap: 2,
+        themesHelper: '(tap both — both themes are mandatory for the Short Course)',
+        course_type: 'short',
+        religions: [
+          { slug: 'buddhism', name: 'Buddhism' },
+          { slug: 'christianity', name: 'Christianity' },
+          { slug: 'islam', name: 'Islam' },
+          { slug: 'judaism', name: 'Judaism' }
+        ],
+        themes: [
+          { slug: 'theme-a-relationships', name: 'Theme A — Relationships & Families' },
+          { slug: 'theme-d-peace-conflict', name: 'Theme B — Religion, Peace & Conflict' }
         ]
       },
       'eduqas': {
@@ -3321,7 +3345,7 @@
       'design-technology': { 'aqa': 'design-technology', 'eduqas': 'design-technology-eduqas', 'wjec': 'design-technology-eduqas' },
       'electronics': { 'eduqas': 'electronics-eduqas', 'wjec': 'electronics-eduqas' },
       'geology': { 'eduqas': 'geology-eduqas', 'wjec': 'geology-eduqas' },
-      'religious-studies': { 'aqa': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas', 'edexcel': 'religious-studies-edexcel' },
+      'religious-studies': { 'aqa': 'religious-studies-aqa', 'aqa short course': 'religious-studies-aqa', 'eduqas': 'religious-studies-eduqas', 'wjec': 'religious-studies-eduqas', 'edexcel': 'religious-studies-edexcel' },
       'spanish': { 'aqa': 'spanish-aqa', 'edexcel': 'spanish-edexcel' },
       'french': { 'aqa': 'french-aqa', 'edexcel': 'french-edexcel' },
       'german': { 'aqa': 'german-aqa', 'edexcel': 'german-edexcel' },
@@ -3372,6 +3396,13 @@
           entry.themes = (wizardState.re && wizardState.re.themes) || [];
           if (wizardState.re && wizardState.re.route) {
             entry.route = wizardState.re.route;
+          }
+          // AQA Short Course (8061) — strict subset of Spec A (Beliefs only,
+          // 2 of 4 religions, 2 fixed themes). Same Supabase row as Spec A;
+          // the course_type flag tells the unit filter (reAqaFilter in
+          // js/free-user-filters.js) to skip -practices units.
+          if (board === 'aqa short course') {
+            entry.course_type = 'short';
           }
           // Edexcel: save paper1 + paper2 + Paper3-or-Paper4 picks for browse-loader unit filter
           if (board === 'edexcel') {

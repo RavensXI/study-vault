@@ -77,10 +77,13 @@
   function reAqaFilter(pref) {
     if (!pref) return null;
     if ((pref.religions && pref.religions.length) || (pref.themes && pref.themes.length)) {
+      // AQA Short Course (8061) — Beliefs only, no Practices. Same Supabase row
+      // as Spec A; wizard saves course_type='short' to drive this filter.
+      var includesPractices = pref.course_type !== 'short';
       var slugs = [];
       (pref.religions || []).forEach(function (r) {
         slugs.push(r + '-beliefs');
-        slugs.push(r + '-practices');
+        if (includesPractices) slugs.push(r + '-practices');
       });
       (pref.themes || []).forEach(function (t) { slugs.push(t); });
       return slugs;
