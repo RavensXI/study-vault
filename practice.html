@@ -66,6 +66,19 @@
       margin: 0;
     }
 
+    /* The global stylesheet pulls the StudyVault wordmark out of the header
+       and pins it to the top-left gutter on wide viewports (>=1400px). On the
+       practice page the left "gutter" is occupied by the method/passage panel,
+       so the fixed brand sits ON TOP of the panel content and obscures the
+       method card whenever the panel scrolls. Force the brand back into the
+       header-inner flex flow on this page. */
+    @media (min-width: 1400px) {
+      .page-header-inner:not(:has(.admin-nav)) .header-brand {
+        position: static;
+        transform: none;
+      }
+    }
+
     /* Panel toggle button (mobile) */
     .panel-toggle-btn {
       display: none;
@@ -6450,7 +6463,17 @@
     // ---- Spot Error ----
     function renderSpotError(p){
       var h='<div class="problem-question-hint">Click on the words or phrases that contain errors.</div><div class="spot-text">';
-      (p.tokens||[]).forEach(function(t,i){
+      // Older problems store tokens with embedded leading/trailing spaces ("word ");
+      // newer problems store bare words ("word"). Detect by checking whether any
+      // token already carries internal whitespace, and inject spaces only when not.
+      var tokens=p.tokens||[];
+      var hasOwnSpacing=tokens.some(function(t){return /\s/.test(t.text||'');});
+      tokens.forEach(function(t,i){
+        if(i>0 && !hasOwnSpacing){
+          // Skip the join space before pure-punctuation tokens so "word" + "," renders as "word,"
+          var cur=(t.text||'');
+          if(!/^[.,;:!?\)\]\}’”—]/.test(cur)) h+=' ';
+        }
         if(t.error) h+='<span class="spot-token" data-idx="'+i+'" onclick="engSpotTog(this)">'+t.text+'</span>';
         else h+=t.text;
       });
