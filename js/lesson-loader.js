@@ -93,8 +93,20 @@
     // Determine content source: bespoke (school-specific) or generic (school_id NULL)
     // Staff with teacher/admin session can view any lesson — no school_id filter
     var isStaff = false;
-    try { var _a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')); isStaff = _a && (_a.role === 'admin' || _a.role === 'teacher'); } catch(e) {}
+    var staffSchoolId = null;
+    try {
+      var _a = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+      isStaff = _a && (_a.role === 'admin' || _a.role === 'teacher');
+      if (isStaff && _a && _a.school_id) staffSchoolId = _a.school_id;
+    } catch(e) {}
     var hasBespoke = (typeof SchoolSession !== 'undefined' && SchoolSession.hasBespoke(params.subjectSlug));
+    // School hint for staff: prefer the teacher-login school_id, then any active
+    // school session (admin "browsing as Unity"). Without this hint, the staff
+    // wildcard query .not('subjects.school_id', 'is', null) returns >1 row when
+    // multiple schools share a subject slug (e.g. both Unity and Severn Vale
+    // have a 'science' subject), and .maybeSingle() bails with no data.
+    var schoolHint = staffSchoolId
+      || (typeof SchoolSession !== 'undefined' && SchoolSession.isActive() ? SchoolSession.getSchoolId() : null);
 
     var unitQuery = sb
       .from('units')
@@ -105,9 +117,15 @@
     if (params.subjectId) {
       // Explicit subject ID from review dashboard — use it directly
       unitQuery = unitQuery.eq('subject_id', params.subjectId);
+    } else if (isStaff && schoolHint) {
+      // Staff with a school hint (teacher login or active school session) —
+      // scope to that school first
+      unitQuery = unitQuery.eq('subjects.school_id', schoolHint);
     } else if (isStaff) {
-      // Staff: don't filter by school_id — try bespoke first, fall back to generic
-      unitQuery = unitQuery.not('subjects.school_id', 'is', null);
+      // True admin with no school hint — any bespoke version; .limit(1) keeps
+      // maybeSingle happy when multiple schools share a subject slug. Falls
+      // back to generic below if nothing returns.
+      unitQuery = unitQuery.not('subjects.school_id', 'is', null).limit(1);
     } else if (hasBespoke) {
       unitQuery = unitQuery.eq('subjects.school_id', SchoolSession.getSchoolId());
     } else {
