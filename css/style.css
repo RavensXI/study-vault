@@ -2032,6 +2032,13 @@ body.dark-mode .lesson-progress-item.completed {
     transform: translateX(-50%);
     width: auto;
     max-width: 200px;
+    /* Don't overflow past the highlight FAB stack at the bottom. JS in
+       initLessonProgress() shrinks individual items to fit; this max-height +
+       overflow is a safety net for ultra-short viewports where even the 28px
+       floor doesn't leave enough room. */
+    max-height: calc(100vh - 120px - 160px);
+    overflow-y: auto;
+    scrollbar-width: thin;
     padding: 0;
     background: none;
     border: none;
@@ -2083,7 +2090,10 @@ body.dark-mode .lesson-progress-item.completed {
   gap: 0;
   width: 100%;
   aspect-ratio: 1;
-  max-width: 80px;
+  /* --gp-item-size is set by initLessonProgress() in main.js so the column
+     always fits between top:120px and the highlight FAB stack at the bottom.
+     Falls back to 80px when the JS hasn't run yet (e.g. brief flicker). */
+  max-width: var(--gp-item-size, 80px);
   border-radius: 12px;
   background: var(--bg-card);
   border: 1px solid var(--border-light);

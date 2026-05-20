@@ -2496,6 +2496,35 @@ function initLessonProgress() {
   gutter.innerHTML = gutterHtml;
   document.body.appendChild(gutter);
 
+  // ---- Auto-fit the gutter checklist into the viewport ----
+  // The checklist is fixed at top:120px and grows downward. On short viewports
+  // and / or lessons with many tasks (Unity tier with podcast + video pushes it
+  // to 8+ items), the column extends past the highlight-mode FAB stack at the
+  // bottom-left. Cap item size so the whole column always fits between the top
+  // anchor and the FAB reserve.
+  function fitGutterChecklist() {
+    var g = document.querySelector('.gutter-progress');
+    if (!g) return;
+    // Only active on wide-viewport gutter layout (CSS shows gutter at >=1400px).
+    if (window.innerWidth < 1400) {
+      g.style.removeProperty('--gp-item-size');
+      return;
+    }
+    var items = g.querySelectorAll('.gutter-progress-item');
+    var n = items.length;
+    if (!n) return;
+    var title = g.querySelector('.gutter-progress-title');
+    var titleH = title ? title.offsetHeight + 8 : 30;
+    var gap = parseFloat(getComputedStyle(g).gap) || 12;
+    // Reserve ~160px at the bottom for the highlight FAB stack.
+    var avail = window.innerHeight - 120 /* top */ - 160 /* FAB reserve */ - titleH - (n - 1) * gap;
+    var perItem = Math.floor(avail / n);
+    var size = Math.max(28, Math.min(80, perItem));
+    g.style.setProperty('--gp-item-size', size + 'px');
+  }
+  fitGutterChecklist();
+  window.addEventListener('resize', fitGutterChecklist);
+
   // ---- Build inline progress bar (between title and hero) ----
   var lessonHeader = document.querySelector('.lesson-header');
   var heroFigure = document.getElementById('hero-figure');
