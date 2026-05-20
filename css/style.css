@@ -2032,13 +2032,12 @@ body.dark-mode .lesson-progress-item.completed {
     transform: translateX(-50%);
     width: auto;
     max-width: 200px;
-    /* Don't overflow past the highlight FAB stack at the bottom. JS in
-       initLessonProgress() shrinks individual items to fit; this max-height +
-       overflow is a safety net for ultra-short viewports where even the 28px
-       floor doesn't leave enough room. */
-    max-height: calc(100vh - 120px - 160px);
-    overflow-y: auto;
-    scrollbar-width: thin;
+    /* JS in initLessonProgress() shrinks individual items so the column
+       always fits between the top anchor and the highlight FAB at the
+       bottom. No scroll fallback — the tick indicators are positioned
+       outside their parent (top:-4px;right:-4px) and trigger scrollbars
+       if we cap height with overflow. Accept FAB overlap on the very
+       rare extreme-short viewports instead. */
     padding: 0;
     background: none;
     border: none;
