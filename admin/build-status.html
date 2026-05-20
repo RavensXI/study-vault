@@ -483,8 +483,8 @@
         '1BH0':     { tag: 'skip',    text: 'Edexcel Biblical Hebrew 1BH0: Paper 1 Language (translation, comprehension, grammar) + Paper 2 Set Text (prescribed Hebrew Bible passages, rotated every 3 years). Audience too small to justify a build — almost exclusively Jewish faith schools with bespoke in-house resources. Park unless a specific school requests.' }
       },
       'greek': {
-        '_general': { tag: 'general', text: 'Edexcel Greek 1GK0 is MODERN Greek (a Modern Foreign Language GCSE), entirely distinct from OCR Classical Greek J292. Same four-skills MFL structure as our existing Spanish/French/German practice-format builds. Sole board for Modern Greek at GCSE. Audience ~1k entries/yr.' },
-        '1GK0':     { tag: 'port',    text: 'Edexcel Modern Greek 1GK0: standard MFL four-skills GCSE with Foundation/Higher tiering, three themes (Identity & Culture, Local/National/International, Future Aspirations). PORT the practice-first MFL factory used for Spanish/French/German — same input types, same AI marking, same dictation pipeline. Vocab/audio fresh. Low priority by entry base but cheap to ship.' }
+        '_general': { tag: 'general', text: 'Edexcel Greek 1GK0 is MODERN Greek (a Modern Foreign Language GCSE), entirely distinct from OCR Classical Greek J292. Sole board for Modern Greek at GCSE. Audience ~1k entries/yr — overwhelmingly heritage speakers.' },
+        '1GK0':     { tag: 'build',   text: 'Edexcel Modern Greek 1GK0: PIVOTED to exam-technique guide approach (2026-05-20 plan, see arabic/russian/turkish notes). 8–10 article lessons in English on exam structure, translation technique, register, mark-scheme calibration — NOT a full vocab/grammar build. Heritage speakers already speak; what they need is exam-skills coaching. Short Greek examples (sample answers, translation extracts) need a native-speaker spot-check before ship.' }
       },
 
       // === Welsh-only specs (skip family) ===
@@ -505,56 +505,68 @@
       },
 
       // === Community/heritage languages ===
-      // All share standard MFL 4-skills shape (Listening/Speaking/Reading/Writing, F/H tiers, themes).
-      // PORT efficiency from our French/German/Spanish practice factory is high (engine reuses;
-      // vocab + audio fresh per language). Audiences tiny (heritage speakers, faith communities,
-      // supplementary schools). Build only on direct school demand.
+      // PIVOTED 2026-05-20: heritage-speaker GCSEs (Arabic, Bengali, Chinese, Gujarati, Hebrew,
+      // Japanese, Panjabi, Persian, Polish, Russian, Turkish, Urdu, Modern Greek) are taken
+      // overwhelmingly by students who ALREADY SPEAK the language. They don't need a vocab/grammar
+      // build — they need exam technique. New plan per language: ~8-10 ARTICLE lessons, mostly in
+      // English, covering: paper structure, translation technique both directions, register
+      // (heritage-speaker register issues), mark-scheme calibration, listening/speaking strategy,
+      // common heritage-speaker errors. Foreign-language EXAMPLES short and reviewable — native
+      // speaker spot-checks the FL extracts before ship.
+      //
+      // EXCEPTIONS — full MFL practice build still appropriate:
+      //   - Italian (Tier 1 — confident, largest minority MFL audience, both AQA + Edexcel)
+      //   - Portuguese (Tier 1 — Romance-language reuse from Spanish, moderate audience)
+      // These keep the "PORT from MFL factory" plan.
 
       'arabic': {
-        '1AA0':     { tag: 'port',    text: 'Edexcel Arabic 1AA0: standard 4-skills 4-paper structure, Foundation/Higher, themes-based. PORT from existing MFL practice factory — dictation, AI marking, grammar drills reusable; vocabulary, example sentences and listening audio need fresh Arabic recordings. Niche audience (heritage speakers, faith schools, supplementary schools). Low priority unless a partner school requests.' }
+        '1AA0':     { tag: 'build',   text: 'Edexcel Arabic 1AA0: NEW PLAN (2026-05-20) — exam-technique guide, not full MFL build. ~8-10 article lessons in English covering paper structure, translation technique (MSA vs dialectal awareness), register, mark-scheme calibration. Short Arabic extracts (sample answers, set phrases) need native-speaker spot-check — script handling (harakat / vowel pointing) is the main risk on unfamiliar words. Heritage-speaker audience (faith schools, supplementary schools).' }
       },
       'bengali': {
-        '8638':     { tag: 'port',    text: 'AQA Bengali 8638: standard 4-papers, F/H, three themes (Identity/culture, Local-national-international, Current/future study/employment). PORT from MFL factory — scaffolding reuses, vocab/audio need Bengali. Tiny entries (heritage-language cohort in a few UK cities). Build only on direct school demand.' }
+        '8638':     { tag: 'build',   text: 'AQA Bengali 8638: NEW PLAN (2026-05-20) — exam-technique guide approach. ~8-10 article lessons in English. Bengali script extracts need native-speaker review before ship (Tier 3 language for my confidence). Heritage-speaker audience (Bengali diaspora in a few UK cities). Lower priority than higher-uptake languages.' }
       },
       'chinese': {
-        '8673':     { tag: 'build',   text: 'AQA Chinese (Spoken Mandarin) 8673: speaking-and-listening only variant, no reading/writing of Chinese characters required. Structurally different from our practice-first MFL builds (which assume 4 skills). Would need a stripped-down oral-skills mode. Niche audience (oral heritage speakers without character literacy). Don\'t build unless specifically requested.' },
-        '1CN0':     { tag: 'port',    text: 'Edexcel Chinese (Mandarin/Cantonese) 1CN0: standard 4-skills/4-papers F/H. PORT from MFL factory — engine reuses; vocab and audio need Mandarin (and optionally Cantonese). Character recognition needs UI consideration for reading items. Niche but more mainstream than AQA\'s spoken-only variant.' }
+        '_general': { tag: 'general', text: 'NEW PLAN (2026-05-20): exam-technique guide approach for both Chinese variants. Heritage speakers + Mandarin learners need exam-skills coaching more than vocab building. Native-speaker review of any tone marks and short character extracts mandatory before ship (Tier 2 for me — tones are my weak spot).' },
+        '8673':     { tag: 'build',   text: 'AQA Chinese (Spoken Mandarin) 8673: speaking-only variant. Exam-technique guide focuses on the speaking/listening papers — role play, photo card, conversation strategy. ~6-8 lessons (smaller than the full-skills variant because no reading/writing paper). Native ear on the pinyin/tone examples.' },
+        '1CN0':     { tag: 'build',   text: 'Edexcel Chinese (Mandarin or Cantonese) 1CN0: full 4-paper spec. Exam-technique guide ~8-10 lessons covering character recognition strategy, translation technique, formal vs colloquial register. More mainstream than the AQA spoken-only variant.' }
       },
       'gujarati': {
-        '1GU0':     { tag: 'port',    text: 'Edexcel Gujarati 1GU0: standard 4-skills/4-papers F/H. PORT from MFL factory — scaffolding reuses, vocab/audio need Gujarati. Heritage-speaker cohort (Gujarati diaspora, predominantly Leicester/London/Bolton supplementary schools). Tiny national entries. Build only on direct school demand.' }
+        '1GU0':     { tag: 'build',   text: 'Edexcel Gujarati 1GU0: NEW PLAN (2026-05-20) — exam-technique guide approach. Heritage-speaker cohort (Gujarati diaspora, Leicester/London/Bolton supplementary schools). ~8-10 article lessons in English. Gujarati script extracts need native-speaker review (Tier 3 for me). Low priority unless a partner school requests.' }
       },
       'hebrew': {
-        '8678':     { tag: 'port',    text: 'AQA Modern Hebrew 8678: standard 4-papers, F/H, three themes. PORT from MFL factory — scaffolding reuses, vocab/audio need Hebrew (right-to-left script needs UI check). Very small audience (Jewish faith schools, ~500 entries nationally). Low priority.' }
+        '8678':     { tag: 'build',   text: 'AQA Modern Hebrew 8678: NEW PLAN (2026-05-20) — exam-technique guide. ~8-10 article lessons in English on paper structure, translation technique, register issues. RTL script handling for any short Hebrew extracts. Native-speaker spot-check on niqqud (vowel pointing) for unfamiliar words. Very small audience (~500 entries nationally, Jewish faith schools).' }
       },
       'italian': {
-        '_general': { tag: 'general', text: 'Italian is the largest minority MFL in UK schools and the strongest cross-board uptake of any community-language family. AQA + Edexcel only — Eduqas/WJEC/OCR don\'t offer Italian.' },
+        '_general': { tag: 'general', text: 'Italian is the largest minority MFL in UK schools and the strongest cross-board uptake of any community-language family. AQA + Edexcel only. EXCEPTION to the heritage-language exam-technique-guide plan — Italian gets the full MFL practice build (Tier 1 confidence, mixed heritage + learner audience).' },
         '8633':     { tag: 'port',    text: 'AQA Italian 8633: full standard MFL spec (4 papers, F/H, three AQA themes, grammar/vocab lists). PORT from existing French/German/Spanish AQA practice builds is very high reuse — same factory, same input types, same theme structure; only vocabulary and example sentences need Italian. Highest-value port in this cluster.' },
         '1IN0':     { tag: 'port',    text: 'Edexcel Italian 1IN0: standard 4-skills/4-papers F/H. PORT from existing Edexcel French/German/Spanish builds — factory and theme structure align directly; Italian vocab and audio only. Pair with AQA 8633 to cover both boards efficiently.' }
       },
       'japanese': {
-        '1JA0':     { tag: 'port',    text: 'Edexcel Japanese 1JA0: standard 4-skills/4-papers F/H. PORT from MFL factory — engine reuses, but Japanese script (hiragana, katakana, kanji) needs careful UI handling for reading/typing items. Vocab/audio fresh. Motivated audience (state-school enrichment + Saturday schools). Lower priority than Italian.' }
+        '1JA0':     { tag: 'build',   text: 'Edexcel Japanese 1JA0: NEW PLAN (2026-05-20) — exam-technique guide. ~8-10 article lessons in English on paper structure, translation technique, register (formal vs casual), kanji vs kana usage strategy. Short Japanese extracts (sample answers) need native-speaker spot-check, especially honorifics and tone (Tier 2 for me). Motivated audience (state-school enrichment + Saturday schools).' }
       },
       'panjabi': {
-        '8683':     { tag: 'port',    text: 'AQA Panjabi 8683: standard 4-papers, F/H, three themes. PORT from MFL factory — scaffolding reuses, vocab/audio need Panjabi (Gurmukhi script). Heritage-speaker cohort (Sikh community, predominantly West Midlands/Slough/Southall). Small national entries; build only on direct school demand.' }
+        '8683':     { tag: 'build',   text: 'AQA Panjabi 8683: NEW PLAN (2026-05-20) — exam-technique guide approach. Heritage-speaker cohort (Sikh community in West Midlands/Slough/Southall). ~8-10 article lessons in English. Gurmukhi script extracts need native-speaker review (Tier 3 for me). Build only on direct school demand.' }
       },
       'persian': {
-        '1PN0':     { tag: 'port',    text: 'Edexcel Persian 1PN0: standard 4-skills/4-papers F/H. PORT from MFL factory — engine reuses, vocab/audio need Persian (RTL script UI check). Very small audience (Iranian-diaspora heritage speakers). Low priority unless a partner school requests.' }
+        '1PN0':     { tag: 'build',   text: 'Edexcel Persian 1PN0: NEW PLAN (2026-05-20) — exam-technique guide. ~8-10 article lessons in English. RTL/Nastaliq-style script extracts need native-speaker review (Tier 3 for me). Iranian-diaspora heritage audience. Low priority unless a partner school requests.' }
       },
       'polish': {
-        '8688':     { tag: 'port',    text: 'AQA Polish 8688: standard 4-papers, F/H, three themes. PORT from MFL factory — engine and theme structure reuse directly; Polish vocab and audio only. Largest community-language cohort (Polish is the most-spoken non-English first language in UK schools). Strong reuse + real audience makes this the second-best port after Italian.' }
+        '8688':     { tag: 'build',   text: 'AQA Polish 8688: NEW PLAN (2026-05-20) — exam-technique guide approach. Polish is the most-spoken non-English first language in UK schools, so audience is the largest of any heritage-language family. ~8-10 article lessons in English on paper structure, translation technique, register issues common to heritage speakers (case usage, formal vs colloquial). Native-speaker spot-check on Polish extracts (Tier 2 — case endings and idioms are my weak spot). Strong candidate for the heritage-language pilot.' }
       },
       'portuguese': {
+        '_general': { tag: 'general', text: 'Portuguese is one of two heritage-language EXCEPTIONS that keeps the full MFL practice build (Tier 1 confidence due to Romance-language overlap with Spanish, moderate audience).' },
         '1PG0':     { tag: 'port',    text: 'Edexcel Portuguese 1PG0: standard 4-skills/4-papers F/H. PORT from MFL factory — engine and theme structure reuse cleanly with Spanish (similar Romance structure); Portuguese vocab/audio only. Heritage-speaker audience (Portuguese and Brazilian-Portuguese communities, predominantly London). Moderate priority.' }
       },
       'russian': {
-        '1RU0':     { tag: 'port',    text: 'Edexcel Russian 1RU0: standard 4-skills/4-papers F/H. PORT from MFL factory — scaffolding reuses, vocab/audio need Russian (Cyrillic UI check, especially typed input items). Niche audience (Russian-speaking diaspora, independent schools). Low priority.' }
+        '1RU0':     { tag: 'build',   text: 'Edexcel Russian 1RU0: NEW PLAN (2026-05-20) — exam-technique guide approach. ~8-10 article lessons in English on paper structure, translation technique (both directions), register, mark-scheme calibration. Short Russian extracts (sample answers, Cyrillic) need native-speaker spot-check (Tier 2 for me — case usage and idioms). NOMINATED PILOT for the heritage-language exam-technique-guide approach: reasonable audience, my content level for English-heavy framing is solid, Edexcel-only spec keeps wiring simple.' }
       },
       'turkish': {
-        '1TU0':     { tag: 'port',    text: 'Edexcel Turkish 1TU0: standard 4-skills/4-papers F/H. PORT from MFL factory — scaffolding reuses, vocab/audio need Turkish (Latin script with diacritics, no special UI work). Heritage-speaker audience (Turkish/Cypriot communities, predominantly North London). Small entries; build on direct school demand.' }
+        '1TU0':     { tag: 'build',   text: 'Edexcel Turkish 1TU0: NEW PLAN (2026-05-20) — exam-technique guide. ~8-10 article lessons in English. Turkish uses Latin script with diacritics, so script handling is straightforward. Native-speaker spot-check on Turkish extracts (Tier 2 for me). Heritage-speaker audience (Turkish/Cypriot communities, North London).' }
       },
       'urdu': {
-        '8648':     { tag: 'port',    text: 'AQA Urdu 8648: standard 4-papers, F/H, three themes. PORT from MFL factory — scaffolding reuses, vocab/audio need Urdu (Nastaliq script, RTL UI check). Reasonable cohort (heritage speakers in Birmingham, Bradford, East London). Moderate priority.' },
-        '1UR0':     { tag: 'port',    text: 'Edexcel Urdu 1UR0: standard 4-skills/4-papers F/H. PORT from MFL factory — engine reuses, Urdu vocab and audio needed. Pair with AQA 8648 build for both-board coverage. Same heritage-speaker audience as AQA version.' }
+        '_general': { tag: 'general', text: 'NEW PLAN (2026-05-20): exam-technique guide approach, not full MFL build. Heritage-speaker audience (Birmingham, Bradford, East London). Both boards covered.' },
+        '8648':     { tag: 'build',   text: 'AQA Urdu 8648: ~8-10 article lessons in English on paper structure, translation technique, register issues. Nastaliq RTL script extracts need native-speaker review (Tier 3 for me). Reasonable cohort — strong candidate after Russian pilot lands.' },
+        '1UR0':     { tag: 'build',   text: 'Edexcel Urdu 1UR0: same exam-technique-guide plan as AQA 8648, adapted to Edexcel paper structure. Build paired with AQA version once template is proven.' }
       },
 
       // === Cambridge Nationals (OCR-only, no aliasing possible) ===
