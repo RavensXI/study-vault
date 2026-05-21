@@ -165,7 +165,9 @@
     ],
     'health-social-care': [
       { board: 'Edexcel', slug: 'health-social-care-edexcel' },
-      { board: 'OCR', slug: 'health-social-care-ocr' }
+      { board: 'OCR', slug: 'health-social-care-ocr' },
+      { board: 'Eduqas', slug: 'health-social-care-eduqas' },
+      { board: 'WJEC', slug: 'health-social-care-eduqas' }
     ],
     'food-preparation-and-nutrition': [
       { board: 'Eduqas', slug: 'food-preparation-and-nutrition-eduqas' }
