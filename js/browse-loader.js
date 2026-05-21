@@ -177,6 +177,9 @@
     'enterprise-and-marketing': [
       { board: 'OCR', slug: 'cambridge-nationals-enterprise-and-marketing' }
     ],
+    'sport-studies': [
+      { board: 'OCR', slug: 'cambridge-nationals-sport-studies' }
+    ],
     'computer-science': [
       { board: 'OCR', slug: 'computer-science' },
       { board: 'AQA', slug: 'computer-science-aqa' },
