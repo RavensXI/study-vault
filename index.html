@@ -1440,6 +1440,21 @@
       var gridEl = document.getElementById('home-grid');
       var headerEl = document.getElementById('home-section-header');
 
+      // Board label formatter — uppercases real acronyms (AQA, OCR, WJEC, NCFE),
+      // proper-cases other boards (Edexcel, Eduqas, Pearson), and uppercases
+      // single-letter tier markers (Edexcel A, OCR B). Input is the wizard's
+      // lowercase board key (e.g. 'edexcel a', 'aqa short course').
+      var BOARD_ACRONYMS = { AQA: 1, OCR: 1, WJEC: 1, NCFE: 1, BTEC: 1, NEA: 1 };
+      function formatBoardLabel(s) {
+        if (!s) return '';
+        return s.split(/\s+/).map(function (tok) {
+          var up = tok.toUpperCase();
+          if (BOARD_ACRONYMS[up]) return up;
+          if (tok.length === 1) return up;
+          return tok.charAt(0).toUpperCase() + tok.slice(1).toLowerCase();
+        }).join(' ');
+      }
+
       var freeSubjectMeta = {
         // New board-suffixed keys (post-2026-05-04 slug refactor)
         'maths-edexcel': { name: 'Mathematics', image: '/images/subject-maths.jpg', accent: '#2563eb', detail: '6 units' },
@@ -1520,7 +1535,7 @@
           if (freeSepSci && (s.slug === 'science' || s.baseSlug === 'science')) return;
           var meta = freeSubjectMeta[s.baseSlug] || freeSubjectMeta[s.slug] || { name: s.slug, image: '', accent: '#666', detail: '' };
           var cardName = meta.name;
-          var boardLabel = (s.examBoard || '').toUpperCase();
+          var boardLabel = formatBoardLabel(s.examBoard || '');
           cardsHtml += '<a href="/browse/' + s.slug + '" class="home-card sv-reveal" data-subject="' + s.slug + '" style="--card-accent: ' + meta.accent + '">';
           if (meta.image) {
             cardsHtml += '<img class="home-card-img" src="' + meta.image + '" alt="' + cardName + '" width="500" height="300" loading="lazy" decoding="async">';
