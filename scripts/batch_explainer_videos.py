@@ -126,6 +126,9 @@ def build_explainer_focus(lesson, subject_name, unit_name, exam_board, unit_less
         f"assumed knowledge and tease future ones briefly, but do not teach "
         f"content from other lessons in detail — that is what those lessons are for.\n\n"
         f"TONE AND LANGUAGE:\n"
+        f"- Speak with a single consistent British English (UK) narrator throughout. "
+        f"Pronounce all place names, units, and proper nouns in British English. "
+        f"Do NOT switch accent mid-video even when discussing non-UK content.\n"
         f"- Clear, focused explanation suitable for a 15-16 year old GCSE student.\n"
         f"- Preserve key subject-specific terms students need for exams. Define "
         f"them when first introduced.\n"
@@ -284,7 +287,7 @@ def cmd_generate(args):
         focus = build_explainer_focus(lesson, entry["subject_name"], entry["unit_name"],
                                        entry["exam_board"], entry["unit_lessons"])
         try:
-            nlm_run(["video", "create", notebook_id, "--format", "explainer", "--focus", focus, "--confirm"], timeout=90)
+            nlm_run(["video", "create", notebook_id, "--format", "explainer", "--language", "en-GB", "--focus", focus, "--confirm"], timeout=90)
         except Exception as e:
             print(f"  WARN: video create raised: {str(e)[:120]}")
         time.sleep(2)

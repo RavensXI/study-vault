@@ -72,7 +72,7 @@ FACT_CHECK_REQUIRED = {
     # Engineering (vocational — has named technologies/standards/dates that fabricate easily)
     "engineering-eduqas",
     # Computer Science (named scientists, dates, UK legislation, programming language history)
-    "computer-science-aqa",
+    "computer-science-aqa", "computer-science-eduqas",
     # Information Technology (vocational — named legislation, AR/IoT examples,
     # cyber-security cases that fabricate easily)
     "it-ocr",
@@ -81,7 +81,15 @@ FACT_CHECK_REQUIRED = {
     # Seaton, Gerbner, Blumler & Katz, BBFC/OFCOM/IPSO/ASA/PEGI scope)
     "media-studies-aqa",
     # PE
-    "physical-education-aqa", "physical-education-ocr",
+    "physical-education-aqa", "physical-education-ocr", "physical-education-edexcel",
+    # Geology (named formations, scientists, dates, crater sizes that fabricate easily)
+    "geology-eduqas",
+    # Design & Technology (named designers, products, regulations, material properties)
+    "design-technology-eduqas", "design-technology",
+    # Electronics (named inventors, IC functions, regulations)
+    "electronics-eduqas",
+    # Cambridge Nationals Enterprise & Marketing (real-business case studies, regs)
+    "cambridge-nationals-enterprise-and-marketing",
     # Citizenship
     "citizenship-aqa",
     # Music
