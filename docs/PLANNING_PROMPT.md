@@ -202,7 +202,7 @@ Return a single JSON object. No markdown code fences. No explanation text outsid
       "body_class": "unit-religious-education-1",
       "accent": "#7c2d12",
       "accent_light": "#fef2f2",
-      "accent_badge": "#b91c1c",
+      "accent_badge": "#7c2d1233",
       "lesson_count": 5,
       "sort_order": 1,
       "lessons": [
@@ -261,6 +261,11 @@ Subject type for calibration: "core" | "full-gcse-100-exam" | "gcse-with-coursew
 
 Target hero colour: one hex value for the subject's dominant accent. Unit accents can vary within the palette.
 
+Accent / accent_light / accent_badge per unit:
+- `accent` — solid 6-digit hex (e.g. `#7c2d12`). This is the unit's dominant colour.
+- `accent_light` — pale tint of the accent, used as the unit card background (e.g. `#fef2f2`).
+- `accent_badge` — **MUST be the translucent form of `accent`: 6-digit hex + `33` alpha suffix** (e.g. `#7c2d1233`). This produces a ~20% opacity pill background so dark lesson title text renders legibly on top. **NEVER use a solid darker hex** like `#b91c1c` — students cannot read black title text on a dark solid badge. Pattern: `accent_badge = accent + '33'`.
+
 ---
 
 VALIDATION BEFORE RETURNING
@@ -272,6 +277,7 @@ Check your own output:
 - No spec codes, paper codes, or component codes in any user-facing string
 - Every teaching_brief entry has a cited source
 - Lesson counts fit the subject_type band
+- **Every unit's `accent_badge` is the translucent form of its `accent`** — 6-digit hex + `33` alpha suffix (e.g. accent `#7c2d12` → accent_badge `#7c2d1233`). Solid badge values like `#b91c1c` are wrong and will break the lesson-title pill legibility. Grep the JSON: every `accent_badge` value MUST be 9 chars long ending `33`.
 
 If building against an existing board (existing_board_plan provided):
 - `baseline_transferability` is set

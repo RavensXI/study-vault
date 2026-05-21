@@ -48,6 +48,24 @@ def slugify(s: str) -> str:
     return s[:80]
 
 
+def translucent_badge(accent: str, badge_from_plan: str) -> str:
+    """Force accent_badge to translucent form (<accent>33) regardless of plan.
+
+    Past planners produced solid darker hexes (e.g. #92400e instead of
+    #b4530933) which made dark lesson-title text illegible on the unit
+    pill. Memory rule: feedback_accent_badge_must_be_translucent.
+    """
+    if (
+        isinstance(badge_from_plan, str)
+        and len(badge_from_plan) == 9
+        and badge_from_plan.lower().endswith("33")
+    ):
+        return badge_from_plan
+    if isinstance(accent, str) and len(accent) == 7 and accent.startswith("#"):
+        return accent + "33"
+    return badge_from_plan  # last resort: pass through unchanged
+
+
 print(f"=== Activating {SUBJECT_SLUG} ===\n")
 
 existing = (
@@ -186,7 +204,7 @@ for pu in plan["article_units"]:
         "body_class": pu["body_class"],
         "accent": pu["accent"],
         "accent_light": pu["accent_light"],
-        "accent_badge": pu["accent_badge"],
+        "accent_badge": translucent_badge(pu["accent"], pu["accent_badge"]),
         "lesson_count": pu["lesson_count"],
         "sort_order": pu["sort_order"],
     }

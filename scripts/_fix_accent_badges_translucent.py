@@ -18,6 +18,7 @@ SLUGS = [
     'geology-eduqas',
     'design-technology-eduqas',
     'computer-science-eduqas',
+    'cambridge-nationals-enterprise-and-marketing',
 ]
 
 
