@@ -174,6 +174,9 @@
     'statistics': [
       { board: 'AQA', slug: 'statistics-aqa' }
     ],
+    'enterprise-and-marketing': [
+      { board: 'OCR', slug: 'cambridge-nationals-enterprise-and-marketing' }
+    ],
     'computer-science': [
       { board: 'OCR', slug: 'computer-science' },
       { board: 'AQA', slug: 'computer-science-aqa' },
