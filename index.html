@@ -2011,7 +2011,7 @@
         religionsCap: 2,
         religionsHelper: '(pick 2 — Beliefs only, no Practices)',
         themesCap: 2,
-        themesHelper: '(tap both — both themes are mandatory for the Short Course)',
+        themesHelper: '(both mandatory — already included)',
         course_type: 'short',
         religions: [
           { slug: 'buddhism', name: 'Buddhism' },
@@ -2974,13 +2974,21 @@
       }
 
       // ============================================================
-      // AQA (and any other board) — original 2-of-N religions + N-of-M themes flow
+      // AQA (and any other board) — original 2-of-N religions + N-of-M themes flow.
+      // AQA Short Course (8061) reuses this path but pre-populates both themes
+      // (they're mandatory in the spec — not a meaningful pick) and renders
+      // them as read-only pre-selected pills.
       // ============================================================
       var opts = fwGetREOpts();
       if (!opts) return;
+      var isShortCourse = (board === 'aqa short course');
 
       if (subhead) {
-        subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
+        if (isShortCourse) {
+          subhead.innerHTML = 'AQA Religious Studies Short Course — pick <strong>2 religions</strong> from the four below (Beliefs only). Both themes are <strong>mandatory</strong> and already included for you.';
+        } else {
+          subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
+        }
       }
 
       function buildAqaSection(heading, helper, items, stateKey, max) {
@@ -3013,8 +3021,38 @@
         container.appendChild(sectionEl);
       }
 
+      // Static "already included" section for Short Course themes — both are
+      // mandatory in the spec, no point making the student tap them.
+      function buildAqaStaticThemes(items) {
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML =
+          '<h3>Themes <span style="font-weight:400;color:#7a7068;font-size:0.8rem">(both mandatory — already included)</span></h3>' +
+          '<div class="fw-text-options" data-group="themes"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+        items.forEach(function (item) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn selected';
+          btn.type = 'button';
+          btn.textContent = item.name;
+          btn.dataset.value = item.slug;
+          btn.style.cursor = 'default';
+          btn.setAttribute('aria-disabled', 'true');
+          btn.addEventListener('click', function (e) { e.preventDefault(); });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      }
+
       buildAqaSection('Religions', opts.religionsHelper, opts.religions, 'religions', opts.religionsCap);
-      buildAqaSection('Themes', opts.themesHelper, opts.themes, 'themes', opts.themesCap);
+      if (isShortCourse) {
+        // Pre-populate state so fwUpdateREDoneBtn sees both themes as picked,
+        // then render them as read-only pre-selected pills.
+        wizardState.re.themes = opts.themes.map(function (t) { return t.slug; });
+        buildAqaStaticThemes(opts.themes);
+      } else {
+        buildAqaSection('Themes', opts.themesHelper, opts.themes, 'themes', opts.themesCap);
+      }
 
       fwUpdateREDoneBtn();
     }
