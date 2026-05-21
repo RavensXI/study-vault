@@ -1,0 +1,163 @@
+{
+  "_lesson_number": 6,
+  "_unit_slug": "engineering-systems",
+  "_subject_slug": "engineering-aqa",
+  "description": "How microcontrollers work, flowchart programming, ADC and interfacing with transistors.",
+  "content_html": "<h2 data-narration-id=\"n1\">What Is a Microcontroller?</h2>\n<p data-narration-id=\"n2\">A <dfn class=\"term\" data-def=\"A small integrated circuit that contains a processor, memory and programmable input and output connections on a single chip, used to control engineered systems.\">microcontroller</dfn> is a small computer on a single chip. It contains a processor (to execute instructions), memory (to store the program and data) and a set of input and output connections &mdash; all on one integrated circuit. Microcontrollers run a program that reads sensor inputs, makes decisions and drives output devices. They replace large banks of discrete logic gates, making control systems compact, flexible and reprogrammable.</p>\n<p data-narration-id=\"n3\">Common microcontroller families include the <strong>PIC</strong> (Peripheral Interface Controller &mdash; widely used in industrial and automotive applications) and development boards such as the <strong>BBC micro:bit</strong> and <strong>Arduino</strong> (used in school workshops and rapid prototyping). For the purposes of this specification, the key rule is that a microcontroller is limited to <strong>three inputs and three outputs</strong> within an engineered system &mdash; this keeps the design manageable at GCSE level.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Cover this and write the input-process-output model for a microcontroller system from memory, then give one real example for each stage.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>The microcontroller follows the input&ndash;process&ndash;output model. Sensors and switches are inputs; the microcontroller&rsquo;s program is the process; actuators (motors, solenoids, LEDs, buzzers) are outputs. The program runs in a continuous loop: read inputs &rarr; make decision &rarr; set outputs &rarr; repeat.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Flowchart Programming</h2>\n<p data-narration-id=\"n6\">Microcontrollers are typically programmed using a <dfn class=\"term\" data-def=\"A visual programming method that represents the steps of a program as a sequence of standard flowchart symbols (terminator, process, input/output, decision), which can be directly translated into code.\">flowchart program</dfn> at GCSE level. A flowchart shows exactly what the microcontroller does at each step, making it easy to trace the logic before writing code. The standard symbols are the same four shapes from Lesson 1: oval (start/stop), rectangle (process), parallelogram (input/output) and diamond (decision).</p>\n<p data-narration-id=\"n7\">A typical microcontroller flowchart for a temperature-controlled fan looks like this in sequence:</p>\n<ol>\n  <li data-narration-id=\"n8\">START</li>\n  <li data-narration-id=\"n9\">Read temperature sensor (ADC converts analogue output to digital number)</li>\n  <li data-narration-id=\"n10\">Decision: is temperature above threshold (e.g. 30&deg;C)?</li>\n  <li data-narration-id=\"n11\">YES &rarr; Switch fan motor ON; loop back to &ldquo;Read temperature sensor&rdquo;</li>\n  <li data-narration-id=\"n12\">NO &rarr; Switch fan motor OFF; loop back to &ldquo;Read temperature sensor&rdquo;</li>\n</ol>\n<p data-narration-id=\"n13\">This loop runs continuously while the system is powered. The decision diamond and its YES/NO branches create the responsive behaviour. Changing the threshold value in the program immediately changes the system behaviour &mdash; no rewiring needed. This is a key advantage of programmable systems over fixed logic-gate circuits.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Why Use a Microcontroller Instead of Discrete Logic Gates?</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\">Discrete logic gates are fixed &mdash; once a circuit is built, its behaviour is determined by the physical wiring. Adding a new condition means redesigning and rebuilding the circuit. A microcontroller replaces all the logic gates with a program, so:</p>\n    <ul>\n      <li data-narration-id=\"n15\">Behaviour can be changed by reprogramming &mdash; no hardware changes needed.</li>\n      <li data-narration-id=\"n16\">Multiple conditions and complex decision trees can be handled by a single chip that would require dozens of logic gates if built from discrete components.</li>\n      <li data-narration-id=\"n17\">The same hardware platform (e.g. Arduino) can be programmed to control a fan, a door lock or a conveyor &mdash; reducing component variety and manufacturing cost.</li>\n      <li data-narration-id=\"n18\">Timing functions (delays, PWM motor speed control) are built into the microcontroller &mdash; they would require separate timer ICs in a discrete circuit.</li>\n    </ul>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n19\">The ADC and Sensor Thresholds</h2>\n<p data-narration-id=\"n20\">Most real-world sensors (thermistors, LDRs, pressure transducers) produce <dfn class=\"term\" data-def=\"A continuously varying voltage output from a sensor that represents a physical quantity; must be converted to digital before a microcontroller can use it.\">analogue sensor outputs</dfn>. The microcontroller&rsquo;s internal ADC converts these to a digital number (typically 0&ndash;1023 for a 10-bit ADC). The program then compares this number to a <dfn class=\"term\" data-def=\"A preset digital value in the microcontroller program that the sensor reading is compared against to trigger an action.\">sensor threshold</dfn>: if the reading exceeds the threshold, the output is triggered; if not, it stays off.</p>\n<p data-narration-id=\"n21\">Example: an LDR connected to a 10-bit ADC produces values from 0 (very dark) to 1023 (very bright). The program might set a threshold of 200: if reading &lt; 200, switch on the lamp; if reading &ge; 200, switch off. Adjusting the threshold changes the light level at which the lamp triggers, without any soldering.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n22\" data-revision-tip=\"Close this and explain in two sentences why a threshold value is used in a microcontroller program, mentioning ADC and sensor reading.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A sensor threshold is a number stored in the microcontroller program. The ADC converts the analogue sensor voltage into a digital value; the program compares this to the threshold and decides what action to take. Changing the threshold changes the system&rsquo;s sensitivity without rewiring &mdash; this is a major advantage of programmable control over fixed logic.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Interfacing: Transistors and FETs as Driver Components</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n23\">Microcontroller output pins supply only a small current (typically 20&ndash;40&thinsp;mA). Most actuators (motors, solenoids, lamps) draw far more current than this. Connecting a motor directly to an output pin would damage or destroy the microcontroller. An <dfn class=\"term\" data-def=\"A component placed between a microcontroller output and a high-current load device to allow the low-current control signal to switch the larger load current safely.\">interfacing component</dfn> is used to switch the larger current safely.</p>\n    <p data-narration-id=\"n24\">The two main interfacing components are:</p>\n    <ul>\n      <li data-narration-id=\"n25\"><strong>Bipolar junction transistor (BJT)</strong> &mdash; a small base current from the microcontroller controls a much larger collector-to-emitter current through the load. Think of it as a current-controlled switch. An NPN transistor is used with the load between the positive supply and the collector, and the emitter to ground.</li>\n      <li data-narration-id=\"n26\"><strong>Field-effect transistor (FET/MOSFET)</strong> &mdash; a voltage on the gate terminal switches a much larger current through the drain-to-source path. FETs are voltage-controlled (not current-controlled like BJTs) and are preferred for driving motors and high-power LEDs because they can switch rapidly and waste very little energy when fully on.</li>\n    </ul>\n    <p data-narration-id=\"n27\">A protection diode (flyback diode) is placed across an inductive load (motor, solenoid) in parallel to absorb the voltage spike that occurs when the device is switched off. Without it, the spike can destroy the transistor or FET.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n28\">Industrial Application: Pick-and-Place Machines</h2>\n<p data-narration-id=\"n29\">A pick-and-place machine on an electronics production line uses a microcontroller to control three outputs: a vacuum gripper (picks up components), an X-Y positioning motor (moves to target location) and a placement actuator (releases the component). Three sensors (position encoder, component-present sensor, placement-complete sensor) provide the three inputs. The microcontroller loops through its flowchart program hundreds of times per second, precisely coordinating all six connections. This is exactly the three-inputs, three-outputs model described in the specification.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n30\">If a question asks you to &ldquo;explain why a microcontroller is used instead of discrete logic gates&rdquo;, focus on two advantages: (1) reprogrammable &mdash; behaviour can be changed without rewiring; (2) handles complex multiple conditions in a compact single chip. For flowchart questions, always use the four correct symbols &mdash; draw the diamond for decisions, the rectangle for processes. A common error is putting a decision in a rectangle &mdash; this loses a mark. If a question mentions ADC, always explain that it converts an analogue sensor voltage to a digital number the microcontroller can compare to a threshold.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n31\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n32\">A microcontroller contains a processor, memory and I/O on one chip; it reads sensor inputs (via ADC if analogue), runs a flowchart-based program and drives output actuators &mdash; the three-inputs-three-outputs model.</li>\n  <li data-narration-id=\"n33\">Flowchart programs use four symbols (oval, rectangle, parallelogram, diamond); the decision diamond creates branching and looping behaviour that replaces banks of discrete logic gates, and can be updated by reprogramming without hardware changes.</li>\n  <li data-narration-id=\"n34\">Interfacing components (transistors and FETs) are needed between microcontroller output pins and high-current actuators; flyback diodes protect against inductive voltage spikes when motors or solenoids switch off.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following best describes a microcontroller?\nA) A type of logic gate used to invert a signal\nB) A single chip containing a processor, memory and programmable I/O connections\nC) A relay that switches between mains and battery power\nD) A sensor that converts temperature to a digital signal",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) A single chip containing a processor, memory and programmable I/O connections [1 mark]"
+    },
+    {
+      "text": "A microcontroller is used in an automatic plant-watering system. A soil moisture sensor is the input; a water pump motor is the output.\n\nThe system must switch the pump ON when the moisture reading falls below a set threshold, and switch it OFF when the reading is at or above the threshold.\n\nDraw and label a flowchart for this system. Your flowchart must include: START, reading the sensor, a decision, switching the pump on or off, and a loop back.",
+      "type": "5 marks — Complete the Flowchart or System Diagram",
+      "marks": "Award marks for:\n- START terminator (oval) present [1 mark]\n- 'Read soil moisture sensor' in a rectangle or parallelogram, with correct placement [1 mark]\n- Decision diamond: 'Is moisture below threshold?' (or equivalent) with YES and NO branches [1 mark]\n- YES branch: 'Switch pump ON'; NO branch: 'Switch pump OFF' (or vice versa — check logic is consistent) [1 mark]\n- Feedback loop back to 'Read sensor' from both branches (continuous control loop) [1 mark]\n[5 marks]"
+    },
+    {
+      "text": "State two advantages of using a microcontroller to control an automated system instead of using a fixed logic gate circuit.",
+      "type": "2 marks — Give Two Reasons",
+      "marks": "Award 1 mark per advantage, up to 2 marks:\n- A microcontroller can be reprogrammed to change its behaviour without rewiring or replacing hardware.\n- A single microcontroller can handle many inputs and outputs with complex decision logic that would require numerous discrete logic gate ICs.\n- Built-in timing and ADC functions remove the need for separate timer ICs and converter chips.\n- The same microcontroller hardware can be reused for different products by changing only the program.\n[2 marks — vague answers like 'easier' without specifying the mechanism do not earn marks]"
+    },
+    {
+      "text": "Explain why a transistor or FET is needed between a microcontroller output pin and a DC motor. In your answer, refer to current.",
+      "type": "2 marks — State / Describe",
+      "marks": "Award 1 mark per correct point, up to 2 marks:\n- A microcontroller output pin can only supply a small current (typically 20-40 mA), which is not enough to drive a motor.\n- A transistor or FET is used as a switch: a small control current/voltage on the base/gate switches a much larger current through the motor.\n- Without the interfacing component, the large motor current would damage or destroy the microcontroller.\n[2 marks — must mention small control current vs large motor current]"
+    },
+    {
+      "text": "A light-sensing system uses an LDR, a microcontroller and an LED indicator. The LDR is connected to the microcontroller via an ADC. The system must switch the LED on when light levels are low.\n\nDescribe the four stages that happen between the LDR detecting a change in light level and the LED switching on.",
+      "type": "4 marks — Describe Stages of a Process",
+      "marks": "Award 1 mark per correct stage, up to 4 marks:\n1. The LDR resistance increases as light falls, changing the analogue voltage in the sensing circuit.\n2. The ADC converts this analogue voltage into a digital number (e.g. 0-1023).\n3. The microcontroller program compares the digital number to the stored threshold value.\n4. If the reading is below the threshold, the program sets the output pin HIGH, which switches the LED on (via a transistor/directly if current is within limit).\n[4 marks]"
+    },
+    {
+      "text": "Aethon Robotics is designing an automated greenhouse monitoring system. The system monitors temperature and humidity using two analogue sensors, and controls a heating element, a ventilation fan and a misting pump. The lead engineer proposes using a microcontroller rather than separate logic gate circuits for each function.\n\nEvaluate this proposal. Consider advantages and disadvantages of using a microcontroller for this application.",
+      "type": "8 marks — Extended Response: Evaluate an Engineering Decision",
+      "marks": "Mastering (7-8): Detailed evaluation. Advantages: single chip handles all three output devices and two sensor inputs (within the three-inputs/three-outputs model if temperature and humidity are the two active inputs); reprogrammable — thresholds and timing can be adjusted for different crops without hardware changes; built-in ADC converts analogue sensor outputs; timing control allows delays (e.g. fan runs for 30 s after triggering). Disadvantages: program must be written and tested; if the microcontroller fails, all three functions stop; needs correct interfacing components for high-current actuators (heater, fan, pump). Compares with discrete approach (very complex wiring, not reprogrammable, harder to modify). Reaches justified conclusion referencing the greenhouse context.\n\nSecure (5-6): Identifies key advantages (reprogrammable, handles multiple I/O) and at least one disadvantage. Some comparison with alternative. Conclusion present.\n\nDeveloping (3-4): Describes microcontroller function and one or two advantages. Limited evaluation depth.\n\nEmerging (1-2): Basic description of what a microcontroller is with minimal evaluative comment.\n\n[8 marks]"
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "What does a microcontroller program run in to continuously monitor inputs and update outputs?",
+      "options": ["A decision tree", "A continuous loop", "A one-shot sequence", "A timer interrupt only"],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "Why is a transistor or FET placed between a microcontroller output and a motor?",
+      "options": ["To convert AC to DC", "To switch a large current using a small control signal from the microcontroller", "To smooth the voltage supply to the motor", "To amplify the sensor signal"],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A microcontroller uses a sensor _____ value stored in the program to decide when to trigger an output.",
+      "options": ["resistance", "frequency", "threshold", "wavelength"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "In a microcontroller flowchart, a _____ shape is used to represent a YES/NO decision.",
+      "options": ["rectangle", "oval", "diamond", "parallelogram"],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each component to its role in a programmable system:",
+      "left": ["Thermistor", "ADC", "Transistor (as interfacing component)"],
+      "right": ["Analogue input sensor that changes resistance with temperature", "Converts analogue sensor voltage to a digital number", "Switches a high-current load using a small microcontroller signal"],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {"q": "What is a microcontroller?", "a": "A single chip containing a processor, memory and programmable I/O connections used to control engineered systems."},
+    {"q": "What is the PIC?", "a": "Peripheral Interface Controller — a widely used microcontroller family in industrial and automotive applications."},
+    {"q": "What does a flowchart program represent in a microcontroller system?", "a": "The sequence of steps, decisions and loops the microcontroller executes to control its inputs and outputs."},
+    {"q": "Why can a microcontroller replace discrete logic gate circuits?", "a": "Its program handles complex decision logic in a single chip and can be reprogrammed without rewiring."},
+    {"q": "What is a sensor threshold in a microcontroller program?", "a": "A preset digital value the sensor reading is compared against to trigger an output action."},
+    {"q": "What is an interfacing component?", "a": "A transistor or FET placed between a microcontroller output pin and a high-current load to switch safely."},
+    {"q": "What is a FET (MOSFET) controlled by?", "a": "A voltage on its gate terminal — it is voltage-controlled, unlike a BJT transistor which is current-controlled."},
+    {"q": "What is a flyback diode used for?", "a": "To absorb the voltage spike produced when an inductive load (motor or solenoid) is switched off, protecting the transistor or FET."},
+    {"q": "How many inputs and outputs does the specification limit a GCSE microcontroller system to?", "a": "Three inputs and three outputs."},
+    {"q": "Name two examples of microcontroller platforms used in engineering workshops.", "a": "BBC micro:bit and Arduino."},
+    {"q": "Why does an analogue sensor need an ADC before a microcontroller can use it?", "a": "The microcontroller only processes digital (binary) numbers; the ADC converts the continuous voltage to a number the program can compare."},
+    {"q": "Name the shape used for a START or STOP in a microcontroller flowchart.", "a": "Oval (terminator)."}
+  ],
+  "glossary_terms": [
+    {"term": "microcontroller", "definition": "A small integrated circuit that contains a processor, memory and programmable input and output connections on a single chip, used to control engineered systems."},
+    {"term": "flowchart program", "definition": "A visual programming method that represents the steps of a program as a sequence of standard flowchart symbols (terminator, process, input/output, decision), which can be directly translated into code."},
+    {"term": "analogue sensor outputs", "definition": "A continuously varying voltage output from a sensor that represents a physical quantity; must be converted to digital before a microcontroller can use it."},
+    {"term": "sensor threshold", "definition": "A preset digital value in the microcontroller program that the sensor reading is compared against to trigger an action."},
+    {"term": "interfacing component", "definition": "A component placed between a microcontroller output and a high-current load device to allow the low-current control signal to switch the larger load current safely."}
+  ],
+  "hero_keywords": ["microcontroller Arduino circuit", "BBC micro:bit electronics", "programmable control system circuit board"],
+  "hero_image_caption": "A programmable microcontroller circuit board connected to sensors and output actuators",
+  "related_media": [
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "You Can Learn Arduino in 15 Minutes",
+          "description": "Rapid introduction to the Arduino microcontroller — covers the input-process-output loop, sensors and output devices in exactly the way this lesson describes.",
+          "url": "https://www.youtube.com/watch?v=nL34zDTPkcs"
+        },
+        {
+          "title": "Arduino 101 — Crash Course with Mark Rober",
+          "description": "Engaging beginner tutorial by a NASA engineer turned YouTuber — shows how a microcontroller reads sensors and controls actuators through real project examples.",
+          "url": "https://www.youtube.com/watch?v=yi29dbPnu28"
+        },
+        {
+          "title": "Beginners Arduino — Getting Started Tutorial",
+          "description": "Step-by-step guide to programming a microcontroller using flowchart-style logic — reinforces the lesson's coverage of threshold values and decision loops.",
+          "url": "https://www.youtube.com/watch?v=Qth4-aXN_TA"
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "AlphaGo (2017)",
+          "description": "Documentary on the AI system that mastered the board game Go — shows how programmable decision-making at massive scale emerges from the same sensor-threshold-output logic studied here.",
+          "url": "https://www.justwatch.com/uk/movie/alphago"
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "BBC micro:bit — Official Learning Resources",
+          "description": "Free projects and tutorials for programming the micro:bit microcontroller, including sensor inputs, LED outputs and flowchart-style block coding.",
+          "url": "https://microbit.org/projects/"
+        },
+        {
+          "title": "BBC Bitesize — Engineering",
+          "description": "Covers microcontroller structure, flowchart programs, ADC interfacing and transistor driver circuits with exam-style questions.",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/zf2f4wx"
+        }
+      ]
+    },
+    {
+      "category": "Articles & Web",
+      "emoji": "📰",
+      "items": [
+        {
+          "title": "Arduino — What is Arduino?",
+          "description": "Official overview of the Arduino platform, its use in engineering education and prototyping, and how the IPO model maps to real hardware.",
+          "url": "https://www.arduino.cc/en/Guide/Introduction"
+        },
+        {
+          "title": "The Engineer — How Microcontrollers Transformed Industrial Automation",
+          "description": "Feature on how programmable systems replaced hard-wired relay logic in factories — exactly the comparison made in the lesson's advantages section.",
+          "url": "https://www.theengineer.co.uk/content/news/how-microcontrollers-transformed-industrial-automation"
+        }
+      ]
+    }
+  ]
+}

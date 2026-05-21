@@ -1,0 +1,160 @@
+{
+  "_lesson_number": 4,
+  "_unit_slug": "engineering-systems",
+  "_subject_slug": "engineering-aqa",
+  "description": "Mains AC and battery DC power, relays, motors, solenoids and output devices compared.",
+  "content_html": "<h2 data-narration-id=\"n1\">Two Types of Electrical Power</h2>\n<p data-narration-id=\"n2\">Every electrical system needs a power supply. In engineering there are two fundamentally different types: <dfn class=\"term\" data-def=\"Alternating current — electricity in which the direction of current flow reverses many times per second, forming a sine wave. UK mains is 230 V AC at 50 Hz.\">alternating current (AC)</dfn> and <dfn class=\"term\" data-def=\"Direct current — electricity that flows continuously in one direction only. Batteries and power-supply units (PSUs) produce DC.\">direct current (DC)</dfn>.</p>\n<p data-narration-id=\"n3\">UK mains electricity is 230&thinsp;V AC at 50&thinsp;Hz. The voltage swings between a positive peak and a negative peak 50 times per second, producing a smooth sine wave. If you display mains AC on an oscilloscope you see a repeating wave; if you display battery DC you see a flat horizontal line. Mains AC is used for high-power fixed equipment (motors, heaters, industrial machinery). Batteries produce DC and are used for portable, low-power and safety-critical applications.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n4\" data-revision-tip=\"Cover this and write three differences between mains AC and battery DC from memory, including typical voltage, waveform shape and portability.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Mains AC: 230&thinsp;V, sine-wave waveform, high power, fixed location, not portable. Battery DC: typically 1.5&ndash;12&thinsp;V, flat-line waveform, lower power, portable, finite energy store. Electronic circuits (microcontrollers, sensors, logic gates) require DC &mdash; a power supply unit (PSU) converts mains AC to regulated DC.</p>\n</div>\n\n<h2 data-narration-id=\"n5\">Transformers</h2>\n<p data-narration-id=\"n6\">A <dfn class=\"term\" data-def=\"An electromagnetic device that steps AC voltage up or down using two coils (primary and secondary) wound on a shared iron core.\">transformer</dfn> changes the voltage of an AC supply. It consists of a <strong>primary coil</strong> (input) and a <strong>secondary coil</strong> (output) wound around a shared iron core. When AC flows in the primary coil, a changing magnetic field is created in the core; this induces a voltage in the secondary coil. Transformers only work with AC &mdash; a DC current creates a static magnetic field that induces nothing.</p>\n<p data-narration-id=\"n7\">The relationship between voltages and number of turns is:\n$$\\frac{V_p}{V_s} = \\frac{N_p}{N_s}$$\nwhere \\(V_p\\) is primary voltage, \\(V_s\\) is secondary voltage, \\(N_p\\) is number of primary turns and \\(N_s\\) is number of secondary turns.</p>\n<p data-narration-id=\"n8\">Example: a transformer has 2000 primary turns and 100 secondary turns. If the primary is connected to 230&thinsp;V AC:\n$$V_s = \\frac{V_p \\times N_s}{N_p} = \\frac{230 \\times 100}{2000} = 11.5\\text{ V}$$\nThis is a <strong>step-down transformer</strong> (output lower than input), used to produce safe low-voltage DC from mains. Step-up transformers increase voltage (more secondary turns than primary) and are used in electricity grid transmission.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Rectifiers: AC to DC Conversion</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n9\">A <dfn class=\"term\" data-def=\"A circuit that converts AC into DC by allowing current to flow in one direction only, using diodes.\">rectifier</dfn> converts AC into DC. A single diode produces <strong>half-wave rectification</strong> &mdash; it blocks every negative half-cycle, leaving only the positive pulses. A <strong>bridge rectifier</strong> uses four diodes arranged in a diamond so that both the positive and negative half-cycles contribute to the output (full-wave rectification). The output is pulsing DC, which is smoothed by a capacitor to produce a steady DC voltage.</p>\n    <p data-narration-id=\"n10\">In practice, a mains-powered PSU contains a step-down transformer, a bridge rectifier and a smoothing capacitor &mdash; this chain produces the stable DC that electronic circuits need. Many also include a voltage-regulator IC to hold the output at an exact value (e.g. 5&thinsp;V for a microcontroller).</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n11\">Input Control Devices: Switches</h2>\n<p data-narration-id=\"n12\">A <dfn class=\"term\" data-def=\"A component that manually or automatically makes or breaks an electrical circuit.\">switch</dfn> is the simplest input control device. Push-to-make switches (normally open) complete the circuit when pressed; push-to-break switches (normally closed) interrupt the circuit when pressed. Toggle switches, rotary switches and limit switches (triggered by a physical stop on a machine) are all common in engineering applications. Switches are direct inputs &mdash; they require a human or a mechanical actuator to operate them.</p>\n\n<h2 data-narration-id=\"n13\">The Relay &mdash; Electrically Controlled Switch</h2>\n<p data-narration-id=\"n14\">A <dfn class=\"term\" data-def=\"An electromagnetic switch that uses a small control current to open or close a circuit carrying a much larger current.\">relay</dfn> is an electromagnetic switch. A small current in the control coil creates a magnetic field that attracts an iron armature, closing (or opening) a separate set of contacts. The relay allows a low-voltage, low-current control signal (e.g. 5&thinsp;V from a microcontroller) to switch a high-voltage, high-current circuit (e.g. 230&thinsp;V AC motor). The two circuits are electrically isolated &mdash; a relay is the safe interface between control electronics and mains-powered equipment.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n15\" data-revision-tip=\"Close this and explain in two sentences why a relay is used between a microcontroller output and a 230 V motor, mentioning isolation and current.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A relay uses a small control current to switch a large load current, and keeps the two circuits electrically isolated. This protects sensitive control electronics (microcontrollers, sensors) from the high voltages and currents of mains-powered output devices like motors and heaters.</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Output Devices: Motors, Solenoids, Buzzers and Lamps</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n16\">Output devices convert electrical energy into other forms of energy. You need to know four types:</p>\n    <ul>\n      <li data-narration-id=\"n17\"><strong>Electric motor</strong> &mdash; converts electrical energy into rotary mechanical energy. Used to drive pumps, conveyors, drills and fans. DC motors are common in battery-powered tools; AC motors power industrial machinery.</li>\n      <li data-narration-id=\"n18\"><strong>Solenoid</strong> &mdash; an electromagnet with a moveable iron core (plunger). When energised, the plunger is pulled into the coil, producing linear mechanical movement. Used in door locks, valve actuators and automatic dispensing machines. A <dfn class=\"term\" data-def=\"An output device that uses an electromagnet to produce a linear push or pull movement of a metal plunger.\">solenoid</dfn> converts electrical energy to linear mechanical motion.</li>\n      <li data-narration-id=\"n19\"><strong>Buzzer and bell</strong> &mdash; audible alarms that convert electrical energy to sound. A piezo buzzer uses a piezoelectric crystal that vibrates when current is applied. An electric bell uses an electromagnet and a striker on a spring.</li>\n      <li data-narration-id=\"n20\"><strong>Lamp (light)</strong> &mdash; converts electrical energy to light and heat. Indicator lamps (signal lights on control panels) and LED assemblies are output devices. LEDs are much more energy-efficient than filament lamps.</li>\n    </ul>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n21\">Choosing a Power Supply</h2>\n<p data-narration-id=\"n22\">The choice between mains and battery depends on four factors: power requirement, portability, safety and cost. A mains supply can deliver unlimited power continuously but requires fixed wiring and is dangerous if mishandled. Batteries are self-contained and portable but have a finite energy store and must be replaced or recharged. For safety reasons, all control electronics (sensors, microcontrollers, logic circuits) should operate at low DC voltages (typically 3.3&ndash;12&thinsp;V) &mdash; mains AC must be stepped down and rectified before it can power them.</p>",
+  "exam_tip_html": "<p data-narration-id=\"n23\">For questions asking you to explain AC vs DC, draw the waveform shape (sine wave for AC, flat horizontal line for DC) and describe the direction of current flow. Saying &ldquo;AC changes direction&rdquo; without mentioning the frequency (50 Hz in the UK) or the waveform shape will not earn full marks. For transformer calculations, write the formula \n\\(\\frac{V_p}{V_s} = \\frac{N_p}{N_s}\\) first, then rearrange and substitute &mdash; show all working because method marks are available even if the arithmetic is wrong.</p>",
+  "conclusion_html": "<h3 data-narration-id=\"n24\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n25\">Mains AC (230 V, 50 Hz, sine wave) powers fixed high-power equipment; battery DC (low voltage, flat-line) powers portable and control electronics &mdash; a transformer steps voltage up or down and a rectifier converts AC to DC.</li>\n  <li data-narration-id=\"n26\">The transformer equation \\(V_p / V_s = N_p / N_s\\) links voltages to turn counts; a step-down transformer has fewer secondary turns and is used to produce safe low-voltage DC from mains.</li>\n  <li data-narration-id=\"n27\">A relay uses a small control current to safely switch a large load current, electrically isolating the control circuit from the power circuit; output devices (motors, solenoids, buzzers, lamps) convert electrical energy to mechanical, sound or light energy.</li>\n</ul>",
+  "practice_questions": [
+    {
+      "text": "Which one of the following correctly describes alternating current (AC)?\nA) Current that flows continuously in one direction only\nB) Current that reverses direction many times per second, producing a sine wave\nC) Current produced only by batteries\nD) Current that is always at a fixed low voltage",
+      "type": "1 mark — Multiple Choice",
+      "marks": "B) Current that reverses direction many times per second, producing a sine wave [1 mark]"
+    },
+    {
+      "text": "A step-down transformer has 3000 turns on the primary coil and is connected to a 230 V AC supply. The secondary coil has 150 turns.\n\nCalculate the output voltage of the secondary coil.",
+      "type": "3 marks — Calculation: Single Step",
+      "marks": "Formula: Vp/Vs = Np/Ns [1 mark]\nRearranged: Vs = Vp × Ns/Np = 230 × 150/3000 [1 mark for correct substitution]\n= 11.5 V [1 mark for correct answer with unit]\n[3 marks — method marks awarded even if arithmetic error]"
+    },
+    {
+      "text": "State two advantages of using a battery power supply instead of a mains power supply in a portable engineering diagnostic tool.",
+      "type": "2 marks — Give Two Reasons",
+      "marks": "Award 1 mark per correct advantage, up to 2 marks:\n- Batteries are portable — the tool can be used anywhere without needing a mains socket.\n- Batteries produce DC directly, which electronic circuits require without additional conversion.\n- Battery voltage is low (typically 3–12 V), making the device safer to handle than mains equipment.\n- No mains cable required — the technician can move freely around a vehicle or machine.\n[2 marks — vague answers like 'cheaper' or 'quicker' without context do not earn marks]"
+    },
+    {
+      "text": "Explain the function of a relay in an engineered system. Include in your answer:\n(a) What the relay does\n(b) Why electrical isolation between the two circuits is important",
+      "type": "4 marks — Describe Stages of a Process",
+      "marks": "(a) A relay uses a small control current in an electromagnet/coil to attract an armature/switch contacts, which switches a separate circuit carrying a much larger current. [2 marks — 1 for 'small current controls large current', 1 for electromagnetic/physical mechanism]\n(b) Isolation means the high-voltage/high-current power circuit (e.g. 230 V motor) is not electrically connected to the control circuit (e.g. 5 V microcontroller). This prevents high voltage damaging or destroying the sensitive control electronics. [2 marks — 1 for identifying the circuits as separate/not connected, 1 for consequence: protection of electronics]\n[4 marks total]"
+    },
+    {
+      "text": "Explain the difference between a motor and a solenoid as output devices in an engineering system.",
+      "type": "2 marks — State / Describe",
+      "marks": "Award 1 mark per correct point, up to 2 marks:\n- A motor converts electrical energy into continuous rotary motion; a solenoid converts electrical energy into a single linear push or pull motion.\n- Motors are used where sustained rotation is needed (e.g. pump, conveyor); solenoids are used where a short, controlled linear stroke is needed (e.g. door lock, valve).\n[2 marks]"
+    },
+    {
+      "text": "Elwick Automation Ltd designs a control system for an automated chemical-dosing pump. The pump motor runs on 230 V AC mains. The control circuit uses a microcontroller operating at 5 V DC.\n\nEvaluate the use of a relay to interface the microcontroller with the pump motor. In your answer, consider at least one alternative approach.",
+      "type": "8 marks — Extended Response: Evaluate an Engineering Decision",
+      "marks": "Mastering (7-8): Detailed explanation of the relay's function (small 5 V control signal drives coil, which switches the 230 V motor circuit). Evaluates advantages: electrical isolation protects the microcontroller from mains voltage, simple to implement, reliable, easily replaced. Evaluates disadvantages: relay switching is relatively slow (~10 ms), has moving parts that wear, produces a clicking noise. Considers an alternative (solid-state relay or TRIAC/thyristor): no moving parts, faster switching, silent, but more expensive and can fail silently without cutting power (safety concern in a chemical dosing context). Reaches a justified conclusion referencing the application.\n\nSecure (5-6): Explains the isolation benefit clearly. Identifies at least one disadvantage and one alternative with some comparison. Conclusion present but may lack full engineering reasoning.\n\nDeveloping (3-4): Describes relay function and one advantage. Limited alternative discussion.\n\nEmerging (1-2): Basic relay description with minimal reasoning.\n\n[8 marks]"
+    }
+  ],
+  "knowledge_checks": [
+    {
+      "type": "mcq",
+      "q": "UK mains electricity is 230 V AC. What does the 'AC' mean?",
+      "options": ["The current flows in one direction only", "The current reverses direction 50 times per second", "The voltage is constant", "The current is produced by a battery"],
+      "correct": 1
+    },
+    {
+      "type": "mcq",
+      "q": "What is the primary purpose of a relay in a control circuit?",
+      "options": ["To convert AC to DC", "To step up the voltage", "To use a small control current to switch a large load current, with electrical isolation", "To measure current in a circuit"],
+      "correct": 2
+    },
+    {
+      "type": "fill",
+      "q": "A transformer that has more secondary turns than primary turns is called a step-_____ transformer and increases the output voltage.",
+      "options": ["down", "up", "across", "right"],
+      "correct": 1
+    },
+    {
+      "type": "fill",
+      "q": "A solenoid converts electrical energy into _____ mechanical motion.",
+      "options": ["rotary", "oscillating", "linear", "reciprocating"],
+      "correct": 2
+    },
+    {
+      "type": "match",
+      "q": "Match each output device to the energy conversion it performs:",
+      "left": ["Electric motor", "Solenoid", "Buzzer"],
+      "right": ["Electrical energy to rotary mechanical energy", "Electrical energy to linear mechanical motion", "Electrical energy to sound"],
+      "order": [0, 1, 2]
+    }
+  ],
+  "flashcard_questions": [
+    {"q": "What waveform does mains AC produce on an oscilloscope?", "a": "A smooth sine wave."},
+    {"q": "What waveform does battery DC produce on an oscilloscope?", "a": "A flat horizontal line."},
+    {"q": "What is the UK mains voltage and frequency?", "a": "230 V AC at 50 Hz."},
+    {"q": "What is the transformer equation?", "a": "Vp/Vs = Np/Ns (primary voltage over secondary voltage equals primary turns over secondary turns)."},
+    {"q": "What is a step-down transformer?", "a": "A transformer with fewer secondary turns than primary turns, producing a lower output voltage."},
+    {"q": "What does a rectifier do?", "a": "Converts AC to DC by allowing current to flow in one direction only, using diodes."},
+    {"q": "What is a relay?", "a": "An electromagnetic switch that uses a small control current to switch a circuit carrying a much larger current."},
+    {"q": "Why is electrical isolation in a relay important?", "a": "It prevents high voltage in the load circuit from damaging sensitive control electronics."},
+    {"q": "What does an electric motor convert electrical energy into?", "a": "Rotary mechanical energy."},
+    {"q": "What does a solenoid produce when energised?", "a": "A linear push or pull movement of its metal plunger."},
+    {"q": "Name the four main output devices in an electrical system.", "a": "Motor, solenoid, buzzer/bell, lamp (LED)."},
+    {"q": "Why do electronic circuits need DC rather than AC?", "a": "Electronic components (microcontrollers, logic gates) require a constant-direction current at a stable low voltage."}
+  ],
+  "glossary_terms": [
+    {"term": "alternating current (AC)", "definition": "Electricity in which the direction of current flow reverses many times per second, forming a sine wave. UK mains is 230 V AC at 50 Hz."},
+    {"term": "direct current (DC)", "definition": "Electricity that flows continuously in one direction only. Batteries and power-supply units (PSUs) produce DC."},
+    {"term": "transformer", "definition": "An electromagnetic device that steps AC voltage up or down using two coils (primary and secondary) wound on a shared iron core."},
+    {"term": "rectifier", "definition": "A circuit that converts AC into DC by allowing current to flow in one direction only, using diodes."},
+    {"term": "switch", "definition": "A component that manually or automatically makes or breaks an electrical circuit."},
+    {"term": "relay", "definition": "An electromagnetic switch that uses a small control current to open or close a circuit carrying a much larger current."},
+    {"term": "solenoid", "definition": "An output device that uses an electromagnet to produce a linear push or pull movement of a metal plunger."}
+  ],
+  "hero_keywords": ["electrical power supply engineering", "transformer electricity station", "control panel relay"],
+  "hero_image_caption": "Industrial electrical control panel with relays, switches and power-supply components",
+  "related_media": [
+    {
+      "category": "Videos & Channels",
+      "emoji": "📺",
+      "items": [
+        {
+          "title": "How Does a Transformer Work — Working Principle Electrical Engineering",
+          "description": "Animated explainer covering primary and secondary coils, the turn ratio equation and step-up vs step-down transformers — matches this lesson's transformer section exactly.",
+          "url": "https://www.youtube.com/watch?v=UchitHGF4n8"
+        },
+        {
+          "title": "What is a Transformer? An Electrical Transformer Tutorial",
+          "description": "Clear tutorial on how transformers convert AC voltages, with the Vp/Vs = Np/Ns formula and practical examples from mains power supplies.",
+          "url": "https://www.youtube.com/watch?v=GMePE7NZcxw"
+        }
+      ]
+    },
+    {
+      "category": "Documentaries",
+      "emoji": "🎬",
+      "items": [
+        {
+          "title": "The Current War (2017)",
+          "description": "The rivalry between Edison (DC) and Westinghouse (AC) that shaped how electricity is distributed today — brings the AC vs DC debate to life.",
+          "url": "https://www.justwatch.com/uk/movie/the-current-war"
+        }
+      ]
+    },
+    {
+      "category": "Study Tools",
+      "emoji": "🛠️",
+      "items": [
+        {
+          "title": "BBC Bitesize — Engineering",
+          "description": "Covers AC vs DC, transformer calculations and relay operation with exam-style questions.",
+          "url": "https://www.bbc.co.uk/bitesize/subjects/zf2f4wx"
+        },
+        {
+          "title": "Electronics Tutorials — Transformers",
+          "description": "Comprehensive reference covering transformer theory, turn ratios, rectification and smoothing — useful for deeper understanding of the PSU chain.",
+          "url": "https://www.electronics-tutorials.ws/transformer/transformer-basics.html"
+        }
+      ]
+    },
+    {
+      "category": "Articles & Web",
+      "emoji": "📰",
+      "items": [
+        {
+          "title": "How Stuff Works — How Relays Work",
+          "description": "Illustrated guide to the relay's electromagnet mechanism and how a small control current switches a large load — covers exactly what examiners ask.",
+          "url": "https://electronics.howstuffworks.com/relay.htm"
+        },
+        {
+          "title": "IET — Why the UK Uses 230 V AC at 50 Hz",
+          "description": "The Institution of Engineering and Technology explains the history and engineering reasons behind UK mains supply standards.",
+          "url": "https://www.theiet.org/media/10768/voltage-frequency.pdf"
+        }
+      ]
+    }
+  ]
+}

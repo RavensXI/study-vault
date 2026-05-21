@@ -189,6 +189,14 @@
       { board: 'Eduqas', slug: 'computer-science-eduqas' },
       { board: 'WJEC', slug: 'computer-science-eduqas' }
     ],
+    'engineering': [
+      { board: 'AQA', slug: 'engineering-aqa' },
+      { board: 'Eduqas', slug: 'engineering-eduqas' },
+      { board: 'WJEC', slug: 'engineering-eduqas' }
+    ],
+    'astronomy': [
+      { board: 'Edexcel', slug: 'astronomy-edexcel' }
+    ],
     'design-technology': [
       { board: 'AQA', slug: 'design-technology' },
       { board: 'Eduqas', slug: 'design-technology-eduqas' },
