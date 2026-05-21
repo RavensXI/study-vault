@@ -696,7 +696,7 @@
     if (TIERED.indexOf(subjectSlug) !== -1) {
       var tierLabel = subjectTier === 'foundation' ? 'Foundation' : 'Higher';
       html += '<div class="unit-tier-badge" style="margin-top:0.5rem">';
-      html += '<span style="font-family:Inter,sans-serif;font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.15);padding:0.25rem 0.75rem;border-radius:6px;display:inline-block">';
+      html += '<span style="font-family:Inter,sans-serif;font-size:0.75rem;font-weight:600;color:#fff;background:rgba(0,0,0,0.25);padding:0.25rem 0.75rem;border-radius:6px;display:inline-block">';
       html += tierLabel + ' tier</span></div>';
     }
     html += '</div></div>';
