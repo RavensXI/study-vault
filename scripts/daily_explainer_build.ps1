@@ -19,9 +19,9 @@ function Write-Log {
 }
 
 function Run-Py {
-    param([string[]]$Args)
-    Write-Log ("RUN python " + ($Args -join ' '))
-    $output = & python @Args 2>&1
+    param([string[]]$PyArgs)
+    Write-Log ("RUN python " + ($PyArgs -join ' '))
+    $output = & python @PyArgs 2>&1
     foreach ($line in $output) {
         Add-Content -Path $logFile -Value ("    " + $line) -Encoding utf8
     }
@@ -31,7 +31,7 @@ function Run-Py {
 Write-Log "=== Daily explainer build START ==="
 
 # Bail early if queue is empty so we don't burn API time
-$dry = Run-Py -Args @("scripts\batch_explainer_videos.py", "--daily-cap", "180", "--dry-run")
+$dry = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "180", "--dry-run")
 if ($dry -match "No lessons pending") {
     Write-Log "Queue empty. Done."
     Write-Log "=== END ==="
@@ -40,7 +40,7 @@ if ($dry -match "No lessons pending") {
 
 # Phase 1: launch up to 180 new generations
 Write-Log "Phase 1: launching..."
-Run-Py -Args @("scripts\batch_explainer_videos.py", "--daily-cap", "180") | Out-Null
+Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "180") | Out-Null
 
 # Phase 2: poll up to 4 hours, downloading completed jobs as they come in.
 # Smoke test showed ~20 min cook time for 10 lessons; 180 should land well under 1h.
@@ -52,16 +52,16 @@ for ($i = 1; $i -le $maxLoops; $i++) {
     Start-Sleep -Seconds $pollIntervalSec
 
     Write-Log ("Phase 2 loop {0}/{1}: status check" -f $i, $maxLoops)
-    $status = Run-Py -Args @("scripts\batch_explainer_videos.py", "--status")
+    $status = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--status")
 
     if ($status -match "No in-progress jobs") {
         Write-Log "Nothing in-progress. Final download pass."
-        Run-Py -Args @("scripts\batch_explainer_videos.py", "--download", "--cleanup") | Out-Null
+        Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--download", "--cleanup") | Out-Null
         break
     }
 
     # Download any completed so far
-    Run-Py -Args @("scripts\batch_explainer_videos.py", "--download", "--cleanup") | Out-Null
+    Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--download", "--cleanup") | Out-Null
 }
 
 Write-Log "=== Daily explainer build END ==="
