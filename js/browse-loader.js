@@ -151,7 +151,9 @@
     ],
     'history': [
       { board: 'AQA', slug: 'history-aqa' },
-      { board: 'Edexcel', slug: 'history-edexcel' }
+      { board: 'Edexcel', slug: 'history-edexcel' },
+      { board: 'OCR', slug: 'history-ocr' },
+      { board: 'Eduqas', slug: 'history-eduqas' }
     ],
     'physical-education': [
       { board: 'AQA', slug: 'physical-education-aqa' },
