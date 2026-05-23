@@ -37,6 +37,16 @@ IMAGES = [
         "src_url": "https://images.unsplash.com/photo-1748521694073-31f26e704b75?w=1200&q=82&fit=max&fm=jpg",
         "photographer": "Theo",
     },
+    {
+        "slug": "engineering-aqa",
+        "src_url": "https://images.unsplash.com/photo-1666634157070-6fd830fb5672?w=1200&q=82&fit=max&fm=jpg",
+        "photographer": "Unsplash",
+    },
+    {
+        "slug": "astronomy-edexcel",
+        "src_url": "https://images.unsplash.com/photo-1515705576963-95cad62945b6?w=1200&q=82&fit=max&fm=jpg",
+        "photographer": "Unsplash",
+    },
 ]
 
 
