@@ -54,8 +54,12 @@ for ($i = 1; $i -le $maxLoops; $i++) {
     Write-Log ("Phase 2 loop {0}/{1}: status check" -f $i, $maxLoops)
     $status = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--status")
 
-    if ($status -match "No in-progress jobs") {
-        Write-Log "Nothing in-progress. Final download pass."
+    # Exit when nothing is still cooking. Two phrasings:
+    #   "No in-progress jobs"   → state has zero active jobs at all
+    #   "0 still in progress"   → everything that was active is now either
+    #                              completed or marked failed (terminal)
+    if (($status -match "No in-progress jobs") -or ($status -match "0 still in progress")) {
+        Write-Log "Nothing still cooking. Final download pass."
         Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--download", "--cleanup") | Out-Null
         break
     }

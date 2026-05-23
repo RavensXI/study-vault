@@ -339,9 +339,15 @@ def cmd_status(args):
                     job["status"] = "completed"
                     job["artifact_id"] = s["id"]
                     completed += 1
+                elif s["status"] == "failed":
+                    # NLM gave up. Mark terminal so the poll loop and re-queue
+                    # logic both move on. The lesson will surface in next dry-run.
+                    job["status"] = "failed"
                 break
     save_state(state)
-    print(f"\n{completed} newly completed, {len(active) - completed} still in progress")
+    still_active = sum(1 for j in active if j.get("status") == "in_progress")
+    failed = sum(1 for j in active if j.get("status") == "failed")
+    print(f"\n{completed} newly completed, {still_active} still in progress, {failed} failed")
 
 
 def cmd_download(args):
