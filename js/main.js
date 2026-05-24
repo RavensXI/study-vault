@@ -802,6 +802,17 @@ function initSidebarPanel() {
       '</button>';
     sidebar.insertBefore(closeRow, sidebar.firstChild);
 
+    // School logo (school tier) at the very top of the panel. Reuse the src
+    // of the header logo that school-session.js already injected.
+    var schoolLogoEl = document.querySelector('.header-school-logo');
+    if (schoolLogoEl) {
+      var panelLogo = document.createElement('img');
+      panelLogo.className = 'sidebar-panel-school-logo';
+      panelLogo.src = schoolLogoEl.src;
+      panelLogo.alt = schoolLogoEl.alt || '';
+      sidebar.insertBefore(panelLogo, sidebar.firstChild);
+    }
+
     // Create nav links section from the header nav
     var panelNav = document.createElement('div');
     panelNav.className = 'sidebar-panel-nav';
