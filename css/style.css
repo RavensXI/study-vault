@@ -669,7 +669,7 @@ body.dark-mode .page-header.scrolled {
   .page-header-inner:not(:has(.admin-nav)) .header-brand {
     position: fixed;
     top: 0.75rem;
-    left: calc((100vw - var(--page-max, 1160px)) / 4);
+    left: var(--gutter-center, calc((100vw - var(--page-max, 1160px)) / 4));
     transform: translateX(-50%);
     z-index: 901;
   }
@@ -1078,6 +1078,19 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
   body:has(.lesson-page) .lesson-page {
     margin-left: calc(var(--lesson-pad) + var(--gutter-band) + var(--gutter-gap));
     margin-right: var(--lesson-pad);
+  }
+  /* Align the header to the body: same left/right bounds, so the unit pill
+     starts at the lesson title and the nav (Next Lesson) ends at the sidebar's
+     right edge. The .page-header's 1.5rem padding matches the body's 1.5rem
+     padding, so equal margins line the content boxes up exactly. The brand is
+     position:fixed (out of flow) above the checklist, so the in-flow items
+     [pills | logo | nav] span the body width via space-between. */
+  body:has(.lesson-page) .page-header-inner {
+    margin-left: calc(var(--lesson-pad) + var(--gutter-band) + var(--gutter-gap));
+    margin-right: var(--lesson-pad);
+  }
+  body:has(.lesson-page) .header-pills {
+    margin-left: 0;
   }
 }
 
