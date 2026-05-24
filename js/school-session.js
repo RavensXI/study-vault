@@ -93,6 +93,16 @@
       var nav = document.getElementById('header-nav');
       if (nav) {
         headerInner.insertBefore(img, nav);
+        // Also place a copy at the top of the slide-in burger menu, so the
+        // school logo is present on mobile / tablet (<=960px) where the header
+        // logo is hidden.
+        if (!nav.querySelector('.drawer-school-logo')) {
+          var drawerImg = document.createElement('img');
+          drawerImg.className = 'drawer-school-logo';
+          drawerImg.src = logoUrl;
+          drawerImg.alt = session.school_name;
+          nav.insertBefore(drawerImg, nav.firstChild);
+        }
       } else {
         headerInner.appendChild(img);
       }

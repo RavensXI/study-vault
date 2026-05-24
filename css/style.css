@@ -681,16 +681,6 @@ body.dark-mode .page-header.scrolled {
    the right via the existing flex flow. Lesson header + exam countdown
    pill also centred to match the centred logo above. */
 @media (max-width: 768px) {
-  .page-header-inner {
-    position: relative;
-    min-height: 2.5rem;
-  }
-  .header-brand {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-  }
   .lesson-header {
     display: flex;
     flex-direction: column;
@@ -729,6 +719,23 @@ body.dark-mode .page-header.scrolled {
     max-width: 160px;
     object-fit: contain;
     flex-shrink: 0;
+  }
+}
+
+/* School logo at the top of the slide-in burger menu (the header-nav drawer
+   on <=960px). Covers mobile + tablet, where the header logo is hidden. */
+.drawer-school-logo {
+  display: none;
+}
+@media (max-width: 960px) {
+  .drawer-school-logo {
+    display: block;
+    align-self: center;
+    height: 40px;
+    width: auto;
+    max-width: 180px;
+    object-fit: contain;
+    margin: 0 auto 1.25rem;
   }
 }
 
@@ -7014,6 +7021,18 @@ body.dark-mode .stat-bar-fill {
   .header-unit-label,
   .header-lesson-label {
     display: none;
+  }
+
+  /* Centre the wordmark only once the pills are hidden (<=480), so the two
+     never overlap. At 481-768 the brand stays in normal flow on the left. */
+  .page-header-inner {
+    min-height: 2.5rem;
+  }
+  .header-brand {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   .lesson-header h1 {
