@@ -669,7 +669,7 @@ body.dark-mode .page-header.scrolled {
   .page-header-inner:not(:has(.admin-nav)) .header-brand {
     position: fixed;
     top: 0.75rem;
-    left: var(--gutter-center, calc((100vw - var(--page-max, 1160px)) / 4));
+    left: calc((100vw - var(--page-max, 1160px)) / 4);
     transform: translateX(-50%);
     z-index: 901;
   }
@@ -713,28 +713,22 @@ body.dark-mode .page-header.scrolled {
   flex-shrink: 0;
 }
 
-/* School logo (school tier) — centred in the header's middle gap, between the
-   unit pill (left) and the nav/tour button (right). Separate from the
-   StudyVault wordmark, which stays in place. On mobile the wordmark is
-   centred, so the school logo shifts to the left edge to avoid overlap. */
+/* School logo (school tier) — a flex item sitting between the unit pill (left)
+   and the nav/tour button (right). On wide desktops the StudyVault wordmark is
+   pulled out into the gutter, leaving [pills | logo | nav] as the three header
+   items; space-between then centres the logo in the gap. Below 1400px the
+   header is too tight to add it without crowding the nav, so it's hidden. */
 .header-school-logo {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  height: 34px;
-  width: auto;
-  max-width: 200px;
-  object-fit: contain;
-  z-index: 902;
-  pointer-events: none;
+  display: none;
 }
-@media (max-width: 768px) {
+@media (min-width: 1400px) {
   .header-school-logo {
-    left: 0.75rem;
-    transform: translateY(-50%);
-    height: 26px;
-    max-width: 110px;
+    display: block;
+    height: 32px;
+    width: auto;
+    max-width: 160px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 }
 

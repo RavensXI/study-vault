@@ -87,7 +87,15 @@
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      headerInner.appendChild(img);
+      // Sit between the unit pill and the nav. At >=1400px the StudyVault
+      // wordmark is pulled into the gutter, leaving [pills | logo | nav] so
+      // space-between centres the logo in the gap.
+      var nav = document.getElementById('header-nav');
+      if (nav) {
+        headerInner.insertBefore(img, nav);
+      } else {
+        headerInner.appendChild(img);
+      }
     }
   };
 
