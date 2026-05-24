@@ -1161,7 +1161,7 @@
       // On wide viewports (≥1400px) the stack centres under the gutter
       // checklist column so it feels like one visual unit with the rail.
       '.sv-hl-fab-stack{position:fixed;left:18px;bottom:48px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
-      '@media (min-width:1400px){.sv-hl-fab-stack{left:calc((100vw - var(--page-max, 1160px)) / 4);transform:translateX(-50%);align-items:center}}' +
+      '@media (min-width:1400px){.sv-hl-fab-stack{left:var(--gutter-center, calc((100vw - var(--page-max, 1160px)) / 4));transform:translateX(-50%);align-items:center}}' +
       // Mobile: lay the in-mode buttons side-by-side instead of stacked.
       // Stacked, the X exit button sat above the Lesson Highlights button
       // and the combined height clipped under the narration mini-player.

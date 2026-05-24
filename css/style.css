@@ -669,7 +669,7 @@ body.dark-mode .page-header.scrolled {
   .page-header-inner:not(:has(.admin-nav)) .header-brand {
     position: fixed;
     top: 0.75rem;
-    left: calc((100vw - var(--page-max, 1160px)) / 4);
+    left: var(--gutter-center, calc((100vw - var(--page-max, 1160px)) / 4));
     transform: translateX(-50%);
     z-index: 901;
   }
@@ -711,6 +711,31 @@ body.dark-mode .page-header.scrolled {
   gap: 0.75rem;
   text-decoration: none;
   flex-shrink: 0;
+}
+
+/* School logo (school tier) — centred in the header's middle gap, between the
+   unit pill (left) and the nav/tour button (right). Separate from the
+   StudyVault wordmark, which stays in place. On mobile the wordmark is
+   centred, so the school logo shifts to the left edge to avoid overlap. */
+.header-school-logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 34px;
+  width: auto;
+  max-width: 200px;
+  object-fit: contain;
+  z-index: 902;
+  pointer-events: none;
+}
+@media (max-width: 768px) {
+  .header-school-logo {
+    left: 0.75rem;
+    transform: translateY(-50%);
+    height: 26px;
+    max-width: 110px;
+  }
 }
 
 .header-brand:hover {
@@ -926,6 +951,14 @@ body.dark-mode .header-logo::after {
   background: var(--accent-badge);
   padding: 0.2em 0.7em;
   border-radius: 999px;
+  /* Keep the pill on a single line — wrapping it across 2-3 lines with a
+     999px radius balloons it into a blob (seen ~1024px). Truncate instead. */
+  display: inline-block;
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
 }
 
 .header-nav {
@@ -1032,6 +1065,26 @@ body.dark-mode .header-nav a.nav-revision-techniques .nav-icon {
   grid-template-columns: 1fr var(--sidebar-width);
   gap: 3rem;
   align-items: start;
+}
+
+/* Wide-desktop balance: the lesson-progress checklist is a fixed full-height
+   rail in the LEFT gutter. To stop the page reading as off-centre (checklist
+   filling the left, dead space on the right), treat [gutter-band + body] as a
+   single composition and centre IT — so the outer padding matches left/right.
+   --gutter-center is the x-axis the checklist, brand and highlight FAB align to.
+   Scoped to lesson pages via :has() so browse/practice/guide keep their own
+   gutter handling. */
+@media (min-width: 1400px) {
+  body:has(.lesson-page) {
+    --gutter-band: 160px;
+    --gutter-gap: 2.5rem;
+    --lesson-pad: calc((100vw - var(--page-max) - var(--gutter-band) - var(--gutter-gap)) / 2);
+    --gutter-center: calc(var(--lesson-pad) + var(--gutter-band) / 2);
+  }
+  body:has(.lesson-page) .lesson-page {
+    margin-left: calc(var(--lesson-pad) + var(--gutter-band) + var(--gutter-gap));
+    margin-right: var(--lesson-pad);
+  }
 }
 
 /* Main content column */
@@ -2122,7 +2175,7 @@ body.dark-mode .lesson-progress-item.completed {
     position: fixed;
     top: 120px;
     /* Centre in left gutter */
-    left: calc((100vw - var(--page-max, 1160px)) / 4);
+    left: var(--gutter-center, calc((100vw - var(--page-max, 1160px)) / 4));
     transform: translateX(-50%);
     width: auto;
     max-width: 200px;

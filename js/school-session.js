@@ -65,12 +65,14 @@
       return false;
     },
 
-    /** Inject school logo into the page header brand area. */
+    /** Inject the school logo into the header, centred in the middle gap
+        (between the unit pill on the left and the nav/tour button on the
+        right). Kept separate from the StudyVault wordmark, which stays put. */
     injectLogo: function () {
       if (!this.isActive()) return;
       var session = this.get();
-      var brand = document.querySelector('.header-brand');
-      if (!brand || brand.querySelector('.school-logo')) return;
+      var headerInner = document.querySelector('.page-header-inner');
+      if (!headerInner || headerInner.querySelector('.header-school-logo')) return;
 
       // School logo URLs keyed by slug (local images)
       var logos = {
@@ -81,12 +83,11 @@
       if (!logoUrl) return;
 
       var img = document.createElement('img');
-      img.className = 'school-logo';
+      img.className = 'header-school-logo';
       img.src = logoUrl;
       img.alt = session.school_name;
 
-      // Insert left of the StudyVault logo
-      brand.insertBefore(img, brand.firstChild);
+      headerInner.appendChild(img);
     }
   };
 
