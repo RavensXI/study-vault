@@ -236,15 +236,36 @@
     if (role === 'user') div.textContent = text;
     else div.innerHTML = renderMarkdown(text);
     els.log.appendChild(div);
-    if (role === 'bot' && div.offsetHeight > els.log.clientHeight - 40) {
-      // A reply taller than the panel: line its TOP up with the top of the view
-      // so the student reads it from the beginning instead of being snapped to
-      // its end and having to scroll back up.
-      els.log.scrollTop += div.getBoundingClientRect().top - els.log.getBoundingClientRect().top - 8;
-    } else {
-      els.log.scrollTop = els.log.scrollHeight;
-    }
+    els.log.scrollTop = els.log.scrollHeight;
     return div;
+  }
+
+  // Client-side "typewriter": we already have the full reply, but reveal it word
+  // by word so it reads from the start and feels alive, instead of a whole block
+  // landing at once. No backend streaming needed. Re-renders markdown each word
+  // so formatting resolves as it types. Returns a promise that resolves when done.
+  function typeOut(div, fullText) {
+    return new Promise(function (resolve) {
+      var tokens = fullText.split(/(\s+)/);   // [word, space, word, ...]
+      var acc = '';
+      var i = 0;
+      function step() {
+        if (i >= tokens.length) {
+          div.innerHTML = renderMarkdown(fullText);
+          els.log.scrollTop = els.log.scrollHeight;
+          resolve();
+          return;
+        }
+        var tok = tokens[i];
+        acc += tok;
+        i++;
+        div.innerHTML = renderMarkdown(acc);
+        els.log.scrollTop = els.log.scrollHeight;
+        var delay = tok.trim() === '' ? 0 : (/[.!?,;:]$/.test(tok) ? 130 : 38);
+        setTimeout(step, delay);
+      }
+      step();
+    });
   }
 
   function showTyping() {
@@ -317,9 +338,12 @@
         addBubble('bot', data.error || 'Sorry, I had trouble responding. Try again in a moment.');
       } else {
         var reply = (data.reply || '').trim() || 'Sorry, I didn’t catch that — could you rephrase?';
-        addBubble('bot', reply);
         conversation.push({ role: 'assistant', content: reply });
         incToday();   // count a turn only when the tutor actually answered
+        var bubble = document.createElement('div');
+        bubble.className = 'tutor-msg bot';
+        els.log.appendChild(bubble);
+        await typeOut(bubble, reply);   // reveal it word by word (input stays locked until done)
       }
     } catch (err) {
       hideTyping();
