@@ -83,6 +83,11 @@
       '.tutor-msg.user{align-self:flex-end;background:var(--accent,#2d2a26);color:#fff;border-bottom-right-radius:4px}',
       '.tutor-msg.bot{align-self:flex-start;background:#fff;color:var(--text-primary,#2d2a26);border:1px solid var(--border-light,#e8e4df);border-bottom-left-radius:4px}',
       'body.dark-mode .tutor-msg.bot{background:#262420;color:#f5f1ec;border-color:#3a3733}',
+      '.tutor-msg.bot p{margin:0 0 0.5em}.tutor-msg.bot p:last-child{margin-bottom:0}',
+      '.tutor-msg.bot strong{font-weight:700}',
+      '.tutor-msg.bot ul{margin:0.3em 0 0.5em;padding-left:1.15em}.tutor-msg.bot li{margin:0.15em 0}',
+      '.tutor-msg.bot code{background:rgba(0,0,0,0.06);padding:0.05em 0.3em;border-radius:5px;font-size:0.9em}',
+      'body.dark-mode .tutor-msg.bot code{background:rgba(255,255,255,0.1)}',
       '.tutor-typing{align-self:flex-start;display:flex;gap:4px;padding:0.65rem 0.9rem;background:#fff;border:1px solid var(--border-light,#e8e4df);border-radius:14px}',
       'body.dark-mode .tutor-typing{background:#262420;border-color:#3a3733}',
       '.tutor-typing span{width:7px;height:7px;border-radius:50%;background:var(--text-muted,#8a8178);animation:tutorBlink 1.2s infinite ease-in-out}',
@@ -189,10 +194,47 @@
     handle.addEventListener('touchstart', down, { passive: false });
   }
 
+  // Minimal, XSS-safe markdown for the tutor's replies. Escape first, then only
+  // emit a fixed set of tags (strong/em/code/p/ul/li/br) — the model likes to
+  // bold key terms and use the odd short list, so we render that rather than
+  // fight it in the prompt.
+  function escapeHtml(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  function renderMarkdown(src) {
+    var t = escapeHtml(src);
+    t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
+    t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    t = t.replace(/(^|[^*])\*(?!\s)([^*\n]+?)\*/g, '$1<em>$2</em>');
+    var lines = t.split('\n');
+    var html = '';
+    var para = [];
+    function flush() { if (para.length) { html += '<p>' + para.join('<br>') + '</p>'; para = []; } }
+    for (var i = 0; i < lines.length; i++) {
+      if (/^\s*[-*]\s+/.test(lines[i])) {
+        flush();
+        var items = '';
+        while (i < lines.length && /^\s*[-*]\s+/.test(lines[i])) {
+          items += '<li>' + lines[i].replace(/^\s*[-*]\s+/, '') + '</li>';
+          i++;
+        }
+        i--;
+        html += '<ul>' + items + '</ul>';
+      } else if (lines[i].trim() === '') {
+        flush();
+      } else {
+        para.push(lines[i]);
+      }
+    }
+    flush();
+    return html;
+  }
+
   function addBubble(role, text) {
     var div = document.createElement('div');
     div.className = 'tutor-msg ' + (role === 'user' ? 'user' : 'bot');
-    div.textContent = text;
+    if (role === 'user') div.textContent = text;
+    else div.innerHTML = renderMarkdown(text);
     els.log.appendChild(div);
     els.log.scrollTop = els.log.scrollHeight;
     return div;
