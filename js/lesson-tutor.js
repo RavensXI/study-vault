@@ -20,6 +20,24 @@
   var lastPos = null;      // remember dragged position across opens {left, top}
   var els = {};
 
+  // Daily message cap (per-device, per-day localStorage — mirrors the AI-mark
+  // limit). Soft by design; the server's per-IP rate limit is the real ceiling.
+  var TUTOR_DAILY_LIMIT = 25;
+  function todayKey() { return 'sv_tutor_turns_' + new Date().toISOString().slice(0, 10); }
+  function usedToday() { try { return parseInt(localStorage.getItem(todayKey()) || '0', 10) || 0; } catch (e) { return 0; } }
+  function incToday() { try { localStorage.setItem(todayKey(), String(usedToday() + 1)); } catch (e) {} }
+  function remainingToday() { return Math.max(0, TUTOR_DAILY_LIMIT - usedToday()); }
+  function updateCount() {
+    var left = remainingToday();
+    if (els.count) els.count.textContent = left + '/' + TUTOR_DAILY_LIMIT + ' messages left today';
+    var none = left <= 0;
+    if (els.input) {
+      els.input.disabled = none;
+      els.input.placeholder = none ? 'Daily limit reached — resets at midnight' : 'Ask about this lesson...';
+    }
+    if (els.send) els.send.disabled = none || sending;
+  }
+
   function lessonContext() {
     var titleEl = document.getElementById('lesson-title');
     var notesEl = document.getElementById('study-notes');
@@ -90,7 +108,7 @@
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-label', 'Lesson tutor chat');
     panel.innerHTML =
-      '<div class="tutor-head" id="tutor-head">' +
+      '<div class="tutor-head" id="tutor-head" title="Drag to move">' +
         '<span class="tutor-grip" aria-hidden="true"><i></i><i></i></span>' +
         '<span class="tutor-head-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>' +
         '<span class="tutor-head-title">Ask the Tutor<small>Drag me &middot; the lesson stays clickable</small></span>' +
@@ -108,6 +126,7 @@
     els.log = panel.querySelector('#tutor-log');
     els.input = panel.querySelector('#tutor-input');
     els.send = panel.querySelector('#tutor-send');
+    els.count = panel.querySelector('.tutor-head-title small');
 
     panel.querySelector('.tutor-close').addEventListener('click', closeTutor);
     els.send.addEventListener('click', onSend);
@@ -207,7 +226,8 @@
       var ctx = lessonContext();
       addBubble('bot', 'Hi! I’m your tutor for “' + ctx.title + '”. Ask me anything about it — I’ll help you work it out rather than just hand over the answer. What’s on your mind?');
     }
-    setTimeout(function () { els.input && els.input.focus(); }, 100);
+    updateCount();
+    setTimeout(function () { if (els.input && !els.input.disabled) els.input.focus(); }, 100);
   }
 
   function closeTutor() {
@@ -218,6 +238,11 @@
     if (sending) return;
     var text = (els.input.value || '').trim();
     if (!text) return;
+    if (remainingToday() <= 0) {
+      addBubble('bot', 'That’s all your tutor messages for today — they reset at midnight. You can still read the lesson and use everything else. See you tomorrow!');
+      updateCount();
+      return;
+    }
     els.input.value = '';
     els.input.style.height = 'auto';
     addBubble('user', text);
@@ -242,14 +267,15 @@
         var reply = (data.reply || '').trim() || 'Sorry, I didn’t catch that — could you rephrase?';
         addBubble('bot', reply);
         conversation.push({ role: 'assistant', content: reply });
+        incToday();   // count a turn only when the tutor actually answered
       }
     } catch (err) {
       hideTyping();
       addBubble('bot', 'I couldn’t reach the tutor just now. Check your connection and try again.');
     } finally {
       sending = false;
-      els.send.disabled = false;
-      els.input.focus();
+      updateCount();
+      if (els.input && !els.input.disabled) els.input.focus();
     }
   }
 

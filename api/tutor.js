@@ -51,6 +51,19 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // Only serve calls from our own site — a casual-abuse deterrent (a determined
+  // scripter can spoof Origin, so the per-IP rate limit below is the real
+  // backstop). Browsers always send Origin on POST. Allows production, any
+  // Vercel preview deployment, and localhost.
+  const origin = req.headers.origin || '';
+  const okOrigin =
+    /^https:\/\/(www\.)?studyvault\.co\.uk$/.test(origin) ||
+    /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin) ||
+    /^http:\/\/localhost(:\d+)?$/.test(origin);
+  if (!okOrigin) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   const { lessonTitle, lessonText, messages } = req.body || {};
 
   if (!Array.isArray(messages) || messages.length === 0) {
