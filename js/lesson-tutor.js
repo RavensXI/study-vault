@@ -30,7 +30,9 @@
   function updateCount() {
     var left = remainingToday();
     if (els.count) els.count.textContent = left + '/' + TUTOR_DAILY_LIMIT + ' messages left today';
+    if (els.fabCount) els.fabCount.textContent = String(left);
     var none = left <= 0;
+    if (els.fab) els.fab.classList.toggle('tutor-fab--empty', none);
     if (els.input) {
       els.input.disabled = none;
       els.input.placeholder = none ? 'Daily limit reached — resets at midnight' : 'Ask about this lesson...';
@@ -56,13 +58,17 @@
     var s = document.createElement('style');
     s.id = 'lesson-tutor-styles';
     s.textContent = [
-      // Launcher card (sidebar)
-      '.tutor-launch{display:flex;align-items:center;gap:0.6rem;width:100%;padding:0.85rem 1rem;border:1px solid var(--border-light,#e8e4df);border-radius:14px;background:var(--accent-light,#f0ece7);color:var(--accent,#2d2a26);font-family:Inter,system-ui,sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;text-align:left;transition:filter .15s ease,transform .15s ease}',
-      '.tutor-launch:hover{filter:brightness(0.97);transform:translateY(-1px)}',
-      '.tutor-launch svg{width:20px;height:20px;flex-shrink:0}',
-      '.tutor-launch-sub{display:block;font-weight:400;font-size:0.72rem;color:var(--text-muted,#8a8178);margin-top:1px}',
+      // Floating launcher button (bottom-right, just left of the bug FAB)
+      '.tutor-fab{position:fixed;right:78px;bottom:18px;z-index:9980;display:inline-flex;align-items:center;gap:0.5rem;padding:0.62rem 0.95rem;border:none;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(20,18,15,0.24);transition:filter .15s ease,transform .15s ease}',
+      '.tutor-fab:hover{filter:brightness(1.08);transform:translateY(-1px)}',
+      '.tutor-fab svg{width:19px;height:19px;flex-shrink:0}',
+      '.tutor-fab-count{background:rgba(255,255,255,0.25);border-radius:999px;padding:0.02rem 0.45rem;font-size:0.74rem;font-weight:700;line-height:1.5;min-width:1.1em;text-align:center}',
+      '.tutor-fab--hidden{display:none}',
+      '.tutor-fab--empty{opacity:0.65}',
+      'body.sidebar-open .tutor-fab{display:none}',
+      '@media(max-width:480px){.tutor-fab{right:62px;bottom:12px;padding:0.55rem 0.62rem}.tutor-fab-label{display:none}}',
       // Floating, draggable, NON-blocking panel — no backdrop, page stays interactive.
-      '.tutor-panel{position:fixed;right:24px;bottom:24px;left:auto;top:auto;z-index:9500;display:none;flex-direction:column;width:min(380px,calc(100vw - 24px));height:min(70vh,560px);background:var(--bg-page,#faf8f5);border:1px solid var(--border-light,#e3ddd5);border-radius:16px;box-shadow:0 12px 48px rgba(20,18,15,0.28);overflow:hidden}',
+      '.tutor-panel{position:fixed;right:24px;bottom:24px;left:auto;top:auto;z-index:9995;display:none;flex-direction:column;width:min(380px,calc(100vw - 24px));height:min(70vh,560px);background:var(--bg-page,#faf8f5);border:1px solid var(--border-light,#e3ddd5);border-radius:16px;box-shadow:0 12px 48px rgba(20,18,15,0.28);overflow:hidden}',
       '.tutor-panel.open{display:flex;animation:tutorPop .22s cubic-bezier(0.16,1,0.3,1)}',
       '@keyframes tutorPop{from{transform:translateY(12px) scale(0.98);opacity:0.4}to{transform:translateY(0) scale(1);opacity:1}}',
       'body.dark-mode .tutor-panel{background:#1c1b19;border-color:#3a3733}',
@@ -298,6 +304,7 @@
   function openTutor() {
     buildPanel();
     els.panel.classList.add('open');
+    if (els.fab) els.fab.classList.add('tutor-fab--hidden');
     // Restore the last dragged position if the student moved it before.
     if (lastPos) {
       els.panel.style.left = lastPos.left;
@@ -316,6 +323,7 @@
 
   function closeTutor() {
     if (els.panel) els.panel.classList.remove('open');
+    if (els.fab) els.fab.classList.remove('tutor-fab--hidden');
   }
 
   async function onSend() {
@@ -370,22 +378,20 @@
   }
 
   function insertLauncher() {
-    var sidebar = document.querySelector('.lesson-sidebar');
-    if (!sidebar || document.querySelector('.tutor-launch')) return false;
-
-    var section = document.createElement('div');
-    section.className = 'sidebar-section sidebar-tutor';
-    section.innerHTML =
-      '<button class="tutor-launch" type="button">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-        '<span>Ask the Tutor<span class="tutor-launch-sub">Stuck? Get a Socratic hint</span></span>' +
-      '</button>';
-    section.querySelector('.tutor-launch').addEventListener('click', openTutor);
-
-    var kc = sidebar.querySelector('.sidebar-knowledge-check');
-    if (kc && kc.nextSibling) sidebar.insertBefore(section, kc.nextSibling);
-    else if (kc) sidebar.appendChild(section);
-    else sidebar.insertBefore(section, sidebar.firstChild);
+    if (els.fab) return true;
+    var fab = document.createElement('button');
+    fab.type = 'button';
+    fab.className = 'tutor-fab';
+    fab.setAttribute('aria-label', 'Ask the Tutor');
+    fab.innerHTML =
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+      '<span class="tutor-fab-label">Ask the Tutor</span>' +
+      '<span class="tutor-fab-count" id="tutor-fab-count" title="Messages left today"></span>';
+    fab.addEventListener('click', openTutor);
+    document.body.appendChild(fab);
+    els.fab = fab;
+    els.fabCount = fab.querySelector('#tutor-fab-count');
+    updateCount();
     return true;
   }
 
