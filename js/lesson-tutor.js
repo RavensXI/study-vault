@@ -236,7 +236,14 @@
     if (role === 'user') div.textContent = text;
     else div.innerHTML = renderMarkdown(text);
     els.log.appendChild(div);
-    els.log.scrollTop = els.log.scrollHeight;
+    if (role === 'bot' && div.offsetHeight > els.log.clientHeight - 40) {
+      // A reply taller than the panel: line its TOP up with the top of the view
+      // so the student reads it from the beginning instead of being snapped to
+      // its end and having to scroll back up.
+      els.log.scrollTop += div.getBoundingClientRect().top - els.log.getBoundingClientRect().top - 8;
+    } else {
+      els.log.scrollTop = els.log.scrollHeight;
+    }
     return div;
   }
 
