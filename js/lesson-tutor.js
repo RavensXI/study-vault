@@ -204,8 +204,11 @@
   function renderMarkdown(src) {
     var t = escapeHtml(src);
     t = t.replace(/`([^`]+)`/g, '<code>$1</code>');
-    t = t.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    // Bold/italic: line-bounded and non-greedy so an unclosed ** can't bold half
+    // the message. Any leftover (unpaired) ** is then stripped rather than shown.
+    t = t.replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
     t = t.replace(/(^|[^*])\*(?!\s)([^*\n]+?)\*/g, '$1<em>$2</em>');
+    t = t.replace(/\*\*/g, '');
     var lines = t.split('\n');
     var html = '';
     var para = [];
@@ -240,6 +243,13 @@
     return div;
   }
 
+  // Typewriter pacing (ms) — tune here. Deliberately measured so the student can
+  // read along rather than the text racing off the bottom.
+  var TYPE_WORD = 60;       // each word
+  var TYPE_CLAUSE = 200;    // pause after , ; :
+  var TYPE_SENTENCE = 340;  // pause after . ! ?
+  var TYPE_PARA = 420;      // pause at a paragraph break
+
   // Client-side "typewriter": we already have the full reply, but reveal it word
   // by word so it reads from the start and feels alive, instead of a whole block
   // landing at once. No backend streaming needed. Re-renders markdown each word
@@ -261,7 +271,11 @@
         i++;
         div.innerHTML = renderMarkdown(acc);
         els.log.scrollTop = els.log.scrollHeight;
-        var delay = tok.trim() === '' ? 0 : (/[.!?,;:]$/.test(tok) ? 130 : 38);
+        var delay;
+        if (tok.trim() === '') delay = tok.indexOf('\n') >= 0 ? TYPE_PARA : 0;
+        else if (/[.!?]$/.test(tok)) delay = TYPE_SENTENCE;
+        else if (/[,;:]$/.test(tok)) delay = TYPE_CLAUSE;
+        else delay = TYPE_WORD;
         setTimeout(step, delay);
       }
       step();
