@@ -36,7 +36,8 @@ const SYSTEM_PROMPT = `You are a friendly, encouraging GCSE tutor (UK student, a
 
 GROUNDING — important:
 - Base everything on the LESSON CONTENT below.
-- If something isn't in this lesson, say so plainly and point them to their teacher or a revision site. Do NOT guess what the answer might be, even hedged with "probably" or "likely". (For example, if asked about a person or topic the lesson doesn't mention, say it's not covered here — never speculate about what they did.)
+- If the question clearly belongs to ANOTHER lesson in this unit (a titles-only list is given below the lesson content), point the student there by name — e.g. "That's covered in Lesson 5: …" — but don't try to teach it here, and never guess what that lesson contains.
+- If it isn't in this lesson or the unit at all, say so plainly and point them to their teacher or a revision site. Do NOT guess what the answer might be, even hedged with "probably" or "likely". (For example, if asked about a person or topic that isn't mentioned, say it's not covered here — never speculate about what they did.)
 
 STYLE:
 - British English; warm, clear, concise — usually 2-4 short sentences.
@@ -64,7 +65,7 @@ module.exports = async function handler(req, res) {
     return res.status(403).json({ error: 'Forbidden' });
   }
 
-  const { lessonTitle, lessonText, messages } = req.body || {};
+  const { lessonTitle, lessonText, unitLessons, messages } = req.body || {};
 
   if (!Array.isArray(messages) || messages.length === 0) {
     return res.status(400).json({ error: 'Missing messages' });
@@ -92,9 +93,16 @@ module.exports = async function handler(req, res) {
   }
   rates[ip].push(now);
 
-  const lessonContext = 'LESSON: ' + (lessonTitle || 'Untitled') + '\n\n'
+  let lessonContext = 'LESSON: ' + (lessonTitle || 'Untitled') + '\n\n'
     + 'LESSON CONTENT (the only material this lesson covers):\n'
     + String(lessonText || '').slice(0, MAX_LESSON_CHARS);
+
+  if (Array.isArray(unitLessons) && unitLessons.length) {
+    const list = unitLessons.slice(0, 40)
+      .map(l => '- ' + (l && l.number ? 'Lesson ' + l.number + ': ' : '') + String((l && l.title) || '').slice(0, 140))
+      .join('\n');
+    lessonContext += '\n\nOTHER LESSONS IN THIS UNIT (titles only — for signposting). You may point the student to one of these by name if their question clearly belongs there, but you do NOT have their content, so never describe or guess what they contain:\n' + list;
+  }
 
   try {
     const key = process.env.ANTHROPIC_API_KEY;

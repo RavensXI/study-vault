@@ -296,10 +296,13 @@
 
     var ctx = lessonContext();
     try {
+      var unitLessons = (window._unitLessons || []).filter(function (l) {
+        return l && l.title && l.title !== ctx.title;
+      });
       var resp = await fetch('/api/tutor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lessonTitle: ctx.title, lessonText: ctx.text, messages: conversation }),
+        body: JSON.stringify({ lessonTitle: ctx.title, lessonText: ctx.text, unitLessons: unitLessons, messages: conversation }),
       });
       hideTyping();
       var data = await resp.json().catch(function () { return {}; });
