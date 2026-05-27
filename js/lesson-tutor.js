@@ -87,7 +87,9 @@
       '.tutor-fab-count{background:rgba(255,255,255,0.25);border-radius:999px;padding:0.02rem 0.45rem;font-size:0.74rem;font-weight:700;line-height:1.5;min-width:1.1em;text-align:center}',
       '.tutor-fab--empty{opacity:0.65}',
       '@media(max-width:768px){.tutor-dock{bottom:-4px}.tutor-dock--ready{bottom:16px}}',
-      '@media(max-width:480px){.tutor-fab-label{display:none}}',
+      // Below ~1100px the labelled pill is wider than the 260px column it sits
+      // under (looks squished), so drop to the compact speech-bubble + count form.
+      '@media(max-width:1100px){.tutor-fab-label{display:none}}',
       // Floating, draggable, NON-blocking panel — no backdrop, page stays interactive.
       '.tutor-panel{position:fixed;right:24px;bottom:24px;left:auto;top:auto;z-index:9995;display:none;flex-direction:column;width:min(380px,calc(100vw - 24px));height:min(70vh,560px);background:var(--bg-page,#faf8f5);border:1px solid var(--border-light,#e3ddd5);border-radius:16px;box-shadow:0 12px 48px rgba(20,18,15,0.28);overflow:hidden}',
       '.tutor-panel.open{display:flex;animation:tutorPop .22s cubic-bezier(0.16,1,0.3,1)}',
