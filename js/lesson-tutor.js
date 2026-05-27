@@ -64,11 +64,12 @@
       // overlap a tall related-media list — acceptable, since that list scrolls
       // internally (Tom's call).
       '.tutor-dock{position:fixed;bottom:48px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px}',
-      // Reserve scroll space at the bottom of the sidebar so a long related-media
-      // list scrolls clear of the floating dock instead of hiding behind it. The
-      // sidebar already scrolls internally (overflow-y:auto); this gives the
-      // clearance so the last items can be brought above the button.
-      '.lesson-sidebar{padding-bottom:96px}',
+      // Shorten the related-media column on desktop so it ends ABOVE the floating
+      // dock — the button never overlaps content; the list just scrolls within the
+      // shorter column. A soft mask fade at the bottom edge gives the "fades into
+      // it" look Tom liked (no solid background rectangle). Scoped to desktop;
+      // mobile uses the slide-in panel with its own layout.
+      '@media(min-width:769px){.lesson-sidebar{max-height:calc(100vh - 12rem);-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent)}}',
       '.tutor-dock--hidden{display:none}',
       'body.sidebar-open .tutor-dock{display:none}',
       '.tutor-dock .bugr-fab{position:static !important;right:auto !important;bottom:auto !important;left:auto !important;margin:0 !important}',
