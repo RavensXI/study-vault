@@ -216,7 +216,7 @@
     var state = {
       subjects: [],
       schools: {},
-      lessonsBySubject: {},
+      statsBySubject: {},
       specs: [],
       requestCounts: {},
     };
@@ -688,37 +688,73 @@
       if (schoolsRes.error) throw schoolsRes.error;
       (schoolsRes.data || []).forEach(function (s) { state.schools[s.id] = s; });
 
-      // Units (slim)
+      // Units (slim) — map each unit to its subject
       var unitsRes = await sb.from('units').select('id, subject_id');
       if (unitsRes.error) throw unitsRes.error;
       var unitToSubject = {};
       (unitsRes.data || []).forEach(function (u) { unitToSubject[u.id] = u.subject_id; });
 
-      // Lessons — paginate to bypass 1000-row default cap
-      var lessons = [];
-      var page = 0;
-      while (true) {
-        var from = page * 1000;
-        var to = from + 999;
-        var r = await sb.from('lessons')
-          .select('id, unit_id, status, content_html, hero_image_url, narration_manifest, related_media, practice_data')
-          .range(from, to);
-        if (r.error) throw r.error;
-        lessons = lessons.concat(r.data || []);
-        if (!r.data || r.data.length < 1000) break;
-        page++;
-        if (page > 20) break; // safety
+      // Coverage stats — computed WITHOUT pulling lesson bodies.
+      // The previous version fetched content_html + practice_data +
+      // narration_manifest + related_media for all ~4,400 lessons (~78MB)
+      // purely to test whether each field was present — which routinely
+      // timed out on a cold load (hence "won't load until you refresh").
+      // Instead, for each coverage metric we ask Postgres to FILTER and
+      // return ONLY unit_id (~hundreds of KB total), then bucket by subject.
+      // Asset metrics (content/heroes/narration/podcasts/rel-media) are
+      // counted over ARTICLE lessons only, matching the old per-lesson logic:
+      // an article lesson has practice_data null or '{}'; a practice lesson
+      // has a populated practice_data object. Verified to produce identical
+      // counts to the old code across article/mixed/practice subjects.
+      var ARTICLE = 'practice_data.is.null,practice_data.eq.{}';
+      var L = function () { return sb.from('lessons').select('unit_id'); };
+      var metricDefs = {
+        article:   function (f, t) { return L().or(ARTICLE).range(f, t); },
+        practice:  function (f, t) { return L().not('practice_data', 'is', null).neq('practice_data', '{}').range(f, t); },
+        content:   function (f, t) { return L().or(ARTICLE).not('content_html', 'is', null).range(f, t); },
+        heroes:    function (f, t) { return L().or(ARTICLE).not('hero_image_url', 'is', null).range(f, t); },
+        narration: function (f, t) { return L().or(ARTICLE).not('narration_manifest', 'is', null).range(f, t); },
+        relmedia:  function (f, t) { return L().or(ARTICLE).not('related_media', 'is', null).neq('related_media', '[]').range(f, t); },
+        podcasts:  function (f, t) { return L().or(ARTICLE).contains('related_media', [{ category: 'Podcasts', items: [{ title: 'Lesson Podcast' }] }]).range(f, t); }
+      };
+
+      // Paginate one metric's filtered query, collecting unit_ids only.
+      async function fetchUnitIds(buildQuery) {
+        var ids = [], page = 0;
+        while (true) {
+          var r = await buildQuery(page * 1000, page * 1000 + 999);
+          if (r.error) throw r.error;
+          var d = r.data || [];
+          for (var i = 0; i < d.length; i++) ids.push(d[i].unit_id);
+          if (d.length < 1000) break;
+          page++;
+          if (page > 30) break; // safety
+        }
+        return ids;
       }
 
-      // Bucket lessons by subject
-      var bySubject = {};
-      lessons.forEach(function (L) {
-        var sid = unitToSubject[L.unit_id];
-        if (!sid) return;
-        if (!bySubject[sid]) bySubject[sid] = [];
-        bySubject[sid].push(L);
+      var keys = ['article', 'practice', 'content', 'heroes', 'narration', 'relmedia', 'podcasts'];
+      var results = await Promise.all(keys.map(function (k) { return fetchUnitIds(metricDefs[k]); }));
+
+      var statsBy = {};
+      function ensure(sid) {
+        if (!statsBy[sid]) statsBy[sid] = { total: 0, articleTotal: 0, practiceTotal: 0, content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0 };
+        return statsBy[sid];
+      }
+      keys.forEach(function (k, idx) {
+        results[idx].forEach(function (uid) {
+          var sid = unitToSubject[uid];
+          if (!sid) return;
+          var st = ensure(sid);
+          if (k === 'article') st.articleTotal++;
+          else if (k === 'practice') { st.practiceTotal++; st.practice++; }
+          else st[k]++;
+        });
       });
-      state.lessonsBySubject = bySubject;
+      Object.keys(statsBy).forEach(function (sid) {
+        statsBy[sid].total = statsBy[sid].articleTotal + statsBy[sid].practiceTotal;
+      });
+      state.statsBySubject = statsBy;
 
       // Specs catalogue
       var specsRes = await fetch('/specs/index.json');
@@ -742,60 +778,12 @@
       }
     }
 
-    function hasPodcast(L) {
-      var rm = L.related_media;
-      if (!Array.isArray(rm)) return false;
-      for (var i = 0; i < rm.length; i++) {
-        var cat = rm[i];
-        if (!cat || cat.category !== 'Podcasts') continue;
-        var items = cat.items || [];
-        for (var j = 0; j < items.length; j++) {
-          var t = (items[j] && items[j].title) || '';
-          if (t === 'Lesson Podcast') return true;
-        }
-      }
-      return false;
-    }
-
-    function isPracticeLesson(L) {
-      // Practice lessons populate the JSONB practice_data column.
-      // Article lessons leave it null.
-      var pd = L.practice_data;
-      if (pd == null) return false;
-      if (typeof pd === 'object' && !Array.isArray(pd) && Object.keys(pd).length === 0) return false;
-      return true;
-    }
-
+    // Per-subject coverage, precomputed in fetchAll (see the filtered-query
+    // note there). Returns the same shape the renderer expects.
     function statsForSubject(subject) {
-      var lessons = state.lessonsBySubject[subject.id] || [];
-      var articleLessons = lessons.filter(function (L) { return !isPracticeLesson(L); });
-      var practiceLessons = lessons.filter(isPracticeLesson);
-
-      // Asset coverage is only meaningful for the lessons that should HAVE that asset.
-      // Heroes, narration, podcasts, related-media: article-only by convention.
-      // Content: article uses content_html; practice uses practice_data — counted separately.
-      var content = 0, heroes = 0, narration = 0, podcasts = 0, relmedia = 0;
-      articleLessons.forEach(function (L) {
-        if (L.content_html) content++;
-        if (L.hero_image_url) heroes++;
-        if (L.narration_manifest) narration++;
-        if (hasPodcast(L)) podcasts++;
-        if (Array.isArray(L.related_media) && L.related_media.length > 0) relmedia++;
-      });
-
-      // Practice data fill — for practice lessons only.
-      var practiceFilled = practiceLessons.filter(isPracticeLesson).length;
-
-      return {
-        total: lessons.length,
-        articleTotal: articleLessons.length,
-        practiceTotal: practiceLessons.length,
-        content: content,
-        heroes: heroes,
-        narration: narration,
-        podcasts: podcasts,
-        relmedia: relmedia,
-        practice: practiceFilled,
+      return state.statsBySubject[subject.id] || {
+        total: 0, articleTotal: 0, practiceTotal: 0,
+        content: 0, heroes: 0, narration: 0, podcasts: 0, relmedia: 0, practice: 0
       };
     }
 
@@ -815,7 +803,7 @@
 
       // Stats
       var totalLessons = 0;
-      subjects.forEach(function (s) { totalLessons += (state.lessonsBySubject[s.id] || []).length; });
+      subjects.forEach(function (s) { totalLessons += statsForSubject(s).total; });
       var liveCount = subjects.filter(function (s) { return s.status === 'live'; }).length;
 
       // Specs coverage — match by spec_code (canonical), and count only the
@@ -1105,7 +1093,6 @@
         document.getElementById('refresh-btn').addEventListener('click', function () {
           document.getElementById('built-hint').textContent = 'Refreshing…';
           document.getElementById('built-hint').style.display = '';
-          document.getElementById('built-wrap').style.display = 'none';
           fetchAll().then(render).catch(function (err) {
             document.getElementById('built-hint').textContent = 'Refresh failed: ' + err.message;
             document.getElementById('built-hint').classList.add('error');
