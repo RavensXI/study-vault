@@ -459,32 +459,39 @@
     if (sb) sb.classList.toggle('tutor-clip-fade', isColumn && sb.scrollHeight > sb.clientHeight + 2);
   }
 
-  // The whole lesson (incl. .lesson-sidebar) animates in via .sv-reveal — a 1s
-  // transform glide (style.css). Positioning/revealing the dock mid-animation
-  // lands it on a transient spot, then it snaps when the glide ends. So: keep the
-  // dock hidden, and only measure + reveal AFTER the sidebar's entrance animation
-  // finishes (its transform transitionend), measuring the FINAL position — it
-  // fades in already-centred, no snap. Timed fallback covers reduced-motion,
-  // background tabs (transitions don't fire there), and any no-animation path.
+  // Measured on a real failing page: the related-media column itself shifts
+  // ~256px horizontally about 1-1.5s after load (settling into the grid). If we
+  // position the dock before that and stop, it's left where the column USED to be
+  // (only a resize re-runs it — which is why opening devtools "fixed" it).
+  //
+  // So keep the dock hidden and glued to the column every frame, and only reveal
+  // once the column has stopped moving AND we're past that ~1.5s settle (the time
+  // gate matters: the column sits at the wrong spot, "stable", for ~1s before the
+  // shift, so stability alone would reveal too early). It fades in already centred.
   function bindDock() {
-    var done = false;
-    function finalize() {
+    var lastLeft = null, stable = 0, start = performance.now(), done = false;
+    function reveal() {
       if (done || !els.dock) return;
       done = true;
       updateDock();
       els.dock.classList.add('tutor-dock--ready');
     }
-    var sb = document.querySelector('.lesson-sidebar');
-    if (sb) {
-      sb.addEventListener('transitionend', function (e) {
-        if (e.propertyName === 'transform') requestAnimationFrame(finalize);
-      });
-      // Entrance already complete (reduced motion / re-init): settle next frame.
-      if (sb.classList.contains('sv-visible')) requestAnimationFrame(finalize);
-    }
-    setTimeout(finalize, 1600);
-    window.addEventListener('resize', updateDock);
+    (function tick() {
+      if (done) return;
+      updateDock();   // keep the hidden dock tracking the column as it settles
+      var sb = document.querySelector('.lesson-sidebar');
+      var left = sb ? Math.round(sb.getBoundingClientRect().left) : null;
+      if (left != null && left === lastLeft) stable++; else stable = 0;
+      lastLeft = left;
+      if (stable >= 24 && performance.now() - start >= 1700) reveal();
+      else requestAnimationFrame(tick);
+    })();
+    // Background tabs pause rAF; the page is settled by 2.1s, so reveal regardless.
+    setTimeout(reveal, 2100);
+    // Re-track on viewport change (incl. a second frame to catch post-resize reflow).
+    window.addEventListener('resize', function () { updateDock(); requestAnimationFrame(updateDock); });
     window.addEventListener('load', updateDock);
+    var sb = document.querySelector('.lesson-sidebar');
     if (sb && window.ResizeObserver) {
       try { new ResizeObserver(updateDock).observe(sb); } catch (e) {}
     }
