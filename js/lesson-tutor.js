@@ -63,7 +63,8 @@
       // lines it up level with the highlight-mode button on the left. It may
       // overlap a tall related-media list — acceptable, since that list scrolls
       // internally (Tom's call).
-      '.tutor-dock{position:fixed;bottom:48px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px}',
+      '.tutor-dock{position:fixed;bottom:48px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s ease}',
+      '.tutor-dock--ready{opacity:1;pointer-events:auto}',
       // Shorten the related-media column on desktop so it ends ABOVE the floating
       // dock — the button never overlaps content; the list just scrolls within the
       // shorter column. A soft mask fade at the bottom edge gives the "fades into
@@ -458,22 +459,33 @@
     if (sb) sb.classList.toggle('tutor-clip-fade', isColumn && sb.scrollHeight > sb.clientHeight + 2);
   }
 
-  // Position once the sidebar is genuinely laid out (avoids the race where the
-  // dock lands left/right on a stale/zero measurement), then keep it correct on
-  // resize, on full load, and whenever the column itself resizes.
+  // The dynamic lesson layout settles in stages (content injection, the gutter
+  // :has() reflow, fonts), and the sidebar can SHIFT horizontally after first
+  // paint without changing size — so a one-shot measurement (or a ResizeObserver,
+  // which only sees size) lands the dock on a transient spot. Re-position every
+  // frame until the sidebar's left stops moving, keeping the dock hidden until
+  // then so the settle is never visible. Resize keeps it correct afterwards.
   function bindDock() {
-    var tries = 0;
-    (function ready() {
+    var lastLeft = null, stable = 0, frames = 0;
+    (function tick() {
+      updateDock();
       var sb = document.querySelector('.lesson-sidebar');
-      var r = sb && sb.getBoundingClientRect();
-      if (r && r.width > 40) { updateDock(); }
-      else if (tries++ < 25) { setTimeout(ready, 120); }
+      var left = sb ? sb.getBoundingClientRect().left : null;
+      if (left != null && lastLeft != null && Math.abs(left - lastLeft) < 0.5) stable++;
+      else stable = 0;
+      lastLeft = left;
+      frames++;
+      if (stable >= 3 || frames >= 90) {
+        if (els.dock) els.dock.classList.add('tutor-dock--ready');
+      } else {
+        requestAnimationFrame(tick);
+      }
     })();
     window.addEventListener('resize', updateDock);
     window.addEventListener('load', updateDock);
-    var sb = document.querySelector('.lesson-sidebar');
-    if (sb && window.ResizeObserver) {
-      try { new ResizeObserver(updateDock).observe(sb); } catch (e) {}
+    var sbEl = document.querySelector('.lesson-sidebar');
+    if (sbEl && window.ResizeObserver) {
+      try { new ResizeObserver(updateDock).observe(sbEl); } catch (e) {}
     }
   }
 
