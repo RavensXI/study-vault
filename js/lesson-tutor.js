@@ -69,7 +69,11 @@
       // shorter column. A soft mask fade at the bottom edge gives the "fades into
       // it" look Tom liked (no solid background rectangle). Scoped to desktop;
       // mobile uses the slide-in panel with its own layout.
-      '@media(min-width:769px){.lesson-sidebar{max-height:calc(100vh - 12rem);-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent)}}',
+      '@media(min-width:961px){.lesson-sidebar{max-height:calc(100vh - 12rem)}}',
+      // Fade the bottom edge ONLY when the column overflows down toward the dock
+      // (class toggled in JS). On a short related-media list there's nothing to
+      // fade, so no fade — avoids a pointless fade on media-light lessons.
+      '@media(min-width:961px){.lesson-sidebar.tutor-clip-fade{-webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent);mask-image:linear-gradient(to bottom,#000 calc(100% - 20px),transparent)}}',
       '.tutor-dock--hidden{display:none}',
       'body.sidebar-open .tutor-dock{display:none}',
       '.tutor-dock .bugr-fab{position:static !important;right:auto !important;bottom:auto !important;left:auto !important;margin:0 !important}',
@@ -409,9 +413,7 @@
     els.fab = fab;
     els.fabCount = fab.querySelector('#tutor-fab-count');
     adoptBugButton(0);
-    positionDock();
-    window.addEventListener('resize', positionDock);
-    setTimeout(positionDock, 300);
+    bindDock();
     updateCount();
     return true;
   }
@@ -424,30 +426,51 @@
     var bug = document.querySelector('.bugr-fab');
     if (bug && bug.parentNode !== els.dock) {
       els.dock.appendChild(bug);   // after the tutor button → tutor left, bug right
-      positionDock();
+      updateDock();
       return;
     }
     if (tries < 10) setTimeout(function () { adoptBugButton(tries + 1); }, 400);
   }
 
-  // Centre the dock on the related-media column. Above 960px the lesson grid
-  // keeps the sidebar as a real right-hand column, so we centre on its measured
-  // midpoint; at/below 960px it stacks, so fall back to the bottom-right corner.
-  function positionDock() {
+  // Centre the dock on the related-media column (>960px = real right column),
+  // else bottom-right corner. Also fades the column's bottom edge ONLY when it
+  // overflows toward the dock — so a short related-media list gets no fade.
+  function updateDock() {
     if (!els.dock) return;
     var sb = document.querySelector('.lesson-sidebar');
-    if (sb && window.innerWidth > 960) {
+    var wide = window.innerWidth > 960;
+    if (sb && wide) {
       var r = sb.getBoundingClientRect();
-      if (r.width > 0) {
-        els.dock.style.left = (r.left + r.width / 2) + 'px';
+      if (r.width > 40) {
+        els.dock.style.left = Math.round(r.left + r.width / 2) + 'px';
         els.dock.style.right = 'auto';
         els.dock.style.transform = 'translateX(-50%)';
-        return;
       }
+    } else {
+      els.dock.style.left = 'auto';
+      els.dock.style.transform = 'none';
+      els.dock.style.right = '16px';
     }
-    els.dock.style.left = 'auto';
-    els.dock.style.transform = 'none';
-    els.dock.style.right = '16px';
+    if (sb) sb.classList.toggle('tutor-clip-fade', wide && sb.scrollHeight > sb.clientHeight + 2);
+  }
+
+  // Position once the sidebar is genuinely laid out (avoids the race where the
+  // dock lands left/right on a stale/zero measurement), then keep it correct on
+  // resize, on full load, and whenever the column itself resizes.
+  function bindDock() {
+    var tries = 0;
+    (function ready() {
+      var sb = document.querySelector('.lesson-sidebar');
+      var r = sb && sb.getBoundingClientRect();
+      if (r && r.width > 40) { updateDock(); }
+      else if (tries++ < 25) { setTimeout(ready, 120); }
+    })();
+    window.addEventListener('resize', updateDock);
+    window.addEventListener('load', updateDock);
+    var sb = document.querySelector('.lesson-sidebar');
+    if (sb && window.ResizeObserver) {
+      try { new ResizeObserver(updateDock).observe(sb); } catch (e) {}
+    }
   }
 
   function init() {
