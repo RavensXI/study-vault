@@ -402,7 +402,6 @@
     positionDock();
     window.addEventListener('resize', positionDock);
     setTimeout(positionDock, 300);
-    setTimeout(positionDock, 1200);
     updateCount();
     return true;
   }
