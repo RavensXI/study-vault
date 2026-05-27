@@ -247,7 +247,8 @@
       subject: unit.subjects,
       prevLesson: currentIdx > 0 ? siblings[currentIdx - 1] : null,
       nextLesson: currentIdx < siblings.length - 1 ? siblings[currentIdx + 1] : null,
-      totalLessons: siblings.length
+      totalLessons: siblings.length,
+      unitLessons: siblings.map(function (s) { return { number: s.lesson_number, title: s.title }; })
     };
   }
 
@@ -400,6 +401,7 @@
     window._subjectSlug = params.subjectSlug;
     window._subjectName = subject.name || '';
     window._unitSlug = unit.slug || params.unitSlug || '';
+    window._unitLessons = data.unitLessons || [];
     window._unitName = unit.name || '';
     window._examBoard = subject.exam_board || '';
     // Exam technique guides are legacy — only Unity-bespoke subjects have them.
