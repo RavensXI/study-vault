@@ -401,6 +401,8 @@
     adoptBugButton(0);
     positionDock();
     window.addEventListener('resize', positionDock);
+    setTimeout(positionDock, 300);
+    setTimeout(positionDock, 1200);
     updateCount();
     return true;
   }
@@ -419,15 +421,15 @@
     if (tries < 10) setTimeout(function () { adoptBugButton(tries + 1); }, 400);
   }
 
-  // Centre the dock under the related-media column when it's a true right-hand
-  // column; otherwise (stacked / mobile) fall back to the bottom-right corner.
+  // Centre the dock on the related-media column. Above 960px the lesson grid
+  // keeps the sidebar as a real right-hand column, so we centre on its measured
+  // midpoint; at/below 960px it stacks, so fall back to the bottom-right corner.
   function positionDock() {
     if (!els.dock) return;
     var sb = document.querySelector('.lesson-sidebar');
-    var vw = window.innerWidth;
-    if (sb) {
+    if (sb && window.innerWidth > 960) {
       var r = sb.getBoundingClientRect();
-      if (r.width > 0 && r.width < vw * 0.6 && r.left > vw * 0.45) {
+      if (r.width > 0) {
         els.dock.style.left = (r.left + r.width / 2) + 'px';
         els.dock.style.right = 'auto';
         els.dock.style.transform = 'translateX(-50%)';
