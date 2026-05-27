@@ -715,7 +715,9 @@
         heroes:    function (f, t) { return L().or(ARTICLE).not('hero_image_url', 'is', null).range(f, t); },
         narration: function (f, t) { return L().or(ARTICLE).not('narration_manifest', 'is', null).range(f, t); },
         relmedia:  function (f, t) { return L().or(ARTICLE).not('related_media', 'is', null).neq('related_media', '[]').range(f, t); },
-        podcasts:  function (f, t) { return L().or(ARTICLE).contains('related_media', [{ category: 'Podcasts', items: [{ title: 'Lesson Podcast' }] }]).range(f, t); }
+        // NB: use .filter('cs', <json string>) — supabase-js .contains() does
+        // NOT JSON-serialise objects (it coerces to "[object Object]" → 400).
+        podcasts:  function (f, t) { return L().or(ARTICLE).filter('related_media', 'cs', JSON.stringify([{ category: 'Podcasts', items: [{ title: 'Lesson Podcast' }] }])).range(f, t); }
       };
 
       // Paginate one metric's filtered query, collecting unit_ids only.
