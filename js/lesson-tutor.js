@@ -432,26 +432,30 @@
     if (tries < 10) setTimeout(function () { adoptBugButton(tries + 1); }, 400);
   }
 
-  // Centre the dock on the related-media column (>960px = real right column),
-  // else bottom-right corner. Also fades the column's bottom edge ONLY when it
-  // overflows toward the dock — so a short related-media list gets no fade.
+  // Centre the dock on the related-media column when the sidebar is a real
+  // right-hand column, else bottom-right corner. Decide by GEOMETRY, not a magic
+  // breakpoint: a side column is narrow (< half the viewport); when the layout
+  // stacks, the sidebar spans most of the width. Also fades the column's bottom
+  // edge ONLY when it overflows toward the dock (short list → no fade).
   function updateDock() {
     if (!els.dock) return;
     var sb = document.querySelector('.lesson-sidebar');
-    var wide = window.innerWidth > 960;
-    if (sb && wide) {
+    var isColumn = false;
+    if (sb) {
       var r = sb.getBoundingClientRect();
-      if (r.width > 40) {
+      isColumn = r.width > 40 && r.width < window.innerWidth * 0.5;
+      if (isColumn) {
         els.dock.style.left = Math.round(r.left + r.width / 2) + 'px';
         els.dock.style.right = 'auto';
         els.dock.style.transform = 'translateX(-50%)';
       }
-    } else {
+    }
+    if (!isColumn) {
       els.dock.style.left = 'auto';
       els.dock.style.transform = 'none';
       els.dock.style.right = '16px';
     }
-    if (sb) sb.classList.toggle('tutor-clip-fade', wide && sb.scrollHeight > sb.clientHeight + 2);
+    if (sb) sb.classList.toggle('tutor-clip-fade', isColumn && sb.scrollHeight > sb.clientHeight + 2);
   }
 
   // Position once the sidebar is genuinely laid out (avoids the race where the
