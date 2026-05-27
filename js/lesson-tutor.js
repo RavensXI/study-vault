@@ -60,16 +60,18 @@
     s.textContent = [
       // Floating dock (bottom, centred under the related-media column on wide
       // layouts) holding the tutor button + the adopted bug button.
-      '.tutor-dock{position:fixed;bottom:18px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px}',
-      '.tutor-dock--hidden{display:none}',
-      'body.sidebar-open .tutor-dock{display:none}',
-      '.tutor-dock .bugr-fab{position:static !important;right:auto !important;bottom:auto !important;left:auto !important;margin:0 !important}',
-      '.tutor-fab{display:inline-flex;align-items:center;gap:0.5rem;padding:0.62rem 0.95rem;border:none;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(20,18,15,0.24);transition:filter .15s ease,transform .15s ease}',
+      // Tutor lives as a pinned footer at the bottom of the sidebar column.
+      // position:sticky;bottom:0 keeps it visible at the bottom of the
+      // internally-scrolling sidebar, so it can never overlap the related media.
+      // order:1 keeps it last regardless of when sidebar content is injected.
+      '.sidebar-tutor-footer{order:1;position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:8px;padding:0.7rem 0 0.2rem;margin-top:0.4rem;background:var(--bg-body,#faf8f5)}',
+      '.sidebar-tutor-footer::before{content:"";position:absolute;left:0;right:0;top:-16px;height:16px;background:linear-gradient(to top,var(--bg-body,#faf8f5),transparent);pointer-events:none}',
+      '.tutor-fab{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:0.5rem;padding:0.7rem 0.9rem;border:none;border-radius:14px;background:var(--accent,#2d2a26);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:0.92rem;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(20,18,15,0.18);transition:filter .15s ease,transform .15s ease}',
       '.tutor-fab:hover{filter:brightness(1.08);transform:translateY(-1px)}',
       '.tutor-fab svg{width:19px;height:19px;flex-shrink:0}',
       '.tutor-fab-count{background:rgba(255,255,255,0.25);border-radius:999px;padding:0.02rem 0.45rem;font-size:0.74rem;font-weight:700;line-height:1.5;min-width:1.1em;text-align:center}',
       '.tutor-fab--empty{opacity:0.65}',
-      '@media(max-width:480px){.tutor-dock{bottom:12px}.tutor-fab-label{display:none}}',
+      '.sidebar-tutor-footer .bugr-fab{position:static !important;right:auto !important;bottom:auto !important;left:auto !important;top:auto !important;margin:0 !important;flex-shrink:0}',
       // Floating, draggable, NON-blocking panel — no backdrop, page stays interactive.
       '.tutor-panel{position:fixed;right:24px;bottom:24px;left:auto;top:auto;z-index:9995;display:none;flex-direction:column;width:min(380px,calc(100vw - 24px));height:min(70vh,560px);background:var(--bg-page,#faf8f5);border:1px solid var(--border-light,#e3ddd5);border-radius:16px;box-shadow:0 12px 48px rgba(20,18,15,0.28);overflow:hidden}',
       '.tutor-panel.open{display:flex;animation:tutorPop .22s cubic-bezier(0.16,1,0.3,1)}',
@@ -307,7 +309,6 @@
   function openTutor() {
     buildPanel();
     els.panel.classList.add('open');
-    if (els.dock) els.dock.classList.add('tutor-dock--hidden');
     // Restore the last dragged position if the student moved it before.
     if (lastPos) {
       els.panel.style.left = lastPos.left;
@@ -326,7 +327,6 @@
 
   function closeTutor() {
     if (els.panel) els.panel.classList.remove('open');
-    if (els.dock) els.dock.classList.remove('tutor-dock--hidden');
   }
 
   async function onSend() {
@@ -381,9 +381,11 @@
   }
 
   function insertLauncher() {
-    if (els.dock) return true;
-    var dock = document.createElement('div');
-    dock.className = 'tutor-dock';
+    if (els.footer) return true;
+    var sidebar = document.querySelector('.lesson-sidebar');
+    if (!sidebar) return false;   // keep polling until the sidebar exists
+    var footer = document.createElement('div');
+    footer.className = 'sidebar-tutor-footer';
     var fab = document.createElement('button');
     fab.type = 'button';
     fab.className = 'tutor-fab';
@@ -393,51 +395,27 @@
       '<span class="tutor-fab-label">Ask the Tutor</span>' +
       '<span class="tutor-fab-count" id="tutor-fab-count" title="Messages left today"></span>';
     fab.addEventListener('click', openTutor);
-    dock.appendChild(fab);
-    document.body.appendChild(dock);
-    els.dock = dock;
+    footer.appendChild(fab);
+    sidebar.appendChild(footer);
+    els.footer = footer;
     els.fab = fab;
     els.fabCount = fab.querySelector('#tutor-fab-count');
     adoptBugButton(0);
-    positionDock();
-    window.addEventListener('resize', positionDock);
-    setTimeout(positionDock, 300);
     updateCount();
     return true;
   }
 
-  // Move the global bug-report FAB into our dock so the two sit together, centred
-  // under the related-media column. The bug FAB's click handler travels with it.
-  // It's created by a deferred script, so retry briefly until it appears.
+  // Move the global bug-report FAB into the tutor footer so the two sit together
+  // (Tom doesn't want it floating alone in the corner). Its click handler travels
+  // with it. Created by a deferred script, so retry briefly until it appears.
   function adoptBugButton(tries) {
-    if (!els.dock) return;
+    if (!els.footer) return;
     var bug = document.querySelector('.bugr-fab');
-    if (bug && bug.parentNode !== els.dock) {
-      els.dock.appendChild(bug);   // after the tutor button → tutor left, bug right
-      positionDock();
+    if (bug && bug.parentNode !== els.footer) {
+      els.footer.appendChild(bug);   // small bug button to the right of the tutor pill
       return;
     }
     if (tries < 10) setTimeout(function () { adoptBugButton(tries + 1); }, 400);
-  }
-
-  // Centre the dock on the related-media column. Above 960px the lesson grid
-  // keeps the sidebar as a real right-hand column, so we centre on its measured
-  // midpoint; at/below 960px it stacks, so fall back to the bottom-right corner.
-  function positionDock() {
-    if (!els.dock) return;
-    var sb = document.querySelector('.lesson-sidebar');
-    if (sb && window.innerWidth > 960) {
-      var r = sb.getBoundingClientRect();
-      if (r.width > 0) {
-        els.dock.style.left = (r.left + r.width / 2) + 'px';
-        els.dock.style.right = 'auto';
-        els.dock.style.transform = 'translateX(-50%)';
-        return;
-      }
-    }
-    els.dock.style.left = 'auto';
-    els.dock.style.transform = 'none';
-    els.dock.style.right = '16px';
   }
 
   function init() {
