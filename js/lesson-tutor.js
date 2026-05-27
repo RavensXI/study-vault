@@ -481,6 +481,10 @@
         requestAnimationFrame(tick);
       }
     })();
+    // Guaranteed reveal: requestAnimationFrame is paused in background tabs, so
+    // the rAF loop above can leave the dock stuck invisible. setTimeout fires
+    // regardless — do a final position + reveal after the layout has settled.
+    setTimeout(function () { updateDock(); if (els.dock) els.dock.classList.add('tutor-dock--ready'); }, 1500);
     window.addEventListener('resize', updateDock);
     window.addEventListener('load', updateDock);
     var sbEl = document.querySelector('.lesson-sidebar');
