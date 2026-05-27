@@ -58,15 +58,18 @@
     var s = document.createElement('style');
     s.id = 'lesson-tutor-styles';
     s.textContent = [
-      // Floating launcher button (bottom-right, just left of the bug FAB)
-      '.tutor-fab{position:fixed;right:78px;bottom:18px;z-index:9980;display:inline-flex;align-items:center;gap:0.5rem;padding:0.62rem 0.95rem;border:none;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(20,18,15,0.24);transition:filter .15s ease,transform .15s ease}',
+      // Floating dock (bottom, centred under the related-media column on wide
+      // layouts) holding the tutor button + the adopted bug button.
+      '.tutor-dock{position:fixed;bottom:18px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px}',
+      '.tutor-dock--hidden{display:none}',
+      'body.sidebar-open .tutor-dock{display:none}',
+      '.tutor-dock .bugr-fab{position:static !important;right:auto !important;bottom:auto !important;left:auto !important;margin:0 !important}',
+      '.tutor-fab{display:inline-flex;align-items:center;gap:0.5rem;padding:0.62rem 0.95rem;border:none;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;font-family:Inter,system-ui,sans-serif;font-size:0.9rem;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(20,18,15,0.24);transition:filter .15s ease,transform .15s ease}',
       '.tutor-fab:hover{filter:brightness(1.08);transform:translateY(-1px)}',
       '.tutor-fab svg{width:19px;height:19px;flex-shrink:0}',
       '.tutor-fab-count{background:rgba(255,255,255,0.25);border-radius:999px;padding:0.02rem 0.45rem;font-size:0.74rem;font-weight:700;line-height:1.5;min-width:1.1em;text-align:center}',
-      '.tutor-fab--hidden{display:none}',
       '.tutor-fab--empty{opacity:0.65}',
-      'body.sidebar-open .tutor-fab{display:none}',
-      '@media(max-width:480px){.tutor-fab{right:62px;bottom:12px;padding:0.55rem 0.62rem}.tutor-fab-label{display:none}}',
+      '@media(max-width:480px){.tutor-dock{bottom:12px}.tutor-fab-label{display:none}}',
       // Floating, draggable, NON-blocking panel — no backdrop, page stays interactive.
       '.tutor-panel{position:fixed;right:24px;bottom:24px;left:auto;top:auto;z-index:9995;display:none;flex-direction:column;width:min(380px,calc(100vw - 24px));height:min(70vh,560px);background:var(--bg-page,#faf8f5);border:1px solid var(--border-light,#e3ddd5);border-radius:16px;box-shadow:0 12px 48px rgba(20,18,15,0.28);overflow:hidden}',
       '.tutor-panel.open{display:flex;animation:tutorPop .22s cubic-bezier(0.16,1,0.3,1)}',
@@ -304,7 +307,7 @@
   function openTutor() {
     buildPanel();
     els.panel.classList.add('open');
-    if (els.fab) els.fab.classList.add('tutor-fab--hidden');
+    if (els.dock) els.dock.classList.add('tutor-dock--hidden');
     // Restore the last dragged position if the student moved it before.
     if (lastPos) {
       els.panel.style.left = lastPos.left;
@@ -323,7 +326,7 @@
 
   function closeTutor() {
     if (els.panel) els.panel.classList.remove('open');
-    if (els.fab) els.fab.classList.remove('tutor-fab--hidden');
+    if (els.dock) els.dock.classList.remove('tutor-dock--hidden');
   }
 
   async function onSend() {
@@ -378,7 +381,9 @@
   }
 
   function insertLauncher() {
-    if (els.fab) return true;
+    if (els.dock) return true;
+    var dock = document.createElement('div');
+    dock.className = 'tutor-dock';
     var fab = document.createElement('button');
     fab.type = 'button';
     fab.className = 'tutor-fab';
@@ -388,11 +393,50 @@
       '<span class="tutor-fab-label">Ask the Tutor</span>' +
       '<span class="tutor-fab-count" id="tutor-fab-count" title="Messages left today"></span>';
     fab.addEventListener('click', openTutor);
-    document.body.appendChild(fab);
+    dock.appendChild(fab);
+    document.body.appendChild(dock);
+    els.dock = dock;
     els.fab = fab;
     els.fabCount = fab.querySelector('#tutor-fab-count');
+    adoptBugButton(0);
+    positionDock();
+    window.addEventListener('resize', positionDock);
     updateCount();
     return true;
+  }
+
+  // Move the global bug-report FAB into our dock so the two sit together, centred
+  // under the related-media column. The bug FAB's click handler travels with it.
+  // It's created by a deferred script, so retry briefly until it appears.
+  function adoptBugButton(tries) {
+    if (!els.dock) return;
+    var bug = document.querySelector('.bugr-fab');
+    if (bug && bug.parentNode !== els.dock) {
+      els.dock.appendChild(bug);   // after the tutor button → tutor left, bug right
+      positionDock();
+      return;
+    }
+    if (tries < 10) setTimeout(function () { adoptBugButton(tries + 1); }, 400);
+  }
+
+  // Centre the dock under the related-media column when it's a true right-hand
+  // column; otherwise (stacked / mobile) fall back to the bottom-right corner.
+  function positionDock() {
+    if (!els.dock) return;
+    var sb = document.querySelector('.lesson-sidebar');
+    var vw = window.innerWidth;
+    if (sb) {
+      var r = sb.getBoundingClientRect();
+      if (r.width > 0 && r.width < vw * 0.6 && r.left > vw * 0.45) {
+        els.dock.style.left = (r.left + r.width / 2) + 'px';
+        els.dock.style.right = 'auto';
+        els.dock.style.transform = 'translateX(-50%)';
+        return;
+      }
+    }
+    els.dock.style.left = 'auto';
+    els.dock.style.transform = 'none';
+    els.dock.style.right = '16px';
   }
 
   function init() {
