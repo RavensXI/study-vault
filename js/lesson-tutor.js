@@ -447,7 +447,13 @@
     var isColumn = false;
     if (sb) {
       var r = sb.getBoundingClientRect();
-      isColumn = r.width > 40 && r.width < window.innerWidth * 0.5;
+      // A genuine right-hand column: narrow, in the right portion, AND on-screen.
+      // The last two matter because in panel mode the sidebar is a ~260px panel
+      // pushed off-screen — without these checks the dock centred on it and
+      // vanished off-screen when resizing up from mobile.
+      isColumn = r.width > 40 && r.width < window.innerWidth * 0.5
+        && r.left > window.innerWidth * 0.35
+        && r.right <= window.innerWidth + 8;
       if (isColumn) {
         els.dock.style.left = Math.round(r.left + r.width / 2) + 'px';
         els.dock.style.right = 'auto';
@@ -486,11 +492,11 @@
       var left = sb ? Math.round(sb.getBoundingClientRect().left) : null;
       if (left != null && left === lastLeft) stable++; else stable = 0;
       lastLeft = left;
-      if (stable >= 24 && performance.now() - start >= 1700) reveal();
+      if (stable >= 20 && performance.now() - start >= 1300) reveal();
       else requestAnimationFrame(tick);
     })();
-    // Background tabs pause rAF; the page is settled by 2.1s, so reveal regardless.
-    setTimeout(reveal, 2100);
+    // Background tabs pause rAF; the page is settled by 1.8s, so reveal regardless.
+    setTimeout(reveal, 1800);
     // Re-track on viewport change (incl. a second frame to catch post-resize reflow).
     window.addEventListener('resize', function () { updateDock(); requestAnimationFrame(updateDock); });
     window.addEventListener('load', updateDock);

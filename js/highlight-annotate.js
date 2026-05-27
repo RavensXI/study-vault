@@ -943,7 +943,7 @@
     // so the bottom controls arrive together as the page finishes building.
     // setTimeout (not rAF) so it fires reliably even in a background tab.
     var stackForReveal = fabStackEl;
-    setTimeout(function () { stackForReveal.classList.add('sv-hl-fab-stack--revealed'); }, 1600);
+    setTimeout(function () { stackForReveal.classList.add('sv-hl-fab-stack--revealed'); }, 1300);
     return fabStackEl;
   }
 
