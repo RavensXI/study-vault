@@ -459,37 +459,34 @@
     if (sb) sb.classList.toggle('tutor-clip-fade', isColumn && sb.scrollHeight > sb.clientHeight + 2);
   }
 
-  // The dynamic lesson layout settles in stages (content injection, the gutter
-  // :has() reflow, fonts), and the sidebar can SHIFT horizontally after first
-  // paint without changing size — so a one-shot measurement (or a ResizeObserver,
-  // which only sees size) lands the dock on a transient spot. Re-position every
-  // frame until the sidebar's left stops moving, keeping the dock hidden until
-  // then so the settle is never visible. Resize keeps it correct afterwards.
+  // The whole lesson (incl. .lesson-sidebar) animates in via .sv-reveal — a 1s
+  // transform glide (style.css). Positioning/revealing the dock mid-animation
+  // lands it on a transient spot, then it snaps when the glide ends. So: keep the
+  // dock hidden, and only measure + reveal AFTER the sidebar's entrance animation
+  // finishes (its transform transitionend), measuring the FINAL position — it
+  // fades in already-centred, no snap. Timed fallback covers reduced-motion,
+  // background tabs (transitions don't fire there), and any no-animation path.
   function bindDock() {
-    var lastLeft = null, stable = 0, frames = 0;
-    (function tick() {
+    var done = false;
+    function finalize() {
+      if (done || !els.dock) return;
+      done = true;
       updateDock();
-      var sb = document.querySelector('.lesson-sidebar');
-      var left = sb ? sb.getBoundingClientRect().left : null;
-      if (left != null && lastLeft != null && Math.abs(left - lastLeft) < 0.5) stable++;
-      else stable = 0;
-      lastLeft = left;
-      frames++;
-      if (stable >= 3 || frames >= 90) {
-        if (els.dock) els.dock.classList.add('tutor-dock--ready');
-      } else {
-        requestAnimationFrame(tick);
-      }
-    })();
-    // Guaranteed reveal: requestAnimationFrame is paused in background tabs, so
-    // the rAF loop above can leave the dock stuck invisible. setTimeout fires
-    // regardless — do a final position + reveal after the layout has settled.
-    setTimeout(function () { updateDock(); if (els.dock) els.dock.classList.add('tutor-dock--ready'); }, 1500);
+      els.dock.classList.add('tutor-dock--ready');
+    }
+    var sb = document.querySelector('.lesson-sidebar');
+    if (sb) {
+      sb.addEventListener('transitionend', function (e) {
+        if (e.propertyName === 'transform') requestAnimationFrame(finalize);
+      });
+      // Entrance already complete (reduced motion / re-init): settle next frame.
+      if (sb.classList.contains('sv-visible')) requestAnimationFrame(finalize);
+    }
+    setTimeout(finalize, 1600);
     window.addEventListener('resize', updateDock);
     window.addEventListener('load', updateDock);
-    var sbEl = document.querySelector('.lesson-sidebar');
-    if (sbEl && window.ResizeObserver) {
-      try { new ResizeObserver(updateDock).observe(sbEl); } catch (e) {}
+    if (sb && window.ResizeObserver) {
+      try { new ResizeObserver(updateDock).observe(sb); } catch (e) {}
     }
   }
 
