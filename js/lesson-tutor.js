@@ -63,8 +63,11 @@
       // lines it up level with the highlight-mode button on the left. It may
       // overlap a tall related-media list — acceptable, since that list scrolls
       // internally (Tom's call).
-      '.tutor-dock{position:fixed;bottom:48px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .25s ease}',
-      '.tutor-dock--ready{opacity:1;pointer-events:auto}',
+      // Reveal = slide up from below + fade in (animate `bottom`, NOT transform,
+      // so the translateX(-50%) centring set in JS is left intact). Matches the
+      // lesson's staged entrance (title from top, hero/sidebar slide in).
+      '.tutor-dock{position:fixed;bottom:28px;right:16px;z-index:9980;display:flex;align-items:center;gap:10px;opacity:0;pointer-events:none;transition:opacity .45s ease,bottom .55s cubic-bezier(0.16,1,0.3,1)}',
+      '.tutor-dock--ready{opacity:1;pointer-events:auto;bottom:48px}',
       // Shorten the related-media column on desktop so it ends ABOVE the floating
       // dock — the button never overlaps content; the list just scrolls within the
       // shorter column. A soft mask fade at the bottom edge gives the "fades into
@@ -83,7 +86,7 @@
       '.tutor-fab svg{width:19px;height:19px;flex-shrink:0}',
       '.tutor-fab-count{background:rgba(255,255,255,0.25);border-radius:999px;padding:0.02rem 0.45rem;font-size:0.74rem;font-weight:700;line-height:1.5;min-width:1.1em;text-align:center}',
       '.tutor-fab--empty{opacity:0.65}',
-      '@media(max-width:768px){.tutor-dock{bottom:16px}}',
+      '@media(max-width:768px){.tutor-dock{bottom:-4px}.tutor-dock--ready{bottom:16px}}',
       '@media(max-width:480px){.tutor-fab-label{display:none}}',
       // Floating, draggable, NON-blocking panel — no backdrop, page stays interactive.
       '.tutor-panel{position:fixed;right:24px;bottom:24px;left:auto;top:auto;z-index:9995;display:none;flex-direction:column;width:min(380px,calc(100vw - 24px));height:min(70vh,560px);background:var(--bg-page,#faf8f5);border:1px solid var(--border-light,#e3ddd5);border-radius:16px;box-shadow:0 12px 48px rgba(20,18,15,0.28);overflow:hidden}',

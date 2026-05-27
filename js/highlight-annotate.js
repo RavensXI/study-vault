@@ -939,6 +939,11 @@
     fabStackEl.appendChild(fabExitEl);
 
     document.body.appendChild(fabStackEl);
+    // Slide up + fade in shortly after load, roughly in sync with the tutor dock,
+    // so the bottom controls arrive together as the page finishes building.
+    // setTimeout (not rAF) so it fires reliably even in a background tab.
+    var stackForReveal = fabStackEl;
+    setTimeout(function () { stackForReveal.classList.add('sv-hl-fab-stack--revealed'); }, 1600);
     return fabStackEl;
   }
 
@@ -1160,12 +1165,16 @@
       // pair of equal "Lesson Highlights" + "Exit Highlight Mode" in mode.
       // On wide viewports (≥1400px) the stack centres under the gutter
       // checklist column so it feels like one visual unit with the rail.
-      '.sv-hl-fab-stack{position:fixed;left:18px;bottom:48px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start}' +
+      // Slides up from below + fades in on load (animate `bottom`, not transform,
+      // so the ≥1400 translateX centring is untouched) — matches the tutor dock
+      // and the lesson's staged entrance.
+      '.sv-hl-fab-stack{position:fixed;left:18px;bottom:28px;z-index:8000;display:flex;flex-direction:column;gap:8px;align-items:flex-start;opacity:0;transition:opacity .45s ease,bottom .55s cubic-bezier(0.16,1,0.3,1)}' +
+      '.sv-hl-fab-stack--revealed{opacity:1;bottom:48px}' +
       '@media (min-width:1400px){.sv-hl-fab-stack{left:var(--gutter-center, calc((100vw - var(--page-max, 1160px)) / 4));transform:translateX(-50%);align-items:center}}' +
       // Mobile: lay the in-mode buttons side-by-side instead of stacked.
       // Stacked, the X exit button sat above the Lesson Highlights button
       // and the combined height clipped under the narration mini-player.
-      '@media (max-width:768px){.sv-hl-fab-stack{bottom:16px;flex-direction:row;align-items:center}}' +
+      '@media (max-width:768px){.sv-hl-fab-stack{bottom:-4px;flex-direction:row;align-items:center}.sv-hl-fab-stack--revealed{bottom:16px}}' +
       '.sv-hl-fab{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;background:var(--accent,#2d2a26);color:#fff;border:none;cursor:pointer;text-decoration:none;box-shadow:0 10px 24px rgba(20,18,15,.18);font-family:Inter,system-ui,sans-serif;font-size:.9rem;font-weight:500;transition:filter .15s ease,transform .15s ease}' +
       '.sv-hl-fab:hover{filter:brightness(1.1);transform:translateY(-1px)}' +
       '.sv-hl-fab--exit{background:#2d2a26;color:#fff}' +
