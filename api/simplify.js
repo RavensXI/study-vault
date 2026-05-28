@@ -26,7 +26,10 @@
 const crypto = require('crypto');
 const { supabase } = require('./pipeline/_lib/supabase');
 
-const GEN_MODEL = 'claude-haiku-4-5-20251001';
+// Leveling is a trivial task -> Haiku. "Explain it differently" reframes with
+// an analogy (a reasoning task) -> Sonnet.
+const SIMPLE_MODEL = 'claude-haiku-4-5-20251001';
+const EXPLAIN_MODEL = 'claude-sonnet-4-6';
 const MAX_TEXT_LEN = 4000; // a single paragraph; reject anything pathological
 
 module.exports = async function handler(req, res) {
@@ -38,7 +41,7 @@ module.exports = async function handler(req, res) {
 
   var body = req.body || {};
   var text = typeof body.text === 'string' ? body.text : '';
-  var level = body.level === 'simple' ? 'simple' : 'simple'; // v1: single level
+  var level = body.level === 'explain' ? 'explain' : 'simple';
   var lessonId = body.lessonId || null;
   var paragraphIndex = body.paragraphIndex || null;
   var subjectSlug = body.subjectSlug || null;
@@ -90,9 +93,10 @@ module.exports = async function handler(req, res) {
     }
     rates[ip].push(now);
 
-    var simplified = await generate(text, glossaryTerms);
+    var simplified = await generate(text, glossaryTerms, level);
     simplified = (simplified || '').trim();
     if (!simplified) return res.status(502).json({ error: 'Empty simplification' });
+    var genModel = level === 'explain' ? EXPLAIN_MODEL : SIMPLE_MODEL;
 
     // Insert as pending. Use upsert on the unique key to absorb the race where
     // two first-viewers hit a cold paragraph simultaneously.
@@ -107,7 +111,7 @@ module.exports = async function handler(req, res) {
         original_text: text,
         simplified_text: simplified,
         qa_status: 'pending',
-        gen_model: GEN_MODEL,
+        gen_model: genModel,
         regen_count: 0
       }, { onConflict: 'original_hash,target_level' })
       .select('simplified_text, qa_status')
@@ -144,15 +148,17 @@ function sha256(s) {
   return crypto.createHash('sha256').update(s, 'utf8').digest('hex');
 }
 
-function buildSystemPrompt(glossaryTerms) {
-  var termLine = glossaryTerms.length
-    ? glossaryTerms.join(', ')
-    : '(none for this lesson)';
+function termLineOf(glossaryTerms) {
+  return glossaryTerms.length ? glossaryTerms.join(', ') : '(none for this lesson)';
+}
+
+// Leveling: same facts, plainer wording.
+function buildSimpleSystemPrompt(glossaryTerms) {
   return [
     'You rewrite GCSE revision text into plainer English for students with a lower reading age or who are learning English as an additional language.',
     '',
     'Rules you must never break:',
-    '1. Keep every one of these exact subject terms unchanged — simplify the sentence around them, never replace them with easier words and never define them away: ' + termLine + '.',
+    '1. Keep every one of these exact subject terms unchanged — simplify the sentence around them, never replace them with easier words and never define them away: ' + termLineOf(glossaryTerms) + '.',
     '2. Never change any number, date, name, place, or quotation. Never change a fact.',
     '3. Never add a new point and never remove a point. Same information, simpler wording.',
     '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
@@ -161,8 +167,26 @@ function buildSystemPrompt(glossaryTerms) {
   ].join('\n');
 }
 
-async function generate(text, glossaryTerms) {
-  return callAnthropic(buildSystemPrompt(glossaryTerms), text, GEN_MODEL, 700, 0.2);
+// Re-teaching: explain the same idea a different way, with an everyday analogy.
+function buildExplainSystemPrompt(glossaryTerms) {
+  return [
+    'You are a GCSE teacher re-explaining a tricky paragraph to a student who did not follow the textbook version. Explain the SAME idea a different way, using an everyday analogy or concrete example to make it click.',
+    '',
+    'Rules you must never break:',
+    '1. The analogy must be accurate — it must not imply anything false about the real concept. A misleading analogy is worse than none.',
+    '2. Do not contradict or change any fact, number, date, name, or quotation from the original.',
+    '3. Still use these exact subject terms where relevant (do not avoid them — the student is examined on them): ' + termLineOf(glossaryTerms) + '.',
+    '4. Keep it short — 2 to 4 sentences. Lead with the analogy or plain-language framing, then connect it back to the lesson idea.',
+    '5. A warm, plain teacher voice is fine; you may address the student ("imagine you…"). Do not add unrelated facts or padding.',
+    '6. Output ONLY the explanation. No preamble, no notes, no quotation marks around it.'
+  ].join('\n');
+}
+
+async function generate(text, glossaryTerms, level) {
+  if (level === 'explain') {
+    return callAnthropic(buildExplainSystemPrompt(glossaryTerms), text, EXPLAIN_MODEL, 600, 0.6);
+  }
+  return callAnthropic(buildSimpleSystemPrompt(glossaryTerms), text, SIMPLE_MODEL, 700, 0.2);
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {

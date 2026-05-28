@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
     const status = req.query.status || 'pending_review';
     let q = supabase
       .from('simplify_cache')
-      .select('id, lesson_id, paragraph_index, subject_slug, original_text, simplified_text, qa_status, qa_notes, regen_count, created_at, updated_at, lessons(title)')
+      .select('id, lesson_id, target_level, paragraph_index, subject_slug, original_text, simplified_text, qa_status, qa_notes, regen_count, created_at, updated_at, lessons(title)')
       .order('updated_at', { ascending: false })
       .limit(500);
     if (status && status !== 'all') q = q.eq('qa_status', status);

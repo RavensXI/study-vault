@@ -520,6 +520,27 @@
     }, 500);
   }
 
+  // Public hook so other features (e.g. the chunk menu in simplify.js) can open
+  // the tutor pre-seeded with a specific paragraph. Pre-fills the input and
+  // focuses it — does NOT auto-send, so the student keeps control (and no
+  // message is spent until they hit send).
+  window.LessonTutor = {
+    askAbout: function (text) {
+      openTutor();
+      if (!els.input) return;
+      var quote = (text || '').trim();
+      els.input.value = quote
+        ? 'Can you help me understand this part of the lesson?\n\n"' + quote + '"'
+        : '';
+      els.input.style.height = 'auto';
+      els.input.style.height = Math.min(els.input.scrollHeight, 110) + 'px';
+      if (!els.input.disabled) {
+        els.input.focus();
+        try { els.input.setSelectionRange(0, 0); } catch (e) {}
+      }
+    }
+  };
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
   } else {

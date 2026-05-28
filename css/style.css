@@ -8852,93 +8852,100 @@ body.dark-mode.unit-religious-studies-edexcel-15 { --accent: #58e38c; --accent-l
 /* === End admin nav === */
 
 /* ============================================
-   Simplify Language
-   Per-paragraph plain-English rewriting. Additive only — original paragraph
-   is hidden (.sv-orig-hidden) while a simplified sibling block is shown.
+   Simplify / Explain / Tutor chunk menu
+   Additive only. "Simplify" hides the original (.sv-orig-hidden) and shows a
+   plainer sibling; "Explain" adds a supplementary card; the original content
+   and narration are never modified.
    ============================================ */
 
-/* Per-paragraph "Simplify" pill — subtle, revealed on hover/focus */
-#study-notes [data-narration-id].sv-has-pill {
-  position: relative;
+/* Clickable chunk affordance */
+#study-notes .sv-chunk { position: relative; }
+#study-notes .sv-chunk:hover,
+#study-notes .sv-chunk:focus-within {
+  background: var(--accent-badge, rgba(0, 0, 0, 0.04));
+  border-radius: 8px;
 }
-.sv-simplify-pill {
+.sv-chunk-icon {
   position: absolute;
-  top: 0;
+  top: 0.1rem;
   right: 0;
-  transform: translateY(-50%);
+  width: 1.6rem;
+  height: 1.6rem;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.15rem 0.6rem;
-  font-family: inherit;
-  font-size: 0.7rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  justify-content: center;
+  padding: 0;
   color: var(--accent);
-  background: var(--accent-badge, rgba(0, 0, 0, 0.05));
-  border: 1px solid transparent;
-  border-radius: 999px;
+  background: var(--bg-page, #faf8f5);
+  border: 1px solid var(--border-light, #e3ddd5);
+  border-radius: 50%;
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.18s ease, background 0.18s ease;
+  transition: opacity 0.16s ease, transform 0.16s ease;
 }
-/* Reveal when hovering/focusing the paragraph, or focusing the pill itself */
-#study-notes [data-narration-id].sv-has-pill:hover .sv-simplify-pill,
-#study-notes [data-narration-id].sv-has-pill:focus-within .sv-simplify-pill,
-.sv-simplify-pill:focus-visible {
+.sv-chunk-icon svg { width: 0.95rem; height: 0.95rem; }
+.sv-chunk-icon:hover { transform: scale(1.08); }
+#study-notes .sv-chunk:hover .sv-chunk-icon,
+#study-notes .sv-chunk:focus-within .sv-chunk-icon,
+.sv-chunk-icon:focus-visible {
   opacity: 1;
   pointer-events: auto;
 }
-.sv-simplify-pill:hover {
-  background: var(--accent);
-  color: #fff;
-}
-.sv-simplify-pill:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-/* Touch devices have no hover — keep the pill visible but faint */
 @media (hover: none) {
-  .sv-simplify-pill {
-    opacity: 0.6;
-    pointer-events: auto;
-  }
+  .sv-chunk-icon { opacity: 0.5; pointer-events: auto; }
 }
 
-/* Busy state while the request is in flight */
-#study-notes [data-narration-id].sv-simplifying {
-  opacity: 0.55;
-  transition: opacity 0.2s ease;
-}
+/* Busy state while a request is in flight */
+#study-notes .sv-chunk.sv-busy { opacity: 0.6; }
 
-/* Hidden original (kept in the DOM so revert + narration mapping are intact) */
-.sv-orig-hidden {
-  display: none !important;
+/* Popover menu */
+.sv-menu {
+  position: absolute;
+  z-index: 9990;
+  min-width: 210px;
+  background: #fff;
+  border: 1px solid var(--border-light, #e3ddd5);
+  border-radius: 12px;
+  box-shadow: 0 10px 32px rgba(20, 18, 15, 0.18);
+  padding: 0.35rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.1rem;
 }
+.sv-menu.open { display: flex; animation: svMenuPop 0.16s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes svMenuPop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+body.dark-mode .sv-menu { background: #1c1b19; border-color: #3a3733; }
+.sv-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  font-family: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  text-align: left;
+  color: var(--text-primary, #2d2a26);
+  background: none;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.sv-menu-item svg { width: 1.05rem; height: 1.05rem; flex-shrink: 0; color: var(--accent); }
+.sv-menu-item:hover { background: var(--accent-badge, rgba(0, 0, 0, 0.05)); }
+body.dark-mode .sv-menu-item { color: #f5f1ec; }
 
-/* Simplified replacement block */
-.sv-simplified {
-  border-left: 3px solid var(--accent);
-  padding: 0.1rem 0 0.1rem 1rem;
-  margin: 0 0 1.1rem 0;
-}
-.sv-simplified-text {
-  margin: 0 0 0.5rem 0;
-}
-.sv-simplified-foot {
+/* Shared aside footer (used by both simplified + explained blocks) */
+.sv-aside-foot {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
-.sv-simplified-label {
-  font-size: 0.72rem;
-  color: var(--text-muted, #8a8479);
-  font-style: italic;
-}
-.sv-show-original {
+.sv-aside-label { font-size: 0.72rem; color: var(--text-muted, #8a8479); font-style: italic; }
+.sv-aside-action {
   font-family: inherit;
   font-size: 0.72rem;
   font-weight: 600;
@@ -8949,9 +8956,55 @@ body.dark-mode.unit-religious-studies-edexcel-15 { --accent: #58e38c; --accent-l
   cursor: pointer;
   text-decoration: underline;
 }
-.sv-show-original:hover {
-  opacity: 0.75;
+.sv-aside-action:hover { opacity: 0.75; }
+
+/* Hidden original (kept in the DOM so revert + narration mapping are intact) */
+.sv-orig-hidden { display: none !important; }
+
+/* Simplified replacement (plainer wording, original hidden) */
+.sv-simplified {
+  border-left: 3px solid var(--accent);
+  padding: 0.1rem 0 0.1rem 1rem;
+  margin: 0 0 1.1rem 0;
 }
+.sv-simplified-text { margin: 0 0 0.5rem 0; }
+
+/* Explained-another-way card (supplementary; original stays) */
+.sv-explained {
+  background: var(--accent-badge, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border-light, #e3ddd5);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin: 0.4rem 0 1.1rem 0;
+}
+body.dark-mode .sv-explained { background: #262420; border-color: #3a3733; }
+.sv-explained.sv-busy .sv-explained-text { opacity: 0.7; font-style: italic; }
+.sv-explained-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.sv-explained-head svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.sv-explained-hide {
+  margin-left: auto;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted, #8a8479);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.sv-explained-text { margin: 0 0 0.5rem 0; }
 
 /* Greyed narration controls when wording is simplified (audio = original) */
 .narration-player.narration-disabled,

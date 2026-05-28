@@ -1343,25 +1343,12 @@ function initNarration() {
     speedBtn.textContent = speeds[speedIndex] + 'x';
   });
 
-  // --- Click paragraph to jump to that clip (desktop only) ---
-
-  var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  if (!isTouchDevice) {
-    document.querySelectorAll('[data-narration-id]').forEach(function(el) {
-      el.addEventListener('click', function(e) {
-        // Don't hijack glossary term clicks or work in podcast mode
-        if (e.target.closest('dfn, .glossary-popup')) return;
-        if (playerMode === 'podcast') return;
-        if (narrationGloballyGreyed) return;
-        var id = el.dataset.narrationId;
-        // Simplified paragraphs don't match the audio — no jump.
-        if (simplifiedNarrationIds[id]) return;
-        for (var i = 0; i < manifest.length; i++) {
-          if (manifest[i].id === id) { loadClip(i); audio.play(); break; }
-        }
-      });
-    });
-  }
+  // --- Click paragraph to jump to that clip --- REMOVED (May 2026)
+  // Clicking a paragraph now opens the Simplify / Explain / Ask-the-tutor menu
+  // (js/simplify.js) instead of jumping narration to that point — students
+  // listen from the start or not at all, so the jump was low value. The
+  // SimplifyNarration hooks above still pause/grey playback when wording is
+  // simplified.
 
   // --- Collapsible re-highlight ---
 

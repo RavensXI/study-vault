@@ -21,6 +21,8 @@
     .sq-status { display: inline-flex; padding: 0.18rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
     .sq-status-pending_review { background: #fee2e2; color: #b91c1c; }
     .sq-status-pass { background: #dcfce7; color: #15803d; }
+    .sq-level { display: inline-flex; padding: 0.18rem 0.6rem; border-radius: 999px; font-size: 0.7rem; font-weight: 600; background: #ede9fe; color: #6d28d9; }
+    .sq-level-simple { background: #e0f2fe; color: #075985; }
     .sq-title { font-weight: 600; color: var(--text-primary); }
     .sq-meta { color: var(--text-muted); font-size: 0.78rem; }
 
@@ -136,16 +138,20 @@
       }
       contentEl.innerHTML = allEntries.map(function (e) {
         var title = (e.lessons && e.lessons.title) ? e.lessons.title : (e.subject_slug || 'Unknown lesson');
+        var level = e.target_level === 'explain' ? 'explain' : 'simple';
+        var levelLabel = level === 'explain' ? 'Explain differently' : 'Simplify wording';
+        var rightColHeading = level === 'explain' ? 'Alternative explanation (editable)' : 'Simplified (editable)';
         return ''
           + '<div class="sq-card" data-id="' + e.id + '">'
           +   '<div class="sq-card-header">'
           +     '<span class="sq-status sq-status-' + escHtml(e.qa_status) + '">' + escHtml(e.qa_status.replace('_', ' ')) + '</span>'
+          +     '<span class="sq-level sq-level-' + level + '">' + levelLabel + '</span>'
           +     '<span class="sq-title">' + escHtml(title) + '</span>'
           +     '<span class="sq-meta">' + escHtml(e.subject_slug || '') + (e.paragraph_index ? ' · ' + escHtml(e.paragraph_index) : '') + ' · ' + escHtml(formatDate(e.updated_at)) + '</span>'
           +   '</div>'
           +   '<div class="sq-card-body">'
           +     '<div class="sq-col"><h4>Original</h4><div class="sq-text">' + escHtml(e.original_text) + '</div></div>'
-          +     '<div class="sq-col"><h4>Simplified (editable)</h4><textarea class="sq-edit">' + escHtml(e.simplified_text) + '</textarea></div>'
+          +     '<div class="sq-col"><h4>' + rightColHeading + '</h4><textarea class="sq-edit">' + escHtml(e.simplified_text) + '</textarea></div>'
           +     (e.qa_notes ? '<div class="sq-notes"><strong>QA notes:</strong> ' + escHtml(e.qa_notes) + '</div>' : '')
           +   '</div>'
           +   '<div class="sq-actions">'

@@ -21,7 +21,8 @@
 const { supabase } = require('./pipeline/_lib/supabase');
 
 const QA_MODEL = 'claude-sonnet-4-6';
-const GEN_MODEL = 'claude-haiku-4-5-20251001';
+const SIMPLE_MODEL = 'claude-haiku-4-5-20251001';
+const EXPLAIN_MODEL = 'claude-sonnet-4-6';
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -47,12 +48,15 @@ module.exports = async function handler(req, res) {
   try {
     var row = await supabase
       .from('simplify_cache')
-      .select('id, lesson_id, original_text, simplified_text, qa_status, regen_count')
+      .select('id, lesson_id, target_level, original_text, simplified_text, qa_status, regen_count')
       .eq('original_hash', hash)
       .eq('target_level', level)
       .maybeSingle();
 
     if (!row.data) return res.status(404).json({ error: 'Cache row not found' });
+
+    // Trust the stored level for prompt selection, not the client.
+    var rowLevel = row.data.target_level === 'explain' ? 'explain' : 'simple';
 
     // Idempotent: already resolved => no Sonnet spend.
     if (row.data.qa_status === 'pass' || row.data.qa_status === 'pending_review') {
@@ -81,15 +85,15 @@ module.exports = async function handler(req, res) {
     var regenerated = false;
 
     // First QA pass
-    var verdict = await runQa(lessonTitle, glossaryTerms, original, simplified);
+    var verdict = await runQa(rowLevel, lessonTitle, glossaryTerms, original, simplified);
 
     // Fail + not yet regenerated -> regenerate once and re-check
     if (!verdict.pass && (row.data.regen_count || 0) < 1) {
-      var regen = (await generate(original, glossaryTerms) || '').trim();
+      var regen = (await generate(original, glossaryTerms, rowLevel) || '').trim();
       regenerated = true;
       if (regen) {
         simplified = regen;
-        verdict = await runQa(lessonTitle, glossaryTerms, original, simplified);
+        verdict = await runQa(rowLevel, lessonTitle, glossaryTerms, original, simplified);
       }
     }
 
@@ -99,7 +103,7 @@ module.exports = async function handler(req, res) {
     };
     if (regenerated) {
       update.simplified_text = simplified;
-      update.gen_model = GEN_MODEL;
+      update.gen_model = rowLevel === 'explain' ? EXPLAIN_MODEL : SIMPLE_MODEL;
       update.regen_count = (row.data.regen_count || 0) + 1;
     }
     update.qa_status = verdict.pass ? 'pass' : 'pending_review';
@@ -115,8 +119,8 @@ module.exports = async function handler(req, res) {
 
 // --- QA ---
 
-async function runQa(lessonTitle, glossaryTerms, original, simplified) {
-  var system = [
+function simpleQaSystem() {
+  return [
     'You are a faithfulness checker for simplified GCSE revision text.',
     'You are given a lesson title, the required subject terms, the ORIGINAL paragraph, and a SIMPLIFIED rewrite.',
     'Decide whether the simplified version is safe to show students.',
@@ -130,7 +134,28 @@ async function runQa(lessonTitle, glossaryTerms, original, simplified) {
     'Reply with ONLY a JSON object, no other text:',
     '{"pass": true|false, "reason": "<one short sentence>", "issues": ["<specific problem>", ...]}'
   ].join('\n');
+}
 
+function explainQaSystem() {
+  return [
+    'You are checking an alternative "explain it differently" rewrite of a GCSE revision paragraph. The rewrite is meant to re-teach the SAME idea a different way, usually with an everyday analogy.',
+    'You are given a lesson title, the required subject terms, the ORIGINAL paragraph, and the ALTERNATIVE explanation.',
+    'Decide whether the alternative is safe to show students.',
+    '',
+    'It passes only if ALL of these hold:',
+    '- The analogy / reframing is ACCURATE — it does not imply anything false or misleading about the real concept. This is the most important check.',
+    '- It does not contradict or change any fact, number, date, name or quotation in the original.',
+    '- It actually explains the same idea as the original (not a different topic).',
+    '- It is genuinely a clearer / more intuitive explanation, not just a reworded copy.',
+    '',
+    'Reply with ONLY a JSON object, no other text:',
+    '{"pass": true|false, "reason": "<one short sentence>", "issues": ["<specific problem>", ...]}'
+  ].join('\n');
+}
+
+async function runQa(level, lessonTitle, glossaryTerms, original, simplified) {
+  var system = level === 'explain' ? explainQaSystem() : simpleQaSystem();
+  var altLabel = level === 'explain' ? 'ALTERNATIVE EXPLANATION:' : 'SIMPLIFIED:';
   var user = [
     'LESSON TITLE: ' + (lessonTitle || '(unknown)'),
     'REQUIRED SUBJECT TERMS: ' + (glossaryTerms.length ? glossaryTerms.join(', ') : '(none)'),
@@ -138,7 +163,7 @@ async function runQa(lessonTitle, glossaryTerms, original, simplified) {
     'ORIGINAL:',
     original,
     '',
-    'SIMPLIFIED:',
+    altLabel,
     simplified
   ].join('\n');
 
@@ -163,13 +188,16 @@ function parseVerdict(raw) {
 
 // --- Generation (regen path) — mirrors api/simplify.js ---
 
-function buildGenSystemPrompt(glossaryTerms) {
-  var termLine = glossaryTerms.length ? glossaryTerms.join(', ') : '(none for this lesson)';
+function termLineOf(glossaryTerms) {
+  return glossaryTerms.length ? glossaryTerms.join(', ') : '(none for this lesson)';
+}
+
+function buildSimpleSystemPrompt(glossaryTerms) {
   return [
     'You rewrite GCSE revision text into plainer English for students with a lower reading age or who are learning English as an additional language.',
     '',
     'Rules you must never break:',
-    '1. Keep every one of these exact subject terms unchanged — simplify the sentence around them, never replace them with easier words and never define them away: ' + termLine + '.',
+    '1. Keep every one of these exact subject terms unchanged — simplify the sentence around them, never replace them with easier words and never define them away: ' + termLineOf(glossaryTerms) + '.',
     '2. Never change any number, date, name, place, or quotation. Never change a fact.',
     '3. Never add a new point and never remove a point. Same information, simpler wording.',
     '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
@@ -178,8 +206,25 @@ function buildGenSystemPrompt(glossaryTerms) {
   ].join('\n');
 }
 
-async function generate(text, glossaryTerms) {
-  return callAnthropic(buildGenSystemPrompt(glossaryTerms), text, GEN_MODEL, 700, 0.2);
+function buildExplainSystemPrompt(glossaryTerms) {
+  return [
+    'You are a GCSE teacher re-explaining a tricky paragraph to a student who did not follow the textbook version. Explain the SAME idea a different way, using an everyday analogy or concrete example to make it click.',
+    '',
+    'Rules you must never break:',
+    '1. The analogy must be accurate — it must not imply anything false about the real concept. A misleading analogy is worse than none.',
+    '2. Do not contradict or change any fact, number, date, name, or quotation from the original.',
+    '3. Still use these exact subject terms where relevant (do not avoid them — the student is examined on them): ' + termLineOf(glossaryTerms) + '.',
+    '4. Keep it short — 2 to 4 sentences. Lead with the analogy or plain-language framing, then connect it back to the lesson idea.',
+    '5. A warm, plain teacher voice is fine; you may address the student ("imagine you…"). Do not add unrelated facts or padding.',
+    '6. Output ONLY the explanation. No preamble, no notes, no quotation marks around it.'
+  ].join('\n');
+}
+
+async function generate(text, glossaryTerms, level) {
+  if (level === 'explain') {
+    return callAnthropic(buildExplainSystemPrompt(glossaryTerms), text, EXPLAIN_MODEL, 600, 0.6);
+  }
+  return callAnthropic(buildSimpleSystemPrompt(glossaryTerms), text, SIMPLE_MODEL, 700, 0.2);
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {
