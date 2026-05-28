@@ -8850,4 +8850,131 @@ body.dark-mode.unit-religious-studies-edexcel-15 { --accent: #58e38c; --accent-l
   }
 }
 /* === End admin nav === */
+
+/* ============================================
+   Simplify Language
+   Per-paragraph plain-English rewriting. Additive only — original paragraph
+   is hidden (.sv-orig-hidden) while a simplified sibling block is shown.
+   ============================================ */
+
+/* Per-paragraph "Simplify" pill — subtle, revealed on hover/focus */
+#study-notes [data-narration-id].sv-has-pill {
+  position: relative;
+}
+.sv-simplify-pill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.6rem;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+  background: var(--accent-badge, rgba(0, 0, 0, 0.05));
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease, background 0.18s ease;
+}
+/* Reveal when hovering/focusing the paragraph, or focusing the pill itself */
+#study-notes [data-narration-id].sv-has-pill:hover .sv-simplify-pill,
+#study-notes [data-narration-id].sv-has-pill:focus-within .sv-simplify-pill,
+.sv-simplify-pill:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sv-simplify-pill:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.sv-simplify-pill:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* Touch devices have no hover — keep the pill visible but faint */
+@media (hover: none) {
+  .sv-simplify-pill {
+    opacity: 0.6;
+    pointer-events: auto;
+  }
+}
+
+/* Busy state while the request is in flight */
+#study-notes [data-narration-id].sv-simplifying {
+  opacity: 0.55;
+  transition: opacity 0.2s ease;
+}
+
+/* Hidden original (kept in the DOM so revert + narration mapping are intact) */
+.sv-orig-hidden {
+  display: none !important;
+}
+
+/* Simplified replacement block */
+.sv-simplified {
+  border-left: 3px solid var(--accent);
+  padding: 0.1rem 0 0.1rem 1rem;
+  margin: 0 0 1.1rem 0;
+}
+.sv-simplified-text {
+  margin: 0 0 0.5rem 0;
+}
+.sv-simplified-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.sv-simplified-label {
+  font-size: 0.72rem;
+  color: var(--text-muted, #8a8479);
+  font-style: italic;
+}
+.sv-show-original {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.sv-show-original:hover {
+  opacity: 0.75;
+}
+
+/* Greyed narration controls when wording is simplified (audio = original) */
+.narration-player.narration-disabled,
+.narration-fab.narration-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+.narration-player.narration-disabled {
+  position: relative;
+}
+.narration-player.narration-disabled::after {
+  content: "Narration follows the original wording. Turn off Simplify to listen.";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.4rem;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--text-muted, #8a8479);
+  pointer-events: none;
+  filter: grayscale(0);
+  opacity: 1;
+}
+
 /* AUTOGEN-MARKER-END: religious-studies-edexcel unit accents */

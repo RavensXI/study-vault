@@ -44,6 +44,7 @@ function initLessonFeatures() {
   initFlashcardModal();
   initSidebarPanel();
   if (typeof window.initHighlightAnnotate === 'function') window.initHighlightAnnotate();
+  if (typeof window.initSimplify === 'function') window.initSimplify();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
@@ -986,6 +987,13 @@ function initNarration() {
   var autoScrollEnabled = true;
   var lastProgrammaticScroll = 0;
 
+  // --- Simplify-language coupling ---
+  // Narration audio is locked to the original wording. When a student
+  // simplifies text the audio no longer matches, so the Simplify module
+  // greys the relevant controls through this hook (see js/simplify.js).
+  var simplifiedNarrationIds = {}; // narration id -> true when that segment is simplified
+  var narrationGloballyGreyed = false;
+
   // --- Podcast tab support ---
   var podcastUrl = window.podcastUrl || null;
   var playerMode = 'narration'; // 'narration' or 'podcast'
@@ -1065,6 +1073,39 @@ function initNarration() {
     fab.classList.toggle('visible', !mainPlayerVisible && audioStarted);
   }, { threshold: 0 });
   observer.observe(playerEl);
+
+  // --- Simplify-language greying API ---
+  // Exposed for js/simplify.js. Greys the narration controls and pauses
+  // playback when wording has been simplified (audio follows the original).
+  // Narration data is never mutated — this only toggles UI state + playback.
+  function applyGlobalGrey() {
+    playerEl.classList.toggle('narration-disabled', narrationGloballyGreyed);
+    fab.classList.toggle('narration-disabled', narrationGloballyGreyed);
+    var tip = narrationGloballyGreyed
+      ? 'Narration follows the original wording. Turn off Simplify to listen.'
+      : '';
+    playerEl.setAttribute('title', tip);
+    playerEl.setAttribute('aria-disabled', narrationGloballyGreyed ? 'true' : 'false');
+    if (narrationGloballyGreyed && !audio.paused) audio.pause();
+  }
+  window.SimplifyNarration = {
+    // Whole-lesson Simplify toggle: grey the entire player + mini-player.
+    setGlobal: function (on) {
+      narrationGloballyGreyed = !!on;
+      applyGlobalGrey();
+    },
+    // A single paragraph was simplified: drop its click-to-jump and pause if
+    // that exact clip is currently playing.
+    setParagraph: function (narrationId, on) {
+      if (!narrationId) return;
+      if (on) simplifiedNarrationIds[narrationId] = true;
+      else delete simplifiedNarrationIds[narrationId];
+      if (on && isPlaying && currentIndex >= 0 &&
+          manifest[currentIndex] && manifest[currentIndex].id === narrationId) {
+        audio.pause();
+      }
+    }
+  };
 
   // --- Helpers ---
 
@@ -1311,7 +1352,10 @@ function initNarration() {
         // Don't hijack glossary term clicks or work in podcast mode
         if (e.target.closest('dfn, .glossary-popup')) return;
         if (playerMode === 'podcast') return;
+        if (narrationGloballyGreyed) return;
         var id = el.dataset.narrationId;
+        // Simplified paragraphs don't match the audio — no jump.
+        if (simplifiedNarrationIds[id]) return;
         for (var i = 0; i < manifest.length; i++) {
           if (manifest[i].id === id) { loadClip(i); audio.play(); break; }
         }
