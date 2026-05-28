@@ -42,56 +42,61 @@ module.exports = async function handler(req, res) {
 
       const subjectsResult = await subjectsQuery;
       subjects = subjectsResult.data || [];
-      const subjectIds = subjects.map(s => s.id);
+      const subjectIds = new Set(subjects.map(s => s.id));
 
-      // Get unit IDs for scoping (if not admin)
-      let scopedUnitIds = null;
-      if (!isAdmin && subjectIds.length > 0) {
-        const { data: scopedUnits } = await supabase
-          .from('units')
-          .select('id')
-          .in('subject_id', subjectIds);
-        scopedUnitIds = (scopedUnits || []).map(u => u.id);
+      // --- Aggregate all status counts in JS instead of ~6 count queries per
+      // subject. With ~90+ subjects the old per-subject loop fired 550+ serial
+      // round-trips on every fresh load. We now pull units + lessons in a
+      // handful of queries and bucket in memory (same pattern as build-status).
+
+      // Map every unit to its subject (slim columns). Scope to visible subjects
+      // so a teacher's payload stays small.
+      let unitsQuery = supabase.from('units').select('id, subject_id');
+      if (!isAdmin && subjectIds.size > 0) {
+        unitsQuery = unitsQuery.in('subject_id', Array.from(subjectIds));
       }
+      const { data: allUnits } = await unitsQuery;
+      const unitToSubject = {};
+      (allUnits || []).forEach(u => { unitToSubject[u.id] = u.subject_id; });
 
-      // Fetch counts by status (scoped to visible subjects)
-      const statuses = ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live', 'draft', 'review', 'approved'];
-      for (const s of statuses) {
-        let countQuery = supabase
+      // Pull all lessons (slim) — paginate past the 1000-row default cap.
+      const allLessons = [];
+      let page = 0;
+      while (true) {
+        const { data: chunk, error: chunkErr } = await supabase
           .from('lessons')
-          .select('id', { count: 'exact', head: true })
-          .eq('status', s);
-
-        if (scopedUnitIds && scopedUnitIds.length > 0) {
-          countQuery = countQuery.in('unit_id', scopedUnitIds);
-        }
-
-        const { count } = await countQuery;
-        counts[s] = count || 0;
+          .select('id, unit_id, status')
+          .range(page * 1000, page * 1000 + 999);
+        if (chunkErr) break;
+        allLessons.push(...(chunk || []));
+        if (!chunk || chunk.length < 1000) break;
+        page++;
+        if (page > 20) break; // safety
       }
 
-      // Fetch per-subject counts for summary cards
+      // Bucket counts. Global `counts` is scoped to visible subjects (for admin
+      // that's everything). Per-subject summary mirrors the old shape.
+      const summaryStatuses = ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live'];
+      const perSubject = {};
+      for (const L of allLessons) {
+        const sid = unitToSubject[L.unit_id];
+        if (sid === undefined) continue;          // unit not in scope / orphan lesson
+        if (!isAdmin && !subjectIds.has(sid)) continue;
+        counts[L.status] = (counts[L.status] || 0) + 1;
+        if (!perSubject[sid]) perSubject[sid] = {};
+        perSubject[sid][L.status] = (perSubject[sid][L.status] || 0) + 1;
+      }
+
       for (const subject of subjects) {
-        const { data: unitIds } = await supabase
-          .from('units')
-          .select('id')
-          .eq('subject_id', subject.id);
-
-        const uids = (unitIds || []).map(u => u.id);
-        if (uids.length === 0) continue;
-
+        const ps = perSubject[subject.id];
+        if (!ps) continue;
         const summary = { id: subject.id, slug: subject.slug, name: subject.name, school_id: subject.school_id };
-        for (const s of ['pending_review', 'ready_for_teacher', 'publishing', 'awaiting_qa', 'live']) {
-          const { count } = await supabase
-            .from('lessons')
-            .select('id', { count: 'exact', head: true })
-            .eq('status', s)
-            .in('unit_id', uids);
-          summary[s] = count || 0;
+        let total = 0;
+        for (const s of summaryStatuses) {
+          summary[s] = ps[s] || 0;
+          total += summary[s];
         }
-        if (summary.pending_review + summary.ready_for_teacher + summary.publishing + summary.awaiting_qa + summary.live > 0) {
-          subjectSummary.push(summary);
-        }
+        if (total > 0) subjectSummary.push(summary);
       }
     }
 
