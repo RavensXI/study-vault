@@ -94,6 +94,10 @@ FACT_CHECK_REQUIRED = {
     "citizenship-aqa",
     # Music
     "gcse-music", "music",
+    # Psychology (named core studies, scholars, statistics — very high fabrication risk:
+    # Asch %, Milgram %, Murdock list lengths, Piaget age ranges, Whorf claims,
+    # Von Frisch dance distance, Bruner & Minturn, Gilchrist & Nesberg method)
+    "psychology-aqa",
 }
 
 # Subjects where fact-check is unnecessary (practice format / no factual claims).
