@@ -126,6 +126,16 @@ Output: `practice_data` JSONB on each lesson row (not `content_html`). Practice 
 
 Runs per lesson as its content lands, not batched. A stuck content agent blocks only itself.
 
+**Asset ordering matters.** Narration is the most expensive phase (~$4 per 30-lesson subject, 25-40 min sequential). Fact-check must run BEFORE narration so any content fix doesn't waste a narration pass. The right order:
+
+1. **Heroes** (parallel, cheap, content-independent)
+2. **Fact-check** (`scripts/_fact_check_subject.py`) — applies corrections to `content_html` for fact-heavy subjects (see Phase 6 step 7 for the gate; the script runs the agent+apply loop)
+3. **Related media + revision guides** (can run in parallel with fact-check — they don't touch content_html)
+4. **Narration** (last among content-dependent steps — narrates the FINAL `content_html`, post-fact-check fixes)
+5. **Podcasts** (Tom-driven, NotebookLM is manual — runs after everything else)
+
+If you run narration before fact-check and then a fact-check fix lands, you'll need to clear `narration_manifest` on the affected lessons and re-narrate. The narrate script is idempotent (skips lessons with an existing manifest), so a `_renarrate_*_post_factcheck.py` script that nulls just the affected manifests followed by a re-run of the narrate script is the recovery path. See `memory/feedback_factcheck_before_narration.md`.
+
 | Asset | Produced by | Destination | Feature matrix |
 |---|---|---|---|
 | Hero image | `scripts/batch_heroes_*.py` or `download_heroes.py` (Unsplash → R2, index-first reuse) | `lessons.hero_image_url`, `hero_image_alt`, `hero_image_caption`, `hero_image_position` | Both tiers |
@@ -163,7 +173,7 @@ Guide HTML structure is `<main class="lesson-content">` + `<aside class="lesson-
 4. Confirm every practice question `type` string is registered in `getGuideUrl()` mappings — no 404s.
 5. Confirm `youtube_video_id` convention: Unity lessons have R2 URLs, free-tier article lessons are NULL, free-tier practice lessons are the sentinel `'practice-only'`.
 6. **Run `python scripts/_verify_subject_build.py {subject-slug}`.** Structural verifier — catches missing unit images, malformed quote ticker, missing revision-technique guides, lessons missing description / hero / related_media, related_media coverage gaps, dead YouTube refs (oembed-verified), Gemini diagrams sneaking into free-tier content, fieldwork lessons missing the school-specific notice. Zero issues required to ship.
-7. **Run `python scripts/_fact_check_subject.py {subject-slug}`.** **Mandatory for fact-heavy subjects** (English Lit, Religious Studies, History, Geography case studies, Business, Drama set texts, Science scientist/experiment attributions). Web-search-verifies every direct quote, scripture citation, named scholar/practitioner attribution, named event/date, and specific statistic. Flags fabrications (`HIGH`), wrong attributions (`MEDIUM`), and exam-mark-affecting issues. Zero `HIGH` findings required to ship; `MEDIUM` reviewed-and-approved before ship. Skip for practice-format subjects (Maths, English Lang, Languages) — the schema is deterministic, no factual claims to fabricate. See `memory/feedback_fact_check_built_in.md`.
+7. *(Already done in Phase 4)* — confirm fact-check report under `scripts/_fact_check/{slug}.json` has zero outstanding HIGH findings and that `{slug}_fixes_applied.md` exists showing the fixes were applied. If fact-check was skipped (practice subject) or the report is missing, run `python scripts/_fact_check_subject.py {subject-slug}` now AND clear+re-narrate any lessons it modifies before continuing. See `memory/feedback_fact_check_built_in.md` and `memory/feedback_factcheck_before_narration.md`.
 8. Visit `/admin/build-status` — live view of every subject in Supabase plus what's still to build from `specs/index.json`. The new subject should appear in the Built table; confirm asset coverage looks right.
 9. Commit + push. Tom reviews `status: pending_review` lessons via `/admin/review` and flips them to `live` once satisfied.
 
