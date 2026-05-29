@@ -31,7 +31,7 @@ BANNED_PATTERNS = [
     (re.compile(r"\bPaper\s+[0-9][A-Z]?\s+Section\b"), "paper section code"),
     (re.compile(r"\bLevel\s+[1-9]\b"), "Level N descriptor"),
     (re.compile(r"Nothing worthy of credit", re.IGNORECASE), "exam board rubric phrase"),
-    (re.compile(r"Award\s+[0-9]+\s+marks\s+for", re.IGNORECASE), "mark-award rubric phrase"),
+    (re.compile(r"Award\s+[0-9]+\s+marks?\s+for", re.IGNORECASE), "mark-award rubric phrase"),
     (re.compile(r"\bAO[1-4]\.[0-9]?"), "AO code"),
 ]
 
