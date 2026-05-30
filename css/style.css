@@ -8864,4 +8864,201 @@ body.dark-mode.unit-religious-studies-edexcel-15 { --accent: #58e38c; --accent-l
   }
 }
 /* === End admin nav === */
+
+/* ============================================
+   Simplify / Explain / Tutor chunk menu
+   Additive only. "Simplify" hides the original (.sv-orig-hidden) and shows a
+   plainer sibling; "Explain" adds a supplementary card; the original content
+   and narration are never modified.
+   ============================================ */
+
+/* Clickable chunk — click anywhere on a paragraph to pop the bubbles. Subtle
+   hover cue signals it's interactive; no persistent icon. */
+#study-notes .sv-chunk { cursor: pointer; border-radius: 8px; transition: background 0.15s ease; }
+#study-notes .sv-chunk:hover {
+  background: var(--accent-badge, rgba(0, 0, 0, 0.035));
+}
+
+/* Busy state while a request is in flight */
+#study-notes .sv-chunk.sv-busy { opacity: 0.6; }
+
+/* Bubble cluster — three icon buttons popped over the click point */
+.sv-bubbles {
+  position: absolute;
+  z-index: 9990;
+  display: none;
+  gap: 0.5rem;
+  padding: 0.3rem;
+  background: #fff;
+  border: 1px solid var(--border-light, #e3ddd5);
+  border-radius: 999px;
+  box-shadow: 0 8px 28px rgba(20, 18, 15, 0.2);
+}
+.sv-bubbles.open { display: flex; animation: svBubblePop 0.16s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: bottom center; }
+@keyframes svBubblePop { from { opacity: 0; transform: scale(0.8) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+body.dark-mode .sv-bubbles { background: #1c1b19; border-color: #3a3733; }
+.sv-bubble {
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: var(--accent);
+  background: var(--accent-badge, rgba(0, 0, 0, 0.05));
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.14s ease, transform 0.14s ease, color 0.14s ease;
+}
+.sv-bubble svg { width: 1.15rem; height: 1.15rem; }
+.sv-bubble:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+/* Hover tooltip with the action label */
+.sv-bubble::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #2d2a26;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 7px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease;
+}
+.sv-bubble:hover::after { opacity: 1; }
+
+/* Shared aside footer (used by both simplified + explained blocks) */
+.sv-aside-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.sv-aside-label { font-size: 0.72rem; color: var(--text-muted, #8a8479); font-style: italic; }
+.sv-aside-action {
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.sv-aside-action:hover { opacity: 0.75; }
+
+/* Hidden original (kept in the DOM so revert + narration mapping are intact) */
+.sv-orig-hidden { display: none !important; }
+
+/* Simplified replacement (plainer wording, original hidden). The left stripe +
+   the toggle state are the only "this is simplified" indicators. Clickable to
+   re-open the bubbles ("Show original"). */
+.sv-simplified {
+  border-left: 3px solid var(--accent);
+  padding: 0.1rem 0 0.1rem 1rem;
+  margin: 0 0 1.1rem 0;
+  cursor: pointer;
+}
+.sv-simplified-text { margin: 0; }
+
+/* Shimmer skeleton shown while the text is being generated */
+.sv-shimmer { padding: 0.1rem 0; }
+.sv-shimmer span {
+  display: block;
+  height: 0.72em;
+  margin: 0.5em 0;
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.10) 37%, rgba(0,0,0,0.05) 63%);
+  background-size: 400% 100%;
+  animation: svShimmer 1.3s ease infinite;
+}
+.sv-shimmer span:nth-child(1) { width: 97%; }
+.sv-shimmer span:nth-child(2) { width: 88%; }
+.sv-shimmer span:nth-child(3) { width: 64%; margin-bottom: 0; }
+@keyframes svShimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+body.dark-mode .sv-shimmer span {
+  background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.06) 63%);
+  background-size: 400% 100%;
+}
+
+/* When the source was a Key Fact, keep the callout look (sans the revision tip) */
+.sv-simplified--keyfact {
+  background: var(--accent-light);
+  border-left: 4px solid var(--accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 1.15rem 1.35rem;
+  margin: 1.5rem 0;
+}
+
+/* Explained-another-way card (supplementary; original stays) */
+.sv-explained {
+  background: var(--accent-badge, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border-light, #e3ddd5);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  margin: 0.4rem 0 1.1rem 0;
+}
+body.dark-mode .sv-explained { background: #262420; border-color: #3a3733; }
+.sv-explained.sv-busy .sv-explained-text { opacity: 0.7; font-style: italic; }
+.sv-explained-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+.sv-explained-head svg { width: 1rem; height: 1rem; flex-shrink: 0; }
+.sv-explained-hide {
+  margin-left: auto;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted, #8a8479);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.sv-explained-text { margin: 0 0 0.5rem 0; }
+
+/* Greyed narration controls when wording is simplified (audio = original) */
+.narration-player.narration-disabled,
+.narration-fab.narration-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+.narration-player.narration-disabled {
+  position: relative;
+}
+.narration-player.narration-disabled::after {
+  content: "Narration follows the original wording. Turn off Simplify to listen.";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1.4rem;
+  font-size: 0.7rem;
+  font-style: italic;
+  color: var(--text-muted, #8a8479);
+  pointer-events: none;
+  filter: grayscale(0);
+  opacity: 1;
+}
+
 /* AUTOGEN-MARKER-END: religious-studies-edexcel unit accents */

@@ -44,6 +44,7 @@ function initLessonFeatures() {
   initFlashcardModal();
   initSidebarPanel();
   if (typeof window.initHighlightAnnotate === 'function') window.initHighlightAnnotate();
+  if (typeof window.initSimplify === 'function') window.initSimplify();
 }
 
 // Expose globally for lesson-loader.js and guide-loader.js
@@ -986,6 +987,13 @@ function initNarration() {
   var autoScrollEnabled = true;
   var lastProgrammaticScroll = 0;
 
+  // --- Simplify-language coupling ---
+  // Narration audio is locked to the original wording. When a student
+  // simplifies text the audio no longer matches, so the Simplify module
+  // greys the relevant controls through this hook (see js/simplify.js).
+  var simplifiedNarrationIds = {}; // narration id -> true when that segment is simplified
+  var narrationGloballyGreyed = false;
+
   // --- Podcast tab support ---
   var podcastUrl = window.podcastUrl || null;
   var playerMode = 'narration'; // 'narration' or 'podcast'
@@ -1062,9 +1070,45 @@ function initNarration() {
 
   var observer = new IntersectionObserver(function(entries) {
     mainPlayerVisible = entries[0].isIntersecting;
-    fab.classList.toggle('visible', !mainPlayerVisible && audioStarted);
+    fab.classList.toggle('visible', !mainPlayerVisible && audioStarted && !narrationGloballyGreyed);
   }, { threshold: 0 });
   observer.observe(playerEl);
+
+  // --- Simplify-language greying API ---
+  // Exposed for js/simplify.js. Greys the narration controls and pauses
+  // playback when wording has been simplified (audio follows the original).
+  // Narration data is never mutated — this only toggles UI state + playback.
+  function applyGlobalGrey() {
+    playerEl.classList.toggle('narration-disabled', narrationGloballyGreyed);
+    var tip = narrationGloballyGreyed
+      ? 'Narration follows the original wording. Turn off Simplify to listen.'
+      : '';
+    playerEl.setAttribute('title', tip);
+    playerEl.setAttribute('aria-disabled', narrationGloballyGreyed ? 'true' : 'false');
+    if (narrationGloballyGreyed) {
+      // No point floating a greyed-out mini-player around the page — hide it.
+      if (!audio.paused) audio.pause();
+      fab.classList.remove('visible');
+    }
+  }
+  window.SimplifyNarration = {
+    // Whole-lesson Simplify toggle: grey the entire player + mini-player.
+    setGlobal: function (on) {
+      narrationGloballyGreyed = !!on;
+      applyGlobalGrey();
+    },
+    // A single paragraph was simplified: drop its click-to-jump and pause if
+    // that exact clip is currently playing.
+    setParagraph: function (narrationId, on) {
+      if (!narrationId) return;
+      if (on) simplifiedNarrationIds[narrationId] = true;
+      else delete simplifiedNarrationIds[narrationId];
+      if (on && isPlaying && currentIndex >= 0 &&
+          manifest[currentIndex] && manifest[currentIndex].id === narrationId) {
+        audio.pause();
+      }
+    }
+  };
 
   // --- Helpers ---
 
@@ -1207,7 +1251,7 @@ function initNarration() {
     playBtn.classList.add('playing');
     playBtn.setAttribute('aria-label', 'Pause ' + playerMode);
     fabPlay.classList.add('playing');
-    fab.classList.toggle('visible', !mainPlayerVisible);
+    fab.classList.toggle('visible', !mainPlayerVisible && !narrationGloballyGreyed);
     if (playerMode === 'narration' && currentIndex >= 0) setHighlight(manifest[currentIndex].id);
   });
 
@@ -1302,22 +1346,12 @@ function initNarration() {
     speedBtn.textContent = speeds[speedIndex] + 'x';
   });
 
-  // --- Click paragraph to jump to that clip (desktop only) ---
-
-  var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  if (!isTouchDevice) {
-    document.querySelectorAll('[data-narration-id]').forEach(function(el) {
-      el.addEventListener('click', function(e) {
-        // Don't hijack glossary term clicks or work in podcast mode
-        if (e.target.closest('dfn, .glossary-popup')) return;
-        if (playerMode === 'podcast') return;
-        var id = el.dataset.narrationId;
-        for (var i = 0; i < manifest.length; i++) {
-          if (manifest[i].id === id) { loadClip(i); audio.play(); break; }
-        }
-      });
-    });
-  }
+  // --- Click paragraph to jump to that clip --- REMOVED (May 2026)
+  // Clicking a paragraph now opens the Simplify / Explain / Ask-the-tutor menu
+  // (js/simplify.js) instead of jumping narration to that point — students
+  // listen from the start or not at all, so the jump was low value. The
+  // SimplifyNarration hooks above still pause/grey playback when wording is
+  // simplified.
 
   // --- Collapsible re-highlight ---
 
