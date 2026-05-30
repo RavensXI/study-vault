@@ -12,6 +12,8 @@ Runs the checks that have caught real issues on past builds:
     on article lessons
   - fieldwork-keyword lessons begin with a <div class="lesson-notice">
     block (the school-fieldwork-is-different reminder)
+  - every local /images/ asset referenced by index.html exists on disk
+    (catches broken homepage cards — see _verify_homepage_images.py)
 
 Exit code 0 = ship-ready, 1 = issues found.
 
@@ -30,6 +32,9 @@ import urllib.error
 import urllib.request
 
 from supabase import create_client
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _verify_homepage_images import find_missing_images
 
 YT_RE = re.compile(r"(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([\w\-]{11})")
 DIAGRAM_RE = re.compile(r'<figure[^>]*class="[^"]*\b(?:diagram|lesson-diagram)\b', re.IGNORECASE)
@@ -257,6 +262,13 @@ def main():
     if yt_dead:
         for ctx, title, url in yt_dead:
             issues.append(f"{ctx} — dead YouTube ref: {title} ({url})")
+
+    # ----- homepage subject images exist (index.html references a local file) -----
+    # Catches the Psychology/Sociology failure mode: a card/picker/meta entry
+    # wired to /images/subject-{slug}.jpg with no committed file -> broken card.
+    missing_imgs, _ = find_missing_images()
+    for ref in missing_imgs:
+        issues.append(f"homepage — index.html references {ref} but no such file exists in images/")
 
     # ----- report -----
     print()
