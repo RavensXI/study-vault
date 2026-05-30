@@ -47,21 +47,25 @@
   }
 
   // ---- Helpers ----
+  // Extract the prose to simplify. Strip glossary popups, our own controls, the
+  // "Key Fact" label, and the revision-tip widgets (lightbulb + task popup) —
+  // the revision task is a separate activity and must NOT be simplified, but
+  // the Key Fact's actual content should be.
   function extractText(el) {
     var clone = el.cloneNode(true);
-    clone.querySelectorAll('.term-popup, .sv-chunk-icon, .sv-simplified, .sv-explained, .revision-tip-btn, .revision-tip').forEach(function (n) {
+    clone.querySelectorAll('.term-popup, .sv-chunk-icon, .sv-simplified, .sv-explained, .revision-tip-btn, .revision-tip-popup, .key-fact-label').forEach(function (n) {
       n.parentNode && n.parentNode.removeChild(n);
     });
     return (clone.textContent || '').replace(/\s+/g, ' ').trim();
   }
 
-  // Interactive / non-prose blocks that carry a data-narration-id but must NOT
-  // be simplified or explained (e.g. "Key Fact" cover-and-recall widgets).
+  // Blocks that carry a data-narration-id but aren't prose to simplify.
   function isExcludedChunk(el) {
-    return /^H[1-6]$/.test(el.tagName)
-      || el.classList.contains('key-fact')
-      || (el.closest && el.closest('.key-fact'))
-      || el.hasAttribute('data-revision-tip');
+    return /^H[1-6]$/.test(el.tagName);
+  }
+
+  function isKeyFact(el) {
+    return el.classList.contains('key-fact') || !!(el.closest && el.closest('.key-fact'));
   }
   function glossaryTerms() {
     var g = window._lessonGlossary || [];
@@ -109,9 +113,16 @@
 
   function showSimplified(el, id, text) {
     if (isSimplified(el)) return;
+    var keyFact = isKeyFact(el);
     var block = document.createElement('div');
-    block.className = 'sv-simplified';
+    block.className = 'sv-simplified' + (keyFact ? ' sv-simplified--keyfact' : '');
     block.setAttribute('data-for', id);
+    if (keyFact) {
+      var kfLabel = document.createElement('div');
+      kfLabel.className = 'key-fact-label';
+      kfLabel.textContent = 'Key Fact';
+      block.appendChild(kfLabel);
+    }
     var p = document.createElement('p');
     p.className = 'sv-simplified-text';
     p.textContent = text;
