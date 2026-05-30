@@ -142,7 +142,7 @@
   // Click the simplified block to re-open the bubbles ("Show original").
   function isSimplified(el) { return el.classList.contains('sv-orig-hidden'); }
 
-  function createSimplifiedBlock(el, id) {
+  function createSimplifiedBlock(el, id, withShimmer) {
     var keyFact = isKeyFact(el);
     var block = document.createElement('div');
     block.className = 'sv-simplified' + (keyFact ? ' sv-simplified--keyfact' : '');
@@ -156,8 +156,8 @@
     var p = document.createElement('p');
     p.className = 'sv-simplified-text';
     block.appendChild(p);
-    var sh = shimmer();
-    block.appendChild(sh);
+    var sh = null;
+    if (withShimmer) { sh = shimmer(); block.appendChild(sh); }
     block.addEventListener('click', function (e) {
       if (e.target.closest('a, button')) return;
       if (document.body.classList.contains('sv-hl-mode')) return;
@@ -179,17 +179,34 @@
     if (window.SimplifyNarration) window.SimplifyNarration.setParagraph(id, false);
   }
 
-  function simplifyParagraph(el, id) {
+  // animate (default true): show shimmer immediately + write the text out — used
+  // when the student deliberately turns Simplify on. animate=false: fetch first,
+  // then swap the text in silently — used when a new lesson auto-loads with the
+  // remembered preference already on (no theatrics on every page).
+  function simplifyParagraph(el, id, animate) {
     if (isSimplified(el)) return Promise.resolve();
-    var parts = createSimplifiedBlock(el, id); // shimmer shows immediately
+    var doAnimate = animate !== false;
     var ck = 'simple:' + id;
-    if (clientCache[ck]) { fill(parts, clientCache[ck]); return Promise.resolve(); }
-    return callGenerate(id, 'simple').then(function (data) {
-      if (data.useOriginal || !data.simplified) { revertSimplified(el, id); return; }
-      clientCache[ck] = data.simplified;
-      fill(parts, data.simplified);
-      if (data.needsQa) triggerQa(data.hash, 'simple');
-    }).catch(function () { revertSimplified(el, id); });
+    var parts = doAnimate ? createSimplifiedBlock(el, id, true) : null;
+
+    var getText = clientCache[ck]
+      ? Promise.resolve(clientCache[ck])
+      : callGenerate(id, 'simple').then(function (data) {
+          if (data.useOriginal || !data.simplified) return null;
+          clientCache[ck] = data.simplified;
+          if (data.needsQa) triggerQa(data.hash, 'simple');
+          return data.simplified;
+        });
+
+    return getText.then(function (text) {
+      if (!text) { if (parts) revertSimplified(el, id); return; }
+      if (doAnimate) {
+        fill(parts, text); // remove shimmer, write it out
+      } else if (!isSimplified(el)) {
+        var instant = createSimplifiedBlock(el, id, false);
+        instant.p.textContent = text; // swap in, no shimmer / no typing
+      }
+    }).catch(function () { if (parts) revertSimplified(el, id); });
   }
 
   // ---- EXPLAIN (analogy/reframe): supplementary card, original untouched ----
@@ -344,13 +361,14 @@
   // ---- Global toggle (simplify whole lesson into plainer wording) ----
   function setGlobalState(on, opts) {
     opts = opts || {};
+    var animate = opts.animate !== false; // animate on deliberate toggle, not on auto-restore
     globalOn = !!on;
     setPref({ on: globalOn });
     if (toggleBtn) toggleBtn.setAttribute('aria-pressed', globalOn ? 'true' : 'false');
     document.body.classList.toggle('sv-simplify-global', globalOn);
     if (window.SimplifyNarration) window.SimplifyNarration.setGlobal(globalOn);
     if (globalOn) {
-      segments.forEach(function (s) { simplifyParagraph(s.el, s.id); });
+      segments.forEach(function (s) { simplifyParagraph(s.el, s.id, animate); });
     } else if (!opts.skipRevertAll) {
       segments.forEach(function (s) { if (isSimplified(s.el)) revertSimplified(s.el, s.id); });
     }
@@ -383,7 +401,7 @@
     }
 
     var pref = getPref();
-    if (pref.on) setGlobalState(true);
+    if (pref.on) setGlobalState(true, { animate: false }); // remembered → load silently
   }
 
   window.initSimplify = init;
