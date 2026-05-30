@@ -13,8 +13,13 @@
     .sq-layout { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
     .sq-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem; }
     .sq-header h1 { font-family: 'Source Serif 4', serif; font-size: 1.75rem; margin: 0; }
-    .sq-controls select { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+    .sq-controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+    .sq-controls select, .sq-controls input { padding: 0.45rem 0.75rem; border: 1px solid #ddd; border-radius: 8px; font-size: 0.82rem; font-family: inherit; }
+    .sq-controls input { min-width: 200px; }
     .sq-intro { color: var(--text-muted); font-size: 0.88rem; margin: 0 0 1.25rem; max-width: 760px; line-height: 1.5; }
+    .sq-counts { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1rem; }
+    .sq-count { background: #fff; border-radius: 10px; padding: 0.6rem 1rem; box-shadow: 0 1px 6px rgba(0,0,0,0.05); font-size: 0.8rem; color: var(--text-muted); }
+    .sq-count strong { display: block; font-size: 1.3rem; color: var(--text-primary); font-family: 'Source Serif 4', serif; line-height: 1.2; }
 
     .sq-card { background: #fff; border-radius: 14px; box-shadow: 0 1px 8px rgba(0,0,0,0.06); margin-bottom: 1rem; overflow: hidden; }
     .sq-card-header { padding: 0.85rem 1.15rem; border-bottom: 1px solid #f0ede8; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap; }
@@ -76,6 +81,12 @@
           <option value="pass">Approved</option>
           <option value="all">All</option>
         </select>
+        <select id="level-filter">
+          <option value="all" selected>Both modes</option>
+          <option value="simple">Simplify wording</option>
+          <option value="explain">Explain differently</option>
+        </select>
+        <input type="search" id="search-input" placeholder="Search text / subject…">
       </div>
     </div>
 
@@ -85,7 +96,11 @@
       Approve if it's actually fine, edit and save a fix, or delete to regenerate fresh on the next view.
     </p>
 
+    <div id="counts" class="sq-counts"></div>
     <div id="content"><div class="loading-msg">Loading...</div></div>
+    <div id="load-more-wrap" style="text-align:center;margin:1.25rem 0;display:none">
+      <button id="load-more" class="sq-btn">Load more</button>
+    </div>
   </div>
 
   <script>
@@ -118,13 +133,41 @@
 
     var allEntries = [];
 
-    async function load() {
-      contentEl.innerHTML = '<div class="loading-msg">Loading...</div>';
+    var levelFilter = document.getElementById('level-filter');
+    var searchInput = document.getElementById('search-input');
+    var countsEl = document.getElementById('counts');
+    var loadMoreWrap = document.getElementById('load-more-wrap');
+    var loadMoreBtn = document.getElementById('load-more');
+    var PAGE = 50;
+    var offset = 0;
+
+    function queryString() {
+      var p = 'status=' + encodeURIComponent(statusFilter.value)
+        + '&level=' + encodeURIComponent(levelFilter.value)
+        + '&limit=' + PAGE + '&offset=' + offset;
+      var s = searchInput.value.trim();
+      if (s) p += '&q=' + encodeURIComponent(s);
+      return p;
+    }
+
+    function renderCounts(counts) {
+      if (!counts) { countsEl.innerHTML = ''; return; }
+      countsEl.innerHTML =
+        '<div class="sq-count">Needs review<strong>' + (counts.pending_review || 0) + '</strong></div>'
+        + '<div class="sq-count">Approved<strong>' + (counts.pass || 0) + '</strong></div>';
+    }
+
+    // reset=true replaces the list (filter changed); reset=false appends (Load more)
+    async function load(reset) {
+      if (reset) { offset = 0; allEntries = []; contentEl.innerHTML = '<div class="loading-msg">Loading...</div>'; }
       try {
-        var resp = await fetch('/api/admin/simplify-flags?status=' + statusFilter.value, { headers: authHeaders() });
+        var resp = await fetch('/api/admin/simplify-flags?' + queryString(), { headers: authHeaders() });
         if (!resp.ok) { contentEl.innerHTML = '<div class="loading-msg">Failed to load (' + resp.status + ')</div>'; return; }
         var json = await resp.json();
-        allEntries = json.entries || [];
+        renderCounts(json.counts);
+        allEntries = allEntries.concat(json.entries || []);
+        offset += (json.entries || []).length;
+        loadMoreWrap.style.display = json.hasMore ? '' : 'none';
         render();
       } catch (e) {
         contentEl.innerHTML = '<div class="loading-msg">Network error</div>';
@@ -133,7 +176,7 @@
 
     function render() {
       if (allEntries.length === 0) {
-        contentEl.innerHTML = '<div class="empty-state">Nothing here — no simplifications with this status.</div>';
+        contentEl.innerHTML = '<div class="empty-state">Nothing here — no simplifications match these filters.</div>';
         return;
       }
       contentEl.innerHTML = allEntries.map(function (e) {
@@ -188,14 +231,21 @@
           alert('Error: ' + (json.error || resp.status));
           return;
         }
-        load();
+        load(true);
       } catch (e) {
         alert('Network error');
       }
     }
 
-    statusFilter.addEventListener('change', load);
-    load();
+    var searchTimer = null;
+    statusFilter.addEventListener('change', function () { load(true); });
+    levelFilter.addEventListener('change', function () { load(true); });
+    searchInput.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () { load(true); }, 300);
+    });
+    loadMoreBtn.addEventListener('click', function () { load(false); });
+    load(true);
   </script>
 </body>
 </html>

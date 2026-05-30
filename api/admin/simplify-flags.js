@@ -28,15 +28,39 @@ module.exports = async (req, res) => {
 
   if (req.method === 'GET') {
     const status = req.query.status || 'pending_review';
+    const level = req.query.level || 'all';
+    const limit = Math.min(parseInt(req.query.limit, 10) || 50, 200);
+    const offset = parseInt(req.query.offset, 10) || 0;
+    // Strip characters that would break the PostgREST or() filter / ilike.
+    const search = String(req.query.q || '').replace(/[,()%*]/g, ' ').trim();
+
     let q = supabase
       .from('simplify_cache')
       .select('id, lesson_id, target_level, paragraph_index, subject_slug, original_text, simplified_text, qa_status, qa_notes, regen_count, created_at, updated_at, lessons(title)')
       .order('updated_at', { ascending: false })
-      .limit(500);
+      .range(offset, offset + limit - 1);
     if (status && status !== 'all') q = q.eq('qa_status', status);
+    if (level && level !== 'all') q = q.eq('target_level', level);
+    if (search) q = q.or(`subject_slug.ilike.%${search}%,original_text.ilike.%${search}%,simplified_text.ilike.%${search}%`);
+
     const { data, error } = await q;
     if (error) return res.status(500).json({ error: error.message });
-    return res.json({ entries: data || [] });
+
+    // Headline counts (cheap head queries) so the page shows queue sizes
+    // without fetching every row. Respect the active level filter.
+    const counts = {};
+    for (const st of ['pending_review', 'pass']) {
+      let cq = supabase.from('simplify_cache').select('*', { count: 'exact', head: true }).eq('qa_status', st);
+      if (level && level !== 'all') cq = cq.eq('target_level', level);
+      const { count } = await cq;
+      counts[st] = count || 0;
+    }
+
+    return res.json({
+      entries: data || [],
+      counts: counts,
+      hasMore: (data || []).length === limit
+    });
   }
 
   if (req.method === 'PATCH') {
