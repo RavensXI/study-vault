@@ -8858,83 +8858,68 @@ body.dark-mode.unit-religious-studies-edexcel-15 { --accent: #58e38c; --accent-l
    and narration are never modified.
    ============================================ */
 
-/* Clickable chunk affordance */
-#study-notes .sv-chunk { position: relative; }
-#study-notes .sv-chunk:hover,
-#study-notes .sv-chunk:focus-within {
-  background: var(--accent-badge, rgba(0, 0, 0, 0.04));
-  border-radius: 8px;
-}
-.sv-chunk-icon {
-  position: absolute;
-  top: 0.1rem;
-  right: 0;
-  width: 1.6rem;
-  height: 1.6rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  color: var(--accent);
-  background: var(--bg-page, #faf8f5);
-  border: 1px solid var(--border-light, #e3ddd5);
-  border-radius: 50%;
-  cursor: pointer;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.16s ease, transform 0.16s ease;
-}
-.sv-chunk-icon svg { width: 0.95rem; height: 0.95rem; }
-.sv-chunk-icon:hover { transform: scale(1.08); }
-#study-notes .sv-chunk:hover .sv-chunk-icon,
-#study-notes .sv-chunk:focus-within .sv-chunk-icon,
-.sv-chunk-icon:focus-visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-@media (hover: none) {
-  .sv-chunk-icon { opacity: 0.5; pointer-events: auto; }
+/* Clickable chunk — click anywhere on a paragraph to pop the bubbles. Subtle
+   hover cue signals it's interactive; no persistent icon. */
+#study-notes .sv-chunk { cursor: pointer; border-radius: 8px; transition: background 0.15s ease; }
+#study-notes .sv-chunk:hover {
+  background: var(--accent-badge, rgba(0, 0, 0, 0.035));
 }
 
 /* Busy state while a request is in flight */
 #study-notes .sv-chunk.sv-busy { opacity: 0.6; }
 
-/* Popover menu */
-.sv-menu {
+/* Bubble cluster — three icon buttons popped over the click point */
+.sv-bubbles {
   position: absolute;
   z-index: 9990;
-  min-width: 210px;
+  display: none;
+  gap: 0.5rem;
+  padding: 0.3rem;
   background: #fff;
   border: 1px solid var(--border-light, #e3ddd5);
-  border-radius: 12px;
-  box-shadow: 0 10px 32px rgba(20, 18, 15, 0.18);
-  padding: 0.35rem;
-  display: none;
-  flex-direction: column;
-  gap: 0.1rem;
+  border-radius: 999px;
+  box-shadow: 0 8px 28px rgba(20, 18, 15, 0.2);
 }
-.sv-menu.open { display: flex; animation: svMenuPop 0.16s cubic-bezier(0.16, 1, 0.3, 1); }
-@keyframes svMenuPop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
-body.dark-mode .sv-menu { background: #1c1b19; border-color: #3a3733; }
-.sv-menu-item {
-  display: flex;
+.sv-bubbles.open { display: flex; animation: svBubblePop 0.16s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: bottom center; }
+@keyframes svBubblePop { from { opacity: 0; transform: scale(0.8) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+body.dark-mode .sv-bubbles { background: #1c1b19; border-color: #3a3733; }
+.sv-bubble {
+  position: relative;
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  width: 100%;
-  padding: 0.55rem 0.7rem;
-  font-family: inherit;
-  font-size: 0.86rem;
-  font-weight: 500;
-  text-align: left;
-  color: var(--text-primary, #2d2a26);
-  background: none;
+  justify-content: center;
+  padding: 0;
+  color: var(--accent);
+  background: var(--accent-badge, rgba(0, 0, 0, 0.05));
   border: none;
-  border-radius: 8px;
+  border-radius: 50%;
   cursor: pointer;
+  transition: background 0.14s ease, transform 0.14s ease, color 0.14s ease;
 }
-.sv-menu-item svg { width: 1.05rem; height: 1.05rem; flex-shrink: 0; color: var(--accent); }
-.sv-menu-item:hover { background: var(--accent-badge, rgba(0, 0, 0, 0.05)); }
-body.dark-mode .sv-menu-item { color: #f5f1ec; }
+.sv-bubble svg { width: 1.15rem; height: 1.15rem; }
+.sv-bubble:hover { background: var(--accent); color: #fff; transform: translateY(-2px); }
+/* Hover tooltip with the action label */
+.sv-bubble::after {
+  content: attr(data-label);
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #2d2a26;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 7px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.14s ease;
+}
+.sv-bubble:hover::after { opacity: 1; }
 
 /* Shared aside footer (used by both simplified + explained blocks) */
 .sv-aside-foot {

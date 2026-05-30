@@ -230,114 +230,98 @@
     }
   }
 
-  // ---- Chunk menu (popover) ----
-  function buildMenu() {
+  // ---- Chunk bubbles (icon cluster popped over the click point) ----
+  function buildBubbles() {
     if (menuEl) return;
     menuEl = document.createElement('div');
-    menuEl.className = 'sv-menu';
-    menuEl.setAttribute('role', 'menu');
+    menuEl.className = 'sv-bubbles';
     document.body.appendChild(menuEl);
     document.addEventListener('click', function (e) {
-      if (menuEl.classList.contains('open') && !e.target.closest('.sv-menu') && !e.target.closest('.sv-chunk-icon')) {
-        closeMenu();
-      }
+      if (menuEl.classList.contains('open') && !e.target.closest('.sv-bubbles')) closeBubbles();
     });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') closeMenu();
+      if (e.key === 'Escape') closeBubbles();
     });
-    window.addEventListener('scroll', closeMenu, { passive: true });
+    window.addEventListener('scroll', closeBubbles, { passive: true });
   }
 
-  function menuItem(label, iconPath, handler) {
+  function bubble(label, iconPath, handler) {
     var b = document.createElement('button');
     b.type = 'button';
-    b.className = 'sv-menu-item';
-    b.setAttribute('role', 'menuitem');
-    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconPath + '</svg><span>' + label + '</span>';
+    b.className = 'sv-bubble';
+    b.setAttribute('aria-label', label);
+    b.setAttribute('data-label', label);
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + iconPath + '</svg>';
     b.addEventListener('click', function (e) {
       e.stopPropagation();
-      closeMenu();
+      closeBubbles();
       handler();
     });
     return b;
   }
 
-  function openMenu(el, id, anchorRect) {
-    buildMenu();
+  function openBubbles(el, id, clientX, clientY) {
+    buildBubbles();
     menuForId = id;
     menuEl.innerHTML = '';
 
-    // 1. Simplify wording  (toggles to "Show original" when already simplified)
+    // 1. Simplify wording (toggles to "Show original" once simplified)
     if (isSimplified(el)) {
-      menuEl.appendChild(menuItem('Show original', '<path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M9 12h6"/>', function () {
+      menuEl.appendChild(bubble('Show original', '<path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/><path d="M9 12h6"/>', function () {
         revertSimplified(el, id);
         if (globalOn) setGlobalState(false, { skipRevertAll: true });
       }));
     } else {
-      menuEl.appendChild(menuItem('Simplify wording', '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/>', function () {
+      menuEl.appendChild(bubble('Simplify wording', '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/>', function () {
         simplifyParagraph(el, id);
       }));
     }
 
     // 2. Explain it differently (toggles to "Hide explanation" when shown)
     if (explainBlockFor(id)) {
-      menuEl.appendChild(menuItem('Hide explanation', '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', function () {
+      menuEl.appendChild(bubble('Hide explanation', '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', function () {
         removeExplain(id);
       }));
     } else {
-      menuEl.appendChild(menuItem('Explain it differently', '<path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/><path d="M9 18h6"/><path d="M10 22h4"/>', function () {
+      menuEl.appendChild(bubble('Explain it differently', '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/>', function () {
         explainParagraph(el, id);
       }));
     }
 
     // 3. Ask the tutor
-    menuEl.appendChild(menuItem('Ask the tutor', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', function () {
+    menuEl.appendChild(bubble('Ask the tutor', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', function () {
       askTutor(id);
     }));
 
-    // Position: below-left of the anchor, clamped to the viewport.
+    // Pop the cluster centred on the click point, sitting just above the cursor.
     menuEl.classList.add('open');
-    var mw = menuEl.offsetWidth || 220;
-    var mh = menuEl.offsetHeight || 140;
-    var top = anchorRect.bottom + 6;
-    if (top + mh > window.innerHeight - 8) top = Math.max(8, anchorRect.top - mh - 6);
-    var left = Math.min(anchorRect.left, window.innerWidth - mw - 8);
-    left = Math.max(8, left);
-    menuEl.style.top = (top + window.scrollY) + 'px';
+    var mw = menuEl.offsetWidth || 150;
+    var mh = menuEl.offsetHeight || 44;
+    var left = Math.max(8, Math.min(clientX - mw / 2, window.innerWidth - mw - 8));
+    var top = clientY - mh - 12;
+    if (top < 8) top = clientY + 16; // not enough room above — drop below the cursor
     menuEl.style.left = (left + window.scrollX) + 'px';
+    menuEl.style.top = (top + window.scrollY) + 'px';
   }
 
-  function closeMenu() {
+  function closeBubbles() {
     if (menuEl) menuEl.classList.remove('open');
     menuForId = null;
   }
 
-  // ---- Per-chunk affordance + click wiring ----
+  // ---- Per-chunk click wiring ----
+  // Click anywhere on a paragraph (outside highlight mode / text selection) to
+  // pop the bubbles over the click point. No persistent icon.
   function wireChunk(el, id) {
     el.classList.add('sv-chunk');
-
-    var icon = document.createElement('button');
-    icon.type = 'button';
-    icon.className = 'sv-chunk-icon';
-    icon.setAttribute('aria-label', 'Help with this paragraph');
-    icon.setAttribute('tabindex', '0');
-    icon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/><circle cx="12" cy="12" r="10"/></svg>';
-    icon.addEventListener('click', function (e) {
-      e.stopPropagation();
-      if (menuForId === id && menuEl && menuEl.classList.contains('open')) { closeMenu(); return; }
-      openMenu(el, id, icon.getBoundingClientRect());
-    });
-    el.appendChild(icon);
-
-    // Whole-chunk click also opens the menu, but only when it won't fight text
-    // selection or the highlight tool.
     el.addEventListener('click', function (e) {
-      if (e.target.closest('.sv-chunk-icon, .sv-simplified, .sv-explained')) return;
-      if (e.target.closest('dfn, .term, .glossary-popup, a, button')) return;
+      if (e.target.closest('.sv-simplified, .sv-explained, .sv-bubbles')) return;
+      if (e.target.closest('dfn, .term, .glossary-popup, a, button, .revision-tip-btn, .revision-tip-popup')) return;
       if (document.body.classList.contains('sv-hl-mode')) return; // highlighting
       var sel = window.getSelection && window.getSelection();
       if (sel && !sel.isCollapsed) return; // user is selecting text
-      openMenu(el, id, icon.getBoundingClientRect());
+      e.stopPropagation(); // don't let the document close-handler swallow this click
+      openBubbles(el, id, e.clientX, e.clientY);
     });
   }
 
