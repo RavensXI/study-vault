@@ -27,7 +27,7 @@
   'use strict';
 
   var PREF_KEY = 'studyvault-simplify';   // { on: bool } — global leveling toggle
-  var MIN_LEN = 40;                        // skip trivially short segments
+  var MIN_LEN = 60;                        // skip headings / short fragments
 
   var clientCache = {};      // `${level}:${id}` -> generated text
   var segments = [];         // [{ el, id }]
@@ -346,6 +346,7 @@
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
       if (el.classList.contains('sv-chunk')) continue; // already wired
+      if (/^H[1-6]$/.test(el.tagName)) continue;        // headings aren't simplifiable
       var id = el.getAttribute('data-narration-id');
       if (!id) continue;
       var text = extractText(el);

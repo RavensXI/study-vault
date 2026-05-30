@@ -93,8 +93,12 @@ module.exports = async function handler(req, res) {
     }
     rates[ip].push(now);
 
-    var simplified = await generate(text, glossaryTerms, level);
-    simplified = (simplified || '').trim();
+    // Only the subject terms that ACTUALLY appear in this paragraph are
+    // constraints — the glossary is lesson-level, so most paragraphs contain
+    // none of them. Passing the full list made the model (and QA) treat absent
+    // terms as "missing" and fail faithful simplifications.
+    var presentTerms = termsInText(glossaryTerms, text);
+    var simplified = cleanOutput(await generate(text, presentTerms, level));
     if (!simplified) return res.status(502).json({ error: 'Empty simplification' });
     var genModel = level === 'explain' ? EXPLAIN_MODEL : SIMPLE_MODEL;
 
@@ -144,41 +148,63 @@ function normalise(s) {
   return String(s).replace(/\s+/g, ' ').trim();
 }
 
+// Subject terms that actually occur in this paragraph (case-insensitive). The
+// glossary is lesson-level, so a given paragraph usually contains none.
+function termsInText(terms, text) {
+  var lc = (text || '').toLowerCase();
+  return (terms || []).filter(function (t) {
+    return t && lc.indexOf(String(t).toLowerCase()) >= 0;
+  });
+}
+
+// The model occasionally emits markdown (a leading "# heading", **bold**). We
+// render output as plain text, so strip those artefacts.
+function cleanOutput(s) {
+  return String(s || '')
+    .replace(/^\s*#{1,6}\s+/gm, '')
+    .replace(/\*\*/g, '')
+    .trim();
+}
+
 function sha256(s) {
   return crypto.createHash('sha256').update(s, 'utf8').digest('hex');
 }
 
-function termLineOf(glossaryTerms) {
-  return glossaryTerms.length ? glossaryTerms.join(', ') : '(none for this lesson)';
-}
-
-// Leveling: same facts, plainer wording.
-function buildSimpleSystemPrompt(glossaryTerms) {
+// Leveling: same facts, plainer wording. `presentTerms` are subject terms that
+// actually occur in this paragraph (already filtered), so the rule only fires
+// when there's something to preserve.
+function buildSimpleSystemPrompt(presentTerms) {
+  var termRule = presentTerms.length
+    ? '1. This paragraph contains these exact subject terms: ' + presentTerms.join(', ') + '. Keep each of them unchanged — simplify the sentence around them, never replace them with easier words and never define them away.'
+    : '1. Keep any specialist subject term that appears unchanged — simplify the sentence around it, never swap it for an easier word.';
   return [
     'You rewrite GCSE revision text into plainer English for students with a lower reading age or who are learning English as an additional language.',
     '',
     'Rules you must never break:',
-    '1. Keep every one of these exact subject terms unchanged — simplify the sentence around them, never replace them with easier words and never define them away: ' + termLineOf(glossaryTerms) + '.',
+    termRule,
     '2. Never change any number, date, name, place, or quotation. Never change a fact.',
     '3. Never add a new point and never remove a point. Same information, simpler wording.',
     '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
     '5. Keep a neutral, factual tone. Do not address the student ("you"), do not add encouragement, do not add commentary.',
-    '6. Output ONLY the rewritten text. No preamble, no notes, no quotation marks around it.'
+    '6. Output ONLY the rewritten text as plain prose. No markdown, no headings, no preamble, no notes, no quotation marks around it.'
   ].join('\n');
 }
 
 // Re-teaching: explain the same idea a different way, with an everyday analogy.
-function buildExplainSystemPrompt(glossaryTerms) {
+function buildExplainSystemPrompt(presentTerms) {
+  var termRule = presentTerms.length
+    ? '3. Keep using these subject terms from the paragraph (do not avoid them — the student is examined on them): ' + presentTerms.join(', ') + '.'
+    : '3. Where the paragraph uses a specialist subject term, keep using it — do not avoid it, the student is examined on it.';
   return [
     'You are a GCSE teacher re-explaining a tricky paragraph to a student who did not follow the textbook version. Explain the SAME idea a different way, using an everyday analogy or concrete example to make it click.',
     '',
     'Rules you must never break:',
     '1. The analogy must be accurate — it must not imply anything false about the real concept. A misleading analogy is worse than none.',
     '2. Do not contradict or change any fact, number, date, name, or quotation from the original.',
-    '3. Still use these exact subject terms where relevant (do not avoid them — the student is examined on them): ' + termLineOf(glossaryTerms) + '.',
+    termRule,
     '4. Keep it short — 2 to 4 sentences. Lead with the analogy or plain-language framing, then connect it back to the lesson idea.',
     '5. A warm, plain teacher voice is fine; you may address the student ("imagine you…"). Do not add unrelated facts or padding.',
-    '6. Output ONLY the explanation. No preamble, no notes, no quotation marks around it.'
+    '6. Output ONLY the explanation as plain prose. No markdown, no preamble, no notes, no quotation marks around it.'
   ].join('\n');
 }
 

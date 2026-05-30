@@ -84,12 +84,17 @@ module.exports = async function handler(req, res) {
     var simplified = row.data.simplified_text;
     var regenerated = false;
 
+    // Only terms that actually occur in this paragraph are constraints (the
+    // glossary is lesson-level). Without this filter, faithful simplifications
+    // of paragraphs that don't mention a glossary term were wrongly failed.
+    var presentTerms = termsInText(glossaryTerms, original);
+
     // First QA pass
-    var verdict = await runQa(rowLevel, lessonTitle, glossaryTerms, original, simplified);
+    var verdict = await runQa(rowLevel, lessonTitle, presentTerms, original, simplified);
 
     // Fail + not yet regenerated -> regenerate once and re-check
     if (!verdict.pass && (row.data.regen_count || 0) < 1) {
-      var regen = (await generate(original, glossaryTerms, rowLevel) || '').trim();
+      var regen = cleanOutput(await generate(original, presentTerms, rowLevel));
       regenerated = true;
       if (regen) {
         simplified = regen;
@@ -122,12 +127,12 @@ module.exports = async function handler(req, res) {
 function simpleQaSystem() {
   return [
     'You are a faithfulness checker for simplified GCSE revision text.',
-    'You are given a lesson title, the required subject terms, the ORIGINAL paragraph, and a SIMPLIFIED rewrite.',
+    'You are given a lesson title, a list of subject terms that appear in this paragraph (may be empty), the ORIGINAL paragraph, and a SIMPLIFIED rewrite.',
     'Decide whether the simplified version is safe to show students.',
     '',
     'It passes only if ALL of these hold:',
     '- Every number, date, name, place and quotation in the original is preserved exactly.',
-    '- Every required subject term is still present.',
+    '- Each listed subject term that appears in the ORIGINAL is still present in the simplified version (not swapped for an easier word). If the term list is empty, skip this check entirely — do NOT require any term.',
     '- No new claim has been added and no existing point has been dropped.',
     '- It reads more simply than the original (shorter sentences / commoner words).',
     '',
@@ -153,12 +158,12 @@ function explainQaSystem() {
   ].join('\n');
 }
 
-async function runQa(level, lessonTitle, glossaryTerms, original, simplified) {
+async function runQa(level, lessonTitle, presentTerms, original, simplified) {
   var system = level === 'explain' ? explainQaSystem() : simpleQaSystem();
   var altLabel = level === 'explain' ? 'ALTERNATIVE EXPLANATION:' : 'SIMPLIFIED:';
   var user = [
     'LESSON TITLE: ' + (lessonTitle || '(unknown)'),
-    'REQUIRED SUBJECT TERMS: ' + (glossaryTerms.length ? glossaryTerms.join(', ') : '(none)'),
+    'SUBJECT TERMS IN THIS PARAGRAPH: ' + (presentTerms.length ? presentTerms.join(', ') : '(none — skip the term check)'),
     '',
     'ORIGINAL:',
     original,
@@ -188,43 +193,61 @@ function parseVerdict(raw) {
 
 // --- Generation (regen path) — mirrors api/simplify.js ---
 
-function termLineOf(glossaryTerms) {
-  return glossaryTerms.length ? glossaryTerms.join(', ') : '(none for this lesson)';
+// Subject terms that actually occur in this paragraph (case-insensitive).
+function termsInText(terms, text) {
+  var lc = (text || '').toLowerCase();
+  return (terms || []).filter(function (t) {
+    return t && lc.indexOf(String(t).toLowerCase()) >= 0;
+  });
 }
 
-function buildSimpleSystemPrompt(glossaryTerms) {
+// Strip markdown the model sometimes emits; output is rendered as plain text.
+function cleanOutput(s) {
+  return String(s || '')
+    .replace(/^\s*#{1,6}\s+/gm, '')
+    .replace(/\*\*/g, '')
+    .trim();
+}
+
+function buildSimpleSystemPrompt(presentTerms) {
+  var termRule = presentTerms.length
+    ? '1. This paragraph contains these exact subject terms: ' + presentTerms.join(', ') + '. Keep each of them unchanged — simplify the sentence around them, never replace them with easier words and never define them away.'
+    : '1. Keep any specialist subject term that appears unchanged — simplify the sentence around it, never swap it for an easier word.';
   return [
     'You rewrite GCSE revision text into plainer English for students with a lower reading age or who are learning English as an additional language.',
     '',
     'Rules you must never break:',
-    '1. Keep every one of these exact subject terms unchanged — simplify the sentence around them, never replace them with easier words and never define them away: ' + termLineOf(glossaryTerms) + '.',
+    termRule,
     '2. Never change any number, date, name, place, or quotation. Never change a fact.',
     '3. Never add a new point and never remove a point. Same information, simpler wording.',
     '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
     '5. Keep a neutral, factual tone. Do not address the student ("you"), do not add encouragement, do not add commentary.',
-    '6. Output ONLY the rewritten text. No preamble, no notes, no quotation marks around it.'
+    '6. Output ONLY the rewritten text as plain prose. No markdown, no headings, no preamble, no notes, no quotation marks around it.'
   ].join('\n');
 }
 
-function buildExplainSystemPrompt(glossaryTerms) {
+function buildExplainSystemPrompt(presentTerms) {
+  var termRule = presentTerms.length
+    ? '3. Keep using these subject terms from the paragraph (do not avoid them — the student is examined on them): ' + presentTerms.join(', ') + '.'
+    : '3. Where the paragraph uses a specialist subject term, keep using it — do not avoid it, the student is examined on it.';
   return [
     'You are a GCSE teacher re-explaining a tricky paragraph to a student who did not follow the textbook version. Explain the SAME idea a different way, using an everyday analogy or concrete example to make it click.',
     '',
     'Rules you must never break:',
     '1. The analogy must be accurate — it must not imply anything false about the real concept. A misleading analogy is worse than none.',
     '2. Do not contradict or change any fact, number, date, name, or quotation from the original.',
-    '3. Still use these exact subject terms where relevant (do not avoid them — the student is examined on them): ' + termLineOf(glossaryTerms) + '.',
+    termRule,
     '4. Keep it short — 2 to 4 sentences. Lead with the analogy or plain-language framing, then connect it back to the lesson idea.',
     '5. A warm, plain teacher voice is fine; you may address the student ("imagine you…"). Do not add unrelated facts or padding.',
-    '6. Output ONLY the explanation. No preamble, no notes, no quotation marks around it.'
+    '6. Output ONLY the explanation as plain prose. No markdown, no preamble, no notes, no quotation marks around it.'
   ].join('\n');
 }
 
-async function generate(text, glossaryTerms, level) {
+async function generate(text, presentTerms, level) {
   if (level === 'explain') {
-    return callAnthropic(buildExplainSystemPrompt(glossaryTerms), text, EXPLAIN_MODEL, 600, 0.6);
+    return callAnthropic(buildExplainSystemPrompt(presentTerms), text, EXPLAIN_MODEL, 600, 0.6);
   }
-  return callAnthropic(buildSimpleSystemPrompt(glossaryTerms), text, SIMPLE_MODEL, 700, 0.2);
+  return callAnthropic(buildSimpleSystemPrompt(presentTerms), text, SIMPLE_MODEL, 700, 0.2);
 }
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {
