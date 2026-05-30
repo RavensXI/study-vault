@@ -33,7 +33,7 @@ module.exports = async function handler(req, res) {
 
   var body = req.body || {};
   var hash = typeof body.hash === 'string' ? body.hash : '';
-  var level = body.level === 'simple' ? 'simple' : 'simple';
+  var level = body.level === 'explain' ? 'explain' : 'simple';
   if (!hash) return res.status(400).json({ error: 'Missing hash' });
 
   // Light per-IP throttle so QA can't be weaponised into a Sonnet bill.
