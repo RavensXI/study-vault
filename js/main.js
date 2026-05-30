@@ -1070,7 +1070,7 @@ function initNarration() {
 
   var observer = new IntersectionObserver(function(entries) {
     mainPlayerVisible = entries[0].isIntersecting;
-    fab.classList.toggle('visible', !mainPlayerVisible && audioStarted);
+    fab.classList.toggle('visible', !mainPlayerVisible && audioStarted && !narrationGloballyGreyed);
   }, { threshold: 0 });
   observer.observe(playerEl);
 
@@ -1080,13 +1080,16 @@ function initNarration() {
   // Narration data is never mutated — this only toggles UI state + playback.
   function applyGlobalGrey() {
     playerEl.classList.toggle('narration-disabled', narrationGloballyGreyed);
-    fab.classList.toggle('narration-disabled', narrationGloballyGreyed);
     var tip = narrationGloballyGreyed
       ? 'Narration follows the original wording. Turn off Simplify to listen.'
       : '';
     playerEl.setAttribute('title', tip);
     playerEl.setAttribute('aria-disabled', narrationGloballyGreyed ? 'true' : 'false');
-    if (narrationGloballyGreyed && !audio.paused) audio.pause();
+    if (narrationGloballyGreyed) {
+      // No point floating a greyed-out mini-player around the page — hide it.
+      if (!audio.paused) audio.pause();
+      fab.classList.remove('visible');
+    }
   }
   window.SimplifyNarration = {
     // Whole-lesson Simplify toggle: grey the entire player + mini-player.
@@ -1248,7 +1251,7 @@ function initNarration() {
     playBtn.classList.add('playing');
     playBtn.setAttribute('aria-label', 'Pause ' + playerMode);
     fabPlay.classList.add('playing');
-    fab.classList.toggle('visible', !mainPlayerVisible);
+    fab.classList.toggle('visible', !mainPlayerVisible && !narrationGloballyGreyed);
     if (playerMode === 'narration' && currentIndex >= 0) setHighlight(manifest[currentIndex].id);
   });
 

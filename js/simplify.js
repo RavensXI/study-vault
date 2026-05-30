@@ -108,11 +108,41 @@
     } catch (e) {}
   }
 
+  // ---- Shimmer + type-out (shared) ----
+  function shimmer() {
+    var s = document.createElement('div');
+    s.className = 'sv-shimmer';
+    s.innerHTML = '<span></span><span></span><span></span>';
+    return s;
+  }
+
+  // Reveal text word by word, fast — feels like it's being written out.
+  function typeOut(pEl, text) {
+    var tokens = text.split(/(\s+)/); // [word, space, word, ...]
+    var i = 0, acc = '';
+    pEl.textContent = '';
+    (function step() {
+      if (i >= tokens.length) { pEl.textContent = text; return; }
+      var tok = tokens[i++];
+      acc += tok;
+      pEl.textContent = acc;
+      setTimeout(step, tok.trim() === '' ? 0 : 22);
+    })();
+  }
+
+  function fill(parts, text) {
+    if (parts.shimmer && parts.shimmer.parentNode) parts.shimmer.parentNode.removeChild(parts.shimmer);
+    typeOut(parts.p, text);
+  }
+
+  var SPARKLE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></svg>';
+
   // ---- SIMPLE (leveling): hide original, show plainer sibling ----
+  // Indicator is the left stripe + the global toggle state — no tagline.
+  // Click the simplified block to re-open the bubbles ("Show original").
   function isSimplified(el) { return el.classList.contains('sv-orig-hidden'); }
 
-  function showSimplified(el, id, text) {
-    if (isSimplified(el)) return;
+  function createSimplifiedBlock(el, id) {
     var keyFact = isKeyFact(el);
     var block = document.createElement('div');
     block.className = 'sv-simplified' + (keyFact ? ' sv-simplified--keyfact' : '');
@@ -125,29 +155,21 @@
     }
     var p = document.createElement('p');
     p.className = 'sv-simplified-text';
-    p.textContent = text;
-    var foot = document.createElement('div');
-    foot.className = 'sv-aside-foot';
-    var label = document.createElement('span');
-    label.className = 'sv-aside-label';
-    label.textContent = 'Simplified — check key terms against the original.';
-    var revert = document.createElement('button');
-    revert.type = 'button';
-    revert.className = 'sv-aside-action';
-    revert.textContent = 'Show original';
-    revert.addEventListener('click', function (e) {
-      e.stopPropagation();
-      revertSimplified(el, id);
-      if (globalOn) setGlobalState(false, { skipRevertAll: true });
-    });
-    foot.appendChild(label);
-    foot.appendChild(revert);
     block.appendChild(p);
-    block.appendChild(foot);
-
+    var sh = shimmer();
+    block.appendChild(sh);
+    block.addEventListener('click', function (e) {
+      if (e.target.closest('a, button')) return;
+      if (document.body.classList.contains('sv-hl-mode')) return;
+      var sel = window.getSelection && window.getSelection();
+      if (sel && !sel.isCollapsed) return;
+      e.stopPropagation();
+      openBubbles(el, id, e.clientX, e.clientY);
+    });
     el.classList.add('sv-orig-hidden');
     el.parentNode.insertBefore(block, el.nextSibling);
     if (window.SimplifyNarration) window.SimplifyNarration.setParagraph(id, true);
+    return { block: block, p: p, shimmer: sh };
   }
 
   function revertSimplified(el, id) {
@@ -159,15 +181,15 @@
 
   function simplifyParagraph(el, id) {
     if (isSimplified(el)) return Promise.resolve();
+    var parts = createSimplifiedBlock(el, id); // shimmer shows immediately
     var ck = 'simple:' + id;
-    if (clientCache[ck]) { showSimplified(el, id, clientCache[ck]); return Promise.resolve(); }
-    el.classList.add('sv-busy');
+    if (clientCache[ck]) { fill(parts, clientCache[ck]); return Promise.resolve(); }
     return callGenerate(id, 'simple').then(function (data) {
-      if (data.useOriginal || !data.simplified) return;
+      if (data.useOriginal || !data.simplified) { revertSimplified(el, id); return; }
       clientCache[ck] = data.simplified;
-      showSimplified(el, id, data.simplified);
+      fill(parts, data.simplified);
       if (data.needsQa) triggerQa(data.hash, 'simple');
-    }).catch(function () {}).then(function () { el.classList.remove('sv-busy'); });
+    }).catch(function () { revertSimplified(el, id); });
   }
 
   // ---- EXPLAIN (analogy/reframe): supplementary card, original untouched ----
@@ -175,34 +197,28 @@
     return document.querySelector('.sv-explained[data-for="' + cssEscape(id) + '"]');
   }
 
-  function showExplainCard(el, id, text, loading) {
-    var existing = explainBlockFor(id);
-    if (existing) {
-      if (!loading) {
-        existing.querySelector('.sv-explained-text').textContent = text;
-        existing.classList.remove('sv-busy');
-      }
-      return;
-    }
+  function createExplainCard(el, id) {
     var card = document.createElement('div');
-    card.className = 'sv-explained' + (loading ? ' sv-busy' : '');
+    card.className = 'sv-explained';
     card.setAttribute('data-for', id);
     card.innerHTML =
       '<div class="sv-explained-head">' +
-        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.1h6c0-.8.4-1.6 1-2.1A7 7 0 0 0 12 2z"/></svg>' +
+        SPARKLE_ICON +
         '<span>Explained another way</span>' +
         '<button type="button" class="sv-explained-hide" aria-label="Hide">Hide</button>' +
       '</div>' +
       '<p class="sv-explained-text"></p>' +
       '<div class="sv-aside-foot"><span class="sv-aside-label">A different explanation to help it click — the original above is what the exam expects.</span></div>';
-    card.querySelector('.sv-explained-text').textContent = loading ? 'Thinking of another way to explain this…' : text;
     card.querySelector('.sv-explained-hide').addEventListener('click', function (e) {
       e.stopPropagation();
       removeExplain(id);
     });
-    // Insert after the simplified block if present, else right after the chunk.
+    var p = card.querySelector('.sv-explained-text');
+    var sh = shimmer();
+    p.parentNode.insertBefore(sh, p.nextSibling);
     var anchor = document.querySelector('.sv-simplified[data-for="' + cssEscape(id) + '"]') || el;
     anchor.parentNode.insertBefore(card, anchor.nextSibling);
+    return { card: card, p: p, shimmer: sh };
   }
 
   function removeExplain(id) {
@@ -212,13 +228,13 @@
 
   function explainParagraph(el, id) {
     if (explainBlockFor(id)) return; // already shown
+    var parts = createExplainCard(el, id); // shimmer shows immediately
     var ck = 'explain:' + id;
-    if (clientCache[ck]) { showExplainCard(el, id, clientCache[ck], false); return; }
-    showExplainCard(el, id, '', true); // loading card
+    if (clientCache[ck]) { fill(parts, clientCache[ck]); return; }
     callGenerate(id, 'explain').then(function (data) {
       if (data.useOriginal || !data.simplified) { removeExplain(id); return; }
       clientCache[ck] = data.simplified;
-      showExplainCard(el, id, data.simplified, false);
+      fill(parts, data.simplified);
       if (data.needsQa) triggerQa(data.hash, 'explain');
     }).catch(function () { removeExplain(id); });
   }
