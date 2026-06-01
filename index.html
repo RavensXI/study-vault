@@ -825,6 +825,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5f: Geography picker (AQA — 1 ecosystem + 2 of 3 landscapes + 1 resource) -->
+      <div class="free-wizard-step" id="fw-step-geography">
+        <div class="fw-header">
+          <h2>Which Geography options do you study?</h2>
+          <p>AQA lets your school choose within each paper — pick the ecosystem, the two UK landscapes and the resource your class studies.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-geography-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-geography-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-geography-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5: Tier picker (Maths Foundation/Higher, etc.) -->
       <div class="free-wizard-step" id="fw-step-tier">
         <div class="fw-header">
@@ -2236,7 +2251,30 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, classicalCiv: {}, re: { religions: [], themes: [] } };
+    // Geography options (AQA 8035 only for now). Choices are WITHIN the exam
+    // papers, so each group has a `pick` count: one ecosystem, two of three UK
+    // landscapes, one resource. Slugs map to lessons in js/free-user-filters.js
+    // (GEO_AQA_OPTION_LESSONS). The browse-loader hides the non-picked lessons.
+    var geographyOptions = {
+      'aqa': {
+        'Living World — your ecosystem': { pick: 1, options: [
+          { slug: 'hot-deserts', name: 'Hot Deserts' },
+          { slug: 'cold-environments', name: 'Cold Environments' }
+        ] },
+        'UK Physical Landscapes — pick two': { pick: 2, options: [
+          { slug: 'coasts', name: 'Coastal Landscapes' },
+          { slug: 'rivers', name: 'River Landscapes' },
+          { slug: 'glacial', name: 'Glacial Landscapes' }
+        ] },
+        'Resource Management — your resource': { pick: 1, options: [
+          { slug: 'energy', name: 'Energy' },
+          { slug: 'food', name: 'Food' },
+          { slug: 'water', name: 'Water' }
+        ] }
+      }
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, classicalCiv: {}, geography: {}, re: { religions: [], themes: [] } };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -2825,6 +2863,70 @@
       fwUpdateClassicalCivDoneBtn();
     }
 
+    function fwUpdateGeographyDoneBtn() {
+      var btn = document.getElementById('fw-geography-done');
+      if (!btn) return;
+      var opts = geographyOptions['aqa'];
+      var s = wizardState.geography || {};
+      var ok = Object.keys(opts).every(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var need = opts[section].pick;
+        var val = s[groupKey];
+        if (need === 1) return !!val;
+        return Array.isArray(val) && val.length === need;
+      });
+      btn.disabled = !ok;
+    }
+
+    function buildGeographyPicker() {
+      var opts = geographyOptions['aqa'];
+      var container = document.getElementById('fw-geography-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.geography = {};
+      if (!opts) return;
+
+      Object.keys(opts).forEach(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var pick = opts[section].pick;
+        if (pick > 1) wizardState.geography[groupKey] = [];
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML = '<h3>' + section + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        opts[section].options.forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = option.name;
+          btn.dataset.value = option.slug;
+          btn.addEventListener('click', function () {
+            if (pick === 1) {
+              optsEl.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+              btn.classList.add('selected');
+              wizardState.geography[groupKey] = option.slug;
+            } else {
+              var arr = wizardState.geography[groupKey] || [];
+              var idx = arr.indexOf(option.slug);
+              if (idx !== -1) {
+                arr.splice(idx, 1);
+                btn.classList.remove('selected');
+              } else if (arr.length < pick) {
+                arr.push(option.slug);
+                btn.classList.add('selected');
+              }
+              wizardState.geography[groupKey] = arr;
+            }
+            fwUpdateGeographyDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      });
+
+      fwUpdateGeographyDoneBtn();
+    }
+
     // Religious Studies picker — religion + theme caps vary by board.
     // AQA: 2 of 7 religions + 4 of 6 themes.
     // Eduqas: 2 of 7 religions + 2 of 4 themes.
@@ -3310,6 +3412,8 @@
     function fwHasDrama()        { return wizardState.subjects.indexOf('drama') !== -1; }
     function fwHasRE()           { return wizardState.subjects.indexOf('religious-studies') !== -1; }
     function fwHasClassicalCiv() { return wizardState.subjects.indexOf('classical-civilisation') !== -1; }
+    // Geography picker is AQA-only for now (other boards have no option map yet).
+    function fwHasGeography()     { return wizardState.subjects.indexOf('geography') !== -1 && (wizardState.boards['geography'] || 'aqa') === 'aqa'; }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
@@ -3331,6 +3435,9 @@
       } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3361,6 +3468,9 @@
       } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3383,6 +3493,9 @@
       } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3414,6 +3527,9 @@
       } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3444,6 +3560,9 @@
       } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3475,6 +3594,9 @@
       if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3504,6 +3626,40 @@
 
     document.getElementById('fw-classical-civilisation-done').addEventListener('click', function () {
       document.getElementById('fw-step-classical-civilisation').classList.remove('active');
+      if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-geography-back').addEventListener('click', function () {
+      document.getElementById('fw-step-geography').classList.remove('active');
+      if (fwHasClassicalCiv()) {
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasDrama()) {
+        document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasFilmStudies()) {
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasEngLit()) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-geography-done').addEventListener('click', function () {
+      document.getElementById('fw-step-geography').classList.remove('active');
       if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3514,7 +3670,9 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (fwHasClassicalCiv()) {
+      if (fwHasGeography()) {
+        document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
         document.getElementById('fw-step-classical-civilisation').classList.add('active');
       } else if (fwHasRE()) {
@@ -3680,6 +3838,9 @@
         }
         if (baseSlug === 'classical-civilisation') {
           entry.options = wizardState.classicalCiv;
+        }
+        if (baseSlug === 'geography') {
+          entry.options = wizardState.geography;
         }
         if (baseSlug === 'religious-studies') {
           entry.religions = (wizardState.re && wizardState.re.religions) || [];

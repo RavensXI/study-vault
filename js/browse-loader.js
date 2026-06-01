@@ -468,6 +468,33 @@
       }
     }
 
+    // Free user Geography: lesson-level filter (papers contain optional topics
+    // the student chooses between — ecosystem, two of three landscapes, one
+    // resource). Compulsory lessons always show. Selectable lessons are keyed
+    // 'unit_slug/lesson_slug' because geography slugs (lesson-NN) repeat
+    // across papers. Keys/picks live in FreeUserFilters.GEO_SELECTABLE.
+    if (typeof window.FreeUserFilters !== 'undefined') {
+      var pickedGeoList = window.FreeUserFilters.getPickedGeoSlugs(subjectSlug);
+      if (pickedGeoList) {
+        var pickedGeoSet = new Set(pickedGeoList);
+        var GEO_SELECTABLE_MAP = window.FreeUserFilters.GEO_SELECTABLE;
+        var geoCountPromises = units.map(function (u) {
+          return sb.from('lessons').select('slug, tier').eq('unit_id', u.id).eq('status', 'live')
+            .then(function (res) {
+              var rows = res.data || [];
+              if (foundationFilter) rows = rows.filter(function (r) { return r.tier !== 'higher'; });
+              rows = rows.filter(function (r) {
+                var key = u.slug + '/' + r.slug;
+                if (GEO_SELECTABLE_MAP[key]) return pickedGeoSet.has(key);
+                return true;
+              });
+              u._filteredCount = rows.length;
+            });
+        });
+        await Promise.all(geoCountPromises);
+      }
+    }
+
     document.title = subject.name + ' - StudyVault';
     document.getElementById('header-unit-label').textContent = subject.name;
 
@@ -669,6 +696,22 @@
         var FILM_SELECTABLE_MAP_UNIT = window.FreeUserFilters.FILM_SELECTABLE;
         lessons = lessons.filter(function (l) {
           if (FILM_SELECTABLE_MAP_UNIT[l.slug]) return pickedFilmSetUnit.has(l.slug);
+          return true;
+        });
+      }
+    }
+
+    // Free user Geography: trim optional-topic lessons within this paper to
+    // only the student's picks (ecosystem, two landscapes, one resource).
+    // Compulsory lessons keep showing. Keyed 'unit_slug/lesson_slug'.
+    if (typeof window.FreeUserFilters !== 'undefined') {
+      var pickedGeoListUnit = window.FreeUserFilters.getPickedGeoSlugs(subjectSlug);
+      if (pickedGeoListUnit) {
+        var pickedGeoSetUnit = new Set(pickedGeoListUnit);
+        var GEO_SELECTABLE_MAP_UNIT = window.FreeUserFilters.GEO_SELECTABLE;
+        lessons = lessons.filter(function (l) {
+          var key = unit.slug + '/' + l.slug;
+          if (GEO_SELECTABLE_MAP_UNIT[key]) return pickedGeoSetUnit.has(key);
           return true;
         });
       }
