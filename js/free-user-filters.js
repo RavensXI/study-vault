@@ -53,6 +53,17 @@
     return Object.values(pref.options);
   }
 
+  // History OCR (J410) — student picks one each from Non-British Depth,
+  // Thematic Study and British Depth (3 units), PLUS the compulsory period
+  // study (International Relations 1918-1975) that every OCR student takes.
+  var HISTORY_OCR_SLUGS = ['history-ocr'];
+  var HISTORY_OCR_COMPULSORY = ['international-relations-1918-1975'];
+
+  function historyOcrFilter(pref) {
+    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
+    return Object.values(pref.options).concat(HISTORY_OCR_COMPULSORY);
+  }
+
   // Drama AQA — pick 1 set play from 9. Universal units always show.
   var DRAMA_SLUGS = ['drama-aqa'];
   var DRAMA_UNIVERSAL = ['theatre-roles-stagecraft', 'practitioners-styles', 'live-theatre-review'];
@@ -204,6 +215,7 @@
     var pref = freePref(subjectSlug);
     if (ENGLIT_SLUGS.indexOf(subjectSlug) !== -1) return englitFilter(pref);
     if (HISTORY_SLUGS.indexOf(subjectSlug) !== -1) return historyFilter(pref);
+    if (HISTORY_OCR_SLUGS.indexOf(subjectSlug) !== -1) return historyOcrFilter(pref);
     if (DRAMA_SLUGS.indexOf(subjectSlug) !== -1) return dramaFilter(pref);
     if (CLASSICAL_CIV_SLUGS.indexOf(subjectSlug) !== -1) return classicalCivFilter(pref);
     if (RE_AQA_SLUGS.indexOf(subjectSlug) !== -1) return reAqaFilter(pref);
