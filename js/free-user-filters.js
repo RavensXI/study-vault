@@ -202,7 +202,12 @@
   //             (Coasts/Rivers/Glacial); Paper 2 = 1 resource (Energy/Food/Water).
   //   Edexcel A 1GA0: Paper 1 = 2 of 3 landscapes (Coastal/River/Glaciated);
   //                   Paper 2 = 1 resource (Energy/Water).
-  var GEO_SLUGS = ['geography-aqa', 'geography-edexcel-a'];
+  //   Eduqas A C111QS: two "choose one of two" options, both in shared units —
+  //     Hazards (Tectonic Theme 3 OR Coastal Theme 4) in `tectonic-coastal-hazards`;
+  //     Issues (Social Development Theme 7 OR Environmental Challenges Theme 8) in
+  //     `social-environmental-challenges`. Lesson-level keying handles the
+  //     co-mingled units directly — no structural re-split needed.
+  var GEO_SLUGS = ['geography-aqa', 'geography-edexcel-a', 'geography-eduqas'];
   var GEO_OPTION_LESSONS = {
     'geography-aqa': {
       'hot-deserts':       ['paper-1/lesson-12', 'paper-1/lesson-13'],
@@ -220,6 +225,12 @@
       'glaciated': ['paper-1-physical-environment/glaciated-upland-landscapes-and-management', 'paper-1-physical-environment/glaciated-uplands-land-use-tourism-and-management'],
       'energy':    ['paper-2-human-environment/energy-resource-management'],
       'water':     ['paper-2-human-environment/water-resource-management']
+    },
+    'geography-eduqas': {
+      'tectonic-hazards':         ['tectonic-coastal-hazards/tectonic-processes-volcanic-landforms', 'tectonic-coastal-hazards/vulnerability-tectonic-risk'],
+      'coastal-hazards':          ['tectonic-coastal-hazards/vulnerable-coastlines', 'tectonic-coastal-hazards/managing-coastlines'],
+      'social-development':       ['social-environmental-challenges/measuring-social-development', 'social-environmental-challenges/social-challenges-africa-south-asia'],
+      'environmental-challenges': ['social-environmental-challenges/consumerism-and-environment', 'social-environmental-challenges/restoring-and-managing-habitats']
     }
   };
   var GEO_SELECTABLE = {};
