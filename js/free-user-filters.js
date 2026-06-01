@@ -279,9 +279,28 @@
     return slugs.length ? slugs : null;
   }
 
+  // D&T Eduqas (C600QS) — unit-level filter. Students study the core PLUS one
+  // in-depth material specialism (1 of 6). The chosen in-depth unit shows; the
+  // other five hide; the core units always show. Each in-depth option's slug
+  // IS its unit slug, so the filter returns core + the picked unit directly.
+  var DT_EDUQAS_SLUGS = ['design-technology-eduqas'];
+  var DT_EDUQAS_CORE_UNITS = [
+    'design-technology-our-world',
+    'materials-and-properties',
+    'designing-and-making-principles'
+  ];
+
+  function dtEduqasFilter(pref) {
+    if (!pref || !pref.options) return null;
+    var picked = Object.keys(pref.options).map(function (k) { return pref.options[k]; }).filter(Boolean);
+    if (!picked.length) return null;
+    return DT_EDUQAS_CORE_UNITS.concat(picked);
+  }
+
   function getAllowedUnitSlugs(subjectSlug) {
     var pref = freePref(subjectSlug);
     if (ENGLIT_SLUGS.indexOf(subjectSlug) !== -1) return englitFilter(pref);
+    if (DT_EDUQAS_SLUGS.indexOf(subjectSlug) !== -1) return dtEduqasFilter(pref);
     if (HISTORY_SLUGS.indexOf(subjectSlug) !== -1) return historyFilter(pref);
     if (HISTORY_OCR_SLUGS.indexOf(subjectSlug) !== -1) return historyOcrFilter(pref);
     if (DRAMA_SLUGS.indexOf(subjectSlug) !== -1) return dramaFilter(pref);

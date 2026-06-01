@@ -840,6 +840,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5g: Design & Technology picker (Eduqas — 1 in-depth material of 6) -->
+      <div class="free-wizard-step" id="fw-step-dt">
+        <div class="fw-header">
+          <h2>Which in-depth material do you study?</h2>
+          <p>Eduqas D&amp;T students study the core plus one in-depth material area — pick the specialism your class focuses on.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-dt-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-dt-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-dt-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5: Tier picker (Maths Foundation/Higher, etc.) -->
       <div class="free-wizard-step" id="fw-step-tier">
         <div class="fw-header">
@@ -2295,7 +2310,23 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, classicalCiv: {}, geography: {}, re: { religions: [], themes: [] } };
+    // Design & Technology options (Eduqas/WJEC C600QS). Students study the core
+    // plus ONE in-depth material specialism (1 of 6). Each option slug is the
+    // in-depth unit slug; js/free-user-filters.js returns core + the picked unit.
+    var dtOptions = {
+      'eduqas': {
+        'Your in-depth material area': { pick: 1, options: [
+          { slug: 'electronic-mechanical-systems', name: 'Electronic & Mechanical Systems' },
+          { slug: 'papers-and-boards-in-depth', name: 'Papers & Boards' },
+          { slug: 'timber-in-depth', name: 'Timber' },
+          { slug: 'metals-in-depth', name: 'Metals' },
+          { slug: 'polymers-in-depth', name: 'Polymers' },
+          { slug: 'textiles-in-depth', name: 'Textiles' }
+        ] }
+      }
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, classicalCiv: {}, geography: {}, dt: {}, re: { religions: [], themes: [] } };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -2949,6 +2980,47 @@
       fwUpdateGeographyDoneBtn();
     }
 
+    function fwUpdateDTDoneBtn() {
+      var btn = document.getElementById('fw-dt-done');
+      if (!btn) return;
+      var s = wizardState.dt || {};
+      btn.disabled = !Object.keys(s).some(function (k) { return !!s[k]; });
+    }
+
+    function buildDTPicker() {
+      var opts = dtOptions['eduqas'];
+      var container = document.getElementById('fw-dt-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.dt = {};
+      if (!opts) return;
+
+      Object.keys(opts).forEach(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML = '<h3>' + section + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        opts[section].options.forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = option.name;
+          btn.dataset.value = option.slug;
+          btn.addEventListener('click', function () {
+            optsEl.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.dt[groupKey] = option.slug;
+            fwUpdateDTDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      });
+
+      fwUpdateDTDoneBtn();
+    }
+
     // Religious Studies picker — religion + theme caps vary by board.
     // AQA: 2 of 7 religions + 4 of 6 themes.
     // Eduqas: 2 of 7 religions + 2 of 4 themes.
@@ -3437,6 +3509,8 @@
     // Geography picker — boards with an option map in geographyOptions (AQA,
     // Edexcel A). Other geography boards fall through to no picker / no filter.
     function fwHasGeography()     { var b = wizardState.boards['geography'] || 'aqa'; return wizardState.subjects.indexOf('geography') !== -1 && (b === 'aqa' || b === 'edexcel a' || b === 'eduqas'); }
+    // D&T picker is Eduqas/WJEC-only (AQA D&T is a common paper with no in-exam optionality).
+    function fwHasDT()            { var b = wizardState.boards['design-technology'] || 'aqa'; return wizardState.subjects.indexOf('design-technology') !== -1 && (b === 'eduqas' || b === 'wjec'); }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
@@ -3461,6 +3535,9 @@
       } else if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3494,6 +3571,9 @@
       } else if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3519,6 +3599,9 @@
       } else if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3553,6 +3636,9 @@
       } else if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3586,6 +3672,9 @@
       } else if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3620,6 +3709,9 @@
       } else if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3652,6 +3744,9 @@
       if (fwHasGeography()) {
         buildGeographyPicker();
         document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3683,6 +3778,43 @@
 
     document.getElementById('fw-geography-done').addEventListener('click', function () {
       document.getElementById('fw-step-geography').classList.remove('active');
+      if (fwHasDT()) {
+        buildDTPicker();
+        document.getElementById('fw-step-dt').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-dt-back').addEventListener('click', function () {
+      document.getElementById('fw-step-dt').classList.remove('active');
+      if (fwHasGeography()) {
+        buildGeographyPicker();
+        document.getElementById('fw-step-geography').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasDrama()) {
+        document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasFilmStudies()) {
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasEngLit()) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-dt-done').addEventListener('click', function () {
+      document.getElementById('fw-step-dt').classList.remove('active');
       if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3693,7 +3825,9 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (fwHasGeography()) {
+      if (fwHasDT()) {
+        document.getElementById('fw-step-dt').classList.add('active');
+      } else if (fwHasGeography()) {
         document.getElementById('fw-step-geography').classList.add('active');
       } else if (fwHasClassicalCiv()) {
         buildClassicalCivPicker();
@@ -3864,6 +3998,9 @@
         }
         if (baseSlug === 'geography') {
           entry.options = wizardState.geography;
+        }
+        if (baseSlug === 'design-technology') {
+          entry.options = wizardState.dt;
         }
         if (baseSlug === 'religious-studies') {
           entry.religions = (wizardState.re && wizardState.re.religions) || [];
