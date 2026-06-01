@@ -810,6 +810,21 @@
         </div>
       </div>
 
+      <!-- Step 3.5e: Classical Civilisation picker (1 thematic of 2 + 1 lit/culture of 3) -->
+      <div class="free-wizard-step" id="fw-step-classical-civilisation">
+        <div class="fw-header">
+          <h2>Which Classical Civilisation options do you study?</h2>
+          <p>Your school picks one Thematic Study and one Literature and Culture option — pick the two you study.</p>
+        </div>
+        <div class="fw-body">
+          <div id="fw-classical-civilisation-container"></div>
+        </div>
+        <div class="fw-footer">
+          <button class="fw-btn fw-btn-ghost" id="fw-classical-civilisation-back">&larr; Back</button>
+          <button class="fw-btn fw-btn-primary" id="fw-classical-civilisation-done" disabled>Continue &rarr;</button>
+        </div>
+      </div>
+
       <!-- Step 3.5: Tier picker (Maths Foundation/Higher, etc.) -->
       <div class="free-wizard-step" id="fw-step-tier">
         <div class="fw-header">
@@ -2174,7 +2189,24 @@
       }
     };
 
-    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, re: { religions: [], themes: [] } };
+    // Classical Civilisation OCR J199 — pick 1 thematic study (of 2) + 1
+    // literature/culture option (of 3). Option slugs map to unit pairs in
+    // js/free-user-filters.js (CLASSICAL_CIV_OPTION_UNITS).
+    var classicalCivOptions = {
+      'ocr': {
+        'Thematic Study': [
+          { slug: 'myth-and-religion', name: 'Myth and Religion' },
+          { slug: 'women-in-the-ancient-world', name: 'Women in the Ancient World' }
+        ],
+        'Literature and Culture': [
+          { slug: 'the-homeric-world', name: 'The Homeric World' },
+          { slug: 'roman-city-life', name: 'Roman City Life' },
+          { slug: 'war-and-warfare', name: 'War and Warfare' }
+        ]
+      }
+    };
+
+    var wizardState = { subjects: [], boards: {}, texts: {}, history: {}, filmStudies: {}, drama: {}, classicalCiv: {}, re: { religions: [], themes: [] } };
 
     if (freeChangeBtn) {
       freeChangeBtn.addEventListener('click', function () {
@@ -2720,6 +2752,49 @@
       fwUpdateDramaDoneBtn();
     }
 
+    // Classical Civilisation picker — 1 thematic study of 2 + 1 lit/culture of 3.
+    // Continue enabled only when BOTH groups have a pick.
+    function fwUpdateClassicalCivDoneBtn() {
+      var btn = document.getElementById('fw-classical-civilisation-done');
+      if (!btn) return;
+      var s = wizardState.classicalCiv || {};
+      btn.disabled = !(s['thematic-study'] && s['literature-and-culture']);
+    }
+
+    function buildClassicalCivPicker() {
+      var opts = classicalCivOptions['ocr'];
+      var container = document.getElementById('fw-classical-civilisation-container');
+      if (!container) return;
+      container.innerHTML = '';
+      wizardState.classicalCiv = {};
+      if (!opts) return;
+
+      Object.keys(opts).forEach(function (section) {
+        var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        var sectionEl = document.createElement('div');
+        sectionEl.className = 'fw-text-section';
+        sectionEl.innerHTML = '<h3>' + section + '</h3><div class="fw-text-options" data-group="' + groupKey + '"></div>';
+        var optsEl = sectionEl.querySelector('.fw-text-options');
+
+        opts[section].forEach(function (option) {
+          var btn = document.createElement('button');
+          btn.className = 'fw-text-btn';
+          btn.textContent = option.name;
+          btn.dataset.value = option.slug;
+          btn.addEventListener('click', function () {
+            optsEl.querySelectorAll('.fw-text-btn').forEach(function (b) { b.classList.remove('selected'); });
+            btn.classList.add('selected');
+            wizardState.classicalCiv[groupKey] = option.slug;
+            fwUpdateClassicalCivDoneBtn();
+          });
+          optsEl.appendChild(btn);
+        });
+        container.appendChild(sectionEl);
+      });
+
+      fwUpdateClassicalCivDoneBtn();
+    }
+
     // Religious Studies picker — religion + theme caps vary by board.
     // AQA: 2 of 7 religions + 4 of 6 themes.
     // Eduqas: 2 of 7 religions + 2 of 4 themes.
@@ -3204,6 +3279,7 @@
     function fwHasFilmStudies()  { return wizardState.subjects.indexOf('film-studies') !== -1; }
     function fwHasDrama()        { return wizardState.subjects.indexOf('drama') !== -1; }
     function fwHasRE()           { return wizardState.subjects.indexOf('religious-studies') !== -1; }
+    function fwHasClassicalCiv() { return wizardState.subjects.indexOf('classical-civilisation') !== -1; }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');
@@ -3222,6 +3298,9 @@
       } else if (fwHasRE()) {
         buildREPicker();
         document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3249,6 +3328,9 @@
       } else if (fwHasRE()) {
         buildREPicker();
         document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3268,6 +3350,9 @@
       } else if (fwHasRE()) {
         buildREPicker();
         document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3296,6 +3381,9 @@
       } else if (fwHasRE()) {
         buildREPicker();
         document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3323,6 +3411,9 @@
       if (fwHasRE()) {
         buildREPicker();
         document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
       } else if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3351,6 +3442,38 @@
 
     document.getElementById('fw-re-done').addEventListener('click', function () {
       document.getElementById('fw-step-re').classList.remove('active');
+      if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwGetTieredPicks().length > 0) {
+        buildTierPicker();
+        document.getElementById('fw-step-tier').classList.add('active');
+      } else {
+        document.getElementById('fw-step-4').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-classical-civilisation-back').addEventListener('click', function () {
+      document.getElementById('fw-step-classical-civilisation').classList.remove('active');
+      if (fwHasRE()) {
+        buildREPicker();
+        document.getElementById('fw-step-re').classList.add('active');
+      } else if (fwHasDrama()) {
+        document.getElementById('fw-step-drama').classList.add('active');
+      } else if (fwHasFilmStudies()) {
+        document.getElementById('fw-step-film-studies').classList.add('active');
+      } else if (fwHasEngLit()) {
+        document.getElementById('fw-step-3').classList.add('active');
+      } else if (fwHasHistory()) {
+        buildHistoryPicker();
+        document.getElementById('fw-step-history').classList.add('active');
+      } else {
+        document.getElementById('fw-step-2').classList.add('active');
+      }
+    });
+
+    document.getElementById('fw-classical-civilisation-done').addEventListener('click', function () {
+      document.getElementById('fw-step-classical-civilisation').classList.remove('active');
       if (fwGetTieredPicks().length > 0) {
         buildTierPicker();
         document.getElementById('fw-step-tier').classList.add('active');
@@ -3361,7 +3484,10 @@
 
     document.getElementById('fw-tier-back').addEventListener('click', function () {
       document.getElementById('fw-step-tier').classList.remove('active');
-      if (fwHasRE()) {
+      if (fwHasClassicalCiv()) {
+        buildClassicalCivPicker();
+        document.getElementById('fw-step-classical-civilisation').classList.add('active');
+      } else if (fwHasRE()) {
         buildREPicker();
         document.getElementById('fw-step-re').classList.add('active');
       } else if (fwHasDrama()) {
@@ -3521,6 +3647,9 @@
         }
         if (baseSlug === 'drama') {
           entry.options = wizardState.drama;
+        }
+        if (baseSlug === 'classical-civilisation') {
+          entry.options = wizardState.classicalCiv;
         }
         if (baseSlug === 'religious-studies') {
           entry.religions = (wizardState.re && wizardState.re.religions) || [];

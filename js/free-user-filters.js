@@ -178,11 +178,34 @@
     return Object.values(pref.films);
   }
 
+  // Classical Civilisation OCR — student picks 1 thematic study (of 2) + 1
+  // literature/culture option (of 3). Each option maps to 2 Supabase units, so
+  // pref.options stores the OPTION slug per group and we expand to unit slugs.
+  var CLASSICAL_CIV_SLUGS = ['classical-civilisation-ocr'];
+  var CLASSICAL_CIV_OPTION_UNITS = {
+    'myth-and-religion': ['greek-and-roman-mythology', 'greek-and-roman-religion'],
+    'women-in-the-ancient-world': ['women-of-legend-and-the-home', 'women-religion-and-power'],
+    'the-homeric-world': ['the-mycenaean-world', 'homers-odyssey'],
+    'roman-city-life': ['the-roman-city-and-home', 'roman-leisure-and-society'],
+    'war-and-warfare': ['greek-warfare-and-the-persian-wars', 'the-roman-army-and-the-values-of-war']
+  };
+
+  function classicalCivFilter(pref) {
+    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
+    var slugs = [];
+    Object.keys(pref.options).forEach(function (group) {
+      var optSlug = pref.options[group];
+      (CLASSICAL_CIV_OPTION_UNITS[optSlug] || []).forEach(function (u) { slugs.push(u); });
+    });
+    return slugs.length ? slugs : null;
+  }
+
   function getAllowedUnitSlugs(subjectSlug) {
     var pref = freePref(subjectSlug);
     if (ENGLIT_SLUGS.indexOf(subjectSlug) !== -1) return englitFilter(pref);
     if (HISTORY_SLUGS.indexOf(subjectSlug) !== -1) return historyFilter(pref);
     if (DRAMA_SLUGS.indexOf(subjectSlug) !== -1) return dramaFilter(pref);
+    if (CLASSICAL_CIV_SLUGS.indexOf(subjectSlug) !== -1) return classicalCivFilter(pref);
     if (RE_AQA_SLUGS.indexOf(subjectSlug) !== -1) return reAqaFilter(pref);
     if (RE_EDUQAS_SLUGS.indexOf(subjectSlug) !== -1) return reEduqasFilter(pref);
     if (RE_EDEXCEL_SLUGS.indexOf(subjectSlug) !== -1) return reEdexcelFilter(pref);

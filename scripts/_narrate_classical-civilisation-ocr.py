@@ -43,6 +43,12 @@ ARTICLE_UNITS = [
     "greek-and-roman-religion",
     "the-mycenaean-world",
     "homers-odyssey",
+    "women-of-legend-and-the-home",
+    "women-religion-and-power",
+    "the-roman-city-and-home",
+    "roman-leisure-and-society",
+    "greek-warfare-and-the-persian-wars",
+    "the-roman-army-and-the-values-of-war",
 ]
 
 
