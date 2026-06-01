@@ -2271,6 +2271,17 @@
           { slug: 'food', name: 'Food' },
           { slug: 'water', name: 'Water' }
         ] }
+      },
+      'edexcel a': {
+        'UK Physical Landscapes — pick two': { pick: 2, options: [
+          { slug: 'coastal', name: 'Coastal Landscapes' },
+          { slug: 'river', name: 'River Landscapes' },
+          { slug: 'glaciated', name: 'Glaciated Upland Landscapes' }
+        ] },
+        'Resource Management — your resource': { pick: 1, options: [
+          { slug: 'energy', name: 'Energy' },
+          { slug: 'water', name: 'Water' }
+        ] }
       }
     };
 
@@ -2866,7 +2877,8 @@
     function fwUpdateGeographyDoneBtn() {
       var btn = document.getElementById('fw-geography-done');
       if (!btn) return;
-      var opts = geographyOptions['aqa'];
+      var opts = geographyOptions[wizardState.boards['geography'] || 'aqa'];
+      if (!opts) { btn.disabled = true; return; }
       var s = wizardState.geography || {};
       var ok = Object.keys(opts).every(function (section) {
         var groupKey = section.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -2879,7 +2891,7 @@
     }
 
     function buildGeographyPicker() {
-      var opts = geographyOptions['aqa'];
+      var opts = geographyOptions[wizardState.boards['geography'] || 'aqa'];
       var container = document.getElementById('fw-geography-container');
       if (!container) return;
       container.innerHTML = '';
@@ -3412,8 +3424,9 @@
     function fwHasDrama()        { return wizardState.subjects.indexOf('drama') !== -1; }
     function fwHasRE()           { return wizardState.subjects.indexOf('religious-studies') !== -1; }
     function fwHasClassicalCiv() { return wizardState.subjects.indexOf('classical-civilisation') !== -1; }
-    // Geography picker is AQA-only for now (other boards have no option map yet).
-    function fwHasGeography()     { return wizardState.subjects.indexOf('geography') !== -1 && (wizardState.boards['geography'] || 'aqa') === 'aqa'; }
+    // Geography picker — boards with an option map in geographyOptions (AQA,
+    // Edexcel A). Other geography boards fall through to no picker / no filter.
+    function fwHasGeography()     { var b = wizardState.boards['geography'] || 'aqa'; return wizardState.subjects.indexOf('geography') !== -1 && (b === 'aqa' || b === 'edexcel a'); }
 
     document.getElementById('fw-step2-next').addEventListener('click', function () {
       document.getElementById('fw-step-2').classList.remove('active');

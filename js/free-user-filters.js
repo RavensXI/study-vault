@@ -191,33 +191,47 @@
     return Object.values(pref.films);
   }
 
-  // Geography AQA (8035) — lesson-level filter, NOT unit-level. The units are
-  // whole exam papers (all compulsory); the optionality lives WITHIN them:
-  // Paper 1 picks one ecosystem (Hot Deserts OR Cold Environments) and two of
-  // three UK landscapes (Coasts/Rivers/Glacial); Paper 2 picks one resource
-  // (Energy/Food/Water). Geography lesson slugs are 'lesson-NN' and repeat
-  // across papers, so the selectable map is keyed 'unit_slug/lesson_slug'.
-  var GEO_AQA_SLUGS = ['geography-aqa'];
-  var GEO_AQA_OPTION_LESSONS = {
-    'hot-deserts':       ['paper-1/lesson-12', 'paper-1/lesson-13'],
-    'cold-environments': ['paper-1/lesson-21', 'paper-1/lesson-22'],
-    'coasts':            ['paper-1/lesson-14', 'paper-1/lesson-15', 'paper-1/lesson-16'],
-    'rivers':            ['paper-1/lesson-17', 'paper-1/lesson-18', 'paper-1/lesson-19', 'paper-1/lesson-20'],
-    'glacial':           ['paper-1/lesson-23', 'paper-1/lesson-24', 'paper-1/lesson-25'],
-    'energy':            ['paper-2/lesson-19', 'paper-2/lesson-20'],
-    'food':              ['paper-2/lesson-21', 'paper-2/lesson-22'],
-    'water':             ['paper-2/lesson-23', 'paper-2/lesson-24']
+  // Geography — lesson-level filter, NOT unit-level. The units are whole exam
+  // papers (all compulsory); the optionality lives WITHIN them. Keyed
+  // 'unit_slug/lesson_slug' (AQA lesson slugs are 'lesson-NN' and repeat across
+  // papers; Edexcel A uses descriptive slugs). A lesson in GEO_SELECTABLE shows
+  // only if the student picked its option; lessons NOT in the set (compulsory
+  // topics) always show. Per-board option->lesson maps below; add a board by
+  // adding its subject slug here + a wizard config in index.html (geographyOptions).
+  //   AQA 8035: Paper 1 = 1 ecosystem (Hot Deserts/Cold Env) + 2 of 3 landscapes
+  //             (Coasts/Rivers/Glacial); Paper 2 = 1 resource (Energy/Food/Water).
+  //   Edexcel A 1GA0: Paper 1 = 2 of 3 landscapes (Coastal/River/Glaciated);
+  //                   Paper 2 = 1 resource (Energy/Water).
+  var GEO_SLUGS = ['geography-aqa', 'geography-edexcel-a'];
+  var GEO_OPTION_LESSONS = {
+    'geography-aqa': {
+      'hot-deserts':       ['paper-1/lesson-12', 'paper-1/lesson-13'],
+      'cold-environments': ['paper-1/lesson-21', 'paper-1/lesson-22'],
+      'coasts':            ['paper-1/lesson-14', 'paper-1/lesson-15', 'paper-1/lesson-16'],
+      'rivers':            ['paper-1/lesson-17', 'paper-1/lesson-18', 'paper-1/lesson-19', 'paper-1/lesson-20'],
+      'glacial':           ['paper-1/lesson-23', 'paper-1/lesson-24', 'paper-1/lesson-25'],
+      'energy':            ['paper-2/lesson-19', 'paper-2/lesson-20'],
+      'food':              ['paper-2/lesson-21', 'paper-2/lesson-22'],
+      'water':             ['paper-2/lesson-23', 'paper-2/lesson-24']
+    },
+    'geography-edexcel-a': {
+      'coastal':   ['paper-1-physical-environment/coastal-processes-and-landforms', 'paper-1-physical-environment/coastal-management-and-a-distinctive-uk-coastline'],
+      'river':     ['paper-1-physical-environment/river-processes-profiles-and-landforms', 'paper-1-physical-environment/river-management-and-a-distinctive-uk-river'],
+      'glaciated': ['paper-1-physical-environment/glaciated-upland-landscapes-and-management', 'paper-1-physical-environment/glaciated-uplands-land-use-tourism-and-management'],
+      'energy':    ['paper-2-human-environment/energy-resource-management'],
+      'water':     ['paper-2-human-environment/water-resource-management']
+    }
   };
-  // Every optional lesson key (union of all option groups) — a lesson in this
-  // set shows only if the student picked its option; lessons NOT in the set
-  // (compulsory topics) always show.
   var GEO_SELECTABLE = {};
-  Object.keys(GEO_AQA_OPTION_LESSONS).forEach(function (opt) {
-    GEO_AQA_OPTION_LESSONS[opt].forEach(function (k) { GEO_SELECTABLE[k] = true; });
+  Object.keys(GEO_OPTION_LESSONS).forEach(function (subj) {
+    Object.keys(GEO_OPTION_LESSONS[subj]).forEach(function (opt) {
+      GEO_OPTION_LESSONS[subj][opt].forEach(function (k) { GEO_SELECTABLE[k] = true; });
+    });
   });
 
-  function geographyPickedKeys(pref) {
-    if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
+  function geographyPickedKeys(pref, subjectSlug) {
+    var map = GEO_OPTION_LESSONS[subjectSlug];
+    if (!map || !pref || !pref.options || !Object.keys(pref.options).length) return null;
     var picked = [];
     Object.keys(pref.options).forEach(function (group) {
       var v = pref.options[group];
@@ -227,7 +241,7 @@
     if (!picked.length) return null;
     var keys = [];
     picked.forEach(function (opt) {
-      (GEO_AQA_OPTION_LESSONS[opt] || []).forEach(function (k) { keys.push(k); });
+      (map[opt] || []).forEach(function (k) { keys.push(k); });
     });
     return keys.length ? keys : null;
   }
@@ -276,8 +290,8 @@
   // KEEP (compulsory lessons, not in GEO_SELECTABLE, always show). Null when
   // the subject isn't option-filtered or the user hasn't picked.
   function getPickedGeoSlugs(subjectSlug) {
-    if (GEO_AQA_SLUGS.indexOf(subjectSlug) === -1) return null;
-    return geographyPickedKeys(freePref(subjectSlug));
+    if (GEO_SLUGS.indexOf(subjectSlug) === -1) return null;
+    return geographyPickedKeys(freePref(subjectSlug), subjectSlug);
   }
 
   window.FreeUserFilters = {
