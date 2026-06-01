@@ -44,9 +44,11 @@
     return Object.values(pref.texts).concat(ENGLIT_COMPULSORY);
   }
 
-  // History — 4 picked options (one per paper section). AQA picks 4 of 16,
-  // Edexcel picks 4 of 4 (auto). OCR not unit-level filtered (different shape).
-  var HISTORY_SLUGS = ['history-aqa', 'history-edexcel'];
+  // History — 4 picked options (one per paper/component section). AQA picks
+  // 4 of 16, Edexcel picks 4 of 4 (auto), Eduqas picks 4 of 16 (one per
+  // C100QS component). OCR has a compulsory period study so it uses its own
+  // filter below.
+  var HISTORY_SLUGS = ['history-aqa', 'history-edexcel', 'history-eduqas'];
 
   function historyFilter(pref) {
     if (!pref || !pref.options || !Object.keys(pref.options).length) return null;
