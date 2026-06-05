@@ -1,0 +1,180 @@
+{
+ "lesson_number": 8,
+ "slug": "lesson-08",
+ "title": "Testing & Fault-Finding",
+ "description": "Test equipment for circuit faults — multimeter, oscilloscope, continuity tester, signal generator and logic probe —.",
+ "content_html": "<h2 data-narration-id=\"n1\">Why Test a Circuit?</h2>\n<p data-narration-id=\"n2\">Building a prototype circuit is only worthwhile if the circuit is then tested methodically to confirm it behaves as designed. Testing reveals faults — incorrect voltages, broken connections, components that have failed — before the product is manufactured in quantity. The OCR specification lists five items of test equipment: the <dfn class=\"term\" data-def=\"A hand-held instrument that can measure DC voltage, current, and resistance, and is the most widely used general-purpose circuit test tool.\">multimeter</dfn>, the continuity tester, the oscilloscope, the signal generator, and the logic probe. Each instrument has specific uses, benefits, limitations, and safety requirements.</p>\n\n<h2 data-narration-id=\"n3\">Multimeter</h2>\n<p data-narration-id=\"n4\">A multimeter measures DC voltage (in volts), DC current (in amps or milliamps), and resistance (in ohms). To measure voltage, the probes are placed across (in parallel with) the component. To measure current, the circuit must be broken and the multimeter inserted in series — the current flows through the meter. To measure resistance, the component must be disconnected from the circuit and no power applied. Safe use requires selecting the correct measurement function and range before connecting probes; measuring current without breaking the circuit or selecting the wrong range can damage the meter or cause a short circuit. Digital multimeters display a numerical reading and are more accurate and easier to read than analogue models. A multimeter cannot measure rapidly changing or high-frequency AC signals — an oscilloscope is needed for those.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n5\" data-revision-tip=\"Cover this and recall the three things a multimeter measures, the correct connection method for each (parallel/series/disconnected), and one safety rule.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>A multimeter measures DC voltage (probes in parallel — across the component), current (probes in series — circuit broken, meter inserted), and resistance (component disconnected, no power). Always select the correct function and range before connecting. Never measure current without breaking the circuit first — this risks a dangerous short circuit through the meter.</p>\n</div>\n\n<h2 data-narration-id=\"n6\">Continuity Tester</h2>\n<p data-narration-id=\"n7\">A <dfn class=\"term\" data-def=\"A simple test instrument that beeps or lights when its probes are connected through a continuous electrical path, confirming a wire or connection is unbroken.\">continuity tester</dfn> checks whether a continuous electrical path exists between two points. When the probes are touched to either end of a wire, track, or connection, the tester beeps (or lights an LED) if current can flow. It is the quickest way to identify a broken wire, a lifted PCB track, or a faulty switch. Safety requirement: the circuit must be powered off before testing — applying continuity probes to a live circuit risks damaging the tester and causing a short. A continuity tester cannot measure voltage or resistance values; it only confirms presence or absence of a path.</p>\n\n<h2 data-narration-id=\"n8\">Oscilloscope</h2>\n<p data-narration-id=\"n9\">An <dfn class=\"term\" data-def=\"An instrument that displays a real-time graph of voltage against time on a screen, allowing the shape, frequency, and amplitude of a signal waveform to be measured.\">oscilloscope</dfn> displays voltage plotted against time, showing the actual waveform of a signal on its screen. Unlike a multimeter, it can capture rapidly changing signals — both AC sine waves and digital square waves — and measure their amplitude (peak voltage), frequency, and periodic time (the time for one complete cycle). This makes it essential for testing audio circuits, timing circuits, and any system where signal shape matters. Probes are connected in parallel across the point to be measured. An oscilloscope is more complex to set up than a multimeter and more expensive; it does not directly measure resistance or DC current. Safety: use probes with the correct voltage rating for the signal being measured.</p>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Reading an oscilloscope trace</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n10\">The oscilloscope screen is divided into a grid. The vertical axis (Y) represents voltage — each division represents a set number of volts (the volts/div setting). The horizontal axis (X) represents time — each division represents a set time period (the time/div setting). To find amplitude, count the vertical divisions from the lowest to highest point of the wave and multiply by the volts/div. To find the period (time for one cycle), count the horizontal divisions for one complete wave cycle and multiply by the time/div. Frequency equals one divided by the period (f = 1/T). In the OCR exam you may be asked to read values from an oscilloscope display — practise counting grid squares carefully.</p>\n  </div></div>\n</div>\n\n<h2 data-narration-id=\"n11\">Signal Generator and Logic Probe</h2>\n<p data-narration-id=\"n12\">A signal generator is used alongside the oscilloscope: it produces a controllable electrical signal — sine, square, or other waveform — at a chosen frequency and amplitude, which is fed into the circuit under test. This allows the engineer to check how the circuit responds to specific input signals without needing a live sensor. A <dfn class=\"term\" data-def=\"A simple pen-shaped probe that indicates whether a digital signal is logic high (1) or logic low (0) by lighting different LEDs.\">logic probe</dfn> is a simple pen-shaped tool used specifically on digital circuits. Touching its tip to a point in the circuit lights a high LED (logic 1) or a low LED (logic 0), instantly revealing the state of a digital signal. It cannot measure analogue voltage levels but is faster and cheaper than an oscilloscope for basic digital circuit checking.</p>\n\n<div class=\"key-fact\" data-narration-id=\"n13\" data-revision-tip=\"Write the five test instruments and one key use for each from memory. Then add one safety rule that applies to at least two of them.\">\n  <div class=\"key-fact-label\">Key Fact</div>\n  <p>Five test instruments: multimeter (DC voltage, current, resistance — general purpose); continuity tester (checks for unbroken electrical path — must be used on a powered-off circuit); oscilloscope (displays waveform, measures amplitude and frequency); signal generator (produces a controlled test signal to feed into a circuit); logic probe (shows logic high or low on digital circuits — simple and fast).</p>\n</div>\n\n<div class=\"collapsible\">\n  <button class=\"collapsible-toggle\" aria-expanded=\"false\">\n    <span>Systematic fault-finding approach</span>\n    <svg class=\"collapsible-icon\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><polyline points=\"6 9 12 15 18 9\"/></svg>\n  </button>\n  <div class=\"collapsible-content\"><div class=\"collapsible-inner\">\n    <p data-narration-id=\"n14\">A systematic approach to fault-finding follows a logical order. First, visually inspect the circuit for obvious problems: solder bridges, components in the wrong orientation, or damaged tracks. Second, check the power supply with a multimeter — confirm correct voltage is reaching the circuit. Third, use a continuity tester to verify all intended connections are complete. Fourth, work through the circuit stage by stage: measure the voltage at the output of each section (input stage, processing stage, output stage) and compare it with the expected value. Fifth, if signals are involved, use an oscilloscope to verify waveform shapes at key nodes. Replacing a suspected faulty component is the last step after the fault has been narrowed down logically, not the first step.</p>\n  </div></div>\n</div>",
+ "exam_tip_html": "<p data-narration-id=\"n15\">If a question asks you to identify which instrument to use for a specific task, the key distinctions are: multimeter for DC voltage, current, or resistance readings; oscilloscope when you need to see a waveform or measure frequency/amplitude of an AC or digital signal; continuity tester when checking whether a connection or wire is unbroken (always with power off); logic probe when quickly checking logic high/low on a digital circuit. For safety questions, the most commonly tested rule is that current measurement requires the circuit to be broken and the multimeter inserted in series — never just touching probes across a component.</p>",
+ "conclusion_html": "<h3 data-narration-id=\"n16\">Key Takeaways</h3>\n<ul>\n  <li data-narration-id=\"n17\">The five test instruments are the multimeter (DC voltage, current, resistance), continuity tester (unbroken path), oscilloscope (waveform, amplitude, frequency), signal generator (controlled test signal input), and logic probe (digital high/low).</li>\n  <li data-narration-id=\"n18\">The multimeter is connected in parallel for voltage, in series for current, and to a disconnected, unpowered component for resistance; the continuity tester must always be used with the circuit powered off.</li>\n  <li data-narration-id=\"n19\">Systematic fault-finding progresses from visual inspection, through power-supply checks and continuity tests, to stage-by-stage voltage measurement, and finally to waveform analysis — only replacing components once the fault has been logically isolated.</li>\n</ul>",
+ "glossary_terms": [
+  {
+   "term": "multimeter",
+   "definition": "A hand-held instrument that can measure DC voltage, current, and resistance, and is the most widely used general-purpose circuit test tool."
+  },
+  {
+   "term": "continuity tester",
+   "definition": "A simple test instrument that beeps or lights when its probes are connected through a continuous electrical path, confirming a wire or connection is unbroken."
+  },
+  {
+   "term": "oscilloscope",
+   "definition": "An instrument that displays a real-time graph of voltage against time on a screen, allowing the shape, frequency, and amplitude of a signal waveform to be measured."
+  },
+  {
+   "term": "logic probe",
+   "definition": "A simple pen-shaped probe that indicates whether a digital signal is logic high (1) or logic low (0) by lighting different LEDs."
+  }
+ ],
+ "practice_questions": [
+  {
+   "text": "Which instrument would an engineer use to display the waveform and measure the frequency of an AC signal?\nA) Multimeter\nB) Continuity tester\nC) Logic probe\nD) Oscilloscope",
+   "type": "1 mark — Multiple Choice",
+   "marks": "D) Oscilloscope [1 mark]"
+  },
+  {
+   "text": "State two measurements that a multimeter can make when testing a DC circuit.",
+   "type": "2 marks — State Two",
+   "marks": "One mark each for any two from: DC voltage / current / resistance. (All three are acceptable; only two required.) [2 marks]"
+  },
+  {
+   "text": "Explain why a continuity tester must be used on a circuit that has been powered off.",
+   "type": "3 marks — Explain",
+   "marks": "A simple point scores 1 mark (e.g. 'to stay safe'). Development scores 2 marks (e.g. 'if the circuit is live, current from the supply could flow through the continuity tester and damage its internal components'). A further developed point scores 3 marks (e.g. adding 'there is also a risk that the probes could cause a short circuit by accidentally touching two live points at different voltages, potentially causing sparks, damaging components, or posing a risk to the user'). [3 marks]"
+  },
+  {
+   "text": "Describe how a multimeter should be connected to measure the current flowing through a resistor in a DC circuit. Include one safety precaution.",
+   "type": "4 marks — Describe with Example",
+   "marks": "Connection description (up to 2 marks): the circuit must be broken at a point adjacent to the resistor and the multimeter probes inserted in series so that the current flows through the meter; the multimeter function selector must be set to DC current (A or mA) and the correct range selected before connecting (2 marks for a full, correct description; 1 mark for stating 'in series' without further detail).\nSafety precaution (up to 2 marks): always select the correct current range before connecting the probes — if the range is too low, the meter's internal fuse will blow; never connect the multimeter in current mode across a component without breaking the circuit, as this creates a short circuit (2 marks for a specific, developed precaution; 1 mark for a vague statement such as 'be careful'). [4 marks total]"
+  },
+  {
+   "text": "An engineering student has built a timer circuit on a breadboard. The output LED does not light up when the circuit is switched on. The student has a multimeter, a continuity tester, and an oscilloscope available.\n\nDiscuss the steps the student should follow to systematically identify the fault.",
+   "type": "6 marks — Discuss",
+   "marks": "Mastering (5-6 marks): A structured, logical discussion of at least three distinct testing steps in a sensible order, using named instruments appropriately: e.g. (1) visual inspection for obvious faults; (2) use multimeter to confirm correct supply voltage is reaching the circuit; (3) use continuity tester (circuit off) to check all intended connections are intact; (4) use multimeter to measure voltage at each stage working from power supply to LED; (5) use oscilloscope if a timing signal is suspected to be incorrect. Both the instrument choice and the reason for its use are explained in the context of the fault scenario.\nSecure (3-4 marks): At least two testing steps described with correct instrument selection and some reasoning linked to the scenario.\nDeveloping (2 marks): One step described with limited reasoning.\nEmerging (1 mark): A general statement about testing with no specific method or instrument. [6 marks]"
+  },
+  {
+   "text": "Evaluate the extent to which the oscilloscope is the most useful piece of test equipment for an engineer building and testing a simple DC LED circuit.",
+   "type": "8 marks — Evaluate (Extended Response)",
+   "marks": "Mastering (7-8 marks): A balanced evaluation that identifies where the oscilloscope is useful (displaying waveforms, measuring frequency and amplitude of signals, essential for AC or digital timing circuits) and then challenges these with strong counter-arguments specific to a simple DC LED circuit (there are no waveforms to display in a purely DC circuit; a multimeter is far simpler, cheaper, and more appropriate for measuring the DC voltage and current in an LED circuit; a continuity tester is faster for checking connections). The response considers at least two other instruments and reaches a substantiated conclusion that the oscilloscope is not the most useful instrument for this specific scenario, even though it is the most powerful overall.\nSecure (5-6 marks): Strengths and limitations identified with some comparison and a partial judgement.\nDeveloping (3-4 marks): Points listed but limited comparison; no clear judgement.\nEmerging (1-2 marks): Basic description with little evaluation. [8 marks]"
+  }
+ ],
+ "knowledge_checks": [
+  {
+   "q": "Which instrument must be inserted in series with the circuit (breaking the circuit) in order to take a measurement?",
+   "type": "mcq",
+   "correct": 0,
+   "options": [
+    "Multimeter set to measure current",
+    "Multimeter set to measure voltage",
+    "Oscilloscope",
+    "Logic probe"
+   ]
+  },
+  {
+   "q": "Which instrument shows whether a digital signal is logic high (1) or logic low (0) using indicator LEDs?",
+   "type": "mcq",
+   "correct": 3,
+   "options": [
+    "Oscilloscope",
+    "Signal generator",
+    "Continuity tester",
+    "Logic probe"
+   ]
+  },
+  {
+   "q": "To measure resistance with a multimeter, the component must be _____ from the circuit and no power must be applied.",
+   "type": "fill",
+   "correct": 1,
+   "options": [
+    "connected in series",
+    "disconnected",
+    "connected in parallel",
+    "set to a higher voltage range"
+   ]
+  },
+  {
+   "q": "An oscilloscope displays a graph of _____ against time, allowing the amplitude and frequency of a signal waveform to be measured.",
+   "type": "fill",
+   "correct": 2,
+   "options": [
+    "current",
+    "resistance",
+    "voltage",
+    "power"
+   ]
+  },
+  {
+   "q": "Match each test instrument to its primary use.",
+   "left": [
+    "Continuity tester",
+    "Signal generator",
+    "Oscilloscope"
+   ],
+   "type": "match",
+   "order": [
+    1,
+    2,
+    0
+   ],
+   "right": [
+    "Displays voltage against time to reveal waveform shape, amplitude and frequency",
+    "Confirms whether an unbroken electrical path exists between two points",
+    "Produces a controllable test signal at a set frequency and amplitude for feeding into a circuit"
+   ]
+  }
+ ],
+ "flashcard_questions": [
+  {
+   "q": "Name the five test instruments listed in the OCR specification for Topic Area 3.",
+   "a": "The five instruments are the multimeter, continuity tester, oscilloscope, signal generator, and logic probe."
+  },
+  {
+   "q": "What three measurements can a multimeter make on a DC circuit?",
+   "a": "A multimeter can measure DC voltage (volts), current (amps or milliamps), and resistance (ohms) in a DC circuit."
+  },
+  {
+   "q": "How must a multimeter be connected to measure current?",
+   "a": "The circuit must be broken and the multimeter inserted in series so the current flows through the meter's own measurement circuit."
+  },
+  {
+   "q": "Why must a continuity tester always be used with the circuit powered off?",
+   "a": "A live circuit could drive current through the tester and damage it, or the probes could cause a short circuit between live points."
+  },
+  {
+   "q": "What does an oscilloscope display on its screen?",
+   "a": "An oscilloscope displays a real-time graph of voltage plotted against time, showing the shape and characteristics of a signal waveform."
+  },
+  {
+   "q": "What is amplitude as shown on an oscilloscope trace?",
+   "a": "Amplitude is the peak voltage of a waveform — the vertical distance from the midpoint to the highest point of the signal on the screen."
+  },
+  {
+   "q": "How is the frequency of a waveform calculated from an oscilloscope trace?",
+   "a": "Frequency equals one divided by the period — measure the time for one complete cycle (period T) then calculate f = 1/T in hertz."
+  },
+  {
+   "q": "What is the purpose of a signal generator when testing a circuit?",
+   "a": "A signal generator produces a controllable test signal at a chosen frequency and amplitude, allowing the circuit's response to be tested systematically."
+  },
+  {
+   "q": "What is the logic probe used for, and what does it indicate?",
+   "a": "The logic probe is touched to points in a digital circuit and lights a different LED to show whether the signal is logic high (1) or logic low (0)."
+  },
+  {
+   "q": "Give one advantage of a logic probe over an oscilloscope for testing a simple digital circuit.",
+   "a": "A logic probe is cheaper, simpler, and faster to use than an oscilloscope when only logic high or low state needs to be confirmed."
+  },
+  {
+   "q": "What is the first step in a systematic fault-finding process?",
+   "a": "The first step is a visual inspection — checking for obvious faults such as solder bridges, misoriented components, or damaged PCB tracks."
+  },
+  {
+   "q": "Why is replacing a suspected faulty component described as a last resort in fault-finding?",
+   "a": "Replacing components without prior testing is wasteful; logical testing narrows the fault down first, ensuring the correct component is replaced."
+  }
+ ],
+ "hero_keywords": [
+  "multimeter testing circuit board electronics close up",
+  "oscilloscope waveform screen electronics lab",
+  "fault finding circuit testing probes breadboard"
+ ],
+ "hero_image_caption": "A digital multimeter and oscilloscope are the engineer's core tools for diagnosing faults in prototype circuits."
+}
