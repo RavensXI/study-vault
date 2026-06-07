@@ -7090,15 +7090,15 @@
             gVal=gInp?gInp.value.trim():'';
           }
           var gAccept=gGaps[gi].accept||[gGaps[gi].answer];
-          var gMatch=false;
+          var gMatch=false,gMatchTerm=gGaps[gi].answer;
           for(var ga=0;ga<gAccept.length;ga++){
-            if(gVal.toLowerCase()===gAccept[ga].toLowerCase()){gMatch=true;break;}
+            if(gVal.toLowerCase()===gAccept[ga].toLowerCase()){gMatch=true;gMatchTerm=gAccept[ga];break;}
           }
           if(gMatch){
             gCorrect++;
             if(hasBank){var ge=document.getElementById('gf-gap-'+gi);if(ge)ge.classList.add('gf-correct');}
             else{var ge2=document.getElementById('gf-input-'+gi);if(ge2)ge2.classList.add('gf-correct');}
-            feedHtml+='<p>\u2714 Gap '+(gi+1)+': <strong>'+gGaps[gi].answer+'</strong>';
+            feedHtml+='<p>\u2714 Gap '+(gi+1)+': <strong>'+gMatchTerm+'</strong>';
             if(gGaps[gi].correct_explain)feedHtml+=' \u2014 '+gGaps[gi].correct_explain;
             feedHtml+='</p>';
           } else {
