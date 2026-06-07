@@ -98,7 +98,7 @@ module.exports = async function handler(req, res) {
       regenerated = true;
       if (regen) {
         simplified = regen;
-        verdict = await runQa(rowLevel, lessonTitle, glossaryTerms, original, simplified);
+        verdict = await runQa(rowLevel, lessonTitle, presentTerms, original, simplified);
       }
     }
 
@@ -219,7 +219,7 @@ function buildSimpleSystemPrompt(presentTerms) {
     'Rules you must never break:',
     termRule,
     '2. Never change any number, date, name, place, or quotation. Never change a fact.',
-    '3. Never add a new point and never remove a point. Same information, simpler wording.',
+    '3. Never add a new point and never remove a point. Same information, simpler wording. If the text is an introduction, a rhetorical question, or ends with a colon pointing to a list or section, rewrite ONLY the words you are given — do not answer the question and do not fill in or list the items it introduces. That content is in other paragraphs you cannot see.',
     '4. Use shorter sentences and everyday words. Break long sentences into two if it helps. Keep roughly the same overall length.',
     '5. Keep a neutral, factual tone. Do not address the student ("you"), do not add encouragement, do not add commentary.',
     '6. Output ONLY the rewritten text as plain prose. No markdown, no headings, no preamble, no notes, no quotation marks around it.'
@@ -235,7 +235,7 @@ function buildExplainSystemPrompt(presentTerms) {
     '',
     'Rules you must never break:',
     '1. The analogy must be accurate — it must not imply anything false about the real concept. A misleading analogy is worse than none.',
-    '2. Do not contradict or change any fact, number, date, name, or quotation from the original.',
+    '2. Do not contradict or change any fact, number, date, name, or quotation from the original. If the paragraph is an introduction or a rhetorical question that points to content which follows, explain only the idea actually stated — do not answer the question or fill in the list it introduces (that content is in other paragraphs you cannot see).',
     termRule,
     '4. Keep it short — 2 to 4 sentences. Lead with the analogy or plain-language framing, then connect it back to the lesson idea.',
     '5. A warm, plain teacher voice is fine; you may address the student ("imagine you…"). Do not add unrelated facts or padding.',
