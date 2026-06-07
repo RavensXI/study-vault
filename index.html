@@ -4475,11 +4475,17 @@
       var smAll = (typeof window !== 'undefined' && window.slugMap) || (typeof slugMap !== 'undefined' ? slugMap : {});
       var boards = Object.keys(bc[base] || {});
       var sm = smAll[base] || {};
-      var bKey = (board || '').toLowerCase();
+      var bKey = (board || '').toLowerCase().trim();
+      // If they picked a specific board (incl. "Other") that we don't offer for
+      // this subject, it's a genuine request for a variant we don't have — return
+      // null so it submits normally. Only prompt when we'd actually have what they
+      // want: no board preference, or a board we do offer.
+      if (bKey && bKey !== 'not sure') {
+        var hasBoard = boards.some(function (b) { return b.toLowerCase().indexOf(bKey) === 0 || bKey.indexOf(b.toLowerCase()) === 0; });
+        if (!hasBoard) return null;
+      }
       var slug = sm[bKey] || sm[Object.keys(sm)[0]] || base;
-      var hasBoard = !board || board === 'Other' ||
-        boards.some(function (b) { return b.toLowerCase().indexOf(bKey) === 0 || bKey.indexOf(b.toLowerCase()) === 0; });
-      return { base: base, name: subjectDisplayNames[base], boards: boards, browseSlug: slug, hasRequestedBoard: hasBoard, requestedBoard: board };
+      return { base: base, name: subjectDisplayNames[base], boards: boards, browseSlug: slug };
     }
     function showExistingMatch(form, m, onSendAnyway) {
       var panel = form.querySelector('.request-existing');
@@ -4490,9 +4496,8 @@
         form.insertBefore(panel, form.querySelector('.request-actions'));
       }
       var boardsTxt = m.boards.length ? (' We offer it for ' + m.boards.join(', ') + '.') : '';
-      var boardNote = m.hasRequestedBoard ? '' : (' We don’t have the ' + m.requestedBoard + ' board yet, though — send anyway if you’d like us to add it.');
       panel.innerHTML =
-        '<strong style="color:#15803d;">Good news — we already have ' + m.name + '!</strong>' + boardsTxt + boardNote +
+        '<strong style="color:#15803d;">Good news — we already have ' + m.name + '!</strong>' + boardsTxt +
         ' Have a look in the subject picker.' +
         '<div style="margin-top:0.65rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">' +
           '<a href="/browse/' + m.browseSlug + '" style="font-weight:700;color:#15803d;text-decoration:none;">Open ' + m.name + ' →</a>' +
