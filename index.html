@@ -4004,6 +4004,10 @@
       'sport-science': { 'ocr': 'cambridge-nationals-sport-science' },
     };
 
+    // Expose for the subject-request "already have it?" check (separate scope).
+    window.boardConfig = boardConfig;
+    window.slugMap = slugMap;
+
     function resolveSlug(baseSlug, board) {
       var map = slugMap[baseSlug];
       if (map && map[board]) return map[board];
@@ -4418,6 +4422,86 @@
 
   // ---- Subject request form ----
   (function () {
+    // --- Existing-subject detection: if a requested subject is already live and
+    // discoverable in the picker, prompt the student instead of filing a dup. ---
+    var REQUEST_ALIASES = {
+      'physical-education': ['pe', 'physical ed', 'games'],
+      'religious-studies': ['re', 'rs', 'religious education', 'religious ed', 'divinity'],
+      'religious-education': ['re', 'rs'],
+      'design-technology': ['dt', 'design tech', 'resistant materials', 'product design', 'graphics products', 'textiles technology'],
+      'computer-science': ['computing', 'comp sci', 'cs'],
+      'creative-imedia': ['imedia', 'creative media', 'i media'],
+      'media-studies': ['media'],
+      'business': ['business studies', 'enterprise'],
+      'enterprise-and-marketing': ['enterprise', 'marketing'],
+      'english-language': ['english lang'],
+      'english-literature': ['english lit'],
+      'health-social-care': ['health social care', 'hsc'],
+      'food-preparation-and-nutrition': ['food', 'food tech', 'food technology', 'food prep', 'nutrition', 'cooking'],
+      'hospitality-catering': ['catering', 'hospitality'],
+      'sport-science': ['sports science'],
+      'sport-studies': ['sports studies', 'sport'],
+      'classical-civilisation': ['classics', 'classical civ', 'class civ'],
+      'child-development': ['childcare', 'child care'],
+      'engineering': ['engineering'],
+      'engineering-programmable-systems': ['programmable systems', 'electronic systems'],
+      'computer-science': ['computing', 'comp sci', 'cs', 'ict']
+    };
+    var REQ_STOP = ['gcse', 'level', '12', '1', '2', 'vocational', 'award', 'certificate', 'national', 'cambridge', 'btec', 'tech', 'technical', 'studies', 'study', 'course', 'the', 'a', 'an', 'of', 'and', 'in', 'for', 'to', 'my'];
+    function reqNorm(s) {
+      return (s || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/).filter(function (w) { return w && REQ_STOP.indexOf(w) === -1; }).join(' ').trim();
+    }
+    function findExistingSubject(name, board) {
+      if (typeof subjectDisplayNames === 'undefined') return null;
+      var q = reqNorm(name);
+      if (!q) return null;
+      var qTokens = q.split(' ');
+      var best = null;
+      Object.keys(subjectDisplayNames).forEach(function (base) {
+        var cands = [reqNorm(subjectDisplayNames[base]), reqNorm(base)];
+        (REQUEST_ALIASES[base] || []).forEach(function (a) { cands.push(reqNorm(a)); });
+        cands.forEach(function (c) {
+          if (!c) return;
+          var cTokens = c.split(' ');
+          // match if exact, or every significant token of the candidate appears in the query
+          var hit = (c === q) || cTokens.every(function (t) { return qTokens.indexOf(t) !== -1; });
+          if (hit && (!best || c.length > best.score)) best = { base: base, score: c.length };
+        });
+      });
+      if (!best) return null;
+      var base = best.base;
+      var bc = (typeof window !== 'undefined' && window.boardConfig) || (typeof boardConfig !== 'undefined' ? boardConfig : {});
+      var smAll = (typeof window !== 'undefined' && window.slugMap) || (typeof slugMap !== 'undefined' ? slugMap : {});
+      var boards = Object.keys(bc[base] || {});
+      var sm = smAll[base] || {};
+      var bKey = (board || '').toLowerCase();
+      var slug = sm[bKey] || sm[Object.keys(sm)[0]] || base;
+      var hasBoard = !board || board === 'Other' ||
+        boards.some(function (b) { return b.toLowerCase().indexOf(bKey) === 0 || bKey.indexOf(b.toLowerCase()) === 0; });
+      return { base: base, name: subjectDisplayNames[base], boards: boards, browseSlug: slug, hasRequestedBoard: hasBoard, requestedBoard: board };
+    }
+    function showExistingMatch(form, m, onSendAnyway) {
+      var panel = form.querySelector('.request-existing');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.className = 'request-existing';
+        panel.style.cssText = 'margin:0.75rem 0;padding:0.85rem 1rem;border:1px solid #16a34a;background:#f0fdf4;border-radius:12px;font-size:0.9rem;line-height:1.5;color:#2d2a26;';
+        form.insertBefore(panel, form.querySelector('.request-actions'));
+      }
+      var boardsTxt = m.boards.length ? (' We offer it for ' + m.boards.join(', ') + '.') : '';
+      var boardNote = m.hasRequestedBoard ? '' : (' We don’t have the ' + m.requestedBoard + ' board yet, though — send anyway if you’d like us to add it.');
+      panel.innerHTML =
+        '<strong style="color:#15803d;">Good news — we already have ' + m.name + '!</strong>' + boardsTxt + boardNote +
+        ' Have a look in the subject picker.' +
+        '<div style="margin-top:0.65rem;display:flex;gap:1rem;flex-wrap:wrap;align-items:center;">' +
+          '<a href="/browse/' + m.browseSlug + '" style="font-weight:700;color:#15803d;text-decoration:none;">Open ' + m.name + ' →</a>' +
+          '<button type="button" class="request-sendanyway" style="background:none;border:none;color:#6b7280;text-decoration:underline;cursor:pointer;font:inherit;font-size:0.85rem;padding:0;">Not what I meant — send anyway</button>' +
+        '</div>';
+      panel.querySelector('.request-sendanyway').onclick = function () { panel.remove(); onSendAnyway(); };
+      try { panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+    }
+
     function wireForm(form, onSuccess) {
       if (!form || form._wired) return;
       form._wired = true;
@@ -4445,6 +4529,22 @@
           if (msgEl) { msgEl.textContent = 'Subject name is required'; msgEl.className = 'request-msg error'; }
           return;
         }
+        // Already-have-it check: if the subject is live + discoverable, prompt
+        // the student (with a link) instead of filing a duplicate request.
+        if (!form._reqSendAnyway) {
+          var existing = findExistingSubject(payload.subject_name, payload.exam_board);
+          if (existing) {
+            if (msgEl) { msgEl.textContent = ''; msgEl.className = 'request-msg'; }
+            showExistingMatch(form, existing, function () {
+              form._reqSendAnyway = true;
+              if (form.requestSubmit) form.requestSubmit(); else form.querySelector('.request-submit').click();
+            });
+            return;
+          }
+        }
+        form._reqSendAnyway = false;
+        var stalePanel = form.querySelector('.request-existing');
+        if (stalePanel) stalePanel.remove();
         if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
         try {
           var resp = await fetch('/api/subject-request', {
@@ -4456,6 +4556,7 @@
           try { json = await resp.json(); } catch (e) {}
           if (resp.ok && json.ok) {
             form.reset();
+            form._reqSendAnyway = false;
             if (msgEl) { msgEl.textContent = 'Thanks — request received.'; msgEl.className = 'request-msg success'; }
             if (typeof onSuccess === 'function') onSuccess();
           } else {
