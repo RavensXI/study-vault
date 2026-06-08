@@ -1,0 +1,477 @@
+/* ============================================================
+   StudyVault — RESKIN LAB (override layer, loaded AFTER style.css)
+   Active skin = body[data-skin="..."].  No attribute -> current look.
+   Switch live with design-lab/skin-switcher.js.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Hanken+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Schibsted+Grotesk:wght@400..800&display=swap');
+
+/* =================================================================
+   SHARED — applies to ANY active skin. Reads per-skin variables.
+   ================================================================= */
+body[data-skin]{ font-family:var(--font-ui); color:var(--text-primary); background:var(--bg-body); }
+
+body[data-skin] .study-notes,
+body[data-skin] .study-notes p,
+body[data-skin] .study-notes li,
+body[data-skin] .study-notes blockquote,
+body[data-skin] .exam-tip p,
+body[data-skin] .conclusion,
+body[data-skin] .conclusion p{ font-family:var(--font-read) !important; }
+
+body[data-skin] .study-notes p,
+body[data-skin] .study-notes li{
+  font-size:var(--read-size); line-height:var(--read-lh); color:var(--text-primary);
+}
+body[data-skin] .study-notes p{ margin-bottom:1.12em; }
+body[data-skin] .study-notes li{ margin-bottom:.5em; }
+
+body[data-skin] .lesson-header h1,
+body[data-skin] #lesson-title,
+body[data-skin] .study-notes h2,
+body[data-skin] .study-notes h3,
+body[data-skin] .practice-section h2{
+  font-family:var(--font-head) !important; color:var(--text-primary);
+  letter-spacing:var(--head-ls,-.01em);
+}
+body[data-skin] .lesson-header h1,
+body[data-skin] #lesson-title{ line-height:1.06; font-weight:var(--head-weight,700); }
+body[data-skin] .study-notes h2{
+  font-size:1.55rem; line-height:1.2; margin:2.3rem 0 .8rem; font-weight:var(--head-weight,700);
+}
+body[data-skin] .study-notes h3{ font-size:1.18rem; margin:1.8rem 0 .55rem; }
+
+body[data-skin] .study-notes a{
+  color:var(--accent); text-decoration:underline; text-decoration-thickness:1px;
+  text-underline-offset:2px; text-decoration-color:color-mix(in srgb,var(--accent) 45%,transparent);
+}
+body[data-skin] .study-notes a:hover{ text-decoration-color:var(--accent); }
+
+body[data-skin] .lesson-hero-image figcaption{
+  font-family:var(--font-read); font-style:italic; font-size:.9rem; color:var(--text-muted); margin-top:.5rem;
+}
+
+body[data-skin] .gutter-progress-item{
+  background:transparent !important; border:none !important; box-shadow:none !important;
+  border-radius:var(--radius-sm) !important; color:var(--text-muted);
+}
+body[data-skin] .gutter-progress-item:hover{
+  background:color-mix(in srgb,var(--accent) 10%,transparent) !important;
+  transform:none !important; box-shadow:none !important; color:var(--accent);
+}
+body[data-skin] .gutter-progress-item.completed{ color:var(--accent); }
+body[data-skin] .gutter-progress-item svg,
+body[data-skin] .gutter-progress-icon svg{ color:inherit !important; }
+body[data-skin] .gutter-progress-title{ font-family:var(--font-ui); letter-spacing:.14em; color:var(--text-muted); }
+
+body[data-skin] .key-fact{
+  background:color-mix(in srgb,var(--accent) 8%,var(--bg-card)); border:none;
+  border-left:3px solid var(--accent); border-radius:0 var(--radius-sm) var(--radius-sm) 0; box-shadow:none;
+}
+body[data-skin] .key-fact, body[data-skin] .key-fact *{ font-family:var(--font-read) !important; }
+body[data-skin] .exam-tip{ border-radius:var(--radius-sm); box-shadow:none; }
+body[data-skin] blockquote{ border-left:2px solid var(--border-light); padding-left:1.2rem; }
+body[data-skin] blockquote p{ font-style:italic; color:var(--text-secondary); }
+
+body[data-skin] .sidebar-section{
+  background:var(--bg-card); border:1px solid var(--border-light);
+  border-radius:var(--radius); box-shadow:none;
+}
+body[data-skin] .knowledge-check-btn{ font-family:var(--font-ui); box-shadow:none; border-radius:var(--radius-sm); }
+body[data-skin] .sidebar-section-title{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em; font-size:.72rem; color:var(--text-muted);
+}
+
+body[data-skin] .header-unit-label,
+body[data-skin] .header-pills span,
+body[data-skin] .header-nav a,
+body[data-skin] .a11y-toolbar,
+body[data-skin] .a11y-btn,
+body[data-skin] .practice-btn,
+body[data-skin] .narration-speed,
+body[data-skin] .audio-tab,
+body[data-skin] .knowledge-check-label,
+body[data-skin] .back-link{ font-family:var(--font-ui); }
+body[data-skin] .a11y-toolbar{ box-shadow:none; border:1px solid var(--border-light); }
+
+
+/* =================================================================
+   SKIN 1 — PAPER  (warm printed history book)
+   ================================================================= */
+body[data-skin="paper"]{
+  --bg-body:#f3ead8; --bg-card:#fbf5e6;
+  --text-primary:#2a2017; --text-secondary:#6a5b46; --text-muted:#9c8c70;
+  --border-light:#e0d3b8; --border-lighter:#ece1c7;
+  --accent:#8c3a2b; --accent-light:#f4e3dc; --accent-badge:#ecd2c8;
+  --radius:6px; --radius-sm:4px;
+  --font-read:'Literata',Georgia,serif; --font-head:'Fraunces',Georgia,serif; --font-ui:'Newsreader',Georgia,serif;
+  --read-size:1.2rem; --read-lh:1.85; --head-weight:600;
+}
+body[data-skin="paper"] .study-notes > p:first-of-type::first-letter{
+  font-family:'Fraunces',serif; float:left; font-weight:700; font-size:3.5em; line-height:.7; margin:.05em .12em 0 0; color:var(--accent);
+}
+body[data-skin="paper"] .study-notes h2{ border-bottom:1px solid var(--border-light); padding-bottom:.35rem; }
+
+
+/* =================================================================
+   SKIN 2 — INK  (dark focus-reading; pairs with body.dark-mode)
+   ================================================================= */
+body[data-skin="ink"]{
+  --bg-body:#1b1813; --bg-card:#26221b;
+  --text-primary:#ece3d2; --text-secondary:#b7ac97; --text-muted:#8b806e;
+  --border-light:#3a342a; --border-lighter:#2f2a22;
+  --accent:#d8a23f; --accent-light:#2a2418; --accent-badge:#3a2f17;
+  --radius:8px; --radius-sm:6px;
+  --font-read:'Literata',Georgia,serif; --font-head:'Schibsted Grotesk',system-ui,sans-serif; --font-ui:'Schibsted Grotesk',system-ui,sans-serif;
+  --read-size:1.18rem; --read-lh:1.8; --head-weight:700;
+}
+body[data-skin="ink"] .exam-tip{ background:#2a2316; border:1px solid #5a4a22; border-left:3px solid var(--accent); }
+body[data-skin="ink"] .exam-tip p, body[data-skin="ink"] .exam-tip *{ color:#ecd6a4 !important; }
+
+
+/* =================================================================
+   SKIN 3 — CRISP  (modern, confident sans, ultramarine)
+   ================================================================= */
+body[data-skin="crisp"]{
+  --bg-body:#f4f5f3; --bg-card:#ffffff;
+  --text-primary:#181a1c; --text-secondary:#565d63; --text-muted:#8a9096;
+  --border-light:#e3e6e4; --border-lighter:#eef0ee;
+  --accent:#2742c9; --accent-light:#e6e9fb; --accent-badge:#dfe4fb;
+  --radius:10px; --radius-sm:7px;
+  --font-read:'Hanken Grotesk',system-ui,sans-serif; --font-head:'Schibsted Grotesk',system-ui,sans-serif; --font-ui:'Hanken Grotesk',system-ui,sans-serif;
+  --read-size:1.13rem; --read-lh:1.72; --head-weight:800; --head-ls:-.025em;
+}
+body[data-skin="crisp"] .lesson-header h1,
+body[data-skin="crisp"] #lesson-title{ font-size:clamp(2.2rem,4.2vw,3.3rem); }
+body[data-skin="crisp"] .key-fact{ background:var(--bg-card); border:1px solid var(--border-light); border-left:4px solid var(--accent); border-radius:var(--radius-sm); }
+body[data-skin="crisp"] .study-notes h2{ color:var(--accent); }
+
+
+/* =================================================================
+   SKIN 4 — READER  (structural redesign: full-width masthead +
+   two-column body with a sticky, redesigned tool sidebar)
+   ================================================================= */
+body[data-skin="reader"]{
+  /* PAPER styling on the redesign layout: warm sepia, serif, burnt sienna */
+  --bg-body:#f3ead8; --bg-card:#fbf5e6;
+  --text-primary:#2a2017; --text-secondary:#6a5b46; --text-muted:#9c8c70;
+  --border-light:#e0d3b8; --border-lighter:#ece1c7;
+  --accent:#8c3a2b; --accent-light:#f4e3dc; --accent-badge:#ecd2c8;
+  --radius:6px; --radius-sm:4px;
+  --font-read:'Literata',Georgia,serif;
+  --font-head:'Fraunces',Georgia,serif;
+  --font-ui:'Newsreader',Georgia,serif;
+  --read-size:1.2rem; --read-lh:1.85; --head-weight:600;
+}
+
+/* full-width page so the masthead spans edge-to-edge */
+/* NB: #lesson-page only — #lesson-loading also has class .lesson-page */
+body[data-skin="reader"] #lesson-page{ display:block; max-width:none; margin:0; padding:0; }
+body[data-skin="reader"] .gutter-progress{ display:none !important; }
+
+/* ---------- MASTHEAD: full-width cinematic hero, title overlaid ---------- */
+body[data-skin="reader"] .lesson-masthead{ position:relative; width:100%; }
+body[data-skin="reader"] #hero-figure{
+  position:relative; width:100%; height:60vh; max-height:540px;
+  margin:0 0 -19vh; overflow:hidden; border-radius:0; display:block;
+}
+body[data-skin="reader"] #hero-figure img{ width:100%; height:100%; object-fit:cover; border-radius:0; }
+/* clean image by default; scrim fades in WITH the title (on hover / briefly on load),
+   so the photo is never permanently darkened and the title is always legible when shown */
+body[data-skin="reader"] #hero-figure::after{
+  content:""; position:absolute; inset:0; opacity:0; transition:opacity .6s ease;
+  background:linear-gradient(to bottom, rgba(0,0,0,0) 30%, rgba(0,0,0,.45) 66%, rgba(0,0,0,.82) 100%);
+}
+body[data-skin="reader"] #hero-caption{
+  position:absolute; right:1rem; bottom:.6rem; z-index:3; margin:0;
+  background:none !important; padding:0 !important; border:none !important; /* no cream box */
+  color:rgba(255,255,255,.82); font-style:italic; font-size:.8rem; max-width:46%;
+  text-shadow:0 1px 6px rgba(0,0,0,.6);
+  opacity:0; transition:opacity .6s ease;   /* fades in with the scrim + title */
+}
+body[data-skin="reader"] .lesson-masthead .lesson-header{
+  position:relative; z-index:3; width:100%; text-align:center; color:#fff; padding:0 1.5rem 3rem; margin:0;
+  opacity:0; transition:opacity .6s ease;
+}
+/* reveal title + scrim together: on hover, and briefly on load (.show-title via JS) */
+body[data-skin="reader"] .lesson-masthead:hover #hero-figure::after,
+body[data-skin="reader"] .lesson-masthead.show-title #hero-figure::after{ opacity:1; }
+body[data-skin="reader"] .lesson-masthead:hover .lesson-header,
+body[data-skin="reader"] .lesson-masthead.show-title .lesson-header{ opacity:1; }
+body[data-skin="reader"] .lesson-masthead:hover #hero-caption,
+body[data-skin="reader"] .lesson-masthead.show-title #hero-caption{ opacity:1; }
+/* drop the inline lesson-progress bar — the sidebar checklist already shows progress */
+body[data-skin="reader"] .lesson-progress-inline-wrap{ display:none; }
+body[data-skin="reader"] .lesson-header .lesson-number{
+  display:inline-block; color:rgba(255,255,255,.88); font-family:var(--font-ui);
+  text-transform:uppercase; letter-spacing:.24em; font-size:.82rem; margin-bottom:.6rem;
+}
+body[data-skin="reader"] .lesson-header h1,
+body[data-skin="reader"] #lesson-title{
+  color:#fff; font-size:clamp(2rem,3.4vw,3rem); line-height:1.05;
+  max-width:18ch; margin:0 auto; text-wrap:balance;
+  text-shadow:0 1px 2px rgba(0,0,0,.55), 0 2px 20px rgba(0,0,0,.6);
+}
+
+/* ---------- TWO-COLUMN BODY: article + sticky sidebar ---------- */
+/* article + toolbar + narration take ~2/3 (left, from the page edge);
+   tools fill the right ~1/3 as a tile grid */
+body[data-skin="reader"] .lesson-body{
+  max-width:none; margin:0; padding:1.6rem 2.25rem 0; scroll-margin-top:5rem;
+  display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:3rem; align-items:start;
+}
+body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
+/* FIXED tools panel — fills the viewport height, NEVER scrolls; tiles auto-size to fit */
+body[data-skin="reader"] .lesson-sidebar{
+  position:sticky; top:5rem; align-self:start;
+  height:calc(100vh - 6rem); overflow:hidden;
+  display:grid; grid-template-columns:1fr 1fr; gap:.7rem;
+  grid-template-rows:auto 1fr 1fr 1fr;   /* progress strip on top, then 3 rows of action tiles fill the rest */
+}
+body[data-skin="reader"] .lesson-sidebar > .sidebar-section{ min-height:0; overflow:hidden; margin:0; grid-column:span 1; }
+body[data-skin="reader"] .lesson-sidebar > .sidebar-progress-section{ grid-column:1 / -1; }
+
+/* Related Media as a launcher tile + modal */
+body[data-skin="reader"] .rm-launcher{
+  flex:1 1 auto; width:100%; min-height:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:.3rem; cursor:pointer;
+  background:transparent; border:1px dashed var(--border-light); border-radius:var(--radius-sm);
+  color:var(--text-secondary); font-family:var(--font-ui); padding:.7rem;
+}
+body[data-skin="reader"] .rm-launcher:hover{ border-style:solid; border-color:var(--accent); color:var(--accent); }
+body[data-skin="reader"] .rm-launcher-label{ font-weight:600; font-size:.92rem; }
+body[data-skin="reader"] .rm-launcher-count{ font-size:.72rem; color:var(--text-muted); }
+
+.rm-modal{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; }
+.rm-modal[hidden]{ display:none; }
+.rm-backdrop{ position:absolute; inset:0; background:rgba(20,15,10,.5); }
+.rm-panel{ position:relative; z-index:1; width:min(640px,92vw); max-height:84vh; overflow:auto;
+  background:var(--bg-card,#fff); color:var(--text-primary,#2a2017);
+  border:1px solid var(--border-light,#e0d3b8); border-radius:12px; padding:1.6rem 1.7rem; box-shadow:0 24px 70px rgba(0,0,0,.32); }
+.rm-close{ position:absolute; top:.5rem; right:.85rem; background:transparent; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:var(--text-muted,#999); }
+.rm-title{ font-family:var(--font-head,Georgia,serif); margin:0 0 1.1rem; font-size:1.5rem; letter-spacing:-.01em; }
+.rm-modal .sidebar-section-title{ display:none; }
+.rm-modal .sidebar-collapsible-content{ display:block !important; max-height:none !important; overflow:visible !important; }
+
+/* ===== relocate floating buttons ===== */
+/* Highlight + Tutor FABs are hidden (kept present so their panels still work) and
+   surfaced as sidebar tiles instead. Bug button tucks into the bottom-right corner. */
+body[data-skin="reader"] .sv-hl-fab-stack,
+body[data-skin="reader"] .tutor-dock{ opacity:0 !important; pointer-events:none !important; }
+body[data-skin="reader"] .bugr-fab{ bottom:1rem !important; right:1rem !important; top:auto !important; left:auto !important; }
+
+/* ===== unified action tiles (quiz, flashcards, video, highlight, tutor, related-media) ===== */
+body[data-skin="reader"] .lesson-sidebar > .sidebar-section:not(.sidebar-progress-section){
+  padding:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; display:flex;
+}
+body[data-skin="reader"] .knowledge-check-btn,
+body[data-skin="reader"] #sidebar-flashcard-btn,
+body[data-skin="reader"] .sidebar-flashcard-btn,
+body[data-skin="reader"] .sv-tool-btn,
+body[data-skin="reader"] .rm-launcher{
+  flex:1 1 auto; width:100%; min-height:0; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:.4rem; text-align:center; padding:.6rem;
+  background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-primary);
+  border-radius:var(--radius); font-family:var(--font-ui); box-shadow:none; cursor:pointer;
+}
+body[data-skin="reader"] .knowledge-check-btn:hover,
+body[data-skin="reader"] #sidebar-flashcard-btn:hover,
+body[data-skin="reader"] .sidebar-flashcard-btn:hover,
+body[data-skin="reader"] .sv-tool-btn:hover,
+body[data-skin="reader"] .rm-launcher:hover{ border-color:var(--accent); color:var(--accent); background:var(--bg-card); }
+body[data-skin="reader"] .knowledge-check-btn svg,
+body[data-skin="reader"] #sidebar-flashcard-btn svg,
+body[data-skin="reader"] .sidebar-flashcard-btn svg,
+body[data-skin="reader"] .sv-tool-btn svg,
+body[data-skin="reader"] .rm-launcher svg{ width:24px; height:24px; }
+body[data-skin="reader"] .rm-launcher-label{ font-weight:600; font-size:.86rem; }
+body[data-skin="reader"] .rm-launcher-count{ font-size:.68rem; color:var(--text-muted); }
+/* the launcher button has its own label — hide the section title in action tiles */
+body[data-skin="reader"] .sidebar-media > .sidebar-section-title{ display:none; }
+/* active state (e.g. Highlight tile while highlight mode is on) */
+body[data-skin="reader"] .sv-tool-btn--active{ border-color:var(--accent) !important; color:var(--accent); background:color-mix(in srgb,var(--accent) 9%, var(--bg-card)); }
+
+
+/* =================================================================
+   HOMEPAGE (index.html) — Paper editorial
+   ================================================================= */
+body[data-skin="reader"] .hero .hero-welcome{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.2em; font-size:.78rem; color:var(--text-muted);
+}
+body[data-skin="reader"] .hero h1{
+  font-family:var(--font-head) !important; font-weight:600; letter-spacing:-.02em; color:var(--text-primary);
+}
+body[data-skin="reader"] .hero .hero-tagline,
+body[data-skin="reader"] .hero .tagline{ font-family:var(--font-read); color:var(--text-secondary); }
+
+/* subject cards — warm 'clipping' cards; drop the Tailwind accent corner + glow */
+body[data-skin="reader"] .home-card{
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius); box-shadow:none;
+  transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, border-color .25s;
+}
+body[data-skin="reader"] .home-card:hover{
+  transform:translateY(-3px); box-shadow:var(--shadow-lg) !important;
+  border-color:color-mix(in srgb,var(--accent) 35%,var(--border-light));
+}
+body[data-skin="reader"] .home-card-body{ border-top:none !important; }
+body[data-skin="reader"] .home-card-body h3{
+  font-family:var(--font-head) !important; font-weight:600; letter-spacing:-.01em; color:var(--text-primary);
+}
+body[data-skin="reader"] .home-card-board{
+  font-family:var(--font-ui); color:var(--accent); letter-spacing:.04em; font-weight:600;
+  background:none !important; padding:0 !important; border-radius:0 !important;
+}
+body[data-skin="reader"] .home-card-detail{ font-family:var(--font-read); color:var(--text-secondary); }
+
+/* section headings + homepage chrome */
+body[data-skin="reader"] .home-subjects > h2,
+body[data-skin="reader"] .home-section-title,
+body[data-skin="reader"] .home-subjects-header h2{
+  font-family:var(--font-head) !important; color:var(--text-primary); letter-spacing:-.01em; font-weight:600;
+}
+body[data-skin="reader"] .nav-school-link{ font-family:var(--font-ui); }
+body[data-skin="reader"] .beta-pill{ font-family:var(--font-ui); }
+
+
+/* =================================================================
+   BROWSE (browse.html) — Paper editorial
+   ================================================================= */
+body[data-skin="reader"] #browse-content .hero h1,
+body[data-skin="reader"] .subject-header h1,
+body[data-skin="reader"] .unit-page-header h1{
+  font-family:var(--font-head) !important; font-weight:600; color:var(--text-primary); letter-spacing:-.01em;
+}
+/* unit cards + lesson cards — same clipping treatment, no Tailwind accent corner */
+body[data-skin="reader"] .unit-card,
+body[data-skin="reader"] .lesson-card{
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius); box-shadow:none;
+  transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, border-color .25s;
+}
+body[data-skin="reader"] .unit-card:hover,
+body[data-skin="reader"] .lesson-card:hover{
+  transform:translateY(-3px); box-shadow:var(--shadow-lg) !important;
+  border-color:color-mix(in srgb,var(--accent) 35%,var(--border-light));
+}
+body[data-skin="reader"] .unit-card-body h2{
+  font-family:var(--font-head) !important; font-weight:600; color:var(--text-primary); letter-spacing:-.01em;
+}
+body[data-skin="reader"] .unit-subtitle{ font-family:var(--font-read); color:var(--text-secondary); }
+body[data-skin="reader"] .unit-meta,
+body[data-skin="reader"] .unit-progress-label{ font-family:var(--font-ui); color:var(--text-muted); }
+body[data-skin="reader"] .progress-bar-fill{ background:var(--accent); }
+body[data-skin="reader"] .lesson-card-number{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em; font-size:.7rem; color:var(--accent);
+}
+body[data-skin="reader"] .lesson-card h3,
+body[data-skin="reader"] .lesson-card-title,
+body[data-skin="reader"] .lesson-card h2{
+  font-family:var(--font-head) !important; font-weight:600; color:var(--text-primary); letter-spacing:-.01em;
+}
+
+/* compact the Progress checklist: horizontal icon strip (dim=to-do, bright=done) + bar */
+body[data-skin="reader"] .sidebar-progress-section{ padding:.7rem .85rem; }
+body[data-skin="reader"] .sidebar-progress-section .sidebar-section-title{ margin-bottom:.55rem; }
+body[data-skin="reader"] .lesson-progress-card{ display:flex; flex-direction:row; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:.4rem .2rem; }
+body[data-skin="reader"] .lesson-progress-item{ flex:0 0 auto; width:auto; display:inline-flex; align-items:center; padding:0; margin:0; border:none !important; background:transparent !important; opacity:.3; }
+body[data-skin="reader"] .lesson-progress-item.completed{ opacity:1; }
+body[data-skin="reader"] .lesson-progress-label{ display:none; }
+body[data-skin="reader"] .lesson-progress-check{ display:none; }
+body[data-skin="reader"] .lesson-progress-icon{ width:30px; height:30px; }
+body[data-skin="reader"] .lesson-progress-icon svg{ width:17px; height:17px; }
+body[data-skin="reader"] .lesson-progress-bar{ flex:1 1 100%; order:8; margin-top:.55rem; }
+body[data-skin="reader"] .lesson-progress-summary{ flex:1 1 100%; order:9; font-size:.74rem; margin-top:.25rem; }
+
+/* video tile: fills its grid row; play icon centred, no aspect-ratio hack */
+body[data-skin="reader"] #sidebar-video-section{ display:flex; flex-direction:column; }
+body[data-skin="reader"] #sidebar-video-section .sidebar-video{
+  flex:1 1 auto; min-height:0; height:auto; aspect-ratio:auto; padding:0;
+  position:relative; overflow:hidden; border-radius:var(--radius-sm);
+  display:flex; align-items:center; justify-content:center;
+}
+body[data-skin="reader"] #sidebar-video-section .sidebar-video::before{ content:none !important; padding:0 !important; }
+body[data-skin="reader"] #sidebar-video-section .sidebar-video iframe,
+body[data-skin="reader"] #sidebar-video-section .sidebar-video img{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border:0;
+}
+
+@media (max-width:980px){
+  body[data-skin="reader"] .lesson-body{ grid-template-columns:1fr; gap:0; }
+  body[data-skin="reader"] .lesson-sidebar{ display:flex; flex-direction:column; position:static; height:auto; overflow:visible; margin-top:2.5rem; }
+}
+
+/* ---------- BETA notice -> quiet line at top of the article ---------- */
+body[data-skin="reader"] .beta-banner{
+  background:transparent; border:none; box-shadow:none; padding:0;
+  margin:0 0 1.4rem; font-size:.78rem; color:var(--text-muted); font-family:var(--font-ui);
+}
+body[data-skin="reader"] .beta-banner .beta-badge{
+  background:transparent; color:var(--accent); padding:0; font-weight:700; letter-spacing:.1em;
+}
+
+/* ---------- callouts: NO coloured edges ---------- */
+body[data-skin="reader"] .key-fact{
+  background:transparent !important; border:none !important;
+  border-top:1px solid var(--border-light) !important; border-bottom:1px solid var(--border-light) !important;
+  border-radius:0 !important; box-shadow:none !important; padding:1.3rem 0; margin:2.2rem 0;
+}
+body[data-skin="reader"] .exam-tip{
+  background:var(--accent-light); border:none; border-radius:var(--radius); box-shadow:none; padding:1.2rem 1.3rem; margin:2rem 0;
+}
+
+/* ---------- header chrome: drop the rounded accent pills ---------- */
+body[data-skin="reader"] .header-pills span,
+body[data-skin="reader"] .header-unit-label{
+  background:transparent !important; color:var(--text-secondary) !important;
+  border:none !important; padding:0 !important; font-family:var(--font-ui); letter-spacing:.02em;
+}
+
+/* ---------- SIDEBAR TOOL MODULES (clean, hairline, no accent edge, no shadow) ---------- */
+body[data-skin="reader"] .lesson-sidebar .sidebar-section{
+  background:var(--bg-card); border:1px solid var(--border-light);
+  border-radius:var(--radius); box-shadow:none; padding:1.05rem 1.1rem; margin:0;
+}
+body[data-skin="reader"] .sidebar-section-title{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.14em;
+  font-size:.7rem; color:var(--text-muted); margin-bottom:.7rem;
+}
+body[data-skin="reader"] .knowledge-check-btn,
+body[data-skin="reader"] #sidebar-flashcard-btn,
+body[data-skin="reader"] .sidebar-flashcard-btn{
+  font-family:var(--font-ui); box-shadow:none; border-radius:var(--radius-sm);
+  border:1px solid var(--accent); background:transparent; color:var(--accent);
+}
+body[data-skin="reader"] .knowledge-check-btn:hover,
+body[data-skin="reader"] #sidebar-flashcard-btn:hover,
+body[data-skin="reader"] .sidebar-flashcard-btn:hover{ background:var(--accent); color:#fff; }
+/* the left rail is hidden in Reader, so surface the checklist as a sidebar module */
+body[data-skin="reader"] .sidebar-progress-section{ display:block !important; }
+body[data-skin="reader"] .lesson-progress-card{ background:transparent; border:none; box-shadow:none; padding:0; }
+body[data-skin="reader"] .sidebar-media-item{ border-radius:var(--radius-sm); }
+body[data-skin="reader"] .sidebar-video,
+body[data-skin="reader"] .sidebar-video iframe{ border-radius:var(--radius); }
+
+/* ---------- reading flourish ---------- */
+body[data-skin="reader"] .study-notes > p:first-of-type::first-letter{
+  font-family:var(--font-head); float:left; font-weight:800;
+  font-size:3em; line-height:.82; margin:.02em .12em 0 0; color:var(--accent);
+}
+
+/* ---------- Quick Quiz + Flashcards as tile buttons ---------- */
+body[data-skin="reader"] .lesson-sidebar > .sidebar-knowledge-check,
+body[data-skin="reader"] .lesson-sidebar > .sidebar-flashcard-section{
+  padding:0; border:none; background:transparent; box-shadow:none;
+}
+body[data-skin="reader"] .knowledge-check-btn,
+body[data-skin="reader"] #sidebar-flashcard-btn,
+body[data-skin="reader"] .sidebar-flashcard-btn{
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.45rem;
+  width:100%; min-height:104px; padding:1rem .6rem; text-align:center;
+  background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-primary);
+  border-radius:var(--radius); font-family:var(--font-ui); box-shadow:none;
+}
+body[data-skin="reader"] .knowledge-check-btn:hover,
+body[data-skin="reader"] #sidebar-flashcard-btn:hover,
+body[data-skin="reader"] .sidebar-flashcard-btn:hover{ border-color:var(--accent); color:var(--accent); }
+body[data-skin="reader"] .knowledge-check-btn svg,
+body[data-skin="reader"] #sidebar-flashcard-btn svg,
+body[data-skin="reader"] .sidebar-flashcard-btn svg{ width:26px; height:26px; }

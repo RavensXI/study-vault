@@ -575,9 +575,14 @@
       var betaBanner = document.createElement('div');
       betaBanner.className = 'beta-banner';
       betaBanner.innerHTML = '<span class="beta-badge">BETA</span> This content is AI-generated from the exam specification. It has been verified against the spec but may contain errors.';
-      var insertAfter = progressBar || document.querySelector('.lesson-header');
-      if (insertAfter && insertAfter.parentNode) {
-        insertAfter.parentNode.insertBefore(betaBanner, insertAfter.nextSibling);
+      var mainCol = document.querySelector('.lesson-content');
+      if (mainCol) {
+        mainCol.insertBefore(betaBanner, mainCol.firstChild);
+      } else {
+        var insertAfter = progressBar || document.querySelector('.lesson-header');
+        if (insertAfter && insertAfter.parentNode) {
+          insertAfter.parentNode.insertBefore(betaBanner, insertAfter.nextSibling);
+        }
       }
 
       // Report error button at the bottom of the lesson content
