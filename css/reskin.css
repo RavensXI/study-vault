@@ -233,11 +233,12 @@ body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
 /* FIXED tools panel — fills the viewport height, NEVER scrolls; tiles auto-size to fit */
 body[data-skin="reader"] .lesson-sidebar{
   position:sticky; top:5rem; align-self:start;
-  height:calc(100vh - 6rem); overflow:hidden;
+  max-height:calc(100vh - 6rem); overflow:hidden;
   display:grid; grid-template-columns:1fr 1fr;
-  /* BENTO HIERARCHY: slim progress strip / Quiz+Flashcards PRIMARY (stretch) /
-     two rows of compact utilities pinned at the bottom */
-  grid-template-rows:auto minmax(0,1fr) auto auto;
+  /* BENTO HIERARCHY: slim progress strip / Quiz+Flashcards PRIMARY /
+     two rows of compact utilities. Rows are content-sized — no stretched
+     voids; the panel just ends (still capped to the viewport, never scrolls) */
+  grid-template-rows:auto auto auto auto;
   /* ONE instrument panel, not seven boxes: hairline frame + internal 1px rules
      (the container bg shows through the 1px gaps as printed dividers) */
   gap:1px; background:var(--border-light);
@@ -282,40 +283,30 @@ body[data-skin="reader"] .lesson-sidebar > .sidebar-section:not(.sidebar-progres
 body[data-skin="reader"] .knowledge-check-btn,
 body[data-skin="reader"] #sidebar-flashcard-btn,
 body[data-skin="reader"] .sidebar-flashcard-btn{
-  flex:1 1 auto; width:100%; min-height:0; position:relative; display:flex; flex-direction:column;
-  align-items:flex-start; justify-content:flex-end; gap:.35rem; text-align:left; padding:2.6rem 1.15rem 1.2rem;
-  background:transparent; border:none; border-radius:0; color:var(--text-primary);
-  font-family:var(--font-ui); box-shadow:none; cursor:pointer;
-  transition:background .2s ease;
+  flex:1 1 auto; width:100%; min-height:88px; display:flex; flex-direction:row;
+  align-items:center; justify-content:flex-start; gap:.8rem; text-align:left; padding:1rem 1.15rem;
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card));
+  border:none; border-radius:0; color:var(--text-primary);
+  font-family:var(--font-ui); font-size:1.08rem; font-weight:700; letter-spacing:-.01em;
+  box-shadow:none; cursor:pointer; transition:background .2s ease;
 }
 body[data-skin="reader"] .knowledge-check-btn:hover,
 body[data-skin="reader"] #sidebar-flashcard-btn:hover,
-body[data-skin="reader"] .sidebar-flashcard-btn:hover{ background:color-mix(in srgb,var(--accent) 5%,var(--bg-card)); }
+body[data-skin="reader"] .sidebar-flashcard-btn:hover{ background:color-mix(in srgb,var(--accent) 12%,var(--bg-card)); }
+body[data-skin="reader"] .knowledge-check-btn:active,
+body[data-skin="reader"] #sidebar-flashcard-btn:active{ background:color-mix(in srgb,var(--accent) 16%,var(--bg-card)); }
 body[data-skin="reader"] .knowledge-check-btn svg,
 body[data-skin="reader"] #sidebar-flashcard-btn svg,
-body[data-skin="reader"] .sidebar-flashcard-btn svg{ display:none; }
-/* kicker — the only accent in the cell */
-body[data-skin="reader"] .knowledge-check-btn::before,
-body[data-skin="reader"] #sidebar-flashcard-btn::before{
-  content:"Practise"; position:absolute; top:1.05rem; left:1.15rem;
-  font-size:.74rem; font-weight:700; text-transform:uppercase; letter-spacing:.18em;
-  color:var(--accent);
+body[data-skin="reader"] .sidebar-flashcard-btn svg{
+  display:block; width:26px !important; height:26px !important; flex:0 0 auto; color:var(--accent);
 }
-body[data-skin="reader"] #sidebar-flashcard-btn::before{ content:"Revise"; }
 body[data-skin="reader"] .knowledge-check-label,
 body[data-skin="reader"] #sidebar-flashcard-btn span{
-  font-size:1.34rem; font-weight:700; letter-spacing:-.02em; line-height:1.08;
+  font-size:1.08rem; font-weight:700; letter-spacing:-.01em; line-height:1.15;
 }
-/* italic serif sub-line — broadsheet support text */
-body[data-skin="reader"] .knowledge-check-btn::after{
-  content:"Five questions, marked as you go"; font-family:var(--font-read);
-  font-style:italic; font-size:.95rem; color:var(--text-muted); letter-spacing:0;
+body[data-skin="reader"] .knowledge-check-score{
+  margin-left:auto; font-size:.86rem; font-weight:600; color:var(--accent); font-variant-numeric:tabular-nums;
 }
-body[data-skin="reader"] #sidebar-flashcard-btn::after{
-  content:"Drill the key terms and dates"; font-family:var(--font-read);
-  font-style:italic; font-size:.95rem; color:var(--text-muted); letter-spacing:0;
-}
-body[data-skin="reader"] .knowledge-check-score{ font-size:.88rem; color:var(--accent); font-variant-numeric:tabular-nums; }
 
 body[data-skin="reader"] .sv-tool-btn,
 body[data-skin="reader"] .rm-launcher{
@@ -328,7 +319,11 @@ body[data-skin="reader"] .rm-launcher{
 body[data-skin="reader"] .sv-tool-btn:hover,
 body[data-skin="reader"] .rm-launcher:hover{ color:var(--text-primary); background:color-mix(in srgb,var(--accent) 4%,var(--bg-card)); }
 body[data-skin="reader"] .sv-tool-btn svg,
-body[data-skin="reader"] .rm-launcher svg{ display:none; }
+body[data-skin="reader"] .rm-launcher svg{
+  display:block; width:19px !important; height:19px !important; flex:0 0 auto; color:var(--text-secondary);
+}
+body[data-skin="reader"] .sv-tool-btn:hover svg,
+body[data-skin="reader"] .rm-launcher:hover svg{ color:var(--accent); }
 /* quiet chevron, pushed right */
 body[data-skin="reader"] .sv-tool-btn::after,
 body[data-skin="reader"] .rm-launcher::after{
@@ -482,44 +477,44 @@ body[data-skin="reader"] .header-unit-label{
   border:none !important; padding:0 !important; font-family:var(--font-ui); letter-spacing:.02em;
 }
 
-/* ---------- AUDIO: editorial tabs + ledger player (no pills, no card) ---------- */
-/* Narration / Lesson Podcast — text tabs on a hairline rule, active = accent underline */
+/* ---------- AUDIO: tactile switch + crafted player ---------- */
+/* Narration / Lesson Podcast — keep the sliding-switch mechanism but build it
+   like a physical control: recessed groove, raised white key, press feedback */
 body[data-skin="reader"] .audio-tab-track{
-  background:transparent; border-radius:0; padding:0; gap:1.6rem;
-  border-bottom:1px solid var(--border-light);
+  background:color-mix(in srgb,var(--text-primary) 5%,var(--bg-body));
+  border:1px solid var(--border-light); border-radius:11px; padding:3px;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.07);
 }
 body[data-skin="reader"] .audio-tab{
-  flex:0 0 auto; padding:.55rem .1rem .6rem; border-radius:0;
-  font-family:var(--font-ui); font-size:.95rem; font-weight:600; letter-spacing:.01em;
+  font-family:var(--font-ui); font-size:.88rem; font-weight:600; letter-spacing:.01em;
+  padding:.5rem .75rem; border-radius:8px; transition:color .25s ease, transform .12s ease;
 }
-body[data-skin="reader"] .audio-tab-icon{ display:none; }
-body[data-skin="reader"] .audio-tab.active{ color:var(--text-primary); box-shadow:inset 0 -2px 0 var(--accent); }
-body[data-skin="reader"] .audio-tab-indicator{ display:none; }
+body[data-skin="reader"] .audio-tab-icon{ width:15px; height:15px; }
+body[data-skin="reader"] .audio-tab.active{ color:var(--text-primary); }
+body[data-skin="reader"] .audio-tab:active{ transform:scale(.97); }
+body[data-skin="reader"] .audio-tab-indicator{
+  background:#fff; border:1px solid var(--border-light); border-radius:8px;
+  box-shadow:0 1px 2px rgba(0,0,0,.1), 0 2px 6px rgba(0,0,0,.05);
+}
 
-/* player: a quiet ruled strip between hairlines — like a printed footnote bar */
+/* player: one considered container — soft fill, hairline, no floaty shadow */
 body[data-skin="reader"] .narration-player{
-  background:transparent; border:none !important; box-shadow:none;
-  border-top:1px solid var(--border-light) !important;
-  border-bottom:1px solid var(--border-light) !important;
-  border-radius:0 !important; padding:.75rem .25rem;
+  background:var(--bg-card); border:1px solid var(--border-light) !important;
+  border-radius:12px !important; box-shadow:none; padding:.75rem 1rem;
 }
-body[data-skin="reader"] .audio-player-tabs{ margin-bottom:0; }
-body[data-skin="reader"] .audio-player-tabs:not([style*="display:none"]):not([style*="display: none"]) + .narration-player{ border-top:none !important; }
 body[data-skin="reader"] .narration-play{
-  width:40px; height:40px; background:transparent; border:1.5px solid var(--accent);
-  color:var(--accent); transition:background .2s ease, color .2s ease;
+  width:40px; height:40px; background:var(--accent); color:#fff; border:none;
 }
-body[data-skin="reader"] .narration-play:hover{ background:var(--accent); color:#fff; filter:none; transform:none; }
 body[data-skin="reader"] .narration-time{
-  font-family:var(--font-ui); font-size:.88rem; color:var(--text-secondary); font-variant-numeric:tabular-nums;
+  font-family:var(--font-ui); font-size:.9rem; color:var(--text-secondary); font-variant-numeric:tabular-nums;
 }
 body[data-skin="reader"] .narration-speed{
-  background:transparent; border:none; border-radius:0; padding:.2rem .1rem;
-  font-family:var(--font-ui); font-size:.88rem; font-weight:600; color:var(--text-muted);
+  background:transparent; border:1px solid var(--border-light); border-radius:7px;
+  padding:.22rem .55rem; font-family:var(--font-ui); font-size:.85rem; font-weight:600; color:var(--text-secondary);
 }
-body[data-skin="reader"] .narration-speed:hover{ background:transparent; color:var(--accent); }
-body[data-skin="reader"] .narration-progress{ height:3px; border-radius:0; background:var(--border-lighter); }
-body[data-skin="reader"] .narration-progress-fill{ background:var(--accent); border-radius:0; }
+body[data-skin="reader"] .narration-speed:hover{ background:transparent; border-color:var(--accent); color:var(--accent); }
+body[data-skin="reader"] .narration-progress{ height:4px; border-radius:2px; background:var(--border-lighter); }
+body[data-skin="reader"] .narration-progress-fill{ background:var(--accent); border-radius:2px; }
 
 /* ---------- SIDEBAR TOOL MODULES: flat cells inside the one panel frame ---------- */
 body[data-skin="reader"] .lesson-sidebar .sidebar-section{
