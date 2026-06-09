@@ -237,7 +237,7 @@ body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
 body[data-skin="reader"] .lesson-sidebar{
   position:sticky; top:5rem; align-self:start;
   max-height:calc(100vh - 6rem); overflow:hidden;
-  display:flex; flex-direction:column; gap:1.1rem;
+  display:flex; flex-direction:column; gap:1.5rem;
 }
 /* the tool panel proper (harness wraps the tiles in .sv-panel; the contents
    rail sits below it in the freed corner) */
@@ -263,16 +263,23 @@ body[data-skin="reader"] .sv-panel > .sidebar-media{ grid-area:3 / 2; }
 body[data-skin="reader"] .sv-panel > .tile-highlight{ grid-area:4 / 1; }
 body[data-skin="reader"] .sv-panel > .tile-tutor{ grid-area:4 / 2; }
 
+/* ============ THE MARGIN COLUMN (below the tool panel) ============
+   The panel is the machinery; everything under it is editorial margin
+   matter. Rail + recall share ONE system: identical small-caps headers,
+   text hung off a continuous 2px left spine at the column edge. No boxes. */
+
 /* ---------- CONTENTS RAIL — "In this lesson", scroll-synced ---------- */
 body[data-skin="reader"] .sv-contents{
-  flex:0 1 auto; min-height:0; overflow:hidden; padding:.2rem 0 .4rem .15rem;
+  flex:0 1 auto; min-height:0; overflow:hidden;
 }
-body[data-skin="reader"] .sv-contents-title{
-  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em;
-  font-size:.8rem; font-weight:700; color:var(--text-muted); margin-bottom:.55rem;
+body[data-skin="reader"] .sv-contents-title,
+body[data-skin="reader"] .sv-recall-kicker{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.13em;
+  font-size:.78rem; font-weight:700; color:var(--text-muted);
+  margin:0 0 .55rem; padding-left:1rem;
 }
 body[data-skin="reader"] .sv-contents a{
-  display:block; padding:.36rem 0 .36rem .95rem; border-left:2px solid var(--border-light);
+  display:block; padding:.38rem 0 .38rem 1rem; border-left:2px solid var(--border-light);
   font-family:var(--font-ui); font-size:.95rem; line-height:1.3; color:var(--text-secondary);
   text-decoration:none; transition:color .2s ease, border-color .2s ease;
 }
@@ -281,34 +288,37 @@ body[data-skin="reader"] .sv-contents a.active{
   border-left-color:var(--accent); color:var(--text-primary); font-weight:600;
 }
 
-/* ---------- QUICK RECALL — one flashcard, follows your reading ---------- */
+/* ---------- RECALL / SYNTHESIS — a margin prompt, not another box ---------- */
 body[data-skin="reader"] .sv-recall{
-  flex:0 0 auto; background:var(--bg-card); border:1px solid var(--border-light);
-  border-radius:10px; padding:1rem 1.15rem 1.05rem;
+  flex:0 0 auto; background:transparent; border:none; border-radius:0; padding:0;
 }
 body[data-skin="reader"] .sv-recall-kicker{
-  display:flex; align-items:baseline; justify-content:space-between; margin-bottom:.5rem;
-  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em;
-  font-size:.78rem; font-weight:700; color:var(--accent);
+  display:flex; align-items:baseline; justify-content:space-between; gap:.8rem;
+  color:var(--accent);   /* the zone's one colour moment */
 }
 body[data-skin="reader"] .sv-recall-from{
   color:var(--text-muted); letter-spacing:.03em; font-weight:600; text-transform:none;
-  max-width:58%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  flex:0 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+/* question + answer + action hang off the same spine as the rail links,
+   in the accent state — this is the column's "active" item */
+body[data-skin="reader"] .sv-recall-body{
+  border-left:2px solid var(--accent); padding:.1rem 0 .2rem 1rem;
 }
 body[data-skin="reader"] .sv-recall-q{
-  margin:0 0 .6rem; font-family:var(--font-read); font-size:1.02rem; line-height:1.45;
+  margin:0 0 .6rem; font-family:var(--font-read); font-size:1.02rem; line-height:1.5;
   color:var(--text-primary);
 }
 body[data-skin="reader"] .sv-recall-a{
-  margin:0 0 .6rem; padding-top:.6rem; border-top:1px solid var(--border-lighter);
-  font-family:var(--font-read); font-size:.98rem; line-height:1.45; color:var(--text-secondary);
+  margin:0 0 .65rem; padding-top:.6rem; border-top:1px solid var(--border-light);
+  font-family:var(--font-read); font-size:.98rem; line-height:1.5; color:var(--text-secondary);
 }
 body[data-skin="reader"] .sv-recall-a[hidden]{ display:none; }
 body[data-skin="reader"] .sv-recall-actions{ display:flex; gap:.6rem; align-items:center; }
 body[data-skin="reader"] .sv-recall-btn{
   font-family:var(--font-ui); font-size:.88rem; font-weight:600; cursor:pointer;
-  background:transparent; border:1px solid var(--border-light); border-radius:7px;
-  padding:.34rem .8rem; color:var(--text-secondary); transition:border-color .2s, color .2s;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:7px;
+  padding:.36rem .85rem; color:var(--text-secondary); transition:border-color .2s, color .2s;
 }
 body[data-skin="reader"] .sv-recall-btn:hover{ border-color:var(--accent); color:var(--accent); }
 body[data-skin="reader"] .sv-recall-btn--primary{ border-color:var(--accent); color:var(--accent); }

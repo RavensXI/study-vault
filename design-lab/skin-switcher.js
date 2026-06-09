@@ -165,10 +165,12 @@
     recall.className = 'sv-recall';
     recall.innerHTML =
       '<div class="sv-recall-kicker"><span>' + kicker + '</span><span class="sv-recall-from"></span></div>' +
-      '<p class="sv-recall-q"></p>' +
-      '<p class="sv-recall-a" hidden></p>' +
-      '<div class="sv-recall-actions">' +
-        '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
+      '<div class="sv-recall-body">' +
+        '<p class="sv-recall-q"></p>' +
+        '<p class="sv-recall-a" hidden></p>' +
+        '<div class="sv-recall-actions">' +
+          '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
+        '</div>' +
       '</div>';
     sidebar.appendChild(recall);
     var els = {
