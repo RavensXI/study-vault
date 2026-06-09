@@ -64,9 +64,9 @@
     if (!hl && !tutor) return; // FABs not built yet
     sidebar.dataset.toolTiles = '1';
 
-    function tile(label, svg) {
+    function tile(label, svg, cls) {
       var sec = document.createElement('div');
-      sec.className = 'sidebar-section sidebar-tool-tile';
+      sec.className = 'sidebar-section sidebar-tool-tile ' + (cls || '');
       var b = document.createElement('button');
       b.className = 'sv-tool-btn'; b.type = 'button';
       b.innerHTML = svg + '<span class="sv-tool-label">' + label + '</span>';
@@ -78,7 +78,7 @@
     var tutorSvg = '<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
     if (hl) {
-      var ht = tile('Highlight', hlSvg);
+      var ht = tile('Highlight', hlSvg, 'tile-highlight');
       var syncHl = function () {
         var on = /sv-hl-mode/.test(document.body.className);
         ht.btn.classList.toggle('sv-tool-btn--active', on);
@@ -93,7 +93,7 @@
       syncHl();
     }
     if (tutor) {
-      var tt = tile('Ask the tutor', tutorSvg);
+      var tt = tile('Ask the tutor', tutorSvg, 'tile-tutor');
       tt.btn.addEventListener('click', function () {
         var d = document.querySelector('.tutor-dock');
         if (d) (d.querySelector('button,[role="button"]') || d).click();
@@ -128,8 +128,8 @@
     var launcher = document.createElement('button');
     launcher.className = 'rm-launcher';
     launcher.innerHTML = '<svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18M9 14h6"/></svg>'
-      + '<span class="rm-launcher-label">Browse related media</span>'
-      + '<span class="rm-launcher-count">' + count + ' resources</span>';
+      + '<span class="rm-launcher-label">Related media</span>'
+      + '<span class="rm-launcher-count">' + count + '</span>';
     media.appendChild(launcher);
     function open() { modal.hidden = false; document.body.style.overflow = 'hidden'; }
     function close() { modal.hidden = true; document.body.style.overflow = ''; }
@@ -139,9 +139,62 @@
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
   }
 
+  // BRIEF v2: one muted accent per subject (sandbox map keyed by base slug;
+  // ships later via subjects.color). Used sparingly: kicker, links, progress fills.
+  var ACCENTS = {
+    'history': '#7d4f41',            // umber
+    'geography': '#5f7155',          // moss
+    'science': '#44696c',            // slate teal
+    'combined-science': '#44696c',
+    'separate-sciences': '#44696c',
+    'maths': '#535f8a',              // muted indigo
+    'mathematics': '#535f8a',
+    'statistics': '#535f8a',
+    'english-literature': '#71506b', // plum
+    'english-language': '#4a708c',   // dusty azure
+    'business': '#8a6c42',           // ochre
+    'economics': '#6e6440',          // olive
+    'psychology': '#84576b',         // rosewood
+    'sociology': '#5e6a7d',          // slate blue
+    'religious-education': '#6f5b91',// muted violet
+    'religious-studies': '#6f5b91',
+    'computer-science': '#3f6478',   // petrol
+    'physical-education': '#3e6e5f', // pine
+    'sport-science': '#3e6e5f',
+    'sport-coaching-principles': '#3e6e5f',
+    'drama': '#8a4f5c',              // muted crimson
+    'music': '#5b5286',              // heather
+    'music-technology': '#5b5286',
+    'spanish': '#9a5b38',            // terracotta
+    'french': '#4c5f93',             // cornflower ink
+    'german': '#6e5640',             // walnut
+    'food-technology': '#8c5e3a',
+    'food-preparation-nutrition': '#8c5e3a',
+    'design-technology': '#5f666f',  // graphite
+    'engineering': '#5f666f',
+    'electronics': '#5f666f',
+    'creative-imedia': '#54486e',    // ink violet
+    'media-studies': '#54486e',
+    'film-studies': '#54486e',
+    'astronomy': '#3d5a78',
+    'citizenship': '#6b5a45',
+    'geology': '#6e6248',
+    'retail-business': '#8a6c42',
+    'health-social-care': '#84576b',
+    'it': '#3f6478'
+  };
+  function applySubjectAccent() {
+    var m = location.pathname.match(/^\/(?:lesson|practice|browse|guide)\/([a-z0-9-]+)/);
+    if (!m) return;
+    var slug = m[1].replace(/-(aqa|edexcel|ocr|ocr-b|eduqas|wjec|ncfe)$/, '');
+    var c = ACCENTS[slug] || ACCENTS[slug.replace(/-2$/, '')];
+    if (c) document.body.style.setProperty('--subject-accent', c);
+  }
+
   function init() {
     document.body.appendChild(bar);
     set('reader');            // default to the bold structural redesign
+    applySubjectAccent();
     setTimeout(tidy, 1200);
     setTimeout(tidy, 2600);
 

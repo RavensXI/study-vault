@@ -152,17 +152,26 @@ body[data-skin="crisp"] .study-notes h2{ color:var(--accent); }
    two-column body with a sticky, redesigned tool sidebar)
    ================================================================= */
 body[data-skin="reader"]{
-  /* PAPER styling on the redesign layout: warm sepia, serif, burnt sienna */
-  --bg-body:#f3ead8; --bg-card:#fbf5e6;
-  --text-primary:#2a2017; --text-secondary:#6a5b46; --text-muted:#9c8c70;
-  --border-light:#e0d3b8; --border-lighter:#ece1c7;
-  --accent:#8c3a2b; --accent-light:#f4e3dc; --accent-badge:#ecd2c8;
-  --radius:6px; --radius-sm:4px;
+  /* BRIEF v2: neutral chrome that disappears behind any subject's hero.
+     ONE muted accent per subject — the loader sets --subject-accent on <body>
+     (sandbox: design-lab/skin-switcher.js map; production: subjects.color). */
+  --accent:var(--subject-accent,#566a72);
+  --accent-light:color-mix(in srgb,var(--accent) 8%,#ffffff);
+  --accent-badge:color-mix(in srgb,var(--accent) 15%,#ffffff);
+  --bg-body:#f7f6f4; --bg-card:#ffffff;
+  --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
+  --border-light:#e6e4e0; --border-lighter:#f0eeea;
+  --radius:8px; --radius-sm:6px;
   --font-read:'Literata',Georgia,serif;
-  --font-head:'Fraunces',Georgia,serif;
-  --font-ui:'Newsreader',Georgia,serif;
-  --read-size:1.2rem; --read-lh:1.85; --head-weight:600;
+  --font-head:'Schibsted Grotesk',system-ui,sans-serif;
+  --font-ui:'Schibsted Grotesk',system-ui,sans-serif;
+  --read-size:1.22rem; --read-lh:1.78; --head-weight:700; --head-ls:-.02em;
 }
+/* sizes UP — labels and supporting text grow into their boxes */
+body[data-skin="reader"] .study-notes h2{ font-size:1.72rem; }
+body[data-skin="reader"] .study-notes h3{ font-size:1.34rem; }
+body[data-skin="reader"] .a11y-toolbar{ font-size:.84rem; }
+body[data-skin="reader"] .lesson-hero-image figcaption{ font-size:.95rem; }
 
 /* full-width page so the masthead spans edge-to-edge */
 /* NB: #lesson-page only — #lesson-loading also has class .lesson-page */
@@ -185,7 +194,7 @@ body[data-skin="reader"] #hero-figure::after{
 body[data-skin="reader"] #hero-caption{
   position:absolute; right:1rem; bottom:.6rem; z-index:3; margin:0;
   background:none !important; padding:0 !important; border:none !important; /* no cream box */
-  color:rgba(255,255,255,.82); font-style:italic; font-size:.8rem; max-width:46%;
+  color:rgba(255,255,255,.82); font-style:italic; font-size:.88rem; max-width:46%;
   text-shadow:0 1px 6px rgba(0,0,0,.6);
   opacity:0; transition:opacity .6s ease;   /* fades in with the scrim + title */
 }
@@ -204,11 +213,11 @@ body[data-skin="reader"] .lesson-masthead.show-title #hero-caption{ opacity:1; }
 body[data-skin="reader"] .lesson-progress-inline-wrap{ display:none; }
 body[data-skin="reader"] .lesson-header .lesson-number{
   display:inline-block; color:rgba(255,255,255,.88); font-family:var(--font-ui);
-  text-transform:uppercase; letter-spacing:.24em; font-size:.82rem; margin-bottom:.6rem;
+  text-transform:uppercase; letter-spacing:.24em; font-size:.92rem; font-weight:600; margin-bottom:.6rem;
 }
 body[data-skin="reader"] .lesson-header h1,
 body[data-skin="reader"] #lesson-title{
-  color:#fff; font-size:clamp(2rem,3.4vw,3rem); line-height:1.05;
+  color:#fff; font-size:clamp(2.2rem,3.8vw,3.4rem); line-height:1.04;
   max-width:18ch; margin:0 auto; text-wrap:balance;
   text-shadow:0 1px 2px rgba(0,0,0,.55), 0 2px 20px rgba(0,0,0,.6);
 }
@@ -226,22 +235,21 @@ body[data-skin="reader"] .lesson-sidebar{
   position:sticky; top:5rem; align-self:start;
   height:calc(100vh - 6rem); overflow:hidden;
   display:grid; grid-template-columns:1fr 1fr; gap:.7rem;
-  grid-template-rows:auto 1fr 1fr 1fr;   /* progress strip on top, then 3 rows of action tiles fill the rest */
+  /* BENTO HIERARCHY: slim progress strip / Quiz+Flashcards PRIMARY (stretch) /
+     two rows of compact utilities pinned at the bottom */
+  grid-template-rows:auto minmax(0,1fr) auto auto;
 }
-body[data-skin="reader"] .lesson-sidebar > .sidebar-section{ min-height:0; overflow:hidden; margin:0; grid-column:span 1; }
-body[data-skin="reader"] .lesson-sidebar > .sidebar-progress-section{ grid-column:1 / -1; }
+body[data-skin="reader"] .lesson-sidebar > .sidebar-section{ min-height:0; overflow:hidden; margin:0; }
+/* explicit placement — DOM order varies with what the loader injects */
+body[data-skin="reader"] .lesson-sidebar > .sidebar-progress-section{ grid-area:1 / 1 / 2 / -1; }
+body[data-skin="reader"] .lesson-sidebar > .sidebar-knowledge-check{ grid-area:2 / 1; }
+body[data-skin="reader"] .lesson-sidebar > .sidebar-flashcard-section{ grid-area:2 / 2; }
+body[data-skin="reader"] .lesson-sidebar > #sidebar-video-section{ grid-area:3 / 1; }
+body[data-skin="reader"] .lesson-sidebar > .sidebar-media{ grid-area:3 / 2; }
+body[data-skin="reader"] .lesson-sidebar > .tile-highlight{ grid-area:4 / 1; }
+body[data-skin="reader"] .lesson-sidebar > .tile-tutor{ grid-area:4 / 2; }
 
-/* Related Media as a launcher tile + modal */
-body[data-skin="reader"] .rm-launcher{
-  flex:1 1 auto; width:100%; min-height:0; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:.3rem; cursor:pointer;
-  background:transparent; border:1px dashed var(--border-light); border-radius:var(--radius-sm);
-  color:var(--text-secondary); font-family:var(--font-ui); padding:.7rem;
-}
-body[data-skin="reader"] .rm-launcher:hover{ border-style:solid; border-color:var(--accent); color:var(--accent); }
-body[data-skin="reader"] .rm-launcher-label{ font-weight:600; font-size:.92rem; }
-body[data-skin="reader"] .rm-launcher-count{ font-size:.72rem; color:var(--text-muted); }
-
+/* Related Media modal (launcher tile styled with the other utilities below) */
 .rm-modal{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; }
 .rm-modal[hidden]{ display:none; }
 .rm-backdrop{ position:absolute; inset:0; background:rgba(20,15,10,.5); }
@@ -260,32 +268,45 @@ body[data-skin="reader"] .sv-hl-fab-stack,
 body[data-skin="reader"] .tutor-dock{ opacity:0 !important; pointer-events:none !important; }
 body[data-skin="reader"] .bugr-fab{ bottom:1rem !important; right:1rem !important; top:auto !important; left:auto !important; }
 
-/* ===== unified action tiles (quiz, flashcards, video, highlight, tutor, related-media) ===== */
+/* ===== TILE HIERARCHY — not a button wall =====
+   PRIMARY (Quick Quiz, Flashcards): big vertical tiles, accent icon, stretch to fill.
+   UTILITY (Video, Related media, Highlight, Tutor): compact horizontal rows, demoted. */
 body[data-skin="reader"] .lesson-sidebar > .sidebar-section:not(.sidebar-progress-section){
   padding:0 !important; border:none !important; background:transparent !important; box-shadow:none !important; display:flex;
 }
 body[data-skin="reader"] .knowledge-check-btn,
 body[data-skin="reader"] #sidebar-flashcard-btn,
-body[data-skin="reader"] .sidebar-flashcard-btn,
-body[data-skin="reader"] .sv-tool-btn,
-body[data-skin="reader"] .rm-launcher{
+body[data-skin="reader"] .sidebar-flashcard-btn{
   flex:1 1 auto; width:100%; min-height:0; display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:.4rem; text-align:center; padding:.6rem;
+  align-items:center; justify-content:center; gap:.55rem; text-align:center; padding:1rem .7rem;
   background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-primary);
-  border-radius:var(--radius); font-family:var(--font-ui); box-shadow:none; cursor:pointer;
+  border-radius:var(--radius); font-family:var(--font-ui); font-size:1.02rem; font-weight:600;
+  letter-spacing:-.01em; box-shadow:none; cursor:pointer;
 }
 body[data-skin="reader"] .knowledge-check-btn:hover,
 body[data-skin="reader"] #sidebar-flashcard-btn:hover,
-body[data-skin="reader"] .sidebar-flashcard-btn:hover,
-body[data-skin="reader"] .sv-tool-btn:hover,
-body[data-skin="reader"] .rm-launcher:hover{ border-color:var(--accent); color:var(--accent); background:var(--bg-card); }
+body[data-skin="reader"] .sidebar-flashcard-btn:hover{ border-color:var(--accent); color:var(--accent); background:var(--bg-card); }
 body[data-skin="reader"] .knowledge-check-btn svg,
 body[data-skin="reader"] #sidebar-flashcard-btn svg,
-body[data-skin="reader"] .sidebar-flashcard-btn svg,
+body[data-skin="reader"] .sidebar-flashcard-btn svg{ width:30px; height:30px; color:var(--accent); }
+body[data-skin="reader"] .knowledge-check-score{ font-size:.85rem; color:var(--text-muted); }
+
+body[data-skin="reader"] .sv-tool-btn,
+body[data-skin="reader"] .rm-launcher{
+  flex:1 1 auto; width:100%; min-height:52px; display:flex; flex-direction:row;
+  align-items:center; justify-content:flex-start; gap:.65rem; text-align:left; padding:.6rem .95rem;
+  background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-secondary);
+  border-radius:var(--radius); font-family:var(--font-ui); font-size:.95rem; font-weight:500;
+  box-shadow:none; cursor:pointer;
+}
+body[data-skin="reader"] .sv-tool-btn:hover,
+body[data-skin="reader"] .rm-launcher:hover{ border-color:var(--accent); color:var(--accent); background:var(--bg-card); }
 body[data-skin="reader"] .sv-tool-btn svg,
-body[data-skin="reader"] .rm-launcher svg{ width:24px; height:24px; }
-body[data-skin="reader"] .rm-launcher-label{ font-weight:600; font-size:.86rem; }
-body[data-skin="reader"] .rm-launcher-count{ font-size:.68rem; color:var(--text-muted); }
+body[data-skin="reader"] .rm-launcher svg{ width:20px; height:20px; flex:0 0 auto; color:var(--text-muted); }
+body[data-skin="reader"] .sv-tool-btn:hover svg,
+body[data-skin="reader"] .rm-launcher:hover svg{ color:var(--accent); }
+body[data-skin="reader"] .rm-launcher-label{ font-weight:500; font-size:.95rem; }
+body[data-skin="reader"] .rm-launcher-count{ margin-left:auto; font-size:.8rem; color:var(--text-muted); }
 /* the launcher button has its own label — hide the section title in action tiles */
 body[data-skin="reader"] .sidebar-media > .sidebar-section-title{ display:none; }
 /* active state (e.g. Highlight tile while highlight mode is on) */
@@ -376,10 +397,11 @@ body[data-skin="reader"] .lesson-progress-item{ flex:0 0 auto; width:auto; displ
 body[data-skin="reader"] .lesson-progress-item.completed{ opacity:1; }
 body[data-skin="reader"] .lesson-progress-label{ display:none; }
 body[data-skin="reader"] .lesson-progress-check{ display:none; }
-body[data-skin="reader"] .lesson-progress-icon{ width:30px; height:30px; }
-body[data-skin="reader"] .lesson-progress-icon svg{ width:17px; height:17px; }
+body[data-skin="reader"] .lesson-progress-icon{ width:32px; height:32px; }
+body[data-skin="reader"] .lesson-progress-icon svg{ width:18px; height:18px; }
 body[data-skin="reader"] .lesson-progress-bar{ flex:1 1 100%; order:8; margin-top:.55rem; }
-body[data-skin="reader"] .lesson-progress-summary{ flex:1 1 100%; order:9; font-size:.74rem; margin-top:.25rem; }
+body[data-skin="reader"] .lesson-progress-bar-fill{ background:var(--accent); }
+body[data-skin="reader"] .lesson-progress-summary{ flex:1 1 100%; order:9; font-size:.82rem; margin-top:.25rem; }
 
 /* video tile: fills its grid row; play icon centred, no aspect-ratio hack */
 body[data-skin="reader"] #sidebar-video-section{ display:flex; flex-direction:column; }
@@ -402,7 +424,7 @@ body[data-skin="reader"] #sidebar-video-section .sidebar-video img{
 /* ---------- BETA notice -> quiet line at top of the article ---------- */
 body[data-skin="reader"] .beta-banner{
   background:transparent; border:none; box-shadow:none; padding:0;
-  margin:0 0 1.4rem; font-size:.78rem; color:var(--text-muted); font-family:var(--font-ui);
+  margin:0 0 1.4rem; font-size:.86rem; color:var(--text-muted); font-family:var(--font-ui);
 }
 body[data-skin="reader"] .beta-banner .beta-badge{
   background:transparent; color:var(--accent); padding:0; font-weight:700; letter-spacing:.1em;
@@ -431,18 +453,9 @@ body[data-skin="reader"] .lesson-sidebar .sidebar-section{
   border-radius:var(--radius); box-shadow:none; padding:1.05rem 1.1rem; margin:0;
 }
 body[data-skin="reader"] .sidebar-section-title{
-  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.14em;
-  font-size:.7rem; color:var(--text-muted); margin-bottom:.7rem;
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em;
+  font-size:.8rem; color:var(--text-muted); margin-bottom:.7rem;
 }
-body[data-skin="reader"] .knowledge-check-btn,
-body[data-skin="reader"] #sidebar-flashcard-btn,
-body[data-skin="reader"] .sidebar-flashcard-btn{
-  font-family:var(--font-ui); box-shadow:none; border-radius:var(--radius-sm);
-  border:1px solid var(--accent); background:transparent; color:var(--accent);
-}
-body[data-skin="reader"] .knowledge-check-btn:hover,
-body[data-skin="reader"] #sidebar-flashcard-btn:hover,
-body[data-skin="reader"] .sidebar-flashcard-btn:hover{ background:var(--accent); color:#fff; }
 /* the left rail is hidden in Reader, so surface the checklist as a sidebar module */
 body[data-skin="reader"] .sidebar-progress-section{ display:block !important; }
 body[data-skin="reader"] .lesson-progress-card{ background:transparent; border:none; box-shadow:none; padding:0; }
@@ -450,28 +463,4 @@ body[data-skin="reader"] .sidebar-media-item{ border-radius:var(--radius-sm); }
 body[data-skin="reader"] .sidebar-video,
 body[data-skin="reader"] .sidebar-video iframe{ border-radius:var(--radius); }
 
-/* ---------- reading flourish ---------- */
-body[data-skin="reader"] .study-notes > p:first-of-type::first-letter{
-  font-family:var(--font-head); float:left; font-weight:800;
-  font-size:3em; line-height:.82; margin:.02em .12em 0 0; color:var(--accent);
-}
-
-/* ---------- Quick Quiz + Flashcards as tile buttons ---------- */
-body[data-skin="reader"] .lesson-sidebar > .sidebar-knowledge-check,
-body[data-skin="reader"] .lesson-sidebar > .sidebar-flashcard-section{
-  padding:0; border:none; background:transparent; box-shadow:none;
-}
-body[data-skin="reader"] .knowledge-check-btn,
-body[data-skin="reader"] #sidebar-flashcard-btn,
-body[data-skin="reader"] .sidebar-flashcard-btn{
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.45rem;
-  width:100%; min-height:104px; padding:1rem .6rem; text-align:center;
-  background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-primary);
-  border-radius:var(--radius); font-family:var(--font-ui); box-shadow:none;
-}
-body[data-skin="reader"] .knowledge-check-btn:hover,
-body[data-skin="reader"] #sidebar-flashcard-btn:hover,
-body[data-skin="reader"] .sidebar-flashcard-btn:hover{ border-color:var(--accent); color:var(--accent); }
-body[data-skin="reader"] .knowledge-check-btn svg,
-body[data-skin="reader"] #sidebar-flashcard-btn svg,
-body[data-skin="reader"] .sidebar-flashcard-btn svg{ width:26px; height:26px; }
+/* (no drop caps — brief v2) */
