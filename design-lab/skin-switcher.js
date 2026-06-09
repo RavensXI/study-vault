@@ -88,39 +88,7 @@
     });
     sidebar.appendChild(rail);
 
-    // QUICK RECALL — one flashcard below the rail; the card you're shown
-    // follows the section you're reading (active recall while reading)
-    var recall = null, cards = window._lessonFlashcardQuestions || [];
-    if (cards.length) {
-      recall = document.createElement('div');
-      recall.className = 'sv-recall';
-      recall.innerHTML =
-        '<div class="sv-recall-kicker"><span>Quick recall</span></div>' +
-        '<p class="sv-recall-q"></p>' +
-        '<p class="sv-recall-a" hidden></p>' +
-        '<div class="sv-recall-actions">' +
-          '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
-        '</div>';
-      sidebar.appendChild(recall);
-      var cardIdx = 0;
-      var qEl = recall.querySelector('.sv-recall-q'),
-          aEl = recall.querySelector('.sv-recall-a'),
-          revealBtn = recall.querySelector('[data-act="reveal"]');
-      function showCard(i) {
-        cardIdx = ((i % cards.length) + cards.length) % cards.length;
-        var c = cards[cardIdx];
-        qEl.textContent = c.question || c.q || '';
-        aEl.textContent = c.answer || c.a || '';
-        aEl.hidden = true;
-        revealBtn.textContent = 'Reveal answer';
-      }
-      recall.addEventListener('click', function (e) {
-        if (!e.target.closest('[data-act="reveal"]')) return;
-        aEl.hidden = !aEl.hidden;
-        revealBtn.textContent = aEl.hidden ? 'Reveal answer' : 'Hide answer';
-      });
-      showCard(0);
-    }
+    buildPriorRecall(sidebar);
 
     var ticking = false, lastIdx = -2;
     function sync() {
@@ -128,13 +96,78 @@
       var idx = -1, threshold = window.innerHeight * 0.38;
       heads.forEach(function (h, i) { if (h.getBoundingClientRect().top < threshold) idx = i; });
       links.forEach(function (l, i) { l.classList.toggle('active', i === idx); });
-      if (recall && idx !== lastIdx && idx >= 0) showCard(idx);
+      if (window.__svRecall && idx !== lastIdx && idx >= 0) window.__svRecall.deal();
       lastIdx = idx;
     }
     window.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(sync); }
     }, { passive: true });
     sync();
+  }
+
+  // QUICK RECALL v2 — spaced retrieval, not open-book recognition (Tom's call:
+  // asking about the section on screen is "flashcards but cheating").
+  // The card drills EARLIER lessons in this unit: content that is NOT in front
+  // of you. Scroll boundaries deal the next card from a shuffled prior-lesson
+  // deck. Lesson 1 of a unit has nothing to look back on -> no card.
+  function buildPriorRecall(sidebar) {
+    var info = window._lessonOfTotal || {};
+    var unitId = window._lessonUnitId;
+    if (!unitId || !info.num || info.num <= 1) return;
+    var client = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+    client.from('lessons')
+      .select('lesson_number, title, flashcard_questions')
+      .eq('unit_id', unitId)
+      .lt('lesson_number', info.num)
+      .order('lesson_number')
+      .then(function (res) {
+        var deck = [];
+        ((res && res.data) || []).forEach(function (l) {
+          (l.flashcard_questions || []).forEach(function (c) {
+            deck.push({ q: c.question || c.q || '', a: c.answer || c.a || '',
+                        from: 'Lesson ' + l.lesson_number + ' · ' + (l.title || '') });
+          });
+        });
+        if (!deck.length || document.querySelector('.sv-recall')) return;
+        for (var i = deck.length - 1; i > 0; i--) {       // shuffle once per visit
+          var j = Math.floor(Math.random() * (i + 1));
+          var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
+        }
+        var recall = document.createElement('div');
+        recall.className = 'sv-recall';
+        recall.innerHTML =
+          '<div class="sv-recall-kicker"><span>Quick recall</span><span class="sv-recall-from"></span></div>' +
+          '<p class="sv-recall-q"></p>' +
+          '<p class="sv-recall-a" hidden></p>' +
+          '<div class="sv-recall-actions">' +
+            '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
+          '</div>';
+        sidebar.appendChild(recall);
+        var qEl = recall.querySelector('.sv-recall-q'),
+            aEl = recall.querySelector('.sv-recall-a'),
+            fromEl = recall.querySelector('.sv-recall-from'),
+            revealBtn = recall.querySelector('[data-act="reveal"]');
+        var n = -1;
+        function deal() {
+          n = (n + 1) % deck.length;
+          var c = deck[n];
+          qEl.textContent = c.q;
+          aEl.textContent = c.a;
+          fromEl.textContent = c.from;
+          aEl.hidden = true;
+          revealBtn.textContent = 'Reveal answer';
+        }
+        recall.addEventListener('click', function (e) {
+          if (!e.target.closest('[data-act="reveal"]')) return;
+          aEl.hidden = !aEl.hidden;
+          revealBtn.textContent = aEl.hidden ? 'Reveal answer' : 'Hide answer';
+        });
+        deal();
+        window.__svRecall = { deal: deal };
+      });
   }
 
   // Duotone icon set (soft filled shape + bold glyph) — replaces the generic

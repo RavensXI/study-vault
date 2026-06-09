@@ -398,6 +398,7 @@
     window._lessonGlossary = lesson.glossary_terms || [];
     window._lessonFlashcardQuestions = lesson.flashcard_questions || [];
     window._lessonId = lesson.id;
+    window._lessonUnitId = unit.id;
     window._subjectSlug = params.subjectSlug;
     window._subjectName = subject.name || '';
     window._unitSlug = unit.slug || params.unitSlug || '';
