@@ -281,6 +281,39 @@ body[data-skin="reader"] .sv-contents a.active{
   border-left-color:var(--accent); color:var(--text-primary); font-weight:600;
 }
 
+/* ---------- QUICK RECALL — one flashcard, follows your reading ---------- */
+body[data-skin="reader"] .sv-recall{
+  flex:0 0 auto; background:var(--bg-card); border:1px solid var(--border-light);
+  border-radius:10px; padding:1rem 1.15rem 1.05rem;
+}
+body[data-skin="reader"] .sv-recall-kicker{
+  display:flex; align-items:baseline; justify-content:space-between; margin-bottom:.5rem;
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em;
+  font-size:.78rem; font-weight:700; color:var(--accent);
+}
+body[data-skin="reader"] .sv-recall-count{
+  color:var(--text-muted); letter-spacing:.04em; font-variant-numeric:tabular-nums;
+}
+body[data-skin="reader"] .sv-recall-q{
+  margin:0 0 .6rem; font-family:var(--font-read); font-size:1.02rem; line-height:1.45;
+  color:var(--text-primary);
+}
+body[data-skin="reader"] .sv-recall-a{
+  margin:0 0 .6rem; padding-top:.6rem; border-top:1px solid var(--border-lighter);
+  font-family:var(--font-read); font-size:.98rem; line-height:1.45; color:var(--text-secondary);
+}
+body[data-skin="reader"] .sv-recall-a[hidden]{ display:none; }
+body[data-skin="reader"] .sv-recall-actions{ display:flex; gap:.6rem; align-items:center; }
+body[data-skin="reader"] .sv-recall-btn{
+  font-family:var(--font-ui); font-size:.88rem; font-weight:600; cursor:pointer;
+  background:transparent; border:1px solid var(--border-light); border-radius:7px;
+  padding:.34rem .8rem; color:var(--text-secondary); transition:border-color .2s, color .2s;
+}
+body[data-skin="reader"] .sv-recall-btn:hover{ border-color:var(--accent); color:var(--accent); }
+body[data-skin="reader"] .sv-recall-btn--primary{ border-color:var(--accent); color:var(--accent); }
+/* the corner can't fit both on short viewports — reading order wins, card yields */
+@media (max-height:740px){ body[data-skin="reader"] .sv-recall{ display:none; } }
+
 /* Related Media modal (launcher tile styled with the other utilities below) */
 .rm-modal{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; }
 .rm-modal[hidden]{ display:none; }

@@ -88,12 +88,57 @@
     });
     sidebar.appendChild(rail);
 
-    var ticking = false;
+    // QUICK RECALL — one flashcard below the rail; the card you're shown
+    // follows the section you're reading (active recall while reading)
+    var recall = null, cards = window._lessonFlashcardQuestions || [];
+    if (cards.length) {
+      recall = document.createElement('div');
+      recall.className = 'sv-recall';
+      recall.innerHTML =
+        '<div class="sv-recall-kicker"><span>Quick recall</span><span class="sv-recall-count"></span></div>' +
+        '<p class="sv-recall-q"></p>' +
+        '<p class="sv-recall-a" hidden></p>' +
+        '<div class="sv-recall-actions">' +
+          '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
+          '<button type="button" class="sv-recall-btn" data-act="next">Next</button>' +
+        '</div>';
+      sidebar.appendChild(recall);
+      var cardIdx = 0, followScroll = true;
+      var qEl = recall.querySelector('.sv-recall-q'),
+          aEl = recall.querySelector('.sv-recall-a'),
+          cEl = recall.querySelector('.sv-recall-count'),
+          revealBtn = recall.querySelector('[data-act="reveal"]');
+      function showCard(i) {
+        cardIdx = ((i % cards.length) + cards.length) % cards.length;
+        var c = cards[cardIdx];
+        qEl.textContent = c.question || c.q || '';
+        aEl.textContent = c.answer || c.a || '';
+        aEl.hidden = true;
+        revealBtn.textContent = 'Reveal answer';
+        cEl.textContent = (cardIdx + 1) + ' of ' + cards.length;
+      }
+      recall.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        if (b.dataset.act === 'reveal') {
+          aEl.hidden = !aEl.hidden;
+          revealBtn.textContent = aEl.hidden ? 'Reveal answer' : 'Hide answer';
+        } else {
+          followScroll = false;          // once you drive, scroll stops driving
+          showCard(cardIdx + 1);
+        }
+      });
+      showCard(0);
+    }
+
+    var ticking = false, lastIdx = -2;
     function sync() {
       ticking = false;
       var idx = -1, threshold = window.innerHeight * 0.38;
       heads.forEach(function (h, i) { if (h.getBoundingClientRect().top < threshold) idx = i; });
       links.forEach(function (l, i) { l.classList.toggle('active', i === idx); });
+      if (recall && followScroll && idx !== lastIdx && idx >= 0) showCard(idx);
+      lastIdx = idx;
     }
     window.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(sync); }
