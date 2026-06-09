@@ -168,8 +168,8 @@ body[data-skin="reader"]{
   --read-size:1.22rem; --read-lh:1.78; --head-weight:700; --head-ls:-.02em;
 }
 /* sizes UP — labels and supporting text grow into their boxes */
-body[data-skin="reader"] .study-notes h2{ font-size:1.72rem; }
-body[data-skin="reader"] .study-notes h3{ font-size:1.34rem; }
+body[data-skin="reader"] .study-notes h2{ font-size:1.72rem; scroll-margin-top:6.5rem; }
+body[data-skin="reader"] .study-notes h3{ font-size:1.34rem; scroll-margin-top:6.5rem; }
 body[data-skin="reader"] .a11y-toolbar{ font-size:.84rem; }
 body[data-skin="reader"] .lesson-hero-image figcaption{ font-size:.95rem; }
 
@@ -182,7 +182,7 @@ body[data-skin="reader"] .gutter-progress{ display:none !important; }
 body[data-skin="reader"] .lesson-masthead{ position:relative; width:100%; }
 body[data-skin="reader"] #hero-figure{
   position:relative; width:100%; height:60vh; max-height:540px;
-  margin:0 0 -19vh; overflow:hidden; border-radius:0; display:block;
+  margin:0; overflow:hidden; border-radius:0; display:block;
 }
 body[data-skin="reader"] #hero-figure img{ width:100%; height:100%; object-fit:cover; border-radius:0; }
 /* clean image by default; scrim fades in WITH the title (on hover / briefly on load),
@@ -198,9 +198,12 @@ body[data-skin="reader"] #hero-caption{
   text-shadow:0 1px 6px rgba(0,0,0,.6);
   opacity:0; transition:opacity .6s ease;   /* fades in with the scrim + title */
 }
+/* title is a true overlay anchored to the image's bottom edge — no negative-
+   margin balancing act, so short titles can't let the body ride up the hero */
 body[data-skin="reader"] .lesson-masthead .lesson-header{
-  position:relative; z-index:3; width:100%; text-align:center; color:#fff; padding:0 1.5rem 3rem; margin:0;
-  opacity:0; transition:opacity .6s ease;
+  position:absolute; left:0; right:0; bottom:0; z-index:3; width:auto;
+  text-align:center; color:#fff; padding:0 1.5rem 2.6rem; margin:0;
+  opacity:0; transition:opacity .6s ease; pointer-events:none;
 }
 /* reveal title + scrim together: on hover, and briefly on load (.show-title via JS) */
 body[data-skin="reader"] .lesson-masthead:hover #hero-figure::after,
