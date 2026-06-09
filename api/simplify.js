@@ -39,6 +39,16 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
+  // Only serve calls from our own site (same pattern as api/tutor.js).
+  var origin = req.headers.origin || '';
+  var okOrigin =
+    /^https:\/\/(www\.)?studyvault\.co\.uk$/.test(origin) ||
+    /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin) ||
+    /^http:\/\/localhost(:\d+)?$/.test(origin);
+  if (!okOrigin) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   var body = req.body || {};
   var text = typeof body.text === 'string' ? body.text : '';
   var level = body.level === 'explain' ? 'explain' : 'simple';
