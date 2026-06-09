@@ -262,7 +262,8 @@
   }
 
   function init() {
-    document.body.appendChild(bar);
+    // switcher bar hidden (Tom, 10 Jun) — Reader is the working skin; the bar
+    // covered the top-right header buttons. Re-enable by appending `bar` again.
     set('reader');            // default to the bold structural redesign
     applySubjectAccent();
     setTimeout(tidy, 1200);
