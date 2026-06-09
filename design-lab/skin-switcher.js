@@ -124,6 +124,31 @@
         a: 'If it targets a segment, realistic demand is that segment’s size, not the whole market’s. Market share within the segment shows how well it is competing where it actually sells.' },
       { q: 'Research shows strong demand among 16–25s — but the market map from Lesson 1 shows that space is crowded with rivals. What decision might the business take?',
         a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin.' }
+    ],
+    // AQA History — Health & the People L7 (Pasteur, Koch & Germ Theory), the
+    // unit's halfway hinge: every section recontextualises an earlier lesson
+    '/lesson/history-aqa/britain-health-people/7': [
+      { from: 'with Lesson 1',
+        q: 'Miasma theory was wrong but still produced useful action. In Lesson 1 you met another wrong theory that shaped treatment for centuries. What did the two have in common?',
+        a: 'The four humours. Both were coherent, actionable explanations — bleeding and purging to rebalance humours, cleaning and ventilation to clear bad air — and both blocked the search for the real, invisible cause of disease.' },
+      { from: 'with Lesson 6',
+        q: 'Jenner proved vaccination worked some 65 years before Pasteur published germ theory. What could Jenner NOT explain that Pasteur now could?',
+        a: 'WHY it worked. Jenner’s vaccine came from observation, with no mechanism. Germ theory supplied one — a specific microbe causes the disease — which is why vaccines for new diseases could now be developed deliberately rather than stumbled upon.' },
+      { from: 'with Lesson 4',
+        q: 'Koch identified specific microbes using dyes and photography. How does his method echo what Vesalius did in Lesson 4 — and why do examiners love this comparison?',
+        a: 'Both replaced trust in ancient authority with direct observation and proof: Vesalius dissected to correct Galen; Koch stained and photographed microbes to prove each disease had its own germ. The Science & Technology factor recurring across periods — ideal factor-essay evidence.' },
+      { from: 'with Lesson 1',
+        q: 'Compare Ehrlich’s Salvarsan 606 with the treatments a medieval doctor offered in Lesson 1. What fundamental shift does a “magic bullet” represent?',
+        a: 'Medieval treatment aimed at the whole body’s balance (bleeding, purging). Salvarsan attacked one specific cause — the syphilis microbe. Treatment now followed the actual cause of disease, not a theory of balance.' },
+      { from: 'with Lesson 2',
+        q: 'In Lesson 2 the Church both helped and hindered progress. Britain lagged behind France and Germany on germ theory in the 1860s–70s. What is similar about WHY progress was slowed in each case?',
+        a: 'Institutions and attitudes, not lack of evidence: medieval reverence for Galen and Church authority discouraged challenge; the Victorian medical establishment clung to miasma and distrusted foreign laboratory science. “Attitudes in society” as a hindering factor recurs.' },
+      { from: 'with Lesson 3',
+        q: 'During the Black Death (Lesson 3) ordinary people turned to prayer, flagellation and herbs. By the 1880s germ theory was proven — yet what stayed surprisingly similar in everyday medicine, and why?',
+        a: 'Most people still used home remedies, patent medicines and unqualified healers — knowing the cause didn’t yet produce affordable cures. Understanding changed faster than treatment: change and continuity running side by side.' },
+      { from: 'whole course',
+        q: 'Pasteur was a chemist helping brewers; Jenner was a country doctor watching milkmaids. Use both to argue that “science and technology” alone does not explain progress.',
+        a: 'Each breakthrough needed other factors too: Jenner — chance observation plus government compulsion (1853); Pasteur — industrial funding, the microscope, and rivalry with Koch. Progress comes from factors combining — the core argument the 16-marker rewards.' }
     ]
   };
 
