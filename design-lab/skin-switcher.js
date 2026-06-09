@@ -416,19 +416,7 @@
     setTimeout(tidy, 1200);
     setTimeout(tidy, 2600);
 
-    // EXPERIMENT: first scroll-down from the very top jumps past the hero to the content
-    var jumpLock = false;
-    window.addEventListener('wheel', function (e) {
-      if (document.body.dataset.skin !== 'reader' || jumpLock) return;
-      if (window.scrollY < 40 && e.deltaY > 0) {
-        var lb = document.querySelector('#lesson-page .lesson-body');
-        if (!lb) return;
-        e.preventDefault();
-        jumpLock = true;
-        lb.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        setTimeout(function () { jumpLock = false; }, 1000);
-      }
-    }, { passive: false });
+    // (scroll-jump-past-hero experiment removed — felt jerky; plain scrolling wins)
   }
   if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
 })();

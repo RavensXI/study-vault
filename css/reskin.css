@@ -51,6 +51,44 @@ body[data-skin] .lesson-hero-image figcaption{
   font-family:var(--font-read); font-style:italic; font-size:.9rem; color:var(--text-muted); margin-top:.5rem;
 }
 
+/* ---- a11y compatibility: the skin's !important font/bg rules must yield ---- */
+/* Dyslexia mode: OpenDyslexic wins over the skin faces everywhere it applied */
+body[data-skin].dyslexia-font .study-notes,
+body[data-skin].dyslexia-font .study-notes p,
+body[data-skin].dyslexia-font .study-notes li,
+body[data-skin].dyslexia-font .study-notes blockquote,
+body[data-skin].dyslexia-font .study-notes h2,
+body[data-skin].dyslexia-font .study-notes h3,
+body[data-skin].dyslexia-font .exam-tip p,
+body[data-skin].dyslexia-font .conclusion,
+body[data-skin].dyslexia-font .conclusion p,
+body[data-skin].dyslexia-font .key-fact,
+body[data-skin].dyslexia-font .key-fact *,
+body[data-skin].dyslexia-font .lesson-header h1,
+body[data-skin].dyslexia-font #lesson-title,
+body[data-skin].dyslexia-font .practice-question-text,
+body[data-skin].dyslexia-font .practice-answer-input{
+  font-family:'OpenDyslexic',sans-serif !important;
+}
+/* Irlen overlays: tint the page base the skin paints from */
+body[data-skin].overlay-yellow{ --bg-body:#fef9c3; }
+body[data-skin].overlay-blue{   --bg-body:#dbeafe; }
+body[data-skin].overlay-pink{   --bg-body:#fce7f3; }
+body[data-skin].overlay-green{  --bg-body:#dcfce7; }
+body[data-skin].overlay-peach{  --bg-body:#fed7aa; }
+body[data-skin].overlay-aqua{   --bg-body:#cffafe; }
+
+/* Revision-tip popups (lightbulbs) live inside .study-notes, so the reading
+   size inflated them into scrollboxes — popup text is UI, sized to its box */
+body[data-skin] .revision-tip-popup,
+body[data-skin] .revision-tip-popup p{
+  font-family:var(--font-ui) !important; font-size:.88rem !important; line-height:1.5 !important;
+}
+body[data-skin] .revision-tip-popup{
+  width:17rem; max-height:none; overflow:visible;
+  border:1px solid var(--border-light);
+}
+
 body[data-skin] .gutter-progress-item{
   background:transparent !important; border:none !important; box-shadow:none !important;
   border-radius:var(--radius-sm) !important; color:var(--text-muted);
@@ -532,11 +570,11 @@ body[data-skin="reader"] .beta-banner .beta-badge{
   background:transparent; color:var(--accent); padding:0; font-weight:700; letter-spacing:.1em;
 }
 
-/* ---------- callouts: NO coloured edges ---------- */
+/* ---------- callouts: no coloured edges; key facts get a quiet tint ---------- */
 body[data-skin="reader"] .key-fact{
-  background:transparent !important; border:none !important;
-  border-top:1px solid var(--border-light) !important; border-bottom:1px solid var(--border-light) !important;
-  border-radius:0 !important; box-shadow:none !important; padding:1.3rem 0; margin:2.2rem 0;
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card)) !important;
+  border:none !important; border-radius:var(--radius) !important;
+  box-shadow:none !important; padding:1.25rem 1.4rem; margin:2.2rem 0;
 }
 body[data-skin="reader"] .exam-tip{
   background:var(--accent-light); border:none; border-radius:var(--radius); box-shadow:none; padding:1.2rem 1.3rem; margin:2rem 0;
