@@ -234,25 +234,49 @@ body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
 body[data-skin="reader"] .lesson-sidebar{
   position:sticky; top:5rem; align-self:start;
   max-height:calc(100vh - 6rem); overflow:hidden;
+  display:flex; flex-direction:column; gap:1.1rem;
+}
+/* the tool panel proper (harness wraps the tiles in .sv-panel; the contents
+   rail sits below it in the freed corner) */
+body[data-skin="reader"] .sv-panel{
+  flex:0 0 auto;
   display:grid; grid-template-columns:1fr 1fr;
   /* BENTO HIERARCHY: slim progress strip / Quiz+Flashcards PRIMARY /
      two rows of compact utilities. Rows are content-sized — no stretched
-     voids; the panel just ends (still capped to the viewport, never scrolls) */
+     voids; the panel just ends */
   grid-template-rows:auto auto auto auto;
   /* ONE instrument panel, not seven boxes: hairline frame + internal 1px rules
      (the container bg shows through the 1px gaps as printed dividers) */
   gap:1px; background:var(--border-light);
-  border:1px solid var(--border-light); border-radius:10px;
+  border:1px solid var(--border-light); border-radius:10px; overflow:hidden;
 }
-body[data-skin="reader"] .lesson-sidebar > .sidebar-section{ min-height:0; overflow:hidden; margin:0; }
+body[data-skin="reader"] .sv-panel > .sidebar-section{ min-height:0; overflow:hidden; margin:0; }
 /* explicit placement — DOM order varies with what the loader injects */
-body[data-skin="reader"] .lesson-sidebar > .sidebar-progress-section{ grid-area:1 / 1 / 2 / -1; }
-body[data-skin="reader"] .lesson-sidebar > .sidebar-knowledge-check{ grid-area:2 / 1; }
-body[data-skin="reader"] .lesson-sidebar > .sidebar-flashcard-section{ grid-area:2 / 2; }
-body[data-skin="reader"] .lesson-sidebar > #sidebar-video-section{ grid-area:3 / 1; }
-body[data-skin="reader"] .lesson-sidebar > .sidebar-media{ grid-area:3 / 2; }
-body[data-skin="reader"] .lesson-sidebar > .tile-highlight{ grid-area:4 / 1; }
-body[data-skin="reader"] .lesson-sidebar > .tile-tutor{ grid-area:4 / 2; }
+body[data-skin="reader"] .sv-panel > .sidebar-progress-section{ grid-area:1 / 1 / 2 / -1; }
+body[data-skin="reader"] .sv-panel > .sidebar-knowledge-check{ grid-area:2 / 1; }
+body[data-skin="reader"] .sv-panel > .sidebar-flashcard-section{ grid-area:2 / 2; }
+body[data-skin="reader"] .sv-panel > #sidebar-video-section{ grid-area:3 / 1; }
+body[data-skin="reader"] .sv-panel > .sidebar-media{ grid-area:3 / 2; }
+body[data-skin="reader"] .sv-panel > .tile-highlight{ grid-area:4 / 1; }
+body[data-skin="reader"] .sv-panel > .tile-tutor{ grid-area:4 / 2; }
+
+/* ---------- CONTENTS RAIL — "In this lesson", scroll-synced ---------- */
+body[data-skin="reader"] .sv-contents{
+  flex:0 1 auto; min-height:0; overflow:hidden; padding:.2rem 0 .4rem .15rem;
+}
+body[data-skin="reader"] .sv-contents-title{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.12em;
+  font-size:.8rem; font-weight:700; color:var(--text-muted); margin-bottom:.55rem;
+}
+body[data-skin="reader"] .sv-contents a{
+  display:block; padding:.36rem 0 .36rem .95rem; border-left:2px solid var(--border-light);
+  font-family:var(--font-ui); font-size:.95rem; line-height:1.3; color:var(--text-secondary);
+  text-decoration:none; transition:color .2s ease, border-color .2s ease;
+}
+body[data-skin="reader"] .sv-contents a:hover{ color:var(--text-primary); }
+body[data-skin="reader"] .sv-contents a.active{
+  border-left-color:var(--accent); color:var(--text-primary); font-weight:600;
+}
 
 /* Related Media modal (launcher tile styled with the other utilities below) */
 .rm-modal{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; }
@@ -277,7 +301,7 @@ body[data-skin="reader"] .bugr-fab{ bottom:1rem !important; right:1rem !importan
    PRIMARY (Quick Quiz, Flashcards): editorial cells — letterspaced kicker top,
    big bottom-anchored label, italic serif sub-line. NO icons.
    UTILITY (Video, Related media, Highlight, Tutor): slim text rows with a quiet chevron. */
-body[data-skin="reader"] .lesson-sidebar > .sidebar-section:not(.sidebar-progress-section){
+body[data-skin="reader"] .sv-panel > .sidebar-section:not(.sidebar-progress-section){
   padding:0 !important; border:none !important; background:var(--bg-card) !important; box-shadow:none !important; display:flex;
 }
 body[data-skin="reader"] .knowledge-check-btn,
@@ -448,7 +472,8 @@ body[data-skin="reader"] #sidebar-video-section .sidebar-video img{
 
 @media (max-width:980px){
   body[data-skin="reader"] .lesson-body{ grid-template-columns:1fr; gap:0; }
-  body[data-skin="reader"] .lesson-sidebar{ display:flex; flex-direction:column; position:static; height:auto; overflow:visible; margin-top:2.5rem; }
+  body[data-skin="reader"] .lesson-sidebar{ display:flex; flex-direction:column; position:static; max-height:none; height:auto; overflow:visible; margin-top:2.5rem; }
+  body[data-skin="reader"] .sv-contents{ display:none; } /* TOC is a desktop-corner feature */
 }
 
 /* ---------- BETA notice -> quiet line at top of the article ---------- */

@@ -51,7 +51,54 @@
     setupMediaLauncher();
     buildToolTiles();
     upgradePrimaryIcons();
+    buildContentsRail();
     revealMasthead();
+  }
+
+  // "In this lesson" contents rail — fills the corner below the tool panel.
+  // Wraps the tiles in .sv-panel, then lists the article's h2s, scroll-synced.
+  function buildContentsRail() {
+    var sidebar = document.querySelector('#lesson-page .lesson-sidebar');
+    if (!sidebar || sidebar.dataset.contentsRail) return;
+    var heads = [].slice.call(document.querySelectorAll('#lesson-page .study-notes h2'));
+    if (heads.length < 2) return;                       // nothing worth mapping
+    if (!sidebar.querySelector('.sidebar-tool-tile')) return; // wait until tiles are built
+    sidebar.dataset.contentsRail = '1';
+
+    var panel = document.createElement('div');
+    panel.className = 'sv-panel';
+    while (sidebar.firstChild) panel.appendChild(sidebar.firstChild);
+    sidebar.appendChild(panel);
+
+    var rail = document.createElement('nav');
+    rail.className = 'sv-contents';
+    rail.setAttribute('aria-label', 'Lesson contents');
+    rail.innerHTML = '<div class="sv-contents-title">In this lesson</div>';
+    var links = heads.map(function (h, i) {
+      if (!h.id) h.id = 'lesson-sec-' + i;
+      var a = document.createElement('a');
+      a.href = '#' + h.id;
+      a.textContent = h.textContent;
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+      rail.appendChild(a);
+      return a;
+    });
+    sidebar.appendChild(rail);
+
+    var ticking = false;
+    function sync() {
+      ticking = false;
+      var idx = -1, threshold = window.innerHeight * 0.38;
+      heads.forEach(function (h, i) { if (h.getBoundingClientRect().top < threshold) idx = i; });
+      links.forEach(function (l, i) { l.classList.toggle('active', i === idx); });
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(sync); }
+    }, { passive: true });
+    sync();
   }
 
   // Duotone icon set (soft filled shape + bold glyph) — replaces the generic
