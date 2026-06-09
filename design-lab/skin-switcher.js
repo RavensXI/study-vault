@@ -96,7 +96,7 @@
       var idx = -1, threshold = window.innerHeight * 0.38;
       heads.forEach(function (h, i) { if (h.getBoundingClientRect().top < threshold) idx = i; });
       links.forEach(function (l, i) { l.classList.toggle('active', i === idx); });
-      if (window.__svRecall && idx !== lastIdx && idx >= 0) window.__svRecall.deal();
+      if (window.__svRecall && idx !== lastIdx && idx >= 0) window.__svRecall.deal(idx);
       lastIdx = idx;
     }
     window.addEventListener('scroll', function () {
@@ -105,13 +105,88 @@
     sync();
   }
 
+  // DEMO: per-section SYNTHESIS questions (Tom's idea, 10 Jun) — each section
+  // gets one question that combines THIS section's idea with something from a
+  // previous lesson, forcing integration. Hand-written for one specimen lesson
+  // to trial the experience; the real version is a pipeline job
+  // (synthesis_questions jsonb per lesson, generated with prior-lesson context).
+  var DEMO_SYNTH = {
+    '/lesson/business-aqa/marketing/2': [
+      { q: 'In Lesson 1 you used a market map to spot a gap for budget gym wear. Which of the three things market research collects — demand, competition, target market — would confirm the gap is worth filling?',
+        a: 'Demand is the decisive check: a gap on the map only matters if enough people would actually buy budget gym wear. Competition research then confirms the space really is empty.' },
+      { q: 'You segmented a market by age and income in Lesson 1. How would you design a survey so its results can be broken down by segment?',
+        a: 'Include questions that record each respondent’s segment (age group, income band). Answers can then be split per segment and compared against the target market.' },
+      { q: 'Which would better tell a business whether the over-50s segment you met in Lesson 1 is growing — its own customer survey, or government population data? Why?',
+        a: 'Government data (secondary research): it shows whole-population trends over years. A survey only captures the business’s current customers at one moment.' },
+      { q: 'A cinema targets two segments: families and film buffs. Which research type would reveal WHY film buffs visit less often — and which would show HOW MUCH each segment spends?',
+        a: 'Qualitative research (interviews, focus groups) uncovers the why; quantitative research puts numbers on each segment’s spending.' },
+      { q: 'Why might a business measure the size of ONE segment from Lesson 1 rather than the size of the whole market?',
+        a: 'If it targets a segment, realistic demand is that segment’s size, not the whole market’s. Market share within the segment shows how well it is competing where it actually sells.' },
+      { q: 'Research shows strong demand among 16–25s — but the market map from Lesson 1 shows that space is crowded with rivals. What decision might the business take?',
+        a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin.' }
+    ]
+  };
+
   // QUICK RECALL v2 — spaced retrieval, not open-book recognition (Tom's call:
   // asking about the section on screen is "flashcards but cheating").
   // The card drills EARLIER lessons in this unit: content that is NOT in front
   // of you. Scroll boundaries deal the next card from a shuffled prior-lesson
   // deck. Lesson 1 of a unit has nothing to look back on -> no card.
+  // When a DEMO_SYNTH set exists for this page, the card runs in synthesis
+  // mode instead: the active SECTION picks the question (1:1), kicker says
+  // 'Bring it together'.
+  function makeRecallCard(sidebar, kicker) {
+    var recall = document.createElement('div');
+    recall.className = 'sv-recall';
+    recall.innerHTML =
+      '<div class="sv-recall-kicker"><span>' + kicker + '</span><span class="sv-recall-from"></span></div>' +
+      '<p class="sv-recall-q"></p>' +
+      '<p class="sv-recall-a" hidden></p>' +
+      '<div class="sv-recall-actions">' +
+        '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
+      '</div>';
+    sidebar.appendChild(recall);
+    var els = {
+      q: recall.querySelector('.sv-recall-q'),
+      a: recall.querySelector('.sv-recall-a'),
+      from: recall.querySelector('.sv-recall-from'),
+      reveal: recall.querySelector('[data-act="reveal"]')
+    };
+    recall.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-act="reveal"]')) return;
+      els.a.hidden = !els.a.hidden;
+      els.reveal.textContent = els.a.hidden ? 'Reveal answer' : 'Hide answer';
+    });
+    els.show = function (c) {
+      els.q.textContent = c.q;
+      els.a.textContent = c.a;
+      els.from.textContent = c.from || '';
+      els.a.hidden = true;
+      els.reveal.textContent = 'Reveal answer';
+    };
+    return els;
+  }
+
   function buildPriorRecall(sidebar) {
+    if (document.querySelector('.sv-recall')) return;
     var info = window._lessonOfTotal || {};
+
+    // SYNTHESIS MODE (demo) — section index picks the question
+    var synth = DEMO_SYNTH[location.pathname.replace(/\/$/, '')];
+    if (synth && synth.length) {
+      var sEls = makeRecallCard(sidebar, 'Bring it together');
+      var sLast = -1;
+      window.__svRecall = { deal: function (idx) {
+        var n = Math.max(0, Math.min(typeof idx === 'number' ? idx : 0, synth.length - 1));
+        if (n === sLast) return;
+        sLast = n;
+        sEls.show(synth[n]);
+      } };
+      window.__svRecall.deal(0);
+      return;
+    }
+
+    // PRIOR-LESSON RECALL MODE — shuffled deck from earlier lessons
     var unitId = window._lessonUnitId;
     if (!unitId || !info.num || info.num <= 1) return;
     var client = window.supabase.createClient(
@@ -136,37 +211,13 @@
           var j = Math.floor(Math.random() * (i + 1));
           var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
         }
-        var recall = document.createElement('div');
-        recall.className = 'sv-recall';
-        recall.innerHTML =
-          '<div class="sv-recall-kicker"><span>Quick recall</span><span class="sv-recall-from"></span></div>' +
-          '<p class="sv-recall-q"></p>' +
-          '<p class="sv-recall-a" hidden></p>' +
-          '<div class="sv-recall-actions">' +
-            '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
-          '</div>';
-        sidebar.appendChild(recall);
-        var qEl = recall.querySelector('.sv-recall-q'),
-            aEl = recall.querySelector('.sv-recall-a'),
-            fromEl = recall.querySelector('.sv-recall-from'),
-            revealBtn = recall.querySelector('[data-act="reveal"]');
+        var els = makeRecallCard(sidebar, 'Quick recall');
         var n = -1;
-        function deal() {
+        window.__svRecall = { deal: function () {
           n = (n + 1) % deck.length;
-          var c = deck[n];
-          qEl.textContent = c.q;
-          aEl.textContent = c.a;
-          fromEl.textContent = c.from;
-          aEl.hidden = true;
-          revealBtn.textContent = 'Reveal answer';
-        }
-        recall.addEventListener('click', function (e) {
-          if (!e.target.closest('[data-act="reveal"]')) return;
-          aEl.hidden = !aEl.hidden;
-          revealBtn.textContent = aEl.hidden ? 'Reveal answer' : 'Hide answer';
-        });
-        deal();
-        window.__svRecall = { deal: deal };
+          els.show(deck[n]);
+        } };
+        window.__svRecall.deal();
       });
   }
 
