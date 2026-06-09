@@ -181,7 +181,6 @@
     var boardSelect = document.getElementById('board-select');
     var subjectSelect = document.getElementById('subject-select');
     var unitSelect = document.getElementById('unit-select');
-    var demoUser = null;
     var accessToken = null;
     var activeTab = 'hero';
     var allSubjects = [];
@@ -222,21 +221,12 @@
       var result = await sb.auth.getSession();
       if (result.data.session) {
         accessToken = result.data.session.access_token;
-        return;
       }
-      try {
-        var stored = localStorage.getItem('studyvault-user');
-        if (stored) {
-          var u = JSON.parse(stored);
-          if (u && u.isDemo) demoUser = u.id;
-        }
-      } catch (e) {}
     }
 
     function authHeaders() {
       var h = { 'Content-Type': 'application/json' };
       if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
-      else if (demoUser) h['X-Demo-User'] = demoUser;
       else {
         // Fall back to admin/teacher password from auth-gate session
         try {

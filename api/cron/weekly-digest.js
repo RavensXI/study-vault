@@ -26,7 +26,8 @@ function authorize(req) {
   if (secret && auth === 'Bearer ' + secret) return { ok: true, manual: false };
   const pw = req.headers['x-admin-password'];
   if (pw && process.env.ADMIN_PASSWORD && pw === process.env.ADMIN_PASSWORD) return { ok: true, manual: true };
-  if (!secret) return { ok: true, manual: false }; // no secret configured — allow cron out of the box
+  // Fail closed: if CRON_SECRET isn't configured, nobody gets in (set it in
+  // Vercel env — Vercel Cron then sends it automatically).
   return { ok: false };
 }
 

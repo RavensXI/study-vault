@@ -30,10 +30,30 @@ module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
+  // Only serve calls from our own site (same pattern as api/tutor.js) — a
+  // casual-abuse deterrent; the per-IP rate limit below is the backstop.
+  const origin = req.headers.origin || '';
+  const okOrigin =
+    /^https:\/\/(www\.)?studyvault\.co\.uk$/.test(origin) ||
+    /^https:\/\/[a-z0-9-]+\.vercel\.app$/.test(origin) ||
+    /^http:\/\/localhost(:\d+)?$/.test(origin);
+  if (!okOrigin) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   const { tier: requestedTier, marks, system, prompt, free_tier } = req.body || {};
 
   if (!prompt) {
     return res.status(400).json({ error: 'Missing prompt' });
+  }
+
+  // Length caps — legit marking prompts (passage + question + mark scheme +
+  // student answer) sit well under these; anything bigger is abuse.
+  if (typeof prompt !== 'string' || prompt.length > 24000) {
+    return res.status(400).json({ error: 'Prompt too long' });
+  }
+  if (system && (typeof system !== 'string' || system.length > 8000)) {
+    return res.status(400).json({ error: 'System prompt too long' });
   }
 
   // Determine tier: explicit > auto (from marks) > default quick
