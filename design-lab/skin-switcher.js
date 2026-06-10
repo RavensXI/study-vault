@@ -70,6 +70,11 @@
     while (sidebar.firstChild) panel.appendChild(sidebar.firstChild);
     sidebar.appendChild(panel);
 
+    // the COMPANION CARD — second framed object in the column, same frame
+    // spec as the panel: recall/synthesis (feature section) above contents
+    var companion = document.createElement('div');
+    companion.className = 'sv-companion';
+
     var rail = document.createElement('nav');
     rail.className = 'sv-contents';
     rail.setAttribute('aria-label', 'Lesson contents');
@@ -86,9 +91,10 @@
       rail.appendChild(a);
       return a;
     });
-    sidebar.appendChild(rail);
+    companion.appendChild(rail);
+    sidebar.appendChild(companion);
 
-    buildPriorRecall(sidebar);
+    buildPriorRecall(companion);
 
     var ticking = false, lastIdx = -2;
     function sync() {
@@ -160,7 +166,7 @@
   // When a DEMO_SYNTH set exists for this page, the card runs in synthesis
   // mode instead: the active SECTION picks the question (1:1), kicker says
   // 'Bring it together'.
-  function makeRecallCard(sidebar, kicker) {
+  function makeRecallCard(companion, kicker) {
     var recall = document.createElement('div');
     recall.className = 'sv-recall';
     recall.innerHTML =
@@ -172,7 +178,7 @@
           '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
         '</div>' +
       '</div>';
-    sidebar.appendChild(recall);
+    companion.insertBefore(recall, companion.firstChild); // feature section sits above contents
     var els = {
       q: recall.querySelector('.sv-recall-q'),
       a: recall.querySelector('.sv-recall-a'),
@@ -184,24 +190,33 @@
       els.a.hidden = !els.a.hidden;
       els.reveal.textContent = els.a.hidden ? 'Reveal answer' : 'Hide answer';
     });
-    els.show = function (c) {
+    function paint(c) {
       els.q.textContent = c.q;
       els.a.textContent = c.a;
       els.from.textContent = c.from || '';
       els.a.hidden = true;
       els.reveal.textContent = 'Reveal answer';
+    }
+    var dealt = false;
+    els.show = function (c) {
+      if (!dealt) { dealt = true; paint(c); return; } // first deal: no fade
+      recall.classList.add('is-swapping');            // visible swap signal on scroll
+      setTimeout(function () {
+        paint(c);
+        recall.classList.remove('is-swapping');
+      }, 190);
     };
     return els;
   }
 
-  function buildPriorRecall(sidebar) {
+  function buildPriorRecall(companion) {
     if (document.querySelector('.sv-recall')) return;
     var info = window._lessonOfTotal || {};
 
     // SYNTHESIS MODE (demo) — section index picks the question
     var synth = DEMO_SYNTH[location.pathname.replace(/\/$/, '')];
     if (synth && synth.length) {
-      var sEls = makeRecallCard(sidebar, 'Bring it together');
+      var sEls = makeRecallCard(companion, 'Bring it together');
       var sLast = -1;
       window.__svRecall = { deal: function (idx) {
         var n = Math.max(0, Math.min(typeof idx === 'number' ? idx : 0, synth.length - 1));
@@ -238,7 +253,7 @@
           var j = Math.floor(Math.random() * (i + 1));
           var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
         }
-        var els = makeRecallCard(sidebar, 'Quick recall');
+        var els = makeRecallCard(companion, 'Quick recall');
         var n = -1;
         window.__svRecall = { deal: function () {
           n = (n + 1) % deck.length;
