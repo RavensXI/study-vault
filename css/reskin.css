@@ -70,13 +70,25 @@ body[data-skin].dyslexia-font .practice-question-text,
 body[data-skin].dyslexia-font .practice-answer-input{
   font-family:'OpenDyslexic',sans-serif !important;
 }
-/* Irlen overlays: tint the page base the skin paints from */
-body[data-skin].overlay-yellow{ --bg-body:#fef9c3; }
-body[data-skin].overlay-blue{   --bg-body:#dbeafe; }
-body[data-skin].overlay-pink{   --bg-body:#fce7f3; }
-body[data-skin].overlay-green{  --bg-body:#dcfce7; }
-body[data-skin].overlay-peach{  --bg-body:#fed7aa; }
-body[data-skin].overlay-aqua{   --bg-body:#cffafe; }
+/* Irlen overlays: a uniform acetate sheet over the WHOLE page — like the
+   physical coloured overlay it simulates. Multiply blending turns whites the
+   overlay colour, keeps text dark, lets images read through. By construction
+   nothing escapes the tint (cards, toolbar, panel, modals included). */
+body[data-skin].overlay-yellow::after,
+body[data-skin].overlay-blue::after,
+body[data-skin].overlay-pink::after,
+body[data-skin].overlay-green::after,
+body[data-skin].overlay-peach::after,
+body[data-skin].overlay-aqua::after{
+  content:""; position:fixed; inset:0; z-index:2147483000;
+  pointer-events:none; mix-blend-mode:multiply;
+}
+body[data-skin].overlay-yellow::after{ background:#fef9c3; }
+body[data-skin].overlay-blue::after{   background:#dbeafe; }
+body[data-skin].overlay-pink::after{   background:#fce7f3; }
+body[data-skin].overlay-green::after{  background:#dcfce7; }
+body[data-skin].overlay-peach::after{  background:#fed7aa; }
+body[data-skin].overlay-aqua::after{   background:#cffafe; }
 
 /* Revision-tip popups (lightbulbs) live inside .study-notes, so the reading
    size inflated them into scrollboxes — popup text is UI, sized to its box */
