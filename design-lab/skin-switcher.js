@@ -71,19 +71,22 @@
     sidebar.appendChild(panel);
   }
 
-  // EXIT TICKET (Tom, 11 Jun) — synthesis stays, but ONE question per lesson
-  // instead of per-section: a single "Before you go" task at the end of the
-  // article that forces the student to combine this lesson with earlier ones.
-  // Hand-written for two specimen lessons; the real version is a pipeline job
-  // (one synthesis question per lesson, generated with prior-lesson context).
+  // EXIT TICKET (Tom, 11 Jun) — ONE synthesis question per lesson, fired on
+  // Next-lesson click. QUESTION TEMPLATE (Tom): open with "In Lesson N, you
+  // learned that ..." — restate the prior knowledge explicitly, THEN ask the
+  // question that synthesises it with THIS lesson. `from` names the source
+  // lesson in the modal header. Hand-written for two specimen lessons; the
+  // real version is a pipeline job (generated with prior-lesson context).
   var EXIT_TICKETS = {
     '/lesson/business-aqa/marketing/2': {
-      q: 'Research shows strong demand among 16–25s — but the market map you drew in Lesson 1 shows that space is crowded with rivals. Using both lessons, what decision should the business take, and why?',
-      a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin. Market research confirms the demand is real; the market map shows where the space is empty.'
+      from: 'Draws on Lesson 1',
+      q: 'In Lesson 1, you learned that a market map can reveal a gap in the market — a space where customer demand isn’t being served by any rival. This lesson showed how market research measures demand. Suppose research finds strong demand among 16–25s, but your market map shows that space is crowded with competitors. Using both lessons, what decision should the business take, and why?',
+      a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin. Market research proves the demand is real; the market map shows where the space is empty.'
     },
     '/lesson/history-aqa/britain-health-people/7': {
-      q: 'Pasteur was a chemist helping brewers; Jenner was a country doctor watching milkmaids. Use both men to argue that “science and technology” alone does not explain medical progress.',
-      a: 'Each breakthrough needed other factors too: Jenner — chance observation plus government compulsion (1853); Pasteur — industrial funding, the microscope, and rivalry with Koch. Progress comes from factors combining — the core argument the 16-marker rewards.'
+      from: 'Draws on Lesson 6',
+      q: 'In Lesson 6, you learned that Jenner proved vaccination worked — a country doctor acting on chance observation of milkmaids, with no idea WHY it worked. In this lesson, Pasteur — a chemist paid by brewers — finally supplied the explanation. Use both men to argue that “science and technology” alone does not explain medical progress.',
+      a: 'Each breakthrough needed other factors too: Jenner — chance observation plus government compulsion (the 1853 Vaccination Act); Pasteur — industrial funding, the microscope, and rivalry with Koch. Progress comes from factors combining — the core argument the 16-marker rewards.'
     }
   };
 
@@ -117,7 +120,7 @@
       '<div class="sv-exit-backdrop"></div>' +
       '<div class="sv-exit-card" role="dialog" aria-modal="true" aria-label="Before you go">' +
         '<button type="button" class="sv-exit-close" aria-label="Stay on this lesson">&times;</button>' +
-        '<div class="sv-exit-kicker">Before you go</div>' +
+        '<div class="sv-exit-kicker"><span>Before you go</span><span class="sv-exit-from"></span></div>' +
         '<p class="sv-exit-q"></p>' +
         '<p class="sv-exit-a" hidden></p>' +
         '<div class="sv-exit-actions">' +
@@ -127,6 +130,7 @@
       '</div>';
     wrap.querySelector('.sv-exit-q').textContent = t.q;
     wrap.querySelector('.sv-exit-a').textContent = t.a;
+    wrap.querySelector('.sv-exit-from').textContent = t.from || '';
     wrap.querySelector('.sv-exit-continue').href = nextHref;
     var a = wrap.querySelector('.sv-exit-a'), rv = wrap.querySelector('[data-act="reveal"]');
     rv.addEventListener('click', function () {
