@@ -94,7 +94,7 @@
     sec.className = 'sidebar-section tile-practice';
     var b = document.createElement('button');
     b.className = 'sv-practice-btn'; b.type = 'button';
-    b.innerHTML = ICONS.practice + '<span>Practice questions</span>';
+    b.innerHTML = ICONS.practice + '<span>Practice Questions</span>';
     sec.appendChild(b);
     var panel = sidebar.querySelector('.sv-panel');
     (panel || sidebar).appendChild(sec);
