@@ -66,15 +66,24 @@
     vs.dataset.demoVideo = '1';
     vs.style.display = '';
     var sv = vs.querySelector('.sidebar-video') || vs;
-    sv.classList.add('sidebar-video--gdrive');
+    // compose a YouTube-style thumbnail from the lesson's own hero image
+    var hero = document.getElementById('hero-image');
+    var heroSrc = hero && hero.src ? hero.src : '';
+    var title = (document.getElementById('lesson-title') || {}).textContent || '';
+    sv.classList.add('sidebar-video--gdrive', 'sv-video-thumb-rich');
     sv.innerHTML =
-      '<div class="sidebar-video-thumb sidebar-video-thumb--generic">' +
-        '<span class="sv-video-label">StudyVault</span>' +
-        '<span class="sv-video-sublabel">Video Overview</span>' +
-      '</div>' +
+      (heroSrc ? '<img class="sv-video-hero" alt="">' : '') +
+      '<div class="sv-video-scrim"></div>' +
+      '<span class="sv-video-dur">4:32</span>' +
       '<button class="sidebar-video-play" aria-label="Play video overview">' +
-        '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>' +
-      '</button>';
+        '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="8,5 19,12 8,19"/></svg>' +
+      '</button>' +
+      '<div class="sv-video-meta">' +
+        '<span class="sv-video-kicker">Video overview</span>' +
+        '<span class="sv-video-ttl"></span>' +
+      '</div>';
+    if (heroSrc) sv.querySelector('.sv-video-hero').src = heroSrc;
+    sv.querySelector('.sv-video-ttl').textContent = title;
   }
 
   // Practice questions move OFF the page bottom and INTO the panel as the
