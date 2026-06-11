@@ -279,12 +279,13 @@ body[data-skin="reader"] #lesson-title{
 /* article + toolbar + narration take ~2/3 (left, from the page edge);
    tools fill the right ~1/3 as a tile grid */
 body[data-skin="reader"] .lesson-body{
-  max-width:none; margin:0; padding:1.6rem 2.25rem 0; scroll-margin-top:5rem;
-  /* cap the COLUMN at the reading measure (not just the text) and centre the
-     pair — so body, exam tips, figures and key facts all share one width and
-     the slack goes to the outer margins, not a weird channel up the middle */
-  display:grid; grid-template-columns:minmax(0,46rem) minmax(19rem,22rem);
-  justify-content:center; column-gap:3.5rem; align-items:start;
+  /* a centred max-width container with a 1fr article + fixed sidebar — exact
+     gap, symmetric margins, no centring-math offset. Article lands ~870px
+     (~84ch at the reading size) and every article element shares that width;
+     the sidebar column matches the panel so there's no internal slack. */
+  max-width:84rem; margin:0 auto; padding:1.6rem 2.25rem 0; scroll-margin-top:5rem;
+  display:grid; grid-template-columns:minmax(0,1fr) 22rem;
+  column-gap:3rem; align-items:start;
 }
 body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
 /* FIXED tools panel — fills the viewport height, NEVER scrolls; tiles auto-size to fit */
@@ -711,26 +712,36 @@ body[data-skin="reader"] .header-nav a.nav-lesson-pill:hover{
 }
 body[data-skin="reader"] .scroll-progress{ height:3px; }
 
-/* ---- a11y toolbar: boxed pill card -> quiet strip over the article ---- */
+/* ---- a11y toolbar: a DEFINED utility band (Tom: was too undefined as a
+   bare strip). Container reads as one grouped object — faint tint, flat
+   hairline, a leading caps label naming its purpose — while the controls
+   inside stay quiet (no re-pilling: definition comes from the band). ---- */
 body[data-skin="reader"] .a11y-toolbar{
-  background:transparent; border:none; border-bottom:1px solid var(--border-light);
-  border-radius:0; padding:.15rem 0 .7rem; gap:1rem;
-  font-family:var(--font-ui);
+  background:color-mix(in srgb,var(--accent) 4%,var(--bg-card));
+  border:1px solid var(--border-light); border-radius:12px;
+  padding:.5rem .9rem; gap:.35rem .85rem; margin:.2rem 0 2.1rem;
+  font-family:var(--font-ui); justify-content:flex-start;
+}
+body[data-skin="reader"] .a11y-toolbar::before{
+  content:"Reading"; align-self:center; padding-right:.1rem;
+  font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.11em;
+  color:var(--text-muted);
 }
 body[data-skin="reader"] .a11y-btn{
-  background:transparent; border:none; color:var(--text-muted);
+  background:transparent; border:none; color:var(--text-secondary);
   font-weight:600; font-size:.8rem; border-radius:7px; padding:.34rem .6rem;
 }
 body[data-skin="reader"] .a11y-btn:hover{
-  background:color-mix(in srgb,var(--accent) 5%,transparent); color:var(--text-primary);
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card)); color:var(--text-primary);
 }
 /* pressed = tinted groove, not a solid blob */
 body[data-skin="reader"] .a11y-btn[aria-pressed="true"]{
-  background:color-mix(in srgb,var(--accent) 10%,var(--bg-body));
+  background:color-mix(in srgb,var(--accent) 13%,var(--bg-card));
   color:var(--accent); box-shadow:inset 0 1px 2px rgba(29,28,26,.06);
 }
-body[data-skin="reader"] .a11y-separator{ background:var(--border-light); height:18px; }
+body[data-skin="reader"] .a11y-separator{ background:var(--border-light); height:20px; }
 body[data-skin="reader"] .a11y-overlay-label{ font-family:var(--font-ui); }
+@media (max-width:640px){ body[data-skin="reader"] .a11y-toolbar::before{ display:none; } }
 /* swatches stay multicolour — they are functional colour samples */
 body[data-skin="reader"] .a11y-overlay{ border:2px solid var(--border-light); }
 body[data-skin="reader"] .a11y-overlay.active{
