@@ -659,6 +659,222 @@ body[data-skin="reader"] #sidebar-video-section .sidebar-video img{
   body[data-skin="reader"] .lesson-sidebar{ display:flex; flex-direction:column; position:static; max-height:none; height:auto; overflow:visible; margin-top:2.5rem; }
 }
 
+/* ================= LEGACY CHROME SWEEP =================
+   One system, no seams: every piece of pre-redesign chrome on the lesson
+   page re-cut to the Reader tokens. Token-driven throughout, so dark mode
+   re-derives for free. */
+
+/* ---- page header: quiet glass, hairline on scroll, ONE colour voice ---- */
+body[data-skin="reader"] .page-header{
+  background:color-mix(in srgb, var(--bg-body) 78%, transparent);
+}
+body[data-skin="reader"] .page-header.scrolled{
+  border-bottom-color:var(--border-light); box-shadow:none;
+}
+body[data-skin="reader"] .header-logo{ color:var(--text-primary); }
+body[data-skin="reader"] .header-unit-label,
+body[data-skin="reader"] .header-lesson-label{
+  font-family:var(--font-ui); font-size:.74rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.1em;
+  color:var(--text-muted); background:none; padding:.2em 0; border-radius:0;
+}
+body[data-skin="reader"] .header-nav a{
+  font-family:var(--font-ui); font-size:.88rem; font-weight:600;
+  color:var(--text-secondary); border-radius:7px;
+}
+body[data-skin="reader"] .header-nav a:hover{
+  background:color-mix(in srgb,var(--accent) 6%,transparent); color:var(--text-primary);
+}
+/* the multicolour nav icons go — one colour voice per page */
+body[data-skin="reader"] .header-nav a .nav-icon{ color:var(--text-muted) !important; }
+body[data-skin="reader"] .header-nav a:hover .nav-icon{ color:var(--accent) !important; }
+/* lesson pill: solid blob -> quiet bordered chip */
+body[data-skin="reader"] .header-nav a.nav-lesson-pill{
+  background:none; border:1px solid var(--border-light); color:var(--text-secondary);
+  font-weight:600; font-variant-numeric:tabular-nums;
+}
+body[data-skin="reader"] .header-nav a.nav-lesson-pill:hover{
+  background:none; border-color:var(--accent); color:var(--accent); opacity:1;
+}
+body[data-skin="reader"] .scroll-progress{ height:3px; }
+
+/* ---- a11y toolbar: boxed pill card -> quiet strip over the article ---- */
+body[data-skin="reader"] .a11y-toolbar{
+  background:transparent; border:none; border-bottom:1px solid var(--border-light);
+  border-radius:0; padding:.15rem 0 .7rem; gap:1rem;
+  font-family:var(--font-ui);
+}
+body[data-skin="reader"] .a11y-btn{
+  background:transparent; border:none; color:var(--text-muted);
+  font-weight:600; font-size:.8rem; border-radius:7px; padding:.34rem .6rem;
+}
+body[data-skin="reader"] .a11y-btn:hover{
+  background:color-mix(in srgb,var(--accent) 5%,transparent); color:var(--text-primary);
+}
+/* pressed = tinted groove, not a solid blob */
+body[data-skin="reader"] .a11y-btn[aria-pressed="true"]{
+  background:color-mix(in srgb,var(--accent) 10%,var(--bg-body));
+  color:var(--accent); box-shadow:inset 0 1px 2px rgba(29,28,26,.06);
+}
+body[data-skin="reader"] .a11y-separator{ background:var(--border-light); height:18px; }
+body[data-skin="reader"] .a11y-overlay-label{ font-family:var(--font-ui); }
+/* swatches stay multicolour — they are functional colour samples */
+body[data-skin="reader"] .a11y-overlay{ border:2px solid var(--border-light); }
+body[data-skin="reader"] .a11y-overlay.active{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--bg-body), 0 0 0 3.5px var(--accent);
+}
+
+/* ---- foot prev/next cards ---- */
+body[data-skin="reader"] .lesson-nav{ border-top:1px solid var(--border-light); }
+body[data-skin="reader"] .lesson-nav-link{
+  border:1px solid var(--border-light); border-radius:10px; background:var(--bg-card); gap:.3rem;
+}
+body[data-skin="reader"] .lesson-nav-link:hover{
+  border-color:var(--accent);
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 14px 28px -22px rgba(29,28,26,.2);
+}
+body[data-skin="reader"] .lesson-nav-direction{
+  font-family:var(--font-ui); font-size:.74rem; font-weight:700;
+  text-transform:uppercase; letter-spacing:.11em; color:var(--text-muted);
+}
+body[data-skin="reader"] .lesson-nav-title{
+  font-family:var(--font-head); font-weight:600; font-size:1.05rem;
+  color:var(--text-primary); letter-spacing:-.01em;
+}
+
+/* ---- Quick Quiz modal internals ---- */
+body[data-skin="reader"] .kc-modal{ border:1px solid var(--border-light); border-radius:12px; }
+body[data-skin="reader"] .kc-header{ border-bottom-color:var(--border-light); }
+body[data-skin="reader"] .kc-title{ font-family:var(--font-head); font-size:1.08rem; letter-spacing:-.01em; }
+body[data-skin="reader"] .kc-step{ font-family:var(--font-ui); font-variant-numeric:tabular-nums; }
+body[data-skin="reader"] .kc-question{ font-family:var(--font-read); font-size:1.05rem; line-height:1.5; }
+body[data-skin="reader"] .kc-option{
+  font-family:var(--font-ui); font-size:.88rem; border:1px solid var(--border-light);
+  border-radius:7px; padding:.65rem .8rem;
+}
+body[data-skin="reader"] .kc-option:hover:not(.locked){
+  border-color:var(--accent); background:color-mix(in srgb,var(--accent) 6%,var(--bg-card));
+}
+body[data-skin="reader"] .kc-option.selected{
+  border-color:var(--accent); background:color-mix(in srgb,var(--accent) 9%,var(--bg-card));
+}
+/* right/wrong stay semantic — just calmer, on-system tints */
+body[data-skin="reader"] .kc-option.correct,
+body[data-skin="reader"] .kc-fill-btn.correct{
+  border-color:#3e7d58; background:color-mix(in srgb,#3e7d58 10%,var(--bg-card)); color:#2c5940;
+}
+body[data-skin="reader"] .kc-option.incorrect,
+body[data-skin="reader"] .kc-fill-btn.incorrect{
+  border-color:#a04848; background:color-mix(in srgb,#a04848 9%,var(--bg-card)); color:#7c3434;
+}
+body[data-skin="reader"] .kc-blank.correct{ border-color:#3e7d58; color:#2c5940; }
+body[data-skin="reader"] .kc-blank.incorrect{ border-color:#a04848; color:#7c3434; }
+body[data-skin="reader"] .kc-fill-sentence{ font-family:var(--font-read); font-size:1rem; }
+body[data-skin="reader"] .kc-fill-btn{ font-family:var(--font-ui); border:1px solid var(--border-light); }
+body[data-skin="reader"] .kc-fill-btn.selected{
+  border-color:var(--accent); background:color-mix(in srgb,var(--accent) 9%,var(--bg-card));
+}
+body[data-skin="reader"] .kc-btn{ font-family:var(--font-ui); border-radius:7px; font-size:.88rem; }
+body[data-skin="reader"] .kc-btn:hover{ transform:none; }
+body[data-skin="reader"] .kc-btn:active{ transform:scale(.97); }
+body[data-skin="reader"] .kc-btn-secondary{
+  background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-secondary);
+}
+body[data-skin="reader"] .kc-btn-secondary:hover{
+  background:var(--bg-card); border-color:var(--accent); color:var(--accent);
+}
+body[data-skin="reader"] .kc-result-score{
+  font-family:var(--font-head); letter-spacing:-.02em; font-variant-numeric:tabular-nums;
+}
+body[data-skin="reader"] .kc-result-label,
+body[data-skin="reader"] .kc-result-msg{ font-family:var(--font-ui); }
+
+/* ---- Flashcards modal internals (overlay frosts: it tests you) ---- */
+body[data-skin="reader"] .fc-modal-overlay{
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+}
+body[data-skin="reader"] .fc-modal{ border:1px solid var(--border-light); border-radius:12px; }
+body[data-skin="reader"] .fc-modal-header{ border-bottom-color:var(--border-light); }
+body[data-skin="reader"] .fc-modal-title{ font-family:var(--font-head); font-size:1.08rem; letter-spacing:-.01em; }
+body[data-skin="reader"] .fc-modal-count,
+body[data-skin="reader"] .fc-session-counter,
+body[data-skin="reader"] .fc-session-skip{ font-family:var(--font-ui); }
+body[data-skin="reader"] .fc-card-face{
+  border:1px solid var(--border-light); border-radius:10px;
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 14px 28px -22px rgba(29,28,26,.18);
+}
+body[data-skin="reader"] .fc-card-back{ background:color-mix(in srgb,var(--accent) 5%,var(--bg-card)); }
+body[data-skin="reader"] .fc-card-badge{
+  font-family:var(--font-ui);
+  background:color-mix(in srgb,var(--accent) 12%,var(--bg-card)); color:var(--accent);
+}
+
+/* ---- practice card internals (they live in the pq-modal now) ---- */
+body[data-skin="reader"] .practice-intro{ font-family:var(--font-ui); font-size:.95rem; }
+body[data-skin="reader"] .practice-question-card{ border-radius:10px; padding:1.35rem 1.5rem; }
+body[data-skin="reader"] .practice-question-type{
+  font-family:var(--font-ui);
+  background:color-mix(in srgb,var(--accent) 12%,var(--bg-card)); color:var(--accent);
+}
+body[data-skin="reader"] .practice-new-btn{ font-family:var(--font-ui); }
+body[data-skin="reader"] .practice-new-btn:hover{
+  background:color-mix(in srgb,var(--accent) 6%,transparent);
+}
+body[data-skin="reader"] .practice-question-text{
+  font-family:var(--font-read); font-size:1.12rem; line-height:1.55;
+}
+body[data-skin="reader"] .practice-mark-scheme{
+  font-family:var(--font-ui);
+  background:color-mix(in srgb,var(--accent) 6%,var(--bg-card)); border-radius:var(--radius);
+}
+body[data-skin="reader"] .practice-answer-label{ font-family:var(--font-ui); }
+body[data-skin="reader"] .practice-answer-input{
+  font-family:var(--font-ui); font-size:.98rem; border-radius:var(--radius);
+}
+body[data-skin="reader"] .practice-answer-input:focus{
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+body[data-skin="reader"] .practice-btn{ font-family:var(--font-ui); border-radius:7px; }
+body[data-skin="reader"] .practice-btn:hover{ transform:none; }
+body[data-skin="reader"] .practice-btn--send{
+  background:color-mix(in srgb,var(--accent) 10%,var(--bg-card)); color:var(--accent);
+}
+body[data-skin="reader"] .practice-btn--send:hover{
+  background:color-mix(in srgb,var(--accent) 15%,var(--bg-card));
+}
+body[data-skin="reader"] .practice-ai-feedback{
+  border:1px solid var(--border-light); border-radius:var(--radius); font-family:var(--font-ui);
+}
+body[data-skin="reader"] .practice-ai-feedback-title{ font-family:var(--font-ui); }
+
+/* ---- glossary popups ---- */
+body[data-skin="reader"] .term-popup{ font-family:var(--font-ui); border-radius:8px; }
+
+/* ---- bug FAB: accent blob -> quiet corner control ---- */
+body[data-skin="reader"] .bugr-fab{
+  background:var(--bg-card); color:var(--text-muted);
+  border:1px solid var(--border-light);
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 8px 20px -12px rgba(29,28,26,.2);
+}
+body[data-skin="reader"] .bugr-fab:hover{
+  filter:none; color:var(--accent); border-color:var(--accent);
+}
+body[data-skin="reader"] .bugr-btn-primary{ background:var(--accent); color:#fff; }
+body[data-skin="reader"] .bugr-btn-ghost{
+  background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-secondary);
+}
+
+/* ---- cookie banner ---- */
+body[data-skin="reader"] .cookie-banner p,
+body[data-skin="reader"] .cookie-btn{ font-family:var(--font-ui); }
+body[data-skin="reader"] .cookie-banner-inner{ border-radius:10px 10px 0 0; }
+body[data-skin="reader"] .cookie-btn--accept{ background:var(--text-primary); color:var(--bg-card); }
+
+/* ---- legal footer (beta banner already handled as a quiet line below) ---- */
+body[data-skin="reader"] .sv-legal-footer{ border-top:1px solid var(--border-light); }
+body[data-skin="reader"] .sv-legal-footer p{ font-family:var(--font-ui); }
+
 /* ================= READER DARK — warm-dark mapping of the v2 tokens =================
    body.dark-mode swaps the same variables the skin paints from; higher
    specificity than both body.dark-mode (style.css) and body[data-skin="reader"],
