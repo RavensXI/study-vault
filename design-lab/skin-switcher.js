@@ -41,18 +41,12 @@
       .forEach(function (e) { e.remove(); });
     document.querySelectorAll('[class*="sv-reveal"],.lesson-header .lesson-number,.lesson-header h1,.lesson-hero-image,.lesson-sidebar,.study-notes > *,.exam-tip,.conclusion,.practice-section')
       .forEach(function (e) { e.classList.add('sv-visible'); });
-    // DESIGN-LAB: Video as a compact button tile (would open the video modal on real lessons)
-    var vs = document.getElementById('sidebar-video-section');
-    if (vs && !vs.dataset.tilebtn) {
-      vs.dataset.tilebtn = '1';
-      vs.style.display = '';
-      vs.innerHTML = '<button class="sv-tool-btn" type="button">' + ICONS.video + '<span>Video</span></button>';
-    }
     setupMediaLauncher();
     buildToolTiles();
     upgradePrimaryIcons();
     buildPracticeTile();
     buildPanelWrap();
+    buildDemoFigure();
     setupExitIntercept();
     revealMasthead();
   }
@@ -109,8 +103,45 @@
 
     var panel = document.createElement('div');
     panel.className = 'sv-panel';
-    while (sidebar.firstChild) panel.appendChild(sidebar.firstChild);
+    var video = null;
+    while (sidebar.firstChild) {
+      // the video keeps its native player card and lives BELOW the panel in
+      // the freed corner (Tom, 11 Jun) — looks like a player, opens the modal
+      if (sidebar.firstChild.id === 'sidebar-video-section') {
+        video = sidebar.firstChild;
+        sidebar.removeChild(video);
+        continue;
+      }
+      panel.appendChild(sidebar.firstChild);
+    }
     sidebar.appendChild(panel);
+    if (video) sidebar.appendChild(video);
+  }
+
+  // DEMO: one well-placed figure mid-article — relief for the text wall.
+  // The real version is a content job (replace prose with the image, not add
+  // on top); this trials the rhythm on the specimen lesson.
+  var DEMO_FIGURES = {
+    '/lesson/history-aqa/britain-health-people/7': {
+      afterSection: 1,   // end of the Pasteur section
+      src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Albert%20Edelfelt%20-%20Louis%20Pasteur%20-%201885.jpg?width=1400',
+      caption: 'Louis Pasteur in his laboratory, painted by Albert Edelfelt in 1885 — the chemist whose work for brewers and silk farmers rewrote medicine.'
+    }
+  };
+
+  function buildDemoFigure() {
+    var f = DEMO_FIGURES[location.pathname.replace(/\/$/, '')];
+    if (!f || document.querySelector('.sv-article-figure')) return;
+    var heads = document.querySelectorAll('#lesson-page .study-notes h2');
+    if (heads.length <= f.afterSection + 1) return;       // wait for content
+    var fig = document.createElement('figure');
+    fig.className = 'sv-article-figure sv-visible';
+    fig.innerHTML = '<img loading="lazy" alt="">' + '<figcaption></figcaption>';
+    fig.querySelector('img').src = f.src;
+    fig.querySelector('img').alt = f.caption;
+    fig.querySelector('figcaption').textContent = f.caption;
+    var anchor = heads[f.afterSection + 1];               // insert before next section
+    anchor.parentNode.insertBefore(fig, anchor);
   }
 
   // EXIT TICKET (Tom, 11 Jun) — ONE synthesis question per lesson, fired on
