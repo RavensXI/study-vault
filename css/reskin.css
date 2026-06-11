@@ -421,6 +421,7 @@ body[data-skin="reader"] .sv-panel > .sidebar-section:not(.sidebar-progress-sect
 body[data-skin="reader"] .knowledge-check-btn,
 body[data-skin="reader"] #sidebar-flashcard-btn,
 body[data-skin="reader"] .sidebar-flashcard-btn{
+  position:relative;
   flex:1 1 auto; width:100%; min-height:96px; display:flex; flex-direction:column;
   align-items:center; justify-content:center; gap:.5rem; text-align:center; padding:1rem 1.15rem;
   background:color-mix(in srgb,var(--accent) 7%,var(--bg-card));
@@ -442,9 +443,16 @@ body[data-skin="reader"] .knowledge-check-label,
 body[data-skin="reader"] #sidebar-flashcard-btn span{
   font-size:1.05rem; font-weight:700; letter-spacing:-.01em; line-height:1.15;
 }
-/* score sits as a quiet sub-line under the label in the stacked layout */
+/* score = quiet corner mark, out of the flex flow so the icon+label stack
+   stays level with the Flashcards tile. Plain accent text, no pill — the
+   style.css accent pill turned accent-on-accent (unreadable) under the skin */
 body[data-skin="reader"] .knowledge-check-score{
-  margin:-.15rem 0 0; font-size:.84rem; font-weight:600; color:var(--accent); font-variant-numeric:tabular-nums;
+  position:absolute; top:.5rem; left:.7rem; margin:0; padding:0;
+  background:none; border-radius:0;
+  font-size:.8rem; font-weight:600; color:var(--accent); font-variant-numeric:tabular-nums;
+}
+body[data-skin="reader"] .knowledge-check-btn:hover .knowledge-check-score{
+  background:none; color:var(--accent);
 }
 
 body[data-skin="reader"] .sv-tool-btn,
