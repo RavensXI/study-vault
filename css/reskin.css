@@ -279,13 +279,12 @@ body[data-skin="reader"] #lesson-title{
 /* article + toolbar + narration take ~2/3 (left, from the page edge);
    tools fill the right ~1/3 as a tile grid */
 body[data-skin="reader"] .lesson-body{
-  /* a centred max-width container with a 1fr article + fixed sidebar — exact
-     gap, symmetric margins, no centring-math offset. Article lands ~870px
-     (~84ch at the reading size) and every article element shares that width;
-     the sidebar column matches the panel so there's no internal slack. */
-  max-width:84rem; margin:0 auto; padding:1.6rem 2.25rem 0; scroll-margin-top:5rem;
-  display:grid; grid-template-columns:minmax(0,1fr) 22rem;
-  column-gap:3rem; align-items:start;
+  /* full-width two-column — article fills the space (Tom: more cohesive than a
+     capped/centred column). No text-level measure cap, so body, exam tips and
+     figures all share the column width uniformly (the old channel came from
+     capping only the text — that cap is gone). */
+  max-width:none; margin:0; padding:1.6rem 2.25rem 0; scroll-margin-top:5rem;
+  display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:3rem; align-items:start;
 }
 body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
 /* FIXED tools panel — fills the viewport height, NEVER scrolls; tiles auto-size to fit */
@@ -920,13 +919,16 @@ body[data-skin="reader"] .collapsible:has(> .revision-tip-btn) .collapsible-togg
   margin-right:0;
 }
 
-/* ---- mid-article figure (demo) — relief for the text column ---- */
+/* ---- mid-article figure (demo) — relief for the text column ----
+   A diagram must show WHOLE (never cropped) and at a sensible size, so it's
+   capped + centred and shown at its natural aspect (no object-fit:cover,
+   which was clipping the title/captions top and bottom). */
 body[data-skin="reader"] .sv-article-figure{
-  margin:2.4rem 0; border-radius:var(--radius); overflow:hidden;
+  margin:2.4rem auto; max-width:620px; border-radius:var(--radius);
 }
 body[data-skin="reader"] .sv-article-figure img{
-  display:block; width:100%; max-height:440px; object-fit:cover;
-  border-radius:var(--radius);
+  display:block; width:100%; height:auto;
+  border:1px solid var(--border-light); border-radius:var(--radius);
 }
 body[data-skin="reader"] .sv-article-figure figcaption{
   font-family:var(--font-read); font-style:italic; font-size:.9rem;
