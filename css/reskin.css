@@ -297,7 +297,7 @@ body[data-skin="reader"] .sv-panel{
   /* BENTO HIERARCHY: slim progress strip / Quiz+Flashcards PRIMARY /
      two rows of compact utilities. Rows are content-sized — no stretched
      voids; the panel just ends */
-  grid-template-rows:auto auto auto auto;
+  grid-template-rows:auto auto auto auto auto;
   /* TWO-WEIGHT linework (single-weight hairlines read as wireframe):
      internal rules one step lighter than the frame */
   gap:1px; background:var(--border-lighter);
@@ -310,10 +310,11 @@ body[data-skin="reader"] .sv-panel > .sidebar-section{ min-height:0; overflow:hi
 body[data-skin="reader"] .sv-panel > .sidebar-progress-section{ grid-area:1 / 1 / 2 / -1; }
 body[data-skin="reader"] .sv-panel > .sidebar-knowledge-check{ grid-area:2 / 1; }
 body[data-skin="reader"] .sv-panel > .sidebar-flashcard-section{ grid-area:2 / 2; }
-body[data-skin="reader"] .sv-panel > #sidebar-video-section{ grid-area:3 / 1; }
-body[data-skin="reader"] .sv-panel > .sidebar-media{ grid-area:3 / 2; }
-body[data-skin="reader"] .sv-panel > .tile-highlight{ grid-area:4 / 1; }
-body[data-skin="reader"] .sv-panel > .tile-tutor{ grid-area:4 / 2; }
+body[data-skin="reader"] .sv-panel > .tile-practice{ grid-area:3 / 1 / 4 / -1; }
+body[data-skin="reader"] .sv-panel > #sidebar-video-section{ grid-area:4 / 1; }
+body[data-skin="reader"] .sv-panel > .sidebar-media{ grid-area:4 / 2; }
+body[data-skin="reader"] .sv-panel > .tile-highlight{ grid-area:5 / 1; }
+body[data-skin="reader"] .sv-panel > .tile-tutor{ grid-area:5 / 2; }
 
 /* ============ EXIT TICKET — "Before you go" ============
    One synthesis question per lesson, fired when the student clicks
@@ -453,6 +454,55 @@ body[data-skin="reader"] .knowledge-check-score{
 body[data-skin="reader"] .knowledge-check-btn:hover .knowledge-check-score{
   background:none; color:var(--accent);
 }
+
+/* third primary — full-width row under Quiz/Flashcards; same lit-tint
+   family as the stacked tiles, horizontal because it spans the panel */
+body[data-skin="reader"] .sv-practice-btn{
+  flex:1 1 auto; width:100%; min-height:62px; display:flex; flex-direction:row;
+  align-items:center; justify-content:center; gap:.7rem; text-align:center; padding:.85rem 1.15rem;
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--accent) 9%,var(--bg-card)),
+    color-mix(in srgb,var(--accent) 5%,var(--bg-card)));
+  border:none; border-radius:0; color:var(--text-primary);
+  font-family:var(--font-ui); font-size:1.02rem; font-weight:700; letter-spacing:-.01em;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5); cursor:pointer;
+  transition:background .2s ease;
+}
+body[data-skin="reader"] .sv-practice-btn svg{
+  display:block; width:24px !important; height:24px !important; flex:0 0 auto; color:var(--accent);
+}
+body[data-skin="reader"] .sv-practice-btn:hover{
+  background:linear-gradient(180deg,
+    color-mix(in srgb,var(--accent) 13%,var(--bg-card)),
+    color-mix(in srgb,var(--accent) 8%,var(--bg-card)));
+}
+body[data-skin="reader"] .sv-practice-btn:active{
+  background:color-mix(in srgb,var(--accent) 16%,var(--bg-card));
+  box-shadow:inset 0 1px 3px rgba(29,28,26,.08);
+}
+body[data-skin="reader"].dark-mode .sv-practice-btn{ box-shadow:inset 0 1px 0 rgba(255,255,255,.06); }
+
+/* practice modal — the whole live .practice-section moves in here */
+body[data-skin="reader"] .pq-modal{
+  position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center;
+}
+body[data-skin="reader"] .pq-modal[hidden]{ display:none; }
+body[data-skin="reader"] .pq-backdrop{ position:absolute; inset:0; background:rgba(20,15,10,.5); }
+body[data-skin="reader"] .pq-panel{
+  position:relative; z-index:1; width:min(720px,94vw); max-height:88vh; overflow:auto;
+  background:var(--bg-card); color:var(--text-primary);
+  border:1px solid var(--border-light); border-radius:12px;
+  padding:1.6rem 1.8rem; box-shadow:0 24px 70px rgba(0,0,0,.32);
+}
+body[data-skin="reader"] .pq-close{
+  position:sticky; top:0; float:right; background:transparent; border:none;
+  font-size:1.7rem; line-height:1; cursor:pointer; color:var(--text-muted); z-index:2;
+}
+body[data-skin="reader"] .pq-close:hover{ color:var(--text-primary); }
+body[data-skin="reader"] .pq-panel .practice-section{
+  margin:0; padding:0; background:transparent; border:none; box-shadow:none;
+}
+body[data-skin="reader"] .pq-panel .practice-section h2{ margin-top:0; font-size:1.45rem; }
 
 body[data-skin="reader"] .sv-tool-btn,
 body[data-skin="reader"] .rm-launcher{

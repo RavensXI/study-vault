@@ -51,9 +51,51 @@
     setupMediaLauncher();
     buildToolTiles();
     upgradePrimaryIcons();
+    buildPracticeTile();
     buildPanelWrap();
     setupExitIntercept();
     revealMasthead();
+  }
+
+  // Practice questions move OFF the page bottom and INTO the panel as the
+  // third primary (Tom, 11 Jun: "no reason they should be at the bottom —
+  // we only put them there because we ran out of space on the right").
+  // The live .practice-section node is MOVED into a modal (listeners survive),
+  // so AI marking / send-to-teacher keep working untouched.
+  function buildPracticeTile() {
+    var sidebar = document.querySelector('#lesson-page .lesson-sidebar');
+    var section = document.querySelector('.practice-section');
+    if (!sidebar || !section || sidebar.dataset.practiceTile) return;
+    if (!window.practiceQuestions || !window.practiceQuestions.length) return;
+    if (!sidebar.querySelector('.sidebar-tool-tile')) return; // keep build order stable
+    sidebar.dataset.practiceTile = '1';
+
+    var sec = document.createElement('div');
+    sec.className = 'sidebar-section tile-practice';
+    var b = document.createElement('button');
+    b.className = 'sv-practice-btn'; b.type = 'button';
+    b.innerHTML = ICONS.practice + '<span>Practice questions</span>';
+    sec.appendChild(b);
+    var panel = sidebar.querySelector('.sv-panel');
+    (panel || sidebar).appendChild(sec);
+
+    var modal = document.createElement('div');
+    modal.className = 'pq-modal';
+    modal.hidden = true;
+    modal.innerHTML = '<div class="pq-backdrop"></div>' +
+      '<div class="pq-panel" role="dialog" aria-modal="true" aria-label="Practice questions">' +
+        '<button type="button" class="pq-close" aria-label="Close">&times;</button>' +
+      '</div>';
+    modal.querySelector('.pq-panel').appendChild(section); // move, don't clone
+    document.body.appendChild(modal);
+
+    function close() { modal.hidden = true; }
+    b.addEventListener('click', function () { modal.hidden = false; });
+    modal.querySelector('.pq-close').addEventListener('click', close);
+    modal.querySelector('.pq-backdrop').addEventListener('click', close);
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && !modal.hidden) close();
+    });
   }
 
   // Wrap the sidebar tiles in .sv-panel — the column's single object.
@@ -151,6 +193,7 @@
   var ICONS = {
     quiz: '<svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10" fill="currentColor" opacity=".15"/><path d="M9.4 9.2a2.7 2.7 0 0 1 5.25.9c0 1.8-2.7 2.45-2.7 3.55" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><circle cx="12" cy="16.9" r="1.25" fill="currentColor"/></svg>',
     cards: '<svg viewBox="0 0 24 24" width="26" height="26"><rect x="3" y="7.5" width="13.5" height="11" rx="2.2" fill="currentColor" opacity=".15"/><rect x="7.5" y="4" width="13.5" height="11" rx="2.2" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+    practice: '<svg viewBox="0 0 24 24" width="24" height="24"><rect x="4" y="2.5" width="13" height="19" rx="2.2" fill="currentColor" opacity=".15"/><path d="M8 8h7M8 12h7M8 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M20.6 11.6l-5.4 5.4-2.2.7.7-2.2 5.4-5.4a1.06 1.06 0 0 1 1.5 1.5z" fill="currentColor"/></svg>',
     video: '<svg viewBox="0 0 24 24" width="19" height="19"><rect x="2.5" y="5" width="19" height="14" rx="3" fill="currentColor" opacity=".15"/><path d="M10.2 9.3v5.4c0 .5.55.8.98.52l4.3-2.7a.62.62 0 0 0 0-1.05l-4.3-2.7a.62.62 0 0 0-.98.53z" fill="currentColor"/></svg>',
     media: '<svg viewBox="0 0 24 24" width="19" height="19"><rect x="3" y="3" width="8.2" height="8.2" rx="2" fill="currentColor"/><rect x="12.8" y="3" width="8.2" height="8.2" rx="2" fill="currentColor" opacity=".35"/><rect x="3" y="12.8" width="8.2" height="8.2" rx="2" fill="currentColor" opacity=".35"/><rect x="12.8" y="12.8" width="8.2" height="8.2" rx="2" fill="currentColor"/></svg>',
     highlight: '<svg viewBox="0 0 24 24" width="19" height="19"><path d="M14.2 4.6l5.2 5.2L11 18.2l-5.8 1.4a.5.5 0 0 1-.6-.6L6 13.2l8.2-8.6z" fill="currentColor" opacity=".15"/><path d="M14.4 4.4l2-2a2 2 0 0 1 2.8 0l2.4 2.4a2 2 0 0 1 0 2.8l-2 2-5.2-5.2z" fill="currentColor"/><path d="M3.5 21.5h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
