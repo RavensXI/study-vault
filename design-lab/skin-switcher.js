@@ -46,32 +46,31 @@
     upgradePrimaryIcons();
     buildPracticeTile();
     buildPanelWrap();
-    buildDemoVideo();
+    buildRichVideoThumb();
     buildDemoFigure();
     setupExitIntercept();
     revealMasthead();
   }
 
   // DEMO: L7 has no real video, but Tom wants to SEE the corner player card.
-  // Stand in the generic StudyVault play card (what R2/Drive videos render).
-  var DEMO_VIDEO = { '/lesson/history-aqa/britain-health-people/7': true };
-  function buildDemoVideo() {
-    if (!DEMO_VIDEO[location.pathname.replace(/\/$/, '')]) return;
-    var vs = document.getElementById('sidebar-video-section');
-    if (!vs || vs.dataset.demoVideo) return;
-    // don't clobber a real video
-    var realIframe = vs.querySelector('iframe');
-    if (vs.querySelector('.sidebar-video-play') ||
-        (realIframe && realIframe.src && realIframe.src.indexOf('/embed/') !== -1)) return;
-    vs.dataset.demoVideo = '1';
-    vs.style.display = '';
-    var sv = vs.querySelector('.sidebar-video') || vs;
-    // compose a YouTube-style thumbnail from the lesson's own hero image
+  // Upgrade the REAL R2/Drive video card (loader-rendered "thumb + play"
+  // variant) into a YouTube-style thumbnail composed from the lesson's own
+  // hero image. Only swaps the card's VISUAL children, never the container,
+  // so the loader's click->openVideoModal listener survives. YouTube embeds
+  // (iframe, no play button) keep their own thumbnail and are left alone.
+  function buildRichVideoThumb() {
+    var card = document.querySelector('#sidebar-video-section .sidebar-video');
+    if (!card || card.dataset.richThumb) return;
+    // only the R2/Drive play-card has a play button or generic thumb; an empty
+    // iframe means the loader hasn't finished yet — bail and catch it next tidy
+    if (!card.querySelector('.sidebar-video-play') && !card.querySelector('.sidebar-video-thumb')) return;
+    card.dataset.richThumb = '1';
+
     var hero = document.getElementById('hero-image');
     var heroSrc = hero && hero.src ? hero.src : '';
     var title = (document.getElementById('lesson-title') || {}).textContent || '';
-    sv.classList.add('sidebar-video--gdrive', 'sv-video-thumb-rich');
-    sv.innerHTML =
+    card.classList.add('sv-video-thumb-rich');
+    card.innerHTML =
       (heroSrc ? '<img class="sv-video-hero" alt="">' : '') +
       '<div class="sv-video-scrim"></div>' +
       '<span class="sv-video-dur">4:32</span>' +
@@ -82,8 +81,8 @@
         '<span class="sv-video-kicker">Video overview</span>' +
         '<span class="sv-video-ttl"></span>' +
       '</div>';
-    if (heroSrc) sv.querySelector('.sv-video-hero').src = heroSrc;
-    sv.querySelector('.sv-video-ttl').textContent = title;
+    if (heroSrc) card.querySelector('.sv-video-hero').src = heroSrc;
+    card.querySelector('.sv-video-ttl').textContent = title;
   }
 
   // Practice questions move OFF the page bottom and INTO the panel as the
@@ -434,6 +433,7 @@
     applySubjectAccent();
     setTimeout(tidy, 1200);
     setTimeout(tidy, 2600);
+    setTimeout(tidy, 4200);   // safety: catch a slow async video-card render
 
     // (scroll-jump-past-hero experiment removed — felt jerky; plain scrolling wins)
   }
