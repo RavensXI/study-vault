@@ -73,7 +73,7 @@
     card.innerHTML =
       (heroSrc ? '<img class="sv-video-hero" alt="">' : '') +
       '<div class="sv-video-scrim"></div>' +
-      '<span class="sv-video-dur">4:32</span>' +
+      '<span class="sv-video-dur"></span>' +   /* filled from the real file below */
       '<button class="sidebar-video-play" aria-label="Play video overview">' +
         '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="8,5 19,12 8,19"/></svg>' +
       '</button>' +
@@ -83,6 +83,36 @@
       '</div>';
     if (heroSrc) card.querySelector('.sv-video-hero').src = heroSrc;
     card.querySelector('.sv-video-ttl').textContent = title;
+    fillVideoDuration(card.querySelector('.sv-video-dur'));
+  }
+
+  // Read the true running time off the real R2 MP4 (the <video> element
+  // exposes .duration once metadata loads). Only direct-file videos expose
+  // this; Drive/YouTube embeds don't, so the badge stays hidden (:empty).
+  function fillVideoDuration(badge) {
+    if (!badge || !window.supabase || !window._lessonId) return;
+    var c = window.supabase.createClient(
+      'https://baipckgywpnwapobwtsy.supabase.co',
+      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
+    );
+    c.from('lessons').select('youtube_video_id').eq('id', window._lessonId).then(function (r) {
+      var url = r && r.data && r.data[0] && r.data[0].youtube_video_id;
+      if (!url) return;
+      var isDirect = /\.(mp4|webm)(\?|$)/i.test(url) || url.indexOf('r2.dev/') !== -1;
+      if (!isDirect) return;                      // embeds can't be probed
+      var probe = document.createElement('video');
+      probe.preload = 'metadata'; probe.muted = true; probe.src = url;
+      probe.style.cssText = 'position:absolute;width:0;height:0;opacity:0;pointer-events:none';
+      probe.addEventListener('loadedmetadata', function () {
+        var d = probe.duration;
+        if (isFinite(d) && d > 0) {
+          var s = Math.round(d), m = Math.floor(s / 60), ss = s % 60;
+          badge.textContent = m + ':' + (ss < 10 ? '0' : '') + ss;
+        }
+        probe.remove();
+      });
+      document.body.appendChild(probe);
+    });
   }
 
   // Practice questions move OFF the page bottom and INTO the panel as the
