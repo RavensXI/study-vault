@@ -280,7 +280,11 @@ body[data-skin="reader"] #lesson-title{
    tools fill the right ~1/3 as a tile grid */
 body[data-skin="reader"] .lesson-body{
   max-width:none; margin:0; padding:1.6rem 2.25rem 0; scroll-margin-top:5rem;
-  display:grid; grid-template-columns:minmax(0,2fr) minmax(0,1fr); gap:3rem; align-items:start;
+  /* cap the COLUMN at the reading measure (not just the text) and centre the
+     pair — so body, exam tips, figures and key facts all share one width and
+     the slack goes to the outer margins, not a weird channel up the middle */
+  display:grid; grid-template-columns:minmax(0,46rem) minmax(19rem,22rem);
+  justify-content:center; column-gap:3.5rem; align-items:start;
 }
 body[data-skin="reader"] .lesson-content{ min-width:0; max-width:none; }
 /* FIXED tools panel — fills the viewport height, NEVER scrolls; tiles auto-size to fit */
@@ -880,10 +884,8 @@ body[data-skin="reader"] .cookie-btn{ font-family:var(--font-ui); }
 body[data-skin="reader"] .cookie-banner-inner{ border-radius:10px 10px 0 0; }
 body[data-skin="reader"] .cookie-btn--accept{ background:var(--text-primary); color:var(--bg-card); }
 
-/* ---- READING MEASURE — lines cap at ~72ch; walls of text are part
-   width, not just length ---- */
-body[data-skin="reader"] .study-notes,
-body[data-skin="reader"] .conclusion{ max-width:72ch; }
+/* ---- READING MEASURE — now enforced by the capped article COLUMN (see
+   .lesson-body grid above) so every article element shares one width ---- */
 
 /* ---- collapsibles: solid subject-colour headers (Tom — chunking) ---- */
 body[data-skin="reader"] .collapsible{
@@ -895,7 +897,17 @@ body[data-skin="reader"] .collapsible-toggle{
 }
 body[data-skin="reader"] .collapsible-toggle:hover{ filter:brightness(1.07); }
 body[data-skin="reader"] .collapsible-hint{ color:rgba(255,255,255,.75); }
-body[data-skin="reader"] .collapsible-icon{ color:rgba(255,255,255,.85); }
+body[data-skin="reader"] .collapsible-icon{ color:rgba(255,255,255,.9); }
+/* revision-tip lightbulb + down arrow must sit SIDE BY SIDE on the solid
+   header (base CSS stacked them — arrow vanished under the bulb). Arrow stays
+   at the far right; bulb tucks just left of it as a white chip. */
+body[data-skin="reader"] .collapsible > .revision-tip-btn{
+  right:2.9rem; top:.55rem; background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.2);
+}
+body[data-skin="reader"] .collapsible:has(> .revision-tip-btn) .collapsible-toggle-right{
+  margin-right:0;
+}
 
 /* ---- mid-article figure (demo) — relief for the text column ---- */
 body[data-skin="reader"] .sv-article-figure{

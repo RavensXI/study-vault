@@ -46,9 +46,35 @@
     upgradePrimaryIcons();
     buildPracticeTile();
     buildPanelWrap();
+    buildDemoVideo();
     buildDemoFigure();
     setupExitIntercept();
     revealMasthead();
+  }
+
+  // DEMO: L7 has no real video, but Tom wants to SEE the corner player card.
+  // Stand in the generic StudyVault play card (what R2/Drive videos render).
+  var DEMO_VIDEO = { '/lesson/history-aqa/britain-health-people/7': true };
+  function buildDemoVideo() {
+    if (!DEMO_VIDEO[location.pathname.replace(/\/$/, '')]) return;
+    var vs = document.getElementById('sidebar-video-section');
+    if (!vs || vs.dataset.demoVideo) return;
+    // don't clobber a real video
+    var realIframe = vs.querySelector('iframe');
+    if (vs.querySelector('.sidebar-video-play') ||
+        (realIframe && realIframe.src && realIframe.src.indexOf('/embed/') !== -1)) return;
+    vs.dataset.demoVideo = '1';
+    vs.style.display = '';
+    var sv = vs.querySelector('.sidebar-video') || vs;
+    sv.classList.add('sidebar-video--gdrive');
+    sv.innerHTML =
+      '<div class="sidebar-video-thumb sidebar-video-thumb--generic">' +
+        '<span class="sv-video-label">StudyVault</span>' +
+        '<span class="sv-video-sublabel">Video Overview</span>' +
+      '</div>' +
+      '<button class="sidebar-video-play" aria-label="Play video overview">' +
+        '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>' +
+      '</button>';
   }
 
   // Practice questions move OFF the page bottom and INTO the panel as the
@@ -118,30 +144,42 @@
     if (video) sidebar.appendChild(video);
   }
 
-  // DEMO: one well-placed figure mid-article — relief for the text wall.
-  // The real version is a content job (replace prose with the image, not add
-  // on top); this trials the rhythm on the specimen lesson.
+  // DEMO: one generated diagram mid-article — relief for the text wall AND a
+  // genuine REPLACE (Tom): a gpt-image-2 diagram of Pasteur's swan-neck flask
+  // experiment carries the experiment the prose only had room to name, so the
+  // sentence shortens to point at it. The real version is a content job.
   var DEMO_FIGURES = {
     '/lesson/history-aqa/britain-health-people/7': {
-      afterSection: 1,   // end of the Pasteur section
-      src: 'https://commons.wikimedia.org/wiki/Special:FilePath/Albert%20Edelfelt%20-%20Louis%20Pasteur%20-%201885.jpg?width=1400',
-      caption: 'Louis Pasteur in his laboratory, painted by Albert Edelfelt in 1885 — the chemist whose work for brewers and silk farmers rewrote medicine.'
+      src: '/design-lab/assets/pasteur-swan-neck.png',
+      afterPara: 'swan-necked flask',   // drop the figure right after this paragraph
+      caption: 'Pasteur’s swan-neck flask experiment. Boiled broth in an intact swan-neck flask stays clear — airborne microbes are trapped in the bend, never reaching it. Snap the neck and the same broth clouds within days. This is how he proved germs come from the air, not from the broth itself.',
+      replace: {
+        find: 'By using a microscope and a series of swan-necked flask experiments, Pasteur showed that microbes carried in the air caused fermentation and decay. ',
+        with: 'Using a microscope, he traced fermentation and decay to microbes carried in the air — proving it with the swan-neck flask experiment shown below. '
+      }
     }
   };
 
   function buildDemoFigure() {
     var f = DEMO_FIGURES[location.pathname.replace(/\/$/, '')];
     if (!f || document.querySelector('.sv-article-figure')) return;
-    var heads = document.querySelectorAll('#lesson-page .study-notes h2');
-    if (heads.length <= f.afterSection + 1) return;       // wait for content
+    var paras = [].slice.call(document.querySelectorAll('#lesson-page .study-notes p'));
+    if (!paras.length) return;
+    var host = null;
+    for (var i = 0; i < paras.length; i++) {
+      if (paras[i].textContent.indexOf(f.afterPara) !== -1) { host = paras[i]; break; }
+    }
+    if (!host) return;
+    if (f.replace && host.innerHTML.indexOf(f.replace.find) !== -1) {
+      host.innerHTML = host.innerHTML.replace(f.replace.find, f.replace.with);
+    }
     var fig = document.createElement('figure');
     fig.className = 'sv-article-figure sv-visible';
     fig.innerHTML = '<img loading="lazy" alt="">' + '<figcaption></figcaption>';
     fig.querySelector('img').src = f.src;
     fig.querySelector('img').alt = f.caption;
     fig.querySelector('figcaption').textContent = f.caption;
-    var anchor = heads[f.afterSection + 1];               // insert before next section
-    anchor.parentNode.insertBefore(fig, anchor);
+    host.parentNode.insertBefore(fig, host.nextSibling);   // right after the paragraph
   }
 
   // EXIT TICKET (Tom, 11 Jun) — ONE synthesis question per lesson, fired on
