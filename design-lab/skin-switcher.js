@@ -51,216 +51,62 @@
     setupMediaLauncher();
     buildToolTiles();
     upgradePrimaryIcons();
-    buildContentsRail();
+    buildPanelWrap();
+    buildExitTicket();
     revealMasthead();
   }
 
-  // "In this lesson" contents rail — fills the corner below the tool panel.
-  // Wraps the tiles in .sv-panel, then lists the article's h2s, scroll-synced.
-  function buildContentsRail() {
+  // Wrap the sidebar tiles in .sv-panel — the column's single object.
+  // (Companion card / contents rail / per-section recall removed 11 Jun:
+  // Tom — corner felt cobbled together; synthesis lives at article end now.)
+  function buildPanelWrap() {
     var sidebar = document.querySelector('#lesson-page .lesson-sidebar');
-    if (!sidebar || sidebar.dataset.contentsRail) return;
-    var heads = [].slice.call(document.querySelectorAll('#lesson-page .study-notes h2'));
-    if (heads.length < 2) return;                       // nothing worth mapping
+    if (!sidebar || sidebar.dataset.panelWrap) return;
     if (!sidebar.querySelector('.sidebar-tool-tile')) return; // wait until tiles are built
-    sidebar.dataset.contentsRail = '1';
+    sidebar.dataset.panelWrap = '1';
 
     var panel = document.createElement('div');
     panel.className = 'sv-panel';
     while (sidebar.firstChild) panel.appendChild(sidebar.firstChild);
     sidebar.appendChild(panel);
-
-    // the COMPANION CARD — second framed object in the column, same frame
-    // spec as the panel: recall/synthesis (feature section) above contents
-    var companion = document.createElement('div');
-    companion.className = 'sv-companion';
-
-    var rail = document.createElement('nav');
-    rail.className = 'sv-contents';
-    rail.setAttribute('aria-label', 'Lesson contents');
-    rail.innerHTML = '<div class="sv-contents-title">In this lesson</div>';
-    var links = heads.map(function (h, i) {
-      if (!h.id) h.id = 'lesson-sec-' + i;
-      var a = document.createElement('a');
-      a.href = '#' + h.id;
-      a.textContent = h.textContent;
-      a.addEventListener('click', function (e) {
-        e.preventDefault();
-        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-      rail.appendChild(a);
-      return a;
-    });
-    companion.appendChild(rail);
-    sidebar.appendChild(companion);
-
-    buildPriorRecall(companion);
-
-    var ticking = false, lastIdx = -2;
-    function sync() {
-      ticking = false;
-      var idx = -1, threshold = window.innerHeight * 0.38;
-      heads.forEach(function (h, i) { if (h.getBoundingClientRect().top < threshold) idx = i; });
-      links.forEach(function (l, i) { l.classList.toggle('active', i === idx); });
-      if (window.__svRecall && idx !== lastIdx && idx >= 0) window.__svRecall.deal(idx);
-      lastIdx = idx;
-    }
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(sync); }
-    }, { passive: true });
-    sync();
   }
 
-  // DEMO: per-section SYNTHESIS questions (Tom's idea, 10 Jun) — each section
-  // gets one question that combines THIS section's idea with something from a
-  // previous lesson, forcing integration. Hand-written for one specimen lesson
-  // to trial the experience; the real version is a pipeline job
-  // (synthesis_questions jsonb per lesson, generated with prior-lesson context).
-  var DEMO_SYNTH = {
-    '/lesson/business-aqa/marketing/2': [
-      { q: 'In Lesson 1 you used a market map to spot a gap for budget gym wear. Which of the three things market research collects — demand, competition, target market — would confirm the gap is worth filling?',
-        a: 'Demand is the decisive check: a gap on the map only matters if enough people would actually buy budget gym wear. Competition research then confirms the space really is empty.' },
-      { q: 'You segmented a market by age and income in Lesson 1. How would you design a survey so its results can be broken down by segment?',
-        a: 'Include questions that record each respondent’s segment (age group, income band). Answers can then be split per segment and compared against the target market.' },
-      { q: 'Which would better tell a business whether the over-50s segment you met in Lesson 1 is growing — its own customer survey, or government population data? Why?',
-        a: 'Government data (secondary research): it shows whole-population trends over years. A survey only captures the business’s current customers at one moment.' },
-      { q: 'A cinema targets two segments: families and film buffs. Which research type would reveal WHY film buffs visit less often — and which would show HOW MUCH each segment spends?',
-        a: 'Qualitative research (interviews, focus groups) uncovers the why; quantitative research puts numbers on each segment’s spending.' },
-      { q: 'Why might a business measure the size of ONE segment from Lesson 1 rather than the size of the whole market?',
-        a: 'If it targets a segment, realistic demand is that segment’s size, not the whole market’s. Market share within the segment shows how well it is competing where it actually sells.' },
-      { q: 'Research shows strong demand among 16–25s — but the market map from Lesson 1 shows that space is crowded with rivals. What decision might the business take?',
-        a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin.' }
-    ],
-    // AQA History — Health & the People L7 (Pasteur, Koch & Germ Theory), the
-    // unit's halfway hinge: every section recontextualises an earlier lesson
-    '/lesson/history-aqa/britain-health-people/7': [
-      { from: 'with Lesson 1',
-        q: 'Miasma theory was wrong but still produced useful action. In Lesson 1 you met another wrong theory that shaped treatment for centuries. What did the two have in common?',
-        a: 'The four humours. Both were coherent, actionable explanations — bleeding and purging to rebalance humours, cleaning and ventilation to clear bad air — and both blocked the search for the real, invisible cause of disease.' },
-      { from: 'with Lesson 6',
-        q: 'Jenner proved vaccination worked some 65 years before Pasteur published germ theory. What could Jenner NOT explain that Pasteur now could?',
-        a: 'WHY it worked. Jenner’s vaccine came from observation, with no mechanism. Germ theory supplied one — a specific microbe causes the disease — which is why vaccines for new diseases could now be developed deliberately rather than stumbled upon.' },
-      { from: 'with Lesson 4',
-        q: 'Koch identified specific microbes using dyes and photography. How does his method echo what Vesalius did in Lesson 4 — and why do examiners love this comparison?',
-        a: 'Both replaced trust in ancient authority with direct observation and proof: Vesalius dissected to correct Galen; Koch stained and photographed microbes to prove each disease had its own germ. The Science & Technology factor recurring across periods — ideal factor-essay evidence.' },
-      { from: 'with Lesson 1',
-        q: 'Compare Ehrlich’s Salvarsan 606 with the treatments a medieval doctor offered in Lesson 1. What fundamental shift does a “magic bullet” represent?',
-        a: 'Medieval treatment aimed at the whole body’s balance (bleeding, purging). Salvarsan attacked one specific cause — the syphilis microbe. Treatment now followed the actual cause of disease, not a theory of balance.' },
-      { from: 'with Lesson 2',
-        q: 'In Lesson 2 the Church both helped and hindered progress. Britain lagged behind France and Germany on germ theory in the 1860s–70s. What is similar about WHY progress was slowed in each case?',
-        a: 'Institutions and attitudes, not lack of evidence: medieval reverence for Galen and Church authority discouraged challenge; the Victorian medical establishment clung to miasma and distrusted foreign laboratory science. “Attitudes in society” as a hindering factor recurs.' },
-      { from: 'with Lesson 3',
-        q: 'During the Black Death (Lesson 3) ordinary people turned to prayer, flagellation and herbs. By the 1880s germ theory was proven — yet what stayed surprisingly similar in everyday medicine, and why?',
-        a: 'Most people still used home remedies, patent medicines and unqualified healers — knowing the cause didn’t yet produce affordable cures. Understanding changed faster than treatment: change and continuity running side by side.' },
-      { from: 'whole course',
-        q: 'Pasteur was a chemist helping brewers; Jenner was a country doctor watching milkmaids. Use both to argue that “science and technology” alone does not explain progress.',
-        a: 'Each breakthrough needed other factors too: Jenner — chance observation plus government compulsion (1853); Pasteur — industrial funding, the microscope, and rivalry with Koch. Progress comes from factors combining — the core argument the 16-marker rewards.' }
-    ]
+  // EXIT TICKET (Tom, 11 Jun) — synthesis stays, but ONE question per lesson
+  // instead of per-section: a single "Before you go" task at the end of the
+  // article that forces the student to combine this lesson with earlier ones.
+  // Hand-written for two specimen lessons; the real version is a pipeline job
+  // (one synthesis question per lesson, generated with prior-lesson context).
+  var EXIT_TICKETS = {
+    '/lesson/business-aqa/marketing/2': {
+      q: 'Research shows strong demand among 16–25s — but the market map you drew in Lesson 1 shows that space is crowded with rivals. Using both lessons, what decision should the business take, and why?',
+      a: 'Use the two together: rather than fight head-on, reposition toward a gap — an underserved segment where demand exists but competition is thin. Market research confirms the demand is real; the market map shows where the space is empty.'
+    },
+    '/lesson/history-aqa/britain-health-people/7': {
+      q: 'Pasteur was a chemist helping brewers; Jenner was a country doctor watching milkmaids. Use both men to argue that “science and technology” alone does not explain medical progress.',
+      a: 'Each breakthrough needed other factors too: Jenner — chance observation plus government compulsion (1853); Pasteur — industrial funding, the microscope, and rivalry with Koch. Progress comes from factors combining — the core argument the 16-marker rewards.'
+    }
   };
 
-  // QUICK RECALL v2 — spaced retrieval, not open-book recognition (Tom's call:
-  // asking about the section on screen is "flashcards but cheating").
-  // The card drills EARLIER lessons in this unit: content that is NOT in front
-  // of you. Scroll boundaries deal the next card from a shuffled prior-lesson
-  // deck. Lesson 1 of a unit has nothing to look back on -> no card.
-  // When a DEMO_SYNTH set exists for this page, the card runs in synthesis
-  // mode instead: the active SECTION picks the question (1:1), kicker says
-  // 'Bring it together'.
-  function makeRecallCard(companion, kicker) {
-    var recall = document.createElement('div');
-    recall.className = 'sv-recall';
-    recall.innerHTML =
-      '<div class="sv-recall-kicker"><span>' + kicker + '</span><span class="sv-recall-from"></span></div>' +
-      '<div class="sv-recall-body">' +
-        '<p class="sv-recall-q"></p>' +
-        '<p class="sv-recall-a" hidden></p>' +
-        '<div class="sv-recall-actions">' +
-          '<button type="button" class="sv-recall-btn sv-recall-btn--primary" data-act="reveal">Reveal answer</button>' +
-        '</div>' +
-      '</div>';
-    companion.insertBefore(recall, companion.firstChild); // feature section sits above contents
-    var els = {
-      q: recall.querySelector('.sv-recall-q'),
-      a: recall.querySelector('.sv-recall-a'),
-      from: recall.querySelector('.sv-recall-from'),
-      reveal: recall.querySelector('[data-act="reveal"]')
-    };
-    recall.addEventListener('click', function (e) {
-      if (!e.target.closest('[data-act="reveal"]')) return;
-      els.a.hidden = !els.a.hidden;
-      els.reveal.textContent = els.a.hidden ? 'Reveal answer' : 'Hide answer';
+  function buildExitTicket() {
+    var notes = document.querySelector('#lesson-page .study-notes');
+    if (!notes || !notes.children.length || document.querySelector('.sv-exit')) return;
+    var t = EXIT_TICKETS[location.pathname.replace(/\/$/, '')];
+    if (!t) return;
+    var exit = document.createElement('aside');
+    exit.className = 'sv-exit sv-visible';
+    exit.innerHTML =
+      '<div class="sv-exit-kicker">Before you go</div>' +
+      '<p class="sv-exit-q"></p>' +
+      '<p class="sv-exit-a" hidden></p>' +
+      '<button type="button" class="sv-exit-btn">Reveal a model answer</button>';
+    exit.querySelector('.sv-exit-q').textContent = t.q;
+    exit.querySelector('.sv-exit-a').textContent = t.a;
+    var a = exit.querySelector('.sv-exit-a'), btn = exit.querySelector('.sv-exit-btn');
+    btn.addEventListener('click', function () {
+      a.hidden = !a.hidden;
+      btn.textContent = a.hidden ? 'Reveal a model answer' : 'Hide the model answer';
     });
-    function paint(c) {
-      els.q.textContent = c.q;
-      els.a.textContent = c.a;
-      els.from.textContent = c.from || '';
-      els.a.hidden = true;
-      els.reveal.textContent = 'Reveal answer';
-    }
-    var dealt = false;
-    els.show = function (c) {
-      if (!dealt) { dealt = true; paint(c); return; } // first deal: no fade
-      recall.classList.add('is-swapping');            // visible swap signal on scroll
-      setTimeout(function () {
-        paint(c);
-        recall.classList.remove('is-swapping');
-      }, 190);
-    };
-    return els;
-  }
-
-  function buildPriorRecall(companion) {
-    if (document.querySelector('.sv-recall')) return;
-    var info = window._lessonOfTotal || {};
-
-    // SYNTHESIS MODE (demo) — section index picks the question
-    var synth = DEMO_SYNTH[location.pathname.replace(/\/$/, '')];
-    if (synth && synth.length) {
-      var sEls = makeRecallCard(companion, 'Bring it together');
-      var sLast = -1;
-      window.__svRecall = { deal: function (idx) {
-        var n = Math.max(0, Math.min(typeof idx === 'number' ? idx : 0, synth.length - 1));
-        if (n === sLast) return;
-        sLast = n;
-        sEls.show(synth[n]);
-      } };
-      window.__svRecall.deal(0);
-      return;
-    }
-
-    // PRIOR-LESSON RECALL MODE — shuffled deck from earlier lessons
-    var unitId = window._lessonUnitId;
-    if (!unitId || !info.num || info.num <= 1) return;
-    var client = window.supabase.createClient(
-      'https://baipckgywpnwapobwtsy.supabase.co',
-      'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'
-    );
-    client.from('lessons')
-      .select('lesson_number, title, flashcard_questions')
-      .eq('unit_id', unitId)
-      .lt('lesson_number', info.num)
-      .order('lesson_number')
-      .then(function (res) {
-        var deck = [];
-        ((res && res.data) || []).forEach(function (l) {
-          (l.flashcard_questions || []).forEach(function (c) {
-            deck.push({ q: c.question || c.q || '', a: c.answer || c.a || '',
-                        from: 'Lesson ' + l.lesson_number + ' · ' + (l.title || '') });
-          });
-        });
-        if (!deck.length || document.querySelector('.sv-recall')) return;
-        for (var i = deck.length - 1; i > 0; i--) {       // shuffle once per visit
-          var j = Math.floor(Math.random() * (i + 1));
-          var t = deck[i]; deck[i] = deck[j]; deck[j] = t;
-        }
-        var els = makeRecallCard(companion, 'Quick recall');
-        var n = -1;
-        window.__svRecall = { deal: function () {
-          n = (n + 1) % deck.length;
-          els.show(deck[n]);
-        } };
-        window.__svRecall.deal();
-      });
+    notes.appendChild(exit);
   }
 
   // Duotone icon set (soft filled shape + bold glyph) — replaces the generic
