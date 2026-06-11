@@ -316,36 +316,62 @@ body[data-skin="reader"] .sv-panel > .tile-highlight{ grid-area:4 / 1; }
 body[data-skin="reader"] .sv-panel > .tile-tutor{ grid-area:4 / 2; }
 
 /* ============ EXIT TICKET — "Before you go" ============
-   One synthesis question per lesson at the END of the article (companion
-   card / per-section recall removed 11 Jun — the corner breathes again).
-   Same visual family as the key-facts box: quiet subject tint, no chrome. */
-body[data-skin="reader"] .sv-exit{
-  margin:3rem 0 .5rem; padding:1.5rem 1.7rem 1.55rem;
-  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card));
-  border-radius:var(--radius);
+   One synthesis question per lesson, fired when the student clicks
+   Next lesson (either control). Once per lesson per session; Continue
+   is always one click. Tinted question zone = the key-facts family. */
+body[data-skin="reader"] .sv-exit-modal{
+  position:fixed; inset:0; z-index:10000;
+  display:flex; align-items:center; justify-content:center;
 }
+body[data-skin="reader"] .sv-exit-backdrop{
+  position:absolute; inset:0; background:rgba(20,15,10,.5);
+}
+body[data-skin="reader"] .sv-exit-card{
+  position:relative; z-index:1; width:min(560px,92vw); max-height:84vh; overflow:auto;
+  background:var(--bg-card); color:var(--text-primary);
+  border:1px solid var(--border-light); border-radius:12px;
+  padding:1.7rem 1.8rem 1.6rem; box-shadow:0 24px 70px rgba(0,0,0,.32);
+}
+body[data-skin="reader"] .sv-exit-close{
+  position:absolute; top:.55rem; right:.9rem; background:transparent; border:none;
+  font-size:1.7rem; line-height:1; cursor:pointer; color:var(--text-muted);
+}
+body[data-skin="reader"] .sv-exit-close:hover{ color:var(--text-primary); }
 body[data-skin="reader"] .sv-exit-kicker{
   font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.13em;
-  font-size:.78rem; font-weight:700; color:var(--accent); margin:0 0 .7rem;
+  font-size:.78rem; font-weight:700; color:var(--accent); margin:0 0 .8rem;
 }
 body[data-skin="reader"] .sv-exit-q{
-  margin:0 0 1.05rem; font-family:var(--font-read); font-size:1.12rem; line-height:1.65;
+  margin:0 0 1.1rem; padding:1rem 1.15rem;
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card));
+  border-radius:var(--radius);
+  font-family:var(--font-read); font-size:1.12rem; line-height:1.65;
   color:var(--text-primary);
 }
 body[data-skin="reader"] .sv-exit-a{
-  margin:0 0 1.05rem; padding-top:.9rem;
-  border-top:1px solid color-mix(in srgb,var(--accent) 22%,var(--bg-card));
-  font-family:var(--font-read); font-size:1.02rem; line-height:1.6; color:var(--text-secondary);
+  margin:0 0 1.1rem; font-family:var(--font-read); font-size:1.02rem; line-height:1.6;
+  color:var(--text-secondary);
 }
 body[data-skin="reader"] .sv-exit-a[hidden]{ display:none; }
+body[data-skin="reader"] .sv-exit-actions{
+  display:flex; align-items:center; justify-content:space-between; gap:.8rem; flex-wrap:wrap;
+}
 body[data-skin="reader"] .sv-exit-btn{
   font-family:var(--font-ui); font-size:.9rem; font-weight:600; cursor:pointer;
   background:var(--bg-card); border:1px solid color-mix(in srgb,var(--accent) 32%,var(--border-light));
-  border-radius:7px; padding:.45rem 1rem; color:var(--accent);
+  border-radius:7px; padding:.5rem 1rem; color:var(--accent);
   transition:border-color .2s, transform .12s ease;
 }
 body[data-skin="reader"] .sv-exit-btn:hover{ border-color:var(--accent); }
 body[data-skin="reader"] .sv-exit-btn:active{ transform:scale(.97); }
+body[data-skin="reader"] .sv-exit-continue{
+  font-family:var(--font-ui); font-size:.9rem; font-weight:600; text-decoration:none;
+  background:var(--accent); color:#fff; border-radius:7px; padding:.55rem 1.1rem;
+  transition:filter .2s, transform .12s ease;
+}
+body[data-skin="reader"] .sv-exit-continue:hover{ filter:brightness(1.08); }
+body[data-skin="reader"] .sv-exit-continue:active{ transform:scale(.97); }
+body[data-skin="reader"].dark-mode .sv-exit-continue{ color:#181614; }
 
 /* Related Media modal (launcher tile styled with the other utilities below) */
 .rm-modal{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; }

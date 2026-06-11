@@ -52,7 +52,7 @@
     buildToolTiles();
     upgradePrimaryIcons();
     buildPanelWrap();
-    buildExitTicket();
+    setupExitIntercept();
     revealMasthead();
   }
 
@@ -87,26 +87,59 @@
     }
   };
 
-  function buildExitTicket() {
-    var notes = document.querySelector('#lesson-page .study-notes');
-    if (!notes || !notes.children.length || document.querySelector('.sv-exit')) return;
+  // The ticket fires on the way OUT: clicking either "Next lesson" control
+  // (header pill or article-foot nav) intercepts ONCE per lesson per session
+  // and asks the synthesis question. Continue is always one click — answering
+  // is invited, never extorted. Second click passes straight through.
+  function setupExitIntercept() {
+    if (document.body.dataset.exitIntercept) return;
     var t = EXIT_TICKETS[location.pathname.replace(/\/$/, '')];
     if (!t) return;
-    var exit = document.createElement('aside');
-    exit.className = 'sv-exit sv-visible';
-    exit.innerHTML =
-      '<div class="sv-exit-kicker">Before you go</div>' +
-      '<p class="sv-exit-q"></p>' +
-      '<p class="sv-exit-a" hidden></p>' +
-      '<button type="button" class="sv-exit-btn">Reveal a model answer</button>';
-    exit.querySelector('.sv-exit-q').textContent = t.q;
-    exit.querySelector('.sv-exit-a').textContent = t.a;
-    var a = exit.querySelector('.sv-exit-a'), btn = exit.querySelector('.sv-exit-btn');
-    btn.addEventListener('click', function () {
+    document.body.dataset.exitIntercept = '1';
+    var KEY = 'sv-exit-asked:' + location.pathname;
+
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('#nav-next-lesson, .lesson-nav-link--next');
+      if (!link || !link.href) return;
+      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return; // new-tab etc.
+      if (sessionStorage.getItem(KEY)) return;
+      e.preventDefault();
+      e.stopPropagation();                       // beat the page-transition handler
+      sessionStorage.setItem(KEY, '1');
+      openExitModal(t, link.href);
+    }, true);
+  }
+
+  function openExitModal(t, nextHref) {
+    var wrap = document.createElement('div');
+    wrap.className = 'sv-exit-modal';
+    wrap.innerHTML =
+      '<div class="sv-exit-backdrop"></div>' +
+      '<div class="sv-exit-card" role="dialog" aria-modal="true" aria-label="Before you go">' +
+        '<button type="button" class="sv-exit-close" aria-label="Stay on this lesson">&times;</button>' +
+        '<div class="sv-exit-kicker">Before you go</div>' +
+        '<p class="sv-exit-q"></p>' +
+        '<p class="sv-exit-a" hidden></p>' +
+        '<div class="sv-exit-actions">' +
+          '<button type="button" class="sv-exit-btn" data-act="reveal">Reveal a model answer</button>' +
+          '<a class="sv-exit-continue" href="">Continue to next lesson &rarr;</a>' +
+        '</div>' +
+      '</div>';
+    wrap.querySelector('.sv-exit-q').textContent = t.q;
+    wrap.querySelector('.sv-exit-a').textContent = t.a;
+    wrap.querySelector('.sv-exit-continue').href = nextHref;
+    var a = wrap.querySelector('.sv-exit-a'), rv = wrap.querySelector('[data-act="reveal"]');
+    rv.addEventListener('click', function () {
       a.hidden = !a.hidden;
-      btn.textContent = a.hidden ? 'Reveal a model answer' : 'Hide the model answer';
+      rv.textContent = a.hidden ? 'Reveal a model answer' : 'Hide the model answer';
     });
-    notes.appendChild(exit);
+    function close() { wrap.remove(); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+    wrap.querySelector('.sv-exit-close').addEventListener('click', close);
+    wrap.querySelector('.sv-exit-backdrop').addEventListener('click', close);
+    document.addEventListener('keydown', onKey);
+    document.body.appendChild(wrap);
+    wrap.querySelector('.sv-exit-continue').focus();
   }
 
   // Duotone icon set (soft filled shape + bold glyph) — replaces the generic
