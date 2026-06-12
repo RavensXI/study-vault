@@ -733,25 +733,25 @@ body[data-skin="reader"] .header-logo{ color:var(--text-primary); }
    a hairline divider. */
 body[data-skin="reader"] .header-unit-label{
   font-family:var(--font-ui); text-transform:none; letter-spacing:0;
-  font-size:.92rem; font-weight:600; color:var(--text-secondary);
+  font-size:.92rem; font-weight:600; color:var(--text-primary);
   background:none; padding:0; border-radius:0;
 }
 body[data-skin="reader"] .header-lesson-label{
   font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.1em;
-  font-size:.7rem; font-weight:700; color:var(--text-muted);
+  font-size:.7rem; font-weight:600; color:var(--text-muted);
   background:none; padding:0; border-radius:0;
   display:inline-flex; align-items:center; white-space:nowrap;
 }
 body[data-skin="reader"] .header-lesson-label::before{
-  content:""; display:inline-block; width:1px; height:.95em; margin-right:.6rem;
-  background:var(--border-light);
+  content:""; display:inline-block; width:2px; height:1em; margin-right:.65rem;
+  border-radius:1px; background:color-mix(in srgb,var(--text-muted) 55%,transparent);
 }
 
 /* nav: clean editorial text links (the empty boxes were the "plain/weird"
    problem) that light up in the unit colour with an underline-grow on hover.
    Prev/Next grouped off with a hairline; Next is the one solid unit-colour
    chip — the single primary action worth the colour. */
-body[data-skin="reader"] .header-nav{ gap:.15rem; align-items:center; }
+body[data-skin="reader"] .header-nav{ gap:.4rem; align-items:center; }
 body[data-skin="reader"] .header-nav a{
   font-family:var(--font-ui); font-size:.88rem; font-weight:600;
   color:var(--text-secondary); background:none; border:none; border-radius:0;
@@ -764,18 +764,27 @@ body[data-skin="reader"] .header-nav a::after{
 }
 body[data-skin="reader"] .header-nav a:hover{ background:none; color:var(--accent); }
 body[data-skin="reader"] .header-nav a:hover::after{ transform:scaleX(1); }
+/* hairline divider between the wayfinding links (not before Home, not on the
+   sequential prev/next which carry the .nav-lesson-pill class) */
+body[data-skin="reader"] .header-nav a:not(:first-child):not(.nav-lesson-pill)::before{
+  content:""; position:absolute; left:-.22em; top:50%; transform:translateY(-50%);
+  width:1px; height:.95em; background:var(--border-light);
+}
 /* one colour voice — no multicolour nav icons */
 body[data-skin="reader"] .header-nav a .nav-icon{ color:var(--text-muted) !important; }
 body[data-skin="reader"] .header-nav a:hover .nav-icon{ color:var(--accent) !important; }
-/* group the sequential nav apart with a hairline before Previous */
-body[data-skin="reader"] .header-nav a#nav-prev-lesson{
-  margin-left:.45rem; border-left:1px solid var(--border-light); padding-left:.85rem;
-}
-/* prev/next carry the .nav-lesson-pill class — strip the chip back to text */
+/* prev/next carry the .nav-lesson-pill class — strip the chip back to text,
+   and lay them out as flex so a refined SVG arrow sits beside the label */
 body[data-skin="reader"] .header-nav a.nav-lesson-pill{
+  display:inline-flex; align-items:center; gap:.4em;
   background:none; border:none; color:var(--text-secondary); font-weight:600;
 }
 body[data-skin="reader"] .header-nav a.nav-lesson-pill:hover{ background:none; color:var(--accent); }
+body[data-skin="reader"] .header-nav a .nav-arrow{ flex:0 0 auto; }
+/* group the sequential nav apart with a hairline before Previous */
+body[data-skin="reader"] .header-nav a#nav-prev-lesson{
+  margin-left:.5rem; border-left:1px solid var(--border-light); padding-left:.95rem;
+}
 /* Next = the single solid unit-colour primary */
 body[data-skin="reader"] .header-nav a#nav-next-lesson{
   background:var(--accent); color:#fff; border-radius:7px; padding:.42em .9em;
@@ -1077,7 +1086,7 @@ body[data-skin="reader"] .header-pills span{
   background:transparent !important; border:none !important; padding:0 !important;
   font-family:var(--font-ui);
 }
-body[data-skin="reader"] .header-unit-label{ color:var(--text-secondary) !important; letter-spacing:0; }
+body[data-skin="reader"] .header-unit-label{ color:var(--text-primary) !important; letter-spacing:0; }
 
 /* ---------- AUDIO: tactile switch + crafted player ---------- */
 /* Narration / Lesson Podcast — keep the sliding-switch mechanism but build it

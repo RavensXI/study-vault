@@ -49,7 +49,29 @@
     buildRichVideoThumb();
     buildDemoFigure();
     setupExitIntercept();
+    fixLessonNavArrows();
     revealMasthead();
+  }
+
+  // The loader bakes literal ← / → glyphs into the Prev/Next labels — they read
+  // cheap. Strip them and substitute a refined stroked SVG arrow beside the
+  // text (prev = leading left arrow, next = trailing right arrow).
+  function fixLessonNavArrows() {
+    [['#nav-prev-lesson', false], ['#nav-next-lesson', true]].forEach(function (pair) {
+      var a = document.querySelector(pair[0]);
+      if (!a || a.dataset.arrowFixed) return;
+      var isNext = pair[1];
+      var label = a.textContent.replace(/[←→]/g, '').trim();
+      if (!label) return;
+      a.dataset.arrowFixed = '1';
+      var head = isNext
+        ? '<line x1="4" y1="12" x2="18" y2="12"/><polyline points="12 6 18 12 12 18"/>'
+        : '<line x1="20" y1="12" x2="6" y2="12"/><polyline points="12 6 6 12 12 18"/>';
+      var arrow = '<svg class="nav-arrow" viewBox="0 0 24 24" width="15" height="15" fill="none" ' +
+        'stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' + head + '</svg>';
+      var span = '<span>' + label + '</span>';
+      a.innerHTML = isNext ? (span + arrow) : (arrow + span);
+    });
   }
 
   // DEMO: L7 has no real video, but Tom wants to SEE the corner player card.
