@@ -50,6 +50,84 @@
     buildDemoFigure();
     setupExitIntercept();
     revealMasthead();
+    buildPanelOptionLab();
+  }
+
+  // PANEL POP OPTION LAB (Tom, 12 Jun) — flip through 8 distinct "pop"
+  // treatments on the real panel, and recolour to preview each across
+  // subjects. Localhost-only; none applied by default (starts Plain).
+  var POP_VARIANTS = [
+    ['',             'Plain',            'neutral baseline'],
+    ['svp-glow',     'Ambient glow',     'subject-tinted shadow + frame'],
+    ['svp-float',    'Borderless float', 'no frame, soft shadow only'],
+    ['svp-well',     'Recessed well',    'cluster sunk into the page'],
+    ['svp-keys',     'Tactile keys',     'primaries feel physically raised'],
+    ['svp-dividers', 'Accent dividers',  'subject colour in the hairlines'],
+    ['svp-tiles',    'Colour the actions','deeper accent on the 3 primaries'],
+    ['svp-warm',     'Warm surface',     'whole panel a warmer material'],
+    ['svp-chips',    'Icon chips',       'primary icons in accent circles']
+  ];
+  var POP_ACCENTS = [
+    ['#7d4f41', 'Hist'], ['#5f7155', 'Geog'], ['#8a6c42', 'Busi'], ['#46708a', 'Sci']
+  ];
+  function buildPanelOptionLab() {
+    if (document.getElementById('svp-lab')) return;
+    var panel = document.querySelector('.sv-panel');
+    if (!panel) return;   // wait until the panel exists
+
+    var st = document.createElement('style');
+    st.textContent =
+      '#svp-lab{position:fixed;left:14px;bottom:14px;z-index:99998;width:212px;background:#1b1916;' +
+      'color:#e8e2d6;font:11.5px/1.3 ui-monospace,Menlo,monospace;border-radius:10px;' +
+      'box-shadow:0 12px 34px rgba(0,0,0,.45);overflow:hidden}' +
+      '#svp-lab h4{margin:0;padding:.55rem .7rem;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;' +
+      'color:#c9a23f;background:#15130f}' +
+      '#svp-lab .svp-row{display:flex;flex-direction:column;gap:4px;padding:.55rem .6rem}' +
+      '#svp-lab .svp-acc{flex-direction:row}' +
+      '#svp-lab button{font:inherit;cursor:pointer;background:transparent;color:#cdc6b8;border:1px solid #3a352d;' +
+      'border-radius:6px;padding:.34rem .5rem;text-align:left}' +
+      '#svp-lab .svp-acc button{flex:1 1 0;text-align:center;padding:.3rem .2rem}' +
+      '#svp-lab button:hover{color:#fff;border-color:#6a6253}' +
+      '#svp-lab button[aria-pressed="true"]{background:#c9a23f;color:#1b1916;border-color:#c9a23f;font-weight:600}' +
+      '#svp-lab small{display:block;color:#8a8377;font-size:9.5px;margin-top:1px;font-weight:400}' +
+      '#svp-lab button[aria-pressed="true"] small{color:#5a4a20}' +
+      '#svp-lab .svp-sub{padding:.15rem .7rem .15rem;color:#8a8377;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase}';
+    document.head.appendChild(st);
+
+    var lab = document.createElement('div');
+    lab.id = 'svp-lab';
+    var html = '<h4>Panel pop — pick one</h4><div class="svp-row">';
+    POP_VARIANTS.forEach(function (v) {
+      html += '<button data-cls="' + v[0] + '">' + v[1] + '<small>' + v[2] + '</small></button>';
+    });
+    html += '</div><div class="svp-sub">Preview accent</div><div class="svp-row svp-acc">';
+    POP_ACCENTS.forEach(function (a) {
+      html += '<button data-acc="' + a[0] + '">' + a[1] + '</button>';
+    });
+    html += '</div>';
+    lab.innerHTML = html;
+    document.body.appendChild(lab);
+
+    var ALL = POP_VARIANTS.map(function (v) { return v[0]; }).filter(Boolean);
+    function setVariant(cls) {
+      ALL.forEach(function (c) { panel.classList.remove(c); });
+      if (cls) panel.classList.add(cls);
+      [].forEach.call(lab.querySelectorAll('[data-cls]'), function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-cls') === cls);
+      });
+    }
+    function setAccent(hex) {
+      document.body.style.setProperty('--subject-accent', hex);
+      [].forEach.call(lab.querySelectorAll('[data-acc]'), function (b) {
+        b.setAttribute('aria-pressed', b.getAttribute('data-acc') === hex);
+      });
+    }
+    lab.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.hasAttribute('data-cls')) setVariant(b.getAttribute('data-cls'));
+      else if (b.hasAttribute('data-acc')) setAccent(b.getAttribute('data-acc'));
+    });
+    setVariant('');   // start on Plain
   }
 
   // DEMO: L7 has no real video, but Tom wants to SEE the corner player card.
