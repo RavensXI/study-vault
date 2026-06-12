@@ -304,73 +304,16 @@ body[data-skin="reader"] .sv-panel{
   grid-template-rows:auto auto auto auto auto;
   /* TWO-WEIGHT linework (single-weight hairlines read as wireframe):
      internal rules one step lighter than the frame */
-  gap:1px; background:var(--border-lighter);
-  /* TWO-WEIGHT linework neutral baseline — pop treatments are opt-in variant
-     classes (.svp-*) below, toggled from the design-lab option lab */
+  gap:1px;
+  /* ACCENT DIVIDERS (Tom's pick): the panel bg shows through the 1px gaps as
+     the internal hairlines, so tinting it weaves the subject colour through
+     the structure. Frame stays neutral so the colour reads as dividers, not
+     an outline. Re-derives per subject + in dark mode via --accent. */
+  background:color-mix(in srgb,var(--accent) 32%,var(--border-light));
   border:1px solid var(--border-light); border-radius:10px; overflow:hidden;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 18px 36px -24px rgba(29,28,26,.18);
 }
 body[data-skin="reader"] .sv-panel > .sidebar-section{ min-height:0; overflow:hidden; margin:0; }
-
-/* ============ PANEL POP — OPT-IN VARIANTS (design-lab exploration) ============
-   Eight distinct directions for making the bento panel "pop" without the
-   templated coloured-top-bar look. Toggled one at a time from the option lab
-   (bottom-left). None active by default. Helper var for the three primaries:
-   .svp-prim selects Quick Quiz + Flashcards + Practice. */
-body[data-skin="reader"] .sv-panel.svp-glow{
-  border-color:color-mix(in srgb,var(--accent) 20%,var(--border-light));
-  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 46px -26px color-mix(in srgb,var(--accent) 52%,transparent);
-}
-/* 2 — borderless float: definition from a soft, slightly-warm shadow only */
-body[data-skin="reader"] .sv-panel.svp-float{
-  border:none;
-  box-shadow:0 2px 8px rgba(29,28,26,.07), 0 28px 54px -28px color-mix(in srgb,var(--accent) 38%,rgba(29,28,26,.55));
-}
-/* 3 — recessed well: the cluster sits sunken into the page, tiles flush in it */
-body[data-skin="reader"] .sv-panel.svp-well{
-  background:color-mix(in srgb,var(--accent) 7%,var(--border-light));
-  border-color:color-mix(in srgb,var(--accent) 12%,var(--border-light));
-  box-shadow:inset 0 2px 7px rgba(29,28,26,.10), 0 1px 0 rgba(255,255,255,.7);
-}
-/* 4 — tactile keys: the three primaries read as physical raised buttons */
-body[data-skin="reader"] .sv-panel.svp-keys .knowledge-check-btn,
-body[data-skin="reader"] .sv-panel.svp-keys #sidebar-flashcard-btn,
-body[data-skin="reader"] .sv-panel.svp-keys .sv-practice-btn{
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), inset 0 -3px 6px rgba(29,28,26,.07);
-}
-/* 5 — accent dividers: the internal hairlines carry the subject colour */
-body[data-skin="reader"] .sv-panel.svp-dividers{
-  background:color-mix(in srgb,var(--accent) 32%,var(--border-light));
-}
-/* 6 — colour where the actions are: only the primaries get a deeper accent fill */
-body[data-skin="reader"] .sv-panel.svp-tiles .knowledge-check-btn,
-body[data-skin="reader"] .sv-panel.svp-tiles #sidebar-flashcard-btn,
-body[data-skin="reader"] .sv-panel.svp-tiles .sv-practice-btn{
-  background:linear-gradient(180deg,
-    color-mix(in srgb,var(--accent) 17%,var(--bg-card)),
-    color-mix(in srgb,var(--accent) 10%,var(--bg-card))) !important;
-}
-/* 7 — warm surface: whole panel is a warmer subject-tinted material, no lines */
-body[data-skin="reader"] .sv-panel.svp-warm{
-  background:color-mix(in srgb,var(--accent) 10%,var(--border-light));
-  border-color:color-mix(in srgb,var(--accent) 16%,var(--border-light));
-}
-body[data-skin="reader"] .sv-panel.svp-warm .sidebar-section,
-body[data-skin="reader"] .sv-panel.svp-warm .knowledge-check-btn,
-body[data-skin="reader"] .sv-panel.svp-warm #sidebar-flashcard-btn,
-body[data-skin="reader"] .sv-panel.svp-warm .sv-practice-btn,
-body[data-skin="reader"] .sv-panel.svp-warm .sv-tool-btn,
-body[data-skin="reader"] .sv-panel.svp-warm .rm-launcher{
-  background:color-mix(in srgb,var(--accent) 4%,var(--bg-card)) !important;
-}
-/* 8 — icon chips: the primary icons sit in filled accent circles */
-body[data-skin="reader"] .sv-panel.svp-chips .knowledge-check-btn svg,
-body[data-skin="reader"] .sv-panel.svp-chips #sidebar-flashcard-btn svg,
-body[data-skin="reader"] .sv-panel.svp-chips .sv-practice-btn svg{
-  box-sizing:content-box; padding:.5rem; border-radius:50%;
-  background:color-mix(in srgb,var(--accent) 15%,var(--bg-card));
-}
-
 /* explicit placement — DOM order varies with what the loader injects */
 body[data-skin="reader"] .sv-panel > .sidebar-progress-section{ grid-area:1 / 1 / 2 / -1; }
 body[data-skin="reader"] .sv-panel > .sidebar-knowledge-check{ grid-area:2 / 1; }
