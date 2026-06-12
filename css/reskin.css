@@ -728,30 +728,61 @@ body[data-skin="reader"] .page-header.scrolled{
   border-bottom-color:var(--border-light); box-shadow:none;
 }
 body[data-skin="reader"] .header-logo{ color:var(--text-primary); }
-body[data-skin="reader"] .header-unit-label,
-body[data-skin="reader"] .header-lesson-label{
-  font-family:var(--font-ui); font-size:.74rem; font-weight:700;
-  text-transform:uppercase; letter-spacing:.1em;
-  color:var(--text-muted); background:none; padding:.2em 0; border-radius:0;
+/* unit + lesson context: hierarchy, not one grey smear. Unit NAME is the
+   readable anchor (normal case); lesson counter is a small muted detail after
+   a hairline divider. */
+body[data-skin="reader"] .header-unit-label{
+  font-family:var(--font-ui); text-transform:none; letter-spacing:0;
+  font-size:.92rem; font-weight:600; color:var(--text-secondary);
+  background:none; padding:0; border-radius:0;
 }
+body[data-skin="reader"] .header-lesson-label{
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.1em;
+  font-size:.7rem; font-weight:700; color:var(--text-muted);
+  background:none; padding:0; border-radius:0;
+  display:inline-flex; align-items:center; white-space:nowrap;
+}
+body[data-skin="reader"] .header-lesson-label::before{
+  content:""; display:inline-block; width:1px; height:.95em; margin-right:.6rem;
+  background:var(--border-light);
+}
+
+/* nav: clean editorial text links (the empty boxes were the "plain/weird"
+   problem) that light up in the unit colour with an underline-grow on hover.
+   Prev/Next grouped off with a hairline; Next is the one solid unit-colour
+   chip — the single primary action worth the colour. */
+body[data-skin="reader"] .header-nav{ gap:.15rem; align-items:center; }
 body[data-skin="reader"] .header-nav a{
   font-family:var(--font-ui); font-size:.88rem; font-weight:600;
-  color:var(--text-secondary); border-radius:7px;
+  color:var(--text-secondary); background:none; border:none; border-radius:0;
+  padding:.4em .5em; position:relative;
 }
-body[data-skin="reader"] .header-nav a:hover{
-  background:color-mix(in srgb,var(--accent) 6%,transparent); color:var(--text-primary);
+body[data-skin="reader"] .header-nav a::after{
+  content:""; position:absolute; left:.5em; right:.5em; bottom:.16em; height:1.5px;
+  background:var(--accent); transform:scaleX(0); transform-origin:left center;
+  transition:transform .18s ease;
 }
-/* the multicolour nav icons go — one colour voice per page */
+body[data-skin="reader"] .header-nav a:hover{ background:none; color:var(--accent); }
+body[data-skin="reader"] .header-nav a:hover::after{ transform:scaleX(1); }
+/* one colour voice — no multicolour nav icons */
 body[data-skin="reader"] .header-nav a .nav-icon{ color:var(--text-muted) !important; }
 body[data-skin="reader"] .header-nav a:hover .nav-icon{ color:var(--accent) !important; }
-/* lesson pill: solid blob -> quiet bordered chip */
+/* group the sequential nav apart with a hairline before Previous */
+body[data-skin="reader"] .header-nav a#nav-prev-lesson{
+  margin-left:.45rem; border-left:1px solid var(--border-light); padding-left:.85rem;
+}
+/* prev/next carry the .nav-lesson-pill class — strip the chip back to text */
 body[data-skin="reader"] .header-nav a.nav-lesson-pill{
-  background:none; border:1px solid var(--border-light); color:var(--text-secondary);
-  font-weight:600; font-variant-numeric:tabular-nums;
+  background:none; border:none; color:var(--text-secondary); font-weight:600;
 }
-body[data-skin="reader"] .header-nav a.nav-lesson-pill:hover{
-  background:none; border-color:var(--accent); color:var(--accent); opacity:1;
+body[data-skin="reader"] .header-nav a.nav-lesson-pill:hover{ background:none; color:var(--accent); }
+/* Next = the single solid unit-colour primary */
+body[data-skin="reader"] .header-nav a#nav-next-lesson{
+  background:var(--accent); color:#fff; border-radius:7px; padding:.42em .9em;
 }
+body[data-skin="reader"] .header-nav a#nav-next-lesson::after{ display:none; }
+body[data-skin="reader"] .header-nav a#nav-next-lesson:hover{ color:#fff; filter:brightness(1.08); }
+body[data-skin="reader"].dark-mode .header-nav a#nav-next-lesson{ color:#181614; }
 body[data-skin="reader"] .scroll-progress{ height:3px; }
 
 /* ---- a11y toolbar: a DEFINED utility band (Tom: was too undefined as a
@@ -1040,11 +1071,13 @@ body[data-skin="reader"] .exam-tip{
 }
 
 /* ---------- header chrome: drop the rounded accent pills ---------- */
-body[data-skin="reader"] .header-pills span,
-body[data-skin="reader"] .header-unit-label{
-  background:transparent !important; color:var(--text-secondary) !important;
-  border:none !important; padding:0 !important; font-family:var(--font-ui); letter-spacing:.02em;
+/* kill the old pill backgrounds on both labels, but DON'T force their colour
+   (the lesson counter wants to stay muted — see .header-lesson-label) */
+body[data-skin="reader"] .header-pills span{
+  background:transparent !important; border:none !important; padding:0 !important;
+  font-family:var(--font-ui);
 }
+body[data-skin="reader"] .header-unit-label{ color:var(--text-secondary) !important; letter-spacing:0; }
 
 /* ---------- AUDIO: tactile switch + crafted player ---------- */
 /* Narration / Lesson Podcast — keep the sliding-switch mechanism but build it
