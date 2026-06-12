@@ -804,8 +804,11 @@ body[data-skin="reader"] .a11y-toolbar{
   padding:.5rem .9rem; gap:.35rem .85rem; margin:.2rem 0 2.1rem;
   font-family:var(--font-ui); justify-content:flex-start;
 }
+/* "Reading" = a section label, framed off from the controls with a divider
+   so it doesn't read as a stray word running into Dark mode */
 body[data-skin="reader"] .a11y-toolbar::before{
-  content:"Reading"; align-self:center; padding-right:.1rem;
+  content:"Reading"; align-self:center;
+  margin-right:.7rem; padding-right:.85rem; border-right:1px solid var(--border-light);
   font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.11em;
   color:var(--text-muted);
 }
@@ -822,8 +825,24 @@ body[data-skin="reader"] .a11y-btn[aria-pressed="true"]{
   color:var(--accent); box-shadow:inset 0 1px 2px rgba(29,28,26,.06);
 }
 body[data-skin="reader"] .a11y-separator{ background:var(--border-light); height:20px; }
-body[data-skin="reader"] .a11y-overlay-label{ font-family:var(--font-ui); }
-@media (max-width:640px){ body[data-skin="reader"] .a11y-toolbar::before{ display:none; } }
+/* overlay picker anchored to the far right (kills the trailing dead space);
+   its label matches the control text weight (was reading thin) */
+body[data-skin="reader"] .a11y-overlay-group{ margin-left:auto; }
+body[data-skin="reader"] .a11y-separator:has(+ .a11y-overlay-group){ display:none; }
+body[data-skin="reader"] .a11y-overlay-label{
+  font-family:var(--font-ui); font-weight:600; font-size:.8rem; color:var(--text-muted);
+}
+@media (max-width:640px){
+  body[data-skin="reader"] .a11y-toolbar::before{ display:none; }
+  body[data-skin="reader"] .a11y-overlay-group{ margin-left:0; }
+}
+
+/* FONT SIZE A-/A+ : the buttons toggle body.font-size-* classes that only
+   change body's px font-size — which the reader skin's rem-based reading size
+   ignores. Re-map each step to --read-size so the text actually scales. */
+body[data-skin="reader"].font-size-down-1{ --read-size:1.06rem; }
+body[data-skin="reader"].font-size-up-1{ --read-size:1.36rem; }
+body[data-skin="reader"].font-size-up-2{ --read-size:1.5rem; }
 /* swatches stay multicolour — they are functional colour samples */
 body[data-skin="reader"] .a11y-overlay{ border:2px solid var(--border-light); }
 body[data-skin="reader"] .a11y-overlay.active{
