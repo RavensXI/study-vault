@@ -50,7 +50,30 @@
     buildDemoFigure();
     setupExitIntercept();
     fixLessonNavArrows();
+    evenA11yDividers();
     revealMasthead();
+  }
+
+  // Normalise the a11y bar's dividers: the markup's .a11y-separator spans are
+  // inconsistent (missing between Simplify and the font-size group). Drop them
+  // and insert one .a11y-divider before each top-level control, so with the
+  // toolbar's space-between a divider sits centred in every gap, evenly.
+  function evenA11yDividers() {
+    var tb = document.querySelector('.a11y-toolbar');
+    if (!tb || tb.dataset.evenDiv) return;
+    if (!tb.querySelector('.a11y-overlay-group')) return;   // wait for full bar
+    tb.dataset.evenDiv = '1';
+    [].forEach.call(tb.querySelectorAll('.a11y-separator'), function (s) { s.remove(); });
+    var controls = [].filter.call(tb.children, function (c) {
+      return c.classList.contains('a11y-btn') ||
+             c.classList.contains('a11y-font-size-group') ||
+             c.classList.contains('a11y-overlay-group');
+    });
+    controls.forEach(function (c) {
+      var d = document.createElement('span');
+      d.className = 'a11y-divider';
+      tb.insertBefore(d, c);
+    });
   }
 
   // The loader bakes literal ← / → glyphs into the Prev/Next labels — they read
