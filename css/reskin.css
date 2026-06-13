@@ -913,7 +913,73 @@ body[data-skin="reader"].font-size-up-2{ --read-size:1.5rem; }
 body[data-skin="reader"] .a11y-overlay{ border:2px solid var(--border-light); }
 body[data-skin="reader"] .a11y-overlay.active{
   border-color:var(--accent);
-  box-shadow:0 0 0 2px var(--bg-body), 0 0 0 3.5px var(--accent);
+  box-shadow:0 0 0 2px var(--bg-card), 0 0 0 3.5px var(--accent);
+}
+
+/* OVERLAY: button + popover + intensity (Tom, 13 Jun). The shared pastels
+   (top of file) are too weak to help anyone who needs a tint, so the reader
+   uses DEEPER tints and scales them with --overlay-intensity (the ::after
+   opacity, set by the harness slider). Deeper colour + partial opacity gives
+   real headroom: the old pastel look now sits around the slider's midpoint,
+   and full intensity is genuinely strong. Same specificity as the shared
+   rules but later in the file, so these win. */
+body[data-skin="reader"].overlay-yellow::after,
+body[data-skin="reader"].overlay-blue::after,
+body[data-skin="reader"].overlay-pink::after,
+body[data-skin="reader"].overlay-green::after,
+body[data-skin="reader"].overlay-peach::after,
+body[data-skin="reader"].overlay-aqua::after{ opacity:var(--overlay-intensity,.45); }
+body[data-skin="reader"].overlay-yellow::after{ background:#fde047; }
+body[data-skin="reader"].overlay-blue::after{   background:#93c5fd; }
+body[data-skin="reader"].overlay-pink::after{    background:#f9a8d4; }
+body[data-skin="reader"].overlay-green::after{   background:#86efac; }
+body[data-skin="reader"].overlay-peach::after{   background:#fdba74; }
+body[data-skin="reader"].overlay-aqua::after{    background:#67e8f9; }
+
+/* the trigger: a normal a11y control + a small dot showing the live colour */
+body[data-skin="reader"] .a11y-overlay-toggle{ display:inline-flex; align-items:center; gap:.42rem; }
+body[data-skin="reader"] .a11y-overlay-toggle.on{
+  background:color-mix(in srgb,var(--accent) 13%,var(--bg-card)); color:var(--accent);
+}
+body[data-skin="reader"] .a11y-overlay-dot{
+  width:11px; height:11px; border-radius:50%; box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);
+}
+/* popover sits ABOVE the tint sheet (z 2147483000) so the chips read true */
+body[data-skin="reader"] .a11y-overlay-pop{
+  position:fixed; z-index:2147483600; width:288px; box-sizing:border-box;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 44px -22px rgba(29,28,26,.34);
+  padding:.95rem; display:flex; flex-direction:column; gap:.85rem;
+  font-family:var(--font-ui);
+}
+body[data-skin="reader"].dark-mode .a11y-overlay-pop{
+  box-shadow:0 1px 2px rgba(0,0,0,.4), 0 22px 44px -22px rgba(0,0,0,.6);
+}
+body[data-skin="reader"] .a11y-overlay-chips{ display:flex; flex-wrap:wrap; gap:.5rem; }
+body[data-skin="reader"] .a11y-overlay-pop .a11y-overlay{
+  width:28px; height:28px; border-radius:50%; padding:0; cursor:pointer;
+  display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto;
+}
+body[data-skin="reader"] .a11y-overlay-pop .a11y-overlay svg{ width:15px; height:15px; color:var(--text-muted); }
+/* intensity row: caps label + accent range */
+body[data-skin="reader"] .a11y-overlay-intensity{
+  display:flex; align-items:center; gap:.7rem; padding-top:.15rem;
+  border-top:1px solid var(--border-lighter);
+}
+body[data-skin="reader"] .a11y-overlay-intensity span{
+  font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em; color:var(--text-muted);
+  flex:0 0 auto;
+}
+body[data-skin="reader"] .a11y-overlay-intensity input[type="range"]{
+  flex:1 1 auto; -webkit-appearance:none; appearance:none; height:4px; border-radius:3px;
+  background:var(--border-light); cursor:pointer; margin:0;
+}
+body[data-skin="reader"] .a11y-overlay-intensity input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:15px; height:15px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--bg-card); box-shadow:0 1px 3px rgba(29,28,26,.3);
+}
+body[data-skin="reader"] .a11y-overlay-intensity input[type="range"]::-moz-range-thumb{
+  width:15px; height:15px; border-radius:50%; background:var(--accent); border:2px solid var(--bg-card);
 }
 
 /* ---- foot prev/next cards ---- */

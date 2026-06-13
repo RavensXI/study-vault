@@ -52,6 +52,7 @@
     setupExitIntercept();
     fixLessonNavArrows();
     buildFocusToggle();          // before evenA11yDividers so it gets a divider
+    buildOverlayControl();       // collapse the swatch row into a button + popover
     evenA11yDividers();
     revealMasthead();
     // the bug FAB can end up nested inside the (transformed) tutor-dock, which
@@ -98,8 +99,8 @@
       body: 'This fills in as you work through the lesson, so you can always see how far you have got.' },
     { sels: ['.sidebar-knowledge-check', '.tile-practice'], pad: 10, title: 'Test yourself',
       body: 'Quick Quiz, Flashcards and exam-style Practice questions are all here — the fastest way to check what has stuck.' },
-    { sels: ['.sidebar-media', '.tile-highlight', '.tile-tutor'], pad: 10, title: 'Explore and dig in',
-      body: 'Hand-picked media to go deeper, a highlighter for the bits that matter, and a tutor to explain anything a different way.' },
+    { sels: ['.sidebar-media', '.tile-tutor'], pad: 10, title: 'Explore and dig in',
+      body: 'Hand-picked media to go deeper, and a tutor on hand to explain anything a different way.' },
     { sel: '#sidebar-video-section .sidebar-video', pad: 8, title: 'Watch the overview',
       body: 'A short video explainer for the lesson. Tap it to play full-size.' },
     { sel: '.lesson-nav-link--next', pad: 8, title: 'Before you go',
@@ -379,6 +380,96 @@
     simplify.parentNode.insertBefore(b, simplify.nextSibling);   // group with the other toggles
     b.addEventListener('click', function () { setFocus(!focusOn); });
     if (localStorage.getItem('sv-focus-mode') === '1') setFocus(true, true);
+  }
+
+  // OVERLAY CONTROL (Tom, 13 Jun) — the bare swatch row ate the bar and the
+  // pastel tints were too weak to help anyone who needs them. Collapse it to a
+  // single "Overlay" button that opens a popover holding the colours + an
+  // INTENSITY slider. The original swatch <button>s are MOVED (not rebuilt)
+  // into the popover, so main.js's setOverlay() wiring keeps working untouched;
+  // we only add the trigger, the slider, and a current-colour dot.
+  // Deeper tints live in reskin.css; keep this map in sync with them so the
+  // chips preview the real colour. Intensity drives --overlay-intensity (the
+  // ::after opacity) and persists in the same studyvault-a11y prefs blob.
+  var OV_COL = { yellow: '#fde047', blue: '#93c5fd', pink: '#f9a8d4', green: '#86efac', peach: '#fdba74', aqua: '#67e8f9' };
+  function ovPrefs() { try { return JSON.parse(localStorage.getItem('studyvault-a11y')) || {}; } catch (e) { return {}; } }
+  function applyOvIntensity(v) { document.body.style.setProperty('--overlay-intensity', (v / 100).toFixed(2)); }
+  function buildOverlayControl() {
+    var tb = document.querySelector('.a11y-toolbar');
+    if (!tb) return;
+    var group = tb.querySelector('.a11y-overlay-group');
+    if (!group || group.dataset.collapsed) return;
+    var swatches = [].slice.call(group.querySelectorAll('.a11y-overlay'));
+    if (!swatches.length) return;
+    group.dataset.collapsed = '1';
+
+    var label = group.querySelector('.a11y-overlay-label');
+    if (label) label.style.display = 'none';
+
+    // trigger button, styled like the other a11y controls
+    var btn = document.createElement('button');
+    btn.className = 'a11y-btn a11y-overlay-toggle';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('title', 'Colour overlay');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 3.9 5.5 6.7 5.5 9.4a5.5 5.5 0 0 1-11 0c0-2.7 2.3-5.5 5.5-9.4z"/></svg>' +
+      '<span>Overlay</span><span class="a11y-overlay-dot" hidden></span>';
+    group.appendChild(btn);
+
+    // popover (appended to body, fixed + above the tint sheet so chips read true)
+    var pop = document.createElement('div');
+    pop.className = 'a11y-overlay-pop'; pop.hidden = true;
+    var chips = document.createElement('div'); chips.className = 'a11y-overlay-chips';
+    swatches.forEach(function (sw) {
+      if (sw.dataset.overlay) sw.style.background = OV_COL[sw.dataset.overlay] || sw.style.background;
+      chips.appendChild(sw);
+    });
+    var intRow = document.createElement('div'); intRow.className = 'a11y-overlay-intensity';
+    var intLabel = document.createElement('span'); intLabel.textContent = 'Intensity';
+    var range = document.createElement('input');
+    range.type = 'range'; range.min = '10'; range.max = '100'; range.step = '5';
+    range.setAttribute('aria-label', 'Overlay intensity');
+    intRow.appendChild(intLabel); intRow.appendChild(range);
+    pop.appendChild(chips); pop.appendChild(intRow);
+    document.body.appendChild(pop);
+
+    // intensity: load saved (default 45), apply, persist on input
+    var saved = ovPrefs().overlayIntensity;
+    if (typeof saved !== 'number') saved = 45;
+    range.value = saved; applyOvIntensity(saved);
+    range.addEventListener('input', function () {
+      applyOvIntensity(this.value);
+      var p = ovPrefs(); p.overlayIntensity = +this.value;
+      try { localStorage.setItem('studyvault-a11y', JSON.stringify(p)); } catch (e) {}
+    });
+
+    // dot reflects the active swatch (main.js toggles .active on the buttons)
+    function updateDot() {
+      var on = chips.querySelector('.a11y-overlay.active');
+      var col = on && on.dataset.overlay;
+      var dot = btn.querySelector('.a11y-overlay-dot');
+      if (col) { dot.hidden = false; dot.style.background = OV_COL[col] || ''; btn.classList.add('on'); }
+      else { dot.hidden = true; btn.classList.remove('on'); }
+    }
+    swatches.forEach(function (sw) { sw.addEventListener('click', updateDot); });
+    updateDot();
+
+    // open / close + viewport-aware placement (right-aligned under the trigger)
+    function place() {
+      var r = btn.getBoundingClientRect();
+      pop.style.top = (r.bottom + 9) + 'px';
+      var w = pop.offsetWidth || 244;
+      pop.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
+    }
+    function openPop() { pop.hidden = false; place(); btn.setAttribute('aria-expanded', 'true'); }
+    function closePop() { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); pop.hidden ? openPop() : closePop(); });
+    document.addEventListener('click', function (e) {
+      if (!pop.hidden && !pop.contains(e.target) && !btn.contains(e.target)) closePop();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
+    window.addEventListener('resize', function () { if (!pop.hidden) place(); });
   }
 
   // The loader bakes literal ← / → glyphs into the Prev/Next labels — they read
