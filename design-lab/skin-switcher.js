@@ -53,6 +53,10 @@
     fixLessonNavArrows();
     evenA11yDividers();
     revealMasthead();
+    // the bug FAB can end up nested inside the (transformed) tutor-dock, which
+    // offsets its fixed position off the corner — hoist it to <body>
+    var _bf = document.querySelector('.bugr-fab');
+    if (_bf && _bf.parentElement !== document.body) document.body.appendChild(_bf);
     buildTourReplay();
     maybeStartTour();
   }
@@ -64,10 +68,13 @@
     var b = document.createElement('button');
     b.className = 'sv-tour-replay'; b.type = 'button';
     b.setAttribute('aria-label', 'Replay the page tour');
+    b.setAttribute('title', 'Replay the page tour');
     b.innerHTML =
-      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
+      '<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" ' +
       'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
-      '<circle cx="12" cy="12" r="9"/><polygon points="10,8.4 16,12 10,15.6" fill="currentColor" stroke="none"/></svg>' +
+      '<circle cx="12" cy="12" r="9"/>' +
+      '<path d="M9.3 9.1a2.7 2.7 0 0 1 5.2 1c0 1.8-2.6 2.3-2.6 3.4"/>' +
+      '<circle cx="12" cy="16.9" r="1" fill="currentColor" stroke="none"/></svg>' +
       '<span>Tour</span>';
     b.addEventListener('click', function () { startTour(); });
     document.body.appendChild(b);
@@ -82,6 +89,8 @@
   var TOUR_STEPS = [
     { sel: '.a11y-toolbar', pad: 6, title: 'Set up your reading',
       body: 'Dark mode, a dyslexia-friendly font, simpler language, bigger text and colour overlays — make the page comfortable to read.' },
+    { trigger: 'bubbles', sel: '.sv-bubbles', req: '#lesson-page .study-notes p', pad: 12, title: 'Stuck on a sentence?',
+      body: 'Tap any paragraph and you can simplify the wording, have it explained a different way, or ask the tutor.' },
     { sel: '.key-fact', pad: 8, title: 'Helpers in the text',
       body: 'Key facts are boxed like this, underlined words show a definition when you tap them, and the lightbulbs offer quick revision tips as you read.' },
     { sel: '.sidebar-progress-section', pad: 8, title: 'Track your progress',
@@ -92,9 +101,9 @@
       body: 'Hand-picked media to go deeper, a highlighter for the bits that matter, and a tutor to explain anything a different way.' },
     { sel: '#sidebar-video-section .sidebar-video', pad: 8, title: 'Watch the overview',
       body: 'A short video explainer for the lesson. Tap it to play full-size.' },
-    { sel: '#nav-next-lesson', pad: 6, title: 'Before you go',
+    { sel: '.lesson-nav-link--next', pad: 8, title: 'Before you go',
       body: 'When you move to the next lesson, we’ll ask one question that links it back to something you already learned — that’s what makes it stick.' },
-    { sel: '.sv-tour-replay', pad: 8, title: 'Replay any time',
+    { sel: '.sv-tour-replay', pad: 10, title: 'Replay any time',
       body: 'New to all this? Tap here whenever you like to run through the tour again.' }
   ];
   // first visible element of a step (for scrolling), and the union rect to spotlight
@@ -137,8 +146,28 @@
   function startTour() {
     if (document.querySelector('.sv-tour-card')) return;
     tourStarted = true;
-    var steps = TOUR_STEPS.filter(function (s) { return tourRect(s); });   // drop absent/hidden
+    // keep a step if its target exists (or, for a triggered step, its required
+    // source element exists — the spotlight target appears once triggered)
+    var steps = TOUR_STEPS.filter(function (s) {
+      return s.req ? document.querySelector(s.req) : tourRect(s);
+    });
     if (!steps.length) return;
+    // open the paragraph "simplify / explain / ask the tutor" bubbles so the
+    // tour can spotlight them (drives the real .sv-chunk click handler)
+    function openParagraphBubbles() {
+      if (document.querySelector('.sv-bubbles.open')) return;
+      var p = document.querySelector('#lesson-page .study-notes p.sv-chunk') ||
+              document.querySelector('#lesson-page .study-notes p');
+      if (!p) return;
+      p.scrollIntoView({ block: 'center', behavior: 'auto' });   // bring it into view first
+      var r = p.getBoundingClientRect();
+      var x = Math.round(r.left + Math.min(140, r.width / 2));
+      var y = Math.round(r.top + Math.min(40, r.height / 2));
+      p.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+    }
+    function closeParagraphBubbles() {
+      var m = document.querySelector('.sv-bubbles'); if (m) m.classList.remove('open');
+    }
     var i = 0;
     function el(tag, cls) { var e = document.createElement(tag); e.className = cls; return e; }
     var block = el('div', 'sv-tour-block');
@@ -159,31 +188,35 @@
     document.body.appendChild(spot);
     document.body.appendChild(card);
 
+    // place the card on the side of the spotlight with the most room, clamped
+    // on-screen, never overlapping the spot
     function placeCard(r) {
-      var cw = card.offsetWidth, ch = card.offsetHeight, vw = innerWidth, vh = innerHeight, m = 14, left, top;
-      if (r.left > vw * 0.55) {                 // target on the right → card to its left
-        left = r.left - cw - 18;
-        top = Math.max(m, Math.min(r.top, vh - ch - m));
-      } else if (r.bottom + ch + 18 < vh) {     // room below
-        left = Math.max(m, Math.min(r.left, vw - cw - m));
-        top = r.bottom + 18;
-      } else {                                  // above
-        left = Math.max(m, Math.min(r.left, vw - cw - m));
-        top = Math.max(m, r.top - ch - 18);
+      var cw = card.offsetWidth, ch = card.offsetHeight, vw = innerWidth, vh = innerHeight, m = 14, g = 18, left, top;
+      var roomBelow = vh - r.bottom, roomAbove = r.top, roomRight = vw - r.right, roomLeft = r.left;
+      if (roomRight >= cw + g) {                 // to the right of the spotlight
+        left = r.right + g; top = clamp(r.top, m, vh - ch - m);
+      } else if (roomLeft >= cw + g) {           // to the left
+        left = r.left - cw - g; top = clamp(r.top, m, vh - ch - m);
+      } else if (roomBelow >= ch + g) {          // below
+        top = r.bottom + g; left = clamp(r.left, m, vw - cw - m);
+      } else {                                   // above
+        top = Math.max(m, r.top - ch - g); left = clamp(r.left, m, vw - cw - m);
       }
       card.style.left = left + 'px'; card.style.top = top + 'px';
     }
-    // keep the spotlight glued to the current step's target — survives any
-    // late reflow (lazy images pushing content down) so it never drifts
+    function clamp(v, lo, hi) { return Math.max(lo, Math.min(v, hi)); }
+    // keep the spotlight (and card) glued to the current step's target every
+    // frame — rides the element as the page settles, no glide-vs-scroll snap
     function syncSpot() {
       var s = steps[i], r = tourRect(s); if (!r) return;
       var pad = s.pad || 8;
       spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
       spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
+      placeCard(r);
     }
     function show(n) {
       i = n;
-      var s = steps[n], first = tourFirstEl(s);
+      var s = steps[n];
       // card content updates immediately
       card.querySelector('.sv-tour-kicker').textContent = 'Step ' + (n + 1) + ' of ' + steps.length;
       card.querySelector('.sv-tour-title').textContent = s.title;
@@ -191,13 +224,20 @@
       card.querySelector('.sv-tour-back').style.visibility = n === 0 ? 'hidden' : 'visible';
       card.querySelector('.sv-tour-next').textContent = n === steps.length - 1 ? 'Done' : 'Next';
       [].forEach.call(card.querySelectorAll('.sv-tour-dots i'), function (d, k) { d.classList.toggle('on', k === n); });
-      // instant scroll, then position (the tracker keeps it glued afterwards)
-      if (first) first.scrollIntoView({ block: 'center', behavior: 'auto' });
-      syncSpot();
-      setTimeout(function () { syncSpot(); placeCard(tourRect(s) || first.getBoundingClientRect()); }, 60);
-      setTimeout(function () { placeCard(tourRect(s) || first.getBoundingClientRect()); }, 260);
+      closeParagraphBubbles();
+      if (s.trigger === 'bubbles') {
+        // defer past the current click: the advancing Next click keeps
+        // propagating to simplify's document close-handler, which would shut
+        // the bubbles we just opened. Open on the next tick instead.
+        setTimeout(function () { openParagraphBubbles(); syncSpot(); }, 0);
+      } else {
+        var first = tourFirstEl(s);
+        if (first) first.scrollIntoView({ block: 'center', behavior: 'auto' });
+        syncSpot();
+        setTimeout(syncSpot, 60);        // catch any settle
+      }
     }
-    var tracker = setInterval(syncSpot, 120);   // glue the spot to its target
+    var tracker = setInterval(syncSpot, 90);   // glue spot + card to the target
     // lock the page: programmatic scrollIntoView still works, the user can't
     // scroll the highlighted element out from under the spotlight
     function preventScroll(e) { e.preventDefault(); }
@@ -214,6 +254,7 @@
       window.removeEventListener('wheel', preventScroll, { passive: false });
       window.removeEventListener('touchmove', preventScroll, { passive: false });
       window.removeEventListener('keydown', preventScrollKeys, true);
+      closeParagraphBubbles();
       [block, spot, card].forEach(function (e) { e.remove(); });
       document.removeEventListener('keydown', onKey);
       tourStarted = false;

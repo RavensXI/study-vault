@@ -730,6 +730,14 @@ body[data-skin="reader"] .page-header.scrolled{
 body[data-skin="reader"] .header-logo{ color:var(--text-primary); }
 /* drop the BETA stamp on the logo — this is the launch-ready look */
 body[data-skin="reader"] .header-logo::after{ content:none !important; display:none !important; }
+/* FIX a real bug: base CSS runs `animation: page-enter ... forwards` on <body>,
+   whose final keyframe is transform:translateY(0). A non-none transform on an
+   ancestor makes position:fixed resolve against THAT element, not the viewport
+   — so the bug FAB / tour / replay get flung to the document bottom on long
+   pages. Re-do the entrance as a transform-free fade so fixed elements pin to
+   the viewport. (Production should drop `forwards` / the transform keyframe.) */
+@keyframes sv-page-enter-fade{ from{ opacity:0; } to{ opacity:1; } }
+body[data-skin="reader"]{ animation:sv-page-enter-fade .3s ease-out both !important; }
 /* unit + lesson context: hierarchy, not one grey smear. Unit NAME is the
    readable anchor (normal case); lesson counter is a small muted detail after
    a hairline divider. */
@@ -980,6 +988,7 @@ body[data-skin="reader"] .term-popup{ font-family:var(--font-ui); border-radius:
 
 /* ---- bug FAB: accent blob -> quiet corner control ---- */
 body[data-skin="reader"] .bugr-fab{
+  position:fixed !important;   /* something resets it to static -> falls into flow */
   background:var(--bg-card); color:var(--text-muted);
   border:1px solid var(--border-light);
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 8px 20px -12px rgba(29,28,26,.2);
@@ -1089,18 +1098,20 @@ body[data-skin="reader"] .sv-tour-next{
 body[data-skin="reader"] .sv-tour-next:hover{ filter:brightness(1.08); }
 body[data-skin="reader"] .sv-tour-next:active{ transform:scale(.97); }
 body[data-skin="reader"].dark-mode .sv-tour-next{ color:#181614; }
-/* persistent replay control (bottom-left; bug FAB owns bottom-right) */
+/* persistent help/replay control — round FAB stacked above the bug FAB
+   (bottom-right) so the two feedback/help affordances pair up */
 body[data-skin="reader"] .sv-tour-replay{
-  position:fixed; left:16px; bottom:16px; z-index:9980;
-  display:inline-flex; align-items:center; gap:.45rem;
-  background:var(--bg-card); color:var(--text-secondary);
-  border:1px solid var(--border-light); border-radius:999px;
-  padding:.45rem .85rem; font-family:var(--font-ui); font-size:.82rem; font-weight:600; cursor:pointer;
+  position:fixed; right:16px; bottom:74px; z-index:9980;
+  width:44px; height:44px; padding:0; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--bg-card); color:var(--accent);
+  border:1px solid var(--border-light); cursor:pointer;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 8px 20px -12px rgba(29,28,26,.22);
-  transition:color .2s, border-color .2s;
+  transition:color .2s, border-color .2s, transform .15s;
 }
-body[data-skin="reader"] .sv-tour-replay:hover{ color:var(--accent); border-color:var(--accent); }
-body[data-skin="reader"] .sv-tour-replay svg{ color:var(--accent); flex:0 0 auto; }
+body[data-skin="reader"] .sv-tour-replay:hover{ border-color:var(--accent); transform:translateY(-1px); }
+body[data-skin="reader"] .sv-tour-replay svg{ flex:0 0 auto; }
+body[data-skin="reader"] .sv-tour-replay span{ display:none; }
 
 /* ================= READER DARK — warm-dark mapping of the v2 tokens =================
    body.dark-mode swaps the same variables the skin paints from; higher
