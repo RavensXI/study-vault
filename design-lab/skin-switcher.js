@@ -89,8 +89,8 @@
   var TOUR_STEPS = [
     { sel: '.a11y-toolbar', pad: 6, title: 'Set up your reading',
       body: 'Dark mode, a dyslexia-friendly font, simpler language, bigger text and colour overlays — make the page comfortable to read.' },
-    { trigger: 'bubbles', sel: '.sv-tour-demo-menu', req: '#lesson-page .study-notes p', pad: 12, title: 'Stuck on a sentence?',
-      body: 'Tap any paragraph and you can simplify the wording, have it explained a different way, or ask the tutor.' },
+    { trigger: 'bubbles', sel: '#lesson-page .study-notes p.sv-chunk', pad: 14, title: 'Stuck on a sentence?',
+      body: 'Tap any paragraph and these options pop up — simplify the wording, have it explained a different way, or ask the tutor.' },
     { sel: '.key-fact', pad: 8, title: 'Helpers in the text',
       body: 'Key facts are boxed like this, underlined words show a definition when you tap them, and the lightbulbs offer quick revision tips as you read.' },
     { sel: '.sidebar-progress-section', pad: 8, title: 'Track your progress',
@@ -227,7 +227,7 @@
       spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
       placeCard(r);
     }
-    function fadeIn() { setTimeout(function () { card.style.opacity = '1'; }, 20); }
+    function fadeIn() { setTimeout(function () { spot.style.opacity = '1'; card.style.opacity = '1'; }, 30); }
     // reposition while the card is faded out: the spot relocates in one clean
     // instant move (no glide-under-then-snap), the card cross-fades the step
     function reposition(n) {
@@ -259,9 +259,9 @@
     var firstShow = true, transitioning = false;
     function show(n) {
       if (firstShow) { firstShow = false; reposition(n); return; }  // no fade-out on first
-      transitioning = true;            // freeze the tracker so the spot jumps once
-      card.style.opacity = '0';        // fade the card out; spot stays lit
-      setTimeout(function () { reposition(n); }, 170);
+      transitioning = true;                                  // freeze the tracker
+      spot.style.opacity = '0'; card.style.opacity = '0';    // whole spotlight fades out as ONE
+      setTimeout(function () { reposition(n); }, 200);        // move unseen, then fade back in
     }
     // glue spot + card to the target (paused mid-transition so it relocates once)
     var tracker = setInterval(function () { if (!transitioning) syncSpot(); }, 90);

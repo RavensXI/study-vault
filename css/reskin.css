@@ -1056,12 +1056,13 @@ body[data-skin="reader"] .sv-legal-footer p{ font-family:var(--font-ui); }
    A dimmed page with a soft spotlight on one feature at a time + a small
    caption card. Replaces the old coachmark clutter. Subject-accent throughout. */
 body[data-skin="reader"] .sv-tour-block{ position:fixed; inset:0; z-index:100000; }
-/* the spotlight relocates INSTANTLY (no glide — that caused the "slide under
-   then snap" jank) while invisible-to-the-eye because the CARD fades the step
-   across; the dim stays constant so the page never flashes bright */
+/* the whole spotlight cross-fades between steps: it fades out, relocates while
+   invisible (no visible glide/scroll), then fades back in — one coordinated
+   motion, so it can't stutter mid-stage */
 body[data-skin="reader"] .sv-tour-spot{
   position:fixed; z-index:100000; border-radius:12px; pointer-events:none;
   box-shadow:0 0 0 9999px rgba(20,15,10,.62);
+  opacity:1; transition:opacity .2s ease;
 }
 body[data-skin="reader"] .sv-tour-card{
   position:fixed; z-index:100001; width:300px; max-width:calc(100vw - 28px);
