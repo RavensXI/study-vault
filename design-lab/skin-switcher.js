@@ -89,7 +89,7 @@
   var TOUR_STEPS = [
     { sel: '.a11y-toolbar', pad: 6, title: 'Set up your reading',
       body: 'Dark mode, a dyslexia-friendly font, simpler language, bigger text and colour overlays — make the page comfortable to read.' },
-    { trigger: 'bubbles', sel: '.sv-bubbles', req: '#lesson-page .study-notes p', pad: 12, title: 'Stuck on a sentence?',
+    { trigger: 'bubbles', sel: '.sv-tour-demo-menu', req: '#lesson-page .study-notes p', pad: 12, title: 'Stuck on a sentence?',
       body: 'Tap any paragraph and you can simplify the wording, have it explained a different way, or ask the tutor.' },
     { sel: '.key-fact', pad: 8, title: 'Helpers in the text',
       body: 'Key facts are boxed like this, underlined words show a definition when you tap them, and the lightbulbs offer quick revision tips as you read.' },
@@ -152,22 +152,35 @@
       return s.req ? document.querySelector(s.req) : tourRect(s);
     });
     if (!steps.length) return;
-    // open the paragraph "simplify / explain / ask the tutor" bubbles so the
-    // tour can spotlight them (drives the real .sv-chunk click handler)
-    function openParagraphBubbles() {
-      if (document.querySelector('.sv-bubbles.open')) return;
+    // The paragraph-menu step shows a STATIC replica of the simplify / explain /
+    // ask-the-tutor menu over the first paragraph (reliable — no dependency on
+    // simplify's fragile open/close + scroll-dismiss timing). Same look.
+    var demoMenu = null;
+    var DEMO_OPTS = [
+      ['Simplify wording', '<path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/>'],
+      ['Explain it differently', '<path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/>'],
+      ['Ask the tutor', '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>']
+    ];
+    function showDemoMenu() {
       var p = document.querySelector('#lesson-page .study-notes p.sv-chunk') ||
               document.querySelector('#lesson-page .study-notes p');
       if (!p) return;
-      p.scrollIntoView({ block: 'center', behavior: 'auto' });   // bring it into view first
+      if (!demoMenu) {
+        demoMenu = document.createElement('div');
+        demoMenu.className = 'sv-tour-demo-menu';
+        demoMenu.innerHTML = DEMO_OPTS.map(function (o) {
+          return '<span class="sv-tour-demo-bubble" title="' + o[0] + '">' +
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+            'stroke-linecap="round" stroke-linejoin="round">' + o[1] + '</svg></span>';
+        }).join('');
+        document.body.appendChild(demoMenu);
+      }
       var r = p.getBoundingClientRect();
-      var x = Math.round(r.left + Math.min(140, r.width / 2));
-      var y = Math.round(r.top + Math.min(40, r.height / 2));
-      p.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, clientX: x, clientY: y }));
+      demoMenu.style.left = Math.round(r.left + 26) + 'px';
+      demoMenu.style.top = Math.round(r.top + r.height / 2 - 23) + 'px';
+      demoMenu.style.display = 'flex';
     }
-    function closeParagraphBubbles() {
-      var m = document.querySelector('.sv-bubbles'); if (m) m.classList.remove('open');
-    }
+    function hideDemoMenu() { if (demoMenu) demoMenu.style.display = 'none'; }
     var i = 0;
     function el(tag, cls) { var e = document.createElement(tag); e.className = cls; return e; }
     var block = el('div', 'sv-tour-block');
@@ -214,30 +227,44 @@
       spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
       placeCard(r);
     }
-    function show(n) {
+    function fadeIn() { setTimeout(function () { card.style.opacity = '1'; }, 20); }
+    // reposition while the card is faded out: the spot relocates in one clean
+    // instant move (no glide-under-then-snap), the card cross-fades the step
+    function reposition(n) {
       i = n;
       var s = steps[n];
-      // card content updates immediately
       card.querySelector('.sv-tour-kicker').textContent = 'Step ' + (n + 1) + ' of ' + steps.length;
       card.querySelector('.sv-tour-title').textContent = s.title;
       card.querySelector('.sv-tour-body').textContent = s.body;
       card.querySelector('.sv-tour-back').style.visibility = n === 0 ? 'hidden' : 'visible';
       card.querySelector('.sv-tour-next').textContent = n === steps.length - 1 ? 'Done' : 'Next';
       [].forEach.call(card.querySelectorAll('.sv-tour-dots i'), function (d, k) { d.classList.toggle('on', k === n); });
-      closeParagraphBubbles();
+      hideDemoMenu();
       if (s.trigger === 'bubbles') {
-        // defer past the current click: the advancing Next click keeps
-        // propagating to simplify's document close-handler, which would shut
-        // the bubbles we just opened. Open on the next tick instead.
-        setTimeout(function () { openParagraphBubbles(); syncSpot(); }, 0);
-      } else {
-        var first = tourFirstEl(s);
-        if (first) first.scrollIntoView({ block: 'center', behavior: 'auto' });
+        var p = document.querySelector('#lesson-page .study-notes p.sv-chunk') ||
+                document.querySelector('#lesson-page .study-notes p');
+        if (p) p.scrollIntoView({ block: 'center', behavior: 'auto' });
+        showDemoMenu();
         syncSpot();
-        setTimeout(syncSpot, 60);        // catch any settle
+        transitioning = false;
+        fadeIn();
+        return;
       }
+      var first = tourFirstEl(s);
+      if (first) first.scrollIntoView({ block: 'center', behavior: 'auto' });
+      syncSpot();
+      transitioning = false;
+      fadeIn();
     }
-    var tracker = setInterval(syncSpot, 90);   // glue spot + card to the target
+    var firstShow = true, transitioning = false;
+    function show(n) {
+      if (firstShow) { firstShow = false; reposition(n); return; }  // no fade-out on first
+      transitioning = true;            // freeze the tracker so the spot jumps once
+      card.style.opacity = '0';        // fade the card out; spot stays lit
+      setTimeout(function () { reposition(n); }, 170);
+    }
+    // glue spot + card to the target (paused mid-transition so it relocates once)
+    var tracker = setInterval(function () { if (!transitioning) syncSpot(); }, 90);
     // lock the page: programmatic scrollIntoView still works, the user can't
     // scroll the highlighted element out from under the spotlight
     function preventScroll(e) { e.preventDefault(); }
@@ -254,7 +281,7 @@
       window.removeEventListener('wheel', preventScroll, { passive: false });
       window.removeEventListener('touchmove', preventScroll, { passive: false });
       window.removeEventListener('keydown', preventScrollKeys, true);
-      closeParagraphBubbles();
+      if (demoMenu) demoMenu.remove();
       [block, spot, card].forEach(function (e) { e.remove(); });
       document.removeEventListener('keydown', onKey);
       tourStarted = false;
