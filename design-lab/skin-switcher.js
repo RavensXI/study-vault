@@ -694,13 +694,9 @@
     var cards = [].slice.call(mbody.querySelectorAll('.sidebar-collapsible'));
     var feed = mbody.querySelector('.sidebar-podcast-feed');
     var panel = modal.querySelector('.rm-panel');
-    function masonry() {
-      if (modal.hidden) return;
-      // column count fits the CONTENT (never more columns than categories) and
-      // the viewport; the panel then sizes to exactly wrap those columns
-      var PAD = 54, COLW = 270, GAP = 18;
-      var maxByVp = Math.max(1, Math.floor((window.innerWidth * 0.94 - PAD) / (COLW + GAP)));
-      var n = Math.max(1, Math.min(3, cards.length, maxByVp));
+    var PAD = 54, COLW = 270, GAP = 18;
+    // lay the cards into n balanced columns, size the panel to wrap them
+    function renderCols(n) {
       panel.style.width = Math.min(n * COLW + (n - 1) * GAP + PAD, Math.round(window.innerWidth * 0.94)) + 'px';
       var wrap = document.createElement('div'); wrap.className = 'rm-cols';
       var cols = [];
@@ -710,15 +706,24 @@
       // pass 1: measure each card at the real column width
       var measured = cards.map(function (card) { cols[0].appendChild(card); return { card: card, h: card.offsetHeight }; });
       measured.forEach(function (o) { cols[0].removeChild(o.card); });
-      // pass 2: tallest-first into the currently-shortest column (LPT balancing —
-      // fills gaps AND keeps columns even, unlike greedy-by-original-order)
+      // pass 2: tallest-first into the currently-shortest column (LPT balancing)
       measured.sort(function (a, b) { return b.h - a.h; });
       var hts = []; for (var k = 0; k < n; k++) hts.push(0);
       measured.forEach(function (o) {
         var m = 0; for (var k = 1; k < n; k++) if (hts[k] < hts[m]) m = k;
-        cols[m].appendChild(o.card); hts[m] += o.h + 18;        // +gap
+        cols[m].appendChild(o.card); hts[m] += o.h + GAP;
       });
       if (feed) mbody.appendChild(feed);
+    }
+    function masonry() {
+      if (modal.hidden) return;
+      var maxByVp = Math.max(1, Math.floor((window.innerWidth * 0.94 - PAD) / (COLW + GAP)));
+      var cap = Math.min(cards.length, maxByVp, 4);   // up to 4 cols when it helps
+      var n = Math.max(1, Math.min(3, cap));
+      renderCols(n);
+      // too tall to fit without a scroll? spread it WIDER (add a column) rather
+      // than shrink the text — keeps it readable, uses the horizontal space
+      while (panel.scrollHeight > panel.clientHeight + 2 && n < cap) { n++; renderCols(n); }
     }
     var launcher = document.createElement('button');
     launcher.className = 'rm-launcher';
