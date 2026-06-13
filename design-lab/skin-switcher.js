@@ -53,7 +53,24 @@
     fixLessonNavArrows();
     evenA11yDividers();
     revealMasthead();
+    buildTourReplay();
     maybeStartTour();
+  }
+
+  // persistent "replay the tour" control (bottom-left; the tour's last step
+  // points at it). Clicking re-runs the tour from the start.
+  function buildTourReplay() {
+    if (document.querySelector('.sv-tour-replay')) return;
+    var b = document.createElement('button');
+    b.className = 'sv-tour-replay'; b.type = 'button';
+    b.setAttribute('aria-label', 'Replay the page tour');
+    b.innerHTML =
+      '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" ' +
+      'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<circle cx="12" cy="12" r="9"/><polygon points="10,8.4 16,12 10,15.6" fill="currentColor" stroke="none"/></svg>' +
+      '<span>Tour</span>';
+    b.addEventListener('click', function () { startTour(); });
+    document.body.appendChild(b);
   }
 
   // FEATURE TOUR (Tom, 13 Jun) — a clean first-visit walkthrough: dim the page,
@@ -71,14 +88,14 @@
       body: 'This fills in as you work through the lesson, so you can always see how far you have got.' },
     { sels: ['.sidebar-knowledge-check', '.tile-practice'], pad: 10, title: 'Test yourself',
       body: 'Quick Quiz, Flashcards and exam-style Practice questions are all here — the fastest way to check what has stuck.' },
-    { sel: '.sidebar-media', pad: 10, title: 'Go deeper',
-      body: 'Hand-picked videos, articles and podcasts to explore the topic beyond the lesson.' },
-    { sels: ['.tile-highlight', '.tile-tutor'], pad: 10, title: 'Read actively',
-      body: 'Highlight anything as you go, or ask the tutor to explain a tricky part a different way.' },
+    { sels: ['.sidebar-media', '.tile-highlight', '.tile-tutor'], pad: 10, title: 'Explore and dig in',
+      body: 'Hand-picked media to go deeper, a highlighter for the bits that matter, and a tutor to explain anything a different way.' },
     { sel: '#sidebar-video-section .sidebar-video', pad: 8, title: 'Watch the overview',
       body: 'A short video explainer for the lesson. Tap it to play full-size.' },
     { sel: '#nav-next-lesson', pad: 6, title: 'Before you go',
-      body: 'When you move to the next lesson, we’ll ask one question that links it back to something you already learned — that’s what makes it stick.' }
+      body: 'When you move to the next lesson, we’ll ask one question that links it back to something you already learned — that’s what makes it stick.' },
+    { sel: '.sv-tour-replay', pad: 8, title: 'Replay any time',
+      body: 'New to all this? Tap here whenever you like to run through the tour again.' }
   ];
   // first visible element of a step (for scrolling), and the union rect to spotlight
   function tourFirstEl(s) {
@@ -156,27 +173,47 @@
       }
       card.style.left = left + 'px'; card.style.top = top + 'px';
     }
+    // keep the spotlight glued to the current step's target — survives any
+    // late reflow (lazy images pushing content down) so it never drifts
+    function syncSpot() {
+      var s = steps[i], r = tourRect(s); if (!r) return;
+      var pad = s.pad || 8;
+      spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
+      spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
+    }
     function show(n) {
       i = n;
       var s = steps[n], first = tourFirstEl(s);
-      // instant scroll so the rect is stable when we place the spotlight
-      // (reading mid-smooth-scroll left the spot misaligned)
+      // card content updates immediately
+      card.querySelector('.sv-tour-kicker').textContent = 'Step ' + (n + 1) + ' of ' + steps.length;
+      card.querySelector('.sv-tour-title').textContent = s.title;
+      card.querySelector('.sv-tour-body').textContent = s.body;
+      card.querySelector('.sv-tour-back').style.visibility = n === 0 ? 'hidden' : 'visible';
+      card.querySelector('.sv-tour-next').textContent = n === steps.length - 1 ? 'Done' : 'Next';
+      [].forEach.call(card.querySelectorAll('.sv-tour-dots i'), function (d, k) { d.classList.toggle('on', k === n); });
+      // instant scroll, then position (the tracker keeps it glued afterwards)
       if (first) first.scrollIntoView({ block: 'center', behavior: 'auto' });
-      setTimeout(function () {
-        var r = tourRect(s) || tourFirstEl(s).getBoundingClientRect(), pad = s.pad || 8;
-        spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
-        spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
-        card.querySelector('.sv-tour-kicker').textContent = 'Step ' + (n + 1) + ' of ' + steps.length;
-        card.querySelector('.sv-tour-title').textContent = s.title;
-        card.querySelector('.sv-tour-body').textContent = s.body;
-        card.querySelector('.sv-tour-back').style.visibility = n === 0 ? 'hidden' : 'visible';
-        card.querySelector('.sv-tour-next').textContent = n === steps.length - 1 ? 'Done' : 'Next';
-        [].forEach.call(card.querySelectorAll('.sv-tour-dots i'), function (d, k) { d.classList.toggle('on', k === n); });
-        placeCard(r);
-      }, 340);
+      syncSpot();
+      setTimeout(function () { syncSpot(); placeCard(tourRect(s) || first.getBoundingClientRect()); }, 60);
+      setTimeout(function () { placeCard(tourRect(s) || first.getBoundingClientRect()); }, 260);
     }
+    var tracker = setInterval(syncSpot, 120);   // glue the spot to its target
+    // lock the page: programmatic scrollIntoView still works, the user can't
+    // scroll the highlighted element out from under the spotlight
+    function preventScroll(e) { e.preventDefault(); }
+    function preventScrollKeys(e) {
+      if (e.target.closest('.sv-tour-card')) return;
+      if (['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End', ' ', 'Spacebar'].indexOf(e.key) !== -1) e.preventDefault();
+    }
+    window.addEventListener('wheel', preventScroll, { passive: false });
+    window.addEventListener('touchmove', preventScroll, { passive: false });
+    window.addEventListener('keydown', preventScrollKeys, true);
     function finish() {
       localStorage.setItem('sv-reader-tour-v1', '1');
+      clearInterval(tracker);
+      window.removeEventListener('wheel', preventScroll, { passive: false });
+      window.removeEventListener('touchmove', preventScroll, { passive: false });
+      window.removeEventListener('keydown', preventScrollKeys, true);
       [block, spot, card].forEach(function (e) { e.remove(); });
       document.removeEventListener('keydown', onKey);
       tourStarted = false;
