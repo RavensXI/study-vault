@@ -728,6 +728,8 @@ body[data-skin="reader"] .page-header.scrolled{
   border-bottom-color:var(--border-light); box-shadow:none;
 }
 body[data-skin="reader"] .header-logo{ color:var(--text-primary); }
+/* drop the BETA stamp on the logo — this is the launch-ready look */
+body[data-skin="reader"] .header-logo::after{ content:none !important; display:none !important; }
 /* unit + lesson context: hierarchy, not one grey smear. Unit NAME is the
    readable anchor (normal case); lesson counter is a small muted detail after
    a hairline divider. */
@@ -1040,6 +1042,53 @@ body[data-skin="reader"] .sv-article-figure figcaption{
 /* ---- legal footer (beta banner already handled as a quiet line below) ---- */
 body[data-skin="reader"] .sv-legal-footer{ border-top:1px solid var(--border-light); }
 body[data-skin="reader"] .sv-legal-footer p{ font-family:var(--font-ui); }
+
+/* ================= FEATURE TOUR — clean first-visit spotlight =================
+   A dimmed page with a soft spotlight on one feature at a time + a small
+   caption card. Replaces the old coachmark clutter. Subject-accent throughout. */
+body[data-skin="reader"] .sv-tour-block{ position:fixed; inset:0; z-index:100000; }
+body[data-skin="reader"] .sv-tour-spot{
+  position:fixed; z-index:100000; border-radius:12px; pointer-events:none;
+  box-shadow:0 0 0 9999px rgba(20,15,10,.62);
+  transition:left .35s cubic-bezier(.16,1,.3,1), top .35s cubic-bezier(.16,1,.3,1),
+             width .35s cubic-bezier(.16,1,.3,1), height .35s cubic-bezier(.16,1,.3,1);
+}
+body[data-skin="reader"] .sv-tour-card{
+  position:fixed; z-index:100001; width:300px; max-width:calc(100vw - 28px);
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:12px;
+  box-shadow:0 24px 60px rgba(0,0,0,.32); padding:1.1rem 1.2rem 1rem;
+  font-family:var(--font-ui);
+  transition:left .35s cubic-bezier(.16,1,.3,1), top .35s cubic-bezier(.16,1,.3,1);
+}
+body[data-skin="reader"] .sv-tour-kicker{
+  font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.12em;
+  color:var(--accent); margin-bottom:.4rem;
+}
+body[data-skin="reader"] .sv-tour-title{
+  font-family:var(--font-head); font-size:1.15rem; font-weight:600; letter-spacing:-.01em;
+  color:var(--text-primary); margin-bottom:.4rem;
+}
+body[data-skin="reader"] .sv-tour-body{
+  font-family:var(--font-read); font-size:.95rem; line-height:1.55; color:var(--text-secondary); margin:0 0 1rem;
+}
+body[data-skin="reader"] .sv-tour-foot{ display:flex; align-items:center; justify-content:space-between; gap:.8rem; }
+body[data-skin="reader"] .sv-tour-dots{ display:flex; gap:.35rem; }
+body[data-skin="reader"] .sv-tour-dots i{ width:6px; height:6px; border-radius:50%; background:var(--border-light); display:block; transition:background .2s; }
+body[data-skin="reader"] .sv-tour-dots i.on{ background:var(--accent); }
+body[data-skin="reader"] .sv-tour-btns{ display:flex; gap:.55rem; align-items:center; }
+body[data-skin="reader"] .sv-tour-skip,
+body[data-skin="reader"] .sv-tour-back{ background:none; border:none; font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; padding:.2rem .1rem; }
+body[data-skin="reader"] .sv-tour-skip{ color:var(--text-muted); }
+body[data-skin="reader"] .sv-tour-back{ color:var(--text-secondary); }
+body[data-skin="reader"] .sv-tour-skip:hover,
+body[data-skin="reader"] .sv-tour-back:hover{ color:var(--text-primary); }
+body[data-skin="reader"] .sv-tour-next{
+  background:var(--accent); color:#fff; border:none; border-radius:7px; padding:.42rem .95rem;
+  font:inherit; font-size:.85rem; font-weight:600; cursor:pointer; transition:filter .15s, transform .12s;
+}
+body[data-skin="reader"] .sv-tour-next:hover{ filter:brightness(1.08); }
+body[data-skin="reader"] .sv-tour-next:active{ transform:scale(.97); }
+body[data-skin="reader"].dark-mode .sv-tour-next{ color:#181614; }
 
 /* ================= READER DARK — warm-dark mapping of the v2 tokens =================
    body.dark-mode swaps the same variables the skin paints from; higher

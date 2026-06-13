@@ -37,7 +37,8 @@
 
   // clear onboarding overlays + force scroll-reveal so the page is fully visible
   function tidy() {
-    document.querySelectorAll('[class*="tour"],[class*="coach"],[class*="tutorial"],[class*="walkthrough"],[class*="spotlight"],.anon-welcome-overlay,[class*="whats-new"]')
+    // strip the OLD onboarding clutter — but NOT our own sv-tour feature tour
+    document.querySelectorAll('[class*="tour"]:not([class*="sv-tour"]),[class*="coach"],[class*="tutorial"],[class*="walkthrough"],[class*="spotlight"],.anon-welcome-overlay,[class*="whats-new"]')
       .forEach(function (e) { e.remove(); });
     document.querySelectorAll('[class*="sv-reveal"],.lesson-header .lesson-number,.lesson-header h1,.lesson-hero-image,.lesson-sidebar,.study-notes > *,.exam-tip,.conclusion,.practice-section')
       .forEach(function (e) { e.classList.add('sv-visible'); });
@@ -52,7 +53,119 @@
     fixLessonNavArrows();
     evenA11yDividers();
     revealMasthead();
+    maybeStartTour();
   }
+
+  // FEATURE TOUR (Tom, 13 Jun) — a clean first-visit walkthrough: dim the page,
+  // spotlight one feature at a time, small caption card with Back/Next/Skip.
+  // Shows once (localStorage); re-run anytime with window.svStartTour().
+  var tourStarted = false, tourPolling = false;
+  var TOUR_STEPS = [
+    { sel: '.a11y-toolbar', pad: 6, title: 'Make it your own',
+      body: 'Dark mode, a dyslexia-friendly font, simpler language, bigger text and colour overlays — set the page up to read the way that suits you.' },
+    { sel: '.sv-panel', pad: 10, title: 'Your study tools',
+      body: 'Quick Quiz, Flashcards and exam-style Practice are all here — plus related media and a highlighter. Everything for this lesson in one place.' },
+    { sel: '#sidebar-video-section .sidebar-video', pad: 8, title: 'Watch the overview',
+      body: 'A short video explainer for the lesson. Tap it to play full-size.' }
+  ];
+  function maybeStartTour() {
+    if (tourPolling || tourStarted) return;
+    if (localStorage.getItem('sv-reader-tour-v1')) return;
+    tourPolling = true;
+    // poll until the async-loaded panel + a11y bar exist (fixed tidy timers
+    // can fire before the loader finishes), then start once
+    (function poll(n) {
+      if (tourStarted || localStorage.getItem('sv-reader-tour-v1')) { tourPolling = false; return; }
+      if (document.querySelector('.sv-panel') && document.querySelector('.a11y-toolbar')) {
+        tourPolling = false; startTour(); return;
+      }
+      if (n > 0) setTimeout(function () { poll(n - 1); }, 500);
+      else tourPolling = false;
+    })(20);
+  }
+  function startTour() {
+    if (document.querySelector('.sv-tour-card')) return;
+    tourStarted = true;
+    var steps = TOUR_STEPS.filter(function (s) {
+      var t = document.querySelector(s.sel);
+      return t && t.getBoundingClientRect().height > 4;   // skip absent/hidden (e.g. no video)
+    });
+    if (!steps.length) return;
+    var i = 0;
+    function el(tag, cls) { var e = document.createElement(tag); e.className = cls; return e; }
+    var block = el('div', 'sv-tour-block');
+    var spot = el('div', 'sv-tour-spot');
+    var card = el('div', 'sv-tour-card');
+    card.innerHTML =
+      '<div class="sv-tour-kicker"></div>' +
+      '<div class="sv-tour-title"></div>' +
+      '<p class="sv-tour-body"></p>' +
+      '<div class="sv-tour-foot"><span class="sv-tour-dots">' +
+        steps.map(function () { return '<i></i>'; }).join('') +
+      '</span><span class="sv-tour-btns">' +
+        '<button type="button" class="sv-tour-skip" data-act="skip">Skip</button>' +
+        '<button type="button" class="sv-tour-back" data-act="back">Back</button>' +
+        '<button type="button" class="sv-tour-next" data-act="next">Next</button>' +
+      '</span></div>';
+    document.body.appendChild(block);
+    document.body.appendChild(spot);
+    document.body.appendChild(card);
+
+    function placeCard(r) {
+      var cw = card.offsetWidth, ch = card.offsetHeight, vw = innerWidth, vh = innerHeight, m = 14, left, top;
+      if (r.left > vw * 0.55) {                 // target on the right → card to its left
+        left = r.left - cw - 18;
+        top = Math.max(m, Math.min(r.top, vh - ch - m));
+      } else if (r.bottom + ch + 18 < vh) {     // room below
+        left = Math.max(m, Math.min(r.left, vw - cw - m));
+        top = r.bottom + 18;
+      } else {                                  // above
+        left = Math.max(m, Math.min(r.left, vw - cw - m));
+        top = Math.max(m, r.top - ch - 18);
+      }
+      card.style.left = left + 'px'; card.style.top = top + 'px';
+    }
+    function show(n) {
+      i = n;
+      var s = steps[n], target = document.querySelector(s.sel);
+      // instant scroll so the rect is stable when we place the spotlight
+      // (reading mid-smooth-scroll left the spot misaligned)
+      target.scrollIntoView({ block: 'center', behavior: 'auto' });
+      setTimeout(function () {
+        var r = target.getBoundingClientRect(), pad = s.pad || 8;
+        spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
+        spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
+        card.querySelector('.sv-tour-kicker').textContent = 'Step ' + (n + 1) + ' of ' + steps.length;
+        card.querySelector('.sv-tour-title').textContent = s.title;
+        card.querySelector('.sv-tour-body').textContent = s.body;
+        card.querySelector('.sv-tour-back').style.visibility = n === 0 ? 'hidden' : 'visible';
+        card.querySelector('.sv-tour-next').textContent = n === steps.length - 1 ? 'Done' : 'Next';
+        [].forEach.call(card.querySelectorAll('.sv-tour-dots i'), function (d, k) { d.classList.toggle('on', k === n); });
+        placeCard(r);
+      }, 340);
+    }
+    function finish() {
+      localStorage.setItem('sv-reader-tour-v1', '1');
+      [block, spot, card].forEach(function (e) { e.remove(); });
+      document.removeEventListener('keydown', onKey);
+      tourStarted = false;
+    }
+    function onKey(e) {
+      if (e.key === 'Escape') finish();
+      else if (e.key === 'ArrowRight') (i < steps.length - 1 ? show(i + 1) : finish());
+      else if (e.key === 'ArrowLeft' && i > 0) show(i - 1);
+    }
+    card.addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]'); if (!b) return;
+      var a = b.getAttribute('data-act');
+      if (a === 'skip') finish();
+      else if (a === 'back') { if (i > 0) show(i - 1); }
+      else { if (i < steps.length - 1) show(i + 1); else finish(); }
+    });
+    document.addEventListener('keydown', onKey);
+    show(0);
+  }
+  window.svStartTour = startTour;   // re-run from console any time
 
   // Normalise the a11y bar's dividers: the markup's .a11y-separator spans are
   // inconsistent (missing between Simplify and the font-size group). Drop them
@@ -452,7 +565,7 @@
   // BRIEF v2: one muted accent per subject (sandbox map keyed by base slug;
   // ships later via subjects.color). Used sparingly: kicker, links, progress fills.
   var ACCENTS = {
-    'history': '#7d4f41',            // umber
+    'history': '#3f5e78',            // deep slate-blue (was a muddy umber)
     'geography': '#5f7155',          // moss
     'science': '#44696c',            // slate teal
     'combined-science': '#44696c',
