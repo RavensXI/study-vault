@@ -4,7 +4,7 @@
    Switch live with design-lab/skin-switcher.js.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Hanken+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Schibsted+Grotesk:wght@400..800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=Hanken+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400;1,700&family=Andika:ital,wght@0,400;0,700;1,400;1,700&family=Schibsted+Grotesk:wght@400..800&display=swap');
 
 /* =================================================================
    SHARED — applies to ANY active skin. Reads per-skin variables.
@@ -21,7 +21,13 @@ body[data-skin] .conclusion p{ font-family:var(--font-read) !important; }
 
 body[data-skin] .study-notes p,
 body[data-skin] .study-notes li{
-  font-size:var(--read-size); line-height:var(--read-lh); color:var(--text-primary);
+  font-size:var(--read-size); color:var(--text-primary);
+  /* --read-space (0–1, set by the Read-your-way panel) loosens line/letter/word
+     spacing together — the evidence-based crowding lever for dyslexic readers
+     (Zorzi/WCAG). Default 0 = the skin's normal reading rhythm. */
+  line-height:calc(var(--read-lh) + var(--read-space, 0) * 0.34);
+  letter-spacing:calc(var(--read-space, 0) * 0.11em);
+  word-spacing:calc(var(--read-space, 0) * 0.16em);
 }
 body[data-skin] .study-notes p{ margin-bottom:1.12em; }
 body[data-skin] .study-notes li{ margin-bottom:.5em; }
@@ -983,6 +989,74 @@ body[data-skin="reader"] .a11y-overlay-intensity input[type="range"]::-webkit-sl
 }
 body[data-skin="reader"] .a11y-overlay-intensity input[type="range"]::-moz-range-thumb{
   width:15px; height:15px; border-radius:50%; background:var(--accent); border:2px solid var(--bg-card);
+}
+
+/* READ YOUR WAY (Tom, 13 Jun) — text size + spacing + reading-font picker in one
+   popover, replacing the inline A-/A+ and the OpenDyslexic toggle. Per the
+   dyslexia-font report: deprecate OpenDyslexic; offer Atkinson Hyperlegible +
+   Andika (both SIL OFL, static weights); and bundle ADJUSTABLE spacing — the
+   real crowding lever — rather than a font swap alone. Default font stays
+   Literata; left-align + paragraph gaps + measure are already baked reader
+   defaults so they need no control. */
+body[data-skin="reader"] .a11y-reading-toggle{ display:inline-flex; align-items:center; gap:.42rem; }
+body[data-skin="reader"] .a11y-reading-toggle.on{
+  background:color-mix(in srgb,var(--accent) 13%,var(--bg-card)); color:var(--accent);
+}
+body[data-skin="reader"] .a11y-reading-toggle svg{ width:17px; height:17px; }
+body[data-skin="reader"] .a11y-reading-pop{
+  position:fixed; z-index:2147483600; width:282px; box-sizing:border-box;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 44px -22px rgba(29,28,26,.34);
+  padding:.4rem 1.05rem .9rem; font-family:var(--font-ui);
+}
+body[data-skin="reader"] .a11y-reading-pop[hidden]{ display:none; }
+body[data-skin="reader"].dark-mode .a11y-reading-pop{
+  box-shadow:0 1px 2px rgba(0,0,0,.4), 0 22px 44px -22px rgba(0,0,0,.6);
+}
+body[data-skin="reader"] .a11y-rd-section{ padding:.75rem 0; }
+body[data-skin="reader"] .a11y-rd-section + .a11y-rd-section{ border-top:1px solid var(--border-lighter); }
+body[data-skin="reader"] .a11y-rd-label{
+  display:block; font-size:.66rem; font-weight:700; text-transform:uppercase; letter-spacing:.1em;
+  color:var(--text-muted); margin-bottom:.55rem;
+}
+/* text-size: the relocated A-/A+ group, as two equal segmented buttons */
+body[data-skin="reader"] .a11y-reading-pop .a11y-font-size-group{ display:flex; gap:.45rem; }
+body[data-skin="reader"] .a11y-reading-pop .a11y-font-size-group .a11y-btn{
+  flex:1 1 0; border:1px solid var(--border-light); border-radius:8px; padding:.42rem 0;
+  text-align:center; color:var(--text-secondary);
+}
+body[data-skin="reader"] .a11y-reading-pop .a11y-font-size-group .a11y-btn:hover{
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card)); color:var(--text-primary);
+}
+/* spacing slider */
+body[data-skin="reader"] .a11y-rd-slider{
+  display:block; width:100%; -webkit-appearance:none; appearance:none; height:4px; border-radius:3px;
+  background:var(--border-light); cursor:pointer; margin:.1rem 0 0;
+}
+body[data-skin="reader"] .a11y-rd-slider::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:15px; height:15px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--bg-card); box-shadow:0 1px 3px rgba(29,28,26,.3);
+}
+body[data-skin="reader"] .a11y-rd-slider::-moz-range-thumb{
+  width:15px; height:15px; border-radius:50%; background:var(--accent); border:2px solid var(--bg-card);
+}
+/* reading-font options: full-width rows, each name previewed in its own face */
+body[data-skin="reader"] .a11y-rd-fonts{ display:flex; flex-direction:column; gap:.4rem; }
+body[data-skin="reader"] .a11y-rd-font{
+  display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+  border:1px solid var(--border-light); border-radius:9px; padding:.5rem .7rem;
+  background:var(--bg-card); color:var(--text-primary); font-size:1rem; line-height:1.1;
+  cursor:pointer; text-align:left;
+}
+body[data-skin="reader"] .a11y-rd-font:hover{ background:color-mix(in srgb,var(--accent) 6%,var(--bg-card)); }
+body[data-skin="reader"] .a11y-rd-font.active{
+  border-color:var(--accent); background:color-mix(in srgb,var(--accent) 9%,var(--bg-card));
+}
+body[data-skin="reader"] .a11y-rd-font .a11y-rd-check{ color:var(--accent); opacity:0; font-size:.9rem; }
+body[data-skin="reader"] .a11y-rd-font.active .a11y-rd-check{ opacity:1; }
+body[data-skin="reader"] .a11y-rd-font small{
+  display:block; font-family:var(--font-ui); font-size:.66rem; font-weight:600; letter-spacing:.04em;
+  color:var(--text-muted); margin-top:.15rem;
 }
 
 /* ---- foot prev/next cards ---- */

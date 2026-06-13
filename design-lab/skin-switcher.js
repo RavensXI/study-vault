@@ -53,6 +53,7 @@
     fixLessonNavArrows();
     buildFocusToggle();          // before evenA11yDividers so it gets a divider
     buildOverlayControl();       // collapse the swatch row into a button + popover
+    buildReadingPanel();         // A-/A+ + spacing + reading-font picker (replaces OpenDyslexic)
     evenA11yDividers();
     revealMasthead();
     // the bug FAB can end up nested inside the (transformed) tutor-dock, which
@@ -460,6 +461,113 @@
       var r = btn.getBoundingClientRect();
       pop.style.top = (r.bottom + 9) + 'px';
       var w = pop.offsetWidth || 244;
+      pop.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
+    }
+    function openPop() { pop.hidden = false; place(); btn.setAttribute('aria-expanded', 'true'); }
+    function closePop() { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    btn.addEventListener('click', function (e) { e.stopPropagation(); pop.hidden ? openPop() : closePop(); });
+    document.addEventListener('click', function (e) {
+      if (!pop.hidden && !pop.contains(e.target) && !btn.contains(e.target)) closePop();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
+    window.addEventListener('resize', function () { if (!pop.hidden) place(); });
+  }
+
+  // READ YOUR WAY (Tom, 13 Jun) — one popover for text size + spacing + reading
+  // font, replacing the inline A-/A+ group and the OpenDyslexic toggle. Per the
+  // dyslexia-font report: OpenDyslexic is deprecated (null/negative evidence);
+  // the win is adjustable SPACING (the crowding lever) plus a small choice of
+  // disambiguation-first reading faces — Atkinson Hyperlegible + Andika. The
+  // existing A-/A+ buttons are MOVED in (main.js wiring intact); spacing drives
+  // --read-space; font sets an inline --font-read. Persists in studyvault-a11y.
+  var RD_FONTS = [
+    { key: 'default', name: 'Default', note: 'Literata', css: "'Literata',Georgia,serif" },
+    { key: 'atkinson', name: 'Atkinson Hyperlegible', note: 'Clear letter shapes', css: "'Atkinson Hyperlegible',sans-serif" },
+    { key: 'andika', name: 'Andika', note: 'Soft, literacy-friendly', css: "'Andika',sans-serif" }
+  ];
+  function rdPrefs() { try { return JSON.parse(localStorage.getItem('studyvault-a11y')) || {}; } catch (e) { return {}; } }
+  function rdSave(patch) { var p = rdPrefs(); for (var k in patch) p[k] = patch[k]; try { localStorage.setItem('studyvault-a11y', JSON.stringify(p)); } catch (e) {} }
+  function rdApplyFont(css) { if (css) document.body.style.setProperty('--font-read', css); else document.body.style.removeProperty('--font-read'); }
+  function rdApplySpace(v) { document.body.style.setProperty('--read-space', (v / 100).toFixed(2)); }
+  function buildReadingPanel() {
+    var tb = document.querySelector('.a11y-toolbar');
+    if (!tb || tb.dataset.readingPanel) return;
+    var sizeGroup = tb.querySelector('.a11y-font-size-group');
+    if (!sizeGroup) return;                 // wait for the full bar
+    tb.dataset.readingPanel = '1';
+
+    // deprecate OpenDyslexic: remove the toggle + strip any persisted class
+    var dys = tb.querySelector('.a11y-dyslexia-toggle');
+    if (dys) dys.remove();
+    document.body.classList.remove('dyslexia-font');
+
+    // trigger button (placed where A-/A+ used to sit — before the overlay group)
+    var btn = document.createElement('button');
+    btn.className = 'a11y-btn a11y-reading-toggle';
+    btn.setAttribute('aria-haspopup', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('title', 'Read your way — size, spacing and reading fonts');
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V5h16v2"/><path d="M9 5v14"/>' +
+      '<path d="M7 19h4"/><path d="M15 13v-1h6v1"/><path d="M18 12v7"/><path d="M16.5 19h3"/></svg>' +
+      '<span>Read your way</span>';
+    var ovGroup = tb.querySelector('.a11y-overlay-group');
+    tb.insertBefore(btn, ovGroup || null);
+
+    // popover
+    var pop = document.createElement('div');
+    pop.className = 'a11y-reading-pop'; pop.hidden = true;
+
+    // SIZE — relocate the existing A-/A+ group (keeps main.js setFontSize wiring)
+    var s1 = document.createElement('div'); s1.className = 'a11y-rd-section';
+    s1.innerHTML = '<span class="a11y-rd-label">Text size</span>';
+    s1.appendChild(sizeGroup);
+
+    // SPACING — slider drives --read-space
+    var s2 = document.createElement('div'); s2.className = 'a11y-rd-section';
+    s2.innerHTML = '<span class="a11y-rd-label">Line &amp; letter spacing</span>';
+    var range = document.createElement('input');
+    range.type = 'range'; range.min = '0'; range.max = '100'; range.step = '5';
+    range.className = 'a11y-rd-slider'; range.setAttribute('aria-label', 'Line and letter spacing');
+    s2.appendChild(range);
+
+    // FONT — pick-list, each previewed in its own face
+    var s3 = document.createElement('div'); s3.className = 'a11y-rd-section';
+    s3.innerHTML = '<span class="a11y-rd-label">Reading font</span>';
+    var fonts = document.createElement('div'); fonts.className = 'a11y-rd-fonts';
+    s3.appendChild(fonts);
+
+    pop.appendChild(s1); pop.appendChild(s2); pop.appendChild(s3);
+    document.body.appendChild(pop);
+
+    // ---- spacing wiring ----
+    var savedSpace = rdPrefs().readingSpace;
+    if (typeof savedSpace !== 'number') savedSpace = 0;
+    range.value = savedSpace; rdApplySpace(savedSpace);
+    range.addEventListener('input', function () { rdApplySpace(this.value); rdSave({ readingSpace: +this.value }); });
+
+    // ---- font wiring ----
+    function setFontActive(key) {
+      [].forEach.call(fonts.children, function (b) { b.classList.toggle('active', b.dataset.font === key); });
+      btn.classList.toggle('on', key && key !== 'default');   // lit when a reading-aid face is on
+    }
+    RD_FONTS.forEach(function (f) {
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'a11y-rd-font'; b.dataset.font = f.key;
+      b.innerHTML = '<span><span style="font-family:' + f.css + '">' + f.name + '</span>' +
+        '<small>' + f.note + '</small></span><span class="a11y-rd-check">✓</span>';
+      b.addEventListener('click', function () { rdApplyFont(f.key === 'default' ? '' : f.css); setFontActive(f.key); rdSave({ readingFont: f.key }); });
+      fonts.appendChild(b);
+    });
+    var savedFont = rdPrefs().readingFont || 'default';
+    var sf = RD_FONTS.filter(function (f) { return f.key === savedFont; })[0] || RD_FONTS[0];
+    rdApplyFont(sf.key === 'default' ? '' : sf.css); setFontActive(sf.key);
+
+    // ---- open / close + placement (right-aligned under the trigger) ----
+    function place() {
+      var r = btn.getBoundingClientRect();
+      pop.style.top = (r.bottom + 9) + 'px';
+      var w = pop.offsetWidth || 282;
       pop.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
     }
     function openPop() { pop.hidden = false; place(); btn.setAttribute('aria-expanded', 'true'); }
