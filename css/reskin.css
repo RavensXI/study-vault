@@ -391,47 +391,54 @@ body[data-skin="reader"].dark-mode .sv-exit-continue{ color:#181614; }
 .rm-modal{ position:fixed; inset:0; z-index:10000; display:flex; align-items:center; justify-content:center; }
 .rm-modal[hidden]{ display:none; }
 .rm-backdrop{ position:absolute; inset:0; background:rgba(20,15,10,.5); }
-.rm-panel{ position:relative; z-index:1; width:min(640px,92vw); max-height:84vh; overflow:auto;
+.rm-panel{ position:relative; z-index:1; width:min(900px,94vw); max-height:84vh; overflow:auto;
   background:var(--bg-card,#fff); color:var(--text-primary,#2a2017);
   border:1px solid var(--border-light,#e0d3b8); border-radius:12px; padding:1.6rem 1.7rem; box-shadow:0 24px 70px rgba(0,0,0,.32); }
 .rm-close{ position:absolute; top:.5rem; right:.85rem; background:transparent; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:var(--text-muted,#999); }
 .rm-title{ font-family:var(--font-head,Georgia,serif); margin:0 0 1.1rem; font-size:1.5rem; letter-spacing:-.01em; }
 .rm-modal .sidebar-section-title{ display:none; }
-/* in the roomy modal, categories are OPEN sections — not fake collapsibles you
-   can't collapse. Drop the chevron, present the category as a heading with a
-   hairline, items as clean bordered rows. */
-body[data-skin="reader"] .rm-panel .sidebar-collapsible{ border:none; margin:0 0 1.35rem; }
-body[data-skin="reader"] .rm-panel .sidebar-collapsible:last-child{ margin-bottom:0; }
+/* the roomy modal lays categories out as a responsive CARD GRID (3 cols on a
+   wide screen, 1 on a phone) — each category is a card, items are plain rows
+   inside it. No fake collapsibles. */
+body[data-skin="reader"] .rm-body{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr));
+  gap:1.1rem; align-items:start;
+}
+body[data-skin="reader"] .rm-body .sidebar-podcast-feed{ grid-column:1 / -1; }
+body[data-skin="reader"] .rm-panel .sidebar-collapsible{   /* = one category card */
+  margin:0; background:var(--bg-card);
+  border:1px solid var(--border-light); border-radius:12px; padding:.9rem 1rem 1rem; overflow:hidden;
+}
 body[data-skin="reader"] .rm-panel .sidebar-collapsible-toggle{
   cursor:default; background:none !important; border:none; width:100%;
-  display:flex; align-items:center; gap:.4rem; padding:0 0 .5rem; margin-bottom:.7rem;
+  display:flex; align-items:center; gap:.4rem; padding:0 0 .55rem; margin-bottom:.55rem;
   border-bottom:1px solid var(--border-light);
 }
 body[data-skin="reader"] .rm-panel .sidebar-collapsible-toggle span{
-  font-family:var(--font-ui); font-size:.95rem; font-weight:700; letter-spacing:-.01em; color:var(--text-primary);
+  font-family:var(--font-ui); font-size:.92rem; font-weight:700; letter-spacing:-.01em; color:var(--text-primary);
 }
 body[data-skin="reader"] .rm-panel .sidebar-collapsible-icon{ display:none; }   /* not collapsible here */
 body[data-skin="reader"] .rm-panel .sidebar-collapsible-content{
-  display:flex !important; flex-direction:column; gap:.5rem; max-height:none !important; overflow:visible !important;
+  display:flex !important; flex-direction:column; gap:.1rem; max-height:none !important; overflow:visible !important;
 }
-body[data-skin="reader"] .rm-panel .sidebar-media-item{
-  display:block; padding:.6rem .8rem; border:1px solid var(--border-light); border-radius:var(--radius);
-  text-decoration:none; transition:border-color .15s ease, background .15s ease; position:relative;
+body[data-skin="reader"] .rm-panel .sidebar-media-item{   /* plain row inside the card */
+  display:block; padding:.5rem .55rem; border:none; border-radius:8px;
+  text-decoration:none; transition:background .15s ease; position:relative;
 }
 body[data-skin="reader"] .rm-panel .sidebar-media-item:hover{
-  border-color:var(--accent); background:color-mix(in srgb,var(--accent) 5%,var(--bg-card));
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card));
 }
 body[data-skin="reader"] .rm-panel .sidebar-media-item strong{
-  display:block; font-family:var(--font-ui); font-size:.92rem; font-weight:600; color:var(--text-primary);
-  padding-right:1.2rem;   /* clear the ↗ */
+  display:block; font-family:var(--font-ui); font-size:.9rem; font-weight:600; color:var(--text-primary);
+  line-height:1.3; padding-right:1.1rem;   /* clear the ↗ */
 }
 body[data-skin="reader"] .rm-panel .sidebar-media-item span{
-  display:block; font-family:var(--font-ui); font-size:.82rem; line-height:1.45; color:var(--text-secondary); margin-top:.15rem;
+  display:block; font-family:var(--font-ui); font-size:.8rem; line-height:1.45; color:var(--text-secondary); margin-top:.15rem;
 }
 body[data-skin="reader"] .rm-panel .sidebar-media-item::after{
-  content:"\2197"; position:absolute; top:.6rem; right:.7rem; color:var(--text-muted); font-size:.9rem;
+  content:"\2197"; position:absolute; top:.5rem; right:.5rem; color:var(--text-muted); font-size:.85rem; opacity:0; transition:opacity .15s;
 }
-body[data-skin="reader"] .rm-panel .sidebar-media-item:hover::after{ color:var(--accent); }
+body[data-skin="reader"] .rm-panel .sidebar-media-item:hover::after{ opacity:1; color:var(--accent); }
 
 /* ===== relocate floating buttons ===== */
 /* Highlight + Tutor FABs are hidden (kept present so their panels still work) and
