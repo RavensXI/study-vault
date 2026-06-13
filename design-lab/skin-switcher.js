@@ -333,18 +333,23 @@
   var focusOn = false, focusRAF = false;
   function focusUpdate() {
     if (!focusOn) return;
-    var center = window.innerHeight * 0.42;          // focal line, a touch above middle
-    var span = window.innerHeight * 0.5;
+    var vh = window.innerHeight;
+    var center = vh * 0.40;          // focal line, a touch above middle
+    var dead = vh * 0.085;           // crisp band: the line you're on stays razor-sharp
+    var span = vh * 0.52;            // distance over which it fully defocuses
     [].forEach.call(document.querySelectorAll('#lesson-page .study-notes > *'), function (p) {
       var r = p.getBoundingClientRect();
       // distance to the NEAREST EDGE (0 if the focal line runs through it), so a
-      // tall paragraph you're reading stays lit instead of dimming by its midpoint
+      // tall paragraph you're reading stays lit instead of dimming by its midpoint.
+      // Symmetric: text scrolled PAST (above) defocuses just like text ahead (below).
       var d = center < r.top ? r.top - center : (center > r.bottom ? center - r.bottom : 0);
-      p.style.opacity = (1 - Math.min(1, d / span) * 0.66).toFixed(3);   // 1.0 → ~0.34
+      var t = Math.min(1, Math.max(0, d - dead) / span);   // 0 = sharp, 1 = fully out
+      p.style.opacity = (1 - t * 0.82).toFixed(3);          // 1.0 → ~0.18
+      p.style.filter = t > 0.02 ? 'blur(' + (t * 3.6).toFixed(2) + 'px)' : '';  // depth-of-field defocus
     });
   }
   function clearFocus() {
-    [].forEach.call(document.querySelectorAll('#lesson-page .study-notes > *'), function (p) { p.style.opacity = ''; });
+    [].forEach.call(document.querySelectorAll('#lesson-page .study-notes > *'), function (p) { p.style.opacity = ''; p.style.filter = ''; });
   }
   function setFocus(on, silent) {
     focusOn = on;
