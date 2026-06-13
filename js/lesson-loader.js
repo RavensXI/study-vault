@@ -652,7 +652,7 @@
 
       html += '<div class="sidebar-collapsible">';
       html += '<button class="sidebar-collapsible-toggle" aria-expanded="false">';
-      html += '<span>' + (cat.emoji ? cat.emoji + ' ' : '') + escapeHtml(categoryName) + '</span>';
+      html += '<span>' + (cat.emoji ? cat.emoji + ' ' : '') + cleanText(categoryName) + '</span>';
       html += '<svg class="sidebar-collapsible-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>';
       html += '</button>';
       html += '<div class="sidebar-collapsible-content">';
@@ -660,9 +660,9 @@
       items.forEach(function (item) {
         if (!item || !item.url) return;
         html += '<a href="' + escapeAttr(item.url) + '" target="_blank" rel="noopener noreferrer" class="sidebar-media-item">';
-        html += '<strong>' + escapeHtml(item.title || '') + '</strong>';
+        html += '<strong>' + cleanText(item.title || '') + '</strong>';
         if (item.description) {
-          html += '<span>' + escapeHtml(item.description) + '</span>';
+          html += '<span>' + cleanText(item.description) + '</span>';
         }
         html += '</a>';
       });
@@ -805,6 +805,17 @@
     div.textContent = str;
     return div.innerHTML;
   }
+
+  // Some related_media titles carry literal HTML entities (e.g. "&mdash;") that
+  // would otherwise render as text once escaped. Decode to the real character
+  // first, then escapeHtml re-escapes safely for insertion.
+  function decodeEntities(str) {
+    if (!str || str.indexOf('&') === -1) return str || '';
+    var t = document.createElement('textarea');
+    t.innerHTML = str;
+    return t.value;
+  }
+  function cleanText(str) { return escapeHtml(decodeEntities(str || '')); }
 
   function escapeAttr(str) {
     return str.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

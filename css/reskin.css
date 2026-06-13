@@ -397,7 +397,41 @@ body[data-skin="reader"].dark-mode .sv-exit-continue{ color:#181614; }
 .rm-close{ position:absolute; top:.5rem; right:.85rem; background:transparent; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:var(--text-muted,#999); }
 .rm-title{ font-family:var(--font-head,Georgia,serif); margin:0 0 1.1rem; font-size:1.5rem; letter-spacing:-.01em; }
 .rm-modal .sidebar-section-title{ display:none; }
-.rm-modal .sidebar-collapsible-content{ display:block !important; max-height:none !important; overflow:visible !important; }
+/* in the roomy modal, categories are OPEN sections — not fake collapsibles you
+   can't collapse. Drop the chevron, present the category as a heading with a
+   hairline, items as clean bordered rows. */
+body[data-skin="reader"] .rm-panel .sidebar-collapsible{ border:none; margin:0 0 1.35rem; }
+body[data-skin="reader"] .rm-panel .sidebar-collapsible:last-child{ margin-bottom:0; }
+body[data-skin="reader"] .rm-panel .sidebar-collapsible-toggle{
+  cursor:default; background:none !important; border:none; width:100%;
+  display:flex; align-items:center; gap:.4rem; padding:0 0 .5rem; margin-bottom:.7rem;
+  border-bottom:1px solid var(--border-light);
+}
+body[data-skin="reader"] .rm-panel .sidebar-collapsible-toggle span{
+  font-family:var(--font-ui); font-size:.95rem; font-weight:700; letter-spacing:-.01em; color:var(--text-primary);
+}
+body[data-skin="reader"] .rm-panel .sidebar-collapsible-icon{ display:none; }   /* not collapsible here */
+body[data-skin="reader"] .rm-panel .sidebar-collapsible-content{
+  display:flex !important; flex-direction:column; gap:.5rem; max-height:none !important; overflow:visible !important;
+}
+body[data-skin="reader"] .rm-panel .sidebar-media-item{
+  display:block; padding:.6rem .8rem; border:1px solid var(--border-light); border-radius:var(--radius);
+  text-decoration:none; transition:border-color .15s ease, background .15s ease; position:relative;
+}
+body[data-skin="reader"] .rm-panel .sidebar-media-item:hover{
+  border-color:var(--accent); background:color-mix(in srgb,var(--accent) 5%,var(--bg-card));
+}
+body[data-skin="reader"] .rm-panel .sidebar-media-item strong{
+  display:block; font-family:var(--font-ui); font-size:.92rem; font-weight:600; color:var(--text-primary);
+  padding-right:1.2rem;   /* clear the ↗ */
+}
+body[data-skin="reader"] .rm-panel .sidebar-media-item span{
+  display:block; font-family:var(--font-ui); font-size:.82rem; line-height:1.45; color:var(--text-secondary); margin-top:.15rem;
+}
+body[data-skin="reader"] .rm-panel .sidebar-media-item::after{
+  content:"\2197"; position:absolute; top:.6rem; right:.7rem; color:var(--text-muted); font-size:.9rem;
+}
+body[data-skin="reader"] .rm-panel .sidebar-media-item:hover::after{ color:var(--accent); }
 
 /* ===== relocate floating buttons ===== */
 /* Highlight + Tutor FABs are hidden (kept present so their panels still work) and
