@@ -60,14 +60,48 @@
   // spotlight one feature at a time, small caption card with Back/Next/Skip.
   // Shows once (localStorage); re-run anytime with window.svStartTour().
   var tourStarted = false, tourPolling = false;
+  // A step targets one selector (sel) or a group whose union is spotlit (sels).
+  // Steps whose targets are all absent/hidden are dropped (e.g. video).
   var TOUR_STEPS = [
-    { sel: '.a11y-toolbar', pad: 6, title: 'Make it your own',
-      body: 'Dark mode, a dyslexia-friendly font, simpler language, bigger text and colour overlays — set the page up to read the way that suits you.' },
-    { sel: '.sv-panel', pad: 10, title: 'Your study tools',
-      body: 'Quick Quiz, Flashcards and exam-style Practice are all here — plus related media and a highlighter. Everything for this lesson in one place.' },
+    { sel: '.a11y-toolbar', pad: 6, title: 'Set up your reading',
+      body: 'Dark mode, a dyslexia-friendly font, simpler language, bigger text and colour overlays — make the page comfortable to read.' },
+    { sel: '.key-fact', pad: 8, title: 'Helpers in the text',
+      body: 'Key facts are boxed like this, underlined words show a definition when you tap them, and the lightbulbs offer quick revision tips as you read.' },
+    { sel: '.sidebar-progress-section', pad: 8, title: 'Track your progress',
+      body: 'This fills in as you work through the lesson, so you can always see how far you have got.' },
+    { sels: ['.sidebar-knowledge-check', '.tile-practice'], pad: 10, title: 'Test yourself',
+      body: 'Quick Quiz, Flashcards and exam-style Practice questions are all here — the fastest way to check what has stuck.' },
+    { sel: '.sidebar-media', pad: 10, title: 'Go deeper',
+      body: 'Hand-picked videos, articles and podcasts to explore the topic beyond the lesson.' },
+    { sels: ['.tile-highlight', '.tile-tutor'], pad: 10, title: 'Read actively',
+      body: 'Highlight anything as you go, or ask the tutor to explain a tricky part a different way.' },
     { sel: '#sidebar-video-section .sidebar-video', pad: 8, title: 'Watch the overview',
-      body: 'A short video explainer for the lesson. Tap it to play full-size.' }
+      body: 'A short video explainer for the lesson. Tap it to play full-size.' },
+    { sel: '#nav-next-lesson', pad: 6, title: 'Before you go',
+      body: 'When you move to the next lesson, we’ll ask one question that links it back to something you already learned — that’s what makes it stick.' }
   ];
+  // first visible element of a step (for scrolling), and the union rect to spotlight
+  function tourFirstEl(s) {
+    var sels = s.sels || [s.sel];
+    for (var i = 0; i < sels.length; i++) {
+      var e = document.querySelector(sels[i]);
+      if (e && e.getBoundingClientRect().height > 4) return e;
+    }
+    return null;
+  }
+  function tourRect(s) {
+    var sels = s.sels || [s.sel], rects = [];
+    sels.forEach(function (sel) {
+      var e = document.querySelector(sel);
+      if (e) { var r = e.getBoundingClientRect(); if (r.height > 4) rects.push(r); }
+    });
+    if (!rects.length) return null;
+    var l = Math.min.apply(null, rects.map(function (r) { return r.left; }));
+    var t = Math.min.apply(null, rects.map(function (r) { return r.top; }));
+    var rt = Math.max.apply(null, rects.map(function (r) { return r.right; }));
+    var b = Math.max.apply(null, rects.map(function (r) { return r.bottom; }));
+    return { left: l, top: t, right: rt, bottom: b, width: rt - l, height: b - t };
+  }
   function maybeStartTour() {
     if (tourPolling || tourStarted) return;
     if (localStorage.getItem('sv-reader-tour-v1')) return;
@@ -86,10 +120,7 @@
   function startTour() {
     if (document.querySelector('.sv-tour-card')) return;
     tourStarted = true;
-    var steps = TOUR_STEPS.filter(function (s) {
-      var t = document.querySelector(s.sel);
-      return t && t.getBoundingClientRect().height > 4;   // skip absent/hidden (e.g. no video)
-    });
+    var steps = TOUR_STEPS.filter(function (s) { return tourRect(s); });   // drop absent/hidden
     if (!steps.length) return;
     var i = 0;
     function el(tag, cls) { var e = document.createElement(tag); e.className = cls; return e; }
@@ -127,12 +158,12 @@
     }
     function show(n) {
       i = n;
-      var s = steps[n], target = document.querySelector(s.sel);
+      var s = steps[n], first = tourFirstEl(s);
       // instant scroll so the rect is stable when we place the spotlight
       // (reading mid-smooth-scroll left the spot misaligned)
-      target.scrollIntoView({ block: 'center', behavior: 'auto' });
+      if (first) first.scrollIntoView({ block: 'center', behavior: 'auto' });
       setTimeout(function () {
-        var r = target.getBoundingClientRect(), pad = s.pad || 8;
+        var r = tourRect(s) || tourFirstEl(s).getBoundingClientRect(), pad = s.pad || 8;
         spot.style.left = (r.left - pad) + 'px'; spot.style.top = (r.top - pad) + 'px';
         spot.style.width = (r.width + pad * 2) + 'px'; spot.style.height = (r.height + pad * 2) + 'px';
         card.querySelector('.sv-tour-kicker').textContent = 'Step ' + (n + 1) + ' of ' + steps.length;
