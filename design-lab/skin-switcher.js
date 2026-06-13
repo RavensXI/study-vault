@@ -51,6 +51,7 @@
     buildDemoFigure();
     setupExitIntercept();
     fixLessonNavArrows();
+    buildFocusToggle();          // before evenA11yDividers so it gets a divider
     evenA11yDividers();
     revealMasthead();
     // the bug FAB can end up nested inside the (transformed) tutor-dock, which
@@ -323,6 +324,56 @@
       d.className = 'a11y-divider';
       tb.insertBefore(d, c);
     });
+  }
+
+  // FOCUS MODE (Tom, 13 Jun) — replaces the highlighter. A Reading-bar toggle
+  // that dims the article into a soft gradient: the paragraph at your reading
+  // line is full-contrast, the rest ease out the further they are, so text
+  // comes into focus as you scroll. Keeps text size unchanged (readable).
+  var focusOn = false, focusRAF = false;
+  function focusUpdate() {
+    if (!focusOn) return;
+    var center = window.innerHeight * 0.42;          // focal line, a touch above middle
+    var span = window.innerHeight * 0.5;
+    [].forEach.call(document.querySelectorAll('#lesson-page .study-notes > *'), function (p) {
+      var r = p.getBoundingClientRect();
+      // distance to the NEAREST EDGE (0 if the focal line runs through it), so a
+      // tall paragraph you're reading stays lit instead of dimming by its midpoint
+      var d = center < r.top ? r.top - center : (center > r.bottom ? center - r.bottom : 0);
+      p.style.opacity = (1 - Math.min(1, d / span) * 0.66).toFixed(3);   // 1.0 → ~0.34
+    });
+  }
+  function clearFocus() {
+    [].forEach.call(document.querySelectorAll('#lesson-page .study-notes > *'), function (p) { p.style.opacity = ''; });
+  }
+  function setFocus(on, silent) {
+    focusOn = on;
+    document.body.classList.toggle('sv-focus-mode', on);
+    var b = document.querySelector('.a11y-focus-toggle');
+    if (b) b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (!silent) localStorage.setItem('sv-focus-mode', on ? '1' : '0');
+    if (on) focusUpdate(); else clearFocus();
+  }
+  window.addEventListener('scroll', function () {
+    if (!focusOn || focusRAF) return;
+    focusRAF = true; requestAnimationFrame(function () { focusRAF = false; focusUpdate(); });
+  }, { passive: true });
+  function buildFocusToggle() {
+    var tb = document.querySelector('.a11y-toolbar');
+    if (!tb || tb.dataset.focusBtn) return;
+    var simplify = tb.querySelector('.a11y-simplify-toggle');
+    if (!simplify) return;                              // wait for the toolbar
+    tb.dataset.focusBtn = '1';
+    var b = document.createElement('button');
+    b.className = 'a11y-btn a11y-focus-toggle';
+    b.setAttribute('aria-pressed', 'false');
+    b.setAttribute('title', 'Focus mode — eases everything but what you’re reading');
+    b.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>' +
+      '<span>Focus</span>';
+    simplify.parentNode.insertBefore(b, simplify.nextSibling);   // group with the other toggles
+    b.addEventListener('click', function () { setFocus(!focusOn); });
+    if (localStorage.getItem('sv-focus-mode') === '1') setFocus(true, true);
   }
 
   // The loader bakes literal ← / → glyphs into the Prev/Next labels — they read
@@ -618,9 +669,8 @@
   function buildToolTiles() {
     var sidebar = document.querySelector('#lesson-page .lesson-sidebar');
     if (!sidebar || sidebar.dataset.toolTiles) return;
-    var hl = document.querySelector('.sv-hl-fab-stack');
     var tutor = document.querySelector('.tutor-dock');
-    if (!hl && !tutor) return; // FABs not built yet
+    if (!tutor) return; // FAB not built yet
     sidebar.dataset.toolTiles = '1';
 
     function tile(label, svg, cls) {
@@ -633,24 +683,10 @@
       sidebar.appendChild(sec);
       return { btn: b, label: b.querySelector('.sv-tool-label') };
     }
-    var hlSvg = ICONS.highlight;
     var tutorSvg = ICONS.tutor;
 
-    if (hl) {
-      var ht = tile('Highlight', hlSvg, 'tile-highlight');
-      var syncHl = function () {
-        var on = /sv-hl-mode/.test(document.body.className);
-        ht.btn.classList.toggle('sv-tool-btn--active', on);
-        ht.label.textContent = on ? 'Exit highlight' : 'Highlight';
-      };
-      ht.btn.addEventListener('click', function () {
-        var on = /sv-hl-mode/.test(document.body.className);
-        var t = document.querySelector(on ? '.sv-hl-fab--exit' : '.sv-hl-fab--enter');
-        if (t) t.click();
-        setTimeout(syncHl, 60);
-      });
-      syncHl();
-    }
+    // Highlight tile removed (Tom, 13 Jun): highlighting is a low-utility study
+    // technique; its focus/reading-aid value is now served by Focus mode.
     if (tutor) {
       var tt = tile('Ask the tutor', tutorSvg, 'tile-tutor');
       tt.btn.addEventListener('click', function () {
