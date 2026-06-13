@@ -684,6 +684,11 @@
     document.body.appendChild(modal);
     var mbody = modal.querySelector('.rm-body');
     content.forEach(function (n) { mbody.appendChild(n); }); // move real nodes (links keep working)
+    // drop the raw category emoji — clashes with the redesign's icon language;
+    // the heading becomes a clean accent caps label instead
+    [].forEach.call(mbody.querySelectorAll('.sidebar-collapsible-toggle span'), function (s) {
+      s.textContent = s.textContent.replace(/^[^\w(]+/, '').trim();
+    });
     var launcher = document.createElement('button');
     launcher.className = 'rm-launcher';
     launcher.innerHTML = ICONS.media
