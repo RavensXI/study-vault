@@ -372,6 +372,32 @@
     if (!focusOn || focusRAF) return;
     focusRAF = true; requestAnimationFrame(function () { focusRAF = false; focusUpdate(); });
   }, { passive: true });
+  // Focus mode's per-paragraph filter:blur + will-change promotes each paragraph
+  // to its own compositor layer, which ESCAPES the frosting modals' backdrop-filter
+  // (the lesson text stayed sharp behind the frost). While any frosting modal is
+  // open, flag the body so CSS drops that blur and the backdrop frosts uniformly.
+  (function watchFrostModals() {
+    if (!document.body || document.body.dataset.frostWatch) return;
+    document.body.dataset.frostWatch = '1';
+    var SEL = '.kc-overlay, .fc-modal-overlay, .pq-backdrop, .sv-exit-backdrop';
+    // VISIBLE, not merely present: the practice .pq-backdrop lives in the DOM
+    // permanently and is toggled via its modal's `hidden` attribute, so check
+    // for rendered client rects (0 when an ancestor is display:none).
+    function visible(el) { return el && el.getClientRects().length > 0; }
+    function sync() {
+      var open = [].some.call(document.querySelectorAll(SEL), visible);
+      var was = document.body.classList.contains('sv-modal-open');
+      if (open === was) return;
+      document.body.classList.toggle('sv-modal-open', open);
+      if (was && !open && focusOn) focusUpdate();   // restore the gradient on close
+    }
+    // childList catches KC/flashcard overlays (added/removed); attributeFilter
+    // ['hidden'] catches the practice modal (toggled, not re-created). NOT 'style'
+    // — the focus engine mutates paragraph styles every scroll frame and would
+    // spam the observer.
+    new MutationObserver(sync).observe(document.body,
+      { childList: true, subtree: true, attributes: true, attributeFilter: ['hidden'] });
+  })();
   function buildFocusToggle() {
     var tb = document.querySelector('.a11y-toolbar');
     if (!tb || tb.dataset.focusBtn) return;
