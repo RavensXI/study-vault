@@ -693,9 +693,15 @@
     // (CSS columns only balance total height — they leave the gap Tom saw)
     var cards = [].slice.call(mbody.querySelectorAll('.sidebar-collapsible'));
     var feed = mbody.querySelector('.sidebar-podcast-feed');
+    var panel = modal.querySelector('.rm-panel');
     function masonry() {
-      var w = mbody.clientWidth; if (!w) return;               // 0 while hidden
-      var n = Math.max(1, Math.min(3, Math.round(w / 280)));
+      if (modal.hidden) return;
+      // column count fits the CONTENT (never more columns than categories) and
+      // the viewport; the panel then sizes to exactly wrap those columns
+      var PAD = 54, COLW = 270, GAP = 18;
+      var maxByVp = Math.max(1, Math.floor((window.innerWidth * 0.94 - PAD) / (COLW + GAP)));
+      var n = Math.max(1, Math.min(3, cards.length, maxByVp));
+      panel.style.width = Math.min(n * COLW + (n - 1) * GAP + PAD, Math.round(window.innerWidth * 0.94)) + 'px';
       var wrap = document.createElement('div'); wrap.className = 'rm-cols';
       var cols = [];
       for (var k = 0; k < n; k++) { var c = document.createElement('div'); c.className = 'rm-col'; wrap.appendChild(c); cols.push(c); }
