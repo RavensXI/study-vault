@@ -1203,7 +1203,15 @@ body[data-skin="reader"].dark-mode .audio-tab-indicator{
   box-shadow:0 1px 2px rgba(0,0,0,.5), 0 2px 6px rgba(0,0,0,.3);
 }
 body[data-skin="reader"].dark-mode .narration-play{ color:#181614; }
-/* overlays are a light-mode reading aid; page tint beats them in dark */
+/* Irlen overlay + dark mode fix: html is transparent, so the browser propagates
+   body's (dark) background to the page CANVAS — and a mix-blend-mode:multiply
+   overlay composites against that phantom white canvas, NOT the real dark page.
+   Result was the article washing out to light cream with pale, unreadable text
+   (invisible in light mode, where phantom + real are both light). Painting the
+   canvas explicitly stops the propagation, so the overlay multiplies over the
+   true dark page: background stays dark, text stays light + gently tinted.
+   Mirrors --bg-body (#181614) on the reader-dark token. */
+html:has(body[data-skin="reader"].dark-mode){ background:#181614 !important; }
 body[data-skin="reader"].dark-mode .lesson-progress-bar{ background:var(--border-lighter); }
 /* depth cues re-tuned for dark: white highlights drop to a whisper, shadows deepen */
 body[data-skin="reader"].dark-mode .knowledge-check-btn,
