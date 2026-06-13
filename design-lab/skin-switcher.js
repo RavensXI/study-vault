@@ -689,18 +689,46 @@
     [].forEach.call(mbody.querySelectorAll('.sidebar-collapsible-toggle span'), function (s) {
       s.textContent = s.textContent.replace(/^[^\w(]+/, '').trim();
     });
+    // TRUE masonry: drop each category card into the currently-shortest column
+    // (CSS columns only balance total height — they leave the gap Tom saw)
+    var cards = [].slice.call(mbody.querySelectorAll('.sidebar-collapsible'));
+    var feed = mbody.querySelector('.sidebar-podcast-feed');
+    function masonry() {
+      var w = mbody.clientWidth; if (!w) return;               // 0 while hidden
+      var n = Math.max(1, Math.min(3, Math.round(w / 280)));
+      var wrap = document.createElement('div'); wrap.className = 'rm-cols';
+      var cols = [];
+      for (var k = 0; k < n; k++) { var c = document.createElement('div'); c.className = 'rm-col'; wrap.appendChild(c); cols.push(c); }
+      mbody.innerHTML = '';
+      mbody.appendChild(wrap);
+      // pass 1: measure each card at the real column width
+      var measured = cards.map(function (card) { cols[0].appendChild(card); return { card: card, h: card.offsetHeight }; });
+      measured.forEach(function (o) { cols[0].removeChild(o.card); });
+      // pass 2: tallest-first into the currently-shortest column (LPT balancing —
+      // fills gaps AND keeps columns even, unlike greedy-by-original-order)
+      measured.sort(function (a, b) { return b.h - a.h; });
+      var hts = []; for (var k = 0; k < n; k++) hts.push(0);
+      measured.forEach(function (o) {
+        var m = 0; for (var k = 1; k < n; k++) if (hts[k] < hts[m]) m = k;
+        cols[m].appendChild(o.card); hts[m] += o.h + 18;        // +gap
+      });
+      if (feed) mbody.appendChild(feed);
+    }
     var launcher = document.createElement('button');
     launcher.className = 'rm-launcher';
     launcher.innerHTML = ICONS.media
       + '<span class="rm-launcher-label">Related media</span>'
       + '<span class="rm-launcher-count">' + count + '</span>';
     media.appendChild(launcher);
-    function open() { modal.hidden = false; document.body.style.overflow = 'hidden'; }
+    function open() { modal.hidden = false; document.body.style.overflow = 'hidden'; masonry(); }
     function close() { modal.hidden = true; document.body.style.overflow = ''; }
     launcher.addEventListener('click', open);
     modal.querySelector('.rm-close').addEventListener('click', close);
     modal.querySelector('.rm-backdrop').addEventListener('click', close);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+    var rt; window.addEventListener('resize', function () {
+      if (modal.hidden) return; clearTimeout(rt); rt = setTimeout(masonry, 150);
+    });
   }
 
   // BRIEF v2: one muted accent per subject (sandbox map keyed by base slug;
