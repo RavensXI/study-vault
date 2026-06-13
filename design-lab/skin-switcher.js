@@ -326,6 +326,13 @@
       d.className = 'a11y-divider';
       tb.insertBefore(d, c);
     });
+    // terminal spacer so the last control (Overlay) centres in its slot rather
+    // than hugging the right edge (space-between pins the final item to the edge)
+    if (!tb.querySelector('.a11y-bar-end')) {
+      var end = document.createElement('span');
+      end.className = 'a11y-bar-end';
+      tb.appendChild(end);
+    }
   }
 
   // FOCUS MODE (Tom, 13 Jun) — replaces the highlighter. A Reading-bar toggle
@@ -562,6 +569,25 @@
     var savedFont = rdPrefs().readingFont || 'default';
     var sf = RD_FONTS.filter(function (f) { return f.key === savedFont; })[0] || RD_FONTS[0];
     rdApplyFont(sf.key === 'default' ? '' : sf.css); setFontActive(sf.key);
+
+    // ---- reset: size + spacing + font back to StudyVault defaults ----
+    var reset = document.createElement('button');
+    reset.type = 'button'; reset.className = 'a11y-rd-reset';
+    reset.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>' +
+      '<span>Reset to default</span>';
+    reset.addEventListener('click', function () {
+      rdApplyFont(''); setFontActive('default');
+      range.value = 0; rdApplySpace(0);
+      rdSave({ readingFont: 'default', readingSpace: 0 });
+      // size back to step 0 by driving the real A-/A+ buttons (keeps main.js synced)
+      var cls = document.body.className;
+      var step = /font-size-down-1/.test(cls) ? -1 : /font-size-up-1/.test(cls) ? 1 : /font-size-up-2/.test(cls) ? 2 : 0;
+      var up = sizeGroup.querySelector('.a11y-font-up'), down = sizeGroup.querySelector('.a11y-font-down');
+      while (step < 0) { up.click(); step++; }
+      while (step > 0) { down.click(); step--; }
+    });
+    pop.appendChild(reset);
 
     // ---- open / close + placement (right-aligned under the trigger) ----
     function place() {
