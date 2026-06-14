@@ -50,6 +50,7 @@
     if (!document.body || document.body.dataset.obWatch) return;
     document.body.dataset.obWatch = '1';
     stripOldOnboarding();
+    coBrandSchoolLogo();   // relocate now if the logo was already injected
     new MutationObserver(function (muts) {
       for (var i = 0; i < muts.length; i++) {
         var added = muts[i].addedNodes;
@@ -60,6 +61,10 @@
           if (n.querySelector && n.querySelector(OLD_ONBOARDING)) stripOldOnboarding(n);
         }
       }
+      // school-session.js injects the logo mid-header after load — move it into
+      // the wordmark lockup the instant it appears, so it doesn't flash centre
+      // then jump left.
+      coBrandSchoolLogo();
     }).observe(document.body, { childList: true, subtree: true });
   }
 
