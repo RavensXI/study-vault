@@ -550,16 +550,20 @@ body[data-skin="reader"] .pq-modal{
 body[data-skin="reader"] .pq-modal[hidden]{ display:none; }
 /* ASSESSMENT SURFACES FROST THE PAGE (Tom, 11 Jun): the lesson text behind
    an exam question is an answer sheet. Practice + Quick Quiz + exit ticket
-   all blur it out; reference/browse modals (related media) stay readable. */
+   all blur it out; reference/browse modals (related media) stay readable.
+   FROST METHOD (Tom, 14 Jun): blur the CONTENT directly via filter on the
+   header + lesson page, NOT backdrop-filter on the overlay. Chrome's
+   backdrop-filter does not blur text glyphs — boxes/images/key-facts frosted
+   but titles and paragraphs stayed razor-sharp. A real filter blurs everything
+   uniformly. The modals are body children OUTSIDE #lesson-page, so they stay
+   sharp; the overlays keep their dark scrim (base + .pq-/.sv-exit- backdrops)
+   for the dimming. */
 body[data-skin="reader"] .pq-backdrop{
   position:absolute; inset:0; background:rgba(20,15,10,.45);
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
 }
-body[data-skin="reader"] .kc-overlay{
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-}
-body[data-skin="reader"] .sv-exit-backdrop{
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+body[data-skin="reader"].sv-modal-open .page-header,
+body[data-skin="reader"].sv-modal-open #lesson-page{
+  filter:blur(14px);
 }
 body[data-skin="reader"] .pq-panel{
   position:relative; z-index:1; width:min(720px,94vw); max-height:88vh; overflow:auto;
@@ -894,11 +898,9 @@ body[data-skin="reader"].sv-focus-mode #lesson-page .study-notes > *{
   transition:opacity .26s ease, filter .26s ease;
   will-change:opacity, filter;
 }
-/* while a frosting modal (quiz/flashcards/practice/exit) is open, drop Focus
-   mode's per-paragraph blur — its inline filter + will-change put each paragraph
-   on its own compositor layer that escapes the modal's backdrop-filter, leaving
-   the lesson text sharp behind the frost. !important beats the inline filter so
-   the paragraphs rejoin the backdrop and frost uniformly. */
+/* while a frosting modal is open, drop Focus mode's per-paragraph blur so it
+   doesn't COMPOUND with the page-content blur (which already blurs #lesson-page
+   uniformly) — otherwise focus-dimmed paragraphs would read as extra-blurred. */
 body[data-skin="reader"].sv-modal-open #lesson-page .study-notes > *{
   filter:none !important; opacity:1 !important; will-change:auto !important;
 }
@@ -1146,9 +1148,8 @@ body[data-skin="reader"] .kc-result-label,
 body[data-skin="reader"] .kc-result-msg{ font-family:var(--font-ui); }
 
 /* ---- Flashcards modal internals (overlay frosts: it tests you) ---- */
-body[data-skin="reader"] .fc-modal-overlay{
-  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
-}
+/* frost via content-blur (see the .sv-modal-open rule near .pq-backdrop) — the
+   flashcard overlay keeps only its base rgba(0,0,0,.6) scrim, no backdrop-filter */
 body[data-skin="reader"] .fc-modal{ border:1px solid var(--border-light); border-radius:12px; }
 body[data-skin="reader"] .fc-modal-header{ border-bottom-color:var(--border-light); }
 body[data-skin="reader"] .fc-modal-title{ font-family:var(--font-head); font-size:1.08rem; letter-spacing:-.01em; }
