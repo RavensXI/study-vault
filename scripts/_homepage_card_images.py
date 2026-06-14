@@ -34,8 +34,9 @@ IMAGES = [
     },
     {
         "slug": "geology-eduqas",
-        "src_url": "https://images.unsplash.com/photo-1748521694073-31f26e704b75?w=1200&q=82&fit=max&fm=jpg",
-        "photographer": "Theo",
+        # Folded rock strata close-up — unmistakably geology (replaced chalk-cliff/person shot Jun 2026)
+        "src_url": "https://images.unsplash.com/photo-1702165643196-1a46601c3177?w=1200&q=82&fit=max&fm=jpg",
+        "photographer": "Melody Zimmerman",
     },
     {
         "slug": "engineering-aqa",
