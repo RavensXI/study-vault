@@ -35,11 +35,37 @@
     if (b) set(b.getAttribute('data-skin'));
   });
 
+  // OLD production first-visit onboarding to strip in the reader redesign:
+  // anon-welcome ("First time at StudyVault?"), whats-new ("recently built"
+  // toast), lesson-tutorial tooltips, and any legacy coach/walkthrough/spotlight
+  // — but NOT our own sv-tour feature tour.
+  var OLD_ONBOARDING = '[class*="tour"]:not([class*="sv-tour"]),[class*="coach"],[class*="tutorial"],[class*="walkthrough"],[class*="spotlight"]:not([class*="sv-tour"]),.anon-welcome-overlay,[class*="whats-new"]';
+  function stripOldOnboarding(root) {
+    (root || document).querySelectorAll(OLD_ONBOARDING).forEach(function (e) { e.remove(); });
+  }
+  // Remove the instant they're inserted (deferred onboarding scripts add them
+  // after load) so they never flash. CSS in reskin also hides them from first
+  // paint; this guarantees removal regardless of skin-CSS timing.
+  function watchOldOnboarding() {
+    if (!document.body || document.body.dataset.obWatch) return;
+    document.body.dataset.obWatch = '1';
+    stripOldOnboarding();
+    new MutationObserver(function (muts) {
+      for (var i = 0; i < muts.length; i++) {
+        var added = muts[i].addedNodes;
+        for (var j = 0; j < added.length; j++) {
+          var n = added[j];
+          if (n.nodeType !== 1) continue;
+          if (n.matches && n.matches(OLD_ONBOARDING)) { n.remove(); continue; }
+          if (n.querySelector && n.querySelector(OLD_ONBOARDING)) stripOldOnboarding(n);
+        }
+      }
+    }).observe(document.body, { childList: true, subtree: true });
+  }
+
   // clear onboarding overlays + force scroll-reveal so the page is fully visible
   function tidy() {
-    // strip the OLD onboarding clutter — but NOT our own sv-tour feature tour
-    document.querySelectorAll('[class*="tour"]:not([class*="sv-tour"]),[class*="coach"],[class*="tutorial"],[class*="walkthrough"],[class*="spotlight"],.anon-welcome-overlay,[class*="whats-new"]')
-      .forEach(function (e) { e.remove(); });
+    stripOldOnboarding();
     document.querySelectorAll('[class*="sv-reveal"],.lesson-header .lesson-number,.lesson-header h1,.lesson-hero-image,.lesson-sidebar,.study-notes > *,.exam-tip,.conclusion,.practice-section')
       .forEach(function (e) { e.classList.add('sv-visible'); });
     setupMediaLauncher();
@@ -1134,6 +1160,7 @@
     // covered the top-right header buttons. Re-enable by appending `bar` again.
     set('reader');            // default to the bold structural redesign
     applySubjectAccent();
+    watchOldOnboarding();     // kill the first-visit onboarding flash from the start
     setTimeout(tidy, 1200);
     setTimeout(tidy, 2600);
     setTimeout(tidy, 4200);   // safety: catch a slow async video-card render

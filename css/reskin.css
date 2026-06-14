@@ -129,6 +129,20 @@ body[data-skin] .gutter-progress-title{ font-family:var(--font-ui); letter-spaci
 body[data-skin="reader"] [data-task="highlight-mode"]{ display:none !important; }
 body[data-skin="reader"] .sv-hl-fab-stack{ display:none !important; }
 
+/* OLD ONBOARDING (Tom, 14 Jun) — on a fresh/incognito visit the production
+   first-visit overlays fire: anon-welcome ("First time at StudyVault?"),
+   whats-new ("recently built subjects", bottom-right) and the lesson-tutorial
+   tooltips (top-left). They're not part of the reader redesign (it has its own
+   sv-tour). The harness strips them, but they FLASHED in for ~1s first; hide
+   from first paint too. sv-tour explicitly excluded. */
+body[data-skin="reader"] .anon-welcome-overlay,
+body[data-skin="reader"] [class*="whats-new"],
+body[data-skin="reader"] [class*="tutorial"],
+body[data-skin="reader"] [class*="coach"],
+body[data-skin="reader"] [class*="walkthrough"],
+body[data-skin="reader"] [class*="spotlight"]:not([class*="sv-tour"]),
+body[data-skin="reader"] [class*="tour"]:not([class*="sv-tour"]){ display:none !important; }
+
 body[data-skin] .key-fact{
   background:color-mix(in srgb,var(--accent) 8%,var(--bg-card)); border:none;
   border-left:3px solid var(--accent); border-radius:0 var(--radius-sm) var(--radius-sm) 0; box-shadow:none;
