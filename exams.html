@@ -8,12 +8,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/reskin.css"><!-- DESIGN-LAB reskin; remove to revert -->
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#2d2a26">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">
   <link rel="apple-touch-icon" href="/images/icon-192.png">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
+    /* Keep the StudyVault wordmark in the normal header flow (it carries the
+       "Revision Planner" label here); otherwise style.css pins it position:fixed
+       in the left gutter on >=1400px and it jams against the page edge. Mirrors
+       the browse template. */
+    @media (min-width: 1400px) {
+      .page-header-inner:not(:has(.admin-nav)) .header-brand {
+        position: static;
+        transform: none;
+      }
+    }
+
     /* ── Page layout ── */
     .exams-container {
       max-width: 1400px;
@@ -508,7 +520,7 @@
     }
   </style>
 </head>
-<body>
+<body data-skin="reader">
 
   <!-- Page Header -->
   <header class="page-header">
