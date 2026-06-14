@@ -120,6 +120,15 @@ body[data-skin] .gutter-progress-item svg,
 body[data-skin] .gutter-progress-icon svg{ color:inherit !important; }
 body[data-skin] .gutter-progress-title{ font-family:var(--font-ui); letter-spacing:.14em; color:var(--text-muted); }
 
+/* Highlighter was CUT from the redesign (replaced by Focus mode, Round 25), but
+   production still builds its triggers — the "Highlight notes" checklist task
+   (sidebar progress section + gutter rail, data-task="highlight-mode") and the
+   floating .sv-hl-fab-stack. Hide both in the reader skin so highlight mode can't
+   be entered; the harness also clears any active mode + sets sv-hl-enabled=0.
+   PROD: remove the highlight task + FAB at source when the feature is dropped. */
+body[data-skin="reader"] [data-task="highlight-mode"]{ display:none !important; }
+body[data-skin="reader"] .sv-hl-fab-stack{ display:none !important; }
+
 body[data-skin] .key-fact{
   background:color-mix(in srgb,var(--accent) 8%,var(--bg-card)); border:none;
   border-left:3px solid var(--accent); border-radius:0 var(--radius-sm) var(--radius-sm) 0; box-shadow:none;

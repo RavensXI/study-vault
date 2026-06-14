@@ -54,6 +54,7 @@
     buildFocusToggle();          // before evenA11yDividers so it gets a divider
     buildOverlayControl();       // collapse the swatch row into a button + popover
     buildReadingPanel();         // A-/A+ + spacing + reading-font picker (replaces OpenDyslexic)
+    killHighlighter();           // cut feature (Round 25) — clear any active mode + disable
     evenA11yDividers();
     revealMasthead();
     // the bug FAB can end up nested inside the (transformed) tutor-dock, which
@@ -414,6 +415,19 @@
     simplify.parentNode.insertBefore(b, simplify.nextSibling);   // group with the other toggles
     b.addEventListener('click', function () { setFocus(!focusOn); });
     if (localStorage.getItem('sv-focus-mode') === '1') setFocus(true, true);
+  }
+
+  // HIGHLIGHTER CUT (Tom, 14 Jun) — the feature was replaced by Focus mode
+  // (Round 25), but production still builds its triggers: the "Highlight notes"
+  // checklist task (data-task="highlight-mode", in the sidebar progress section
+  // AND the gutter rail) and the floating FAB. The triggers are hidden via
+  // reskin CSS; here we clear any ACTIVE highlight mode (marker cursor /
+  // ::selection colour) and set sv-hl-enabled=0 so it won't bootstrap a FAB or
+  // re-apply stored highlights on future loads.
+  function killHighlighter() {
+    var b = document.body;
+    b.classList.remove('sv-hl-mode', 'sv-hl-color-yellow', 'sv-hl-color-green', 'sv-hl-color-pink', 'sv-hl-color-blue');
+    try { localStorage.setItem('sv-hl-mode', '0'); localStorage.setItem('sv-hl-enabled', '0'); } catch (e) {}
   }
 
   // OVERLAY CONTROL (Tom, 13 Jun) — the bare swatch row ate the bar and the
