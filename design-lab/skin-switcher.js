@@ -120,6 +120,9 @@
       var ts = tour.querySelector('span'); if (ts) ts.textContent = 'Replay tour';
       if (tour.parentNode !== dock) dock.appendChild(tour);
     }
+    // reveal only once the buttons are docked + labelled, so the lone circular
+    // bug button never flashes first (CSS keeps the dock hidden until this)
+    if (tour && dock.contains(tour)) dock.classList.add('sv-util-ready');
   }
 
   // persistent "replay the tour" control (bottom-left; the tour's last step
