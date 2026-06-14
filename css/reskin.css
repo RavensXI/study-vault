@@ -854,9 +854,19 @@ body[data-skin="reader"] .header-lesson-label{
   background:none; padding:0; border-radius:0;
   display:inline-flex; align-items:center; white-space:nowrap;
 }
+/* DIVIDER HIERARCHY (Tom, 14 Jun): BIG (1px×22px) separates the header's four
+   sections — logo │ unit-title │ wayfinding │ prev-next; THIN (1px×13px) divides
+   WITHIN a section (unit↔lesson, and between the wayfinding links). The
+   unit↔lesson divider was a heavy 2px — demote it to the thin within-section one. */
 body[data-skin="reader"] .header-lesson-label::before{
-  content:""; display:inline-block; width:2px; height:1em; margin-right:.65rem;
-  border-radius:1px; background:color-mix(in srgb,var(--text-muted) 55%,transparent);
+  content:""; display:inline-block; width:1px; height:13px; margin-right:.65rem;
+  border-radius:0; background:var(--border-light);
+}
+/* BIG divider to the LEFT of the unit title (between the logo and the unit) */
+body[data-skin="reader"] .header-pills{ position:relative; padding-left:1.15rem; }
+body[data-skin="reader"] .header-pills::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:1px; height:22px; background:var(--border-light);
 }
 
 /* nav: clean editorial text links (the empty boxes were the "plain/weird"
@@ -876,11 +886,17 @@ body[data-skin="reader"] .header-nav a::after{
 }
 body[data-skin="reader"] .header-nav a:hover{ background:none; color:var(--accent); }
 body[data-skin="reader"] .header-nav a:hover::after{ transform:scaleX(1); }
-/* hairline divider between the wayfinding links (not before Home, not on the
+/* THIN hairline between the wayfinding links (not before Home, not on the
    sequential prev/next which carry the .nav-lesson-pill class) */
 body[data-skin="reader"] .header-nav a:not(:first-child):not(.nav-lesson-pill)::before{
   content:""; position:absolute; left:-.22em; top:50%; transform:translateY(-50%);
-  width:1px; height:.95em; background:var(--border-light);
+  width:1px; height:13px; background:var(--border-light);
+}
+/* BIG divider to the LEFT of Home — the section break from the unit title */
+body[data-skin="reader"] .header-nav a:first-child{ margin-left:.55rem; padding-left:1.1rem; }
+body[data-skin="reader"] .header-nav a:first-child::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:1px; height:22px; background:var(--border-light);
 }
 /* one colour voice — no multicolour nav icons */
 body[data-skin="reader"] .header-nav a .nav-icon{ color:var(--text-muted) !important; }
@@ -893,9 +909,13 @@ body[data-skin="reader"] .header-nav a.nav-lesson-pill{
 }
 body[data-skin="reader"] .header-nav a.nav-lesson-pill:hover{ background:none; color:var(--accent); }
 body[data-skin="reader"] .header-nav a .nav-arrow{ flex:0 0 auto; }
-/* group the sequential nav apart with a hairline before Previous */
+/* BIG divider before Previous — the section break from the wayfinding links */
 body[data-skin="reader"] .header-nav a#nav-prev-lesson{
-  margin-left:.5rem; border-left:1px solid var(--border-light); padding-left:.95rem;
+  margin-left:.55rem; padding-left:1.1rem;
+}
+body[data-skin="reader"] .header-nav a#nav-prev-lesson::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:1px; height:22px; background:var(--border-light);
 }
 /* Next = the single solid unit-colour primary */
 body[data-skin="reader"] .header-nav a#nav-next-lesson{
