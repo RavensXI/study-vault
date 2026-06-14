@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept · Spotlight — StudyVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..900&family=Literata:opsz,wght@7..72,400..600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#16131c; --ink2:#221d2b;
+  --paper:#f6f4f0; --card:#fff; --text:#1c1a23; --muted:#6b6675; --line:#e7e3dc;
+  --accent:#e8623a; --accent2:#7b5cff;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Schibsted Grotesk',system-ui,sans-serif;background:var(--paper);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5}
+
+/* ---- concept switcher (shared chrome) ---- */
+.cs{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;align-items:center;gap:.2rem;
+  background:#100d16;color:#cfc9d6;padding:.5rem .9rem;font:600 12px/1 'Schibsted Grotesk',monospace}
+.cs b{color:#e8623a;letter-spacing:.14em;text-transform:uppercase;margin-right:.8rem;font-weight:700}
+.cs a{color:#9b94a6;text-decoration:none;padding:.35rem .7rem;border-radius:7px}
+.cs a:hover{color:#fff;background:#241f2e}
+.cs a.on{color:#fff;background:#e8623a}
+.cs .sp{margin-left:auto;color:#5f5970;font-weight:500}
+
+/* ---- HERO: full-bleed dark spotlight ---- */
+.hero{position:relative;min-height:100vh;background:var(--ink);color:#fff;overflow:hidden;
+  display:flex;flex-direction:column;padding:5.5rem clamp(1.5rem,6vw,6rem) 0}
+/* spotlight + colour glow */
+.hero::before{content:"";position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(60% 55% at 22% 12%, rgba(232,98,58,.34), transparent 60%),
+    radial-gradient(55% 50% at 88% 0%, rgba(123,92,255,.30), transparent 55%),
+    radial-gradient(120% 80% at 50% 120%, rgba(10,8,14,.6), transparent 70%);
+  animation:glow 18s ease-in-out infinite alternate}
+@keyframes glow{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(2%,-1.5%,0) scale(1.12)}}
+.hero-top{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center}
+.brand{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;display:flex;align-items:center;gap:.3rem}
+.brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.hero-top nav{display:flex;gap:1.6rem;font-size:.92rem;font-weight:600}
+.hero-top nav a{color:rgba(255,255,255,.72);text-decoration:none}
+.hero-top nav a:hover{color:#fff}
+
+.hero-mid{position:relative;z-index:2;flex:1;display:flex;flex-direction:column;justify-content:center;
+  max-width:1100px;padding:3rem 0}
+.kicker{display:inline-flex;align-items:center;gap:.5rem;align-self:flex-start;
+  font-size:.8rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.7);
+  border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:.4rem .9rem;margin-bottom:1.6rem}
+.kicker .pulse{width:7px;height:7px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 0 rgba(74,222,128,.6);animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(74,222,128,.55)}70%{box-shadow:0 0 0 9px rgba(74,222,128,0)}100%{box-shadow:0 0 0 0 rgba(74,222,128,0)}}
+h1{font-size:clamp(2.8rem,8vw,6.6rem);line-height:.95;letter-spacing:-.035em;font-weight:800;max-width:16ch}
+h1 em{font-style:normal;background:linear-gradient(100deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lede{font-size:clamp(1.05rem,1.8vw,1.4rem);color:rgba(255,255,255,.78);max-width:46ch;margin:1.8rem 0 0;line-height:1.55;font-weight:400}
+.cta{display:flex;gap:.9rem;margin-top:2.4rem;flex-wrap:wrap}
+.btn{font:700 1rem/1 'Schibsted Grotesk';padding:1.05rem 1.8rem;border-radius:13px;cursor:pointer;border:none;text-decoration:none;display:inline-flex;align-items:center;gap:.6rem;transition:transform .2s,box-shadow .2s,background .2s}
+.btn-primary{background:#fff;color:var(--ink)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 40px -12px rgba(232,98,58,.5)}
+.btn-ghost{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.2)}
+.btn-ghost:hover{background:rgba(255,255,255,.16)}
+
+/* subject marquee along the foot of the hero */
+.marquee{position:relative;z-index:2;margin:0 clamp(-1.5rem,-6vw,-6rem);padding:2rem 0 2.4rem;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.marquee-track{display:flex;gap:1rem;width:max-content;animation:scroll 40s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+@keyframes scroll{to{transform:translateX(-50%)}}
+.mq-card{width:200px;flex:0 0 auto;border-radius:14px;overflow:hidden;position:relative;height:130px;
+  border:1px solid rgba(255,255,255,.1)}
+.mq-card img{width:100%;height:100%;object-fit:cover;filter:saturate(.9) brightness(.78)}
+.mq-card span{position:absolute;left:.8rem;bottom:.7rem;font-weight:700;font-size:1rem;color:#fff;z-index:1;text-shadow:0 1px 8px rgba(0,0,0,.6)}
+.mq-card::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 60%)}
+
+/* ---- SUBJECTS ---- */
+.subjects{max-width:1240px;margin:0 auto;padding:clamp(3.5rem,7vw,6rem) clamp(1.5rem,5vw,3rem)}
+.sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;margin-bottom:2.2rem;flex-wrap:wrap}
+.sec-head h2{font-size:clamp(1.8rem,3.4vw,2.6rem);font-weight:800;letter-spacing:-.03em}
+.sec-head p{color:var(--muted);font-size:1rem;max-width:34ch}
+.grid{display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr))}
+.card{position:relative;border-radius:18px;overflow:hidden;aspect-ratio:1/1.15;cursor:pointer;
+  text-decoration:none;color:#fff;display:block;border:1px solid var(--line);
+  transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .5s cubic-bezier(.22,1,.36,1)}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(12,9,16,.92) 6%,rgba(12,9,16,.15) 55%,transparent)}
+.card:hover{transform:translateY(-6px);box-shadow:0 30px 50px -24px rgba(0,0,0,.4)}
+.card:hover img{transform:scale(1.07)}
+.card-in{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;justify-content:flex-end;padding:1.3rem}
+.card-board{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.75);margin-bottom:.3rem}
+.card-name{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;line-height:1.05}
+.card-meta{font-size:.84rem;color:rgba(255,255,255,.7);margin-top:.45rem}
+.card-accent{position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--c);z-index:2;transform:scaleX(0);transform-origin:left;transition:transform .3s}
+.card:hover .card-accent{transform:scaleX(1)}
+.foot{text-align:center;padding:2rem;color:var(--muted);font-size:.85rem}
+@media(max-width:640px){.hero{padding-top:4.5rem}.hero-top nav{display:none}}
+</style>
+</head>
+<body>
+<nav class="cs">
+  <b>Concepts</b>
+  <a href="/design-lab/concept-broadsheet.html">Broadsheet</a>
+  <a href="/design-lab/concept-spotlight.html" class="on">Spotlight</a>
+  <a href="/design-lab/concept-command.html">Command</a>
+  <a href="/design-lab/concept-playful.html">Playful</a>
+  <span class="sp">bold · full-bleed · statement-led</span>
+</nav>
+
+<header class="hero">
+  <div class="hero-top">
+    <div class="brand"><span class="dot"></span>StudyVault</div>
+    <nav><a href="#">Subjects</a><a href="#">Exam planner</a><a href="#">School code</a></nav>
+  </div>
+
+  <div class="hero-mid">
+    <span class="kicker"><span class="pulse"></span>Free · every subject · every exam board</span>
+    <h1>Your whole GCSE, <em>finally</em> in one place.</h1>
+    <p class="lede">Thousands of lessons, practice questions and podcasts — for every subject and every exam board. Built to make revision feel calm, not chaotic.</p>
+    <div class="cta">
+      <a href="#" class="btn btn-primary">Start revising — it's free →</a>
+      <a href="#" class="btn btn-ghost">I have a school code</a>
+    </div>
+  </div>
+
+  <div class="marquee">
+    <div class="marquee-track">
+      <a class="mq-card"><img src="/images/subject-history.jpg" alt=""><span>History</span></a>
+      <a class="mq-card"><img src="/images/subject-biology.jpg" alt=""><span>Biology</span></a>
+      <a class="mq-card"><img src="/images/subject-english-lit.jpg" alt=""><span>English Lit</span></a>
+      <a class="mq-card"><img src="/images/subject-maths.jpg" alt=""><span>Maths</span></a>
+      <a class="mq-card"><img src="/images/subject-chemistry.jpg" alt=""><span>Chemistry</span></a>
+      <a class="mq-card"><img src="/images/subject-geography.jpg" alt=""><span>Geography</span></a>
+      <a class="mq-card"><img src="/images/subject-spanish.jpg" alt=""><span>Spanish</span></a>
+      <a class="mq-card"><img src="/images/subject-psychology-aqa.jpg" alt=""><span>Psychology</span></a>
+      <!-- duplicate for seamless loop -->
+      <a class="mq-card"><img src="/images/subject-history.jpg" alt=""><span>History</span></a>
+      <a class="mq-card"><img src="/images/subject-biology.jpg" alt=""><span>Biology</span></a>
+      <a class="mq-card"><img src="/images/subject-english-lit.jpg" alt=""><span>English Lit</span></a>
+      <a class="mq-card"><img src="/images/subject-maths.jpg" alt=""><span>Maths</span></a>
+      <a class="mq-card"><img src="/images/subject-chemistry.jpg" alt=""><span>Chemistry</span></a>
+      <a class="mq-card"><img src="/images/subject-geography.jpg" alt=""><span>Geography</span></a>
+      <a class="mq-card"><img src="/images/subject-spanish.jpg" alt=""><span>Spanish</span></a>
+      <a class="mq-card"><img src="/images/subject-psychology-aqa.jpg" alt=""><span>Psychology</span></a>
+    </div>
+  </div>
+</header>
+
+<section class="subjects">
+  <div class="sec-head">
+    <h2>Pick up where you left off</h2>
+    <p>Your subjects, ready when you are. Tap one to jump back in.</p>
+  </div>
+  <div class="grid">
+    <a class="card" style="--c:#3b5bdb"><img src="/images/subject-maths.jpg" alt=""><span class="card-accent"></span><div class="card-in"><span class="card-board">Edexcel</span><span class="card-name">Mathematics</span><span class="card-meta">6 units · 48 lessons</span></div></a>
+    <a class="card" style="--c:#2f8f5b"><img src="/images/subject-biology.jpg" alt=""><span class="card-accent"></span><div class="card-in"><span class="card-board">AQA</span><span class="card-name">Biology</span><span class="card-meta">7 topics · 54 lessons</span></div></a>
+    <a class="card" style="--c:#3f5e78"><img src="/images/subject-history.jpg" alt=""><span class="card-accent"></span><div class="card-in"><span class="card-board">AQA</span><span class="card-name">History</span><span class="card-meta">4 units · 60 lessons</span></div></a>
+    <a class="card" style="--c:#9e4444"><img src="/images/subject-english-lit.jpg" alt=""><span class="card-accent"></span><div class="card-in"><span class="card-board">AQA</span><span class="card-name">English Literature</span><span class="card-meta">5 texts · 42 lessons</span></div></a>
+    <a class="card" style="--c:#1f8a8a"><img src="/images/subject-chemistry.jpg" alt=""><span class="card-accent"></span><div class="card-in"><span class="card-board">AQA</span><span class="card-name">Chemistry</span><span class="card-meta">10 topics · 50 lessons</span></div></a>
+    <a class="card" style="--c:#6f8f3f"><img src="/images/subject-geography.jpg" alt=""><span class="card-accent"></span><div class="card-in"><span class="card-board">AQA</span><span class="card-name">Geography</span><span class="card-meta">3 papers · 52 lessons</span></div></a>
+  </div>
+</section>
+<p class="foot">StudyVault — concept exploration · Spotlight direction</p>
+</body>
+</html>

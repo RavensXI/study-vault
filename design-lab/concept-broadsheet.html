@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept · Broadsheet — StudyVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..900;1,9..144,400..600&family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --paper:#f4eddd; --ink:#211c14; --soft:#5c5346; --faint:#8c8270;
+  --line:#d6cab2; --line2:#e4dcc8; --accent:#8a2b2b;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Newsreader',Georgia,serif;background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased}
+/* paper grain */
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.045;mix-blend-mode:multiply;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+.cs{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;align-items:center;gap:.2rem;
+  background:#100d16;color:#cfc9d6;padding:.5rem .9rem;font:600 12px/1 ui-sans-serif,system-ui}
+.cs b{color:#e8623a;letter-spacing:.14em;text-transform:uppercase;margin-right:.8rem;font-weight:700}
+.cs a{color:#9b94a6;text-decoration:none;padding:.35rem .7rem;border-radius:7px}
+.cs a:hover{color:#fff;background:#241f2e}.cs a.on{color:#fff;background:#e8623a}
+.cs .sp{margin-left:auto;color:#5f5970;font-weight:500}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.25rem,4vw,2.5rem);position:relative;z-index:2}
+
+/* nameplate */
+.plate{padding-top:4.5rem;text-align:center}
+.plate .rule{height:3px;border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);height:4px;margin:0}
+.plate .nameplate{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(3rem,9vw,6.5rem);letter-spacing:-.02em;line-height:1;padding:1.4rem 0 .3rem}
+.plate .dateline{font-size:.82rem;letter-spacing:.34em;text-transform:uppercase;color:var(--soft);font-family:'Newsreader',serif;padding-bottom:1.3rem}
+.thinrule{border:0;border-top:1px solid var(--line);margin:0}
+
+/* lead feature */
+.lead{display:grid;grid-template-columns:1.4fr 1fr;gap:clamp(1.5rem,4vw,3.5rem);padding:3rem 0;align-items:start}
+.lead .eyebrow{font-size:.78rem;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);font-family:'Newsreader',serif;font-weight:600;margin-bottom:1rem}
+.lead h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(2.4rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.02em}
+.lead h1 em{font-style:italic;color:var(--accent)}
+.lead .deck{font-size:clamp(1.15rem,1.6vw,1.4rem);line-height:1.6;color:var(--soft)}
+.lead .deck::first-letter{font-family:'Fraunces',serif;font-weight:600;float:left;font-size:3.3em;line-height:.72;margin:.06em .1em 0 0;color:var(--ink)}
+.lead .begin{display:inline-block;margin-top:1.4rem;font-family:'Newsreader',serif;font-size:1.05rem;color:var(--accent);text-decoration:none;border-bottom:1px solid var(--accent);padding-bottom:2px}
+.lead .begin:hover{color:var(--ink);border-color:var(--ink)}
+
+/* the catalogue */
+.cat-head{display:flex;align-items:center;gap:1rem;padding:2.2rem 0 1.2rem}
+.cat-head h2{font-family:'Newsreader',serif;font-variant:small-caps;letter-spacing:.08em;font-size:1.5rem;color:var(--ink);font-weight:600}
+.cat-head .line{flex:1;height:1px;background:var(--ink);opacity:.5}
+.cat-head .count{font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+.cat{columns:2;column-gap:clamp(2rem,5vw,4rem);padding-bottom:4rem}
+@media(max-width:680px){.cat{columns:1}.lead{grid-template-columns:1fr}}
+.entry{break-inside:avoid;display:flex;align-items:baseline;gap:1rem;padding:1rem 0;border-bottom:1px solid var(--line2);text-decoration:none;color:var(--ink);transition:padding-left .25s ease}
+.entry:hover{padding-left:.5rem}
+.entry .folio{font-family:'Newsreader',serif;font-size:.85rem;color:var(--faint);min-width:1.6rem;font-variant-numeric:tabular-nums}
+.entry .body{flex:1}
+.entry .name{font-family:'Fraunces',serif;font-weight:500;font-size:1.45rem;letter-spacing:-.01em;line-height:1.1}
+.entry:hover .name{color:var(--accent)}
+.entry .sub{font-size:.92rem;color:var(--soft);margin-top:.15rem}
+.entry .board{font-variant:small-caps;letter-spacing:.06em;color:var(--accent);font-weight:600}
+.entry .arr{font-size:1.1rem;color:var(--faint);opacity:0;transition:opacity .25s,transform .25s}
+.entry:hover .arr{opacity:1;transform:translateX(3px)}
+.colophon{border-top:1px solid var(--ink);padding:1.5rem 0 4rem;font-size:.85rem;color:var(--faint);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+</style>
+</head>
+<body>
+<nav class="cs"><b>Concepts</b>
+  <a href="/design-lab/concept-broadsheet.html" class="on">Broadsheet</a>
+  <a href="/design-lab/concept-spotlight.html">Spotlight</a>
+  <a href="/design-lab/concept-command.html">Command</a>
+  <a href="/design-lab/concept-playful.html">Playful</a>
+  <span class="sp">editorial · literary · quiet authority</span></nav>
+
+<div class="wrap">
+  <div class="plate">
+    <div class="rule"></div>
+    <div class="nameplate">StudyVault</div>
+    <div class="dateline">Free GCSE Revision · Every Subject · Every Exam Board</div>
+    <hr class="thinrule">
+  </div>
+
+  <div class="lead">
+    <div>
+      <p class="eyebrow">The whole curriculum, beautifully set</p>
+      <h1>Revision worth <em>actually</em> reading.</h1>
+      <a href="#" class="begin">Choose your subjects →</a>
+    </div>
+    <div>
+      <p class="deck">Thousands of lessons, practice questions and podcasts — written with care, set like a good book, and free for every student. Nothing flashing, nothing shouting. Just everything you need, exactly where you expect it.</p>
+    </div>
+  </div>
+
+  <hr class="thinrule">
+
+  <div class="cat-head"><h2>The Subjects</h2><span class="line"></span><span class="count">8 of 70+</span></div>
+  <div class="cat">
+    <a class="entry"><span class="folio">01</span><span class="body"><span class="name">Mathematics</span><div class="sub"><span class="board">Edexcel</span> · 6 units, 48 lessons</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">02</span><span class="body"><span class="name">Biology</span><div class="sub"><span class="board">AQA</span> · 7 topics, 54 lessons</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">03</span><span class="body"><span class="name">History</span><div class="sub"><span class="board">AQA</span> · 4 units, 60 lessons</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">04</span><span class="body"><span class="name">English Literature</span><div class="sub"><span class="board">AQA</span> · 5 texts, 42 lessons</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">05</span><span class="body"><span class="name">Chemistry</span><div class="sub"><span class="board">AQA</span> · 10 topics, 50 lessons</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">06</span><span class="body"><span class="name">Geography</span><div class="sub"><span class="board">AQA</span> · 3 papers, 52 lessons</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">07</span><span class="body"><span class="name">Spanish</span><div class="sub"><span class="board">AQA</span> · 3 themes, 26 units</div></span><span class="arr">→</span></a>
+    <a class="entry"><span class="folio">08</span><span class="body"><span class="name">Psychology</span><div class="sub"><span class="board">AQA</span> · 8 units, 32 lessons</div></span><span class="arr">→</span></a>
+  </div>
+
+  <div class="colophon"><span>StudyVault — concept exploration · Broadsheet direction</span><span>Set in Fraunces &amp; Newsreader</span></div>
+</div>
+</body>
+</html>

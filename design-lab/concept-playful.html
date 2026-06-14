@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Concept · Playful — StudyVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400..800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#fdf6ee; --text:#2c2620; --soft:#6f6358; --card:#fff;
+  --p1:#ff8a5c; --p2:#5cc4c4; --p3:#9b7ede; --p4:#f6c453;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Nunito',system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;line-height:1.5;overflow-x:hidden}
+
+.cs{position:fixed;top:0;left:0;right:0;z-index:9999;display:flex;align-items:center;gap:.2rem;
+  background:#100d16;color:#cfc9d6;padding:.5rem .9rem;font:700 12px/1 'Nunito'}
+.cs b{color:#e8623a;letter-spacing:.14em;text-transform:uppercase;margin-right:.8rem;font-weight:800}
+.cs a{color:#9b94a6;text-decoration:none;padding:.35rem .7rem;border-radius:7px}
+.cs a:hover{color:#fff;background:#241f2e}.cs a.on{color:#fff;background:#e8623a}
+.cs .sp{margin-left:auto;color:#5f5970}
+
+.top{max-width:1180px;margin:0 auto;padding:4.4rem clamp(1.25rem,4vw,2.5rem) 0;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}
+.brand{font-family:'Fredoka',sans-serif;font-weight:700;font-size:1.5rem;color:var(--text);display:flex;align-items:center;gap:.45rem}
+.brand .blob{width:26px;height:26px;border-radius:46% 54% 58% 42%/52% 44% 56% 48%;background:var(--p1)}
+.top nav{display:flex;gap:.5rem}
+.top nav a{font-family:'Fredoka';font-weight:500;font-size:.95rem;color:var(--text);text-decoration:none;padding:.5rem 1rem;border-radius:999px;transition:background .2s}
+.top nav a:hover{background:#fff}
+
+/* hero with floating blobs */
+.hero{position:relative;max-width:1180px;margin:0 auto;padding:clamp(2.5rem,6vw,5rem) clamp(1.25rem,4vw,2.5rem) 1rem;text-align:center;z-index:2}
+.blobs{position:absolute;inset:-10% -20%;z-index:-1;pointer-events:none;filter:blur(8px);opacity:.5}
+.blobs i{position:absolute;border-radius:50%;animation:float 9s ease-in-out infinite}
+.blobs i:nth-child(1){width:240px;height:240px;background:var(--p1);left:2%;top:8%}
+.blobs i:nth-child(2){width:180px;height:180px;background:var(--p2);right:6%;top:2%;animation-delay:-3s}
+.blobs i:nth-child(3){width:200px;height:200px;background:var(--p3);right:18%;bottom:-6%;animation-delay:-6s}
+.blobs i:nth-child(4){width:140px;height:140px;background:var(--p4);left:18%;bottom:0;animation-delay:-1.5s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-26px) scale(1.06)}}
+.pill{display:inline-block;background:#fff;border-radius:999px;padding:.5rem 1.2rem;font-family:'Fredoka';font-weight:500;color:var(--p1);font-size:.92rem;box-shadow:0 6px 18px -8px rgba(255,138,92,.5);margin-bottom:1.5rem}
+.hero h1{font-family:'Fredoka',sans-serif;font-weight:700;font-size:clamp(2.6rem,7vw,5rem);line-height:1.02;letter-spacing:-.01em;max-width:15ch;margin:0 auto}
+.hero h1 .hl{position:relative;color:var(--p1);white-space:nowrap}
+.hero h1 .hl::after{content:"";position:absolute;left:-2%;right:-2%;bottom:.06em;height:.32em;background:var(--p4);opacity:.5;border-radius:6px;z-index:-1}
+.hero p{font-size:clamp(1.1rem,1.8vw,1.35rem);color:var(--soft);max-width:42ch;margin:1.4rem auto 0;font-weight:500}
+.cta{display:flex;gap:.9rem;justify-content:center;margin-top:2rem;flex-wrap:wrap}
+.btn{font-family:'Fredoka';font-weight:500;font-size:1.05rem;padding:1rem 2rem;border-radius:999px;border:none;cursor:pointer;text-decoration:none;transition:transform .18s ease,box-shadow .2s}
+.btn-primary{background:var(--p1);color:#fff;box-shadow:0 10px 26px -8px rgba(255,138,92,.6)}
+.btn-primary:hover{transform:translateY(-3px) scale(1.02)}
+.btn-soft{background:#fff;color:var(--text)}.btn-soft:hover{transform:translateY(-3px)}
+
+/* subjects as bubbles */
+.subs{max-width:1180px;margin:0 auto;padding:clamp(2.5rem,6vw,4.5rem) clamp(1.25rem,4vw,2.5rem) 4rem;position:relative;z-index:2}
+.subs h2{font-family:'Fredoka';font-weight:600;font-size:1.7rem;text-align:center;margin-bottom:.4rem}
+.subs .sub-sub{text-align:center;color:var(--soft);margin-bottom:2.2rem;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:1.2rem}
+.bub{position:relative;border-radius:26px;padding:1.5rem;min-height:175px;cursor:pointer;text-decoration:none;
+  display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;
+  background:var(--c);color:#fff;transition:transform .25s cubic-bezier(.34,1.56,.64,1),box-shadow .25s}
+.bub:hover{transform:translateY(-6px) rotate(-1.2deg);box-shadow:0 24px 40px -18px var(--c)}
+.bub .em{position:absolute;top:-18px;right:-10px;font-family:'Fredoka';font-weight:700;font-size:6rem;opacity:.18;line-height:1}
+.bub .board{font-family:'Nunito';font-weight:700;font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.bub h3{font-family:'Fredoka';font-weight:600;font-size:1.5rem;line-height:1.05;margin:.2rem 0}
+.bub .meta{font-family:'Nunito';font-weight:600;font-size:.84rem;opacity:.9}
+.bub .go{position:absolute;top:1.2rem;right:1.2rem;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.25);display:grid;place-items:center;font-size:1.1rem;transition:transform .2s,background .2s}
+.bub:hover .go{background:rgba(255,255,255,.4);transform:rotate(-45deg)}
+@media(prefers-reduced-motion:reduce){.blobs i{animation:none}}
+</style>
+</head>
+<body>
+<nav class="cs"><b>Concepts</b>
+  <a href="/design-lab/concept-broadsheet.html">Broadsheet</a>
+  <a href="/design-lab/concept-spotlight.html">Spotlight</a>
+  <a href="/design-lab/concept-command.html">Command</a>
+  <a href="/design-lab/concept-playful.html" class="on">Playful</a>
+  <span class="sp">friendly · rounded · encouraging</span></nav>
+
+<div class="top">
+  <div class="brand"><span class="blob"></span>StudyVault</div>
+  <nav><a href="#">Subjects</a><a href="#">Exam planner</a><a href="#">School code</a></nav>
+</div>
+
+<header class="hero">
+  <div class="blobs"><i></i><i></i><i></i><i></i></div>
+  <span class="pill">Free GCSE revision · every subject, every board</span>
+  <h1>Revision that's actually <span class="hl">on your side</span>.</h1>
+  <p>Lessons, practice and podcasts that make sense — for every subject you're taking. Calm, clear, and yours.</p>
+  <div class="cta">
+    <a href="#" class="btn btn-primary">Let's go →</a>
+    <a href="#" class="btn btn-soft">I have a school code</a>
+  </div>
+</header>
+
+<section class="subs">
+  <h2>What are you revising?</h2>
+  <p class="sub-sub">Tap a subject to dive in — you can add more any time.</p>
+  <div class="grid">
+    <a class="bub" style="--c:#3b5bdb"><span class="em">M</span><span class="go">→</span><span class="board">Edexcel</span><h3>Mathematics</h3><span class="meta">6 units · 48 lessons</span></a>
+    <a class="bub" style="--c:#2f8f5b"><span class="em">B</span><span class="go">→</span><span class="board">AQA</span><h3>Biology</h3><span class="meta">7 topics · 54 lessons</span></a>
+    <a class="bub" style="--c:#3f5e78"><span class="em">H</span><span class="go">→</span><span class="board">AQA</span><h3>History</h3><span class="meta">4 units · 60 lessons</span></a>
+    <a class="bub" style="--c:#b65656"><span class="em">E</span><span class="go">→</span><span class="board">AQA</span><h3>English Lit</h3><span class="meta">5 texts · 42 lessons</span></a>
+    <a class="bub" style="--c:#1f8a8a"><span class="em">C</span><span class="go">→</span><span class="board">AQA</span><h3>Chemistry</h3><span class="meta">10 topics · 50 lessons</span></a>
+    <a class="bub" style="--c:#7a8f3f"><span class="em">G</span><span class="go">→</span><span class="board">AQA</span><h3>Geography</h3><span class="meta">3 papers · 52 lessons</span></a>
+    <a class="bub" style="--c:#c2603a"><span class="em">S</span><span class="go">→</span><span class="board">AQA</span><h3>Spanish</h3><span class="meta">3 themes · 26 units</span></a>
+    <a class="bub" style="--c:#7a5aa6"><span class="em">P</span><span class="go">→</span><span class="board">AQA</span><h3>Psychology</h3><span class="meta">8 units · 32 lessons</span></a>
+  </div>
+</section>
+</body>
+</html>
