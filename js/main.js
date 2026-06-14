@@ -1025,6 +1025,7 @@ function initNarration() {
         if (mode === 'podcast') {
           // Switch to single-file podcast mode
           audio.src = podcastUrl;
+          audio.preload = 'metadata';   // fetch duration now, not only on play
           audio.load();
           currentIndex = -1;
           progressFill.style.width = '0%';
@@ -1049,6 +1050,11 @@ function initNarration() {
       });
     });
   }
+
+  // Default mode is narration — show its total straight away (the manifest gives
+  // us the duration without loading any audio). Previously the total was only
+  // set on a podcast→narration toggle, so a fresh load read "0:00 / 0:00".
+  timeEl.textContent = '0:00 / ' + fmtTime(totalDuration);
 
   // --- Floating mini-player ---
   var fab = document.createElement('div');
@@ -1260,6 +1266,15 @@ function initNarration() {
     playBtn.classList.remove('playing');
     playBtn.setAttribute('aria-label', 'Play narration');
     fabPlay.classList.remove('playing');
+  });
+
+  // Show the podcast duration as soon as its metadata loads (on tab-switch),
+  // rather than only once playback starts.
+  audio.addEventListener('loadedmetadata', function() {
+    if (playerMode === 'podcast') {
+      podcastDuration = audio.duration || 0;
+      timeEl.textContent = fmtTime(audio.currentTime || 0) + ' / ' + fmtTime(podcastDuration);
+    }
   });
 
   // --- Progress ---
