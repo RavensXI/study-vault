@@ -635,45 +635,236 @@ body[data-skin="reader"] .sv-tool-btn--active{ color:var(--accent) !important; b
 
 
 /* =================================================================
-   HOMEPAGE (index.html) — Paper editorial
+   HOMEPAGE (index.html) — the front door in the reader language.
+   No sticky header here: a centred hero over the subject grid. CSS-only
+   (no JS harness) — every surface reads from the reader tokens, so the
+   muted palette + dark mode track for free.
    ================================================================= */
+
+/* ---- hero: quiet kicker, confident wordmark, calm beta chip ---- */
 body[data-skin="reader"] .hero .hero-welcome{
-  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.2em; font-size:.78rem; color:var(--text-muted);
+  font-family:var(--font-ui); text-transform:uppercase; letter-spacing:.22em;
+  font-size:.76rem; font-weight:700; color:var(--text-muted);
 }
 body[data-skin="reader"] .hero h1{
-  font-family:var(--font-head) !important; font-weight:600; letter-spacing:-.02em; color:var(--text-primary);
+  font-family:var(--font-head) !important; font-weight:700; letter-spacing:-.025em; color:var(--text-primary);
+}
+body[data-skin="reader"] .hero h1 .logo-lock{ color:var(--accent); }
+/* BETA: style.css paints the wordmark badge amber + tilted 8°. Calm it to a
+   flat, level, accent-tint chip — an honest beta signal without the cheap
+   sticker look (the lesson header drops its copy of this badge entirely). */
+body[data-skin="reader"] .hero .hero-welcome + h1::after{
+  background:color-mix(in srgb,var(--accent) 14%,var(--bg-card)) !important; color:var(--accent) !important;
+  transform:none !important; border-radius:var(--radius-sm) !important; box-shadow:none !important;
+  font-family:var(--font-ui); font-weight:700; right:-1.5em;
+}
+body[data-skin="reader"].dark-mode .hero .hero-welcome + h1::after{
+  background:color-mix(in srgb,var(--accent) 24%,var(--bg-card)) !important;
+}
+/* the welcome-modal beta pill (different element) gets the same calm treatment */
+body[data-skin="reader"] .beta-pill{
+  font-family:var(--font-ui); font-weight:700; letter-spacing:.14em; transform:none;
+  background:color-mix(in srgb,var(--accent) 13%,var(--bg-card)); color:var(--accent);
+  border-radius:var(--radius-sm);
+}
+body[data-skin="reader"].dark-mode .beta-pill{
+  background:color-mix(in srgb,var(--accent) 22%,var(--bg-card)); color:var(--accent);
 }
 body[data-skin="reader"] .hero .hero-tagline,
 body[data-skin="reader"] .hero .tagline{ font-family:var(--font-read); color:var(--text-secondary); }
+/* inline action links (Pick subjects / Enter school code / Change subjects) */
+body[data-skin="reader"] .nav-school-link,
+body[data-skin="reader"] .free-user-badge button{
+  font-family:var(--font-ui); color:var(--accent); font-weight:600;
+  text-decoration-color:color-mix(in srgb,var(--accent) 40%,transparent); text-underline-offset:2px;
+}
+body[data-skin="reader"] .nav-school-link:hover,
+body[data-skin="reader"] .free-user-badge button:hover{ color:var(--accent); text-decoration-color:var(--accent); }
+body[data-skin="reader"] .free-user-badge{ font-family:var(--font-ui); color:var(--text-muted); }
 
-/* subject cards — warm 'clipping' cards; drop the Tailwind accent corner + glow */
+/* ---- subject cards: photo-led clippings, ONE muted accent per subject ----
+   Each card derives a muted tone from its saturated --card-accent (mixed toward
+   a warm grey) so the grid keeps gentle per-subject identity for scanning but
+   never goes garish. The tone shows only on the board label + the hover edge;
+   the photograph does the rest. Lifts toward light in dark mode to stay legible. */
 body[data-skin="reader"] .home-card{
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius); box-shadow:none;
+  --sub:color-mix(in srgb, var(--card-accent,#566a72) 60%, #71695f);
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius);
+  box-shadow:0 1px 2px rgba(29,28,26,.05); overflow:hidden;
   transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, border-color .25s;
 }
+body[data-skin="reader"].dark-mode .home-card{ --sub:color-mix(in srgb, var(--card-accent,#566a72) 52%, #b8b0a4); }
 body[data-skin="reader"] .home-card:hover{
-  transform:translateY(-3px); box-shadow:var(--shadow-lg) !important;
-  border-color:color-mix(in srgb,var(--accent) 35%,var(--border-light));
+  transform:translateY(-3px);
+  border-color:color-mix(in srgb,var(--sub) 55%,var(--border-light));
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 18px 36px -24px rgba(29,28,26,.22);
 }
+body[data-skin="reader"].dark-mode .home-card:hover{
+  box-shadow:0 1px 2px rgba(0,0,0,.4), 0 18px 36px -24px rgba(0,0,0,.6);
+}
+/* photo sits slightly desaturated at rest, blooms to full on hover — a quiet
+   tell that the whole card is live, on system with the lesson hover language */
+body[data-skin="reader"] .home-card-img{ filter:saturate(.92); transition:filter .25s ease; }
+body[data-skin="reader"] .home-card:hover .home-card-img{ filter:saturate(1); }
+/* the rainbow 3px top stripe goes — identity now lives in the board label */
 body[data-skin="reader"] .home-card-body{ border-top:none !important; }
-body[data-skin="reader"] .home-card-body h3{
-  font-family:var(--font-head) !important; font-weight:600; letter-spacing:-.01em; color:var(--text-primary);
+body[data-skin="reader"] .home-card h3,
+body[data-skin="reader"] .home-card-name{
+  font-family:var(--font-head) !important; font-weight:700; letter-spacing:-.01em; color:var(--text-primary);
 }
 body[data-skin="reader"] .home-card-board{
-  font-family:var(--font-ui); color:var(--accent); letter-spacing:.04em; font-weight:600;
+  font-family:var(--font-ui); color:var(--sub); letter-spacing:.05em; font-weight:700;
+  text-transform:uppercase; font-size:.72rem;
   background:none !important; padding:0 !important; border-radius:0 !important;
 }
-body[data-skin="reader"] .home-card-detail{ font-family:var(--font-read); color:var(--text-secondary); }
+body[data-skin="reader"] .home-card-detail{ font-family:var(--font-ui); color:var(--text-muted); }
+/* premium badge — quiet glass chip, on-system radius (was a hard cream box) */
+body[data-skin="reader"] .home-card-premium{
+  font-family:var(--font-ui); border-radius:var(--radius-sm); color:var(--text-secondary);
+  background:color-mix(in srgb,var(--bg-card) 86%,transparent); box-shadow:0 1px 3px rgba(29,28,26,.12);
+}
 
-/* section headings + homepage chrome */
+/* ---- section header + exam-timetable chip ---- */
+body[data-skin="reader"] .home-section-header h2,
 body[data-skin="reader"] .home-subjects > h2,
 body[data-skin="reader"] .home-section-title,
 body[data-skin="reader"] .home-subjects-header h2{
-  font-family:var(--font-head) !important; color:var(--text-primary); letter-spacing:-.01em; font-weight:600;
+  font-family:var(--font-head) !important; color:var(--text-primary); letter-spacing:-.01em; font-weight:700;
 }
-body[data-skin="reader"] .nav-school-link{ font-family:var(--font-ui); }
-body[data-skin="reader"] .beta-pill{ font-family:var(--font-ui); }
+/* the saturated-blue pill becomes a calm on-system chip (accent text, hairline,
+   softer-square radius — the 999px pill read as the AI tell) */
+body[data-skin="reader"] .home-exams-link{
+  font-family:var(--font-ui); color:var(--accent); font-weight:600;
+  background:var(--bg-card); border:1px solid color-mix(in srgb,var(--accent) 28%,var(--border-light));
+  border-radius:8px;
+}
+body[data-skin="reader"] .home-exams-link:hover{
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card)); border-color:var(--accent);
+}
 
+/* ---- request-a-subject panel (the <details> at the foot of the grid) ---- */
+body[data-skin="reader"] .request-panel{
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:var(--radius);
+  box-shadow:0 1px 2px rgba(29,28,26,.05);
+}
+body[data-skin="reader"] .request-panel[open]{ border-color:var(--border-light); box-shadow:0 1px 2px rgba(29,28,26,.05), 0 18px 36px -24px rgba(29,28,26,.2); }
+body[data-skin="reader"] .request-panel > summary:hover{ background:color-mix(in srgb,var(--accent) 4%,var(--bg-card)); }
+body[data-skin="reader"] .request-panel .req-icon{
+  background:color-mix(in srgb,var(--accent) 13%,var(--bg-card)) !important; color:var(--accent) !important;
+  border-radius:var(--radius-sm);
+}
+body[data-skin="reader"] .request-panel .req-title{ font-family:var(--font-head); color:var(--text-primary); }
+body[data-skin="reader"] .request-panel .req-title small{ font-family:var(--font-ui); color:var(--text-muted); }
+body[data-skin="reader"] .request-panel-body{ background:none; border-top-color:var(--border-light); }
+body[data-skin="reader"] .request-panel-body > p{ font-family:var(--font-read); color:var(--text-secondary); }
+body[data-skin="reader"] .request-panel-body .update-note{
+  background:color-mix(in srgb,var(--accent) 7%,var(--bg-card));
+  border:1px solid color-mix(in srgb,var(--accent) 22%,var(--border-light));
+  border-radius:var(--radius-sm); color:var(--text-secondary); font-family:var(--font-ui);
+}
+body[data-skin="reader"] .request-submit{ font-family:var(--font-ui); background:var(--accent); border-radius:var(--radius-sm); color:#fff; }
+body[data-skin="reader"].dark-mode .request-submit{ color:#181614; }
+body[data-skin="reader"] .request-fields label{ font-family:var(--font-ui); color:var(--text-secondary); }
+body[data-skin="reader"] .request-fields label > input,
+body[data-skin="reader"] .request-fields label > select{
+  font-family:var(--font-ui); background:var(--bg-card); color:var(--text-primary);
+  border:1px solid var(--border-light); border-radius:var(--radius-sm);
+}
+body[data-skin="reader"] .request-fields label > input:focus,
+body[data-skin="reader"] .request-fields label > select:focus{
+  border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+
+
+/* ---- static site footer (brand · copy · links) ---- */
+body[data-skin="reader"] .site-footer{ border-top:1px solid var(--border-light); }
+body[data-skin="reader"] .site-footer-inner{ font-family:var(--font-ui); color:var(--text-muted); }
+body[data-skin="reader"] .site-footer-brand{ font-family:var(--font-head); color:var(--text-secondary); }
+body[data-skin="reader"] .site-footer-brand .logo-lock{ color:var(--accent); }
+body[data-skin="reader"] .site-footer-links a{ color:var(--text-secondary); text-decoration:none; }
+body[data-skin="reader"] .site-footer-links a:hover{ color:var(--accent); }
+
+/* =================================================================
+   HOMEPAGE MODALS — free-wizard (pick subjects), subject picker,
+   welcome / school-code. Retargeted off the coral/amber/dark one-offs
+   onto the reader tokens, so they track accent + dark mode like the rest.
+   ================================================================= */
+/* ---- free wizard ("Add your subjects") ---- */
+body[data-skin="reader"] .free-wizard-modal{ background:var(--bg-card); border:1px solid var(--border-light); border-radius:16px; }
+body[data-skin="reader"] .fw-header{ border-bottom-color:var(--border-light); }
+body[data-skin="reader"] .fw-header h2{ font-family:var(--font-head); color:var(--text-primary); letter-spacing:-.01em; }
+body[data-skin="reader"] .fw-header p{ font-family:var(--font-ui); color:var(--text-secondary); }
+body[data-skin="reader"] .fw-step-pill{
+  font-family:var(--font-ui); border-radius:var(--radius-sm); letter-spacing:.1em;
+  background:color-mix(in srgb,var(--accent) 13%,var(--bg-card)); color:var(--accent);
+}
+body[data-skin="reader"] .fw-core-note{ background:color-mix(in srgb,var(--accent) 4%,var(--bg-card)); border-color:var(--border-light); border-radius:var(--radius); }
+body[data-skin="reader"] .fw-core-note svg{ color:var(--accent); }
+body[data-skin="reader"] .fw-core-note strong{ color:var(--text-primary); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-core-chip{ background:var(--bg-card); border-color:var(--border-light); border-radius:7px; color:var(--text-secondary); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-search-input{ background:var(--bg-card); border-color:var(--border-light); border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-search-input:focus{ border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent); }
+body[data-skin="reader"] .fw-category{ border-bottom-color:var(--border-light); }
+body[data-skin="reader"] .fw-cat-header:hover{ background:color-mix(in srgb,var(--accent) 4%,var(--bg-card)); }
+body[data-skin="reader"] .fw-cat-title{ font-family:var(--font-ui); color:var(--text-primary); }
+body[data-skin="reader"] .fw-cat-count{ background:var(--bg-card); border-color:var(--border-light); color:var(--text-muted); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-cat-count.has-selected{ background:var(--accent); border-color:var(--accent); color:#fff; }
+body[data-skin="reader"].dark-mode .fw-cat-count.has-selected{ color:#181614; }
+body[data-skin="reader"] .fw-subj-card{ background:var(--bg-card); border-color:var(--border-light); border-radius:var(--radius-sm); color:var(--text-primary); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-subj-card:hover:not(.unavailable){ border-color:var(--accent); }
+body[data-skin="reader"] .fw-subj-card.selected{ background:color-mix(in srgb,var(--accent) 9%,var(--bg-card)); border-color:var(--accent); }
+body[data-skin="reader"] .fw-subj-card .fw-check{ color:var(--accent); }
+body[data-skin="reader"] .fw-soon-tag{ background:color-mix(in srgb,var(--accent) 7%,var(--bg-card)); color:var(--text-muted); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-footer{ border-top-color:var(--border-light); background:color-mix(in srgb,var(--accent) 3%,var(--bg-card)); }
+body[data-skin="reader"] .fw-footer-count{ font-family:var(--font-ui); color:var(--text-secondary); }
+body[data-skin="reader"] .fw-footer-count strong{ color:var(--text-primary); }
+body[data-skin="reader"] .fw-btn{ font-family:var(--font-ui); border-radius:var(--radius-sm); }
+body[data-skin="reader"] .fw-btn-ghost{ background:var(--bg-card); color:var(--text-secondary); border-color:var(--border-light); }
+body[data-skin="reader"] .fw-btn-ghost:hover{ color:var(--accent); border-color:var(--accent); }
+body[data-skin="reader"] .fw-btn-primary{ background:var(--accent); color:#fff; }
+body[data-skin="reader"].dark-mode .fw-btn-primary{ color:#181614; }
+body[data-skin="reader"] .fw-btn-primary:hover:not(:disabled){ filter:brightness(1.08); }
+/* step 2 — board picker rows */
+body[data-skin="reader"] .fw-board-row{ background:var(--bg-card); border-color:var(--border-light); border-radius:var(--radius); }
+body[data-skin="reader"] .fw-board-row.unresolved{ background:color-mix(in srgb,var(--accent) 4%,var(--bg-card)); border-color:color-mix(in srgb,var(--accent) 22%,var(--border-light)); }
+body[data-skin="reader"] .fw-board-name{ font-family:var(--font-ui); color:var(--text-primary); }
+body[data-skin="reader"] .fw-core-badge{ background:color-mix(in srgb,var(--accent) 13%,var(--bg-card)); color:var(--accent); border-radius:var(--radius-sm); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-board-status.picked{ color:var(--accent); }
+body[data-skin="reader"] .fw-board-pill{ background:var(--bg-card); border-color:var(--border-light); border-radius:var(--radius-sm); color:var(--text-secondary); font-family:var(--font-ui); }
+body[data-skin="reader"] .fw-board-pill:hover{ border-color:var(--accent); }
+body[data-skin="reader"] .fw-board-pill.selected{ background:var(--accent); border-color:var(--accent); color:#fff; }
+body[data-skin="reader"].dark-mode .fw-board-pill.selected{ color:#181614; }
+body[data-skin="reader"] .fw-section-label,
+body[data-skin="reader"] .fw-search-group-label{ font-family:var(--font-ui); color:var(--text-muted); }
+body[data-skin="reader"] .fw-text-btn{ font-family:var(--font-ui); border-color:var(--border-light); border-radius:var(--radius-sm); background:var(--bg-card); color:var(--text-secondary); }
+body[data-skin="reader"] .fw-text-btn.selected{ background:var(--accent); border-color:var(--accent); color:#fff; }
+body[data-skin="reader"].dark-mode .fw-text-btn.selected{ color:#181614; }
+body[data-skin="reader"] .fw-toast{ font-family:var(--font-ui); background:var(--text-primary); color:var(--bg-card); border-radius:var(--radius-sm); }
+
+/* ---- subject picker modal ("Change subjects") ---- */
+body[data-skin="reader"] .picker-modal{ border:1px solid var(--border-light); border-radius:16px; }
+body[data-skin="reader"] .picker-header h2{ font-family:var(--font-head); color:var(--text-primary); }
+body[data-skin="reader"] .picker-header p{ font-family:var(--font-ui); color:var(--text-secondary); }
+body[data-skin="reader"] .picker-item{ border-radius:var(--radius-sm); }
+body[data-skin="reader"] .picker-item.selected{ border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent); }
+body[data-skin="reader"] .picker-item .picker-check{ background:var(--accent); }
+body[data-skin="reader"].dark-mode .picker-item .picker-check{ color:#181614; }
+body[data-skin="reader"] .picker-item-label{ font-family:var(--font-head); color:var(--text-primary); }
+body[data-skin="reader"] .picker-done{ font-family:var(--font-ui); background:var(--accent); border-radius:var(--radius-sm); }
+body[data-skin="reader"].dark-mode .picker-done{ color:#181614; }
+body[data-skin="reader"] .picker-tier-name{ font-family:var(--font-head); }
+body[data-skin="reader"] .picker-tier-btn{ font-family:var(--font-ui); }
+body[data-skin="reader"] .picker-tier-indicator{ background:var(--accent); }
+body[data-skin="reader"] .picker-disclaimer{ font-family:var(--font-ui); color:var(--text-muted); }
+
+/* ---- welcome / school-code modal ---- */
+body[data-skin="reader"] .welcome-modal h2,
+body[data-skin="reader"] .school-modal h2{ font-family:var(--font-head); color:var(--text-primary); }
+body[data-skin="reader"] .welcome-modal p,
+body[data-skin="reader"] .school-modal p{ font-family:var(--font-ui); color:var(--text-secondary); }
+body[data-skin="reader"] .welcome-choice-primary{ background:var(--accent); color:#fff; border-radius:var(--radius-sm); font-family:var(--font-ui); }
+body[data-skin="reader"].dark-mode .welcome-choice-primary{ background:var(--accent); color:#181614; }
+body[data-skin="reader"] .welcome-choice-secondary{ border-radius:var(--radius-sm); font-family:var(--font-ui); }
 
 /* =================================================================
    BROWSE (browse.html) — Paper editorial
