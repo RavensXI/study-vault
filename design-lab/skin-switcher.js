@@ -77,6 +77,7 @@
     buildDemoFigure();
     setupExitIntercept();
     fixLessonNavArrows();
+    coBrandSchoolLogo();         // school account: lock the school logo beside the wordmark
     buildFocusToggle();          // before evenA11yDividers so it gets a divider
     buildOverlayControl();       // collapse the swatch row into a button + popover
     buildReadingPanel();         // A-/A+ + spacing + reading-font picker (replaces OpenDyslexic)
@@ -699,6 +700,22 @@
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
     window.addEventListener('resize', function () { if (!pop.hidden) place(); });
+  }
+
+  // SCHOOL CO-BRAND (Tom, 14 Jun) — on a school account, school-session.js
+  // injects .header-school-logo before the nav. Move it INTO .header-brand so it
+  // forms a "StudyVault │ Unity College" lockup beside the wordmark and travels
+  // with it (incl. the ≥1400px gutter position). No-op for free/anon users.
+  function coBrandSchoolLogo() {
+    var brand = document.querySelector('.header-brand');
+    var logo = document.querySelector('.header-school-logo');
+    if (!brand || !logo || brand.dataset.cobrand) return;
+    brand.dataset.cobrand = '1';
+    var divider = document.createElement('span');
+    divider.className = 'header-cobrand-divider';
+    divider.setAttribute('aria-hidden', 'true');
+    brand.appendChild(divider);
+    brand.appendChild(logo);   // relocate the injected logo into the lockup
   }
 
   // The loader bakes literal ← / → glyphs into the Prev/Next labels — they read

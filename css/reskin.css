@@ -811,6 +811,24 @@ body[data-skin="reader"] .page-header.scrolled{
 body[data-skin="reader"] .header-logo{ color:var(--text-primary); }
 /* drop the BETA stamp on the logo — this is the launch-ready look */
 body[data-skin="reader"] .header-logo::after{ content:none !important; display:none !important; }
+
+/* SCHOOL CO-BRAND (Tom, 14 Jun) — the harness moves the injected school logo
+   into .header-brand so it reads "StudyVault │ Unity College" beside the
+   wordmark. Override production's display:none + ≥1400px centring (this lives
+   in the lockup at all widths); the divider is a hairline between the two
+   marks. Hidden on mobile, where the wordmark collapses and the drawer carries
+   the school logo instead. */
+body[data-skin="reader"] .header-cobrand-divider{
+  flex:0 0 auto; align-self:center; width:1px; height:20px; background:var(--border-light);
+}
+body[data-skin="reader"] .header-brand .header-school-logo{
+  display:block !important; height:22px; width:auto; max-width:130px;
+  object-fit:contain; border-radius:4px; flex:0 0 auto; align-self:center; margin:0;
+}
+@media (max-width:960px){
+  body[data-skin="reader"] .header-brand .header-school-logo,
+  body[data-skin="reader"] .header-cobrand-divider{ display:none !important; }
+}
 /* FIX a real bug: base CSS runs `animation: page-enter ... forwards` on <body>,
    whose final keyframe is transform:translateY(0). A non-none transform on an
    ancestor makes position:fixed resolve against THAT element, not the viewport
