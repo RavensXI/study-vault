@@ -874,6 +874,16 @@ body[data-skin="reader"] .subject-header h1,
 body[data-skin="reader"] .unit-page-header h1{
   font-family:var(--font-head) !important; font-weight:600; color:var(--text-primary); letter-spacing:-.01em;
 }
+/* browse/guide carry the subject/unit name inside .header-brand (lesson pages
+   use .header-pills) — give it the same logo│context hairline as the lesson
+   header so the wordmark and the page context read as two sections. */
+body[data-skin="reader"] .header-brand .header-unit-label:not(:empty){
+  position:relative; padding-left:1.15rem; margin-left:.2rem;
+}
+body[data-skin="reader"] .header-brand .header-unit-label:not(:empty)::before{
+  content:""; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:1px; height:20px; background:var(--border-light);
+}
 /* unit cards + lesson cards — same clipping treatment, no Tailwind accent corner */
 body[data-skin="reader"] .unit-card,
 body[data-skin="reader"] .lesson-card{
@@ -900,6 +910,51 @@ body[data-skin="reader"] .lesson-card-title,
 body[data-skin="reader"] .lesson-card h2{
   font-family:var(--font-head) !important; font-weight:600; color:var(--text-primary); letter-spacing:-.01em;
 }
+
+/* =================================================================
+   GUIDE (guide.html) — revision-technique + exam-technique pages.
+   The content reuses .lesson-page; the hub paints its category cards
+   entirely from --paper-accent / --paper-light (authored green for
+   revision, amber for exam). Retarget those two variables to the
+   subject accent and the whole guide tracks the reader palette + dark
+   mode (border, heading, labels, hover, header tint all follow).
+   ================================================================= */
+body[data-skin="reader"] .guide-paper{
+  --paper-accent:var(--accent) !important;
+  --paper-light:color-mix(in srgb,var(--accent) 8%,var(--bg-card)) !important;
+  border:1px solid var(--border-light); border-left:4px solid var(--accent);
+  border-radius:var(--radius); box-shadow:0 1px 2px rgba(29,28,26,.05);
+}
+body[data-skin="reader"].dark-mode .guide-paper{ box-shadow:none; }
+body[data-skin="reader"] .guide-paper-header h2{ font-family:var(--font-head); letter-spacing:-.01em; }
+body[data-skin="reader"] .guide-paper-ref{ font-family:var(--font-ui); }
+body[data-skin="reader"] .guide-question-label{ font-family:var(--font-ui); }
+body[data-skin="reader"] .guide-question-card{ border-top-color:var(--border-light); }
+body[data-skin="reader"] .guide-question-card h3{ font-family:var(--font-head); font-weight:700; letter-spacing:-.005em; }
+body[data-skin="reader"] .guide-question-card p{ font-family:var(--font-read); color:var(--text-secondary); }
+body[data-skin="reader"] .guide-question-marks,
+body[data-skin="reader"] .guide-soon-badge{ font-family:var(--font-ui); border-radius:var(--radius-sm); }
+/* hub title + intro + individual-guide title. The unscoped lesson-masthead
+   rule (white text + heavy drop-shadow, meant for a title over a hero image)
+   also matches the guide's .lesson-header h1 — neutralise the shadow + force
+   the dark colour so the title reads cleanly on the cream page. */
+body[data-skin="reader"] #guide-content h1,
+body[data-skin="reader"] .guide-hub-title{
+  font-family:var(--font-head) !important; color:var(--text-primary) !important;
+  text-shadow:none !important; letter-spacing:-.02em; font-weight:700;
+}
+body[data-skin="reader"] #guide-content .guide-hub-intro,
+body[data-skin="reader"] #guide-content .hero p{ font-family:var(--font-read); color:var(--text-secondary); }
+/* individual technique article: it reuses .lesson-page > main + aside but NOT
+   .study-notes, so the reader article fonts never reach it — set them here. */
+body[data-skin="reader"] #guide-content h2,
+body[data-skin="reader"] #guide-content h3,
+body[data-skin="reader"] #guide-content h4{ font-family:var(--font-head) !important; color:var(--text-primary); letter-spacing:-.01em; }
+body[data-skin="reader"] #guide-content .lesson-content p,
+body[data-skin="reader"] #guide-content .lesson-content li{ font-family:var(--font-read); color:var(--text-primary); }
+body[data-skin="reader"] #guide-content .lesson-content table,
+body[data-skin="reader"] #guide-content .lesson-content th{ font-family:var(--font-ui); }
+body[data-skin="reader"] #guide-content .lesson-content td{ font-family:var(--font-read); }
 
 /* compact the Progress checklist: ledger strip — monochrome icon row (dim=to-do,
    accent=done), hairline bar, tabular count in the top-right corner */
