@@ -90,12 +90,36 @@
     fixProgressCount();          // recount "X of N" from VISIBLE items (highlight task hidden)
     evenA11yDividers();
     revealMasthead();
-    // the bug FAB can end up nested inside the (transformed) tutor-dock, which
-    // offsets its fixed position off the corner — hoist it to <body>
-    var _bf = document.querySelector('.bugr-fab');
-    if (_bf && _bf.parentElement !== document.body) document.body.appendChild(_bf);
     buildTourReplay();
+    dockUtilityButtons();   // group bug + replay-tour into the under-column dock
     maybeStartTour();
+  }
+
+  // UTILITY BUTTONS (Tom, 14 Jun) — cutting the highlighter freed space at the
+  // foot of the panel; the bug + replay-tour buttons looked stray stacked in the
+  // bottom-right corner. lesson-tutor.js already floats a .tutor-dock that
+  // positions itself UNDER the panel column, so reuse it: move both into the
+  // dock as a side-by-side pair (the dock's own adoptBugButton also wants the
+  // bug there, so no fight). Reskin CSS hides the redundant "Ask the Tutor" pill
+  // (covered by the panel tutor tile) + styles the two as labelled buttons.
+  function dockUtilityButtons() {
+    var dock = document.querySelector('.tutor-dock');
+    if (!dock) return;   // tutor dock not built yet; a later tidy pass catches it
+    var bug = document.querySelector('.bugr-fab');
+    var tour = document.querySelector('.sv-tour-replay');
+    if (bug) {
+      // label regardless of parent — adoptBugButton may have already docked it
+      if (!bug.querySelector('.bugr-fab-label')) {
+        var bl = document.createElement('span');
+        bl.className = 'bugr-fab-label'; bl.textContent = 'Report a problem';
+        bug.appendChild(bl);
+      }
+      if (bug.parentNode !== dock) dock.appendChild(bug);
+    }
+    if (tour) {
+      var ts = tour.querySelector('span'); if (ts) ts.textContent = 'Replay tour';
+      if (tour.parentNode !== dock) dock.appendChild(tour);
+    }
   }
 
   // persistent "replay the tour" control (bottom-left; the tour's last step

@@ -1397,6 +1397,37 @@ body[data-skin="reader"] .sv-tour-replay:hover{ border-color:var(--accent); tran
 body[data-skin="reader"] .sv-tour-replay svg{ flex:0 0 auto; }
 body[data-skin="reader"] .sv-tour-replay span{ display:none; }
 
+/* UTILITY BUTTONS (Tom, 14 Jun) — the harness moves bug + replay-tour into the
+   floating tutor dock (which positions itself under the panel column). Hide the
+   redundant "Ask the Tutor" pill (panel has a tutor tile), and present the two
+   as a side-by-side labelled pair. */
+/* the dock fades in on a transition that we don't need here — keep it always
+   visible (Tom: "same position no matter where you are"). display:none states
+   (mobile sidebar-open) still win over opacity. */
+body[data-skin="reader"] .tutor-dock{ opacity:1 !important; pointer-events:auto !important; }
+body[data-skin="reader"] .tutor-dock .tutor-fab{ display:none !important; }
+/* hide the un-docked corner FABs on the lesson page until they're moved into the
+   dock (else the bug + tour flash in the corner first). Sibling selector only
+   matches them at BODY level; once inside #lesson-page's dock it stops matching. */
+body[data-skin="reader"] #lesson-page ~ .bugr-fab,
+body[data-skin="reader"] #lesson-page ~ .sv-tour-replay{ display:none !important; }
+body[data-skin="reader"] .tutor-dock .bugr-fab,
+body[data-skin="reader"] .tutor-dock .sv-tour-replay{
+  position:static !important; inset:auto !important; margin:0 !important;
+  width:auto !important; height:auto !important; border-radius:999px;
+  display:inline-flex !important; align-items:center; justify-content:center; gap:.45rem;
+  padding:.55rem .95rem; font-family:var(--font-ui); font-size:.82rem; font-weight:600;
+  background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--border-light);
+  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 8px 20px -12px rgba(29,28,26,.2); cursor:pointer;
+}
+body[data-skin="reader"] .tutor-dock .bugr-fab:hover,
+body[data-skin="reader"] .tutor-dock .sv-tour-replay:hover{
+  color:var(--accent); border-color:var(--accent); transform:none; filter:none;
+}
+body[data-skin="reader"] .tutor-dock .bugr-fab svg,
+body[data-skin="reader"] .tutor-dock .sv-tour-replay svg{ width:17px !important; height:17px !important; flex:0 0 auto; }
+body[data-skin="reader"] .tutor-dock .sv-tour-replay span{ display:inline !important; }
+
 /* ================= READER DARK — warm-dark mapping of the v2 tokens =================
    body.dark-mode swaps the same variables the skin paints from; higher
    specificity than both body.dark-mode (style.css) and body[data-skin="reader"],
