@@ -2111,3 +2111,91 @@ body[data-skin="reader"] .fw-board-pill{ padding:.5rem 1rem; }
   body[data-skin="reader"] .free-wizard-overlay{ padding:0; }
   body[data-skin="reader"] .free-wizard-modal{ width:100%; max-width:100%; max-height:100dvh; height:100dvh; border-radius:0; }
 }
+
+/* =================================================================
+   HOMEPAGE — LIFE & DEPTH: the launch-ready hero. Beta framing is gone
+   (the ::after BETA no longer matches — hero-welcome was removed — and
+   the 'still growing' notes are dropped). An ambient drifting gradient
+   field sits behind the masthead; the headline carries a rotating
+   subject word in that subject's colour; the cards tilt + glow. All
+   motion respects prefers-reduced-motion.
+   ================================================================= */
+body[data-skin="reader"] .update-note{ display:none !important; }
+
+/* ambient field behind the masthead — slow, soft, premium; fades out before
+   the subjects (full-bleed via body::before) */
+body[data-skin="reader"]{ position:relative; }
+body[data-skin="reader"]::before{
+  content:""; position:absolute; top:0; left:0; right:0; height:660px; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(60% 80% at 12% -10%, color-mix(in srgb,var(--accent) 34%, transparent), transparent 62%),
+    radial-gradient(48% 68% at 90% 0%, color-mix(in srgb,#c4895c 26%, transparent), transparent 58%),
+    radial-gradient(54% 66% at 67% -8%, color-mix(in srgb,#5f8a74 22%, transparent), transparent 60%);
+  -webkit-mask-image:linear-gradient(to bottom,#000 60%, transparent 100%);
+          mask-image:linear-gradient(to bottom,#000 60%, transparent 100%);
+  animation:sv-ambient 30s ease-in-out infinite alternate;
+}
+body[data-skin="reader"].dark-mode::before{ opacity:.72; }
+@keyframes sv-ambient{
+  from{ transform:translate3d(0,0,0) scale(1); }
+  to{   transform:translate3d(-3.5%,2%,0) scale(1.09); }
+}
+@media (prefers-reduced-motion:reduce){ body[data-skin="reader"]::before{ animation:none; } }
+/* lift real content above the field */
+body[data-skin="reader"] .hero,
+body[data-skin="reader"] .free-user-badge,
+body[data-skin="reader"] .school-name-badge,
+body[data-skin="reader"] #home-subjects,
+body[data-skin="reader"] .request-panel{ position:relative; z-index:1; }
+
+/* brand mark (moderate) — the HEADLINE is now the hero statement */
+body[data-skin="reader"] .hero-wordmark{
+  font-family:var(--font-head) !important; font-weight:700; letter-spacing:-.02em;
+  font-size:clamp(1.45rem,2.2vw,1.95rem); line-height:1; color:var(--text-primary);
+  margin:0 0 1.05rem; display:inline-flex; align-items:center;
+}
+body[data-skin="reader"] .hero-wordmark .logo-lock{ color:var(--accent); }
+body[data-skin="reader"] .hero-headline{
+  font-family:var(--font-head); font-weight:700; letter-spacing:-.025em;
+  font-size:clamp(2rem,4.4vw,3.35rem); line-height:1.05; color:var(--text-primary);
+  margin:0; max-width:20ch; text-wrap:balance;
+}
+/* rotating subject word, in its own muted accent (home-lab.js sets --rot-accent + swaps) */
+body[data-skin="reader"] .hero-rotator{
+  color:var(--rot-accent,var(--accent)); font-weight:700; display:inline-block; white-space:nowrap;
+  transition:opacity .3s ease, transform .3s cubic-bezier(.22,1,.36,1), color .3s ease;
+}
+body[data-skin="reader"] .hero-rotator.is-swapping{ opacity:0; transform:translateY(.3em); }
+body[data-skin="reader"] .hero-rotator-sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; }
+@media (prefers-reduced-motion:reduce){ body[data-skin="reader"] .hero-rotator{ transition:none; } }
+body[data-skin="reader"] .hero-headline + .hero-tagline{ margin-top:1.05rem; }
+
+/* subject cards: tactile — cursor-driven 3D tilt (home-lab.js sets --tx/--ty),
+   a soft accent glow, and a 'continue' arrow that slides in on hover */
+body[data-skin="reader"] #home-grid{ perspective:1300px; }
+body[data-skin="reader"] .home-card{
+  transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) translateY(var(--lift,0));
+  transform-style:preserve-3d;
+}
+body[data-skin="reader"] .home-card:hover{
+  --lift:-5px;
+  transform:rotateX(var(--tx,0deg)) rotateY(var(--ty,0deg)) translateY(-5px);
+  box-shadow:0 1px 2px rgba(29,28,26,.05),
+             0 26px 50px -28px color-mix(in srgb,var(--sub) 55%, rgba(29,28,26,.9));
+}
+body[data-skin="reader"].dark-mode .home-card:hover{
+  box-shadow:0 1px 2px rgba(0,0,0,.4), 0 26px 50px -26px color-mix(in srgb,var(--sub) 50%, #000);
+}
+body[data-skin="reader"] .home-card-body{ position:relative; }
+body[data-skin="reader"] .home-card-go{
+  position:absolute; right:1.05rem; bottom:1.1rem; width:31px; height:31px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:color-mix(in srgb,var(--sub) 15%,var(--bg-card)); color:var(--sub);
+  opacity:0; transform:translateX(-5px); transition:opacity .25s ease, transform .25s cubic-bezier(.22,1,.36,1);
+}
+body[data-skin="reader"] .home-card-go svg{ width:15px; height:15px; }
+body[data-skin="reader"] .home-card:hover .home-card-go{ opacity:1; transform:translateX(0); }
+@media (prefers-reduced-motion:reduce){
+  body[data-skin="reader"] .home-card,
+  body[data-skin="reader"] .home-card:hover{ transform:none; }
+}
