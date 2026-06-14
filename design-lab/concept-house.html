@@ -46,7 +46,7 @@ body{font-family:var(--head);background:var(--bg);color:var(--text);-webkit-font
 .top nav a{color:var(--soft);text-decoration:none}.top nav a:hover{color:var(--accent)}
 
 /* ===== HERO ===== */
-.hero{position:relative;padding:clamp(2.5rem,5vw,4.5rem) 0 clamp(2.5rem,5vw,4rem);display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(2rem,5vw,4rem);align-items:center}
+.hero{position:relative;padding:clamp(2.6rem,6vw,5rem) 0 clamp(2.6rem,5vw,4.5rem)}
 .hero::before{content:"";position:absolute;top:-3rem;left:-12vw;right:-12vw;height:660px;z-index:-1;pointer-events:none;
   background:radial-gradient(50% 70% at 18% 0%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 60%),
     radial-gradient(46% 64% at 92% 6%,color-mix(in srgb,#c4895c 22%,transparent),transparent 56%),
@@ -67,29 +67,18 @@ h1{font-family:var(--head);font-weight:800;font-size:clamp(2.4rem,5.2vw,4rem);li
 body.dark .btn-p{color:#181614}
 .btn-g{background:var(--card);color:var(--text);border-color:var(--line)}.btn-g:hover{border-color:var(--accent);color:var(--accent)}
 
-/* hero showcase — a FIXED-size visual that re-themes to the rotating subject.
-   Two forms (toggle, top-right): a single cinematic FRAME, or a 3-tile MOSAIC.
-   Fixed height + object-fit:cover so nothing reflows as images load; the next
-   subject's images are preloaded so swaps are instant. No labels on images. */
-.showcase{position:relative;height:clamp(330px,38vw,468px);transition:transform .3s ease}
-.showcase .sc-frame,.showcase .sc-mosaic{position:absolute;inset:0;opacity:0;pointer-events:none;transition:opacity .4s ease}
-.showcase[data-form="frame"] .sc-frame{opacity:1;pointer-events:auto}
-.showcase[data-form="mosaic"] .sc-mosaic{opacity:1;pointer-events:auto}
-.sc-frame{border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shL)}
-.sc-frame img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease;will-change:opacity,transform}
-.sc-frame img.show{opacity:1;animation:kb 17s ease-in-out infinite alternate}
-@keyframes kb{from{transform:scale(1.002)}to{transform:scale(1.085)}}
-.sc-mosaic{display:grid;grid-template-columns:1.3fr 1fr;grid-template-rows:1fr 1fr;gap:.7rem}
-.sc-tile{position:relative;border-radius:var(--rs);overflow:hidden;border:1px solid var(--line);box-shadow:var(--sh)}
-.sc-tile.t1{grid-row:1 / span 2}
-.sc-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(.95);transition:opacity .45s ease,transform .6s cubic-bezier(.22,1,.36,1)}
-.sc-tile.out img{opacity:0;transform:scale(1.06)}
-/* hero-form toggle (sits left of the dark toggle) */
-.formsw{position:fixed;top:3.1rem;right:4rem;z-index:60;display:flex;gap:2px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px;box-shadow:var(--sh);font-family:var(--head)}
-.formsw button{border:none;background:none;font-size:.76rem;font-weight:600;color:var(--soft);padding:.4rem .7rem;border-radius:7px;cursor:pointer;transition:background .2s,color .2s}
-.formsw button.on{background:var(--accent);color:#fff}body.dark .formsw button.on{color:#181614}
-@media(prefers-reduced-motion:reduce){.sc-frame img.show{animation:none}}
-@media(max-width:880px){.formsw{right:1.1rem;top:auto;bottom:1.1rem}}
+/* TYPE-MASK hero — the rotating subject word, rendered HUGE, with that
+   subject's photo showing THROUGH the letters (background-clip:text). The
+   image crossfades inside the word as the subject changes. Two stacked text
+   layers crossfade; images preloaded so the swap is instant. */
+.lede{max-width:1160px}
+.lead{font-family:var(--head);font-weight:700;font-size:clamp(1.3rem,2.6vw,2rem);letter-spacing:-.015em;color:var(--soft);margin:.2rem 0 0}
+.bigword{position:relative;max-width:none;height:clamp(3.7rem,13.5vw,11rem);margin:.05rem 0 1.4rem}
+.bw{position:absolute;left:0;top:0;margin:0;font-family:var(--head);font-weight:800;font-size:clamp(3.7rem,13.5vw,11rem);line-height:.92;letter-spacing:-.045em;white-space:nowrap;
+  background-color:var(--accent);background-size:cover;background-position:center;background-repeat:no-repeat;
+  -webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;
+  opacity:0;transition:opacity .55s ease;will-change:opacity}
+.bw.show{opacity:1}
 
 /* trust strip */
 .trust{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:1.4rem 0;display:flex;flex-wrap:wrap;gap:1rem 2.5rem;justify-content:center;font-size:.95rem;color:var(--soft);font-weight:600}
@@ -176,7 +165,6 @@ body.dark .btn-p{color:#181614}
   <span class="sp">our lesson design language, as a landing page</span></nav>
 
 <button class="dm" aria-label="Toggle dark mode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg></button>
-<div class="formsw" title="Hero visual form"><button data-form="frame" class="on">Frame</button><button data-form="mosaic">Mosaic</button></div>
 
 <div class="wrap">
   <header class="top">
@@ -187,16 +175,13 @@ body.dark .btn-p{color:#181614}
   <section class="hero">
     <div class="lede">
       <span class="pill"><span class="live"></span>Free · every subject · every exam board</span>
-      <h1>Everything you need to revise <span class="rotator">History</span>.</h1>
-      <p class="sub">Thousands of lessons, practice questions and podcasts — written with care and set beautifully, for every GCSE subject and every exam board. Calm, clear, and free.</p>
+      <p class="lead">Everything you need to revise</p>
+      <h1 class="bigword" id="bigword"><span class="bw"></span><span class="bw"></span></h1>
+      <p class="sub">Lessons, practice questions and podcasts for every GCSE subject and every exam board — free, with no login and nothing to install.</p>
       <div class="cta">
         <a href="#" class="btn btn-p">Choose your subjects →</a>
         <a href="#" class="btn btn-g">I have a school code</a>
       </div>
-    </div>
-    <div class="showcase" id="showcase" data-form="frame">
-      <div class="sc-frame"><img alt=""><img alt=""></div>
-      <div class="sc-mosaic"><div class="sc-tile t1"><img alt=""></div><div class="sc-tile t2"><img alt=""></div><div class="sc-tile t3"><img alt=""></div></div>
     </div>
   </section>
 </div>
@@ -292,72 +277,50 @@ body.dark .btn-p{color:#181614}
 (function(){
   var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // dark toggle
-  document.querySelector('.dm').addEventListener('click',function(){document.body.classList.toggle('dark');});
-  // ---- hero showcase: the rotating subject + that subject's real unit hero
-  // images, fetched live from Supabase, PRELOADED, and swapped in sync. Two
-  // forms (Frame / Mosaic, toggle top-right). No labels on images; fixed size
-  // so nothing reflows. ----
-  var rot=document.querySelector('.rotator');
-  var hero=document.querySelector('.hero');
-  var showcase=document.getElementById('showcase');
+  document.querySelector('.dm').addEventListener('click',function(){document.body.classList.toggle('dark');var sh=document.querySelector('.bw.show');if(sh&&sh.dataset.img)sh.style.backgroundImage=tint()+', url("'+sh.dataset.img+'")';});
+  // ---- TYPE-MASK hero: the rotating subject word, rendered HUGE, with that
+  // subject's real unit hero image showing THROUGH the letters (background-
+  // clip:text), crossfading inside the word. Images fetched live + preloaded
+  // so the swap is instant; the word also crossfades two stacked layers. ----
+  var bigword=document.getElementById('bigword');
+  var bw=bigword?[].slice.call(bigword.querySelectorAll('.bw')):[];
   var SUBJECTS=[],si=0,offs={},started=false;
-  function muted(c){return 'color-mix(in srgb, '+(c||'#566a72')+' 62%, #71695f)';}
-  function setRot(s){rot.textContent=s.name;rot.style.setProperty('--rc',muted(s.color));}
   function picks(s,n){var k=s.slug||s.name,o=offs[k]||0;offs[k]=o+1;var p=[];for(var i=0;i<n;i++)p.push(s.heroes[(o*n+i)%s.heroes.length]);return p;}
   function preload(s){if(!s||s._pre)return;s._pre=1;(s.heroes||[]).slice(0,5).forEach(function(u){var im=new Image();im.src=u;});}
-  var frameImgs=showcase?[].slice.call(showcase.querySelectorAll('.sc-frame img')):[];
-  function applyFrame(url){
-    if(!frameImgs.length||!url)return;
-    var cur=showcase.querySelector('.sc-frame img.show');
-    var nxt=(cur===frameImgs[0])?frameImgs[1]:frameImgs[0];
-    var go=function(){nxt.classList.add('show');if(cur&&cur!==nxt)cur.classList.remove('show');};
-    if(nxt.getAttribute('src')===url){go();return;}
-    nxt.onload=go;nxt.src=url;if(nxt.complete)go();
+  function tint(){return document.body.classList.contains('dark')?'linear-gradient(rgba(255,255,255,.10),rgba(255,255,255,.10))':'linear-gradient(rgba(20,16,12,.20),rgba(20,16,12,.20))';}
+  function applyWord(name,url){
+    if(!bw.length)return;
+    var cur=bigword.querySelector('.bw.show');
+    var nxt=(cur===bw[0])?bw[1]:bw[0];
+    nxt.textContent=name;
+    var go=function(){if(url){nxt.dataset.img=url;nxt.style.backgroundImage=tint()+', url("'+url+'")';}nxt.classList.add('show');if(cur&&cur!==nxt)cur.classList.remove('show');};
+    if(!url){go();return;}
+    var im=new Image();im.onload=go;im.onerror=go;im.src=url;if(im.complete)go();
   }
-  var tiles=showcase?[].slice.call(showcase.querySelectorAll('.sc-tile')):[];
-  function applyMosaic(urls){
-    tiles.forEach(function(t,i){
-      var img=t.querySelector('img'),u=urls[i%urls.length];if(!u)return;
-      t.classList.add('out');
-      setTimeout(function(){var go=function(){t.classList.remove('out');};if(img.getAttribute('src')===u){go();return;}img.onload=go;img.src=u;if(img.complete)go();},200+i*70);
-    });
-  }
-  function show(idx){
-    var s=SUBJECTS[idx];if(!s)return;
-    setRot(s);
-    var form=showcase?showcase.getAttribute('data-form'):'frame';
-    if(form==='mosaic')applyMosaic(picks(s,3));else applyFrame(picks(s,1)[0]);
-    preload(SUBJECTS[(idx+1)%SUBJECTS.length]);
-  }
-  function start(){if(started||!SUBJECTS.length)return;started=true;si=0;preload(SUBJECTS[0]);preload(SUBJECTS[1]);show(0);if(!rm)setInterval(function(){si=(si+1)%SUBJECTS.length;rot.classList.add('out');setTimeout(function(){rot.classList.remove('out');},300);show(si);},3000);}
-  if(showcase){[].slice.call(document.querySelectorAll('.formsw button')).forEach(function(b){b.addEventListener('click',function(){document.querySelectorAll('.formsw button').forEach(function(x){x.classList.remove('on');});b.classList.add('on');showcase.setAttribute('data-form',b.getAttribute('data-form'));show(si);});});}
+  function show(idx){var s=SUBJECTS[idx];if(!s)return;applyWord(s.name,picks(s,1)[0]);preload(SUBJECTS[(idx+1)%SUBJECTS.length]);}
+  function start(){if(started||!SUBJECTS.length)return;started=true;si=0;preload(SUBJECTS[0]);preload(SUBJECTS[1]);show(0);if(!rm)setInterval(function(){si=(si+1)%SUBJECTS.length;show(si);},3000);}
   var LOCAL=[
-    {name:'History',color:'#3f5e78',heroes:['/images/unit hero conflict.jpg','/images/unit hero health.jpg','/images/unit hero elizabeth.jpg','/images/unit hero america.jpg']},
-    {name:'Geography',color:'#6f7d44',heroes:['/images/subject-geography.jpg','/images/subject-geography-1.jpg','/images/subject-geography-2.jpg']},
-    {name:'Sciences',color:'#3e7d58',heroes:['/images/subject-biology.jpg','/images/subject-chemistry.jpg','/images/subject-physics.jpg']},
-    {name:'English Literature',color:'#9e5151',heroes:['/images/subject-english-lit.jpg','/images/subject-english-lang.jpg','/images/subject-drama.jpg']}
+    {name:'History',heroes:['/images/unit hero conflict.jpg','/images/unit hero health.jpg','/images/unit hero elizabeth.jpg']},
+    {name:'Geography',heroes:['/images/subject-geography.jpg','/images/subject-geography-1.jpg','/images/subject-geography-2.jpg']},
+    {name:'Biology',heroes:['/images/subject-biology.jpg','/images/subject-chemistry.jpg','/images/subject-physics.jpg']},
+    {name:'Spanish',heroes:['/images/subject-spanish.jpg','/images/subject-french.jpg','/images/subject-german.jpg']}
   ];
   if(window.supabase){
     try{
       var SB=window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
-      SB.from('units').select('name,image_url,subjects!inner(name,slug,color,school_id)').is('subjects.school_id',null).not('image_url','is',null).limit(700).then(function(res){
+      SB.from('units').select('name,image_url,subjects!inner(name,slug,school_id)').is('subjects.school_id',null).not('image_url','is',null).limit(700).then(function(res){
         if(res&&res.data&&res.data.length){
           var map={};
-          res.data.forEach(function(u){var s=u.subjects;if(!s||!u.image_url)return;if(!map[s.slug])map[s.slug]={name:s.name,slug:s.slug,color:s.color,heroes:[]};map[s.slug].heroes.push(u.image_url);});
-          var list=Object.keys(map).map(function(k){return map[k];}).filter(function(s){return s.heroes.length>=3&&s.name&&s.name.length<24;});
+          res.data.forEach(function(u){var s=u.subjects;if(!s||!u.image_url)return;if(!map[s.slug])map[s.slug]={name:s.name,slug:s.slug,heroes:[]};map[s.slug].heroes.push(u.image_url);});
+          var list=Object.keys(map).map(function(k){return map[k];}).filter(function(s){return s.heroes.length>=3&&s.name&&s.name.length<=11;});
           for(var i=list.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=list[i];list[i]=list[j];list[j]=t;}
-          if(list.length){SUBJECTS=list.slice(0,14);start();return;}
+          if(list.length){SUBJECTS=list.slice(0,16);start();return;}
         }
         SUBJECTS=LOCAL;start();
       },function(){SUBJECTS=LOCAL;start();});
     }catch(e){SUBJECTS=LOCAL;start();}
   } else { SUBJECTS=LOCAL;start(); }
   setTimeout(function(){if(!started){SUBJECTS=LOCAL;start();}},1900); // insurance if the fetch hangs
-  // subtle whole-unit parallax (the unit drifts together; no stacking)
-  if(showcase&&!rm&&matchMedia('(hover:hover) and (pointer:fine)').matches){
-    hero.addEventListener('mousemove',function(e){var r=hero.getBoundingClientRect();var mx=(e.clientX-r.left)/r.width-0.5,my=(e.clientY-r.top)/r.height-0.5;showcase.style.transform='translate3d('+(mx*12).toFixed(1)+'px,'+(my*10).toFixed(1)+'px,0)';});
-    hero.addEventListener('mouseleave',function(){showcase.style.transform='';});
-  }
   // subject card tilt
   if(!rm&&matchMedia('(hover:hover) and (pointer:fine)').matches){
     document.querySelectorAll('.sc').forEach(function(card){
