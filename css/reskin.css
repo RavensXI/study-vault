@@ -1261,10 +1261,53 @@ body[data-skin="reader"] .bugr-fab{
 body[data-skin="reader"] .bugr-fab:hover{
   filter:none; color:var(--accent); border-color:var(--accent);
 }
+/* REPORT-A-PROBLEM MODAL (Tom, 14 Jun) — reskin the legacy bug modal to the
+   reader tokens: token-driven surface (so it works in dark mode too), Schibsted
+   headline + Source-Serif gone, subject accent instead of the red bug theme,
+   softer-square radii. */
+body[data-skin="reader"] .bugr-modal{
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  box-shadow:0 1px 2px rgba(29,28,26,.06), 0 24px 48px -22px rgba(29,28,26,.34);
+}
+body[data-skin="reader"].dark-mode .bugr-modal{ box-shadow:0 1px 2px rgba(0,0,0,.4), 0 24px 48px -22px rgba(0,0,0,.6); }
+body[data-skin="reader"] .bugr-header{ border-bottom-color:var(--border-light); }
+body[data-skin="reader"] .bugr-header .bugr-icon{
+  background:color-mix(in srgb,var(--accent) 14%,var(--bg-card)); color:var(--accent); border-radius:var(--radius-sm);
+}
+body[data-skin="reader"] .bugr-header h2{ font-family:var(--font-head); color:var(--text-primary); }
+body[data-skin="reader"] .bugr-header h2 small{ font-family:var(--font-ui); color:var(--text-muted); }
+body[data-skin="reader"] .bugr-close{ color:var(--text-muted); }
+body[data-skin="reader"] .bugr-close:hover{ background:color-mix(in srgb,var(--accent) 8%,var(--bg-card)); color:var(--accent); }
+body[data-skin="reader"] .bugr-field > .bugr-label{ font-family:var(--font-ui); color:var(--text-secondary); }
+body[data-skin="reader"] .bugr-field .bugr-meta{ color:var(--text-muted); }
+body[data-skin="reader"] .bugr-field textarea,
+body[data-skin="reader"] .bugr-field input[type="email"]{
+  font-family:var(--font-ui); background:var(--bg-card); color:var(--text-primary);
+  border:1px solid var(--border-light); border-radius:var(--radius-sm);
+}
+body[data-skin="reader"] .bugr-field textarea::placeholder,
+body[data-skin="reader"] .bugr-field input::placeholder{ color:var(--text-muted); }
+body[data-skin="reader"] .bugr-field textarea:focus,
+body[data-skin="reader"] .bugr-field input:focus{
+  border-color:var(--accent); box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+body[data-skin="reader"] .bugr-page,
+body[data-skin="reader"] .bugr-screenshot{
+  background:color-mix(in srgb,var(--accent) 5%,var(--bg-card)); border-radius:var(--radius-sm); color:var(--text-secondary);
+}
+body[data-skin="reader"] .bugr-screenshot input[type="checkbox"]{ accent-color:var(--accent); }
+body[data-skin="reader"] .bugr-screenshot label{ color:var(--text-secondary); font-family:var(--font-ui); }
+body[data-skin="reader"] .bugr-screenshot small{ color:var(--text-muted); }
+body[data-skin="reader"] .bugr-footer{ border-top-color:var(--border-light); background:color-mix(in srgb,var(--accent) 3%,var(--bg-card)); }
+body[data-skin="reader"] .bugr-msg{ font-family:var(--font-ui); color:var(--text-muted); }
+body[data-skin="reader"] .bugr-btn{ font-family:var(--font-ui); border-radius:var(--radius-sm); }
 body[data-skin="reader"] .bugr-btn-primary{ background:var(--accent); color:#fff; }
+body[data-skin="reader"].dark-mode .bugr-btn-primary{ color:#181614; }
+body[data-skin="reader"] .bugr-btn-primary:hover:not(:disabled){ background:var(--accent); filter:brightness(1.08); }
 body[data-skin="reader"] .bugr-btn-ghost{
   background:var(--bg-card); border:1px solid var(--border-light); color:var(--text-secondary);
 }
+body[data-skin="reader"] .bugr-btn-ghost:hover:not(:disabled){ border-color:var(--accent); color:var(--accent); background:var(--bg-card); }
 
 /* ---- cookie banner ---- */
 body[data-skin="reader"] .cookie-banner p,
@@ -1397,41 +1440,40 @@ body[data-skin="reader"] .sv-tour-replay:hover{ border-color:var(--accent); tran
 body[data-skin="reader"] .sv-tour-replay svg{ flex:0 0 auto; }
 body[data-skin="reader"] .sv-tour-replay span{ display:none; }
 
-/* UTILITY BUTTONS (Tom, 14 Jun) — the harness moves bug + replay-tour into the
-   floating tutor dock (which positions itself under the panel column). Hide the
-   redundant "Ask the Tutor" pill (panel has a tutor tile), and present the two
-   as a side-by-side labelled pair. */
-/* Keep the dock HIDDEN until the harness has docked BOTH buttons and labelled
-   them (sv-util-ready), then reveal. Otherwise it flashed the lone circular bug
-   button (adopted before our label + the tour arrive). display:none states
-   (mobile sidebar-open) still win over opacity. */
-body[data-skin="reader"] .tutor-dock{ opacity:0 !important; pointer-events:none !important; }
-body[data-skin="reader"] .tutor-dock.sv-util-ready{ opacity:1 !important; pointer-events:auto !important; }
-body[data-skin="reader"] .tutor-dock .tutor-fab{ display:none !important; }
-/* hide the un-docked corner FABs on the lesson page until they're moved into the
-   dock (else the bug + tour flash in the corner first). Sibling selector only
-   matches them at BODY level; once inside #lesson-page's dock it stops matching. */
+/* UTILITY BUTTONS (Tom, 14 Jun) — bug + replay-tour embedded in the panel FLOW,
+   under the video, as a squared side-by-side pair filling the freed space. The
+   floating tutor dock is retired (the panel tutor tile covers "Ask the Tutor");
+   the harness reclaims the bug if the dock tries to adopt it. */
+body[data-skin="reader"] .tutor-dock{ display:none !important; }
+/* hide the corner FABs on the lesson page until the harness moves them into the
+   row (else the bug flashes in the corner first). Sibling selector matches them
+   only at BODY level; once inside #lesson-page's row it stops matching. */
 body[data-skin="reader"] #lesson-page ~ .bugr-fab,
 body[data-skin="reader"] #lesson-page ~ .sv-tour-replay{ display:none !important; }
-/* squared with soft rounding (matches the tiles) — the pill shape read as an AI
-   tell; nowrap keeps each label on one line */
-body[data-skin="reader"] .tutor-dock .bugr-fab,
-body[data-skin="reader"] .tutor-dock .sv-tour-replay{
-  position:static !important; inset:auto !important; margin:0 !important;
-  width:auto !important; height:auto !important; border-radius:var(--radius-sm);
-  display:inline-flex !important; align-items:center; justify-content:center; gap:.45rem;
-  padding:.55rem .9rem; font-family:var(--font-ui); font-size:.82rem; font-weight:600;
-  white-space:nowrap;
-  background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--border-light);
-  box-shadow:0 1px 2px rgba(29,28,26,.05), 0 8px 20px -12px rgba(29,28,26,.2); cursor:pointer;
+/* the row sits under the video; opacity-gate the reveal until both buttons are
+   in (no lone-button flash) — opacity not display, so it reserves its space */
+body[data-skin="reader"] .sv-utility-row{
+  display:flex; gap:.7rem; margin-top:.9rem; opacity:0;
 }
-body[data-skin="reader"] .tutor-dock .bugr-fab:hover,
-body[data-skin="reader"] .tutor-dock .sv-tour-replay:hover{
+body[data-skin="reader"] .sv-utility-row.sv-util-ready{ opacity:1; }
+/* squared with soft rounding (matches the tiles — the pill read as an AI tell);
+   equal width filling the row; nowrap keeps each label on one line */
+body[data-skin="reader"] .sv-utility-row .bugr-fab,
+body[data-skin="reader"] .sv-utility-row .sv-tour-replay{
+  position:static !important; inset:auto !important; margin:0 !important;
+  flex:1 1 0; width:auto !important; height:auto !important; border-radius:var(--radius-sm);
+  display:inline-flex !important; align-items:center; justify-content:center; gap:.45rem;
+  padding:.62rem .5rem; white-space:nowrap; font-family:var(--font-ui); font-size:.82rem; font-weight:600;
+  background:var(--bg-card); color:var(--text-secondary); border:1px solid var(--border-light);
+  box-shadow:none; cursor:pointer; transition:color .2s, border-color .2s;
+}
+body[data-skin="reader"] .sv-utility-row .bugr-fab:hover,
+body[data-skin="reader"] .sv-utility-row .sv-tour-replay:hover{
   color:var(--accent); border-color:var(--accent); transform:none; filter:none;
 }
-body[data-skin="reader"] .tutor-dock .bugr-fab svg,
-body[data-skin="reader"] .tutor-dock .sv-tour-replay svg{ width:17px !important; height:17px !important; flex:0 0 auto; }
-body[data-skin="reader"] .tutor-dock .sv-tour-replay span{ display:inline !important; }
+body[data-skin="reader"] .sv-utility-row .bugr-fab svg,
+body[data-skin="reader"] .sv-utility-row .sv-tour-replay svg{ width:17px !important; height:17px !important; flex:0 0 auto; }
+body[data-skin="reader"] .sv-utility-row .sv-tour-replay span{ display:inline !important; }
 
 /* ================= READER DARK — warm-dark mapping of the v2 tokens =================
    body.dark-mode swaps the same variables the skin paints from; higher

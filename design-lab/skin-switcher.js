@@ -91,38 +91,49 @@
     evenA11yDividers();
     revealMasthead();
     buildTourReplay();
-    dockUtilityButtons();   // group bug + replay-tour into the under-column dock
+    buildUtilityRow();      // embed bug + replay-tour in the panel, under the video
     maybeStartTour();
   }
 
   // UTILITY BUTTONS (Tom, 14 Jun) — cutting the highlighter freed space at the
-  // foot of the panel; the bug + replay-tour buttons looked stray stacked in the
-  // bottom-right corner. lesson-tutor.js already floats a .tutor-dock that
-  // positions itself UNDER the panel column, so reuse it: move both into the
-  // dock as a side-by-side pair (the dock's own adoptBugButton also wants the
-  // bug there, so no fight). Reskin CSS hides the redundant "Ask the Tutor" pill
-  // (covered by the panel tutor tile) + styles the two as labelled buttons.
-  function dockUtilityButtons() {
-    var dock = document.querySelector('.tutor-dock');
-    if (!dock) return;   // tutor dock not built yet; a later tidy pass catches it
+  // foot of the (sticky) panel; the bug + replay-tour buttons looked stray
+  // floating in the corner. Embed them in the panel FLOW under the video as a
+  // squared side-by-side pair. The floating .tutor-dock is retired (CSS hides
+  // it; the panel tutor tile covers "Ask the Tutor"). lesson-tutor.js's
+  // adoptBugButton tries to grab the bug ONCE — a small observer reclaims it
+  // into our row if it does (microtask, so no visible flicker).
+  function buildUtilityRow() {
+    var sidebar = document.querySelector('#lesson-page .lesson-sidebar');
+    if (!sidebar || !sidebar.dataset.panelWrap) return;   // wait until the panel is wrapped (so the row sits after the video, not swept into .sv-panel)
     var bug = document.querySelector('.bugr-fab');
     var tour = document.querySelector('.sv-tour-replay');
+    var row = sidebar.querySelector('.sv-utility-row');
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'sv-utility-row';
+      sidebar.appendChild(row);   // after the video (sidebar's last child)
+    }
     if (bug) {
-      // label regardless of parent — adoptBugButton may have already docked it
       if (!bug.querySelector('.bugr-fab-label')) {
         var bl = document.createElement('span');
         bl.className = 'bugr-fab-label'; bl.textContent = 'Report a problem';
         bug.appendChild(bl);
       }
-      if (bug.parentNode !== dock) dock.appendChild(bug);
+      if (bug.parentNode !== row) row.appendChild(bug);
+      // reclaim if the tutor dock's adoptBugButton steals it back
+      if (!sidebar.dataset.fabReclaim) {
+        sidebar.dataset.fabReclaim = '1';
+        new MutationObserver(function () {
+          var b = document.querySelector('.bugr-fab');
+          if (b && b.parentNode !== row && document.body.contains(row)) row.appendChild(b);
+        }).observe(document.body, { childList: true, subtree: true });
+      }
     }
     if (tour) {
       var ts = tour.querySelector('span'); if (ts) ts.textContent = 'Replay tour';
-      if (tour.parentNode !== dock) dock.appendChild(tour);
+      if (tour.parentNode !== row) row.appendChild(tour);
     }
-    // reveal only once the buttons are docked + labelled, so the lone circular
-    // bug button never flashes first (CSS keeps the dock hidden until this)
-    if (tour && dock.contains(tour)) dock.classList.add('sv-util-ready');
+    if (tour && row.contains(tour)) row.classList.add('sv-util-ready');  // reveal once populated (no flash)
   }
 
   // persistent "replay the tour" control (bottom-left; the tour's last step
