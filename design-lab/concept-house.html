@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 /* ===== established Reader tokens (from the lessons) ===== */
@@ -68,8 +69,9 @@ body.dark .btn-p{color:#181614}
 
 /* parallax cluster */
 .cluster{position:relative;height:clamp(320px,34vw,440px);perspective:1200px}
-.cl-card{position:absolute;border-radius:var(--r);overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--shL);
-  transition:transform .3s cubic-bezier(.22,1,.36,1)}
+.cl-card{position:absolute;transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.cl-inner{position:absolute;inset:0;border-radius:var(--r);overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--shL);
+  transition:opacity .45s ease,transform .55s cubic-bezier(.22,1,.36,1);backface-visibility:hidden}
 .cl-card img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.95)}
 .cl-card .tag{position:absolute;left:0;right:0;bottom:0;padding:1rem;color:#fff;background:linear-gradient(to top,rgba(15,12,9,.85),transparent);z-index:1}
 .cl-card .tag .b{font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;opacity:.85}
@@ -181,9 +183,9 @@ body.dark .btn-p{color:#181614}
       </div>
     </div>
     <div class="cluster" id="cluster">
-      <div class="cl-card cl-1"><img src="/images/subject-history.jpg" alt=""><div class="tag"><div class="b">AQA</div><div class="n">History</div></div></div>
-      <div class="cl-card cl-2"><img src="/images/subject-biology.jpg" alt=""><div class="tag"><div class="b">AQA</div><div class="n">Biology</div></div></div>
-      <div class="cl-card cl-3"><img src="/images/subject-english-lit.jpg" alt=""><div class="tag"><div class="b">AQA</div><div class="n">English Lit</div></div></div>
+      <div class="cl-card cl-1"><div class="cl-inner"><img src="/images/subject-history.jpg" alt=""><div class="tag"><div class="b">AQA</div><div class="n">History</div></div></div></div>
+      <div class="cl-card cl-2"><div class="cl-inner"><img src="/images/subject-biology.jpg" alt=""><div class="tag"><div class="b">AQA</div><div class="n">Biology</div></div></div></div>
+      <div class="cl-card cl-3"><div class="cl-inner"><img src="/images/subject-english-lit.jpg" alt=""><div class="tag"><div class="b">AQA</div><div class="n">English Lit</div></div></div></div>
     </div>
   </section>
 </div>
@@ -280,14 +282,51 @@ body.dark .btn-p{color:#181614}
   var rm = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // dark toggle
   document.querySelector('.dm').addEventListener('click',function(){document.body.classList.toggle('dark');});
-  // rotator
+  // ---- hero showcase: the rotating subject word + a cluster of THAT subject's
+  // real unit hero images, fetched live from Supabase and swapped in sync.
+  // Cards exit upward, the new subject's heroes drop in staggered. ----
   var rot=document.querySelector('.rotator');
-  var subs=[{n:'History',c:'#3f5e78'},{n:'Biology',c:'#3e7d58'},{n:'Maths',c:'#46569e'},{n:'English Literature',c:'#9e5151'},{n:'Chemistry',c:'#3a7f7f'},{n:'Spanish',c:'#b06a45'},{n:'Psychology',c:'#6f5a93'},{n:'Geography',c:'#6f7d44'}];
-  function setR(s){rot.textContent=s.n;rot.style.setProperty('--rc',s.c);}
-  var ri=0;setR(subs[0]);
-  if(!rm)setInterval(function(){ri=(ri+1)%subs.length;rot.classList.add('out');setTimeout(function(){setR(subs[ri]);rot.classList.remove('out');},300);},2600);
-  // parallax cluster
-  var hero=document.querySelector('.hero'),cluster=document.getElementById('cluster');
+  var hero=document.querySelector('.hero');
+  var cluster=document.getElementById('cluster');
+  var cards=cluster?[].slice.call(cluster.querySelectorAll('.cl-card')):[];
+  var SUBJECTS=[],si=0,offs={},started=false;
+  function muted(c){return 'color-mix(in srgb, '+(c||'#566a72')+' 62%, #71695f)';}
+  function fill(card,img,name,board){if(!card)return;var im=card.querySelector('img');if(im&&img)im.src=img;var n=card.querySelector('.n');if(n)n.textContent=name;var b=card.querySelector('.b');if(b)b.textContent=board||'';}
+  function picks(s){var key=s.slug||s.name,o=offs[key]||0;offs[key]=o+1;var p=[];for(var i=0;i<3;i++)p.push(s.heroes[(o*3+i)%s.heroes.length]);return p;}
+  function setRot(s){rot.textContent=s.name;rot.style.setProperty('--rc',muted(s.color));}
+  function getCards(){return [].slice.call(document.querySelectorAll('#cluster .cl-card'));}
+  function show(idx,anim){
+    var s=SUBJECTS[idx];if(!s)return;
+    var p=picks(s),cs=getCards();
+    if(!anim){setRot(s);cs.forEach(function(c,i){fill(c,p[i],s.name,s.board);});return;}
+    // cluster exits upward; the rotator word is swapped by the interval while faded out
+    cs.forEach(function(c,i){var inn=c.querySelector('.cl-inner');if(!inn)return;inn.style.transition='opacity .35s ease,transform .45s cubic-bezier(.22,1,.36,1)';inn.style.transitionDelay=(i*60)+'ms';inn.style.opacity='0';inn.style.transform='translateY(-14px) scale(.965)';});
+    setTimeout(function(){cs.forEach(function(c,i){fill(c,p[i],s.name,s.board);var inn=c.querySelector('.cl-inner');if(!inn)return;inn.style.transition='none';inn.style.opacity='0';inn.style.transform='translateY(22px) scale(.965)';void inn.offsetWidth;inn.style.transition='opacity .5s ease,transform .6s cubic-bezier(.22,1,.36,1)';inn.style.transitionDelay=(i*85)+'ms';inn.style.opacity='1';inn.style.transform='none';});},380);
+  }
+  function start(){if(started||!SUBJECTS.length)return;started=true;si=0;show(0,false);if(!rm)setInterval(function(){si=(si+1)%SUBJECTS.length;rot.classList.add('out');setTimeout(function(){setRot(SUBJECTS[si]);rot.classList.remove('out');},300);show(si,true);},3400);}
+  var LOCAL=[
+    {name:'History',color:'#3f5e78',board:'AQA',heroes:['/images/unit hero conflict.jpg','/images/unit hero health.jpg','/images/unit hero elizabeth.jpg','/images/unit hero america.jpg']},
+    {name:'Geography',color:'#6f7d44',board:'AQA',heroes:['/images/subject-geography.jpg','/images/subject-geography-1.jpg','/images/subject-geography-2.jpg']},
+    {name:'Sciences',color:'#3e7d58',board:'AQA',heroes:['/images/subject-biology.jpg','/images/subject-chemistry.jpg','/images/subject-physics.jpg']},
+    {name:'English Literature',color:'#9e5151',board:'AQA',heroes:['/images/subject-english-lit.jpg','/images/subject-english-lang.jpg','/images/subject-drama.jpg']}
+  ];
+  if(window.supabase){
+    try{
+      var SB=window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
+      SB.from('units').select('name,image_url,subjects!inner(name,slug,color,exam_board,school_id)').is('subjects.school_id',null).not('image_url','is',null).limit(700).then(function(res){
+        if(res&&res.data&&res.data.length){
+          var map={};
+          res.data.forEach(function(u){var s=u.subjects;if(!s||!u.image_url)return;if(!map[s.slug])map[s.slug]={name:s.name,slug:s.slug,color:s.color,board:s.exam_board,heroes:[]};map[s.slug].heroes.push(u.image_url);});
+          var list=Object.keys(map).map(function(k){return map[k];}).filter(function(s){return s.heroes.length>=3&&s.name&&s.name.length<24;});
+          for(var i=list.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=list[i];list[i]=list[j];list[j]=t;}
+          if(list.length){SUBJECTS=list.slice(0,14);start();return;}
+        }
+        SUBJECTS=LOCAL;start();
+      },function(){SUBJECTS=LOCAL;start();});
+    }catch(e){SUBJECTS=LOCAL;start();}
+  } else { SUBJECTS=LOCAL;start(); }
+  setTimeout(function(){if(!started){SUBJECTS=LOCAL;start();}},1900); // insurance if the fetch hangs
+  // parallax (on the slots; the swap animation lives on .cl-inner)
   if(cluster&&!rm&&matchMedia('(hover:hover) and (pointer:fine)').matches){
     hero.addEventListener('mousemove',function(e){var r=hero.getBoundingClientRect();cluster.style.setProperty('--mx',((e.clientX-r.left)/r.width-0.5).toFixed(3));cluster.style.setProperty('--my',((e.clientY-r.top)/r.height-0.5).toFixed(3));});
     hero.addEventListener('mouseleave',function(){cluster.style.setProperty('--mx',0);cluster.style.setProperty('--my',0);});
