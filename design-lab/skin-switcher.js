@@ -55,6 +55,7 @@
     buildOverlayControl();       // collapse the swatch row into a button + popover
     buildReadingPanel();         // A-/A+ + spacing + reading-font picker (replaces OpenDyslexic)
     killHighlighter();           // cut feature (Round 25) — clear any active mode + disable
+    fixProgressCount();          // recount "X of N" from VISIBLE items (highlight task hidden)
     evenA11yDividers();
     revealMasthead();
     // the bug FAB can end up nested inside the (transformed) tutor-dock, which
@@ -428,6 +429,34 @@
     var b = document.body;
     b.classList.remove('sv-hl-mode', 'sv-hl-color-yellow', 'sv-hl-color-green', 'sv-hl-color-pink', 'sv-hl-color-blue');
     try { localStorage.setItem('sv-hl-mode', '0'); localStorage.setItem('sv-hl-enabled', '0'); } catch (e) {}
+  }
+
+  // With the highlight task hidden, main.js's "X of N complete" still counts it
+  // (N = tasks.length). Recompute from the VISIBLE items instead, and keep it
+  // corrected via an observer — syncAll() rewrites the summary + bar on every
+  // task completion, so a one-shot fix would revert. The "only write if changed"
+  // guard stops the observer looping on its own edits.
+  function fixProgressCount() {
+    var section = document.querySelector('.sidebar-progress-section');
+    if (!section) return;
+    function apply() {
+      var summary = section.querySelector('.lesson-progress-summary');
+      if (!summary) return;
+      var items = [].slice.call(section.querySelectorAll('.lesson-progress-item'))
+        .filter(function (it) { return it.getClientRects().length > 0; });   // exclude the hidden highlight task
+      var total = items.length;
+      var done = items.filter(function (it) { return it.classList.contains('completed'); }).length;
+      var want = done + ' of ' + total + ' complete';
+      if (summary.textContent !== want) summary.textContent = want;
+      var fill = section.querySelector('.lesson-progress-bar-fill');
+      if (fill) { var w = (total ? Math.round(done / total * 100) : 0) + '%'; if (fill.style.width !== w) fill.style.width = w; }
+    }
+    apply();
+    if (!section.dataset.countFix) {
+      section.dataset.countFix = '1';
+      new MutationObserver(apply).observe(section,
+        { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ['class', 'style'] });
+    }
   }
 
   // OVERLAY CONTROL (Tom, 13 Jun) — the bare swatch row ate the bar and the
