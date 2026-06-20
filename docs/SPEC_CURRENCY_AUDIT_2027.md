@@ -1,151 +1,288 @@
-# Spec-Currency Audit — 2027 Cohort
+# Spec-Currency Audit — 2027 Cohort (all subjects, all boards)
 
-**Run:** 2026-06-19 · **Scope:** 88 live free-tier subjects (school_id NULL). Unity bespoke out of scope (owner-controlled, low spec-volatility).
+**Run:** 2026-06-20 · **Scope:** 194 qualifications = every catalogued spec (specs/index.json, all boards) unioned with everything we ship. Build status: {'not-built': 87, 'both': 17, 'free': 87, 'school': 3}.
 
-**Result:** 81 GREEN · 6 AMBER · 1 RED
+**Result:** 161 GREEN · 18 AMBER · 15 RED.
 
-Method: one research agent per subject checked the Ofqual Register of Regulated Qualifications (operational/certification end dates = authoritative withdrawal signal) plus the board's own specification/updates pages. Every RED/withdrawal verdict was adversarially re-verified before it was allowed to stand (a refuted withdrawal downgrades to AMBER for human confirm, never silently to GREEN). Calibration: GCSEs cannot be reformed mid-course, so RED = withdrawal affecting the 2027 series, not a future reform.
+Method: per-qualification research agent (Ofqual register operational/cert end dates + board amendment pages), every RED/withdrawal adversarially re-verified. For built specs RED/AMBER = act now; for not-built specs the verdict is a BUILD-READINESS signal (RED = do not build / superseded). Re-run: `_gen_spec_audit_worklist.py --scope full` → workflow `spec-currency-audit-2027` → this script.
 
-Re-run annually: `python scripts/_gen_spec_audit_worklist.py` then run the `spec-currency-audit-2027` workflow, then `python scripts/_gen_spec_audit_ledger.py <date>`.
+> **Systemic note — Wales reform.** WJEC `3xxxQS`/`3xxxCS` legacy GCSEs (Curriculum for Wales / "Made-for-Wales") are being withdrawn: final full assessment Summer 2026, Jan-2027 resit only, no Summer 2027 series. Our "Eduqas / WJEC" aliased subjects are fine for **England (Eduqas, Cxxx)** but the **Wales (WJEC, 3xxx)** arm is dead for 2027 — relevant only if we serve Welsh students.
 
-## RED — withdrawn / not offered for 2027 (decision needed) (1)
+## 1. Built content needing action (9)
 
-These qualifications do not have a normal summer-2027 exam series. Decide per subject: pull from the picker, mark legacy, or rebuild against the replacement spec.
+Subjects we ship that are RED or AMBER — real 2027-cohort exposure.
 
-### GCSE Food Preparation and Nutrition — Eduqas (WJEC) `C560QS (C560P1 written / C560P2 on-screen)`
-- **slug:** `food-preparation-and-nutrition-eduqas` · **offered 2027:** False · **confidence:** high · **end date:** Final full assessment: Summer 2026. Resit-only: January 2027 (subject to demand). Ofqual operational end date: 31/07/2027. No Summer 2027 exam series.
-- **What changed:** No material content amendment since our 2026-05-05 build. The qualification is being withdrawn, not updated.
-- **Adversarial verify:** confirmed_withdrawn=True, still_offered_2027=False — Adversarial attempt to refute the withdrawal FAILED — every authoritative board source confirms the legacy spec is being withdrawn, not updated.
+- `RED/free` **GCSE Computer Science (WJEC, Wales)** — WJEC `3500QS` (conf high)
+  - **End date:** Summer 2026 = final full assessment; January 2027 = final resit only (subject to demand). No full summer 2027 exam series.
+  - **What changed:** Legacy WJEC GCSE Computer Science 3500QS (Wales) is being withdrawn. WJEC's qualification page states summer 2026 is the final full assessment opportunity, with a January 2027 resit only (subject to demand). From Sept 2025, learners must not be entered in Year 10 and must instead take the replacement GCSE Computer Science 3460QS (teaching from 2025, for award from 2027), part of the Qualifications Wales National 14-16 reform.
+  - **Action:** RED — DO NOT serve/maintain this for a 2027 cohort. The WJEC 3500QS legacy spec has no full summer 2027 exam series (final full assessment summer 2026; Jan 2027 resit only). A 2027 teaching/exam cohort must be on the replacement spec WJEC GCSE Computer Science 3460QS ("Made for Wales", teaching from 2025, first award 2027). Recommendation: retire/redirect our 3500QS-aligned content and rebuild against 3460QS if WJEC-Wales Computer Science coverage is wanted. Note our live cat
+  - Evidence: https://www.wjec.co.uk/qualifications/computer-science-gcse/ · https://www.wjec.co.uk/qualifications/gcse-computer-science-teaching-from-2025/ · https://www.wjec.co.uk/media/13im5was/wjec-gcse-computer-science-specification-e.pdf
 
-LEGACY SPEC (our build target): Eduqas GCSE Food Preparation and Nutrition, code C560 / C560QS (England, first taught 2016).
-- Eduqas/WJEC's own guidance,
-- **Action:** WITHDRAW from our free-tier offer for the 2027 cohort. Eduqas/WJEC GCSE Food Preparation and Nutrition (C560, QN 601/8093/6) is being replaced by the reformed GCSE Food and Nutrition (QWADN, QN 601/8085/7; first teaching Sept 2025, first assessment Summer 2026). From Sept 2025 learners must NOT be entered onto C560; its final full assessment was Summer 2026 with only a conditional January 2027 resit — there is NO Summer 2027 examination. A 2027-cohort student (started Sept 2025) cannot sit C560. Replace our content with the new GCSE Food and Nutrition (teaching from 2025) spec, or retire the Eduqas food slug. Confidence high: Ofqual operational end date 31/07/2027 and the repeated official Eduqas/WJEC withdrawal notice both confirm this. Note: distinct from the also-withdrawn legacy GCSE Food and Nutrition QWADN/601/8085/7 — verdict is for C560 specifically.
-- **Evidence:** https://www.qualifications.education.gov.uk/Qualification/60180936 · https://www.eduqas.co.uk/qualifications/food-preparation-and-nutrition-gcse/ · https://www.wjec.co.uk/qualifications/food-and-nutrition-gcse/ · https://www.eduqas.co.uk/media/1wabxvpn/eduqas-food-prep-and-nutr-newsletter-sept-2025-1-1.pdf
+- `RED/free` **GCSE Religious Studies (WJEC, full course, teaching from 2017)** — WJEC `3120QS` (conf high)
+  - **End date:** Final full assessment: Summer 2026. Resit-only opportunity: January 2027 (subject to demand). No summer 2027 series.
+  - **What changed:** 3120QS is being withdrawn and replaced by WJEC's new "Made for Wales" GCSE Religious Studies (3150QS, teaching from September 2025). Final full assessment of 3120QS is Summer 2026, with a January 2027 resit only (subject to demand). From September 2025, learners cannot be entered onto 3120QS in Year 10 and must take 3150QS instead.
+  - **Action:** RED — DO NOT continue relying on this content for the 2027 cohort. WJEC GCSE Religious Studies 3120QS (teaching from 2017) is being withdrawn: Summer 2026 is the final full assessment and there is NO summer 2027 series, only a conditional January 2027 resit for legacy candidates. Any student starting now sits the new "Made for Wales" spec 3150QS (teaching from September 2025). Our 2026-05-08 content is built to the retired 3120QS spec and must be REBUILT to the new 3150QS spe
+  - Evidence: https://www.wjec.co.uk/qualifications/religious-studies-gcse/ · https://www.wjec.co.uk/qualifications/gcse-religious-studies-teaching-from-2025/ · https://www.wjec.co.uk/media/iiobkkix/wjec-gcse-religious-studies-specification-e.pdf
 
-## AMBER — offered for 2027 but a change needs a content review (6)
+- `AMBER/free` **Cambridge Nationals: Enterprise and Marketing** — OCR `J837` (conf high)
+  - **What changed:** Spec moved to Version 6 (June 2026), issued after our 2026-05-21 build. Material content change is confined to the two NEA/coursework units: the aim of unit R068 was updated to reflect a change to the set-assignment tasks, and the R068/R069 marking-criteria grids were amended to make grading more explicit. Also a non-content rebrand (OCR -> "Cambridge OCR", with an "About our new name" statement, effective Sept 2025) and admin changes (Appendix A file-formats table; URS + set-assignment feedback
+  - **Action:** Light-touch review only; do not rebuild. Our 12 lessons map to the unchanged R067 exam unit, so exam-facing content is unaffected. Recommended: (1) refresh any coursework/NEA (R068/R069) guidance/wording to match the June 2026 marking-criteria and set-assignment-task changes if we surface any; (2) swap "OCR" -> "Cambridge OCR" naming where shown. Availability is solid: OCR confirms Jan/June 2027 assessment series; DfE funding approved to 31/07/2027; QN 603/7093/2 shows no ope
+  - Evidence: https://www.ocr.org.uk/qualifications/cambridge-nationals/enterprise-and-marketing-level-1-2-j837/ · https://www.ocr.org.uk/Images/610949-specification-cambridge-nationals-enterprise-and-marketing-j837.pdf · https://www.qualifications.education.gov.uk/Qualification/60370932
 
-Offered for 2027, but a material spec/assessment change lands on the 2027 cohort or a withdrawal is coming for a later cohort. Targeted content pass, not a rebuild. Priority-order by exam-entry size.
+- `AMBER/free` **GCSE (9-1) Sociology** — WJEC / Eduqas `3200QS (WJEC, Wales) / C200QS (Eduqas, England)` (conf high)
+  - **End date:** Summer 2027 (last exams in Wales under WJEC 3200QS); Year 10 starters Sept 2025 are the final Wales cohort. England/Eduqas C200QS continues beyond 2027 with no withdrawal notice.
+  - **What changed:** No material content amendment since the 2026-05-07 build. The accredited spec is locked: Version 2 (January 2019), teaching from 2017. The only documented amendment is admin-only (clarification of resit rules in the 'Making entries' section), which predates our build. Spec content is unchanged.
+  - **Action:** SAFE FOR 2027 COHORT, but flag as final year under the WJEC (Wales) 3200QS code. Summer 2027 IS offered: Eduqas/WJEC have published a Summer 2027 examination timetable that includes Sociology (C200, two 1h45 components), and Qualifications Wales confirms Year 10 starters in Sept 2025 (who sit exams summer 2027) are the LAST cohort able to take GCSE Sociology in Wales. It is being withdrawn in Wales under the 'Qualified for the Future' reform and replaced by the new GCSE Socia
+  - Evidence: https://www.wjec.co.uk/qualifications/sociology-gcse/ · https://www.eduqas.co.uk/qualifications/sociology-gcse/ · https://qualifications.wales/regulation-reform/reforming/qualified-for-the-future/made-for-wales-gcses/
 
-### Cambridge National in Information Technology (Level 1/Level 2) — OCR `J836`
-- **slug:** `it-ocr` · **offered 2027:** True · **confidence:** high
-- **What changed:** Spec moved to Version 7 (June 2026), issued after our 2026-05-09 build. Material teaching-content changes to Unit R070 (Augmented Reality, the NEA unit): Topic Area 3.2 Triggers — "Object recognition" and "Location based" REMOVED from teaching content; Topic Area 4.1 Testing — "User testing" REMOVED from teaching content; Topic Area 3.4 Information report — "Animation" ADDED to teaching content; R070 Aims/Assessment guidance clarified that alternative software can be used to create a simulated AR experience (with expectations defined); Section 6.2.2 Plagiarism expanded with AI-misuse and source-referencing teaching requirements. Remaining V7 changes are admin/clarification (marks calculator on results day, feedback section, post-results services, refreshed hyperlinks, Cambridge OCR rebrand). Note: V6 (Sept 2025) was a pre-build rebrand/clarification update; only V7 is post-build and material.
-- **Action:** Review R070 (Augmented Reality) content built 2026-05-09 against Version 7 (June 2026). Specifically: remove any teaching of "object recognition" and "location-based" triggers (Topic Area 3.2) and "user testing" (Topic Area 4.1) as these were dropped from the teaching content; add coverage of "animation" in the information report (3.4); reflect that a simulated AR experience using alternative software is now explicitly permitted; and align any plagiarism/integrity material with the expanded AI-misuse and referencing requirements. Confirmed still offered for summer 2027 (OCR lists set assignments for the Jan and June 2027 series; no withdrawal notice). NB: J836 is a vocational Level 1/2 Cambridge National (technical award), not a true GCSE — assessment is one exam unit (R050) plus two NEA coursework units (R060, R070); content drift here is in the NEA unit.
-- **Evidence:** https://www.ocr.org.uk/qualifications/cambridge-nationals/it-level-1-2-j836/ · https://www.ocr.org.uk/qualifications/cambridge-nationals/it-level-1-2-j836/assessment/ · https://www.ocr.org.uk/Images/610951-specification-cambridge-nationals-it-j836.pdf · https://www.ocr.org.uk/administration/support-and-tools/subject-updates/cambridge-national-it-update-654212/
+- `AMBER/free` **GCSE Computer Science** — AQA `8525` (conf high)
+  - **What changed:** AQA reformed 8525 in line with DfE subject-content changes: same spec code, updated v1.3 (16 Jun 2025) reduces content for the 2027 cohort. Per the official "Summary of changes" (v1.0, June 2025): 3.4.5 Systems architecture — REMOVED Von Neumann architecture references and optical secondary storage. 3.5 Networks — REMOVED LAN topologies (star/bus), removed the requirement to know the use of common network protocols, removed Ethernet, Wi-Fi, UDP and FTP, removed alternative link-layer names; rewo
+  - **Action:** Review which 8525 edition our content (built 2026-05-09, 23 lessons) targets. Verify the Computer Systems and Computational Thinking units against v1.3: if they still teach Von Neumann architecture, optical secondary storage, LAN star/bus topologies, or the protocols Ethernet/Wi-Fi/UDP/FTP as required exam content, demote that to optional/context (it is removed from the 2027 Paper 2) and reframe TCP/UDP transport-layer wording (UDP dropped). No withdrawal risk — qualification
+  - Evidence: https://www.aqa.org.uk/gcse-computer-science-specification-changes-for-summer-2027 · https://www.aqa.org.uk/files/e5e3609b-98ee-4a88-b4ff-da9dc40904cd/faf3ab172b76f13781ac8dbe12783c16915663e0.pdf · https://www.aqa.org.uk/subjects/computer-science/gcse/computer-science-8525/specification/scheme-of-assessment
 
-### GCSE Computer Science — AQA `8525`
-- **slug:** `computer-science-aqa` · **offered 2027:** True · **confidence:** medium
-- **What changed:** AQA issued an UPDATED 8525 spec (v1.3, June 2025) for the 2027 cohort that REMOVES content (DfE-driven): elements with "varying views on continued relevancy" and "some stated examples of networking protocols". Paper 2 no longer covers the removed content from summer 2027. Crucially, spec code 8525 is REUSED for both the legacy spec (first teach 2020, exams 2022-2026, v1.1/1.2) and the new 2027 spec (first teach Sept 2025, v1.3). The v1.3 amendment was published June 2025, BEFORE our 2026-05-09 build, so it is not an amendment issued after our build (amended_since_build=false). However, AMBER is warranted because our build fell during the transitional year when both spec variants coexist under the identical code: there is a material risk our content tracked legacy 2022-2026 content rather than the trimmed 2027 (v1.3) content. No NEW material amendment was found dated after 2026-05-09.
-- **Action:** REVIEW: Confirm our 2026-05-09 build reflects the v1.3 (2027-cohort) trimmed spec, not the legacy 2022-2026 content. Specifically verify removed content is absent: the dropped networking-protocol examples and the lower-relevance items AQA cut from Paper 2 for summer 2027. Cross-check our Computer Systems / Computational Thinking units against the v1.3 spec PDF (16 Jun 2025) at aqa.org.uk/8525. Qualification IS offered for summer 2027 (June 2027 series confirmed: Papers 1A/1B/1C 10 May 2027, Paper 2 19 May 2027) and is NOT withdrawn. Confidence is medium because the Ofqual register detail page (QN 601/8301/9) could not be loaded directly (it now redirects to find-a-regulated-qualification with a JS search form); status was confirmed via AQA's own Key Dates and news pages instead. No operational/certification end date before summer 2027 found.
-- **Evidence:** https://www.aqa.org.uk/gcse-computer-science-specification-changes-for-summer-2027 · https://www.aqa.org.uk/subjects/computer-science/gcse/computer-science-8525/key-dates · https://www.aqa.org.uk/subjects/computer-science/gcse/computer-science-8525/specification/general-administration · https://www.aqa.org.uk/subjects/computer-science/gcse/computer-science-8525/specification
+- `AMBER/both` **GCSE English Language** — AQA `8700` (conf high)
+  - **What changed:** AQA issued a material assessment amendment to GCSE English Language 8700, first assessed summer 2026 (so it applies to the 2027 cohort). The spec PDF was republished 20 Mar 2026, AFTER our 12 Mar 2026 build. Paper 1: Q1 now multiple-choice (circle-shading), Q3 now targets a single structural effect (not broad structural analysis), Q4 reworded (drops the "student" framing, students may agree and/or disagree, specifies which extract portion applies), Q5 narrative option now asks for a story "openi
+  - **Action:** Review our AQA English Language practice content against the summer-2026 assessment changes (spec republished 20 Mar 2026, after our 12 Mar build). Priority: Paper 1 Q1 (now multiple-choice), Q3 (single structural effect), and Q5 narrative-"opening" task; plus minor Paper 2 Q2/Q4 rewording. Marks, structure and AOs are unchanged, so the bulk of content holds, but question-type authenticity in practice items needs updating for the 2027 cohort. Qualification is confirmed still 
+  - Evidence: https://www.aqa.org.uk/english-language-changes · https://www.aqa.org.uk/subjects/english/gcse/english-8700/specification · https://www.aqa.org.uk/subjects/english/gcse/english-8700/key-dates
 
-### GCSE English Language — AQA `8700`
-- **slug:** `english-language-aqa` · **offered 2027:** True · **confidence:** high
-- **What changed:** AQA introduced changes to GCSE English Language exam papers that are live from summer 2026 onwards and therefore apply to the summer 2027 cohort. Changes are concentrated in Paper 1: Q1 is now a multiple-choice format (circle-shading, replacing true/false ticks); Q3 narrowed to a single structural effect; Q4 reworded (removed "student", clarified agree/disagree, added a foreground statement); Q5 narrative option now asks for the OPENING of a story rather than a full narrative, plus an imagination reminder. Paper 2 Q2/Q4 minor rewording. Mark schemes enhanced (new "typical features" column for Q5 on both papers). Mark allocations and assessed skills are unchanged; AQA frames these as wording/mark-scheme clarifications. Announced Jan/Mar 2025; updated SAMs (sets 2 & 3) published Nov 2025; spec PDF re-versioned 20 Mar 2026 — 5 days AFTER our 2026-03-15 build. The Q1 multiple-choice and Q5 "story opening" shifts are material to how a practice-first English Language build should drill question formats, so our practice content should be reviewed to confirm it reflects the 2026 AQA Paper 1 format.
-- **Action:** REVIEW our practice-first English Language (AQA) content against AQA's 2026 Paper 1 changes — specifically Q1 (now multiple-choice), Q3 (single structural effect), Q5 (story OPENING not full narrative), and the Q4 rewording. These are live for summer 2026 and apply to the 2027 cohort. Our build (2026-03-15) predates the re-versioned spec PDF (20 Mar 2026) by 5 days, so verify the new formats are reflected. Not a withdrawal risk: Ofqual Register shows status "Available to learners" with no end date, and AQA confirms June 2027 exams (8700/1 24 May 2027, 8700/2 8 June 2027). Confidence high.
-- **Evidence:** https://find-a-qualification.services.ofqual.gov.uk/qualifications/60142923 · https://www.aqa.org.uk/subjects/english/gcse/english-8700/key-dates · https://www.aqa.org.uk/subjects/english/gcse/english-8700/specification · https://www.aqa.org.uk/english-language-changes
+- `AMBER/free` **GCSE English Literature** — Eduqas (WJEC) `C720QS (C720)` (conf high)
+  - **What changed:** Eduqas has replaced the GCSE English Literature Poetry Anthology for the 2027 cohort. The OLD anthology (18 poems) was examined for the last time in Summer 2026; the NEW anthology (15 poems — 3 fewer, with more poems by women and broader global voices) is taught from September 2025 and FIRST examined in Summer 2027. Same spec code (C720) and QN (601/5246/1) — the qualification is NOT withdrawn, only the Component 1 poetry-from-1789 anthology content has changed. Our content was built 2026-03-24,
+  - **Action:** Review and rebuild the Component 1 poetry anthology lessons against the NEW Eduqas 15-poem anthology (first examination Summer 2027). Download the new anthology PDF (eduqas.co.uk/media/zd1b4ii5/new-poetry-anthology-for-first-examination.pdf) and Eduqas free Digital Resources (Blended Learning + Knowledge Organiser for all 15 poems). Re-plan the anthology unit: replace dropped poems, add the new ones, and re-narrate affected lessons. Non-poetry components (Shakespeare, A Chris
+  - Evidence: https://www.eduqas.co.uk/qualifications/english-literature-gcse/ · https://www.eduqas.co.uk/home/english-with-eduqas/eduqas-gcse-english-literature-poetry-anthology-2025/ · https://www.eduqas.co.uk/media/zd1b4ii5/new-poetry-anthology-for-first-examination.pdf
 
-### GCSE English Literature — Eduqas (WJEC) `C720QS`
-- **slug:** `english-literature-eduqas` · **offered 2027:** True · **confidence:** high
-- **What changed:** MATERIAL content change for the 2027 cohort: the GCSE English Literature Poetry Anthology (Component 1, Section B) has been replaced. The current anthology (18 poems) was examined for the FINAL time in Summer 2026; a NEW 15-poem anthology is examined for the FIRST time in Summer 2027 (first teaching Sept 2025). New anthology adds poems such as "Origin Story" by Eve L. Ewing and drops 3 poems. The spec code (C720QS) and Ofqual QN (601/5246/1) are unchanged — this is an amendment to the existing qualification, not a new one, and the qualification is NOT withdrawn. NOTE: the amendment was PUBLISHED before our build date (Sept 2025 newsletter / 2025 download), so it was not issued after 2026-03-24 (hence amended_since_build=false). The risk is the inverse: our 2026-03-24 build could have been keyed to the still-live 2026 (old 18-poem) anthology. Our anthology coverage must be checked against the new 2027 set.
-- **Action:** REVIEW our anthology content. The qualification is fully offered for Summer 2027 (no withdrawal; same C720QS / QN 601/5246/1). AMBER because a material content change is in effect for the 2027 cohort: the Poetry Anthology was swapped — old 18-poem anthology last examined Summer 2026, new 15-poem anthology first examined Summer 2027. Verify that our Eduqas English Lit poetry-anthology lessons cover the NEW 15-poem 2027 anthology (incl. "Origin Story" by Eve L. Ewing; The Schoolboy, I Wandered Lonely as a Cloud, Sonnet 29, Cousin Kate, Drummer Hodge, I Shall Return, Disabled, Decomposition, Catrin, Blackberry Picking, Kamikaze, War Photographer, Dusting the Phone, Remains) and do NOT teach the retired 18-poem set. If our 2026-03-24 build used the old anthology, that content is wrong for the 2027 cohort and needs replacing. Confidence high on the facts; not amended_since_build because the change pre-dates our build.
-- **Evidence:** https://www.eduqas.co.uk/qualifications/english-literature-gcse/ · https://www.eduqas.co.uk/home/english-with-eduqas/eduqas-gcse-english-literature-poetry-anthology-2025/ · https://www.eduqas.co.uk/media/zd1b4ii5/new-poetry-anthology-for-first-examination.pdf · https://www.eduqas.co.uk/media/szolurrz/new-poetry-anthology-for-first-examination-in-2027-mlp-18pt.pdf
+- `AMBER/free` **GCSE Food Preparation and Nutrition** — Eduqas `C560QS` (conf high)
+  - **End date:** 2027-07-31 (funding/review end on DfE-Ofqual register; final exam series Summer 2027, provisional exam 24 May 2027)
+  - **What changed:** No material content amendment to the specification since our 2026-05-05 build. The only post-build communication is the April 2026 Eduqas newsletter, which carries administrative/clarification changes only: NEA initial sample-size increase from summer 2026, AI-declaration coversheet reminders, new 2025 exemplars, and exam-timetable dates. No teaching-content change, so the live C560 spec content matches what we built.
+  - **Action:** KEEP for summer 2027, but FLAG as terminal. This is a withdrawing qualification in active teach-out: it is being replaced by the new WJEC/Eduqas GCSE Food and Nutrition (first teaching Sept 2025, first exams 2027). From Sept 2025 learners must NOT be entered onto C560 in Year 10. Exams ARE still available for summer 2027 (DfE register funds it to 31/07/2027; April 2026 Eduqas newsletter timetables a provisional 24 May 2027 exam), so it is NOT RED — students already on-course 
+  - Evidence: https://www.eduqas.co.uk/media/nmvi002b/eduqas-gcse-food-preparation-nutrition-newsletter-april-2026.pdf · https://www.qualifications.education.gov.uk/Qualification/60180936 · https://www.eduqas.co.uk/qualifications/food-preparation-and-nutrition-gcse/
 
-### Pearson Edexcel Level 1/Level 2 GCSE (9-1) in Geography A — Edexcel (Pearson) `1GA0`
-- **slug:** `geography-edexcel-a` · **offered 2027:** True · **confidence:** medium
-- **What changed:** No NEW material content amendment was published after our 2026-04-25 build. However, an assessment change that was already published earlier (Issue 4, 4 Sept 2024; current spec Issue 5, Sept 2025) first took EFFECT at the May/June 2026 exam series, immediately after our build: Paper 1 (1GA0/01 The Physical Environment) duration increased from 1h30 to 1h45. Issue 4 also made DEI terminology updates ('small number of geographical terms' changed for inclusivity). The May 2026 subject update only reiterated the Paper 1 duration change; it introduced nothing new. No Issue 6 has been published in 2026.
-- **Action:** Quick review recommended (AMBER), not a rebuild. The qualification is firmly offered for summer 2027 (Ofqual Register: QN 601/8134/5, status 'Available to learners', no operational end date; no withdrawal notice). The 2027 cohort sits the same now-locked updated spec (Issue 5). The one thing to verify: our 2026-04-25 content was built right before the May/June 2026 series when Paper 1's new 1h45 duration first applied — confirm our exam-technique/timing guidance and any Paper 1 references reflect 1h45 (not 1h30) and that we adopted the Issue 4 DEI terminology. Note: the DfE funding-approval end date of 31/07/2027 is a routine funding window (periodically renewed), NOT a qualification withdrawal/last-assessment date — Ofqual shows no operational end date. Medium confidence: the Issue 5 PDF could not be parsed directly to confirm the printed summary-of-changes, but multiple Pearson sources corroborate the issue history and the single assessment change.
-- **Evidence:** https://find-a-qualification.services.ofqual.gov.uk/qualifications/60181345 · https://www.qualifications.education.gov.uk/Qualification/60181345 · https://qualifications.pearson.com/en/qualifications/edexcel-gcses/geography-a-2016.html · https://qualifications.pearson.com/en/news-policy/subject-updates/geography/GCSE-Geography-A-B-Specification-Updates.html
+- `AMBER/free` **GCSE Spanish** — Eduqas `C820QS` (conf medium)
+  - **What changed:** No post-build amendment is the issue. The issue is a pre-build spec mismatch: the reformed Eduqas GCSE MFL specs (French/German/Spanish) have first teaching Sept 2024 and first exams Summer 2026, and are the live qualification for the 2027 cohort. Our repo file specs/eduqas/spanish-C820QS.md, although tagged spec_code C820QS, contains the OLD 'Teaching from 2016 / award from 2018 / Version 3b August 2023' specification text — i.e. the legacy spec whose final Eduqas assessment was Summer 2026. Ou
+  - **Action:** REVIEW/REBUILD against the reformed Eduqas GCSE Spanish spec. Still offered for summer 2027 (not RED), so do not withdraw. But verify our content was built from the reformed Eduqas spec, not the legacy 2016 one — current evidence (specs/eduqas/spanish-C820QS.md holding 'Teaching from 2016, Version 3b Aug 2023' text) indicates it was built from the legacy spec. Action: (1) obtain the reformed Eduqas C820QS spec PDF + sample assessment materials and replace the legacy file; (2)
+  - Evidence: https://www.eduqas.co.uk/articles/bringing-languages-to-life-reformed-gcses-in-french-german-and-spanish/ · https://www.eduqas.co.uk/home/modern-foreign-language-gcses-for-2024/ · https://www.qualifications.education.gov.uk/Qualification/60189010
 
-### Separate Sciences B (Twenty First Century) — Biology B / Chemistry B / Physics B — OCR `J257 / J258 / J259`
-- **slug:** `separate-sciences-ocr-b` · **offered 2027:** True · **confidence:** high · **end date:** 31/07/2027 (operational end date on DfE/Ofqual register — summer 2027 is the FINAL assessment series; no exams or resits available thereafter)
-- **What changed:** No material content amendment issued after the 2026-05-09 build date. The live specification remains the 2016 accredited version; the most recent documented spec touch was Feb 2024 (Physics B), well before our build. Content is current.
-- **Action:** FLAG FOR WITHDRAWAL PLANNING. The entire OCR Twenty First Century Science B suite (Biology B J257, Chemistry B J258, Physics B J259, Combined Science B J260) carries an operational end date of 31/07/2027 on the DfE/Ofqual register — confirmed directly for Combined Science B (QN 60186902) and Chemistry B (QN 60186057), and the suite shares dates. Summer 2027 exams ARE available (hence still_offered_2027=true, not RED), but it is the LAST assessment series; the suite is being discontinued in favour of OCR's Gateway Science suite (A) thereafter. Content stays usable for the 2027 cohort with no spec changes needed, but schedule this subject for retirement/relabel after summer 2027 and do not target it for the 2028 cohort. Confidence high on the withdrawal date (two independent DfE register entries, consistent suite-wide).
-- **Evidence:** https://www.qualifications.education.gov.uk/Qualification/60186902 · https://www.qualifications.education.gov.uk/Qualification/60186057 · https://www.ocr.org.uk/qualifications/gcse/twenty-first-century-science-suite-biology-b-j257-from-2016/ · https://www.ocr.org.uk/qualifications/gcse/twenty-first-century-science-suite-biology-b-j257-from-2016/assessment/
+## 2. Sunsetting watch — built, fine for 2027 but withdrawing soon (4)
 
-## GREEN — current & offered for 2027 (81)
+- `GREEN/free` **Level 1/2 Vocational Award in ICT (Technical Award)** — Eduqas (WJEC) `5539QA` (conf high)
+  - **End date:** Wales: Summer 2028 final full assessment (Unit 1 resit Jan 2029). England: no confirmed end date.
+  - **What changed:** No material content amendment found after the build date (2026-06-15). Current accredited spec is Version 3 (12 Sep 2023); Unit 2 SAMs and guidance for teaching re-published May 2023. All amendment activity predates the build.
+  - **Action:** BUILD-READINESS: GREEN — current, accredited, funded and examined for the 2027 cohort in both England and Wales, so worth building. Caveat for planning (not a blocker): a withdrawal horizon exists beyond 2027 — Wales has a confirmed final full assessment in Summer 2028 (Unit 1 resit Jan 2029) and England has no confirmed end date amid the wider DfE Level 2 / V-Level reform; the England DfE funding approval end date is 31/07/2027 (a funding window subject to routine extension,
+  - Evidence: https://www.eduqas.co.uk/qualifications/level-12-vocational-award-in-ict/ · https://www.wjec.co.uk/qualifications/level-12-vocational-award-in-ict/ · https://www.wjec.co.uk/media/pvbotmta/wjec_l1-2-vocaward-ict_spec-e-120923.pdf
+
+- `GREEN/free` **OCR GCSE Chemistry B (Twenty First Century Science)** — OCR `J258` (conf high)
+  - **End date:** 2027-07-31 (operational end date; summer 2027 is the FINAL exam series — suite withdrawn thereafter)
+  - **What changed:** No material content amendment found issued after the 2026-05-09 build date. GCSE specs are locked mid-course; the accredited J258 spec (601/8605/7) is unchanged. OCR's J258 specification and SaveMyExams spec pages show no 2026 amendment or withdrawal notice in their content.
+  - **Action:** GREEN for the 2027 cohort: J258 is still Available on the Ofqual register and the summer 2027 (May/June 2027) exam series falls inside the operational window, so students sitting in 2027 are covered and our content (built 2026-05-09) remains fit. IMPORTANT caveat: the operational end date is 31/07/2027 across the entire Twenty First Century Science B suite (J257/J258/J259/J260), meaning summer 2027 is the LAST assessment series and the suite is being retired — do NOT carry th
+  - Evidence: https://www.qualifications.education.gov.uk/Qualification/60186057 · https://www.qualifications.education.gov.uk/Qualification/60186902 · https://www.ocr.org.uk/qualifications/gcse/twenty-first-century-science-suite-chemistry-b-j258-from-2016/
+
+- `GREEN/school` **GCSE (9-1) Drama** — OCR `J316` (conf high)
+  - **End date:** 2028-08-31
+  - **What changed:** Two set-text notices were issued after our 2026-03-02 build, but neither affects the summer 2027 cohort. (1) "Two new set texts" (Blue Remembered Hills, Noughts & Crosses) applied ONLY to first-teach Sept 2026 / first-assessment June 2028 — explicitly not students assessed in 2027. (2) "Set texts to remain unchanged" (13 Apr 2026) then reversed that plan for the final cohort, keeping Misterman and Gizmo until withdrawal. The Component 04 set-text list for the 2027 cohort (incl. Misterman + Gizmo
+  - **Action:** No action needed for the 2027 cohort — content is current and fit. FORWARD FLAG ONLY: OCR (Cambridge OCR) is withdrawing GCSE Drama J316. Final first teach Sept 2026; final assessment opportunity June 2028 (no resits after); Ofqual operational + certification end date 31 Aug 2028. Plan a content sunset for J316 after the June 2028 series; Eduqas Drama is the likely migration board for future cohorts. Do NOT treat the withdrawal as a 2027 risk.
+  - Evidence: https://www.ocr.org.uk/qualifications/gcse/drama-j316-from-2016/ · https://www.ocr.org.uk/administration/support-and-tools/subject-updates/qual-withdrawals-757190/ · https://www.ocr.org.uk/administration/support-and-tools/subject-updates/gcse-drama-texts-update-757683/
+
+- `GREEN/free` **GCSE Design and Technology** — WJEC `3600QS` (conf high)
+  - **End date:** Summer 2027 = final full assessment; January 2028 = final resit (subject to demand). No new Year 10 entries from Sept 2026.
+  - **What changed:** No amendment since our 2026-05-19 build. The current accredited spec is Version 2 (January 2019); its only ever amendment (v2) clarified resit rules and predates the build by years. The spec is locked for the 2027 cohort.
+  - **Action:** KEEP — GREEN for the 2027 cohort. WJEC confirms verbatim: "Summer 2027 will be the final full assessment opportunity for this qualification. A resit opportunity for examinations will be available in January 2028, subject to demand." The 2027 cohort is the LAST to sit this spec but the exam IS available, and the spec is unchanged since build (v2, Jan 2019). Per audit rules a reform for a later cohort is not a RED. IMPORTANT SUNSET CAVEAT (not a status trigger): this is being w
+  - Evidence: https://www.wjec.co.uk/qualifications/design-and-technology-gcse/ · https://www.wjec.co.uk/qualifications/gcse-design-and-technology-teaching-from-2026/ · https://www.wjec.co.uk/media/qhamvsua/wjec-gcse-d-t-spec-from-2017-e.pdf
+
+## 3. Do NOT build — not-built specs that are withdrawn/superseded (13)
+
+- `Edexcel (Pearson)` **GCSE Computer Science (2016)** `1CP1` — DO NOT BUILD against 1CP1 — it is a dead/superseded code (last exams 2021). The correct current target for the Edexcel GCSE Computer Science 2027 cohort is the 2020 spec, code 1CP2 (GREEN, current, on
+- `WJEC` **GCSE Art and Design (Art, Craft & Design)** `3650QS` — DO NOT BUILD against 3650QS. This is the LEGACY WJEC GCSE Art and Design "Art, Craft & Design" spec (teaching from 2016, Wales-only, Qualifications Wales-regulated). Its final full assessment was Summ
+- `WJEC` **GCSE Business (WJEC, approved by Qualifications Wales)** `3510QS` — DO NOT BUILD against 3510QS. This is the withdrawn 2017 WJEC GCSE Business spec (Qualifications Wales). Per the official WJEC qualification page: summer 2026 is the final full assessment, with only a 
+- `WJEC` **GCSE Drama** `3690QS` — DO NOT BUILD 3690QS. This is a Wales-specific reform: the WJEC GCSE Drama 3690QS (teaching from 2016) is being withdrawn — last full assessment summer 2026, with only a demand-dependent January 2027 r
+- `WJEC` **GCSE English Language (Wales)** `3700QS` — DO NOT BUILD 3700QS. This Wales-only GCSE English Language spec is being superseded by the new WJEC GCSE English Language and Literature (Double and Single Award), teaching from Sept 2025. From Sept 2
+- `WJEC` **GCSE English Literature (Wales)** `3720QS` — DO NOT BUILD. WJEC GCSE English Literature 3720QS is a Wales-only qualification being withdrawn under the Curriculum for Wales / 'Made for Wales' reform. WJEC's official page states summer 2026 is the
+- `WJEC` **GCSE Food and Nutrition** `3560QS` — DO NOT BUILD against 3560QS. This legacy WJEC GCSE Food and Nutrition (QN 601/8085/7, Qualifications Wales-regulated) is being withdrawn: last full assessment was summer 2026, with only a demand-depen
+- `WJEC` **GCSE French (legacy, teaching from 2016)** `3800QS` — DO NOT BUILD against 3800QS. This legacy spec is withdrawn for the 2027 cohort: WJEC's official qualification page states "Summer 2026 will be the final full assessment opportunity for this qualificat
+- `WJEC` **GCSE Mathematics / Mathematics – Numeracy (WJEC, Wales)** `3300QS / 3310QS` — DO NOT BUILD the legacy 3300QS/3310QS. These Welsh GCSEs (regulated by Qualifications Wales, not Ofqual) have their final full assessment in Summer 2026 and are being superseded from Sept 2025 by the 
+- `WJEC` **GCSE Music (WJEC, legacy spec from 2016)** `3660QS` — DO NOT BUILD against 3660QS. This entry code is the LEGACY WJEC GCSE Music spec (from 2016, QN 601/8290/8): final full assessment Summer 2026, January 2027 resit only (subject to demand), and learners
+- `WJEC` **GCSE Welsh Language** `3000CS` — DO NOT BUILD. This qualification is being withdrawn under the Curriculum for Wales / Made-for-Wales reform. From Sept 2025 learners must not be entered in Year 10; they sit the new GCSE Iaith a Llenyd
+- `WJEC` **GCSE Welsh Literature** `3010CS` — DO NOT BUILD. WJEC GCSE Welsh Literature (3010CS) is being withdrawn under Curriculum for Wales reform. Summer 2026 was the final full assessment; the only 2027 availability is a January 2027 RESIT ON
+- `WJEC` **GCSE Welsh Second Language** `3020CS` — DO NOT BUILD. WJEC GCSE Welsh Second Language (3020 family; Qualifications Wales / Ofqual ref C00/1166/2) is being withdrawn. WJEC's official page states "Summer 2026 will be the final full assessment
+
+## 4. Build with care — not-built AMBER (build to the current version) (11)
+
+- `AQA` **GCSE Art and Design (Art, craft and design)** `8201` — BUILD-READINESS: Cleared to build — qualification is current and offered for summer 2027 (June 2027 NEA deadlines and 2027 exam timetable both confirm it; QN 601/8088/2; not withdrawn). AMBER flag is 
+- `Eduqas` **Level 1/2 Vocational Award in Global Business Communication (French)** `5879QA` — BUILD-READINESS NOTE: This qualification is WITHDRAWN with its final-ever exam sitting in Summer 2027 (Eduqas notice verbatim: "This qualification has been withdrawn and will award for the final time 
+- `Eduqas` **Level 1/2 Vocational Award in Global Business Communication (German)** `5889QA` — Research flagged withdrawal; adversarial verify REFUTED it. Human confirm. DO NOT BUILD. This qualification is WITHDRAWN and awards for the final time in Summer 2027 (confirmed on the official Eduqas 
+- `Eduqas (WJEC-CBAC)` **Level 1/2 Vocational Award in Global Business Communication (Spanish)** `5899QA` — Research flagged withdrawal; adversarial verify REFUTED it. Human confirm. DO NOT BUILD. The qualification has been formally WITHDRAWN by Eduqas: the Eduqas page states it "has been withdrawn and will
+- `Eduqas` **GCSE Physical Education** `C550QS` — BUILD-READINESS: AMBER — do NOT build a fresh full content suite. Although C550QS IS still offered for summer 2027 (the 2027 cohort started Year 10 in Sept 2025 and is unaffected by the Sept-2026 Year
+- `WJEC` **German** `3850QS (new, teaching from 2025) / 3820QS (legacy 2016, resit-only Jan 2027). NOTE: the supplied code 3810QS is WJEC GCSE SPANISH, not German.` — BUILD-READINESS (AMBER, build with care). German IS offered for summer 2027, so worth building — BUT two hazards must be handled before building. (1) CODE MISMATCH: the supplied code 3810QS is WJEC GC
+- `WJEC` **WJEC GCSE History (Wales-only)** `3100QS` — BUILD-READINESS (not-built): Spec is current and validly assessed for summer 2027, but the qualification is in active withdrawal — summer 2027 is the FINAL full assessment (resit only Jan 2028), and a
+- `WJEC` **Level 1/2 Vocational Award in Global Business Communication (French)** `5879QA` — Research flagged withdrawal; adversarial verify REFUTED it. Human confirm. DO NOT BUILD. Build-readiness signal is RED. This qualification (2022 spec, QN 603/7488/3) is being withdrawn: Ofqual operati
+- `WJEC` **GCSE Media Studies** `3680QS` — BUILD-READINESS: AMBER — build with caution / consider deprioritising the WJEC 3680QS variant. This Wales-regulated qualification is being WITHDRAWN under Curriculum for Wales reform and replaced by t
+- `WJEC` **GCSE Physical Education (Full Course)** `3550QS` — Research flagged withdrawal; adversarial verify REFUTED it. Human confirm. DO NOT BUILD. Build-readiness = RED. WJEC's official qualification page states summer 2027 is the FINAL full assessment oppor
+- `WJEC` **GCSE Spanish (WJEC, Made for Wales)** `3840QS` — BUILD-READINESS: Worth building, BUT fix the spec code first. The catalogued code 3820QS does NOT belong to WJEC Spanish — 3820QS is WJEC GCSE German. The correct codes are: legacy WJEC GCSE Spanish =
+
+## 5. GREEN — current & offered for 2027 (161)
+
+98 built (no action) · 63 not-built (build-ready).
 
 <details><summary>Full GREEN list</summary>
 
-- BTEC Level 1/Level 2 Tech Award in Health and Social Care — Pearson Edexcel `BTEC Tech Award (2022)` (health-social-care-edexcel)
-- Cambridge National (Level 1/Level 2) in Child Development — OCR `J809` (cambridge-nationals-child-development)
-- Cambridge National Level 1/2 in Engineering Programmable Systems — OCR `J824` (cambridge-nationals-engineering-programmable-systems)
-- Cambridge National Level 1/2 in Enterprise and Marketing — OCR `J837` (cambridge-nationals-enterprise-and-marketing)
-- Cambridge National Level 1/Level 2 in Engineering Design — OCR `J822` (cambridge-nationals-engineering-design)
-- Cambridge National Level 1/Level 2 in Engineering Manufacture — OCR `J823` (cambridge-nationals-engineering-manufacture)
-- Cambridge National Level 1/Level 2 in Health and Social Care — OCR `J835` (health-social-care-ocr)
-- Cambridge National in Sport Studies (Level 1/2) — OCR `J829` (cambridge-nationals-sport-studies)
-- Cambridge Nationals - Creative iMedia (Level 1/Level 2) — OCR `J834` (cambridge-nationals-creative-imedia)
-- Cambridge Nationals Sport Science (Level 1/Level 2) — OCR `J828` (cambridge-nationals-sport-science)
-- Classical Civilisation — OCR `J199` (classical-civilisation-ocr)
-- GCSE (9-1) Astronomy — Edexcel (Pearson) `1AS0` (astronomy-edexcel)
-- GCSE (9-1) Business — OCR `J204` (business-ocr)
-- GCSE (9-1) Combined Science — Edexcel (Pearson) `1SC0` (science-edexcel)
-- GCSE (9-1) Combined Science A (Gateway Science) — OCR `J250` (science-ocr)
-- GCSE (9-1) Computer Science — OCR `J277` (computer-science)
-- GCSE (9-1) Electronics — Eduqas / WJEC `C490QS` (electronics-eduqas)
-- GCSE (9-1) English Language — Edexcel (Pearson) `1EN0` (english-language-edexcel)
-- GCSE (9-1) English Literature — OCR `J352` (english-literature-ocr)
-- GCSE (9-1) Gateway Science Suite — Separate Sciences A (Biology A, Chemistry A, Physics A) — OCR `J247 / J248 / J249` (separate-sciences-ocr)
-- GCSE (9-1) Geography A — Eduqas (WJEC) `C111QS` (geography-eduqas)
-- GCSE (9-1) Geography A (Geographical Themes) — OCR `J383` (geography-ocr)
-- GCSE (9-1) Geography B — Edexcel B (Pearson) `1GB0` (geography-edexcel-b)
-- GCSE (9-1) Geology — Eduqas / WJEC `C480QS (Welsh-medium 4250SA); our records' "C180QS / 3180QS" appears incorrect` (geology-eduqas)
-- GCSE (9-1) Mathematics — OCR `J560` (maths-ocr)
-- GCSE (9-1) Physical Education — OCR `J587` (physical-education-ocr)
-- GCSE (9-1) Religious Studies — OCR `J625` (religious-studies-ocr)
-- GCSE (9-1) Religious Studies A — Edexcel (Pearson) `1RA0` (religious-studies-edexcel)
-- GCSE (9-1) Separate Sciences — Biology / Chemistry / Physics — Edexcel (Pearson) `1BI0 / 1CH0 / 1PH0` (separate-sciences-edexcel)
-- GCSE (9-1) Sociology — Eduqas / WJEC `C200QS / 3200QS` (sociology-eduqas)
-- GCSE (9-1) Spanish — Edexcel (Pearson) `1SP1` (spanish-edexcel)
-- GCSE Business — Pearson Edexcel `1BS0` (business-edexcel)
-- GCSE Business — AQA `8132` (business-aqa)
-- GCSE Citizenship Studies — AQA `8100` (citizenship-aqa)
-- GCSE Combined Science B (Twenty First Century Science) — OCR `J260` (science-ocr-b)
-- GCSE Combined Science: Trilogy — AQA `8464` (science-aqa)
-- GCSE Computer Science — Eduqas / WJEC `C500QS` (computer-science-eduqas)
-- GCSE Computer Science — Edexcel (Pearson) `1CP2` (computer-science-edexcel)
-- GCSE Design and Technology — AQA `8552` (design-technology)
-- GCSE Design and Technology — Eduqas / WJEC `C600QS / 3600QS` (design-technology-eduqas)
-- GCSE Drama — AQA `8261` (drama-aqa)
-- GCSE Economics — AQA `8136` (economics-aqa)
-- GCSE Engineering — AQA `8852` (engineering-aqa)
-- GCSE English Language — OCR `J351` (english-language-ocr)
-- GCSE English Language — Eduqas (WJEC-CBAC) `C700QS` (english-language-eduqas)
-- GCSE English Literature — AQA `8702` (english-literature-aqa)
-- GCSE English Literature — Edexcel (Pearson) `1ET0` (english-literature-edexcel)
-- GCSE Film Studies — Eduqas / WJEC `C670QS / 3670QS` (film-studies-eduqas)
-- GCSE Food Preparation and Nutrition — AQA `8585` (food-preparation-and-nutrition-aqa)
-- GCSE French — Eduqas (WJEC) `C800QS` (french-eduqas)
-- GCSE French — AQA `8652` (french-aqa)
-- GCSE French — Edexcel (Pearson) `1FR1` (french-edexcel)
-- GCSE Geography — AQA `8035` (geography-aqa)
-- GCSE German — AQA `8662` (german-aqa)
-- GCSE German — Edexcel (Pearson) `1GN1` (german-edexcel)
-- GCSE History — Edexcel `1HI0` (history-edexcel)
-- GCSE History — AQA `8145` (history-aqa)
-- GCSE History A (Explaining the Modern World) — OCR `J410` (history-ocr)
-- GCSE Mathematics — Eduqas (WJEC) `C300QS` (maths-eduqas)
-- GCSE Mathematics — Edexcel (Pearson) `1MA1` (maths-edexcel)
-- GCSE Mathematics — AQA `8300` (maths-aqa)
-- GCSE Media Studies — AQA `8572` (media-studies-aqa)
-- GCSE Physical Education — Edexcel (Pearson) `1PE0` (physical-education-edexcel)
-- GCSE Physical Education — AQA `8582` (physical-education-aqa)
-- GCSE Psychology — AQA `8182` (psychology-aqa)
-- GCSE Religious Studies — Eduqas / WJEC `C120QS / 3120QS` (religious-studies-eduqas)
-- GCSE Religious Studies A (8062) + Short Course (8061) — AQA `8062 / 8061` (religious-studies-aqa)
-- GCSE Separate Sciences (Biology / Chemistry / Physics) — AQA `8461/8462/8463` (separate-sciences)
-- GCSE Sociology — AQA `8192` (sociology-aqa)
-- GCSE Spanish — Eduqas (WJEC) `C820QS` (spanish-eduqas)
-- GCSE Spanish — AQA `8692` (spanish-aqa)
-- GCSE Statistics — AQA `8382` (statistics-aqa)
-- Level 1/2 Vocational Award in Construction and the Built Environment (Technical Award) — Eduqas / WJEC `5229QA` (l12-construction-built-environment)
-- Level 1/2 Vocational Award in Engineering (Technical Award) — Eduqas (WJEC) `5239QA` (engineering-eduqas)
-- Level 1/2 Vocational Award in Health and Social Care (Technical Award) — Eduqas (WJEC) `5249QA` (health-social-care-eduqas)
-- Level 1/2 Vocational Award in Hospitality and Catering (Technical Award) — Eduqas / WJEC `5409QA` (hospitality-catering)
-- Level 1/2 Vocational Award in ICT (Technical Award) — Eduqas / WJEC `5539QA` (l12-ict)
-- Level 1/2 Vocational Award in Retail Business (Technical Award) — Eduqas / WJEC `5789QA (live board code; audit brief said 5299QA — see action)` (l12-retail-business)
-- Level 1/2 Vocational Award in Sport and Coaching Principles (Technical Award) — Eduqas / WJEC `5259QA` (l12-sport-and-coaching-principles)
-- NCFE Level 1/2 Technical Award in Music Technology — NCFE `603/7008/7` (music-technology)
-- WJEC Eduqas Level 1/Level 2 GCSE (9-1) in History — Eduqas (WJEC) `C100QS` (history-eduqas)
+- `both` Cambridge Nationals: Creative iMedia — OCR `J834`
+- `both` GCSE (9-1) Business — Edexcel `1BS0`
+- `both` GCSE (9-1) Computer Science — OCR `J277`
+- `both` GCSE Biology — AQA `8461`
+- `both` GCSE Chemistry — AQA `8462`
+- `both` GCSE Combined Science: Trilogy — AQA `8464`
+- `both` GCSE Design and Technology — AQA `8552`
+- `both` GCSE English Literature — AQA `8702`
+- `both` GCSE Food Preparation and Nutrition — AQA `8585`
+- `both` GCSE French — AQA `8652`
+- `both` GCSE Geography — AQA `8035`
+- `both` GCSE German — AQA `8662`
+- `both` GCSE History — AQA `8145`
+- `both` GCSE Physics — AQA `8463`
+- `both` GCSE Religious Studies A — AQA `8062`
+- `both` GCSE Spanish — AQA `8692`
+- `free` BTEC Tech Award Level 1/2 in Health and Social Care — Pearson Edexcel `603/7047/6 (BTEC Tech Award 2022)`
+- `free` Cambridge National Level 1/2 in Health and Social Care — OCR `J835`
+- `free` Cambridge National Level 1/Level 2 in Sport Studies — OCR `J829`
+- `free` Cambridge National in Engineering Programmable Systems (Level 1/Level 2) — OCR `J824`
+- `free` Cambridge Nationals Level 1/Level 2 in Child Development — OCR `J809`
+- `free` Cambridge Nationals Level 1/Level 2 in Sport Science — OCR `J828`
+- `free` Cambridge Nationals: Engineering Design — OCR `J822`
+- `free` Cambridge Nationals: Engineering Manufacture (Level 1/Level 2) — OCR `J823`
+- `free` Cambridge Nationals: IT — OCR `J836`
+- `free` Computer Science — Eduqas `C500QS`
+- `free` GCSE (9-1) Biology A (Gateway Science) — OCR `J247`
+- `free` GCSE (9-1) Biology B (Twenty First Century Science) — OCR `J257`
+- `free` GCSE (9-1) Business — OCR `J204`
+- `free` GCSE (9-1) Chemistry — Edexcel (Pearson) `1CH0`
+- `free` GCSE (9-1) Classical Civilisation — OCR `J199`
+- `free` GCSE (9-1) Combined Science B (Twenty First Century Science) — OCR `J260`
+- `free` GCSE (9-1) English Language — Eduqas (WJEC) `C700QS`
+- `free` GCSE (9-1) Geography A — Edexcel (Pearson) `1GA0`
+- `free` GCSE (9-1) Geography A (Geographical Themes) — OCR `J383`
+- `free` GCSE (9-1) Geography B — Edexcel (Pearson) `1GB0`
+- `free` GCSE (9-1) Geology — Eduqas (WJEC) `C180QS / C480QS`
+- `free` GCSE (9-1) Mathematics — OCR `J560`
+- `free` GCSE (9-1) Physics A (Gateway Science) — OCR `J249`
+- `free` GCSE (9-1) Physics B (Twenty First Century Science) — OCR `J259`
+- `free` GCSE Astronomy — Edexcel `1AS0`
+- `free` GCSE Biology — Edexcel `1BI0`
+- `free` GCSE Business — AQA `8132`
+- `free` GCSE Chemistry A (Gateway Science) — OCR `J248`
+- `free` GCSE Citizenship Studies — AQA `8100`
+- `free` GCSE Combined Science — Edexcel `1SC0`
+- `free` GCSE Combined Science A (Gateway Science) — OCR `J250`
+- `free` GCSE Computer Science — Edexcel (Pearson) `1CP2`
+- `free` GCSE Design and Technology — Eduqas `C600QS`
+- `free` GCSE Design and Technology — WJEC `3600QS`
+- `free` GCSE Drama — AQA `8261`
+- `free` GCSE Economics — AQA `8136`
+- `free` GCSE Electronics — Eduqas `C490QS`
+- `free` GCSE Engineering — AQA `8852`
+- `free` GCSE English Language — Edexcel `1EN0`
+- `free` GCSE English Language (9-1) — OCR `J351`
+- `free` GCSE English Literature — Edexcel `1ET0`
+- `free` GCSE English Literature — OCR `J352`
+- `free` GCSE Film Studies — WJEC `3670QS`
+- `free` GCSE French — Edexcel `1FR1`
+- `free` GCSE French (Eduqas, reformed) — Eduqas (WJEC) `C800QS`
+- `free` GCSE Geography A — Eduqas `C111QS`
+- `free` GCSE German (2024) — Edexcel `1GN1`
+- `free` GCSE History — Edexcel (Pearson) `1HI0`
+- `free` GCSE Mathematics — AQA `8300`
+- `free` GCSE Mathematics — Edexcel (Pearson) `1MA1`
+- `free` GCSE Mathematics — Eduqas `C300QS`
+- `free` GCSE Media Studies — AQA `8572`
+- `free` GCSE Physical Education — AQA `8582`
+- `free` GCSE Physical Education — Edexcel `1PE0`
+- `free` GCSE Physical Education — OCR `J587`
+- `free` GCSE Physics — Edexcel (Pearson) `1PH0`
+- `free` GCSE Psychology — AQA `8182`
+- `free` GCSE Religious Studies (Eduqas, Route A / Route B) — Eduqas `C120QS`
+- `free` GCSE Religious Studies (Short Course) — AQA `8061`
+- `free` GCSE Religious Studies A — Edexcel `1RA0`
+- `free` GCSE Sociology — AQA `8192`
+- `free` GCSE Sociology — Eduqas `C200QS`
+- `free` GCSE Spanish — Edexcel `1SP1`
+- `free` GCSE Statistics — AQA `8382`
+- `free` History A (Explaining the Modern World) — OCR `J410`
+- `free` Level 1/2 Technical Award in Music Technology (V Cert) — NCFE `603/7008/7`
+- `free` Level 1/2 Vocational Award in Construction and the Built Environment (Technical Award) — Eduqas (WJEC-CBAC) `E819QA (task-supplied 5229QA is a legacy/entry designation; current accredited code is E819QA)`
+- `free` Level 1/2 Vocational Award in Engineering (Technical Award) — Eduqas `5239QA`
+- `free` Level 1/2 Vocational Award in Health and Social Care — Eduqas `5249QA`
+- `free` Level 1/2 Vocational Award in Hospitality and Catering — WJEC `5409QA`
+- `free` Level 1/2 Vocational Award in Hospitality and Catering (Technical Award) — Eduqas `5409QA`
+- `free` Level 1/2 Vocational Award in ICT (Technical Award) — Eduqas (WJEC) `5539QA`
+- `free` Level 1/2 Vocational Award in Retail Business (Technical Award) — Eduqas `5299QA`
+- `free` Level 1/2 Vocational Award in Sport and Coaching Principles — Eduqas `5259QA`
+- `free` OCR GCSE (9-1) Religious Studies (Full Course) — OCR `J625`
+- `free` OCR GCSE Chemistry B (Twenty First Century Science) — OCR `J258`
+- `free` WJEC Eduqas Level 1/Level 2 GCSE (9-1) in Film Studies — Eduqas `C670QS`
+- `free` WJEC Eduqas Level 1/Level 2 GCSE (9-1) in Geology — WJEC (Eduqas) `3180QS`
+- `free` WJEC Eduqas Level 1/Level 2 GCSE (9-1) in History — Eduqas (WJEC) `C100QS`
+- `not-built` Cambridge OCR Level 1/Level 2 GCSE (9-1) in Media Studies — OCR `J200`
+- `not-built` GCSE (9-1) Ancient History — OCR `J198`
+- `not-built` GCSE (9-1) Art and Design (Art, Craft and Design) — Edexcel (Pearson) `1AD0`
+- `not-built` GCSE (9-1) Biblical Hebrew — Edexcel `1BH0`
+- `not-built` GCSE (9-1) Citizenship Studies — Edexcel `1CS0`
+- `not-built` GCSE (9-1) Citizenship Studies — OCR `J270`
+- `not-built` GCSE (9-1) Classical Greek — OCR `J292`
+- `not-built` GCSE (9-1) Design and Technology — Edexcel (Pearson) `1DT0`
+- `not-built` GCSE (9-1) Design and Technology — OCR `J310`
+- `not-built` GCSE (9-1) Economics — OCR `J205`
+- `not-built` GCSE (9-1) Food Preparation and Nutrition — OCR `J309`
+- `not-built` GCSE (9-1) Latin — OCR `J282`
+- `not-built` GCSE (9-1) Religious Studies (Short Course) — OCR `J125`
+- `not-built` GCSE (9-1) Statistics — Edexcel (Pearson) `1ST0`
+- `not-built` GCSE Arabic — Edexcel `1AA0`
+- `not-built` GCSE Art and Design — Eduqas `C650QS`
+- `not-built` GCSE Art and Design (Fine art) — AQA `8202`
+- `not-built` GCSE Art and Design (Graphic communication) — AQA `8203`
+- `not-built` GCSE Art and Design (Photography) — AQA `8206`
+- `not-built` GCSE Art and Design (Textile design) — AQA `8204`
+- `not-built` GCSE Art and Design (Three-dimensional design) — AQA `8205`
+- `not-built` GCSE Bengali — AQA `8638`
+- `not-built` GCSE Biology (WJEC, Wales / Qualifications Wales) — WJEC `3400QS`
+- `not-built` GCSE Business — Eduqas `C510QS`
+- `not-built` GCSE Chemistry (Wales) — WJEC `3410QS`
+- `not-built` GCSE Chinese (Spoken Mandarin) — AQA `8673`
+- `not-built` GCSE Chinese (spoken Mandarin / spoken Cantonese) — Edexcel `1CN0`
+- `not-built` GCSE Combined Science: Synergy — AQA `8465`
+- `not-built` GCSE Dance — AQA `8236`
+- `not-built` GCSE Drama — Edexcel `1DR0`
+- `not-built` GCSE Drama — Eduqas `C690QS`
+- `not-built` GCSE Electronics — WJEC/Eduqas `C490 (catalogued by us as 3490QS)`
+- `not-built` GCSE Geography (WJEC, Made for Wales) — WJEC `3140QS`
+- `not-built` GCSE Geography B — Eduqas `C112QS`
+- `not-built` GCSE Geography B (Geography for Enquiring Minds) — OCR `J384`
+- `not-built` GCSE Greek — Edexcel `1GK0`
+- `not-built` GCSE Gujarati — Edexcel `1GU0`
+- `not-built` GCSE Hebrew (Modern) — AQA `8678`
+- `not-built` GCSE History B (Schools History Project) — OCR `J411`
+- `not-built` GCSE Italian — AQA `8633`
+- `not-built` GCSE Italian — Edexcel `1IN0`
+- `not-built` GCSE Japanese — Edexcel `1JA0`
+- `not-built` GCSE Latin — Eduqas (WJEC) `C990QS`
+- `not-built` GCSE Latin — WJEC `C990QS`
+- `not-built` GCSE Media Studies — Eduqas (WJEC) `C680QS`
+- `not-built` GCSE Music — AQA `8271`
+- `not-built` GCSE Music — Edexcel `1MU0`
+- `not-built` GCSE Music — Eduqas `C660QS`
+- `not-built` GCSE Music — OCR `J536`
+- `not-built` GCSE Panjabi — AQA `8683`
+- `not-built` GCSE Persian — Edexcel `1PN0`
+- `not-built` GCSE Physics — WJEC `3420QS`
+- `not-built` GCSE Polish — AQA `8688`
+- `not-built` GCSE Portuguese — Edexcel (Pearson) `1PG0`
+- `not-built` GCSE Psychology — Edexcel (Pearson) `1PS0`
+- `not-built` GCSE Religious Studies B — AQA `8063`
+- `not-built` GCSE Russian — Edexcel `1RU0`
+- `not-built` GCSE Turkish — Edexcel `1TU0`
+- `not-built` GCSE Urdu — AQA `8648`
+- `not-built` GCSE Urdu — Edexcel `1UR0`
+- `not-built` Level 1/2 Vocational Award in Global Business Communication (Spanish) — WJEC `5899QA`
+- `not-built` Level 1/2 Vocational Award in Performing Arts (Technical Award) — Eduqas (WJEC) `5639QA`
+- `not-built` Psychology — OCR `J203`
+- `school` Cambridge National Level 1/Level 2 in Sport Science — OCR `R180 (unit of J828)`
+- `school` GCSE (9-1) Drama — OCR `J316`
+- `school` GCSE Music — Eduqas `C660U`
 
 </details>
