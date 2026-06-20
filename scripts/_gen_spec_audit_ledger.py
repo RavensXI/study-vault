@@ -43,10 +43,13 @@ L.append('Method: per-qualification research agent (Ofqual register operational/
          'for not-built specs the verdict is a BUILD-READINESS signal (RED = do not build / superseded). '
          'Re-run: `_gen_spec_audit_worklist.py --scope full` → workflow `spec-currency-audit-2027` → this script.')
 L.append('')
-L.append('> **Systemic note — Wales reform.** WJEC `3xxxQS`/`3xxxCS` legacy GCSEs (Curriculum for Wales / '
-         '"Made-for-Wales") are being withdrawn: final full assessment Summer 2026, Jan-2027 resit only, no '
-         'Summer 2027 series. Our "Eduqas / WJEC" aliased subjects are fine for **England (Eduqas, Cxxx)** but the '
-         '**Wales (WJEC, 3xxx)** arm is dead for 2027 — relevant only if we serve Welsh students.')
+L.append('> **Systemic note — Wales reform (Wales IS a planned build market).** WJEC `3xxxQS`/`3xxxCS` legacy '
+         'GCSEs (Curriculum for Wales) are being withdrawn — final full assessment Summer 2026, Jan-2027 resit '
+         'only, no Summer 2027 series — and REPLACED by new "Made-for-Wales" GCSEs (first teaching 2025/2026). '
+         'So a WJEC legacy RED below means **build the Made-for-Wales replacement** (a future build target we have '
+         'not yet catalogued), NOT ignore. Our existing "Eduqas / WJEC" aliased content stays fine for **England '
+         '(Eduqas, Cxxx)**; for reformed subjects the **Wales arm diverges** and becomes a SEPARATE Made-for-Wales '
+         'build/row (the aliasing no longer holds). See memory project_wales_build_plan.')
 L.append('')
 
 # 1. Built + RED/AMBER (act now)
