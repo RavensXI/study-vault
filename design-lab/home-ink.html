@@ -645,7 +645,7 @@ var running = false;
 
 // cursor parallax + dwell-triggered same-subject constellation lines
 var paraX = 0, paraY = 0;
-var constSrc = -1, constData = null, constAlpha = 0, dwell = 0, dwellIdx = -1;
+var constSrc = -1, constData = null, constAlpha = 0, constGrow = 0, dwell = 0, dwellIdx = -1;
 function buildConstellation(src){
   var sub = chosenFlag[src] ? assignSub[src] : subjIdx[src];
   var cand = [];
@@ -655,7 +655,7 @@ function buildConstellation(src){
     cand.push({i:i, d2:dx*dx+dy*dy});
   }
   cand.sort(function(a,b){ return a.d2-b.d2; });
-  if(cand.length > 10) cand.length = 10;                  // nearest ~10 in the same subject
+  if(cand.length > 18) cand.length = 18;                  // nearest ~18 in the same subject
   var inTree=[src], edges=[];
   for(var c=0;c<cand.length;c++){                          // greedy nearest-in-tree → an organic branch, not a star
     var ni=cand[c].i, bj=src, bd=Infinity;
@@ -699,9 +699,10 @@ function frame(now){
   if(peekIdx !== dwellIdx){ dwellIdx = peekIdx; dwell = 0; }
   else if(peekIdx >= 0){ dwell += dt; }
   var wantConst = peekIdx >= 0 && dwell > 1.2 && !anyC;
-  if(wantConst && constSrc !== peekIdx){ constSrc = peekIdx; constData = buildConstellation(peekIdx); }
+  if(wantConst && constSrc !== peekIdx){ constSrc = peekIdx; constData = buildConstellation(peekIdx); constGrow = 0; }
   constAlpha += ((wantConst ? 1 : 0) - constAlpha) * (1 - Math.pow(0.02, dt));
-  if(constAlpha < 0.006 && !wantConst){ constSrc = -1; constData = null; constAlpha = 0; }
+  if(wantConst) constGrow += (1 - constGrow) * (1 - Math.pow(0.2, dt));    // slow draw-out from the centre
+  if(constAlpha < 0.006 && !wantConst){ constSrc = -1; constData = null; constAlpha = 0; constGrow = 0; }
 
   ctx.clearRect(0,0,W,H);
 
@@ -735,6 +736,7 @@ function frame(now){
       var ax = x[k]-mx, ay = y[k]-my, ad2 = ax*ax + ay*ay;
       if(ad2 < 40000){ var g = 1 - Math.sqrt(ad2)/200; if(g > 0){ baseA *= 1 + g*1.8; rk = rad[k]*(1 + g*0.6); } }
     }
+    if(k === peekIdx) rk = 3.8;                                        // the lesson you're on is always the biggest dot
     if(inking) baseA *= inkMul(k, elapsed);
     if(baseA < 0.012) continue;
     if(baseA > 0.96) baseA = 0.96;
@@ -783,12 +785,17 @@ function frame(now){
     ctx.lineWidth = 1;
     for(var ei=0; ei<E.length; ei++){
       var ea = E[ei][0], eb = E[ei][1], eo = E[ei][2];
-      var ca = constAlpha * (1 - eo/ne*0.7);                       // outer branches overall fainter
-      var grad = ctx.createLinearGradient(x[ea],y[ea],x[eb],y[eb]); // each line fades along its own length
+      var startAt = (eo/ne)*0.8;                                    // outer branches begin later in the draw
+      var local = (constGrow - startAt) / 0.28;                     // each segment extends over part of the timeline
+      if(local <= 0) continue;
+      if(local > 1) local = 1;
+      var exx = x[ea] + (x[eb]-x[ea])*local, eyy = y[ea] + (y[eb]-y[ea])*local;   // grow from parent toward the dot
+      var ca = constAlpha * (1 - eo/ne*0.5);                        // outer branches overall fainter
+      var grad = ctx.createLinearGradient(x[ea],y[ea],exx,eyy);     // each line fades toward its growing tip
       grad.addColorStop(0, 'rgba('+cr+','+cg+','+cb+','+(ca*0.6).toFixed(3)+')');
       grad.addColorStop(1, 'rgba('+cr+','+cg+','+cb+','+(ca*0.07).toFixed(3)+')');
       ctx.strokeStyle = grad;
-      ctx.beginPath(); ctx.moveTo(x[ea],y[ea]); ctx.lineTo(x[eb],y[eb]); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(x[ea],y[ea]); ctx.lineTo(exx,eyy); ctx.stroke();
     }
     ctx.globalAlpha = 1;
   }
