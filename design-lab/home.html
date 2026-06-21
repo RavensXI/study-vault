@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StudyVault — all your GCSE revision, in one calm place</title>
+<script>document.documentElement.classList.add('js')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:opsz,wght@7..72,400..600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   StudyVault homepage — design-lab/BRIEF.md
+   Rule (from rebuilt lessons): colour woven THROUGH structure, never around objects.
+   Tokens/idioms mirror css/reskin.css [data-skin="reader"].
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-body:#f7f6f4; --bg-card:#ffffff;
+  --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
+  --border-light:#e6e4e0; --border-lighter:#f0eeea;
+  --anchor:#566a72; --accent:var(--anchor); --mark:#f3cf6b;
+  --radius:8px; --radius-sm:6px; --radius-lg:12px;
+  --shadow-sm:0 1px 3px rgba(45,42,38,.06);
+  --shadow-md:0 4px 12px rgba(45,42,38,.08);
+  --shadow-lg:0 8px 24px rgba(45,42,38,.10);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --font-head:'Schibsted Grotesk',system-ui,sans-serif;
+  --font-read:'Literata',Georgia,serif;
+  --font-ui:'Schibsted Grotesk',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--font-read);background:var(--bg-body);color:var(--text-primary);line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+h1,h2,h3{font-family:var(--font-head);letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:4px}
+.kicker{font-family:var(--font-ui);text-transform:uppercase;letter-spacing:.13em;font-size:.72rem;font-weight:700;color:var(--text-muted)}
+.kicker.acc{color:var(--accent)}
+.shell{width:100%;max-width:1140px;margin:0 auto;padding:0 clamp(1.1rem,4vw,2rem)}
+.js .rv{opacity:0;transform:translateY(14px);transition:opacity .5s ease,transform .9s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+
+/* ---------- masthead ---------- */
+.mast{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg-body) 88%,transparent);backdrop-filter:saturate(1.1) blur(8px);border-bottom:1px solid transparent;transition:border-color .2s}
+.mast.scrolled{border-color:var(--border-light)}
+.mast .row{display:flex;align-items:center;justify-content:space-between;padding:1rem 0}
+.brand{font-family:var(--font-head);font-weight:800;font-size:1.3rem;letter-spacing:-.02em}
+.brand i{color:var(--anchor);font-style:normal}
+.mast nav{display:flex;align-items:center}
+.mast nav a{position:relative;font-family:var(--font-ui);font-weight:500;font-size:.92rem;color:var(--text-secondary);padding:.4rem .95rem;transition:color .18s}
+.mast nav a:not(:first-child)::before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);height:1.05em;border-left:1px solid var(--border-light)}
+.mast nav a:hover{color:var(--text-primary)}
+.mast nav a.code{color:var(--anchor);font-weight:600}
+.mast nav a.code:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+
+/* ---------- hero (informational) ---------- */
+.hero-wrap{position:relative;overflow:hidden}
+.bg-doodles{position:absolute;inset:0;z-index:0;pointer-events:none}
+.bg-doodles .dd{position:absolute;opacity:.08;filter:saturate(.6)}
+.bg-doodles .dd img{display:block;width:100%;height:auto}
+.hero{position:relative;z-index:1;display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.5rem,4vw,3.4rem);align-items:center;padding:clamp(2.4rem,5vw,4rem) 0 clamp(2rem,5vw,3.4rem)}
+.eyebrow{margin-bottom:1.2rem}
+.hero h1{font-weight:800;font-size:clamp(2.4rem,4.8vw,3.7rem);line-height:1.05;max-width:14ch}
+.hl{position:relative;white-space:nowrap}
+.hl::before{content:"";position:absolute;z-index:-1;left:-.1em;right:-.1em;top:.16em;bottom:.05em;
+  background:linear-gradient(100deg,var(--mark),#f0c24e);border-radius:45% 55% 50% 50%/60% 40% 60% 40%;
+  filter:url(#rough);transform:scaleX(0) rotate(-.7deg);transform-origin:left center;opacity:.9}
+.js .hl::before{transition:transform .7s var(--ease) .5s}
+.rv.in .hl::before,html:not(.js) .hl::before{transform:scaleX(1) rotate(-.7deg)}
+.hero .lede{font-size:clamp(1.05rem,1.5vw,1.2rem);color:var(--text-secondary);max-width:48ch;margin:1.4rem 0 0}
+.cta{display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1.9rem}
+.btn{font-family:var(--font-ui);font-weight:600;font-size:1rem;padding:.82rem 1.5rem;border-radius:var(--radius);cursor:pointer;border:1px solid transparent;transition:transform .18s var(--ease),box-shadow .2s,background .2s,border-color .2s;white-space:nowrap}
+.btn-p{background:var(--anchor);color:#fff}
+.btn-p:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.btn-p:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-s{background:var(--bg-card);border-color:var(--border-light);color:var(--text-primary)}
+.btn-s:hover{transform:translateY(-2px);border-color:#cfcac2}
+.btn:active{transform:translateY(0)}
+.microtrust{margin-top:1.6rem;font-family:var(--font-ui);font-size:.88rem;color:var(--text-muted)}
+.microtrust b{color:var(--text-primary);font-weight:700}
+
+/* device mockup */
+.device{position:relative;padding:.5rem .5rem 2rem}
+.laptop{position:relative;background:#26221b;border-radius:12px 12px 0 0;padding:8px 8px 0;box-shadow:var(--shadow-lg)}
+.laptop .screen{border-radius:5px 5px 0 0;overflow:hidden;background:#fff;aspect-ratio:16/10}
+.laptop .base{height:13px;background:linear-gradient(#d8d3cb,#b3aca2);border-radius:0 0 11px 11px;width:116%;margin-left:-8%}
+.laptop .base::after{content:"";display:block;margin:0 auto;width:84px;height:4px;border-radius:0 0 6px 6px;background:#8c867d}
+.phone{position:absolute;right:-4px;bottom:-2px;width:116px;background:#26221b;border-radius:17px;padding:5px;box-shadow:var(--shadow-lg)}
+.phone .pscreen{border-radius:13px;overflow:hidden;background:#fff;aspect-ratio:9/19}
+/* faux reader lesson inside */
+.mini{font-family:var(--font-ui);height:100%;display:flex;flex-direction:column}
+.mini .mh{position:relative;height:46%;overflow:hidden}
+.mini .mh img{width:100%;height:100%;object-fit:cover;display:block}
+.mini .mh .nav{position:absolute;top:0;left:0;right:0;display:flex;align-items:center;gap:5px;padding:5px 8px;font-size:.42rem;font-weight:800;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.mini .mh .nav b i{color:#f3cf6b;font-style:normal}
+.mini .mb{flex:1;display:grid;grid-template-columns:1.7fr 1fr;gap:7%;padding:7% 8%}
+.mini .kk{font-size:.4rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--anchor);margin-bottom:4px}
+.mini h4{font-family:var(--font-head);font-size:.62rem;line-height:1.1;color:var(--text-primary);margin-bottom:6px;letter-spacing:-.01em}
+.mini .ln{height:3px;border-radius:2px;background:#e6e4e0;margin-bottom:4px}
+.mini .ln.s{width:55%}
+.mini .kf{border-left:2px solid var(--anchor);background:color-mix(in srgb,var(--anchor) 9%,#fff);padding:4px 5px;margin:6px 0;border-radius:0 3px 3px 0}
+.mini .kf .ln{background:color-mix(in srgb,var(--anchor) 22%,#e6e4e0)}
+.mini .side{border:1px solid #e6e4e0;border-radius:5px;padding:6px}
+.mini .side .st{font-size:.4rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin-bottom:5px}
+.mini .side .play{display:flex;align-items:center;gap:4px}
+.mini .side .pb{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--anchor);flex:none;position:relative}
+.mini .side .pb::after{content:"";position:absolute;left:4.5px;top:3px;border-left:4px solid var(--anchor);border-top:2.5px solid transparent;border-bottom:2.5px solid transparent}
+.mini .side .wav{flex:1;height:9px;background:repeating-linear-gradient(90deg,#d3d8da 0 2px,transparent 2px 4px);opacity:.8}
+.mini.pl .mb{grid-template-columns:1fr}
+.mini.pl .mh{height:36%}
+
+/* ---------- generic section ---------- */
+.sec{padding:clamp(2.6rem,5.5vw,4rem) 0}
+.sec-head{margin-bottom:1.8rem}
+.sec-head.center{text-align:center}
+.sec-head.center p{margin-left:auto;margin-right:auto}
+.sec-head h2{font-size:clamp(1.5rem,2.9vw,2.1rem);font-weight:800;margin-top:.3rem}
+.sec-head p{color:var(--text-secondary);font-size:1.02rem;max-width:56ch;margin-top:.5rem}
+
+/* how it works — 3 steps */
+.steps3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));gap:1.4rem;margin-bottom:2.6rem}
+.step3{position:relative;padding-left:3rem}
+.step3 .no{position:absolute;left:0;top:-2px;width:2.1rem;height:2.1rem;border:1px solid var(--border-light);border-radius:50%;display:grid;place-items:center;font-family:var(--font-head);font-weight:800;color:var(--anchor);font-size:1rem}
+.step3 h3{font-size:1.12rem;font-weight:700;margin-bottom:.3rem}
+.step3 p{color:var(--text-secondary);font-size:.96rem}
+.scatter{font-family:var(--font-ui);font-size:.92rem;color:var(--text-muted);margin-bottom:1.6rem;line-height:2}
+.scatter .s{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--text-muted) 60%,transparent)}
+.scatter .mid{margin:0 .5rem;opacity:.55}
+.scatter .arr{margin:0 .55rem;color:var(--text-secondary)}
+.scatter .one{font-weight:700;color:var(--anchor)}
+.feats{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,232px),1fr));gap:.85rem}
+.feat{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.4rem;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+.feat:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:color-mix(in srgb,var(--a,var(--anchor)) 30%,var(--border-light))}
+.feat .kicker{color:var(--a,var(--anchor));display:block;margin-bottom:.7rem}
+.feat h3{font-size:1.08rem;font-weight:700;margin-bottom:.3rem}
+.feat p{color:var(--text-secondary);font-size:.95rem}
+
+/* ---------- BUILD YOUR SHELF (staged wizard + dot prune) ---------- */
+.build{background:var(--bg-card);border-top:1px solid var(--border-light);border-bottom:1px solid var(--border-light)}
+.stepper{display:flex;align-items:center;gap:.4rem;margin-bottom:1.8rem;flex-wrap:wrap}
+.stepper .st{display:flex;align-items:center;gap:.5rem;font-family:var(--font-ui);font-size:.86rem;font-weight:600;color:var(--text-muted);cursor:pointer}
+.stepper .st .n{width:1.7rem;height:1.7rem;border:1px solid var(--border-light);border-radius:50%;display:grid;place-items:center;font-size:.82rem;background:var(--bg-card);transition:.2s}
+.stepper .st.on{color:var(--text-primary)}
+.stepper .st.on .n{border-color:var(--anchor);color:var(--anchor);background:color-mix(in srgb,var(--anchor) 10%,#fff)}
+.stepper .st.done .n{border-color:var(--anchor);background:var(--anchor);color:#fff}
+.stepper .sep{flex:0 0 1.6rem;height:1px;background:var(--border-light)}
+.wiz{display:grid;grid-template-columns:1fr 1fr;gap:clamp(1.4rem,3.5vw,3rem);align-items:start}
+.wiz-panel{min-height:300px}
+.stage{display:none}.stage.show{display:block}
+/* finder + chips (squared, tinted-groove) */
+.finder{position:relative;margin-bottom:.9rem}
+.finder::before{content:"";position:absolute;left:.7rem;top:50%;transform:translateY(-50%);width:15px;height:15px;opacity:.5;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237f7c75' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3'/%3E%3C/svg%3E") center/contain no-repeat}
+#subjSearch{width:100%;font-family:var(--font-ui);font-size:.92rem;padding:.62rem .8rem .62rem 2.1rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-primary)}
+#subjSearch::placeholder{color:var(--text-muted)}
+#subjSearch:focus{outline:none;border-color:color-mix(in srgb,var(--anchor) 45%,var(--border-light))}
+.finder-drop{position:absolute;left:0;right:0;top:calc(100% + 4px);background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);max-height:230px;overflow:auto;z-index:6}
+.finder-drop button{display:flex;align-items:center;gap:.5rem;width:100%;text-align:left;padding:.5rem .75rem;background:none;border:none;border-bottom:1px solid var(--border-lighter);font-family:var(--font-ui);font-size:.9rem;color:var(--text-primary);cursor:pointer}
+.finder-drop button:last-child{border-bottom:none}
+.finder-drop button:hover{background:color-mix(in srgb,var(--anchor) 8%,var(--bg-card))}
+.finder-drop .fb{margin-left:auto;font-family:var(--font-ui);font-size:.74rem;color:var(--text-muted)}
+.finder-drop .none{padding:.7rem .75rem;color:var(--text-muted);font-family:var(--font-ui);font-size:.86rem}
+.popular{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-bottom:1.05rem;min-height:1.6rem}
+.popular .kicker{margin-right:.15rem}
+.qadd{font-family:var(--font-ui);font-weight:600;font-size:.84rem;padding:.36rem .7rem;border-radius:var(--radius-sm);cursor:pointer;border:1px dashed var(--border-light);background:var(--bg-card);color:var(--text-secondary);transition:border-color .18s,color .18s}
+.qadd:hover{border-color:#cfcac2;color:var(--text-primary)}
+.qadd b{font-weight:700;margin-right:.15rem;color:var(--text-muted)}
+.shelf-rows{display:flex;flex-direction:column;gap:.4rem}
+.srow{display:flex;align-items:center;gap:.6rem;padding:.5rem .55rem .5rem .7rem;border:1px solid var(--border-lighter);border-radius:var(--radius-sm);background:var(--bg-card)}
+.js .srow.pop{animation:rowin .35s var(--ease)}
+@keyframes rowin{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:none}}
+.srow .dotc{width:9px;height:9px;border-radius:50%;background:var(--a);flex:none}
+.srow .sname{flex:1;font-family:var(--font-ui);font-weight:600;font-size:.92rem;letter-spacing:-.01em}
+.bsel{font-family:var(--font-ui);font-size:.82rem;font-weight:600;padding:.32rem .5rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:var(--bg-card);color:var(--text-secondary);cursor:pointer}
+.bsel:focus{outline:none;border-color:color-mix(in srgb,var(--anchor) 45%,var(--border-light))}
+.srm{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:1.15rem;line-height:1;padding:.05rem .35rem;border-radius:4px;transition:.15s}
+.srm:hover{color:var(--text-primary);background:var(--border-lighter)}
+.empty-hint{color:var(--text-muted);font-family:var(--font-ui);font-size:.9rem;padding:.4rem 0}
+/* trim step */
+.trim-sub{border:1px solid var(--border-lighter);border-radius:var(--radius-sm);margin-bottom:.5rem;overflow:hidden}
+.trim-head{display:flex;align-items:center;gap:.55rem;padding:.55rem .7rem;cursor:pointer;font-family:var(--font-ui);font-weight:600;font-size:.9rem;background:var(--bg-card)}
+.trim-head .dotc{width:9px;height:9px;border-radius:50%;background:var(--a);flex:none}
+.trim-head .cnt{margin-left:auto;font-size:.8rem;color:var(--text-muted);font-weight:500}
+.trim-head .cv{transition:transform .2s;color:var(--text-muted)}
+.trim-sub.open .trim-head .cv{transform:rotate(180deg)}
+.trim-units{display:none;flex-wrap:wrap;gap:.4rem;padding:.1rem .7rem .7rem}
+.trim-sub.open .trim-units{display:flex}
+.uchip{font-family:var(--font-ui);font-weight:600;font-size:.8rem;padding:.34rem .65rem;border-radius:var(--radius-sm);cursor:pointer;border:1px solid var(--border-light);background:var(--bg-card);color:color-mix(in srgb,var(--a) 70%,#000);box-shadow:inset 0 1px 2px rgba(29,28,26,.05);transition:.15s;background-color:color-mix(in srgb,var(--a) 11%,#fff);border-color:color-mix(in srgb,var(--a) 38%,var(--border-light))}
+.uchip.off{background-color:var(--bg-card);border-color:var(--border-light);border-style:dashed;color:var(--text-muted);text-decoration:line-through;box-shadow:none}
+.wiz-foot{display:flex;align-items:center;gap:.7rem;margin-top:1.4rem;flex-wrap:wrap}
+.linkbtn{font-family:var(--font-ui);font-weight:600;font-size:.92rem;color:var(--text-secondary);background:none;border:none;cursor:pointer;padding:.4rem 0}
+.linkbtn:hover{color:var(--text-primary)}
+
+/* the visualisation */
+.viz{position:sticky;top:5rem}
+.viz-count{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem}
+.viz-count b{font-family:var(--font-head);font-weight:800;font-size:clamp(2.2rem,4vw,2.9rem);color:var(--anchor);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.viz-count span{font-family:var(--font-ui);font-size:.95rem;color:var(--text-secondary)}
+.viz-sub{font-family:var(--font-ui);font-size:.86rem;color:var(--text-muted);margin-bottom:.9rem;min-height:1.1em}
+.viz-sub b{color:var(--anchor);font-weight:700}
+.dotcloud{display:flex;flex-wrap:wrap;align-content:flex-start;gap:0;border:1px solid var(--border-light);border-radius:var(--radius);background:var(--bg-body);padding:.7rem;max-height:300px;overflow:hidden}
+.dot{width:7px;height:7px;border-radius:50%;margin:2px;flex:none;background:color-mix(in srgb,var(--a) 60%,#cfcac2);
+  transition:opacity .45s var(--ease),transform .45s var(--ease),width .45s var(--ease),height .45s var(--ease),margin .45s var(--ease)}
+.dot.out{opacity:0;width:0;height:0;margin:0;transform:scale(.2)}
+.viz-cap{font-family:var(--font-read);font-size:.95rem;color:var(--text-secondary);margin-top:.9rem;line-height:1.5}
+
+/* result tiles (real subject heroes) */
+.shelf-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,228px),1fr));gap:.9rem;margin-top:.4rem}
+.tile{display:block;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius);overflow:hidden;cursor:pointer;transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+.tile:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg);border-color:color-mix(in srgb,var(--a) 38%,var(--border-light))}
+.tile .thumb{height:108px;background:var(--border-lighter);overflow:hidden}
+.tile .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .4s var(--ease)}
+.tile:hover .thumb img{transform:scale(1.04)}
+.tbody{padding:.85rem 1rem .95rem}
+.tbody .bd{color:var(--a)}
+.tbody h3{font-size:1.04rem;font-weight:700;letter-spacing:-.01em;margin:.35rem 0 .1rem}
+.tbody .mt{font-family:var(--font-ui);font-size:.83rem;color:var(--text-muted)}
+
+/* why trust it */
+.trust-band{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-lg);overflow:hidden}
+.tcol{padding:clamp(1.3rem,2.6vw,1.8rem);border-right:1px solid var(--border-lighter)}
+.tcol:last-child{border-right:none}
+.tcol .kicker{display:block;margin-bottom:.6rem}
+.tcol h3{font-size:1.04rem;font-weight:700;margin-bottom:.3rem}
+.tcol p{font-size:.93rem;color:var(--text-secondary)}
+
+/* stats */
+.stats-wrap{text-align:center}
+.stats{display:flex;flex-wrap:wrap;gap:.85rem;justify-content:center}
+.stat{flex:1;min-width:130px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius);padding:1.3rem .8rem}
+.stat b{display:block;font-family:var(--font-head);font-weight:800;font-size:clamp(1.5rem,2.6vw,2rem);color:var(--anchor);letter-spacing:-.02em}
+.stat span{font-family:var(--font-ui);font-size:.84rem;color:var(--text-muted)}
+.stats-wrap .note{font-family:var(--font-ui);color:var(--text-muted);font-size:.92rem;margin-top:1rem}
+
+/* closing cta */
+.close{text-align:center;background:var(--anchor);color:#fff;border-radius:var(--radius-lg);padding:clamp(2.2rem,5vw,3.2rem) 1.5rem}
+.close .kicker{color:rgba(255,255,255,.7);display:block;margin-bottom:.7rem}
+.close h2{font-size:clamp(1.6rem,3vw,2.2rem);font-weight:800;color:#fff}
+.close p{color:rgba(255,255,255,.82);max-width:44ch;margin:.7rem auto 1.5rem}
+.close .btn-w{background:#fff;color:var(--anchor)}
+.close .btn-w:hover{transform:translateY(-2px);box-shadow:0 10px 22px -12px rgba(0,0,0,.4)}
+
+.foot{border-top:1px solid var(--border-light);margin-top:0;padding:2.2rem 0;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;color:var(--text-muted);font-family:var(--font-ui);font-size:.88rem}
+.foot nav{display:flex;gap:1.1rem;flex-wrap:wrap}
+.foot a:hover{color:var(--text-primary)}
+
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:1.8rem}
+  .device{max-width:430px;margin:0 auto;order:2}
+  .mast nav a:not(.code):not(.brandlink){display:none}
+  .bg-doodles .dd{opacity:.16}            /* sketches a touch stronger on mobile */
+  .wiz{grid-template-columns:1fr}
+  .viz{position:static}
+  .tcol{border-right:none;border-bottom:1px solid var(--border-lighter)}
+  .tcol:last-child{border-bottom:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .js .rv{opacity:1!important;transform:none!important;transition:none}
+  .js .hl::before,html:not(.js) .hl::before{transform:scaleX(1) rotate(-.7deg)!important;transition:none}
+  .dot{transition:none}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.014" numOctaves="2" seed="4" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="5.5" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+
+<header class="mast" id="mast">
+  <div class="shell row">
+    <a class="brand brandlink" href="#">StudyVault<i>.</i></a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="#build">Build your shelf</a>
+      <a href="#">For schools</a>
+      <a href="#" class="code">I have a school code</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- ============ HERO ============ -->
+  <div class="hero-wrap">
+    <div class="bg-doodles" aria-hidden="true">
+      <div class="dd" style="left:-2%;top:8%;width:150px;transform:rotate(-6deg)"><img src="sketches/cut/timetable.png" alt=""></div>
+      <div class="dd" style="right:-1%;top:4%;width:170px;transform:rotate(5deg)"><img src="sketches/cut/mindmap.png" alt=""></div>
+      <div class="dd" style="left:6%;bottom:6%;width:120px;transform:rotate(-8deg)"><img src="sketches/cut/flashcards.png" alt=""></div>
+      <div class="dd" style="right:7%;bottom:10%;width:74px;transform:rotate(10deg)"><img src="sketches/cut/highlighter.png" alt=""></div>
+      <div class="dd" style="left:44%;top:2%;width:60px;transform:rotate(18deg)"><img src="sketches/cut/pencil.png" alt=""></div>
+    </div>
+    <section class="shell hero">
+      <div class="hero-copy">
+        <p class="eyebrow kicker rv">Free · no login · built by a teacher</p>
+        <h1 class="rv">Everything you’re sitting. <span class="hl">Nothing you’re not.</span></h1>
+        <p class="lede rv">StudyVault gathers every GCSE subject and exam board into one calm place — lessons, practice that marks itself, podcasts and a revision plan. Tell us what you’re sitting and it hides everything else, so all you ever see is your revision.</p>
+        <div class="cta rv">
+          <button class="btn btn-p" id="getStarted">Get started →</button>
+          <a class="btn btn-s" href="#how">See how it works</a>
+        </div>
+        <p class="microtrust rv"><b>72</b> subjects · <b>every</b> major board · <b>4,400+</b> lessons · <b>£0</b></p>
+      </div>
+      <div class="device rv" aria-hidden="true">
+        <div class="laptop">
+          <div class="screen">
+            <div class="mini">
+              <div class="mh"><img src="/images/subject-history.jpg" alt=""><div class="nav"><b>StudyVault<i>.</i></b></div></div>
+              <div class="mb">
+                <div>
+                  <div class="kk">AQA · Conflict &amp; Tension</div>
+                  <h4>The Western Front, 1914–18</h4>
+                  <div class="ln"></div><div class="ln"></div><div class="ln s"></div>
+                  <div class="kf"><div class="ln"></div><div class="ln s"></div></div>
+                  <div class="ln"></div><div class="ln s"></div>
+                </div>
+                <div class="side"><div class="st">Listen</div><div class="play"><span class="pb"></span><span class="wav"></span></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="base"></div>
+        </div>
+        <div class="phone">
+          <div class="pscreen">
+            <div class="mini pl">
+              <div class="mh"><img src="/images/subject-combined-science.jpg" alt=""></div>
+              <div class="mb"><div><div class="kk">Practice</div><div class="ln"></div><div class="ln"></div><div class="ln s"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============ HOW IT WORKS ============ -->
+  <section class="shell sec" id="how">
+    <div class="sec-head rv">
+      <span class="kicker acc">How it works</span>
+      <h2>Three steps, then you just revise</h2>
+      <p>No more bouncing between half a dozen sites and guessing what’s relevant. You tell us once; we do the sorting.</p>
+    </div>
+    <div class="steps3">
+      <div class="step3 rv"><span class="no">1</span><h3>Tell us your subjects</h3><p>Add everything you’re taking — and the exam board for each, since they’re rarely all the same.</p></div>
+      <div class="step3 rv"><span class="no">2</span><h3>We hide the rest</h3><p>The other 60-odd subjects and three other boards vanish. What’s left is only ever yours.</p></div>
+      <div class="step3 rv"><span class="no">3</span><h3>Revise, your way</h3><p>Read it, practise it, listen on the bus, or let the planner build your timetable to your exam dates.</p></div>
+    </div>
+    <p class="scatter rv" aria-hidden="true"><span class="s">a video somewhere</span><span class="mid">·</span><span class="s">a quiz site</span><span class="mid">·</span><span class="s">PDFs in downloads</span><span class="mid">·</span><span class="s">class slides</span><span class="mid">·</span><span class="s">past papers</span><span class="arr">→</span><span class="one">StudyVault</span></p>
+    <div class="feats">
+      <div class="feat rv" style="--a:#3f5e78"><span class="kicker">Read</span><h3>Lessons that explain</h3><p>Plain-English teaching with key terms and worked examples — pitched at your board, not a generic version.</p></div>
+      <div class="feat rv" style="--a:#4f7a6a"><span class="kicker">Practise</span><h3>Practice that marks itself</h3><p>Exam-style questions with instant feedback and model answers, so you know where the marks are.</p></div>
+      <div class="feat rv" style="--a:#6a5a8a"><span class="kicker">Listen</span><h3>Podcasts for the bus</h3><p>Every lesson as a two-voice audio episode — keep revising with your eyes shut.</p></div>
+      <div class="feat rv" style="--a:#b07a3f"><span class="kicker">Plan</span><h3>A plan that builds itself</h3><p>Add your exam dates and we’ll lay out a realistic timetable around everything you’re sitting.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ BUILD YOUR SHELF (wizard + prune viz) ============ -->
+  <section class="build" id="build">
+    <div class="shell sec">
+      <div class="sec-head center rv">
+        <span class="kicker acc">Build your shelf</span>
+        <h2>Watch it cut down to just yours</h2>
+        <p>Every dot is a lesson. Right now you’re looking at the whole library. Add your subjects and see everything you’re <em>not</em> sitting drop away.</p>
+      </div>
+
+      <div class="stepper rv" id="stepper">
+        <button class="st on" data-step="0"><span class="n">1</span>Your subjects</button>
+        <span class="sep"></span>
+        <button class="st" data-step="1"><span class="n">2</span>Fine-tune</button>
+        <span class="sep"></span>
+        <button class="st" data-step="2"><span class="n">3</span>Your shelf</button>
+      </div>
+
+      <div class="wiz rv">
+        <div class="wiz-panel">
+          <!-- STAGE 0: subjects + per-subject board -->
+          <div class="stage show" data-stage="0">
+            <div class="finder">
+              <input id="subjSearch" type="text" autocomplete="off" placeholder="Type to find any of 72 subjects…" aria-label="Search subjects to add">
+              <div class="finder-drop" id="finderDrop" hidden></div>
+            </div>
+            <div class="popular" id="popular"></div>
+            <div class="shelf-rows" id="shelfRows"></div>
+            <div class="wiz-foot"><button class="btn btn-p" id="toTrim" disabled>Next: fine-tune →</button></div>
+          </div>
+          <!-- STAGE 1: trim units -->
+          <div class="stage" data-stage="1">
+            <p class="empty-hint" style="margin-bottom:.8rem">Taking the whole subject? Leave it as is. Only revising certain units? Untick the ones you don’t need and watch them drop from the cloud.</p>
+            <div id="trimList"></div>
+            <div class="wiz-foot"><button class="btn btn-p" id="toShelf">See my shelf →</button><button class="linkbtn" id="skipTrim">Skip — I’ll revise it all</button></div>
+          </div>
+          <!-- STAGE 2: result -->
+          <div class="stage" data-stage="2">
+            <div class="shelf-grid" id="shelfGrid"></div>
+            <div class="wiz-foot"><button class="btn btn-p" id="openShelf">Open my shelf →</button><button class="linkbtn" id="backToSubjects">← Change subjects</button></div>
+          </div>
+        </div>
+
+        <div class="viz">
+          <div class="viz-count"><b id="vizN">0</b><span id="vizUnit">lessons</span></div>
+          <div class="viz-sub" id="vizSub"></div>
+          <div class="dotcloud" id="dotcloud"></div>
+          <p class="viz-cap" id="vizCap"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WHY TRUST IT ============ -->
+  <section class="shell sec">
+    <div class="sec-head rv"><span class="kicker acc">Why it’s different</span><h2>Made to be trusted</h2></div>
+    <div class="trust-band rv">
+      <div class="tcol"><span class="kicker acc">Built by a teacher</span><h3>Not a content mill</h3><p>Made by someone who teaches and marks these papers — not scraped together to fill a page.</p></div>
+      <div class="tcol"><span class="kicker acc">Matched to your spec</span><h3>Only what’s examined</h3><p>Every subject mapped to its real exam specification, so you’re never learning the wrong board’s material.</p></div>
+      <div class="tcol"><span class="kicker acc">Free, no login</span><h3>Start in seconds</h3><p>No account, no card. A school code unlocks your own school’s content on top.</p></div>
+    </div>
+  </section>
+
+  <!-- ============ STATS ============ -->
+  <section class="shell sec">
+    <div class="stats-wrap rv">
+      <div class="stats">
+        <div class="stat"><b>72</b><span>subjects</span></div>
+        <div class="stat"><b>Every</b><span>major board</span></div>
+        <div class="stat"><b>4,400+</b><span>lessons</span></div>
+        <div class="stat"><b>£0</b><span>to use</span></div>
+      </div>
+      <p class="note">The whole library is here — you just never have to wade through it.</p>
+    </div>
+  </section>
+
+  <!-- ============ CLOSING CTA ============ -->
+  <section class="shell sec">
+    <div class="close rv">
+      <span class="kicker">Ready when you are</span>
+      <h2>Pick your subjects. Start revising.</h2>
+      <p>Tell us what you’re sitting and we’ll do the sorting. You’ll be in a lesson in under a minute.</p>
+      <button class="btn btn-w" id="ctaBottom">Build your shelf →</button>
+    </div>
+  </section>
+
+  <footer class="shell foot">
+    <div>© StudyVault — free GCSE revision, in one calm place</div>
+    <nav><a href="#how">How it works</a><a href="#build">Build your shelf</a><a href="#">Exam planner</a><a href="#">For schools</a><a href="#">Privacy</a></nav>
+  </footer>
+</main>
+
+<script>
+/* ---------- data ---------- */
+var SUBJECTS = [
+  {k:'maths', n:'Mathematics',        a:'#3f5e78', img:'subject-maths',              boards:['AQA','Edexcel','OCR','Eduqas'], def:'Edexcel', nu:6,  L:48, pop:1},
+  {k:'comb',  n:'Combined Science',   a:'#4f7a6a', img:'subject-combined-science',   boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:6,  L:78, pop:1},
+  {k:'engl',  n:'English Language',   a:'#7a6a8a', img:'subject-english-lang',       boards:['AQA','Edexcel','OCR','Eduqas'], def:'AQA',     nu:4,  L:30, pop:1},
+  {k:'lit',   n:'English Literature', a:'#8a5566', img:'subject-english-lit',        boards:['AQA','Edexcel','OCR','Eduqas'], def:'AQA',     nu:5,  L:42, pop:1},
+  {k:'hist',  n:'History',            a:'#3f5e78', img:'subject-history',            boards:['AQA','Edexcel','OCR','Eduqas'], def:'AQA',     nu:4,  L:60, pop:1},
+  {k:'geog',  n:'Geography',          a:'#5f7155', img:'subject-geography',          boards:['AQA','Edexcel','OCR','Eduqas'], def:'AQA',     nu:3,  L:54, pop:1},
+  {k:'bio',   n:'Biology',            a:'#5b8a63', img:'subject-biology',            boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:7,  L:54, pop:1},
+  {k:'chem',  n:'Chemistry',          a:'#6f7a45', img:'subject-chemistry',          boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:10, L:50, pop:1},
+  {k:'phys',  n:'Physics',            a:'#46688a', img:'subject-physics',            boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:8,  L:48, pop:1},
+  {k:'cs',    n:'Computer Science',   a:'#46707a', img:'subject-computer-science',   boards:['AQA','Edexcel','OCR','Eduqas'], def:'OCR',     nu:2,  L:23, pop:1},
+  {k:'re',    n:'Religious Studies',  a:'#5a6a8a', img:'subject-religious-studies',  boards:['AQA','Edexcel','Eduqas'],       def:'AQA',     nu:8,  L:40, pop:1},
+  {k:'psych', n:'Psychology',         a:'#6a5a8a', img:'subject-psychology-aqa',     boards:['AQA'],                          def:'AQA',     nu:8,  L:32, pop:1},
+  {k:'bus',   n:'Business',           a:'#4a6a6a', img:'subject-business',           boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:2,  L:30, pop:1},
+  {k:'econ',  n:'Economics',          a:'#51707a', img:'subject-economics',          boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:6,  L:29},
+  {k:'fren',  n:'French',             a:'#9a6a4a', img:'subject-french',             boards:['AQA','Edexcel'],                def:'AQA',     nu:3,  L:26, pop:1},
+  {k:'germ',  n:'German',             a:'#6a6a4a', img:'subject-german',             boards:['AQA','Edexcel'],                def:'AQA',     nu:3,  L:26},
+  {k:'pe',    n:'Physical Education', a:'#5a7a5a', img:'subject-physical-education', boards:['AQA','Edexcel','OCR'],          def:'AQA',     nu:2,  L:30, pop:1},
+  {k:'soc',   n:'Sociology',          a:'#7a5a6a', img:'subject-citizenship',        boards:['AQA','Eduqas'],                 def:'AQA',     nu:4,  L:33},
+  {k:'drama', n:'Drama',              a:'#8a5a6a', img:'subject-drama',              boards:['AQA','Eduqas','OCR'],           def:'AQA',     nu:2,  L:14},
+  {k:'media', n:'Media Studies',      a:'#6a5a7a', img:'subject-media-studies-aqa',  boards:['AQA','Eduqas'],                 def:'AQA',     nu:4,  L:20},
+  {k:'film',  n:'Film Studies',       a:'#5a6a7a', img:'subject-film-studies',       boards:['Eduqas','WJEC'],                def:'Eduqas',  nu:3,  L:44},
+  {k:'music', n:'Music',              a:'#7a5a7a', img:'subject-music',              boards:['Eduqas','AQA','OCR'],           def:'Eduqas',  nu:6,  L:26},
+  {k:'dt',    n:'Design & Technology',a:'#7a6a4a', img:'subject-design-technology',  boards:['AQA','Eduqas','OCR'],           def:'AQA',     nu:3,  L:20},
+  {k:'food',  n:'Food Preparation',   a:'#a06a4a', img:'subject-food',               boards:['AQA','Eduqas'],                 def:'AQA',     nu:5,  L:18},
+  {k:'hsc',   n:'Health & Social Care',a:'#5a7a6a',img:'subject-health-social-care', boards:['Edexcel','OCR','Eduqas'],       def:'Edexcel', nu:3,  L:38}
+];
+var byKey={}; SUBJECTS.forEach(function(s){byKey[s.k]=s;});
+/* unit split: distribute L across nu units */
+SUBJECTS.forEach(function(s){
+  s.units=[]; var per=Math.ceil(s.L/s.nu), left=s.L;
+  for(var i=0;i<s.nu;i++){ var c=Math.min(per,left); left-=c; s.units.push({name:'Unit '+(i+1), L:c}); }
+});
+var TOTAL=SUBJECTS.reduce(function(t,s){return t+s.L;},0);
+
+/* state */
+var added=[];                 // [{k,board}]  empty = full library shown
+var trimmed={};               // k -> Set(unitIndex) deselected
+function has(k){return added.some(function(a){return a.k===k;});}
+
+/* ---------- build dot cloud once ---------- */
+var cloud=document.getElementById('dotcloud');
+var DOTS=[];
+SUBJECTS.forEach(function(s){
+  var u=0,inU=0;
+  for(var i=0;i<s.L;i++){
+    if(inU>=s.units[u].L){u++;inU=0;}
+    inU++;
+    var d=document.createElement('span');
+    d.className='dot'; d.style.setProperty('--a',s.a);
+    d._k=s.k; d._u=u;
+    cloud.appendChild(d); DOTS.push(d);
+  }
+});
+
+/* ---------- DOM refs ---------- */
+var searchEl=document.getElementById('subjSearch'), dropEl=document.getElementById('finderDrop'),
+    popularEl=document.getElementById('popular'), rowsEl=document.getElementById('shelfRows'),
+    trimListEl=document.getElementById('trimList'), grid=document.getElementById('shelfGrid'),
+    vizN=document.getElementById('vizN'), vizUnit=document.getElementById('vizUnit'),
+    vizSub=document.getElementById('vizSub'), vizCap=document.getElementById('vizCap'),
+    toTrimBtn=document.getElementById('toTrim'), stepEls=[].slice.call(document.querySelectorAll('.stepper .st')),
+    stageEls=[].slice.call(document.querySelectorAll('.stage'));
+
+/* ---------- step nav ---------- */
+var step=0;
+function go(n){
+  step=n;
+  stageEls.forEach(function(st){st.classList.toggle('show', +st.dataset.stage===n);});
+  stepEls.forEach(function(s){ var i=+s.dataset.step; s.classList.toggle('on',i===n); s.classList.toggle('done',i<n); });
+  if(n===1) renderTrim();
+  if(n===2) renderResult();
+  updateViz();
+}
+stepEls.forEach(function(s){ s.addEventListener('click',function(){ if(added.length||+s.dataset.step===0) go(+s.dataset.step); }); });
+document.getElementById('toTrim').addEventListener('click',function(){go(1);});
+document.getElementById('toShelf').addEventListener('click',function(){go(2);});
+document.getElementById('skipTrim').addEventListener('click',function(){trimmed={};go(2);});
+document.getElementById('backToSubjects').addEventListener('click',function(){go(0);});
+
+/* ---------- subject add/remove/board ---------- */
+function addSubject(k){ if(has(k))return; added.push({k:k,board:byKey[k].def}); searchEl.value=''; closeDrop(); renderSubjects(); }
+function removeSubject(k){ added=added.filter(function(a){return a.k!==k;}); delete trimmed[k]; renderSubjects(); }
+function setBoard(k,b){ var a=added.find(function(x){return x.k===k;}); if(a)a.board=b; }
+
+function renderSubjects(){
+  var pop=SUBJECTS.filter(function(s){return s.pop&&!has(s.k);}).slice(0,6);
+  popularEl.innerHTML = pop.length ? '<span class="kicker">Popular</span>'+pop.map(function(s){return '<button class="qadd" type="button" data-k="'+s.k+'"><b>+</b>'+s.n+'</button>';}).join('') : '';
+  [].forEach.call(popularEl.querySelectorAll('.qadd'),function(b){b.addEventListener('click',function(){addSubject(b.dataset.k);});});
+
+  rowsEl.innerHTML = added.length ? added.map(function(a){
+    var s=byKey[a.k];
+    var opts=s.boards.concat(['Not sure yet']).map(function(b){return '<option'+(b===a.board?' selected':'')+'>'+b+'</option>';}).join('');
+    return '<div class="srow"><span class="dotc" style="background:'+s.a+'"></span><span class="sname">'+s.n+'</span>'+
+      '<select class="bsel" data-k="'+a.k+'" aria-label="Board for '+s.n+'">'+opts+'</select>'+
+      '<button class="srm" type="button" data-k="'+a.k+'" aria-label="Remove '+s.n+'">×</button></div>';
+  }).join('') : '<p class="empty-hint">No subjects yet — search above or tap a popular one. Watch the cloud shrink as you add them.</p>';
+  [].forEach.call(rowsEl.querySelectorAll('.bsel'),function(sel){sel.addEventListener('change',function(){setBoard(sel.dataset.k,sel.value);});});
+  [].forEach.call(rowsEl.querySelectorAll('.srm'),function(b){b.addEventListener('click',function(){removeSubject(b.dataset.k);});});
+  toTrimBtn.disabled = added.length===0;
+  updateViz();
+}
+
+/* finder dropdown */
+function openDrop(){
+  var q=searchEl.value.trim().toLowerCase();
+  var m=SUBJECTS.filter(function(s){return !has(s.k)&&s.n.toLowerCase().indexOf(q)>-1;});
+  dropEl.innerHTML = m.length ? m.map(function(s){return '<button type="button" data-k="'+s.k+'">'+s.n+'<span class="fb">'+s.boards.slice(0,3).join(' · ')+(s.boards.length>3?' …':'')+'</span></button>';}).join('') : '<div class="none">No match — try another name.</div>';
+  dropEl.hidden=false;
+}
+function closeDrop(){dropEl.hidden=true;}
+searchEl.addEventListener('focus',openDrop);
+searchEl.addEventListener('input',openDrop);
+searchEl.addEventListener('keydown',function(e){ if(e.key==='Enter'){var f=dropEl.querySelector('button[data-k]'); if(f)addSubject(f.dataset.k); e.preventDefault();} else if(e.key==='Escape'){closeDrop();searchEl.blur();} });
+dropEl.addEventListener('mousedown',function(e){var b=e.target.closest('button[data-k]'); if(b){e.preventDefault();addSubject(b.dataset.k);}});
+document.addEventListener('click',function(e){ if(!e.target.closest('.finder')) closeDrop(); });
+
+/* ---------- trim step ---------- */
+function renderTrim(){
+  trimListEl.innerHTML = added.map(function(a){
+    var s=byKey[a.k]; var off=trimmed[a.k]||new Set();
+    var kept=s.units.reduce(function(t,u,i){return t+(off.has(i)?0:u.L);},0);
+    var units=s.units.map(function(u,i){return '<button class="uchip'+(off.has(i)?' off':'')+'" type="button" data-k="'+a.k+'" data-u="'+i+'" style="--a:'+s.a+'">'+u.name+' · '+u.L+'</button>';}).join('');
+    return '<div class="trim-sub" data-k="'+a.k+'"><div class="trim-head"><span class="dotc" style="background:'+s.a+'"></span>'+s.n+
+      '<span class="cnt">'+kept+' of '+s.L+' lessons</span><span class="cv">⌄</span></div><div class="trim-units">'+units+'</div></div>';
+  }).join('');
+  [].forEach.call(trimListEl.querySelectorAll('.trim-head'),function(h){h.addEventListener('click',function(){h.parentNode.classList.toggle('open');});});
+  [].forEach.call(trimListEl.querySelectorAll('.uchip'),function(c){c.addEventListener('click',function(){
+    var k=c.dataset.k,u=+c.dataset.u; if(!trimmed[k])trimmed[k]=new Set();
+    if(trimmed[k].has(u))trimmed[k].delete(u); else trimmed[k].add(u);
+    c.classList.toggle('off');
+    // update the subject's kept count
+    var head=c.closest('.trim-sub').querySelector('.cnt'); var s=byKey[k];
+    var kept=s.units.reduce(function(t,uu,i){return t+(trimmed[k].has(i)?0:uu.L);},0);
+    head.textContent=kept+' of '+s.L+' lessons';
+    updateViz();
+  });});
+}
+
+/* ---------- result tiles ---------- */
+function renderResult(){
+  grid.innerHTML = added.map(function(a){
+    var s=byKey[a.k]; var off=trimmed[a.k]||new Set();
+    var kept=s.units.reduce(function(t,u,i){return t+(off.has(i)?0:u.L);},0);
+    var bd=(a.board==='Not sure yet')?'GCSE':a.board;
+    var unitsLabel = off.size ? (s.nu-off.size)+' of '+s.nu+' units' : s.nu+' units';
+    return '<a class="tile" href="#" style="--a:'+s.a+'"><div class="thumb"><img src="/images/'+s.img+'.jpg" alt="" loading="lazy"></div>'+
+      '<div class="tbody"><span class="kicker bd">'+bd+'</span><h3>'+s.n+'</h3><div class="mt">'+unitsLabel+' · '+kept+' lessons</div></div></a>';
+  }).join('');
+}
+
+/* ---------- the prune visualisation ---------- */
+function dotIn(d){
+  if(added.length===0) return true;                 // full library
+  if(!has(d._k)) return false;                       // subject not chosen
+  var off=trimmed[d._k]; return !(off&&off.has(d._u));// unit not trimmed
+}
+function updateViz(){
+  var n=0;
+  for(var i=0;i<DOTS.length;i++){ var inS=dotIn(DOTS[i]); DOTS[i].classList.toggle('out',!inS); if(inS)n++; }
+  vizN.textContent=n.toLocaleString();
+  var nb=new Set(added.map(function(a){return a.board;}).filter(function(b){return b!=='Not sure yet';})).size;
+  var pct=Math.round((1-n/TOTAL)*100);
+  if(added.length===0){
+    vizSub.innerHTML='the whole library';
+    vizCap.innerHTML='Every dot is a lesson — every subject, every board. This is what you’d be wading through. Add your subjects and watch it shrink.';
+  } else if(step<2){
+    vizSub.innerHTML='<b>'+pct+'% less</b> to wade through';
+    vizCap.innerHTML='Just your <b>'+added.length+'</b> subject'+(added.length>1?'s':'')+(nb>1?' across <b>'+nb+'</b> boards':'')+'. Everything else has dropped away'+(step===1?' — trim units to go finer.':'.');
+  } else {
+    vizSub.innerHTML='<b>'+pct+'% less</b> to wade through';
+    vizCap.innerHTML='This is your shelf: <b>'+added.length+'</b> subject'+(added.length>1?'s':'')+', <b>'+n.toLocaleString()+'</b> lessons — and nothing else.';
+  }
+}
+
+/* ---------- misc ---------- */
+function toBuild(e){ if(e)e.preventDefault(); document.getElementById('build').scrollIntoView({behavior:'smooth',block:'start'}); setTimeout(function(){searchEl.focus({preventScroll:true});},500); }
+document.getElementById('getStarted').addEventListener('click',toBuild);
+document.getElementById('ctaBottom').addEventListener('click',toBuild);
+document.getElementById('openShelf').addEventListener('click',function(){});
+
+var mast=document.getElementById('mast');
+addEventListener('scroll',function(){mast.classList.toggle('scrolled',scrollY>8);},{passive:true});
+
+/* reveals */
+(function(){
+  var reduce=matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=[].slice.call(document.querySelectorAll('.rv'));
+  if(reduce||!('IntersectionObserver' in window)){els.forEach(function(e){e.classList.add('in');});return;}
+  var io=new IntersectionObserver(function(en,obs){var h=en.filter(function(e){return e.isIntersecting;});h.sort(function(a,b){return a.boundingClientRect.top-b.boundingClientRect.top;});h.forEach(function(e,i){setTimeout(function(){e.target.classList.add('in');},i*80);obs.unobserve(e.target);});},{threshold:.1,rootMargin:'0px 0px -6% 0px'});
+  els.forEach(function(e){io.observe(e);});
+})();
+
+/* init */
+renderSubjects();
+updateViz();
+</script>
+</body>
+</html>

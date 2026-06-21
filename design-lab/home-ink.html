@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script>document.documentElement.classList.add('js')</script>
+<title>StudyVault — your revision, taking shape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   StudyVault — Ink constellation on paper.
+   Rule (from the reader skin): colour woven THROUGH structure / data,
+   never wrapped around UI. Three colour touchpoints in the chrome:
+   the period glyph, the one solid CTA, the shelf left-rule.
+   Canvas particles coloured by subject = data encoding = allowed.
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg-body:#f7f6f4; --bg-card:#ffffff;
+  --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
+  --border-light:#e6e4e0; --border-lighter:#f0eeea;
+  --anchor:#566a72;                 /* neutral page accent: the period, focus rings, the one CTA */
+  --radius:8px; --radius-sm:6px;
+  --shadow-sm:0 1px 3px rgba(45,42,38,.06);
+  --shadow-md:0 4px 12px rgba(45,42,38,.08);
+  --shadow-lg:0 8px 24px rgba(45,42,38,.10);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --font-head:'Schibsted Grotesk',system-ui,sans-serif;  /* headings + ALL UI */
+  --font-read:'Literata',Georgia,serif;                  /* body / lede / italic subtitles */
+}
+html,body{background:var(--bg-body);color:var(--text-primary);font-family:var(--font-read);-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;overflow:hidden}
+h1,h2,h3,.ui,button,input,select,.kicker,nav,label{font-family:var(--font-head)}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer}
+:focus-visible{outline:2.5px solid var(--anchor);outline-offset:2px;border-radius:4px}
+.kicker{text-transform:uppercase;letter-spacing:.13em;font-size:.72rem;font-weight:700;color:var(--text-muted)}
+
+/* ============ PAGE GRID — the page IS the hero ============ */
+.page{height:100dvh;display:grid;grid-template-rows:auto 1fr auto;position:relative;z-index:1}
+
+/* ---------- masthead ---------- */
+.mast{display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  height:68px;padding:0 clamp(1.25rem,4vw,2.75rem);border-bottom:1px solid var(--border-light);
+  position:relative;z-index:5;background:color-mix(in srgb,var(--bg-body) 86%,transparent);backdrop-filter:saturate(1.05) blur(6px)}
+.brand{display:inline-flex;align-items:center;font-family:var(--font-head);font-weight:700;font-size:1.18rem;letter-spacing:-.01em;color:var(--text-primary)}
+.brand .logo-lock{width:.62em;height:.62em;margin-left:.18em;fill:currentColor}
+.brand .logo-lock-keyhole{fill:var(--bg-body)}
+.mast nav{display:flex;align-items:center;gap:0}
+.mast nav a{font-family:var(--font-head);font-weight:500;font-size:.92rem;color:var(--text-secondary);transition:color .18s}
+.mast nav a:hover{color:var(--text-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;text-decoration-color:color-mix(in srgb,var(--anchor) 45%,transparent)}
+.mast nav .div{display:inline-block;width:1px;height:14px;background:var(--border-light);margin:0 .9rem;vertical-align:middle}
+.btn-cta{background:var(--anchor);color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:.55rem 1rem;font-weight:600;font-size:.92rem;box-shadow:var(--shadow-sm);
+  transition:filter .18s,box-shadow .18s}
+.btn-cta:hover{filter:brightness(.94);box-shadow:var(--shadow-md)}
+.mast .right{display:flex;align-items:center;gap:1.1rem}
+
+/* ---------- stage: console LEFT, living field + gather RIGHT ---------- */
+.stage{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:flex-start}
+#field{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+/* legibility fog — PAGE COLOUR ONLY, left-anchored behind the console, fading out toward the right field */
+.fog{position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:2;
+  width:min(780px,66%);height:96%;pointer-events:none;
+  background:radial-gradient(ellipse 72% 58% at 33% 50%,
+    var(--bg-body) 0%, var(--bg-body) 44%,
+    color-mix(in srgb,var(--bg-body) 70%,transparent) 70%,
+    transparent 100%)}
+
+.console{position:relative;z-index:3;width:min(620px,54%);
+  margin-left:clamp(1.5rem,6vw,4.5rem);text-align:left;
+  display:flex;flex-direction:column;max-height:calc(100% - 28px)}
+.console .kicker{margin-bottom:.55rem}
+
+h1{font-family:var(--font-head);font-weight:700;font-size:clamp(1.7rem,3.1vw,2.6rem);
+  line-height:1.06;letter-spacing:-.02em;color:var(--text-primary)}
+h1 span{white-space:nowrap}                       /* keep each line whole — "Everything you’re studying." on one line */
+h1 .beat{color:var(--text-secondary)}
+.freeline{font-family:var(--font-ui);font-size:.82rem;font-weight:600;color:var(--text-muted);
+  letter-spacing:.01em;margin-top:.5rem}
+.lede{font-family:var(--font-read);font-size:1.04rem;color:var(--text-secondary);
+  max-width:40ch;margin:1rem 0 1.5rem;line-height:1.55}
+
+/* ---------- tutorial guide (inline, game-tutorial style) ---------- */
+.guide{margin:.7rem 0 .85rem;max-width:42ch}
+.guide-text{font-family:var(--font-head);font-weight:600;font-size:clamp(1.3rem,2.3vw,1.7rem);
+  letter-spacing:-.012em;color:var(--text-primary);line-height:1.2;min-height:0;
+  opacity:1;transition:opacity .32s ease}
+.console.started .guide-text{min-height:1.3em}
+.guide-text.gt-out{opacity:0}
+.guide-text.gt-typing::after{content:'';display:inline-block;width:2px;height:1.02em;border-radius:1px;
+  background:currentColor;margin-left:3px;vertical-align:-.14em;animation:gtcaret .85s steps(1) infinite}
+@keyframes gtcaret{50%{opacity:0}}
+.guide #beginBtn{margin-top:1.1rem}
+.console.started #beginBtn{display:none}
+
+/* ---------- picker ---------- */
+.picker{position:relative;width:100%;flex:none}
+.searchbox{position:relative}
+.searchbox.locked{display:none}                 /* hidden until the student takes over (no dead bar) */
+@keyframes searchIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.js-anim .searchbox.reveal{animation:searchIn .55s var(--ease)}
+.searchbox .ico{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);
+  width:16px;height:16px;color:var(--text-muted);pointer-events:none}
+#subjSearch{width:100%;font-family:var(--font-head);font-size:1rem;
+  padding:.85rem 1rem .85rem 2.5rem;background:#fff;color:var(--text-primary);
+  border:1px solid var(--border-light);border-radius:var(--radius-sm);box-shadow:var(--shadow-sm);
+  transition:border-color .18s,box-shadow .18s}
+#subjSearch::placeholder{color:var(--text-muted)}
+#subjSearch:focus{outline:none;border-color:var(--anchor);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--anchor) 18%,transparent)}
+@keyframes focuspulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--anchor) 48%,transparent)}100%{box-shadow:0 0 0 13px color-mix(in srgb,var(--anchor) 0%,transparent)}}
+#subjSearch.pulse{animation:focuspulse 1.5s var(--ease) 2}
+
+#sgList{position:absolute;left:0;right:0;top:calc(100% + 6px);z-index:9;
+  background:#fff;border:1px solid var(--border-light);border-radius:var(--radius-sm);
+  box-shadow:var(--shadow-md);max-height:252px;overflow:auto;text-align:left;padding:.25rem}
+#sgList[hidden]{display:none}
+#sgList .opt{display:flex;align-items:baseline;gap:.5rem;width:100%;text-align:left;
+  padding:.55rem .7rem;background:none;border:none;border-radius:var(--radius-sm);
+  font-family:var(--font-head);font-size:.95rem;color:var(--text-primary)}
+#sgList .opt .nm{font-weight:600}
+#sgList .opt .ct{margin-left:auto;font-size:.8rem;font-weight:500;color:var(--text-muted)}
+#sgList .opt.active,#sgList .opt:hover{background:var(--border-lighter)}
+#sgList .none{padding:.6rem .7rem;color:var(--text-muted);font-size:.9rem;font-family:var(--font-head)}
+
+/* ---------- chosen subjects list — scrolls within the console; .key-fact idiom rows ---------- */
+.shelf{width:100%;margin:.7rem 0 0;text-align:left;display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.4rem;align-content:start;
+  flex:0 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding-right:.2rem}
+.shelf::-webkit-scrollbar{width:8px}
+.shelf::-webkit-scrollbar-thumb{background:var(--border-light);border-radius:8px}
+.shelf{scrollbar-width:thin;scrollbar-color:var(--border-light) transparent}
+.srow{display:flex;align-items:center;gap:.5rem;padding:.46rem .5rem .46rem .62rem;
+  background:#fff;border:1px solid var(--border-light);border-radius:var(--radius-sm)}
+.js-anim .srow.fresh{animation:rowin .4s var(--ease)}
+@keyframes rowin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.srow .sdot{width:8px;height:8px;border-radius:50%;background:var(--a);flex:none}
+.srow .sname{flex:1;min-width:0;font-family:var(--font-head);font-weight:600;font-size:.9rem;
+  color:var(--text-primary);letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.srow .scount{flex:none;font-family:var(--font-head);font-weight:500;font-size:.74rem;color:var(--text-muted)}
+.srow .ssub .change{font-family:var(--font-head);font-size:.78rem;color:var(--a);background:none;border:none;
+  padding:0 0 0 .35rem;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+/* ---------- board step: each subject card gains a row of selectable exam-board chips ---------- */
+.console.boards-phase .picker,.console.options-phase .picker{display:none}   /* search bar gone once choosing boards/topics */
+.console.options-phase .shelf{grid-template-columns:1fr}                     /* one column — long topic/text lists need the width */
+.opt-hint{font-family:var(--font-head);font-size:.8rem;color:var(--text-muted);margin:-.05rem 0 .15rem}
+/* later steps hide the picker + the subject grid, and reveal the finish panel */
+.console.finish-phase .picker,.console.finish-phase .shelf,
+.console.done-phase .picker,.console.done-phase .shelf{display:none}
+.finishpanel[hidden]{display:none}
+.finishpanel{margin:.1rem 0 0}
+.fin-stat{font-family:var(--font-head);font-weight:600;font-size:1.02rem;color:var(--text-primary);margin-bottom:.5rem;letter-spacing:-.01em}
+.fin-stat b{font-weight:700}
+.fin-t{font-family:var(--font-read);font-size:.96rem;color:var(--text-secondary);line-height:1.55;max-width:46ch}
+.fin-actions{display:flex;align-items:center;gap:0;margin-top:1rem}
+.fin-div{display:inline-block;width:1px;height:13px;background:var(--border-light);margin:0 .85rem}
+.srow.brd{flex-direction:column;align-items:stretch;gap:.5rem;padding:.55rem .6rem .62rem}
+.srow.brd .srow-top{display:flex;align-items:center;gap:.5rem}
+.srow .brow{display:flex;align-items:center;gap:.34rem;flex-wrap:wrap}
+.bchip{font-family:var(--font-head);font-weight:600;font-size:.78rem;padding:.3rem .58rem;
+  border:1px solid var(--border-light);border-radius:var(--radius-sm);background:#fff;color:var(--text-secondary);
+  cursor:pointer;transition:border-color .15s,color .15s,background .15s}
+.bchip:hover{border-color:var(--anchor);color:var(--text-primary)}
+.bchip.sel{background:var(--anchor);border-color:var(--anchor);color:#fff}
+.bchip.only{cursor:default}
+.js-anim .srow.brd .brow{animation:rowin .35s var(--ease)}
+.srow .rm{flex:none;background:none;border:none;color:var(--text-muted);padding:.12rem;border-radius:var(--radius-sm);
+  display:grid;place-items:center;transition:color .15s,background .15s}
+.srow .rm:hover{color:var(--text-primary);background:var(--border-lighter)}
+.srow .rm svg{width:15px;height:15px}
+
+/* ---------- constellation labels (over canvas) ---------- */
+.labels{position:absolute;inset:0;z-index:2;pointer-events:none}
+.clabel{position:absolute;display:flex;align-items:center;gap:.4rem;
+  font-family:var(--font-head);font-weight:600;font-size:.85rem;color:var(--text-primary);white-space:nowrap;
+  transform:translate(-50%,6px);opacity:0;transition:opacity .5s var(--ease),transform .5s var(--ease)}
+.clabel.in{opacity:1;transform:translate(-50%,0)}
+.clabel .dot{width:7px;height:7px;border-radius:50%;background:var(--a);flex:none}
+/* stacked legend when crowded */
+.legend{position:absolute;z-index:2;left:50%;transform:translateX(-50%);
+  display:flex;flex-wrap:wrap;gap:.35rem .9rem;justify-content:center;max-width:520px;pointer-events:none;
+  opacity:0;transition:opacity .4s var(--ease)}
+.legend.in{opacity:1}
+.legend .li{display:flex;align-items:center;gap:.4rem;font-family:var(--font-head);font-weight:600;font-size:.82rem;color:var(--text-secondary)}
+.legend .li .dot{width:6px;height:6px;border-radius:50%;background:var(--a)}
+
+/* ---------- hover-peek card — clean catalogue card; colour ONLY in the subject icon (data), no accent edges ---------- */
+.peek{position:absolute;z-index:4;pointer-events:none;width:560px;
+  background:var(--bg-card);border:1px solid rgba(29,28,26,.13);border-radius:2px;
+  box-shadow:0 2px 4px -2px rgba(29,28,26,.10), 0 18px 34px -18px rgba(29,28,26,.20);
+  padding:.9rem;display:flex;gap:1rem;align-items:center;overflow:hidden}
+.peek[hidden]{display:none}
+@keyframes peekin{from{opacity:0;transform:translateY(5px) scale(.985)}to{opacity:1;transform:none}}
+.js-anim .peek.in{animation:peekin .2s var(--ease)}
+.peek .pk-media{flex:none;width:240px;height:auto;border-radius:1px;display:block;
+  background:var(--border-lighter);outline:1px solid rgba(29,28,26,.10);outline-offset:-1px;
+  opacity:0;transition:opacity .28s var(--ease)}
+.peek .pk-media.ld{opacity:1}
+.peek .pk-body{flex:1;min-width:0}
+.peek .pk-top{display:flex;align-items:center;justify-content:center;gap:.45rem;padding-bottom:.52rem;border-bottom:1px solid var(--border-lighter)}
+.peek .pk-icon{width:19px;height:19px;flex:none;display:block}
+.peek .pk-subj{font-family:var(--font-ui);text-transform:uppercase;letter-spacing:.11em;font-size:.64rem;
+  font-weight:700;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.peek .pk-t{display:block;font-family:var(--font-read);font-weight:600;font-size:.96rem;color:var(--text-primary);line-height:1.3;margin-top:.52rem}
+.peek .pk-u{display:block;font-family:var(--font-ui);font-size:.72rem;color:var(--text-muted);margin-top:.28rem}
+.peek .pk-d{font-family:var(--font-read);font-size:.8rem;color:var(--text-secondary);line-height:1.46;margin-top:.4rem}
+.peek .pk-in{display:flex;align-items:center;justify-content:center;gap:.8rem;margin-top:.56rem;padding-top:.5rem;
+  border-top:1px solid var(--border-lighter);font-family:var(--font-ui);font-size:.66rem;font-weight:600;color:var(--text-muted)}
+.peek .pk-in .mk{display:flex;align-items:center;gap:.28rem}
+.peek .pk-in svg{width:13px;height:13px}
+
+/* ---------- resolution block ---------- */
+.resolve{width:100%;flex:none;margin:.8rem 0 0;text-align:left;padding-top:.7rem;border-top:1px solid var(--border-light)}
+.resolve[hidden]{display:none}
+.resolve .btn-primary{padding:.58rem 1.15rem;font-size:.95rem}
+.resolve .beat{font-family:var(--font-head);font-weight:600;font-size:1.02rem;color:var(--text-primary);margin-bottom:.7rem}
+.resolve .beat b{font-weight:700}
+.btn-primary{background:var(--anchor);color:#fff;border:none;border-radius:var(--radius-sm);
+  padding:.7rem 1.4rem;font-weight:600;font-size:1rem;box-shadow:var(--shadow-sm);transition:filter .18s,box-shadow .18s}
+.btn-primary:hover{filter:brightness(.94);box-shadow:var(--shadow-md)}
+/* wizard nav: ghost Back + primary Continue, with refined SVG arrows (not the cheap unicode glyph) */
+.wiznav{display:flex;align-items:center;gap:.6rem}
+#beginBtn,#stepCta{display:inline-flex;align-items:center;gap:.5rem}
+.wiz-back{display:inline-flex;align-items:center;gap:.45rem;background:none;
+  border:1px solid var(--border-light);color:var(--text-secondary);border-radius:var(--radius-sm);
+  padding:.56rem .95rem;font-family:var(--font-head);font-weight:600;font-size:.95rem;cursor:pointer;
+  transition:border-color .15s,color .15s,background .15s}
+.wiz-back:hover{border-color:var(--text-muted);color:var(--text-primary);background:var(--border-lighter)}
+.wiz-back[hidden]{display:none}
+.cta-ico{width:17px;height:17px;flex:none;transition:transform .25s var(--ease)}
+#beginBtn:hover .cta-ico,#stepCta:hover .cta-ico{transform:translateX(3px)}
+.wiz-back:hover .cta-ico{transform:translateX(-3px)}
+.resolve .sublabel{font-family:var(--font-read);font-style:italic;font-size:.85rem;color:var(--text-muted);margin-top:.35rem}
+.resolve .secs{display:flex;align-items:center;justify-content:center;gap:0;margin-top:.7rem}
+.resolve .secs .div{display:inline-block;width:1px;height:13px;background:var(--border-light);margin:0 .85rem;vertical-align:middle}
+.linkbtn{font-family:var(--font-head);font-weight:500;font-size:.92rem;color:var(--text-secondary);background:none;border:none;padding:.2rem 0}
+.linkbtn:hover{color:var(--text-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.startlink{display:inline-block;margin-top:.6rem;font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--anchor)}
+.startlink:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.schoolbox{overflow:hidden;max-height:0;transition:max-height .3s var(--ease);margin-top:.4rem}
+.schoolbox.open{max-height:120px}
+.schoolbox .inner{display:flex;gap:.5rem;align-items:center;justify-content:center;padding-top:.7rem;flex-wrap:wrap}
+.schoolbox input{font-family:var(--font-head);font-size:.92rem;padding:.5rem .75rem;border:1px solid var(--border-light);
+  border-radius:var(--radius-sm);background:#fff;color:var(--text-primary)}
+.schoolbox input:focus{outline:none;border-color:var(--anchor);box-shadow:0 0 0 2px color-mix(in srgb,var(--anchor) 18%,transparent)}
+.schoolbox .cont{font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--anchor);background:none;border:none}
+.schoolbox .cont:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+
+/* ---------- footer ---------- */
+.foot{height:52px;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;
+  padding:0 clamp(1.25rem,4vw,2.75rem);border-top:1px solid var(--border-light);
+  position:relative;z-index:5;font-family:var(--font-head);font-size:.82rem;color:var(--text-muted)}
+.foot .sep{display:inline-block;width:1px;height:11px;background:var(--border-light);margin:0 .75rem;vertical-align:middle}
+.foot a:hover{color:var(--text-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+
+/* ---------- type entrance (gated on no-preference + .js-anim) ---------- */
+.rise{opacity:1}
+@media (prefers-reduced-motion: no-preference){
+  .js-anim .rise{opacity:0;transform:translateY(8px);transition:opacity .65s var(--ease),transform .7s var(--ease)}
+  .js-anim .rise.in{opacity:1;transform:none}
+}
+
+/* ---------- tutorial takeover: Begin clears the marketing hero, leaving one instruction line ---------- */
+.console .kicker,.console h1,.console .freeline{transition:opacity .35s ease}
+.console.started .kicker,.console.started h1,.console.started .freeline{opacity:0}
+.console.heroGone .kicker,.console.heroGone h1,.console.heroGone .freeline{display:none}
+
+/* ---------- no-JS / static picker fallback ---------- */
+.nojs-picker{max-width:520px;margin:1.25rem auto 0;text-align:left}
+.nojs-picker fieldset{border:1px solid var(--border-light);border-radius:var(--radius);padding:1rem;background:#fff}
+.nojs-picker legend{font-family:var(--font-head);font-weight:600;padding:0 .5rem;color:var(--text-primary)}
+.nojs-picker .nrow{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--border-lighter)}
+.nojs-picker .nrow:last-child{border-bottom:none}
+.nojs-picker .nrow label{flex:1;font-family:var(--font-head);font-size:.92rem}
+.nojs-picker .nrow select{font-family:var(--font-head);font-size:.82rem;padding:.25rem .4rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);background:#fff}
+.nojs-picker .nactions{margin-top:1rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.nojs-picker .nactions a{font-family:var(--font-head);font-weight:500;font-size:.92rem;color:var(--text-secondary)}
+.js .nojs-picker{display:none}
+.js .console-canvas{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
+html:not(.js) #field,html:not(.js) .fog,html:not(.js) .labels,html:not(.js) .console-canvas{display:none}
+.console-canvas{display:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:768px){
+  .stage{justify-content:center}
+  .console{width:auto;max-width:540px;margin:0 auto;text-align:center;align-items:center}
+  .console .lede{margin-left:auto;margin-right:auto}
+  .console .picker,.console .shelf,.console .resolve{text-align:left}
+  .fog{left:50%;transform:translate(-50%,-50%);width:min(660px,92%)}
+}
+@media (max-width:720px){
+  .mast nav a:not(.signin){display:none}
+  .mast nav .div{display:none}
+  .lede{font-size:1rem}
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <!-- ============ MASTHEAD ============ -->
+  <header class="mast">
+    <a class="brand" href="#" aria-label="StudyVault home">StudyVault<svg class="logo-lock" viewBox="0 0 2048 2048" aria-hidden="true"><path fill="currentColor" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/><path class="logo-lock-keyhole" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></svg></a>
+    <div class="right">
+      <nav aria-label="Primary">
+        <a href="/for-schools">For schools</a><span class="div" aria-hidden="true"></span>
+        <a href="/school-code">I have a school code</a><span class="div" aria-hidden="true"></span>
+        <a class="signin" href="/login">Sign in</a>
+      </nav>
+      <button class="btn-cta" id="mastCta" type="button">Get started</button>
+    </div>
+  </header>
+
+  <!-- ============ HERO STAGE ============ -->
+  <main class="stage">
+    <canvas id="field" aria-hidden="true"></canvas>
+    <div class="fog" aria-hidden="true"></div>
+    <div class="labels" id="labels" aria-hidden="true"></div>
+    <div class="peek" id="peek" aria-hidden="true" hidden></div>
+
+    <section class="console">
+      <p class="kicker rise" data-rise="0">Your revision, taking shape</p>
+      <h1>
+        <span class="rise" data-rise="1" style="display:block">Everything you’re studying.</span>
+        <span class="rise beat" data-rise="2" style="display:block">Nothing you’re not.</span>
+      </h1>
+      <p class="freeline">Free for students, forever.</p>
+      <div class="guide rise" data-rise="3" id="guide" aria-live="polite">
+        <p class="guide-text" id="guideText"></p>
+        <button class="btn-primary" type="button" id="beginBtn">Begin <svg class="cta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
+      </div>
+
+      <!-- canvas-driven picker (JS-enhanced) -->
+      <div class="console-canvas">
+        <div class="picker rise" data-rise="4">
+          <div class="searchbox locked" id="searchbox">
+            <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.4-4.4"/></svg>
+            <input id="subjSearch" type="text" autocomplete="off" spellcheck="false"
+              role="combobox" aria-expanded="false" aria-controls="sgList" aria-autocomplete="list"
+              aria-label="Add a subject" placeholder="Add a subject — e.g. Biology, History…">
+            <ul id="sgList" role="listbox" aria-label="Matching subjects" hidden></ul>
+          </div>
+        </div>
+        <div class="shelf" id="shelf" role="list" aria-label="Your subjects"></div>
+        <div class="finishpanel" id="finishPanel" hidden></div>
+
+        <!-- wizard nav: Back + Continue; labels/actions/visibility set in JS per step -->
+        <div class="resolve" id="resolve" hidden>
+          <div class="wiznav">
+            <button class="wiz-back" type="button" id="stepBack" hidden>
+              <svg class="cta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12H6"/><path d="M11.5 5.5 5 12l6.5 6.5"/></svg>
+              Back
+            </button>
+            <button class="btn-primary" type="button" id="stepCta"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- no-JS fallback: real, usable picker -->
+      <noscript>
+        <style>.console-canvas{display:none!important}</style>
+      </noscript>
+      <form class="nojs-picker" method="get" action="/browse">
+        <fieldset>
+          <legend>Pick your subjects</legend>
+          <div id="nojsRows"></div>
+        </fieldset>
+        <div class="nactions">
+          <button class="btn-cta" type="submit">See my subjects</button>
+          <a href="/signup">Create a free account</a>
+          <a href="/login">Sign in</a>
+          <a href="/school-code">I have a school code</a>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="foot">
+    <span>© 2026 StudyVault</span><span class="sep" aria-hidden="true"></span>
+    <span>Built by a teacher</span><span class="sep" aria-hidden="true"></span>
+    <a href="/privacy">Privacy</a><span class="sep" aria-hidden="true"></span>
+    <span>Free, always</span>
+  </footer>
+</div>
+
+<script src="_icons.js"></script>
+<script src="_catalogue.js"></script>
+<script>
+/* ===========================================================================
+   STUDYVAULT — INK CONSTELLATION
+   - particles in flat typed arrays (cache-friendly hot loop, ~3600 specks)
+   - rAF time-based motion; DPR capped at 2; pause on hidden; FPS downgrade
+   - reduced-motion: single static frame, instant converge
+   =========================================================================== */
+(function(){
+"use strict";
+
+/* ---------- real catalogue data (verbatim keys from home.html) ---------- */
+/* SUBJECTS + TITLES are loaded from _catalogue.js — the REAL live free-tier catalogue
+   (41 subjects, real boards / lesson counts / lesson titles, muted per-subject accents,
+   each with an `icon` key). Built from Supabase via scripts; see design-lab/_catalogue.json. */
+var byKey = {}; SUBJECTS.forEach(function(s){ byKey[s.k] = s; });
+
+/* the long tail of the 72-subject catalogue, neutral grey (the rest of the library) */
+var OTHER = {k:'other', n:'', a:'#9a968e', L:1800};
+
+function hexToRgb(h){ var n = parseInt(h.slice(1),16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+
+/* ---------- weighted-pick pool over full catalogue ---------- */
+var POOL = SUBJECTS.concat([OTHER]).map(function(s){
+  return { k:s.k, rgb:hexToRgb(s.a), baseA:(s.k==='other'?0.22:0.34), L:s.L };
+});
+var POOL_BYKEY = {}; POOL.forEach(function(p){ POOL_BYKEY[p.k] = p; });
+var poolIdxByKey = {}; POOL.forEach(function(p,i){ poolIdxByKey[p.k] = i; });
+var OTHER_PI = POOL.length - 1;
+var NEUTRAL_RGB = hexToRgb(OTHER.a);
+var ICON_DOTS = 220;                 // target dots per subject icon — recruit neutral specks to fill the silhouette
+var CUM = []; var ACC = 0;
+POOL.forEach(function(p){ ACC += p.L; CUM.push(ACC); });
+var TOTAL_W = ACC;
+function pickPoolIndex(){
+  var r = Math.random() * TOTAL_W;
+  for(var i=0;i<CUM.length;i++){ if(r < CUM[i]) return i; }
+  return POOL.length - 1;
+}
+
+/* ---------- environment ---------- */
+var reduceMQ = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches:false, addEventListener:function(){} };
+var reduceMotion = reduceMQ.matches;
+var touch = window.matchMedia ? window.matchMedia('(pointer: coarse)').matches : false;
+
+document.documentElement.classList.toggle('js-anim', !reduceMotion);
+
+/* ---------- DOM refs ---------- */
+var stage   = document.querySelector('.stage');
+var cvs     = document.getElementById('field');
+var ctx     = cvs.getContext('2d', { alpha:true });
+var labelsEl= document.getElementById('labels');
+var searchEl= document.getElementById('subjSearch');
+var listEl  = document.getElementById('sgList');
+var shelfEl = document.getElementById('shelf');
+var resolveEl = document.getElementById('resolve');
+var stepCta   = document.getElementById('stepCta');
+var stepBack  = document.getElementById('stepBack');
+var finishPanel = document.getElementById('finishPanel');
+var ARROW_FWD = '<svg class="cta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg>';
+var phase = 'subjects';                 // wizard phase: 'subjects' → 'boards' → 'finish' → 'done'
+var consoleEl = document.querySelector('.console');
+var h1El    = document.querySelector('h1');
+
+/* ---------- canvas particle fields (FLAT TYPED ARRAYS) ---------- */
+var DPR = Math.min(window.devicePixelRatio || 1, 2);
+var FLOW = {cap:4.0, stiff:0.02, ret:0.86};   // convergence feel — live-tunable via the dev flow tuner
+var W = 0, H = 0;
+var N = 0;                       // particle count
+// flat arrays — allocated in initParticles()
+var hx, hy, x, y, ph, sp, amp, rad, alpha, dim, tx, ty, vx, vy;   // Float32Array (vx/vy = converge spring velocity)
+var subjIdx;                     // Int16Array (index into POOL)
+var assignSub;                   // Int16Array — POOL index the dot currently ACTS as (icon grouping)
+var recruited;                   // Uint8Array — 1 if a neutral speck recruited into a subject icon
+var chosenFlag;                  // Uint8Array
+var colR, colG, colB;            // Uint8Array (per-particle colour, copied from POOL)
+
+var subjectParticleCount = {};   // slug -> count of particles assigned
+
+function pickCount(){
+  var iw = window.innerWidth;
+  if(iw >= 1024) return 3600;
+  if(iw >= 640)  return 2200;
+  return 1200;
+}
+
+function resize(){
+  var w = cvs.clientWidth, h = cvs.clientHeight;
+  cvs.width  = Math.round(w * DPR);
+  cvs.height = Math.round(h * DPR);
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  W = w; H = h;
+}
+
+function initParticles(){
+  N = pickCount();
+  // low-end mobile downgrade
+  if(touch && (navigator.hardwareConcurrency || 8) <= 4) N = 900;
+
+  hx = new Float32Array(N); hy = new Float32Array(N);
+  x  = new Float32Array(N); y  = new Float32Array(N);
+  ph = new Float32Array(N); sp = new Float32Array(N);
+  amp= new Float32Array(N); rad= new Float32Array(N);
+  alpha = new Float32Array(N); dim = new Float32Array(N);
+  tx = new Float32Array(N); ty = new Float32Array(N);
+  vx = new Float32Array(N); vy = new Float32Array(N);
+  subjIdx = new Int16Array(N);
+  assignSub = new Int16Array(N); recruited = new Uint8Array(N);
+  chosenFlag = new Uint8Array(N);
+  colR = new Uint8Array(N); colG = new Uint8Array(N); colB = new Uint8Array(N);
+
+  subjectParticleCount = {};
+  POOL.forEach(function(p){ subjectParticleCount[p.k] = 0; });
+
+  var ar = W / Math.max(H,1);
+  var cols = Math.max(1, Math.round(Math.sqrt(N * ar)));
+  var rows = Math.ceil(N / cols);
+  var i = 0;
+  for(var r=0; r<rows && i<N; r++){
+    for(var c=0; c<cols && i<N; c++, i++){
+      var phx = (c+0.5)/cols * W + (Math.random()-0.5)*(W/cols)*0.9;
+      var phy = (r+0.5)/rows * H + (Math.random()-0.5)*(H/rows)*0.9;
+      var pi  = pickPoolIndex();
+      var P   = POOL[pi];
+      hx[i]=phx; hy[i]=phy; x[i]=phx; y[i]=phy;
+      ph[i]  = Math.random()*Math.PI*2;
+      sp[i]  = 0.5 + Math.random()*0.7;
+      amp[i] = 2.2 + Math.random()*2.6;
+      rad[i] = 0.8 + Math.random()*0.9;
+      alpha[i] = P.baseA + (Math.random()-0.5)*0.12;
+      dim[i] = 0; tx[i]=0; ty[i]=0; chosenFlag[i]=0;
+      subjIdx[i] = pi; assignSub[i] = pi; recruited[i] = 0;
+      colR[i]=P.rgb[0]; colG[i]=P.rgb[1]; colB[i]=P.rgb[2];
+      subjectParticleCount[P.k]++;
+    }
+  }
+}
+
+/* ---------- ink-in stagger (per-particle alpha ramp 0->base) ---------- */
+var inkStart = 0;
+var inkOrder;            // indices sorted by (x+y) for top-left -> bottom-right bloom
+function buildInkOrder(){
+  inkOrder = new Int32Array(N);
+  for(var i=0;i<N;i++) inkOrder[i]=i;
+  // sort by x+y
+  var arr = Array.prototype.slice.call(inkOrder);
+  arr.sort(function(a,b){ return (hx[a]+hy[a]) - (hx[b]+hy[b]); });
+  for(var j=0;j<N;j++) inkOrder[j]=arr[j];
+}
+// returns 0..1 multiplier for particle i at time since inkStart (ms)
+var inkRank;             // particle index -> its rank position (0..N-1)
+function buildInkRank(){
+  inkRank = new Float32Array(N);
+  for(var j=0;j<N;j++) inkRank[inkOrder[j]] = j/N;   // 0..1
+}
+function easeOutCubic(t){ return 1 - Math.pow(1-t, 3); }
+function inkMul(i, elapsed){
+  if(elapsed >= 900) return 1;
+  var delay = inkRank[i] * 600;      // start delay
+  var local = (elapsed - delay) / 300; // ramp 300ms
+  if(local <= 0) return 0;
+  if(local >= 1) return 1;
+  return easeOutCubic(local);
+}
+
+/* ---------- chosen state ---------- */
+var order = [];              // chosen slugs in pick order
+function anyChosen(){ return order.length > 0; }
+function consoleTopY(){
+  // y of the console top relative to the stage, for cluster centre placement
+  var sr = stage.getBoundingClientRect();
+  var cr = consoleEl.getBoundingClientRect();
+  return cr.top - sr.top;
+}
+
+/* ---------- subject icons: a picked subject's dots settle into a bold ink silhouette ----------
+   ICON_DRAW (+ helpers) live in the shared _icons.js (loaded above) — single source of truth,
+   reused by the icon viewer (icons.html) so the two never drift. */
+function iconKey(slug){ var s=byKey[slug]; var k = s && s.icon; return (k && ICON_DRAW[k]) ? k : '_default'; }
+var iconCache = {};
+function iconPoints(slug){                               // normalised [x,y] (0..1) filled-pixel points, cached by icon key
+  var key = iconKey(slug);
+  if(iconCache[key]) return iconCache[key];
+  var S=104, oc=document.createElement('canvas'); oc.width=S; oc.height=S;
+  var o=oc.getContext('2d'); o.fillStyle='#000'; ICON_DRAW[key](o,S);
+  var d=o.getImageData(0,0,S,S).data, pts=[];
+  for(var yy=0;yy<S;yy++) for(var xx=0;xx<S;xx++){ if(d[(yy*S+xx)*4+3]>128) pts.push([xx/S, yy/S]); }
+  if(!pts.length) pts.push([0.5,0.5]);
+  // shuffle once: decorrelates dot-index from pixel-position so even-stride sampling can't form a diagonal
+  // moiré on repeating vertical structures (e.g. Classical Civ columns)
+  for(var a=pts.length-1; a>0; a--){ var b=(Math.random()*(a+1))|0, tmp=pts[a]; pts[a]=pts[b]; pts[b]=tmp; }
+  iconCache[key]=pts; return pts;
+}
+
+/* ---------- right-zone gallery: one icon cell per chosen subject ---------- */
+function rightZoneStart(){
+  if(W < 768) return W*0.08;
+  var cr=consoleEl.getBoundingClientRect(), sr=stage.getBoundingClientRect();
+  return Math.max((cr.right - sr.left) + 40, W*0.46);
+}
+function gridLayout(m){
+  var x0=rightZoneStart(), x1=W-28, y0=70, y1=H-44;
+  var cols = m<=1?1 : (m<=4?2 : 3), rows=Math.ceil(m/cols);
+  var cw=(x1-x0)/cols, chh=(y1-y0)/rows;
+  var size=Math.max(58, Math.min(cw*0.66, chh*0.58, 170));
+  var cells=[];
+  for(var j=0;j<m;j++){ var r=Math.floor(j/cols), c=j%cols;
+    cells.push({ cx:x0+(c+0.5)*cw, cy:y0+(r+0.5)*chh, size:size }); }
+  return cells;
+}
+
+/* ---------- converge target assignment: each subject's dots FILL its icon ---------- */
+function assignTargets(){
+  var m=order.length; if(m===0) return;
+  var cells=gridLayout(m);
+  order.forEach(function(slug, j){
+    var cell=cells[j], pts=iconPoints(slug), np=pts.length, half=cell.size/2, pi=poolIdxByKey[slug];
+    var dots=[];
+    for(var i=0;i<N;i++){ if(chosenFlag[i] && assignSub[i]===pi) dots.push(i); }
+    var cnt=dots.length||1;
+    for(var di=0; di<dots.length; di++){
+      var p=pts[ Math.floor(di*np/cnt) % np ], i=dots[di];
+      tx[i]=cell.cx - half + p[0]*cell.size + (Math.random()-0.5)*2.0;
+      ty[i]=cell.cy - half + p[1]*cell.size + (Math.random()-0.5)*2.0;
+    }
+  });
+}
+
+/* ---------- per-frame update + draw ---------- */
+var mouseOn = false, mx = 0, my = 0;
+var raf = 0, last = 0, t = 0;
+var running = false;
+
+// FPS probe → downgrade
+var fpsAccum = 0, fpsFrames = 0, downgraded = false;
+
+function frame(now){
+  if(!running) return;
+  var dt = Math.min((now - last)/1000, 0.033);
+  last = now; t += dt;
+
+  // FPS probe over first ~1.2s of running
+  if(!downgraded){
+    fpsAccum += dt; fpsFrames++;
+    if(fpsAccum > 1.2 && fpsFrames > 20){
+      var fps = fpsFrames / fpsAccum;
+      if(fps < 45 && N > 1200){
+        downgrade();
+      }
+      downgraded = true;
+    }
+  }
+
+  var elapsed = now - inkStart;
+  var inking = elapsed < 900;
+  var anyC = anyChosen();
+
+  ctx.clearRect(0,0,W,H);
+
+  // FIELD pass (unchosen) then CHOSEN pass on top
+  var k, baseA;
+  for(k=0;k<N;k++){
+    if(chosenFlag[k]) continue;
+    // drift / breathe — ~2x faster than spec (perceptible-but-calm ~14-22s period)
+    var bx = Math.sin(t*0.36*sp[k] + ph[k]) * amp[k];
+    var by = Math.cos(t*0.30*sp[k] + ph[k]*1.3) * amp[k];
+    var dtx = hx[k] + bx, dty = hy[k] + by;
+    var lf = 1 - Math.pow(0.02, dt);
+    if(mouseOn && !touch){
+      if(k === peekIdx){          // the one nearest the cursor is DRAWN IN so you can read it
+        dtx = mx; dty = my; lf = 1 - Math.pow(0.0009, dt);   // firmer pull toward the cursor
+      } else {                    // everything else parts away from the cursor
+        var ddx = dtx - mx, ddy = dty - my, d2 = ddx*ddx + ddy*ddy;
+        if(d2 < 8100){ var d = Math.sqrt(d2)||1, f = (90-d)/90*16; dtx += ddx/d*f; dty += ddy/d*f; }
+      }
+    }
+    x[k] += (dtx - x[k]) * lf;
+    y[k] += (dty - y[k]) * lf;
+    // recede
+    var dimT = anyC ? 1 : 0;
+    dim[k] += (dimT - dim[k]) * (1 - Math.pow(0.25, dt));
+    baseA = alpha[k] * (1 - dim[k]*0.78);
+    if(inking) baseA *= inkMul(k, elapsed);
+    if(baseA < 0.012) continue;
+    ctx.globalAlpha = baseA;
+    ctx.fillStyle = 'rgb('+colR[k]+','+colG[k]+','+colB[k]+')';
+    ctx.beginPath();
+    ctx.arc(x[k], y[k], rad[k], 0, 6.283185);
+    ctx.fill();
+  }
+  // chosen pass (on top, brighter, thicker)
+  for(k=0;k<N;k++){
+    if(!chosenFlag[k]) continue;
+    // slow, even flow: a soft spring + a velocity cap so dots GLIDE in at a steady pace, then ease the last bit (no snap)
+    var f = 60*dt;                                  // frame-rate normalise
+    vx[k] = vx[k]*Math.pow(FLOW.ret,f) + (tx[k]-x[k])*FLOW.stiff*f;
+    vy[k] = vy[k]*Math.pow(FLOW.ret,f) + (ty[k]-y[k])*FLOW.stiff*f;
+    var vcap = FLOW.cap*f, vsp = Math.sqrt(vx[k]*vx[k]+vy[k]*vy[k]);   // steady glide — never a rush
+    if(vsp > vcap){ var vm = vcap/vsp; vx[k]*=vm; vy[k]*=vm; }
+    x[k] += vx[k]; y[k] += vy[k];
+    if(Math.abs(vx[k])<0.06 && Math.abs(vy[k])<0.06){   // settled → faint living drift, never frozen
+      x[k] += Math.sin(t*0.6 + ph[k]) * 0.1;
+      y[k] += Math.cos(t*0.5 + ph[k]) * 0.1;
+    }
+    baseA = Math.min(alpha[k]*2.1, 0.92);
+    if(inking) baseA *= inkMul(k, elapsed);
+    if(baseA < 0.012) continue;
+    ctx.globalAlpha = baseA;
+    ctx.fillStyle = 'rgb('+colR[k]+','+colG[k]+','+colB[k]+')';
+    ctx.beginPath();
+    ctx.arc(x[k], y[k], rad[k]*1.6, 0, 6.283185);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  // hover-peek highlight ring (delight layer)
+  if(peekIdx >= 0 && peekIdx < N){
+    ctx.lineWidth = 1.4; ctx.globalAlpha = 0.95;
+    ctx.strokeStyle = 'rgb('+colR[peekIdx]+','+colG[peekIdx]+','+colB[peekIdx]+')';
+    ctx.beginPath(); ctx.arc(x[peekIdx], y[peekIdx], 6.5, 0, 6.283185); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  positionLabels();
+  raf = requestAnimationFrame(frame);
+}
+
+function startLoop(){
+  if(running || reduceMotion) return;
+  running = true; last = performance.now();
+  raf = requestAnimationFrame(frame);
+}
+function stopLoop(){ running = false; if(raf) cancelAnimationFrame(raf); raf = 0; }
+
+function downgrade(){
+  // halve particle count cheaply: keep first half, but easiest is re-seed at lower N
+  // re-seed: recompute with reduced cap
+  var prevN = N;
+  // crude but effective: drop count and re-init
+  var cap = Math.max(900, Math.floor(prevN * 0.6));
+  pickCount = function(){ return cap; };
+  initParticles();
+  buildInkOrder(); buildInkRank();
+  // re-claim chosen + retarget
+  order.forEach(function(slug){ claimSubject(slug); });
+  assignTargets();
+}
+
+/* ---------- reduced-motion: single static frame ---------- */
+function drawOnce(){
+  ctx.clearRect(0,0,W,H);
+  var anyC = anyChosen();
+  var k, baseA;
+  for(k=0;k<N;k++){
+    if(chosenFlag[k]) continue;
+    baseA = alpha[k] * (anyC ? 0.22 : 1);
+    if(baseA < 0.012) continue;
+    ctx.globalAlpha = baseA;
+    ctx.fillStyle = 'rgb('+colR[k]+','+colG[k]+','+colB[k]+')';
+    ctx.beginPath(); ctx.arc(x[k], y[k], rad[k], 0, 6.283185); ctx.fill();
+  }
+  for(k=0;k<N;k++){
+    if(!chosenFlag[k]) continue;
+    baseA = Math.min(alpha[k]*2.1, 0.92);
+    ctx.globalAlpha = baseA;
+    ctx.fillStyle = 'rgb('+colR[k]+','+colG[k]+','+colB[k]+')';
+    ctx.beginPath(); ctx.arc(x[k], y[k], rad[k]*1.6, 0, 6.283185); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+  positionLabels();
+}
+function snapChosenToTargets(){
+  for(var i=0;i<N;i++){ if(chosenFlag[i]){ x[i]=tx[i]; y[i]=ty[i]; } }
+}
+
+/* ---------- constellation labels (real DOM, hairline accent tick) ---------- */
+var labelNodes = {};   // slug -> element
+function spawnLabel(slug){
+  var s = byKey[slug];
+  if(!s) return;
+  var el = document.createElement('div');
+  el.className = 'clabel';
+  el.style.setProperty('--a', s.a);
+  el.innerHTML = '<span class="dot" aria-hidden="true"></span><span class="nm">'+s.n+'</span>';
+  labelsEl.appendChild(el);
+  labelNodes[slug] = el;
+  positionLabels();
+  // fade in after the gather begins
+  setTimeout(function(){ if(labelNodes[slug]) labelNodes[slug].classList.add('in'); }, reduceMotion ? 0 : 250);
+}
+function removeLabel(slug){
+  var el = labelNodes[slug];
+  if(!el) return;
+  el.classList.remove('in');
+  delete labelNodes[slug];
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 320);
+}
+var legendEl = null;
+function clearLegend(){ if(legendEl && legendEl.parentNode){ legendEl.parentNode.removeChild(legendEl); } legendEl = null; }
+
+function positionLabels(){
+  var m = order.length;
+  if(m === 0){ clearLegend(); return; }
+  clearLegend();
+  var cells = gridLayout(m);
+  order.forEach(function(slug, j){
+    var el = labelNodes[slug]; if(!el) return;
+    var cell = cells[j];
+    el.style.display = '';
+    el.style.left = cell.cx + 'px';
+    el.style.right = '';
+    el.style.top = (cell.cy + cell.size*0.5 + 14) + 'px';
+  });
+}
+
+/* ---------- shelf rendering ---------- */
+function totalLessons(){
+  return order.reduce(function(sum, slug){ return sum + byKey[slug].L; }, 0);
+}
+var RM_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+function bindRemoveButtons(){
+  Array.prototype.forEach.call(shelfEl.querySelectorAll('.rm'), function(btn){
+    btn.addEventListener('click', function(){ removeSubject(btn.dataset.k); });
+  });
+}
+function renderShelf(){
+  if(phase === 'boards'){ renderBoardShelf(); return; }
+  if(phase === 'options'){ renderOptionsShelf(); return; }
+  shelfEl.innerHTML = order.map(function(slug){
+    var s = byKey[slug];
+    return '<div class="srow fresh" role="listitem" style="--a:'+s.a+'">'+
+      '<span class="sdot" aria-hidden="true"></span>'+
+      '<span class="sname">'+s.n+'</span>'+
+      '<span class="scount">'+s.L+'</span>'+
+      '<button class="rm" type="button" data-k="'+slug+'" aria-label="Remove '+s.n+'">'+RM_SVG+'</button></div>';
+  }).join('');
+  bindRemoveButtons();
+  // strip the fresh class after the animation so re-render doesn't re-fire all rows
+  setTimeout(function(){
+    Array.prototype.forEach.call(shelfEl.querySelectorAll('.srow.fresh'), function(r){ r.classList.remove('fresh'); });
+  }, 450);
+}
+/* board step: same grid, but each subject card carries a row of selectable exam-board chips */
+function renderBoardShelf(){
+  shelfEl.innerHTML = order.map(function(slug){
+    var s = byKey[slug], boards = (s.boards && s.boards.length) ? s.boards : [s.def];
+    var single = boards.length <= 1;
+    var chips = boards.map(function(b){
+      var sel = chosenBoard[slug] === b;
+      return '<button class="bchip'+(sel?' sel':'')+(single?' only':'')+'" type="button" '
+        + 'data-k="'+slug+'" data-b="'+b+'"'+(single?' tabindex="-1" aria-disabled="true"':'')+'>'+b+'</button>';
+    }).join('');
+    return '<div class="srow brd" role="listitem" style="--a:'+s.a+'">'+
+      '<div class="srow-top">'+
+        '<span class="sdot" aria-hidden="true"></span>'+
+        '<span class="sname">'+s.n+'</span>'+
+        '<button class="rm" type="button" data-k="'+slug+'" aria-label="Remove '+s.n+'">'+RM_SVG+'</button>'+
+      '</div>'+
+      '<div class="brow" role="group" aria-label="Exam board for '+s.n+'">'+chips+'</div>'+
+    '</div>';
+  }).join('');
+  bindRemoveButtons();
+  Array.prototype.forEach.call(shelfEl.querySelectorAll('.bchip'), function(btn){
+    if(btn.classList.contains('only')) return;
+    btn.addEventListener('click', function(){ setBoard(btn.dataset.k, btn.dataset.b); });
+  });
+}
+function setBoard(slug, b){
+  chosenBoard[slug] = b;
+  // toggle just this subject's chips in place (no full re-render → no flicker)
+  Array.prototype.forEach.call(shelfEl.querySelectorAll('.bchip[data-k="'+slug+'"]'), function(c){
+    c.classList.toggle('sel', c.dataset.b === b);
+  });
+}
+
+/* ---------- per-subject options step (History topics, English Lit set texts, RS religions/themes) ---------- */
+var chosenTopics = {};              // slug -> array of chosen topic/text names
+var OPT_NOUN = {'English Literature':'set texts','History':'topics','Religious Studies':'topics and religions'};
+function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+function escTxt(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function subjOptions(slug){         // board-specific option list, or null if this subject has none
+  var s = byKey[slug], o = (typeof OPTIONS !== 'undefined') ? OPTIONS[s.n] : null;
+  return (o && o[chosenBoard[slug]] && o[chosenBoard[slug]].length) ? o[chosenBoard[slug]] : null;
+}
+function hasAnyOptions(){ return order.some(function(slug){ return !!subjOptions(slug); }); }
+function renderOptionsShelf(){
+  shelfEl.innerHTML = order.map(function(slug){
+    var s = byKey[slug], opts = subjOptions(slug);
+    if(!opts) return '';                                   // only option-bearing subjects appear here
+    var sel = chosenTopics[slug] || (chosenTopics[slug] = []);
+    var noun = OPT_NOUN[s.n] || 'topics';
+    var chips = opts.map(function(o){
+      var on = sel.indexOf(o) !== -1;
+      return '<button class="bchip'+(on?' sel':'')+'" type="button" data-k="'+slug+'" data-o="'+escAttr(o)+'">'+escTxt(o)+'</button>';
+    }).join('');
+    return '<div class="srow brd opt" role="listitem" style="--a:'+s.a+'">'+
+      '<div class="srow-top"><span class="sdot" aria-hidden="true"></span><span class="sname">'+escTxt(s.n)+'</span></div>'+
+      '<p class="opt-hint">Tap the '+noun+' you’re studying</p>'+
+      '<div class="brow" role="group" aria-label="'+noun+' for '+escAttr(s.n)+'">'+chips+'</div>'+
+    '</div>';
+  }).join('');
+  Array.prototype.forEach.call(shelfEl.querySelectorAll('.bchip'), function(btn){
+    btn.addEventListener('click', function(){ toggleTopic(btn.dataset.k, btn.dataset.o, btn); });
+  });
+}
+function toggleTopic(slug, topic, btn){
+  var arr = chosenTopics[slug] || (chosenTopics[slug] = []);
+  var i = arr.indexOf(topic);
+  if(i === -1){ arr.push(topic); btn.classList.add('sel'); }
+  else { arr.splice(i, 1); btn.classList.remove('sel'); }
+}
+
+function renderResolution(){ /* bottom CTA is managed by setWizNav / the wizard phase now */ }
+function setWizNav(ctaLabel, ctaFn, backFn){    // primary Continue + optional ghost Back
+  if(!stepCta) return;
+  stepCta.innerHTML = ctaLabel + ARROW_FWD;
+  stepCta.onclick = ctaFn;
+  if(backFn){ stepBack.hidden = false; stepBack.onclick = backFn; }
+  else { stepBack.hidden = true; stepBack.onclick = null; }
+  resolveEl.hidden = false;
+}
+/* apply per-phase visibility: which of picker / shelf / finish-panel show */
+function applyPhase(){
+  consoleEl.classList.remove('boards-phase','options-phase','finish-phase','done-phase');
+  if(phase !== 'subjects') consoleEl.classList.add(phase + '-phase');
+  finishPanel.hidden = !(phase === 'finish' || phase === 'done');
+}
+function enterSubjectStep(){    // step 1 (also: Back from boards)
+  if(phase === 'subjects') return;
+  phase = 'subjects'; applyPhase();
+  setGuide(LINE2);                                                 // "Now add the subjects you've chosen."
+  renderShelf();
+  setWizNav('Next: exam boards', enterBoardStep, null);
+}
+function enterBoardStep(){      // step 2
+  if(phase === 'boards') return;
+  phase = 'boards'; applyPhase();
+  order.forEach(function(slug){ if(!chosenBoard[slug]) chosenBoard[slug] = byKey[slug].def; });   // sensible defaults
+  setGuide([{t:'Now add the exam boards your school studies.'}]);
+  renderShelf();
+  setWizNav('Continue', afterBoards, enterSubjectStep);
+}
+function afterBoards(){ hasAnyOptions() ? enterOptionsStep() : enterFinishStep(); }   // some subjects need topics/texts
+function enterOptionsStep(){    // step 3 — topics / set texts (only for subjects that have them)
+  if(phase === 'options') return;
+  phase = 'options'; applyPhase();
+  order.forEach(function(slug){ if(subjOptions(slug) && !chosenTopics[slug]) chosenTopics[slug] = []; });
+  setGuide([{t:'Now pick your topics and set texts.'}]);
+  renderShelf();
+  setWizNav('Continue', enterFinishStep, enterBoardStep);
+}
+function enterFinishStep(){     // step 4 — save your shelf
+  if(phase === 'finish') return;
+  phase = 'finish'; applyPhase();
+  setGuide([{t:'One last thing — save your shelf.'}]);
+  renderFinishPanel();
+  setWizNav('Create free account', function(){ enterDone('account'); }, function(){ hasAnyOptions() ? enterOptionsStep() : enterBoardStep(); });
+}
+function enterDone(via){        // step 4 — done / start
+  phase = 'done'; applyPhase();
+  setGuide([{t:'You’re all set.'}]);
+  renderDonePanel(via || 'guest');
+  setWizNav('Start revising', startRevising, enterFinishStep);
+}
+function startRevising(){ /* prototype end — in production this lands in /browse with the chosen shelf */ }
+
+function renderFinishPanel(){
+  var n = order.length, lc = totalLessons();
+  finishPanel.innerHTML =
+    '<p class="fin-stat"><b>'+n+'</b> subject'+(n===1?'':'s')+' · <b>'+lc.toLocaleString()+'</b> lessons — your shelf is ready.</p>'+
+    '<p class="fin-t">Create a free account to keep your shelf and your progress on every device. You don’t need one to start.</p>'+
+    '<div class="fin-actions">'+
+      '<button class="linkbtn" type="button" id="codeToggle" aria-expanded="false" aria-controls="schoolbox2">I have a school code</button>'+
+      '<span class="fin-div" aria-hidden="true"></span>'+
+      '<button class="linkbtn" type="button" id="skipSave">Start without saving</button>'+
+    '</div>'+
+    '<div class="schoolbox" id="schoolbox2"><div class="inner">'+
+      '<input id="schoolCode2" type="text" placeholder="Enter your school code" aria-label="School code">'+
+      '<button class="cont" type="button" id="codeGo">Continue</button>'+
+    '</div></div>';
+  document.getElementById('skipSave').addEventListener('click', function(){ enterDone('guest'); });
+  var ct = document.getElementById('codeToggle'), sb = document.getElementById('schoolbox2');
+  ct.addEventListener('click', function(){
+    var open = sb.classList.toggle('open');
+    ct.setAttribute('aria-expanded', open ? 'true' : 'false');
+    if(open) setTimeout(function(){ var i=document.getElementById('schoolCode2'); if(i) i.focus(); }, 240);
+  });
+  document.getElementById('codeGo').addEventListener('click', function(){ enterDone('school'); });
+}
+function renderDonePanel(via){
+  var msg = via === 'school'  ? 'Your school code is linked — your shelf is saved.'
+          : via === 'account' ? 'Your shelf is saved to your free account.'
+          :                     'Your shelf is saved on this device.';
+  finishPanel.innerHTML = '<p class="fin-t">'+msg+' Pick up exactly where you leave off, any time.</p>';
+}
+
+/* ---------- claim / release specks for a subject's icon (recruit neutral specks to fill) ---------- */
+function claimSubject(slug){
+  var pi = poolIdxByKey[slug], rgb = POOL[pi].rgb, have = 0, i;
+  for(i=0;i<N;i++){ if(subjIdx[i]===pi){ chosenFlag[i]=1; assignSub[i]=pi; have++; } }   // native specks
+  for(i=0; i<N && have<ICON_DOTS; i++){                                                  // recruit free neutral specks
+    if(chosenFlag[i] || subjIdx[i]!==OTHER_PI) continue;
+    chosenFlag[i]=1; assignSub[i]=pi; recruited[i]=1;
+    colR[i]=rgb[0]; colG[i]=rgb[1]; colB[i]=rgb[2];
+    have++;
+  }
+}
+function releaseSubject(slug){
+  var pi = poolIdxByKey[slug], i;
+  for(i=0;i<N;i++){
+    if(chosenFlag[i] && assignSub[i]===pi){
+      chosenFlag[i]=0; tx[i]=0; ty[i]=0; vx[i]=0; vy[i]=0;
+      if(recruited[i]){ recruited[i]=0; colR[i]=NEUTRAL_RGB[0]; colG[i]=NEUTRAL_RGB[1]; colB[i]=NEUTRAL_RGB[2]; }
+      assignSub[i]=subjIdx[i];
+    }
+  }
+}
+
+/* ---------- add / remove ---------- */
+var chosenBoard = {};   // slug -> board
+/* compulsory GCSEs every student sits — pre-loaded onto the shelf (board defaults to AQA, changeable) */
+var CORE = [
+  {k:'maths-ocr',               board:'AQA'},
+  {k:'english-literature-aqa',  board:'AQA'},
+  {k:'english-language-ocr',    board:'AQA'},
+  {k:'science-aqa',             board:'AQA'}   /* Combined Science */
+];
+/* add ONE core subject (gathers its icon + shelf row), used by the paced tutorial */
+function addCore(c){
+  if(!byKey[c.k] || order.indexOf(c.k)!==-1) return;
+  order.push(c.k); chosenBoard[c.k]=c.board;
+  claimSubject(c.k); assignTargets();
+  if(reduceMotion){ snapChosenToTargets(); drawOnce(); }
+  renderShelf(); spawnLabel(c.k);
+}
+
+/* ---------- the inline tutorial (game-tutorial style: Begin → core eases in one at a time → your turn) ---------- */
+var guideEl   = document.getElementById('guide');
+var guideText = document.getElementById('guideText');
+var beginBtn  = document.getElementById('beginBtn');
+var searchBox = document.getElementById('searchbox');
+/* ---------- instruction line: fade the old out, then type the new in, character by character ---------- */
+var LINE1 = [{t:'Let’s add in the four that everyone takes.'}];
+var LINE2 = [{t:'Now add the subjects '},{t:'you’ve',b:true},{t:' chosen.'}];
+var TYPE_MS = 38;                  // per-character typing speed
+var typeTimer = 0;
+function segHTML(segs){ return segs.map(function(s){ return s.b ? '<b>'+s.t+'</b>' : s.t; }).join(''); }
+function typeText(segs, done){     // type segments in one character at a time, with a blinking caret
+  clearTimeout(typeTimer);
+  guideText.innerHTML = '';
+  guideText.classList.add('gt-typing');
+  var si = 0, ci = 0, node = null;
+  (function tick(){
+    if(si >= segs.length){ guideText.classList.remove('gt-typing'); if(done) done(); return; }
+    var seg = segs[si];
+    if(ci === 0){ node = seg.b ? document.createElement('b') : document.createTextNode(''); guideText.appendChild(node); }
+    node.textContent += seg.t.charAt(ci);
+    if(++ci >= seg.t.length){ si++; ci = 0; }
+    typeTimer = setTimeout(tick, TYPE_MS);
+  })();
+}
+function setGuide(segs, done){     // fade current line away, then type the new one
+  if(reduceMotion){ guideText.innerHTML = segHTML(segs); if(done) done(); return; }
+  clearTimeout(typeTimer);
+  guideText.classList.add('gt-out');                 // fade the old text out first
+  setTimeout(function(){
+    guideText.classList.remove('gt-out');
+    typeText(segs, done);                            // ...then type the new text in
+  }, 360);
+}
+function runTutorial(){
+  consoleEl.classList.add('started');               // fade the marketing hero, hide Begin
+  if(reduceMotion){
+    consoleEl.classList.add('heroGone');
+    guideText.innerHTML = segHTML(LINE1);
+    CORE.forEach(addCore);
+    finishTutorial();
+    return;
+  }
+  // let the hero fade out, collapse it, then type the first instruction line in
+  setTimeout(function(){
+    consoleEl.classList.add('heroGone');
+    typeText(LINE1, function(){
+      // once the line has finished typing, ease the cores in one at a time — unhurried (~3.3s apart)
+      var i = 0;
+      (function next(){
+        if(i >= CORE.length){ setTimeout(finishTutorial, 1700); return; }
+        addCore(CORE[i]); i++;
+        setTimeout(next, 2500);
+      })();
+    });
+  }, 460);
+}
+function finishTutorial(){
+  searchBox.classList.remove('locked'); searchBox.classList.add('reveal');   // search fades in now
+  setGuide(LINE2);                                   // fade line 1, type line 2
+  setWizNav('Next: exam boards', enterBoardStep, null);   // reveal the step-forward button (no Back on step 1)
+  // a slower, more deliberate ring around the search bar so it's clearly noticed (twice)
+  if(!reduceMotion){
+    setTimeout(function(){ searchEl.classList.remove('pulse'); void searchEl.offsetWidth; searchEl.classList.add('pulse'); }, 1500);
+    setTimeout(function(){ searchEl.classList.remove('pulse'); }, 4600);
+  }
+}
+beginBtn.addEventListener('click', runTutorial);
+function addSubject(slug){
+  if(order.indexOf(slug) !== -1) return;
+  if(!byKey[slug]) return;
+  order.push(slug);                 // boards are deferred to a later step
+  claimSubject(slug);
+  assignTargets();
+  if(reduceMotion){ snapChosenToTargets(); drawOnce(); }
+  renderShelf(); renderResolution(); spawnLabel(slug);
+  searchEl.value=''; closeList(); searchEl.focus();   // ready for the next subject
+}
+function removeSubject(slug){
+  var pos = order.indexOf(slug);
+  if(pos === -1) return;
+  order.splice(pos, 1);
+  delete chosenBoard[slug];
+  releaseSubject(slug);
+  if(order.length) assignTargets();
+  if(reduceMotion){ snapChosenToTargets(); drawOnce(); }
+  renderShelf(); renderResolution(); removeLabel(slug);
+}
+
+/* ---------- combobox (keyboard-first) ---------- */
+var activeIdx = -1, matches = [];
+function filterSubjects(q){
+  q = q.trim().toLowerCase();
+  return SUBJECTS.filter(function(s){
+    return order.indexOf(s.k) === -1 && s.n.toLowerCase().indexOf(q) > -1;
+  }).slice(0, 6);
+}
+function openList(){
+  matches = filterSubjects(searchEl.value);
+  activeIdx = -1;
+  if(matches.length === 0){
+    listEl.innerHTML = '<li class="none" role="presentation">No match — try another name.</li>';
+  } else {
+    listEl.innerHTML = matches.map(function(s, i){
+      return '<li class="opt" role="option" id="opt-'+s.k+'" data-k="'+s.k+'" aria-selected="false">'+
+        '<span class="nm">'+s.n+'</span><span class="ct">'+s.L+' lessons</span></li>';
+    }).join('');
+  }
+  listEl.hidden = false;
+  searchEl.setAttribute('aria-expanded', 'true');
+}
+function closeList(){
+  listEl.hidden = true;
+  searchEl.setAttribute('aria-expanded', 'false');
+  searchEl.removeAttribute('aria-activedescendant');
+  activeIdx = -1;
+}
+function highlight(i){
+  var opts = listEl.querySelectorAll('.opt');
+  opts.forEach(function(o){ o.classList.remove('active'); o.setAttribute('aria-selected','false'); });
+  if(i >= 0 && i < opts.length){
+    opts[i].classList.add('active');
+    opts[i].setAttribute('aria-selected','true');
+    searchEl.setAttribute('aria-activedescendant', opts[i].id);
+    opts[i].scrollIntoView({block:'nearest'});
+  }
+}
+searchEl.addEventListener('focus', openList);
+searchEl.addEventListener('input', openList);
+searchEl.addEventListener('keydown', function(e){
+  if(e.key === 'ArrowDown'){ e.preventDefault(); if(listEl.hidden) openList(); if(matches.length){ activeIdx = (activeIdx+1) % matches.length; highlight(activeIdx); } }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); if(matches.length){ activeIdx = (activeIdx-1+matches.length) % matches.length; highlight(activeIdx); } }
+  else if(e.key === 'Enter'){ e.preventDefault(); var pick = activeIdx>=0 ? matches[activeIdx] : matches[0]; if(pick) addSubject(pick.k); }
+  else if(e.key === 'Escape'){ closeList(); }
+});
+listEl.addEventListener('mousedown', function(e){
+  var li = e.target.closest('.opt'); if(li){ e.preventDefault(); addSubject(li.dataset.k); }
+});
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.picker')) closeList();
+});
+
+/* ---------- masthead CTA ---------- */
+document.getElementById('mastCta').addEventListener('click', function(){ searchEl.focus(); });
+
+/* ---------- no-JS fallback rows (also harmless when JS on; hidden via CSS) ---------- */
+(function buildNojs(){
+  var host = document.getElementById('nojsRows');
+  if(!host) return;
+  host.innerHTML = SUBJECTS.map(function(s){
+    var board = s.boards.length>1
+      ? '<select name="board_'+s.k+'">'+s.boards.map(function(b){return '<option'+(b===s.def?' selected':'')+'>'+b+'</option>';}).join('')+'</select>'
+      : '<span style="font-size:.82rem;color:var(--text-muted)">'+s.boards[0]+'</span>';
+    return '<div class="nrow"><input type="checkbox" id="nojs-'+s.k+'" name="subjects" value="'+s.k+'">'+
+      '<label for="nojs-'+s.k+'">'+s.n+'</label>'+board+'</div>';
+  }).join('');
+})();
+
+/* ---------- type entrance choreography ---------- */
+function runEntrance(){
+  if(reduceMotion){
+    Array.prototype.forEach.call(document.querySelectorAll('.rise'), function(el){ el.classList.add('in'); });
+    return;
+  }
+  var schedule = [
+    {sel:'[data-rise="0"]', at:200},
+    {sel:'[data-rise="1"]', at:320},
+    {sel:'[data-rise="2"]', at:420},
+    {sel:'[data-rise="3"]', at:560},
+    {sel:'[data-rise="4"]', at:720}
+  ];
+  schedule.forEach(function(s){
+    setTimeout(function(){
+      var el = document.querySelector(s.sel);
+      if(el) el.classList.add('in');
+    }, s.at);
+  });
+  // (search-bar pulse happens in finishTutorial, once the bar is actually revealed)
+}
+
+/* ---------- visibility + resize ---------- */
+document.addEventListener('visibilitychange', function(){
+  if(document.hidden){ stopLoop(); }
+  else if(!reduceMotion){ last = performance.now(); startLoop(); }
+});
+/* ---------- delight layer: hover the ambient field to peek a real lesson ---------- */
+var SAMPLE_TITLES = {
+  hist:['The Western Front, 1914–18','Elizabethan England','Medicine through time','The Cold War','The Norman Conquest'],
+  bio:['Cell structure','Enzymes','The heart & circulation','Natural selection','Homeostasis'],
+  maths:['Quadratic equations','Trigonometry','Pythagoras’ theorem','Probability trees','Simultaneous equations'],
+  geog:['Coastal landforms','Tectonic hazards','Urban change','The water cycle','Ecosystems'],
+  comb:['Atomic structure','Forces & motion','Photosynthesis','The periodic table','Waves'],
+  lit:['Macbeth','An Inspector Calls','A Christmas Carol','Power & conflict poetry'],
+  phys:['Energy stores','Electric circuits','Radioactivity','Forces & motion'],
+  chem:['The periodic table','Rates of reaction','Electrolysis','Chemical bonding'],
+  cs:['Algorithms','Boolean logic','Computer networks','Data representation']
+};
+var peekEl = document.getElementById('peek');
+var peekIdx = -1;
+function actingSlug(i){ return POOL[ chosenFlag[i] ? assignSub[i] : subjIdx[i] ].k; }   // recruited dots peek as their subject
+function dotLesson(i){          // real {title, unit} from the live catalogue
+  var slug = actingSlug(i), s = byKey[slug];
+  var list = (typeof TITLES !== 'undefined') ? TITLES[slug] : null;
+  if(list && list.length) return list[i % list.length];
+  return { t: (s ? 'Lesson ' + ((i % s.L)+1) : ''), u:'' };
+}
+/* "what's inside" marks — practice-first subjects are practice-only; the rest read+practice+listen */
+var PRACTICE_FIRST = {'Mathematics':1,'English Language':1,'French':1,'German':1,'Spanish':1};
+var MK_READ = '<span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.5 5 8 4.5 4 5v13c4-.5 6.5 0 8 1.5 1.5-1.5 4-2 8-1.5V5c-4-.5-6.5 0-8 1.5Z"/><path d="M12 6.5v13"/></svg>Read</span>';
+var MK_PRACTICE = '<span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19l1-3.5 9-9 2.5 2.5-9 9L5 19Z"/><path d="M14 7.5l2.5 2.5"/></svg>Practice</span>';
+var MK_LISTEN = '<span class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13v-1a7 7 0 0 1 14 0v1"/><path d="M5 13.5h2.2a1 1 0 0 1 1 1V19a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/><path d="M19 13.5h-2.2a1 1 0 0 0-1 1V19a1 1 0 0 0 1 1H18a1 1 0 0 0 1-1Z"/></svg>Listen</span>';
+function insideMarks(s){ return PRACTICE_FIRST[s.n] ? MK_PRACTICE : (MK_READ + MK_PRACTICE + MK_LISTEN); }
+function setPeek(i){
+  if(i === peekIdx) return;
+  var wasHidden = peekEl.hidden;
+  peekIdx = i;
+  if(i < 0){ peekEl.hidden = true; peekEl.classList.remove('in'); return; }
+  var slug = actingSlug(i), s = byKey[slug];
+  if(!s){ peekEl.hidden = true; return; }
+  var L = dotLesson(i);
+  peekEl.style.setProperty('--pa', s.a);
+  peekEl.innerHTML =
+    (L.img ? '<img class="pk-media" alt="" src="'+L.img+'" onload="this.classList.add(\'ld\')" onerror="this.remove()">' : '')+
+    '<div class="pk-body">'+
+      '<div class="pk-top"><canvas class="pk-icon" width="36" height="36"></canvas><span class="pk-subj">'+s.n+'</span></div>'+
+      '<span class="pk-t">'+L.t+'</span>'+
+      (L.u ? '<span class="pk-u">'+L.u+'</span>' : '')+
+      (L.d ? '<p class="pk-d">'+L.d+'</p>' : '')+
+      '<div class="pk-in">'+insideMarks(s)+'</div>'+
+    '</div>';
+  // draw the subject's own dot-icon, tinted to its accent, as the card's mark
+  var cv = peekEl.querySelector('.pk-icon'), cx2 = cv.getContext('2d');
+  cx2.clearRect(0,0,36,36); cx2.fillStyle = s.a; cx2.strokeStyle = s.a;
+  (ICON_DRAW[iconKey(slug)]||ICON_DRAW._default)(cx2, 36);
+  peekEl.hidden = false;
+  if(wasHidden && !reduceMotion){ peekEl.classList.remove('in'); void peekEl.offsetWidth; peekEl.classList.add('in'); }
+}
+function findPeek(){
+  if(!mouseOn || touch || reduceMotion){ setPeek(-1); return; }
+  // only the open right-hand field is hoverable — never the console column (title / info / Begin)
+  var sr = stage.getBoundingClientRect(), cr = consoleEl.getBoundingClientRect();
+  var minX = (cr.right - sr.left) + 24;
+  if(mx < minX){ setPeek(-1); return; }
+  var gated = anyChosen();   // once subjects are picked, ONLY the solidified icon specks are hoverable
+  // wider capture in the open field so the nearest lesson is drawn to the cursor; tighter on the icons
+  var best=-1, bd = gated ? 24*24 : 78*78;
+  for(var i=0;i<N;i++){
+    if(x[i] < minX) continue;                              // ignore dots in/behind the console
+    if(gated){ if(!chosenFlag[i]) continue; }
+    else { if(POOL[subjIdx[i]].k === 'other') continue; }
+    var dx=x[i]-mx, dy=y[i]-my, d=dx*dx+dy*dy;
+    if(d<bd){ bd=d; best=i; }
+  }
+  setPeek(best);
+  if(best>=0){
+    peekEl.style.left = Math.min(mx+16, W - peekEl.offsetWidth - 8)+'px';
+    peekEl.style.top  = Math.min(my+16, H - peekEl.offsetHeight - 8)+'px';
+  }
+}
+window.addEventListener('mousemove', function(e){
+  var r = stage.getBoundingClientRect();
+  mx = e.clientX - r.left; my = e.clientY - r.top; mouseOn = true;
+  findPeek();
+});
+window.addEventListener('mouseleave', function(){ mouseOn = false; setPeek(-1); });
+
+var resizeTimer = 0;
+window.addEventListener('resize', function(){
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(function(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    resize();
+    initParticles();
+    buildInkOrder(); buildInkRank();
+    // re-claim chosen specks for the new seeding + retarget
+    inkStart = performance.now() - 1000;  // skip ink-in on resize (already settled)
+    order.forEach(function(slug){ claimSubject(slug); });
+    if(order.length) assignTargets();
+    if(reduceMotion){ snapChosenToTargets(); drawOnce(); }
+    positionLabels();
+  }, 150);
+});
+
+/* react live to reduced-motion changes */
+reduceMQ.addEventListener('change', function(e){
+  reduceMotion = e.matches;
+  document.documentElement.classList.toggle('js-anim', !reduceMotion);
+  if(reduceMotion){
+    stopLoop();
+    snapChosenToTargets();
+    drawOnce();
+    Array.prototype.forEach.call(document.querySelectorAll('.rise'), function(el){ el.classList.add('in'); });
+  } else {
+    inkStart = performance.now();
+    startLoop();
+  }
+});
+
+/* ---------- boot ---------- */
+function boot(){
+  resize();
+  if(W === 0 || H === 0){ requestAnimationFrame(boot); return; }
+  initParticles();
+  buildInkOrder(); buildInkRank();
+  inkStart = performance.now();
+  if(reduceMotion){
+    drawOnce();           // tutorial waits for the Begin button (no auto-run)
+  } else {
+    startLoop();          // full library breathes; the tutorial starts when the student hits Begin
+  }
+  runEntrance();
+}
+
+function start(){
+  // fonts ready (or 400ms fallback) so text-wrap:balance doesn't reflow under the dots
+  var booted = false;
+  function go(){ if(booted) return; booted = true; boot(); }
+  if(document.fonts && document.fonts.ready){
+    var to = setTimeout(go, 400);
+    document.fonts.ready.then(function(){ clearTimeout(to); go(); });
+  } else {
+    go();
+  }
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', start);
+} else {
+  start();
+}
+
+/* localhost-only verification hook (lets the orchestrator snap the converge to a static frame
+   since rAF is throttled in headless/automation tabs). Harmless in production. */
+if(location.hostname==='127.0.0.1'||location.hostname==='localhost'){
+  // scatter the chosen dots back out so they flow into their icons again with the current FLOW values
+  function regather(){
+    for(var k=0;k<N;k++){ if(!chosenFlag[k]) continue;
+      x[k]=W*0.32+Math.random()*W*0.66; y[k]=H*0.06+Math.random()*H*0.88; vx[k]=0; vy[k]=0; }
+  }
+  window.__sv = { assign:assignTargets, snap:snapChosenToTargets, draw:drawOnce, stop:stopLoop, begin:runTutorial, regather:regather,
+    boards:enterBoardStep, options:enterOptionsStep, finish:enterFinishStep, done:function(){ enterDone('guest'); },
+    quickfill:function(){ consoleEl.classList.add('started','heroGone'); CORE.forEach(addCore); finishTutorial(); },   // dev: skip the paced intro
+    order:function(){return order.slice();} };
+}
+
+})();
+</script>
+</body>
+</html>
