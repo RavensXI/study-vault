@@ -104,6 +104,26 @@
     return RE_AQA_LEGACY_DEFAULT.slice();
   }
 
+  // RE OCR (J625) — pick 2 of 5 religions (each gives Beliefs & Teachings +
+  // Practices) + all 4 Group-2 themes (mandatory, pre-selected by the wizard).
+  // Religion unit slugs use the -beliefs-and-teachings / -practices suffix;
+  // theme slugs are stored in full.
+  var RE_OCR_SLUGS = ['religious-studies-ocr'];
+
+  function reOcrFilter(pref) {
+    if (!pref) return null;
+    if ((pref.religions && pref.religions.length) || (pref.themes && pref.themes.length)) {
+      var slugs = [];
+      (pref.religions || []).forEach(function (r) {
+        slugs.push(r + '-beliefs-and-teachings');
+        slugs.push(r + '-practices');
+      });
+      (pref.themes || []).forEach(function (t) { slugs.push(t); });
+      return slugs;
+    }
+    return null;
+  }
+
   // RE Eduqas / WJEC — flatter unit structure (no -beliefs/-practices suffix).
   // Route B implicitly includes two Foundational Catholic Theology units not
   // surfaced in the picker.
@@ -306,6 +326,7 @@
     if (DRAMA_SLUGS.indexOf(subjectSlug) !== -1) return dramaFilter(pref);
     if (CLASSICAL_CIV_SLUGS.indexOf(subjectSlug) !== -1) return classicalCivFilter(pref);
     if (RE_AQA_SLUGS.indexOf(subjectSlug) !== -1) return reAqaFilter(pref);
+    if (RE_OCR_SLUGS.indexOf(subjectSlug) !== -1) return reOcrFilter(pref);
     if (RE_EDUQAS_SLUGS.indexOf(subjectSlug) !== -1) return reEduqasFilter(pref);
     if (RE_EDEXCEL_SLUGS.indexOf(subjectSlug) !== -1) return reEdexcelFilter(pref);
     return null;

@@ -2195,6 +2195,30 @@
           { slug: 'theme-d-peace-conflict', name: 'Theme B — Religion, Peace & Conflict' }
         ]
       },
+      // OCR (J625): pick 2 religions from 5 (NO Sikhism, NO standalone Catholic),
+      // each studied for Beliefs & Teachings + Practices. All 4 Group-2 themes are
+      // mandatory (studied through one chosen religion) — pre-selected, not picked.
+      // Unit slugs use the `-beliefs-and-teachings` / `-practices` suffix (see
+      // reOcrFilter in js/free-user-filters.js).
+      'ocr': {
+        religionsCap: 2,
+        religionsHelper: '(pick 2 — you study Beliefs & Teachings + Practices for each)',
+        themesCap: 4,
+        themesHelper: '(all 4 mandatory — already included)',
+        religions: [
+          { slug: 'buddhism', name: 'Buddhism' },
+          { slug: 'christianity', name: 'Christianity' },
+          { slug: 'hinduism', name: 'Hinduism' },
+          { slug: 'islam', name: 'Islam' },
+          { slug: 'judaism', name: 'Judaism' }
+        ],
+        themes: [
+          { slug: 'theme-relationships-and-families', name: 'Relationships & Families' },
+          { slug: 'theme-the-existence-of-god', name: 'The Existence of God & Ultimate Reality' },
+          { slug: 'theme-religion-peace-and-conflict', name: 'Religion, Peace & Conflict' },
+          { slug: 'theme-dialogue-religious-and-non-religious', name: 'Dialogue: Religious & Non-Religious Beliefs' }
+        ]
+      },
       'eduqas': {
         // Eduqas RS Route A: 2 religions × Beliefs/Practices + 2 themes from 4.
         // Route B: Catholic Christianity in depth + Judaism + 2 themes — picking
@@ -3416,10 +3440,14 @@
       var opts = fwGetREOpts();
       if (!opts) return;
       var isShortCourse = (board === 'aqa short course');
+      var isOcr = (board === 'ocr');
+      var themesMandatory = isShortCourse || isOcr;
 
       if (subhead) {
         if (isShortCourse) {
           subhead.innerHTML = 'AQA Religious Studies Short Course — pick <strong>2 religions</strong> from the four below (Beliefs only). Both themes are <strong>mandatory</strong> and already included for you.';
+        } else if (isOcr) {
+          subhead.innerHTML = 'OCR Religious Studies — pick <strong>2 religions</strong> (you study Beliefs &amp; Teachings + Practices for each). All <strong>4 themes</strong> are studied and already included for you.';
         } else {
           subhead.innerHTML = 'AQA Religious Studies — pick <strong>2 religions</strong> (you study Beliefs + Practices for each) and <strong>4 themes</strong> from the 6 options.';
         }
@@ -3479,9 +3507,10 @@
       }
 
       buildAqaSection('Religions', opts.religionsHelper, opts.religions, 'religions', opts.religionsCap);
-      if (isShortCourse) {
-        // Pre-populate state so fwUpdateREDoneBtn sees both themes as picked,
-        // then render them as read-only pre-selected pills.
+      if (themesMandatory) {
+        // Short Course (2 themes) and OCR (all 4 themes) have mandatory themes —
+        // pre-populate state so fwUpdateREDoneBtn sees them as picked, then render
+        // them as read-only pre-selected pills.
         wizardState.re.themes = opts.themes.map(function (t) { return t.slug; });
         buildAqaStaticThemes(opts.themes);
       } else {
