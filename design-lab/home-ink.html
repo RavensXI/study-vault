@@ -245,14 +245,6 @@ h1 .beat{color:var(--text-secondary)}
 .linkbtn:hover{color:var(--text-primary);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 .startlink{display:inline-block;margin-top:.6rem;font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--anchor)}
 .startlink:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
-.schoolbox{overflow:hidden;max-height:0;transition:max-height .3s var(--ease);margin-top:.4rem}
-.schoolbox.open{max-height:120px}
-.schoolbox .inner{display:flex;gap:.5rem;align-items:center;justify-content:center;padding-top:.7rem;flex-wrap:wrap}
-.schoolbox input{font-family:var(--font-head);font-size:.92rem;padding:.5rem .75rem;border:1px solid var(--border-light);
-  border-radius:var(--radius-sm);background:#fff;color:var(--text-primary)}
-.schoolbox input:focus{outline:none;border-color:var(--anchor);box-shadow:0 0 0 2px color-mix(in srgb,var(--anchor) 18%,transparent)}
-.schoolbox .cont{font-family:var(--font-head);font-weight:600;font-size:.92rem;color:var(--anchor);background:none;border:none}
-.schoolbox .cont:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
 
 /* ---------- footer ---------- */
 .foot{height:52px;display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap;
@@ -311,7 +303,6 @@ html:not(.js) #field,html:not(.js) .fog,html:not(.js) .labels,html:not(.js) .con
     <div class="right">
       <nav aria-label="Primary">
         <a href="/for-schools">For schools</a><span class="div" aria-hidden="true"></span>
-        <a href="/school-code">I have a school code</a><span class="div" aria-hidden="true"></span>
         <a class="signin" href="/login">Sign in</a>
       </nav>
       <button class="btn-cta" id="mastCta" type="button">Get started</button>
@@ -376,7 +367,6 @@ html:not(.js) #field,html:not(.js) .fog,html:not(.js) .labels,html:not(.js) .con
           <button class="btn-cta" type="submit">See my subjects</button>
           <a href="/signup">Create a free account</a>
           <a href="/login">Sign in</a>
-          <a href="/school-code">I have a school code</a>
         </div>
       </form>
     </section>
@@ -1039,26 +1029,12 @@ function renderFinishPanel(){
     '<p class="fin-stat">Everything you’re studying, ready in one place.</p>'+
     '<p class="fin-t">Create a free account to keep your subjects and your progress on every device. You don’t need one to start.</p>'+
     '<div class="fin-actions">'+
-      '<button class="linkbtn" type="button" id="codeToggle" aria-expanded="false" aria-controls="schoolbox2">I have a school code</button>'+
-      '<span class="fin-div" aria-hidden="true"></span>'+
       '<button class="linkbtn" type="button" id="skipSave">Start without saving</button>'+
-    '</div>'+
-    '<div class="schoolbox" id="schoolbox2"><div class="inner">'+
-      '<input id="schoolCode2" type="text" placeholder="Enter your school code" aria-label="School code">'+
-      '<button class="cont" type="button" id="codeGo">Continue</button>'+
-    '</div></div>';
+    '</div>';
   document.getElementById('skipSave').addEventListener('click', function(){ enterDone('guest'); });
-  var ct = document.getElementById('codeToggle'), sb = document.getElementById('schoolbox2');
-  ct.addEventListener('click', function(){
-    var open = sb.classList.toggle('open');
-    ct.setAttribute('aria-expanded', open ? 'true' : 'false');
-    if(open) setTimeout(function(){ var i=document.getElementById('schoolCode2'); if(i) i.focus(); }, 240);
-  });
-  document.getElementById('codeGo').addEventListener('click', function(){ enterDone('school'); });
 }
 function renderDonePanel(via){
-  var msg = via === 'school'  ? 'Your school code is linked — your subjects are saved.'
-          : via === 'account' ? 'Your subjects are saved to your free account.'
+  var msg = via === 'account' ? 'Your subjects are saved to your free account.'
           :                     'Your subjects are saved on this device.';
   finishPanel.innerHTML = '<p class="fin-t">'+msg+' Pick up exactly where you leave off, any time.</p>';
 }
