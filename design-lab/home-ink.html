@@ -1062,20 +1062,14 @@ function startRevising(){ /* prototype end — in production this lands in /brow
 function renderFinishPanel(){
   finishPanel.innerHTML =
     '<p class="fin-stat">Everything you’re studying, ready in one place.</p>'+
-    '<p class="fin-t">Create a free account to keep your subjects and progress on every device. You don’t need one to start.</p>'+
+    '<p class="fin-t">Create a free account to keep your subjects and your progress on every device.</p>'+
     '<div class="signup">'+
       '<input class="fld" id="suEmail" type="email" autocomplete="email" placeholder="Your email address" aria-label="Email address">'+
       '<input class="fld" id="suPass" type="password" autocomplete="new-password" placeholder="Create a password" aria-label="Password">'+
-    '</div>'+
-    '<div class="fin-actions">'+
-      '<button class="linkbtn" type="button" id="skipSave">Start without saving</button>'+
     '</div>';
-  document.getElementById('skipSave').addEventListener('click', function(){ enterDone('guest'); });
 }
-function renderDonePanel(via){
-  var msg = via === 'email' ? 'Your free account’s ready — your subjects are saved.'
-          :                   'Your subjects are saved on this device.';
-  finishPanel.innerHTML = '<p class="fin-t">'+msg+' Pick up exactly where you leave off, any time.</p>';
+function renderDonePanel(){
+  finishPanel.innerHTML = '<p class="fin-t">Your free account’s ready — your subjects are saved. Pick up exactly where you leave off, any time.</p>';
 }
 
 /* ---------- claim / release specks for a subject's icon (recruit neutral specks to fill) ---------- */
@@ -1165,12 +1159,12 @@ function runTutorial(){
   setTimeout(function(){
     consoleEl.classList.add('heroGone');
     typeText(LINE1, function(){
-      // once the line has finished typing, ease the cores in one at a time — unhurried (~3.3s apart)
+      // once the line has finished typing, ease the cores in one at a time (~1.7s apart — 33% quicker)
       var i = 0;
       (function next(){
         if(i >= CORE.length){ setTimeout(finishTutorial, 1700); return; }
         addCore(CORE[i]); i++;
-        setTimeout(next, 2500);
+        setTimeout(next, 1675);
       })();
     });
   }, 460);
