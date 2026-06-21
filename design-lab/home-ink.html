@@ -692,12 +692,19 @@ function frame(now){
     var dimT = anyC ? 1 : 0;
     dim[k] += (dimT - dim[k]) * (1 - Math.pow(0.25, dt));
     baseA = alpha[k] * (1 - dim[k]*0.78);
+    baseA *= 0.82 + 0.18*Math.sin(t*0.7*sp[k] + ph[k]*2.0);            // gentle twinkle — the field breathes at rest
+    var rk = rad[k];
+    if(mouseOn && !touch && !anyC){                                    // cursor aurora — colour wells up + swells near the pointer
+      var ax = x[k]-mx, ay = y[k]-my, ad2 = ax*ax + ay*ay;
+      if(ad2 < 32000){ var g = 1 - Math.sqrt(ad2)/179; if(g > 0){ baseA *= 1 + g*0.9; rk = rad[k]*(1 + g*0.45); } }
+    }
     if(inking) baseA *= inkMul(k, elapsed);
     if(baseA < 0.012) continue;
+    if(baseA > 0.96) baseA = 0.96;
     ctx.globalAlpha = baseA;
     ctx.fillStyle = 'rgb('+colR[k]+','+colG[k]+','+colB[k]+')';
     ctx.beginPath();
-    ctx.arc(x[k], y[k], rad[k], 0, 6.283185);
+    ctx.arc(x[k], y[k], rk, 0, 6.283185);
     ctx.fill();
   }
   // smooth per-subject visibility — in the options step the focused subject stays full, the rest fade away
@@ -1374,6 +1381,7 @@ function setPeek(i){
 }
 function findPeek(){
   if(!mouseOn || touch || reduceMotion){ setPeek(-1); return; }
+  if(my < 0 || my > H){ setPeek(-1); return; }   // above the stage (masthead) or below it (footer) — not the field
   // only the open right-hand field is hoverable — never the console column (title / info / Begin)
   var sr = stage.getBoundingClientRect(), cr = consoleEl.getBoundingClientRect();
   var minX = (cr.right - sr.left) + 24;
