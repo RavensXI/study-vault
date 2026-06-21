@@ -145,8 +145,13 @@ h1 .beat{color:var(--text-secondary)}
   padding:0 0 0 .35rem;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
 /* ---------- board step: each subject card gains a row of selectable exam-board chips ---------- */
 .console.boards-phase .picker,.console.options-phase .picker{display:none}   /* search bar gone once choosing boards/topics */
-.console.options-phase .shelf{grid-template-columns:1fr}                     /* one column — long topic/text lists need the width */
-.opt-hint{font-family:var(--font-head);font-size:.8rem;color:var(--text-muted);margin:-.05rem 0 .15rem}
+.console.options-phase .shelf{grid-template-columns:1fr}                     /* one column — the current subject only */
+.srow.brd.opt{gap:.7rem;padding:.7rem .8rem .8rem}
+.optcat-h{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin:0 0 .42rem}
+.optcat-h > span:first-child{font-family:var(--font-head);font-weight:600;font-size:.88rem;color:var(--text-primary);letter-spacing:-.01em}
+.optcat-pick{font-family:var(--font-ui);font-size:.66rem;font-weight:600;letter-spacing:.02em;color:var(--text-muted);white-space:nowrap}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;filter:none}
+.btn-primary:disabled .cta-ico{transform:none}
 /* later steps hide the picker + the subject grid, and reveal the finish panel */
 .console.finish-phase .picker,.console.finish-phase .shelf,
 .console.done-phase .picker,.console.done-phase .shelf{display:none}
@@ -677,6 +682,13 @@ function frame(now){
     ctx.arc(x[k], y[k], rad[k], 0, 6.283185);
     ctx.fill();
   }
+  // smooth per-subject visibility — in the options step the focused subject stays full, the rest fade away
+  var focusing = (phase === 'options' && !!focusSlug);
+  var fpi = focusing ? poolIdxByKey[focusSlug] : -1;
+  for(var oi=0; oi<order.length; oi++){ var ppi = poolIdxByKey[order[oi]];
+    var vt = (!focusing || ppi === fpi) ? 1 : 0;
+    if(subjVis[ppi] == null) subjVis[ppi] = vt;
+    subjVis[ppi] += (vt - subjVis[ppi]) * Math.min(1, 0.07*(60*dt)); }
   // chosen pass (on top, brighter, thicker)
   for(k=0;k<N;k++){
     if(!chosenFlag[k]) continue;
@@ -692,6 +704,7 @@ function frame(now){
       y[k] += Math.cos(t*0.5 + ph[k]) * 0.1;
     }
     baseA = Math.min(alpha[k]*2.1, 0.92);
+    var vv = subjVis[assignSub[k]]; if(vv != null) baseA *= vv;     // options-focus fade
     if(inking) baseA *= inkMul(k, elapsed);
     if(baseA < 0.012) continue;
     ctx.globalAlpha = baseA;
@@ -791,6 +804,10 @@ function positionLabels(){
   var m = order.length;
   if(m === 0){ clearLegend(); return; }
   clearLegend();
+  if(phase === 'options'){                 // focus mode: the console's typed line names the subject — hide constellation labels
+    order.forEach(function(slug){ var el = labelNodes[slug]; if(el) el.style.display = 'none'; });
+    return;
+  }
   var cells = gridLayout(m);
   order.forEach(function(slug, j){
     var el = labelNodes[slug]; if(!el) return;
@@ -862,41 +879,73 @@ function setBoard(slug, b){
   });
 }
 
-/* ---------- per-subject options step (History topics, English Lit set texts, RS religions/themes) ---------- */
-var chosenTopics = {};              // slug -> array of chosen topic/text names
-var OPT_NOUN = {'English Literature':'set texts','History':'topics','Religious Studies':'topics and religions'};
+/* ---------- per-subject options: categorised + pick-N gated, ONE subject at a time ---------- */
+var chosenTopics = {};              // slug -> { categoryTitle: [chosen item names] }
+var optIndex = 0;                   // which option-subject we're currently on
+var OPT_NOUN = {'English Literature':'set texts','History':'topics','Religious Studies':'religions & themes',
+  'Geography':'options','Drama':'set play','Film Studies':'films','Classical Civilisation':'options','Design & Technology':'specialism'};
 function escAttr(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
 function escTxt(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
-function subjOptions(slug){         // board-specific option list, or null if this subject has none
+function subjOptions(slug){         // board-specific CATEGORY list, or null if this subject has none
   var s = byKey[slug], o = (typeof OPTIONS !== 'undefined') ? OPTIONS[s.n] : null;
   return (o && o[chosenBoard[slug]] && o[chosenBoard[slug]].length) ? o[chosenBoard[slug]] : null;
 }
-function hasAnyOptions(){ return order.some(function(slug){ return !!subjOptions(slug); }); }
-function renderOptionsShelf(){
-  shelfEl.innerHTML = order.map(function(slug){
-    var s = byKey[slug], opts = subjOptions(slug);
-    if(!opts) return '';                                   // only option-bearing subjects appear here
-    var sel = chosenTopics[slug] || (chosenTopics[slug] = []);
-    var noun = OPT_NOUN[s.n] || 'topics';
-    var chips = opts.map(function(o){
-      var on = sel.indexOf(o) !== -1;
-      return '<button class="bchip'+(on?' sel':'')+'" type="button" data-k="'+slug+'" data-o="'+escAttr(o)+'">'+escTxt(o)+'</button>';
-    }).join('');
-    return '<div class="srow brd opt" role="listitem" style="--a:'+s.a+'">'+
-      '<div class="srow-top"><span class="sdot" aria-hidden="true"></span><span class="sname">'+escTxt(s.n)+'</span></div>'+
-      '<p class="opt-hint">Tap the '+noun+' you’re studying</p>'+
-      '<div class="brow" role="group" aria-label="'+noun+' for '+escAttr(s.n)+'">'+chips+'</div>'+
+function optionSubjects(){ return order.filter(function(slug){ return !!subjOptions(slug); }); }
+function hasAnyOptions(){ return optionSubjects().length > 0; }
+function catSel(slug, t){ var m = chosenTopics[slug] || (chosenTopics[slug] = {}); return m[t] || (m[t] = []); }
+function subjComplete(slug){ var cats = subjOptions(slug); return !cats || cats.every(function(c){ return catSel(slug, c.t).length === c.pick; }); }
+function renderOptionsShelf(){      // render ONLY the current focus subject's categorised picker
+  var slug = optionSubjects()[optIndex];
+  if(!slug){ shelfEl.innerHTML = ''; return; }
+  var s = byKey[slug], cats = subjOptions(slug);
+  shelfEl.innerHTML =
+    '<div class="srow brd opt" role="listitem" style="--a:'+s.a+'">'+
+    cats.map(function(c, ci){
+      var sel = catSel(slug, c.t);
+      var chips = c.items.map(function(it){
+        var on = sel.indexOf(it) !== -1;
+        return '<button class="bchip'+(on?' sel':'')+'" type="button" data-ci="'+ci+'" data-o="'+escAttr(it)+'">'+escTxt(it)+'</button>';
+      }).join('');
+      var meta = c.helper ? c.helper : (c.pick === 1 ? 'pick one' : 'pick ' + c.pick);
+      return '<div class="optcat">'+
+        '<div class="optcat-h"><span>'+escTxt(c.t)+'</span><span class="optcat-pick">'+escTxt(meta)+'</span></div>'+
+        '<div class="brow" role="group" aria-label="'+escAttr(c.t)+'">'+chips+'</div>'+
+      '</div>';
+    }).join('')+
     '</div>';
-  }).join('');
   Array.prototype.forEach.call(shelfEl.querySelectorAll('.bchip'), function(btn){
-    btn.addEventListener('click', function(){ toggleTopic(btn.dataset.k, btn.dataset.o, btn); });
+    btn.addEventListener('click', function(){ toggleTopic(slug, cats[+btn.dataset.ci], btn.dataset.o, btn); });
   });
 }
-function toggleTopic(slug, topic, btn){
-  var arr = chosenTopics[slug] || (chosenTopics[slug] = []);
-  var i = arr.indexOf(topic);
-  if(i === -1){ arr.push(topic); btn.classList.add('sel'); }
-  else { arr.splice(i, 1); btn.classList.remove('sel'); }
+function toggleTopic(slug, cat, item, btn){
+  var sel = catSel(slug, cat.t), i = sel.indexOf(item);
+  if(i !== -1){ sel.splice(i, 1); btn.classList.remove('sel'); }
+  else if(cat.pick === 1){                  // single-pick category behaves like a radio
+    sel.length = 0;
+    Array.prototype.forEach.call(btn.parentNode.querySelectorAll('.bchip.sel'), function(c){ c.classList.remove('sel'); });
+    sel.push(item); btn.classList.add('sel');
+  } else if(sel.length < cat.pick){          // multi-pick capped at pick N
+    sel.push(item); btn.classList.add('sel');
+  }                                          // at cap → ignore (deselect one first)
+  refreshOptionsCta();
+}
+function refreshOptionsCta(){
+  if(phase !== 'options' || !stepCta) return;
+  stepCta.disabled = !subjComplete(optionSubjects()[optIndex]);
+}
+
+/* ---------- constellation focus: grow the current subject's icon to centre, fade the rest ---------- */
+var focusSlug = null, subjVis = {};
+function focusSubjectIcon(slug){ focusSlug = slug; assignFocus(slug); }
+function assignFocus(slug){
+  var x0 = rightZoneStart(), x1 = W - 28, cx = (x0 + x1) / 2, cy = H * 0.5;
+  var size = Math.min((x1 - x0) * 0.72, H * 0.58, 230);
+  var pts = iconPoints(slug), np = pts.length, pi = poolIdxByKey[slug], half = size / 2;
+  var dots = []; for(var i = 0; i < N; i++){ if(chosenFlag[i] && assignSub[i] === pi) dots.push(i); }
+  var cnt = dots.length || 1;
+  for(var di = 0; di < dots.length; di++){ var p = pts[Math.floor(di * np / cnt) % np], k = dots[di];
+    tx[k] = cx - half + p[0] * size + (Math.random() - 0.5) * 2.0;
+    ty[k] = cy - half + p[1] * size + (Math.random() - 0.5) * 2.0; }
 }
 
 function renderResolution(){ /* bottom CTA is managed by setWizNav / the wizard phase now */ }
@@ -904,6 +953,7 @@ function setWizNav(ctaLabel, ctaFn, backFn){    // primary Continue + optional g
   if(!stepCta) return;
   stepCta.innerHTML = ctaLabel + ARROW_FWD;
   stepCta.onclick = ctaFn;
+  stepCta.disabled = false;
   if(backFn){ stepBack.hidden = false; stepBack.onclick = backFn; }
   else { stepBack.hidden = true; stepBack.onclick = null; }
   resolveEl.hidden = false;
@@ -916,37 +966,55 @@ function applyPhase(){
 }
 function enterSubjectStep(){    // step 1 (also: Back from boards)
   if(phase === 'subjects') return;
-  phase = 'subjects'; applyPhase();
+  phase = 'subjects'; focusSlug = null; applyPhase();
+  assignTargets();                                                 // icons back to their grid
   setGuide(LINE2);                                                 // "Now add the subjects you've chosen."
   renderShelf();
   setWizNav('Next: exam boards', enterBoardStep, null);
 }
 function enterBoardStep(){      // step 2
   if(phase === 'boards') return;
-  phase = 'boards'; applyPhase();
+  phase = 'boards'; focusSlug = null; applyPhase();
   order.forEach(function(slug){ if(!chosenBoard[slug]) chosenBoard[slug] = byKey[slug].def; });   // sensible defaults
+  assignTargets();                                                 // icons back to their grid
   setGuide([{t:'Now add the exam boards your school studies.'}]);
   renderShelf();
   setWizNav('Continue', afterBoards, enterSubjectStep);
 }
-function afterBoards(){ hasAnyOptions() ? enterOptionsStep() : enterFinishStep(); }   // some subjects need topics/texts
-function enterOptionsStep(){    // step 3 — topics / set texts (only for subjects that have them)
-  if(phase === 'options') return;
+function afterBoards(){ hasAnyOptions() ? enterOptionsStep(false) : enterFinishStep(); }
+/* step 3 — topics / set texts, ONE option-subject at a time (its icon grows to centre, the rest fade) */
+function enterOptionsStep(fromEnd){
   phase = 'options'; applyPhase();
-  order.forEach(function(slug){ if(subjOptions(slug) && !chosenTopics[slug]) chosenTopics[slug] = []; });
-  setGuide([{t:'Now pick your topics and set texts.'}]);
-  renderShelf();
-  setWizNav('Continue', enterFinishStep, enterBoardStep);
+  var list = optionSubjects();
+  optIndex = fromEnd ? list.length - 1 : 0;
+  showOptionsStep();
 }
+function showOptionsStep(){
+  var list = optionSubjects();
+  if(!list.length){ enterFinishStep(); return; }
+  if(optIndex < 0){ enterBoardStep(); return; }
+  if(optIndex >= list.length){ enterFinishStep(); return; }
+  var slug = list[optIndex], s = byKey[slug];
+  subjOptions(slug).forEach(function(c){ catSel(slug, c.t); });    // ensure stores exist
+  focusSubjectIcon(slug);                                          // grow this subject's icon to centre, fade others
+  var noun = OPT_NOUN[s.n] || 'options';
+  setGuide([{t: s.n + ' — choose your ' + noun + '.'}]);
+  renderShelf();
+  setWizNav('Continue', optionsNext, optionsPrev);
+  refreshOptionsCta();
+}
+function optionsNext(){ optIndex++; (optIndex >= optionSubjects().length) ? enterFinishStep() : showOptionsStep(); }
+function optionsPrev(){ optIndex--; (optIndex < 0) ? enterBoardStep() : showOptionsStep(); }
 function enterFinishStep(){     // step 4 — save your shelf
   if(phase === 'finish') return;
-  phase = 'finish'; applyPhase();
+  phase = 'finish'; focusSlug = null; applyPhase();
+  assignTargets();                                                 // gather all icons back into the grid (the "your universe" view)
   setGuide([{t:'One last thing — save your shelf.'}]);
   renderFinishPanel();
-  setWizNav('Create free account', function(){ enterDone('account'); }, function(){ hasAnyOptions() ? enterOptionsStep() : enterBoardStep(); });
+  setWizNav('Create free account', function(){ enterDone('account'); }, function(){ hasAnyOptions() ? enterOptionsStep(true) : enterBoardStep(); });
 }
-function enterDone(via){        // step 4 — done / start
-  phase = 'done'; applyPhase();
+function enterDone(via){        // step 5 — done / start
+  phase = 'done'; focusSlug = null; applyPhase();
   setGuide([{t:'You’re all set.'}]);
   renderDonePanel(via || 'guest');
   setWizNav('Start revising', startRevising, enterFinishStep);
