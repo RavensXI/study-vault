@@ -823,6 +823,19 @@ function positionLabels(){
 function totalLessons(){
   return order.reduce(function(sum, slug){ return sum + byKey[slug].L; }, 0);
 }
+/* lessons actually scoped by the picks: option-subjects count only the picked units
+   (picked units × that subject-board's lessons-per-unit); other subjects count in full */
+function scopedLessons(){
+  return order.reduce(function(sum, slug){
+    var s = byKey[slug], cats = subjOptions(slug);
+    var per = (typeof OPT_PER_UNIT !== 'undefined' && OPT_PER_UNIT[s.n]) ? OPT_PER_UNIT[s.n][chosenBoard[slug]] : null;
+    if(cats && per){
+      var units = cats.reduce(function(u, c){ return u + catSel(slug, c.t).length * (c.u || 1); }, 0);
+      return sum + units * per;
+    }
+    return sum + s.L;
+  }, 0);
+}
 var RM_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 function bindRemoveButtons(){
   Array.prototype.forEach.call(shelfEl.querySelectorAll('.rm'), function(btn){
@@ -1009,7 +1022,7 @@ function enterFinishStep(){     // step 4 — save your shelf
   if(phase === 'finish') return;
   phase = 'finish'; focusSlug = null; applyPhase();
   assignTargets();                                                 // gather all icons back into the grid (the "your universe" view)
-  setGuide([{t:'One last thing — save your shelf.'}]);
+  setGuide([{t:'One last thing — save your subjects.'}]);
   renderFinishPanel();
   setWizNav('Create free account', function(){ enterDone('account'); }, function(){ hasAnyOptions() ? enterOptionsStep(true) : enterBoardStep(); });
 }
@@ -1022,10 +1035,10 @@ function enterDone(via){        // step 5 — done / start
 function startRevising(){ /* prototype end — in production this lands in /browse with the chosen shelf */ }
 
 function renderFinishPanel(){
-  var n = order.length, lc = totalLessons();
+  var n = order.length, lc = scopedLessons();
   finishPanel.innerHTML =
-    '<p class="fin-stat"><b>'+n+'</b> subject'+(n===1?'':'s')+' · <b>'+lc.toLocaleString()+'</b> lessons — your shelf is ready.</p>'+
-    '<p class="fin-t">Create a free account to keep your shelf and your progress on every device. You don’t need one to start.</p>'+
+    '<p class="fin-stat"><b>'+n+'</b> subject'+(n===1?'':'s')+' · <b>'+lc.toLocaleString()+'</b> lessons — just what you’re studying.</p>'+
+    '<p class="fin-t">Create a free account to keep your subjects and your progress on every device. You don’t need one to start.</p>'+
     '<div class="fin-actions">'+
       '<button class="linkbtn" type="button" id="codeToggle" aria-expanded="false" aria-controls="schoolbox2">I have a school code</button>'+
       '<span class="fin-div" aria-hidden="true"></span>'+
@@ -1045,9 +1058,9 @@ function renderFinishPanel(){
   document.getElementById('codeGo').addEventListener('click', function(){ enterDone('school'); });
 }
 function renderDonePanel(via){
-  var msg = via === 'school'  ? 'Your school code is linked — your shelf is saved.'
-          : via === 'account' ? 'Your shelf is saved to your free account.'
-          :                     'Your shelf is saved on this device.';
+  var msg = via === 'school'  ? 'Your school code is linked — your subjects are saved.'
+          : via === 'account' ? 'Your subjects are saved to your free account.'
+          :                     'Your subjects are saved on this device.';
   finishPanel.innerHTML = '<p class="fin-t">'+msg+' Pick up exactly where you leave off, any time.</p>';
 }
 
