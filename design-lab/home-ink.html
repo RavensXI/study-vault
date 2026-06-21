@@ -29,6 +29,7 @@
   --ease:cubic-bezier(.22,1,.36,1);
   --font-head:'Schibsted Grotesk',system-ui,sans-serif;  /* headings + ALL UI */
   --font-read:'Literata',Georgia,serif;                  /* body / lede / italic subtitles */
+  --font-ui:var(--font-head);                            /* small UI labels (was undefined → silently fell back to serif) */
 }
 html,body{background:var(--bg-body);color:var(--text-primary);font-family:var(--font-read);-webkit-font-smoothing:antialiased}
 body{min-height:100dvh;overflow:hidden}
@@ -74,12 +75,12 @@ button{cursor:pointer}
   display:flex;flex-direction:column;max-height:calc(100% - 28px)}
 .console .kicker{margin-bottom:.55rem}
 
-h1{font-family:var(--font-head);font-weight:700;font-size:clamp(1.7rem,3.1vw,2.6rem);
+h1{font-family:var(--font-head);font-weight:600;font-size:clamp(1.7rem,3.1vw,2.6rem);
   line-height:1.06;letter-spacing:-.02em;color:var(--text-primary)}
 h1 span{white-space:nowrap}                       /* keep each line whole — "Everything you’re studying." on one line */
-h1 .beat{color:var(--text-secondary)}
-.freeline{font-family:var(--font-ui);font-size:.82rem;font-weight:600;color:var(--text-muted);
-  letter-spacing:.01em;margin-top:.5rem}
+h1 .beat{font-weight:800}                         /* contrast by WEIGHT (echoes the Study/Vault wordmark), one ink colour */
+.freeline{font-family:var(--font-head);font-size:.92rem;font-weight:500;color:var(--text-secondary);
+  letter-spacing:.005em;margin-top:.7rem}
 .lede{font-family:var(--font-read);font-size:1.04rem;color:var(--text-secondary);
   max-width:40ch;margin:1rem 0 1.5rem;line-height:1.55}
 
@@ -240,16 +241,15 @@ h1 .beat{color:var(--text-secondary)}
 .wiz-back:hover .cta-ico{transform:translateX(-3px)}
 #stepCta[hidden]{display:none}
 /* SSO sign-in buttons (branded, white — not the single solid CTA) */
-.sso-group{max-width:330px;margin-top:1.05rem}
-.sso{display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%;
-  padding:.64rem 1rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);
-  background:#fff;color:var(--text-primary);font-family:var(--font-head);font-weight:600;font-size:.95rem;cursor:pointer;
+.sso-group{display:flex;gap:.5rem;max-width:380px;margin-top:.85rem}
+.sso{flex:1;display:flex;align-items:center;justify-content:center;gap:.5rem;
+  padding:.6rem .75rem;border:1px solid var(--border-light);border-radius:var(--radius-sm);
+  background:#fff;color:var(--text-primary);font-family:var(--font-head);font-weight:600;font-size:.92rem;cursor:pointer;
   transition:border-color .15s,box-shadow .15s}
 .sso:hover{border-color:var(--text-muted);box-shadow:var(--shadow-sm)}
-.sso + .sso{margin-top:.55rem}
 .sso svg{flex:none;width:18px;height:18px}
 /* hero: SSO route for premium-school students (hidden once the free picker starts) */
-.hero-alt{margin-top:1.5rem;max-width:330px}
+.hero-alt{margin-top:1.5rem;max-width:380px}
 .hero-alt-label{font-family:var(--font-head);font-size:.84rem;color:var(--text-muted);margin-bottom:.6rem}
 /* email signup (free tier, end of picker) */
 .signup{max-width:330px;margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
@@ -352,8 +352,8 @@ html:not(.js) #field,html:not(.js) .fog,html:not(.js) .labels,html:not(.js) .con
         <div class="hero-alt" id="heroAlt">
           <p class="hero-alt-label">Already set up by your school? Sign in.</p>
           <div class="sso-group">
-            <button class="sso" type="button" id="heroGoogle"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>Continue with Google</button>
-            <button class="sso" type="button" id="heroMicrosoft"><svg viewBox="0 0 23 23" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Continue with Microsoft</button>
+            <button class="sso" type="button" id="heroGoogle"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>Google</button>
+            <button class="sso" type="button" id="heroMicrosoft"><svg viewBox="0 0 23 23" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Microsoft</button>
           </div>
         </div>
       </div>
