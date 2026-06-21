@@ -98,7 +98,6 @@
     padding:.32rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap}
   .legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin-top:.55rem;border-top:1px solid var(--border-lighter);padding-top:.8rem}
   .leg{display:flex;align-items:center;gap:.45rem;min-width:150px;flex:1}
-  .leg .d{width:8px;height:8px;border-radius:50%;flex:none}
   .leg .n{font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-primary);white-space:nowrap}
   .leg .pbar{flex:1;height:4px;border-radius:3px;background:var(--border-lighter);overflow:hidden;min-width:40px}
   .leg .pbar i{display:block;height:100%;border-radius:3px}
@@ -228,7 +227,7 @@
   (function(){
     var L=document.getElementById('legend');
     L.innerHTML=SHELF.map(function(s){
-      return '<span class="leg"><span class="d" style="background:'+s.a+'"></span><span class="n">'+s.n+'</span>'+
+      return '<span class="leg"><span class="n">'+s.n+'</span>'+
         '<span class="pbar"><i style="width:'+Math.round(s.m*100)+'%;background:'+s.a+'"></i></span></span>';
     }).join('');
   })();
@@ -237,14 +236,21 @@
   var cv=document.getElementById('universe'), ctx=cv.getContext('2d');
   var DPR=Math.min(window.devicePixelRatio||1,2), W=0,H=0;
   var iconCache={};
-  function pts(key){
+  function geom(key){
     if(iconCache[key]) return iconCache[key];
     var S=84, oc=document.createElement('canvas'); oc.width=oc.height=S; var o=oc.getContext('2d');
     o.fillStyle='#000'; (ICON_DRAW[key]||ICON_DRAW._default)(o,S);
-    var d=o.getImageData(0,0,S,S).data, p=[];
-    for(var y=0;y<S;y++)for(var x=0;x<S;x++){ if(d[(y*S+x)*4+3]>128) p.push([x/S,y/S]); }
+    var d=o.getImageData(0,0,S,S).data;
+    function on(x,y){ return x>=0&&y>=0&&x<S&&y<S && d[(y*S+x)*4+3]>128; }
+    var p=[], e=[];
+    for(var y=0;y<S;y++)for(var x=0;x<S;x++){
+      if(!on(x,y)) continue;
+      p.push([x/S,y/S]);
+      if(!on(x-1,y)||!on(x+1,y)||!on(x,y-1)||!on(x,y+1)) e.push([x/S,y/S]);   // boundary pixel = outline
+    }
     for(var a=p.length-1;a>0;a--){ var b=(Math.random()*(a+1))|0,t=p[a];p[a]=p[b];p[b]=t; }   // shuffle (no moiré)
-    iconCache[key]=p; return p;
+    var e2=[], step=(e.length>200?2:1); for(var i=0;i<e.length;i+=step) e2.push(e[i]);          // thin the outline
+    iconCache[key]={pts:p, edges:e2}; return iconCache[key];
   }
   var dots=[], cells=[];
   function layout(){
@@ -254,8 +260,10 @@
     cells=[]; dots=[];
     SHELF.forEach(function(s,i){
       var c=i%cols, r=Math.floor(i/cols), cx=(c+0.5)*cw, cy=(r+0.5)*chh, half=size/2;
-      cells.push({cx:cx,cy:cy,size:size,s:s});
-      var P=pts(s.icon), N=Math.min(86,P.length), lit=Math.round(N*s.m);
+      var G=geom(s.icon);
+      var edges=G.edges.map(function(p){ return [cx-half+p[0]*size, cy-half+p[1]*size]; });
+      cells.push({cx:cx,cy:cy,size:size,s:s,edges:edges});
+      var P=G.pts, N=Math.min(86,P.length), lit=Math.round(N*s.m);
       for(var k=0;k<N;k++){
         var p=P[Math.floor(k*P.length/N)%P.length];
         dots.push({ bx:cx-half+p[0]*size, by:cy-half+p[1]*size, ph:Math.random()*6.28, sp:0.5+Math.random()*0.6,
@@ -267,6 +275,13 @@
   function frame(now){
     var dt=Math.min(0.05,(now-last)/1000)||0; last=now; t+=dt;
     ctx.clearRect(0,0,W,H);
+    // faint static outline of each symbol so the shape always reads, even when little is lit
+    ctx.fillStyle='#8a847b';
+    for(var ce=0;ce<cells.length;ce++){
+      ctx.globalAlpha=(hover===-1||hover===ce)?0.42:0.22;
+      var E=cells[ce].edges;
+      for(var j=0;j<E.length;j++){ ctx.beginPath(); ctx.arc(E[j][0],E[j][1],0.8,0,6.2832); ctx.fill(); }
+    }
     for(var i=0;i<dots.length;i++){
       var d=dots[i];
       var x=d.bx+Math.sin(t*0.5*d.sp+d.ph)*1.4, y=d.by+Math.cos(t*0.42*d.sp+d.ph)*1.4;
