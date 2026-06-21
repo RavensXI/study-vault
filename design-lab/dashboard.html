@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyVault — your revision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:opsz,wght@7..72,400..600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-body:#f7f6f4; --bg-card:#fff; --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
+    --border-light:#e6e4e0; --border-lighter:#f0eeea; --anchor:#566a72;
+    --good:#3f8f5f; --mid:#c8943a; --weak:#b15c4e;
+    --font-head:'Schibsted Grotesk',system-ui,sans-serif; --font-read:'Literata',Georgia,serif;
+    --r:6px; --ease:cubic-bezier(.22,1,.36,1);
+    --shadow-sm:0 1px 2px rgba(29,28,26,.05);
+    --shadow-md:0 2px 4px -2px rgba(29,28,26,.10),0 10px 24px -14px rgba(29,28,26,.16);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg-body);color:var(--text-primary);font-family:var(--font-read);-webkit-font-smoothing:antialiased;line-height:1.5}
+  h1,h2,h3,.ui,button,nav,.kicker,label,input{font-family:var(--font-head)}
+  button{cursor:pointer}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1rem,4vw,2.25rem)}
+
+  /* masthead */
+  .mast{display:flex;align-items:center;justify-content:space-between;gap:1rem;height:64px;border-bottom:1px solid var(--border-light);
+    position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg-body) 88%,transparent);backdrop-filter:saturate(1.05) blur(7px)}
+  .brand{display:inline-flex;align-items:center;font-weight:700;font-size:1.12rem;letter-spacing:-.01em}
+  .brand .lk{width:.6em;height:.6em;margin-left:.16em;border-radius:50%;border:2px solid currentColor;display:inline-block}
+  .mast .right{display:flex;align-items:center;gap:.7rem}
+  .chip{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-secondary);
+    background:var(--bg-card);border:1px solid var(--border-light);border-radius:100px;padding:.32rem .7rem}
+  .chip svg{width:14px;height:14px;color:var(--text-muted)}
+  .chip b{color:var(--text-primary);font-weight:700}
+  .avatar{width:32px;height:32px;border-radius:50%;background:var(--anchor);color:#fff;font-family:var(--font-head);font-weight:700;font-size:.85rem;
+    display:grid;place-items:center}
+
+  /* greeting */
+  .hello{margin:1.6rem 0 1.1rem}
+  .hello h1{font-size:clamp(1.5rem,2.6vw,1.95rem);font-weight:700;letter-spacing:-.02em}
+  .hello p{font-family:var(--font-read);color:var(--text-secondary);font-size:1rem;margin-top:.2rem}
+
+  /* layout */
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:1.1rem;align-items:start}
+  @media(max-width:880px){ .grid{grid-template-columns:1fr} }
+
+  .card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm)}
+  .col-left{display:flex;flex-direction:column;gap:1.1rem}
+
+  /* continue card */
+  .cont{padding:1rem 1.05rem 1.1rem}
+  .cont .lbl{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted);margin-bottom:.7rem}
+  .cont .row{display:flex;align-items:center;gap:.7rem}
+  .cont .ic{width:38px;height:38px;flex:none;border-radius:5px;display:grid;place-items:center;background:var(--border-lighter)}
+  .cont .ic canvas{display:block}
+  .cont .meta{min-width:0;flex:1}
+  .cont .subj{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.09em;font-size:.62rem;font-weight:700;color:var(--text-muted)}
+  .cont .ttl{font-family:var(--font-read);font-weight:600;font-size:1.05rem;line-height:1.25;color:var(--text-primary);margin-top:.12rem}
+  .cont .unit{font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);margin-top:.2rem}
+  .cont .bar{height:4px;border-radius:3px;background:var(--border-lighter);margin:.85rem 0 .9rem;overflow:hidden}
+  .cont .bar i{display:block;height:100%;background:var(--anchor);border-radius:3px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;width:100%;padding:.62rem 1rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-family:var(--font-head);font-weight:600;font-size:.95rem;box-shadow:var(--shadow-sm);transition:filter .18s,box-shadow .18s}
+  .btn:hover{filter:brightness(.94);box-shadow:var(--shadow-md)}
+  .btn svg{width:16px;height:16px;transition:transform .25s var(--ease)}
+  .btn:hover svg{transform:translateX(3px)}
+
+  /* review card */
+  .rev{padding:1rem 1.05rem 1.1rem}
+  .rev .top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.2rem}
+  .rev h3{font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:-.01em}
+  .rev .due{font-family:var(--font-head);font-size:.78rem;font-weight:600;color:var(--anchor)}
+  .rev .sub{font-family:var(--font-read);font-size:.85rem;color:var(--text-secondary);margin-bottom:.85rem}
+  .light{display:flex;height:9px;border-radius:5px;overflow:hidden;gap:2px;background:transparent;margin-bottom:.45rem}
+  .light span{display:block;border-radius:2px}
+  .light .g{background:var(--good)} .light .m{background:var(--mid)} .light .w{background:var(--weak)}
+  .light-key{display:flex;gap:.9rem;font-family:var(--font-head);font-size:.7rem;color:var(--text-muted);margin-bottom:.95rem}
+  .light-key i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.3rem;vertical-align:0}
+  .light-key .g i{background:var(--good)} .light-key .m i{background:var(--mid)} .light-key .w i{background:var(--weak)}
+  .btn.ghost{background:#fff;color:var(--text-primary);border:1px solid var(--border-light);box-shadow:none}
+  .btn.ghost:hover{border-color:var(--text-muted);box-shadow:var(--shadow-sm);filter:none}
+
+  /* quick row */
+  .quick{display:flex;gap:.7rem}
+  .quick button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem .5rem;border:1px solid var(--border-light);
+    background:var(--bg-card);border-radius:var(--r);font-family:var(--font-head);font-weight:600;font-size:.86rem;color:var(--text-secondary);box-shadow:var(--shadow-sm);transition:border-color .15s,color .15s}
+  .quick button:hover{border-color:var(--text-muted);color:var(--text-primary)}
+  .quick svg{width:15px;height:15px;color:var(--text-muted)}
+
+  /* universe */
+  .uni{padding:1rem 1.05rem 1.15rem;position:relative;overflow:hidden}
+  .uni .uhead{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.1rem}
+  .uni h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+  .uni .cap{font-family:var(--font-read);font-style:italic;font-size:.82rem;color:var(--text-muted)}
+  #universe{display:block;width:100%;height:420px}
+  .tip{position:absolute;pointer-events:none;background:rgba(29,28,26,.92);color:#f5f3f0;font-family:var(--font-head);font-size:.74rem;font-weight:600;
+    padding:.32rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap}
+  .legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin-top:.55rem;border-top:1px solid var(--border-lighter);padding-top:.8rem}
+  .leg{display:flex;align-items:center;gap:.45rem;min-width:150px;flex:1}
+  .leg .d{width:8px;height:8px;border-radius:50%;flex:none}
+  .leg .n{font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-primary);white-space:nowrap}
+  .leg .pbar{flex:1;height:4px;border-radius:3px;background:var(--border-lighter);overflow:hidden;min-width:40px}
+  .leg .pbar i{display:block;height:100%;border-radius:3px}
+
+  /* week strip */
+  .week{margin:1.1rem 0 2.4rem;display:flex;align-items:center;gap:0;flex-wrap:wrap;
+    background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.85rem 1.1rem}
+  .week .wlbl{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted);margin-right:1.2rem}
+  .week .stat{font-family:var(--font-head);font-size:.92rem;color:var(--text-secondary)}
+  .week .stat b{color:var(--text-primary);font-weight:700}
+  .week .sep{width:1px;height:14px;background:var(--border-light);margin:0 1rem}
+</style>
+</head>
+<body>
+  <header class="mast">
+    <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+      <span class="brand">StudyVault<span class="lk" aria-hidden="true"></span></span>
+      <div class="right">
+        <span class="chip" title="Keep your streak going"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c0 3-4 4-4 8a4 4 0 0 0 8 0c0-1-1-2-1-3 2 1 3 3 3 5a6 6 0 1 1-12 0c0-5 6-7 6-10Z"/></svg><b id="streak">4</b>-day streak</span>
+        <span class="chip" id="examChip" title="Your first GCSE exam"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16" rx="2"/><path d="M3 9h18M8 2.5v4M16 2.5v4"/></svg><span id="examTxt">First exam …</span></span>
+        <span class="avatar" aria-label="Your account">S</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="hello">
+      <h1>Welcome back, Sam.</h1>
+      <p id="subhello">Here's where you left off — pick one thing and go.</p>
+    </div>
+
+    <div class="grid">
+      <!-- ACTION COLUMN -->
+      <div class="col-left">
+        <!-- continue -->
+        <section class="card cont">
+          <div class="lbl">Pick up where you left off</div>
+          <div class="row">
+            <span class="ic"><canvas id="contIcon" width="44" height="44"></canvas></span>
+            <span class="meta">
+              <span class="subj" id="contSubj">English Literature</span>
+              <span class="ttl" id="contTtl">Macbeth — Act 1: ambition &amp; the witches</span>
+              <span class="unit" id="contUnit">7 of 12 lessons · last opened yesterday</span>
+            </span>
+          </div>
+          <div class="bar"><i id="contBar" style="width:58%"></i></div>
+          <button class="btn" id="contBtn">Continue lesson <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
+        </section>
+
+        <!-- today's review -->
+        <section class="card rev">
+          <div class="top"><h3>Today's review</h3><span class="due" id="dueTxt">14 cards due</span></div>
+          <p class="sub">A quick mix of flashcards, interleaved across your subjects — the ones you're shakiest on come round first.</p>
+          <div class="light" id="lightBar" aria-hidden="true"></div>
+          <div class="light-key">
+            <span class="g"><i></i><b id="cGood">41</b> solid</span>
+            <span class="m"><i></i><b id="cMid">23</b> learning</span>
+            <span class="w"><i></i><b id="cWeak">8</b> shaky</span>
+          </div>
+          <button class="btn" id="revBtn">Start today's review <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
+        </section>
+
+        <!-- quick actions -->
+        <div class="quick">
+          <button id="luckyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="16" cy="16" r="1.4" fill="currentColor"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="16" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>I'm feeling lucky</button>
+          <button id="browseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.4-4.4"/></svg>Browse everything</button>
+        </div>
+      </div>
+
+      <!-- UNIVERSE -->
+      <section class="card uni">
+        <div class="uhead">
+          <h2>Your universe</h2>
+          <span class="cap">lighting up as you revise</span>
+        </div>
+        <canvas id="universe"></canvas>
+        <div class="tip" id="tip"></div>
+        <div class="legend" id="legend"></div>
+      </section>
+    </div>
+
+    <div class="week">
+      <span class="wlbl">This week</span>
+      <span class="stat"><b>6</b> lessons</span><span class="sep"></span>
+      <span class="stat"><b>52</b> cards reviewed</span><span class="sep"></span>
+      <span class="stat"><b>3h 10m</b> revising</span><span class="sep"></span>
+      <span class="stat">best run <b>4 days</b></span>
+    </div>
+  </main>
+
+<script src="_icons.js"></script>
+<script src="_catalogue.js"></script>
+<script>
+(function(){
+  /* ---------- mock student shelf (subjects + mock mastery 0..1) ---------- */
+  var byName={}; SUBJECTS.forEach(function(s){ byName[s.n]=s; });
+  var SHELF=[
+    {n:'Mathematics',        m:0.55},
+    {n:'English Literature', m:0.30},
+    {n:'Combined Science',   m:0.42},
+    {n:'History',            m:0.20},
+    {n:'Geography',          m:0.66},
+    {n:'Religious Studies',  m:0.12}
+  ].map(function(r){ var s=byName[r.n]||{n:r.n,a:'#777',icon:'_default',L:40}; return {n:s.n,a:s.a,icon:(s.icon&&ICON_DRAW[s.icon])?s.icon:'_default',L:s.L,m:r.m}; });
+
+  /* ---------- continue-card icon (English Literature) ---------- */
+  (function(){
+    var s=byName['English Literature']; var cv=document.getElementById('contIcon'),x=cv.getContext('2d');
+    x.fillStyle=s?s.a:'#7d3737'; x.strokeStyle=x.fillStyle; (ICON_DRAW[s&&s.icon]||ICON_DRAW._default)(x,44);
+  })();
+
+  /* ---------- today's review lighting bar ---------- */
+  (function(){
+    var g=41,m=23,w=8,tot=g+m+w, bar=document.getElementById('lightBar');
+    function seg(cls,n){ var e=document.createElement('span'); e.className=cls; e.style.flex=n/tot; return e; }
+    bar.appendChild(seg('g',g)); bar.appendChild(seg('m',m)); bar.appendChild(seg('w',w));
+  })();
+
+  /* ---------- exam countdown (first GCSE exam, summer 2027) ---------- */
+  (function(){
+    var first=new Date('2027-05-10T09:00:00');
+    var days=Math.max(0,Math.ceil((first-new Date())/86400000));
+    document.getElementById('examTxt').innerHTML='First exam <b>'+first.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'</b> · '+days+'d';
+  })();
+
+  /* ---------- legend ---------- */
+  (function(){
+    var L=document.getElementById('legend');
+    L.innerHTML=SHELF.map(function(s){
+      return '<span class="leg"><span class="d" style="background:'+s.a+'"></span><span class="n">'+s.n+'</span>'+
+        '<span class="pbar"><i style="width:'+Math.round(s.m*100)+'%;background:'+s.a+'"></i></span></span>';
+    }).join('');
+  })();
+
+  /* ---------- constellation: each subject's icon, dots lit by mastery ---------- */
+  var cv=document.getElementById('universe'), ctx=cv.getContext('2d');
+  var DPR=Math.min(window.devicePixelRatio||1,2), W=0,H=0;
+  var iconCache={};
+  function pts(key){
+    if(iconCache[key]) return iconCache[key];
+    var S=84, oc=document.createElement('canvas'); oc.width=oc.height=S; var o=oc.getContext('2d');
+    o.fillStyle='#000'; (ICON_DRAW[key]||ICON_DRAW._default)(o,S);
+    var d=o.getImageData(0,0,S,S).data, p=[];
+    for(var y=0;y<S;y++)for(var x=0;x<S;x++){ if(d[(y*S+x)*4+3]>128) p.push([x/S,y/S]); }
+    for(var a=p.length-1;a>0;a--){ var b=(Math.random()*(a+1))|0,t=p[a];p[a]=p[b];p[b]=t; }   // shuffle (no moiré)
+    iconCache[key]=p; return p;
+  }
+  var dots=[], cells=[];
+  function layout(){
+    W=cv.clientWidth; H=cv.clientHeight; cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
+    var n=SHELF.length, cols=W<560?2:3, rows=Math.ceil(n/cols);
+    var cw=W/cols, chh=H/rows, size=Math.min(cw*0.62,chh*0.66,150);
+    cells=[]; dots=[];
+    SHELF.forEach(function(s,i){
+      var c=i%cols, r=Math.floor(i/cols), cx=(c+0.5)*cw, cy=(r+0.5)*chh, half=size/2;
+      cells.push({cx:cx,cy:cy,size:size,s:s});
+      var P=pts(s.icon), N=Math.min(86,P.length), lit=Math.round(N*s.m);
+      for(var k=0;k<N;k++){
+        var p=P[Math.floor(k*P.length/N)%P.length];
+        dots.push({ bx:cx-half+p[0]*size, by:cy-half+p[1]*size, ph:Math.random()*6.28, sp:0.5+Math.random()*0.6,
+                    lit:k<lit, a:s.a, ci:i });
+      }
+    });
+  }
+  var hover=-1, t=0, last=0;
+  function frame(now){
+    var dt=Math.min(0.05,(now-last)/1000)||0; last=now; t+=dt;
+    ctx.clearRect(0,0,W,H);
+    for(var i=0;i<dots.length;i++){
+      var d=dots[i];
+      var x=d.bx+Math.sin(t*0.5*d.sp+d.ph)*1.4, y=d.by+Math.cos(t*0.42*d.sp+d.ph)*1.4;
+      var foc=(hover===-1||hover===d.ci);
+      if(d.lit){
+        ctx.globalAlpha=(foc?0.92:0.5)*(0.85+0.15*Math.sin(t*1.2+d.ph));
+        ctx.fillStyle=d.a;
+      } else {
+        ctx.globalAlpha=foc?0.34:0.16; ctx.fillStyle='#b8b2a8';
+      }
+      ctx.beginPath(); ctx.arc(x,y,d.lit?2.1:1.7,0,6.2832); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+    raf=requestAnimationFrame(frame);
+  }
+  var raf=0;
+  function start(){ layout(); cancelAnimationFrame(raf); raf=requestAnimationFrame(frame); }
+  window.addEventListener('resize', start);
+  // hover → tooltip + focus a subject's cluster
+  var tip=document.getElementById('tip');
+  cv.addEventListener('mousemove', function(e){
+    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, best=-1, bd=1e9;
+    cells.forEach(function(c,i){ var dx=mx-c.cx, dy=my-c.cy, dist=dx*dx+dy*dy; if(dist<(c.size*0.62)*(c.size*0.62)&&dist<bd){bd=dist;best=i;} });
+    hover=best; cv.style.cursor=best>=0?'pointer':'default';
+    if(best>=0){ var s=cells[best].s; tip.textContent=s.n+' · '+Math.round(s.m*100)+'% lit'; tip.style.left=cells[best].cx+'px'; tip.style.top=(cells[best].cy-cells[best].size*0.5)+'px'; tip.style.opacity='1'; }
+    else tip.style.opacity='0';
+  });
+  cv.addEventListener('mouseleave', function(){ hover=-1; tip.style.opacity='0'; cv.style.cursor='default'; });
+
+  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(start); setTimeout(start,400); } else start();
+
+  /* prototype buttons (no-ops for the draft) */
+  ['contBtn','revBtn','luckyBtn','browseBtn'].forEach(function(id){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(e){e.preventDefault();}); });
+})();
+</script>
+</body>
+</html>
