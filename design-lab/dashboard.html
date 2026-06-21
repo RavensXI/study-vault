@@ -96,11 +96,6 @@
   #universe{display:block;width:100%;height:420px}
   .tip{position:absolute;pointer-events:none;background:rgba(29,28,26,.92);color:#f5f3f0;font-family:var(--font-head);font-size:.74rem;font-weight:600;
     padding:.32rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap}
-  .legend{display:flex;flex-wrap:wrap;gap:.5rem .9rem;margin-top:.55rem;border-top:1px solid var(--border-lighter);padding-top:.8rem}
-  .leg{display:flex;align-items:center;gap:.45rem;min-width:150px;flex:1}
-  .leg .n{font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-primary);white-space:nowrap}
-  .leg .pbar{flex:1;height:4px;border-radius:3px;background:var(--border-lighter);overflow:hidden;min-width:40px}
-  .leg .pbar i{display:block;height:100%;border-radius:3px}
 
   /* week strip */
   .week{margin:1.1rem 0 2.4rem;display:flex;align-items:center;gap:0;flex-wrap:wrap;
@@ -175,7 +170,6 @@
         </div>
         <canvas id="universe"></canvas>
         <div class="tip" id="tip"></div>
-        <div class="legend" id="legend"></div>
       </section>
     </div>
 
@@ -196,10 +190,13 @@
   var byName={}; SUBJECTS.forEach(function(s){ byName[s.n]=s; });
   var SHELF=[
     {n:'Mathematics',        m:0.55},
+    {n:'English Language',   m:0.48},
     {n:'English Literature', m:0.30},
     {n:'Combined Science',   m:0.42},
     {n:'History',            m:0.20},
     {n:'Geography',          m:0.66},
+    {n:'Spanish',            m:0.35},
+    {n:'Computer Science',   m:0.58},
     {n:'Religious Studies',  m:0.12}
   ].map(function(r){ var s=byName[r.n]||{n:r.n,a:'#777',icon:'_default',L:40}; return {n:s.n,a:s.a,icon:(s.icon&&ICON_DRAW[s.icon])?s.icon:'_default',L:s.L,m:r.m}; });
 
@@ -223,14 +220,6 @@
     document.getElementById('examTxt').innerHTML='First exam <b>'+first.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'</b> · '+days+'d';
   })();
 
-  /* ---------- legend ---------- */
-  (function(){
-    var L=document.getElementById('legend');
-    L.innerHTML=SHELF.map(function(s){
-      return '<span class="leg"><span class="n">'+s.n+'</span>'+
-        '<span class="pbar"><i style="width:'+Math.round(s.m*100)+'%;background:'+s.a+'"></i></span></span>';
-    }).join('');
-  })();
 
   /* ---------- constellation: each subject's icon, dots lit by mastery ---------- */
   var cv=document.getElementById('universe'), ctx=cv.getContext('2d');
@@ -262,11 +251,12 @@
   var dots=[], cells=[];
   function layout(){
     W=cv.clientWidth; H=cv.clientHeight; cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
-    var n=SHELF.length, cols=W<560?2:3, rows=Math.ceil(n/cols);
+    var n=SHELF.length, cols=W<330?2:(n<=9?3:4), rows=Math.ceil(n/cols);
     var cw=W/cols, chh=H/rows, size=Math.min(cw*0.62,chh*0.66,150);
     cells=[]; dots=[];
     SHELF.forEach(function(s,i){
-      var c=i%cols, r=Math.floor(i/cols), cx=(c+0.5)*cw, cy=(r+0.5)*chh, half=size/2;
+      var r=Math.floor(i/cols), inRow=Math.min(cols,n-r*cols), cInRow=i-r*cols;   // centre ragged rows
+      var cx=(W-inRow*cw)/2+(cInRow+0.5)*cw, cy=(r+0.5)*chh, half=size/2;
       var G=geom(s.icon);
       cells.push({cx:cx,cy:cy,size:size,s:s,ol:outline(s.icon,s.a)});
       var P=G.pts, N=Math.min(86,P.length), lit=Math.round(N*s.m);
@@ -311,7 +301,10 @@
     var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, best=-1, bd=1e9;
     cells.forEach(function(c,i){ var dx=mx-c.cx, dy=my-c.cy, dist=dx*dx+dy*dy; if(dist<(c.size*0.62)*(c.size*0.62)&&dist<bd){bd=dist;best=i;} });
     hover=best; cv.style.cursor=best>=0?'pointer':'default';
-    if(best>=0){ var s=cells[best].s; tip.textContent=s.n+' · '+Math.round(s.m*100)+'% lit'; tip.style.left=cells[best].cx+'px'; tip.style.top=(cells[best].cy-cells[best].size*0.5)+'px'; tip.style.opacity='1'; }
+    if(best>=0){ var c=cells[best],s=c.s; tip.textContent=s.n+' · '+Math.round(s.m*100)+'% revised';
+      var up=c.cy-c.size*0.5>40;   // room above? else flip below so the top row doesn't clip
+      tip.style.left=c.cx+'px'; tip.style.top=(up?c.cy-c.size*0.5:c.cy+c.size*0.5)+'px';
+      tip.style.transform=up?'translate(-50%,-130%)':'translate(-50%,30%)'; tip.style.opacity='1'; }
     else tip.style.opacity='0';
   });
   cv.addEventListener('mouseleave', function(){ hover=-1; tip.style.opacity='0'; cv.style.cursor='default'; });
