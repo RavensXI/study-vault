@@ -643,6 +643,28 @@ var mouseOn = false, mx = 0, my = 0;
 var raf = 0, last = 0, t = 0;
 var running = false;
 
+// cursor parallax + dwell-triggered same-subject constellation lines
+var paraX = 0, paraY = 0;
+var constSrc = -1, constData = null, constAlpha = 0, dwell = 0, dwellIdx = -1;
+function buildConstellation(src){
+  var sub = chosenFlag[src] ? assignSub[src] : subjIdx[src];
+  var cand = [];
+  for(var i=0;i<N;i++){
+    if(i===src || chosenFlag[i] || subjIdx[i] !== sub) continue;
+    var dx=x[i]-x[src], dy=y[i]-y[src];
+    cand.push({i:i, d2:dx*dx+dy*dy});
+  }
+  cand.sort(function(a,b){ return a.d2-b.d2; });
+  if(cand.length > 10) cand.length = 10;                  // nearest ~10 in the same subject
+  var inTree=[src], edges=[];
+  for(var c=0;c<cand.length;c++){                          // greedy nearest-in-tree → an organic branch, not a star
+    var ni=cand[c].i, bj=src, bd=Infinity;
+    for(var ti=0;ti<inTree.length;ti++){ var tj=inTree[ti], ex=x[ni]-x[tj], ey=y[ni]-y[tj], ed=ex*ex+ey*ey; if(ed<bd){bd=ed;bj=tj;} }
+    edges.push([bj, ni, c]); inTree.push(ni);              // [from, to, branch order]
+  }
+  return { edges:edges, n:Math.max(1,cand.length) };
+}
+
 // FPS probe → downgrade
 var fpsAccum = 0, fpsFrames = 0, downgraded = false;
 
@@ -667,6 +689,20 @@ function frame(now){
   var inking = elapsed < 900;
   var anyC = anyChosen();
 
+  // smoothed cursor offset → depth parallax (field layers shift differentially)
+  var ptX = (mouseOn && !touch && !anyC) ? (mx - W*0.5) : 0;
+  var ptY = (mouseOn && !touch && !anyC) ? (my - H*0.5) : 0;
+  paraX += (ptX - paraX) * (1 - Math.pow(0.05, dt));
+  paraY += (ptY - paraY) * (1 - Math.pow(0.05, dt));
+
+  // dwell on one lesson → branch faint constellation lines to its nearest same-subject dots
+  if(peekIdx !== dwellIdx){ dwellIdx = peekIdx; dwell = 0; }
+  else if(peekIdx >= 0){ dwell += dt; }
+  var wantConst = peekIdx >= 0 && dwell > 1.2 && !anyC;
+  if(wantConst && constSrc !== peekIdx){ constSrc = peekIdx; constData = buildConstellation(peekIdx); }
+  constAlpha += ((wantConst ? 1 : 0) - constAlpha) * (1 - Math.pow(0.02, dt));
+  if(constAlpha < 0.006 && !wantConst){ constSrc = -1; constData = null; constAlpha = 0; }
+
   ctx.clearRect(0,0,W,H);
 
   // FIELD pass (unchosen) then CHOSEN pass on top
@@ -676,7 +712,8 @@ function frame(now){
     // drift / breathe — ~2x faster than spec (perceptible-but-calm ~14-22s period)
     var bx = Math.sin(t*0.36*sp[k] + ph[k]) * amp[k];
     var by = Math.cos(t*0.30*sp[k] + ph[k]*1.3) * amp[k];
-    var dtx = hx[k] + bx, dty = hy[k] + by;
+    var dep = (rad[k]-0.8)/0.9;                                       // 0 (far) .. 1 (near), from dot size
+    var dtx = hx[k] + bx - paraX*dep*0.016, dty = hy[k] + by - paraY*dep*0.016;   // parallax: near layers shift more
     var lf = 1 - Math.pow(0.02, dt);
     if(mouseOn && !touch){
       if(k === peekIdx){          // the one nearest the cursor is DRAWN IN so you can read it
@@ -696,7 +733,7 @@ function frame(now){
     var rk = rad[k];
     if(mouseOn && !touch && !anyC){                                    // cursor aurora — colour wells up + swells near the pointer
       var ax = x[k]-mx, ay = y[k]-my, ad2 = ax*ax + ay*ay;
-      if(ad2 < 32000){ var g = 1 - Math.sqrt(ad2)/179; if(g > 0){ baseA *= 1 + g*0.9; rk = rad[k]*(1 + g*0.45); } }
+      if(ad2 < 40000){ var g = 1 - Math.sqrt(ad2)/200; if(g > 0){ baseA *= 1 + g*1.8; rk = rad[k]*(1 + g*0.6); } }
     }
     if(inking) baseA *= inkMul(k, elapsed);
     if(baseA < 0.012) continue;
@@ -739,6 +776,22 @@ function frame(now){
     ctx.fill();
   }
   ctx.globalAlpha = 1;
+
+  // dwell constellation — faint branches to the nearest same-subject lessons, fading toward the ends
+  if(constData && constAlpha > 0.006 && constSrc >= 0){
+    var cr = colR[constSrc], cg = colG[constSrc], cb = colB[constSrc], E = constData.edges, ne = constData.n;
+    ctx.lineWidth = 1;
+    for(var ei=0; ei<E.length; ei++){
+      var ea = E[ei][0], eb = E[ei][1], eo = E[ei][2];
+      var ca = constAlpha * (1 - eo/ne*0.7);                       // outer branches overall fainter
+      var grad = ctx.createLinearGradient(x[ea],y[ea],x[eb],y[eb]); // each line fades along its own length
+      grad.addColorStop(0, 'rgba('+cr+','+cg+','+cb+','+(ca*0.6).toFixed(3)+')');
+      grad.addColorStop(1, 'rgba('+cr+','+cg+','+cb+','+(ca*0.07).toFixed(3)+')');
+      ctx.strokeStyle = grad;
+      ctx.beginPath(); ctx.moveTo(x[ea],y[ea]); ctx.lineTo(x[eb],y[eb]); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
 
   // hover-peek highlight ring (delight layer)
   if(peekIdx >= 0 && peekIdx < N){
