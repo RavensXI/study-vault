@@ -179,6 +179,7 @@
     </div>
   </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="_icons.js"></script>
 <script src="_catalogue.js"></script>
 <script>
@@ -195,7 +196,7 @@
     {n:'Spanish',            m:0.35},
     {n:'Computer Science',   m:0.58},
     {n:'Religious Studies',  m:0.12}
-  ].map(function(r){ var s=byName[r.n]||{n:r.n,a:'#777',icon:'_default',L:40}; return {n:s.n,a:s.a,icon:(s.icon&&ICON_DRAW[s.icon])?s.icon:'_default',L:s.L,m:r.m}; });
+  ].map(function(r){ var s=byName[r.n]||{n:r.n,k:null,a:'#777',icon:'_default',L:40}; return {n:s.n,k:s.k||null,a:s.a,icon:(s.icon&&ICON_DRAW[s.icon])?s.icon:'_default',L:s.L,m:r.m}; });
 
   /* ---------- continue-card icon (English Literature) ---------- */
   (function(){
@@ -308,8 +309,53 @@
 
   if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(start); setTimeout(start,400); } else start();
 
-  /* prototype buttons (no-ops for the draft) */
-  ['contBtn','revBtn','luckyBtn','browseBtn'].forEach(function(id){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(e){e.preventDefault();}); });
+  /* ---------- wire every button to a real, scoped destination ---------- */
+  var sbc = (window.supabase&&window.supabase.createClient)
+    ? window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2') : null;
+  var PRACTICE={};   // subject slug -> [unit slugs that use /practice/]
+  var POOL={};       // subject slug -> [{u:unitSlug, n:lessonNumber}] of live lessons
+  var scoped = SHELF.filter(function(s){ return s.k; });   // the student's subjects, by slug
+
+  function go(url){ window.location.href=url; }
+  function pick(a){ return a[(Math.random()*a.length)|0]; }
+  function poolFor(slug){ return (POOL[slug]&&POOL[slug].length)?POOL[slug]:null; }
+  // article vs practice is per-unit (Maths/MFL/Eng-Lang fully practice; Science calc + Geog skills mixed)
+  function contentUrl(slug,unit,n){ var pu=PRACTICE[slug]||[]; return (pu.indexOf(unit)>=0?'/practice/':'/lesson/')+slug+'/'+unit+'/'+n; }
+  function randomLesson(slug){ var p=poolFor(slug); if(!p) return '/browse/'+slug; var l=p[(Math.random()*p.length)|0]; return contentUrl(slug,l.u,l.n); }
+  function firstLesson(slug){ var p=poolFor(slug); return p? contentUrl(slug,p[0].u,p[0].n) : '/browse/'+slug; }
+
+  // load the practice-unit map first, then a live-lesson pool for each subject (so URLs route correctly)
+  if(sbc && scoped.length){
+    var slugs=scoped.map(function(s){return s.k;});
+    sbc.from('subjects').select('slug, settings').in('slug',slugs).is('school_id',null).then(function(res){
+      (res.data||[]).forEach(function(r){ PRACTICE[r.slug]=(r.settings&&r.settings.practice_units)||[]; });
+      scoped.forEach(function(s){
+        sbc.from('lessons').select('lesson_number, units!inner(slug, subjects!inner(slug, school_id))')
+          .eq('status','live').is('units.subjects.school_id',null).eq('units.subjects.slug',s.k).limit(300)
+          .then(function(r2){ if(r2.data&&r2.data.length) POOL[s.k]=r2.data.map(function(x){return {u:x.units.slug,n:x.lesson_number};}); });
+      });
+    });
+  }
+
+  function nav(id,fn){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(e){e.preventDefault();fn();}); }
+  nav('contBtn', function(){ go(firstLesson('english-literature-aqa')); });                         // continue the displayed subject
+  nav('revBtn',  function(){ var s=scoped.slice().sort(function(a,b){return a.m-b.m;})[0]; go(s?randomLesson(s.k):'/'); });  // review the shakiest
+  nav('luckyBtn',function(){ var s=pick(scoped.length?scoped:SHELF); go(s&&s.k?randomLesson(s.k):'/'); });                  // random scoped lesson
+  nav('browseBtn',function(){ go('/'); });                                                          // all subjects
+
+  // click a constellation → browse that subject
+  cv.addEventListener('click', function(e){
+    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, best=-1, bd=1e9;
+    cells.forEach(function(c,i){ var dx=mx-c.cx, dy=my-c.cy, d=dx*dx+dy*dy; if(d<(c.size*0.62)*(c.size*0.62)&&d<bd){bd=d;best=i;} });
+    if(best>=0 && cells[best].s.k) go('/browse/'+cells[best].s.k);
+  });
+
+  // header
+  function clickable(el,fn,label){ if(!el) return; el.style.cursor='pointer'; if(label) el.title=label; el.addEventListener('click',fn); }
+  clickable(document.querySelector('.brand'), function(){ go('dashboard.html'); }, 'Home');
+  clickable(document.getElementById('examChip'), function(){ go('/exams.html'); });
+  clickable(document.querySelector('.avatar'), function(){ go('/'); }, 'Account');
+  clickable(document.querySelector('.chip[title="Keep your streak going"]'), function(){ var rv=document.querySelector('.rev'); if(rv) rv.scrollIntoView({behavior:'smooth',block:'center'}); });
 })();
 </script>
 </body>
