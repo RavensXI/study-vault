@@ -243,10 +243,21 @@
     var d=o.getImageData(0,0,S,S).data, p=[];
     for(var y=0;y<S;y++)for(var x=0;x<S;x++){ if(d[(y*S+x)*4+3]>128) p.push([x/S,y/S]); }
     for(var a=p.length-1;a>0;a--){ var b=(Math.random()*(a+1))|0,t=p[a];p[a]=p[b];p[b]=t; }   // shuffle (no moiré)
-    // bake one solid silhouette → drawn faintly behind the dots so the shape always reads
-    var R=224, sc=document.createElement('canvas'); sc.width=sc.height=R; var sx=sc.getContext('2d');
-    sx.fillStyle='#2d2a26'; (ICON_DRAW[key]||ICON_DRAW._default)(sx,R);
-    iconCache[key]={pts:p, sil:sc}; return iconCache[key];
+    iconCache[key]={pts:p}; return iconCache[key];
+  }
+  // a clean thin outline of an icon, tinted to `color`, baked once: dilate the filled glyph then knock out its centre → a ring
+  var olCache={};
+  function outline(key,color){
+    var ck=key+'|'+color; if(olCache[ck]) return olCache[ck];
+    var R=224, w=3;
+    var tmp=document.createElement('canvas'); tmp.width=tmp.height=R; var tx=tmp.getContext('2d');
+    tx.fillStyle='#000'; (ICON_DRAW[key]||ICON_DRAW._default)(tx,R);
+    var out=document.createElement('canvas'); out.width=out.height=R; var ox=out.getContext('2d');
+    for(var an=0;an<6.2832;an+=Math.PI/8){ ox.drawImage(tmp, Math.cos(an)*w, Math.sin(an)*w); }   // dilate outward
+    ox.globalCompositeOperation='destination-out'; ox.drawImage(tmp,0,0);                          // knock out centre → ring
+    ox.globalCompositeOperation='source-in'; ox.fillStyle=color; ox.fillRect(0,0,R,R);             // tint the ring
+    ox.globalCompositeOperation='source-over';
+    olCache[ck]=out; return out;
   }
   var dots=[], cells=[];
   function layout(){
@@ -257,7 +268,7 @@
     SHELF.forEach(function(s,i){
       var c=i%cols, r=Math.floor(i/cols), cx=(c+0.5)*cw, cy=(r+0.5)*chh, half=size/2;
       var G=geom(s.icon);
-      cells.push({cx:cx,cy:cy,size:size,s:s,sil:G.sil});
+      cells.push({cx:cx,cy:cy,size:size,s:s,ol:outline(s.icon,s.a)});
       var P=G.pts, N=Math.min(86,P.length), lit=Math.round(N*s.m);
       for(var k=0;k<N;k++){
         var p=P[Math.floor(k*P.length/N)%P.length];
@@ -270,11 +281,11 @@
   function frame(now){
     var dt=Math.min(0.05,(now-last)/1000)||0; last=now; t+=dt;
     ctx.clearRect(0,0,W,H);
-    // faint filled silhouette of each symbol so the shape always reads, even when little is lit
+    // thin accent outline of each symbol so the shape always reads, even when little is lit
     for(var ce=0;ce<cells.length;ce++){
       var cl=cells[ce], hf=cl.size/2;
-      ctx.globalAlpha=(hover===-1||hover===ce)?0.13:0.06;
-      ctx.drawImage(cl.sil, cl.cx-hf, cl.cy-hf, cl.size, cl.size);
+      ctx.globalAlpha=(hover===-1||hover===ce)?0.55:0.26;
+      ctx.drawImage(cl.ol, cl.cx-hf, cl.cy-hf, cl.size, cl.size);
     }
     for(var i=0;i<dots.length;i++){
       var d=dots[i];
