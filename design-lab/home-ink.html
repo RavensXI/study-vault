@@ -248,6 +248,16 @@ h1 .beat{color:var(--text-secondary)}
 .sso:hover{border-color:var(--text-muted);box-shadow:var(--shadow-sm)}
 .sso + .sso{margin-top:.55rem}
 .sso svg{flex:none;width:18px;height:18px}
+/* hero: SSO route for premium-school students (hidden once the free picker starts) */
+.hero-alt{margin-top:1.5rem;max-width:330px}
+.hero-alt-label{font-family:var(--font-head);font-size:.84rem;color:var(--text-muted);margin-bottom:.6rem}
+.console.started .hero-alt{display:none}
+/* email signup (free tier, end of picker) */
+.signup{max-width:330px;margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
+.signup .fld{width:100%;font-family:var(--font-head);font-size:.95rem;padding:.62rem .85rem;
+  border:1px solid var(--border-light);border-radius:var(--radius-sm);background:#fff;color:var(--text-primary)}
+.signup .fld::placeholder{color:var(--text-muted)}
+.signup .fld:focus{outline:none;border-color:var(--anchor);box-shadow:0 0 0 3px color-mix(in srgb,var(--anchor) 16%,transparent)}
 .resolve .sublabel{font-family:var(--font-read);font-style:italic;font-size:.85rem;color:var(--text-muted);margin-top:.35rem}
 .resolve .secs{display:flex;align-items:center;justify-content:center;gap:0;margin-top:.7rem}
 .resolve .secs .div{display:inline-block;width:1px;height:13px;background:var(--border-light);margin:0 .85rem;vertical-align:middle}
@@ -335,7 +345,14 @@ html:not(.js) #field,html:not(.js) .fog,html:not(.js) .labels,html:not(.js) .con
       <p class="freeline">Free for students, forever.</p>
       <div class="guide rise" data-rise="3" id="guide" aria-live="polite">
         <p class="guide-text" id="guideText"></p>
-        <button class="btn-primary" type="button" id="beginBtn">Begin <svg class="cta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
+        <button class="btn-primary" type="button" id="beginBtn">Set up my subjects <svg class="cta-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
+        <div class="hero-alt" id="heroAlt">
+          <p class="hero-alt-label">Already set up by your school? Sign in.</p>
+          <div class="sso-group">
+            <button class="sso" type="button" id="heroGoogle"><svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>Continue with Google</button>
+            <button class="sso" type="button" id="heroMicrosoft"><svg viewBox="0 0 23 23" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>Continue with Microsoft</button>
+          </div>
+        </div>
       </div>
 
       <!-- canvas-driven picker (JS-enhanced) -->
@@ -1017,13 +1034,13 @@ function showOptionsStep(){
 }
 function optionsNext(){ optIndex++; (optIndex >= optionSubjects().length) ? enterFinishStep() : showOptionsStep(); }
 function optionsPrev(){ optIndex--; (optIndex < 0) ? enterBoardStep() : showOptionsStep(); }
-function enterFinishStep(){     // step 4 — save your shelf
+function enterFinishStep(){     // step 4 (free tier) — create your free account with email + password
   if(phase === 'finish') return;
   phase = 'finish'; focusSlug = null; applyPhase();
   assignTargets();                                                 // gather all icons back into the grid (the "your universe" view)
-  setGuide([{t:'One last thing — save your subjects.'}]);
+  setGuide([{t:'One last thing — create your free account.'}]);
   renderFinishPanel();
-  setWizNav(null, null, function(){ hasAnyOptions() ? enterOptionsStep(true) : enterBoardStep(); });  // sign-in lives in the panel; nav is Back only
+  setWizNav('Create account', function(){ enterDone('email'); }, function(){ hasAnyOptions() ? enterOptionsStep(true) : enterBoardStep(); });
 }
 function enterDone(via){        // step 5 — done / start
   phase = 'done'; focusSlug = null; applyPhase();
@@ -1031,29 +1048,33 @@ function enterDone(via){        // step 5 — done / start
   renderDonePanel(via || 'guest');
   setWizNav('Start revising', startRevising, enterFinishStep);
 }
-function startRevising(){ /* prototype end — in production this lands in /browse with the chosen subjects */ }
+/* premium-school student: signed in up front via SSO — the school has preset everything, so skip the picker entirely */
+function premiumDone(provider){
+  consoleEl.classList.add('started','heroGone');                   // clear the hero
+  phase = 'done'; focusSlug = null; applyPhase();
+  setGuide([{t:'Welcome back.'}]);
+  finishPanel.innerHTML = '<p class="fin-t">Signed in with '+(provider === 'google' ? 'Google' : 'Microsoft')+
+    '. Your school has already set up your subjects, exam boards and topics — everything’s ready.</p>';
+  setWizNav('Start revising', startRevising, null);
+}
+function startRevising(){ /* prototype end — in production this lands in /browse */ }
 
-var SSO_GOOGLE = '<svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/></svg>';
-var SSO_MS = '<svg viewBox="0 0 23 23" aria-hidden="true"><path fill="#f25022" d="M1 1h10v10H1z"/><path fill="#7fba00" d="M12 1h10v10H12z"/><path fill="#00a4ef" d="M1 12h10v10H1z"/><path fill="#ffb900" d="M12 12h10v10H12z"/></svg>';
 function renderFinishPanel(){
   finishPanel.innerHTML =
     '<p class="fin-stat">Everything you’re studying, ready in one place.</p>'+
-    '<p class="fin-t">Sign in to keep your subjects and your progress on every device. You don’t need an account to start.</p>'+
-    '<div class="sso-group">'+
-      '<button class="sso" type="button" id="ssoGoogle">'+SSO_GOOGLE+'Continue with Google</button>'+
-      '<button class="sso" type="button" id="ssoMicrosoft">'+SSO_MS+'Continue with Microsoft</button>'+
+    '<p class="fin-t">Create a free account to keep your subjects and progress on every device. You don’t need one to start.</p>'+
+    '<div class="signup">'+
+      '<input class="fld" id="suEmail" type="email" autocomplete="email" placeholder="Your email address" aria-label="Email address">'+
+      '<input class="fld" id="suPass" type="password" autocomplete="new-password" placeholder="Create a password" aria-label="Password">'+
     '</div>'+
     '<div class="fin-actions">'+
       '<button class="linkbtn" type="button" id="skipSave">Start without saving</button>'+
     '</div>';
-  document.getElementById('ssoGoogle').addEventListener('click', function(){ enterDone('google'); });
-  document.getElementById('ssoMicrosoft').addEventListener('click', function(){ enterDone('microsoft'); });
   document.getElementById('skipSave').addEventListener('click', function(){ enterDone('guest'); });
 }
 function renderDonePanel(via){
-  var msg = via === 'google'    ? 'Signed in with Google — your subjects are saved.'
-          : via === 'microsoft' ? 'Signed in with Microsoft — your subjects are saved.'
-          :                       'Your subjects are saved on this device.';
+  var msg = via === 'email' ? 'Your free account’s ready — your subjects are saved.'
+          :                   'Your subjects are saved on this device.';
   finishPanel.innerHTML = '<p class="fin-t">'+msg+' Pick up exactly where you leave off, any time.</p>';
 }
 
@@ -1165,6 +1186,8 @@ function finishTutorial(){
   }
 }
 beginBtn.addEventListener('click', runTutorial);
+document.getElementById('heroGoogle').addEventListener('click', function(){ premiumDone('google'); });
+document.getElementById('heroMicrosoft').addEventListener('click', function(){ premiumDone('microsoft'); });
 function addSubject(slug){
   if(order.indexOf(slug) !== -1) return;
   if(!byKey[slug]) return;
