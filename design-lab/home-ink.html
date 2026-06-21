@@ -87,14 +87,13 @@ h1 .beat{color:var(--text-secondary)}
 .guide{margin:.7rem 0 .85rem;max-width:42ch}
 .guide-text{font-family:var(--font-head);font-weight:600;font-size:clamp(1.3rem,2.3vw,1.7rem);
   letter-spacing:-.012em;color:var(--text-primary);line-height:1.2;min-height:0;
-  opacity:1;transition:opacity .32s ease}
+  opacity:1;transition:opacity .42s ease}
 .console.started .guide-text{min-height:1.3em}
 .guide-text.gt-out{opacity:0}
 .guide-text.gt-typing::after{content:'';display:inline-block;width:2px;height:1.02em;border-radius:1px;
   background:currentColor;margin-left:3px;vertical-align:-.14em;animation:gtcaret .85s steps(1) infinite}
 @keyframes gtcaret{50%{opacity:0}}
 .guide #beginBtn{margin-top:1.1rem}
-.console.started #beginBtn{display:none}
 
 /* ---------- picker ---------- */
 .picker{position:relative;width:100%;flex:none}
@@ -135,8 +134,9 @@ h1 .beat{color:var(--text-secondary)}
 .shelf{scrollbar-width:thin;scrollbar-color:var(--border-light) transparent}
 .srow{display:flex;align-items:center;gap:.5rem;padding:.46rem .5rem .46rem .62rem;
   background:#fff;border:1px solid var(--border-light);border-radius:var(--radius-sm)}
-.js-anim .srow.fresh{animation:rowin .4s var(--ease)}
+.js-anim .srow.fresh{animation:rowin .45s var(--ease)}
 @keyframes rowin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.srow.leaving{opacity:0;transform:translateY(-4px);transition:opacity .32s var(--ease),transform .32s var(--ease);pointer-events:none}
 .srow .sdot{width:8px;height:8px;border-radius:50%;background:var(--a);flex:none}
 .srow .sname{flex:1;min-width:0;font-family:var(--font-head);font-weight:600;font-size:.9rem;
   color:var(--text-primary);letter-spacing:-.01em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -251,7 +251,6 @@ h1 .beat{color:var(--text-secondary)}
 /* hero: SSO route for premium-school students (hidden once the free picker starts) */
 .hero-alt{margin-top:1.5rem;max-width:330px}
 .hero-alt-label{font-family:var(--font-head);font-size:.84rem;color:var(--text-muted);margin-bottom:.6rem}
-.console.started .hero-alt{display:none}
 /* email signup (free tier, end of picker) */
 .signup{max-width:330px;margin-top:1rem;display:flex;flex-direction:column;gap:.5rem}
 .signup .fld{width:100%;font-family:var(--font-head);font-size:.95rem;padding:.62rem .85rem;
@@ -281,9 +280,9 @@ h1 .beat{color:var(--text-secondary)}
 }
 
 /* ---------- tutorial takeover: Begin clears the marketing hero, leaving one instruction line ---------- */
-.console .kicker,.console h1,.console .freeline{transition:opacity .35s ease}
-.console.started .kicker,.console.started h1,.console.started .freeline{opacity:0}
-.console.heroGone .kicker,.console.heroGone h1,.console.heroGone .freeline{display:none}
+.console .kicker,.console h1,.console .freeline,.guide #beginBtn,.console .hero-alt{transition:opacity .55s ease}
+.console.started .kicker,.console.started h1,.console.started .freeline,.console.started #beginBtn,.console.started .hero-alt{opacity:0}
+.console.heroGone .kicker,.console.heroGone h1,.console.heroGone .freeline,.console.heroGone #beginBtn,.console.heroGone .hero-alt{display:none}
 
 /* ---------- no-JS / static picker fallback ---------- */
 .nojs-picker{max-width:520px;margin:1.25rem auto 0;text-align:left}
@@ -299,6 +298,10 @@ h1 .beat{color:var(--text-secondary)}
 .js .console-canvas{display:flex;flex-direction:column;min-height:0;flex:1 1 auto}
 html:not(.js) #field,html:not(.js) .fog,html:not(.js) .labels,html:not(.js) .console-canvas{display:none}
 .console-canvas{display:none}
+.js-anim .console-canvas{transition:opacity .45s var(--ease)}    /* calm crossfade between wizard steps */
+.console-canvas.swapping{opacity:0}
+@keyframes navIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.js-anim .resolve.reveal{animation:navIn .55s var(--ease)}
 
 /* ---------- responsive ---------- */
 @media (max-width:768px){
@@ -859,22 +862,24 @@ function bindRemoveButtons(){
     btn.addEventListener('click', function(){ removeSubject(btn.dataset.k); });
   });
 }
+var shownSlugs = {};   // subjects whose row has already eased in — so re-renders don't re-animate the whole list
 function renderShelf(){
   if(phase === 'boards'){ renderBoardShelf(); return; }
   if(phase === 'options'){ renderOptionsShelf(); return; }
   shelfEl.innerHTML = order.map(function(slug){
     var s = byKey[slug];
-    return '<div class="srow fresh" role="listitem" style="--a:'+s.a+'">'+
+    var fresh = shownSlugs[slug] ? '' : ' fresh';      // only a newly-added row eases in; the rest stay put
+    return '<div class="srow'+fresh+'" role="listitem" style="--a:'+s.a+'">'+
       '<span class="sdot" aria-hidden="true"></span>'+
       '<span class="sname">'+s.n+'</span>'+
       '<span class="scount">'+s.L+'</span>'+
       '<button class="rm" type="button" data-k="'+slug+'" aria-label="Remove '+s.n+'">'+RM_SVG+'</button></div>';
   }).join('');
+  order.forEach(function(slug){ shownSlugs[slug] = true; });
   bindRemoveButtons();
-  // strip the fresh class after the animation so re-render doesn't re-fire all rows
   setTimeout(function(){
     Array.prototype.forEach.call(shelfEl.querySelectorAll('.srow.fresh'), function(r){ r.classList.remove('fresh'); });
-  }, 450);
+  }, 460);
 }
 /* board step: same grid, but each subject card carries a row of selectable exam-board chips */
 function renderBoardShelf(){
@@ -993,13 +998,25 @@ function applyPhase(){
   if(phase !== 'subjects') consoleEl.classList.add(phase + '-phase');
   finishPanel.hidden = !(phase === 'finish' || phase === 'done');
 }
+/* calm crossfade between wizard steps: fade the panel content out, swap while invisible, ease it back in */
+var consoleCanvas = document.querySelector('.console-canvas');
+function transitionPhase(fn){
+  if(reduceMotion){ fn(); return; }
+  consoleCanvas.classList.add('swapping');
+  setTimeout(function(){
+    fn();
+    void consoleCanvas.offsetWidth;
+    consoleCanvas.classList.remove('swapping');
+  }, 470);
+}
+function tp(fn){ return function(){ transitionPhase(fn); }; }
 function enterSubjectStep(){    // step 1 (also: Back from boards)
   if(phase === 'subjects') return;
   phase = 'subjects'; focusSlug = null; applyPhase();
   assignTargets();                                                 // icons back to their grid
   setGuide(LINE2);                                                 // "Now add the subjects you've chosen."
   renderShelf();
-  setWizNav('Next: exam boards', enterBoardStep, null);
+  setWizNav('Next: exam boards', tp(enterBoardStep), null);
 }
 function enterBoardStep(){      // step 2
   if(phase === 'boards') return;
@@ -1008,7 +1025,7 @@ function enterBoardStep(){      // step 2
   assignTargets();                                                 // icons back to their grid
   setGuide([{t:'Now add the exam boards your school studies.'}]);
   renderShelf();
-  setWizNav('Continue', afterBoards, enterSubjectStep);
+  setWizNav('Continue', tp(afterBoards), tp(enterSubjectStep));
 }
 function afterBoards(){ hasAnyOptions() ? enterOptionsStep(false) : enterFinishStep(); }
 /* step 3 — topics / set texts, ONE option-subject at a time (its icon grows to centre, the rest fade) */
@@ -1029,7 +1046,7 @@ function showOptionsStep(){
   var noun = OPT_NOUN[s.n] || 'options';
   setGuide([{t: s.n + ' — choose your ' + noun + '.'}]);
   renderShelf();
-  setWizNav('Continue', optionsNext, optionsPrev);
+  setWizNav('Continue', tp(optionsNext), tp(optionsPrev));
   refreshOptionsCta();
 }
 function optionsNext(){ optIndex++; (optIndex >= optionSubjects().length) ? enterFinishStep() : showOptionsStep(); }
@@ -1040,13 +1057,13 @@ function enterFinishStep(){     // step 4 (free tier) — create your free accou
   assignTargets();                                                 // gather all icons back into the grid (the "your universe" view)
   setGuide([{t:'One last thing — create your free account.'}]);
   renderFinishPanel();
-  setWizNav('Create account', function(){ enterDone('email'); }, function(){ hasAnyOptions() ? enterOptionsStep(true) : enterBoardStep(); });
+  setWizNav('Create account', tp(function(){ enterDone('email'); }), tp(function(){ hasAnyOptions() ? enterOptionsStep(true) : enterBoardStep(); }));
 }
 function enterDone(via){        // step 5 — done / start
   phase = 'done'; focusSlug = null; applyPhase();
   setGuide([{t:'You’re all set.'}]);
   renderDonePanel(via || 'guest');
-  setWizNav('Start revising', startRevising, enterFinishStep);
+  setWizNav('Start revising', startRevising, tp(enterFinishStep));
 }
 /* premium-school student: signed in up front via SSO — the school has preset everything, so skip the picker entirely */
 function premiumDone(provider){
@@ -1144,7 +1161,7 @@ function setGuide(segs, done){     // fade current line away, then type the new 
   setTimeout(function(){
     guideText.classList.remove('gt-out');
     typeText(segs, done);                            // ...then type the new text in
-  }, 360);
+  }, 440);
 }
 function runTutorial(){
   consoleEl.classList.add('started');               // fade the marketing hero, hide Begin
@@ -1167,12 +1184,13 @@ function runTutorial(){
         setTimeout(next, 1675);
       })();
     });
-  }, 460);
+  }, 520);
 }
 function finishTutorial(){
   searchBox.classList.remove('locked'); searchBox.classList.add('reveal');   // search fades in now
   setGuide(LINE2);                                   // fade line 1, type line 2
-  setWizNav('Next: exam boards', enterBoardStep, null);   // reveal the step-forward button (no Back on step 1)
+  setWizNav('Next: exam boards', tp(enterBoardStep), null);   // reveal the step-forward button (no Back on step 1)
+  if(!reduceMotion){ resolveEl.classList.remove('reveal'); void resolveEl.offsetWidth; resolveEl.classList.add('reveal'); }  // ease the nav in
   // a slower, more deliberate ring around the search bar so it's clearly noticed (twice)
   if(!reduceMotion){
     setTimeout(function(){ searchEl.classList.remove('pulse'); void searchEl.offsetWidth; searchEl.classList.add('pulse'); }, 1500);
@@ -1193,14 +1211,22 @@ function addSubject(slug){
   searchEl.value=''; closeList(); searchEl.focus();   // ready for the next subject
 }
 function removeSubject(slug){
-  var pos = order.indexOf(slug);
-  if(pos === -1) return;
-  order.splice(pos, 1);
-  delete chosenBoard[slug];
-  releaseSubject(slug);
-  if(order.length) assignTargets();
-  if(reduceMotion){ snapChosenToTargets(); drawOnce(); }
-  renderShelf(); renderResolution(); removeLabel(slug);
+  if(order.indexOf(slug) === -1) return;
+  var btn = shelfEl.querySelector('.rm[data-k="'+slug+'"]');
+  var row = btn ? btn.closest('.srow') : null;
+  function commit(){
+    var pos = order.indexOf(slug); if(pos === -1) return;
+    order.splice(pos, 1);
+    delete chosenBoard[slug]; delete shownSlugs[slug];
+    releaseSubject(slug);
+    if(order.length) assignTargets();
+    if(reduceMotion){ snapChosenToTargets(); drawOnce(); }
+    renderShelf(); renderResolution();
+  }
+  removeLabel(slug);                       // its constellation label fades out
+  if(reduceMotion || !row){ commit(); return; }
+  row.classList.add('leaving');            // fade the row away, then drop it and reflow
+  setTimeout(commit, 300);
 }
 
 /* ---------- combobox (keyboard-first) ---------- */
