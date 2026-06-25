@@ -11,7 +11,7 @@
   :root{
     --bg-body:#f7f6f4; --bg-card:#fff; --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
     --border-light:#e6e4e0; --border-lighter:#f0eeea; --anchor:#566a72;
-    --good:#3f8f5f; --mid:#c8943a; --weak:#b15c4e;
+    --good:#3f8f5f; --mid:#c8943a; --weak:#b15c4e; --wash:#f1efec;
     --font-head:'Schibsted Grotesk',system-ui,sans-serif; --font-read:'Literata',Georgia,serif;
     --r:6px; --ease:cubic-bezier(.22,1,.36,1);
     --shadow-sm:0 1px 2px rgba(29,28,26,.05);
@@ -25,7 +25,7 @@
 
   /* masthead */
   .mast{display:flex;align-items:center;justify-content:space-between;gap:1rem;height:64px;border-bottom:1px solid var(--border-light);
-    position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg-body) 88%,transparent);backdrop-filter:saturate(1.05) blur(7px)}
+    position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg-body) 88%,transparent);backdrop-filter:saturate(1.05) blur(7px)}
   .brand{display:inline-flex;align-items:baseline;font-family:var(--font-head);font-weight:500;font-size:1.12rem;letter-spacing:-.012em}
   .brand b{font-weight:800}
   .brand .sv-lock{height:.28em;width:.225em;margin-left:.04em;align-self:baseline;fill:currentColor;flex:none}
@@ -67,6 +67,53 @@
   .btn svg{width:16px;height:16px;transition:transform .25s var(--ease)}
   .btn:hover svg{transform:translateX(3px)}
 
+  /* ===== selector ===== */
+  .sel{padding:.55rem .6rem .5rem;display:flex;flex-direction:column}
+  .sel-head{display:flex;justify-content:space-between;align-items:baseline;padding:.45rem .55rem .55rem;border-bottom:1px solid var(--border-lighter)}
+  .sel-head .kicker{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted)}
+  .sel-head .tally{font-family:var(--font-head);font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text-muted)}
+  .sel-head .tally b{color:var(--text-secondary);font-weight:700}
+  .sel-list{display:flex;flex-direction:column;padding-top:.15rem}
+
+  .srow{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:.6rem;width:100%;
+    padding:.55rem .55rem;border:0;background:transparent;border-radius:var(--r);text-align:left;cursor:pointer;
+    transition:background .14s ease}
+  .srow .sw{width:9px;height:9px;border-radius:50%;background:var(--acc);opacity:.82;transition:transform .2s var(--ease),opacity .2s ease}
+  .srow .nm{font-family:var(--font-head);font-size:.92rem;font-weight:500;letter-spacing:-.005em;color:var(--text-primary);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:color .14s ease}
+  .srow .ct{font-family:var(--font-head);font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--text-muted)}
+  .srow .ct b{color:var(--text-primary);font-weight:600}
+  .srow .cv{width:13px;height:13px;color:var(--text-muted);transition:transform .3s var(--ease),color .14s ease}
+  .srow:hover,.srow.is-skyfocus,.srow:focus-visible{background:var(--wash);outline:none}
+  .srow:hover .nm,.srow.is-skyfocus .nm,.srow[aria-expanded="true"] .nm{color:var(--text-primary);font-weight:600}
+  .srow:hover .sw,.srow.is-skyfocus .sw,.srow[aria-expanded="true"] .sw{opacity:1;transform:scale(1.14)}
+  .srow:hover .cv,.srow.is-skyfocus .cv{color:var(--text-secondary)}
+  .srow[aria-expanded="true"] .cv{transform:rotate(90deg);color:var(--text-secondary)}
+  .srow:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+
+  .lessons{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows .42s var(--ease),visibility 0s linear .42s}
+  .srow[aria-expanded="true"]+.lessons{grid-template-rows:1fr;visibility:visible;transition:grid-template-rows .42s var(--ease),visibility 0s}
+  .lessons>.inner{overflow:hidden;min-height:0;opacity:0;transition:opacity .26s ease .04s;padding:.1rem 0 .35rem}
+  .srow[aria-expanded="true"]+.lessons>.inner{opacity:1}
+  .lrow{display:grid;grid-template-columns:1.5rem 1fr 1.4rem;align-items:center;gap:.1rem;padding:.42rem .55rem;border-radius:var(--r);text-decoration:none;
+    transform:translateY(3px);opacity:0;transition:opacity .24s ease,transform .3s var(--ease),background .14s ease}
+  .srow[aria-expanded="true"]+.lessons .lrow{opacity:1;transform:none;transition-delay:calc(var(--i)*16ms)}
+  .lrow .no{font-family:var(--font-head);font-size:.72rem;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text-muted);text-align:right;padding-right:.5rem}
+  .lrow .lt{font-family:var(--font-read);font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-muted);transition:color .14s ease}
+  .lrow.done .lt{color:var(--text-secondary)}
+  .lrow .mk{justify-self:center;display:grid;place-items:center;width:14px;height:14px}
+  .lrow .mk .ring{width:11px;height:11px;border:1.5px solid #cfccc6;border-radius:50%}
+  .lrow .mk svg{width:13px;height:13px;color:var(--text-secondary)}
+  .lrow:hover,.lrow.is-skyfocus,.lrow:focus-visible{background:var(--wash);outline:none}
+  .lrow:hover .lt,.lrow.is-skyfocus .lt,.lrow:focus-visible .lt{color:var(--text-primary)}
+  .lrow:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+
+  .sel-foot{border-top:1px solid var(--border-lighter);margin-top:.4rem;padding-top:.5rem;display:flex;gap:.5rem}
+  .sel-foot button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.5rem;background:transparent;border:0;border-radius:var(--r);
+    font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-secondary);transition:background .14s ease,color .14s ease}
+  .sel-foot button svg{width:15px;height:15px;color:var(--text-muted)}
+  .sel-foot button:hover{background:var(--wash);color:var(--text-primary)}
+
   /* review card */
   .rev{padding:1rem 1.05rem 1.1rem}
   .rev .top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.2rem}
@@ -82,20 +129,17 @@
   .btn.ghost{background:#fff;color:var(--text-primary);border:1px solid var(--border-light);box-shadow:none}
   .btn.ghost:hover{border-color:var(--text-muted);box-shadow:var(--shadow-sm);filter:none}
 
-  /* quick row */
-  .quick{display:flex;gap:.7rem}
-  .quick button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.6rem .5rem;border:1px solid var(--border-light);
-    background:var(--bg-card);border-radius:var(--r);font-family:var(--font-head);font-weight:600;font-size:.86rem;color:var(--text-secondary);box-shadow:var(--shadow-sm);transition:border-color .15s,color .15s}
-  .quick button:hover{border-color:var(--text-muted);color:var(--text-primary)}
-  .quick svg{width:15px;height:15px;color:var(--text-muted)}
-
-  /* universe */
-  .uni{padding:1rem 1.05rem 1.15rem;position:relative;overflow:hidden}
-  .uni .uhead{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.1rem}
-  .uni h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
-  #universe{display:block;width:100%;height:420px}
+  /* ===== sky ===== */
+  .sky{padding:1rem 1.05rem 1.15rem;position:sticky;top:76px;overflow:hidden}
+  @media(max-width:880px){ .sky{position:static} }
+  .sky .shead{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.15rem}
+  .sky h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em}
+  .sky .hint{font-family:var(--font-head);font-size:.74rem;color:var(--text-muted)}
+  #sky{display:block;width:100%;height:560px}
+  @media(max-width:880px){ #sky{height:440px} }
   .tip{position:absolute;pointer-events:none;background:rgba(29,28,26,.92);color:#f5f3f0;font-family:var(--font-head);font-size:.74rem;font-weight:600;
-    padding:.32rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap}
+    padding:.3rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap;max-width:240px;z-index:2}
+  .tip .ts{display:block;font-size:.62rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#bdb8b0;margin-bottom:.06rem}
 
   /* week strip */
   .week{margin:1.1rem 0 2.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem 1.4rem;flex-wrap:wrap;
@@ -103,6 +147,11 @@
   .week .wlbl{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted)}
   .week .stat{font-family:var(--font-head);font-size:.92rem;color:var(--text-secondary)}
   .week .stat b{color:var(--text-primary);font-weight:700}
+
+  @media(prefers-reduced-motion:reduce){
+    .srow .sw,.srow .cv,.srow .nm,.lessons,.lessons>.inner,.lrow,.btn svg{transition:none!important}
+    .srow[aria-expanded="true"]+.lessons{transition:none}
+  }
 </style>
 </head>
 <body>
@@ -120,7 +169,7 @@
   <main class="wrap">
     <div class="hello">
       <h1>Welcome back, Sam.</h1>
-      <p id="subhello">Here's where you left off — pick one thing and go.</p>
+      <p id="subhello">Here's where you left off — or pick a subject and see where you're up to.</p>
     </div>
 
     <div class="grid">
@@ -141,6 +190,19 @@
           <button class="btn" id="contBtn">Continue lesson <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
         </section>
 
+        <!-- subject selector -->
+        <section class="card sel">
+          <div class="sel-head">
+            <span class="kicker">Your subjects</span>
+            <span class="tally" id="tally"><b>44</b> / 108 done</span>
+          </div>
+          <div class="sel-list" id="selList"></div>
+          <div class="sel-foot">
+            <button id="luckyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="16" cy="16" r="1.4" fill="currentColor"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="16" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>Feeling lucky</button>
+            <button id="browseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.4-4.4"/></svg>Browse everything</button>
+          </div>
+        </section>
+
         <!-- today's review -->
         <section class="card rev">
           <div class="top"><h3>Today's review</h3><span class="due" id="dueTxt">14 cards due</span></div>
@@ -153,20 +215,15 @@
           </div>
           <button class="btn" id="revBtn">Start today's review <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
         </section>
-
-        <!-- quick actions -->
-        <div class="quick">
-          <button id="luckyBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="16" cy="16" r="1.4" fill="currentColor"/><circle cx="16" cy="8" r="1.4" fill="currentColor"/><circle cx="8" cy="16" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></svg>I'm feeling lucky</button>
-          <button id="browseBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.4-4.4"/></svg>Browse everything</button>
-        </div>
       </div>
 
-      <!-- UNIVERSE -->
-      <section class="card uni">
-        <div class="uhead">
+      <!-- SKY -->
+      <section class="card sky">
+        <div class="shead">
           <h2>Your progress</h2>
+          <span class="hint" id="skyHint">Hover a subject — your done lessons glow</span>
         </div>
-        <canvas id="universe"></canvas>
+        <canvas id="sky"></canvas>
         <div class="tip" id="tip"></div>
       </section>
     </div>
@@ -185,7 +242,9 @@
 <script src="_catalogue.js"></script>
 <script>
 (function(){
-  /* ---------- mock student shelf (subjects + mock mastery 0..1) ---------- */
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- student shelf: 9 subjects + mock mastery + 12 real lessons each ---------- */
   var byName={}; SUBJECTS.forEach(function(s){ byName[s.n]=s; });
   var SHELF=[
     {n:'Mathematics',        m:0.55},
@@ -197,7 +256,35 @@
     {n:'Spanish',            m:0.35},
     {n:'Computer Science',   m:0.58},
     {n:'Religious Studies',  m:0.12}
-  ].map(function(r){ var s=byName[r.n]||{n:r.n,k:null,a:'#777',icon:'_default',L:40}; return {n:s.n,k:s.k||null,a:s.a,icon:(s.icon&&ICON_DRAW[s.icon])?s.icon:'_default',L:s.L,m:r.m}; });
+  ].map(function(r){
+    var s=byName[r.n]||{n:r.n,k:null,a:'#777',icon:'_default'};
+    var lessons=(TITLES[s.k]||[]).slice(0,12);
+    var done=Math.round(r.m*12);
+    return {n:s.n,k:s.k||null,a:s.a,icon:s.icon,m:r.m,lessons:lessons,done:done};
+  });
+  var TOTAL_LESSONS=SHELF.reduce(function(a,s){return a+s.lessons.length;},0);
+  var TOTAL_DONE=SHELF.reduce(function(a,s){return a+s.done;},0);
+
+  /* ---------- colour helpers (constant-chroma law) ---------- */
+  function hexRgb(h){ h=h.replace('#',''); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
+  function mix(a,b,t){ return [Math.round(a[0]+(b[0]-a[0])*t),Math.round(a[1]+(b[1]-a[1])*t),Math.round(a[2]+(b[2]-a[2])*t)]; }
+  var GREY=[138,135,128];                       // warm grey the accents are muted toward
+  SHELF.forEach(function(s){
+    var acc=hexRgb(s.a);
+    s.accRgb=acc;                                // full accent — used only for the focused subject's join-the-dots lines
+    var gmix=(s.k && s.k.indexOf('geography')>=0)?0.46:0.36;   // tame the one loud hue (#514bb4)
+    s.doneRgb=mix(acc,GREY,gmix);                // muted done-dot colour, FIXED across rest/focus/recede
+  });
+
+  /* ---------- the shared Focus bus (list + sky both read & write it) ---------- */
+  var Focus={ subj:-1, lesson:-1, lock:-1, _subs:[],
+    on:function(f){ this._subs.push(f); },
+    _emit:function(){ for(var i=0;i<this._subs.length;i++) this._subs[i](this); },
+    hover:function(s){ this.subj=s; this.lesson=-1; this._emit(); },
+    ping:function(s,l){ this.subj=s; this.lesson=l; this._emit(); },
+    setLock:function(s){ this.lock=s; this.subj=s; this.lesson=-1; this._emit(); },
+    clear:function(){ this.subj=this.lock; this.lesson=-1; this._emit(); } };
+  window.Focus=Focus;
 
   /* ---------- continue-card icon (English Literature) ---------- */
   (function(){
@@ -212,120 +299,332 @@
     bar.appendChild(seg('g',g)); bar.appendChild(seg('m',m)); bar.appendChild(seg('w',w));
   })();
 
-  /* ---------- exam countdown (first GCSE exam, summer 2027) ---------- */
+  /* ---------- exam countdown ---------- */
   (function(){
     var first=new Date('2027-05-10T09:00:00');
     var days=Math.max(0,Math.ceil((first-new Date())/86400000));
     document.getElementById('examTxt').innerHTML='First exam <b>'+first.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})+'</b> · '+days+'d';
   })();
 
+  /* ===================================================================
+     SELECTOR — accordion of subjects → lessons, driving the Focus bus
+     =================================================================== */
+  document.getElementById('tally').innerHTML='<b>'+TOTAL_DONE+'</b> / '+TOTAL_LESSONS+' done';
+  var CHEV='<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
+  var selList=document.getElementById('selList');
+  SHELF.forEach(function(s,i){
+    var btn=document.createElement('button');
+    btn.className='srow'; btn.setAttribute('data-subj',i); btn.setAttribute('aria-expanded','false'); btn.setAttribute('aria-controls','ls-'+i);
+    btn.style.setProperty('--acc',s.a);
+    btn.innerHTML='<span class="sw" aria-hidden="true"></span>'+
+      '<span class="nm">'+s.n+'</span>'+
+      '<span class="ct"><b>'+s.done+'</b> / '+s.lessons.length+'</span>'+CHEV;
+    selList.appendChild(btn);
 
-  /* ---------- constellation: each subject's icon, dots lit by mastery ---------- */
-  var cv=document.getElementById('universe'), ctx=cv.getContext('2d');
-  var DPR=Math.min(window.devicePixelRatio||1,2), W=0,H=0;
-  var iconCache={};
-  function geom(key){
-    if(iconCache[key]) return iconCache[key];
-    var S=84, oc=document.createElement('canvas'); oc.width=oc.height=S; var o=oc.getContext('2d');
-    o.fillStyle='#000'; (ICON_DRAW[key]||ICON_DRAW._default)(o,S);
-    var d=o.getImageData(0,0,S,S).data, p=[];
-    for(var y=0;y<S;y++)for(var x=0;x<S;x++){ if(d[(y*S+x)*4+3]>128) p.push([x/S,y/S]); }
-    for(var a=p.length-1;a>0;a--){ var b=(Math.random()*(a+1))|0,t=p[a];p[a]=p[b];p[b]=t; }   // shuffle (no moiré)
-    iconCache[key]={pts:p}; return iconCache[key];
+    var wrap=document.createElement('div'); wrap.className='lessons'; wrap.id='ls-'+i; wrap.setAttribute('role','group'); wrap.setAttribute('aria-label',s.n+' lessons');
+    var inner=document.createElement('div'); inner.className='inner'; wrap.appendChild(inner);
+    s.lessons.forEach(function(L,j){
+      var a=document.createElement('a');
+      a.className='lrow'+(j<s.done?' done':''); a.setAttribute('data-subj',i); a.setAttribute('data-lesson',j);
+      a.style.setProperty('--i',j); a.href=s.k?('/browse/'+s.k):'#';
+      a.innerHTML='<span class="no">'+(j+1)+'</span>'+
+        '<span class="lt">'+L.t+'</span>'+
+        '<span class="mk">'+(j<s.done?TICK:'<span class="ring"></span>')+'</span>';
+      inner.appendChild(a);
+    });
+    selList.appendChild(wrap);
+    setInert(wrap,true);
+  });
+
+  function setInert(el,on){ try{ el.inert=on; }catch(e){} el.setAttribute('aria-hidden',on?'true':'false'); }
+
+  var rows=[].slice.call(selList.querySelectorAll('.srow'));
+  var panels=[].slice.call(selList.querySelectorAll('.lessons'));
+
+  function collapseAll(){ rows.forEach(function(r,i){ r.setAttribute('aria-expanded','false'); setInert(panels[i],true); }); }
+  rows.forEach(function(btn,i){
+    btn.addEventListener('mouseenter', function(){ Focus.hover(i); });
+    btn.addEventListener('mouseleave', function(){ Focus.clear(); });
+    btn.addEventListener('focus', function(){ Focus.hover(i); });
+    btn.addEventListener('blur', function(){ Focus.clear(); });
+    btn.addEventListener('click', function(){
+      var open=btn.getAttribute('aria-expanded')==='true';
+      collapseAll();
+      if(!open){ btn.setAttribute('aria-expanded','true'); setInert(panels[i],false); Focus.setLock(i);
+        if(!reduceMotion) setTimeout(function(){ btn.scrollIntoView({block:'nearest',behavior:'smooth'}); },60);
+      } else { Focus.setLock(-1); }
+    });
+    // keyboard roving between subjects
+    btn.addEventListener('keydown', function(e){
+      if(e.key==='ArrowDown'){ e.preventDefault(); (rows[i+1]||rows[0]).focus(); }
+      else if(e.key==='ArrowUp'){ e.preventDefault(); (rows[i-1]||rows[rows.length-1]).focus(); }
+    });
+  });
+  selList.querySelectorAll('.lrow').forEach(function(a){
+    var si=+a.getAttribute('data-subj'), li=+a.getAttribute('data-lesson');
+    a.addEventListener('mouseenter', function(){ Focus.ping(si,li); });
+    a.addEventListener('mouseleave', function(){ Focus.hover(si); });
+    a.addEventListener('focus', function(){ Focus.ping(si,li); });
+    a.addEventListener('blur', function(){ Focus.hover(si); });
+  });
+
+  // reverse linkage: sky → list row highlight
+  Focus.on(function(f){
+    rows.forEach(function(r){ r.classList.remove('is-skyfocus'); });
+    selList.querySelectorAll('.lrow.is-skyfocus').forEach(function(a){ a.classList.remove('is-skyfocus'); });
+    if(f.subj>=0){
+      if(rows[f.subj]) rows[f.subj].classList.add('is-skyfocus');
+      if(f.lesson>=0){ var a=selList.querySelector('.lrow[data-subj="'+f.subj+'"][data-lesson="'+f.lesson+'"]'); if(a) a.classList.add('is-skyfocus'); }
+    }
+  });
+
+  /* ===================================================================
+     SKY — one shared constellation: clusters per subject, dots per lesson
+     =================================================================== */
+  var cv=document.getElementById('sky'), ctx=cv.getContext('2d');
+  var DPR=Math.min(window.devicePixelRatio||1,2), W=0, H=0;
+
+  // golden-angle, hue-separated cluster placement (computed once, in 600x580 ref coords)
+  var GOLD=2.399963, PHASE=0.65, RX=232, RY=232, CXr=300, CYr=286, VSQ=0.94;
+  function sfrac(i){ var s=Math.sin(i*127.1+311.7)*43758.5453; return s-Math.floor(s); }
+  var ORDER=[8,0,3,7,6,5,2,1,4];                // slot -> SHELF index (keeps like hues apart)
+  var refCx=[], refCy=[];
+  for(var slot=0;slot<9;slot++){
+    var rn=Math.sqrt((slot+0.5)/9), ang=slot*GOLD+PHASE;
+    var rj=rn*(0.92+sfrac(slot)*0.16), aj=ang+(sfrac(slot+99)-0.5)*0.42;
+    var subj=ORDER[slot];
+    refCx[subj]=CXr+Math.cos(aj)*RX*rj;
+    refCy[subj]=CYr+Math.sin(aj)*RY*rj*VSQ;
   }
-  // a clean thin outline of an icon, tinted to `color`, baked once: dilate the filled glyph then knock out its centre → a ring
-  var olCache={};
-  function outline(key,color){
-    var ck=key+'|'+color; if(olCache[ck]) return olCache[ck];
-    var R=224, w=3;
-    var tmp=document.createElement('canvas'); tmp.width=tmp.height=R; var tx=tmp.getContext('2d');
-    tx.fillStyle='#000'; (ICON_DRAW[key]||ICON_DRAW._default)(tx,R);
-    var out=document.createElement('canvas'); out.width=out.height=R; var ox=out.getContext('2d');
-    for(var an=0;an<6.2832;an+=Math.PI/8){ ox.drawImage(tmp, Math.cos(an)*w, Math.sin(an)*w); }   // dilate outward
-    ox.globalCompositeOperation='destination-out'; ox.drawImage(tmp,0,0);                          // knock out centre → ring
-    ox.globalCompositeOperation='source-in'; ox.fillStyle=color; ox.fillRect(0,0,R,R);             // tint the ring
-    ox.globalCompositeOperation='source-over';
-    olCache[ck]=out; return out;
-  }
-  var dots=[], cells=[];
+
+  var CORE=14, HALO=31, RJIT=8;
+  var dots=[];                                   // {subj,done,hx,hy,ph,sp,baseR}
+  var dotOf=[];                                  // dotOf[subj][lessonIdx] -> dot
+  var dust=[];                                   // {hx,hy,r,a,ph,sp}
+  var cl=[];                                     // cluster centres (live px) per subject
+
   function layout(){
-    W=cv.clientWidth; H=cv.clientHeight; cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
-    var n=SHELF.length, cols=W<330?2:(n<=9?3:4), rows=Math.ceil(n/cols);
-    var cw=W/cols, chh=H/rows, size=Math.min(cw*0.62,chh*0.66,150);
-    cells=[]; dots=[];
+    W=cv.clientWidth; H=cv.clientHeight;
+    cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
+    var sx=W/600, sy=H/580, cs=Math.max(0.85,Math.min(1.15,Math.min(W,H)/580));
+    dots=[]; dotOf=[]; dust=[]; cl=[];
     SHELF.forEach(function(s,i){
-      var r=Math.floor(i/cols), inRow=Math.min(cols,n-r*cols), cInRow=i-r*cols;   // centre ragged rows
-      var cx=(W-inRow*cw)/2+(cInRow+0.5)*cw, cy=(r+0.5)*chh, half=size/2;
-      var G=geom(s.icon);
-      cells.push({cx:cx,cy:cy,size:size,s:s,ol:outline(s.icon,s.a)});
-      var P=G.pts, N=Math.min(86,P.length), lit=Math.round(N*s.m);
-      for(var k=0;k<N;k++){
-        var p=P[Math.floor(k*P.length/N)%P.length];
-        dots.push({ bx:cx-half+p[0]*size, by:cy-half+p[1]*size, ph:Math.random()*6.28, sp:0.5+Math.random()*0.6,
-                    lit:k<lit, a:s.a, ci:i });
+      var cx=refCx[i]*sx, cy=refCy[i]*sy; cl[i]={x:cx,y:cy};
+      dotOf[i]=[];
+      for(var d=0;d<s.lessons.length;d++){
+        var isDone=d<s.done;
+        var a=d*GOLD+sfrac(i+7)*6.283;
+        var r=(isDone?CORE:HALO)+(sfrac(i*13+d)-0.5)*2*RJIT; r*=cs;
+        var dot={subj:i,done:isDone,hx:cx+Math.cos(a)*r,hy:cy+Math.sin(a)*r*0.96,
+                 ph:Math.random()*6.283,sp:0.5+Math.random()*0.4,baseR:(isDone?2.7:2.1)};
+        dot.x=dot.hx; dot.y=dot.hy; dots.push(dot); dotOf[i][d]=dot;
       }
     });
+    // ambient dust — neutral, for depth + density haze (80 field + 40 nebula)
+    function speck(x,y){ var sz=0.7+Math.random()*0.6; dust.push({hx:x,hy:y,r:sz,a:0.045+(sz-0.7)/0.6*0.065,ph:Math.random()*6.283,sp:0.5+Math.random()*0.5}); }
+    var cols=Math.round(Math.sqrt(80*W/H)), gx=W/cols, gy=H/Math.ceil(80/cols);
+    for(var f=0;f<80;f++){ var r0=Math.floor(f/cols), c0=f%cols; speck((c0+0.2+Math.random()*0.6)*gx,(r0+0.2+Math.random()*0.6)*gy); }
+    for(var nb=0;nb<40;nb++){ var ci=(Math.random()*9)|0; speck(cl[ci].x+(Math.random()-0.5)*64,cl[ci].y+(Math.random()-0.5)*64); }
   }
-  var hover=-1, t=0, last=0;
-  function frame(now){
-    var dt=Math.min(0.05,(now-last)/1000)||0; last=now; t+=dt;
-    ctx.clearRect(0,0,W,H);
-    // thin accent outline of each symbol so the shape always reads, even when little is lit
-    for(var ce=0;ce<cells.length;ce++){
-      var cl=cells[ce], hf=cl.size/2;
-      ctx.globalAlpha=(hover===-1||hover===ce)?0.55:0.26;
-      ctx.drawImage(cl.ol, cl.cx-hf, cl.cy-hf, cl.size, cl.size);
+
+  /* ---- smoothed per-subject focus state ---- */
+  var foc=[0,0,0,0,0,0,0,0,0], anyFoc=0, holdTime=0, holdSubj=-1;
+  // join-the-dots
+  var constSubj=-1, constData=null, constAlpha=0, constGrow=0;
+  function buildLines(si){
+    var done=[]; for(var d=0;d<dotOf[si].length;d++){ if(dotOf[si][d].done) done.push(dotOf[si][d]); }
+    if(done.length<2) return {edges:[],n:1};
+    // source = done dot nearest the cluster centroid
+    var c=cl[si], src=0, bd=Infinity;
+    for(var q=0;q<done.length;q++){ var dx=done[q].hx-c.x, dy=done[q].hy-c.y, dd=dx*dx+dy*dy; if(dd<bd){bd=dd;src=q;} }
+    var inTree=[src], used={}; used[src]=1, edges=[];
+    while(inTree.length<done.length){
+      var bj=-1,bk=-1,best=Infinity;
+      for(var t=0;t<inTree.length;t++){ var ti=inTree[t];
+        for(var k=0;k<done.length;k++){ if(used[k]) continue;
+          var ex=done[k].hx-done[ti].hx, ey=done[k].hy-done[ti].hy, ed=ex*ex+ey*ey;
+          if(ed<best){best=ed;bj=ti;bk=k;} } }
+      edges.push([done[bj],done[bk],edges.length]); used[bk]=1; inTree.push(bk);
     }
-    for(var i=0;i<dots.length;i++){
-      var d=dots[i];
-      var x=d.bx+Math.sin(t*0.5*d.sp+d.ph)*1.4, y=d.by+Math.cos(t*0.42*d.sp+d.ph)*1.4;
-      var foc=(hover===-1||hover===d.ci);
-      if(d.lit){
-        ctx.globalAlpha=(foc?0.92:0.5)*(0.85+0.15*Math.sin(t*1.2+d.ph));
-        ctx.fillStyle=d.a;
-      } else {
-        ctx.globalAlpha=foc?0.34:0.16; ctx.fillStyle='#b8b2a8';
+    return {edges:edges,n:Math.max(1,edges.length)};
+  }
+
+  // ping (single non-looping ring on a hovered lesson dot)
+  var pingDot=null, pingStart=0, lastPing=-1;
+
+  var raf=0, last=0, t=0;
+  function frame(now){
+    var dt=Math.min(0.033,(now-last)/1000)||0; last=now; t+=dt;
+
+    // focus targets from the bus
+    var fs=Focus.subj;
+    for(var i=0;i<9;i++){ var tgt=(i===fs)?1:0; foc[i]+=(tgt-foc[i])*(1-Math.pow(i===fs?0.14:0.13,dt)); }
+    var afT=(fs>=0)?1:0; anyFoc+=(afT-anyFoc)*(1-Math.pow(afT? 0.16:0.22,dt));
+    if(fs===holdSubj && fs>=0) holdTime+=dt; else { holdSubj=fs; holdTime=0; }
+
+    // lines arm on a deliberate dwell
+    var armed=(fs>=0 && holdTime>0.5 && foc[fs]>0.55);
+    if(armed && constSubj!==fs){ constSubj=fs; constData=buildLines(fs); constGrow=0; }
+    constAlpha+=((armed?1:0)-constAlpha)*(1-Math.pow(0.06,dt));
+    if(armed) constGrow+=(1-constGrow)*(1-Math.pow(0.24,dt));
+    if(constAlpha<0.006 && !armed){ constSubj=-1; constData=null; constGrow=0; }
+
+    // ping bookkeeping
+    var pl=Focus.lesson, ps=Focus.subj;
+    if(pl!==lastPing){ lastPing=pl; pingStart=now; pingDot=(pl>=0 && ps>=0 && dotOf[ps])?dotOf[ps][pl]:null; }
+
+    ctx.clearRect(0,0,W,H);
+
+    // soft neutral dome (depth, no colour)
+    var vg=ctx.createRadialGradient(W*0.5,H*0.46,0,W*0.5,H*0.46,Math.max(W,H)*0.62);
+    vg.addColorStop(0,'rgba(255,255,255,0)'); vg.addColorStop(1,'rgba(228,224,218,0.30)');
+    ctx.fillStyle=vg; ctx.fillRect(0,0,W,H);
+
+    // dust
+    var dustMul=1-anyFoc*0.5;
+    for(var u=0;u<dust.length;u++){ var p=dust[u];
+      var x=p.hx+Math.sin(t*0.4*p.sp+p.ph)*2.4, y=p.hy+Math.cos(t*0.33*p.sp+p.ph*1.3)*2.4;
+      var a=p.a*(0.82+0.18*Math.sin(t*0.7*p.sp+p.ph*2))*dustMul;
+      ctx.globalAlpha=a; ctx.fillStyle='#8f8b83';
+      ctx.beginPath(); ctx.arc(x,y,p.r,0,6.283); ctx.fill();
+    }
+
+    // join-the-dots lines (under the dots)
+    if(constData && constAlpha>0.006 && constSubj>=0){
+      var s=SHELF[constSubj], cr=s.accRgb, E=constData.edges, ne=constData.n;
+      ctx.lineWidth=1;
+      for(var e=0;e<E.length;e++){
+        var A=E[e][0], B=E[e][1], eo=E[e][2];
+        var startAt=(eo/ne)*0.75, local=(constGrow-startAt)/0.30; if(local<=0) continue; if(local>1) local=1;
+        var ax=A.x, ay=A.y, bx=ax+(B.x-ax)*local, by=ay+(B.y-ay)*local;
+        var ca=constAlpha*foc[constSubj]*0.42*(1-eo/ne*0.5);
+        var g=ctx.createLinearGradient(ax,ay,bx,by);
+        g.addColorStop(0,'rgba('+cr[0]+','+cr[1]+','+cr[2]+','+(ca*0.55).toFixed(3)+')');
+        g.addColorStop(1,'rgba('+cr[0]+','+cr[1]+','+cr[2]+','+(ca*0.06).toFixed(3)+')');
+        ctx.strokeStyle=g; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
       }
-      ctx.beginPath(); ctx.arc(x,y,d.lit?2.1:1.7,0,6.2832); ctx.fill();
+      ctx.globalAlpha=1;
+    }
+
+    // dots
+    for(var k=0;k<dots.length;k++){
+      var d=dots[k], f=foc[d.subj], other=anyFoc*(1-f);
+      var bx2=Math.sin(t*0.40*d.sp+d.ph)*1.3, by2=Math.cos(t*0.33*d.sp+d.ph*1.3)*1.3;
+      d.x=d.hx+bx2; d.y=d.hy+by2;
+      var r=d.baseR*(1+0.62*f)*(1-0.42*other);
+      var tw, alpha;
+      if(d.done){
+        tw=0.87+0.13*Math.sin(t*0.55*d.sp+d.ph*2);
+        alpha=(0.58+0.38*f-0.40*other)*tw;
+        if(d===pingDot) alpha=Math.max(alpha,0.97);
+        if(alpha<0.01) continue;
+        ctx.globalAlpha=Math.min(0.97,alpha);
+        var c=SHELF[d.subj].doneRgb; ctx.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')';
+        ctx.beginPath(); ctx.arc(d.x,d.y,d===pingDot?Math.max(r,4.6):r,0,6.283); ctx.fill();
+      } else {
+        tw=0.93+0.07*Math.sin(t*0.55*d.sp+d.ph*2);
+        alpha=(0.28+0.22*f-0.18*other)*tw;
+        if(d===pingDot) alpha=Math.max(alpha,0.7);
+        if(alpha<0.01) continue;
+        var rg=mix([179,173,163],[156,150,140],f);     // grey ring firms on focus (still grey — colour=progress only)
+        ctx.globalAlpha=Math.min(0.85,alpha); ctx.lineWidth=1; ctx.strokeStyle='rgb('+rg[0]+','+rg[1]+','+rg[2]+')';
+        ctx.beginPath(); ctx.arc(d.x,d.y,d===pingDot?Math.max(r,4.4):r,0,6.283); ctx.stroke();
+      }
+    }
+    ctx.globalAlpha=1;
+
+    // ping ring (single soft expansion, no loop)
+    if(pingDot){
+      var ph2=Math.min(1,(now-pingStart)/600); // 0..1 over 0.6s, then rests
+      if(ph2<1){
+        var er=1-(1-ph2)*(1-ph2);                // easeOut
+        var rr=(pingDot.done?4.6:4.4)+er*8, ra=0.7*(1-ph2);
+        var pc=pingDot.done?SHELF[pingDot.subj].doneRgb:[155,150,140];
+        ctx.globalAlpha=1; ctx.lineWidth=1.3; ctx.strokeStyle='rgba('+pc[0]+','+pc[1]+','+pc[2]+','+ra.toFixed(3)+')';
+        ctx.beginPath(); ctx.arc(pingDot.x,pingDot.y,rr,0,6.283); ctx.stroke();
+      }
     }
     ctx.globalAlpha=1;
     raf=requestAnimationFrame(frame);
   }
-  var raf=0;
-  function start(){ layout(); cancelAnimationFrame(raf); raf=requestAnimationFrame(frame); }
-  window.addEventListener('resize', start);
-  // hover → tooltip + focus a subject's cluster
+
+  /* ---- reduced-motion: one static frame, redrawn on interaction ---- */
+  function drawStatic(){
+    layout();
+    var fs=Focus.subj;
+    ctx.clearRect(0,0,W,H);
+    for(var u=0;u<dust.length;u++){ var p=dust[u]; ctx.globalAlpha=p.a; ctx.fillStyle='#8f8b83'; ctx.beginPath(); ctx.arc(p.hx,p.hy,p.r,0,6.283); ctx.fill(); }
+    // faint always-on lines for well-started subjects so the frozen sky still reads as constellations
+    SHELF.forEach(function(s,i){
+      if(s.done<3) return; var L=buildLines(i), cr=s.accRgb;
+      ctx.globalAlpha=1; ctx.lineWidth=1; ctx.strokeStyle='rgba('+cr[0]+','+cr[1]+','+cr[2]+',0.09)';
+      L.edges.forEach(function(e){ ctx.beginPath(); ctx.moveTo(e[0].hx,e[0].hy); ctx.lineTo(e[1].hx,e[1].hy); ctx.stroke(); });
+    });
+    for(var k=0;k<dots.length;k++){ var d=dots[k], f=(d.subj===fs)?1:0, other=(fs>=0&&!f)?1:0;
+      if(d.done){ ctx.globalAlpha=Math.min(0.92,0.50+0.4*f-0.3*other); var c=SHELF[d.subj].doneRgb;
+        ctx.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')'; ctx.beginPath(); ctx.arc(d.hx,d.hy,d.baseR*(1+0.5*f),0,6.283); ctx.fill(); }
+      else { ctx.globalAlpha=Math.min(0.7,0.28+0.2*f-0.14*other); ctx.lineWidth=1; ctx.strokeStyle='#b3ada3';
+        ctx.beginPath(); ctx.arc(d.hx,d.hy,d.baseR,0,6.283); ctx.stroke(); }
+    }
+    ctx.globalAlpha=1;
+  }
+
+  function start(){
+    layout();
+    if(reduceMotion){ drawStatic(); Focus.on(function(){ drawStatic(); }); }
+    else { cancelAnimationFrame(raf); last=0; raf=requestAnimationFrame(frame); }
+  }
+  window.addEventListener('resize', function(){ if(reduceMotion) drawStatic(); else start(); });
+
+  /* ---- canvas hover/click → the bus (sky is directly interactive too) ---- */
   var tip=document.getElementById('tip');
+  function hit(mx,my){
+    var bestC=-1,bcd=1e9;
+    for(var i=0;i<9;i++){ var dx=mx-cl[i].x, dy=my-cl[i].y, dd=dx*dx+dy*dy; if(dd<bcd){bcd=dd;bestC=i;} }
+    if(bcd>3600) return {subj:-1,lesson:-1};      // >60px from any centre → empty sky
+    var sub=SHELF[bestC], bl=-1,bld=1e9;
+    for(var j=0;j<sub.lessons.length;j++){ var dt2=dotOf[bestC][j], ex=mx-dt2.x, ey=my-dt2.y, ed=ex*ex+ey*ey; if(ed<bld){bld=ed;bl=j;} }
+    return {subj:bestC, lesson:(bld<90)?bl:-1};
+  }
   cv.addEventListener('mousemove', function(e){
-    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, best=-1, bd=1e9;
-    cells.forEach(function(c,i){ var dx=mx-c.cx, dy=my-c.cy, dist=dx*dx+dy*dy; if(dist<(c.size*0.62)*(c.size*0.62)&&dist<bd){bd=dist;best=i;} });
-    hover=best; cv.style.cursor=best>=0?'pointer':'default';
-    if(best>=0){ var c=cells[best],s=c.s; tip.textContent=s.n+' · '+Math.round(s.m*100)+'% revised';
-      var up=c.cy-c.size*0.5>40;   // room above? else flip below so the top row doesn't clip
-      tip.style.left=c.cx+'px'; tip.style.top=(up?c.cy-c.size*0.5:c.cy+c.size*0.5)+'px';
-      tip.style.transform=up?'translate(-50%,-130%)':'translate(-50%,30%)'; tip.style.opacity='1'; }
-    else tip.style.opacity='0';
+    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, h=hit(mx,my);
+    if(h.subj<0){ Focus.clear(); tip.style.opacity='0'; cv.style.cursor='default'; return; }
+    cv.style.cursor='pointer';
+    var ox=cv.offsetLeft, oy=cv.offsetTop;       // canvas sits below the heading + card padding
+    if(h.lesson>=0){ Focus.ping(h.subj,h.lesson); var L=SHELF[h.subj].lessons[h.lesson], dotp=dotOf[h.subj][h.lesson];
+      tip.innerHTML='<span class="ts">'+SHELF[h.subj].n+'</span>'+L.t;
+      var up=dotp.y>54; tip.style.left=(ox+dotp.x)+'px'; tip.style.top=(oy+(up?dotp.y-10:dotp.y+12))+'px';
+      tip.style.transform=up?'translate(-50%,-100%)':'translate(-50%,0)'; tip.style.opacity='1';
+    } else { Focus.hover(h.subj); var s=SHELF[h.subj];
+      tip.innerHTML='<span class="ts">'+s.done+' / '+s.lessons.length+' done</span>'+s.n;
+      tip.style.left=(ox+cl[h.subj].x)+'px'; tip.style.top=(oy+cl[h.subj].y-46)+'px'; tip.style.transform='translate(-50%,-100%)'; tip.style.opacity='1';
+    }
   });
-  cv.addEventListener('mouseleave', function(){ hover=-1; tip.style.opacity='0'; cv.style.cursor='default'; });
+  cv.addEventListener('mouseleave', function(){ Focus.clear(); tip.style.opacity='0'; cv.style.cursor='default'; });
+  cv.addEventListener('click', function(e){
+    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, h=hit(mx,my);
+    if(h.subj<0) return;
+    if(h.lesson>=0){ launchLesson(h.subj,h.lesson); }
+    else { var btn=rows[h.subj]; if(btn && btn.getAttribute('aria-expanded')!=='true') btn.click(); else Focus.setLock(h.subj); }
+  });
 
-  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(start); setTimeout(start,400); } else start();
+  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(start); setTimeout(start,500); } else start();
 
-  /* ---------- wire every button to a real, scoped destination ---------- */
-  var sbc = (window.supabase&&window.supabase.createClient)
+  /* ===================================================================
+     wiring — scoped Supabase routing
+     =================================================================== */
+  var sbc=(window.supabase&&window.supabase.createClient)
     ? window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2') : null;
-  var PRACTICE={};   // subject slug -> [unit slugs that use /practice/]
-  var POOL={};       // subject slug -> [{u:unitSlug, n:lessonNumber}] of live lessons
-  var scoped = SHELF.filter(function(s){ return s.k; });   // the student's subjects, by slug
-
-  function go(url){ window.location.href=url; }   // plain instant nav — a loader on click-around is just friction
+  var PRACTICE={}, POOL={};
+  var scoped=SHELF.filter(function(s){ return s.k; });
+  function go(url){ window.location.href=url; }
   function pick(a){ return a[(Math.random()*a.length)|0]; }
-  function poolFor(slug){ return (POOL[slug]&&POOL[slug].length)?POOL[slug]:null; }
-  // article vs practice is per-unit (Maths/MFL/Eng-Lang fully practice; Science calc + Geog skills mixed)
   function contentUrl(slug,unit,n){ var pu=PRACTICE[slug]||[]; return (pu.indexOf(unit)>=0?'/practice/':'/lesson/')+slug+'/'+unit+'/'+n; }
-  function randomLesson(slug){ var p=poolFor(slug); if(!p) return '/browse/'+slug; var l=p[(Math.random()*p.length)|0]; return contentUrl(slug,l.u,l.n); }
-  function firstLesson(slug){ var p=poolFor(slug); return p? contentUrl(slug,p[0].u,p[0].n) : '/browse/'+slug; }
+  function randomLesson(slug){ var p=POOL[slug]; if(!p||!p.length) return '/browse/'+slug; var l=p[(Math.random()*p.length)|0]; return contentUrl(slug,l.u,l.n); }
+  function lessonUrl(si,li){ var s=SHELF[si]; if(!s.k) return '#'; var p=POOL[s.k]; if(p&&p.length){ var l=p[li%p.length]; return contentUrl(s.k,l.u,l.n); } return '/browse/'+s.k; }
+  function launchLesson(si,li){ go(lessonUrl(si,li)); }
 
-  // load the practice-unit map first, then a live-lesson pool for each subject (so URLs route correctly)
   if(sbc && scoped.length){
     var slugs=scoped.map(function(s){return s.k;});
     sbc.from('subjects').select('slug, settings').in('slug',slugs).is('school_id',null).then(function(res){
@@ -333,25 +632,26 @@
       scoped.forEach(function(s){
         sbc.from('lessons').select('lesson_number, units!inner(slug, subjects!inner(slug, school_id))')
           .eq('status','live').is('units.subjects.school_id',null).eq('units.subjects.slug',s.k).limit(300)
-          .then(function(r2){ if(r2.data&&r2.data.length) POOL[s.k]=r2.data.map(function(x){return {u:x.units.slug,n:x.lesson_number};}); });
+          .then(function(r2){ if(r2.data&&r2.data.length){ POOL[s.k]=r2.data.map(function(x){return {u:x.units.slug,n:x.lesson_number};});
+            // upgrade lesson links to real scoped URLs
+            var si=SHELF.indexOf(s);
+            selList.querySelectorAll('.lrow[data-subj="'+si+'"]').forEach(function(a){ a.href=lessonUrl(si,+a.getAttribute('data-lesson')); });
+          }});
       });
     });
   }
 
-  function nav(id,fn){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(e){e.preventDefault();fn();}); }
-  nav('contBtn', function(){ go(firstLesson('english-literature-aqa')); });                         // continue the displayed subject
-  nav('revBtn',  function(){ var s=scoped.slice().sort(function(a,b){return a.m-b.m;})[0]; go(s?randomLesson(s.k):'/'); });  // review the shakiest
-  nav('luckyBtn',function(){ var s=pick(scoped.length?scoped:SHELF); go(s&&s.k?randomLesson(s.k):'/'); });                  // random scoped lesson
-  nav('browseBtn',function(){ go('/'); });                                                          // all subjects
-
-  // click a constellation → browse that subject
-  cv.addEventListener('click', function(e){
-    var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, best=-1, bd=1e9;
-    cells.forEach(function(c,i){ var dx=mx-c.cx, dy=my-c.cy, d=dx*dx+dy*dy; if(d<(c.size*0.62)*(c.size*0.62)&&d<bd){bd=d;best=i;} });
-    if(best>=0 && cells[best].s.k) go('/browse/'+cells[best].s.k);
+  // lesson links navigate via their href (set above); intercept to keep SPA-style go()
+  selList.querySelectorAll('.lrow').forEach(function(a){
+    a.addEventListener('click', function(e){ if(a.getAttribute('href')&&a.getAttribute('href')!=='#'){ e.preventDefault(); go(a.getAttribute('href')); } });
   });
 
-  // header
+  function nav(id,fn){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(e){e.preventDefault();fn();}); }
+  nav('contBtn', function(){ go(randomLesson('english-literature-aqa')); });
+  nav('revBtn',  function(){ var s=scoped.slice().sort(function(a,b){return a.m-b.m;})[0]; go(s?randomLesson(s.k):'/'); });
+  nav('luckyBtn',function(){ var s=pick(scoped.length?scoped:SHELF); go(s&&s.k?randomLesson(s.k):'/'); });
+  nav('browseBtn',function(){ go('/'); });
+
   function clickable(el,fn,label){ if(!el) return; el.style.cursor='pointer'; if(label) el.title=label; el.addEventListener('click',fn); }
   clickable(document.querySelector('.brand'), function(){ go('dashboard.html'); }, 'Home');
   clickable(document.getElementById('examChip'), function(){ go('/exams.html'); });
