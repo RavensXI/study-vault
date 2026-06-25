@@ -9,9 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:opsz,wght@7..72,400..600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-body:#f7f6f4; --bg-card:#fff; --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
+    --bg-body:#f7f6f4; --bg-card:#fff; --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#6e6b64;
     --border-light:#e6e4e0; --border-lighter:#f0eeea; --anchor:#566a72;
-    --good:#3f8f5f; --mid:#c8943a; --weak:#b15c4e; --wash:#f1efec;
+    /* mastery status — muted toward the warm-grey register so the review strip stays calm, not a traffic light */
+    --good:#5f8c6d; --mid:#ae8f57; --weak:#a16e63; --wash:#f1efec;
     --font-head:'Schibsted Grotesk',system-ui,sans-serif; --font-read:'Literata',Georgia,serif;
     --r:6px; --ease:cubic-bezier(.22,1,.36,1);
     --shadow-sm:0 1px 2px rgba(29,28,26,.05);
@@ -30,8 +31,10 @@
   .brand b{font-weight:800}
   .brand .sv-lock{height:.28em;width:.225em;margin-left:.04em;align-self:baseline;fill:currentColor;flex:none}
   .mast .right{display:flex;align-items:center;gap:.7rem}
-  .chip{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-secondary);
+  .chip{display:inline-flex;align-items:center;gap:.4rem;white-space:nowrap;font-family:var(--font-head);font-size:.8rem;font-weight:600;color:var(--text-secondary);
     background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);padding:.34rem .7rem}
+  @media(max-width:560px){ .mast .right #examChip{display:none} }
+  @media(max-width:380px){ .mast .right .chip{display:none} }
   .chip svg{width:14px;height:14px;color:var(--text-muted)}
   .chip b{color:var(--text-primary);font-weight:700}
   .avatar{width:32px;height:32px;border-radius:50%;background:var(--anchor);color:#fff;font-family:var(--font-head);font-weight:700;font-size:.85rem;
@@ -117,7 +120,7 @@
   /* review card */
   .rev{padding:1rem 1.05rem 1.1rem}
   .rev .top{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin-bottom:.2rem}
-  .rev h3{font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:-.01em}
+  .rev h2{font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:-.01em}
   .rev .due{font-family:var(--font-head);font-size:.78rem;font-weight:600;color:var(--anchor)}
   .rev .sub{font-family:var(--font-read);font-size:.85rem;color:var(--text-secondary);margin-bottom:.85rem}
   .light{display:flex;height:9px;border-radius:5px;overflow:hidden;gap:2px;background:transparent;margin-bottom:.45rem}
@@ -179,7 +182,7 @@
         <section class="card cont">
           <div class="lbl">Pick up where you left off</div>
           <div class="row">
-            <span class="ic"><canvas id="contIcon" width="44" height="44"></canvas></span>
+            <span class="ic"><canvas id="contIcon" width="44" height="44" aria-hidden="true"></canvas></span>
             <span class="meta">
               <span class="subj" id="contSubj">English Literature</span>
               <span class="ttl" id="contTtl">Macbeth — Act 1: ambition &amp; the witches</span>
@@ -205,7 +208,7 @@
 
         <!-- today's review -->
         <section class="card rev">
-          <div class="top"><h3>Today's review</h3><span class="due" id="dueTxt">14 cards due</span></div>
+          <div class="top"><h2>Today's review</h2><span class="due" id="dueTxt">14 cards due</span></div>
           <p class="sub">A quick mix of flashcards, interleaved across your subjects — the ones you're shakiest on come round first.</p>
           <div class="light" id="lightBar" aria-hidden="true"></div>
           <div class="light-key">
@@ -223,8 +226,8 @@
           <h2>Your progress</h2>
           <span class="hint" id="skyHint">Hover a subject — your done lessons glow</span>
         </div>
-        <canvas id="sky"></canvas>
-        <div class="tip" id="tip"></div>
+        <canvas id="sky" aria-hidden="true" tabindex="-1"></canvas>
+        <div class="tip" id="tip" aria-hidden="true"></div>
       </section>
     </div>
 
@@ -274,7 +277,9 @@
     s.accRgb=acc;                                // full accent — used only for the focused subject's join-the-dots lines
     var gmix=(s.k && s.k.indexOf('geography')>=0)?0.46:0.36;   // tame the one loud hue (#514bb4)
     s.doneRgb=mix(acc,GREY,gmix);                // muted done-dot colour, FIXED across rest/focus/recede
+    s.swRgb=mix(acc,GREY,gmix*0.5);              // swatch: half the dot's mute — livelier identity, same relative taming
   });
+  var byShelf={}; SHELF.forEach(function(s){ byShelf[s.n]=s; });
 
   /* ---------- the shared Focus bus (list + sky both read & write it) ---------- */
   var Focus={ subj:-1, lesson:-1, lock:-1, _subs:[],
@@ -288,8 +293,9 @@
 
   /* ---------- continue-card icon (English Literature) ---------- */
   (function(){
-    var s=byName['English Literature']; var cv=document.getElementById('contIcon'),x=cv.getContext('2d');
-    x.fillStyle=s?s.a:'#7d3737'; x.strokeStyle=x.fillStyle; (ICON_DRAW[s&&s.icon]||ICON_DRAW._default)(x,44);
+    var s=byShelf['English Literature']; var cv=document.getElementById('contIcon'),x=cv.getContext('2d');
+    var c=s?s.doneRgb:[130,84,81]; x.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')'; x.strokeStyle=x.fillStyle;   // muted, matches the sky
+    (ICON_DRAW[(s&&s.icon)||'englit']||ICON_DRAW._default)(x,44);
   })();
 
   /* ---------- today's review lighting bar ---------- */
@@ -316,7 +322,7 @@
   SHELF.forEach(function(s,i){
     var btn=document.createElement('button');
     btn.className='srow'; btn.setAttribute('data-subj',i); btn.setAttribute('aria-expanded','false'); btn.setAttribute('aria-controls','ls-'+i);
-    btn.style.setProperty('--acc',s.a);
+    btn.style.setProperty('--acc','rgb('+s.swRgb.join(',')+')');   // muted to match the sky (tames Geography's loud hue too)
     btn.innerHTML='<span class="sw" aria-hidden="true"></span>'+
       '<span class="nm">'+s.n+'</span>'+
       '<span class="ct"><b>'+s.done+'</b> / '+s.lessons.length+'</span>'+CHEV;
@@ -337,12 +343,16 @@
     setInert(wrap,true);
   });
 
-  function setInert(el,on){ try{ el.inert=on; }catch(e){} el.setAttribute('aria-hidden',on?'true':'false'); }
+  function setInert(el,on){ try{ el.inert=on; }catch(e){} el.setAttribute('aria-hidden',on?'true':'false');
+    // belt-and-braces for browsers without inert: drop collapsed lessons out of the tab order immediately
+    [].slice.call(el.querySelectorAll('.lrow')).forEach(function(a){ a.tabIndex=on?-1:0; }); }
 
   var rows=[].slice.call(selList.querySelectorAll('.srow'));
   var panels=[].slice.call(selList.querySelectorAll('.lessons'));
 
-  function collapseAll(){ rows.forEach(function(r,i){ r.setAttribute('aria-expanded','false'); setInert(panels[i],true); }); }
+  function collapseAll(){ rows.forEach(function(r,i){
+    if(panels[i].contains(document.activeElement)) r.focus();   // never leave focus inside a freshly-inerted panel
+    r.setAttribute('aria-expanded','false'); setInert(panels[i],true); }); }
   rows.forEach(function(btn,i){
     btn.addEventListener('mouseenter', function(){ Focus.hover(i); });
     btn.addEventListener('mouseleave', function(){ Focus.clear(); });
@@ -383,7 +393,7 @@
      SKY — one shared constellation: clusters per subject, dots per lesson
      =================================================================== */
   var cv=document.getElementById('sky'), ctx=cv.getContext('2d');
-  var DPR=Math.min(window.devicePixelRatio||1,2), W=0, H=0;
+  var DPR=Math.min(window.devicePixelRatio||1,2), W=0, H=0, clScale=1;
 
   // golden-angle, hue-separated cluster placement (computed once, in 600x580 ref coords)
   var GOLD=2.399963, PHASE=0.65, RX=232, RY=232, CXr=300, CYr=286, VSQ=0.94;
@@ -405,40 +415,45 @@
   var cl=[];                                     // cluster centres (live px) per subject
 
   function layout(){
+    DPR=Math.min(window.devicePixelRatio||1,2);             // re-read (window may move to a different-DPR monitor)
     W=cv.clientWidth; H=cv.clientHeight;
     cv.width=Math.round(W*DPR); cv.height=Math.round(H*DPR); ctx.setTransform(DPR,0,0,DPR,0,0);
-    var sx=W/600, sy=H/580, cs=Math.max(0.85,Math.min(1.15,Math.min(W,H)/580));
+    var cs=Math.min(1.15,Math.min(W,H)/580); clScale=cs;     // ONE uniform scale + centre the field, so clusters shrink together (never merge)
     dots=[]; dotOf=[]; dust=[]; cl=[];
+    constCache=[]; constGrowCache=[]; constSeen=[]; constSubj=-1; constData=null; constGrow=0;   // cached line figures hold dot refs that just moved
     SHELF.forEach(function(s,i){
-      var cx=refCx[i]*sx, cy=refCy[i]*sy; cl[i]={x:cx,y:cy};
+      var cx=W/2+(refCx[i]-CXr)*cs, cy=H/2+(refCy[i]-CYr)*cs; cl[i]={x:cx,y:cy};
       dotOf[i]=[];
       for(var d=0;d<s.lessons.length;d++){
         var isDone=d<s.done;
         var a=d*GOLD+sfrac(i+7)*6.283;
-        var r=(isDone?CORE:HALO)+(sfrac(i*13+d)-0.5)*2*RJIT; r*=cs;
+        var r=((isDone?CORE:HALO)+(sfrac(i*13+d)-0.5)*2*RJIT)*cs;
         var dot={subj:i,done:isDone,hx:cx+Math.cos(a)*r,hy:cy+Math.sin(a)*r*0.96,
-                 ph:Math.random()*6.283,sp:0.5+Math.random()*0.4,baseR:(isDone?2.7:2.1)};
+                 ph:sfrac(i*37+d*7)*6.283,sp:0.5+sfrac(i*53+d*11)*0.4,baseR:(isDone?2.7:2.1)};   // deterministic phase → idempotent layout (no reshuffle on resize)
         dot.x=dot.hx; dot.y=dot.hy; dots.push(dot); dotOf[i][d]=dot;
       }
     });
-    // ambient dust — neutral, for depth + density haze (80 field + 40 nebula)
-    function speck(x,y){ var sz=0.7+Math.random()*0.6; dust.push({hx:x,hy:y,r:sz,a:0.045+(sz-0.7)/0.6*0.065,ph:Math.random()*6.283,sp:0.5+Math.random()*0.5}); }
-    var cols=Math.round(Math.sqrt(80*W/H)), gx=W/cols, gy=H/Math.ceil(80/cols);
-    for(var f=0;f<80;f++){ var r0=Math.floor(f/cols), c0=f%cols; speck((c0+0.2+Math.random()*0.6)*gx,(r0+0.2+Math.random()*0.6)*gy); }
-    for(var nb=0;nb<40;nb++){ var ci=(Math.random()*9)|0; speck(cl[ci].x+(Math.random()-0.5)*64,cl[ci].y+(Math.random()-0.5)*64); }
+    // ambient dust — neutral, deterministic, for depth + density haze (80 field + 40 nebula)
+    function speck(x,y,seed){ var sz=0.7+sfrac(seed*5+1)*0.6; dust.push({hx:x,hy:y,r:sz,a:0.045+(sz-0.7)/0.6*0.065,ph:sfrac(seed*5+2)*6.283,sp:0.5+sfrac(seed*5+3)*0.5}); }
+    var cols=Math.round(Math.sqrt(80*W/H))||1, gx=W/cols, gy=H/Math.ceil(80/cols);
+    for(var fi=0;fi<80;fi++){ var r0=Math.floor(fi/cols), c0=fi%cols; speck((c0+0.2+sfrac(fi*3+1)*0.6)*gx,(r0+0.2+sfrac(fi*3+2)*0.6)*gy,fi); }
+    for(var nb=0;nb<40;nb++){ var ci=(sfrac(nb*7+1)*9)|0; speck(cl[ci].x+(sfrac(nb*7+2)-0.5)*64*cs,cl[ci].y+(sfrac(nb*7+3)-0.5)*64*cs,80+nb); }
+    _lw=W; _lh=H;
   }
+  var _lw=-1, _lh=-1;
 
   /* ---- smoothed per-subject focus state ---- */
   var foc=[0,0,0,0,0,0,0,0,0], anyFoc=0, holdTime=0, holdSubj=-1;
   // join-the-dots
   var constSubj=-1, constData=null, constAlpha=0, constGrow=0;
+  var constCache=[], constGrowCache=[], constSeen=[];   // cache built figures + grow progress so re-entry resumes instead of replaying
   function buildLines(si){
     var done=[]; for(var d=0;d<dotOf[si].length;d++){ if(dotOf[si][d].done) done.push(dotOf[si][d]); }
     if(done.length<2) return {edges:[],n:1};
     // source = done dot nearest the cluster centroid
     var c=cl[si], src=0, bd=Infinity;
     for(var q=0;q<done.length;q++){ var dx=done[q].hx-c.x, dy=done[q].hy-c.y, dd=dx*dx+dy*dy; if(dd<bd){bd=dd;src=q;} }
-    var inTree=[src], used={}; used[src]=1, edges=[];
+    var inTree=[src], used={}, edges=[]; used[src]=1;
     while(inTree.length<done.length){
       var bj=-1,bk=-1,best=Infinity;
       for(var t=0;t<inTree.length;t++){ var ti=inTree[t];
@@ -451,7 +466,7 @@
   }
 
   // ping (single non-looping ring on a hovered lesson dot)
-  var pingDot=null, pingStart=0, lastPing=-1;
+  var pingDot=null, pingStart=0;
 
   var raf=0, last=0, t=0;
   function frame(now){
@@ -463,16 +478,21 @@
     var afT=(fs>=0)?1:0; anyFoc+=(afT-anyFoc)*(1-Math.pow(afT? 0.16:0.22,dt));
     if(fs===holdSubj && fs>=0) holdTime+=dt; else { holdSubj=fs; holdTime=0; }
 
-    // lines arm on a deliberate dwell
+    // lines arm on a deliberate dwell — built once per subject, and on a return within 4s we RESUME the figure (no replay)
     var armed=(fs>=0 && holdTime>0.5 && foc[fs]>0.55);
-    if(armed && constSubj!==fs){ constSubj=fs; constData=buildLines(fs); constGrow=0; }
+    if(armed && constSubj!==fs){
+      if(constSubj>=0){ constGrowCache[constSubj]=constGrow; constSeen[constSubj]=now; }
+      constSubj=fs; constData=constCache[fs]||(constCache[fs]=buildLines(fs));
+      constGrow=(constSeen[fs]!=null && now-constSeen[fs]<4000)?(constGrowCache[fs]||0):0;
+    }
     constAlpha+=((armed?1:0)-constAlpha)*(1-Math.pow(0.06,dt));
     if(armed) constGrow+=(1-constGrow)*(1-Math.pow(0.24,dt));
-    if(constAlpha<0.006 && !armed){ constSubj=-1; constData=null; constGrow=0; }
+    if(constAlpha<0.006 && !armed && constSubj>=0){ constGrowCache[constSubj]=constGrow; constSeen[constSubj]=now; constSubj=-1; constData=null; constGrow=0; }
 
-    // ping bookkeeping
+    // ping bookkeeping — keyed on the actual target DOT (so a same-index jump across subjects restarts the ring)
     var pl=Focus.lesson, ps=Focus.subj;
-    if(pl!==lastPing){ lastPing=pl; pingStart=now; pingDot=(pl>=0 && ps>=0 && dotOf[ps])?dotOf[ps][pl]:null; }
+    var nd=(pl>=0 && ps>=0 && dotOf[ps])?dotOf[ps][pl]:null;
+    if(nd!==pingDot){ pingDot=nd; pingStart=now; }
 
     ctx.clearRect(0,0,W,H);
 
@@ -493,7 +513,7 @@
     // join-the-dots lines (under the dots)
     if(constData && constAlpha>0.006 && constSubj>=0){
       var s=SHELF[constSubj], cr=s.accRgb, E=constData.edges, ne=constData.n;
-      ctx.lineWidth=1;
+      ctx.lineWidth=1; ctx.globalAlpha=1;        // reset — the dust loop left it at the last speck's alpha (per-line alpha is in the gradient)
       for(var e=0;e<E.length;e++){
         var A=E[e][0], B=E[e][1], eo=E[e][2];
         var startAt=(eo/ne)*0.75, local=(constGrow-startAt)/0.30; if(local<=0) continue; if(local>1) local=1;
@@ -551,7 +571,7 @@
 
   /* ---- reduced-motion: one static frame, redrawn on interaction ---- */
   function drawStatic(){
-    layout();
+    if(!dots.length || cv.clientWidth!==_lw || cv.clientHeight!==_lh) layout();   // only re-layout on real size change, not every hover
     var fs=Focus.subj;
     ctx.clearRect(0,0,W,H);
     for(var u=0;u<dust.length;u++){ var p=dust[u]; ctx.globalAlpha=p.a; ctx.fillStyle='#8f8b83'; ctx.beginPath(); ctx.arc(p.hx,p.hy,p.r,0,6.283); ctx.fill(); }
@@ -570,22 +590,24 @@
     ctx.globalAlpha=1;
   }
 
+  var rmBound=false;
   function start(){
     layout();
-    if(reduceMotion){ drawStatic(); Focus.on(function(){ drawStatic(); }); }
+    if(reduceMotion){ if(!rmBound){ rmBound=true; Focus.on(function(){ drawStatic(); }); } drawStatic(); }
     else { cancelAnimationFrame(raf); last=0; raf=requestAnimationFrame(frame); }
   }
-  window.addEventListener('resize', function(){ if(reduceMotion) drawStatic(); else start(); });
+  var rT; window.addEventListener('resize', function(){ clearTimeout(rT); rT=setTimeout(function(){ if(reduceMotion) drawStatic(); else start(); }, 120); });
 
   /* ---- canvas hover/click → the bus (sky is directly interactive too) ---- */
   var tip=document.getElementById('tip');
   function hit(mx,my){
+    if(!cl.length) return {subj:-1,lesson:-1};    // canvas can be hovered before the first (async) layout()
     var bestC=-1,bcd=1e9;
     for(var i=0;i<9;i++){ var dx=mx-cl[i].x, dy=my-cl[i].y, dd=dx*dx+dy*dy; if(dd<bcd){bcd=dd;bestC=i;} }
-    if(bcd>3600) return {subj:-1,lesson:-1};      // >60px from any centre → empty sky
+    if(bcd>3600*clScale*clScale) return {subj:-1,lesson:-1};   // >60·scale px from any centre → empty sky
     var sub=SHELF[bestC], bl=-1,bld=1e9;
     for(var j=0;j<sub.lessons.length;j++){ var dt2=dotOf[bestC][j], ex=mx-dt2.x, ey=my-dt2.y, ed=ex*ex+ey*ey; if(ed<bld){bld=ed;bl=j;} }
-    return {subj:bestC, lesson:(bld<90)?bl:-1};
+    return {subj:bestC, lesson:(bld<90*clScale*clScale)?bl:-1};
   }
   cv.addEventListener('mousemove', function(e){
     var r=cv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, h=hit(mx,my);
@@ -609,7 +631,9 @@
     else { var btn=rows[h.subj]; if(btn && btn.getAttribute('aria-expanded')!=='true') btn.click(); else Focus.setLock(h.subj); }
   });
 
-  if(document.fonts&&document.fonts.ready){ document.fonts.ready.then(start); setTimeout(start,500); } else start();
+  var booted=false; function boot(){ if(booted) return; booted=true; start(); }
+  if(document.fonts&&document.fonts.ready){ var fb=setTimeout(boot,500); document.fonts.ready.then(function(){ clearTimeout(fb); boot(); }); }
+  else boot();
 
   /* ===================================================================
      wiring — scoped Supabase routing
