@@ -481,36 +481,24 @@
 
   /* ---- zoom: a selected (locked) subject fills the viewport as a star-map of its units ---- */
   var zoomSubj=-1, zoomT=0, zoomData=null;
-  function unitTree(lessons){                 // spanning tree over a unit's DONE dots (zoom positions)
-    var done=lessons.filter(function(d){ return d.done; });
-    if(done.length<2) return [];
-    var inTree=[0], used={0:1}, edges=[];
-    while(inTree.length<done.length){
-      var bj=-1,bk=-1,best=Infinity;
-      for(var t2=0;t2<inTree.length;t2++){ var ti=inTree[t2];
-        for(var k=0;k<done.length;k++){ if(used[k]) continue;
-          var ex=done[k].zx-done[ti].zx, ey=done[k].zy-done[ti].zy, ed=ex*ex+ey*ey; if(ed<best){best=ed;bj=ti;bk=k;} } }
-      edges.push([done[bj],done[bk]]); used[bk]=1; inTree.push(bk);
-    }
-    return edges;
-  }
-  function computeZoom(si){                    // lay subject si's units out in a grid filling the viewport
+  function computeZoom(si){                    // lay each unit out as an ORDERED trail (lesson 1→N), filling the viewport
     var s=SHELF[si], U=s.units.length; zoomData=null; if(!U) return;
     var cols=U<=1?1:(U<=2?2:(U<=4?2:3)), rows=Math.ceil(U/cols);
-    var padX=W*0.08, padY=H*0.09, cellW=(W-2*padX)/cols, cellH=(H-2*padY)/rows;
+    var padX=W*0.07, padY=H*0.10, cellW=(W-2*padX)/cols, cellH=(H-2*padY)/rows;
     var arr=[];
     s.units.forEach(function(u,ui){
       var row=Math.floor(ui/cols), inRow=Math.min(cols,U-row*cols), colInRow=ui-row*cols;
       var ucx=padX+cellW*(cols-inRow)/2+(colInRow+0.5)*cellW, ucy=padY+(row+0.5)*cellH;   // centre a short last row
-      var cnt=u.lessons.length||1, UR=Math.min(cellW,cellH)*0.32;
-      var dr=Math.max(2.6,Math.min(6.5,UR/Math.sqrt(cnt)*1.05));     // dot size scales to the cell → 10-lesson subjects read as bold, sparse stars
-      var rec={name:u.name,cx:ucx,cy:ucy,UR:UR,cellW:cellW,lessons:[]};
+      var cnt=u.lessons.length||1, trackW=cellW*0.80, amp=Math.min(cellH*0.16,24);
+      var dr=Math.max(2.8,Math.min(6,trackW/Math.max(7,cnt)*0.62));
+      var rec={name:u.name,cx:ucx,cy:ucy,cellW:cellW,amp:amp,lessons:[]};
+      var x0=ucx-trackW/2;
       u.lessons.forEach(function(L,j){
-        var ang=j*GOLD+sfrac(si*5+ui+3), rad=UR*Math.sqrt((j+0.5)/cnt);
+        var tn=cnt>1?j/(cnt-1):0.5;                                   // position ALONG the unit, in lesson order
+        var px=x0+tn*trackW, py=ucy+Math.sin(tn*Math.PI*1.4+ui*0.6)*amp;   // a gentle ordered meander — a trail, not a cluster
         var dot=dotOf[si][L.gi];
-        if(dot){ dot.zx=ucx+Math.cos(ang)*rad; dot.zy=ucy+Math.sin(ang)*rad*0.96; dot.zr=dr; rec.lessons.push(dot); }
+        if(dot){ dot.zx=px; dot.zy=py; dot.zr=dr; rec.lessons.push(dot); }   // rec.lessons stays in lesson order → consecutive = the real sequence
       });
-      rec.tree=unitTree(rec.lessons);
       arr.push(rec);
     });
     zoomData=arr;
@@ -537,16 +525,7 @@
     var afT=(fs>=0)?1:0; anyFoc+=(afT-anyFoc)*(1-Math.pow(afT? 0.16:0.22,dt));
     if(fs===holdSubj && fs>=0) holdTime+=dt; else { holdSubj=fs; holdTime=0; }
 
-    // overview join-the-dots — only when NOT zoomed
-    var armed=(!zoomed && fs>=0 && holdTime>0.5 && foc[fs]>0.55);
-    if(armed && constSubj!==fs){
-      if(constSubj>=0){ constGrowCache[constSubj]=constGrow; constSeen[constSubj]=now; }
-      constSubj=fs; constData=constCache[fs]||(constCache[fs]=buildLines(fs));
-      constGrow=(constSeen[fs]!=null && now-constSeen[fs]<4000)?(constGrowCache[fs]||0):0;
-    }
-    constAlpha+=((armed?1:0)-constAlpha)*(1-Math.pow(0.06,dt));
-    if(armed) constGrow+=(1-constGrow)*(1-Math.pow(0.24,dt));
-    if(constAlpha<0.006 && !armed && constSubj>=0){ constGrowCache[constSubj]=constGrow; constSeen[constSubj]=now; constSubj=-1; constData=null; constGrow=0; }
+    // (overview shows no connecting lines — lessons aren't related by proximity; the honest sequence lives in the zoom trail)
 
     // ping — keyed on the actual target DOT
     var pl=Focus.lesson, ps=Focus.subj;
@@ -567,30 +546,17 @@
       ctx.globalAlpha=pa; ctx.fillStyle='#8f8b83'; ctx.beginPath(); ctx.arc(px,py,p.r,0,6.283); ctx.fill();
     } }
 
-    // overview lines (fade out as the zoom takes over)
-    if(constData && constAlpha>0.006 && constSubj>=0 && zoomT<0.7){
-      var s=SHELF[constSubj], cr=s.accRgb, E=constData.edges, ne=constData.n, fadeL=1-zoomT;
-      ctx.lineWidth=1; ctx.globalAlpha=1;
-      for(var e=0;e<E.length;e++){
-        var A=E[e][0], B=E[e][1], eo=E[e][2];
-        var startAt=(eo/ne)*0.75, local=(constGrow-startAt)/0.30; if(local<=0) continue; if(local>1) local=1;
-        var ax=A.x, ay=A.y, bx=ax+(B.x-ax)*local, by=ay+(B.y-ay)*local;
-        var ca=constAlpha*foc[constSubj]*0.42*(1-eo/ne*0.5)*fadeL;
-        var g=ctx.createLinearGradient(ax,ay,bx,by);
-        g.addColorStop(0,'rgba('+cr[0]+','+cr[1]+','+cr[2]+','+(ca*0.55).toFixed(3)+')');
-        g.addColorStop(1,'rgba('+cr[0]+','+cr[1]+','+cr[2]+','+(ca*0.06).toFixed(3)+')');
-        ctx.strokeStyle=g; ctx.beginPath(); ctx.moveTo(ax,ay); ctx.lineTo(bx,by); ctx.stroke();
-      }
-      ctx.globalAlpha=1;
-    }
-
-    // zoom per-unit lines (join the done lessons within each unit)
+    // zoom: the trail through each unit, IN LESSON ORDER (consecutive lessons only) — walked part solid, ahead faint
     if(zoomed && zoomData && zoomSubj>=0){
-      var zc=SHELF[zoomSubj].accRgb; ctx.lineWidth=1; ctx.globalAlpha=1;
-      for(var zu=0; zu<zoomData.length; zu++){ var tr=zoomData[zu].tree; if(!tr) continue;
-        ctx.strokeStyle='rgba('+zc[0]+','+zc[1]+','+zc[2]+','+(0.32*zoomT).toFixed(3)+')';
-        for(var te=0; te<tr.length; te++){ ctx.beginPath(); ctx.moveTo(tr[te][0].x,tr[te][0].y); ctx.lineTo(tr[te][1].x,tr[te][1].y); ctx.stroke(); }
+      var zc=SHELF[zoomSubj].accRgb; ctx.lineWidth=1.4; ctx.lineCap='round'; ctx.globalAlpha=1;
+      for(var zu=0; zu<zoomData.length; zu++){ var Lz=zoomData[zu].lessons;
+        for(var j=0;j<Lz.length-1;j++){ var A=Lz[j], B=Lz[j+1], walked=A.done&&B.done;
+          var la=(walked?0.55:0.15)*zoomT;
+          ctx.strokeStyle=walked?('rgba('+zc[0]+','+zc[1]+','+zc[2]+','+la.toFixed(3)+')'):('rgba(150,146,138,'+la.toFixed(3)+')');
+          ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke();
+        }
       }
+      ctx.lineCap='butt';
     }
 
     // dots — each lerps between its overview home and its zoom (unit-map) home
@@ -627,7 +593,7 @@
       var la=Math.min(1,(zoomT-0.45)/0.4);
       ctx.font='600 11px "Schibsted Grotesk",system-ui,sans-serif'; ctx.textAlign='center'; ctx.textBaseline='alphabetic';
       ctx.fillStyle='rgba(110,107,100,'+(0.92*la).toFixed(3)+')';
-      for(var zl=0; zl<zoomData.length; zl++){ var ud=zoomData[zl]; ctx.fillText(truncate(ud.name.toUpperCase(),ud.cellW*0.9), ud.cx, ud.cy+ud.UR+16); }
+      for(var zl=0; zl<zoomData.length; zl++){ var ud=zoomData[zl]; ctx.fillText(truncate(ud.name.toUpperCase(),ud.cellW*0.9), ud.cx, ud.cy+ud.amp+16); }
       ctx.textAlign='start';
     }
 
@@ -654,22 +620,21 @@
     zoomT=(zs>=0)?1:0;
     var fs=Focus.subj;
     ctx.clearRect(0,0,W,H);
-    if(zs<0){                                   // ---- overview ----
+    if(zs<0){                                   // ---- overview (ambient clouds, no connecting lines) ----
       for(var u=0;u<dust.length;u++){ var p=dust[u]; ctx.globalAlpha=p.a; ctx.fillStyle='#8f8b83'; ctx.beginPath(); ctx.arc(p.hx,p.hy,p.r,0,6.283); ctx.fill(); }
-      SHELF.forEach(function(s,i){ if(s.done<3) return; var L=buildLines(i), cr=s.accRgb;
-        ctx.globalAlpha=1; ctx.lineWidth=1; ctx.strokeStyle='rgba('+cr[0]+','+cr[1]+','+cr[2]+',0.09)';
-        L.edges.forEach(function(e){ ctx.beginPath(); ctx.moveTo(e[0].ox,e[0].oy); ctx.lineTo(e[1].ox,e[1].oy); ctx.stroke(); }); });
       for(var k=0;k<dots.length;k++){ var d=dots[k], f=(d.subj===fs)?1:0, other=(fs>=0&&!f)?1:0;
         d.x=d.ox; d.y=d.oy;   // keep hit-testing in sync with what's drawn
         if(d.done){ ctx.globalAlpha=Math.min(0.92,0.50+0.4*f-0.3*other); var c=SHELF[d.subj].doneRgb;
           ctx.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')'; ctx.beginPath(); ctx.arc(d.ox,d.oy,d.baseR*(1+0.5*f),0,6.283); ctx.fill(); }
         else { ctx.globalAlpha=Math.min(0.7,0.28+0.2*f-0.14*other); ctx.lineWidth=1; ctx.strokeStyle='#b3ada3';
           ctx.beginPath(); ctx.arc(d.ox,d.oy,d.baseR,0,6.283); ctx.stroke(); } }
-    } else if(zoomData){                         // ---- zoomed: the subject's unit star-map ----
-      var zc=SHELF[zs].accRgb;
-      for(var zu=0;zu<zoomData.length;zu++){ var tr=zoomData[zu].tree; if(!tr) continue;
-        ctx.globalAlpha=1; ctx.lineWidth=1; ctx.strokeStyle='rgba('+zc[0]+','+zc[1]+','+zc[2]+',0.22)';
-        for(var te=0;te<tr.length;te++){ ctx.beginPath(); ctx.moveTo(tr[te][0].zx,tr[te][0].zy); ctx.lineTo(tr[te][1].zx,tr[te][1].zy); ctx.stroke(); } }
+    } else if(zoomData){                         // ---- zoomed: each unit as an ordered trail ----
+      var zc=SHELF[zs].accRgb; ctx.lineWidth=1.4; ctx.lineCap='round';
+      for(var zu=0;zu<zoomData.length;zu++){ var Lz=zoomData[zu].lessons;
+        for(var j2=0;j2<Lz.length-1;j2++){ var A=Lz[j2], B=Lz[j2+1], walked=A.done&&B.done;
+          ctx.globalAlpha=1; ctx.strokeStyle=walked?('rgba('+zc[0]+','+zc[1]+','+zc[2]+',0.5)'):('rgba(150,146,138,0.16)');
+          ctx.beginPath(); ctx.moveTo(A.zx,A.zy); ctx.lineTo(B.zx,B.zy); ctx.stroke(); } }
+      ctx.lineCap='butt';
       var arr=dotOf[zs]||[];
       for(var j=0;j<arr.length;j++){ var d2=arr[j];
         d2.x=d2.zx; d2.y=d2.zy;   // keep hit-testing in sync with the drawn unit-map
@@ -677,7 +642,7 @@
         else { ctx.globalAlpha=0.55; ctx.lineWidth=Math.max(1,d2.zr*0.28); ctx.strokeStyle='#9c968c'; ctx.beginPath(); ctx.arc(d2.zx,d2.zy,d2.zr,0,6.283); ctx.stroke(); } }
       ctx.font='600 11px "Schibsted Grotesk",system-ui,sans-serif'; ctx.textAlign='center';
       ctx.fillStyle='rgba(110,107,100,0.92)';
-      for(var zl=0;zl<zoomData.length;zl++){ var ud=zoomData[zl]; ctx.fillText(truncate(ud.name.toUpperCase(),ud.cellW*0.9), ud.cx, ud.cy+ud.UR+16); }
+      for(var zl=0;zl<zoomData.length;zl++){ var ud=zoomData[zl]; ctx.fillText(truncate(ud.name.toUpperCase(),ud.cellW*0.9), ud.cx, ud.cy+ud.amp+16); }
       ctx.textAlign='start';
     }
     ctx.globalAlpha=1;
