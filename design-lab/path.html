@@ -28,7 +28,8 @@
   .back{font-family:var(--font-head);font-size:.82rem;font-weight:600;color:var(--text-muted);text-decoration:none;display:inline-flex;align-items:center;gap:.3rem}
   .back svg{width:14px;height:14px}
   .phead .mid{flex:1;text-align:center}
-  .phead h1{font-size:1rem;font-weight:700;letter-spacing:-.01em}
+  .phead h1{font-size:1.02rem;font-weight:500;letter-spacing:-.012em}
+  .phead h1 b{font-weight:800}
   .phead .prog{font-family:var(--font-head);font-size:.72rem;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums}
   .swatch{width:11px;height:11px;border-radius:50%;background:var(--acc);flex:none}
 
@@ -46,9 +47,12 @@
   .node{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
   .node .dot{border-radius:50%;display:grid;place-items:center;transition:transform .18s var(--ease),box-shadow .18s}
   .node:hover .dot{transform:scale(1.07)}
-  .node .lt{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--font-read);font-size:.85rem;line-height:1.25;width:150px}
-  .node.t-right .lt{left:calc(50% + 38px);text-align:left}
-  .node.t-left .lt{right:calc(50% + 38px);text-align:right}
+  /* lesson title sits in a frosted-paper chip so it reads cleanly over the sketch */
+  .node .lt{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--font-read);font-size:.78rem;line-height:1.22;max-width:150px;
+    background:rgba(247,246,244,.74);-webkit-backdrop-filter:blur(2.5px) saturate(1.05);backdrop-filter:blur(2.5px) saturate(1.05);
+    padding:.18rem .46rem;border-radius:6px}
+  .node.t-right .lt{left:calc(50% + 34px);text-align:left}
+  .node.t-left .lt{right:calc(50% + 34px);text-align:right}
 
   /* node states */
   .node.done .dot{width:46px;height:46px;background:var(--acc-mute);color:#fff;box-shadow:var(--shadow-sm)}
@@ -120,7 +124,8 @@
   (function(){ function hx(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
     var a=hx(SUBJECT.accent), g=[138,135,128], m=[Math.round(a[0]+(g[0]-a[0])*0.18),Math.round(a[1]+(g[1]-a[1])*0.18),Math.round(a[2]+(g[2]-a[2])*0.18)];
     document.documentElement.style.setProperty('--acc-mute','rgb('+m.join(',')+')'); })();
-  document.getElementById('subjName').textContent=SUBJECT.name;
+  (function(){ var p=SUBJECT.name.split(' '), last=p.pop();   // weight-split like the wordmark: emphasis on the key noun
+    document.getElementById('subjName').innerHTML=(p.length?p.join(' ')+' ':'')+'<b>'+last+'</b>'; })();
 
   var sb=window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
   var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
