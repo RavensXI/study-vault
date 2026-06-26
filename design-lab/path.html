@@ -96,7 +96,8 @@
     accent: qs.get('accent')||'#368352',
     mastery: parseFloat(qs.get('mastery')||'0.42'),
     keep: qs.get('keep')? qs.get('keep').split('|') : null,
-    keepRe: qs.get('subject')? null : /Paper/      // default science → the 6 papers
+    keepRe: qs.get('subject')? null : /Paper/,     // default science → the 6 papers
+    bg: qs.get('bg')||null                          // ?bg=path-bg-sketch.png → lay the path over a generated backdrop
   };
   document.documentElement.style.setProperty('--acc', SUBJECT.accent);
   // a muted partner for done nodes
@@ -161,7 +162,7 @@
     var total=0; units.forEach(function(u,ui){ total += chGap + u.lessons.length*vGap + (ui<units.length-1?unitGap:0); });
     var H=total+botPad+topPad;
     function Y(yb){ return H-botPad-yb; }        // lesson 1 at the BOTTOM; you climb up
-    var stage=document.createElement('div'); stage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto'; host.appendChild(stage);
+    var stage=document.createElement('div'); stage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto'+(SUBJECT.bg?(';background:url(assets/'+SUBJECT.bg+') top center / 100% auto repeat-y'):''); host.appendChild(stage);
     var conn=E('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible'; stage.appendChild(conn);
     var yb=0, currentEl=null;
     units.forEach(function(u,ui){
