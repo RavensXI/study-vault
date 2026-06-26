@@ -142,61 +142,42 @@
       render(units);
     }, function(){ document.getElementById('path').innerHTML='<div class="loading">Could not load.</div>'; });
 
-  /* ---- the PATH IS the structure: the connector between two lessons takes a
-         themed form, and you climb through it (no separate backdrop) ---- */
+  /* ---- a clean winding path; the generated backdrop carries the topic, the path just climbs ---- */
   var NS='http://www.w3.org/2000/svg';
   function E(tag,a){ var e=document.createElementNS(NS,tag); for(var k in a) e.setAttribute(k,a[k]); return e; }
-  function themeFor(name){
-    if(/biolog|cell|dna|living|organis|inher|evolut|ecolog|infect/i.test(name)) return 'helix';
-    if(/phys|energy|force|wave|electric|magnet|radiat/i.test(name)) return 'wave';
-    return 'curve';
-  }
-  function strandD(cx,y0,y1,A,turns,phase){ var d='',N=Math.max(12,Math.round(Math.abs(y1-y0)/5)); for(var i=0;i<=N;i++){ var t=i/N,y=y0+(y1-y0)*t,x=cx+Math.sin(t*Math.PI*2*turns+phase)*A; d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' '; } return d; }
-  // draw the themed structure between two consecutive nodes (this segment IS the path)
-  function connector(conn,theme,cx,y0,y1,A,done,idx){
-    var acc=SUBJECT.accent, col=done?acc:'#cdcac4', op=done?0.62:0.95, w=done?3.4:2.6;
-    function add(d,wd,o,dash,c){ var p=E('path',{d:d,fill:'none',stroke:c||col,'stroke-width':wd==null?w:wd,'stroke-linecap':'round',opacity:o==null?op:o}); if(dash) p.setAttribute('stroke-dasharray',dash); conn.appendChild(p); }
-    if(theme==='helix'){                                   // one DNA twist per lesson-gap, nodes at the crossings
-      add(strandD(cx,y0,y1,A,1,0),w,op,done?null:'1 7');
-      add(strandD(cx,y0,y1,A,1,Math.PI),w,op,done?null:'1 7');
-      [0.25,0.75].forEach(function(tt){ var y=y0+(y1-y0)*tt, xa=cx+Math.sin(tt*Math.PI*2)*A; add('M '+xa+' '+y+' L '+(2*cx-xa)+' '+y, 1.4, done?0.42:0.22); });
-    } else if(theme==='wave'){
-      add(strandD(cx,y0,y1,A,1,0),w,op,done?null:'1 7');
-    } else {                                               // gentle alternating bulge
-      add(strandD(cx,y0,y1,A,0.5, idx%2?Math.PI:0),w,op,done?null:'1 7');
-    }
-  }
 
   function render(units){
     var host=document.getElementById('path'); host.innerHTML='';
-    var W=Math.min(host.clientWidth,520), cx=W/2, vGap=98, chGap=74, unitGap=52, botPad=74, topPad=48;
+    var W=Math.min(host.clientWidth,520), cx=W/2, amp=Math.min(64,(W-300)/2), vGap=96, chGap=74, unitGap=52, botPad=74, topPad=48;
     var total=0; units.forEach(function(u,ui){ total += chGap + u.lessons.length*vGap + (ui<units.length-1?unitGap:0); });
     var H=total+botPad+topPad;
     function Y(yb){ return H-botPad-yb; }        // lesson 1 at the BOTTOM; you climb up
     var stage=document.createElement('div'); stage.id='pstage'; stage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto'; host.appendChild(stage);
     var conn=E('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible'; stage.appendChild(conn);
-    var yb=0, currentEl=null;
+    var yb=0, gidx=0, currentEl=null;
     units.forEach(function(u,ui){
-      var n=u.lessons.length, base=yb+chGap, theme=themeFor(u.name);
-      var A=theme==='helix'?40:(theme==='wave'?34:66);
-      var pos=u.lessons.map(function(L,j){ return Y(base+j*vGap); });   // centred column, just the y
-      // connectors (the structured path), consecutive pairs in lesson order
-      for(var j=0;j<n-1;j++){ connector(conn,theme,cx,pos[j],pos[j+1],A, u.lessons[j].done&&u.lessons[j+1].done, j); }
+      var n=u.lessons.length, base=yb+chGap;
+      var pos=u.lessons.map(function(L,j){ return {x:cx+Math.sin((gidx+j)*0.85)*amp, top:Y(base+j*vGap)}; });   // gentle weave, stays in the clear central lane
+      // one smooth winding path: walked part solid, the rest a faint dashed trail ahead
+      function seg(a,b,stroke,wd,op,dash){ if(b<=a) return; var d='M '+pos[a].x.toFixed(1)+' '+pos[a].top.toFixed(1); for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],my=(p0.top+p1.top)/2; d+=' C '+p0.x.toFixed(1)+' '+my.toFixed(1)+' '+p1.x.toFixed(1)+' '+my.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.top.toFixed(1); } var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
+      var lastDone=-1; u.lessons.forEach(function(L,j){ if(L.done) lastDone=j; });
+      seg(0,Math.max(0,lastDone),SUBJECT.accent,3.6,0.6);
+      seg(Math.max(0,lastDone),n-1,'#cdcac4',2.6,0.95,'1 7');
       // chapter label (foot of the unit — you climb up into it)
       var doneInUnit=u.lessons.filter(function(L){return L.done;}).length;
       var ch=document.createElement('div'); ch.className='chapter'; ch.style.cssText='position:absolute;left:0;width:100%;margin:0;top:'+(Y(yb+chGap*0.5)-9)+'px';
       ch.innerHTML='<span class="line"></span><span class="lbl">'+esc(u.name)+'</span><span class="ct">'+doneInUnit+' / '+n+'</span><span class="line"></span>';
       stage.appendChild(ch);
-      // nodes (centred column; titles alternate side)
+      // nodes (weaving; title sits toward the centre, clear of the margin art)
       u.lessons.forEach(function(L,j){
-        var node=document.createElement('div'); node.className='node '+(j%2?'t-left':'t-right')+' '+(L.current?'current':(L.done?'done':'ahead'));
-        node.style.left=cx+'px'; node.style.top=pos[j]+'px';
+        var node=document.createElement('div'); node.className='node '+(pos[j].x<cx?'t-right':'t-left')+' '+(L.current?'current':(L.done?'done':'ahead'));
+        node.style.left=pos[j].x+'px'; node.style.top=pos[j].top+'px';
         node.innerHTML='<span class="dot">'+(L.current?PLAY:(L.done?CHECK:L.no))+'</span><span class="lt">'+(L.current?'<span class="pill">Up next</span><br>':'')+esc(L.t)+'</span>';
         node.addEventListener('click',function(){ console.log('open lesson',L.no,L.t); });
         stage.appendChild(node);
         if(L.current) currentEl=node;
       });
-      yb=base+n*vGap+(ui<units.length-1?unitGap:0);
+      gidx+=n; yb=base+n*vGap+(ui<units.length-1?unitGap:0);
     });
     if(currentEl) setTimeout(function(){ currentEl.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'}); },140);
     applyBg(SUBJECT.bg||'');
