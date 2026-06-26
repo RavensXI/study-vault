@@ -89,12 +89,12 @@
   </header>
 
   <div class="bgtoggle" id="bgtoggle">
-    <button data-bg="">No backdrop</button>
-    <button data-bg="path-bg-sketch.png">Sketch</button>
-    <button data-bg="path-bg-draft.png">Sketch + blueprint</button>
-    <button data-bg="path-bg-blueprint.png">Blueprint</button>
-    <button data-bg="path-bg-watercolour.png">Watercolour</button>
-    <button data-bg="path-bg-riso.png">Riso</button>
+    <button data-style="">No backdrop</button>
+    <button data-style="sketch">Sketch</button>
+    <button data-style="draft">Sketch + blueprint</button>
+    <button data-style="blueprint">Blueprint</button>
+    <button data-style="watercolour">Watercolour</button>
+    <button data-style="riso">Riso</button>
   </div>
 
   <main class="wrap" id="path"><div class="loading">Loading your path…</div></main>
@@ -113,8 +113,12 @@
     mastery: parseFloat(qs.get('mastery')||'0.42'),
     keep: qs.get('keep')? qs.get('keep').split('|') : null,
     keepRe: qs.get('subject')? null : /Paper/,     // default science → the 6 papers
-    bg: qs.get('bg')||null                          // ?bg=path-bg-sketch.png → lay the path over a generated backdrop
+    bg: qs.get('bg')||null
   };
+  // backdrop file naming: science = path-bg-<style>.png; other subjects = path-bg-<base>-<style>.png
+  (function(){ var b=(qs.get('bg')||'').replace(/^path-bg-/,'').replace(/\.png$/,''), seg=b?b.split('-'):[];
+    SUBJECT.style0 = seg.length? seg.pop() : '';
+    SUBJECT.bgbase = qs.get('bgbase') || (seg.length? seg.join('-') : ''); })();
   document.documentElement.style.setProperty('--acc', SUBJECT.accent);
   // a muted partner for done nodes
   (function(){ function hx(h){h=h.replace('#','');return[parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)];}
@@ -186,13 +190,14 @@
       gidx+=n; yb=base+n*vGap+(ui<units.length-1?unitGap:0);
     });
     if(currentEl) setTimeout(function(){ currentEl.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'}); },140);
-    applyBg(SUBJECT.bg||'');
+    applyBg(SUBJECT.style0||'');
   }
-  function applyBg(bg){
-    var st=document.getElementById('pstage'); if(st) st.style.background = bg?('url(assets/'+bg+') top center / 100% auto repeat-y'):'none';
-    var bar=document.getElementById('bgtoggle'); if(bar) [].slice.call(bar.children).forEach(function(b){ b.classList.toggle('on',(b.getAttribute('data-bg')||'')===(bg||'')); });
+  function applyBg(style){
+    var file = style ? ('path-bg-'+(SUBJECT.bgbase?SUBJECT.bgbase+'-':'')+style+'.png') : '';   // per-subject backdrop set
+    var st=document.getElementById('pstage'); if(st) st.style.background = file?('url(assets/'+file+') top center / 100% auto repeat-y'):'none';
+    var bar=document.getElementById('bgtoggle'); if(bar) [].slice.call(bar.children).forEach(function(b){ b.classList.toggle('on',(b.getAttribute('data-style')||'')===(style||'')); });
   }
-  (function(){ var bar=document.getElementById('bgtoggle'); if(bar) [].slice.call(bar.children).forEach(function(b){ b.addEventListener('click',function(){ applyBg(b.getAttribute('data-bg')); }); }); })();
+  (function(){ var bar=document.getElementById('bgtoggle'); if(bar) [].slice.call(bar.children).forEach(function(b){ b.addEventListener('click',function(){ applyBg(b.getAttribute('data-style')); }); }); })();
 })();
 </script>
 </body>
