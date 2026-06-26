@@ -43,12 +43,12 @@
   .unit{position:relative;width:100%}
   .unit svg.conn{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
 
-  .node{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:.7rem;cursor:pointer}
-  .node .dot{flex:none;border-radius:50%;display:grid;place-items:center;transition:transform .18s var(--ease),box-shadow .18s}
+  .node{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
+  .node .dot{border-radius:50%;display:grid;place-items:center;transition:transform .18s var(--ease),box-shadow .18s}
   .node:hover .dot{transform:scale(1.07)}
-  .node .lt{font-family:var(--font-read);font-size:.85rem;line-height:1.25;max-width:170px}
-  .node.side-r{flex-direction:row-reverse;text-align:right}
-  .node.side-r .lt{text-align:right}
+  .node .lt{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--font-read);font-size:.85rem;line-height:1.25;width:150px}
+  .node.t-right .lt{left:calc(50% + 38px);text-align:left}
+  .node.t-left .lt{right:calc(50% + 38px);text-align:right}
 
   /* node states */
   .node.done .dot{width:46px;height:46px;background:var(--acc-mute);color:#fff;box-shadow:var(--shadow-sm)}
@@ -130,81 +130,61 @@
       render(units);
     }, function(){ document.getElementById('path').innerHTML='<div class="loading">Could not load.</div>'; });
 
-  /* ---- thematic backdrops: a faint motif each unit's path winds over ---- */
+  /* ---- the PATH IS the structure: the connector between two lessons takes a
+         themed form, and you climb through it (no separate backdrop) ---- */
   var NS='http://www.w3.org/2000/svg';
   function E(tag,a){ var e=document.createElementNS(NS,tag); for(var k in a) e.setAttribute(k,a[k]); return e; }
-  function motifBox(W,h){ var s=E('svg',{width:W,height:h,viewBox:'0 0 '+W+' '+h}); s.style.cssText='position:absolute;left:0;pointer-events:none;overflow:visible'; return s; }
-  function motifFor(name,W,h,cx,amp){
-    var a=SUBJECT.accent;
-    if(/biolog|cell|dna|living|organis|inher|evolut|ecolog|infect/i.test(name)) return helix(W,h,cx,amp,a);
-    if(/chem/i.test(name)) return molecules(W,h,cx,a);
-    if(/phys|energy|force|wave|electric|magnet|radiat/i.test(name)) return waves(W,h,cx,a);
-    return null;
+  function themeFor(name){
+    if(/biolog|cell|dna|living|organis|inher|evolut|ecolog|infect/i.test(name)) return 'helix';
+    if(/phys|energy|force|wave|electric|magnet|radiat/i.test(name)) return 'wave';
+    return 'curve';
   }
-  function helix(W,h,cx,amp,a){
-    var s=motifBox(W,h), A=Math.min(amp*0.8,76), turns=Math.max(2,h/175), N=Math.max(26,Math.round(h/7)), d1='',d2='';
-    for(var i=0;i<=N;i++){ var t=i/N,y=(t*h).toFixed(1),p=t*turns*Math.PI*2;
-      d1+=(i?'L':'M')+(cx+Math.sin(p)*A).toFixed(1)+' '+y+' '; d2+=(i?'L':'M')+(cx+Math.sin(p+Math.PI)*A).toFixed(1)+' '+y+' '; }
-    s.appendChild(E('path',{d:d1,fill:'none',stroke:a,'stroke-width':2,opacity:0.15}));
-    s.appendChild(E('path',{d:d2,fill:'none',stroke:a,'stroke-width':2,opacity:0.15}));
-    var step=Math.max(1,Math.round(N/(turns*7)));
-    for(var k=0;k<=N;k+=step){ var tt=k/N,yy=tt*h,pp=tt*turns*Math.PI*2; s.appendChild(E('line',{x1:cx+Math.sin(pp)*A,y1:yy,x2:cx+Math.sin(pp+Math.PI)*A,y2:yy,stroke:a,'stroke-width':1.4,opacity:0.1})); }
-    return s;
-  }
-  function molecules(W,h,cx,a){
-    var s=motifBox(W,h), r=27, gap=Math.max(150,h/3.2), y=gap*0.55, side=1, prev=null;
-    function hex(hx,hy){ var p=''; for(var q=0;q<6;q++){ var ang=Math.PI/6+q*Math.PI/3; p+=(q?'L':'M')+(hx+Math.cos(ang)*r).toFixed(1)+' '+(hy+Math.sin(ang)*r).toFixed(1)+' '; } p+='Z'; s.appendChild(E('path',{d:p,fill:'none',stroke:a,'stroke-width':2,opacity:0.13})); }
-    while(y<h-30){ var hx=cx+side*48; hex(hx,y); if(prev) s.appendChild(E('line',{x1:prev.x,y1:prev.y,x2:hx,y2:y,stroke:a,'stroke-width':1.6,opacity:0.1})); prev={x:hx,y:y}; y+=gap; side*=-1; }
-    return s;
-  }
-  function waves(W,h,cx,a){
-    var s=motifBox(W,h), N=Math.max(48,Math.round(h/6));
-    for(var w=0;w<3;w++){ var off=(w-1)*68, A=24+w*6, d='';
-      for(var i=0;i<=N;i++){ var t=i/N; d+=(i?'L':'M')+(cx+off+Math.sin(t*Math.PI*4.4+w)*A).toFixed(1)+' '+(t*h).toFixed(1)+' '; }
-      s.appendChild(E('path',{d:d,fill:'none',stroke:a,'stroke-width':2,opacity:0.12})); }
-    return s;
+  function strandD(cx,y0,y1,A,turns,phase){ var d='',N=Math.max(12,Math.round(Math.abs(y1-y0)/5)); for(var i=0;i<=N;i++){ var t=i/N,y=y0+(y1-y0)*t,x=cx+Math.sin(t*Math.PI*2*turns+phase)*A; d+=(i?'L':'M')+x.toFixed(1)+' '+y.toFixed(1)+' '; } return d; }
+  // draw the themed structure between two consecutive nodes (this segment IS the path)
+  function connector(conn,theme,cx,y0,y1,A,done,idx){
+    var acc=SUBJECT.accent, col=done?acc:'#cdcac4', op=done?0.62:0.95, w=done?3.4:2.6;
+    function add(d,wd,o,dash,c){ var p=E('path',{d:d,fill:'none',stroke:c||col,'stroke-width':wd==null?w:wd,'stroke-linecap':'round',opacity:o==null?op:o}); if(dash) p.setAttribute('stroke-dasharray',dash); conn.appendChild(p); }
+    if(theme==='helix'){                                   // one DNA twist per lesson-gap, nodes at the crossings
+      add(strandD(cx,y0,y1,A,1,0),w,op,done?null:'1 7');
+      add(strandD(cx,y0,y1,A,1,Math.PI),w,op,done?null:'1 7');
+      [0.25,0.75].forEach(function(tt){ var y=y0+(y1-y0)*tt, xa=cx+Math.sin(tt*Math.PI*2)*A; add('M '+xa+' '+y+' L '+(2*cx-xa)+' '+y, 1.4, done?0.42:0.22); });
+    } else if(theme==='wave'){
+      add(strandD(cx,y0,y1,A,1,0),w,op,done?null:'1 7');
+    } else {                                               // gentle alternating bulge
+      add(strandD(cx,y0,y1,A,0.5, idx%2?Math.PI:0),w,op,done?null:'1 7');
+    }
   }
 
   function render(units){
     var host=document.getElementById('path'); host.innerHTML='';
-    var W=Math.min(host.clientWidth,520), cx=W/2, amp=Math.min(118,(W-160)/2), vGap=94, chGap=72, unitGap=48, botPad=72, topPad=46;
+    var W=Math.min(host.clientWidth,520), cx=W/2, vGap=98, chGap=74, unitGap=52, botPad=74, topPad=48;
     var total=0; units.forEach(function(u,ui){ total += chGap + u.lessons.length*vGap + (ui<units.length-1?unitGap:0); });
     var H=total+botPad+topPad;
-    function Y(yb){ return H-botPad-yb; }        // y-from-bottom → CSS top: lesson 1 sits at the BOTTOM, you climb up
-    var stage=document.createElement('div'); stage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto';
-    host.appendChild(stage);
+    function Y(yb){ return H-botPad-yb; }        // lesson 1 at the BOTTOM; you climb up
+    var stage=document.createElement('div'); stage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto'; host.appendChild(stage);
     var conn=E('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible'; stage.appendChild(conn);
-    var yb=0, gidx=0, currentEl=null;
+    var yb=0, currentEl=null;
     units.forEach(function(u,ui){
-      var n=u.lessons.length, base=yb+chGap;
-      var pos=u.lessons.map(function(L,j){ var ybj=base+j*vGap; return {x:cx+Math.sin((gidx+j)*0.9)*amp, top:Y(ybj)}; });
-      // backdrop motif spanning this unit's nodes (behind the connector + nodes)
-      var topY=pos[n-1].top, botY=pos[0].top, mtop=topY-44, mh=(botY-topY)+88;
-      var motif=motifFor(u.name,W,mh,cx,amp);
-      if(motif){ motif.style.top=mtop+'px'; stage.insertBefore(motif,conn); }
-      // connector: consecutive segments — walked (solid accent) then ahead (faint dashed)
-      var lastDone=-1; u.lessons.forEach(function(L,j){ if(L.done) lastDone=j; });
-      function seg(a,b,stroke,wd,op,dash){ var d='M '+pos[a].x+' '+pos[a].top; for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],my=(p0.top+p1.top)/2; d+=' C '+p0.x+' '+my+' '+p1.x+' '+my+' '+p1.x+' '+p1.top; } var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
-      if(lastDone>0) seg(0,lastDone,SUBJECT.accent,4,0.5);
-      if(lastDone<n-1) seg(Math.max(0,lastDone),n-1,'#cfccc6',3,1,'1 9');
-      // chapter label (sits at the foot of the unit — you climb up into it)
+      var n=u.lessons.length, base=yb+chGap, theme=themeFor(u.name);
+      var A=theme==='helix'?40:(theme==='wave'?34:66);
+      var pos=u.lessons.map(function(L,j){ return Y(base+j*vGap); });   // centred column, just the y
+      // connectors (the structured path), consecutive pairs in lesson order
+      for(var j=0;j<n-1;j++){ connector(conn,theme,cx,pos[j],pos[j+1],A, u.lessons[j].done&&u.lessons[j+1].done, j); }
+      // chapter label (foot of the unit — you climb up into it)
       var doneInUnit=u.lessons.filter(function(L){return L.done;}).length;
-      var ch=document.createElement('div'); ch.className='chapter';
-      ch.style.cssText='position:absolute;left:0;width:100%;margin:0;top:'+(Y(yb+chGap*0.5)-9)+'px';
+      var ch=document.createElement('div'); ch.className='chapter'; ch.style.cssText='position:absolute;left:0;width:100%;margin:0;top:'+(Y(yb+chGap*0.5)-9)+'px';
       ch.innerHTML='<span class="line"></span><span class="lbl">'+esc(u.name)+'</span><span class="ct">'+doneInUnit+' / '+n+'</span><span class="line"></span>';
       stage.appendChild(ch);
-      // nodes
+      // nodes (centred column; titles alternate side)
       u.lessons.forEach(function(L,j){
-        var node=document.createElement('div'), side=pos[j].x<cx?'side-r':'side-l';
-        node.className='node '+side+' '+(L.current?'current':(L.done?'done':'ahead'));
-        node.style.left=pos[j].x+'px'; node.style.top=pos[j].top+'px';
-        node.innerHTML='<span class="dot">'+(L.current?PLAY:(L.done?CHECK:L.no))+'</span>'+
-          '<span class="lt">'+(L.current?'<span class="pill">Up next</span><br>':'')+esc(L.t)+'</span>';
+        var node=document.createElement('div'); node.className='node '+(j%2?'t-left':'t-right')+' '+(L.current?'current':(L.done?'done':'ahead'));
+        node.style.left=cx+'px'; node.style.top=pos[j]+'px';
+        node.innerHTML='<span class="dot">'+(L.current?PLAY:(L.done?CHECK:L.no))+'</span><span class="lt">'+(L.current?'<span class="pill">Up next</span><br>':'')+esc(L.t)+'</span>';
         node.addEventListener('click',function(){ console.log('open lesson',L.no,L.t); });
         stage.appendChild(node);
         if(L.current) currentEl=node;
       });
-      gidx+=n; yb=base+n*vGap+(ui<units.length-1?unitGap:0);
+      yb=base+n*vGap+(ui<units.length-1?unitGap:0);
     });
     if(currentEl) setTimeout(function(){ currentEl.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'}); },140);
   }
