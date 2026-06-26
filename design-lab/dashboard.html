@@ -110,6 +110,9 @@
   .lrow:hover,.lrow.is-skyfocus,.lrow:focus-visible{background:var(--wash);outline:none}
   .lrow:hover .lt,.lrow.is-skyfocus .lt,.lrow:focus-visible .lt{color:var(--text-primary)}
   .lrow:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .unit-h{font-family:var(--font-head);font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-muted);padding:.6rem .55rem .2rem}
+  .lessons .inner>.unit-h:first-child{padding-top:.15rem}
+  .sel-loading{padding:1.1rem .55rem;font-family:var(--font-head);font-size:.84rem;color:var(--text-muted)}
 
   .sel-foot{border-top:1px solid var(--border-lighter);margin-top:.4rem;padding-top:.5rem;display:flex;gap:.5rem}
   .sel-foot button{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.5rem;background:transparent;border:0;border-radius:var(--r);
@@ -247,26 +250,28 @@
 (function(){
   var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------- student shelf: 9 subjects + mock mastery + 12 real lessons each ---------- */
-  var byName={}; SUBJECTS.forEach(function(s){ byName[s.n]=s; });
-  var SHELF=[
-    {n:'Mathematics',        m:0.55},
-    {n:'English Language',   m:0.48},
-    {n:'English Literature', m:0.30},
-    {n:'Combined Science',   m:0.42},
-    {n:'History',            m:0.20},
-    {n:'Geography',          m:0.66},
-    {n:'Spanish',            m:0.35},
-    {n:'Computer Science',   m:0.58},
-    {n:'Religious Studies',  m:0.12}
-  ].map(function(r){
-    var s=byName[r.n]||{n:r.n,k:null,a:'#777',icon:'_default'};
-    var lessons=(TITLES[s.k]||[]).slice(0,12);
-    var done=Math.round(r.m*12);
-    return {n:s.n,k:s.k||null,a:s.a,icon:s.icon,m:r.m,lessons:lessons,done:done};
-  });
-  var TOTAL_LESSONS=SHELF.reduce(function(a,s){return a+s.lessons.length;},0);
-  var TOTAL_DONE=SHELF.reduce(function(a,s){return a+s.done;},0);
+  /* ---------- a realistic GCSE student: their actual subjects + the actual
+       units they study. Real lessons are fetched from Supabase in loadAll().
+       `keep` = the unit names this student takes; `keepFn` filters by name; omit = all units. ---------- */
+  var bySlug={}, byName={};
+  SUBJECTS.forEach(function(s){ bySlug[s.k]=s; byName[s.n]=s; });
+  var STUDENT=[
+    {n:'Mathematics',        k:'maths-ocr',              m:0.55},
+    {n:'English Language',   k:'english-language-ocr',   m:0.48},
+    {n:'English Literature', k:'english-literature-aqa', m:0.30,
+       keep:['Macbeth','A Christmas Carol','An Inspector Calls','Power & Conflict Poetry','Unseen Poetry']},
+    {n:'Combined Science',   k:'science-aqa',            m:0.42,
+       keepFn:function(nm){ return /Paper/.test(nm); }},        // the 6 Bio/Chem/Physics papers (not the calc-practice units)
+    {n:'History',            k:'history-ocr',            m:0.20,
+       keep:['International Relations 1918-1975','Germany 1925-1955: The People and the State','Migration to Britain c.1000-c.2010','The USA 1919-1948: The People and the State']},
+    {n:'Geography',          k:'geography-edexcel-b',    m:0.66},
+    {n:'Spanish',            k:'spanish-edexcel',        m:0.35},
+    {n:'Computer Science',   k:'computer-science',       m:0.58},
+    {n:'Religious Studies',  k:'religious-studies-aqa',  m:0.12,
+       keep:['Christianity: Beliefs','Christianity: Practices','Islam: Beliefs','Islam: Practices','Theme A: Relationships & Families','Theme B: Religion & Life','Theme D: Peace & Conflict','Theme E: Crime & Punishment']}
+  ];
+  STUDENT.forEach(function(s){ var c=bySlug[s.k]||byName[s.n]||{a:'#777',icon:'_default'}; s.a=c.a; s.icon=c.icon; s.units=[]; s.lessons=[]; s.total=0; s.done=0; });
+  var SHELF=STUDENT;   // the engine reads SHELF; entries get .lessons/.units/.done populated after the fetch
 
   /* ---------- colour helpers (constant-chroma law) ---------- */
   function hexRgb(h){ h=h.replace('#',''); return [parseInt(h.substr(0,2),16),parseInt(h.substr(2,2),16),parseInt(h.substr(4,2),16)]; }
@@ -313,76 +318,75 @@
   })();
 
   /* ===================================================================
-     SELECTOR — accordion of subjects → lessons, driving the Focus bus
+     SELECTOR — accordion of subjects → units → lessons, driving the Focus bus.
+     Built by buildSelector() once the real lessons have loaded.
      =================================================================== */
-  document.getElementById('tally').innerHTML='<b>'+TOTAL_DONE+'</b> / '+TOTAL_LESSONS+' done';
   var CHEV='<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
   var TICK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
   var selList=document.getElementById('selList');
-  SHELF.forEach(function(s,i){
-    var btn=document.createElement('button');
-    btn.className='srow'; btn.setAttribute('data-subj',i); btn.setAttribute('aria-expanded','false'); btn.setAttribute('aria-controls','ls-'+i);
-    btn.style.setProperty('--acc','rgb('+s.swRgb.join(',')+')');   // muted to match the sky (tames Geography's loud hue too)
-    btn.innerHTML='<span class="sw" aria-hidden="true"></span>'+
-      '<span class="nm">'+s.n+'</span>'+
-      '<span class="ct"><b>'+s.done+'</b> / '+s.lessons.length+'</span>'+CHEV;
-    selList.appendChild(btn);
-
-    var wrap=document.createElement('div'); wrap.className='lessons'; wrap.id='ls-'+i; wrap.setAttribute('role','group'); wrap.setAttribute('aria-label',s.n+' lessons');
-    var inner=document.createElement('div'); inner.className='inner'; wrap.appendChild(inner);
-    s.lessons.forEach(function(L,j){
-      var a=document.createElement('a');
-      a.className='lrow'+(j<s.done?' done':''); a.setAttribute('data-subj',i); a.setAttribute('data-lesson',j);
-      a.style.setProperty('--i',j); a.href=s.k?('/browse/'+s.k):'#';
-      a.innerHTML='<span class="no">'+(j+1)+'</span>'+
-        '<span class="lt">'+L.t+'</span>'+
-        '<span class="mk">'+(j<s.done?TICK:'<span class="ring"></span>')+'</span>';
-      inner.appendChild(a);
-    });
-    selList.appendChild(wrap);
-    setInert(wrap,true);
-  });
+  var rows=[], panels=[];
+  function esc(t){ return (t==null?'':String(t)).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function setInert(el,on){ try{ el.inert=on; }catch(e){} el.setAttribute('aria-hidden',on?'true':'false');
-    // belt-and-braces for browsers without inert: drop collapsed lessons out of the tab order immediately
     [].slice.call(el.querySelectorAll('.lrow')).forEach(function(a){ a.tabIndex=on?-1:0; }); }
-
-  var rows=[].slice.call(selList.querySelectorAll('.srow'));
-  var panels=[].slice.call(selList.querySelectorAll('.lessons'));
-
   function collapseAll(){ rows.forEach(function(r,i){
     if(panels[i].contains(document.activeElement)) r.focus();   // never leave focus inside a freshly-inerted panel
     r.setAttribute('aria-expanded','false'); setInert(panels[i],true); }); }
-  rows.forEach(function(btn,i){
-    btn.addEventListener('mouseenter', function(){ Focus.hover(i); });
-    btn.addEventListener('mouseleave', function(){ Focus.clear(); });
-    btn.addEventListener('focus', function(){ Focus.hover(i); });
-    btn.addEventListener('blur', function(){ Focus.clear(); });
-    btn.addEventListener('click', function(){
-      var open=btn.getAttribute('aria-expanded')==='true';
-      collapseAll();
-      if(!open){ btn.setAttribute('aria-expanded','true'); setInert(panels[i],false); Focus.setLock(i);
-        if(!reduceMotion) setTimeout(function(){ btn.scrollIntoView({block:'nearest',behavior:'smooth'}); },60);
-      } else { Focus.setLock(-1); }
-    });
-    // keyboard roving between subjects
-    btn.addEventListener('keydown', function(e){
-      if(e.key==='ArrowDown'){ e.preventDefault(); (rows[i+1]||rows[0]).focus(); }
-      else if(e.key==='ArrowUp'){ e.preventDefault(); (rows[i-1]||rows[rows.length-1]).focus(); }
-    });
-  });
-  selList.querySelectorAll('.lrow').forEach(function(a){
-    var si=+a.getAttribute('data-subj'), li=+a.getAttribute('data-lesson');
-    a.addEventListener('mouseenter', function(){ Focus.ping(si,li); });
-    a.addEventListener('mouseleave', function(){ Focus.hover(si); });
-    a.addEventListener('focus', function(){ Focus.ping(si,li); });
-    a.addEventListener('blur', function(){ Focus.hover(si); });
-  });
 
-  // reverse linkage: sky → list row highlight
+  function buildSelector(){
+    selList.innerHTML='';
+    SHELF.forEach(function(s,i){
+      var btn=document.createElement('button');
+      btn.className='srow'; btn.setAttribute('data-subj',i); btn.setAttribute('aria-expanded','false'); btn.setAttribute('aria-controls','ls-'+i);
+      btn.style.setProperty('--acc','rgb('+s.swRgb.join(',')+')');   // muted to match the sky
+      btn.innerHTML='<span class="sw" aria-hidden="true"></span><span class="nm">'+esc(s.n)+'</span>'+
+        '<span class="ct"><b>'+s.done+'</b> / '+s.total+'</span>'+CHEV;
+      selList.appendChild(btn);
+      var wrap=document.createElement('div'); wrap.className='lessons'; wrap.id='ls-'+i; wrap.setAttribute('role','group'); wrap.setAttribute('aria-label',s.n+' lessons');
+      var inner=document.createElement('div'); inner.className='inner'; wrap.appendChild(inner);
+      var multi=s.units.length>1, sc=0;
+      s.units.forEach(function(u){
+        if(multi){ var h=document.createElement('div'); h.className='unit-h'; h.textContent=u.name; inner.appendChild(h); }
+        u.lessons.forEach(function(L){
+          var a=document.createElement('a');
+          a.className='lrow'+(L.doneFlag?' done':''); a.setAttribute('data-subj',i); a.setAttribute('data-lesson',L.gi);
+          a.style.setProperty('--i',Math.min(sc++,16)); a.href=L.url||('/browse/'+s.k);
+          a.innerHTML='<span class="no">'+L.no+'</span><span class="lt">'+esc(L.t)+'</span>'+
+            '<span class="mk">'+(L.doneFlag?TICK:'<span class="ring"></span>')+'</span>';
+          a.addEventListener('mouseenter', function(){ Focus.ping(i,L.gi); });
+          a.addEventListener('mouseleave', function(){ Focus.hover(i); });
+          a.addEventListener('focus', function(){ Focus.ping(i,L.gi); });
+          a.addEventListener('blur', function(){ Focus.hover(i); });
+          a.addEventListener('click', function(e){ var href=a.getAttribute('href'); if(href&&href!=='#'){ e.preventDefault(); go(href); } });
+          inner.appendChild(a);
+        });
+      });
+      selList.appendChild(wrap); setInert(wrap,true);
+    });
+    rows=[].slice.call(selList.querySelectorAll('.srow'));
+    panels=[].slice.call(selList.querySelectorAll('.lessons'));
+    rows.forEach(function(btn,i){
+      btn.addEventListener('mouseenter', function(){ Focus.hover(i); });
+      btn.addEventListener('mouseleave', function(){ Focus.clear(); });
+      btn.addEventListener('focus', function(){ Focus.hover(i); });
+      btn.addEventListener('blur', function(){ Focus.clear(); });
+      btn.addEventListener('click', function(){
+        var open=btn.getAttribute('aria-expanded')==='true'; collapseAll();
+        if(!open){ btn.setAttribute('aria-expanded','true'); setInert(panels[i],false); Focus.setLock(i);
+          if(!reduceMotion) setTimeout(function(){ btn.scrollIntoView({block:'nearest',behavior:'smooth'}); },60);
+        } else { Focus.setLock(-1); }
+      });
+      btn.addEventListener('keydown', function(e){
+        if(e.key==='ArrowDown'){ e.preventDefault(); (rows[i+1]||rows[0]).focus(); }
+        else if(e.key==='ArrowUp'){ e.preventDefault(); (rows[i-1]||rows[rows.length-1]).focus(); }
+      });
+    });
+  }
+
+  // reverse linkage: sky → list highlight (subscribed once; re-reads rows each emit)
   Focus.on(function(f){
-    rows.forEach(function(r){ r.classList.remove('is-skyfocus'); });
-    selList.querySelectorAll('.lrow.is-skyfocus').forEach(function(a){ a.classList.remove('is-skyfocus'); });
+    for(var r=0;r<rows.length;r++) rows[r].classList.remove('is-skyfocus');
+    var prev=selList.querySelectorAll('.lrow.is-skyfocus'); for(var p=0;p<prev.length;p++) prev[p].classList.remove('is-skyfocus');
     if(f.subj>=0){
       if(rows[f.subj]) rows[f.subj].classList.add('is-skyfocus');
       if(f.lesson>=0){ var a=selList.querySelector('.lrow[data-subj="'+f.subj+'"][data-lesson="'+f.lesson+'"]'); if(a) a.classList.add('is-skyfocus'); }
@@ -424,12 +428,14 @@
     SHELF.forEach(function(s,i){
       var cx=W/2+(refCx[i]-CXr)*cs, cy=H/2+(refCy[i]-CYr)*cs; cl[i]={x:cx,y:cy};
       dotOf[i]=[];
-      for(var d=0;d<s.lessons.length;d++){
-        var isDone=d<s.done;
-        var a=d*GOLD+sfrac(i+7)*6.283;
-        var r=((isDone?CORE:HALO)+(sfrac(i*13+d)-0.5)*2*RJIT)*cs;
-        var dot={subj:i,done:isDone,hx:cx+Math.cos(a)*r,hy:cy+Math.sin(a)*r*0.96,
-                 ph:sfrac(i*37+d*7)*6.283,sp:0.5+sfrac(i*53+d*11)*0.4,baseR:(isDone?2.7:2.1)};   // deterministic phase → idempotent layout (no reshuffle on resize)
+      var cnt=s.lessons.length; if(!cnt) return;
+      var R=Math.max(22,Math.min(46,7*Math.sqrt(cnt)))*cs;          // disc radius grows with the real lesson count (capped so clusters don't merge)
+      for(var d=0;d<cnt;d++){
+        var dn=s.lessons[d].doneFlag;                               // done = the low indices → they land in the bright core
+        var ang=d*GOLD+sfrac(i+7)*6.283;
+        var rad=R*Math.sqrt((d+0.5)/cnt);                           // Vogel spiral: even fill, done(core) dissolves to to-do(halo)
+        var dot={subj:i,done:dn,hx:cx+Math.cos(ang)*rad,hy:cy+Math.sin(ang)*rad*0.96,
+                 ph:sfrac(i*37+d*7)*6.283,sp:0.5+sfrac(i*53+d*11)*0.4,baseR:(dn?2.7:2.1)};   // deterministic phase → idempotent layout
         dot.x=dot.hx; dot.y=dot.hy; dots.push(dot); dotOf[i][d]=dot;
       }
     });
@@ -631,49 +637,78 @@
     else { var btn=rows[h.subj]; if(btn && btn.getAttribute('aria-expanded')!=='true') btn.click(); else Focus.setLock(h.subj); }
   });
 
-  var booted=false; function boot(){ if(booted) return; booted=true; start(); }
-  if(document.fonts&&document.fonts.ready){ var fb=setTimeout(boot,500); document.fonts.ready.then(function(){ clearTimeout(fb); boot(); }); }
-  else boot();
-
   /* ===================================================================
-     wiring — scoped Supabase routing
+     load the real lessons → assemble each subject → build the page
      =================================================================== */
   var sbc=(window.supabase&&window.supabase.createClient)
     ? window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2') : null;
-  var PRACTICE={}, POOL={};
-  var scoped=SHELF.filter(function(s){ return s.k; });
+  var PRACTICE={};
   function go(url){ window.location.href=url; }
   function pick(a){ return a[(Math.random()*a.length)|0]; }
   function contentUrl(slug,unit,n){ var pu=PRACTICE[slug]||[]; return (pu.indexOf(unit)>=0?'/practice/':'/lesson/')+slug+'/'+unit+'/'+n; }
-  function randomLesson(slug){ var p=POOL[slug]; if(!p||!p.length) return '/browse/'+slug; var l=p[(Math.random()*p.length)|0]; return contentUrl(slug,l.u,l.n); }
-  function lessonUrl(si,li){ var s=SHELF[si]; if(!s.k) return '#'; var p=POOL[s.k]; if(p&&p.length){ var l=p[li%p.length]; return contentUrl(s.k,l.u,l.n); } return '/browse/'+s.k; }
+  function lessonUrl(si,li){ var s=SHELF[si], L=s&&s.lessons[li]; return (L&&L.url)?L.url:('/browse/'+(s?s.k:'')); }
   function launchLesson(si,li){ go(lessonUrl(si,li)); }
 
-  if(sbc && scoped.length){
-    var slugs=scoped.map(function(s){return s.k;});
-    sbc.from('subjects').select('slug, settings').in('slug',slugs).is('school_id',null).then(function(res){
-      (res.data||[]).forEach(function(r){ PRACTICE[r.slug]=(r.settings&&r.settings.practice_units)||[]; });
-      scoped.forEach(function(s){
-        sbc.from('lessons').select('lesson_number, units!inner(slug, subjects!inner(slug, school_id))')
-          .eq('status','live').is('units.subjects.school_id',null).eq('units.subjects.slug',s.k).limit(300)
-          .then(function(r2){ if(r2.data&&r2.data.length){ POOL[s.k]=r2.data.map(function(x){return {u:x.units.slug,n:x.lesson_number};});
-            // upgrade lesson links to real scoped URLs
-            var si=SHELF.indexOf(s);
-            selList.querySelectorAll('.lrow[data-subj="'+si+'"]').forEach(function(a){ a.href=lessonUrl(si,+a.getAttribute('data-lesson')); });
-          }});
-      });
-    });
+  // Supabase unreachable → curated TITLES sample so the page is never empty (links go to browse)
+  function fallback(s){
+    var t=(TITLES[s.k]||[]).slice(0,12), u={slug:'_'+s.k,name:s.n,lessons:[]};
+    t.forEach(function(e,gi){ u.lessons.push({no:gi+1,t:e.t,uslug:'_',uname:e.u||s.n,gi:gi,url:'/browse/'+s.k}); });
+    s.units=[u]; s.lessons=u.lessons; s.total=u.lessons.length; s.done=Math.round(s.m*s.total);
+    s.lessons.forEach(function(L){ L.doneFlag=L.gi<s.done; });
+  }
+  // real lessons → keep only this student's units → group by unit → flat order; done = the first round(m*total)
+  function ingest(s,rows){
+    if(s.keep) rows=rows.filter(function(r){ return s.keep.indexOf(r.units.name)>=0; });
+    else if(s.keepFn) rows=rows.filter(function(r){ return s.keepFn(r.units.name); });
+    if(!rows.length){ fallback(s); return; }
+    var byU={}, order=[];
+    rows.forEach(function(r){ var u=r.units; if(!byU[u.slug]){ byU[u.slug]={slug:u.slug,name:u.name,lessons:[]}; order.push(u.slug); } byU[u.slug].lessons.push({no:r.lesson_number,t:r.title,uslug:u.slug}); });
+    var units=order.map(function(k){ return byU[k]; });
+    if(s.keep) units.sort(function(a,b){ return s.keep.indexOf(a.name)-s.keep.indexOf(b.name); });   // option subjects: the student's chosen order
+    else units.sort(function(a,b){ return a.name<b.name?-1:(a.name>b.name?1:0); });
+    units.forEach(function(u){ u.lessons.sort(function(a,b){ return a.no-b.no; }); });
+    var flat=[]; units.forEach(function(u){ u.lessons.forEach(function(L){ L.gi=flat.length; L.uname=u.name; L.url=contentUrl(s.k,L.uslug,L.no); flat.push(L); }); });
+    s.units=units; s.lessons=flat; s.total=flat.length; s.done=Math.round(s.m*flat.length);
+    flat.forEach(function(L){ L.doneFlag=L.gi<s.done; });
   }
 
-  // lesson links navigate via their href (set above); intercept to keep SPA-style go()
-  selList.querySelectorAll('.lrow').forEach(function(a){
-    a.addEventListener('click', function(e){ if(a.getAttribute('href')&&a.getAttribute('href')!=='#'){ e.preventDefault(); go(a.getAttribute('href')); } });
-  });
+  var contUrl='/browse/english-literature-aqa';
+  function wireContinue(){     // continue card reflects where the student is up to in English Literature
+    var s=byShelf['English Literature']; if(!s||!s.lessons.length) return;
+    var L=null; for(var i=0;i<s.lessons.length;i++){ if(!s.lessons[i].doneFlag){ L=s.lessons[i]; break; } }
+    if(!L) L=s.lessons[s.lessons.length-1];
+    document.getElementById('contTtl').textContent=L.t;
+    document.getElementById('contUnit').textContent=L.uname+' · '+s.done+' of '+s.total+' lessons done';
+    document.getElementById('contBar').style.width=Math.round(s.m*100)+'%';
+    contUrl=L.url||contUrl;
+  }
+
+  function buildAll(){
+    var TD=0,TL=0; SHELF.forEach(function(s){ TD+=s.done; TL+=s.total; });
+    document.getElementById('tally').innerHTML='<b>'+TD+'</b> / '+TL+' done';
+    buildSelector(); wireContinue(); start();
+  }
+
+  function loadAll(){
+    selList.innerHTML='<div class="sel-loading">Loading your subjects…</div>';
+    if(!sbc){ STUDENT.forEach(fallback); buildAll(); return; }
+    var slugs=STUDENT.map(function(s){ return s.k; });
+    sbc.from('subjects').select('slug, settings').in('slug',slugs).is('school_id',null).then(function(res){
+      (res.data||[]).forEach(function(r){ PRACTICE[r.slug]=(r.settings&&r.settings.practice_units)||[]; });
+      var pending=STUDENT.length;
+      function fin(){ if(--pending===0) buildAll(); }
+      STUDENT.forEach(function(s){
+        sbc.from('lessons').select('lesson_number, title, units!inner(slug, name, subjects!inner(slug, school_id))')
+          .eq('status','live').is('units.subjects.school_id',null).eq('units.subjects.slug',s.k).limit(800)
+          .then(function(r2){ ingest(s,r2.data||[]); fin(); }, function(){ fallback(s); fin(); });
+      });
+    }, function(){ STUDENT.forEach(fallback); buildAll(); });
+  }
 
   function nav(id,fn){ var b=document.getElementById(id); if(b) b.addEventListener('click',function(e){e.preventDefault();fn();}); }
-  nav('contBtn', function(){ go(randomLesson('english-literature-aqa')); });
-  nav('revBtn',  function(){ var s=scoped.slice().sort(function(a,b){return a.m-b.m;})[0]; go(s?randomLesson(s.k):'/'); });
-  nav('luckyBtn',function(){ var s=pick(scoped.length?scoped:SHELF); go(s&&s.k?randomLesson(s.k):'/'); });
+  nav('contBtn', function(){ go(contUrl); });
+  nav('revBtn',  function(){ var s=SHELF.slice().sort(function(a,b){return a.m-b.m;})[0]; var L=s&&s.lessons.length?s.lessons[0]:null; go(L?L.url:'/'); });   // shakiest subject
+  nav('luckyBtn',function(){ var s=pick(SHELF); var L=s.lessons.length?pick(s.lessons):null; go(L?L.url:'/'); });
   nav('browseBtn',function(){ go('/'); });
 
   function clickable(el,fn,label){ if(!el) return; el.style.cursor='pointer'; if(label) el.title=label; el.addEventListener('click',fn); }
@@ -681,6 +716,8 @@
   clickable(document.getElementById('examChip'), function(){ go('/exams.html'); });
   clickable(document.querySelector('.avatar'), function(){ go('/'); }, 'Account');
   clickable(document.querySelector('.chip[title="Keep your streak going"]'), function(){ var rv=document.querySelector('.rev'); if(rv) rv.scrollIntoView({behavior:'smooth',block:'center'}); });
+
+  loadAll();
 })();
 </script>
 </body>
