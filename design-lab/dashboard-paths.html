@@ -227,6 +227,122 @@
   .week .wlbl{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted)}
   .week .stat{font-family:var(--font-head);font-size:.92rem;color:var(--text-secondary)}
   .week .stat b{color:var(--text-primary);font-weight:700}
+
+  /* ===== ⓘ info popover (shared) ===== */
+  .info{position:relative;display:inline-flex;flex:none}
+  .info > button{width:16px;height:16px;border-radius:50%;border:1px solid var(--border-light);background:var(--bg-card);color:var(--text-muted);
+    font-family:var(--font-head);font-style:italic;font-weight:700;font-size:.66rem;line-height:1;display:grid;place-items:center;cursor:pointer;transition:color .14s,border-color .14s}
+  .info > button:hover{color:var(--text-secondary);border-color:var(--text-muted)}
+  .info .pop{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%) translateY(-4px);width:min(280px,72vw);z-index:40;
+    background:var(--text-primary);color:#f3f1ee;font-family:var(--font-read);font-size:.78rem;line-height:1.45;padding:.7rem .8rem;border-radius:8px;box-shadow:var(--shadow-lg);
+    opacity:0;visibility:hidden;transition:opacity .16s ease,transform .2s var(--ease),visibility 0s linear .16s}
+  .info.open .pop{opacity:1;visibility:visible;transform:translateX(-50%) translateY(0);transition:opacity .16s ease,transform .2s var(--ease)}
+  .info .pop::before{content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);border:6px solid transparent;border-bottom-color:var(--text-primary)}
+
+  /* ===== Today's session ===== */
+  .today{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm);
+    padding:1.05rem 1.25rem;margin:0 0 1.1rem;display:flex;align-items:center;gap:1.2rem 1.5rem;flex-wrap:wrap}
+  .today .tmain{flex:1;min-width:260px}
+  .today .tk{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted);display:flex;align-items:center;gap:.5rem}
+  .today h2{font-family:var(--font-head);font-size:1.18rem;font-weight:700;letter-spacing:-.015em;margin:.32rem 0 .55rem}
+  .today .plan{display:flex;flex-wrap:wrap;gap:.4rem}
+  .today .chip2{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-head);font-size:.78rem;font-weight:600;color:var(--text-secondary);
+    background:var(--bg-body);border:1px solid var(--border-light);border-radius:30px;padding:.34rem .7rem}
+  .today .chip2 .d{width:7px;height:7px;border-radius:50%;background:var(--cd,var(--anchor));flex:none}
+  .today .tside{display:flex;flex-direction:column;align-items:flex-end;gap:.6rem}
+  .today .tmeta{font-family:var(--font-head);font-size:.76rem;color:var(--text-muted);text-align:right;line-height:1.5}
+  .today .tmeta b{color:var(--text-secondary);font-weight:700}
+  .today .start{display:inline-flex;align-items:center;gap:.5rem;padding:.7rem 1.3rem;border:none;border-radius:var(--r);background:var(--anchor);color:#fff;
+    font-family:var(--font-head);font-weight:700;font-size:1rem;box-shadow:var(--shadow-sm);transition:filter .18s,box-shadow .18s}
+  .today .start:hover{filter:brightness(.94);box-shadow:var(--shadow-md)}
+  .today .start svg{width:17px;height:17px}
+  @media(max-width:560px){ .today .tside{align-items:stretch;width:100%} .today .start{justify-content:center} }
+
+  /* ===== card headers (warm-up / radio) ===== */
+  .ch{display:flex;align-items:center;gap:.5rem;margin-bottom:.55rem}
+  .ch .ct{font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:-.01em}
+  .ch .ico{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;background:var(--border-lighter);color:var(--text-secondary);flex:none}
+  .ch .ico svg{width:17px;height:17px}
+
+  /* ===== Warm-up ===== */
+  .warmup{padding:1rem 1.05rem 1.1rem}
+  .warmup p{font-family:var(--font-read);font-size:.85rem;color:var(--text-secondary);margin:0 0 .85rem;line-height:1.45}
+  .warmup .mixrow{display:flex;gap:.45rem;margin-bottom:.9rem}
+  .warmup .mix{flex:1;text-align:center;background:var(--bg-body);border:1px solid var(--border-light);border-radius:var(--r);padding:.5rem .3rem}
+  .warmup .mix b{display:block;font-family:var(--font-head);font-size:1.1rem;font-weight:700;color:var(--text-primary)}
+  .warmup .mix span{font-family:var(--font-head);font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted)}
+
+  /* ===== Revision Radio ===== */
+  .radio{padding:1rem 1.05rem 1.05rem}
+  .radio .stand{font-family:var(--font-read);font-size:.78rem;color:var(--text-muted);margin:-.2rem 0 .8rem;line-height:1.4}
+  .radio .np{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
+  .radio .art{width:50px;height:50px;border-radius:8px;flex:none;display:grid;place-items:center;color:#fff;position:relative;overflow:hidden;
+    background:var(--np,var(--anchor))}
+  .radio .art svg{width:22px;height:22px;opacity:.92}
+  .radio .npmeta{min-width:0;flex:1}
+  .radio .npsub{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.08em;font-size:.6rem;font-weight:700;color:var(--text-muted)}
+  .radio .nptitle{font-family:var(--font-read);font-weight:600;font-size:.92rem;line-height:1.25;color:var(--text-primary);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:.1rem}
+  .radio .scrub{height:4px;border-radius:3px;background:var(--border-lighter);overflow:hidden;margin:.2rem 0 .35rem;cursor:pointer}
+  .radio .scrub i{display:block;height:100%;width:0%;background:var(--anchor);border-radius:3px}
+  .radio .time{display:flex;justify-content:space-between;font-family:var(--font-head);font-size:.66rem;color:var(--text-muted);font-variant-numeric:tabular-nums;margin-bottom:.5rem}
+  .radio .ctrls{display:flex;align-items:center;justify-content:center;gap:.9rem;margin-bottom:.85rem}
+  .radio .ctrls button{background:transparent;border:0;color:var(--text-secondary);cursor:pointer;display:grid;place-items:center;border-radius:50%;transition:color .14s,background .14s}
+  .radio .ctrls button:hover{color:var(--text-primary);background:var(--wash)}
+  .radio .ctrls .sk{width:34px;height:34px} .radio .ctrls .sk svg{width:18px;height:18px}
+  .radio .ctrls .pp{width:48px;height:48px;background:var(--anchor);color:#fff;box-shadow:var(--shadow-sm)} .radio .ctrls .pp:hover{background:var(--anchor);filter:brightness(.94)} .radio .ctrls .pp svg{width:22px;height:22px}
+  .radio .qhead{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--border-lighter);padding-top:.6rem;margin-bottom:.3rem}
+  .radio .qhead .ql{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.09em;font-size:.6rem;font-weight:700;color:var(--text-muted)}
+  .radio .qhead a{font-family:var(--font-head);font-size:.72rem;font-weight:600;color:var(--anchor);cursor:pointer;text-decoration:none}
+  .radio .qrow{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:.55rem;padding:.4rem .3rem;border-radius:var(--r);cursor:pointer;transition:background .14s}
+  .radio .qrow:hover{background:var(--wash)}
+  .radio .qrow .qd{width:8px;height:8px;border-radius:50%;background:var(--qd,var(--anchor));opacity:.8}
+  .radio .qrow .qt{font-family:var(--font-read);font-size:.8rem;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .radio .qrow .qt small{color:var(--text-muted);font-family:var(--font-head);font-size:.66rem}
+  .radio.playing .art::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 120%,rgba(255,255,255,.32),transparent 60%);animation:pl 2.4s ease-in-out infinite}
+  @keyframes pl{0%,100%{opacity:.4}50%{opacity:.9}}
+
+  /* ===== Weak spots strip ===== */
+  .weakspots{background:var(--bg-body);border:1px solid var(--border-light);border-radius:var(--r);padding:.7rem .85rem;margin:0 .15rem 1rem;
+    display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+  .weakspots .wl{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.09em;font-size:.62rem;font-weight:700;color:var(--text-muted);display:inline-flex;align-items:center;gap:.4rem}
+  .weakspots .wl svg{width:14px;height:14px;color:var(--weak,#a16e63)}
+  .weakspots .ws{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--font-head);font-size:.78rem;font-weight:600;color:var(--text-secondary);
+    background:var(--bg-card);border:1px solid var(--border-light);border-radius:30px;padding:.32rem .7rem;cursor:pointer;transition:border-color .14s,color .14s}
+  .weakspots .ws:hover{border-color:var(--text-muted);color:var(--text-primary)}
+  .weakspots .ws .d{width:7px;height:7px;border-radius:50%;background:var(--cd,var(--anchor))}
+
+  /* ===== Warm-up quiz modal ===== */
+  .qmodal{position:fixed;inset:0;z-index:60;background:rgba(29,28,26,.55);backdrop-filter:blur(3px);display:grid;place-items:center;padding:1rem;
+    opacity:0;visibility:hidden;transition:opacity .2s ease,visibility 0s linear .2s}
+  .qmodal.open{opacity:1;visibility:visible;transition:opacity .2s ease}
+  .qcard{width:min(560px,96vw);background:var(--bg-card);border:1px solid var(--border-light);border-radius:12px;box-shadow:var(--shadow-lg);padding:1.3rem 1.4rem 1.4rem;
+    transform:translateY(10px);transition:transform .26s var(--ease)}
+  .qmodal.open .qcard{transform:none}
+  .qcard .qtop{display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem}
+  .qcard .qprog{font-family:var(--font-head);font-size:.72rem;font-weight:700;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .qcard .qx{background:transparent;border:0;color:var(--text-muted);cursor:pointer;font-size:1.1rem;line-height:1}
+  .qcard .qbar{height:4px;border-radius:3px;background:var(--border-lighter);overflow:hidden;margin-bottom:1rem}
+  .qcard .qbar i{display:block;height:100%;background:var(--anchor);border-radius:3px;transition:width .3s var(--ease)}
+  .qcard .qtag{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.08em;font-size:.62rem;font-weight:700;margin-bottom:.5rem;display:inline-flex;align-items:center;gap:.4rem}
+  .qcard .qtag .d{width:8px;height:8px;border-radius:50%;background:var(--cd,var(--anchor))}
+  .qcard .qq{font-family:var(--font-read);font-size:1.12rem;font-weight:600;line-height:1.4;color:var(--text-primary);margin-bottom:1rem}
+  .qcard .qopts{display:flex;flex-direction:column;gap:.5rem}
+  .qcard .qopt{text-align:left;font-family:var(--font-read);font-size:.92rem;color:var(--text-primary);background:var(--bg-body);border:1.5px solid var(--border-light);
+    border-radius:var(--r);padding:.7rem .85rem;cursor:pointer;transition:border-color .14s,background .14s}
+  .qcard .qopt:hover{border-color:var(--text-muted)}
+  .qcard .qopt.correct{border-color:var(--good,#5f8c6d);background:color-mix(in srgb,var(--good,#5f8c6d) 12%,var(--bg-card))}
+  .qcard .qopt.wrong{border-color:var(--weak,#a16e63);background:color-mix(in srgb,var(--weak,#a16e63) 12%,var(--bg-card))}
+  .qcard .qopt[disabled]{cursor:default}
+  .qcard .qreveal{font-family:var(--font-read);font-size:.95rem;color:var(--text-secondary);background:var(--bg-body);border:1px solid var(--border-light);border-radius:var(--r);padding:.85rem;line-height:1.5}
+  .qcard .qfoot{display:flex;justify-content:space-between;align-items:center;margin-top:1.1rem;gap:.6rem}
+  .qcard .qskip{background:transparent;border:0;font-family:var(--font-head);font-size:.82rem;font-weight:600;color:var(--text-muted);cursor:pointer}
+  .qcard .qnext{display:inline-flex;align-items:center;gap:.45rem;padding:.6rem 1.15rem;border:none;border-radius:var(--r);background:var(--anchor);color:#fff;
+    font-family:var(--font-head);font-weight:600;font-size:.92rem;cursor:pointer;box-shadow:var(--shadow-sm)}
+  .qcard .qnext[disabled]{opacity:.4;cursor:default}
+  .qcard .qdone{text-align:center;padding:1rem 0 .4rem}
+  .qcard .qdone .score{font-family:var(--font-head);font-size:2.4rem;font-weight:800;letter-spacing:-.02em}
+  .qcard .qdone p{font-family:var(--font-read);color:var(--text-secondary);margin:.3rem 0 1.1rem}
 </style>
 </head>
 <body>
@@ -244,11 +360,14 @@
   <main class="wrap">
     <div class="hello">
       <h1>Welcome back, Sam.</h1>
-      <p>Pick a subject, choose a topic, then climb its path — one lesson at a time.</p>
+      <p>Here's your revision, all in one place.</p>
     </div>
 
+    <!-- TODAY'S SESSION — the spine: what to do right now -->
+    <section class="today" id="todaySession"></section>
+
     <div class="layout">
-      <!-- LEFT RAIL -->
+      <!-- LEFT RAIL — the "do" actions -->
       <div class="col-left">
         <section class="card cont">
           <div class="lbl">Pick up where you left off</div>
@@ -264,16 +383,11 @@
           <button class="btn" id="contBtn">Continue on the path <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg></button>
         </section>
 
-        <section class="card nav">
-          <div class="nav-head">
-            <span class="kicker">Your subjects</span>
-            <span class="tally" id="tally">—</span>
-          </div>
-          <div class="nav-list" id="navList"><div class="nav-loading">Loading your subjects…</div></div>
-        </section>
+        <section class="card warmup" id="warmup"></section>
+        <section class="card radio" id="radio"></section>
       </div>
 
-      <!-- STAGE -->
+      <!-- STAGE — Explore + Progress + Weak spots -->
       <section class="card stage">
         <div class="crumbs" id="crumbs">
           <a id="crumbHome">All subjects</a>
@@ -292,6 +406,9 @@
       <span class="stat">best run <b>4 days</b></span>
     </div>
   </main>
+
+  <!-- Warm-up quiz modal -->
+  <div class="qmodal" id="qmodal" aria-hidden="true"><div class="qcard" id="qcard"></div></div>
 
   <div class="toast" id="toast" aria-live="polite"></div>
 
@@ -407,8 +524,28 @@
     assemble(s,units);
   }
 
+  var WARMUP=[];   // interleaved pool of real KC + flashcard questions for the warm-up
+  function ingestWarmup(rows){
+    var pool=[];
+    (rows||[]).forEach(function(r){
+      var subj=(r.units&&r.units.subjects&&r.units.subjects.slug)||'', sm=bySlug[subj], sn=(sm&&sm.n)||'', sw=(byShelf[sn]&&byShelf[sn].swatch)||'#888';
+      (r.knowledge_checks||[]).forEach(function(k){
+        var qq=k&&(k.q||k.question), opts=k&&k.options;
+        if(qq && Array.isArray(opts) && opts.length && typeof k.correct==='number')
+          pool.push({type:'check',subj:sn,sw:sw,q:qq,options:opts,correct:k.correct,lesson:r.title}); });
+      (r.flashcard_questions||[]).forEach(function(fc){
+        var qq=fc&&(fc.q||fc.question||fc.front), aa=fc&&(fc.a||fc.answer||fc.back);
+        if(qq&&aa) pool.push({type:'card',subj:sn,sw:sw,q:qq,a:aa,lesson:r.title}); });
+    });
+    // interleave: shuffle deterministically-ish by walking subjects round-robin
+    pool.sort(function(a,b){ return (a.subj+a.q).length-(b.subj+b.q).length; });
+    var bys={}; pool.forEach(function(p){ (bys[p.subj]=bys[p.subj]||[]).push(p); });
+    var keys=Object.keys(bys), out=[], i=0;
+    while(out.length<pool.length){ var k=keys[i%keys.length]; if(bys[k].length) out.push(bys[k].shift()); i++; if(i>pool.length+keys.length) break; }
+    WARMUP=out;
+  }
   function loadAll(){
-    var done=0, total=2+STUDENT.length;
+    var done=0, total=3+STUDENT.length;
     function step(){ if(++done>=total) buildPage(); }
     // backdrops manifest
     fetch('_path_backdrops.json').then(function(r){ return r.json(); }).then(function(j){ BG=j||{}; step(); }, step);
@@ -416,6 +553,10 @@
     sbc.from('subjects').select('slug, settings').in('slug',STUDENT.map(function(s){return s.k;})).is('school_id',null).then(function(res){
       (res.data||[]).forEach(function(r){ PRACTICE[r.slug]=(r.settings&&r.settings.practice_units)||[]; }); step();
     }, step);
+    // warm-up question pool (a sample across SAM's subjects)
+    sbc.from('lessons').select('title, knowledge_checks, flashcard_questions, units!inner(name, subjects!inner(slug, school_id))')
+      .eq('status','live').is('units.subjects.school_id',null).in('units.subjects.slug',STUDENT.map(function(s){return s.k;})).limit(60)
+      .then(function(r){ ingestWarmup(r.data); step(); }, step);
     STUDENT.forEach(function(s){
       sbc.from('lessons').select('lesson_number, title, units!inner(slug, name, subjects!inner(slug, school_id))')
         .eq('status','live').is('units.subjects.school_id',null).eq('units.subjects.slug',s.k).limit(900)
@@ -426,8 +567,9 @@
   /* ===================================================================
      NAVIGATOR (left rail accordion)
      =================================================================== */
-  var navList=document.getElementById('navList');
+  var navList=document.getElementById('navList');   // optional left-rail accordion (removed in the feature layout)
   function buildNav(){
+    if(!navList) return;
     navList.innerHTML='';
     SHELF.forEach(function(s,i){
       var btn=document.createElement('button');
@@ -454,11 +596,13 @@
     });
   }
   function navHighlight(si,ui){
+    if(!navList) return;
     [].slice.call(navList.querySelectorAll('.srow')).forEach(function(r,i){ r.classList.toggle('is-active', i===si && ui==null); });
     [].slice.call(navList.querySelectorAll('.urow')).forEach(function(u){
       u.classList.toggle('is-active', (+u.getAttribute('data-subj'))===si && (+u.getAttribute('data-unit'))===ui); });
   }
   function navExpand(si){
+    if(!navList) return;
     [].slice.call(navList.querySelectorAll('.srow')).forEach(function(r,i){ r.setAttribute('aria-expanded', i===si?'true':'false'); });
   }
 
@@ -493,6 +637,16 @@
     var TD=0,TL=0; SHELF.forEach(function(s){ TD+=s.done; TL+=s.total; });
     head.innerHTML='<h2>Your progress</h2><span class="hint">'+TD+' of '+TL+' lessons done · pick a subject to dive in</span>';
     scSubjects.appendChild(head);
+    // Weak spots — topics you've started but are shaky on (approximated by mastery; real version uses KC scores)
+    var weak=weakSpots(4);
+    if(weak.length){
+      var ws=document.createElement('div'); ws.className='weakspots';
+      ws.innerHTML='<span class="wl"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>Needs attention</span>';
+      weak.forEach(function(w){ var b=document.createElement('button'); b.className='ws'; b.style.setProperty('--cd',w.swatch);
+        b.innerHTML='<span class="d"></span>'+esc(w.name)+' · '+w.pct+'%';
+        b.addEventListener('click',function(){ showPath(w.si,w.ui); }); ws.appendChild(b); });
+      scSubjects.appendChild(ws);
+    }
     var grid=document.createElement('div'); grid.className='subjgrid';
     SHELF.forEach(function(s,i){
       var pct=s.total?Math.round(s.done/s.total*100):0;
@@ -678,10 +832,154 @@
     document.getElementById('contBtn').addEventListener('click',function(){ navExpand(si); showPath(si,ui); });
   }
 
+  /* ===================================================================
+     FEATURE TILES — Today's session · Warm-up · Revision Radio · Weak spots
+     =================================================================== */
+  var ICON_WARM='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z"/></svg>';
+  var ICON_RADIO='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 16.2a6 6 0 0 0 0-8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2"/></svg>';
+  var ICON_WAVE='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="9.5" width="2.4" height="5" rx="1.2"/><rect x="9" y="5.5" width="2.4" height="13" rx="1.2"/><rect x="14" y="8" width="2.4" height="8" rx="1.2"/><rect x="18.6" y="10.5" width="2.4" height="3" rx="1.2"/></svg>';
+  var ICON_PAUSE='<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2"/><rect x="14" y="5" width="3.6" height="14" rx="1.2"/></svg>';
+  var ICON_PREV='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h2v14H7zM20 5v14l-10-7z"/></svg>';
+  var ICON_NEXT='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M15 5h2v14h-2zM4 5l10 7-10 7z"/></svg>';
+  var ARROW='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h14"/><path d="M12.5 5.5 19 12l-6.5 6.5"/></svg>';
+  var RADIO_BLURB='Press play and Revision Radio streams short audio from your lessons — it starts with whatever you’re working on, then quietly brings back the topics that are starting to slip. No playlists to build, no decisions to make. Perfect for the bus, the walk home, or whenever reading feels like too much.';
+
+  /* ⓘ popovers */
+  function infoHTML(t){ return '<span class="info"><button type="button" aria-label="What’s this?">i</button><span class="pop">'+esc(t)+'</span></span>'; }
+  function wireInfo(scope){ [].slice.call((scope||document).querySelectorAll('.info')).forEach(function(inf){
+    inf.querySelector('button').addEventListener('click',function(e){ e.stopPropagation(); var open=inf.classList.contains('open');
+      [].slice.call(document.querySelectorAll('.info.open')).forEach(function(o){o.classList.remove('open');}); if(!open) inf.classList.add('open'); }); }); }
+  document.addEventListener('click',function(){ [].slice.call(document.querySelectorAll('.info.open')).forEach(function(o){o.classList.remove('open');}); });
+
+  /* shared helpers */
+  function nextLesson(s){ if(!s||!s.lessons.length) return null; var si=SHELF.indexOf(s), L=null;
+    for(var i=0;i<s.lessons.length;i++){ if(!s.lessons[i].doneFlag){ L=s.lessons[i]; break; } }
+    if(!L) L=s.lessons[s.lessons.length-1];
+    var ui=0; s.units.forEach(function(u,k){ if(u.lessons.indexOf(L)>=0) ui=k; });
+    return {L:L,si:si,ui:ui,s:s}; }
+  function weakSpots(n){ var arr=[];
+    SHELF.forEach(function(s,si){ s.units.forEach(function(u,ui){
+      if(u.lessons.length>=2 && u.frac>0 && u.frac<0.7) arr.push({si:si,ui:ui,name:u.name,swatch:s.swatch,frac:u.frac,pct:Math.round(u.frac*100)}); }); });
+    arr.sort(function(a,b){ return a.frac-b.frac; }); return arr.slice(0,n); }
+
+  /* ---- Today's session ---- */
+  function buildToday(){
+    var el=document.getElementById('todaySession'); if(!el) return;
+    var items=[];
+    var cont=nextLesson(byShelf['English Literature']);
+    if(cont) items.push({d:cont.s.swatch,t:cont.s.n+' · '+cont.L.t,go:function(){ showPath(cont.si,cont.ui); }});
+    var w=weakSpots(1)[0];
+    if(w){ var u=SHELF[w.si].units[w.ui], L=u.lessons.filter(function(L){return !L.doneFlag;})[0]||u.lessons[0];
+      items.push({d:w.swatch,t:SHELF[w.si].n+' · '+L.t,go:function(){ showPath(w.si,w.ui); }}); }
+    items.push({d:'var(--good,#5f8c6d)',t:'14 warm-up questions',go:openWarmup});
+    var first=new Date('2027-05-10T09:00:00'), days=Math.max(0,Math.ceil((first-new Date())/86400000));
+    el.innerHTML='<div class="tmain"><div class="tk">Today’s session · ~35 min</div><h2>Here’s a plan to keep you on track</h2><div class="plan"></div></div>'+
+      '<div class="tside"><div class="tmeta"><b>'+days+' days</b> to your first exam</div>'+
+      '<button class="start" id="startToday">Start session '+ARROW+'</button></div>';
+    var plan=el.querySelector('.plan');
+    items.forEach(function(it){ var c=document.createElement('button'); c.className='chip2'; c.style.setProperty('--cd',it.d);
+      c.innerHTML='<span class="d"></span>'+esc(it.t); c.addEventListener('click',it.go); plan.appendChild(c); });
+    el.querySelector('#startToday').addEventListener('click',function(){ if(items[0]){ items[0].go(); toast('Starting today’s session — first up: <b>'+esc(items[0].t)+'</b>'); } });
+  }
+
+  /* ---- Warm-up ---- */
+  function buildWarmup(){
+    var el=document.getElementById('warmup'); if(!el) return;
+    el.innerHTML='<div class="ch"><span class="ico">'+ICON_WARM+'</span><span class="ct">Warm-up</span>'+
+      infoHTML('A quick mix of flashcards and knowledge-check questions, interleaved across your subjects — the shaky ones come round first. A couple of minutes to get your brain in gear before you dig in.')+'</div>'+
+      '<p>Ten quick questions across your subjects to get going.</p>'+
+      '<div class="mixrow"><div class="mix"><b>6</b><span>Quick checks</span></div><div class="mix"><b>4</b><span>Flashcards</span></div></div>'+
+      '<button class="btn" id="warmBtn">Start warm-up '+ARROW+'</button>';
+    el.querySelector('#warmBtn').addEventListener('click',openWarmup); wireInfo(el);
+  }
+  function openWarmup(){
+    var checks=WARMUP.filter(function(q){return q.type==='check';}), cards=WARMUP.filter(function(q){return q.type==='card';});
+    if(!checks.length && !cards.length){ toast('Warm-up questions are still loading…'); return; }
+    var deck=[], ci=0, fi=0;
+    for(var n=0;n<10;n++){ if((n===2||n===4||n===7||n===9) && fi<cards.length) deck.push(cards[fi++]); else if(ci<checks.length) deck.push(checks[ci++]); else if(fi<cards.length) deck.push(cards[fi++]); }
+    if(!deck.length){ toast('Warm-up questions are still loading…'); return; } runQuiz(deck);
+  }
+  function praise(p){ return p>=80?'Brain officially warmed up.':p>=50?'Nice — a few of those to firm up.':'Good start — these’ll be your warm-up regulars.'; }
+  function runQuiz(deck){
+    var modal=document.getElementById('qmodal'), card=document.getElementById('qcard'), idx=0, score=0;
+    function close(){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); }
+    function render(){
+      if(idx>=deck.length){ done(); return; }
+      var q=deck[idx], pct=Math.round(idx/deck.length*100);
+      var h='<div class="qtop"><span class="qprog">Question '+(idx+1)+' of '+deck.length+'</span><button class="qx" aria-label="Close">×</button></div>'+
+        '<div class="qbar"><i style="width:'+pct+'%"></i></div>'+
+        '<div class="qtag" style="--cd:'+q.sw+';color:'+q.sw+'"><span class="d"></span>'+esc(q.subj)+' · '+(q.type==='card'?'Flashcard':'Quick check')+'</div>'+
+        '<div class="qq">'+esc(q.q)+'</div>'+
+        (q.type==='check'?'<div class="qopts"></div>':'<div class="qreveal" id="qrev" hidden></div>')+
+        '<div class="qfoot"><button class="qskip">Skip</button><button class="qnext" disabled>Next</button></div>';
+      card.innerHTML=h;
+      card.querySelector('.qx').onclick=close;
+      var nextBtn=card.querySelector('.qnext'); card.querySelector('.qskip').onclick=function(){ idx++; render(); };
+      if(q.type==='check'){
+        var opts=card.querySelector('.qopts'), answered=false;
+        q.options.forEach(function(o,oi){ var b=document.createElement('button'); b.className='qopt'; b.textContent=o;
+          b.onclick=function(){ if(answered) return; answered=true;
+            [].slice.call(opts.children).forEach(function(x,xi){ x.disabled=true; if(xi===q.correct) x.classList.add('correct'); });
+            if(oi!==q.correct) b.classList.add('wrong'); else score++;
+            nextBtn.disabled=false; nextBtn.textContent=(idx===deck.length-1?'Finish':'Next'); };
+          opts.appendChild(b); });
+        nextBtn.onclick=function(){ if(nextBtn.disabled) return; idx++; render(); };
+      } else {
+        nextBtn.disabled=false; nextBtn.textContent='Show answer'; var revealed=false, rev=card.querySelector('#qrev');
+        nextBtn.onclick=function(){ if(!revealed){ revealed=true; rev.textContent=q.a; rev.hidden=false; score++; nextBtn.textContent=(idx===deck.length-1?'Finish':'Next'); } else { idx++; render(); } };
+      }
+    }
+    function done(){ var pct=Math.round(score/deck.length*100);
+      card.innerHTML='<div class="qdone"><div class="score">'+score+'/'+deck.length+'</div><p>'+praise(pct)+'</p><button class="qnext" id="qclose">Done</button></div>';
+      card.querySelector('#qclose').onclick=close; }
+    modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); render();
+  }
+
+  /* ---- Revision Radio ---- */
+  var RADIO=null, radioTimer=null;
+  function fmt(s){ s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+('0'+(s%60)).slice(-2); }
+  function radioQueue(cont){ var out=[];
+    weakSpots(2).forEach(function(w){ var s=SHELF[w.si], u=s.units[w.ui], L=u.lessons.filter(function(L){return L.doneFlag;})[0]||u.lessons[0]; out.push({subj:s.n,sw:s.swatch,title:L.t}); });
+    SHELF.forEach(function(s){ if(cont&&s===cont.s) return; var d=s.lessons.filter(function(L){return L.doneFlag;}); if(d.length && out.length<5){ var L=d[Math.floor(d.length*0.4)]; out.push({subj:s.n,sw:s.swatch,title:L.t}); } });
+    return out.slice(0,5); }
+  function buildRadio(){
+    var el=document.getElementById('radio'); if(!el) return;
+    var cont=nextLesson(byShelf['English Literature']);
+    RADIO={ list:[{subj:cont.s.n,sw:cont.s.swatch,title:cont.L.t}].concat(radioQueue(cont)), idx:0, playing:false, pos:0, dur:630 };
+    el.innerHTML='<div class="ch"><span class="ico">'+ICON_RADIO+'</span><span class="ct">Revision Radio</span>'+infoHTML(RADIO_BLURB)+'</div>'+
+      '<div class="stand">Starts where you left off, then refreshes what’s fading.</div>'+
+      '<div class="np"><span class="art" id="rArt">'+ICON_WAVE+'</span><span class="npmeta"><span class="npsub" id="rSub"></span><span class="nptitle" id="rTitle"></span></span></div>'+
+      '<div class="scrub" id="rScrub"><i id="rFill"></i></div><div class="time"><span id="rCur">0:00</span><span id="rDur">0:00</span></div>'+
+      '<div class="ctrls"><button class="sk" id="rPrev" aria-label="Previous">'+ICON_PREV+'</button><button class="pp" id="rPlay" aria-label="Play">'+PLAY+'</button><button class="sk" id="rNext" aria-label="Next">'+ICON_NEXT+'</button></div>'+
+      '<div class="qhead"><span class="ql">Up next · topics worth a refresh</span><a id="rBrowse">Browse</a></div><div id="rQueue"></div>';
+    wireInfo(el);
+    el.querySelector('#rPlay').onclick=radioToggle;
+    el.querySelector('#rPrev').onclick=function(){ radioGo(RADIO.idx-1); };
+    el.querySelector('#rNext').onclick=function(){ radioGo(RADIO.idx+1); };
+    el.querySelector('#rBrowse').onclick=function(){ showSubjects(); window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'}); toast('Browse episodes — pick any subject → topic'); };
+    el.querySelector('#rScrub').onclick=function(e){ var r=this.getBoundingClientRect(); RADIO.pos=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*RADIO.dur; radioPaint(); };
+    radioLoad(0);
+  }
+  function radioLoad(i){ if(!RADIO) return; RADIO.idx=Math.max(0,Math.min(RADIO.list.length-1,i)); var t=RADIO.list[RADIO.idx];
+    RADIO.pos=0; RADIO.dur=600+ (t.title.length%9)*11;
+    var el=document.getElementById('radio'); el.querySelector('#rSub').textContent=t.subj; el.querySelector('#rTitle').textContent=t.title;
+    el.querySelector('#rArt').style.setProperty('--np',t.sw); renderQueue(); radioPaint(); }
+  function radioPaint(){ var el=document.getElementById('radio'); if(!el||!RADIO) return;
+    el.querySelector('#rFill').style.width=(RADIO.pos/RADIO.dur*100)+'%';
+    el.querySelector('#rCur').textContent=fmt(RADIO.pos); el.querySelector('#rDur').textContent=fmt(RADIO.dur);
+    el.querySelector('#rPlay').innerHTML=RADIO.playing?ICON_PAUSE:PLAY; el.classList.toggle('playing',RADIO.playing); }
+  function radioTick(){ if(!RADIO||!RADIO.playing) return; RADIO.pos++; if(RADIO.pos>=RADIO.dur){ radioGo(RADIO.idx+1); return; } radioPaint(); }
+  function radioToggle(){ if(!RADIO) return; RADIO.playing=!RADIO.playing;
+    if(RADIO.playing){ if(!radioTimer) radioTimer=setInterval(radioTick,1000); toast('▶ Revision Radio — <b>'+esc(RADIO.list[RADIO.idx].subj)+'</b>'); } radioPaint(); }
+  function radioGo(i){ if(!RADIO) return; if(i<0)i=0; if(i>=RADIO.list.length){ RADIO.playing=false; i=RADIO.list.length-1; } radioLoad(i); radioPaint(); }
+  function renderQueue(){ var el=document.getElementById('radio'); if(!el||!RADIO) return; var q=el.querySelector('#rQueue'); q.innerHTML='';
+    RADIO.list.forEach(function(t,i){ if(i<=RADIO.idx) return; var row=document.createElement('div'); row.className='qrow'; row.style.setProperty('--qd',t.sw);
+      row.innerHTML='<span class="qd"></span><span class="qt">'+esc(t.title)+' <small>· '+esc(t.subj)+'</small></span>';
+      row.onclick=function(){ radioGo(i); if(!RADIO.playing) radioToggle(); }; q.appendChild(row); });
+    if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem">That’s the end of today’s queue.</div>'; }
+
   function buildPage(){
-    var TD=0,TL=0; SHELF.forEach(function(s){ TD+=s.done; TL+=s.total; });
-    document.getElementById('tally').innerHTML='<b>'+TD+'</b> / '+TL+' done';
-    buildNav(); wireContinue(); showSubjects();
+    wireContinue(); buildToday(); buildWarmup(); buildRadio(); showSubjects();
   }
 
   document.getElementById('crumbHome').addEventListener('click',showSubjects);
