@@ -332,20 +332,21 @@
   var BG={};   // manifest: "subjectKey/unitSlug" -> {file,accent,name}
   var bgOk={}; // cache of which resolved urls actually load (file -> bool)
   function bgBase(si,ui){ var key=SHELF[si].k+'/'+SHELF[si].units[ui].slug, m=BG[key]; return m?('assets/'+m.file):null; }
-  // resolve the best available backdrop for (base file, desired stage): probe staged file, fall back to base.
-  // cb(url, stageUsed) — stageUsed is '' when we fell back to the base sketch (so labels stay honest).
+  function probeImg(url, cb){ if(!url) return cb(false);
+    if(bgOk[url]===true) return cb(true); if(bgOk[url]===false) return cb(false);
+    var im=new Image(); im.onload=function(){ bgOk[url]=true; cb(true); }; im.onerror=function(){ bgOk[url]=false; cb(false); }; im.src=url; }
+  // resolve the best available backdrop for (base file, desired stage). cb(url, stageUsed):
+  // stageUsed is '' when we fell back to the base sketch; url is null when no art exists at all (clean blank, no 404).
   function resolveBg(baseUrl, stage, cb){
     if(!baseUrl){ cb(null,''); return; }
-    if(!stage){ cb(baseUrl,''); return; }
-    var staged=baseUrl.replace(/\.png$/i,'-'+stage+'.png');
-    if(bgOk[staged]===true) return cb(staged,stage);
-    if(bgOk[staged]===false) return cb(baseUrl,'');
-    var im=new Image();
-    im.onload=function(){ bgOk[staged]=true; cb(staged,stage); };
-    im.onerror=function(){ bgOk[staged]=false; cb(baseUrl,''); };
-    im.src=staged;
+    var staged = stage ? baseUrl.replace(/\.png$/i,'-'+stage+'.png') : baseUrl;
+    probeImg(staged, function(ok){
+      if(ok) return cb(staged, stage||'');
+      if(!stage) return cb(null,'');                          // base sketch itself missing → no backdrop yet
+      probeImg(baseUrl, function(ok2){ cb(ok2?baseUrl:null, ''); });   // staged missing → fall to base sketch
+    });
   }
-  function stageExists(baseUrl, stage, cb){ if(!stage) return cb(true); resolveBg(baseUrl, stage, function(u,used){ cb(!!used); }); }
+  function stageExists(baseUrl, stage, cb){ if(!stage) return cb(true); resolveBg(baseUrl, stage, function(u,used){ cb(used===stage); }); }
 
   /* ---------- toast ---------- */
   var toastEl=document.getElementById('toast'), toastT;
