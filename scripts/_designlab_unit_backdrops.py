@@ -123,6 +123,12 @@ def main():
                 continue
             motifs = MOTIFS.get(key) or fallback_motifs(u)
             prompt = sketch_prompt(motifs, word, hexc)
+            # Religious-sensitivity guard: many faiths forbid figural depiction of prophets (and Islamic
+            # art is aniconic). Keep RE backdrops to symbols, architecture and objects only — no people.
+            if skey == "religious-studies-aqa":
+                prompt += (" IMPORTANT religious-sensitivity rule: use ONLY symbols, architecture and objects — "
+                           "absolutely NO human figures, NO faces, and NO depiction of any prophet, deity or "
+                           "religious person (aniconic). Empty crosses, not crucified figures.")
             ok = False
             for model in ("gpt-image-2", "gpt-image-1"):
                 try:

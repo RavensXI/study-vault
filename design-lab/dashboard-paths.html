@@ -188,6 +188,9 @@
   .pstage.haspaper .node .lt{text-shadow:0 0 3px var(--bg-body),0 0 6px var(--bg-body),0 0 11px var(--bg-body),0 0 11px var(--bg-body)}
   .node.t-right .lt{left:calc(50% + 34px);text-align:left}
   .node.t-left .lt{right:calc(50% + 34px);text-align:right}
+  /* the big "up next" node is 62px — push its label clear so it isn't cramped against the play button */
+  .node.current.t-right .lt{left:calc(50% + 47px)}
+  .node.current.t-left .lt{right:calc(50% + 47px)}
   .node.done .dot{width:46px;height:46px;background:var(--acc-mute);color:#fff;box-shadow:var(--shadow-sm)}
   .node.done .dot svg{width:22px;height:22px}
   .node.done .lt{color:var(--text-secondary)}
@@ -625,14 +628,17 @@
 
   function renderPath(si,ui){
     var s=SHELF[si], u=s.units[ui], host=document.getElementById('phost'); host.innerHTML='';
-    var W=Math.min(host.clientWidth||520,520), cx=W/2, amp=Math.min(60,(W-280)/2), vGap=94, footPad=30, topPad=46;
-    var n=u.lessons.length, H=topPad+footPad+n*vGap;
-    function Y(yb){ return H-footPad-yb; }   // lesson 1 at the BOTTOM; climb up
+    var W=Math.min(host.clientWidth||520,520), cx=W/2, amp=Math.min(60,(W-280)/2), topPad=58, footPad=72;
+    var n=u.lessons.length, minGap=94, backdropH=Math.round(W*1.5);
+    // short units stretch so their single backdrop shows in full (no cut-off); long units tile as before
+    var H=Math.max(topPad+footPad+(n-1)*minGap, backdropH);
+    var gap=(n>1)?(H-topPad-footPad)/(n-1):0;
+    function nodeTop(j){ return n>1 ? (H-footPad-j*gap) : Math.round(H/2); }   // lesson 1 at the BOTTOM; climb up
     var pstage=document.createElement('div'); pstage.className='pstage'; pstage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto'; host.appendChild(pstage);
     var bgA=document.createElement('div'), bgB=document.createElement('div'); bgA.className='pbg'; bgB.className='pbg';
     pstage.appendChild(bgA); pstage.appendChild(bgB); pstage._bg=[bgA,bgB]; pstage._bgActive=-1;
     var conn=E('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1'; pstage.appendChild(conn);
-    var pos=u.lessons.map(function(L,j){ return {x:cx+Math.sin(j*0.85)*amp, top:Y(topPad*0.4+j*vGap)}; });
+    var pos=u.lessons.map(function(L,j){ return {x:cx+Math.sin(j*0.85)*amp, top:nodeTop(j)}; });
     function seg(a,b,stroke,wd,op,dash){ if(b<=a) return; var d='M '+pos[a].x.toFixed(1)+' '+pos[a].top.toFixed(1);
       for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],my=(p0.top+p1.top)/2; d+=' C '+p0.x.toFixed(1)+' '+my.toFixed(1)+' '+p1.x.toFixed(1)+' '+my.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.top.toFixed(1); }
       var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
