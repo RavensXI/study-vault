@@ -104,7 +104,8 @@
   .nav-loading{padding:1.1rem .55rem;font-family:var(--font-head);font-size:.84rem;color:var(--text-muted)}
 
   /* ===== stage (right) ===== */
-  .stage{position:relative;min-height:620px;overflow:hidden}
+  .stage{position:relative;min-height:620px}
+  .screen{overflow:hidden}   /* clip the entrance slide, not the stage (keeps the sticky crumbs in flow) */
   .crumbs{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;padding:.95rem 1.15rem;border-bottom:1px solid var(--border-lighter);
     position:sticky;top:64px;background:color-mix(in srgb,var(--bg-card) 92%,transparent);backdrop-filter:blur(6px);z-index:8;min-height:48px}
   .crumbs a,.crumbs span{font-family:var(--font-head);font-size:.82rem;font-weight:600;color:var(--text-muted);text-decoration:none}
@@ -159,7 +160,7 @@
   .topictile .pm b{color:var(--text-secondary);font-weight:700}
 
   /* ===== path screen ===== */
-  .pathwrap{position:relative}
+  .pathwrap{position:relative;scroll-margin-top:124px}
   .pathtools{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin:.1rem 0 .3rem}
   .fidelity{display:inline-flex;align-items:center;gap:.3rem;background:var(--bg-body);border:1px solid var(--border-light);border-radius:9px;padding:3px;box-shadow:var(--shadow-sm)}
   .fidelity .flbl{font-family:var(--font-head);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);padding:0 .45rem 0 .35rem}
@@ -555,6 +556,8 @@
     renderPath(si,ui);
     var pm=document.getElementById('prevMastery'); if(pm) pm.addEventListener('click',function(){ previewMastery(si,ui); });
     showScreen(scPath);
+    // land at the page top so the toolbar (Detail toggle + Preview mastery) is always in view
+    window.scrollTo({top:0, behavior:reduceMotion?'auto':'smooth'});
   }
 
   // demo: step a topic through the fidelity states it has, cross-fading + narrating each
@@ -648,7 +651,6 @@
       if(isCur) currentEl=node;
     });
     applyStage();
-    if(currentEl) setTimeout(function(){ currentEl.scrollIntoView({block:'center',behavior:reduceMotion?'auto':'smooth'}); },150);
   }
 
   function openLesson(s,u,L){
@@ -667,7 +669,7 @@
     document.getElementById('contTtl').textContent=L.t;
     document.getElementById('contUnit').textContent=L.uname+' · '+s.done+' of '+s.total+' lessons done';
     document.getElementById('contBar').style.width=Math.round(s.m*100)+'%';
-    document.getElementById('contBtn').addEventListener('click',function(){ navExpand(si); showPath(si,ui); window.scrollTo({top:0,behavior:reduceMotion?'auto':'smooth'}); });
+    document.getElementById('contBtn').addEventListener('click',function(){ navExpand(si); showPath(si,ui); });
   }
 
   function buildPage(){
