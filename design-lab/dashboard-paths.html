@@ -40,12 +40,12 @@
   .avatar{width:32px;height:32px;border-radius:50%;background:var(--anchor);color:#fff;font-family:var(--font-head);font-weight:700;font-size:.85rem;display:grid;place-items:center;cursor:pointer}
 
   /* greeting */
-  .hello{margin:1.5rem 0 1rem}
+  .hello{margin:1.5rem 0 1.1rem}
   .hello h1{font-size:clamp(1.5rem,2.6vw,1.95rem);font-weight:700;letter-spacing:-.02em}
   .hello p{font-family:var(--font-read);color:var(--text-secondary);font-size:1rem;margin-top:.2rem}
 
   /* layout */
-  .layout{display:grid;grid-template-columns:340px 1fr;gap:1.1rem;align-items:start}
+  .layout{display:grid;grid-template-columns:340px 1fr;gap:1.1rem;align-items:stretch;margin-bottom:1.1rem}
   @media(max-width:900px){ .layout{grid-template-columns:1fr} }
   .card{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm)}
   .col-left{display:flex;flex-direction:column;gap:1.1rem}
@@ -222,7 +222,7 @@
   .toast b{color:#fff}
 
   /* week strip */
-  .week{margin:1.1rem 0 2.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem 1.4rem;flex-wrap:wrap;
+  .week{margin:0 0 2.4rem;display:flex;align-items:center;justify-content:space-between;gap:1rem 1.4rem;flex-wrap:wrap;
     background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.9rem 1.5rem}
   .week .wlbl{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted)}
   .week .stat{font-family:var(--font-head);font-size:.92rem;color:var(--text-secondary)}
@@ -344,9 +344,9 @@
   .qcard .qdone .score{font-family:var(--font-head);font-size:2.4rem;font-weight:800;letter-spacing:-.02em}
   .qcard .qdone p{font-family:var(--font-read);color:var(--text-secondary);margin:.3rem 0 1.1rem}
 
-  /* ===== left rail: Continue + Warm-up as two even tiles ===== */
-  .col-left > .card{min-height:244px;display:flex;flex-direction:column}
-  .col-left > .card > .btn{margin-top:auto}
+  /* ===== left rail: Continue + Warm-up fill the column as two even tiles ===== */
+  .col-left{max-height:660px}   /* cap so they don't stretch tall on the long path screen */
+  .col-left > .card{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:space-between}
 
   /* ===== Revision Radio — full-width player bar along the bottom ===== */
   .radio.bar{margin:0 0 1.1rem;padding:.95rem 1.25rem 1.05rem;min-height:0}
@@ -356,17 +356,19 @@
   .radio.bar .rtop .ct{font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:-.01em}
   .radio.bar .rstand{font-family:var(--font-read);font-size:.78rem;color:var(--text-muted);margin-left:.2rem}
   @media(max-width:620px){ .radio.bar .rstand{display:none} }
-  .radio.bar .rbody{display:grid;grid-template-columns:minmax(200px,1fr) minmax(240px,1.25fr) minmax(190px,1fr);gap:1rem 1.8rem;align-items:center}
-  @media(max-width:860px){ .radio.bar .rbody{grid-template-columns:1fr;gap:.9rem} }
+  .radio.bar .rmain{display:grid;grid-template-columns:1fr 2fr;gap:1.6rem;align-items:center;margin-bottom:.9rem}
+  @media(max-width:760px){ .radio.bar .rmain{grid-template-columns:1fr;gap:.9rem} }
   .radio.bar .rnow{display:flex;align-items:center;gap:.7rem;min-width:0}
   .radio.bar .rnow .nptitle{-webkit-line-clamp:1}
   .radio.bar .rplayer{min-width:0}
-  .radio.bar .rplayer .ctrls{margin:0 0 .35rem}
+  .radio.bar .rplayer .ctrls{margin:0 0 .4rem}
   .radio.bar .rplayer .scrub{margin:.1rem 0 .3rem}
-  .radio.bar .rqueue-wrap{min-width:0}
-  .radio.bar .qhead{border-top:0;padding-top:0;margin-bottom:.35rem}
-  .radio.bar #rQueue{max-height:108px;overflow:hidden}
-  @media(max-width:860px){ .radio.bar #rQueue{max-height:none} }
+  .radio.bar .rqhead{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid var(--border-lighter);padding-top:.7rem;margin-bottom:.55rem}
+  .radio.bar .rqhead .ql{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.09em;font-size:.6rem;font-weight:700;color:var(--text-muted)}
+  .radio.bar .rqhead a{font-family:var(--font-head);font-size:.72rem;font-weight:600;color:var(--anchor);cursor:pointer;text-decoration:none}
+  .radio.bar #rQueue{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+  @media(max-width:760px){ .radio.bar #rQueue{grid-template-columns:1fr} }
+  .radio.bar #rQueue .qrow{background:var(--bg-body);border:1px solid var(--border-light);padding:.5rem .6rem}
 </style>
 </head>
 <body>
@@ -973,12 +975,13 @@
     var cont=nextLesson(byShelf['English Literature']);
     RADIO={ list:[{subj:cont.s.n,sw:cont.s.swatch,title:cont.L.t}].concat(radioQueue(cont)), idx:0, playing:false, pos:0, dur:630 };
     el.innerHTML='<div class="rtop"><span class="ico">'+ICON_RADIO+'</span><span class="ct">Revision Radio</span>'+infoHTML(RADIO_BLURB)+'<span class="rstand">Starts where you left off, then refreshes what’s fading.</span></div>'+
-      '<div class="rbody">'+
+      '<div class="rmain">'+
         '<div class="rnow"><span class="art" id="rArt">'+ICON_WAVE+'</span><span class="npmeta"><span class="npsub" id="rSub"></span><span class="nptitle" id="rTitle"></span></span></div>'+
         '<div class="rplayer"><div class="ctrls"><button class="sk" id="rPrev" aria-label="Previous">'+ICON_PREV+'</button><button class="pp" id="rPlay" aria-label="Play">'+PLAY+'</button><button class="sk" id="rNext" aria-label="Next">'+ICON_NEXT+'</button></div>'+
           '<div class="scrub" id="rScrub"><i id="rFill"></i></div><div class="time"><span id="rCur">0:00</span><span id="rDur">0:00</span></div></div>'+
-        '<div class="rqueue-wrap"><div class="qhead"><span class="ql">Up next · refresh</span><a id="rBrowse">Browse</a></div><div id="rQueue"></div></div>'+
-      '</div>';
+      '</div>'+
+      '<div class="rqhead"><span class="ql">Up next · topics worth a refresh</span><a id="rBrowse">Browse</a></div>'+
+      '<div id="rQueue"></div>';
     wireInfo(el);
     el.querySelector('#rPlay').onclick=radioToggle;
     el.querySelector('#rPrev').onclick=function(){ radioGo(RADIO.idx-1); };
@@ -1000,10 +1003,11 @@
     if(RADIO.playing){ if(!radioTimer) radioTimer=setInterval(radioTick,1000); toast('▶ Revision Radio — <b>'+esc(RADIO.list[RADIO.idx].subj)+'</b>'); } radioPaint(); }
   function radioGo(i){ if(!RADIO) return; if(i<0)i=0; if(i>=RADIO.list.length){ RADIO.playing=false; i=RADIO.list.length-1; } radioLoad(i); radioPaint(); }
   function renderQueue(){ var el=document.getElementById('radio'); if(!el||!RADIO) return; var q=el.querySelector('#rQueue'); q.innerHTML='';
-    RADIO.list.forEach(function(t,i){ if(i<=RADIO.idx) return; var row=document.createElement('div'); row.className='qrow'; row.style.setProperty('--qd',t.sw);
+    RADIO.list.slice(RADIO.idx+1, RADIO.idx+4).forEach(function(t,k){ var i=RADIO.idx+1+k;
+      var row=document.createElement('div'); row.className='qrow'; row.style.setProperty('--qd',t.sw);
       row.innerHTML='<span class="qd"></span><span class="qt">'+esc(t.title)+' <small>· '+esc(t.subj)+'</small></span>';
       row.onclick=function(){ radioGo(i); if(!RADIO.playing) radioToggle(); }; q.appendChild(row); });
-    if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem">That’s the end of today’s queue.</div>'; }
+    if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem;grid-column:1/-1">That’s the end of today’s queue.</div>'; }
 
   function buildPage(){
     wireContinue(); buildToday(); buildWarmup(); buildRadio(); showSubjects();
