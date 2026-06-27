@@ -49,7 +49,7 @@ MOTIFS = {
  "english-literature-aqa/power-and-conflict": "a crumbling colossal statue half-buried in desert sand, a cavalry charge of horses, a bayonet rifle, a war photographer's camera, a single poppy, a craggy mountain peak, a diving warplane",
  "english-literature-aqa/unseen-poetry": "an open book of poetry, a quill, scattered loose lines of verse, a magnifying glass over a stanza, a pressed flower, two poems side by side, an inkblot",
  # Combined Science
- "science-aqa/biology-paper-1": "a microscope, a single rounded animal cell, a beating heart with vessels, a leaf cross-section, bacteria in a petri dish, a vaccine syringe, a pair of lungs",
+ "science-aqa/biology-paper-1": "a microscope, a single rounded biological animal cell with a clearly visible round nucleus and cell membrane (a microscope cell, NOT an egg or food), a beating heart with vessels, a leaf cross-section, bacteria in a petri dish, a vaccine syringe, a pair of lungs",
  "science-aqa/biology-paper-2": "a DNA double helix, a branching neuron, a side profile of a brain, a Punnett inheritance square, an eye, a kidney, a simple food chain of creatures",
  "science-aqa/chemistry-paper-1": "a Bohr atom with orbiting electrons, a single periodic-table tile, a conical flask, two atoms bonded together, a Bunsen burner flame, electrolysis electrodes in a beaker, a balance scale",
  "science-aqa/chemistry-paper-2": "an oil-refinery fractionating column, a rising reaction-rate curve, a chromatography strip, the Earth wrapped in atmosphere, a long polymer chain, a rack of test tubes, a gas jar",
@@ -133,7 +133,7 @@ def main():
             for model in ("gpt-image-2", "gpt-image-1"):
                 try:
                     print(f"[{key}] {model}…", flush=True)
-                    r = client.images.generate(model=model, prompt=prompt, size="1024x1536", quality="high")
+                    r = client.images.generate(model=model, prompt=prompt, size="1024x1536", quality=os.environ.get("DL_QUALITY", "medium"))
                     with open(out, "wb") as f:
                         f.write(base64.b64decode(r.data[0].b64_json))
                     print(f"[{key}] saved ({os.path.getsize(out)//1024} KB)", flush=True)
