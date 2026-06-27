@@ -37,13 +37,21 @@ generator skips existing files, so just re-run:
 `python scripts/_designlab_unit_backdrops.py`
 
 ## Progressive fidelity (Tom's idea — see memory `project_progressive_fidelity_backdrops`)
-The art is meant to **sharpen as you master a unit**: sketch (0–33%) → blueprint
-(33–66%) → refined (66–99%) → photoreal (100%). The dashboard already picks a
-unit's stage from its mastery (`autoStage`), falls back to sketch when a stage
-isn't generated, shows the chosen stage as a pip, and offers a dev **fidelity
-toggle** on the path (stages with no art are disabled).
-- Proof: full 4-stage ladder on **Combined Science · Biology Paper 2**
-  (`_designlab_fidelity_ladder.py`), plus Biology P1 photo + Chemistry P1 blueprint
-  (`_designlab_stage_backdrop.py`) so Combined Science's topics grid shows the
-  ladder for real (photo / blueprint / sketch by mastery).
-- Full rollout (4 stages × every unit) is deferred — Tom said "doesn't need doing now".
+The art **sharpens as you master a unit**: sketch (0–33%) → blueprint (33–66%) →
+refined (66–99%) → photoreal (100%). The dashboard picks a unit's stage from its
+mastery (`autoStage`), falls back to sketch when a stage isn't generated, shows
+the stage as a pip, and offers a dev **fidelity toggle** + a **▶ Preview mastery**
+button that cross-fades through every state the unit has, narrating each band.
+
+### States must be ALIGNED (image-to-image, not re-generated)
+Independent generations put the same objects in different places, so a transition
+morphs instead of sharpening. Fix: generate each higher state **from the sketch**
+via `images.edit` — `_designlab_aligned_ladder.py <subject> <unit>` — keeping the
+SAME objects in the SAME positions and the central lane empty. The path then
+**cross-fades in place** (two stacked `.pbg` layers), so e.g. the microscope just
+comes into focus.
+- Aligned 4-state proof: **Combined Science · Biology Paper 1** (microscope, cell,
+  petri dish, syringe, heart, lungs — same layout sketch→blueprint→refined→photo).
+- Full rollout (aligned 4 stages × every unit) is deferred — Tom said "doesn't need
+  doing now". To roll out: run `_designlab_aligned_ladder.py` per unit after its
+  sketch exists.

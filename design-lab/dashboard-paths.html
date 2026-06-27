@@ -169,10 +169,17 @@
   .fidelity button.off{opacity:.34;cursor:not-allowed}
   .fidelity button.off:hover{background:transparent;color:var(--text-muted)}
   .fidelity .auto{margin-left:.1rem;border-left:1px solid var(--border-light);padding-left:.4rem}
+  .prevbtn{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1px solid var(--border-light);border-radius:9px;padding:.42rem .8rem;box-shadow:var(--shadow-sm);transition:background .14s,color .14s,border-color .14s}
+  .prevbtn:hover{border-color:var(--text-muted);color:var(--text-primary)}
+  .prevbtn[disabled]{opacity:.4;cursor:default}
+  @media(prefers-reduced-motion:reduce){ .pbg{transition:none} }
 
   .pcol{max-width:540px;margin:.2rem auto 0;padding:0 .5rem}
   .pstage-host{position:relative}
-  .node{position:absolute;transform:translate(-50%,-50%);cursor:pointer}
+  /* two stacked backdrop layers → cross-fade in place (aligned img2img states sharpen, don't morph) */
+  .pbg{position:absolute;inset:0;background-position:top center;background-size:100% auto;background-repeat:repeat-y;opacity:0;transition:opacity 1.15s ease;z-index:0;pointer-events:none}
+  .pbg.show{opacity:1}
+  .node{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:2}
   .node .dot{border-radius:50%;display:grid;place-items:center;transition:transform .18s var(--ease),box-shadow .18s}
   .node:hover .dot{transform:scale(1.07)}
   .node .lt{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--font-read);font-size:.78rem;line-height:1.22;max-width:150px;
@@ -540,13 +547,36 @@
     document.documentElement.style.setProperty('--acc-mute',accMute);
     scPath.innerHTML=
       '<div class="pathwrap">'+
-        '<div class="pathtools"><div class="fidelity" id="fidelity"></div></div>'+
+        '<div class="pathtools"><div class="fidelity" id="fidelity"></div><button class="prevbtn" id="prevMastery" title="Watch this topic sharpen as you master it">▶ Preview mastery</button></div>'+
         '<div class="pcol"><div class="pstage-host" id="phost"></div></div>'+
         '<div class="pfoot"><span class="line"></span><span class="lbl">'+esc(u.name)+'</span><span class="ct">'+u.done+' / '+u.lessons.length+'</span><span class="line"></span></div>'+
       '</div>';
     buildFidelity(si,ui);
     renderPath(si,ui);
+    var pm=document.getElementById('prevMastery'); if(pm) pm.addEventListener('click',function(){ previewMastery(si,ui); });
     showScreen(scPath);
+  }
+
+  // demo: step a topic through the fidelity states it has, cross-fading + narrating each
+  // — what a student sees as they cross 33% / 66% / 100% mastery of the topic.
+  var previewing=false;
+  function previewMastery(si,ui){
+    if(previewing) return;
+    var base=bgBase(si,ui), seq=['','blueprint','refined','photo'], have=[], pending=seq.length;
+    seq.forEach(function(st,i){ stageExists(base,st,function(ok){ have[i]=ok; if(--pending===0) run(); }); });
+    function run(){
+      var steps=seq.filter(function(st,i){ return have[i]; });
+      if(steps.length<2){ toast('Higher-detail art for this topic isn’t generated yet'); return; }
+      previewing=true; var btn=document.getElementById('prevMastery'); if(btn) btn.disabled=true;
+      var i=0;
+      (function tick(){
+        if(i>=steps.length){ previewing=false; if(btn) btn.disabled=false; pathCtx.override=null; applyStage(); return; }
+        pathCtx.override=steps[i]; applyStage();
+        var pct=[0,33,66,100][seq.indexOf(steps[i])]||0;
+        toast('✦ '+esc(SHELF[si].units[ui].name)+' · '+pct+'% mastered — art sharpened to <b>'+STAGE_LBL[steps[i]]+'</b>');
+        i++; setTimeout(tick, reduceMotion?700:1750);
+      })();
+    }
   }
 
   function buildFidelity(si,ui){
@@ -572,11 +602,22 @@
       if(b.classList.contains('auto')) b.classList.toggle('on', pathCtx.override==null);
       else b.classList.toggle('on', pathCtx.override!=null && b.getAttribute('data-st')===st); }); }
     var host=document.getElementById('phost'), pstage=host&&host.querySelector('.pstage');
-    if(!pstage) return;
+    if(!pstage||!pstage._bg) return;
     resolveBg(bgBase(si,ui), st, function(url){
-      pstage.style.background = url?('url('+url+') top center / 100% auto repeat-y'):'none';
+      setBackdrop(pstage, url);
       pstage.classList.toggle('haspaper', !!url);
     });
+  }
+  // cross-fade between two stacked layers so an aligned state change sharpens IN PLACE
+  function setBackdrop(pstage, url){
+    var layers=pstage._bg, cur=pstage._bgActive, curLayer=cur>=0?layers[cur]:null;
+    if(!url){ layers.forEach(function(l){ l.classList.remove('show'); l.style.backgroundImage='none'; l.dataset.url=''; }); pstage._bgActive=-1; return; }
+    if(curLayer && curLayer.dataset.url===url) return;                 // already showing this exact art
+    var nextI=(cur===0)?1:0, next=layers[nextI];
+    next.style.backgroundImage='url("'+url+'")'; next.dataset.url=url;
+    void next.offsetWidth;                                              // reflow so the opacity transition fires
+    next.classList.add('show'); if(curLayer) curLayer.classList.remove('show');
+    pstage._bgActive=nextI;
   }
 
   function renderPath(si,ui){
@@ -585,7 +626,9 @@
     var n=u.lessons.length, H=topPad+footPad+n*vGap;
     function Y(yb){ return H-footPad-yb; }   // lesson 1 at the BOTTOM; climb up
     var pstage=document.createElement('div'); pstage.className='pstage'; pstage.style.cssText='position:relative;width:'+W+'px;height:'+H+'px;margin:0 auto'; host.appendChild(pstage);
-    var conn=E('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible'; pstage.appendChild(conn);
+    var bgA=document.createElement('div'), bgB=document.createElement('div'); bgA.className='pbg'; bgB.className='pbg';
+    pstage.appendChild(bgA); pstage.appendChild(bgB); pstage._bg=[bgA,bgB]; pstage._bgActive=-1;
+    var conn=E('svg',{width:W,height:H,viewBox:'0 0 '+W+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1'; pstage.appendChild(conn);
     var pos=u.lessons.map(function(L,j){ return {x:cx+Math.sin(j*0.85)*amp, top:Y(topPad*0.4+j*vGap)}; });
     function seg(a,b,stroke,wd,op,dash){ if(b<=a) return; var d='M '+pos[a].x.toFixed(1)+' '+pos[a].top.toFixed(1);
       for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],my=(p0.top+p1.top)/2; d+=' C '+p0.x.toFixed(1)+' '+my.toFixed(1)+' '+p1.x.toFixed(1)+' '+my.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.top.toFixed(1); }
