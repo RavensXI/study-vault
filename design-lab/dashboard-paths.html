@@ -343,6 +343,30 @@
   .qcard .qdone{text-align:center;padding:1rem 0 .4rem}
   .qcard .qdone .score{font-family:var(--font-head);font-size:2.4rem;font-weight:800;letter-spacing:-.02em}
   .qcard .qdone p{font-family:var(--font-read);color:var(--text-secondary);margin:.3rem 0 1.1rem}
+
+  /* ===== left rail: Continue + Warm-up as two even tiles ===== */
+  .col-left > .card{min-height:244px;display:flex;flex-direction:column}
+  .col-left > .card > .btn{margin-top:auto}
+
+  /* ===== Revision Radio — full-width player bar along the bottom ===== */
+  .radio.bar{margin:0 0 1.1rem;padding:.95rem 1.25rem 1.05rem;min-height:0}
+  .radio.bar .rtop{display:flex;align-items:center;gap:.55rem;margin-bottom:.75rem;flex-wrap:wrap}
+  .radio.bar .rtop .ico{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;background:var(--border-lighter);color:var(--text-secondary);flex:none}
+  .radio.bar .rtop .ico svg{width:17px;height:17px}
+  .radio.bar .rtop .ct{font-family:var(--font-head);font-size:1rem;font-weight:700;letter-spacing:-.01em}
+  .radio.bar .rstand{font-family:var(--font-read);font-size:.78rem;color:var(--text-muted);margin-left:.2rem}
+  @media(max-width:620px){ .radio.bar .rstand{display:none} }
+  .radio.bar .rbody{display:grid;grid-template-columns:minmax(200px,1fr) minmax(240px,1.25fr) minmax(190px,1fr);gap:1rem 1.8rem;align-items:center}
+  @media(max-width:860px){ .radio.bar .rbody{grid-template-columns:1fr;gap:.9rem} }
+  .radio.bar .rnow{display:flex;align-items:center;gap:.7rem;min-width:0}
+  .radio.bar .rnow .nptitle{-webkit-line-clamp:1}
+  .radio.bar .rplayer{min-width:0}
+  .radio.bar .rplayer .ctrls{margin:0 0 .35rem}
+  .radio.bar .rplayer .scrub{margin:.1rem 0 .3rem}
+  .radio.bar .rqueue-wrap{min-width:0}
+  .radio.bar .qhead{border-top:0;padding-top:0;margin-bottom:.35rem}
+  .radio.bar #rQueue{max-height:108px;overflow:hidden}
+  @media(max-width:860px){ .radio.bar #rQueue{max-height:none} }
 </style>
 </head>
 <body>
@@ -384,7 +408,6 @@
         </section>
 
         <section class="card warmup" id="warmup"></section>
-        <section class="card radio" id="radio"></section>
       </div>
 
       <!-- STAGE — Explore + Progress + Weak spots -->
@@ -397,6 +420,9 @@
         <div class="screen" id="screenPath" hidden></div>
       </section>
     </div>
+
+    <!-- REVISION RADIO — full-width player bar along the bottom -->
+    <section class="card radio bar" id="radio"></section>
 
     <div class="week">
       <span class="wlbl">This week</span>
@@ -946,12 +972,13 @@
     var el=document.getElementById('radio'); if(!el) return;
     var cont=nextLesson(byShelf['English Literature']);
     RADIO={ list:[{subj:cont.s.n,sw:cont.s.swatch,title:cont.L.t}].concat(radioQueue(cont)), idx:0, playing:false, pos:0, dur:630 };
-    el.innerHTML='<div class="ch"><span class="ico">'+ICON_RADIO+'</span><span class="ct">Revision Radio</span>'+infoHTML(RADIO_BLURB)+'</div>'+
-      '<div class="stand">Starts where you left off, then refreshes what’s fading.</div>'+
-      '<div class="np"><span class="art" id="rArt">'+ICON_WAVE+'</span><span class="npmeta"><span class="npsub" id="rSub"></span><span class="nptitle" id="rTitle"></span></span></div>'+
-      '<div class="scrub" id="rScrub"><i id="rFill"></i></div><div class="time"><span id="rCur">0:00</span><span id="rDur">0:00</span></div>'+
-      '<div class="ctrls"><button class="sk" id="rPrev" aria-label="Previous">'+ICON_PREV+'</button><button class="pp" id="rPlay" aria-label="Play">'+PLAY+'</button><button class="sk" id="rNext" aria-label="Next">'+ICON_NEXT+'</button></div>'+
-      '<div class="qhead"><span class="ql">Up next · topics worth a refresh</span><a id="rBrowse">Browse</a></div><div id="rQueue"></div>';
+    el.innerHTML='<div class="rtop"><span class="ico">'+ICON_RADIO+'</span><span class="ct">Revision Radio</span>'+infoHTML(RADIO_BLURB)+'<span class="rstand">Starts where you left off, then refreshes what’s fading.</span></div>'+
+      '<div class="rbody">'+
+        '<div class="rnow"><span class="art" id="rArt">'+ICON_WAVE+'</span><span class="npmeta"><span class="npsub" id="rSub"></span><span class="nptitle" id="rTitle"></span></span></div>'+
+        '<div class="rplayer"><div class="ctrls"><button class="sk" id="rPrev" aria-label="Previous">'+ICON_PREV+'</button><button class="pp" id="rPlay" aria-label="Play">'+PLAY+'</button><button class="sk" id="rNext" aria-label="Next">'+ICON_NEXT+'</button></div>'+
+          '<div class="scrub" id="rScrub"><i id="rFill"></i></div><div class="time"><span id="rCur">0:00</span><span id="rDur">0:00</span></div></div>'+
+        '<div class="rqueue-wrap"><div class="qhead"><span class="ql">Up next · refresh</span><a id="rBrowse">Browse</a></div><div id="rQueue"></div></div>'+
+      '</div>';
     wireInfo(el);
     el.querySelector('#rPlay').onclick=radioToggle;
     el.querySelector('#rPrev').onclick=function(){ radioGo(RADIO.idx-1); };
