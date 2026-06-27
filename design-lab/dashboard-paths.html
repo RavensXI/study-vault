@@ -19,6 +19,7 @@
     --shadow-lg:0 6px 14px -8px rgba(29,28,26,.18),0 24px 48px -28px rgba(29,28,26,.28);
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  [hidden]{display:none!important}   /* class display rules must never override the hidden attribute */
   body{background:var(--bg-body);color:var(--text-primary);font-family:var(--font-read);-webkit-font-smoothing:antialiased;line-height:1.5}
   h1,h2,h3,.ui,button,nav,.kicker,label,input{font-family:var(--font-head)}
   button{cursor:pointer}
@@ -432,6 +433,23 @@
   /* drill view tweaks */
   .drill{padding-top:.85rem}
   .drill .crumbs .swatch{display:none}
+
+  /* ===== YOUR PROGRESS — constellation deep-dive ===== */
+  .progress{display:flex;flex-direction:column;height:calc(100dvh - 65px);padding:.9rem clamp(1rem,4vw,2.25rem) 1rem;gap:.75rem;overflow:hidden}
+  .progress .phead{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap;flex:none}
+  .progress .ptitle{display:flex;align-items:baseline;gap:.9rem}
+  .progress .phead h1{font-family:var(--font-head);font-size:1.5rem;font-weight:700;letter-spacing:-.02em}
+  .progress .phead p{font-family:var(--font-read);color:var(--text-secondary);font-size:.92rem}
+  .backlink{background:transparent;border:0;font-family:var(--font-head);font-size:.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;padding:0}
+  .backlink:hover{color:var(--text-primary)}
+  .skywrap{position:relative;flex:1;min-height:0;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);overflow:hidden}
+  .skywrap canvas{display:block;width:100%;height:100%;cursor:default}
+  .skywrap .tip{position:absolute;pointer-events:none;background:rgba(29,28,26,.92);color:#f5f3f0;font-family:var(--font-head);font-size:.74rem;font-weight:600;padding:.3rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap;z-index:2;max-width:240px}
+  .skywrap .tip .ts{display:block;font-size:.6rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#bdb8b0;margin-bottom:.05rem}
+  .pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;flex:none}
+  .pstat{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);padding:.7rem .85rem}
+  .pstat b{display:block;font-family:var(--font-head);font-size:1.3rem;font-weight:800;letter-spacing:-.02em;color:var(--text-primary)}
+  .pstat span{font-family:var(--font-head);font-size:.72rem;color:var(--text-muted)}
 </style>
 </head>
 <body>
@@ -463,6 +481,16 @@
       <div class="screen" id="screenTopics"></div>
       <div class="screen" id="screenPath" hidden></div>
     </section>
+  </main>
+
+  <!-- YOUR PROGRESS — the living constellation (motivational deep-dive, off the home) -->
+  <main class="wrap progress" id="viewProgress" hidden>
+    <div class="phead">
+      <div class="ptitle"><button class="backlink" id="progHome">‹ Home</button><h1>Your progress</h1></div>
+      <p id="progStat"></p>
+    </div>
+    <div class="skywrap"><canvas id="sky" aria-hidden="true"></canvas><div class="tip" id="skyTip"></div></div>
+    <div class="pstats" id="pstats"></div>
   </main>
 
   <!-- Warm-up quiz modal -->
@@ -667,11 +695,14 @@
       scPath=document.getElementById('screenPath'),
       crumbs=document.getElementById('crumbs'),
       viewHome=document.getElementById('viewHome'),
-      viewDrill=document.getElementById('viewDrill');
+      viewDrill=document.getElementById('viewDrill'),
+      viewProgress=document.getElementById('viewProgress');
   function showScreen(el){ [scTopics,scPath].forEach(function(s){ if(s) s.hidden=(s!==el); });
     el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); }
-  function enterDrill(){ if(viewHome) viewHome.style.display='none'; if(viewDrill) viewDrill.hidden=false; window.scrollTo(0,0); }
-  function showHome(){ if(viewDrill) viewDrill.hidden=true; if(viewHome) viewHome.style.display='flex'; window.scrollTo(0,0); }
+  function enterDrill(){ leaveProgress(); if(viewHome) viewHome.style.display='none'; if(viewDrill) viewDrill.hidden=false; window.scrollTo(0,0); }
+  function showHome(){ leaveProgress(); if(viewDrill) viewDrill.hidden=true; if(viewHome) viewHome.style.display='flex'; window.scrollTo(0,0); }
+  function showProgress(){ if(viewDrill) viewDrill.hidden=true; if(viewHome) viewHome.style.display='none'; if(viewProgress){ viewProgress.hidden=false; } window.scrollTo(0,0); startSky(); }
+  function leaveProgress(){ if(viewProgress && !viewProgress.hidden){ viewProgress.hidden=true; stopSky(); } }
 
   function setCrumbs(parts){   // parts: [{label, fn, here, swatch}]
     crumbs.innerHTML='';
@@ -989,6 +1020,80 @@
       row.onclick=function(){ radioGo(i); if(!RADIO.playing) radioToggle(); }; q.appendChild(row); });
     if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem;grid-column:1/-1">That’s the end of today’s queue.</div>'; }
 
+  /* ===================================================================
+     YOUR PROGRESS — self-contained living constellation (done lessons glow)
+     =================================================================== */
+  var skyCv, skyCtx, skyDPR=1, skyW=0, skyH=0, skyScale=1, skyRaf=0, skyLast=0, skyT=0, skyWired=false;
+  var SKGREY=[138,135,128], SKGOLD=2.399963, SKPHASE=0.65, SKRX=232, SKRY=232, SKCX=300, SKCY=286, SKVSQ=0.94;
+  function skfrac(i){ var s=Math.sin(i*127.1+311.7)*43758.5453; return s-Math.floor(s); }
+  function doneRgbOf(s){ var a=hexRgb(s.a), gm=(s.k.indexOf('geography')>=0)?0.46:0.36; return mix(a,SKGREY,gm); }
+  var skORDER=[8,0,3,7,6,5,2,1,4], skRefX=[], skRefY=[];
+  (function(){ for(var slot=0;slot<9;slot++){ var rn=Math.sqrt((slot+0.5)/9), ang=slot*SKGOLD+SKPHASE, rj=rn*(0.92+skfrac(slot)*0.16), aj=ang+(skfrac(slot+99)-0.5)*0.42, sj=skORDER[slot]; skRefX[sj]=SKCX+Math.cos(aj)*SKRX*rj; skRefY[sj]=SKCY+Math.sin(aj)*SKRY*rj*SKVSQ; } })();
+  var skDots=[], skDotOf=[], skDust=[], skCl=[], skFoc=[0,0,0,0,0,0,0,0,0], skAny=0, skHover=-1;
+  function skyLayout(){
+    if(!skyCv) return; skyDPR=Math.min(window.devicePixelRatio||1,2); skyW=skyCv.clientWidth; skyH=skyCv.clientHeight; if(!skyW||!skyH) return;
+    skyCv.width=Math.round(skyW*skyDPR); skyCv.height=Math.round(skyH*skyDPR); skyCtx.setTransform(skyDPR,0,0,skyDPR,0,0);
+    var cs=Math.min(1.3,Math.min(skyW,skyH)/520); skyScale=cs; skDots=[]; skDotOf=[]; skDust=[]; skCl=[];
+    SHELF.forEach(function(s,i){ var cx=skyW/2+(skRefX[i]-SKCX)*cs, cy=skyH/2+(skRefY[i]-SKCY)*cs; skCl[i]={x:cx,y:cy,dr:doneRgbOf(s)};
+      skDotOf[i]=[]; var cnt=s.lessons.length; if(!cnt) return; var R=Math.max(22,Math.min(52,7*Math.sqrt(cnt)))*cs;
+      for(var d=0;d<cnt;d++){ var dn=s.lessons[d].doneFlag, ang=d*SKGOLD+skfrac(i+7)*6.283, rad=R*Math.sqrt((d+0.5)/cnt);
+        var ddx=cx+Math.cos(ang)*rad, ddy=cy+Math.sin(ang)*rad*0.96;
+        skDots.push((skDotOf[i][d]={subj:i,li:d,done:dn,ox:ddx,oy:ddy,x:ddx,y:ddy,ph:skfrac(i*37+d*7)*6.283,sp:0.5+skfrac(i*53+d*11)*0.4,baseR:(dn?2.7:2.1)})); } });
+    function speck(x,y,seed){ var sz=0.7+skfrac(seed*5+1)*0.6; skDust.push({x:x,y:y,r:sz,a:0.045+(sz-0.7)/0.6*0.06,ph:skfrac(seed*5+2)*6.283,sp:0.5+skfrac(seed*5+3)*0.5}); }
+    var cols=Math.round(Math.sqrt(80*skyW/skyH))||1, gx=skyW/cols, gy=skyH/Math.ceil(80/cols);
+    for(var fi=0;fi<80;fi++){ var r0=Math.floor(fi/cols), c0=fi%cols; speck((c0+0.2+skfrac(fi*3+1)*0.6)*gx,(r0+0.2+skfrac(fi*3+2)*0.6)*gy,fi); }
+    for(var nb=0;nb<40;nb++){ var ci=(skfrac(nb*7+1)*9)|0; if(skCl[ci]) speck(skCl[ci].x+(skfrac(nb*7+2)-0.5)*64*cs,skCl[ci].y+(skfrac(nb*7+3)-0.5)*64*cs,80+nb); }
+  }
+  function skyRender(){ var ctx=skyCtx; if(!ctx||!skyW) return; ctx.clearRect(0,0,skyW,skyH);
+    var vg=ctx.createRadialGradient(skyW*0.5,skyH*0.46,0,skyW*0.5,skyH*0.46,Math.max(skyW,skyH)*0.62);
+    vg.addColorStop(0,'rgba(255,255,255,0)'); vg.addColorStop(1,'rgba(228,224,218,0.30)'); ctx.fillStyle=vg; ctx.fillRect(0,0,skyW,skyH);
+    var dm=1-skAny*0.5;
+    for(var u=0;u<skDust.length;u++){ var p=skDust[u], px=p.x+Math.sin(skyT*0.4*p.sp+p.ph)*2.4, py=p.y+Math.cos(skyT*0.33*p.sp+p.ph*1.3)*2.4;
+      ctx.globalAlpha=p.a*(0.82+0.18*Math.sin(skyT*0.7*p.sp+p.ph*2))*dm; ctx.fillStyle='#8f8b83'; ctx.beginPath(); ctx.arc(px,py,p.r,0,6.283); ctx.fill(); }
+    for(var k=0;k<skDots.length;k++){ var d=skDots[k], f=skFoc[d.subj], other=skAny*(1-f);
+      d.x=d.ox+Math.sin(skyT*0.40*d.sp+d.ph)*1.3; d.y=d.oy+Math.cos(skyT*0.33*d.sp+d.ph*1.3)*1.3;
+      var r=d.baseR*(1+0.62*f)*(1-0.42*other);
+      if(d.done){ var a=(0.58+0.38*f-0.40*other)*(0.87+0.13*Math.sin(skyT*0.55*d.sp+d.ph*2)); if(a<0.01) continue;
+        var c=skCl[d.subj].dr; ctx.globalAlpha=Math.min(0.97,a); ctx.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')'; ctx.beginPath(); ctx.arc(d.x,d.y,r,0,6.283); ctx.fill();
+      } else { var a2=(0.28+0.22*f-0.18*other)*(0.93+0.07*Math.sin(skyT*0.55*d.sp+d.ph*2)); if(a2<0.01) continue;
+        var rg=mix([179,173,163],[156,150,140],f); ctx.globalAlpha=Math.min(0.9,a2); ctx.lineWidth=Math.max(1,r*0.28); ctx.strokeStyle='rgb('+rg[0]+','+rg[1]+','+rg[2]+')'; ctx.beginPath(); ctx.arc(d.x,d.y,r,0,6.283); ctx.stroke(); } }
+    ctx.globalAlpha=1; }
+  function skyTick(now){ var dt=Math.min(0.033,(now-skyLast)/1000)||0; skyLast=now; skyT+=dt;
+    for(var i=0;i<9;i++){ var tg=(i===skHover)?1:0; skFoc[i]+=(tg-skFoc[i])*(1-Math.pow(i===skHover?0.14:0.13,dt)); }
+    skAny+=(((skHover>=0)?1:0)-skAny)*(1-Math.pow((skHover>=0)?0.16:0.22,dt));
+    skyRender(); skyRaf=requestAnimationFrame(skyTick); }
+  function skyHit(mx,my){ if(!skCl.length) return {subj:-1,lesson:-1}; var bc=-1,bcd=1e9;
+    for(var i=0;i<9;i++){ if(!skCl[i]) continue; var dx=mx-skCl[i].x, dy=my-skCl[i].y, dd=dx*dx+dy*dy; if(dd<bcd){bcd=dd;bc=i;} }
+    if(bcd>3600*skyScale*skyScale) return {subj:-1,lesson:-1};
+    var sub=SHELF[bc], bl=-1,bld=1e9;
+    for(var j=0;j<sub.lessons.length;j++){ var dd2=skDotOf[bc][j], ex=mx-dd2.x, ey=my-dd2.y, ed=ex*ex+ey*ey; if(ed<bld){bld=ed;bl=j;} }
+    return {subj:bc, lesson:(bld<90*skyScale*skyScale)?bl:-1}; }
+  function wireSky(){ if(skyWired) return; skyWired=true; var tip=document.getElementById('skyTip');
+    skyCv.addEventListener('mousemove',function(e){ var r=skyCv.getBoundingClientRect(), mx=e.clientX-r.left, my=e.clientY-r.top, h=skyHit(mx,my); skHover=h.subj;
+      if(h.subj>=0){ skyCv.style.cursor='pointer'; var s=SHELF[h.subj];
+        if(h.lesson>=0){ var L=s.lessons[h.lesson], dot=skDotOf[h.subj][h.lesson]; tip.innerHTML='<span class="ts">'+esc(s.n)+(L.doneFlag?' · done':'')+'</span>'+esc(L.t); tip.style.left=dot.x+'px'; tip.style.top=(dot.y-8)+'px'; }
+        else { tip.innerHTML='<span class="ts">'+s.done+' / '+s.total+' done</span>'+esc(s.n); tip.style.left=skCl[h.subj].x+'px'; tip.style.top=(skCl[h.subj].y-30)+'px'; }
+        tip.style.opacity='1';
+      } else { skyCv.style.cursor='default'; tip.style.opacity='0'; } });
+    skyCv.addEventListener('mouseleave',function(){ skHover=-1; tip.style.opacity='0'; skyCv.style.cursor='default'; });
+    skyCv.addEventListener('click',function(e){ var r=skyCv.getBoundingClientRect(), h=skyHit(e.clientX-r.left,e.clientY-r.top); if(h.subj>=0) showTopics(h.subj); });
+  }
+  function startSky(){ skyCv=document.getElementById('sky'); if(!skyCv) return; skyCtx=skyCv.getContext('2d'); wireSky(); buildProgressStats();
+    skyLayout(); skyRender();
+    if(!skyW) requestAnimationFrame(function(){ skyLayout(); skyRender(); });   // fallback if dimensions weren't ready yet
+    cancelAnimationFrame(skyRaf); skyLast=0; if(!reduceMotion) skyRaf=requestAnimationFrame(skyTick); }
+  function stopSky(){ cancelAnimationFrame(skyRaf); skyRaf=0; }
+  var skyRT; window.addEventListener('resize',function(){ if(viewProgress && !viewProgress.hidden){ clearTimeout(skyRT); skyRT=setTimeout(function(){ skyLayout(); skyRender(); },150); } });
+  function buildProgressStats(){
+    var TD=0,TL=0; SHELF.forEach(function(s){ TD+=s.done; TL+=s.total; });
+    var stat=document.getElementById('progStat'); if(stat) stat.textContent='You’ve mastered '+TD+' of '+TL+' lessons — every dot you’ve done glows. Hover a cluster, or click to dive in.';
+    var near=SHELF.filter(function(s){ return s.total && s.done>0 && s.done<s.total; }).sort(function(a,b){ return (b.done/b.total)-(a.done/a.total); })[0];
+    var cards=[ {b:TD+' / '+TL, s:'lessons done'}, {b:'+6', s:'this week'}, {b:'4 days', s:'on a roll'},
+      near?{b:Math.round(near.done/near.total*100)+'%', s:near.n+' — nearly there'}:{b:String(SHELF.length), s:'subjects on the go'} ];
+    var el=document.getElementById('pstats'); if(!el) return; el.innerHTML='';
+    cards.forEach(function(c){ var d=document.createElement('div'); d.className='pstat'; d.innerHTML='<b>'+esc(c.b)+'</b><span>'+esc(c.s)+'</span>'; el.appendChild(d); });
+  }
+
   function buildPage(){
     buildGuided(); buildRevisionList(); buildRadio(); showHome();
   }
@@ -996,6 +1101,8 @@
   document.getElementById('crumbHome').addEventListener('click',showHome);
   document.getElementById('brand').style.cursor='pointer';
   document.getElementById('brand').addEventListener('click',showHome);
+  (function(){ var pb=document.getElementById('progHome'); if(pb) pb.addEventListener('click',showHome);
+    var av=document.querySelector('.avatar'); if(av){ av.style.cursor='pointer'; av.title='Your progress'; av.addEventListener('click',showProgress); } })();
 
   loadAll();
 })();
