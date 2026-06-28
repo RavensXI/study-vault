@@ -85,60 +85,45 @@ def stitch(imgs):
     return canvas
 
 def build(skey, slug, n_lessons):
-    hexc, word = ACCENT[skey]
     motifs = motifs_for(skey, slug)
-    photo = os.path.join(ASSETS, f"path-bg-u-{skey}-{slug}-photo.png")
-    src = photo if os.path.exists(photo) else os.path.join(ASSETS, f"path-bg-u-{skey}-{slug}.png")
-    if not os.path.exists(src):
-        print(f"[{skey}/{slug}] no source art, skip", flush=True); return False
+    uname = unit_name_for(skey, slug)
     k = min(MAX_EXTENDS, n_extends_for(n_lessons))
     tmp = os.path.join(ASSETS, f"_strip-{skey}-{slug}")
-    pano_prompt = (
-        f"Recompose as a WIDE horizontal banner: ONE rich, cohesive illustrated scene that fills the whole frame "
-        f"top to bottom. Use the SAME subjects as the picture, woven together naturally and overlapping across the "
-        f"full height and length like a detailed editorial science illustration: {motifs}; render each as exactly "
-        f"what it is, do not reinterpret. No empty bands — compose them into one connected scene. {NOPATH} Full "
-        f"colour, soft natural light, warm off-white paper, gentle {word} ({hexc}) tones.")
-    print(f"[{skey}/{slug}] {n_lessons} lessons -> {k} extend(s)", flush=True)
-    p0 = gen([pano_prompt, Image.open(src)], tmp + "-0.png")
+    style = ("Render it as ONE cohesive modern editorial SCREEN-PRINT illustration in a single unified style and a "
+             "limited palette of sage green, warm cream and deep ink: bold clean contour linework, every element "
+             "drawn the same way and connected by flowing lines into one seamless woven composition that fills the "
+             "whole banner top to bottom — a tapestry of ideas. NOT separate cut-out objects, NOT a collage, NOT "
+             "photographs, NO empty bands. Warm off-white paper. ABSOLUTELY NO text, letters, numbers or labels.")
+    pano_prompt = (f"A wide horizontal banner weaving these GCSE \"{uname}\" ideas together into one continuous "
+                   f"illustrated scene: {motifs}. {style}")
+    print(f"[{skey}/{slug}] {n_lessons} lessons -> {k} extend(s) (D tapestry)", flush=True)
+    p0 = gen([pano_prompt], tmp + "-0.png")   # text-to-image keeps it cohesive (no isolated-object source to copy)
     if not p0:
         print("   panorama failed", flush=True); return False
-    uname = unit_name_for(skey, slug)
-    src_img = Image.open(src)
     segs = [Image.open(p0).convert("RGB")]
     for i in range(k):
-        # SWAP, not "continue": match the panorama's style/palette but draw an entirely different cast of
-        # subjects. "Continue the scene" makes the model copy the objects it sees; an explicit replace doesn't.
-        ext_prompt = (
-            f"Make a WIDE horizontal banner in EXACTLY the same illustrated style, warm off-white paper and soft "
-            f"{word} ({hexc}) palette as the reference image — ONE rich cohesive scene filling the whole frame top "
-            f"to bottom — but with a COMPLETELY DIFFERENT cast of subjects. Do NOT draw any of these (they appear "
-            f"elsewhere already): {motifs}. Instead weave together a fresh set of other real subjects from the GCSE "
-            f"topic \"{uname}\" — different objects, organs, organisms, apparatus or diagrams that fit the topic, "
-            f"overlapping naturally across the full height. {NOPATH}")
-        pi = gen([ext_prompt, src_img], tmp + f"-{i+1}.png")
+        ext_prompt = (f"Continue this illustration to the RIGHT as ONE seamless mural in EXACTLY the same style and "
+                      f"palette. Weave in a COMPLETELY DIFFERENT set of \"{uname}\" ideas — do NOT repeat any of "
+                      f"these: {motifs}. The far-left edge of your image must continue smoothly from this picture. "
+                      f"{style}")
+        pi = gen([ext_prompt, segs[-1]], tmp + f"-{i+1}.png")
         if not pi:
             print(f"   extend {i+1} failed, stopping early", flush=True); break
         segs.append(Image.open(pi).convert("RGB"))
-    # photo strip = the canonical composition; lower fidelity stages are ALIGNED transforms of the SAME
-    # segments (same objects in the same places) so the lane can sharpen in place as mastery rises.
-    keep = ("Keep the SAME objects in the SAME positions, same sizes and the same composition as the input image. "
-            "ABSOLUTELY NO text, words, letters or numbers.")
+    # complete = the canonical composition; refined + sketch are ALIGNED transforms of the SAME segments
+    keep = ("Keep the SAME composition — every element in the SAME position and size as the input image. "
+            "ABSOLUTELY NO text, letters or numbers.")
     stage_prompts = {
-        "refined":   (f"Redraw this exact image as a detailed PEN-AND-INK and soft-watercolour illustration: confident "
-                      f"finished linework with gentle {word} ({hexc}) washes and light shading, a polished naturalist's "
-                      f"notebook plate, calm and not too dark. {keep}"),
-        "blueprint": (f"Redraw this exact image as a precise technical BLUEPRINT: render every object as clean {word} "
-                      f"({hexc}) outline linework with light measurement ticks and thin construction guide-lines, "
-                      f"drafting style on pale warm paper. {keep}"),
-        "sketch":    (f"Redraw this exact image as a rough hand-drawn PENCIL-AND-BIRO SKETCH: loose confident graphite "
-                      f"linework with light hatching, mostly uncoloured warm paper, the look of a quick study-notebook "
-                      f"doodle. {keep}"),
+        "refined": ("Redraw this exact image as a REFINED line-illustration stage: confident clean single-weight "
+                    "deep-sage contour linework on warm paper with only the faintest hint of flat colour, mostly "
+                    "uncoloured — the inked stage just before the finished print. " + keep),
+        "sketch":  ("Redraw this exact image as a loose hand-drawn PENCIL SKETCH: rough, light, unfinished graphite "
+                    "linework on warm paper, no colour, the look of a quick first study. " + keep),
     }
     def out_for(stage):
-        suf = "land.png" if stage == "sketch" else f"land-{stage}.png"   # sketch is the base -land.png
+        suf = "land.png" if stage == "sketch" else f"land-{stage}.png"   # sketch=base; complete saved to -photo slot
         return os.path.join(ASSETS, f"path-bg-u-{skey}-{slug}-{suf}")
-    stitch(segs).save(out_for("photo")); made = ["photo"]
+    stitch(segs).save(out_for("photo")); made = ["complete"]
     for stage, prompt in stage_prompts.items():
         tsegs, ok = [], True
         for si, seg in enumerate(segs):
@@ -155,7 +140,6 @@ def build(skey, slug, n_lessons):
         try: os.remove(f)
         except OSError: pass
     print(f"   saved stages: {', '.join(made)}", flush=True)
-    return True
     return True
 
 if __name__ == "__main__":

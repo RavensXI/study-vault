@@ -163,9 +163,14 @@
   /* ===== V2: stacked thin landscape lanes (units down, lessons across) ===== */
   .lanes{display:flex;flex-direction:column;gap:1.15rem;padding-bottom:1.4rem}
   .lane{scroll-margin-top:96px}
-  .lane-cap{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin:0 .2rem .4rem}
-  .lc-nm{font-family:var(--font-head);font-size:.96rem;font-weight:600;color:var(--text-primary)}
+  .lane-cap{display:flex;align-items:center;gap:.7rem;margin:0 .2rem .4rem}
+  .lc-nm{font-family:var(--font-head);font-size:.96rem;font-weight:600;color:var(--text-primary);flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .lc-ct{font-family:var(--font-head);font-size:.73rem;color:var(--text-muted);font-variant-numeric:tabular-nums;flex:none}
+  /* dev preview: step the art through sketch / refined / complete */
+  .stager{display:inline-flex;gap:.1rem;background:var(--bg-card);border:1px solid var(--border-light);border-radius:7px;padding:2px;flex:none}
+  .stbtn{font-family:var(--font-head);font-size:.62rem;font-weight:700;color:var(--text-muted);background:transparent;border:0;border-radius:5px;padding:.22rem .46rem;cursor:pointer;transition:background .14s,color .14s}
+  .stbtn:hover{color:var(--text-secondary)}
+  .stbtn.on{background:var(--acc);color:#fff}
   .lane-scroller{position:relative}
   .lane-track{overflow-x:auto;overflow-y:hidden;border:1px solid var(--border-light);border-radius:var(--r);background:var(--bg-card);box-shadow:var(--shadow-sm);
     cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;scrollbar-width:none;-ms-overflow-style:none}
@@ -182,8 +187,10 @@
   .lane-arrow.hide{opacity:0;pointer-events:none;transform:translateY(-50%) scale(.9)}
   /* two-band lane: illustration on top, clean path rail (nodes + labels) below */
   .lane-inner{position:relative;display:flex;flex-direction:column;background:#f6f2ea}
-  .lane-art{flex:none;height:222px;background-repeat:repeat-x;background-size:auto 100%;background-position:center}
+  .lane-art{position:relative;flex:none;height:222px;overflow:hidden}
   .lane-art:not(.hasart){background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 9%,#fff),color-mix(in srgb,var(--acc) 3%,#fff))}
+  .la-layer{position:absolute;inset:0;background-repeat:repeat-x;background-size:auto 100%;background-position:left center;opacity:0;transition:opacity .85s ease}
+  .la-layer.show{opacity:1}
   .lane-rail{position:relative;flex:none;height:104px;border-top:1px solid rgba(120,112,98,.14)}
   /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
   .lnode{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:2}
@@ -607,7 +614,7 @@
     s.swatch='rgb('+mix(acc,GREY,gm).join(',')+')'; });
 
   /* ---------- fidelity ladder (Tom's idea): mastery → backdrop sharpness, no labels ---------- */
-  function autoStage(frac){ return frac>=0.999?'photo':(frac>=0.66?'refined':(frac>=0.33?'blueprint':'')); }
+  function autoStage(frac){ return frac>=0.999?'photo':(frac>=0.34?'refined':''); }   // 3 stages: sketch / refined / complete(=photo)
   var BG={};   // manifest: "subjectKey/unitSlug" -> {file,accent,name}
   var bgOk={}; // cache of which resolved urls actually load (file -> bool)
   function bgBase(si,ui){ var key=SHELF[si].k+'/'+SHELF[si].units[ui].slug, m=BG[key]; return m?('assets/'+m.file):null; }
@@ -811,7 +818,7 @@
       lane.innerHTML='<div class="lane-cap"><span class="lc-nm">'+esc(u.name)+'</span><span class="lc-ct">'+u.done+' / '+u.lessons.length+' lessons · '+pct+'%</span></div>'+
         '<div class="lane-scroller">'+
           '<button class="lane-arrow l hide" aria-label="Scroll left">'+CHEVL+'</button>'+
-          '<div class="lane-track"><div class="lane-inner"><div class="lane-art"></div><div class="lane-rail"></div></div></div>'+
+          '<div class="lane-track"><div class="lane-inner"><div class="lane-art"><i class="la-layer"></i><i class="la-layer"></i></div><div class="lane-rail"></div></div></div>'+
           '<button class="lane-arrow r" aria-label="Scroll right">'+CHEVR+'</button>'+
         '</div>';
       wrap.appendChild(lane);
@@ -858,16 +865,49 @@
       if(!url){ build(Math.max(720,lessonW)); return; }
       var img=new Image();
       img.onload=function(){ var artW=Math.round(ART_H*img.naturalWidth/img.naturalHeight), innerW=Math.max(lessonW, artW);
-        art.style.backgroundImage='url("'+url+'")'; art.classList.add('hasart');
-        var fits=innerW<=artW+1;
-        art.style.backgroundSize=fits?'100% 100%':'auto 100%';
-        art.style.backgroundRepeat=fits?'no-repeat':'repeat-x';
-        build(innerW); };
+        var fits=innerW<=artW+1; art._fits=fits;
+        build(innerW);
+        setLaneArt(art, url, fits);
+        buildStager(art, landBase, fits, autoStage(u.frac)); };
       img.onerror=function(){ build(Math.max(720,lessonW)); };
       img.src=url;
     }
     if(landBase) resolveBg(landBase, autoStage(u.frac), loadStrip);
     else build(Math.max(720,lessonW));
+  }
+  // cross-fade the art band between two stacked layers (sharpen in place, no hard swap)
+  function setLaneArt(art, url, fits){
+    if(!art || !url) return;
+    var layers=art.querySelectorAll('.la-layer'); if(layers.length<2) return;
+    var cur=(art._act==null?-1:art._act), nextI=(cur===0)?1:0, nx=layers[nextI];
+    if(nx.dataset.url===url) return;
+    nx.style.backgroundImage='url("'+url+'")';
+    nx.style.backgroundSize=fits?'100% 100%':'auto 100%';
+    nx.style.backgroundRepeat=fits?'no-repeat':'repeat-x';
+    nx.dataset.url=url; void nx.offsetWidth;
+    nx.classList.add('show'); if(cur>=0) layers[cur].classList.remove('show');
+    art._act=nextI; art.classList.add('hasart');
+  }
+  // dev preview control: step the art through Sketch / Refined / Complete (the stages that exist)
+  var STAGE_LIST=[{k:'',n:'Sketch'},{k:'refined',n:'Refined'},{k:'photo',n:'Complete'}];
+  function buildStager(art, landBase, fits, curStage){
+    if(!landBase) return; var lane=art.closest('.lane'); if(!lane) return;
+    var cap=lane.querySelector('.lane-cap'); if(!cap || cap.querySelector('.stager')) return;
+    var urls={}, pending=STAGE_LIST.length;
+    STAGE_LIST.forEach(function(st){ var u=st.k? landBase.replace(/\.png$/i,'-'+st.k+'.png') : landBase;
+      probeImg(u, function(ok){ if(ok) urls[st.k]=u; if(--pending===0) render(); }); });
+    function render(){
+      var have=STAGE_LIST.filter(function(st){ return urls[st.k]; });
+      if(have.length<2 || cap.querySelector('.stager')) return;
+      var box=document.createElement('div'); box.className='stager';
+      have.forEach(function(st){
+        var b=document.createElement('button'); b.className='stbtn'+(st.k===curStage?' on':''); b.textContent=st.n;
+        b.addEventListener('click',function(){ setLaneArt(art, urls[st.k], art._fits!=null?art._fits:fits);
+          [].forEach.call(box.children,function(x){ x.classList.toggle('on', x===b); }); });
+        box.appendChild(b);
+      });
+      cap.appendChild(box);
+    }
   }
 
   // smooth horizontal scroll via setInterval (native smooth + rAF are unreliable on these tracks)
