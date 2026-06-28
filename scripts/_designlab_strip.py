@@ -120,13 +120,43 @@ def build(skey, slug, n_lessons):
         if not pi:
             print(f"   extend {i+1} failed, stopping early", flush=True); break
         segs.append(Image.open(pi).convert("RGB"))
-    out = os.path.join(ASSETS, f"path-bg-u-{skey}-{slug}-land.png")
-    strip = stitch(segs)
-    strip.save(out)
-    for i in range(len(segs)):
-        try: os.remove(tmp + f"-{i}.png")
+    # photo strip = the canonical composition; lower fidelity stages are ALIGNED transforms of the SAME
+    # segments (same objects in the same places) so the lane can sharpen in place as mastery rises.
+    keep = ("Keep the SAME objects in the SAME positions, same sizes and the same composition as the input image. "
+            "Keep the horizontal centre band empty (calm warm paper, no objects, no path). "
+            "ABSOLUTELY NO text, words, letters or numbers.")
+    stage_prompts = {
+        "refined":   (f"Redraw this exact image as a detailed PEN-AND-INK and soft-watercolour illustration: confident "
+                      f"finished linework with gentle {word} ({hexc}) washes and light shading, a polished naturalist's "
+                      f"notebook plate, calm and not too dark. {keep}"),
+        "blueprint": (f"Redraw this exact image as a precise technical BLUEPRINT: render every object as clean {word} "
+                      f"({hexc}) outline linework with light measurement ticks and thin construction guide-lines, "
+                      f"drafting style on pale warm paper. {keep}"),
+        "sketch":    (f"Redraw this exact image as a rough hand-drawn PENCIL-AND-BIRO SKETCH: loose confident graphite "
+                      f"linework with light hatching, mostly uncoloured warm paper, the look of a quick study-notebook "
+                      f"doodle. {keep}"),
+    }
+    def out_for(stage):
+        suf = "land.png" if stage == "sketch" else f"land-{stage}.png"   # sketch is the base -land.png
+        return os.path.join(ASSETS, f"path-bg-u-{skey}-{slug}-{suf}")
+    stitch(segs).save(out_for("photo")); made = ["photo"]
+    for stage, prompt in stage_prompts.items():
+        tsegs, ok = [], True
+        for si, seg in enumerate(segs):
+            tp = gen([prompt, seg], tmp + f"-{stage}-{si}.png")
+            if not tp:
+                ok = False; break
+            tsegs.append(Image.open(tp).convert("RGB"))
+        if ok and tsegs:
+            stitch(tsegs).save(out_for(stage)); made.append(stage)
+        else:
+            print(f"   {stage} failed", flush=True)
+    import glob
+    for f in glob.glob(tmp + "*.png"):
+        try: os.remove(f)
         except OSError: pass
-    print(f"   saved {os.path.basename(out)} {strip.size} {round(strip.size[0]/strip.size[1],2)}:1", flush=True)
+    print(f"   saved stages: {', '.join(made)}", flush=True)
+    return True
     return True
 
 if __name__ == "__main__":
