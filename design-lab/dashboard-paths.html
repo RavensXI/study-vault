@@ -442,14 +442,40 @@
   .progress .phead p{font-family:var(--font-read);color:var(--text-secondary);font-size:.92rem}
   .backlink{background:transparent;border:0;font-family:var(--font-head);font-size:.85rem;font-weight:600;color:var(--text-muted);cursor:pointer;padding:0}
   .backlink:hover{color:var(--text-primary)}
-  .skywrap{position:relative;flex:1;min-height:0;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);overflow:hidden}
-  .skywrap canvas{display:block;width:100%;height:100%;cursor:default}
-  .skywrap .tip{position:absolute;pointer-events:none;background:rgba(29,28,26,.92);color:#f5f3f0;font-family:var(--font-head);font-size:.74rem;font-weight:600;padding:.3rem .55rem;border-radius:5px;transform:translate(-50%,-130%);opacity:0;transition:opacity .12s;white-space:nowrap;z-index:2;max-width:240px}
-  .skywrap .tip .ts{display:block;font-size:.6rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#bdb8b0;margin-bottom:.05rem}
-  .pstats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.7rem;flex:none}
-  .pstat{background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);padding:.7rem .85rem}
-  .pstat b{display:block;font-family:var(--font-head);font-size:1.3rem;font-weight:800;letter-spacing:-.02em;color:var(--text-primary)}
-  .pstat span{font-family:var(--font-head);font-size:.72rem;color:var(--text-muted)}
+  /* overall completion — one quiet focal bar */
+  .poverall{display:flex;align-items:center;gap:.75rem;flex:none}
+  .poverall .potxt{font-family:var(--font-head);font-size:.82rem;font-weight:800;letter-spacing:-.01em;color:var(--text-secondary);font-variant-numeric:tabular-nums;flex:none;min-width:2.4rem}
+  .poverall .pobar{flex:1;height:6px;border-radius:3px;background:var(--border-lighter);overflow:hidden}
+  .poverall .pobar i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,var(--acc-mute),var(--acc));transition:width .7s var(--ease)}
+  /* momentum strip — typographic, hairline-divided, no cards/pills */
+  .pstats{display:flex;align-items:stretch;flex:none;border:1px solid var(--border-light);border-radius:var(--r);background:var(--bg-card);overflow:hidden}
+  .pstat{flex:1;padding:.6rem .9rem;display:flex;flex-direction:column;gap:.06rem;border-left:1px solid var(--border-lighter)}
+  .pstat:first-child{border-left:0}
+  .pstat b{font-family:var(--font-head);font-size:1.4rem;font-weight:800;letter-spacing:-.025em;color:var(--text-primary);font-variant-numeric:tabular-nums;line-height:1.04}
+  .pstat span{font-family:var(--font-head);font-size:.7rem;color:var(--text-muted)}
+  @media(max-width:620px){ .pstats{flex-wrap:wrap} .pstat{flex:1 0 40%} .pstat:nth-child(odd){border-left:0} }
+  /* two-column body: where you stand · needs a look */
+  .pbody{flex:1;min-height:0;display:grid;grid-template-columns:1.55fr 1fr;gap:1rem}
+  @media(max-width:760px){ .pbody{grid-template-columns:1fr} }
+  .prcol{display:flex;flex-direction:column;min-height:0;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);padding:.8rem .85rem}
+  .plabel{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.1em;font-size:.64rem;font-weight:700;color:var(--text-muted);margin-bottom:.55rem;flex:none}
+  .standlist{overflow:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:.1rem}
+  .standrow{display:grid;gap:.24rem;width:100%;text-align:left;background:transparent;border:0;cursor:pointer;padding:.46rem .5rem;border-radius:var(--r);transition:background .14s}
+  .standrow:hover{background:var(--wash)}
+  .standrow .srtop{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem}
+  .standrow .snm{font-family:var(--font-head);font-size:.9rem;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .standrow:hover .snm{font-weight:600}
+  .standrow .spc{font-family:var(--font-head);font-size:.84rem;font-weight:700;color:var(--text-secondary);font-variant-numeric:tabular-nums;flex:none}
+  .standrow .srbar{height:4px;border-radius:2px;background:var(--border-lighter);overflow:hidden}
+  .standrow .srbar i{display:block;height:100%;border-radius:2px;background:var(--sc,#a7a39b);opacity:.9;transition:width .6s var(--ease)}
+  .standrow .src{font-family:var(--font-head);font-size:.68rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .weaklist{overflow:auto;flex:1;min-height:0;display:flex;flex-direction:column;gap:.42rem}
+  .weakrow{display:flex;flex-direction:column;gap:.13rem;width:100%;text-align:left;background:var(--bg-body);border:1px solid var(--border-light);border-left:3px solid var(--sc,#a7a39b);border-radius:var(--r);cursor:pointer;padding:.5rem .62rem;transition:background .14s,transform .14s}
+  .weakrow:hover{background:var(--wash);transform:translateX(2px)}
+  .weakrow .wsub{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.07em;font-size:.6rem;font-weight:700;color:var(--sc,var(--text-muted))}
+  .weakrow .wnm{font-family:var(--font-head);font-size:.84rem;font-weight:600;color:var(--text-primary);line-height:1.25}
+  .weakrow .wmeta{font-family:var(--font-head);font-size:.68rem;color:var(--text-muted);font-variant-numeric:tabular-nums}
+  .wempty{font-family:var(--font-read);font-size:.85rem;color:var(--text-muted);padding:.3rem .2rem}
 </style>
 </head>
 <body>
@@ -483,14 +509,24 @@
     </section>
   </main>
 
-  <!-- YOUR PROGRESS — the living constellation (motivational deep-dive, off the home) -->
+  <!-- YOUR PROGRESS — a legible report card: momentum · where you stand · what's slipping -->
   <main class="wrap progress" id="viewProgress" hidden>
     <div class="phead">
       <div class="ptitle"><button class="backlink" id="progHome">‹ Home</button><h1>Your progress</h1></div>
       <p id="progStat"></p>
     </div>
-    <div class="skywrap"><canvas id="sky" aria-hidden="true"></canvas><div class="tip" id="skyTip"></div></div>
+    <div class="poverall"><span class="potxt" id="potxt"></span><span class="pobar"><i id="poFill"></i></span></div>
     <div class="pstats" id="pstats"></div>
+    <div class="pbody">
+      <section class="prcol pstand">
+        <h2 class="plabel">Where you stand</h2>
+        <div class="standlist" id="standList"></div>
+      </section>
+      <section class="prcol pweak">
+        <h2 class="plabel">Needs a look</h2>
+        <div class="weaklist" id="weakList"></div>
+      </section>
+    </div>
   </main>
 
   <!-- Warm-up quiz modal -->
@@ -701,8 +737,8 @@
     el.classList.remove('in'); void el.offsetWidth; el.classList.add('in'); }
   function enterDrill(){ leaveProgress(); if(viewHome) viewHome.style.display='none'; if(viewDrill) viewDrill.hidden=false; window.scrollTo(0,0); }
   function showHome(){ leaveProgress(); if(viewDrill) viewDrill.hidden=true; if(viewHome) viewHome.style.display='flex'; window.scrollTo(0,0); }
-  function showProgress(){ if(viewDrill) viewDrill.hidden=true; if(viewHome) viewHome.style.display='none'; if(viewProgress){ viewProgress.hidden=false; } window.scrollTo(0,0); startSky(); }
-  function leaveProgress(){ if(viewProgress && !viewProgress.hidden){ viewProgress.hidden=true; stopSky(); } }
+  function showProgress(){ if(viewDrill) viewDrill.hidden=true; if(viewHome) viewHome.style.display='none'; if(viewProgress){ viewProgress.hidden=false; } window.scrollTo(0,0); buildProgress(); }
+  function leaveProgress(){ if(viewProgress && !viewProgress.hidden){ viewProgress.hidden=true; } }
 
   function setCrumbs(parts){   // parts: [{label, fn, here, swatch}]
     crumbs.innerHTML='';
@@ -1021,7 +1057,10 @@
     if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem;grid-column:1/-1">That’s the end of today’s queue.</div>'; }
 
   /* ===================================================================
-     YOUR PROGRESS — self-contained living constellation (done lessons glow)
+     PARKED — living-constellation engine (was the "Your progress" view).
+     Retired 28 Jun: pretty but not legible for a progress screen; replaced
+     by buildProgress() below. Kept intact in case it's reused as a hero
+     animation. Nothing calls into this block now.
      =================================================================== */
   var skyCv, skyCtx, skyDPR=1, skyW=0, skyH=0, skyScale=1, skyRaf=0, skyLast=0, skyT=0, skyWired=false;
   var SKGREY=[138,135,128], SKGOLD=2.399963, SKPHASE=0.65, SKRX=262, SKRY=236, SKCX=300, SKCY=286, SKVSQ=0.94;
@@ -1092,20 +1131,45 @@
     skyCv.addEventListener('mouseleave',function(){ skHover=-1; tip.style.opacity='0'; skyCv.style.cursor='default'; });
     skyCv.addEventListener('click',function(e){ var r=skyCv.getBoundingClientRect(), h=skyHit(e.clientX-r.left,e.clientY-r.top); if(h.subj>=0) showTopics(h.subj); });
   }
-  function startSky(){ skyCv=document.getElementById('sky'); if(!skyCv) return; skyCtx=skyCv.getContext('2d'); wireSky(); buildProgressStats();
+  function startSky(){ skyCv=document.getElementById('sky'); if(!skyCv) return; skyCtx=skyCv.getContext('2d'); wireSky();
     skyLayout(); skyRender();
     if(!skyW) requestAnimationFrame(function(){ skyLayout(); skyRender(); });   // fallback if dimensions weren't ready yet
     cancelAnimationFrame(skyRaf); skyLast=0; if(!reduceMotion) skyRaf=requestAnimationFrame(skyTick); }
   function stopSky(){ cancelAnimationFrame(skyRaf); skyRaf=0; }
   var skyRT; window.addEventListener('resize',function(){ if(viewProgress && !viewProgress.hidden){ clearTimeout(skyRT); skyRT=setTimeout(function(){ skyLayout(); skyRender(); },150); } });
-  function buildProgressStats(){
+  function buildProgress(){
     var TD=0,TL=0; SHELF.forEach(function(s){ TD+=s.done; TL+=s.total; });
-    var stat=document.getElementById('progStat'); if(stat) stat.textContent='You’ve mastered '+TD+' of '+TL+' lessons — every dot you’ve done glows. Hover a cluster, or click to dive in.';
-    var near=SHELF.filter(function(s){ return s.total && s.done>0 && s.done<s.total; }).sort(function(a,b){ return (b.done/b.total)-(a.done/a.total); })[0];
-    var cards=[ {b:TD+' / '+TL, s:'lessons done'}, {b:'+6', s:'this week'}, {b:'4 days', s:'on a roll'},
-      near?{b:Math.round(near.done/near.total*100)+'%', s:near.n+' — nearly there'}:{b:String(SHELF.length), s:'subjects on the go'} ];
-    var el=document.getElementById('pstats'); if(!el) return; el.innerHTML='';
-    cards.forEach(function(c){ var d=document.createElement('div'); d.className='pstat'; d.innerHTML='<b>'+esc(c.b)+'</b><span>'+esc(c.s)+'</span>'; el.appendChild(d); });
+    var pct=TL?Math.round(TD/TL*100):0;
+    var stat=document.getElementById('progStat');
+    if(stat) stat.textContent='You’ve revised '+TD+' of '+TL+' lessons across '+SHELF.length+' subjects. Here’s where you stand and what’s slipping.';
+    var pf=document.getElementById('poFill'); if(pf) pf.style.width=pct+'%';
+    var pt=document.getElementById('potxt'); if(pt) pt.textContent=pct+'%';
+    /* momentum strip (this-week / streak are demo until per-activity tracking lands) */
+    var days=Math.max(0,Math.round((new Date('2027-05-11T09:00:00')-new Date())/86400000));
+    var stats=[ {b:String(TD), s:'lessons revised'}, {b:'+6', s:'this week'}, {b:String(SHELF.length), s:'subjects on the go'}, {b:String(days), s:'days to your first GCSE'} ];
+    var ps=document.getElementById('pstats'); if(ps){ ps.innerHTML='';
+      stats.forEach(function(c){ var d=document.createElement('div'); d.className='pstat'; d.innerHTML='<b>'+esc(c.b)+'</b><span>'+esc(c.s)+'</span>'; ps.appendChild(d); }); }
+    /* where you stand — subjects, strongest first */
+    var sl=document.getElementById('standList'); if(sl){ sl.innerHTML='';
+      SHELF.map(function(s,i){ return {s:s,i:i,p:s.total?s.done/s.total:0}; })
+        .sort(function(a,b){ return b.p-a.p; })
+        .forEach(function(o){ var s=o.s, p=Math.round(o.p*100);
+          var b=document.createElement('button'); b.className='standrow'; b.style.setProperty('--sc',s.swatch);
+          b.innerHTML='<span class="srtop"><span class="snm">'+esc(s.n)+'</span><span class="spc">'+p+'%</span></span>'+
+            '<span class="srbar"><i style="width:'+p+'%"></i></span>'+
+            '<span class="src">'+s.done+' / '+s.total+' lessons</span>';
+          b.addEventListener('click',function(){ showTopics(o.i); });
+          sl.appendChild(b); }); }
+    /* needs a look — the topics fading fastest, click straight into them */
+    var wl=document.getElementById('weakList'); if(wl){ wl.innerHTML='';
+      var ws=weakSpots(5);
+      if(!ws.length){ wl.innerHTML='<p class="wempty">Nothing slipping right now — keep it up.</p>'; }
+      ws.forEach(function(w){ var s=SHELF[w.si];
+        var b=document.createElement('button'); b.className='weakrow'; b.style.setProperty('--sc',w.swatch);
+        b.innerHTML='<span class="wsub">'+esc(s.n)+'</span><span class="wnm">'+esc(w.name)+'</span>'+
+          '<span class="wmeta">'+w.pct+'% done · pick this back up</span>';
+        b.addEventListener('click',function(){ showPath(w.si,w.ui); });
+        wl.appendChild(b); }); }
   }
 
   function buildPage(){
