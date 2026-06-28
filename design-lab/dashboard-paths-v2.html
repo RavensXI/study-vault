@@ -169,22 +169,29 @@
   .lane-track{overflow-x:auto;overflow-y:hidden;border:1px solid var(--border-light);border-radius:var(--r);background:var(--bg-card);box-shadow:var(--shadow-sm);scrollbar-width:thin}
   .lane-inner{position:relative;background-repeat:repeat-x;background-size:auto 100%;background-position:left center}
   .lane-inner:not(.hasart){background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 9%,#fff),color-mix(in srgb,var(--acc) 3%,#fff))}
+  /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
   .lnode{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:2}
-  .lnode .dot{border-radius:50%;display:grid;place-items:center;transition:transform .18s var(--ease),box-shadow .18s;font-family:var(--font-head);font-weight:700}
-  .lnode:hover .dot{transform:scale(1.08)}
-  .lnode.done .dot{width:40px;height:40px;background:var(--acc-mute);color:#fff;box-shadow:var(--shadow-sm)}
-  .lnode.done .dot svg{width:20px;height:20px}
-  .lnode.current .dot{width:52px;height:52px;background:var(--acc);color:#fff;box-shadow:var(--shadow-md)}
-  .lnode.current .dot svg{width:22px;height:22px}
-  .lnode.ahead .dot{width:38px;height:38px;background:var(--bg-card);border:2px solid var(--border-light);color:var(--text-muted);font-size:.85rem}
-  .lnode .lt{position:absolute;left:50%;transform:translateX(-50%);width:110px;text-align:center;font-family:var(--font-read);font-size:.71rem;line-height:1.22;color:var(--text-secondary);
-    text-shadow:0 0 3px var(--bg-card),0 0 7px var(--bg-card),0 0 11px var(--bg-card),0 0 11px var(--bg-card)}
-  .lane-inner.hasart .lnode .lt{text-shadow:0 0 3px #f6f2ea,0 0 6px #f6f2ea,0 0 10px #f6f2ea,0 0 13px #f6f2ea}
-  .lnode.t-up .lt{bottom:calc(50% + 28px)}
-  .lnode.t-down .lt{top:calc(50% + 28px)}
-  .lnode.current.t-up .lt{bottom:calc(50% + 34px)}
-  .lnode.current.t-down .lt{top:calc(50% + 34px)}
-  .lnode .lt .pill{display:inline-block;font-family:var(--font-head);font-size:.56rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--acc);}
+  .lnode .dot{border-radius:50%;display:grid;place-items:center;transition:transform .16s var(--ease),box-shadow .18s;font-family:var(--font-head);font-weight:700}
+  .lnode:hover .dot{transform:scale(1.09)}
+  .lnode.done .dot{width:31px;height:31px;background:var(--sc,#8a857c);color:#fff;box-shadow:0 1px 3px rgba(29,28,26,.2)}
+  .lnode.done .dot svg{width:16px;height:16px}
+  .lnode.ahead .dot{width:27px;height:27px;background:rgba(255,255,255,.92);border:1.5px solid #cdc9c2;color:var(--text-muted);font-size:.76rem}
+  .lnode.current{z-index:3}
+  .lnode.current .dot{width:44px;height:44px;background:var(--acc);color:#fff;box-shadow:0 4px 14px -4px color-mix(in srgb,var(--acc) 55%,transparent),0 0 0 5px color-mix(in srgb,var(--acc) 14%,transparent);animation:lpulse 2.6s var(--ease) infinite}
+  .lnode.current .dot svg{width:20px;height:20px}
+  @keyframes lpulse{0%,100%{box-shadow:0 4px 14px -4px color-mix(in srgb,var(--acc) 55%,transparent),0 0 0 4px color-mix(in srgb,var(--acc) 16%,transparent)}
+    50%{box-shadow:0 4px 14px -4px color-mix(in srgb,var(--acc) 55%,transparent),0 0 0 9px color-mix(in srgb,var(--acc) 5%,transparent)}}
+  /* labels: one line, truncated, sitting in the art's empty centre band; full title on hover */
+  .lnode .lt{position:absolute;left:50%;transform:translateX(-50%);width:122px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    font-family:var(--font-head);font-size:.745rem;font-weight:500;line-height:1.2;color:var(--text-secondary);pointer-events:none}
+  .lane-inner.hasart .lnode .lt{text-shadow:0 1px 2px #f3efe7,0 0 4px #f3efe7,0 0 8px #f3efe7}
+  .lnode.t-up .lt{bottom:calc(50% + 20px)}
+  .lnode.t-down .lt{top:calc(50% + 20px)}
+  .lnode:hover .lt{white-space:normal;overflow:visible;z-index:5;color:var(--text-primary)}
+  .lnode.current .lt{width:154px;font-weight:700;font-size:.8rem;color:var(--text-primary);white-space:normal}
+  .lnode.current.t-up .lt{bottom:calc(50% + 28px)}
+  .lnode.current.t-down .lt{top:calc(50% + 28px)}
+  .lnode .lt .pill{display:block;font-family:var(--font-head);font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);margin-bottom:.02rem}
 
   .pcol{max-width:540px;margin:.2rem auto 0;padding:0 .5rem}
   .pstage-host{position:relative}
@@ -783,7 +790,7 @@
     document.documentElement.style.setProperty('--acc-mute','rgb('+mix(hexRgb(s.a),GREY,0.18).join(',')+')');
     setCrumbs([{label:'Home',fn:showHome},{label:s.n,here:true}]);
     scTopics.innerHTML='<div class="shead"><h2>'+esc(s.n)+'</h2><span class="hint">'+s.done+' / '+s.total+' lessons · scroll through your units</span></div><div class="lanes" id="lanes"></div>';
-    var wrap=document.getElementById('lanes');
+    var wrap=document.getElementById('lanes'); wrap.style.setProperty('--sc', s.swatch);
     s.units.forEach(function(u,ui){
       var pct=Math.round(u.frac*100);
       var lane=document.createElement('section'); lane.className='lane'; lane.dataset.ui=ui;
@@ -797,7 +804,7 @@
   }
   function renderLane(si,ui,inner){
     var s=SHELF[si], u=s.units[ui], n=u.lessons.length;
-    var H=264, padL=78, gapX=124, midY=H/2, amp=Math.min(56,(H-130)/2);
+    var H=264, padL=84, gapX=128, midY=H/2, amp=14;   // shallow glide that stays in the art's empty centre band
     var lessonW=padL*2 + Math.max(0,n-1)*gapX;
     inner.style.height=H+'px';
     var url=landUrl(si,ui);
@@ -810,10 +817,10 @@
         for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],mx=(p0.x+p1.x)/2; d+=' C '+mx.toFixed(1)+' '+p0.y.toFixed(1)+' '+mx.toFixed(1)+' '+p1.y.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.y.toFixed(1); }
         var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
       var lastDone=-1, curIdx=-1; u.lessons.forEach(function(L,j){ if(L.doneFlag) lastDone=j; else if(curIdx<0) curIdx=j; });
-      seg(0,Math.max(0,lastDone),s.a,3.4,0.62); seg(Math.max(0,lastDone),n-1,'#cdcac4',2.4,0.95,'1 7');
+      seg(0,Math.max(0,lastDone),s.swatch,2.6,0.5); seg(Math.max(0,lastDone),n-1,'#cbc7c0',2,0.8,'1 6');
       u.lessons.forEach(function(L,j){
         var isCur=(j===curIdx), cls=isCur?'current':(L.doneFlag?'done':'ahead');
-        var node=document.createElement('div'); node.className='lnode '+(pos[j].y<midY?'t-down':'t-up')+' '+cls;
+        var node=document.createElement('div'); node.className='lnode '+(j%2?'t-up':'t-down')+' '+cls;
         node.style.left=pos[j].x+'px'; node.style.top=pos[j].y+'px';
         node.innerHTML='<span class="dot">'+(isCur?PLAY:(L.doneFlag?CHECK:L.no))+'</span><span class="lt">'+(isCur?'<span class="pill">Up next</span> ':'')+esc(L.t)+'</span>';
         node.addEventListener('click',function(){ openLesson(s,u,L); });
