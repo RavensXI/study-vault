@@ -180,8 +180,11 @@
   .lane-arrow:active{transform:translateY(-50%) scale(.94)}
   .lane-arrow.l{left:10px} .lane-arrow.r{right:10px}
   .lane-arrow.hide{opacity:0;pointer-events:none;transform:translateY(-50%) scale(.9)}
-  .lane-inner{position:relative;background-repeat:repeat-x;background-size:auto 100%;background-position:left center}
-  .lane-inner:not(.hasart){background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 9%,#fff),color-mix(in srgb,var(--acc) 3%,#fff))}
+  /* two-band lane: illustration on top, clean path rail (nodes + labels) below */
+  .lane-inner{position:relative;display:flex;flex-direction:column;background:#f6f2ea}
+  .lane-art{flex:none;height:224px;background-repeat:repeat-x;background-size:auto 100%;background-position:center}
+  .lane-art:not(.hasart){background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 9%,#fff),color-mix(in srgb,var(--acc) 3%,#fff))}
+  .lane-rail{position:relative;flex:none;height:92px;border-top:1px solid rgba(120,112,98,.14)}
   /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
   .lnode{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:2}
   .lnode .dot{border-radius:50%;display:grid;place-items:center;transition:transform .16s var(--ease),box-shadow .18s;font-family:var(--font-head);font-weight:700}
@@ -812,7 +815,7 @@
       lane.innerHTML='<div class="lane-cap"><span class="lc-nm">'+esc(u.name)+'</span><span class="lc-ct">'+u.done+' / '+u.lessons.length+' lessons · '+pct+'%</span></div>'+
         '<div class="lane-scroller">'+
           '<button class="lane-arrow l hide" aria-label="Scroll left">'+CHEVL+'</button>'+
-          '<div class="lane-track"><div class="lane-inner"></div></div>'+
+          '<div class="lane-track"><div class="lane-inner"><div class="lane-art"></div><div class="lane-rail"></div></div></div>'+
           '<button class="lane-arrow r" aria-label="Scroll right">'+CHEVR+'</button>'+
         '</div>';
       wrap.appendChild(lane);
@@ -823,45 +826,46 @@
     if(wantUi>=0){ var t=wrap.querySelector('.lane[data-ui="'+wantUi+'"]'); if(t) requestAnimationFrame(function(){ t.scrollIntoView({block:'center',behavior:reduceMotion?'auto':'smooth'}); }); }
   }
   var SLIDE_ON_OPEN=true;   // on open, each lane glides to the student's next lesson, staggered one at a time
+  var ART_H=224, RAIL_H=92;   // illustration band height + clean path-rail height
   function renderLane(si,ui,inner){
     var s=SHELF[si], u=s.units[ui], n=u.lessons.length;
-    var H=264, padL=84, gapX=128, midY=H/2, amp=14;   // shallow glide that stays in the art's empty centre band
+    var padL=80, gapX=112;
     var lessonW=padL*2 + Math.max(0,n-1)*gapX;
-    inner.style.height=H+'px';
+    inner.style.height=(ART_H+RAIL_H)+'px';
+    var art=inner.querySelector('.lane-art'), rail=inner.querySelector('.lane-rail');
     var landBase=bgBase(si,ui); if(landBase) landBase=landBase.replace(/\.png$/i,'-land.png');
     function build(innerW){
-      inner.style.width=innerW+'px';
-      var conn=E('svg',{width:innerW,height:H,viewBox:'0 0 '+innerW+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1'; inner.appendChild(conn);
-      var step=(n>1)?(innerW-padL*2)/(n-1):0;   // spread lessons across the whole strip
-      var pos=u.lessons.map(function(L,j){ return {x:padL+j*step, y:midY+Math.sin(j*0.9+0.3)*amp}; });
+      inner.style.width=innerW+'px'; rail.innerHTML='';
+      var step=(n>1)?(innerW-padL*2)/(n-1):0, nodeY=RAIL_H*0.66, amp=7;   // path lives in the clean rail
+      var conn=E('svg',{width:innerW,height:RAIL_H,viewBox:'0 0 '+innerW+' '+RAIL_H}); conn.style.cssText='position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:1'; rail.appendChild(conn);
+      var pos=u.lessons.map(function(L,j){ return {x:padL+j*step, y:nodeY+Math.sin(j*0.8+0.3)*amp}; });
       function seg(a,b,stroke,wd,op,dash){ if(b<=a) return; var d='M '+pos[a].x.toFixed(1)+' '+pos[a].y.toFixed(1);
         for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],mx=(p0.x+p1.x)/2; d+=' C '+mx.toFixed(1)+' '+p0.y.toFixed(1)+' '+mx.toFixed(1)+' '+p1.y.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.y.toFixed(1); }
         var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
       var lastDone=-1, curIdx=-1; u.lessons.forEach(function(L,j){ if(L.doneFlag) lastDone=j; else if(curIdx<0) curIdx=j; });
-      seg(0,Math.max(0,lastDone),s.swatch,2.6,0.5); seg(Math.max(0,lastDone),n-1,'#cbc7c0',2,0.8,'1 6');
+      seg(0,Math.max(0,lastDone),s.swatch,2.6,0.62); seg(Math.max(0,lastDone),n-1,'#cbc7c0',2,0.85,'1 6');
       u.lessons.forEach(function(L,j){
         var isCur=(j===curIdx), cls=isCur?'current':(L.doneFlag?'done':'ahead');
-        var node=document.createElement('div'); node.className='lnode '+(j%2?'t-up':'t-down')+' '+cls;
+        var node=document.createElement('div'); node.className='lnode t-up '+cls;   // labels sit above the rail path, on clean paper
         node.style.left=pos[j].x+'px'; node.style.top=pos[j].y+'px';
         node.innerHTML='<span class="dot">'+(isCur?PLAY:(L.doneFlag?CHECK:L.no))+'</span><span class="lt">'+(isCur?'<span class="pill">Up next</span> ':'')+esc(L.t)+'</span>';
         node.addEventListener('click',function(){ openLesson(s,u,L); });
-        inner.appendChild(node);
+        rail.appendChild(node);
       });
       // remember where the student is; on open, glide each lane to its next lesson — staggered, one at a time
       var trk=inner.parentElement, tgt=(curIdx>=0?curIdx:n-1);
       trk._nextScroll=Math.max(0, Math.min(innerW-trk.clientWidth, pos[tgt].x - trk.clientWidth/2));
       if(SLIDE_ON_OPEN){ setTimeout(function(){ tweenScrollX(trk, trk._nextScroll); if(trk._upd) setTimeout(trk._upd,420); }, 440 + ui*340); }
     }
-    // size the lane to the banner so the WHOLE non-repeating strip shows; lessons spread across it.
-    // pick the fidelity stage matching this unit's mastery (resolveBg falls back to sketch if a stage is missing).
+    // art band sized to the banner; pick the fidelity stage matching this unit's mastery (sketch fallback)
     function loadStrip(url){
       if(!url){ build(Math.max(720,lessonW)); return; }
       var img=new Image();
-      img.onload=function(){ var artW=Math.round(H*img.naturalWidth/img.naturalHeight), innerW=Math.max(lessonW, artW);
-        inner.style.backgroundImage='url("'+url+'")'; inner.classList.add('hasart');
+      img.onload=function(){ var artW=Math.round(ART_H*img.naturalWidth/img.naturalHeight), innerW=Math.max(lessonW, artW);
+        art.style.backgroundImage='url("'+url+'")'; art.classList.add('hasart');
         var fits=innerW<=artW+1;
-        inner.style.backgroundSize=fits?'100% 100%':'auto 100%';
-        inner.style.backgroundRepeat=fits?'no-repeat':'repeat-x';   // only tiles if a unit out-runs its strip
+        art.style.backgroundSize=fits?'100% 100%':'auto 100%';
+        art.style.backgroundRepeat=fits?'no-repeat':'repeat-x';
         build(innerW); };
       img.onerror=function(){ build(Math.max(720,lessonW)); };
       img.src=url;
