@@ -797,26 +797,40 @@
   }
   function renderLane(si,ui,inner){
     var s=SHELF[si], u=s.units[ui], n=u.lessons.length;
-    var H=264, padL=72, gapX=120, midY=H/2, amp=Math.min(56,(H-130)/2);
-    var innerW=Math.max(720, padL*2 + (n-1)*gapX);
-    inner.style.width=innerW+'px'; inner.style.height=H+'px';
+    var H=264, padL=78, gapX=124, midY=H/2, amp=Math.min(56,(H-130)/2);
+    var lessonW=padL*2 + Math.max(0,n-1)*gapX;
+    inner.style.height=H+'px';
     var url=landUrl(si,ui);
-    probeImg(url,function(ok){ if(ok){ inner.style.backgroundImage='url("'+url+'")'; inner.classList.add('hasart'); } });
-    var conn=E('svg',{width:innerW,height:H,viewBox:'0 0 '+innerW+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1'; inner.appendChild(conn);
-    var pos=u.lessons.map(function(L,j){ return {x:padL+j*gapX, y:midY+Math.sin(j*0.9+0.3)*amp}; });
-    function seg(a,b,stroke,wd,op,dash){ if(b<=a) return; var d='M '+pos[a].x.toFixed(1)+' '+pos[a].y.toFixed(1);
-      for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],mx=(p0.x+p1.x)/2; d+=' C '+mx.toFixed(1)+' '+p0.y.toFixed(1)+' '+mx.toFixed(1)+' '+p1.y.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.y.toFixed(1); }
-      var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
-    var lastDone=-1, curIdx=-1; u.lessons.forEach(function(L,j){ if(L.doneFlag) lastDone=j; else if(curIdx<0) curIdx=j; });
-    seg(0,Math.max(0,lastDone),s.a,3.4,0.62); seg(Math.max(0,lastDone),n-1,'#cdcac4',2.4,0.95,'1 7');
-    u.lessons.forEach(function(L,j){
-      var isCur=(j===curIdx), cls=isCur?'current':(L.doneFlag?'done':'ahead');
-      var node=document.createElement('div'); node.className='lnode '+(pos[j].y<midY?'t-down':'t-up')+' '+cls;
-      node.style.left=pos[j].x+'px'; node.style.top=pos[j].y+'px';
-      node.innerHTML='<span class="dot">'+(isCur?PLAY:(L.doneFlag?CHECK:L.no))+'</span><span class="lt">'+(isCur?'<span class="pill">Up next</span> ':'')+esc(L.t)+'</span>';
-      node.addEventListener('click',function(){ openLesson(s,u,L); });
-      inner.appendChild(node);
-    });
+    function build(innerW){
+      inner.style.width=innerW+'px';
+      var conn=E('svg',{width:innerW,height:H,viewBox:'0 0 '+innerW+' '+H}); conn.style.cssText='position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:1'; inner.appendChild(conn);
+      var step=(n>1)?(innerW-padL*2)/(n-1):0;   // spread lessons across the whole strip
+      var pos=u.lessons.map(function(L,j){ return {x:padL+j*step, y:midY+Math.sin(j*0.9+0.3)*amp}; });
+      function seg(a,b,stroke,wd,op,dash){ if(b<=a) return; var d='M '+pos[a].x.toFixed(1)+' '+pos[a].y.toFixed(1);
+        for(var k=a+1;k<=b;k++){ var p0=pos[k-1],p1=pos[k],mx=(p0.x+p1.x)/2; d+=' C '+mx.toFixed(1)+' '+p0.y.toFixed(1)+' '+mx.toFixed(1)+' '+p1.y.toFixed(1)+' '+p1.x.toFixed(1)+' '+p1.y.toFixed(1); }
+        var pa=E('path',{d:d,fill:'none',stroke:stroke,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash) pa.setAttribute('stroke-dasharray',dash); conn.appendChild(pa); }
+      var lastDone=-1, curIdx=-1; u.lessons.forEach(function(L,j){ if(L.doneFlag) lastDone=j; else if(curIdx<0) curIdx=j; });
+      seg(0,Math.max(0,lastDone),s.a,3.4,0.62); seg(Math.max(0,lastDone),n-1,'#cdcac4',2.4,0.95,'1 7');
+      u.lessons.forEach(function(L,j){
+        var isCur=(j===curIdx), cls=isCur?'current':(L.doneFlag?'done':'ahead');
+        var node=document.createElement('div'); node.className='lnode '+(pos[j].y<midY?'t-down':'t-up')+' '+cls;
+        node.style.left=pos[j].x+'px'; node.style.top=pos[j].y+'px';
+        node.innerHTML='<span class="dot">'+(isCur?PLAY:(L.doneFlag?CHECK:L.no))+'</span><span class="lt">'+(isCur?'<span class="pill">Up next</span> ':'')+esc(L.t)+'</span>';
+        node.addEventListener('click',function(){ openLesson(s,u,L); });
+        inner.appendChild(node);
+      });
+    }
+    // size the lane to the banner so the WHOLE non-repeating strip shows; lessons spread across it
+    if(url){ var img=new Image();
+      img.onload=function(){ var artW=Math.round(H*img.naturalWidth/img.naturalHeight), innerW=Math.max(lessonW, artW);
+        inner.style.backgroundImage='url("'+url+'")'; inner.classList.add('hasart');
+        var fits=innerW<=artW+1;
+        inner.style.backgroundSize=fits?'100% 100%':'auto 100%';
+        inner.style.backgroundRepeat=fits?'no-repeat':'repeat-x';   // only tiles if a unit out-runs its strip
+        build(innerW); };
+      img.onerror=function(){ build(Math.max(720,lessonW)); };
+      img.src=url;
+    } else { build(Math.max(720,lessonW)); }
   }
 
   /* ---- (portrait single-path machinery from the base design — unused in V2's lane layout) ---- */
