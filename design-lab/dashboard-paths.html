@@ -1024,25 +1024,28 @@
      YOUR PROGRESS — self-contained living constellation (done lessons glow)
      =================================================================== */
   var skyCv, skyCtx, skyDPR=1, skyW=0, skyH=0, skyScale=1, skyRaf=0, skyLast=0, skyT=0, skyWired=false;
-  var SKGREY=[138,135,128], SKGOLD=2.399963, SKPHASE=0.65, SKRX=292, SKRY=252, SKCX=300, SKCY=286, SKVSQ=0.94;
+  var SKGREY=[138,135,128], SKGOLD=2.399963, SKPHASE=0.65, SKRX=262, SKRY=236, SKCX=300, SKCY=286, SKVSQ=0.94;
+  function mstOf(arr){ if(!arr||arr.length<2) return []; var inT=[0], used={0:1}, edges=[];   // proximity tree = a constellation
+    while(inT.length<arr.length){ var bj=-1,bk=-1,best=Infinity;
+      for(var t=0;t<inT.length;t++){ var a=arr[inT[t]]; for(var k=0;k<arr.length;k++){ if(used[k]) continue; var dx=arr[k].ox-a.ox, dy=arr[k].oy-a.oy, dd=dx*dx+dy*dy; if(dd<best){best=dd;bj=inT[t];bk=k;} } }
+      edges.push([arr[bj],arr[bk]]); used[bk]=1; inT.push(bk); } return edges; }
   function skfrac(i){ var s=Math.sin(i*127.1+311.7)*43758.5453; return s-Math.floor(s); }
   function doneRgbOf(s){ var a=hexRgb(s.a), gm=(s.k.indexOf('geography')>=0)?0.46:0.36; return mix(a,SKGREY,gm); }
   var skORDER=[8,0,3,7,6,5,2,1,4], skRefX=[], skRefY=[];
   (function(){ for(var slot=0;slot<9;slot++){ var rn=Math.sqrt((slot+0.5)/9), ang=slot*SKGOLD+SKPHASE, rj=rn*(0.92+skfrac(slot)*0.16), aj=ang+(skfrac(slot+99)-0.5)*0.42, sj=skORDER[slot]; skRefX[sj]=SKCX+Math.cos(aj)*SKRX*rj; skRefY[sj]=SKCY+Math.sin(aj)*SKRY*rj*SKVSQ; } })();
-  var skDots=[], skDotOf=[], skDust=[], skCl=[], skFoc=[0,0,0,0,0,0,0,0,0], skAny=0, skHover=-1;
+  var skDots=[], skDotOf=[], skDust=[], skCl=[], skLines=[], skFoc=[0,0,0,0,0,0,0,0,0], skAny=0, skHover=-1;
   function skyLayout(){
     if(!skyCv) return; skyDPR=Math.min(window.devicePixelRatio||1,2); skyW=skyCv.clientWidth; skyH=skyCv.clientHeight; if(!skyW||!skyH) return;
     skyCv.width=Math.round(skyW*skyDPR); skyCv.height=Math.round(skyH*skyDPR); skyCtx.setTransform(skyDPR,0,0,skyDPR,0,0);
-    var cs=Math.min(1.55,Math.min(skyW,skyH)/460); skyScale=cs; skDots=[]; skDotOf=[]; skDust=[]; skCl=[];
+    var cs=Math.min(1.45,Math.min(skyW,skyH)/470); skyScale=cs; skDots=[]; skDotOf=[]; skDust=[]; skCl=[]; skLines=[];
     SHELF.forEach(function(s,i){ var cx=skyW/2+(skRefX[i]-SKCX)*cs, cy=skyH/2+(skRefY[i]-SKCY)*cs; skCl[i]={x:cx,y:cy,dr:doneRgbOf(s)};
       skDotOf[i]=[]; var cnt=s.lessons.length; if(!cnt) return;
-      // each subject = an organic ORDERED trail (lesson 0→N wanders out from its centre) → a real little constellation
-      var rgn=Math.max(30,Math.min(66,11*Math.sqrt(cnt)))*cs, step=rgn/Math.max(3.2,Math.sqrt(cnt))*0.98;
-      var dir=skfrac(i*13+1)*6.283, px=cx, py=cy;
-      for(var d=0;d<cnt;d++){ var dn=s.lessons[d].doneFlag;
-        skDots.push((skDotOf[i][d]={subj:i,li:d,done:dn,ox:px,oy:py,x:px,y:py,ph:skfrac(i*37+d*7)*6.283,sp:0.5+skfrac(i*53+d*11)*0.4,baseR:(dn?3:2.3)}));
-        dir += (skfrac(i*7+d*5+1)-0.5)*1.5;
-        px += Math.cos(dir)*step + (cx-px)*0.05; py += Math.sin(dir)*step*0.94 + (cy-py)*0.05; }
+      // loose, airy scatter per subject (not a tight blob, not a trail); done dots toward the lit core, to-do in the halo
+      var R=Math.max(34,Math.min(78,9*Math.sqrt(cnt)))*cs;
+      for(var d=0;d<cnt;d++){ var dn=s.lessons[d].doneFlag, ang=d*SKGOLD+skfrac(i+7)*6.283, rad=R*Math.sqrt((d+0.5)/cnt);
+        var ddx=cx+Math.cos(ang)*rad, ddy=cy+Math.sin(ang)*rad*0.92;
+        skDots.push((skDotOf[i][d]={subj:i,li:d,done:dn,ox:ddx,oy:ddy,x:ddx,y:ddy,ph:skfrac(i*37+d*7)*6.283,sp:0.5+skfrac(i*53+d*11)*0.4,baseR:(dn?2.8:2.2)})); }
+      skLines[i]=mstOf(skDotOf[i]);
     });
     function speck(x,y,seed){ var sz=0.7+skfrac(seed*5+1)*0.6; skDust.push({x:x,y:y,r:sz,a:0.045+(sz-0.7)/0.6*0.06,ph:skfrac(seed*5+2)*6.283,sp:0.5+skfrac(seed*5+3)*0.5}); }
     var cols=Math.round(Math.sqrt(80*skyW/skyH))||1, gx=skyW/cols, gy=skyH/Math.ceil(80/cols);
@@ -1055,11 +1058,11 @@
     var dm=1-skAny*0.5;
     for(var u=0;u<skDust.length;u++){ var p=skDust[u], px=p.x+Math.sin(skyT*0.4*p.sp+p.ph)*2.4, py=p.y+Math.cos(skyT*0.33*p.sp+p.ph*1.3)*2.4;
       ctx.globalAlpha=p.a*(0.82+0.18*Math.sin(skyT*0.7*p.sp+p.ph*2))*dm; ctx.fillStyle='#8f8b83'; ctx.beginPath(); ctx.arc(px,py,p.r,0,6.283); ctx.fill(); }
-    // hover: trace the hovered subject's journey (lesson ORDER) as constellation lines — done stretch glows, rest faint
+    // hover: the hovered subject's lessons link up into a constellation — done links glow in its colour, the rest faint
     ctx.lineCap='round';
-    for(var hs=0;hs<9;hs++){ var hf=skFoc[hs]; if(hf<0.02||!skDotOf[hs]) continue; var arr=skDotOf[hs], cc=skCl[hs].dr;
-      for(var j=1;j<arr.length;j++){ var A=arr[j-1], B=arr[j], dq=A.done&&B.done;
-        ctx.globalAlpha=hf*(dq?0.55:0.16); ctx.lineWidth=dq?1.5:1;
+    for(var hs=0;hs<9;hs++){ var hf=skFoc[hs]; if(hf<0.02||!skLines[hs]) continue; var es=skLines[hs], cc=skCl[hs].dr;
+      for(var j=0;j<es.length;j++){ var A=es[j][0], B=es[j][1], dq=A.done&&B.done;
+        ctx.globalAlpha=hf*(dq?0.5:0.18); ctx.lineWidth=dq?1.4:1;
         ctx.strokeStyle=dq?('rgb('+cc[0]+','+cc[1]+','+cc[2]+')'):'rgb(170,164,154)';
         ctx.beginPath(); ctx.moveTo(A.x,A.y); ctx.lineTo(B.x,B.y); ctx.stroke(); } }
     ctx.lineCap='butt'; ctx.globalAlpha=1;
