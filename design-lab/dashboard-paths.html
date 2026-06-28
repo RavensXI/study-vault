@@ -126,7 +126,6 @@
   .shead{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin:.1rem .15rem 1rem}
   .shead h2{font-family:var(--font-head);font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
   .shead .hint{font-family:var(--font-head);font-size:.76rem;color:var(--text-muted)}
-  .fidnote{font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);margin:-.5rem .15rem 1rem;line-height:1.4}
   .subjgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.7rem}
   .subjtile{position:relative;display:flex;flex-direction:column;text-align:left;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);padding:.9rem .95rem 1rem;cursor:pointer;
     transition:transform .18s var(--ease),box-shadow .18s ease,border-color .18s ease}
@@ -148,9 +147,6 @@
   .topictile:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
   .topictile:focus-visible{outline:2px solid var(--anchor);outline-offset:2px}
   .topictile .thumb{height:96px;background:var(--border-lighter) center/cover no-repeat;position:relative;border-bottom:1px solid var(--border-lighter)}
-  .topictile .thumb .stage-pip{position:absolute;top:.5rem;right:.5rem;display:inline-flex;align-items:center;gap:.28rem;background:rgba(255,255,255,.9);
-    border:1px solid var(--border-light);border-radius:20px;padding:.16rem .5rem;font-family:var(--font-head);font-size:.6rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary)}
-  .topictile .stage-pip i{width:6px;height:6px;border-radius:50%;background:var(--ac)}
   .topictile .body{display:flex;flex-direction:column;padding:.7rem .8rem .85rem}
   .topictile .un{font-family:var(--font-head);font-size:.92rem;font-weight:600;letter-spacing:-.005em;color:var(--text-primary);line-height:1.25}
   .topictile .nx{font-family:var(--font-read);font-size:.78rem;color:var(--text-muted);margin-top:.3rem;min-height:1.1em;
@@ -162,18 +158,6 @@
 
   /* ===== path screen ===== */
   .pathwrap{position:relative;scroll-margin-top:124px}
-  .pathtools{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;margin:.1rem 0 .3rem}
-  .fidelity{display:inline-flex;align-items:center;gap:.3rem;background:var(--bg-body);border:1px solid var(--border-light);border-radius:9px;padding:3px;box-shadow:var(--shadow-sm)}
-  .fidelity .flbl{font-family:var(--font-head);font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);padding:0 .45rem 0 .35rem}
-  .fidelity button{font-family:var(--font-head);font-size:.72rem;font-weight:600;color:var(--text-muted);background:transparent;border:0;border-radius:6px;padding:.34rem .62rem;transition:background .12s,color .12s}
-  .fidelity button:hover{background:var(--border-lighter);color:var(--text-secondary)}
-  .fidelity button.on{background:var(--acc);color:#fff}
-  .fidelity button.off{opacity:.34;cursor:not-allowed}
-  .fidelity button.off:hover{background:transparent;color:var(--text-muted)}
-  .fidelity .auto{margin-left:.1rem;border-left:1px solid var(--border-light);padding-left:.4rem}
-  .prevbtn{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--text-secondary);background:var(--bg-card);border:1px solid var(--border-light);border-radius:9px;padding:.42rem .8rem;box-shadow:var(--shadow-sm);transition:background .14s,color .14s,border-color .14s}
-  .prevbtn:hover{border-color:var(--text-muted);color:var(--text-primary)}
-  .prevbtn[disabled]{opacity:.4;cursor:default}
   @media(prefers-reduced-motion:reduce){ .pbg{transition:none} }
 
   .pcol{max-width:540px;margin:.2rem auto 0;padding:0 .5rem}
@@ -575,9 +559,7 @@
   SHELF.forEach(function(s){ var acc=hexRgb(s.a), gm=(s.k.indexOf('geography')>=0)?0.42:0.30;
     s.swatch='rgb('+mix(acc,GREY,gm).join(',')+')'; });
 
-  /* ---------- fidelity ladder (Tom's idea): mastery → backdrop sharpness ---------- */
-  var STAGES=['','blueprint','refined','photo'];      // '' = base sketch
-  var STAGE_LBL={'':'Sketch','blueprint':'Blueprint','refined':'Refined','photo':'Photoreal'};
+  /* ---------- fidelity ladder (Tom's idea): mastery → backdrop sharpness, no labels ---------- */
   function autoStage(frac){ return frac>=0.999?'photo':(frac>=0.66?'refined':(frac>=0.33?'blueprint':'')); }
   var BG={};   // manifest: "subjectKey/unitSlug" -> {file,accent,name}
   var bgOk={}; // cache of which resolved urls actually load (file -> bool)
@@ -596,7 +578,6 @@
       probeImg(baseUrl, function(ok2){ cb(ok2?baseUrl:null, ''); });   // staged missing → fall to base sketch
     });
   }
-  function stageExists(baseUrl, stage, cb){ if(!stage) return cb(true); resolveBg(baseUrl, stage, function(u,used){ cb(used===stage); }); }
 
   /* ---------- toast ---------- */
   var toastEl=document.getElementById('toast'), toastT;
@@ -773,23 +754,20 @@
     var head=document.createElement('div'); head.className='shead';
     head.innerHTML='<h2>'+esc(s.n)+'</h2><span class="hint">'+s.done+' / '+s.total+' lessons · choose a topic</span>';
     scTopics.appendChild(head);
-    var note=document.createElement('p'); note.className='fidnote';
-    note.innerHTML='✦ A topic’s artwork sharpens as you master it — a rough sketch when you start, a finished picture at 100%.';
-    scTopics.appendChild(note);
     var grid=document.createElement('div'); grid.className='topicgrid';
     s.units.forEach(function(u,ui){
       var pct=Math.round(u.frac*100), stage=autoStage(u.frac);
       var nextL=null; for(var k=0;k<u.lessons.length;k++){ if(!u.lessons[k].doneFlag){ nextL=u.lessons[k]; break; } }
       var nxt = nextL? ('Up next · L'+nextL.no+' '+nextL.t) : 'Topic complete ✓';
       var t=document.createElement('button'); t.className='topictile'; t.style.setProperty('--ac',s.swatch);
-      t.innerHTML='<span class="thumb"><span class="stage-pip"><i></i><span class="pl">'+STAGE_LBL[stage]+'</span></span></span>'+
+      t.innerHTML='<span class="thumb"></span>'+
         '<span class="body"><span class="un">'+esc(u.name)+'</span>'+
         '<span class="nx">'+esc(nxt)+'</span>'+
         '<span class="pbar"><i style="width:'+pct+'%"></i></span>'+
         '<span class="pm"><b>'+u.done+'</b> / '+u.lessons.length+' lessons · '+pct+'%</span></span>';
-      var thumb=t.querySelector('.thumb'), pl=t.querySelector('.pl');
-      // pip shows the stage we can actually show (honest); art + label update together once probed
-      resolveBg(bgBase(si,ui), stage, function(url,used){ if(url) thumb.style.backgroundImage='url('+url+')'; if(pl) pl.textContent=STAGE_LBL[used]; });
+      var thumb=t.querySelector('.thumb');
+      // backdrop shows the stage we can actually render (the sharpening is for students to notice on their own)
+      resolveBg(bgBase(si,ui), stage, function(url){ if(url) thumb.style.backgroundImage='url('+url+')'; });
       t.addEventListener('click',function(){ navExpand(si); showPath(si,ui); });
       grid.appendChild(t);
     });
@@ -808,62 +786,18 @@
     document.documentElement.style.setProperty('--acc-mute',accMute);
     scPath.innerHTML=
       '<div class="pathwrap">'+
-        '<div class="pathtools"><div class="fidelity" id="fidelity"></div><button class="prevbtn" id="prevMastery" title="Watch this topic sharpen as you master it">▶ Preview mastery</button></div>'+
         '<div class="pcol"><div class="pstage-host" id="phost"></div></div>'+
         '<div class="pfoot"><span class="line"></span><span class="lbl">'+esc(u.name)+'</span><span class="ct">'+u.done+' / '+u.lessons.length+'</span><span class="line"></span></div>'+
       '</div>';
-    buildFidelity(si,ui);
     renderPath(si,ui);
-    var pm=document.getElementById('prevMastery'); if(pm) pm.addEventListener('click',function(){ previewMastery(si,ui); });
     showScreen(scPath);
-    // land at the page top so the toolbar (Detail toggle + Preview mastery) is always in view
     window.scrollTo({top:0, behavior:reduceMotion?'auto':'smooth'});
   }
 
-  // demo: step a topic through the fidelity states it has, cross-fading + narrating each
-  // — what a student sees as they cross 33% / 66% / 100% mastery of the topic.
-  var previewing=false;
-  function previewMastery(si,ui){
-    if(previewing) return;
-    var base=bgBase(si,ui), seq=['','blueprint','refined','photo'], have=[], pending=seq.length;
-    seq.forEach(function(st,i){ stageExists(base,st,function(ok){ have[i]=ok; if(--pending===0) run(); }); });
-    function run(){
-      var steps=seq.filter(function(st,i){ return have[i]; });
-      if(steps.length<2){ toast('Higher-detail art for this topic isn’t generated yet'); return; }
-      previewing=true; var btn=document.getElementById('prevMastery'); if(btn) btn.disabled=true;
-      var i=0;
-      (function tick(){
-        if(i>=steps.length){ previewing=false; if(btn) btn.disabled=false; pathCtx.override=null; applyStage(); return; }
-        pathCtx.override=steps[i]; applyStage();
-        var pct=[0,33,66,100][seq.indexOf(steps[i])]||0;
-        toast('✦ '+esc(SHELF[si].units[ui].name)+' · '+pct+'% mastered — art sharpened to <b>'+STAGE_LBL[steps[i]]+'</b>');
-        i++; setTimeout(tick, reduceMotion?700:1750);
-      })();
-    }
-  }
-
-  function buildFidelity(si,ui){
-    var u=SHELF[si].units[ui], base=bgBase(si,ui);
-    var bar=document.getElementById('fidelity');
-    bar.innerHTML='<span class="flbl">Detail</span>';
-    STAGES.forEach(function(st){
-      var b=document.createElement('button'); b.textContent=STAGE_LBL[st]; b.setAttribute('data-st',st);
-      b.addEventListener('click',function(){ if(b.disabled) return; pathCtx.override=st; applyStage(); });
-      bar.appendChild(b);
-      // only enable a stage once its art exists for THIS unit (sketch always available)
-      if(st) stageExists(base, st, function(ok){ if(!ok){ b.disabled=true; b.classList.add('off'); b.title='Not generated for this topic yet'; } });
-    });
-    var a=document.createElement('button'); a.className='auto'; a.textContent='Auto'; a.title='Match this topic’s mastery ('+Math.round(u.frac*100)+'%)';
-    a.addEventListener('click',function(){ pathCtx.override=null; applyStage(); });
-    bar.appendChild(a);
-    applyStage();
-  }
-  function curStage(){ var u=SHELF[pathCtx.si].units[pathCtx.ui]; return pathCtx.override==null? autoStage(u.frac) : pathCtx.override; }
+  // the backdrop renders at the stage this topic's mastery has unlocked — no labels, no controls;
+  // the sharpening is something students notice on their own as they complete lessons.
   function applyStage(){
-    var st=curStage(), si=pathCtx.si, ui=pathCtx.ui;
-    var bar=document.getElementById('fidelity'); if(bar){ [].slice.call(bar.querySelectorAll('button')).forEach(function(b){
-      if(b.classList.contains('auto')) b.classList.toggle('on', pathCtx.override==null);
-      else b.classList.toggle('on', pathCtx.override!=null && b.getAttribute('data-st')===st); }); }
+    var si=pathCtx.si, ui=pathCtx.ui, st=autoStage(SHELF[si].units[ui].frac);
     var host=document.getElementById('phost'), pstage=host&&host.querySelector('.pstage');
     if(!pstage||!pstage._bg) return;
     resolveBg(bgBase(si,ui), st, function(url){
