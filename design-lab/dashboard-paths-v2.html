@@ -166,7 +166,20 @@
   .lane-cap{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;margin:0 .2rem .4rem}
   .lc-nm{font-family:var(--font-head);font-size:.96rem;font-weight:600;color:var(--text-primary)}
   .lc-ct{font-family:var(--font-head);font-size:.73rem;color:var(--text-muted);font-variant-numeric:tabular-nums;flex:none}
-  .lane-track{overflow-x:auto;overflow-y:hidden;border:1px solid var(--border-light);border-radius:var(--r);background:var(--bg-card);box-shadow:var(--shadow-sm);scrollbar-width:thin}
+  .lane-scroller{position:relative}
+  .lane-track{overflow-x:auto;overflow-y:hidden;border:1px solid var(--border-light);border-radius:var(--r);background:var(--bg-card);box-shadow:var(--shadow-sm);
+    cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;scrollbar-width:none;-ms-overflow-style:none}
+  .lane-track::-webkit-scrollbar{display:none;height:0;width:0}
+  .lane-track.dragging{cursor:grabbing}
+  .lane-track.dragging .lnode{cursor:grabbing}
+  .lane-arrow{position:absolute;top:50%;transform:translateY(-50%);width:38px;height:38px;border-radius:50%;border:1px solid var(--border-light);
+    background:rgba(255,255,255,.84);backdrop-filter:blur(4px);color:var(--text-secondary);display:grid;place-items:center;cursor:pointer;z-index:6;
+    box-shadow:var(--shadow-md);opacity:.92;transition:opacity .16s var(--ease),background .16s,transform .16s,color .16s}
+  .lane-arrow svg{width:18px;height:18px}
+  .lane-arrow:hover{background:#fff;color:var(--text-primary);transform:translateY(-50%) scale(1.06)}
+  .lane-arrow:active{transform:translateY(-50%) scale(.94)}
+  .lane-arrow.l{left:10px} .lane-arrow.r{right:10px}
+  .lane-arrow.hide{opacity:0;pointer-events:none;transform:translateY(-50%) scale(.9)}
   .lane-inner{position:relative;background-repeat:repeat-x;background-size:auto 100%;background-position:left center}
   .lane-inner:not(.hasart){background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 9%,#fff),color-mix(in srgb,var(--acc) 3%,#fff))}
   /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
@@ -563,6 +576,8 @@
   var CHECK='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"/></svg>';
   var PLAY='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>';
   var CHEV='<svg class="cv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+  var CHEVR='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>';
+  var CHEVL='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>';
 
   /* ---------- SAM: real subjects + the actual units this student takes ---------- */
   var bySlug={}; SUBJECTS.forEach(function(s){ bySlug[s.k]=s; });
@@ -795,9 +810,14 @@
       var pct=Math.round(u.frac*100);
       var lane=document.createElement('section'); lane.className='lane'; lane.dataset.ui=ui;
       lane.innerHTML='<div class="lane-cap"><span class="lc-nm">'+esc(u.name)+'</span><span class="lc-ct">'+u.done+' / '+u.lessons.length+' lessons · '+pct+'%</span></div>'+
-        '<div class="lane-track"><div class="lane-inner"></div></div>';
+        '<div class="lane-scroller">'+
+          '<button class="lane-arrow l hide" aria-label="Scroll left">'+CHEVL+'</button>'+
+          '<div class="lane-track"><div class="lane-inner"></div></div>'+
+          '<button class="lane-arrow r" aria-label="Scroll right">'+CHEVR+'</button>'+
+        '</div>';
       wrap.appendChild(lane);
       renderLane(si, ui, lane.querySelector('.lane-inner'));
+      wireLaneScroll(lane.querySelector('.lane-scroller'));
     });
     showScreen(scTopics);
     if(wantUi>=0){ var t=wrap.querySelector('.lane[data-ui="'+wantUi+'"]'); if(t) requestAnimationFrame(function(){ t.scrollIntoView({block:'center',behavior:reduceMotion?'auto':'smooth'}); }); }
@@ -838,6 +858,42 @@
       img.onerror=function(){ build(Math.max(720,lessonW)); };
       img.src=url;
     } else { build(Math.max(720,lessonW)); }
+  }
+
+  // smooth horizontal scroll via setInterval (native smooth + rAF are unreliable on these tracks)
+  function tweenScrollX(el, target){
+    target=Math.max(0, Math.min(el.scrollWidth-el.clientWidth, target));
+    if(el._tw){ clearInterval(el._tw); el._tw=0; }
+    var start=el.scrollLeft, d=target-start; if(Math.abs(d)<1) return;
+    if(reduceMotion){ el.scrollLeft=target; return; }
+    var i=0, N=20;
+    el._tw=setInterval(function(){ i++; var p=i/N, e=1-Math.pow(1-p,3); el.scrollLeft=start+d*e;
+      if(i>=N){ clearInterval(el._tw); el._tw=0; el.scrollLeft=target; } }, 16);
+    setTimeout(function(){ if(el._tw){ clearInterval(el._tw); el._tw=0; el.scrollLeft=target; } }, N*16+160);  // guarantee arrival if timers throttle
+  }
+  // click-drag to pan + left/right carousel buttons (no visible scrollbar)
+  function wireLaneScroll(scroller){
+    if(!scroller) return;
+    var track=scroller.querySelector('.lane-track'),
+        aL=scroller.querySelector('.lane-arrow.l'), aR=scroller.querySelector('.lane-arrow.r');
+    function update(){ var max=track.scrollWidth-track.clientWidth-1;
+      aL.classList.toggle('hide', track.scrollLeft<=2);
+      aR.classList.toggle('hide', max<=2 || track.scrollLeft>=max); }
+    track.addEventListener('scroll', update);
+    function page(dir){ tweenScrollX(track, track.scrollLeft + dir*Math.max(240, track.clientWidth*0.78));
+      [120,360,560].forEach(function(t){ setTimeout(update, t); }); }   // refresh arrow visibility as the tween lands
+    aL.addEventListener('click', function(){ page(-1); });
+    aR.addEventListener('click', function(){ page(1); });
+    // drag-to-pan
+    var down=false, sx=0, sl=0, moved=0;
+    track.addEventListener('pointerdown', function(e){ if(e.button!==0) return; down=true; moved=0; sx=e.clientX; sl=track.scrollLeft;
+      track.classList.add('dragging'); if(track.setPointerCapture) try{ track.setPointerCapture(e.pointerId); }catch(_){} });
+    track.addEventListener('pointermove', function(e){ if(!down) return; var dx=e.clientX-sx; if(Math.abs(dx)>moved) moved=Math.abs(dx); track.scrollLeft=sl-dx; });
+    function end(){ if(!down) return; down=false; track.classList.remove('dragging'); }
+    track.addEventListener('pointerup', end); track.addEventListener('pointercancel', end);
+    // a real drag must not fire the node's click
+    track.addEventListener('click', function(e){ if(moved>5){ e.stopPropagation(); e.preventDefault(); } }, true);
+    [80,360,900].forEach(function(t){ setTimeout(update, t); });   // re-check once the async banner sizing lands
   }
 
   /* ---- (portrait single-path machinery from the base design — unused in V2's lane layout) ---- */
