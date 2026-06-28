@@ -36,9 +36,8 @@ LANE_H, PAD_L, GAP_X = 264, 78, 124
 PANO_ASPECT = 21/9                 # widest native single image
 OVERLAP = 140                      # px crossfade between stitched segments (at native height)
 
-NOPATH = ("Keep the HORIZONTAL CENTRE as a calm, open, uncluttered band of quiet warm off-white "
-          "paper — absolutely NO painted path, road, river, ribbon, line or trail of any kind "
-          "(a separate learning path is drawn on top later). ABSOLUTELY NO text, words, letters or numbers.")
+NOPATH = ("Do NOT draw any path, road, river, ribbon, line or trail. ABSOLUTELY NO text, words, "
+          "letters, numbers or labels anywhere.")
 
 def extract(resp):
     for cand in (resp.candidates or []):
@@ -95,10 +94,11 @@ def build(skey, slug, n_lessons):
     k = min(MAX_EXTENDS, n_extends_for(n_lessons))
     tmp = os.path.join(ASSETS, f"_strip-{skey}-{slug}")
     pano_prompt = (
-        f"Recompose as a WIDE horizontal banner, a single continuous illustrated scene. Use the SAME subjects "
-        f"as the picture, spread EVENLY along the length: {motifs}; render each as exactly what it is, do not "
-        f"reinterpret. Place every motif along the UPPER and LOWER edges only. {NOPATH} Full colour, soft natural "
-        f"light, warm off-white paper, gentle {word} ({hexc}) tones; far-left and far-right edges calm and open.")
+        f"Recompose as a WIDE horizontal banner: ONE rich, cohesive illustrated scene that fills the whole frame "
+        f"top to bottom. Use the SAME subjects as the picture, woven together naturally and overlapping across the "
+        f"full height and length like a detailed editorial science illustration: {motifs}; render each as exactly "
+        f"what it is, do not reinterpret. No empty bands — compose them into one connected scene. {NOPATH} Full "
+        f"colour, soft natural light, warm off-white paper, gentle {word} ({hexc}) tones.")
     print(f"[{skey}/{slug}] {n_lessons} lessons -> {k} extend(s)", flush=True)
     p0 = gen([pano_prompt, Image.open(src)], tmp + "-0.png")
     if not p0:
@@ -111,11 +111,11 @@ def build(skey, slug, n_lessons):
         # subjects. "Continue the scene" makes the model copy the objects it sees; an explicit replace doesn't.
         ext_prompt = (
             f"Make a WIDE horizontal banner in EXACTLY the same illustrated style, warm off-white paper and soft "
-            f"{word} ({hexc}) palette as the reference image, but with a COMPLETELY DIFFERENT cast of subjects. "
-            f"Do NOT draw any of these (they appear elsewhere already): {motifs}. Instead, along the TOP and BOTTOM "
-            f"edges only, draw a fresh set of other real subjects from the GCSE topic \"{uname}\" — different "
-            f"objects, organs, organisms, apparatus or diagrams that fit the topic. {NOPATH} Far-left and far-right "
-            f"edges calm and open.")
+            f"{word} ({hexc}) palette as the reference image — ONE rich cohesive scene filling the whole frame top "
+            f"to bottom — but with a COMPLETELY DIFFERENT cast of subjects. Do NOT draw any of these (they appear "
+            f"elsewhere already): {motifs}. Instead weave together a fresh set of other real subjects from the GCSE "
+            f"topic \"{uname}\" — different objects, organs, organisms, apparatus or diagrams that fit the topic, "
+            f"overlapping naturally across the full height. {NOPATH}")
         pi = gen([ext_prompt, src_img], tmp + f"-{i+1}.png")
         if not pi:
             print(f"   extend {i+1} failed, stopping early", flush=True); break
@@ -123,7 +123,6 @@ def build(skey, slug, n_lessons):
     # photo strip = the canonical composition; lower fidelity stages are ALIGNED transforms of the SAME
     # segments (same objects in the same places) so the lane can sharpen in place as mastery rises.
     keep = ("Keep the SAME objects in the SAME positions, same sizes and the same composition as the input image. "
-            "Keep the horizontal centre band empty (calm warm paper, no objects, no path). "
             "ABSOLUTELY NO text, words, letters or numbers.")
     stage_prompts = {
         "refined":   (f"Redraw this exact image as a detailed PEN-AND-INK and soft-watercolour illustration: confident "
