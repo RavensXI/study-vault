@@ -624,7 +624,7 @@
     s.swatch='rgb('+mix(acc,GREY,gm).join(',')+')'; });
 
   /* ---------- fidelity ladder (Tom's idea): mastery → backdrop sharpness, no labels ---------- */
-  function autoStage(frac){ return frac>=0.999?'photo':(frac>=0.34?'refined':''); }   // 3 stages: sketch / refined / complete(=photo)
+  function autoStage(frac){ return frac>=0.999?'photo':'refined'; }   // sketch dropped — refined is the look, snaps to the real photo at 100%
   var BG={};   // manifest: "subjectKey/unitSlug" -> {file,accent,name}
   var bgOk={}; // cache of which resolved urls actually load (file -> bool)
   function bgBase(si,ui){ var key=SHELF[si].k+'/'+SHELF[si].units[ui].slug, m=BG[key]; return m?('assets/'+m.file):null; }
@@ -901,7 +901,7 @@
     art._act=nextI; art.classList.add('hasart');
   }
   // dev preview control: step the art through Sketch / Refined / Complete (the stages that exist)
-  var STAGE_LIST=[{k:'',n:'Sketch'},{k:'refined',n:'Refined'},{k:'photo',n:'Complete'}];
+  var STAGE_LIST=[{k:'refined',n:'Refined'},{k:'photo',n:'Complete'}];
   function buildStager(art, landBase, curStage){
     if(!landBase) return; var tools=art.querySelector('.lane-hero-tools'); if(!tools || tools.querySelector('.stager')) return;
     var urls={}, pending=STAGE_LIST.length;
