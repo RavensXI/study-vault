@@ -163,11 +163,13 @@
   /* ===== V2: stacked thin landscape lanes (units down, lessons across) ===== */
   .lanes{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:1.4rem;align-items:start;padding-bottom:1.4rem}
   .lane{scroll-margin-top:96px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;display:flex;flex-direction:column}
-  .lane-cap{display:flex;align-items:center;gap:.6rem;padding:.55rem .8rem .55rem;margin:0}
-  .lc-nm{font-family:var(--font-head);font-size:.96rem;font-weight:600;color:var(--text-primary);flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .lc-ct{font-family:var(--font-head);font-size:.73rem;color:var(--text-muted);font-variant-numeric:tabular-nums;flex:none}
-  /* dev preview: step the art through sketch / refined / complete */
-  .stager{display:inline-flex;gap:.1rem;background:var(--bg-card);border:1px solid var(--border-light);border-radius:7px;padding:2px;flex:none}
+  /* unit title lives ON the hero now (masthead reveal) — see .lane-hero-cap below */
+  .lane-hero-cap .lc-nm{display:block;font-family:var(--font-head);font-size:1.06rem;font-weight:700;line-height:1.14;color:#fff;
+    text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 14px rgba(0,0,0,.5)}
+  .lane-hero-cap .lc-ct{display:block;margin-top:.2rem;font-family:var(--font-head);font-size:.74rem;font-weight:600;
+    color:rgba(255,255,255,.86);font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.6)}
+  /* dev preview: step the art through sketch / refined / complete (top-right of the hero, also reveals on hover) */
+  .stager{display:inline-flex;gap:.1rem;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.5);border-radius:7px;padding:2px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.18)}
   .stbtn{font-family:var(--font-head);font-size:.62rem;font-weight:700;color:var(--text-muted);background:transparent;border:0;border-radius:5px;padding:.22rem .46rem;cursor:pointer;transition:background .14s,color .14s}
   .stbtn:hover{color:var(--text-secondary)}
   .stbtn.on{background:var(--acc);color:#fff}
@@ -190,7 +192,14 @@
   .lane-hero:not(.hasart){background:linear-gradient(180deg,color-mix(in srgb,var(--acc) 12%,#fff),color-mix(in srgb,var(--acc) 4%,#fff))}
   .la-layer{position:absolute;inset:0;background-size:cover;background-position:center;background-repeat:no-repeat;opacity:0;transition:opacity .9s ease}
   .la-layer.show{opacity:1}
-  .lane-cap{order:1}
+  /* MASTHEAD REVEAL: clean image by default; on hover a bottom scrim + the unit title fade in together (like the lesson pages) */
+  .lane-hero::after{content:"";position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .5s ease;pointer-events:none;
+    background:linear-gradient(to bottom,rgba(0,0,0,0) 34%,rgba(0,0,0,.4) 67%,rgba(0,0,0,.8) 100%)}
+  .lane-hero:hover::after{opacity:1}
+  .lane-hero-cap{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 .95rem .75rem;opacity:0;transition:opacity .5s ease;pointer-events:none}
+  .lane-hero:hover .lane-hero-cap{opacity:1}
+  .lane-hero-tools{position:absolute;top:.6rem;right:.6rem;z-index:4;opacity:0;transition:opacity .5s ease;pointer-events:none}
+  .lane-hero:hover .lane-hero-tools{opacity:1;pointer-events:auto}
   .lane-scroller{order:2}
   .lane-rail{position:relative;flex:none;height:124px}
   /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
@@ -820,8 +829,10 @@
     s.units.forEach(function(u,ui){
       var pct=Math.round(u.frac*100);
       var lane=document.createElement('section'); lane.className='lane'; lane.dataset.ui=ui;
-      lane.innerHTML='<div class="lane-cap"><span class="lc-nm">'+esc(u.name)+'</span><span class="lc-ct">'+u.done+' / '+u.lessons.length+' lessons · '+pct+'%</span></div>'+
-        '<div class="lane-hero"><i class="la-layer"></i><i class="la-layer"></i></div>'+
+      lane.innerHTML='<div class="lane-hero"><i class="la-layer"></i><i class="la-layer"></i>'+
+          '<div class="lane-hero-tools"></div>'+
+          '<div class="lane-hero-cap"><span class="lc-nm">'+esc(u.name)+'</span><span class="lc-ct">'+u.done+' / '+u.lessons.length+' lessons · '+pct+'%</span></div>'+
+        '</div>'+
         '<div class="lane-scroller">'+
           '<button class="lane-arrow l hide" aria-label="Scroll left">'+CHEVL+'</button>'+
           '<div class="lane-track"><div class="lane-rail"></div></div>'+
@@ -893,14 +904,13 @@
   // dev preview control: step the art through Sketch / Refined / Complete (the stages that exist)
   var STAGE_LIST=[{k:'',n:'Sketch'},{k:'refined',n:'Refined'},{k:'photo',n:'Complete'}];
   function buildStager(art, landBase, curStage){
-    if(!landBase) return; var lane=art.closest('.lane'); if(!lane) return;
-    var cap=lane.querySelector('.lane-cap'); if(!cap || cap.querySelector('.stager')) return;
+    if(!landBase) return; var tools=art.querySelector('.lane-hero-tools'); if(!tools || tools.querySelector('.stager')) return;
     var urls={}, pending=STAGE_LIST.length;
     STAGE_LIST.forEach(function(st){ var u=st.k? landBase.replace(/\.png$/i,'-'+st.k+'.png') : landBase;
       probeImg(u, function(ok){ if(ok) urls[st.k]=u; if(--pending===0) render(); }); });
     function render(){
       var have=STAGE_LIST.filter(function(st){ return urls[st.k]; });
-      if(have.length<2 || cap.querySelector('.stager')) return;
+      if(have.length<2 || tools.querySelector('.stager')) return;
       var box=document.createElement('div'); box.className='stager';
       have.forEach(function(st){
         var b=document.createElement('button'); b.className='stbtn'+(st.k===curStage?' on':''); b.textContent=st.n;
@@ -908,7 +918,7 @@
           [].forEach.call(box.children,function(x){ x.classList.toggle('on', x===b); }); });
         box.appendChild(b);
       });
-      cap.appendChild(box);
+      tools.appendChild(box);
     }
   }
 
