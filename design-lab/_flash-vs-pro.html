@@ -9,25 +9,26 @@
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;padding:2.4rem clamp(1rem,4vw,3rem)}
   h1{font-size:1.5rem;font-weight:700;margin:0 0 .3rem}
-  .sub{color:var(--muted);font-size:.95rem;margin:0 0 .5rem;max-width:66ch}
-  .note{font-size:.85rem;color:#a8542f;background:#fbeee6;border:1px solid #f0d6c4;border-radius:9px;padding:.6rem .8rem;margin:0 0 2rem;max-width:66ch}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 .5rem;max-width:70ch}
+  .note{font-size:.85rem;color:#a8542f;background:#fbeee6;border:1px solid #f0d6c4;border-radius:9px;padding:.6rem .8rem;margin:0 0 2rem;max-width:70ch}
   .row{margin:0 0 2.4rem}
   .row h2{font-size:1.02rem;font-weight:600;margin:0 0 .15rem}
   .row .kind{font-size:.8rem;color:var(--muted);margin:0 0 .7rem}
-  .pair{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+  .trip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
   figure{margin:0}
-  figure img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(29,28,26,.06),0 18px 36px -28px rgba(29,28,26,.35);display:block;background:#eee}
-  figcaption{font-size:.8rem;font-weight:700;margin-top:.5rem;text-transform:uppercase;letter-spacing:.06em}
-  .flash figcaption{color:#9a7b1e}
+  figure img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:12px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(29,28,26,.06),0 14px 30px -26px rgba(29,28,26,.35);display:block;background:#eee}
+  figcaption{font-size:.78rem;font-weight:700;margin-top:.45rem;text-transform:uppercase;letter-spacing:.05em}
+  .f1 figcaption{color:#9a7b1e}
+  .f2 figcaption{color:#a8542f}
   .pro figcaption{color:#2f7d57}
   .tag{font-weight:500;text-transform:none;letter-spacing:0;color:var(--muted)}
-  @media(max-width:680px){ .pair{grid-template-columns:1fr} }
+  @media(max-width:760px){ .trip{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
-  <h1>Line &amp; wash — Flash vs Pro</h1>
-  <p class="sub">Same source hero, same line-and-wash prompt, same run. Left = <b>Flash</b> (gemini-2.5-flash-image, ~$0.04). Right = <b>Pro</b> (Nano Banana Pro, ~$0.13). The question: does Flash hold the linework and composition well enough to use at scale?</p>
-  <p class="note"><b>Note:</b> the single-person portrait (An Inspector Calls — a J.B. Priestley photo) was refused by <b>both</b> models — neither will redraw a recognisable real person. That's a sourcing rule, not a model choice.</p>
+  <h1>Line &amp; wash — Flash v1 / Flash v2 / Pro</h1>
+  <p class="sub">Same source hero, same run. <b>Flash v1</b> = original prompt. <b>Flash v2</b> = much stronger "hand-drawn ink, no photo texture, no text" prompt. <b>Pro</b> = Nano Banana Pro. The question was whether a stronger prompt makes Flash match Pro.</p>
+  <p class="note"><b>Verdict:</b> it doesn't. The stronger prompt left the hard cases failing (micrograph stays photographic, treaty keeps its text) and destabilised the good ones — the Ford line lost its watercolour and went monochrome ink, Macbeth went more photographic. The Flash↔Pro gap is a model limit, not a prompt limit. (The single-person portrait was refused by both models — a sourcing rule.)</p>
   <div id="rows"></div>
 <script>
   var UNITS=[
@@ -35,14 +36,15 @@
     ['science-aqa','biology-paper-1','Biology Paper 1','abstract micrograph'],
     ['geography-edexcel-b','uk-geographical-issues','UK Geographical Issues','landscape'],
     ['history-ocr','usa-people-state-1919-1948','USA 1919–1948','documentary — figures'],
-    ['history-ocr','international-relations-1918-1975','International Relations','group photo / crowd']
+    ['history-ocr','international-relations-1918-1975','International Relations','treaty document']
   ];
   var host=document.getElementById('rows');
   UNITS.forEach(function(u){
     var base='assets/path-bg-u-'+u[0]+'-'+u[1];
     var sec=document.createElement('section'); sec.className='row';
-    sec.innerHTML='<h2>'+u[2]+'</h2><div class="kind">'+u[3]+'</div><div class="pair">'+
-      '<figure class="flash"><img loading="lazy" src="'+base+'-cmp-flash.png" alt=""><figcaption>Flash <span class="tag">~$0.04</span></figcaption></figure>'+
+    sec.innerHTML='<h2>'+u[2]+'</h2><div class="kind">'+u[3]+'</div><div class="trip">'+
+      '<figure class="f1"><img loading="lazy" src="'+base+'-cmp-flash.png" alt=""><figcaption>Flash v1 <span class="tag">~$0.04</span></figcaption></figure>'+
+      '<figure class="f2"><img loading="lazy" src="'+base+'-cmp-flashv2.png" alt=""><figcaption>Flash v2 <span class="tag">stronger prompt</span></figcaption></figure>'+
       '<figure class="pro"><img loading="lazy" src="'+base+'-cmp-pro.png" alt=""><figcaption>Pro <span class="tag">~$0.13</span></figcaption></figure>'+
       '</div>';
     host.appendChild(sec);
