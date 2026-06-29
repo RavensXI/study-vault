@@ -35,6 +35,29 @@
     if (b) set(b.getAttribute('data-skin'));
   });
 
+  // LINE-AND-WASH PILOT (localhost only) — if a refined hero exists for this
+  // lesson's hero image (built by _designlab_lw_pilot.py), swap it in so the
+  // real lesson page shows the signature ink-and-wash treatment. Keyed by the
+  // lesson's stored hero URL (query stripped); lessons with no refined variant
+  // (e.g. Pro refused a person photo) simply keep their photo.
+  var LW_MANIFEST = null;
+  fetch('/design-lab/_lw_manifest.json')
+    .then(function (r) { return r.ok ? r.json() : {}; })
+    .then(function (m) { LW_MANIFEST = m || {}; trySwapHero(0); })
+    .catch(function () { LW_MANIFEST = {}; });
+  function lwNorm(u) { return (u || '').split('?')[0]; }
+  function trySwapHero(attempt) {
+    if (!LW_MANIFEST) return;
+    var img = document.getElementById('hero-image');
+    if (!img || !img.getAttribute('src')) {
+      if (attempt < 50) setTimeout(function () { trySwapHero(attempt + 1); }, 200);
+      return;
+    }
+    if (img.dataset.lwSwapped) return;
+    var lw = LW_MANIFEST[lwNorm(img.getAttribute('src'))] || LW_MANIFEST[lwNorm(img.src)];
+    if (lw) { img.dataset.lwSwapped = '1'; img.removeAttribute('srcset'); img.src = lw; }
+  }
+
   // OLD production first-visit onboarding to strip in the reader redesign:
   // anon-welcome ("First time at StudyVault?"), whats-new ("recently built"
   // toast), lesson-tutorial tooltips, and any legacy coach/walkthrough/spotlight
@@ -90,6 +113,7 @@
     fixProgressCount();          // recount "X of N" from VISIBLE items (highlight task hidden)
     evenA11yDividers();
     revealMasthead();
+    trySwapHero(0);              // line-and-wash pilot: swap in the refined hero if one exists
     buildTourReplay();
     buildUtilityRow();      // embed bug + replay-tour in the panel, under the video
     maybeStartTour();

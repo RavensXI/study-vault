@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Line &amp; wash pilot — SAM's History</title>
+<style>
+  :root{ --bg:#faf8f5; --ink:#2d2a26; --muted:#8a857c; --line:#e7e3dc; --acc:#5b3776; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;padding:2.4rem clamp(1rem,4vw,3rem)}
+  h1{font-size:1.55rem;font-weight:700;margin:0 0 .3rem}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 .4rem;max-width:72ch}
+  .stat{font-size:.9rem;color:var(--ink);margin:0 0 2rem}
+  .stat b{color:var(--acc)}
+  h2{font-size:1.05rem;font-weight:700;margin:2rem 0 .9rem;padding-bottom:.4rem;border-bottom:1px solid var(--line)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:1rem}
+  a.card{display:block;text-decoration:none;color:inherit;background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;
+    box-shadow:0 1px 2px rgba(29,28,26,.05);transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
+  a.card:hover{transform:translateY(-3px);box-shadow:0 1px 2px rgba(29,28,26,.05),0 18px 34px -24px rgba(29,28,26,.4);border-color:color-mix(in srgb,var(--acc) 40%,var(--line))}
+  .thumb{position:relative;width:100%;aspect-ratio:3/2;background:#ece8e2;overflow:hidden}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb.photo{display:grid;place-items:center;background:repeating-linear-gradient(45deg,#efe9e1,#efe9e1 10px,#e9e2d8 10px,#e9e2d8 20px)}
+  .badge{position:absolute;top:.5rem;left:.5rem;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    padding:.2rem .45rem;border-radius:6px;backdrop-filter:blur(3px)}
+  .badge.lw{background:rgba(91,55,118,.9);color:#fff}
+  .badge.ph{background:rgba(120,112,98,.16);color:#6c6458}
+  .photo .ph-note{font-size:.72rem;color:var(--muted);font-weight:600}
+  .meta{padding:.55rem .65rem .7rem}
+  .ln{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--acc);margin-bottom:.18rem}
+  .tt{font-family:Georgia,serif;font-size:.92rem;line-height:1.22;color:var(--ink)}
+</style>
+</head>
+<body>
+  <h1>Line &amp; wash pilot — SAM's History</h1>
+  <p class="sub">Every hero in SAM's four OCR History units, redrawn with Pro (Nano Banana Pro) into the signature ink-and-wash. Click any lesson to open the real lesson page — the refined hero is swapped in automatically. Lessons marked <b>photo</b> kept their original (Pro refused the source — a recognisable person, sensitive content, or a relative path with no remote image).</p>
+  <p class="stat" id="stat"></p>
+  <div id="units"></div>
+<script>
+  fetch('/design-lab/_lw_pilot_index.json').then(function(r){return r.json();}).then(function(idx){
+    var units={}, order=[];
+    idx.forEach(function(L){ if(!units[L.unit]){ units[L.unit]={name:L.unitName, lessons:[]}; order.push(L.unit);} units[L.unit].lessons.push(L); });
+    var lad=idx.filter(function(L){return L.laddered;}).length;
+    document.getElementById('stat').innerHTML='<b>'+lad+'</b> of '+idx.length+' heroes laddered &middot; '+(idx.length-lad)+' kept their photo';
+    var host=document.getElementById('units');
+    order.forEach(function(uk){
+      var u=units[uk];
+      var sec=document.createElement('section');
+      var grid='<div class="grid">';
+      u.lessons.sort(function(a,b){return a.number-b.number;}).forEach(function(L){
+        var href='/lesson/history-ocr/'+L.unit+'/'+L.number;
+        var thumb = L.laddered
+          ? '<div class="thumb"><span class="badge lw">Ink &amp; wash</span><img loading="lazy" src="'+L.lw+'" alt=""></div>'
+          : '<div class="thumb photo"><span class="badge ph">Photo</span><span class="ph-note">kept original</span></div>';
+        grid+='<a class="card" href="'+href+'" target="_blank" rel="noopener">'+thumb+
+          '<div class="meta"><div class="ln">Lesson '+L.number+'</div><div class="tt">'+L.title+'</div></div></a>';
+      });
+      grid+='</div>';
+      sec.innerHTML='<h2>'+u.name+'</h2>'+grid;
+      host.appendChild(sec);
+    });
+  });
+</script>
+</body>
+</html>
