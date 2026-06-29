@@ -172,7 +172,7 @@
   .stbtn:hover{color:var(--text-secondary)}
   .stbtn.on{background:var(--acc);color:#fff}
   .lane-scroller{position:relative}
-  .lane-track{overflow-x:auto;overflow-y:hidden;height:104px;border:0;border-top:1px solid rgba(120,112,98,.16);background:#f6f2ea;
+  .lane-track{overflow-x:auto;overflow-y:hidden;height:124px;border:0;border-top:1px solid rgba(120,112,98,.16);background:#f6f2ea;
     cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;scrollbar-width:none;-ms-overflow-style:none}
   .lane-track::-webkit-scrollbar{display:none;height:0;width:0}
   .lane-track.dragging{cursor:grabbing}
@@ -192,7 +192,7 @@
   .la-layer.show{opacity:1}
   .lane-cap{order:1}
   .lane-scroller{order:2}
-  .lane-rail{position:relative;flex:none;height:104px}
+  .lane-rail{position:relative;flex:none;height:124px}
   /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
   .lnode{position:absolute;transform:translate(-50%,-50%);cursor:pointer;z-index:2}
   .lnode .dot{border-radius:50%;display:grid;place-items:center;transition:transform .16s var(--ease),box-shadow .18s;font-family:var(--font-head);font-weight:700}
@@ -212,6 +212,10 @@
   .lnode.t-down .lt{top:calc(50% + 19px)}
   .lnode.current .lt{font-weight:700;color:var(--text-primary)}
   .lnode .lt .pill{display:block;font-family:var(--font-head);font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);margin-bottom:.02rem;-webkit-line-clamp:none}
+  /* hover a stop to reveal its full title (like the lesson pages) */
+  .lnode:hover{z-index:9}
+  .lnode:hover .lt{-webkit-line-clamp:initial;overflow:visible;width:150px;color:var(--text-primary);
+    background:var(--bg-card);border:1px solid var(--border-light);border-radius:5px;padding:.22rem .42rem;box-shadow:var(--shadow-md)}
 
   .pcol{max-width:540px;margin:.2rem auto 0;padding:0 .5rem}
   .pstage-host{position:relative}
@@ -833,7 +837,7 @@
       window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ [].forEach.call(document.querySelectorAll('.lane'),function(l){ if(l._relayout) l._relayout(false); }); },150); }); }
   }
   var SLIDE_ON_OPEN=true;   // on open, each lane glides to the student's next lesson, staggered one at a time
-  var HERO_H=232, RAIL_H=104;   // fixed hero banner height + scrolling path-rail height
+  var HERO_H=232, RAIL_H=124;   // rail height (taller so the hover-revealed full title fits)
   function renderLane(si,ui,lane){
     var s=SHELF[si], u=s.units[ui], n=u.lessons.length;
     var padL=80, gapX=132, lessonW=padL*2 + Math.max(0,n-1)*gapX;
@@ -870,14 +874,10 @@
       trk._nextScroll=Math.max(0, Math.min(lessonW-trk.clientWidth, pos[tgt].x - trk.clientWidth/2));
       if(slide && SLIDE_ON_OPEN){ tweenScrollX(trk, trk._nextScroll); } if(trk._upd) setTimeout(trk._upd,420); };
     setTimeout(function(){ lane._relayout(true); }, 440 + ui*340);
-    // ---- CARD hero: the full image at its NATURAL aspect ratio (no crop) ----
-    if(landBase) resolveBg(landBase, autoStage(u.frac), function(url){
-      var probe=new Image();
-      probe.onload=function(){ if(probe.naturalWidth) hero.style.aspectRatio=probe.naturalWidth+' / '+probe.naturalHeight;
-        setLaneArt(hero, url); buildStager(hero, landBase, autoStage(u.frac)); };
-      probe.onerror=function(){ setLaneArt(hero, url); buildStager(hero, landBase, autoStage(u.frac)); };
-      probe.src=url;
-    });
+    // ---- CARD hero: ONE uniform aspect so every card sits equal, cropped with the QA'd lesson-header position ----
+    var bgKey=s.k+'/'+u.slug, hpos=(BG[bgKey]&&BG[bgKey].position)||'center';
+    [].forEach.call(hero.querySelectorAll('.la-layer'),function(l){ l.style.backgroundPosition=hpos; });
+    if(landBase) resolveBg(landBase, autoStage(u.frac), function(url){ setLaneArt(hero, url); buildStager(hero, landBase, autoStage(u.frac)); });
   }
   // cross-fade the hero between two stacked cover layers (sharpen in place, no hard swap)
   function setLaneArt(art, url){
