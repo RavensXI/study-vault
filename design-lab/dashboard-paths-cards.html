@@ -195,9 +195,9 @@
   /* MASTHEAD REVEAL: clean image by default; on hover a bottom scrim + the unit title fade in together (like the lesson pages) */
   .lane-hero::after{content:"";position:absolute;inset:0;z-index:2;opacity:0;transition:opacity .5s ease;pointer-events:none;
     background:linear-gradient(to bottom,rgba(0,0,0,0) 34%,rgba(0,0,0,.4) 67%,rgba(0,0,0,.8) 100%)}
-  .lane-hero:hover::after{opacity:1}
+  .lane-hero:hover::after,.lane-hero.show-title::after{opacity:1}
   .lane-hero-cap{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 .95rem .75rem;opacity:0;transition:opacity .5s ease;pointer-events:none}
-  .lane-hero:hover .lane-hero-cap{opacity:1}
+  .lane-hero:hover .lane-hero-cap,.lane-hero.show-title .lane-hero-cap{opacity:1}
   .lane-hero-tools{position:absolute;top:.6rem;right:.6rem;z-index:4;opacity:0;transition:opacity .5s ease;pointer-events:none}
   .lane-hero:hover .lane-hero-tools{opacity:1;pointer-events:auto}
   .lane-scroller{order:2}
@@ -221,10 +221,6 @@
   .lnode.t-down .lt{top:calc(50% + 19px)}
   .lnode.current .lt{font-weight:700;color:var(--text-primary)}
   .lnode .lt .pill{display:block;font-family:var(--font-head);font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);margin-bottom:.02rem;-webkit-line-clamp:none}
-  /* hover a stop to reveal its full title (like the lesson pages) */
-  .lnode:hover{z-index:9}
-  .lnode:hover .lt{-webkit-line-clamp:initial;overflow:visible;width:150px;color:var(--text-primary);
-    background:var(--bg-card);border:1px solid var(--border-light);border-radius:5px;padding:.22rem .42rem;box-shadow:var(--shadow-md)}
 
   .pcol{max-width:540px;margin:.2rem auto 0;padding:0 .5rem}
   .pstage-host{position:relative}
@@ -889,6 +885,9 @@
     var bgKey=s.k+'/'+u.slug, hpos=(BG[bgKey]&&BG[bgKey].position)||'center';
     [].forEach.call(hero.querySelectorAll('.la-layer'),function(l){ l.style.backgroundPosition=hpos; });
     if(landBase) resolveBg(landBase, autoStage(u.frac), function(url){ setLaneArt(hero, url); buildStager(hero, landBase, autoStage(u.frac)); });
+    // flash the unit title in briefly on load so the hover-reveal is discoverable (like the lesson masthead)
+    hero.classList.add('show-title');
+    setTimeout(function(){ hero.classList.remove('show-title'); }, 2000 + ui*180);
   }
   // cross-fade the hero between two stacked cover layers (sharpen in place, no hard swap)
   function setLaneArt(art, url){
