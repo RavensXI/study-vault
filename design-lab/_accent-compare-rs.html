@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Accent-tinted refined — Religious Studies</title>
+<style>
+  :root{ --bg:#faf8f5; --ink:#2d2a26; --muted:#8a857c; --line:#e7e3dc; --acc:#9a6a4a; }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;padding:2.4rem clamp(1rem,4vw,3rem)}
+  h1{font-size:1.5rem;font-weight:700;margin:0 0 .3rem}
+  .sub{color:var(--muted);font-size:.95rem;margin:0 0 .6rem;max-width:64ch}
+  .acc-key{font-size:.82rem;color:var(--muted);margin:0 0 2rem;font-variant-numeric:tabular-nums}
+  .acc-key i{display:inline-block;width:12px;height:12px;border-radius:3px;background:var(--acc);vertical-align:middle;margin-right:.45rem}
+  .row{margin:0 0 2.4rem}
+  .row h2{font-size:1.02rem;font-weight:600;margin:0 0 .7rem}
+  .pair{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem}
+  figure{margin:0}
+  figure img{width:100%;aspect-ratio:3/2;object-fit:cover;border-radius:14px;border:1px solid var(--line);box-shadow:0 1px 2px rgba(29,28,26,.06),0 18px 36px -28px rgba(29,28,26,.35);display:block;background:#eee}
+  figcaption{font-size:.8rem;font-weight:600;margin-top:.5rem;text-transform:uppercase;letter-spacing:.06em}
+  .now figcaption{color:#b0784a}
+  .acc figcaption{color:var(--acc)}
+  @media(max-width:680px){ .pair{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+  <h1>Accent-tinted refined — Religious Studies</h1>
+  <p class="sub">All 8 RS units share one accent, so the accent-tinted versions (right) sit as a single tonal family — a quick read on whether one colour across a whole subject reads as cohesive or monotonous. Left is the current refined (each follows its photo's own colours). Same composition each time.</p>
+  <p class="acc-key"><i></i>accent #9a6a4a — warm tan / ochre</p>
+  <div id="rows"></div>
+<script>
+  var UNITS=[
+    ['christianity-beliefs','Christianity: Beliefs'],
+    ['christianity-practices','Christianity: Practices'],
+    ['islam-beliefs','Islam: Beliefs'],
+    ['islam-practices','Islam: Practices'],
+    ['theme-a-relationships','Theme A: Relationships & Families'],
+    ['theme-b-religion-life','Theme B: Religion & Life'],
+    ['theme-d-peace-conflict','Theme D: Peace & Conflict'],
+    ['theme-e-crime-punishment','Theme E: Crime & Punishment']
+  ];
+  var host=document.getElementById('rows');
+  UNITS.forEach(function(u){
+    var base='assets/path-bg-u-religious-studies-aqa-'+u[0];
+    var sec=document.createElement('section'); sec.className='row';
+    sec.innerHTML='<h2>'+u[1]+'</h2><div class="pair">'+
+      '<figure class="now"><img loading="lazy" src="'+base+'-land-refined.png" alt=""><figcaption>Current refined</figcaption></figure>'+
+      '<figure class="acc"><img loading="lazy" src="'+base+'-land-refined-accent.png" alt=""><figcaption>Accent-tinted</figcaption></figure>'+
+      '</div>';
+    host.appendChild(sec);
+  });
+</script>
+</body>
+</html>
