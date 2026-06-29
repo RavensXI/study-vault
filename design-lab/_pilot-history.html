@@ -23,6 +23,7 @@
   .badge{position:absolute;top:.5rem;left:.5rem;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
     padding:.2rem .45rem;border-radius:6px;backdrop-filter:blur(3px)}
   .badge.lw{background:rgba(91,55,118,.9);color:#fff}
+  .badge.gen{background:rgba(47,125,87,.92);color:#fff}
   .badge.ph{background:rgba(120,112,98,.16);color:#6c6458}
   .photo .ph-note{font-size:.72rem;color:var(--muted);font-weight:600}
   .meta{padding:.55rem .65rem .7rem}
@@ -40,7 +41,8 @@
     var units={}, order=[];
     idx.forEach(function(L){ if(!units[L.unit]){ units[L.unit]={name:L.unitName, lessons:[]}; order.push(L.unit);} units[L.unit].lessons.push(L); });
     var lad=idx.filter(function(L){return L.laddered;}).length;
-    document.getElementById('stat').innerHTML='<b>'+lad+'</b> of '+idx.length+' heroes laddered &middot; '+(idx.length-lad)+' kept their photo';
+    var gen=idx.filter(function(L){return L.source==='generated';}).length;
+    document.getElementById('stat').innerHTML='<b>'+lad+'</b> of '+idx.length+' heroes in line-and-wash &middot; '+(lad-gen)+' redrawn from the photo &middot; <b>'+gen+'</b> original art generated from scratch (refused photos filled automatically)';
     var host=document.getElementById('units');
     order.forEach(function(uk){
       var u=units[uk];
@@ -48,8 +50,10 @@
       var grid='<div class="grid">';
       u.lessons.sort(function(a,b){return a.number-b.number;}).forEach(function(L){
         var href='/lesson/history-ocr/'+L.unit+'/'+L.number;
+        var badge = L.source==='generated' ? '<span class="badge gen">Original art</span>'
+                  : '<span class="badge lw">Ink &amp; wash</span>';
         var thumb = L.laddered
-          ? '<div class="thumb"><span class="badge lw">Ink &amp; wash</span><img loading="lazy" src="'+L.lw+'" alt=""></div>'
+          ? '<div class="thumb">'+badge+'<img loading="lazy" src="'+L.lw+'" alt=""></div>'
           : '<div class="thumb photo"><span class="badge ph">Photo</span><span class="ph-note">kept original</span></div>';
         grid+='<a class="card" href="'+href+'" target="_blank" rel="noopener">'+thumb+
           '<div class="meta"><div class="ln">Lesson '+L.number+'</div><div class="tt">'+L.title+'</div></div></a>';
