@@ -168,11 +168,6 @@
     text-shadow:0 1px 2px rgba(0,0,0,.55),0 2px 14px rgba(0,0,0,.5)}
   .lane-hero-cap .lc-ct{display:block;margin-top:.2rem;font-family:var(--font-head);font-size:.74rem;font-weight:600;
     color:rgba(255,255,255,.86);font-variant-numeric:tabular-nums;text-shadow:0 1px 6px rgba(0,0,0,.6)}
-  /* dev preview: step the art through sketch / refined / complete (top-right of the hero, also reveals on hover) */
-  .stager{display:inline-flex;gap:.1rem;background:rgba(255,255,255,.92);backdrop-filter:blur(4px);border:1px solid rgba(255,255,255,.5);border-radius:7px;padding:2px;flex:none;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-  .stbtn{font-family:var(--font-head);font-size:.62rem;font-weight:700;color:var(--text-muted);background:transparent;border:0;border-radius:5px;padding:.22rem .46rem;cursor:pointer;transition:background .14s,color .14s}
-  .stbtn:hover{color:var(--text-secondary)}
-  .stbtn.on{background:var(--acc);color:#fff}
   .lane-scroller{position:relative}
   .lane-track{overflow-x:auto;overflow-y:hidden;height:124px;border:0;border-top:1px solid rgba(120,112,98,.16);background:#f6f2ea;
     cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y;scrollbar-width:none;-ms-overflow-style:none}
@@ -198,8 +193,6 @@
   .lane-hero:hover::after,.lane-hero.show-title::after{opacity:1}
   .lane-hero-cap{position:absolute;left:0;right:0;bottom:0;z-index:3;padding:0 .95rem .75rem;opacity:0;transition:opacity .5s ease;pointer-events:none}
   .lane-hero:hover .lane-hero-cap,.lane-hero.show-title .lane-hero-cap{opacity:1}
-  .lane-hero-tools{position:absolute;top:.6rem;right:.6rem;z-index:4;opacity:0;transition:opacity .5s ease;pointer-events:none}
-  .lane-hero:hover .lane-hero-tools{opacity:1;pointer-events:auto}
   .lane-scroller{order:2}
   .lane-rail{position:relative;flex:none;height:124px}
   /* nodes: smaller, harmonised with the muted art; the current stop is the one thing that pops */
@@ -624,7 +617,7 @@
     s.swatch='rgb('+mix(acc,GREY,gm).join(',')+')'; });
 
   /* ---------- fidelity ladder (Tom's idea): mastery → backdrop sharpness, no labels ---------- */
-  function autoStage(frac){ return frac>=0.999?'photo':'refined'; }   // sketch dropped — refined is the look, snaps to the real photo at 100%
+  function autoStage(frac){ return 'refined'; }   // refined is the only look — no sketch, no photo reveal at 100%
   var BG={};   // manifest: "subjectKey/unitSlug" -> {file,accent,name}
   var bgOk={}; // cache of which resolved urls actually load (file -> bool)
   function bgBase(si,ui){ var key=SHELF[si].k+'/'+SHELF[si].units[ui].slug, m=BG[key]; return m?('assets/'+m.file):null; }
@@ -826,7 +819,6 @@
       var pct=Math.round(u.frac*100);
       var lane=document.createElement('section'); lane.className='lane'; lane.dataset.ui=ui;
       lane.innerHTML='<div class="lane-hero"><i class="la-layer"></i><i class="la-layer"></i>'+
-          '<div class="lane-hero-tools"></div>'+
           '<div class="lane-hero-cap"><span class="lc-nm">'+esc(u.name)+'</span><span class="lc-ct">'+u.done+' / '+u.lessons.length+' lessons · '+pct+'%</span></div>'+
         '</div>'+
         '<div class="lane-scroller">'+
@@ -884,7 +876,7 @@
     // ---- CARD hero: ONE uniform aspect so every card sits equal, cropped with the QA'd lesson-header position ----
     var bgKey=s.k+'/'+u.slug, hpos=(BG[bgKey]&&BG[bgKey].position)||'center';
     [].forEach.call(hero.querySelectorAll('.la-layer'),function(l){ l.style.backgroundPosition=hpos; });
-    if(landBase) resolveBg(landBase, autoStage(u.frac), function(url){ setLaneArt(hero, url); buildStager(hero, landBase, autoStage(u.frac)); });
+    if(landBase) resolveBg(landBase, 'refined', function(url){ setLaneArt(hero, url); });
     // flash the unit title in briefly on load so the hover-reveal is discoverable (like the lesson masthead)
     hero.classList.add('show-title');
     setTimeout(function(){ hero.classList.remove('show-title'); }, 2000 + ui*180);
@@ -900,26 +892,7 @@
     nx.classList.add('show'); if(cur>=0) layers[cur].classList.remove('show');
     art._act=nextI; art.classList.add('hasart');
   }
-  // dev preview control: step the art through Sketch / Refined / Complete (the stages that exist)
-  var STAGE_LIST=[{k:'refined',n:'Refined'},{k:'photo',n:'Complete'}];
-  function buildStager(art, landBase, curStage){
-    if(!landBase) return; var tools=art.querySelector('.lane-hero-tools'); if(!tools || tools.querySelector('.stager')) return;
-    var urls={}, pending=STAGE_LIST.length;
-    STAGE_LIST.forEach(function(st){ var u=st.k? landBase.replace(/\.png$/i,'-'+st.k+'.png') : landBase;
-      probeImg(u, function(ok){ if(ok) urls[st.k]=u; if(--pending===0) render(); }); });
-    function render(){
-      var have=STAGE_LIST.filter(function(st){ return urls[st.k]; });
-      if(have.length<2 || tools.querySelector('.stager')) return;
-      var box=document.createElement('div'); box.className='stager';
-      have.forEach(function(st){
-        var b=document.createElement('button'); b.className='stbtn'+(st.k===curStage?' on':''); b.textContent=st.n;
-        b.addEventListener('click',function(){ setLaneArt(art, urls[st.k]);
-          [].forEach.call(box.children,function(x){ x.classList.toggle('on', x===b); }); });
-        box.appendChild(b);
-      });
-      tools.appendChild(box);
-    }
-  }
+  // (stager removed — refined is the single, fixed look; no stage toggle)
 
   // smooth horizontal scroll via setInterval (native smooth + rAF are unreliable on these tracks)
   function tweenScrollX(el, target){
