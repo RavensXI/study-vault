@@ -136,20 +136,23 @@
         '<button class="lane-arrow r">'+CHEVR+'</button></div>';
     var hero=sec.querySelector('.lane-hero'), rail=sec.querySelector('.lane-rail'), trk=sec.querySelector('.lane-track');
     [].forEach.call(hero.querySelectorAll('.la-layer'),function(l){ l.style.backgroundPosition=u.position||'center'; });   // reuse the lesson-header QA crop
-    // rail
-    rail.style.width=lessonW+'px';
-    var step=(n>1)?(lessonW-padL*2)/(n-1):0, lineY=Math.round(RAIL_H*0.30);
-    var conn=E('svg',{width:lessonW,height:RAIL_H,viewBox:'0 0 '+lessonW+' '+RAIL_H}); conn.style.cssText='position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:1'; rail.appendChild(conn);
-    var pos=u.lessons.map(function(L,j){ return {x:padL+j*step,y:lineY}; });
-    function seg(a,b,st,wd,op,dash){ if(b<=a)return; var p=E('line',{x1:pos[a].x,y1:lineY,x2:pos[b].x,y2:lineY,stroke:st,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash)p.setAttribute('stroke-dasharray',dash); conn.appendChild(p); }
-    var lastDone=Math.max(0,u.done-1);
-    seg(0,lastDone,'#5d8a6e',2.6,0.62); seg(lastDone,n-1,'#cbc7c0',2,0.85,'1 6');
-    u.lessons.forEach(function(L,j){
-      var isCur=(j===curIdx), cls=isCur?'current':(j<u.done?'done':'ahead');
-      var node=document.createElement('div'); node.className='lnode '+cls; node.style.left=pos[j].x+'px'; node.style.top=pos[j].y+'px';
-      node.innerHTML='<span class="dot">'+(isCur?PLAY:(j<u.done?CHECK:L.no))+'</span><span class="lt">'+(isCur?'<span class="pill">Up next</span> ':'')+esc(L.t)+'</span>';
-      rail.appendChild(node);
-    });
+    // rail — rebuildable at a given width so we can spread evenly across the full track when there's no overflow
+    var lineY=Math.round(RAIL_H*0.30), lastDone=Math.max(0,u.done-1), pos, railW=lessonW;
+    function buildRail(w){
+      railW=w; rail.style.width=w+'px'; rail.innerHTML='';
+      var step=(n>1)?(w-padL*2)/(n-1):0;
+      var conn=E('svg',{width:w,height:RAIL_H,viewBox:'0 0 '+w+' '+RAIL_H}); conn.style.cssText='position:absolute;left:0;top:0;pointer-events:none;overflow:visible;z-index:1'; rail.appendChild(conn);
+      pos=u.lessons.map(function(L,j){ return {x:padL+j*step,y:lineY}; });
+      function seg(a,b,st,wd,op,dash){ if(b<=a)return; var p=E('line',{x1:pos[a].x,y1:lineY,x2:pos[b].x,y2:lineY,stroke:st,'stroke-width':wd,'stroke-linecap':'round',opacity:op}); if(dash)p.setAttribute('stroke-dasharray',dash); conn.appendChild(p); }
+      seg(0,lastDone,'#5d8a6e',2.6,0.62); seg(lastDone,n-1,'#cbc7c0',2,0.85,'1 6');
+      u.lessons.forEach(function(L,j){
+        var isCur=(j===curIdx), cls=isCur?'current':(j<u.done?'done':'ahead');
+        var node=document.createElement('div'); node.className='lnode '+cls; node.style.left=pos[j].x+'px'; node.style.top=pos[j].y+'px';
+        node.innerHTML='<span class="dot">'+(isCur?PLAY:(j<u.done?CHECK:L.no))+'</span><span class="lt">'+(isCur?'<span class="pill">Up next</span> ':'')+esc(L.t)+'</span>';
+        rail.appendChild(node);
+      });
+    }
+    buildRail(lessonW);
     // hero + stager
     setHero(hero, u.stages[stage] || u.stages.complete);
     var order=[['sketch','Sketch'],['refined','Refined'],['complete','Complete']].filter(function(p){ return u.stages[p[0]]; });
@@ -159,15 +162,21 @@
         b.addEventListener('click',function(){ setHero(hero,u.stages[p[0]]); [].forEach.call(box.children,function(x){x.classList.toggle('on',x===b);}); }); box.appendChild(b); });
       cap.appendChild(box);
     }
-    // slide rail to next lesson
+    // after layout: spread across the full track if the lessons don't overflow it, else slide to the next lesson
     var tgt=(curIdx>=0?curIdx:n-1);
-    setTimeout(function(){ if(!trk.clientWidth) return; var t=Math.max(0,Math.min(lessonW-trk.clientWidth, pos[tgt].x-trk.clientWidth/2)); tweenScrollX(trk,t); if(trk._upd) setTimeout(trk._upd,420); }, 420+idx*300);
+    function relayout(){ if(!trk.clientWidth) return;
+      if(trk.clientWidth > lessonW+1){ if(railW!==trk.clientWidth) buildRail(trk.clientWidth); trk.scrollLeft=0; if(trk._upd) trk._upd(); }
+      else { if(railW!==lessonW) buildRail(lessonW);
+        tweenScrollX(trk, Math.max(0,Math.min(lessonW-trk.clientWidth, pos[tgt].x-trk.clientWidth/2))); if(trk._upd) setTimeout(trk._upd,420); } }
+    sec._relayout=relayout;
+    setTimeout(relayout, 420+idx*300);
     return sec;
   }
 
   fetch('_hero_showcase.json').then(function(r){ return r.json(); }).then(function(units){
     var wrap=document.getElementById('lanes'); wrap.innerHTML='';
     units.forEach(function(u,i){ var sec=lane(u,i); wrap.appendChild(sec); wireScroll(sec.querySelector('.lane-scroller')); });
+    var rt; window.addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(function(){ [].forEach.call(document.querySelectorAll('.lanes section'),function(s){ if(s._relayout) s._relayout(); }); },150); });
   }).catch(function(e){ document.getElementById('lanes').innerHTML='<div class="loading">Could not load manifest: '+esc(e.message)+'</div>'; });
 })();
 </script>
