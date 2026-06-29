@@ -870,6 +870,8 @@
       if(slide && SLIDE_ON_OPEN){ tweenScrollX(trk, trk._nextScroll); } if(trk._upd) setTimeout(trk._upd,420); };
     setTimeout(function(){ lane._relayout(true); }, 440 + ui*340);
     // ---- fixed hero banner: the unit's image at the mastery stage (cross-fades when it sharpens) ----
+    var bgKey=s.k+'/'+u.slug, hpos=(BG[bgKey]&&BG[bgKey].position)||'center';   // reuse the QA'd lesson-header crop
+    [].forEach.call(hero.querySelectorAll('.la-layer'),function(l){ l.style.backgroundPosition=hpos; });
     if(landBase) resolveBg(landBase, autoStage(u.frac), function(url){ setLaneArt(hero, url); buildStager(hero, landBase, autoStage(u.frac)); });
   }
   // cross-fade the hero between two stacked cover layers (sharpen in place, no hard swap)
