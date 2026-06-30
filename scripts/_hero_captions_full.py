@@ -9,7 +9,7 @@ chipped across months.
 Ledger: design-lab/_hero_caption_ledger_full.csv  (UTF-8 BOM, resumable off itself)
 Reads-only against Supabase. No caption is written to the DB here.
 """
-import os, io, csv, json, re, sys, time, hashlib, urllib.request
+import os, io, csv, json, re, sys, time, hashlib, urllib.request, urllib.error
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from google import genai
 from PIL import Image
@@ -108,6 +108,7 @@ def fetch_image(nu, full):
         p = os.path.join(ROOT, MANIFEST[nu].lstrip("/"))
         if os.path.exists(p): return Image.open(p).convert("RGB")
     if not full or not full.startswith("http"): return None
+    full = full.replace(" ", "%20")              # some R2 paths have raw spaces → urllib rejects them
     if "wikimedia.org" in full or "wikipedia.org" in full: time.sleep(1.3)
     req = urllib.request.Request(full, headers={"User-Agent": UA})
     im = Image.open(io.BytesIO(urllib.request.urlopen(req, timeout=40).read())).convert("RGB")
@@ -115,22 +116,29 @@ def fetch_image(nu, full):
     return im
 
 def describe(nu, full, subject, title, desc):
-    try:
-        im = fetch_image(nu, full)
-    except Exception:
-        return ""
+    im = None
+    for attempt in range(3):                       # fetch with retry; 404/410 = permanently dead URL
+        try:
+            im = fetch_image(nu, full); break
+        except urllib.error.HTTPError as e:
+            if e.code in (404, 410): return "__DEAD__"
+            time.sleep(2 * (attempt + 1))
+        except Exception:
+            time.sleep(2 * (attempt + 1))
     if im is None: return ""
     buf = io.BytesIO(); im.save(buf, format="JPEG", quality=85)
     part = {"inline_data": {"mime_type": "image/jpeg", "data": buf.getvalue()}}
     ctx = (f"The lesson is about: {desc}\n" if desc else "")
     prompt = DESC_PROMPT.format(subject=subject.replace("-", " ").title(), title=title, ctx=ctx)
-    for _ in range(4):
+    delay = 2
+    for _ in range(6):                             # back off on throttle AND on empty responses
         try:
             r = client.models.generate_content(model=MODEL, contents=[prompt, part])
             t = (getattr(r, "text", "") or "").strip().strip('"').split("\n")[0].strip()
             if t: return clean_desc(re.sub(r"\s*\.\s*$", "", t))
-        except Exception:
-            time.sleep(3)
+        except Exception as e:
+            if any(k in str(e) for k in ("429", "RESOURCE_EXHAUSTED", "503", "UNAVAILABLE")): delay = min(delay * 2, 30)
+        time.sleep(delay); delay = min(int(delay * 1.6) + 1, 30)
     return ""
 
 COLS = ["hero_url", "source_type", "license", "license_risk", "artist", "art_status",
@@ -160,20 +168,28 @@ if not DESCRIBE:
     print("  with description already:", sum(1 for r in recs if r["description"]), "/", len(recs))
     sys.exit(0)
 
-# describe pass (resumable)
-todo = [(nu, h) for nu, h in items if not prior.get(nu)]
-print(f"describing {len(todo)} heroes ({len(items)-len(todo)} already done)…", flush=True)
+# describe pass (resumable). Skip ones already done AND ones already known dead.
+DEADPATH = os.path.join(ROOT, "design-lab", "_dead_hero_urls.json")
+dead = set(json.load(open(DEADPATH, encoding="utf-8"))) if os.path.exists(DEADPATH) else set()
+todo = [(nu, h) for nu, h in items if not prior.get(nu) and nu not in dead]
+print(f"describing {len(todo)} heroes ({len(items)-len(todo)} already done/dead)…", flush=True)
 results = dict(prior)
 done = 0; lock_every = 50
 def work(nu, h):
     return nu, describe(nu, h["full"], h["subject"], h["title"], h["desc"])
-with ThreadPoolExecutor(max_workers=4) as ex:
+with ThreadPoolExecutor(max_workers=2) as ex:
     futs = [ex.submit(work, nu, h) for nu, h in todo]
     for f in as_completed(futs):
-        nu, dsc = f.result(); results[nu] = dsc; done += 1
+        nu, dsc = f.result(); done += 1
+        if dsc == "__DEAD__":
+            dead.add(nu); dsc = ""
+        results[nu] = dsc
         if done % lock_every == 0:
             write_ledger([assemble(nu2, h2, results.get(nu2, "")) for nu2, h2 in items])   # checkpoint
-            print(f"  {done}/{len(todo)} (checkpointed)", flush=True)
+            json.dump(sorted(dead), open(DEADPATH, "w", encoding="utf-8"), indent=1)
+            fld = sum(1 for nu2, h2 in items if results.get(nu2))
+            print(f"  {done}/{len(todo)} done | filled {fld} | dead {len(dead)}", flush=True)
 write_ledger([assemble(nu, h, results.get(nu, "")) for nu, h in items])
+json.dump(sorted(dead), open(DEADPATH, "w", encoding="utf-8"), indent=1)
 blank = sum(1 for nu, h in items if not results.get(nu))
-print(f"done — {len(items)-blank}/{len(items)} described, {blank} still blank (re-run to retry)", flush=True)
+print(f"done — {len(items)-blank}/{len(items)} described | {len(dead)} dead URLs | {blank-len(dead)} transient-blank (re-run to retry)", flush=True)
