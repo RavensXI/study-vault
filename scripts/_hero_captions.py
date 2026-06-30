@@ -113,7 +113,7 @@ for unit, lessons in CTX.items():
 LEDGER = os.path.join(ROOT, "design-lab", "_hero_caption_ledger.csv")
 prior = {}
 if os.path.exists(LEDGER):
-    with open(LEDGER, encoding="utf-8") as fh:
+    with open(LEDGER, encoding="utf-8-sig") as fh:
         for row in csv.DictReader(fh):
             dsc = (row.get("description") or "").strip()
             if dsc and not dsc.startswith("(needs"):
@@ -143,7 +143,7 @@ cols = ["subject", "unit", "lesson_number", "lesson_id", "title", "hero_url", "s
         "license", "license_risk", "artist", "art_status", "description", "credit",
         "caption_final", "written_to_db"]
 out = os.path.join(ROOT, "design-lab", "_hero_caption_ledger.csv")
-with open(out, "w", encoding="utf-8", newline="") as fh:
+with open(out, "w", encoding="utf-8-sig", newline="") as fh:   # BOM so Excel reads it as UTF-8 (no "Â·")
     w = csv.writer(fh); w.writerow(cols)
     for r in done:
         w.writerow([r["subject"], r["unit"], r["n"], r["id"], r["title"], norm(r["hero"]),
