@@ -100,6 +100,7 @@
 
 <script>
 const MANIFEST = "/scripts/_shorts_manifest.json";
+const QUESTIONS_URL = "/scripts/_shorts_questions.json";
 const CHECK_EVERY = 5;
 const WATCH_FRAC = 0.5;   // count a short as watched once past half (or played to the end)
 const CHROME_MS = 10000;  // chrome fades this long after a short starts playing
@@ -135,9 +136,16 @@ function sampleCheck(short){
     opts:['The correct exam-critical point from this short','A plausible-but-wrong distractor','Another distractor','A third distractor'],
     correct:0 };
 }
+// the real recall question mapped to this short (its lesson's QA'd knowledge check); placeholder if unmapped
+function realCheck(s){
+  const m=QUESTIONS[s.lesson_id], q=m&&m[String(s.topic_index)];
+  if(q && Array.isArray(q.opts) && typeof q.correct==='number') return { q:q.q, opts:q.opts, correct:q.correct };
+  return sampleCheck(s);
+}
 
 let slides=[], current=-1;
 let watchedSinceCheck=0, watchedQueue=[];   // a check appears after CHECK_EVERY genuinely-watched shorts
+let QUESTIONS={};                           // lesson_id -> { topic_index: {q,opts,correct} }, from _shorts_questions.json
 // sound is ON by default; browsers just won't let the FIRST short play unmuted
 // until the user has interacted (scroll/tap). After that first gesture, every
 // short plays with sound and stays that way.
@@ -242,7 +250,7 @@ function insertCheckAfter(afterEl){
 }
 
 function makeCheck(s){
-  const acc=accent(s.subject), topic=s.topic||titleCase(s.unit), c=sampleCheck({...s, topic});
+  const acc=accent(s.subject), topic=s.topic||titleCase(s.unit), c=realCheck(s);
   const el=document.createElement('div'); el.className='slide';
   el.innerHTML=`<div class="check" style="--acc:${acc}">
     <div class="kick">◆ Quick check</div>
@@ -332,7 +340,11 @@ addEventListener('keydown',e=>{
   if(['ArrowUp','PageUp'].includes(e.key)){ e.preventDefault(); glideTo(feed,Math.max(0,i-1)*h); }
 });
 
-fetch(MANIFEST).then(r=>r.json()).then(m=>{
+Promise.all([
+  fetch(MANIFEST).then(r=>r.json()),
+  fetch(QUESTIONS_URL).then(r=>r.ok?r.json():{}).catch(()=>({}))
+]).then(([m,q])=>{
+  QUESTIONS=q||{};
   if(!m.length){ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts banked yet.</div></div></div>'; return; }
   render(m);
 }).catch(err=>{ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">Could not load shorts.</div></div></div>'; });
