@@ -66,8 +66,9 @@ MANIFEST = os.path.join(SCRIPT_DIR, "_shorts_manifest.json")
 DAILY_FILE = os.path.join(SCRIPT_DIR, "_shorts_daily.json")
 LOCK_FILE = os.path.join(SCRIPT_DIR, "_batch_short.lock")
 DOWNLOAD_DIR = os.path.join(tempfile.gettempdir(), "sv_shorts_dl")   # nlm refuses to write under Documents/profile
-DEFAULT_CAP = 180                                       # /day (safe margin under the 200 quota)
-WAVE_SIZE = 12                                          # notebooks alive at once (keeps well under NB cap)
+DEFAULT_CAP = 180                                       # videos/day (safe margin under the 200 quota)
+MAX_PER_LESSON = 4                                      # focused shorts per lesson (one per section, capped)
+WAVE_SIZE = 6                                           # LESSONS (=notebooks) alive at once; ~WAVE_SIZE*4 videos in flight
 PER_VIDEO_TIMEOUT = 40 * 60                             # give up on a single video after this
 POLL_INTERVAL = 30
 LOCK_STALE_SECS = 6 * 3600                              # reclaim a lock older than this
@@ -222,15 +223,37 @@ def strip_html(content_html):
     return "\n".join(line.strip() for line in c.split("\n")).strip()
 
 
-def build_short_focus(title, subject_name, unit_name, exam_board):
+def extract_topics(content_html, max_n=MAX_PER_LESSON):
+    """The lesson's own section headings ARE its non-overlapping topics. Prefer <h2>;
+    if there are too few, fall back to <h3>. Returns up to max_n topic strings."""
+    heads = re.findall(r"<h2[^>]*>(.*?)</h2>", content_html or "", re.S | re.I)
+    if len(heads) < 2:
+        heads += re.findall(r"<h3[^>]*>(.*?)</h3>", content_html or "", re.S | re.I)
+    topics = []
+    for h in heads:
+        t = html_mod.unescape(re.sub(r"<[^>]+>", "", h)).strip()
+        if t and t.lower() not in ("key fact", "overview") and t not in topics:
+            topics.append(t)
+    return topics[:max_n]
+
+
+def build_section_focus(title, section, subject_name, unit_name, exam_board, all_sections):
+    others = [s for s in all_sections if s != section]
+    other_note = (f" Companion shorts cover: {', '.join(others)} — do NOT cover those." if others else "")
     return (
-        f"Make a punchy, fast-paced ~60-second SHORT-FORM revision video for a 15-16 year old GCSE "
-        f"student studying {exam_board} {subject_name}, on the lesson \"{title}\" (from the {unit_name} unit). "
-        f"The source titled \"Lesson Material\" is the content to cover.\n"
-        f"- Hook the viewer in the first 3 seconds.\n"
-        f"- Cover only the 2-3 most exam-critical ideas — punchy and memorable, not exhaustive.\n"
-        f"- Energetic, simple language a 15-16 year old will watch to the end.\n"
-        f"- Keep the key exam terms; define them fast. Stay anchored to THIS lesson; do not drift."
+        f"Make a punchy ~60-second SHORT-FORM revision video for a 15-16 year old GCSE {exam_board} {subject_name} "
+        f"student. It's one of a set of shorts for the lesson \"{title}\" ({unit_name} unit). "
+        f"This one must focus ONLY on: \"{section}\".{other_note} "
+        f"The source \"Lesson Material\" is the full lesson for context, but cover ONLY \"{section}\". "
+        f"Hook in 3 seconds; 1-2 exam-critical points; energetic and simple; keep and define key exam terms fast."
+    )
+
+
+def build_general_focus(title, subject_name, unit_name, exam_board):
+    return (
+        f"Make a punchy ~60-second SHORT-FORM revision video for a 15-16 year old GCSE {exam_board} {subject_name} "
+        f"student, on the lesson \"{title}\" ({unit_name} unit). The source \"Lesson Material\" is the content. "
+        f"Hook in 3 seconds; the 2-3 most exam-critical ideas only; energetic and simple; define key terms fast."
     )
 
 
@@ -311,13 +334,18 @@ def _find_video_artifact(notebook_id):
     return None, None
 
 
-# ── one wave: create -> trigger -> poll -> download -> delete ────────────────
-def run_wave(sb, r2, wave):
-    jobs = []
+# ── one wave of LESSONS: each = 1 notebook with up to MAX_PER_LESSON focused shorts ──
+def run_wave(sb, r2, wave, cap):
+    # phase 1: per lesson, create a notebook, add the source once, trigger a focused short per section
+    launched = []                                       # {e, nb_id, jobs:[{topic, idx, art_id, started}]}
     for e in wave:
+        if today_count() >= cap:
+            break
         content = strip_html(e["content_html"])
         if not content.strip():
             continue
+        topics = extract_topics(e["content_html"])
+        plan = topics or [None]                         # no headings -> one general short
         temp = os.path.join(SCRIPT_DIR, f"_short_src_{e['lesson_id'][:8]}.txt")
         with open(temp, "w", encoding="utf-8") as f:
             f.write(f"{e['title']}\n\n{content}")
@@ -331,44 +359,67 @@ def run_wave(sb, r2, wave):
                 raise RuntimeError("notebook not found after create")
             nb_id = nb["id"]
             nlm_run(["source", "add", nb_id, "--file", temp, "--title", "Lesson Material", "--wait"], timeout=120)
-            focus = build_short_focus(e["title"], e["subject_name"], e["unit_name"], e["exam_board"])
-            nlm_run(["video", "create", nb_id, "--format", "short", "--focus", focus, "--confirm"], timeout=120)
-            bump_daily(1)                               # a submission counts against the daily quota
-            jobs.append({"e": e, "nb_id": nb_id, "started": time.time()})
-            print(f"  launched {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}")
         except AuthExpired:
             raise
         except Exception as ex:
-            print(f"  ! {e['subject_slug']}/L{e['lesson_number']:02d}: launch failed — {str(ex)[:100]}")
-        finally:
+            print(f"  ! {e['subject_slug']}/L{e['lesson_number']:02d}: setup failed — {str(ex)[:90]}")
             try: os.remove(temp)
             except OSError: pass
+            continue
+        try: os.remove(temp)
+        except OSError: pass
+
+        seen, jobs = set(), []
+        for idx, topic in enumerate(plan):
+            if today_count() >= cap:
+                break
+            focus = (build_section_focus(e["title"], topic, e["subject_name"], e["unit_name"], e["exam_board"], topics)
+                     if topic else build_general_focus(e["title"], e["subject_name"], e["unit_name"], e["exam_board"]))
+            try:
+                nlm_run(["video", "create", nb_id, "--format", "short", "--focus", focus, "--confirm"], timeout=120)
+                bump_daily(1)                            # each submission counts against the daily quota
+                time.sleep(2)
+                st = nlm_json(["studio", "status", nb_id]) or []
+                new = [s for s in st if s.get("type") == "video" and s.get("id") not in seen]
+                if new:
+                    seen.add(new[0]["id"])
+                    jobs.append({"topic": topic or "overview", "idx": idx, "art_id": new[0]["id"], "started": time.time()})
+            except AuthExpired:
+                raise
+            except Exception as ex:
+                print(f"  ! {e['subject_slug']}/L{e['lesson_number']:02d} [{topic}]: create failed — {str(ex)[:70]}")
+        if jobs:
+            launched.append({"e": e, "nb_id": nb_id, "jobs": jobs})
+            print(f"  launched {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}: {len(jobs)} short(s)")
+        else:
+            _delete_nb(nb_id)
         time.sleep(2)
 
-    # poll this wave to completion
+    # phase 2: poll each notebook (its videos were all triggered above and generate server-side), collect, delete
     done_ct = 0
-    while jobs:
-        for job in list(jobs):
-            e, nb_id = job["e"], job["nb_id"]
+    for L in launched:
+        e, nb_id, pend = L["e"], L["nb_id"], list(L["jobs"])
+        while pend:
             try:
-                art_id, status = _find_video_artifact(nb_id)
+                st = {s.get("id"): s for s in (nlm_json(["studio", "status", nb_id]) or []) if s.get("type") == "video"}
             except AuthExpired:
                 raise
             except Exception:
-                status = None
-            if status == "completed" and art_id:
-                if _download_and_store(sb, r2, e, nb_id, art_id):
-                    done_ct += 1
-                _delete_nb(nb_id); jobs.remove(job)
-            elif status in ("failed", "error"):
-                print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d}: generation failed")
-                _delete_nb(nb_id); jobs.remove(job)
-            elif time.time() - job["started"] > PER_VIDEO_TIMEOUT:
-                print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d}: timed out ({status})")
-                _delete_nb(nb_id); jobs.remove(job)
-            # in_progress / unknown / None -> keep waiting
-        if jobs:
-            time.sleep(POLL_INTERVAL)
+                st = {}
+            for job in list(pend):
+                status = (st.get(job["art_id"]) or {}).get("status")
+                if status == "completed":
+                    if _download_and_store(sb, r2, e, nb_id, job["art_id"], job["idx"], job["topic"]):
+                        done_ct += 1
+                    pend.remove(job)
+                elif status in ("failed", "error"):
+                    print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d} [{job['topic']}]: failed"); pend.remove(job)
+                elif time.time() - job["started"] > PER_VIDEO_TIMEOUT:
+                    print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d} [{job['topic']}]: timed out"); pend.remove(job)
+                # in_progress / unknown / None -> keep waiting
+            if pend:
+                time.sleep(POLL_INTERVAL)
+        _delete_nb(nb_id)                               # all shorts collected -> free the notebook
     return done_ct
 
 
@@ -381,9 +432,10 @@ def _delete_nb(nb_id):
         pass
 
 
-def _download_and_store(sb, r2, e, nb_id, art_id):
+def _download_and_store(sb, r2, e, nb_id, art_id, idx, topic):
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-    path = os.path.join(DOWNLOAD_DIR, f"{e['subject_slug']}_{e['unit_slug']}_L{e['lesson_number']:02d}.mp4")
+    stem = f"{e['subject_slug']}_{e['unit_slug']}_L{e['lesson_number']:02d}_{idx + 1}"
+    path = os.path.join(DOWNLOAD_DIR, stem + ".mp4")
     try:
         ok = False
         for attempt in range(2):
@@ -392,22 +444,22 @@ def _download_and_store(sb, r2, e, nb_id, art_id):
                 ok = True; break
             time.sleep(5)
         if not ok:
-            print(f"  x L{e['lesson_number']:02d}: empty download after retries"); return False
-        key = f"shorts/{e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}.mp4"
+            print(f"  x L{e['lesson_number']:02d} [{topic}]: empty download after retries"); return False
+        key = f"shorts/{e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}_{idx + 1}.mp4"
         with open(path, "rb") as f:
             r2.put_object(Bucket=VIDEO_BUCKET, Key=key, Body=f.read(), ContentType="video/mp4")
         url = f"{VIDEO_PUBLIC_URL}/{key}"
         append_manifest({
             "lesson_id": e["lesson_id"], "subject": e["subject_slug"], "unit": e["unit_slug"],
-            "lesson_number": e["lesson_number"], "title": e["title"], "url": url,
-            "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
+            "lesson_number": e["lesson_number"], "title": e["title"], "topic": topic, "topic_index": idx + 1,
+            "url": url, "created_at": datetime.datetime.now().isoformat(timespec="seconds"),
         })
-        print(f"  ✓ {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}  ({os.path.getsize(path)//1024} KB)")
+        print(f"  ✓ {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d} [{topic}]  ({os.path.getsize(path)//1024} KB)")
         return True
     except AuthExpired:
         raise
     except Exception as ex:
-        print(f"  x L{e['lesson_number']:02d}: store failed — {str(ex)[:120]}"); return False
+        print(f"  x L{e['lesson_number']:02d} [{topic}]: store failed — {str(ex)[:110]}"); return False
     finally:
         try: os.remove(path)
         except OSError: pass
@@ -432,14 +484,17 @@ def cmd_run(args):
     print(f"Today so far: {already}/{cap}. Budget this run: {budget}.")
 
     sb = get_client()
-    pending = get_pending_mixed(sb, args.subject, min(budget, args.limit or budget))
+    # queue lessons (video budget is an upper bound on lessons needed; run_wave caps videos)
+    pending = get_pending_mixed(sb, args.subject, args.limit or budget)
     if not pending:
         print("No pending lessons need a short. All done!"); return
-    print(f"{len(pending)} lessons queued (mixed across subjects).")
+    est = sum(min(len(extract_topics(e["content_html"])) or 1, MAX_PER_LESSON) for e in pending)
+    print(f"{len(pending)} lessons queued (mixed across subjects), ~{est} shorts if all run.")
     if args.dry_run:
-        for e in pending[:40]:
-            print(f"  [DRY] {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d} — {e['title']}")
-        print(f"  … {len(pending)} total"); return
+        for e in pending[:30]:
+            n = min(len(extract_topics(e["content_html"])) or 1, MAX_PER_LESSON)
+            print(f"  [DRY] {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d} — {n} short(s) — {e['title']}")
+        print(f"  … {len(pending)} lessons total"); return
 
     r2 = get_r2_client()
     total_done = 0
@@ -447,8 +502,8 @@ def cmd_run(args):
         if today_count() >= cap:
             print("Hit daily cap mid-run — stopping cleanly."); break
         wave = pending[i:i + WAVE_SIZE]
-        print(f"\n── wave {i // WAVE_SIZE + 1} ({len(wave)} videos) ──")
-        total_done += run_wave(sb, r2, wave)
+        print(f"\n── wave {i // WAVE_SIZE + 1} ({len(wave)} lessons) ──")
+        total_done += run_wave(sb, r2, wave, cap)
 
     summary = f"Shorts batch: {total_done} produced this run, {today_count()}/{cap} today, {len(done_lesson_ids())} total banked."
     print("\n" + summary)
