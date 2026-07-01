@@ -52,6 +52,10 @@
   .railwrap{display:flex;flex-direction:column;align-items:center}
   .tap-hint{position:absolute;inset:auto 0 42%;text-align:center;color:#fff;font-size:.8rem;opacity:0;transition:opacity .3s;pointer-events:none;text-shadow:0 1px 8px rgba(0,0,0,.6)}
   .short.muted .tap-hint{opacity:.9}
+  /* chrome (meta + rail + scrim) fades after CHROME_MS of playback; back on any touch */
+  .short .scrim,.short .meta,.short .rail{transition:opacity .45s ease}
+  .short.chrome-hidden .scrim,.short.chrome-hidden .meta,.short.chrome-hidden .rail{opacity:0}
+  .short.chrome-hidden .rail{pointer-events:none}
 
   /* ---- a recall check: native warm card in the same scroll ---- */
   .check{position:relative;height:100%;aspect-ratio:9/16;max-width:min(94vw,52vh);border-radius:var(--r);
@@ -93,6 +97,7 @@
 const MANIFEST = "/scripts/_shorts_manifest.json";
 const CHECK_EVERY = 5;
 const WATCH_FRAC = 0.5;   // count a short as watched once past half (or played to the end)
+const CHROME_MS = 10000;  // chrome fades this long after a short starts playing
 
 const ICON = {
   book:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3-7 3z"/><path d="M18 3a2 2 0 0 1 2 2v14"/></svg>',
@@ -145,6 +150,17 @@ function toggleSound(){ gestured=true; wantSound=!wantSound; applySound(); }    
 function markGesture(){ if(gestured) return; gestured=true; applySound(); if(currentVideo) currentVideo.play().catch(()=>{}); }
 ['pointerdown','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,markGesture,{passive:true}));
 
+// meta + rail + scrim show when a short starts (and on any touch), then fade after CHROME_MS
+let hideTimer=0;
+function revealChrome(){
+  if(!currentVideo) return;
+  const short=currentVideo.closest('.short'); if(!short) return;
+  short.classList.remove('chrome-hidden');
+  clearTimeout(hideTimer);
+  if(!currentVideo.paused)
+    hideTimer=setTimeout(()=>{ if(currentVideo && !currentVideo.paused) currentVideo.closest('.short').classList.add('chrome-hidden'); }, CHROME_MS);
+}
+
 function render(items){
   const feed=document.getElementById('feed');
   const mixed=interleave(items);
@@ -187,6 +203,8 @@ function makeShort(s){
   // finishing a short counts it, then glides to the next slide (a freshly inserted
   // check if this was the 5th watched; checks/done have no video, so they wait)
   vid.addEventListener('ended',()=>{ countWatch(); const nxt=el.nextElementSibling; if(nxt) glideTo(el.parentElement, nxt.offsetTop); });
+  vid.addEventListener('play',()=>{ if(vid===currentVideo) revealChrome(); });        // (re)start the fade timer
+  vid.addEventListener('pause',()=>{ el.querySelector('.short').classList.remove('chrome-hidden'); if(vid===currentVideo) clearTimeout(hideTimer); });
   vid.addEventListener('click',toggleSound); el.querySelector('.r-mute').addEventListener('click',e=>{e.stopPropagation();toggleSound();});
   el.querySelector('.r-save').addEventListener('click',e=>{e.stopPropagation();e.currentTarget.classList.toggle('on');});
   return el;
@@ -264,13 +282,18 @@ function activate(){
   let best=null, bestDist=Infinity;
   for(const s of feed.children){ const c=s.offsetTop+s.offsetHeight/2, d=Math.abs(c-mid); if(d<bestDist){ bestDist=d; best=s; } }
   for(const s of feed.children){
-    const v=s.querySelector('video'); if(!v) continue;
-    if(s===best){
+    const v=s.querySelector('video'), sh=s.querySelector('.short');
+    if(s===best && v){
+      const changed=currentVideo!==v;
       currentVideo=v;
       v.muted=!(wantSound&&gestured);
       if(v.paused) v.play().catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
       refreshSoundUI();
-    } else if(!v.paused){ v.pause(); v.currentTime=0; }
+      if(changed) revealChrome();          // new short -> chrome visible for CHROME_MS
+    } else {
+      if(v && !v.paused){ v.pause(); v.currentTime=0; }
+      if(sh) sh.classList.remove('chrome-hidden');   // reset off-screen shorts to visible
+    }
   }
 }
 function setupAutoplay(){
@@ -278,6 +301,7 @@ function setupAutoplay(){
   activate();
   let raf=0;
   feed.addEventListener('scroll',()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; activate(); }); });
+  feed.addEventListener('pointerdown', revealChrome);   // any touch brings the chrome back
 }
 
 // keyboard paging for desktop demo
