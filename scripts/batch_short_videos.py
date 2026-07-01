@@ -369,8 +369,8 @@ def run_wave(sb, r2, wave, cap):
         try: os.remove(temp)
         except OSError: pass
 
-        seen, jobs = set(), []
-        for idx, topic in enumerate(plan):
+        fired = []                                      # topics of successfully-fired shorts, in creation order
+        for topic in plan:
             if today_count() >= cap:
                 break
             focus = (build_section_focus(e["title"], topic, e["subject_name"], e["unit_name"], e["exam_board"], topics)
@@ -378,48 +378,50 @@ def run_wave(sb, r2, wave, cap):
             try:
                 nlm_run(["video", "create", nb_id, "--format", "short", "--focus", focus, "--confirm"], timeout=120)
                 bump_daily(1)                            # each submission counts against the daily quota
+                fired.append(topic or "overview")
                 time.sleep(2)
-                st = nlm_json(["studio", "status", nb_id]) or []
-                new = [s for s in st if s.get("type") == "video" and s.get("id") not in seen]
-                if new:
-                    seen.add(new[0]["id"])
-                    jobs.append({"topic": topic or "overview", "idx": idx, "art_id": new[0]["id"], "started": time.time()})
             except AuthExpired:
                 raise
             except Exception as ex:
                 print(f"  ! {e['subject_slug']}/L{e['lesson_number']:02d} [{topic}]: create failed — {str(ex)[:70]}")
-        if jobs:
-            launched.append({"e": e, "nb_id": nb_id, "jobs": jobs})
-            print(f"  launched {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}: {len(jobs)} short(s)")
+        if fired:
+            launched.append({"e": e, "nb_id": nb_id, "topics": fired, "n": len(fired), "started": time.time()})
+            print(f"  launched {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}: {len(fired)} short(s)")
         else:
             _delete_nb(nb_id)
         time.sleep(2)
 
-    # phase 2: poll each notebook (its videos were all triggered above and generate server-side), collect, delete
+    # phase 2: poll each notebook and download whatever is 'completed', using its CURRENT id from a fresh
+    # status each pass — NotebookLM re-IDs the artifact between pending and done, so never pre-capture ids.
+    # Topic label is by collection order (refined later if the artifact exposes its focus).
     done_ct = 0
     for L in launched:
-        e, nb_id, pend = L["e"], L["nb_id"], list(L["jobs"])
-        while pend:
+        e, nb_id, topics, n = L["e"], L["nb_id"], L["topics"], L["n"]
+        got, handled = 0, set()                         # got = accounted (downloaded+failed); handled = terminal ids seen
+        while got < n and time.time() - L["started"] < PER_VIDEO_TIMEOUT:
             try:
-                st = {s.get("id"): s for s in (nlm_json(["studio", "status", nb_id]) or []) if s.get("type") == "video"}
+                vids = [s for s in (nlm_json(["studio", "status", nb_id]) or []) if s.get("type") == "video"]
             except AuthExpired:
                 raise
             except Exception:
-                st = {}
-            for job in list(pend):
-                status = (st.get(job["art_id"]) or {}).get("status")
+                vids = []
+            for s in vids:
+                aid, status = s.get("id"), s.get("status")
+                if not aid or aid in handled:
+                    continue
                 if status == "completed":
-                    if _download_and_store(sb, r2, e, nb_id, job["art_id"], job["idx"], job["topic"]):
+                    topic = topics[got] if got < len(topics) else "overview"
+                    if _download_and_store(sb, r2, e, nb_id, aid, got, topic):
                         done_ct += 1
-                    pend.remove(job)
+                    handled.add(aid); got += 1
                 elif status in ("failed", "error"):
-                    print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d} [{job['topic']}]: failed"); pend.remove(job)
-                elif time.time() - job["started"] > PER_VIDEO_TIMEOUT:
-                    print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d} [{job['topic']}]: timed out"); pend.remove(job)
-                # in_progress / unknown / None -> keep waiting
-            if pend:
+                    print(f"  x {e['subject_slug']}/L{e['lesson_number']:02d}: a short failed")
+                    handled.add(aid); got += 1
+            if got < n:
                 time.sleep(POLL_INTERVAL)
-        _delete_nb(nb_id)                               # all shorts collected -> free the notebook
+        if got < n:
+            print(f"  ~ {e['subject_slug']}/L{e['lesson_number']:02d}: {got}/{n} collected before timeout")
+        _delete_nb(nb_id)                               # free the notebook
     return done_ct
 
 
