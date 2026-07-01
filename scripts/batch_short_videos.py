@@ -257,6 +257,13 @@ def build_general_focus(title, subject_name, unit_name, exam_board):
     )
 
 
+def topic_from_instructions(custom_instructions, topics):
+    """The artifact echoes its focus prompt in custom_instructions, so we label each short by
+    its ACTUAL topic (status order isn't creation order, so this beats positional guessing)."""
+    m = re.search(r'focus ONLY on: "([^"]+)"', custom_instructions or "")
+    return m.group(1) if m else (topics[0] if topics else "overview")
+
+
 def get_pending_mixed(sb, subject_filter, limit):
     """Free-tier lessons with a real article body and no short yet, ROUND-ROBINED across
     subjects so a day's batch is a diverse feed. Returns list of entry dicts."""
@@ -410,8 +417,9 @@ def run_wave(sb, r2, wave, cap):
                 if not aid or aid in handled:
                     continue
                 if status == "completed":
-                    topic = topics[got] if got < len(topics) else "overview"
-                    if _download_and_store(sb, r2, e, nb_id, aid, got, topic):
+                    topic = topic_from_instructions(s.get("custom_instructions"), topics)
+                    idx = topics.index(topic) if topic in topics else got   # stable per-section filename
+                    if _download_and_store(sb, r2, e, nb_id, aid, idx, topic):
                         done_ct += 1
                     handled.add(aid); got += 1
                 elif status in ("failed", "error"):
