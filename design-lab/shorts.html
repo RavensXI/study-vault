@@ -56,6 +56,11 @@
   .short .scrim,.short .meta,.short .rail{transition:opacity .45s ease}
   .short.chrome-hidden .scrim,.short.chrome-hidden .meta,.short.chrome-hidden .rail{opacity:0}
   .short.chrome-hidden .rail{pointer-events:none}
+  /* big play glyph while the student has the short paused */
+  .short .playpause{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .18s ease}
+  .short.paused .playpause{opacity:1}
+  .short .playpause span{width:74px;height:74px;border-radius:50%;background:rgba(0,0,0,.4);backdrop-filter:blur(3px);display:grid;place-items:center}
+  .short .playpause svg{width:32px;height:32px;fill:#fff;margin-left:4px}
 
   /* ---- a recall check: native warm card in the same scroll ---- */
   .check{position:relative;height:100%;aspect-ratio:9/16;max-width:min(94vw,52vh);border-radius:var(--r);
@@ -104,6 +109,7 @@ const ICON = {
   save:'<svg viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4-7 4V4a1 1 0 0 1 1-1z"/></svg>',
   mute:'<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>',
   vol:'<svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>',
+  play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
 };
 
 function subjName(slug){
@@ -148,7 +154,7 @@ function refreshSoundUI(){
 function applySound(){ if(!currentVideo) return; currentVideo.muted=!(wantSound&&gestured); refreshSoundUI(); }
 function toggleSound(){ gestured=true; wantSound=!wantSound; applySound(); }        // rail button / tap
 function markGesture(){ if(gestured) return; gestured=true; applySound(); if(currentVideo) currentVideo.play().catch(()=>{}); }
-['pointerdown','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,markGesture,{passive:true}));
+['keydown','wheel'].forEach(ev=>addEventListener(ev,markGesture,{passive:true}));   // taps route through onTap; scroll handles mobile unmute
 
 // meta + rail + scrim show when a short starts (and on any touch), then fade after CHROME_MS
 let hideTimer=0;
@@ -159,6 +165,18 @@ function revealChrome(){
   clearTimeout(hideTimer);
   if(!currentVideo.paused)
     hideTimer=setTimeout(()=>{ if(currentVideo && !currentVideo.paused) currentVideo.closest('.short').classList.add('chrome-hidden'); }, CHROME_MS);
+}
+
+function togglePlay(){
+  if(!currentVideo) return;
+  const sh=currentVideo.closest('.short');
+  if(currentVideo.paused){ currentVideo.play().catch(()=>{}); sh&&sh.classList.remove('paused'); }
+  else { currentVideo.pause(); sh&&sh.classList.add('paused'); }
+  revealChrome();
+}
+function onTap(){                     // first tap turns sound on; after that, tap = pause/play
+  if(!gestured){ gestured=true; applySound(); if(currentVideo) currentVideo.play().catch(()=>{}); revealChrome(); }
+  else togglePlay();
 }
 
 function render(items){
@@ -177,6 +195,7 @@ function makeShort(s){
     <video src="${s.url}" poster="${posterFor(s.url)}" muted playsinline preload="metadata"></video>
     <div class="scrim"></div>
     <div class="prog"><i></i></div>
+    <div class="playpause"><span>${ICON.play}</span></div>
     <div class="tap-hint">tap for sound</div>
     <div class="meta">
       <span class="subj">${subjName(s.subject)}</span>
@@ -203,9 +222,10 @@ function makeShort(s){
   // finishing a short counts it, then glides to the next slide (a freshly inserted
   // check if this was the 5th watched; checks/done have no video, so they wait)
   vid.addEventListener('ended',()=>{ countWatch(); const nxt=el.nextElementSibling; if(nxt) glideTo(el.parentElement, nxt.offsetTop); });
-  vid.addEventListener('play',()=>{ if(vid===currentVideo) revealChrome(); });        // (re)start the fade timer
-  vid.addEventListener('pause',()=>{ el.querySelector('.short').classList.remove('chrome-hidden'); if(vid===currentVideo) clearTimeout(hideTimer); });
-  vid.addEventListener('click',toggleSound); el.querySelector('.r-mute').addEventListener('click',e=>{e.stopPropagation();toggleSound();});
+  vid.addEventListener('play',()=>{ short.classList.remove('paused'); if(vid===currentVideo) revealChrome(); });   // (re)start the fade timer
+  vid.addEventListener('pause',()=>{ short.classList.remove('chrome-hidden'); if(vid===currentVideo) clearTimeout(hideTimer); });
+  vid.addEventListener('click',onTap);   // tap = pause/play (first tap turns the sound on)
+  el.querySelector('.r-mute').addEventListener('click',e=>{e.stopPropagation();toggleSound();});
   el.querySelector('.r-save').addEventListener('click',e=>{e.stopPropagation();e.currentTarget.classList.toggle('on');});
   return el;
 }
@@ -300,7 +320,7 @@ function setupAutoplay(){
   const feed=document.getElementById('feed');
   activate();
   let raf=0;
-  feed.addEventListener('scroll',()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; activate(); }); });
+  feed.addEventListener('scroll',()=>{ markGesture(); if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; activate(); }); });
   feed.addEventListener('pointerdown', revealChrome);   // any touch brings the chrome back
 }
 
