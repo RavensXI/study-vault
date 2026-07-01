@@ -42,6 +42,7 @@ import os
 import re
 import subprocess
 import sys
+import tempfile
 import time
 
 if sys.platform == "win32":
@@ -64,7 +65,7 @@ NB_PREFIX = "SVSHORT"                                   # marks our notebooks (s
 MANIFEST = os.path.join(SCRIPT_DIR, "_shorts_manifest.json")
 DAILY_FILE = os.path.join(SCRIPT_DIR, "_shorts_daily.json")
 LOCK_FILE = os.path.join(SCRIPT_DIR, "_batch_short.lock")
-DOWNLOAD_DIR = os.path.join(SCRIPT_DIR, "_short_videos")
+DOWNLOAD_DIR = os.path.join(tempfile.gettempdir(), "sv_shorts_dl")   # nlm refuses to write under Documents/profile
 DEFAULT_CAP = 180                                       # /day (safe margin under the 200 quota)
 WAVE_SIZE = 12                                          # notebooks alive at once (keeps well under NB cap)
 PER_VIDEO_TIMEOUT = 40 * 60                             # give up on a single video after this
@@ -384,9 +385,14 @@ def _download_and_store(sb, r2, e, nb_id, art_id):
     os.makedirs(DOWNLOAD_DIR, exist_ok=True)
     path = os.path.join(DOWNLOAD_DIR, f"{e['subject_slug']}_{e['unit_slug']}_L{e['lesson_number']:02d}.mp4")
     try:
-        nlm_run(["download", "video", nb_id, "--id", art_id, "--output", path, "--no-progress"], timeout=600)
-        if not os.path.exists(path) or os.path.getsize(path) < 1024:
-            print(f"  x L{e['lesson_number']:02d}: empty download"); return False
+        ok = False
+        for attempt in range(2):
+            nlm_run(["download", "video", nb_id, "--id", art_id, "--output", path, "--no-progress"], timeout=600)
+            if os.path.exists(path) and os.path.getsize(path) >= 1024:
+                ok = True; break
+            time.sleep(5)
+        if not ok:
+            print(f"  x L{e['lesson_number']:02d}: empty download after retries"); return False
         key = f"shorts/{e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}.mp4"
         with open(path, "rb") as f:
             r2.put_object(Bucket=VIDEO_BUCKET, Key=key, Body=f.read(), ContentType="video/mp4")
