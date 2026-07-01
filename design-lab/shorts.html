@@ -124,6 +124,23 @@ function sampleCheck(short){
 }
 
 let slides=[], current=-1;
+// sound is ON by default; browsers just won't let the FIRST short play unmuted
+// until the user has interacted (scroll/tap). After that first gesture, every
+// short plays with sound and stays that way.
+let wantSound=true, gestured=false, currentVideo=null;
+
+function refreshSoundUI(){
+  if(!currentVideo) return;
+  const short=currentVideo.closest('.short'); if(!short) return;
+  const m=currentVideo.muted;
+  short.classList.toggle('muted', m);
+  const b=short.querySelector('.r-mute');
+  if(b){ b.innerHTML=m?ICON.mute:ICON.vol; b.classList.toggle('on',!m); }
+}
+function applySound(){ if(!currentVideo) return; currentVideo.muted=!(wantSound&&gestured); refreshSoundUI(); }
+function toggleSound(){ gestured=true; wantSound=!wantSound; applySound(); }        // rail button / tap
+function markGesture(){ if(gestured) return; gestured=true; applySound(); if(currentVideo) currentVideo.play().catch(()=>{}); }
+['pointerdown','keydown','wheel','touchstart'].forEach(ev=>addEventListener(ev,markGesture,{passive:true}));
 
 function render(items){
   const feed=document.getElementById('feed');
@@ -142,7 +159,7 @@ function makeShort(s){
   const acc=accent(s.subject);
   const el=document.createElement('div'); el.className='slide';
   el.innerHTML=`<div class="short muted" style="--acc:${acc}">
-    <video src="${s.url}" poster="${posterFor(s.url)}" muted loop playsinline preload="metadata"></video>
+    <video src="${s.url}" poster="${posterFor(s.url)}" muted playsinline preload="metadata"></video>
     <div class="scrim"></div>
     <div class="prog"><i></i></div>
     <div class="tap-hint">tap for sound</div>
@@ -159,9 +176,9 @@ function makeShort(s){
   </div>`;
   const short=el.querySelector('.short'), vid=el.querySelector('video');
   vid.addEventListener('timeupdate',()=>{ if(vid.duration) el.querySelector('.prog i').style.width=(vid.currentTime/vid.duration*100)+'%'; });
-  const unmute=()=>{ vid.muted=!vid.muted; short.classList.toggle('muted',vid.muted);
-    const b=el.querySelector('.r-mute'); b.innerHTML=vid.muted?ICON.mute:ICON.vol; b.classList.toggle('on',!vid.muted); };
-  vid.addEventListener('click',unmute); el.querySelector('.r-mute').addEventListener('click',e=>{e.stopPropagation();unmute();});
+  // when a short finishes, glide to the next slide (checks/done have no video, so they wait)
+  vid.addEventListener('ended',()=>{ const nxt=el.nextElementSibling; if(nxt) glideTo(el.parentElement, nxt.offsetTop); });
+  vid.addEventListener('click',toggleSound); el.querySelector('.r-mute').addEventListener('click',e=>{e.stopPropagation();toggleSound();});
   el.querySelector('.r-save').addEventListener('click',e=>{e.stopPropagation();e.currentTarget.classList.toggle('on');});
   return el;
 }
@@ -206,22 +223,49 @@ function makeDone(mixed){
   return el;
 }
 
+// mandatory scroll-snap cancels programmatic smooth scroll, so animate it ourselves
+function glideTo(feed, top){
+  feed.style.scrollSnapType='none';
+  const start=feed.scrollTop, dist=top-start, dur=440; let t0=null;
+  function step(now){
+    if(t0===null) t0=now;
+    const p=Math.min(1,(now-t0)/dur);
+    const e=p<0.5?2*p*p:1-Math.pow(-2*p+2,2)/2;   // easeInOutQuad
+    feed.scrollTop=start+dist*e;
+    if(p<1) requestAnimationFrame(step); else feed.style.scrollSnapType='y mandatory';
+  }
+  requestAnimationFrame(step);
+}
+
+// play the slide centred in the feed, pause the rest — deterministic in a snap scroller
+function activate(){
+  const feed=document.getElementById('feed');
+  const mid=feed.scrollTop + feed.clientHeight/2;
+  let best=null, bestDist=Infinity;
+  for(const s of feed.children){ const c=s.offsetTop+s.offsetHeight/2, d=Math.abs(c-mid); if(d<bestDist){ bestDist=d; best=s; } }
+  for(const s of feed.children){
+    const v=s.querySelector('video'); if(!v) continue;
+    if(s===best){
+      currentVideo=v;
+      v.muted=!(wantSound&&gestured);
+      if(v.paused) v.play().catch(()=>{ v.muted=true; v.play().catch(()=>{}); });
+      refreshSoundUI();
+    } else if(!v.paused){ v.pause(); v.currentTime=0; }
+  }
+}
 function setupAutoplay(){
-  const io=new IntersectionObserver(es=>{
-    es.forEach(e=>{
-      const v=e.target.querySelector('video'); if(!v)return;
-      if(e.isIntersecting && e.intersectionRatio>0.6){ v.play().catch(()=>{}); }
-      else { v.pause(); v.currentTime=0; }
-    });
-  },{threshold:[0,0.6,1]});
-  slides.forEach(s=>{ if(s.querySelector('video')) io.observe(s); });
+  const feed=document.getElementById('feed');
+  activate();
+  let raf=0;
+  feed.addEventListener('scroll',()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; activate(); }); });
 }
 
 // keyboard paging for desktop demo
 addEventListener('keydown',e=>{
-  const feed=document.getElementById('feed'); const h=innerHeight;
-  if(['ArrowDown',' ','PageDown'].includes(e.key)){ e.preventDefault(); feed.scrollBy({top:h,behavior:'smooth'}); }
-  if(['ArrowUp','PageUp'].includes(e.key)){ e.preventDefault(); feed.scrollBy({top:-h,behavior:'smooth'}); }
+  const feed=document.getElementById('feed'); const h=feed.clientHeight;
+  const i=Math.round(feed.scrollTop/h);
+  if(['ArrowDown',' ','PageDown'].includes(e.key)){ e.preventDefault(); glideTo(feed,(i+1)*h); }
+  if(['ArrowUp','PageUp'].includes(e.key)){ e.preventDefault(); glideTo(feed,Math.max(0,i-1)*h); }
 });
 
 fetch(MANIFEST).then(r=>r.json()).then(m=>{
