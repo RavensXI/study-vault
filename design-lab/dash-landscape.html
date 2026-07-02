@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 2 — The Landscape</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+  :root{--card:#fffdf9;--ink:#2a2721;--sec:#5a554b;--mut:#87816f;--line:#e3ddd0;
+    --r:8px;--anchor:#4e5f66;--head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;
+    --shadow:0 2px 10px rgba(42,39,33,.09)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:var(--head);color:var(--ink)}
+  /* the page IS the landscape — UI lives in the sky the artist left empty */
+  body{background:url('assets/lw/night-panorama-b.png') center bottom/cover no-repeat #f6f1e3}
+
+  .world{max-width:1240px;margin:0 auto;height:100dvh;padding:1.2rem clamp(1.1rem,4vw,2.6rem);
+    display:flex;flex-direction:column;overflow:hidden}
+  .sky-top{flex:none;display:flex;align-items:baseline;justify-content:space-between}
+  .brand{font-size:1.05rem;font-weight:500}.brand b{font-weight:800}
+  .who{display:flex;align-items:center;gap:.9rem}
+  .countdown{font-family:var(--read);font-style:italic;font-size:.9rem;color:var(--sec)}
+  .countdown b{font-style:normal;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.8rem}
+
+  .sky{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(380px,460px) 1fr;gap:clamp(1.5rem,6vw,5rem);
+    align-items:start;padding-top:1.3rem}
+
+  /* the plan: one sheet of paper pinned in the sky */
+  .sheet{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:1.25rem 1.35rem 1.3rem}
+  .hi{font-family:var(--read);font-style:italic;font-size:.9rem;color:var(--mut)}
+  h1{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;margin:.25rem 0 .75rem}
+  .plan{list-style:none;margin:0;padding:0}
+  .plan li{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:.7rem;padding:.5rem .45rem;margin:0 -.45rem;
+    border-radius:var(--r);cursor:pointer;transition:background .14s}
+  .plan li:hover{background:#f7f3ea}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{width:23px;height:23px;border-radius:50%;border:1.5px solid var(--mut);display:grid;place-items:center;font-weight:700;font-size:.75rem}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.95rem;display:block;line-height:1.25}
+  .plan small{font-size:.7rem;color:var(--mut)}
+  .plan .mins{font-size:.7rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+  .momentum{font-size:.74rem;font-weight:600;color:var(--mut);margin:.65rem 0 .8rem}
+  .start{display:inline-flex;align-items:center;gap:.5rem;padding:.68rem 1.4rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;box-shadow:var(--shadow);transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:14px;height:14px;fill:#fff}
+
+  /* written on the sky itself — the sky is the artist's blank paper.
+     (padding clears the skein of birds in the artwork) */
+  .onsky{padding-top:7rem;min-width:0}
+  .skylab{font-family:var(--read);font-style:italic;font-size:.95rem;color:var(--sec);margin:0 0 .55rem}
+  .subjects{display:flex;flex-wrap:wrap;gap:.3rem 1.4rem;max-width:560px}
+  .subj{font-family:var(--head);font-size:.95rem;font-weight:500;color:var(--sec);text-decoration:none;padding:.2rem 0;
+    border-bottom:2px solid color-mix(in srgb,var(--sc) 60%,transparent);transition:color .14s,border-color .14s}
+  .subj:hover,.subj:focus-visible{color:var(--ink);border-color:var(--sc);outline:none}
+  .lean{margin-top:1.6rem;display:flex;align-items:center;gap:2.2rem;flex-wrap:wrap}
+  .rack{display:flex;align-items:center;gap:.55rem;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+  .rack .p{width:58px;aspect-ratio:9/16;border-radius:5px;background-size:cover;background-position:center;
+    border:2px solid var(--card);box-shadow:var(--shadow);transition:transform .18s}
+  .rack:hover .p{transform:translateY(-3px)}
+  .rack:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .rack .t{margin-left:.4rem}
+  .rack .t b{display:block;font-size:.95rem;font-weight:700;color:var(--ink)}
+  .rack .t small{display:block;font-family:var(--read);font-style:italic;font-size:.8rem;color:var(--sec);margin-top:.1rem}
+  .wireless{display:flex;align-items:center;gap:.8rem;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+  .wireless .play{width:42px;height:42px;border-radius:var(--r);border:1.5px solid var(--sec);color:var(--ink);
+    display:grid;place-items:center;background:var(--card);box-shadow:var(--shadow);transition:border-color .14s}
+  .wireless:hover .play{border-color:var(--anchor);color:var(--anchor)}
+  .wireless:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .wireless .play svg{width:16px;height:16px;fill:currentColor}
+  .wireless .t b{display:block;font-size:.95rem;font-weight:700;color:var(--ink)}
+  .wireless .t small{display:block;font-family:var(--read);font-style:italic;font-size:.8rem;color:var(--sec);margin-top:.1rem}
+
+  /* the ground stays the artist's: one line of type stands quietly at the horizon */
+  .horizon{flex:none;padding-bottom:1.1rem}
+  .folio{font-family:var(--read);font-style:italic;font-size:.82rem;color:var(--sec)}
+
+  @media(max-width:900px){ .world{height:auto;overflow:visible} .sky{grid-template-columns:1fr} body{background-attachment:fixed} }
+  @media(prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="world">
+
+  <div class="sky-top">
+    <span class="brand">Study<b>Vault</b></span>
+    <span class="who">
+      <span class="countdown"><b>312 days</b> to your first exam · <b>4-day</b> streak</span>
+      <span class="avatar">S</span>
+    </span>
+  </div>
+
+  <div class="sky">
+    <section class="sheet">
+      <div class="hi">Welcome back, Sam.</div>
+      <h1>Here’s your plan.</h1>
+      <ol class="plan">
+        <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled last time</small></div><span class="mins">2 min</span></li>
+        <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — your nearest exam</small></div><span class="mins">15 min</span></li>
+        <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — not seen for 3 weeks</small></div><span class="mins">8 min</span></li>
+      </ol>
+      <p class="momentum">23 topics this week — your best yet.</p>
+      <button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start · 25 min</button>
+    </section>
+
+    <div class="onsky">
+      <p class="skylab">…or pick a subject:</p>
+      <nav class="subjects" id="subjects" aria-label="Your subjects"></nav>
+      <div class="lean">
+        <button class="rack" id="rack" aria-label="Watch today’s shorts">
+          <span class="p"></span><span class="p"></span><span class="p"></span>
+          <span class="t"><b>Shorts</b><small>today’s 20</small></span>
+        </button>
+        <button class="wireless">
+          <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="t"><b>Revision Radio</b><small>up next: Stave 3 — English Literature</small></span>
+        </button>
+      </div>
+      <p class="folio" style="margin:1.7rem 0 0">The village on the horizon is May 2027 — keep walking.</p>
+    </div>
+  </div>
+
+</div>
+<script>
+const SUBJECTS=[['Mathematics','#535f8a'],['English Language','#4a708c'],['English Literature','#71506b'],
+  ['Combined Science','#44696c'],['History','#3f5e78'],['Geography','#5f7155'],['Spanish','#9a5b38'],
+  ['Computer Science','#3f6478'],['Religious Studies','#6f5b91']];
+const nav=document.getElementById('subjects');
+SUBJECTS.forEach(([n,c])=>{const a=document.createElement('a');a.className='subj';a.href='#';a.textContent=n;
+  a.style.setProperty('--sc',c);a.onclick=e=>e.preventDefault();nav.appendChild(a);});
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  const seen={},ps=[];for(const s of m){if(seen[s.subject])continue;seen[s.subject]=1;
+    const p=(s.url||'').split('.r2.dev/');if(p.length<2)continue;
+    ps.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'));if(ps.length===3)break;}
+  document.querySelectorAll('.rack .p').forEach((el,i)=>{if(ps[i])el.style.backgroundImage="url('"+ps[i]+"')";});
+  document.getElementById('rack').onclick=()=>location.href='/design-lab/shorts.html';}).catch(()=>{});
+</script>
+</body>
+</html>
