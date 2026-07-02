@@ -92,6 +92,8 @@
   .done .stat div{font-family:var(--font-head)} .done .stat b{display:block;font-size:1.5rem;font-weight:800;color:var(--acc)}
   .done .stat small{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
   .done button{font-family:var(--font-head);font-weight:600;font-size:.92rem;background:transparent;color:var(--sec);border:1px solid var(--line);border-radius:10px;padding:.7rem 1.3rem;cursor:pointer}
+  .done button:hover:not(:disabled){border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
+  .done button:disabled{opacity:.55;cursor:default}
 </style>
 </head>
 <body>
@@ -101,9 +103,19 @@
 <script>
 const MANIFEST = "/scripts/_shorts_manifest.json";
 const QUESTIONS_URL = "/scripts/_shorts_questions.json";
+const SITE = "https://www.studyvault.co.uk";   // Lesson deep-links (design-lab has no /lesson router)
 const CHECK_EVERY = 5;
 const WATCH_FRAC = 0.5;   // count a short as watched once past half (or played to the end)
 const CHROME_MS = 10000;  // chrome fades this long after a short starts playing
+const DAILY_TARGET = 20;  // today's session: this many shorts, then the done card
+
+// ---- persistence (free-user pattern: localStorage) ----
+const LS = { watched:'sv_shorts_watched', saved:'sv_shorts_saved', day:'sv_shorts_day', streak:'sv_shorts_streak' };
+function lsGet(k,fb){ try{ const v=JSON.parse(localStorage.getItem(k)); return v==null?fb:v; }catch(e){ return fb; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+function todayStr(){ return new Date().toISOString().slice(0,10); }
+function yesterdayStr(){ return new Date(Date.now()-864e5).toISOString().slice(0,10); }
+function keyOf(s){ return s.lesson_id+':'+(s.topic_index==null?'g':s.topic_index); }
 
 const ICON = {
   book:'<svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16l-7-3-7 3z"/><path d="M18 3a2 2 0 0 1 2 2v14"/></svg>',
@@ -113,20 +125,53 @@ const ICON = {
   play:'<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
 };
 
+const SUBJ_NAMES={ 'ict':'ICT','it':'IT','construction-built-environment':'Construction',
+  'child-development':'Child Development','sport-and-coaching-principles':'Sport & Coaching' };
 function subjName(slug){
-  return slug.replace(/^l12-/,'').replace(/-(aqa|ocr|edexcel|eduqas|wjec)$/,'')
-    .split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ').replace(/\bAnd\b/,'&');
+  const s=slug.replace(/^l12-/,'').replace(/^cambridge-nationals-/,'').replace(/-(aqa|ocr|edexcel|eduqas|wjec|ncfe)$/,'');
+  return SUBJ_NAMES[s] || s.split('-').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ').replace(/\bAnd\b/,'&');
 }
-function accent(slug){ let h=0; for(const c of slug) h=(h*31+c.charCodeAt(0))>>>0; return `hsl(${h%360} 30% 40%)`; }
+// BRIEF v2: one muted accent per subject — same map the reader skin uses
+// (skin-switcher.js ACCENTS; ships later via subjects.color)
+const ACCENTS = {
+  'history':'#3f5e78','geography':'#5f7155','science':'#44696c','combined-science':'#44696c',
+  'separate-sciences':'#44696c','maths':'#535f8a','mathematics':'#535f8a','statistics':'#535f8a',
+  'english-literature':'#71506b','english-language':'#4a708c','business':'#8a6c42','economics':'#6e6440',
+  'psychology':'#84576b','sociology':'#5e6a7d','religious-education':'#6f5b91','religious-studies':'#6f5b91',
+  'computer-science':'#3f6478','physical-education':'#3e6e5f','sport-science':'#3e6e5f',
+  'sport-coaching-principles':'#3e6e5f','drama':'#8a4f5c','music':'#5b5286','music-technology':'#5b5286',
+  'spanish':'#9a5b38','french':'#4c5f93','german':'#6e5640','food-technology':'#8c5e3a',
+  'food-preparation-nutrition':'#8c5e3a','design-technology':'#5f666f','engineering':'#5f666f',
+  'electronics':'#5f666f','creative-imedia':'#54486e','media-studies':'#54486e','film-studies':'#54486e',
+  'astronomy':'#3d5a78','citizenship':'#6b5a45','geology':'#6e6248','retail-business':'#8a6c42',
+  'health-social-care':'#84576b','it':'#3f6478','ict':'#3f6478',
+  'construction-built-environment':'#75604a','child-development':'#84576b',
+};
+function accent(slug){
+  const base = slug.replace(/^l12-/,'').replace(/^cambridge-nationals-/,'')
+                   .replace(/-(aqa|edexcel|ocr|ocr-b|eduqas|wjec|ncfe)$/,'');
+  const c = ACCENTS[base] || ACCENTS[base.replace(/-and-/g,'-')];
+  if (c) return c;
+  let h=0; for(const ch of slug) h=(h*31+ch.charCodeAt(0))>>>0; return `hsl(${h%360} 25% 42%)`;
+}
 function titleCase(s){ return s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
 // poster frame mirrors the R2 key under /design-lab/_posters/, .mp4 -> .jpg
 function posterFor(url){ const m=url.split('.r2.dev/'); if(m.length<2) return ''; return '/design-lab/_posters/'+m[1].replace(/\.mp4$/,'.jpg'); }
 
-// interleave shorts across subjects so the feed is mixed
-function interleave(items){
-  const by={}; items.forEach(e=>{ (by[e.subject]=by[e.subject]||[]).push(e); });
-  const queues=Object.values(by); const out=[];
-  while(queues.some(q=>q.length)) for(const q of queues) if(q.length) out.push(q.shift());
+// today's playlist: least-recently-watched first within each subject (never-watched
+// leads), round-robined across subjects, starting subject rotated daily
+function buildPlaylist(items, n){
+  const w = lsGet(LS.watched, {});
+  const by = {};
+  items.forEach(e=>{ if(!inFeed.has(keyOf(e))) (by[e.subject]=by[e.subject]||[]).push(e); });
+  const queues = Object.values(by);
+  if(!queues.length) return [];
+  queues.forEach(q=>q.sort((a,b)=>{ const da=w[keyOf(a)]||'', db=w[keyOf(b)]||''; return da<db?-1:da>db?1:0; }));
+  let seed=0; for(const c of todayStr()) seed=(seed*31+c.charCodeAt(0))>>>0;
+  for(let i=0;i<seed%queues.length;i++) queues.push(queues.shift());
+  const out=[];
+  while(out.length<n && queues.some(q=>q.length))
+    for(const q of queues){ if(q.length && out.length<n) out.push(q.shift()); }
   return out;
 }
 
@@ -145,7 +190,10 @@ function realCheck(s){
 
 let slides=[], current=-1;
 let watchedSinceCheck=0, watchedQueue=[];   // a check appears after CHECK_EVERY genuinely-watched shorts
-let totalWatched=0, watchedSubjects=new Set();   // lifetime-of-session watched stats, feed the done card
+let pool=[];                                // the full manifest; playlists draw from it
+const inFeed=new Set();                     // keys already placed in the feed this session
+const savedSet=new Set(lsGet(LS.saved,[])); // persisted saves
+let feedInited=false;
 let QUESTIONS={};                           // lesson_id -> { topic_index: {q,opts,correct} }, from _shorts_questions.json
 // sound is ON by default; browsers just won't let the FIRST short play unmuted
 // until the user has interacted (scroll/tap). After that first gesture, every
@@ -189,12 +237,28 @@ function onTap(){                     // first tap turns sound on; after that, t
 }
 
 function render(items){
+  pool=items;
+  appendBatch(buildPlaylist(pool, DAILY_TARGET));
+}
+
+// append a playlist batch + a fresh done card at the end (checks are inserted live,
+// once 5 shorts are actually watched)
+function appendBatch(batch){
   const feed=document.getElementById('feed');
-  const mixed=interleave(items);
-  mixed.forEach(s=>feed.appendChild(makeShort(s)));   // checks are inserted live, once 5 shorts are actually watched
+  batch.forEach(s=>{ inFeed.add(keyOf(s)); feed.appendChild(makeShort(s)); });
   feed.appendChild(makeDone()); updateDone();
   slides=[].slice.call(feed.children);
-  setupAutoplay();
+  if(!feedInited){ feedInited=true; setupAutoplay(); } else activate();
+}
+
+// "Keep going anyway": swap the done card for the next batch (the first new short
+// lands exactly where the done card was, so the scroll position carries over)
+function loadMore(){
+  const feed=document.getElementById('feed');
+  const next=buildPlaylist(pool, DAILY_TARGET);
+  const doneSlide=feed.querySelector('.done')?.closest('.slide');
+  if(doneSlide) doneSlide.remove();
+  appendBatch(next);
 }
 
 function makeShort(s){
@@ -221,7 +285,7 @@ function makeShort(s){
   const countWatch=()=>{
     if(el.dataset.counted) return;
     el.dataset.counted='1'; watchedQueue.push(s);
-    totalWatched++; watchedSubjects.add(s.subject); updateDone();
+    recordWatch(s); updateDone();
     if(++watchedSinceCheck>=CHECK_EVERY) insertCheckAfter(el);
   };
   vid.addEventListener('timeupdate',()=>{
@@ -236,7 +300,18 @@ function makeShort(s){
   vid.addEventListener('pause',()=>{ short.classList.remove('chrome-hidden'); if(vid===currentVideo) clearTimeout(hideTimer); });
   vid.addEventListener('click',onTap);   // tap = pause/play (first tap turns the sound on)
   el.querySelector('.r-mute').addEventListener('click',e=>{e.stopPropagation();toggleSound();});
-  el.querySelector('.r-save').addEventListener('click',e=>{e.stopPropagation();e.currentTarget.classList.toggle('on');});
+  const saveBtn=el.querySelector('.r-save');
+  if(savedSet.has(keyOf(s))) saveBtn.classList.add('on');
+  saveBtn.addEventListener('click',e=>{
+    e.stopPropagation();
+    const k=keyOf(s), on=e.currentTarget.classList.toggle('on');
+    on ? savedSet.add(k) : savedSet.delete(k);
+    lsSet(LS.saved,[...savedSet]);
+  });
+  el.querySelector('.r-lesson').addEventListener('click',e=>{
+    e.stopPropagation();
+    window.open(`${SITE}/lesson/${s.subject}/${s.unit}/${s.lesson_number}`,'_blank');
+  });
   return el;
 }
 
@@ -274,35 +349,62 @@ function makeCheck(s){
   return el;
 }
 
+// ---- watched log, today's stats, streak (all localStorage — survive refresh) ----
+function recordWatch(s){
+  const k=keyOf(s), t=todayStr();
+  const w=lsGet(LS.watched,{}); w[k]=t; lsSet(LS.watched,w);
+  const day=lsGet(LS.day,{});
+  if(day.date!==t){ day.date=t; day.keys=[]; day.subjects=[]; }
+  if(!day.keys.includes(k)) day.keys.push(k);
+  if(!day.subjects.includes(s.subject)) day.subjects.push(s.subject);
+  lsSet(LS.day,day);
+  const st=lsGet(LS.streak,{last:'',n:0});
+  if(st.last!==t){ st.n = st.last===yesterdayStr() ? st.n+1 : 1; st.last=t; lsSet(LS.streak,st); }
+}
+function todayStats(){
+  const day=lsGet(LS.day,{});
+  return day.date===todayStr() ? {t:(day.keys||[]).length, n:(day.subjects||[]).length} : {t:0,n:0};
+}
+function streakNow(){
+  const st=lsGet(LS.streak,{last:'',n:0});
+  return (st.last===todayStr()||st.last===yesterdayStr()) ? st.n : 0;
+}
+
 function makeDone(){
   const el=document.createElement('div'); el.className='slide';
-  el.innerHTML=`<div class="done" style="--acc:${accent('geography-ocr')}">
+  el.innerHTML=`<div class="done" style="--acc:#566a72">
     <div class="flame">🔥</div>
     <h2>Done for today</h2>
     <p class="d-line"></p>
     <div class="stat">
       <div><b class="d-topics">0</b><small>topics</small></div>
       <div><b class="d-subjects">0</b><small>subjects</small></div>
-      <div><b>5</b><small>day streak</small></div>
+      <div><b class="d-streak">0</b><small>day streak</small></div>
     </div>
-    <button onclick="document.getElementById('feed').scrollTo({top:0,behavior:'smooth'})">Keep going anyway →</button>
+    <button class="d-more" onclick="loadMore()">Keep going anyway →</button>
   </div>`;
   return el;
 }
 
-// the done card reflects what was genuinely watched, not the size of the feed
+// the done card reflects what was genuinely watched today (persisted), not feed size
 function updateDone(){
   const d=document.querySelector('.done'); if(!d) return;
-  const t=totalWatched, n=watchedSubjects.size;
+  const {t,n}=todayStats();
   d.querySelector('.d-line').textContent = t===0
     ? 'Scroll back up — nothing counted as watched yet.'
     : `You revised ${t} ${t===1?'topic':'topics'} across ${n} ${n===1?'subject':'subjects'}.`;
   d.querySelector('.d-topics').textContent=t;
   d.querySelector('.d-subjects').textContent=n;
+  d.querySelector('.d-streak').textContent=streakNow();
+  const left=pool.filter(e=>!inFeed.has(keyOf(e))).length;
+  const btn=d.querySelector('.d-more');
+  if(left===0){ btn.disabled=true; btn.textContent='That’s everything for now'; }
+  else btn.textContent=`Keep going anyway → (${Math.min(left,DAILY_TARGET)} more)`;
 }
 
 // mandatory scroll-snap cancels programmatic smooth scroll, so animate it ourselves
 function glideTo(feed, top){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ feed.scrollTop=top; return; }
   feed.style.scrollSnapType='none';
   const start=feed.scrollTop, dist=top-start, dur=440; let t0=null;
   function step(now){

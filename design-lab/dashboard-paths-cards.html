@@ -469,6 +469,24 @@
   .rbar a.rbrowse{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--anchor);cursor:pointer;flex:none}
   @media(max-width:760px){ .rbar{flex-wrap:wrap} .rbar .rnow{order:3;width:100%} .rbar .rmid{width:100%} }
 
+  /* SHORTS — slim strip under the doors: today's 20 sixty-second videos, one tap.
+     A mode, not a subject — the low-commitment lane beside Guided/Revision. */
+  .strip-shorts{flex:none;display:flex;align-items:center;gap:1rem;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.55rem .9rem;cursor:pointer;transition:box-shadow .18s}
+  .strip-shorts:hover{box-shadow:var(--shadow-md)}
+  .strip-shorts .sthumbs{display:flex;flex:none;padding-left:9px}
+  .strip-shorts .sthumbs i{width:27px;height:46px;border-radius:5px;background-size:cover;background-position:center;border:2px solid var(--bg-card);box-shadow:0 1px 3px rgba(29,28,26,.25);margin-left:-9px;transform:rotate(var(--tilt,0deg))}
+  .strip-shorts .sthumbs i:nth-child(1){--tilt:-4deg}
+  .strip-shorts .sthumbs i:nth-child(2){--tilt:2deg}
+  .strip-shorts .sthumbs i:nth-child(3){--tilt:-2deg}
+  .strip-shorts .sthumbs i:nth-child(4){--tilt:3deg}
+  .strip-shorts .slab{display:flex;flex-direction:column;gap:.05rem;min-width:0;flex:1}
+  .strip-shorts .slab .ct{font-family:var(--font-head);font-size:.92rem;font-weight:700}
+  .strip-shorts .slab .sub{font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .strip-shorts .sgo{flex:none;display:inline-flex;align-items:center;gap:.45rem;font-family:var(--font-head);font-weight:700;font-size:.85rem;color:#fff;background:var(--anchor);border:none;border-radius:var(--r);padding:.5rem 1rem;cursor:pointer;box-shadow:var(--shadow-sm);transition:filter .18s}
+  .strip-shorts .sgo:hover{filter:brightness(.94)}
+  .strip-shorts .sgo svg{width:13px;height:13px}
+  @media(max-height:680px){ .strip-shorts .sthumbs{display:none} .strip-shorts{padding:.45rem .9rem} }
+
   /* drill view tweaks */
   .drill{padding-top:.85rem}
   .drill .crumbs .swatch{display:none}
@@ -536,6 +554,7 @@
       <section class="card guided" id="guided"></section>
       <section class="card revision" id="revision"></section>
     </div>
+    <section class="strip-shorts" id="shortsStrip" hidden></section>
     <section class="rbar" id="radio"></section>
   </main>
 
@@ -1127,6 +1146,29 @@
       row.onclick=function(){ radioGo(i); if(!RADIO.playing) radioToggle(); }; q.appendChild(row); });
     if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem;grid-column:1/-1">That’s the end of today’s queue.</div>'; }
 
+  /* ---- SHORTS strip: real manifest thumbs + real watched-today count (shared
+     localStorage with the feed). Hidden if the manifest isn't served. ---- */
+  function buildShortsStrip(){
+    var el=document.getElementById('shortsStrip'); if(!el) return;
+    fetch('/scripts/_shorts_manifest.json').then(function(r){ return r.json(); }).then(function(m){
+      if(!m || !m.length) return;
+      var seen={}, thumbs=[];
+      for(var i=0;i<m.length && thumbs.length<4;i++){ var s=m[i];
+        if(seen[s.subject]) continue; seen[s.subject]=1;
+        var p=(s.url||'').split('.r2.dev/'); if(p.length<2) continue;
+        thumbs.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg')); }
+      var day={}; try{ day=JSON.parse(localStorage.getItem('sv_shorts_day'))||{}; }catch(e){}
+      var watched=(day.date===new Date().toISOString().slice(0,10))?(day.keys||[]).length:0;
+      var sub=watched>0 ? watched+' of 20 watched today · mixed across your subjects'
+                        : 'Today’s 20 · 60-second videos across your subjects';
+      el.innerHTML='<span class="sthumbs">'+thumbs.map(function(t){ return '<i style="background-image:url(\''+t+'\')"></i>'; }).join('')+'</span>'+
+        '<span class="slab"><span class="ct">Shorts</span><span class="sub">'+sub+'</span></span>'+
+        '<button class="sgo">'+PLAY+' Start</button>';
+      el.hidden=false;
+      el.onclick=function(){ location.href='/design-lab/shorts.html'; };
+    }).catch(function(){ /* no manifest — strip stays hidden */ });
+  }
+
   /* ===================================================================
      PARKED — living-constellation engine (was the "Your progress" view).
      Retired 28 Jun: pretty but not legible for a progress screen; replaced
@@ -1244,7 +1286,7 @@
   }
 
   function buildPage(){
-    buildGuided(); buildRevisionList(); buildRadio(); showHome();
+    buildGuided(); buildRevisionList(); buildRadio(); buildShortsStrip(); showHome();
   }
 
   document.getElementById('crumbHome').addEventListener('click',showHome);
