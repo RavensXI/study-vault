@@ -457,17 +457,15 @@
   .guided .gstart svg{width:16px;height:16px}
   .guided .gmeta{font-family:var(--font-head);font-size:.78rem;color:var(--text-muted)}
 
-  /* REVISION — the calm library. Its half of the landscape: the fingerpost
-     at the fork (choose your own) — very quiet, the list stays boss. */
-  .revision{display:flex;flex-direction:column;padding:1.1rem 1.2rem 1rem;min-height:0;position:relative;overflow:hidden}
-  .revision::before{content:"";position:absolute;top:0;right:0;bottom:0;width:80%;z-index:0;pointer-events:none;
-    background:url('assets/lw/guided-b.png') right bottom/cover no-repeat;opacity:.1;
-    -webkit-mask-image:linear-gradient(250deg,#000 16%,transparent 60%);mask-image:linear-gradient(250deg,#000 16%,transparent 60%)}
-  .revision>*{position:relative;z-index:1}
-  .revision h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin:.4rem 0 .7rem}
-  .subjlist{list-style:none;margin:0;padding:0 .15rem;overflow:auto;flex:1;min-height:0;scrollbar-width:none}
-  .subjlist::-webkit-scrollbar{display:none}
-  .subjrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.3rem .8rem;width:100%;text-align:left;background:transparent;border:0;cursor:pointer;padding:.44rem .45rem;border-radius:var(--r);transition:background .14s}
+  /* Right column: Revision (pick a subject) stacked over Lean back */
+  .rcol{display:flex;flex-direction:column;gap:.95rem;min-height:0}
+
+  /* REVISION — the calm library, compressed to a two-column grid.
+     No art back here: the list is the whole job. */
+  .revision{display:flex;flex-direction:column;padding:1.1rem 1.2rem 1rem;flex:none}
+  .revision h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin:.4rem 0 .55rem}
+  .subjlist{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:.05rem .9rem}
+  .subjrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.24rem .6rem;width:100%;text-align:left;background:transparent;border:0;cursor:pointer;padding:.4rem .45rem;border-radius:var(--r);transition:background .14s}
   .subjrow:hover{background:var(--wash)}
   .subjrow .snm{font-family:var(--font-head);font-size:.92rem;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .subjrow:hover .snm{font-weight:600}
@@ -496,37 +494,36 @@
   .rbar a.rbrowse{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--anchor);cursor:pointer;flex:none}
   @media(max-width:760px){ .rbar{flex-wrap:wrap} .rbar .rnow{order:3;width:100%} .rbar .rmid{width:100%} }
 
-  /* SHORTS — the Revision door's lower shelf: a real 9:16 poster (the shape
-     of the content) beside a plain text block, filling the space below the
-     subject list. Same flat card language as everything else. */
-  .rshelf{flex:none;display:flex;gap:.95rem;align-items:stretch;border-top:1px solid var(--border-lighter);
-    margin-top:.65rem;padding:.75rem .15rem 0;cursor:pointer}
-  .rshelf .sposter{position:relative;flex:none;width:112px;aspect-ratio:9/16;border-radius:var(--r);overflow:hidden;
+  /* LEAN BACK — the low-effort lane: Shorts poster + Revision Radio, siblings
+     in one card with its own name. Fills the right column below Revision. */
+  .leanback{flex:1;min-height:0;display:flex;flex-direction:column;padding:1rem 1.2rem 1.1rem}
+  .leanback .lb-row{display:flex;gap:1.05rem;flex:1;min-height:0;align-items:stretch;margin-top:.65rem}
+  .lb-shorts{flex:none;height:100%;display:flex;cursor:pointer}
+  .lb-shorts .sposter{position:relative;display:block;height:100%;aspect-ratio:9/16;border-radius:var(--r);overflow:hidden;
     border:1px solid var(--border-light);background-size:cover;background-position:center;box-shadow:var(--shadow-sm);transition:box-shadow .18s}
-  .rshelf:hover .sposter{box-shadow:var(--shadow-md)}
-  .rshelf .sposter .pp{position:absolute;inset:0;display:grid;place-items:center;
-    background:linear-gradient(to top,rgba(22,19,15,.4),transparent 55%)}
-  .rshelf .sposter .pp span{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);backdrop-filter:blur(5px);
-    border:1px solid rgba(255,255,255,.45);display:grid;place-items:center;color:#fff}
-  .rshelf .pp svg{width:15px;height:15px;fill:#fff;margin-left:2px}
-  .rshelf .smeta{display:flex;flex-direction:column;justify-content:center;gap:.3rem;min-width:0}
-  .rshelf .smeta .ct{font-family:var(--font-head);font-weight:700;font-size:1rem;color:var(--text-primary)}
-  .rshelf .smeta .sub{font-family:var(--font-read);font-size:.82rem;color:var(--text-secondary);line-height:1.4}
-
-  /* RADIO — docked into the masthead as an actual player: play, now-playing,
-     a hairline of progress. Fixed into the chrome, not parked on the page. */
-  .dock{position:relative;overflow:hidden;display:flex;align-items:center;gap:.6rem;background:var(--bg-card);
-    border:1px solid var(--border-light);border-radius:var(--r);padding:.3rem .35rem .3rem .8rem;box-shadow:var(--shadow-sm)}
-  .dock .ico{display:grid;place-items:center;color:var(--text-muted);flex:none}
-  .dock .ico svg{width:15px;height:15px}
-  .dock .dnow{display:flex;flex-direction:column;min-width:0;line-height:1.18}
-  .dock .npsub{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.07em;font-size:.5rem;font-weight:700;color:var(--text-muted);white-space:nowrap}
-  .dock .nptitle{font-family:var(--font-read);font-size:.77rem;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-  .dock .pp{width:30px;height:30px;border-radius:6px;background:var(--anchor);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;flex:none;transition:filter .15s}
-  .dock .pp:hover{filter:brightness(.94)}
-  .dock .pp svg{width:14px;height:14px}
-  .dock .dfill{position:absolute;left:0;bottom:0;height:2px;background:var(--anchor);width:0;transition:width 1s linear}
-  @media(max-width:760px){ .dock .dnow,.dock .ico{display:none} .dock{padding:.28rem .32rem} }
+  .lb-shorts:hover .sposter{box-shadow:var(--shadow-md)}
+  .lb-shorts .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(22,19,15,.72),rgba(22,19,15,.2) 42%,transparent 62%)}
+  .lb-shorts .pp2{position:absolute;top:38%;left:50%;transform:translate(-50%,-50%);width:38px;height:38px;border-radius:50%;
+    background:rgba(255,255,255,.2);backdrop-filter:blur(5px);border:1px solid rgba(255,255,255,.45);display:grid;place-items:center;color:#fff}
+  .lb-shorts .pp2 svg{width:15px;height:15px;fill:#fff;margin-left:2px}
+  .lb-shorts .plab{position:absolute;left:0;right:0;bottom:0;padding:.6rem .65rem;color:#fff}
+  .lb-shorts .plab b{display:block;font-family:var(--font-head);font-weight:800;font-size:.95rem}
+  .lb-shorts .plab small{display:block;font-family:var(--font-head);font-size:.62rem;color:rgba(255,255,255,.88);margin-top:.1rem}
+  .lb-radio{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:.55rem}
+  .lb-radio .rkick{display:flex;align-items:center;gap:.45rem;font-family:var(--font-head);text-transform:uppercase;letter-spacing:.11em;font-size:.64rem;font-weight:700;color:var(--text-secondary)}
+  .lb-radio .rkick svg{width:15px;height:15px}
+  .lb-radio .npsub{display:block;font-family:var(--font-head);text-transform:uppercase;letter-spacing:.07em;font-size:.6rem;font-weight:700;color:var(--text-muted)}
+  .lb-radio .nptitle{display:block;font-family:var(--font-read);font-size:1.04rem;font-weight:600;color:var(--text-primary);line-height:1.3;margin-top:.12rem}
+  .lb-radio .rctrl{display:flex;align-items:center;gap:.55rem;margin-top:.15rem}
+  .lb-radio .sk{width:30px;height:30px;border:0;background:transparent;color:var(--text-secondary);display:grid;place-items:center;cursor:pointer;border-radius:6px}
+  .lb-radio .sk:hover{background:var(--wash);color:var(--text-primary)}
+  .lb-radio .sk svg{width:16px;height:16px}
+  .lb-radio .pp{width:40px;height:40px;border-radius:var(--r);background:var(--anchor);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;transition:filter .15s;flex:none}
+  .lb-radio .pp:hover{filter:brightness(.94)}
+  .lb-radio .pp svg{width:18px;height:18px}
+  .lb-radio .scrub{flex:1;height:4px;border-radius:2px;background:var(--border-lighter);overflow:hidden;cursor:pointer}
+  .lb-radio .scrub i{display:block;height:100%;width:0;background:var(--anchor)}
+  .lb-radio .rtime{font-family:var(--font-head);font-size:.66rem;color:var(--text-muted);font-variant-numeric:tabular-nums;flex:none}
 
   /* drill view tweaks */
   .drill{padding-top:.85rem}
@@ -581,7 +578,6 @@
     <div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:100%">
       <span class="brand" id="brand">Study<b>Vault</b><svg class="sv-lock" viewBox="512 384 1023 1280" aria-hidden="true"><mask id="svlk-dash"><rect x="512" y="384" width="1023" height="1280" fill="#fff"/><path fill="#000" d="M 1010.92 1075.34 C 1032.39 1072.69 1058.68 1077.88 1078.25 1086.82 C 1108.74 1101.11 1132.38 1126.83 1144.05 1158.4 C 1155.23 1188.63 1153.67 1227.84 1139.51 1256.66 C 1122.21 1291.9 1098.3 1312.15 1062.02 1325.22 C 1061.91 1344.15 1065.34 1395.94 1058.79 1410.84 C 1054.1 1421.5 1045.86 1427.24 1035.49 1431.54 C 1022.09 1434.04 1009.85 1433.55 998.968 1424.13 C 993.361 1419.21 989.346 1412.74 987.435 1405.53 C 984.458 1394.29 986.554 1342.42 985.404 1325.3 C 972.138 1319.93 962.284 1316.02 950.395 1307.56 C 923.012 1288.07 903.201 1257.64 897.872 1224.34 C 892.21 1190.1 900.488 1155.02 920.859 1126.93 C 943.784 1095.82 973.572 1081.06 1010.92 1075.34 z"/></mask><path fill="currentColor" mask="url(#svlk-dash)" d="M 1006.55 384.5 C 1012.26 384.032 1017.96 384.019 1023.69 384.03 C 1126.34 383.508 1224.86 424.385 1296.99 497.419 C 1360.21 560.738 1398.86 644.469 1406.04 733.658 C 1408.66 765.139 1407.27 812.813 1407.19 845.206 C 1408.84 845.067 1410.49 844.96 1412.14 844.887 C 1429.72 844.275 1447.74 845.081 1465.32 844.677 C 1495.06 843.994 1535.25 840.392 1535.47 882.388 L 1535.36 1317.69 L 1535.32 1438.19 C 1535.26 1507.75 1538.75 1557.74 1484.85 1611.82 C 1460.86 1635.66 1430.61 1652.23 1397.59 1659.62 C 1375.13 1664.65 1350.12 1663.97 1327.09 1663.93 L 1262.44 1663.83 L 1039.75 1663.73 L 791.843 1663.77 C 753.977 1663.77 680.267 1666.52 646.687 1658.7 C 616.228 1651.35 588.323 1635.91 565.929 1614 C 532.163 1581.54 512.105 1536.9 512.157 1490.19 C 512.202 1449.42 512.422 1408.59 512.416 1367.82 L 512.46 1090.95 L 512.437 949.482 C 512.426 925.408 512.016 901.145 513.113 877.152 C 513.68 864.772 526.116 849.163 538.208 846.652 C 551.022 843.991 567.128 844.956 580.366 844.959 C 600.487 844.856 620.61 844.943 640.73 845.219 C 639.551 827.347 640.432 805.755 640.372 787.686 C 640.3 766.215 640.741 742.607 643.073 721.312 C 651.702 644.63 683.654 572.444 734.615 514.5 C 806.373 432.129 899.065 391.821 1006.55 384.5 z M 716.467 845.223 C 818.381 844.143 921.774 845.464 1023.95 845.099 L 1331.64 844.834 L 1331.54 843.821 C 1330.34 831.289 1331.21 811.921 1331.49 799.241 C 1331.8 783.652 1331.59 768.058 1330.86 752.483 C 1326.9 666.541 1286.96 586.231 1220.82 531.214 C 1176.33 494.282 1122.33 470.636 1065.02 462.987 C 1056.45 461.791 1035.74 459.773 1026.64 460.477 C 938.331 462.331 863.078 491.197 801.283 555.598 C 753.658 605.045 724.17 669.155 717.618 737.494 C 714.147 772.586 716.753 809.897 716.467 845.223 z"/></svg></span>
       <div class="right">
-        <div class="dock" id="radio"></div>
         <span class="avatar" aria-label="Your account">S</span>
       </div>
     </div>
@@ -592,7 +588,10 @@
     <p class="hi">Welcome back, Sam. <span class="hisub" id="hiSub"></span></p>
     <div class="doors">
       <section class="card guided" id="guided"></section>
-      <section class="card revision" id="revision"></section>
+      <div class="rcol">
+        <section class="card revision" id="revision"></section>
+        <section class="card leanback" id="leanback"></section>
+      </div>
     </div>
   </main>
 
@@ -1186,11 +1185,17 @@
     var el=document.getElementById('radio'); if(!el) return;
     var cont=nextLesson(byShelf['English Literature']);
     RADIO={ list:[{subj:cont.s.n,sw:cont.s.swatch,title:cont.L.t}].concat(radioQueue(cont)), idx:0, playing:false, pos:0, dur:630 };
-    el.innerHTML='<span class="ico" title="Revision Radio">'+ICON_RADIO+'</span>'+
-      '<span class="dnow"><span class="npsub" id="rSub"></span><span class="nptitle" id="rTitle"></span></span>'+
+    el.innerHTML='<div class="rkick">'+ICON_RADIO+'<span>Revision Radio</span></div>'+
+      '<div class="rnow"><span class="npsub" id="rSub"></span><span class="nptitle" id="rTitle"></span></div>'+
+      '<div class="rctrl"><button class="sk" id="rPrev" aria-label="Previous episode">'+ICON_PREV+'</button>'+
       '<button class="pp" id="rPlay" aria-label="Play Revision Radio">'+PLAY+'</button>'+
-      '<i class="dfill" id="rFill"></i>';
+      '<button class="sk" id="rNext" aria-label="Next episode">'+ICON_NEXT+'</button>'+
+      '<span class="scrub" id="rScrub"><i id="rFill"></i></span>'+
+      '<span class="rtime"><span id="rCur">0:00</span> / <span id="rDur">0:00</span></span></div>';
     el.querySelector('#rPlay').onclick=radioToggle;
+    el.querySelector('#rPrev').onclick=function(){ radioGo(RADIO.idx-1); };
+    el.querySelector('#rNext').onclick=function(){ radioGo(RADIO.idx+1); };
+    el.querySelector('#rScrub').onclick=function(e){ var r=this.getBoundingClientRect(); RADIO.pos=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*RADIO.dur; radioPaint(); };
     radioLoad(0);
   }
   function radioLoad(i){ if(!RADIO) return; RADIO.idx=Math.max(0,Math.min(RADIO.list.length-1,i)); var t=RADIO.list[RADIO.idx];
@@ -1215,11 +1220,18 @@
       row.onclick=function(){ radioGo(i); if(!RADIO.playing) radioToggle(); }; q.appendChild(row); });
     if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem;grid-column:1/-1">That’s the end of today’s queue.</div>'; }
 
-  /* ---- SHORTS shelf: appended below the Revision subject list. A real 9:16
-     poster + plain text; watched count shares localStorage with the feed. ---- */
+  /* ---- LEAN BACK card: skeleton (kick + shorts slot + radio slot) ---- */
+  function buildLeanback(){
+    var el=document.getElementById('leanback'); if(!el) return;
+    el.innerHTML='<div class="kick">Lean back · watch or listen</div>'+
+      '<div class="lb-row"><div class="lb-shorts" id="lbShorts" role="button" tabindex="0" aria-label="Watch today’s shorts"></div>'+
+      '<div class="lb-radio" id="radio"></div></div>';
+  }
+
+  /* ---- SHORTS poster in the lean-back card; watched count shares
+     localStorage with the feed. ---- */
   function buildShortsStrip(){
-    var rev=document.getElementById('revision'); if(!rev) return;
-    var old=document.getElementById('shortsShelf'); if(old) old.remove();
+    var el=document.getElementById('lbShorts'); if(!el) return;
     fetch('/scripts/_shorts_manifest.json').then(function(r){ return r.json(); }).then(function(m){
       if(!m || !m.length) return;
       var poster='';
@@ -1228,16 +1240,14 @@
       if(!poster) return;
       var day={}; try{ day=JSON.parse(localStorage.getItem('sv_shorts_day'))||{}; }catch(e){}
       var watched=(day.date===new Date().toISOString().slice(0,10))?(day.keys||[]).length:0;
-      var sub=watched>0 ? watched+' of 20 watched today.' : 'Twenty 60-second videos, mixed across your subjects.';
-      var shelf=document.createElement('div'); shelf.className='rshelf'; shelf.id='shortsShelf';
-      shelf.setAttribute('role','button'); shelf.setAttribute('tabindex','0');
-      shelf.innerHTML='<span class="sposter" style="background-image:url(\''+poster+'\')"><span class="pp"><span>'+PLAY+'</span></span></span>'+
-        '<span class="smeta"><span class="kick">Shorts</span><span class="ct">Watch today’s 20</span><span class="sub">'+sub+'</span></span>';
+      var sub=watched>0 ? watched+' of 20 watched' : 'Today’s 20';
+      el.innerHTML='<span class="sposter" style="background-image:url(\''+poster+'\')">'+
+        '<span class="pscrim"></span><span class="pp2">'+PLAY+'</span>'+
+        '<span class="plab"><b>Shorts</b><small>'+sub+'</small></span></span>';
       function go(){ location.href='/design-lab/shorts.html'; }
-      shelf.onclick=go;
-      shelf.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
-      rev.appendChild(shelf);
-    }).catch(function(){ /* no manifest — no shelf */ });
+      el.onclick=go;
+      el.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+    }).catch(function(){ /* no manifest — slot stays empty */ });
   }
 
   /* ===================================================================
@@ -1357,7 +1367,7 @@
   }
 
   function buildPage(){
-    buildGuided(); buildRevisionList(); buildRadio(); buildShortsStrip(); showHome();
+    buildGuided(); buildRevisionList(); buildLeanback(); buildRadio(); buildShortsStrip(); showHome();
   }
 
   document.getElementById('crumbHome').addEventListener('click',showHome);
