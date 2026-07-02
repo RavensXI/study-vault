@@ -9,10 +9,10 @@
 We're prototyping a **TikTok-style vertical "doom-scroll" feed of NotebookLM short videos**, scoped to a student's GCSE subjects, in the reader-skin design. It's a **design-lab prototype** (`design-lab/shorts.html`), **not yet in production**. The feed UX is complete and validated; content and question-mapping are partially built.
 
 - **130 shorts banked** across 36 lessons / 18 subjects (in R2 + `scripts/_shorts_manifest.json`).
-- **Recall-check questions mapped for 14 of 34** focused-short lessons; 20 still unmapped (feed shows a placeholder for those — harmless).
+- **Recall-check questions mapped for ALL 34 focused-short lessons** (128/128 focused shorts; done 2 Jul). Posters exist for all 130. Done-card counts genuinely-watched shorts.
 - **The batch is paused** on the NotebookLM auth-expiry fail-safe. To add more shorts: Tom runs `nlm login` (interactive, only he can), then relaunch the batch.
 - **All work is committed on branch `sandbox`, NOT pushed** (Tom's rule: commit locally, wait for explicit "push"/"deploy").
-- **One decision is pending Tom** (see §6): keep grinding the full ~700-short library now (~8 more login cycles) vs. bank the 130 we have, re-map all lessons, and treat the rest as a background top-up.
+- **Working mode (Tom, 2 Jul): keep building the feature continuously; top up videos whenever auth is fresh.** No "bank vs grind" decision — video generation is a rolling background task.
 
 ## 2. What the feature is
 
@@ -75,17 +75,16 @@ python scripts/_make_short_posters.py
 - **130 shorts / 36 lessons / 18 subjects** banked; **14 lessons mapped, 20 unmapped**.
 - Untracked/intermediate (regenerable, safe to ignore or clean): `scratchpad/_shorts_qbank.json`, `scratchpad/_shorts_picks.json`, `scripts/_test_short_video.py`.
 
-## 6. Pending decision for Tom
+## 6. Working mode (resolved 2 Jul)
 
-Batch paused. Options I put to him (awaiting answer):
-- **(Recommended) Bank the 130 as the feature's content set**, re-map all 34 shorts-lessons in one pass, call the *feature* done; treat the remaining ~570 shorts as a background top-up he does whenever (one `nlm login` + relaunch, no rush — manifest resumes cleanly).
-- **Or keep grinding the full library now** — ~8 more supervised login+relaunch cycles.
+Tom's call: no "bank vs grind" framing — **keep working the feature continuously and generate videos whenever auth allows**. When he types `! nlm login`, relaunch `batch_short_videos.py` and let it run to the next auth wall. After each banked batch: re-run the §3c mapping pipeline (re-tags ALL lessons in one pass — the assembler rebuild is then a non-issue) and `_make_short_posters.py`.
 
 ## 7. Open items / next steps
 
-- **Re-map the 20 unmapped lessons** (once he decides §6) — needs the all-lessons re-tag or a merge-aware assembler (§3c).
-- **Done-card stat** still counts *all* shorts as "topics revised" rather than watched-only — wire to the real watched count.
-- **Posters** for shorts #30–130 not generated yet (§3b).
+- ~~Re-map the 20 unmapped lessons~~ **DONE 2 Jul** — all 34 lessons / 128 focused shorts mapped (workflow re-tagged everything in one pass).
+- ~~Done-card stat~~ **DONE 2 Jul** — counts genuinely-watched shorts (`totalWatched` + `watchedSubjects`, live-updating, pluralised copy, zero-state line).
+- ~~Posters for #30–130~~ **DONE 2 Jul** — all 130 shorts have poster frames.
+- **More videos:** relaunch batch after each `nlm login` (~570 shorts remaining in the ~180-lesson queue).
 - **Feature graduation:** decide if/when this leaves `design-lab` for the real platform, and how a student *reaches* it (a "Shorts" entry point on the dashboard).
 - **Production serving:** custom domain in front of R2 for range/streaming before real use.
 
