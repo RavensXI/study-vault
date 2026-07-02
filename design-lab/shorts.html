@@ -145,6 +145,7 @@ function realCheck(s){
 
 let slides=[], current=-1;
 let watchedSinceCheck=0, watchedQueue=[];   // a check appears after CHECK_EVERY genuinely-watched shorts
+let totalWatched=0, watchedSubjects=new Set();   // lifetime-of-session watched stats, feed the done card
 let QUESTIONS={};                           // lesson_id -> { topic_index: {q,opts,correct} }, from _shorts_questions.json
 // sound is ON by default; browsers just won't let the FIRST short play unmuted
 // until the user has interacted (scroll/tap). After that first gesture, every
@@ -191,7 +192,7 @@ function render(items){
   const feed=document.getElementById('feed');
   const mixed=interleave(items);
   mixed.forEach(s=>feed.appendChild(makeShort(s)));   // checks are inserted live, once 5 shorts are actually watched
-  feed.appendChild(makeDone(mixed));
+  feed.appendChild(makeDone()); updateDone();
   slides=[].slice.call(feed.children);
   setupAutoplay();
 }
@@ -220,6 +221,7 @@ function makeShort(s){
   const countWatch=()=>{
     if(el.dataset.counted) return;
     el.dataset.counted='1'; watchedQueue.push(s);
+    totalWatched++; watchedSubjects.add(s.subject); updateDone();
     if(++watchedSinceCheck>=CHECK_EVERY) insertCheckAfter(el);
   };
   vid.addEventListener('timeupdate',()=>{
@@ -272,21 +274,31 @@ function makeCheck(s){
   return el;
 }
 
-function makeDone(mixed){
-  const subs=new Set(mixed.map(m=>m.subject));
+function makeDone(){
   const el=document.createElement('div'); el.className='slide';
   el.innerHTML=`<div class="done" style="--acc:${accent('geography-ocr')}">
     <div class="flame">🔥</div>
     <h2>Done for today</h2>
-    <p>You revised ${mixed.length} topics across ${subs.size} subjects.</p>
+    <p class="d-line"></p>
     <div class="stat">
-      <div><b>${mixed.length}</b><small>topics</small></div>
-      <div><b>${subs.size}</b><small>subjects</small></div>
+      <div><b class="d-topics">0</b><small>topics</small></div>
+      <div><b class="d-subjects">0</b><small>subjects</small></div>
       <div><b>5</b><small>day streak</small></div>
     </div>
     <button onclick="document.getElementById('feed').scrollTo({top:0,behavior:'smooth'})">Keep going anyway →</button>
   </div>`;
   return el;
+}
+
+// the done card reflects what was genuinely watched, not the size of the feed
+function updateDone(){
+  const d=document.querySelector('.done'); if(!d) return;
+  const t=totalWatched, n=watchedSubjects.size;
+  d.querySelector('.d-line').textContent = t===0
+    ? 'Scroll back up — nothing counted as watched yet.'
+    : `You revised ${t} ${t===1?'topic':'topics'} across ${n} ${n===1?'subject':'subjects'}.`;
+  d.querySelector('.d-topics').textContent=t;
+  d.querySelector('.d-subjects').textContent=n;
 }
 
 // mandatory scroll-snap cancels programmatic smooth scroll, so animate it ourselves
