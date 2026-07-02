@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>StudyVault — a year of doodles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f6f4;--card:#fff;--ink:#1d1c1a;--sec:#54524d;--mut:#7f7c75;--line:#e6e4e0;--r:8px;
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--head)}
+  header{max-width:1180px;margin:0 auto;padding:2.2rem 1.5rem .6rem}
+  h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0}
+  header p{font-family:var(--read);color:var(--sec);font-size:.95rem;margin:.4rem 0 0;max-width:60ch}
+  .grid{max-width:1180px;margin:1.4rem auto 3rem;padding:0 1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:1rem}
+  .wk{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+  .wk img{display:block;width:100%;aspect-ratio:3/2;object-fit:cover;border-bottom:1px solid var(--line)}
+  .wk .b{padding:.65rem .8rem .75rem}
+  .wk .mon{font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--mut)}
+  .wk .cap{font-family:var(--read);font-size:.88rem;font-weight:600;color:var(--ink);margin:.2rem 0 .1rem;line-height:1.3}
+  .wk .tag{display:inline-block;font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sec);margin-top:.3rem}
+</style>
+</head>
+<body>
+<header>
+  <h1>A year of doodles</h1>
+  <p>The Guided door's weekly backdrop, 29 June 2026 to 30 August 2027. Every image generated
+     from <code>_weekly_doodles.json</code> — swap any week by editing that file and re-running
+     <code>scripts/_designlab_weekly_doodle.py</code>.</p>
+</header>
+<div class="grid" id="grid"></div>
+<script>
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const grid=document.getElementById('grid');
+  Object.keys(cal).sort().forEach(mon=>{
+    const w=cal[mon], d=new Date(mon+'T12:00:00');
+    const wk=document.createElement('div'); wk.className='wk';
+    wk.innerHTML=`<img loading="lazy" src="assets/lw/${w.art}" alt="${w.cap}">
+      <div class="b"><div class="mon">week of ${d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+      <div class="cap">${w.cap}</div>
+      ${w.subject_area?`<span class="tag">${w.subject_area}</span>`:''}</div>`;
+    grid.appendChild(wk);
+  });
+});
+</script>
+</body>
+</html>
