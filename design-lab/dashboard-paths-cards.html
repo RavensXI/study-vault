@@ -429,11 +429,13 @@
      upper-left is drawn into the art, so it can run at real presence):
      one path to a distant landmark = the plan, followed. */
   .guided::before{content:"";position:absolute;top:0;right:0;bottom:0;width:80%;z-index:0;pointer-events:none;
-    background:url('assets/lw/guided-a.png') right bottom/cover no-repeat;opacity:.55;
+    background:var(--gart,url('assets/lw/guided-a.png')) right bottom/cover no-repeat;opacity:.55;
     -webkit-mask-image:linear-gradient(255deg,#000 45%,transparent 90%);mask-image:linear-gradient(255deg,#000 45%,transparent 90%)}
   .guided>*{position:relative;z-index:1}
   .guided h2{font-family:var(--font-head);font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin:.45rem 0 .3rem}
   .guided .gwhy{font-family:var(--font-read);font-size:.88rem;color:var(--text-secondary);margin:0 0 1rem}
+  /* weekly-doodle caption: the teachable moment, whispered */
+  .guided .gdood{position:absolute;right:1.1rem;bottom:.8rem;font-family:var(--font-read);font-style:italic;font-size:.7rem;color:var(--text-muted)}
   @media(max-height:720px){ .guided{padding:1.15rem 1.3rem} .guided h2{font-size:1.3rem;margin:.35rem 0 .25rem} .guided .gwhy{margin-bottom:.8rem} }
   .plan{list-style:none;margin:0 0 auto;padding:0;display:flex;flex-direction:column;gap:.15rem}
   .plan li{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:.85rem;padding:.62rem .4rem;border-radius:var(--r);cursor:pointer;transition:background .14s}
@@ -674,6 +676,19 @@
   var toastEl=document.getElementById('toast'), toastT;
   function toast(html){ toastEl.innerHTML=html; toastEl.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(function(){ toastEl.classList.remove('show'); },2600); }
 
+
+  /* ---------- weekly doodle: the Guided door's art swaps for notable weeks
+     (Google-doodle style). Keyed by the week's MONDAY; guided-a is the
+     default whenever nothing is scheduled. Generate new pieces with
+     scripts/_designlab_weekly_doodle.py — same style + composition rule. ---------- */
+  (function(){
+    var WEEKLY={
+      '2026-06-29':{art:'weekly-somme110.png', cap:'1 July 1916 — the Somme, 110 years on'},
+    };
+    var d=new Date(), mon=new Date(d); mon.setDate(d.getDate()-((d.getDay()+6)%7));
+    var w=WEEKLY[mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0')];
+    if(w){ document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')"); window.__doodleCap=w.cap; }
+  })();
 
   /* ---------- context line: today · exam countdown · streak (the why-spine
      for everything below it; replaced the two header chips) ---------- */
@@ -1077,7 +1092,8 @@
       '<p class="gwhy">Warm-up on what you missed, then your nearest exam, then a topic going stale.</p>'+
       '<ol class="plan" id="planList"></ol>'+
       '<div class="gfoot"><button class="gstart" id="gStart">'+PLAY+' Start · '+total+' min</button>'+
-      '<span class="gmeta">23 topics this week — your best week yet.</span></div>';   // demo momentum; real impl reads the activity log
+      '<span class="gmeta">23 topics this week — your best week yet.</span></div>'+   // demo momentum; real impl reads the activity log
+      (window.__doodleCap?'<span class="gdood">'+esc(window.__doodleCap)+'</span>':'');
     var planList=el.querySelector('#planList');
     items.forEach(function(it,idx){ var li=document.createElement('li');
       li.innerHTML='<span class="n">'+(idx+1)+'</span><div><b>'+esc(it.title)+'</b><small>'+esc(it.sub)+'</small></div><span class="mins">'+it.mins+' min</span>';
