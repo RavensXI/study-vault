@@ -67,7 +67,9 @@ python scripts/_shorts_assemble_questions.py          # -> scripts/_shorts_quest
 python scripts/_make_short_posters.py
 ```
 
-**The auth wall:** each `nlm login` buys ~one session (~90 generations / ~23 lessons / ~67 banked shorts) before NotebookLM drops the token. It's usage-triggered, not our 180/day cap, and re-auth is interactive so it can't be automated. Finishing the ~180-lesson queue (~700 shorts) = ~8 more login+relaunch cycles.
+**The auth wall:** each `nlm login` buys ~one session (~90 generations / ~23 lessons / ~67 banked shorts) before NotebookLM drops the token. It's usage-triggered, not our 180/day cap, and re-auth is interactive so it can't be automated.
+
+**Queue scope (don't misread the "N lessons queued" line):** the printed queue is capped at the RUN's remaining daily budget (`get_pending_mixed(..., limit=budget)`), not the backlog. The true eligible pool is every free-tier article lesson with content and no short yet — ~3,200 lessons ≈ ~13,000 shorts at 4/lesson. Round-robin across subjects means every subject gets its L01s before any gets L03. Full coverage is a multi-month background grind at 180/day; coverage depth is a product decision, not a fixed queue.
 
 ## 5. Exact state (2 Jul 2026)
 
@@ -84,7 +86,7 @@ Tom's call: no "bank vs grind" framing — **keep working the feature continuous
 - ~~Re-map the 20 unmapped lessons~~ **DONE 2 Jul** — all 34 lessons / 128 focused shorts mapped (workflow re-tagged everything in one pass).
 - ~~Done-card stat~~ **DONE 2 Jul** — counts genuinely-watched shorts (`totalWatched` + `watchedSubjects`, live-updating, pluralised copy, zero-state line).
 - ~~Posters for #30–130~~ **DONE 2 Jul** — all 130 shorts have poster frames.
-- **More videos:** relaunch batch after each `nlm login` (~570 shorts remaining in the ~180-lesson queue).
+- **More videos:** relaunch batch after each `nlm login`. Eligible pool is the whole free tier (~13,000 shorts) — decide how deep coverage should go per subject rather than "finishing the queue".
 - **Feature graduation:** decide if/when this leaves `design-lab` for the real platform, and how a student *reaches* it (a "Shorts" entry point on the dashboard).
 - **Production serving:** custom domain in front of R2 for range/streaming before real use.
 
