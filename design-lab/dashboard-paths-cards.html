@@ -416,8 +416,8 @@
   .home .hi{font-family:var(--font-head);font-size:1.45rem;font-weight:700;letter-spacing:-.02em;flex:none}
   @media(max-height:680px){ .home .hi{font-size:1.2rem} }
   /* the context line: today · countdown · streak — the why for everything below */
-  .home .hi .hisub{font-size:.92rem;font-weight:500;letter-spacing:0;color:var(--text-muted);margin-left:.55rem;white-space:nowrap}
-  .home .hi .hisub b{color:var(--text-secondary);font-weight:700;font-variant-numeric:tabular-nums}
+  .home .hi .hisub{font-family:var(--font-read);font-style:italic;font-size:.95rem;font-weight:500;letter-spacing:0;color:var(--text-muted);margin-left:.55rem;white-space:nowrap}
+  .home .hi .hisub b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
   @media(max-width:900px){ .home .hi .hisub{display:block;margin-left:0;font-size:.82rem;white-space:normal} }
   .doors{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.25fr 1fr 236px;gap:.95rem}
   @media(max-width:1080px){ .doors{grid-template-columns:1.25fr 1fr} .stile{display:none} }
@@ -442,11 +442,20 @@
   @media(max-height:720px){ .guided .gdood{top:1.25rem;right:1.3rem} }
   @media(max-width:560px){ .guided .gdood{display:none} }
   @media(max-height:720px){ .guided{padding:1.15rem 1.3rem} .guided h2{font-size:1.3rem;margin:.35rem 0 .25rem} .guided .gwhy{margin-bottom:.8rem} }
-  .plan{list-style:none;margin:0 0 auto;padding:0;display:flex;flex-direction:column;gap:.15rem}
-  .plan li{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:.85rem;padding:.62rem .4rem;border-radius:var(--r);cursor:pointer;transition:background .14s}
+  .plan{list-style:none;margin:0 0 auto;padding:0;display:flex;flex-direction:column;gap:.15rem;position:relative}
+  .plan li{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:.85rem;padding:.62rem .4rem;border-radius:var(--r);cursor:pointer;transition:background .14s;position:relative;z-index:1}
   .plan li .mins{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums;padding-right:.3rem}
+  /* the plan IS the path: a stippled ink route joins the waypoints, same
+     vernacular as the drawn track in the backdrop landscape */
+  .plan .planpath{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:0}
+  .plan .planpath path{fill:none;stroke:var(--anchor);stroke-width:2;stroke-linecap:round;stroke-dasharray:.5 7;opacity:.55}
+  .plan .planpath .tail{opacity:.28}
+  .plan .planpath{clip-path:inset(0 0 100% 0)}
+  .plan.pathdrawn .planpath{clip-path:inset(0 0 -30% 0);transition:clip-path .9s var(--ease) .25s}
+  @media(prefers-reduced-motion:reduce){ .plan.pathdrawn .planpath{transition:none} }
   .plan li:hover{background:var(--wash)}
-  .plan li .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border-light);display:grid;place-items:center;font-family:var(--font-head);font-weight:700;font-size:.82rem;color:var(--text-secondary)}
+  .plan li .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--text-muted);background:var(--bg-card);display:grid;place-items:center;font-family:var(--font-head);font-weight:700;font-size:.82rem;color:var(--text-primary);transition:border-color .15s,background .15s}
+  .plan li:hover .n{border-color:var(--anchor);background:color-mix(in srgb,var(--anchor) 9%,var(--bg-card))}
   .plan li b{font-family:var(--font-read);font-weight:600;font-size:1rem;color:var(--text-primary);display:block;line-height:1.25}
   .plan li small{font-family:var(--font-head);font-size:.74rem;color:var(--text-muted)}
   .guided .gfoot{display:flex;align-items:center;gap:1.1rem;margin-top:1.05rem;flex-wrap:wrap}
@@ -458,9 +467,9 @@
   /* REVISION — the calm library. Its half of the landscape: the fingerpost
      at the fork (choose your own) — very quiet, the list stays boss. */
   .revision{display:flex;flex-direction:column;padding:1.1rem 1.2rem 1rem;min-height:0;position:relative;overflow:hidden}
-  .revision::before{content:"";position:absolute;top:0;right:0;bottom:0;width:85%;z-index:0;pointer-events:none;
-    background:url('assets/lw/guided-b.png') right bottom/cover no-repeat;opacity:.16;
-    -webkit-mask-image:linear-gradient(255deg,#000 30%,transparent 85%);mask-image:linear-gradient(255deg,#000 30%,transparent 85%)}
+  .revision::before{content:"";position:absolute;top:0;right:0;bottom:0;width:80%;z-index:0;pointer-events:none;
+    background:url('assets/lw/guided-b.png') right bottom/cover no-repeat;opacity:.1;
+    -webkit-mask-image:linear-gradient(250deg,#000 16%,transparent 60%);mask-image:linear-gradient(250deg,#000 16%,transparent 60%)}
   .revision>*{position:relative;z-index:1}
   .revision h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin:.4rem 0 .7rem}
   .subjlist{list-style:none;margin:0;padding:0 .15rem;overflow:auto;flex:1;min-height:0}
@@ -498,8 +507,8 @@
   .stile{position:relative;aspect-ratio:9/16;align-self:center;width:100%;cursor:pointer}
   .stile .deckcard{position:absolute;inset:0;border-radius:14px;background-size:cover;background-position:center;
     box-shadow:var(--shadow-md);border:3px solid #fff}
-  .stile .d1{transform:rotate(-4.5deg) translate(-8px,5px)}
-  .stile .d2{transform:rotate(2.6deg) translate(7px,-3px)}
+  .stile .d1{transform:rotate(-3.2deg) translate(-6px,6px)}
+  .stile .d2{transform:rotate(2deg) translate(6px,-4px)}
   .stile .front{transition:transform .2s var(--ease)}
   .stile:hover .front{transform:translateY(-3px)}
   .stile .front .scrim{position:absolute;inset:0;border-radius:inherit;
@@ -1125,10 +1134,45 @@
       (window.__doodleCap?'<span class="gdood">'+esc(window.__doodleCap)+'</span>':'');
     var planList=el.querySelector('#planList');
     items.forEach(function(it,idx){ var li=document.createElement('li');
+      li.setAttribute('tabindex','0'); li.setAttribute('role','button');
       li.innerHTML='<span class="n">'+(idx+1)+'</span><div><b>'+esc(it.title)+'</b><small>'+esc(it.sub)+'</small></div><span class="mins">'+it.mins+' min</span>';
-      li.addEventListener('click',it.go); planList.appendChild(li); });
+      li.addEventListener('click',it.go);
+      li.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); it.go(); } });
+      planList.appendChild(li); });
     el.querySelector('#gStart').addEventListener('click',function(){ toast('Starting your session — first up, a quick warm-up.'); openWarmup(); });
+    requestAnimationFrame(drawPlanPath);
   }
+
+  // the plan IS the path: join the waypoints with a stippled ink route (the same
+  // vernacular as the drawn track in the landscape), revealed top-to-bottom
+  function drawPlanPath(){
+    var plan=document.getElementById('planList'); if(!plan) return;
+    var old=plan.querySelector('.planpath'); if(old) old.remove();
+    plan.classList.remove('pathdrawn');
+    var nodes=[].slice.call(plan.querySelectorAll('li .n')); if(nodes.length<2) return;
+    var pr=plan.getBoundingClientRect();
+    var pts=nodes.map(function(n){ var r=n.getBoundingClientRect();
+      return {x:r.left+r.width/2-pr.left, y:r.top+r.height/2-pr.top, r:r.height/2}; });
+    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    svg.setAttribute('class','planpath');
+    svg.setAttribute('viewBox','0 0 '+pr.width+' '+pr.height);
+    svg.setAttribute('width',pr.width); svg.setAttribute('height',pr.height);
+    var d='';
+    for(var i=0;i<pts.length-1;i++){
+      var a=pts[i], b=pts[i+1], my=(a.y+b.y)/2, dx=(i%2?-7:7);   // gentle S between waypoints
+      d+='M '+a.x+' '+(a.y+a.r+4)+' C '+(a.x+dx)+' '+my+' '+(b.x-dx)+' '+my+' '+b.x+' '+(b.y-b.r-4)+' ';
+    }
+    var p=document.createElementNS('http://www.w3.org/2000/svg','path');
+    p.setAttribute('d',d); svg.appendChild(p);
+    var last=pts[pts.length-1];   // the route wanders on past today's last step
+    var t=document.createElementNS('http://www.w3.org/2000/svg','path');
+    t.setAttribute('class','tail');
+    t.setAttribute('d','M '+last.x+' '+(last.y+last.r+4)+' C '+(last.x-9)+' '+(last.y+last.r+20)+' '+(last.x-1)+' '+(last.y+last.r+32)+' '+(last.x-13)+' '+(last.y+last.r+46));
+    svg.appendChild(t);
+    plan.appendChild(svg);
+    requestAnimationFrame(function(){ requestAnimationFrame(function(){ plan.classList.add('pathdrawn'); }); });
+  }
+  var planPathRT; addEventListener('resize',function(){ clearTimeout(planPathRT); planPathRT=setTimeout(drawPlanPath,150); });
 
   function openWarmup(){
     var checks=WARMUP.filter(function(q){return q.type==='check';}), cards=WARMUP.filter(function(q){return q.type==='card';});
