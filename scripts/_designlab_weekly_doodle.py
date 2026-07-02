@@ -1,14 +1,19 @@
-"""Weekly-doodle candidates for the Guided door backdrop (Google-doodle style:
-the art changes weekly with a notable event). Same lw style + composition rule
-as _designlab_guided_backdrop.py. Week of 2026-06-29: Somme 110 / World Cup.
+"""Weekly-doodle art generator (Google-doodle style backdrops for the dashboard's
+Guided door). Reads design-lab/_weekly_doodles.json — {monday: {art, cap, scene}} —
+and generates any entry whose art file doesn't exist yet, using the locked
+line-and-wash style plus the backdrop composition rule (blank cream upper-left
+where the plan text sits, detail gathering lower-right).
+
+Usage: python scripts/_designlab_weekly_doodle.py [--only YYYY-MM-DD]
 """
-import os, io, time
+import os, io, sys, json, time
 from google import genai
 from google.genai import types
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, "design-lab", "assets", "lw")
+CAL = os.path.join(ROOT, "design-lab", "_weekly_doodles.json")
 client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
 IMG_MODEL = "gemini-3-pro-image-preview"
 
@@ -20,17 +25,6 @@ STYLE = (" — drawn as a refined pen-and-ink illustration finished with a thin 
          "CRITICAL COMPOSITION RULE: all detail and ink density gathers in the LOWER-RIGHT of the image; "
          "the drawing dissolves into completely blank warm cream paper across the UPPER-LEFT THIRD — "
          "that region must be empty paper, as if the illustration was never finished there.")
-
-WEEK = {
-    # 1 July 1916 -> 110 years. Indirect and tasteful: poppies + a distant memorial arch.
-    "weekly-somme110": ("A gentle meadow of scattered wild poppies rippling across soft chalk downland, "
-                        "with a great weathered stone memorial arch standing hazy and small on the far "
-                        "horizon under a quiet dawn sky, the reds of the poppies the only strong colour"),
-    # FIFA World Cup 2026 knockout rounds, happening this week.
-    "weekly-worldcup": ("An empty sunlit football goal seen from a low angle on a freshly mown pitch, "
-                        "a single ball resting near the penalty spot casting a long evening shadow, "
-                        "faint mown stripes leading to a small flag-topped stand far on the horizon"),
-}
 
 def extract(r):
     for c in (r.candidates or []):
@@ -57,12 +51,22 @@ def render(prompt):
                 return None, msg[:90]
     return None, "refused/empty"
 
-for name, scene in WEEK.items():
-    path = os.path.join(OUT, name + ".png")
-    if os.path.exists(path):
-        print(f"skip {name}.png (exists)", flush=True); continue
-    img, err = render(scene + STYLE)
-    if img:
-        img.save(path); print(f"ok  {name}.png  {img.size}", flush=True)
-    else:
-        print(f"FAILED {name}: {err}", flush=True)
+def main():
+    only = sys.argv[sys.argv.index("--only") + 1] if "--only" in sys.argv else None
+    cal = json.load(open(CAL, encoding="utf-8"))
+    todo = [(k, v) for k, v in sorted(cal.items())
+            if (not only or k == only) and not os.path.exists(os.path.join(OUT, v["art"]))]
+    print(f"{len(todo)} doodles to generate ({len(cal)} in calendar)", flush=True)
+    fails = 0
+    for k, v in todo:
+        img, err = render(v["scene"] + STYLE)
+        if img:
+            img.save(os.path.join(OUT, v["art"]))
+            print(f"ok    {k}  {v['art']}  ({v['cap']})", flush=True)
+        else:
+            fails += 1
+            print(f"FAIL  {k}  {v['art']}: {err}", flush=True)
+    print(f"done: {len(todo) - fails} generated, {fails} failed", flush=True)
+
+if __name__ == "__main__":
+    main()
