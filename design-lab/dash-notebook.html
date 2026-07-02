@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 3 — The Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#efece6;--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e7e2d6;--rule:#eae5d9;
+    --marg:#dcaba1;--r:8px;--anchor:#4e5f66;--head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--head)}
+  .top{height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem)}
+  .brand{font-size:1rem;font-weight:500}.brand b{font-weight:800}
+  .who{display:flex;align-items:center;gap:.9rem}
+  .countdown{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--sec)}
+  .countdown b{font-style:normal;font-weight:600;color:var(--ink)}
+  .avatar{width:29px;height:29px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.78rem}
+
+  .deskbed{height:calc(100dvh - 54px);display:grid;place-items:center;padding:0 2.4rem 1.4rem;overflow:hidden}
+  .book{position:relative;width:min(1080px,100%);height:min(640px,100%);display:grid;grid-template-columns:1fr 1fr;
+    border-radius:10px;box-shadow:0 18px 50px -18px rgba(38,35,30,.35), 0 2px 6px rgba(38,35,30,.12)}
+  .pg{background:var(--paper);padding:1.6rem 1.7rem 1.5rem;min-width:0;display:flex;flex-direction:column;position:relative}
+  .pg.l{border-radius:10px 0 0 10px;border-right:1px solid #e4ded0;
+    background:linear-gradient(to right,var(--paper) 92%,#f4efe4 100%)}
+  .pg.r{border-radius:0 10px 10px 0;
+    background:linear-gradient(to left,var(--paper) 92%,#f4efe4 100%)}
+  /* the jotter's red margin rule */
+  .pg.l::before{content:"";position:absolute;top:0;bottom:0;left:52px;width:1px;background:var(--marg);opacity:.55}
+
+  .datestamp{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--mut);padding-left:34px}
+  h1{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;margin:.35rem 0 1rem;padding-left:34px}
+  .plan{list-style:none;margin:0;padding:0 0 0 34px}
+  .plan li{display:grid;grid-template-columns:24px 1fr auto;align-items:center;gap:.7rem;padding:.6rem .4rem .6rem 0;
+    border-bottom:1px solid var(--rule);cursor:pointer;transition:background .14s}
+  .plan li:hover{background:#faf7ef}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:1.05rem;color:var(--mut)}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.98rem;display:block;line-height:1.25}
+  .plan small{font-size:.72rem;color:var(--mut)}
+  .plan .mins{font-size:.72rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+  .momentum{font-size:.75rem;font-weight:600;color:var(--mut);margin:.9rem 0 0;padding-left:34px}
+  .startrow{margin-top:auto;padding-left:34px}
+  .start{display:inline-flex;align-items:center;gap:.5rem;padding:.68rem 1.4rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-weight:700;font-size:.95rem;cursor:pointer;transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:14px;height:14px;fill:#fff}
+
+  /* right page: the tipped-in plate + the lean-back scraps */
+  .plate{position:relative;height:58%;min-height:200px;border-radius:4px;overflow:hidden;
+    background:var(--gart,url('assets/lw/guided-a.png')) center/cover no-repeat;
+    box-shadow:0 2px 8px rgba(38,35,30,.18);transform:rotate(-.6deg)}
+  .tape{position:absolute;width:74px;height:22px;background:rgba(238,230,210,.85);box-shadow:0 1px 2px rgba(38,35,30,.12)}
+  .tape.tl{top:-8px;left:18px;transform:rotate(-5deg)}
+  .tape.tr{top:-8px;right:18px;transform:rotate(4deg)}
+  .platewrap{position:relative;padding-top:8px}
+  .folio{font-family:var(--read);font-style:italic;font-size:.8rem;color:var(--mut);text-align:center;margin:.6rem 0 0}
+  .scraps{margin-top:auto;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
+  .rack{display:flex;align-items:flex-end;gap:.45rem;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+  .rack .p{width:62px;aspect-ratio:9/16;border-radius:3px;background-size:cover;background-position:center;
+    border:4px solid #fff;box-shadow:0 2px 7px rgba(38,35,30,.22);transition:transform .18s}
+  .rack .p:nth-child(1){transform:rotate(-2.5deg)}
+  .rack .p:nth-child(2){transform:rotate(1.5deg) translateY(-3px)}
+  .rack .p:nth-child(3){transform:rotate(-1deg)}
+  .rack:hover .p{transform:rotate(0) translateY(-4px)}
+  .rack:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .rack .t{margin-left:.5rem;padding-bottom:.2rem}
+  .rack .t b{display:block;font-size:.92rem;font-weight:700}
+  .rack .t small{display:block;font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--mut);white-space:nowrap}
+  .wireless{display:flex;align-items:center;gap:.7rem;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+  .wireless .play{width:40px;height:40px;border-radius:var(--r);border:1.5px solid var(--line);color:var(--sec);
+    display:grid;place-items:center;background:var(--paper);transition:border-color .14s,color .14s}
+  .wireless:hover .play{border-color:var(--anchor);color:var(--anchor)}
+  .wireless:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .wireless .play svg{width:15px;height:15px;fill:currentColor}
+  .wireless .t b{display:block;font-size:.92rem;font-weight:700}
+  .wireless .t small{display:block;font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--mut);max-width:170px}
+
+  /* the subject tabs: nine cloth tabs bound into the book's fore-edge */
+  .tabs{position:absolute;right:-30px;top:38px;bottom:38px;display:flex;flex-direction:column;justify-content:space-between;width:30px}
+  .tab{flex:none;height:8.6%;min-height:38px;width:30px;border-radius:0 6px 6px 0;background:var(--tc,#888);
+    display:grid;place-items:center;cursor:pointer;border:none;padding:0;
+    box-shadow:2px 2px 5px rgba(38,35,30,.18);transition:width .15s}
+  .tab:hover,.tab:focus-visible{width:38px;outline:none}
+  .tab span{writing-mode:vertical-rl;font-family:var(--head);font-size:.56rem;font-weight:700;letter-spacing:.08em;
+    color:#fff;text-transform:uppercase;pointer-events:none}
+
+  @media(max-width:900px){ .deskbed{height:auto;padding:1rem} .book{grid-template-columns:1fr;height:auto}
+    .pg.l{border-radius:10px 10px 0 0} .pg.r{border-radius:0 0 10px 10px} .tabs{display:none} .plate{height:220px} }
+  @media(prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">Study<b>Vault</b></span>
+  <span class="who"><span class="countdown"><b>312 days</b> to your first exam · <b>4-day</b> streak</span><span class="avatar">S</span></span>
+</div>
+
+<div class="deskbed">
+  <div class="book">
+    <section class="pg l">
+      <div class="datestamp" id="today">—</div>
+      <h1>Here’s your plan.</h1>
+      <ol class="plan">
+        <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled last time</small></div><span class="mins">2 min</span></li>
+        <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — your nearest exam</small></div><span class="mins">15 min</span></li>
+        <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — not seen for 3 weeks</small></div><span class="mins">8 min</span></li>
+      </ol>
+      <p class="momentum">23 topics this week — your best yet.</p>
+      <div class="startrow"><button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start · 25 min</button></div>
+    </section>
+
+    <section class="pg r">
+      <div class="platewrap">
+        <div class="plate" role="img" aria-label="This week’s plate"></div>
+        <span class="tape tl"></span><span class="tape tr"></span>
+      </div>
+      <p class="folio" id="doodleCap">The path to the landmark.</p>
+      <div class="scraps">
+        <button class="rack" id="rack" aria-label="Watch today’s shorts">
+          <span class="p"></span><span class="p"></span><span class="p"></span>
+          <span class="t"><b>Shorts</b><small>today’s 20</small></span>
+        </button>
+        <button class="wireless">
+          <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="t"><b>Revision Radio</b><small>Stave 3 — English Literature</small></span>
+        </button>
+      </div>
+    </section>
+
+    <nav class="tabs" id="tabs" aria-label="Your subjects"></nav>
+  </div>
+</div>
+
+<script>
+document.getElementById('today').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const SUBJECTS=[['Maths','#535f8a','Mathematics'],['Eng Lang','#4a708c','English Language'],['Eng Lit','#71506b','English Literature'],
+  ['Science','#44696c','Combined Science'],['History','#3f5e78','History'],['Geog','#5f7155','Geography'],
+  ['Spanish','#9a5b38','Spanish'],['CompSci','#3f6478','Computer Science'],['RS','#6f5b91','Religious Studies']];
+const tabs=document.getElementById('tabs');
+SUBJECTS.forEach(([short,c,full])=>{const b=document.createElement('button');b.className='tab';b.title=full;
+  b.style.setProperty('--tc',c);b.innerHTML='<span>'+short+'</span>';tabs.appendChild(b);});
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k];if(!w)return;
+  document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
+  document.getElementById('doodleCap').textContent=w.cap;}).catch(()=>{});
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  const seen={},ps=[];for(const s of m){if(seen[s.subject])continue;seen[s.subject]=1;
+    const p=(s.url||'').split('.r2.dev/');if(p.length<2)continue;
+    ps.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'));if(ps.length===3)break;}
+  document.querySelectorAll('.rack .p').forEach((el,i)=>{if(ps[i])el.style.backgroundImage="url('"+ps[i]+"')";});
+  document.getElementById('rack').onclick=()=>location.href='/design-lab/shorts.html';}).catch(()=>{});
+</script>
+</body>
+</html>
