@@ -419,19 +419,18 @@
   .home .hi .hisub{font-family:var(--font-read);font-style:italic;font-size:.95rem;font-weight:500;letter-spacing:0;color:var(--text-muted);margin-left:.55rem;white-space:nowrap}
   .home .hi .hisub b{color:var(--text-secondary);font-weight:600;font-variant-numeric:tabular-nums}
   @media(max-width:900px){ .home .hi .hisub{display:block;margin-left:0;font-size:.82rem;white-space:normal} }
-  .doors{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.25fr 1fr 236px;gap:.95rem}
-  @media(max-width:1080px){ .doors{grid-template-columns:1.25fr 1fr} .stile{display:none} }
-  @media(max-width:820px){ .doors{grid-template-columns:1fr} .stile{display:block;width:min(64vw,238px);margin:0 auto} }
+  .doors{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.25fr 1fr;gap:.95rem}
+  @media(max-width:820px){ .doors{grid-template-columns:1fr} }
   .kick{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.12em;font-size:.64rem;font-weight:700;color:var(--text-muted)}
 
   /* GUIDED — the hero */
   .guided{display:flex;flex-direction:column;padding:1.4rem 1.5rem;min-height:0;position:relative;overflow:hidden}
-  /* Bespoke line-and-wash backdrop, composed FOR this layout (blank cream
-     upper-left is drawn into the art, so it can run at real presence):
-     one path to a distant landmark = the plan, followed. */
-  .guided::before{content:"";position:absolute;top:0;right:0;bottom:0;width:80%;z-index:0;pointer-events:none;
-    background:var(--gart,url('assets/lw/guided-a.png')) right bottom/cover no-repeat;opacity:.55;
-    -webkit-mask-image:linear-gradient(255deg,#000 45%,transparent 90%);mask-image:linear-gradient(255deg,#000 45%,transparent 90%)}
+  /* Line-and-wash backdrop as a wide bottom band — the 3:2 landscape art is
+     cropped the way landscapes want to be cropped (wide and shallow), fading
+     up into the paper the plan sits on. */
+  .guided::before{content:"";position:absolute;left:0;right:0;bottom:0;height:48%;z-index:0;pointer-events:none;
+    background:var(--gart,url('assets/lw/guided-a.png')) center bottom/cover no-repeat;opacity:.5;
+    -webkit-mask-image:linear-gradient(to top,#000 52%,transparent 100%);mask-image:linear-gradient(to top,#000 52%,transparent 100%)}
   .guided>*{position:relative;z-index:1}
   .guided h2{font-family:var(--font-head);font-size:1.5rem;font-weight:700;letter-spacing:-.02em;margin:.45rem 0 .3rem}
   .guided .gwhy{font-family:var(--font-read);font-size:.88rem;color:var(--text-secondary);margin:0 0 1rem}
@@ -442,17 +441,11 @@
   @media(max-height:720px){ .guided .gdood{top:1.25rem;right:1.3rem} }
   @media(max-width:560px){ .guided .gdood{display:none} }
   @media(max-height:720px){ .guided{padding:1.15rem 1.3rem} .guided h2{font-size:1.3rem;margin:.35rem 0 .25rem} .guided .gwhy{margin-bottom:.8rem} }
-  .plan{list-style:none;margin:0 0 auto;padding:0;display:flex;flex-direction:column;gap:.15rem;position:relative}
-  .plan li{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:.85rem;padding:.62rem .4rem;border-radius:var(--r);cursor:pointer;transition:background .14s;position:relative;z-index:1}
+  .plan{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.15rem}
+  /* momentum sits on clean paper under the plan, above the landscape */
+  .guided .gmom{font-family:var(--font-head);font-size:.78rem;font-weight:600;color:var(--text-muted);margin:.55rem 0 auto;padding-left:.45rem}
+  .plan li{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:.85rem;padding:.62rem .4rem;border-radius:var(--r);cursor:pointer;transition:background .14s}
   .plan li .mins{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--text-muted);font-variant-numeric:tabular-nums;padding-right:.3rem}
-  /* the plan IS the path: a stippled ink route joins the waypoints, same
-     vernacular as the drawn track in the backdrop landscape */
-  .plan .planpath{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:0}
-  .plan .planpath path{fill:none;stroke:var(--anchor);stroke-width:2;stroke-linecap:round;stroke-dasharray:.5 7;opacity:.55}
-  .plan .planpath .tail{opacity:.28}
-  .plan .planpath{clip-path:inset(0 0 100% 0)}
-  .plan.pathdrawn .planpath{clip-path:inset(0 0 -30% 0);transition:clip-path .9s var(--ease) .25s}
-  @media(prefers-reduced-motion:reduce){ .plan.pathdrawn .planpath{transition:none} }
   .plan li:hover{background:var(--wash)}
   .plan li .n{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--text-muted);background:var(--bg-card);display:grid;place-items:center;font-family:var(--font-head);font-weight:700;font-size:.82rem;color:var(--text-primary);transition:border-color .15s,background .15s}
   .plan li:hover .n{border-color:var(--anchor);background:color-mix(in srgb,var(--anchor) 9%,var(--bg-card))}
@@ -472,8 +465,9 @@
     -webkit-mask-image:linear-gradient(250deg,#000 16%,transparent 60%);mask-image:linear-gradient(250deg,#000 16%,transparent 60%)}
   .revision>*{position:relative;z-index:1}
   .revision h2{font-family:var(--font-head);font-size:1.05rem;font-weight:700;letter-spacing:-.01em;margin:.4rem 0 .7rem}
-  .subjlist{list-style:none;margin:0;padding:0 .15rem;overflow:auto;flex:1;min-height:0}
-  .subjrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.35rem .8rem;width:100%;text-align:left;background:transparent;border:0;cursor:pointer;padding:.5rem .45rem;border-radius:var(--r);transition:background .14s}
+  .subjlist{list-style:none;margin:0;padding:0 .15rem;overflow:auto;flex:1;min-height:0;scrollbar-width:none}
+  .subjlist::-webkit-scrollbar{display:none}
+  .subjrow{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.3rem .8rem;width:100%;text-align:left;background:transparent;border:0;cursor:pointer;padding:.44rem .45rem;border-radius:var(--r);transition:background .14s}
   .subjrow:hover{background:var(--wash)}
   .subjrow .snm{font-family:var(--font-head);font-size:.92rem;font-weight:500;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .subjrow:hover .snm{font-weight:600}
@@ -502,36 +496,33 @@
   .rbar a.rbrowse{font-family:var(--font-head);font-size:.74rem;font-weight:600;color:var(--anchor);cursor:pointer;flex:none}
   @media(max-width:760px){ .rbar{flex-wrap:wrap} .rbar .rnow{order:3;width:100%} .rbar .rmid{width:100%} }
 
-  /* SHORTS — a portrait tile, the same 9:16 shape as the content it opens.
-     A deck of today's posters; the front card carries the label + play. */
-  .stile{position:relative;aspect-ratio:9/16;align-self:center;width:100%;cursor:pointer}
-  .stile .deckcard{position:absolute;inset:0;border-radius:14px;background-size:cover;background-position:center;
-    box-shadow:var(--shadow-md);border:3px solid #fff}
-  .stile .d1{transform:rotate(-3.2deg) translate(-6px,6px)}
-  .stile .d2{transform:rotate(2deg) translate(6px,-4px)}
-  .stile .front{transition:transform .2s var(--ease)}
-  .stile:hover .front{transform:translateY(-3px)}
-  .stile .front .scrim{position:absolute;inset:0;border-radius:inherit;
-    background:linear-gradient(to top,rgba(22,19,15,.74),rgba(22,19,15,.26) 34%,transparent 56%)}
-  .stile .pp{position:absolute;top:50%;left:50%;transform:translate(-50%,-62%);width:54px;height:54px;border-radius:50%;
-    background:rgba(255,255,255,.16);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.4);
-    display:grid;place-items:center;color:#fff;transition:background .18s}
-  .stile:hover .pp{background:rgba(255,255,255,.3)}
-  .stile .pp svg{width:22px;height:22px;fill:#fff;margin-left:3px}
-  .stile .slab{position:absolute;left:0;right:0;bottom:0;padding:1rem 1.05rem;color:#fff}
-  .stile .slab .ct{display:block;font-family:var(--font-head);font-weight:800;font-size:1.18rem;letter-spacing:-.01em}
-  .stile .slab .sub{display:block;font-family:var(--font-head);font-size:.72rem;color:rgba(255,255,255,.88);margin-top:.2rem}
+  /* SHORTS — the Revision door's lower shelf: a real 9:16 poster (the shape
+     of the content) beside a plain text block, filling the space below the
+     subject list. Same flat card language as everything else. */
+  .rshelf{flex:none;display:flex;gap:.95rem;align-items:stretch;border-top:1px solid var(--border-lighter);
+    margin-top:.65rem;padding:.75rem .15rem 0;cursor:pointer}
+  .rshelf .sposter{position:relative;flex:none;width:112px;aspect-ratio:9/16;border-radius:var(--r);overflow:hidden;
+    border:1px solid var(--border-light);background-size:cover;background-position:center;box-shadow:var(--shadow-sm);transition:box-shadow .18s}
+  .rshelf:hover .sposter{box-shadow:var(--shadow-md)}
+  .rshelf .sposter .pp{position:absolute;inset:0;display:grid;place-items:center;
+    background:linear-gradient(to top,rgba(22,19,15,.4),transparent 55%)}
+  .rshelf .sposter .pp span{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);backdrop-filter:blur(5px);
+    border:1px solid rgba(255,255,255,.45);display:grid;place-items:center;color:#fff}
+  .rshelf .pp svg{width:15px;height:15px;fill:#fff;margin-left:2px}
+  .rshelf .smeta{display:flex;flex-direction:column;justify-content:center;gap:.3rem;min-width:0}
+  .rshelf .smeta .ct{font-family:var(--font-head);font-weight:700;font-size:1rem;color:var(--text-primary)}
+  .rshelf .smeta .sub{font-family:var(--font-read);font-size:.82rem;color:var(--text-secondary);line-height:1.4}
 
   /* RADIO — docked into the masthead as an actual player: play, now-playing,
      a hairline of progress. Fixed into the chrome, not parked on the page. */
   .dock{position:relative;overflow:hidden;display:flex;align-items:center;gap:.6rem;background:var(--bg-card);
-    border:1px solid var(--border-light);border-radius:99px;padding:.28rem .32rem .28rem .8rem;box-shadow:var(--shadow-sm)}
+    border:1px solid var(--border-light);border-radius:var(--r);padding:.3rem .35rem .3rem .8rem;box-shadow:var(--shadow-sm)}
   .dock .ico{display:grid;place-items:center;color:var(--text-muted);flex:none}
   .dock .ico svg{width:15px;height:15px}
   .dock .dnow{display:flex;flex-direction:column;min-width:0;line-height:1.18}
   .dock .npsub{font-family:var(--font-head);text-transform:uppercase;letter-spacing:.07em;font-size:.5rem;font-weight:700;color:var(--text-muted);white-space:nowrap}
   .dock .nptitle{font-family:var(--font-read);font-size:.77rem;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
-  .dock .pp{width:32px;height:32px;border-radius:50%;background:var(--anchor);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;flex:none;transition:filter .15s}
+  .dock .pp{width:30px;height:30px;border-radius:6px;background:var(--anchor);color:#fff;border:0;display:grid;place-items:center;cursor:pointer;flex:none;transition:filter .15s}
   .dock .pp:hover{filter:brightness(.94)}
   .dock .pp svg{width:14px;height:14px}
   .dock .dfill{position:absolute;left:0;bottom:0;height:2px;background:var(--anchor);width:0;transition:width 1s linear}
@@ -602,7 +593,6 @@
     <div class="doors">
       <section class="card guided" id="guided"></section>
       <section class="card revision" id="revision"></section>
-      <section class="stile" id="shortsStrip" hidden></section>
     </div>
   </main>
 
@@ -1129,8 +1119,8 @@
     el.innerHTML='<div class="kick">Guided · today</div><h2>Here’s your plan</h2>'+
       '<p class="gwhy">Warm-up on what you missed, then your nearest exam, then a topic going stale.</p>'+
       '<ol class="plan" id="planList"></ol>'+
-      '<div class="gfoot"><button class="gstart" id="gStart">'+PLAY+' Start · '+total+' min</button>'+
-      '<span class="gmeta">23 topics this week — your best week yet.</span></div>'+   // demo momentum; real impl reads the activity log
+      '<p class="gmom">23 topics this week — your best week yet.</p>'+   // demo momentum; real impl reads the activity log
+      '<div class="gfoot"><button class="gstart" id="gStart">'+PLAY+' Start · '+total+' min</button></div>'+
       (window.__doodleCap?'<span class="gdood">'+esc(window.__doodleCap)+'</span>':'');
     var planList=el.querySelector('#planList');
     items.forEach(function(it,idx){ var li=document.createElement('li');
@@ -1140,39 +1130,7 @@
       li.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); it.go(); } });
       planList.appendChild(li); });
     el.querySelector('#gStart').addEventListener('click',function(){ toast('Starting your session — first up, a quick warm-up.'); openWarmup(); });
-    requestAnimationFrame(drawPlanPath);
   }
-
-  // the plan IS the path: join the waypoints with a stippled ink route (the same
-  // vernacular as the drawn track in the landscape), revealed top-to-bottom
-  function drawPlanPath(){
-    var plan=document.getElementById('planList'); if(!plan) return;
-    var old=plan.querySelector('.planpath'); if(old) old.remove();
-    plan.classList.remove('pathdrawn');
-    var nodes=[].slice.call(plan.querySelectorAll('li .n')); if(nodes.length<2) return;
-    var pr=plan.getBoundingClientRect();
-    var pts=nodes.map(function(n){ var r=n.getBoundingClientRect();
-      return {x:r.left+r.width/2-pr.left, y:r.top+r.height/2-pr.top, r:r.height/2}; });
-    var svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('class','planpath');
-    svg.setAttribute('viewBox','0 0 '+pr.width+' '+pr.height);
-    svg.setAttribute('width',pr.width); svg.setAttribute('height',pr.height);
-    var d='';
-    for(var i=0;i<pts.length-1;i++){
-      var a=pts[i], b=pts[i+1], my=(a.y+b.y)/2, dx=(i%2?-7:7);   // gentle S between waypoints
-      d+='M '+a.x+' '+(a.y+a.r+4)+' C '+(a.x+dx)+' '+my+' '+(b.x-dx)+' '+my+' '+b.x+' '+(b.y-b.r-4)+' ';
-    }
-    var p=document.createElementNS('http://www.w3.org/2000/svg','path');
-    p.setAttribute('d',d); svg.appendChild(p);
-    var last=pts[pts.length-1];   // the route wanders on past today's last step
-    var t=document.createElementNS('http://www.w3.org/2000/svg','path');
-    t.setAttribute('class','tail');
-    t.setAttribute('d','M '+last.x+' '+(last.y+last.r+4)+' C '+(last.x-9)+' '+(last.y+last.r+20)+' '+(last.x-1)+' '+(last.y+last.r+32)+' '+(last.x-13)+' '+(last.y+last.r+46));
-    svg.appendChild(t);
-    plan.appendChild(svg);
-    requestAnimationFrame(function(){ requestAnimationFrame(function(){ plan.classList.add('pathdrawn'); }); });
-  }
-  var planPathRT; addEventListener('resize',function(){ clearTimeout(planPathRT); planPathRT=setTimeout(drawPlanPath,150); });
 
   function openWarmup(){
     var checks=WARMUP.filter(function(q){return q.type==='check';}), cards=WARMUP.filter(function(q){return q.type==='card';});
@@ -1257,31 +1215,29 @@
       row.onclick=function(){ radioGo(i); if(!RADIO.playing) radioToggle(); }; q.appendChild(row); });
     if(!q.children.length) q.innerHTML='<div style="font-family:var(--font-head);font-size:.74rem;color:var(--text-muted);padding:.35rem .3rem;grid-column:1/-1">That’s the end of today’s queue.</div>'; }
 
-  /* ---- SHORTS tile: portrait 9:16 — the same shape as the content it opens.
-     A deck of today's real posters; watched count shares localStorage with
-     the feed. Hidden if the manifest isn't served. ---- */
+  /* ---- SHORTS shelf: appended below the Revision subject list. A real 9:16
+     poster + plain text; watched count shares localStorage with the feed. ---- */
   function buildShortsStrip(){
-    var el=document.getElementById('shortsStrip'); if(!el) return;
+    var rev=document.getElementById('revision'); if(!rev) return;
+    var old=document.getElementById('shortsShelf'); if(old) old.remove();
     fetch('/scripts/_shorts_manifest.json').then(function(r){ return r.json(); }).then(function(m){
       if(!m || !m.length) return;
-      var seen={}, posters=[];
-      for(var i=0;i<m.length && posters.length<3;i++){ var s=m[i];
-        if(seen[s.subject]) continue; seen[s.subject]=1;
-        var p=(s.url||'').split('.r2.dev/'); if(p.length<2) continue;
-        posters.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg')); }
-      if(!posters.length) return;
+      var poster='';
+      for(var i=0;i<m.length;i++){ var p=(m[i].url||'').split('.r2.dev/');
+        if(p.length>1){ poster='/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'); break; } }
+      if(!poster) return;
       var day={}; try{ day=JSON.parse(localStorage.getItem('sv_shorts_day'))||{}; }catch(e){}
       var watched=(day.date===new Date().toISOString().slice(0,10))?(day.keys||[]).length:0;
-      var sub=watched>0 ? watched+' of 20 watched today' : 'Today’s 20 · across your subjects';
-      el.innerHTML=(posters[1]?'<span class="deckcard d1" style="background-image:url(\''+posters[1]+'\')"></span>':'')+
-        (posters[2]?'<span class="deckcard d2" style="background-image:url(\''+posters[2]+'\')"></span>':'')+
-        '<span class="deckcard front" style="background-image:url(\''+posters[0]+'\')">'+
-          '<span class="scrim"></span><span class="pp">'+PLAY+'</span>'+
-          '<span class="slab"><span class="ct">Shorts</span><span class="sub">'+sub+'</span></span>'+
-        '</span>';
-      el.hidden=false;
-      el.onclick=function(){ location.href='/design-lab/shorts.html'; };
-    }).catch(function(){ /* no manifest — tile stays hidden */ });
+      var sub=watched>0 ? watched+' of 20 watched today.' : 'Twenty 60-second videos, mixed across your subjects.';
+      var shelf=document.createElement('div'); shelf.className='rshelf'; shelf.id='shortsShelf';
+      shelf.setAttribute('role','button'); shelf.setAttribute('tabindex','0');
+      shelf.innerHTML='<span class="sposter" style="background-image:url(\''+poster+'\')"><span class="pp"><span>'+PLAY+'</span></span></span>'+
+        '<span class="smeta"><span class="kick">Shorts</span><span class="ct">Watch today’s 20</span><span class="sub">'+sub+'</span></span>';
+      function go(){ location.href='/design-lab/shorts.html'; }
+      shelf.onclick=go;
+      shelf.addEventListener('keydown',function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); go(); } });
+      rev.appendChild(shelf);
+    }).catch(function(){ /* no manifest — no shelf */ });
   }
 
   /* ===================================================================
