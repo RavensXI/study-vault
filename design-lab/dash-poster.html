@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 4 — The Poster</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,300..700;1,7..72,300..600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#f7f6f4;--ink:#1d1c1a;--sec:#54524d;--mut:#7f7c75;--line:#e6e4e0;--rule:#cfcabf;
+    --r:8px;--anchor:#4e5f66;--head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--head)}
+  .sheet{max-width:1150px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;
+    padding:1.1rem clamp(1rem,4vw,2.6rem) 1.35rem;overflow:hidden}
+
+  .top{flex:none;display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+  .brand{font-size:1rem;font-weight:500}.brand b{font-weight:800}
+  .meta{display:flex;align-items:center;gap:1.1rem;font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--mut)}
+  .meta b{font-style:normal;font-weight:600;color:var(--sec);font-variant-numeric:tabular-nums}
+  .avatar{width:29px;height:29px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.78rem;font-style:normal}
+
+  .main{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(1.5rem,5vw,4rem);align-items:center}
+  .monument{min-width:0}
+  .eyebrow{font-family:var(--read);font-style:italic;font-size:1.05rem;color:var(--sec)}
+  .big{font-family:var(--read);font-weight:700;font-size:clamp(3.6rem,7.6vw,6.2rem);line-height:.98;letter-spacing:-.025em;margin:.35rem 0 0}
+  .big em{font-style:italic;font-weight:300}
+  .why{font-family:var(--read);font-style:italic;font-size:.95rem;color:var(--mut);margin:1.05rem 0 0;max-width:34ch}
+  .startrow{display:flex;align-items:center;gap:1.1rem;margin-top:1.5rem}
+  .start{display:inline-flex;align-items:center;gap:.55rem;padding:.78rem 1.65rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:1.05rem;cursor:pointer;transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:15px;height:15px;fill:#fff}
+  .momentum{font-size:.78rem;font-weight:600;color:var(--mut)}
+
+  /* the programme: tonight's three items, set like a fine table of contents */
+  .toc{min-width:0;border-left:1px solid var(--rule);padding-left:clamp(1.2rem,3vw,2.4rem)}
+  .toclab{font-size:.62rem;font-weight:700;letter-spacing:.14em;color:var(--mut)}
+  .toc ol{list-style:none;margin:.7rem 0 0;padding:0}
+  .toc li{display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;column-gap:1rem;align-items:baseline;
+    padding:.72rem .45rem;margin:0 -.45rem;border-radius:var(--r);cursor:pointer;transition:background .14s}
+  .toc li:hover{background:#f1efe9}
+  .toc li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .toc b{font-family:var(--read);font-weight:600;font-size:1.12rem;line-height:1.3}
+  .toc .mins{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--mut);font-variant-numeric:tabular-nums}
+  .toc small{grid-column:1/-1;font-size:.74rem;color:var(--mut);margin-top:.1rem}
+
+  /* foot: subjects · shorts · wireless · the stamp */
+  .foot{flex:none;border-top:1px solid var(--rule);padding-top:.9rem;display:flex;align-items:flex-start;gap:2.2rem}
+  .fc{min-width:0}
+  .clab{font-family:var(--read);font-style:italic;font-size:.88rem;color:var(--mut);margin:0 0 .45rem}
+  .subjects{display:flex;flex-wrap:wrap;gap:.22rem 1.25rem;max-width:520px}
+  .subj{font-family:var(--head);font-size:.9rem;font-weight:500;color:var(--sec);text-decoration:none;padding:.16rem 0;
+    border-bottom:2px solid color-mix(in srgb,var(--sc) 55%,transparent);transition:color .14s,border-color .14s}
+  .subj:hover,.subj:focus-visible{color:var(--ink);border-color:var(--sc);outline:none}
+  .rack{display:flex;align-items:center;gap:.45rem;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+  .rack .p{width:46px;aspect-ratio:9/16;border-radius:4px;background-size:cover;background-position:center;
+    border:1px solid var(--line);transition:transform .18s}
+  .rack:hover .p{transform:translateY(-2px)}
+  .rack:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .rack .t{margin-left:.35rem}
+  .rack .t b{display:block;font-size:.88rem;font-weight:700}
+  .rack .t small{display:block;font-family:var(--read);font-style:italic;font-size:.76rem;color:var(--mut);white-space:nowrap}
+  .wireless{display:flex;align-items:center;gap:.6rem;cursor:pointer;background:none;border:none;padding:0;text-align:left}
+  .wireless .play{width:36px;height:36px;border-radius:var(--r);border:1.5px solid var(--line);color:var(--sec);display:grid;place-items:center;transition:border-color .14s,color .14s}
+  .wireless:hover .play{border-color:var(--anchor);color:var(--anchor)}
+  .wireless:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .wireless .play svg{width:14px;height:14px;fill:currentColor}
+  .wireless .t b{display:block;font-size:.88rem;font-weight:700}
+  .wireless .t small{display:block;font-family:var(--read);font-style:italic;font-size:.76rem;color:var(--mut);white-space:nowrap}
+  /* the week, reduced to a postage stamp */
+  .stampcol{margin-left:auto;flex:none;width:150px;text-align:right}
+  .stamp{width:96px;aspect-ratio:3/2;border-radius:3px;border:1px solid var(--line);box-shadow:0 1px 4px rgba(29,28,26,.14);
+    background:var(--gart,url('assets/lw/guided-a.png')) center/cover no-repeat;display:inline-block}
+  .stamp-cap{font-family:var(--read);font-style:italic;font-size:.68rem;color:var(--mut);margin-top:.35rem;line-height:1.45}
+
+  @media(max-width:900px){ .sheet{height:auto;overflow:visible} .main{grid-template-columns:1fr}
+    .toc{border-left:0;padding-left:0} .foot{flex-wrap:wrap} .stampcol{margin-left:0} }
+  @media(prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="top">
+    <span class="brand">Study<b>Vault</b></span>
+    <span class="meta"><span id="today">—</span><span><b>312 days</b> to your first exam</span><span><b>4-day</b> streak</span><span class="avatar">S</span></span>
+  </div>
+
+  <div class="main">
+    <div class="monument">
+      <div class="eyebrow">Tonight, Sam —</div>
+      <h1 class="big">Twenty-five <em>minutes.</em></h1>
+      <p class="why">Warm-up on what you missed, then your nearest exam, then a topic going stale.</p>
+      <div class="startrow">
+        <button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start</button>
+        <span class="momentum">23 topics this week — your best yet.</span>
+      </div>
+    </div>
+
+    <div class="toc">
+      <div class="toclab">THE PROGRAMME</div>
+      <ol>
+        <li tabindex="0"><b>Warm up</b><span class="mins">2 min</span><small>10 quick questions · the ones you fumbled last time</small></li>
+        <li tabindex="0"><b>Stave 3: Poverty &amp; Generosity</b><span class="mins">15 min</span><small>Continue · English Literature — your nearest exam</small></li>
+        <li tabindex="0"><b>Embedded Systems</b><span class="mins">8 min</span><small>Refresh · Computer Science — not seen for 3 weeks</small></li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="fc">
+      <p class="clab">…or pick a subject:</p>
+      <nav class="subjects" id="subjects" aria-label="Your subjects"></nav>
+    </div>
+    <div class="fc">
+      <p class="clab">…or lean back:</p>
+      <div style="display:flex;gap:1.6rem;align-items:center">
+        <button class="rack" id="rack" aria-label="Watch today’s shorts">
+          <span class="p"></span><span class="p"></span><span class="p"></span>
+          <span class="t"><b>Shorts</b><small>today’s 20</small></span>
+        </button>
+        <button class="wireless">
+          <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
+          <span class="t"><b>Revision Radio</b><small>Stave 3 — English Literature</small></span>
+        </button>
+      </div>
+    </div>
+    <div class="stampcol">
+      <span class="stamp" role="img" aria-label="This week’s artwork"></span>
+      <div class="stamp-cap" id="doodleCap"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+document.getElementById('today').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const SUBJECTS=[['Mathematics','#535f8a'],['English Language','#4a708c'],['English Literature','#71506b'],
+  ['Combined Science','#44696c'],['History','#3f5e78'],['Geography','#5f7155'],['Spanish','#9a5b38'],
+  ['Computer Science','#3f6478'],['Religious Studies','#6f5b91']];
+const nav=document.getElementById('subjects');
+SUBJECTS.forEach(([n,c])=>{const a=document.createElement('a');a.className='subj';a.href='#';a.textContent=n;
+  a.style.setProperty('--sc',c);a.onclick=e=>e.preventDefault();nav.appendChild(a);});
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k];if(!w)return;
+  document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
+  document.getElementById('doodleCap').textContent=w.cap;}).catch(()=>{});
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  const seen={},ps=[];for(const s of m){if(seen[s.subject])continue;seen[s.subject]=1;
+    const p=(s.url||'').split('.r2.dev/');if(p.length<2)continue;
+    ps.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'));if(ps.length===3)break;}
+  document.querySelectorAll('.rack .p').forEach((el,i)=>{if(ps[i])el.style.backgroundImage="url('"+ps[i]+"')";});
+  document.getElementById('rack').onclick=()=>location.href='/design-lab/shorts.html';}).catch(()=>{});
+</script>
+</body>
+</html>
