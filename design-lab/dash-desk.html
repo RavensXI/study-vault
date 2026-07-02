@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direction 5 — The Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#ece8e0;--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
+    --r:8px;--anchor:#4e5f66;--head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:radial-gradient(120% 100% at 50% 0%,#f0ece4 0%,var(--bg) 70%,#e5e0d6 100%);
+    color:var(--ink);font-family:var(--head)}
+  .top{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem)}
+  .brand{font-size:1rem;font-weight:500}.brand b{font-weight:800}
+  .avatar{width:29px;height:29px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.78rem}
+
+  .desk{position:relative;max-width:1150px;margin:0 auto;height:calc(100dvh - 52px);padding:0 clamp(1rem,4vw,2.4rem);overflow:hidden;
+    display:grid;grid-template-columns:1fr .92fr;grid-template-rows:1fr auto;gap:0 2.2rem}
+
+  /* the lamp keeps watch from the corner (object plate, multiply = ink on the desk) */
+  .lamp{position:absolute;top:-30px;right:-14px;width:200px;opacity:.95;pointer-events:none}
+
+  /* the jotter: today's plan on a pad */
+  .padwrap{align-self:center;position:relative}
+  .pad{background:var(--paper);border:1px solid var(--line);border-radius:6px;transform:rotate(-.8deg);
+    box-shadow:0 14px 34px -16px rgba(38,35,30,.4),0 2px 5px rgba(38,35,30,.1);padding:1.35rem 1.5rem 1.4rem;position:relative}
+  .pad::before{content:"";position:absolute;top:0;bottom:0;left:44px;width:1px;background:#dcaba1;opacity:.5}
+  .hi{font-family:var(--read);font-style:italic;font-size:.88rem;color:var(--mut);padding-left:28px}
+  h1{font-size:1.35rem;font-weight:800;letter-spacing:-.02em;margin:.3rem 0 .8rem;padding-left:28px}
+  .plan{list-style:none;margin:0;padding:0 0 0 28px}
+  .plan li{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:.65rem;padding:.55rem .4rem .55rem 0;
+    border-bottom:1px solid #ece7db;cursor:pointer;transition:background .14s}
+  .plan li:hover{background:#faf7ef}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:1rem;color:var(--mut)}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.95rem;display:block;line-height:1.25}
+  .plan small{font-size:.71rem;color:var(--mut)}
+  .plan .mins{font-size:.71rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+  .momentum{font-size:.73rem;font-weight:600;color:var(--mut);margin:.7rem 0 .9rem;padding-left:28px}
+  .startrow{padding-left:28px}
+  .start{display:inline-flex;align-items:center;gap:.5rem;padding:.66rem 1.35rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-weight:700;font-size:.94rem;cursor:pointer;transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:13px;height:13px;fill:#fff}
+  /* the tear-off calendar, clipped to the pad's corner */
+  .cal{position:absolute;top:-26px;right:-18px;width:104px;background:var(--paper);border:1px solid var(--line);border-radius:6px;
+    box-shadow:0 6px 16px -6px rgba(38,35,30,.3);text-align:center;transform:rotate(2.2deg);overflow:hidden}
+  .cal .band{background:var(--anchor);color:#fff;font-size:.56rem;font-weight:700;letter-spacing:.1em;padding:.28rem 0}
+  .cal b{display:block;font-family:var(--read);font-weight:700;font-size:1.5rem;padding:.35rem 0 0}
+  .cal small{display:block;font-size:.6rem;color:var(--mut);padding:0 .4rem .45rem}
+
+  /* right column: wireless + polaroids */
+  .right{align-self:center;display:flex;flex-direction:column;align-items:center;gap:.4rem;min-width:0;padding-top:1.4rem}
+  .setwrap{position:relative;text-align:center;cursor:pointer;background:none;border:none;padding:0}
+  .set{width:min(280px,80%);transition:transform .2s;filter:drop-shadow(0 10px 14px rgba(38,35,30,.18))}
+  .setwrap:hover .set{transform:scale(1.02)}
+  .setwrap:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .setlab b{display:block;font-size:.98rem;font-weight:700}
+  .setlab small{display:block;font-family:var(--read);font-style:italic;font-size:.8rem;color:var(--sec);margin-top:.15rem}
+  .listen{display:inline-flex;align-items:center;gap:.45rem;margin-top:.55rem;font-size:.8rem;font-weight:700;color:var(--anchor);
+    border:1.5px solid #d8d2c2;border-radius:var(--r);padding:.4rem .9rem;background:var(--paper);transition:border-color .14s}
+  .setwrap:hover .listen{border-color:var(--anchor)}
+  .listen svg{width:12px;height:12px;fill:currentColor}
+  .polas{display:flex;align-items:flex-end;margin-top:1.1rem;cursor:pointer;background:none;border:none;padding:0}
+  .polas .p{width:74px;aspect-ratio:9/16;border-radius:3px;background-size:cover;background-position:center;
+    border:5px solid #fff;border-bottom-width:16px;box-shadow:0 3px 9px rgba(38,35,30,.24);transition:transform .18s}
+  .polas .p:nth-child(1){transform:rotate(-4deg) translateX(6px)}
+  .polas .p:nth-child(2){transform:rotate(1.6deg) translateY(-5px);z-index:1}
+  .polas .p:nth-child(3){transform:rotate(4.4deg) translateX(-6px)}
+  .polas:hover .p{transform:rotate(0) translate(0,-4px)}
+  .polas:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .polas .t{margin-left:.9rem;text-align:left;padding-bottom:.4rem}
+  .polas .t b{display:block;font-size:.95rem;font-weight:700}
+  .polas .t small{display:block;font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--sec);white-space:nowrap}
+
+  /* the shelf: nine cloth spines, fore-edge on */
+  .shelf{grid-column:1/-1;align-self:end;justify-content:center;padding:0 .5rem;display:flex;align-items:flex-end;gap:.4rem;
+    border-bottom:3px solid #cfc8b8;margin-bottom:1.15rem;position:relative}
+  .shelf .lab{position:absolute;left:.6rem;bottom:8px;font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--sec)}
+  .spine{flex:none;width:30px;border-radius:3px 3px 0 0;background:linear-gradient(to right,color-mix(in srgb,var(--tc) 82%,#000) 0,var(--tc) 22%,var(--tc) 78%,color-mix(in srgb,var(--tc) 86%,#fff) 100%);
+    border:none;cursor:pointer;display:grid;place-items:center;box-shadow:inset 0 -4px 6px rgba(0,0,0,.12);transition:transform .16s}
+  .spine:hover,.spine:focus-visible{transform:translateY(-7px);outline:none}
+  .spine span{writing-mode:vertical-rl;font-size:.58rem;font-weight:700;letter-spacing:.07em;color:#fff;text-transform:uppercase;padding:.5rem 0}
+
+  @media(max-width:900px){ .desk{height:auto;overflow:visible;grid-template-columns:1fr} .lamp{display:none}
+    .right{padding-top:2rem} .shelf{flex-wrap:nowrap;overflow-x:auto} }
+  @media(prefers-reduced-motion:reduce){ *{transition:none!important} }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">Study<b>Vault</b></span>
+  <span class="avatar">S</span>
+</div>
+
+<div class="desk">
+
+  <div class="padwrap">
+    <section class="pad">
+      <div class="hi" id="today">—</div>
+      <h1>Here’s your plan.</h1>
+      <ol class="plan">
+        <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled last time</small></div><span class="mins">2 min</span></li>
+        <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — your nearest exam</small></div><span class="mins">15 min</span></li>
+        <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — not seen for 3 weeks</small></div><span class="mins">8 min</span></li>
+      </ol>
+      <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
+      <div class="startrow"><button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start · 25 min</button></div>
+    </section>
+    <div class="cal"><div class="band">FIRST EXAM</div><b>312</b><small>days · May 2027</small></div>
+  </div>
+
+  <div class="right">
+    <button class="setwrap" aria-label="Play Revision Radio">
+      <img class="set" src="assets/lw/night-radio-set-cut.png" alt="">
+      <span class="setlab"><b>Revision Radio</b><small>Up next: Stave 3 — English Literature</small></span>
+      <span class="listen"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Listen</span>
+    </button>
+    <button class="polas" id="polas" aria-label="Watch today’s shorts">
+      <span class="p"></span><span class="p"></span><span class="p"></span>
+      <span class="t"><b>Shorts</b><small>today’s 20</small></span>
+    </button>
+  </div>
+
+  <nav class="shelf" id="shelf" aria-label="Your subjects">
+    <span class="lab">…or take a book down:</span>
+  </nav>
+</div>
+
+<script>
+document.getElementById('today').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const SUBJECTS=[['Maths','#535f8a',96],['Eng Lang','#4a708c',108],['Eng Lit','#71506b',102],['Science','#44696c',112],
+  ['History','#3f5e78',100],['Geog','#5f7155',94],['Spanish','#9a5b38',104],['CompSci','#3f6478',98],['RS','#6f5b91',92]];
+const shelf=document.getElementById('shelf');
+SUBJECTS.forEach(([n,c,h])=>{const b=document.createElement('button');b.className='spine';b.title=n;
+  b.style.setProperty('--tc',c);b.style.height=h+'px';b.innerHTML='<span>'+n+'</span>';shelf.appendChild(b);});
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  const seen={},ps=[];for(const s of m){if(seen[s.subject])continue;seen[s.subject]=1;
+    const p=(s.url||'').split('.r2.dev/');if(p.length<2)continue;
+    ps.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'));if(ps.length===3)break;}
+  document.querySelectorAll('.polas .p').forEach((el,i)=>{if(ps[i])el.style.backgroundImage="url('"+ps[i]+"')";});
+  document.getElementById('polas').onclick=()=>location.href='/design-lab/shorts.html';}).catch(()=>{});
+</script>
+</body>
+</html>
