@@ -15,76 +15,85 @@
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:var(--head)}
 
-  .mast{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);border-bottom:1px solid var(--linel)}
+  .mast{height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);border-bottom:1px solid var(--linel)}
   .brand{font-size:1.05rem;font-weight:500}.brand b{font-weight:800}
   .avatar{width:32px;height:32px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.85rem}
 
-  .page{max-width:790px;margin:0 auto;height:calc(100dvh - 60px);display:flex;flex-direction:column;
-    padding:1.3rem clamp(1rem,4vw,2.2rem) 1.3rem;gap:1rem;overflow:hidden}
+  .page{max-width:980px;margin:0 auto;height:calc(100dvh - 58px);display:flex;flex-direction:column;
+    padding:1.2rem clamp(1rem,4vw,2.2rem);gap:.85rem;overflow:hidden}
 
-  /* ---- the sentence, clause 1: HERE'S YOUR PLAN (the only card, the only filled button) ---- */
-  .plancard{position:relative;flex:1 1 auto;min-height:0;background:var(--card);border:1px solid var(--line);
-    border-radius:var(--r);box-shadow:var(--shadow-sm);padding:1.5rem 1.7rem;overflow:hidden;
-    display:flex;flex-direction:column}
-  /* panoramic foot: today, the right-composed art fades in from the right;
-     when the layout is blessed, the year regenerates as true bottom-strip panoramas */
-  .plancard::before{content:"";position:absolute;left:0;right:0;bottom:0;height:33%;z-index:0;pointer-events:none;
-    background:var(--gart,url('assets/lw/guided-a.png')) center bottom/cover no-repeat;opacity:.5;
-    -webkit-mask-image:linear-gradient(to top,#000 52%,transparent 100%);mask-image:linear-gradient(to top,#000 52%,transparent 100%)}
-  .plancard>*{position:relative;z-index:1}
-  .ptop{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;flex-wrap:wrap}
-  h1{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin:0}
-  .countdown{font-family:var(--read);font-style:italic;font-size:.92rem;color:var(--mut)}
-  .countdown b{color:var(--sec);font-weight:600;font-variant-numeric:tabular-nums}
-  .plan{list-style:none;margin:1.1rem 0 0;padding:0;display:flex;flex-direction:column;gap:.1rem}
-  .plan li{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:.8rem;padding:.55rem .45rem;
-    border-radius:var(--r);cursor:pointer;transition:background .14s}
-  .plan li:hover{background:#f5f3ef}
+  /* ================= clause 1 — the plan, an editorial spread =================
+     Text on paper, left. The week's artwork as a FULL-INK plate, right.
+     No text over art. Nothing faded. Two territories, one card. */
+  .hero{position:relative;flex:1 1 auto;min-height:0;background:var(--card);border:1px solid var(--line);
+    border-radius:var(--r);box-shadow:var(--shadow-sm);overflow:hidden;display:flex}
+  .htext{flex:1 1 58%;min-width:0;padding:1.5rem 1.6rem 1.4rem;display:flex;flex-direction:column}
+  .greet{display:flex;align-items:baseline;justify-content:space-between;gap:1rem}
+  .greet .hi{font-family:var(--read);font-style:italic;font-size:.95rem;color:var(--mut)}
+  .greet .countdown{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--mut);white-space:nowrap}
+  .greet .countdown b{color:var(--sec);font-weight:600;font-variant-numeric:tabular-nums}
+  h1{font-size:1.55rem;font-weight:800;letter-spacing:-.02em;margin:.3rem 0 0}
+  .plan{list-style:none;margin:1.05rem 0 0;padding:0;display:flex;flex-direction:column;gap:.12rem}
+  .plan li{display:grid;grid-template-columns:27px 1fr auto;align-items:center;gap:.75rem;padding:.55rem .5rem;
+    margin:0 -.5rem;border-radius:var(--r);cursor:pointer;transition:background .14s}
+  .plan li:hover{background:#f6f3ee}
   .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:2px}
   .plan .n{width:25px;height:25px;border-radius:50%;border:1.5px solid var(--mut);background:var(--card);
     display:grid;place-items:center;font-weight:700;font-size:.8rem}
   .plan b{font-family:var(--read);font-weight:600;font-size:1rem;display:block;line-height:1.25}
-  .plan small{font-size:.74rem;color:var(--mut)}
-  .plan .mins{font-size:.74rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
-  .momentum{margin:1rem .45rem 0;font-size:.78rem;font-weight:600;color:var(--mut)}
-  .pfoot{margin-top:auto;display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
-  .start{display:inline-flex;align-items:center;gap:.55rem;padding:.72rem 1.5rem;border:none;border-radius:var(--r);
-    background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:1rem;cursor:pointer;
-    box-shadow:var(--shadow-sm);transition:filter .18s}
+  .plan small{font-size:.73rem;color:var(--mut)}
+  .plan .mins{font-size:.73rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+  .momentum{margin:auto 0 .85rem;font-size:.77rem;font-weight:600;color:var(--mut);padding-top:1rem}
+  .start{align-self:flex-start;display:inline-flex;align-items:center;gap:.55rem;padding:.72rem 1.5rem;border:none;
+    border-radius:var(--r);background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:1rem;
+    cursor:pointer;box-shadow:var(--shadow-sm);transition:filter .18s}
   .start:hover{filter:brightness(.94)}
   .start svg{width:15px;height:15px;fill:#fff}
-  .momentum{font-size:.78rem;font-weight:600;color:var(--mut)}
-  /* folio line under the card, right-aligned — never collides with anything */
-  .doodlecap{align-self:flex-end;font-family:var(--read);font-style:italic;font-size:.78rem;
-    color:var(--mut);margin:-.45rem .2rem 0}
+  /* the plate: full-bleed, full-ink, its own territory */
+  .hplate{flex:1 1 42%;min-width:0;position:relative;
+    background:var(--gart,url('assets/lw/guided-a.png')) center/cover no-repeat;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 52px);mask-image:linear-gradient(to right,transparent 0,#000 52px)}
+  .folio{align-self:flex-end;font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--mut);margin:-.35rem .2rem 0}
 
-  /* ---- clauses 2 & 3: quiet bands on the page ground, introduced in prose ---- */
-  .clause{font-family:var(--read);font-style:italic;font-size:.95rem;color:var(--mut);flex:none}
-  .band{flex:none}
-
-  .subjects{display:flex;flex-wrap:wrap;gap:.35rem 1.5rem;margin-top:.55rem}
+  /* ================= clauses 2 & 3 — quiet bands in prose ================= */
+  .clause{font-family:var(--read);font-style:italic;font-size:.95rem;color:var(--mut);flex:none;margin:0}
+  .subjects{display:flex;flex-wrap:wrap;gap:.3rem 1.45rem;flex:none}
   .subj{font-family:var(--head);font-size:.95rem;font-weight:500;color:var(--sec);text-decoration:none;
-    padding:.25rem 0;border-bottom:2px solid color-mix(in srgb,var(--sc) 55%,transparent);transition:color .14s,border-color .14s}
+    padding:.22rem 0;border-bottom:2px solid color-mix(in srgb,var(--sc) 55%,transparent);transition:color .14s,border-color .14s}
   .subj:hover,.subj:focus-visible{color:var(--ink);border-color:var(--sc);outline:none}
 
-  .lean{display:flex;gap:.9rem;margin-top:.55rem}
-  .tile{flex:1 1 0;display:flex;align-items:center;gap:.9rem;background:var(--card);border:1px solid var(--line);
-    border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.7rem .95rem;cursor:pointer;min-width:0;
-    transition:box-shadow .18s;text-align:left}
-  .tile:hover{box-shadow:var(--shadow-md)}
-  .tile:focus-visible{outline:2px solid var(--anchor);outline-offset:2px}
-  .tile .poster{flex:none;width:52px;aspect-ratio:9/16;border-radius:5px;background-size:cover;background-position:center;
-    border:1px solid var(--line)}
-  .tile .ico{flex:none;width:38px;height:38px;border-radius:var(--r);border:1.5px solid var(--line);color:var(--sec);
-    display:grid;place-items:center}
-  .tile .ico svg{width:17px;height:17px}
-  .tile .t b{display:block;font-size:.95rem;font-weight:700;color:var(--ink)}
-  .tile .t small{display:block;font-family:var(--read);font-size:.8rem;color:var(--mut);margin-top:.12rem}
+  /* lean back: a RACK of real posters at readable size + Revision Radio, named */
+  .lean{flex:none;display:flex;gap:.9rem;align-items:stretch}
+  .rack{flex:1 1 55%;min-width:0;display:flex;align-items:center;gap:.7rem;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.8rem .95rem;
+    cursor:pointer;text-align:left;transition:box-shadow .18s}
+  .rack:hover{box-shadow:var(--shadow-md)}
+  .rack:focus-visible{outline:2px solid var(--anchor);outline-offset:2px}
+  .rack .p{flex:none;width:84px;aspect-ratio:9/16;border-radius:6px;background-size:cover;background-position:center;
+    border:1px solid var(--line);box-shadow:var(--shadow-sm)}
+  .rack .t{margin-left:.35rem;min-width:0}
+  .rack .t b{display:block;font-size:1rem;font-weight:700}
+  .rack .t small{display:block;font-family:var(--read);font-size:.8rem;color:var(--mut);margin-top:.15rem}
+  .radiocard{flex:1 1 45%;min-width:0;display:flex;align-items:center;gap:1rem;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow-sm);padding:.8rem 1.05rem;
+    cursor:pointer;text-align:left;transition:box-shadow .18s}
+  .radiocard:hover{box-shadow:var(--shadow-md)}
+  .radiocard:focus-visible{outline:2px solid var(--anchor);outline-offset:2px}
+  .radiocard .play{flex:none;width:46px;height:46px;border-radius:var(--r);border:1.5px solid var(--line);
+    color:var(--sec);display:grid;place-items:center;transition:border-color .14s,color .14s}
+  .radiocard:hover .play{border-color:var(--anchor);color:var(--anchor)}
+  .radiocard .play svg{width:18px;height:18px;fill:currentColor}
+  .radiocard .t{min-width:0}
+  .radiocard .t b{display:block;font-size:1rem;font-weight:700}
+  .radiocard .t small{display:block;font-family:var(--read);font-size:.8rem;color:var(--mut);margin-top:.15rem;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-  @media(max-width:700px){
+  @media(max-width:760px){
     .page{height:auto;overflow:visible}
+    .hero{flex-direction:column}
+    .hplate{min-height:190px;-webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 46px);mask-image:linear-gradient(to bottom,transparent 0,#000 46px)}
     .lean{flex-direction:column}
-    .doodlecap{display:none}
+    .rack .p:nth-child(4){display:none}
   }
   @media(prefers-reduced-motion:reduce){ *{transition:none!important} }
 </style>
@@ -97,34 +106,36 @@
 
 <main class="page">
 
-  <section class="plancard">
-    <div class="ptop">
-      <h1>Welcome back, Sam. Here’s your plan.</h1>
-      <span class="countdown"><b>312 days</b> to your first exam</span>
-    </div>
-    <ol class="plan">
-      <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled last time</small></div><span class="mins">2 min</span></li>
-      <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — your nearest exam</small></div><span class="mins">15 min</span></li>
-      <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — not seen for 3 weeks</small></div><span class="mins">8 min</span></li>
-    </ol>
-    <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
-    <div class="pfoot">
+  <section class="hero">
+    <div class="htext">
+      <div class="greet">
+        <span class="hi">Welcome back, Sam.</span>
+        <span class="countdown"><b>312 days</b> to your first exam</span>
+      </div>
+      <h1>Here’s your plan.</h1>
+      <ol class="plan">
+        <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled last time</small></div><span class="mins">2 min</span></li>
+        <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — your nearest exam</small></div><span class="mins">15 min</span></li>
+        <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — not seen for 3 weeks</small></div><span class="mins">8 min</span></li>
+      </ol>
+      <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
       <button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start · 25 min</button>
     </div>
+    <div class="hplate" role="img" aria-label="This week’s artwork"></div>
   </section>
-  <span class="doodlecap" id="doodleCap" hidden></span>
+  <span class="folio" id="doodleCap" hidden></span>
 
   <p class="clause">…or pick a subject:</p>
-  <nav class="band subjects" id="subjects" aria-label="Your subjects"></nav>
+  <nav class="subjects" id="subjects" aria-label="Your subjects"></nav>
 
   <p class="clause">…or lean back:</p>
-  <div class="band lean">
-    <button class="tile" id="tileShorts">
-      <span class="poster" id="shortsPoster"></span>
-      <span class="t"><b>Shorts</b><small id="shortsSub">Today’s 20 · 60-second videos</small></span>
+  <div class="lean">
+    <button class="rack" id="rack">
+      <span class="p"></span><span class="p"></span><span class="p"></span><span class="p"></span>
+      <span class="t"><b>Shorts</b><small id="shortsSub">Today’s 20</small></span>
     </button>
-    <button class="tile" id="tileRadio">
-      <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19 5a10 10 0 0 1 0 14M5 19A10 10 0 0 1 5 5"/></svg></span>
+    <button class="radiocard" id="radiocard">
+      <span class="play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>
       <span class="t"><b>Revision Radio</b><small>Up next: Stave 3 — English Literature</small></span>
     </button>
   </div>
@@ -145,7 +156,7 @@ SUBJECTS.forEach(([name,c])=>{
   nav.appendChild(a);
 });
 
-// this week's doodle (art + folio caption); path-to-landmark default otherwise
+// this week's doodle: full-ink plate + folio caption; path-to-landmark default
 fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   const d=new Date(), mon=new Date(d); mon.setDate(d.getDate()-((d.getDay()+6)%7));
   const key=mon.getFullYear()+'-'+String(mon.getMonth()+1).padStart(2,'0')+'-'+String(mon.getDate()).padStart(2,'0');
@@ -154,16 +165,20 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   const cap=document.getElementById('doodleCap'); cap.textContent=w.cap; cap.hidden=false;
 }).catch(()=>{});
 
-// shorts poster + watched count (shared localStorage with the feed)
+// the poster rack: four real posters, four different subjects
 fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
-  for(const s of m){ const p=(s.url||'').split('.r2.dev/');
-    if(p.length>1){ document.getElementById('shortsPoster').style.backgroundImage=
-      "url('/design-lab/_posters/"+p[1].replace(/\.mp4$/,'.jpg')+"')"; break; } }
+  const seen={}, posters=[];
+  for(const s of m){ if(seen[s.subject]) continue; seen[s.subject]=1;
+    const p=(s.url||'').split('.r2.dev/'); if(p.length<2) continue;
+    posters.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'));
+    if(posters.length===4) break; }
+  document.querySelectorAll('.rack .p').forEach((el,i)=>{
+    if(posters[i]) el.style.backgroundImage="url('"+posters[i]+"')"; else el.remove(); });
   let day={}; try{ day=JSON.parse(localStorage.getItem('sv_shorts_day'))||{}; }catch(e){}
   const n=(day.date===new Date().toISOString().slice(0,10))?(day.keys||[]).length:0;
-  if(n>0) document.getElementById('shortsSub').textContent=n+' of 20 watched today';
+  if(n>0) document.getElementById('shortsSub').textContent=n+' of 20 watched';
 }).catch(()=>{});
-document.getElementById('tileShorts').onclick=()=>location.href='/design-lab/shorts.html';
+document.getElementById('rack').onclick=()=>location.href='/design-lab/shorts.html';
 </script>
 </body>
 </html>
