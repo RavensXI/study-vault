@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk v3 — an actual desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
+    --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;color:var(--ink);font-family:var(--head)}
+  /* the desk itself: drawn oak, softly lit from above */
+  body{background:url('assets/lw/night-desk-wood-a.png') center/cover no-repeat fixed #e8dcc0}
+  /* a cream veil quietens the grain so paper wins; vignette keeps the depth */
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:linear-gradient(rgba(247,243,234,.52),rgba(247,243,234,.52)),
+               radial-gradient(120% 90% at 50% 8%,transparent 40%,rgba(84,62,30,.18) 100%)}
+
+  .top{position:relative;z-index:2;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem)}
+  .brand{font-size:1rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
+  .avatar{width:29px;height:29px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.78rem}
+
+  .desk{position:relative;z-index:1;max-width:1280px;margin:0 auto;height:calc(100dvh - 52px);padding:0 clamp(1rem,3vw,2rem)}
+
+  /* ============ notebook (openable — from v2) ============ */
+  .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:47%;transform:translateY(-50%)}
+  .book{position:relative;width:min(640px,55vw);height:424px;display:grid;grid-template-columns:1fr 1fr;
+    border-radius:9px;box-shadow:0 26px 48px -16px rgba(56,40,18,.5),0 3px 7px rgba(56,40,18,.18);perspective:1600px}
+  .pg{background:var(--paper);padding:1.1rem 1.2rem 1.05rem;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+  .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;background:linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
+  .pg.r{border-radius:0 9px 9px 0;background:linear-gradient(to left,var(--paper) 90%,#f2ecdf 100%)}
+  .pg.l::before{content:"";position:absolute;top:0;bottom:0;left:38px;width:1px;background:#dcaba1;opacity:.5}
+  .datestamp{font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--mut);padding-left:22px}
+  .pg h2{font-size:1.16rem;font-weight:800;letter-spacing:-.02em;margin:.22rem 0 .55rem;padding-left:22px}
+  .plan{list-style:none;margin:0;padding:0 0 0 22px}
+  .plan li{display:grid;grid-template-columns:19px 1fr auto;align-items:center;gap:.5rem;padding:.45rem .3rem .45rem 0;
+    border-bottom:1px solid #ece7db;cursor:pointer;transition:background .14s}
+  .plan li:hover{background:#faf7ef}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:.9rem;color:var(--mut)}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.85rem;display:block;line-height:1.22}
+  .plan small{font-size:.64rem;color:var(--mut)}
+  .plan .mins{font-size:.64rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+  .momentum{font-size:.66rem;font-weight:600;color:var(--mut);margin:.5rem 0 .6rem;padding-left:22px}
+  .startrow{margin-top:auto;padding-left:22px}
+  .start{display:inline-flex;align-items:center;gap:.45rem;padding:.56rem 1.15rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-weight:700;font-size:.86rem;cursor:pointer;transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:12px;height:12px;fill:#fff}
+  .pg h3{font-family:var(--read);font-style:italic;font-weight:500;font-size:.9rem;color:var(--sec);margin:0 0 .5rem}
+  .noteline{font-family:var(--read);font-size:.82rem;color:var(--sec);line-height:2;border-bottom:1px solid #ece7db;padding:0 .1rem}
+  .noteline b{color:var(--ink);font-weight:600}
+  .pg .doable{margin-top:auto;font-family:var(--read);font-style:italic;font-size:.75rem;color:var(--mut);text-align:right}
+  .subjpg .unit{display:flex;align-items:baseline;justify-content:space-between;gap:.7rem;padding:.45rem .3rem;
+    border-bottom:1px solid #ece7db;cursor:pointer;transition:background .14s}
+  .subjpg .unit:hover{background:#faf7ef}
+  .subjpg .unit b{font-family:var(--read);font-weight:600;font-size:.85rem}
+  .subjpg .unit small{font-size:.64rem;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+  .subjpg .open{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:.4rem;
+    font-size:.8rem;font-weight:700;color:var(--anchor);border:1.5px solid var(--line);border-radius:var(--r);
+    padding:.42rem .9rem;background:var(--paper);cursor:pointer;transition:border-color .14s}
+  .subjpg .open:hover{border-color:var(--anchor)}
+  .backlink{background:none;border:none;padding:0;font-family:var(--read);font-style:italic;font-size:.75rem;
+    color:var(--mut);cursor:pointer;text-align:left}
+  .backlink:hover{color:var(--ink)}
+  .turn{position:absolute;top:0;right:0;width:50%;height:100%;transform-origin:left center;
+    transform-style:preserve-3d;pointer-events:none;z-index:5;opacity:0}
+  .turn .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:0 9px 9px 0;background:var(--paper)}
+  .turn .face.back{transform:rotateY(180deg);border-radius:9px 0 0 9px;background:linear-gradient(to right,var(--paper) 88%,#efe9db 100%)}
+  .book.turning .turn{opacity:1;animation:pageturn .62s var(--ease) forwards}
+  @keyframes pageturn{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}}
+  .tabs{position:absolute;right:-29px;top:24px;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;width:29px}
+  .tab{flex:none;height:9.6%;min-height:40px;width:29px;border-radius:0 6px 6px 0;background:var(--tc,#888);
+    display:grid;place-items:center;cursor:pointer;border:none;padding:0;box-shadow:2px 3px 6px rgba(56,40,18,.28);transition:width .15s}
+  .tab:hover,.tab:focus-visible{width:37px;outline:none}
+  .tab[aria-current="true"]{width:37px}
+  .tab span{writing-mode:vertical-rl;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:#fff;text-transform:uppercase;pointer-events:none;white-space:nowrap}
+
+  /* ============ the postcard (flips — from v2) ============ */
+  .postcard{position:absolute;right:clamp(.8rem,4vw,3rem);top:7%;width:290px;aspect-ratio:3/2;cursor:pointer;
+    perspective:1200px;background:none;border:none;padding:0;z-index:2}
+  .postcard .inner{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
+    transition:transform .7s var(--ease);transform:rotate(2deg)}
+  .postcard.flipped .inner{transform:rotate(2deg) rotateY(180deg)}
+  .postcard .side{position:absolute;inset:0;backface-visibility:hidden;border-radius:4px;overflow:hidden;
+    box-shadow:0 14px 30px -10px rgba(56,40,18,.5);border:6px solid #fff}
+  .postcard .front{background:var(--gart,url('assets/lw/guided-a.png')) center/cover no-repeat}
+  .postcard .back{transform:rotateY(180deg);background:var(--paper);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:1rem}
+  .postmark{width:70px;height:70px;border:1.5px solid var(--mut);border-radius:50%;display:grid;place-items:center;
+    font-size:.48rem;font-weight:700;letter-spacing:.08em;color:var(--mut);text-transform:uppercase;
+    transform:rotate(-8deg);line-height:1.5;margin-bottom:.55rem;opacity:.85}
+  .postcard .cap{font-family:var(--read);font-style:italic;font-size:.83rem;color:var(--sec);line-height:1.45;max-width:22ch}
+  .postcard .hint{position:absolute;bottom:.35rem;right:.55rem;font-family:var(--read);font-style:italic;
+    font-size:.64rem;color:rgba(255,255,255,.92);text-shadow:0 1px 4px rgba(0,0,0,.45)}
+  .postcard.flipped .hint{display:none}
+
+  /* ============ the PHONE: shorts live on its screen ============ */
+  .phone{position:absolute;right:clamp(21rem,26vw,25rem);top:11%;width:132px;aspect-ratio:9/19;cursor:pointer;
+    background:#26231e;border:none;border-radius:20px;padding:7px;box-shadow:0 18px 34px -12px rgba(56,40,18,.55);
+    transform:rotate(-3deg);transition:transform .2s;z-index:2}
+  .phone:hover{transform:rotate(-3deg) translateY(-4px)}
+  .phone:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .phone .screen{display:block;position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;
+    background:#111 var(--pshot,none) center/cover no-repeat}
+  .phone .cam{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;
+    background:#0a0a0a;box-shadow:inset 0 0 2px #333;z-index:2}
+  .phone .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,5,.78),transparent 44%)}
+  .phone .plab{position:absolute;left:0;right:0;bottom:.55rem;text-align:center;color:#fff}
+  .phone .plab b{display:block;font-size:.78rem;font-weight:800}
+  .phone .plab small{display:block;font-family:var(--read);font-style:italic;font-size:.6rem;color:rgba(255,255,255,.85)}
+
+  /* the phone pops up: the REAL feed, full screen */
+  .phonemodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
+  .phonemodal.open{display:grid}
+  .phonemodal .dev{position:relative;height:min(92vh,860px);aspect-ratio:9/18.2;background:#26231e;border-radius:30px;padding:10px;
+    box-shadow:0 40px 90px -20px rgba(0,0,0,.6)}
+  .phonemodal iframe{width:100%;height:100%;border:0;border-radius:20px;background:#f2efe9}
+  .phonemodal .x{position:absolute;top:-14px;right:-14px;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:var(--paper);color:var(--ink);font-size:1.05rem;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.35)}
+
+  /* ============ the WIRELESS: drawn radio, working LCD ============ */
+  .radio{position:absolute;right:clamp(1.2rem,4.5vw,3.6rem);bottom:6.5%;width:250px;background:none;border:none;padding:0;
+    cursor:pointer;text-align:center;z-index:2}
+  .radio:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .radio .art{position:relative;display:block}
+  .radio img{width:100%;filter:drop-shadow(0 12px 14px rgba(56,40,18,.3))}
+  /* the LCD sits in the radio's fascia between the dials */
+  .lcd{position:absolute;left:26%;right:26%;top:59%;height:9%;background:#23281f;border-radius:3px;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.75),0 0 0 2px rgba(38,30,16,.4);overflow:hidden;display:flex;align-items:center}
+  .lcd .mq{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:.58rem;letter-spacing:.08em;
+    color:#e6c17c;text-shadow:0 0 5px rgba(230,193,124,.55);animation:mq 11s linear infinite;padding-left:100%}
+  @keyframes mq{to{transform:translateX(-100%)}}
+  .lcd.lofi .mq{color:#a8d8b0;text-shadow:0 0 5px rgba(168,216,176,.55)}
+  /* the mode knob: the left dial is a real control */
+  .knob{position:absolute;left:20.5%;top:76%;width:13%;aspect-ratio:1;border-radius:50%;background:transparent;
+    border:2px solid transparent;cursor:pointer;transition:border-color .15s;padding:0}
+  .radio:hover .knob,.knob:focus-visible{border-color:rgba(230,193,124,.65);outline:none}
+  .radio .rlab{margin-top:.35rem}
+  .radio .rlab b{display:block;font-size:.9rem;font-weight:700;color:#3d3428}
+  .radio .rlab small{display:block;font-family:var(--read);font-style:italic;font-size:.74rem;color:#5d5342;margin-top:.08rem}
+
+  /* ============ sticky notes ============ */
+  .sticky{position:absolute;width:150px;padding:.7rem .75rem .85rem;background:#f6e7a2;color:#4d4425;
+    font-family:var(--read);font-style:italic;font-size:.8rem;line-height:1.45;
+    box-shadow:0 8px 18px -6px rgba(56,40,18,.4);z-index:2}
+  .sticky::after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 16px 16px;
+    border-color:transparent transparent rgba(56,40,18,.14) transparent}
+  .sticky.s1{left:36%;top:5.5%;transform:rotate(-3deg)}
+  .sticky.s2{right:clamp(19rem,24vw,23rem);bottom:9%;transform:rotate(2.5deg);background:#efe3b6}
+  .sticky b{font-weight:600;color:#33301c}
+
+  @media(prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important}
+    .lcd .mq{padding-left:.5rem} }
+  @media(max-width:1000px){
+    .desk{height:auto;padding-bottom:2rem}
+    .bookwrap,.postcard,.phone,.radio,.sticky{position:static;transform:none;margin:1rem auto;display:block}
+    .book{width:100%;height:auto;grid-template-columns:1fr}
+    .tabs{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">Study<b>Vault</b></span>
+  <span class="avatar">S</span>
+</div>
+
+<div class="desk">
+
+  <div class="sticky s1"><b>312 days</b> to your first exam.<br>Small days add up. —SV</div>
+  <div class="sticky s2">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</div>
+
+  <div class="bookwrap">
+    <div class="book" id="book">
+      <section class="pg l" id="pgL"></section>
+      <section class="pg r" id="pgR"></section>
+      <div class="turn" id="turn"><div class="face front"></div><div class="face back"></div></div>
+      <nav class="tabs" id="tabs" aria-label="Your subjects"></nav>
+    </div>
+  </div>
+
+  <button class="postcard" id="postcard" aria-label="This week’s postcard — flip to read the back">
+    <span class="inner">
+      <span class="side front"></span>
+      <span class="side back">
+        <span class="postmark" id="postmark">STUDYVAULT<br>W/C —</span>
+        <span class="cap" id="doodleCap">The path to the landmark.</span>
+      </span>
+      <span class="hint">flip ↻</span>
+    </span>
+  </button>
+
+  <button class="phone" id="phone" aria-label="Open Shorts — today’s 20">
+    <span class="screen">
+      <span class="cam"></span>
+      <span class="pscrim"></span>
+      <span class="plab"><b>Shorts</b><small id="shortsSub">today’s 20</small></span>
+    </span>
+  </button>
+
+  <button class="radio" id="radio" aria-label="Revision Radio">
+    <span class="art">
+      <img src="assets/lw/night-radio-set-cut.png" alt="">
+      <span class="lcd" id="lcd"><span class="mq" id="mq">NOW PLAYING · STAVE 3 — POVERTY &amp; GENEROSITY · ENGLISH LITERATURE · 10 MIN ·&nbsp;</span></span>
+      <span class="knob" id="knob" role="switch" aria-checked="false" aria-label="Switch between podcasts and lo-fi study beats" title="podcasts / lo-fi"></span>
+    </span>
+    <span class="rlab"><b>Revision Radio</b><small id="rmode">podcasts · tap the left dial for lo-fi</small></span>
+  </button>
+
+</div>
+
+<div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
+  <div class="dev">
+    <button class="x" id="closephone" aria-label="Close">×</button>
+    <iframe id="feedframe" title="Shorts feed" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script>
+/* ---------- data (same demo set) ---------- */
+const SUBJECTS=[
+  {tab:'Maths',name:'Mathematics',c:'#535f8a',units:[['Number',12,8],['Algebra',14,6],['Geometry',12,7],['Statistics',10,5]]},
+  {tab:'Eng Lang',name:'English Language',c:'#4a708c',units:[['Paper 1: Explorations',15,9],['Paper 2: Viewpoints',15,8],['Spoken Language',8,3],['Practice papers',12,4]]},
+  {tab:'Eng Lit',name:'English Literature',c:'#71506b',units:[['A Christmas Carol',12,7],['An Inspector Calls',10,2],['Power & Conflict poetry',15,3],['Macbeth',12,1]]},
+  {tab:'Science',name:'Combined Science',c:'#44696c',units:[['Biology Paper 1',18,11],['Chemistry Paper 1',17,9],['Physics Paper 1',18,6],['Biology Paper 2',17,3]]},
+  {tab:'History',name:'History',c:'#3f5e78',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
+  {tab:'Geog',name:'Geography',c:'#5f7155',units:[['Physical environment',14,9],['Human environment',14,8],['Geographical skills',12,9]]},
+  {tab:'Spanish',name:'Spanish',c:'#9a5b38',units:[['Identity & culture',9,4],['Local & global areas',9,3],['School & future plans',9,2]]},
+  {tab:'CompSci',name:'Computer Science',c:'#3f6478',units:[['Computer systems',12,7],['Computational thinking',11,6]]},
+  {tab:'RS',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
+];
+const TODAY_L=`
+  <div class="datestamp" id="today"></div>
+  <h2>Here’s your plan.</h2>
+  <ol class="plan">
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+  </ol>
+  <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
+  <div class="startrow"><button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start · 25 min</button></div>`;
+const TODAY_R=`
+  <h3>This week</h3>
+  <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
+  <div class="noteline">Needs a look: <b>Macbeth</b> — 3 wks ago</div>
+  <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
+  <div class="noteline">Next mock: <b>none booked</b></div>
+  <p class="doable">Small days add up. —SV</p>`;
+function subjSpread(s){
+  const L=`
+    <div class="datestamp">${s.name}</div>
+    <h2 style="padding-left:22px">Where you stand.</h2>
+    <div style="padding-left:22px" class="subjpg">
+      ${s.units.map(([u,total,done])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${done} / ${total}</small></div>`).join('')}
+    </div>`;
+  const R=`
+    <h3>Pick up where you left off</h3>
+    <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
+      <div class="unit" tabindex="0"><b>${s.units[0][0]} — next lesson</b><small>continue</small></div>
+      <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <button class="open">Open ${s.name} →</button>
+      <button class="backlink" style="margin-top:.7rem" onclick="goToday()">⟵ back to today</button>
+    </div>`;
+  return [L,R];
+}
+const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR'), book=document.getElementById('book');
+let current='today';
+function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
+  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+function turnTo(l,r){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
+  book.classList.remove('turning'); void book.offsetWidth;
+  book.classList.add('turning');
+  setTimeout(()=>setSpread(l,r),300);
+  setTimeout(()=>book.classList.remove('turning'),650);
+}
+function goToday(){ current='today'; turnTo(TODAY_L,TODAY_R); markTabs(); }
+function goSubject(i){ current=i; const [l,r]=subjSpread(SUBJECTS[i]); turnTo(l,r); markTabs(); }
+function markTabs(){ [...document.querySelectorAll('.tab')].forEach((t,i)=>t.setAttribute('aria-current',String(current===i))); }
+const tabs=document.getElementById('tabs');
+SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab'; b.title=s.name;
+  b.style.setProperty('--tc',s.c); b.innerHTML='<span>'+s.tab+'</span>'; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
+setSpread(TODAY_L,TODAY_R);
+
+/* ---------- postcard ---------- */
+const pc=document.getElementById('postcard');
+pc.onclick=()=>pc.classList.toggle('flipped');
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k];if(!w)return;
+  document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
+  document.getElementById('doodleCap').textContent=w.cap;
+  document.getElementById('postmark').innerHTML='STUDYVAULT<br>W/C '+m.toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase();
+}).catch(()=>{});
+
+/* ---------- the phone: live poster on screen; opens the REAL feed ---------- */
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  for(const s of m){ const p=(s.url||'').split('.r2.dev/');
+    if(p.length>1){ document.documentElement.style.setProperty('--pshot',
+      "url('/design-lab/_posters/"+p[1].replace(/\.mp4$/,'.jpg')+"')"); break; } }
+  let day={}; try{ day=JSON.parse(localStorage.getItem('sv_shorts_day'))||{}; }catch(e){}
+  const n=(day.date===new Date().toISOString().slice(0,10))?(day.keys||[]).length:0;
+  if(n>0) document.getElementById('shortsSub').textContent=n+' of 20 watched';
+}).catch(()=>{});
+const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
+document.getElementById('phone').onclick=()=>{ frame.src='/design-lab/shorts.html'; modal.classList.add('open'); };
+document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
+modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
+
+/* ---------- the wireless: LCD + mode knob ---------- */
+const PODCAST_TXT='NOW PLAYING · STAVE 3 — POVERTY & GENEROSITY · ENGLISH LITERATURE · 10 MIN · ';
+const LOFI_TXT='LO-FI STUDY BEATS · SIDE A · LOW VOLUME, LONG EVENINGS · ';
+let lofi=false;
+const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'), knob=document.getElementById('knob');
+function setMode(v){ lofi=v;
+  lcd.classList.toggle('lofi',lofi);
+  mq.textContent=lofi?LOFI_TXT:PODCAST_TXT;
+  rmode.textContent=lofi?'lo-fi study beats · tap the left dial for podcasts':'podcasts · tap the left dial for lo-fi';
+  knob.setAttribute('aria-checked',String(lofi)); }
+knob.onclick=e=>{ e.stopPropagation(); setMode(!lofi); };
+
+/* ---------- state presets for headless render QA ---------- */
+const q=new URLSearchParams(location.search);
+if(q.get('flip')==='1') pc.classList.add('flipped');
+if(q.get('mode')==='lofi') setMode(true);
+if(q.get('tab')!==null && q.get('tab')!==''){ const i=+q.get('tab'); const [l,r]=subjSpread(SUBJECTS[i]); setSpread(l,r); current=i; markTabs(); }
+if(q.get('phone')==='1'){ frame.src='/design-lab/shorts.html'; modal.classList.add('open'); }
+</script>
+</body>
+</html>
