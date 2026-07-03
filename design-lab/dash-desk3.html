@@ -10,7 +10,9 @@
   :root{--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
     --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
     --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;
-    --hand:'Caveat',cursive}   /* Sam's handwriting — stickies, jotted notes */
+    --hand:'Caveat',cursive;   /* Sam's handwriting — stickies, jotted notes */
+    /* paper tooth: faint monochrome noise, tiled — the 'good stock' feel */
+    --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E")}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;color:var(--ink);font-family:var(--head)}
   /* the desk itself: drawn oak, softly lit from above */
@@ -36,11 +38,11 @@
     background:repeating-linear-gradient(to bottom,#f4efe3 0 2px,#ddd5c2 2px 3px)}
   .bookwrap::after{content:"";position:absolute;left:4%;right:-3%;bottom:-16px;height:22px;z-index:-2;
     background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.3),transparent 70%);filter:blur(4px)}
-  .pg{--lh:32px;background:var(--paper);padding:calc(var(--lh)*.5) 1.35rem calc(var(--lh)*.5);min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;
-    background-image:repeating-linear-gradient(to bottom,transparent 0 calc(var(--lh)*.66),rgba(112,140,170,.17) calc(var(--lh)*.66) calc(var(--lh)*.66 + 1px),transparent calc(var(--lh)*.66 + 1px) var(--lh));
-    background-origin:content-box,border-box}
-  /* vertical column rule (ledger): templates place it */
-  .pg .vr{position:absolute;top:0;bottom:0;width:1px;background:rgba(112,140,170,.2);pointer-events:none}
+  /* premium plain stock: no rules — tone, tooth and margins do the work.
+     --lh stays as the invisible vertical rhythm everything still sits on. */
+  .pg{--lh:32px;background:var(--paper);padding:calc(var(--lh)*.5) 1.6rem calc(var(--lh)*.5);min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;
+    background-image:var(--grain),
+      radial-gradient(145% 125% at 30% 18%,transparent 60%,rgba(96,74,42,.05) 100%)}
   /* header block occupies exactly two rule-lines so rows land on the feints */
   .pghead{height:calc(var(--lh)*2);display:flex;flex-direction:column;justify-content:flex-end}
   /* the subject plate: the emblem that FINISHES as the student does —
@@ -48,15 +50,16 @@
   .splate{flex:none;height:calc(var(--lh)*7);background-size:contain;background-position:center;background-repeat:no-repeat}
   .scap{font-family:var(--hand);font-size:1rem;color:var(--mut);text-align:center;line-height:var(--lh);height:calc(var(--lh)*2);margin:0;overflow:hidden}
   .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;
-    background-image:repeating-linear-gradient(to bottom,transparent 0 calc(var(--lh)*.66),rgba(112,140,170,.17) calc(var(--lh)*.66) calc(var(--lh)*.66 + 1px),transparent calc(var(--lh)*.66 + 1px) var(--lh)),
-      linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
+    background-image:var(--grain),
+      radial-gradient(145% 125% at 30% 18%,transparent 60%,rgba(96,74,42,.05) 100%),
+      linear-gradient(to right,transparent 84%,rgba(105,84,54,.09) 100%)}
   .pg.r{border-radius:0 9px 9px 0;
-    background-image:repeating-linear-gradient(to bottom,transparent 0 calc(var(--lh)*.66),rgba(112,140,170,.17) calc(var(--lh)*.66) calc(var(--lh)*.66 + 1px),transparent calc(var(--lh)*.66 + 1px) var(--lh)),
-      linear-gradient(to left,var(--paper) 90%,#f2ecdf 100%)}
-  .pg.l::before{content:"";position:absolute;top:0;bottom:0;left:38px;width:1px;background:#dcaba1;opacity:.5}
-  .datestamp{font-family:var(--hand);font-size:1rem;color:var(--mut);padding-left:22px;line-height:var(--lh)}
-  .pg h2{font-size:1.16rem;font-weight:800;letter-spacing:-.02em;margin:0;padding-left:22px;line-height:var(--lh)}
-  .plan{list-style:none;margin:0;padding:0 0 0 22px}
+    background-image:var(--grain),
+      radial-gradient(145% 125% at 70% 18%,transparent 60%,rgba(96,74,42,.05) 100%),
+      linear-gradient(to left,transparent 84%,rgba(105,84,54,.09) 100%)}
+  .datestamp{font-family:var(--hand);font-size:1rem;color:var(--mut);line-height:var(--lh)}
+  .pg h2{font-size:1.16rem;font-weight:800;letter-spacing:-.02em;margin:0;line-height:var(--lh)}
+  .plan{list-style:none;margin:0;padding:0}
   .plan li{display:grid;grid-template-columns:19px 1fr 52px;align-content:start;gap:0 .5rem;padding:0 .3rem 0 0;
     height:calc(var(--lh)*2);cursor:pointer;transition:background .14s}
   .plan li:hover{background:#faf7ef}
@@ -66,8 +69,8 @@
   .plan b{font-family:var(--read);font-weight:600;font-size:.85rem;display:block;line-height:var(--lh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .plan small{font-size:.64rem;color:var(--mut);display:block;line-height:var(--lh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .plan .mins{font-size:.64rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums;line-height:var(--lh);align-self:start}
-  .momentum{font-size:.66rem;font-weight:600;color:var(--mut);line-height:var(--lh);margin:0;padding-left:22px}
-  .startrow{margin-top:auto;padding-left:22px}
+  .momentum{font-size:.66rem;font-weight:600;color:var(--mut);line-height:var(--lh);margin:0}
+  .startrow{margin-top:auto}
   .start{display:inline-flex;align-items:center;gap:.45rem;padding:.56rem 1.15rem;border:none;border-radius:var(--r);
     background:var(--anchor);color:#fff;font-weight:700;font-size:.86rem;cursor:pointer;transition:filter .18s}
   .start:hover{filter:brightness(.94)}
@@ -307,7 +310,6 @@ const SUBJECTS=[
   {tab:'RS',slug:'rs',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
 ];
 const TODAY_L=`
-  <i class="vr" style="right:66px"></i>
   <div class="pghead"><div class="datestamp" id="today"></div><h2>Here’s your plan.</h2></div>
   <ol class="plan">
     <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
@@ -332,15 +334,14 @@ function subjSpread(s){
   const lad=LADDERS[s.slug];
   const stageWord=['a pencil sketch','inked, not yet painted','almost fully painted'][stage-1];
   const L=`
-    <i class="vr" style="right:76px"></i>
     <div class="pghead"><div class="datestamp">${s.name}</div><h2>Where you stand.</h2></div>
-    <div style="padding-left:22px" class="subjpg">
+    <div class="subjpg">
       ${s.units.map(([u,tot,d])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${d} / ${tot}</small></div>`).join('')}
     </div>
     <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
   const R= (lad? `
     <div class="splate" style="background-image:url('${lad[stage-1].replace('.png','-page.png')}')"></div>
-    <p class="scap">${pct}% drawn — ${stageWord}. The picture finishes as you do.</p>` : `
+    <p class="scap">${stageWord[0].toUpperCase()+stageWord.slice(1)} — ${pct}% drawn.<br>The picture finishes as you do.</p>` : `
     <h3>Pick up where you left off</h3>`)+`
     <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
       <div class="unit" tabindex="0"><b>${s.units[0][0]} — next lesson</b><small>continue</small></div>
@@ -374,6 +375,10 @@ let LADDERS={};
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{LADDERS=j||{};
   if(current!=='today'){ const [l,r2]=subjSpread(SUBJECTS[current]); setSpread(l,r2); }
 }).catch(()=>{});
+/* QA hook: ?s=slug opens that subject spread directly (headless renders) */
+{ const qs=new URLSearchParams(location.search).get('s');
+  const qi=SUBJECTS.findIndex(x=>x.slug===qs);
+  if(qi>=0){ current=qi; const [l,r2]=subjSpread(SUBJECTS[qi]); setSpread(l,r2); markTabs(); } }
 
 /* ---------- postcard ---------- */
 const pc=document.getElementById('postcard');
