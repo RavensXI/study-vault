@@ -27,8 +27,14 @@
 
   /* ============ notebook (openable — from v2) ============ */
   .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:47%;transform:translateY(-50%)}
-  .book{position:relative;width:min(640px,55vw);height:424px;display:grid;grid-template-columns:1fr 1fr;
-    border-radius:9px;box-shadow:0 26px 48px -16px rgba(56,40,18,.5),0 3px 7px rgba(56,40,18,.18);perspective:1600px}
+  /* light comes from top-left everywhere on this desk: shadows fall down-right */
+  .book{position:relative;width:min(700px,58vw);height:500px;display:grid;grid-template-columns:1fr 1fr;
+    border-radius:9px;box-shadow:10px 26px 44px -16px rgba(56,40,18,.42),3px 5px 9px rgba(56,40,18,.16);perspective:1600px}
+  /* the stack of pages beneath the open spread */
+  .book::after{content:"";position:absolute;left:5px;right:-4px;bottom:-6px;height:8px;border-radius:0 0 8px 8px;z-index:-1;
+    background:repeating-linear-gradient(to bottom,#f4efe3 0 2px,#ddd5c2 2px 3px)}
+  .bookwrap::after{content:"";position:absolute;left:4%;right:-3%;bottom:-16px;height:22px;z-index:-2;
+    background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.3),transparent 70%);filter:blur(4px)}
   .pg{background:var(--paper);padding:1.1rem 1.2rem 1.05rem;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
   .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;background:linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
   .pg.r{border-radius:0 9px 9px 0;background:linear-gradient(to left,var(--paper) 90%,#f2ecdf 100%)}
@@ -72,12 +78,14 @@
   .turn .face.back{transform:rotateY(180deg);border-radius:9px 0 0 9px;background:linear-gradient(to right,var(--paper) 88%,#efe9db 100%)}
   .book.turning .turn{opacity:1;animation:pageturn .62s var(--ease) forwards}
   @keyframes pageturn{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}}
-  .tabs{position:absolute;right:-29px;top:24px;bottom:24px;display:flex;flex-direction:column;justify-content:space-between;width:29px}
-  .tab{flex:none;height:9.6%;min-height:40px;width:29px;border-radius:0 6px 6px 0;background:var(--tc,#888);
-    display:grid;place-items:center;cursor:pointer;border:none;padding:0;box-shadow:2px 3px 6px rgba(56,40,18,.28);transition:width .15s}
-  .tab:hover,.tab:focus-visible{width:37px;outline:none}
-  .tab[aria-current="true"]{width:37px}
-  .tab span{writing-mode:vertical-rl;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:#fff;text-transform:uppercase;pointer-events:none;white-space:nowrap}
+  .tabs{position:absolute;right:-30px;top:26px;bottom:26px;display:flex;flex-direction:column;gap:4px;width:30px}
+  .tab{flex:1;min-height:0;width:30px;border-radius:0 6px 6px 0;
+    background:linear-gradient(to right,color-mix(in srgb,var(--tc) 78%,#000) 0,var(--tc) 26%,color-mix(in srgb,var(--tc) 88%,#fff) 100%);
+    display:grid;place-items:center;cursor:pointer;border:none;padding:.35rem 0;
+    box-shadow:3px 4px 7px rgba(56,40,18,.3);transition:width .15s}
+  .tab:hover,.tab:focus-visible{width:38px;outline:none}
+  .tab[aria-current="true"]{width:38px}
+  .tab span{writing-mode:vertical-rl;font-size:.52rem;font-weight:700;letter-spacing:.07em;color:#fff;text-transform:uppercase;pointer-events:none;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 
   /* ============ the postcard (flips — from v2) ============ */
   .postcard{position:absolute;right:clamp(.8rem,4vw,3rem);top:7%;width:290px;aspect-ratio:3/2;cursor:pointer;
@@ -86,7 +94,7 @@
     transition:transform .7s var(--ease);transform:rotate(2deg)}
   .postcard.flipped .inner{transform:rotate(2deg) rotateY(180deg)}
   .postcard .side{position:absolute;inset:0;backface-visibility:hidden;border-radius:4px;overflow:hidden;
-    box-shadow:0 14px 30px -10px rgba(56,40,18,.5);border:6px solid #fff}
+    box-shadow:8px 16px 26px -10px rgba(56,40,18,.44),2px 4px 6px rgba(56,40,18,.2);border:6px solid #fff}
   .postcard .front{background:var(--gart,url('assets/lw/guided-a.png')) center/cover no-repeat}
   .postcard .back{transform:rotateY(180deg);background:var(--paper);display:flex;flex-direction:column;
     align-items:center;justify-content:center;text-align:center;padding:1rem}
@@ -100,9 +108,16 @@
 
   /* ============ the PHONE: shorts live on its screen ============ */
   .phone{position:absolute;right:clamp(21rem,26vw,25rem);top:11%;width:132px;aspect-ratio:9/19;cursor:pointer;
-    background:#26231e;border:none;border-radius:20px;padding:7px;box-shadow:0 18px 34px -12px rgba(56,40,18,.55);
+    background:linear-gradient(125deg,#3a352d 0%,#26231e 30%,#1c1a16 100%);border:none;border-radius:20px;padding:7px;
+    box-shadow:inset 1px 1px 1px rgba(255,250,238,.28),inset -1px -1px 1px rgba(0,0,0,.5),
+      9px 20px 30px -10px rgba(56,40,18,.5),2px 5px 8px rgba(56,40,18,.28);
     transform:rotate(-3deg);transition:transform .2s;z-index:2}
+  .phone::after{content:"";position:absolute;left:8%;right:-11%;bottom:-15px;height:24px;z-index:-1;
+    background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.46),transparent 72%);filter:blur(3px);transform:rotate(1.5deg)}
   .phone:hover{transform:rotate(-3deg) translateY(-4px)}
+  /* glass: a diagonal glare across the screen */
+  .phone .screen::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:linear-gradient(115deg,rgba(255,253,244,.2) 0%,rgba(255,253,244,.06) 22%,transparent 40%)}
   .phone:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
   .phone .screen{display:block;position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;
     background:#111 var(--pshot,none) center/cover no-repeat}
@@ -127,12 +142,14 @@
     cursor:pointer;text-align:center;z-index:2}
   .radio:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
   .radio .art{position:relative;display:block}
-  .radio img{width:100%;filter:drop-shadow(0 12px 14px rgba(56,40,18,.3))}
+  .radio .art::before{content:"";position:absolute;left:10%;right:-2%;bottom:2%;height:14px;z-index:-1;
+    background:radial-gradient(50% 100% at 50% 50%,rgba(56,40,18,.36),transparent 72%);filter:blur(3px)}
+  .radio img{width:100%;filter:drop-shadow(7px 12px 12px rgba(56,40,18,.32))}
   /* the LCD sits in the radio's fascia between the dials */
   .lcd{position:absolute;left:26%;right:26%;top:59%;height:9%;background:#23281f;border-radius:3px;
     box-shadow:inset 0 1px 3px rgba(0,0,0,.75),0 0 0 2px rgba(38,30,16,.4);overflow:hidden;display:flex;align-items:center}
   .lcd .mq{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:.58rem;letter-spacing:.08em;
-    color:#e6c17c;text-shadow:0 0 5px rgba(230,193,124,.55);animation:mq 11s linear infinite;padding-left:100%}
+    color:#e6c17c;text-shadow:0 0 5px rgba(230,193,124,.55);animation:mq 11s linear infinite;animation-delay:-4s;padding-left:100%}
   @keyframes mq{to{transform:translateX(-100%)}}
   .lcd.lofi .mq{color:#a8d8b0;text-shadow:0 0 5px rgba(168,216,176,.55)}
   /* the mode knob: the left dial is a real control */
@@ -144,12 +161,13 @@
   .radio .rlab small{display:block;font-family:var(--read);font-style:italic;font-size:.74rem;color:#5d5342;margin-top:.08rem}
 
   /* ============ sticky notes ============ */
-  .sticky{position:absolute;width:150px;padding:.7rem .75rem .85rem;background:#f6e7a2;color:#4d4425;
+  .sticky{position:absolute;width:150px;padding:.7rem .75rem .85rem;color:#4d4425;
+    background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
     font-family:var(--read);font-style:italic;font-size:.8rem;line-height:1.45;
-    box-shadow:0 8px 18px -6px rgba(56,40,18,.4);z-index:2}
+    box-shadow:5px 9px 16px -5px rgba(56,40,18,.38);z-index:2}
   .sticky::after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 16px 16px;
     border-color:transparent transparent rgba(56,40,18,.14) transparent}
-  .sticky.s1{left:36%;top:5.5%;transform:rotate(-3deg)}
+  .sticky.s1{left:41%;top:3%;width:128px;transform:rotate(-3deg)}
   .sticky.s2{right:clamp(19rem,24vw,23rem);bottom:9%;transform:rotate(2.5deg);background:#efe3b6}
   .sticky b{font-weight:600;color:#33301c}
 
@@ -171,7 +189,7 @@
 
 <div class="desk">
 
-  <div class="sticky s1"><b>312 days</b> to your first exam.<br>Small days add up. —SV</div>
+  <div class="sticky s1"><b>312 days</b> to your first exam.</div>
   <div class="sticky s2">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</div>
 
   <div class="bookwrap">
@@ -224,13 +242,13 @@
 /* ---------- data (same demo set) ---------- */
 const SUBJECTS=[
   {tab:'Maths',name:'Mathematics',c:'#535f8a',units:[['Number',12,8],['Algebra',14,6],['Geometry',12,7],['Statistics',10,5]]},
-  {tab:'Eng Lang',name:'English Language',c:'#4a708c',units:[['Paper 1: Explorations',15,9],['Paper 2: Viewpoints',15,8],['Spoken Language',8,3],['Practice papers',12,4]]},
-  {tab:'Eng Lit',name:'English Literature',c:'#71506b',units:[['A Christmas Carol',12,7],['An Inspector Calls',10,2],['Power & Conflict poetry',15,3],['Macbeth',12,1]]},
+  {tab:'Lang',name:'English Language',c:'#4a708c',units:[['Paper 1: Explorations',15,9],['Paper 2: Viewpoints',15,8],['Spoken Language',8,3],['Practice papers',12,4]]},
+  {tab:'Lit',name:'English Literature',c:'#71506b',units:[['A Christmas Carol',12,7],['An Inspector Calls',10,2],['Power & Conflict poetry',15,3],['Macbeth',12,1]]},
   {tab:'Science',name:'Combined Science',c:'#44696c',units:[['Biology Paper 1',18,11],['Chemistry Paper 1',17,9],['Physics Paper 1',18,6],['Biology Paper 2',17,3]]},
   {tab:'History',name:'History',c:'#3f5e78',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
   {tab:'Geog',name:'Geography',c:'#5f7155',units:[['Physical environment',14,9],['Human environment',14,8],['Geographical skills',12,9]]},
   {tab:'Spanish',name:'Spanish',c:'#9a5b38',units:[['Identity & culture',9,4],['Local & global areas',9,3],['School & future plans',9,2]]},
-  {tab:'CompSci',name:'Computer Science',c:'#3f6478',units:[['Computer systems',12,7],['Computational thinking',11,6]]},
+  {tab:'CS',name:'Computer Science',c:'#3f6478',units:[['Computer systems',12,7],['Computational thinking',11,6]]},
   {tab:'RS',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
 ];
 const TODAY_L=`
@@ -248,6 +266,8 @@ const TODAY_R=`
   <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
   <div class="noteline">Needs a look: <b>Macbeth</b> — 3 wks ago</div>
   <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
+  <div class="noteline">Shorts watched: <b>41</b> · checks passed: <b>7/8</b></div>
+  <div class="noteline">Radio: <b>3 episodes</b> on the bus</div>
   <div class="noteline">Next mock: <b>none booked</b></div>
   <p class="doable">Small days add up. —SV</p>`;
 function subjSpread(s){
