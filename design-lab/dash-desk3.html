@@ -99,6 +99,9 @@
   .turn .face.back{transform:rotateY(180deg);border-radius:9px 0 0 9px;background:linear-gradient(to right,var(--paper) 88%,#efe9db 100%)}
   .book.turning .turn{opacity:1;animation:pageturn .62s var(--ease) forwards}
   @keyframes pageturn{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}}
+  /* going back to today flips the page the other way */
+  .book.turningback .turn{opacity:1;animation:pageturnback .62s var(--ease) forwards}
+  @keyframes pageturnback{from{transform:rotateY(-178deg)}to{transform:rotateY(0)}}
   .tabs{position:absolute;right:-30px;top:26px;bottom:26px;display:flex;flex-direction:column;gap:4px;width:30px;z-index:4}
   .tab{flex:1;min-height:0;width:30px;border-radius:0 6px 6px 0;
     background:linear-gradient(to right,color-mix(in srgb,var(--tc) 78%,#000) 0,var(--tc) 26%,color-mix(in srgb,var(--tc) 88%,#fff) 100%);
@@ -129,11 +132,20 @@
 
   /* ============ the DRAWN phone: an object plate with a live screen set
      into its glass. The wrapper is inert; only the screen takes pointers. */
-  .phonewrap{position:absolute;right:clamp(9rem,13vw,14rem);top:31%;width:330px;pointer-events:none;z-index:2}
-  .phonewrap img{width:100%;display:block}
+  .phonewrap{position:absolute;right:clamp(8rem,12vw,13rem);top:27%;width:400px;pointer-events:none;z-index:2;
+    transition:transform .25s var(--ease)}
+  .phonewrap:has(.screen:hover){transform:translateY(-4px) rotate(-.4deg)}
+  .phonewrap img{width:100%;display:block;filter:drop-shadow(5px 9px 11px rgba(56,40,18,.26))}
+  /* unread dot: pinned to the screen's top-right corner (screen is %-placed) */
+  .phonewrap .dot{position:absolute;left:62%;top:19.4%;width:14px;height:14px;border-radius:50%;
+    background:#b3402f;border:2px solid #f7f3ea;box-shadow:0 1px 3px rgba(56,40,18,.3);
+    animation:dotpulse 2.8s ease-in-out infinite}
+  @keyframes dotpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+  @media (prefers-reduced-motion:reduce){.phonewrap .dot{animation:none}}
   .phonewrap .screen{position:absolute;left:35.9%;top:20.6%;width:27.4%;height:58.2%;border-radius:11px;overflow:hidden;
-    pointer-events:auto;cursor:pointer;border:none;padding:0;
+    pointer-events:auto;cursor:pointer;border:none;padding:0;transition:filter .2s;
     background:#14120e var(--pshot,none) center/cover no-repeat}
+  .phonewrap .screen:hover{filter:brightness(1.08)}
   .phonewrap .screen:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
   .phonewrap .screen::after{content:"";position:absolute;inset:0;pointer-events:none;
     background:linear-gradient(115deg,rgba(255,253,244,.16) 0%,rgba(255,253,244,.05) 24%,transparent 42%)}
@@ -201,11 +213,29 @@
   .clutter img{display:block;width:100%;filter:drop-shadow(4px 6px 7px rgba(56,40,18,.24))}
   /* widths MEASURED from each plate's solid pixels (alpha>=200 bbox), not
      guessed: css_w = real_cm × 11px/cm × img_w ÷ solid_extent */
-  .clutter.c-pencil{width:141px;right:25%;top:8%;transform:rotate(14deg)}   /* 18cm, fill .97 */
-  .clutter.c-pen{width:193px;left:44%;bottom:5%;transform:rotate(-22deg)}    /* 13cm, fill .52 — the padded plate */
+  /* widths = target visible px / fill(w) of the SOLIDIFIED cuts (_clutter_solidify.py) */
+  .clutter.c-pencil{width:140px;right:25%;top:8%;transform:rotate(14deg)}   /* 18cm, fill .98 */
+  .clutter.c-pen{width:102px;left:44%;bottom:5%;transform:rotate(-22deg)}    /* 13cm, fill .98 — plate no longer padded */
   .clutter.c-high{width:85px;right:4.5%;top:47%;transform:rotate(-9deg)}     /* 11cm, fill 1.0 */
-  .clutter.c-eraser{width:63px;left:13.5%;bottom:3.5%;transform:rotate(9deg)}/* 5.5cm, fill .96 */
-  .clutter.c-mug{width:134px;right:1.5%;top:24%}                             /* 17cm tall, fill 1.0 */
+  .clutter.c-eraser{width:42px;left:13.5%;bottom:3.5%;transform:rotate(9deg)}/* 5.5cm, fill .98 */
+  .clutter.c-mug{width:138px;right:1.5%;top:24%}                             /* 17cm tall, fill .97 */
+
+  /* flashcards: a loose mixed deck — the door to interleaved practice.
+     Click flips Q -> A; next click deals the next card (different subject). */
+  .cards{position:absolute;left:24.5%;bottom:5.5%;width:158px;height:106px;background:none;border:none;padding:0;
+    cursor:pointer;z-index:2;transform:rotate(-3deg);perspective:520px}
+  .cards .fc{position:absolute;inset:0;background:var(--paper);border:1px solid var(--line);border-radius:6px;
+    box-shadow:3px 5px 9px rgba(56,40,18,.16)}
+  .cards .fc.u1{transform:rotate(6.5deg) translate(9px,5px)}
+  .cards .fc.u2{transform:rotate(-7.5deg) translate(-8px,2px)}
+  .cards .fc.top{display:flex;flex-direction:column;justify-content:center;gap:.25rem;padding:.55rem .85rem;text-align:left;
+    border-left:4px solid var(--fcc,#a24d43);transition:transform .16s ease-in}
+  .cards .q{font-family:var(--hand);font-size:1.08rem;line-height:1.12;color:var(--ink)}
+  .cards .subj{font-size:.58rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+  .cards:hover .fc.top{transform:translateY(-3px)}
+  .cards:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .cards .fchint{position:absolute;left:50%;bottom:-1.5rem;transform:translateX(-50%);
+    font-family:var(--hand);font-size:.95rem;color:#6b5c41;white-space:nowrap}
 
   /* draggables */
   .drg{touch-action:none;user-select:none;-webkit-user-select:none}
@@ -268,6 +298,7 @@
       <span class="pscrim"></span>
       <span class="plab"><b>Shorts</b><small id="shortsSub">today’s 20</small></span>
     </button>
+    <span class="dot" aria-hidden="true"></span>
   </div>
 
   <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
@@ -277,6 +308,16 @@
   <div class="clutter c-high" id="cl3"><img src="assets/lw/night-highlighter-cut.png" alt=""></div>
   <div class="clutter c-eraser" id="cl4"><img src="assets/lw/night-eraser-cut.png" alt=""></div>
   <div class="clutter c-mug" id="cl5"><img src="assets/lw/night-pen-mug-cut.png" alt=""></div>
+
+  <button class="cards" id="cards" aria-label="Flashcards — a mixed deck. Click to flip.">
+    <span class="fc u1"></span>
+    <span class="fc u2"></span>
+    <span class="fc top" id="fcTop">
+      <span class="q" id="fcText"></span>
+      <span class="subj" id="fcSubj"></span>
+    </span>
+    <span class="fchint">mixed deck ↻</span>
+  </button>
 
   <button class="radio" id="radio" aria-label="Revision Radio">
     <span class="art">
@@ -355,14 +396,15 @@ const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR'), bo
 let current='today';
 function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
   if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
-function turnTo(l,r){
+function turnTo(l,r,back){
   if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
-  book.classList.remove('turning'); void book.offsetWidth;
-  book.classList.add('turning');
+  const cls=back?'turningback':'turning';
+  book.classList.remove('turning','turningback'); void book.offsetWidth;
+  book.classList.add(cls);
   setTimeout(()=>setSpread(l,r),300);
-  setTimeout(()=>book.classList.remove('turning'),650);
+  setTimeout(()=>book.classList.remove(cls),650);
 }
-function goToday(){ current='today'; turnTo(TODAY_L,TODAY_R); markTabs(); }
+function goToday(){ current='today'; turnTo(TODAY_L,TODAY_R,true); markTabs(); }
 function goSubject(i){ current=i; const [l,r]=subjSpread(SUBJECTS[i]); turnTo(l,r); markTabs(); }
 function markTabs(){ [...document.querySelectorAll('.tab')].forEach((t,i)=>t.setAttribute('aria-current',String(current===i))); }
 const tabs=document.getElementById('tabs');
@@ -521,6 +563,31 @@ makeDraggable(document.getElementById('phonewrap'),'phone',document.getElementBy
 makeDraggable(document.getElementById('radio'),'radio');
 makeDraggable(document.getElementById('pad'),'pad');
 ['cl1','cl2','cl3','cl4','cl5'].forEach(id=>makeDraggable(document.getElementById(id),id));
+
+/* ---------- flashcards: the interleaved mixed deck ---------- */
+const FC=[
+  {slug:'history', q:'When was the NHS founded?', a:'1948'},
+  {slug:'science', q:'Speed = ?', a:'distance ÷ time'},
+  {slug:'lit', q:'Who was Scrooge’s business partner?', a:'Jacob Marley'},
+  {slug:'geog', q:'The three types of rainfall?', a:'Relief · frontal · convectional'},
+  {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
+];
+const cardsEl=document.getElementById('cards'), fcTop=document.getElementById('fcTop'),
+      fcText=document.getElementById('fcText'), fcSubj=document.getElementById('fcSubj');
+let fci=0, fcA=false;
+function fcRender(){
+  const f=FC[fci], s=SUBJECTS.find(x=>x.slug===f.slug);
+  cardsEl.style.setProperty('--fcc', s?s.c:'#a24d43');
+  fcText.textContent=fcA?f.a:f.q;
+  fcSubj.textContent=(s?s.name:f.slug)+(fcA?' — answer':'');
+}
+cardsEl.addEventListener('click',()=>{ if(dragBlockClick) return;
+  fcTop.style.transform='rotateY(88deg)';
+  setTimeout(()=>{ if(fcA){ fci=(fci+1)%FC.length; fcA=false; } else fcA=true;
+    fcRender(); fcTop.style.transform=''; },160);
+});
+fcRender();
+makeDraggable(cardsEl,'cards');
 
 /* ---------- stickies: edit in place, peel new ones, bin them ---------- */
 let stickyStore={}; try{ stickyStore=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
