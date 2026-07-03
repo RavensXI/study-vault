@@ -27,16 +27,21 @@
   .desk{position:relative;z-index:1;max-width:1280px;margin:0 auto;height:calc(100dvh - 52px);padding:0 clamp(1rem,3vw,2rem)}
 
   /* ============ notebook (openable — from v2) ============ */
-  .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:47%;transform:translateY(-50%)}
+  .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:48%;transform:translateY(-50%)}
   /* light comes from top-left everywhere on this desk: shadows fall down-right */
-  .book{position:relative;width:min(700px,58vw);height:500px;display:grid;grid-template-columns:1fr 1fr;
+  .book{position:relative;width:min(740px,60vw);height:540px;display:grid;grid-template-columns:1fr 1fr;
     border-radius:9px;box-shadow:10px 26px 44px -16px rgba(56,40,18,.42),3px 5px 9px rgba(56,40,18,.16);perspective:1600px}
   /* the stack of pages beneath the open spread */
   .book::after{content:"";position:absolute;left:5px;right:-4px;bottom:-6px;height:8px;border-radius:0 0 8px 8px;z-index:-1;
     background:repeating-linear-gradient(to bottom,#f4efe3 0 2px,#ddd5c2 2px 3px)}
   .bookwrap::after{content:"";position:absolute;left:4%;right:-3%;bottom:-16px;height:22px;z-index:-2;
     background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.3),transparent 70%);filter:blur(4px)}
-  .pg{background:var(--paper);padding:1.1rem 1.2rem 1.05rem;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+  .pg{background:var(--paper);padding:1.25rem 1.35rem 1.2rem;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+  /* the subject plate: the emblem that FINISHES as the student does —
+     pencil sketch (<33%) -> ink (<66%) -> full wash */
+  .splate{flex:none;height:46%;border-radius:4px;overflow:hidden;background-size:cover;background-position:center;
+    box-shadow:0 2px 8px rgba(38,35,30,.16);transform:rotate(-.5deg)}
+  .scap{font-family:var(--hand);font-size:1rem;color:var(--mut);text-align:center;margin:.5rem 0 .7rem}
   .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;background:linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
   .pg.r{border-radius:0 9px 9px 0;background:linear-gradient(to left,var(--paper) 90%,#f2ecdf 100%)}
   .pg.l::before{content:"";position:absolute;top:0;bottom:0;left:38px;width:1px;background:#dcaba1;opacity:.5}
@@ -109,7 +114,7 @@
 
   /* ============ the DRAWN phone: an object plate with a live screen set
      into its glass. The wrapper is inert; only the screen takes pointers. */
-  .phonewrap{position:absolute;right:clamp(13rem,17vw,18rem);top:34%;width:330px;pointer-events:none;z-index:2}
+  .phonewrap{position:absolute;right:clamp(9rem,13vw,14rem);top:31%;width:330px;pointer-events:none;z-index:2}
   .phonewrap img{width:100%;display:block}
   .phonewrap .screen{position:absolute;left:35.9%;top:20.6%;width:27.4%;height:58.2%;border-radius:11px;overflow:hidden;
     pointer-events:auto;cursor:pointer;border:none;padding:0;
@@ -166,7 +171,7 @@
     box-shadow:0 2px 5px rgba(56,40,18,.25)}
   .sticky:hover .del{display:grid}
   /* the pad of blank notes — peel one off */
-  .pad{position:absolute;left:clamp(.8rem,2.5vw,2rem);bottom:6.5%;width:112px;height:84px;cursor:pointer;
+  .pad{position:absolute;left:clamp(.8rem,2.5vw,2rem);bottom:3%;width:112px;height:84px;cursor:pointer;
     background:linear-gradient(168deg,#f9edb4,#f0df95);border:none;padding:0;
     box-shadow:0 2px 0 #e8d78a,0 4px 0 #decd80,6px 10px 16px -5px rgba(56,40,18,.4);z-index:2}
   .pad span{font-family:var(--hand);font-size:1.15rem;color:#8a7d45}
@@ -181,10 +186,10 @@
   .clutter img{display:block;width:100%;filter:drop-shadow(4px 6px 7px rgba(56,40,18,.24))}
   /* widths MEASURED from each plate's solid pixels (alpha>=200 bbox), not
      guessed: css_w = real_cm × 11px/cm × img_w ÷ solid_extent */
-  .clutter.c-pencil{width:141px;right:30%;top:12%;transform:rotate(14deg)}   /* 18cm, fill .97 */
+  .clutter.c-pencil{width:141px;right:25%;top:8%;transform:rotate(14deg)}   /* 18cm, fill .97 */
   .clutter.c-pen{width:193px;left:44%;bottom:5%;transform:rotate(-22deg)}    /* 13cm, fill .52 — the padded plate */
   .clutter.c-high{width:85px;right:4.5%;top:47%;transform:rotate(-9deg)}     /* 11cm, fill 1.0 */
-  .clutter.c-eraser{width:63px;left:12.5%;bottom:6.5%;transform:rotate(9deg)}/* 5.5cm, fill .96 */
+  .clutter.c-eraser{width:63px;left:13.5%;bottom:3.5%;transform:rotate(9deg)}/* 5.5cm, fill .96 */
   .clutter.c-mug{width:134px;right:1.5%;top:24%}                             /* 17cm tall, fill 1.0 */
 
   /* draggables */
@@ -198,7 +203,7 @@
   .sticky::after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 16px 16px;
     border-color:transparent transparent rgba(56,40,18,.14) transparent}
   .sticky.s1{left:41%;top:3%;width:128px;transform:rotate(-3deg)}
-  .sticky.s2{right:clamp(19rem,24vw,23rem);bottom:9%;transform:rotate(2.5deg);background:#efe3b6}
+  .sticky.s2{right:clamp(19rem,24vw,23rem);bottom:5%;transform:rotate(2.5deg);background:#efe3b6}
   .sticky b{font-weight:600;color:#33301c}
 
   @media(prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important}
@@ -279,15 +284,15 @@
 <script>
 /* ---------- data (same demo set) ---------- */
 const SUBJECTS=[
-  {tab:'Maths',name:'Mathematics',c:'#535f8a',units:[['Number',12,8],['Algebra',14,6],['Geometry',12,7],['Statistics',10,5]]},
-  {tab:'Lang',name:'English Language',c:'#4a708c',units:[['Paper 1: Explorations',15,9],['Paper 2: Viewpoints',15,8],['Spoken Language',8,3],['Practice papers',12,4]]},
-  {tab:'Lit',name:'English Literature',c:'#71506b',units:[['A Christmas Carol',12,7],['An Inspector Calls',10,2],['Power & Conflict poetry',15,3],['Macbeth',12,1]]},
-  {tab:'Science',name:'Combined Science',c:'#44696c',units:[['Biology Paper 1',18,11],['Chemistry Paper 1',17,9],['Physics Paper 1',18,6],['Biology Paper 2',17,3]]},
-  {tab:'History',name:'History',c:'#3f5e78',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
-  {tab:'Geog',name:'Geography',c:'#5f7155',units:[['Physical environment',14,9],['Human environment',14,8],['Geographical skills',12,9]]},
-  {tab:'Spanish',name:'Spanish',c:'#9a5b38',units:[['Identity & culture',9,4],['Local & global areas',9,3],['School & future plans',9,2]]},
-  {tab:'CS',name:'Computer Science',c:'#3f6478',units:[['Computer systems',12,7],['Computational thinking',11,6]]},
-  {tab:'RS',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
+  {tab:'Maths',slug:'maths',name:'Mathematics',c:'#535f8a',units:[['Number',12,8],['Algebra',14,6],['Geometry',12,7],['Statistics',10,5]]},
+  {tab:'Lang',slug:'lang',name:'English Language',c:'#4a708c',units:[['Paper 1: Explorations',15,9],['Paper 2: Viewpoints',15,8],['Spoken Language',8,3],['Practice papers',12,4]]},
+  {tab:'Lit',slug:'lit',name:'English Literature',c:'#71506b',units:[['A Christmas Carol',12,7],['An Inspector Calls',10,2],['Power & Conflict poetry',15,3],['Macbeth',12,1]]},
+  {tab:'Science',slug:'science',name:'Combined Science',c:'#44696c',units:[['Biology Paper 1',18,11],['Chemistry Paper 1',17,9],['Physics Paper 1',18,6],['Biology Paper 2',17,3]]},
+  {tab:'History',slug:'history',name:'History',c:'#3f5e78',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
+  {tab:'Geog',slug:'geog',name:'Geography',c:'#5f7155',units:[['Physical environment',14,12],['Human environment',14,12],['Geographical skills',12,11]]},
+  {tab:'Spanish',slug:'spanish',name:'Spanish',c:'#9a5b38',units:[['Identity & culture',9,4],['Local & global areas',9,3],['School & future plans',9,2]]},
+  {tab:'CS',slug:'cs',name:'Computer Science',c:'#3f6478',units:[['Computer systems',12,7],['Computational thinking',11,6]]},
+  {tab:'RS',slug:'rs',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
 ];
 const TODAY_L=`
   <div class="datestamp" id="today"></div>
@@ -309,14 +314,22 @@ const TODAY_R=`
   <div class="noteline">Next mock: <b>none booked</b></div>
   <p class="doable">Small days add up. —SV</p>`;
 function subjSpread(s){
+  const done=s.units.reduce((t,u)=>t+u[2],0), total=s.units.reduce((t,u)=>t+u[1],0);
+  const pct=Math.round(done/total*100);
+  const stage= pct>=66?3 : pct>=33?2 : 1;
+  const lad=LADDERS[s.slug];
+  const stageWord=['a pencil sketch','inked, not yet painted','almost fully painted'][stage-1];
   const L=`
     <div class="datestamp">${s.name}</div>
     <h2 style="padding-left:22px">Where you stand.</h2>
     <div style="padding-left:22px" class="subjpg">
-      ${s.units.map(([u,total,done])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${done} / ${total}</small></div>`).join('')}
-    </div>`;
-  const R=`
-    <h3>Pick up where you left off</h3>
+      ${s.units.map(([u,tot,d])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${d} / ${tot}</small></div>`).join('')}
+    </div>
+    <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
+  const R= (lad? `
+    <div class="splate" style="background-image:url('${lad[stage-1]}')"></div>
+    <p class="scap">${pct}% drawn — ${stageWord}. The picture finishes as you do.</p>` : `
+    <h3>Pick up where you left off</h3>`)+`
     <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
       <div class="unit" tabindex="0"><b>${s.units[0][0]} — next lesson</b><small>continue</small></div>
       <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
@@ -343,6 +356,12 @@ const tabs=document.getElementById('tabs');
 SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab'; b.title=s.name;
   b.style.setProperty('--tc',s.c); b.innerHTML='<span>'+s.tab+'</span>'; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
 setSpread(TODAY_L,TODAY_R);
+
+/* ---------- subject emblem ladders (the picture finishes as you do) ---------- */
+let LADDERS={};
+fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{LADDERS=j||{};
+  if(current!=='today'){ const [l,r2]=subjSpread(SUBJECTS[current]); setSpread(l,r2); }
+}).catch(()=>{});
 
 /* ---------- postcard ---------- */
 const pc=document.getElementById('postcard');
