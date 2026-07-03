@@ -409,7 +409,9 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
 
 /* ---------- the wireless: LCD + mode knob ---------- */
 const PODCAST_TXT='NOW PLAYING · STAVE 3 — POVERTY & GENEROSITY · ENGLISH LITERATURE · 10 MIN · ';
-const STATION_ORDER=['morning','library','rain','midnight','steady','season'];
+const STATION_ORDER=['morning','library','rain','midnight','steady','bossa','season'];
+/* the season stop always plays the season outside the window */
+const SEASON_BY_MONTH=['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn','autumn','winter'];
 const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'), knob=document.getElementById('knob');
 
 /* the station engine: stations are FOLDERS under assets/radio/ — drop tracks
@@ -430,18 +432,22 @@ async function discover(){
   const dirs=(await listDir(base)).filter(e=>e.endsWith('/')).map(e=>e.replace(/\/$/,'').split('/').pop());
   const found=[];
   for(const d of dirs){
-    const files=(await listDir(base+d+'/')).filter(f=>/\.mp3$/i.test(f));
-    if(files.length) found.push({name:d, tracks:files.map(f=>base+d+'/'+f)});
+    let dir=base+d+'/', label=d;
+    if(d==='season'){ const s=SEASON_BY_MONTH[new Date().getMonth()]; dir+= s+'/'; label=s; }
+    const files=(await listDir(dir)).filter(f=>/\.mp3$/i.test(f));
+    if(files.length) found.push({name:d, label, tracks:files.map(f=>dir+f)});
   }
   found.sort((a,b)=>{ const ia=STATION_ORDER.indexOf(a.name), ib=STATION_ORDER.indexOf(b.name);
     return (ia<0?99:ia)-(ib<0?99:ib) || a.name.localeCompare(b.name); });
   stations=found.map(s=>({...s, queue:shuffle([...s.tracks.keys()]), qpos:0}));
   setMode(-1,{init:true});
+  const want=new URLSearchParams(location.search).get('station');   // QA preset
+  if(want){ const i=stations.findIndex(s=>s.name===want||s.label===want); if(i>=0) setMode(i,{silent:true}); }
 }
 function playCurrent(){
   const s=stations[mode], url=s.tracks[s.queue[s.qpos]];
   player.src=url; player.play().catch(()=>{});
-  mq.textContent='TUNED: '+s.name.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · '+pretty(url)+' · ';
+  mq.textContent='TUNED: '+s.label.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · '+pretty(url)+' · ';
 }
 function nextTrack(){
   const s=stations[mode]; if(!s) return;
@@ -456,15 +462,15 @@ function setMode(i,opts={}){
     player.pause();
     mq.textContent=PODCAST_TXT;
     rmode.textContent= stations.length
-      ? 'podcasts · tap the dial for '+stations[0].name
+      ? 'podcasts · tap the dial for '+stations[0].label
       : 'podcasts · drop tracks in assets/radio/ to open stations';
   } else if(opts.silent){
     const s=stations[mode];
-    mq.textContent='TUNED: '+s.name.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · ';
-    rmode.textContent=s.name+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].name:'podcasts');
+    mq.textContent='TUNED: '+s.label.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · ';
+    rmode.textContent=s.label+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].label:'podcasts');
   } else {
     const s=stations[mode];
-    rmode.textContent=s.name+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].name:'podcasts');
+    rmode.textContent=s.label+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].label:'podcasts');
     playCurrent();
   }
 }
@@ -549,7 +555,7 @@ document.getElementById('tidy').onclick=()=>{ localStorage.removeItem(LKEY); loc
 /* ---------- state presets for headless render QA ---------- */
 const q=new URLSearchParams(location.search);
 if(q.get('flip')==='1') pc.classList.add('flipped');
-if(q.get('station')!==null && q.get('station')!==''){ setTimeout(()=>{ const i=stations.findIndex(s=>s.name===q.get('station')); if(i>=0) setMode(i,{silent:true}); },600); }
+/* (?station= preset is applied at the end of discover() — no timer race) */
 if(q.get('tab')!==null && q.get('tab')!==''){ const i=+q.get('tab'); const [l,r]=subjSpread(SUBJECTS[i]); setSpread(l,r); current=i; markTabs(); }
 if(q.get('phone')==='1'){ frame.src='/design-lab/shorts.html'; modal.classList.add('open'); }
 </script>

@@ -18,15 +18,16 @@ if os.path.exists(LEDGER):
     done = json.load(open(LEDGER, encoding="utf-8"))
 
 count = 0
-for station in sorted(os.listdir(RADIO)):
-    sdir = os.path.join(RADIO, station)
-    if not os.path.isdir(sdir) or station.startswith("_"):
+# walk so season/{spring,summer,autumn,winter}/ subfolders are covered too
+for sdir, dirs, files in os.walk(RADIO):
+    rel = os.path.relpath(sdir, RADIO)
+    if rel == "." or rel.startswith("_"):
         continue
-    for f in sorted(os.listdir(sdir)):
+    for f in sorted(files):
         stem, ext = os.path.splitext(f)
         if ext.lower() not in (".mp3", ".m4a", ".wav"):
             continue
-        key = f"{station}/{stem}"
+        key = f"{rel.replace(os.sep, '/')}/{stem}"
         if done.get(key):
             continue
         src = os.path.join(sdir, f)
@@ -36,12 +37,12 @@ for station in sorted(os.listdir(RADIO)):
                             "-codec:a", "libmp3lame", "-b:a", "192k", tmp])
         if r.returncode != 0:
             print(f"FAIL  {key}"); continue
-        mdir = os.path.join(MASTERS, station)
+        mdir = os.path.join(MASTERS, rel)
         os.makedirs(mdir, exist_ok=True)
         shutil.move(src, os.path.join(mdir, f))          # keep the master
         shutil.move(tmp, os.path.join(sdir, stem + ".mp3"))
         done[key] = True; count += 1
-        print(f"ok    {key}")
+        print(f"ok    {key}", flush=True)
 
 json.dump(done, open(LEDGER, "w", encoding="utf-8"), indent=1)
 print(f"done: {count} new track(s) normalised")
