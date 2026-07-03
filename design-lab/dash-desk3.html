@@ -172,14 +172,18 @@
   .pad span{font-family:var(--hand);font-size:1.15rem;color:#8a7d45}
   .pad:hover span{color:#4d4425}
   .pad:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
-  /* desk clutter: drawn stationery, draggable, no jobs — just life */
+  /* desk clutter: drawn stationery, draggable, no jobs — just life.
+     SIZE SYSTEM: props obey physics relative to each other. Real length in cm
+     × 11px/cm, corrected for how much of the plate's bbox the object fills
+     (diagonal pose + drawn shadow shrink the fill). Interactive objects
+     (book/phone/postcard/radio) deliberately cheat larger — they're UI. */
   .clutter{position:absolute;z-index:2;pointer-events:auto}
   .clutter img{display:block;width:100%;filter:drop-shadow(4px 6px 7px rgba(56,40,18,.24))}
-  .clutter.c-pencil{width:150px;right:30%;top:12%;transform:rotate(14deg)}
-  .clutter.c-pen{width:120px;left:47%;bottom:8%;transform:rotate(-22deg)}
-  .clutter.c-high{width:104px;right:4.5%;top:47%;transform:rotate(-9deg)}
-  .clutter.c-eraser{width:60px;left:12.5%;bottom:6.5%;transform:rotate(9deg)}
-  .clutter.c-mug{width:96px;right:1.5%;top:26%}
+  .clutter.c-pencil{width:147px;right:30%;top:12%;transform:rotate(14deg)}   /* 18cm diag: 13.4×11 */
+  .clutter.c-pen{width:108px;left:47%;bottom:8%;transform:rotate(-22deg)}    /* 13cm diag: 9.8×11 */
+  .clutter.c-high{width:99px;right:4.5%;top:47%;transform:rotate(-9deg)}     /* 11cm chunky: 9×11 */
+  .clutter.c-eraser{width:66px;left:12.5%;bottom:6.5%;transform:rotate(9deg)}/* 5.5cm + shadow: 6×11 */
+  .clutter.c-mug{width:133px;right:1.5%;top:24%}                             /* 17cm tall incl pens → w by aspect */
 
   /* draggables */
   .drg{touch-action:none;user-select:none;-webkit-user-select:none}
