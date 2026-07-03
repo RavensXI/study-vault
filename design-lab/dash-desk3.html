@@ -29,14 +29,14 @@
   /* ============ notebook (openable — from v2) ============ */
   .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:48%;transform:translateY(-50%)}
   /* light comes from top-left everywhere on this desk: shadows fall down-right */
-  .book{position:relative;width:min(740px,60vw);height:540px;display:grid;grid-template-columns:1fr 1fr;
+  .book{position:relative;width:min(740px,60vw);height:544px;display:grid;grid-template-columns:1fr 1fr;
     border-radius:9px;box-shadow:10px 26px 44px -16px rgba(56,40,18,.42),3px 5px 9px rgba(56,40,18,.16);perspective:1600px}
   /* the stack of pages beneath the open spread */
   .book::after{content:"";position:absolute;left:5px;right:-4px;bottom:-6px;height:8px;border-radius:0 0 8px 8px;z-index:-1;
     background:repeating-linear-gradient(to bottom,#f4efe3 0 2px,#ddd5c2 2px 3px)}
   .bookwrap::after{content:"";position:absolute;left:4%;right:-3%;bottom:-16px;height:22px;z-index:-2;
     background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.3),transparent 70%);filter:blur(4px)}
-  .pg{--lh:32px;background:var(--paper);padding:calc(var(--lh)*.5) 1.35rem 1.2rem;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;
+  .pg{--lh:32px;background:var(--paper);padding:calc(var(--lh)*.5) 1.35rem calc(var(--lh)*.5);min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden;
     background-image:repeating-linear-gradient(to bottom,transparent 0 calc(var(--lh) - 1px),rgba(112,140,170,.17) calc(var(--lh) - 1px) var(--lh));
     background-origin:content-box,border-box}
   /* vertical column rule (ledger): templates place it */
@@ -45,8 +45,8 @@
   .pghead{height:calc(var(--lh)*2);display:flex;flex-direction:column;justify-content:flex-end}
   /* the subject plate: the emblem that FINISHES as the student does —
      pencil sketch (<33%) -> ink (<66%) -> full wash */
-  .splate{flex:none;height:46%;background-size:contain;background-position:center;background-repeat:no-repeat}
-  .scap{font-family:var(--hand);font-size:1rem;color:var(--mut);text-align:center;margin:.5rem 0 .7rem}
+  .splate{flex:none;height:calc(var(--lh)*7);background-size:contain;background-position:center;background-repeat:no-repeat}
+  .scap{font-family:var(--hand);font-size:1rem;color:var(--mut);text-align:center;line-height:var(--lh);height:calc(var(--lh)*2);margin:0;overflow:hidden}
   .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;
     background-image:repeating-linear-gradient(to bottom,transparent 0 calc(var(--lh) - 1px),rgba(112,140,170,.17) calc(var(--lh) - 1px) var(--lh)),
       linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
@@ -57,16 +57,16 @@
   .datestamp{font-family:var(--hand);font-size:1rem;color:var(--mut);padding-left:22px;line-height:var(--lh)}
   .pg h2{font-size:1.16rem;font-weight:800;letter-spacing:-.02em;margin:0;padding-left:22px;line-height:var(--lh)}
   .plan{list-style:none;margin:0;padding:0 0 0 22px}
-  .plan li{display:grid;grid-template-columns:19px 1fr 52px;align-items:center;gap:.5rem;padding:0 .3rem 0 0;
+  .plan li{display:grid;grid-template-columns:19px 1fr 52px;align-content:start;gap:0 .5rem;padding:0 .3rem 0 0;
     height:calc(var(--lh)*2);cursor:pointer;transition:background .14s}
   .plan li:hover{background:#faf7ef}
   .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
-  .plan .n{font-family:var(--read);font-weight:700;font-size:.9rem;color:var(--mut)}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:.9rem;color:var(--mut);line-height:var(--lh);align-self:start}
   .plan li>div{min-width:0}
-  .plan b{font-family:var(--read);font-weight:600;font-size:.85rem;display:block;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .plan small{font-size:.64rem;color:var(--mut);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .plan .mins{font-size:.64rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
-  .momentum{font-size:.66rem;font-weight:600;color:var(--mut);line-height:var(--lh);margin:0 0 calc(var(--lh)*.5);padding-left:22px}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.85rem;display:block;line-height:var(--lh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plan small{font-size:.64rem;color:var(--mut);display:block;line-height:var(--lh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plan .mins{font-size:.64rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums;line-height:var(--lh);align-self:start}
+  .momentum{font-size:.66rem;font-weight:600;color:var(--mut);line-height:var(--lh);margin:0;padding-left:22px}
   .startrow{margin-top:auto;padding-left:22px}
   .start{display:inline-flex;align-items:center;gap:.45rem;padding:.56rem 1.15rem;border:none;border-radius:var(--r);
     background:var(--anchor);color:#fff;font-weight:700;font-size:.86rem;cursor:pointer;transition:filter .18s}
@@ -76,13 +76,13 @@
   .noteline{font-family:var(--hand);font-size:1.1rem;color:var(--sec);line-height:var(--lh);height:var(--lh);padding:0 .1rem;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .noteline b{color:var(--ink);font-weight:600}
-  .pg .doable{margin-top:auto;font-family:var(--hand);font-size:1.05rem;color:var(--mut);text-align:right}
-  .subjpg .unit{display:grid;grid-template-columns:1fr 60px;align-items:center;gap:.7rem;padding:0 .3rem 0 0;
+  .pg .doable{margin-top:auto;font-family:var(--hand);font-size:1.05rem;color:var(--mut);text-align:right;line-height:var(--lh);margin-bottom:0}
+  .subjpg .unit{display:grid;grid-template-columns:1fr 60px;gap:.7rem;padding:0 .3rem 0 0;
     height:var(--lh);cursor:pointer;transition:background .14s}
   .subjpg .unit small{text-align:right}
   .subjpg .unit:hover{background:#faf7ef}
-  .subjpg .unit b{font-family:var(--read);font-weight:600;font-size:.85rem}
-  .subjpg .unit small{font-size:.64rem;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+  .subjpg .unit b{font-family:var(--read);font-weight:600;font-size:.85rem;line-height:var(--lh);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .subjpg .unit small{font-size:.64rem;color:var(--mut);font-variant-numeric:tabular-nums;line-height:var(--lh)}
   .subjpg .open{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:.4rem;
     font-size:.8rem;font-weight:700;color:var(--anchor);border:1.5px solid var(--line);border-radius:var(--r);
     padding:.42rem .9rem;background:var(--paper);cursor:pointer;transition:border-color .14s}
