@@ -173,7 +173,9 @@
   .pad:hover span{color:#4d4425}
   .pad:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
   /* draggables */
-  .drg{touch-action:none}
+  .drg{touch-action:none;user-select:none;-webkit-user-select:none}
+  .drg img{-webkit-user-drag:none}
+  .sticky .txt{user-select:text;-webkit-user-select:text}
   .drg:not(.lift){cursor:grab}
   .drg.lift{cursor:grabbing;z-index:14!important}
   .tidy{background:none;border:none;font-family:var(--hand);font-size:1.05rem;color:#6b5f49;cursor:pointer;margin-right:1rem}
@@ -367,21 +369,30 @@ let layout={}; try{ layout=JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e)
 function saveLayout(){ try{ localStorage.setItem(LKEY,JSON.stringify(layout)); }catch(e){} }
 let dragBlockClick=false;
 function makeDraggable(el,id,handle){
+  if(!el) return;
   const h=handle||el;
   el.classList.add('drg'); if(handle) handle.classList.add('drg');
+  el.querySelectorAll('img').forEach(im=>im.draggable=false);   // native image-drag steals the gesture
   const saved=layout[id];
   if(saved){ el.style.left=saved.x+'px'; el.style.top=saved.y+'px'; el.style.right='auto'; el.style.bottom='auto'; }
   let sx,sy,ox,oy,moved=false,pid=null;
   h.addEventListener('pointerdown',e=>{
-    if(document.activeElement && el.contains(document.activeElement) && document.activeElement.isContentEditable) return;
-    pid=e.pointerId; try{ h.setPointerCapture(pid); }catch(_){}
+    // dragging by the note's edge always works; only defer to the caret when
+    // the press is ON the text of a note that's already being edited
+    const t=el.querySelector('.txt');
+    if(t && e.target.closest('.txt') && document.activeElement===t) return;
+    pid=e.pointerId;
     const r=el.getBoundingClientRect(), pr=deskEl.getBoundingClientRect();
     sx=e.clientX; sy=e.clientY; ox=r.left-pr.left; oy=r.top-pr.top; moved=false;
   });
   h.addEventListener('pointermove',e=>{
     if(pid===null) return;
     const dx=e.clientX-sx, dy=e.clientY-sy;
-    if(!moved){ if(Math.hypot(dx,dy)<6) return; moved=true; el.classList.add('lift'); }
+    if(!moved){ if(Math.hypot(dx,dy)<6) return;
+      moved=true; el.classList.add('lift');
+      try{ h.setPointerCapture(pid); }catch(_){}   // capture only once it IS a drag — plain clicks stay native
+      e.preventDefault();
+    }
     el.style.left=(ox+dx)+'px'; el.style.top=(oy+dy)+'px'; el.style.right='auto'; el.style.bottom='auto';
   });
   function up(){ if(pid===null) return; try{ h.releasePointerCapture(pid); }catch(_){} pid=null; el.classList.remove('lift');
@@ -392,7 +403,7 @@ function makeDraggable(el,id,handle){
 makeDraggable(document.getElementById('postcard'),'postcard');
 makeDraggable(document.getElementById('phonewrap'),'phone',document.getElementById('phone'));
 makeDraggable(document.getElementById('radio'),'radio');
-makeDraggable(document.querySelector('.cal'),'cal');
+makeDraggable(document.getElementById('pad'),'pad');
 
 /* ---------- stickies: edit in place, peel new ones, bin them ---------- */
 let stickyStore={}; try{ stickyStore=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
