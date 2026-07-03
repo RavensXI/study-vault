@@ -25,6 +25,13 @@ for f in sorted(os.listdir(LAD)):
     # darkness relative to paper, strongest channel wins (keeps coloured washes)
     d = np.clip((paper - a) / np.maximum(paper, 1), 0, 1).max(axis=2)
     alpha = np.clip(d * 1.25, 0, 1)
+    # edge feather: plates often darken toward their edges or draw themselves a
+    # faint frame — ramp alpha to zero over the outer 9% so no border survives
+    h, w = alpha.shape
+    fy = np.clip(np.minimum(np.arange(h), np.arange(h)[::-1]) / (h * 0.09), 0, 1)
+    fx = np.clip(np.minimum(np.arange(w), np.arange(w)[::-1]) / (w * 0.09), 0, 1)
+    ramp = np.minimum.outer(fy, fx)
+    alpha = alpha * (ramp * ramp * (3 - 2 * ramp))          # smoothstep
     alpha = (alpha * 255).astype(np.uint8)
     rgba = np.dstack([a.astype(np.uint8), alpha])
     Image.fromarray(rgba, "RGBA").save(out)
