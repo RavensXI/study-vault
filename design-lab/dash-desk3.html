@@ -172,6 +172,15 @@
   .pad span{font-family:var(--hand);font-size:1.15rem;color:#8a7d45}
   .pad:hover span{color:#4d4425}
   .pad:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  /* desk clutter: drawn stationery, draggable, no jobs — just life */
+  .clutter{position:absolute;z-index:2;pointer-events:auto}
+  .clutter img{display:block;width:100%;filter:drop-shadow(4px 6px 7px rgba(56,40,18,.24))}
+  .clutter.c-pencil{width:150px;right:30%;top:12%;transform:rotate(14deg)}
+  .clutter.c-pen{width:120px;left:47%;bottom:8%;transform:rotate(-22deg)}
+  .clutter.c-high{width:104px;right:4.5%;top:47%;transform:rotate(-9deg)}
+  .clutter.c-eraser{width:60px;left:12.5%;bottom:6.5%;transform:rotate(9deg)}
+  .clutter.c-mug{width:96px;right:1.5%;top:26%}
+
   /* draggables */
   .drg{touch-action:none;user-select:none;-webkit-user-select:none}
   .drg img{-webkit-user-drag:none}
@@ -236,6 +245,12 @@
   </div>
 
   <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
+
+  <div class="clutter c-pencil" id="cl1"><img src="assets/lw/night-pencil-cut.png" alt=""></div>
+  <div class="clutter c-pen" id="cl2"><img src="assets/lw/night-fountain-pen-cut.png" alt=""></div>
+  <div class="clutter c-high" id="cl3"><img src="assets/lw/night-highlighter-cut.png" alt=""></div>
+  <div class="clutter c-eraser" id="cl4"><img src="assets/lw/night-eraser-cut.png" alt=""></div>
+  <div class="clutter c-mug" id="cl5"><img src="assets/lw/night-pen-mug-cut.png" alt=""></div>
 
   <button class="radio" id="radio" aria-label="Revision Radio">
     <span class="art">
@@ -352,18 +367,68 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
 
 /* ---------- the wireless: LCD + mode knob ---------- */
 const PODCAST_TXT='NOW PLAYING · STAVE 3 — POVERTY & GENEROSITY · ENGLISH LITERATURE · 10 MIN · ';
-const LOFI_TXT='LO-FI STUDY BEATS · SIDE A · LOW VOLUME, LONG EVENINGS · ';
-let lofi=false;
+const STATION_ORDER=['morning','library','rain','midnight','steady','season'];
 const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'), knob=document.getElementById('knob');
-// side A: recorded from Lyria RealTime through the same API key as the art
-const lofiAudio=new Audio('assets/lofi-a.mp3'); lofiAudio.loop=true; lofiAudio.volume=.55;
-function setMode(v){ lofi=v;
-  lcd.classList.toggle('lofi',lofi);
-  mq.textContent=lofi?LOFI_TXT:PODCAST_TXT;
-  rmode.textContent=lofi?'lo-fi study beats · tap the left dial for podcasts':'podcasts · tap the left dial for lo-fi';
-  knob.setAttribute('aria-checked',String(lofi));
-  if(lofi) lofiAudio.play().catch(()=>{}); else lofiAudio.pause(); }
-knob.onclick=e=>{ e.stopPropagation(); if(dragBlockClick) return; setMode(!lofi); };
+
+/* the station engine: stations are FOLDERS under assets/radio/ — drop tracks
+   in, refresh, the dial knows. Discovery rides the dev server's directory
+   listings; production swaps this for a manifest. */
+let stations=[], mode=-1;                      // -1 = podcasts
+const player=new Audio(); player.volume=.55;
+player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); });
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+function pretty(u){ return decodeURIComponent(u.split('/').pop()).replace(/\.(mp3|m4a|wav)$/i,'').replace(/[_-]+/g,' ').toUpperCase(); }
+async function listDir(url){
+  try{ const html=await (await fetch(url)).text();
+    return [...html.matchAll(/href="([^"?]+)"/g)].map(m=>m[1]).filter(h=>h!=='../' && !h.startsWith('_')); }
+  catch(e){ return []; }
+}
+async function discover(){
+  const base='/design-lab/assets/radio/';
+  const dirs=(await listDir(base)).filter(e=>e.endsWith('/')).map(e=>e.replace(/\/$/,'').split('/').pop());
+  const found=[];
+  for(const d of dirs){
+    const files=(await listDir(base+d+'/')).filter(f=>/\.mp3$/i.test(f));
+    if(files.length) found.push({name:d, tracks:files.map(f=>base+d+'/'+f)});
+  }
+  found.sort((a,b)=>{ const ia=STATION_ORDER.indexOf(a.name), ib=STATION_ORDER.indexOf(b.name);
+    return (ia<0?99:ia)-(ib<0?99:ib) || a.name.localeCompare(b.name); });
+  stations=found.map(s=>({...s, queue:shuffle([...s.tracks.keys()]), qpos:0}));
+  setMode(-1,{init:true});
+}
+function playCurrent(){
+  const s=stations[mode], url=s.tracks[s.queue[s.qpos]];
+  player.src=url; player.play().catch(()=>{});
+  mq.textContent='TUNED: '+s.name.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · '+pretty(url)+' · ';
+}
+function nextTrack(){
+  const s=stations[mode]; if(!s) return;
+  s.qpos++; if(s.qpos>=s.queue.length){ s.queue=shuffle([...s.tracks.keys()]); s.qpos=0; }
+  playCurrent();
+}
+function setMode(i,opts={}){
+  mode=i;
+  lcd.classList.toggle('lofi',mode>=0);
+  knob.setAttribute('aria-checked',String(mode>=0));
+  if(mode<0){
+    player.pause();
+    mq.textContent=PODCAST_TXT;
+    rmode.textContent= stations.length
+      ? 'podcasts · tap the dial for '+stations[0].name
+      : 'podcasts · drop tracks in assets/radio/ to open stations';
+  } else if(opts.silent){
+    const s=stations[mode];
+    mq.textContent='TUNED: '+s.name.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · ';
+    rmode.textContent=s.name+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].name:'podcasts');
+  } else {
+    const s=stations[mode];
+    rmode.textContent=s.name+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].name:'podcasts');
+    playCurrent();
+  }
+}
+knob.onclick=e=>{ e.stopPropagation(); if(dragBlockClick) return;
+  setMode(mode+1>=stations.length ? -1 : mode+1); };
+discover();
 
 /* ---------- a desk you can rearrange: drag anything, it stays put ---------- */
 const deskEl=document.querySelector('.desk');
@@ -407,6 +472,7 @@ makeDraggable(document.getElementById('postcard'),'postcard');
 makeDraggable(document.getElementById('phonewrap'),'phone',document.getElementById('phone'));
 makeDraggable(document.getElementById('radio'),'radio');
 makeDraggable(document.getElementById('pad'),'pad');
+['cl1','cl2','cl3','cl4','cl5'].forEach(id=>makeDraggable(document.getElementById(id),id));
 
 /* ---------- stickies: edit in place, peel new ones, bin them ---------- */
 let stickyStore={}; try{ stickyStore=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
@@ -441,7 +507,7 @@ document.getElementById('tidy').onclick=()=>{ localStorage.removeItem(LKEY); loc
 /* ---------- state presets for headless render QA ---------- */
 const q=new URLSearchParams(location.search);
 if(q.get('flip')==='1') pc.classList.add('flipped');
-if(q.get('mode')==='lofi') setMode(true);
+if(q.get('station')!==null && q.get('station')!==''){ setTimeout(()=>{ const i=stations.findIndex(s=>s.name===q.get('station')); if(i>=0) setMode(i,{silent:true}); },600); }
 if(q.get('tab')!==null && q.get('tab')!==''){ const i=+q.get('tab'); const [l,r]=subjSpread(SUBJECTS[i]); setSpread(l,r); current=i; markTabs(); }
 if(q.get('phone')==='1'){ frame.src='/design-lab/shorts.html'; modal.classList.add('open'); }
 </script>
