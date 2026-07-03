@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk v2 — the desk is a place</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#ece7de;--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
+    --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;color:var(--ink);font-family:var(--head);
+    background:radial-gradient(130% 110% at 50% -10%,#f1ede5 0%,var(--bg) 62%,#e2dcd0 100%)}
+  .top{height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem)}
+  .brand{font-size:1rem;font-weight:500}.brand b{font-weight:800}
+  .avatar{width:29px;height:29px;border-radius:50%;background:var(--anchor);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.78rem}
+
+  .desk{position:relative;max-width:1240px;margin:0 auto;height:calc(100dvh - 52px);padding:0 clamp(1rem,3vw,2rem)}
+
+  /* ============ the notebook: an object that OPENS ============ */
+  .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:48%;transform:translateY(-50%)}
+  .book{position:relative;width:min(660px,58vw);height:432px;display:grid;grid-template-columns:1fr 1fr;
+    border-radius:9px;box-shadow:0 20px 46px -18px rgba(38,35,30,.42),0 2px 5px rgba(38,35,30,.12);
+    perspective:1600px}
+  .pg{background:var(--paper);padding:1.15rem 1.25rem 1.1rem;min-width:0;display:flex;flex-direction:column;position:relative;overflow:hidden}
+  .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;background:linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
+  .pg.r{border-radius:0 9px 9px 0;background:linear-gradient(to left,var(--paper) 90%,#f2ecdf 100%)}
+  .pg.l::before{content:"";position:absolute;top:0;bottom:0;left:40px;width:1px;background:#dcaba1;opacity:.5}
+
+  .datestamp{font-family:var(--read);font-style:italic;font-size:.8rem;color:var(--mut);padding-left:24px}
+  .pg h2{font-size:1.2rem;font-weight:800;letter-spacing:-.02em;margin:.25rem 0 .6rem;padding-left:24px}
+  .plan{list-style:none;margin:0;padding:0 0 0 24px}
+  .plan li{display:grid;grid-template-columns:20px 1fr auto;align-items:center;gap:.55rem;padding:.48rem .35rem .48rem 0;
+    border-bottom:1px solid #ece7db;cursor:pointer;transition:background .14s}
+  .plan li:hover{background:#faf7ef}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:.95rem;color:var(--mut)}
+  .plan b{font-family:var(--read);font-weight:600;font-size:.88rem;display:block;line-height:1.22}
+  .plan small{font-size:.66rem;color:var(--mut)}
+  .plan .mins{font-size:.66rem;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums}
+  .momentum{font-size:.68rem;font-weight:600;color:var(--mut);margin:.55rem 0 .7rem;padding-left:24px}
+  .startrow{margin-top:auto;padding-left:24px}
+  .start{display:inline-flex;align-items:center;gap:.45rem;padding:.58rem 1.2rem;border:none;border-radius:var(--r);
+    background:var(--anchor);color:#fff;font-weight:700;font-size:.88rem;cursor:pointer;transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:12px;height:12px;fill:#fff}
+
+  /* right page: notes-to-self */
+  .pg h3{font-family:var(--read);font-style:italic;font-weight:500;font-size:.92rem;color:var(--sec);margin:0 0 .6rem}
+  .noteline{font-family:var(--read);font-size:.85rem;color:var(--sec);line-height:2.05;border-bottom:1px solid #ece7db;padding:0 .1rem}
+  .noteline b{color:var(--ink);font-weight:600}
+  .pg .doable{margin-top:auto;font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--mut);text-align:right}
+
+  /* subject spread (revealed by the page turn) */
+  .subjpg .unit{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem;padding:.5rem .35rem;
+    border-bottom:1px solid #ece7db;cursor:pointer;transition:background .14s}
+  .subjpg .unit:hover{background:#faf7ef}
+  .subjpg .unit b{font-family:var(--read);font-weight:600;font-size:.88rem}
+  .subjpg .unit small{font-size:.68rem;color:var(--mut);font-variant-numeric:tabular-nums;flex:none}
+  .subjpg .open{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:.4rem;
+    font-size:.82rem;font-weight:700;color:var(--anchor);border:1.5px solid var(--line);border-radius:var(--r);
+    padding:.45rem .95rem;background:var(--paper);cursor:pointer;transition:border-color .14s}
+  .subjpg .open:hover{border-color:var(--anchor)}
+  .backlink{background:none;border:none;padding:0;font-family:var(--read);font-style:italic;font-size:.78rem;
+    color:var(--mut);cursor:pointer;text-align:left}
+  .backlink:hover{color:var(--ink)}
+
+  /* the turning page (a sheet that flips right→left across the gutter) */
+  .turn{position:absolute;top:0;right:0;width:50%;height:100%;transform-origin:left center;
+    transform-style:preserve-3d;pointer-events:none;z-index:5;opacity:0}
+  .turn .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:0 9px 9px 0;background:var(--paper)}
+  .turn .face.back{transform:rotateY(180deg);border-radius:9px 0 0 9px;
+    background:linear-gradient(to right,var(--paper) 88%,#efe9db 100%)}
+  .book.turning .turn{opacity:1;animation:pageturn .62s var(--ease) forwards}
+  @keyframes pageturn{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}}
+  @media(prefers-reduced-motion:reduce){ .book.turning .turn{animation:none;opacity:0} }
+
+  /* the cloth tabs on the fore-edge */
+  .tabs{position:absolute;right:-29px;top:26px;bottom:26px;display:flex;flex-direction:column;justify-content:space-between;width:29px}
+  .tab{flex:none;height:9.6%;min-height:41px;width:29px;border-radius:0 6px 6px 0;background:var(--tc,#888);
+    display:grid;place-items:center;cursor:pointer;border:none;padding:0;
+    box-shadow:2px 2px 5px rgba(38,35,30,.2);transition:width .15s}
+  .tab:hover,.tab:focus-visible{width:37px;outline:none}
+  .tab[aria-current="true"]{width:37px;box-shadow:2px 2px 7px rgba(38,35,30,.3)}
+  .tab span{writing-mode:vertical-rl;font-size:.5rem;font-weight:700;letter-spacing:.06em;color:#fff;text-transform:uppercase;pointer-events:none;white-space:nowrap}
+
+  /* ============ the postcard: this week, and it has a BACK ============ */
+  .postcard{position:absolute;right:clamp(.8rem,4vw,3rem);top:9%;width:300px;aspect-ratio:3/2;cursor:pointer;
+    perspective:1200px;background:none;border:none;padding:0}
+  .postcard .inner{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
+    transition:transform .7s var(--ease);transform:rotate(1.8deg)}
+  .postcard.flipped .inner{transform:rotate(1.8deg) rotateY(180deg)}
+  .postcard .side{position:absolute;inset:0;backface-visibility:hidden;border-radius:5px;overflow:hidden;
+    box-shadow:0 10px 26px -10px rgba(38,35,30,.4);border:6px solid #fff}
+  .postcard .front{background:var(--gart,url('assets/lw/guided-a.png')) center/cover no-repeat}
+  .postcard .back{transform:rotateY(180deg);background:var(--paper);display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;padding:1rem}
+  .postmark{width:74px;height:74px;border:1.5px solid var(--mut);border-radius:50%;display:grid;place-items:center;
+    font-size:.5rem;font-weight:700;letter-spacing:.08em;color:var(--mut);text-transform:uppercase;
+    transform:rotate(-8deg);line-height:1.5;margin-bottom:.6rem;opacity:.85}
+  .postcard .cap{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--sec);line-height:1.45;max-width:22ch}
+  .postcard .hint{position:absolute;bottom:.4rem;right:.6rem;font-family:var(--read);font-style:italic;
+    font-size:.66rem;color:rgba(255,255,255,.9);text-shadow:0 1px 4px rgba(0,0,0,.4)}
+  .postcard.flipped .hint{display:none}
+  @media(prefers-reduced-motion:reduce){ .postcard .inner{transition:none} }
+
+  /* ============ the wireless + the polaroids ============ */
+  .setwrap{position:absolute;right:clamp(1.4rem,5vw,4rem);bottom:7%;text-align:center;cursor:pointer;background:none;border:none;padding:0}
+  .set{width:210px;filter:drop-shadow(0 10px 12px rgba(38,35,30,.2));transition:transform .2s}
+  .setwrap:hover .set{transform:scale(1.02)}
+  .setwrap:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .setlab b{display:block;font-size:.9rem;font-weight:700}
+  .setlab small{display:block;font-family:var(--read);font-style:italic;font-size:.76rem;color:var(--sec);margin-top:.1rem}
+
+  .polas{position:absolute;left:52%;bottom:5.5%;display:flex;align-items:flex-end;cursor:pointer;background:none;border:none;padding:0}
+  .polas .p{width:66px;aspect-ratio:9/16;border-radius:3px;background-size:cover;background-position:center;
+    border:4px solid #fff;border-bottom-width:14px;box-shadow:0 3px 9px rgba(38,35,30,.26);transition:transform .18s}
+  .polas .p:nth-child(1){transform:rotate(-4deg) translateX(5px)}
+  .polas .p:nth-child(2){transform:rotate(1.4deg) translateY(-4px);z-index:1}
+  .polas .p:nth-child(3){transform:rotate(4deg) translateX(-5px)}
+  .polas:hover .p{transform:rotate(0) translateY(-4px)}
+  .polas:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
+  .polas .t{margin-left:.7rem;text-align:left;padding-bottom:.3rem}
+  .polas .t b{display:block;font-size:.9rem;font-weight:700}
+  .polas .t small{display:block;font-family:var(--read);font-style:italic;font-size:.76rem;color:var(--sec);white-space:nowrap}
+
+  /* the calendar chip */
+  .cal{position:absolute;left:clamp(.6rem,2.5vw,2rem);top:6.5%;width:96px;z-index:3;background:var(--paper);border:1px solid var(--line);
+    border-radius:6px;box-shadow:0 6px 16px -6px rgba(38,35,30,.3);text-align:center;transform:rotate(-2deg);overflow:hidden}
+  .cal .band{background:var(--anchor);color:#fff;font-size:.52rem;font-weight:700;letter-spacing:.1em;padding:.26rem 0}
+  .cal b{display:block;font-family:var(--read);font-weight:700;font-size:1.4rem;padding:.3rem 0 0}
+  .cal small{display:block;font-size:.56rem;color:var(--mut);padding:0 .35rem .4rem}
+
+  @media(max-width:980px){
+    .desk{height:auto;padding-bottom:2rem}
+    .bookwrap,.postcard,.setwrap,.polas,.cal{position:static;transform:none;margin:1rem auto;display:block}
+    .book{width:100%;height:auto;grid-template-columns:1fr}
+    .tabs{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">Study<b>Vault</b></span>
+  <span class="avatar">S</span>
+</div>
+
+<div class="desk">
+
+  <div class="cal"><div class="band">FIRST EXAM</div><b>312</b><small>days · May 2027</small></div>
+
+  <div class="bookwrap">
+    <div class="book" id="book">
+      <section class="pg l" id="pgL"></section>
+      <section class="pg r" id="pgR"></section>
+      <div class="turn" id="turn"><div class="face front"></div><div class="face back"></div></div>
+      <nav class="tabs" id="tabs" aria-label="Your subjects"></nav>
+    </div>
+  </div>
+
+  <button class="postcard" id="postcard" aria-label="This week’s postcard — flip to read the back">
+    <span class="inner">
+      <span class="side front"></span>
+      <span class="side back">
+        <span class="postmark" id="postmark">STUDYVAULT<br>W/C —</span>
+        <span class="cap" id="doodleCap">The path to the landmark.</span>
+      </span>
+      <span class="hint">flip ↻</span>
+    </span>
+  </button>
+
+  <button class="setwrap" aria-label="Play Revision Radio">
+    <img class="set" src="assets/lw/night-radio-set-cut.png" alt="">
+    <span class="setlab"><b>Revision Radio</b><small>Up next: Stave 3 — English Literature</small></span>
+  </button>
+
+  <button class="polas" id="polas" aria-label="Watch today’s shorts">
+    <span class="p"></span><span class="p"></span><span class="p"></span>
+    <span class="t"><b>Shorts</b><small>today’s 20</small></span>
+  </button>
+
+</div>
+
+<script>
+/* ---------- data ---------- */
+const SUBJECTS=[
+  {tab:'Maths',name:'Mathematics',c:'#535f8a',units:[['Number',12,8],['Algebra',14,6],['Geometry',12,7],['Statistics',10,5]]},
+  {tab:'Eng Lang',name:'English Language',c:'#4a708c',units:[['Paper 1: Explorations',15,9],['Paper 2: Viewpoints',15,8],['Spoken Language',8,3],['Practice papers',12,4]]},
+  {tab:'Eng Lit',name:'English Literature',c:'#71506b',units:[['A Christmas Carol',12,7],['An Inspector Calls',10,2],['Power & Conflict poetry',15,3],['Macbeth',12,1]]},
+  {tab:'Science',name:'Combined Science',c:'#44696c',units:[['Biology Paper 1',18,11],['Chemistry Paper 1',17,9],['Physics Paper 1',18,6],['Biology Paper 2',17,3]]},
+  {tab:'History',name:'History',c:'#3f5e78',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
+  {tab:'Geog',name:'Geography',c:'#5f7155',units:[['Living with the physical environment',14,9],['Challenges in the human environment',14,8],['Geographical skills',12,9]]},
+  {tab:'Spanish',name:'Spanish',c:'#9a5b38',units:[['Identity & culture',9,4],['Local & global areas',9,3],['School & future plans',9,2]]},
+  {tab:'CompSci',name:'Computer Science',c:'#3f6478',units:[['Computer systems',12,7],['Computational thinking',11,6]]},
+  {tab:'RS',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
+];
+
+const TODAY_L=`
+  <div class="datestamp" id="today"></div>
+  <h2>Here’s your plan.</h2>
+  <ol class="plan">
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+  </ol>
+  <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
+  <div class="startrow"><button class="start"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Start · 25 min</button></div>`;
+const TODAY_R=`
+  <h3>This week</h3>
+  <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
+  <div class="noteline">Needs a look: <b>Macbeth</b> — last seen 3 wks ago</div>
+  <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
+  <div class="noteline">Next mock: <b>none booked</b></div>
+  <p class="doable">Small days add up. —SV</p>`;
+
+function subjSpread(s){
+  const L=`
+    <div class="datestamp">${s.name}</div>
+    <h2 style="padding-left:24px">Where you stand.</h2>
+    <div style="padding-left:24px" class="subjpg">
+      ${s.units.map(([u,total,done])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${done} / ${total}</small></div>`).join('')}
+    </div>`;
+  const R=`
+    <h3>Pick up where you left off</h3>
+    <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
+      <div class="unit" tabindex="0"><b>${s.units[0][0]} — next lesson</b><small>continue</small></div>
+      <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <button class="open">Open ${s.name} →</button>
+      <button class="backlink" style="margin-top:.8rem" onclick="goToday()">⟵ back to today</button>
+    </div>`;
+  return [L,R];
+}
+
+/* ---------- the page turn ---------- */
+const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR'), book=document.getElementById('book');
+let current='today';
+function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
+  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+function turnTo(l,r){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
+  book.classList.remove('turning'); void book.offsetWidth;   // restart animation
+  book.classList.add('turning');
+  setTimeout(()=>setSpread(l,r),300);                        // swap under the sheet mid-turn
+  setTimeout(()=>book.classList.remove('turning'),650);
+}
+function goToday(){ current='today'; turnTo(TODAY_L,TODAY_R); markTabs(); }
+function goSubject(i){ current=i; const [l,r]=subjSpread(SUBJECTS[i]); turnTo(l,r); markTabs(); }
+function markTabs(){ [...document.querySelectorAll('.tab')].forEach((t,i)=>t.setAttribute('aria-current',String(current===i))); }
+
+const tabs=document.getElementById('tabs');
+SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab'; b.title=s.name;
+  b.style.setProperty('--tc',s.c); b.innerHTML='<span>'+s.tab+'</span>';
+  b.onclick=()=>goSubject(i); tabs.appendChild(b); });
+setSpread(TODAY_L,TODAY_R);
+
+/* ---------- the postcard ---------- */
+const pc=document.getElementById('postcard');
+pc.onclick=()=>pc.classList.toggle('flipped');
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k];if(!w)return;
+  document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
+  document.getElementById('doodleCap').textContent=w.cap;
+  document.getElementById('postmark').innerHTML='STUDYVAULT<br>W/C '+m.toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase();
+}).catch(()=>{});
+
+/* ---------- polaroids ---------- */
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  const seen={},ps=[];for(const s of m){if(seen[s.subject])continue;seen[s.subject]=1;
+    const p=(s.url||'').split('.r2.dev/');if(p.length<2)continue;
+    ps.push('/design-lab/_posters/'+p[1].replace(/\.mp4$/,'.jpg'));if(ps.length===3)break;}
+  document.querySelectorAll('.polas .p').forEach((el,i)=>{if(ps[i])el.style.backgroundImage="url('"+ps[i]+"')";});
+  document.getElementById('polas').onclick=()=>location.href='/design-lab/shorts.html';}).catch(()=>{});
+
+/* ---------- state presets for headless render verification ---------- */
+const q=new URLSearchParams(location.search);
+if(q.get('flip')==='1') pc.classList.add('flipped');
+if(q.get('tab')!==null && q.get('tab')!==''){ const i=+q.get('tab'); const [l,r]=subjSpread(SUBJECTS[i]); setSpread(l,r); current=i; markTabs(); }
+</script>
+</body>
+</html>
