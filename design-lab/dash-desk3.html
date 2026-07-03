@@ -15,12 +15,11 @@
     --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E")}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;color:var(--ink);font-family:var(--head)}
-  /* the desk itself: drawn oak, softly lit from above */
-  body{background:url('assets/lw/night-desk-wood-a.png') center/cover no-repeat fixed #e8dcc0}
-  /* a cream veil quietens the grain so paper wins; vignette keeps the depth */
+  /* the desk is one painted scene — pale scrubbed wood, stains, stationery
+     all baked in. Only INTERACTIVE things sit on top and pop. */
+  body{background:url('assets/lw/desk-scene-a.png') center top/cover no-repeat fixed #e9dfc9}
   body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
-    background:linear-gradient(rgba(247,243,234,.52),rgba(247,243,234,.52)),
-               radial-gradient(120% 90% at 50% 8%,transparent 40%,rgba(84,62,30,.18) 100%)}
+    background:radial-gradient(120% 90% at 50% 8%,transparent 45%,rgba(84,62,30,.13) 100%)}
 
   .top{position:relative;z-index:2;height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem)}
   .brand{font-size:1rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
@@ -29,10 +28,11 @@
   .desk{position:relative;z-index:1;max-width:1280px;margin:0 auto;height:calc(100dvh - 52px);padding:0 clamp(1rem,3vw,2rem)}
 
   /* ============ notebook (openable — from v2) ============ */
-  .bookwrap{position:absolute;left:clamp(.5rem,3vw,2.5rem);top:48%;transform:translateY(-50%)}
+  .bookwrap{position:absolute;left:clamp(9rem,17vw,16rem);top:52%;transform:translateY(-50%);perspective:1500px}
   /* light comes from top-left everywhere on this desk: shadows fall down-right */
   .book{position:relative;width:min(740px,60vw);height:544px;display:grid;grid-template-columns:1fr 1fr;
-    border-radius:9px;box-shadow:10px 26px 44px -16px rgba(56,40,18,.42),3px 5px 9px rgba(56,40,18,.16);perspective:1600px}
+    border-radius:9px;box-shadow:10px 26px 44px -16px rgba(56,40,18,.42),3px 5px 9px rgba(56,40,18,.16);perspective:1600px;
+    transform:rotateX(5deg) rotate(-1.8deg)}   /* lies ON the desk, not stamped over it */
   /* the stack of pages beneath the open spread */
   .book::after{content:"";position:absolute;left:5px;right:-4px;bottom:-6px;height:8px;border-radius:0 0 8px 8px;z-index:-1;
     background:repeating-linear-gradient(to bottom,#f4efe3 0 2px,#ddd5c2 2px 3px)}
@@ -112,7 +112,7 @@
   .tab span{writing-mode:vertical-rl;font-size:.52rem;font-weight:700;letter-spacing:.07em;color:#fff;text-transform:uppercase;pointer-events:none;white-space:nowrap;text-shadow:0 1px 2px rgba(0,0,0,.25)}
 
   /* ============ the postcard (flips — from v2) ============ */
-  .postcard{position:absolute;right:clamp(.8rem,4vw,3rem);top:7%;width:290px;aspect-ratio:3/2;cursor:pointer;
+  .postcard{position:absolute;right:-40px;top:8%;width:290px;aspect-ratio:3/2;cursor:pointer;rotate:-3deg;
     perspective:1200px;background:none;border:none;padding:0;z-index:2}
   .postcard .inner{display:block;position:relative;width:100%;height:100%;transform-style:preserve-3d;
     transition:transform .7s var(--ease);transform:rotate(2deg)}
@@ -132,9 +132,9 @@
 
   /* ============ the DRAWN phone: an object plate with a live screen set
      into its glass. The wrapper is inert; only the screen takes pointers. */
-  .phonewrap{position:absolute;right:clamp(8rem,12vw,13rem);top:27%;width:400px;pointer-events:none;z-index:2;
-    transition:transform .25s var(--ease)}
-  .phonewrap:has(.screen:hover){transform:translateY(-4px) rotate(-.4deg)}
+  .phonewrap{position:absolute;right:-16px;bottom:1%;width:400px;pointer-events:none;z-index:2;
+    transform:rotate(-5deg);transition:transform .25s var(--ease)}
+  .phonewrap:has(.screen:hover){transform:translateY(-4px) rotate(-5.5deg)}
   .phonewrap img{width:100%;display:block;filter:drop-shadow(5px 9px 11px rgba(56,40,18,.26))}
   /* unread dot: pinned to the screen's top-right corner (screen is %-placed) */
   .phonewrap .dot{position:absolute;left:62%;top:19.4%;width:14px;height:14px;border-radius:50%;
@@ -164,13 +164,15 @@
     background:var(--paper);color:var(--ink);font-size:1.05rem;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.35)}
 
   /* ============ the WIRELESS: drawn radio, working LCD ============ */
-  .radio{position:absolute;right:clamp(1.2rem,4.5vw,3.6rem);bottom:6.5%;width:250px;background:none;border:none;padding:0;
+  /* the set itself is scenery (sits under the book, takes no clicks);
+     only its two knobs are live controls */
+  .radio{position:absolute;left:-20px;top:-40px;width:320px;background:none;border:none;padding:0;pointer-events:none;
     cursor:pointer;text-align:center;z-index:2}
   .radio:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
   .radio .art{position:relative;display:block}
   .radio .art::before{content:"";position:absolute;left:10%;right:-2%;bottom:2%;height:14px;z-index:-1;
     background:radial-gradient(50% 100% at 50% 50%,rgba(56,40,18,.36),transparent 72%);filter:blur(3px)}
-  .radio img{width:100%;filter:drop-shadow(7px 12px 12px rgba(56,40,18,.32))}
+  .radio img{width:100%;display:block;filter:drop-shadow(7px 12px 12px rgba(56,40,18,.32))}
   /* the LCD sits in the radio's fascia between the dials (display only) */
   .lcd{position:absolute;left:26%;right:26%;top:59%;height:9%;background:#23281f;border-radius:3px;pointer-events:none;
     box-shadow:inset 0 1px 3px rgba(0,0,0,.75),0 0 0 2px rgba(38,30,16,.4);overflow:hidden;display:flex;align-items:center}
@@ -181,10 +183,10 @@
   /* both dials are real controls, sitting exactly on the drawn knobs:
      left = stations, right = skip song */
   .knob{position:absolute;left:37.5%;top:54.5%;width:10.5%;aspect-ratio:1;border-radius:50%;background:transparent;
-    border:2px solid transparent;cursor:pointer;transition:border-color .15s;padding:0}
+    border:2px solid transparent;cursor:pointer;transition:border-color .15s;padding:0;pointer-events:auto}
   .knob.k2{left:62.8%;top:50.8%}
-  .radio:hover .knob,.knob:focus-visible{border-color:rgba(230,193,124,.65);outline:none}
-  .radio .rlab{margin-top:.35rem}
+  .knob:hover,.knob:focus-visible{border-color:rgba(230,193,124,.65);outline:none}
+  .radio .rlab{display:block;margin:-4.6rem 0 0 16px;text-align:left;max-width:220px}   /* under the drawn set, clear of the book */
   .radio .rlab b{display:block;font-size:.9rem;font-weight:700;color:#3d3428}
   .radio .rlab small{display:block;font-family:var(--read);font-style:italic;font-size:.74rem;color:#5d5342;margin-top:.08rem}
 
@@ -200,31 +202,17 @@
     box-shadow:0 2px 5px rgba(56,40,18,.25)}
   .sticky:hover .del{display:grid}
   /* the pad of blank notes — peel one off */
-  .pad{position:absolute;left:clamp(.8rem,2.5vw,2rem);bottom:3%;width:112px;height:84px;cursor:pointer;
+  .pad{position:absolute;left:34.5%;top:5%;width:112px;height:84px;cursor:pointer;
     background:linear-gradient(168deg,#f9edb4,#f0df95);border:none;padding:0;
     box-shadow:0 2px 0 #e8d78a,0 4px 0 #decd80,6px 10px 16px -5px rgba(56,40,18,.4);z-index:2}
   .pad span{font-family:var(--hand);font-size:1.15rem;color:#8a7d45}
   .pad:hover span{color:#4d4425}
   .pad:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
-  /* desk clutter: drawn stationery, draggable, no jobs — just life.
-     SIZE SYSTEM: props obey physics relative to each other. Real length in cm
-     × 11px/cm, corrected for how much of the plate's bbox the object fills
-     (diagonal pose + drawn shadow shrink the fill). Interactive objects
-     (book/phone/postcard/radio) deliberately cheat larger — they're UI. */
-  .clutter{position:absolute;z-index:2;pointer-events:auto}
-  .clutter img{display:block;width:100%;filter:drop-shadow(4px 6px 7px rgba(56,40,18,.24))}
-  /* widths MEASURED from each plate's solid pixels (alpha>=200 bbox), not
-     guessed: css_w = real_cm × 11px/cm × img_w ÷ solid_extent */
-  /* widths = target visible px / fill(w) of the SOLIDIFIED cuts (_clutter_solidify.py) */
-  .clutter.c-pencil{width:140px;right:25%;top:8%;transform:rotate(14deg)}   /* 18cm, fill .98 */
-  .clutter.c-pen{width:102px;left:44%;bottom:5%;transform:rotate(-22deg)}    /* 13cm, fill .98 — plate no longer padded */
-  .clutter.c-high{width:85px;right:4.5%;top:47%;transform:rotate(-9deg)}     /* 11cm, fill 1.0 */
-  .clutter.c-eraser{width:42px;left:13.5%;bottom:3.5%;transform:rotate(9deg)}/* 5.5cm, fill .98 */
-  .clutter.c-mug{width:138px;right:1.5%;top:24%}                             /* 17cm tall, fill .97 */
+  /* (stationery is painted into the desk scene now — not elements) */
 
   /* flashcards: a loose mixed deck — the door to interleaved practice.
      Click flips Q -> A; next click deals the next card (different subject). */
-  .cards{position:absolute;left:24.5%;bottom:5.5%;width:158px;height:106px;background:none;border:none;padding:0;
+  .cards{position:absolute;right:-45px;bottom:7%;width:158px;height:106px;background:none;border:none;padding:0;
     cursor:pointer;z-index:2;transform:rotate(-3deg);perspective:520px}
   .cards .fc{position:absolute;inset:0;background:var(--paper);border:1px solid var(--line);border-radius:6px;
     box-shadow:3px 5px 9px rgba(56,40,18,.16)}
@@ -249,15 +237,15 @@
   .tidy:hover{color:#3d3428}
   .sticky::after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 16px 16px;
     border-color:transparent transparent rgba(56,40,18,.14) transparent}
-  .sticky.s1{left:41%;top:3%;width:128px;transform:rotate(-3deg)}
-  .sticky.s2{right:clamp(19rem,24vw,23rem);bottom:5%;transform:rotate(2.5deg);background:#efe3b6}
+  .sticky.s1{left:24%;top:3.5%;width:128px;transform:rotate(-3deg)}
+  .sticky.s2{left:45.5%;top:2.5%;transform:rotate(2.5deg);background:#efe3b6}
   .sticky b{font-weight:600;color:#33301c}
 
   @media(prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important}
     .lcd .mq{padding-left:.5rem} }
   @media(max-width:1000px){
     .desk{height:auto;padding-bottom:2rem}
-    .bookwrap,.postcard,.phone,.radio,.sticky{position:static;transform:none;margin:1rem auto;display:block}
+    .bookwrap,.postcard,.phonewrap,.radio,.sticky{position:static;transform:none;margin:1rem auto;display:block}
     .book{width:100%;height:auto;grid-template-columns:1fr}
     .tabs{display:none}
   }
@@ -273,6 +261,16 @@
 
   <div class="sticky s1" data-sid="s1"><span class="txt"><b>312 days</b> to your first exam.</span></div>
   <div class="sticky s2" data-sid="s2"><span class="txt">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</span></div>
+
+  <div class="radio" id="radio" role="group" aria-label="Revision Radio">
+    <span class="art">
+      <img src="assets/lw/night-radio-set-cut.png" alt="">
+      <span class="lcd" id="lcd"><span class="mq" id="mq">NOW PLAYING · STAVE 3 — POVERTY &amp; GENEROSITY · ENGLISH LITERATURE · 10 MIN ·&nbsp;</span></span>
+      <button class="knob" id="knob" role="switch" aria-checked="false" aria-label="Tune: next station" title="stations"></button>
+      <button class="knob k2" id="knob2" aria-label="Skip to the next song" title="skip song"></button>
+    </span>
+    <span class="rlab"><b>Revision Radio</b><small id="rmode">podcasts · tap the left dial for lo-fi</small></span>
+  </div>
 
   <div class="bookwrap">
     <div class="book" id="book">
@@ -305,12 +303,6 @@
 
   <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
 
-  <div class="clutter c-pencil" id="cl1"><img src="assets/lw/night-pencil-cut.png" alt=""></div>
-  <div class="clutter c-pen" id="cl2"><img src="assets/lw/night-fountain-pen-cut.png" alt=""></div>
-  <div class="clutter c-high" id="cl3"><img src="assets/lw/night-highlighter-cut.png" alt=""></div>
-  <div class="clutter c-eraser" id="cl4"><img src="assets/lw/night-eraser-cut.png" alt=""></div>
-  <div class="clutter c-mug" id="cl5"><img src="assets/lw/night-pen-mug-cut.png" alt=""></div>
-
   <button class="cards" id="cards" aria-label="Flashcards — a mixed deck. Click to flip.">
     <span class="fc u1"></span>
     <span class="fc u2"></span>
@@ -319,16 +311,6 @@
       <span class="subj" id="fcSubj"></span>
     </span>
     <span class="fchint">mixed deck ↻</span>
-  </button>
-
-  <button class="radio" id="radio" aria-label="Revision Radio">
-    <span class="art">
-      <img src="assets/lw/night-radio-set-cut.png" alt="">
-      <span class="lcd" id="lcd"><span class="mq" id="mq">NOW PLAYING · STAVE 3 — POVERTY &amp; GENEROSITY · ENGLISH LITERATURE · 10 MIN ·&nbsp;</span></span>
-      <span class="knob" id="knob" role="switch" aria-checked="false" aria-label="Tune: next station" title="stations"></span>
-      <span class="knob k2" id="knob2" role="button" aria-label="Skip to the next song" title="skip song"></span>
-    </span>
-    <span class="rlab"><b>Revision Radio</b><small id="rmode">podcasts · tap the left dial for lo-fi</small></span>
   </button>
 
 </div>
@@ -536,7 +518,7 @@ discover();
 
 /* ---------- a desk you can rearrange: drag anything, it stays put ---------- */
 const deskEl=document.querySelector('.desk');
-const LKEY='sv_desk_layout', SKEY='sv_desk_stickies';
+const LKEY='sv_desk_layout2', SKEY='sv_desk_stickies';   // v2: painted-scene layout
 let layout={}; try{ layout=JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e){}
 function saveLayout(){ try{ localStorage.setItem(LKEY,JSON.stringify(layout)); }catch(e){} }
 let dragBlockClick=false;
@@ -572,11 +554,11 @@ function makeDraggable(el,id,handle){
       dragBlockClick=true; setTimeout(()=>dragBlockClick=false,0); } }
   h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
 }
+/* radio + notebook are furniture now; the rest still moves (they pop, so
+   dragging them over the painted scene reads fine) */
 makeDraggable(document.getElementById('postcard'),'postcard');
 makeDraggable(document.getElementById('phonewrap'),'phone',document.getElementById('phone'));
-makeDraggable(document.getElementById('radio'),'radio');
 makeDraggable(document.getElementById('pad'),'pad');
-['cl1','cl2','cl3','cl4','cl5'].forEach(id=>makeDraggable(document.getElementById(id),id));
 
 /* ---------- flashcards: the interleaved mixed deck ---------- */
 const FC=[
