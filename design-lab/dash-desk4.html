@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desk v4 — the painted desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
+    --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;
+    --hand:'Caveat',cursive}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:var(--head);color:var(--ink);overflow:hidden}
+  body{background:#e9dfc9}
+
+  /* ============ the stage: one coordinate system for paint AND ui ============
+     Everything lives in 2752x1536 stage units (the background plate's pixels)
+     and the whole stage scales as one object — so painted props and live
+     overlays can never drift apart. */
+  #stage{position:absolute;left:50%;top:50%;width:2752px;height:1536px;
+    transform:translate(-50%,-50%) scale(var(--k,.53));}
+  #stage>.bg{position:absolute;inset:0;width:100%;height:100%}
+
+  .top{position:fixed;left:0;right:0;top:0;z-index:10;height:52px;display:flex;align-items:center;
+    justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);pointer-events:none}
+  .top>*{pointer-events:auto}
+  .brand{font-size:1rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
+  .avatar{width:29px;height:29px;border-radius:50%;background:var(--anchor);color:#fff;
+    display:grid;place-items:center;font-weight:700;font-size:.78rem}
+
+  /* ============ the notebook: painted plate + live pages ============ */
+  #book{position:absolute;left:150px;top:260px;width:2184px;height:1443px;
+    transform:rotate(-1.2deg) scale(.755);transform-origin:0 0}
+  #book>.plate{position:absolute;left:0;top:0;width:2184px;display:block}
+  /* content layers are homography-mapped onto the painted pages
+     (matrices from scripts/_desk4_homography.py — plate-pixel space) */
+  .pg4{position:absolute;left:0;top:0;transform-origin:0 0;display:flex;flex-direction:column;
+    transition:opacity .22s ease}
+  .pg4.fade{opacity:0}
+  .pl{width:640px;height:915px;transform:matrix3d(0.997807,-0.023817,0.000000,-0.000002,-0.074615,0.906528,0.000000,-0.000094,0.000000,0.000000,1.000000,0.000000,370.000000,190.000000,0.000000,1.000000)}
+  .pr{width:685px;height:920px;transform:matrix3d(0.985680,0.012212,0.000000,0.000028,-0.230161,0.823772,0.000000,-0.000174,0.000000,0.000000,1.000000,0.000000,1190.000000,170.000000,0.000000,1.000000)}
+
+  /* page typography (plate px; ~0.48x on screen at the reference viewport) */
+  .pg4 .datestamp{font-family:var(--hand);font-size:36px;color:var(--mut);line-height:1.2;margin-bottom:6px}
+  .pg4 h2{font-size:50px;font-weight:800;letter-spacing:-.02em;margin:2px 0 34px;line-height:1.1}
+  .plan{list-style:none;margin:0;padding:0}
+  .plan li{display:grid;grid-template-columns:44px 1fr 78px;gap:0 12px;padding:22px 6px 22px 0;
+    cursor:pointer;border-radius:8px;transition:background .14s}
+  .plan li:hover{background:rgba(112,90,50,.07)}
+  .plan li:focus-visible{outline:2px solid var(--anchor);outline-offset:-2px}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:31px;color:var(--mut)}
+  .plan li>div{min-width:0}
+  .plan b{font-family:var(--read);font-weight:600;font-size:34px;line-height:1.2;display:block}
+  .plan small{font-size:25px;color:var(--mut);display:block;margin-top:8px}
+  .plan .mins{font-size:23px;font-weight:600;color:var(--mut);font-variant-numeric:tabular-nums;text-align:right}
+  .momentum{font-size:23px;font-weight:600;color:var(--mut);margin:30px 0 0}
+  .startrow{margin-top:auto;padding-bottom:6px}
+  .start{display:inline-flex;align-items:center;gap:14px;padding:20px 40px;border:none;border-radius:14px;
+    background:var(--anchor);color:#fff;font-weight:700;font-size:31px;cursor:pointer;transition:filter .18s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:24px;height:24px;fill:#fff}
+  .pg4 h3{font-family:var(--read);font-style:italic;font-weight:500;font-size:34px;color:var(--sec);margin:0 0 20px}
+  .noteline{font-family:var(--hand);font-size:37px;color:var(--sec);line-height:1.75;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .noteline b{color:var(--ink);font-weight:600}
+  .pg4 .doable{margin-top:auto;font-family:var(--hand);font-size:34px;color:var(--mut);text-align:right}
+  .subjpg .unit{display:grid;grid-template-columns:1fr 90px;gap:10px;padding:9px 6px;cursor:pointer;
+    border-radius:8px;transition:background .14s}
+  .subjpg .unit:hover{background:rgba(112,90,50,.07)}
+  .subjpg .unit b{font-family:var(--read);font-weight:600;font-size:30px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .subjpg .unit small{font-size:23px;color:var(--mut);font-variant-numeric:tabular-nums;text-align:right}
+  .splate{flex:none;height:400px;background-size:contain;background-position:center;background-repeat:no-repeat}
+  .scap{font-family:var(--hand);font-size:33px;color:var(--mut);text-align:center;line-height:1.3;margin:6px 0 12px}
+  .open4{margin-top:auto;align-self:flex-start;display:inline-flex;align-items:center;gap:12px;
+    font-size:29px;font-weight:700;color:var(--anchor);border:3px solid var(--line);border-radius:12px;
+    padding:12px 26px;background:var(--paper);cursor:pointer;transition:border-color .14s}
+  .open4:hover{border-color:var(--anchor)}
+  .backlink{background:none;border:none;padding:10px 0 0;font-family:var(--read);font-style:italic;
+    font-size:26px;color:var(--mut);cursor:pointer;text-align:left}
+  .backlink:hover{color:var(--ink)}
+
+  /* subject tabs along the painted fore-edge (angle = its outward normal) */
+  .tab4{position:absolute;width:132px;height:62px;border:none;cursor:pointer;padding:0 12px 0 30px;
+    border-radius:0 16px 16px 0;transform:translate(-30px,-31px) rotate(-7.2deg);transform-origin:left center;
+    background:linear-gradient(to right,color-mix(in srgb,var(--tc) 78%,#000) 0,var(--tc) 22%,color-mix(in srgb,var(--tc) 86%,#fff) 100%);
+    color:#fffdf8;font-weight:800;font-size:24px;letter-spacing:.06em;text-align:right;
+    box-shadow:6px 8px 14px -6px rgba(56,40,18,.4);transition:transform .16s}
+  .tab4:hover,.tab4[aria-current="true"]{transform:translate(-16px,-31px) rotate(-7.2deg)}
+  .tab4:focus-visible{outline:3px solid var(--anchor);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="top">
+  <span class="brand">Study<b>Vault</b></span>
+  <span class="avatar">S</span>
+</div>
+
+<div id="stage">
+  <img class="bg" src="assets/lw/desk4-scene-a.png" alt="">
+  <div id="book">
+    <img class="plate" src="assets/lw/desk4-book-d-cut.png" alt="">
+    <section class="pg4 pl" id="pgL"></section>
+    <section class="pg4 pr" id="pgR"></section>
+    <nav id="tabs" aria-label="Your subjects"></nav>
+  </div>
+</div>
+
+<script>
+/* ---------- data (same demo data as desk3) ---------- */
+const SUBJECTS=[
+ {tab:'MATHS',slug:'maths',name:'Mathematics',c:'#4e5f66',units:[['Number',8,3],['Algebra',10,2],['Geometry',8,1]]},
+ {tab:'LANG',slug:'lang',name:'English Language',c:'#5b7285',units:[['Paper 1',8,2],['Paper 2',8,1]]},
+ {tab:'LIT',slug:'lit',name:'English Literature',c:'#7d5a78',units:[['Macbeth',9,4],['A Christmas Carol',8,5],['Power & Conflict',15,3]]},
+ {tab:'SCIENCE',slug:'science',name:'Combined Science',c:'#4e6e5d',units:[['Biology P1',12,4],['Chemistry P1',12,2],['Physics P1',12,1]]},
+ {tab:'HISTORY',slug:'history',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
+ {tab:'GEOG',slug:'geog',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Living with the physical environment',12,5],['Paper 2: Challenges in the human environment',12,4]]},
+ {tab:'SPANISH',slug:'spanish',name:'Spanish',c:'#a2643f',units:[['Theme 1',9,3],['Theme 2',9,2],['Theme 3',8,1]]},
+ {tab:'CS',slug:'cs',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3],['Computational Thinking',11,2]]},
+ {tab:'RS',slug:'rs',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
+];
+const TODAY_L=`
+  <div class="datestamp" id="today"></div>
+  <h2>Here’s your plan.</h2>
+  <ol class="plan">
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+  </ol>
+  <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
+  <div class="startrow"><button class="start"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>Start · 25 min</button></div>`;
+const TODAY_R=`
+  <h3>This week</h3>
+  <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
+  <div class="noteline">Needs a look: <b>Macbeth</b> — 3 wks ago</div>
+  <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
+  <div class="noteline">Shorts watched: <b>41</b> · checks passed: <b>7/8</b></div>
+  <div class="noteline">Radio: <b>3 episodes</b> on the bus</div>
+  <div class="noteline">Next mock: <b>none booked</b></div>
+  <p class="doable">Small days add up. —SV</p>`;
+
+let LADDERS={};
+function subjSpread(s){
+  const done=s.units.reduce((t,u)=>t+u[2],0), total=s.units.reduce((t,u)=>t+u[1],0);
+  const pct=Math.round(done/total*100);
+  const stage= pct>=66?3 : pct>=33?2 : 1;
+  const lad=LADDERS[s.slug];
+  const stageWord=['a pencil sketch','inked, not yet painted','almost fully painted'][stage-1];
+  const L=`
+    <div class="datestamp">${s.name}</div>
+    <h2>Where you stand.</h2>
+    <div class="subjpg">
+      ${s.units.map(([u,tot,d])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${d} / ${tot}</small></div>`).join('')}
+    </div>
+    <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
+  const R=(lad?`
+    <div class="splate" style="background-image:url('${lad[stage-1].replace('.png','-page.png')}')"></div>
+    <p class="scap">${stageWord[0].toUpperCase()+stageWord.slice(1)} — ${pct}% drawn.<br>The picture finishes as you do.</p>`:`
+    <h3>Pick up where you left off</h3>`)+`
+    <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
+      <div class="unit" tabindex="0"><b>${s.units[0][0]} — next lesson</b><small>continue</small></div>
+      <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <button class="open4">Open ${s.name} →</button>
+      <button class="backlink" onclick="goToday()">⟵ back to today</button>
+    </div>`;
+  return [L,R];
+}
+
+/* ---------- spreads (v1 page change: soft crossfade) ---------- */
+const pgL=document.getElementById('pgL'), pgR=document.getElementById('pgR');
+let current='today';
+function setSpread(l,r){ pgL.innerHTML=l; pgR.innerHTML=r; const t=document.getElementById('today');
+  if(t) t.textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'}); }
+function turnTo(l,r){
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ setSpread(l,r); return; }
+  pgL.classList.add('fade'); pgR.classList.add('fade');
+  setTimeout(()=>{ setSpread(l,r); pgL.classList.remove('fade'); pgR.classList.remove('fade'); },230);
+}
+function goToday(){ current='today'; turnTo(TODAY_L,TODAY_R); markTabs(); }
+function goSubject(i){ current=i; const [l,r]=subjSpread(SUBJECTS[i]); turnTo(l,r); markTabs(); }
+function markTabs(){ [...document.querySelectorAll('.tab4')].forEach((t,i)=>t.setAttribute('aria-current',String(current===i))); }
+
+/* tabs along the painted fore-edge (positions from _desk4_homography.py) */
+const TABPTS=[[1948,194],[1963,312],[1978,430],[1993,547],[2008,665],[2022,783],[2037,900],[2052,1018],[2067,1136]];
+const tabs=document.getElementById('tabs');
+SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab4'; b.title=s.name;
+  b.style.setProperty('--tc',s.c); b.style.left=TABPTS[i][0]+'px'; b.style.top=TABPTS[i][1]+'px';
+  b.textContent=s.tab; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
+
+setSpread(TODAY_L,TODAY_R); markTabs();
+fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{LADDERS=j||{};
+  if(current!=='today'){ const [l,r2]=subjSpread(SUBJECTS[current]); setSpread(l,r2); }
+}).catch(()=>{});
+/* QA hook: ?s=slug opens that subject spread directly */
+{ const qs=new URLSearchParams(location.search).get('s');
+  const qi=SUBJECTS.findIndex(x=>x.slug===qs);
+  if(qi>=0){ current=qi; const [l,r2]=subjSpread(SUBJECTS[qi]); setSpread(l,r2); markTabs(); } }
+
+/* ---------- stage scaling: cover the viewport, one uniform scale ---------- */
+const stage=document.getElementById('stage');
+function fit(){ stage.style.setProperty('--k', Math.max(innerWidth/2752, innerHeight/1536)); }
+addEventListener('resize', fit); fit();
+</script>
+</body>
+</html>
