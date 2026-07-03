@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Desk v3 — an actual desk</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..600&display=swap" rel="stylesheet">
 <style>
   :root{--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
     --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
-    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif}
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;
+    --hand:'Caveat',cursive}   /* Sam's handwriting — stickies, jotted notes */
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;color:var(--ink);font-family:var(--head)}
   /* the desk itself: drawn oak, softly lit from above */
@@ -39,7 +40,7 @@
   .pg.l{border-radius:9px 0 0 9px;border-right:1px solid #e4ded0;background:linear-gradient(to right,var(--paper) 90%,#f2ecdf 100%)}
   .pg.r{border-radius:0 9px 9px 0;background:linear-gradient(to left,var(--paper) 90%,#f2ecdf 100%)}
   .pg.l::before{content:"";position:absolute;top:0;bottom:0;left:38px;width:1px;background:#dcaba1;opacity:.5}
-  .datestamp{font-family:var(--read);font-style:italic;font-size:.78rem;color:var(--mut);padding-left:22px}
+  .datestamp{font-family:var(--hand);font-size:1.05rem;color:var(--mut);padding-left:22px}
   .pg h2{font-size:1.16rem;font-weight:800;letter-spacing:-.02em;margin:.22rem 0 .55rem;padding-left:22px}
   .plan{list-style:none;margin:0;padding:0 0 0 22px}
   .plan li{display:grid;grid-template-columns:19px 1fr auto;align-items:center;gap:.5rem;padding:.45rem .3rem .45rem 0;
@@ -57,9 +58,9 @@
   .start:hover{filter:brightness(.94)}
   .start svg{width:12px;height:12px;fill:#fff}
   .pg h3{font-family:var(--read);font-style:italic;font-weight:500;font-size:.9rem;color:var(--sec);margin:0 0 .5rem}
-  .noteline{font-family:var(--read);font-size:.82rem;color:var(--sec);line-height:2;border-bottom:1px solid #ece7db;padding:0 .1rem}
+  .noteline{font-family:var(--hand);font-size:1.12rem;color:var(--sec);line-height:1.85;border-bottom:1px solid #ece7db;padding:0 .1rem}
   .noteline b{color:var(--ink);font-weight:600}
-  .pg .doable{margin-top:auto;font-family:var(--read);font-style:italic;font-size:.75rem;color:var(--mut);text-align:right}
+  .pg .doable{margin-top:auto;font-family:var(--hand);font-size:1.05rem;color:var(--mut);text-align:right}
   .subjpg .unit{display:flex;align-items:baseline;justify-content:space-between;gap:.7rem;padding:.45rem .3rem;
     border-bottom:1px solid #ece7db;cursor:pointer;transition:background .14s}
   .subjpg .unit:hover{background:#faf7ef}
@@ -78,7 +79,7 @@
   .turn .face.back{transform:rotateY(180deg);border-radius:9px 0 0 9px;background:linear-gradient(to right,var(--paper) 88%,#efe9db 100%)}
   .book.turning .turn{opacity:1;animation:pageturn .62s var(--ease) forwards}
   @keyframes pageturn{from{transform:rotateY(0)}to{transform:rotateY(-178deg)}}
-  .tabs{position:absolute;right:-30px;top:26px;bottom:26px;display:flex;flex-direction:column;gap:4px;width:30px}
+  .tabs{position:absolute;right:-30px;top:26px;bottom:26px;display:flex;flex-direction:column;gap:4px;width:30px;z-index:4}
   .tab{flex:1;min-height:0;width:30px;border-radius:0 6px 6px 0;
     background:linear-gradient(to right,color-mix(in srgb,var(--tc) 78%,#000) 0,var(--tc) 26%,color-mix(in srgb,var(--tc) 88%,#fff) 100%);
     display:grid;place-items:center;cursor:pointer;border:none;padding:.35rem 0;
@@ -106,27 +107,20 @@
     font-size:.64rem;color:rgba(255,255,255,.92);text-shadow:0 1px 4px rgba(0,0,0,.45)}
   .postcard.flipped .hint{display:none}
 
-  /* ============ the PHONE: shorts live on its screen ============ */
-  .phone{position:absolute;right:clamp(21rem,26vw,25rem);top:11%;width:132px;aspect-ratio:9/19;cursor:pointer;
-    background:linear-gradient(125deg,#3a352d 0%,#26231e 30%,#1c1a16 100%);border:none;border-radius:20px;padding:7px;
-    box-shadow:inset 1px 1px 1px rgba(255,250,238,.28),inset -1px -1px 1px rgba(0,0,0,.5),
-      9px 20px 30px -10px rgba(56,40,18,.5),2px 5px 8px rgba(56,40,18,.28);
-    transform:rotate(-3deg);transition:transform .2s;z-index:2}
-  .phone::after{content:"";position:absolute;left:8%;right:-11%;bottom:-15px;height:24px;z-index:-1;
-    background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.46),transparent 72%);filter:blur(3px);transform:rotate(1.5deg)}
-  .phone:hover{transform:rotate(-3deg) translateY(-4px)}
-  /* glass: a diagonal glare across the screen */
-  .phone .screen::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
-    background:linear-gradient(115deg,rgba(255,253,244,.2) 0%,rgba(255,253,244,.06) 22%,transparent 40%)}
-  .phone:focus-visible{outline:2px solid var(--anchor);outline-offset:4px}
-  .phone .screen{display:block;position:relative;width:100%;height:100%;border-radius:14px;overflow:hidden;
-    background:#111 var(--pshot,none) center/cover no-repeat}
-  .phone .cam{position:absolute;top:9px;left:50%;transform:translateX(-50%);width:7px;height:7px;border-radius:50%;
-    background:#0a0a0a;box-shadow:inset 0 0 2px #333;z-index:2}
-  .phone .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,5,.78),transparent 44%)}
-  .phone .plab{position:absolute;left:0;right:0;bottom:.55rem;text-align:center;color:#fff}
-  .phone .plab b{display:block;font-size:.78rem;font-weight:800}
-  .phone .plab small{display:block;font-family:var(--read);font-style:italic;font-size:.6rem;color:rgba(255,255,255,.85)}
+  /* ============ the DRAWN phone: an object plate with a live screen set
+     into its glass. The wrapper is inert; only the screen takes pointers. */
+  .phonewrap{position:absolute;right:clamp(13rem,17vw,18rem);top:34%;width:330px;pointer-events:none;z-index:2}
+  .phonewrap img{width:100%;display:block}
+  .phonewrap .screen{position:absolute;left:35.9%;top:20.6%;width:27.4%;height:58.2%;border-radius:11px;overflow:hidden;
+    pointer-events:auto;cursor:pointer;border:none;padding:0;
+    background:#14120e var(--pshot,none) center/cover no-repeat}
+  .phonewrap .screen:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  .phonewrap .screen::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,rgba(255,253,244,.16) 0%,rgba(255,253,244,.05) 24%,transparent 42%)}
+  .phonewrap .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,5,.78),transparent 44%)}
+  .phonewrap .plab{position:absolute;left:0;right:0;bottom:.5rem;text-align:center;color:#fff}
+  .phonewrap .plab b{display:block;font-size:.76rem;font-weight:800}
+  .phonewrap .plab small{display:block;font-family:var(--read);font-style:italic;font-size:.58rem;color:rgba(255,255,255,.85)}
 
   /* the phone pops up: the REAL feed, full screen */
   .phonemodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
@@ -161,10 +155,29 @@
   .radio .rlab small{display:block;font-family:var(--read);font-style:italic;font-size:.74rem;color:#5d5342;margin-top:.08rem}
 
   /* ============ sticky notes ============ */
-  .sticky{position:absolute;width:150px;padding:.7rem .75rem .85rem;color:#4d4425;
+  .sticky{position:absolute;width:150px;padding:.65rem .75rem .8rem;color:#4d4425;
     background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
-    font-family:var(--read);font-style:italic;font-size:.8rem;line-height:1.45;
+    font-family:var(--hand);font-size:1.1rem;line-height:1.3;
     box-shadow:5px 9px 16px -5px rgba(56,40,18,.38);z-index:2}
+  .sticky:focus-within{outline:2px solid rgba(78,95,102,.45);outline-offset:2px}
+  .sticky .txt{outline:none;min-height:1.2em}
+  .sticky .del{position:absolute;top:-9px;left:-9px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line);
+    background:var(--paper);color:var(--sec);font-size:.8rem;line-height:1;cursor:pointer;display:none;place-items:center;
+    box-shadow:0 2px 5px rgba(56,40,18,.25)}
+  .sticky:hover .del{display:grid}
+  /* the pad of blank notes — peel one off */
+  .pad{position:absolute;left:clamp(.8rem,2.5vw,2rem);bottom:6.5%;width:112px;height:84px;cursor:pointer;
+    background:linear-gradient(168deg,#f9edb4,#f0df95);border:none;padding:0;
+    box-shadow:0 2px 0 #e8d78a,0 4px 0 #decd80,6px 10px 16px -5px rgba(56,40,18,.4);z-index:2}
+  .pad span{font-family:var(--hand);font-size:1.15rem;color:#8a7d45}
+  .pad:hover span{color:#4d4425}
+  .pad:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+  /* draggables */
+  .drg{touch-action:none}
+  .drg:not(.lift){cursor:grab}
+  .drg.lift{cursor:grabbing;z-index:14!important}
+  .tidy{background:none;border:none;font-family:var(--hand);font-size:1.05rem;color:#6b5f49;cursor:pointer;margin-right:1rem}
+  .tidy:hover{color:#3d3428}
   .sticky::after{content:"";position:absolute;right:0;bottom:0;border-style:solid;border-width:0 0 16px 16px;
     border-color:transparent transparent rgba(56,40,18,.14) transparent}
   .sticky.s1{left:41%;top:3%;width:128px;transform:rotate(-3deg)}
@@ -184,13 +197,13 @@
 <body>
 <div class="top">
   <span class="brand">Study<b>Vault</b></span>
-  <span class="avatar">S</span>
+  <span style="display:flex;align-items:center;gap:.4rem"><button class="tidy" id="tidy" title="Put everything back where it started">tidy desk</button><span class="avatar">S</span></span>
 </div>
 
 <div class="desk">
 
-  <div class="sticky s1"><b>312 days</b> to your first exam.</div>
-  <div class="sticky s2">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</div>
+  <div class="sticky s1" data-sid="s1"><span class="txt"><b>312 days</b> to your first exam.</span></div>
+  <div class="sticky s2" data-sid="s2"><span class="txt">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</span></div>
 
   <div class="bookwrap">
     <div class="book" id="book">
@@ -212,13 +225,15 @@
     </span>
   </button>
 
-  <button class="phone" id="phone" aria-label="Open Shorts — today’s 20">
-    <span class="screen">
-      <span class="cam"></span>
+  <div class="phonewrap" id="phonewrap">
+    <img src="assets/lw/night-phone-cut.png" alt="">
+    <button class="screen" id="phone" aria-label="Open Shorts — today’s 20">
       <span class="pscrim"></span>
       <span class="plab"><b>Shorts</b><small id="shortsSub">today’s 20</small></span>
-    </span>
-  </button>
+    </button>
+  </div>
+
+  <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
 
   <button class="radio" id="radio" aria-label="Revision Radio">
     <span class="art">
@@ -308,7 +323,7 @@ setSpread(TODAY_L,TODAY_R);
 
 /* ---------- postcard ---------- */
 const pc=document.getElementById('postcard');
-pc.onclick=()=>pc.classList.toggle('flipped');
+pc.onclick=()=>{ if(dragBlockClick) return; pc.classList.toggle('flipped'); };
 fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
   const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
@@ -328,7 +343,7 @@ fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
   if(n>0) document.getElementById('shortsSub').textContent=n+' of 20 watched';
 }).catch(()=>{});
 const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
-document.getElementById('phone').onclick=()=>{ frame.src='/design-lab/shorts.html'; modal.classList.add('open'); };
+document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return; frame.src='/design-lab/shorts.html'; modal.classList.add('open'); };
 document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
@@ -343,7 +358,71 @@ function setMode(v){ lofi=v;
   mq.textContent=lofi?LOFI_TXT:PODCAST_TXT;
   rmode.textContent=lofi?'lo-fi study beats · tap the left dial for podcasts':'podcasts · tap the left dial for lo-fi';
   knob.setAttribute('aria-checked',String(lofi)); }
-knob.onclick=e=>{ e.stopPropagation(); setMode(!lofi); };
+knob.onclick=e=>{ e.stopPropagation(); if(dragBlockClick) return; setMode(!lofi); };
+
+/* ---------- a desk you can rearrange: drag anything, it stays put ---------- */
+const deskEl=document.querySelector('.desk');
+const LKEY='sv_desk_layout', SKEY='sv_desk_stickies';
+let layout={}; try{ layout=JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e){}
+function saveLayout(){ try{ localStorage.setItem(LKEY,JSON.stringify(layout)); }catch(e){} }
+let dragBlockClick=false;
+function makeDraggable(el,id,handle){
+  const h=handle||el;
+  el.classList.add('drg'); if(handle) handle.classList.add('drg');
+  const saved=layout[id];
+  if(saved){ el.style.left=saved.x+'px'; el.style.top=saved.y+'px'; el.style.right='auto'; el.style.bottom='auto'; }
+  let sx,sy,ox,oy,moved=false,pid=null;
+  h.addEventListener('pointerdown',e=>{
+    if(document.activeElement && el.contains(document.activeElement) && document.activeElement.isContentEditable) return;
+    pid=e.pointerId; try{ h.setPointerCapture(pid); }catch(_){}
+    const r=el.getBoundingClientRect(), pr=deskEl.getBoundingClientRect();
+    sx=e.clientX; sy=e.clientY; ox=r.left-pr.left; oy=r.top-pr.top; moved=false;
+  });
+  h.addEventListener('pointermove',e=>{
+    if(pid===null) return;
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(!moved){ if(Math.hypot(dx,dy)<6) return; moved=true; el.classList.add('lift'); }
+    el.style.left=(ox+dx)+'px'; el.style.top=(oy+dy)+'px'; el.style.right='auto'; el.style.bottom='auto';
+  });
+  function up(){ if(pid===null) return; try{ h.releasePointerCapture(pid); }catch(_){} pid=null; el.classList.remove('lift');
+    if(moved){ layout[id]={x:parseFloat(el.style.left),y:parseFloat(el.style.top)}; saveLayout();
+      dragBlockClick=true; setTimeout(()=>dragBlockClick=false,0); } }
+  h.addEventListener('pointerup',up); h.addEventListener('pointercancel',up);
+}
+makeDraggable(document.getElementById('postcard'),'postcard');
+makeDraggable(document.getElementById('phonewrap'),'phone',document.getElementById('phone'));
+makeDraggable(document.getElementById('radio'),'radio');
+makeDraggable(document.querySelector('.cal'),'cal');
+
+/* ---------- stickies: edit in place, peel new ones, bin them ---------- */
+let stickyStore={}; try{ stickyStore=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
+function saveStickies(){ try{ localStorage.setItem(SKEY,JSON.stringify(stickyStore)); }catch(e){} }
+function wireSticky(el){
+  const sid=el.dataset.sid, txt=el.querySelector('.txt');
+  const rec=stickyStore[sid];
+  if(rec){ if(rec.del){ el.remove(); return; } if(rec.html!=null) txt.innerHTML=rec.html; }
+  txt.contentEditable='true'; txt.spellcheck=false;
+  txt.addEventListener('input',()=>{ stickyStore[sid]=Object.assign(stickyStore[sid]||{},{html:txt.innerHTML}); saveStickies(); });
+  const del=document.createElement('button'); del.className='del'; del.textContent='×'; del.title='Bin this note';
+  del.onclick=e=>{ e.stopPropagation(); stickyStore[sid]=Object.assign(stickyStore[sid]||{},{del:true}); saveStickies(); el.remove(); };
+  el.appendChild(del);
+  makeDraggable(el,'sticky-'+sid);
+}
+function spawnSticky(sid,html,fresh){
+  const el=document.createElement('div'); el.className='sticky'; el.dataset.sid=sid;
+  el.innerHTML='<span class="txt">'+html+'</span>';
+  const saved=layout['sticky-'+sid];
+  el.style.left=(saved?saved.x:170+Math.random()*90)+'px';
+  el.style.top=(saved?saved.y:460+Math.random()*60)+'px';
+  el.style.transform='rotate('+(Math.random()*6-3).toFixed(1)+'deg)';
+  deskEl.appendChild(el); wireSticky(el);
+  if(fresh) el.querySelector('.txt').focus();
+}
+document.querySelectorAll('.sticky').forEach(wireSticky);
+Object.keys(stickyStore).filter(k=>k.startsWith('u')).forEach(sid=>{ if(!stickyStore[sid].del) spawnSticky(sid,stickyStore[sid].html||''); });
+document.getElementById('pad').onclick=()=>{ if(dragBlockClick) return;
+  const sid='u'+Date.now(); stickyStore[sid]={html:''}; saveStickies(); spawnSticky(sid,'',true); };
+document.getElementById('tidy').onclick=()=>{ localStorage.removeItem(LKEY); localStorage.removeItem(SKEY); location.reload(); };
 
 /* ---------- state presets for headless render QA ---------- */
 const q=new URLSearchParams(location.search);
