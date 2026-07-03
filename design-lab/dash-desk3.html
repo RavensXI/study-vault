@@ -171,16 +171,18 @@
   .radio .art::before{content:"";position:absolute;left:10%;right:-2%;bottom:2%;height:14px;z-index:-1;
     background:radial-gradient(50% 100% at 50% 50%,rgba(56,40,18,.36),transparent 72%);filter:blur(3px)}
   .radio img{width:100%;filter:drop-shadow(7px 12px 12px rgba(56,40,18,.32))}
-  /* the LCD sits in the radio's fascia between the dials */
-  .lcd{position:absolute;left:26%;right:26%;top:59%;height:9%;background:#23281f;border-radius:3px;
+  /* the LCD sits in the radio's fascia between the dials (display only) */
+  .lcd{position:absolute;left:26%;right:26%;top:59%;height:9%;background:#23281f;border-radius:3px;pointer-events:none;
     box-shadow:inset 0 1px 3px rgba(0,0,0,.75),0 0 0 2px rgba(38,30,16,.4);overflow:hidden;display:flex;align-items:center}
   .lcd .mq{white-space:nowrap;font-family:ui-monospace,Consolas,monospace;font-size:.58rem;letter-spacing:.08em;
     color:#e6c17c;text-shadow:0 0 5px rgba(230,193,124,.55);animation:mq 11s linear infinite;animation-delay:-4s;padding-left:100%}
   @keyframes mq{to{transform:translateX(-100%)}}
   .lcd.lofi .mq{color:#a8d8b0;text-shadow:0 0 5px rgba(168,216,176,.55)}
-  /* the mode knob: the left dial is a real control */
-  .knob{position:absolute;left:20.5%;top:76%;width:13%;aspect-ratio:1;border-radius:50%;background:transparent;
+  /* both dials are real controls, sitting exactly on the drawn knobs:
+     left = stations, right = skip song */
+  .knob{position:absolute;left:37.5%;top:54.5%;width:10.5%;aspect-ratio:1;border-radius:50%;background:transparent;
     border:2px solid transparent;cursor:pointer;transition:border-color .15s;padding:0}
+  .knob.k2{left:62.8%;top:50.8%}
   .radio:hover .knob,.knob:focus-visible{border-color:rgba(230,193,124,.65);outline:none}
   .radio .rlab{margin-top:.35rem}
   .radio .rlab b{display:block;font-size:.9rem;font-weight:700;color:#3d3428}
@@ -323,7 +325,8 @@
     <span class="art">
       <img src="assets/lw/night-radio-set-cut.png" alt="">
       <span class="lcd" id="lcd"><span class="mq" id="mq">NOW PLAYING · STAVE 3 — POVERTY &amp; GENEROSITY · ENGLISH LITERATURE · 10 MIN ·&nbsp;</span></span>
-      <span class="knob" id="knob" role="switch" aria-checked="false" aria-label="Switch between podcasts and lo-fi study beats" title="podcasts / lo-fi"></span>
+      <span class="knob" id="knob" role="switch" aria-checked="false" aria-label="Tune: next station" title="stations"></span>
+      <span class="knob k2" id="knob2" role="button" aria-label="Skip to the next song" title="skip song"></span>
     </span>
     <span class="rlab"><b>Revision Radio</b><small id="rmode">podcasts · tap the left dial for lo-fi</small></span>
   </button>
@@ -454,7 +457,8 @@ const PODCAST_TXT='NOW PLAYING · STAVE 3 — POVERTY & GENEROSITY · ENGLISH LI
 const STATION_ORDER=['morning','library','rain','midnight','steady','bossa','season'];
 /* the season stop always plays the season outside the window */
 const SEASON_BY_MONTH=['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn','autumn','winter'];
-const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'), knob=document.getElementById('knob');
+const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'),
+      knob=document.getElementById('knob'), knob2=document.getElementById('knob2');
 
 /* the station engine: stations are FOLDERS under assets/radio/ — drop tracks
    in, refresh, the dial knows. Discovery rides the dev server's directory
@@ -504,20 +508,30 @@ function setMode(i,opts={}){
     player.pause();
     mq.textContent=PODCAST_TXT;
     rmode.textContent= stations.length
-      ? 'podcasts · tap the dial for '+stations[0].label
+      ? 'podcasts · tap the left dial for '+stations[0].label
       : 'podcasts · drop tracks in assets/radio/ to open stations';
   } else if(opts.silent){
     const s=stations[mode];
     mq.textContent='TUNED: '+s.label.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · ';
-    rmode.textContent=s.label+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].label:'podcasts');
+    rmode.textContent=s.label+' · right dial skips the song';
   } else {
     const s=stations[mode];
-    rmode.textContent=s.label+' · tap the dial for '+(mode+1<stations.length?stations[mode+1].label:'podcasts');
+    rmode.textContent=s.label+' · right dial skips the song';
     playCurrent();
   }
 }
 knob.onclick=e=>{ e.stopPropagation(); if(dragBlockClick) return;
   setMode(mode+1>=stations.length ? -1 : mode+1); };
+/* right dial: skip within the station; on podcasts it just points you left */
+let lcdNudge=null;
+knob2.onclick=e=>{ e.stopPropagation(); if(dragBlockClick) return;
+  if(mode<0){
+    mq.textContent='TUNE THE LEFT DIAL FIRST · ';
+    clearTimeout(lcdNudge);
+    lcdNudge=setTimeout(()=>{ if(mode<0) mq.textContent=PODCAST_TXT; },3200);
+    return;
+  }
+  nextTrack(); };
 discover();
 
 /* ---------- a desk you can rearrange: drag anything, it stays put ---------- */
