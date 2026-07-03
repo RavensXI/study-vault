@@ -355,11 +355,14 @@ const PODCAST_TXT='NOW PLAYING · STAVE 3 — POVERTY & GENEROSITY · ENGLISH LI
 const LOFI_TXT='LO-FI STUDY BEATS · SIDE A · LOW VOLUME, LONG EVENINGS · ';
 let lofi=false;
 const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'), knob=document.getElementById('knob');
+// side A: recorded from Lyria RealTime through the same API key as the art
+const lofiAudio=new Audio('assets/lofi-a.mp3'); lofiAudio.loop=true; lofiAudio.volume=.55;
 function setMode(v){ lofi=v;
   lcd.classList.toggle('lofi',lofi);
   mq.textContent=lofi?LOFI_TXT:PODCAST_TXT;
   rmode.textContent=lofi?'lo-fi study beats · tap the left dial for podcasts':'podcasts · tap the left dial for lo-fi';
-  knob.setAttribute('aria-checked',String(lofi)); }
+  knob.setAttribute('aria-checked',String(lofi));
+  if(lofi) lofiAudio.play().catch(()=>{}); else lofiAudio.pause(); }
 knob.onclick=e=>{ e.stopPropagation(); if(dragBlockClick) return; setMode(!lofi); };
 
 /* ---------- a desk you can rearrange: drag anything, it stays put ---------- */
