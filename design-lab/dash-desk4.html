@@ -108,6 +108,95 @@
   .rlab4 b{display:block;font-size:30px;font-weight:700;color:#3d3428}
   .rlab4 small{display:block;font-family:var(--read);font-style:italic;font-size:24px;color:#5d5342;margin-top:4px}
 
+  /* ============ paper objects: stickies, pad, postcard, flashcards ============
+     These ARE paper, so they stay crisp HTML — they pop because they're live. */
+  .sticky{position:absolute;width:264px;padding:20px 24px 26px;color:#4d4425;
+    background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
+    font-family:var(--hand);font-size:36px;line-height:1.3;
+    box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);z-index:3;cursor:grab}
+  .sticky:focus-within{outline:3px solid rgba(78,95,102,.45);outline-offset:3px}
+  .sticky .txt{outline:none;min-height:1.2em}
+  .sticky b{font-weight:600;color:#33301c}
+  .sticky .del{position:absolute;top:-16px;left:-16px;width:40px;height:40px;border-radius:50%;border:2px solid var(--line);
+    background:var(--paper);color:var(--sec);font-size:26px;line-height:1;cursor:pointer;display:none;place-items:center;
+    box-shadow:0 3px 9px rgba(56,40,18,.25)}
+  .sticky:hover .del{display:grid}
+  .sticky.s1{left:660px;top:150px;width:240px;transform:rotate(-3deg)}
+  .sticky.s2{left:1450px;top:140px;width:330px;transform:rotate(2.5deg);background:#efe3b6}
+  .pad{position:absolute;left:924px;top:168px;width:200px;height:150px;cursor:pointer;
+    background:linear-gradient(168deg,#f9edb4,#f0df95);border:none;padding:0;z-index:3;
+    box-shadow:0 4px 0 #e8d78a,0 8px 0 #decd80,11px 18px 28px -9px rgba(56,40,18,.4)}
+  .pad span{font-family:var(--hand);font-size:38px;color:#8a7d45}
+  .pad:hover span{color:#4d4425}
+  .pad:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
+
+  .postcard{position:absolute;left:2130px;top:96px;width:540px;aspect-ratio:3/2;cursor:pointer;
+    background:none;border:none;padding:0;z-index:3;rotate:-4deg;perspective:2000px}
+  .postcard .inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .6s var(--ease)}
+  .postcard.flipped .inner{transform:rotateY(180deg)}
+  .postcard .side{position:absolute;inset:0;backface-visibility:hidden;background:var(--paper);
+    border:16px solid var(--paper);box-shadow:10px 18px 30px -10px rgba(56,40,18,.4)}
+  .postcard .side.front{background:var(--paper) var(--gart,linear-gradient(120deg,#e8e2d2,#d9d2be)) center/cover no-repeat;
+    background-clip:padding-box}
+  .postcard .side.back{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:space-between;
+    padding:26px 30px}
+  .postcard .postmark{font-family:ui-monospace,Consolas,monospace;font-size:24px;letter-spacing:.14em;color:#8a4f42;
+    border:3px solid #b98a80;border-radius:50%;width:210px;height:210px;display:grid;place-items:center;text-align:center;
+    transform:rotate(-12deg);opacity:.85;align-self:flex-end}
+  .postcard .cap{font-family:var(--hand);font-size:38px;color:var(--sec);line-height:1.25}
+  .postcard .hint{position:absolute;right:14px;bottom:8px;font-family:var(--hand);font-size:26px;color:rgba(77,68,37,.65)}
+  .postcard:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
+
+  /* flashcards: a believable loose pile — every card the SAME size */
+  .cards{position:absolute;left:2350px;top:1128px;width:300px;height:200px;background:none;border:none;padding:0;
+    cursor:pointer;z-index:3;transform:rotate(-4deg)}
+  .cards .fc{position:absolute;inset:0;background:var(--paper);border:2px solid var(--line);border-radius:10px;
+    box-shadow:6px 10px 18px -7px rgba(56,40,18,.28)}
+  .cards .fc.u1{transform:rotate(9deg) translate(38px,-14px)}
+  .cards .fc.u2{transform:rotate(-11deg) translate(-30px,10px)}
+  .cards .fc.u3{transform:rotate(4deg) translate(14px,26px)}
+  .cards .fc.u4{transform:rotate(-5deg) translate(-12px,-24px)}
+  .cards .fc.top{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:20px 28px;text-align:left;
+    border-left:8px solid var(--fcc,#8a5a44);transition:transform .15s ease-in}
+  .cards .q{font-family:var(--hand);font-size:37px;line-height:1.15;color:var(--ink)}
+  .cards .subj{font-size:19px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+  .cards:hover .fc.top{transform:translateY(-6px)}
+  .cards:focus-visible{outline:3px solid var(--anchor);outline-offset:6px}
+  .cards .fchint{position:absolute;left:50%;bottom:-52px;transform:translateX(-50%);
+    font-family:var(--hand);font-size:32px;color:#6b5c41;white-space:nowrap}
+
+  /* ============ the phone: painted plate, live glass ============ */
+  #phonewrap{position:absolute;left:1810px;top:825px;width:1067px;height:1736px;
+    transform:scale(.37);transform-origin:0 0;pointer-events:none}
+  #phonewrap>.plate{position:absolute;left:0;top:0;width:1067px;display:block;pointer-events:none}
+  .screen4{position:absolute;left:0;top:0;width:660px;height:1400px;transform-origin:0 0;
+    transform:matrix3d(1.017443,0.089297,0.000000,0.000026,-0.156085,0.901021,0.000000,-0.000054,0.000000,0.000000,1.000000,0.000000,348.000000,112.000000,0.000000,1.000000);
+    overflow:hidden;border:none;padding:0;cursor:pointer;pointer-events:auto;transition:filter .2s;
+    background:#14120e var(--pshot,none) center/cover no-repeat}
+  .screen4:hover{filter:brightness(1.1)}
+  .screen4:focus-visible{outline:6px solid var(--anchor);outline-offset:6px}
+  .screen4 .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,5,.8),transparent 44%)}
+  .screen4 .plab{position:absolute;left:0;right:0;bottom:60px;text-align:center;color:#fff}
+  .screen4 .plab b{display:block;font-size:70px;font-weight:800}
+  .screen4 .plab small{display:block;font-family:var(--read);font-style:italic;font-size:48px;color:rgba(255,255,255,.85);margin-top:8px}
+  .dot4{position:absolute;left:930px;top:118px;width:58px;height:58px;border-radius:50%;
+    background:#b3402f;border:8px solid #f7f3ea;box-shadow:0 4px 12px rgba(56,40,18,.3);
+    animation:dotpulse4 2.8s ease-in-out infinite}
+  @keyframes dotpulse4{0%,100%{transform:scale(1)}50%{transform:scale(1.22)}}
+  @media (prefers-reduced-motion:reduce){.dot4{animation:none}}
+
+  /* ============ the phone modal: the REAL feed ============ */
+  .phonemodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
+  .phonemodal.open{display:grid}
+  .phonemodal .dev{position:relative;height:min(92vh,860px);aspect-ratio:9/18.2;background:#26231e;border-radius:30px;padding:10px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+  .phonemodal iframe{width:100%;height:100%;border:0;border-radius:20px;background:#f2efe9}
+  .phonemodal .x{position:absolute;top:-14px;right:-14px;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:18px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+
+  .tidy{background:none;border:none;font-family:var(--hand);font-size:1.05rem;color:#6b5c41;cursor:pointer}
+  .tidy:hover{color:#26231e}
+
   /* subject tabs along the painted fore-edge (angle = its outward normal) */
   .tab4{position:absolute;width:158px;height:74px;border:none;cursor:pointer;padding:0 14px 0 36px;
     border-radius:0 18px 18px 0;transform:translate(-36px,-37px) rotate(-7.2deg);transform-origin:left center;
@@ -122,7 +211,7 @@
 
 <div class="top">
   <span class="brand">Study<b>Vault</b></span>
-  <span class="avatar">S</span>
+  <span style="display:flex;align-items:center;gap:.6rem"><button class="tidy" id="tidy" title="Put everything back where it started">tidy desk</button><span class="avatar">S</span></span>
 </div>
 
 <div id="stage">
@@ -136,11 +225,54 @@
   </div>
   <div class="rlab4"><b>Revision Radio</b><small id="rmode">podcasts · tap the left dial for lo-fi</small></div>
 
+  <div class="sticky s1" data-sid="s1"><span class="txt"><b>312 days</b> to your first exam.</span></div>
+  <div class="sticky s2" data-sid="s2"><span class="txt">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</span></div>
+  <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
+
+  <button class="postcard" id="postcard" aria-label="This week’s postcard — flip to read the back">
+    <span class="inner">
+      <span class="side front"></span>
+      <span class="side back">
+        <span class="cap" id="doodleCap">This week’s picture.</span>
+        <span class="postmark" id="postmark">STUDYVAULT<br>W/C —</span>
+      </span>
+      <span class="hint">flip ↻</span>
+    </span>
+  </button>
+
+  <div id="phonewrap" role="group" aria-label="Shorts phone">
+    <img class="plate" src="assets/lw/desk4-phone-c-cut.png" alt="">
+    <button class="screen4" id="phone" aria-label="Open Shorts — today’s 20">
+      <span class="pscrim"></span>
+      <span class="plab"><b>Shorts</b><small id="shortsSub">today’s 20</small></span>
+    </button>
+    <span class="dot4" aria-hidden="true"></span>
+  </div>
+
+  <button class="cards" id="cards" aria-label="Flashcards — a mixed deck. Click to flip.">
+    <span class="fc u1"></span>
+    <span class="fc u2"></span>
+    <span class="fc u3"></span>
+    <span class="fc u4"></span>
+    <span class="fc top" id="fcTop">
+      <span class="q" id="fcText"></span>
+      <span class="subj" id="fcSubj"></span>
+    </span>
+    <span class="fchint">mixed deck ↻</span>
+  </button>
+
   <div id="book">
     <img class="plate" src="assets/lw/desk4-book-d-cut.png" alt="">
     <section class="pg4 pl" id="pgL"></section>
     <section class="pg4 pr" id="pgR"></section>
     <nav id="tabs" aria-label="Your subjects"></nav>
+  </div>
+</div>
+
+<div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
+  <div class="dev">
+    <button class="x" id="closephone" aria-label="Close">×</button>
+    <iframe id="feedframe" title="Shorts feed" loading="lazy"></iframe>
   </div>
 </div>
 
@@ -309,6 +441,120 @@ knob2.onclick=e=>{ e.stopPropagation();
   nextTrack(); };
 discover();
 
+/* ---------- stage-aware dragging: pointer deltas are screen px, positions
+   are STAGE px — divide by the current scale k. ---------- */
+const LKEY='sv_desk4_layout', SKEY='sv_desk4_stickies';
+let layout={}; try{ layout=JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e){}
+function saveLayout(){ try{ localStorage.setItem(LKEY,JSON.stringify(layout)); }catch(e){} }
+let dragBlockClick=false, kNow=.53;
+function makeDraggable(el,id){
+  if(!el) return;
+  el.querySelectorAll('img').forEach(im=>im.draggable=false);
+  const saved=layout[id];
+  if(saved){ el.style.left=saved.x+'px'; el.style.top=saved.y+'px'; el.style.right='auto'; el.style.bottom='auto'; }
+  let sx,sy,ox,oy,moved=false,pid=null;
+  el.addEventListener('pointerdown',e=>{
+    const t=el.querySelector('.txt');
+    if(t && e.target.closest('.txt') && document.activeElement===t) return;
+    pid=e.pointerId;
+    sx=e.clientX; sy=e.clientY;
+    ox=parseFloat(getComputedStyle(el).left); oy=parseFloat(getComputedStyle(el).top); moved=false;
+  });
+  el.addEventListener('pointermove',e=>{
+    if(pid===null) return;
+    const dx=(e.clientX-sx)/kNow, dy=(e.clientY-sy)/kNow;
+    if(!moved){ if(Math.hypot(dx,dy)<6/kNow) return;
+      moved=true;
+      try{ el.setPointerCapture(pid); }catch(_){}
+      e.preventDefault();
+    }
+    el.style.left=(ox+dx)+'px'; el.style.top=(oy+dy)+'px'; el.style.right='auto'; el.style.bottom='auto';
+  });
+  function up(){ if(pid===null) return; try{ el.releasePointerCapture(pid); }catch(_){} pid=null;
+    if(moved){ layout[id]={x:parseFloat(el.style.left),y:parseFloat(el.style.top)}; saveLayout();
+      dragBlockClick=true; setTimeout(()=>dragBlockClick=false,0); } }
+  el.addEventListener('pointerup',up); el.addEventListener('pointercancel',up);
+}
+
+/* ---------- postcard: weekly doodle, flips to the postmark ---------- */
+const pc=document.getElementById('postcard');
+pc.onclick=()=>{ if(dragBlockClick) return; pc.classList.toggle('flipped'); };
+fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
+  const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
+  const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
+  const w=cal[k];if(!w)return;
+  document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
+  document.getElementById('doodleCap').textContent=w.cap;
+  document.getElementById('postmark').innerHTML='STUDYVAULT<br>W/C '+m.toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase();
+}).catch(()=>{});
+
+/* ---------- stickies: edit in place, peel new ones, bin them ---------- */
+let stickyStore={}; try{ stickyStore=JSON.parse(localStorage.getItem(SKEY))||{}; }catch(e){}
+function saveStickies(){ try{ localStorage.setItem(SKEY,JSON.stringify(stickyStore)); }catch(e){} }
+function wireSticky(el){
+  const sid=el.dataset.sid, txt=el.querySelector('.txt');
+  const rec=stickyStore[sid];
+  if(rec){ if(rec.del){ el.remove(); return; } if(rec.html!=null) txt.innerHTML=rec.html; }
+  txt.contentEditable='true'; txt.spellcheck=false;
+  txt.addEventListener('input',()=>{ stickyStore[sid]={...(stickyStore[sid]||{}),html:txt.innerHTML}; saveStickies(); });
+  const del=document.createElement('button'); del.className='del'; del.textContent='×'; del.title='Bin this note';
+  del.onclick=e=>{ e.stopPropagation(); stickyStore[sid]={...(stickyStore[sid]||{}),del:true}; saveStickies(); el.remove(); };
+  el.appendChild(del);
+  makeDraggable(el,sid);
+}
+document.querySelectorAll('.sticky').forEach(wireSticky);
+function spawnSticky(sid,html,focus){
+  const el=document.createElement('div'); el.className='sticky'; el.dataset.sid=sid;
+  el.style.left=(980+Math.round(Math.random()*160))+'px'; el.style.top=(280+Math.round(Math.random()*80))+'px';
+  el.style.transform='rotate('+(Math.random()*6-3).toFixed(1)+'deg)';
+  el.innerHTML='<span class="txt">'+html+'</span>';
+  document.getElementById('stage').appendChild(el); wireSticky(el);
+  if(focus){ const t=el.querySelector('.txt'); t.focus(); }
+}
+Object.keys(stickyStore).filter(k=>k.startsWith('u')&&!stickyStore[k].del)
+  .forEach(k=>spawnSticky(k,stickyStore[k].html||''));
+document.getElementById('pad').onclick=()=>{ if(dragBlockClick) return;
+  const sid='u'+Math.random().toString(36).slice(2,9); stickyStore[sid]={html:''}; saveStickies(); spawnSticky(sid,'',true); };
+document.getElementById('tidy').onclick=()=>{ localStorage.removeItem(LKEY); localStorage.removeItem(SKEY); location.reload(); };
+
+/* ---------- flashcards: the interleaved mixed deck ---------- */
+const FC=[
+  {slug:'history', q:'When was the NHS founded?', a:'1948'},
+  {slug:'science', q:'Speed = ?', a:'distance ÷ time'},
+  {slug:'lit', q:'Who was Scrooge’s business partner?', a:'Jacob Marley'},
+  {slug:'geog', q:'The three types of rainfall?', a:'Relief · frontal · convectional'},
+  {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
+];
+const cardsEl=document.getElementById('cards'), fcTop=document.getElementById('fcTop'),
+      fcText=document.getElementById('fcText'), fcSubj=document.getElementById('fcSubj');
+let fci=0, fcA=false;
+function fcRender(){
+  const f=FC[fci], s=SUBJECTS.find(x=>x.slug===f.slug);
+  cardsEl.style.setProperty('--fcc', s?s.c:'#8a5a44');
+  fcText.textContent=fcA?f.a:f.q;
+  fcSubj.textContent=(s?s.name:f.slug)+(fcA?' — answer':'');
+}
+cardsEl.addEventListener('click',()=>{ if(dragBlockClick) return;
+  fcTop.style.transform='rotateY(88deg)';
+  setTimeout(()=>{ if(fcA){ fci=(fci+1)%FC.length; fcA=false; } else fcA=true;
+    fcRender(); fcTop.style.transform=''; },150);
+});
+fcRender();
+makeDraggable(cardsEl,'cards');
+makeDraggable(pc,'postcard');
+
+/* ---------- the phone: live poster on screen; opens the REAL feed ---------- */
+fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
+  for(const s of m){ const p=(s.url||'').split('.r2.dev/');
+    if(p.length>1){ document.documentElement.style.setProperty('--pshot',
+      "url('/design-lab/_posters/"+p[1].replace(/\.mp4$/,'.jpg')+"')"); break; } }
+}).catch(()=>{});
+const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
+document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return; frame.src='/design-lab/shorts.html'; modal.classList.add('open'); };
+document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
+modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
+
 /* QA: ?hit=x,y (screen px) paints a red dot and reports the topmost element there */
 { const hitq=new URLSearchParams(location.search).get('hit');
   if(hitq){ const [hx,hy]=hitq.split(',').map(Number);
@@ -317,7 +563,7 @@ discover();
       d.style.cssText='position:fixed;left:8px;bottom:8px;background:#000;color:#0f0;font:14px monospace;padding:6px 10px;z-index:99';
       const r=x=>{const b=x.getBoundingClientRect();return Math.round(b.left)+','+Math.round(b.top)+' '+Math.round(b.width)+'x'+Math.round(b.height)};
       const k2=document.getElementById('knob2'), cs=getComputedStyle(k2);
-      d.textContent='('+hx+','+hy+') -> '+(el? el.tagName+' #'+(el.id||'-'):'null')
+      d.textContent=innerWidth+'x'+innerHeight+' ('+hx+','+hy+') -> '+(el? el.tagName+' #'+(el.id||'-')+' .'+(String(el.className).split(' ')[0]||'-'):'null')
         +' | k2 '+r(k2)+' cssTop='+cs.top+' cssLeft='+cs.left
         +' | parent='+(k2.offsetParent? k2.offsetParent.id||k2.offsetParent.tagName:'null')
         +' | radio '+r(document.getElementById('radio'));
@@ -330,6 +576,7 @@ discover();
 const stage=document.getElementById('stage');
 function fit(){
   const k=Math.max(innerWidth/2752, innerHeight/1536);
+  kNow=k;
   stage.style.transform=`translate(${(innerWidth-2752*k)/2}px, ${(innerHeight-1536*k)/2}px) scale(${k})`;
 }
 addEventListener('resize', fit); fit();
