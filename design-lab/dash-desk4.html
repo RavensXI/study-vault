@@ -624,12 +624,16 @@ const bgmess=document.getElementById('bgmess');
 document.getElementById('tidy').onclick=()=>{
   localStorage.removeItem(LKEY); localStorage.removeItem(SKEY);
   try{ localStorage.setItem(CKEY, String(Date.now())); }catch(e){}
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches || bgmess.style.display==='none'){ location.reload(); return; }
-  document.getElementById('shine').classList.add('go');
-  document.getElementById('sparks').classList.add('go');
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ location.reload(); return; }
+  /* the wipe performs every time — even on an already-clean desk it resets
+     the layout, so it should still feel like something happened */
+  const sh=document.getElementById('shine'), sp=document.getElementById('sparks');
+  sh.classList.remove('go'); sp.classList.remove('go'); void sh.offsetWidth;
+  sh.classList.add('go'); sp.classList.add('go');
   bgmess.classList.add('gone');
   setTimeout(()=>location.reload(), 1950);
 };
+if(new URLSearchParams(location.search).get('shineqa')==='1') setTimeout(()=>document.getElementById('tidy').click(),500);
 
 /* ---------- flashcards: painted scatter -> flashcard mode ---------- */
 const FC=[
