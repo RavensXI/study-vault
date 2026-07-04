@@ -150,14 +150,19 @@
   /* flashcards: a believable loose pile — every card the SAME size */
   .cards{position:absolute;left:2350px;top:1128px;width:300px;height:200px;background:none;border:none;padding:0;
     cursor:pointer;z-index:3;transform:rotate(-4deg)}
-  .cards .fc{position:absolute;inset:0;background:var(--paper);border:2px solid var(--line);border-radius:10px;
-    box-shadow:6px 10px 18px -7px rgba(56,40,18,.28)}
+  .cards .fc{position:absolute;inset:0;background:#fdf9ef;border:2px solid #ddd3bc;border-radius:10px;
+    box-shadow:6px 10px 16px -7px rgba(56,40,18,.3)}
+  .cards .fc.u1{background:#fbf6e9}
+  .cards .fc.u3{background:#fdfaf2}
   .cards .fc.u1{transform:rotate(9deg) translate(38px,-14px)}
   .cards .fc.u2{transform:rotate(-11deg) translate(-30px,10px)}
   .cards .fc.u3{transform:rotate(4deg) translate(14px,26px)}
   .cards .fc.u4{transform:rotate(-5deg) translate(-12px,-24px)}
-  .cards .fc.top{display:flex;flex-direction:column;justify-content:center;gap:8px;padding:20px 28px;text-align:left;
-    border-left:8px solid var(--fcc,#8a5a44);transition:transform .15s ease-in}
+  .cards .fc.top{left:0;top:0;width:300px;height:200px;display:flex;flex-direction:column;justify-content:center;gap:8px;
+    padding:20px 24px 20px 34px;text-align:left;transition:transform .15s ease-in;background:#fffcf4}
+  /* subject accent: a translucent wash down the left edge, not an app stripe */
+  .cards .fc.top::before{content:"";position:absolute;left:0;top:0;bottom:0;width:16px;
+    border-radius:8px 0 0 8px;background:color-mix(in srgb,var(--fcc,#8a5a44) 34%,transparent)}
   .cards .q{font-family:var(--hand);font-size:37px;line-height:1.15;color:var(--ink)}
   .cards .subj{font-size:19px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
   .cards:hover .fc.top{transform:translateY(-6px)}
@@ -169,11 +174,17 @@
   #phonewrap{position:absolute;left:1810px;top:825px;width:1067px;height:1736px;
     transform:scale(.37);transform-origin:0 0;pointer-events:none}
   #phonewrap>.plate{position:absolute;left:0;top:0;width:1067px;display:block;pointer-events:none}
-  .screen4{position:absolute;left:0;top:0;width:660px;height:1400px;transform-origin:0 0;
+  .screen4{position:absolute;left:0;top:0;width:660px;height:1400px;transform-origin:0 0;border-radius:46px;
     transform:matrix3d(1.017443,0.089297,0.000000,0.000026,-0.156085,0.901021,0.000000,-0.000054,0.000000,0.000000,1.000000,0.000000,348.000000,112.000000,0.000000,1.000000);
     overflow:hidden;border:none;padding:0;cursor:pointer;pointer-events:auto;transition:filter .2s;
-    background:#14120e var(--pshot,none) center/cover no-repeat}
-  .screen4:hover{filter:brightness(1.1)}
+    background:#14120e}
+  .screen4 .pshot{position:absolute;inset:0;background:var(--pshot,none) center/cover no-repeat;
+    filter:saturate(.78) sepia(.1) contrast(.93) brightness(.96)}
+  /* the glass: warm tint + the diagonal reflection the painted phones carry */
+  .screen4::after{content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(107deg,rgba(255,250,238,.16) 6%,rgba(255,250,238,.05) 26%,transparent 44%),
+               linear-gradient(rgba(236,222,198,.05),rgba(236,222,198,.05))}
+  .screen4:hover{filter:brightness(1.08)}
   .screen4:focus-visible{outline:6px solid var(--anchor);outline-offset:6px}
   .screen4 .pscrim{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,7,5,.8),transparent 44%)}
   .screen4 .plab{position:absolute;left:0;right:0;bottom:60px;text-align:center;color:#fff}
@@ -243,6 +254,7 @@
   <div id="phonewrap" role="group" aria-label="Shorts phone">
     <img class="plate" src="assets/lw/desk4-phone-c-cut.png" alt="">
     <button class="screen4" id="phone" aria-label="Open Shorts — today’s 20">
+      <span class="pshot"></span>
       <span class="pscrim"></span>
       <span class="plab"><b>Shorts</b><small id="shortsSub">today’s 20</small></span>
     </button>
@@ -566,7 +578,7 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
       d.textContent=innerWidth+'x'+innerHeight+' ('+hx+','+hy+') -> '+(el? el.tagName+' #'+(el.id||'-')+' .'+(String(el.className).split(' ')[0]||'-'):'null')
         +' | k2 '+r(k2)+' cssTop='+cs.top+' cssLeft='+cs.left
         +' | parent='+(k2.offsetParent? k2.offsetParent.id||k2.offsetParent.tagName:'null')
-        +' | radio '+r(document.getElementById('radio'));
+        +' | fcTop '+r(document.getElementById('fcTop'))+' | cards '+r(document.getElementById('cards'));
       document.body.appendChild(d);
       const m=document.createElement('div');
       m.style.cssText='position:fixed;left:'+(hx-6)+'px;top:'+(hy-6)+'px;width:12px;height:12px;border-radius:50%;background:red;z-index:99;pointer-events:none';
