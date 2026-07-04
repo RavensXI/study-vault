@@ -145,6 +145,9 @@
   /* ============ paper objects: stickies, pad, postcard, flashcards ============
      These ARE paper, so they stay crisp HTML — they pop because they're live. */
   .sticky{position:absolute;width:264px;padding:20px 24px 26px;color:#4d4425;
+    transition:translate .25s var(--ease)}
+  .sticky:hover{translate:0 -8px}
+  .sticky{
     background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
     font-family:var(--hand);font-size:36px;line-height:1.3;
     box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);z-index:3;cursor:grab}
@@ -158,6 +161,9 @@
   .sticky.s1{left:660px;top:150px;width:240px;transform:rotate(-3deg)}
   .sticky.s2{left:1450px;top:140px;width:330px;transform:rotate(2.5deg);background:#efe3b6}
   .pad{position:absolute;left:924px;top:168px;width:200px;height:150px;cursor:pointer;
+    transition:translate .25s var(--ease),box-shadow .25s var(--ease)}
+  .pad:hover{translate:0 -8px}
+  .pad{
     background:linear-gradient(168deg,#f9edb4,#f0df95);border:none;padding:0;z-index:3;
     box-shadow:0 4px 0 #e8d78a,0 8px 0 #decd80,11px 18px 28px -9px rgba(56,40,18,.4)}
   .pad span{font-family:var(--hand);font-size:38px;color:#8a7d45}
@@ -169,18 +175,22 @@
      page; clicking crossfades front/back like the book's page turns. */
   .postcard{position:absolute;left:2120px;top:64px;width:1455px;height:1555px;cursor:pointer;
     background:none;border:none;padding:0;z-index:3;transform:scale(.37);transform-origin:0 0;
-    transition:transform .25s var(--ease);pointer-events:none}
-  .postcard:hover{transform:translateY(-12px) scale(.37)}
+    transition:translate .25s var(--ease);pointer-events:none}
+  .postcard:hover{translate:0 -12px}
   .postcard>.plate{position:absolute;left:0;top:0;width:1455px;display:block;pointer-events:none}
-  .postcard .chit{position:absolute;left:115px;top:100px;width:1250px;height:1300px;pointer-events:auto;cursor:pointer}
+  .postcard .chit{position:absolute;left:115px;top:100px;width:1250px;height:1300px;pointer-events:auto;cursor:grab}
   .postcard:focus-visible .chit{outline:16px solid var(--anchor);outline-offset:20px}
   .calpage{position:absolute;left:0;top:0;width:640px;height:700px;transform-origin:0 0;pointer-events:none;
     transform:matrix3d(1.983801,-0.111068,0,0.00016624,0.147150,1.696613,0,-0.00001267,0,0,1,0,120.000000,195.000000,0,1);
     display:flex;flex-direction:column;padding:30px 34px 22px;transition:opacity .25s ease}
-  .postcard .calpage.back{opacity:0;justify-content:space-between;padding:44px 40px 36px}
-  .postcard.flipped .calpage.front{opacity:0}
-  .postcard.flipped .calpage.back{opacity:1}
-  .postcard .calart{flex:none;height:298px;background:var(--gart,linear-gradient(120deg,#e8e2d2,#d9d2be)) center/cover no-repeat}
+  .postcard .calart{flex:none;height:258px;margin:10px 14px 0;opacity:.96;
+    background:var(--gart,linear-gradient(120deg,#e8e2d2,#d9d2be)) center/cover no-repeat;
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%),
+      linear-gradient(to bottom,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%);
+    -webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to right,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%),
+      linear-gradient(to bottom,transparent 0,#000 20px,#000 calc(100% - 20px),transparent 100%);
+    mask-composite:intersect}
   .postcard .calmonth{font-family:var(--hand);font-size:48px;color:#33301c;line-height:1.05;padding:6px 6px 2px;text-align:center}
   .postcard .calgrid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(0,1fr)}
   .postcard .wd{font-size:24px;font-weight:700;letter-spacing:.04em;color:var(--mut);text-align:center;align-self:center}
@@ -190,20 +200,18 @@
     font-family:var(--hand);font-style:normal;font-size:44px;color:#b8442f;opacity:.82;pointer-events:none}
   .postcard .dy.td::after{content:"";position:absolute;left:14%;right:14%;top:8%;bottom:8%;
     border:3px solid #b8442f;border-radius:50%;transform:rotate(-5deg);opacity:.7}
-  .postcard .cap{font-family:var(--hand);font-size:52px;color:var(--sec);line-height:1.25}
-  .postcard .postmark{font-family:ui-monospace,Consolas,monospace;font-size:30px;letter-spacing:.14em;color:#8a4f42;
-    border:4px solid #b98a80;border-radius:50%;width:270px;height:270px;display:grid;place-items:center;text-align:center;
-    transform:rotate(-12deg);opacity:.85;align-self:flex-end}
-  .postcard .hint{position:absolute;left:1130px;top:1462px;font-family:var(--hand);font-size:58px;
-    color:rgba(77,68,37,.65);white-space:nowrap;transform:rotate(-2deg)}
+  /* hover: the picture's caption appears handwritten on the desk below */
+  .postcard .calcap{position:absolute;left:190px;top:1478px;width:1140px;font-family:var(--hand);font-size:54px;
+    color:#6b5c41;line-height:1.15;opacity:0;transition:opacity .3s ease;transform:rotate(-1.5deg);pointer-events:none}
+  .postcard:hover .calcap{opacity:1}
 
   /* ============ the wristwatch: painted plate, live hands ============
      Taken off and dropped on the desk. Hands show the real time; clicking
      the face opens the revision-timer note; the countdown draws as a red
      arc on the dial. Container pe:none, only the face circle takes clicks. */
   #watch{position:absolute;left:1150px;top:170px;width:1362px;height:1227px;background:none;border:none;padding:0;
-    transform:scale(.22);transform-origin:0 0;transition:transform .25s var(--ease);pointer-events:none;z-index:2}
-  #watch:hover{transform:translateY(-10px) scale(.22)}
+    transform:scale(.22);transform-origin:0 0;transition:translate .25s var(--ease);pointer-events:none;z-index:2}
+  #watch:hover{translate:0 -10px}
   #watch>.plate{position:absolute;left:0;top:0;width:1362px;display:block;pointer-events:none}
   #watch .whit{position:absolute;left:400px;top:250px;width:580px;height:580px;border-radius:50%;
     pointer-events:auto;cursor:pointer}
@@ -236,8 +244,8 @@
      book's lower-left corner. Click target is the .hit span (the visible
      cards only) — the full plate box would swallow clicks under the book. */
   .cards{position:absolute;left:-75px;top:975px;width:2210px;height:1489px;background:none;border:none;padding:0;
-    pointer-events:none;transform:scale(.42);transform-origin:0 0;transition:transform .25s var(--ease)}
-  .cards:hover{transform:translateY(-16px) scale(.42)}
+    pointer-events:none;transform:scale(.42);transform-origin:0 0;transition:translate .25s var(--ease)}
+  .cards:hover{translate:0 -16px}
   .cards .hit{position:absolute;left:560px;top:300px;width:1000px;height:1189px;pointer-events:auto;cursor:pointer}
   .cards:focus-visible .hit{outline:20px solid var(--anchor);outline-offset:24px}
   .cards>.plate{position:absolute;left:0;top:0;width:2210px;display:block;pointer-events:none}
@@ -247,7 +255,6 @@
     display:flex;flex-direction:column;justify-content:center;gap:14px;padding:30px 44px}
   .fcq .q{font-family:var(--hand);font-size:96px;line-height:1.12;color:#3e3a31}
   .fcq .subj{font-size:54px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--fcc,#8a5a44) 75%,#84806f)}
-  .cards .fchint{position:absolute;left:720px;top:110px;font-family:var(--hand);font-size:84px;color:#6b5c41;white-space:nowrap;transform:rotate(-3deg)}
 
   /* flashcard mode: the card table */
   .fcmodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
@@ -272,7 +279,8 @@
 
   /* ============ the phone: painted plate, live glass ============ */
   #phonewrap{position:absolute;left:2260px;top:830px;width:1067px;height:1736px;z-index:4;
-    transform:scale(.37);transform-origin:0 0;pointer-events:none}
+    transform:scale(.37);transform-origin:0 0;pointer-events:none;transition:translate .25s var(--ease)}
+  #phonewrap:has(.screen4:hover){translate:0 -12px}
   #phonewrap>.plate{position:absolute;left:0;top:0;width:1067px;display:block;pointer-events:none}
   .screen4{position:absolute;left:0;top:0;width:660px;height:1400px;transform-origin:0 0;border-radius:46px;
     transform:translate(566px,845px) rotate(1.2deg) translate(-566px,-845px)
@@ -381,20 +389,16 @@
     </span>
   </div>
 
-  <button class="postcard" id="postcard" aria-label="This month’s calendar — flip to read the back">
+  <div class="postcard" id="postcard" role="img" aria-label="This month’s calendar">
     <img class="plate" src="assets/lw/desk4-calendar-b-cut.png" alt="">
     <span class="calpage front">
       <span class="calart"></span>
       <span class="calmonth" id="calMonth">—</span>
       <span class="calgrid" id="calGrid"></span>
     </span>
-    <span class="calpage back">
-      <span class="cap" id="doodleCap">This week’s picture.</span>
-      <span class="postmark" id="postmark">STUDYVAULT<br>W/C —</span>
-    </span>
-    <span class="hint">flip ↻</span>
+    <span class="calcap" id="doodleCap"></span>
     <span class="chit"></span>
-  </button>
+  </div>
 
   <div id="phonewrap" role="group" aria-label="Shorts phone">
     <img class="plate" src="assets/lw/desk4-phone-c-cut.png" alt="">
@@ -411,7 +415,6 @@
     <img class="plate" src="assets/lw/desk4-cards-a-cut.png" alt="">
     <span class="hit"></span>
     <span class="fcq"><span class="q" id="fcText"></span><span class="subj" id="fcSubj"></span></span>
-    <span class="fchint">mixed deck &#8635;</span>
   </button>
 
   <div id="book">
@@ -643,9 +646,8 @@ function makeDraggable(el,id){
 }
 
 /* ---------- the desk calendar: doodle on top, the month below with the
-   gone days X'd off in red, today circled ---------- */
+   gone days X'd off in red, today circled. Caption shows on hover. ---------- */
 const pc=document.getElementById('postcard');
-pc.onclick=()=>{ if(dragBlockClick) return; pc.classList.toggle('flipped'); };
 function buildCal(){
   const now=new Date(), y=now.getFullYear(), m=now.getMonth();
   document.getElementById('calMonth').textContent=now.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
@@ -668,7 +670,6 @@ fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   const w=cal[k];if(!w)return;
   document.documentElement.style.setProperty('--gart',"url('assets/lw/"+w.art+"')");
   document.getElementById('doodleCap').textContent=w.cap;
-  document.getElementById('postmark').innerHTML='STUDYVAULT<br>W/C '+m.toLocaleDateString('en-GB',{day:'numeric',month:'short'}).toUpperCase();
 }).catch(()=>{});
 
 /* ---------- stickies: edit in place, peel new ones, bin them ---------- */
@@ -717,7 +718,6 @@ function resetDeskInPlace(){
     wireSticky(el);
   });
   pc.style.left=pc.style.top=pc.style.right=pc.style.bottom='';
-  pc.classList.remove('flipped');
 }
 document.getElementById('tidy').onclick=()=>{
   localStorage.removeItem(LKEY); localStorage.removeItem(SKEY);
