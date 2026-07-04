@@ -110,13 +110,16 @@
   .knob4.k2{left:1666px;top:744px;width:210px;height:210px}
   /* the radio's label lives on a sticky note at the set's base — not the
      drag/edit .sticky class, purely decorative. Bottom corner carries THE S. */
-  .rnote{position:absolute;left:44px;top:596px;width:300px;padding:22px 24px 24px;color:#4d4425;
+  .rnote{position:absolute;left:44px;top:596px;width:316px;padding:22px 24px 24px;color:#4d4425;
     background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
     font-family:var(--hand);box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);
-    transform:rotate(-3.5deg);pointer-events:none}
-  .rnote b{display:block;font-size:36px;font-weight:600;color:#33301c}
-  .rnote small{display:block;font-family:var(--read);font-style:italic;font-size:24px;line-height:1.3;
-    color:#5d5342;margin-top:6px;padding-right:64px}
+    transform:rotate(-3.5deg);cursor:pointer}
+  .rnote b{display:block;font-size:36px;font-weight:600;color:#33301c;padding-right:44px}
+  .rnote .rlines{display:block;font-family:var(--read);font-style:italic;font-size:23px;line-height:1.3;
+    color:#5d5342;margin-top:6px;padding-right:66px}
+  .rnote .rlines .ln{display:block}
+  .rnote .rlines .ln+.ln{margin-top:9px}
+  .rnote .rarrow{position:absolute;right:16px;top:12px;width:34px;opacity:.7;transform:rotate(6deg)}
   .rnote .cools{position:absolute;right:16px;bottom:14px;width:52px;opacity:.7;transform:rotate(7deg)}
 
   /* ============ paper objects: stickies, pad, postcard, flashcards ============
@@ -263,14 +266,20 @@
     <button class="knob4 k1" id="knob" role="switch" aria-checked="false" aria-label="Tune: next station" title="stations"></button>
     <button class="knob4 k2" id="knob2" aria-label="Skip to the next song" title="skip song"></button>
   </div>
-  <div class="rnote"><b>Revision Radio</b><small id="rmode">podcasts · tap the left dial for lo-fi</small>
+  <div class="rnote"><b>Revision Radio</b>
+    <small class="rlines"><span class="ln">left dial = change station</span><span class="ln">right dial = change track</span></small>
+    <small id="rmode" hidden></small>
+    <svg class="rarrow" viewBox="0 0 26 38" fill="none" stroke="#40382b" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 35 C 16 25, 11 15, 13 5"/>
+      <path d="M6 13 L13 3 L20 12"/>
+    </svg>
     <svg class="cools" viewBox="0 0 40 74" fill="none" stroke="#40382b" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M2 16 V30"/><path d="M20 16 V30"/><path d="M38 16 V30"/>
+      <path d="M2 44 V58"/><path d="M20 44 V58"/><path d="M38 44 V58"/>
+      <path d="M2 30 L20 44"/><path d="M20 30 L38 44"/>
       <path d="M2 16 L20 2 L38 16"/>
-      <path d="M2 16 V30 M20 16 V30 M38 16 V30"/>
-      <path d="M2 30 L20 44 M20 30 L38 44"/>
-      <path d="M2 44 L11 37 M38 30 L29 37"/>
-      <path d="M2 44 V58 M20 44 V58 M38 44 V58"/>
       <path d="M2 58 L20 72 L38 58"/>
+      <path d="M2 44 L11 37"/><path d="M38 30 L29 37"/>
     </svg></div>
 
   <div class="sticky s1" data-sid="s1"><span class="txt"><b>312 days</b> to your first exam.</span></div>
@@ -621,6 +630,25 @@ document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return; frame.
 document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
+
+/* ---------- easter egg: click the radio sticky, the S draws itself ---------- */
+{ const rnote=document.querySelector('.rnote');
+  const sPaths=[...rnote.querySelectorAll('.cools path')];
+  let drawing=false;
+  rnote.addEventListener('click',()=>{
+    if(drawing || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    drawing=true;
+    sPaths.forEach(p=>{ const L=p.getTotalLength();
+      p.style.transition='none'; p.style.strokeDasharray=L+' '+L; p.style.strokeDashoffset=L; });
+    rnote.getBoundingClientRect();
+    let t=.05;
+    sPaths.forEach(p=>{ const L=p.getTotalLength(); const dur=Math.max(.14, L/110);
+      p.style.transition=`stroke-dashoffset ${dur}s cubic-bezier(.4,0,.6,1) ${t}s`;
+      p.style.strokeDashoffset='0'; t+=dur+.05; });
+    setTimeout(()=>{ drawing=false; }, t*1000+300);
+  });
+  if(new URLSearchParams(location.search).get('segg')==='1') setTimeout(()=>rnote.click(),600);
+}
 
 /* QA: ?hit=x,y (screen px) paints a red dot and reports the topmost element there */
 { const hitq=new URLSearchParams(location.search).get('hit');
