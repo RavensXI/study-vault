@@ -12,7 +12,7 @@ Splat: (90,1140)-(450,1440)  ->  centred near (2060,1170), by the pen nib.
 """
 import numpy as np
 from PIL import Image
-from scipy.ndimage import gaussian_filter
+from scipy.ndimage import gaussian_filter, binary_dilation, binary_fill_holes
 
 P = r"C:\Users\tshau\Documents\Study Vault\.claude\worktrees\sandbox\design-lab\assets\lw\desk4-scene-a.png"
 im = np.array(Image.open(P).convert("RGB")).astype(np.float64)
@@ -35,10 +35,19 @@ def move_stain(sx0, sy0, sx1, sy1, bg_dx, dcx, dcy, thresh=0.05):
     alpha = (alpha * edge)[..., None]
     # heal the source
     im[sy0:sy1, sx0:sx1] = src * (1 - alpha) + bg * alpha
-    # stamp at destination: multiply the stain into whatever grain is there
+    # stamp at destination: multiply the stain into the DESK only — painted
+    # objects (highlighter, eraser, pens...) sit on top of the stain, so they
+    # are masked out: saturated or inked pixels, hole-filled so an outlined
+    # object counts as one solid blob.
     dx0, dy0 = dcx - w // 2, dcy - h // 2
     dst = im[dy0:dy0 + h, dx0:dx0 + w]
-    im[dy0:dy0 + h, dx0:dx0 + w] = dst * (1 - alpha * (1 - ratio_stamp))
+    lum = dst.mean(axis=2)
+    sat = dst.max(axis=2) - dst.min(axis=2)
+    obj = (sat > 55) | (lum < 130)
+    obj = binary_fill_holes(binary_dilation(obj, iterations=2))
+    obj = binary_dilation(obj, iterations=3)
+    deskok = gaussian_filter((~obj).astype(np.float64), 2)[..., None]
+    im[dy0:dy0 + h, dx0:dx0 + w] = dst * (1 - alpha * deskok * (1 - ratio_stamp))
     print(f"moved ({sx0},{sy0})-({sx1},{sy1}) -> centre ({dcx},{dcy}), "
           f"stain px {int((alpha > .5).sum())}")
 
