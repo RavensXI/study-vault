@@ -66,5 +66,14 @@ lift_object(2360, 890, 2480, 985, -800)        # crumbs
 lift_object(1950, 540, 2130, 710, -840)        # stub cap (bg at -700 has a speck)
 lift_object(2230, 450, 2430, 560, -800)        # specks above the pencil
 
+# the SECOND ink splatter (left-centre, mostly under the book but its left
+# droplets peek out) + stray marks Tom can still see. Donor columns picked
+# to dodge the two wood knots (keep those - character, not mess).
+lift_object(380, 700, 780, 1290, 920)          # second splatter cluster
+lift_object(90, 1130, 470, 1450, 1200)         # faint specks the stain thresh missed
+lift_object(60, 665, 150, 760, 500)            # coffee smudge below the radio
+lift_object(410, 260, 490, 330, 300)           # specks above the book
+lift_object(1120, 230, 1280, 330, 400)         # faint drips top-centre
+
 Image.fromarray(np.clip(im, 0, 255).astype(np.uint8)).save(OUT)
 print("wrote", OUT)

@@ -30,6 +30,17 @@
     background:linear-gradient(105deg,transparent 40%,rgba(255,252,238,.5) 50%,transparent 60%)}
   .shine.go{animation:sweep4 1.25s ease}
   @keyframes sweep4{from{opacity:1;transform:translateX(-28%)}to{opacity:1;transform:translateX(28%)}}
+  /* sparkles pop where the mess just vanished, timed to the passing band */
+  #sparks{position:absolute;inset:0;pointer-events:none;z-index:7}
+  #sparks .spark{position:absolute;width:90px;height:90px;opacity:0}
+  #sparks .spark svg{width:100%;height:100%;fill:#fffdf2;filter:drop-shadow(0 0 16px rgba(255,250,225,.95))}
+  #sparks.go .spark{animation:spark4 .6s ease both}
+  #sparks .k1{left:400px;top:830px;animation-delay:.35s}
+  #sparks .k2{left:2040px;top:520px;width:110px;height:110px;animation-delay:.85s}
+  #sparks .k3{left:2090px;top:1130px;animation-delay:1s}
+  #sparks .k4{left:2260px;top:700px;width:70px;height:70px;animation-delay:1.12s}
+  @keyframes spark4{0%{opacity:0;transform:scale(0) rotate(0deg)}35%{opacity:1;transform:scale(1) rotate(18deg)}
+    100%{opacity:0;transform:scale(.15) rotate(50deg)}}
 
   .top{position:fixed;left:0;right:0;top:0;z-index:10;height:52px;display:flex;align-items:center;
     justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);pointer-events:none}
@@ -274,6 +285,12 @@
   <img class="bg" src="assets/lw/desk4-scene-clean.png" alt="">
   <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.png" alt="">
   <div class="shine" id="shine"></div>
+  <div id="sparks">
+    <span class="spark k1"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+    <span class="spark k2"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+    <span class="spark k3"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+    <span class="spark k4"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
+  </div>
 
   <div id="radio" role="group" aria-label="Revision Radio">
     <img class="plate" src="assets/lw/desk4-radio-a-cut.png" alt="">
@@ -609,8 +626,9 @@ document.getElementById('tidy').onclick=()=>{
   try{ localStorage.setItem(CKEY, String(Date.now())); }catch(e){}
   if(matchMedia('(prefers-reduced-motion: reduce)').matches || bgmess.style.display==='none'){ location.reload(); return; }
   document.getElementById('shine').classList.add('go');
+  document.getElementById('sparks').classList.add('go');
   bgmess.classList.add('gone');
-  setTimeout(()=>location.reload(), 1350);
+  setTimeout(()=>location.reload(), 1950);
 };
 
 /* ---------- flashcards: painted scatter -> flashcard mode ---------- */
