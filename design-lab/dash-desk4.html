@@ -338,8 +338,8 @@
 </div>
 
 <div id="stage">
-  <img class="bg" src="assets/lw/desk4-scene-clean.png" alt="">
-  <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.png" alt="">
+  <img class="bg" id="bgclean" data-src="assets/lw/desk4-scene-clean.webp" alt="">
+  <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.webp" alt="">
   <div class="shine" id="shine"></div>
   <div id="sparks">
     <span class="spark k1"><svg viewBox="0 0 100 100"><path d="M50 0 L61 39 L100 50 L61 61 L50 100 L39 61 L0 50 L39 39 Z"/></svg></span>
@@ -349,7 +349,7 @@
   </div>
 
   <div id="radio" role="group" aria-label="Revision Radio">
-    <img class="plate" src="assets/lw/desk4-radio-a-cut.png" alt="">
+    <img class="plate" src="assets/lw/desk4-radio-a-cut.webp" alt="">
     <span class="lcd4" id="lcd"><span class="mq" id="mq">NOW PLAYING · STAVE 3 — POVERTY &amp; GENEROSITY · ENGLISH LITERATURE · 10 MIN ·&nbsp;</span></span>
     <button class="knob4 k1" id="knob" role="switch" aria-checked="false" aria-label="Tune: next station" title="stations"></button>
     <button class="knob4 k2" id="knob2" aria-label="Skip to the next song" title="skip song"></button>
@@ -374,7 +374,7 @@
   <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
 
   <button id="watch" aria-label="Wristwatch — set a revision timer">
-    <img class="plate" src="assets/lw/desk4-watch-a-cut.png" alt="">
+    <img class="plate" src="assets/lw/desk4-watch-a-cut.webp" alt="">
     <svg class="tarc" id="tarc" viewBox="0 0 1362 1227"><circle id="tcirc" cx="690" cy="539" r="238"
       fill="none" stroke="#b8442f" stroke-width="18" stroke-linecap="round"
       transform="rotate(-90 690 539)" stroke-dasharray="1495" stroke-dashoffset="1495"/></svg>
@@ -389,7 +389,7 @@
   </div>
 
   <div class="postcard" id="postcard" role="img" aria-label="This month’s calendar">
-    <img class="plate" src="assets/lw/desk4-calendar-b-cut.png" alt="">
+    <img class="plate" src="assets/lw/desk4-calendar-b-cut.webp" alt="">
     <span class="calpage front">
       <span class="calart"></span>
       <span class="calmonth" id="calMonth">—</span>
@@ -400,7 +400,7 @@
   </div>
 
   <div id="phonewrap" role="group" aria-label="Shorts phone">
-    <img class="plate" src="assets/lw/desk4-phone-c-cut.png" alt="">
+    <img class="plate" src="assets/lw/desk4-phone-c-cut.webp" alt="">
     <button class="screen4" id="phone" aria-label="Open Shorts — today’s 20">
       <span class="pshot"></span>
       <span class="pscrim"></span>
@@ -408,16 +408,16 @@
     </button>
   </div>
 
-  <img class="bookwash" src="assets/lw/desk4-book-d-wash.png" alt="">
+  <img class="bookwash" src="assets/lw/desk4-book-d-wash.webp" alt="">
 
   <button class="cards" id="cards" aria-label="Flashcards — start a mixed deck">
-    <img class="plate" src="assets/lw/desk4-cards-a-cut.png" alt="">
+    <img class="plate" src="assets/lw/desk4-cards-a-cut.webp" alt="">
     <span class="hit"></span>
     <span class="fcq"><span class="q" id="fcText"></span><span class="subj" id="fcSubj"></span></span>
   </button>
 
   <div id="book">
-    <img class="plate" src="assets/lw/desk4-book-d-solid.png" alt="">
+    <img class="plate" src="assets/lw/desk4-book-d-solid.webp" alt="">
     <section class="pg4 pl" id="pgL"></section>
     <section class="pg4 pr" id="pgR"></section>
     <nav id="tabs" aria-label="Your subjects"></nav>
@@ -707,10 +707,12 @@ document.getElementById('pad').onclick=()=>{ if(dragBlockClick) return;
 /* clean desk: reset the layout AND actually clean — stains and clutter fade
    under a light sweep. The desk stays clean for a week, then the mess is back. */
 const CKEY='sv_desk4_cleaned', CLEAN_MS=7*24*3600*1000;
-const bgmess=document.getElementById('bgmess');
+const bgmess=document.getElementById('bgmess'), bgclean=document.getElementById('bgclean');
+function loadClean(){ if(!bgclean.src) bgclean.src=bgclean.dataset.src; }
 { const q=new URLSearchParams(location.search).get('desk');   // QA: ?desk=clean|mess
   const cleanedAt=+localStorage.getItem(CKEY)||0;
-  if(q==='clean' || (q!=='mess' && Date.now()-cleanedAt<CLEAN_MS)) bgmess.style.display='none'; }
+  if(q==='clean' || (q!=='mess' && Date.now()-cleanedAt<CLEAN_MS)){ bgmess.style.display='none'; loadClean(); }
+  else (window.requestIdleCallback||(f=>setTimeout(f,2500)))(loadClean); }
 /* everything back to its pristine spot, no page reload (the reload flashed) */
 function resetDeskInPlace(){
   document.querySelectorAll('.sticky').forEach(el=>el.remove());
@@ -723,6 +725,7 @@ function resetDeskInPlace(){
   pc.style.left=pc.style.top=pc.style.right=pc.style.bottom='';
 }
 document.getElementById('tidy').onclick=()=>{
+  loadClean();
   localStorage.removeItem(LKEY); localStorage.removeItem(SKEY);
   layout={}; stickyStore={};
   try{ localStorage.setItem(CKEY, String(Date.now())); }catch(e){}
@@ -853,7 +856,11 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
 /* ---------- stage scaling: cover the viewport, one uniform scale ---------- */
 const stage=document.getElementById('stage');
 function fit(){
-  const k=Math.max(innerWidth/2752, innerHeight/1536);
+  /* wide screens: cover (edge-to-edge desk). Squarish screens (tablets,
+     4:3 laptops): contain — the whole desk, warm bars above and below. */
+  const cover = innerWidth/innerHeight >= 1.6;
+  const k = cover ? Math.max(innerWidth/2752, innerHeight/1536)
+                  : Math.min(innerWidth/2752, innerHeight/1536);
   kNow=k;
   stage.style.transform=`translate(${(innerWidth-2752*k)/2}px, ${(innerHeight-1536*k)/2}px) scale(${k})`;
 }
