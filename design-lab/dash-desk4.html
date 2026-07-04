@@ -613,6 +613,10 @@ discover();
 /* ---------- stage-aware dragging: pointer deltas are screen px, positions
    are STAGE px — divide by the current scale k. ---------- */
 const LKEY='sv_desk4_layout', SKEY='sv_desk4_stickies';
+/* ?fresh=1 — factory reset: forget moved notes, edits and the last clean,
+   so the desk loads exactly as designed (clutter and all) */
+if(new URLSearchParams(location.search).get('fresh')==='1'){
+  try{ localStorage.removeItem(LKEY); localStorage.removeItem(SKEY); localStorage.removeItem('sv_desk4_cleaned'); }catch(e){} }
 let layout={}; try{ layout=JSON.parse(localStorage.getItem(LKEY))||{}; }catch(e){}
 function saveLayout(){ try{ localStorage.setItem(LKEY,JSON.stringify(layout)); }catch(e){} }
 let dragBlockClick=false, kNow=.53;
