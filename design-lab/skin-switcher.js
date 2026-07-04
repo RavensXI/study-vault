@@ -1347,7 +1347,7 @@
     if (!document.body.classList.contains('desk-world')) return;
     var brand = document.querySelector('a.header-brand');
     if (brand) brand.setAttribute('href', '/desk');
-    [].forEach.call(document.querySelectorAll('.header-nav a'), function (a) {
+    [].forEach.call(document.querySelectorAll('.header-nav a, a.back-link'), function (a) {
       if (a.getAttribute('href') === '/') a.setAttribute('href', '/desk');
     });
   }
