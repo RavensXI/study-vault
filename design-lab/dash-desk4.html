@@ -382,7 +382,7 @@
     <img class="plate" src="assets/lw/desk4-watch-a-cut.webp" alt="">
     <svg class="tarc" id="tarc" viewBox="0 0 1362 1227"><circle id="tcirc" cx="690" cy="539" r="238"
       fill="none" stroke="#b8442f" stroke-width="18" stroke-linecap="round"
-      transform="rotate(-90 690 539)" stroke-dasharray="1495" stroke-dashoffset="1495"/></svg>
+      transform="rotate(-45 690 539)" stroke-dasharray="1495" stroke-dashoffset="1495"/></svg>
     <span class="hands"><span class="hand hh" id="hh"></span><span class="hand mh" id="mh"></span><span class="hand sh" id="sh"></span><span class="wcap"></span></span>
     <span class="whit"></span>
   </button>
@@ -843,12 +843,17 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
   const wpop=document.getElementById('wpop'), wstop=document.getElementById('wstop');
   const C=1495;
   let tEnd=0, tTotal=0;
+  /* the painted watch lies at an angle on the desk — its dial's 12 sits 45°
+     clockwise of screen-up (measured from the hour ticks; the crown agrees).
+     Hands (and the timer arc's rotate(-45) above) carry that tilt so the
+     time reads true against the PAINTED dial, not the screen. */
+  const TILT=45;
   function tickWatch(){
     const n=new Date();
     const s=n.getSeconds(), m=n.getMinutes()+s/60, h=(n.getHours()%12)+m/60;
-    sh.style.transform='rotate('+(s*6)+'deg)';
-    mh.style.transform='rotate('+(m*6)+'deg)';
-    hh.style.transform='rotate('+(h*30)+'deg)';
+    sh.style.transform='rotate('+(s*6+TILT)+'deg)';
+    mh.style.transform='rotate('+(m*6+TILT)+'deg)';
+    hh.style.transform='rotate('+(h*30+TILT)+'deg)';
     if(tEnd){
       const left=tEnd-Date.now();
       if(left<=0){ tEnd=0; wstop.style.display='none';
