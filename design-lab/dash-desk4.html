@@ -201,6 +201,38 @@
   .postcard .hint{position:absolute;right:8px;bottom:-38px;font-family:var(--hand);font-size:26px;color:rgba(77,68,37,.65)}
   .postcard:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
 
+  /* ============ the wristwatch: painted plate, live hands ============
+     Taken off and dropped on the desk. Hands show the real time; clicking
+     the face opens the revision-timer note; the countdown draws as a red
+     arc on the dial. Container pe:none, only the face circle takes clicks. */
+  #watch{position:absolute;left:1150px;top:170px;width:1362px;height:1227px;background:none;border:none;padding:0;
+    transform:scale(.22);transform-origin:0 0;transition:transform .25s var(--ease);pointer-events:none;z-index:2}
+  #watch:hover{transform:translateY(-10px) scale(.22)}
+  #watch>.plate{position:absolute;left:0;top:0;width:1362px;display:block;pointer-events:none}
+  #watch .whit{position:absolute;left:400px;top:250px;width:580px;height:580px;border-radius:50%;
+    pointer-events:auto;cursor:pointer}
+  #watch:focus-visible .whit{outline:16px solid var(--anchor);outline-offset:20px}
+  #watch .hands{position:absolute;left:690px;top:539px;pointer-events:none}
+  #watch .hand{position:absolute;transform-origin:50% 100%;background:#3a3428;border-radius:8px}
+  #watch .hh{left:-8px;top:-150px;width:16px;height:150px}
+  #watch .mh{left:-6px;top:-205px;width:12px;height:205px}
+  #watch .sh{left:-2.5px;top:-215px;width:5px;height:215px;background:#b8442f}
+  #watch .wcap{position:absolute;left:-11px;top:-11px;width:22px;height:22px;border-radius:50%;background:#3a3428}
+  #watch .tarc{position:absolute;left:0;top:0;width:1362px;height:1227px;pointer-events:none}
+  #watch .tarc circle{opacity:.75}
+  #watch .tarc.wflash circle{animation:wblink 1.9s linear}
+  @keyframes wblink{0%,30%,62%{opacity:.85}15%,46%,80%{opacity:0}100%{opacity:0}}
+  /* the timer note */
+  .wpop{position:absolute;left:1040px;top:466px;width:330px;padding:20px 24px 22px;z-index:4;display:none;
+    background:linear-gradient(168deg,#f9edb4 0%,#f4e49c 70%,#eeda8d 100%);
+    font-family:var(--hand);box-shadow:9px 16px 28px -9px rgba(56,40,18,.38);transform:rotate(1.6deg)}
+  .wpop.open{display:block}
+  .wpop b{display:block;font-size:34px;font-weight:600;color:#33301c;margin-bottom:6px}
+  .wpop .opts{display:flex;gap:10px;flex-wrap:wrap}
+  .wpop button{background:none;border:2.5px solid rgba(77,68,37,.35);border-radius:12px;padding:6px 16px;
+    font-family:var(--hand);font-size:30px;color:#4d4425;cursor:pointer}
+  .wpop button:hover{border-color:#4d4425}
+
   /* flashcards: a painted scatter — the DOOR to flashcard mode (like the
      phone is the door to shorts). Anchored off the bottom-left corner so only
      the top few cards show; the rest of the pile reads as running off-screen.
@@ -337,6 +369,21 @@
   <div class="sticky s1" data-sid="s1"><span class="txt"><b>312 days</b> to your first exam.</span></div>
   <div class="sticky s2" data-sid="s2"><span class="txt">Ask Mr&nbsp;S about a <b>Macbeth</b> mock?<br>Warm-up accuracy <b>78%</b> ↑</span></div>
   <button class="pad" id="pad" aria-label="New sticky note"><span>＋ new note</span></button>
+
+  <button id="watch" aria-label="Wristwatch — set a revision timer">
+    <img class="plate" src="assets/lw/desk4-watch-a-cut.png" alt="">
+    <svg class="tarc" id="tarc" viewBox="0 0 1362 1227"><circle id="tcirc" cx="690" cy="539" r="238"
+      fill="none" stroke="#b8442f" stroke-width="18" stroke-linecap="round"
+      transform="rotate(-90 690 539)" stroke-dasharray="1495" stroke-dashoffset="1495"/></svg>
+    <span class="hands"><span class="hand hh" id="hh"></span><span class="hand mh" id="mh"></span><span class="hand sh" id="sh"></span><span class="wcap"></span></span>
+    <span class="whit"></span>
+  </button>
+  <div class="wpop" id="wpop"><b>revision timer</b>
+    <span class="opts">
+      <button data-min="25">25 min</button><button data-min="15">15 min</button><button data-min="5">5 min</button>
+      <button data-min="0" id="wstop" style="display:none">stop</button>
+    </span>
+  </div>
 
   <button class="postcard" id="postcard" aria-label="This month’s calendar — flip to read the back">
     <span class="rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
@@ -738,6 +785,38 @@ document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return; frame.
 document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
+
+/* ---------- the wristwatch: real time on the dial + revision timer ---------- */
+{ const hh=document.getElementById('hh'), mh=document.getElementById('mh'), sh=document.getElementById('sh');
+  const tarc=document.getElementById('tarc'), tcirc=document.getElementById('tcirc');
+  const wpop=document.getElementById('wpop'), wstop=document.getElementById('wstop');
+  const C=1495;
+  let tEnd=0, tTotal=0;
+  function tickWatch(){
+    const n=new Date();
+    const s=n.getSeconds(), m=n.getMinutes()+s/60, h=(n.getHours()%12)+m/60;
+    sh.style.transform='rotate('+(s*6)+'deg)';
+    mh.style.transform='rotate('+(m*6)+'deg)';
+    hh.style.transform='rotate('+(h*30)+'deg)';
+    if(tEnd){
+      const left=tEnd-Date.now();
+      if(left<=0){ tEnd=0; wstop.style.display='none';
+        tarc.classList.add('wflash');
+        setTimeout(()=>{ tarc.classList.remove('wflash'); tcirc.style.strokeDashoffset=C; },1900);
+      } else tcirc.style.strokeDashoffset=C*(1-left/tTotal);
+    }
+  }
+  setInterval(tickWatch,1000); tickWatch();
+  document.getElementById('watch').onclick=()=>{ wpop.classList.toggle('open'); };
+  wpop.querySelectorAll('button').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const min=+b.dataset.min;
+    if(min){ tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; }
+    else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; }
+    wpop.classList.remove('open'); tickWatch();
+  });
+  addEventListener('keydown',e=>{ if(e.key==='Escape') wpop.classList.remove('open'); });
+}
 
 /* ---------- easter egg: click the radio sticky, the S draws itself ---------- */
 { const rnote=document.querySelector('.rnote');
