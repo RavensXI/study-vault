@@ -164,42 +164,38 @@
   .pad:hover span{color:#4d4425}
   .pad:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
 
-  /* the desk calendar: wire-bound flip pad. The rings live OUTSIDE .inner so
-     the page flips behind them, the way a real flip calendar turns. */
-  .postcard{position:absolute;left:2130px;top:96px;width:540px;height:480px;cursor:pointer;
-    background:none;border:none;padding:0;z-index:3;rotate:-4deg;perspective:2000px}
-  .postcard .rings{position:absolute;left:0;right:0;top:0;height:58px;display:flex;justify-content:center;
-    gap:32px;pointer-events:none;z-index:2}
-  .postcard .rings i{width:22px;height:46px;border:4px solid #979ba1;
-    border-radius:11px;position:relative;transform:rotate(2deg)}
-  .postcard .rings i::after{content:"";position:absolute;left:50%;bottom:5px;width:10px;height:11px;
-    margin-left:-5px;background:#4a4238;border-radius:5px;opacity:.4}
-  .postcard .inner{position:absolute;left:0;top:36px;right:0;bottom:0;transform-style:preserve-3d;
-    transition:transform .6s var(--ease)}
-  .postcard.flipped .inner{transform:rotateY(180deg)}
-  .postcard .side{position:absolute;inset:0;backface-visibility:hidden;background:var(--paper);
-    border:16px solid var(--paper);box-shadow:10px 18px 30px -10px rgba(56,40,18,.4)}
-  .postcard .side.front{display:flex;flex-direction:column;background-clip:padding-box}
-  .postcard .calart{flex:none;height:214px;background:var(--gart,linear-gradient(120deg,#e8e2d2,#d9d2be)) center/cover no-repeat}
-  .postcard .calfoot{flex:1;min-height:0;display:flex;flex-direction:column;padding:8px 6px 0}
-  .postcard .calmonth{font-family:var(--hand);font-size:33px;color:#33301c;line-height:1.05;padding:2px 6px 2px;text-align:center}
+  /* the desk calendar: painted wire-bound plate, live page. The doodle,
+     month grid and the caption 'back' are homography-mapped onto the painted
+     page; clicking crossfades front/back like the book's page turns. */
+  .postcard{position:absolute;left:2120px;top:64px;width:1455px;height:1555px;cursor:pointer;
+    background:none;border:none;padding:0;z-index:3;transform:scale(.37);transform-origin:0 0;
+    transition:transform .25s var(--ease);pointer-events:none}
+  .postcard:hover{transform:translateY(-12px) scale(.37)}
+  .postcard>.plate{position:absolute;left:0;top:0;width:1455px;display:block;pointer-events:none}
+  .postcard .chit{position:absolute;left:115px;top:100px;width:1250px;height:1300px;pointer-events:auto;cursor:pointer}
+  .postcard:focus-visible .chit{outline:16px solid var(--anchor);outline-offset:20px}
+  .calpage{position:absolute;left:0;top:0;width:640px;height:700px;transform-origin:0 0;pointer-events:none;
+    transform:matrix3d(1.983801,-0.111068,0,0.00016624,0.147150,1.696613,0,-0.00001267,0,0,1,0,120.000000,195.000000,0,1);
+    display:flex;flex-direction:column;padding:30px 34px 22px;transition:opacity .25s ease}
+  .postcard .calpage.back{opacity:0;justify-content:space-between;padding:44px 40px 36px}
+  .postcard.flipped .calpage.front{opacity:0}
+  .postcard.flipped .calpage.back{opacity:1}
+  .postcard .calart{flex:none;height:298px;background:var(--gart,linear-gradient(120deg,#e8e2d2,#d9d2be)) center/cover no-repeat}
+  .postcard .calmonth{font-family:var(--hand);font-size:48px;color:#33301c;line-height:1.05;padding:6px 6px 2px;text-align:center}
   .postcard .calgrid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:minmax(0,1fr)}
-  .postcard .wd{font-size:17px;font-weight:700;letter-spacing:.04em;color:var(--mut);text-align:center;
-    align-self:center}
-  .postcard .dy{position:relative;font-family:var(--read);font-size:19px;line-height:1;color:#57534a;
+  .postcard .wd{font-size:24px;font-weight:700;letter-spacing:.04em;color:var(--mut);text-align:center;align-self:center}
+  .postcard .dy{position:relative;font-family:var(--read);font-size:28px;line-height:1;color:#57534a;
     display:flex;align-items:center;justify-content:center;min-height:0}
   .postcard .dy .x{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-family:var(--hand);font-style:normal;font-size:30px;color:#b8442f;opacity:.82;pointer-events:none}
-  .postcard .dy.td::after{content:"";position:absolute;left:12%;right:12%;top:6%;bottom:6%;
-    border:2.5px solid #b8442f;border-radius:50%;transform:rotate(-5deg);opacity:.7}
-  .postcard .side.back{transform:rotateY(180deg);display:flex;flex-direction:column;justify-content:space-between;
-    padding:26px 30px}
-  .postcard .postmark{font-family:ui-monospace,Consolas,monospace;font-size:24px;letter-spacing:.14em;color:#8a4f42;
-    border:3px solid #b98a80;border-radius:50%;width:210px;height:210px;display:grid;place-items:center;text-align:center;
+    font-family:var(--hand);font-style:normal;font-size:44px;color:#b8442f;opacity:.82;pointer-events:none}
+  .postcard .dy.td::after{content:"";position:absolute;left:14%;right:14%;top:8%;bottom:8%;
+    border:3px solid #b8442f;border-radius:50%;transform:rotate(-5deg);opacity:.7}
+  .postcard .cap{font-family:var(--hand);font-size:52px;color:var(--sec);line-height:1.25}
+  .postcard .postmark{font-family:ui-monospace,Consolas,monospace;font-size:30px;letter-spacing:.14em;color:#8a4f42;
+    border:4px solid #b98a80;border-radius:50%;width:270px;height:270px;display:grid;place-items:center;text-align:center;
     transform:rotate(-12deg);opacity:.85;align-self:flex-end}
-  .postcard .cap{font-family:var(--hand);font-size:38px;color:var(--sec);line-height:1.25}
-  .postcard .hint{position:absolute;right:8px;bottom:-38px;font-family:var(--hand);font-size:26px;color:rgba(77,68,37,.65)}
-  .postcard:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
+  .postcard .hint{position:absolute;left:1130px;top:1462px;font-family:var(--hand);font-size:58px;
+    color:rgba(77,68,37,.65);white-space:nowrap;transform:rotate(-2deg)}
 
   /* ============ the wristwatch: painted plate, live hands ============
      Taken off and dropped on the desk. Hands show the real time; clicking
@@ -386,18 +382,18 @@
   </div>
 
   <button class="postcard" id="postcard" aria-label="This month’s calendar — flip to read the back">
-    <span class="rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-    <span class="inner">
-      <span class="side front">
-        <span class="calart"></span>
-        <span class="calfoot"><span class="calmonth" id="calMonth">—</span><span class="calgrid" id="calGrid"></span></span>
-      </span>
-      <span class="side back">
-        <span class="cap" id="doodleCap">This week’s picture.</span>
-        <span class="postmark" id="postmark">STUDYVAULT<br>W/C —</span>
-      </span>
+    <img class="plate" src="assets/lw/desk4-calendar-b-cut.png" alt="">
+    <span class="calpage front">
+      <span class="calart"></span>
+      <span class="calmonth" id="calMonth">—</span>
+      <span class="calgrid" id="calGrid"></span>
+    </span>
+    <span class="calpage back">
+      <span class="cap" id="doodleCap">This week’s picture.</span>
+      <span class="postmark" id="postmark">STUDYVAULT<br>W/C —</span>
     </span>
     <span class="hint">flip ↻</span>
+    <span class="chit"></span>
   </button>
 
   <div id="phonewrap" role="group" aria-label="Shorts phone">
