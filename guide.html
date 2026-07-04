@@ -10,6 +10,19 @@
   <link rel="stylesheet" href="/css/style.css">
   <link rel="stylesheet" href="/css/reskin.css"><!-- DESIGN-LAB reskin; remove to revert -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css" crossorigin="anonymous">
+  <style>
+    /* Same fix browse.html carries: the global stylesheet pins .header-brand
+       position:fixed in the left gutter on >=1400px viewports (designed for
+       article pages with an empty gutter). Guide pages carry a wide label
+       ("Revision Techniques") in the brand, which shoves the logo off the
+       left edge and lands the label on top of the nav. Keep it in flow. */
+    @media (min-width: 1400px) {
+      .page-header-inner:not(:has(.admin-nav)) .header-brand {
+        position: static;
+        transform: none;
+      }
+    }
+  </style>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#2d2a26">
   <link rel="icon" type="image/png" sizes="192x192" href="/images/icon-192.png">

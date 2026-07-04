@@ -2297,3 +2297,74 @@ body[data-skin="reader"].desk-world ::selection{
 body[data-skin="reader"].desk-world .header-lesson-label{
   color:var(--accent);
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   DESK-WORLD · DEMO-LOOP PASS — browse, unit list, guide, practice.
+   The lesson page is the benchmark; these bring its siblings into
+   the same warm chrome + subject-tab language. Nothing here touches
+   the locked reader skin outside .desk-world.
+   ───────────────────────────────────────────────────────────────── */
+
+/* — BROWSE · subject overview — */
+/* the quote ribbon writes in ONE ink, not a rainbow: quotes as quiet
+   marginalia, authors in the subject colour */
+body[data-skin="reader"].desk-world .quote-ticker{
+  border-top:1px solid var(--border-lighter); border-bottom:1px solid var(--border-lighter);
+  margin-bottom:.75rem;
+}
+body[data-skin="reader"].desk-world .quote-item{
+  color:var(--text-secondary); font-weight:500;
+  border-left:2px solid color-mix(in srgb,var(--accent) 38%,transparent);
+}
+body[data-skin="reader"].desk-world .quote-item em{ color:var(--accent); }
+/* unit photos sit in the world like album prints: warmed, gently faded,
+   with a soft paper edge instead of a hard photographic crop */
+body[data-skin="reader"].desk-world .unit-card-image img{
+  filter:sepia(.22) saturate(.8) contrast(.95) brightness(1.03);
+}
+body[data-skin="reader"].desk-world .unit-card-image{ position:relative; }
+body[data-skin="reader"].desk-world .unit-card-image::after{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  box-shadow:inset 0 0 0 1px rgba(122,104,72,.14), inset 0 -14px 22px -18px rgba(84,66,38,.4);
+}
+/* the notebook tab peeks from each unit card's spine */
+body[data-skin="reader"].desk-world .unit-card{ position:relative; }
+body[data-skin="reader"].desk-world .unit-card::before{
+  content:""; position:absolute; left:0; top:26px; width:4px; height:38px; z-index:2;
+  background:var(--accent); border-radius:0 3px 3px 0; opacity:.85;
+}
+
+/* — BROWSE · unit lesson list — */
+/* the old per-unit theme band becomes the desk's warm paper with the
+   subject's tab hairline; the theme stripe goes */
+body[data-skin="reader"].desk-world .unit-page-header{
+  background:linear-gradient(160deg,color-mix(in srgb,var(--accent) 7%,#f6f1e7) 0%,#f6f1e7 72%);
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 26%,#e4dfd2);
+}
+body[data-skin="reader"].desk-world .unit-page-header::before,
+body[data-skin="reader"].desk-world .unit-page-header::after{ content:none; }
+
+/* — CHROME · guide/browse header integrity — */
+/* the brand never crushes when a page carries a wider nav (guide's extra
+   links were collapsing the lockup and shoving the label into the nav) */
+body[data-skin="reader"].desk-world .header-brand{ flex:0 0 auto; }
+body[data-skin="reader"].desk-world .header-logo{ flex:0 0 auto; }
+body[data-skin="reader"].desk-world.has-bindery .header-logo{ flex:0 0 122px; }
+
+/* — PRACTICE · the drill chrome joins the desk — */
+body[data-skin="reader"].desk-world .practice-score-bar{
+  background:color-mix(in srgb,#f6f1e7 55%,#fffdf8);
+}
+body[data-skin="reader"].desk-world .header-lesson-pill{
+  background:color-mix(in srgb,var(--accent) 14%,#fffdf8); color:var(--accent);
+}
+/* method card = a page from the notebook: paper ground, serif title,
+   steps labelled in the subject ink, CTA in the subject colour */
+body[data-skin="reader"].desk-world .method-modal-overlay{
+  background:color-mix(in srgb,var(--accent-deep) 52%,transparent);
+}
+body[data-skin="reader"].desk-world .method-modal{ background:#fffdf8; border-radius:16px; }
+body[data-skin="reader"].desk-world .method-modal-title{ font-family:var(--font-head); }
+body[data-skin="reader"].desk-world .method-modal-steps-label{ color:var(--accent); }
+body[data-skin="reader"].desk-world .method-modal-go-btn{ background:var(--accent); }
+body[data-skin="reader"].desk-world .method-modal-go-btn:hover{ filter:brightness(.94); }
