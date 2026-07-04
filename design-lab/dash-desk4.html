@@ -555,9 +555,15 @@ const tabs=document.getElementById('tabs');
 SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className='tab4'; b.title=s.name;
   b.style.setProperty('--tc',s.c); b.style.left=TABPTS[i][0]+'px'; b.style.top=(TABPTS[i][1]+50)+'px';
   b.style.setProperty('--jit',(((i*37)%5)-2)*0.7+'deg');
-  /* seat each base against the MEASURED painted silhouette (plate alpha
-     at each tab height), overlapping the page-edge band by 16px */
-  b.style.setProperty('--outx',[60,61,64,65,67,70,72,76,80][i]+'px');
+  /* stagger the tabs THROUGH the painted page stack: each tab belongs to
+     a page deeper in the pile, so its base emerges from a line further
+     across the fore-edge band — Maths from the topmost pages by the open
+     spread, RS from down by the cover. S = measured outer silhouette at
+     each tab height (plate alpha); label always starts past the edge. */
+  const S=[76,77,80,81,83,86,88,92,96][i];
+  const base=4+Math.round((i/(SUBJECTS.length-1))*(S-26));
+  b.style.setProperty('--outx',base+'px');
+  b.style.paddingLeft=(S-base+12)+'px';
   b.textContent=s.tab; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
 
 setSpread(TODAY_L,TODAY_R); markTabs();
