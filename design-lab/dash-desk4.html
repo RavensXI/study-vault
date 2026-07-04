@@ -549,14 +549,44 @@ fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{LADDERS=j||{};
   if(qi>=0){ current=qi; const [l,r2]=subjSpread(SUBJECTS[qi]); setSpread(l,r2); markTabs(); } }
 
 /* ---------- the wireless: LCD marquee + two dials (ported from desk3) ---------- */
-const PODCAST_TXT='NOW PLAYING · STAVE 3 — POVERTY & GENEROSITY · ENGLISH LITERATURE · 10 MIN · ';
+const PODCAST_TXT='PODCASTS · TAP THE RIGHT DIAL TO PLAY ONE OF SAM’S EPISODES · ';
+/* the podcast station is REAL: these are the demo lessons' own episodes on R2 */
+const PODCASTS=[
+ {t:'Weimar democracy and political unrest, 1919-1923',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/germany-democracy-dictatorship/podcast_l05.mp3'},
+ {t:'Anglo-German Rivalry: Weltpolitik and the Naval Race',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/conflict-tension-first-world-war/podcast_l03.mp3'},
+ {t:'The Church, the Monastery and Islamic Medicine',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/britain-health-people/podcast_l02.mp3'},
+ {t:'Key ministers: Cecil, Walsingham and the Privy Council',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/elizabethan-england/podcast_l02.mp3'},
+ {t:'Guilt & Consequences',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/macbeth/podcast_l05.mp3'},
+ {t:'Stave 3: Poverty & Generosity',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l04.mp3'},
+ {t:'Stave 5: Transformation & Redemption',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l06.mp3'},
+ {t:'My Last Duchess — Power & Control',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/power-and-conflict/podcast_l04.mp3'},
+ {t:'Health, Non-Communicable Diseases and Plant Tissues',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/biology-paper-1/podcast_l05.mp3'},
+ {t:'Ionic, Covalent and Metallic Bonding',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/chemistry-paper-1/podcast_l03.mp3'},
+ {t:'Conservation of Energy, Efficiency and Energy Resources',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/physics-paper-1/podcast_l02.mp3'},
+ {t:'Tropical Storm Effects & Management: Hurricane Ida',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/podcast_l06.mp3'},
+ {t:'UK Population Distribution & a Major UK City',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-2/podcast_l05.mp3'},
+ {t:'Primary Storage (RAM, ROM & Virtual Memory)',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l04.mp3'},
+ {t:'Embedded Systems',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l03.mp3'},
+ {t:'Searching Algorithms',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computational-thinking/podcast_l03.mp3'},
+ {t:'Jesus Christ: Incarnation, the Cross and Salvation',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/christianity-beliefs-and-teachings/podcast_l03.mp3'},
+ {t:'The Nature of Allah',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/islam-beliefs-and-teachings/podcast_l02.mp3'},
+ {t:'Marriage, the Family and Sexuality',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/theme-relationships-and-families/podcast_l01.mp3'},
+];
+let podOn=false, podQ=null, podPos=-1;
+function playPod(){
+  if(!podQ) podQ=shuffle([...PODCASTS.keys()]);
+  podPos=(podPos+1)%podQ.length; const pd=PODCASTS[podQ[podPos]];
+  podOn=true; lcd.classList.add('lofi');
+  player.src=pd.u; player.play().catch(()=>{});
+  mq.textContent='NOW PLAYING · '+pd.t.toUpperCase()+' · '+pd.s.toUpperCase()+' · ';
+}
 const STATION_ORDER=['morning','library','rain','midnight','steady','bossa','season'];
 const SEASON_BY_MONTH=['winter','winter','spring','spring','spring','summer','summer','summer','autumn','autumn','autumn','winter'];
 const lcd=document.getElementById('lcd'), mq=document.getElementById('mq'), rmode=document.getElementById('rmode'),
       knob=document.getElementById('knob'), knob2=document.getElementById('knob2');
 let stations=[], mode=-1;                      // -1 = podcasts
 const player=new Audio(); player.volume=.55;
-player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); });
+player.addEventListener('ended',()=>{ if(mode>=0) nextTrack(); else if(podOn) playPod(); });
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 function pretty(u){ return decodeURIComponent(u.split('/').pop()).replace(/\.(mp3|m4a|wav)$/i,'').replace(/[_-]+/g,' ').toUpperCase(); }
 async function listDir(url){
@@ -593,14 +623,14 @@ function nextTrack(){
 }
 function setMode(i,opts={}){
   mode=i;
-  lcd.classList.toggle('lofi',mode>=0);
+  lcd.classList.toggle('lofi',mode>=0||podOn);
   knob.setAttribute('aria-checked',String(mode>=0));
   if(mode<0){
-    player.pause();
+    player.pause(); podOn=false; lcd.classList.remove('lofi');
     mq.textContent=PODCAST_TXT;
     rmode.textContent= stations.length
-      ? 'podcasts · tap the left dial for '+stations[0].label
-      : 'podcasts · drop tracks in assets/radio/ to open stations';
+      ? 'podcasts · right dial plays · left dial for '+stations[0].label
+      : 'podcasts · right dial plays an episode';
   } else if(opts.silent){
     const s=stations[mode];
     mq.textContent='TUNED: '+s.label.toUpperCase()+' · STATION '+(mode+1)+'/'+stations.length+' · ';
@@ -613,14 +643,7 @@ function setMode(i,opts={}){
 }
 knob.onclick=e=>{ e.stopPropagation(); setMode(mode+1>=stations.length ? -1 : mode+1); };
 let lcdNudge=null;
-knob2.onclick=e=>{ e.stopPropagation();
-  if(mode<0){
-    mq.textContent='TUNE THE LEFT DIAL FIRST · ';
-    clearTimeout(lcdNudge);
-    lcdNudge=setTimeout(()=>{ if(mode<0) mq.textContent=PODCAST_TXT; },3200);
-    return;
-  }
-  nextTrack(); };
+knob2.onclick=e=>{ e.stopPropagation(); if(mode<0){ playPod(); return; } nextTrack(); };
 discover();
 
 /* ---------- stage-aware dragging: pointer deltas are screen px, positions
