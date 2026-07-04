@@ -601,6 +601,8 @@ function wireSticky(el){
   el.appendChild(del);
   makeDraggable(el,sid);
 }
+/* pristine copies, captured before wiring mutates them — clean desk rebuilds from these */
+const STICKY_DEFAULTS=[...document.querySelectorAll('.sticky')].map(el=>el.outerHTML);
 document.querySelectorAll('.sticky').forEach(wireSticky);
 function spawnSticky(sid,html,focus){
   const el=document.createElement('div'); el.className='sticky'; el.dataset.sid=sid;
@@ -621,17 +623,31 @@ const bgmess=document.getElementById('bgmess');
 { const q=new URLSearchParams(location.search).get('desk');   // QA: ?desk=clean|mess
   const cleanedAt=+localStorage.getItem(CKEY)||0;
   if(q==='clean' || (q!=='mess' && Date.now()-cleanedAt<CLEAN_MS)) bgmess.style.display='none'; }
+/* everything back to its pristine spot, no page reload (the reload flashed) */
+function resetDeskInPlace(){
+  document.querySelectorAll('.sticky').forEach(el=>el.remove());
+  STICKY_DEFAULTS.forEach(html=>{
+    const t=document.createElement('div'); t.innerHTML=html;
+    const el=t.firstElementChild;
+    document.getElementById('stage').appendChild(el);
+    wireSticky(el);
+  });
+  pc.style.left=pc.style.top=pc.style.right=pc.style.bottom='';
+  pc.classList.remove('flipped');
+}
 document.getElementById('tidy').onclick=()=>{
   localStorage.removeItem(LKEY); localStorage.removeItem(SKEY);
+  layout={}; stickyStore={};
   try{ localStorage.setItem(CKEY, String(Date.now())); }catch(e){}
-  if(matchMedia('(prefers-reduced-motion: reduce)').matches){ location.reload(); return; }
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){
+    bgmess.classList.add('gone'); resetDeskInPlace(); return; }
   /* the wipe performs every time — even on an already-clean desk it resets
      the layout, so it should still feel like something happened */
   const sh=document.getElementById('shine'), sp=document.getElementById('sparks');
   sh.classList.remove('go'); sp.classList.remove('go'); void sh.offsetWidth;
   sh.classList.add('go'); sp.classList.add('go');
   bgmess.classList.add('gone');
-  setTimeout(()=>location.reload(), 1950);
+  setTimeout(resetDeskInPlace, 650);   // props snap home as the band passes them
 };
 if(new URLSearchParams(location.search).get('shineqa')==='1') setTimeout(()=>document.getElementById('tidy').click(),500);
 
