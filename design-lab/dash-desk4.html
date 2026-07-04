@@ -149,11 +149,16 @@
   .postcard:focus-visible{outline:3px solid var(--anchor);outline-offset:4px}
 
   /* flashcards: a painted scatter — the DOOR to flashcard mode (like the
-     phone is the door to shorts). One click target, no per-card fiddling. */
-  .cards{position:absolute;left:1935px;top:1120px;width:2210px;height:1489px;background:none;border:none;padding:0;
-    cursor:pointer;z-index:2;transform:scale(.2217);transform-origin:0 0;transition:transform .25s var(--ease)}
-  .cards:hover{transform:translateY(-14px) scale(.2217)}
-  .cards:focus-visible{outline:14px solid var(--anchor);outline-offset:20px}
+     phone is the door to shorts). Anchored off the bottom-left corner so only
+     the top few cards show; the rest of the pile reads as running off-screen.
+     No z-index: sits before #book in the DOM, so the pile tucks UNDER the
+     book's lower-left corner. Click target is the .hit span (the visible
+     cards only) — the full plate box would swallow clicks under the book. */
+  .cards{position:absolute;left:-250px;top:980px;width:2210px;height:1489px;background:none;border:none;padding:0;
+    pointer-events:none;transform:scale(.42);transform-origin:0 0;transition:transform .25s var(--ease)}
+  .cards:hover{transform:translateY(-16px) scale(.42)}
+  .cards .hit{position:absolute;left:560px;top:300px;width:1000px;height:1189px;pointer-events:auto;cursor:pointer}
+  .cards:focus-visible .hit{outline:20px solid var(--anchor);outline-offset:24px}
   .cards>.plate{position:absolute;left:0;top:0;width:2210px;display:block;pointer-events:none}
   /* live question handwritten on the clean top card */
   .fcq{position:absolute;left:0;top:0;width:660px;height:480px;transform-origin:0 0;pointer-events:none;
@@ -161,7 +166,7 @@
     display:flex;flex-direction:column;justify-content:center;gap:14px;padding:30px 44px}
   .fcq .q{font-family:var(--hand);font-size:96px;line-height:1.12;color:#3e3a31}
   .fcq .subj{font-size:54px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--fcc,#8a5a44) 75%,#84806f)}
-  .cards .fchint{position:absolute;left:40px;top:-150px;font-family:var(--hand);font-size:130px;color:#6b5c41;white-space:nowrap;transform:rotate(-3deg)}
+  .cards .fchint{position:absolute;left:720px;top:110px;font-family:var(--hand);font-size:84px;color:#6b5c41;white-space:nowrap;transform:rotate(-3deg)}
 
   /* flashcard mode: the card table */
   .fcmodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
@@ -276,6 +281,7 @@
 
   <button class="cards" id="cards" aria-label="Flashcards — start a mixed deck">
     <img class="plate" src="assets/lw/desk4-cards-a-cut.png" alt="">
+    <span class="hit"></span>
     <span class="fcq"><span class="q" id="fcText"></span><span class="subj" id="fcSubj"></span></span>
     <span class="fchint">mixed deck &#8635;</span>
   </button>
