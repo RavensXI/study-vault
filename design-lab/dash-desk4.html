@@ -561,7 +561,9 @@ SUBJECTS.forEach((s,i)=>{ const b=document.createElement('button'); b.className=
      spread, RS from down by the cover. S = measured outer silhouette at
      each tab height (plate alpha); label always starts past the edge. */
   const S=[76,77,80,81,83,86,88,92,96][i];
-  const base=4+Math.round((i/(SUBJECTS.length-1))*(S-26));
+  /* min depth 26px: even the first tab sits behind a few pages, never on
+     the open page itself */
+  const base=26+Math.round((i/(SUBJECTS.length-1))*(S-48));
   b.style.setProperty('--outx',base+'px');
   b.style.paddingLeft=(S-base+12)+'px';
   b.textContent=s.tab; b.onclick=()=>goSubject(i); tabs.appendChild(b); });
