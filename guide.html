@@ -63,7 +63,11 @@
 
   <script src="/js/school-session.js"></script>
   <script src="/js/free-user.js"></script>
-  <script>if (!SchoolSession.isActive() && !FreeUser.isActive()) { window.location.href = '/'; }</script>
+  <script>/* DESIGN-LAB: demo hosts skip the pick-your-subjects gate so shared
+    visitors can open guides straight from a lesson */
+  if (!SchoolSession.isActive() && !FreeUser.isActive()
+      && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1'
+      && !/\.vercel\.app$/.test(location.hostname)) { window.location.href = '/'; }</script>
   <script src="/js/main.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.js" crossorigin="anonymous"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
