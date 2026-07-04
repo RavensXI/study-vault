@@ -2249,6 +2249,9 @@ body[data-skin="reader"].desk-world{
   --accent:var(--subject-accent,#8a5a44);
   --accent-light:color-mix(in srgb,var(--accent) 9%,#fffdf8);
   --accent-badge:color-mix(in srgb,var(--accent) 16%,#fffdf8);
+  /* the subject colour taken down to near-black — every "dark" surface in the
+     desk world darkens THROUGH the subject, never to plain black */
+  --accent-deep:color-mix(in srgb,var(--accent) 45%,#16100c);
 }
 /* Bindery replaces the wordmark (brand kit is local-only, gitignored) */
 body[data-skin="reader"].desk-world .header-logo{
@@ -2259,6 +2262,36 @@ body[data-skin="reader"].desk-world .header-logo svg{ display:none; }
 body[data-skin="reader"].desk-world .page-header{
   background:color-mix(in srgb,#f6f1e7 92%,transparent);
   backdrop-filter:blur(8px);
+  /* hairline of the subject under the chrome — like the notebook tab peeking out */
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 22%,#e4dfd2);
 }
 /* masthead: keep the reader's scrim + overlaid title (Tom likes the reveal) —
-   the painted hero simply takes the photo's place under the same treatment */
+   the painted hero simply takes the photo's place under the same treatment.
+   The scrim is TINTED: it darkens through the subject colour, so the title
+   reveal quietly announces which desk-notebook you pulled this from. */
+body[data-skin="reader"].desk-world #hero-figure::after{
+  background:linear-gradient(to bottom,
+    rgba(0,0,0,0) 30%,
+    color-mix(in srgb,var(--accent-deep) 52%,transparent) 66%,
+    color-mix(in srgb,var(--accent-deep) 90%,transparent) 100%);
+}
+/* the eyebrow above the title picks up a pale wash of the subject */
+body[data-skin="reader"].desk-world .lesson-header .lesson-number{
+  color:color-mix(in srgb,var(--accent) 34%,#fff);
+}
+/* the video-overview card's scrim joins the same colour world */
+body[data-skin="reader"].desk-world .sv-video-scrim{
+  background:linear-gradient(to top,
+    color-mix(in srgb,var(--accent-deep) 86%,transparent) 0%,
+    color-mix(in srgb,var(--accent-deep) 14%,transparent) 48%,
+    color-mix(in srgb,var(--accent-deep) 30%,transparent) 100%);
+}
+/* selecting text highlights in the subject's wash */
+body[data-skin="reader"].desk-world ::selection{
+  background:color-mix(in srgb,var(--accent) 26%,transparent);
+}
+/* the lesson counter in the chrome takes the subject colour — the small
+   constant reminder of which notebook tab you're inside */
+body[data-skin="reader"].desk-world .header-lesson-label{
+  color:var(--accent);
+}
