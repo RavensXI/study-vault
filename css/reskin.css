@@ -2232,3 +2232,50 @@ body[data-skin="reader"] .site-footer-brand .logo-lock{ color:inherit; fill:curr
 /* Drop the amber BETA pill on the redesign masthead (matches the
    approved design-lab header; restore by deleting this rule). */
 .header-logo::after{ content:none; }
+
+/* =================================================================
+   SKIN 5 — DESK-WORLD (rides the reader skin via body.desk-world):
+   one world with the illustrated desk. Warm paper chrome, Bindery
+   masthead, the painted hero sits as a PLATE with caption + title
+   set below on paper — never over the art. Subject accent = the
+   same colour as the subject's cloth tab on the desk notebook.
+   ================================================================= */
+body[data-skin="reader"].desk-world{
+  --bg-body:#f6f1e7; --bg-card:#fffdf8;
+  --text-primary:#26231e; --text-secondary:#57534a; --text-muted:#84806f;
+  --border-light:#e4dfd2; --border-lighter:#efeadf;
+  --accent:var(--subject-accent,#8a5a44);
+  --accent-light:color-mix(in srgb,var(--accent) 9%,#fffdf8);
+  --accent-badge:color-mix(in srgb,var(--accent) 16%,#fffdf8);
+}
+/* Bindery replaces the wordmark (brand kit is local-only, gitignored) */
+body[data-skin="reader"].desk-world .header-logo{
+  font-size:0; color:transparent; width:122px; height:30px;
+  background:url('/design-lab/assets/brand/bindery-lockup.svg') left center/contain no-repeat;
+}
+body[data-skin="reader"].desk-world .header-logo svg{ display:none; }
+body[data-skin="reader"].desk-world .page-header{
+  background:color-mix(in srgb,#f6f1e7 92%,transparent);
+  backdrop-filter:blur(8px);
+}
+/* hero = painted plate in the flow; caption on paper right-aligned under it */
+body[data-skin="reader"].desk-world #hero-figure{ height:auto; max-height:none; overflow:visible; }
+body[data-skin="reader"].desk-world #hero-figure img{ height:56vh; max-height:560px; }
+body[data-skin="reader"].desk-world #hero-figure::after{ display:none; }
+body[data-skin="reader"].desk-world #hero-caption{
+  position:static; opacity:1 !important; color:var(--text-muted); text-shadow:none;
+  max-width:none; text-align:right; font-size:.85rem;
+  padding:.5rem 2.25rem 0 !important;
+}
+/* title below the art, in ink on paper */
+body[data-skin="reader"].desk-world .lesson-masthead .lesson-header{
+  position:static; opacity:1 !important; pointer-events:auto;
+  color:var(--text-primary); padding:1.1rem 1.5rem .2rem; transition:none;
+}
+body[data-skin="reader"].desk-world .lesson-header .lesson-number{
+  color:var(--accent); text-shadow:none;
+}
+body[data-skin="reader"].desk-world .lesson-header h1,
+body[data-skin="reader"].desk-world #lesson-title{
+  color:var(--text-primary); text-shadow:none;
+}

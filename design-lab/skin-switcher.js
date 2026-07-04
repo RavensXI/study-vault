@@ -3,7 +3,7 @@
 (function () {
   if (location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') return;
 
-  var SKINS = [['', 'Today'], ['reader', 'Reader'], ['paper', 'Paper'], ['ink', 'Ink'], ['crisp', 'Crisp']];
+  var SKINS = [['', 'Today'], ['reader', 'Reader'], ['desk', 'Desk'], ['paper', 'Paper'], ['ink', 'Ink'], ['crisp', 'Crisp']];
 
   var style = document.createElement('style');
   style.textContent =
@@ -24,8 +24,14 @@
   }).join('');
 
   function set(skin) {
-    if (skin) document.body.dataset.skin = skin; else delete document.body.dataset.skin;
+    // 'desk' = reader's structure wearing the illustrated-desk world:
+    // warm paper, Bindery masthead, painted hero with the title below.
+    var desk = skin === 'desk';
+    var eff = desk ? 'reader' : skin;
+    document.body.classList.toggle('desk-world', desk);
+    if (eff) document.body.dataset.skin = eff; else delete document.body.dataset.skin;
     document.body.classList.toggle('dark-mode', skin === 'ink'); // reuse battle-tested dark coverage
+    applySubjectAccent();
     [].forEach.call(bar.querySelectorAll('button'), function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-skin') === skin);
     });
@@ -40,6 +46,15 @@
   // real lesson page shows the signature ink-and-wash treatment. Keyed by the
   // lesson's stored hero URL (query stripped); lessons with no refined variant
   // (e.g. Pro refused a person photo) simply keep their photo.
+  // captions for OUR generated art (prompt-only where the source photo is
+  // CC BY-SA): swapped heroes get the illustration caption, not the photo credit
+  var LW_CAPTIONS = {
+    'https://upload.wikimedia.org/wikipedia/commons/0/07/Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0486.jpg':
+      'The Gräf & Stift touring car on the Appel Quay, Sarajevo, 28 June 1914 · ink & wash illustration'
+  };
+  var LW_POS = {   // art-specific framing for swapped heroes
+    'https://upload.wikimedia.org/wikipedia/commons/0/07/Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0486.jpg': 'center 62%'
+  };
   var LW_MANIFEST = null;
   fetch('/design-lab/_lw_manifest.json')
     .then(function (r) { return r.ok ? r.json() : {}; })
@@ -55,7 +70,14 @@
     }
     if (img.dataset.lwSwapped) return;
     var lw = LW_MANIFEST[lwNorm(img.getAttribute('src'))] || LW_MANIFEST[lwNorm(img.src)];
-    if (lw) { img.dataset.lwSwapped = '1'; img.removeAttribute('srcset'); img.src = lw; }
+    if (lw) {
+      img.dataset.lwSwapped = '1'; img.removeAttribute('srcset');
+      var srcKey = lwNorm(img.getAttribute('src'));
+      img.src = lw;
+      var cap = LW_CAPTIONS[srcKey], capEl = document.getElementById('hero-caption');
+      if (cap && capEl) capEl.textContent = cap;
+      if (LW_POS[srcKey]) img.style.objectPosition = LW_POS[srcKey];
+    }
   }
 
   // OLD production first-visit onboarding to strip in the reader redesign:
@@ -1189,6 +1211,15 @@
 
   // BRIEF v2: one muted accent per subject (sandbox map keyed by base slug;
   // ships later via subjects.color). Used sparingly: kicker, links, progress fills.
+  // the desk's own subject colours (dash-desk4 notebook tabs) — in desk-world
+  // mode the lesson inherits the SAME accent as its tab on the desk
+  var DESK_ACCENTS = {
+    'maths': '#4e5f66', 'mathematics': '#4e5f66',
+    'english-language': '#5b7285', 'english-literature': '#7d5a78',
+    'science': '#4e6e5d', 'combined-science': '#4e6e5d',
+    'history': '#8a5a44', 'geography': '#6d7a4e', 'spanish': '#a2643f',
+    'computer-science': '#54606e', 'religious-studies': '#6f5b91'
+  };
   var ACCENTS = {
     'history': '#3f5e78',            // deep slate-blue (was a muddy umber)
     'geography': '#5f7155',          // moss
@@ -1235,14 +1266,20 @@
     var m = location.pathname.match(/^\/(?:lesson|practice|browse|guide)\/([a-z0-9-]+)/);
     if (!m) return;
     var slug = m[1].replace(/-(aqa|edexcel|ocr|ocr-b|eduqas|wjec|ncfe)$/, '');
-    var c = ACCENTS[slug] || ACCENTS[slug.replace(/-2$/, '')];
+    var deskMode = document.body.classList.contains('desk-world');
+    var c = (deskMode && (DESK_ACCENTS[slug] || DESK_ACCENTS[slug.replace(/-2$/, '')])) ||
+            ACCENTS[slug] || ACCENTS[slug.replace(/-2$/, '')];
     if (c) document.body.style.setProperty('--subject-accent', c);
   }
 
   function init() {
+    if (location.search.indexOf('notour') !== -1) {
+      try { localStorage.setItem('sv-reader-tour-v1', '1'); } catch (e) {}
+    }
     // switcher bar hidden (Tom, 10 Jun) — Reader is the working skin; the bar
     // covered the top-right header buttons. Re-enable by appending `bar` again.
-    set('reader');            // default to the bold structural redesign
+    var reqSkin = new URLSearchParams(location.search).get('skin');
+    set(reqSkin !== null ? reqSkin : 'desk');   // default: desk-world (?skin=reader to compare)
     applySubjectAccent();
     watchOldOnboarding();     // kill the first-visit onboarding flash from the start
     setTimeout(tidy, 1200);
