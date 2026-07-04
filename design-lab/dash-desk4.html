@@ -21,6 +21,15 @@
      overlays can never drift apart. */
   #stage{position:absolute;left:0;top:0;width:2752px;height:1536px;transform-origin:0 0}
   #stage>.bg{position:absolute;inset:0;width:100%;height:100%}
+  /* two desk states: the clean plate sits under the messy one. 'clean desk'
+     fades the mess away; after a week the mess comes back on its own. */
+  #stage>.bg.mess{transition:opacity 1s ease .15s}
+  #stage>.bg.mess.gone{opacity:0}
+  /* the clean shimmer: one soft band of light sweeps the desk */
+  .shine{position:absolute;left:-60%;top:0;width:220%;height:100%;pointer-events:none;opacity:0;z-index:6;
+    background:linear-gradient(105deg,transparent 40%,rgba(255,252,238,.5) 50%,transparent 60%)}
+  .shine.go{animation:sweep4 1.25s ease}
+  @keyframes sweep4{from{opacity:1;transform:translateX(-28%)}to{opacity:1;transform:translateX(28%)}}
 
   .top{position:fixed;left:0;right:0;top:0;z-index:10;height:52px;display:flex;align-items:center;
     justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);pointer-events:none}
@@ -258,11 +267,13 @@
 
 <div class="top">
   <img class="brandlogo" src="assets/brand/bindery-lockup.svg" alt="Bindery">
-  <span style="display:flex;align-items:center;gap:.6rem"><button class="tidy" id="tidy" title="Put everything back where it started">tidy desk</button><span class="avatar">S</span></span>
+  <span style="display:flex;align-items:center;gap:.6rem"><button class="tidy" id="tidy" title="Wipe it all down — stains, shavings, the lot">clean desk</button><span class="avatar">S</span></span>
 </div>
 
 <div id="stage">
-  <img class="bg" src="assets/lw/desk4-scene-a.png" alt="">
+  <img class="bg" src="assets/lw/desk4-scene-clean.png" alt="">
+  <img class="bg mess" id="bgmess" src="assets/lw/desk4-scene-a.png" alt="">
+  <div class="shine" id="shine"></div>
 
   <div id="radio" role="group" aria-label="Revision Radio">
     <img class="plate" src="assets/lw/desk4-radio-a-cut.png" alt="">
@@ -586,7 +597,21 @@ Object.keys(stickyStore).filter(k=>k.startsWith('u')&&!stickyStore[k].del)
   .forEach(k=>spawnSticky(k,stickyStore[k].html||''));
 document.getElementById('pad').onclick=()=>{ if(dragBlockClick) return;
   const sid='u'+Math.random().toString(36).slice(2,9); stickyStore[sid]={html:''}; saveStickies(); spawnSticky(sid,'',true); };
-document.getElementById('tidy').onclick=()=>{ localStorage.removeItem(LKEY); localStorage.removeItem(SKEY); location.reload(); };
+/* clean desk: reset the layout AND actually clean — stains and clutter fade
+   under a light sweep. The desk stays clean for a week, then the mess is back. */
+const CKEY='sv_desk4_cleaned', CLEAN_MS=7*24*3600*1000;
+const bgmess=document.getElementById('bgmess');
+{ const q=new URLSearchParams(location.search).get('desk');   // QA: ?desk=clean|mess
+  const cleanedAt=+localStorage.getItem(CKEY)||0;
+  if(q==='clean' || (q!=='mess' && Date.now()-cleanedAt<CLEAN_MS)) bgmess.style.display='none'; }
+document.getElementById('tidy').onclick=()=>{
+  localStorage.removeItem(LKEY); localStorage.removeItem(SKEY);
+  try{ localStorage.setItem(CKEY, String(Date.now())); }catch(e){}
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches || bgmess.style.display==='none'){ location.reload(); return; }
+  document.getElementById('shine').classList.add('go');
+  bgmess.classList.add('gone');
+  setTimeout(()=>location.reload(), 1350);
+};
 
 /* ---------- flashcards: painted scatter -> flashcard mode ---------- */
 const FC=[
