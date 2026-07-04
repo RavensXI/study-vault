@@ -649,12 +649,7 @@
     updateDot();
 
     // open / close + viewport-aware placement (right-aligned under the trigger)
-    function place() {
-      var r = btn.getBoundingClientRect();
-      pop.style.top = (r.bottom + 9) + 'px';
-      var w = pop.offsetWidth || 244;
-      pop.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
-    }
+    function place() { placePop(btn, pop, 244); }
     function openPop() { pop.hidden = false; place(); btn.setAttribute('aria-expanded', 'true'); }
     function closePop() { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     btn.addEventListener('click', function (e) { e.stopPropagation(); pop.hidden ? openPop() : closePop(); });
@@ -663,6 +658,30 @@
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
     window.addEventListener('resize', function () { if (!pop.hidden) place(); });
+    window.addEventListener('scroll', function () { if (!pop.hidden) place(); }, { passive: true });
+  }
+
+  // Shared popover placement: right-aligned to the trigger, FLIPS above it
+  // when the viewport below is cramped, clamps to a scrollable max-height,
+  // and is re-placed on scroll so it stays glued to its button. (Fixes: menu
+  // opened near the bottom was cut off and unreachable — it neither scrolled
+  // with the page nor within itself.)
+  function placePop(btn, pop, defW) {
+    var r = btn.getBoundingClientRect();
+    var h = pop.offsetHeight || 320;
+    var below = window.innerHeight - r.bottom - 17;
+    var above = r.top - 17;
+    var top;
+    if (below < h && above > below) {
+      pop.style.maxHeight = Math.min(h, above) + 'px';
+      top = Math.max(8, r.top - 9 - Math.min(h, above));
+    } else {
+      pop.style.maxHeight = Math.max(120, below) + 'px';
+      top = r.bottom + 9;
+    }
+    pop.style.top = top + 'px';
+    var w = pop.offsetWidth || defW;
+    pop.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
   }
 
   // READ YOUR WAY (Tom, 13 Jun) — one popover for text size + spacing + reading
@@ -775,12 +794,7 @@
     pop.appendChild(reset);
 
     // ---- open / close + placement (right-aligned under the trigger) ----
-    function place() {
-      var r = btn.getBoundingClientRect();
-      pop.style.top = (r.bottom + 9) + 'px';
-      var w = pop.offsetWidth || 282;
-      pop.style.left = Math.max(8, Math.min(r.right - w, window.innerWidth - w - 8)) + 'px';
-    }
+    function place() { placePop(btn, pop, 282); }
     function openPop() { pop.hidden = false; place(); btn.setAttribute('aria-expanded', 'true'); }
     function closePop() { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     btn.addEventListener('click', function (e) { e.stopPropagation(); pop.hidden ? openPop() : closePop(); });
@@ -789,6 +803,7 @@
     });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !pop.hidden) closePop(); });
     window.addEventListener('resize', function () { if (!pop.hidden) place(); });
+    window.addEventListener('scroll', function () { if (!pop.hidden) place(); }, { passive: true });
   }
 
   // SCHOOL CO-BRAND (Tom, 14 Jun) — on a school account, school-session.js

@@ -1276,6 +1276,7 @@ body[data-skin="reader"] .a11y-overlay-dot{
 }
 /* popover sits ABOVE the tint sheet (z 2147483000) so the chips read true */
 body[data-skin="reader"] .a11y-overlay-pop{
+  overflow-y:auto; overscroll-behavior:contain;
   position:fixed; z-index:2147483600; width:288px; box-sizing:border-box;
   background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 44px -22px rgba(29,28,26,.34);
@@ -1329,6 +1330,7 @@ body[data-skin="reader"] .a11y-reading-toggle.on{
 body[data-skin="reader"] .a11y-reading-toggle svg{ width:17px; height:17px; }
 body[data-skin="reader"] .a11y-reading-pop{
   position:fixed; z-index:2147483600; width:282px; box-sizing:border-box;
+  overflow-y:auto; overscroll-behavior:contain;
   background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 44px -22px rgba(29,28,26,.34);
   padding:.4rem 1.05rem .9rem; font-family:var(--font-ui);
@@ -2258,24 +2260,5 @@ body[data-skin="reader"].desk-world .page-header{
   background:color-mix(in srgb,#f6f1e7 92%,transparent);
   backdrop-filter:blur(8px);
 }
-/* hero = painted plate in the flow; caption on paper right-aligned under it */
-body[data-skin="reader"].desk-world #hero-figure{ height:auto; max-height:none; overflow:visible; }
-body[data-skin="reader"].desk-world #hero-figure img{ height:56vh; max-height:560px; }
-body[data-skin="reader"].desk-world #hero-figure::after{ display:none; }
-body[data-skin="reader"].desk-world #hero-caption{
-  position:static; opacity:1 !important; color:var(--text-muted); text-shadow:none;
-  max-width:none; text-align:right; font-size:.85rem;
-  padding:.5rem 2.25rem 0 !important;
-}
-/* title below the art, in ink on paper */
-body[data-skin="reader"].desk-world .lesson-masthead .lesson-header{
-  position:static; opacity:1 !important; pointer-events:auto;
-  color:var(--text-primary); padding:1.1rem 1.5rem .2rem; transition:none;
-}
-body[data-skin="reader"].desk-world .lesson-header .lesson-number{
-  color:var(--accent); text-shadow:none;
-}
-body[data-skin="reader"].desk-world .lesson-header h1,
-body[data-skin="reader"].desk-world #lesson-title{
-  color:var(--text-primary); text-shadow:none;
-}
+/* masthead: keep the reader's scrim + overlaid title (Tom likes the reveal) —
+   the painted hero simply takes the photo's place under the same treatment */
