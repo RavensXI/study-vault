@@ -50,7 +50,9 @@
   // CC BY-SA): swapped heroes get the illustration caption, not the photo credit
   var LW_CAPTIONS = {
     'https://upload.wikimedia.org/wikipedia/commons/0/07/Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0486.jpg':
-      'The Gräf & Stift touring car on the Appel Quay, Sarajevo, 28 June 1914 · ink & wash illustration'
+      'The Gräf & Stift touring car on the Appel Quay, Sarajevo, 28 June 1914 · ink & wash illustration',
+    'https://upload.wikimedia.org/wikipedia/commons/3/39/Doom_painting%2C_St_Thomas%27s_church_-_geograph.org.uk_-_8141542.jpg':
+      'A church Doom painting: Christ in judgement between heaven and hell · ink & wash illustration'
   };
   var LW_POS = {   // art-specific framing for swapped heroes
     'https://upload.wikimedia.org/wikipedia/commons/0/07/Gr%C3%A4f_%26_Stift_automobile_of_Archduke_Franz_Ferdinand_of_Austria-0486.jpg': 'center 62%'
@@ -77,6 +79,10 @@
       var cap = LW_CAPTIONS[srcKey], capEl = document.getElementById('hero-caption');
       if (cap && capEl) capEl.textContent = cap;
       if (LW_POS[srcKey]) img.style.objectPosition = LW_POS[srcKey];
+      // the video-overview card thumbnails the hero — keep it in the same world
+      // whichever of the two built first (it snapshots hero src at build time)
+      var vh = document.querySelector('.sv-video-hero');
+      if (vh) vh.src = lw;
     }
   }
 
