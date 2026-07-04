@@ -1,7 +1,16 @@
-/* Design-lab skin switcher — localhost only. Flips body[data-skin] so the
-   real lesson re-skins live. Not shipped; remove the <script> to drop it. */
+/* Design-lab skin switcher — localhost + Vercel PREVIEW deployments only
+   (the desk-world demo Tom can share). Never fires on the production domain.
+   Not shipped; remove the <script> to drop it. */
 (function () {
-  if (location.hostname !== '127.0.0.1' && location.hostname !== 'localhost') return;
+  var host = location.hostname;
+  if (host !== '127.0.0.1' && host !== 'localhost' && !/\.vercel\.app$/.test(host)) return;
+
+  // The Bindery brand kit is local-only (gitignored — trademark clearance
+  // pending, must not enter the public repo). Only swap the wordmark when the
+  // asset actually exists; deployed previews keep the StudyVault wordmark.
+  var binderyProbe = new Image();
+  binderyProbe.onload = function () { document.body.classList.add('has-bindery'); };
+  binderyProbe.src = '/design-lab/assets/brand/bindery-lockup.svg';
 
   var SKINS = [['', 'Today'], ['reader', 'Reader'], ['desk', 'Desk'], ['paper', 'Paper'], ['ink', 'Ink'], ['crisp', 'Crisp']];
 
@@ -32,6 +41,7 @@
     if (eff) document.body.dataset.skin = eff; else delete document.body.dataset.skin;
     document.body.classList.toggle('dark-mode', skin === 'ink'); // reuse battle-tested dark coverage
     applySubjectAccent();
+    wireDeskHome();
     [].forEach.call(bar.querySelectorAll('button'), function (b) {
       b.setAttribute('aria-pressed', b.getAttribute('data-skin') === skin);
     });
@@ -1283,6 +1293,17 @@
     'health-social-care': '#84576b',
     'it': '#3f6478'
   };
+  // In the desk world, HOME is Sam's desk: the brand mark and the Home nav
+  // link lead back to the dashboard, closing the desk → lesson → desk loop.
+  function wireDeskHome() {
+    if (!document.body.classList.contains('desk-world')) return;
+    var brand = document.querySelector('a.header-brand');
+    if (brand) brand.setAttribute('href', '/desk');
+    [].forEach.call(document.querySelectorAll('.header-nav a'), function (a) {
+      if (a.getAttribute('href') === '/') a.setAttribute('href', '/desk');
+    });
+  }
+
   function applySubjectAccent() {
     var m = location.pathname.match(/^\/(?:lesson|practice|browse|guide)\/([a-z0-9-]+)/);
     if (!m) return;

@@ -16,6 +16,7 @@ REWRITES = [
     ("/browse/", "/browse.html"),
     ("/practice/", "/practice.html"),
     ("/guide/", "/guide.html"),
+    ("/desk", "/design-lab/dash-desk4.html"),  # Sam's desk (the dashboard)
 ]
 
 

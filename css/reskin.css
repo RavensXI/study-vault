@@ -2253,12 +2253,14 @@ body[data-skin="reader"].desk-world{
      desk world darkens THROUGH the subject, never to plain black */
   --accent-deep:color-mix(in srgb,var(--accent) 45%,#16100c);
 }
-/* Bindery replaces the wordmark (brand kit is local-only, gitignored) */
-body[data-skin="reader"].desk-world .header-logo{
+/* Bindery replaces the wordmark ONLY when the local brand kit exists —
+   skin-switcher probes for it and adds .has-bindery. Deployed previews
+   (public repo, kit gitignored, trademark pending) keep StudyVault. */
+body[data-skin="reader"].desk-world.has-bindery .header-logo{
   font-size:0; color:transparent; width:122px; height:30px;
   background:url('/design-lab/assets/brand/bindery-lockup.svg') left center/contain no-repeat;
 }
-body[data-skin="reader"].desk-world .header-logo svg{ display:none; }
+body[data-skin="reader"].desk-world.has-bindery .header-logo svg{ display:none; }
 body[data-skin="reader"].desk-world .page-header{
   background:color-mix(in srgb,#f6f1e7 92%,transparent);
   backdrop-filter:blur(8px);

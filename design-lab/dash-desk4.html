@@ -3,7 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Desk v4 — the painted desk</title>
+<!-- served at /desk (vercel.json + serve.py rewrite) — base keeps the
+     relative asset paths resolving into design-lab/ -->
+<base href="/design-lab/">
+<title>Your desk — StudyVault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..600&display=swap" rel="stylesheet">
 <style>
@@ -21,6 +24,7 @@
      overlays can never drift apart. */
   #stage{position:absolute;left:0;top:0;width:2752px;height:1536px;transform-origin:0 0;opacity:0}
   #stage.ready{opacity:1;transition:opacity .5s ease}
+  #stage.exit{opacity:0 !important;transition:opacity .22s ease}
   #stage>.bg{position:absolute;inset:0;width:100%;height:100%}
   /* two desk states: the clean plate sits under the messy one. 'clean desk'
      fades the mess away; after a week the mess comes back on its own. */
@@ -333,7 +337,8 @@
 <body>
 
 <div class="top">
-  <img class="brandlogo" src="assets/brand/bindery-lockup.svg" alt="Bindery">
+  <img class="brandlogo" src="assets/brand/bindery-lockup.svg" alt="Bindery"
+       onerror="this.outerHTML='<span class=&quot;brand&quot;>Study<b>Vault</b></span>'">
   <span style="display:flex;align-items:center;gap:.6rem"><button class="tidy" id="tidy" title="Wipe it all down — stains, shavings, the lot">clean desk</button><span class="avatar">S</span></span>
 </div>
 
@@ -445,28 +450,36 @@
 </div>
 
 <script>
-/* ---------- data (same demo data as desk3) ---------- */
+/* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
+   `sub` = live subject slug, unit rows are [label, real lesson count, Sam's
+   fictional done count, real unit slug]. mode 'p' = practice-first URLs.
+   Every row opens the actual lesson/practice page ("next" = done+1). */
 const SUBJECTS=[
- {tab:'MATHS',slug:'maths',name:'Mathematics',c:'#4e5f66',units:[['Number',8,3],['Algebra',10,2],['Geometry',8,1]]},
- {tab:'LANG',slug:'lang',name:'English Language',c:'#5b7285',units:[['Paper 1',8,2],['Paper 2',8,1]]},
- {tab:'LIT',slug:'lit',name:'English Literature',c:'#7d5a78',units:[['Macbeth',9,4],['A Christmas Carol',8,5],['Power & Conflict',15,3]]},
- {tab:'SCIENCE',slug:'science',name:'Combined Science',c:'#4e6e5d',units:[['Biology P1',12,4],['Chemistry P1',12,2],['Physics P1',12,1]]},
- {tab:'HISTORY',slug:'history',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4],['Conflict & Tension',12,2],['Britain: Health & the People',12,1],['Elizabethan England',12,1]]},
- {tab:'GEOG',slug:'geog',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Living with the physical environment',12,5],['Paper 2: Challenges in the human environment',12,4]]},
- {tab:'SPANISH',slug:'spanish',name:'Spanish',c:'#a2643f',units:[['Theme 1',9,3],['Theme 2',9,2],['Theme 3',8,1]]},
- {tab:'CS',slug:'cs',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3],['Computational Thinking',11,2]]},
- {tab:'RS',slug:'rs',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: beliefs',10,2],['Islam: beliefs',10,1],['Themes A–D',8,0]]},
+ {tab:'MATHS',slug:'maths',sub:'maths-aqa',mode:'p',name:'Mathematics',c:'#4e5f66',units:[['Number',7,3,'number'],['Algebra',14,5,'algebra'],['Geometry & Measures',8,2,'geometry']]},
+ {tab:'LANG',slug:'lang',sub:'english-language-aqa',mode:'p',name:'English Language',c:'#5b7285',units:[['Paper 1: Reading',8,2,'paper-1-reading'],['Paper 1: Writing',7,1,'paper-1-writing'],['Paper 2: Reading',8,1,'paper-2-reading'],['Paper 2: Writing',7,0,'paper-2-writing']]},
+ {tab:'LIT',slug:'lit',sub:'english-literature-aqa',mode:'l',name:'English Literature',c:'#7d5a78',units:[['Macbeth',10,4,'macbeth'],['A Christmas Carol',8,5,'a-christmas-carol'],['Power & Conflict',10,3,'power-and-conflict']]},
+ {tab:'SCIENCE',slug:'science',sub:'science-aqa',mode:'l',name:'Combined Science',c:'#4e6e5d',units:[['Biology Paper 1',10,4,'biology-paper-1'],['Chemistry Paper 1',12,2,'chemistry-paper-1'],['Physics Paper 1',11,1,'physics-paper-1']]},
+ {tab:'HISTORY',slug:'history',sub:'history-aqa',mode:'l',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4,'germany-democracy-dictatorship'],['Conflict & Tension',13,2,'conflict-tension-first-world-war'],['Britain: Health & the People',14,1,'britain-health-people'],['Elizabethan England',12,1,'elizabethan-england']]},
+ {tab:'GEOG',slug:'geog',sub:'geography-aqa',mode:'l',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Physical Geography',20,5,'paper-1'],['Paper 2: Human Geography',20,4,'paper-2']]},
+ {tab:'SPANISH',slug:'spanish',sub:'spanish-aqa',mode:'p',name:'Spanish',c:'#a2643f',units:[['People & Lifestyle',10,3,'people-and-lifestyle'],['Popular Culture',8,2,'popular-culture'],['Communication & the World',8,1,'communication-and-world']]},
+ {tab:'CS',slug:'cs',sub:'computer-science',mode:'l',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3,'computer-systems'],['Computational Thinking',11,2,'computational-thinking']]},
+ {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
 ];
+function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
+/* leave the desk with a quick dip through the curtain; coming Back restores a
+   bfcached faded frame, so pageshow always clears it */
+function nav(u){ stage.classList.add('exit'); setTimeout(()=>{ location.href=u; },230); }
+addEventListener('pageshow',()=>stage.classList.remove('exit'));
 const TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
     <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
-    <li tabindex="0"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
-    <li tabindex="0"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+    <li tabindex="0" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0" onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
   </ol>
   <p class="momentum">4-day streak · 23 topics this week — your best yet.</p>
-  <div class="startrow"><button class="start"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>Start · 25 min</button></div>`;
+  <div class="startrow"><button class="start" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>Start · 25 min</button></div>`;
 const TODAY_R=`
   <h3>This week</h3>
   <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
@@ -479,6 +492,7 @@ const TODAY_R=`
 
 let LADDERS={};
 function subjSpread(s){
+  const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
   const done=s.units.reduce((t,u)=>t+u[2],0), total=s.units.reduce((t,u)=>t+u[1],0);
   const pct=Math.round(done/total*100);
   const stage= pct>=66?3 : pct>=33?2 : 1;
@@ -488,7 +502,7 @@ function subjSpread(s){
     <div class="datestamp">${s.name}</div>
     <h2>Where you stand.</h2>
     <div class="subjpg">
-      ${s.units.map(([u,tot,d])=>`<div class="unit" tabindex="0"><b>${u}</b><small>${d} / ${tot}</small></div>`).join('')}
+      ${s.units.map(u=>`<div class="unit" tabindex="0" onclick="nav('${urlFor(s,u)}')"><b>${u[0]}</b><small>${u[2]} / ${u[1]}</small></div>`).join('')}
     </div>
     <p class="momentum" style="margin-top:auto">${done} of ${total} topics · ${pct}% complete</p>`;
   const R=(lad?`
@@ -496,9 +510,9 @@ function subjSpread(s){
     <p class="scap">${stageWord[0].toUpperCase()+stageWord.slice(1)} — ${pct}% drawn.<br>The picture finishes as you do.</p>`:`
     <h3>Pick up where you left off</h3>`)+`
     <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
-      <div class="unit" tabindex="0"><b>${s.units[0][0]} — next lesson</b><small>continue</small></div>
+      <div class="unit" tabindex="0" onclick="nav('${urlFor(s,nxt)}')"><b>${nxt[0]} — next lesson</b><small>continue</small></div>
       <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
-      <button class="open4">Open ${s.name} →</button>
+      <button class="open4" onclick="nav('/browse/${s.sub}')">Open ${s.name} →</button>
       <button class="backlink" onclick="goToday()">⟵ back to today</button>
     </div>`;
   return [L,R];
