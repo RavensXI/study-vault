@@ -65,8 +65,11 @@ applied + verified.
       (scripts/_fact_check/computer-science.{json,md})
 - [x] Unity mirror 23/23 by (unit_slug, lesson_number).
       Backups: scratchpad/unity_cs_backup.jsonl
-- [~] Re-narration RUNNING (task b1tptfbtn): 98 lessons sequential via
-      _narrate_single_lesson.py — 23 free CS + 23 Unity CS + 52 strip-drift
-      (list: scratchpad/renarrate_strip_list.json; log: scratchpad/renarrate_run.log)
+- [x] Re-narration DONE: 75 lessons (23 free CS + 52 strip-drift), 66 first
+      pass + 9 UTF-8-console retries, 0 failures. Unity CS did NOT get its own
+      runs (Tom's catch): R2 narration keys carry no school namespace, so both
+      tiers share clip paths — Unity got the 23 fresh manifests COPIED from
+      free twins instead (23/23). ~23 duplicate Azure runs saved.
 - [x] Shorts remap: N/A — no shorts exist for slug computer-science
-- [ ] Final report (incl. stale Unity CS podcasts/videos note)
+- [x] COMPLETE 5 Jul 2026. Outstanding for Tom: Unity CS podcasts + cinematic
+      videos describe the old thin lessons (NLM/manual pipelines).
