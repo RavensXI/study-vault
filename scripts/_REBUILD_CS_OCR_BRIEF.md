@@ -58,11 +58,15 @@ applied + verified.
       language), platform scanner clean. Backups: scratchpad/specfix_backup.jsonl
 - [~] Rebuild content fan-out RUNNING (wf_9ed6aeda-cd3, 23 Opus agents,
       outputs scratchpad/csrebuild_out/<id>.json)
-- [ ] Validate (validator + KC shape + Award-marks drift-grep + spec-ref scan)
-      + backup + PATCH free tier
-- [ ] Fact-check gate: python scripts/_fact_check_subject.py computer-science
-      (fix findings surgically BEFORE narration)
-- [ ] Mirror to Unity CS rows
-- [ ] Re-narrate (a)+(b)+(c)
-- [ ] Shorts qbank refetch + remap for CS lessons (new KCs)
-- [ ] Final report
+- [x] Validated + applied 23/23 free-tier (avg 1,033 words; 2 flashcards
+      hand-fixed; 1 lesson single-agent regen after two phantom successes).
+      Backups: scratchpad/csrebuild_backup.jsonl
+- [x] Fact-check gate PASSED: 0 findings, 4 web-verify slices
+      (scripts/_fact_check/computer-science.{json,md})
+- [x] Unity mirror 23/23 by (unit_slug, lesson_number).
+      Backups: scratchpad/unity_cs_backup.jsonl
+- [~] Re-narration RUNNING (task b1tptfbtn): 98 lessons sequential via
+      _narrate_single_lesson.py — 23 free CS + 23 Unity CS + 52 strip-drift
+      (list: scratchpad/renarrate_strip_list.json; log: scratchpad/renarrate_run.log)
+- [x] Shorts remap: N/A — no shorts exist for slug computer-science
+- [ ] Final report (incl. stale Unity CS podcasts/videos note)
