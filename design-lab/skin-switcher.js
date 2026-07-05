@@ -148,9 +148,15 @@
   // anon-welcome ("First time at StudyVault?"), whats-new ("recently built"
   // toast), lesson-tutorial tooltips, and any legacy coach/walkthrough/spotlight
   // — but NOT our own sv-tour feature tour.
-  var OLD_ONBOARDING = '[class*="tour"]:not([class*="sv-tour"]),[class*="coach"],[class*="tutorial"],[class*="walkthrough"],[class*="spotlight"]:not([class*="sv-tour"]),.anon-welcome-overlay,[class*="whats-new"]';
+  // NB: .sv-tutorial-spotlight is a MARKER the old loader tutorial puts on
+  // REAL content (it hid/deleted the practice section on fresh visits) —
+  // never match it, and clear any stranded markers.
+  var OLD_ONBOARDING = '[class*="tour"]:not([class*="sv-tour"]),[class*="coach"],[class*="tutorial"]:not(.sv-tutorial-spotlight),[class*="walkthrough"],[class*="spotlight"]:not([class*="sv-tour"]):not(.sv-tutorial-spotlight),.anon-welcome-overlay,[class*="whats-new"]';
   function stripOldOnboarding(root) {
     (root || document).querySelectorAll(OLD_ONBOARDING).forEach(function (e) { e.remove(); });
+    (root || document).querySelectorAll('.sv-tutorial-spotlight').forEach(function (e) {
+      e.classList.remove('sv-tutorial-spotlight');
+    });
   }
   // Remove the instant they're inserted (deferred onboarding scripts add them
   // after load) so they never flash. CSS in reskin also hides them from first
@@ -1366,6 +1372,13 @@
     if (location.search.indexOf('notour') !== -1) {
       try { localStorage.setItem('sv-reader-tour-v1', '1'); } catch (e) {}
     }
+    // the OLD loader tutorial is replaced by the reader tour — its tooltip is
+    // stripped under this skin, so if it ever starts it strands mid-step with
+    // a spotlight marker stuck on real content. Retire it before it can run.
+    try {
+      localStorage.setItem('sv-lesson-tutorial-done', '1');
+      localStorage.setItem('sv-highlight-tutorial-done', '1');
+    } catch (e) {}
     // switcher bar hidden (Tom, 10 Jun) — Reader is the working skin; the bar
     // covered the top-right header buttons. Re-enable by appending `bar` again.
     var reqSkin = new URLSearchParams(location.search).get('skin');
