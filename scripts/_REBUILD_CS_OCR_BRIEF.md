@@ -42,8 +42,27 @@ applied + verified.
    questions must be re-checked after new KCs land — re-run the shorts qbank
    fetch + remap for this subject's lessons.
 
+## Decisions (Tom, 5 Jul): BOTH YES
+- Re-narration: YES — (a) 23 rebuilt CS free-tier lessons, (b) Unity CS copies
+  after mirror, (c) strip-touched lessons whose content_html changed
+  (from scratchpad/specfix_backup.jsonl, exclude CS which is rebuilt anyway;
+  exclude practice-first subjects — no narration). Ollie odd / Ada even,
+  docs/NARRATION_PIPELINE.md. Note in report: Unity podcasts/cinematic videos
+  for CS become stale (NLM/manual — Tom's call separately).
+- Unity mirror: YES — copy the six rebuilt content fields onto
+  computer-science[school] rows matched by (unit_slug, lesson_number).
+  Unity CS was originally a copy of generic, so this preserves provenance.
+
 ## Status
-- [ ] Strip workflow complete, edits applied, scanner = 0 hits
-- [ ] Rebuild content fan-out (23 Opus agents)
-- [ ] Validate + PATCH + fact-check
-- [ ] Report narration cost decision to Tom
+- [x] Strip: 105/105 applied (2 scanner leftovers = benign D&T design-spec
+      language), platform scanner clean. Backups: scratchpad/specfix_backup.jsonl
+- [~] Rebuild content fan-out RUNNING (wf_9ed6aeda-cd3, 23 Opus agents,
+      outputs scratchpad/csrebuild_out/<id>.json)
+- [ ] Validate (validator + KC shape + Award-marks drift-grep + spec-ref scan)
+      + backup + PATCH free tier
+- [ ] Fact-check gate: python scripts/_fact_check_subject.py computer-science
+      (fix findings surgically BEFORE narration)
+- [ ] Mirror to Unity CS rows
+- [ ] Re-narrate (a)+(b)+(c)
+- [ ] Shorts qbank refetch + remap for CS lessons (new KCs)
+- [ ] Final report
