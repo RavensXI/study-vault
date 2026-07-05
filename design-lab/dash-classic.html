@@ -74,6 +74,18 @@
   .subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
   .scard{position:relative;padding:1rem 1.1rem 1.05rem;overflow:hidden;display:block;color:inherit;text-decoration:none;
     transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+  .scard .cont,.scard .open{cursor:pointer}
+  .scard .units{display:none;margin-top:.7rem;border-top:1px solid var(--linel);padding-top:.35rem}
+  .scard.expanded .units{display:block}
+  .scard .units .urow{display:flex;align-items:center;gap:10px;padding:.42rem .2rem;border-radius:8px;
+    color:inherit;text-decoration:none;font-size:.86rem}
+  .scard .units .urow:hover{background:rgba(112,90,50,.06)}
+  .scard .units .urow .un{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .scard .units .urow .ud{color:var(--mut);font-size:.78rem;font-variant-numeric:tabular-nums}
+  .scard .units .utrack{width:52px;height:3px;border-radius:2px;background:var(--linel);overflow:hidden}
+  .scard .units .utrack i{display:block;height:100%;background:var(--tc)}
+  .scard .units .uart{float:right;width:120px;height:80px;object-fit:cover;border-radius:8px;
+    margin:.2rem 0 .4rem .8rem;box-shadow:inset 0 0 0 1px rgba(122,104,72,.18)}
   .scard:hover{transform:translateY(-3px);box-shadow:0 14px 30px -18px rgba(29,28,26,.35);
     border-color:color-mix(in srgb,var(--tc) 45%,var(--line))}
   .scard::before{content:"";position:absolute;left:0;top:20px;width:4px;height:34px;
@@ -211,8 +223,8 @@
       <div class="ln"><span>Needs a look</span><b>Macbeth — 3 wks ago</b></div>
       <div class="ln"><span>Warm-up accuracy</span><b>78% and climbing</b></div>
       <div class="ln"><span>Shorts watched</span><b>41 · checks 7/8</b></div>
-      <div class="ln"><span>Radio</span><b>3 episodes on the bus</b></div>
-      <div class="ln"><span>Next mock</span><b>none booked</b></div>
+      <div class="ln lndue" id="duerow" style="cursor:pointer" title="Open flashcard review">
+        <span>Cards due today</span><b id="duecount">0</b></div>
     </div>
 
     <button class="card door" id="fcdoor">
@@ -307,21 +319,34 @@ function renderSubjects(){
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
     const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
-    const a=document.createElement('a');
+    const a=document.createElement('div');
     a.className='card scard'; a.style.setProperty('--tc',s.c);
-    a.href=urlFor(s,nxt);
-    a.addEventListener('click',e=>{ e.preventDefault(); nav(urlFor(s,nxt)); });
     const lad=LADDERS[s.slug];
-    a.innerHTML=(lad?'<img class="vig" src="'+lad[stageOf(s)-1]+'" alt="">':'')+
-      '<h3>'+s.name+'</h3>'+
-      '<div class="meta">'+d+' of '+t+' topics · '+Math.round(d/t*100)+'%</div>'+
+    a.innerHTML='<h3>'+s.name+'</h3>'+
+      '<div class="meta">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%</div>'+
       '<div class="track"><div class="fill" style="width:'+Math.round(d/t*100)+'%"></div></div>'+
-      '<div class="row"><span class="cont">'+nxt[0]+'</span><span class="sp"></span>'+
-      '<span class="open" data-open>Open '+s.tab+'</span></div>';
-    a.querySelector('[data-open]').addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); nav('/browse/'+s.sub); });
+      '<div class="row"><span class="cont" data-cont>Continue: '+nxt[0]+'</span><span class="sp"></span>'+
+      '<span class="open" data-open aria-expanded="false">Units ▾</span></div>'+
+      '<div class="units">'+
+        (lad?'<img class="uart" src="'+lad[stageOf(s)-1]+'" alt="">':'')+
+        s.units.map(u=>'<a class="urow" href="/browse/'+s.sub+'/'+u[3]+'">'+
+          '<span class="un">'+u[0]+'</span>'+
+          '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
+          '<span class="ud">'+u[2]+' / '+u[1]+'</span></a>').join('')+
+        '<a class="urow" href="/browse/'+s.sub+'" style="color:var(--mut)"><span class="un">All of '+s.name+' →</span></a>'+
+      '</div>';
+    a.querySelector('[data-cont]').addEventListener('click',()=>nav(urlFor(s,nxt)));
+    a.querySelector('[data-open]').addEventListener('click',e=>{
+      e.stopPropagation();
+      const ex=a.classList.toggle('expanded');
+      e.target.setAttribute('aria-expanded',String(ex));
+      e.target.textContent=ex?'Units ▴':'Units ▾';
+    });
+    a.querySelectorAll('.units a').forEach(x=>x.addEventListener('click',e=>{
+      e.preventDefault(); nav(x.getAttribute('href')); }));
     host.appendChild(a);
   });
-  document.getElementById('subcount').textContent=done+' of '+tot+' topics · '+Math.round(done/tot*100)+'% complete';
+  document.getElementById('subcount').textContent=done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete';
 }
 renderSubjects();
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); }).catch(()=>{});
@@ -398,6 +423,16 @@ podplay.onclick=()=>{ if(!podOn){ playPod(podPos<0); } else if(player.paused){ p
 document.getElementById('podnext').onclick=()=>playPod(true);
 player.addEventListener('ended',()=>playPod(true));
 
+/* cards due today — read the real Leitner store (sv-flashcard-progress,
+   shared with the lesson flashcards and /revise) */
+{ let n=0;
+  try{ const p=JSON.parse(localStorage.getItem('sv-flashcard-progress')||'{}');
+    const t=new Date().toISOString().slice(0,10);
+    for(const k in (p.cards||{})) if((p.cards[k].nextReview||'9999')<=t) n++;
+  }catch(e){}
+  document.getElementById('duecount').textContent=String(n);
+  document.getElementById('duerow').onclick=()=>nav('/revise');
+}
 requestAnimationFrame(()=>document.body.classList.add('ready'));
 
 </script>
