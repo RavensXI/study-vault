@@ -17,6 +17,7 @@ REWRITES = [
     ("/practice/", "/practice.html"),
     ("/guide/", "/guide.html"),
     ("/desk", "/design-lab/dash-desk4.html"),  # Sam's desk (the dashboard)
+    ("/classic", "/design-lab/dash-classic.html"),  # the classic (filed) dashboard
 ]
 
 

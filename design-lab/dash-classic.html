@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- served at /classic (serve.py + vercel.json rewrite) -->
+<base href="/design-lab/">
+<title>Your dashboard — StudyVault</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<style>
+  /* ============ CLASSIC: the desk's contents, filed neatly ============
+     Same data, same painted objects, same subject cloth-tabs as the cosy
+     desk — laid out as a clean planner page. This is the professional
+     front door (and the mobile answer); the desk is the cosy mode. */
+  :root{--paper:#f6f1e7;--card:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;
+    --line:#e4dfd2;--linel:#efeadf;--anchor:#4e5f66;
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive;
+    --ease:cubic-bezier(.22,1,.36,1)}
+  *{box-sizing:border-box}
+  html{background:var(--paper)}
+  body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper);
+    opacity:0;transition:opacity .3s ease}
+  body.ready{opacity:1}
+
+  .top{max-width:1180px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
+  .brand{font-size:1.05rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
+  .brandlogo{height:30px;display:block}
+  .datestamp{font-family:var(--hand);font-size:1.35rem;color:var(--mut);margin-left:6px;margin-top:2px}
+  .top .sp{flex:1}
+  .cosy{font-family:var(--head);font-size:.88rem;font-weight:600;color:var(--sec);text-decoration:none;
+    border:1px solid var(--line);border-radius:9px;padding:.45rem .8rem;background:var(--card);transition:border-color .15s,color .15s}
+  .cosy:hover{border-color:#b9a98c;color:var(--ink)}
+  .avatar{width:32px;height:32px;border-radius:50%;background:#221E19;color:#faf8f5;
+    display:grid;place-items:center;font-weight:700;font-size:.8rem}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:10px clamp(16px,4vw,32px) 56px;
+    display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:34px}
+  @media (max-width:980px){ .wrap{grid-template-columns:minmax(0,1fr)} }
+  .cosy{white-space:nowrap}
+  @media (max-width:560px){ .datestamp{display:none} .scard h3,.scard .meta{padding-right:86px} }
+
+  h1{font-size:clamp(1.7rem,3.4vw,2.3rem);font-weight:800;letter-spacing:-.02em;margin:.4rem 0 .3rem}
+  .momentum{font-family:var(--read);font-size:.98rem;color:var(--sec);margin:0 0 1.2rem}
+  .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.4) 93%,transparent 98.5%);
+    border-radius:6px;padding:1px 7px;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 1px 2px rgba(29,28,26,.04)}
+
+  /* ---- today's plan ---- */
+  .plan{padding:1.2rem 1.4rem 1.25rem}
+  .plan ol{list-style:none;margin:0;padding:0}
+  .plan li{display:grid;grid-template-columns:34px minmax(0,1fr) 64px;gap:0 12px;align-items:start;
+    padding:.8rem .4rem;border-radius:10px;cursor:pointer;transition:background .14s}
+  .plan li.inert{cursor:default}
+  .plan li:hover:not(.inert){background:rgba(112,90,50,.06)}
+  .plan li+li{border-top:1px solid var(--linel)}
+  .plan .n{font-family:var(--read);font-weight:700;font-size:1.05rem;color:var(--mut);padding-top:.05rem}
+  .plan b{font-family:var(--read);font-weight:600;font-size:1.06rem;line-height:1.3;display:block}
+  .plan small{font-size:.83rem;color:var(--mut);display:block;margin-top:.15rem}
+  .plan .mins{font-size:.83rem;font-weight:600;color:var(--mut);text-align:right;padding-top:.2rem;font-variant-numeric:tabular-nums}
+  .startrow{display:flex;align-items:center;gap:14px;margin-top:.9rem}
+  .start{display:inline-flex;align-items:center;gap:10px;padding:.72rem 1.5rem;border:none;border-radius:11px;
+    background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:1rem;cursor:pointer;transition:filter .15s}
+  .start:hover{filter:brightness(.94)}
+  .start svg{width:14px;height:14px;fill:#fff}
+  .startnote{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
+
+  /* ---- subjects ---- */
+  .sechead{display:flex;align-items:baseline;gap:12px;margin:1.9rem 0 .9rem}
+  .sechead h2{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin:0}
+  .sechead span{font-size:.85rem;color:var(--mut)}
+  .subjects{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+  .scard{position:relative;padding:1rem 1.1rem 1.05rem;overflow:hidden;display:block;color:inherit;text-decoration:none;
+    transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+  .scard:hover{transform:translateY(-3px);box-shadow:0 14px 30px -18px rgba(29,28,26,.35);
+    border-color:color-mix(in srgb,var(--tc) 45%,var(--line))}
+  .scard::before{content:"";position:absolute;left:0;top:20px;width:4px;height:34px;
+    background:var(--tc);border-radius:0 3px 3px 0}
+  .scard .vig{position:absolute;right:10px;top:10px;width:86px;height:58px;object-fit:cover;
+    border-radius:6px;opacity:.9;box-shadow:inset 0 0 0 1px rgba(122,104,72,.18)}
+  .scard h3{font-size:1.02rem;font-weight:700;letter-spacing:-.01em;margin:0 0 .2rem;padding-right:96px}
+  .scard .meta{font-size:.8rem;color:var(--mut);padding-right:96px}
+  .scard .track{height:4px;border-radius:2px;background:var(--linel);margin:.75rem 0 .6rem;overflow:hidden}
+  .scard .fill{height:100%;background:var(--tc);border-radius:2px}
+  .scard .row{display:flex;gap:1rem;align-items:center}
+  .scard .cont{font-size:.86rem;font-weight:600;color:color-mix(in srgb,var(--tc) 78%,#26231e)}
+  .scard .cont::after{content:" →"}
+  .scard .row .sp{flex:1}
+  .scard .open{font-size:.8rem;color:var(--mut)}
+  .scard:hover .open{color:var(--sec)}
+
+  /* ---- rail ---- */
+  .rail{display:flex;flex-direction:column;gap:14px}
+  .exam{padding:1.05rem 1.2rem 1.1rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
+  .exam .big{font-size:2rem;font-weight:800;letter-spacing:-.02em;line-height:1}
+  .exam .lbl{font-size:.82rem;color:var(--mut)}
+  .cal{grid-column:1 / -1;margin-top:.45rem;border-top:1px solid var(--linel);padding-top:.7rem}
+  .cal .mon{font-size:.72rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin-bottom:.4rem}
+  .cal .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:.72rem;color:var(--sec)}
+  .cal .d{position:relative;text-align:center;padding:.18rem 0;font-variant-numeric:tabular-nums}
+  .cal .d.gone{color:var(--mut)}
+  .cal .d.gone::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;
+    color:rgba(184,68,47,.38);font-size:.82rem;transform:rotate(-4deg)}
+  .cal .d.today{color:#fff;isolation:isolate}
+  .cal .d.today::before{content:"";position:absolute;inset:-1px 18%;background:var(--anchor);border-radius:7px;z-index:-1}
+
+  .week{padding:1rem 1.2rem 1.05rem}
+  .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0 0 .5rem}
+  .week .ln{display:flex;justify-content:space-between;gap:12px;font-family:var(--read);font-size:.92rem;
+    color:var(--sec);padding:.42rem 0;border-top:1px solid var(--linel)}
+  .week .ln:first-of-type{border-top:none}
+  .week .ln b{color:var(--ink);font-weight:600;text-align:right}
+
+  .door{display:grid;grid-template-columns:74px minmax(0,1fr) auto;gap:14px;align-items:center;
+    padding:.8rem 1rem .8rem .8rem;cursor:pointer;text-align:left;width:100%;font-family:var(--head);color:inherit;
+    transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
+  .door:hover{transform:translateY(-2px);box-shadow:0 12px 26px -18px rgba(29,28,26,.35);border-color:#cdbfa4}
+  .door img{width:74px;height:58px;object-fit:contain;display:block}
+  .door h3{font-size:.98rem;font-weight:700;margin:0 0 .1rem}
+  .door p{font-size:.8rem;color:var(--mut);margin:0}
+  .door .go{color:var(--mut);font-size:1.1rem}
+  /* podcast door grows a mini player when playing */
+  .podrow{display:flex;align-items:center;gap:10px;margin-top:.45rem}
+  .podrow button{width:30px;height:30px;border-radius:50%;border:1px solid var(--line);background:var(--card);
+    cursor:pointer;display:grid;place-items:center;color:var(--anchor)}
+  .podrow button:hover{border-color:var(--anchor)}
+  .podrow svg{width:12px;height:12px;fill:currentColor}
+  .podtitle{font-size:.78rem;color:var(--sec);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+
+  .signoff{font-family:var(--hand);font-size:1.25rem;color:var(--mut);text-align:right;padding:0 .3rem}
+
+  /* ---- flashcards modal (same deck as the desk) ---- */
+  .fcmodal{position:fixed;inset:0;background:rgba(38,30,18,.55);display:none;place-items:center;z-index:60}
+  .fcmodal.open{display:grid}
+  .fcmodal .x{position:absolute;top:18px;right:22px;width:38px;height:38px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:19px;font-weight:700}
+  .bigcard{width:min(92vw,560px);aspect-ratio:8/5;border:none;background:none;cursor:pointer;perspective:1400px;padding:0}
+  .bigcard .flip{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s var(--ease)}
+  .bigcard.showa .flip{transform:rotateY(180deg)}
+  .bigcard .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffdf8;border-radius:18px;
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;padding:2rem}
+  .bigcard .back{transform:rotateY(180deg)}
+  .bigcard .tag{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+  .bigcard .qq{font-family:var(--hand);font-size:clamp(1.5rem,4vw,2.2rem);color:#3e3a31;text-align:center;line-height:1.2}
+  .fcmeta{position:fixed;left:0;right:0;bottom:26px;text-align:center;color:#f1e8d8;font-size:.85rem}
+
+  /* ---- shorts modal ---- */
+  .phonemodal{position:fixed;inset:0;background:rgba(38,30,18,.6);display:none;place-items:center;z-index:60}
+  .phonemodal.open{display:grid}
+  .phonemodal .dev{position:relative;height:min(92vh,860px);aspect-ratio:9/18.2;background:#26231e;border-radius:30px;padding:10px;
+    box-shadow:0 30px 80px -20px rgba(0,0,0,.6)}
+  .phonemodal iframe{width:100%;height:100%;border:0;border-radius:20px;background:#f2efe9}
+  .phonemodal .x{position:absolute;top:-14px;right:-14px;width:34px;height:34px;border-radius:50%;border:none;cursor:pointer;
+    background:#fffdf8;color:#26231e;font-size:18px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;animation:none !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <img class="brandlogo" src="assets/brand/bindery-lockup.svg" alt="Bindery"
+       onerror="this.outerHTML='<span class=&quot;brand&quot;>Study<b>Vault</b></span>'">
+  <span class="datestamp" id="today"></span>
+  <span class="sp"></span>
+  <a class="cosy" href="/desk">Cosy desk ↗</a>
+  <span class="avatar" title="Sam">S</span>
+</div>
+
+<div class="wrap">
+  <main>
+    <h1>Here’s your plan.</h1>
+    <p class="momentum"><span class="hl">4-day streak · 23 topics this week — your best yet.</span></p>
+
+    <div class="card plan">
+      <ol>
+        <li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · the ones you fumbled</small></div><span class="mins">2 min</span></li>
+        <li onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><span class="n">2</span><div><b>Stave 3: Poverty &amp; Generosity</b><small>Continue · English Literature — nearest exam</small></div><span class="mins">15 min</span></li>
+        <li onclick="nav('/lesson/computer-science/computer-systems/3')"><span class="n">3</span><div><b>Embedded Systems</b><small>Refresh · Computer Science — 3 weeks stale</small></div><span class="mins">8 min</span></li>
+      </ol>
+      <div class="startrow">
+        <button class="start" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>Start · 25 min</button>
+        <span class="startnote">the one thing to actually do today</span>
+      </div>
+    </div>
+
+    <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
+    <div class="subjects" id="subjects"></div>
+  </main>
+
+  <aside class="rail">
+    <div class="card exam">
+      <div>
+        <div class="big" id="examdays">—</div>
+        <div class="lbl">days to your first exam · May 2027</div>
+      </div>
+      <div class="cal">
+        <div class="mon" id="calmon"></div>
+        <div class="grid" id="calgrid"></div>
+      </div>
+    </div>
+
+    <div class="card week">
+      <h3>This week</h3>
+      <div class="ln"><span>Best subject</span><b>Geography — 9 topics</b></div>
+      <div class="ln"><span>Needs a look</span><b>Macbeth — 3 wks ago</b></div>
+      <div class="ln"><span>Warm-up accuracy</span><b>78% and climbing</b></div>
+      <div class="ln"><span>Shorts watched</span><b>41 · checks 7/8</b></div>
+      <div class="ln"><span>Radio</span><b>3 episodes on the bus</b></div>
+      <div class="ln"><span>Next mock</span><b>none booked</b></div>
+    </div>
+
+    <button class="card door" id="fcdoor">
+      <img src="assets/lw/desk4-cards-a-cut.webp" alt="">
+      <span><h3>Flashcards</h3><p>mixed deck · tap to flip</p></span>
+      <span class="go">→</span>
+    </button>
+
+    <button class="card door" id="shortsdoor">
+      <img src="assets/lw/desk4-phone-c-cut.webp" alt="">
+      <span><h3>Shorts</h3><p>today’s 20 · one-minute videos</p></span>
+      <span class="go">→</span>
+    </button>
+
+    <div class="card door" id="poddoor" role="group" aria-label="Podcasts">
+      <img src="assets/lw/desk4-radio-a-cut.webp" alt="">
+      <span style="min-width:0">
+        <h3>Podcasts</h3><p>episodes for the bus</p>
+        <span class="podrow">
+          <button id="podplay" aria-label="Play"><svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg></button>
+          <button id="podnext" aria-label="Next episode"><svg viewBox="0 0 16 16"><path d="M3 2l8 6-8 6zM12 2h2v12h-2z"/></svg></button>
+          <span class="podtitle" id="podtitle">tap play for an episode</span>
+        </span>
+      </span>
+      <span class="go"></span>
+    </div>
+
+    <p class="signoff">Small days add up. — SV</p>
+  </aside>
+</div>
+
+<div class="fcmodal" id="fcmodal" aria-modal="true" role="dialog" aria-label="Flashcards">
+  <button class="x" id="closefc" aria-label="Close">×</button>
+  <button class="bigcard" id="bigcard" aria-label="Flip the card">
+    <span class="flip">
+      <span class="face front"><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
+      <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span></span>
+    </span>
+  </button>
+  <div class="fcmeta">tap the card to flip · tap again for the next one</div>
+</div>
+
+<div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
+  <div class="dev">
+    <button class="x" id="closephone" aria-label="Close">×</button>
+    <iframe id="feedframe" title="Shorts feed" loading="lazy"></iframe>
+  </div>
+</div>
+
+<script>
+/* Sam's subjects — same real free-tier wiring as the desk */
+const SUBJECTS=[
+ {tab:'Maths',slug:'maths',sub:'maths-aqa',mode:'p',name:'Mathematics',c:'#4e5f66',units:[['Number',7,3,'number'],['Algebra',14,5,'algebra'],['Geometry & Measures',8,2,'geometry']]},
+ {tab:'English',slug:'lang',sub:'english-language-aqa',mode:'p',name:'English Language',c:'#5b7285',units:[['Paper 1: Reading',8,2,'paper-1-reading'],['Paper 1: Writing',7,1,'paper-1-writing'],['Paper 2: Reading',8,1,'paper-2-reading'],['Paper 2: Writing',7,0,'paper-2-writing']]},
+ {tab:'Lit',slug:'lit',sub:'english-literature-aqa',mode:'l',name:'English Literature',c:'#7d5a78',units:[['Macbeth',10,4,'macbeth'],['A Christmas Carol',8,5,'a-christmas-carol'],['Power & Conflict',10,3,'power-and-conflict']]},
+ {tab:'Science',slug:'science',sub:'science-aqa',mode:'l',name:'Combined Science',c:'#4e6e5d',units:[['Biology Paper 1',10,4,'biology-paper-1'],['Chemistry Paper 1',12,2,'chemistry-paper-1'],['Physics Paper 1',11,1,'physics-paper-1']]},
+ {tab:'History',slug:'history',sub:'history-aqa',mode:'l',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4,'germany-democracy-dictatorship'],['Conflict & Tension',13,2,'conflict-tension-first-world-war'],['Britain: Health & the People',14,1,'britain-health-people'],['Elizabethan England',12,1,'elizabethan-england']]},
+ {tab:'Geog',slug:'geog',sub:'geography-aqa',mode:'l',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Physical Geography',20,5,'paper-1'],['Paper 2: Human Geography',20,4,'paper-2']]},
+ {tab:'Spanish',slug:'spanish',sub:'spanish-aqa',mode:'p',name:'Spanish',c:'#a2643f',units:[['People & Lifestyle',10,3,'people-and-lifestyle'],['Popular Culture',8,2,'popular-culture'],['Communication & the World',8,1,'communication-and-world']]},
+ {tab:'CS',slug:'cs',sub:'computer-science',mode:'l',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3,'computer-systems'],['Computational Thinking',11,2,'computational-thinking']]},
+ {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
+];
+function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
+function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
+addEventListener('pageshow',()=>document.body.classList.add('ready'));
+
+/* date + exam countdown + mini month */
+const now=new Date();
+document.getElementById('today').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+const FIRST_EXAM=new Date(2027,4,17);
+document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXAM-now)/864e5));
+{ const m=new Date(now.getFullYear(),now.getMonth(),1);
+  document.getElementById('calmon').textContent=m.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+  const g=document.getElementById('calgrid');
+  const days=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const lead=(m.getDay()+6)%7;
+  for(let i=0;i<lead;i++){ const d=document.createElement('span'); g.appendChild(d); }
+  for(let d=1;d<=days;d++){ const el=document.createElement('span'); el.className='d'; el.textContent=d;
+    if(d<now.getDate()) el.classList.add('gone');
+    if(d===now.getDate()) el.classList.add('today');
+    g.appendChild(el); } }
+
+/* subjects: cloth-tab nub + progress + the subject's ladder sketch as a
+   small vignette (same three-stage art the notebook uses) */
+let LADDERS={};
+function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.reduce((t,u)=>t+u[1],0);
+  const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
+function renderSubjects(){
+  const host=document.getElementById('subjects'); host.innerHTML='';
+  let done=0,tot=0;
+  SUBJECTS.forEach(s=>{
+    const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
+    done+=d; tot+=t;
+    const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
+    const a=document.createElement('a');
+    a.className='card scard'; a.style.setProperty('--tc',s.c);
+    a.href=urlFor(s,nxt);
+    a.addEventListener('click',e=>{ e.preventDefault(); nav(urlFor(s,nxt)); });
+    const lad=LADDERS[s.slug];
+    a.innerHTML=(lad?'<img class="vig" src="'+lad[stageOf(s)-1]+'" alt="">':'')+
+      '<h3>'+s.name+'</h3>'+
+      '<div class="meta">'+d+' of '+t+' topics · '+Math.round(d/t*100)+'%</div>'+
+      '<div class="track"><div class="fill" style="width:'+Math.round(d/t*100)+'%"></div></div>'+
+      '<div class="row"><span class="cont">'+nxt[0]+'</span><span class="sp"></span>'+
+      '<span class="open" data-open>Open '+s.tab+'</span></div>';
+    a.querySelector('[data-open]').addEventListener('click',e=>{ e.preventDefault(); e.stopPropagation(); nav('/browse/'+s.sub); });
+    host.appendChild(a);
+  });
+  document.getElementById('subcount').textContent=done+' of '+tot+' topics · '+Math.round(done/tot*100)+'% complete';
+}
+renderSubjects();
+fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); }).catch(()=>{});
+
+/* flashcards — same mixed deck as the desk */
+const FC=[
+  {slug:'history', q:'When was the NHS founded?', a:'1948'},
+  {slug:'science', q:'Speed = ?', a:'distance ÷ time'},
+  {slug:'lit', q:'Who was Scrooge’s business partner?', a:'Jacob Marley'},
+  {slug:'geog', q:'The three types of rainfall?', a:'Relief · frontal · convectional'},
+  {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
+];
+const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
+let fci=0, fcShowA=false;
+function fcDeal(){
+  const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
+  document.getElementById('bqTag').textContent=sub?sub.name:'';
+  document.getElementById('bqQ').textContent=f.q;
+  document.getElementById('baTag').textContent='Answer';
+  document.getElementById('baA').textContent=f.a;
+  fcShowA=false; bigcard.classList.remove('showa');
+}
+document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open'); };
+bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
+  else { fci=(fci+1)%FC.length; fcDeal(); } };
+document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
+fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
+
+/* shorts — same feed, in a phone frame */
+const pm=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
+document.getElementById('shortsdoor').onclick=()=>{ frame.src='/design-lab/shorts.html'; pm.classList.add('open'); };
+document.getElementById('closephone').onclick=()=>{ pm.classList.remove('open'); frame.src=''; };
+pm.addEventListener('click',e=>{ if(e.target===pm){ pm.classList.remove('open'); frame.src=''; } });
+addEventListener('keydown',e=>{ if(e.key!=='Escape') return;
+  fcmodal.classList.remove('open'); pm.classList.remove('open'); frame.src=''; });
+
+/* podcasts — the demo lessons' own episodes (R2) */
+const PODCASTS=[
+ {t:'Weimar democracy and political unrest, 1919-1923',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/germany-democracy-dictatorship/podcast_l05.mp3'},
+ {t:'Anglo-German Rivalry: Weltpolitik and the Naval Race',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/conflict-tension-first-world-war/podcast_l03.mp3'},
+ {t:'The Church, the Monastery and Islamic Medicine',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/britain-health-people/podcast_l02.mp3'},
+ {t:'Key ministers: Cecil, Walsingham and the Privy Council',s:'History',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/history-aqa/elizabethan-england/podcast_l02.mp3'},
+ {t:'Guilt & Consequences',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/macbeth/podcast_l05.mp3'},
+ {t:'Stave 3: Poverty & Generosity',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l04.mp3'},
+ {t:'Stave 5: Transformation & Redemption',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/a-christmas-carol/podcast_l06.mp3'},
+ {t:'My Last Duchess — Power & Control',s:'English Literature',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/english-literature/power-and-conflict/podcast_l04.mp3'},
+ {t:'Health, Non-Communicable Diseases and Plant Tissues',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/biology-paper-1/podcast_l05.mp3'},
+ {t:'Ionic, Covalent and Metallic Bonding',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/chemistry-paper-1/podcast_l03.mp3'},
+ {t:'Conservation of Energy, Efficiency and Energy Resources',s:'Combined Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/science/physics-paper-1/podcast_l02.mp3'},
+ {t:'Tropical Storm Effects & Management: Hurricane Ida',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-1/podcast_l06.mp3'},
+ {t:'UK Population Distribution & a Major UK City',s:'Geography',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/geography/paper-2/podcast_l05.mp3'},
+ {t:'Primary Storage (RAM, ROM & Virtual Memory)',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l04.mp3'},
+ {t:'Embedded Systems',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computer-systems/podcast_l03.mp3'},
+ {t:'Searching Algorithms',s:'Computer Science',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/computer-science/computational-thinking/podcast_l03.mp3'},
+ {t:'Jesus Christ: Incarnation, the Cross and Salvation',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/christianity-beliefs-and-teachings/podcast_l03.mp3'},
+ {t:'The Nature of Allah',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/islam-beliefs-and-teachings/podcast_l02.mp3'},
+ {t:'Marriage, the Family and Sexuality',s:'Religious Studies',u:'https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/religious-studies-ocr/theme-relationships-and-families/podcast_l01.mp3'},
+];
+const player=new Audio(); player.volume=.65;
+let podQ=null,podPos=-1,podOn=false;
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+const podplay=document.getElementById('podplay'), podtitle=document.getElementById('podtitle');
+const ICOPLAY='<svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>';
+const ICOPAUSE='<svg viewBox="0 0 16 16"><path d="M3 2h4v12H3zM9 2h4v12H9z"/></svg>';
+function playPod(next){
+  if(!podQ) podQ=shuffle([...PODCASTS.keys()]);
+  if(next||podPos<0) podPos=(podPos+1)%podQ.length;
+  const p=PODCASTS[podQ[podPos]];
+  player.src=p.u; player.play().catch(()=>{}); podOn=true;
+  podplay.innerHTML=ICOPAUSE;
+  podtitle.textContent=p.t+' · '+p.s;
+}
+podplay.onclick=()=>{ if(!podOn){ playPod(podPos<0); } else if(player.paused){ player.play(); podplay.innerHTML=ICOPAUSE; } else { player.pause(); podplay.innerHTML=ICOPLAY; } };
+document.getElementById('podnext').onclick=()=>playPod(true);
+player.addEventListener('ended',()=>playPod(true));
+
+requestAnimationFrame(()=>document.body.classList.add('ready'));
+
+</script>
+</body>
+</html>
