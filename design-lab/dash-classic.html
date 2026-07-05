@@ -84,24 +84,29 @@
      honest (proportional to lesson count). Stale books grow an amber
      bookmark. Selected spine pulls forward; the fixed-height panel below
      shows that subject with every unit selectable. */
-  .shelf{display:flex;align-items:flex-end;gap:7px;height:148px;padding:0 6px}
-  .spine{position:relative;height:138px;border:none;cursor:pointer;border-radius:5px 5px 2px 2px;
-    background:color-mix(in srgb,var(--tc) 24%,#efe9db);overflow:hidden;flex:var(--w) 1 0;min-width:42px;
-    box-shadow:inset -3px 0 6px -3px rgba(56,40,18,.35), inset 1px 0 0 rgba(255,253,248,.5);
-    transition:transform .22s var(--ease),box-shadow .22s;transform-origin:bottom center}
-  .spine .ink{position:absolute;left:0;right:0;bottom:0;background:var(--tc);opacity:.92}
-  .spine .nm{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;
-    padding-top:10px;writing-mode:vertical-rl;font-size:.78rem;font-weight:700;letter-spacing:.04em;
-    color:#fffdf8;text-shadow:0 1px 2px rgba(40,28,12,.35);mix-blend-mode:normal}
-  .spine.lowink .nm{color:color-mix(in srgb,var(--tc) 80%,#26231e);text-shadow:none}
-  .spine .ribbon{position:absolute;top:-6px;right:7px;width:9px;height:26px;background:#d99a3d;
-    border-radius:2px 2px 3px 3px;box-shadow:0 1px 3px rgba(56,40,18,.3)}
+  /* THE PAINTED SHELF: each spine is line-and-wash art. Two stacked copies
+     of the same painting — the lower layer knocked back to a pencil-sketch
+     state, the colour layer clipped to progress — so every book literally
+     colours in from the bottom as its subject gets studied. */
+  .shelf{display:flex;align-items:flex-end;gap:12px;height:168px;padding:0 8px;justify-content:center;position:relative;z-index:1}
+  .spine{position:relative;height:158px;border:none;cursor:pointer;background:none;padding:0;
+    transition:transform .22s var(--ease),filter .22s;transform-origin:bottom center}
+  .spine img{height:146px;width:100%;object-fit:cover;object-position:left bottom;display:block;
+    position:absolute;left:0;bottom:12px}
+  .spine .sketch{filter:grayscale(.88) sepia(.14) brightness(1.1) contrast(.86);opacity:.85}
+  .spine .paint{clip-path:inset(calc(100% - var(--pct)) 0 0 0)}
+  .spine .ribbon{position:absolute;top:-10px;right:12%;width:22px;height:52px;object-fit:contain;
+    left:auto;bottom:auto;filter:drop-shadow(0 1px 2px rgba(56,40,18,.35)) saturate(1.25)}
+  .spine .lbl{position:absolute;left:-8px;right:-8px;bottom:-6px;text-align:center;font-size:.58rem;
+    font-weight:600;color:var(--mut);letter-spacing:0;white-space:nowrap}
   .spine:hover{transform:translateY(-5px)}
-  .spine[aria-selected="true"]{transform:translateY(-9px) rotate(-1.2deg);
-    box-shadow:0 12px 22px -12px rgba(56,40,18,.5), inset -3px 0 6px -3px rgba(56,40,18,.35)}
-  .spine:focus-visible{outline:3px solid var(--anchor);outline-offset:2px}
-  .shelfboard{height:7px;border-radius:3px;background:linear-gradient(180deg,#d9cdb4,#c9bb9e);
-    box-shadow:0 2px 4px rgba(56,40,18,.18);margin:0 2px 10px}
+  .spine[aria-selected="true"]{transform:translateY(-9px) rotate(-1.4deg)}
+  .spine[aria-selected="true"]::after{content:"";position:absolute;inset:auto 10% -10px 10%;height:8px;
+    border-radius:50%;background:radial-gradient(50% 100% at 50% 0,rgba(56,40,18,.30),transparent 75%)}
+  .spine[aria-selected="true"] .lbl{color:var(--ink)}
+  .spine:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
+  .shelfboard{height:16px;margin:-14px 2px 10px;background:url('assets/lw/shelf/plank.webp') center/100% 100% no-repeat;
+    filter:drop-shadow(0 3px 4px rgba(56,40,18,.22))}
   /* the open book: fixed height, never reflows the page */
   .sdetail{height:150px;padding:.75rem 1rem .8rem;position:relative;overflow:hidden}
   .sdetail::before{content:"";position:absolute;left:0;top:14px;width:4px;height:28px;
@@ -337,23 +342,26 @@ function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.red
   const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
 const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
 let selSlug=null;
+const SPINE_W={maths:40,lang:56,lit:36,science:76,history:60,geog:70,spanish:40,cs:58,rs:42};
 function renderSubjects(){
   const shelf=document.getElementById('shelf'); shelf.innerHTML='';
   let done=0,tot=0;
   SUBJECTS.forEach(s=>{
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
-    const pct=d/t;
+    const pct=Math.max(6,Math.round(d/t*100));
+    const src='assets/lw/shelf/'+s.slug+'.webp';
     const b=document.createElement('button');
-    b.className='spine'+(pct<.45?' lowink':'');
+    b.className='spine';
     b.setAttribute('role','tab');
-    b.style.setProperty('--tc',s.c);
-    b.style.setProperty('--w',String(t));
+    b.style.width=(SPINE_W[s.slug]||48)+'px';
+    b.style.setProperty('--pct',pct+'%');
     b.dataset.slug=s.slug;
     b.title=s.name+' — '+d+' of '+t+' lessons';
-    b.innerHTML='<span class="ink" style="height:'+Math.max(6,Math.round(pct*100))+'%"></span>'+
-      '<span class="nm">'+s.tab+'</span>'+
-      ((REC[s.slug]||0)>=14?'<span class="ribbon" title="Not studied for a while"></span>':'');
+    b.innerHTML='<img class="sketch" src="'+src+'" alt="">'+
+      '<img class="paint" src="'+src+'" alt="">'+
+      ((REC[s.slug]||0)>=14?'<img class="ribbon" src="assets/lw/shelf/ribbon.webp" alt="" title="Not studied for a while">':'')+
+      '<span class="lbl">'+s.tab+'</span>';
     b.addEventListener('click',()=>selectSubject(s.slug));
     shelf.appendChild(b);
   });
