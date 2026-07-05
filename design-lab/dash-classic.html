@@ -79,44 +79,51 @@
   .sechead{display:flex;align-items:baseline;gap:12px;margin:1.1rem 0 .6rem}
   .sechead h2{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin:0}
   .sechead span{font-size:.85rem;color:var(--mut)}
-  .subjects{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-  @media (max-width:640px){ .subjects{grid-template-columns:repeat(2,minmax(0,1fr))} }
-  .scard{position:relative;padding:.65rem .8rem .7rem;overflow:hidden;text-align:left;width:100%;
-    font-family:var(--head);color:inherit;cursor:pointer;border:1px solid var(--line);
-    transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
-  .scard:hover{transform:translateY(-2px);box-shadow:0 12px 26px -18px rgba(29,28,26,.35);
-    border-color:color-mix(in srgb,var(--tc) 45%,var(--line))}
-  .scard::before{content:"";position:absolute;left:0;top:12px;width:4px;height:24px;
+  /* THE SHELF: nine spines, progress as ink filling each book from the
+     bottom. Whole GCSE at a glance, no words doing the work. Width is
+     honest (proportional to lesson count). Stale books grow an amber
+     bookmark. Selected spine pulls forward; the fixed-height panel below
+     shows that subject with every unit selectable. */
+  .shelf{display:flex;align-items:flex-end;gap:7px;height:148px;padding:0 6px}
+  .spine{position:relative;height:138px;border:none;cursor:pointer;border-radius:5px 5px 2px 2px;
+    background:color-mix(in srgb,var(--tc) 24%,#efe9db);overflow:hidden;flex:var(--w) 1 0;min-width:42px;
+    box-shadow:inset -3px 0 6px -3px rgba(56,40,18,.35), inset 1px 0 0 rgba(255,253,248,.5);
+    transition:transform .22s var(--ease),box-shadow .22s;transform-origin:bottom center}
+  .spine .ink{position:absolute;left:0;right:0;bottom:0;background:var(--tc);opacity:.92}
+  .spine .nm{position:absolute;inset:0;display:flex;align-items:flex-start;justify-content:center;
+    padding-top:10px;writing-mode:vertical-rl;font-size:.78rem;font-weight:700;letter-spacing:.04em;
+    color:#fffdf8;text-shadow:0 1px 2px rgba(40,28,12,.35);mix-blend-mode:normal}
+  .spine.lowink .nm{color:color-mix(in srgb,var(--tc) 80%,#26231e);text-shadow:none}
+  .spine .ribbon{position:absolute;top:-6px;right:7px;width:9px;height:26px;background:#d99a3d;
+    border-radius:2px 2px 3px 3px;box-shadow:0 1px 3px rgba(56,40,18,.3)}
+  .spine:hover{transform:translateY(-5px)}
+  .spine[aria-selected="true"]{transform:translateY(-9px) rotate(-1.2deg);
+    box-shadow:0 12px 22px -12px rgba(56,40,18,.5), inset -3px 0 6px -3px rgba(56,40,18,.35)}
+  .spine:focus-visible{outline:3px solid var(--anchor);outline-offset:2px}
+  .shelfboard{height:7px;border-radius:3px;background:linear-gradient(180deg,#d9cdb4,#c9bb9e);
+    box-shadow:0 2px 4px rgba(56,40,18,.18);margin:0 2px 10px}
+  /* the open book: fixed height, never reflows the page */
+  .sdetail{height:150px;padding:.75rem 1rem .8rem;position:relative;overflow:hidden}
+  .sdetail::before{content:"";position:absolute;left:0;top:14px;width:4px;height:28px;
     background:var(--tc);border-radius:0 3px 3px 0}
-  .scard h3{font-size:.88rem;font-weight:700;letter-spacing:-.01em;margin:0 0 .15rem;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .scard .meta{font-size:.72rem;color:var(--mut);display:flex;justify-content:space-between;gap:6px}
-  .scard .meta .stale{color:#a3542f;font-weight:600}
-  .scard .track{height:4px;border-radius:2px;background:var(--linel);margin:.45rem 0 .35rem;overflow:hidden}
-  .scard .fill{height:100%;background:var(--tc);border-radius:2px}
-  /* depth on demand: the subject popover */
-  .spop{position:fixed;inset:0;background:rgba(38,30,18,.45);display:none;place-items:center;z-index:50}
-  .spop.open{display:grid}
-  .spop .pnl{width:min(92vw,430px);background:var(--card);border:1px solid var(--line);border-radius:16px;
-    padding:1.1rem 1.25rem 1.15rem;box-shadow:0 30px 70px -25px rgba(0,0,0,.45);position:relative}
-  .spop .pnl::before{content:"";position:absolute;left:0;top:18px;width:4px;height:30px;
-    background:var(--tc);border-radius:0 3px 3px 0}
-  .spop h3{margin:0 0 .1rem;font-size:1.1rem}
-  .spop .sub{font-size:.8rem;color:var(--mut);margin-bottom:.7rem}
-  .spop .uart{float:right;width:110px;height:74px;object-fit:cover;border-radius:8px;margin:0 0 .4rem .8rem;
-    box-shadow:inset 0 0 0 1px rgba(122,104,72,.18)}
-  .spop .cont{display:inline-flex;align-items:center;gap:8px;background:var(--anchor);color:#fff;border:none;
-    border-radius:9px;padding:.55rem 1rem;font-family:var(--head);font-weight:700;font-size:.9rem;cursor:pointer;margin-bottom:.6rem}
-  .spop .cont:hover{filter:brightness(.94)}
-  .spop .urow{display:flex;align-items:center;gap:10px;padding:.42rem .2rem;border-radius:8px;
-    color:inherit;text-decoration:none;font-size:.86rem}
-  .spop .urow:hover{background:rgba(112,90,50,.06)}
-  .spop .urow .un{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .spop .urow .ud{color:var(--mut);font-size:.78rem;font-variant-numeric:tabular-nums}
-  .spop .utrack{width:52px;height:3px;border-radius:2px;background:var(--linel);overflow:hidden}
-  .spop .utrack i{display:block;height:100%;background:var(--tc)}
-  .spop .x{position:absolute;top:10px;right:12px;border:none;background:none;font-size:1.2rem;color:var(--mut);cursor:pointer}
-
+  .sdetail .top{display:flex;align-items:baseline;gap:12px;margin-bottom:.55rem;flex-wrap:nowrap}
+  .sdetail h3{font-size:1rem;font-weight:700;margin:0;white-space:nowrap}
+  .sdetail .sub{font-size:.78rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sdetail .sp{flex:1}
+  .sdetail .cont{display:inline-flex;align-items:center;gap:8px;background:var(--anchor);color:#fff;border:none;
+    border-radius:9px;padding:.42rem .85rem;font-family:var(--head);font-weight:700;font-size:.83rem;cursor:pointer;white-space:nowrap}
+  .sdetail .cont:hover{filter:brightness(.94)}
+  .units{display:flex;gap:8px;align-items:stretch}
+  .ublock{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:9px;padding:.5rem .6rem .55rem;
+    background:var(--card);cursor:pointer;text-align:left;font-family:var(--head);color:inherit;
+    transition:transform .18s var(--ease),border-color .18s,box-shadow .18s;position:relative;overflow:hidden}
+  .ublock:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--tc) 45%,var(--line));
+    box-shadow:0 8px 18px -12px rgba(29,28,26,.4)}
+  .ublock .un{font-size:.78rem;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
+  .ublock .utrack{display:block;height:4px;border-radius:2px;background:var(--linel);margin:.4rem 0 .3rem;overflow:hidden}
+  .ublock .utrack i{display:block;height:100%;background:var(--tc)}
+  .ublock .ud{display:block;font-size:.72rem;color:var(--mut);font-variant-numeric:tabular-nums}
   /* ---- rail ---- */
   .rail{display:flex;flex-direction:column;gap:14px}
   .exam{padding:.8rem 1.1rem .85rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
@@ -216,7 +223,9 @@
     </div>
 
     <div class="sechead"><h2>Your subjects</h2><span id="subcount"></span></div>
-    <div class="subjects" id="subjects"></div>
+    <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
+    <div class="shelfboard"></div>
+    <div class="card sdetail" id="sdetail"></div>
   </main>
 
   <aside class="rail">
@@ -268,10 +277,6 @@
 
     <p class="signoff">Small days add up. — SV</p>
   </aside>
-</div>
-
-<div class="spop" id="spop" aria-modal="true" role="dialog">
-  <div class="pnl" id="spopPnl"></div>
 </div>
 
 <div class="fcmodal" id="fcmodal" aria-modal="true" role="dialog" aria-label="Flashcards">
@@ -330,51 +335,67 @@ document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXA
 let LADDERS={};
 function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.reduce((t,u)=>t+u[1],0);
   const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
+const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
+let selSlug=null;
 function renderSubjects(){
-  const host=document.getElementById('subjects'); host.innerHTML='';
+  const shelf=document.getElementById('shelf'); shelf.innerHTML='';
   let done=0,tot=0;
-  /* needs-attention first: demo recency (days since last studied) does the
-     sorting so the urgent subject is always visible without hunting */
-  const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
-  const order=[...SUBJECTS].sort((a,b)=>(REC[b.slug]||0)-(REC[a.slug]||0));
-  order.forEach(s=>{
+  SUBJECTS.forEach(s=>{
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
-    const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
-    const rec=REC[s.slug]||0;
-    const a=document.createElement('button');
-    a.className='card scard'; a.style.setProperty('--tc',s.c);
-    a.innerHTML='<h3>'+s.name+'</h3>'+
-      '<div class="track"><div class="fill" style="width:'+Math.round(d/t*100)+'%"></div></div>'+
-      '<div class="meta"><span>'+d+' / '+t+' lessons</span>'+
-      (rec>=14?'<span class="stale">'+Math.round(rec/7)+'w ago</span>':
-       rec>=7?'<span class="stale" style="color:var(--mut)">'+rec+'d ago</span>':'')+'</div>';
-    a.addEventListener('click',()=>openSubject(s,nxt,d,t,rec));
-    host.appendChild(a);
+    const pct=d/t;
+    const b=document.createElement('button');
+    b.className='spine'+(pct<.45?' lowink':'');
+    b.setAttribute('role','tab');
+    b.style.setProperty('--tc',s.c);
+    b.style.setProperty('--w',String(t));
+    b.dataset.slug=s.slug;
+    b.title=s.name+' — '+d+' of '+t+' lessons';
+    b.innerHTML='<span class="ink" style="height:'+Math.max(6,Math.round(pct*100))+'%"></span>'+
+      '<span class="nm">'+s.tab+'</span>'+
+      ((REC[s.slug]||0)>=14?'<span class="ribbon" title="Not studied for a while"></span>':'');
+    b.addEventListener('click',()=>selectSubject(s.slug));
+    shelf.appendChild(b);
   });
   document.getElementById('subcount').textContent=done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete';
+  if(!selSlug){
+    const stale=[...SUBJECTS].sort((a,b)=>(REC[b.slug]||0)-(REC[a.slug]||0))[0];
+    selSlug=stale.slug;
+  }
+  selectSubject(selSlug,true);
 }
-const spop=document.getElementById('spop'), spopPnl=document.getElementById('spopPnl');
-function openSubject(s,nxt,d,t,rec){
-  const lad=LADDERS[s.slug];
-  spopPnl.style.setProperty('--tc',s.c);
-  spopPnl.innerHTML='<button class="x" aria-label="Close">×</button>'+
-    (lad?'<img class="uart" src="'+lad[stageOf(s)-1]+'" alt="">':'')+
-    '<h3>'+s.name+'</h3>'+
-    '<div class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+(rec?' · last studied '+rec+'d ago':'')+'</div>'+
-    '<button class="cont">Continue: '+nxt[0]+' →</button>'+
-    s.units.map(u=>'<a class="urow" href="/browse/'+s.sub+'/'+u[3]+'">'+
-      '<span class="un">'+u[0]+'</span>'+
-      '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
-      '<span class="ud">'+u[2]+' / '+u[1]+'</span></a>').join('')+
-    '<a class="urow" href="/browse/'+s.sub+'" style="color:var(--mut)"><span class="un">All of '+s.name+' →</span></a>';
-  spopPnl.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
-  spopPnl.querySelector('.x').onclick=()=>spop.classList.remove('open');
-  spopPnl.querySelectorAll('a.urow').forEach(x=>x.onclick=e=>{e.preventDefault();nav(x.getAttribute('href'));});
-  spop.classList.add('open');
+function selectSubject(slug,silent){
+  selSlug=slug;
+  const s=SUBJECTS.find(x=>x.slug===slug);
+  document.querySelectorAll('.spine').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug)));
+  const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
+  const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
+  const rec=REC[s.slug]||0;
+  const el=document.getElementById('sdetail');
+  el.style.setProperty('--tc',s.c);
+  el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+    '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
+    (rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today')+'</span>'+
+    '<span class="sp"></span>'+
+    '<button class="cont">Continue: '+nxt[0]+' →</button></div>'+
+    '<div class="units">'+
+      s.units.map(u=>'<button class="ublock" data-u="'+u[3]+'">'+
+        '<span class="un">'+u[0]+'</span>'+
+        '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
+        '<span class="ud">'+u[2]+' / '+u[1]+' lessons</span></button>').join('')+
+    '</div>';
+  el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
+  el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>nav('/browse/'+s.sub+'/'+x.dataset.u));
 }
-spop.addEventListener('click',e=>{ if(e.target===spop) spop.classList.remove('open'); });
-addEventListener('keydown',e=>{ if(e.key==='Escape') spop.classList.remove('open'); });
+/* game-menu grammar: arrows walk the shelf */
+addEventListener('keydown',e=>{
+  if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+  if(/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const idx=SUBJECTS.findIndex(x=>x.slug===selSlug);
+  const n=SUBJECTS.length;
+  const next=SUBJECTS[(idx+(e.key==='ArrowRight'?1:n-1))%n];
+  selectSubject(next.slug);
+});
 renderSubjects();
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); }).catch(()=>{});
 
