@@ -1,0 +1,30 @@
+<!doctype html><meta charset="utf-8">
+<style>
+ body{margin:0;background:#f6f1e7;font:14px system-ui;padding:24px}
+ .wrap{max-width:900px;margin:0 auto}
+ h3{color:#26231e;font-size:1rem}
+ .stage{position:relative;display:inline-block;padding:0 0 0}
+ .row{display:flex;align-items:flex-end;gap:2px;position:relative;z-index:2;padding:0 30px}
+ .bk{position:relative;height:230px}
+ .bk img{display:block}
+ .bk img.cold{height:230px;width:auto;filter:saturate(.32) brightness(1.26) drop-shadow(1px 5px 3px rgba(40,28,12,.32))}
+ .bk img.warm{position:absolute;inset:0;height:100%;width:100%}
+ .ledge{display:block;width:100%;margin-top:-12px;position:relative;z-index:1}
+</style>
+<div class="wrap">
+ <h3>Static approach — individual per-subject books (one generation each, reused for every student) on one shared shelf, each grounded by its own contact shadow. Fully static, per-student cost = 0.</h3>
+ <div class="stage">
+   <div class="row" id="row"></div>
+   <img class="ledge" src="/design-lab/assets/lw/shelf/ledge_walnut.png">
+ </div>
+</div>
+<script>
+const S=[['maths',34],['lang',13],['lit',43],['science',21],['history',15],['geog',23],['spanish',23],['cs',22],['rs',27]];
+const row=document.getElementById('row');
+S.forEach(([slug,pct])=>{
+  const u='/design-lab/assets/lw/shelf/book_'+slug+'.png';
+  const clip='inset('+(100-pct)+'% 0 0 0)';
+  row.insertAdjacentHTML('beforeend',
+    '<div class="bk"><img class="cold" src="'+u+'"><img class="warm" src="'+u+'" style="clip-path:'+clip+'"></div>');
+});
+</script>
