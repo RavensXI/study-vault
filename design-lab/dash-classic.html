@@ -96,7 +96,7 @@
   .shelf{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:212px;padding:0 6px;position:relative;z-index:2}
   .bookend{height:214px;width:auto;align-self:flex-end;margin-right:-15px;pointer-events:none;
     filter:drop-shadow(0 5px 4px rgba(40,28,12,.22))}
-  .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:pointer;
+  .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:grab;touch-action:none;
     transform:rotate(var(--lean,0deg));
     transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
   .bk img{display:block}
@@ -108,6 +108,17 @@
   .bk[aria-selected="true"]{transform:translateY(-16px) scale(1.06);z-index:4}
   .bk[aria-selected="true"]::before{opacity:.55;bottom:-13px}
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
+  /* drag to reorder; drop with a little physics */
+  .bk.dragging{z-index:50;transition:none;cursor:grabbing;
+    filter:drop-shadow(0 16px 14px rgba(40,28,12,.38))}
+  body.dragging-book{cursor:grabbing;user-select:none}
+  @keyframes drop-settle{
+    0%{transform:translateY(-15px) rotate(var(--lean,0deg))}
+    45%{transform:translateY(0) rotate(calc(var(--lean,0deg) - 4deg))}
+    72%{transform:translateY(-3px) rotate(calc(var(--lean,0deg) + 2.2deg))}
+    100%{transform:translateY(0) rotate(var(--lean,0deg))}}
+  .bk.settling{animation:drop-settle .55s cubic-bezier(.3,1.2,.5,1)}
+  @media (prefers-reduced-motion:reduce){ .bk.settling{animation:none} }
   .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
   /* hover card — the book's own name + progress, in-style (replaces the OS tooltip) */
   .booktip{position:absolute;z-index:20;pointer-events:none;opacity:0;transform:translate(-50%,-94%);
@@ -365,6 +376,7 @@ const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:1
 let selSlug=null;
 const _tip=document.createElement('div'); _tip.className='booktip';
 function showTip(bk,s,d,t,pct){
+  if(drag&&drag.moved) return;              // no tooltips mid-drag
   _tip.innerHTML='<b>'+s.name+'</b><span class="c">'+d+' of '+t+' lessons · '+pct+'%</span>';
   const stage=bk.closest('.shelfstage'); if(_tip.parentElement!==stage) stage.appendChild(_tip);
   _tip.style.left=(bk.offsetLeft+bk.offsetWidth/2)+'px';
@@ -387,9 +399,11 @@ function renderSubjects(){
     b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
     b.style.setProperty('--lean',lean+'deg');
     b.setAttribute('aria-label',s.name+' — '+d+' of '+t+' lessons');
-    b.innerHTML='<img class="cold" src="'+src+'" alt="">'+
-      '<img class="warm" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
-    b.addEventListener('click',()=>selectSubject(s.slug));
+    b.innerHTML='<img class="cold" draggable="false" src="'+src+'" alt="">'+
+      '<img class="warm" draggable="false" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
+    b.addEventListener('pointerdown',e=>onBookDown(e,b,s.slug));
+    b.addEventListener('dragstart',e=>e.preventDefault());
+    b.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectSubject(s.slug); } });
     b.addEventListener('mouseenter',()=>showTip(b,s,d,t,pct));
     b.addEventListener('mouseleave',hideTip);
     shelf.appendChild(b);
@@ -430,6 +444,75 @@ function selectSubject(slug,silent){
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>nav('/browse/'+s.sub+'/'+x.dataset.u));
 }
+/* ---- drag a spine to reorder; drop it in with a little physics ---- */
+const ORDER_KEY='sv-shelf-order';
+function applySavedOrder(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(ORDER_KEY)||'null');
+    if(!Array.isArray(saved)) return;
+    const bySlug=Object.fromEntries(SUBJECTS.map(s=>[s.slug,s]));
+    const ordered=saved.map(sl=>bySlug[sl]).filter(Boolean);
+    SUBJECTS.forEach(s=>{ if(!saved.includes(s.slug)) ordered.push(s); });   // any new subjects go last
+    if(ordered.length===SUBJECTS.length) SUBJECTS.splice(0,SUBJECTS.length,...ordered);
+  }catch(e){}
+}
+function saveOrder(){ try{ localStorage.setItem(ORDER_KEY,JSON.stringify(SUBJECTS.map(s=>s.slug))); }catch(e){} }
+
+let drag=null;
+function onBookDown(e,bk,slug){
+  if(e.pointerType==='mouse'&&e.button!==0) return;
+  drag={bk,slug,startX:e.clientX,startY:e.clientY,moved:false};
+  window.addEventListener('pointermove',onBookMove);
+  window.addEventListener('pointerup',onBookUp,{once:true});
+}
+function onBookMove(e){
+  if(!drag) return;
+  const dx=e.clientX-drag.startX, dy=e.clientY-drag.startY;
+  if(!drag.moved){ if(Math.hypot(dx,dy)<8) return; beginDrag(); }
+  drag.bk.style.transform='translate('+dx+'px,'+(dy-8)+'px) rotate(3deg) scale(1.05)';
+  layoutGap(e.clientX);
+}
+function beginDrag(){
+  drag.moved=true; hideTip();
+  const shelf=document.getElementById('shelf');
+  drag.bks=[...shelf.querySelectorAll('.bk')];
+  drag.fromIdx=drag.bks.indexOf(drag.bk);
+  drag.lefts=drag.bks.map(b=>b.getBoundingClientRect().left);
+  drag.centers=drag.bks.map(b=>{const r=b.getBoundingClientRect(); return r.left+r.width/2;});
+  drag.to=drag.fromIdx;
+  document.body.classList.add('dragging-book');
+  drag.bk.classList.add('dragging');
+}
+function orderFor(d,to){                      // original indices in their new on-shelf order
+  const o=d.bks.map((b,i)=>i).filter(i=>i!==d.fromIdx);
+  o.splice(to,0,d.fromIdx); return o;
+}
+function layoutGap(clientX){
+  let cnt=0; drag.bks.forEach((b,i)=>{ if(i!==drag.fromIdx&&drag.centers[i]<clientX) cnt++; });
+  drag.to=cnt;
+  const order=orderFor(drag,drag.to);
+  drag.bks.forEach((b,oi)=>{                 // FLIP: slide each other spine to its new slot
+    if(oi===drag.fromIdx) return;
+    const shift=drag.lefts[order.indexOf(oi)]-drag.lefts[oi];
+    b.style.transform='translateX('+shift+'px) rotate(var(--lean,0deg))';
+  });
+}
+function onBookUp(){
+  window.removeEventListener('pointermove',onBookMove);
+  const d=drag; drag=null;
+  if(!d) return;
+  if(!d.moved){ selectSubject(d.slug); return; }        // a tap, not a drag -> select/deselect
+  document.body.classList.remove('dragging-book');
+  const newSubs=orderFor(d,d.to).map(oi=>SUBJECTS[oi]);
+  SUBJECTS.splice(0,SUBJECTS.length,...newSubs);
+  saveOrder();
+  renderSubjects();
+  if(d.slug!==selSlug){                                  // physics settle on the dropped spine
+    const dropped=document.querySelector('.bk[data-slug="'+d.slug+'"]');
+    if(dropped){ dropped.classList.add('settling');
+      dropped.addEventListener('animationend',()=>dropped.classList.remove('settling'),{once:true}); }
+  }
+}
 /* game-menu grammar: arrows walk the shelf */
 addEventListener('keydown',e=>{
   if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
@@ -439,6 +522,7 @@ addEventListener('keydown',e=>{
   const next=SUBJECTS[(idx+(e.key==='ArrowRight'?1:n-1))%n];
   selectSubject(next.slug);
 });
+applySavedOrder();
 renderSubjects();
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); }).catch(()=>{});
 
