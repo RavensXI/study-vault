@@ -96,8 +96,8 @@
   .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:pointer;
     transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
   .bk img{display:block}
-  .bk img.cold{height:204px;width:auto;filter:saturate(.55) brightness(1.07)}
-  .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:saturate(1.3) brightness(.78)}
+  .bk img.cold{height:204px;width:auto;filter:var(--coldf, saturate(.55) brightness(1.07))}
+  .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.3) brightness(.78))}
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
   .bk:hover{transform:translateY(-5px)}
@@ -486,6 +486,78 @@ player.addEventListener('ended',()=>playPod(true));
 requestAnimationFrame(()=>{ document.body.classList.add('ready');
   const sb=document.getElementById('startbtn'); if(sb) sb.focus({preventScroll:true}); });
 
+/* ---- ?tune : live gold tuner docked over the right column ---- */
+if(/(?:^|[?&])tune(?:=|&|$)/.test(location.search)){(function(){
+  const R=document.documentElement;
+  const D={cb:1.07,cs:0.55,cc:1.00,cse:0.00,ch:0,wb:0.78,ws:1.30,wc:1.00};
+  const P={
+    current:{cb:1.24,cs:0.34,cc:1.00,cse:0.00,ch:0,wb:0.82,ws:1.22,wc:1.00},
+    warm:{cb:0.98,cs:0.70,cc:1.10,cse:0.30,ch:6,wb:0.80,ws:1.45,wc:1.08},
+    contrast:{cb:1.02,cs:0.60,cc:1.40,cse:0.12,ch:0,wb:0.76,ws:1.35,wc:1.25},
+  };
+  const st=document.createElement('style'); st.textContent=`
+    #tuner{position:fixed;top:14px;right:14px;width:300px;max-height:calc(100vh - 28px);overflow:auto;
+      background:rgba(255,253,248,.94);backdrop-filter:blur(6px);border:1px solid #e4dfd2;border-radius:14px;
+      box-shadow:0 12px 40px rgba(40,28,12,.22);padding:14px 16px 16px;z-index:9999;
+      font:13px/1.45 -apple-system,Segoe UI,system-ui,sans-serif;color:#2d2a26}
+    #tuner h4{font:600 .98rem/1.2 Georgia,serif;margin:0 0 2px}
+    #tuner .lede{color:#84806f;font-size:.78rem;margin:0 0 10px}
+    #tuner fieldset{border:1px solid #e4dfd2;border-radius:10px;margin:0 0 11px;padding:8px 11px 10px}
+    #tuner legend{font:600 .72rem/1 sans-serif;letter-spacing:.03em;text-transform:uppercase;color:#8a6d3b;padding:0 5px}
+    #tuner .c{margin:7px 0}
+    #tuner .c label{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:2px}
+    #tuner .c .v{color:#84806f;font-variant-numeric:tabular-nums}
+    #tuner input[type=range]{width:100%;accent-color:#8a6d3b;margin:0}
+    #tuner .presets{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 11px}
+    #tuner button{font:inherit;font-size:.76rem;border:1px solid #e4dfd2;background:#fff;border-radius:8px;padding:4px 9px;cursor:pointer;color:#2d2a26}
+    #tuner button:hover{border-color:#8a6d3b}
+    #tuner .out{background:#2d2a26;color:#f3ead4;border-radius:9px;padding:9px 10px;
+      font:11.5px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word;margin:2px 0 8px}
+    #tuner .out .k{color:#c9b891}
+    #tuner .tools{display:flex;gap:7px;align-items:center}
+    #tuner .ok{color:#4a7a4a;font-size:.75rem;opacity:0;transition:opacity .2s}
+    #tuner .ok.on{opacity:1}
+    #tunerToggle{position:fixed;top:14px;right:14px;z-index:9999;display:none;
+      background:#8a6d3b;color:#fff;border:0;border-radius:20px;padding:8px 15px;cursor:pointer;
+      font:600 13px/1 sans-serif;box-shadow:0 6px 20px rgba(40,28,12,.25)}
+    #tuner .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+    #tuner .hd .x{border:0;background:none;font-size:1.1rem;line-height:1;padding:2px 4px;color:#84806f}`;
+  document.head.appendChild(st);
+
+  const row=(id,lab,mn,mx,sp)=>`<div class="c"><label><b>${lab}</b><span class="v" id="v_${id}"></span></label>`+
+    `<input type="range" id="t_${id}" min="${mn}" max="${mx}" step="${sp}"></div>`;
+  const box=document.createElement('div'); box.id='tuner'; box.innerHTML=
+    `<div class="hd"><div><h4>Gold tuner</h4><p class="lede">Live on the real shelf. Send me the values below.</p></div>`+
+    `<button class="x" id="t_hide" title="Hide">–</button></div>`+
+    `<div class="presets"><button data-p="current">Current</button><button data-p="warm">Warmer gold</button><button data-p="contrast">High contrast</button></div>`+
+    `<fieldset><legend>Unstudied</legend>`+row('cb','Brightness',0.70,1.40,0.01)+row('cs','Saturation',0,2,0.01)+
+      row('cc','Contrast',0.60,1.80,0.01)+row('cse','Warmth',0,1,0.01)+row('ch','Hue',-40,40,1)+`</fieldset>`+
+    `<fieldset><legend>Studied fill</legend>`+row('wb','Brightness',0.60,1.15,0.01)+row('ws','Saturation',0.80,2.20,0.01)+
+      row('wc','Contrast',0.60,1.80,0.01)+`</fieldset>`+
+    `<div class="out" id="t_out"></div>`+
+    `<div class="tools"><button id="t_copy">Copy CSS</button><button id="t_reset">Reset</button><span class="ok" id="t_ok">copied ✓</span></div>`;
+  document.body.appendChild(box);
+  const tog=document.createElement('button'); tog.id='tunerToggle'; tog.textContent='Gold tuner'; document.body.appendChild(tog);
+  const g=id=>document.getElementById(id);
+  const cold=()=>`saturate(${(+g('t_cs').value).toFixed(2)}) brightness(${(+g('t_cb').value).toFixed(2)}) contrast(${(+g('t_cc').value).toFixed(2)}) sepia(${(+g('t_cse').value).toFixed(2)}) hue-rotate(${g('t_ch').value}deg)`;
+  const warm=()=>`saturate(${(+g('t_ws').value).toFixed(2)}) brightness(${(+g('t_wb').value).toFixed(2)}) contrast(${(+g('t_wc').value).toFixed(2)})`;
+  const IDS=['cb','cs','cc','cse','ch','wb','ws','wc'];
+  function apply(){
+    R.style.setProperty('--coldf',cold()); R.style.setProperty('--warmf',warm());
+    IDS.forEach(k=>{const el=g('v_'+k); if(el) el.textContent=(k==='ch')?g('t_ch').value+'°':(+g('t_'+k).value).toFixed(2);});
+    g('t_out').innerHTML=`<span class="k">.bk img.cold</span>{filter:${cold()}}\n\n<span class="k">.bk img.warm</span>{filter:${warm()}}`;
+  }
+  const setv=o=>{for(const k in o) g('t_'+k).value=o[k]; apply();};
+  IDS.forEach(k=>g('t_'+k).addEventListener('input',apply));
+  box.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>setv(P[b.dataset.p]));
+  g('t_reset').onclick=()=>setv(D);
+  g('t_copy').onclick=async()=>{try{await navigator.clipboard.writeText(`.bk img.cold{filter:${cold()}}\n.bk img.warm{filter:${warm()}}`);}catch(e){}
+    g('t_ok').classList.add('on'); setTimeout(()=>g('t_ok').classList.remove('on'),1200);};
+  g('t_hide').onclick=()=>{box.style.display='none'; tog.style.display='block';};
+  tog.onclick=()=>{box.style.display='block'; tog.style.display='none';};
+  const q=(location.search.match(/[?&]tune=([a-z]+)/)||[])[1];
+  setv(P[q]||D);
+})();}
 </script>
 </body>
 </html>
