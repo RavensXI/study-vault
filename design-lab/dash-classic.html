@@ -425,9 +425,12 @@ bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa')
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
 fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
 
-/* shorts — same feed, in a phone frame */
+/* shorts — same feed, in a phone frame; scoped to Sam's chosen subjects so the
+   feed interleaves only across what he studies (real app reads this from the
+   free-user / school selection instead of this explicit list). */
 const pm=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
-document.getElementById('shortsdoor').onclick=()=>{ frame.src='/design-lab/shorts.html'; pm.classList.add('open'); };
+const SAM_SUBJECTS=SUBJECTS.map(s=>s.sub).join(',');
+document.getElementById('shortsdoor').onclick=()=>{ frame.src='/design-lab/shorts.html?subjects='+encodeURIComponent(SAM_SUBJECTS); pm.classList.add('open'); };
 document.getElementById('closephone').onclick=()=>{ pm.classList.remove('open'); frame.src=''; };
 pm.addEventListener('click',e=>{ if(e.target===pm){ pm.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key!=='Escape') return;

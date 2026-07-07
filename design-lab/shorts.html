@@ -100,6 +100,8 @@
   <div class="brand"><span>Study<b>Vault</b><span class="lock"></span></span></div>
   <div class="feed" id="feed"></div>
 
+<script src="/js/free-user.js"></script>
+<script src="/js/school-session.js"></script>
 <script>
 const MANIFEST = "/scripts/_shorts_manifest.json";
 const QUESTIONS_URL = "/scripts/_shorts_questions.json";
@@ -186,6 +188,18 @@ function realCheck(s){
   const m=QUESTIONS[s.lesson_id], q=m&&m[String(s.topic_index)];
   if(q && Array.isArray(q.opts) && typeof q.correct==='number') return { q:q.q, opts:q.opts, correct:q.correct };
   return sampleCheck(s);
+}
+
+// the student's chosen subjects — the feed interleaves ONLY across these.
+// order of truth: explicit ?subjects= override -> free-user picks -> school
+// subscription -> null (no known selection, fall back to the whole pool).
+function mySubjectSlugs(){
+  const qp = new URLSearchParams(location.search).get('subjects');
+  if(qp) return qp.split(',').map(s=>s.trim()).filter(Boolean);
+  try{ if(window.FreeUser){ const s=FreeUser.getSubjectSlugs(); if(s&&s.length) return s; } }catch(e){}
+  try{ if(window.SchoolSession){ const s=SchoolSession.get();
+        if(s){ const list=[].concat(s.subscribed_subjects||[], s.bespoke_subjects||[]); if(list.length) return list; } } }catch(e){}
+  return null;
 }
 
 let slides=[], current=-1;
@@ -460,7 +474,17 @@ Promise.all([
 ]).then(([m,q])=>{
   QUESTIONS=q||{};
   if(!m.length){ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts banked yet.</div></div></div>'; return; }
-  render(m);
+  // scope the feed to the student's chosen subjects; never leave it empty while
+  // a subject is still backfilling — if none of their subjects has shorts yet,
+  // fall back to the whole interleaved pool rather than an empty feed.
+  const mine=mySubjectSlugs();
+  let pool=m;
+  if(mine && mine.length){
+    const set=new Set(mine);
+    const scoped=m.filter(e=>set.has(e.subject));
+    pool = scoped.length ? scoped : m;
+  }
+  render(pool);
 }).catch(err=>{ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">Could not load shorts.</div></div></div>'; });
 </script>
 </body>
