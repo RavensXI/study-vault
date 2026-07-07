@@ -13,26 +13,32 @@
   .row{display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap}
   .panel{background:#fffdf8;border:1px solid #e4dfd2;border-radius:14px;padding:22px 26px}
   .specimen svg{display:block}
-  .shelfwrap{display:flex;align-items:flex-end;gap:4px;padding:10px 14px 0}
+  .shelfwrap{display:flex;align-items:flex-end;gap:4px;padding:10px 14px 0;position:relative;z-index:2}
+  #mshelf{padding-bottom:0}
   .board{height:12px;margin:-6px 4px 0;border-radius:3px;
     background:linear-gradient(180deg,#cdbb96,#b9a67e 60%,#a8956d);box-shadow:0 3px 5px rgba(56,40,18,.25)}
+  .pboard{display:block;width:100%;height:auto;margin-top:-7px;position:relative;z-index:0}
   .knobs{margin-top:14px;font-size:.8rem;color:#84806f}
   .knobs label{margin-right:18px}
   /* gilt title on the leather label panel — real text, any font */
+  .scene{position:relative;width:100%;max-width:820px;margin:6px auto 0}
+  .scene img{display:block;width:100%;height:auto}
+  .scene .base{filter:var(--coldf)}
+  .scene .lay{position:absolute;inset:0}
   .booklabel{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;
     color:#c9a24a;font-family:'Cormorant Garamond',serif;font-weight:600;line-height:.98;
     letter-spacing:.02em;text-transform:uppercase;pointer-events:none;
     text-shadow:0 1px 0 rgba(20,12,4,.55),0 -0.5px 0 rgba(255,236,180,.25);
     -webkit-mask-image:none}
   /* master-book shelf */
-  .mbook{position:relative;display:inline-block;height:158px;transition:transform .2s}
+  .mbook{position:relative;display:inline-block;height:158px;transition:transform .2s;z-index:2}
   .mbook:hover{transform:translateY(-6px)}
   .mbook img{display:block}
-  .mbook img.cold{height:158px;width:auto;filter:grayscale(.92) brightness(1.06) contrast(.94);opacity:.9}
+  .mbook img.cold{height:158px;width:auto;filter:var(--coldf)}
   .mbook img.warm{position:absolute;inset:0;height:100%;width:100%}
   .bigm{position:relative;display:inline-block;height:560px}
   .bigm img{display:block}
-  .bigm img.cold{height:560px;width:auto;filter:grayscale(.92) brightness(1.06) contrast(.94);opacity:.9}
+  .bigm img.cold{height:560px;width:auto;filter:var(--coldf)}
   .bigm img.warm{position:absolute;inset:0;height:100%;width:100%}
 </style>
 </head>
@@ -68,14 +74,19 @@
       <option value="master2">bands ×5 + label</option>
       <option value="master1">bands ×3</option>
       <option value="master3">smooth</option>
+    </select>
+    &nbsp; unstudied: <select id="cPick">
+      <option value="pale">pale colour</option>
+      <option value="ghost">ghosted colour</option>
+      <option value="pencil">light pencil</option>
+      <option value="graphite">graphite grey</option>
     </select></div>
     <div id="bigm" style="margin-top:10px"></div>
   </div>
   <div class="panel">
-    <div>Master shelf · one titled book per subject · colour rises with progress</div>
-    <div class="shelfwrap" id="mshelf"></div>
-    <div class="board"></div>
-    <div class="knobs">One master, recoloured &amp; titled per subject (img2img — all coherent). Grey = not studied yet; colour fills as Sam learns.</div>
+    <div>The shelf · one coherent painting · colour rises per book with progress</div>
+    <div class="scene" id="scene"></div>
+    <div class="knobs">ONE coherent painting — books sit naturally with real contact shadows. Colour rises per book with progress; the desaturated painting is the “unstudied” state.</div>
   </div>
 </div>
 
@@ -197,10 +208,29 @@ function bakedBook(slug,pct,cls,tc){
     <img class="warm" src="${url}" style="clip-path:${clip}" alt="">
   </div>`;
 }
+const COLDF={graphite:'grayscale(.92) brightness(1.06) contrast(.94) opacity(.9)',
+  pencil:'grayscale(1) brightness(1.24) contrast(.8) opacity(.85)',
+  pale:'saturate(.32) brightness(1.26)',
+  ghost:'saturate(.6) brightness(1.12) opacity(.5)'};
+const SCENE_COLS={"maths": [0.02306805074971165, 0.12283737024221453], "lang": [0.12975778546712802, 0.2295271049596309], "lit": [0.2364475201845444, 0.3356401384083045], "science": [0.34256055363321797, 0.44232987312572086], "history": [0.44925028835063435, 0.5490196078431373], "geog": [0.5559400230680508, 0.6557093425605537], "spanish": [0.6626297577854672, 0.76239907727797], "cs": [0.7693194925028836, 0.8708189158016147], "rs": [0.8777393310265282, 0.9769319492502884]};
+const SCENE_LT=0.6582278481012658;
+function sceneShelf(){
+  const url='/design-lab/assets/lw/shelf/_scene.webp';
+  let h='<img class="base" src="'+url+'" alt="">'+
+    '<img class="lay" src="'+url+'" style="clip-path:inset('+(SCENE_LT*100)+'% 0 0 0)">';  // colour shelf
+  SUBJECTS.forEach(s=>{
+    const c=SCENE_COLS[s.slug]; if(!c) return;
+    const pct=Math.max(0,Math.min(100,s.pct))/100;
+    const top=(SCENE_LT*(1-pct))*100, bottom=(1-SCENE_LT)*100, left=c[0]*100, right=(1-c[1])*100;
+    h+='<img class="lay" src="'+url+'" style="clip-path:inset('+top+'% '+right+'% '+bottom+'% '+left+'%)">';
+  });
+  return h;
+}
 function renderMaster(){
+  const cf=COLDF[(document.getElementById('cPick')||{}).value||'pale'];
+  document.documentElement.style.setProperty('--coldf',cf);
   document.getElementById('bigm').innerHTML=bakedBook('history',38,'bigm');
-  const sh=document.getElementById('mshelf'); sh.innerHTML='';
-  SUBJECTS.forEach(s=>{ sh.insertAdjacentHTML('beforeend',bakedBook(s.slug,s.pct,'mbook',s.c)); });
+  document.getElementById('scene').innerHTML=sceneShelf();
 }
 function fitLabels(root){
   (root||document).querySelectorAll('.booklabel').forEach(el=>{
@@ -213,7 +243,11 @@ function fitLabels(root){
 }
 const _rm=renderMaster; renderMaster=function(){ _rm(); fitLabels(); };
 document.getElementById('mPick').onchange=renderMaster;
-{ const mq=new URLSearchParams(location.search).get('m'); if(mq) document.getElementById('mPick').value=mq; }
+document.getElementById('cPick').onchange=renderMaster;
+
+{ const q=new URLSearchParams(location.search);
+  if(q.get('m')) document.getElementById('mPick').value=q.get('m');
+  if(q.get('cold')) document.getElementById('cPick').value=q.get('cold'); }
 render(); renderMaster();
 </script>
 </body>
