@@ -93,11 +93,22 @@
      student — zero per-student cost) on a shared walnut ledge. Pale = not
      studied; the colour fills up AND deepens from the shelf as it is learned. */
   .shelfstage{position:relative;margin-top:34px}   /* clearance so a lifted/selected spine never covers the heading + metrics above */
-  .shelf{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:212px;padding:0 6px;position:relative;z-index:2}
-  .bookend{height:214px;width:auto;align-self:flex-end;margin-right:-15px;pointer-events:none;
-    filter:drop-shadow(0 5px 4px rgba(40,28,12,.22))}
+  .shelf{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px;height:212px;padding:0 6px 0 10px;position:relative;z-index:2}
+  .bookend{height:210px;width:auto;align-self:flex-end;margin-right:-6px;pointer-events:none;
+    filter:drop-shadow(-7px 5px 4px rgba(40,28,12,.30))}
+  /* lamp on the right, arm reaching left; its shade is the light source for the scene */
+  .lamp{position:absolute;right:8px;bottom:24px;height:300px;width:auto;z-index:5;pointer-events:none;
+    filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22))}
+  /* soft shadow falling to the LEFT (away from the lamp) */
+  .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:34px;z-index:3;pointer-events:none;
+    background:linear-gradient(to right, rgba(26,18,8,.34), rgba(26,18,8,.12) 34%, transparent 60%);
+    mix-blend-mode:multiply}
+  /* warm pool of light thrown by the shade (upper-right), lifting the right of the scene */
+  .lampglow{position:absolute;left:0;right:0;top:-10px;bottom:34px;z-index:4;pointer-events:none;
+    background:radial-gradient(95% 100% at 74% 22%, rgba(255,206,128,.38), rgba(255,206,128,.12) 48%, transparent 76%);
+    mix-blend-mode:screen}
   .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:grab;touch-action:none;
-    transform:rotate(var(--lean,0deg));
+    transform:rotate(var(--lean,0deg));filter:drop-shadow(-6px 2px 3px rgba(28,18,8,.26));
     transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
   .bk img{display:block}
   .bk img.cold{height:204px;width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
@@ -260,6 +271,9 @@
     <div class="shelfstage">
       <div class="shelf" id="shelf" role="tablist" aria-label="Your subjects"></div>
       <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
     </div>
     <div class="card sdetail" id="sdetail"></div>
     <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
@@ -387,7 +401,7 @@ function hideTip(){ _tip.classList.remove('on'); }
 function renderSubjects(){
   const shelf=document.getElementById('shelf'); shelf.innerHTML='';
   const be=document.createElement('img'); be.className='bookend';
-  be.src='assets/lw/shelf/bookend.webp'; be.alt=''; shelf.appendChild(be);
+  be.src='assets/lw/shelf/bookend2.webp'; be.alt=''; shelf.appendChild(be);
   let done=0,tot=0;
   SUBJECTS.forEach((s,i)=>{
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
