@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book bench — SVG spine workshop</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Literata:opsz,wght@7..72,500;7..72,600&display=swap" rel="stylesheet">
+<style>
+  :root{--paper:#f6f1e7;--ink:#3a3428}
+  body{margin:0;background:var(--paper);font:14px 'Segoe UI',system-ui,sans-serif;color:#57534a;padding:28px 40px}
+  h1{font-size:1.1rem;color:#26231e}
+  .row{display:flex;gap:56px;align-items:flex-start;flex-wrap:wrap}
+  .panel{background:#fffdf8;border:1px solid #e4dfd2;border-radius:14px;padding:22px 26px}
+  .specimen svg{display:block}
+  .shelfwrap{display:flex;align-items:flex-end;gap:4px;padding:10px 14px 0}
+  .board{height:12px;margin:-6px 4px 0;border-radius:3px;
+    background:linear-gradient(180deg,#cdbb96,#b9a67e 60%,#a8956d);box-shadow:0 3px 5px rgba(56,40,18,.25)}
+  .knobs{margin-top:14px;font-size:.8rem;color:#84806f}
+  .knobs label{margin-right:18px}
+  /* gilt title on the leather label panel — real text, any font */
+  .booklabel{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;
+    color:#c9a24a;font-family:'Cormorant Garamond',serif;font-weight:600;line-height:.98;
+    letter-spacing:.02em;text-transform:uppercase;pointer-events:none;
+    text-shadow:0 1px 0 rgba(20,12,4,.55),0 -0.5px 0 rgba(255,236,180,.25);
+    -webkit-mask-image:none}
+  /* master-book shelf */
+  .mbook{position:relative;display:inline-block;height:158px;transition:transform .2s}
+  .mbook:hover{transform:translateY(-6px)}
+  .mbook img{display:block}
+  .mbook img.cold{height:158px;width:auto;filter:grayscale(.92) brightness(1.06) contrast(.94);opacity:.9}
+  .mbook img.warm{position:absolute;inset:0;height:100%;width:100%}
+  .bigm{position:relative;display:inline-block;height:560px}
+  .bigm img{display:block}
+  .bigm img.cold{height:560px;width:auto;filter:grayscale(.92) brightness(1.06) contrast(.94);opacity:.9}
+  .bigm img.warm{position:absolute;inset:0;height:100%;width:100%}
+</style>
+</head>
+<body>
+<h1>Book bench — iterate here, deploy never (until we say so)</h1>
+<div class="row">
+  <div class="panel specimen">
+    <div>Specimen · 4× size</div>
+    <div id="big"></div>
+  </div>
+  <div class="panel">
+    <div>The shelf · real size · Sam's progress</div>
+    <div class="shelfwrap" id="shelf"></div>
+    <div class="board"></div>
+    <div class="knobs">
+      <label><input type="checkbox" id="kBands" checked> binding bands</label>
+      <label><input type="checkbox" id="kHatch" checked> pencil hatch (unpainted)</label>
+      <label><input type="checkbox" id="kGrain" checked> wash grain</label>
+      <label><input type="checkbox" id="kJitter" checked> shelf jitter</label>
+      <label>fill: <select id="kWash">
+        <option value="wash1">watercolour 1</option>
+        <option value="wash2">watercolour 2</option>
+        <option value="wash3">watercolour 3</option>
+        <option value="none">flat colour</option>
+      </select></label>
+    </div>
+  </div>
+</div>
+
+<div class="row" style="margin-top:24px">
+  <div class="panel bigm-panel">
+    <div>Master book · 4× · <select id="mPick">
+      <option value="master2">bands ×5 + label</option>
+      <option value="master1">bands ×3</option>
+      <option value="master3">smooth</option>
+    </select></div>
+    <div id="bigm" style="margin-top:10px"></div>
+  </div>
+  <div class="panel">
+    <div>Master shelf · one titled book per subject · colour rises with progress</div>
+    <div class="shelfwrap" id="mshelf"></div>
+    <div class="board"></div>
+    <div class="knobs">One master, recoloured &amp; titled per subject (img2img — all coherent). Grey = not studied yet; colour fills as Sam learns.</div>
+  </div>
+</div>
+
+<script>
+/* ---- one book, drawn once, re-inked per subject ----
+   viewBox 0 0 100 300. All lines hand-wobbled: nothing is straight. */
+function bookSVG(o){
+  // o: {w,h,color,pct,ribbon,seed,bands,hatch,grain}
+  const W=o.w, H=o.h, tc=o.color, pct=Math.max(4,Math.min(100,o.pct));
+  const R=mulberry(o.seed||1);
+  const j=(amt)=> (R()*2-1)*amt;
+  // spine seen square-on: near-straight sides, gently rounded corners,
+  // a whisper of cloth-sag in the top and bottom edges. No feet, no lid.
+  const x0=18+j(1.2), x1=82+j(1.2), yT=14+j(1.5), yB=290+j(1);
+  const cr=5;                                   // corner radius
+  const sag=1.6+R()*1.2;                        // edge sag
+  const bowL=j(1.1), bowR=j(1.1);               // tiny side character
+  const path=`M ${x0+cr} ${yT}
+    Q ${50+j(3)} ${yT+sag} ${x1-cr} ${yT}
+    Q ${x1} ${yT+1} ${x1} ${yT+cr}
+    C ${x1+bowR} ${yT+(yB-yT)*0.33} ${x1+bowR} ${yT+(yB-yT)*0.66} ${x1} ${yB-cr}
+    Q ${x1} ${yB-1} ${x1-cr} ${yB}
+    Q ${50+j(3)} ${yB+sag} ${x0+cr} ${yB}
+    Q ${x0} ${yB-1} ${x0} ${yB-cr}
+    C ${x0+bowL} ${yT+(yB-yT)*0.66} ${x0+bowL} ${yT+(yB-yT)*0.33} ${x0} ${yT+cr}
+    Q ${x0} ${yT+1} ${x0+cr} ${yT} Z`;
+  // hinge groove near the top + tail groove near the bottom (cloth over boards)
+  const groove=(y,op)=>`<path d="M ${x0+3} ${y+j(.8)} Q 50 ${y+2.2} ${x1-3} ${y+j(.8)}"
+      stroke="rgba(40,28,12,${op})" stroke-width="1.6" fill="none"/>`;
+  // raised binding bands: shadow under, light above
+  let bands='';
+  if(o.bands){
+    [0.30,0.44,0.72].forEach(f=>{
+      const y=yT+(yB-yT)*f+j(2.5);
+      bands+=`<path d="M ${x0+2.5} ${y+2.2} Q 50 ${y+4.4} ${x1-2.5} ${y+2.2}" stroke="rgba(40,28,12,.30)" stroke-width="2.6" fill="none"/>
+              <path d="M ${x0+2.5} ${y} Q 50 ${y+2.2} ${x1-2.5} ${y}" stroke="rgba(255,253,244,.55)" stroke-width="1.5" fill="none"/>`;
+    });
+  }
+  const clip='c'+Math.floor(R()*1e9), grad='g'+Math.floor(R()*1e9);
+  const fillH=(yB-yT-4)*pct/100;
+  return `<svg viewBox="0 0 100 300" width="${W}" height="${H}" style="overflow:visible">
+    <defs>
+      <clipPath id="${clip}"><path d="${path}"/></clipPath>
+      <linearGradient id="${grad}" x1="0" x2="1">
+        <stop offset="0" stop-color="rgba(40,28,12,.18)"/>
+        <stop offset=".14" stop-color="rgba(40,28,12,.03)"/>
+        <stop offset=".5" stop-color="rgba(255,253,244,.14)"/>
+        <stop offset=".86" stop-color="rgba(40,28,12,.05)"/>
+        <stop offset="1" stop-color="rgba(40,28,12,.22)"/>
+      </linearGradient>
+      ${o.grain?`<filter id="gr${clip}"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.24 0 0 0 0 0.18 0 0 0 0 0.10 0 0 0 0.045 0"/>
+        <feComposite in2="SourceGraphic" operator="in"/></filter>`:''}
+      <pattern id="h${clip}" width="9" height="9" patternTransform="rotate(-26)" patternUnits="userSpaceOnUse">
+        <line x1="0" y1="0" x2="0" y2="9" stroke="rgba(90,80,60,.07)" stroke-width="1"/>
+      </pattern>
+    </defs>
+    <ellipse cx="50" cy="${yB+4}" rx="${(x1-x0)/2+3}" ry="3.5" fill="rgba(56,40,18,.16)"/>
+    <g clip-path="url(#${clip})">
+      <rect x="0" y="0" width="100" height="300" fill="#f1ebdc"/>
+      <rect x="0" y="0" width="100" height="300" fill="${tc}" opacity=".17"/>
+      ${o.hatch?`<rect x="0" y="0" width="100" height="300" fill="url(#h${clip})"/>`:''}
+      <rect x="0" y="${yB-2-fillH}" width="100" height="${fillH+6}" fill="${tc}" opacity=".9"/>
+      <path d="M 0 ${yB-2-fillH} Q 30 ${yB-7-fillH} 55 ${yB-2-fillH} T 100 ${yB-4-fillH}"
+        fill="${tc}" opacity=".5"/>
+      ${o.wash?`<image href="${o.wash}" x="-6" y="${yB-2-fillH-4}" width="112" height="${fillH+14}"
+        preserveAspectRatio="xMidYMid slice" style="mix-blend-mode:multiply" opacity=".7"/>
+        <image href="${o.wash}" x="-6" y="${yB-2-fillH-4}" width="112" height="${fillH+14}"
+        preserveAspectRatio="xMidYMid slice" style="mix-blend-mode:soft-light" opacity=".5"/>`:''}
+      <path d="M 0 ${yB-2-fillH} Q 30 ${yB-7-fillH} 55 ${yB-2-fillH} T 100 ${yB-4-fillH}"
+        fill="none" stroke="rgba(40,28,12,.28)" stroke-width="1.6"/>
+      <rect x="0" y="0" width="100" height="300" fill="url(#${grad})"/>
+      ${o.grain?`<rect x="0" y="0" width="100" height="300" fill="#000" filter="url(#gr${clip})"/>`:''}
+    </g>
+    ${groove(yT+10,'.30')}${groove(yB-12,'.22')}
+    ${bands}
+    <path d="${path}" fill="none" stroke="var(--ink)" stroke-width="2.3" stroke-linejoin="round"/>
+    ${o.ribbon?`<g transform="translate(${x1-26+j(2)} ${yT-1}) rotate(${j(3)})">
+      <path d="M 0 0 l 11 0 l 0 24 l -5.5 -5 l -5.5 5 Z" fill="#d99a3d" stroke="rgba(120,70,20,.5)" stroke-width="1.3"/></g>`:''}
+  </svg>`;
+}
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+
+const SUBJECTS=[
+ {slug:'maths',c:'#4e5f66',pct:34,w:1.0},
+ {slug:'lang',c:'#5b7285',pct:13,w:1.1},
+ {slug:'lit',c:'#7d5a78',pct:43,w:0.9,ribbon:true},
+ {slug:'science',c:'#4e6e5d',pct:21,w:1.15},
+ {slug:'history',c:'#8a5a44',pct:15,w:1.4},
+ {slug:'geog',c:'#6d7a4e',pct:23,w:1.1},
+ {slug:'spanish',c:'#a2643f',pct:23,w:0.9},
+ {slug:'cs',c:'#54606e',pct:22,w:1.05,ribbon:true},
+ {slug:'rs',c:'#6f5b91',pct:27,w:0.95},
+];
+function knob(id){return document.getElementById(id).checked}
+function render(){
+  const wash=document.getElementById('kWash').value;
+  const washUrl=wash==='none'?null:'/design-lab/assets/lw/shelf/'+wash+'.png';
+  const opts={bands:knob('kBands'),hatch:knob('kHatch'),grain:knob('kGrain'),wash:washUrl};
+  const jit=knob('kJitter');
+  document.getElementById('big').innerHTML=
+    bookSVG({w:200,h:600,color:'#8a5a44',pct:38,ribbon:true,seed:5,...opts});
+  const shelf=document.getElementById('shelf'); shelf.innerHTML='';
+  SUBJECTS.forEach((s,i)=>{
+    const holder=document.createElement('div');
+    const h=150+(jit?Math.round((mulberry(i+11)()*2-1)*10):0);
+    holder.style.cssText='display:flex;align-items:flex-end;'+(jit?('transform:rotate('+((mulberry(i+31)()*2-1)*0.9)+'deg);transform-origin:bottom center;'):'');
+    holder.innerHTML=bookSVG({w:Math.round(34*s.w),h,color:s.c,pct:s.pct,ribbon:s.ribbon,seed:i+7,...opts});
+    shelf.appendChild(holder);
+  });
+}
+document.querySelectorAll('.knobs input,.knobs select').forEach(k=>k.onchange=render);
+
+function bakedBook(slug,pct,cls,tc){
+  const url='/design-lab/assets/lw/shelf/book_'+slug+'.png';
+  const clip='inset('+(100-Math.max(3,Math.min(100,pct)))+'% 0 0 0)';
+  return `<div class="${cls}" style="--tc:${tc||'#8a5a44'}">
+    <img class="cold" src="${url}" alt="">
+    <img class="warm" src="${url}" style="clip-path:${clip}" alt="">
+  </div>`;
+}
+function renderMaster(){
+  document.getElementById('bigm').innerHTML=bakedBook('history',38,'bigm');
+  const sh=document.getElementById('mshelf'); sh.innerHTML='';
+  SUBJECTS.forEach(s=>{ sh.insertAdjacentHTML('beforeend',bakedBook(s.slug,s.pct,'mbook',s.c)); });
+}
+function fitLabels(root){
+  (root||document).querySelectorAll('.booklabel').forEach(el=>{
+    let fs=parseFloat(getComputedStyle(el).fontSize);
+    let guard=0;
+    while((el.scrollWidth>el.clientWidth+0.5||el.scrollHeight>el.clientHeight+0.5)&&fs>3&&guard<40){
+      fs-=0.5; el.style.fontSize=fs+'px'; guard++;
+    }
+  });
+}
+const _rm=renderMaster; renderMaster=function(){ _rm(); fitLabels(); };
+document.getElementById('mPick').onchange=renderMaster;
+{ const mq=new URLSearchParams(location.search).get('m'); if(mq) document.getElementById('mPick').value=mq; }
+render(); renderMaster();
+</script>
+</body>
+</html>
