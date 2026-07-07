@@ -25,6 +25,7 @@
   .scene img{display:block;width:100%;height:auto}
   .scene .base{filter:var(--coldf)}
   .scene .lay{position:absolute;inset:0}
+  .scene .col{filter:saturate(1.2) brightness(.84)}
   .booklabel{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;
     color:#c9a24a;font-family:'Cormorant Garamond',serif;font-weight:600;line-height:.98;
     letter-spacing:.02em;text-transform:uppercase;pointer-events:none;
@@ -222,7 +223,7 @@ function sceneShelf(){
     const c=SCENE_COLS[s.slug]; if(!c) return;
     const pct=Math.max(0,Math.min(100,s.pct))/100;
     const top=(SCENE_LT*(1-pct))*100, bottom=(1-SCENE_LT)*100, left=c[0]*100, right=(1-c[1])*100;
-    h+='<img class="lay" src="'+url+'" style="clip-path:inset('+top+'% '+right+'% '+bottom+'% '+left+'%)">';
+    h+='<img class="lay col" src="'+url+'" style="clip-path:inset('+top+'% '+right+'% '+bottom+'% '+left+'%)">';
   });
   return h;
 }

@@ -10,13 +10,14 @@
  .scene img{display:block;width:100%;height:auto}
  .scene .base{filter:saturate(.32) brightness(1.26)}
  .scene .lay{position:absolute;inset:0}
+ .scene .col{filter:saturate(1.2) brightness(.84)}
  /* static composite */
  .stage{position:relative}
  .row{display:flex;align-items:flex-end;gap:5px;position:relative;z-index:2;padding:0 26px}
  .bk{position:relative;height:242px}
  .bk img{display:block}
  .bk img.cold{height:242px;width:auto;filter:saturate(.34) brightness(1.24)}
- .bk img.warm{position:absolute;inset:0;height:100%;width:100%}
+ .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:saturate(1.22) brightness(.82)}
  /* real contact shadow on the shelf under each book base */
  .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:18px;z-index:-1;
    background:radial-gradient(52% 120% at 50% 0%, rgba(34,22,8,.55), rgba(34,22,8,.18) 55%, transparent 78%);
@@ -43,7 +44,7 @@ const COLS={"maths": [0.02306805074971165, 0.12283737024221453], "lang": [0.1297
     '<img class="lay" src="'+u+'" style="clip-path:inset('+(LT*100)+'% 0 0 0)">';
   S.forEach(([slug,pct])=>{ const c=COLS[slug]; if(!c) return; const p=pct/100;
     const top=(LT*(1-p))*100, bot=(1-LT)*100, left=c[0]*100, right=(1-c[1])*100;
-    h+='<img class="lay" src="'+u+'" style="clip-path:inset('+top+'% '+right+'% '+bot+'% '+left+'%)">'; });
+    h+='<img class="lay col" src="'+u+'" style="clip-path:inset('+top+'% '+right+'% '+bot+'% '+left+'%)">'; });
   document.getElementById('scene').innerHTML=h; }
 // static composite
 { const row=document.getElementById('row');
