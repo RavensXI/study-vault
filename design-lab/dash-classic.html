@@ -24,8 +24,8 @@
   body.ready{opacity:1}
 
   .top{max-width:1180px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
-  .brand{font-size:1.15rem;font-weight:500;color:#3d3428;display:inline-flex;align-items:baseline}.brand b{font-weight:800}
-  .brandlock{height:.86em;width:auto;margin-left:2px;align-self:center;transform:translateY(1px)}
+  .brand{font-size:1.15rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
+  .brandlock{height:.30em;width:auto;margin-left:.5px;vertical-align:baseline}   /* the padlock is the full stop */
   .brandlogo{height:30px;display:block}
   .datestamp{font-family:var(--hand);font-size:1.35rem;color:var(--mut);margin-left:6px;margin-top:2px}
   .top .sp{flex:1}
@@ -92,7 +92,7 @@
   /* THE SHELF: static per-subject books (one image each, reused for every
      student — zero per-student cost) on a shared walnut ledge. Pale = not
      studied; the colour fills up AND deepens from the shelf as it is learned. */
-  .shelfstage{position:relative;margin-top:20px}   /* clearance so a lifted/selected spine never covers the heading + metrics above */
+  .shelfstage{position:relative;margin-top:34px}   /* clearance so a lifted/selected spine never covers the heading + metrics above */
   .shelf{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:212px;padding:0 6px;position:relative;z-index:2}
   .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:pointer;
     transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
@@ -108,6 +108,7 @@
   .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
   /* the open book: fixed height, never reflows the page */
   .sdetail{height:142px;padding:.65rem 1rem .7rem;position:relative;overflow:hidden}
+  .sdetail[hidden]{display:none}
   .sdetail::before{content:"";position:absolute;left:0;top:14px;width:4px;height:28px;
     background:var(--tc);border-radius:0 3px 3px 0}
   .sdetail .top{display:flex;align-items:baseline;gap:12px;margin-bottom:.55rem;flex-wrap:nowrap}
@@ -366,7 +367,13 @@ function renderSubjects(){
   }
   selectSubject(selSlug,true);
 }
+function deselectSubject(){                 // click a selected spine again -> it drops back in line, no panel
+  selSlug=null;
+  document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected','false'));
+  const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';
+}
 function selectSubject(slug,silent){
+  if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off
   selSlug=slug;
   const s=SUBJECTS.find(x=>x.slug===slug);
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug)));
@@ -374,6 +381,7 @@ function selectSubject(slug,silent){
   const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
   const rec=REC[s.slug]||0;
   const el=document.getElementById('sdetail');
+  el.hidden=false;
   el.style.setProperty('--tc',s.c);
   el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
     '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
