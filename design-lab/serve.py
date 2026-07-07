@@ -19,6 +19,8 @@ REWRITES = [
     ("/desk", "/design-lab/dash-desk4.html"),  # Sam's desk (the dashboard)
     ("/classic", "/design-lab/dash-classic.html"),  # the classic (filed) dashboard
     ("/revise", "/revise.html"),  # cross-lesson Leitner review
+    ("/bench", "/design-lab/bookbench.html"),  # SVG book workshop (local only)
+    ("/shelves", "/design-lab/_shelf_compare.html"),  # coherent vs static comparison
 ]
 
 

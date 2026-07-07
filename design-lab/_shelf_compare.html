@@ -1,0 +1,48 @@
+<!doctype html><meta charset="utf-8">
+<style>
+ body{margin:0;background:#f6f1e7;font:14px/1.4 system-ui;color:#57534a;padding:26px 30px}
+ .wrap{max-width:860px;margin:0 auto}
+ h2{color:#26231e;font-size:1.05rem;margin:0 0 2px}
+ .sub{color:#84806f;margin:0 0 10px;font-size:.85rem}
+ .card{background:#fffdf8;border:1px solid #e4dfd2;border-radius:14px;padding:16px 18px;margin-bottom:26px}
+ /* coherent painting */
+ .scene{position:relative;width:100%}
+ .scene img{display:block;width:100%;height:auto}
+ .scene .base{filter:saturate(.32) brightness(1.26)}
+ .scene .lay{position:absolute;inset:0}
+ /* static composite */
+ .stage{position:relative}
+ .row{display:flex;align-items:flex-end;gap:2px;position:relative;z-index:2;padding:0 26px}
+ .bk{position:relative;height:242px}
+ .bk img{display:block}
+ .bk img.cold{height:242px;width:auto;filter:saturate(.32) brightness(1.26) drop-shadow(1px 5px 3px rgba(40,28,12,.32))}
+ .bk img.warm{position:absolute;inset:0;height:100%;width:100%}
+ .ledge{display:block;width:100%;margin-top:-12px;position:relative;z-index:1}
+</style>
+<div class="wrap">
+ <div class="card">
+   <h2>1 · One coherent painting</h2>
+   <p class="sub">A single image. Books shadow each other + share one light. Used for Sam's demo shelf (one generation, done).</p>
+   <div class="scene" id="scene"></div>
+ </div>
+ <div class="card">
+   <h2>2 · Static composite (per-subject books)</h2>
+   <p class="sub">Each book generated once, reused for every student, dropped on a shared shelf with its own contact shadow. Per-student cost = 0.</p>
+   <div class="stage"><div class="row" id="row"></div><img class="ledge" src="/design-lab/assets/lw/shelf/ledge_walnut.png"></div>
+ </div>
+</div>
+<script>
+const S=[['maths',34],['lang',13],['lit',43],['science',21],['history',15],['geog',23],['spanish',23],['cs',22],['rs',27]];
+const COLS={"maths": [0.02306805074971165, 0.12283737024221453], "lang": [0.12975778546712802, 0.2295271049596309], "lit": [0.2364475201845444, 0.3356401384083045], "science": [0.34256055363321797, 0.44232987312572086], "history": [0.44925028835063435, 0.5490196078431373], "geog": [0.5559400230680508, 0.6557093425605537], "spanish": [0.6626297577854672, 0.76239907727797], "cs": [0.7693194925028836, 0.8708189158016147], "rs": [0.8777393310265282, 0.9769319492502884]}, LT=0.6582278481012658;
+// coherent scene fill
+{ const u='/design-lab/assets/lw/shelf/_scene.webp'; let h='<img class="base" src="'+u+'">'+
+    '<img class="lay" src="'+u+'" style="clip-path:inset('+(LT*100)+'% 0 0 0)">';
+  S.forEach(([slug,pct])=>{ const c=COLS[slug]; if(!c) return; const p=pct/100;
+    const top=(LT*(1-p))*100, bot=(1-LT)*100, left=c[0]*100, right=(1-c[1])*100;
+    h+='<img class="lay" src="'+u+'" style="clip-path:inset('+top+'% '+right+'% '+bot+'% '+left+'%)">'; });
+  document.getElementById('scene').innerHTML=h; }
+// static composite
+{ const row=document.getElementById('row');
+  S.forEach(([slug,pct])=>{ const u='/design-lab/assets/lw/shelf/book_'+slug+'.png';
+    row.insertAdjacentHTML('beforeend','<div class="bk"><img class="cold" src="'+u+'"><img class="warm" src="'+u+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)"></div>'); }); }
+</script>
