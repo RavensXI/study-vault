@@ -1,0 +1,142 @@
+<!doctype html><meta charset="utf-8">
+<base href="/design-lab/">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shorts review</title>
+<style>
+  :root{--bg:#faf8f5;--ink:#2d2a26;--mut:#84806f;--line:#e7e2d6;--card:#fffdf8;--accent:#8a5a44;--good:#3f7a52}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,system-ui,sans-serif}
+  header{position:sticky;top:0;z-index:20;background:rgba(250,248,245,.93);backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);padding:14px 26px;display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+  header h1{font:600 1.2rem/1 Georgia,serif;margin:0}
+  header .count{color:var(--mut);font-size:.86rem}
+  header .sp{flex:1}
+  header label{font-size:.82rem;color:var(--mut);margin-right:6px}
+  select{font:inherit;font-size:.88rem;padding:6px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--ink)}
+  .wrap{padding:22px 26px 60px;max-width:1200px;margin:0 auto}
+  .subj{font:600 .78rem/1 sans-serif;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
+    margin:26px 0 4px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .lesson{margin:16px 0 6px}
+  .lesson h3{font:600 1rem/1.3 Georgia,serif;margin:0}
+  .lesson .u{color:var(--mut);font-size:.8rem}
+  .strip{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 4px}
+  .short{width:150px;cursor:pointer}
+  .short .thumb{position:relative;width:150px;height:267px;border-radius:11px;overflow:hidden;
+    background:#e9e3d7;border:1px solid var(--line);box-shadow:0 4px 12px rgba(40,28,12,.1)}
+  .short .thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s}
+  .short:hover .thumb img{transform:scale(1.05)}
+  .short .play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .short .play::after{content:"";width:0;height:0;border-left:18px solid #fff;border-top:12px solid transparent;
+    border-bottom:12px solid transparent;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));margin-left:4px}
+  .short .cap{font-size:.78rem;color:var(--ink);margin-top:6px;line-height:1.3}
+  .short .qbadge{display:inline-block;font-size:.68rem;margin-top:3px;padding:1px 7px;border-radius:20px}
+  .short .qbadge.has{background:#e6f0e9;color:var(--good)}
+  .short .qbadge.no{background:#f1ede4;color:var(--mut)}
+  /* modal */
+  .modal{position:fixed;inset:0;z-index:50;background:rgba(30,22,14,.72);display:none;
+    align-items:center;justify-content:center;padding:24px}
+  .modal.on{display:flex}
+  .sheet{background:var(--card);border-radius:16px;max-width:920px;width:100%;max-height:92vh;overflow:auto;
+    display:grid;grid-template-columns:340px 1fr;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+  .sheet video{width:340px;height:605px;background:#000;border-radius:16px 0 0 16px;display:block;object-fit:cover}
+  .meta{padding:22px 24px}
+  .meta .subj2{font:600 .74rem/1 sans-serif;letter-spacing:.05em;text-transform:uppercase;color:var(--accent)}
+  .meta h2{font:600 1.25rem/1.3 Georgia,serif;margin:6px 0 2px}
+  .meta .u2{color:var(--mut);font-size:.85rem;margin-bottom:14px}
+  .meta .tp{font-size:.8rem;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:16px 0 4px}
+  .meta .topic{font-size:1.02rem;font-weight:600}
+  .qbox{margin-top:18px;border-top:1px solid var(--line);padding-top:16px}
+  .qbox .q{font-weight:600;margin-bottom:10px}
+  .qbox .opt{padding:8px 12px;border:1px solid var(--line);border-radius:9px;margin:6px 0;font-size:.9rem}
+  .qbox .opt.correct{border-color:var(--good);background:#eef6f0;font-weight:600}
+  .qbox .opt.correct::after{content:" ✓";color:var(--good)}
+  .qbox .none{color:var(--mut);font-style:italic}
+  .x{position:absolute;top:18px;right:22px;font-size:1.6rem;color:#fff;cursor:pointer;line-height:1;z-index:60}
+  @media(max-width:720px){.sheet{grid-template-columns:1fr}.sheet video{width:100%;height:auto;border-radius:16px 16px 0 0}}
+</style>
+
+<header>
+  <h1>Shorts review</h1>
+  <span class="count" id="count"></span>
+  <span class="sp"></span>
+  <label for="filter">Subject</label>
+  <select id="filter"></select>
+</header>
+<div class="wrap" id="wrap"></div>
+
+<div class="modal" id="modal">
+  <span class="x" id="x">×</span>
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+const SUBJ_LABEL = {
+  'history-aqa':'History · AQA','history-edexcel':'History · Edexcel','history-ocr':'History · OCR','history-eduqas':'History · Eduqas',
+};
+const nice = s => SUBJ_LABEL[s] || s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+const titleCase = s => (s||'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+let DATA = [];
+
+fetch('_shorts_review.json').then(r=>r.json()).then(d=>{ DATA=d; initFilter(); render(); });
+
+function initFilter(){
+  const sel = document.getElementById('filter');
+  const subs = [...new Set(DATA.map(r=>r.subject))].sort();
+  const opts = ['<option value="history">History — all boards</option>',
+                '<option value="__all">Everything</option>'];
+  for(const s of subs) opts.push(`<option value="${s}">${nice(s)}</option>`);
+  sel.innerHTML = opts.join('');
+  sel.value = 'history';
+  sel.onchange = render;
+}
+
+function render(){
+  const f = document.getElementById('filter').value;
+  const rows = DATA.filter(r => f==='__all' ? true : f==='history' ? r.subject.startsWith('history') : r.subject===f);
+  document.getElementById('count').textContent = `${rows.length} shorts`;
+  // group subject -> unit -> lesson
+  const wrap = document.getElementById('wrap'); wrap.innerHTML='';
+  const bySubj = {};
+  for(const r of rows){ (bySubj[r.subject] ||= {}); const k=r.unit+'||'+r.lesson_number; (bySubj[r.subject][k] ||= {u:r.unit,n:r.lesson_number,title:r.title,items:[]}).items.push(r); }
+  for(const subj of Object.keys(bySubj).sort()){
+    const h=document.createElement('div'); h.className='subj'; h.textContent=nice(subj); wrap.appendChild(h);
+    const lessons=Object.values(bySubj[subj]).sort((a,b)=> a.u<b.u?-1:a.u>b.u?1:a.n-b.n);
+    for(const L of lessons){
+      const el=document.createElement('div'); el.className='lesson';
+      el.innerHTML=`<h3>L${String(L.n).padStart(2,'0')} · ${L.title}</h3><div class="u">${titleCase(L.u)}</div>`;
+      const strip=document.createElement('div'); strip.className='strip';
+      L.items.sort((a,b)=>(a.topic_index||0)-(b.topic_index||0));
+      for(const r of L.items){
+        const c=document.createElement('div'); c.className='short';
+        c.innerHTML=`<div class="thumb"><img loading="lazy" src="${r.poster}" onerror="this.style.opacity=.15"><div class="play"></div></div>`+
+          `<div class="cap">${r.topic||'Overview'}</div>`+
+          `<span class="qbadge ${r.q?'has':'no'}">${r.q?'recall Q':'no Q'}</span>`;
+        c.onclick=()=>openShort(r, subj);
+        strip.appendChild(c);
+      }
+      el.appendChild(strip); wrap.appendChild(el);
+    }
+  }
+  if(!rows.length) wrap.innerHTML='<p style="color:var(--mut);margin-top:30px">No shorts for that subject yet.</p>';
+}
+
+function openShort(r, subj){
+  const sheet=document.getElementById('sheet');
+  let qhtml='<div class="none">No recall question mapped to this short.</div>';
+  if(r.q){
+    const opts=(r.q.opts||[]).map((o,i)=>`<div class="opt ${i===r.q.correct?'correct':''}">${o}</div>`).join('');
+    qhtml=`<div class="q">${r.q.q}</div>${opts}`;
+  }
+  sheet.innerHTML=`<video src="${r.url}" controls autoplay playsinline></video>`+
+    `<div class="meta"><div class="subj2">${nice(subj)}</div>`+
+    `<h2>L${String(r.lesson_number).padStart(2,'0')} · ${r.title}</h2>`+
+    `<div class="u2">${titleCase(r.unit)}</div>`+
+    `<div class="tp">Short focus</div><div class="topic">${r.topic||'Overview'}</div>`+
+    `<div class="qbox"><div class="tp">Recall check in the feed</div>${qhtml}</div></div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(){ const m=document.getElementById('modal'); m.classList.remove('on'); document.getElementById('sheet').innerHTML=''; }
+document.getElementById('x').onclick=closeModal;
+document.getElementById('modal').onclick=e=>{ if(e.target.id==='modal') closeModal(); };
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeModal(); });
+</script>

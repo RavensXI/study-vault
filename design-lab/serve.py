@@ -22,6 +22,7 @@ REWRITES = [
     ("/bench", "/design-lab/bookbench.html"),  # SVG book workshop (local only)
     ("/shelves", "/design-lab/_shelf_compare.html"),  # coherent vs static comparison
     ("/gold", "/design-lab/gold-lab.html"),  # spine-title gold tuner
+    ("/shorts-review", "/design-lab/shorts-review.html"),  # review banked shorts by subject
 ]
 
 

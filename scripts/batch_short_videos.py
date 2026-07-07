@@ -139,6 +139,16 @@ def done_lesson_ids():
     return {e["lesson_id"] for e in load_json(MANIFEST, [])}
 
 
+def done_topics_by_lesson():
+    """{lesson_id: set(topic_index)} — which shorts each lesson already has (1-based).
+    A lesson is only 'done' once it has ALL its expected shorts; partial lessons re-queue
+    and get topped up with just the missing sections."""
+    d = {}
+    for e in load_json(MANIFEST, []):
+        d.setdefault(e["lesson_id"], set()).add(e.get("topic_index"))
+    return d
+
+
 def append_manifest(entry):
     m = load_json(MANIFEST, [])
     m.append(entry)
@@ -267,7 +277,7 @@ def topic_from_instructions(custom_instructions, topics):
 def get_pending_mixed(sb, subject_filter, limit):
     """Free-tier lessons with a real article body and no short yet, ROUND-ROBINED across
     subjects so a day's batch is a diverse feed. Returns list of entry dicts."""
-    done = done_lesson_ids()
+    have = done_topics_by_lesson()
     q = sb.from_("subjects").select("id, name, slug, exam_board, settings").is_("school_id", "null")
     if subject_filter:
         q = q.eq("slug", subject_filter)
@@ -284,8 +294,13 @@ def get_pending_mixed(sb, subject_filter, limit):
             lessons = sb.from_("lessons").select("id, title, lesson_number, content_html").eq(
                 "unit_id", unit["id"]).order("lesson_number").execute().data or []
             for L in lessons:
-                if L["id"] in done or not (L.get("content_html") or "").strip():
+                html = L.get("content_html") or ""
+                if not html.strip():
                     continue
+                hv = have.get(L["id"], set())
+                expected = len(extract_topics(html)) or 1     # min(sections,4), or 1 if no headings
+                if None in hv or len(hv) >= expected:          # None = legacy 1-general-short lesson (leave as-is)
+                    continue                                   # else: fully covered -> skip; partial -> re-queue
                 queue.append({
                     "lesson_id": L["id"], "title": L["title"], "lesson_number": L["lesson_number"],
                     "content_html": L["content_html"], "subject_slug": subj["slug"],
@@ -345,14 +360,21 @@ def _find_video_artifact(notebook_id):
 def run_wave(sb, r2, wave, cap):
     # phase 1: per lesson, create a notebook, add the source once, trigger a focused short per section
     launched = []                                       # {e, nb_id, jobs:[{topic, idx, art_id, started}]}
+    have_topics = done_topics_by_lesson()               # {lesson_id: set(topic_index)} already banked
     for e in wave:
         if today_count() >= cap:
             break
         content = strip_html(e["content_html"])
         if not content.strip():
             continue
-        topics = extract_topics(e["content_html"])
-        plan = topics or [None]                         # no headings -> one general short
+        topics = extract_topics(e["content_html"])      # full ordered list; positions are the stable idx
+        done_idx = have_topics.get(e["lesson_id"], set())   # 1-based indexes this lesson already has
+        if topics:
+            plan = [t for i, t in enumerate(topics) if (i + 1) not in done_idx]   # only the missing sections
+        else:
+            plan = [] if 1 in done_idx else [None]       # no headings -> one general short (idx 1)
+        if not plan:                                    # nothing missing (guarded by pending filter, but be safe)
+            continue
         temp = os.path.join(SCRIPT_DIR, f"_short_src_{e['lesson_id'][:8]}.txt")
         with open(temp, "w", encoding="utf-8") as f:
             f.write(f"{e['title']}\n\n{content}")
@@ -392,7 +414,8 @@ def run_wave(sb, r2, wave, cap):
             except Exception as ex:
                 print(f"  ! {e['subject_slug']}/L{e['lesson_number']:02d} [{topic}]: create failed — {str(ex)[:70]}")
         if fired:
-            launched.append({"e": e, "nb_id": nb_id, "topics": fired, "n": len(fired), "started": time.time()})
+            launched.append({"e": e, "nb_id": nb_id, "topics": fired, "all_topics": topics,
+                             "n": len(fired), "started": time.time()})
             print(f"  launched {e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}: {len(fired)} short(s)")
         else:
             _delete_nb(nb_id)
@@ -403,7 +426,7 @@ def run_wave(sb, r2, wave, cap):
     # Topic label is by collection order (refined later if the artifact exposes its focus).
     done_ct = 0
     for L in launched:
-        e, nb_id, topics, n = L["e"], L["nb_id"], L["topics"], L["n"]
+        e, nb_id, full_topics, n = L["e"], L["nb_id"], L["all_topics"], L["n"]
         got, handled = 0, set()                         # got = accounted (downloaded+failed); handled = terminal ids seen
         while got < n and time.time() - L["started"] < PER_VIDEO_TIMEOUT:
             try:
@@ -417,8 +440,8 @@ def run_wave(sb, r2, wave, cap):
                 if not aid or aid in handled:
                     continue
                 if status == "completed":
-                    topic = topic_from_instructions(s.get("custom_instructions"), topics)
-                    idx = topics.index(topic) if topic in topics else got   # stable per-section filename
+                    topic = topic_from_instructions(s.get("custom_instructions"), full_topics)
+                    idx = full_topics.index(topic) if topic in full_topics else got   # ORIGINAL section position -> fills the exact gap
                     if _download_and_store(sb, r2, e, nb_id, aid, idx, topic):
                         done_ct += 1
                     handled.add(aid); got += 1
