@@ -76,7 +76,7 @@
   .startnote{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
 
   /* ---- subjects ---- */
-  .sechead{display:flex;align-items:baseline;gap:12px;margin:.8rem 0 .45rem}
+  .sechead{display:flex;align-items:baseline;gap:12px;margin:.6rem 0 .35rem}
   .sechead h2{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin:0}
   .sechead span{font-size:.85rem;color:var(--mut)}
   /* THE SHELF: nine spines, progress as ink filling each book from the
@@ -92,18 +92,20 @@
      student — zero per-student cost) on a shared walnut ledge. Pale = not
      studied; the colour fills up AND deepens from the shelf as it is learned. */
   .shelfstage{position:relative}
-  .shelf{display:flex;align-items:flex-end;justify-content:center;gap:4px;height:180px;padding:0 10px;position:relative;z-index:2}
-  .bk{position:relative;height:170px;border:none;background:none;padding:0;cursor:pointer;
+  .shelf{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:212px;padding:0 6px;position:relative;z-index:2}
+  .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:pointer;
     transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
   .bk img{display:block}
-  .bk img.cold{height:170px;width:auto;filter:saturate(.34) brightness(1.24)}
+  .bk img.cold{height:204px;width:auto;filter:saturate(.34) brightness(1.24)}
   .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:saturate(1.22) brightness(.82)}
+  .bk img.lbl{position:absolute;inset:0;height:100%;width:100%;filter:saturate(1.15) brightness(1.04) contrast(1.06);clip-path:inset(7% 0 74% 0)}
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
   .bk:hover{transform:translateY(-5px)}
-  .bk[aria-selected="true"]{transform:perspective(440px) translateY(-4px) rotateX(-26deg);z-index:4}
+  .bk[aria-selected="true"]{transform:translateY(-16px) scale(1.06);z-index:4}
+  .bk[aria-selected="true"]::before{opacity:.55;bottom:-13px}
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
-  .ledge{display:block;width:100%;height:auto;margin-top:-10px;position:relative;z-index:1}
+  .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
   /* the open book: fixed height, never reflows the page */
   .sdetail{height:142px;padding:.65rem 1rem .7rem;position:relative;overflow:hidden}
   .sdetail::before{content:"";position:absolute;left:0;top:14px;width:4px;height:28px;
@@ -354,7 +356,8 @@ function renderSubjects(){
     b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
     b.title=s.name+' — '+d+' of '+t+' lessons';
     b.innerHTML='<img class="cold" src="'+src+'" alt="">'+
-      '<img class="warm" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
+      '<img class="warm" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">'+
+      '<img class="lbl" src="'+src+'" alt="">';
     b.addEventListener('click',()=>selectSubject(s.slug));
     shelf.appendChild(b);
   });
