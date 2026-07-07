@@ -94,18 +94,36 @@
      studied; the colour fills up AND deepens from the shelf as it is learned. */
   .shelfstage{position:relative;margin-top:34px}   /* clearance so a lifted/selected spine never covers the heading + metrics above */
   .shelf{display:flex;align-items:flex-end;justify-content:center;gap:3px;height:212px;padding:0 6px;position:relative;z-index:2}
+  .bookend{height:214px;width:auto;align-self:flex-end;margin-right:-15px;pointer-events:none;
+    filter:drop-shadow(0 5px 4px rgba(40,28,12,.22))}
   .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:pointer;
+    transform:rotate(var(--lean,0deg));
     transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
   .bk img{display:block}
   .bk img.cold{height:204px;width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
   .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.64) brightness(1.15) contrast(0.93))}
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
-  .bk:hover{transform:translateY(-5px)}
+  .bk:hover{transform:rotate(var(--lean,0deg)) translateY(-5px)}
   .bk[aria-selected="true"]{transform:translateY(-16px) scale(1.06);z-index:4}
   .bk[aria-selected="true"]::before{opacity:.55;bottom:-13px}
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
+  /* hover card — the book's own name + progress, in-style (replaces the OS tooltip) */
+  .booktip{position:absolute;z-index:20;pointer-events:none;opacity:0;transform:translate(-50%,-94%);
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:.4rem .62rem;
+    box-shadow:0 10px 26px rgba(40,28,12,.16);white-space:nowrap;font-family:var(--head);
+    transition:opacity .16s ease,transform .16s cubic-bezier(.16,1,.3,1)}
+  .booktip.on{opacity:1;transform:translate(-50%,-100%)}
+  .booktip b{font-weight:700;font-size:.86rem;color:var(--ink)}
+  .booktip .c{display:block;font-size:.73rem;color:var(--mut);margin-top:1px}
+  .booktip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:6px solid transparent;border-top-color:var(--card)}
+  /* prompt shown under the shelf when nothing is selected */
+  .selprompt{text-align:center;padding:16px 0 6px;color:var(--mut);font-family:var(--hand);font-size:1.2rem;line-height:1.1}
+  .selprompt .uparrow{display:block;font-size:1.5rem;color:var(--anchor);margin-bottom:2px;animation:sp-bob 1.7s ease-in-out infinite}
+  @keyframes sp-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  @media (prefers-reduced-motion:reduce){ .selprompt .uparrow{animation:none} }
   /* the open book: fixed height, never reflows the page */
   .sdetail{height:142px;padding:.65rem 1rem .7rem;position:relative;overflow:hidden}
   .sdetail[hidden]{display:none}
@@ -233,6 +251,7 @@
       <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
     </div>
     <div class="card sdetail" id="sdetail"></div>
+    <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
   </main>
 
   <aside class="rail">
@@ -344,33 +363,46 @@ function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.red
   const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
 const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
 let selSlug=null;
+const _tip=document.createElement('div'); _tip.className='booktip';
+function showTip(bk,s,d,t,pct){
+  _tip.innerHTML='<b>'+s.name+'</b><span class="c">'+d+' of '+t+' lessons · '+pct+'%</span>';
+  const stage=bk.closest('.shelfstage'); if(_tip.parentElement!==stage) stage.appendChild(_tip);
+  _tip.style.left=(bk.offsetLeft+bk.offsetWidth/2)+'px';
+  _tip.style.top=(bk.offsetTop-4)+'px';
+  _tip.classList.add('on');
+}
+function hideTip(){ _tip.classList.remove('on'); }
 function renderSubjects(){
   const shelf=document.getElementById('shelf'); shelf.innerHTML='';
+  const be=document.createElement('img'); be.className='bookend';
+  be.src='assets/lw/shelf/bookend.webp'; be.alt=''; shelf.appendChild(be);
   let done=0,tot=0;
-  SUBJECTS.forEach(s=>{
+  SUBJECTS.forEach((s,i)=>{
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
     const pct=Math.max(3,Math.round(d/t*100));
+    const lean=i===SUBJECTS.length-1?-5:-1.5;   // all tilt gently toward the bookend; the last leans more
     const src='assets/lw/shelf/book_'+s.slug+'.webp';
     const b=document.createElement('button');
     b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
-    b.title=s.name+' — '+d+' of '+t+' lessons';
+    b.style.setProperty('--lean',lean+'deg');
+    b.setAttribute('aria-label',s.name+' — '+d+' of '+t+' lessons');
     b.innerHTML='<img class="cold" src="'+src+'" alt="">'+
       '<img class="warm" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
     b.addEventListener('click',()=>selectSubject(s.slug));
+    b.addEventListener('mouseenter',()=>showTip(b,s,d,t,pct));
+    b.addEventListener('mouseleave',hideTip);
     shelf.appendChild(b);
   });
   document.getElementById('subcount').textContent=done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete';
-  if(!selSlug){
-    const stale=[...SUBJECTS].sort((a,b)=>(REC[b.slug]||0)-(REC[a.slug]||0))[0];
-    selSlug=stale.slug;
-  }
-  selectSubject(selSlug,true);
+  if(selSlug) selectSubject(selSlug,true);      // rest with none selected -> the shelf invites a pick
+  else deselectSubject();
 }
 function deselectSubject(){                 // click a selected spine again -> it drops back in line, no panel
   selSlug=null;
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected','false'));
   const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';
+  const p=document.getElementById('selprompt'); if(p) p.hidden=false;
 }
 function selectSubject(slug,silent){
   if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off
@@ -380,6 +412,7 @@ function selectSubject(slug,silent){
   const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
   const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
   const rec=REC[s.slug]||0;
+  const p=document.getElementById('selprompt'); if(p) p.hidden=true;
   const el=document.getElementById('sdetail');
   el.hidden=false;
   el.style.setProperty('--tc',s.c);
