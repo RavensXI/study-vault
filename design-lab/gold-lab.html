@@ -1,0 +1,201 @@
+<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Gold Lab — spine title tuner</title>
+<style>
+  :root{--bg:#faf8f5;--ink:#2d2a26;--mut:#84806f;--line:#e4dfd2;--card:#fffdf8;--accent:#8a6d3b}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 -apple-system,Segoe UI,system-ui,sans-serif}
+  .wrap{display:grid;grid-template-columns:360px 1fr;min-height:100vh}
+  /* ---- control panel ---- */
+  .panel{background:var(--card);border-right:1px solid var(--line);padding:22px 24px 40px;position:sticky;top:0;align-self:start;max-height:100vh;overflow-y:auto}
+  .panel h1{font:600 1.15rem/1.2 Georgia,serif;margin:0 0 2px}
+  .panel .lede{color:var(--mut);font-size:.86rem;margin:0 0 18px}
+  fieldset{border:1px solid var(--line);border-radius:12px;margin:0 0 16px;padding:12px 14px 14px}
+  legend{font-weight:600;font-size:.82rem;letter-spacing:.02em;text-transform:uppercase;color:var(--accent);padding:0 6px}
+  .ctl{margin:9px 0}
+  .ctl label{display:flex;justify-content:space-between;font-size:.83rem;margin-bottom:3px}
+  .ctl label b{font-weight:600}
+  .ctl label .v{font-variant-numeric:tabular-nums;color:var(--mut)}
+  input[type=range]{width:100%;accent-color:var(--accent);margin:0}
+  .presets{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 16px}
+  .presets button,.tools button{font:inherit;font-size:.8rem;border:1px solid var(--line);background:#fff;border-radius:9px;padding:5px 11px;cursor:pointer;color:var(--ink)}
+  .presets button:hover,.tools button:hover{border-color:var(--accent)}
+  .out{background:#2d2a26;color:#f3ead4;border-radius:11px;padding:12px 13px;font:12.5px/1.55 ui-monospace,Menlo,Consolas,monospace;white-space:pre-wrap;word-break:break-word;margin:4px 0 10px}
+  .out .k{color:#c9b891}
+  .tools{display:flex;gap:8px;align-items:center}
+  .tools .ok{color:#4a7a4a;font-size:.8rem;opacity:0;transition:opacity .2s}
+  .tools .ok.show{opacity:1}
+  .seg{display:flex;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;margin-top:5px}
+  .seg button{flex:1;border:0;border-radius:0;padding:6px 4px;font-size:.78rem}
+  .seg button[aria-pressed=true]{background:var(--accent);color:#fff}
+  /* ---- stage ---- */
+  .stage{padding:26px 34px;display:flex;flex-direction:column;gap:24px}
+  .stage.paper{background:#f6f1e7}
+  .stage.white{background:#fff}
+  .zone h2{font:600 .82rem/1 uppercase;letter-spacing:.04em;text-transform:uppercase;color:var(--mut);margin:0 0 12px}
+  /* the shelf */
+  .shelf{display:flex;align-items:flex-end;gap:3px}
+  .bk{position:relative;cursor:pointer}
+  .bk img{display:block}
+  .bk img.cold{height:204px;width:auto;filter:var(--coldf)}
+  .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf)}
+  .bk[data-sel=true]{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+  .ledge{height:44px;width:100%;max-width:760px;object-fit:cover;object-position:center 18%;margin-top:-8px;display:block;filter:drop-shadow(0 3px 3px rgba(40,28,12,.18))}
+  /* big single book */
+  .big{display:flex;gap:34px;align-items:flex-end}
+  .bigbk{position:relative}
+  .bigbk img{display:block}
+  .bigbk img.cold{height:440px;width:auto;filter:var(--coldf)}
+  .bigbk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf)}
+  .swatchrow{font-size:.83rem;color:var(--mut);max-width:230px}
+  .swatchrow .name{font:600 1.05rem/1.2 Georgia,serif;color:var(--ink);margin-bottom:6px}
+</style>
+
+<div class="wrap">
+  <div class="panel">
+    <h1>Gold Lab</h1>
+    <p class="lede">The gilt title is painted into each book, so these tune how it <em>renders</em>. Slide until the gold reads well on the pale cloths (Maths, English Language), then send me the values in the black box.</p>
+
+    <div class="presets">
+      <button data-preset="current">Current</button>
+      <button data-preset="warm">Warmer gold</button>
+      <button data-preset="contrast">High contrast</button>
+    </div>
+
+    <fieldset>
+      <legend>Unstudied (top of book)</legend>
+      <div class="ctl"><label><b>Brightness</b><span class="v" id="v_cb"></span></label><input type="range" id="cb" min="0.70" max="1.40" step="0.01"></div>
+      <div class="ctl"><label><b>Saturation</b><span class="v" id="v_cs"></span></label><input type="range" id="cs" min="0" max="2" step="0.01"></div>
+      <div class="ctl"><label><b>Contrast</b><span class="v" id="v_cc"></span></label><input type="range" id="cc" min="0.60" max="1.80" step="0.01"></div>
+      <div class="ctl"><label><b>Warmth (sepia)</b><span class="v" id="v_cse"></span></label><input type="range" id="cse" min="0" max="1" step="0.01"></div>
+      <div class="ctl"><label><b>Hue shift</b><span class="v" id="v_ch"></span></label><input type="range" id="ch" min="-40" max="40" step="1"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Studied (fills from bottom)</legend>
+      <div class="ctl"><label><b>Brightness</b><span class="v" id="v_wb"></span></label><input type="range" id="wb" min="0.60" max="1.15" step="0.01"></div>
+      <div class="ctl"><label><b>Saturation</b><span class="v" id="v_ws"></span></label><input type="range" id="ws" min="0.80" max="2.20" step="0.01"></div>
+      <div class="ctl"><label><b>Contrast</b><span class="v" id="v_wc"></span></label><input type="range" id="wc" min="0.60" max="1.80" step="0.01"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Preview</legend>
+      <div class="ctl"><label><b>Fill this book</b><span class="v" id="v_fill"></span></label><input type="range" id="fill" min="0" max="100" step="1"></div>
+      <div style="font-size:.8rem;color:var(--mut);margin:2px 0 6px">Background</div>
+      <div class="seg" id="bgseg">
+        <button data-bg="" aria-pressed="true">Dashboard</button>
+        <button data-bg="paper">Paper</button>
+        <button data-bg="white">White</button>
+      </div>
+    </fieldset>
+
+    <div class="out" id="out"></div>
+    <div class="tools">
+      <button id="copy">Copy CSS</button>
+      <button id="reset">Reset</button>
+      <span class="ok" id="ok">copied ✓</span>
+    </div>
+  </div>
+
+  <div class="stage" id="stage">
+    <div class="zone">
+      <h2>Zoom — <span id="zoomname"></span> <span style="color:var(--line)">·</span> <span style="color:var(--mut);text-transform:none;letter-spacing:0;font-weight:400">click any book below to inspect it here</span></h2>
+      <div class="big">
+        <div class="bigbk" id="bigbk"></div>
+        <div class="swatchrow" id="swatch"></div>
+      </div>
+    </div>
+    <div class="zone">
+      <h2>Sam's shelf — real progress</h2>
+      <div class="shelf" id="shelf"></div>
+      <img class="ledge" src="/design-lab/assets/lw/shelf/ledge_walnut.webp" alt="">
+    </div>
+  </div>
+</div>
+
+<script>
+const A='/design-lab/assets/lw/shelf/book_';
+// slug, name, done, total, cloth colour — mirrors dash-classic SUBJECTS
+const SUBJECTS=[
+ ['maths','Mathematics',10,29,'#4e5f66'],
+ ['lang','English Language',4,30,'#5b7285'],
+ ['lit','English Literature',12,28,'#7d5a78'],
+ ['science','Combined Science',7,33,'#4e6e5d'],
+ ['history','History',8,53,'#8a5a44'],
+ ['geog','Geography',9,40,'#6d7a4e'],
+ ['spanish','Spanish',6,26,'#a2643f'],
+ ['cs','Computer Science',5,23,'#54606e'],
+ ['rs','Religious Studies',3,11,'#6f5b91'],
+];
+const pctOf=(d,t)=>Math.max(3,Math.round(d/t*100));
+
+const DEFAULTS={cb:1.07,cs:0.55,cc:1.00,cse:0.00,ch:0,wb:0.78,ws:1.30,wc:1.00,fill:pctOf(4,30)};
+const PRESETS={
+  current:{cb:1.24,cs:0.34,cc:1.00,cse:0.00,ch:0,wb:0.82,ws:1.22,wc:1.00},
+  warm:{cb:0.98,cs:0.70,cc:1.10,cse:0.30,ch:6,wb:0.80,ws:1.45,wc:1.08},
+  contrast:{cb:1.02,cs:0.60,cc:1.40,cse:0.12,ch:0,wb:0.76,ws:1.35,wc:1.25},
+};
+const IDS=['cb','cs','cc','cse','ch','wb','ws','wc','fill'];
+const $=id=>document.getElementById(id);
+let selSlug='lang';
+
+function coldFilter(){
+  return `saturate(${(+$('cs').value).toFixed(2)}) brightness(${(+$('cb').value).toFixed(2)}) contrast(${(+$('cc').value).toFixed(2)}) sepia(${(+$('cse').value).toFixed(2)}) hue-rotate(${$('ch').value}deg)`;
+}
+function warmFilter(){
+  return `saturate(${(+$('ws').value).toFixed(2)}) brightness(${(+$('wb').value).toFixed(2)}) contrast(${(+$('wc').value).toFixed(2)})`;
+}
+function bookHTML(slug,pct,cls){
+  return `<img class="cold" src="${A}${slug}.webp" alt="">`+
+         `<img class="warm" src="${A}${slug}.webp" style="clip-path:inset(${100-pct}% 0 0 0)" alt="">`;
+}
+function buildShelf(){
+  const sh=$('shelf'); sh.innerHTML='';
+  SUBJECTS.forEach(([slug,name,d,t])=>{
+    const el=document.createElement('div'); el.className='bk'; el.dataset.slug=slug;
+    el.dataset.sel=(slug===selSlug);
+    el.title=name+' · '+pctOf(d,t)+'%';
+    el.innerHTML=bookHTML(slug,pctOf(d,t));
+    el.onclick=()=>{selSlug=slug; buildShelf(); buildBig();};
+    sh.appendChild(el);
+  });
+}
+function buildBig(){
+  const [slug,name,d,t,c]=SUBJECTS.find(s=>s[0]===selSlug);
+  const pct=+$('fill').value;
+  $('bigbk').innerHTML=bookHTML(slug,pct);
+  $('zoomname').textContent=name;
+  $('swatch').innerHTML=`<div class="name">${name}</div>Cloth <code style="color:${c}">${c}</code><br>Real progress ${d}/${t} · ${pctOf(d,t)}%<br><span style="color:var(--mut)">Use “Fill this book” to preview any level.</span>`;
+}
+function apply(){
+  document.documentElement.style.setProperty('--coldf',coldFilter());
+  document.documentElement.style.setProperty('--warmf',warmFilter());
+  // value labels
+  $('v_cb').textContent=(+$('cb').value).toFixed(2);
+  $('v_cs').textContent=(+$('cs').value).toFixed(2);
+  $('v_cc').textContent=(+$('cc').value).toFixed(2);
+  $('v_cse').textContent=(+$('cse').value).toFixed(2);
+  $('v_ch').textContent=$('ch').value+'°';
+  $('v_wb').textContent=(+$('wb').value).toFixed(2);
+  $('v_ws').textContent=(+$('ws').value).toFixed(2);
+  $('v_wc').textContent=(+$('wc').value).toFixed(2);
+  $('v_fill').textContent=$('fill').value+'%';
+  $('out').innerHTML=`<span class="k">.bk img.cold</span>{filter:${coldFilter()}}\n\n<span class="k">.bk img.warm</span>{filter:${warmFilter()}}`;
+  buildBig();
+}
+function setVals(o){ for(const k in o) $(k).value=o[k]; apply(); }
+IDS.forEach(id=>$(id).addEventListener('input',apply));
+document.querySelectorAll('.presets button').forEach(b=>b.onclick=()=>setVals(Object.assign({fill:+$('fill').value},PRESETS[b.dataset.preset])));
+$('reset').onclick=()=>setVals(DEFAULTS);
+$('copy').onclick=async()=>{
+  const txt=`.bk img.cold{filter:${coldFilter()}}\n.bk img.warm{filter:${warmFilter()}}`;
+  try{await navigator.clipboard.writeText(txt);}catch(e){}
+  $('ok').classList.add('show'); setTimeout(()=>$('ok').classList.remove('show'),1200);
+};
+$('bgseg').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+  $('bgseg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed','false'));
+  b.setAttribute('aria-pressed','true');
+  $('stage').className='stage'+(b.dataset.bg?' '+b.dataset.bg:'');
+});
+setVals(DEFAULTS); buildShelf();
+</script>
