@@ -117,6 +117,23 @@
   @keyframes cord-tug{0%{transform:translateY(0)}26%{transform:translateY(9px)}62%{transform:translateY(-2px)}100%{transform:translateY(0)}}
   .pullcord.tug{animation:cord-tug .42s cubic-bezier(.3,1.25,.5,1)}
   .lampbtn:hover ~ .pullcord{filter:brightness(1.08)}
+  /* ---- ?place : drag-to-position workbench for the cord + light origin ---- */
+  .ph{position:absolute;z-index:60;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;
+    border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.55);cursor:grab;touch-action:none}
+  .ph.grab{cursor:grabbing;transform:scale(1.15)}
+  .ph-top{background:#3b82f6}.ph-knob{background:#f59e0b}.ph-glow{background:#ef4444}
+  .ph b{position:absolute;left:22px;top:-3px;white-space:nowrap;font:600 11px/1.4 system-ui,sans-serif;
+    color:#fff;background:rgba(20,15,8,.7);padding:1px 6px;border-radius:5px}
+  .placepanel{position:fixed;top:14px;right:14px;z-index:9999;background:#211d17;color:#f3ead4;border-radius:13px;
+    padding:15px 17px;font:12.5px/1.55 ui-monospace,Consolas,monospace;box-shadow:0 14px 44px rgba(0,0,0,.45);width:308px}
+  .placepanel h4{margin:0 0 3px;font:700 14px/1.2 Georgia,serif;color:#fff}
+  .placepanel .sub{font:400 11px/1.4 system-ui,sans-serif;color:#a89b82;margin:0 0 11px}
+  .placepanel .row{margin:4px 0}.placepanel .k{color:#c9b891}
+  .placepanel .dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+  .placepanel button{margin-top:12px;font:600 12px/1 system-ui,sans-serif;background:#8a6d3b;color:#fff;
+    border:0;border-radius:8px;padding:7px 13px;cursor:pointer}
+  .placepanel .ok{color:#8fce9b;font-family:system-ui,sans-serif;font-size:11px;margin-left:8px;opacity:0;transition:opacity .2s}
+  .placepanel .ok.on{opacity:1}
   /* soft shadow falling to the LEFT, away from the lamp (over spines AND shelf) */
   .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:2px;z-index:3;pointer-events:none;
     background:linear-gradient(to right, rgba(24,16,7,.38), rgba(24,16,7,.13) 34%, transparent 58%);
@@ -588,6 +605,55 @@ fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; render
   btn.addEventListener('mouseenter',()=>lamp.classList.add('hot'));
   btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
 })();
+
+/* ---- ?place : drag the cord + light origin, read off the coordinates ---- */
+if(new URLSearchParams(location.search).has('place')){(function(){
+  const stage=document.querySelector('.shelfstage'), cord=document.querySelector('.pullcord'),
+        bulb=document.querySelector('.bulb'), glow=document.querySelector('.lampglow'),
+        btn=document.querySelector('.lampbtn');
+  if(!stage||!cord||!bulb||!glow) return;
+  stage.classList.add('lit');                 // light on so the glow is visible while placing
+  if(btn) btn.style.pointerEvents='none';      // don't let the toggle fire while placing
+  const sr=()=>stage.getBoundingClientRect();
+  // seed state from the current rendered positions
+  const cr=cord.getBoundingClientRect(), br=bulb.getBoundingClientRect(), s0=sr();
+  let cordLeft=(cr.left-s0.left)/s0.width*100, cordTop=(cr.top-s0.top)/s0.height*100, cordLen=cord.offsetHeight;
+  let glowLeft=(br.left+br.width/2-s0.left)/s0.width*100, glowTop=(br.top+br.height/2-s0.top)/s0.height*100;
+  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const toX=x=>clamp((x-sr().left)/sr().width*100,0,100), toY=y=>clamp((y-sr().top)/sr().height*100,-10,110);
+  function coneFor(l,t){ const H=sr().height, ay=((t/100*H)+10)/(H+8)*100;   // shelfstage% -> lampglow-box%
+    return 'polygon('+(l-4).toFixed(1)+'% '+(ay-1).toFixed(1)+'%, '+(l+3).toFixed(1)+'% '+(ay+2).toFixed(1)+'%, 80% 100%, 29% 100%)'; }
+  const mk=(cls,label)=>{ const h=document.createElement('div'); h.className='ph '+cls; h.innerHTML='<b>'+label+'</b>'; stage.appendChild(h); return h; };
+  const hTop=mk('ph-top','cord top'), hKnob=mk('ph-knob','length'), hGlow=mk('ph-glow','light');
+  const put=(el,l,t)=>{ el.style.left=l+'%'; el.style.top=t+'%'; };
+  const g=id=>document.getElementById(id);
+  function apply(){
+    cord.style.left=cordLeft+'%'; cord.style.top=cordTop+'%'; cord.style.height=Math.round(cordLen)+'px';
+    bulb.style.left=glowLeft+'%'; bulb.style.top=glowTop+'%'; glow.style.clipPath=coneFor(glowLeft,glowTop);
+    const H=sr().height;
+    put(hTop,cordLeft,cordTop); put(hKnob,cordLeft,cordTop+cordLen/H*100); put(hGlow,glowLeft,glowTop);
+    g('ro-cord').textContent=cordLeft.toFixed(1)+'% / '+cordTop.toFixed(1)+'% / '+Math.round(cordLen)+'px';
+    g('ro-glow').textContent=glowLeft.toFixed(1)+'% / '+glowTop.toFixed(1)+'%';
+  }
+  function drag(h,onMove){ h.addEventListener('pointerdown',e=>{ e.preventDefault(); h.classList.add('grab');
+    const mv=ev=>{ onMove(ev.clientX,ev.clientY); apply(); };
+    const up=()=>{ h.classList.remove('grab'); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
+    window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up); }); }
+  drag(hTop,(x,y)=>{ cordLeft=toX(x); cordTop=toY(y); });
+  drag(hKnob,(x,y)=>{ cordLen=Math.max(12,(toY(y)-cordTop)/100*sr().height); });
+  drag(hGlow,(x,y)=>{ glowLeft=toX(x); glowTop=toY(y); });
+  const panel=document.createElement('div'); panel.className='placepanel';
+  panel.innerHTML='<h4>Placement bench</h4><p class="sub">Drag the coloured dots to place things, then read me the values (or hit Copy).</p>'+
+    '<div class="row"><span class="dot" style="background:#3b82f6"></span><span class="k">cord</span> left/top/len: <span id="ro-cord"></span></div>'+
+    '<div class="row" style="color:#a89b82;font-family:system-ui;font-size:11px">the orange dot sets the cord length</div>'+
+    '<div class="row"><span class="dot" style="background:#ef4444"></span><span class="k">light</span> origin: <span id="ro-glow"></span></div>'+
+    '<button id="ro-copy">Copy values</button><span class="ok" id="ro-ok">copied ✓</span>';
+  document.body.appendChild(panel);
+  g('ro-copy').onclick=async()=>{ const txt='.pullcord{left:'+cordLeft.toFixed(1)+'%;top:'+cordTop.toFixed(1)+'%;height:'+Math.round(cordLen)+'px}\n'+
+    '.bulb{left:'+glowLeft.toFixed(1)+'%;top:'+glowTop.toFixed(1)+'%}\n.lampglow clip-path:'+coneFor(glowLeft,glowTop);
+    try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
+  apply();
+})();}
 
 /* flashcards — same mixed deck as the desk */
 const FC=[
