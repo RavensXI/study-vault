@@ -201,39 +201,46 @@
   .selprompt .uparrow{display:block;font-size:1.5rem;color:var(--anchor);margin-bottom:2px;animation:sp-bob 1.7s ease-in-out infinite}
   @keyframes sp-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
   @media (prefers-reduced-motion:reduce){ .selprompt .uparrow{animation:none} }
-  /* the open book: fixed height, never reflows the page */
-  .sdetail{height:142px;padding:.65rem 1rem .7rem;position:relative;overflow:hidden}
+  /* the open book: a ledger page tied to the book by its spine edge; sizes to its content so nothing is ever clipped */
+  .sdetail{min-height:100px;padding:.6rem 1rem .7rem 1.05rem;position:relative;overflow:visible;display:flex;flex-direction:column;gap:.4rem;
+    background:var(--card);border:1px solid var(--line);border-left:3px solid var(--tc);border-radius:4px;box-shadow:none}
   .sdetail[hidden]{display:none}
-  .sdetail::before{content:"";position:absolute;left:0;top:14px;width:4px;height:28px;
-    background:var(--tc);border-radius:0 3px 3px 0}
-  .sdetail .top{display:flex;align-items:baseline;gap:12px;margin-bottom:.55rem;flex-wrap:nowrap}
-  .sdetail h3{font-size:1rem;font-weight:700;margin:0;white-space:nowrap}
-  .sdetail .sub{font-size:.78rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sdetail .top{display:flex;align-items:baseline;gap:10px;flex:none;flex-wrap:nowrap}
+  .sdetail h3{font-family:var(--read);font-size:1.1rem;font-weight:600;margin:0;white-space:nowrap;color:var(--ink)}
+  .sdetail .sub{font-size:.76rem;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sdetail .sp{flex:1}
-  .sdetail .cont{display:inline-flex;align-items:center;gap:8px;background:var(--anchor);color:#fff;border:none;
-    border-radius:9px;padding:.42rem .85rem;font-family:var(--head);font-weight:700;font-size:.83rem;cursor:pointer;white-space:nowrap}
-  .sdetail .cont:hover{filter:brightness(.94)}
-  .units{display:flex;gap:8px;align-items:stretch}
-  .ublock{flex:1 1 0;min-width:0;border:1px solid var(--line);border-radius:9px;padding:.5rem .6rem .55rem;
-    background:var(--card);cursor:pointer;text-align:left;font-family:var(--head);color:inherit;
-    transition:transform .18s var(--ease),border-color .18s,box-shadow .18s;position:relative;overflow:hidden}
-  .ublock:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--tc) 45%,var(--line));
-    box-shadow:0 8px 18px -12px rgba(29,28,26,.4)}
-  .ublock .un{font-size:.78rem;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;
-    -webkit-box-orient:vertical;overflow:hidden;min-height:2.4em}
-  .ublock .utrack{display:block;height:4px;border-radius:2px;background:var(--linel);margin:.4rem 0 .3rem;overflow:hidden}
+  /* crafted button — a pressable slab, not a pill */
+  .sdetail .cont,.sdetail .go{font-family:var(--head);font-weight:600;font-size:.82rem;color:#fff;background:var(--tc);
+    border:none;border-radius:3px;padding:.32rem .75rem;cursor:pointer;white-space:nowrap;
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);transition:filter .15s}
+  .sdetail .cont:hover,.sdetail .go:hover{filter:brightness(1.07)}
+  .sdetail .cont:active,.sdetail .go:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.28)}
+  /* topics — hairline-divided ledger cells, not floating cards */
+  .units{display:flex;gap:0;flex:none}
+  .ublock{flex:1 1 0;min-width:0;border:none;border-left:1px solid var(--line);background:none;cursor:pointer;
+    text-align:left;font-family:var(--head);color:inherit;padding:.2rem .75rem;transition:background .15s}
+  .ublock:first-child{border-left:none;padding-left:0}
+  .ublock:hover{background:color-mix(in srgb,var(--tc) 9%,transparent)}
+  .ublock .un{font-family:var(--read);font-size:.84rem;font-weight:600;line-height:1.2;color:var(--ink);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.1em}
+  .ublock .utrack{display:block;height:3px;background:var(--linel);margin:.5rem 0 .3rem;overflow:hidden}
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
-  .ublock .ud{display:block;font-size:.72rem;color:var(--mut);font-variant-numeric:tabular-nums}
-  /* drill into a topic -> pick any lesson */
-  .sdetail .back{flex:none;width:26px;height:26px;border:1px solid var(--line);background:var(--card);border-radius:8px;
-    cursor:pointer;font-size:1.15rem;line-height:1;color:var(--sec)}
+  .ublock .ud{display:block;font-size:.7rem;color:var(--mut);font-variant-numeric:tabular-nums}
+  /* drill into a topic -> pick any lesson (select, then confirm) */
+  .sdetail .back{flex:none;width:24px;height:24px;border:1px solid var(--line);background:var(--card);border-radius:3px;
+    cursor:pointer;font-size:1.05rem;line-height:1;color:var(--sec)}
   .sdetail .back:hover{border-color:var(--tc);color:var(--ink)}
-  .lessons{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;max-height:92px;overflow-y:auto}
-  .ltile{flex:none;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;
-    font:600 .8rem/1 var(--head);color:var(--sec);display:grid;place-items:center;transition:transform .15s,border-color .15s}
-  .ltile:hover{transform:translateY(-1px);border-color:var(--tc);color:var(--ink)}
-  .ltile.done{background:color-mix(in srgb,var(--tc) 18%,var(--card));color:var(--tc);border-color:transparent}
-  .ltile.next{border-color:var(--tc);box-shadow:0 0 0 1.5px var(--tc);color:var(--tc)}
+  .lessons{display:flex;flex-wrap:wrap;gap:5px;align-content:flex-start;flex:none;max-height:71px;overflow-y:auto}
+  .ltile{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;background:var(--card);cursor:pointer;
+    font:600 .78rem/1 var(--head);color:var(--sec);display:grid;place-items:center;transition:border-color .12s,background .12s,color .12s}
+  .ltile:hover{border-color:var(--tc);color:var(--ink)}
+  .ltile.done{background:color-mix(in srgb,var(--tc) 16%,var(--card));color:var(--tc);border-color:transparent}
+  .ltile.next:not(.sel){box-shadow:inset 0 0 0 1.5px var(--tc);color:var(--tc)}
+  .ltile.sel{background:var(--tc);color:#fff;border-color:var(--tc)}
+  .lpick{display:flex;align-items:baseline;gap:8px;border-top:1px solid var(--line);padding-top:.32rem;flex:none}
+  .lpn{flex:none;font-size:.7rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .lpt{flex:1;min-width:0;font-family:var(--read);font-size:.92rem;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lpick .go{align-self:center}
   /* ---- rail ---- */
   .rail{display:flex;flex-direction:column;gap:14px}
   .exam{padding:.65rem 1rem .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
@@ -452,6 +459,7 @@ document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXA
 /* subjects: cloth-tab nub + progress + the subject's ladder sketch as a
    small vignette (same three-stage art the notebook uses) */
 let LADDERS={};
+let LESSON_TITLES={};   // {subjectSlug:{unitSlug:[title,...]}} from _lesson_titles.json
 function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.reduce((t,u)=>t+u[1],0);
   const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
 const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
@@ -558,19 +566,32 @@ function renderSubjectPanel(s){
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
 }
-/* topic drilled open: every lesson selectable (done, next-up, or ahead) */
+/* topic drilled open: pick a lesson tile to see its title, then confirm with the button */
 function showLessons(s,u){
   const el=document.getElementById('sdetail');
   el.style.setProperty('--tc',s.c);
+  const titles=((LESSON_TITLES[s.sub]||{})[u[3]])||[];
+  const n=titles.length||u[1];
   const base='/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
+  const nextK=Math.min(u[2]+1,n);
   let tiles='';
-  for(let k=1;k<=u[1];k++){ const done=k<=u[2], next=k===u[2]+1;
-    tiles+='<button class="ltile'+(done?' done':'')+(next?' next':'')+'" data-n="'+k+'" title="Lesson '+k+(done?' · done':next?' · next up':'')+'">'+k+'</button>'; }
+  for(let k=1;k<=n;k++){ const done=k<=u[2], next=k===nextK;
+    tiles+='<button class="ltile'+(done?' done':'')+(next?' next':'')+'" data-n="'+k+'">'+k+'</button>'; }
   el.innerHTML='<div class="top"><button class="back" title="Back to topics">‹</button>'+
-    '<h3>'+u[0]+'</h3><span class="sub">'+u[2]+' of '+u[1]+' lessons · pick any</span></div>'+
-    '<div class="lessons">'+tiles+'</div>';
+    '<h3>'+u[0]+'</h3><span class="sub">'+u[2]+' of '+n+' lessons</span></div>'+
+    '<div class="lessons">'+tiles+'</div>'+
+    '<div class="lpick"><span class="lpn"></span><span class="lpt"></span>'+
+      '<button class="go">Let’s learn →</button></div>';
+  const tileEls=[...el.querySelectorAll('.ltile')];
+  function sel(k){
+    tileEls.forEach(t=>t.classList.toggle('sel',+t.dataset.n===k));
+    el.querySelector('.lpn').textContent='Lesson '+k;
+    const lpt=el.querySelector('.lpt'); lpt.textContent=titles[k-1]||('Lesson '+k); lpt.title=lpt.textContent;
+    el.querySelector('.go').onclick=()=>nav(base+k);
+  }
   el.querySelector('.back').onclick=()=>renderSubjectPanel(s);
-  el.querySelectorAll('.ltile').forEach(x=>x.onclick=()=>nav(base+x.dataset.n));
+  tileEls.forEach(x=>x.onclick=()=>sel(+x.dataset.n));
+  sel(nextK);   // pre-select the next-up lesson so its title + button show on entry
 }
 /* ---- drag a spine to reorder; drop it in with a little physics ---- */
 const ORDER_KEY='sv-shelf-order';
@@ -657,6 +678,7 @@ if(_pick&&SUBJECTS.some(x=>x.slug===_pick)) selSlug=_pick;
 function _applyOpen(){ if(_pick&&_open!=null){ const s=SUBJECTS.find(x=>x.slug===_pick); if(s&&s.units[+_open]) showLessons(s,s.units[+_open]); } }
 renderSubjects(); _applyOpen();
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); _applyOpen(); }).catch(()=>{});
+fetch('_lesson_titles.json').then(r=>r.json()).then(j=>{ LESSON_TITLES=j||{}; _applyOpen(); }).catch(()=>{});
 
 /* the reading lamp: click it to turn the light on/off (off by default) */
 (function(){
