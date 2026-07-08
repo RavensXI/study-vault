@@ -152,6 +152,47 @@ body[data-skin] .exam-tip{ border-radius:var(--radius-sm); box-shadow:none; }
 body[data-skin] blockquote{ border-left:2px solid var(--border-light); padding-left:1.2rem; }
 body[data-skin] blockquote p{ font-style:italic; color:var(--text-secondary); }
 
+/* ---------- narration read-along (reader): a light that RUNS the box edge ----------
+   Replaces the old gold side-stripe (box-shadow:-4px 0 0 — the AI tell). The
+   active chunk sits on a faint accent wash; a bright arc travels its perimeter,
+   accelerating along the straights and easing as it wraps a corner. Built as a
+   masked conic ring on a pseudo-element so it hugs any box at any size and follows
+   the squared corners. Reduced-motion falls back to a static hairline. */
+@property --sv-run{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
+body[data-skin="reader"] [data-narration-id].narration-active,
+body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active){
+  position:relative; isolation:isolate; box-shadow:none !important;
+  background:color-mix(in srgb,var(--accent) 6%,transparent) !important;
+  border-radius:var(--radius-sm);
+}
+/* text chunks: drop the old stripe's 0.75rem indent so nothing nudges sideways */
+body[data-skin="reader"] :is(p,h2,h3,h4,li)[data-narration-id].narration-active{ padding-left:0 !important; }
+body[data-skin="reader"] [data-narration-id].narration-active::after,
+body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active)::after{
+  content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
+  border-radius:inherit; padding:2px;
+  background:conic-gradient(from var(--sv-run),
+      transparent 0deg, transparent 172deg,
+      color-mix(in srgb,var(--accent) 30%,transparent) 250deg,
+      var(--accent) 320deg,
+      color-mix(in srgb,#fff 75%,var(--accent)) 344deg,
+      var(--accent) 350deg,
+      transparent 360deg);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude;
+  filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 55%,transparent));
+  animation:sv-runner 3.4s cubic-bezier(.45,0,.55,1) infinite;
+}
+@keyframes sv-runner{ to{ --sv-run:360deg; } }
+@media (prefers-reduced-motion:reduce){
+  body[data-skin="reader"] [data-narration-id].narration-active::after,
+  body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active)::after{
+    animation:none; background:none;
+    border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);
+  }
+}
+
 body[data-skin] .sidebar-section{
   background:var(--bg-card); border:1px solid var(--border-light);
   border-radius:var(--radius); box-shadow:none;
@@ -200,7 +241,7 @@ body[data-skin="ink"]{
   --text-primary:#ece3d2; --text-secondary:#b7ac97; --text-muted:#8b806e;
   --border-light:#3a342a; --border-lighter:#2f2a22;
   --accent:#d8a23f; --accent-light:#2a2418; --accent-badge:#3a2f17;
-  --radius:8px; --radius-sm:6px;
+  --radius:4px; --radius-sm:3px;
   --font-read:'Literata',Georgia,serif; --font-head:'Schibsted Grotesk',system-ui,sans-serif; --font-ui:'Schibsted Grotesk',system-ui,sans-serif;
   --read-size:1.18rem; --read-lh:1.8; --head-weight:700;
 }
@@ -240,7 +281,7 @@ body[data-skin="reader"]{
   --bg-body:#f7f6f4; --bg-card:#ffffff;
   --text-primary:#1d1c1a; --text-secondary:#54524d; --text-muted:#7f7c75;
   --border-light:#e6e4e0; --border-lighter:#f0eeea;
-  --radius:8px; --radius-sm:6px;
+  --radius:4px; --radius-sm:3px;
   --font-read:'Literata',Georgia,serif;
   --font-head:'Schibsted Grotesk',system-ui,sans-serif;
   --font-ui:'Schibsted Grotesk',system-ui,sans-serif;
@@ -339,7 +380,7 @@ body[data-skin="reader"] .sv-panel{
      the structure. Frame stays neutral so the colour reads as dividers, not
      an outline. Re-derives per subject + in dark mode via --accent. */
   background:color-mix(in srgb,var(--accent) 32%,var(--border-light));
-  border:1px solid var(--border-light); border-radius:10px; overflow:hidden;
+  border:1px solid var(--border-light); border-radius:4px; overflow:hidden;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 18px 36px -24px rgba(29,28,26,.18);
 }
 body[data-skin="reader"] .sv-panel > .sidebar-section{ min-height:0; overflow:hidden; margin:0; }
@@ -366,7 +407,7 @@ body[data-skin="reader"] .sv-exit-backdrop{
 body[data-skin="reader"] .sv-exit-card{
   position:relative; z-index:1; width:min(560px,92vw); max-height:84vh; overflow:auto;
   background:var(--bg-card); color:var(--text-primary);
-  border:1px solid var(--border-light); border-radius:12px;
+  border:1px solid var(--border-light); border-radius:4px;
   padding:1.7rem 1.8rem 1.6rem; box-shadow:0 24px 70px rgba(0,0,0,.32);
 }
 body[data-skin="reader"] .sv-exit-close{
@@ -422,7 +463,7 @@ body[data-skin="reader"].dark-mode .sv-exit-continue{ color:#181614; }
 .rm-backdrop{ position:absolute; inset:0; background:rgba(20,15,10,.5); }
 .rm-panel{ position:relative; z-index:1; width:min(900px,94vw); max-height:84vh; overflow:auto;
   background:var(--bg-card,#fff); color:var(--text-primary,#2a2017);
-  border:1px solid var(--border-light,#e0d3b8); border-radius:12px; padding:1.6rem 1.7rem; box-shadow:0 24px 70px rgba(0,0,0,.32); }
+  border:1px solid var(--border-light,#e0d3b8); border-radius:4px; padding:1.6rem 1.7rem; box-shadow:0 24px 70px rgba(0,0,0,.32); }
 .rm-close{ position:absolute; top:.6rem; right:.9rem; background:transparent; border:none; font-size:1.7rem; line-height:1; cursor:pointer; color:var(--text-muted,#999); transition:color .15s; }
 body[data-skin="reader"] .rm-close:hover{ color:var(--text-primary); }
 body[data-skin="reader"] .rm-title{
@@ -442,7 +483,7 @@ body[data-skin="reader"] .rm-col{ flex:1 1 0; min-width:0; display:flex; flex-di
 body[data-skin="reader"] .rm-body .sidebar-podcast-feed{ margin-top:1.1rem; }
 body[data-skin="reader"] .rm-panel .sidebar-collapsible{   /* = one category card */
   margin:0; background:var(--bg-card);
-  border:1px solid var(--border-light); border-radius:12px; padding:.9rem 1rem 1rem; overflow:hidden;
+  border:1px solid var(--border-light); border-radius:4px; padding:.9rem 1rem 1rem; overflow:hidden;
 }
 body[data-skin="reader"] .rm-panel .sidebar-collapsible-toggle{
   cursor:default; background:none !important; border:none; width:100%;
@@ -591,7 +632,7 @@ body[data-skin="reader"].sv-modal-open #lesson-page{
 body[data-skin="reader"] .pq-panel{
   position:relative; z-index:1; width:min(720px,94vw); max-height:88vh; overflow:auto;
   background:var(--bg-card); color:var(--text-primary);
-  border:1px solid var(--border-light); border-radius:12px;
+  border:1px solid var(--border-light); border-radius:4px;
   padding:1.6rem 1.8rem; box-shadow:0 24px 70px rgba(0,0,0,.32);
 }
 body[data-skin="reader"] .pq-close{
@@ -790,7 +831,7 @@ body[data-skin="reader"] .site-footer-links a:hover{ color:var(--accent); }
    onto the reader tokens, so they track accent + dark mode like the rest.
    ================================================================= */
 /* ---- free wizard ("Add your subjects") ---- */
-body[data-skin="reader"] .free-wizard-modal{ background:var(--bg-card); border:1px solid var(--border-light); border-radius:16px; }
+body[data-skin="reader"] .free-wizard-modal{ background:var(--bg-card); border:1px solid var(--border-light); border-radius:6px; }
 body[data-skin="reader"] .fw-header{ border-bottom-color:var(--border-light); }
 body[data-skin="reader"] .fw-header h2{ font-family:var(--font-head); color:var(--text-primary); letter-spacing:-.01em; }
 body[data-skin="reader"] .fw-header p{ font-family:var(--font-ui); color:var(--text-secondary); }
@@ -842,7 +883,7 @@ body[data-skin="reader"].dark-mode .fw-text-btn.selected{ color:#181614; }
 body[data-skin="reader"] .fw-toast{ font-family:var(--font-ui); background:var(--text-primary); color:var(--bg-card); border-radius:var(--radius-sm); }
 
 /* ---- subject picker modal ("Change subjects") ---- */
-body[data-skin="reader"] .picker-modal{ border:1px solid var(--border-light); border-radius:16px; }
+body[data-skin="reader"] .picker-modal{ border:1px solid var(--border-light); border-radius:6px; }
 body[data-skin="reader"] .picker-header h2{ font-family:var(--font-head); color:var(--text-primary); }
 body[data-skin="reader"] .picker-header p{ font-family:var(--font-ui); color:var(--text-secondary); }
 body[data-skin="reader"] .picker-item{ border-radius:var(--radius-sm); }
@@ -987,7 +1028,7 @@ body[data-skin="reader"] .lesson-sidebar > #sidebar-video-section .sidebar-secti
 }
 body[data-skin="reader"] .lesson-sidebar > #sidebar-video-section .sidebar-video{
   position:relative; overflow:hidden; padding:0; height:auto; aspect-ratio:16/9;
-  border:1px solid var(--border-light); border-radius:10px;
+  border:1px solid var(--border-light); border-radius:4px;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 18px 36px -24px rgba(29,28,26,.18);
   cursor:pointer;
 }
@@ -1178,7 +1219,7 @@ body[data-skin="reader"] .scroll-progress{ height:3px; }
    inside stay quiet (no re-pilling: definition comes from the band). ---- */
 body[data-skin="reader"] .a11y-toolbar{
   background:color-mix(in srgb,var(--accent) 4%,var(--bg-card));
-  border:1px solid var(--border-light); border-radius:12px;
+  border:1px solid var(--border-light); border-radius:4px;
   padding:.5rem .9rem; gap:.4rem; margin:.2rem 0 2.1rem;
   font-family:var(--font-ui); justify-content:space-between;
 }
@@ -1278,7 +1319,7 @@ body[data-skin="reader"] .a11y-overlay-dot{
 body[data-skin="reader"] .a11y-overlay-pop{
   overflow-y:auto; overscroll-behavior:contain;
   position:fixed; z-index:2147483600; width:288px; box-sizing:border-box;
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:4px;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 44px -22px rgba(29,28,26,.34);
   padding:.95rem; display:flex; flex-direction:column; gap:.85rem;
   font-family:var(--font-ui);
@@ -1331,7 +1372,7 @@ body[data-skin="reader"] .a11y-reading-toggle svg{ width:17px; height:17px; }
 body[data-skin="reader"] .a11y-reading-pop{
   position:fixed; z-index:2147483600; width:282px; box-sizing:border-box;
   overflow-y:auto; overscroll-behavior:contain;
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:4px;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 22px 44px -22px rgba(29,28,26,.34);
   padding:.4rem 1.05rem .9rem; font-family:var(--font-ui);
 }
@@ -1397,7 +1438,7 @@ body[data-skin="reader"] .a11y-rd-reset svg{ width:14px; height:14px; }
 /* ---- foot prev/next cards ---- */
 body[data-skin="reader"] .lesson-nav{ border-top:1px solid var(--border-light); }
 body[data-skin="reader"] .lesson-nav-link{
-  border:1px solid var(--border-light); border-radius:10px; background:var(--bg-card); gap:.3rem;
+  border:1px solid var(--border-light); border-radius:4px; background:var(--bg-card); gap:.3rem;
 }
 body[data-skin="reader"] .lesson-nav-link:hover{
   border-color:var(--accent);
@@ -1413,7 +1454,7 @@ body[data-skin="reader"] .lesson-nav-title{
 }
 
 /* ---- Quick Quiz modal internals ---- */
-body[data-skin="reader"] .kc-modal{ border:1px solid var(--border-light); border-radius:12px; }
+body[data-skin="reader"] .kc-modal{ border:1px solid var(--border-light); border-radius:4px; }
 body[data-skin="reader"] .kc-header{ border-bottom-color:var(--border-light); }
 body[data-skin="reader"] .kc-title{ font-family:var(--font-head); font-size:1.08rem; letter-spacing:-.01em; }
 body[data-skin="reader"] .kc-step{ font-family:var(--font-ui); font-variant-numeric:tabular-nums; }
@@ -1462,14 +1503,14 @@ body[data-skin="reader"] .kc-result-msg{ font-family:var(--font-ui); }
 /* ---- Flashcards modal internals (overlay frosts: it tests you) ---- */
 /* frost via content-blur (see the .sv-modal-open rule near .pq-backdrop) — the
    flashcard overlay keeps only its base rgba(0,0,0,.6) scrim, no backdrop-filter */
-body[data-skin="reader"] .fc-modal{ border:1px solid var(--border-light); border-radius:12px; }
+body[data-skin="reader"] .fc-modal{ border:1px solid var(--border-light); border-radius:4px; }
 body[data-skin="reader"] .fc-modal-header{ border-bottom-color:var(--border-light); }
 body[data-skin="reader"] .fc-modal-title{ font-family:var(--font-head); font-size:1.08rem; letter-spacing:-.01em; }
 body[data-skin="reader"] .fc-modal-count,
 body[data-skin="reader"] .fc-session-counter,
 body[data-skin="reader"] .fc-session-skip{ font-family:var(--font-ui); }
 body[data-skin="reader"] .fc-card-face{
-  border:1px solid var(--border-light); border-radius:10px;
+  border:1px solid var(--border-light); border-radius:4px;
   box-shadow:0 1px 2px rgba(29,28,26,.05), 0 14px 28px -22px rgba(29,28,26,.18);
 }
 body[data-skin="reader"] .fc-card-back{ background:color-mix(in srgb,var(--accent) 5%,var(--bg-card)); }
@@ -1480,7 +1521,7 @@ body[data-skin="reader"] .fc-card-badge{
 
 /* ---- practice card internals (they live in the pq-modal now) ---- */
 body[data-skin="reader"] .practice-intro{ font-family:var(--font-ui); font-size:.95rem; }
-body[data-skin="reader"] .practice-question-card{ border-radius:10px; padding:1.35rem 1.5rem; }
+body[data-skin="reader"] .practice-question-card{ border-radius:4px; padding:1.35rem 1.5rem; }
 body[data-skin="reader"] .practice-question-type{
   font-family:var(--font-ui);
   background:color-mix(in srgb,var(--accent) 12%,var(--bg-card)); color:var(--accent);
@@ -1534,7 +1575,7 @@ body[data-skin="reader"] .bugr-fab:hover{
    headline + Source-Serif gone, subject accent instead of the red bug theme,
    softer-square radii. */
 body[data-skin="reader"] .bugr-modal{
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:4px;
   box-shadow:0 1px 2px rgba(29,28,26,.06), 0 24px 48px -22px rgba(29,28,26,.34);
 }
 body[data-skin="reader"].dark-mode .bugr-modal{ box-shadow:0 1px 2px rgba(0,0,0,.4), 0 24px 48px -22px rgba(0,0,0,.6); }
@@ -1642,13 +1683,13 @@ body[data-skin="reader"] .sv-tour-block{ position:fixed; inset:0; z-index:100000
    invisible (no visible glide/scroll), then fades back in — one coordinated
    motion, so it can't stutter mid-stage */
 body[data-skin="reader"] .sv-tour-spot{
-  position:fixed; z-index:100000; border-radius:12px; pointer-events:none;
+  position:fixed; z-index:100000; border-radius:4px; pointer-events:none;
   box-shadow:0 0 0 9999px rgba(20,15,10,.62);
   opacity:1; transition:opacity .2s ease;
 }
 body[data-skin="reader"] .sv-tour-card{
   position:fixed; z-index:100001; width:300px; max-width:calc(100vw - 28px);
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:12px;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:4px;
   box-shadow:0 24px 60px rgba(0,0,0,.32); padding:1.1rem 1.2rem 1rem;
   font-family:var(--font-ui);
   opacity:1; transition:opacity .16s ease;
@@ -1840,7 +1881,7 @@ body[data-skin="reader"] .audio-tab-indicator{
 /* player: one considered container — soft fill, hairline, no floaty shadow */
 body[data-skin="reader"] .narration-player{
   background:var(--bg-card); border:1px solid var(--border-light) !important;
-  border-radius:12px !important; box-shadow:none; padding:.75rem 1rem;
+  border-radius:4px !important; box-shadow:none; padding:.75rem 1rem;
 }
 body[data-skin="reader"] .narration-play{
   width:40px; height:40px; background:var(--accent); color:#fff; border:none;
@@ -1972,7 +2013,7 @@ body[data-skin="reader"] .hero-lede{ flex:1 1 26rem; min-width:0; }
    not filler (links to the deterministic /exams planner) */
 body[data-skin="reader"] .hero-planner{
   flex:0 1 23rem; display:flex; align-items:center; gap:.9rem; text-decoration:none;
-  background:var(--bg-card); border:1px solid var(--border-light); border-radius:14px;
+  background:var(--bg-card); border:1px solid var(--border-light); border-radius:4px;
   padding:1rem 1.15rem; color:var(--text-primary); box-shadow:0 1px 2px rgba(29,28,26,.05);
   transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s, border-color .25s;
 }
@@ -2034,7 +2075,7 @@ body[data-skin="reader"] .home-grid{
    kicker(board) / title / scope hierarchy; one muted per-subject accent */
 body[data-skin="reader"] .home-card{
   --sub:color-mix(in srgb, var(--card-accent,#566a72) 60%, #71695f);
-  display:flex; flex-direction:column; border-radius:14px; overflow:hidden;
+  display:flex; flex-direction:column; border-radius:4px; overflow:hidden;
   background:var(--bg-card); border:1px solid var(--border-light);
   box-shadow:0 1px 2px rgba(29,28,26,.05); position:relative;
   transition:transform .28s cubic-bezier(.22,1,.36,1), box-shadow .28s, border-color .28s;
@@ -2083,7 +2124,7 @@ body[data-skin="reader"] .request-panel{ max-width:860px; margin:clamp(1.75rem,3
    actually fits a narrow viewport (was a fixed 720 slab that overflowed). */
 body[data-skin="reader"] .free-wizard-overlay{ padding:clamp(0px,2.5vw,2rem); }
 body[data-skin="reader"] .free-wizard-modal{
-  width:min(860px,100%); max-width:860px; max-height:min(900px,96vh); border-radius:18px;
+  width:min(860px,100%); max-width:860px; max-height:min(900px,96vh); border-radius:6px;
 }
 body[data-skin="reader"] .fw-header{
   padding:clamp(1.5rem,3.5vw,2.4rem) clamp(1.4rem,4vw,2.6rem) clamp(1.1rem,2vw,1.5rem);
@@ -2094,7 +2135,7 @@ body[data-skin="reader"] .fw-core-note{ padding:1rem 1.15rem; }
 body[data-skin="reader"] .fw-search-wrap{ margin-top:1.15rem; }
 body[data-skin="reader"] .fw-search-input{ padding:.8rem .9rem .8rem 2.6rem; font-size:.92rem; }
 body[data-skin="reader"] .fw-body{ padding:.4rem clamp(1rem,3.5vw,1.9rem) .6rem; }
-body[data-skin="reader"] .fw-cat-header{ padding:1.1rem .85rem; border-radius:12px; }
+body[data-skin="reader"] .fw-cat-header{ padding:1.1rem .85rem; border-radius:4px; }
 body[data-skin="reader"] .fw-cat-title{ font-size:1rem; gap:.85rem; }
 body[data-skin="reader"] .fw-cat-dot{ width:10px; height:10px; }
 body[data-skin="reader"] .fw-subj-grid{
@@ -2363,7 +2404,7 @@ body[data-skin="reader"].desk-world .header-lesson-pill{
 body[data-skin="reader"].desk-world .method-modal-overlay{
   background:color-mix(in srgb,var(--accent-deep) 52%,transparent);
 }
-body[data-skin="reader"].desk-world .method-modal{ background:#fffdf8; border-radius:16px; }
+body[data-skin="reader"].desk-world .method-modal{ background:#fffdf8; border-radius:6px; }
 body[data-skin="reader"].desk-world .method-modal-title{ font-family:var(--font-head); }
 body[data-skin="reader"].desk-world .method-modal-steps-label{ color:var(--accent); }
 body[data-skin="reader"].desk-world .method-modal-go-btn{ background:var(--accent); }
