@@ -138,6 +138,12 @@
   .placepanel .ok{color:#8fce9b;font-family:system-ui,sans-serif;font-size:11px;margin-left:8px;opacity:0;transition:opacity .2s}
   .placepanel .ok.on{opacity:1}
   .placepanel input[type=range]{width:120px;vertical-align:middle;accent-color:#e0a86a;margin-left:6px}
+  /* ?lean bench */
+  body.leaning .bk{cursor:grab}
+  .bk.tilting{transition:none;cursor:grabbing;z-index:30}
+  .leanlbl{position:absolute;top:-22px;left:50%;transform:translateX(-50%) rotate(calc(-1*var(--lean,0deg)));
+    font:600 11px/1 system-ui,sans-serif;color:#fff;background:rgba(20,15,8,.72);padding:1px 5px;border-radius:4px;
+    white-space:nowrap;pointer-events:none;z-index:40}
   /* soft shadow falling to the LEFT, away from the lamp (over spines AND shelf) */
   .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:2px;z-index:3;pointer-events:none;
     background:linear-gradient(to right, rgba(24,16,7,.38), rgba(24,16,7,.13) 34%, transparent 58%);
@@ -437,6 +443,9 @@ let LADDERS={};
 function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.reduce((t,u)=>t+u[1],0);
   const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
 const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
+/* per-position lean (deg); tuned on the ?lean bench. First rests on the bookend,
+   each leans on the next, last is most severe. Index = shelf position. */
+const LEANS=[-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-5];
 let selSlug=null;
 const _tip=document.createElement('div'); _tip.className='booktip';
 function showTip(bk,s,d,t,pct){
@@ -457,7 +466,7 @@ function renderSubjects(){
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
     const pct=Math.max(3,Math.round(d/t*100));
-    const lean=i===SUBJECTS.length-1?-5:-1.5;   // all tilt gently toward the bookend; the last leans more
+    const lean=(LEANS[i]!=null?LEANS[i]:-1.5);   // per-position lean (see LEANS / ?lean bench)
     const src='assets/lw/shelf/book_'+s.slug+'.webp';
     const b=document.createElement('button');
     b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
@@ -670,6 +679,38 @@ if(new URLSearchParams(location.search).has('place')){(function(){
     '.bulb{left:'+oX.toFixed(1)+'%;top:'+oY.toFixed(1)+'%}\n.lampglow clip-path:'+coneClip();
     try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
   apply();
+})();}
+
+/* ---- ?lean : tilt each book to taste; read off the per-position leans ---- */
+if(new URLSearchParams(location.search).has('lean')){(function(){
+  const shelf=document.getElementById('shelf');
+  if(!shelf) return;
+  document.body.classList.add('leaning');
+  const g=id=>document.getElementById(id);
+  const clampA=a=>Math.max(-25,Math.min(8,a));
+  const label=bk=>{ let l=bk.querySelector('.leanlbl'); if(!l){ l=document.createElement('div'); l.className='leanlbl'; bk.appendChild(l); } return l; };
+  const leanOf=bk=>parseFloat(bk.style.getPropertyValue('--lean'))||0;
+  function setLean(bk,a){ a=clampA(a); bk.style.setProperty('--lean',a.toFixed(1)+'deg'); label(bk).textContent=a.toFixed(1)+'°'; }
+  function readout(){ const vals=[...shelf.querySelectorAll('.bk')].map(leanOf);
+    if(g('ro-leans')) g('ro-leans').textContent='['+vals.map(v=>v.toFixed(1)).join(', ')+']'; return vals; }
+  shelf.addEventListener('pointerdown',e=>{                 // capture: intercept before reorder/select
+    const bk=e.target.closest('.bk'); if(!bk) return;
+    e.stopPropagation(); e.preventDefault(); bk.classList.add('tilting');
+    const s=shelf.getBoundingClientRect(), px=s.left+bk.offsetLeft+bk.offsetWidth/2, py=s.top+bk.offsetTop+bk.offsetHeight;
+    const mv=ev=>{ setLean(bk, Math.atan2(ev.clientX-px, py-ev.clientY)*180/Math.PI); readout(); };
+    const up=()=>{ bk.classList.remove('tilting'); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
+    window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
+  }, true);
+  const panel=document.createElement('div'); panel.className='placepanel';
+  panel.innerHTML='<h4>Lean bench</h4><p class="sub">Grab any book and tilt it — it points at your cursor. First rests on the bookend, each leans on the next, the last most severe. Then Copy.</p>'+
+    '<div class="row"><span class="k">leans</span>: <span id="ro-leans" style="font-size:11px;word-break:break-all"></span></div>'+
+    '<button id="ro-copy">Copy leans</button><span class="ok" id="ro-ok">copied ✓</span>';
+  document.body.appendChild(panel);
+  const relabel=()=>{ [...shelf.querySelectorAll('.bk')].forEach(b=>{ label(b).textContent=leanOf(b).toFixed(1)+'°'; }); readout(); };
+  relabel();
+  new MutationObserver(relabel).observe(shelf,{childList:true});   // survive the ladder re-render
+  g('ro-copy').onclick=async()=>{ const vals=readout(); const txt='const LEANS=['+vals.map(v=>v.toFixed(1)).join(',')+'];';
+    try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
 })();}
 
 /* flashcards — same mixed deck as the desk */
