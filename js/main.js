@@ -1302,9 +1302,15 @@ function initNarration() {
       timeEl.textContent = fmtTime(gt) + ' / ' + fmtTime(totalDuration);
       fabFill.style.width = pct;
       fabTime.textContent = fmtTime(gt);
-      // reader skin: fill the active chunk's read-along line to where the voice is
-      if (currentIndex >= 0 && manifest[currentIndex] && activeChunk) {
-        var clipDur = manifest[currentIndex].duration || 0;
+      // reader skin: fill the active chunk's read-along line to where the voice is.
+      // Divide by the loaded clip's REAL duration (audio.duration), NOT the stored
+      // manifest duration — those are unreliable (measured off by 0.3x–1.8x), which
+      // paced the fill wrongly on every paragraph. audio.duration is the ground truth
+      // for the clip currently playing; fall back to the manifest only pre-metadata.
+      if (currentIndex >= 0 && activeChunk) {
+        var clipDur = (isFinite(audio.duration) && audio.duration > 0)
+          ? audio.duration
+          : ((manifest[currentIndex] && manifest[currentIndex].duration) || 0);
         var clipPct = clipDur > 0 ? Math.max(0, Math.min(100, (audio.currentTime || 0) / clipDur * 100)) : 0;
         var actEl = document.querySelector('[data-narration-id="' + activeChunk + '"]');
         if (actEl) actEl.style.setProperty('--sv-read', clipPct.toFixed(1) + '%');
