@@ -96,7 +96,7 @@
     --bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}                 /* lamp off: soft neutral shadow */
   .shelfstage.lit{--bkshadow:drop-shadow(-6px 2px 3px rgba(28,18,8,.30))}  /* lamp on: shadow cast left */
   .shelf{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px;height:212px;padding:0 6px 0 10px;position:relative;z-index:2}
-  .bookend{height:210px;width:auto;align-self:flex-end;margin-right:-6px;pointer-events:none;
+  .bookend{height:var(--beh,210px);width:auto;align-self:flex-end;margin-right:-6px;pointer-events:none;
     filter:drop-shadow(-7px 5px 4px rgba(40,28,12,.30))}
   /* lamp on the right, arm reaching left; its shade is the light source for the scene */
   .lamp{position:absolute;right:14px;bottom:20px;height:250px;width:auto;z-index:5;pointer-events:none;
@@ -138,6 +138,8 @@
   .placepanel .ok{color:#8fce9b;font-family:system-ui,sans-serif;font-size:11px;margin-left:8px;opacity:0;transition:opacity .2s}
   .placepanel .ok.on{opacity:1}
   .placepanel input[type=range]{width:120px;vertical-align:middle;accent-color:#e0a86a;margin-left:6px}
+  .placepanel .cbtn{margin:0 5px 0 0;background:#4a4235;color:#e8ddc8}
+  .placepanel .cbtn[aria-pressed=true]{background:#c98a3a;color:#fff}
   /* ?lean bench */
   body.leaning .bk{cursor:grab}
   .bk.tilting{transition:none;cursor:grabbing;z-index:30}
@@ -160,16 +162,16 @@
     background:radial-gradient(circle, rgba(255,198,124,.92), rgba(255,168,84,.48) 42%, transparent 72%);
     mix-blend-mode:screen}
   .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
-  .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:grab;touch-action:none;
-    transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg));filter:var(--bkshadow);
+  .bk{position:relative;height:var(--bkh,204px);border:none;background:none;padding:0;cursor:grab;touch-action:none;
+    transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg));filter:var(--bkshadow);
     transition:transform .28s cubic-bezier(.34,1.4,.5,1),filter .55s ease;transform-origin:bottom center}
   .bk img{display:block}
-  .bk img.cold{height:204px;width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
+  .bk img.cold{height:var(--bkh,204px);width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
   .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.64) brightness(1.15) contrast(0.93))}
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
-  .bk:hover{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-5px)}
-  .bk[aria-selected="true"]{transform:translateX(var(--shift,0px)) translateY(-16px) scale(1.06);z-index:4}
+  .bk:hover{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg)) translateY(-5px)}
+  .bk[aria-selected="true"]{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(-16px) scale(1.06);z-index:4}
   .bk[aria-selected="true"]::before{opacity:.55;bottom:-13px}
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   /* drag to reorder; drop with a little physics */
@@ -177,10 +179,10 @@
     filter:drop-shadow(0 16px 14px rgba(40,28,12,.38))}
   body.dragging-book{cursor:grabbing;user-select:none}
   @keyframes drop-settle{
-    0%{transform:translateX(var(--shift,0px)) translateY(-15px) rotate(var(--lean,0deg))}
-    45%{transform:translateX(var(--shift,0px)) translateY(0) rotate(calc(var(--lean,0deg) - 4deg))}
-    72%{transform:translateX(var(--shift,0px)) translateY(-3px) rotate(calc(var(--lean,0deg) + 2.2deg))}
-    100%{transform:translateX(var(--shift,0px)) translateY(0) rotate(var(--lean,0deg))}}
+    0%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(-15px) rotate(var(--lean,0deg))}
+    45%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0) rotate(calc(var(--lean,0deg) - 4deg))}
+    72%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(-3px) rotate(calc(var(--lean,0deg) + 2.2deg))}
+    100%{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0) rotate(var(--lean,0deg))}}
   .bk.settling{animation:drop-settle .55s cubic-bezier(.3,1.2,.5,1)}
   @media (prefers-reduced-motion:reduce){ .bk.settling{animation:none} }
   .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
@@ -493,6 +495,23 @@ function renderSubjects(){
   document.getElementById('subcount').textContent=done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete';
   if(selSlug) selectSubject(selSlug,true);      // rest with none selected -> the shelf invites a pick
   else deselectSubject();
+  fitShelf();
+}
+/* shrink the book row (books + bookend) to fit the space left of the lamp, so any
+   subject count fits; full size up to ~9, gently smaller beyond. */
+function fitShelf(){
+  const shelf=document.getElementById('shelf'), lamp=document.querySelector('.lamp');
+  if(!shelf) return;
+  shelf.style.removeProperty('--bkh'); shelf.style.removeProperty('--beh'); shelf.style.setProperty('--fit',1);  // full size to measure
+  const bks=shelf.querySelectorAll('.bk'); if(!bks.length){ shelf.style.removeProperty('--fit'); return; }
+  const shelfLeft=shelf.getBoundingClientRect().left;
+  const last=bks[bks.length-1], footShift=Math.max(0,parseFloat(last.style.getPropertyValue('--shift'))||0);
+  const natural=last.offsetLeft+last.offsetWidth+footShift;   // rightmost extent: layout + kicked-out foot
+  const avail=(lamp?lamp.getBoundingClientRect().left-shelfLeft:shelf.clientWidth)+72;   // +margin for the lamp's transparent left / space under the shade
+  const f=Math.min(1, avail/natural);
+  shelf.style.setProperty('--bkh',(204*f).toFixed(1)+'px');
+  shelf.style.setProperty('--beh',(210*f).toFixed(1)+'px');
+  shelf.style.setProperty('--fit',f.toFixed(4));   // scales the foot-shift with the books
 }
 function deselectSubject(){                 // click a selected spine again -> it drops back in line, no panel
   selSlug=null;
@@ -733,6 +752,29 @@ if(new URLSearchParams(location.search).has('lean')){(function(){
   g('ro-copy').onclick=async()=>{ const bks=readout();
     const txt='const LEANS=['+bks.map(b=>leanOf(b).toFixed(1)).join(',')+'];\nconst SHIFTS=['+bks.map(b=>shiftOf(b).toFixed(0)).join(',')+'];';
     try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
+})();}
+
+/* ---- ?counts : preview random subject sets 7-11 (scale-to-fit + leaning apply) ---- */
+if(new URLSearchParams(location.search).has('counts')){(function(){
+  const orig=SUBJECTS.slice();
+  let cur=9;
+  function show(n){
+    cur=n;
+    const pool=orig.slice();
+    for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=pool[i]; pool[i]=pool[j]; pool[j]=t; }
+    const sel=[]; for(let i=0;i<n;i++) sel.push(Object.assign({},pool[i%pool.length]));   // repeats only if n>pool
+    SUBJECTS.length=0; SUBJECTS.push(...sel);
+    renderSubjects();
+    [...document.querySelectorAll('#cbtns button')].forEach(b=>b.setAttribute('aria-pressed',String(+b.textContent===n)));
+  }
+  const panel=document.createElement('div'); panel.className='placepanel';
+  panel.innerHTML='<h4>Shelf counts</h4><p class="sub">Preview random subject sets from 7 to 11 — the shelf scales to fit the lamp and the leaning cascade adapts.</p>'+
+    '<div class="row" id="cbtns"></div><button id="shuf" style="margin-top:10px">Shuffle</button>';
+  document.body.appendChild(panel);
+  const cb=document.getElementById('cbtns');
+  [7,8,9,10,11].forEach(n=>{ const b=document.createElement('button'); b.type='button'; b.textContent=n; b.className='cbtn'; b.onclick=()=>show(n); cb.appendChild(b); });
+  document.getElementById('shuf').onclick=()=>show(cur);
+  show(9);
 })();}
 
 /* flashcards — same mixed deck as the desk */
