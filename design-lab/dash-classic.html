@@ -107,6 +107,16 @@
   .lampbtn{position:absolute;right:12px;bottom:18px;width:132px;height:240px;z-index:7;
     border:none;background:transparent;cursor:pointer;padding:0}
   .lampbtn:focus-visible{outline:3px solid var(--anchor);outline-offset:2px;border-radius:8px}
+  /* pull-cord — the visible 'you can click me' affordance hanging from the shade */
+  .pullcord{position:absolute;left:81.5%;top:25.5%;width:2px;height:42px;z-index:6;pointer-events:none;
+    background:linear-gradient(#7c6848,#57492f);border-radius:1px;transform-origin:top center}
+  .pullcord::after{content:"";position:absolute;left:50%;bottom:-12px;transform:translateX(-50%);
+    width:10px;height:14px;border-radius:46% 46% 50% 50%/36% 36% 64% 64%;
+    background:radial-gradient(46% 38% at 38% 28%, #e6d29c 0%, #d9b978 30%, #a2814f 62%, #6f5733 100%);
+    box-shadow:0 1px 2px rgba(40,28,12,.45)}
+  @keyframes cord-tug{0%{transform:translateY(0)}26%{transform:translateY(9px)}62%{transform:translateY(-2px)}100%{transform:translateY(0)}}
+  .pullcord.tug{animation:cord-tug .42s cubic-bezier(.3,1.25,.5,1)}
+  .lampbtn:hover ~ .pullcord{filter:brightness(1.08)}
   /* soft shadow falling to the LEFT, away from the lamp (over spines AND shelf) */
   .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:2px;z-index:3;pointer-events:none;
     background:linear-gradient(to right, rgba(24,16,7,.38), rgba(24,16,7,.13) 34%, transparent 58%);
@@ -292,6 +302,7 @@
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
       <div class="bulb"></div>
       <button class="lampbtn" type="button"></button>
+      <div class="pullcord"></div>
     </div>
     <div class="card sdetail" id="sdetail"></div>
     <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
@@ -560,7 +571,8 @@ fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; render
 
 /* the reading lamp: click it to turn the light on/off (off by default) */
 (function(){
-  const stage=document.querySelector('.shelfstage'), lamp=document.querySelector('.lamp'), btn=document.querySelector('.lampbtn');
+  const stage=document.querySelector('.shelfstage'), lamp=document.querySelector('.lamp'),
+        btn=document.querySelector('.lampbtn'), cord=document.querySelector('.pullcord');
   if(!stage||!lamp||!btn) return;
   const KEY='sv-lamp-on';
   let on=false; try{ on=localStorage.getItem(KEY)==='1'; }catch(e){}
@@ -570,7 +582,8 @@ fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; render
     btn.setAttribute('aria-pressed',String(on));
     btn.setAttribute('aria-label', on?'Reading lamp — on. Click to turn off':'Reading lamp — off. Click to turn on'); };
   apply();
-  const toggle=()=>{ on=!on; apply(); try{ localStorage.setItem(KEY, on?'1':'0'); }catch(e){} };
+  const toggle=()=>{ on=!on; apply(); try{ localStorage.setItem(KEY, on?'1':'0'); }catch(e){}
+    if(cord){ cord.classList.remove('tug'); void cord.offsetWidth; cord.classList.add('tug'); } };  // tug the cord
   btn.addEventListener('click',toggle);
   btn.addEventListener('mouseenter',()=>lamp.classList.add('hot'));
   btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
