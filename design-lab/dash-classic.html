@@ -161,15 +161,15 @@
     mix-blend-mode:screen}
   .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
   .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:grab;touch-action:none;
-    transform:rotate(var(--lean,0deg));filter:var(--bkshadow);
+    transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg));filter:var(--bkshadow);
     transition:transform .28s cubic-bezier(.34,1.4,.5,1),filter .55s ease;transform-origin:bottom center}
   .bk img{display:block}
   .bk img.cold{height:204px;width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
   .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.64) brightness(1.15) contrast(0.93))}
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
-  .bk:hover{transform:rotate(var(--lean,0deg)) translateY(-5px)}
-  .bk[aria-selected="true"]{transform:translateY(-16px) scale(1.06);z-index:4}
+  .bk:hover{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-5px)}
+  .bk[aria-selected="true"]{transform:translateX(var(--shift,0px)) translateY(-16px) scale(1.06);z-index:4}
   .bk[aria-selected="true"]::before{opacity:.55;bottom:-13px}
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   /* drag to reorder; drop with a little physics */
@@ -177,10 +177,10 @@
     filter:drop-shadow(0 16px 14px rgba(40,28,12,.38))}
   body.dragging-book{cursor:grabbing;user-select:none}
   @keyframes drop-settle{
-    0%{transform:translateY(-15px) rotate(var(--lean,0deg))}
-    45%{transform:translateY(0) rotate(calc(var(--lean,0deg) - 4deg))}
-    72%{transform:translateY(-3px) rotate(calc(var(--lean,0deg) + 2.2deg))}
-    100%{transform:translateY(0) rotate(var(--lean,0deg))}}
+    0%{transform:translateX(var(--shift,0px)) translateY(-15px) rotate(var(--lean,0deg))}
+    45%{transform:translateX(var(--shift,0px)) translateY(0) rotate(calc(var(--lean,0deg) - 4deg))}
+    72%{transform:translateX(var(--shift,0px)) translateY(-3px) rotate(calc(var(--lean,0deg) + 2.2deg))}
+    100%{transform:translateX(var(--shift,0px)) translateY(0) rotate(var(--lean,0deg))}}
   .bk.settling{animation:drop-settle .55s cubic-bezier(.3,1.2,.5,1)}
   @media (prefers-reduced-motion:reduce){ .bk.settling{animation:none} }
   .ledge{display:block;width:100%;height:46px;object-fit:cover;object-position:center 18%;margin-top:-8px;position:relative;z-index:1}
@@ -446,6 +446,9 @@ const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:1
 /* per-position lean (deg); tuned on the ?lean bench. First rests on the bookend,
    each leans on the next, last is most severe. Index = shelf position. */
 const LEANS=[-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-1.5,-5];
+/* horizontal base offset per position (px); pairs with LEANS so a book can kick
+   its foot out as well as tilt. Tuned on the ?lean bench. */
+const SHIFTS=[0,0,0,0,0,0,0,0,0];
 let selSlug=null;
 const _tip=document.createElement('div'); _tip.className='booktip';
 function showTip(bk,s,d,t,pct){
@@ -471,6 +474,7 @@ function renderSubjects(){
     const b=document.createElement('button');
     b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
     b.style.setProperty('--lean',lean+'deg');
+    b.style.setProperty('--shift',(SHIFTS[i]!=null?SHIFTS[i]:0)+'px');
     b.setAttribute('aria-label',s.name+' — '+d+' of '+t+' lessons');
     b.innerHTML='<img class="cold" draggable="false" src="'+src+'" alt="">'+
       '<img class="warm" draggable="false" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
@@ -687,29 +691,42 @@ if(new URLSearchParams(location.search).has('lean')){(function(){
   if(!shelf) return;
   document.body.classList.add('leaning');
   const g=id=>document.getElementById(id);
-  const clampA=a=>Math.max(-25,Math.min(8,a));
+  const clampA=a=>Math.max(-25,Math.min(8,a)), clampS=s=>Math.max(-70,Math.min(70,s));
   const label=bk=>{ let l=bk.querySelector('.leanlbl'); if(!l){ l=document.createElement('div'); l.className='leanlbl'; bk.appendChild(l); } return l; };
   const leanOf=bk=>parseFloat(bk.style.getPropertyValue('--lean'))||0;
-  function setLean(bk,a){ a=clampA(a); bk.style.setProperty('--lean',a.toFixed(1)+'deg'); label(bk).textContent=a.toFixed(1)+'°'; }
-  function readout(){ const vals=[...shelf.querySelectorAll('.bk')].map(leanOf);
-    if(g('ro-leans')) g('ro-leans').textContent='['+vals.map(v=>v.toFixed(1)).join(', ')+']'; return vals; }
+  const shiftOf=bk=>parseFloat(bk.style.getPropertyValue('--shift'))||0;
+  function relbl(bk){ const sh=shiftOf(bk); label(bk).textContent=leanOf(bk).toFixed(1)+'°'+(sh?' '+(sh>0?'+':'')+sh.toFixed(0):''); }
+  function setLean(bk,a){ bk.style.setProperty('--lean',clampA(a).toFixed(1)+'deg'); relbl(bk); }
+  function setShift(bk,s){ bk.style.setProperty('--shift',clampS(s).toFixed(0)+'px'); relbl(bk); }
+  function readout(){ const bks=[...shelf.querySelectorAll('.bk')];
+    if(g('ro-leans')) g('ro-leans').textContent='['+bks.map(b=>leanOf(b).toFixed(1)).join(', ')+']';
+    if(g('ro-shifts')) g('ro-shifts').textContent='['+bks.map(b=>shiftOf(b).toFixed(0)).join(', ')+']';
+    return bks; }
   shelf.addEventListener('pointerdown',e=>{                 // capture: intercept before reorder/select
     const bk=e.target.closest('.bk'); if(!bk) return;
     e.stopPropagation(); e.preventDefault(); bk.classList.add('tilting');
-    const s=shelf.getBoundingClientRect(), px=s.left+bk.offsetLeft+bk.offsetWidth/2, py=s.top+bk.offsetTop+bk.offsetHeight;
-    const mv=ev=>{ setLean(bk, Math.atan2(ev.clientX-px, py-ev.clientY)*180/Math.PI); readout(); };
+    const r=bk.getBoundingClientRect(), topGrab=(e.clientY-r.top)<r.height*0.55;
+    const s=shelf.getBoundingClientRect(), py=s.top+bk.offsetTop+bk.offsetHeight;
+    const baseX=s.left+bk.offsetLeft+bk.offsetWidth/2, startX=e.clientX, s0=shiftOf(bk);
+    const mv=ev=>{
+      if(topGrab) setLean(bk, Math.atan2(ev.clientX-(baseX+shiftOf(bk)), py-ev.clientY)*180/Math.PI);
+      else setShift(bk, s0+(ev.clientX-startX));
+      readout();
+    };
     const up=()=>{ bk.classList.remove('tilting'); window.removeEventListener('pointermove',mv); window.removeEventListener('pointerup',up); };
     window.addEventListener('pointermove',mv); window.addEventListener('pointerup',up);
   }, true);
   const panel=document.createElement('div'); panel.className='placepanel';
-  panel.innerHTML='<h4>Lean bench</h4><p class="sub">Grab any book and tilt it — it points at your cursor. First rests on the bookend, each leans on the next, the last most severe. Then Copy.</p>'+
+  panel.innerHTML='<h4>Lean bench</h4><p class="sub">Grab the <b>top</b> of a book to tilt it, the <b>bottom</b> to slide its foot. First rests on the bookend, each leans on the next, the last most severe. Then Copy.</p>'+
     '<div class="row"><span class="k">leans</span>: <span id="ro-leans" style="font-size:11px;word-break:break-all"></span></div>'+
-    '<button id="ro-copy">Copy leans</button><span class="ok" id="ro-ok">copied ✓</span>';
+    '<div class="row"><span class="k">shifts</span>: <span id="ro-shifts" style="font-size:11px;word-break:break-all"></span></div>'+
+    '<button id="ro-copy">Copy leans + shifts</button><span class="ok" id="ro-ok">copied ✓</span>';
   document.body.appendChild(panel);
-  const relabel=()=>{ [...shelf.querySelectorAll('.bk')].forEach(b=>{ label(b).textContent=leanOf(b).toFixed(1)+'°'; }); readout(); };
+  const relabel=()=>{ [...shelf.querySelectorAll('.bk')].forEach(relbl); readout(); };
   relabel();
   new MutationObserver(relabel).observe(shelf,{childList:true});   // survive the ladder re-render
-  g('ro-copy').onclick=async()=>{ const vals=readout(); const txt='const LEANS=['+vals.map(v=>v.toFixed(1)).join(',')+'];';
+  g('ro-copy').onclick=async()=>{ const bks=readout();
+    const txt='const LEANS=['+bks.map(b=>leanOf(b).toFixed(1)).join(',')+'];\nconst SHIFTS=['+bks.map(b=>shiftOf(b).toFixed(0)).join(',')+'];';
     try{await navigator.clipboard.writeText(txt);}catch(e){} const ok=g('ro-ok'); ok.classList.add('on'); setTimeout(()=>ok.classList.remove('on'),1300); };
 })();}
 
