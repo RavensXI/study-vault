@@ -449,6 +449,10 @@ const LEANS=[-4.2,-5.4,-6.4,-7.5,-8.8,-9.3,-10.3,-11.6,-23.6];
 /* horizontal base offset per position (px); pairs with LEANS so a book can kick
    its foot out as well as tilt. Tuned on the ?lean bench. */
 const SHIFTS=[5,6,3,0,1,-1,-1,0,38];
+/* For any subject count other than the tuned length, derive lean/shift so the
+   cascade + end-flop still work: gentle ramp toward the end, last book flopped. */
+function leanFor(i,n){ if(n<=1) return -3; if(i===n-1) return -23; return -4.2-(i/Math.max(1,n-2))*7.4; }
+function shiftFor(i,n){ return i===n-1?38:0; }
 let selSlug=null;
 const _tip=document.createElement('div'); _tip.className='booktip';
 function showTip(bk,s,d,t,pct){
@@ -469,12 +473,13 @@ function renderSubjects(){
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
     const pct=Math.max(3,Math.round(d/t*100));
-    const lean=(LEANS[i]!=null?LEANS[i]:-1.5);   // per-position lean (see LEANS / ?lean bench)
+    const n=SUBJECTS.length;                      // tuned arrays when count matches, else procedural
+    const lean=(n===LEANS.length?LEANS[i]:leanFor(i,n));
     const src='assets/lw/shelf/book_'+s.slug+'.webp';
     const b=document.createElement('button');
     b.className='bk'; b.setAttribute('role','tab'); b.dataset.slug=s.slug;
     b.style.setProperty('--lean',lean+'deg');
-    b.style.setProperty('--shift',(SHIFTS[i]!=null?SHIFTS[i]:0)+'px');
+    b.style.setProperty('--shift',(n===SHIFTS.length?SHIFTS[i]:shiftFor(i,n))+'px');
     b.setAttribute('aria-label',s.name+' — '+d+' of '+t+' lessons');
     b.innerHTML='<img class="cold" draggable="false" src="'+src+'" alt="">'+
       '<img class="warm" draggable="false" src="'+src+'" style="clip-path:inset('+(100-pct)+'% 0 0 0)" alt="">';
