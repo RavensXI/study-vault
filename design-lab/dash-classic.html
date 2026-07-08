@@ -92,25 +92,39 @@
   /* THE SHELF: static per-subject books (one image each, reused for every
      student — zero per-student cost) on a shared walnut ledge. Pale = not
      studied; the colour fills up AND deepens from the shelf as it is learned. */
-  .shelfstage{position:relative;margin-top:34px}   /* clearance so a lifted/selected spine never covers the heading + metrics above */
+  .shelfstage{position:relative;margin-top:34px;   /* clearance so a lifted/selected spine never covers the heading + metrics above */
+    --bkshadow:drop-shadow(0 3px 3px rgba(28,18,8,.15))}                 /* lamp off: soft neutral shadow */
+  .shelfstage.lit{--bkshadow:drop-shadow(-6px 2px 3px rgba(28,18,8,.30))}  /* lamp on: shadow cast left */
   .shelf{display:flex;align-items:flex-end;justify-content:flex-start;gap:3px;height:212px;padding:0 6px 0 10px;position:relative;z-index:2}
   .bookend{height:210px;width:auto;align-self:flex-end;margin-right:-6px;pointer-events:none;
     filter:drop-shadow(-7px 5px 4px rgba(40,28,12,.30))}
   /* lamp on the right, arm reaching left; its shade is the light source for the scene */
   .lamp{position:absolute;right:14px;bottom:20px;height:250px;width:auto;z-index:5;pointer-events:none;
-    filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22))}
+    filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22));transition:filter .2s ease}
+  .lamp.hot{filter:drop-shadow(-10px 8px 8px rgba(40,28,12,.22)) brightness(1.06)}
+  /* invisible click-target over the lamp, kept in the gap (right of the books) so it
+     never steals a spine's click */
+  .lampbtn{position:absolute;right:12px;bottom:18px;width:132px;height:240px;z-index:7;
+    border:none;background:transparent;cursor:pointer;padding:0}
+  .lampbtn:focus-visible{outline:3px solid var(--anchor);outline-offset:2px;border-radius:8px}
   /* soft shadow falling to the LEFT, away from the lamp (over spines AND shelf) */
   .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:2px;z-index:3;pointer-events:none;
     background:linear-gradient(to right, rgba(24,16,7,.38), rgba(24,16,7,.13) 34%, transparent 58%);
-    mix-blend-mode:multiply}
+    mix-blend-mode:multiply;opacity:0;transition:opacity .55s ease}
   /* the light itself: warm core at the shade opening, spilling down-left across books + shelf */
   .lampglow{position:absolute;left:0;right:0;top:-10px;bottom:2px;z-index:4;pointer-events:none;
     background:radial-gradient(80% 88% at 81% 23%,
       rgba(255,216,150,.54), rgba(255,206,132,.22) 32%, rgba(255,206,132,.06) 58%, transparent 78%);
+    mix-blend-mode:screen;opacity:0;transition:opacity .55s ease}
+  /* a warm bulb behind the shade, glowing only when lit */
+  .bulb{position:absolute;left:82%;top:20%;width:66px;height:66px;transform:translate(-50%,-50%);z-index:6;
+    pointer-events:none;border-radius:50%;opacity:0;transition:opacity .55s ease;
+    background:radial-gradient(circle, rgba(255,226,168,.85), rgba(255,214,140,.4) 42%, transparent 72%);
     mix-blend-mode:screen}
+  .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
   .bk{position:relative;height:204px;border:none;background:none;padding:0;cursor:grab;touch-action:none;
-    transform:rotate(var(--lean,0deg));filter:drop-shadow(-6px 2px 3px rgba(28,18,8,.26));
-    transition:transform .28s cubic-bezier(.34,1.4,.5,1);transform-origin:bottom center}
+    transform:rotate(var(--lean,0deg));filter:var(--bkshadow);
+    transition:transform .28s cubic-bezier(.34,1.4,.5,1),filter .55s ease;transform-origin:bottom center}
   .bk img{display:block}
   .bk img.cold{height:204px;width:auto;filter:var(--coldf, saturate(1.20) brightness(0.92) contrast(1.30) sepia(0.10) hue-rotate(-8deg))}
   .bk img.warm{position:absolute;inset:0;height:100%;width:100%;filter:var(--warmf, saturate(1.64) brightness(1.15) contrast(0.93))}
@@ -275,6 +289,8 @@
       <div class="lightwash"></div>
       <div class="lampglow"></div>
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <button class="lampbtn" type="button"></button>
     </div>
     <div class="card sdetail" id="sdetail"></div>
     <div class="selprompt" id="selprompt" hidden><span class="uparrow">↑</span>Select a subject</div>
@@ -540,6 +556,24 @@ addEventListener('keydown',e=>{
 applySavedOrder();
 renderSubjects();
 fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); }).catch(()=>{});
+
+/* the reading lamp: click it to turn the light on/off (off by default) */
+(function(){
+  const stage=document.querySelector('.shelfstage'), lamp=document.querySelector('.lamp'), btn=document.querySelector('.lampbtn');
+  if(!stage||!lamp||!btn) return;
+  const KEY='sv-lamp-on';
+  let on=false; try{ on=localStorage.getItem(KEY)==='1'; }catch(e){}
+  const q=new URLSearchParams(location.search).get('lamp');   // ?lamp=on|off overrides
+  if(q==='on') on=true; else if(q==='off') on=false;
+  const apply=()=>{ stage.classList.toggle('lit',on);
+    btn.setAttribute('aria-pressed',String(on));
+    btn.setAttribute('aria-label', on?'Reading lamp — on. Click to turn off':'Reading lamp — off. Click to turn on'); };
+  apply();
+  const toggle=()=>{ on=!on; apply(); try{ localStorage.setItem(KEY, on?'1':'0'); }catch(e){} };
+  btn.addEventListener('click',toggle);
+  btn.addEventListener('mouseenter',()=>lamp.classList.add('hot'));
+  btn.addEventListener('mouseleave',()=>lamp.classList.remove('hot'));
+})();
 
 /* flashcards — same mixed deck as the desk */
 const FC=[
