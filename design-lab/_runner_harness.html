@@ -17,6 +17,30 @@
   .page-transition,.scroll-progress,.sv-tour-replay{display:none !important}
   [class*="sv-reveal"],.study-notes>*,.lesson-sidebar>*,.key-fact,.exam-tip,.practice-question-card,.sidebar-section{
     opacity:1 !important;transform:none !important;filter:none !important;visibility:visible !important}
+
+  /* ===== PROGRESS-LINE variant (harness demo) — overrides the committed runner =====
+     A calm accent underline that FILLS as the narration reads through the chunk,
+     like Audible/Speechify. In the app the fill width is driven by audio time;
+     here it's animated once so you can see it. Keeps the faint active wash. */
+  body[data-skin="reader"] [data-narration-id].narration-active::before,
+  body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active)::before{
+    content:'';position:absolute;left:0;right:0;bottom:0;height:2.5px;
+    background:var(--border-lighter);z-index:2;pointer-events:none;border-radius:0;
+  }
+  body[data-skin="reader"] [data-narration-id].narration-active::after,
+  body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active)::after{
+    content:'';position:absolute;top:auto;right:auto;left:0;bottom:0;
+    width:0;height:3px;padding:0;border-radius:0;transform:none;
+    background:linear-gradient(90deg,
+      color-mix(in srgb,var(--accent) 65%,transparent),
+      var(--accent) 78%,
+      color-mix(in srgb,#fff 55%,var(--accent)));
+    box-shadow:0 0 6px color-mix(in srgb,var(--accent) 45%,transparent);
+    -webkit-mask:none;mask:none;filter:none;
+    z-index:3;pointer-events:none;
+    animation:sv-readfill 7s linear infinite;   /* demo: loops. In-app the width tracks audio time, filling once */
+  }
+  @keyframes sv-readfill{ 0%{width:0} 72%{width:100%} 100%{width:100%} }
 </style>
 </head>
 <body data-skin="reader">
