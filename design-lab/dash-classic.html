@@ -224,6 +224,16 @@
   .ublock .utrack{display:block;height:4px;border-radius:2px;background:var(--linel);margin:.4rem 0 .3rem;overflow:hidden}
   .ublock .utrack i{display:block;height:100%;background:var(--tc)}
   .ublock .ud{display:block;font-size:.72rem;color:var(--mut);font-variant-numeric:tabular-nums}
+  /* drill into a topic -> pick any lesson */
+  .sdetail .back{flex:none;width:26px;height:26px;border:1px solid var(--line);background:var(--card);border-radius:8px;
+    cursor:pointer;font-size:1.15rem;line-height:1;color:var(--sec)}
+  .sdetail .back:hover{border-color:var(--tc);color:var(--ink)}
+  .lessons{display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;max-height:92px;overflow-y:auto}
+  .ltile{flex:none;width:32px;height:32px;border:1px solid var(--line);border-radius:8px;background:var(--card);cursor:pointer;
+    font:600 .8rem/1 var(--head);color:var(--sec);display:grid;place-items:center;transition:transform .15s,border-color .15s}
+  .ltile:hover{transform:translateY(-1px);border-color:var(--tc);color:var(--ink)}
+  .ltile.done{background:color-mix(in srgb,var(--tc) 18%,var(--card));color:var(--tc);border-color:transparent}
+  .ltile.next{border-color:var(--tc);box-shadow:0 0 0 1.5px var(--tc);color:var(--tc)}
   /* ---- rail ---- */
   .rail{display:flex;flex-direction:column;gap:14px}
   .exam{padding:.65rem 1rem .7rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center}
@@ -522,8 +532,11 @@ function deselectSubject(){                 // click a selected spine again -> i
 function selectSubject(slug,silent){
   if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off
   selSlug=slug;
-  const s=SUBJECTS.find(x=>x.slug===slug);
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug)));
+  renderSubjectPanel(SUBJECTS.find(x=>x.slug===slug));
+}
+/* default panel: resume button + the subject's topics (click one to pick a lesson) */
+function renderSubjectPanel(s){
   const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
   const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
   const rec=REC[s.slug]||0;
@@ -535,15 +548,29 @@ function selectSubject(slug,silent){
     '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
     (rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today')+'</span>'+
     '<span class="sp"></span>'+
-    '<button class="cont">Continue: '+nxt[0]+' →</button></div>'+
+    '<button class="cont">Where you left off →</button></div>'+
     '<div class="units">'+
-      s.units.map(u=>'<button class="ublock" data-u="'+u[3]+'">'+
+      s.units.map((u,ui)=>'<button class="ublock" data-u="'+ui+'" title="'+u[0]+' — pick a lesson">'+
         '<span class="un">'+u[0]+'</span>'+
         '<span class="utrack"><i style="width:'+Math.round(u[2]/u[1]*100)+'%"></i></span>'+
         '<span class="ud">'+u[2]+' / '+u[1]+' lessons</span></button>').join('')+
     '</div>';
   el.querySelector('.cont').onclick=()=>nav(urlFor(s,nxt));
-  el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>nav('/browse/'+s.sub+'/'+x.dataset.u));
+  el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
+}
+/* topic drilled open: every lesson selectable (done, next-up, or ahead) */
+function showLessons(s,u){
+  const el=document.getElementById('sdetail');
+  el.style.setProperty('--tc',s.c);
+  const base='/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
+  let tiles='';
+  for(let k=1;k<=u[1];k++){ const done=k<=u[2], next=k===u[2]+1;
+    tiles+='<button class="ltile'+(done?' done':'')+(next?' next':'')+'" data-n="'+k+'" title="Lesson '+k+(done?' · done':next?' · next up':'')+'">'+k+'</button>'; }
+  el.innerHTML='<div class="top"><button class="back" title="Back to topics">‹</button>'+
+    '<h3>'+u[0]+'</h3><span class="sub">'+u[2]+' of '+u[1]+' lessons · pick any</span></div>'+
+    '<div class="lessons">'+tiles+'</div>';
+  el.querySelector('.back').onclick=()=>renderSubjectPanel(s);
+  el.querySelectorAll('.ltile').forEach(x=>x.onclick=()=>nav(base+x.dataset.n));
 }
 /* ---- drag a spine to reorder; drop it in with a little physics ---- */
 const ORDER_KEY='sv-shelf-order';
@@ -624,8 +651,12 @@ addEventListener('keydown',e=>{
   selectSubject(next.slug);
 });
 applySavedOrder();
-renderSubjects();
-fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); }).catch(()=>{});
+const _pick=new URLSearchParams(location.search).get('pick');   // deep-link a subject's panel (+ ?open=<unit index> for its lessons)
+const _open=new URLSearchParams(location.search).get('open');
+if(_pick&&SUBJECTS.some(x=>x.slug===_pick)) selSlug=_pick;
+function _applyOpen(){ if(_pick&&_open!=null){ const s=SUBJECTS.find(x=>x.slug===_pick); if(s&&s.units[+_open]) showLessons(s,s.units[+_open]); } }
+renderSubjects(); _applyOpen();
+fetch('_subject_ladders.json').then(r=>r.json()).then(j=>{ LADDERS=j||{}; renderSubjects(); _applyOpen(); }).catch(()=>{});
 
 /* the reading lamp: click it to turn the light on/off (off by default) */
 (function(){
