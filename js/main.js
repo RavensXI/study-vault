@@ -1178,7 +1178,7 @@ function initNarration() {
     // Remove old highlight
     if (activeChunk) {
       var oldEl = document.querySelector('[data-narration-id="' + activeChunk + '"]');
-      if (oldEl) oldEl.classList.remove('narration-active');
+      if (oldEl) { oldEl.classList.remove('narration-active'); oldEl.style.removeProperty('--sv-read'); }
     }
 
     var newEl = null;
@@ -1225,7 +1225,7 @@ function initNarration() {
   function clearHighlight() {
     if (activeChunk) {
       var el = document.querySelector('[data-narration-id="' + activeChunk + '"]');
-      if (el) el.classList.remove('narration-active');
+      if (el) { el.classList.remove('narration-active'); el.style.removeProperty('--sv-read'); }
       activeChunk = null;
     }
     document.querySelectorAll('.collapsible.narration-reading').forEach(function(el) {
@@ -1302,6 +1302,13 @@ function initNarration() {
       timeEl.textContent = fmtTime(gt) + ' / ' + fmtTime(totalDuration);
       fabFill.style.width = pct;
       fabTime.textContent = fmtTime(gt);
+      // reader skin: fill the active chunk's read-along line to where the voice is
+      if (currentIndex >= 0 && manifest[currentIndex] && activeChunk) {
+        var clipDur = manifest[currentIndex].duration || 0;
+        var clipPct = clipDur > 0 ? Math.max(0, Math.min(100, (audio.currentTime || 0) / clipDur * 100)) : 0;
+        var actEl = document.querySelector('[data-narration-id="' + activeChunk + '"]');
+        if (actEl) actEl.style.setProperty('--sv-read', clipPct.toFixed(1) + '%');
+      }
     }
   });
 

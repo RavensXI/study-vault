@@ -152,45 +152,40 @@ body[data-skin] .exam-tip{ border-radius:var(--radius-sm); box-shadow:none; }
 body[data-skin] blockquote{ border-left:2px solid var(--border-light); padding-left:1.2rem; }
 body[data-skin] blockquote p{ font-style:italic; color:var(--text-secondary); }
 
-/* ---------- narration read-along (reader): a light that RUNS the box edge ----------
-   Replaces the old gold side-stripe (box-shadow:-4px 0 0 — the AI tell). The
-   active chunk sits on a faint accent wash; a bright arc travels its perimeter,
-   accelerating along the straights and easing as it wraps a corner. Built as a
-   masked conic ring on a pseudo-element so it hugs any box at any size and follows
-   the squared corners. Reduced-motion falls back to a static hairline. */
-@property --sv-run{ syntax:'<angle>'; initial-value:0deg; inherits:false; }
+/* ---------- narration read-along (reader): a progress line that tracks the voice ----------
+   Replaces the old gold side-stripe (box-shadow:-4px 0 0 — the AI tell). The active
+   chunk sits on a faint accent wash with a thin accent line along its bottom edge that
+   FILLS as the narration reads through it — width driven by audio time from main.js
+   (--sv-read), brighter and glowing at the leading edge as a playhead, with a faint
+   track showing the passage still to come. Reduced-motion shows a static full line. */
 body[data-skin="reader"] [data-narration-id].narration-active,
 body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active){
-  position:relative; isolation:isolate; box-shadow:none !important;
+  position:relative; box-shadow:none !important;
   background:color-mix(in srgb,var(--accent) 6%,transparent) !important;
   border-radius:var(--radius-sm);
 }
 /* text chunks: drop the old stripe's 0.75rem indent so nothing nudges sideways */
 body[data-skin="reader"] :is(p,h2,h3,h4,li)[data-narration-id].narration-active{ padding-left:0 !important; }
-body[data-skin="reader"] [data-narration-id].narration-active::after,
-body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active)::after{
-  content:''; position:absolute; inset:0; z-index:2; pointer-events:none;
-  border-radius:inherit; padding:2px;
-  background:conic-gradient(from var(--sv-run),
-      transparent 0deg, transparent 172deg,
-      color-mix(in srgb,var(--accent) 30%,transparent) 250deg,
-      var(--accent) 320deg,
-      color-mix(in srgb,#fff 75%,var(--accent)) 344deg,
-      var(--accent) 350deg,
-      transparent 360deg);
-  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite:xor; mask-composite:exclude;
-  filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 55%,transparent));
-  animation:sv-runner 3.4s cubic-bezier(.45,0,.55,1) infinite;
+/* the line sits on the actual narrated element (a paragraph, heading, or a key-fact
+   that is its own chunk) — not a parent box, since --sv-read inherits downward only.
+   faint track: the passage still to be read */
+body[data-skin="reader"] [data-narration-id].narration-active::before{
+  content:''; position:absolute; left:0; right:0; bottom:0; height:3px;
+  background:var(--border-lighter); z-index:2; pointer-events:none;
 }
-@keyframes sv-runner{ to{ --sv-run:360deg; } }
+/* the fill: how far the voice has read through this chunk (0% until playback moves it) */
+body[data-skin="reader"] [data-narration-id].narration-active::after{
+  content:''; position:absolute; left:0; bottom:0; height:3px;
+  width:var(--sv-read,0%); max-width:100%;
+  background:linear-gradient(90deg,
+    color-mix(in srgb,var(--accent) 65%,transparent),
+    var(--accent) 78%,
+    color-mix(in srgb,#fff 55%,var(--accent)));
+  box-shadow:0 0 6px color-mix(in srgb,var(--accent) 45%,transparent);
+  z-index:3; pointer-events:none; transition:width .25s linear;
+}
 @media (prefers-reduced-motion:reduce){
-  body[data-skin="reader"] [data-narration-id].narration-active::after,
-  body[data-skin="reader"] .key-fact:has([data-narration-id].narration-active)::after{
-    animation:none; background:none;
-    border:1.5px solid color-mix(in srgb,var(--accent) 55%,transparent);
-  }
+  body[data-skin="reader"] [data-narration-id].narration-active::after{ width:100%; box-shadow:none; transition:none; }
 }
 
 body[data-skin] .sidebar-section{
