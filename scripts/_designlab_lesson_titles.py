@@ -14,7 +14,7 @@ DEMO = {
   "maths-aqa": ["number", "algebra", "geometry"],
   "english-language-aqa": ["paper-1-reading", "paper-1-writing", "paper-2-reading", "paper-2-writing"],
   "english-literature-aqa": ["macbeth", "a-christmas-carol", "power-and-conflict"],
-  "science-aqa": ["biology-paper-1", "chemistry-paper-1", "physics-paper-1"],
+  "science-aqa": ["biology-paper-1", "biology-paper-2", "chemistry-paper-1", "chemistry-paper-2", "physics-paper-1", "physics-paper-2"],
   "history-aqa": ["germany-democracy-dictatorship", "conflict-tension-first-world-war", "britain-health-people", "elizabethan-england"],
   "geography-aqa": ["paper-1", "paper-2"],
   "spanish-aqa": ["people-and-lifestyle", "popular-culture", "communication-and-world"],

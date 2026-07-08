@@ -14,7 +14,7 @@
      desk — laid out as a clean planner page. This is the professional
      front door (and the mobile answer); the desk is the cosy mode. */
   :root{--paper:#f6f1e7;--card:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;
-    --line:#e4dfd2;--linel:#efeadf;--anchor:#4e5f66;
+    --line:#e4dfd2;--linel:#efeadf;--anchor:#5b4632;
     --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive;
     --ease:cubic-bezier(.22,1,.36,1)}
   *{box-sizing:border-box}
@@ -30,7 +30,7 @@
   .datestamp{font-family:var(--hand);font-size:1.35rem;color:var(--mut);margin-left:6px;margin-top:2px}
   .top .sp{flex:1}
   .cosy{font-family:var(--head);font-size:.88rem;font-weight:600;color:var(--sec);text-decoration:none;
-    border:1px solid var(--line);border-radius:9px;padding:.45rem .8rem;background:var(--card);transition:border-color .15s,color .15s}
+    border:1px solid var(--line);border-radius:4px;padding:.45rem .8rem;background:var(--card);transition:border-color .15s,color .15s}
   .cosy:hover{border-color:#b9a98c;color:var(--ink)}
   .avatar{width:32px;height:32px;border-radius:50%;background:#221E19;color:#faf8f5;
     display:grid;place-items:center;font-weight:700;font-size:.8rem}
@@ -53,14 +53,13 @@
   .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.4) 93%,transparent 98.5%);
     border-radius:6px;padding:1px 7px;margin:0 -3px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;
-    box-shadow:0 1px 2px rgba(29,28,26,.04)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:none}
 
   /* ---- today's plan ---- */
   .plan{padding:.7rem 1.2rem .8rem}
   .plan ol{list-style:none;margin:0;padding:0}
   .plan li{display:grid;grid-template-columns:28px minmax(0,1fr) 58px;gap:0 12px;align-items:center;
-    padding:.36rem .4rem;border-radius:10px;cursor:pointer;transition:background .14s}
+    padding:.36rem .4rem;border-radius:3px;cursor:pointer;transition:background .14s}
   .plan li.inert{cursor:default}
   .plan li:hover:not(.inert){background:rgba(112,90,50,.06)}
   .plan li+li{border-top:1px solid var(--linel)}
@@ -69,10 +68,12 @@
   .plan small{font-size:.8rem;color:var(--mut);display:block;margin-top:.1rem}
   .plan .mins{font-size:.83rem;font-weight:600;color:var(--mut);text-align:right;padding-top:.2rem;font-variant-numeric:tabular-nums}
   .startrow{display:flex;align-items:center;gap:14px;margin-top:.55rem}
-  .start{display:inline-flex;align-items:center;gap:10px;padding:.6rem 1.35rem;border:none;border-radius:11px;
-    background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:.95rem;cursor:pointer;transition:filter .15s}
+  .start{display:inline-flex;align-items:center;gap:10px;padding:.6rem 1.35rem;border:none;border-radius:4px;
+    background:var(--anchor);color:#fff;font-family:var(--head);font-weight:700;font-size:.95rem;cursor:pointer;
+    box-shadow:inset 0 -2px 0 rgba(0,0,0,.22);transition:filter .15s}
   .start:focus-visible{outline:3px solid color-mix(in srgb,var(--anchor) 40%,#fff);outline-offset:2px}
-  .start:hover{filter:brightness(.94)}
+  .start:hover{filter:brightness(1.06)}
+  .start:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
   .start svg{width:14px;height:14px;fill:#fff}
   .startnote{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
 
@@ -254,7 +255,7 @@
   .cal .d.gone::after{content:"✕";position:absolute;inset:0;display:grid;place-items:center;
     color:rgba(184,68,47,.38);font-size:.82rem;transform:rotate(-4deg)}
   .cal .d.today{color:#fff;isolation:isolate}
-  .cal .d.today::before{content:"";position:absolute;inset:-1px 18%;background:var(--anchor);border-radius:7px;z-index:-1}
+  .cal .d.today::before{content:"";position:absolute;inset:-1px 18%;background:var(--anchor);border-radius:3px;z-index:-1}
 
   .week{padding:.6rem 1rem .65rem}
   .week h3{font-size:.78rem;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--mut);margin:0 0 .5rem}
@@ -265,8 +266,8 @@
 
   .door{display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:11px;align-items:center;
     padding:.45rem .85rem .45rem .55rem;cursor:pointer;text-align:left;width:100%;font-family:var(--head);color:inherit;
-    transition:transform .25s var(--ease),box-shadow .25s,border-color .25s}
-  .door:hover{transform:translateY(-2px);box-shadow:0 12px 26px -18px rgba(29,28,26,.35);border-color:#cdbfa4}
+    transition:border-color .2s,background .2s}
+  .door:hover{border-color:#c9ba9e;background:color-mix(in srgb,var(--anchor) 4%,transparent)}
   .door img{width:48px;height:38px;object-fit:contain;display:block}
   .door h3{font-size:.98rem;font-weight:700;margin:0 0 .1rem}
   .door p{font-size:.8rem;color:var(--mut);margin:0}
@@ -290,7 +291,7 @@
   .bigcard{width:min(92vw,560px);aspect-ratio:8/5;border:none;background:none;cursor:pointer;perspective:1400px;padding:0}
   .bigcard .flip{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s var(--ease)}
   .bigcard.showa .flip{transform:rotateY(180deg)}
-  .bigcard .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffdf8;border-radius:18px;
+  .bigcard .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffdf8;border-radius:8px;
     box-shadow:0 30px 70px -25px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;
     gap:14px;padding:2rem}
   .bigcard .back{transform:rotateY(180deg)}
@@ -429,7 +430,7 @@ const SUBJECTS=[
  {tab:'Maths',slug:'maths',sub:'maths-aqa',mode:'p',name:'Mathematics',c:'#4e5f66',units:[['Number',7,3,'number'],['Algebra',14,5,'algebra'],['Geometry & Measures',8,2,'geometry']]},
  {tab:'English',slug:'lang',sub:'english-language-aqa',mode:'p',name:'English Language',c:'#5b7285',units:[['Paper 1: Reading',8,2,'paper-1-reading'],['Paper 1: Writing',7,1,'paper-1-writing'],['Paper 2: Reading',8,1,'paper-2-reading'],['Paper 2: Writing',7,0,'paper-2-writing']]},
  {tab:'Lit',slug:'lit',sub:'english-literature-aqa',mode:'l',name:'English Literature',c:'#7d5a78',units:[['Macbeth',10,4,'macbeth'],['A Christmas Carol',8,5,'a-christmas-carol'],['Power & Conflict',10,3,'power-and-conflict']]},
- {tab:'Science',slug:'science',sub:'science-aqa',mode:'l',name:'Combined Science',c:'#4e6e5d',units:[['Biology Paper 1',10,4,'biology-paper-1'],['Chemistry Paper 1',12,2,'chemistry-paper-1'],['Physics Paper 1',11,1,'physics-paper-1']]},
+ {tab:'Science',slug:'science',sub:'science-aqa',mode:'l',name:'Combined Science',c:'#4e6e5d',units:[['Biology Paper 1',10,4,'biology-paper-1'],['Biology Paper 2',13,2,'biology-paper-2'],['Chemistry Paper 1',12,2,'chemistry-paper-1'],['Chemistry Paper 2',11,1,'chemistry-paper-2'],['Physics Paper 1',11,1,'physics-paper-1'],['Physics Paper 2',13,0,'physics-paper-2']]},
  {tab:'History',slug:'history',sub:'history-aqa',mode:'l',name:'History',c:'#8a5a44',units:[['Germany 1890–1945',14,4,'germany-democracy-dictatorship'],['Conflict & Tension',13,2,'conflict-tension-first-world-war'],['Britain: Health & the People',14,1,'britain-health-people'],['Elizabethan England',12,1,'elizabethan-england']]},
  {tab:'Geog',slug:'geog',sub:'geography-aqa',mode:'l',name:'Geography',c:'#6d7a4e',units:[['Paper 1: Physical Geography',20,5,'paper-1'],['Paper 2: Human Geography',20,4,'paper-2']]},
  {tab:'Spanish',slug:'spanish',sub:'spanish-aqa',mode:'p',name:'Spanish',c:'#a2643f',units:[['People & Lifestyle',10,3,'people-and-lifestyle'],['Popular Culture',8,2,'popular-culture'],['Communication & the World',8,1,'communication-and-world']]},
