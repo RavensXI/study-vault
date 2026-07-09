@@ -182,8 +182,16 @@
     66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(-90deg)           scale(1.04)}  /* turned to read the spine */
     100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(20px) rotate(-90deg)           scale(1.5)}   /* drawn closer */
   }
-  /* click again -> slot back in: the same motion played in reverse (enlarge→turn→down into the shelf) */
-  .bk.returning{transform-origin:center center;z-index:20;animation:book-pull 1s cubic-bezier(.4,0,.2,1) reverse both}
+  /* click again -> slot back in. Needs its OWN @keyframes (not book-pull with reverse): reusing
+     book-pull's name leaves the resolved animation-name unchanged, so the browser never restarts
+     it and the book just snaps. book-return is book-pull with the keyframes mirrored. */
+  .bk.returning{transform-origin:center center;z-index:20;animation:book-return 1s cubic-bezier(.4,0,.2,1) both}
+  @keyframes book-return{
+    0%   {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(20px) rotate(-90deg)           scale(1.5)}   /* out in the hand */
+    34%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(-90deg)           scale(1.04)}  /* drawn back, still turned */
+    66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* turned upright */
+    100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0)    rotate(var(--lean,0deg)) scale(1)}     /* slotted back into the shelf */
+  }
   @media (prefers-reduced-motion:reduce){ .bk[aria-selected="true"],.bk.returning{animation:none} }
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   /* drag to reorder; drop with a little physics */
