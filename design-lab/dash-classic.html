@@ -182,7 +182,9 @@
     66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(-90deg)           scale(1.04)}  /* turned to read the spine */
     100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(20px) rotate(-90deg)           scale(1.5)}   /* drawn closer */
   }
-  @media (prefers-reduced-motion:reduce){ .bk[aria-selected="true"]{animation:none} }
+  /* click again -> slot back in: the same motion played in reverse (enlarge→turn→down into the shelf) */
+  .bk.returning{transform-origin:center center;z-index:20;animation:book-pull 1s cubic-bezier(.4,0,.2,1) reverse both}
+  @media (prefers-reduced-motion:reduce){ .bk[aria-selected="true"],.bk.returning{animation:none} }
   .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   /* drag to reorder; drop with a little physics */
   .bk.dragging{z-index:50;transition:none;cursor:grabbing;
@@ -541,9 +543,14 @@ function fitShelf(){
   shelf.style.setProperty('--beh',(210*f).toFixed(1)+'px');
   shelf.style.setProperty('--fit',f.toFixed(4));   // scales the foot-shift with the books
 }
-function deselectSubject(){                 // click a selected spine again -> it drops back in line, no panel
+function deselectSubject(){                 // click a selected spine again -> it slots back into the shelf
+  const cur=document.querySelector('.bk[aria-selected="true"]');
   selSlug=null;
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected','false'));
+  if(cur && !matchMedia('(prefers-reduced-motion:reduce)').matches){   // replay the pull-out in reverse
+    cur.classList.add('returning');
+    cur.addEventListener('animationend',()=>cur.classList.remove('returning'),{once:true});
+  }
   const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';
   const p=document.getElementById('selprompt'); if(p) p.hidden=false;
 }
