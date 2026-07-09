@@ -172,24 +172,26 @@
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
   .bk:hover{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) rotate(var(--lean,0deg)) translateY(-5px)}
-  /* taken off the shelf, in stages: slide DOWN out of the slot → turn 90° to read → draw closer (enlarge) */
-  .bk[aria-selected="true"]{transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(20px) rotate(-90deg) scale(1.5);
+  /* taken off the shelf, in stages: slide DOWN out of the slot → turn 90° while sliding to the frame
+     centre → draw closer (enlarge). --pull-dx (set per-book in JS) is the x-shift to the frame centre,
+     so every book ends in the same central spot regardless of which slot it came from. */
+  .bk[aria-selected="true"]{transform:translateX(var(--pull-dx,0px)) translateY(20px) rotate(-90deg) scale(1.5);
     transform-origin:center center;z-index:20;animation:book-pull 1s cubic-bezier(.4,0,.2,1) forwards}
   .bk[aria-selected="true"]::before{opacity:0}
   @keyframes book-pull{
     0%   {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0)    rotate(var(--lean,0deg)) scale(1)}
-    34%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* pulled down out of the shelf */
-    66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(-90deg)           scale(1.04)}  /* turned to read the spine */
-    100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(20px) rotate(-90deg)           scale(1.5)}   /* drawn closer */
+    34%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* pulled straight down out of its slot */
+    66%  {transform:translateX(var(--pull-dx,0px))                  translateY(30px) rotate(-90deg)          scale(1.04)}  /* turned, slid to centre */
+    100% {transform:translateX(var(--pull-dx,0px))                  translateY(20px) rotate(-90deg)          scale(1.5)}   /* centred + drawn closer */
   }
   /* click again -> slot back in. Needs its OWN @keyframes (not book-pull with reverse): reusing
      book-pull's name leaves the resolved animation-name unchanged, so the browser never restarts
      it and the book just snaps. book-return is book-pull with the keyframes mirrored. */
   .bk.returning{transform-origin:center center;z-index:20;animation:book-return 1s cubic-bezier(.4,0,.2,1) both}
   @keyframes book-return{
-    0%   {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(20px) rotate(-90deg)           scale(1.5)}   /* out in the hand */
-    34%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(-90deg)           scale(1.04)}  /* drawn back, still turned */
-    66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* turned upright */
+    0%   {transform:translateX(var(--pull-dx,0px))                  translateY(20px) rotate(-90deg)          scale(1.5)}   /* centred, in the hand */
+    34%  {transform:translateX(var(--pull-dx,0px))                  translateY(30px) rotate(-90deg)          scale(1.04)}  /* drawn back, still turned */
+    66%  {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(30px) rotate(0deg)             scale(1.02)}  /* turned upright, slid back to its slot */
     100% {transform:translateX(calc(var(--shift,0px)*var(--fit,1))) translateY(0)    rotate(var(--lean,0deg)) scale(1)}     /* slotted back into the shelf */
   }
   @media (prefers-reduced-motion:reduce){ .bk[aria-selected="true"],.bk.returning{animation:none} }
@@ -578,7 +580,24 @@ function selectSubject(slug,silent){
 }
 function _pullOut(slug){
   if(slug!==selSlug) return;                    // a later click superseded this one — don't pull the wrong book
-  document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug)));
+  const bk=[...document.querySelectorAll('.bk')].find(sp=>sp.dataset.slug===slug);
+  const applySel=()=>{ if(slug!==selSlug) return;   // set aria-selected -> starts the pull-out animation
+    document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug))); };
+  if(bk){
+    // measure the x-shift to the frame centre FIRST (once the painted spine has a width), THEN start
+    // the animation — a running CSS animation won't reliably pick up a --pull-dx set after it began.
+    const shelf=bk.parentElement; let tries=0;
+    const measure=()=>{
+      if(slug!==selSlug || !bk.isConnected) return;   // superseded, or a re-render replaced this element — abandon
+      if(bk.offsetWidth){
+        bk.style.setProperty('--pull-dx',Math.round(shelf.clientWidth/2-(bk.offsetLeft+bk.offsetWidth/2))+'px');
+        applySel(); return;
+      }
+      if(tries++<30){ requestAnimationFrame(measure); return; }
+      applySel();                               // art never sized — pull out anyway (uncentred fallback)
+    };
+    measure();
+  } else applySel();
   renderSubjectPanel(SUBJECTS.find(x=>x.slug===slug));
 }
 /* default panel: resume button + the subject's topics (click one to pick a lesson) */
