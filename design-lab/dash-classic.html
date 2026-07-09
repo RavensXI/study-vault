@@ -555,8 +555,21 @@ function deselectSubject(){                 // click a selected spine again -> i
   const p=document.getElementById('selprompt'); if(p) p.hidden=false;
 }
 function selectSubject(slug,silent){
-  if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off
+  if(!silent && slug===selSlug){ deselectSubject(); return; }   // toggle off (same spine)
+  const prev=document.querySelector('.bk[aria-selected="true"]');
   selSlug=slug;
+  // switching from a different open book: slot the old one back in FIRST, then pull the new one out
+  if(prev && prev.dataset.slug!==slug && !silent && !matchMedia('(prefers-reduced-motion:reduce)').matches){
+    prev.setAttribute('aria-selected','false');
+    prev.classList.add('returning');
+    const el=document.getElementById('sdetail'); el.hidden=true; el.innerHTML='';   // close the panel while it returns
+    prev.addEventListener('animationend',()=>{ prev.classList.remove('returning'); _pullOut(slug); },{once:true});
+    return;
+  }
+  _pullOut(slug);
+}
+function _pullOut(slug){
+  if(slug!==selSlug) return;                    // a later click superseded this one — don't pull the wrong book
   document.querySelectorAll('.bk').forEach(sp=>sp.setAttribute('aria-selected',String(sp.dataset.slug===slug)));
   renderSubjectPanel(SUBJECTS.find(x=>x.slug===slug));
 }
