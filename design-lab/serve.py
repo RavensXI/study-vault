@@ -23,6 +23,7 @@ REWRITES = [
     ("/shelves", "/design-lab/_shelf_compare.html"),  # coherent vs static comparison
     ("/gold", "/design-lab/gold-lab.html"),  # spine-title gold tuner
     ("/shorts-review", "/design-lab/shorts-review.html"),  # review banked shorts by subject
+    ("/welcome", "/design-lab/home-study.html"),  # landing concept: the study, before you sit down
 ]
 
 
