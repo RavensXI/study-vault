@@ -122,6 +122,8 @@
   .view{display:none}
   body[data-view="landing"] .view-landing{display:block}
   body[data-view="picker"] .view-picker{display:block}
+  body[data-view="boards"] .view-boards{display:block}
+  body[data-view="save"] .view-save{display:block}
   .picker-head{text-align:center;margin:1.5rem 0 .2rem}
   .picker-head h1{margin-bottom:.35rem}
   .picker-head p{font-size:.98rem;color:var(--sec);margin:0}
@@ -142,6 +144,25 @@
   .picker-foot .cta{width:auto;padding:.68rem 1.6rem}
   .backlink{background:none;border:none;font:inherit;font-size:.88rem;color:var(--sec);cursor:pointer;
     text-decoration:underline;text-underline-offset:3px}
+  /* editions: one row per picked book, a chip per board */
+  .boardlist{max-width:740px;margin:1.4rem auto 0;display:flex;flex-direction:column}
+  .brow{display:flex;align-items:center;gap:12px;padding:.5rem .2rem;border-top:1px solid var(--linel)}
+  .brow:first-child{border-top:none}
+  .brow img{height:38px;width:auto;flex:none;filter:saturate(1.4) brightness(1.1)}
+  .brow .bn{font-family:var(--read);font-size:.94rem;font-weight:600;min-width:9.5rem}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-left:auto}
+  .chip{font:600 .78rem/1 var(--head);color:var(--sec);background:var(--card);border:1px solid var(--line);
+    border-radius:3px;padding:.42rem .65rem;cursor:pointer;transition:border-color .15s,background .15s;letter-spacing:.02em}
+  .chip:hover{border-color:var(--tc)}
+  .chip[aria-pressed="true"]{background:var(--tc);border-color:var(--tc);color:#fff}
+  /* a board we don't have yet: honest, and one tap turns the miss into a request */
+  .chip.off{border-style:dashed;color:var(--mut)}
+  .chip.off[aria-pressed="true"]{background:#a1793d;border-color:#a1793d;border-style:solid;color:#fff}
+  .verdict{text-align:center;font-size:.92rem;color:var(--sec);margin:1rem 0 0}
+  .verdict b{color:var(--ink)}
+  .verdict .req{color:#8a6430}
+  .savecard{max-width:400px;margin:1.5rem auto 0}
+  @media (max-width:640px){ .brow{flex-wrap:wrap} .chips{margin-left:50px} }
   .shelf-empty-note{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:2;
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
 </style>
@@ -179,10 +200,10 @@
     <div class="doors">
       <div class="door">
         <h2>Revising on my own</h2>
-        <p class="sub">Free, every subject, no card. Pick your subjects and build your shelf.</p>
-        <input class="field" type="email" placeholder="Email address" aria-label="Email address">
-        <input class="field" type="password" placeholder="Password" aria-label="Password">
-        <button class="cta" onclick="enterPicker()">Create your shelf &rarr;</button>
+        <p class="sub">Free, every subject, no card. Build your shelf first &mdash; see we&rsquo;ve got
+          everything you&rsquo;re sitting <em>before</em> you sign up.</p>
+        <button class="cta" onclick="go('picker')">Create your shelf &rarr;</button>
+        <p class="tiny">Takes a minute &middot; nothing saved until you say so</p>
         <p class="tiny">Already have a shelf? <a href="#" onclick="return false">Sign in</a></p>
       </div>
       <div class="door">
@@ -224,9 +245,63 @@
     <div class="subject-grid" id="sgrid"></div>
 
     <div class="picker-foot">
-      <button class="backlink" onclick="leavePicker()">&larr; Back</button>
+      <button class="backlink" onclick="go('landing')">&larr; Back</button>
       <span class="picker-count" id="pcount">No subjects yet</span>
-      <button class="cta" id="pnext" disabled style="opacity:.45">Choose exam boards &rarr;</button>
+      <button class="cta" id="pnext" disabled style="opacity:.45" onclick="go('boards')">Choose exam boards &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ================= EDITIONS: one board per book ================= -->
+  <div class="view view-boards">
+    <div class="picker-head">
+      <h1>Which exam board?</h1>
+      <p>Choose each book&rsquo;s edition &mdash; the spec your teacher follows.</p>
+    </div>
+
+    <div class="shelfstage lit">
+      <div class="shelf" id="shelf-boards"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <div class="pullcord"></div>
+    </div>
+
+    <div class="boardlist" id="blist"></div>
+    <p class="verdict" id="verdict"></p>
+
+    <div class="picker-foot">
+      <button class="backlink" onclick="go('picker')">&larr; Subjects</button>
+      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="go('save')">Save your shelf &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ================= SAVE: the only moment we ask for anything ================= -->
+  <div class="view view-save">
+    <div class="picker-head">
+      <h1>Save your shelf.</h1>
+      <p id="savesub"></p>
+    </div>
+
+    <div class="shelfstage lit">
+      <div class="shelf" id="shelf-save"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <div class="pullcord"></div>
+    </div>
+
+    <div class="door savecard">
+      <input class="field" type="email" placeholder="Email address" aria-label="Email address">
+      <input class="field" type="password" placeholder="Choose a password" aria-label="Choose a password">
+      <button class="cta" onclick="return false">Save your shelf</button>
+      <p class="tiny">Free &middot; your shelf will be waiting</p>
+    </div>
+    <div class="picker-foot">
+      <button class="backlink" onclick="go('boards')">&larr; Exam boards</button>
     </div>
   </div>
 
@@ -299,6 +374,8 @@ function togglePick(slug){
   pc.textContent=n===0?'No subjects yet':n+' subject'+(n>1?'s':'')+' on your shelf';
   nx.disabled=n===0; nx.style.opacity=n===0?'.45':'1';
   document.getElementById('emptynote').style.opacity=n===0?'1':'0';
+  if(!picked.includes(slug)) delete boards[slug];   /* un-picking a book drops its edition */
+  persist();
 }
 function renderPickerShelf(newSlug){
   shelfP.innerHTML=''; shelfP.appendChild(bookendEl());
@@ -308,14 +385,94 @@ function renderPickerShelf(newSlug){
     shelfP.appendChild(bookEl(s,i,n,slug===newSlug));
   });
 }
-function enterPicker(){ document.body.dataset.view='picker'; scrollTo(0,0); }
-function leavePicker(){ document.body.dataset.view='landing'; scrollTo(0,0); }
+/* real free-tier coverage per family (from Supabase, 10 Jul 2026). 1 = built & live.
+   Honest gaps today: Combined Science has no Eduqas/WJEC row; Spanish has no OCR. */
+const BOARDKEYS=['aqa','edexcel','ocr','eduqas'];
+const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC'};
+const COVER={
+  maths:{aqa:1,edexcel:1,ocr:1,eduqas:1}, lang:{aqa:1,edexcel:1,ocr:1,eduqas:1},
+  lit:{aqa:1,edexcel:1,ocr:1,eduqas:1},   science:{aqa:1,edexcel:1,ocr:1,eduqas:0},
+  history:{aqa:1,edexcel:1,ocr:1,eduqas:1}, geog:{aqa:1,edexcel:1,ocr:1,eduqas:1},
+  spanish:{aqa:1,edexcel:1,ocr:0,eduqas:1}, cs:{aqa:1,edexcel:1,ocr:1,eduqas:1},
+  rs:{aqa:1,edexcel:1,ocr:1,eduqas:1},
+};
+let boards={};   /* slug -> board key; a key the board doesn't offer = a request */
 
-/* deep-link for review: ?view=picker&picked=history,maths */
+function renderShelfInto(el,slugs){
+  el.innerHTML=''; el.appendChild(bookendEl());
+  slugs.forEach((slug,i)=>{ const s=SUBJECTS.find(x=>x.slug===slug);
+    el.appendChild(bookEl(s,i,slugs.length,false)); });
+}
+function renderBoards(){
+  renderShelfInto(document.getElementById('shelf-boards'),picked);
+  const bl=document.getElementById('blist'); bl.innerHTML='';
+  picked.forEach(slug=>{
+    const su=SUBJECTS.find(x=>x.slug===slug);
+    const row=document.createElement('div'); row.className='brow'; row.style.setProperty('--tc',su.c);
+    row.innerHTML='<img src="assets/lw/shelf/book_'+slug+'.webp" alt=""><span class="bn">'+su.name+'</span><span class="chips"></span>';
+    const chips=row.querySelector('.chips');
+    BOARDKEYS.forEach(k=>{
+      const have=COVER[slug]&&COVER[slug][k];
+      const ch=document.createElement('button'); ch.type='button';
+      ch.className='chip'+(have?'':' off');
+      ch.setAttribute('aria-pressed',String(boards[slug]===k));
+      ch.textContent=BOARDLBL[k];
+      ch.title=have?'':'Not on our shelves yet \u2014 tap to ask for it';
+      ch.onclick=()=>{ if(boards[slug]===k) delete boards[slug]; else boards[slug]=k;
+        persist(); renderBoards(); };
+      chips.appendChild(ch);
+    });
+    bl.appendChild(row);
+  });
+  /* verdict: found vs requested */
+  const chosen=picked.filter(sl=>boards[sl]);
+  const found=chosen.filter(sl=>COVER[sl]&&COVER[sl][boards[sl]]);
+  const reqs=chosen.filter(sl=>!(COVER[sl]&&COVER[sl][boards[sl]]));
+  const v=document.getElementById('verdict');
+  if(!chosen.length) v.innerHTML='Pick a board for each book.';
+  else if(reqs.length===0 && chosen.length===picked.length)
+    v.innerHTML='<b>'+found.length+' of '+picked.length+' on the shelf.</b> Everything you&rsquo;re sitting is here.';
+  else{
+    let t='<b>'+found.length+' of '+picked.length+'</b> on the shelf now.';
+    if(reqs.length) t+=' <span class="req">'+reqs.map(sl=>SUBJECTS.find(x=>x.slug===sl).name+' ('+BOARDLBL[boards[sl]]+')').join(', ')
+      +(reqs.length>1?' aren&rsquo;t':' isn&rsquo;t')+' bound yet &mdash; we&rsquo;ll email you when it lands.</span>';
+    if(chosen.length<picked.length) t+=' '+(picked.length-chosen.length)+' still to choose.';
+    v.innerHTML=t;
+  }
+  const nx=document.getElementById('bnext'), ready=chosen.length===picked.length&&picked.length>0;
+  nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
+}
+function renderSave(){
+  renderShelfInto(document.getElementById('shelf-save'),picked);
+  const found=picked.filter(sl=>COVER[sl]&&COVER[sl][boards[sl]]);
+  const reqs=picked.length-found.length;
+  document.getElementById('savesub').textContent=
+    reqs===0?(picked.length+(picked.length===1?' book':' books')+' \u00b7 everything you\u2019re sitting.')
+            :(found.length+' ready now \u00b7 '+reqs+' on the way \u2014 we\u2019ll email you.');
+}
+function go(v){
+  document.body.dataset.view=v;
+  if(v==='boards') renderBoards();
+  if(v==='save') renderSave();
+  scrollTo(0,0);
+}
+/* the shelf you built survives a wander-off (nothing server-side until Save) */
+function persist(){ try{ localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards})); }catch(e){} }
+(function restore(){ try{
+  const st=JSON.parse(localStorage.getItem('sv-welcome')||'{}');
+  (st.picked||[]).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
+  boards=st.boards||{};
+}catch(e){} })();
+
+/* deep-link for review: ?view=picker|boards|save&picked=history,maths&boards=history:aqa */
 const q=new URLSearchParams(location.search);
-if(q.get('view')==='picker'){ document.body.dataset.view='picker';
+if(q.get('picked')!==null){
+  picked.slice().forEach(sl=>togglePick(sl));            /* reset, then apply the link's shelf */
   (q.get('picked')||'').split(',').filter(Boolean).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
 }
+if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
+  const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&BOARDKEYS.includes(kv[1])) boards[kv[0]]=kv[1]; }); }
+if(q.get('view')) go(q.get('view'));
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
 </script>
 </body>
