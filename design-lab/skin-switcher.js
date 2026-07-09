@@ -8,9 +8,12 @@
   // The Bindery brand kit is local-only (gitignored — trademark clearance
   // pending, must not enter the public repo). Only swap the wordmark when the
   // asset actually exists; deployed previews keep the StudyVault wordmark.
-  var binderyProbe = new Image();
-  binderyProbe.onload = function () { document.body.classList.add('has-bindery'); };
-  binderyProbe.src = '/design-lab/assets/brand/bindery-lockup.svg';
+  // Bindery wordmark swap DISABLED (Tom, 9 Jul) — lessons show the StudyVault
+  // wordmark again. To re-enable the Bindery masthead exploration, restore the
+  // probe below (it adds .has-bindery when the local-only lockup asset exists).
+  // var binderyProbe = new Image();
+  // binderyProbe.onload = function () { document.body.classList.add('has-bindery'); };
+  // binderyProbe.src = '/design-lab/assets/brand/bindery-lockup.svg';
 
   var SKINS = [['', 'Today'], ['reader', 'Reader'], ['desk', 'Desk'], ['paper', 'Paper'], ['ink', 'Ink'], ['crisp', 'Crisp']];
 
