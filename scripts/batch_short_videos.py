@@ -12,8 +12,10 @@ Hardening baked in (from the scars of the podcast/explainer batches):
                                     the moment its video downloads => never hits NotebookLM's
                                     notebook cap.
   * STARTUP SWEEP               — deletes orphaned "SVSHORT" notebooks left by a crashed run.
-  * FAIL-SAFE AUTH              — detects expiry and EXITS CLEANLY (never launches the
-                                    interactive `nlm login`, which hangs a headless run).
+  * SELF-HEALING AUTH            — on expiry, runs `nlm login` itself (the CLI's saved
+                                    Chrome profile completes it non-interactively, same as
+                                    batch_podcasts) with a 150s timeout; only if THAT fails
+                                    does it exit cleanly asking for a manual login.
   * "unknown" != failed         — treated as still-processing until a per-video timeout.
   * DATE-STAMPED DAILY QUOTA     — respects the ~180/day cap across re-runs on the same day.
   * APPEND-ONLY MANIFEST         — the durable record of finished shorts; also the "done" set,
@@ -78,8 +80,24 @@ class AuthExpired(Exception):
     pass
 
 
-# ── nlm CLI (hardened: NO interactive re-login) ─────────────────────────────
-def nlm_run(args, timeout=120):
+# ── nlm CLI (self-healing auth: saved-profile re-login, then clean exit) ────
+def _reauth():
+    """nlm's saved Chrome profile completes login without a human (same flow
+    batch_podcasts has used all along). 150s cap so a dead session can't hang us."""
+    print("  [AUTH] Cookies expired — re-authenticating via saved profile...", flush=True)
+    try:
+        result = subprocess.run(["nlm", "login"], capture_output=True, text=True,
+                                encoding="utf-8", errors="replace", env=NLM_ENV, timeout=150)
+    except subprocess.TimeoutExpired:
+        print("  [AUTH] Re-auth timed out"); return False
+    if result.returncode == 0 and "success" in (result.stdout or "").lower():
+        print("  [AUTH] Re-auth successful", flush=True)
+        return True
+    print(f"  [AUTH] Re-auth failed: {(result.stdout or '')[:200]}")
+    return False
+
+
+def nlm_run(args, timeout=120, _retried=False):
     try:
         result = subprocess.run(
             ["nlm"] + args, capture_output=True, text=True,
@@ -89,7 +107,9 @@ def nlm_run(args, timeout=120):
         raise RuntimeError(f"nlm {args[0] if args else ''} timed out after {timeout}s")
     output = (result.stdout or "") + (result.stderr or "")
     if "Authentication expired" in output or "Authentication Error" in output:
-        raise AuthExpired()                            # bubble up — caller exits cleanly
+        if not _retried and _reauth():
+            return nlm_run(args, timeout, _retried=True)
+        raise AuthExpired()                            # genuinely dead — caller exits cleanly
     if result.returncode != 0 and "Error" in (result.stderr or ""):
         raise RuntimeError(f"nlm {' '.join(args[:3])} failed: {result.stderr[:200]}")
     return result.stdout.strip()
