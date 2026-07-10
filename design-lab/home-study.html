@@ -39,15 +39,15 @@
 
   /* ---- THE BOOKCASE: the whole library, full-bleed, two shelves ---- */
   .bookcase.shelfstage{position:relative;width:100vw;max-width:none;margin:1.7rem calc(50% - 50vw) 0}
-  .caserow{position:relative;max-width:1440px;margin:0 auto;padding:0 16px}
+  .caserow{position:relative;padding:0}
   .caserow{--bkh:236px}
   .caserow .shelf{justify-content:flex-start;height:244px}
   .caserow .ledgewrap{height:46px;overflow:hidden;margin-top:-8px;position:relative;z-index:1}
-  .caserow .ledgewrap .ledge{width:116%;margin-left:-8%;margin-top:0}
+  .caserow .ledgewrap .ledge{width:106%;margin-left:-3%;margin-top:0}
   .caserow .bookend{height:calc(var(--bkh,236px)*1.03)}
   .caserow .bk{transition:transform .3s var(--ease),filter .55s ease}
   .caserow .lamp{height:266px}
-  .caserow+.caserow{margin-top:-4px}
+  .caserow+.caserow{margin-top:16px}
   .caserow .bk{cursor:pointer;pointer-events:auto}
   .caserow .bk:hover{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-6px)}
   .caserow .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
@@ -67,11 +67,12 @@
   .booktip .tb{font-size:.72rem;color:var(--mut);letter-spacing:.05em;display:block;margin-top:.15rem}
   /* the light rig rides the right end of the top shelf (fixed-width so the cone geometry holds) */
   .bookcase .lightwash{display:none}
-  .lightrig .lampglow{display:none}
-  .lightrig{position:absolute;right:max(0px,calc(50% - 720px));top:0;height:100%;width:700px;pointer-events:none;z-index:4}
-  .lightrig .lamp{position:absolute;right:14px;bottom:302px;height:266px}
-  .bookcase .lampbtn{right:max(12px,calc(50% - 708px));bottom:auto;top:12px;height:280px}
-  @media (max-width:760px){ .lightrig,.bookcase .lampbtn{display:none} }
+  .lamprig{position:absolute;right:0;bottom:0;width:360px;height:100%;pointer-events:none;z-index:5}
+  .lamprig .lamp{position:absolute;right:14px;bottom:16px;height:266px;left:auto;top:auto}
+  .lamprig .bulb{left:183px;top:80px}
+  .lamprig .pullcord{left:192px;top:69px;height:72px}
+  .caserow .lampbtn{position:absolute;right:12px;bottom:12px;width:160px;height:275px;z-index:7}
+  @media (max-width:760px){ .lamprig,.caserow .lampbtn{display:none} }
 
   /* ---- the shelf (same painted world as the dashboard) ---- */
   .shelfstage{position:relative;max-width:900px;margin:1.4rem auto 0;
@@ -96,9 +97,6 @@
   .lightwash{position:absolute;left:0;right:0;top:-6px;bottom:2px;z-index:3;pointer-events:none;
     background:linear-gradient(to right, rgba(24,16,7,.38), rgba(24,16,7,.13) 34%, transparent 58%);
     mix-blend-mode:multiply;opacity:0;transition:opacity .55s ease}
-  .lightrig .lampglow{clip-path:polygon(68.6% 9.3%, 79.9% 16.5%, 73.0% 70%, 26% 46%)}
-  .lightrig .bulb{left:74.3%;top:12.9%}
-  .lightrig .pullcord{left:77.5%;top:10.8%;height:60px}
   .lampglow{position:absolute;inset:0;z-index:4;pointer-events:none;
     clip-path:polygon(75.6% 18.2%, 84.3% 32.4%, 79.0% 138.8%, 46.8% 86.2%);
     background:linear-gradient(to bottom,
@@ -226,19 +224,18 @@
         <div class="shelf" id="case-top"></div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
         <div class="lightwash"></div>
+        <div class="lamprig">
+          <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+          <div class="bulb"></div>
+          <div class="pullcord" id="cord-landing"></div>
+        </div>
+        <button class="lampbtn" type="button" aria-label="Toggle the lamp"></button>
       </div>
       <div class="caserow">
         <div class="shelf" id="case-bottom"></div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
         <div class="lightwash"></div>
       </div>
-      <div class="lightrig">
-        <div class="lampglow"></div>
-        <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-        <div class="bulb"></div>
-        <div class="pullcord" id="cord-landing"></div>
-      </div>
-      <button class="lampbtn" type="button" aria-label="Toggle the lamp"></button>
       <div class="booktip" id="booktip"></div>
     </div>
 
@@ -398,7 +395,7 @@ const SUBJECTS=[
  {slug:'hosp',   name:'Hospitality & Catering',c:'#67424e', cover:{aqa:0,edexcel:0,ocr:0,eduqas:1}},
  {slug:'hsc',    name:'Health & Social Care',c:'#4e7d78', cover:{aqa:0,edexcel:1,ocr:1,eduqas:1}},
 ];
-const ROW_TOP=['maths','lang','lit','science','triple','history','geog','french','spanish','german','cs','business','pe','psych','rs'];
+const ROW_TOP=['maths','lang','lit','science','triple','history','geog','french','spanish','german','cs','business','pe','psych','rs','socio'];
 const ROW_BOTTOM=SUBJECTS.map(s=>s.slug).filter(sl=>!ROW_TOP.includes(sl));
 /* per-position lean/foot tuned on the dashboard benches (9 slots) */
 const LEANS=[-4.2,-5.4,-6.4,-7.5,-8.8,-9.3,-10.3,-11.6,-23.6];

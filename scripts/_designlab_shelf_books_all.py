@@ -42,7 +42,7 @@ ROSTER = {
     "electronics": ("ELECTRONICS",           "burnished copper-brown cloth (title in ONE single column, no wrapping)","#8f5b31"),
     "it":          ("I.T.",                  "cool blue-grey cloth",        "#4f6d7d"),
     "media":       ("MEDIA STUDIES",         "plum-mauve cloth",            "#6b4f63"),
-    "film":        ("FILM STUDIES",          "charcoal cloth",              "#4a4a52"),
+    "film":        ("FILM STUDIES",          "charcoal cloth (title wrapped as two words: FILM on the first column, STUDIES on the second — never split a word)","#4a4a52"),
     "drama":       ("DRAMA",                 "deep crimson cloth",          "#8d3f4c"),
     "music":       ("MUSIC",                 "petrol-teal cloth",           "#446272"),
     "mtech":       ("MUSIC TECHNOLOGY",      "indigo cloth",                "#4c5480"),
@@ -65,11 +65,13 @@ def prompt_for(title, desc, hexc):
         "The FIRST attached image is a grayscale line-and-wash master painting of a cloth hardback "
         "book seen square-on from its SPINE. The SECOND attached image is a finished example of the "
         "same book, recoloured with a cloth colour and given a gold gilt spine title. "
-        f"Produce the SAME book again, identical shape, bands and brown leather label panel, but with: "
+        f"Produce the SAME book again, identical shape and bands, but with: "
         f"(1) the cloth painted {desc} (close to {hexc}), keeping the line-and-wash watercolour feel; "
         f"(2) the spine title '{title}' in EXACTLY the same vertical gold gilt serif capitals as the "
         "second image, running top-to-bottom down the spine, fitted to the spine (wrap onto a second "
         "column of lettering if long, like a real bound book). "
+        "NO label panel of any kind — no brown leather label, no rectangle patch: the gilt title sits "
+        "DIRECTLY on the cloth exactly as in the second reference image. "
         f"The title must be spelled EXACTLY, letter by letter: {spelled} — no other words. "
         "Exactly ONE single book in the frame, standing alone — no second book behind it, beside it, "
         "or lying flat. Plain pale warm paper background, the book filling most of the frame height, "
