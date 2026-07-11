@@ -42,32 +42,44 @@
   .caserow{position:relative;padding:0;--bkh:clamp(118px,9.5vw,158px)}
   .caserow .shelf{justify-content:center;height:auto;min-height:calc(var(--bkh) + 8px);
     align-items:flex-end;padding:0 clamp(10px,2.5vw,44px);gap:3px}
+  .caserow:first-child .shelf{min-height:calc(var(--bkh) + 118px)}
   .caserow .gap{flex:1 1 0;min-width:14px}
   .bks{display:flex;align-items:flex-end;gap:3px}
   .caserow .bookend{height:calc(var(--bkh)*1.03)}
   .caserow .ledgewrap{height:26px;overflow:hidden;margin-top:-16px;position:relative;z-index:1;
-    filter:drop-shadow(0 4px 5px rgba(40,28,12,.16))}
+    filter:drop-shadow(0 7px 8px rgba(40,28,12,.24))}
   .caserow .ledgewrap .ledge{width:104%;margin-left:-2%;margin-top:0;height:26px;object-position:center 12%}
   .caserow:nth-child(2) .ledgewrap .ledge{transform:scaleX(-1)}
   .caserow:nth-child(3) .ledgewrap .ledge{object-position:center 17%}
-  .caserow+.caserow{margin-top:22px}
+  .caserow+.caserow{margin-top:30px}
   .caserow .bk{transition:transform .3s var(--ease),filter .55s ease}
   /* content standing on the planks */
   .slot{align-self:flex-end;text-align:center;margin:0 4px -4px;position:relative;z-index:2}
-  .brandslot{max-width:640px;padding:0 10px;margin-bottom:16px}
-  .brandslot .brand{display:block;margin-bottom:.5rem}
-  .brandslot h1{font-family:var(--read);font-size:clamp(1.35rem,2.1vw,1.9rem);font-weight:600;
-    letter-spacing:-.015em;line-height:1.16;margin:0 0 .4rem}
-  .brandslot p{font-size:.92rem;color:var(--sec);margin:0 auto;max-width:540px}
-  .slot.door{width:clamp(280px,24vw,340px);text-align:left;margin-bottom:-2px;
-    box-shadow:0 10px 14px -10px rgba(40,28,12,.35)}
+  .brandslot{max-width:720px;padding:0 10px;margin-bottom:22px}
+  .brandslot .brand{display:block;margin-bottom:.9rem;font-size:1.9rem}
+  .brandslot h1{font-family:var(--read);font-size:clamp(1.9rem,2.7vw,2.75rem);font-weight:600;
+    letter-spacing:-.02em;line-height:1.1;margin:0 0 .7rem}
+  .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
+  .slot.door{width:clamp(300px,25vw,368px);text-align:left;margin-bottom:-2px;min-height:266px;
+    display:flex;flex-direction:column;justify-content:flex-start;
+    padding:1.45rem 1.55rem 1.3rem;box-shadow:0 16px 24px -16px rgba(40,28,12,.45)}
+  .slot.door h2{font-size:1.28rem;margin-bottom:.35rem}
+  .slot.door .sub{font-size:.88rem;color:var(--sec);line-height:1.5;margin-bottom:1rem}
+  .slot.door .cta{margin-top:auto;padding:.78rem 1rem;font-size:1rem}
+  .slot.door .sso{padding:.68rem 1rem}
   .signslot .signoff{margin:0}
   /* the lamp shrinks with the books; bulb + cord ride the lamp art itself */
   .lampwrap{position:relative;align-self:flex-end;border:none;background:none;padding:0;cursor:pointer;
-    margin-left:6px;flex:none}
+    margin-left:22px;flex:none}
+  /* the pool of light: a big soft warm radial anchored on the shade, behind the books */
+  .lampwrap::after{content:'';position:absolute;left:9%;top:30%;width:560px;height:560px;
+    transform:translate(-50%,-50%);pointer-events:none;border-radius:50%;z-index:-1;
+    background:radial-gradient(circle, rgba(255,196,120,.55), rgba(255,176,92,.22) 42%, transparent 70%);
+    mix-blend-mode:multiply;opacity:0;transition:opacity .7s ease}
+  .shelfstage.lit .lampwrap::after{opacity:.5}
   .lampwrap .lamp{position:static;display:block;height:calc(var(--bkh)*1.2);width:auto;right:auto;bottom:auto;
     filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
-  .lampwrap .bulb{left:9%;top:30%;width:34px;height:34px}
+  .lampwrap .bulb{left:9%;top:30%;width:56px;height:56px}
   .lampwrap .pullcord{left:14%;top:26%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
   .caserow .bk{cursor:pointer;pointer-events:auto}
@@ -122,10 +134,10 @@
     background:radial-gradient(circle, rgba(255,198,124,.92), rgba(255,168,84,.48) 42%, transparent 72%);
     mix-blend-mode:screen}
   .shelfstage.lit .lightwash,.shelfstage.lit .lampglow,.shelfstage.lit .bulb{opacity:1}
-  .bk{position:relative;height:var(--bkh,204px);border:none;background:none;padding:0;pointer-events:none;
+  .bk{position:relative;height:calc(var(--bkh,204px)*var(--vf,1));border:none;background:none;padding:0;pointer-events:none;
     transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg));filter:var(--bkshadow);
     transition:filter .55s ease;transform-origin:bottom center}
-  .bk img{display:block;height:var(--bkh,204px);width:auto;
+  .bk img{display:block;height:calc(var(--bkh,204px)*var(--vf,1));width:auto;
     filter:saturate(1.64) brightness(1.15) contrast(0.93)}   /* warm: the shelf as it looks lived-in */
   .bk::before{content:"";position:absolute;left:4%;right:4%;bottom:1px;height:15px;z-index:-1;
     background:radial-gradient(52% 120% at 50% 0%,rgba(34,22,8,.55),rgba(34,22,8,.18) 55%,transparent 78%);filter:blur(2.5px)}
@@ -154,23 +166,25 @@
   .cta:hover{filter:brightness(1.07)}
   .cta:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.3)}
   .door .tiny{font-size:.78rem;color:var(--mut);text-align:center;margin:.7rem 0 0}
-  .door .tiny a{color:var(--sec)}
+  .door .tiny a{color:var(--sec);white-space:nowrap}
   /* SSO buttons: our slab frame, their official marks */
   .sso{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;font-family:var(--head);
     font-weight:600;font-size:.92rem;color:var(--ink);background:var(--card);border:1px solid var(--line);
-    border-radius:4px;padding:.62rem 1rem;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,.05);
-    transition:border-color .15s,background .15s;margin-bottom:.6rem}
+    border-radius:4px;padding:.62rem .6rem;cursor:pointer;box-shadow:inset 0 -2px 0 rgba(0,0,0,.05);
+    transition:border-color .15s,background .15s;margin-bottom:.6rem;white-space:nowrap}
+  @media (max-width:1180px){ .sso{font-size:.85rem;gap:8px} }
   .sso:hover{border-color:#b9a98c;background:color-mix(in srgb,var(--anchor) 3%,var(--card))}
   .sso svg{width:18px;height:18px;flex:none}
 
-  .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0}
+  .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0;opacity:.9}
   .signslot{margin-bottom:18px}
-  .signslot .boardsrow{margin:0 0 .55rem}
-  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.3rem;margin:1rem 0 0;
+  .signslot .boardsrow{margin:0 0 1.1rem}
+  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.5rem;row-gap:.45rem;flex-wrap:wrap;margin:1rem 0 0;opacity:.92;
     font-size:.78rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
+  .boardsrow span{white-space:nowrap}
   .boardsrow i{font-style:normal;opacity:.55}
-  @media (max-width:560px){ .boardsrow{gap:.8rem;flex-wrap:wrap} }
-  .legal{max-width:680px;margin:2.8rem auto 0;text-align:center;font-size:.72rem;color:var(--mut);line-height:1.55;opacity:.85}
+  @media (max-width:560px){ .boardsrow{gap:.8rem} }
+  .legal{max-width:620px;margin:2.4rem auto 2.2rem;text-align:center;font-size:.72rem;color:var(--mut);line-height:1.55;opacity:.85}
 
   /* ---- the picker: build your shelf ---- */
   .view{display:none}
@@ -275,7 +289,7 @@
               <svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
               Continue with Microsoft
             </button>
-            <p class="tiny">Use the account your school gave you.</p>
+            <p class="tiny">Use the account your school gave&nbsp;you.</p>
           </div>
           <span class="gap"></span>
           <span class="bks" data-books="stats,media,film,drama"></span>
@@ -295,7 +309,7 @@
           </div>
           <span class="gap"></span>
           <span class="bks" data-books="astro,geology,classics,citizenship,food,hosp,hsc"></span>
-          <img class="bookend mirror" src="assets/lw/shelf/bookend2.webp" alt="">
+          <img class="bookend mirror" src="assets/lw/shelf/bookend2_marble.png" alt="">
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
       </div>
@@ -459,6 +473,9 @@ function boardsLine(s){
 let casePulled=null;
 function caseBook(s,i,n,flop){
   const b=document.createElement('button'); b.type='button'; b.className='bk'; b.dataset.slug=s.slug;
+  /* organic shelf: deterministic per-title height variance (real books aren't clones) */
+  let h=0; for(const ch of s.slug) h=(h*31+ch.charCodeAt(0))>>>0;
+  b.style.setProperty('--vf',(0.93+(h%13)/100).toFixed(2));
   b.setAttribute('aria-selected','false'); b.setAttribute('aria-label',s.name);
   b.style.setProperty('--lean',leanFor(i,n,flop)+'deg'); b.style.setProperty('--shift',shiftFor(i,n,flop)+'px');
   b.innerHTML='<img draggable="false" src="assets/lw/shelf/book_'+s.slug+'.webp" alt="">';
