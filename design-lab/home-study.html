@@ -88,14 +88,20 @@
   .prop-inkwell img{height:calc(var(--bkh)*.36)}
   .prop-bookstack img{height:calc(var(--bkh)*.27)}
   .prop-globe img{height:calc(var(--bkh)*.6)}
-  /* L-bookends: the whole foot slides UNDER the neighbouring books (z below,
-     deep negative margin) so the upright plate sits flush against the end
-     book — the way bookends actually work. Art: foot-left/plate-right */
+  /* L-bookends: upright plate flush against the end book, foot lying OUT
+     along the shelf so the L silhouette reads (Tom, 11 Jul). Raw art is
+     plate-right/foot-left = left end; mirror for right ends */
   .prop-bendl img,.prop-bendr img{height:calc(var(--bkh)*.66)}
   .prop-bendl,.prop-bendr{z-index:-1}
-  .prop-bendl{margin-right:calc(var(--bkh)*-.30)}
-  .prop-bendl img{transform:scaleX(-1)}
-  .prop-bendr{margin-left:calc(var(--bkh)*-.30)}
+  .prop-bendl{margin-right:-3px}
+  .prop-bendr{margin-left:-3px}
+  .prop-bendr img{transform:scaleX(-1)}
+  /* every prop gets the same ground-contact shadow the books have — objects
+     sit on the shelf, they don't hover over it */
+  .prop::before{content:'';position:absolute;left:5%;right:5%;bottom:1px;height:12px;z-index:-1;
+    background:radial-gradient(52% 120% at 50% 10%,rgba(34,22,8,.48),rgba(34,22,8,.16) 55%,transparent 78%);
+    filter:blur(2.5px)}
+  .prop-pot_ivy::before{bottom:calc(var(--bkh)*.124 + 1px)}
   .caserow .bookend{height:calc(var(--bkh)*1.03)}
   /* the plank now has a lit top surface (ledge_strip): shelf items stand ON the
      top face, feet just shy of the front-edge line — the depth cue Tom asked for */
