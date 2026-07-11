@@ -37,23 +37,41 @@
     margin:0 0 .45rem;line-height:1.18}
   .hero-copy p{font-size:1.02rem;color:var(--sec);margin:0}
 
-  /* ---- THE BOOKCASE: the whole library, full-bleed, two shelves ---- */
-  .bookcase.shelfstage{position:relative;width:100vw;max-width:none;margin:1.7rem calc(50% - 50vw) 0}
-  .caserow{position:relative;padding:0}
-  .caserow{--bkh:236px}
-  .caserow .shelf{justify-content:flex-start;height:244px}
-  .caserow .ledgewrap{height:46px;overflow:hidden;margin-top:-8px;position:relative;z-index:1}
-  .caserow .ledgewrap .ledge{width:106%;margin-left:-3%;margin-top:0}
-  .caserow .bookend{height:calc(var(--bkh,236px)*1.03)}
+  /* ---- THE BOOKCASE WALL: the page IS the shelves; content lives in the gaps ---- */
+  .bookcase.shelfstage{position:relative;width:100vw;max-width:none;margin:2.4rem calc(50% - 50vw) 0}
+  .caserow{position:relative;padding:0;--bkh:clamp(104px,9vw,150px)}
+  .caserow .shelf{justify-content:center;height:auto;min-height:calc(var(--bkh) + 8px);
+    align-items:flex-end;padding:0 clamp(10px,2.5vw,44px);gap:3px}
+  .caserow .gap{flex:1 1 0;min-width:14px}
+  .bks{display:flex;align-items:flex-end;gap:3px}
+  .caserow .bookend{height:calc(var(--bkh)*1.03)}
+  .caserow .ledgewrap{height:40px;overflow:hidden;margin-top:-7px;position:relative;z-index:1}
+  .caserow .ledgewrap .ledge{width:106%;margin-left:-3%;margin-top:0;height:40px}
+  .caserow+.caserow{margin-top:22px}
   .caserow .bk{transition:transform .3s var(--ease),filter .55s ease}
-  .caserow .lamp{height:266px}
-  .caserow+.caserow{margin-top:16px}
+  /* content standing on the planks */
+  .slot{align-self:flex-end;text-align:center;margin:0 4px 6px}
+  .brandslot{max-width:640px;padding:0 10px}
+  .brandslot .brand{display:block;margin-bottom:.5rem}
+  .brandslot h1{font-family:var(--read);font-size:clamp(1.35rem,2.1vw,1.9rem);font-weight:600;
+    letter-spacing:-.015em;line-height:1.16;margin:0 0 .4rem}
+  .brandslot p{font-size:.92rem;color:var(--sec);margin:0}
+  .slot.door{width:clamp(280px,24vw,340px);text-align:left;margin-bottom:10px}
+  .signslot .signoff{margin:0}
+  /* the lamp shrinks with the books; bulb + cord ride the lamp art itself */
+  .lampwrap{position:relative;align-self:flex-end;border:none;background:none;padding:0;cursor:pointer;
+    margin-left:6px;flex:none}
+  .lampwrap .lamp{display:block;height:calc(var(--bkh)*1.2);width:auto;
+    filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
+  .lampwrap .bulb{left:9%;top:30%;width:44px;height:44px}
+  .lampwrap .pullcord{left:14%;top:26%;height:27%}
+  .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
   .caserow .bk{cursor:pointer;pointer-events:auto}
   .caserow .bk:hover{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-6px)}
   .caserow .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
   /* pulled out to look at: glides to the case centre, turns to read, comes closer */
   .caserow .bk[aria-selected="true"]{
-    transform:translate(var(--pull-dx,0px),var(--pull-dy,0px)) rotate(-90deg) scale(1.4);
+    transform:translate(var(--pull-dx,0px),var(--pull-dy,0px)) rotate(-90deg) scale(1.9);
     z-index:30;transition:transform .8s cubic-bezier(.3,.9,.3,1)}
   .caserow .bk[aria-selected="true"]::before{opacity:0}
   .bookend.mirror{transform:scaleX(-1);margin-right:0;margin-left:-6px}
@@ -65,14 +83,7 @@
   .booktip.on{opacity:1;transform:translate(-50%,-100%)}
   .booktip .tn{font-family:var(--read);font-size:.92rem;font-weight:600;color:var(--ink);display:block}
   .booktip .tb{font-size:.72rem;color:var(--mut);letter-spacing:.05em;display:block;margin-top:.15rem}
-  /* the light rig rides the right end of the top shelf (fixed-width so the cone geometry holds) */
-  .bookcase .lightwash{display:none}
-  .lamprig{position:absolute;right:0;bottom:0;width:360px;height:100%;pointer-events:none;z-index:5}
-  .lamprig .lamp{position:absolute;right:14px;bottom:16px;height:266px;left:auto;top:auto}
-  .lamprig .bulb{left:183px;top:80px}
-  .lamprig .pullcord{left:192px;top:69px;height:72px}
-  .caserow .lampbtn{position:absolute;right:12px;bottom:12px;width:160px;height:275px;z-index:7}
-  @media (max-width:760px){ .lamprig,.caserow .lampbtn{display:none} }
+  @media (max-width:760px){ .lampwrap{display:none} }
 
   /* ---- the shelf (same painted world as the dashboard) ---- */
   .shelfstage{position:relative;max-width:900px;margin:1.4rem auto 0;
@@ -206,68 +217,84 @@
 </head>
 <body data-view="landing">
 
-<div class="masthead">
-  <span class="brand">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
-</div>
-
 <div class="wrap">
 
-  <!-- ================= LANDING ================= -->
+  <!-- ================= LANDING: the bookcase IS the page ================= -->
   <div class="view view-landing">
-    <div class="hero-copy">
-      <h1>Everything you’re sitting. Nothing you’re not.</h1>
-      <p>Lessons, practice and podcasts for every subject and every board — on a shelf that’s yours.</p>
-    </div>
-
     <div class="bookcase shelfstage" id="stage-landing">
+
       <div class="caserow">
-        <div class="shelf" id="case-top"></div>
-        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
-        <div class="lightwash"></div>
-        <div class="lamprig">
-          <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-          <div class="bulb"></div>
-          <div class="pullcord" id="cord-landing"></div>
+        <div class="shelf">
+          <img class="bookend" src="assets/lw/shelf/bookend2.webp" alt="">
+          <span class="bks" data-books="maths,lang,lit,science,triple"></span>
+          <span class="gap"></span>
+          <div class="slot brandslot">
+            <span class="brand">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
+            <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
+            <p>Lessons, practice and podcasts for every subject and every board &mdash; on a shelf that&rsquo;s yours.</p>
+          </div>
+          <span class="gap"></span>
+          <span class="bks" data-books="history,geog,french,spanish,german"></span>
+          <button class="lampwrap" type="button" aria-label="Toggle the lamp">
+            <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+            <div class="bulb"></div>
+            <div class="pullcord" id="cord-landing"></div>
+          </button>
         </div>
-        <button class="lampbtn" type="button" aria-label="Toggle the lamp"></button>
-      </div>
-      <div class="caserow">
-        <div class="shelf" id="case-bottom"></div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
-        <div class="lightwash"></div>
       </div>
+
+      <div class="caserow">
+        <div class="shelf">
+          <span class="bks" data-books="cs,business,pe"></span>
+          <span class="gap"></span>
+          <div class="slot door">
+            <h2>Revising on my own</h2>
+            <p class="sub">Free, every subject, no card. Build your shelf first &mdash; see we&rsquo;ve got
+              everything you&rsquo;re sitting <em>before</em> you sign up.</p>
+            <button class="cta" onclick="go('picker')">Create your shelf &rarr;</button>
+            <p class="tiny">Nothing saved until you say so &middot; <a href="#" onclick="return false">Sign in</a></p>
+          </div>
+          <span class="gap"></span>
+          <span class="bks" data-books="psych,rs,socio,econ"></span>
+          <span class="gap"></span>
+          <div class="slot door">
+            <h2>With my school</h2>
+            <p class="sub">Your school signs you in &mdash; your shelf is ready when you arrive.</p>
+            <button class="sso" type="button">
+              <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+              Continue with Google
+            </button>
+            <button class="sso" type="button">
+              <svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
+              Continue with Microsoft
+            </button>
+            <p class="tiny">Use the account your school gave you.</p>
+          </div>
+          <span class="gap"></span>
+          <span class="bks" data-books="stats,media,film,drama"></span>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
+      </div>
+
+      <div class="caserow">
+        <div class="shelf">
+          <span class="bks" data-books="music,mtech,dt,eng,electronics,it"></span>
+          <span class="gap"></span>
+          <div class="slot signslot"><span class="signoff">Small days add up. &mdash; SV</span></div>
+          <span class="gap"></span>
+          <span class="bks" data-books="astro,geology,classics,citizenship,food,hosp,hsc"></span>
+          <img class="bookend mirror" src="assets/lw/shelf/bookend2.webp" alt="">
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
+      </div>
+
       <div class="booktip" id="booktip"></div>
     </div>
 
     <div class="boardsrow" aria-label="Exam boards covered">
       <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
     </div>
-
-    <div class="doors">
-      <div class="door">
-        <h2>Revising on my own</h2>
-        <p class="sub">Free, every subject, no card. Build your shelf first &mdash; see we&rsquo;ve got
-          everything you&rsquo;re sitting <em>before</em> you sign up.</p>
-        <button class="cta" onclick="go('picker')">Create your shelf &rarr;</button>
-        <p class="tiny">Takes a minute &middot; nothing saved until you say so</p>
-        <p class="tiny">Already have a shelf? <a href="#" onclick="return false">Sign in</a></p>
-      </div>
-      <div class="door">
-        <h2>With my school</h2>
-        <p class="sub">Your school signs you in — your shelf is ready when you arrive.</p>
-        <button class="sso" type="button">
-          <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          Continue with Google
-        </button>
-        <button class="sso" type="button">
-          <svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
-          Continue with Microsoft
-        </button>
-        <p class="tiny">Use the account your school gave you.</p>
-      </div>
-    </div>
-
-    <p class="signoff">Small days add up. &mdash; SV</p>
   </div>
 
   <!-- ================= PICKER: BUILD YOUR SHELF ================= -->
@@ -447,39 +474,19 @@ function caseBook(s,i,n,flop){
   return b;
 }
 function buildCase(){
-  const top=document.getElementById('case-top'), bot=document.getElementById('case-bottom');
-  top.innerHTML=''; bot.innerHTML='';
-  top.appendChild(bookendEl());
-  ROW_TOP.forEach((sl,i)=>top.appendChild(caseBook(SUBJECTS.find(x=>x.slug===sl),i,ROW_TOP.length,false)));
-  ROW_BOTTOM.forEach((sl,i)=>bot.appendChild(caseBook(SUBJECTS.find(x=>x.slug===sl),i,ROW_BOTTOM.length,true)));
-  const be=bookendEl(); be.classList.add('mirror'); bot.appendChild(be);
-}
-buildCase();
-function fitRows(){
-  const rows=[...document.querySelectorAll('#stage-landing .caserow')];
-  const groupOf=sh=>{ const k=sh.children; if(!k.length) return 1;
-    return k[k.length-1].getBoundingClientRect().right-k[0].getBoundingClientRect().left; };
-  const reserveOf=ri=>ri===0?460:24;                     /* row 1 keeps the lamp's spot */
-  rows.forEach(r=>{ r.style.removeProperty('--bkh'); r.querySelector('.shelf').style.paddingLeft='10px'; });
-  requestAnimationFrame(()=>{
-    let f=1;
-    rows.forEach((row,ri)=>{ const sh=row.querySelector('.shelf');
-      f=Math.min(f,(sh.clientWidth-reserveOf(ri)-20)/groupOf(sh)); });
-    if(f<1) rows.forEach(r=>r.style.setProperty('--bkh',Math.max(120,Math.floor(236*f))+'px'));
-    requestAnimationFrame(()=>{
-      rows.forEach((row,ri)=>{ const sh=row.querySelector('.shelf');
-        sh.style.paddingLeft=Math.max(10,Math.round((sh.clientWidth-reserveOf(ri)-groupOf(sh))/2))+'px'; });
-    });
+  document.querySelectorAll('#stage-landing .bks').forEach(g=>{
+    const slugs=(g.dataset.books||'').split(',').filter(Boolean);
+    g.innerHTML='';
+    slugs.forEach((sl,i)=>g.appendChild(caseBook(SUBJECTS.find(x=>x.slug===sl),i,slugs.length,false)));
   });
 }
-addEventListener('resize',fitRows);
-addEventListener('load',fitRows);
+buildCase();
 const stageL=document.getElementById('stage-landing'), cordL=document.getElementById('cord-landing');
 function lampOn(){ cordL.classList.add('tug'); setTimeout(()=>stageL.classList.add('lit'),150);
   setTimeout(()=>cordL.classList.remove('tug'),500); }
 if(matchMedia('(prefers-reduced-motion:reduce)').matches) stageL.classList.add('lit');
 else setTimeout(lampOn,1200);                                 /* the room wakes up */
-stageL.querySelector('.lampbtn').addEventListener('click',()=>{
+stageL.querySelector('.lampwrap').addEventListener('click',()=>{
   cordL.classList.add('tug'); setTimeout(()=>cordL.classList.remove('tug'),500);
   setTimeout(()=>stageL.classList.toggle('lit'),140);
 });
