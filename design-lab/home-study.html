@@ -59,6 +59,16 @@
   .wing.wl{justify-content:flex-start}
   .wing.wm{justify-content:center}
   .wing.wr{justify-content:flex-end}
+  /* the middle panel: the wordmark large over its own little run of books */
+  .wing.wm{flex-direction:column;align-items:center;justify-content:flex-end;gap:0}
+  .brandmid{font-size:clamp(2.2rem,2.7vw,3rem);margin-bottom:34px;white-space:nowrap}
+  /* below 1240 the middle gap is too tight for the wordmark — it returns home
+     above the headline and the centre panel is books alone */
+  .brandtop{display:none;font-size:clamp(2rem,2.4vw,2.4rem);margin-bottom:.9rem}
+  @media (max-width:1240px){
+    .brandmid{display:none}
+    .brandtop{display:block}
+  }
   /* narrower window = narrower slice of the same wall: anchor books to the
      content side and let the excess crop off-screen at the viewport edges */
   @media (max-width:1240px){
@@ -80,6 +90,13 @@
   .prop-inkwell img{height:calc(var(--bkh)*.36)}
   .prop-bookstack img{height:calc(var(--bkh)*.27)}
   .prop-globe img{height:calc(var(--bkh)*.6)}
+  /* L-bookends: foot slides under the neighbouring book, plate holds the run.
+     Art is drawn foot-left/plate-right (= right end); bendl mirrors it */
+  .prop-bendl img,.prop-bendr img{height:calc(var(--bkh)*.66)}
+  .prop-bendl,.prop-bendr{z-index:-1}
+  .prop-bendl{margin-right:-14px}
+  .prop-bendl img{transform:scaleX(-1)}
+  .prop-bendr{margin-left:-14px}
   .caserow .bookend{height:calc(var(--bkh)*1.03)}
   /* the plank now has a lit top surface (ledge_strip): shelf items stand ON the
      top face, feet just shy of the front-edge line — the depth cue Tom asked for */
@@ -98,11 +115,16 @@
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
   /* doors as objects OF the scene: painted walnut frames with a brass lip,
      content written on the aged paper inside (border-image, fill = the paper) */
-  .slot.door{width:clamp(300px,25vw,368px);text-align:left;margin-bottom:-2px;min-height:302px;
+  .slot.door{width:clamp(300px,25vw,368px);text-align:center;margin-bottom:-2px;min-height:296px;
     display:flex;flex-direction:column;justify-content:flex-start;
-    background:none;border:22px solid transparent;border-radius:0;
-    border-image:url("assets/lw/shelf/door_frame_cut.webp") 100 fill / 22px stretch;
-    padding:1.05rem 1.15rem .95rem;box-shadow:0 14px 16px -12px rgba(40,28,12,.5)}
+    background:none;border:17px solid transparent;border-radius:0;
+    border-image:url("assets/lw/shelf/door_frame_cut.webp") 100 fill / 17px stretch;
+    padding:1.2rem 1.25rem 1.1rem;box-shadow:none;
+    filter:drop-shadow(0 10px 9px rgba(40,28,12,.32))}
+  .slot.door::after{content:'';position:absolute;left:6%;right:6%;bottom:-15px;height:14px;
+    background:radial-gradient(50% 100% at 50% 0%,rgba(34,22,8,.4),transparent 75%);
+    filter:blur(3px);pointer-events:none}
+  .slot.door .tiny{margin-top:.75rem}
   .slot.door h2{font-size:1.28rem;margin-bottom:.35rem}
   .slot.door .sub{font-size:.88rem;color:var(--sec);line-height:1.5;margin-bottom:1rem}
   .slot.door .cta{margin-top:auto;padding:.78rem 1rem;font-size:1rem}
@@ -296,11 +318,11 @@
             <span class="bks" data-books="maths,lang,lit,science,triple,@bookstack"></span>
           </span>
           <div class="slot brandslot">
-            <span class="brand">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
+            <span class="brand brandtop">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
             <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
           </div>
           <span class="wing wr">
-            <span class="bks" data-books="history,geog,french,spanish,german,@inkwell"></span>
+            <span class="bks" data-books="@bendl,history,geog,french,spanish,german,@inkwell"></span>
             <button class="lampwrap" type="button" aria-label="Toggle the lamp">
               <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
               <div class="bulb"></div>
@@ -314,7 +336,7 @@
       <div class="caserow">
         <div class="shelf">
           <span class="wing wl">
-            <span class="bks" data-books="@pot_ivy,cs,business,pe"></span>
+            <span class="bks" data-books="@pot_ivy,cs,business,pe,@bendr"></span>
           </span>
           <div class="slot door">
             <h2>Revising on my own</h2>
@@ -324,7 +346,8 @@
             <p class="tiny">Nothing saved until you say so &middot; <a href="#" onclick="return false">Sign in</a></p>
           </div>
           <span class="wing wm">
-            <span class="bks" data-books="psych,rs,socio,econ,@hourglass"></span>
+            <span class="brand brandmid">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
+            <span class="bks" data-books="@bendl,psych,rs,socio,econ,@hourglass"></span>
           </span>
           <div class="slot door">
             <h2>With my school</h2>
@@ -340,7 +363,7 @@
             <p class="tiny">Use the account your school gave&nbsp;you.</p>
           </div>
           <span class="wing wr">
-            <span class="bks" data-books="@clock,stats,media,film,drama"></span>
+            <span class="bks" data-books="@clock,stats,media,film,drama,@bendr"></span>
           </span>
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
@@ -349,7 +372,7 @@
       <div class="caserow">
         <div class="shelf">
           <span class="wing wl">
-            <span class="bks" data-books="music,mtech,dt,eng,electronics,it,@globe"></span>
+            <span class="bks" data-books="@bendl,music,mtech,dt,eng,electronics,it,@globe"></span>
           </span>
           <div class="slot signslot">
             <div class="boardsplaque">
@@ -557,18 +580,22 @@ function buildCase(){
     const nBooks=toks.filter(t=>t[0]!=='@').length;
     g.innerHTML='';
     let bi=0;
+    /* bookends and the tiny inkwell hold books UPRIGHT — no leaning onto them */
+    const NOLEAN=n=>n.startsWith('bend')||n==='inkwell';
+    const propFile=n=>n==='bendl'||n==='bendr'?'prop_bookend_l':'prop_'+n;
     toks.forEach((tk,ti)=>{
       if(tk[0]==='@'){
         const name=tk.slice(1), p=document.createElement('span');
         p.className='prop prop-'+name;
-        p.innerHTML='<img draggable="false" src="assets/lw/shelf/prop_'+name+'.webp" alt="">';
+        p.innerHTML='<img draggable="false" src="assets/lw/shelf/'+propFile(name)+'.webp" alt="">';
         g.appendChild(p);
         return;
       }
       const b=caseBook(SUBJECTS.find(x=>x.slug===tk),bi,nBooks,false); bi++;
       /* a book next to a prop leans on it — that's how real shelves hold books up */
-      if(toks[ti+1] && toks[ti+1][0]==='@'){ b.style.setProperty('--lean','7.5deg'); b.style.setProperty('--shift','5px'); }
-      else if(toks[ti-1] && toks[ti-1][0]==='@'){ b.style.setProperty('--lean','-7.5deg'); b.style.setProperty('--shift','-5px'); }
+      const nx=toks[ti+1], pv=toks[ti-1];
+      if(nx && nx[0]==='@' && !NOLEAN(nx.slice(1))){ b.style.setProperty('--lean','7.5deg'); b.style.setProperty('--shift','5px'); }
+      else if(pv && pv[0]==='@' && !NOLEAN(pv.slice(1))){ b.style.setProperty('--lean','-7.5deg'); b.style.setProperty('--shift','-5px'); }
       g.appendChild(b);
     });
   });

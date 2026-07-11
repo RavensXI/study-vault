@@ -80,3 +80,15 @@ for key, (prompt, aspect) in ITEMS.items():
     im.save(os.path.join(OUT, f"{key}.webp"), quality=84, method=6)
     print("made", key, flush=True)
 print("done")
+
+# appended 11 Jul late: L-shaped bookend (foot LEFT, upright RIGHT = supports a
+# run's right end; CSS mirrors it for left ends)
+if __name__ == "__main__" and "bookend_l" in sys.argv:
+    p = (STYLE + "A plain simple L-shaped metal bookend: one flat vertical rectangular plate "
+         "standing upright, joined at a right angle to one flat horizontal rectangular foot "
+         "plate lying along the ground POINTING LEFT. Dark oiled bronze with a soft aged sheen, "
+         "completely plain and unadorned — no holes, no decoration, no engraving. The upright "
+         "plate is on the RIGHT, the foot extends to the LEFT.")
+    im = gen([p, LAMP], "3:4")
+    im.save(os.path.join(OUT, "bookend_l_raw.png"))
+    print("made bookend_l_raw", flush=True)
