@@ -59,9 +59,10 @@
   .wing.wl{justify-content:flex-start}
   .wing.wm{justify-content:center}
   .wing.wr{justify-content:flex-end}
-  /* the middle panel: the wordmark large over its own little run of books */
-  .wing.wm{flex-direction:column;align-items:center;justify-content:flex-end;gap:0}
-  .brandmid{font-size:clamp(2.2rem,2.7vw,3rem);margin-bottom:34px;white-space:nowrap}
+  /* the middle panel: the wordmark large over its own little run of books.
+     The centre wing takes a bigger flex share so the wordmark has room */
+  .wing.wm{flex:1.55 1 0;flex-direction:column;align-items:center;justify-content:flex-end;gap:0}
+  .brandmid{font-size:clamp(2.5rem,3.1vw,3.35rem);margin-bottom:36px;white-space:nowrap}
   /* below 1240 the middle gap can't hold the wordmark cleanly — the wall
      goes wordless rather than showing it squeezed (open question for Tom) */
   @media (max-width:1240px){
@@ -111,25 +112,22 @@
   .slot{align-self:flex-end;text-align:center;margin:0 4px -4px;position:relative;z-index:2}
   /* headline rides high in the top gap — the wordmark lives on the middle shelf */
   .brandslot{max-width:720px;padding:0 10px;margin-bottom:76px}
-  .brandslot h1{font-family:var(--read);font-size:clamp(1.9rem,2.7vw,2.75rem);font-weight:600;
-    letter-spacing:-.02em;line-height:1.1;margin:0 0 .7rem}
+  /* the tagline in the hand voice — chalk on the study wall, distinct from
+     the grotesk wordmark below */
+  .brandslot h1{font-family:var(--hand);font-size:clamp(2.6rem,3.6vw,3.6rem);font-weight:600;
+    letter-spacing:0;line-height:1.04;margin:0 0 .7rem;color:#4a4234}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
-  /* doors as objects OF the scene: painted walnut frames with a brass lip,
-     content written on the aged paper inside (border-image, fill = the paper) */
-  .slot.door{width:clamp(300px,25vw,368px);text-align:center;margin-bottom:-2px;min-height:296px;
+  /* doors are NOT of the scene (Tom, 12 Jul): honest floating UI over the
+     painted wall — plain cards, big headings, no flavour text */
+  .slot.door{width:clamp(320px,27vw,400px);text-align:center;margin-bottom:30px;min-height:212px;
     display:flex;flex-direction:column;justify-content:flex-start;
-    background:none;border:17px solid transparent;border-radius:0;
-    border-image:url("assets/lw/shelf/door_frame_cut.webp") 100 fill / 17px stretch;
-    padding:1.2rem 1.25rem 1.1rem;box-shadow:none;
-    filter:drop-shadow(0 10px 9px rgba(40,28,12,.32))}
-  .slot.door::after{content:'';position:absolute;left:6%;right:6%;bottom:-15px;height:14px;
-    background:radial-gradient(50% 100% at 50% 0%,rgba(34,22,8,.4),transparent 75%);
-    filter:blur(3px);pointer-events:none}
-  .slot.door .tiny{margin-top:.75rem}
-  .slot.door h2{font-size:1.28rem;margin-bottom:.35rem}
-  .slot.door .sub{font-size:.88rem;color:var(--sec);line-height:1.5;margin-bottom:1rem}
-  .slot.door .cta{margin-top:auto;padding:.78rem 1rem;font-size:1rem}
-  .slot.door .sso{padding:.68rem 1rem}
+    background:#fffdf9;border:1px solid var(--line);border-radius:6px;
+    padding:1.7rem 1.8rem 1.55rem;
+    box-shadow:0 24px 48px -20px rgba(40,28,12,.4),0 2px 6px rgba(40,28,12,.08)}
+  .slot.door h2{font-size:1.5rem;margin:0 0 1.15rem}
+  .slot.door .cta{margin-top:auto;padding:.85rem 1rem;font-size:1.04rem}
+  .slot.door .sso{padding:.75rem 1rem;font-size:.98rem}
+  .slot.door .tiny{margin-top:.85rem}
   .signslot .signoff{margin:0}
   /* the lamp shrinks with the books; bulb + cord ride the lamp art itself */
   .lampwrap{position:relative;align-self:flex-end;border:none;background:none;padding:0;cursor:pointer;
@@ -240,14 +238,14 @@
   .sso svg{width:18px;height:18px;flex:none}
 
   .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0;opacity:.9}
-  .signslot{margin-bottom:18px}
+  .signslot{margin-bottom:34px}
   /* the boards live on an engraved brass plaque screwed to the case back */
-  .boardsplaque{display:inline-block;padding:19px 46px 21px;
+  .boardsplaque{display:inline-block;padding:22px 54px 24px;
     background:url("assets/lw/shelf/plaque_wide.webp");background-size:100% 100%;
     filter:drop-shadow(0 5px 7px rgba(40,28,12,.28))}
   .boardsplaque .boardsrow{margin:0}
-  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.9rem;row-gap:.45rem;flex-wrap:wrap;
-    font-size:.8rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:2.1rem;row-gap:.45rem;flex-wrap:wrap;
+    font-size:.92rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;
     color:#54401c;text-shadow:0 1px 0 rgba(255,249,226,.65)}
   .boardsrow span{white-space:nowrap}
   .boardsrow i{font-style:normal;opacity:.5}
@@ -340,9 +338,7 @@
           </span>
           <div class="slot door">
             <h2>Revising on my own</h2>
-            <p class="sub">Free, every subject, no card. Build your shelf first &mdash; see we&rsquo;ve got
-              everything you&rsquo;re sitting <em>before</em> you sign up.</p>
-            <button class="cta" onclick="go('picker')">Create your shelf &rarr;</button>
+            <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re sitting &rarr;</button>
             <p class="tiny">Nothing saved until you say so &middot; <a href="#" onclick="return false">Sign in</a></p>
           </div>
           <span class="wing wm">
@@ -351,7 +347,6 @@
           </span>
           <div class="slot door">
             <h2>With my school</h2>
-            <p class="sub">Your school signs you in &mdash; your shelf is ready when you arrive.</p>
             <button class="sso" type="button">
               <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
               Continue with Google
@@ -360,7 +355,6 @@
               <svg viewBox="0 0 23 23"><rect x="1" y="1" width="10" height="10" fill="#F25022"/><rect x="12" y="1" width="10" height="10" fill="#7FBA00"/><rect x="1" y="12" width="10" height="10" fill="#00A4EF"/><rect x="12" y="12" width="10" height="10" fill="#FFB900"/></svg>
               Continue with Microsoft
             </button>
-            <p class="tiny">Use the account your school gave&nbsp;you.</p>
           </div>
           <span class="wing wr">
             <span class="bks" data-books="@clock,stats,media,film,drama,@bookstack"></span>
