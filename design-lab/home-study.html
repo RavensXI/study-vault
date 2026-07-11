@@ -72,7 +72,8 @@
   .prop{position:relative;flex:none;pointer-events:none;align-self:flex-end;margin:0 2px;
     filter:var(--bkshadow)}
   .prop img{display:block;width:auto;filter:saturate(1.3) brightness(1.06)}
-  .prop-pot_ivy img{height:calc(var(--bkh)*.62)}
+  /* ivy: pot base sits on the plank, strands trail over the shelf edge */
+  .prop-pot_ivy img{height:calc(var(--bkh)*.62);margin-bottom:calc(var(--bkh)*-.124)}
   .prop-pot_fern img{height:calc(var(--bkh)*.5)}
   .prop-clock img{height:calc(var(--bkh)*.54)}
   .prop-hourglass img{height:calc(var(--bkh)*.46)}
@@ -95,14 +96,13 @@
   .brandslot h1{font-family:var(--read);font-size:clamp(1.9rem,2.7vw,2.75rem);font-weight:600;
     letter-spacing:-.02em;line-height:1.1;margin:0 0 .7rem}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
-  /* doors as objects of the world: warm paper panels with a bookplate double
-     rule, resting on the shelf — not floating SaaS cards */
-  .slot.door{width:clamp(300px,25vw,368px);text-align:left;margin-bottom:-2px;min-height:266px;
+  /* doors as objects OF the scene: painted walnut frames with a brass lip,
+     content written on the aged paper inside (border-image, fill = the paper) */
+  .slot.door{width:clamp(300px,25vw,368px);text-align:left;margin-bottom:-2px;min-height:302px;
     display:flex;flex-direction:column;justify-content:flex-start;
-    background:#fbf5e9;border:1px solid #d8cbb0;border-radius:3px;
-    padding:1.55rem 1.65rem 1.4rem;box-shadow:0 10px 14px -12px rgba(40,28,12,.5)}
-  .slot.door::before{content:'';position:absolute;inset:6px;border:1px solid rgba(91,70,50,.22);
-    border-radius:2px;pointer-events:none}
+    background:none;border:22px solid transparent;border-radius:0;
+    border-image:url("assets/lw/shelf/door_frame_cut.webp") 100 fill / 22px stretch;
+    padding:1.05rem 1.15rem .95rem;box-shadow:0 14px 16px -12px rgba(40,28,12,.5)}
   .slot.door h2{font-size:1.28rem;margin-bottom:.35rem}
   .slot.door .sub{font-size:.88rem;color:var(--sec);line-height:1.5;margin-bottom:1rem}
   .slot.door .cta{margin-top:auto;padding:.78rem 1rem;font-size:1rem}
@@ -218,11 +218,17 @@
 
   .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0;opacity:.9}
   .signslot{margin-bottom:18px}
-  .signslot .boardsrow{margin:0 0 1.1rem}
-  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.9rem;row-gap:.45rem;flex-wrap:wrap;margin:1rem 0 0;opacity:.92;
-    font-size:.8rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+  /* the boards live on an engraved brass plaque screwed to the case back */
+  .boardsplaque{display:inline-block;padding:19px 46px 21px;
+    background:url("assets/lw/shelf/plaque_wide.webp");background-size:100% 100%;
+    filter:drop-shadow(0 5px 7px rgba(40,28,12,.28))}
+  .boardsplaque .boardsrow{margin:0}
+  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.9rem;row-gap:.45rem;flex-wrap:wrap;
+    font-size:.8rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+    color:#54401c;text-shadow:0 1px 0 rgba(255,249,226,.65)}
   .boardsrow span{white-space:nowrap}
-  .boardsrow i{font-style:normal;opacity:.55}
+  .boardsrow i{font-style:normal;opacity:.5}
+  .signslot .signoff{display:block;margin:1.1rem 0 0}
   @media (max-width:560px){ .boardsrow{gap:.8rem} }
   .legal{max-width:620px;margin:2.4rem auto 2.2rem;text-align:center;font-size:.72rem;color:var(--mut);line-height:1.55;opacity:.85}
 
@@ -292,7 +298,6 @@
           <div class="slot brandslot">
             <span class="brand">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
             <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
-            <p>Lessons, practice and podcasts for every subject and every board &mdash; on a shelf that&rsquo;s yours.</p>
           </div>
           <span class="wing wr">
             <span class="bks" data-books="history,geog,french,spanish,german,@inkwell"></span>
@@ -347,8 +352,10 @@
             <span class="bks" data-books="music,mtech,dt,eng,electronics,it,@globe"></span>
           </span>
           <div class="slot signslot">
-            <div class="boardsrow" aria-label="Exam boards covered">
-              <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
+            <div class="boardsplaque">
+              <div class="boardsrow" aria-label="Exam boards covered">
+                <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
+              </div>
             </div>
             <span class="signoff">Small days add up. &mdash; SV</span>
           </div>
