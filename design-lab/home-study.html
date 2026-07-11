@@ -62,12 +62,10 @@
   /* the middle panel: the wordmark large over its own little run of books */
   .wing.wm{flex-direction:column;align-items:center;justify-content:flex-end;gap:0}
   .brandmid{font-size:clamp(2.2rem,2.7vw,3rem);margin-bottom:34px;white-space:nowrap}
-  /* below 1240 the middle gap is too tight for the wordmark — it returns home
-     above the headline and the centre panel is books alone */
-  .brandtop{display:none;font-size:clamp(2rem,2.4vw,2.4rem);margin-bottom:.9rem}
+  /* below 1240 the middle gap can't hold the wordmark cleanly — the wall
+     goes wordless rather than showing it squeezed (open question for Tom) */
   @media (max-width:1240px){
     .brandmid{display:none}
-    .brandtop{display:block}
   }
   /* narrower window = narrower slice of the same wall: anchor books to the
      content side and let the excess crop off-screen at the viewport edges */
@@ -90,13 +88,14 @@
   .prop-inkwell img{height:calc(var(--bkh)*.36)}
   .prop-bookstack img{height:calc(var(--bkh)*.27)}
   .prop-globe img{height:calc(var(--bkh)*.6)}
-  /* L-bookends: foot slides under the neighbouring book, plate holds the run.
-     Art is drawn foot-left/plate-right (= right end); bendl mirrors it */
+  /* L-bookends: the whole foot slides UNDER the neighbouring books (z below,
+     deep negative margin) so the upright plate sits flush against the end
+     book — the way bookends actually work. Art: foot-left/plate-right */
   .prop-bendl img,.prop-bendr img{height:calc(var(--bkh)*.66)}
   .prop-bendl,.prop-bendr{z-index:-1}
-  .prop-bendl{margin-right:-14px}
+  .prop-bendl{margin-right:calc(var(--bkh)*-.30)}
   .prop-bendl img{transform:scaleX(-1)}
-  .prop-bendr{margin-left:-14px}
+  .prop-bendr{margin-left:calc(var(--bkh)*-.30)}
   .caserow .bookend{height:calc(var(--bkh)*1.03)}
   /* the plank now has a lit top surface (ledge_strip): shelf items stand ON the
      top face, feet just shy of the front-edge line — the depth cue Tom asked for */
@@ -108,8 +107,8 @@
   .caserow .bk{transition:transform .3s var(--ease),filter .55s ease}
   /* content standing on the planks */
   .slot{align-self:flex-end;text-align:center;margin:0 4px -4px;position:relative;z-index:2}
-  .brandslot{max-width:720px;padding:0 10px;margin-bottom:22px}
-  .brandslot .brand{display:block;margin-bottom:1rem;font-size:clamp(2.1rem,2.4vw,2.6rem)}
+  /* headline rides high in the top gap — the wordmark lives on the middle shelf */
+  .brandslot{max-width:720px;padding:0 10px;margin-bottom:76px}
   .brandslot h1{font-family:var(--read);font-size:clamp(1.9rem,2.7vw,2.75rem);font-weight:600;
     letter-spacing:-.02em;line-height:1.1;margin:0 0 .7rem}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
@@ -318,7 +317,6 @@
             <span class="bks" data-books="maths,lang,lit,science,triple,@bookstack"></span>
           </span>
           <div class="slot brandslot">
-            <span class="brand brandtop">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
             <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
           </div>
           <span class="wing wr">
