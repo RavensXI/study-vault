@@ -88,14 +88,10 @@
   .prop-inkwell img{height:calc(var(--bkh)*.36)}
   .prop-bookstack img{height:calc(var(--bkh)*.27)}
   .prop-globe img{height:calc(var(--bkh)*.6)}
-  /* L-bookends: upright plate flush against the end book, foot lying OUT
-     along the shelf so the L silhouette reads (Tom, 11 Jul). Raw art is
-     plate-right/foot-left = left end; mirror for right ends */
-  .prop-bendl img,.prop-bendr img{height:calc(var(--bkh)*.66)}
-  .prop-bendl,.prop-bendr{z-index:-1}
-  .prop-bendl{margin-right:-3px}
-  .prop-bendr{margin-left:-3px}
-  .prop-bendr img{transform:scaleX(-1)}
+  .prop-trophy img{height:calc(var(--bkh)*.52)}
+  .prop-pencilpot img{height:calc(var(--bkh)*.44)}
+  .prop-owl img{height:calc(var(--bkh)*.5)}
+  .prop-handbell img{height:calc(var(--bkh)*.46)}
   /* every prop gets the same ground-contact shadow the books have — objects
      sit on the shelf, they don't hover over it */
   .prop::before{content:'';position:absolute;left:5%;right:5%;bottom:1px;height:12px;z-index:-1;
@@ -326,7 +322,7 @@
             <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
           </div>
           <span class="wing wr">
-            <span class="bks" data-books="@bendl,history,geog,french,spanish,german,@inkwell"></span>
+            <span class="bks" data-books="@trophy,history,geog,french,spanish,german,@inkwell"></span>
             <button class="lampwrap" type="button" aria-label="Toggle the lamp">
               <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
               <div class="bulb"></div>
@@ -340,7 +336,7 @@
       <div class="caserow">
         <div class="shelf">
           <span class="wing wl">
-            <span class="bks" data-books="@pot_ivy,cs,business,pe,@bendr"></span>
+            <span class="bks" data-books="@pot_ivy,cs,business,pe,@pencilpot"></span>
           </span>
           <div class="slot door">
             <h2>Revising on my own</h2>
@@ -351,7 +347,7 @@
           </div>
           <span class="wing wm">
             <span class="brand brandmid">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
-            <span class="bks" data-books="@bendl,psych,rs,socio,econ,@hourglass"></span>
+            <span class="bks" data-books="@owl,psych,rs,socio,econ,@hourglass"></span>
           </span>
           <div class="slot door">
             <h2>With my school</h2>
@@ -367,7 +363,7 @@
             <p class="tiny">Use the account your school gave&nbsp;you.</p>
           </div>
           <span class="wing wr">
-            <span class="bks" data-books="@clock,stats,media,film,drama,@bendr"></span>
+            <span class="bks" data-books="@clock,stats,media,film,drama,@bookstack"></span>
           </span>
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
@@ -376,7 +372,7 @@
       <div class="caserow">
         <div class="shelf">
           <span class="wing wl">
-            <span class="bks" data-books="@bendl,music,mtech,dt,eng,electronics,it,@globe"></span>
+            <span class="bks" data-books="@handbell,music,mtech,dt,eng,electronics,it,@globe"></span>
           </span>
           <div class="slot signslot">
             <div class="boardsplaque">
@@ -584,9 +580,9 @@ function buildCase(){
     const nBooks=toks.filter(t=>t[0]!=='@').length;
     g.innerHTML='';
     let bi=0;
-    /* bookends and the tiny inkwell hold books UPRIGHT — no leaning onto them */
-    const NOLEAN=n=>n.startsWith('bend')||n==='inkwell';
-    const propFile=n=>n==='bendl'||n==='bendr'?'prop_bookend_l':'prop_'+n;
+    /* the tiny inkwell can't hold a book up — no leaning onto it */
+    const NOLEAN=n=>n==='inkwell';
+    const propFile=n=>'prop_'+n;
     toks.forEach((tk,ti)=>{
       if(tk[0]==='@'){
         const name=tk.slice(1), p=document.createElement('span');
