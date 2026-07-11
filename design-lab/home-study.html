@@ -39,30 +39,70 @@
 
   /* ---- THE BOOKCASE WALL: the page IS the shelves; content lives in the gaps ---- */
   .bookcase.shelfstage{position:relative;width:100vw;max-width:none;margin:2.4rem calc(50% - 50vw) 0}
+  /* the wall itself: faded damask paper + a soft vignette pulling the eye centre.
+     One layer, two backgrounds, multiplied over the cream so type stays crisp */
+  .bookcase.shelfstage::before{content:'';position:absolute;inset:-170px 0 -10px;z-index:0;
+    pointer-events:none;mix-blend-mode:multiply;opacity:.4;
+    background:
+      radial-gradient(120% 90% at 50% 38%, rgba(255,255,255,0) 50%, rgba(64,44,20,.36) 100%),
+      url("assets/lw/shelf/wallpaper_tile.webp");
+    background-size:cover, min(52vw,700px) auto}
+  .bookcase.shelfstage>*{position:relative;z-index:1}
   .caserow{position:relative;padding:0;--bkh:clamp(118px,9.5vw,158px)}
   .caserow .shelf{justify-content:center;height:auto;min-height:calc(var(--bkh) + 8px);
     align-items:flex-end;padding:0 clamp(10px,2.5vw,44px);gap:3px}
   .caserow:first-child .shelf{min-height:calc(var(--bkh) + 118px)}
   .caserow .gap{flex:1 1 0;min-width:14px}
+  /* wings: equal flexible halves either side of a slot, so slots sit EXACTLY on
+     the viewport centreline no matter how wide each book cluster runs */
+  .wing{flex:1 1 0;min-width:14px;display:flex;align-items:flex-end;gap:3px}
+  .wing.wl{justify-content:flex-start}
+  .wing.wm{justify-content:center}
+  .wing.wr{justify-content:flex-end}
+  /* narrower window = narrower slice of the same wall: anchor books to the
+     content side and let the excess crop off-screen at the viewport edges */
+  @media (max-width:1240px){
+    .wing.wl{justify-content:flex-end}
+    .wing.wr{justify-content:flex-start}
+    /* keep the lamp: it steps inside the books rather than cropping away */
+    .wing.wr .lampwrap{order:-1;margin-left:0;margin-right:14px}
+  }
   .bks{display:flex;align-items:flex-end;gap:3px}
+  /* shelf clutter: painted props books can lean against (built from @tokens) */
+  .prop{position:relative;flex:none;pointer-events:none;align-self:flex-end;margin:0 2px;
+    filter:var(--bkshadow)}
+  .prop img{display:block;width:auto;filter:saturate(1.3) brightness(1.06)}
+  .prop-pot_ivy img{height:calc(var(--bkh)*.62)}
+  .prop-pot_fern img{height:calc(var(--bkh)*.5)}
+  .prop-clock img{height:calc(var(--bkh)*.54)}
+  .prop-hourglass img{height:calc(var(--bkh)*.46)}
+  .prop-inkwell img{height:calc(var(--bkh)*.36)}
+  .prop-bookstack img{height:calc(var(--bkh)*.27)}
+  .prop-globe img{height:calc(var(--bkh)*.6)}
   .caserow .bookend{height:calc(var(--bkh)*1.03)}
-  .caserow .ledgewrap{height:26px;overflow:hidden;margin-top:-16px;position:relative;z-index:1;
+  /* the plank now has a lit top surface (ledge_strip): shelf items stand ON the
+     top face, feet just shy of the front-edge line — the depth cue Tom asked for */
+  .caserow .ledgewrap{height:46px;overflow:hidden;margin-top:-12px;position:relative;z-index:1;
     filter:drop-shadow(0 7px 8px rgba(40,28,12,.24))}
-  .caserow .ledgewrap .ledge{width:104%;margin-left:-2%;margin-top:0;height:26px;object-position:center 12%}
+  .caserow .ledgewrap .ledge{width:104%;margin-left:-2%;margin-top:0;height:46px;object-position:center}
   .caserow:nth-child(2) .ledgewrap .ledge{transform:scaleX(-1)}
-  .caserow:nth-child(3) .ledgewrap .ledge{object-position:center 17%}
   .caserow+.caserow{margin-top:30px}
   .caserow .bk{transition:transform .3s var(--ease),filter .55s ease}
   /* content standing on the planks */
   .slot{align-self:flex-end;text-align:center;margin:0 4px -4px;position:relative;z-index:2}
   .brandslot{max-width:720px;padding:0 10px;margin-bottom:22px}
-  .brandslot .brand{display:block;margin-bottom:.9rem;font-size:1.9rem}
+  .brandslot .brand{display:block;margin-bottom:1rem;font-size:clamp(2.1rem,2.4vw,2.6rem)}
   .brandslot h1{font-family:var(--read);font-size:clamp(1.9rem,2.7vw,2.75rem);font-weight:600;
     letter-spacing:-.02em;line-height:1.1;margin:0 0 .7rem}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
+  /* doors as objects of the world: warm paper panels with a bookplate double
+     rule, resting on the shelf — not floating SaaS cards */
   .slot.door{width:clamp(300px,25vw,368px);text-align:left;margin-bottom:-2px;min-height:266px;
     display:flex;flex-direction:column;justify-content:flex-start;
-    padding:1.45rem 1.55rem 1.3rem;box-shadow:0 16px 24px -16px rgba(40,28,12,.45)}
+    background:#fbf5e9;border:1px solid #d8cbb0;border-radius:3px;
+    padding:1.55rem 1.65rem 1.4rem;box-shadow:0 10px 14px -12px rgba(40,28,12,.5)}
+  .slot.door::before{content:'';position:absolute;inset:6px;border:1px solid rgba(91,70,50,.22);
+    border-radius:2px;pointer-events:none}
   .slot.door h2{font-size:1.28rem;margin-bottom:.35rem}
   .slot.door .sub{font-size:.88rem;color:var(--sec);line-height:1.5;margin-bottom:1rem}
   .slot.door .cta{margin-top:auto;padding:.78rem 1rem;font-size:1rem}
@@ -72,11 +112,11 @@
   .lampwrap{position:relative;align-self:flex-end;border:none;background:none;padding:0;cursor:pointer;
     margin-left:22px;flex:none}
   /* the pool of light: a big soft warm radial anchored on the shade, behind the books */
-  .lampwrap::after{content:'';position:absolute;left:9%;top:30%;width:560px;height:560px;
+  .lampwrap::after{content:'';position:absolute;left:9%;top:30%;width:620px;height:620px;
     transform:translate(-50%,-50%);pointer-events:none;border-radius:50%;z-index:-1;
-    background:radial-gradient(circle, rgba(255,196,120,.55), rgba(255,176,92,.22) 42%, transparent 70%);
-    mix-blend-mode:multiply;opacity:0;transition:opacity .7s ease}
-  .shelfstage.lit .lampwrap::after{opacity:.5}
+    background:radial-gradient(circle, rgba(255,214,150,.85), rgba(255,190,110,.38) 44%, transparent 70%);
+    mix-blend-mode:screen;opacity:0;transition:opacity .7s ease}
+  .shelfstage.lit .lampwrap::after{opacity:.6}
   .lampwrap .lamp{position:static;display:block;height:calc(var(--bkh)*1.2);width:auto;right:auto;bottom:auto;
     filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
   .lampwrap .bulb{left:9%;top:30%;width:56px;height:56px}
@@ -179,8 +219,8 @@
   .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0;opacity:.9}
   .signslot{margin-bottom:18px}
   .signslot .boardsrow{margin:0 0 1.1rem}
-  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.5rem;row-gap:.45rem;flex-wrap:wrap;margin:1rem 0 0;opacity:.92;
-    font-size:.78rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
+  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.9rem;row-gap:.45rem;flex-wrap:wrap;margin:1rem 0 0;opacity:.92;
+    font-size:.8rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
   .boardsrow span{white-space:nowrap}
   .boardsrow i{font-style:normal;opacity:.55}
   @media (max-width:560px){ .boardsrow{gap:.8rem} }
@@ -245,29 +285,32 @@
 
       <div class="caserow">
         <div class="shelf">
-          <img class="bookend" src="assets/lw/shelf/bookend2.webp" alt="">
-          <span class="bks" data-books="maths,lang,lit,science,triple"></span>
-          <span class="gap"></span>
+          <span class="wing wl">
+            <img class="bookend" src="assets/lw/shelf/bookend2.webp" alt="">
+            <span class="bks" data-books="maths,lang,lit,science,triple,@bookstack"></span>
+          </span>
           <div class="slot brandslot">
             <span class="brand">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
             <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
             <p>Lessons, practice and podcasts for every subject and every board &mdash; on a shelf that&rsquo;s yours.</p>
           </div>
-          <span class="gap"></span>
-          <span class="bks" data-books="history,geog,french,spanish,german"></span>
-          <button class="lampwrap" type="button" aria-label="Toggle the lamp">
-            <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
-            <div class="bulb"></div>
-            <div class="pullcord" id="cord-landing"></div>
-          </button>
+          <span class="wing wr">
+            <span class="bks" data-books="history,geog,french,spanish,german,@inkwell"></span>
+            <button class="lampwrap" type="button" aria-label="Toggle the lamp">
+              <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+              <div class="bulb"></div>
+              <div class="pullcord" id="cord-landing"></div>
+            </button>
+          </span>
         </div>
-        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
 
       <div class="caserow">
         <div class="shelf">
-          <span class="bks" data-books="cs,business,pe"></span>
-          <span class="gap"></span>
+          <span class="wing wl">
+            <span class="bks" data-books="@pot_ivy,cs,business,pe"></span>
+          </span>
           <div class="slot door">
             <h2>Revising on my own</h2>
             <p class="sub">Free, every subject, no card. Build your shelf first &mdash; see we&rsquo;ve got
@@ -275,9 +318,9 @@
             <button class="cta" onclick="go('picker')">Create your shelf &rarr;</button>
             <p class="tiny">Nothing saved until you say so &middot; <a href="#" onclick="return false">Sign in</a></p>
           </div>
-          <span class="gap"></span>
-          <span class="bks" data-books="psych,rs,socio,econ"></span>
-          <span class="gap"></span>
+          <span class="wing wm">
+            <span class="bks" data-books="psych,rs,socio,econ,@hourglass"></span>
+          </span>
           <div class="slot door">
             <h2>With my school</h2>
             <p class="sub">Your school signs you in &mdash; your shelf is ready when you arrive.</p>
@@ -291,27 +334,30 @@
             </button>
             <p class="tiny">Use the account your school gave&nbsp;you.</p>
           </div>
-          <span class="gap"></span>
-          <span class="bks" data-books="stats,media,film,drama"></span>
+          <span class="wing wr">
+            <span class="bks" data-books="@clock,stats,media,film,drama"></span>
+          </span>
         </div>
-        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
 
       <div class="caserow">
         <div class="shelf">
-          <span class="bks" data-books="music,mtech,dt,eng,electronics,it"></span>
-          <span class="gap"></span>
+          <span class="wing wl">
+            <span class="bks" data-books="music,mtech,dt,eng,electronics,it,@globe"></span>
+          </span>
           <div class="slot signslot">
             <div class="boardsrow" aria-label="Exam boards covered">
               <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
             </div>
             <span class="signoff">Small days add up. &mdash; SV</span>
           </div>
-          <span class="gap"></span>
-          <span class="bks" data-books="astro,geology,classics,citizenship,food,hosp,hsc"></span>
-          <img class="bookend mirror" src="assets/lw/shelf/bookend2_marble.png" alt="">
+          <span class="wing wr">
+            <span class="bks" data-books="@pot_fern,astro,geology,classics,citizenship,food,hosp,hsc"></span>
+            <img class="bookend mirror" src="assets/lw/shelf/bookend2_marble.png" alt="">
+          </span>
         </div>
-        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt=""></div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
       </div>
 
       <div class="booktip" id="booktip"></div>
@@ -328,7 +374,7 @@
 
     <div class="shelfstage lit" id="stage-picker">
       <div class="shelf" id="shelf-picker"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
       <div class="lightwash"></div>
       <div class="lampglow"></div>
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
@@ -355,7 +401,7 @@
 
     <div class="shelfstage lit">
       <div class="shelf" id="shelf-boards"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
       <div class="lightwash"></div>
       <div class="lampglow"></div>
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
@@ -381,7 +427,7 @@
 
     <div class="shelfstage lit">
       <div class="shelf" id="shelf-save"></div>
-      <img class="ledge" src="assets/lw/shelf/ledge_walnut.webp" alt="">
+      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
       <div class="lightwash"></div>
       <div class="lampglow"></div>
       <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
@@ -500,9 +546,24 @@ function caseBook(s,i,n,flop){
 }
 function buildCase(){
   document.querySelectorAll('#stage-landing .bks').forEach(g=>{
-    const slugs=(g.dataset.books||'').split(',').filter(Boolean);
+    const toks=(g.dataset.books||'').split(',').filter(Boolean);
+    const nBooks=toks.filter(t=>t[0]!=='@').length;
     g.innerHTML='';
-    slugs.forEach((sl,i)=>g.appendChild(caseBook(SUBJECTS.find(x=>x.slug===sl),i,slugs.length,false)));
+    let bi=0;
+    toks.forEach((tk,ti)=>{
+      if(tk[0]==='@'){
+        const name=tk.slice(1), p=document.createElement('span');
+        p.className='prop prop-'+name;
+        p.innerHTML='<img draggable="false" src="assets/lw/shelf/prop_'+name+'.webp" alt="">';
+        g.appendChild(p);
+        return;
+      }
+      const b=caseBook(SUBJECTS.find(x=>x.slug===tk),bi,nBooks,false); bi++;
+      /* a book next to a prop leans on it — that's how real shelves hold books up */
+      if(toks[ti+1] && toks[ti+1][0]==='@'){ b.style.setProperty('--lean','7.5deg'); b.style.setProperty('--shift','5px'); }
+      else if(toks[ti-1] && toks[ti-1][0]==='@'){ b.style.setProperty('--lean','-7.5deg'); b.style.setProperty('--shift','-5px'); }
+      g.appendChild(b);
+    });
   });
 }
 buildCase();
@@ -633,6 +694,10 @@ if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
   const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&BOARDKEYS.includes(kv[1])) boards[kv[0]]=kv[1]; }); }
 if(q.get('view')) go(q.get('view'));
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
+/* ?snap — verification hook: skip fades/animations so headless captures are honest */
+if(q.has('snap')){ document.body.classList.add('ready');
+  const st=document.createElement('style'); st.textContent='*{transition:none!important;animation:none!important}';
+  document.head.appendChild(st); stageL.classList.add('lit'); }
 </script>
 </body>
 </html>
