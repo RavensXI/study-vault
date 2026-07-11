@@ -39,31 +39,35 @@
 
   /* ---- THE BOOKCASE WALL: the page IS the shelves; content lives in the gaps ---- */
   .bookcase.shelfstage{position:relative;width:100vw;max-width:none;margin:2.4rem calc(50% - 50vw) 0}
-  .caserow{position:relative;padding:0;--bkh:clamp(104px,9vw,150px)}
+  .caserow{position:relative;padding:0;--bkh:clamp(118px,9.5vw,158px)}
   .caserow .shelf{justify-content:center;height:auto;min-height:calc(var(--bkh) + 8px);
     align-items:flex-end;padding:0 clamp(10px,2.5vw,44px);gap:3px}
   .caserow .gap{flex:1 1 0;min-width:14px}
   .bks{display:flex;align-items:flex-end;gap:3px}
   .caserow .bookend{height:calc(var(--bkh)*1.03)}
-  .caserow .ledgewrap{height:40px;overflow:hidden;margin-top:-7px;position:relative;z-index:1}
-  .caserow .ledgewrap .ledge{width:106%;margin-left:-3%;margin-top:0;height:40px}
+  .caserow .ledgewrap{height:26px;overflow:hidden;margin-top:-16px;position:relative;z-index:1;
+    filter:drop-shadow(0 4px 5px rgba(40,28,12,.16))}
+  .caserow .ledgewrap .ledge{width:104%;margin-left:-2%;margin-top:0;height:26px;object-position:center 12%}
+  .caserow:nth-child(2) .ledgewrap .ledge{transform:scaleX(-1)}
+  .caserow:nth-child(3) .ledgewrap .ledge{object-position:center 17%}
   .caserow+.caserow{margin-top:22px}
   .caserow .bk{transition:transform .3s var(--ease),filter .55s ease}
   /* content standing on the planks */
-  .slot{align-self:flex-end;text-align:center;margin:0 4px 6px}
-  .brandslot{max-width:640px;padding:0 10px}
+  .slot{align-self:flex-end;text-align:center;margin:0 4px -4px;position:relative;z-index:2}
+  .brandslot{max-width:640px;padding:0 10px;margin-bottom:16px}
   .brandslot .brand{display:block;margin-bottom:.5rem}
   .brandslot h1{font-family:var(--read);font-size:clamp(1.35rem,2.1vw,1.9rem);font-weight:600;
     letter-spacing:-.015em;line-height:1.16;margin:0 0 .4rem}
-  .brandslot p{font-size:.92rem;color:var(--sec);margin:0}
-  .slot.door{width:clamp(280px,24vw,340px);text-align:left;margin-bottom:10px}
+  .brandslot p{font-size:.92rem;color:var(--sec);margin:0 auto;max-width:540px}
+  .slot.door{width:clamp(280px,24vw,340px);text-align:left;margin-bottom:-2px;
+    box-shadow:0 10px 14px -10px rgba(40,28,12,.35)}
   .signslot .signoff{margin:0}
   /* the lamp shrinks with the books; bulb + cord ride the lamp art itself */
   .lampwrap{position:relative;align-self:flex-end;border:none;background:none;padding:0;cursor:pointer;
     margin-left:6px;flex:none}
-  .lampwrap .lamp{display:block;height:calc(var(--bkh)*1.2);width:auto;
+  .lampwrap .lamp{position:static;display:block;height:calc(var(--bkh)*1.2);width:auto;right:auto;bottom:auto;
     filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
-  .lampwrap .bulb{left:9%;top:30%;width:44px;height:44px}
+  .lampwrap .bulb{left:9%;top:30%;width:34px;height:34px}
   .lampwrap .pullcord{left:14%;top:26%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
   .caserow .bk{cursor:pointer;pointer-events:auto}
@@ -160,7 +164,9 @@
   .sso svg{width:18px;height:18px;flex:none}
 
   .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0}
-  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.6rem;margin:1rem 0 0;
+  .signslot{margin-bottom:18px}
+  .signslot .boardsrow{margin:0 0 .55rem}
+  .boardsrow{display:flex;justify-content:center;align-items:baseline;gap:1.3rem;margin:1rem 0 0;
     font-size:.78rem;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:var(--mut)}
   .boardsrow i{font-style:normal;opacity:.55}
   @media (max-width:560px){ .boardsrow{gap:.8rem;flex-wrap:wrap} }
@@ -281,7 +287,12 @@
         <div class="shelf">
           <span class="bks" data-books="music,mtech,dt,eng,electronics,it"></span>
           <span class="gap"></span>
-          <div class="slot signslot"><span class="signoff">Small days add up. &mdash; SV</span></div>
+          <div class="slot signslot">
+            <div class="boardsrow" aria-label="Exam boards covered">
+              <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
+            </div>
+            <span class="signoff">Small days add up. &mdash; SV</span>
+          </div>
           <span class="gap"></span>
           <span class="bks" data-books="astro,geology,classics,citizenship,food,hosp,hsc"></span>
           <img class="bookend mirror" src="assets/lw/shelf/bookend2.webp" alt="">
@@ -292,9 +303,6 @@
       <div class="booktip" id="booktip"></div>
     </div>
 
-    <div class="boardsrow" aria-label="Exam boards covered">
-      <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
-    </div>
   </div>
 
   <!-- ================= PICKER: BUILD YOUR SHELF ================= -->
@@ -427,7 +435,7 @@ const ROW_BOTTOM=SUBJECTS.map(s=>s.slug).filter(sl=>!ROW_TOP.includes(sl));
 /* per-position lean/foot tuned on the dashboard benches (9 slots) */
 const LEANS=[-4.2,-5.4,-6.4,-7.5,-8.8,-9.3,-10.3,-11.6,-23.6];
 const SHIFTS=[5,6,3,0,1,-1,-1,0,38];
-function leanFor(i,n,flop){ if(n<=1) return -3; const t=i/(n-1); return -(3+t*t*8.5) - ((flop!==false)&&i===n-1&&n>=5?10:0); }
+function leanFor(i,n,flop){ if(n<=1) return -2; const t=i/(n-1); return -(2+t*t*3.2) - ((flop!==false)&&i===n-1&&n>=5?10:0); }
 function shiftFor(i,n,flop){ return (flop!==false)&&i===n-1&&n>=5?Math.round(14+n*2.4):Math.round(i*0.4); }
 
 function bookEl(s,i,n,land){
