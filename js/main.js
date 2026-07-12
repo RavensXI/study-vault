@@ -2471,19 +2471,28 @@ function initLessonProgress() {
   function getState() {
     try { return JSON.parse(localStorage.getItem(storageKey)) || {}; } catch(e) { return {}; }
   }
-  // Dashboard rollup: a lesson counts COMPLETE when every task except the
-  // optional exam question is done. Kept in one compact map the student
-  // dashboard can read: sv-lessons-done = { "subject/unit": [lessonNumbers] }.
+  // WEIGHTED completion — design-lab/LESSON_COMPLETION_SPEC.md (agreed 27 Jun):
+  // exam question 40, flashcards 15, revision task 15, quiz/video/podcast 10,
+  // highlight-mode 0 (note-taking tool). Done at >=50% of the weights AVAILABLE
+  // on this lesson — exam+any-one-thing is the shortest path to done; doing
+  // everything except the exam scrapes 60. Rollup the dashboard reads:
+  // sv-lessons-done = { "subject/unit": [lessonNumbers] }.
+  var TASK_WEIGHTS = { 'practice-question': 40, 'flashcards': 15, 'revision-task': 15,
+    'knowledge-check': 10, 'video': 10, 'podcast': 10 };
+  function weighted(sd) {
+    var avail = 0, got = 0;
+    tasks.forEach(function (t) {
+      var w = TASK_WEIGHTS[t.id] || 0;
+      avail += w;
+      if (sd[t.id]) got += w;
+    });
+    return { pct: avail ? Math.round(got / avail * 100) : 0,
+             complete: avail > 0 && got / avail >= 0.5 };
+  }
   function updateRollup(s) {
     try {
-      // completion = the learning tasks. The exam question is optional, and
-      // highlight-mode is a note-taking tool (hidden by the reader skin) —
-      // neither should hold a lesson hostage.
-      var need = tasks.filter(function (t) {
-        return t.id !== 'practice-question' && t.id !== 'highlight-mode';
-      });
-      if (!need.length) return;
-      var complete = need.every(function (t) { return !!s[t.id]; });
+      var wres = weighted(s);
+      var complete = wres.complete;
       var key = pathMatch[1] + '/' + pathMatch[2];
       var num = parseInt(pathMatch[3], 10);
       var roll = {};
@@ -2497,7 +2506,7 @@ function initLessonProgress() {
       localStorage.setItem('sv-lessons-done', JSON.stringify(roll));
       // observable, so nobody has to guess whether the rule fired
       console.log('[sv-progress]', key, num, complete ? 'COMPLETE' : 'not complete',
-        '- outstanding:', need.filter(function (t) { return !s[t.id]; }).map(function (t) { return t.id; }));
+        '- weighted ' + wres.pct + '% (threshold 50%)');
       if (newlyDone) {
         var t = document.createElement('div');
         t.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:#2d5a3d;color:#fff;font-family:Inter,sans-serif;font-size:0.85rem;padding:0.65rem 1.3rem;border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.2);z-index:9999;opacity:0;transition:opacity 0.3s ease;pointer-events:none;';
@@ -2583,7 +2592,7 @@ function initLessonProgress() {
   });
 
   var completed = tasks.filter(function(t) { return state[t.id]; }).length;
-  var pct = Math.round((completed / tasks.length) * 100);
+  var pct = weighted(state).pct;
   html += '<div class="lesson-progress-bar"><div class="lesson-progress-bar-fill" style="width:' + pct + '%"></div></div>';
   html += '<div class="lesson-progress-summary">' + completed + ' of ' + tasks.length + ' complete</div></div>';
   section.innerHTML = html;
@@ -2747,7 +2756,8 @@ function initLessonProgress() {
   // ---- Sync both widgets after any state change ----
   function syncAll() {
     var done = tasks.filter(function(t) { return state[t.id]; }).length;
-    var p = Math.round((done / tasks.length) * 100);
+    var p = weighted(state).pct;
+    section.dataset.svPct = p;   // reader-skin adapter reads this for its bar
 
     // Sidebar version
     tasks.forEach(function(t) {

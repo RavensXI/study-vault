@@ -41,6 +41,11 @@ real pages + the reading tour; design-lab only), `design-lab/serve.py`,
 - Signed up/in: the same object lives in the account as `user_metadata.sv_welcome`.
   Sign-in restores it; while signed in, every wizard change syncs up (debounced).
   `localStorage["sv-user"]` = `{email}` marks the signed-in state for the prototypes.
+- **Lesson completion is WEIGHTED** — `design-lab/LESSON_COMPLETION_SPEC.md`
+  (agreed 27 Jun): exam question 40, flashcards 15, revision task 15,
+  quiz/video/podcast 10 each, highlighter 0; done at ≥50% of available.
+  Lesson pages write completions to `localStorage["sv-lessons-done"]`
+  (`{"subject/unit":[numbers]}`); dashboards read it.
 - Topic choices for History/Lit are literal Supabase **unit slugs** — "start
   lesson 1" links go straight into the chosen option/text.
 - Real subject slugs + first units were **queried from Supabase**, not guessed

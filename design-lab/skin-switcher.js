@@ -642,7 +642,11 @@
       var want = done + ' of ' + total + ' complete';
       if (summary.textContent !== want) summary.textContent = want;
       var fill = section.querySelector('.lesson-progress-bar-fill');
-      if (fill) { var w = (total ? Math.round(done / total * 100) : 0) + '%'; if (fill.style.width !== w) fill.style.width = w; }
+      // the bar shows WEIGHTED depth (LESSON_COMPLETION_SPEC.md) when main.js
+      // provides it; the count-based fallback covers older pages
+      var wpct = section.dataset.svPct !== undefined ? section.dataset.svPct
+        : (total ? Math.round(done / total * 100) : 0);
+      if (fill) { var w = wpct + '%'; if (fill.style.width !== w) fill.style.width = w; }
     }
     apply();
     if (!section.dataset.countFix) {
