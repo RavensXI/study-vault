@@ -563,7 +563,7 @@ if(DAYONE){
       (Array.isArray(v)?v:[v]).forEach(x=>raw.push(x)); });
     let first=null;
     if(sub){
-      if((sl==='history'||sl==='lit')&&raw.length) first=raw[0];          /* topic choices ARE unit slugs */
+      if((sl==='history'||sl==='lit'||sl==='drama')&&raw.length) first=raw[0];   /* topic choices ARE unit slugs */
       else if(sl==='rs'&&board==='aqa'&&raw.length) first=raw[0]+'-beliefs';
       else first=FIRSTUNIT[sub]||null;
     }
@@ -571,7 +571,7 @@ if(DAYONE){
       name:NAMEC[sl][0],c:NAMEC[sl][1],units:[],
       board:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].board)||BOARDLBL[board]||'',
       topics:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].topics)||[],
-      topicsRaw:(sl==='history'||sl==='lit')?raw:[], first:first};
+      topicsRaw:(sl==='history'||sl==='lit'||sl==='drama')?raw:[], first:first};
   }));
 }
 /* where does day one actually start? A real lesson if we know the unit,
@@ -579,6 +579,46 @@ if(DAYONE){
 function dayOneUrl(su){ if(!su||!su.sub) return null;
   if(su.first) return (su.mode==='p'?'/practice/':'/lesson/')+su.sub+'/'+su.first+'/1';
   return '/browse/'+su.sub; }
+/* progress + live course structure — same contract as the classic view */
+let DONE={};
+try{ DONE=JSON.parse(localStorage.getItem('sv-lessons-done'))||{}; }catch(e){}
+if(_dq.get('done')){ DONE={};
+  _dq.get('done').split(',').forEach(p=>{ const kv=p.split(':');
+    if(kv[1]) DONE[kv[0]]=kv[1].split('.').map(Number); }); }
+function doneIn(sub,unit){ return (DONE[sub+'/'+unit]||[]); }
+const SUPA='https://baipckgywpnwapobwtsy.supabase.co';
+const ANON='sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+const DRAMA_PLAYS=['the-crucible','blood-brothers','noughts-and-crosses','around-the-world-80-days',
+ 'things-i-know-to-be-true','romeo-and-juliet','a-taste-of-honey','the-great-wave','the-empress'];
+function keepUnit(su,uslug){
+  const raw=su.topicsRaw||[], allRaw=(WIZ&&WIZ.topics&&WIZ.topics[su.slug])?
+    Object.values(WIZ.topics[su.slug]).flat():[];
+  if(su.slug==='history'||su.slug==='lit')
+    return !raw.length||raw.includes(uslug)||doneIn(su.sub,uslug).length>0;
+  if(su.slug==='drama')
+    return !DRAMA_PLAYS.includes(uslug)||!raw.length||raw.includes(uslug)||doneIn(su.sub,uslug).length>0;
+  if(su.slug==='rs'&&allRaw.length)
+    return allRaw.some(r=>uslug===r||uslug.indexOf(r+'-')===0)||doneIn(su.sub,uslug).length>0;
+  return true;
+}
+if(DAYONE){
+  const subs=SUBJECTS.filter(su=>su.sub&&su.mode!=='p').map(su=>su.sub);
+  if(subs.length) fetch(SUPA+'/rest/v1/subjects?select=slug,units(slug,name,lesson_count,sort_order)'
+      +'&school_id=is.null&slug=in.('+subs.map(x=>'"'+x+'"').join(',')+')',
+      {headers:{apikey:ANON}})
+    .then(r=>r.json()).then(rows=>{
+      rows.forEach(row=>{
+        const su=SUBJECTS.find(x=>x.sub===row.slug); if(!su) return;
+        const us=(row.units||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))
+          .filter(u=>keepUnit(su,u.slug));
+        if(!us.length) return;
+        su.units=us.map(u=>{
+          const dn=doneIn(su.sub,u.slug).filter(k=>k>=1&&k<=(u.lesson_count||0));
+          return [u.name,u.lesson_count||0,dn.length,u.slug,dn];
+        });
+      });
+    }).catch(()=>{});
+}
 /* leave the desk with a quick dip through the curtain; coming Back restores a
    bfcached faded frame, so pageshow always clears it */
 function nav(u){ stage.classList.add('exit'); setTimeout(()=>{ location.href=u; },230); }

@@ -618,7 +618,7 @@ if(DAYONE){
       (Array.isArray(v)?v:[v]).forEach(x=>raw.push(x)); });
     let first=null;
     if(sub){
-      if((sl==='history'||sl==='lit')&&raw.length) first=raw[0];          /* topic choices ARE unit slugs */
+      if((sl==='history'||sl==='lit'||sl==='drama')&&raw.length) first=raw[0];   /* topic choices ARE unit slugs */
       else if(sl==='rs'&&board==='aqa'&&raw.length) first=raw[0]+'-beliefs';
       else first=FIRSTUNIT[sub]||null;
     }
@@ -626,7 +626,7 @@ if(DAYONE){
       name:NAMEC[sl][0],c:NAMEC[sl][1],units:[],
       board:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].board)||BOARDLBL[board]||'',
       topics:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].topics)||[],
-      topicsRaw:(sl==='history'||sl==='lit')?raw:[], first:first};
+      topicsRaw:(sl==='history'||sl==='lit'||sl==='drama')?raw:[], first:first};
   }));
 }
 /* where does day one actually start? A real lesson if we know the unit,
@@ -646,11 +646,15 @@ function doneIn(sub,unit){ return (DONE[sub+'/'+unit]||[]); }
    own topic choices where the subject has them */
 const SUPA='https://baipckgywpnwapobwtsy.supabase.co';
 const ANON='sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+const DRAMA_PLAYS=['the-crucible','blood-brothers','noughts-and-crosses','around-the-world-80-days',
+ 'things-i-know-to-be-true','romeo-and-juliet','a-taste-of-honey','the-great-wave','the-empress'];
 function keepUnit(su,uslug){
   const raw=su.topicsRaw||[], allRaw=(WIZ&&WIZ.topics&&WIZ.topics[su.slug])?
     Object.values(WIZ.topics[su.slug]).flat():[];
   if(su.slug==='history'||su.slug==='lit')
     return !raw.length||raw.includes(uslug)||doneIn(su.sub,uslug).length>0;
+  if(su.slug==='drama')                        /* core units always; plays = the chosen one */
+    return !DRAMA_PLAYS.includes(uslug)||!raw.length||raw.includes(uslug)||doneIn(su.sub,uslug).length>0;
   if(su.slug==='rs'&&allRaw.length)
     return allRaw.some(r=>uslug===r||uslug.indexOf(r+'-')===0)||doneIn(su.sub,uslug).length>0;
   return true;
@@ -674,7 +678,10 @@ if(DAYONE){
       });
       if(OPEN_STAGE&&!selSlug) selSlug=OPEN_STAGE;
       renderSubjects();
-      if(selSlug){ const cur=SUBJECTS.find(x=>x.slug===selSlug); if(cur) renderSubjectPanel(cur); }
+      if(selSlug){ const cur=SUBJECTS.find(x=>x.slug===selSlug);
+        if(cur){ renderSubjectPanel(cur);
+          const ou=_dq.get('openunit'), uu=ou&&cur.units.find(x=>x[3]===ou);
+          if(uu) showLessons(cur,uu); } }
       refreshDayOnePlan();
       document.body.dataset.unitsLoaded='1';   /* staging: renders can wait on this */
     }).catch(()=>{});
@@ -1041,10 +1048,25 @@ function renderSubjectPanel(s){
   el.querySelectorAll('.ublock').forEach(x=>x.onclick=()=>showLessons(s,s.units[+x.dataset.u]));
 }
 /* topic drilled open: pick a lesson tile to see its title, then confirm with the button */
+const TITLE_FETCHED={};
+function fetchTitles(s,u){
+  const fk=s.sub+'/'+u[3];
+  if(TITLE_FETCHED[fk]) return; TITLE_FETCHED[fk]=1;
+  fetch(SUPA+'/rest/v1/units?select=lessons(lesson_number,title),subjects!inner(slug)'
+    +'&slug=eq.'+u[3]+'&subjects.slug=eq.'+s.sub,{headers:{apikey:ANON}})
+  .then(r=>r.json()).then(rows=>{
+    const ls=(rows[0]&&rows[0].lessons)||[]; if(!ls.length) return;
+    const t=[]; ls.forEach(l=>{ if(l.lesson_number>=1) t[l.lesson_number-1]=l.title; });
+    (LESSON_TITLES[s.sub]=LESSON_TITLES[s.sub]||{})[u[3]]=t;
+    const el=document.getElementById('sdetail');
+    if(el&&!el.hidden&&el.querySelector('.lessons')) showLessons(s,u);
+  }).catch(()=>{});
+}
 function showLessons(s,u){
   const el=document.getElementById('sdetail');
   el.style.setProperty('--tc',s.c);
   const titles=((LESSON_TITLES[s.sub]||{})[u[3]])||[];
+  if(!titles.length) fetchTitles(s,u);
   const n=titles.length||u[1];
   const base='/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
   const dset=u[4]||null;                     /* day-one: exact done set from the rollup */
