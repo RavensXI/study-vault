@@ -19,6 +19,7 @@
     --ease:cubic-bezier(.22,1,.36,1)}
   *{box-sizing:border-box}
   html{background:var(--paper)}
+  html,body{overflow-x:clip}
   body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper);
     opacity:0;transition:opacity .3s ease}
   body.ready{opacity:1}
@@ -29,7 +30,11 @@
   .brand{font-size:1.65rem;font-weight:500;color:#3d3428;letter-spacing:-.01em}.brand b{font-weight:800}
   .brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
 
-  .wrap{max-width:1020px;margin:0 auto;padding:8px 32px 60px}
+  .wrap{max-width:1020px;margin:0 auto;padding:0 32px 60px}
+  /* the landing is a single full-bleed screen: no disclaimer block (it lives
+     on the exam-boards step where board names are interactive), no tail padding */
+  body[data-view="landing"] .wrap{padding-bottom:0}
+  body[data-view="landing"] .legal{display:none}
 
   /* ---- headline ---- */
   .hero-copy{text-align:center;margin:1.6rem 0 .4rem}
@@ -40,7 +45,7 @@
   /* ---- THE BOOKCASE WALL: the page IS the shelves; content lives in the gaps ---- */
   /* fixed 1366px canvas: the page composition is constant; fitScale() zooms
      the whole canvas to the visitor's window (Tom's 12 Jul proportions) */
-  .bookcase.shelfstage{position:relative;width:1835px;max-width:none;margin:2.4rem calc(50% - 917.5px) 0}
+  .bookcase.shelfstage{position:relative;width:1835px;max-width:none;margin:1rem calc(50% - 917.5px) 0}
   /* the wall itself: faded damask paper + a soft vignette pulling the eye centre.
      One layer, two backgrounds, multiplied over the cream so type stays crisp */
   .bookcase.shelfstage::before{content:'';position:absolute;inset:-170px 0 -10px;z-index:0;
