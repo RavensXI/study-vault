@@ -435,6 +435,7 @@
   body[data-view="picker"] .view-picker{display:block}
   body[data-view="boards"] .view-boards{display:block}
   body[data-view="topics"] .view-topics{display:block}
+  body[data-view="dash"] .view-dash{display:block}
   body[data-view="save"] .view-save{display:block}
   .picker-head{text-align:center;margin:1.5rem 0 .2rem}
   .picker-head h1{margin-bottom:.35rem}
@@ -473,6 +474,24 @@
   .verdict{text-align:center;font-size:.92rem;color:var(--sec);margin:1rem 0 0}
   .verdict b{color:var(--ink)}
   .verdict .req{color:#8a6430}
+  /* the dashboard preview: see the finished product BEFORE any sign-up ask */
+  .savebar{max-width:820px;margin:1.5rem auto 0;display:flex;align-items:center;gap:16px;
+    justify-content:space-between;background:#fffdf9;border:1px solid var(--line);
+    border-radius:6px;padding:.8rem 1.1rem .8rem 1.3rem}
+  .savebar span{font-family:var(--read);font-size:.94rem;color:var(--sec)}
+  .savebar .cta{width:auto;display:inline-block;padding:.6rem 1.3rem;font-size:.92rem;margin:0;flex:none}
+  .dashgrid{max-width:1100px;margin:1.6rem auto 0;display:grid;
+    grid-template-columns:repeat(3,1fr);gap:14px;text-align:left}
+  .dcard{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:1rem 1.1rem}
+  .dcard .dhead{display:flex;align-items:center;gap:10px;margin-bottom:.35rem}
+  .dcard .dhead img{height:30px;width:auto;filter:saturate(1.4) brightness(1.1)}
+  .dcard .dhead .bn{font-family:var(--read);font-weight:600;font-size:.98rem;line-height:1.2}
+  .dcard .dhead .bd{font-size:.7rem;color:var(--mut);letter-spacing:.09em;text-transform:uppercase;margin-left:auto}
+  .dcard .dtopics{font-size:.8rem;color:var(--mut);line-height:1.5;margin:.1rem 0 .55rem;min-height:1.2em}
+  .dcard .dlinks{font-size:.8rem;font-weight:600;color:var(--anchor)}
+  .dcard .dlinks a{color:var(--anchor);text-decoration:none;border-bottom:1px solid var(--line)}
+  .dcard .dlinks i{font-style:normal;color:var(--mut);opacity:.6;padding:0 .35rem}
+
   /* topics step: one decision at a time — a single focused question card */
   .stepcard{max-width:780px;margin:1.7rem auto 0;text-align:center}
   .tprog{font-size:.76rem;font-weight:600;color:var(--mut);letter-spacing:.14em;text-transform:uppercase}
@@ -764,7 +783,7 @@
 
     <div class="picker-foot">
       <button class="backlink" onclick="go('picker')">&larr; Subjects</button>
-      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="go('save')">Save your choices &rarr;</button>
+      <button class="cta" id="bnext" disabled style="opacity:.45" onclick="go('dash')">See my StudyVault &rarr;</button>
     </div>
   </div>
 
@@ -790,8 +809,33 @@
 
     <div class="picker-foot">
       <button class="backlink" id="tback">&larr; Exam boards</button>
-      <button class="cta" id="tnext" disabled style="opacity:.45">Save your choices &rarr;</button>
+      <button class="cta" id="tnext" disabled style="opacity:.45">Next &rarr;</button>
     </div>
+  </div>
+
+  <!-- ================= DASH: see the product BEFORE any sign-up ask ================= -->
+  <div class="view view-dash">
+    <div class="picker-head">
+      <h1>This is your StudyVault.</h1>
+      <p id="dashsub">Set up for exactly what you&rsquo;re sitting &mdash; have a look around.</p>
+    </div>
+
+    <div class="shelfstage lit">
+      <div class="shelf" id="shelf-dash"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <div class="pullcord"></div>
+    </div>
+
+    <div class="savebar">
+      <span>Nothing is saved yet &mdash; your setup lives on this device only.</span>
+      <button class="cta" onclick="go('save')">Save it &mdash; free</button>
+    </div>
+
+    <div class="dashgrid" id="dashgrid"></div>
   </div>
 
   <!-- ================= SAVE: the only moment we ask for anything ================= -->
@@ -818,7 +862,7 @@
       <p class="tiny">Free &middot; everything will be exactly as you left it</p>
     </div>
     <div class="picker-foot">
-      <button class="backlink" onclick="go('boards')">&larr; Exam boards</button>
+      <button class="backlink" onclick="go('dash')">&larr; Back to my StudyVault</button>
     </div>
   </div>
 
@@ -1185,10 +1229,11 @@ function renderBoards(){
   }
   const nx=document.getElementById('bnext'), ready=chosen.length===picked.length&&picked.length>0;
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
-  /* some books have another level (history options, set texts) — route there */
+  /* some subjects have another level (history options, set texts) — route there.
+     Either way the wizard ends INSIDE the product, never at a sign-up gate. */
   const needT=topicsNeeded().length>0;
-  nx.innerHTML=needT?'Choose your topics &rarr;':'Save your choices &rarr;';
-  nx.onclick=()=>go(needT?'topics':'save');
+  nx.innerHTML=needT?'Choose your topics &rarr;':'See my StudyVault &rarr;';
+  nx.onclick=()=>go(needT?'topics':'dash');
 }
 /* one focused decision per screen: flatten every needed group into steps */
 let tstep=0, TSTEP_OVR=null;
@@ -1249,10 +1294,41 @@ function renderTopics(){
     nx.disabled=!stepDone(st); nx.style.opacity=stepDone(st)?'1':'.45';
     nx.onclick=()=>{ tstep++; renderTopics(); };
   }else{
-    nx.innerHTML='Save your choices &rarr;';
+    nx.innerHTML='See my StudyVault &rarr;';
     nx.disabled=!allDone; nx.style.opacity=allDone?'1':'.45';
-    nx.onclick=()=>go('save');
+    nx.onclick=()=>go('dash');
   }
+}
+function renderDash(){
+  renderShelfInto(document.getElementById('shelf-dash'),picked);
+  document.getElementById('dashsub').textContent=
+    picked.length+' subjects, set up for your exact specs — have a look around.';
+  const dg=document.getElementById('dashgrid'); dg.innerHTML='';
+  picked.forEach(slug=>{
+    const su=SUBJECTS.find(x=>x.slug===slug);
+    const groups=topicsFor(slug), tp=topics[slug]||{};
+    let tsum='';
+    if(groups){
+      const names=[];
+      groups.forEach((g,gi)=>{
+        const v=tp[gi]; if(!v) return;
+        (Array.isArray(v)?v:[v]).forEach(sv=>{
+          const o=g[2].find(x=>x.s===sv); if(o) names.push(o.n);
+        });
+      });
+      tsum=names.join(' · ');
+    }
+    const card=document.createElement('div'); card.className='dcard'; card.style.setProperty('--tc',su.c);
+    card.innerHTML='<div class="dhead"><img src="assets/lw/shelf/book_'+slug+'.webp" alt="">'
+      +'<span class="bn">'+su.name+'</span>'
+      +'<span class="bd">'+(su.alt&&su.alt[boards[slug]]?su.alt[boards[slug]]:(BOARDLBL[boards[slug]]||''))+'</span></div>'
+      +'<div class="dtopics">'+(tsum||'Full course')+'</div>'
+      +'<div class="dlinks"><a href="#" onclick="return false">Lessons</a><i>&middot;</i>'
+      +'<a href="#" onclick="return false">Practice</a><i>&middot;</i>'
+      +'<a href="#" onclick="return false">Flashcards</a><i>&middot;</i>'
+      +'<a href="#" onclick="return false">Planner</a></div>';
+    dg.appendChild(card);
+  });
 }
 function renderSave(){
   renderShelfInto(document.getElementById('shelf-save'),picked);
@@ -1271,6 +1347,7 @@ function go(v){
     TSTEP_OVR=null;
     renderTopics();
   }
+  if(v==='dash') renderDash();
   if(v==='save') renderSave();
   scrollTo(0,0);
 }

@@ -48,7 +48,7 @@ STATES = {
     "b1": f"view=boards&{P8}&{B5},lit:aqa",
     "b2": f"view=boards&{P8}&{B5},lit:aqa,history:aqa",
     "b3": f"view=boards&{P8}&{B8}",
-    "sF": f"view=save&{P8}&{B8}&{tsel(NQ)}",
+    "dS": f"view=dash&{P8}&{B8}&{tsel(NQ)}",
 }
 for k in range(NQ):
     STATES[f"q{k}"]  = f"view=topics&{P8}&{B8}&{tsel(k)}&tstep={k}"      # blank
@@ -174,7 +174,7 @@ def topic_ops(k, prev_at):
         ops += [("move",blank,prev_at,at1,6), ("click",blank,"q9a",at1), ("hold","q9a",3,at1),
                 ("move","q9a",at1,at2,4), ("click","q9a",sel,at2), ("hold",sel,3,at2)]
         last = at2
-    target = "sF" if k == NQ-1 else f"q{k+1}"
+    target = "dS" if k == NQ-1 else f"q{k+1}"
     ops += [("move",sel,last,nxt,5), ("click",sel,target,nxt), ("hold",target,3 if k<NQ-1 else 0,nxt if k<NQ-1 else None)]
     return ops, nxt
 
@@ -183,7 +183,7 @@ prev = ENTRY
 for k in range(NQ):
     ops, prev = topic_ops(k, prev)
     topic_seq += ops
-topic_seq += [("hold","sF",18,None)]
+topic_seq += [("hold","dS",22,None)]
 topicsFull = build(topic_seq)
 
 # the short landing teaser: first three questions, ends resting on Q4
