@@ -20,14 +20,19 @@ dashboard** (`/classic`, day-one state, everything links to real lessons) →
 sign-up is opt-in from the dashboard, never a gate. Sign-in restores the whole
 setup from the account on any device.
 
-## The four files that ARE the product flow
+## The five files that ARE the product flow
 
 | File | Job |
 |---|---|
 | `design-lab/home-study.html` | Landing scene + wizard + real Supabase sign-up/sign-in |
-| `design-lab/dash-classic.html` | The dashboard (planner modal, day-one mode, wizard hand-off) |
-| `design-lab/dash-desk4.html` | The cosy-desk skin of the same dashboard (same data contract) |
+| `design-lab/dash-data.js` | **The shared data layer** — wizard hand-off, subject catalog (NAMEC), slug + first-unit maps, completion rollup, unit scoping (`keepUnit`), the live Supabase units fetch. Both dashboards call `svDashInit()` |
+| `design-lab/dash-classic.html` | The dashboard skin (planner modal, day-one UI, renderers) |
+| `design-lab/dash-desk4.html` | The cosy-desk skin of the same dashboard (same `svDashInit` contract) |
 | `css/reskin.css` | The lesson/browse/practice/guide look, incl. Young Serif masthead + dark mode |
+
+Rule: anything both dashboards need lives in `dash-data.js`, never copy-pasted
+into the pages. Staging hooks (`?picked` `?boards` `?tsel` `?done` `?snap`)
+are parsed there too, so they behave identically on both views.
 
 Supporting cast: `design-lab/skin-switcher.js` (applies the desk-world skin to
 real pages + the reading tour; design-lab only), `design-lab/serve.py`,
@@ -49,7 +54,7 @@ real pages + the reading tour; design-lab only), `design-lab/serve.py`,
 - Topic choices for History/Lit are literal Supabase **unit slugs** — "start
   lesson 1" links go straight into the chosen option/text.
 - Real subject slugs + first units were **queried from Supabase**, not guessed
-  (maps live in both dashboard files: `SUBSLUG`, `FIRSTUNIT`).
+  (maps live once, in `design-lab/dash-data.js`: `SUBSLUG`, `FIRSTUNIT`).
 
 ## QA / staging hooks (all harmless in production)
 
