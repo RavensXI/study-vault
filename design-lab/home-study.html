@@ -48,12 +48,17 @@
   .bookcase.shelfstage{position:relative;width:1835px;max-width:none;margin:1rem calc(50% - 917.5px) 0}
   /* the wall itself: faded damask paper + a soft vignette pulling the eye centre.
      One layer, two backgrounds, multiplied over the cream so type stays crisp */
+  /* wall treatment for a case of ANY height: the fold keeps its centre-light
+     radial (top tile only), the sides fall into shadow all the way down */
   .bookcase.shelfstage::before{content:'';position:absolute;inset:-170px 0 -10px;z-index:0;
     pointer-events:none;mix-blend-mode:multiply;opacity:.4;
-    background:
+    background-image:
       radial-gradient(120% 90% at 50% 38%, rgba(255,255,255,0) 50%, rgba(64,44,20,.36) 100%),
+      linear-gradient(90deg, rgba(64,44,20,.30), rgba(64,44,20,0) 12%, rgba(64,44,20,0) 88%, rgba(64,44,20,.30)),
       url("assets/lw/shelf/wallpaper_tile.webp");
-    background-size:cover, 700px auto}
+    background-size:100% 1250px, 100% 100%, 700px auto;
+    background-repeat:no-repeat, no-repeat, repeat;
+    background-position:top center, center, center top}
   .bookcase.shelfstage>*{position:relative;z-index:1}
   .caserow{position:relative;padding:0;--bkh:158px}
   .caserow .shelf{justify-content:center;height:auto;min-height:calc(var(--bkh) + 8px);
@@ -278,6 +283,152 @@
   .boardsrow i{font-style:normal;opacity:.5}
   .legal{max-width:620px;margin:2.4rem auto 2.2rem;text-align:center;font-size:.72rem;color:var(--mut);line-height:1.55;opacity:.85}
 
+  /* ============ THE LOWER SHELVES (scroll extension, 12 Jul) ============
+     The landing keeps scrolling down the same case: every section is another
+     caserow, so wallpaper, planks, painted books and hover tips carry on. */
+  .seclead{text-align:center;padding:88px 24px 30px;position:relative;z-index:2}
+  .sechead{font-family:var(--read);font-size:2.05rem;font-weight:600;letter-spacing:-.012em;
+    color:var(--ink);margin:0}
+  .sechead::after{content:'';display:block;width:170px;height:16px;margin:8px auto 0;
+    background:url("assets/lw/shelf/underline_sketch.webp") no-repeat center/100% 100%}
+  .secsub{font-family:var(--read);font-size:1.06rem;color:var(--sec);margin:.9rem auto 0;
+    max-width:640px;line-height:1.55}
+  .secsub2{font-size:.88rem;color:var(--mut);margin:.45rem auto 0}
+  .handnote{font-family:var(--hand);font-size:1.5rem;color:#5a4a34;line-height:1.25}
+  .rv .wing{justify-content:center}
+
+  /* S2 — three minutes to your shelf: captions live UNDER the plank */
+  .stepcaps{display:flex;padding:16px 44px 4px;position:relative;z-index:2}
+  .stepcaps>div{flex:1;text-align:center}
+  .stepcaps .handnote b{color:#3f3222}
+  .steptags{margin-top:.4rem}
+  .brasschip{display:inline-block;margin:0 3px;padding:2px 10px 3px;font-size:.68rem;font-weight:600;
+    letter-spacing:.13em;color:#54401c;text-shadow:0 1px 0 rgba(255,249,226,.65);
+    background:url("assets/lw/shelf/plaque_wide.webp");background-size:100% 100%;
+    border-radius:2px;filter:drop-shadow(0 2px 2px rgba(40,28,12,.25))}
+
+  /* S3 — inside every lesson: the display book + its plate labels */
+  .artprop{margin:0 26px;align-self:flex-end;position:relative;z-index:2;filter:var(--bkshadow)}
+  .artprop img{display:block;width:auto;filter:saturate(1.15) brightness(1.04)}
+  .artprop.openbook img{height:255px}
+  .artprop.jotter img{height:185px}
+  .artprop.cupboard img{height:290px}
+  .artprop::after{content:'';position:absolute;left:6%;right:6%;bottom:1px;height:12px;z-index:-1;
+    background:radial-gradient(52% 120% at 50% 10%,rgba(34,22,8,.44),rgba(34,22,8,.14) 55%,transparent 78%);
+    filter:blur(2.5px)}
+  .insideslot{margin-bottom:44px;max-width:470px}
+  .lessonlist{list-style:none;margin:0;padding:0;text-align:left}
+  .lessonlist li{font-family:var(--read);font-size:1.02rem;color:var(--ink);line-height:1.45;
+    padding:.44rem 0 .44rem 36px;position:relative}
+  .lessonlist li::before{content:'';position:absolute;left:2px;top:1.08rem;width:20px;height:3px;
+    background:#4a3d2c;opacity:.5;border-radius:2px;transform:rotate(-4deg)}
+  .lessonlist li b,.slist li b{font-weight:600}
+  .workslot{margin-bottom:52px;max-width:470px}
+  .workcopy{text-align:left}
+  .workcopy h3{font-family:var(--read);font-size:1.35rem;font-weight:600;margin:0 0 .55rem}
+  .workcopy p{font-family:var(--read);font-size:1.01rem;color:var(--sec);line-height:1.6;margin:0}
+
+  /* S4 — the whole library: packed display rows, hover tips live */
+  .shelf.packed{justify-content:center}
+  .shelf.packed .bks{gap:2px}
+  /* keep the feature rows off the canvas edges — the wall is wide, the story isn't */
+  .sec-inside .shelf{padding:0 180px}
+  .sec-work .shelf{padding:0 250px}
+  .sec-schools .shelf{padding:0 180px}
+
+  /* S5 — planned backwards: the pinned run-in sheet */
+  .paper{background:#fffdf6;border:1px solid var(--line);border-radius:3px;
+    box-shadow:0 18px 34px -16px rgba(40,28,12,.45);padding:1.5rem 1.9rem 1.4rem;
+    position:relative;text-align:left;transform:rotate(-1.4deg)}
+  .paper::before{content:'';position:absolute;left:50%;top:-7px;width:14px;height:14px;margin-left:-7px;
+    border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3dfa4,#96742e 70%,#6b5120);
+    box-shadow:0 2px 3px rgba(40,28,12,.4)}
+  .paper h3{font-family:var(--hand);font-size:1.8rem;font-weight:600;margin:0 0 .5rem;color:#3f3222}
+  .paper ul{list-style:none;margin:0;padding:0}
+  .paper li{font-family:var(--read);font-size:.98rem;color:var(--ink);line-height:1.5;
+    padding:.36rem 0;border-bottom:1px solid var(--linel)}
+  .paper li:last-child{border-bottom:0}
+  .paper li b{font-weight:600;color:#5b4632;display:inline-block;min-width:122px}
+  .planslot{width:470px;margin-bottom:56px}
+  .planline{font-family:var(--read);font-size:.95rem;color:var(--sec);line-height:1.55;
+    margin:1.2rem auto 0;max-width:430px}
+
+  /* S6 — with your school: the cupboard + the pitch */
+  .schoolslot{width:520px;text-align:left;margin-bottom:54px;margin-left:40px}
+  .slist{list-style:none;margin:0 0 1.1rem;padding:0}
+  .slist li{font-family:var(--read);font-size:1.04rem;color:var(--ink);line-height:1.5;
+    padding:.46rem 0 .46rem 36px;position:relative}
+  .slist li::before{content:'';position:absolute;left:2px;top:1.08rem;width:20px;height:3px;
+    background:#4a3d2c;opacity:.5;border-radius:2px;transform:rotate(-4deg)}
+  .teacherline{font-family:var(--hand);font-size:1.45rem;color:#5a4a34;margin:.3rem 0 1.25rem}
+  a.cta{display:inline-block;text-decoration:none}
+  .schoolslot .cta,.floorcta .cta{display:inline-block;width:auto;padding:.85rem 2.3rem}
+  .artprop.cupboard .cupplate{position:absolute;left:50%;transform:translateX(-50%);top:7.5%;
+    display:inline-block;padding:3px 14px 4px;font-size:.74rem;font-weight:600;letter-spacing:.16em;
+    color:#54401c;text-shadow:0 1px 0 rgba(255,249,226,.65);white-space:nowrap;
+    background:url("assets/lw/shelf/plaque_wide.webp");background-size:100% 100%}
+
+  /* S7 — the bottom drawer: FAQ as a card catalogue */
+  .catwrap{width:640px;margin-bottom:52px}
+  .catalogue{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;padding:14px;
+    background:linear-gradient(180deg,#4a3826,#38291a);border-radius:5px;
+    box-shadow:0 20px 40px -18px rgba(30,20,8,.55), inset 0 1px 0 rgba(255,236,200,.12)}
+  .fdrawer{position:relative;height:88px;border:0;cursor:pointer;border-radius:3px;
+    background:url("assets/lw/shelf/ledge_strip.webp") center/cover;
+    box-shadow:inset 0 0 0 2px rgba(46,32,16,.55), inset 0 2px 6px rgba(255,236,200,.14),
+      0 3px 6px rgba(25,16,6,.45);
+    transition:transform .18s var(--ease), box-shadow .18s ease}
+  .fdrawer:hover{transform:translateY(-2px)}
+  .fdrawer:focus-visible{outline:3px solid #e8c47a;outline-offset:2px}
+  .fdrawer.open{transform:translateY(3px);box-shadow:inset 0 0 0 2px rgba(46,32,16,.75),
+      inset 0 3px 10px rgba(25,16,6,.5), 0 1px 2px rgba(25,16,6,.4)}
+  .fdrawer .pull{position:absolute;left:50%;bottom:11px;width:26px;height:13px;margin-left:-13px;
+    border:3px solid #b28e46;border-top:0;border-radius:0 0 15px 15px;
+    filter:drop-shadow(0 1px 1px rgba(25,16,6,.5))}
+  .fdrawer .flabel{position:absolute;left:50%;top:13px;transform:translateX(-50%);
+    background:#f6efdc;border:2px solid #a8853f;border-radius:2px;padding:3px 11px;
+    font-family:var(--head);font-weight:600;font-size:.7rem;letter-spacing:.1em;
+    color:#46351d;white-space:nowrap}
+  .faqslot{width:400px;margin-bottom:56px;margin-left:36px}
+  .paper.index{transform:rotate(1.1deg);min-height:198px}
+  .paper.index h3{font-family:var(--hand);font-size:1.55rem;margin:0 0 .45rem;color:#3f3222}
+  .paper.index p{font-family:var(--read);font-size:.96rem;color:var(--sec);line-height:1.6;margin:0}
+
+  /* the floor: last call, skirting, boards, small print */
+  .floorcta{text-align:center;padding:96px 20px 80px;position:relative;z-index:2}
+  .floorcta .handnote{display:block;margin-bottom:16px}
+  .skirting{height:42px;background:url("assets/lw/shelf/ledge_strip.webp") center/auto 160%;
+    filter:brightness(.72);box-shadow:0 -4px 10px rgba(40,28,12,.25);position:relative;z-index:2}
+  .floorboards{position:relative;z-index:2;padding:36px 20px 42px;
+    background:
+      linear-gradient(rgba(30,20,8,.58),rgba(30,20,8,.66)),
+      repeating-linear-gradient(90deg, rgba(20,12,4,.5) 0 2px, rgba(0,0,0,0) 2px 214px),
+      url("assets/lw/shelf/ledge_strip.webp") center/auto 300%}
+  .caselegal{max-width:780px;margin:0 auto;text-align:center}
+  .caselegal p{font-size:.72rem;line-height:1.65;color:#d9cbae;opacity:.88;margin:.35rem 0}
+  .caselegal a{color:#f0e4c8}
+
+  /* scroll reveals — quiet: content rises, books fade onto their shelf */
+  .rv .seclead,.rv .slot,.rv .artprop,.rv .stepcaps>div{opacity:0;transform:translateY(16px);
+    transition:opacity .55s ease,transform 1.15s var(--ease)}
+  .rv.in .seclead,.rv.in .slot,.rv.in .artprop,.rv.in .stepcaps>div{opacity:1;transform:none}
+  .rv .bks .bk,.rv .bks .prop{opacity:0;transition:opacity .5s ease}
+  .rv.in .bks .bk,.rv.in .bks .prop{opacity:1}
+  .rv.in .bks>*:nth-child(2){transition-delay:.06s}
+  .rv.in .bks>*:nth-child(3){transition-delay:.12s}
+  .rv.in .bks>*:nth-child(4){transition-delay:.18s}
+  .rv.in .bks>*:nth-child(5){transition-delay:.24s}
+  .rv.in .bks>*:nth-child(6){transition-delay:.3s}
+  .rv.in .bks>*:nth-child(n+7){transition-delay:.36s}
+  .sec-build.rv.in .stepcaps>div:nth-child(2){transition-delay:.16s}
+  .sec-build.rv.in .stepcaps>div:nth-child(3){transition-delay:.32s}
+  .rvself{opacity:0;transform:translateY(16px);transition:opacity .55s ease,transform 1.15s var(--ease)}
+  .rvself.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){
+    .rv .seclead,.rv .slot,.rv .artprop,.rv .stepcaps>div,.rv .bks .bk,.rv .bks .prop,.rvself{
+      opacity:1;transform:none;transition:none}
+  }
+
   /* ---- the picker: build your shelf ---- */
   .view{display:none}
   body[data-view="landing"] .view-landing{display:block}
@@ -406,6 +557,144 @@
           </span>
         </div>
         <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- ============ THE LOWER SHELVES: keep scrolling down the case ============ -->
+
+      <!-- S2 · how the shelf gets built -->
+      <div class="caserow rv sec-build">
+        <div class="seclead"><h2 class="sechead">Three minutes to your shelf</h2></div>
+        <div class="shelf">
+          <span class="wing"><span class="bks" data-books="history,maths,science"></span></span>
+          <span class="wing"><span class="bks" data-books="history,maths,science,@bookstack"></span></span>
+          <span class="wing"><span class="bks" data-books="history,maths,science,lit,geog,@pot_fern"></span></span>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+        <div class="stepcaps">
+          <div><span class="handnote"><b>1.</b> Pick your subjects</span></div>
+          <div><span class="handnote"><b>2.</b> Tell us your boards</span>
+            <div class="steptags"><span class="brasschip">AQA</span><span class="brasschip">EDEXCEL</span><span class="brasschip">OCR</span></div></div>
+          <div><span class="handnote"><b>3.</b> Your shelf &mdash; nothing else on it</span></div>
+        </div>
+      </div>
+
+      <!-- S3 · inside every lesson -->
+      <div class="caserow rv sec-inside">
+        <div class="seclead"><h2 class="sechead">Inside every lesson</h2></div>
+        <div class="shelf">
+          <span class="wing"><figure class="artprop openbook"><img draggable="false" src="assets/lw/shelf/prop_openbook.webp" alt="An open lesson on its stand"></figure></span>
+          <div class="slot insideslot">
+            <ul class="lessonlist">
+              <li><b>The lesson itself</b> &mdash; written to your exact specification</li>
+              <li><b>Six practice questions</b>, mark-scheme style</li>
+              <li><b>A five-question knowledge check</b> to prove it stuck</li>
+              <li><b>Flashcards</b> for the bus home</li>
+              <li><b>Read aloud</b> &mdash; narration and a podcast for every lesson</li>
+            </ul>
+          </div>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- S3b · the workbook subjects -->
+      <div class="caserow rv sec-work">
+        <div class="shelf">
+          <div class="slot workslot">
+            <div class="workcopy">
+              <h3>Some subjects aren&rsquo;t reading subjects</h3>
+              <p>Maths, French, Spanish, German and English Language are built as workbooks instead:
+                type your answer and StudyVault doesn&rsquo;t just mark it wrong &mdash; it spots
+                <em>which mistake</em> you made, and drills the fix.</p>
+            </div>
+          </div>
+          <span class="wing"><figure class="artprop jotter"><img draggable="false" src="assets/lw/shelf/prop_jotter.webp" alt=""></figure></span>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- S4 · the whole library -->
+      <div class="caserow rv sec-library">
+        <div class="seclead">
+          <h2 class="sechead">The whole library</h2>
+          <p class="secsub">Seventy-plus GCSE subjects. Over four thousand lessons.
+            AQA, Pearson Edexcel, OCR, WJEC and Eduqas.</p>
+          <p class="secsub2">Hover any spine &mdash; every book comes in the editions its boards actually set.</p>
+        </div>
+        <div class="shelf packed"><span class="bks" data-books="maths,stats,lang,drama,lit,music,science,dt,triple,it,history,astro,geog,food,french,hsc,spanish,film,german,cs,business,pe,psych,rs,socio,econ"></span></div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+      <div class="caserow rv sec-library">
+        <div class="shelf packed"><span class="bks" data-books="stats,maths,media,history,film,geog,drama,science,music,lit,mtech,french,dt,cs,eng,business,electronics,pe,it,astro,geology,classics,citizenship,food,hosp,hsc"></span></div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- S5 · planned backwards from exam day -->
+      <div class="caserow rv sec-plan">
+        <div class="seclead"><h2 class="sechead">Planned backwards from exam day</h2></div>
+        <div class="shelf">
+          <span class="wing"><span class="bks" data-books="@pot_ivy,@bookstack"></span></span>
+          <div class="slot planslot">
+            <div class="paper">
+              <h3>The run-in</h3>
+              <ul>
+                <li><b>Weeks 6&ndash;4</b> first pass &mdash; weakest topics first</li>
+                <li><b>Weeks 3&ndash;2</b> past-paper drills, timed</li>
+                <li><b>Final week</b> flashcards + knowledge checks</li>
+                <li><b>Night before</b> sleep.</li>
+              </ul>
+            </div>
+            <p class="planline">Put your exam dates in once and the planner fills the run-in for you,
+              in 25-minute sittings &mdash; free, no account needed.</p>
+          </div>
+          <span class="wing"><span class="bks" data-books="@clock,@hourglass"></span></span>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- S6 · with your school -->
+      <div class="caserow rv sec-schools">
+        <div class="seclead"><h2 class="sechead">With your school</h2></div>
+        <div class="shelf">
+          <span class="wing"><figure class="artprop cupboard"><img draggable="false" src="assets/lw/shelf/prop_cupboard.webp" alt=""><span class="cupplate">FOR SCHOOLS</span></figure></span>
+          <div class="slot schoolslot">
+            <ul class="slist">
+              <li>Your own shelf, stocked for your classes &mdash; bespoke lessons built from your schemes of work</li>
+              <li>Students sign straight in with Google or Microsoft &mdash; no passwords to manage</li>
+              <li>Progress teachers can actually see, class by class</li>
+            </ul>
+            <p class="teacherline">Built and run by a serving classroom teacher.</p>
+            <a class="cta" href="mailto:studyvault.info@gmail.com">Talk to us</a>
+          </div>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- S7 · the bottom drawer -->
+      <div class="caserow rv sec-faq">
+        <div class="seclead"><h2 class="sechead">The bottom drawer</h2>
+          <p class="secsub">Questions people actually ask.</p></div>
+        <div class="shelf">
+          <div class="slot catwrap"><div class="catalogue" id="faqcat"></div></div>
+          <div class="slot faqslot"><div class="paper index" id="faqcard"></div></div>
+        </div>
+        <div class="ledgewrap"><img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt=""></div>
+      </div>
+
+      <!-- the floor -->
+      <div class="casefloor">
+        <div class="floorcta rvself">
+          <span class="handnote">Still scrolling?</span>
+          <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re sitting</button>
+        </div>
+        <div class="skirting"></div>
+        <div class="floorboards">
+          <footer class="caselegal">
+            <p>StudyVault is an independent revision resource and is not affiliated with, endorsed by,
+              or associated with AQA, Pearson Edexcel, OCR, WJEC or Eduqas. Exam board names are used only
+              to identify the specification each resource is designed to support.</p>
+            <p><a href="/privacy.html">Privacy</a> &middot; <a href="mailto:studyvault.info@gmail.com">Contact</a> &middot; &copy; StudyVault</p>
+          </footer>
+        </div>
       </div>
 
       <div class="booktip" id="booktip"></div>
@@ -618,6 +907,45 @@ stageL.querySelector('.lampwrap').addEventListener('click',()=>{
   setTimeout(()=>stageL.classList.toggle('lit'),140);
 });
 
+/* ---- lower shelves: FAQ card catalogue ---- */
+const FAQS=[
+ {k:'FREE?',q:'Is it actually free?',
+  a:'Yes. Every subject, every lesson, free for individual students — no card, no trial. Schools pay for the connected, teacher-run version; that’s what keeps the free shelf free.'},
+ {k:'BOARDS',q:'Which exam boards?',
+  a:'AQA, Pearson Edexcel, OCR, WJEC and Eduqas. You choose your board for each subject, so you only ever see your own specification.'},
+ {k:'MY SPEC',q:'Will it match my exact spec?',
+  a:'That’s the whole idea. Tell us what you’re sitting and the shelf builds itself around those editions — the units your board sets, nothing else.'},
+ {k:'PRACTICE',q:'Is it just reading?',
+  a:'No. Every lesson carries practice questions, a knowledge check and flashcards — and maths, languages and English Language are full workbooks that spot which mistake you made, not just that you made one.'},
+ {k:'MY DATA',q:'What happens to my data?',
+  a:'Nothing saved until you say so. You can use the whole library without an account — your choices stay on your device until you decide to sign up.'},
+ {k:'SCHOOLS',q:'My school uses StudyVault — what’s different?',
+  a:'Ask your teacher for the school sign-in. You’ll get your school’s own shelf, stocked for your classes, and sign in with your school Google or Microsoft account.'}
+];
+const faqcat=document.getElementById('faqcat'), faqcard=document.getElementById('faqcard');
+function openDrawer(i){
+  faqcat.querySelectorAll('.fdrawer').forEach((d,j)=>d.classList.toggle('open',i===j));
+  faqcard.innerHTML='<h3>'+FAQS[i].q+'</h3><p>'+FAQS[i].a+'</p>';
+}
+FAQS.forEach((f,i)=>{
+  const d=document.createElement('button'); d.type='button'; d.className='fdrawer';
+  d.setAttribute('aria-label',f.q);
+  d.innerHTML='<span class="flabel">'+f.k+'</span><span class="pull"></span>';
+  d.addEventListener('click',()=>openDrawer(i));
+  faqcat.appendChild(d);
+});
+openDrawer(0);
+
+/* ---- lower shelves: quiet scroll reveals ---- */
+const rvEls=document.querySelectorAll('.rv,.rvself');
+if(matchMedia('(prefers-reduced-motion:reduce)').matches || !('IntersectionObserver' in window)){
+  rvEls.forEach(r=>r.classList.add('in'));
+}else{
+  const rio=new IntersectionObserver(es=>es.forEach(en=>{
+    if(en.isIntersecting){en.target.classList.add('in');rio.unobserve(en.target);}}),{threshold:.14});
+  rvEls.forEach(r=>rio.observe(r));
+}
+
 /* ---- picker: build your shelf ---- */
 const picked=[];                                               /* slugs, in pick order */
 const shelfP=document.getElementById('shelf-picker');
@@ -748,7 +1076,8 @@ fitScale(); addEventListener('resize',fitScale);
 /* ?snap — verification hook: skip fades/animations so headless captures are honest */
 if(q.has('snap')){ document.body.classList.add('ready');
   const st=document.createElement('style'); st.textContent='*{transition:none!important;animation:none!important}';
-  document.head.appendChild(st); stageL.classList.add('lit'); }
+  document.head.appendChild(st); stageL.classList.add('lit');
+  document.querySelectorAll('.rv,.rvself').forEach(r=>r.classList.add('in')); }
 /* ?tagfont=fraunces&ul — preview a tagline font/underline straight from the URL */
 if(q.get('tagfont')!==null) document.body.dataset.tagfont=q.get('tagfont')||'';
 if(q.has('ul')) document.body.classList.add('tagul');
