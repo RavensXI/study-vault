@@ -77,8 +77,9 @@
   /* sketched arrows swooping from under the wordmark onto each door card:
      real pen-drawn assets (Gemini, arrow_sketch), z-index lifts them over the cards */
   .brandmid .arr{position:absolute;pointer-events:none;width:245px;height:auto;z-index:3}
-  .brandmid .arr.al{left:-132px;bottom:-106px;transform:rotate(10deg)}
-  .brandmid .arr.ar{right:-132px;bottom:-106px;transform:rotate(-10deg) scaleX(-1)}
+  /* arrow anchors: Tom-tuned on the bench, 12 Jul 2026 */
+  .brandmid .arr.al{left:-113px;bottom:-89px;transform:rotate(10deg)}
+  .brandmid .arr.ar{right:-113px;bottom:-89px;transform:rotate(-10deg) scaleX(-1)}
   /* logo-pack preview (?logo=grotesk|serif[&fx=plate]) */
   .brandmid.haslogo{display:block;margin-bottom:44px}
   .brandmid.haslogo .logoimg{height:132px;width:auto;display:block;
@@ -147,9 +148,10 @@
     font-size:2.7rem;letter-spacing:-.03em}
   body[data-tagfont="hand"] .brandslot h1{font-family:var(--hand);font-style:normal;font-weight:600;
     font-size:3.5rem;letter-spacing:0}
-  /* fountain-pen swish under the tagline (bench toggle: body.tagul) */
-  body.tagul .brandslot h1::after{content:'';display:block;width:min(48%,310px);height:14px;
-    margin:9px auto 0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 16' preserveAspectRatio='none'><path d='M6 12 C 110 4, 250 3, 354 7 C 250 8.6, 120 10.4, 26 14.8 Z' fill='%233c352a' opacity='.78'/></svg>") no-repeat center/100% 100%}
+  /* pen swish under the tagline — same drawn-ink hand as the door arrows
+     (Gemini underline_sketch; bench toggle: body.tagul) */
+  body.tagul .brandslot h1::after{content:'';display:block;width:min(48%,310px);height:23px;
+    margin:6px auto 0;background:url("assets/lw/shelf/underline_sketch.webp") no-repeat center/100% 100%}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
   /* doors are NOT of the scene (Tom, 12 Jul): honest floating UI over the
      painted wall — plain cards, big headings, no flavour text */
@@ -174,8 +176,8 @@
   .lampwrap .lamp{position:static;display:block;height:calc(var(--bkh)*1.2);width:auto;right:auto;bottom:auto;
     filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
   .lampwrap .bulb{left:16%;top:42%;width:56px;height:56px}
-  /* cord anchor: Tom-tuned on the bench, 12 Jul 2026 */
-  .lampwrap .pullcord{left:32.2%;top:29.6%;height:27%}
+  /* cord anchor: Tom-tuned on the bench, 12 Jul 2026 (corrected values) */
+  .lampwrap .pullcord{left:31.7%;top:29.2%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
   /* landing books are scenery with a hover tip — no pull-out theatre here */
   .caserow .bk{cursor:default;pointer-events:auto}
@@ -770,7 +772,7 @@ if(q.get('logo')){
 if(q.has('bench')){
   const lw=stageL.querySelector('.lampwrap');
   const arrL=document.querySelector('.brandmid .arr.al'), arrR=document.querySelector('.brandmid .arr.ar');
-  const st=Object.assign({l:32.2,t:29.6,h:27,font:'',ul:true,ax:-132,ay:-106,aw:245,arot:10},
+  const st=Object.assign({l:31.7,t:29.2,h:27,font:'',ul:true,ax:-113,ay:-89,aw:245,arot:10},
     JSON.parse(localStorage.getItem('sv_bench')||'{}'));
   let mode='arr';
   const FONTS=[['','Literata upright'],['literata-it','Literata italic'],['fraunces','Fraunces italic'],
