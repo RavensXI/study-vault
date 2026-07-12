@@ -515,6 +515,7 @@ if(_dq.get('picked')){
   (_dq.get('boards')||'').split(',').forEach(p=>{const kv=p.split(':'); if(kv[1]) WIZ.boards[kv[0]]=kv[1];});
 }
 const DAYONE=!!(WIZ&&Array.isArray(WIZ.picked)&&WIZ.picked.length);
+let SVUSER=null; try{ SVUSER=JSON.parse(localStorage.getItem('sv-user')||'null'); }catch(e){}
 /* verified platform slugs (queried from Supabase) + first unit per subject */
 const SUBSLUG={
  maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},
@@ -613,10 +614,14 @@ if(DAYONE){
   <h3>This week</h3>
   <div class="noteline">Nothing here yet — it fills in as you revise.</div>
   <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>
-  <p class="doable"><a href="home-study.html?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a></p>`;
+  <p class="doable">${SVUSER&&SVUSER.email?('Signed in as '+SVUSER.email+'.')
+    :'<a href="home-study.html?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a>'}</p>`;
   const _av=document.querySelector('.avatar');
-  if(_av){ const a=document.createElement('a'); a.className='tidy'; a.style.textDecoration='none';
-    a.href='home-study.html?view=save'; a.textContent='Sign up & save your progress'; _av.replaceWith(a); }
+  if(_av){
+    if(SVUSER&&SVUSER.email){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; }
+    else{ const a=document.createElement('a'); a.className='tidy'; a.style.textDecoration='none';
+      a.href='home-study.html?view=save'; a.textContent='Sign up & save your progress'; _av.replaceWith(a); }
+  }
 }
 
 let LADDERS={};

@@ -571,6 +571,7 @@ if(_dq.get('picked')){                    /* staging override for renders/QA */
   (_dq.get('boards')||'').split(',').forEach(p=>{const kv=p.split(':'); if(kv[1]) WIZ.boards[kv[0]]=kv[1];});
 }
 const DAYONE=!!(WIZ&&Array.isArray(WIZ.picked)&&WIZ.picked.length);
+let SVUSER=null; try{ SVUSER=JSON.parse(localStorage.getItem('sv-user')||'null'); }catch(e){}
 /* verified platform slugs (queried from Supabase) + first unit per subject */
 const SUBSLUG={
  maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},
@@ -650,14 +651,20 @@ if(DAYONE){
       _lis[1].onclick=()=>nav(_u2); } }
   document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
     '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
-  const bar=document.createElement('div'); bar.className='savebar';
-  bar.innerHTML='<span>Nothing is saved yet. Sign up to save your progress.</span>'+
-    '<a class="savecta" href="home-study.html?view=save">Sign up — free</a>';
-  const _av=document.querySelector('.top .avatar');
-  if(_av){ const a=document.createElement('a'); a.className='savecta';
-    a.href='home-study.html?view=save'; a.textContent='Sign up and save your progress';
-    _av.replaceWith(a); }
-  document.querySelector('.wrap').before(bar);
+  if(SVUSER&&SVUSER.email){
+    /* signed in: the avatar is you; no sign-up asks anywhere */
+    const _av=document.querySelector('.top .avatar');
+    if(_av){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; }
+  }else{
+    const bar=document.createElement('div'); bar.className='savebar';
+    bar.innerHTML='<span>Nothing is saved yet. Sign up to save your progress.</span>'+
+      '<a class="savecta" href="home-study.html?view=save">Sign up — free</a>';
+    const _av=document.querySelector('.top .avatar');
+    if(_av){ const a=document.createElement('a'); a.className='savecta';
+      a.href='home-study.html?view=save'; a.textContent='Sign up and save your progress';
+      _av.replaceWith(a); }
+    document.querySelector('.wrap').before(bar);
+  }
 }
 
 /* date + exam countdown + mini month */

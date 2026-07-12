@@ -437,6 +437,7 @@
   body[data-view="boards"] .view-boards{display:block}
   body[data-view="topics"] .view-topics{display:block}
   body[data-view="save"] .view-save{display:block}
+  body[data-view="signin"] .view-signin{display:block}
   .picker-head{text-align:center;margin:1.5rem 0 .2rem}
   .picker-head h1{margin-bottom:.35rem}
   .picker-head p{font-size:.98rem;color:var(--sec);margin:0}
@@ -528,7 +529,7 @@
           <div class="slot door">
             <h2>Revising on my own</h2>
             <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re sitting</button>
-            <p class="tiny"><a href="#" onclick="return false">Sign in</a></p>
+            <p class="tiny"><a href="#" onclick="go('signin');return false">Sign in</a></p>
           </div>
           <span class="wing wm">
             <span class="brand brandmid">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""><img class="arr al" src="assets/lw/shelf/arrow_sketch.webp" alt=""><img class="arr ar" src="assets/lw/shelf/arrow_sketch.webp" alt=""></span>
@@ -817,9 +818,28 @@
       <input class="field" id="savepass" type="password" placeholder="Choose a password" aria-label="Choose a password" autocomplete="new-password">
       <button class="cta" id="savebtn">Create my free account</button>
       <p class="tiny" id="savemsg">Free &middot; everything will be exactly as you left it</p>
+      <p class="tiny"><a href="#" onclick="go('signin');return false">Already have an account? Sign in</a></p>
     </div>
     <div class="picker-foot">
       <button class="backlink" onclick="location.href='dash-classic.html'">&larr; Back to my StudyVault</button>
+    </div>
+  </div>
+
+  <!-- ================= SIGN IN: pick up exactly where you left off ================= -->
+  <div class="view view-signin">
+    <div class="picker-head">
+      <h1>Sign in.</h1>
+      <p>Your subjects, boards and topics are saved to your account &mdash;
+        sign in and it all comes back.</p>
+    </div>
+    <div class="door savecard">
+      <input class="field" id="simail" type="email" placeholder="Email address" aria-label="Email address" autocomplete="email">
+      <input class="field" id="sipass" type="password" placeholder="Password" aria-label="Password" autocomplete="current-password">
+      <button class="cta" id="sibtn">Sign in</button>
+      <p class="tiny" id="simsg">Everything will be exactly as you left it</p>
+    </div>
+    <div class="picker-foot">
+      <button class="backlink" onclick="go('landing')">&larr; Back</button>
     </div>
   </div>
 
@@ -1381,13 +1401,42 @@ if(savebtn) savebtn.onclick=async()=>{
   savebtn.disabled=true; savebtn.textContent='Creating your account…';
   try{
     let setup={}; try{ setup=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
-    const res=await SBC.auth.signUp({email:em,password:pw,options:{data:{sv_welcome:setup}}});
+    const res=await SBC.auth.signUp({email:em,password:pw,
+      options:{data:{sv_welcome:setup},emailRedirectTo:location.origin+'/classic'}});
     if(res.error) say(res.error.message);
     else if(res.data&&res.data.user&&!res.data.session)
       say('Account created — check your inbox to confirm your email. Everything you set up is saved to it.');
     else say('Account created — you’re in.');
   }catch(e){ say('Something went wrong — try again.'); }
   savebtn.disabled=false; savebtn.textContent='Create my free account';
+};
+/* sign-in: the account carries the setup — restore it here, then open the
+   dashboard exactly as they left it (any device, any time) */
+const sibtn=document.getElementById('sibtn');
+if(sibtn) sibtn.onclick=async()=>{
+  const em=document.getElementById('simail').value.trim();
+  const pw=document.getElementById('sipass').value;
+  const say=t=>{ document.getElementById('simsg').textContent=t; };
+  if(!em||!pw) return say('Email and password, then you’re in.');
+  if(!SBC) return say('Couldn’t reach the server — try again in a moment.');
+  sibtn.disabled=true; sibtn.textContent='Signing in…';
+  try{
+    const res=await SBC.auth.signInWithPassword({email:em,password:pw});
+    if(res.error){ say(res.error.message); }
+    else{
+      const u=res.data&&res.data.user;
+      const sv=u&&u.user_metadata&&u.user_metadata.sv_welcome;
+      if(sv&&Array.isArray(sv.picked)&&sv.picked.length){
+        try{ localStorage.setItem('sv-welcome',JSON.stringify(sv)); }catch(e){}
+      }
+      try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
+      say('Signed in — opening your StudyVault…');
+      document.body.classList.remove('ready');
+      setTimeout(()=>{ location.href='dash-classic.html'; },250);
+      return;
+    }
+  }catch(e){ say('Something went wrong — try again.'); }
+  sibtn.disabled=false; sibtn.textContent='Sign in';
 };
 
 /* ?bench — Tom's tuning bench. Two targets: the lamp CORD (click the lamp to
