@@ -7,7 +7,7 @@
 <base href="/design-lab/">
 <title>StudyVault — everything you’re sitting, nothing you’re not</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@1,9..144,300..700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@1,9..144,300..700&family=Instrument+Serif:ital@1&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
   /* ============ THE STUDY, BEFORE YOU SIT DOWN ============
      Landing = the dashboard's world seen from the doorway, logged out.
@@ -69,7 +69,16 @@
   /* the middle panel: the wordmark large over its own little run of books.
      The centre wing takes a bigger flex share so the wordmark has room */
   .wing.wm{flex:1.75 1 0;flex-direction:column;align-items:center;justify-content:flex-end;gap:0}
-  .brandmid{font-size:4.35rem;margin-bottom:44px;white-space:nowrap}
+  /* the wordmark: Young Serif (the logo-pack face), single weight, both words
+     in the same black ink; the padlock keeps the pack's rust accent */
+  .brandmid{position:relative;font-family:'Young Serif',serif;font-weight:400;font-size:78px;
+    letter-spacing:-.02em;color:#1d1c1a;margin-bottom:44px;white-space:nowrap}
+  .brandmid .brandlock{height:.26em;margin-left:11px}
+  /* hand-drawn arrows arcing from the wordmark out over each door card */
+  .brandmid .arr{position:absolute;pointer-events:none;width:200px;height:70px}
+  .brandmid .arr.al{left:-205px;top:-6px}
+  .brandmid .arr.ar{right:-205px;top:-6px;transform:scaleX(-1)}
+  .brandmid .arr path{fill:none;stroke:#4a3d2c;stroke-width:3.25;stroke-linecap:round;opacity:.78}
   /* logo-pack preview (?logo=grotesk|serif[&fx=plate]) */
   .brandmid.haslogo{display:block;margin-bottom:44px}
   .brandmid.haslogo .logoimg{height:132px;width:auto;display:block;
@@ -254,7 +263,7 @@
   .sso:hover{border-color:#b9a98c;background:color-mix(in srgb,var(--anchor) 3%,var(--card))}
   .sso svg{width:18px;height:18px;flex:none}
 
-  .signslot{margin-bottom:34px}
+  .signslot{margin-bottom:80px;transform:translateX(-44px)}
   /* the boards live on an engraved brass plaque screwed to the case back */
   .boardsplaque{display:inline-block;padding:22px 54px 24px;
     background:url("assets/lw/shelf/plaque_wide.webp");background-size:100% 100%;
@@ -356,7 +365,7 @@
             <p class="tiny">Nothing saved until you say so &middot; <a href="#" onclick="return false">Sign in</a></p>
           </div>
           <span class="wing wm">
-            <span class="brand brandmid">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
+            <span class="brand brandmid">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""><svg class="arr al" viewBox="0 0 200 70" aria-hidden="true"><path d="M 185,12 C 142,2 92,6 58,26 C 46,33 40,44 40,56 M 40,56 L 46.6,43 M 40,56 L 33.4,43"/></svg><svg class="arr ar" viewBox="0 0 200 70" aria-hidden="true"><path d="M 185,12 C 142,2 92,6 58,26 C 46,33 40,44 40,56 M 40,56 L 46.6,43 M 40,56 L 33.4,43"/></svg></span>
             <span class="bks" data-books="@owl,psych,rs,socio,econ,media,film,@hourglass"></span>
           </span>
           <div class="slot door">
