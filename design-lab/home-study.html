@@ -706,7 +706,8 @@
   <div class="view view-picker">
     <div class="picker-head">
       <h1>Pick your subjects.</h1>
-      <p>Each one becomes a book on your shelf. You can change these any time.</p>
+      <p>Maths, English and Science are already on every shelf &mdash; add your options
+        (most students pick four). You can change these any time.</p>
     </div>
 
     <div class="shelfstage lit" id="stage-picker">
@@ -1047,7 +1048,9 @@ function go(v){
 }
 /* the shelf you built survives a wander-off (nothing server-side until Save) */
 function persist(){ try{ localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards})); }catch(e){} }
+let firstVisit=true;
 (function restore(){ try{
+  firstVisit=localStorage.getItem('sv-welcome')===null;
   const st=JSON.parse(localStorage.getItem('sv-welcome')||'{}');
   (st.picked||[]).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
   boards=st.boards||{};
@@ -1059,6 +1062,10 @@ if(q.get('picked')!==null){
   picked.slice().forEach(sl=>togglePick(sl));            /* reset, then apply the link's shelf */
   (q.get('picked')||'').split(',').filter(Boolean).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
 }
+/* first visit: the core four every student sits are already on the shelf —
+   they add their options (usually four). Deep links and returning shelves win. */
+if(firstVisit && q.get('picked')===null)
+  ['maths','lang','lit','science'].forEach(sl=>togglePick(sl));
 if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
   const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&BOARDKEYS.includes(kv[1])) boards[kv[0]]=kv[1]; }); }
 if(q.get('view')) go(q.get('view'));
