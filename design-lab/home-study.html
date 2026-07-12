@@ -434,6 +434,7 @@
   body[data-view="landing"] .view-landing{display:block}
   body[data-view="picker"] .view-picker{display:block}
   body[data-view="boards"] .view-boards{display:block}
+  body[data-view="topics"] .view-topics{display:block}
   body[data-view="save"] .view-save{display:block}
   .picker-head{text-align:center;margin:1.5rem 0 .2rem}
   .picker-head h1{margin-bottom:.35rem}
@@ -472,6 +473,18 @@
   .verdict{text-align:center;font-size:.92rem;color:var(--sec);margin:1rem 0 0}
   .verdict b{color:var(--ink)}
   .verdict .req{color:#8a6430}
+  /* topics step: the chapters your school chose (history options, set texts) */
+  .topiclist{max-width:880px;margin:1.4rem auto 0}
+  .tblock{border-top:1px solid var(--linel);padding:.95rem .2rem .75rem}
+  .tblock:first-child{border-top:none}
+  .tbhead{display:flex;align-items:center;gap:10px;margin-bottom:.45rem}
+  .tbhead img{height:34px;width:auto;filter:saturate(1.4) brightness(1.1)}
+  .tbhead .bn{font-family:var(--read);font-weight:600;font-size:1rem}
+  .tbhead .bd{font-size:.74rem;color:var(--mut);letter-spacing:.09em;text-transform:uppercase}
+  .tgroup{display:flex;align-items:baseline;gap:14px;padding:.32rem 0}
+  .tglabel{flex:none;width:11.5rem;text-align:right;font-size:.78rem;font-weight:600;
+    color:var(--sec);letter-spacing:.04em}
+  .tgroup .chips{margin-left:0;justify-content:flex-start}
   .savecard{max-width:400px;margin:1.5rem auto 0}
   @media (max-width:640px){ .brow{flex-wrap:wrap} .chips{margin-left:50px} }
   .shelf-empty-note{position:absolute;left:50%;bottom:70px;transform:translateX(-50%);z-index:2;
@@ -756,6 +769,33 @@
     </div>
   </div>
 
+  <!-- ================= TOPICS: the chapters your school chose ================= -->
+  <div class="view view-topics">
+    <div class="picker-head">
+      <h1>Choose your topics.</h1>
+      <p>Some books have chapters your school chose &mdash; history options, set texts.
+        Tell us yours and we&rsquo;ll shelve only those.</p>
+    </div>
+
+    <div class="shelfstage lit">
+      <div class="shelf" id="shelf-topics"></div>
+      <img class="ledge" src="assets/lw/shelf/ledge_strip.webp" alt="">
+      <div class="lightwash"></div>
+      <div class="lampglow"></div>
+      <img class="lamp" src="assets/lw/shelf/lamp.webp" alt="">
+      <div class="bulb"></div>
+      <div class="pullcord"></div>
+    </div>
+
+    <div class="topiclist" id="tlist"></div>
+    <p class="verdict" id="tverdict"></p>
+
+    <div class="picker-foot">
+      <button class="backlink" onclick="go('boards')">&larr; Exam boards</button>
+      <button class="cta" id="tnext" disabled style="opacity:.45" onclick="go('save')">Save your shelf &rarr;</button>
+    </div>
+  </div>
+
   <!-- ================= SAVE: the only moment we ask for anything ================= -->
   <div class="view view-save">
     <div class="picker-head">
@@ -967,7 +1007,7 @@ function togglePick(slug){
   pc.textContent=n===0?'No subjects yet':n+' subject'+(n>1?'s':'')+' on your shelf';
   nx.disabled=n===0; nx.style.opacity=n===0?'.45':'1';
   document.getElementById('emptynote').style.opacity=n===0?'1':'0';
-  if(!picked.includes(slug)) delete boards[slug];   /* un-picking a book drops its edition */
+  if(!picked.includes(slug)){ delete boards[slug]; delete topics[slug]; }   /* un-picking a book drops its edition + topics */
   persist();
 }
 function renderPickerShelf(newSlug){
@@ -982,7 +1022,67 @@ function renderPickerShelf(newSlug){
    Honest gaps today: Combined Science has no Eduqas/WJEC row; Spanish has no OCR. */
 const BOARDKEYS=['aqa','edexcel','ocr','eduqas'];
 const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC'};
+
+/* Topic-level pickers — mined from the production wizard (index.html
+   litTexts + historyOptions). Subjects where the board choice opens another
+   level: the student picks ONE from each group. */
+const TOPICS={
+ history:{
+  aqa:[
+   ['Period study',[{s:'germany-democracy-dictatorship',n:'Germany, 1890–1945'},{s:'russia-tsardom-communism',n:'Russia, 1894–1945'},{s:'america-opportunity-inequality',n:'America, 1920–1973'},{s:'america-expansion-consolidation',n:'America, 1840–1895'}]],
+   ['Wider world depth',[{s:'conflict-tension-inter-war',n:'Inter-war years 1918–39'},{s:'conflict-tension-east-west',n:'East and West, 1945–72'},{s:'conflict-tension-first-world-war',n:'First World War'},{s:'conflict-tension-asia',n:'Asia 1950–1975'},{s:'conflict-tension-gulf-afghanistan',n:'Gulf & Afghanistan'}]],
+   ['Thematic study',[{s:'britain-health-people',n:'Health and the People'},{s:'britain-power-people',n:'Power and the People'},{s:'britain-migration-empires',n:'Migration & Empires'}]],
+   ['British depth study',[{s:'elizabethan-england',n:'Elizabethan England'},{s:'norman-england',n:'Norman England'},{s:'medieval-england-edward-i',n:'Edward I'},{s:'restoration-england',n:'Restoration England'}]]
+  ],
+  edexcel:[
+   ['Thematic + environment',[{s:'medicine-in-britain',n:'Medicine in Britain'},{s:'crime-punishment-whitechapel',n:'Crime & Punishment'},{s:'migrants-in-britain',n:'Migrants in Britain'},{s:'warfare-british-society',n:'Warfare & British Society'}]],
+   ['British depth study',[{s:'anglo-saxon-norman',n:'Anglo-Saxon & Norman England'},{s:'early-elizabethan-england',n:'Early Elizabethan England'},{s:'henry-viii-ministers',n:'Henry VIII & his Ministers'},{s:'richard-i-king-john',n:'Richard I & King John'}]],
+   ['Period study',[{s:'superpower-relations',n:'Superpower Relations'},{s:'american-west',n:'The American West'},{s:'british-america',n:'British America'},{s:'conflict-middle-east',n:'Conflict in the Middle East'},{s:'spain-new-world',n:'Spain & the New World'}]],
+   ['Modern depth study',[{s:'weimar-nazi-germany',n:'Weimar & Nazi Germany'},{s:'usa-conflict-home-abroad',n:'The USA, 1954–75'},{s:'russia-soviet-union',n:'Russia & the Soviet Union'},{s:'maos-china',n:'Mao’s China'}]]
+  ],
+  ocr:[
+   ['Non-British depth',[{s:'china-people-state-1950-1981',n:'China 1950–81'},{s:'germany-people-state-1925-1955',n:'Germany 1925–55'},{s:'south-africa-people-state-1960-1994',n:'South Africa 1960–94'},{s:'usa-people-state-1919-1948',n:'USA 1919–48'},{s:'usa-people-state-1945-1974',n:'USA 1945–74'}]],
+   ['Thematic study',[{s:'migration-to-britain-1000-2010',n:'Migration to Britain'},{s:'power-monarchy-democracy-1000-2014',n:'Power: Monarchy & Democracy'},{s:'war-british-society-790-2010',n:'War & British Society'}]],
+   ['British depth study',[{s:'impact-empire-britain-1688-1730',n:'Impact of Empire'},{s:'english-reformation-1520-1550',n:'The English Reformation'},{s:'personal-rule-restoration-1629-1660',n:'Personal Rule to Restoration'}]]
+  ],
+  eduqas:[
+   ['British study in depth',[{s:'conflict-upheaval-england-1337-1381',n:'Conflict & Upheaval, 1337–81'},{s:'elizabethan-age-1558-1603',n:'The Elizabethan Age'},{s:'empire-reform-war-1890-1918',n:'Empire, Reform & War'},{s:'austerity-affluence-discontent-1951-1979',n:'Austerity & Affluence'}]],
+   ['Non-British in depth',[{s:'crusades-1095-1149',n:'The Crusades'},{s:'voyages-discovery-conquest-americas-1492-1522',n:'Voyages of Discovery'},{s:'germany-transition-1919-1939',n:'Germany in Transition'},{s:'usa-nation-contrasts-1910-1929',n:'The USA, 1910–29'}]],
+   ['Thematic study',[{s:'crime-punishment-britain-c500-present',n:'Crime & Punishment'},{s:'health-medicine-britain-c500-present',n:'Health & Medicine'},{s:'warfare-britain-c500-present',n:'Warfare in Britain'},{s:'entertainment-leisure-britain-c500-present',n:'Entertainment & Leisure'}]],
+   ['Study in development',[{s:'development-usa-1929-2000',n:'The USA, 1929–2000'},{s:'development-germany-1919-1991',n:'Germany, 1919–91'},{s:'development-ussr-1924-1991',n:'The USSR, 1924–91'},{s:'development-uk-1919-1990',n:'The UK, 1919–90'}]]
+  ]
+ },
+ lit:{
+  aqa:[
+   ['Shakespeare',[{s:'macbeth',n:'Macbeth'},{s:'romeo-and-juliet',n:'Romeo & Juliet'},{s:'the-tempest',n:'The Tempest'},{s:'the-merchant-of-venice',n:'The Merchant of Venice'},{s:'much-ado-about-nothing',n:'Much Ado About Nothing'},{s:'julius-caesar',n:'Julius Caesar'}]],
+   ['19th-century novel',[{s:'a-christmas-carol',n:'A Christmas Carol'},{s:'jekyll-and-hyde',n:'Jekyll & Hyde'},{s:'frankenstein',n:'Frankenstein'},{s:'pride-and-prejudice',n:'Pride & Prejudice'},{s:'jane-eyre',n:'Jane Eyre'},{s:'great-expectations',n:'Great Expectations'},{s:'the-sign-of-four',n:'The Sign of Four'}]],
+   ['Modern text',[{s:'an-inspector-calls',n:'An Inspector Calls'},{s:'animal-farm',n:'Animal Farm'},{s:'lord-of-the-flies',n:'Lord of the Flies'},{s:'blood-brothers',n:'Blood Brothers'},{s:'pigeon-english',n:'Pigeon English'},{s:'dna',n:'DNA'},{s:'anita-and-me',n:'Anita and Me'},{s:'a-taste-of-honey',n:'A Taste of Honey'},{s:'princess-and-the-hustler',n:'Princess & The Hustler'},{s:'leave-taking',n:'Leave Taking'},{s:'my-name-is-leon',n:'My Name is Leon'},{s:'telling-tales',n:'Telling Tales'}]],
+   ['Poetry',[{s:'power-and-conflict',n:'Power & Conflict'},{s:'love-and-relationships',n:'Love & Relationships'},{s:'worlds-and-lives',n:'Worlds and Lives'}]]
+  ],
+  edexcel:[
+   ['Shakespeare',[{s:'macbeth',n:'Macbeth'},{s:'romeo-and-juliet',n:'Romeo & Juliet'},{s:'the-tempest',n:'The Tempest'},{s:'the-merchant-of-venice',n:'The Merchant of Venice'},{s:'much-ado-about-nothing',n:'Much Ado About Nothing'},{s:'twelfth-night',n:'Twelfth Night'}]],
+   ['19th-century novel',[{s:'a-christmas-carol',n:'A Christmas Carol'},{s:'dr-jekyll-and-mr-hyde',n:'Jekyll & Hyde'},{s:'frankenstein',n:'Frankenstein'},{s:'pride-and-prejudice',n:'Pride & Prejudice'},{s:'jane-eyre',n:'Jane Eyre'},{s:'great-expectations',n:'Great Expectations'},{s:'silas-marner',n:'Silas Marner'}]],
+   ['Modern text',[{s:'an-inspector-calls',n:'An Inspector Calls'},{s:'animal-farm',n:'Animal Farm'},{s:'lord-of-the-flies',n:'Lord of the Flies'},{s:'blood-brothers',n:'Blood Brothers'},{s:'hobsons-choice',n:'Hobson’s Choice'},{s:'journeys-end',n:'Journey’s End'},{s:'anita-and-me',n:'Anita and Me'},{s:'the-woman-in-black',n:'The Woman in Black'},{s:'the-empress',n:'The Empress'},{s:'refugee-boy',n:'Refugee Boy'},{s:'coram-boy',n:'Coram Boy'},{s:'boys-dont-cry',n:'Boys Don’t Cry'}]],
+   ['Poetry',[{s:'poetry-relationships',n:'Relationships'},{s:'poetry-conflict',n:'Conflict'},{s:'poetry-time-and-place',n:'Time and Place'},{s:'poetry-belonging',n:'Belonging'}]]
+  ],
+  ocr:[
+   ['Shakespeare',[{s:'macbeth',n:'Macbeth'},{s:'romeo-and-juliet',n:'Romeo & Juliet'},{s:'the-merchant-of-venice',n:'The Merchant of Venice'},{s:'much-ado-about-nothing',n:'Much Ado About Nothing'}]],
+   ['19th-century novel',[{s:'a-christmas-carol',n:'A Christmas Carol'},{s:'dr-jekyll-and-mr-hyde',n:'Jekyll & Hyde'},{s:'great-expectations',n:'Great Expectations'},{s:'pride-and-prejudice',n:'Pride & Prejudice'},{s:'jane-eyre',n:'Jane Eyre'},{s:'war-of-the-worlds',n:'The War of the Worlds'}]],
+   ['Modern text',[{s:'an-inspector-calls',n:'An Inspector Calls'},{s:'animal-farm',n:'Animal Farm'},{s:'never-let-me-go',n:'Never Let Me Go'},{s:'anita-and-me',n:'Anita and Me'},{s:'dna',n:'DNA'},{s:'leave-taking',n:'Leave Taking'}]],
+   ['Poetry',[{s:'poetry-love-and-relationships',n:'Love and Relationships'},{s:'poetry-conflict',n:'Conflict'},{s:'poetry-youth-and-age',n:'Youth and Age'}]]
+  ],
+  eduqas:[
+   ['Shakespeare',[{s:'macbeth',n:'Macbeth'},{s:'romeo-and-juliet',n:'Romeo & Juliet'},{s:'the-merchant-of-venice',n:'The Merchant of Venice'},{s:'much-ado-about-nothing',n:'Much Ado About Nothing'},{s:'othello',n:'Othello'},{s:'henry-v',n:'Henry V'}]],
+   ['19th-century novel',[{s:'a-christmas-carol',n:'A Christmas Carol'},{s:'dr-jekyll-and-mr-hyde',n:'Jekyll & Hyde'},{s:'pride-and-prejudice',n:'Pride & Prejudice'},{s:'jane-eyre',n:'Jane Eyre'},{s:'silas-marner',n:'Silas Marner'},{s:'war-of-the-worlds',n:'The War of the Worlds'}]],
+   ['Modern text',[{s:'an-inspector-calls',n:'An Inspector Calls'},{s:'lord-of-the-flies',n:'Lord of the Flies'},{s:'blood-brothers',n:'Blood Brothers'},{s:'anita-and-me',n:'Anita and Me'},{s:'never-let-me-go',n:'Never Let Me Go'},{s:'the-woman-in-black',n:'The Woman in Black'},{s:'the-history-boys',n:'The History Boys'},{s:'the-curious-incident',n:'The Curious Incident…'},{s:'a-taste-of-honey',n:'A Taste of Honey'},{s:'oranges-are-not-the-only-fruit',n:'Oranges Are Not the Only Fruit'}]],
+   ['Poetry',[{s:'poetry-anthology',n:'Poetry Anthology'}]]
+  ]
+ }
+};
+function topicsFor(sl){ return TOPICS[sl]&&boards[sl]?TOPICS[sl][boards[sl]]||null:null; }
+function topicsNeeded(){ return picked.filter(sl=>topicsFor(sl)); }
 let boards={};   /* slug -> board key; a key the board doesn't offer = a request */
+let topics={};   /* slug -> {groupIndex: choice slug} for subjects with another level */
 
 function renderShelfInto(el,slugs){
   el.innerHTML=''; el.appendChild(bookendEl());
@@ -1031,6 +1131,44 @@ function renderBoards(){
   }
   const nx=document.getElementById('bnext'), ready=chosen.length===picked.length&&picked.length>0;
   nx.disabled=!ready; nx.style.opacity=ready?'1':'.45';
+  /* some books have another level (history options, set texts) — route there */
+  const needT=topicsNeeded().length>0;
+  nx.innerHTML=needT?'Choose your topics &rarr;':'Save your shelf &rarr;';
+  nx.onclick=()=>go(needT?'topics':'save');
+}
+function renderTopics(){
+  const need=topicsNeeded();
+  renderShelfInto(document.getElementById('shelf-topics'),need.length?need:picked);
+  const tl=document.getElementById('tlist'); tl.innerHTML='';
+  need.forEach(slug=>{
+    const su=SUBJECTS.find(x=>x.slug===slug), groups=topicsFor(slug);
+    const blk=document.createElement('div'); blk.className='tblock'; blk.style.setProperty('--tc',su.c);
+    blk.innerHTML='<div class="tbhead"><img src="assets/lw/shelf/book_'+slug+'.webp" alt="">'
+      +'<span class="bn">'+su.name+'</span><span class="bd">'+(BOARDLBL[boards[slug]]||'')+'</span></div>';
+    groups.forEach((g,gi)=>{
+      const row=document.createElement('div'); row.className='tgroup';
+      row.innerHTML='<span class="tglabel">'+g[0]+'</span><span class="chips"></span>';
+      const chips=row.querySelector('.chips');
+      g[1].forEach(o=>{
+        const ch=document.createElement('button'); ch.type='button'; ch.className='chip';
+        ch.setAttribute('aria-pressed',String((topics[slug]||{})[gi]===o.s));
+        ch.textContent=o.n;
+        ch.onclick=()=>{ topics[slug]=topics[slug]||{};
+          if(topics[slug][gi]===o.s) delete topics[slug][gi]; else topics[slug][gi]=o.s;
+          persist(); renderTopics(); };
+        chips.appendChild(ch);
+      });
+      blk.appendChild(row);
+    });
+    tl.appendChild(blk);
+  });
+  let total=0, done=0;
+  need.forEach(sl=>topicsFor(sl).forEach((g,gi)=>{ total++; if((topics[sl]||{})[gi]) done++; }));
+  const v=document.getElementById('tverdict');
+  v.innerHTML=done===total?'<b>All chosen.</b> Your shelf holds exactly what you’re sitting.'
+    :'<b>'+done+' of '+total+'</b> picked — one from each row.';
+  const nx=document.getElementById('tnext');
+  nx.disabled=done<total; nx.style.opacity=done<total?'.45':'1';
 }
 function renderSave(){
   renderShelfInto(document.getElementById('shelf-save'),picked);
@@ -1043,17 +1181,18 @@ function renderSave(){
 function go(v){
   document.body.dataset.view=v;
   if(v==='boards') renderBoards();
+  if(v==='topics') renderTopics();
   if(v==='save') renderSave();
   scrollTo(0,0);
 }
 /* the shelf you built survives a wander-off (nothing server-side until Save) */
-function persist(){ try{ localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards})); }catch(e){} }
+function persist(){ try{ localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics})); }catch(e){} }
 let firstVisit=true;
 (function restore(){ try{
   firstVisit=localStorage.getItem('sv-welcome')===null;
   const st=JSON.parse(localStorage.getItem('sv-welcome')||'{}');
   (st.picked||[]).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
-  boards=st.boards||{};
+  boards=st.boards||{}; topics=st.topics||{};
 }catch(e){} })();
 
 /* deep-link for review: ?view=picker|boards|save&picked=history,maths&boards=history:aqa */
@@ -1068,6 +1207,10 @@ if(firstVisit && q.get('picked')===null)
   ['maths','lang','lit','science'].forEach(sl=>togglePick(sl));
 if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
   const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&BOARDKEYS.includes(kv[1])) boards[kv[0]]=kv[1]; }); }
+/* &tsel=history.0.america-opportunity-inequality,lit.2.an-inspector-calls —
+   preset topic picks (slug.groupIndex.choice) for review/demo staging */
+if(q.get('tsel')!==null){ topics={}; (q.get('tsel')||'').split(',').filter(Boolean).forEach(t=>{
+  const p=t.split('.'); if(p.length>=3) (topics[p[0]]=topics[p[0]]||{})[p[1]]=p.slice(2).join('.'); }); }
 if(q.get('view')) go(q.get('view'));
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
 /* the composition is authored on a 1366px canvas; scale it to every window so
