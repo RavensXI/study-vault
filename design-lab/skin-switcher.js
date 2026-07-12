@@ -1366,10 +1366,13 @@
   // link lead back to the dashboard, closing the desk → lesson → desk loop.
   function wireDeskHome() {
     if (!document.body.classList.contains('desk-world')) return;
+    // home = the dashboard view the student last used (classic is the default)
+    var pref = '/classic';
+    try { if (localStorage.getItem('sv-dash-view') === 'desk') pref = '/desk'; } catch (e) {}
     var brand = document.querySelector('a.header-brand');
-    if (brand) brand.setAttribute('href', '/desk');
+    if (brand) brand.setAttribute('href', pref);
     [].forEach.call(document.querySelectorAll('.header-nav a, a.back-link'), function (a) {
-      if (a.getAttribute('href') === '/') a.setAttribute('href', '/desk');
+      if (a.getAttribute('href') === '/') a.setAttribute('href', pref);
     });
   }
 
