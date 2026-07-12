@@ -7,6 +7,7 @@ Outputs in scripts/_demo_out: wizard_pick / wizard_boards / wizard_topics
 (.mp4 + .gif each), wizard_full.mp4, and a QA strip per loop.
 """
 import os, subprocess, sys, math
+import numpy as np
 from PIL import Image, ImageDraw
 
 CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
@@ -29,11 +30,14 @@ STATES = {
     "b1": f"view=boards&{P8}&{B5},lit:aqa",
     "b2": f"view=boards&{P8}&{B5},lit:aqa,history:aqa",
     "b3": f"view=boards&{P8}&{B8}",
-    "c0": f"view=topics&{P8}&{B8}&tsel=&tstep=0",
-    "c1": f"view=topics&{P8}&{B8}&{TS1}&tstep=1",
-    "c2": f"view=topics&{P8}&{B8}&{TS2}&tstep=2",
-    "c3": f"view=topics&{P8}&{B8}&{TS3}&tstep=3",
-    "sF": f"view=save&{P8}&{B8}&{TS3}",
+    "c0":  f"view=topics&{P8}&{B8}&tsel=&tstep=0",
+    "c0s": f"view=topics&{P8}&{B8}&{TS1}&tstep=0",
+    "c1":  f"view=topics&{P8}&{B8}&{TS1}&tstep=1",
+    "c1s": f"view=topics&{P8}&{B8}&{TS2}&tstep=1",
+    "c2":  f"view=topics&{P8}&{B8}&{TS2}&tstep=2",
+    "c2s": f"view=topics&{P8}&{B8}&{TS3}&tstep=2",
+    "c3":  f"view=topics&{P8}&{B8}&{TS3}&tstep=3",
+    "sF":  f"view=save&{P8}&{B8}&{TS3}",
 }
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_demo_out")
@@ -100,6 +104,19 @@ NEXT_B = PT(975,911)
 CHIP_MAC, CHIP_ACC, CHIP_AIC = PT(572,532), PT(653,533), PT(638,532)
 ENTRY = (W-60, H-260)
 
+def find_cta(key):
+    """Locate the enabled (dark) CTA button in a state's lower half."""
+    a = np.array(S[key])
+    r, g, b = a[:,:,0].astype(int), a[:,:,1].astype(int), a[:,:,2].astype(int)
+    m = (r<125)&(g<110)&(b<95)&(r>=g)&(g>=b)
+    m[:500,:] = False
+    rows = m.sum(axis=1)
+    ys = np.where(rows>80)[0]
+    if not len(ys): raise RuntimeError(f"no CTA found in {key}")
+    band = m[ys.min():ys.max()+1]
+    xs = np.where(band.any(axis=0))[0]
+    return (int(xs.mean()), int((ys.min()+ys.max())/2))
+
 loopA = build([
     ("hold","a0",6,None), ("move","a0",ENTRY,CARDS[0],10),
     ("click","a0","a1",CARDS[0]), ("hold","a1",5,CARDS[0]),
@@ -115,11 +132,15 @@ loopB = build([
     ("move","b2",CHIP_HIS,CHIP_PSY,7), ("click","b2","b3",CHIP_PSY), ("hold","b3",8,CHIP_PSY),
     ("move","b3",CHIP_PSY,NEXT_B,7), ("click","b3","c0",NEXT_B), ("hold","c0",14,None),
 ])
+N0, N1, N2 = find_cta("c0s"), find_cta("c1s"), find_cta("c2s")
 loopC = build([
     ("hold","c0",6,None), ("move","c0",ENTRY,CHIP_MAC,10),
-    ("click","c0","c1",CHIP_MAC), ("hold","c1",6,CHIP_MAC),
-    ("move","c1",CHIP_MAC,CHIP_ACC,6), ("click","c1","c2",CHIP_ACC), ("hold","c2",6,CHIP_ACC),
-    ("move","c2",CHIP_ACC,CHIP_AIC,6), ("click","c2","c3",CHIP_AIC), ("hold","c3",7,CHIP_AIC),
+    ("click","c0","c0s",CHIP_MAC), ("hold","c0s",5,CHIP_MAC),
+    ("move","c0s",CHIP_MAC,N0,6), ("click","c0s","c1",N0), ("hold","c1",4,N0),
+    ("move","c1",N0,CHIP_ACC,6), ("click","c1","c1s",CHIP_ACC), ("hold","c1s",4,CHIP_ACC),
+    ("move","c1s",CHIP_ACC,N1,6), ("click","c1s","c2",N1), ("hold","c2",4,N1),
+    ("move","c2",N1,CHIP_AIC,6), ("click","c2","c2s",CHIP_AIC), ("hold","c2s",4,CHIP_AIC),
+    ("move","c2s",CHIP_AIC,N2,6), ("click","c2s","c3",N2), ("hold","c3",6,None),
     ("fade","c3","sF",4), ("hold","sF",16,None),
 ])
 full = loopA[:-14] + build([("fade","bE","b0",3)]) + loopB[6:] + loopC[6:]
