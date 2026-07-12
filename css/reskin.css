@@ -1006,8 +1006,15 @@ body[data-skin="reader"] .lesson-progress-check{ display:none; }
 body[data-skin="reader"] .lesson-progress-icon{ width:32px; height:32px; color:var(--text-muted) !important; background:transparent !important; }
 body[data-skin="reader"] .lesson-progress-icon svg{ width:18px; height:18px; }
 body[data-skin="reader"] .lesson-progress-item.completed .lesson-progress-icon{ color:var(--accent) !important; }
-body[data-skin="reader"] .lesson-progress-bar{ flex:1 1 100%; order:8; margin-top:.6rem; height:3px; border-radius:0; background:var(--border-lighter); }
+body[data-skin="reader"] .lesson-progress-bar{ flex:1 1 100%; order:8; margin-top:.6rem; height:3px; border-radius:0; background:var(--border-lighter); overflow:visible; position:relative; }
 body[data-skin="reader"] .lesson-progress-bar-fill{ background:var(--accent); border-radius:0; }
+/* the done-line: a lesson counts as complete from 50% (weighted) — the hatched
+   tick marks the target, on every lesson, always at the same spot */
+body[data-skin="reader"] .lesson-progress-bar::after{
+  content:''; position:absolute; left:50%; top:-4px; bottom:-4px; width:2px; margin-left:-1px;
+  background:repeating-linear-gradient(180deg, var(--text-muted) 0 2px, transparent 2px 4px);
+  opacity:.75; pointer-events:none;
+}
 body[data-skin="reader"] .lesson-progress-summary{
   position:absolute; top:.95rem; right:1.15rem; flex:none; order:0; margin:0;
   font-size:.84rem; color:var(--text-muted); font-variant-numeric:tabular-nums;

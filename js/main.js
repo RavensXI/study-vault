@@ -2596,6 +2596,7 @@ function initLessonProgress() {
   html += '<div class="lesson-progress-bar"><div class="lesson-progress-bar-fill" style="width:' + pct + '%"></div></div>';
   html += '<div class="lesson-progress-summary">' + completed + ' of ' + tasks.length + ' complete</div></div>';
   section.innerHTML = html;
+  section.dataset.svPct = pct;   // weighted % — reader-skin adapter reads this
 
   var firstSection = sidebar.querySelector('.sidebar-section');
   sidebar.insertBefore(section, firstSection);

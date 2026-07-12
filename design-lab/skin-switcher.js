@@ -639,8 +639,12 @@
         .filter(function (it) { return it.getClientRects().length > 0; });   // exclude the hidden highlight task
       var total = items.length;
       var done = items.filter(function (it) { return it.classList.contains('completed'); }).length;
-      var want = done + ' of ' + total + ' complete';
+      var wp = section.dataset.svPct;
+      var want = done + ' of ' + total + (wp !== undefined ? ' · ' + wp + '%' : ' complete');
       if (summary.textContent !== want) summary.textContent = want;
+      if (!section.dataset.doneTip) { section.dataset.doneTip = '1';
+        var bar0 = section.querySelector('.lesson-progress-bar');
+        if (bar0) bar0.title = 'The dashes mark the done line — a lesson counts as complete from 50%'; }
       var fill = section.querySelector('.lesson-progress-bar-fill');
       // the bar shows WEIGHTED depth (LESSON_COMPLETION_SPEC.md) when main.js
       // provides it; the count-based fallback covers older pages
