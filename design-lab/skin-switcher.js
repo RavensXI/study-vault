@@ -43,7 +43,9 @@
     var eff = desk ? 'reader' : skin;
     document.body.classList.toggle('desk-world', desk);
     if (eff) document.body.dataset.skin = eff; else delete document.body.dataset.skin;
-    document.body.classList.toggle('dark-mode', skin === 'ink'); // reuse battle-tested dark coverage
+    // ink IS a dark skin; otherwise leave dark-mode alone — it belongs to the
+    // accessibility toolbar (prefs.darkMode), not the skin switcher.
+    if (skin === 'ink') document.body.classList.add('dark-mode');
     applySubjectAccent();
     wireDeskHome();
     [].forEach.call(bar.querySelectorAll('button'), function (b) {
@@ -324,6 +326,8 @@
   }
   function maybeStartTour() {
     if (tourPolling || tourStarted) return;
+    if (new URLSearchParams(location.search).get('notour') === '1')
+      try { localStorage.setItem('sv-reader-tour-v1', '1'); } catch (e) {}   // QA staging
     if (localStorage.getItem('sv-reader-tour-v1')) return;
     tourPolling = true;
     // poll until the async-loaded panel + a11y bar exist (fixed tidy timers
@@ -1386,6 +1390,7 @@
     // covered the top-right header buttons. Re-enable by appending `bar` again.
     var reqSkin = new URLSearchParams(location.search).get('skin');
     set(reqSkin !== null ? reqSkin : 'desk');   // default: desk-world (?skin=reader to compare)
+  if (new URLSearchParams(location.search).get('dark') === '1') document.body.classList.add('dark-mode');   // QA staging
     applySubjectAccent();
     watchOldOnboarding();     // kill the first-visit onboarding flash from the start
     setTimeout(tidy, 1200);
@@ -1396,3 +1401,16 @@
   }
   if (document.body) init(); else document.addEventListener('DOMContentLoaded', init);
 })();
+
+// throwaway computed-style probe (QA): ?csprobe=1 writes colours into <title>
+if (new URLSearchParams(location.search).get('csprobe') === '1') {
+  setTimeout(function () {
+    try {
+      var lg = getComputedStyle(document.querySelector('.header-logo'));
+      var bd = getComputedStyle(document.body);
+      var hd = getComputedStyle(document.querySelector('.page-header'));
+      document.title = 'CS|logo=' + lg.color + '|tp=' + bd.getPropertyValue('--text-primary')
+        + '|hdrbg=' + hd.backgroundColor + '|cls=' + document.body.className;
+    } catch (e) { document.title = 'CS|ERR ' + e.message; }
+  }, 600);
+}
