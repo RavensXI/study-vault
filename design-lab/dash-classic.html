@@ -567,8 +567,11 @@ if(_dq.has('snap')){ document.body.classList.add('ready');
 let WIZ=null;
 try{ WIZ=JSON.parse(localStorage.getItem('sv-welcome')||'null'); }catch(e){}
 if(_dq.get('picked')){                    /* staging override for renders/QA */
-  WIZ={picked:_dq.get('picked').split(',').filter(sl=>NAMEC[sl]),boards:{},meta:{}};
+  WIZ={picked:_dq.get('picked').split(',').filter(sl=>NAMEC[sl]),boards:{},meta:{},topics:{}};
   (_dq.get('boards')||'').split(',').forEach(p=>{const kv=p.split(':'); if(kv[1]) WIZ.boards[kv[0]]=kv[1];});
+  (_dq.get('tsel')||'').split(',').filter(Boolean).forEach(t=>{ const p=t.split('.');
+    if(p.length>=3){ const v=p.slice(2).join('.');
+      (WIZ.topics[p[0]]=WIZ.topics[p[0]]||{})[p[1]]=v.includes('~')?v.split('~'):v; } });
 }
 const DAYONE=!!(WIZ&&Array.isArray(WIZ.picked)&&WIZ.picked.length);
 let SVUSER=null; try{ SVUSER=JSON.parse(localStorage.getItem('sv-user')||'null'); }catch(e){}
@@ -630,6 +633,75 @@ if(DAYONE){
 function dayOneUrl(su){ if(!su||!su.sub) return null;
   if(su.first) return (su.mode==='p'?'/practice/':'/lesson/')+su.sub+'/'+su.first+'/1';
   return '/browse/'+su.sub; }
+/* lessons the student has actually finished (written by the lesson pages:
+   complete = every task except the optional exam question) */
+let DONE={};
+try{ DONE=JSON.parse(localStorage.getItem('sv-lessons-done'))||{}; }catch(e){}
+if(_dq.get('done')){ DONE={};                       /* staging: ?done=sub/unit:1.2,... */
+  _dq.get('done').split(',').forEach(p=>{ const kv=p.split(':');
+    if(kv[1]) DONE[kv[0]]=kv[1].split('.').map(Number); }); }
+function doneIn(sub,unit){ return (DONE[sub+'/'+unit]||[]); }
+/* the real course structure, live from Supabase — filtered to the student's
+   own topic choices where the subject has them */
+const SUPA='https://baipckgywpnwapobwtsy.supabase.co';
+const ANON='sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+function keepUnit(su,uslug){
+  const raw=su.topicsRaw||[], allRaw=(WIZ&&WIZ.topics&&WIZ.topics[su.slug])?
+    Object.values(WIZ.topics[su.slug]).flat():[];
+  if(su.slug==='history'||su.slug==='lit')
+    return !raw.length||raw.includes(uslug)||doneIn(su.sub,uslug).length>0;
+  if(su.slug==='rs'&&allRaw.length)
+    return allRaw.some(r=>uslug===r||uslug.indexOf(r+'-')===0)||doneIn(su.sub,uslug).length>0;
+  return true;
+}
+const OPEN_STAGE=_dq.get('open');   /* staging: auto-open a panel once units land */
+if(DAYONE){
+  const subs=SUBJECTS.filter(su=>su.sub&&su.mode!=='p').map(su=>su.sub);
+  if(subs.length) fetch(SUPA+'/rest/v1/subjects?select=slug,units(slug,name,lesson_count,sort_order)'
+      +'&school_id=is.null&slug=in.('+subs.map(x=>'"'+x+'"').join(',')+')',
+      {headers:{apikey:ANON}})
+    .then(r=>r.json()).then(rows=>{
+      rows.forEach(row=>{
+        const su=SUBJECTS.find(x=>x.sub===row.slug); if(!su) return;
+        const us=(row.units||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))
+          .filter(u=>keepUnit(su,u.slug));
+        if(!us.length) return;
+        su.units=us.map(u=>{
+          const dn=doneIn(su.sub,u.slug).filter(k=>k>=1&&k<=(u.lesson_count||0));
+          return [u.name,u.lesson_count||0,dn.length,u.slug,dn];
+        });
+      });
+      if(OPEN_STAGE&&!selSlug) selSlug=OPEN_STAGE;
+      renderSubjects();
+      if(selSlug){ const cur=SUBJECTS.find(x=>x.slug===selSlug); if(cur) renderSubjectPanel(cur); }
+      refreshDayOnePlan();
+      document.body.dataset.unitsLoaded='1';   /* staging: renders can wait on this */
+    }).catch(()=>{});
+}
+/* once real progress exists, the plan says Continue, not Start-at-the-start */
+function refreshDayOnePlan(){
+  if(!DAYONE) return;
+  let target=null, tsu=null, tunit=null, tnum=1, fresh=true;
+  for(const su of SUBJECTS){
+    if(!su.units.length) continue;
+    for(const u of su.units){
+      const set=u[4]||[];
+      let k=1; while(k<=u[1]&&set.includes(k)) k++;
+      if(k<=u[1]&&set.length){ target=urlFor(su,[u[0],u[1],k-1,u[3]]); tsu=su; tunit=u; tnum=k; fresh=false; break; }
+    }
+    if(target) break;
+  }
+  if(!target) return;                       /* nothing started yet — leave day-one plan */
+  const lis=document.querySelectorAll('.card.plan ol li');
+  if(lis[1]){
+    lis[1].innerHTML='<span class="n">2</span><div><b>Continue: '+tunit[0]+'</b>'
+      +'<small>'+tsu.name+' · lesson '+tnum+' of '+tunit[1]+'</small></div><span class="mins">15 min</span>';
+    lis[1].classList.remove('inert'); lis[1].style.cursor='pointer';
+    lis[1].onclick=()=>nav(target);
+  }
+  const sb=document.getElementById('startbtn');
+  if(sb) sb.onclick=()=>nav(target);
+}
 function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
 function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
@@ -954,7 +1026,7 @@ function renderSubjectPanel(s){
   el.style.setProperty('--tc',s.c);
   el.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
     '<span class="sub">'+d+' of '+t+' lessons · '+Math.round(d/t*100)+'%'+
-    (rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today')+'</span>'+
+    (DAYONE?'':(rec>=14?' · <span style="color:#a3542f;font-weight:600">'+Math.round(rec/7)+'w untouched</span>':rec>0?' · '+rec+'d ago':' · studied today'))+'</span>'+
     '<span class="sp"></span>'+
     '<button class="cont">Where you left off →</button></div>'+
     '<div class="units">'+
@@ -973,9 +1045,11 @@ function showLessons(s,u){
   const titles=((LESSON_TITLES[s.sub]||{})[u[3]])||[];
   const n=titles.length||u[1];
   const base='/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
-  const nextK=Math.min(u[2]+1,n);
+  const dset=u[4]||null;                     /* day-one: exact done set from the rollup */
+  let nextK=Math.min(u[2]+1,n);
+  if(dset){ let k=1; while(k<=n&&dset.includes(k)) k++; nextK=Math.min(k,n); }
   let tiles='';
-  for(let k=1;k<=n;k++){ const done=k<=u[2], next=k===nextK;
+  for(let k=1;k<=n;k++){ const done=dset?dset.includes(k):k<=u[2], next=k===nextK;
     tiles+='<button class="ltile'+(done?' done':'')+(next?' next':'')+'" data-n="'+k+'">'+k+'</button>'; }
   el.innerHTML='<div class="top"><button class="back" title="Back to topics">‹</button>'+
     '<h3>'+u[0]+'</h3><span class="sub">'+u[2]+' of '+n+' lessons</span></div>'+

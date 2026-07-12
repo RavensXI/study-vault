@@ -2471,7 +2471,27 @@ function initLessonProgress() {
   function getState() {
     try { return JSON.parse(localStorage.getItem(storageKey)) || {}; } catch(e) { return {}; }
   }
-  function saveState(s) { localStorage.setItem(storageKey, JSON.stringify(s)); }
+  // Dashboard rollup: a lesson counts COMPLETE when every task except the
+  // optional exam question is done. Kept in one compact map the student
+  // dashboard can read: sv-lessons-done = { "subject/unit": [lessonNumbers] }.
+  function updateRollup(s) {
+    try {
+      var need = tasks.filter(function (t) { return t.id !== 'practice-question'; });
+      if (!need.length) return;
+      var complete = need.every(function (t) { return !!s[t.id]; });
+      var key = pathMatch[1] + '/' + pathMatch[2];
+      var num = parseInt(pathMatch[3], 10);
+      var roll = {};
+      try { roll = JSON.parse(localStorage.getItem('sv-lessons-done')) || {}; } catch (e) {}
+      var arr = roll[key] || [];
+      var ix = arr.indexOf(num);
+      if (complete && ix < 0) arr.push(num);
+      if (!complete && ix >= 0) arr.splice(ix, 1);
+      roll[key] = arr;
+      localStorage.setItem('sv-lessons-done', JSON.stringify(roll));
+    } catch (e) {}
+  }
+  function saveState(s) { localStorage.setItem(storageKey, JSON.stringify(s)); updateRollup(s); }
 
   var tasks = [];
 
@@ -2529,6 +2549,7 @@ function initLessonProgress() {
   if (tasks.length === 0) return;
 
   var state = getState();
+  updateRollup(state);   // retro-register lessons finished before rollup existed
   var checkSVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
   // ---- Build sidebar version (shown on narrow screens / mobile panel) ----
