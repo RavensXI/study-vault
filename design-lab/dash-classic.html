@@ -337,9 +337,9 @@
     gap:14px;justify-content:space-between;background:var(--card);border:1px solid var(--line);
     border-radius:6px;padding:.7rem 1rem .7rem 1.2rem}
   .savebar>span{font-family:var(--read);font-size:.93rem;color:var(--sec)}
-  .savebar .savecta{flex:none;background:var(--anchor);color:#faf6ec;font-weight:600;font-size:.9rem;
+  .savecta{flex:none;background:var(--anchor);color:#faf6ec;font-weight:600;font-size:.9rem;
     padding:.55rem 1.2rem;border-radius:4px;text-decoration:none}
-  .savebar .savecta:hover{filter:brightness(1.08)}
+  .savecta:hover{filter:brightness(1.08)}
   .weekempty{font-family:var(--read);font-size:.92rem;color:var(--sec);line-height:1.55;margin:.4rem 0 0}
 </style>
 </head>
@@ -516,15 +516,19 @@ if(DAYONE){
   document.querySelector('.card.plan ol').innerHTML=
     '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>'+
     '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+(WIZ.picked[0]&&NAMEC[WIZ.picked[0]]?NAMEC[WIZ.picked[0]][0]:'your first subject')+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
-    '<li class="inert"><span class="n">3</span><div><b>Exam dates</b><small>tell the planner when your exams are</small></div><span class="mins">1 min</span></li>';
+    '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>';
   const _sb=document.getElementById('startbtn');
   if(_sb){ _sb.onclick=()=>false;
-    _sb.innerHTML=_sb.innerHTML.replace('25 min','18 min'); }
+    _sb.innerHTML=_sb.innerHTML.replace('25 min','19 min'); }
   document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
     '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
   const bar=document.createElement('div'); bar.className='savebar';
-  bar.innerHTML='<span>Nothing is saved yet — your setup lives on this device only.</span>'+
-    '<a class="savecta" href="home-study.html?view=save">Save it — free</a>';
+  bar.innerHTML='<span>Nothing is saved yet. Sign up to save your progress.</span>'+
+    '<a class="savecta" href="home-study.html?view=save">Sign up — free</a>';
+  const _av=document.querySelector('.top .avatar');
+  if(_av){ const a=document.createElement('a'); a.className='savecta';
+    a.href='home-study.html?view=save'; a.textContent='Sign up and save your progress';
+    _av.replaceWith(a); }
   document.querySelector('.wrap').before(bar);
 }
 

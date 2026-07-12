@@ -8,7 +8,7 @@
 <base href="/design-lab/">
 <title>Your desk — StudyVault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
   :root{--paper:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;--line:#e4dfd2;
     --r:8px;--anchor:#4e5f66;--ease:cubic-bezier(.22,1,.36,1);
@@ -50,7 +50,8 @@
   .top{position:fixed;left:0;right:0;top:0;z-index:10;height:52px;display:flex;align-items:center;
     justify-content:space-between;padding:0 clamp(1rem,4vw,2.2rem);pointer-events:none}
   .top>*{pointer-events:auto}
-  .brand{font-size:1rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
+  .brand{font-family:'Young Serif',serif;font-size:1.05rem;font-weight:400;color:#1d1c1a}
+  .brandlock{height:.30em;width:auto;margin-left:1px;vertical-align:baseline}
   .brandlogo{height:34px;display:block}
   .avatar{width:30px;height:30px;border-radius:50%;background:#221E19;color:#faf8f5;
     display:grid;place-items:center;font-weight:700;font-size:.78rem}
@@ -354,8 +355,7 @@
 <body>
 
 <div class="top">
-  <img class="brandlogo" src="assets/brand/bindery-lockup.svg" alt="Bindery"
-       onerror="this.outerHTML='<span class=&quot;brand&quot;>Study<b>Vault</b></span>'">
+  <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
   <span style="display:flex;align-items:center;gap:.9rem"><a class="tidy" href="/classic" style="text-decoration:none">classic view</a><button class="tidy" id="tidy" title="Wipe it all down — stains, shavings, the lot">clean desk</button><span class="avatar">S</span></span>
 </div>
 
@@ -483,11 +483,50 @@ const SUBJECTS=[
  {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
 ];
 function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
+/* ---- wizard hand-off: same contract as the classic view — sv-welcome (or
+   ?picked=&boards= staging) drives the desk; day one = nothing started. ---- */
+const NAMEC={maths:['Mathematics','#4e5f66','Maths'],lang:['English Language','#5b7285','English'],
+ lit:['English Literature','#7d5a78','Lit'],science:['Combined Science','#4e6e5d','Science'],
+ triple:['Triple Science','#3d5c50','Triple'],history:['History','#8a5a44','History'],
+ geog:['Geography','#6d7a4e','Geog'],french:['French','#5c72a4','French'],
+ spanish:['Spanish','#a2643f','Spanish'],german:['German','#7c4a52','German'],
+ cs:['Computer Science','#54606e','CS'],business:['Business','#3f5570','Business'],
+ pe:['Physical Education','#a34a3a','PE'],psych:['Psychology','#9c6b74','Psych'],
+ rs:['Religious Studies','#6f5b91','RS'],socio:['Sociology','#85688f','Sociology'],
+ econ:['Economics','#35594e','Econ'],stats:['Statistics','#557a8a','Stats'],
+ media:['Media Studies','#6b4f63','Media'],film:['Film Studies','#4a4a52','Film'],
+ drama:['Drama','#8d3f4c','Drama'],music:['Music','#446272','Music'],
+ mtech:['Music Technology','#4c5480','M-Tech'],dt:['Design & Technology','#8a713b','D&T'],
+ eng:['Engineering','#5a6068','Eng'],electronics:['Electronics','#8f5b31','Electr'],
+ it:['IT','#4f6d7d','IT'],astro:['Astronomy','#3c4a6b','Astro'],
+ geology:['Geology','#6e6459','Geology'],classics:['Classical Civilisation','#9a8a5a','Classics'],
+ citizenship:['Citizenship','#5d5f8d','Citizen'],food:['Food & Nutrition','#a8842f','Food'],
+ hosp:['Hospitality & Catering','#67424e','Hosp'],hsc:['Health & Social Care','#4e7d78','H&SC']};
+const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC',ncfe:'NCFE'};
+const _dq=new URLSearchParams(location.search);
+if(_dq.has('snap')){ document.body.classList.add('ready');
+  const _st=document.createElement('style');
+  _st.textContent='*{transition:none!important;animation:none!important}';
+  document.head.appendChild(_st); }
+let WIZ=null;
+try{ WIZ=JSON.parse(localStorage.getItem('sv-welcome')||'null'); }catch(e){}
+if(_dq.get('picked')){
+  WIZ={picked:_dq.get('picked').split(',').filter(sl=>NAMEC[sl]),boards:{},meta:{}};
+  (_dq.get('boards')||'').split(',').forEach(p=>{const kv=p.split(':'); if(kv[1]) WIZ.boards[kv[0]]=kv[1];});
+}
+const DAYONE=!!(WIZ&&Array.isArray(WIZ.picked)&&WIZ.picked.length);
+if(DAYONE){
+  SUBJECTS.splice(0,SUBJECTS.length,...WIZ.picked.filter(sl=>NAMEC[sl]).map(sl=>({
+    tab:NAMEC[sl][2],slug:sl,sub:sl,mode:'l',name:NAMEC[sl][0],c:NAMEC[sl][1],units:[],
+    board:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].board)||BOARDLBL[(WIZ.boards||{})[sl]]||'',
+    topics:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].topics)||[]
+  })));
+}
 /* leave the desk with a quick dip through the curtain; coming Back restores a
    bfcached faded frame, so pageshow always clears it */
 function nav(u){ stage.classList.add('exit'); setTimeout(()=>{ location.href=u; },230); }
 addEventListener('pageshow',()=>stage.classList.remove('exit'));
-const TODAY_L=`
+let TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
@@ -497,18 +536,56 @@ const TODAY_L=`
   </ol>
   <p class="momentum"><span class="hl">4-day streak · 23 topics this week — your best yet.</span></p>
   <div class="startrow"><button class="start" onclick="nav('/lesson/english-literature-aqa/a-christmas-carol/4')"><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 25 min</button></div>`;
-const TODAY_R=`
+let TODAY_R=`
   <h3>This week</h3>
   <div class="noteline">Best subject: <b>Geography</b> — 9 topics</div>
   <div class="noteline">Needs a look: <b>Macbeth</b> — 3 wks ago</div>
   <div class="noteline">Warm-up accuracy: <b>78%</b> and climbing</div>
   <div class="noteline">Shorts watched: <b>41</b> · checks passed: <b>7/8</b></div>
   <div class="noteline">Radio: <b>3 episodes</b> on the bus</div>
-  <div class="noteline">Next mock: <b>none booked</b></div>
-  <p class="doable">Small days add up. —SV</p>`;
+  <div class="noteline">Next mock: <b>none booked</b></div>`;
+
+/* day one: no history to summarise — the desk says so instead of faking it */
+if(DAYONE){
+  TODAY_L=`
+  <div class="datestamp" id="today"></div>
+  <h2>Here’s your plan.</h2>
+  <ol class="plan">
+    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0"><span class="n">2</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
+  </ol>
+  <p class="momentum"><span class="hl">day one — your first session is ready.</span></p>
+  <div class="startrow"><button class="start"><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 19 min</button></div>`;
+  TODAY_R=`
+  <h3>This week</h3>
+  <div class="noteline">Nothing here yet — it fills in as you revise.</div>
+  <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>
+  <p class="doable"><a href="home-study.html?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a></p>`;
+  const _av=document.querySelector('.avatar');
+  if(_av){ const a=document.createElement('a'); a.className='tidy'; a.style.textDecoration='none';
+    a.href='home-study.html?view=save'; a.textContent='Sign up & save your progress'; _av.replaceWith(a); }
+}
 
 let LADDERS={};
 function subjSpread(s){
+  if(!s.units.length){                       /* day one: nothing started yet */
+    const rows=(s.topics&&s.topics.length?s.topics:['Full course'])
+      .map(tn=>`<div class="unit" tabindex="0"><b>${tn}</b><small>not started</small></div>`).join('');
+    const L=`
+    <div class="datestamp">${s.name}${s.board?' · '+s.board:''}</div>
+    <h2>Where you stand.</h2>
+    <div class="subjpg">${rows}</div>
+    <p class="momentum" style="margin-top:auto">day one — nothing started yet</p>`;
+    const R=`
+    <h3>Start here</h3>
+    <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
+      <div class="unit" tabindex="0"><b><span class="hl">Lesson 1 — begin ${s.name}</span></b><small>15 min</small></div>
+      <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <button class="backlink" onclick="goToday()">⟵ back to today</button>
+    </div>`;
+    return [L,R];
+  }
   const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
   const done=s.units.reduce((t,u)=>t+u[2],0), total=s.units.reduce((t,u)=>t+u[1],0);
   const pct=Math.round(done/total*100);
