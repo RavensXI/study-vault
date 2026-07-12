@@ -1300,7 +1300,7 @@ function go(v){
   scrollTo(0,0);
 }
 /* the shelf you built survives a wander-off (nothing server-side until Save) */
-function persist(){ try{
+function persist(){ if(RESTORING) return; try{
   /* meta: resolved board labels + chosen topic NAMES, so the dashboard can
      show them without carrying the whole TOPICS dataset */
   const meta={};
@@ -1311,14 +1311,30 @@ function persist(){ try{
     meta[sl]={board:su.alt&&su.alt[boards[sl]]?su.alt[boards[sl]]:(BOARDLBL[boards[sl]]||''),topics:names};
   });
   localStorage.setItem('sv-welcome',JSON.stringify({picked:picked,boards:boards,topics:topics,meta:meta}));
+  /* signed in? the account mirrors every change (debounced) — the setup on
+     the account is always the setup on the screen */
+  clearTimeout(persist._t);
+  persist._t=setTimeout(()=>{
+    if(!SBC) return;
+    SBC.auth.getSession().then(r=>{
+      const sess=r&&r.data&&r.data.session;
+      if(!sess) return;
+      let cur={}; try{ cur=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
+      SBC.auth.updateUser({data:{sv_welcome:cur}});
+    }).catch(()=>{});
+  },1200);
 }catch(e){} }
-let firstVisit=true;
+let firstVisit=true, RESTORING=false;
 (function restore(){ try{
   firstVisit=localStorage.getItem('sv-welcome')===null;
   const st=JSON.parse(localStorage.getItem('sv-welcome')||'{}');
-  (st.picked||[]).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
+  /* boards/topics load BEFORE the pick loop, and persist() is suppressed
+     while restoring — re-persisting mid-restore used to clobber them */
+  RESTORING=true;
   boards=st.boards||{}; topics=st.topics||{};
-}catch(e){} })();
+  (st.picked||[]).forEach(sl=>{ if(SUBJECTS.some(x=>x.slug===sl)) togglePick(sl); });
+  RESTORING=false;
+}catch(e){ RESTORING=false; } })();
 
 /* deep-link for review: ?view=picker|boards|save&picked=history,maths&boards=history:aqa */
 const q=new URLSearchParams(location.search);
