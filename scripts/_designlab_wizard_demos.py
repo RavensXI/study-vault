@@ -1,12 +1,17 @@
 """Wizard demo loops for the landing page (Tom, 12 Jul): three staged product
-loops — subjects, boards, topics — plus the full ~26s journey cut, assembled
-from headless state renders with an animated cursor, click pulses, crossfades.
+loops — subjects, boards, topics — plus the full journey cut, assembled from
+headless state renders with an animated cursor, click pulses and crossfades.
+
+24fps; every CTA click target is located by pixel-scanning the state render
+(no hardcoded button coords). The full cut finishes honestly: four topic
+questions at normal pace, a fast-forward montage through the rest, then a
+real click on "Save your choices".
 
 Run: python scripts/_designlab_wizard_demos.py   (serve.py on :8901)
 Outputs in scripts/_demo_out: wizard_pick / wizard_boards / wizard_topics
 (.mp4 + .gif each), wizard_full.mp4, and a QA strip per loop.
 """
-import os, subprocess, sys, math
+import os, subprocess, sys
 import numpy as np
 from PIL import Image, ImageDraw
 
@@ -15,15 +20,24 @@ BASE = "http://localhost:8901/design-lab/home-study.html?snap&"
 P8 = "picked=maths,lang,lit,science,history,geog,french,psych"
 B5 = "boards=maths:edexcel,lang:aqa,science:aqa,geog:aqa,french:aqa"
 B8 = "boards=maths:edexcel,lang:aqa,science:aqa,geog:aqa,french:aqa,lit:aqa,history:aqa,psych:aqa"
+
 TS1 = "tsel=lit.0.macbeth"
 TS2 = TS1 + ",lit.1.a-christmas-carol"
 TS3 = TS2 + ",lit.2.an-inspector-calls"
+TS4 = TS3 + ",lit.3.power-and-conflict"
+TH1 = TS4 + ",history.0.america-opportunity-inequality"
+TH2 = TH1 + ",history.1.conflict-tension-east-west"
+TH3 = TH2 + ",history.2.britain-health-people"
+TH4 = TH3 + ",history.3.elizabethan-england"
+TG1 = TH4 + ",geog.0.hot-deserts"
+TG2 = TG1 + ",geog.1.coasts~rivers"
+TG3 = TG2 + ",geog.2.energy"
 
 STATES = {
-    "a0": f"view=picker&picked=maths,lang,lit,science",
-    "a1": f"view=picker&picked=maths,lang,lit,science,history",
-    "a2": f"view=picker&picked=maths,lang,lit,science,history,geog",
-    "a3": f"view=picker&picked=maths,lang,lit,science,history,geog,french",
+    "a0": "view=picker&picked=maths,lang,lit,science",
+    "a1": "view=picker&picked=maths,lang,lit,science,history",
+    "a2": "view=picker&picked=maths,lang,lit,science,history,geog",
+    "a3": "view=picker&picked=maths,lang,lit,science,history,geog,french",
     "a4": f"view=picker&{P8}",
     "bE": f"view=boards&{P8}",
     "b0": f"view=boards&{P8}&{B5}",
@@ -37,7 +51,16 @@ STATES = {
     "c2":  f"view=topics&{P8}&{B8}&{TS2}&tstep=2",
     "c2s": f"view=topics&{P8}&{B8}&{TS3}&tstep=2",
     "c3":  f"view=topics&{P8}&{B8}&{TS3}&tstep=3",
-    "sF":  f"view=save&{P8}&{B8}&{TS3}",
+    # fast-forward montage: each remaining question shown answered
+    "m3":  f"view=topics&{P8}&{B8}&{TS4}&tstep=3",
+    "m4":  f"view=topics&{P8}&{B8}&{TH1}&tstep=4",
+    "m5":  f"view=topics&{P8}&{B8}&{TH2}&tstep=5",
+    "m6":  f"view=topics&{P8}&{B8}&{TH3}&tstep=6",
+    "m7":  f"view=topics&{P8}&{B8}&{TH4}&tstep=7",
+    "m8":  f"view=topics&{P8}&{B8}&{TG1}&tstep=8",
+    "m9":  f"view=topics&{P8}&{B8}&{TG2}&tstep=9",
+    "m10": f"view=topics&{P8}&{B8}&{TG3}&tstep=10",
+    "sF":  f"view=save&{P8}&{B8}&{TG3}",
 }
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_demo_out")
@@ -59,6 +82,22 @@ S = {k: Image.open(os.path.join(FD, f"{k}.png")).crop(CROP).convert("RGB") for k
 W, H = S["a0"].size
 PT = lambda x, y: (x - OX, y - OY)
 
+def find_cta(key, ymin=500):
+    """Locate the enabled (dark) CTA button in a state render."""
+    a = np.array(S[key])
+    r, g, b = a[:,:,0].astype(int), a[:,:,1].astype(int), a[:,:,2].astype(int)
+    m = (r<125)&(g<110)&(b<95)&(r>=g)&(g>=b)
+    m[:ymin,:] = False
+    rows = m.sum(axis=1)
+    ys = np.where(rows>80)[0]
+    if not len(ys): raise RuntimeError(f"no CTA found in {key}")
+    band = m[ys.min():ys.max()+1]
+    xs = np.where(band.any(axis=0))[0]
+    return (int(xs.mean()), int((ys.min()+ys.max())/2))
+
+NS = 2                      # smoothness scale: op counts were tuned at 12fps
+FPS = 24
+
 def ease(t): return t*t*(3-2*t)
 def cursor(d, x, y):
     pts = [(0,0),(0,17.5),(4.3,13.8),(7.6,21.2),(10.8,19.6),(7.5,12.6),(12.9,12.9)]
@@ -74,48 +113,40 @@ def frame(st, cur=None, pulse=None):
     return im
 
 def build(seq):
-    """seq: list of ops -> frames.  ops: ('hold',st,n,cur) ('move',st,a,b,n) ('click',st1,st2,at)"""
     fr = []
     for op in seq:
         if op[0] == "hold":
             _, st, n, cur = op
-            fr += [frame(st, cur) for _ in range(n)]
+            fr += [frame(st, cur) for _ in range(n*NS)]
+        elif op[0] == "flash":                       # montage beat — no NS scaling
+            _, st, n = op
+            fr += [frame(st) for _ in range(n)]
         elif op[0] == "move":
             _, st, a, b, n = op
-            for i in range(1, n+1):
-                t = ease(i/n)
+            for i in range(1, n*NS+1):
+                t = ease(i/(n*NS))
                 fr.append(frame(st, (a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t)))
         elif op[0] == "click":
             _, s1, s2, at = op
-            for i in range(3): fr.append(frame(s1, at, (at, i/3)))
-            for t in (0.45, 0.8):
+            for i in range(3*NS): fr.append(frame(s1, at, (at, i/(3*NS))))
+            for t in (0.3, 0.55, 0.75, 0.9):
                 im = Image.blend(S[s1], S[s2], t)
                 d = ImageDraw.Draw(im, "RGBA"); cursor(d, *at)
                 fr.append(im)
         elif op[0] == "fade":
             _, s1, s2, n = op
-            fr += [Image.blend(S[s1], S[s2], (i+1)/(n+1)) for i in range(n)]
+            fr += [Image.blend(S[s1], S[s2], (i+1)/(n*NS+1)) for i in range(n*NS)]
     return fr
 
 CARDS = [PT(570,499), PT(744,499), PT(918,499), PT(1092,573)]
-CTA_A = PT(1045,947)
 CHIP_LIT, CHIP_HIS, CHIP_PSY = PT(998,527), PT(998,637), PT(998,802)
-NEXT_B = PT(975,911)
 CHIP_MAC, CHIP_ACC, CHIP_AIC = PT(572,532), PT(653,533), PT(638,532)
+CTA_A  = find_cta("a4", 880)
+NEXT_B = find_cta("b3", 850)
+N0, N1, N2 = find_cta("c0s"), find_cta("c1s"), find_cta("c2s")
+SAVE_M = find_cta("m10", 555)
 ENTRY = (W-60, H-260)
-
-def find_cta(key):
-    """Locate the enabled (dark) CTA button in a state's lower half."""
-    a = np.array(S[key])
-    r, g, b = a[:,:,0].astype(int), a[:,:,1].astype(int), a[:,:,2].astype(int)
-    m = (r<125)&(g<110)&(b<95)&(r>=g)&(g>=b)
-    m[:500,:] = False
-    rows = m.sum(axis=1)
-    ys = np.where(rows>80)[0]
-    if not len(ys): raise RuntimeError(f"no CTA found in {key}")
-    band = m[ys.min():ys.max()+1]
-    xs = np.where(band.any(axis=0))[0]
-    return (int(xs.mean()), int((ys.min()+ys.max())/2))
+ASIDE = (W-50, H-180)
 
 loopA = build([
     ("hold","a0",6,None), ("move","a0",ENTRY,CARDS[0],10),
@@ -132,7 +163,7 @@ loopB = build([
     ("move","b2",CHIP_HIS,CHIP_PSY,7), ("click","b2","b3",CHIP_PSY), ("hold","b3",8,CHIP_PSY),
     ("move","b3",CHIP_PSY,NEXT_B,7), ("click","b3","c0",NEXT_B), ("hold","c0",14,None),
 ])
-N0, N1, N2 = find_cta("c0s"), find_cta("c1s"), find_cta("c2s")
+montage = [("flash",k,4) for k in ("m3","m4","m5","m6","m7","m8","m9")] + [("flash","m10",7)]
 loopC = build([
     ("hold","c0",6,None), ("move","c0",ENTRY,CHIP_MAC,10),
     ("click","c0","c0s",CHIP_MAC), ("hold","c0s",5,CHIP_MAC),
@@ -140,12 +171,14 @@ loopC = build([
     ("move","c1",N0,CHIP_ACC,6), ("click","c1","c1s",CHIP_ACC), ("hold","c1s",4,CHIP_ACC),
     ("move","c1s",CHIP_ACC,N1,6), ("click","c1s","c2",N1), ("hold","c2",4,N1),
     ("move","c2",N1,CHIP_AIC,6), ("click","c2","c2s",CHIP_AIC), ("hold","c2s",4,CHIP_AIC),
-    ("move","c2s",CHIP_AIC,N2,6), ("click","c2s","c3",N2), ("hold","c3",6,None),
-    ("fade","c3","sF",4), ("hold","sF",16,None),
+    ("move","c2s",CHIP_AIC,N2,6), ("click","c2s","c3",N2), ("hold","c3",5,None),
+    ("move","c3",N2,ASIDE,5),                          # cursor steps aside…
+    ] + montage + [                                    # …the rest answer themselves
+    ("move","m10",ASIDE,SAVE_M,7), ("click","m10","sF",SAVE_M),
+    ("hold","sF",16,None),
 ])
-full = loopA[:-14] + build([("fade","bE","b0",3)]) + loopB[6:] + loopC[6:]
+full = loopA[:-(14*NS)] + build([("fade","bE","b0",3)]) + loopB[6*NS:] + loopC[6*NS:]
 
-FPS = 12
 def export(frames, name, gif=True):
     seq = os.path.join(ROOT, "_seq"); os.makedirs(seq, exist_ok=True)
     for f in os.listdir(seq): os.remove(os.path.join(seq, f))
@@ -157,8 +190,7 @@ def export(frames, name, gif=True):
         subprocess.run(["ffmpeg","-y","-framerate",str(FPS),"-i",os.path.join(seq,"f%04d.png"),
             "-vf","fps=12,scale=700:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=192[p];[s1][p]paletteuse=dither=sierra2_4a",
             os.path.join(ROOT,f"{name}.gif")], check=True, capture_output=True)
-    # QA strip
-    sel = frames[::12]
+    sel = frames[::24]
     tw = 300; th = int(tw*H/W)
     strip = Image.new("RGB",(tw*4+30, (th+4)*((len(sel)+3)//4)+16),(60,50,40))
     for i, fr in enumerate(sel):

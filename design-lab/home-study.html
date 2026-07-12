@@ -1296,12 +1296,13 @@ if(firstVisit && q.get('picked')===null)
   ['maths','lang','lit','science'].forEach(sl=>togglePick(sl));
 if(q.get('boards')){ boards={}; q.get('boards').split(',').forEach(pair=>{
   const kv=pair.split(':'); if(SUBJECTS.some(x=>x.slug===kv[0])&&BOARDKEYS.includes(kv[1])) boards[kv[0]]=kv[1]; }); }
-/* &tsel=history.0.america-opportunity-inequality,rs.0.christianity+islam —
-   preset topic picks (slug.groupIndex.choice; '+' joins multi-picks).
+/* &tsel=history.0.america-opportunity-inequality,rs.0.christianity~islam —
+   preset topic picks (slug.groupIndex.choice; '~' joins multi-picks, since
+   '+' decodes to a space in query strings).
    &tstep=N opens the topics view at question N. Review/demo staging. */
 if(q.get('tsel')!==null){ topics={}; (q.get('tsel')||'').split(',').filter(Boolean).forEach(t=>{
   const p=t.split('.'); if(p.length>=3){ const val=p.slice(2).join('.');
-    (topics[p[0]]=topics[p[0]]||{})[p[1]]=val.includes('+')?val.split('+'):val; } }); }
+    (topics[p[0]]=topics[p[0]]||{})[p[1]]=val.includes('~')?val.split('~'):val; } }); }
 if(q.get('tstep')!==null) TSTEP_OVR=parseInt(q.get('tstep'),10)||0;
 if(q.get('view')) go(q.get('view'));
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
