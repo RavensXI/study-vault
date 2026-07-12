@@ -70,6 +70,21 @@
      The centre wing takes a bigger flex share so the wordmark has room */
   .wing.wm{flex:1.75 1 0;flex-direction:column;align-items:center;justify-content:flex-end;gap:0}
   .brandmid{font-size:4.35rem;margin-bottom:44px;white-space:nowrap}
+  /* logo-pack preview (?logo=grotesk|serif[&fx=plate]) */
+  .brandmid.haslogo{display:block;margin-bottom:44px}
+  .brandmid.haslogo .logoimg{height:132px;width:auto;display:block;
+    filter:drop-shadow(-3px 3px 3px rgba(28,18,8,.15));transition:filter 1.2s ease}
+  .shelfstage.lit .brandmid.haslogo .logoimg{filter:drop-shadow(-8px 6px 7px rgba(28,18,8,.32))}
+  .brandmid.logoplate{background:#fffdf9;border:1px solid var(--line);border-radius:6px;
+    padding:26px 52px;box-shadow:0 24px 48px -20px rgba(40,28,12,.4)}
+  .brandmid.logoplate .logoimg,.shelfstage.lit .brandmid.logoplate .logoimg{height:104px;filter:none}
+  /* &fx=halo — lamplight catches the wall behind the wordmark when lit */
+  .brandmid.logohalo{position:relative;z-index:0}
+  .brandmid.logohalo::before{content:'';position:absolute;left:50%;top:50%;width:640px;height:380px;
+    transform:translate(-50%,-50%);z-index:-1;pointer-events:none;
+    background:radial-gradient(closest-side,rgba(255,212,138,.9),rgba(255,212,138,0) 72%);
+    mix-blend-mode:screen;opacity:0;transition:opacity 1.4s ease}
+  .shelfstage.lit .brandmid.logohalo::before{opacity:.75}
   .bks{display:flex;align-items:flex-end;gap:3px}
   /* shelf clutter: painted props books can lean against (built from @tokens) */
   .prop{position:relative;flex:none;pointer-events:none;align-self:flex-end;margin:0 2px;
@@ -724,6 +739,16 @@ if(q.has('snap')){ document.body.classList.add('ready');
 /* ?tagfont=fraunces&ul — preview a tagline font/underline straight from the URL */
 if(q.get('tagfont')!==null) document.body.dataset.tagfont=q.get('tagfont')||'';
 if(q.has('ul')) document.body.classList.add('tagul');
+/* ?logo=grotesk|serif — preview a logo-pack lockup in place of the text wordmark.
+   Default treatment: bigger + a lamp shadow that deepens with the rest of the
+   scene when the light is on. &fx=plate swaps in a floating card behind it. */
+if(q.get('logo')){
+  const bm=document.querySelector('.brandmid');
+  bm.classList.add('haslogo');
+  if(q.get('fx')==='plate') bm.classList.add('logoplate');
+  if(q.get('fx')==='halo') bm.classList.add('logohalo');
+  bm.innerHTML='<img class="logoimg" src="assets/logo-preview-'+q.get('logo')+'.png" alt="StudyVault">';
+}
 
 /* ?bench — Tom's tuning bench: click the LAMP to pin the cord's top exactly
    where it should hang; arrows nudge, [ ] adjust length. Also cycles the
