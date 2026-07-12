@@ -14,10 +14,9 @@ BASE = "http://localhost:8901/design-lab/home-study.html?snap&"
 P8 = "picked=maths,lang,lit,science,history,geog,french,psych"
 B5 = "boards=maths:edexcel,lang:aqa,science:aqa,geog:aqa,french:aqa"
 B8 = "boards=maths:edexcel,lang:aqa,science:aqa,geog:aqa,french:aqa,lit:aqa,history:aqa,psych:aqa"
-T6 = ("tsel=history.0.america-opportunity-inequality,history.1.conflict-tension-east-west,"
-      "history.2.britain-health-people,lit.0.macbeth,lit.1.a-christmas-carol,lit.3.power-and-conflict")
-T7 = T6 + ",lit.2.an-inspector-calls"
-T8 = T7 + ",history.3.elizabethan-england"
+TS1 = "tsel=lit.0.macbeth"
+TS2 = TS1 + ",lit.1.a-christmas-carol"
+TS3 = TS2 + ",lit.2.an-inspector-calls"
 
 STATES = {
     "a0": f"view=picker&picked=maths,lang,lit,science",
@@ -30,10 +29,11 @@ STATES = {
     "b1": f"view=boards&{P8}&{B5},lit:aqa",
     "b2": f"view=boards&{P8}&{B5},lit:aqa,history:aqa",
     "b3": f"view=boards&{P8}&{B8}",
-    "c0": f"view=topics&{P8}&{B8}&{T6}",
-    "c1": f"view=topics&{P8}&{B8}&{T7}",
-    "c2": f"view=topics&{P8}&{B8}&{T8}",
-    "sF": f"view=save&{P8}&{B8}&{T8}",
+    "c0": f"view=topics&{P8}&{B8}&tsel=&tstep=0",
+    "c1": f"view=topics&{P8}&{B8}&{TS1}&tstep=1",
+    "c2": f"view=topics&{P8}&{B8}&{TS2}&tstep=2",
+    "c3": f"view=topics&{P8}&{B8}&{TS3}&tstep=3",
+    "sF": f"view=save&{P8}&{B8}&{TS3}",
 }
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_demo_out")
@@ -97,7 +97,7 @@ CARDS = [PT(570,499), PT(744,499), PT(918,499), PT(1092,573)]
 CTA_A = PT(1045,947)
 CHIP_LIT, CHIP_HIS, CHIP_PSY = PT(998,527), PT(998,637), PT(998,802)
 NEXT_B = PT(975,911)
-CH_INSP, CH_ELIZ, SAVE_C = PT(744,609), PT(753,974), PT(980,1089)
+CHIP_MAC, CHIP_ACC, CHIP_AIC = PT(572,532), PT(653,533), PT(638,532)
 ENTRY = (W-60, H-260)
 
 loopA = build([
@@ -116,10 +116,11 @@ loopB = build([
     ("move","b3",CHIP_PSY,NEXT_B,7), ("click","b3","c0",NEXT_B), ("hold","c0",14,None),
 ])
 loopC = build([
-    ("hold","c0",6,None), ("move","c0",ENTRY,CH_INSP,10),
-    ("click","c0","c1",CH_INSP), ("hold","c1",6,CH_INSP),
-    ("move","c1",CH_INSP,CH_ELIZ,9), ("click","c1","c2",CH_ELIZ), ("hold","c2",8,CH_ELIZ),
-    ("move","c2",CH_ELIZ,SAVE_C,8), ("click","c2","sF",SAVE_C), ("hold","sF",16,None),
+    ("hold","c0",6,None), ("move","c0",ENTRY,CHIP_MAC,10),
+    ("click","c0","c1",CHIP_MAC), ("hold","c1",6,CHIP_MAC),
+    ("move","c1",CHIP_MAC,CHIP_ACC,6), ("click","c1","c2",CHIP_ACC), ("hold","c2",6,CHIP_ACC),
+    ("move","c2",CHIP_ACC,CHIP_AIC,6), ("click","c2","c3",CHIP_AIC), ("hold","c3",7,CHIP_AIC),
+    ("fade","c3","sF",4), ("hold","sF",16,None),
 ])
 full = loopA[:-14] + build([("fade","bE","b0",3)]) + loopB[6:] + loopC[6:]
 
