@@ -7,7 +7,7 @@
 <base href="/design-lab/">
 <title>StudyVault — everything you’re sitting, nothing you’re not</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@1,9..144,300..700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <style>
   /* ============ THE STUDY, BEFORE YOU SIT DOWN ============
      Landing = the dashboard's world seen from the doorway, logged out.
@@ -117,6 +117,20 @@
   .brandslot h1{font-family:var(--read);font-style:italic;font-weight:500;
     font-size:clamp(2rem,2.9vw,2.9rem);letter-spacing:-.01em;line-height:1.16;
     margin:0 0 .7rem;color:#3c352a}
+  /* ---- tagline font options (bench-switchable via body[data-tagfont]) ---- */
+  body[data-tagfont="fraunces"] .brandslot h1{font-family:'Fraunces',serif;font-style:italic;
+    font-weight:460;font-size:clamp(2.1rem,3vw,3rem);letter-spacing:-.005em}
+  body[data-tagfont="instrument"] .brandslot h1{font-family:'Instrument Serif',serif;font-style:italic;
+    font-weight:400;font-size:clamp(2.4rem,3.4vw,3.4rem);letter-spacing:.002em}
+  body[data-tagfont="literata-up"] .brandslot h1{font-style:normal;font-weight:600;
+    font-size:clamp(1.9rem,2.7vw,2.7rem);letter-spacing:-.015em}
+  body[data-tagfont="grotesk"] .brandslot h1{font-family:var(--head);font-style:normal;font-weight:750;
+    font-size:clamp(1.9rem,2.7vw,2.7rem);letter-spacing:-.03em}
+  body[data-tagfont="hand"] .brandslot h1{font-family:var(--hand);font-style:normal;font-weight:600;
+    font-size:clamp(2.5rem,3.5vw,3.5rem);letter-spacing:0}
+  /* fountain-pen swish under the tagline (bench toggle: body.tagul) */
+  body.tagul .brandslot h1::after{content:'';display:block;width:min(48%,310px);height:14px;
+    margin:9px auto 0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 16' preserveAspectRatio='none'><path d='M6 12 C 110 4, 250 3, 354 7 C 250 8.6, 120 10.4, 26 14.8 Z' fill='%233c352a' opacity='.78'/></svg>") no-repeat center/100% 100%}
   .brandslot p{font-size:1rem;color:var(--sec);margin:0 auto;max-width:560px;line-height:1.5}
   /* doors are NOT of the scene (Tom, 12 Jul): honest floating UI over the
      painted wall — plain cards, big headings, no flavour text */
@@ -129,7 +143,6 @@
   .slot.door .cta{margin:auto 0;padding:.85rem 1rem;font-size:1.04rem}
   .slot.door .sso{padding:.75rem 1rem;font-size:.98rem}
   .slot.door .tiny{margin-top:.85rem}
-  .signslot .signoff{margin:0}
   /* the lamp shrinks with the books; bulb + cord ride the lamp art itself */
   .lampwrap{position:relative;align-self:flex-end;border:none;background:none;padding:0;cursor:pointer;
     margin-left:22px;flex:none}
@@ -146,14 +159,8 @@
      floating inside the cone */
   .lampwrap .pullcord{left:46%;top:32.5%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
-  .caserow .bk{cursor:pointer;pointer-events:auto}
-  .caserow .bk:hover{transform:translateX(var(--shift,0px)) rotate(var(--lean,0deg)) translateY(-6px)}
-  .caserow .bk:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:6px}
-  /* pulled out to look at: glides to the case centre, turns to read, comes closer */
-  .caserow .bk[aria-selected="true"]{
-    transform:translate(var(--pull-dx,0px),var(--pull-dy,0px)) rotate(-90deg) scale(1.9);
-    z-index:30;transition:transform .8s cubic-bezier(.3,.9,.3,1)}
-  .caserow .bk[aria-selected="true"]::before{opacity:0}
+  /* landing books are scenery with a hover tip — no pull-out theatre here */
+  .caserow .bk{cursor:default;pointer-events:auto}
   .bookend.mirror{transform:scaleX(-1);margin-right:0;margin-left:-6px}
   /* hover card: subject name + the boards that edition comes in */
   .booktip{position:absolute;z-index:40;pointer-events:none;opacity:0;transform:translate(-50%,-94%);
@@ -240,7 +247,6 @@
   .sso:hover{border-color:#b9a98c;background:color-mix(in srgb,var(--anchor) 3%,var(--card))}
   .sso svg{width:18px;height:18px;flex:none}
 
-  .signoff{font-family:var(--hand);font-size:1.2rem;color:var(--mut);text-align:center;margin:2.2rem 0 0;opacity:.9}
   .signslot{margin-bottom:34px}
   /* the boards live on an engraved brass plaque screwed to the case back */
   .boardsplaque{display:inline-block;padding:22px 54px 24px;
@@ -252,7 +258,6 @@
     color:#54401c;text-shadow:0 1px 0 rgba(255,249,226,.65)}
   .boardsrow span{white-space:nowrap}
   .boardsrow i{font-style:normal;opacity:.5}
-  .signslot .signoff{display:block;margin:1.1rem 0 0}
   @media (max-width:560px){ .boardsrow{gap:.8rem} }
   .legal{max-width:620px;margin:2.4rem auto 2.2rem;text-align:center;font-size:.72rem;color:var(--mut);line-height:1.55;opacity:.85}
 
@@ -377,7 +382,6 @@
                 <span>AQA</span><i>&middot;</i><span>Pearson Edexcel</span><i>&middot;</i><span>OCR</span><i>&middot;</i><span>WJEC</span><i>&middot;</i><span>Eduqas</span>
               </div>
             </div>
-            <span class="signoff">Small days add up. &mdash; SV</span>
           </div>
           <span class="wing wr">
             <span class="bks" data-books="@pot_fern,astro,geology,classics,citizenship,food,hosp,hsc"></span>
@@ -543,32 +547,20 @@ function boardsLine(s){
   const L={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC'};
   return ['aqa','edexcel','ocr','eduqas'].filter(k=>s.cover&&s.cover[k]).map(k=>L[k]).join(' \u00b7 ');
 }
-let casePulled=null;
 function caseBook(s,i,n,flop){
-  const b=document.createElement('button'); b.type='button'; b.className='bk'; b.dataset.slug=s.slug;
+  const b=document.createElement('span'); b.className='bk'; b.dataset.slug=s.slug;
   /* organic shelf: deterministic per-title height variance (real books aren't clones) */
   let h=0; for(const ch of s.slug) h=(h*31+ch.charCodeAt(0))>>>0;
   b.style.setProperty('--vf',(0.93+(h%13)/100).toFixed(2));
-  b.setAttribute('aria-selected','false'); b.setAttribute('aria-label',s.name);
   b.style.setProperty('--lean',leanFor(i,n,flop)+'deg'); b.style.setProperty('--shift',shiftFor(i,n,flop)+'px');
-  b.innerHTML='<img draggable="false" src="assets/lw/shelf/book_'+s.slug+'.webp" alt="">';
+  b.innerHTML='<img draggable="false" src="assets/lw/shelf/book_'+s.slug+'.webp" alt="'+s.name+'">';
   b.addEventListener('mouseenter',()=>{
-    if(casePulled===b) return;
     const stage=document.getElementById('stage-landing'), r=b.getBoundingClientRect(), sr=stage.getBoundingClientRect();
     tip.innerHTML='<span class="tn">'+s.name+'</span><span class="tb">'+boardsLine(s)+'</span>';
     tip.style.left=(r.left+r.width/2-sr.left)+'px'; tip.style.top=(r.top-sr.top+4)+'px';
     tip.classList.add('on');
   });
   b.addEventListener('mouseleave',()=>tip.classList.remove('on'));
-  b.addEventListener('click',()=>{
-    tip.classList.remove('on');
-    if(casePulled===b){ b.setAttribute('aria-selected','false'); casePulled=null; return; }
-    if(casePulled){ casePulled.setAttribute('aria-selected','false'); }
-    const stage=document.getElementById('stage-landing'), sr=stage.getBoundingClientRect(), r=b.getBoundingClientRect();
-    b.style.setProperty('--pull-dx',Math.round(sr.left+sr.width/2-(r.left+r.width/2))+'px');
-    b.style.setProperty('--pull-dy',Math.round(sr.top+sr.height/2-(r.top+r.height/2))+'px');
-    b.setAttribute('aria-selected','true'); casePulled=b;
-  });
   return b;
 }
 function buildCase(){
@@ -729,6 +721,65 @@ addEventListener('pageshow',()=>document.body.classList.add('ready'));
 if(q.has('snap')){ document.body.classList.add('ready');
   const st=document.createElement('style'); st.textContent='*{transition:none!important;animation:none!important}';
   document.head.appendChild(st); stageL.classList.add('lit'); }
+/* ?tagfont=fraunces&ul — preview a tagline font/underline straight from the URL */
+if(q.get('tagfont')!==null) document.body.dataset.tagfont=q.get('tagfont')||'';
+if(q.has('ul')) document.body.classList.add('tagul');
+
+/* ?bench — Tom's tuning bench: click the LAMP to pin the cord's top exactly
+   where it should hang; arrows nudge, [ ] adjust length. Also cycles the
+   tagline font + pen-underline. Values persist + shown for baking into CSS. */
+if(q.has('bench')){
+  const lw=stageL.querySelector('.lampwrap');
+  const st=Object.assign({l:46,t:32.5,h:27,font:'',ul:false},
+    JSON.parse(localStorage.getItem('sv_bench')||'{}'));
+  const FONTS=[['','Literata italic'],['fraunces','Fraunces italic'],['instrument','Instrument Serif'],
+               ['literata-up','Literata upright'],['grotesk','Grotesk bold'],['hand','Caveat hand']];
+  const panel=document.createElement('div');
+  panel.innerHTML='<b>THE BENCH</b><br>'
+    +'<span style="opacity:.75">Click the lamp = pin cord top<br>arrows nudge &middot; [ ] = length &middot; shift = coarse</span>'
+    +'<div id="bro" style="margin:.5em 0;padding:.4em;background:#00000033;border-radius:4px"></div>'
+    +'<div id="bfonts"></div>'
+    +'<button id="bul" style="margin-top:.4em">underline: off</button> '
+    +'<button id="bcopy">copy values</button>';
+  panel.style.cssText='position:fixed;left:14px;top:14px;z-index:999;background:#26231ee8;color:#f2ead9;'
+    +'padding:12px 14px;border-radius:8px;font:12px/1.7 Consolas,monospace;max-width:270px';
+  document.body.appendChild(panel);
+  const bro=panel.querySelector('#bro'), bf=panel.querySelector('#bfonts'), bul=panel.querySelector('#bul');
+  FONTS.forEach(([k,label])=>{
+    const bt=document.createElement('button'); bt.textContent=label; bt.dataset.f=k;
+    bt.style.cssText='margin:2px 3px 0 0;padding:2px 7px;cursor:pointer';
+    bt.addEventListener('click',()=>{st.font=k;apply();});
+    bf.appendChild(bt);
+  });
+  function apply(){
+    cordL.style.left=st.l+'%'; cordL.style.top=st.t+'%'; cordL.style.height=st.h+'%';
+    document.body.dataset.tagfont=st.font; document.body.classList.toggle('tagul',st.ul);
+    bul.textContent='underline: '+(st.ul?'ON':'off');
+    bf.querySelectorAll('button').forEach(b=>b.style.outline=b.dataset.f===st.font?'2px solid #e8c47a':'none');
+    bro.textContent='cord left:'+st.l.toFixed(1)+'% top:'+st.t.toFixed(1)+'% height:'+st.h.toFixed(1)+'%'
+      +' | font:'+(st.font||'literata-italic')+' | ul:'+(st.ul?'on':'off');
+    localStorage.setItem('sv_bench',JSON.stringify(st));
+  }
+  bul.addEventListener('click',()=>{st.ul=!st.ul;apply();});
+  panel.querySelector('#bcopy').addEventListener('click',()=>navigator.clipboard.writeText(bro.textContent));
+  lw.addEventListener('click',e=>{
+    e.stopPropagation();
+    const r=lw.getBoundingClientRect();
+    st.l=+(((e.clientX-r.left)/r.width)*100).toFixed(1);
+    st.t=+(((e.clientY-r.top)/r.height)*100).toFixed(1);
+    apply();
+  },true);
+  document.addEventListener('keydown',e=>{
+    if(/input|textarea/i.test(e.target.tagName)) return;
+    const s=e.shiftKey?1:0.25; const k=e.key;
+    if(k==='ArrowLeft')st.l-=s; else if(k==='ArrowRight')st.l+=s;
+    else if(k==='ArrowUp')st.t-=s; else if(k==='ArrowDown')st.t+=s;
+    else if(k==='[')st.h-=s; else if(k===']')st.h+=s; else return;
+    e.preventDefault(); apply();
+  });
+  stageL.classList.add('lit');
+  apply();
+}
 </script>
 </body>
 </html>
