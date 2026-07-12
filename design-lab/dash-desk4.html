@@ -577,7 +577,8 @@ function dayOneUrl(su){ if(!su||!su.sub) return null;
 /* leave the desk with a quick dip through the curtain; coming Back restores a
    bfcached faded frame, so pageshow always clears it */
 function nav(u){ stage.classList.add('exit'); setTimeout(()=>{ location.href=u; },230); }
-addEventListener('pageshow',()=>stage.classList.remove('exit'));
+addEventListener('pageshow',e=>{ stage.classList.remove('exit');
+  if(e.persisted) location.reload();   /* back-cache: progress may be stale */ });
 let TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
