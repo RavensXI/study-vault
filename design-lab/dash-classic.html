@@ -7,7 +7,7 @@
 <base href="/design-lab/">
 <title>Your dashboard — StudyVault</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Young+Serif&display=swap" rel="stylesheet">
 <style>
   /* ============ CLASSIC: the desk's contents, filed neatly ============
      Same data, same painted objects, same subject cloth-tabs as the cosy
@@ -24,7 +24,7 @@
   body.ready{opacity:1}
 
   .top{max-width:1180px;margin:0 auto;padding:18px clamp(16px,4vw,32px) 6px;display:flex;align-items:center;gap:14px}
-  .brand{font-size:1.15rem;font-weight:500;color:#3d3428}.brand b{font-weight:800}
+  .brand{font-family:'Young Serif',serif;font-size:1.22rem;font-weight:400;color:#1d1c1a}
   .brandlock{height:.30em;width:auto;margin-left:.5px;vertical-align:baseline}   /* the padlock is the full stop */
   .brandlogo{height:30px;display:block}
   .datestamp{font-family:var(--hand);font-size:1.35rem;color:var(--mut);margin-left:6px;margin-top:2px}
@@ -332,12 +332,21 @@
   @media (prefers-reduced-motion: reduce){
     *{transition:none !important;animation:none !important}
   }
+  /* wizard hand-off: quiet save-it bar (account creation is opt-in, never a gate) */
+  .savebar{max-width:1116px;width:calc(100% - 32px);margin:12px auto 0;display:flex;align-items:center;
+    gap:14px;justify-content:space-between;background:var(--card);border:1px solid var(--line);
+    border-radius:6px;padding:.7rem 1rem .7rem 1.2rem}
+  .savebar>span{font-family:var(--read);font-size:.93rem;color:var(--sec)}
+  .savebar .savecta{flex:none;background:var(--anchor);color:#faf6ec;font-weight:600;font-size:.9rem;
+    padding:.55rem 1.2rem;border-radius:4px;text-decoration:none}
+  .savebar .savecta:hover{filter:brightness(1.08)}
+  .weekempty{font-family:var(--read);font-size:.92rem;color:var(--sec);line-height:1.55;margin:.4rem 0 0}
 </style>
 </head>
 <body>
 
 <div class="top">
-  <span class="brand">Study<b>Vault</b><img class="brandlock" src="assets/studyvault-lock.svg" alt=""></span>
+  <span class="brand">StudyVault<img class="brandlock" src="assets/studyvault-lock-rust.svg" alt=""></span>
   <span class="datestamp" id="today"></span>
   <span class="sp"></span>
   <a class="cosy" href="/desk">Cosy desk ↗</a>
@@ -423,7 +432,6 @@
       <span class="go"></span>
     </div>
 
-    <p class="signoff">Small days add up. — SV</p>
   </aside>
 </div>
 
@@ -458,9 +466,67 @@ const SUBJECTS=[
  {tab:'CS',slug:'cs',sub:'computer-science',mode:'l',name:'Computer Science',c:'#54606e',units:[['Computer Systems',12,3,'computer-systems'],['Computational Thinking',11,2,'computational-thinking']]},
  {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
 ];
+/* ---- wizard hand-off: if the visitor just built their setup on the welcome
+   page (sv-welcome), THEIR subjects drive the shelf — day one, nothing done
+   yet. No wizard state = Sam's demo data above (direct prototype viewing). */
+const NAMEC={maths:['Mathematics','#4e5f66','Maths'],lang:['English Language','#5b7285','English'],
+ lit:['English Literature','#7d5a78','Lit'],science:['Combined Science','#4e6e5d','Science'],
+ triple:['Triple Science','#3d5c50','Triple'],history:['History','#8a5a44','History'],
+ geog:['Geography','#6d7a4e','Geog'],french:['French','#5c72a4','French'],
+ spanish:['Spanish','#a2643f','Spanish'],german:['German','#7c4a52','German'],
+ cs:['Computer Science','#54606e','CS'],business:['Business','#3f5570','Business'],
+ pe:['Physical Education','#a34a3a','PE'],psych:['Psychology','#9c6b74','Psych'],
+ rs:['Religious Studies','#6f5b91','RS'],socio:['Sociology','#85688f','Sociology'],
+ econ:['Economics','#35594e','Econ'],stats:['Statistics','#557a8a','Stats'],
+ media:['Media Studies','#6b4f63','Media'],film:['Film Studies','#4a4a52','Film'],
+ drama:['Drama','#8d3f4c','Drama'],music:['Music','#446272','Music'],
+ mtech:['Music Technology','#4c5480','M-Tech'],dt:['Design & Technology','#8a713b','D&T'],
+ eng:['Engineering','#5a6068','Eng'],electronics:['Electronics','#8f5b31','Electr'],
+ it:['IT','#4f6d7d','IT'],astro:['Astronomy','#3c4a6b','Astro'],
+ geology:['Geology','#6e6459','Geology'],classics:['Classical Civilisation','#9a8a5a','Classics'],
+ citizenship:['Citizenship','#5d5f8d','Citizen'],food:['Food & Nutrition','#a8842f','Food'],
+ hosp:['Hospitality & Catering','#67424e','Hosp'],hsc:['Health & Social Care','#4e7d78','H&SC']};
+const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC',ncfe:'NCFE'};
+const _dq=new URLSearchParams(location.search);
+if(_dq.has('snap')){ document.body.classList.add('ready');
+  const _st=document.createElement('style');
+  _st.textContent='*{transition:none!important;animation:none!important}';
+  document.head.appendChild(_st); }
+let WIZ=null;
+try{ WIZ=JSON.parse(localStorage.getItem('sv-welcome')||'null'); }catch(e){}
+if(_dq.get('picked')){                    /* staging override for renders/QA */
+  WIZ={picked:_dq.get('picked').split(',').filter(sl=>NAMEC[sl]),boards:{},meta:{}};
+  (_dq.get('boards')||'').split(',').forEach(p=>{const kv=p.split(':'); if(kv[1]) WIZ.boards[kv[0]]=kv[1];});
+}
+const DAYONE=!!(WIZ&&Array.isArray(WIZ.picked)&&WIZ.picked.length);
+if(DAYONE){
+  SUBJECTS.splice(0,SUBJECTS.length,...WIZ.picked.filter(sl=>NAMEC[sl]).map(sl=>({
+    tab:NAMEC[sl][2],slug:sl,sub:sl,mode:'l',name:NAMEC[sl][0],c:NAMEC[sl][1],units:[],
+    board:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].board)||BOARDLBL[(WIZ.boards||{})[sl]]||'',
+    topics:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].topics)||[]
+  })));
+}
 function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
 function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
+
+/* day one: no history to summarise, nothing to refresh — say so gracefully */
+if(DAYONE){
+  document.querySelector('.momentum .hl').textContent='day one — your first session is ready.';
+  document.querySelector('.card.plan ol').innerHTML=
+    '<li class="inert"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>'+
+    '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+(WIZ.picked[0]&&NAMEC[WIZ.picked[0]]?NAMEC[WIZ.picked[0]][0]:'your first subject')+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
+    '<li class="inert"><span class="n">3</span><div><b>Exam dates</b><small>tell the planner when your exams are</small></div><span class="mins">1 min</span></li>';
+  const _sb=document.getElementById('startbtn');
+  if(_sb){ _sb.onclick=()=>false;
+    _sb.innerHTML=_sb.innerHTML.replace('25 min','18 min'); }
+  document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
+    '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
+  const bar=document.createElement('div'); bar.className='savebar';
+  bar.innerHTML='<span>Nothing is saved yet — your setup lives on this device only.</span>'+
+    '<a class="savecta" href="home-study.html?view=save">Save it — free</a>';
+  document.querySelector('.wrap').before(bar);
+}
 
 /* date + exam countdown + mini month */
 const now=new Date();
@@ -483,7 +549,7 @@ document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXA
 let LADDERS={};
 let LESSON_TITLES={};   // {subjectSlug:{unitSlug:[title,...]}} from _lesson_titles.json
 function stageOf(s){ const done=s.units.reduce((t,u)=>t+u[2],0), tot=s.units.reduce((t,u)=>t+u[1],0);
-  const pct=done/tot*100; return pct>=66?3:pct>=33?2:1; }
+  const pct=tot?done/tot*100:0; return pct>=66?3:pct>=33?2:1; }
 const REC={maths:2,lang:5,lit:21,science:4,history:1,geog:0,spanish:9,cs:23,rs:12};
 /* per-position lean (deg); tuned on the ?lean bench. First rests on the bookend,
    each leans on the next, last is most severe. Index = shelf position. */
@@ -499,7 +565,7 @@ let selSlug=null;
 const _tip=document.createElement('div'); _tip.className='booktip';
 function showTip(bk,s,d,t,pct){
   if(drag&&drag.moved) return;              // no tooltips mid-drag
-  _tip.innerHTML='<b>'+s.name+'</b><span class="c">'+d+' of '+t+' lessons · '+pct+'%</span>';
+  _tip.innerHTML='<b>'+s.name+'</b><span class="c">'+(t?d+' of '+t+' lessons · '+pct+'%':'not started yet')+'</span>';
   const stage=bk.closest('.shelfstage'); if(_tip.parentElement!==stage) stage.appendChild(_tip);
   _tip.style.left=(bk.offsetLeft+bk.offsetWidth/2)+'px';
   _tip.style.top=(bk.offsetTop-4)+'px';
@@ -514,7 +580,7 @@ function renderSubjects(){
   SUBJECTS.forEach((s,i)=>{
     const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
     done+=d; tot+=t;
-    const pct=Math.max(3,Math.round(d/t*100));
+    const pct=t?Math.max(3,Math.round(d/t*100)):0;
     const n=SUBJECTS.length;                      // tuned arrays when count matches, else procedural
     const lean=(n===LEANS.length?LEANS[i]:leanFor(i,n));
     const src='assets/lw/shelf/book_'+s.slug+'.webp';
@@ -532,7 +598,8 @@ function renderSubjects(){
     b.addEventListener('mouseleave',hideTip);
     shelf.appendChild(b);
   });
-  document.getElementById('subcount').textContent=done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete';
+  document.getElementById('subcount').textContent=tot?done+' of '+tot+' lessons · '+Math.round(done/tot*100)+'% complete'
+    :SUBJECTS.length+' subjects · nothing started yet — pick a book to begin';
   if(selSlug) selectSubject(selSlug,true);      // rest with none selected -> the shelf invites a pick
   else deselectSubject();
   fitShelf();
@@ -602,6 +669,21 @@ function _pullOut(slug){
 }
 /* default panel: resume button + the subject's topics (click one to pick a lesson) */
 function renderSubjectPanel(s){
+  if(!s.units.length){                      /* day one: nothing started yet */
+    const p0=document.getElementById('selprompt'); if(p0) p0.hidden=true;
+    const el0=document.getElementById('sdetail');
+    el0.hidden=false; el0.style.setProperty('--tc',s.c);
+    const rows=(s.topics&&s.topics.length?s.topics:['Full course'])
+      .map(tn=>'<div class="ublock" style="cursor:default"><span class="un">'+tn+'</span>'+
+        '<span class="utrack"><i style="width:0%"></i></span>'+
+        '<span class="ud">not started</span></div>').join('');
+    el0.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+      '<span class="sub">'+(s.board?s.board+' · ':'')+'ready when you are</span>'+
+      '<span class="sp"></span><button class="cont">Start lesson 1 →</button></div>'+
+      '<div class="units">'+rows+'</div>';
+    el0.querySelector('.cont').onclick=()=>false;
+    return;
+  }
   const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
   const nxt=s.units.find(u=>u[2]<u[1])||s.units[0];
   const rec=REC[s.slug]||0;

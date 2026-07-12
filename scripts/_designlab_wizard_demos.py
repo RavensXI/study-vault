@@ -48,7 +48,7 @@ STATES = {
     "b1": f"view=boards&{P8}&{B5},lit:aqa",
     "b2": f"view=boards&{P8}&{B5},lit:aqa,history:aqa",
     "b3": f"view=boards&{P8}&{B8}",
-    "dS": f"view=dash&{P8}&{B8}&{tsel(NQ)}",
+    "dS": f"DASH:{P8}&{B8}",
 }
 for k in range(NQ):
     STATES[f"q{k}"]  = f"view=topics&{P8}&{B8}&{tsel(k)}&tstep={k}"      # blank
@@ -59,12 +59,17 @@ ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_demo_out")
 FD = os.path.join(ROOT, "wizframes")
 os.makedirs(FD, exist_ok=True)
 
+DASH_URL = "http://localhost:8901/design-lab/dash-classic.html?snap&"
 for key, qs in STATES.items():
     out = os.path.join(FD, f"{key}.png")
     if os.path.exists(out): continue
+    if qs.startswith("DASH:"):   # finale: the real dashboard, day-one state
+        url, win = DASH_URL + qs[5:], "1440,1250"
+    else:
+        url, win = BASE + qs, "1835,1250"
     subprocess.run([CHROME, "--headless=new", "--force-device-scale-factor=1",
-        "--hide-scrollbars", "--window-size=1835,1250", "--virtual-time-budget=25000",
-        f"--screenshot={out}", BASE + qs], capture_output=True)
+        "--hide-scrollbars", f"--window-size={win}", "--virtual-time-budget=25000",
+        f"--screenshot={out}", url], capture_output=True)
     if not os.path.exists(out): sys.exit(f"state {key} failed")
     print("rendered", key)
 
@@ -87,7 +92,16 @@ def probe(state_key):
 
 CROP = (420, 8, 1420, 1148)
 OX, OY = CROP[0], CROP[1]
-S = {k: Image.open(os.path.join(FD, f"{k}.png")).crop(CROP).convert("RGB") for k in STATES}
+S = {}
+for k, qs in STATES.items():
+    im = Image.open(os.path.join(FD, f"{k}.png")).convert("RGB")
+    if qs.startswith("DASH:"):   # zoom-out finale: whole dashboard, letterboxed
+        sc = im.resize((1000, round(im.height*1000/im.width)), Image.LANCZOS)
+        base = Image.new("RGB", (CROP[2]-CROP[0], CROP[3]-CROP[1]), (246, 241, 231))
+        base.paste(sc, (0, max(0, (base.height-sc.height)//2)))
+        S[k] = base
+    else:
+        S[k] = im.crop(CROP)
 W, H = S["a0"].size
 PT = lambda p: (p[0] - OX, p[1] - OY)
 
