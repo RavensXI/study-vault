@@ -1304,6 +1304,20 @@ if(q.get('tsel')!==null){ topics={}; (q.get('tsel')||'').split(',').filter(Boole
   const p=t.split('.'); if(p.length>=3){ const val=p.slice(2).join('.');
     (topics[p[0]]=topics[p[0]]||{})[p[1]]=val.includes('~')?val.split('~'):val; } }); }
 if(q.get('tstep')!==null) TSTEP_OVR=parseInt(q.get('tstep'),10)||0;
+/* ?probe — layout probe for the demo generator: writes the centre coordinates
+   of every clickable control into a <pre> that headless --dump-dom can read */
+if(q.has('probe')){ setTimeout(()=>{
+  const out={};
+  const c=el=>{const r=el.getBoundingClientRect();
+    return [Math.round(r.left+r.width/2),Math.round(r.top+r.height/2)];};
+  document.querySelectorAll('.scard').forEach(el=>{out['card_'+el.dataset.slug]=c(el);});
+  document.querySelectorAll('#blist .brow').forEach((row,ri)=>{
+    row.querySelectorAll('.chip').forEach(ch=>{out['bchip_'+ri+'_'+ch.textContent.trim()]=c(ch);});});
+  document.querySelectorAll('.stepcard .chip').forEach(ch=>{out['chip_'+ch.textContent.trim()]=c(ch);});
+  ['pnext','bnext','tnext','tback'].forEach(id=>{const el=document.getElementById(id); if(el) out[id]=c(el);});
+  const pre=document.createElement('pre'); pre.id='proberects';
+  pre.textContent=JSON.stringify(out); document.body.appendChild(pre);
+},150); }
 if(q.get('view')) go(q.get('view'));
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
 /* the composition is authored on a 1366px canvas; scale it to every window so
