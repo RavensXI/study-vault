@@ -2476,7 +2476,12 @@ function initLessonProgress() {
   // dashboard can read: sv-lessons-done = { "subject/unit": [lessonNumbers] }.
   function updateRollup(s) {
     try {
-      var need = tasks.filter(function (t) { return t.id !== 'practice-question'; });
+      // completion = the learning tasks. The exam question is optional, and
+      // highlight-mode is a note-taking tool (hidden by the reader skin) —
+      // neither should hold a lesson hostage.
+      var need = tasks.filter(function (t) {
+        return t.id !== 'practice-question' && t.id !== 'highlight-mode';
+      });
       if (!need.length) return;
       var complete = need.every(function (t) { return !!s[t.id]; });
       var key = pathMatch[1] + '/' + pathMatch[2];
