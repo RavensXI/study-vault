@@ -8,6 +8,7 @@
 <title>StudyVault — everything you’re sitting, nothing you’re not</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@1,9..144,300..700&family=Instrument+Serif:ital@1&family=Young+Serif&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   /* ============ THE STUDY, BEFORE YOU SIT DOWN ============
      Landing = the dashboard's world seen from the doorway, logged out.
@@ -812,10 +813,10 @@
     </div>
 
     <div class="door savecard">
-      <input class="field" type="email" placeholder="Email address" aria-label="Email address">
-      <input class="field" type="password" placeholder="Choose a password" aria-label="Choose a password">
-      <button class="cta" onclick="return false">Create my free account</button>
-      <p class="tiny">Free &middot; everything will be exactly as you left it</p>
+      <input class="field" id="savemail" type="email" placeholder="Email address" aria-label="Email address" autocomplete="email">
+      <input class="field" id="savepass" type="password" placeholder="Choose a password" aria-label="Choose a password" autocomplete="new-password">
+      <button class="cta" id="savebtn">Create my free account</button>
+      <p class="tiny" id="savemsg">Free &middot; everything will be exactly as you left it</p>
     </div>
     <div class="picker-foot">
       <button class="backlink" onclick="location.href='dash-classic.html'">&larr; Back to my StudyVault</button>
@@ -1364,6 +1365,30 @@ if(q.get('logo')){
   if(q.get('fx')==='flat') bm.classList.add('logoflat');
   bm.innerHTML='<img class="logoimg" src="assets/logo-preview-'+q.get('logo')+'.png" alt="StudyVault">';
 }
+
+/* ---- real sign-up: Supabase auth. The setup you built travels with the
+   account as user metadata; nothing is created until this button. ---- */
+const SBC=(window.supabase&&window.supabase.createClient)?window.supabase.createClient(
+  'https://baipckgywpnwapobwtsy.supabase.co','sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2'):null;
+const savebtn=document.getElementById('savebtn');
+if(savebtn) savebtn.onclick=async()=>{
+  const em=document.getElementById('savemail').value.trim();
+  const pw=document.getElementById('savepass').value;
+  const say=t=>{ document.getElementById('savemsg').textContent=t; };
+  if(!/.+@.+\..+/.test(em)) return say('That email doesn’t look right.');
+  if(pw.length<8) return say('Your password needs at least 8 characters.');
+  if(!SBC) return say('Couldn’t reach the server — try again in a moment.');
+  savebtn.disabled=true; savebtn.textContent='Creating your account…';
+  try{
+    let setup={}; try{ setup=JSON.parse(localStorage.getItem('sv-welcome')||'{}'); }catch(e){}
+    const res=await SBC.auth.signUp({email:em,password:pw,options:{data:{sv_welcome:setup}}});
+    if(res.error) say(res.error.message);
+    else if(res.data&&res.data.user&&!res.data.session)
+      say('Account created — check your inbox to confirm your email. Everything you set up is saved to it.');
+    else say('Account created — you’re in.');
+  }catch(e){ say('Something went wrong — try again.'); }
+  savebtn.disabled=false; savebtn.textContent='Create my free account';
+};
 
 /* ?bench — Tom's tuning bench. Two targets: the lamp CORD (click the lamp to
    pin its top; arrow keys nudge, [ ] length) and the sketched ARROWS (click an

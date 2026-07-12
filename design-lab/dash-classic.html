@@ -571,13 +571,64 @@ if(_dq.get('picked')){                    /* staging override for renders/QA */
   (_dq.get('boards')||'').split(',').forEach(p=>{const kv=p.split(':'); if(kv[1]) WIZ.boards[kv[0]]=kv[1];});
 }
 const DAYONE=!!(WIZ&&Array.isArray(WIZ.picked)&&WIZ.picked.length);
+/* verified platform slugs (queried from Supabase) + first unit per subject */
+const SUBSLUG={
+ maths:{aqa:'maths-aqa',edexcel:'maths-edexcel',ocr:'maths-ocr',eduqas:'maths-eduqas'},
+ lang:{aqa:'english-language-aqa',edexcel:'english-language-edexcel',ocr:'english-language-ocr',eduqas:'english-language-eduqas'},
+ lit:{aqa:'english-literature-aqa',edexcel:'english-literature-edexcel',ocr:'english-literature-ocr',eduqas:'english-literature-eduqas'},
+ science:{aqa:'science-aqa',edexcel:'science-edexcel',ocr:'science-ocr'},
+ triple:{aqa:'separate-sciences',edexcel:'separate-sciences-edexcel',ocr:'separate-sciences-ocr'},
+ history:{aqa:'history-aqa',edexcel:'history-edexcel',ocr:'history-ocr',eduqas:'history-eduqas'},
+ geog:{aqa:'geography-aqa',edexcel:'geography-edexcel-a',ocr:'geography-ocr',eduqas:'geography-eduqas'},
+ french:{aqa:'french-aqa',edexcel:'french-edexcel',eduqas:'french-eduqas'},
+ spanish:{aqa:'spanish-aqa',edexcel:'spanish-edexcel',eduqas:'spanish-eduqas'},
+ german:{aqa:'german-aqa',edexcel:'german-edexcel'},
+ cs:{aqa:'computer-science-aqa',edexcel:'computer-science-edexcel',ocr:'computer-science',eduqas:'computer-science-eduqas'},
+ business:{aqa:'business-aqa',edexcel:'business-edexcel',ocr:'business-ocr'},
+ pe:{aqa:'physical-education-aqa',edexcel:'physical-education-edexcel',ocr:'physical-education-ocr'},
+ psych:{aqa:'psychology-aqa'},
+ rs:{aqa:'religious-studies-aqa',edexcel:'religious-studies-edexcel',ocr:'religious-studies-ocr',eduqas:'religious-studies-eduqas'},
+ socio:{aqa:'sociology-aqa',eduqas:'sociology-eduqas'},
+ econ:{aqa:'economics-aqa'},stats:{aqa:'statistics-aqa'},media:{aqa:'media-studies-aqa'},
+ film:{eduqas:'film-studies-eduqas'},drama:{aqa:'drama-aqa'},music:{aqa:'music-aqa'},
+ mtech:{ncfe:'music-technology'},
+ dt:{aqa:'design-technology',eduqas:'design-technology-eduqas'},
+ eng:{aqa:'engineering-aqa',eduqas:'engineering-eduqas'},
+ electronics:{eduqas:'electronics-eduqas'},it:{ocr:'it-ocr'},astro:{edexcel:'astronomy-edexcel'},
+ geology:{eduqas:'geology-eduqas'},classics:{ocr:'classical-civilisation-ocr'},
+ citizenship:{aqa:'citizenship-aqa'},
+ food:{aqa:'food-preparation-and-nutrition-aqa',eduqas:'food-preparation-and-nutrition-eduqas'},
+ hosp:{eduqas:'hospitality-catering'},
+ hsc:{edexcel:'health-social-care-edexcel',ocr:'health-social-care-ocr',eduqas:'health-social-care-eduqas'}
+};
+const FIRSTUNIT={"astronomy-edexcel":"naked-eye-astronomy","business-aqa":"business-real-world","business-edexcel":"investigating-small-business","business-ocr":"business-activity-marketing-people","cambridge-nationals-child-development":"health-and-well-being-for-child-development","cambridge-nationals-creative-imedia":"creative-imedia-in-the-media-industry","cambridge-nationals-engineering-design":"principles-of-engineering-design","cambridge-nationals-engineering-manufacture":"principles-of-engineering-manufacture","cambridge-nationals-engineering-programmable-systems":"principles-of-electronic-and-programmable-systems","cambridge-nationals-enterprise-and-marketing":"enterprise-and-marketing-concepts","cambridge-nationals-sport-science":"reducing-the-risk-of-sports-injuries","cambridge-nationals-sport-studies":"contemporary-issues-in-sport","citizenship-aqa":"politics-participation-active-citizenship","classical-civilisation-ocr":"greek-and-roman-mythology","computer-science":"computer-systems","computer-science-aqa":"algorithms","computer-science-edexcel":"computational-thinking","computer-science-eduqas":"hardware-and-systems","design-technology":"core-technical","design-technology-eduqas":"design-technology-our-world","drama-aqa":"theatre-roles-stagecraft","economics-aqa":"economic-foundations-and-resource-allocation","electronics-eduqas":"discovering-electronics","engineering-aqa":"engineering-materials","engineering-eduqas":"engineering-achievements-and-environment","english-language-aqa":"paper-1-reading","english-language-edexcel":"paper-1-reading","english-language-eduqas":"component-1-reading","english-language-ocr":"component-1-reading","english-literature-aqa":"macbeth","english-literature-edexcel":"macbeth","english-literature-eduqas":"romeo-and-juliet","english-literature-ocr":"anita-and-me","film-studies-eduqas":"film-form-and-language","food-preparation-and-nutrition-aqa":"food-nutrition-and-health","food-preparation-and-nutrition-eduqas":"food-science-and-nutrition","french-aqa":"people-and-lifestyle","french-edexcel":"my-personal-world","french-eduqas":"people-and-lifestyle","geography-aqa":"paper-1","geography-edexcel-a":"paper-1-physical-environment","geography-edexcel-b":"global-geographical-issues","geography-eduqas":"landscapes-physical-processes","geography-ocr":"living-in-the-uk-today","geology-eduqas":"rocks-and-minerals","german-aqa":"people-and-lifestyle","german-edexcel":"my-personal-world","health-social-care-edexcel":"health-and-wellbeing","health-social-care-eduqas":"growth-development-lifespan","health-social-care-ocr":"principles-of-care","history-aqa":"germany-democracy-dictatorship","history-edexcel":"medicine-in-britain","history-eduqas":"conflict-upheaval-england-1337-1381","history-ocr":"international-relations-1918-1975","hospitality-catering":"the-hospitality-and-catering-industry","it-ocr":"it-in-the-digital-world","l12-construction-built-environment":"the-construction-sector","l12-ict":"it-systems-and-services","l12-retail-business":"the-retail-business-environment","l12-sport-and-coaching-principles":"body-systems","maths-aqa":"number","maths-edexcel":"number","maths-eduqas":"number","maths-ocr":"number","media-studies-aqa":"media-language","music-aqa":"western-classical-1650-1910","music-technology":"music-business","physical-education-aqa":"human-body-and-movement","physical-education-edexcel":"fitness-and-body-systems","physical-education-ocr":"physical-factors-affecting-performance","psychology-aqa":"memory","religious-studies-aqa":"christianity-beliefs","religious-studies-edexcel":"paper-1-catholic-christianity","religious-studies-eduqas":"christianity","religious-studies-ocr":"christianity-beliefs-and-teachings","science-aqa":"biology-paper-1","science-edexcel":"biology-paper-1","science-ocr":"biology-paper-1","science-ocr-b":"biology-paper-1","separate-sciences":"biology-paper-1","separate-sciences-edexcel":"biology-paper-1","separate-sciences-ocr":"biology-paper-1","separate-sciences-ocr-b":"biology-you-and-your-genes","sociology-aqa":"studying-society-research-methods","sociology-eduqas":"cultural-transmission-research-methods","spanish-aqa":"people-and-lifestyle","spanish-edexcel":"my-personal-world","spanish-eduqas":"people-and-lifestyle","statistics-aqa":"planning-designing-enquiry"};
+const PFAM=['maths','lang','french','spanish','german'];   /* practice-first families */
 if(DAYONE){
-  SUBJECTS.splice(0,SUBJECTS.length,...WIZ.picked.filter(sl=>NAMEC[sl]).map(sl=>({
-    tab:NAMEC[sl][2],slug:sl,sub:sl,mode:'l',name:NAMEC[sl][0],c:NAMEC[sl][1],units:[],
-    board:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].board)||BOARDLBL[(WIZ.boards||{})[sl]]||'',
-    topics:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].topics)||[]
-  })));
+  const _rawT=WIZ.topics||{};
+  SUBJECTS.splice(0,SUBJECTS.length,...WIZ.picked.filter(sl=>NAMEC[sl]).map(sl=>{
+    const board=(WIZ.boards||{})[sl]||'';
+    const sub=(SUBSLUG[sl]||{})[board]||null;
+    const raw=[]; const tsl=_rawT[sl]||{};
+    Object.keys(tsl).sort((a,b)=>a-b).forEach(k=>{ const v=tsl[k];
+      (Array.isArray(v)?v:[v]).forEach(x=>raw.push(x)); });
+    let first=null;
+    if(sub){
+      if((sl==='history'||sl==='lit')&&raw.length) first=raw[0];          /* topic choices ARE unit slugs */
+      else if(sl==='rs'&&board==='aqa'&&raw.length) first=raw[0]+'-beliefs';
+      else first=FIRSTUNIT[sub]||null;
+    }
+    return {tab:NAMEC[sl][2],slug:sl,sub:sub,mode:PFAM.includes(sl)?'p':'l',
+      name:NAMEC[sl][0],c:NAMEC[sl][1],units:[],
+      board:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].board)||BOARDLBL[board]||'',
+      topics:(WIZ.meta&&WIZ.meta[sl]&&WIZ.meta[sl].topics)||[],
+      topicsRaw:(sl==='history'||sl==='lit')?raw:[], first:first};
+  }));
 }
+/* where does day one actually start? A real lesson if we know the unit,
+   the subject's browse page if we don't, nowhere if it isn't built yet. */
+function dayOneUrl(su){ if(!su||!su.sub) return null;
+  if(su.first) return (su.mode==='p'?'/practice/':'/lesson/')+su.sub+'/'+su.first+'/1';
+  return '/browse/'+su.sub; }
 function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
 function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
 addEventListener('pageshow',()=>document.body.classList.add('ready'));
@@ -590,8 +641,13 @@ if(DAYONE){
     '<li class="inert"><span class="n">2</span><div><b>First lesson</b><small>'+(WIZ.picked[0]&&NAMEC[WIZ.picked[0]]?NAMEC[WIZ.picked[0]][0]:'your first subject')+' · start at the beginning</small></div><span class="mins">15 min</span></li>'+
     '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>';
   const _sb=document.getElementById('startbtn');
-  if(_sb){ _sb.onclick=()=>false;
+  if(_sb){ const _u=dayOneUrl(SUBJECTS[0]);
+    _sb.onclick=_u?()=>nav(_u):()=>false;
     _sb.innerHTML=_sb.innerHTML.replace('25 min','19 min'); }
+  const _lis=document.querySelectorAll('.card.plan ol li');
+  if(_lis[1]){ const _u2=dayOneUrl(SUBJECTS[0]);
+    if(_u2){ _lis[1].classList.remove('inert'); _lis[1].style.cursor='pointer';
+      _lis[1].onclick=()=>nav(_u2); } }
   document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
     '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
   const bar=document.createElement('div'); bar.className='savebar';
@@ -867,15 +923,19 @@ function renderSubjectPanel(s){
     const p0=document.getElementById('selprompt'); if(p0) p0.hidden=true;
     const el0=document.getElementById('sdetail');
     el0.hidden=false; el0.style.setProperty('--tc',s.c);
+    const _tr=s.topicsRaw||[];
     const rows=(s.topics&&s.topics.length?s.topics:['Full course'])
-      .map(tn=>'<div class="ublock" style="cursor:default"><span class="un">'+tn+'</span>'+
-        '<span class="utrack"><i style="width:0%"></i></span>'+
-        '<span class="ud">not started</span></div>').join('');
+      .map((tn,ti)=>{ const u=(s.sub&&_tr[ti])?('/lesson/'+s.sub+'/'+_tr[ti]+'/1'):null;
+        return '<'+(u?'button':'div')+' class="ublock"'
+          +(u?' onclick="nav(\''+u+'\')" title="Start '+tn.replace(/"/g,'&quot;')+' at lesson 1"':' style="cursor:default"')+'>'
+          +'<span class="un">'+tn+'</span><span class="utrack"><i style="width:0%"></i></span>'
+          +'<span class="ud">'+(u?'start here':'not started')+'</span></'+(u?'button':'div')+'>'; }).join('');
     el0.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
       '<span class="sub">'+(s.board?s.board+' · ':'')+'ready when you are</span>'+
       '<span class="sp"></span><button class="cont">Start lesson 1 →</button></div>'+
       '<div class="units">'+rows+'</div>';
-    el0.querySelector('.cont').onclick=()=>false;
+    const _cu=dayOneUrl(s);
+    el0.querySelector('.cont').onclick=_cu?()=>nav(_cu):()=>false;
     return;
   }
   const d=s.units.reduce((t,u)=>t+u[2],0), t=s.units.reduce((t,u)=>t+u[1],0);
