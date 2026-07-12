@@ -112,18 +112,17 @@
   .slot{align-self:flex-end;text-align:center;margin:0 4px -4px;position:relative;z-index:2}
   /* headline rides high in the top gap — the wordmark lives on the middle shelf */
   .brandslot{max-width:720px;padding:0 10px;margin-bottom:76px}
-  /* the tagline in Literata italic — bookish, clearly apart from the grotesk
-     wordmark without going full-handwriting */
-  .brandslot h1{font-family:var(--read);font-style:italic;font-weight:500;
-    font-size:clamp(2rem,2.9vw,2.9rem);letter-spacing:-.01em;line-height:1.16;
+  /* the tagline: Literata upright + pen underline — Tom's bench pick, 12 Jul */
+  .brandslot h1{font-family:var(--read);font-style:normal;font-weight:600;
+    font-size:clamp(1.9rem,2.7vw,2.7rem);letter-spacing:-.015em;line-height:1.16;
     margin:0 0 .7rem;color:#3c352a}
   /* ---- tagline font options (bench-switchable via body[data-tagfont]) ---- */
+  body[data-tagfont="literata-it"] .brandslot h1{font-style:italic;font-weight:500;
+    font-size:clamp(2rem,2.9vw,2.9rem);letter-spacing:-.01em}
   body[data-tagfont="fraunces"] .brandslot h1{font-family:'Fraunces',serif;font-style:italic;
     font-weight:460;font-size:clamp(2.1rem,3vw,3rem);letter-spacing:-.005em}
   body[data-tagfont="instrument"] .brandslot h1{font-family:'Instrument Serif',serif;font-style:italic;
     font-weight:400;font-size:clamp(2.4rem,3.4vw,3.4rem);letter-spacing:.002em}
-  body[data-tagfont="literata-up"] .brandslot h1{font-style:normal;font-weight:600;
-    font-size:clamp(1.9rem,2.7vw,2.7rem);letter-spacing:-.015em}
   body[data-tagfont="grotesk"] .brandslot h1{font-family:var(--head);font-style:normal;font-weight:750;
     font-size:clamp(1.9rem,2.7vw,2.7rem);letter-spacing:-.03em}
   body[data-tagfont="hand"] .brandslot h1{font-family:var(--hand);font-style:normal;font-weight:600;
@@ -155,9 +154,8 @@
   .lampwrap .lamp{position:static;display:block;height:calc(var(--bkh)*1.2);width:auto;right:auto;bottom:auto;
     filter:drop-shadow(-8px 6px 6px rgba(40,28,12,.22))}
   .lampwrap .bulb{left:16%;top:42%;width:56px;height:56px}
-  /* cord hangs from the shade's lower lip — anchored to the painted art, not
-     floating inside the cone */
-  .lampwrap .pullcord{left:46%;top:32.5%;height:27%}
+  /* cord anchor: Tom-tuned on the bench, 12 Jul 2026 */
+  .lampwrap .pullcord{left:32.2%;top:29.6%;height:27%}
   .lampwrap:focus-visible{outline:3px solid var(--anchor);outline-offset:3px;border-radius:8px}
   /* landing books are scenery with a hover tip — no pull-out theatre here */
   .caserow .bk{cursor:default;pointer-events:auto}
@@ -310,7 +308,7 @@
     font-family:var(--hand);font-size:1.25rem;color:var(--mut);pointer-events:none;transition:opacity .3s}
 </style>
 </head>
-<body data-view="landing">
+<body data-view="landing" class="tagul">
 
 <div class="wrap">
 
@@ -730,10 +728,10 @@ if(q.has('ul')) document.body.classList.add('tagul');
    tagline font + pen-underline. Values persist + shown for baking into CSS. */
 if(q.has('bench')){
   const lw=stageL.querySelector('.lampwrap');
-  const st=Object.assign({l:46,t:32.5,h:27,font:'',ul:false},
+  const st=Object.assign({l:32.2,t:29.6,h:27,font:'',ul:true},
     JSON.parse(localStorage.getItem('sv_bench')||'{}'));
-  const FONTS=[['','Literata italic'],['fraunces','Fraunces italic'],['instrument','Instrument Serif'],
-               ['literata-up','Literata upright'],['grotesk','Grotesk bold'],['hand','Caveat hand']];
+  const FONTS=[['','Literata upright'],['literata-it','Literata italic'],['fraunces','Fraunces italic'],
+               ['instrument','Instrument Serif'],['grotesk','Grotesk bold'],['hand','Caveat hand']];
   const panel=document.createElement('div');
   panel.innerHTML='<b>THE BENCH</b><br>'
     +'<span style="opacity:.75">Click the lamp = pin cord top<br>arrows nudge &middot; [ ] = length &middot; shift = coarse</span>'
