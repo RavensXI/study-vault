@@ -762,24 +762,30 @@ if(q.get('logo')){
   bm.innerHTML='<img class="logoimg" src="assets/logo-preview-'+q.get('logo')+'.png" alt="StudyVault">';
 }
 
-/* ?bench — Tom's tuning bench: click the LAMP to pin the cord's top exactly
-   where it should hang; arrows nudge, [ ] adjust length. Also cycles the
-   tagline font + pen-underline. Values persist + shown for baking into CSS. */
+/* ?bench — Tom's tuning bench. Two targets: the lamp CORD (click the lamp to
+   pin its top; arrow keys nudge, [ ] length) and the sketched ARROWS (click an
+   arrow; arrow keys move, [ ] size, - = rotate; the right arrow mirrors the
+   left automatically). Also cycles the tagline font + pen-underline.
+   Values persist + shown for baking into CSS. */
 if(q.has('bench')){
   const lw=stageL.querySelector('.lampwrap');
-  const st=Object.assign({l:32.2,t:29.6,h:27,font:'',ul:true},
+  const arrL=document.querySelector('.brandmid .arr.al'), arrR=document.querySelector('.brandmid .arr.ar');
+  const st=Object.assign({l:32.2,t:29.6,h:27,font:'',ul:true,ax:-132,ay:-106,aw:245,arot:10},
     JSON.parse(localStorage.getItem('sv_bench')||'{}'));
+  let mode='arr';
   const FONTS=[['','Literata upright'],['literata-it','Literata italic'],['fraunces','Fraunces italic'],
                ['instrument','Instrument Serif'],['grotesk','Grotesk bold'],['hand','Caveat hand']];
   const panel=document.createElement('div');
   panel.innerHTML='<b>THE BENCH</b><br>'
-    +'<span style="opacity:.75">Click the lamp = pin cord top<br>arrows nudge &middot; [ ] = length &middot; shift = coarse</span>'
+    +'<span style="opacity:.75">Click an ARROW or the LAMP to pick a target &middot; shift = coarse<br>'
+    +'arrows: keys move &middot; [ ] = size &middot; - = rotate<br>'
+    +'cord: click lamp pins top &middot; keys nudge &middot; [ ] = length</span>'
     +'<div id="bro" style="margin:.5em 0;padding:.4em;background:#00000033;border-radius:4px"></div>'
     +'<div id="bfonts"></div>'
     +'<button id="bul" style="margin-top:.4em">underline: off</button> '
     +'<button id="bcopy">copy values</button>';
   panel.style.cssText='position:fixed;left:14px;top:14px;z-index:999;background:#26231ee8;color:#f2ead9;'
-    +'padding:12px 14px;border-radius:8px;font:12px/1.7 Consolas,monospace;max-width:270px';
+    +'padding:12px 14px;border-radius:8px;font:12px/1.7 Consolas,monospace;max-width:290px';
   document.body.appendChild(panel);
   const bro=panel.querySelector('#bro'), bf=panel.querySelector('#bfonts'), bul=panel.querySelector('#bul');
   FONTS.forEach(([k,label])=>{
@@ -790,17 +796,28 @@ if(q.has('bench')){
   });
   function apply(){
     cordL.style.left=st.l+'%'; cordL.style.top=st.t+'%'; cordL.style.height=st.h+'%';
+    arrL.style.left=st.ax+'px'; arrL.style.bottom=st.ay+'px'; arrL.style.width=st.aw+'px';
+    arrL.style.transform='rotate('+st.arot+'deg)';
+    arrR.style.right=st.ax+'px'; arrR.style.bottom=st.ay+'px'; arrR.style.width=st.aw+'px';
+    arrR.style.transform='rotate('+(-st.arot)+'deg) scaleX(-1)';
     document.body.dataset.tagfont=st.font; document.body.classList.toggle('tagul',st.ul);
     bul.textContent='underline: '+(st.ul?'ON':'off');
     bf.querySelectorAll('button').forEach(b=>b.style.outline=b.dataset.f===st.font?'2px solid #e8c47a':'none');
-    bro.textContent='cord left:'+st.l.toFixed(1)+'% top:'+st.t.toFixed(1)+'% height:'+st.h.toFixed(1)+'%'
-      +' | font:'+(st.font||'literata-italic')+' | ul:'+(st.ul?'on':'off');
+    bro.innerHTML='<b>[tuning: '+(mode==='arr'?'ARROWS':'CORD')+']</b><br>'
+      +'arr x:'+st.ax+' y:'+st.ay+' w:'+st.aw+' rot:'+(+st.arot.toFixed(1))+'<br>'
+      +'cord left:'+st.l.toFixed(1)+'% top:'+st.t.toFixed(1)+'% height:'+st.h.toFixed(1)+'%'
+      +' | font:'+(st.font||'literata-up')+' | ul:'+(st.ul?'on':'off');
     localStorage.setItem('sv_bench',JSON.stringify(st));
   }
   bul.addEventListener('click',()=>{st.ul=!st.ul;apply();});
   panel.querySelector('#bcopy').addEventListener('click',()=>navigator.clipboard.writeText(bro.textContent));
+  [arrL,arrR].forEach(a=>{
+    a.style.pointerEvents='auto'; a.style.cursor='pointer';
+    a.addEventListener('click',e=>{e.stopPropagation();mode='arr';apply();},true);
+  });
   lw.addEventListener('click',e=>{
     e.stopPropagation();
+    if(mode!=='cord'){ mode='cord'; apply(); return; }   /* first click = take the cord tool */
     const r=lw.getBoundingClientRect();
     st.l=+(((e.clientX-r.left)/r.width)*100).toFixed(1);
     st.t=+(((e.clientY-r.top)/r.height)*100).toFixed(1);
@@ -808,10 +825,19 @@ if(q.has('bench')){
   },true);
   document.addEventListener('keydown',e=>{
     if(/input|textarea/i.test(e.target.tagName)) return;
-    const s=e.shiftKey?1:0.25; const k=e.key;
-    if(k==='ArrowLeft')st.l-=s; else if(k==='ArrowRight')st.l+=s;
-    else if(k==='ArrowUp')st.t-=s; else if(k==='ArrowDown')st.t+=s;
-    else if(k==='[')st.h-=s; else if(k===']')st.h+=s; else return;
+    const k=e.key;
+    if(mode==='arr'){
+      const p=e.shiftKey?5:1, w=e.shiftKey?8:2, r=e.shiftKey?2:0.5;
+      if(k==='ArrowLeft')st.ax-=p; else if(k==='ArrowRight')st.ax+=p;
+      else if(k==='ArrowUp')st.ay+=p; else if(k==='ArrowDown')st.ay-=p;
+      else if(k==='[')st.aw-=w; else if(k===']')st.aw+=w;
+      else if(k==='-'||k==='_')st.arot-=r; else if(k==='='||k==='+')st.arot+=r; else return;
+    }else{
+      const s=e.shiftKey?1:0.25;
+      if(k==='ArrowLeft')st.l-=s; else if(k==='ArrowRight')st.l+=s;
+      else if(k==='ArrowUp')st.t-=s; else if(k==='ArrowDown')st.t+=s;
+      else if(k==='[')st.h-=s; else if(k===']')st.h+=s; else return;
+    }
     e.preventDefault(); apply();
   });
   stageL.classList.add('lit');
