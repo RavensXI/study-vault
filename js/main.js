@@ -2504,6 +2504,14 @@ function initLessonProgress() {
       if (!complete && ix >= 0) arr.splice(ix, 1);
       roll[key] = arr;
       localStorage.setItem('sv-lessons-done', JSON.stringify(roll));
+      // completion dates power the dashboards' "this week" figures
+      try {
+        var when = JSON.parse(localStorage.getItem('sv-lessons-when')) || {};
+        var wkey = key + '/' + num;
+        if (complete && !when[wkey]) when[wkey] = new Date().toISOString().slice(0, 10);
+        if (!complete && when[wkey]) delete when[wkey];
+        localStorage.setItem('sv-lessons-when', JSON.stringify(when));
+      } catch (e2) {}
       // observable, so nobody has to guess whether the rule fired
       console.log('[sv-progress]', key, num, complete ? 'COMPLETE' : 'not complete',
         '- weighted ' + wres.pct + '% (threshold 50%)');

@@ -34,9 +34,12 @@ Rule: anything both dashboards need lives in `dash-data.js`, never copy-pasted
 into the pages. Staging hooks (`?picked` `?boards` `?tsel` `?done` `?snap`)
 are parsed there too, so they behave identically on both views.
 
-Supporting cast: `design-lab/skin-switcher.js` (applies the desk-world skin to
-real pages + the reading tour; design-lab only), `design-lab/serve.py`,
-`vercel.json` (rewrites), `js/main.js` (a11y toolbar — owns dark mode).
+Supporting cast: `design-lab/warmup.js` (the Start-button warm-up quiz — 10
+knowledge checks pulled from the student's own current units, once a day,
+then into the lesson; shared by both dashboards), `design-lab/skin-switcher.js`
+(applies the desk-world skin to real pages + the reading tour; design-lab
+only), `design-lab/serve.py`, `vercel.json` (rewrites), `js/main.js` (a11y
+toolbar — owns dark mode; stamps completion dates).
 
 ## The data contract
 
@@ -50,7 +53,12 @@ real pages + the reading tour; design-lab only), `design-lab/serve.py`,
   (agreed 27 Jun): exam question 40, flashcards 15, revision task 15,
   quiz/video/podcast 10 each, highlighter 0; done at ≥50% of available.
   Lesson pages write completions to `localStorage["sv-lessons-done"]`
-  (`{"subject/unit":[numbers]}`); dashboards read it.
+  (`{"subject/unit":[numbers]}`) + completion dates to `sv-lessons-when`
+  (powers the "this week" figures); dashboards read both.
+- `localStorage["sv-warmup"]` = `{date,correct,total}` — today's warm-up
+  result; Start skips the warm-up once it's done for the day.
+- Exam countdowns on BOTH dashboards come from `EXAMS`/`svFirstLast()` in
+  `dash-data.js` — never hardcode a day count in a view.
 - Topic choices for History/Lit are literal Supabase **unit slugs** — "start
   lesson 1" links go straight into the chosen option/text.
 - Real subject slugs + first units were **queried from Supabase**, not guessed
@@ -59,9 +67,11 @@ real pages + the reading tour; design-lab only), `design-lab/serve.py`,
 ## QA / staging hooks (all harmless in production)
 
 `?snap` (kill animations for screenshots) · `?picked=&boards=&tsel=&tstep=`
-(stage wizard state) · `?probe` (page reports control coordinates) ·
-`?plan=YYYY-MM` (open planner at a month) · `?dark=1` / `?notour=1` /
-`?csprobe=1` (skin-switcher QA) · `?bench` (Tom's tuning bench on the landing).
+(stage wizard state) · `?done=` (stage lesson completions) · `?probe` (page
+reports control coordinates) · `?plan=YYYY-MM` (open planner at a month) ·
+`?warmup=1` (auto-open the warm-up overlay) · `?forcecheck=1` (shorts feed:
+splice a recall card immediately) · `?dark=1` / `?notour=1` / `?csprobe=1`
+(skin-switcher QA) · `?bench` (Tom's tuning bench on the landing).
 
 ## Generators (rerun any time; all in `scripts/`)
 

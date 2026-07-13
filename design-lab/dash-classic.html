@@ -526,6 +526,7 @@
 <div class="daytip" id="daytip"></div>
 
 <script src="dash-data.js"></script>
+<script src="warmup.js"></script>
 <script>
 /* Sam's subjects — same real free-tier wiring as the desk */
 const SUBJECTS=[
@@ -552,29 +553,51 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
   refreshDayOnePlan();
   document.body.dataset.unitsLoaded='1';
 }});
-/* once real progress exists, the plan says Continue, not Start-at-the-start */
+/* once real progress exists, the plan says Continue, not Start-at-the-start.
+   The continue target comes from the shared layer so the desk view agrees. */
 function refreshDayOnePlan(){
   if(!DAYONE) return;
-  let target=null, tsu=null, tunit=null, tnum=1, fresh=true;
-  for(const su of SUBJECTS){
-    if(!su.units.length) continue;
-    for(const u of su.units){
-      const set=u[4]||[];
-      let k=1; while(k<=u[1]&&set.includes(k)) k++;
-      if(k<=u[1]&&set.length){ target=urlFor(su,[u[0],u[1],k-1,u[3]]); tsu=su; tunit=u; tnum=k; fresh=false; break; }
+  const t=svContinueTarget(SUBJECTS);
+  const target=t?t.url:dayOneUrl(SUBJECTS[0]);
+  wireWarmupRow(target);
+  refreshWeekCard();
+  if(t){
+    const lis=document.querySelectorAll('.card.plan ol li');
+    if(lis[1]){
+      lis[1].innerHTML='<span class="n">2</span><div><b>Continue: '+t.unitName+'</b>'
+        +'<small>'+t.su.name+' · lesson '+t.num+' of '+t.total+'</small></div><span class="mins">15 min</span>';
+      lis[1].classList.remove('inert'); lis[1].style.cursor='pointer';
+      lis[1].onclick=()=>nav(t.url);
     }
-    if(target) break;
-  }
-  if(!target) return;                       /* nothing started yet — leave day-one plan */
-  const lis=document.querySelectorAll('.card.plan ol li');
-  if(lis[1]){
-    lis[1].innerHTML='<span class="n">2</span><div><b>Continue: '+tunit[0]+'</b>'
-      +'<small>'+tsu.name+' · lesson '+tnum+' of '+tunit[1]+'</small></div><span class="mins">15 min</span>';
-    lis[1].classList.remove('inert'); lis[1].style.cursor='pointer';
-    lis[1].onclick=()=>nav(target);
   }
   const sb=document.getElementById('startbtn');
-  if(sb) sb.onclick=()=>nav(target);
+  if(sb&&target) sb.onclick=()=>startWithWarmup(target);
+  if(_dq.get('warmup')&&!window._wuOpened&&target){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target,nav}); }
+}
+/* Start = warm-up first (once a day), then straight into the lesson */
+function startWithWarmup(url){
+  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  else nav(url);
+}
+function wireWarmupRow(url){
+  const li=document.querySelector('.card.plan ol li');
+  if(!li||!url) return;
+  li.classList.remove('inert'); li.style.cursor='pointer';
+  li.onclick=()=>svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  const w=svWarmup.doneToday(), small=li.querySelector('small');
+  if(w&&small) small.textContent='done today · '+w.correct+'/'+w.total+' — tap to go again';
+}
+window.svWarmupDone=()=>refreshDayOnePlan();
+/* the week card trades its empty copy for real numbers once anything's done */
+function refreshWeekCard(){
+  const st=svDoneStats(); if(!st.total) return;
+  const wc=document.querySelector('.card.week'); if(!wc) return;
+  const w=svWarmup.doneToday();
+  wc.innerHTML='<h3>This week</h3>'
+    +'<div class="ln"><span>Lessons this week</span><b>'+st.week+'</b></div>'
+    +'<div class="ln"><span>Finished so far</span><b>'+st.total+' '+(st.total===1?'lesson':'lessons')+'</b></div>'
+    +(w?'<div class="ln"><span>Warm-up today</span><b>'+w.correct+' / '+w.total+'</b></div>':'')
+    +'<p class="weekempty">Best subject and cards due join in as the week builds.</p>';
 }
 function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
 function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
@@ -590,14 +613,16 @@ if(DAYONE){
     '<li class="inert"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>';
   const _sb=document.getElementById('startbtn');
   if(_sb){ const _u=dayOneUrl(SUBJECTS[0]);
-    _sb.onclick=_u?()=>nav(_u):()=>false;
+    _sb.onclick=_u?()=>startWithWarmup(_u):()=>false;
     _sb.innerHTML=_sb.innerHTML.replace('25 min','19 min'); }
   const _lis=document.querySelectorAll('.card.plan ol li');
   if(_lis[1]){ const _u2=dayOneUrl(SUBJECTS[0]);
     if(_u2){ _lis[1].classList.remove('inert'); _lis[1].style.cursor='pointer';
       _lis[1].onclick=()=>nav(_u2); } }
+  wireWarmupRow(dayOneUrl(SUBJECTS[0]));
   document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
     '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
+  refreshWeekCard();
   if(SVUSER&&SVUSER.email){
     /* signed in: the avatar is you; no sign-up asks anywhere */
     const _av=document.querySelector('.top .avatar');
@@ -617,48 +642,11 @@ if(DAYONE){
 /* date + exam countdown + mini month */
 const now=new Date();
 document.getElementById('today').textContent=now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
-/* per-subject exam papers (summer 2027, PROVISIONAL demo timetable — the
-   real build reads data/exam-dates-*.json). Students never type these. */
-const EXAMS={
- maths:[[5,20,'Paper 1'],[6,3,'Paper 2'],[6,10,'Paper 3']],
- lang:[[5,24,'Paper 1'],[6,7,'Paper 2']],
- lit:[[5,12,'Paper 1'],[5,19,'Paper 2']],
- science:[[5,11,'Biology 1'],[5,21,'Physics 1'],[6,14,'Physics 2']],
- triple:[[5,11,'Biology 1'],[5,21,'Physics 1'],[6,15,'Physics 2']],
- history:[[5,18,'Paper 1'],[6,8,'Paper 2']],
- geog:[[5,14,'Paper 1'],[5,27,'Paper 2'],[6,2,'Paper 3']],
- french:[[5,25,'Listening & Reading'],[6,1,'Writing']],
- spanish:[[5,26,'Listening & Reading'],[6,2,'Writing']],
- german:[[5,27,'Listening & Reading'],[6,3,'Writing']],
- cs:[[5,13,'Paper 1'],[5,25,'Paper 2']],
- business:[[5,19,'Paper 1'],[6,7,'Paper 2']],
- pe:[[5,17,'Paper 1'],[5,28,'Paper 2']],
- psych:[[5,20,'Paper 1'],[6,11,'Paper 2']],
- rs:[[5,13,'Paper 1'],[5,24,'Paper 2']],
- socio:[[5,21,'Paper 1'],[6,9,'Paper 2']],
- econ:[[5,24,'Paper 1'],[6,8,'Paper 2']],
- stats:[[6,1,'Paper 1'],[6,10,'Paper 2']],
- media:[[5,26,'Paper 1'],[6,4,'Paper 2']],
- film:[[6,1,'Paper 1'],[6,8,'Paper 2']],
- drama:[[5,27,'Written paper']],
- music:[[6,3,'Listening exam']],
- mtech:[[6,4,'Exam']],
- dt:[[6,2,'Written paper']],
- eng:[[6,9,'Written paper']],
- electronics:[[6,11,'Paper 2']],
- it:[[5,14,'Exam']],
- astro:[[5,28,'Paper 1'],[6,10,'Paper 2']],
- geology:[[6,7,'Written paper']],
- classics:[[5,19,'Thematic study'],[6,1,'Literature & culture']],
- citizenship:[[6,4,'Paper 1'],[6,11,'Paper 2']],
- food:[[6,8,'Written paper']],
- hosp:[[6,9,'Exam']],
- hsc:[[5,13,'Exam 1'],[6,6,'Exam 2']]
-};
-function examsFor(s){ return (EXAMS[s.slug]||[]).map(e=>({d:new Date(2027,e[0]-1,e[1]),label:e[2]})); }
-const _allEx=SUBJECTS.flatMap(s=>examsFor(s)).sort((a,b)=>a.d-b.d);
-const FIRST_EXAM=_allEx.length?_allEx[0].d:new Date(2027,4,17);
-const LASTX=_allEx.length?_allEx[_allEx.length-1].d:new Date(2027,5,18);
+/* exam timetable lives in dash-data.js (EXAMS) so both dashboard views count
+   down from the SAME dates. examsFor stays as the planner's local name. */
+function examsFor(s){ return svExamsFor(s); }
+const _fl=svFirstLast(SUBJECTS);
+const FIRST_EXAM=_fl.first, LASTX=_fl.last;
 document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXAM-now)/864e5));
 document.querySelector('.card.exam .lbl').textContent='days to your first exam · '
   +FIRST_EXAM.toLocaleDateString('en-GB',{month:'long',year:'numeric'});

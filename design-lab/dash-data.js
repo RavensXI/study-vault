@@ -132,6 +132,90 @@ function dayOneUrl(su) {
   return '/browse/' + su.sub;
 }
 
+/* per-subject exam papers (summer 2027, PROVISIONAL demo timetable — the
+   real build reads data/exam-dates-*.json). Students never type these. */
+var EXAMS = {
+ maths:[[5,20,'Paper 1'],[6,3,'Paper 2'],[6,10,'Paper 3']],
+ lang:[[5,24,'Paper 1'],[6,7,'Paper 2']],
+ lit:[[5,12,'Paper 1'],[5,19,'Paper 2']],
+ science:[[5,11,'Biology 1'],[5,21,'Physics 1'],[6,14,'Physics 2']],
+ triple:[[5,11,'Biology 1'],[5,21,'Physics 1'],[6,15,'Physics 2']],
+ history:[[5,18,'Paper 1'],[6,8,'Paper 2']],
+ geog:[[5,14,'Paper 1'],[5,27,'Paper 2'],[6,2,'Paper 3']],
+ french:[[5,25,'Listening & Reading'],[6,1,'Writing']],
+ spanish:[[5,26,'Listening & Reading'],[6,2,'Writing']],
+ german:[[5,27,'Listening & Reading'],[6,3,'Writing']],
+ cs:[[5,13,'Paper 1'],[5,25,'Paper 2']],
+ business:[[5,19,'Paper 1'],[6,7,'Paper 2']],
+ pe:[[5,17,'Paper 1'],[5,28,'Paper 2']],
+ psych:[[5,20,'Paper 1'],[6,11,'Paper 2']],
+ rs:[[5,13,'Paper 1'],[5,24,'Paper 2']],
+ socio:[[5,21,'Paper 1'],[6,9,'Paper 2']],
+ econ:[[5,24,'Paper 1'],[6,8,'Paper 2']],
+ stats:[[6,1,'Paper 1'],[6,10,'Paper 2']],
+ media:[[5,26,'Paper 1'],[6,4,'Paper 2']],
+ film:[[6,1,'Paper 1'],[6,8,'Paper 2']],
+ drama:[[5,27,'Written paper']],
+ music:[[6,3,'Listening exam']],
+ mtech:[[6,4,'Exam']],
+ dt:[[6,2,'Written paper']],
+ eng:[[6,9,'Written paper']],
+ electronics:[[6,11,'Paper 2']],
+ it:[[5,14,'Exam']],
+ astro:[[5,28,'Paper 1'],[6,10,'Paper 2']],
+ geology:[[6,7,'Written paper']],
+ classics:[[5,19,'Thematic study'],[6,1,'Literature & culture']],
+ citizenship:[[6,4,'Paper 1'],[6,11,'Paper 2']],
+ food:[[6,8,'Written paper']],
+ hosp:[[6,9,'Exam']],
+ hsc:[[5,13,'Exam 1'],[6,6,'Exam 2']]
+};
+function svExamsFor(su) {
+  return (EXAMS[su.slug] || []).map(function (e) { return { d: new Date(2027, e[0] - 1, e[1]), label: e[2] }; });
+}
+/* first + last exam date across the student's subjects — BOTH dashboards'
+   countdowns read this, so they can never disagree */
+function svFirstLast(SUBJECTS) {
+  var all = [];
+  SUBJECTS.forEach(function (su) { all = all.concat(svExamsFor(su)); });
+  all.sort(function (a, b) { return a.d - b.d; });
+  return { first: all.length ? all[0].d : new Date(2027, 4, 17),
+           last: all.length ? all[all.length - 1].d : new Date(2027, 5, 18),
+           all: all };
+}
+
+/* where should "Start" take this student? The first unfinished lesson of the
+   first subject with any progress; null while nothing's started (day-one plan
+   stands) or before units load. Single source for both dashboards' plans. */
+function svContinueTarget(SUBJECTS) {
+  for (var si = 0; si < SUBJECTS.length; si++) {
+    var su = SUBJECTS[si];
+    if (!su.units || !su.units.length) continue;
+    for (var ui = 0; ui < su.units.length; ui++) {
+      var u = su.units[ui], set = u[4] || [];
+      if (!set.length) continue;
+      var k = 1; while (k <= u[1] && set.indexOf(k) >= 0) k++;
+      if (k <= u[1])
+        return { su: su, unitName: u[0], unitSlug: u[3], total: u[1], num: k,
+                 url: '/' + (su.mode === 'p' ? 'practice' : 'lesson') + '/' + su.sub + '/' + u[3] + '/' + k };
+    }
+  }
+  return null;
+}
+
+/* lifetime + this-week completion counts. Lesson pages stamp completion dates
+   into sv-lessons-when (js/main.js) — lessons finished before stamping existed
+   count in the total but not the weekly figure. */
+function svDoneStats() {
+  var total = 0, k;
+  for (k in DONE) total += DONE[k].length;
+  var when = {};
+  try { when = JSON.parse(localStorage.getItem('sv-lessons-when')) || {}; } catch (e) {}
+  var week = 0, cutoff = Date.now() - 7 * 864e5;
+  for (k in when) { var d = new Date(when[k]); if (d.getTime() >= cutoff) week++; }
+  return { total: total, week: Math.min(week, total) };
+}
+
 /* entry point: swap demo subjects for the student's own, then fetch their
    real course structure and lay their completions over it */
 function svDashInit(SUBJECTS, opts) {

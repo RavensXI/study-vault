@@ -471,6 +471,7 @@
 </div>
 
 <script src="dash-data.js"></script>
+<script src="warmup.js"></script>
 <script>
 /* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
    `sub` = live subject slug, unit rows are [label, real lesson count, Sam's
@@ -488,8 +489,22 @@ const SUBJECTS=[
  {tab:'RS',slug:'rs',sub:'religious-studies-ocr',mode:'l',name:'Religious Studies',c:'#6f5b91',units:[['Christianity: Beliefs',4,2,'christianity-beliefs-and-teachings'],['Islam: Beliefs',4,1,'islam-beliefs-and-teachings'],['Relationships & Families',3,0,'theme-relationships-and-families']]},
 ];
 function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
-/* shared data layer: dash-data.js (SVDash) — same contract as classic */
-svDashInit(SUBJECTS,{view:'desk'});
+/* shared data layer: dash-data.js (SVDash) — same contract as classic.
+   Once live units land, the day-one spread swaps "start at the beginning"
+   for the same Continue target the classic view shows. */
+svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
+  if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
+  if(_dq.get('warmup')&&!window._wuOpened){
+    const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(SUBJECTS[0]);
+    if(u){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target:u,nav}); }
+  }
+}});
+/* the wall sticky counts down to the student's OWN first exam — same shared
+   dates as the classic card. A hand-edited sticky keeps its text (it's theirs). */
+(function(){
+  const b=document.querySelector('.sticky.s1 .txt b'); if(!b) return;
+  b.textContent=Math.max(0,Math.round((svFirstLast(SUBJECTS).first-new Date())/864e5))+' days';
+})();
 /* leave the desk with a quick dip through the curtain; coming Back restores a
    bfcached faded frame, so pageshow always clears it */
 function nav(u){ stage.classList.add('exit'); setTimeout(()=>{ location.href=u; },230); }
@@ -514,25 +529,45 @@ let TODAY_R=`
   <div class="noteline">Radio: <b>3 episodes</b> on the bus</div>
   <div class="noteline">Next mock: <b>none booked</b></div>`;
 
-/* day one: no history to summarise — the desk says so instead of faking it */
-if(DAYONE){
-  const DAY1U=dayOneUrl(SUBJECTS[0]);
+/* day one: no history to summarise — the desk says so instead of faking it.
+   Rebuilt whenever live units/warm-up state change, so the plan here always
+   matches the classic view's (same svContinueTarget, same svDoneStats). */
+function buildDayOneToday(){
+  const t=svContinueTarget(SUBJECTS);
+  const url=t?t.url:dayOneUrl(SUBJECTS[0]);
+  const w=window.svWarmup?svWarmup.doneToday():null;
+  const row2=t
+    ?`<li tabindex="0" onclick="nav('${t.url}')"><span class="n">2</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
+    :`<li tabindex="0" ${url?`onclick="nav('${url}')"`:''}><span class="n">2</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
   TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0"><span class="n">1</span><div><b>Warm up</b><small>10 quick questions · finds your level</small></div><span class="mins">2 min</span></li>
-    <li tabindex="0" ${DAY1U?`onclick="nav('${DAY1U}')"`:''}><span class="n">2</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>
+    <li tabindex="0" ${url?`onclick="openWarmup('${url}')"`:''}><span class="n">1</span><div><b>Warm up</b><small>${w?`done today · ${w.correct}/${w.total} — tap to go again`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
+    ${row2}
     <li tabindex="0"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
   </ol>
-  <p class="momentum"><span class="hl">day one — your first session is ready.</span></p>
-  <div class="startrow"><button class="start" ${DAY1U?`onclick="nav('${DAY1U}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 19 min</button></div>`;
+  <p class="momentum"><span class="hl">${t?'picking up where you left off.':'day one — your first session is ready.'}</span></p>
+  <div class="startrow"><button class="start" ${url?`onclick="startWithWarmup('${url}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 19 min</button></div>`;
+  const st=svDoneStats();
   TODAY_R=`
   <h3>This week</h3>
-  <div class="noteline">Nothing here yet — it fills in as you revise.</div>
-  <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>
+  ${st.total?`<div class="noteline">Lessons this week: <b>${st.week}</b></div>
+  <div class="noteline">Finished so far: <b>${st.total} ${st.total===1?'lesson':'lessons'}</b></div>
+  ${w?`<div class="noteline">Warm-up today: <b>${w.correct}/${w.total}</b></div>`:''}`
+ :`<div class="noteline">Nothing here yet — it fills in as you revise.</div>
+  <div class="noteline">Warm-ups, your best subject, radio episodes: all of it lands on this page.</div>`}
   <p class="doable">${SVUSER&&SVUSER.email?('Signed in as '+SVUSER.email+'.')
     :'<a href="home-study.html?view=save" style="color:inherit">Nothing saved yet — sign up to save your progress.</a>'}</p>`;
+}
+function startWithWarmup(url){
+  if(window.svWarmup && !svWarmup.doneToday()) svWarmup.open({subjects:SUBJECTS,target:url,nav});
+  else nav(url);
+}
+function openWarmup(url){ if(window.svWarmup) svWarmup.open({subjects:SUBJECTS,target:url,nav}); }
+window.svWarmupDone=()=>{ if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
+if(DAYONE){
+  buildDayOneToday();
   const _av=document.querySelector('.avatar');
   if(_av){
     if(SVUSER&&SVUSER.email){ _av.textContent=SVUSER.email[0].toUpperCase(); _av.title=SVUSER.email; }
