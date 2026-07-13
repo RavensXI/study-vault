@@ -88,6 +88,9 @@
   .plan b{font-family:var(--hand);font-weight:600;font-size:50px;line-height:1.05;display:block}
   .plan small{font-family:var(--hand);font-size:34px;color:var(--mut);display:block;margin-top:6px}
   .plan .mins{font-family:var(--hand);font-size:34px;color:var(--mut);text-align:right}
+  .plan li.done{opacity:.55}
+  .plan li.done b{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#b8442f}
+  .plan li.done .n{color:#4e6e5d}
   .momentum{font-family:var(--hand);font-size:36px;font-weight:500;color:var(--sec);margin:22px 0 0}
   .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.42) 93%,transparent 98.5%);
     border-radius:8px;padding:1px 10px;margin:0 -4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
@@ -212,6 +215,10 @@
     font-family:var(--hand);font-style:normal;font-size:44px;color:#b8442f;opacity:.82;pointer-events:none}
   .postcard .dy.td::after{content:"";position:absolute;left:14%;right:14%;top:8%;bottom:8%;
     border:3px solid #b8442f;border-radius:50%;transform:rotate(-5deg);opacity:.7}
+  /* planner session dot on days ahead (today keeps its red circle instead) */
+  .postcard .dy.pd:not(.td)::after{content:"";position:absolute;left:50%;bottom:3px;translate:-50%;
+    width:14px;height:14px;border-radius:50%;background:var(--dot,#8a5a44);opacity:.85}
+  .postcard .dy.hol{color:#a3873a}
   /* hover: the picture's caption appears handwritten on the desk below */
   .postcard .calcap{position:absolute;left:190px;top:1478px;width:1140px;font-family:var(--hand);font-size:54px;
     color:#6b5c41;line-height:1.15;opacity:0;transition:opacity .3s ease;transform:rotate(-1.5deg);pointer-events:none}
@@ -472,6 +479,7 @@
 
 <script src="dash-data.js"></script>
 <script src="warmup.js"></script>
+<script src="planner.js"></script>
 <script>
 /* ---------- data: Sam's subjects, wired to REAL free-tier content ----------
    `sub` = live subject slug, unit rows are [label, real lesson count, Sam's
@@ -536,19 +544,21 @@ function buildDayOneToday(){
   const t=svContinueTarget(SUBJECTS);
   const url=t?t.url:dayOneUrl(SUBJECTS[0]);
   const w=window.svWarmup?svWarmup.doneToday():null;
+  const ps=svPlanState();
   const row2=t
-    ?`<li tabindex="0" onclick="nav('${t.url}')"><span class="n">2</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
-    :`<li tabindex="0" ${url?`onclick="nav('${url}')"`:''}><span class="n">2</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
+    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">2</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
+    :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">2</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
+  const startLbl=ps.any?(ps.mins?`Keep going · ${ps.mins} min`:'One more? · 15 min'):'Start · 19 min';
   TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0" ${url?`onclick="openWarmup('${url}')"`:''}><span class="n">1</span><div><b>Warm up</b><small>${w?`done today · ${w.correct}/${w.total} — tap to go again`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.warm?'done':''}" ${url?`onclick="openWarmup('${url}')"`:''}><span class="n">1</span><div><b>Warm up</b><small>${w?`done today · ${w.correct}/${w.total} — tap to go again`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
     ${row2}
-    <li tabindex="0"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">${t?'picking up where you left off.':'day one — your first session is ready.'}</span></p>
-  <div class="startrow"><button class="start" ${url?`onclick="startWithWarmup('${url}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>Start · 19 min</button></div>`;
+  <div class="startrow"><button class="start" ${url?`onclick="startWithWarmup('${url}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>${startLbl}</button></div>`;
   const st=svDoneStats();
   TODAY_R=`
   <h3>This week</h3>
@@ -825,13 +835,30 @@ function buildCal(){
   for(let i=0;i<off;i++) h+='<span></span>';
   for(let d=1;d<=dim;d++){
     const past=d<now.getDate(), today=d===now.getDate();
-    h+='<span class="dy'+(today?' td':'')+'">'+d
+    h+='<span class="dy'+(today?' td':'')+'" data-d="'+d+'">'+d
       +(past?'<i class="x" style="transform:rotate('+(((d*37)%15)-7)+'deg)">✕</i>':'')
       +'</span>';
   }
-  document.getElementById('calGrid').innerHTML=h;
+  const grid=document.getElementById('calGrid'); grid.innerHTML=h;
+  /* the shared planner lays session dots on the days ahead; hovering a day
+     shows what's planned (same tooltip as the classic view), clicking opens
+     the full planner */
+  grid.querySelectorAll('.dy').forEach(el=>{
+    const d=+el.dataset.d; if(!d||d<now.getDate()) return;
+    const dt=new Date(y,m,d), p=planFor(dt);
+    if(p&&(p.exams.length||p.sessions)){ el.classList.add('pd');
+      el.style.setProperty('--dot', p.exams.length?'#a3542f':p.sessions[0].s.c); }
+    if(p&&p.off==='holiday') el.classList.add('hol');
+    el.addEventListener('mouseenter',()=>showDayTip(el,dt));
+    el.addEventListener('mouseleave',()=>{ const t=document.getElementById('daytip'); if(t) t.classList.remove('on'); });
+    el.addEventListener('click',ev=>{ ev.stopPropagation(); svPlannerOpen(new Date(y,m,1)); });
+  });
 }
+svPlannerBoot(SUBJECTS,{onChange:buildCal});
 buildCal();
+/* the calendar postcard is the planner's door (same modal as classic) */
+pc.style.cursor='pointer';
+pc.addEventListener('click',()=>{ if(typeof dragBlockClick!=='undefined'&&dragBlockClick) return; svPlannerOpen(); });
 fetch('_weekly_doodles.json').then(r=>r.json()).then(cal=>{
   const d=new Date(),m=new Date(d);m.setDate(d.getDate()-((d.getDay()+6)%7));
   const k=m.getFullYear()+'-'+String(m.getMonth()+1).padStart(2,'0')+'-'+String(m.getDate()).padStart(2,'0');
@@ -932,7 +959,9 @@ function fcDeal(){
   document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
-cardsEl.onclick=()=>{ if(dragBlockClick) return; fcDeal(); fcmodal.classList.add('open'); };
+cardsEl.onclick=()=>{ if(dragBlockClick) return; fcDeal(); fcmodal.classList.add('open');
+  try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
 if(new URLSearchParams(location.search).get('fc')==='1'){ fcDeal(); fcmodal.classList.add('open'); }
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
   else { fci=(fci+1)%FC.length; fcDeal(); } };

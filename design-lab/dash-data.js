@@ -216,6 +216,30 @@ function svDoneStats() {
   return { total: total, week: Math.min(week, total) };
 }
 
+/* which of today's plan steps are already done — warm-up (sv-warmup), a
+   lesson (sv-lessons-when stamped today), flashcards (sv-flash-day). Both
+   views cross rows off and relabel Start from this. */
+function svPlanState() {
+  var today = new Date().toISOString().slice(0, 10);
+  var warm = false, cards = false, lesson = false;
+  var sim = _dq.get('psim');          /* staging: ?psim=warm.lesson to fake done steps */
+  if (sim !== null) {
+    var ss = sim.split('.');
+    warm = ss.indexOf('warm') >= 0; lesson = ss.indexOf('lesson') >= 0; cards = ss.indexOf('cards') >= 0;
+    var m0 = (warm ? 0 : 2) + (lesson ? 0 : 15) + (cards ? 0 : 2);
+    return { warm: warm, lesson: lesson, cards: cards, any: warm || lesson || cards, mins: m0 };
+  }
+  try { var w = JSON.parse(localStorage.getItem('sv-warmup')); warm = !!(w && w.date === today); } catch (e) {}
+  try { cards = localStorage.getItem('sv-flash-day') === today; } catch (e) {}
+  try {
+    var when = JSON.parse(localStorage.getItem('sv-lessons-when')) || {};
+    for (var k in when) if (when[k] === today) { lesson = true; break; }
+  } catch (e) {}
+  var mins = (warm ? 0 : 2) + (lesson ? 0 : 15) + (cards ? 0 : 2);
+  return { warm: warm, lesson: lesson, cards: cards,
+           any: warm || lesson || cards, mins: mins };
+}
+
 /* entry point: swap demo subjects for the student's own, then fetch their
    real course structure and lay their completions over it */
 function svDashInit(SUBJECTS, opts) {

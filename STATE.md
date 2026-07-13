@@ -36,10 +36,13 @@ are parsed there too, so they behave identically on both views.
 
 Supporting cast: `design-lab/warmup.js` (the Start-button warm-up quiz — 10
 knowledge checks pulled from the student's own current units, once a day,
-then into the lesson; shared by both dashboards), `design-lab/skin-switcher.js`
-(applies the desk-world skin to real pages + the reading tour; design-lab
-only), `design-lab/serve.py`, `vercel.json` (rewrites), `js/main.js` (a11y
-toolbar — owns dark mode; stamps completion dates).
+then into the lesson; shared by both dashboards), `design-lab/planner.js`
+(the revision-plan engine + modal + day tooltip, shared — classic's exam
+card and the desk's calendar postcard open the SAME planner),
+`design-lab/skin-switcher.js` (applies the desk-world skin to real pages +
+the reading tour; design-lab only), `design-lab/serve.py`, `vercel.json`
+(rewrites), `js/main.js` (a11y toolbar — owns dark mode; stamps completion
+dates).
 
 ## The data contract
 
@@ -69,8 +72,9 @@ toolbar — owns dark mode; stamps completion dates).
 `?snap` (kill animations for screenshots) · `?picked=&boards=&tsel=&tstep=`
 (stage wizard state) · `?done=` (stage lesson completions) · `?probe` (page
 reports control coordinates) · `?plan=YYYY-MM` (open planner at a month) ·
-`?warmup=1` (auto-open the warm-up overlay) · `?forcecheck=1` (shorts feed:
-splice a recall card immediately) · `?dark=1` / `?notour=1` / `?csprobe=1`
+`?warmup=1` (auto-open the warm-up overlay) · `?psim=warm.lesson.cards`
+(fake today's plan steps done) · `?forcecheck=1` (shorts feed: splice a
+recall card immediately) · `?dark=1` / `?notour=1` / `?csprobe=1`
 (skin-switcher QA) · `?bench` (Tom's tuning bench on the landing).
 
 ## Generators (rerun any time; all in `scripts/`)

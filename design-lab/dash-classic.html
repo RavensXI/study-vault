@@ -339,49 +339,11 @@
   .cal .d.hasplan::after{content:"";position:absolute;left:50%;bottom:-1px;width:4px;height:4px;
     margin-left:-2px;border-radius:50%;background:var(--dot,#8a5a44)}
   .cal .d.hol2{color:#a3873a}
-  .daytip{position:absolute;z-index:70;background:#26231e;color:#f2ead9;border-radius:6px;
-    padding:.6rem .8rem;font-size:.78rem;line-height:1.6;max-width:250px;
-    box-shadow:0 10px 24px rgba(20,14,6,.35);display:none}
-  .daytip.on{display:block}
-  .daytip b{color:#fff}
-  .daytip .row{display:flex;gap:7px;align-items:center;white-space:nowrap}
-  .daytip .sw,.plday .sw{width:8px;height:8px;border-radius:2px;flex:none}
-  .plmodal{position:fixed;inset:0;background:rgba(38,30,18,.55);display:none;place-items:center;z-index:60;padding:20px}
-  .plmodal.open{display:grid}
-  .plsheet{background:var(--paper);border-radius:10px;max-width:1000px;width:100%;max-height:92vh;
-    overflow:auto;padding:26px 30px 30px;position:relative;box-shadow:0 30px 80px rgba(20,14,6,.45)}
-  .plsheet .x{position:absolute;top:16px;right:18px;width:36px;height:36px;border-radius:50%;
-    border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:1rem;color:var(--sec)}
-  .plsheet h2{font-family:var(--read);margin:0 0 .2rem;font-size:1.6rem}
-  .plsub{color:var(--sec);font-size:.92rem;margin:0 0 1rem;max-width:640px;line-height:1.5}
-  .plctl{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:center;margin-bottom:1rem;
-    padding:.8rem 1rem;background:var(--card);border:1px solid var(--line);border-radius:6px}
-  .plctl .lbl2{font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
-  .wkday{display:flex;gap:5px}
-  .wkday button{border:1px solid var(--line);background:var(--card);border-radius:4px;
-    padding:.35rem .55rem;font-weight:600;font-size:.78rem;cursor:pointer;color:var(--sec)}
-  .wkday button[aria-pressed="true"]{background:var(--anchor);border-color:var(--anchor);color:#fff}
-  .holhint{font-size:.8rem;color:var(--sec)}
-  .plnav{display:flex;align-items:center;gap:10px;margin:.3rem 0 .5rem}
-  .plnav b{font-family:var(--read);font-size:1.05rem;min-width:160px;text-align:center}
-  .plnav button{width:30px;height:30px;border:1px solid var(--line);background:var(--card);border-radius:4px;cursor:pointer}
-  .plgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
-  .plgrid .hd{font-size:.68rem;font-weight:700;letter-spacing:.1em;color:var(--mut);text-transform:uppercase;text-align:center;padding:.2rem 0}
-  .plday{min-height:88px;min-width:0;overflow:hidden;border:1px solid var(--linel);border-radius:5px;background:var(--card);
-    padding:.32rem .45rem;font-size:.72rem;position:relative;cursor:pointer;text-align:left;font-family:var(--head)}
-  .plday .dn{font-weight:700;color:var(--sec);font-variant-numeric:tabular-nums}
-  .plday.off{background:transparent;border-style:dashed}
-  .plday.off .dn{color:var(--mut)}
-  .plday.past{opacity:.4;cursor:default}
-  .plday.hol{background:#f6ecd2;border-color:#e6d5a9}
-  .plday.hol .dn::after{content:" · holiday";font-weight:600;color:#a3873a}
-  .plday.examday{outline:2px solid #a3542f;outline-offset:-2px}
-  .plday .sess{display:flex;gap:5px;align-items:center;margin-top:.24rem;white-space:nowrap;overflow:hidden;color:var(--sec)}
-  .plday.today .dn{color:#fff;background:var(--anchor);border-radius:3px;padding:0 4px}
-  .plfoot{margin-top:.9rem;font-size:.8rem;color:var(--sec)}
-  .plday .sess b{color:#7a3f24}
-  .replan{opacity:0;transition:opacity .3s;font-size:.78rem;font-weight:700;color:#4e6e5d}
-  .replan.on{opacity:1}
+  /* planner modal + day-tooltip styles live in planner.js (shared with the desk) */
+  /* today's-plan rows cross off as they're done */
+  .card.plan li.done{opacity:.55}
+  .card.plan li.done>div>b{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#8a5a44}
+  .card.plan li.done .n{background:#4e6e5d;color:#fff;border-color:#4e6e5d}
 
   /* wizard hand-off: quiet save-it bar (account creation is opt-in, never a gate) */
   .savebar{max-width:1116px;width:calc(100% - 32px);margin:12px auto 0;display:flex;align-items:center;
@@ -504,29 +466,11 @@
   </div>
 </div>
 
-<div class="plmodal" id="plmodal" aria-modal="true" role="dialog" aria-label="Your revision plan">
-  <div class="plsheet">
-    <button class="x" id="closepl" aria-label="Close">✕</button>
-    <h2>Your revision plan.</h2>
-    <p class="plsub" id="plsub"></p>
-    <div class="plctl">
-      <span class="lbl2">Revise on</span>
-      <span class="wkday" id="wkday"></span>
-      <span class="lbl2">Holidays</span>
-      <span class="holhint">tap any day to mark it as a holiday — sessions move around it</span>
-      <span class="replan" id="replan">replanned ✓</span>
-    </div>
-    <div class="plnav"><button id="plprev" aria-label="Previous month">‹</button><b id="plmon"></b><button id="plnext" aria-label="Next month">›</button></div>
-    <div class="plgrid" id="plgrid"></div>
-    <p class="plfoot">Built from your subjects and the exam boards&rsquo; own timetables &mdash; no dates to type in.
-      Runs to your last paper; each subject drops out of the rotation once it&rsquo;s been sat.
-      <em>(Prototype uses a provisional summer-2027 timetable.)</em></p>
-  </div>
-</div>
-<div class="daytip" id="daytip"></div>
+<!-- planner modal + day tooltip are injected by planner.js (shared with the desk) -->
 
 <script src="dash-data.js"></script>
 <script src="warmup.js"></script>
+<script src="planner.js"></script>
 <script>
 /* Sam's subjects — same real free-tier wiring as the desk */
 const SUBJECTS=[
@@ -572,6 +516,13 @@ function refreshDayOnePlan(){
   }
   const sb=document.getElementById('startbtn');
   if(sb&&target) sb.onclick=()=>startWithWarmup(target);
+  /* cross off what's already done today; Start becomes Keep going */
+  const ps=svPlanState(), rows=document.querySelectorAll('.card.plan ol li');
+  if(rows[0]) rows[0].classList.toggle('done',ps.warm);
+  if(rows[1]) rows[1].classList.toggle('done',ps.lesson);
+  if(rows[2]) rows[2].classList.toggle('done',ps.cards);
+  if(sb) sb.innerHTML='<svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>'
+    +(ps.any?(ps.mins?'Keep going · '+ps.mins+' min':'One more? · 15 min'):'Start · 19 min');
   if(_dq.get('warmup')&&!window._wuOpened&&target){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target,nav}); }
 }
 /* Start = warm-up first (once a day), then straight into the lesson */
@@ -622,7 +573,7 @@ if(DAYONE){
   wireWarmupRow(dayOneUrl(SUBJECTS[0]));
   document.querySelector('.card.week').innerHTML='<h3>This week</h3>'+
     '<p class="weekempty">Nothing here yet — it fills in as you revise. Warm-up accuracy, your best subject, cards due: all of it lands on this card.</p>';
-  refreshWeekCard();
+  refreshDayOnePlan();   /* ticks + Keep-going label apply before units land too */
   if(SVUSER&&SVUSER.email){
     /* signed in: the avatar is you; no sign-up asks anywhere */
     const _av=document.querySelector('.top .avatar');
@@ -650,71 +601,7 @@ const FIRST_EXAM=_fl.first, LASTX=_fl.last;
 document.getElementById('examdays').textContent=Math.max(0,Math.round((FIRST_EXAM-now)/864e5));
 document.querySelector('.card.exam .lbl').textContent='days to your first exam · '
   +FIRST_EXAM.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-/* ---- plan engine v2: a real schedule from today to your LAST exam.
-   Sessions are laid over the days you actually have — rest days and holidays
-   push work along rather than deleting it. A subject's urgency rises as its
-   next paper approaches, and it drops out of the rotation entirely once its
-   final paper is sat (the taper). Recomputes automatically on any change. ---- */
-const PLANK='sv-plan-prefs';
-let PLANP={rest:[],hols:[]};
-try{ Object.assign(PLANP,JSON.parse(localStorage.getItem(PLANK)||'{}')); }catch(e){}
-function planSave(){ try{ localStorage.setItem(PLANK,JSON.stringify(PLANP)); }catch(e){} }
-function iso(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-const T0=new Date(now.getFullYear(),now.getMonth(),now.getDate());
-function offKind(d){ if(PLANP.rest.includes(d.getDay())) return 'rest';
-  if(PLANP.hols.includes(iso(d))) return 'holiday'; return null; }
-let SCHED={};
-function buildSchedule(){
-  SCHED={};
-  if(!SUBJECTS.length) return;
-  const lastSeen={}; SUBJECTS.forEach(su=>lastSeen[su.slug]=-999);
-  const ACT=['lesson','practice','flashcards','knowledge check'];
-  for(let d=new Date(T0), di=0; d<=LASTX; d=new Date(d.getTime()+864e5), di++){
-    if(offKind(d)) continue;
-    const active=SUBJECTS.filter(su=>{ const ex=examsFor(su);
-      return ex.length&&ex[ex.length-1].d>=d; });
-    if(!active.length) continue;
-    const scored=active.map(su=>{
-      const nxt=examsFor(su).find(e=>e.d>=d);
-      const urg=1+8/((nxt?Math.round((nxt.d-d)/864e5):400)+3);
-      return {su:su,score:(di-lastSeen[su.slug])*urg};
-    }).sort((a,b)=>b.score-a.score||a.su.slug.localeCompare(b.su.slug));
-    SCHED[iso(d)]=scored.slice(0,Math.min(2,scored.length)).map((p,pi)=>{
-      lastSeen[p.su.slug]=di;
-      return {s:p.su,act:ACT[(di+pi*2)%4],min:pi?15:25}; });
-  }
-}
-function examsOn(d){ const k=iso(d), out=[];
-  SUBJECTS.forEach(su=>examsFor(su).forEach(e=>{ if(iso(e.d)===k) out.push({s:su,label:e.label}); }));
-  return out; }
-function planFor(d){
-  if(d<T0||d>LASTX||!SUBJECTS.length) return null;
-  const off=offKind(d);
-  return {exams:examsOn(d), off:off, sessions:off?null:(SCHED[iso(d)]||null)};
-}
-const daytip=document.getElementById('daytip');
-const DOWNAME=['Sundays','Mondays','Tuesdays','Wednesdays','Thursdays','Fridays','Saturdays'];
-function showDayTip(anchor,d){
-  const p=planFor(d);
-  let html='<b>'+d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'})+'</b><br>';
-  if(!p){ html+= d>LASTX?'Exams over. Freedom.':'Outside your plan.'; }
-  else{
-    if(p.exams.length) html+=p.exams.map(e=>'<span class="row"><span class="sw" style="background:'
-      +e.s.c+'"></span><b>Exam · '+e.s.name+' — '+e.label+'</b></span>').join('');
-    if(p.off==='rest') html+='Rest day — you don’t revise on '+DOWNAME[d.getDay()]+'.';
-    else if(p.off==='holiday') html+='Holiday — enjoy it. The work moved along, it didn’t vanish.';
-    else if(p.sessions) html+=p.sessions.map(x=>'<span class="row"><span class="sw" style="background:'
-      +x.s.c+'"></span>'+x.s.name+' · '+x.act+' · '+x.min+' min</span>').join('');
-    else if(!p.exams.length) html+='Nothing scheduled.';
-  }
-  daytip.innerHTML=html;
-  const r=anchor.getBoundingClientRect();
-  daytip.style.left=Math.min(innerWidth-270,Math.max(8,r.left-40))+'px';
-  daytip.style.top=(r.bottom+6+scrollY)+'px';
-  daytip.classList.add('on');
-}
-document.addEventListener('click',e=>{
-  if(!e.target.closest('.cal .d')&&!e.target.closest('.daytip')) daytip.classList.remove('on'); });
+/* plan engine + modal + day tooltip live in planner.js (shared with the desk) */
 function buildMini(){
   const m=new Date(now.getFullYear(),now.getMonth(),1);
   document.getElementById('calmon').textContent=m.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
@@ -733,7 +620,7 @@ function buildMini(){
     if(d>=now.getDate()){ el.classList.add('hasplan');
       el.onclick=ev=>{ ev.stopPropagation(); showDayTip(el,dt); } }
     g.appendChild(el); } }
-buildSchedule();
+svPlannerBoot(SUBJECTS,{onChange:buildMini});   /* rest/holiday edits redraw the mini month */
 buildMini();
 
 /* subjects: cloth-tab nub + progress + the subject's ladder sketch as a
@@ -1200,7 +1087,9 @@ function fcDeal(){
   document.getElementById('baA').textContent=f.a;
   fcShowA=false; bigcard.classList.remove('showa');
 }
-document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open'); };
+document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open');
+  try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(DAYONE) refreshDayOnePlan(); };
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
   else { fci=(fci+1)%FC.length; fcDeal(); } };
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
@@ -1344,71 +1233,8 @@ if(/(?:^|[?&])tune(?:=|&|$)/.test(location.search)){(function(){
   setv(P[q]||D);
 })();}
 
-/* ---- the planner modal: the exam card is its door. Any change replans
-   automatically — the chip near the controls acknowledges it. ---- */
-const plmodal=document.getElementById('plmodal'), plgrid=document.getElementById('plgrid'),
-      plmon=document.getElementById('plmon');
-let plview=new Date(now.getFullYear(),now.getMonth(),1);
-function flashReplan(){ const el=document.getElementById('replan'); if(!el) return;
-  el.classList.add('on'); clearTimeout(flashReplan._t);
-  flashReplan._t=setTimeout(()=>el.classList.remove('on'),1500); }
-function replan(){ buildSchedule(); buildPlan(); buildMini(); flashReplan(); }
-function buildWk(){
-  const w=document.getElementById('wkday'); w.innerHTML='';
-  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach((nm,i)=>{
-    const dow=(i+1)%7;
-    const b=document.createElement('button'); b.type='button'; b.textContent=nm;
-    b.setAttribute('aria-pressed',String(!PLANP.rest.includes(dow)));
-    b.onclick=()=>{ const ix=PLANP.rest.indexOf(dow);
-      if(ix>=0) PLANP.rest.splice(ix,1); else PLANP.rest.push(dow);
-      planSave(); buildWk(); replan(); };
-    w.appendChild(b); });
-}
-function buildPlan(){
-  plmon.textContent=plview.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
-  plgrid.innerHTML='';
-  ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(h=>{
-    const sp=document.createElement('span'); sp.className='hd'; sp.textContent=h; plgrid.appendChild(sp); });
-  const days=new Date(plview.getFullYear(),plview.getMonth()+1,0).getDate();
-  const lead=(plview.getDay()+6)%7;
-  for(let i=0;i<lead;i++) plgrid.appendChild(document.createElement('span'));
-  for(let dd=1;dd<=days;dd++){
-    const d=new Date(plview.getFullYear(),plview.getMonth(),dd);
-    const cell=document.createElement('button'); cell.className='plday'; cell.type='button';
-    cell.innerHTML='<span class="dn">'+dd+'</span>';
-    const p=planFor(d);
-    if(d<T0) cell.classList.add('past');
-    if(iso(d)===iso(now)) cell.classList.add('today');
-    if(p&&p.exams.length){ cell.classList.add('examday');
-      p.exams.forEach(e=>{ cell.innerHTML+='<span class="sess"><span class="sw" style="background:'
-        +e.s.c+'"></span><b>EXAM · '+e.s.tab+'</b></span>'; }); }
-    if(p&&p.off==='rest') cell.classList.add('off');
-    else if(p&&p.off==='holiday') cell.classList.add('hol');
-    else if(p&&p.sessions) p.sessions.forEach(x=>{
-      cell.innerHTML+='<span class="sess"><span class="sw" style="background:'+x.s.c+'"></span>'
-        +x.s.tab+' · '+x.act+'</span>'; });
-    if(d>=T0&&d<=LASTX&&!(p&&p.off==='rest')){
-      cell.title=(p&&p.off==='holiday')?'Tap to unmark this holiday':'Tap to mark as a holiday';
-      cell.onclick=()=>{ const id=iso(d), ix=PLANP.hols.indexOf(id);
-        if(ix>=0) PLANP.hols.splice(ix,1); else PLANP.hols.push(id);
-        planSave(); replan(); };
-    }
-    plgrid.appendChild(cell);
-  }
-}
-document.getElementById('plprev').onclick=()=>{ plview=new Date(plview.getFullYear(),plview.getMonth()-1,1); buildPlan(); };
-document.getElementById('plnext').onclick=()=>{ plview=new Date(plview.getFullYear(),plview.getMonth()+1,1); buildPlan(); };
-document.querySelector('.card.exam').onclick=()=>{
-  document.getElementById('plsub').textContent='Runs to your last exam on '
-    +LASTX.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})
-    +'. Each subject drops out once its final paper is sat. Switch off the days you keep free, tap any date to mark a holiday — it replans itself, nothing is lost.';
-  buildWk(); buildPlan(); plmodal.classList.add('open');
-};
-document.getElementById('closepl').onclick=()=>plmodal.classList.remove('open');
-plmodal.addEventListener('click',e=>{ if(e.target===plmodal) plmodal.classList.remove('open'); });
-if(_dq.has('plan')){ const _pv=_dq.get('plan');   /* staging: open the planner (?plan=2027-05 jumps the view) */
-  if(_pv&&/^\d{4}-\d{2}$/.test(_pv)) plview=new Date(+_pv.slice(0,4),+_pv.slice(5,7)-1,1);
-  document.querySelector('.card.exam').onclick(); }
+/* the planner modal (planner.js): the exam card is its door */
+document.querySelector('.card.exam').onclick=()=>svPlannerOpen();
 </script>
 </body>
 </html>
