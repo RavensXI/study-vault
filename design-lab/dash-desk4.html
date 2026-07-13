@@ -88,9 +88,10 @@
   .plan b{font-family:var(--hand);font-weight:600;font-size:50px;line-height:1.05;display:block}
   .plan small{font-family:var(--hand);font-size:34px;color:var(--mut);display:block;margin-top:6px}
   .plan .mins{font-family:var(--hand);font-size:34px;color:var(--mut);text-align:right}
-  .plan li.done{opacity:.55}
-  .plan li.done b{text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#b8442f}
+  /* a finished plan step: handwritten tick, text steps back — no strikethrough */
   .plan li.done .n{color:#4e6e5d}
+  .plan li.done b,.plan li.done .mins{color:var(--mut)}
+  .plan li.done{cursor:default}
   .momentum{font-family:var(--hand);font-size:36px;font-weight:500;color:var(--sec);margin:22px 0 0}
   .hl{background:linear-gradient(101deg,transparent 1.5%,rgba(255,222,84,.5) 7%,rgba(255,226,96,.42) 93%,transparent 98.5%);
     border-radius:8px;padding:1px 10px;margin:0 -4px;-webkit-box-decoration-break:clone;box-decoration-break:clone}
@@ -548,16 +549,16 @@ function buildDayOneToday(){
   const w=window.svWarmup?svWarmup.doneToday():null;
   const ps=svPlanState();
   const row2=t
-    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">2</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
-    :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">2</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
+    ?`<li tabindex="0" class="${ps.lesson?'done':''}" onclick="nav('${t.url}')"><span class="n">${ps.lesson?'✓':'2'}</span><div><b>Continue: ${t.unitName}</b><small>${t.su.name} · lesson ${t.num} of ${t.total}</small></div><span class="mins">15 min</span></li>`
+    :`<li tabindex="0" class="${ps.lesson?'done':''}" ${url?`onclick="nav('${url}')"`:''}><span class="n">${ps.lesson?'✓':'2'}</span><div><b>First lesson</b><small>${SUBJECTS[0]?SUBJECTS[0].name:'your first subject'} · start at the beginning</small></div><span class="mins">15 min</span></li>`;
   const startLbl=ps.any?(ps.mins?`Keep going · ${ps.mins} min`:'One more? · 15 min'):'Start · 19 min';
   TODAY_L=`
   <div class="datestamp" id="today"></div>
   <h2>Here’s your plan.</h2>
   <ol class="plan">
-    <li tabindex="0" class="${ps.warm?'done':''}" ${url?`onclick="openWarmup('${url}')"`:''}><span class="n">1</span><div><b>Warm up</b><small>${w?`done today · ${w.correct}/${w.total} — tap to go again`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.warm?'done':''}" ${url&&!w?`onclick="openWarmup('${url}')"`:''}><span class="n">${ps.warm?'✓':'1'}</span><div><b>Warm up</b><small>${w?`done today · ${w.correct} of ${w.total}`:'10 quick questions · finds your level'}</small></div><span class="mins">2 min</span></li>
     ${row2}
-    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">3</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
+    <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
   </ol>
   <p class="momentum"><span class="hl">${t?'picking up where you left off.':'day one — your first session is ready.'}</span></p>
   <div class="startrow"><button class="start" ${url?`onclick="startWithWarmup('${url}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>${startLbl}</button></div>`;

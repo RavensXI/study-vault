@@ -340,10 +340,12 @@
     margin-left:-2px;border-radius:50%;background:var(--dot,#8a5a44)}
   .cal .d.hol2{color:#a3873a}
   /* planner modal + day-tooltip styles live in planner.js (shared with the desk) */
-  /* today's-plan rows cross off as they're done */
-  .card.plan li.done{opacity:.55}
-  .card.plan li.done>div>b{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:#8a5a44}
-  .card.plan li.done .n{background:#4e6e5d;color:#fff;border-color:#4e6e5d}
+  /* a finished plan step: the number becomes a quiet green tick and the text
+     steps back — no strikethrough, no fade, no boxes */
+  .card.plan li.done .n{color:#4e6e5d;font-weight:800}
+  .card.plan li.done>div>b{color:var(--sec);font-weight:600}
+  .card.plan li.done>div>small{color:var(--mut)}
+  .card.plan li.done .mins{color:var(--mut)}
 
   /* wizard hand-off: quiet save-it bar (account creation is opt-in, never a gate) */
   .savebar{max-width:1116px;width:calc(100% - 32px);margin:12px auto 0;display:flex;align-items:center;
@@ -518,11 +520,13 @@ function refreshDayOnePlan(){
   }
   const sb=document.getElementById('startbtn');
   if(sb&&target) sb.onclick=()=>startWithWarmup(target);
-  /* cross off what's already done today; Start becomes Keep going */
+  /* tick off what's already done today; Start becomes Keep going */
   const ps=svPlanState(), rows=document.querySelectorAll('.card.plan ol li');
-  if(rows[0]) rows[0].classList.toggle('done',ps.warm);
-  if(rows[1]) rows[1].classList.toggle('done',ps.lesson);
-  if(rows[2]) rows[2].classList.toggle('done',ps.cards);
+  [ps.warm,ps.lesson,ps.cards].forEach((done,i)=>{
+    if(!rows[i]) return;
+    rows[i].classList.toggle('done',done);
+    const n=rows[i].querySelector('.n'); if(n) n.textContent=done?'✓':String(i+1);
+  });
   if(sb) sb.innerHTML='<svg viewBox="0 0 16 16"><path d="M4 2l10 6-10 6z"/></svg>'
     +(ps.any?(ps.mins?'Keep going · '+ps.mins+' min':'One more? · 15 min'):'Start · 19 min');
   if(_dq.get('warmup')&&!window._wuOpened&&target){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target,nav}); }
@@ -535,10 +539,14 @@ function startWithWarmup(url){
 function wireWarmupRow(url){
   const li=document.querySelector('.card.plan ol li');
   if(!li||!url) return;
+  const w=svWarmup.doneToday(), small=li.querySelector('small');
+  if(w){ /* once it's done, it's done — the score is the record */
+    li.classList.add('inert'); li.style.cursor='default'; li.onclick=null;
+    if(small) small.textContent='done today · '+w.correct+' of '+w.total;
+    return;
+  }
   li.classList.remove('inert'); li.style.cursor='pointer';
   li.onclick=()=>svWarmup.open({subjects:SUBJECTS,target:url,nav});
-  const w=svWarmup.doneToday(), small=li.querySelector('small');
-  if(w&&small) small.textContent='done today · '+w.correct+'/'+w.total+' — tap to go again';
 }
 window.svWarmupDone=()=>refreshDayOnePlan();
 /* the week card trades its empty copy for real numbers once anything's done */

@@ -31,6 +31,7 @@ function svProgressGather() {
   } catch (e) {}
   return { done: g('sv-lessons-done', {}), when: g('sv-lessons-when', {}),
            plan: g('sv-plan-prefs', null), warmup: g('sv-warmup', null),
+           warmlog: g('sv-warmup-log', {}),
            flashday: localStorage.getItem('sv-flash-day') || null, tasks: tasks };
 }
 
@@ -52,6 +53,7 @@ function svProgressMerge(remote) {
     });
     if (!L.plan && remote.plan) L.plan = remote.plan;
     if (remote.warmup && (!L.warmup || remote.warmup.date > L.warmup.date)) L.warmup = remote.warmup;
+    L.warmlog = Object.assign({}, remote.warmlog || {}, L.warmlog || {});
     if (remote.flashday && (!L.flashday || remote.flashday > L.flashday)) L.flashday = remote.flashday;
   }
   try {
@@ -59,6 +61,7 @@ function svProgressMerge(remote) {
     localStorage.setItem('sv-lessons-when', JSON.stringify(L.when));
     if (L.plan) localStorage.setItem('sv-plan-prefs', JSON.stringify(L.plan));
     if (L.warmup) localStorage.setItem('sv-warmup', JSON.stringify(L.warmup));
+    if (L.warmlog) localStorage.setItem('sv-warmup-log', JSON.stringify(L.warmlog));
     if (L.flashday) localStorage.setItem('sv-flash-day', L.flashday);
     Object.keys(L.tasks).forEach(function (k) {
       localStorage.setItem('sv_progress_' + k, JSON.stringify(L.tasks[k]));

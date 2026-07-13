@@ -2532,6 +2532,7 @@ function initLessonProgress() {
               body: JSON.stringify({ data: { sv_progress: {
                 done: g('sv-lessons-done', {}), when: g('sv-lessons-when', {}),
                 plan: g('sv-plan-prefs', null), warmup: g('sv-warmup', null),
+                warmlog: g('sv-warmup-log', {}),
                 flashday: localStorage.getItem('sv-flash-day') || null,
                 tasks: tasks, updated: new Date().toISOString() } } })
             }).catch(function () {});

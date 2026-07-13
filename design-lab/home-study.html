@@ -1429,6 +1429,13 @@ if(savebtn) savebtn.onclick=async()=>{
 };
 /* sign-in: the account carries the setup — restore it here, then open the
    dashboard exactly as they left it (any device, any time) */
+/* Enter in either field = clicking the button (both auth forms) */
+[['savemail','savepass','savebtn'],['simail','sipass','sibtn']].forEach(([a,b,btn])=>{
+  [a,b].forEach(id=>{ const el=document.getElementById(id);
+    if(el) el.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){ e.preventDefault(); const t=document.getElementById(btn); if(t&&!t.disabled) t.click(); } });
+  });
+});
 const sibtn=document.getElementById('sibtn');
 if(sibtn) sibtn.onclick=async()=>{
   const em=document.getElementById('simail').value.trim();
