@@ -241,6 +241,59 @@ function svPlanState() {
            any: warm || lesson || cards, mins: mins };
 }
 
+/* the student's OWN flashcards + podcasts, drawn from each subject's current
+   unit (flashcard_questions come from lessons they've reached; podcasts from
+   the whole unit — listening ahead is what the bus is for). Called by both
+   dashboards after live units land; cb({deck, pods}). */
+function svUnitMedia(SUBJECTS, cb) {
+  var srcs = [];
+  SUBJECTS.forEach(function (su) {
+    if (!su.sub || su.mode === 'p') return;
+    var unit = null, next = 1;
+    if (su.units && su.units.length) {
+      for (var i = 0; i < su.units.length; i++) {
+        var u = su.units[i], set = u[4] || [];
+        var k = 1; while (k <= u[1] && set.indexOf(k) >= 0) k++;
+        if (k <= u[1]) { unit = u[3]; next = k; break; }
+      }
+      if (!unit) { unit = su.units[0][3]; next = 1; }
+    } else if (su.first) { unit = su.first; }
+    if (unit) srcs.push({ su: su, unit: unit, next: next });
+  });
+  if (!srcs.length) { cb({ deck: [], pods: [] }); return; }
+  Promise.all(srcs.map(function (s) {
+    var url = SUPA + '/rest/v1/lessons?select=lesson_number,title,flashcard_questions,related_media,units!inner(slug,subjects!inner(slug,school_id))'
+      + '&units.slug=eq.' + encodeURIComponent(s.unit)
+      + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub)
+      + '&units.subjects.school_id=is.null&order=lesson_number';
+    return fetch(url, { headers: { apikey: ANON } })
+      .then(function (r) { return r.json(); })
+      .then(function (rows) {
+        var deck = [], pods = [];
+        (rows || []).forEach(function (row) {
+          if (row.lesson_number <= s.next) (row.flashcard_questions || []).forEach(function (f) {
+            if (f && f.q && f.a) deck.push({ slug: s.su.slug, name: s.su.name, q: f.q, a: f.a });
+          });
+          var pc = (row.related_media || []).find(function (m) { return m.category === 'Podcasts'; });
+          var ep = pc && (pc.items || []).find(function (it) { return it.url && it.url.indexOf('.r2.dev/') >= 0; });
+          if (ep) pods.push({ t: row.title || ('Lesson ' + row.lesson_number), s: s.su.name, u: ep.url });
+        });
+        return { deck: deck, pods: pods };
+      })
+      .catch(function () { return { deck: [], pods: [] }; });
+  })).then(function (per) {
+    /* interleave decks across subjects so the mixed deck is genuinely mixed */
+    var decks = per.map(function (p) { return p.deck; });
+    decks.forEach(function (d) {
+      for (var i = d.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = d[i]; d[i] = d[j]; d[j] = t; }
+    });
+    var deck = [];
+    while (decks.some(function (d) { return d.length; }))
+      decks.forEach(function (d) { if (d.length) deck.push(d.shift()); });
+    cb({ deck: deck, pods: per.reduce(function (a, p) { return a.concat(p.pods); }, []) });
+  });
+}
+
 /* signed-in avatar menu: who you are, edit subjects, sign out. Signing out
    removes the signed-in marker and the Supabase session token; the device
    keeps its setup and progress (those live locally, not on the account). */

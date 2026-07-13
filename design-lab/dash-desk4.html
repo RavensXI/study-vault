@@ -505,6 +505,10 @@ function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/
 if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
 svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
+  /* swap the demo flashcard deck for this student's own current-unit cards */
+  svUnitMedia(SUBJECTS,m=>{
+    if(m.deck.length>=4){ FC.length=0; m.deck.forEach(x=>FC.push(x)); fci=0; fcPreview(); }
+  });
   if(_dq.get('warmup')&&!window._wuOpened){
     const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(SUBJECTS[0]);
     if(u){ window._wuOpened=1; svWarmup.open({subjects:SUBJECTS,target:u,nav}); }
@@ -948,17 +952,18 @@ const FC=[
   {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
 ];
 const cardsEl=document.getElementById('cards');
-{ const f=FC[0], sub=SUBJECTS.find(x=>x.slug===f.slug);
+function fcPreview(){ const f=FC[0], sub=SUBJECTS.find(x=>x.slug===f.slug);
   cardsEl.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
   document.getElementById('fcText').textContent=f.q;
-  document.getElementById('fcSubj').textContent=sub?sub.name:f.slug; }
+  document.getElementById('fcSubj').textContent=f.name||(sub?sub.name:f.slug); }
+fcPreview();
 
 const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
 let fci=0, fcShowA=false;
 function fcDeal(){
   const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
   fcmodal.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
-  document.getElementById('bqTag').textContent=sub?sub.name:f.slug;
+  document.getElementById('bqTag').textContent=f.name||(sub?sub.name:f.slug);
   document.getElementById('bqQ').textContent=f.q;
   document.getElementById('baTag').textContent=(sub?sub.name:f.slug)+' \u2014 answer';
   document.getElementById('baA').textContent=f.a;
@@ -984,7 +989,9 @@ fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
       "url('/design-lab/_posters/"+p[1].replace(/\.mp4$/,'.jpg')+"')"); break; } }
 }).catch(()=>{});
 const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
-document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return; frame.src='/design-lab/shorts.html'; modal.classList.add('open'); };
+document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return;
+  const subs=SUBJECTS.map(s=>s.sub).filter(Boolean).join(',');   /* scoped to THEIR subjects */
+  frame.src='/design-lab/shorts.html'+(subs?'?subjects='+encodeURIComponent(subs):''); modal.classList.add('open'); };
 document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
