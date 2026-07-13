@@ -17,7 +17,7 @@ Hardening baked in (from the scars of the podcast/explainer batches):
                                     batch_podcasts) with a 150s timeout; only if THAT fails
                                     does it exit cleanly asking for a manual login.
   * "unknown" != failed         — treated as still-processing until a per-video timeout.
-  * DATE-STAMPED DAILY QUOTA     — respects the ~180/day cap across re-runs on the same day.
+  * DATE-STAMPED DAILY QUOTA     — respects the daily cap (100 since 14 Jul 2026) across re-runs on the same day.
   * APPEND-ONLY MANIFEST         — the durable record of finished shorts; also the "done" set,
                                     so it's inherently resumable and race-free.
   * MIXED SELECTION             — round-robins across subjects so each day's batch is a
@@ -29,7 +29,7 @@ Storage: MP4 -> R2 studyvault-video at shorts/{subject}/{unit}/L{NN}.mp4.
 
 Usage:
     python scripts/batch_short_videos.py                      # one day's run, default cap
-    python scripts/batch_short_videos.py --daily-cap 180
+    python scripts/batch_short_videos.py --daily-cap 100
     python scripts/batch_short_videos.py --subject science-edexcel
     python scripts/batch_short_videos.py --dry-run --limit 20
     python scripts/batch_short_videos.py --status            # show progress + today's count
@@ -68,7 +68,7 @@ MANIFEST = os.path.join(SCRIPT_DIR, "_shorts_manifest.json")
 DAILY_FILE = os.path.join(SCRIPT_DIR, "_shorts_daily.json")
 LOCK_FILE = os.path.join(SCRIPT_DIR, "_batch_short.lock")
 DOWNLOAD_DIR = os.path.join(tempfile.gettempdir(), "sv_shorts_dl")   # nlm refuses to write under Documents/profile
-DEFAULT_CAP = 180                                       # videos/day (safe margin under the 200 quota)
+DEFAULT_CAP = 100                                       # videos/day (Google AI Ultra tier dropped to ~100/day quota, 14 Jul 2026)
 MAX_PER_LESSON = 4                                      # focused shorts per lesson (one per section, capped)
 WAVE_SIZE = 6                                           # LESSONS (=notebooks) alive at once; ~WAVE_SIZE*4 videos in flight
 PER_VIDEO_TIMEOUT = 40 * 60                             # give up on a single video after this

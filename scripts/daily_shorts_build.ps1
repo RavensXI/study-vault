@@ -119,7 +119,7 @@ New-Item -ItemType File -Path $lockFile -Force | Out-Null
 Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"))
 
 try {
-    Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "180") -TimeoutMin 300 | Out-Null
+    Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "100") -TimeoutMin 300 | Out-Null
     Write-Log "=== Daily shorts build END ==="
 } finally {
     Remove-Item $lockFile -Force -ErrorAction SilentlyContinue
