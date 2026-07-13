@@ -78,6 +78,9 @@
   .opt.wrong{border-color:#c0533a;background:#fbeee9;color:#9a3a25}
   .check .foot{margin-top:auto;font-family:var(--font-read);font-size:.82rem;color:var(--mut);min-height:1.2em}
   .check .foot b{color:var(--ink)}
+  .check .nextq{display:block;margin-top:.65rem;font-family:var(--font-head);font-weight:600;font-size:.88rem;
+    background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:.55rem 1.05rem;cursor:pointer}
+  .check .nextq:hover{border-color:color-mix(in srgb,var(--acc) 45%,var(--line))}
   .swipe{position:absolute;left:0;right:0;bottom:.7rem;text-align:center;font-size:.72rem;color:var(--mut);opacity:0;transition:opacity .3s}
   .check.answered .swipe{opacity:1}
 
@@ -106,7 +109,8 @@
 const MANIFEST = "/scripts/_shorts_manifest.json";
 const QUESTIONS_URL = "/scripts/_shorts_questions.json";
 const SITE = "https://www.studyvault.co.uk";   // Lesson deep-links (design-lab has no /lesson router)
-const CHECK_EVERY = 5;
+const CHECK_EVERY = 3;    // a check card appears after this many genuinely-watched shorts
+const QS_PER_CHECK = 2;   // questions per check card (drawn from that window's shorts)
 const WATCH_FRAC = 0.5;   // count a short as watched once past half (or played to the end)
 const CHROME_MS = 10000;  // chrome fades this long after a short starts playing
 const DAILY_TARGET = 20;  // today's session: this many shorts, then the done card
@@ -184,10 +188,13 @@ function sampleCheck(short){
     correct:0 };
 }
 // the real recall question mapped to this short (its lesson's QA'd knowledge check); placeholder if unmapped
-function realCheck(s){
+function mappedCheck(s){
   const m=QUESTIONS[s.lesson_id], q=m&&m[String(s.topic_index)];
-  if(q && Array.isArray(q.opts) && typeof q.correct==='number') return { q:q.q, opts:q.opts, correct:q.correct };
-  return sampleCheck(s);
+  return (q && Array.isArray(q.opts) && typeof q.correct==='number') ? q : null;
+}
+function realCheck(s){
+  const q=mappedCheck(s);
+  return q ? { q:q.q, opts:q.opts, correct:q.correct } : sampleCheck(s);
 }
 
 // the student's chosen subjects — the feed interleaves ONLY across these.
@@ -253,10 +260,17 @@ function onTap(){                     // first tap turns sound on; after that, t
 function render(items){
   pool=items;
   appendBatch(buildPlaylist(pool, DAILY_TARGET));
+  // QA hook: ?forcecheck=1 splices a check card straight after the first slide
+  // (seeded from the head of the playlist) so the card can be staged without
+  // sitting through CHECK_EVERY videos. Harmless if a student ever finds it.
+  if(new URLSearchParams(location.search).get('forcecheck')){
+    watchedQueue=pool.slice(0,Math.max(CHECK_EVERY,QS_PER_CHECK));
+    insertCheckAfter(document.getElementById('feed').children[0]);
+  }
 }
 
 // append a playlist batch + a fresh done card at the end (checks are inserted live,
-// once 5 shorts are actually watched)
+// once CHECK_EVERY shorts are actually watched)
 function appendBatch(batch){
   const feed=document.getElementById('feed');
   batch.forEach(s=>{ inFeed.add(keyOf(s)); feed.appendChild(makeShort(s)); });
@@ -308,7 +322,7 @@ function makeShort(s){
     if(vid.currentTime/vid.duration>=WATCH_FRAC) countWatch();   // watched past half -> counts
   });
   // finishing a short counts it, then glides to the next slide (a freshly inserted
-  // check if this was the 5th watched; checks/done have no video, so they wait)
+  // check if this hit CHECK_EVERY; checks/done have no video, so they wait)
   vid.addEventListener('ended',()=>{ countWatch(); const nxt=el.nextElementSibling; if(nxt) glideTo(el.parentElement, nxt.offsetTop); });
   vid.addEventListener('play',()=>{ short.classList.remove('paused'); if(vid===currentVideo) revealChrome(); });   // (re)start the fade timer
   vid.addEventListener('pause',()=>{ short.classList.remove('chrome-hidden'); if(vid===currentVideo) clearTimeout(hideTimer); });
@@ -334,32 +348,61 @@ function makeShort(s){
 function insertCheckAfter(afterEl){
   const already=afterEl.nextElementSibling && afterEl.nextElementSibling.querySelector('.check');
   if(!already && watchedQueue.length){
-    const seed=watchedQueue[Math.floor(Math.random()*watchedQueue.length)];
-    afterEl.insertAdjacentElement('afterend', makeCheck(seed));
+    afterEl.insertAdjacentElement('afterend', makeCheck(pickSeeds(watchedQueue, QS_PER_CHECK)));
   }
   watchedSinceCheck=0; watchedQueue=[];
 }
 
-function makeCheck(s){
-  const acc=accent(s.subject), topic=s.topic||titleCase(s.unit), c=realCheck(s);
+// up to n distinct seed shorts from the watched window, real mapped questions first
+function pickSeeds(queue,n){
+  const shuffle=a=>{ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+  const real=shuffle(queue.filter(s=>mappedCheck(s)));
+  const rest=shuffle(queue.filter(s=>!mappedCheck(s)));
+  return real.concat(rest).slice(0,Math.max(1,n));
+}
+
+// one card, QS_PER_CHECK questions asked in sequence ("1 of 2" -> "2 of 2");
+// swipe-on affordance only unlocks after the last answer
+function makeCheck(seeds){
   const el=document.createElement('div'); el.className='slide';
-  el.innerHTML=`<div class="check" style="--acc:${acc}">
-    <div class="kick">◆ Quick check</div>
-    <div class="from">from a short you just watched — ${subjName(s.subject)} · ${topic}</div>
-    <div class="q">${c.q}</div>
-    <div class="opts">${c.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('')}</div>
-    <div class="foot">Answer to keep your streak going.</div>
+  el.innerHTML=`<div class="check">
+    <div class="kick"></div>
+    <div class="from"></div>
+    <div class="q"></div>
+    <div class="opts"></div>
+    <div class="foot"></div>
     <div class="swipe">swipe up to continue ↑</div>
   </div>`;
   const check=el.querySelector('.check');
-  el.querySelectorAll('.opt').forEach(b=>b.addEventListener('click',()=>{
-    if(check.classList.contains('answered'))return;
-    check.classList.add('answered');
+  let i=0, locked=false;
+  const renderQ=()=>{
+    const s=seeds[i], c=realCheck(s), topic=s.topic||titleCase(s.unit);
+    locked=false;
+    check.style.setProperty('--acc',accent(s.subject));
+    check.querySelector('.kick').textContent=`◆ Quick check${seeds.length>1?` · ${i+1} of ${seeds.length}`:''}`;
+    check.querySelector('.from').textContent=`from a short you just watched — ${subjName(s.subject)} · ${topic}`;
+    check.querySelector('.q').textContent=c.q;
+    check.querySelector('.foot').textContent='Answer to keep your streak going.';
+    const opts=check.querySelector('.opts');
+    opts.innerHTML=c.opts.map((o,k)=>`<button class="opt" data-i="${k}"></button>`).join('');
+    [...opts.children].forEach((b,k)=>{ b.textContent=c.opts[k]; b.addEventListener('click',()=>answer(b,c)); });
+  };
+  const answer=(b,c)=>{
+    if(locked) return; locked=true;
     const ok=+b.dataset.i===c.correct;
     b.classList.add(ok?'correct':'wrong');
-    if(!ok) el.querySelector(`.opt[data-i="${c.correct}"]`).classList.add('correct');
-    el.querySelector('.foot').innerHTML= ok?'<b>Nice — that one stuck.</b>':'<b>Worth another look.</b> This topic comes back soon.';
-  }));
+    if(!ok) check.querySelector(`.opt[data-i="${c.correct}"]`).classList.add('correct');
+    const foot=check.querySelector('.foot');
+    const verdict= ok?'<b>Nice — that one stuck.</b>':'<b>Worth another look.</b> This topic comes back soon.';
+    if(i<seeds.length-1){
+      foot.innerHTML=`${verdict}<button class="nextq">Next question →</button>`;
+      foot.querySelector('.nextq').addEventListener('click',()=>{ i++; renderQ(); });
+    } else {
+      foot.innerHTML=verdict;
+      check.classList.add('answered');
+    }
+  };
+  renderQ();
   return el;
 }
 
