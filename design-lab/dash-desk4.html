@@ -560,7 +560,10 @@ function buildDayOneToday(){
     ${row2}
     <li tabindex="0" class="${ps.cards?'done':''}"><span class="n">${ps.cards?'✓':'3'}</span><div><b>Flashcards</b><small>flip through your first mixed deck</small></div><span class="mins">2 min</span></li>
   </ol>
-  <p class="momentum"><span class="hl">${t?'picking up where you left off.':'day one — your first session is ready.'}</span></p>
+  <p class="momentum"><span class="hl">${(function(){ const st=svDoneStats();
+    return !st.total ? 'day one — your first session is ready.'
+      : ps.lesson ? 'today’s lesson is done — anything more is a bonus.'
+      : st.total+' lesson'+(st.total===1?'':'s')+' in — picking up where you left off.'; })()}</span></p>
   <div class="startrow"><button class="start" ${url?`onclick="startWithWarmup('${url}')"`:''}><svg class="ring" viewBox="0 0 260 96" preserveAspectRatio="none"><path d="M18 52 C14 22, 74 8, 132 10 C 196 12, 250 22, 246 50 C 242 80, 180 90, 118 88 C 58 86, 20 76, 22 46"/></svg>${startLbl}</button></div>`;
   const st=svDoneStats();
   TODAY_R=`

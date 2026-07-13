@@ -520,6 +520,11 @@ function refreshDayOnePlan(){
   }
   const sb=document.getElementById('startbtn');
   if(sb&&target) sb.onclick=()=>startWithWarmup(target);
+  /* the highlight line tells the truth about where you are, not "day one" forever */
+  const hl=document.querySelector('.momentum .hl'), st0=svDoneStats();
+  if(hl) hl.textContent = !st0.total ? 'day one — your first session is ready.'
+    : (svPlanState().lesson ? 'today’s lesson is done — anything more is a bonus.'
+    : st0.total+' lesson'+(st0.total===1?'':'s')+' in — picking up where you left off.');
   /* tick off what's already done today; Start becomes Keep going */
   const ps=svPlanState(), rows=document.querySelectorAll('.card.plan ol li');
   [ps.warm,ps.lesson,ps.cards].forEach((done,i)=>{
