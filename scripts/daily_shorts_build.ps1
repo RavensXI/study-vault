@@ -120,6 +120,11 @@ Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "
 
 try {
     Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "100") -TimeoutMin 300 | Out-Null
+    # Post-pass: map recall questions onto tonight's new shorts (headless
+    # `claude -p` on the subscription, deterministic fallback inside) and
+    # extract their poster frames. Delta-based and idempotent — if it fails,
+    # tomorrow's run catches up; it never affects the batch above.
+    Run-Py -PyArgs @("scripts\_shorts_postpass.py") -TimeoutMin 45 | Out-Null
     Write-Log "=== Daily shorts build END ==="
 } finally {
     Remove-Item $lockFile -Force -ErrorAction SilentlyContinue

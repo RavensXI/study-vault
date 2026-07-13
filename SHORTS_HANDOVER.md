@@ -37,11 +37,17 @@ Everything is styled in the **reader skin**: warm ground `#f2efe9`, framed portr
 - **Posters:** `scripts/_make_short_posters.py` extracts a frame per short (ffmpeg) to `design-lab/_posters/` mirroring the R2 key. Needed because **`r2.dev` ignores HTTP range requests**, so `<video>` can't stream — the poster paints instantly while the clip buffers. **Only the first 29 shorts have posters so far**; re-run the script to cover the new 100 (it skips existing; downloads each MP4 with a browser UA to dodge r2.dev's bot-403).
 - **Production note:** r2.dev is dev-tier (no range, rate-limited). Real deployment needs a **custom domain in front of R2** (range + CDN) before video streams smoothly.
 
-### (c) Question mapping (recall checks)
-Reuses each lesson's **already-QA'd** knowledge checks — no new content to review. KC types `mcq` and `fill` both carry `options[]` + `correct`, so both map straight onto the 4-option tap card (`match` type excluded). Re-runnable 3-step pipeline:
-1. **`scripts/_shorts_fetch_qbank.py`** → `scratchpad/_shorts_qbank.json` — pulls each shorts-lesson's `sections` (h2s) + usable KCs. Deterministic, no model.
-2. **A workflow** (`map-short-questions`) tags the best-fit KC to each short's section — **one Sonnet agent per lesson**. This is the only model step and MUST run via the Claude Code subscription (a workflow/agent), NOT the Anthropic API (Tom's rule) — so it can't live inside the Python batch. Save its returned `{results:[...]}` to `scratchpad/_shorts_picks.json`.
-3. **`scripts/_shorts_assemble_questions.py`** → `scripts/_shorts_questions.json` (`lesson_id → {topic_index: {q,opts,correct,type}}`). **Note:** the assembler *rebuilds* the file from the picks — so to add the 20 unmapped lessons you must either re-tag **all** shorts-lessons in one workflow run, or extend the assembler to merge with the existing file. Feed loads this and falls back to a placeholder for any unmapped short.
+### (c) Question mapping (recall checks) — AUTOMATED nightly since 13 Jul
+Reuses each lesson's **already-QA'd** knowledge checks — no new content to review. KC types `mcq` and `fill` both carry `options[]` + `correct`, so both map straight onto the 4-option tap card (`match` type excluded).
+
+**`scripts/_shorts_postpass.py`** now runs the whole thing automatically — `daily_shorts_build.ps1` calls it right after the video batch, so new shorts get their question + poster the same night. What it does:
+1. Refreshes the qbank (`_shorts_fetch_qbank.py` → `scratchpad/_shorts_qbank.json`).
+2. Finds lessons whose shorts lack a valid pick (new lessons, legacy `kc_index:-1`, or previously heuristic-mapped).
+3. Maps them via **headless `claude -p --model sonnet`** in 8-lesson chunks (subscription, NOT the API — the CLI shim `%APPDATA%\npm\claude.cmd` is on the user PATH so Task Scheduler finds it). If the CLI is missing or a chunk fails, a **token-overlap heuristic** fills in (tagged `"src":"heuristic"` in the picks) and the model re-maps those lessons the next night — the feed never lags, quality self-corrects.
+4. Merges into `scratchpad/_shorts_picks.json`, rebuilds `scripts/_shorts_questions.json` (`lesson_id → {topic_index: {q,opts,correct,type}}`).
+5. Runs `_make_short_posters.py` (skips existing).
+
+Manual run any time (idempotent): `python scripts/_shorts_postpass.py` (flags: `--skip-posters`, `--force-lessons <id,...>` test hook). The old interactive-workflow route (`map-short-questions`, 8-lesson agent batches) is still fine for big catch-ups.
 
 ## 4. How to run / resume everything
 
@@ -57,14 +63,9 @@ python design-lab/serve.py            # then open http://127.0.0.1:8901/design-l
 python -u scripts/batch_short_videos.py --daily-cap 180
 #   useful flags: --status  --dry-run  --limit N  --subject <slug>  --sweep-only
 
-# re-run question mapping after more shorts are banked (see §3c):
-python scripts/_shorts_fetch_qbank.py                 # -> scratchpad/_shorts_qbank.json
-#   ...run the map-short-questions workflow over the lessons-with-shorts,
-#      save its {results:[...]} to scratchpad/_shorts_picks.json...
-python scripts/_shorts_assemble_questions.py          # -> scripts/_shorts_questions.json
-
-# regenerate posters for newly-banked shorts (optional; skips existing):
-python scripts/_make_short_posters.py
+# question mapping + posters now run NIGHTLY inside daily_shorts_build.ps1.
+# Manual catch-up (idempotent, delta-based):
+python scripts/_shorts_postpass.py                    # qbank -> claude -p mapping -> assemble -> posters
 ```
 
 **The auth wall:** each `nlm login` buys ~one session (~90 generations / ~23 lessons / ~67 banked shorts) before NotebookLM drops the token. It's usage-triggered, not our 180/day cap, and re-auth is interactive so it can't be automated.
