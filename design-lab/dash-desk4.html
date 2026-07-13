@@ -478,6 +478,7 @@
 </div>
 
 <script src="dash-data.js"></script>
+<script src="sync.js"></script>
 <script src="warmup.js"></script>
 <script src="planner.js"></script>
 <script>
@@ -500,6 +501,7 @@ function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/
 /* shared data layer: dash-data.js (SVDash) — same contract as classic.
    Once live units land, the day-one spread swaps "start at the beginning"
    for the same Continue target the classic view shows. */
+if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
 svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
   if(_dq.get('warmup')&&!window._wuOpened){
@@ -961,6 +963,7 @@ function fcDeal(){
 }
 cardsEl.onclick=()=>{ if(dragBlockClick) return; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
 if(new URLSearchParams(location.search).get('fc')==='1'){ fcDeal(); fcmodal.classList.add('open'); }
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }

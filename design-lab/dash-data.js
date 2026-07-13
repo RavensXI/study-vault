@@ -277,6 +277,7 @@ function svAvatarMenu(av) {
     menu.style.top = (r.bottom + 8) + 'px';
     menu.style.left = Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, r.right - menu.offsetWidth)) + 'px';
     menu.querySelector('.out').addEventListener('click', function () {
+      if (window.svSignOut) { svSignOut(); return; }   /* push progress, then clean the device */
       try { localStorage.removeItem('sv-user'); } catch (e2) {}
       try { Object.keys(localStorage).forEach(function (k) {
         if (/^sb-.*-auth-token/.test(k)) localStorage.removeItem(k); }); } catch (e2) {}

@@ -469,6 +469,7 @@
 <!-- planner modal + day tooltip are injected by planner.js (shared with the desk) -->
 
 <script src="dash-data.js"></script>
+<script src="sync.js"></script>
 <script src="warmup.js"></script>
 <script src="planner.js"></script>
 <script>
@@ -487,6 +488,7 @@ const SUBJECTS=[
 /* shared data layer: dash-data.js (SVDash) — wizard state, catalogs,
    progress rollup and the live unit fetch live there, once, for both views */
 const OPEN_STAGE=_dq.get('open');
+if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
 svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
   if(OPEN_STAGE&&!selSlug) selSlug=OPEN_STAGE;
   renderSubjects();
@@ -1089,6 +1091,7 @@ function fcDeal(){
 }
 document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); };
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
   else { fci=(fci+1)%FC.length; fcDeal(); } };

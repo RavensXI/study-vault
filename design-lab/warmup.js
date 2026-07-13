@@ -158,6 +158,7 @@
 
       function renderSummary() {
         try { localStorage.setItem(LSKEY, JSON.stringify({ date: todayStr(), correct: correct, total: pool.length })); } catch (e) {}
+        if (window.svProgressPushSoon) svProgressPushSoon();
         var line = correct >= pool.length * 0.8 ? 'Sharp. Today’s lesson will build on that.'
                  : correct >= pool.length * 0.5 ? 'Solid — a couple to revisit, and today’s lesson is next.'
                  : 'Good — now you know where the gaps are. The lesson fills them in.';

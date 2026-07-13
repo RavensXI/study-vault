@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@1,9..144,300..700&family=Instrument+Serif:ital@1&family=Young+Serif&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="sync.js"></script>
 <style>
   /* ============ THE STUDY, BEFORE YOU SIT DOWN ============
      Landing = the dashboard's world seen from the doorway, logged out.
@@ -1445,6 +1446,8 @@ if(sibtn) sibtn.onclick=async()=>{
       if(sv&&Array.isArray(sv.picked)&&sv.picked.length){
         try{ localStorage.setItem('sv-welcome',JSON.stringify(sv)); }catch(e){}
       }
+      /* progress comes home with the account (sync.js merges it in additively) */
+      try{ if(window.svProgressMerge) svProgressMerge(u&&u.user_metadata&&u.user_metadata.sv_progress); }catch(e){}
       try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
       say('Signed in — opening your StudyVault…');
       document.body.classList.remove('ready');

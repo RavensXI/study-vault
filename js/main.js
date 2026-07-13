@@ -2512,6 +2512,32 @@ function initLessonProgress() {
         if (!complete && when[wkey]) delete when[wkey];
         localStorage.setItem('sv-lessons-when', JSON.stringify(when));
       } catch (e2) {}
+      // signed in: progress lives on the account too (user_metadata.sv_progress,
+      // same place the wizard setup syncs). Guests: silently local-only.
+      try {
+        clearTimeout(window._svProgPushT);
+        window._svProgPushT = setTimeout(function () {
+          try {
+            var sess = JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token') || 'null');
+            var tok = sess && sess.access_token; if (!tok) return;
+            var g = function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
+            var tasks = {};
+            Object.keys(localStorage).forEach(function (k) {
+              if (k.indexOf('sv_progress_') === 0) { try { tasks[k.slice(12)] = JSON.parse(localStorage.getItem(k)); } catch (e) {} }
+            });
+            fetch('https://baipckgywpnwapobwtsy.supabase.co/auth/v1/user', {
+              method: 'PUT',
+              headers: { apikey: 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2',
+                'Content-Type': 'application/json', Authorization: 'Bearer ' + tok },
+              body: JSON.stringify({ data: { sv_progress: {
+                done: g('sv-lessons-done', {}), when: g('sv-lessons-when', {}),
+                plan: g('sv-plan-prefs', null), warmup: g('sv-warmup', null),
+                flashday: localStorage.getItem('sv-flash-day') || null,
+                tasks: tasks, updated: new Date().toISOString() } } })
+            }).catch(function () {});
+          } catch (e3) {}
+        }, 1500);
+      } catch (e2) {}
       // observable, so nobody has to guess whether the rule fired
       console.log('[sv-progress]', key, num, complete ? 'COMPLETE' : 'not complete',
         '- weighted ' + wres.pct + '% (threshold 50%)');

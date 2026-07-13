@@ -19,7 +19,10 @@
 var PLANK = 'sv-plan-prefs';
 var PLANP = { rest: [], hols: [] };
 try { Object.assign(PLANP, JSON.parse(localStorage.getItem(PLANK) || '{}')); } catch (e) {}
-function planSave() { try { localStorage.setItem(PLANK, JSON.stringify(PLANP)); } catch (e) {} }
+function planSave() {
+  try { localStorage.setItem(PLANK, JSON.stringify(PLANP)); } catch (e) {}
+  if (window.svProgressPushSoon) svProgressPushSoon();
+}
 function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 var PLNOW = new Date();
 var T0 = new Date(PLNOW.getFullYear(), PLNOW.getMonth(), PLNOW.getDate());

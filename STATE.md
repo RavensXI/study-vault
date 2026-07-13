@@ -52,6 +52,13 @@ dates).
 - Signed up/in: the same object lives in the account as `user_metadata.sv_welcome`.
   Sign-in restores it; while signed in, every wizard change syncs up (debounced).
   `localStorage["sv-user"]` = `{email}` marks the signed-in state for the prototypes.
+- **Progress syncs to the account too** (`user_metadata.sv_progress`, via
+  `design-lab/sync.js`): completions, dates, per-lesson task ticks, plan prefs,
+  warm-up/flashcard stamps. Dashboards pull-merge on load and push after;
+  lesson pages push after each completion (inline in `js/main.js`); sign-in
+  restores it all onto a fresh device. Merges are ADDITIVE (union/OR) so no
+  device can erase another's work. Sign-out pushes, then wipes the device —
+  safe because the account now holds everything. Guests stay local-only.
 - **Lesson completion is WEIGHTED** — `design-lab/LESSON_COMPLETION_SPEC.md`
   (agreed 27 Jun): exam question 40, flashcards 15, revision task 15,
   quiz/video/podcast 10 each, highlighter 0; done at ≥50% of available.
