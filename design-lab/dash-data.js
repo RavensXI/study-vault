@@ -99,6 +99,7 @@ if (_dq.get('picked')) {                    /* staging override for renders/QA *
 var DAYONE = !!(WIZ && Array.isArray(WIZ.picked) && WIZ.picked.length);
 var SVUSER = null;
 try { SVUSER = JSON.parse(localStorage.getItem('sv-user') || 'null'); } catch (e) {}
+if (_dq.get('user')) SVUSER = { email: _dq.get('user') };   /* staging */
 
 var DONE = {};
 try { DONE = JSON.parse(localStorage.getItem('sv-lessons-done')) || {}; } catch (e) {}
@@ -238,6 +239,52 @@ function svPlanState() {
   var mins = (warm ? 0 : 2) + (lesson ? 0 : 15) + (cards ? 0 : 2);
   return { warm: warm, lesson: lesson, cards: cards,
            any: warm || lesson || cards, mins: mins };
+}
+
+/* signed-in avatar menu: who you are, edit subjects, sign out. Signing out
+   removes the signed-in marker and the Supabase session token; the device
+   keeps its setup and progress (those live locally, not on the account). */
+function svAvatarMenu(av) {
+  if (!av || !SVUSER || !SVUSER.email) return;
+  var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  av.style.cursor = 'pointer';
+  av.setAttribute('role', 'button'); av.setAttribute('aria-haspopup', 'true');
+  var menu = null;
+  function close() { if (menu) { menu.remove(); menu = null; document.removeEventListener('click', onDoc, true); } }
+  function onDoc(e) { if (menu && !menu.contains(e.target) && e.target !== av) close(); }
+  av.addEventListener('click', function (e) {
+    e.stopPropagation();
+    if (menu) { close(); return; }
+    if (!document.getElementById('sv-avmenu-style')) {
+      var st = document.createElement('style'); st.id = 'sv-avmenu-style';
+      st.textContent = '.sv-avmenu{position:fixed;z-index:950;min-width:232px;background:#fffdf8;color:#26231e;'
+        + 'border:1px solid #e4dfd2;border-radius:10px;box-shadow:0 14px 40px rgba(20,14,6,.22);'
+        + 'padding:.45rem;font-family:"Schibsted Grotesk",system-ui,sans-serif;font-size:.9rem}'
+        + '.sv-avmenu .who{padding:.5rem .65rem;color:#84806f;font-size:.8rem;border-bottom:1px solid #efeadf;'
+        + 'margin-bottom:.35rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'
+        + '.sv-avmenu button,.sv-avmenu a{display:block;width:100%;text-align:left;background:none;border:none;'
+        + 'font:inherit;color:#26231e;padding:.5rem .65rem;border-radius:7px;cursor:pointer;text-decoration:none}'
+        + '.sv-avmenu button:hover,.sv-avmenu a:hover{background:#f4efe4}';
+      document.head.appendChild(st);
+    }
+    menu = document.createElement('div'); menu.className = 'sv-avmenu';
+    menu.innerHTML = '<div class="who">Signed in as ' + esc(SVUSER.email) + '</div>'
+      + '<a href="home-study.html">Edit subjects &amp; boards</a>'
+      + '<button type="button" class="out">Sign out</button>';
+    document.body.appendChild(menu);
+    var r = av.getBoundingClientRect();
+    menu.style.top = (r.bottom + 8) + 'px';
+    menu.style.left = Math.max(8, Math.min(window.innerWidth - menu.offsetWidth - 8, r.right - menu.offsetWidth)) + 'px';
+    menu.querySelector('.out').addEventListener('click', function () {
+      try { localStorage.removeItem('sv-user'); } catch (e2) {}
+      try { Object.keys(localStorage).forEach(function (k) {
+        if (/^sb-.*-auth-token/.test(k)) localStorage.removeItem(k); }); } catch (e2) {}
+      location.reload();
+    });
+    setTimeout(function () { document.addEventListener('click', onDoc, true); }, 0);
+  });
+  if (_dq.get('menu')) setTimeout(function () { av.click(); }, 80);   /* staging: render it open */
 }
 
 /* entry point: swap demo subjects for the student's own, then fetch their
