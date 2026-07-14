@@ -325,6 +325,7 @@
     border-radius:9px;background:#fff;padding:.5rem 1rem;cursor:pointer;color:var(--sec)}
   .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
   .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
+  .fcbtns .fb.waiting{opacity:.4;pointer-events:none;cursor:default}
   .fcmeta{position:fixed;left:0;right:0;bottom:26px;text-align:center;color:#f1e8d8;font-size:.85rem}
 
   /* ---- shorts modal ---- */
@@ -513,7 +514,7 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
   svUnitMedia(SUBJECTS,m=>{
     if(m.deck.length>=4){ FC.length=0; m.deck.forEach(x=>FC.push(x)); fci=0;
       if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
-        if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); } } }
+        if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
     if(m.pods.length){ PODCASTS.length=0; m.pods.forEach(x=>PODCASTS.push(x));
       if(!podOn){ podQ=null; podPos=-1; } }
   });
@@ -1125,10 +1126,22 @@ document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classLi
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); };
-bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
+bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); }
   else { fci=(fci+1)%FC.length; fcDeal(); } };   /* tapping the back = skip, unmarked */
+/* same read-gate as the in-lesson deck: marks unlock only after there's been
+   time to actually read the answer (words/4s, clamped 1.5–6s) */
+let fcCanMark=false, fcUnlockT=null;
+function fcReadGate(){
+  const a=document.getElementById('baA').textContent||'';
+  const secs=Math.max(1.5,Math.min(a.trim().split(/\s+/).length/4,6));
+  fcCanMark=false; clearTimeout(fcUnlockT);
+  document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.add('waiting'));
+  fcUnlockT=setTimeout(()=>{ fcCanMark=true;
+    document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.remove('waiting')); },secs*1000);
+}
 /* self-marking: the record that feeds the teacher view + spaced repetition */
 function fcMark(ok){
+  if(!fcCanMark) return;
   try{ const f=FC[fci], lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
     lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
       n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
@@ -1141,7 +1154,7 @@ function fcMark(ok){
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
 fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
 if(_dq.get('fc')){ fcDeal(); fcmodal.classList.add('open');   /* staging: ?fc=1 open, ?fc=2 flipped */
-  if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); } }
+  if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } }
 
 /* shorts — same feed, in a phone frame; scoped to THIS student's subjects so
    the feed interleaves only across what they study */

@@ -297,6 +297,7 @@
     border-radius:9px;background:#fff;padding:.55rem 1.1rem;cursor:pointer;color:#57534a}
   .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
   .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
+  .fcbtns .fb.waiting{opacity:.4;pointer-events:none;cursor:default}
   .fcmodal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;color:#efe9da}
   .fcmodal .meta small{font-family:var(--read);font-style:italic;font-size:.95rem;opacity:.85}
   .fcmodal .meta .cnt{font-variant-numeric:tabular-nums;font-weight:700;font-size:.9rem}
@@ -983,8 +984,20 @@ cardsEl.onclick=()=>{ if(dragBlockClick) return; fcDeal(); fcmodal.classList.add
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
 if(new URLSearchParams(location.search).get('fc')==='1'){ fcDeal(); fcmodal.classList.add('open'); }
+/* same read-gate as the in-lesson deck: marks unlock only after there's been
+   time to actually read the answer (words/4s, clamped 1.5–6s) */
+let fcCanMark=false, fcUnlockT=null;
+function fcReadGate(){
+  const a=document.getElementById('baA').textContent||'';
+  const secs=Math.max(1.5,Math.min(a.trim().split(/\s+/).length/4,6));
+  fcCanMark=false; clearTimeout(fcUnlockT);
+  document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.add('waiting'));
+  fcUnlockT=setTimeout(()=>{ fcCanMark=true;
+    document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.remove('waiting')); },secs*1000);
+}
 /* self-marking: the record that feeds the teacher view + spaced repetition */
 function fcMark(ok){
+  if(!fcCanMark) return;
   try{ const f=FC[fci], lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
     lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
       n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
@@ -994,7 +1007,7 @@ function fcMark(ok){
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
-bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
+bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); }
   else { fci=(fci+1)%FC.length; fcDeal(); } };
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
 fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
