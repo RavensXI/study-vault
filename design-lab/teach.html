@@ -104,6 +104,41 @@
 
   .foot{max-width:1240px;margin:0 auto;padding:0 16px 40px;font-size:.78rem;color:var(--mut);line-height:1.6}
   .foot b{color:var(--sec)}
+
+  /* ---- the parents'-evening / report pack: one printable page per student ---- */
+  body.packmode .top,body.packmode .demo,body.packmode .wrap,body.packmode .foot{display:none}
+  .pack{max-width:840px;margin:26px auto 60px;background:#fff;border:1px solid var(--line);border-radius:12px;
+    padding:2.2rem 2.4rem;box-shadow:0 18px 50px rgba(20,14,6,.10)}
+  .pack .phead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:.7rem}
+  .pack .phead h1{font-family:var(--read);font-size:1.65rem;margin:0}
+  .pack .phead .pclass{color:var(--sec);font-size:.9rem;text-align:right;line-height:1.5}
+  .pack .pbrand{font-family:'Young Serif',serif;font-size:.95rem;color:#1d1c1a}
+  .pack .pbrand img{height:.3em;margin-left:1px}
+  .pack .kv{margin:1.1rem 0 .4rem}
+  .pack h3{font-size:.74rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);margin:1.4rem 0 .5rem}
+  .pack table{width:100%;border-collapse:collapse;font-size:.86rem}
+  .pack td{padding:.45rem .3rem;border-top:1px solid var(--linel);vertical-align:middle}
+  .pack .ubar{position:relative;display:block;height:10px;border-radius:5px;background:var(--linel);min-width:180px}
+  .pack .ubar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--good)}
+  .pack .ubar.low i{background:var(--warn)} .pack .ubar.mid i{background:var(--gold)}
+  .pack .ubar .cls{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--ink);opacity:.45}
+  .pack .legend{font-size:.72rem;color:var(--mut);margin-top:.3rem}
+  .pack .two{display:grid;grid-template-columns:1fr 1fr;gap:0 2rem}
+  @media (max-width:700px){ .pack .two{grid-template-columns:1fr} }
+  .pack .aidraft{border-left:3px solid var(--gold);background:#faf6ea;border-radius:0 9px 9px 0;
+    padding:.9rem 1.1rem;font-family:var(--read);font-size:.92rem;line-height:1.62;color:#3d3931}
+  .pack .aidraft b{color:var(--ink)}
+  .pack .aistamp{font-size:.72rem;color:var(--mut);margin-top:.45rem}
+  .pack .pfoot{margin-top:1.6rem;padding-top:.8rem;border-top:1px solid var(--linel);font-size:.72rem;color:var(--mut);line-height:1.55}
+  .packbar{max-width:840px;margin:18px auto 0;display:flex;gap:10px;justify-content:flex-end;padding:0 4px}
+  .packbar button,.packbar a{font-family:var(--head);font-weight:600;font-size:.88rem;border:1px solid var(--line);
+    border-radius:9px;background:var(--card);padding:.55rem 1.05rem;cursor:pointer;color:var(--ink);text-decoration:none}
+  .packbar .prim{background:#221E19;color:#faf8f5;border-color:#221E19}
+  @media print{
+    body{background:#fff}
+    .packbar{display:none}
+    .pack{box-shadow:none;border:none;margin:0;max-width:none;padding:0}
+  }
 </style>
 </head>
 <body>
@@ -154,6 +189,7 @@
 </div>
 
 <script src="teach-digest.js"></script>
+<script src="teach-pack-demo.js"></script>
 <script>
 /* ---------- seeded synthetic class over the REAL history-aqa structure ------- */
 function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed);
@@ -368,6 +404,9 @@ function drill(ix){
     '<div class="paper"><div class="meta">'+esc(pr.d)+' · '+esc(pr.k)+' · '+pr.m+' marks</div>'
     +'<p class="pq">'+esc(pr.q)+'</p><div class="pa">'+esc(pr.a)+'</div>'
     +'<div class="pr">'+esc(pr.r).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n\n/g,'<br><br>')+'</div></div>').join(''); }
+  h+='<div class="sect">Parents’ evening / reports</div>'
+    +'<a href="teach.html?pack='+ix+'" style="display:inline-block;font-weight:600;font-size:.88rem;'
+    +'border:1px solid var(--line);border-radius:9px;background:#fff;padding:.55rem 1rem;text-decoration:none">Generate this student’s pack →</a>';
   $('#dbody').innerHTML=h; $('#dbody').classList.remove('sub');
 }
 
@@ -377,9 +416,86 @@ const AI_DIGEST=window.SV_TEACH_DIGEST||null;
 if(AI_DIGEST){ $('#digestbody').innerHTML=AI_DIGEST.html; $('#digeststamp').textContent=AI_DIGEST.stamp; }
 else{ $('#digestbody').innerHTML='<i style="color:var(--mut)">No digest generated yet — run scripts/_teach_digest.py (one small-model call per class per week).</i>'; }
 
+/* ---- the pack: template + visuals + the AI draft, per student ------------- */
+function renderPack(ix){
+  const {s,st}=STATS[ix], p=s.p;
+  document.body.classList.add('packmode');
+  const win=st.activeDays.filter(d=>d>=iso(daysAgo(27))).length;
+  const unitRows=UNITS.map(u=>{
+    const evs=st.ev.filter(e=>e.unit===u.slug), ok=evs.filter(e=>e.ok).length;
+    const acc=evs.length>=5?ok/evs.length:null;
+    const clsAcc=(UNITAGG.find(x=>x.u.slug===u.slug)||{}).acc;
+    const doneN=(p.done['history-aqa/'+u.slug]||[]).length;
+    const cls=acc===null?'':acc<.55?'low':acc<.72?'mid':'';
+    return '<tr><td style="font-weight:600;max-width:230px">'+esc(u.name)+'</td>'
+      +'<td><span class="ubar '+cls+'"><i style="width:'+(acc?Math.round(acc*100):0)+'%"></i>'
+      +(clsAcc?'<span class="cls" style="left:'+Math.round(clsAcc*100)+'%"></span>':'')+'</span></td>'
+      +'<td class="att"><span class="pct">'+pct(acc)+'</span></td>'
+      +'<td class="att">'+evs.length+' answers</td>'
+      +'<td class="att">'+doneN+'/'+u.lessons+' lessons</td></tr>';
+  }).join('');
+  const by={};
+  st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||''); (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; });
+  const weak=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,4);
+  const strong=UNITS.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.slug); const ok=evs.filter(e=>e.ok).length;
+    return {name:u.name,acc:evs.length>=6?ok/evs.length:null}; }).filter(x=>x.acc!==null&&x.acc>=.75);
+  const wl=Object.keys(p.warmlog||{}).sort().slice(-10);
+  const pr=(p.practice||[])[0];
+  const ai=(window.SV_PACK_DEMO||{})[ix];
+  const el=document.createElement('div');
+  el.innerHTML='<div class="packbar"><a href="teach.html?student='+ix+'">← back to the class</a>'
+    +'<button class="prim" onclick="print()">Print</button></div>'
+    +'<div class="pack">'
+    +'<div class="phead"><div><h1>'+esc(s.name)+'</h1></div>'
+    +'<div class="pclass"><span class="pbrand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span><br>10H · History (AQA) · 4 weeks to '+TODAY.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+    +'<div class="kv"><div><b>'+st.lessons+'</b><small>lessons finished</small></div>'
+    +'<div><b>'+win+'</b><small>days revised</small></div>'
+    +'<div><b>'+pct(st.acc)+'</b><small>recall accuracy</small></div>'
+    +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d ago')+'</b><small>last revised</small></div></div>'
+    +'<h3>Topics — how well it’s sticking</h3><table>'+unitRows+'</table>'
+    +'<div class="legend">bar = '+esc(s.name.split(' ')[0])+'’s recall · thin line = class average · from warm-ups, quizzes, shorts &amp; flashcards</div>'
+    +'<div class="two"><div><h3>Strengths</h3>'
+    +(strong.length?'<div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join('<br>')+'</div>':'<div class="att">Not enough evidence yet.</div>')
+    +'</div><div><h3>Working on</h3>'
+    +(weak.length?weak.map(w=>{ const un=UNITS.find(u=>u.slug===w.unit);
+      return '<div class="miss"><b>'+esc(w.title||'')+'</b><span class="q">'+esc(un?un.name:'')+' · missed ×'+w.n+'</span></div>'; }).join(''):'<div class="att">No repeated misses.</div>')
+    +'</div></div>'
+    +(wl.length?'<h3>Warm-up scores, last '+wl.length+'</h3><div class="wubars">'
+      +wl.map(d=>{ const w=p.warmlog[d]; return '<i style="height:52px"><b style="height:'+Math.round(w.correct/w.total*100)+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>':'')
+    +(pr?'<h3>Most recent practice answer · AI-marked</h3><div class="paper"><div class="meta">'+esc(pr.d)+' · '+pr.m+' marks</div>'
+      +'<p class="pq">'+esc(pr.q)+'</p><div class="pr">'+esc(pr.r).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n\n/g,'<br><br>')+'</div></div>':'')
+    +'<h3>Teacher summary — draft</h3>'
+    +(ai?'<div class="aidraft">'+ai+'</div><div class="aistamp">AI-drafted from the evidence above · edit before sharing · ≈ 1p per pack</div>'
+       :'<div class="aidraft" style="color:var(--mut)"><i>Drafts generate when the teacher clicks "Generate packs" — one small-model call per student, batched, ≈ 1p each. (Demo has one pre-generated: Oscar Grant.)</i></div>')
+    +'<div class="pfoot">Every figure on this page is aggregated from '+esc(s.name.split(' ')[0])
+    +'’s own revision activity on StudyVault — warm-up answers, lesson quizzes, shorts recall checks and self-marked flashcards, each tied to a lesson. '
+    +'Recall accuracy is a measure of what has stuck so far, not of ability. The teacher summary is a draft written from this evidence and reviewed by the teacher.</div>'
+    +'</div>';
+  document.body.appendChild(el);
+}
+
 /* staging: ?student=N opens a drill-in for screenshots */
 const _sq=new URLSearchParams(location.search).get('student');
 if(_sq!==null&&STATS[+_sq]) drill(+_sq);
+const _pq=new URLSearchParams(location.search).get('pack');
+if(_pq!==null&&STATS[+_pq]) renderPack(+_pq);
+/* ?packagg=N dumps one student's pack aggregates for the draft generator */
+if(new URLSearchParams(location.search).get('packagg')!==null){
+  const ix=+new URLSearchParams(location.search).get('packagg');
+  const {s,st}=STATS[ix], p=s.p;
+  const by2={}; st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=(e.title||''); by2[k]=(by2[k]||0)+1; });
+  const agg={name:s.name, class:'10H History (AQA)',
+    lessons:st.lessons, recall:st.acc===null?null:Math.round(st.acc*100),
+    daysRevised:st.activeDays.filter(d=>d>=iso(daysAgo(27))).length, lastSeenDaysAgo:st.lastGap,
+    units:UNITS.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.slug), ok=evs.filter(e=>e.ok).length;
+      return {name:u.name, recall:evs.length>=5?Math.round(ok/evs.length*100):null, answers:evs.length,
+        classAvg:Math.round(((UNITAGG.find(x=>x.u.slug===u.slug)||{}).acc||0)*100)}; }),
+    keepsMissing:Object.entries(by2).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([t,n])=>({lesson:t,misses:n})),
+    practiceFeedback:(p.practice||[]).map(x=>x.r.slice(0,400))};
+  const pre=document.createElement('pre'); pre.id='packagg'; pre.textContent=JSON.stringify(agg);
+  pre.style.cssText='position:fixed;left:0;top:0;background:#fff;z-index:999;max-width:100%;overflow:auto';
+  document.body.appendChild(pre);
+}
 
 /* expose aggregates for the digest generator (?agg=1 dumps JSON) */
 if(new URLSearchParams(location.search).get('agg')){
