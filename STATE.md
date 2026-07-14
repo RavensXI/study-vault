@@ -91,6 +91,23 @@ reports control coordinates) · `?plan=YYYY-MM` (open planner at a month) ·
 - `_designlab_picker_demo.py` — original picker loop (superseded by the above)
 - `_designlab_sketch_arrows.py`, `_designlab_shelf_lower.py`, `_designlab_shelf_bricabrac.py`, `_designlab_shelf_atmosphere*.py` — Gemini art props for the landing scene
 
+## Teacher side (rudimentary, 14 Jul)
+
+`design-lab/teach.html` (route `/teach`) — reader-skin teacher dashboard over a
+SYNTHETIC 28-student class built on the real History AQA structure. The
+aggregation code is the real thing: it consumes exactly the `sv_progress`
+shape students sync. Surfaces: triage sentences (reteach candidate, gone
+quiet, slipping, flying — all computed), topic recall grid, needs-first
+roster with sparklines, student drill-in (warm-up trend, keeps-missing by
+lesson, AI-marked practice transcripts). AI = ONE weekly brief per class
+(`scripts/_teach_digest.py` → claude -p over aggregates → `teach-digest.js`)
++ the already-paid-for stored marking feedback. Capture feeding it (all in
+sv_progress): warm-up misses + per-unit attempts, KC scores (`sv-kc-log`),
+shorts check answers (`sv-shorts-checks`), practice answers + AI feedback
+(`sv-practice-log`, capped 40). Missing for real data: a teacher-gated API
+reading class members' sv_progress (service-key, server-side) — the metadata
+approach itself should become an events table + RLS in the platform build.
+
 ## Parked / open decisions
 
 - **Paper→content mapping** for the planner taper (unit→paper per subject-board;

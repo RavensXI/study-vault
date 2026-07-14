@@ -653,6 +653,16 @@ function initPracticeQuestions() {
       aiFeedbackBody.innerHTML = formatAiResponse(data.result || '(no response)');
       aiUsageIncrement();
       aiUpdateLimitPill();
+      // keep the answer + AI feedback for teacher review (account-synced, capped)
+      try {
+        const plog = JSON.parse(localStorage.getItem('sv-practice-log')) || [];
+        const ppm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+        plog.unshift({ d: new Date().toISOString().slice(0, 10),
+          k: ppm ? ppm[2] + '/' + ppm[3] + '/' + ppm[4] : '',
+          q: q.text.slice(0, 240), m: parseInt(marksMatch, 10),
+          a: answer.slice(0, 1500), r: (data.result || '').slice(0, 1800) });
+        localStorage.setItem('sv-practice-log', JSON.stringify(plog.slice(0, 40)));
+      } catch (e2) {}
       aiFeedback.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (err) {
       aiFeedback.classList.remove('loading');
@@ -2174,6 +2184,14 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       localStorage.setItem(storageKey, scoreStr);
       if (scoreEl) scoreEl.textContent = scoreStr;
     }
+    // teacher-facing recall record: latest KC attempt per lesson (account-synced)
+    try {
+      var kclg = JSON.parse(localStorage.getItem('sv-kc-log')) || {};
+      var kpm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+      kclg[kpm ? kpm[2] + '/' + kpm[3] + '/' + kpm[4] : storageKey] =
+        { s: score, t: total, d: new Date().toISOString().slice(0, 10) };
+      localStorage.setItem('sv-kc-log', JSON.stringify(kclg));
+    } catch (e) {}
 
     overlay.querySelector('#kc-close').addEventListener('click', closeKC);
     overlay.querySelector('#kc-retry').addEventListener('click', () => {
@@ -2532,7 +2550,9 @@ function initLessonProgress() {
               body: JSON.stringify({ data: { sv_progress: {
                 done: g('sv-lessons-done', {}), when: g('sv-lessons-when', {}),
                 plan: g('sv-plan-prefs', null), warmup: g('sv-warmup', null),
-                warmlog: g('sv-warmup-log', {}),
+                warmlog: g('sv-warmup-log', {}), kc: g('sv-kc-log', {}),
+                practice: g('sv-practice-log', []),
+                shortschecks: g('sv-shorts-checks', []),
                 flashday: localStorage.getItem('sv-flash-day') || null,
                 tasks: tasks, updated: new Date().toISOString() } } })
             }).catch(function () {});

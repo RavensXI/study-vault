@@ -1,0 +1,395 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyVault — Teacher</title>
+<base href="/design-lab/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..600&family=Caveat:wght@400..600&family=Young+Serif&display=swap" rel="stylesheet">
+<style>
+  /* Teacher view, reader skin. Everything on this page is computed from the
+     SAME sv_progress objects students sync to their accounts — the demo class
+     is synthetic (seeded), the aggregation code is the real thing. */
+  :root{--paper:#f6f1e7;--card:#fffdf8;--ink:#26231e;--sec:#57534a;--mut:#84806f;
+    --line:#e4dfd2;--linel:#efeadf;--anchor:#5b4632;--good:#4e6e5d;--warn:#a3542f;--gold:#a3873a;
+    --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive}
+  *{box-sizing:border-box}
+  html{background:var(--paper)}
+  body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper)}
+  a{color:inherit}
+  .top{max-width:1240px;margin:0 auto;padding:18px 16px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .brand{font-family:'Young Serif',serif;font-size:1.05rem;color:#1d1c1a}
+  .brand img{height:.30em;margin-left:1px;vertical-align:baseline}
+  .who{font-family:var(--hand);font-size:1.15rem;color:var(--mut)}
+  .classpick{margin-left:auto;font-size:.85rem;color:var(--sec);background:var(--card);border:1px solid var(--line);
+    border-radius:8px;padding:.45rem .8rem}
+  .classpick b{color:var(--ink)}
+  .demo{max-width:1240px;margin:10px auto 0;padding:0 16px}
+  .demo span{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+    color:#7a5b1f;background:#f3e8c8;border:1px solid #e2d3a4;border-radius:6px;padding:.3rem .6rem}
+  .wrap{max-width:1240px;margin:14px auto 60px;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px}
+  @media (max-width:1020px){ .wrap{grid-template-columns:1fr} }
+  .col{min-width:0;display:flex;flex-direction:column;gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem}
+  .card h2{font-family:var(--read);font-size:1.15rem;margin:0 0 .7rem}
+  .card h2 small{font-family:var(--head);font-weight:600;font-size:.76rem;color:var(--mut);margin-left:.5rem}
+
+  /* triage — sentences first */
+  .triage .tri{display:flex;gap:10px;align-items:flex-start;padding:.55rem 0;border-top:1px solid var(--linel);font-size:.92rem;line-height:1.45}
+  .triage .tri:first-of-type{border-top:none}
+  .tri .dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:.42rem}
+  .tri b{font-weight:700}
+  .tri .names{color:var(--sec)}
+
+  /* topic grid */
+  .topics table{width:100%;border-collapse:collapse;font-size:.86rem}
+  .topics th{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:.3rem .4rem}
+  .topics td{padding:.5rem .4rem;border-top:1px solid var(--linel);vertical-align:middle}
+  .topics .u{font-weight:600;max-width:260px}
+  .bar{position:relative;height:9px;border-radius:5px;background:var(--linel);min-width:110px}
+  .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--good)}
+  .bar.low i{background:var(--warn)}
+  .bar.mid i{background:var(--gold)}
+  .pct{font-variant-numeric:tabular-nums;color:var(--sec);width:44px;display:inline-block}
+  .att{color:var(--mut);font-size:.78rem;white-space:nowrap}
+  tr.worst .u::after{content:" · reteach candidate";font-size:.72rem;font-weight:700;color:var(--warn)}
+
+  /* roster */
+  .roster table{width:100%;border-collapse:collapse;font-size:.88rem}
+  .roster th{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:.3rem .45rem;cursor:default}
+  .roster td{padding:.42rem .45rem;border-top:1px solid var(--linel);white-space:nowrap}
+  .roster tr.r{cursor:pointer}
+  .roster tr.r:hover td{background:#faf6ec}
+  .roster tr.sel td{background:#f4ecd9}
+  .nm{font-weight:600}
+  .spark{display:inline-block;vertical-align:middle}
+  .spark rect{fill:#c9bda2}
+  .spark rect.hot{fill:var(--anchor)}
+  .flag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;border-radius:5px;padding:.14rem .42rem}
+  .flag.quiet{background:#fbeee9;color:#9a3a25}
+  .flag.slip{background:#f6ecd2;color:#8a6d1f}
+  .flag.fly{background:#edf6f0;color:#1e5b3e}
+  .acc{font-variant-numeric:tabular-nums}
+  .tr-up{color:var(--good)} .tr-dn{color:var(--warn)} .tr-fl{color:var(--mut)}
+
+  /* drill-in */
+  .drill .sub{color:var(--sec);font-size:.85rem;margin:-.4rem 0 .8rem}
+  .kv{display:flex;gap:1.4rem;flex-wrap:wrap;margin-bottom:.9rem}
+  .kv div b{display:block;font-size:1.3rem;font-weight:800}
+  .kv div small{font-size:.72rem;color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+  .sect{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin:1rem 0 .35rem}
+  .miss{font-size:.86rem;line-height:1.5;padding:.35rem 0;border-top:1px solid var(--linel)}
+  .miss b{font-weight:600}
+  .miss .q{color:var(--sec);font-family:var(--read);font-size:.83rem;display:block}
+  .ok{color:var(--good);font-size:.86rem;line-height:1.6}
+  .wubars{display:flex;align-items:flex-end;gap:5px;height:52px;margin:.3rem 0 .1rem}
+  .wubars i{width:20px;background:var(--linel);border-radius:3px 3px 0 0;position:relative}
+  .wubars i b{position:absolute;left:0;right:0;bottom:0;background:var(--anchor);border-radius:3px 3px 0 0}
+  .wubars i small{position:absolute;top:100%;left:50%;translate:-50%;font-size:.6rem;color:var(--mut);padding-top:3px}
+  .paper{border:1px solid var(--line);border-radius:9px;background:#fff;padding:.8rem .9rem;margin:.5rem 0;font-size:.86rem}
+  .paper .pq{font-family:var(--read);font-weight:600;margin:0 0 .4rem}
+  .paper .pa{white-space:pre-wrap;color:var(--sec);border-left:2px solid var(--linel);padding-left:.7rem;margin:.4rem 0;line-height:1.5}
+  .paper .pr{background:#f8f4ea;border-radius:7px;padding:.55rem .7rem;line-height:1.5;color:#4a4438}
+  .paper .pr b{color:var(--ink)}
+  .paper .meta{font-size:.72rem;color:var(--mut);margin-bottom:.3rem}
+
+  /* AI digest */
+  .digest{border-left:3px solid var(--gold)}
+  .digest .body{font-family:var(--read);font-size:.9rem;line-height:1.62;color:#3d3931}
+  .digest .body b{color:var(--ink)}
+  .digest .stamp{font-size:.74rem;color:var(--mut);margin-top:.7rem}
+  .digest ul{margin:.4rem 0 .2rem;padding-left:1.1rem}
+  .digest li{margin:.25rem 0}
+
+  .foot{max-width:1240px;margin:0 auto;padding:0 16px 40px;font-size:.78rem;color:var(--mut);line-height:1.6}
+  .foot b{color:var(--sec)}
+</style>
+</head>
+<body>
+<div class="top">
+  <span class="brand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span>
+  <span class="who">the teacher's side of the desk</span>
+  <span class="classpick">Class: <b>10H · History (AQA)</b> · 28 students · this week</span>
+</div>
+<div class="demo"><span>Synthetic demo class — real pipeline reads the same sv_progress objects via a teacher-gated API</span></div>
+
+<div class="wrap">
+  <div class="col">
+    <div class="card triage" id="triage">
+      <h2>Needs your eyes <small>computed, no AI</small></h2>
+    </div>
+    <div class="card topics" id="topics">
+      <h2>What's sticking, by topic <small>recall accuracy across warm-ups, quizzes &amp; shorts</small></h2>
+      <table><thead><tr><th>Unit</th><th>Recall</th><th></th><th>Evidence</th><th>Coverage</th></tr></thead>
+      <tbody id="topicrows"></tbody></table>
+    </div>
+    <div class="card roster" id="rosterc">
+      <h2>The class <small>click a student</small></h2>
+      <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
+      <tbody id="roster"></tbody></table>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card digest">
+      <h2>This week, in brief <small>AI · written weekly, not per view</small></h2>
+      <div class="body" id="digestbody"></div>
+      <div class="stamp" id="digeststamp"></div>
+    </div>
+    <div class="card drill" id="drill">
+      <h2 id="dname">Pick a student</h2>
+      <div id="dbody" class="sub">Their week, weak spots, and practice answers with the AI marker's feedback land here.</div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <b>How this is calculated.</b> Every number on this page is aggregated from retrieval-practice
+  evidence students already generate while revising — warm-up answers, lesson quiz scores, shorts
+  recall checks — each one tied to a lesson and unit. Recall accuracy is a <b>retention signal,
+  not an ability judgement</b>: low numbers mean "this hasn't stuck yet", and clusters across the
+  class are reteach signals. The only AI on the page is the weekly brief (one small-model call per
+  class per week, ≈1p) and the stored practice-marking feedback, which was already generated when
+  each student pressed "mark" — nothing reasons per student per page-view.
+</div>
+
+<script src="teach-digest.js"></script>
+<script>
+/* ---------- seeded synthetic class over the REAL history-aqa structure ------- */
+function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed);
+  t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+const R=rng(20260714);
+const UNITS=[            /* the class's taught options (mirrors a real 10H) */
+  {slug:'america-opportunity-inequality', name:'America, 1920–1973', lessons:14},
+  {slug:'conflict-tension-inter-war',     name:'Conflict & Tension, 1918–39', lessons:13},
+  {slug:'britain-health-people',          name:'Britain: Health & the People', lessons:14},
+  {slug:'elizabethan-england',            name:'Elizabethan England', lessons:12},
+];
+const LTITLES={ 'america-opportunity-inequality':['The Boom','Wall Street Boom & the Inequalities Beneath It','Race & Immigration in the 1920s','Prohibition & Organised Crime','The Wall Street Crash','Hoover & the Depression','FDR & the New Deal','Opposition to the New Deal','WW2 & the American Economy','Post-war Prosperity','McCarthyism','Civil Rights: Education','Civil Rights: Protest','The Great Society'],
+ 'conflict-tension-inter-war':['The Armistice','Versailles: Aims of the Big Three','Versailles: Terms','Reactions to Versailles','The League: Structure','The League in the 1920s','Manchuria','Abyssinia','Hitler’s Foreign Policy Aims','Rhineland & Rearmament','Anschluss','Munich & the Sudetenland','The Road to War'],
+ 'britain-health-people':['Medieval Medicine','The Church, the Monastery & Islamic Medicine','The Black Death','Renaissance Anatomy','Vesalius, Paré & Harvey','The Great Plague','Jenner & Vaccination','Germ Theory','Anaesthetics & Antiseptics','Public Health in Industrial Britain','The Liberal Reforms','War & Medicine','Penicillin','The NHS'],
+ 'elizabethan-england':['Elizabeth’s Court & Government','Key Ministers: Cecil & Walsingham','Marriage & Succession','Mary, Queen of Scots','Catholic Plots','The Spanish Armada','Puritans & the Church','Poverty & Vagabonds','The Golden Age','Voyages & Exploration','Essex’s Rebellion','Hardwick Hall'],
+};
+const FIRSTNAMES='Amelia Oliver Ava Noah Isla Leo Freya Arthur Mia Oscar Grace Archie Sofia Theo Evie Finley Poppy Jude Alice Felix Ruby Louie Esme Albie Willow Ronnie Ivy Hugo'.split(' ');
+const SURNAMES='Khan Booth Ahmed Riley Clarke Osei Nowak Doyle Patel Grant Bibi Walsh Singh Moore Iqbal Fox Kaur Webb Ali Dunn Shah Cole Hart Reid Amin Page Rose Todd'.split(' ');
+const ARCH=[ {k:'steady',p:.74,days:.62,n:8},{k:'crammer',p:.66,days:.28,n:5},{k:'quiet',p:.62,days:.10,n:4},
+             {k:'struggling',p:.44,days:.5,n:5},{k:'flying',p:.88,days:.7,n:6} ];
+/* one class-wide sore topic so the reteach signal is visible: Versailles terms */
+const SORE={unit:'conflict-tension-inter-war', dip:.30};
+
+function iso(d){ return d.toISOString().slice(0,10); }
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+function daysAgo(n){ const d=new Date(TODAY); d.setDate(d.getDate()-n); return d; }
+
+function makeStudent(ix,arch){
+  const name=FIRSTNAMES[ix]+' '+SURNAMES[ix];
+  const p={done:{},when:{},warmlog:{},kc:{},practice:[],shortschecks:[]};
+  const ability={}; UNITS.forEach(u=>{ ability[u.slug]=Math.min(.96,Math.max(.2,arch.p+(R()-.5)*.24
+     - (u.slug===SORE.unit?SORE.dip*(0.6+R()*.8):0))); });
+  /* prior-term progress: the class has been going since September — walk each
+     student partway through the course before the 4-week window opens */
+  const prior=Math.round((arch.k==='flying'?30:arch.k==='steady'?22:12)+R()*10);
+  let cursor={u:0,n:0};
+  for(let i=0;i<prior;i++){ cursor.n++;
+    if(cursor.n>UNITS[cursor.u].lessons&&cursor.u<UNITS.length-1){cursor.u++;cursor.n=1;}
+    const u=UNITS[cursor.u], key='history-aqa/'+u.slug;
+    (p.done[key]=p.done[key]||[]).push(Math.min(cursor.n,u.lessons)); }
+  const startedUnit=()=>UNITS[R()<.55?cursor.u:Math.floor(R()*(cursor.u+1))];  /* only studied units */
+  for(let d=27;d>=0;d--){
+    const active=R()<arch.days*(arch.k==='crammer'&&d>6?.3:1)*(arch.k==='crammer'&&d<=4?2.4:1);
+    if(!active) continue;
+    const date=iso(daysAgo(d));
+    /* a lesson done */
+    if(R()<.8){ cursor.n++; if(cursor.n>UNITS[cursor.u].lessons&&cursor.u<UNITS.length-1){cursor.u++;cursor.n=1;}
+      const u=UNITS[cursor.u];
+      const key='history-aqa/'+u.slug; (p.done[key]=p.done[key]||[]).push(Math.min(cursor.n,u.lessons));
+      p.when[key+'/'+Math.min(cursor.n,u.lessons)]=date;
+      if(R()<.75){ const sc=Math.round(5*Math.min(1,ability[u.slug]+(R()-.5)*.3));
+        p.kc[key+'/'+Math.min(cursor.n,u.lessons)]={s:Math.max(0,sc),t:5,d:date}; }
+    }
+    /* warm-up — questions come only from units this student has studied,
+       and the log records per-unit attempts exactly like warmup.js does */
+    if(R()<.7){ const total=10; let ok=0; const misses=[], ua={};
+      for(let q=0;q<total;q++){ const u=startedUnit();
+        const hit=R()<ability[u.slug];
+        const uk='history-aqa/'+u.slug; ua[uk]=ua[uk]||{a:0,m:0}; ua[uk].a++;
+        if(hit) ok++; else { ua[uk].m++; const ln=1+Math.floor(R()*Math.min(8,u.lessons));
+          misses.push({sub:'history-aqa',unit:u.slug,n:ln,title:(LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln)}); } }
+      p.warmlog[date]={correct:ok,total:total,misses:misses,units:ua}; }
+    /* shorts checks */
+    if(R()<.4){ const u=startedUnit();
+      p.shortschecks.push({d:date,sub:'history-aqa',unit:u.slug,ok:R()<ability[u.slug]}); }
+  }
+  /* one practice answer for some students */
+  if(R()<.5){ const u=UNITS[Math.floor(R()*UNITS.length)]; const good=ability[u.slug]>.6;
+    p.practice.push({d:iso(daysAgo(Math.floor(R()*6))),k:'history-aqa/'+u.slug+'/3',m:8,
+      q:'Explain two consequences of '+(u.slug==='conflict-tension-inter-war'?'the Treaty of Versailles for Germany':'the Wall Street Crash')+'. (8 marks)',
+      a: good?'One consequence was economic collapse. Germany had to pay £6.6 billion in reparations which crippled the economy and led to hyperinflation in 1923 when France occupied the Ruhr after missed payments. This meant savings became worthless and the middle classes lost faith in Weimar. A second consequence was political extremism...':'It made Germany poor and angry. They had to pay money and lost land. This meant people did not like the government and some joined the Nazis later on because Hitler said he would cancel the treaty.',
+      r: good?'**Mark: 7/8**\n\n**What worked:** Two clearly separated consequences, each developed with specific evidence — the £6.6bn figure, the Ruhr occupation and 1923 hyperinflation chain is exactly the causal detail examiners reward.\n\n**What to develop:** The second consequence needs the same depth as the first — name a specific example of extremism (the Munich Putsch, 1923).\n\n**One suggestion:** End each consequence with "This mattered because..." to force the final link.':'**Mark: 3/8**\n\n**What worked:** You know the treaty caused both economic hardship and anger — the right two ideas are here.\n\n**What to develop:** Each point needs specific evidence: HOW much money (£6.6bn), WHICH land (the Polish Corridor, Saar). "Poor and angry" needs dates and names to become an explained consequence.\n\n**One suggestion:** Use the sentence frame "One consequence was X. For example... This meant..."'});
+  }
+  return {name,arch:arch.k,p};
+}
+const STUDENTS=[]; let ai=0;
+ARCH.forEach(a=>{ for(let i=0;i<a.n;i++) STUDENTS.push(makeStudent(ai++,a)); });
+
+/* ---------------- aggregation (this is the real code, demo data) ------------- */
+function recallEvents(p){ /* every attributable right/wrong this student produced */
+  const ev=[];
+  Object.keys(p.warmlog||{}).forEach(d=>{ const w=p.warmlog[d];
+    if(w.units){ Object.keys(w.units).forEach(uk=>{ const u=w.units[uk], unit=uk.split('/')[1]||uk;
+      for(let i=0;i<u.a-u.m;i++) ev.push({d,unit,ok:true,src:'warm-up'}); }); }
+    else for(let i=0;i<w.correct;i++) ev.push({d,unit:null,ok:true});   /* legacy entries */
+    (w.misses||[]).forEach(m=>ev.push({d,unit:m.unit,n:m.n,title:m.title,q:m.q,ok:false,src:'warm-up'}));
+  });
+  Object.keys(p.kc||{}).forEach(k=>{ const r=p.kc[k]; const unit=k.split('/')[1];
+    for(let i=0;i<r.s;i++) ev.push({d:r.d,unit,ok:true,src:'quiz'});
+    for(let i=0;i<r.t-r.s;i++) ev.push({d:r.d,unit,ok:false,src:'quiz',title:'Lesson '+k.split('/')[2]+' quiz'});
+  });
+  (p.shortschecks||[]).forEach(c=>ev.push({d:c.d,unit:c.unit,ok:c.ok,src:'shorts',title:c.topic}));
+  return ev;
+}
+function studentStats(s){
+  const p=s.p, ev=recallEvents(p);
+  const days={}; Object.keys(p.when||{}).forEach(k=>days[p.when[k]]=1);
+  Object.keys(p.warmlog||{}).forEach(d=>days[d]=1);
+  (p.shortschecks||[]).forEach(c=>days[c.d]=1);
+  const activeDays=Object.keys(days).sort();
+  const last=activeDays[activeDays.length-1]||null;
+  const lastGap=last?Math.round((TODAY-new Date(last))/864e5):99;
+  const lessons=Object.values(p.done||{}).reduce((a,x)=>a+x.length,0);
+  const wk=x=>{ const c=ev.filter(e=>e.d>=iso(daysAgo(x+6))&&e.d<=iso(daysAgo(x)));
+    return c.length?c.filter(e=>e.ok).length/c.length:null; };
+  const accNow=wk(0), accPrev=wk(7);
+  const acc=ev.length?ev.filter(e=>e.ok).length/ev.length:null;
+  const spark=[]; for(let d=13;d>=0;d--) spark.push(days[iso(daysAgo(d))]?1:0);
+  let flag=null;
+  if(lastGap>=5) flag='quiet';
+  else if(accNow!==null&&accPrev!==null&&accNow<accPrev-.12) flag='slip';
+  else if(accNow!==null&&accNow>=.85&&spark.reduce((a,b)=>a+b,0)>=8) flag='fly';
+  return {ev,activeDays,lastGap,lessons,acc,accNow,accPrev,spark,flag};
+}
+const STATS=STUDENTS.map(s=>({s,st:studentStats(s)}));
+const UNITAGG=UNITS.map(u=>{
+  let ok=0,no=0,who={};
+  STATS.forEach(({s,st})=>st.ev.forEach(e=>{ if(e.unit===u.slug){ e.ok?ok++:no++; if(!e.ok)(who[s.name]=who[s.name]||0)? who[s.name]++ : who[s.name]=1; } }));
+  const covered=STATS.filter(({s})=>(s.p.done['history-aqa/'+u.slug]||[]).length>0).length;
+  return {u,ok,no,att:ok+no,acc:(ok+no)?ok/(ok+no):null,covered,who};
+});
+
+/* ---------------- render ---------------------------------------------------- */
+const $=s=>document.querySelector(s);
+function pct(x){ return x===null?'—':Math.round(x*100)+'%'; }
+function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+
+/* triage */
+(function(){
+  const quiet=STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name);
+  const slip=STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name);
+  const fly=STATS.filter(x=>x.st.flag==='fly').map(x=>x.s.name);
+  const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
+  const missed=worst?Object.keys(worst.who).length:0;
+  let h='';
+  if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+'</b> is the class’s weakest recall — '+pct(worst.acc)+' across '+worst.att+' answers, misses from '+missed+' students. <b>Reteach candidate.</b></div></div>';
+  if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' gone quiet</b> (5+ days): <span class="names">'+esc(quiet.join(', '))+'</span></div></div>';
+  if(slip.length) h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Accuracy slipping:</b> <span class="names">'+esc(slip.join(', '))+'</span> — down 12%+ on last week</div></div>';
+  if(fly.length) h+='<div class="tri"><span class="dot" style="background:var(--good)"></span><div><b>Flying:</b> <span class="names">'+esc(fly.join(', '))+'</span> — high accuracy, revising most days</div></div>';
+  $('#triage').insertAdjacentHTML('beforeend',h);
+})();
+
+/* topic grid */
+(function(){
+  const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
+  $('#topicrows').innerHTML=UNITAGG.map(x=>{
+    const cls=x.acc===null?'':x.acc<.55?'low':x.acc<.72?'mid':'';
+    return '<tr'+(x===worst?' class="worst"':'')+'><td class="u">'+esc(x.u.name)+'</td>'
+      +'<td><span class="pct">'+pct(x.acc)+'</span></td>'
+      +'<td><span class="bar '+cls+'"><i style="width:'+(x.acc?Math.round(x.acc*100):0)+'%"></i></span></td>'
+      +'<td class="att">'+x.att+' answers</td>'
+      +'<td class="att">'+x.covered+'/28 started</td></tr>';
+  }).join('');
+})();
+
+/* roster */
+function sparkSvg(sp){
+  return '<svg class="spark" width="98" height="18">'+sp.map((v,i)=>
+    '<rect class="'+(v?'hot':'')+'" x="'+(i*7)+'" y="'+(v?3:12)+'" width="5" height="'+(v?12:3)+'" rx="1"></rect>').join('')+'</svg>';
+}
+const order=[...STATS].sort((a,b)=>{
+  const w=x=>x.st.flag==='quiet'?0:x.st.flag==='slip'?1:x.st.flag==='fly'?3:2;
+  return w(a)-w(b)||a.s.name.localeCompare(b.s.name);
+});
+$('#roster').innerHTML=order.map((x,i)=>{
+  const {s,st}=x;
+  const trend=st.accNow===null||st.accPrev===null?'<span class="tr-fl">·</span>'
+    :st.accNow>st.accPrev+.04?'<span class="tr-up">▲</span>'
+    :st.accNow<st.accPrev-.04?'<span class="tr-dn">▼</span>':'<span class="tr-fl">—</span>';
+  return '<tr class="r" data-i="'+STATS.indexOf(x)+'"><td class="nm">'+esc(s.name)+(st.flag?' <span class="flag '+(st.flag==='quiet'?'quiet':st.flag==='slip'?'slip':'fly')+'">'+(st.flag==='quiet'?'quiet':st.flag==='slip'?'slipping':'flying')+'</span>':'')+'</td>'
+    +'<td>'+sparkSvg(st.spark)+'</td><td>'+st.lessons+'</td>'
+    +'<td class="acc">'+pct(st.acc)+' '+trend+'</td><td></td>'
+    +'<td class="att">'+(st.lastGap===0?'today':st.lastGap===1?'yesterday':st.lastGap>27?'—':st.lastGap+'d ago')+'</td></tr>';
+}).join('');
+
+/* drill-in */
+document.getElementById('roster').addEventListener('click',e=>{
+  const tr=e.target.closest('tr.r'); if(!tr) return;
+  document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
+  tr.classList.add('sel');
+  drill(+tr.dataset.i);
+});
+function drill(ix){
+  const {s,st}=STATS[ix], p=s.p;
+  $('#dname').textContent=s.name;
+  /* weak lessons: group misses by lesson */
+  const by={};
+  st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||''); (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; });
+  const weak=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,5);
+  const strong=UNITAGG.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.u.slug); const ok=evs.filter(e=>e.ok).length;
+    return {name:u.u.name,acc:evs.length>=6?ok/evs.length:null,n:evs.length}; })
+    .filter(x=>x.acc!==null&&x.acc>=.8).sort((a,b)=>b.acc-a.acc);
+  const wl=Object.keys(p.warmlog||{}).sort().slice(-7);
+  let h='<div class="kv">'
+    +'<div><b>'+st.lessons+'</b><small>lessons</small></div>'
+    +'<div><b>'+pct(st.acc)+'</b><small>recall</small></div>'
+    +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d')+'</b><small>last seen</small></div></div>';
+  if(wl.length){ h+='<div class="sect">Warm-ups, last '+wl.length+'</div><div class="wubars">'
+    +wl.map(d=>{ const w=p.warmlog[d]; const pc=Math.round(w.correct/w.total*100);
+      return '<i style="height:100%"><b style="height:'+pc+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>'; }
+  if(weak.length){ h+='<div class="sect">Keeps missing</div>'+weak.map(w=>{
+    const un=UNITS.find(u=>u.slug===w.unit);
+    return '<div class="miss"><b>'+esc(w.title||'')+'</b> · '+esc(un?un.name:w.unit)+' <span class="att">× '+w.n+'</span></div>'; }).join(''); }
+  if(strong.length){ h+='<div class="sect">Strengths</div><div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join(' · ')+'</div>'; }
+  if((p.practice||[]).length){ h+='<div class="sect">Practice answers · AI-marked</div>'+p.practice.map(pr=>
+    '<div class="paper"><div class="meta">'+esc(pr.d)+' · '+esc(pr.k)+' · '+pr.m+' marks</div>'
+    +'<p class="pq">'+esc(pr.q)+'</p><div class="pa">'+esc(pr.a)+'</div>'
+    +'<div class="pr">'+esc(pr.r).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n\n/g,'<br><br>')+'</div></div>').join(''); }
+  $('#dbody').innerHTML=h; $('#dbody').classList.remove('sub');
+}
+
+/* AI digest — injected by the weekly generator (scripts/_teach_digest.py runs
+   claude -p over THE AGGREGATES ONLY and rewrites the block below). */
+const AI_DIGEST=window.SV_TEACH_DIGEST||null;
+if(AI_DIGEST){ $('#digestbody').innerHTML=AI_DIGEST.html; $('#digeststamp').textContent=AI_DIGEST.stamp; }
+else{ $('#digestbody').innerHTML='<i style="color:var(--mut)">No digest generated yet — run scripts/_teach_digest.py (one small-model call per class per week).</i>'; }
+
+/* staging: ?student=N opens a drill-in for screenshots */
+const _sq=new URLSearchParams(location.search).get('student');
+if(_sq!==null&&STATS[+_sq]) drill(+_sq);
+
+/* expose aggregates for the digest generator (?agg=1 dumps JSON) */
+if(new URLSearchParams(location.search).get('agg')){
+  const agg={class:'10H History (AQA)',students:STATS.length,
+    week:{active:STATS.filter(x=>x.st.spark.slice(7).some(v=>v)).length,
+      quiet:STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name),
+      slipping:STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name),
+      flying:STATS.filter(x=>x.st.flag==='fly').map(x=>x.s.name)},
+    units:UNITAGG.map(x=>({name:x.u.name,recall:x.acc===null?null:Math.round(x.acc*100),answers:x.att,started:x.covered})),
+    topMisses:(function(){ const by={}; STATS.forEach(({st})=>st.ev.filter(e=>!e.ok&&e.title).forEach(e=>{
+      const k=e.title; by[k]=(by[k]||0)+1; }));
+      return Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([t,n])=>({lesson:t,misses:n})); })()};
+  const pre=document.createElement('pre'); pre.id='aggjson'; pre.textContent=JSON.stringify(agg);
+  pre.style.cssText='position:fixed;left:0;top:0;background:#fff;z-index:999;max-width:100%;overflow:auto';
+  document.body.appendChild(pre);
+}
+</script>
+</body>
+</html>

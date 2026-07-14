@@ -394,6 +394,9 @@ function makeCheck(seeds){
   const answer=(b,c)=>{
     if(locked) return; locked=true;
     const ok=+b.dataset.i===c.correct;
+    try{ const s=seeds[i], lg=JSON.parse(localStorage.getItem('sv-shorts-checks'))||[];
+      lg.unshift({d:new Date().toISOString().slice(0,10),lid:s.lesson_id,sub:s.subject,unit:s.unit,n:s.lesson_number,ti:s.topic_index,topic:s.topic,ok:ok});
+      localStorage.setItem('sv-shorts-checks',JSON.stringify(lg.slice(0,300))); }catch(e){}
     b.classList.add(ok?'correct':'wrong');
     if(!ok) check.querySelector(`.opt[data-i="${c.correct}"]`).classList.add('correct');
     const foot=check.querySelector('.foot');

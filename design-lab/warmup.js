@@ -87,6 +87,8 @@
             (row.knowledge_checks || []).forEach(function (kc) {
               if (Array.isArray(kc.options) && typeof kc.correct === 'number' && kc.q)
                 qs.push({ q: kc.q, opts: kc.options, correct: kc.correct,
+                          sub: s.sub, unit: s.unit, n: row.lesson_number,
+                          title: row.title || ('Lesson ' + row.lesson_number),
                           from: s.name + ' · ' + (row.title || 'Lesson ' + row.lesson_number) });
             });
           });
@@ -131,7 +133,7 @@
     fetchPool(SUBJECTS).then(function (pool) {
       if (pool.length < 4) { goLesson(); return; }   /* too thin to be worth it */
       var card = veil.querySelector('.wu-card');
-      var i = 0, correct = 0, locked = false, marks = [];
+      var i = 0, correct = 0, locked = false, marks = [], misses = [], unitAtt = {};
 
       function renderQ() {
         var c = pool[i]; locked = false;
@@ -149,6 +151,12 @@
             if (locked) return; locked = true;
             var ok = +b.dataset.i === c.correct;
             marks[i] = ok; if (ok) correct++;
+            else misses.push({ sub: c.sub, unit: c.unit, n: c.n, title: c.title, q: (c.q || '').slice(0, 160) });
+            /* per-unit attempt counts — without these, unit accuracy would be
+               computed from misses alone and every topic would look dire */
+            var uk = (c.sub || '') + '/' + (c.unit || '');
+            unitAtt[uk] = unitAtt[uk] || { a: 0, m: 0 };
+            unitAtt[uk].a++; if (!ok) unitAtt[uk].m++;
             b.classList.add(ok ? 'correct' : 'wrong');
             if (!ok) card.querySelector('.wu-opt[data-i="' + c.correct + '"]').classList.add('correct');
             setTimeout(function () { (++i < pool.length) ? renderQ() : renderSummary(); }, ok ? 550 : 1100);
@@ -158,10 +166,11 @@
 
       function renderSummary() {
         try { localStorage.setItem(LSKEY, JSON.stringify({ date: todayStr(), correct: correct, total: pool.length })); } catch (e) {}
-        /* the running log is the teacher-facing record (one entry per day) */
+        /* the running log is the teacher-facing record (one entry per day,
+           misses carry their lesson so weaknesses aggregate by topic) */
         try {
           var lg = JSON.parse(localStorage.getItem('sv-warmup-log')) || {};
-          lg[todayStr()] = { correct: correct, total: pool.length };
+          lg[todayStr()] = { correct: correct, total: pool.length, misses: misses, units: unitAtt };
           localStorage.setItem('sv-warmup-log', JSON.stringify(lg));
         } catch (e) {}
         if (window.svProgressPushSoon) svProgressPushSoon();
