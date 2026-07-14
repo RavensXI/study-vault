@@ -33,6 +33,7 @@ function svProgressGather() {
            plan: g('sv-plan-prefs', null), warmup: g('sv-warmup', null),
            warmlog: g('sv-warmup-log', {}), kc: g('sv-kc-log', {}),
            practice: g('sv-practice-log', []), shortschecks: g('sv-shorts-checks', []),
+           flashlog: g('sv-flash-log', []),
            flashday: localStorage.getItem('sv-flash-day') || null, tasks: tasks };
 }
 
@@ -67,6 +68,11 @@ function svProgressMerge(remote) {
       var k = e.d + '|' + e.lid + '|' + e.ti;
       if (seen2[k]) return false; seen2[k] = 1; return true;
     }).slice(0, 300);
+    var seen3 = {};
+    L.flashlog = (L.flashlog || []).concat(remote.flashlog || []).filter(function (e) {
+      var k = e.t || JSON.stringify(e);
+      if (seen3[k]) return false; seen3[k] = 1; return true;
+    }).sort(function (a, b) { return (b.t || 0) - (a.t || 0); }).slice(0, 400);
     if (remote.flashday && (!L.flashday || remote.flashday > L.flashday)) L.flashday = remote.flashday;
   }
   try {
@@ -78,6 +84,7 @@ function svProgressMerge(remote) {
     if (L.kc) localStorage.setItem('sv-kc-log', JSON.stringify(L.kc));
     if (L.practice) localStorage.setItem('sv-practice-log', JSON.stringify(L.practice));
     if (L.shortschecks) localStorage.setItem('sv-shorts-checks', JSON.stringify(L.shortschecks));
+    if (L.flashlog) localStorage.setItem('sv-flash-log', JSON.stringify(L.flashlog));
     if (L.flashday) localStorage.setItem('sv-flash-day', L.flashday);
     Object.keys(L.tasks).forEach(function (k) {
       localStorage.setItem('sv_progress_' + k, JSON.stringify(L.tasks[k]));

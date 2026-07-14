@@ -319,6 +319,12 @@
   .bigcard .tag{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
   .bigcard .qq{font-family:var(--hand);font-size:clamp(1.5rem,4vw,2.2rem);color:#3e3a31;text-align:center;line-height:1.2}
   .bigcard .qq.long{font-size:1.35rem;line-height:1.35}
+  .fcbtns{display:flex;gap:10px;margin-top:.5rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
+  .bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
+  .fcbtns .fb{font-family:var(--head);font-weight:600;font-size:.88rem;border:1px solid var(--line);
+    border-radius:9px;background:#fff;padding:.5rem 1rem;cursor:pointer;color:var(--sec)}
+  .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
+  .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
   .fcmeta{position:fixed;left:0;right:0;bottom:26px;text-align:center;color:#f1e8d8;font-size:.85rem}
 
   /* ---- shorts modal ---- */
@@ -456,10 +462,12 @@
   <button class="bigcard" id="bigcard" aria-label="Flip the card">
     <span class="flip">
       <span class="face front"><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
-      <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span></span>
+      <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
+        <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
+      </span>
     </span>
   </button>
-  <div class="fcmeta">tap the card to flip · tap again for the next one</div>
+  <div class="fcmeta">tap to flip · mark it so your deck learns what to bring back</div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -504,7 +512,8 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
      subject's current unit) — the demo set stays only until this lands */
   svUnitMedia(SUBJECTS,m=>{
     if(m.deck.length>=4){ FC.length=0; m.deck.forEach(x=>FC.push(x)); fci=0;
-      if(_dq.get('fc')) fcDeal();   /* staging: re-deal so the real card shows */ }
+      if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
+        if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); } } }
     if(m.pods.length){ PODCASTS.length=0; m.pods.forEach(x=>PODCASTS.push(x));
       if(!podOn){ podQ=null; podPos=-1; } }
   });
@@ -1117,7 +1126,18 @@ document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classLi
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); };
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
-  else { fci=(fci+1)%FC.length; fcDeal(); } };
+  else { fci=(fci+1)%FC.length; fcDeal(); } };   /* tapping the back = skip, unmarked */
+/* self-marking: the record that feeds the teacher view + spaced repetition */
+function fcMark(ok){
+  try{ const f=FC[fci], lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
+    lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
+      n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
+    localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  fci=(fci+1)%FC.length; fcDeal();
+}
+['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
+  e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
 fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
 if(_dq.get('fc')){ fcDeal(); fcmodal.classList.add('open');   /* staging: ?fc=1 open, ?fc=2 flipped */

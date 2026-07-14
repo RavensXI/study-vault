@@ -2553,6 +2553,7 @@ function initLessonProgress() {
                 warmlog: g('sv-warmup-log', {}), kc: g('sv-kc-log', {}),
                 practice: g('sv-practice-log', []),
                 shortschecks: g('sv-shorts-checks', []),
+                flashlog: g('sv-flash-log', []),
                 flashday: localStorage.getItem('sv-flash-day') || null,
                 tasks: tasks, updated: new Date().toISOString() } } })
             }).catch(function () {});

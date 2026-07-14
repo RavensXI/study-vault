@@ -120,7 +120,7 @@
       <h2>Needs your eyes <small>computed, no AI</small></h2>
     </div>
     <div class="card topics" id="topics">
-      <h2>What's sticking, by topic <small>recall accuracy across warm-ups, quizzes &amp; shorts</small></h2>
+      <h2>What's sticking, by topic <small>recall accuracy across warm-ups, quizzes, shorts &amp; flashcards</small></h2>
       <table><thead><tr><th>Unit</th><th>Recall</th><th></th><th>Evidence</th><th>Coverage</th></tr></thead>
       <tbody id="topicrows"></tbody></table>
     </div>
@@ -183,7 +183,7 @@ function daysAgo(n){ const d=new Date(TODAY); d.setDate(d.getDate()-n); return d
 
 function makeStudent(ix,arch){
   const name=FIRSTNAMES[ix]+' '+SURNAMES[ix];
-  const p={done:{},when:{},warmlog:{},kc:{},practice:[],shortschecks:[]};
+  const p={done:{},when:{},warmlog:{},kc:{},practice:[],shortschecks:[],flashlog:[]};
   const ability={}; UNITS.forEach(u=>{ ability[u.slug]=Math.min(.96,Math.max(.2,arch.p+(R()-.5)*.24
      - (u.slug===SORE.unit?SORE.dip*(0.6+R()*.8):0))); });
   /* prior-term progress: the class has been going since September — walk each
@@ -219,6 +219,11 @@ function makeStudent(ix,arch){
     /* shorts checks */
     if(R()<.4){ const u=startedUnit();
       p.shortschecks.push({d:date,sub:'history-aqa',unit:u.slug,ok:R()<ability[u.slug]}); }
+    /* a flashcard run, self-marked */
+    if(R()<.35){ const u=startedUnit(), nn=6+Math.floor(R()*8);
+      for(let c=0;c<nn;c++){ const ln=1+Math.floor(R()*Math.min(8,u.lessons));
+        p.flashlog.push({d:date,unit:u.slug,ok:R()<ability[u.slug],
+          q:((LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln))}); } }
   }
   /* one practice answer for some students */
   if(R()<.5){ const u=UNITS[Math.floor(R()*UNITS.length)]; const good=ability[u.slug]>.6;
@@ -246,6 +251,7 @@ function recallEvents(p){ /* every attributable right/wrong this student produce
     for(let i=0;i<r.t-r.s;i++) ev.push({d:r.d,unit,ok:false,src:'quiz',title:'Lesson '+k.split('/')[2]+' quiz'});
   });
   (p.shortschecks||[]).forEach(c=>ev.push({d:c.d,unit:c.unit,ok:c.ok,src:'shorts',title:c.topic}));
+  (p.flashlog||[]).forEach(f=>ev.push({d:f.d,unit:f.unit,ok:f.ok,src:'flashcards',title:f.q?('Card · '+f.q):null}));
   return ev;
 }
 function studentStats(s){

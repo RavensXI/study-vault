@@ -291,6 +291,12 @@
     background:color-mix(in srgb,var(--fcc,#8a5a44) 30%,transparent)}
   .fcmodal .face .qq{font-family:var(--hand);font-size:2.1rem;line-height:1.2;color:#33301c;text-align:center}
   .fcmodal .face .tag{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+  .fcbtns{display:flex;gap:12px;margin-top:.4rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
+  .fcmodal .showa .fcbtns,.bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
+  .fcbtns .fb{font-family:var(--head);font-weight:600;font-size:.92rem;border:1px solid #ddd3bc;
+    border-radius:9px;background:#fff;padding:.55rem 1.1rem;cursor:pointer;color:#57534a}
+  .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
+  .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
   .fcmodal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;color:#efe9da}
   .fcmodal .meta small{font-family:var(--read);font-style:italic;font-size:.95rem;opacity:.85}
   .fcmodal .meta .cnt{font-variant-numeric:tabular-nums;font-weight:700;font-size:.9rem}
@@ -464,10 +470,12 @@
     <button class="bigcard" id="bigcard" aria-label="Flip the card">
       <span class="flip">
         <span class="face front"><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
-        <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span></span>
+        <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
+          <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
+        </span>
       </span>
     </button>
-    <div class="meta"><small>tap the card to flip &middot; tap again for the next one</small><span class="cnt" id="fcCnt"></span></div>
+    <div class="meta"><small>tap to flip &middot; mark it so your deck learns what to bring back</small><span class="cnt" id="fcCnt"></span></div>
   </div>
 </div>
 
@@ -975,6 +983,17 @@ cardsEl.onclick=()=>{ if(dragBlockClick) return; fcDeal(); fcmodal.classList.add
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
 if(new URLSearchParams(location.search).get('fc')==='1'){ fcDeal(); fcmodal.classList.add('open'); }
+/* self-marking: the record that feeds the teacher view + spaced repetition */
+function fcMark(ok){
+  try{ const f=FC[fci], lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
+    lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
+      n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
+    localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
+  if(window.svProgressPushSoon) svProgressPushSoon();
+  fci=(fci+1)%FC.length; fcDeal();
+}
+['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
+  e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); }
   else { fci=(fci+1)%FC.length; fcDeal(); } };
 document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
