@@ -1,0 +1,30 @@
+{
+  "key": "depreciation_rate_find_3yr",
+  "tier": "higher",
+  "index": 13,
+  "new_display": "A car was worth \\(£16{,}000\\). After 3 years at \\(x\\%\\) depreciation it is worth \\(£11{,}664\\). Find the annual rate of depreciation.",
+  "new_solutions": [10],
+  "new_misconceptions": [
+    {
+      "pattern": "simple_percentage_drop",
+      "check": "equals_27.1",
+      "message": "You've found the overall percentage drop over all three years — to find the annual rate you need to take the cube root of the multiplier (11664 ÷ 16000), then subtract from 1 and multiply by 100."
+    },
+    {
+      "pattern": "divides_total_loss_by_years",
+      "check": "equals_9.03",
+      "message": "Dividing the total loss by 3 gives the average annual money lost, not the compound rate — depreciation multiplies each year, so you need the cube root of 11664 ÷ 16000 to find the annual multiplier."
+    },
+    {
+      "pattern": "omits_subtraction_from_1",
+      "check": "equals_90",
+      "message": "You've correctly found the annual multiplier (0.9), but the rate of depreciation is 1 minus that multiplier: 1 − 0.9 = 0.1, so the answer is 10%, not 90%."
+    },
+    {
+      "pattern": "inverts_the_ratio",
+      "check": "equals_11.11",
+      "message": "You've divided the larger value by the smaller — make sure to write the fraction as (final ÷ original), i.e. 11664 ÷ 16000, then take the cube root and subtract from 1."
+    }
+  ],
+  "rationale": "The original display (£18,000 → £11,664, 3 years) has no clean rational answer: (11664/18000)^(1/3) = (81/125)^(1/3) is irrational, giving ≈13.47%, not the stored 13.33/13.3. No single change to the ending value or starting value can simultaneously keep both monetary figures as whole numbers and deliver exactly 13⅓%. The minimal single-constant repair is to change the starting value from £18,000 to £16,000, because 16000 × 0.9³ = 16000 × 0.729 = 11,664 exactly, yielding a clean depreciation rate of exactly 10%. The stored solutions [13.33, 13.3] cannot be made correct by any single-constant display edit, so new_solutions is set to [10] per the fallback rule. Verification: 16000 × (1 − 0.10)³ = 16000 × 0.729 = 11,664 ✓."
+}

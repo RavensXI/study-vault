@@ -1,0 +1,30 @@
+{
+  "key": "repair_14",
+  "tier": "higher",
+  "index": 14,
+  "new_display": "Use \\(x_{n+1} = \\frac{2x_n^3 + 5}{3x_n^2}\\) with \\(x_0 = 2\\) to find a root to 3 d.p. Give \\(x_3\\).",
+  "new_solutions": [1.71],
+  "new_misconceptions": [
+    {
+      "pattern": "missing_numerator_coefficient",
+      "check": "equals_1.119",
+      "message": "It looks like the 2 in the numerator was left out — the formula is \\(\\frac{2x_n^3+5}{3x_n^2}\\), so the top is \\(2x_n^3+5\\), not just \\(x_n^3+5\\); redo each substitution with the full formula."
+    },
+    {
+      "pattern": "off_by_one_iteration",
+      "check": "equals_1.711",
+      "message": "It looks like you stopped at \\(x_2\\) — \\(x_3\\) means applying the formula a third time, so after finding \\(x_1\\) and \\(x_2\\) you need one more substitution to reach \\(x_3\\)."
+    },
+    {
+      "pattern": "single_substitution_only",
+      "check": "equals_1.750",
+      "message": "It looks like only one substitution was made — iterative methods require you to feed each output back in as the next input, so apply the formula three times in total to find \\(x_3\\)."
+    },
+    {
+      "pattern": "wrong_starting_value",
+      "check": "equals_1.722",
+      "message": "It looks like a different starting value was used — the question specifies \\(x_0 = 2\\), so make sure your very first substitution uses \\(x_0 = 2\\) before iterating."
+    }
+  ],
+  "rationale": "The displayed formula (x_n^3+5)/(3x_n^2) was missing the coefficient 2 on the x_n^3 term. The correct Newton-Raphson iteration for x^3=5 is x_{n+1}=(2x_n^3+5)/(3x_n^2). With x_0=2: x_1=(16+5)/12=1.75, x_2=(10.71875+5)/9.1875=1.7109, x_3=(2*1.7109^3+5)/(3*1.7109^2)=1.7100, which rounds to 1.71 to 3 d.p., matching the stored answer exactly. Minimal fix: insert '2' before x_n^3 in the numerator of the displayed formula."
+}
