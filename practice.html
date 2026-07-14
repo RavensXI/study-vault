@@ -4385,6 +4385,44 @@
     }
 
     // ===== MISCONCEPTION DETECTION =====
+    // ===== HONEST MISCONCEPTION MATCHING =====
+    // A diagnosis is only shown when the student's actual wrong answer MATCHES
+    // the wrong answer that error would produce (m.expect, added by the content
+    // audit; legacy equals_X check names too). An unmatched misconception is
+    // NEVER presented as a diagnosis — a confident wrong "what went wrong" is
+    // more confusing than none (it described a mistake the student didn't make).
+    function matchMisconception(problem, inputType, given) {
+      var ms = problem.misconceptions || [];
+      function near(a, b) { return typeof a === 'number' && typeof b === 'number' && Math.abs(a - b) < 0.011; }
+      function asNum(x) { var n = parseFloat(x); return isNaN(n) ? null : n; }
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i] || {};
+        var exp = m.expect;
+        if (exp === undefined || exp === null) {
+          // legacy matcher encoded in the check name: equals_7.5 / equals_2_9
+          var mm = /^equals_(-?[\d.]+)(?:_(-?[\d.]+))?$/.exec(m.check || '');
+          if (mm) exp = mm[2] !== undefined ? [parseFloat(mm[1]), parseFloat(mm[2])] : parseFloat(mm[1]);
+        }
+        if (exp === undefined || exp === null) continue;
+        if (Array.isArray(exp)) {
+          if (given.length !== 2 || exp.length !== 2) continue;
+          var e0 = asNum(exp[0]), e1 = asNum(exp[1]);
+          if (e0 === null || e1 === null) continue;
+          if (inputType === 'two_solutions') {   // unordered pair
+            var g = given.slice().sort(function(a, b) { return a - b; });
+            var e = [e0, e1].sort(function(a, b) { return a - b; });
+            if (near(g[0], e[0]) && near(g[1], e[1])) return m;
+          } else {                               // fraction / standard_form: ordered
+            if (near(given[0], e0) && near(given[1], e1)) return m;
+          }
+        } else {
+          var ev = asNum(exp);
+          if (ev !== null && given.length === 1 && near(given[0], ev)) return m;
+        }
+      }
+      return null;
+    }
+
     function detectMisconception(given, expected, problem) {
       var g = given.slice().sort(function(a, b) { return a - b; });
       var e = expected.slice().sort(function(a, b) { return a - b; });
@@ -4586,6 +4624,7 @@
         practiceState[tier].correct++;
         practiceState[tier].streak++;
         practiceState.streak++;
+        practiceState.wrongRun = 0;
         card.classList.add('card-correct');
         if (inputA) inputA.classList.add('input-correct');
         if (inputB) inputB.classList.add('input-correct');
@@ -4630,16 +4669,25 @@
         if (sfAI) sfAI.classList.add('input-incorrect');
         if (sfNI) sfNI.classList.add('input-incorrect');
 
-        // Try misconception detection for two_solutions, generic message for others
-        var misconceptionMsg = '';
-        if (inputType === 'two_solutions') {
-          var mc = detectMisconception(given, problem.solutions, problem);
-          misconceptionMsg = mc.message;
-        } else if (problem.misconceptions && problem.misconceptions.length > 0) {
-          // Use first misconception as generic feedback
-          misconceptionMsg = problem.misconceptions[0].message;
+        // Diagnosis ONLY when the student's answer matches a known error's
+        // expected result; otherwise honest guidance, never a guessed diagnosis.
+        practiceState.wrongRun = (practiceState.wrongRun || 0) + 1;
+        var matched = matchMisconception(problem, inputType, given);
+        var diagnosisHtml;
+        if (matched) {
+          diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + matched.message + '</div>';
+        } else if (inputType === 'two_solutions') {
+          var det = detectMisconception(given, problem.solutions, problem);
+          diagnosisHtml = det.type !== 'unknown'
+            ? '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + det.message + '</div>'
+            : '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line — find the first line where yours differs.</div>';
         } else {
-          misconceptionMsg = 'Check your working and try to spot where you went wrong.';
+          diagnosisHtml = '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line — find the first line where yours differs.</div>';
+        }
+        var nudgeHtml = '';
+        if ((practiceState.wrongRun || 0) >= 2 && (window._workedExamples || []).length) {
+          nudgeHtml = '<div class="feedback-simplify">Two in a row — worth ninety seconds: '
+            + '<a href="#" id="fb-see-example"><strong>walk through a worked example</strong></a>, then come back.</div>';
         }
 
         feedbackContent.innerHTML =
@@ -4647,10 +4695,13 @@
             '<span class="feedback-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span>' +
             '<div class="feedback-body">' +
               '<div class="feedback-title">Not quite</div>' +
-              '<div class="misconception-tip"><strong>What went wrong:</strong> ' + misconceptionMsg + '</div>' +
+              diagnosisHtml +
               '<div class="correct-answer-text">Correct answer: ' + correctText + '</div>' +
+              nudgeHtml +
             '</div>' +
           '</div>';
+        var seeEx = document.getElementById('fb-see-example');
+        if (seeEx) seeEx.addEventListener('click', function(ev) { ev.preventDefault(); switchMode('learn'); });
       }
 
       feedbackArea.className = 'problem-feedback-area shown';

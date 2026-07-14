@@ -365,10 +365,27 @@
         return problems.filter(function(p) { return !p.higher_only; });
       }
 
+      // Same-day sessions keep one order (a mid-session refresh isn't jarring),
+      // but tomorrow deals the bank fresh — a returning student shouldn't meet
+      // the identical run of questions in the identical order every visit.
+      function daySeed(salt) {
+        var str = new Date().toISOString().slice(0, 10) + '|' + location.pathname + '|' + salt;
+        var h = 2166136261;
+        for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+        return h >>> 0;
+      }
+      function seededShuffle(arr, seed) {
+        var a = arr.slice(), s = seed;
+        for (var i = a.length - 1; i > 0; i--) {
+          s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
+          var j = s % (i + 1); var t = a[i]; a[i] = a[j]; a[j] = t;
+        }
+        return a;
+      }
       window._problemBank = {
-        bronze: filterTier(pb.bronze || []),
-        silver: filterTier(pb.silver || []),
-        gold: filterTier(pb.gold || [])
+        bronze: seededShuffle(filterTier(pb.bronze || []), daySeed('b')),
+        silver: seededShuffle(filterTier(pb.silver || []), daySeed('s')),
+        gold: seededShuffle(filterTier(pb.gold || []), daySeed('g'))
       };
       window._examBoard = subject.exam_board || '';
     }
