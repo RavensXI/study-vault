@@ -326,6 +326,11 @@
   .fcbtns .fb.ok:hover{border-color:#2f7d57;color:#1e5b3e;background:#edf6f0}
   .fcbtns .fb.no:hover{border-color:#c0533a;color:#9a3a25;background:#fbeee9}
   .fcbtns .fb.waiting{opacity:.4;pointer-events:none;cursor:default}
+  /* reading-pace underline (same as the in-lesson deck): fills over --read-duration */
+  .bigcard .face.back .qq{position:relative;display:block;padding-bottom:8px}
+  .bigcard .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
+    background:var(--anchor);opacity:.35;border-radius:1px}
+  .bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
   .fcmeta{position:fixed;left:0;right:0;bottom:26px;text-align:center;color:#f1e8d8;font-size:.85rem}
 
   /* ---- shorts modal ---- */
@@ -468,7 +473,7 @@
       </span>
     </span>
   </button>
-  <div class="fcmeta">tap to flip · mark it so your deck learns what to bring back</div>
+  <div class="fcmeta">tap to flip · read the answer, then mark it — the line shows when</div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -1126,14 +1131,15 @@ document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classLi
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE) refreshDayOnePlan(); };
-bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); }
-  else { fci=(fci+1)%FC.length; fcDeal(); } };   /* tapping the back = skip, unmarked */
+bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
+/* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
 /* same read-gate as the in-lesson deck: marks unlock only after there's been
    time to actually read the answer (words/4s, clamped 1.5–6s) */
 let fcCanMark=false, fcUnlockT=null;
 function fcReadGate(){
   const a=document.getElementById('baA').textContent||'';
   const secs=Math.max(1.5,Math.min(a.trim().split(/\s+/).length/4,6));
+  bigcard.style.setProperty('--read-duration',secs+'s');
   fcCanMark=false; clearTimeout(fcUnlockT);
   document.querySelectorAll('.fcbtns .fb').forEach(b=>b.classList.add('waiting'));
   fcUnlockT=setTimeout(()=>{ fcCanMark=true;
