@@ -130,14 +130,28 @@
   .pack .aidraft b{color:var(--ink)}
   .pack .aistamp{font-size:.72rem;color:var(--mut);margin-top:.45rem}
   .pack .pfoot{margin-top:1.6rem;padding-top:.8rem;border-top:1px solid var(--linel);font-size:.72rem;color:var(--mut);line-height:1.55}
+  .pack .wubars i{position:relative}
+  .pack .wubars i em{position:absolute;bottom:100%;left:50%;translate:-50%;font-style:normal;font-size:.62rem;font-weight:700;color:var(--sec);padding-bottom:2px}
+  .pack .wubars{margin-top:16px}
   .packbar{max-width:840px;margin:18px auto 0;display:flex;gap:10px;justify-content:flex-end;padding:0 4px}
   .packbar button,.packbar a{font-family:var(--head);font-weight:600;font-size:.88rem;border:1px solid var(--line);
     border-radius:9px;background:var(--card);padding:.55rem 1.05rem;cursor:pointer;color:var(--ink);text-decoration:none}
   .packbar .prim{background:#221E19;color:#faf8f5;border-color:#221E19}
+  /* one A4 page, guaranteed: tighter type + spacing under print, no page 2 */
+  @page{size:A4;margin:11mm}
   @media print{
     body{background:#fff}
     .packbar{display:none}
-    .pack{box-shadow:none;border:none;margin:0;max-width:none;padding:0}
+    .pack{box-shadow:none;border:none;margin:0;max-width:none;padding:0;font-size:.78rem}
+    .pack .phead h1{font-size:1.35rem}
+    .pack .kv div b{font-size:1.05rem}
+    .pack h3{margin:.85rem 0 .3rem}
+    .pack td{padding:.28rem .3rem}
+    .pack .aidraft{font-size:.8rem;line-height:1.5;padding:.65rem .85rem}
+    .pack .miss{padding:.22rem 0;font-size:.78rem}
+    .pack .wubars{height:36px;margin-top:20px} .pack .wubars i{width:16px}
+    .pack .pfoot{margin-top:.8rem;font-size:.62rem}
+    .pack table{font-size:.76rem}
   }
 </style>
 </head>
@@ -430,9 +444,8 @@ function renderPack(ix){
     return '<tr><td style="font-weight:600;max-width:230px">'+esc(u.name)+'</td>'
       +'<td><span class="ubar '+cls+'"><i style="width:'+(acc?Math.round(acc*100):0)+'%"></i>'
       +(clsAcc?'<span class="cls" style="left:'+Math.round(clsAcc*100)+'%"></span>':'')+'</span></td>'
-      +'<td class="att"><span class="pct">'+pct(acc)+'</span></td>'
-      +'<td class="att">'+evs.length+' answers</td>'
-      +'<td class="att">'+doneN+'/'+u.lessons+' lessons</td></tr>';
+      +'<td class="att" style="white-space:nowrap">'+(acc===null?'not enough evidence yet':'<b>'+pct(acc)+'</b> of '+evs.length+' questions right')+'</td>'
+      +'<td class="att" style="white-space:nowrap">'+doneN+' of '+u.lessons+' lessons done</td></tr>';
   }).join('');
   const by={};
   st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||''); (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; });
@@ -452,18 +465,17 @@ function renderPack(ix){
     +'<div><b>'+win+'</b><small>days revised</small></div>'
     +'<div><b>'+pct(st.acc)+'</b><small>recall accuracy</small></div>'
     +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d ago')+'</b><small>last revised</small></div></div>'
-    +'<h3>Topics — how well it’s sticking</h3><table>'+unitRows+'</table>'
-    +'<div class="legend">bar = '+esc(s.name.split(' ')[0])+'’s recall · thin line = class average · from warm-ups, quizzes, shorts &amp; flashcards</div>'
-    +'<div class="two"><div><h3>Strengths</h3>'
-    +(strong.length?'<div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join('<br>')+'</div>':'<div class="att">Not enough evidence yet.</div>')
-    +'</div><div><h3>Working on</h3>'
-    +(weak.length?weak.map(w=>{ const un=UNITS.find(u=>u.slug===w.unit);
-      return '<div class="miss"><b>'+esc(w.title||'')+'</b><span class="q">'+esc(un?un.name:'')+' · missed ×'+w.n+'</span></div>'; }).join(''):'<div class="att">No repeated misses.</div>')
+    +'<h3>Topics — how much is sticking when '+esc(s.name.split(' ')[0])+' is quizzed</h3><table>'+unitRows+'</table>'
+    +'<div class="legend">Every figure counts real quiz questions '+esc(s.name.split(' ')[0])+' has answered while revising — in daily warm-ups, lesson quizzes, video recall checks and flashcards. Bar = share answered correctly · thin line = class average.</div>'
+    +'<div class="two"><div><h3>Strongest topics</h3>'
+    +(strong.length?'<div class="ok">'+strong.map(x=>esc(x.name)+' — '+pct(x.acc)+' right').join('<br>')+'</div>':'<div class="att">Not enough evidence yet.</div>')
+    +'</div><div><h3>Keeps getting questions wrong on</h3>'
+    +(weak.length?weak.slice(0,3).map(w=>{ const un=UNITS.find(u=>u.slug===w.unit);
+      return '<div class="miss"><b>'+esc(w.title||'')+'</b><span class="q">answered wrong '+w.n+' times · a lesson in '+esc(un?un.name:'')+'</span></div>'; }).join(''):'<div class="att">No repeated misses.</div>')
     +'</div></div>'
-    +(wl.length?'<h3>Warm-up scores, last '+wl.length+'</h3><div class="wubars">'
-      +wl.map(d=>{ const w=p.warmlog[d]; return '<i style="height:52px"><b style="height:'+Math.round(w.correct/w.total*100)+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>':'')
-    +(pr?'<h3>Most recent practice answer · AI-marked</h3><div class="paper"><div class="meta">'+esc(pr.d)+' · '+pr.m+' marks</div>'
-      +'<p class="pq">'+esc(pr.q)+'</p><div class="pr">'+esc(pr.r).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n\n/g,'<br><br>')+'</div></div>':'')
+    +(wl.length?'<h3>Daily warm-up quiz — score out of 10</h3><div class="wubars">'
+      +wl.map(d=>{ const w=p.warmlog[d]; return '<i style="height:52px"><em>'+w.correct+'</em><b style="height:'+Math.round(w.correct/w.total*100)+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')
+      +'</div><div class="legend" style="margin-top:14px">10 quick recall questions at the start of each revision session · number = questions right that day · dates along the bottom</div>':'')
     +'<h3>Teacher summary — draft</h3>'
     +(ai?'<div class="aidraft">'+ai+'</div><div class="aistamp">AI-drafted from the evidence above · edit before sharing · ≈ 1p per pack</div>'
        :'<div class="aidraft" style="color:var(--mut)"><i>Drafts generate when the teacher clicks "Generate packs" — one small-model call per student, batched, ≈ 1p each. (Demo has one pre-generated: Oscar Grant.)</i></div>')
