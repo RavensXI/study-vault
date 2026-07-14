@@ -103,10 +103,18 @@ lesson, AI-marked practice transcripts). AI = ONE weekly brief per class
 (`scripts/_teach_digest.py` → claude -p over aggregates → `teach-digest.js`)
 + the already-paid-for stored marking feedback. Capture feeding it (all in
 sv_progress): warm-up misses + per-unit attempts, KC scores (`sv-kc-log`),
-shorts check answers (`sv-shorts-checks`), practice answers + AI feedback
-(`sv-practice-log`, capped 40). Missing for real data: a teacher-gated API
-reading class members' sv_progress (service-key, server-side) — the metadata
-approach itself should become an events table + RLS in the platform build.
+shorts check answers (`sv-shorts-checks`), flashcard self-marks
+(`sv-flash-log`), practice answers + AI feedback (`sv-practice-log`).
+Per-student pack: `?pack=N` — ONE A4 page (print-to-pdf verified), parent-
+readable labels, AI draft via `scripts/_teach_pack.py`, teacher-triggered.
+
+**DECIDED (14 Jul): the teacher dashboard is a SCHOOL-TIER feature and a
+headline reason schools pay.** No class codes, no join rituals: on the school
+tier students/teachers sign in with school SSO and classes/teachers MIRROR
+the school's own directory (Teams / Classroom groups) — we never own or
+maintain rosters. Free tier = student experience only. Prerequisites for the
+real build: Entra admin consent (still pending), Graph/Classroom group reads,
+capture moved to an events table + RLS.
 
 ## Parked / open decisions
 
