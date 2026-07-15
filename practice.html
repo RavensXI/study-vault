@@ -973,6 +973,15 @@
       font-size: 0.8rem;
       color: var(--text-muted, #8a8580);
     }
+    .problem-walk-link {
+      display: block;
+      text-align: center;
+      margin-top: 0.7rem;
+      font-size: 0.82rem;
+      color: var(--text-muted, #8a8580);
+    }
+    .guided-prefill-note { font-style: italic; color: var(--text-muted, #8a8580); }
+    .guided-step-prefilled { opacity: 0.82; }
     .guided-actions .problem-check-btn { margin-top: 0.6rem; }
     .guided-actions .guided-secondary {
       display: block;
@@ -3979,6 +3988,7 @@
                   <!-- Dynamically populated by renderCurrentProblem based on input_type -->
                 </div>
                 <button class="problem-check-btn" id="problem-check-btn">Check Answer</button>
+                <a href="#" class="problem-walk-link" id="problem-walk-link" style="display:none;">Stuck? Do this one with me instead</a>
 
                 <!-- Feedback (slides in) -->
                 <div class="problem-feedback-area" id="problem-feedback-area">
@@ -4116,6 +4126,8 @@
       streak: 0,
       answered: false,                   // is current problem answered?
       allDone: false,
+      // Which tiers have shown their half-worked completion problem this session
+      completionShown: { bronze: false, silver: false, gold: false },
       // History of completed tier attempts for this session (passed or failed)
       // Each entry: { tier, attemptNumber, correct, attempted, passed, completedAt }
       tierAttemptHistory: [],
@@ -4290,6 +4302,46 @@
 
       var p = items[idx];
       practiceState.answered = false;
+
+      // Completion problem (backward fading): the tier's first question comes
+      // half-worked. Elimination is done and ticked; the student finishes the
+      // substitute-back and check. Bridges the teach walk and bare questions.
+      if (idx === 0 && !practiceState.completionShown[tier] && window._guided &&
+          p.guided_steps && p.guided_steps.length) {
+        practiceState.completionShown[tier] = true;
+        var pf = 0;
+        for (var gi = 0; gi < p.guided_steps.length; gi++) {
+          if (p.guided_steps[gi].phase === 'substitute') { pf = gi; break; }
+        }
+        if (pf > 0) {
+          showGuided({
+            label: 'First one: finish it',
+            display: p.display,
+            steps: p.guided_steps,
+            prefill: pf,
+            prefillNote: 'We’ve done the first half with you. The rest is yours:',
+            doneText: 'Next problem →',
+            skip: { text: 'No help needed, give it to me bare', onClick: function() { renderCurrentProblem(); } },
+            onDone: function(reveals) {
+              practiceState[tier].attempted++;
+              if (reveals) {
+                practiceState[tier].streak = 0;
+                practiceState.streak = 0;
+              } else {
+                practiceState[tier].correct++;
+                practiceState[tier].streak++;
+                practiceState.streak++;
+              }
+              updateTierProgress();
+              updateScoreBarTier();
+              updateScoreBarScore();
+              saveProgress();
+              nextProblem();
+            }
+          });
+          return;
+        }
+      }
 
       // Card elements
       var card = document.getElementById('current-problem-card');
@@ -4487,6 +4539,37 @@
       var checkBtn = document.getElementById('problem-check-btn');
       checkBtn.disabled = false;
       checkBtn.style.display = '';
+
+      // Help before failure: a quiet walk-through link on every problem that
+      // has guided steps. Using it counts as attempted (not correct).
+      var walkLink = document.getElementById('problem-walk-link');
+      if (walkLink) {
+        if (p.guided_steps && p.guided_steps.length && window._guided) {
+          walkLink.style.display = '';
+          walkLink.onclick = function(ev) {
+            ev.preventDefault();
+            if (practiceState.answered) return;
+            practiceState.answered = true;
+            practiceState[tier].attempted++;
+            practiceState[tier].streak = 0;
+            practiceState.streak = 0;
+            updateTierProgress();
+            updateScoreBarTier();
+            updateScoreBarScore();
+            saveProgress();
+            showGuided({
+              label: 'Together',
+              display: p.display,
+              steps: p.guided_steps,
+              doneText: 'Next problem →',
+              onDone: function() { nextProblem(); }
+            });
+          };
+        } else {
+          walkLink.style.display = 'none';
+          walkLink.onclick = null;
+        }
+      }
 
       // Reset feedback
       document.getElementById('problem-feedback-area').className = 'problem-feedback-area';
@@ -4805,6 +4888,8 @@
       checkBtn.disabled = true;
       // Disable all inputs
       document.querySelectorAll('#problem-inputs-area input, #problem-inputs-area button').forEach(function(el) { el.disabled = true; });
+      var walkLinkDone = document.getElementById('problem-walk-link');
+      if (walkLinkDone) walkLinkDone.style.display = 'none';
 
       if (isCorrect) {
         practiceState[tier].correct++;
@@ -5062,11 +5147,41 @@
         });
         actions.appendChild(sk);
       }
-      guidedState = { cfg: cfg, idx: 0, wrongs: 0 };
+      guidedState = { cfg: cfg, idx: 0, wrongs: 0, reveals: 0 };
       card.style.display = '';
       practiceRenderKaTeX(disp);
+      // Completion mode: the first `prefill` steps arrive already worked and
+      // ticked (backward fading) so the student finishes, not starts.
+      if (cfg.prefill && cfg.prefill > 0) {
+        if (cfg.prefillNote) {
+          var note = document.createElement('p');
+          note.className = 'guided-say guided-prefill-note';
+          note.innerHTML = cfg.prefillNote;
+          document.getElementById('guided-steps').appendChild(note);
+        }
+        while (guidedState.idx < cfg.prefill && cfg.steps[guidedState.idx]) {
+          renderPrefilledStep(cfg.steps[guidedState.idx]);
+          guidedState.idx++;
+        }
+      }
       guidedNextStep();
       card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function renderPrefilledStep(st) {
+      var row = document.createElement('div');
+      row.className = 'guided-step guided-step-prefilled';
+      var h = '';
+      if (st.say) h += '<p class="guided-say">' + st.say + '</p>';
+      if (st.answer !== undefined && st.answer !== null) {
+        h += '<div class="guided-box-row"><span class="gb-pre">' + (st.pre || '') + '</span>' +
+             '<input type="text" class="guided-input guided-right" value="' + st.answer + '" disabled>' +
+             (st.post ? '<span class="gb-post">' + st.post + '</span>' : '') +
+             '<span class="guided-tick">&#10003;</span></div>';
+      }
+      row.innerHTML = h;
+      document.getElementById('guided-steps').appendChild(row);
+      practiceRenderKaTeX(row);
     }
 
     function guidedNextStep() {
@@ -5136,6 +5251,7 @@
             lockStep('guided-shown');
             hintEl.textContent = 'It’s ' + st.answer + '. Look at why, then keep going.';
             hintEl.style.display = '';
+            guidedState.reveals++;
             guidedState.idx++;
             setTimeout(guidedNextStep, 700);
           }
@@ -5156,8 +5272,9 @@
         btn.className = b.primary === false ? 'guided-secondary' : 'problem-check-btn';
         btn.textContent = b.text;
         btn.addEventListener('click', function() {
+          var reveals = guidedState ? guidedState.reveals : 0;
           hideGuided();
-          if (b.onClick) b.onClick();
+          if (b.onClick) b.onClick(reveals);
         });
         actions.appendChild(btn);
       });
@@ -5691,11 +5808,17 @@
         dismissMethodModal(goToLearnMode);
       });
 
-      // Render first problem
+      // Render first problem — unless the first-visit opener is about to
+      // cover it, in which case the doors/teach-walk callbacks render it
+      // afterwards (so the tier's completion problem fires at the right time).
+      var lessonId0 = window._practiceLoadLessonId || window.location.pathname;
+      var openerWillShow = !!(window._tierGuides && (window._guided || {}).opener &&
+          (!localStorage.getItem('sv-practice-modal-' + lessonId0) ||
+           new URLSearchParams(location.search).has('fresh')));
       if (window._problemBank) {
         var counts = getTierCounts();
         document.getElementById('score-bar-score').textContent = '0/' + (counts.bronze + counts.silver + counts.gold);
-        renderCurrentProblem();
+        if (!openerWillShow) renderCurrentProblem();
       }
 
       // Render first worked example
@@ -5727,11 +5850,14 @@
                     var t = guidedTeachCfg('bronze');
                     if (t) {
                       t.doneText = 'Your turn →';
-                      t.skip = { text: 'Skip this (I know the move)' };
+                      t.onDone = function() { renderCurrentProblem(); };
+                      t.skip = { text: 'Skip this (I know the move)', onClick: function() { renderCurrentProblem(); } };
                       showGuided(t);
+                    } else {
+                      renderCurrentProblem();
                     }
                   } },
-                { text: 'Been taught this before? Jump straight in', primary: false, onClick: null }
+                { text: 'Been taught this before? Jump straight in', primary: false, onClick: function() { renderCurrentProblem(); } }
               ]
             });
           } else {

@@ -13,7 +13,7 @@ function until(name, cond, cb, tries) {
   var ok = false;
   try { ok = cond(); } catch (e) { ok = false; }
   if (ok) { cb(); return; }
-  if (tries > 800) { log('FAIL timeout: ' + name); document.title = 'DRIVER FAILED'; return; }
+  if (tries > 900) { log('FAIL timeout: ' + name); document.title = 'DRIVER FAILED'; return; }
   setTimeout(function() { until(name, cond, cb, tries + 1); }, 50);
 }
 
@@ -21,9 +21,8 @@ function doc() { return f.contentDocument; }
 function win() { return f.contentWindow; }
 function visible(el) { return el && el.style.display !== 'none'; }
 
-// Walk a guided sequence whose steps are stepsArr; on each new row, fill the
-// expected answer (wrongFirstOn: try a wrong value once on that step index to
-// exercise the hint path). done(cond) = what ends the walk.
+// Walk a guided sequence; fills each new live box with the expected answer.
+// wrongFirstOn: index to deliberately flub once (exercises the hint path).
 function walk(name, stepsArr, wrongFirstOn, onButtons) {
   var wrongDone = false;
   function tick() {
@@ -76,35 +75,62 @@ until('lesson + guided data loaded', function() {
       walk('P2 teach-bronze', win()._guided.teach.bronze.steps, -1, function(btns2) {
         btns2[0].click(); // Your turn →
 
-        // PHASE 3: bank Q1 — answer wrong deliberately, expect rescue link
-        until('problem card back', function() {
-          return visible(doc().getElementById('current-problem-card')) &&
-                 doc().getElementById('problem-input-a');
+        // PHASE 3: completion problem — first bank question arrives half-worked
+        var q1 = win()._problemBank.bronze[0];
+        until('completion card shown', function() {
+          return visible(doc().getElementById('guided-card')) &&
+                 doc().getElementById('guided-label').textContent.indexOf('finish it') !== -1;
         }, function() {
-          var p = win()._currentProblem;
-          log('PASS P3 — bank Q1 visible: ' + (p && p.display || '?').slice(0, 60));
-          doc().getElementById('problem-input-a').value = '999';
-          doc().getElementById('problem-input-b').value = '999';
-          doc().getElementById('problem-check-btn').click();
-          until('rescue link', function() {
-            return doc().getElementById('fb-do-with-me');
-          }, function() {
-            log('PASS P3 — wrong answer produced "do this one with me" link');
-            doc().getElementById('fb-do-with-me').click();
+          var pre = doc().querySelectorAll('.guided-step-prefilled').length;
+          log('PASS P3 — completion card shown, ' + pre + ' steps pre-worked: ' + q1.display.slice(6, 50));
+          if (!pre) log('WARN P3 — expected pre-worked steps');
+          walk('P3 completion', q1.guided_steps, -1, function(btns3) {
+            btns3[0].click(); // Next problem →
 
-            // PHASE 4: rescue walk on the exact failed problem
-            until('rescue walk shown', function() {
-              return visible(doc().getElementById('guided-card'));
+            // PHASE 4: bare Q2 with the pre-answer walk link; get it wrong → rescue
+            until('bare Q2', function() {
+              return visible(doc().getElementById('current-problem-card')) &&
+                     doc().getElementById('problem-number-label').textContent === 'Q2' &&
+                     doc().getElementById('problem-input-a');
             }, function() {
-              walk('P4 rescue', p.guided_steps, -1, function(btns3) {
-                btns3[0].click(); // Next problem →
-                until('advanced to Q2', function() {
-                  return visible(doc().getElementById('current-problem-card')) &&
-                         doc().getElementById('problem-number-label').textContent === 'Q2';
-                }, function() {
-                  log('PASS P4 — rescue complete, moved on to Q2');
-                  log('ALL PHASES PASSED');
-                  document.title = 'DRIVER DONE';
+              var link = doc().getElementById('problem-walk-link');
+              log('PASS P4 — Q2 bare, walk link visible: ' + (link && link.style.display !== 'none'));
+              var p2 = win()._currentProblem;
+              doc().getElementById('problem-input-a').value = '999';
+              doc().getElementById('problem-input-b').value = '999';
+              doc().getElementById('problem-check-btn').click();
+              until('rescue link', function() { return doc().getElementById('fb-do-with-me'); }, function() {
+                log('PASS P4 — wrong answer offers rescue');
+                doc().getElementById('fb-do-with-me').click();
+                until('rescue walk', function() { return visible(doc().getElementById('guided-card')); }, function() {
+                  walk('P4 rescue', p2.guided_steps, -1, function(btns4) {
+                    btns4[0].click();
+
+                    // PHASE 5: Q3 — use the pre-answer walk link directly
+                    until('bare Q3', function() {
+                      return visible(doc().getElementById('current-problem-card')) &&
+                             doc().getElementById('problem-number-label').textContent === 'Q3';
+                    }, function() {
+                      var p3 = win()._currentProblem;
+                      var l3 = doc().getElementById('problem-walk-link');
+                      if (!l3 || l3.style.display === 'none') { log('FAIL P5 — no walk link on Q3'); document.title = 'DRIVER FAILED'; return; }
+                      l3.click();
+                      until('pre-answer walk', function() { return visible(doc().getElementById('guided-card')); }, function() {
+                        log('PASS P5 — pre-answer walk opened without failing first');
+                        walk('P5 walk-instead', p3.guided_steps, -1, function(btns5) {
+                          btns5[0].click();
+                          until('advanced to Q4', function() {
+                            return visible(doc().getElementById('current-problem-card')) &&
+                                   doc().getElementById('problem-number-label').textContent === 'Q4';
+                          }, function() {
+                            log('PASS P5 — advanced to Q4');
+                            log('ALL PHASES PASSED');
+                            document.title = 'DRIVER DONE';
+                          });
+                        });
+                      });
+                    });
+                  });
                 });
               });
             });

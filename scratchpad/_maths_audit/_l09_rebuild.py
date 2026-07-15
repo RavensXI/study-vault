@@ -426,19 +426,20 @@ def gen_guided(e1, e2, sol):
     say_sub = "Now find " + L + ". Put " + S + " = " + par(sv) + " into \\(" + fmt_eq(ea, eb, ec) + "\\):"
     if abs(kco) != 1:
         say_sub = say_sub[:-1] + ". The " + S + " part is " + str(_i(kco)) + " × " + par(sv) + " = " + str(_i(kpart)) + ", so:"
+    # phase marker: completion problems prefill everything BEFORE substitution
     if uco == 1:
-        steps.append({"say": say_sub,
+        steps.append({"say": say_sub, "phase": "substitute",
             "pre": str(_i(kpart)) + " + " + L + " = " + str(_i(ec)) + "  →  " + L + " = ", "post": "",
             "answer": uv, "hint": "Take " + str(_i(kpart)) + " from both sides."})
     elif uco == -1:
-        steps.append({"say": say_sub,
+        steps.append({"say": say_sub, "phase": "substitute",
             "pre": str(_i(kpart)) + " − " + L + " = " + str(_i(ec)) + "  →  " + L + " = ", "post": "",
             "answer": uv, "hint": str(_i(kpart)) + " minus what gives " + str(_i(ec)) + "?"})
     else:
-        steps.append({"say": say_sub,
+        steps.append({"say": say_sub, "phase": "substitute",
             "pre": term(uco, L, True) + " = " + str(_i(ec)) + " − " + par(kpart) + " = ", "post": "",
             "answer": _i(ec - kpart), "hint": "Whatever is left after taking the known part away."})
-        steps.append({
+        steps.append({"phase": "substitute",
             "pre": L + " = ", "post": "", "answer": uv,
             "hint": "Divide by " + str(_i(uco)) + "."})
 
