@@ -869,6 +869,53 @@
       margin: -0.35rem 0 0.75rem;
     }
 
+    /* Tier intro card — one rung's method, taught at the moment it's needed */
+    .tier-intro-title {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.35rem;
+      margin: 0.25rem 0 0.75rem;
+    }
+    .tier-intro-steps {
+      margin: 0 0 1rem;
+      padding-left: 1.25rem;
+    }
+    .tier-intro-steps li {
+      font-size: 0.92rem;
+      line-height: 1.55;
+      margin-bottom: 0.5rem;
+    }
+    .tier-intro-example {
+      border: 1px solid var(--border, #e8e4de);
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1.1rem;
+      font-size: 0.92rem;
+    }
+    .tier-intro-example-q {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-weight: 700;
+      font-size: 1.02rem;
+      margin-bottom: 0.6rem;
+    }
+    .tier-intro-example-step {
+      display: flex;
+      gap: 0.6rem;
+      margin-bottom: 0.4rem;
+      align-items: baseline;
+    }
+    .tier-intro-example-step .tie-label {
+      flex: 0 0 auto;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #8a8580);
+      min-width: 6.5rem;
+    }
+    .tier-intro-example-step .tie-content p { margin: 0; }
+    .tier-intro-example-step.is-answer .tie-content { font-weight: 700; }
+
     .problem-equation {
       font-family: 'Source Serif 4', Georgia, serif;
       font-size: 1.75rem;
@@ -3869,6 +3916,18 @@
                 </div>
               </div>
 
+              <!-- Tier intro card (progressive method teaching — shown before a tier's first question) -->
+              <div class="problem-card tier-intro-card" id="tier-intro-card" style="display:none;">
+                <div class="problem-card-header">
+                  <span class="problem-number-label">New method</span>
+                  <span class="problem-tier-pill pill-bronze" id="tier-intro-pill">Bronze</span>
+                </div>
+                <h3 class="tier-intro-title" id="tier-intro-title"></h3>
+                <ol class="tier-intro-steps" id="tier-intro-steps"></ol>
+                <div class="tier-intro-example" id="tier-intro-example"></div>
+                <button class="problem-check-btn" id="tier-intro-btn">Start</button>
+              </div>
+
               <!-- Tier progress bar -->
               <div class="tier-progress" id="tier-progress">
                 <div class="tier-progress-track">
@@ -4793,6 +4852,82 @@
       return 'continue';
     }
 
+    // ===== PROGRESSIVE TIER GUIDES =====
+    // One rung's method at a time: bronze card on first visit, silver/gold
+    // cards as interstitials at their transitions. Lessons without
+    // practice_data.tier_guides behave exactly as before.
+    function tierGuide(tier) {
+      return (window._tierGuides || {})[tier] || null;
+    }
+
+    function updateMethodPanelForTier(tier) {
+      var g = tierGuide(tier);
+      if (!g) return;
+      var stepsHtml = '';
+      (g.steps || []).forEach(function(s) { stepsHtml += '<li>' + s + '</li>'; });
+      var exHtml = '';
+      if (g.example) {
+        exHtml = '<div class="tier-intro-example"><div class="tier-intro-example-q">' + (g.example.question || '') + '</div>';
+        (g.example.steps || []).forEach(function(st) {
+          exHtml += '<div class="tier-intro-example-step' + ((st.isAnswer || st.is_answer) ? ' is-answer' : '') + '">' +
+            '<span class="tie-label">' + (st.label || '') + '</span>' +
+            '<div class="tie-content">' + (st.content || '') + '</div></div>';
+        });
+        exHtml += '</div>';
+      }
+      [['panel-method-title', 'panel-method-steps', 'panel-method-content'],
+       ['method-modal-title', 'method-modal-steps', 'method-modal-content']].forEach(function(ids) {
+        var t = document.getElementById(ids[0]);
+        var s = document.getElementById(ids[1]);
+        var c = document.getElementById(ids[2]);
+        if (t) t.textContent = g.title || '';
+        if (s) s.innerHTML = stepsHtml;
+        if (c) { c.innerHTML = exHtml; practiceRenderKaTeX(c); }
+      });
+    }
+
+    function showTierIntro(tier, onStart) {
+      var g = tierGuide(tier);
+      if (!g) { if (onStart) onStart(); return; }
+      updateMethodPanelForTier(tier);
+      var card = document.getElementById('current-problem-card');
+      var intro = document.getElementById('tier-intro-card');
+      var tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
+      var pill = document.getElementById('tier-intro-pill');
+      pill.className = 'problem-tier-pill pill-' + tier;
+      pill.textContent = tierName;
+      document.getElementById('tier-intro-title').textContent = g.title || '';
+      var ol = document.getElementById('tier-intro-steps');
+      ol.innerHTML = '';
+      (g.steps || []).forEach(function(s) { var li = document.createElement('li'); li.innerHTML = s; ol.appendChild(li); });
+      var ex = document.getElementById('tier-intro-example');
+      ex.innerHTML = '';
+      ex.style.display = 'none';
+      if (g.example) {
+        var h = '<div class="tier-intro-example-q">' + (g.example.question || '') + '</div>';
+        (g.example.steps || []).forEach(function(st) {
+          h += '<div class="tier-intro-example-step' + ((st.isAnswer || st.is_answer) ? ' is-answer' : '') + '">' +
+            '<span class="tie-label">' + (st.label || '') + '</span>' +
+            '<div class="tie-content">' + (st.content || '') + '</div></div>';
+        });
+        ex.innerHTML = h;
+        ex.style.display = '';
+      }
+      card.style.display = 'none';
+      intro.style.display = '';
+      practiceRenderKaTeX(intro);
+      var btn = document.getElementById('tier-intro-btn');
+      btn.textContent = 'Start ' + tierName + ' →';
+      var newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+      newBtn.addEventListener('click', function() {
+        intro.style.display = 'none';
+        card.style.display = '';
+        if (onStart) onStart();
+      });
+      intro.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
     function nextProblem() {
       var tier = practiceState.currentTier;
       var counts = getTierCounts();
@@ -4813,7 +4948,7 @@
             showSummary();
             return;
           }
-          animateToNextProblem();
+          showTierIntro(practiceState.currentTier, animateToNextProblem);
         });
       } else if (verdict === 'fail') {
         recordTierAttempt(tier, false);
@@ -4945,6 +5080,7 @@
 
       document.getElementById('summary-overlay').classList.remove('active');
       updateScoreBarScore();
+      if (window._tierGuides) updateMethodPanelForTier('bronze');
       renderCurrentProblem();
     }
 
@@ -5318,7 +5454,23 @@
       var modalKey = 'sv-practice-modal-' + lessonId;
       var tooltipKey = 'sv-practice-tooltips-seen';
       var mc = window._practiceMethodCard;
-      if (mc && mc.title && !localStorage.getItem(modalKey)) {
+      if (window._tierGuides) {
+        // Progressive tier guides: no big up-front modal. Panel shows the
+        // current rung's card; first visit teaches bronze right before Q1.
+        updateMethodPanelForTier(practiceState.currentTier);
+        if (!localStorage.getItem(modalKey)) {
+          _isFirstVisit = !localStorage.getItem(tooltipKey);
+          switchMode('practice');
+          showTierIntro(practiceState.currentTier, null);
+          localStorage.setItem(modalKey, '1');
+          if (_isFirstVisit) localStorage.setItem(tooltipKey, '1');
+        } else {
+          switchMode('learn');
+          if (window._workedExamples && window._workedExamples.length) {
+            renderLearnExample();
+          }
+        }
+      } else if (mc && mc.title && !localStorage.getItem(modalKey)) {
         // First visit to this lesson — show method modal
         _isFirstVisit = !localStorage.getItem(tooltipKey); // tooltips only on very first lesson
         showMethodModal();

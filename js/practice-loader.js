@@ -392,6 +392,9 @@
         silver: pb.silver_description || '',
         gold: pb.gold_description || ''
       };
+      // Per-tier method guides (progressive teaching) — practice.html shows
+      // the current rung's card only, and teaches each new rung at its transition.
+      window._tierGuides = pd.tier_guides || null;
       window._examBoard = subject.exam_board || '';
     }
 
