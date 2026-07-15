@@ -387,6 +387,11 @@
         silver: seededShuffle(filterTier(pb.silver || []), daySeed('s')),
         gold: seededShuffle(filterTier(pb.gold || []), daySeed('g'))
       };
+      window._tierDescriptions = {
+        bronze: pb.bronze_description || '',
+        silver: pb.silver_description || '',
+        gold: pb.gold_description || ''
+      };
       window._examBoard = subject.exam_board || '';
     }
 
