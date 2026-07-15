@@ -280,6 +280,180 @@ WORKED_EXAMPLES = [
   ]},
 ]
 
+# ============================== GUIDED STEPS ==============================
+# Learning-by-doing: every problem gets machine-generated micro-steps (each a
+# tiny numeric box). Same data drives the "walk me through one" teaching
+# problems and the "do this one with me" rescue on wrong answers.
+
+def _i(f):
+    assert f == int(f), "non-integer in guided step: %s" % f
+    return int(f)
+
+def term(c, letter, lead=False):
+    c = _i(c)
+    mag = ("" if abs(c) == 1 else str(abs(c))) + letter
+    if lead:
+        return ("-" if c < 0 else "") + mag
+    return ("- " if c < 0 else "+ ") + mag
+
+def fmt_eq(a, b, c):
+    return term(a, "x", True) + " " + term(b, "y") + " = " + str(_i(c))
+
+def par(n):
+    n = _i(n)
+    return "(" + str(n) + ")" if n < 0 else str(n)
+
+def route_of(e1, e2):
+    """Cheapest elimination route: (letter_index, k1, k2). Tie prefers y."""
+    import math as _m
+    best = None
+    for pick in (1, 0):  # try y first so ties prefer eliminating y
+        c1, c2 = abs(e1[pick]), abs(e2[pick])
+        if c1 == 0 or c2 == 0:
+            continue
+        l = c1 * c2 / F(_m.gcd(c1.numerator, c2.numerator))
+        k1, k2 = _i(l / c1), _i(l / c2)
+        score = (k1 != 1) + (k2 != 1)
+        if best is None or score < best[0]:
+            best = (score, pick, k1, k2)
+    return best[1], best[2], best[3]
+
+def gen_guided(e1, e2, sol):
+    """Generate guided micro-steps for an elimination solve. Returns list of
+    steps: {say?, pre?, post?, answer?, hint?, done?} — steps without answer
+    are statements."""
+    (a1, b1, c1), (a2, b2, c2) = e1, e2
+    pick, k1, k2 = route_of(e1, e2)
+    L = "xy"[pick]          # letter being eliminated
+    S = "xy"[1 - pick]      # survivor
+    steps = []
+
+    def scale_steps(a, b, c, k, which):
+        cs = [(a, "x"), (b, "y")]
+        say = ("To make the " + L + " terms match, multiply ALL of \\(" + fmt_eq(a, b, c) +
+               "\\) by " + str(k) + " — every term, both sides.")
+        first = True
+        for coef, let in cs:
+            steps.append({
+                "say": say if first else None,
+                "pre": term(coef, let, True) + " × " + str(k) + " = ", "post": let,
+                "answer": _i(coef * k),
+                "hint": "Just multiply the number in front" + (" — and keep the minus." if coef < 0 else ".")})
+            first = False
+        steps.append({
+            "pre": "and the right-hand side: " + par(c) + " × " + str(k) + " = ", "post": "",
+            "answer": _i(c * k),
+            "hint": "The right-hand side gets multiplied too — that's the step everyone forgets."})
+
+    if k1 > 1: scale_steps(a1, b1, c1, k1, 1)
+    if k2 > 1: scale_steps(a2, b2, c2, k2, 2)
+
+    A1, B1_, C1 = a1 * k1, b1 * k1, c1 * k1
+    A2, B2_, C2 = a2 * k2, b2 * k2, c2 * k2
+    m1, m2 = (A1, A2) if pick == 1 else (B1_, B2_)   # survivor coefficients
+    e1c, e2c = (A1, B1_, C1), (A2, B2_, C2)
+    lc1, lc2 = (B1_, B2_) if pick == 1 else (A1, A2)  # eliminated-letter coefficients
+    same_sign = (lc1 > 0) == (lc2 > 0)
+
+    if same_sign:
+        # subtract in the direction that keeps the survivor positive
+        if m1 - m2 < 0:
+            e1c, e2c = e2c, e1c
+        (A1, B1_, C1), (A2, B2_, C2) = e1c, e2c
+        surv = (A1 - A2) if pick == 1 else (B1_ - B2_)
+        assert (A1 if pick == 1 else B1_) > 0 and (A2 if pick == 1 else B2_) > 0, \
+            "sub-route survivor coefficients must be positive"
+        elim1, elim2 = (B1_, B2_) if pick == 1 else (A1, A2)
+        steps.append({
+            "say": "Both equations now have " + term(elim1, L, True) +
+                   " — same sign. <strong>Same Signs Subtract.</strong> Take \\(" +
+                   fmt_eq(*e2c) + "\\) away from \\(" + fmt_eq(*e1c) + "\\), term by term:",
+            "pre": term((A1 if pick == 1 else B1_), S, True) + " − " + term((A2 if pick == 1 else B2_), S, True) + " = ",
+            "post": S, "answer": _i(surv),
+            "hint": "Subtract the numbers in front: " + str(_i(A1 if pick == 1 else B1_)) + " − " + str(_i(A2 if pick == 1 else B2_)) + "."})
+        steps.append({
+            "pre": term(elim1, L, True) + " − " + term(elim2, L, True) + " = ", "post": "",
+            "answer": 0, "done": "Gone — that was the whole point.",
+            "hint": "They're identical — anything minus itself is 0."})
+        steps.append({
+            "pre": str(_i(C1)) + " − " + par(C2) + " = ", "post": "",
+            "answer": _i(C1 - C2),
+            "hint": "The right-hand sides get subtracted too, exactly like the left."})
+        R = C1 - C2
+    else:
+        surv = (A1 + A2) if pick == 1 else (B1_ + B2_)
+        s1, s2 = ((A1, A2) if pick == 1 else (B1_, B2_))
+        assert s1 > 0 and s2 > 0, "add-route survivor coefficients must be positive"
+        elim1, elim2 = (B1_, B2_) if pick == 1 else (A1, A2)
+        def wrap(coef, letter):
+            t = term(coef, letter, True)
+            return "(" + t + ")" if coef < 0 else t
+        steps.append({
+            "say": "The " + L + " terms are " + term(elim1, L, True) + " and " + term(elim2, L, True) +
+                   " — opposite signs, so <strong>ADD</strong> the equations and they cancel:",
+            "pre": term(s1, S, True) + " + " + term(s2, S, True) + " = ",
+            "post": S, "answer": _i(surv),
+            "hint": "Add the numbers in front."})
+        steps.append({
+            "pre": term(elim1, L, True) + " + " + wrap(elim2, L) + " = ", "post": "",
+            "answer": 0, "done": "Cancelled — adding opposites gives zero.",
+            "hint": "One is plus, one is minus, same size — they cancel to 0."})
+        steps.append({
+            "pre": str(_i(C1)) + " + " + par(C2) + " = ", "post": "",
+            "answer": _i(C1 + C2),
+            "hint": "Add the right-hand sides too."})
+        R = C1 + C2
+
+    sv = sol[1 - pick]  # numeric value of survivor (sol is [x, y])
+    if _i(surv) != 1:
+        steps.append({
+            "say": "So " + term(surv, S, True) + " = " + str(_i(R)) + ".",
+            "pre": S + " = ", "post": "", "answer": sv,
+            "hint": "Divide both sides by " + str(_i(surv)) + "."})
+    else:
+        steps.append({"say": "So " + S + " = " + str(_i(R)) + " — done in one."})
+
+    # substitute into the original equation whose unknown-letter coefficient is nicest
+    unk = pick  # index of the letter still unknown (the eliminated one)
+    cands = [e1, e2]
+    cands.sort(key=lambda e: (abs(e[unk]) != 1, abs(_i(e[unk])), abs(_i(e[0])) + abs(_i(e[1]))))
+    ea, eb, ec = cands[0]
+    kco = ea if unk == 1 else eb          # coefficient of the KNOWN letter in this eq
+    uco = eb if unk == 1 else ea          # coefficient of the unknown letter
+    known_val = sv
+    kpart = kco * known_val
+    uv = sol[unk]
+    say_sub = "Now find " + L + ". Put " + S + " = " + par(sv) + " into \\(" + fmt_eq(ea, eb, ec) + "\\):"
+    if abs(kco) != 1:
+        say_sub = say_sub[:-1] + " — the " + S + " part is " + str(_i(kco)) + " × " + par(sv) + " = " + str(_i(kpart)) + ", so:"
+    if uco == 1:
+        steps.append({"say": say_sub,
+            "pre": str(_i(kpart)) + " + " + L + " = " + str(_i(ec)) + "  →  " + L + " = ", "post": "",
+            "answer": uv, "hint": "Take " + str(_i(kpart)) + " from both sides."})
+    elif uco == -1:
+        steps.append({"say": say_sub,
+            "pre": str(_i(kpart)) + " − " + L + " = " + str(_i(ec)) + "  →  " + L + " = ", "post": "",
+            "answer": uv, "hint": str(_i(kpart)) + " minus what gives " + str(_i(ec)) + "?"})
+    else:
+        steps.append({"say": say_sub,
+            "pre": term(uco, L, True) + " = " + str(_i(ec)) + " − " + par(kpart) + " = ", "post": "",
+            "answer": _i(ec - kpart), "hint": "Whatever is left after taking the known part away."})
+        steps.append({
+            "pre": L + " = ", "post": "", "answer": uv,
+            "hint": "Divide by " + str(_i(uco)) + "."})
+
+    # check in the other original equation
+    oa, ob, oc = cands[1]
+    xv, yv = sol[0], sol[1]
+    def prod(coef, val):
+        return par(val) if abs(_i(coef)) == 1 else str(abs(_i(coef))) + " × " + par(val)
+    steps.append({
+        "say": "Last thing — check the pair in the other equation:",
+        "pre": prod(oa, xv) + " " + ("+" if ob > 0 else "−") + " " + prod(ob, yv) + " = ", "post": "",
+        "answer": _i(oc), "done": "It balances — so x = " + par(xv) + ", y = " + par(yv) + " is right.",
+        "hint": "Work it out — if it doesn't give " + str(_i(oc)) + ", something slipped."})
+    return steps
+
 # ============================== VERIFICATION ==============================
 
 def parse_eq(s):
@@ -370,8 +544,13 @@ for tier, rows in BANK.items():
                 print("FAIL %s %s: expect equals the correct answer" % (tag, m["pattern"])); errors += 1
             clean.append({"pattern": m["pattern"], "check": m["pattern"], "expect": exp,
                           "message": m["message"], "note": m.get("note", "machine-verified via error simulation")})
+        gs = gen_guided(e1, e2, sol)
+        for st in gs:
+            if "answer" in st:
+                assert isinstance(st["answer"], (int, float)), "non-numeric step answer in " + tag
         out.append({"display": display, "solutions": sol, "input_type": "xy_pair",
-                    "calculator": False, "hint": hint, "misconceptions": clean})
+                    "calculator": False, "hint": hint, "misconceptions": clean,
+                    "guided_steps": gs})
     problems_out[tier] = out
 
 print("bank: %d bronze / %d silver / %d gold, verification %s"
@@ -382,9 +561,43 @@ if errors:
 
 # ============================== ASSEMBLE + PUSH ==============================
 l09_path = r"C:\Users\tshau\AppData\Local\Temp\claude\C--Users-tshau-Documents-Study-Vault\b7ce0950-5850-4b5c-8f69-ce16ff3c08b6\scratchpad\_l09_live.json"
+# ---- teaching walks (one per tier) + the concrete opener ----
+def teach_problem(display, label):
+    e1, e2 = parse_display(display)
+    x, y = solve2(e1, e2)
+    return {"display": display, "label": label,
+            "steps": gen_guided(e1, e2, [_i(x) if x == int(x) else float(x),
+                                         _i(y) if y == int(y) else float(y)])}
+
+GUIDED = {
+ "opener": {
+  "label": "Before any algebra",
+  "display": "2 coffees + 1 muffin = £7<br>1 coffee + 1 muffin = £4",
+  "steps": [
+   {"say": "A coffee-shop puzzle — no algebra allowed, just look at the two orders.",
+    "pre": "A coffee costs £", "post": "", "answer": 3,
+    "hint": "Compare the orders: the ONLY difference is one extra coffee — and £3 of price."},
+   {"say": "That move you just made — comparing the orders and letting the muffin cancel out — is called <strong>elimination</strong>. You subtracted two equations without noticing.",
+    "pre": "And the muffin? £", "post": "", "answer": 1,
+    "hint": "One coffee (£3) and a muffin cost £4 together."},
+   {"say": "That second move — using the value you know to find the one you don't — is <strong>substitution</strong>. Those two moves are the entire topic. Algebra just writes coffee as \\(x\\) and muffin as \\(y\\): \\(2x + y = 7\\) and \\(x + y = 4\\)."},
+  ]},
+ "teach": {
+  "bronze": teach_problem(r"Solve \(3x + y = 10\) and \(x + y = 4\)", "Together: your first one"),
+  "silver": teach_problem(r"Solve \(2x + 3y = 12\) and \(x + y = 5\)", "Together: the silver move"),
+  "gold": teach_problem(r"Solve \(4x + 3y = 23\) and \(3x + 2y = 16\)", "Together: the gold move"),
+ },
+}
+# silver/gold teaching walks must actually demonstrate the new move
+_, sk1, sk2 = route_of(*parse_display(GUIDED["teach"]["silver"]["display"]))
+assert (sk1 != 1) != (sk2 != 1), "silver walk must scale exactly one equation"
+_, gk1, gk2 = route_of(*parse_display(GUIDED["teach"]["gold"]["display"]))
+assert gk1 != 1 and gk2 != 1, "gold walk must scale both equations"
+
 pd = json.load(io.open(l09_path, encoding="utf-8"))
 pd["method_card"] = METHOD_CARD
 pd["tier_guides"] = TIER_GUIDES
+pd["guided"] = GUIDED
 pd["worked_examples"] = WORKED_EXAMPLES
 for k, v in TIER_DESCRIPTIONS.items():
     pd["problem_bank"][k] = v
@@ -394,6 +607,31 @@ for tier in ("bronze", "silver", "gold"):
 outp = os.path.join(ROOT, "scratchpad", "_maths_audit", "_l09_rebuilt_practice_data.json")
 io.open(outp, "w", encoding="utf-8").write(json.dumps(pd, ensure_ascii=False, indent=1))
 print("wrote", outp)
+
+# ---- human-readable transcript of every guided walk, for eyeball QA ----
+def transcript(name, steps, f):
+    f.write("\n### " + name + "\n")
+    for st in steps:
+        if st.get("say"): f.write("  [say] " + st["say"] + "\n")
+        if "answer" in st:
+            f.write("  [box] " + (st.get("pre") or "") + "___" + (st.get("post") or "") +
+                    "   => " + str(st["answer"]) + "   (hint: " + (st.get("hint") or "") + ")\n")
+            if st.get("done"): f.write("        on-correct: " + st["done"] + "\n")
+tf = io.open(os.path.join(ROOT, "scratchpad", "_maths_audit", "_l09_guided_transcripts.txt"), "w", encoding="utf-8")
+transcript("OPENER", GUIDED["opener"]["steps"], tf)
+for t in ("bronze", "silver", "gold"):
+    transcript("TEACH " + t.upper() + " — " + GUIDED["teach"][t]["display"], GUIDED["teach"][t]["steps"], tf)
+for tier in ("bronze", "silver", "gold"):
+    for n, p in enumerate(pd["problem_bank"][tier]):
+        transcript(tier[0].upper() + str(n) + " — " + p["display"], p["guided_steps"], tf)
+tf.close()
+print("wrote guided transcripts (eyeball QA file)")
+for show in (("bronze", 0), ("silver", 1), ("gold", 2)):
+    p = pd["problem_bank"][show[0]][show[1]]
+    print("\n===== SAMPLE", show[0].upper(), show[1], p["display"], "=====")
+    for st in p["guided_steps"]:
+        if st.get("say"): print(" say:", st["say"][:110])
+        if "answer" in st: print(" box:", (st.get("pre") or "") + "___" + (st.get("post") or ""), "=>", st["answer"])
 
 # L10 check for the report: is it also simultaneous?
 dump = json.load(io.open(os.path.join(ROOT, "scratchpad", "_maths_edexcel_practice.json"), encoding="utf-8"))

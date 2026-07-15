@@ -395,6 +395,9 @@
       // Per-tier method guides (progressive teaching) — practice.html shows
       // the current rung's card only, and teaches each new rung at its transition.
       window._tierGuides = pd.tier_guides || null;
+      // Guided walks (learning by doing): opener + per-tier teaching problems.
+      // Bank problems carry their own guided_steps for the "do this one with me" rescue.
+      window._guided = pd.guided || null;
       window._examBoard = subject.exam_board || '';
     }
 

@@ -916,6 +916,81 @@
     .tier-intro-example-step .tie-content p { margin: 0; }
     .tier-intro-example-step.is-answer .tie-content { font-weight: 700; }
 
+    /* Guided walk — micro-steps the student types, checked one at a time */
+    .guided-display {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      text-align: center;
+      margin: 0.25rem 0 1rem;
+      line-height: 1.55;
+    }
+    .guided-step { margin-bottom: 0.55rem; }
+    .guided-say {
+      font-size: 0.95rem;
+      line-height: 1.55;
+      margin: 1rem 0 0.55rem;
+    }
+    .guided-box-row {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.08rem;
+      padding-left: 0.5rem;
+    }
+    .guided-input {
+      width: 4.2rem;
+      padding: 0.35rem 0.4rem;
+      border: 1.5px solid var(--border, #ddd6cc);
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+      font-family: 'Inter', sans-serif;
+    }
+    .guided-input:focus { outline: none; border-color: var(--accent, #2563eb); }
+    .guided-input.guided-right { border-color: #16a34a; background: #f0fdf4; }
+    .guided-input.guided-wrong { border-color: #dc2626; animation: gshake 0.3s; }
+    .guided-input.guided-shown { border-color: #d97706; background: #fffbeb; }
+    .guided-go {
+      border: none;
+      background: var(--accent, #2563eb);
+      color: #fff;
+      border-radius: 8px;
+      padding: 0.38rem 0.75rem;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-family: 'Inter', sans-serif;
+    }
+    .guided-tick { color: #16a34a; font-weight: 700; font-size: 1.05rem; }
+    .guided-hint { font-size: 0.82rem; color: #b45309; margin: 0.35rem 0 0 0.5rem; }
+    .guided-done { font-size: 0.85rem; color: #16a34a; margin: 0.35rem 0 0 0.5rem; }
+    .guided-skip {
+      display: block;
+      text-align: center;
+      margin-top: 0.9rem;
+      font-size: 0.8rem;
+      color: var(--text-muted, #8a8580);
+    }
+    .guided-actions .problem-check-btn { margin-top: 0.6rem; }
+    .guided-actions .guided-secondary {
+      display: block;
+      margin: 0.65rem auto 0;
+      background: none;
+      border: none;
+      color: var(--text-muted, #8a8580);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      font-family: 'Inter', sans-serif;
+    }
+    @keyframes gshake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
+    }
+
     .problem-equation {
       font-family: 'Source Serif 4', Georgia, serif;
       font-size: 1.75rem;
@@ -3928,6 +4003,16 @@
                 <button class="problem-check-btn" id="tier-intro-btn">Start</button>
               </div>
 
+              <!-- Guided walk card (learning by doing — opener, tier teaching, and rescue) -->
+              <div class="problem-card guided-card" id="guided-card" style="display:none;">
+                <div class="problem-card-header">
+                  <span class="problem-number-label" id="guided-label">Together</span>
+                </div>
+                <div class="guided-display" id="guided-display"></div>
+                <div class="guided-steps" id="guided-steps"></div>
+                <div class="guided-actions" id="guided-actions"></div>
+              </div>
+
               <!-- Tier progress bar -->
               <div class="tier-progress" id="tier-progress">
                 <div class="tier-progress-track">
@@ -4791,7 +4876,10 @@
           diagnosisHtml = '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line — find the first line where yours differs.</div>';
         }
         var nudgeHtml = '';
-        if ((practiceState.wrongRun || 0) >= 2 && (window._workedExamples || []).length) {
+        if (problem.guided_steps && problem.guided_steps.length) {
+          nudgeHtml = '<div class="feedback-simplify">'
+            + '<a href="#" id="fb-do-with-me"><strong>Stuck? Do this one with me →</strong></a></div>';
+        } else if ((practiceState.wrongRun || 0) >= 2 && (window._workedExamples || []).length) {
           nudgeHtml = '<div class="feedback-simplify">Two in a row — worth ninety seconds: '
             + '<a href="#" id="fb-see-example"><strong>walk through a worked example</strong></a>, then come back.</div>';
         }
@@ -4808,6 +4896,17 @@
           '</div>';
         var seeEx = document.getElementById('fb-see-example');
         if (seeEx) seeEx.addEventListener('click', function(ev) { ev.preventDefault(); switchMode('learn'); });
+        var doWithMe = document.getElementById('fb-do-with-me');
+        if (doWithMe) doWithMe.addEventListener('click', function(ev) {
+          ev.preventDefault();
+          showGuided({
+            label: 'Together',
+            display: problem.display,
+            steps: problem.guided_steps,
+            doneText: 'Next problem →',
+            onDone: function() { nextProblem(); }
+          });
+        });
       }
 
       feedbackArea.className = 'problem-feedback-area shown';
@@ -4928,6 +5027,150 @@
       intro.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
+    // ===== GUIDED WALKS (learning by doing) =====
+    // A walk is a sequence of micro-steps; each with a tiny numeric box checked
+    // instantly. Wrong once → hint. Wrong twice → answer shown, move on (never
+    // trap the student). Statement steps (no answer) just flow past.
+    var guidedState = null;
+
+    function hideGuided() {
+      document.getElementById('guided-card').style.display = 'none';
+      document.getElementById('current-problem-card').style.display = '';
+      guidedState = null;
+    }
+
+    function showGuided(cfg) {
+      document.getElementById('current-problem-card').style.display = 'none';
+      var intro = document.getElementById('tier-intro-card');
+      if (intro) intro.style.display = 'none';
+      var card = document.getElementById('guided-card');
+      document.getElementById('guided-label').textContent = cfg.label || 'Together';
+      var disp = document.getElementById('guided-display');
+      disp.innerHTML = cfg.display || '';
+      document.getElementById('guided-steps').innerHTML = '';
+      var actions = document.getElementById('guided-actions');
+      actions.innerHTML = '';
+      if (cfg.skip) {
+        var sk = document.createElement('a');
+        sk.href = '#';
+        sk.className = 'guided-skip';
+        sk.textContent = cfg.skip.text;
+        sk.addEventListener('click', function(e) {
+          e.preventDefault();
+          hideGuided();
+          if (cfg.skip.onClick) cfg.skip.onClick();
+        });
+        actions.appendChild(sk);
+      }
+      guidedState = { cfg: cfg, idx: 0, wrongs: 0 };
+      card.style.display = '';
+      practiceRenderKaTeX(disp);
+      guidedNextStep();
+      card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function guidedNextStep() {
+      if (!guidedState) return;
+      var st = guidedState.cfg.steps[guidedState.idx];
+      if (!st) { guidedFinish(); return; }
+      guidedState.wrongs = 0;
+      var row = document.createElement('div');
+      row.className = 'guided-step';
+      var h = '';
+      if (st.say) h += '<p class="guided-say">' + st.say + '</p>';
+      var hasBox = st.answer !== undefined && st.answer !== null;
+      if (hasBox) {
+        h += '<div class="guided-box-row"><span class="gb-pre">' + (st.pre || '') + '</span>' +
+             '<input type="text" class="guided-input" inputmode="text" autocomplete="off">' +
+             (st.post ? '<span class="gb-post">' + st.post + '</span>' : '') +
+             '<button class="guided-go" type="button">&#10142;</button>' +
+             '<span class="guided-tick" style="display:none">&#10003;</span></div>' +
+             '<div class="guided-hint" style="display:none"></div>';
+      }
+      row.innerHTML = h;
+      document.getElementById('guided-steps').appendChild(row);
+      practiceRenderKaTeX(row);
+      if (!hasBox) {
+        guidedState.idx++;
+        setTimeout(guidedNextStep, 200);
+        return;
+      }
+      var input = row.querySelector('.guided-input');
+      var go = row.querySelector('.guided-go');
+      function lockStep(cls) {
+        input.disabled = true;
+        go.style.display = 'none';
+        if (cls) input.classList.add(cls);
+      }
+      function check() {
+        var v = parseFloat((input.value || '').trim().replace(/−/g, '-'));
+        if (isNaN(v)) {
+          input.classList.add('guided-wrong');
+          setTimeout(function() { input.classList.remove('guided-wrong'); }, 500);
+          return;
+        }
+        var hintEl = row.querySelector('.guided-hint');
+        if (Math.abs(v - st.answer) < 0.005) {
+          input.classList.remove('guided-wrong');
+          lockStep('guided-right');
+          row.querySelector('.guided-tick').style.display = '';
+          hintEl.style.display = 'none';
+          if (st.done) {
+            var d = document.createElement('p');
+            d.className = 'guided-done';
+            d.innerHTML = st.done;
+            row.appendChild(d);
+            practiceRenderKaTeX(d);
+          }
+          guidedState.idx++;
+          setTimeout(guidedNextStep, 250);
+        } else {
+          guidedState.wrongs++;
+          input.classList.add('guided-wrong');
+          setTimeout(function() { input.classList.remove('guided-wrong'); }, 600);
+          if (guidedState.wrongs === 1 && st.hint) {
+            hintEl.textContent = st.hint;
+            hintEl.style.display = '';
+          } else if (guidedState.wrongs >= 2) {
+            input.value = String(st.answer);
+            lockStep('guided-shown');
+            hintEl.textContent = 'It’s ' + st.answer + ' — look at why, then keep going.';
+            hintEl.style.display = '';
+            guidedState.idx++;
+            setTimeout(guidedNextStep, 700);
+          }
+        }
+      }
+      go.addEventListener('click', check);
+      input.addEventListener('keydown', function(e) { if (e.key === 'Enter') check(); });
+      setTimeout(function() { input.focus({ preventScroll: false }); }, 120);
+    }
+
+    function guidedFinish() {
+      var cfg = guidedState.cfg;
+      var actions = document.getElementById('guided-actions');
+      actions.innerHTML = '';
+      var buttons = cfg.buttons || [{ text: cfg.doneText || 'Carry on →', primary: true, onClick: cfg.onDone }];
+      buttons.forEach(function(b) {
+        var btn = document.createElement('button');
+        btn.className = b.primary === false ? 'guided-secondary' : 'problem-check-btn';
+        btn.textContent = b.text;
+        btn.addEventListener('click', function() {
+          hideGuided();
+          if (b.onClick) b.onClick();
+        });
+        actions.appendChild(btn);
+      });
+      var first = actions.querySelector('button');
+      if (first) first.focus();
+    }
+
+    function guidedTeachCfg(tier) {
+      var t = ((window._guided || {}).teach || {})[tier];
+      if (!t) return null;
+      return { label: t.label || 'Together', display: t.display, steps: t.steps || [] };
+    }
+
     function nextProblem() {
       var tier = practiceState.currentTier;
       var counts = getTierCounts();
@@ -4948,7 +5191,18 @@
             showSummary();
             return;
           }
-          showTierIntro(practiceState.currentTier, animateToNextProblem);
+          var newTier = practiceState.currentTier;
+          var tcfg = guidedTeachCfg(newTier);
+          if (tcfg) {
+            // Teach the new rung's one new move by doing it, not reading it
+            updateMethodPanelForTier(newTier);
+            tcfg.doneText = 'Your turn →';
+            tcfg.onDone = animateToNextProblem;
+            tcfg.skip = { text: 'Skip — I’ve got this', onClick: animateToNextProblem };
+            showGuided(tcfg);
+          } else {
+            showTierIntro(newTier, animateToNextProblem);
+          }
         });
       } else if (verdict === 'fail') {
         recordTierAttempt(tier, false);
@@ -5458,10 +5712,31 @@
         // Progressive tier guides: no big up-front modal. Panel shows the
         // current rung's card; first visit teaches bronze right before Q1.
         updateMethodPanelForTier(practiceState.currentTier);
-        if (!localStorage.getItem(modalKey)) {
+        if (!localStorage.getItem(modalKey) || new URLSearchParams(location.search).has('fresh')) {
           _isFirstVisit = !localStorage.getItem(tooltipKey);
           switchMode('practice');
-          showTierIntro(practiceState.currentTier, null);
+          var opener = (window._guided || {}).opener;
+          if (opener) {
+            // Concrete before abstract: the coffee-shop puzzle, then two doors
+            showGuided({
+              label: opener.label || 'Start here',
+              display: opener.display || '',
+              steps: opener.steps || [],
+              buttons: [
+                { text: 'Walk me through one →', onClick: function() {
+                    var t = guidedTeachCfg('bronze');
+                    if (t) {
+                      t.doneText = 'Your turn →';
+                      t.skip = { text: 'Skip — I’ve got this' };
+                      showGuided(t);
+                    }
+                  } },
+                { text: 'Been taught this before — jump straight in', primary: false, onClick: null }
+              ]
+            });
+          } else {
+            showTierIntro(practiceState.currentTier, null);
+          }
           localStorage.setItem(modalKey, '1');
           if (_isFirstVisit) localStorage.setItem(tooltipKey, '1');
         } else {

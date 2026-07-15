@@ -1,0 +1,117 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>L09 guided-walk driver</title>
+<pre id="log">starting…</pre>
+<iframe id="f" src="/practice/maths-edexcel/algebra/9" style="width:1200px;height:900px"></iframe>
+<script>
+var LOG = document.getElementById('log');
+function log(m) { LOG.textContent += '\n' + m; }
+var f = document.getElementById('f');
+
+function until(name, cond, cb, tries) {
+  tries = tries || 0;
+  var ok = false;
+  try { ok = cond(); } catch (e) { ok = false; }
+  if (ok) { cb(); return; }
+  if (tries > 800) { log('FAIL timeout: ' + name); document.title = 'DRIVER FAILED'; return; }
+  setTimeout(function() { until(name, cond, cb, tries + 1); }, 50);
+}
+
+function doc() { return f.contentDocument; }
+function win() { return f.contentWindow; }
+function visible(el) { return el && el.style.display !== 'none'; }
+
+// Walk a guided sequence whose steps are stepsArr; on each new row, fill the
+// expected answer (wrongFirstOn: try a wrong value once on that step index to
+// exercise the hint path). done(cond) = what ends the walk.
+function walk(name, stepsArr, wrongFirstOn, onButtons) {
+  var wrongDone = false;
+  function tick() {
+    var rows = doc().querySelectorAll('#guided-steps .guided-step');
+    var btns = doc().querySelectorAll('#guided-actions button');
+    if (btns.length) { log('PASS ' + name + ' — walk complete, ' + btns.length + ' button(s)'); onButtons(btns); return; }
+    if (!rows.length) { setTimeout(tick, 50); return; }
+    var idx = rows.length - 1;
+    var st = stepsArr[idx];
+    if (!st) { setTimeout(tick, 50); return; }
+    var row = rows[idx];
+    var input = row.querySelector('.guided-input');
+    if (st.answer === undefined || st.answer === null || !input) { setTimeout(tick, 60); return; }
+    if (input.disabled) { setTimeout(tick, 60); return; }
+    if (idx === wrongFirstOn && !wrongDone) {
+      wrongDone = true;
+      input.value = String(Number(st.answer) + 7);
+      row.querySelector('.guided-go').click();
+      var hint = row.querySelector('.guided-hint');
+      if (hint && hint.style.display !== 'none') log('PASS ' + name + ' — hint shown on wrong try');
+      else log('WARN ' + name + ' — no hint after wrong try (step ' + idx + ')');
+      setTimeout(tick, 80);
+      return;
+    }
+    input.value = String(st.answer);
+    row.querySelector('.guided-go').click();
+    setTimeout(tick, 80);
+  }
+  tick();
+}
+
+until('lesson + guided data loaded', function() {
+  return win()._guided && doc().getElementById('guided-card') &&
+         visible(doc().getElementById('guided-card'));
+}, function() {
+  log('PASS boot — guided opener visible, problem card hidden: ' +
+      (doc().getElementById('current-problem-card').style.display === 'none'));
+
+  // PHASE 1: coffee opener (hint path on step 0), ends at two doors
+  walk('P1 opener', win()._guided.opener.steps, 0, function(btns) {
+    if (btns.length !== 2) log('WARN P1 — expected 2 door buttons, got ' + btns.length);
+    log('  doors: [' + btns[0].textContent + '] / [' + btns[1].textContent + ']');
+    btns[0].click(); // Walk me through one
+
+    // PHASE 2: bronze teaching walk
+    until('teach bronze shown', function() {
+      return visible(doc().getElementById('guided-card')) &&
+             doc().getElementById('guided-label').textContent.indexOf('first one') !== -1;
+    }, function() {
+      walk('P2 teach-bronze', win()._guided.teach.bronze.steps, -1, function(btns2) {
+        btns2[0].click(); // Your turn →
+
+        // PHASE 3: bank Q1 — answer wrong deliberately, expect rescue link
+        until('problem card back', function() {
+          return visible(doc().getElementById('current-problem-card')) &&
+                 doc().getElementById('problem-input-a');
+        }, function() {
+          var p = win()._currentProblem;
+          log('PASS P3 — bank Q1 visible: ' + (p && p.display || '?').slice(0, 60));
+          doc().getElementById('problem-input-a').value = '999';
+          doc().getElementById('problem-input-b').value = '999';
+          doc().getElementById('problem-check-btn').click();
+          until('rescue link', function() {
+            return doc().getElementById('fb-do-with-me');
+          }, function() {
+            log('PASS P3 — wrong answer produced "do this one with me" link');
+            doc().getElementById('fb-do-with-me').click();
+
+            // PHASE 4: rescue walk on the exact failed problem
+            until('rescue walk shown', function() {
+              return visible(doc().getElementById('guided-card'));
+            }, function() {
+              walk('P4 rescue', p.guided_steps, -1, function(btns3) {
+                btns3[0].click(); // Next problem →
+                until('advanced to Q2', function() {
+                  return visible(doc().getElementById('current-problem-card')) &&
+                         doc().getElementById('problem-number-label').textContent === 'Q2';
+                }, function() {
+                  log('PASS P4 — rescue complete, moved on to Q2');
+                  log('ALL PHASES PASSED');
+                  document.title = 'DRIVER DONE';
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+</script>
