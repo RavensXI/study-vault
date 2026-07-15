@@ -4613,7 +4613,7 @@
         return {
           type: 'one-correct',
           message: 'You got \\(x = ' + correct + '\\) right, but the other solution is wrong. ' +
-            'Check your factor pair \u2014 both numbers must multiply to give the constant AND add to give the coefficient of \\(x\\).'
+            'Check your factor pair: both numbers must multiply to give the constant AND add to give the coefficient of \\(x\\).'
         };
       }
 
@@ -4621,7 +4621,7 @@
       if (g[0] === g[1]) {
         return {
           type: 'repeated',
-          message: 'You gave the same value twice. Quadratic equations usually have two different solutions \u2014 ' +
+          message: 'You gave the same value twice. Quadratic equations usually have two different solutions, so ' +
             'check that you found two different factor pairs.'
         };
       }
@@ -4631,7 +4631,7 @@
         return {
           type: 'factors-not-solutions',
           message: 'It looks like you gave the factor pair rather than the solutions. ' +
-            'The factors go inside the brackets, but to find \\(x\\) you set each bracket equal to zero \u2014 ' +
+            'The factors go inside the brackets, but to find \\(x\\) you set each bracket equal to zero, ' +
             'which flips the signs. If the factors are 2 and 3, the solutions are \\(x = -2\\) and \\(x = -3\\).'
         };
       }
@@ -4866,21 +4866,21 @@
             Math.abs(given[0] - problem.solutions[1]) < 0.011 &&
             Math.abs(given[1] - problem.solutions[0]) < 0.011 &&
             Math.abs(problem.solutions[0] - problem.solutions[1]) >= 0.011) {
-          diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> Your two values are right but swapped — the first box is \\(x\\), the second is \\(y\\). Match each value to the letter you solved for.</div>';
+          diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> Your two values are right but swapped. The first box is \\(x\\), the second is \\(y\\). Match each value to the letter you solved for.</div>';
         } else if (inputType === 'two_solutions') {
           var det = detectMisconception(given, problem.solutions, problem);
           diagnosisHtml = det.type !== 'unknown'
             ? '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + det.message + '</div>'
-            : '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line — find the first line where yours differs.</div>';
+            : '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>';
         } else {
-          diagnosisHtml = '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line — find the first line where yours differs.</div>';
+          diagnosisHtml = '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>';
         }
         var nudgeHtml = '';
         if (problem.guided_steps && problem.guided_steps.length) {
           nudgeHtml = '<div class="feedback-simplify">'
             + '<a href="#" id="fb-do-with-me"><strong>Stuck? Do this one with me →</strong></a></div>';
         } else if ((practiceState.wrongRun || 0) >= 2 && (window._workedExamples || []).length) {
-          nudgeHtml = '<div class="feedback-simplify">Two in a row — worth ninety seconds: '
+          nudgeHtml = '<div class="feedback-simplify">Two in a row. Worth ninety seconds: '
             + '<a href="#" id="fb-see-example"><strong>walk through a worked example</strong></a>, then come back.</div>';
         }
 
@@ -5134,7 +5134,7 @@
           } else if (guidedState.wrongs >= 2) {
             input.value = String(st.answer);
             lockStep('guided-shown');
-            hintEl.textContent = 'It’s ' + st.answer + ' — look at why, then keep going.';
+            hintEl.textContent = 'It’s ' + st.answer + '. Look at why, then keep going.';
             hintEl.style.display = '';
             guidedState.idx++;
             setTimeout(guidedNextStep, 700);
@@ -5198,7 +5198,7 @@
             updateMethodPanelForTier(newTier);
             tcfg.doneText = 'Your turn →';
             tcfg.onDone = animateToNextProblem;
-            tcfg.skip = { text: 'Skip — I’ve got this', onClick: animateToNextProblem };
+            tcfg.skip = { text: 'Skip this (I know the move)', onClick: animateToNextProblem };
             showGuided(tcfg);
           } else {
             showTierIntro(newTier, animateToNextProblem);
@@ -5264,7 +5264,7 @@
       var t = practiceState[tier];
       var counts = getTierCounts();
       var tierName = tier.charAt(0).toUpperCase() + tier.slice(1);
-      document.getElementById('tier-fail-heading').textContent = tierName + ' — not quite';
+      document.getElementById('tier-fail-heading').textContent = tierName + ': not quite';
       document.getElementById('tier-fail-correct').textContent = t.correct;
       document.getElementById('tier-fail-total').textContent = counts[tier];
       document.getElementById('tier-fail-sub').textContent =
@@ -5308,7 +5308,7 @@
       } else if (pct >= 0.5) {
         msgEl.innerHTML = '<strong>Good progress.</strong> Try the worked examples in the sidebar for the tricky parts, then have another go.';
       } else {
-        msgEl.innerHTML = 'Keep going \u2014 try the <strong>worked examples</strong> from the sidebar to study the method, then try again.';
+        msgEl.innerHTML = 'Keep going. Try the <strong>worked examples</strong> from the sidebar to study the method, then try again.';
       }
 
       document.getElementById('summary-overlay').classList.add('active');
@@ -5727,11 +5727,11 @@
                     var t = guidedTeachCfg('bronze');
                     if (t) {
                       t.doneText = 'Your turn →';
-                      t.skip = { text: 'Skip — I’ve got this' };
+                      t.skip = { text: 'Skip this (I know the move)' };
                       showGuided(t);
                     }
                   } },
-                { text: 'Been taught this before — jump straight in', primary: false, onClick: null }
+                { text: 'Been taught this before? Jump straight in', primary: false, onClick: null }
               ]
             });
           } else {
@@ -6110,8 +6110,8 @@
       });
       h += '</div>' +
         '<div class="range-slots">' +
-          '<div class="range-slot"><div class="range-slot-label low">Lowest</div><div class="range-slot-value" id="range-low-val">—</div></div>' +
-          '<div class="range-slot"><div class="range-slot-label high">Highest</div><div class="range-slot-value" id="range-high-val">—</div></div>' +
+          '<div class="range-slot"><div class="range-slot-label low">Lowest</div><div class="range-slot-value" id="range-low-val">?</div></div>' +
+          '<div class="range-slot"><div class="range-slot-label high">Highest</div><div class="range-slot-value" id="range-high-val">?</div></div>' +
         '</div>' +
         '<div class="range-calc" id="range-calc"></div>' +
         '</div>';
@@ -6144,8 +6144,8 @@
         else { state.low = val; state.lowIdx = idx; }
 
         // Update slot display
-        document.getElementById('range-high-val').textContent = state.high !== null ? state.high : '—';
-        document.getElementById('range-low-val').textContent = state.low !== null ? state.low : '—';
+        document.getElementById('range-high-val').textContent = state.high !== null ? state.high : '?';
+        document.getElementById('range-low-val').textContent = state.low !== null ? state.low : '?';
 
         // Show calculation when both selected
         var calcEl = document.getElementById('range-calc');
@@ -6203,7 +6203,7 @@
         }
         state.sum = Math.round(state.sum * 1000) / 1000;
         document.getElementById('running-sum').textContent = state.sum;
-        document.getElementById('running-meta').textContent = state.count + ' of ' + state.total + ' values added — sum = ' + state.sum;
+        document.getElementById('running-meta').textContent = state.count + ' of ' + state.total + ' values added. Sum = ' + state.sum;
         var btn = document.getElementById('running-divide');
         btn.disabled = state.count === 0;
         btn.textContent = state.count > 0 ? '÷ ' + state.count + ' = ?' : '÷ Divide by count';
@@ -6443,7 +6443,7 @@
         var hasRuler = !!problem.ruler;
         if (hasRuler) {
           area.innerHTML =
-            '<div class="passage-header"><span class="passage-header-label">Map — click two points to measure</span></div>' +
+            '<div class="passage-header"><span class="passage-header-label">Map: click two points to measure</span></div>' +
             '<div class="ruler-container" id="ruler-container">' +
               '<img src="' + problem.image + '" alt="Map" id="ruler-img" draggable="false">' +
               '<svg class="ruler-svg" id="ruler-svg"></svg>' +

@@ -30,46 +30,46 @@ SUPA = "https://baipckgywpnwapobwtsy.supabase.co"
 
 BRONZE = [
  (r"Solve \(x + y = 8\) and \(x - y = 2\)", [5, 3],
-  "The y terms are +y and −y — opposite signs, so ADD the equations.",
+  "The y terms are +y and −y. Opposite signs, so ADD the equations.",
   []),
  (r"Solve \(2x + y = 9\) and \(x + y = 5\)", [4, 1],
-  "Both equations have +y — same sign, so subtract one from the other.",
+  "Both equations have +y (same sign), so subtract one from the other.",
   [dict(pattern="rhs_not_subtracted", expect=[14, -9],
         _sim=dict(op="sub", rhs_wrong=True, subst=2),
-        message="When you subtract the equations, the right-hand sides subtract too: \\(9 - 5 = 4\\), so \\(x = 4\\). Adding them instead gives 14, which is too big to fit either equation — always do the same thing to both sides.")],
+        message="When you subtract the equations, the right-hand sides subtract too: \\(9 - 5 = 4\\), so \\(x = 4\\). Adding them instead gives 14, which is too big to fit either equation. Always do the same thing to both sides.")],
  ),
  (r"Solve \(3x + y = 11\) and \(x + y = 5\)", [3, 2],
-  "Both equations have +y — subtract to make the y terms vanish.",
+  "Both equations have +y, so subtract to make the y terms vanish.",
   [dict(pattern="rhs_not_subtracted", expect=[8, -3],
         _sim=dict(op="sub", rhs_wrong=True, subst=2),
         message="Subtracting the left-hand sides means subtracting the right-hand sides as well: \\(11 - 5 = 6\\), so \\(2x = 6\\) and \\(x = 3\\). It looks like the right-hand sides were added instead.")],
  ),
  (r"Solve \(x + 2y = 10\) and \(x + y = 7\)", [4, 3],
-  "The x terms already match — subtract to remove them.",
+  "The x terms already match, so subtract to remove them.",
   [dict(pattern="rhs_not_subtracted", expect=[-10, 17],
         _sim=dict(op="sub", rhs_wrong=True, subst=2),
-        message="Subtracting the equations removes x and leaves \\(y = 10 - 7 = 3\\). It looks like the right-hand sides were added (giving 17) instead of subtracted — both sides get the same treatment.")],
+        message="Subtracting the equations removes x and leaves \\(y = 10 - 7 = 3\\). It looks like the right-hand sides were added (giving 17) instead of subtracted. Both sides get the same treatment.")],
  ),
  (r"Solve \(2x + y = 10\) and \(2x - y = 6\)", [4, 2],
-  "Opposite signs on y — adding the equations makes y disappear.",
+  "Opposite signs on y, so adding the equations makes y disappear.",
   [dict(pattern="rhs_wrong_operation", expect=[1, 8],
         _sim=dict(op="sub", rhs_wrong=True, subst=1),
         message="Whichever route you take, the right-hand sides must get the same operation as the left. Adding: \\(4x = 16\\) so \\(x = 4\\). Subtracting: \\(2y = 4\\) so \\(y = 2\\). Mixing the two up leads to \\(x = 1, y = 8\\), which doesn't fit either equation.")],
  ),
  (r"Solve \(3x + y = 17\) and \(x + y = 7\)", [5, 2],
-  "Both equations have +y — subtract them.",
+  "Both equations have +y, so subtract them.",
   [dict(pattern="rhs_not_subtracted", expect=[12, -5],
         _sim=dict(op="sub", rhs_wrong=True, subst=2),
         message="Subtract the right-hand sides too: \\(17 - 7 = 10\\), so \\(2x = 10\\) and \\(x = 5\\). Adding them gives 24 and everything after that comes out wrong.")],
  ),
  (r"Solve \(x + 3y = 14\) and \(x + y = 6\)", [2, 4],
-  "The x terms match — subtract to leave just y terms.",
+  "The x terms match, so subtract to leave just y terms.",
   [dict(pattern="rhs_not_subtracted", expect=[-4, 10],
         _sim=dict(op="sub", rhs_wrong=True, subst=2),
-        message="After subtracting, \\(2y = 14 - 6 = 8\\), so \\(y = 4\\). It looks like the right-hand sides were added — they must be subtracted, exactly like the left-hand sides.")],
+        message="After subtracting, \\(2y = 14 - 6 = 8\\), so \\(y = 4\\). It looks like the right-hand sides were added. They must be subtracted, exactly like the left-hand sides.")],
  ),
  (r"Solve \(4x + y = 13\) and \(2x + y = 7\)", [3, 1],
-  "Same sign on y in both — subtract.",
+  "Same sign on y in both, so subtract.",
   [dict(pattern="rhs_not_subtracted", expect=[10, -13],
         _sim=dict(op="sub", rhs_wrong=True, subst=2),
         message="Subtracting gives \\(2x = 13 - 7 = 6\\), so \\(x = 3\\). Adding the right-hand sides (20) instead of subtracting sends the whole answer off course.")],
@@ -81,16 +81,16 @@ SILVER = [
   "Multiply the second equation by 2, then subtract.",
   [dict(pattern="scaled_lhs_only", expect=[11, -3],
         _sim=dict(scale=(1, 2), lhs_only=2, op="sub", subst=2),
-        message="When you multiply an equation, multiply BOTH sides. \\(x + y = 8\\) doubled is \\(2x + 2y = 16\\) — the 8 doubles too. Leaving it as 8 makes every later step wrong."),
+        message="When you multiply an equation, multiply BOTH sides. \\(x + y = 8\\) doubled is \\(2x + 2y = 16\\). The 8 doubles too. Leaving it as 8 makes every later step wrong."),
    dict(pattern="rhs_not_subtracted", expect=[35, -27],
         _sim=dict(scale=(1, 2), op="sub", rhs_wrong=True, subst=2),
         message="After doubling the second equation the right-hand sides are 19 and 16, and subtracting gives \\(x = 3\\). It looks like they were added (35) instead of subtracted.")],
  ),
  (r"Solve \(2x + 5y = 21\) and \(x + 2y = 8\)", [-2, 5],
-  "Multiply the second equation by 2 so both have 2x. Watch out — x comes out negative.",
+  "Multiply the second equation by 2 so both have 2x. Watch out: x comes out negative.",
   [dict(pattern="scaled_lhs_only", expect=[-18, 13],
         _sim=dict(scale=(1, 2), lhs_only=2, op="sub", subst=2),
-        message="Doubling \\(x + 2y = 8\\) gives \\(2x + 4y = 16\\) — the right-hand side doubles as well. Keeping it at 8 gives \\(y = 13\\), which is too big to fit either equation."),
+        message="Doubling \\(x + 2y = 8\\) gives \\(2x + 4y = 16\\). The right-hand side doubles as well. Keeping it at 8 gives \\(y = 13\\), which is too big to fit either equation."),
    dict(pattern="rhs_not_subtracted", expect=[-66, 37],
         _sim=dict(scale=(1, 2), op="sub", rhs_wrong=True, subst=2),
         message="Subtract the right-hand sides: \\(21 - 16 = 5\\), so \\(y = 5\\). Adding them (37) instead of subtracting is the slip here.")],
@@ -99,22 +99,22 @@ SILVER = [
   "Multiply the first equation by 3 so both have 3y.",
   [dict(pattern="scaled_lhs_only", expect=[0.2, 13.2],
         _sim=dict(scale=(3, 1), lhs_only=1, op="sub", subst=1),
-        message="Multiplying \\(4x + y = 14\\) by 3 gives \\(12x + 3y = 42\\) — the 14 gets multiplied too. If the right-hand side stays at 14 you end up with decimals that don't fit the equations."),
+        message="Multiplying \\(4x + y = 14\\) by 3 gives \\(12x + 3y = 42\\). The 14 gets multiplied too. If the right-hand side stays at 14 you end up with decimals that don't fit the equations."),
    dict(pattern="rhs_not_subtracted", expect=[5.4, -7.6],
         _sim=dict(scale=(3, 1), op="sub", rhs_wrong=True, subst=1),
-        message="After scaling, subtract the right-hand sides: \\(42 - 12 = 30\\), so \\(10x = 30\\) and \\(x = 3\\). Adding them (54) is the slip — both sides get subtracted.")],
+        message="After scaling, subtract the right-hand sides: \\(42 - 12 = 30\\), so \\(10x = 30\\) and \\(x = 3\\). Adding them (54) is the slip. Both sides get subtracted.")],
  ),
  (r"Solve \(5x - y = 5\) and \(2x + 3y = 19\)", [2, 5],
-  "Multiply the first equation by 3. The y terms then have opposite signs — so add.",
+  "Multiply the first equation by 3. The y terms then have opposite signs, so add.",
   [dict(pattern="substitute_sign_slip", expect=[2, -5],
-        message="\\(x = 2\\) is right. Substituting into \\(5x - y = 5\\) gives \\(10 - y = 5\\), so \\(y = 5\\) — positive. Getting \\(-5\\) means the sign flipped once too often when moving terms across.",
+        message="\\(x = 2\\) is right. Substituting into \\(5x - y = 5\\) gives \\(10 - y = 5\\), so \\(y = 5\\), positive. Getting \\(-5\\) means the sign flipped once too often when moving terms across.",
         note="From 10 - y = 5: -y = -5 so y = 5; the slip keeps y = -5.")],
  ),
  (r"Solve \(x + 4y = 17\) and \(3x + 2y = 11\)", [1, 4],
   "Multiply the second equation by 2 so both have 4y.",
   [dict(pattern="scaled_lhs_only", expect=[-1.2, 4.55],
         _sim=dict(scale=(1, 2), lhs_only=2, op="sub", subst=1),
-        message="Doubling \\(3x + 2y = 11\\) gives \\(6x + 4y = 22\\) — the 11 doubles too. Leaving it at 11 makes x come out negative when it shouldn't."),
+        message="Doubling \\(3x + 2y = 11\\) gives \\(6x + 4y = 22\\). The 11 doubles too. Leaving it at 11 makes x come out negative when it shouldn't."),
    dict(pattern="rhs_not_subtracted", expect=[7.8, 2.3],
         _sim=dict(scale=(1, 2), op="sub", rhs_wrong=True, subst=1),
         message="Subtracting the right-hand sides gives \\(22 - 17 = 5\\), so \\(5x = 5\\) and \\(x = 1\\). Adding them (39) instead is the slip here.")],
@@ -122,62 +122,62 @@ SILVER = [
  (r"Solve \(3x + y = 13\) and \(2x + 3y = 18\)", [3, 4],
   "Multiply the first equation by 3 so both have 3y.",
   [dict(pattern="substitute_sign_slip", expect=[3, 22],
-        message="\\(x = 3\\) is right. Substituting into \\(3x + y = 13\\) gives \\(9 + y = 13\\), so \\(y = 4\\). Getting 22 means the 9 was added to 13 instead of subtracted — moving a term across the equals sign changes its sign.",
+        message="\\(x = 3\\) is right. Substituting into \\(3x + y = 13\\) gives \\(9 + y = 13\\), so \\(y = 4\\). Getting 22 means the 9 was added to 13 instead of subtracted. Moving a term across the equals sign changes its sign.",
         note="Slip: y = 13 + 9 = 22 instead of 13 - 9 = 4.")],
  ),
  (r"Solve \(2x - 3y = 6\) and \(x + y = 8\)", [6, 2],
-  "Multiply the second equation by 3. Opposite signs on the y terms — add.",
+  "Multiply the second equation by 3. Opposite signs on the y terms, so add.",
   [dict(pattern="scaled_lhs_only", expect=[2.8, 5.2],
         _sim=dict(scale=(1, 3), lhs_only=2, op="add", subst=2),
-        message="Multiplying \\(x + y = 8\\) by 3 gives \\(3x + 3y = 24\\) — the 8 is multiplied too. Keeping it at 8 gives decimal answers, and this question has whole-number ones.")],
+        message="Multiplying \\(x + y = 8\\) by 3 gives \\(3x + 3y = 24\\). The 8 is multiplied too. Keeping it at 8 gives decimal answers, and this question has whole-number ones.")],
  ),
 ]
 
 GOLD = [
  (r"Solve \(3x + 4y = 25\) and \(2x + 3y = 18\)", [3, 4],
-  "No single multiplication works here — scale BOTH equations (try ×3 and ×4, or ×2 and ×3).",
+  "No single multiplication works here, so scale BOTH equations (try ×3 and ×4, or ×2 and ×3).",
   [dict(pattern="rhs_not_subtracted", expect=[147, -104],
         _sim=dict(scale=(3, 4), op="sub", rhs_wrong=True, subst=1),
-        message="After scaling by 3 and 4 the right-hand sides are 75 and 72. Subtract them: \\(x = 75 - 72 = 3\\). Adding them (147) is the slip — the right-hand sides get subtracted just like the left."),
+        message="After scaling by 3 and 4 the right-hand sides are 75 and 72. Subtract them: \\(x = 75 - 72 = 3\\). Adding them (147) is the slip. The right-hand sides get subtracted just like the left."),
    dict(pattern="scaled_lhs_only", expect=[57, -36.5],
         _sim=dict(scale=(3, 4), lhs_only=2, op="sub", subst=1),
-        message="Both equations must be multiplied on BOTH sides. Scaling \\(2x + 3y = 18\\) by 4 gives \\(8x + 12y = 72\\) — if the 18 is left unscaled, x comes out as 57, which fits neither equation.")],
+        message="Both equations must be multiplied on BOTH sides. Scaling \\(2x + 3y = 18\\) by 4 gives \\(8x + 12y = 72\\). If the 18 is left unscaled, x comes out as 57, which fits neither equation.")],
  ),
  (r"Solve \(5x + 3y = 29\) and \(3x + 4y = 24\)", [4, 3],
-  "Scale both equations — ×4 and ×3 makes both y terms 12y.",
+  "Scale both equations: ×4 and ×3 makes both y terms 12y.",
   []),
  (r"Solve \(2x + 3y = 4\) and \(5x + 2y = -1\)", [-1, 2],
-  "Scale both (×2 and ×3 makes both 6y). Negative numbers appear — keep signs on a tight leash.",
+  "Scale both (×2 and ×3 makes both 6y). Negative numbers appear, so keep signs on a tight leash.",
   []),
  (r"Solve \(7x + 2y = 27\) and \(3x + 5y = 24\)", [3, 3],
-  "Scale both equations — ×5 and ×2 makes both y terms 10y.",
+  "Scale both equations: ×5 and ×2 makes both y terms 10y.",
   [dict(pattern="substitute_sign_slip", expect=[3, 24],
         message="\\(x = 3\\) is right. Substituting into \\(7x + 2y = 27\\) gives \\(21 + 2y = 27\\), so \\(2y = 6\\) and \\(y = 3\\). Getting 24 means the 21 was added instead of subtracted when moving it across.",
         note="Slip: 2y = 27 + 21 = 48, y = 24.")],
  ),
  (r"Solve \(5x - 3y = 1\) and \(2x + 7y = 25\)", [2, 3],
-  "Scale both (×7 and ×3 makes the y terms −21y and +21y) — opposite signs, so add.",
+  "Scale both (×7 and ×3 makes the y terms −21y and +21y). Opposite signs, so add.",
   [dict(pattern="substitute_sign_slip", expect=[2, -3],
-        message="\\(x = 2\\) is right. Substituting into \\(5x - 3y = 1\\) gives \\(10 - 3y = 1\\), so \\(3y = 9\\) and \\(y = 3\\) — positive. Getting \\(-3\\) means a sign flipped once too often on the way.",
+        message="\\(x = 2\\) is right. Substituting into \\(5x - 3y = 1\\) gives \\(10 - 3y = 1\\), so \\(3y = 9\\) and \\(y = 3\\), positive. Getting \\(-3\\) means a sign flipped once too often on the way.",
         note="From 10 - 3y = 1: -3y = -9 so y = 3; the slip keeps y = -3.")],
  ),
 ]
 
 TIER_DESCRIPTIONS = {
- "bronze_description": "The numbers in front already match — add or subtract once and a letter vanishes",
+ "bronze_description": "The numbers in front already match: add or subtract once and a letter vanishes",
  "silver_description": "Multiply one equation first to make a matching pair",
- "gold_description": "Multiply both equations — or switch to the substitution method",
+ "gold_description": "Multiply both equations, or switch to the substitution method",
 }
 
 METHOD_CARD = {
  "title": "Simultaneous Equations (Linear)",
  "steps": [
-  "Find (or make) a matching pair — the same number in front of x or of y in both equations.",
+  "Find (or make) a matching pair: the same number in front of x or of y in both equations.",
   "Same signs? Subtract. Opposite signs? Add. The matched letter vanishes.",
   "Solve what's left, substitute back, and check the pair in both equations.",
  ],
- "content": "<p><strong>Simultaneous equations</strong> are two equations sharing the same two unknowns. Exactly one pair of values — an \\(x\\) and a \\(y\\) — fits both, and your job is to find it by making one letter disappear.</p><p>Remember <strong>SSS — Same Signs Subtract</strong>. Opposite signs? Add instead.</p>",
- "example": "<p><strong>Solve</strong> \\(2x + y = 7\\) and \\(x + y = 4\\)</p><p>Both have \\(+y\\) — same signs, so subtract: \\(x = 3\\). Then \\(3 + y = 4\\), so \\(y = 1\\). Check in the first: \\(2(3) + 1 = 7\\) ✓</p>",
+ "content": "<p><strong>Simultaneous equations</strong> are two equations sharing the same two unknowns. Exactly one pair of values, an \\(x\\) and a \\(y\\), fits both, and your job is to find it by making one letter disappear.</p><p>Remember <strong>SSS: Same Signs Subtract</strong>. Opposite signs? Add instead.</p>",
+ "example": "<p><strong>Solve</strong> \\(2x + y = 7\\) and \\(x + y = 4\\)</p><p>Both have \\(+y\\), the same sign, so subtract: \\(x = 3\\). Then \\(3 + y = 4\\), so \\(y = 1\\). Check in the first: \\(2(3) + 1 = 7\\) ✓</p>",
 }
 
 # Progressive teaching: one rung's method at a time. Bronze shows before Q1 on
@@ -185,16 +185,16 @@ METHOD_CARD = {
 # The left panel always shows only the current rung's card.
 TIER_GUIDES = {
  "bronze": {
-  "title": "Bronze — the pair already matches",
+  "title": "Bronze: the pair already matches",
   "steps": [
-   "You need the one pair of values — an \\(x\\) AND a \\(y\\) — that fits both equations. In bronze, a matching pair is already there (like \\(+y\\) in both).",
-   "<strong>Same Signs Subtract</strong> — subtract one equation from the other (right-hand sides too) and the matched letter vanishes. Opposite signs (\\(+y\\) and \\(-y\\))? Add instead.",
+   "You need the one pair of values, an \\(x\\) AND a \\(y\\), that fits both equations. In bronze, a matching pair is already there (like \\(+y\\) in both).",
+   "<strong>Same Signs Subtract</strong>: subtract one equation from the other (right-hand sides too) and the matched letter vanishes. Opposite signs (\\(+y\\) and \\(-y\\))? Add instead.",
    "Solve the one-letter equation that's left, then substitute your value into the easier original equation to find the other letter.",
   ],
   "example": {
    "question": "Solve 3x + y = 10 and x + y = 4",
    "steps": [
-    {"label": "Match", "content": "<p>Both equations have \\(+y\\) — same sign, so subtract.</p>"},
+    {"label": "Match", "content": "<p>Both equations have \\(+y\\), the same sign, so subtract.</p>"},
     {"label": "Subtract", "content": "<p>\\((3x + y) - (x + y) = 10 - 4\\) → \\(2x = 6\\) → \\(x = 3\\)</p>"},
     {"label": "Substitute", "content": "<p>\\(3 + y = 4\\) → \\(y = 1\\)</p>"},
     {"label": "Check", "content": "<p>\\(3(3) + 1 = 10\\) ✓</p>"},
@@ -202,9 +202,9 @@ TIER_GUIDES = {
    ]},
  },
  "silver": {
-  "title": "Silver — make a match first",
+  "title": "Silver: make a match first",
   "steps": [
-   "Now nothing matches yet. Multiply ONE whole equation — every term, both sides of the equals sign — until a pair matches.",
+   "Now nothing matches yet. Multiply ONE whole equation (every term, both sides of the equals sign) until a pair matches.",
    "Then it's a bronze question: same signs subtract, opposite signs add.",
    "Substitute back and check your pair in both equations.",
   ],
@@ -219,9 +219,9 @@ TIER_GUIDES = {
    ]},
  },
  "gold": {
-  "title": "Gold — multiply both equations",
+  "title": "Gold: multiply both equations",
   "steps": [
-   "Sometimes no single multiplication works. Multiply BOTH equations to hit a common target — \\(3y\\) and \\(2y\\) both become \\(6y\\) with \\(\\times 2\\) and \\(\\times 3\\).",
+   "Sometimes no single multiplication works. Multiply BOTH equations to hit a common target: \\(3y\\) and \\(2y\\) both become \\(6y\\) with \\(\\times 2\\) and \\(\\times 3\\).",
    "Everything else is the same: same signs subtract, opposite signs add, substitute back, check.",
    "Prefer rearranging? <strong>Substitution</strong> also works: make \\(y\\) the subject of one equation and substitute it into the other. Either method gets full marks.",
   ],
@@ -240,42 +240,42 @@ TIER_GUIDES = {
 WORKED_EXAMPLES = [
  {"difficulty": "Bronze", "question": "Solve 3x + y = 10 and x + y = 4",
   "steps": [
-   {"label": "Step 1 — Spot the match", "content": "<p>Both equations contain exactly \\(+y\\) — same sign in both. <strong>Same Signs Subtract.</strong></p>"},
-   {"label": "Step 2 — Subtract the equations", "content": "<p>\\((3x + y) - (x + y) = 10 - 4\\) → \\(2x = 6\\) → \\(x = 3\\). The \\(y\\) terms cancel, and the right-hand sides are subtracted too.</p>"},
-   {"label": "Step 3 — Substitute back", "content": "<p>Put \\(x = 3\\) into the simpler equation: \\(3 + y = 4\\) → \\(y = 1\\).</p>"},
-   {"label": "Step 4 — Check", "content": "<p>In the other equation: \\(3(3) + 1 = 10\\) ✓</p>"},
+   {"label": "Step 1: Spot the match", "content": "<p>Both equations contain exactly \\(+y\\), the same sign in both. <strong>Same Signs Subtract.</strong></p>"},
+   {"label": "Step 2: Subtract the equations", "content": "<p>\\((3x + y) - (x + y) = 10 - 4\\) → \\(2x = 6\\) → \\(x = 3\\). The \\(y\\) terms cancel, and the right-hand sides are subtracted too.</p>"},
+   {"label": "Step 3: Substitute back", "content": "<p>Put \\(x = 3\\) into the simpler equation: \\(3 + y = 4\\) → \\(y = 1\\).</p>"},
+   {"label": "Step 4: Check", "content": "<p>In the other equation: \\(3(3) + 1 = 10\\) ✓</p>"},
    {"label": "Answer", "content": "<p><strong>\\(x = 3\\), \\(y = 1\\)</strong></p>", "isAnswer": True, "is_answer": True},
   ]},
  {"difficulty": "Bronze", "question": "Solve 3x + 2y = 17 and 5x − 2y = 7",
   "steps": [
-   {"label": "Step 1 — Spot the match", "content": "<p>The \\(y\\) terms are \\(+2y\\) and \\(-2y\\) — same size, <em>opposite</em> signs. Opposite signs means <strong>add</strong>: \\(+2y\\) and \\(-2y\\) make zero.</p>"},
-   {"label": "Step 2 — Add the equations", "content": "<p>\\((3x + 2y) + (5x - 2y) = 17 + 7\\) → \\(8x = 24\\) → \\(x = 3\\).</p>"},
-   {"label": "Step 3 — Substitute back", "content": "<p>\\(x = 3\\) into the first equation: \\(9 + 2y = 17\\) → \\(2y = 8\\) → \\(y = 4\\).</p>"},
-   {"label": "Step 4 — Check", "content": "<p>\\(5(3) - 2(4) = 15 - 8 = 7\\) ✓</p>"},
+   {"label": "Step 1: Spot the match", "content": "<p>The \\(y\\) terms are \\(+2y\\) and \\(-2y\\): same size, <em>opposite</em> signs. Opposite signs means <strong>add</strong>: \\(+2y\\) and \\(-2y\\) make zero.</p>"},
+   {"label": "Step 2: Add the equations", "content": "<p>\\((3x + 2y) + (5x - 2y) = 17 + 7\\) → \\(8x = 24\\) → \\(x = 3\\).</p>"},
+   {"label": "Step 3: Substitute back", "content": "<p>\\(x = 3\\) into the first equation: \\(9 + 2y = 17\\) → \\(2y = 8\\) → \\(y = 4\\).</p>"},
+   {"label": "Step 4: Check", "content": "<p>\\(5(3) - 2(4) = 15 - 8 = 7\\) ✓</p>"},
    {"label": "Answer", "content": "<p><strong>\\(x = 3\\), \\(y = 4\\)</strong></p>", "isAnswer": True, "is_answer": True},
   ]},
  {"difficulty": "Silver", "question": "Solve 2x + 3y = 12 and x + y = 5",
   "steps": [
-   {"label": "Step 1 — Nothing matches yet", "content": "<p>\\(2x\\) vs \\(x\\), \\(3y\\) vs \\(y\\) — no matching pair. Multiply the <em>whole</em> second equation by 3: \\(3x + 3y = 15\\). The 5 gets multiplied too — every term, both sides.</p>"},
-   {"label": "Step 2 — Subtract", "content": "<p>Now both have \\(3y\\), same sign. \\((3x + 3y) - (2x + 3y) = 15 - 12\\) → \\(x = 3\\).</p>"},
-   {"label": "Step 3 — Substitute back", "content": "<p>\\(x = 3\\) into \\(x + y = 5\\): \\(y = 2\\).</p>"},
-   {"label": "Step 4 — Check", "content": "<p>\\(2(3) + 3(2) = 6 + 6 = 12\\) ✓</p>"},
+   {"label": "Step 1: Nothing matches yet", "content": "<p>\\(2x\\) vs \\(x\\), \\(3y\\) vs \\(y\\): no matching pair. Multiply the <em>whole</em> second equation by 3: \\(3x + 3y = 15\\). The 5 gets multiplied too (every term, both sides).</p>"},
+   {"label": "Step 2: Subtract", "content": "<p>Now both have \\(3y\\), same sign. \\((3x + 3y) - (2x + 3y) = 15 - 12\\) → \\(x = 3\\).</p>"},
+   {"label": "Step 3: Substitute back", "content": "<p>\\(x = 3\\) into \\(x + y = 5\\): \\(y = 2\\).</p>"},
+   {"label": "Step 4: Check", "content": "<p>\\(2(3) + 3(2) = 6 + 6 = 12\\) ✓</p>"},
    {"label": "Answer", "content": "<p><strong>\\(x = 3\\), \\(y = 2\\)</strong></p>", "isAnswer": True, "is_answer": True},
   ]},
  {"difficulty": "Gold", "question": "Solve 4x + 3y = 23 and 3x + 2y = 16",
   "steps": [
-   {"label": "Step 1 — Scale BOTH equations", "content": "<p>No single multiplication makes a match, so make the \\(y\\) terms both \\(6y\\): first equation \\(\\times 2\\) → \\(8x + 6y = 46\\); second \\(\\times 3\\) → \\(9x + 6y = 48\\). Both sides of both equations get scaled.</p>"},
-   {"label": "Step 2 — Subtract", "content": "<p>Same signs, so subtract: \\((9x + 6y) - (8x + 6y) = 48 - 46\\) → \\(x = 2\\).</p>"},
-   {"label": "Step 3 — Substitute back", "content": "<p>\\(x = 2\\) into \\(3x + 2y = 16\\): \\(6 + 2y = 16\\) → \\(y = 5\\).</p>"},
-   {"label": "Step 4 — Check", "content": "<p>\\(4(2) + 3(5) = 8 + 15 = 23\\) ✓</p>"},
+   {"label": "Step 1: Scale BOTH equations", "content": "<p>No single multiplication makes a match, so make the \\(y\\) terms both \\(6y\\): first equation \\(\\times 2\\) → \\(8x + 6y = 46\\); second \\(\\times 3\\) → \\(9x + 6y = 48\\). Both sides of both equations get scaled.</p>"},
+   {"label": "Step 2: Subtract", "content": "<p>Same signs, so subtract: \\((9x + 6y) - (8x + 6y) = 48 - 46\\) → \\(x = 2\\).</p>"},
+   {"label": "Step 3: Substitute back", "content": "<p>\\(x = 2\\) into \\(3x + 2y = 16\\): \\(6 + 2y = 16\\) → \\(y = 5\\).</p>"},
+   {"label": "Step 4: Check", "content": "<p>\\(4(2) + 3(5) = 8 + 15 = 23\\) ✓</p>"},
    {"label": "Answer", "content": "<p><strong>\\(x = 2\\), \\(y = 5\\)</strong></p>", "isAnswer": True, "is_answer": True},
   ]},
  {"difficulty": "Gold", "question": "Solve 2x + y = 11 and 3x + 2y = 18 (substitution method)",
   "steps": [
-   {"label": "Step 1 — Make y the subject", "content": "<p>From the first equation: \\(y = 11 - 2x\\). This is the substitution method — the alternative to elimination, and worth the same marks.</p>"},
-   {"label": "Step 2 — Substitute into the other equation", "content": "<p>\\(3x + 2(11 - 2x) = 18\\) → \\(3x + 22 - 4x = 18\\) → \\(-x = -4\\) → \\(x = 4\\).</p>"},
-   {"label": "Step 3 — Find y", "content": "<p>\\(y = 11 - 2(4) = 3\\).</p>"},
-   {"label": "Step 4 — Check", "content": "<p>\\(3(4) + 2(3) = 12 + 6 = 18\\) ✓</p>"},
+   {"label": "Step 1: Make y the subject", "content": "<p>From the first equation: \\(y = 11 - 2x\\). This is the substitution method, the alternative to elimination, and worth the same marks.</p>"},
+   {"label": "Step 2: Substitute into the other equation", "content": "<p>\\(3x + 2(11 - 2x) = 18\\) → \\(3x + 22 - 4x = 18\\) → \\(-x = -4\\) → \\(x = 4\\).</p>"},
+   {"label": "Step 3: Find y", "content": "<p>\\(y = 11 - 2(4) = 3\\).</p>"},
+   {"label": "Step 4: Check", "content": "<p>\\(3(4) + 2(3) = 12 + 6 = 18\\) ✓</p>"},
    {"label": "Answer", "content": "<p><strong>\\(x = 4\\), \\(y = 3\\)</strong></p>", "isAnswer": True, "is_answer": True},
   ]},
 ]
@@ -331,19 +331,19 @@ def gen_guided(e1, e2, sol):
     def scale_steps(a, b, c, k, which):
         cs = [(a, "x"), (b, "y")]
         say = ("To make the " + L + " terms match, multiply ALL of \\(" + fmt_eq(a, b, c) +
-               "\\) by " + str(k) + " — every term, both sides.")
+               "\\) by " + str(k) + ": every term, both sides.")
         first = True
         for coef, let in cs:
             steps.append({
                 "say": say if first else None,
                 "pre": term(coef, let, True) + " × " + str(k) + " = ", "post": let,
                 "answer": _i(coef * k),
-                "hint": "Just multiply the number in front" + (" — and keep the minus." if coef < 0 else ".")})
+                "hint": "Just multiply the number in front" + (", and keep the minus." if coef < 0 else ".")})
             first = False
         steps.append({
             "pre": "and the right-hand side: " + par(c) + " × " + str(k) + " = ", "post": "",
             "answer": _i(c * k),
-            "hint": "The right-hand side gets multiplied too — that's the step everyone forgets."})
+            "hint": "The right-hand side gets multiplied too. That's the step everyone forgets."})
 
     if k1 > 1: scale_steps(a1, b1, c1, k1, 1)
     if k2 > 1: scale_steps(a2, b2, c2, k2, 2)
@@ -366,15 +366,15 @@ def gen_guided(e1, e2, sol):
         elim1, elim2 = (B1_, B2_) if pick == 1 else (A1, A2)
         steps.append({
             "say": "Both equations now have " + term(elim1, L, True) +
-                   " — same sign. <strong>Same Signs Subtract.</strong> Take \\(" +
+                   ", the same sign. <strong>Same Signs Subtract.</strong> Take \\(" +
                    fmt_eq(*e2c) + "\\) away from \\(" + fmt_eq(*e1c) + "\\), term by term:",
             "pre": term((A1 if pick == 1 else B1_), S, True) + " − " + term((A2 if pick == 1 else B2_), S, True) + " = ",
             "post": S, "answer": _i(surv),
             "hint": "Subtract the numbers in front: " + str(_i(A1 if pick == 1 else B1_)) + " − " + str(_i(A2 if pick == 1 else B2_)) + "."})
         steps.append({
             "pre": term(elim1, L, True) + " − " + term(elim2, L, True) + " = ", "post": "",
-            "answer": 0, "done": "Gone — that was the whole point.",
-            "hint": "They're identical — anything minus itself is 0."})
+            "answer": 0, "done": "Gone. That was the whole point.",
+            "hint": "They're identical, and anything minus itself is 0."})
         steps.append({
             "pre": str(_i(C1)) + " − " + par(C2) + " = ", "post": "",
             "answer": _i(C1 - C2),
@@ -390,14 +390,14 @@ def gen_guided(e1, e2, sol):
             return "(" + t + ")" if coef < 0 else t
         steps.append({
             "say": "The " + L + " terms are " + term(elim1, L, True) + " and " + term(elim2, L, True) +
-                   " — opposite signs, so <strong>ADD</strong> the equations and they cancel:",
+                   ". Opposite signs, so <strong>ADD</strong> the equations and they cancel:",
             "pre": term(s1, S, True) + " + " + term(s2, S, True) + " = ",
             "post": S, "answer": _i(surv),
             "hint": "Add the numbers in front."})
         steps.append({
             "pre": term(elim1, L, True) + " + " + wrap(elim2, L) + " = ", "post": "",
-            "answer": 0, "done": "Cancelled — adding opposites gives zero.",
-            "hint": "One is plus, one is minus, same size — they cancel to 0."})
+            "answer": 0, "done": "Cancelled. Adding opposites gives zero.",
+            "hint": "One is plus, one is minus, same size, so they cancel to 0."})
         steps.append({
             "pre": str(_i(C1)) + " + " + par(C2) + " = ", "post": "",
             "answer": _i(C1 + C2),
@@ -411,7 +411,7 @@ def gen_guided(e1, e2, sol):
             "pre": S + " = ", "post": "", "answer": sv,
             "hint": "Divide both sides by " + str(_i(surv)) + "."})
     else:
-        steps.append({"say": "So " + S + " = " + str(_i(R)) + " — done in one."})
+        steps.append({"say": "So " + S + " = " + str(_i(R)) + ". Done in one."})
 
     # substitute into the original equation whose unknown-letter coefficient is nicest
     unk = pick  # index of the letter still unknown (the eliminated one)
@@ -425,7 +425,7 @@ def gen_guided(e1, e2, sol):
     uv = sol[unk]
     say_sub = "Now find " + L + ". Put " + S + " = " + par(sv) + " into \\(" + fmt_eq(ea, eb, ec) + "\\):"
     if abs(kco) != 1:
-        say_sub = say_sub[:-1] + " — the " + S + " part is " + str(_i(kco)) + " × " + par(sv) + " = " + str(_i(kpart)) + ", so:"
+        say_sub = say_sub[:-1] + ". The " + S + " part is " + str(_i(kco)) + " × " + par(sv) + " = " + str(_i(kpart)) + ", so:"
     if uco == 1:
         steps.append({"say": say_sub,
             "pre": str(_i(kpart)) + " + " + L + " = " + str(_i(ec)) + "  →  " + L + " = ", "post": "",
@@ -448,10 +448,10 @@ def gen_guided(e1, e2, sol):
     def prod(coef, val):
         return par(val) if abs(_i(coef)) == 1 else str(abs(_i(coef))) + " × " + par(val)
     steps.append({
-        "say": "Last thing — check the pair in the other equation:",
+        "say": "Last thing: check the pair in the other equation:",
         "pre": prod(oa, xv) + " " + ("+" if ob > 0 else "−") + " " + prod(ob, yv) + " = ", "post": "",
-        "answer": _i(oc), "done": "It balances — so x = " + par(xv) + ", y = " + par(yv) + " is right.",
-        "hint": "Work it out — if it doesn't give " + str(_i(oc)) + ", something slipped."})
+        "answer": _i(oc), "done": "It balances, so x = " + par(xv) + ", y = " + par(yv) + " is right.",
+        "hint": "Work it out. If it doesn't give " + str(_i(oc)) + ", something slipped."})
     return steps
 
 # ============================== VERIFICATION ==============================
@@ -574,13 +574,13 @@ GUIDED = {
   "label": "Before any algebra",
   "display": "2 coffees + 1 muffin = £7<br>1 coffee + 1 muffin = £4",
   "steps": [
-   {"say": "A coffee-shop puzzle — no algebra allowed, just look at the two orders.",
+   {"say": "A coffee-shop puzzle. No algebra allowed, just look at the two orders.",
     "pre": "A coffee costs £", "post": "", "answer": 3,
-    "hint": "Compare the orders: the ONLY difference is one extra coffee — and £3 of price."},
-   {"say": "That move you just made — comparing the orders and letting the muffin cancel out — is called <strong>elimination</strong>. You subtracted two equations without noticing.",
+    "hint": "Compare the orders: the ONLY difference is one extra coffee, and £3 of price."},
+   {"say": "That move you just made, comparing the orders and letting the muffin cancel out, is called <strong>elimination</strong>. You subtracted two equations without noticing.",
     "pre": "And the muffin? £", "post": "", "answer": 1,
     "hint": "One coffee (£3) and a muffin cost £4 together."},
-   {"say": "That second move — using the value you know to find the one you don't — is <strong>substitution</strong>. Those two moves are the entire topic. Algebra just writes coffee as \\(x\\) and muffin as \\(y\\): \\(2x + y = 7\\) and \\(x + y = 4\\)."},
+   {"say": "That second move, using the value you know to find the one you don't, is <strong>substitution</strong>. Those two moves are the entire topic. Algebra just writes coffee as \\(x\\) and muffin as \\(y\\): \\(2x + y = 7\\) and \\(x + y = 4\\)."},
   ]},
  "teach": {
   "bronze": teach_problem(r"Solve \(3x + y = 10\) and \(x + y = 4\)", "Together: your first one"),
@@ -603,6 +603,30 @@ for k, v in TIER_DESCRIPTIONS.items():
     pd["problem_bank"][k] = v
 for tier in ("bronze", "silver", "gold"):
     pd["problem_bank"][tier] = problems_out[tier]
+
+# ---- style guard: NO em dashes in student-facing text (they read as minus
+# signs next to numbers — Tom, 15 Jul). "note" fields are internal-only.
+def dash_scan(obj, path="pd"):
+    hits = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k != "note":
+                hits += dash_scan(v, path + "." + str(k))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            hits += dash_scan(v, path + "[%d]" % i)
+    elif isinstance(obj, str) and "—" in obj:
+        i = obj.find("—")
+        hits.append(path + ": ..." + obj[max(0, i - 35):i + 35] + "...")
+    return hits
+
+dash_hits = dash_scan(pd)
+if dash_hits:
+    print("EM-DASH GUARD FAILED (%d):" % len(dash_hits))
+    for h in dash_hits:
+        print("  ", h)
+    sys.exit(1)
+print("em-dash guard: CLEAN")
 
 outp = os.path.join(ROOT, "scratchpad", "_maths_audit", "_l09_rebuilt_practice_data.json")
 io.open(outp, "w", encoding="utf-8").write(json.dumps(pd, ensure_ascii=False, indent=1))
