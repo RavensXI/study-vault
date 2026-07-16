@@ -107,6 +107,15 @@ area -> tiles/paint; sequences -> spotting the next number pattern children
 already do; standard form -> writing the distance to the Moon without zeros.
 `display` supports HTML (`<br>`) and plain text; keep it visual.
 
+**Show what you say (Tom's rule, 16 Jul).** If any student-facing text claims
+a figure ("Here is a triangle...", "Look at this chart", "the diagram
+shows"), the display MUST actually contain it: inline SVG is allowed and
+encouraged (self-contained, <2KB, `role="img"` + `aria-label`, soft fills,
+Inter labels), or unicode art for simple grids. This mirrors the exam, where
+the figure is given. If you can't draw it, reword to pure imagination
+("Picture a pizza cut into quarters") so nothing is claimed that isn't shown.
+Reference implementation: geometry-L05's tiled-squares Pythagoras opener.
+
 ### 6. guided.teach walks (one per tier)
 - A problem NOT in the bank, at that tier's difficulty, walked in micro-steps.
 - The walk demonstrates the tier's ONE new move explicitly.
