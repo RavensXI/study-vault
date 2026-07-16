@@ -29,6 +29,29 @@ def scan_dashes(obj, path):
     elif isinstance(obj, str) and EM in obj:
         fail("em dash at " + path + ": ..." + obj[max(0, obj.find(EM) - 25):obj.find(EM) + 25] + "...")
 
+def scan_svg(obj, path):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            scan_svg(v, path + "." + str(k))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            scan_svg(v, path + "[%d]" % i)
+    elif isinstance(obj, str) and "<svg" in obj:
+        for i, chunk in enumerate(obj.split("<svg")[1:]):
+            tag = chunk.split(">", 1)[0]
+            p = path + " svg#%d" % i
+            if "viewBox" not in tag:
+                fail(p + " missing viewBox")
+            if 'role="img"' not in tag:
+                fail(p + ' missing role="img"')
+            if "aria-label" not in tag:
+                fail(p + " missing aria-label")
+        low = obj.lower()
+        if "http://" in low or "https://" in low or "xlink:href" in low:
+            fail(path + " svg references external resources")
+        if len(obj) > 12000:
+            fail(path + " display with svg exceeds 12000 chars, keep figures lean")
+
 def check_steps(steps, path, need_substitute, min_boxes=3):
     boxes = 0
     sub_at = None
@@ -67,6 +90,7 @@ def main(fn):
     pd = json.load(io.open(fn, encoding="utf-8"))
 
     scan_dashes(pd, "pd")
+    scan_svg(pd, "pd")
 
     pb = pd.get("problem_bank") or {}
     for tier in ("bronze", "silver", "gold"):
