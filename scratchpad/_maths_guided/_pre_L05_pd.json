@@ -1,0 +1,995 @@
+{
+  "method_card": {
+    "steps": [
+      "For CF: add running totals, plot at upper boundaries, draw smooth curve",
+      "Read median at n/2, Q1 at n/4, Q3 at 3n/4",
+      "For box plots: draw using min, Q1, median, Q3, max",
+      "For histograms: frequency density = frequency ÷ class width"
+    ],
+    "title": "Cumulative Frequency, Box Plots & Histograms",
+    "content": "<p><strong>Cumulative frequency (CF):</strong> Running total of frequencies. Plot against the <strong>upper class boundary</strong> and join with a smooth curve.</p><p>From a CF graph, read off: <strong>median</strong> (at \\(n/2\\)), <strong>Q1</strong> (at \\(n/4\\)), <strong>Q3</strong> (at \\(3n/4\\)). <strong>IQR</strong> = Q3 − Q1.</p><p>A <strong>box plot</strong> shows: minimum, Q1, median, Q3, maximum. The box spans the IQR.</p><p><strong>Histograms</strong> use <strong>frequency density</strong> = frequency ÷ class width on the y-axis. Area of each bar = frequency.</p>",
+    "example": "<p><strong>40 students. From CF graph, median is at \\(40/2 = 20\\)th value. Read across at CF = 20 to find the median.</strong></p>"
+  },
+  "topic_links": {
+    "prerequisites": [
+      {
+        "slug": "probability-statistics/4",
+        "title": "Averages & Spread"
+      }
+    ]
+  },
+  "problem_bank": {
+    "gold": [
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              "0–10",
+              "10–20",
+              "20–30",
+              "30–50",
+              "50–80"
+            ],
+            "datasets": [
+              {
+                "data": [
+                  2,
+                  5,
+                  3,
+                  2,
+                  1
+                ],
+                "borderColor": "#7c3aed",
+                "borderWidth": 1,
+                "backgroundColor": "rgba(124, 58, 237, 0.4)"
+              }
+            ]
+          },
+          "type": "bar",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.05)"
+                },
+                "title": {
+                  "text": "Age (years)",
+                  "display": true
+                }
+              },
+              "y": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 1
+                },
+                "title": {
+                  "text": "Frequency density",
+                  "display": true
+                },
+                "beginAtZero": true
+              }
+            }
+          }
+        },
+        "display": "The histogram shows ages of visitors to a museum. Estimate the number of visitors aged between 15 and 25.",
+        "solutions": [
+          40
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 80,
+            "message": "15–20 uses half of the 10–20 bar: fd 5 × width 5 = 25. 20–25 uses half of the 20–30 bar: fd 3 × width 5 = 15. Total = 25 + 15 = 40.",
+            "pattern": "wrong_calculation",
+            "expect_note": "Student uses the full 10–20 and 20–30 bars without halving: fd 5 × 10 + fd 3 × 10 = 50 + 30 = 80."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              0,
+              10,
+              20,
+              30,
+              40,
+              50,
+              60,
+              70,
+              75,
+              80,
+              90,
+              100
+            ],
+            "datasets": [
+              {
+                "data": [
+                  0,
+                  5,
+                  10,
+                  30,
+                  60,
+                  100,
+                  140,
+                  160,
+                  180,
+                  190,
+                  198,
+                  200
+                ],
+                "fill": false,
+                "tension": 0.3,
+                "borderColor": "#dc2626",
+                "pointRadius": 4,
+                "pointBackgroundColor": "#dc2626"
+              }
+            ]
+          },
+          "type": "line",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.05)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Mark",
+                  "display": true
+                }
+              },
+              "y": {
+                "max": 200,
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 20
+                },
+                "title": {
+                  "text": "Cumulative frequency",
+                  "display": true
+                },
+                "beginAtZero": true
+              }
+            }
+          }
+        },
+        "display": "The cumulative frequency curve shows exam results for 200 students. Estimate how many students scored more than 75 marks.",
+        "solutions": [
+          20
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 180,
+            "message": "At mark 75, CF = 180. Students scoring MORE than 75 = 200 - 180 = 20. Remember to subtract from the total, not read directly.",
+            "pattern": "wrong_subtraction",
+            "expect_note": "Student reads CF = 180 directly as the answer, forgetting to subtract from the total (200 - 180 = 20)."
+          }
+        ]
+      },
+      {
+        "display": "A box plot has Q1 = 20 and Q3 = 44. An outlier is defined as more than \\(1.5 \\times \\text{IQR}\\) beyond the quartiles. Find the lower outlier boundary.",
+        "solutions": [
+          -16
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 56,
+            "message": "IQR = 24. 1.5 × 24 = 36. Lower fence = Q1 − 36 = 20 − 36 = −16.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student adds instead of subtracts: Q1 + 1.5 × IQR = 20 + 36 = 56, computing the upper outlier fence instead of the lower."
+          }
+        ]
+      },
+      {
+        "display": "A histogram and a CF curve both represent the same data. The histogram bar 20-30 has fd = 4.5. Total data = 120. What percentage of data falls in this class?",
+        "solutions": [
+          37.5
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 45,
+            "message": "Frequency = 4.5 × 10 = 45. Percentage = 45/120 × 100 = 37.5%.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student correctly finds frequency (45) but stops there, forgetting to express it as a percentage of the total (45/120 × 100)."
+          }
+        ]
+      },
+      {
+        "display": "Two CF curves show exam results. School A (120 students): median = 58, IQR = 22. School B (80 students): median = 62, IQR = 16. How many students from School A scored above School A's Q3 (which is 69)?",
+        "solutions": [
+          30
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 90,
+            "message": "25% above Q3. 120 × 0.25 = 30 students.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student uses 75% instead of 25%, thinking 'above Q3' means three-quarters of the data: 120 × 0.75 = 90."
+          }
+        ]
+      }
+    ],
+    "bronze": [
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              10,
+              20,
+              30,
+              40,
+              50,
+              60,
+              70,
+              80
+            ],
+            "datasets": [
+              {
+                "data": [
+                  0,
+                  5,
+                  15,
+                  40,
+                  60,
+                  72,
+                  78,
+                  80
+                ],
+                "fill": false,
+                "tension": 0.3,
+                "borderColor": "#3b82f6",
+                "pointRadius": 4,
+                "pointBackgroundColor": "#3b82f6"
+              }
+            ]
+          },
+          "type": "line",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.05)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Test score",
+                  "display": true
+                }
+              },
+              "y": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Cumulative frequency",
+                  "display": true
+                },
+                "beginAtZero": true
+              }
+            }
+          }
+        },
+        "display": "The cumulative frequency curve shows test scores for 80 students. Use the graph to read the median score.",
+        "solutions": [
+          40
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 80,
+            "message": "Median = n/2 = 80/2 = 40th value. Reading across from CF = 40 gives a score of exactly 40.",
+            "pattern": "wrong_reading",
+            "expect_note": "Student reads at CF = 80 (the total) instead of CF = 40 (n/2), so they get the maximum x-value (~80) rather than the median."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              0,
+              10,
+              20,
+              30,
+              40,
+              50,
+              60,
+              70,
+              80,
+              90,
+              100
+            ],
+            "datasets": [
+              {
+                "data": [
+                  0,
+                  2,
+                  8,
+                  20,
+                  40,
+                  60,
+                  80,
+                  100,
+                  112,
+                  118,
+                  120
+                ],
+                "fill": false,
+                "tension": 0.3,
+                "borderColor": "#8b5cf6",
+                "pointRadius": 4,
+                "pointBackgroundColor": "#8b5cf6"
+              }
+            ]
+          },
+          "type": "line",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.05)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Mark",
+                  "display": true
+                }
+              },
+              "y": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 20
+                },
+                "title": {
+                  "text": "Cumulative frequency",
+                  "display": true
+                },
+                "beginAtZero": true
+              }
+            }
+          }
+        },
+        "display": "The cumulative frequency curve shows exam marks for 120 students. How many students scored less than 60 marks?",
+        "solutions": [
+          80
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 60,
+            "message": "Read up from 60 on the x-axis to the curve, then across to the y-axis: CF = 80. So 80 students scored less than 60.",
+            "pattern": "wrong_reading",
+            "expect_note": "Student reads the x-axis value (60) directly as the answer instead of reading up to the curve and across to the CF axis."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              "Heights"
+            ],
+            "datasets": [
+              {
+                "data": [
+                  {
+                    "q1": 160,
+                    "q3": 170,
+                    "max": 185,
+                    "min": 150,
+                    "median": 165
+                  }
+                ],
+                "borderColor": "#22c55e",
+                "borderWidth": 2,
+                "backgroundColor": "rgba(34, 197, 94, 0.3)"
+              }
+            ]
+          },
+          "type": "boxplot",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 5
+                },
+                "title": {
+                  "text": "Height (cm)",
+                  "display": true
+                }
+              }
+            },
+            "indexAxis": "y"
+          }
+        },
+        "display": "The box plot shows the distribution of heights (cm) of students in a class. What is the median height?",
+        "solutions": [
+          165
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "The median is the vertical line inside the box. Here, the median height is 165 cm.",
+            "pattern": "wrong_reading",
+            "expect_note": "No single determinate wrong answer: student could misread any of Q1 (160), Q3 (170), min (150), or max (185)."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              "Homework time"
+            ],
+            "datasets": [
+              {
+                "data": [
+                  {
+                    "q1": 20,
+                    "q3": 40,
+                    "max": 55,
+                    "min": 10,
+                    "median": 30
+                  }
+                ],
+                "borderColor": "#ef4444",
+                "borderWidth": 2,
+                "backgroundColor": "rgba(239, 68, 68, 0.3)"
+              }
+            ]
+          },
+          "type": "boxplot",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 5
+                },
+                "title": {
+                  "text": "Time (minutes)",
+                  "display": true
+                }
+              }
+            },
+            "indexAxis": "y"
+          }
+        },
+        "display": "The box plot shows the time (in minutes) students spent on homework. What is the interquartile range (IQR)?",
+        "solutions": [
+          20
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 45,
+            "message": "IQR = Q3 - Q1 = 40 - 20 = 20. Don't use the range (max - min) by mistake.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student uses range formula: max - min = 55 - 10 = 45."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              "Sprint times"
+            ],
+            "datasets": [
+              {
+                "data": [
+                  {
+                    "q1": 12,
+                    "q3": 18,
+                    "max": 20,
+                    "min": 10,
+                    "median": 15
+                  }
+                ],
+                "borderColor": "#f59e0b",
+                "borderWidth": 2,
+                "backgroundColor": "rgba(245, 158, 11, 0.3)"
+              }
+            ]
+          },
+          "type": "boxplot",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 2
+                },
+                "title": {
+                  "text": "Time (seconds)",
+                  "display": true
+                }
+              }
+            },
+            "indexAxis": "y"
+          }
+        },
+        "display": "The box plot shows sprint times (seconds) for athletes. What is the range of the data?",
+        "solutions": [
+          10
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 6,
+            "message": "Range = max - min = 20 - 10 = 10 seconds. Don't confuse with IQR.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student uses IQR formula instead of range: Q3 - Q1 = 18 - 12 = 6."
+          }
+        ]
+      },
+      {
+        "display": "Histogram: class 20-40, frequency = 30. Find the frequency density.",
+        "solutions": [
+          1.5
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 30,
+            "message": "Width = 20. FD = 30 ÷ 20 = 1.5.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student reports the frequency (30) directly without dividing by class width, confusing frequency with frequency density."
+          }
+        ]
+      },
+      {
+        "display": "Box plot: Q1=20, median=28, Q3=36. What percentage of data is between Q1 and Q3?",
+        "solutions": [
+          50
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 25,
+            "message": "The box (Q1 to Q3) always contains 50% of the data.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student thinks the IQR spans only one quartile (25%) rather than two quartiles (Q1 to Q3 = 50%)."
+          }
+        ]
+      },
+      {
+        "display": "CF graph shows median = 35 and Q3 = 48. If Q1 = 22, find the IQR.",
+        "solutions": [
+          26
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 13,
+            "message": "IQR = 48 − 22 = 26.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student subtracts Q1 from the median (35 - 22 = 13) instead of from Q3, misidentifying which values define the IQR."
+          }
+        ]
+      }
+    ],
+    "silver": [
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              "Class A",
+              "Class B"
+            ],
+            "datasets": [
+              {
+                "data": [
+                  {
+                    "q1": 40,
+                    "q3": 65,
+                    "max": 80,
+                    "min": 25,
+                    "median": 50
+                  },
+                  {
+                    "q1": 45,
+                    "q3": 70,
+                    "max": 85,
+                    "min": 30,
+                    "median": 60
+                  }
+                ],
+                "borderColor": [
+                  "#3b82f6",
+                  "#ef4444"
+                ],
+                "borderWidth": 2,
+                "backgroundColor": [
+                  "rgba(59, 130, 246, 0.3)",
+                  "rgba(239, 68, 68, 0.3)"
+                ]
+              }
+            ]
+          },
+          "type": "boxplot",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Test score (%)",
+                  "display": true
+                }
+              }
+            },
+            "indexAxis": "y"
+          }
+        },
+        "display": "The box plots compare test scores for Class A and Class B. Which class had the higher median score?",
+        "options": [
+          "Class A",
+          "Class B",
+          "They are the same",
+          "Cannot tell from the box plots"
+        ],
+        "solutions": [
+          1
+        ],
+        "calculator": false,
+        "input_type": "multiple_choice",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0,
+            "message": "Class A median = 50, Class B median = 60. Class B has the higher median.",
+            "pattern": "wrong_reading",
+            "expect_note": "Student selects Class A (option index 0), misreading which box plot corresponds to which class or confusing median with range."
+          }
+        ]
+      },
+      {
+        "display": "A histogram has bars: 0-10 (fd=2), 10-20 (fd=5), 20-50 (fd=3). Find the total frequency.",
+        "solutions": [
+          160
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 100,
+            "message": "10×2 + 10×5 + 30×3 = 20 + 50 + 90 = 160.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student treats the 20–50 bar as width 10 (not 30): 10×2 + 10×5 + 10×3 = 20 + 50 + 30 = 100."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              0,
+              10,
+              20,
+              30,
+              40,
+              50,
+              60,
+              70,
+              80,
+              90,
+              100
+            ],
+            "datasets": [
+              {
+                "data": [
+                  0,
+                  2,
+                  5,
+                  15,
+                  25,
+                  50,
+                  75,
+                  90,
+                  96,
+                  99,
+                  100
+                ],
+                "fill": false,
+                "tension": 0.3,
+                "borderColor": "#059669",
+                "pointRadius": 4,
+                "pointBackgroundColor": "#059669"
+              }
+            ]
+          },
+          "type": "line",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.05)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Score",
+                  "display": true
+                }
+              },
+              "y": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 10
+                },
+                "title": {
+                  "text": "Cumulative frequency",
+                  "display": true
+                },
+                "beginAtZero": true
+              }
+            }
+          }
+        },
+        "display": "The cumulative frequency curve shows results for 100 students. Use the graph to estimate the interquartile range (IQR).",
+        "solutions": [
+          20
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "Q1 at n/4 = 25th value = 40. Q3 at 3n/4 = 75th value = 60. IQR = 60 - 40 = 20.",
+            "pattern": "wrong_reading",
+            "expect_note": "No single determinate wrong answer: student might use wrong CF positions (e.g. n/3 and 2n/3) or misread the curve at those positions, giving a range of plausible wrong answers."
+          }
+        ]
+      },
+      {
+        "chart": {
+          "data": {
+            "labels": [
+              "0–10",
+              "10–20",
+              "20–30",
+              "30–50",
+              "50–80"
+            ],
+            "datasets": [
+              {
+                "data": [
+                  2,
+                  4,
+                  3,
+                  2,
+                  1
+                ],
+                "borderColor": [
+                  "#3b82f6",
+                  "#8b5cf6",
+                  "#22c55e",
+                  "#f59e0b",
+                  "#ef4444"
+                ],
+                "borderWidth": 1,
+                "backgroundColor": [
+                  "rgba(59, 130, 246, 0.4)",
+                  "rgba(139, 92, 246, 0.4)",
+                  "rgba(34, 197, 94, 0.4)",
+                  "rgba(245, 158, 11, 0.4)",
+                  "rgba(239, 68, 68, 0.4)"
+                ]
+              }
+            ]
+          },
+          "type": "bar",
+          "options": {
+            "scales": {
+              "x": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.05)"
+                },
+                "title": {
+                  "text": "Waiting time (minutes)",
+                  "display": true
+                }
+              },
+              "y": {
+                "grid": {
+                  "color": "rgba(0,0,0,0.08)"
+                },
+                "ticks": {
+                  "stepSize": 1
+                },
+                "title": {
+                  "text": "Frequency density",
+                  "display": true
+                },
+                "beginAtZero": true
+              }
+            }
+          }
+        },
+        "display": "The histogram shows the distribution of waiting times at a clinic. How many patients waited between 10 and 20 minutes? (Remember: frequency = frequency density × class width)",
+        "solutions": [
+          40
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 4,
+            "message": "Frequency = frequency density × class width = 4 × 10 = 40 patients.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student reads the frequency density value (4) directly as the frequency, forgetting to multiply by the class width."
+          }
+        ]
+      },
+      {
+        "display": "A histogram class 5-15 has frequency 24. What is the frequency density?",
+        "solutions": [
+          2.4
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 240,
+            "message": "Width = 10. FD = 24 ÷ 10 = 2.4.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student multiplies instead of divides: 24 × 10 = 240, inverting the frequency density formula."
+          }
+        ]
+      },
+      {
+        "display": "Box plot A has range 40 and IQR 15. Box plot B has range 25 and IQR 20. Which has more extreme outliers (wider spread)?",
+        "options": [
+          "A",
+          "B",
+          "Both the same",
+          "Cannot tell"
+        ],
+        "solutions": [
+          0
+        ],
+        "calculator": false,
+        "input_type": "multiple_choice",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 1,
+            "message": "A has a much bigger range relative to its IQR (40 vs 15), suggesting more spread/extreme values.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student selects B (option index 1) because it has the larger IQR (20 > 15), confusing IQR with overall spread rather than using range as the measure of extreme values."
+          }
+        ]
+      },
+      {
+        "display": "Estimate from a CF curve: total = 80, median ≈ 45, Q1 ≈ 32, Q3 ≈ 58. Find the IQR.",
+        "solutions": [
+          26
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 13,
+            "message": "58 − 32 = 26.",
+            "pattern": "wrong_formula",
+            "expect_note": "Student subtracts Q1 from the median (45 - 32 = 13) instead of Q3 - Q1, using the wrong two values."
+          }
+        ]
+      }
+    ]
+  },
+  "related_videos": [
+    {
+      "url": "https://www.youtube.com/watch?v=FCnqp-Z9FC4",
+      "title": "Drawing Cumulative Frequency Graphs - Corbettmaths",
+      "channel": "Corbett Maths"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=z41_PBqYuVg",
+      "title": "Drawing and Reading Box Plots - Corbettmaths",
+      "channel": "Corbett Maths"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=wGzp-wM90EU",
+      "title": "Drawing Histograms - Corbettmaths",
+      "channel": "Corbett Maths"
+    }
+  ],
+  "worked_examples": [
+    {
+      "steps": [
+        {
+          "label": "Answer",
+          "content": "<p>IQR = Q3 − Q1 = 32 − 18 = <strong>14</strong></p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "A box plot shows: min=12, Q1=18, median=25, Q3=32, max=45. Find the IQR.",
+      "difficulty": "Bronze"
+    },
+    {
+      "steps": [
+        {
+          "label": "Step 1",
+          "content": "<p>Class width = 10</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p>Frequency = 3.5 × 10 = <strong>35</strong></p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "Histogram: class 10-20, frequency density 3.5. Find the frequency.",
+      "difficulty": "Silver"
+    }
+  ]
+}

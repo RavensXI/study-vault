@@ -1,0 +1,525 @@
+# -*- coding: utf-8 -*-
+import json, io
+
+SRC = "_live_graphs-L05.json"
+OUT = "lesson_graphs-L05.json"
+
+pd = json.load(io.open(SRC, encoding="utf-8"))
+
+# ---------------------------------------------------------------------------
+# 8. method_card (slim reference)
+# ---------------------------------------------------------------------------
+pd["method_card"] = {
+    "title": "Cubic, Reciprocal & Exponential Graphs",
+    "steps": [
+        "Substitute x values into the equation to get points; a power means repeated multiplication.",
+        "Cubic \\(y=x^3\\): an S-curve through the origin. A negative coefficient flips it.",
+        "Reciprocal \\(y=\\frac{a}{x}\\): two branches, with both axes as asymptotes.",
+        "Exponential \\(y=k^x\\): passes through \\((0,1)\\), growing if \\(k>1\\) and decaying if \\(0<k<1\\).",
+    ],
+    "content": "<p>These three <strong>Higher-tier</strong> curves each come from a rule you substitute into. A <strong>cubic</strong> \\(y=x^3\\) makes an S-shape through the origin, rising steeply. A <strong>reciprocal</strong> \\(y=\\frac{a}{x}\\) splits into two branches that hug the axes but never touch them (the axes are <strong>asymptotes</strong>). An <strong>exponential</strong> \\(y=k^x\\) passes through \\((0,1)\\) and either grows fast (\\(k>1\\)) or decays (\\(0<k<1\\)), with the x-axis as an asymptote.</p>",
+    "example": "<p><strong>Sketch \\(y=2^x\\).</strong> It is exponential growth (\\(k=2\\)). Key points: \\((0,1)\\), \\((1,2)\\), \\((2,4)\\), \\((-1,0.5)\\). The curve rises steeply to the right and creeps towards the x-axis (its asymptote) on the left.</p>",
+}
+
+# ---------------------------------------------------------------------------
+# worked_examples: fix em-dash labels only (mandatory gate); rest byte-for-byte
+# ---------------------------------------------------------------------------
+for we in pd.get("worked_examples", []):
+    for st in we.get("steps", []):
+        if isinstance(st.get("label"), str):
+            st["label"] = st["label"].replace(" — ", ": ").replace("—", ":")
+
+# ---------------------------------------------------------------------------
+# problem_bank
+# ---------------------------------------------------------------------------
+pb = pd["problem_bank"]
+
+pb["bronze_description"] = "Substitute a simple value into a cubic, reciprocal or exponential, and recognise each graph's shape and asymptotes."
+pb["silver_description"] = "Handle negative inputs, shifted cubics, exponential decay and negative powers, and reason about quadrants and reflections."
+pb["gold_description"] = "Recover unknown constants from given points, find where two curves meet, and solve growth or threshold problems in several steps."
+
+# ---- BRONZE ---------------------------------------------------------------
+pb["bronze"] = [
+    # B0  y = x^3 at x=2  -> 8
+    {
+        "display": "What is the value of \\(y\\) when \\(x = 2\\) on the graph \\(y = x^3\\)?",
+        "solutions": [8],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Cube the 2: multiply it by itself three times.",
+        "misconceptions": [
+            {"check": "common", "expect": 6, "pattern": "confusion",
+             "message": "y = x³ means y = 2³ = 8, not 2 × 3 = 6. Cubing means multiplying the number by itself three times."}
+        ],
+        "guided_steps": [
+            {"say": "Reading a value off a curve just means substituting the x into the equation. Here \\(y = x^3\\) with x = 2, so multiply three 2's together."},
+            {"pre": "Square it first: 2 × 2 = ", "post": "", "answer": 4, "hint": "Two times two."},
+            {"phase": "substitute", "pre": "Now the third 2: 4 × 2 = ", "post": "", "answer": 8, "hint": "Four doubled."},
+            {"phase": "substitute", "pre": "Check by counting the copies, 2 × 2 × 2 = ", "post": "", "answer": 8,
+             "done": "Three 2's multiplied make 8, so the point (2, 8) sits on the curve.", "hint": "It should match: three twos multiplied."},
+        ],
+    },
+    # B1  y = x^3 at x=-1 -> -1
+    {
+        "display": "What is the value of \\(y\\) when \\(x = -1\\) on the graph \\(y = x^3\\)?",
+        "solutions": [-1],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Cube the minus one; an odd power keeps the negative sign.",
+        "misconceptions": [
+            {"check": "common", "expect": 1, "pattern": "sign_error",
+             "message": "(-1)³ = -1, not +1. An odd power preserves the negative sign."}
+        ],
+        "guided_steps": [
+            {"say": "Substitute x = -1 into \\(y = x^3\\). Cube it, keeping careful track of the sign."},
+            {"pre": "First (-1) × (-1) = ", "post": "", "answer": 1, "hint": "Negative times negative is positive."},
+            {"phase": "substitute", "pre": "Now × (-1) again: 1 × (-1) = ", "post": "", "answer": -1, "hint": "Positive times negative is negative."},
+            {"phase": "substitute", "pre": "Check the rule: an odd power keeps the sign, so (-1)³ = ", "post": "", "answer": -1,
+             "done": "Odd power, so the minus survives: y = -1.", "hint": "Cubing keeps a negative negative."},
+        ],
+    },
+    # B3  3^0 -> 1  (placed before the MC below so its numeric [1] is seen first)
+    {
+        "display": "What is the value of \\(3^0\\)?",
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Any non-zero number raised to the power 0 equals 1.",
+        "misconceptions": [
+            {"check": "common", "expect": 0, "pattern": "wrong_formula",
+             "message": "Any non-zero number to the power 0 equals 1, not 0."}
+        ],
+        "guided_steps": [
+            {"say": "The zero-power rule is quick once you see why it works."},
+            {"pre": "Start from \\(3^1\\): that is just ", "post": "", "answer": 3, "hint": "Any number to the power 1 is itself."},
+            {"phase": "substitute", "pre": "Going down one power divides by 3: 3 ÷ 3 = ", "post": "", "answer": 1, "hint": "Three divided by three."},
+            {"phase": "substitute", "pre": "So the rule gives: any non-zero number to the power 0 equals ", "post": "", "answer": 1,
+             "done": "By the zero-power rule, 3⁰ = 1.", "hint": "The same landing value, 1."},
+        ],
+    },
+    # B2  MC: other asymptote of y=1/x -> y=0 (index 1)
+    {
+        "display": "The graph of \\(y = \\frac{1}{x}\\) has two asymptotes. One is \\(x = 0\\). What is the other?",
+        "options": ["y = 1", "y = 0", "y = x", "y = -1"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "As x grows huge, work out the value 1/x heads towards; that horizontal line is the other asymptote.",
+        "misconceptions": [
+            {"check": "common", "expect": 0, "pattern": "wrong_formula",
+             "message": "As x gets very large, 1/x shrinks towards 0, not 1. The x-axis, y = 0, is the horizontal asymptote."}
+        ],
+    },
+    # B4  (FIX: was x=2 undetectable) y = 2^x at x=4 -> 16
+    {
+        "display": "What is the value of \\(y\\) when \\(x = 4\\) on the graph \\(y = 2^x\\)?",
+        "solutions": [16],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Double 2 four times over; it is not 2 times 4.",
+        "misconceptions": [
+            {"check": "common", "expect": 8, "pattern": "confusion",
+             "message": "y = 2ˣ means 2 multiplied by itself x times: 2⁴ = 16, not 2 × 4 = 8. It is an exponential, not a straight line."}
+        ],
+        "guided_steps": [
+            {"say": "\\(y = 2^x\\) means multiply 2 by itself x times. Here x = 4, so four 2's."},
+            {"pre": "First pair: 2 × 2 = ", "post": "", "answer": 4, "hint": "Two twos."},
+            {"phase": "substitute", "pre": "Third 2: 4 × 2 = ", "post": "", "answer": 8, "hint": "Four doubled."},
+            {"phase": "substitute", "pre": "Fourth 2: 8 × 2 = ", "post": "", "answer": 16, "hint": "Eight doubled."},
+            {"phase": "substitute", "pre": "Check it is NOT linear: doubling gives 16, whereas 2 × 4 would only give ", "post": "", "answer": 8,
+             "done": "2⁴ = 16, far bigger than 2 × 4 = 8. That gap is why it is exponential.", "hint": "2 times 4."},
+        ],
+    },
+    # B5  MC (FIX: dropped ambiguous origin clause) gradient of y=x^3 at x=1 -> Positive (index 0)
+    {
+        "display": "Is the gradient of \\(y = x^3\\) positive or negative at \\(x = 1\\)?",
+        "options": ["Positive", "Negative", "Zero", "Undefined"],
+        "solutions": [0],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Picture the S-curve at x = 1: is it heading uphill or downhill?",
+        "misconceptions": [
+            {"check": "common", "expect": 1, "pattern": "wrong_formula",
+             "message": "At x = 1, the cubic y = x³ is increasing (going uphill), so the gradient is positive."}
+        ],
+    },
+    # B6  MC: y as x large on 1/x -> approaches 0 (index 0)
+    {
+        "display": "For the graph \\(y = \\frac{1}{x}\\), what happens to \\(y\\) as \\(x\\) gets very large?",
+        "options": ["y approaches 0", "y approaches 1", "y approaches infinity", "y stays the same"],
+        "solutions": [0],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "As x gets bigger, work out what 1/x heads towards.",
+        "misconceptions": [
+            {"check": "common", "expect": 1, "pattern": "wrong_formula",
+             "message": "As x increases, 1/x gets smaller and smaller, approaching 0 but never reaching it, not settling at 1."}
+        ],
+    },
+    # B7  MC: which is exponential -> y=3^x (index 2)
+    {
+        "display": "Which of these is an exponential graph?",
+        "options": ["y = x³", "y = 3x", "y = 3ˣ", "y = 3/x"],
+        "solutions": [2],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "An exponential has the variable up in the power, like a number to the x.",
+        "misconceptions": [
+            {"check": "common", "expect": 0, "pattern": "confusion",
+             "message": "y = 3ˣ is exponential (the variable is in the power). y = x³ is cubic, y = 3x is linear, y = 3/x is reciprocal."}
+        ],
+    },
+]
+
+# ---- SILVER ---------------------------------------------------------------
+pb["silver"] = [
+    # S0  y = x^3 + 1 at x=-2 -> -7
+    {
+        "display": "Calculate the value of \\(y\\) when \\(x = -2\\) on the graph \\(y = x^3 + 1\\).",
+        "solutions": [-7],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Cube the negative first (watch the sign), then add 1.",
+        "misconceptions": [
+            {"check": "common", "expect": 9, "pattern": "sign_error",
+             "message": "(-2)³ = -8, not +8. Then -8 + 1 = -7."}
+        ],
+        "guided_steps": [
+            {"say": "Substitute x = -2 into \\(y = x^3 + 1\\). Cube first, then add the 1."},
+            {"pre": "(-2) × (-2) = ", "post": "", "answer": 4, "hint": "Negative times negative is positive."},
+            {"phase": "substitute", "pre": "× (-2) again: 4 × (-2) = ", "post": "", "answer": -8, "hint": "That is (-2)³; positive times negative is negative."},
+            {"phase": "substitute", "pre": "Now add 1: -8 + 1 = ", "post": "", "answer": -7, "hint": "Count up one from -8."},
+            {"phase": "substitute", "pre": "Check the two parts: (-2)³ + 1 = -8 + 1 = ", "post": "", "answer": -7,
+             "done": "y = -7; the + 1 lifts the cube value up by one.", "hint": "It should match your last answer."},
+        ],
+    },
+    # S1  (FIX: was duplicate of S2) y = 12/x at x=4 -> 3
+    {
+        "display": "For the graph \\(y = \\frac{12}{x}\\), find \\(y\\) when \\(x = 4\\).",
+        "solutions": [3],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Divide 12 by 4.",
+        "misconceptions": [
+            {"check": "common", "expect": 48, "pattern": "wrong_formula",
+             "message": "y = 12/4 = 3, not 12 × 4. The x goes underneath, so you divide by it."}
+        ],
+        "guided_steps": [
+            {"say": "In \\(y = \\frac{12}{x}\\) the 12 sits on top and you divide it by x = 4."},
+            {"pre": "The number on top of the fraction is ", "post": "", "answer": 12, "hint": "It is y = 12/x, so 12 is the numerator."},
+            {"phase": "substitute", "pre": "Divide by x = 4: 12 ÷ 4 = ", "post": "", "answer": 3, "hint": "How many 4's make 12?"},
+            {"phase": "substitute", "pre": "Check by reversing it: 3 × 4 = ", "post": "", "answer": 12,
+             "done": "3 × 4 = 12 rebuilds the top, so y = 3 is right.", "hint": "It should give back the 12 on top."},
+        ],
+    },
+    # S2  y = 6/x at x=-2 -> -3
+    {
+        "display": "For the graph \\(y = \\frac{6}{x}\\), find \\(y\\) when \\(x = -2\\).",
+        "solutions": [-3],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Divide 6 by minus 2; a positive over a negative is negative.",
+        "misconceptions": [
+            {"check": "common", "expect": 3, "pattern": "sign_error",
+             "message": "y = 6/(-2) = -3. A positive divided by a negative gives a negative."}
+        ],
+        "guided_steps": [
+            {"say": "In \\(y = \\frac{6}{x}\\) divide the 6 on top by x = -2, minding the sign."},
+            {"pre": "The number on top of the fraction is ", "post": "", "answer": 6, "hint": "It is y = 6/x, so 6 is the numerator."},
+            {"phase": "substitute", "pre": "Divide by x = -2: 6 ÷ (-2) = ", "post": "", "answer": -3, "hint": "Positive divided by negative is negative."},
+            {"phase": "substitute", "pre": "Check by reversing it: (-3) × (-2) = ", "post": "", "answer": 6,
+             "done": "(-3) × (-2) = 6 rebuilds the top, so y = -3.", "hint": "It should give back the 6 on top."},
+        ],
+    },
+    # S3  y = 5^x at x=-1 -> 0.2
+    {
+        "display": "A graph has equation \\(y = 5^x\\). Find \\(y\\) when \\(x = -1\\).",
+        "solutions": [0.2],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "A negative power means the reciprocal, so 5 to the minus 1 is one fifth.",
+        "misconceptions": [
+            {"check": "common", "expect": -5, "pattern": "wrong_formula",
+             "message": "5⁻¹ = 1/5 = 0.2, not -5. A negative power means the reciprocal, not a negative answer."}
+        ],
+        "guided_steps": [
+            {"say": "A negative power means 'one over'. Build \\(5^{-1}\\) from \\(5^1\\)."},
+            {"pre": "First, \\(5^1\\) = ", "post": "", "answer": 5, "hint": "Five to the power one is five."},
+            {"phase": "substitute", "pre": "So \\(5^{-1}\\) = 1 ÷ 5 = ", "post": "", "answer": 0.2, "hint": "One fifth as a decimal."},
+            {"phase": "substitute", "pre": "Check by reversing it: 0.2 × 5 = ", "post": "", "answer": 1,
+             "done": "0.2 × 5 = 1, so 5⁻¹ = 0.2 = 1/5.", "hint": "It should rebuild the 1 on top."},
+        ],
+    },
+    # S4  MC: quadrants of y=-1/x -> 2nd and 4th (index 1)
+    {
+        "display": "Which quadrants does the graph of \\(y = -\\frac{1}{x}\\) sit in?",
+        "options": ["1st and 3rd", "2nd and 4th", "1st and 2nd", "3rd and 4th"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "y = 1/x lives in quadrants 1 and 3; the minus sign flips it across.",
+        "misconceptions": [
+            {"check": "common", "expect": 0, "pattern": "confusion",
+             "message": "y = 1/x sits in quadrants 1 and 3. The minus sign flips it into quadrants 2 and 4."}
+        ],
+    },
+    # S5  y = 100 * 0.5^x at x=3 -> 12.5
+    {
+        "display": "A substance decays according to \\(y = 100 \\times 0.5^x\\). Find \\(y\\) when \\(x = 3\\).",
+        "solutions": [12.5],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Work out 0.5 cubed, then multiply by 100.",
+        "misconceptions": [
+            {"check": "common", "expect": 150, "pattern": "wrong_formula",
+             "message": "y = 100 × 0.5³ = 100 × 0.125 = 12.5. You cube the 0.5 first, you do not multiply 0.5 by 3."}
+        ],
+        "guided_steps": [
+            {"say": "Cube the 0.5 first, then multiply by 100. A base under 1 makes the value shrink each step: decay."},
+            {"pre": "First pair: 0.5 × 0.5 = ", "post": "", "answer": 0.25, "hint": "Half of a half."},
+            {"phase": "substitute", "pre": "Third one: 0.25 × 0.5 = ", "post": "", "answer": 0.125, "hint": "Half of 0.25; that is 0.5³."},
+            {"phase": "substitute", "pre": "Now × 100: 0.125 × 100 = ", "post": "", "answer": 12.5, "hint": "Move the decimal two places right."},
+            {"phase": "substitute", "pre": "Check it is decay: 100 halves to 50, to 25, to ", "post": "", "answer": 12.5,
+             "done": "Three halvings of 100 land on 12.5.", "hint": "Halve 25."},
+        ],
+    },
+    # S6  MC: y=-x^3 reflection of y=x^3 -> x-axis (index 0)
+    {
+        "display": "The graph \\(y = -x^3\\) is a reflection of \\(y = x^3\\) in which axis?",
+        "options": ["x-axis", "y-axis", "line y = x", "No reflection"],
+        "solutions": [0],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Multiplying a whole function by minus 1 flips it in one of the axes.",
+        "misconceptions": [
+            {"check": "common", "expect": 1, "pattern": "confusion",
+             "message": "Multiplying the whole function by -1 reflects the graph in the x-axis, so the S-shape flips upside down."}
+        ],
+    },
+]
+
+# ---- GOLD -----------------------------------------------------------------
+pb["gold"] = [
+    # G0  y = 2x^3 - 3x at x=-1 -> 1
+    {
+        "display": "A curve has equation \\(y = 2x^3 - 3x\\). Find the value of \\(y\\) when \\(x = -1\\).",
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Work out each term at x = -1 separately, minding the double negative.",
+        "misconceptions": [
+            {"check": "common", "expect": -5, "pattern": "sign_error",
+             "message": "y = 2(-1)³ - 3(-1) = -2 - (-3) = -2 + 3 = 1. Getting -5 means the double negative was missed. Watch the sign."}
+        ],
+        "guided_steps": [
+            {"say": "Take the two terms of \\(2x^3 - 3x\\) one at a time at x = -1, then combine."},
+            {"pre": "The cube: (-1)³ = ", "post": "", "answer": -1, "hint": "An odd power keeps the minus."},
+            {"pre": "So the 2x³ term: 2 × (-1) = ", "post": "", "answer": -2, "hint": "Two times minus one."},
+            {"phase": "substitute", "pre": "The -3x term: -3 × (-1) = ", "post": "", "answer": 3, "hint": "Negative times negative is positive."},
+            {"phase": "substitute", "pre": "Add the two terms: -2 + 3 = ", "post": "", "answer": 1, "hint": "Count up 3 from -2."},
+            {"phase": "substitute", "pre": "Check: 2(-1)³ - 3(-1) = -2 + 3 = ", "post": "", "answer": 1,
+             "done": "y = 1; the double negative turned the second term into + 3.", "hint": "It should match your total."},
+        ],
+    },
+    # G1  (FIX: was duplicate answer 1 with G0) y = 8/x^2 at x=-2 -> 2
+    {
+        "display": "For the graph \\(y = \\frac{8}{x^2}\\), find \\(y\\) when \\(x = -2\\). Then state whether \\(y\\) is the same when \\(x = 2\\). Give the value of \\(y\\).",
+        "solutions": [2],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Square the x first so the sign turns positive, then divide 8 by it.",
+        "misconceptions": [
+            {"check": "common", "expect": -2, "pattern": "wrong_formula",
+             "message": "y = 8/(-2)² = 8/4 = 2. Remember (-2)² = +4, not -4, so the answer is positive. And 8/2² = 2 as well, because squaring x makes the graph symmetric about the y-axis."}
+        ],
+        "guided_steps": [
+            {"say": "In \\(y = \\frac{8}{x^2}\\) you square the x first, then divide the 8 by it."},
+            {"pre": "Square the input: (-2)² = ", "post": "", "answer": 4, "hint": "Negative times negative is positive, so it is + 4."},
+            {"phase": "substitute", "pre": "Divide: 8 ÷ 4 = ", "post": "", "answer": 2, "hint": "How many 4's in 8?"},
+            {"phase": "substitute", "pre": "Now test x = 2: 2² = 4, so 8 ÷ 4 = ", "post": "", "answer": 2, "hint": "Same denominator, same answer."},
+            {"phase": "substitute", "pre": "So both x = -2 and x = 2 give y = ", "post": "", "answer": 2,
+             "done": "x is squared, so + and - inputs match: the curve is symmetric about the y-axis.", "hint": "They landed on the same value."},
+        ],
+    },
+    # G2  V = 1000 * 1.05^t first exceeds 1200 -> 4  (calculator)
+    {
+        "display": "An investment grows according to \\(V = 1000 \\times 1.05^t\\). After how many complete years does the value first exceed £1200? (Give the number of years.)",
+        "solutions": [4],
+        "calculator": True,
+        "input_type": "single_value",
+        "hint": "Multiply by 1.05 each year and find the first year past 1200.",
+        "misconceptions": [
+            {"check": "common", "expect": 3, "pattern": "wrong_formula",
+             "message": "Year 3 reaches £1157.63, still under £1200. Year 4 reaches £1215.51, the first over £1200, so the answer is 4."}
+        ],
+        "guided_steps": [
+            {"say": "\\(V = 1000 \\times 1.05^t\\) multiplies by 1.05 (a 5% rise) each year. Work up the years."},
+            {"pre": "5% of £1000 = ", "post": "", "answer": 50, "hint": "1000 divided by 20."},
+            {"phase": "substitute", "pre": "So year 1: 1000 + 50 = ", "post": "", "answer": 1050, "hint": "Add the £50 of interest."},
+            {"phase": "substitute", "pre": "On a calculator, year 3 reaches £1157.63 (under) and year 4 reaches £1215.51 (over £1200). So the first whole year above £1200 is year ", "post": "", "answer": 4,
+             "done": "Year 4 is the first to exceed £1200.", "hint": "The earliest year the balance tops £1200."},
+        ],
+    },
+    # G3  y = a*b^x through (1,3),(2,24) find b -> 8
+    {
+        "display": "A curve passes through (1, 3) and (2, 24). It has equation \\(y = a \\times b^x\\). Find the value of \\(b\\).",
+        "solutions": [8],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Divide the equation from the second point by the first so a cancels.",
+        "misconceptions": [
+            {"check": "common", "expect": 21, "pattern": "wrong_formula",
+             "message": "At x=1: a×b = 3. At x=2: a×b² = 24. Dividing the second by the first cancels a and gives b = 24 ÷ 3 = 8, not 24 - 3 = 21."}
+        ],
+        "guided_steps": [
+            {"say": "Substitute both points into \\(y = a \\times b^x\\) to get two facts."},
+            {"pre": "At x = 1: a × b = ", "post": "", "answer": 3, "hint": "The point (1, 3) means y = 3."},
+            {"pre": "At x = 2: a × b² = ", "post": "", "answer": 24, "hint": "The point (2, 24) means y = 24."},
+            {"phase": "substitute", "pre": "Divide the second by the first: the a cancels, so b = 24 ÷ 3 = ", "post": "", "answer": 8, "hint": "Divide the two right-hand sides."},
+            {"phase": "substitute", "pre": "Check with the first point: a = 3 ÷ 8 = 0.375, and a × b = 0.375 × 8 = ", "post": "", "answer": 3,
+             "done": "It rebuilds the point (1, 3), so b = 8.", "hint": "It should give back the 3."},
+        ],
+    },
+    # G4  y=1/x and y=4x intersect first quadrant, x -> 0.5
+    {
+        "display": "The graphs \\(y = \\frac{1}{x}\\) and \\(y = 4x\\) intersect in the first quadrant. Find the \\(x\\)-coordinate of the intersection. Give an exact answer.",
+        "solutions": [0.5],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Set 1/x equal to 4x, then solve for x squared.",
+        "misconceptions": [
+            {"check": "common", "expect": 0.25, "pattern": "wrong_formula",
+             "message": "1/x = 4x gives 4x² = 1, so x² = 0.25 and x = √0.25 = 0.5. Stopping at x² = 0.25 (the value 0.25) forgets the square root."}
+        ],
+        "guided_steps": [
+            {"say": "At an intersection both curves share the same y, so set them equal: \\(\\frac{1}{x} = 4x\\)."},
+            {"pre": "Multiply both sides by x. The left becomes 1, so 4x² = ", "post": "", "answer": 1, "hint": "x times 1/x is 1."},
+            {"phase": "substitute", "pre": "Divide by 4: x² = 1 ÷ 4 = ", "post": "", "answer": 0.25, "hint": "A quarter as a decimal."},
+            {"phase": "substitute", "pre": "Square root (positive, first quadrant): x = √0.25 = ", "post": "", "answer": 0.5, "hint": "What number times itself gives 0.25?"},
+            {"phase": "substitute", "pre": "Check both curves match at x = 0.5: 1 ÷ 0.5 = ", "post": "", "answer": 2,
+             "done": "And 4 × 0.5 = 2 too, so they meet at (0.5, 2): x = 0.5.", "hint": "One divided by a half."},
+        ],
+    },
+]
+
+# ---------------------------------------------------------------------------
+# 4. tier_guides
+# ---------------------------------------------------------------------------
+pd["tier_guides"] = {
+    "bronze": {
+        "title": "Bronze: reading a value off a curve",
+        "steps": [
+            "<strong>Substitute</strong> the x value into the equation and work out y. A power means repeated multiplication: \\(x^3 = x \\times x \\times x\\).",
+            "Know the three shapes: <strong>cubic</strong> \\(y=x^3\\) is an S-curve through the origin, <strong>reciprocal</strong> \\(y=\\frac{a}{x}\\) has two branches, and <strong>exponential</strong> \\(y=k^x\\) passes through \\((0,1)\\).",
+            "An <strong>asymptote</strong> is a line the curve creeps towards but never touches. For \\(y=\\frac{1}{x}\\) both axes are asymptotes.",
+        ],
+        "example": {
+            "question": "Find y when x = 3 on the graph y = x³.",
+            "steps": [
+                {"label": "Substitute", "content": "<p>\\(y = 3^3 = 3 \\times 3 \\times 3\\).</p>"},
+                {"label": "Compute", "content": "<p>\\(3 \\times 3 = 9\\), then \\(9 \\times 3 = 27\\).</p>"},
+                {"label": "Check", "content": "<p>27 is positive and large, sitting on the steep part of the rising S-curve.</p>"},
+                {"label": "Answer", "content": "<p>\\(y = 27\\); the graph is a <strong>cubic</strong>.</p>", "isAnswer": True, "is_answer": True},
+            ],
+        },
+    },
+    "silver": {
+        "title": "Silver: signs, shifts and decay",
+        "steps": [
+            "With <strong>negative</strong> inputs, track the sign. An odd power keeps the minus: \\((-2)^3 = -8\\). Squaring (or \\(x^2\\) in a reciprocal) makes it positive.",
+            "A number added on, like \\(y=x^3+1\\), <strong>shifts</strong> the whole curve up. Work out the power first, then add.",
+            "A base between 0 and 1, like \\(0.5^x\\), is <strong>decay</strong>: y halves each step. A negative power means the reciprocal: \\(5^{-1}=\\frac{1}{5}\\).",
+        ],
+        "example": {
+            "question": "Find y when x = -2 on y = x³ - 4.",
+            "steps": [
+                {"label": "Cube the sign", "content": "<p>\\((-2)^3 = -8\\). An odd power keeps the minus.</p>"},
+                {"label": "Shift", "content": "<p>\\(-8 - 4 = -12\\).</p>"},
+                {"label": "Check", "content": "<p>Negative and below the origin, as expected for \\(x<0\\) on a rising cubic pulled down by 4.</p>"},
+                {"label": "Answer", "content": "<p>\\(y = -12\\).</p>", "isAnswer": True, "is_answer": True},
+            ],
+        },
+    },
+    "gold": {
+        "title": "Gold: recover the rule, then solve",
+        "steps": [
+            "The equation hides unknown numbers. Substitute each given point to get equations, then combine them.",
+            "For \\(y=a \\cdot b^x\\) through two points, <strong>divide</strong> one equation by the other: the \\(a\\) cancels and \\(b\\) drops out.",
+            "For an <strong>intersection</strong>, set the two equations equal and solve. For a <strong>threshold</strong>, try whole values of x in order until you pass it.",
+        ],
+        "example": {
+            "question": "A curve y = a·bˣ passes through (1, 10) and (2, 50). Find b.",
+            "steps": [
+                {"label": "Substitute", "content": "<p>\\(a \\cdot b = 10\\) and \\(a \\cdot b^2 = 50\\).</p>"},
+                {"label": "Divide", "content": "<p>\\(50 \\div 10 = b\\), so \\(b = 5\\).</p>"},
+                {"label": "Check", "content": "<p>\\(a = 10 \\div 5 = 2\\), and \\(2 \\times 5^2 = 50\\).</p>"},
+                {"label": "Answer", "content": "<p>\\(b = 5\\).</p>", "isAnswer": True, "is_answer": True},
+            ],
+        },
+    },
+}
+
+# ---------------------------------------------------------------------------
+# 5, 6. guided (opener + teach walks)
+# ---------------------------------------------------------------------------
+pd["guided"] = {
+    "opener": {
+        "label": "Before any algebra",
+        "display": "1 fold → 2 layers<br>2 folds → 4 layers<br>3 folds → ?",
+        "steps": [
+            {"say": "A sheet of paper is folded in half again and again. Each fold doubles the number of layers. No algebra, just keep doubling.",
+             "pre": "After 3 folds, how many layers? ", "post": "", "answer": 8,
+             "hint": "Start at 1 and double for each fold: 1, 2, 4, then double once more."},
+            {"say": "Keep going, one more fold.",
+             "pre": "After 4 folds? ", "post": "", "answer": 16,
+             "hint": "Double the 8."},
+            {"say": "You just built \\(y = 2^x\\): x folds give \\(2^x\\) layers, so \\(2^4 = 16\\). Doubling over and over is an <strong>exponential</strong>, and it grows terrifyingly fast. This lesson also meets <strong>cubes</strong> \\(y = x^3\\) (a number times itself three times) and <strong>sharing</strong> \\(y = \\frac{a}{x}\\). Every one is the same move: pick x, work out y."},
+        ],
+    },
+    "teach": {
+        "bronze": {
+            "display": "Build points on \\(y = x^3\\)",
+            "label": "Together: your first one",
+            "steps": [
+                {"say": "To sketch a curve you substitute x values and read off y. Take \\(y = x^3\\), where cubing means three copies multiplied.",
+                 "pre": "When x = 2, first 2 × 2 = ", "post": "", "answer": 4, "hint": "Two times two."},
+                {"pre": "then × 2 again: 4 × 2 = ", "post": "", "answer": 8,
+                 "done": "That is 2³, so the point (2, 8) is on the curve.", "hint": "Four doubled."},
+                {"pre": "When x = 3: 3 × 3 × 3 = ", "post": "", "answer": 27, "hint": "Nine, then times three."},
+                {"pre": "When x = 1: 1 × 1 × 1 = ", "post": "", "answer": 1,
+                 "done": "Points (1, 1), (2, 8), (3, 27) climb faster and faster: the S-shaped cubic.", "hint": "One stays one."},
+            ],
+        },
+        "silver": {
+            "display": "Solve \\(y = x^3 + 5\\) at a negative input",
+            "label": "Together: the silver move",
+            "steps": [
+                {"say": "Silver adds negative inputs and a shift. Take \\(y = x^3 + 5\\) at x = -3. Cube first, minding the sign, then add 5.",
+                 "pre": "(-3) × (-3) = ", "post": "", "answer": 9, "hint": "Negative times negative is positive."},
+                {"pre": "× (-3) again: 9 × (-3) = ", "post": "", "answer": -27,
+                 "done": "An odd power keeps the minus, so (-3)³ = -27.", "hint": "Positive times negative is negative."},
+                {"pre": "add the 5: -27 + 5 = ", "post": "", "answer": -22, "hint": "Count up 5 from -27."},
+                {"pre": "Check at x = 0: 0³ + 5 = ", "post": "", "answer": 5,
+                 "done": "The + 5 lifts every point up by 5.", "hint": "Zero cubed is 0."},
+            ],
+        },
+        "gold": {
+            "display": "Solve \\(y = a \\cdot b^x\\) through (1, 6) and (2, 18)",
+            "label": "Together: the gold move",
+            "steps": [
+                {"say": "Gold hides the numbers. \\(y = a \\cdot b^x\\) passes through (1, 6) and (2, 18). Substitute both points.",
+                 "pre": "At x = 1: a × b = ", "post": "", "answer": 6, "hint": "The point (1, 6) means y = 6."},
+                {"pre": "At x = 2: a × b² = ", "post": "", "answer": 18, "hint": "The point (2, 18) means y = 18."},
+                {"say": "Divide the second by the first: the a cancels and one b cancels, leaving b.",
+                 "pre": "b = 18 ÷ 6 = ", "post": "", "answer": 3,
+                 "done": "The a vanished, giving b straight away.", "hint": "Divide the right-hand sides."},
+                {"pre": "then a = 6 ÷ b = 6 ÷ 3 = ", "post": "", "answer": 2, "hint": "Use a × b = 6 with b = 3."},
+                {"pre": "Check: a × b² = 2 × 3² = 2 × 9 = ", "post": "", "answer": 18,
+                 "done": "Rebuilds 18, so a = 2, b = 3.", "hint": "Two times three squared."},
+            ],
+        },
+    },
+}
+
+json.dump(pd, io.open(OUT, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+print("written", OUT)

@@ -70,12 +70,13 @@ until('lesson + guided data loaded', function() {
   walk('P1 opener', win()._guided.opener.steps, 0, function(btns) {
     if (btns.length !== 2) log('WARN P1 — expected 2 door buttons, got ' + btns.length);
     log('  doors: [' + btns[0].textContent + '] / [' + btns[1].textContent + ']');
+    var openerDisp = doc().getElementById('guided-display').innerHTML;
     btns[0].click(); // Walk me through one
 
-    // PHASE 2: bronze teaching walk
+    // PHASE 2: bronze teaching walk (detected by the display changing)
     until('teach bronze shown', function() {
       return visible(doc().getElementById('guided-card')) &&
-             doc().getElementById('guided-label').textContent.indexOf('first one') !== -1;
+             doc().getElementById('guided-display').innerHTML !== openerDisp;
     }, function() {
       walk('P2 teach-bronze', win()._guided.teach.bronze.steps, -1, function(btns2) {
         btns2[0].click(); // Your turn →
@@ -96,13 +97,15 @@ until('lesson + guided data loaded', function() {
             until('bare Q2', function() {
               return visible(doc().getElementById('current-problem-card')) &&
                      doc().getElementById('problem-number-label').textContent === 'Q2' &&
-                     doc().getElementById('problem-input-a');
+                     doc().querySelector('#problem-inputs-area .problem-input, #problem-inputs-area .mc-option');
             }, function() {
               var link = doc().getElementById('problem-walk-link');
               log('PASS P4 — Q2 bare, walk link visible: ' + (link && link.style.display !== 'none'));
               var p2 = win()._currentProblem;
-              doc().getElementById('problem-input-a').value = '999';
-              doc().getElementById('problem-input-b').value = '999';
+              // Fill whatever inputs this problem type renders with a wrong value
+              doc().querySelectorAll('#problem-inputs-area input:not([type=hidden])').forEach(function(inp) { inp.value = '999'; });
+              var mc = doc().querySelector('#problem-inputs-area .mc-option');
+              if (mc) mc.click();
               doc().getElementById('problem-check-btn').click();
               until('rescue link', function() { return doc().getElementById('fb-do-with-me'); }, function() {
                 log('PASS P4 — wrong answer offers rescue');

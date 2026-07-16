@@ -1,0 +1,29 @@
+{
+ "key": "algebra-L08",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "Replaced the degenerate problem: for x^2+2x-8, b=2 so b^2=4=2b, making the b2_error misconception impossible to trap (filed audit issue). Swapped to x^2+5x-6=0 (roots 1, -6), where b^2 != 2b.",
+   "old": "Solve x^2 + 2x - 8 = 0 using the quadratic formula  (solutions [2, -4])",
+   "new": "Solve x^2 + 5x - 6 = 0 using the quadratic formula  (solutions [1, -6])"
+  },
+  {
+   "tier": "silver",
+   "index": 5,
+   "what": "Reworded ambiguous display (filed audit issue): the stem asked two things at once ('Find the discriminant... How many real solutions?') on a single_value input storing -11, so a student could type 0. Now asks only for the discriminant value; the count (0) is handled inside the guided walk as interpretation.",
+   "old": "Find the discriminant of x^2 + 3x + 5 = 0. How many real solutions?  (solutions [-11])",
+   "new": "Find the discriminant of x^2 + 3x + 5 = 0. Enter the discriminant value.  (solutions [-11])"
+  },
+  {
+   "tier": "silver",
+   "index": 6,
+   "what": "Changed the constant to remove a duplicate-answer defect: original x^2+6x-2 gives q=-11, colliding with S5's stored solution [-11] within the silver tier (validator-blocking, and confusable for students). Changed to x^2+6x+1, giving q=-8 (unique).",
+   "old": "Write x^2 + 6x - 2 in completed square form. State q.  (solutions [-11])",
+   "new": "Write x^2 + 6x + 1 in completed square form. State q.  (solutions [-8])"
+  }
+ ],
+ "issues_resolved": 7,
+ "opener_concept": "A square lawn of area 49 m2: find the side (sqrt(49)=7), then a lawn of side (x+2) with the same area gives x+2=7 so x=5. That IS completing the square, then it links to x^2+4x-45=(x+2)^2-49=0.",
+ "notes": "Verified every bank answer by fresh solve; all correct. Gold G2 (2x^2-12x+7) arrived already carrying the audit-corrected [5.35, 0.65] (pre-dump had wrong [5.33, 0.66]); kept and re-verified. Rebuilt misconceptions across all 20 problems to the L09 quality bar: removed the off-topic completing_halve misconception from every quadratic-formula problem and the b2_error from pure completing-the-square problems (both filed issues); replaced the copy-paste 'if b=-6 then b^2=36' message everywhere with personalised, per-problem messages carrying determinate expects. New real, derivable misconceptions: bronze sign_of_b (uses +b not -b, clean determinate wrong pair per problem); silver/gold completing-square forgot_subtract (q=c) and half_b (uses b not b/2); G1 adds strict-vs-equal boundary (k=9). All expects recomputed and asserted != correct answer. Added guided.opener, three teach walks (integer formula, decimal formula, complete-the-square solve), guided_steps on all 20 problems with completion boundaries, tier_guides, hints, and slimmed the method_card. Preserved related_videos, topic_links, worked_examples byte-for-byte except stripping em dashes from worked_examples step labels (the hard style gate rejects them). Validator PASS; live PATCH round-trip equal."
+}

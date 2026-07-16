@@ -1,0 +1,36 @@
+{
+ "key": "number-L01",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 5,
+   "what": "Audit 'degenerate': old problem 10 - 3 + 2 used only equal-priority add/subtract, so it did not test the lesson's core different-priority idea. Replaced with a problem mixing multiply against add and subtract, and rebuilt both misconceptions to real determinate errors.",
+   "old": "\\(10 - 3 + 2\\) = 9 (misconceptions: subtract_sum expect 5, arithmetic expect null)",
+   "new": "\\(10 - 2 \\times 3 + 1\\) = 5 (misconceptions: subtract_sum expect 3, left_to_right expect 25)"
+  },
+  {
+   "tier": "silver",
+   "index": 2,
+   "what": "Audit 'bad_misconception_message': ignore_bracket had check 'equals_17'; ignoring the bracket in 5+3x4-10 gives 7, not 17. Set expect to 7.",
+   "old": "ignore_bracket check 'equals_17'",
+   "new": "ignore_bracket expect 7 ((5)+3x4-10 = 5+12-10 = 7)"
+  },
+  {
+   "tier": "gold",
+   "index": 1,
+   "what": "Audit 'bad_misconception_message': square_wrong had check 'equals_10'; expanding (2+3)^2 as 2^2+3^2=13 gives final 13-8=5, not 10. Set expect to 5.",
+   "old": "square_wrong check 'equals_10'",
+   "new": "square_wrong expect 5 ((2+3)^2 mis-expanded to 13, 13-4x2 = 5)"
+  },
+  {
+   "tier": "gold",
+   "index": 3,
+   "what": "Audit two issues on 2^4-(3x2+1)^0x10. Removed the vacuous 'bracket_error' misconception (any non-zero base to power 0 is 1, so it can never change the answer). Rewrote the mislabelled 'index_error' (its message described the correct working) into 'subtract_before_multiply' (expect 150), and added a genuine 'power_as_base' misconception (treating 7^0 as 7 gives 16-70 = -54).",
+   "old": "misconceptions: zero_power(16), bracket_error(null/vacuous), index_error(150 with a message describing correct working)",
+   "new": "misconceptions: zero_power(16), power_as_base(-54), subtract_before_multiply(150 with corrected message)"
+  }
+ ],
+ "issues_resolved": 5,
+ "opener_concept": "A lunch bill: 1 sandwich (£3) + 2 juices at £2 each. Students naturally total the juices (2 x £2 = £4) before adding the sandwich, doing multiplication before addition by common sense; the reveal names this as BIDMAS. A second box (change from £20 after 3 sandwiches at £3) reinforces multiply-before-subtract.",
+ "notes": "All 20 bank problems re-solved from display; every stored solution correct. Added tier_guides, guided.opener, guided.teach (bronze/silver/gold), and full guided_steps + plain-text hints to all 20 problems (bronze had none). Every guided_steps walk ends with an inverse-operation CHECK box and a completion boundary tagged phase:'substitute' (set-up pre-worked, final operation + check live). Trimmed method_card to slim reference (<=140 words, 4 steps). Stripped em dashes from preserved worked_examples labels (colon) to pass the style gate; related_videos and topic_links preserved byte-for-byte. 98/98 evaluable boxes independently recomputed clean; all misconception expects reproduce the committed error and differ from the answer. Validator PASS."
+}

@@ -1,0 +1,27 @@
+import json
+changes = {
+ "key": "algebra-L06",
+ "problems_fixed": [
+   {"tier": "bronze", "index": 0, "what": "Replaced reducible distractor that leaked the answer by inspection",
+    "old": "(2x+2)(x+1)", "new": "(2x+3)(x+1)"},
+   {"tier": "bronze", "index": 2, "what": "Replaced degenerate problem (identical to the method_card worked example, so answer was pre-shown)",
+    "old": "Factorise 2x^2+7x+3  [(2x+1)(x+3)]", "new": "Factorise 2x^2+11x+5  [(2x+1)(x+5)]"},
+   {"tier": "bronze", "index": 4, "what": "Rebuilt two reducible distractors (both eliminable without factorising)",
+    "old": "(2x+4)(x+1), (2x+2)(x+2)", "new": "(2x+3)(x+2), (2x-1)(x-4)"},
+   {"tier": "bronze", "index": 5, "what": "Rebuilt two reducible distractors that leaked the answer",
+    "old": "(3x+3)(x+2), (3x+6)(x+1)", "new": "(3x+1)(x+6), (3x-2)(x-3)"},
+   {"tier": "silver", "index": 6, "what": "Replaced reducible/degenerate distractor",
+    "old": "(2x-2)(3x+3)", "new": "(6x+1)(x-6)"},
+   {"tier": "gold", "index": 0, "what": "Replaced duplicate-value distractor (opt2 and opt3 both expanded to 4x^2-4x-15); also changed worked_examples[3] which had leaked this answer",
+    "old": "(2x+3)(2x-5)", "new": "(4x-5)(x+3)"},
+   {"tier": "gold", "index": 1, "what": "Replaced reducible distractor",
+    "old": "(3x+1)(2x-2)", "new": "(6x+1)(x-2)"},
+   {"tier": "gold", "index": 4, "what": "Replaced reducible distractor",
+    "old": "(3x+10)(2x-2)", "new": "(6x-5)(x+4)"}
+ ],
+ "issues_resolved": 5,
+ "opener_concept": "Rectangular garden: two whole-number sides with area 12 and sum 7 give 3 and 4, naming the product (a*c) and sum (b) hunt at the heart of the ac method.",
+ "notes": "Every bank problem is multiple_choice, so guided_steps are omitted (spec section 7); the guided ladder is delivered via the opener plus one teach walk per tier (ac method in numeric micro-steps). Added a plain-text hint to all 20 problems (none existed) and rebuilt each problem's misconceptions to point at genuinely-wrong option indices. Verified every option: exactly one correct, all distractors irreducible and distinct. Slimmed method_card and removed em dashes from method_card and all worked_examples labels (validator enforces no em dashes). topic_links and related_videos preserved byte-for-byte. Beyond the 5 filed audit issues, also fixed an unflagged reducible-distractor leak (bronze[0]) and an unflagged duplicate-option + worked-example answer leak (gold[0])."
+}
+json.dump(changes, open("changes_algebra-L06.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+print("wrote changes_algebra-L06.json")

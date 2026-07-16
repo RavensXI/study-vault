@@ -1,0 +1,38 @@
+{
+ "key": "graphs-L05",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "Filed issue (bad_misconception_message): at x=2, 2^2=4 equals the linear slip 2x4=4, so the 'treats exponential as linear' misconception could never be detected. Moved to x=4 so the methods diverge (2^4=16 vs 2x4=8) and the misconception is now derivable.",
+   "old": "display 'y when x=2 on y=2^x', solution 4, misconception expect null ('same answer here')",
+   "new": "display 'y when x=4 on y=2^x', solution 16, misconception expect 8 (student computes 2x4)"
+  },
+  {
+   "tier": "bronze",
+   "index": 5,
+   "what": "Filed issue (ambiguous_wording): removed the redundant 'passes through the origin' clause that implied the origin was relevant to the gradient at x=1. Wording-only fix; answer and options unchanged.",
+   "old": "The graph of y=x^3 passes through the origin. Is the gradient positive or negative at x=1?",
+   "new": "Is the gradient of y=x^3 positive or negative at x=1?"
+  },
+  {
+   "tier": "silver",
+   "index": 1,
+   "what": "Filed issue (duplicate): silver[1] (y=6/x at x=3) and silver[2] (y=6/x at x=-2) tested the identical skill on the same equation. Replaced silver[1] with a distinct reciprocal equation and positive input.",
+   "old": "y = 6/x, find y when x=3; solution 2",
+   "new": "y = 12/x, find y when x=4; solution 3; misconception expect 48 (multiplies instead of divides)"
+  },
+  {
+   "tier": "gold",
+   "index": 1,
+   "what": "Duplicate answer within tier (validator-enforced, spec section 1): gold[0] and gold[1] both had solution 1, both single_value. Changed the reciprocal numerator to give a distinct clean integer answer while preserving the y-axis-symmetry teaching point.",
+   "old": "y = 4/x^2 at x=-2; solution 1; misconception expect -1",
+   "new": "y = 8/x^2 at x=-2; solution 2; misconception expect -2 (treats (-2)^2 as -4)"
+  }
+ ],
+ "issues_resolved": 3,
+ "opener_concept": "Paper folding: each fold doubles the layers (1, 2, 4, 8, ...). A student answers '8 layers after 3 folds' by common sense; the reveal names it as y = 2^x (exponential) and previews cubes y=x^3 and sharing y=a/x as the same 'pick x, work out y' move.",
+ "notes": "Lesson was a substitution/recognition topic (not simultaneous equations), so guided_steps decompose each single-value problem into square/cube-then-finish micro-steps with a phase:'substitute' boundary after the set-up and a reverse-operation check at the end. Added hint + guided_steps to all 9 non-MC bank problems; MC problems keep hints only (walks omitted, allowed). Also fixed 6 em-dash labels in worked_examples ('Step 1 — y-intercept' -> 'Step 1: y-intercept') because the style rule and validator ban em dashes everywhere student-facing; worked_examples bodies, related_videos and topic_links preserved byte-for-byte. Trimmed method_card to 4 steps / ~62-word content / one example. Reordered bronze so the numeric 3^0=1 problem precedes the MC whose correct option index is also 1 (validator adds MC option indices to the within-tier duplicate set). problems_fixed count = 4 (3 maths/answer repairs + 1 wording).",
+ "validator": "PASS",
+ "patch": "204, readback matches"
+}

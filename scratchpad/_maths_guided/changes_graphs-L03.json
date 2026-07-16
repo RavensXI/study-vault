@@ -1,0 +1,43 @@
+{
+ "key": "graphs-L03",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 0,
+   "what": "Misconception was inert (showed the correct working, expect=null). Rewrote as a real error path: squaring 3 as 3x2=6 giving y=8.",
+   "old": "substitution_error, expect null, message 'y = (3)^2 + 2 = 9 + 2 = 11.'",
+   "new": "squaring_error, expect 8, message describing the 3x2=6 slip."
+  },
+  {
+   "tier": "bronze",
+   "index": 3,
+   "what": "MC misconception (confused_root_tp) could not fire on y=x^2 (root and turning point both (0,0)), expect=null. Replaced with plugging_in_one: substituting x=1 gives (1,1)=option index 3.",
+   "old": "confused_root_tp, expect null.",
+   "new": "plugging_in_one, expect 3 (option (1,1))."
+  },
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "Degenerate problem: y=x^2-9 at x=0 just reads the constant, no arithmetic. Changed x-value to 4 (answer 7) and gave a firing misconception.",
+   "old": "'find y when x=0', solutions [-9], substitution_error expect null.",
+   "new": "'find y when x=4', solutions [7], squaring_error expect -1 (4x2=8, 8-9=-1)."
+  },
+  {
+   "tier": "silver",
+   "index": 2,
+   "what": "Misconception message described the correct working, not the error. Rewrote to name the x-instead-of-y slip; kept expect=1 (student stops at turning-point x).",
+   "old": "confused_root_tp, message 'Turning point x = -b/(2a) = 2/2 = 1. Then y = 1-2-8 = -9...'",
+   "new": "gave_x_not_y, expect 1, message 'You found x = 1, but the question asks for the y-value...'"
+  },
+  {
+   "tier": "silver",
+   "index": 3,
+   "what": "Duplicate answer within tier: y=-x^2+4 has roots [-2,2], identical to silver[0]. Retuned to y=-x^2+9 with roots [-3,3].",
+   "old": "'y = -x^2 + 4', solutions [-2,2].",
+   "new": "'y = -x^2 + 9', solutions [-3,3]; guided_steps and misconception updated to match."
+  }
+ ],
+ "issues_resolved": 6,
+ "opener_concept": "A thrown ball: a height-vs-time table. Reading when it lands again (a root) and when it is highest (the turning point) by common sense, then naming those as roots and the turning point of y = ax^2 + bx + c.",
+ "notes": "All 20 bank problems fresh-solved from display; 5 repaired (2 audit-flagged inert misconceptions on B0/B3, 1 degenerate B4, 1 misleading message on S2, 1 within-tier duplicate answer on S3). Also removed pre-existing em dashes from worked_examples labels/content (hard style rule; validator-enforced). Added tier_descriptions, tier_guides, guided.opener, guided.teach (bronze/silver/gold), guided_steps on every non-MC bank problem (MC B3/B5 omit per spec), and slimmed method_card to 4 steps / <=140 words. related_videos and topic_links preserved byte-for-byte. Validator PASS; PATCH 204; round-trip equal."
+}

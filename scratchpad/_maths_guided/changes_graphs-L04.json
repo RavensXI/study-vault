@@ -1,0 +1,36 @@
+{
+ "key": "graphs-L04",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 3,
+   "what": "Audit duplicate: bronze[3] and bronze[7] both tested Distance = Speed x Time. Rephrased bronze[3] to a Time = Distance / Speed question to give the bronze tier full speed-distance-time triangle coverage. Answer changed accordingly.",
+   "old": "A car travels at a constant speed of 50 km/h for 3 hours. How far does it go?  (solutions [150])",
+   "new": "A car travels 150 km at a constant speed of 50 km/h. How long does the journey take, in hours?  (solutions [3])"
+  },
+  {
+   "tier": "bronze",
+   "index": 5,
+   "what": "Audit degenerate: the horizontal-line MC was pure recall stated verbatim in the method card and worked example. Replaced with a reasoning MC that asks which section shows acceleration (positive gradient vs horizontal).",
+   "old": "On a speed-time graph, a horizontal line means the object has: [Constant acceleration / Constant speed / Zero speed / Increasing speed] (answer index 1)",
+   "new": "A speed-time graph rises with a positive gradient, then becomes horizontal. During which section is the object accelerating? [The sloping section / The horizontal section / Both sections / Neither section] (answer index 0)"
+  },
+  {
+   "tier": "silver",
+   "index": 4,
+   "what": "Duplicate solution value within the silver tier: silver[2] (average speed) and silver[4] (conversion) both stored [40], which the validator rejects. Changed the conversion reading from 25 miles to 30 miles so the answer is 48 km (chart already passes through (30, 48)).",
+   "old": "Use it to convert 25 miles to km.  (solutions [40])",
+   "new": "Use it to convert 30 miles to km.  (solutions [48])"
+  },
+  {
+   "tier": "bronze",
+   "index": 0,
+   "what": "Audit bad_misconception_message: the wrong_formula message stated the full correct method instead of diagnosing the error. Rewritten as honest diagnosis of the inverted formula (time / distance = 20 / 5 = 4), matching expect 4.",
+   "old": "Speed = distance / time = 5 km / 20 min = 0.25 km/min. Read the distance at 20 minutes (5 km) and divide by the time.",
+   "new": "It looks like you inverted the formula. Speed = distance / time, not time / distance. At 20 minutes the distance is 5 km, so speed = 5 / 20 = 0.25 km/min."
+ }
+ ],
+ "issues_resolved": 4,
+ "opener_concept": "A real car journey read by common sense: 60 miles in 2 hours is 30 miles each hour (that IS speed = distance / time = the gradient); parking covers 0 miles per hour (a flat line = a rest).",
+ "notes": "Maths of all stored answers was already correct on fresh-solve; graphs-L04 was not in unconfirmed[]. Repairs: 3 problems had their question/answer changed (bronze[3] duplicate, bronze[5] degenerate, silver[4] validator duplicate-solution) plus bronze[0] message rewrite (all four filed audit issues resolved; silver[2] units issue was already fixed in live data). Every misconception message rewritten to honest diagnosis and every expect re-derived and confirmed != solution. Added tier_guides, guided.opener, guided.teach (bronze/silver/gold), and full guided_steps (with a substitute completion boundary + independent check step, e.g. trapezium check for area problems) on all 19 non-MC bank problems; hints on all problems. Two multiple_choice problems (bronze[5], silver[6]) left without guided_steps per schema. method_card trimmed to slim reference (content 95 words). Em dashes normalised out of the preserved worked_examples step labels (validator/style gate). related_videos, topic_links and all chart objects preserved byte-for-byte. Validator PASS; PATCH returned 204 with exact readback match."
+}

@@ -1,0 +1,35 @@
+{
+ "key": "number-L06",
+ "problems_fixed": [
+  {
+   "tier": "silver",
+   "index": 4,
+   "what": "Audit issue (ambiguous_wording): cube-root problem had two misconceptions both with check 'wrong' and no determinate wrong value, so neither could ever fire. Re-posed from cbrt(1000) to cbrt(729)=9, which yields clean determinate misconceptions: sqrt(729)=27 (square-not-cube) and 729/3=243 (divide-by-3). Non-calculator friendly (9^3=729, 27^2=729).",
+   "old": "Calculate \\(\\sqrt[3]{1000}\\)  ->  [10]; misconceptions square_root/divide_by_3 both check:'wrong', expect null",
+   "new": "Calculate \\(\\sqrt[3]{729}\\)  ->  [9]; misconceptions square_not_cube expect 27, divide_by_3 expect 243"
+  },
+  {
+   "tier": "silver",
+   "index": 6,
+   "what": "Audit issue (duplicate): 'Calculate 2^6' was a plain power evaluation structurally identical to bronze B0 (3^4) and B5 (5^3), below silver's difficulty floor. Replaced with a genuine powers+standard-form combination that adds two-step demand.",
+   "old": "Calculate \\(2^6\\)  ->  [64] (single_value)",
+   "new": "Write \\(2^{10}\\) in standard form  ->  [1.024, 3] (standard_form); 2^10=1024=1.024x10^3; misconceptions not_converted expect [1024,0], wrong_A expect [10.24,2]"
+  },
+  {
+   "tier": "silver",
+   "index": 1,
+   "what": "Correctness repair (not in audit): the 'multiply_powers' misconception stored expect [1.2, 15], which cannot be produced by the described error. Multiplying powers gives 3x5=15 and front 4x3=12; adjusting 12 to 1.2 lifts the power to 16. Corrected expect to [1.2, 16] and rewrote the message.",
+   "old": "multiply_powers check equals_15 expect [1.2, 15]",
+   "new": "multiply_powers check equals_16 expect [1.2, 16]"
+  }
+ ],
+ "issues_resolved": 4,
+ "issues_detail": [
+  "silver[6] duplicate -> re-posed to 2^10 in standard form",
+  "silver[5] bad_misconception_message -> removed the inert 'compare_n_only' misconception (comparing powers alone always gives the correct answer for valid standard form, so it can never fire a wrong-answer trap); kept the real 'compare_A_only' (expect 9000)",
+  "silver[4] ambiguous_wording -> re-posed to cbrt(729) with determinate expects 27 and 243",
+  "bronze[3] bad_misconception_message -> rewrote the 'wrong_power' message so it no longer hands over the full answer; it now confirms A=5.6 and diagnoses only the place-count for n"
+ ],
+ "opener_concept": "Writing very large money amounts (a 2,000,000 lottery jackpot, a 9,000,000,000 company) by counting zeros. A student can answer 'how many zeros?' by pure common sense; the reveal names that zero-count as the power n in standard form A x 10^n.",
+ "notes": "All 20 stored solutions fresh-solved correctly; none needed changing. Added guided.opener, guided.teach (bronze/silver/gold walks, all >=4 boxes), tier_guides (title/steps/example per tier), problem_bank {tier}_description, and guided_steps with a phase:'substitute' completion boundary + end-of-walk check on all 20 problems. Slimmed method_card content to <=140 words (4 steps kept, single example preserved). Stripped em dashes from preserved worked_examples labels (hard style rule; replaced ' - ' with ': '). related_videos, topic_links, worked_examples (text) otherwise preserved. Validator PASS; independent maths re-verification (solutions, every box lands on solution components, every misconception expect reproduces its committed error and differs from the answer) all clean. Live row PATCHed (204)."
+}

@@ -1,0 +1,29 @@
+{
+ "key": "ratio-proportion-L06",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "Replaced duplicate gradient problem (audit: bronze 0/4/6 all identical rise-over-run type, indices 4 and 6 both gave 3). New points give a distinct answer and break the within-tier duplicate.",
+   "old": "A tangent passes through (1, 4) and (3, 10). What is the rate of change? -> 3",
+   "new": "A tangent passes through (1, 2) and (5, 22). What is the rate of change? -> 5 (rise 20, run 4)"
+  },
+  {
+   "tier": "bronze",
+   "index": 5,
+   "what": "Fixed degenerate iteration (audit: x_0 = 8 is a fixed point of x/2+4, so x_1 = 8 = x_0 and copying the start gives the answer). Changed x_0 so the sequence actually moves.",
+   "old": "x_{n+1} = x_n/2 + 4 with x_0 = 8, find x_1 -> 8",
+   "new": "x_{n+1} = x_n/2 + 4 with x_0 = 6, find x_1 -> 7 (6/2 + 4)"
+  },
+  {
+   "tier": "gold",
+   "index": 0,
+   "what": "Trimmed misconceptions from 4 to 2. Removed off_by_one (expect 1.711) because the iteration has converged so x_2 and x_3 both round to 1.71, making it undetectable and within the validator's 0.011 answer band; removed wrong_starting_value (expect 1.722) as non-derivable. Kept the two derivable, distinguishable errors.",
+   "old": "misconceptions: missing_numerator_coefficient(1.119), off_by_one(1.711), single_substitution_only(1.75), wrong_starting_value(1.722)",
+   "new": "misconceptions: missing_numerator_coefficient(1.119), single_substitution_only(1.75)"
+  }
+ ],
+ "issues_resolved": 6,
+ "opener_concept": "Iteration as repeatedly applying one rule: a phone game that each round halves your tokens then adds a 30-token bonus (100 -> 80 -> 70). A student solves it by common sense; the reveal names that feed-back loop as iteration and writes it x_{n+1} = x_n/2 + 30, then flags the lesson's second thread (rate of change = gradient of a tangent).",
+ "notes": "Live row already carried the audit's numeric/display corrections (silver[0]=4.22, silver[2]=0.256, gold[0] formula restored the factor 2, gold[3]=4.9593); I fresh-solved and confirmed all four, then preserved them. Fresh-solved all 20 bank problems; all stored solutions correct. Added guided scaffolding: opener, three teach walks (bronze=rate of change, silver=calculator iteration, gold=Newton-Raphson), tier_guides, tier descriptions, and guided_steps with a completion boundary on every non-MC problem (silver[3] is multiple_choice, walk omitted). Each iteration/gradient walk ends on the stored solution and a check step. Trimmed method_card to 4 steps and slimmed content. Fixed an em dash in a preserved worked_examples label (style gate); related_videos, topic_links and all worked_examples content preserved byte-for-byte. Validator PASS; PATCH 204 with identical round-trip."
+}

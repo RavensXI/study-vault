@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+import json, io
+changes = {
+ "key": "number-L04",
+ "problems_fixed": [
+   {"tier":"bronze","index":1,"what":"Renumbered to remove a duplicate solution (both B0 and this HCF landed on 4, which the validator rejects). Changed HCF(12,8)=4 to HCF(12,18)=6 and recomputed both misconceptions (lcm_not_hcf=36, wrong_factor=3).",
+    "old":"Find the HCF of 12 and 8  (solution 4)","new":"Find the HCF of 12 and 18  (solution 6)"},
+   {"tier":"silver","index":5,"what":"Audit issue: for 360=2^3*3^2*5^1 the multiply_indices error (3*2*1=6) equals the correct index sum (3+2+1=6), so the misconception was undetectable. Switched to 1080=2^3*3^3*5^1 where sum=7 and product=9 differ; multiply_indices expect now 9.",
+    "old":"Write 360 ... sum of index values  (solution 6)","new":"Write 1080 ... sum of index values  (solution 7)"},
+   {"tier":"silver","index":4,"what":"Audit issue: wrong_powers had check='wrong' with no determinate value (fired on any wrong answer). Set the determinate value: using lowest powers gives the HCF, 2*3=6. expect now 6 with a pinpointed message.",
+    "old":"wrong_powers check='wrong', expect null","new":"wrong_powers expect 6 (LCM built from lowest powers = HCF)"},
+   {"tier":"gold","index":2,"what":"Audit issue: index_error and multiply_indices produced identical feedback and value (both 180). Kept index_error with determinate expect 180 and a distinguishing message; removed the duplicate multiply_indices misconception.",
+    "old":"index_error(expect 180) + multiply_indices(expect null, same value)","new":"index_error only, expect 180, clearer message"},
+   {"tier":"gold","index":4,"what":"Audit issue: 'When do they next leave together?' with a numeric-minutes answer (36) was ambiguous (a student might type 9:36). Reworded to ask explicitly for minutes; solution unchanged at 36.",
+    "old":"... When do they next leave together?","new":"... How many minutes after 9 am do they next leave together?"},
+   {"tier":"bronze","index":5,"what":"Made count_all misconception determinate: a student confusing 'factors' with 'prime factors' gives all 8 factors of 30. expect now 8.",
+    "old":"count_all expect null","new":"count_all expect 8"},
+   {"tier":"silver","index":0,"what":"Made count_all misconception determinate: counting every prime factor of 180 (2,2,3,3,5) gives 5 rather than the two 2s asked for. expect now 5.",
+    "old":"count_all expect null","new":"count_all expect 5"},
+   {"tier":"gold","index":1,"what":"Replaced a non-determinate 'arithmetic' misconception with a determinate product_is_lcm error: treating LCM as the product of the two numbers gives 120/24=5. expect now 5.",
+    "old":"arithmetic expect null","new":"product_is_lcm expect 5"},
+ ],
+ "issues_resolved": 4,
+ "opener_concept": "Two common-sense puzzles: largest identical bunches from 12 red + 8 white roses (names HCF), and when a 4-second and 6-second flasher next coincide (names LCM); reveal links both to prime building blocks.",
+ "notes": "Added tier_guides, guided.opener, guided.teach (bronze HCF 8&20, silver LCM 24&36, gold HCF*LCM formula), and full guided_steps with a substitute completion boundary + check step on all 20 bank problems. Every misconception expect is now a determinate wrong value or null (never equal to the solution). Also stripped pre-existing em dashes from the preserved worked_examples labels and method_card example (validator hard-gate); method_card content trimmed to a slim reference. related_videos, topic_links and worked_examples content otherwise preserved. Validator PASS on both file and refetched live row; independent recompute of all solutions, boundaries, expects and 58 computable boxes clean."
+}
+json.dump(changes, io.open("changes_number-L04.json","w",encoding="utf-8"), indent=1, ensure_ascii=False)
+print("written changes_number-L04.json")
