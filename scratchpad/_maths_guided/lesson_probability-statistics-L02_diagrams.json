@@ -1,0 +1,1224 @@
+{
+ "guided": {
+  "teach": {
+   "gold": {
+    "label": "Together: the gold move",
+    "steps": [
+     {
+      "pre": "Route through X: P(X) × P(faulty|X) = 0.6 × 0.05 = ",
+      "say": "A faulty part can come from either machine. Take each route.",
+      "hint": "Multiply along the X branch.",
+      "post": "",
+      "answer": 0.03
+     },
+     {
+      "pre": "Route through Y: P(Y) × P(faulty|Y) = 0.4 × 0.10 = ",
+      "hint": "Multiply along the Y branch.",
+      "post": "",
+      "answer": 0.04
+     },
+     {
+      "pre": "A part is faulty if it came from EITHER route, so add them: 0.03 + 0.04 = ",
+      "done": "That is the total probability across both machines.",
+      "hint": "Add the two branch probabilities.",
+      "post": "",
+      "answer": 0.07
+     },
+     {
+      "pre": "Sense check with 100 parts: 0.07 × 100 = ",
+      "done": "About 7 in 100 are faulty, which matches 0.07.",
+      "hint": "Multiply the probability by 100.",
+      "post": "",
+      "answer": 7
+     }
+    ],
+    "display": "A factory: machine X makes 60% of parts, Y makes 40%. X is faulty 5% of the time, Y is faulty 10%. Find P(a random part is faulty)."
+   },
+   "bronze": {
+    "label": "Together: your first one",
+    "steps": [
+     {
+      "pre": "The overlap is given: 6 own both. Bike only: 16 − 6 = ",
+      "say": "Fill the overlap first, then peel it off each circle.",
+      "hint": "Take the 6 'both' out of the 16 bike owners.",
+      "post": "",
+      "answer": 10
+     },
+     {
+      "pre": "Scooter only: 14 − 6 = ",
+      "hint": "Take the 6 'both' out of the 14 scooter owners.",
+      "post": "",
+      "answer": 8
+     },
+     {
+      "pre": "Add the three regions inside the circles: 10 + 8 + 6 = ",
+      "say": "These own at least one.",
+      "hint": "Add bike-only, scooter-only and both.",
+      "post": "",
+      "answer": 24
+     },
+     {
+      "pre": "Everyone else owns neither: 30 − 24 = ",
+      "say": "Now finish.",
+      "hint": "Subtract from the group of 30.",
+      "post": "",
+      "answer": 6
+     },
+     {
+      "pre": "Check every region totals 30: 10 + 8 + 6 + 6 = ",
+      "done": "Every region adds back to 30, so 6 own neither.",
+      "hint": "Add all four regions.",
+      "post": "",
+      "answer": 30
+     }
+    ],
+    "display": "A survey of 30 people: 16 own a bike (B), 14 own a scooter (S), 6 own both. How many own neither?"
+   },
+   "silver": {
+    "label": "Together: the silver move",
+    "steps": [
+     {
+      "pre": "Given they own a dog, the world shrinks. How many dog owners are there? ",
+      "say": "Conditional probability restricts to the condition.",
+      "hint": "20 own a dog.",
+      "post": "",
+      "answer": 20
+     },
+     {
+      "pre": "Of those 20 dog owners, how many also own a cat (the overlap)? ",
+      "hint": "5 own both.",
+      "post": "",
+      "answer": 5
+     },
+     {
+      "pre": "So it is 5 out of 20. As a decimal, 5 ÷ 20 = ",
+      "done": "That is P(cat given dog).",
+      "hint": "5 ÷ 20 = 0.25.",
+      "post": "",
+      "answer": 0.25
+     },
+     {
+      "pre": "Compare: without the condition, P(cat) = 24 ÷ 40 = ",
+      "done": "The condition changed the answer from 0.6 to 0.25. That is why 'given' matters.",
+      "hint": "24 ÷ 40 = 0.6.",
+      "post": "",
+      "answer": 0.6
+     }
+    ],
+    "display": "40 people: 20 own a dog (D), 24 own a cat (C), 5 own both. A dog owner is picked at random. Find P(they also own a cat)."
+   }
+  },
+  "opener": {
+   "label": "Before any formulas",
+   "steps": [
+    {
+     "pre": "Who likes ONLY pizza, not burgers? ",
+     "say": "No formulas yet. Just picture the group.",
+     "hint": "7 like pizza, but 3 of those also like burgers, so take them out.",
+     "post": " people",
+     "answer": 4
+    },
+    {
+     "say": "That little subtraction, taking the shared 3 out of the 7, is the whole idea of a <strong>Venn diagram</strong>: fill the overlap first, then peel it off each circle so nobody is counted twice."
+    },
+    {
+     "pre": "Now only the 5 burger-lovers matter. How many of THEM also like pizza? ",
+     "hint": "3 people like both, and all 3 are among the burger-lovers.",
+     "post": " people",
+     "answer": 3
+    },
+    {
+     "say": "You just shrank the world down to the 5 burger-lovers and found 3 like pizza. That is <strong>conditional probability</strong>: given they like burgers, the chance they also like pizza is 3 out of 5. Shrink to the condition, then count."
+    }
+   ],
+   "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 10 friends, 7 like pizza, 5 like burgers, 3 like both\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Pizza 7</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Burgers 5</text><text x=\"60\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">?</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">3</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 10</text></svg>A group of 10 friends.<br>7 like pizza. 5 like burgers. 3 like both."
+  }
+ },
+ "method_card": {
+  "steps": [
+   "Fill the overlap (both) first, then subtract it from each circle. Whatever is left sits outside.",
+   "Every region adds up to the total. Divide a region by the total to get its probability.",
+   "Addition rule: \\(P(A \\cup B) = P(A) + P(B) - P(A \\cap B)\\).",
+   "Conditional: \\(P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\), the overlap over the condition."
+  ],
+  "title": "Venn Diagrams & Conditional Probability",
+  "content": "<p>A <strong>Venn diagram</strong> sorts items into overlapping circles inside a rectangle (everyone). Fill the <strong>intersection</strong> \\(A \\cap B\\) first, then peel it off each circle so nobody is counted twice.</p><p><strong>Conditional probability</strong> \\(P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\) shrinks the world down to B, then finds the share that is also A. For <strong>independent</strong> events, \\(P(A \\cap B) = P(A) \\times P(B)\\).</p>",
+  "example": "<p><strong>30 students: 18 play football (F), 12 play tennis (T), 7 play both. Find P(F|T).</strong></p><p>P(F|T) = \\(\\frac{7}{12}\\) (of the 12 tennis players, 7 also play football).</p>"
+ },
+ "tier_guides": {
+  "gold": {
+   "steps": [
+    "Gold problems combine several pieces: three overlapping sets, or branches that split and then recombine.",
+    "Total probability: an outcome can arrive by more than one route, so add every route. \\(P(+) = P(+|D)P(D) + P(+|D')P(D')\\).",
+    "Three sets add the singles, subtract each pair, then add the triple back: \\(|A \\cup B \\cup C| = |A| + |B| + |C| - |A \\cap B| - |A \\cap C| - |B \\cap C| + |A \\cap B \\cap C|\\)."
+   ],
+   "title": "Gold: combine the regions",
+   "example": {
+    "steps": [
+     {
+      "label": "Two routes",
+      "content": "<p>Disease route: \\(0.02 \\times 0.9 = 0.018\\). Healthy route: \\(0.98 \\times 0.1 = 0.098\\).</p>"
+     },
+     {
+      "label": "Add the routes",
+      "content": "<p>\\(0.018 + 0.098 = 0.116\\).</p>"
+     },
+     {
+      "label": "Check",
+      "content": "<p>Per 1000: \\(20 \\times 0.9 + 980 \\times 0.1 = 18 + 98 = 116\\), i.e. 0.116 ✓</p>"
+     },
+     {
+      "label": "Answer",
+      "content": "<p><strong>\\(P(positive) = 0.116\\)</strong></p>",
+      "isAnswer": true,
+      "is_answer": true
+     }
+    ],
+    "question": "A test: P(disease) = 0.02, P(positive|disease) = 0.9, P(positive|healthy) = 0.1. Find P(positive)."
+   }
+  },
+  "bronze": {
+   "steps": [
+    "Two overlapping circles sit inside a rectangle that holds everyone. Always write the middle (both) number in first.",
+    "Peel the middle off each circle: only A = A's total minus both, and the same for B. Anything left over goes outside the circles.",
+    "All the regions add up to the group total. To turn a region into a probability, divide it by that total."
+   ],
+   "title": "Bronze: fill the overlap first",
+   "example": {
+    "steps": [
+     {
+      "label": "Overlap first",
+      "content": "<p>8 like both. Tea only \\(= 25 - 8 = 17\\), coffee only \\(= 18 - 8 = 10\\).</p>"
+     },
+     {
+      "label": "Add the circle regions",
+      "content": "<p>\\(17 + 10 + 8 = 35\\) like at least one drink.</p>"
+     },
+     {
+      "label": "Check",
+      "content": "<p>\\(17 + 10 + 8 + 5 = 40\\) ✓</p>"
+     },
+     {
+      "label": "Answer",
+      "content": "<p><strong>Neither \\(= 40 - 35 = 5\\)</strong></p>",
+      "isAnswer": true,
+      "is_answer": true
+     }
+    ],
+    "question": "40 people: 25 like tea (T), 18 like coffee (C), 8 like both. How many like neither?"
+   }
+  },
+  "silver": {
+   "steps": [
+    "Conditional probability P(A|B) asks: given B has already happened, how likely is A? The world shrinks down to just the B outcomes.",
+    "Formula: \\(P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\), the overlap divided by the condition. With counts, it is (in both) ÷ (in B).",
+    "For independent events, one has no effect on the other, so \\(P(A \\cap B) = P(A) \\times P(B)\\)."
+   ],
+   "title": "Silver: shrink to the condition",
+   "example": {
+    "steps": [
+     {
+      "label": "Shrink to the condition",
+      "content": "<p>Given French, use only the 50 French speakers.</p>"
+     },
+     {
+      "label": "Divide",
+      "content": "<p>Of those 50, 15 also speak German: \\(P(G|F) = \\frac{15}{50}\\).</p>"
+     },
+     {
+      "label": "Check",
+      "content": "<p>\\(0.3 \\times 50 = 15\\) ✓</p>"
+     },
+     {
+      "label": "Answer",
+      "content": "<p><strong>\\(P(G|F) = 0.3\\)</strong></p>",
+      "isAnswer": true,
+      "is_answer": true
+     }
+    ],
+    "question": "80 people: 50 speak French (F), 30 speak German (G), 15 both. Find P(G|F)."
+   }
+  }
+ },
+ "topic_links": {
+  "prerequisites": [
+   {
+    "slug": "probability-statistics/1",
+    "title": "Probability Basics & Tree Diagrams"
+   }
+  ]
+ },
+ "problem_bank": {
+  "gold": [
+   {
+    "hint": "Change 'neither' into the union using 1 minus, then apply the addition rule.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.55, P(B)=0.4, neither region 0.25, overlap unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.55</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B 0.4</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">?</text><text x=\"236\" y=\"160\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">neither = 0.25</text></svg>P(A) = 0.55, P(B) = 0.4, P(A' ∩ B') = 0.25. Find P(A ∩ B).",
+    "solutions": [
+     0.2
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "0.25 is the chance of NEITHER event. Everything else is the union. P(A ∪ B) = 1 − 0.25 = ",
+      "say": "Start by turning 'neither' into the union.",
+      "hint": "Take the 'neither' probability away from 1.",
+      "post": "",
+      "answer": 0.75
+     },
+     {
+      "pre": "First add the two singles: 0.55 + 0.4 = ",
+      "say": "Now use the addition rule, P(A ∪ B) = P(A) + P(B) − P(A ∩ B), to dig out the overlap.",
+      "hint": "Just add the two given probabilities.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.95
+     },
+     {
+      "pre": "Now subtract the union: 0.95 − 0.75 = ",
+      "hint": "Take the union away from that total.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.2
+     },
+     {
+      "pre": "Check the four regions total 1. Both 0.2, A only 0.35, B only 0.2, neither 0.25: 0.2 + 0.35 + 0.2 + 0.25 = ",
+      "done": "Every region totals 1, so P(A ∩ B) = 0.2 is right.",
+      "hint": "Add all four regions together.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 1.0
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "student copies the given complement as the intersection",
+      "expect": 0.25,
+      "message": "0.25 is P(A' ∩ B'), the chance of NEITHER event, not the overlap. First turn it into the union: P(A ∪ B) = 1 − 0.25 = 0.75, then P(A ∩ B) = 0.55 + 0.4 − 0.75 = 0.2.",
+      "pattern": "complement_as_intersection"
+     },
+     {
+      "note": "0.55+0.4-0.25 = 0.7",
+      "expect": 0.7,
+      "message": "You used 0.25 straight as the union, but 0.25 is 'neither'. The union is 1 − 0.25 = 0.75. Then P(A ∩ B) = 0.55 + 0.4 − 0.75 = 0.2.",
+      "pattern": "forgot_complement"
+     }
+    ]
+   },
+   {
+    "hint": "Add the three totals, subtract the three pair-overlaps, add back the triple, then take from 120.",
+    "display": "<svg viewBox=\"0 0 250 205\" role=\"img\" aria-label=\"Three-circle Venn: sets A, B, C with all overlaps filled, none region unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"195\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"90\" cy=\"80\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.28\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"160\" cy=\"80\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.28\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"125\" cy=\"128\" r=\"56\" fill=\"#34d399\" fill-opacity=\"0.28\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"50\" y=\"40\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A</text><text x=\"200\" y=\"40\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B</text><text x=\"125\" y=\"192\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">C</text><text x=\"62\" y=\"68\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">25</text><text x=\"188\" y=\"68\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">15</text><text x=\"125\" y=\"168\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">10</text><text x=\"125\" y=\"52\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">20</text><text x=\"92\" y=\"120\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">15</text><text x=\"158\" y=\"120\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">10</text><text x=\"125\" y=\"96\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"400\" fill=\"currentColor\">10</text><text x=\"20\" y=\"24\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 120</text><text x=\"236\" y=\"193\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">none = ?</text></svg>120 students: 70 like A, 55 like B, 45 like C. 30 like A∩B, 20 like B∩C, 25 like A∩C, 10 like all three. How many like none?",
+    "solutions": [
+     15
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Add the three single totals: 70 + 55 + 45 = ",
+      "say": "Build the union with inclusion-exclusion. Singles first.",
+      "hint": "Just add the three group sizes.",
+      "post": "",
+      "answer": 170
+     },
+     {
+      "pre": "Now the three pair overlaps: 30 + 20 + 25 = ",
+      "hint": "Add the three 'both' numbers.",
+      "post": "",
+      "answer": 75
+     },
+     {
+      "pre": "Singles minus pairs, then add the triple back: 170 − 75 + 10 = ",
+      "say": "Inclusion-exclusion subtracts each pair once, then restores the triple.",
+      "hint": "Take off the 75, then add the 10 who like all three.",
+      "post": "",
+      "answer": 105
+     },
+     {
+      "pre": "That 105 like at least one thing, so the rest like none: 120 − 105 = ",
+      "say": "Now finish: everyone not in the union likes none.",
+      "hint": "Subtract from the group of 120.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 15
+     },
+     {
+      "pre": "Check the two parts rebuild the group: 105 + 15 = ",
+      "done": "105 in circles plus 15 with none is everyone, so 15 like none.",
+      "hint": "Add the in-circles count to the none count.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 120
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "170-75 = 95, 120-95 = 25",
+      "expect": 25,
+      "message": "The 10 who like all three get subtracted too many times, so add them back once: 70 + 55 + 45 − 30 − 20 − 25 + 10 = 105, and none = 120 − 105 = 15. Leaving off the +10 gives 25.",
+      "pattern": "forgot_triple"
+     }
+    ]
+   },
+   {
+    "hint": "A positive comes two ways: add disease-and-positive to healthy-and-false-positive.",
+    "display": "<svg viewBox=\"0 0 270 180\" role=\"img\" aria-label=\"Probability tree: disease 0.01 or none 0.99, each branching to positive or negative\" style=\"display:block;margin:0 auto 0.4rem;max-width:290px;width:100%\"><line x1=\"18\" y1=\"90\" x2=\"108\" y2=\"46\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"63\" y=\"65\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.01</text><text x=\"120\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Disease</text><line x1=\"128\" y1=\"46\" x2=\"210\" y2=\"24\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"33\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.95</text><text x=\"224\" y=\"28\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">Positive</text><line x1=\"128\" y1=\"46\" x2=\"210\" y2=\"68\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"55\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.05</text><text x=\"224\" y=\"72\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">Negative</text><line x1=\"18\" y1=\"90\" x2=\"108\" y2=\"134\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"63\" y=\"109\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.99</text><text x=\"120\" y=\"138\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">No dis.</text><line x1=\"128\" y1=\"134\" x2=\"210\" y2=\"112\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"121\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.05</text><text x=\"224\" y=\"116\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">Positive</text><line x1=\"128\" y1=\"134\" x2=\"210\" y2=\"156\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"143\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.95</text><text x=\"224\" y=\"160\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">Negative</text></svg>A medical test: P(disease) = 0.01, P(positive|disease) = 0.95, P(positive|no disease) = 0.05. Find P(positive). Give as a decimal.",
+    "solutions": [
+     0.059
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Route one, has the disease AND tests positive: 0.01 × 0.95 = ",
+      "say": "Two separate routes lead to a positive test.",
+      "hint": "Multiply along the disease branch.",
+      "post": "",
+      "answer": 0.0095
+     },
+     {
+      "pre": "Route two, no disease (that is 0.99) but a false positive: 0.99 × 0.05 = ",
+      "say": "A healthy person can still test positive.",
+      "hint": "Multiply along the healthy branch.",
+      "post": "",
+      "answer": 0.0495
+     },
+     {
+      "pre": "A positive can come from either route, so add them: 0.0095 + 0.0495 = ",
+      "say": "Now finish by combining the routes.",
+      "hint": "Add the two branch probabilities.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.059
+     },
+     {
+      "pre": "Check with 10000 people: 100 diseased give 95 positives, 9900 healthy give 495; 95 + 495 = ",
+      "done": "590 out of 10000 is 0.059, so it checks out.",
+      "hint": "Add the true positives and false positives.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 590
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "reports the conditional, not the total",
+      "expect": 0.95,
+      "message": "0.95 is only P(positive given disease). Positives also come from the 99% who are healthy: P(+) = 0.01 × 0.95 + 0.99 × 0.05 = 0.059.",
+      "pattern": "only_true_positive"
+     },
+     {
+      "note": "0.01*0.95 only",
+      "expect": 0.0095,
+      "message": "0.0095 is just the disease route. Add the false positives from healthy people: 0.99 × 0.05 = 0.0495, giving 0.0095 + 0.0495 = 0.059.",
+      "pattern": "forgot_healthy_branch"
+     }
+    ]
+   },
+   {
+    "hint": "Weight each branch and add: P(B|A) times P(A), plus P(B|A') times P(A').",
+    "display": "<svg viewBox=\"0 0 270 180\" role=\"img\" aria-label=\"Probability tree: A 0.3 or not-A 0.7, each branching to B or not-B\" style=\"display:block;margin:0 auto 0.4rem;max-width:290px;width:100%\"><line x1=\"18\" y1=\"90\" x2=\"108\" y2=\"46\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"63\" y=\"65\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.3</text><text x=\"120\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">A</text><line x1=\"128\" y1=\"46\" x2=\"210\" y2=\"24\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"33\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.5</text><text x=\"224\" y=\"28\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">B</text><line x1=\"128\" y1=\"46\" x2=\"210\" y2=\"68\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"55\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.5</text><text x=\"224\" y=\"72\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">B'</text><line x1=\"18\" y1=\"90\" x2=\"108\" y2=\"134\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"63\" y=\"109\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.7</text><text x=\"120\" y=\"138\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">A'</text><line x1=\"128\" y1=\"134\" x2=\"210\" y2=\"112\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"121\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.2</text><text x=\"224\" y=\"116\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">B</text><line x1=\"128\" y1=\"134\" x2=\"210\" y2=\"156\" stroke=\"currentColor\" stroke-width=\"1.2\" opacity=\"0.75\"/><text x=\"169\" y=\"143\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" font-weight=\"600\" fill=\"currentColor\">0.8</text><text x=\"224\" y=\"160\" text-anchor=\"start\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"400\" fill=\"currentColor\">B'</text></svg>P(A) = 0.3, P(B|A) = 0.5, P(B|A') = 0.2. Find P(B). Give to 2 d.p.",
+    "solutions": [
+     0.29
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Route one, B with A: 0.5 × 0.3 = ",
+      "say": "B can happen with A or without A. Take each route.",
+      "hint": "Multiply along the A branch.",
+      "post": "",
+      "answer": 0.15
+     },
+     {
+      "pre": "Route two, B without A (P(A') = 0.7): 0.2 × 0.7 = ",
+      "say": "First P(A') = 1 − 0.3 = 0.7.",
+      "hint": "Multiply along the not-A branch.",
+      "post": "",
+      "answer": 0.14
+     },
+     {
+      "pre": "B arrives by either route, so add them: 0.15 + 0.14 = ",
+      "say": "Now finish by combining the routes.",
+      "hint": "Add the two branch probabilities.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.29
+     },
+     {
+      "pre": "Check with 100 people: 30 in A give 15, 70 not in A give 14; 15 + 14 = ",
+      "done": "29 out of 100 is 0.29, so it checks out.",
+      "hint": "Add the two counts.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 29
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "0.5*0.3 + 0.2*0.3 = 0.21",
+      "expect": 0.21,
+      "message": "The second branch must be weighted by P(A') = 0.7, not by P(A). P(B) = 0.5 × 0.3 + 0.2 × 0.7 = 0.15 + 0.14 = 0.29.",
+      "pattern": "wrong_weight"
+     },
+     {
+      "note": "0.5*0.3 only",
+      "expect": 0.15,
+      "message": "0.15 is only the route through A. B can also happen without A: add 0.2 × 0.7 = 0.14, giving 0.29.",
+      "pattern": "only_one_branch"
+     }
+    ]
+   },
+   {
+    "hint": "Work out P(A intersect B) with the addition rule; not zero means they can overlap.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.5, P(B)=0.6, union 0.8, overlap unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.5</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B 0.6</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">?</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">P(A ∪ B) = 0.8</text></svg>Two events: P(A ∪ B) = 0.8, P(A) = 0.5, P(B) = 0.6. Are A and B mutually exclusive? Answer yes or no.",
+    "options": [
+     "Yes: \\(P(A) + P(B) = P(A \\cup B)\\)",
+     "No: \\(P(A) + P(B) \\neq P(A \\cup B)\\)"
+    ],
+    "solutions": [
+     1
+    ],
+    "calculator": false,
+    "input_type": "multiple_choice",
+    "misconceptions": [
+     {
+      "note": "picks Yes",
+      "expect": 0,
+      "message": "Work out the overlap: P(A ∩ B) = 0.5 + 0.6 − 0.8 = 0.3. Since 0.3 is not 0, both events can happen together, so they are NOT mutually exclusive.",
+      "pattern": "assumed_exclusive"
+     }
+    ]
+   }
+  ],
+  "bronze": [
+   {
+    "hint": "Take the 8 'both' out of each circle, add the regions, then subtract from 40.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 40 people, 25 like tea, 18 like coffee, 8 like both, neither unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Tea 25</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Coffee 18</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">8</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 40</text><text x=\"236\" y=\"160\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">? outside</text></svg>40 people: 25 like tea (T), 18 like coffee (C), 8 like both. How many like neither?",
+    "solutions": [
+     5
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Tea only, peel off the 8 who also like coffee: 25 − 8 = ",
+      "say": "Fill the overlap first: 8 like both. Now peel it off each circle.",
+      "hint": "Take the 8 'both' out of the 25 tea-likers.",
+      "post": "",
+      "answer": 17
+     },
+     {
+      "pre": "Coffee only: 18 − 8 = ",
+      "hint": "Take the 8 'both' out of the 18 coffee-likers.",
+      "post": "",
+      "answer": 10
+     },
+     {
+      "pre": "Add the three regions inside the circles: 17 + 10 + 8 = ",
+      "say": "These are everyone who likes at least one drink.",
+      "hint": "Add tea-only, coffee-only and both.",
+      "post": "",
+      "answer": 35
+     },
+     {
+      "pre": "Everyone else likes neither: 40 − 35 = ",
+      "say": "Now finish.",
+      "hint": "Subtract from the group of 40.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 5
+     },
+     {
+      "pre": "Check every region totals 40: 17 + 10 + 8 + 5 = ",
+      "done": "It adds back to 40, so 5 like neither.",
+      "hint": "Add all four regions.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 40
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "43 - 40 = 3",
+      "expect": 3,
+      "message": "The 8 who like both sit inside the 25 and the 18, so 25 + 18 = 43 counts them twice. People in a circle = 17 + 10 + 8 = 35, and neither = 40 − 35 = 5.",
+      "pattern": "counted_overlap_twice"
+     }
+    ]
+   },
+   {
+    "hint": "Tea only is 25 minus the 8 who also like coffee, then divide by 40.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 40 people, 25 like tea, 18 like coffee, 8 like both, tea-only unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Tea 25</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Coffee 18</text><text x=\"60\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">?</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">8</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 40</text></svg>40 people: 25 like tea (T), 18 like coffee (C), 8 like both. Find P(T only) as a decimal.",
+    "solutions": [
+     0.425
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "How many like tea only? 25 − 8 = ",
+      "say": "Find the tea-only region first.",
+      "hint": "Take the 8 'both' out of the 25.",
+      "post": "",
+      "answer": 17
+     },
+     {
+      "pre": "Probability is that region out of 40. 17 ÷ 40 = ",
+      "say": "Now turn the count into a probability.",
+      "hint": "17 ÷ 40 = 0.425.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.425
+     },
+     {
+      "pre": "Check: 0.425 × 40 should give the tea-only count back: 0.425 × 40 = ",
+      "done": "It returns 17, so P(T only) = 0.425.",
+      "hint": "Multiply the decimal back by 40.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 17
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "25/40 = 0.625",
+      "expect": 0.625,
+      "message": "T only leaves out the 8 who also like coffee: 25 − 8 = 17, so P(T only) = 17/40 = 0.425. Using the whole 25 gives 0.625.",
+      "pattern": "used_whole_circle"
+     }
+    ]
+   },
+   {
+    "hint": "Keep only the elements that appear in both lists.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram of sets A equals 1 2 3 4 5 and B equals 3 4 5 6 7\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B</text><text x=\"60\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">1, 2</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">3, 4, 5</text><text x=\"190\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">6, 7</text></svg>A = {1,2,3,4,5}, B = {3,4,5,6,7}. How many elements in \\(A \\cap B\\)?",
+    "solutions": [
+     3
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "How many elements does set A have in total? ",
+      "say": "Start with set A.",
+      "hint": "Count A = {1,2,3,4,5}.",
+      "post": "",
+      "answer": 5
+     },
+     {
+      "pre": "Intersect: keep only A's elements that are also in B = {3,4,5,6,7}. 1 and 2 are not in B; 3, 4, 5 are. How many is that? ",
+      "say": "Now find the overlap.",
+      "hint": "Count the shared list {3,4,5}.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 3
+     },
+     {
+      "pre": "Check: 6 and 7 are only in B, so they do not count. Shared count = ",
+      "done": "A ∩ B = {3,4,5}, so 3 elements.",
+      "hint": "Only 3, 4 and 5 are in both.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 3
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "gives the union",
+      "expect": 7,
+      "message": "A ∩ B means in BOTH sets, which is {3, 4, 5} = 3. Counting everything in either set, {1,2,3,4,5,6,7} = 7, is the union A ∪ B instead.",
+      "pattern": "found_union"
+     }
+    ]
+   },
+   {
+    "hint": "List every element once; B only adds the ones not already in A.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram of sets A equals 1 2 3 4 5 and B equals 3 4 5 6 7\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B</text><text x=\"60\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">1, 2</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">3, 4, 5</text><text x=\"190\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">6, 7</text></svg>A = {1,2,3,4,5}, B = {3,4,5,6,7}. How many elements in \\(A \\cup B\\)?",
+    "solutions": [
+     7
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "How many elements in A alone? ",
+      "say": "Start with set A.",
+      "hint": "Count {1,2,3,4,5}.",
+      "post": "",
+      "answer": 5
+     },
+     {
+      "pre": "Union lists every element once. A already has {1,2,3,4,5}; B adds 6 and 7 (3,4,5 are already listed). How many NEW elements does B add? ",
+      "say": "Now add B's new elements.",
+      "hint": "Only 6 and 7 are not already in A.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 2
+     },
+     {
+      "pre": "Total in the union: 5 + 2 = ",
+      "hint": "A's five plus the two new ones.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 7
+     },
+     {
+      "pre": "Check by listing: {1,2,3,4,5,6,7}, count = ",
+      "done": "Each element appears once, so A ∪ B has 7.",
+      "hint": "Count each element once.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 7
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "5+5 = 10",
+      "expect": 10,
+      "message": "A ∪ B lists each element once: {1,2,3,4,5,6,7} = 7. Adding the sizes 5 + 5 = 10 counts 3, 4 and 5 twice.",
+      "pattern": "double_counted"
+     }
+    ]
+   },
+   {
+    "hint": "Add P(A) and P(B), then subtract the overlap once.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.5, P(B)=0.4, overlap 0.2, find the union\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.5</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B 0.4</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">0.2</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">P(A ∪ B) = ?</text></svg>P(A) = 0.5, P(B) = 0.4, P(A ∩ B) = 0.2. Find P(A ∪ B).",
+    "solutions": [
+     0.7
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Add the two probabilities: 0.5 + 0.4 = ",
+      "say": "Addition rule: P(A ∪ B) = P(A) + P(B) − P(A ∩ B).",
+      "hint": "Just add P(A) and P(B).",
+      "post": "",
+      "answer": 0.9
+     },
+     {
+      "pre": "The 0.2 overlap was counted in both, so take it off once: 0.9 − 0.2 = ",
+      "say": "Now finish by removing the double count.",
+      "hint": "Subtract the intersection.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.7
+     },
+     {
+      "pre": "Check with regions. A only 0.3, B only 0.2, both 0.2: 0.3 + 0.2 + 0.2 = ",
+      "done": "The union regions total 0.7, so it is right.",
+      "hint": "Add the three union regions.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.7
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "0.5+0.4 = 0.9",
+      "expect": 0.9,
+      "message": "The 0.2 overlap is inside both P(A) and P(B), so subtract it once: 0.5 + 0.4 − 0.2 = 0.7. Just adding gives 0.9.",
+      "pattern": "forgot_subtract_overlap"
+     }
+    ]
+   },
+   {
+    "hint": "Maths only is the maths total minus the 15 who do both.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 60 students, 35 maths, 28 science, 15 both, maths-only unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Maths 35</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Science 28</text><text x=\"60\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">?</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">15</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 60</text></svg>60 students: 35 study maths (M), 28 study science (S), 15 study both. Find the number studying maths only.",
+    "solutions": [
+     20
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Start from the overlap of 15. Science only: 28 − 15 = ",
+      "say": "Fill the overlap first, then peel it off each circle.",
+      "hint": "Peel the 15 'both' off the 28 scientists.",
+      "post": "",
+      "answer": 13
+     },
+     {
+      "pre": "Maths only peels the same 15 off the 35: 35 − 15 = ",
+      "say": "Now the maths-only region.",
+      "hint": "Subtract the overlap from the maths total.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 20
+     },
+     {
+      "pre": "Check the three circle regions do not exceed 60: 20 + 13 + 15 = ",
+      "done": "48 is within 60, so maths only = 20 is correct.",
+      "hint": "Add maths-only, science-only and both.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 48
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "reports all of maths",
+      "expect": 35,
+      "message": "Maths only leaves out the 15 who do both: 35 − 15 = 20. The full 35 still includes them.",
+      "pattern": "used_whole_total"
+     }
+    ]
+   },
+   {
+    "hint": "Take both overlaps out, add the regions, then subtract from 60.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 60 students, 35 maths, 28 science, 15 both, neither unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Maths 35</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Science 28</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">15</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 60</text><text x=\"236\" y=\"160\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">? outside</text></svg>60 students: 35 study maths (M), 28 study science (S), 15 study both. How many study neither maths nor science?",
+    "solutions": [
+     12
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Maths only: 35 − 15 = ",
+      "say": "Peel the overlap off each subject.",
+      "hint": "Peel the 15 'both' off the 35.",
+      "post": "",
+      "answer": 20
+     },
+     {
+      "pre": "Science only: 28 − 15 = ",
+      "hint": "Peel the 15 'both' off the 28.",
+      "post": "",
+      "answer": 13
+     },
+     {
+      "pre": "Add the three regions inside the circles: 20 + 13 + 15 = ",
+      "say": "These study at least one subject.",
+      "hint": "Add maths-only, science-only and both.",
+      "post": "",
+      "answer": 48
+     },
+     {
+      "pre": "Everyone else studies neither: 60 − 48 = ",
+      "say": "Now finish.",
+      "hint": "Subtract from 60.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 12
+     },
+     {
+      "pre": "Check every region totals 60: 20 + 13 + 15 + 12 = ",
+      "done": "It adds back to 60, so 12 study neither.",
+      "hint": "Add all four regions.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 60
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "60-35-28 = -3",
+      "expect": 3,
+      "message": "The 15 who do both are counted in the 35 and the 28. In a circle = 20 + 13 + 15 = 48, so neither = 60 − 48 = 12.",
+      "pattern": "forgot_overlap"
+     }
+    ]
+   },
+   {
+    "hint": "P(A) is 1 minus P(A').",
+    "display": "<svg viewBox=\"0 0 250 150\" role=\"img\" aria-label=\"Rectangle for the whole sample space with event A inside; outside region is 0.35\" style=\"display:block;margin:0 auto 0.4rem;max-width:250px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"140\" rx=\"6\" fill=\"#f59e0b\" fill-opacity=\"0.18\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.9\"/><circle cx=\"125\" cy=\"75\" r=\"52\" fill=\"#60a5fa\" fill-opacity=\"0.35\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"125\" y=\"79\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"13\" fill=\"currentColor\">?</text><text x=\"125\" y=\"42\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A</text><text x=\"20\" y=\"26\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">A' = 0.35</text><text x=\"232\" y=\"138\" text-anchor=\"end\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">total = 1</text></svg>If P(A') = 0.35, find P(A).",
+    "solutions": [
+     0.65
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "A and not-A together must total 1. So P(A) + 0.35 must equal ",
+      "say": "Something must happen, so the two probabilities add to 1.",
+      "hint": "All probability totals 1.",
+      "post": "",
+      "answer": 1
+     },
+     {
+      "pre": "Therefore P(A) = 1 − 0.35 = ",
+      "say": "Now finish.",
+      "hint": "Subtract 0.35 from 1.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.65
+     },
+     {
+      "pre": "Check: 0.65 + 0.35 = ",
+      "done": "They add to 1, so P(A) = 0.65.",
+      "hint": "Add P(A) and P(A').",
+      "post": "",
+      "phase": "substitute",
+      "answer": 1.0
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "returns the complement",
+      "expect": 0.35,
+      "message": "0.35 is P(A'), the chance of NOT A. P(A) = 1 − 0.35 = 0.65.",
+      "pattern": "gave_complement"
+     }
+    ]
+   }
+  ],
+  "silver": [
+   {
+    "hint": "Divide the overlap by the condition: P(A intersect B) over P(B).",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.7, P(B)=0.5, overlap 0.35\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.7</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B 0.5</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">0.35</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">P(A|B) = ?</text></svg>P(A) = 0.7, P(B) = 0.5, P(A ∩ B) = 0.35. Find P(A|B).",
+    "solutions": [
+     0.7
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Numerator, the overlap P(A ∩ B) = ",
+      "say": "Conditional formula: P(A|B) = P(A ∩ B) ÷ P(B). The condition B is on the bottom.",
+      "hint": "It is the overlap, given as 0.35.",
+      "post": "",
+      "answer": 0.35
+     },
+     {
+      "pre": "Denominator, the condition P(B) = ",
+      "say": "Now divide.",
+      "hint": "The condition is B, given as 0.5.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.5
+     },
+     {
+      "pre": "Divide: 0.35 ÷ 0.5 = ",
+      "hint": "0.35 ÷ 0.5 = 0.7.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.7
+     },
+     {
+      "pre": "Check: 0.7 × 0.5 should give the overlap back: 0.7 × 0.5 = ",
+      "done": "It returns 0.35, so P(A|B) = 0.7.",
+      "hint": "Multiply the answer by P(B).",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.35
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "0.35/0.7 = 0.5",
+      "expect": 0.5,
+      "message": "P(A|B) divides by the condition B, not A: 0.35 ÷ 0.5 = 0.7. Dividing by P(A) = 0.7 gives 0.5.",
+      "pattern": "divided_by_wrong"
+     }
+    ]
+   },
+   {
+    "hint": "Shrink to the 50 French speakers, then divide the 15 who do both by 50.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 80 people, 50 speak French, 30 speak German, 15 both\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">French 50</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">German 30</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">15</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 80</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">P(G|F) = ?</text></svg>80 people: 50 speak French (F), 30 speak German (G), 15 both. Find P(G|F).",
+    "solutions": [
+     0.3
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "The condition F has how many people? ",
+      "say": "Given they speak French, shrink the world down to the 50 French speakers.",
+      "hint": "50 speak French.",
+      "post": "",
+      "answer": 50
+     },
+     {
+      "pre": "Of those, how many also speak German (the overlap)? ",
+      "say": "Now count the ones that also match.",
+      "hint": "15 speak both.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 15
+     },
+     {
+      "pre": "P(G|F) = 15 ÷ 50 = ",
+      "hint": "15 ÷ 50 = 0.3.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.3
+     },
+     {
+      "pre": "Check: 0.3 × 50 should give the both count: 0.3 × 50 = ",
+      "done": "It returns 15, so P(G|F) = 0.3.",
+      "hint": "Multiply the answer by 50.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 15
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "15/80 = 0.1875",
+      "expect": 0.1875,
+      "message": "Given French, restrict to the 50 French speakers: P(G|F) = 15 ÷ 50 = 0.3. Dividing by all 80 gives 0.1875.",
+      "pattern": "divided_by_total"
+     }
+    ]
+   },
+   {
+    "hint": "Independent events multiply: P(A) times P(B).",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.6, P(B)=0.4, independent events, overlap unknown\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.6</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B 0.4</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">?</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">A, B independent</text></svg>P(A) = 0.6, P(B) = 0.4. A and B are independent. Find P(A ∩ B).",
+    "solutions": [
+     0.24
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Write the first probability: P(A) = ",
+      "say": "Independent means one does not affect the other, so multiply, not add.",
+      "hint": "Given as 0.6.",
+      "post": "",
+      "answer": 0.6
+     },
+     {
+      "pre": "Multiply by P(B): 0.6 × 0.4 = ",
+      "say": "Now finish the multiplication.",
+      "hint": "0.6 × 0.4 = 0.24.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.24
+     },
+     {
+      "pre": "Check it behaves independently: P(A|B) = 0.24 ÷ 0.4 = ",
+      "done": "0.6 equals P(A), confirming independence, so P(A ∩ B) = 0.24.",
+      "hint": "Divide the overlap by P(B).",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.6
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "0.6+0.4 = 1.0",
+      "expect": 1.0,
+      "message": "Independent events multiply, they do not add: 0.6 × 0.4 = 0.24. Adding gives 1.0, which cannot be an overlap here.",
+      "pattern": "added_not_multiplied"
+     }
+    ]
+   },
+   {
+    "hint": "Rearrange the addition rule to make P(B) the subject.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.5, overlap 0.15, union 0.75, find P(B)\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.5</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B = ?</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">0.15</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">P(A ∪ B) = 0.75</text></svg>P(A) = 0.5, P(A ∩ B) = 0.15, P(A ∪ B) = 0.75. Find P(B).",
+    "solutions": [
+     0.4
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Start with P(A ∪ B) − P(A): 0.75 − 0.5 = ",
+      "say": "Rearrange the addition rule: P(B) = P(A ∪ B) − P(A) + P(A ∩ B).",
+      "hint": "Subtract P(A) from the union.",
+      "post": "",
+      "answer": 0.25
+     },
+     {
+      "pre": "That is missing the overlap that belongs to B, so add it back: 0.25 + 0.15 = ",
+      "say": "Now finish.",
+      "hint": "Add the intersection 0.15.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.4
+     },
+     {
+      "pre": "Check the addition rule forwards: 0.5 + 0.4 − 0.15 = ",
+      "done": "It gives the union 0.75, so P(B) = 0.4.",
+      "hint": "Put P(B) = 0.4 back in.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.75
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "0.75-0.5 = 0.25",
+      "expect": 0.25,
+      "message": "Rearrange P(A ∪ B) = P(A) + P(B) − P(A ∩ B) to get P(B) = 0.75 − 0.5 + 0.15 = 0.4. Dropping the 0.15 gives 0.25.",
+      "pattern": "forgot_intersection_term"
+     }
+    ]
+   },
+   {
+    "hint": "Restrict to the 60 sport players, then simplify 20 out of 60.",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: 100 students, 60 play sport, 45 play music, 20 both\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Sport 60</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">Music 45</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">20</text><text x=\"12\" y=\"20\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">n = 100</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">P(music | sport) = ?</text></svg>100 students: 60 play sport, 45 play music, 20 do both. A student who plays sport is picked at random. Find P(also plays music).",
+    "solutions": [
+     1,
+     3
+    ],
+    "calculator": false,
+    "input_type": "fraction",
+    "guided_steps": [
+     {
+      "pre": "How many play sport (the condition)? ",
+      "say": "Given they play sport, shrink the world down to the 60 sport players.",
+      "hint": "60 play sport.",
+      "post": "",
+      "answer": 60
+     },
+     {
+      "pre": "Of those, how many also play music (the overlap)? ",
+      "say": "Now count the ones that also match.",
+      "hint": "20 do both.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 20
+     },
+     {
+      "pre": "So it is 20 out of 60. Simplify by dividing by 20. Numerator: 20 ÷ 20 = ",
+      "say": "Simplify the fraction.",
+      "hint": "20 ÷ 20 = 1.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 1
+     },
+     {
+      "pre": "Denominator: 60 ÷ 20 = ",
+      "hint": "60 ÷ 20 = 3.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 3
+     },
+     {
+      "pre": "Check: does one third of 60 give the 20 who do both? 60 ÷ 3 = ",
+      "done": "20 matches, so P(music given sport) = 1/3.",
+      "hint": "Divide 60 by the denominator.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 20
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "20/100 simplifies to 1/5",
+      "expect": [
+       1,
+       5
+      ],
+      "message": "Given they play sport, restrict to the 60 sport players: 20 ÷ 60 = 1/3. Using all 100 gives 20/100 = 1/5.",
+      "pattern": "used_whole_group"
+     }
+    ]
+   },
+   {
+    "hint": "Multiply the conditional by the condition: P(A|B) times P(B).",
+    "display": "P(A|B) = 0.7 and P(B) = 0.5. Find P(A ∩ B).",
+    "solutions": [
+     0.35
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "guided_steps": [
+     {
+      "pre": "Write the conditional: P(A|B) = ",
+      "say": "Rearrange the conditional formula: P(A ∩ B) = P(A|B) × P(B).",
+      "hint": "Given as 0.7.",
+      "post": "",
+      "answer": 0.7
+     },
+     {
+      "pre": "Multiply by P(B): 0.7 × 0.5 = ",
+      "say": "Now finish.",
+      "hint": "0.7 × 0.5 = 0.35.",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.35
+     },
+     {
+      "pre": "Check with the formula forwards: P(A|B) = 0.35 ÷ 0.5 = ",
+      "done": "It returns 0.7, so P(A ∩ B) = 0.35.",
+      "hint": "Divide the overlap by P(B).",
+      "post": "",
+      "phase": "substitute",
+      "answer": 0.7
+     }
+    ],
+    "misconceptions": [
+     {
+      "note": "0.7/0.5 = 1.4",
+      "expect": 1.4,
+      "message": "P(A ∩ B) = P(A|B) × P(B) = 0.7 × 0.5 = 0.35. Dividing instead gives 1.4, which is impossible for a probability.",
+      "pattern": "divided_not_multiplied"
+     }
+    ]
+   },
+   {
+    "hint": "Check whether P(A) times P(B) equals P(A intersect B).",
+    "display": "<svg viewBox=\"0 0 250 172\" role=\"img\" aria-label=\"Venn diagram: P(A)=0.3, P(B)=0.4, overlap 0.12\" style=\"display:block;margin:0 auto 0.4rem;max-width:270px;width:100%\"><rect x=\"5\" y=\"5\" width=\"240\" height=\"162\" rx=\"6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1\" opacity=\"0.6\"/><circle cx=\"95\" cy=\"90\" r=\"56\" fill=\"#60a5fa\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><circle cx=\"155\" cy=\"90\" r=\"56\" fill=\"#f59e0b\" fill-opacity=\"0.3\" stroke=\"currentColor\" stroke-width=\"1.2\"/><text x=\"52\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">A 0.3</text><text x=\"198\" y=\"50\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-weight=\"600\" fill=\"currentColor\">B 0.4</text><text x=\"125\" y=\"95\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" fill=\"currentColor\">0.12</text><text x=\"125\" y=\"162\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"10\" fill=\"currentColor\" opacity=\"0.85\">Independent?</text></svg>Are A and B independent if P(A) = 0.3, P(B) = 0.4, P(A ∩ B) = 0.12? Answer yes or no.",
+    "options": [
+     "Yes: \\(P(A) \\times P(B) = P(A \\cap B)\\)",
+     "No: \\(P(A) \\times P(B) \\neq P(A \\cap B)\\)"
+    ],
+    "solutions": [
+     0
+    ],
+    "calculator": false,
+    "input_type": "multiple_choice",
+    "misconceptions": [
+     {
+      "note": "picks No",
+      "expect": 1,
+      "message": "P(A) × P(B) = 0.3 × 0.4 = 0.12, which equals P(A ∩ B), so the events ARE independent.",
+      "pattern": "assumed_dependent"
+     }
+    ]
+   }
+  ],
+  "gold_description": "Combine several regions or branches: total probability and three-set counting.",
+  "bronze_description": "Fill the overlap first, then subtract it from each circle and count what is left.",
+  "silver_description": "Conditional probability: shrink to the condition, then find the proportion."
+ },
+ "related_videos": [
+  {
+   "url": "https://www.youtube.com/watch?v=xwK--rNDI9E",
+   "title": "Venn Diagrams - Corbettmaths",
+   "channel": "Corbett Maths"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=xhFDlmQUAZo",
+   "title": "Conditional Probability - Corbettmaths",
+   "channel": "Corbett Maths"
+  }
+ ],
+ "worked_examples": [
+  {
+   "steps": [
+    {
+     "label": "Step 1: Addition rule",
+     "content": "<p>\\(P(C \\cup D) = \\frac{30 + 20 - 10}{50} = \\frac{40}{50}\\)</p>"
+    },
+    {
+     "label": "Answer",
+     "content": "<p>\\(= \\frac{4}{5} = 0.8\\)</p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "50 students: 30 have a cat (C), 20 have a dog (D), 10 have both. Find P(C ∪ D).",
+   "difficulty": "Silver"
+  },
+  {
+   "steps": [
+    {
+     "label": "Formula",
+     "content": "<p>\\(P(A|B) = \\frac{P(A \\cap B)}{P(B)}\\)</p>"
+    },
+    {
+     "label": "Answer",
+     "content": "<p>\\(= \\frac{0.3}{0.5} = 0.6\\)</p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "P(A) = 0.6, P(B) = 0.5, P(A ∩ B) = 0.3. Find P(A|B).",
+   "difficulty": "Gold"
+  }
+ ]
+}

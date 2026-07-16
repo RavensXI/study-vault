@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Figure gallery QA</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>
+  body { font-family: Inter, sans-serif; background: #faf8f5; color: #2d2a26; margin: 16px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .cell { background: #fff; border: 1px solid #e8e4de; border-radius: 12px; padding: 10px; }
+  .cell h4 { margin: 0 0 6px; font-size: 11px; color: #8a8580; font-weight: 600; }
+  .cell svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+  .figure-caption { display: block; font-size: 10px; color: #8a8580; text-align: center; }
+  .qtext { font-size: 11px; margin-top: 6px; color: #555; }
+  canvas { max-height: 170px; }
+</style>
+<h2 style="font-size:16px">Diagram-pass QA gallery (live data)</h2>
+<div class="grid" id="g"></div>
+<script>
+const SUPA = 'https://baipckgywpnwapobwtsy.supabase.co';
+const ANON = 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+const LESSONS = (new URLSearchParams(location.search).get('l') ||
+  'geometry-L01,geometry-L06,geometry-L07,graphs-L03,graphs-L06,probability-statistics-L01').split(',');
+const IDS = {}; // filled from worklist json served alongside
+async function run() {
+  const wl = await (await fetch('/scratchpad/_maths_guided/_worklist.json')).json();
+  const g = document.getElementById('g');
+  let chartN = 0;
+  for (const key of LESSONS) {
+    const id = (wl[key] || {}).id;
+    if (!id) continue;
+    const rows = await (await fetch(SUPA + '/rest/v1/lessons?id=eq.' + id + '&select=practice_data', {
+      headers: { apikey: ANON, Authorization: 'Bearer ' + ANON } })).json();
+    const pb = rows[0].practice_data.problem_bank;
+    for (const tier of ['bronze', 'silver', 'gold']) {
+      (pb[tier] || []).forEach((p, i) => {
+        const hasSvg = (p.display || '').includes('<svg');
+        if (!hasSvg && !p.chart) return;
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        const strip = (p.display || '').replace(/<svg[\s\S]*?<\/svg>/, '').replace(/<[^>]+>/g, ' ').slice(0, 90);
+        cell.innerHTML = '<h4>' + key + ' ' + tier + '[' + i + ']</h4>';
+        if (hasSvg) {
+          cell.innerHTML += (p.display.match(/<svg[\s\S]*?<\/svg>/) || [''])[0];
+        } else if (p.chart) {
+          const cid = 'c' + (chartN++);
+          cell.innerHTML += '<canvas id="' + cid + '"></canvas>';
+          setTimeout(() => { try { new Chart(document.getElementById(cid).getContext('2d'), JSON.parse(JSON.stringify(p.chart))); } catch (e) {} }, 50);
+        }
+        cell.innerHTML += '<div class="qtext">' + strip + '…</div>';
+        g.appendChild(cell);
+      });
+    }
+  }
+  document.title = 'GALLERY READY';
+}
+run();
+</script>

@@ -4280,6 +4280,12 @@
         latexSlots.push(m);
         return '\x00LATEX' + (latexSlots.length - 1) + '\x00';
       });
+      // Protect inline figures the same way — colon/equals rules would corrupt
+      // SVG attributes (style="max-width:280px" etc.)
+      text = text.replace(/<svg[\s\S]*?<\/svg>|<span class="figure-caption">[\s\S]*?<\/span>/g, function(m) {
+        latexSlots.push(m);
+        return '\x00LATEX' + (latexSlots.length - 1) + '\x00';
+      });
       // 1. Data series on its own line: break after colon before numbers
       text = text.replace(/:\s*([\d\-])/g, ':<br>$1');
       // 2. Line break before instruction sentences (Explain, Calculate, Find, etc.)

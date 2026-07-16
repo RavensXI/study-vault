@@ -1,24 +1,18 @@
-import json
-live=json.load(open("_live_graphs_l04.json",encoding="utf-8"))
-pre=json.load(open("_pre_fanout_dump.json",encoding="utf-8"))
-lid="d9ac5103-221b-441e-81f2-d95e77269ea3"
-# pre may be dict keyed by id or list
-entry=None
-if isinstance(pre,dict):
-    if lid in pre: entry=pre[lid]
+import json,io
+live=json.load(io.open("_geomL07_LIVE_NOW.json",encoding="utf-8"))
+new=json.load(io.open("lesson_geometry-L07_diagrams.json",encoding="utf-8"))
+def walk(a,b,path,diffs):
+    if type(a)!=type(b): diffs.append(path+" TYPE"); return
+    if isinstance(a,dict):
+        for k in set(a)|set(b):
+            if k not in a or k not in b: diffs.append(path+"."+str(k)+" KEY"); continue
+            walk(a[k],b[k],path+"."+str(k),diffs)
+    elif isinstance(a,list):
+        if len(a)!=len(b): diffs.append(path+" LEN %d!=%d"%(len(a),len(b))); return
+        for i,(x,y) in enumerate(zip(a,b)): walk(x,y,path+"[%d]"%i,diffs)
     else:
-        for k,v in pre.items():
-            if isinstance(v,dict) and v.get("id")==lid: entry=v; break
-elif isinstance(pre,list):
-    for v in pre:
-        if v.get("id")==lid: entry=v; break
-print("pre type",type(pre).__name__)
-if entry is None:
-    print("keys sample:", list(pre.keys())[:5] if isinstance(pre,dict) else pre[0].keys())
-else:
-    ppd=entry.get("practice_data",entry)
-    for f in ["related_videos","topic_links","worked_examples"]:
-        same = json.dumps(ppd.get(f),sort_keys=True,ensure_ascii=False)==json.dumps(live.get(f),sort_keys=True,ensure_ascii=False)
-        print(f, "UNCHANGED" if same else "CHANGED")
-    # show problem displays pre vs live to check number edits
-    print("pre keys:", list(ppd.keys()))
+        if a!=b: diffs.append(path)
+d=[]
+walk(live,new,"pd",d)
+print("changed paths (%d):"%len(d))
+for p in d: print("  ",p)

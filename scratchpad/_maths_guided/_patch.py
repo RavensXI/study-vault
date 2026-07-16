@@ -1,17 +1,20 @@
-import os, json, io, urllib.request
-KEY=os.environ["SUPABASE_SERVICE_KEY"]
-ID="a769c80a-697d-4ae1-a042-6299738f9021"
-pd=json.load(io.open("lesson_algebra-L12.json",encoding="utf-8"))
+import os, json, urllib.request
+ID="4e2bb5ad-e75a-48be-951a-0e8b8db75296"
+key=os.environ["SUPABASE_SERVICE_KEY"]
+pd=json.load(open("lesson_geometry-L06.json",encoding="utf-8"))
 url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}"
 body=json.dumps({"practice_data":pd}).encode("utf-8")
 req=urllib.request.Request(url, data=body, method="PATCH", headers={
- "apikey":KEY,"Authorization":f"Bearer {KEY}","Content-Type":"application/json","Prefer":"return=minimal"})
+    "apikey":key,"Authorization":f"Bearer {key}",
+    "Content-Type":"application/json","Prefer":"return=minimal"})
 r=urllib.request.urlopen(req)
-print("PATCH status", r.status)
-# read back
-req2=urllib.request.Request(url+"&select=practice_data", headers={"apikey":KEY,"Authorization":f"Bearer {KEY}"})
-back=json.load(urllib.request.urlopen(req2))[0]["practice_data"]
-print("readback keys:", sorted(back.keys()))
-print("bronze n=%d silver n=%d gold n=%d"%(len(back["problem_bank"]["bronze"]),len(back["problem_bank"]["silver"]),len(back["problem_bank"]["gold"])))
-print("has guided:", "guided" in back, "has tier_guides:", "tier_guides" in back)
-print("match written:", back==pd)
+print("PATCH status:", r.status)
+
+# verify live
+gurl=f"{url}&select=practice_data"
+greq=urllib.request.Request(gurl, headers={"apikey":key,"Authorization":f"Bearer {key}"})
+live=json.load(urllib.request.urlopen(greq))[0]["practice_data"]
+disp=live["problem_bank"]["silver"][0]["display"]
+print("live has P1 arc:", "M96.7 141.0 A16 16 0 0 0 84.9 125.6" in disp)
+print("live still has old P2 75-arc:", "M143.3 141.0" in disp)
+print("live 75 text x=102.5:", 'x="102.5"' in disp)

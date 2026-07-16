@@ -1,9 +1,9 @@
 import os, json, urllib.request
-ID="622f7959-f9e9-45aa-b2bd-8a5b6698e357"
+ID="4e2bb5ad-e75a-48be-951a-0e8b8db75296"
 key=os.environ["SUPABASE_SERVICE_KEY"]
 url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data"
 req=urllib.request.Request(url, headers={"apikey":key,"Authorization":f"Bearer {key}"})
 data=json.load(urllib.request.urlopen(req))
 pd=data[0]["practice_data"]
-open("_live_L06.json","w",encoding="utf-8").write(json.dumps(pd,indent=2,ensure_ascii=False))
-print("top keys:", list(pd.keys()))
+json.dump(pd, open("lesson_geometry-L06.json","w",encoding="utf-8"), indent=2, ensure_ascii=False)
+print("fetched. top keys:", list(pd.keys()))
