@@ -45,6 +45,11 @@ for key in sorted(wl):
             report["fail"][key] = vg.fails[:12]
     except Exception as e:
         report["fail"][key] = ["QA sweep exception: " + repr(e)]
+    # mojibake scan (double-encoded UTF-8 markers)
+    blob = json.dumps(pd, ensure_ascii=False)
+    moji = [m for m in ("Ã", "Â", "âˆ", "â€") if m in blob]
+    if moji:
+        report.setdefault("mojibake", {})[key] = moji
     # preservation
     old = pre[key]["practice_data"]
     lost = []
@@ -72,5 +77,9 @@ if report["preservation"]:
         print("  ", k, v)
 else:
     print("preservation: all preserved fields intact")
+if report.get("mojibake"):
+    print("MOJIBAKE found:", report["mojibake"])
+else:
+    print("mojibake scan: clean everywhere")
 io.open(os.path.join(HERE, "_qa_openers.txt"), "w", encoding="utf-8").write("\n".join(openers))
 print("openers written for taste review: _qa_openers.txt")

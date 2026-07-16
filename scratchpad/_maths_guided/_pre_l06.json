@@ -1,616 +1,433 @@
 {
-  "method_card": {
-    "steps": [
-      "For powers: multiply the base by itself the number of times shown by the index",
-      "For roots: find the number that when raised to that power gives the original",
-      "For standard form: write as A × 10ⁿ where 1 ≤ A < 10",
-      "Count decimal places moved to find n (right = positive for large, left = negative for small)"
-    ],
-    "title": "How to Use Powers, Roots and Standard Form",
-    "content": "<p><strong>Powers (indices):</strong> \\(a^n\\) means \\(a\\) multiplied by itself \\(n\\) times. Key results: \\(a^0 = 1\\), \\(a^1 = a\\). Square numbers: \\(1, 4, 9, 16, 25, 36, \\ldots\\) Cube numbers: \\(1, 8, 27, 64, 125, \\ldots\\)</p><p><strong>Roots:</strong> \\(\\sqrt{a}\\) is the number that when squared gives \\(a\\). \\(\\sqrt[3]{a}\\) is the cube root. Learn the common ones: \\(\\sqrt{144} = 12\\), \\(\\sqrt[3]{125} = 5\\), etc.</p><p><strong>Standard form:</strong> A way to write very large or very small numbers as \\(A \\times 10^n\\), where \\(1 \\leq A < 10\\) and \\(n\\) is an integer. For large numbers, \\(n\\) is positive (count how many places the decimal moves left). For small numbers, \\(n\\) is negative (count how many places it moves right).</p><p><strong>Calculating with standard form:</strong> For multiplication, multiply the \\(A\\) values and add the powers. For division, divide the \\(A\\) values and subtract the powers. Adjust \\(A\\) if it falls outside \\([1, 10)\\).</p>",
-    "example": "<p><strong>Write 0.00045 in standard form</strong></p><p><strong>Step 1:</strong> Move the decimal right until A is between 1 and 10: \\(0.00045 \\rightarrow 4.5\\) (moved 4 places right)</p><p><strong>Step 2:</strong> Since we moved right (small number), \\(n\\) is negative: \\(n = -4\\)</p><p><strong>Answer:</strong> \\(4.5 \\times 10^{-4}\\)</p>"
-  },
-  "topic_links": {
-    "prerequisites": [
-      {
-        "slug": "number/1",
-        "title": "Four Operations"
-      }
-    ]
-  },
-  "problem_bank": {
-    "gold": [
-      {
-        "hint": "Multiply A values and add powers. Adjust A if needed.",
-        "display": "Calculate \\((6 \\times 10^4) \\times (5 \\times 10^{-2})\\). Give your answer in standard form.",
-        "solutions": [
-          3,
-          3
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_30",
-            "expect": [
-              30,
-              2
-            ],
-            "message": "6 × 5 = 30. Powers: 4 + (−2) = 2. 30 × 10² = 3 × 10³. A = 3.",
-            "pattern": "no_adjust"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Add powers: 4 + (−2) = 2. Then 30 × 10² = 3 × 10³.",
-            "pattern": "wrong_power_add"
-          }
-        ]
-      },
-      {
-        "hint": "Convert to the same power of 10 before adding",
-        "display": "Calculate \\((2.4 \\times 10^6) + (5 \\times 10^5)\\). Give your answer in standard form.",
-        "solutions": [
-          2.9,
-          6
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_7.4",
-            "expect": [
-              7.4,
-              6
-            ],
-            "message": "You can't add A values directly — the powers must match. 5 × 10⁵ = 0.5 × 10⁶. Then 2.4 + 0.5 = 2.9 × 10⁶.",
-            "pattern": "add_directly"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Convert: 5 × 10⁵ = 0.5 × 10⁶. Then 2.4 + 0.5 = 2.9. Answer: 2.9 × 10⁶.",
-            "pattern": "wrong_power"
-          }
-        ]
-      },
-      {
-        "hint": "Distance = speed × time. Multiply and add powers.",
-        "display": "Light travels at \\(3 \\times 10^8\\) m/s. How far does it travel in \\(5 \\times 10^2\\) seconds? Give your answer in standard form.",
-        "solutions": [
-          1.5,
-          11
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "wrong",
-            "expect": [
-              1.5,
-              7
-            ],
-            "message": "For multiplication, ADD powers: 8 + 2 = 10. Then 3 × 5 = 15. 15 × 10¹⁰ = 1.5 × 10¹¹. Power = 11.",
-            "pattern": "subtract_powers"
-          },
-          {
-            "check": "equals_10",
-            "expect": [
-              15,
-              10
-            ],
-            "message": "3 × 5 = 15, which is > 10. Adjust: 1.5 × 10¹¹. Power = 11.",
-            "pattern": "no_adjust"
-          }
-        ]
-      },
-      {
-        "hint": "A must be between 1 and 10 — adjust A and the power accordingly",
-        "display": "Write \\(0.36 \\times 10^5\\) in correct standard form",
-        "solutions": [
-          3.6,
-          4
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_0.36",
-            "expect": [
-              0.36,
-              5
-            ],
-            "message": "0.36 is NOT between 1 and 10. Multiply by 10: 3.6 × 10⁴. A = 3.6.",
-            "pattern": "already_standard"
-          },
-          {
-            "check": "wrong",
-            "expect": [
-              3.6,
-              6
-            ],
-            "message": "0.36 × 10 = 3.6 (now in range). Decrease power by 1: 10⁴. A = 3.6.",
-            "pattern": "wrong_direction"
-          }
-        ]
-      },
-      {
-        "hint": "Doubling 4 times = × 2⁴ = × 16",
-        "display": "A bacteria colony doubles every hour. Starting at \\(5 \\times 10^3\\), how many after 4 hours? Give your answer in standard form.",
-        "solutions": [
-          8,
-          4
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Doubling means ×2 each time. After 4 hours: 5000 × 2⁴ = 5000 × 16 = 80 000 = 8 × 10⁴. Power = 4.",
-            "pattern": "add_not_multiply"
-          },
-          {
-            "check": "wrong",
-            "expect": [
-              4,
-              4
-            ],
-            "message": "2⁴ = 16. Then 5 × 10³ × 16 = 80 × 10³ = 8 × 10⁴.",
-            "pattern": "wrong_double"
-          }
-        ]
-      }
-    ],
-    "bronze": [
-      {
-        "display": "Calculate \\(3^4\\)",
-        "solutions": [
-          81
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_12",
-            "expect": 12,
-            "message": "3⁴ means 3 × 3 × 3 × 3 = 81, not 3 × 4 = 12.",
-            "pattern": "multiply_by_index"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "3 × 3 = 9, × 3 = 27, × 3 = 81.",
-            "pattern": "arithmetic"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(\\sqrt{196}\\)",
-        "solutions": [
-          14
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_98",
-            "expect": 98,
-            "message": "Square root doesn't mean halve! 14 × 14 = 196, so √196 = 14.",
-            "pattern": "halve"
-          },
-          {
-            "check": "equals_13",
-            "expect": 13,
-            "message": "13² = 169, not 196. Try 14: 14 × 14 = 196. OK",
-            "pattern": "close_guess"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(\\sqrt[3]{64}\\)",
-        "solutions": [
-          4
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_8",
-            "expect": 8,
-            "message": "That's √64, not ∛64. Cube root: 4 × 4 × 4 = 64, so ∛64 = 4.",
-            "pattern": "square_not_cube"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Cube root doesn't mean divide by 3. Find the number that cubes to 64.",
-            "pattern": "divide_by_3"
-          }
-        ]
-      },
-      {
-        "display": "Write \\(56 000\\) in standard form",
-        "solutions": [
-          5.6,
-          4
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_56",
-            "expect": [
-              56,
-              3
-            ],
-            "message": "A must be between 1 and 10. Move the point 4 places: 5.6 × 10⁴.",
-            "pattern": "wrong_A"
-          },
-          {
-            "check": "wrong",
-            "expect": [
-              5.6,
-              3
-            ],
-            "message": "Count places: 56 000 -> 5.6 (4 places left) -> 5.6 × 10⁴. Enter the A value: 5.6.",
-            "pattern": "wrong_power"
-          }
-        ]
-      },
-      {
-        "display": "Write \\(0.0023\\) in standard form",
-        "solutions": [
-          2.3,
-          -3
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_3",
-            "expect": [
-              2.3,
-              3
-            ],
-            "message": "Small numbers have NEGATIVE powers. 0.0023 -> 2.3 × 10⁻³, so n = −3.",
-            "pattern": "positive_power"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Move decimal 3 places right to get 2.3. Small number -> negative: n = −3.",
-            "pattern": "count_wrong"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(5^3\\)",
-        "solutions": [
-          125
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_15",
-            "expect": 15,
-            "message": "5³ = 5 × 5 × 5 = 125, not 5 × 3 = 15.",
-            "pattern": "multiply_by_index"
-          },
-          {
-            "check": "equals_25",
-            "expect": 25,
-            "message": "That's 5². For 5³: 5 × 5 × 5 = 125.",
-            "pattern": "square_not_cube"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(10^0\\)",
-        "solutions": [
-          1
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_0",
-            "expect": 0,
-            "message": "Any number to the power 0 equals 1, not 0. 10⁰ = 1.",
-            "pattern": "zero_answer"
-          },
-          {
-            "check": "equals_10",
-            "expect": 10,
-            "message": "10⁰ = 1 (not 10). The zero power always gives 1.",
-            "pattern": "base_answer"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(\\sqrt{225}\\)",
-        "solutions": [
-          15
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_112.5",
-            "expect": 112.5,
-            "message": "Square root doesn't mean halve. 15 × 15 = 225, so √225 = 15.",
-            "pattern": "halve"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Try 15: 15 × 15 = 225. OK",
-            "pattern": "arithmetic"
-          }
-        ]
-      }
-    ],
-    "silver": [
-      {
-        "display": "Write \\(7.1 \\times 10^5\\) as an ordinary number",
-        "solutions": [
-          710000
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "wrong",
-            "expect": 7.1e-05,
-            "message": "Positive power -> move decimal RIGHT 5 places: 7.1 -> 710 000.",
-            "pattern": "wrong_direction"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Move the point 5 places right, filling with zeros: 710 000.",
-            "pattern": "wrong_places"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\((4 \\times 10^3) \\times (3 \\times 10^5)\\). Give your answer in standard form.",
-        "solutions": [
-          1.2,
-          9
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_15",
-            "expect": [
-              1.2,
-              15
-            ],
-            "message": "Add the powers, don't multiply: 3 + 5 = 8. But 4 × 3 = 12, so adjust: 12 × 10⁸ = 1.2 × 10⁹. Power = 9.",
-            "pattern": "multiply_powers"
-          },
-          {
-            "check": "equals_8",
-            "expect": [
-              12,
-              8
-            ],
-            "message": "4 × 3 = 12. Since 12 > 10, adjust: 1.2 × 10⁹. The power is 9.",
-            "pattern": "no_adjust"
-          }
-        ]
-      },
-      {
-        "display": "Write \\(0.000\\,061\\) in standard form",
-        "solutions": [
-          6.1,
-          -5
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_61",
-            "expect": [
-              61,
-              -6
-            ],
-            "message": "A must be between 1 and 10. 0.000061 = 6.1 × 10⁻⁵. A = 6.1.",
-            "pattern": "wrong_A"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Move point 5 places right: 6.1 × 10⁻⁵. A = 6.1.",
-            "pattern": "wrong_count"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\((9 \\times 10^7) \\div (3 \\times 10^4)\\). Give your answer in standard form.",
-        "solutions": [
-          3,
-          3
-        ],
-        "calculator": false,
-        "input_type": "standard_form",
-        "misconceptions": [
-          {
-            "check": "equals_11",
-            "expect": [
-              3,
-              11
-            ],
-            "message": "For division, subtract powers: 7 − 4 = 3. And 9 ÷ 3 = 3. So 3 × 10³. Power = 3.",
-            "pattern": "add_powers"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Subtract powers for division: 7 − 4 = 3.",
-            "pattern": "arithmetic"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(\\sqrt[3]{1000}\\)",
-        "solutions": [
-          10
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Cube root, not square root. 10 × 10 × 10 = 1000, so ∛1000 = 10.",
-            "pattern": "square_root"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "Cube root doesn't mean ÷ 3. What number cubed gives 1000?",
-            "pattern": "divide_by_3"
-          }
-        ]
-      },
-      {
-        "display": "Which is larger: \\(3 \\times 10^4\\) or \\(9 \\times 10^3\\)? Enter the larger value.",
-        "solutions": [
-          30000
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_9000",
-            "expect": 9000,
-            "message": "Don't just compare the A values. 3 × 10⁴ = 30 000 and 9 × 10³ = 9 000. 30 000 is larger.",
-            "pattern": "compare_A_only"
-          },
-          {
-            "check": "wrong",
-            "expect": null,
-            "message": "The power matters most for comparison: 10⁴ > 10³, so 3 × 10⁴ = 30 000 is larger.",
-            "pattern": "compare_n_only"
-          }
-        ]
-      },
-      {
-        "display": "Calculate \\(2^6\\)",
-        "solutions": [
-          64
-        ],
-        "calculator": false,
-        "input_type": "single_value",
-        "misconceptions": [
-          {
-            "check": "equals_12",
-            "expect": 12,
-            "message": "2⁶ = 2×2×2×2×2×2 = 64, not 2 × 6 = 12.",
-            "pattern": "multiply_by_index"
-          },
-          {
-            "check": "equals_32",
-            "expect": 32,
-            "message": "That's 2⁵. One more multiply: 32 × 2 = 64.",
-            "pattern": "wrong_count"
-          }
-        ]
-      }
-    ]
-  },
-  "related_videos": [
-    {
-      "url": "https://www.youtube.com/watch?v=cxGyZ3Yx9ow",
-      "title": "Standard Form - Corbettmaths",
-      "channel": "Corbett Maths"
-    },
-    {
-      "url": "https://www.youtube.com/watch?v=e1J3MJtM2UM",
-      "title": "Laws of Indices - Corbettmaths",
-      "channel": "Corbett Maths"
-    }
+ "method_card": {
+  "steps": [
+   "Draw a tangent to the curve at the required point",
+   "Pick two points on the tangent line far apart for accuracy",
+   "Calculate the gradient: rise ÷ run",
+   "For iteration: substitute x₀ into the formula to get x₁, then x₁ to get x₂, etc.",
+   "Continue until the required number of decimal places are stable"
   ],
-  "worked_examples": [
-    {
-      "steps": [
-        {
-          "label": "Step 1 — Multiply",
-          "content": "<p>\\(2^5 = 2 \\times 2 \\times 2 \\times 2 \\times 2 = 32\\)</p>"
-        },
-        {
-          "label": "Answer",
-          "content": "<p><strong>32</strong></p>",
-          "isAnswer": true,
-          "is_answer": true
-        }
-      ],
-      "question": "Calculate 2⁵",
-      "difficulty": "Bronze"
-    },
-    {
-      "steps": [
-        {
-          "label": "Step 1 — Find A",
-          "content": "<p>Move decimal left: \\(3 200 000 \\rightarrow 3.2\\) (6 places)</p>"
-        },
-        {
-          "label": "Step 2 — Write",
-          "content": "<p>Large number, so positive power: \\(3.2 \\times 10^6\\)</p>"
-        },
-        {
-          "label": "Answer",
-          "content": "<p><strong>\\(3.2 \\times 10^6\\)</strong></p>",
-          "isAnswer": true,
-          "is_answer": true
-        }
-      ],
-      "question": "Write 3 200 000 in standard form",
-      "difficulty": "Silver"
-    },
-    {
-      "steps": [
-        {
-          "label": "Step 1 — Multiply A values",
-          "content": "<p>\\(3 \\times 2 = 6\\)</p>"
-        },
-        {
-          "label": "Step 2 — Add powers",
-          "content": "<p>\\(10^4 \\times 10^3 = 10^7\\)</p>"
-        },
-        {
-          "label": "Answer",
-          "content": "<p><strong>\\(6 \\times 10^7\\)</strong></p>",
-          "isAnswer": true,
-          "is_answer": true
-        }
-      ],
-      "question": "Calculate (3 × 10⁴) × (2 × 10³)",
-      "difficulty": "Silver"
-    },
-    {
-      "steps": [
-        {
-          "label": "Step 1 — Divide A values",
-          "content": "<p>\\(8 \\div 4 = 2\\)</p>"
-        },
-        {
-          "label": "Step 2 — Subtract powers",
-          "content": "<p>\\(10^5 \\div 10^2 = 10^3\\)</p>"
-        },
-        {
-          "label": "Answer",
-          "content": "<p><strong>\\(2 \\times 10^3\\)</strong> (= 2000)</p>",
-          "isAnswer": true,
-          "is_answer": true
-        }
-      ],
-      "question": "Calculate (8 × 10⁵) ÷ (4 × 10²)",
-      "difficulty": "Gold"
-    }
+  "title": "How to Find Rates of Change & Use Iteration",
+  "content": "<p>The <strong>rate of change</strong> is the gradient of a graph at a point. For a curve, draw a <strong>tangent</strong> (straight line touching the curve) at the point and find its gradient using \\(\\frac{\\Delta y}{\\Delta x}\\).</p><p><strong>Iterative processes</strong> use a formula like \\(x_{n+1} = f(x_n)\\) to generate a sequence that converges to a solution. Start with an initial value \\(x_0\\), substitute to find \\(x_1\\), then \\(x_2\\), and so on until the values stabilise to the required decimal places.</p><p>For estimation of area under a curve, use the <strong>trapezium rule</strong>: divide the area into strips and sum the trapeziums.</p>",
+  "example": "<p><strong>Use the iterative formula \\(x_{n+1} = \\sqrt{5x_n + 3}\\) with \\(x_0 = 4\\) to find \\(x_1\\), \\(x_2\\) and \\(x_3\\) to 4 d.p.</strong></p><p>\\(x_1 = \\sqrt{5(4) + 3} = \\sqrt{23} = 4.7958\\)</p><p>\\(x_2 = \\sqrt{5(4.7958) + 3} = \\sqrt{26.979} = 5.1942\\)</p><p>\\(x_3 = \\sqrt{5(5.1942) + 3} = \\sqrt{28.971} = 5.3825\\)</p>"
+ },
+ "topic_links": {
+  "prerequisites": [
+   {
+    "slug": "graphs/8",
+    "title": "Gradients of Curves & Areas"
+   },
+   {
+    "slug": "ratio-proportion/2",
+    "title": "Percentages & Compound Change"
+   }
   ]
+ },
+ "problem_bank": {
+  "gold": [
+   {
+    "display": "Use \\(x_{n+1} = \\frac{2x_n^3 + 5}{3x_n^2}\\) with \\(x_0 = 2\\) to find a root to 3 d.p. Give \\(x_3\\).",
+    "solutions": [
+     1.71
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "equals_1.119",
+      "expect": 1.119,
+      "message": "It looks like the 2 in the numerator was left out — the formula is \\(\\frac{2x_n^3+5}{3x_n^2}\\), so the top is \\(2x_n^3+5\\), not just \\(x_n^3+5\\); redo each substitution with the full formula.",
+      "pattern": "missing_numerator_coefficient"
+     },
+     {
+      "check": "equals_1.711",
+      "expect": 1.711,
+      "message": "It looks like you stopped at \\(x_2\\) — \\(x_3\\) means applying the formula a third time, so after finding \\(x_1\\) and \\(x_2\\) you need one more substitution to reach \\(x_3\\).",
+      "pattern": "off_by_one_iteration"
+     },
+     {
+      "check": "equals_1.750",
+      "expect": 1.75,
+      "message": "It looks like only one substitution was made — iterative methods require you to feed each output back in as the next input, so apply the formula three times in total to find \\(x_3\\).",
+      "pattern": "single_substitution_only"
+     },
+     {
+      "check": "equals_1.722",
+      "expect": 1.722,
+      "message": "It looks like a different starting value was used — the question specifies \\(x_0 = 2\\), so make sure your very first substitution uses \\(x_0 = 2\\) before iterating.",
+      "pattern": "wrong_starting_value"
+     }
+    ]
+   },
+   {
+    "display": "Show that \\(x^3 - 5x + 1 = 0\\) has a root between \\(x = 2\\) and \\(x = 3\\). What is \\(f(2)\\)?",
+    "solutions": [
+     -1
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": -2,
+      "message": "f(2) = 8 − 10 + 1 = −1. f(3) = 27 − 15 + 1 = 13. Sign change ∴ root between 2 and 3.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use the trapezium rule with 4 strips to estimate the area under \\(y = x^2\\) from \\(x = 0\\) to \\(x = 4\\). (Strip width = 1)",
+    "solutions": [
+     22
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 15,
+      "message": "y-values: 0, 1, 4, 9, 16. Area ≈ ½ × 1 × [0 + 16 + 2(1+4+9)] = ½ × [16 + 28] = 22.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = 5 - \\frac{1}{x_n^2}\\) with \\(x_0 = 2\\). Find \\(x_3\\) to 4 d.p.",
+    "solutions": [
+     4.9593
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": null,
+      "message": "x₁ = 5 − 0.25 = 4.75. x₂ = 5 − 1/22.5625 = 4.9557. x₃ ≈ 4.9593.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "An iteration converges to the solution of \\(x = \\sqrt{2x + 15}\\). What quadratic equation does this solve? Give the positive root.",
+    "solutions": [
+     5
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": -3,
+      "message": "Square both sides: x² = 2x + 15 → x² − 2x − 15 = 0 → (x−5)(x+3) = 0. Positive root = 5.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   }
+  ],
+  "bronze": [
+   {
+    "display": "A tangent passes through \\((2, 5)\\) and \\((6, 13)\\). Find the gradient.",
+    "solutions": [
+     2
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 0.5,
+      "message": "Gradient = (13 − 5) ÷ (6 − 2) = 8 ÷ 4 = 2.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "A tangent passes through \\((0, 8)\\) and \\((4, 0)\\). Find the gradient.",
+    "solutions": [
+     -2
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 2,
+      "message": "Gradient = (0 − 8) ÷ (4 − 0) = −8 ÷ 4 = −2. Don't forget the negative.",
+      "pattern": "sign_error"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = x_n + 3\\) with \\(x_0 = 2\\). Find \\(x_3\\).",
+    "solutions": [
+     11
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 8,
+      "message": "x₁ = 5, x₂ = 8, x₃ = 11.",
+      "pattern": "forgot_step"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = 2x_n - 1\\) with \\(x_0 = 3\\). Find \\(x_2\\).",
+    "solutions": [
+     9
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 5,
+      "message": "x₁ = 2(3) − 1 = 5. x₂ = 2(5) − 1 = 9.",
+      "pattern": "forgot_step"
+     }
+    ]
+   },
+   {
+    "display": "A tangent passes through \\((1, 4)\\) and \\((3, 10)\\). What is the rate of change?",
+    "solutions": [
+     3
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": null,
+      "message": "(10 − 4) ÷ (3 − 1) = 6 ÷ 2 = 3.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = \\frac{x_n}{2} + 4\\) with \\(x_0 = 8\\). Find \\(x_1\\).",
+    "solutions": [
+     8
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": null,
+      "message": "x₁ = 8/2 + 4 = 4 + 4 = 8.",
+      "pattern": "forgot_step"
+     }
+    ]
+   },
+   {
+    "display": "A tangent passes through \\((2, 1)\\) and \\((5, 10)\\). Find the gradient.",
+    "solutions": [
+     3
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": null,
+      "message": "(10 − 1) ÷ (5 − 2) = 9 ÷ 3 = 3.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = x_n^2 - 5\\) with \\(x_0 = 3\\). Find \\(x_1\\).",
+    "solutions": [
+     4
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 9,
+      "message": "x₁ = 9 − 5 = 4.",
+      "pattern": "forgot_step"
+     }
+    ]
+   }
+  ],
+  "silver": [
+   {
+    "display": "Use \\(x_{n+1} = \\sqrt{3x_n + 7}\\) with \\(x_0 = 2\\). Find \\(x_2\\) to 2 d.p.",
+    "solutions": [
+     4.22
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": null,
+      "message": "x₁ = √13 ≈ 3.6056. x₂ = √(3(3.6056)+7) = √17.8168 ≈ 4.22.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "A distance-time graph has a tangent at \\(t = 4\\) passing through \\((2, 3)\\) and \\((6, 11)\\). Estimate the speed at \\(t = 4\\).",
+    "solutions": [
+     2
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 0.5,
+      "message": "Speed = gradient = (11 − 3) ÷ (6 − 2) = 8 ÷ 4 = 2 m/s.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = \\frac{x_n^3 + 1}{4}\\) with \\(x_0 = 1\\). Find \\(x_3\\) to 3 d.p.",
+    "solutions": [
+     0.256
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 0.5,
+      "message": "x₁ = 2/4 = 0.5. x₂ = (0.125+1)/4 = 0.281. x₃ = (0.022+1)/4 ≈ 0.256.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "The gradient of a velocity-time graph at \\(t = 5\\) is 3. What does this represent?",
+    "options": [
+     "Speed",
+     "Distance",
+     "Acceleration",
+     "Deceleration"
+    ],
+    "solutions": [
+     2
+    ],
+    "calculator": false,
+    "input_type": "multiple_choice",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 0,
+      "message": "The gradient of a velocity-time graph gives acceleration.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = \\frac{10}{x_n + 1}\\) with \\(x_0 = 3\\). Find \\(x_2\\) to 2 d.p.",
+    "solutions": [
+     2.86
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 2.5,
+      "message": "x₁ = 10/4 = 2.5. x₂ = 10/3.5 ≈ 2.86.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "The gradient of a curve at \\(x = 2\\) is found using the tangent through \\((0, -1)\\) and \\((4, 11)\\). Find the gradient.",
+    "solutions": [
+     3
+    ],
+    "calculator": false,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": null,
+      "message": "(11 − (−1)) ÷ (4 − 0) = 12 ÷ 4 = 3.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   },
+   {
+    "display": "Use \\(x_{n+1} = \\sqrt[3]{8x_n - 3}\\) with \\(x_0 = 1\\). Find \\(x_1\\) to 3 d.p.",
+    "solutions": [
+     1.71
+    ],
+    "calculator": true,
+    "input_type": "single_value",
+    "misconceptions": [
+     {
+      "check": "common",
+      "expect": 5,
+      "message": "x₁ = ∛(8−3) = ∛5 ≈ 1.710.",
+      "pattern": "wrong_formula"
+     }
+    ]
+   }
+  ]
+ },
+ "related_videos": [
+  {
+   "url": "https://www.youtube.com/watch?v=YfDhGn3NLQw",
+   "title": "Instantaneous Rate of Change - Corbettmaths",
+   "channel": "Corbett Maths"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=eWP15jyatIo",
+   "title": "Iteration - Corbettmaths",
+   "channel": "Corbett Maths"
+  },
+  {
+   "url": "https://www.youtube.com/watch?v=qw5CaIOza5w",
+   "title": "Iterative Processes - Corbettmaths",
+   "channel": "Corbett Maths"
+  }
+ ],
+ "worked_examples": [
+  {
+   "steps": [
+    {
+     "label": "Step 1 — Gradient",
+     "content": "<p>\\(\\frac{30 - 10}{5 - 1} = \\frac{20}{4} = 5\\)</p>"
+    },
+    {
+     "label": "Answer",
+     "content": "<p>Rate of change ≈ <strong>5 units per second</strong></p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "A tangent to a curve at t = 3 passes through (1, 10) and (5, 30). Estimate the rate of change at t = 3.",
+   "difficulty": "Silver"
+  },
+  {
+   "steps": [
+    {
+     "label": "x₁",
+     "content": "<p>\\(x_1 = \\frac{1 + 2}{5} = 0.6000\\)</p>"
+    },
+    {
+     "label": "x₂",
+     "content": "<p>\\(x_2 = \\frac{0.6^3 + 2}{5} = \\frac{2.216}{5} = 0.4432\\)</p>"
+    },
+    {
+     "label": "x₃",
+     "content": "<p>\\(x_3 = \\frac{0.4432^3 + 2}{5} = \\frac{2.08709}{5} = 0.4174\\)</p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "Use xₙ₊₁ = (xₙ³ + 2) / 5 with x₀ = 1. Find x₁, x₂, x₃ to 4 d.p.",
+   "difficulty": "Gold"
+  }
+ ]
 }

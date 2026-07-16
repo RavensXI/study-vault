@@ -1,0 +1,1224 @@
+{
+  "guided": {
+    "teach": {
+      "gold": {
+        "steps": [
+          {
+            "say": "The new move: a Newton-Raphson formula. Work the numerator and denominator separately, then divide, and repeat."
+          },
+          {
+            "pre": "x₁ numerator: 2 × 3³ + 20 = 2 × 27 + 20 = ",
+            "hint": "3³ = 27, doubled is 54, plus 20.",
+            "post": "",
+            "answer": 74
+          },
+          {
+            "pre": "x₁ denominator: 3 × 3² = 3 × 9 = ",
+            "hint": "3² = 9, times 3.",
+            "post": "",
+            "answer": 27
+          },
+          {
+            "pre": "x₁ = 74 ÷ 27, to 4 d.p. = ",
+            "hint": "74 ÷ 27 = 2.7407...",
+            "post": "",
+            "answer": 2.7407
+          },
+          {
+            "pre": "x₂ = (2 × 2.7407³ + 20) ÷ (3 × 2.7407²), to 3 d.p. = ",
+            "hint": "Numerator ≈ 61.18, denominator ≈ 22.53.",
+            "post": "",
+            "answer": 2.715
+          },
+          {
+            "pre": "Check: 2.715³ to 2 d.p. = ",
+            "done": "≈ 20, so x₂ solves x³ = 20. Gone. That was the whole point of the Newton-Raphson step.",
+            "hint": "2.715 × 2.715 × 2.715.",
+            "post": "",
+            "answer": 20.01
+          }
+        ],
+        "display": "Use \\(x_{n+1} = \\frac{2x_n^3 + 20}{3x_n^2}\\) with \\(x_0 = 3\\). Find \\(x_2\\) to 3 d.p."
+      },
+      "bronze": {
+        "steps": [
+          {
+            "say": "Rate of change is the steepness of the line: how much y climbs for the x you move across. It is rise ÷ run."
+          },
+          {
+            "pre": "Rise (top y minus bottom y): 11 − 2 = ",
+            "hint": "11 take away 2.",
+            "post": "",
+            "answer": 9
+          },
+          {
+            "pre": "Run (right x minus left x): 4 − 1 = ",
+            "hint": "4 take away 1.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Rate of change = rise ÷ run = 9 ÷ 3 = ",
+            "hint": "9 shared into 3.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Check: a gradient of 3 over a run of 3 should climb 3 × 3 = ",
+            "done": "That matches the rise of 9. Gone. That was the whole point: rise over run.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 9
+          }
+        ],
+        "display": "A tangent to a curve passes through \\((1, 2)\\) and \\((4, 11)\\). Find the rate of change."
+      },
+      "silver": {
+        "steps": [
+          {
+            "say": "The new move here: iterate with a calculator, keeping full precision, and only round the last term."
+          },
+          {
+            "pre": "x₁ denominator: 2 + 2 = ",
+            "hint": "Add 2 to the start value.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "x₁ = 10 ÷ 4 = ",
+            "hint": "10 shared into 4.",
+            "post": "",
+            "answer": 2.5
+          },
+          {
+            "pre": "x₂ denominator: 2.5 + 2 = ",
+            "hint": "Add 2 to x₁.",
+            "post": "",
+            "answer": 4.5
+          },
+          {
+            "pre": "x₂ = 10 ÷ 4.5, to 2 d.p. = ",
+            "hint": "10 ÷ 4.5 = 2.222..., round to 2 d.p.",
+            "post": "",
+            "answer": 2.22
+          },
+          {
+            "pre": "Check: 2.22 × 4.5 = ",
+            "done": "≈ 10, so x₂ = 2.22. That was the whole point: feed each answer back in.",
+            "hint": "Should come back to about 10.",
+            "post": "",
+            "answer": 9.99
+          }
+        ],
+        "display": "Use \\(x_{n+1} = \\frac{10}{x_n + 2}\\) with \\(x_0 = 2\\). Find \\(x_2\\) to 2 d.p."
+      }
+    },
+    "opener": {
+      "steps": [
+        {
+          "say": "A phone game gives you tokens. You start with 100. Each round the app halves your tokens, then hands you 30 bonus tokens. No algebra, just do the two sums."
+        },
+        {
+          "pre": "After round 1 you have ",
+          "hint": "Halve 100 to get 50, then add the 30 bonus.",
+          "post": " tokens",
+          "answer": 80
+        },
+        {
+          "say": "Now take that new total, 80, through the <strong>same</strong> rule again."
+        },
+        {
+          "pre": "After round 2 you have ",
+          "hint": "Halve 80 to get 40, then add 30.",
+          "post": " tokens",
+          "answer": 70
+        },
+        {
+          "say": "Each new total was the old total put through one rule: halve, then add 30. Feeding an answer back into the same rule, over and over, is called <strong>iteration</strong>. In algebra we write the rule as \\(x_{n+1} = \\frac{x_n}{2} + 30\\), with \\(x_0 = 100\\) the starting pile. The other half of this lesson reads a <strong>rate of change</strong> straight off a graph: the steepness (gradient) of the line, rise ÷ run."
+        }
+      ]
+    }
+  },
+  "method_card": {
+    "steps": [
+      "Rate of change = gradient of the tangent: rise ÷ run between two points on it.",
+      "Iteration: start at \\(x_0\\), apply \\(x_{n+1} = f(x_n)\\) repeatedly, feeding each answer back in.",
+      "Keep full precision between steps; round only the final term to the decimal places asked.",
+      "Trapezium rule for area: ½ × width × (first + last + 2 × middle heights)."
+    ],
+    "title": "Rates of Change & Iteration (reference)",
+    "content": "<p>The <strong>rate of change</strong> at a point is the gradient of the tangent there: pick two points on the tangent and compute rise ÷ run.</p><p>An <strong>iterative process</strong> uses \\(x_{n+1} = f(x_n)\\). Start at \\(x_0\\), substitute to get \\(x_1\\), then feed that back in for \\(x_2\\), and so on until the values settle. Keep the full calculator value between steps and round only at the end.</p><p>A <strong>sign change</strong> in \\(f(x)\\) locates a root; the <strong>trapezium rule</strong> estimates the area under a curve.</p>",
+    "example": "<p><strong>Use the iterative formula \\(x_{n+1} = \\sqrt{5x_n + 3}\\) with \\(x_0 = 4\\) to find \\(x_1\\), \\(x_2\\) and \\(x_3\\) to 4 d.p.</strong></p><p>\\(x_1 = \\sqrt{5(4) + 3} = \\sqrt{23} = 4.7958\\)</p><p>\\(x_2 = \\sqrt{5(4.7958) + 3} = \\sqrt{26.979} = 5.1942\\)</p><p>\\(x_3 = \\sqrt{5(5.1942) + 3} = \\sqrt{28.971} = 5.3825\\)</p>"
+  },
+  "tier_guides": {
+    "gold": {
+      "steps": [
+        "A <strong>Newton-Raphson</strong> formula is a fraction such as \\(\\frac{2x_n^3 + a}{3x_n^2}\\): work numerator and denominator separately, then divide.",
+        "A <strong>sign change</strong> in \\(f(x)\\) between two x-values shows a root lies between them.",
+        "<strong>Trapezium rule</strong>: ½ × strip width × (first height + last height + 2 × the middle heights)."
+      ],
+      "title": "Gold: Newton-Raphson, sign change and trapezium rule",
+      "example": {
+        "steps": [
+          {
+            "label": "Numerator",
+            "content": "2 × 2³ + 7 = 16 + 7 = 23"
+          },
+          {
+            "label": "Denominator",
+            "content": "3 × 2² = 12"
+          },
+          {
+            "label": "Check",
+            "content": "23 ÷ 12 ≈ 1.92, close to ∛7 ≈ 1.91, so on track."
+          },
+          {
+            "label": "Answer",
+            "content": "\\(x_1 = 1.917\\); repeat once for \\(x_2 = 1.913\\) (3 d.p.)",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "Use \\(x_{n+1} = \\frac{2x_n^3 + 7}{3x_n^2}\\) with \\(x_0 = 2\\). Find \\(x_2\\) to 3 d.p."
+      }
+    },
+    "bronze": {
+      "steps": [
+        "<strong>Rate of change</strong> = gradient of the line: (change in y) ÷ (change in x), or rise ÷ run.",
+        "<strong>Iteration</strong>: start at \\(x_0\\), put it in the formula for \\(x_1\\), then feed \\(x_1\\) back in for \\(x_2\\), and so on.",
+        "Work one step at a time and write each term down. Watch the sign when a point or term is negative."
+      ],
+      "title": "Bronze: rates of change and simple iteration",
+      "example": {
+        "steps": [
+          {
+            "label": "Rise",
+            "content": "15 − 3 = 12"
+          },
+          {
+            "label": "Run",
+            "content": "5 − 1 = 4"
+          },
+          {
+            "label": "Check",
+            "content": "12 ÷ 4 divides exactly, since 4 × 3 = 12."
+          },
+          {
+            "label": "Answer",
+            "content": "Gradient = 12 ÷ 4 = 3",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "A tangent passes through \\((1, 3)\\) and \\((5, 15)\\). Find the gradient."
+      }
+    },
+    "silver": {
+      "steps": [
+        "Keep the <strong>full calculator value</strong> for each term. Round only the final term, to the decimal places asked for.",
+        "For \\(x_2\\) or \\(x_3\\), apply the formula that many times: each answer becomes the next input.",
+        "On a distance-time graph the gradient is a <strong>speed</strong>; on a velocity-time graph it is an <strong>acceleration</strong>."
+      ],
+      "title": "Silver: calculator iteration and real-life gradients",
+      "example": {
+        "steps": [
+          {
+            "label": "x₁",
+            "content": "\\(\\sqrt{4(1) + 5} = \\sqrt{9} = 3\\)"
+          },
+          {
+            "label": "Inside for x₂",
+            "content": "4 × 3 + 5 = 17"
+          },
+          {
+            "label": "Check",
+            "content": "√17 sits between √16 = 4 and √25 = 5, so expect about 4.1."
+          },
+          {
+            "label": "Answer",
+            "content": "\\(x_2 = \\sqrt{17} = 4.12\\) (2 d.p.)",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "Use \\(x_{n+1} = \\sqrt{4x_n + 5}\\) with \\(x_0 = 1\\). Find \\(x_2\\) to 2 d.p."
+      }
+    }
+  },
+  "topic_links": {
+    "prerequisites": [
+      {
+        "slug": "graphs/8",
+        "title": "Gradients of Curves & Areas"
+      },
+      {
+        "slug": "ratio-proportion/2",
+        "title": "Percentages & Compound Change"
+      }
+    ]
+  },
+  "problem_bank": {
+    "gold": [
+      {
+        "hint": "Work the numerator and denominator separately, then divide. Repeat to x3.",
+        "display": "Use \\(x_{n+1} = \\frac{2x_n^3 + 5}{3x_n^2}\\) with \\(x_0 = 2\\) to find a root to 3 d.p. Give \\(x_3\\).",
+        "solutions": [
+          1.71
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ numerator: 2 × 2³ + 5 = 2 × 8 + 5 = ",
+            "hint": "2³ = 8, doubled is 16, plus 5.",
+            "post": "",
+            "answer": 21
+          },
+          {
+            "pre": "x₁ denominator: 3 × 2² = 3 × 4 = ",
+            "hint": "2² = 4, times 3.",
+            "post": "",
+            "answer": 12
+          },
+          {
+            "pre": "x₁ = 21 ÷ 12 = ",
+            "hint": "21 ÷ 12 = 1.75.",
+            "post": "",
+            "answer": 1.75
+          },
+          {
+            "pre": "x₂ = (2 × 1.75³ + 5) ÷ (3 × 1.75²), to 4 d.p. = ",
+            "say": "Feed x₁ back into the same formula for x₂.",
+            "hint": "1.75³ = 5.359, numerator 15.719, denominator 9.188.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 1.7109
+          },
+          {
+            "pre": "x₃ = (2 × 1.7109³ + 5) ÷ (3 × 1.7109²), to 3 d.p. = ",
+            "hint": "The terms are settling; this is the cube root of 5, about 1.710.",
+            "post": "",
+            "answer": 1.71
+          },
+          {
+            "pre": "Check: 1.71³ to 2 d.p. = ",
+            "done": "≈ 5, so x₃ solves x³ = 5. Answer 1.710.",
+            "hint": "1.71 × 1.71 × 1.71.",
+            "post": "",
+            "answer": 5.0
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "equals_1.119",
+            "expect": 1.119,
+            "message": "It looks like the 2 in the numerator was left out. The top is \\(2x_n^3 + 5\\), not \\(x_n^3 + 5\\); redo each substitution with the full formula.",
+            "pattern": "missing_numerator_coefficient"
+          },
+          {
+            "check": "equals_1.750",
+            "expect": 1.75,
+            "message": "It looks like only one substitution was made. \\(x_3\\) needs the formula applied three times, feeding each answer back in.",
+            "pattern": "single_substitution_only"
+          }
+        ]
+      },
+      {
+        "hint": "Substitute x = 2 into x³ − 5x + 1, then check the sign changes by x = 3.",
+        "display": "Show that \\(x^3 - 5x + 1 = 0\\) has a root between \\(x = 2\\) and \\(x = 3\\). What is \\(f(2)\\)?",
+        "solutions": [
+          -1
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "First 2³ = ",
+            "hint": "2 × 2 × 2.",
+            "post": "",
+            "answer": 8
+          },
+          {
+            "pre": "and 5 × 2 = ",
+            "hint": "Five twos.",
+            "post": "",
+            "answer": 10
+          },
+          {
+            "pre": "f(2) = 8 − 10 + 1 = ",
+            "say": "Put the pieces together for f(2).",
+            "hint": "8 − 10 = −2, then + 1.",
+            "post": "",
+            "phase": "substitute",
+            "answer": -1
+          },
+          {
+            "pre": "Now f(3): 3³ − 5 × 3 + 1 = 27 − 15 + 1 = ",
+            "done": "f(3) = 13, positive.",
+            "hint": "27 − 15 = 12, then + 1.",
+            "post": "",
+            "answer": 13
+          },
+          {
+            "pre": "f(2) is negative and f(3) is positive, so a root lies between. The value asked for, f(2), is ",
+            "done": "Sign change from − to +, so a root sits between x = 2 and x = 3.",
+            "hint": "Read off f(2) from earlier.",
+            "post": "",
+            "answer": -1
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": -2,
+            "message": "f(2) = 2³ − 5(2) + 1 = 8 − 10 + 1 = −1. Getting −2 misses the + 1 at the end.",
+            "pattern": "forgot_constant"
+          }
+        ]
+      },
+      {
+        "hint": "Heights are 0, 1, 4, 9, 16; use ½ × width × (ends + 2 × middles).",
+        "display": "Use the trapezium rule with 4 strips to estimate the area under \\(y = x^2\\) from \\(x = 0\\) to \\(x = 4\\). (Strip width = 1)",
+        "solutions": [
+          22
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Heights y = x² at x = 0, 1, 2, 3, 4. The one at x = 2 is 2² = ",
+            "hint": "2 squared.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "and the one at x = 3 is 3² = ",
+            "hint": "3 squared.",
+            "post": "",
+            "answer": 9
+          },
+          {
+            "pre": "Add the two end heights: 0 + 16 = ",
+            "say": "Now apply the trapezium rule.",
+            "hint": "First height plus last height.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 16
+          },
+          {
+            "pre": "Double the middle heights: 2 × (1 + 4 + 9) = ",
+            "hint": "1 + 4 + 9 = 14, then × 2.",
+            "post": "",
+            "answer": 28
+          },
+          {
+            "pre": "Area = ½ × 1 × (16 + 28) = ",
+            "done": "The trapezium-rule estimate is 22 square units.",
+            "hint": "16 + 28 = 44, then halve.",
+            "post": "",
+            "answer": 22
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 15,
+            "message": "Heights: 0, 1, 4, 9, 16. Area ≈ ½ × 1 × [(0 + 16) + 2(1 + 4 + 9)] = ½ × 44 = 22. Forgetting to double the middle heights gives 15.",
+            "pattern": "forgot_double_middles"
+          }
+        ]
+      },
+      {
+        "hint": "Square the term, take its reciprocal, subtract from 5. Repeat to x3.",
+        "display": "Use \\(x_{n+1} = 5 - \\frac{1}{x_n^2}\\) with \\(x_0 = 2\\). Find \\(x_3\\) to 4 d.p.",
+        "solutions": [
+          4.9593
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ = 5 − 1 ÷ 2² = 5 − 1 ÷ 4 = 5 − 0.25 = ",
+            "hint": "2² = 4, and 1 ÷ 4 = 0.25.",
+            "post": "",
+            "answer": 4.75
+          },
+          {
+            "pre": "For x₂, the denominator 4.75² = ",
+            "hint": "4.75 × 4.75.",
+            "post": "",
+            "answer": 22.5625
+          },
+          {
+            "pre": "x₂ = 5 − 1 ÷ 22.5625, to 4 d.p. = ",
+            "say": "Feed x₁ back in for x₂.",
+            "hint": "1 ÷ 22.5625 = 0.0443, then 5 − 0.0443.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 4.9557
+          },
+          {
+            "pre": "x₃ = 5 − 1 ÷ 4.9557², to 4 d.p. = ",
+            "hint": "4.9557² = 24.559, 1 ÷ 24.559 = 0.0407, then 5 − 0.0407.",
+            "post": "",
+            "answer": 4.9593
+          },
+          {
+            "pre": "Check: 5 − 4.9593 = ",
+            "done": "That equals 1 ÷ x₂², confirming x₃ = 4.9593.",
+            "hint": "The gap below 5.",
+            "post": "",
+            "answer": 0.0407
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "x₁ = 5 − 1/2² = 4.75. x₂ = 5 − 1/4.75² = 4.9557. x₃ = 5 − 1/4.9557² ≈ 4.9593.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Square both sides, rearrange to a quadratic, factorise, take the positive root.",
+        "display": "An iteration converges to the solution of \\(x = \\sqrt{2x + 15}\\). What quadratic equation does this solve? Give the positive root.",
+        "solutions": [
+          5
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "say": "When the iteration settles, x stops changing, so \\(x = \\sqrt{2x + 15}\\). Square both sides: \\(x^2 = 2x + 15\\), which rearranges to \\(x^2 - 2x - 15 = 0\\)."
+          },
+          {
+            "pre": "We need two numbers that multiply to −15 and add to −2. One is −5, the other is ",
+            "hint": "−5 × 3 = −15 and −5 + 3 = −2.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "So (x − 5)(x + 3) = 0. The negative root is x = ",
+            "say": "Set each bracket to zero to find the roots.",
+            "hint": "x + 3 = 0 gives x = −3.",
+            "post": "",
+            "phase": "substitute",
+            "answer": -3
+          },
+          {
+            "pre": "The question wants the positive root, so x = ",
+            "hint": "5 is positive, −3 is not.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "Check: put x = 5 into 2x + 15: 2 × 5 + 15 = ",
+            "done": "√25 = 5 = x, so it balances and the positive root is 5.",
+            "hint": "2 × 5 = 10, plus 15.",
+            "post": "",
+            "answer": 25
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": -3,
+            "message": "x² = 2x + 15 gives x² − 2x − 15 = 0 = (x − 5)(x + 3). The roots are 5 and −3; the positive one is 5.",
+            "pattern": "wrong_root_sign"
+          }
+        ]
+      }
+    ],
+    "bronze": [
+      {
+        "hint": "Gradient = change in y divided by change in x (rise over run).",
+        "display": "A tangent passes through \\((2, 5)\\) and \\((6, 13)\\). Find the gradient.",
+        "solutions": [
+          2
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise (top y minus bottom y): 13 − 5 = ",
+            "hint": "13 take away 5.",
+            "post": "",
+            "answer": 8
+          },
+          {
+            "pre": "Run (right x minus left x): 6 − 2 = ",
+            "hint": "6 take away 2.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Gradient = rise ÷ run = 8 ÷ 4 = ",
+            "say": "Now put the two together.",
+            "hint": "8 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2
+          },
+          {
+            "pre": "Check: a gradient of 2 over a run of 4 should climb 2 × 4 = ",
+            "done": "That matches the rise of 8, so the gradient is 2.",
+            "hint": "Multiply the gradient by the run.",
+            "post": "",
+            "answer": 8
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0.5,
+            "message": "Gradient = (13 − 5) ÷ (6 − 2) = 8 ÷ 4 = 2.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Gradient = rise ÷ run; the line falls, so expect a negative answer.",
+        "display": "A tangent passes through \\((0, 8)\\) and \\((4, 0)\\). Find the gradient.",
+        "solutions": [
+          -2
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise (top y minus bottom y): 0 − 8 = ",
+            "hint": "0 take away 8 is negative.",
+            "post": "",
+            "answer": -8
+          },
+          {
+            "pre": "Run: 4 − 0 = ",
+            "hint": "4 take away 0.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Gradient = −8 ÷ 4 = ",
+            "say": "Divide, keeping the minus sign.",
+            "hint": "A negative divided by a positive stays negative.",
+            "post": "",
+            "phase": "substitute",
+            "answer": -2
+          },
+          {
+            "pre": "Check: −2 × 4 = ",
+            "done": "That matches the rise of −8, so the gradient is −2.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": -8
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 2,
+            "message": "Gradient = (0 − 8) ÷ (4 − 0) = −8 ÷ 4 = −2. Don't forget the negative.",
+            "pattern": "sign_error"
+          }
+        ]
+      },
+      {
+        "hint": "Add 3 each time: find x1, then x2, then x3.",
+        "display": "Use \\(x_{n+1} = x_n + 3\\) with \\(x_0 = 2\\). Find \\(x_3\\).",
+        "solutions": [
+          11
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ = 2 + 3 = ",
+            "hint": "Start value 2, add 3.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "x₂ = 5 + 3 = ",
+            "say": "Feed each answer back into the same rule.",
+            "hint": "Feed x₁ back in, add 3.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 8
+          },
+          {
+            "pre": "x₃ = 8 + 3 = ",
+            "done": "Three steps of +3 done.",
+            "hint": "Feed x₂ back in, add 3.",
+            "post": "",
+            "answer": 11
+          },
+          {
+            "pre": "Check: from the start, 3 jumps of 3 is 2 + 9 = ",
+            "done": "Same answer, so x₃ = 11.",
+            "hint": "Three lots of 3 is 9, added to the start.",
+            "post": "",
+            "answer": 11
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 8,
+            "message": "x₁ = 5, x₂ = 8, x₃ = 11.",
+            "pattern": "forgot_step"
+          }
+        ]
+      },
+      {
+        "hint": "Apply the rule twice: x1 first, then x2.",
+        "display": "Use \\(x_{n+1} = 2x_n - 1\\) with \\(x_0 = 3\\). Find \\(x_2\\).",
+        "solutions": [
+          9
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ = 2 × 3 − 1 = ",
+            "hint": "Double 3, then take 1.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "x₂ = 2 × 5 − 1 = ",
+            "say": "Now feed x₁ back into the same rule.",
+            "hint": "Feed x₁ back in: double 5, take 1.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 9
+          },
+          {
+            "pre": "Check: reverse the rule, (9 + 1) ÷ 2 = ",
+            "done": "That gives back x₁ = 5, so x₂ = 9 is right.",
+            "hint": "Undo the rule: add 1, then halve.",
+            "post": "",
+            "answer": 5
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 5,
+            "message": "x₁ = 2(3) − 1 = 5. x₂ = 2(5) − 1 = 9.",
+            "pattern": "forgot_step"
+          }
+        ]
+      },
+      {
+        "hint": "Rate of change is the gradient: change in y divided by change in x.",
+        "display": "A tangent passes through \\((1, 2)\\) and \\((5, 22)\\). What is the rate of change?",
+        "solutions": [
+          5
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise: 22 − 2 = ",
+            "hint": "22 take away 2.",
+            "post": "",
+            "answer": 20
+          },
+          {
+            "pre": "Run: 5 − 1 = ",
+            "hint": "5 take away 1.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Rate of change = rise ÷ run = 20 ÷ 4 = ",
+            "say": "Divide the rise by the run.",
+            "hint": "20 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 5
+          },
+          {
+            "pre": "Check: 5 × 4 = ",
+            "done": "That matches the rise of 20, so the rate of change is 5.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 20
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0.2,
+            "message": "Rate of change = rise ÷ run = (22 − 2) ÷ (5 − 1) = 20 ÷ 4 = 5. Dividing run by rise instead gives 0.2, which is upside down.",
+            "pattern": "inverted_gradient"
+          }
+        ]
+      },
+      {
+        "hint": "Halve the previous term, then add 4.",
+        "display": "Use \\(x_{n+1} = \\frac{x_n}{2} + 4\\) with \\(x_0 = 6\\). Find \\(x_1\\).",
+        "solutions": [
+          7
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Halve the start value: 6 ÷ 2 = ",
+            "hint": "6 shared into 2.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Then add 4: 3 + 4 = ",
+            "say": "The rule says halve, then add 4.",
+            "hint": "Add 4 to the half.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 7
+          },
+          {
+            "pre": "Check: 6 ÷ 2 + 4 = ",
+            "done": "Yes, x₁ = 7.",
+            "hint": "Halve, then add 4, in one line.",
+            "post": "",
+            "answer": 7
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 10,
+            "message": "Halve first: 6 ÷ 2 = 3, then add 4 to get 7. Adding 4 to 6 without halving gives 10.",
+            "pattern": "forgot_step"
+          }
+        ]
+      },
+      {
+        "hint": "Gradient = rise ÷ run between the two points.",
+        "display": "A tangent passes through \\((2, 1)\\) and \\((5, 10)\\). Find the gradient.",
+        "solutions": [
+          3
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise: 10 − 1 = ",
+            "hint": "10 take away 1.",
+            "post": "",
+            "answer": 9
+          },
+          {
+            "pre": "Run: 5 − 2 = ",
+            "hint": "5 take away 2.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Gradient = 9 ÷ 3 = ",
+            "say": "Divide the rise by the run.",
+            "hint": "9 shared into 3.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 3
+          },
+          {
+            "pre": "Check: 3 × 3 = ",
+            "done": "That matches the rise of 9, so the gradient is 3.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 9
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "(10 − 1) ÷ (5 − 2) = 9 ÷ 3 = 3.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Square the previous term first, then subtract 5.",
+        "display": "Use \\(x_{n+1} = x_n^2 - 5\\) with \\(x_0 = 3\\). Find \\(x_1\\).",
+        "solutions": [
+          4
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Square the start value: 3² = ",
+            "hint": "3 times 3.",
+            "post": "",
+            "answer": 9
+          },
+          {
+            "pre": "Then subtract 5: 9 − 5 = ",
+            "say": "The rule is: square, then take away 5.",
+            "hint": "Take 5 from the square.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 4
+          },
+          {
+            "pre": "Check: 3 × 3 − 5 = ",
+            "done": "So x₁ = 4.",
+            "hint": "Square, then subtract, in one line.",
+            "post": "",
+            "answer": 4
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 9,
+            "message": "Square first: 3² = 9, then subtract 5 to get 4. Stopping at 9 forgets the − 5.",
+            "pattern": "forgot_step"
+          }
+        ]
+      }
+    ],
+    "silver": [
+      {
+        "hint": "Work out x1 first (keep the full value), then use it to find x2.",
+        "display": "Use \\(x_{n+1} = \\sqrt{3x_n + 7}\\) with \\(x_0 = 2\\). Find \\(x_2\\) to 2 d.p.",
+        "solutions": [
+          4.22
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "First iteration, inside the root: 3 × 2 + 7 = ",
+            "hint": "3 × 2 = 6, then + 7.",
+            "post": "",
+            "answer": 13
+          },
+          {
+            "say": "So \\(x_1 = \\sqrt{13} = 3.6056\\). Keep this full value, do not round yet."
+          },
+          {
+            "pre": "Second iteration: 3 × 3.6056 + 7 gives 17.8168 under the root, so x₂ = √17.8168 to 2 d.p. = ",
+            "hint": "Square root of 17.8168, rounded to 2 d.p.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 4.22
+          },
+          {
+            "pre": "Check: 4.22² to 2 d.p. = ",
+            "done": "17.81 is essentially the 17.82 under the root, so x₂ = 4.22 is right.",
+            "hint": "4.22 × 4.22.",
+            "post": "",
+            "answer": 17.81
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "x₁ = √13 ≈ 3.6056. x₂ = √(3(3.6056)+7) = √17.8168 ≈ 4.22.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Speed is the gradient of the tangent: rise ÷ run.",
+        "display": "A distance-time graph has a tangent at \\(t = 4\\) passing through \\((2, 3)\\) and \\((6, 11)\\). Estimate the speed at \\(t = 4\\).",
+        "solutions": [
+          2
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise (distance change): 11 − 3 = ",
+            "hint": "11 take away 3.",
+            "post": "",
+            "answer": 8
+          },
+          {
+            "pre": "Run (time change): 6 − 2 = ",
+            "hint": "6 take away 2.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Speed = gradient = 8 ÷ 4 = ",
+            "say": "Speed is the steepness of the distance-time line.",
+            "hint": "8 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2
+          },
+          {
+            "pre": "Check: 2 × 4 = ",
+            "done": "That matches the rise of 8, so the speed is 2 m/s.",
+            "hint": "Speed times time gives distance.",
+            "post": "",
+            "answer": 8
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0.5,
+            "message": "Speed = gradient = (11 − 3) ÷ (6 − 2) = 8 ÷ 4 = 2 m/s.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Cube the term, add 1, divide by 4. Do it three times.",
+        "display": "Use \\(x_{n+1} = \\frac{x_n^3 + 1}{4}\\) with \\(x_0 = 1\\). Find \\(x_3\\) to 3 d.p.",
+        "solutions": [
+          0.256
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ = (1³ + 1) ÷ 4 = 2 ÷ 4 = ",
+            "hint": "1 cubed is 1, plus 1 is 2, over 4.",
+            "post": "",
+            "answer": 0.5
+          },
+          {
+            "pre": "x₂ = (0.5³ + 1) ÷ 4 = (0.125 + 1) ÷ 4 = ",
+            "say": "Feed x₁ back in to reach x₂.",
+            "hint": "0.5³ = 0.125, add 1 to get 1.125, then divide by 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.28125
+          },
+          {
+            "pre": "x₃ = (0.28125³ + 1) ÷ 4, to 3 d.p. = ",
+            "done": "The terms are settling near 0.256.",
+            "hint": "0.28125³ ≈ 0.0222, add 1, divide by 4.",
+            "post": "",
+            "answer": 0.256
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0.5,
+            "message": "x₁ = (1 + 1) ÷ 4 = 0.5. x₂ = (0.125 + 1) ÷ 4 = 0.281. x₃ = (0.022 + 1) ÷ 4 ≈ 0.256. Stopping at x₁ gives 0.5.",
+            "pattern": "forgot_step"
+          }
+        ]
+      },
+      {
+        "hint": "The gradient of a velocity-time graph shows how fast the velocity is changing.",
+        "display": "The gradient of a velocity-time graph at \\(t = 5\\) is 3. What does this represent?",
+        "options": [
+          "Speed",
+          "Distance",
+          "Acceleration",
+          "Deceleration"
+        ],
+        "solutions": [
+          2
+        ],
+        "calculator": false,
+        "input_type": "multiple_choice",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0,
+            "message": "The gradient of a velocity-time graph gives acceleration.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Add 1 to the term for the denominator, then divide 10 by it. Twice.",
+        "display": "Use \\(x_{n+1} = \\frac{10}{x_n + 1}\\) with \\(x_0 = 3\\). Find \\(x_2\\) to 2 d.p.",
+        "solutions": [
+          2.86
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁: denominator is 3 + 1 = 4, so 10 ÷ 4 = ",
+            "hint": "Bottom is 3 + 1 = 4, then 10 ÷ 4.",
+            "post": "",
+            "answer": 2.5
+          },
+          {
+            "pre": "x₂: denominator is 2.5 + 1 = 3.5, so 10 ÷ 3.5 to 2 d.p. = ",
+            "say": "Feed x₁ back in to reach x₂.",
+            "hint": "10 ÷ 3.5 = 2.857..., round to 2 d.p.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2.86
+          },
+          {
+            "pre": "Check: 2.86 × 3.5 = ",
+            "done": "≈ 10, so x₂ = 2.86 is right.",
+            "hint": "Should come back to about 10.",
+            "post": "",
+            "answer": 10.01
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 2.5,
+            "message": "x₁ = 10/4 = 2.5. x₂ = 10/3.5 ≈ 2.86.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Gradient = rise ÷ run; subtracting −1 adds 1.",
+        "display": "The gradient of a curve at \\(x = 2\\) is found using the tangent through \\((0, -1)\\) and \\((4, 11)\\). Find the gradient.",
+        "solutions": [
+          3
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise: 11 − (−1) = ",
+            "hint": "Subtracting −1 is the same as adding 1: 11 + 1.",
+            "post": "",
+            "answer": 12
+          },
+          {
+            "pre": "Run: 4 − 0 = ",
+            "hint": "4 take away 0.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Gradient = 12 ÷ 4 = ",
+            "say": "Divide the rise by the run.",
+            "hint": "12 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 3
+          },
+          {
+            "pre": "Check: 3 × 4 = ",
+            "done": "That matches the rise of 12, so the gradient is 3.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 12
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "(11 − (−1)) ÷ (4 − 0) = 12 ÷ 4 = 3.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      },
+      {
+        "hint": "Work out 8x − 3 first, then take the cube root.",
+        "display": "Use \\(x_{n+1} = \\sqrt[3]{8x_n - 3}\\) with \\(x_0 = 1\\). Find \\(x_1\\) to 3 d.p.",
+        "solutions": [
+          1.71
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Inside the cube root: 8 × 1 − 3 = ",
+            "hint": "8 × 1 = 8, then − 3.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "x₁ = ∛5, to 3 d.p. = ",
+            "say": "Now take the cube root of that.",
+            "hint": "Cube root of 5 is about 1.710.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 1.71
+          },
+          {
+            "pre": "Check: 1.71³ to 2 d.p. = ",
+            "done": "≈ 5, matching the number under the cube root, so x₁ = 1.710.",
+            "hint": "1.71 × 1.71 × 1.71.",
+            "post": "",
+            "answer": 5.0
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 5,
+            "message": "x₁ = ∛(8−3) = ∛5 ≈ 1.710.",
+            "pattern": "wrong_formula"
+          }
+        ]
+      }
+    ],
+    "gold_description": "Newton-Raphson iteration, sign-change root location, the trapezium rule, and forming equations.",
+    "bronze_description": "Read a rate of change (gradient) from two points, or run a short iteration by hand.",
+    "silver_description": "Iterate with a calculator to x2 or x3, or read a rate of change from a real-life graph."
+  },
+  "related_videos": [
+    {
+      "url": "https://www.youtube.com/watch?v=YfDhGn3NLQw",
+      "title": "Instantaneous Rate of Change - Corbettmaths",
+      "channel": "Corbett Maths"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=eWP15jyatIo",
+      "title": "Iteration - Corbettmaths",
+      "channel": "Corbett Maths"
+    },
+    {
+      "url": "https://www.youtube.com/watch?v=qw5CaIOza5w",
+      "title": "Iterative Processes - Corbettmaths",
+      "channel": "Corbett Maths"
+    }
+  ],
+  "worked_examples": [
+    {
+      "steps": [
+        {
+          "label": "Step 1: Gradient",
+          "content": "<p>\\(\\frac{30 - 10}{5 - 1} = \\frac{20}{4} = 5\\)</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p>Rate of change ≈ <strong>5 units per second</strong></p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "A tangent to a curve at t = 3 passes through (1, 10) and (5, 30). Estimate the rate of change at t = 3.",
+      "difficulty": "Silver"
+    },
+    {
+      "steps": [
+        {
+          "label": "x₁",
+          "content": "<p>\\(x_1 = \\frac{1 + 2}{5} = 0.6000\\)</p>"
+        },
+        {
+          "label": "x₂",
+          "content": "<p>\\(x_2 = \\frac{0.6^3 + 2}{5} = \\frac{2.216}{5} = 0.4432\\)</p>"
+        },
+        {
+          "label": "x₃",
+          "content": "<p>\\(x_3 = \\frac{0.4432^3 + 2}{5} = \\frac{2.08709}{5} = 0.4174\\)</p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "Use xₙ₊₁ = (xₙ³ + 2) / 5 with x₀ = 1. Find x₁, x₂, x₃ to 4 d.p.",
+      "difficulty": "Gold"
+    }
+  ]
+}

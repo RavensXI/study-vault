@@ -1,14 +1,11 @@
-import os, json, urllib.request, time
-ID="a43f9613-dd40-45e2-b692-00ac9c01fb92"
+import os, json, urllib.request
 key=os.environ["SUPABASE_SERVICE_KEY"]
-url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=title,lesson_number,practice_data"
-for i in range(3):
-    req=urllib.request.Request(url, headers={"apikey":key,"Authorization":f"Bearer {key}"})
-    data=json.load(urllib.request.urlopen(req))
-    pd=data[0]["practice_data"]
-    # topic sniff
-    disp=pd["problem_bank"]["bronze"][0]["display"][:60]
-    print(f"fetch {i}: title={data[0]['title']!r} num={data[0]['lesson_number']} | bronze[0]: {disp}")
-    if i==2:
-        json.dump(pd,open("_live_L04.json","w",encoding="utf-8"),indent=2,ensure_ascii=False)
-    time.sleep(2)
+url="https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.1d039d5e-b358-4864-b935-b3334ba99d20&select=practice_data"
+req=urllib.request.Request(url, headers={"apikey":key,"Authorization":"Bearer "+key})
+pd=json.load(urllib.request.urlopen(req))[0]["practice_data"]
+json.dump(pd,open("_live_L04_refetch.json","w",encoding="utf-8"),indent=2,ensure_ascii=False)
+# print solutions for all problems
+for tier in ["gold","bronze","silver"]:
+    for j,p in enumerate(pd["problem_bank"][tier]):
+        print(tier,j,"disp:",p["display"][:55])
+        print("      sols:",p["solutions"])

@@ -1,12 +1,26 @@
-import json,io,sys
-sys.stdout=io.TextIOWrapper(sys.stdout.buffer,encoding="utf-8")
-pre = json.load(open("_pre_L12.json",encoding="utf-8"))
-live = json.load(open("_live_L12.json",encoding="utf-8"))
-pw=pre["worked_examples"]; lw=live["worked_examples"]
+import json
+live=json.load(open("_live_L07.json",encoding="utf-8"))
+pre=json.load(open("_pre_L07.json",encoding="utf-8"))["practice_data"]
+lw=live["worked_examples"]; pw=pre["worked_examples"]
+lines=[]
 for i in range(4):
-    a=pw[i]; b=lw[i]
-    for j,(sa,sb) in enumerate(zip(a["steps"],b["steps"])):
-        if json.dumps(sa,ensure_ascii=False)!=json.dumps(sb,ensure_ascii=False):
-            print(f"we[{i}].steps[{j}]")
-            print("  PRE :",repr(sa.get("content")))
-            print("  LIVE:",repr(sb.get("content")))
+    for si,(ls,ps) in enumerate(zip(lw[i]["steps"],pw[i]["steps"])):
+        if ls.get("label")!=ps.get("label"):
+            lines.append(f"we[{i}].steps[{si}].label  PRE={ps.get('label')!r}  LIVE={ls.get('label')!r}")
+        if ls.get("content")!=ps.get("content"):
+            lines.append(f"we[{i}].steps[{si}].content PRE={ps.get('content')!r} LIVE={ls.get('content')!r}")
+# check em dash and arrow anywhere in live student-facing
+import re
+def walk(o,path):
+    if isinstance(o,dict):
+        for k,v in o.items():
+            if k=="note": continue
+            walk(v,path+"."+k)
+    elif isinstance(o,list):
+        for j,v in enumerate(o): walk(v,f"{path}[{j}]")
+    elif isinstance(o,str):
+        if "—" in o: lines.append("EM DASH at "+path+": "+o[:80])
+        if "->" in o: lines.append("ASCII ARROW -> at "+path+": "+o[:80])
+walk(live,"root")
+open("_we_out.txt","w",encoding="utf-8").write("\n".join(lines))
+print("done")

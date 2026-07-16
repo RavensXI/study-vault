@@ -1,41 +1,28 @@
 import json
+live = json.load(open("_CHK_geomL08_live.json", encoding="utf-8"))
+pre = json.load(open("_CHK_geomL08_predump.json", encoding="utf-8"))
 
-ID = "2603a7c5-7660-4a4c-943d-78f2a112009e"
-KEY = "algebra-L01"
+def norm(o): return json.dumps(o, sort_keys=True, ensure_ascii=False)
 
-dump = json.load(open("_pre_fanout_dump.json", encoding="utf-8"))
-# find entry
-entry = None
-if isinstance(dump, dict):
-    for k, v in dump.items():
-        if k == ID or k == KEY:
-            entry = v; break
-    if entry is None and "lessons" in dump:
-        dump = dump["lessons"]
-if entry is None and isinstance(dump, list):
-    for row in dump:
-        if row.get("id") == ID or row.get("key") == KEY or row.get("lesson_key") == KEY:
-            entry = row; break
-print("entry found:", entry is not None)
-if entry is None:
-    # show shape
-    print("dump type", type(dump))
-    if isinstance(dump, dict):
-        print("top keys sample", list(dump.keys())[:5])
-    elif isinstance(dump, list):
-        print("list len", len(dump), "first keys", list(dump[0].keys()) if dump else None)
-    raise SystemExit
+for k in ["related_videos","topic_links","worked_examples","method_card"]:
+    same = norm(live.get(k))==norm(pre.get(k))
+    print(f"{k}: {'UNCHANGED' if same else 'CHANGED'}")
 
-pre = entry.get("practice_data") or entry.get("practice_data_json") or entry
-live = json.load(open("_chk_L01_live.json", encoding="utf-8"))
-
-for f in ["related_videos", "topic_links", "worked_examples"]:
-    same = json.dumps(pre.get(f), sort_keys=True, ensure_ascii=False) == json.dumps(live.get(f), sort_keys=True, ensure_ascii=False)
-    print(f"{f}: {'UNCHANGED' if same else 'CHANGED'}")
-    if not same:
-        print("  PRE :", json.dumps(pre.get(f), ensure_ascii=False)[:400])
-        print("  LIVE:", json.dumps(live.get(f), ensure_ascii=False)[:400])
-
-# method_card: legitimately trimmable
-print("\npre keys:", sorted(pre.keys()))
-print("live keys:", sorted(live.keys()))
+# Compare problem displays/solutions/input_type per tier
+for tier in ["bronze","silver","gold"]:
+    lp = live["problem_bank"].get(tier,[])
+    pp = pre["problem_bank"].get(tier,[])
+    print(f"\n=== {tier}: live {len(lp)} pre {len(pp)} ===")
+    for i in range(max(len(lp),len(pp))):
+        l = lp[i] if i<len(lp) else {}
+        p = pp[i] if i<len(pp) else {}
+        d_same = l.get("display")==p.get("display")
+        s_same = norm(l.get("solutions"))==norm(p.get("solutions"))
+        it_same = l.get("input_type")==p.get("input_type")
+        flag = "" if (d_same and s_same and it_same) else "  <<< DIFF"
+        print(f" [{i}] disp={'=' if d_same else 'X'} sol={'=' if s_same else 'X'} it={'=' if it_same else 'X'}{flag}")
+        if not d_same:
+            print(f"     PRE : {p.get('display')}")
+            print(f"     LIVE: {l.get('display')}")
+        if not s_same:
+            print(f"     PRE sol : {p.get('solutions')}  LIVE sol: {l.get('solutions')}")

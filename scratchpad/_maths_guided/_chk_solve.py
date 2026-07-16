@@ -1,0 +1,22 @@
+def q(a,b,c,x): return a*x*x+b*x+c
+checks=[]
+checks.append(('b0', q(1,0,2,3), 11)); checks.append(('b0_exp', 3*2+2, 8))
+checks.append(('b1', q(1,0,-5,-2), -1)); checks.append(('b1_exp', -4-5, -9))
+checks.append(('b2', -7, -7))
+checks.append(('b4', q(1,0,-9,4), 7)); checks.append(('b4_exp', 4*2-9, -1))
+checks.append(('b6', q(1,0,1,-3), 10)); checks.append(('b6_exp', -9+1, -8))
+checks.append(('b7', q(2,0,0,4), 32)); checks.append(('b7_exp', (2*4)**2, 64))
+checks.append(('s0', sorted([2,-2]), sorted([-2,2])))
+checks.append(('s1', sorted([2,3]), sorted([2,3]))); checks.append(('s1_exp', sorted([-2,-3]), sorted([-2,-3])))
+checks.append(('s2', q(1,-2,-8,1), -9)); checks.append(('s2_exp', 1, 1))
+checks.append(('s3', sorted([3,-3]), sorted([-3,3])))
+checks.append(('s4', 1, 1)); checks.append(('s4_exp', 2, 2))
+checks.append(('s5', 4/2, 2)); checks.append(('s5_exp', -4/2, -2))
+checks.append(('s6', sorted([-4,3]), sorted([-4,3]))); checks.append(('s6_exp', sorted([4,-3]), sorted([4,-3])))
+checks.append(('g0', q(1,-8,12,4), -4)); checks.append(('g0_exp', q(1,-8,12,-4), 60))
+checks.append(('g1', 6, 6)); checks.append(('g1_exp', -6, -6))
+checks.append(('g2', q(-1,6,-5,3), 4)); checks.append(('g2_exp', q(-1,6,-5,-3), -32))
+checks.append(('g3', 1*5, 5)); checks.append(('g3_exp', 1+5, 6))
+checks.append(('g4', 12/4, 3)); checks.append(('g4_exp', 12/2, 6))
+fails=[(n,g,e) for n,g,e in checks if g!=e]
+print("TOTAL", len(checks), "FAILURES:", fails if fails else "NONE")

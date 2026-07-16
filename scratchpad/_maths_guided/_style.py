@@ -1,30 +1,46 @@
-import json,re
-live=json.load(open("_live_geometry-L06.json",encoding="utf-8"))
-def walk(o,path=""):
+import json,io
+live=json.load(io.open('_live_geometry_L06.json',encoding='utf-8'))[0]['practice_data']
+pre=json.load(io.open('_pre_fanout_dump.json',encoding='utf-8'))
+row=[r for r in pre if r['id']=='4e2bb5ad-e75a-48be-951a-0e8b8db75296'][0]['practice_data']
+# worked_examples: normalize em dash in pre and compare
+import re
+def norm(o): return json.dumps(o,ensure_ascii=False).replace('—',':').replace('–',':')
+print("worked_examples equal after em-dash norm:", norm(row['worked_examples'])==json.dumps(live['worked_examples'],ensure_ascii=False))
+# scan whole live for em dash / en dash, excluding internal 'note' fields
+def scan(o,path=''):
+    hits=[]
     if isinstance(o,dict):
         for k,v in o.items():
-            if k=="note": continue  # internal exempt
-            yield from walk(v,f"{path}.{k}")
+            if k=='note': continue
+            hits+=scan(v,path+'.'+k)
     elif isinstance(o,list):
-        for i,v in enumerate(o):
-            yield from walk(v,f"{path}[{i}]")
+        for i,v in enumerate(o): hits+=scan(v,f'{path}[{i}]')
     elif isinstance(o,str):
-        yield path,o
-emcount=0
-for p,s in walk(live):
-    if "—" in s or "–" in s:
-        print("EM/EN DASH:",p,repr(s)); emcount+=1
-    if "&" in s and re.search(r"&[a-zA-Z]+;|&#",s):
-        print("HTML ENTITY:",p,repr(s))
-print("emdash count:",emcount)
-# check hint fields plain (no latex/html)
-for tier,arr in live["problem_bank"].items():
-    if not isinstance(arr,list): continue
-    for i,p in enumerate(arr):
-        h=p.get("hint","")
-        if "\(" in h or "<" in h: print("HINT not plain",tier,i,h)
-        # numeric answers
-        for j,st in enumerate(p.get("guided_steps",[])):
-            if "answer" in st and not isinstance(st["answer"],(int,float)):
-                print("NON-NUMERIC answer",tier,i,j,st["answer"])
-print("style scan done")
+        if '—' in o or '–' in o: hits.append((path,o))
+    return hits
+h=scan(live)
+print("EM/EN DASH hits (excl note):", len(h))
+for p,s in h: print("  ",p,repr(s[:80]))
+# check hints are plain text (no LaTeX backslash, no HTML tags)
+def check_hints(o,path=''):
+    bad=[]
+    if isinstance(o,dict):
+        for k,v in o.items():
+            if k=='hint' and isinstance(v,str):
+                if '\(' in v or '<' in v or '$' in v: bad.append((path,v))
+            else: bad+=check_hints(v,path+'.'+k)
+    elif isinstance(o,list):
+        for i,v in enumerate(o): bad+=check_hints(v,f'{path}[{i}]')
+    return bad
+print("hint LaTeX/HTML issues:", check_hints(live))
+# check all guided_steps/teach/opener box answers are numeric
+def check_ans(o,path=''):
+    bad=[]
+    if isinstance(o,dict):
+        if 'answer' in o and not isinstance(o['answer'],(int,float)):
+            bad.append((path,o['answer']))
+        for k,v in o.items(): bad+=check_ans(v,path+'.'+k)
+    elif isinstance(o,list):
+        for i,v in enumerate(o): bad+=check_ans(v,f'{path}[{i}]')
+    return bad
+print("non-numeric answers:", check_ans(live))

@@ -1,25 +1,23 @@
-import json
-live = json.load(open("_live_geometry-L05.json",encoding="utf-8"))
-dump = json.load(open("_pre_fanout_dump.json",encoding="utf-8"))
-pre=None
-for e in dump:
-    if isinstance(e,dict):
-        if e.get("id")=="75d6eee2-25e6-4977-b549-e965ddd6c735" or e.get("key")=="geometry-L05":
-            pre=e; break
-if pre is None:
-    print("sample keys:", list(dump[0].keys()))
-else:
-    print("matched via", "id" if pre.get("id") else "key")
-    ppd = pre.get("practice_data",pre)
-    for f in ["related_videos","topic_links","worked_examples"]:
-        same = json.dumps(ppd.get(f),sort_keys=True)==json.dumps(live.get(f),sort_keys=True)
-        print(f, "PRESERVED" if same else "CHANGED")
-        if not same:
-            print("  PRE :",json.dumps(ppd.get(f))[:400])
-            print("  LIVE:",json.dumps(live.get(f))[:400])
-    # also report whether bank displays/solutions changed
-    lb=live["problem_bank"]; pb=ppd.get("problem_bank",{})
-    for tier in ["bronze","silver","gold"]:
-        for i,(lp,pp) in enumerate(zip(lb.get(tier,[]),pb.get(tier,[]))):
-            if lp.get("display")!=pp.get("display") or lp.get("solutions")!=pp.get("solutions"):
-                print(f"BANK CHANGE {tier}[{i}]: disp {pp.get('display')!r} -> {lp.get('display')!r}; sol {pp.get('solutions')} -> {lp.get('solutions')}")
+import json,io
+live=json.load(io.open('_live_geometry_L06.json',encoding='utf-8'))[0]['practice_data']
+pre=json.load(io.open('_pre_fanout_dump.json',encoding='utf-8'))
+row=[r for r in pre if r['id']=='4e2bb5ad-e75a-48be-951a-0e8b8db75296'][0]
+pd=row['practice_data']
+print("PRE keys:", sorted(pd.keys()))
+print("LIVE keys:", sorted(live.keys()))
+for f in ['related_videos','topic_links','worked_examples']:
+    same = pd.get(f)==live.get(f)
+    print(f, "PRESERVED:" , same)
+    if not same:
+        print("  PRE:", json.dumps(pd.get(f),ensure_ascii=False)[:300])
+        print("  LIVE:",json.dumps(live.get(f),ensure_ascii=False)[:300])
+# check pre problem displays/solutions vs live to see if numbers changed
+def bank(pd): return pd.get('problem_bank',{})
+for tier in ['bronze','silver','gold']:
+    pb=bank(pd).get(tier,[]); lb=bank(live).get(tier,[])
+    print(f"--- {tier}: pre {len(pb)} live {len(lb)}")
+    for i,(a,b) in enumerate(zip(pb,lb)):
+        if a.get('display')!=b.get('display') or a.get('solutions')!=b.get('solutions') or a.get('input_type')!=b.get('input_type'):
+            print(f"  [{i}] DISPLAY/SOL CHANGED")
+            print("     pre disp:",a.get('display'),"sol",a.get('solutions'))
+            print("     liv disp:",b.get('display'),"sol",b.get('solutions'))

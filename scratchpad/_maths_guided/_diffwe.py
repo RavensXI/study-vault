@@ -1,13 +1,10 @@
-import json
-ID="bc1ac13e-1cc0-42b3-a805-a8a3f35cbabb"
-live=json.load(open("_live_ratio_L01.json",encoding="utf-8"))
-dump=json.load(open("_pre_fanout_dump.json",encoding="utf-8"))
-entry=None
-if isinstance(dump,list):
-    for e in dump:
-        if e.get("id")==ID: entry=e; break
-pd=entry.get("practice_data") or entry
-print("=== PRE-DUMP worked_examples ===")
-print(json.dumps(pd["worked_examples"],indent=1,ensure_ascii=False))
-print("=== LIVE worked_examples ===")
-print(json.dumps(live["worked_examples"],indent=1,ensure_ascii=False))
+import json,io,sys
+sys.stdout=io.TextIOWrapper(sys.stdout.buffer,encoding="utf-8")
+pre=json.load(open("_pre_fanout_dump.json",encoding="utf-8"))
+live=json.load(open("_live_L05.json",encoding="utf-8"))
+ID="75d6eee2-25e6-4977-b549-e965ddd6c735"
+entry=next(v for v in pre if v.get("id")==ID)
+pw=entry["practice_data"]["worked_examples"]; lw=live["worked_examples"]
+a=pw[2]; b=lw[2]
+print("PRE :",json.dumps(a,ensure_ascii=False,indent=1))
+print("LIVE:",json.dumps(b,ensure_ascii=False,indent=1))

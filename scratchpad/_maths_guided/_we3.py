@@ -1,13 +1,10 @@
-import json,io,sys
+import json,io,sys,difflib
 sys.stdout=io.TextIOWrapper(sys.stdout.buffer,encoding="utf-8")
-pre = json.load(open("_pre_L12.json",encoding="utf-8"))
-live = json.load(open("_live_L12.json",encoding="utf-8"))
-sa=pre["worked_examples"][0]["steps"][0]["content"]
-sb=live["worked_examples"][0]["steps"][0]["content"]
-print("pre codes:",[hex(ord(c)) for c in sa if ord(c)>127])
-print("live codes:",[hex(ord(c)) for c in sb if ord(c)>127])
-print("equal?",sa==sb, len(sa),len(sb))
-# find first diff pos
-for i,(x,y) in enumerate(zip(sa,sb)):
-    if x!=y:
-        print("first diff at",i,repr(x),repr(y)); break
+ID="4aa9afe1-7e47-4f0f-b7e6-da22be472716"
+pre=json.load(open("_pre_fanout_dump.json",encoding="utf-8"))
+pre_pd=[x for x in pre if x["id"]==ID][0]["practice_data"]
+live=json.load(open("_L06_fresh.json",encoding="utf-8"))
+a=json.dumps(pre_pd["worked_examples"],ensure_ascii=False,indent=1)
+b=json.dumps(live["worked_examples"],ensure_ascii=False,indent=1)
+for l in difflib.unified_diff(a.splitlines(),b.splitlines(),lineterm="",fromfile="PRE",tofile="LIVE"):
+    print(l)

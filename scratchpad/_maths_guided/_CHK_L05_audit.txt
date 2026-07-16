@@ -1,0 +1,34 @@
+== issues ==
+{
+  "key": "number-L05",
+  "tier": "bronze",
+  "index": 2,
+  "type": "duplicate",
+  "detail": "Both misconceptions on 'Find 50% of 126' are near-identical: pattern 'wrong_method' says '50% means half. 126 ÷ 2 = 63.' and pattern 'arithmetic' says '50% = half. 126 ÷ 2 = 63.' Both use check 'wrong' with no specific trigger value. They give the same remediation for the same conceptual gap and will fire identically.",
+  "proposed_fix": "Remove the 'arithmetic' misconception entirely. Replace the remaining 'wrong_method' misconception with a specific check (e.g. check: 'equals_252' for a student who multiplies by 2 instead of dividing, or 'equals_25.2' for dividing by 5), so the trigger is meaningful."
+}
+{
+  "key": "number-L05",
+  "tier": "bronze",
+  "index": 3,
+  "type": "duplicate",
+  "detail": "Both misconceptions on 'Find 15% of 200' use check 'wrong' with no specific trigger, and their messages overlap: 'wrong_decimal' gives the decimal method, 'arithmetic' gives the build-up method — but neither detects a distinct wrong answer. Without a specific check value, both fire on any incorrect response and provide no additional diagnostic signal over each other.",
+  "proposed_fix": "Assign specific checks: e.g. check 'equals_300' for a student who uses multiplier 1.5 (treating 15% as 1.5); check 'equals_3' for using 0.015; check 'equals_2000' for multiplying 200 by 15 directly. Remove one of the two generic-check misconceptions and replace with a targeted one."
+}
+{
+  "key": "number-L05",
+  "tier": "gold",
+  "index": 2,
+  "type": "bad_misconception_message",
+  "detail": "The 'wrong_order' misconception message reads 'Multiply the multipliers: 1.2 × 0.8 = 0.96. Then 48 ÷ 0.96 = 50.' — this describes the CORRECT method, not an error the student made. Furthermore, multiplying in the opposite order (0.8 × 1.2) still gives 0.96 since multiplication is commutative, so no student applying this pattern would get a different wrong answer. The pattern label 'wrong_order' does not correspond to a real error here.",
+  "proposed_fix": "Replace with a misconception targeting a student who divides by the wrong combined multiplier, e.g. dividing by 1.2 and then 0.8 sequentially in reverse (treating it as two separate reverse percentages): 48 ÷ 0.8 = 60, then 60 ÷ 1.2 = 50 — which actually still gives 50. Better alternative: target a student who uses only ONE of the two multipliers (e.g. 48 ÷ 0.8 = 60, missing the second step), giving check 'equals_60', message 'You reversed the sale discount but forgot to also reverse the original 20% increase. Both multipliers must be undone: 48 ÷ 0.96 = 50.'"
+}
+{
+  "key": "number-L05",
+  "tier": "silver",
+  "index": 4,
+  "type": "ambiguous_wording",
+  "detail": "The 'divide_by_new' misconception (check: 'wrong') produces a non-integer answer of 19.35%, yet the stored solution is 24 (an integer). While 24 is correct, a student who gets 19.35 might round to 19 or 19.4, making it hard to catch this error with check 'wrong' alone. The check fires on any wrong answer and the misconception message correctly describes the error, but the pattern label implies this is a specific trackable error that deserves its own check value.",
+  "proposed_fix": "Since 60 ÷ 310 × 100 = 19.35..., add a numeric range check or a specific check for 'equals_19' or 'equals_19.35' to catch the most common rounded outputs of this error. This makes the diagnostic actionable rather than a catch-all fallback."
+}
+== unconfirmed ==

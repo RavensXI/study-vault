@@ -1,26 +1,17 @@
 import json
-live=json.load(open("_live_graphs_l01.json",encoding="utf-8"))
-pre=json.load(open("_pre_pd.json",encoding="utf-8"))
-
-def cmp(name):
-    a=json.dumps(pre.get(name),sort_keys=True,ensure_ascii=False)
-    b=json.dumps(live.get(name),sort_keys=True,ensure_ascii=False)
-    print(f"{name}: {'SAME' if a==b else 'CHANGED'}")
-
-for n in ["related_videos","topic_links","worked_examples","method_card"]:
-    cmp(n)
-
-# problem displays & solutions preserved?
-print("\n-- problem displays/solutions old vs new --")
-for tier in ["bronze","silver","gold"]:
-    op=pre["problem_bank"][tier]; np_=live["problem_bank"][tier]
-    print(f"[{tier}] pre n={len(op)} live n={len(np_)}")
-    for i,(o,n) in enumerate(zip(op,np_)):
-        od,nd=o.get("display"),n.get("display")
-        os_,ns_=o.get("solutions"),n.get("solutions")
-        if od!=nd: print(f"  {tier}[{i}] DISPLAY changed:\n    OLD: {od}\n    NEW: {nd}")
-        if os_!=ns_: print(f"  {tier}[{i}] SOL changed: {os_} -> {ns_}")
-
-# descriptions
-for k in ["bronze_description","silver_description","gold_description"]:
-    print(k, "present" if k in live["problem_bank"] else "MISSING")
+live=json.load(open("_live_L07.json",encoding="utf-8"))
+pre=json.load(open("_pre_fanout_dump.json",encoding="utf-8"))
+ID="6623fba3-fb9e-4353-80c4-35ed1d88f47e"
+print("pre type:", type(pre))
+entry=None
+for e in pre:
+    if e.get("id")==ID or e.get("key")=="graphs-L07": entry=e
+pdp=entry.get("practice_data",entry)
+print("pdp keys:", list(pdp.keys()))
+for f in ["related_videos","topic_links","worked_examples"]:
+    a=json.dumps(pdp.get(f),sort_keys=True,ensure_ascii=False)
+    b=json.dumps(live.get(f),sort_keys=True,ensure_ascii=False)
+    print("="*30, f, "match:", a==b)
+    if a!=b:
+        print("PRE :",a[:1000])
+        print("LIVE:",b[:1000])
