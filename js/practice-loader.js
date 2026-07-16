@@ -288,7 +288,7 @@
         panelSteps.innerHTML = '';
         for (var si = 0; si < mc.steps.length; si++) {
           var li = document.createElement('li');
-          li.innerHTML = mc.steps[si];
+          li.innerHTML = '<span class="step-body">' + mc.steps[si] + '</span>';
           panelSteps.appendChild(li);
         }
       }
@@ -312,7 +312,7 @@
         modalSteps.innerHTML = '';
         for (var msi = 0; msi < mc.steps.length; msi++) {
           var mli = document.createElement('li');
-          mli.innerHTML = mc.steps[msi];
+          mli.innerHTML = '<span class="step-body">' + mc.steps[msi] + '</span>';
           modalSteps.appendChild(mli);
         }
       }

@@ -254,6 +254,19 @@
       padding-bottom: 0;
     }
 
+    /* Step content must be ONE flex item — mixed text + KaTeX + <strong>
+       otherwise shatters into interleaved flex columns */
+    .panel-method-steps li .step-body,
+    .method-modal-steps li .step-body {
+      flex: 1 1 auto;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+    #panel-method .tier-intro-example { font-size: 0.82rem; padding: 0.7rem 0.75rem; }
+    #panel-method .tier-intro-example-step { gap: 0.45rem; }
+    #panel-method .tier-intro-example-step .tie-label { min-width: 4.6rem; }
+    .tier-intro-example-step .tie-content { min-width: 0; overflow-wrap: break-word; }
+
     .panel-method-steps li::before {
       content: counter(panel-step);
       flex-shrink: 0;
@@ -5072,7 +5085,7 @@
       var g = tierGuide(tier);
       if (!g) return;
       var stepsHtml = '';
-      (g.steps || []).forEach(function(s) { stepsHtml += '<li>' + s + '</li>'; });
+      (g.steps || []).forEach(function(s) { stepsHtml += '<li><span class="step-body">' + s + '</span></li>'; });
       var exHtml = '';
       if (g.example) {
         exHtml = '<div class="tier-intro-example"><div class="tier-intro-example-q">' + (g.example.question || '') + '</div>';
