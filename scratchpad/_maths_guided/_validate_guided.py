@@ -112,8 +112,8 @@ def main(fn):
                 if key in seen and p.get("input_type") != "multiple_choice":
                     fail(path + " duplicate solution values within tier: " + repr(sols))
                 seen.add(key)
-            if not (p.get("hint") or "").strip():
-                fail(path + " no hint")
+            if not (p.get("hint") or "").strip() and not (p.get("equation_hint") or "").strip():
+                fail(path + " no hint (science lessons may use equation_hint instead)")
             it = p.get("input_type") or "single_value"
             gs = p.get("guided_steps")
             if it == "multiple_choice" or p.get("guided_skip_reason"):
