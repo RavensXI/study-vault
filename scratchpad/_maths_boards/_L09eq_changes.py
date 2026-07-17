@@ -1,0 +1,41 @@
+import json
+
+changes = {
+ "key": "maths-eduqas_algebra-L09",
+ "lesson_id": "038c2343-8acf-41e4-b02a-914268bc6572",
+ "problems_fixed": [
+  {"tier":"all","index":"*","what":"Format conversion: every problem was single_value (Find x / Find y separately) and lacked guided walks. Rebuilt to xy_pair (ordered x-then-y) per board spec, with a full elimination guided_steps walk on each.","old":"single_value, no guided_steps","new":"xy_pair with verified guided walk"},
+  {"tier":"bronze","index":"0/1 -> 0","what":"Same system (x+y=10, x-y=4) was asked twice (Find x, Find y). Merged into one xy_pair.","old":"two single_value rows","new":"(7,3)"},
+  {"tier":"bronze","index":"4","what":"Original 2x+y=11, x-y=1 gave (4,3), duplicating another bronze pair. Changed constant to x-y=4 for a distinct clean pair.","old":"2x+y=11, x-y=1 -> (4,3) duplicate","new":"2x+y=11, x-y=4 -> (5,1)"},
+  {"tier":"bronze","index":"7","what":"Added a new distinct system to restore tier size 8 after the forced xy_pair merge.","old":"(absent)","new":"3x+y=17, x+y=7 -> (5,2)"},
+  {"tier":"silver","index":"0","what":"Original 3x+2y=16, x+2y=10 gave y=3.5 (messy on a non-calculator paper). Replaced with a genuine multiply-one silver.","old":"3x+2y=16, x+2y=10 -> (3, 3.5)","new":"3x+2y=16, x+y=7 -> (2,5)"},
+  {"tier":"silver","index":"1","what":"Original 2x+3y=19, 2x+y=11 gave x=3.5 (messy). Replaced with a genuine multiply-one silver.","old":"2x+3y=19, 2x+y=11 -> (3.5, 4)","new":"2x+3y=19, x+y=8 -> (5,3)"},
+  {"tier":"silver","index":"3","what":"Original 3x+4y=23, x+4y=15 gave y=2.75 (messy). Replaced with a clean multiply-one silver.","old":"3x+4y=23, x+4y=15 -> (4, 2.75)","new":"3x+4y=18, x+2y=8 -> (2,3)"},
+  {"tier":"silver","index":"4","what":"Original 3x+2y=14, x-y=3 gave (4,1), duplicating silver index 2. Replaced with a distinct multiply-then-add silver.","old":"3x+2y=14, x-y=3 -> (4,1) duplicate","new":"3x+2y=13, x-y=1 -> (3,2)"},
+  {"tier":"silver","index":"6","what":"Original x+2y=8, 3x-y=10 gave (4,2), duplicating silver index 5. Replaced with a distinct multiply-then-add silver.","old":"x+2y=8, 3x-y=10 -> (4,2) duplicate","new":"x+3y=13, 2x-y=5 -> (4,3)"},
+  {"tier":"gold","index":"0/1 -> 0","what":"Same system (2x+3y=12, 5x-2y=11) asked twice. Merged into one xy_pair.","old":"two single_value rows","new":"(3,2)"},
+  {"tier":"gold","index":"2/3 -> 2","what":"Same system (3x+2y=18, 5x-2y=14) asked twice. Merged into one xy_pair.","old":"two single_value rows","new":"(4,3)"},
+  {"tier":"gold","index":"3","what":"Added a new distinct multiply-both system to restore tier size 5 after merges.","old":"(absent)","new":"2x+5y=24, 3x+2y=14 -> (2,4)"},
+  {"tier":"gold","index":"4","what":"Added a new distinct multiply-both system to restore tier size 5.","old":"(absent)","new":"3x+5y=21, 5x+2y=16 -> (2,3)"}
+ ],
+ "issues_resolved": 3,
+ "issues_detail": "3 messy-decimal problems (silver y=3.5, x=3.5, y=2.75) and 3 within-tier duplicate answers (silver (4,1)x2, (4,2)x2; bronze (4,3)x2 post-merge) repaired; all bank now clean-integer xy_pair with distinct within-tier pairs.",
+ "misconceptions": "Every expect derived by committing the error (rhs_not_subtracted, rhs_wrong_operation, scaled_lhs_only, substitute_sign_slip) and machine-checked != solution. gold[3], gold[4] carry none (no single clean determinate error).",
+ "opener_concept": "Cinema trip: 2 tickets + 1 popcorn = £19; 1 ticket + 1 popcorn = £12. The single-ticket difference IS elimination; using ticket=£7 to get popcorn=£5 IS substitution. Maps to 2x+y=19, x+y=12.",
+ "figures_added": 0,
+ "figures_note": "Textual algebra lesson: no exam would print a figure here, and the opener claims none (Show-what-you-say satisfied). Diagram pass = no figures.",
+ "preserved": ["method_card","topic_links","related_videos (empty)","worked_examples (3, byte-for-byte)"],
+ "notes": "Live row was pre-guided single_value format; full guided conversion applied (opener + bronze/silver/gold teach walks + tier_guides + per-problem guided_steps + hints + misconceptions). Tier sizes 8/7/5. Validator PASS; PATCH 204; round-trip byte-match confirmed."
+}
+with open("changes_maths-eduqas_algebra-L09.json","w",encoding="utf-8") as f:
+    json.dump(changes,f,indent=1,ensure_ascii=False)
+
+diag = {
+ "key":"maths-eduqas_algebra-L09",
+ "figures_added":[],
+ "opener_touched":False,
+ "notes":"Textual simultaneous-equations lesson. No problem describes a printable figure; an exam paper prints none here. Opener is a two-line price list (no figure claimed), so the Show-what-you-say rule needs no SVG. Zero figures by design."
+}
+with open("changes_maths-eduqas_algebra-L09_diagrams.json","w",encoding="utf-8") as f:
+    json.dump(diag,f,indent=1,ensure_ascii=False)
+print("wrote changes + diagrams changes files")

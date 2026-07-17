@@ -1,10 +1,12 @@
 import json
-pre = json.load(open("_pre_numL03_pd.json",encoding="utf-8"))
-live = json.load(open("_live_ocr_numberL03.json",encoding="utf-8"))
+pre=json.load(open('_pre_dump_maths-eduqas.json',encoding='utf-8'))
+live=json.load(open('_chk_live_geoL03.json',encoding='utf-8'))
+row=[r for r in pre if r['id']=='1e9d6465-1ec1-40a3-8138-958197366837'][0]
+ppd=row['practice_data']
 out=[]
-out.append("PRE worked_examples:\n"+json.dumps(pre.get("worked_examples"),indent=2,ensure_ascii=False))
-out.append("\n\nLIVE worked_examples:\n"+json.dumps(live.get("worked_examples"),indent=2,ensure_ascii=False))
-# method_card diff
-out.append("\n\nPRE method_card:\n"+json.dumps(pre.get("method_card"),indent=2,ensure_ascii=False))
-open("_we_compare.txt","w",encoding="utf-8").write("\n".join(out))
-print("written")
+out.append('PRE worked_examples:')
+out.append(json.dumps(ppd.get('worked_examples'),ensure_ascii=False,indent=1))
+out.append('\nLIVE worked_examples:')
+out.append(json.dumps(live.get('worked_examples'),ensure_ascii=False,indent=1))
+open('_chk_we.txt','w',encoding='utf-8').write('\n'.join(out))
+print('n pre', len(ppd.get('worked_examples') or []), 'n live', len(live.get('worked_examples') or []))

@@ -1,11 +1,15 @@
 import os, json, urllib.request
-ID="fb13c12c-f5c1-4832-871b-40440d729361"
-key=os.environ["SUPABASE_SERVICE_KEY"]
-url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data,title,slug"
-req=urllib.request.Request(url, headers={"apikey":key,"Authorization":f"Bearer {key}"})
-data=json.load(urllib.request.urlopen(req))
-open("_CHK_L04_live.json","w",encoding="utf-8").write(json.dumps(data[0],ensure_ascii=False,indent=1))
-print("title:",data[0]["title"])
-print("slug:",data[0]["slug"])
-pd=data[0]["practice_data"]
-print("top keys:",list(pd.keys()))
+SID = "4feee23f-c960-4264-a828-cde0f9080d45"
+KEY = os.environ["SUPABASE_SERVICE_KEY"]
+url = f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{SID}&select=practice_data,title,slug"
+req = urllib.request.Request(url, headers={"apikey": KEY, "Authorization": f"Bearer {KEY}"})
+with urllib.request.urlopen(req) as r:
+    data = json.load(r)
+row = data[0]
+pd = row["practice_data"]
+with open("_live_eduqas_algebra-L04.json", "w", encoding="utf-8") as f:
+    json.dump(pd, f, indent=2, ensure_ascii=False)
+print("title:", row.get("title"), "| slug:", row.get("slug"))
+print("top keys:", list(pd.keys()))
+pb = pd.get("problem_bank", {})
+print("problem_bank keys:", list(pb.keys()) if isinstance(pb, dict) else type(pb))

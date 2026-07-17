@@ -1,0 +1,315 @@
+
+########## bronze  desc: Volume and surface area of cuboids, cubes and simple prisms.
+
+--- bronze[0] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the volume of a cuboid with length 6 cm, width 4 cm and height 3 cm.
+SOL: [72]
+HINT: Volume of a cuboid is length × width × height.
+  MIS[0] expect=108 pattern=surface_area
+       msg: 108 cm² is the surface area, 2(lw + lh + wh). Volume is 6 × 4 × 3 = 72 cm³.
+  MIS[1] expect=13 pattern=added
+       msg: Multiply the three lengths, do not add: 6 × 4 × 3 = 72 cm³.
+   gs[0] SAY: Volume of a cuboid is length × width × height. Multiply all three.
+   gs[1] BOX pre='Multiply length by width: 6 × 4 = ' post='' answer=24 phase=None
+   gs[2] BOX pre='Now multiply by the height: 24 × 3 = ' post='' answer=72 phase=substitute
+        done: That is the volume, 72 cm³.
+   gs[3] BOX pre='Check another order: 4 × 3 × 6 = ' post='' answer=72 phase=substitute
+        done: Still 72, so V = 72 cm³.
+
+--- bronze[1] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the volume of a cube with side length 5 cm.
+SOL: [125]
+HINT: Volume of a cube is side × side × side.
+  MIS[0] expect=25 pattern=squared
+       msg: Cube the side, do not square it: 5³ = 5 × 5 × 5 = 125 cm³.
+  MIS[1] expect=150 pattern=surface_area
+       msg: 150 cm² is the surface area (6 × 5²). Volume = 5³ = 125 cm³.
+   gs[0] SAY: Volume of a cube is side × side × side.
+   gs[1] BOX pre='Square the side: 5 × 5 = ' post='' answer=25 phase=None
+   gs[2] BOX pre='Multiply by the side again: 25 × 5 = ' post='' answer=125 phase=substitute
+        done: So V = 125 cm³.
+   gs[3] BOX pre='Compare: the surface area would be 6 × 25 = ' post='' answer=150 phase=substitute
+        done: 150 is the surface area; the volume is 125 cm³.
+
+--- bronze[2] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A triangular prism has cross-section area 20 cm² and length 9 cm. Find its volume.
+SOL: [180]
+HINT: Volume of any prism is the cross-section area times the length.
+  MIS[0] expect=29 pattern=added
+       msg: Multiply, do not add: volume of a prism = cross-section area × length = 20 × 9 = 180 cm³.
+  MIS[1] expect=90 pattern=halved
+       msg: The cross-section area is already given as 20. Do not halve it again: 20 × 9 = 180 cm³.
+   gs[0] SAY: Volume of any prism is the cross-section area times the length.
+   gs[1] BOX pre='Write the cross-section area: ' post='' answer=20 phase=None
+   gs[2] BOX pre='Multiply by the length: 20 × 9 = ' post='' answer=180 phase=substitute
+        done: So V = 180 cm³.
+   gs[3] BOX pre='Check: 180 ÷ 9 = ' post='' answer=20 phase=substitute
+        done: Back to the 20 cm² cross-section, so V = 180 cm³.
+
+--- bronze[3] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the surface area of a cube with side length 4 cm.
+SOL: [96]
+HINT: A cube has 6 identical square faces: find one, then times by 6.
+  MIS[0] expect=64 pattern=volume
+       msg: 64 cm³ is the volume (4³). Surface area = 6 × 4² = 6 × 16 = 96 cm².
+  MIS[1] expect=16 pattern=one_face
+       msg: A cube has 6 faces, not one: SA = 6 × 4² = 96 cm².
+   gs[0] SAY: A cube has 6 identical square faces. Find one face, then multiply by 6.
+   gs[1] BOX pre='Area of one face: 4 × 4 = ' post='' answer=16 phase=None
+   gs[2] BOX pre='Six faces: 6 × 16 = ' post='' answer=96 phase=substitute
+        done: So SA = 96 cm².
+   gs[3] BOX pre='Compare: the volume would be 4 × 4 × 4 = ' post='' answer=64 phase=substitute
+        done: 64 is the volume; the surface area is 96 cm².
+
+--- bronze[4] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A cuboid is 10 cm by 5 cm by 2 cm. Find its volume.
+SOL: [100]
+HINT: Volume of a cuboid is length × width × height.
+  MIS[0] expect=17 pattern=added
+       msg: Multiply, do not add: 10 × 5 × 2 = 100 cm³.
+  MIS[1] expect=160 pattern=surface_area
+       msg: 160 cm² is the surface area. Volume = 10 × 5 × 2 = 100 cm³.
+   gs[0] SAY: Volume of a cuboid is length × width × height. Multiply all three.
+   gs[1] BOX pre='Multiply length by width: 10 × 5 = ' post='' answer=50 phase=None
+   gs[2] BOX pre='Now multiply by the height: 50 × 2 = ' post='' answer=100 phase=substitute
+        done: So V = 100 cm³.
+   gs[3] BOX pre='Check another order: 5 × 2 × 10 = ' post='' answer=100 phase=substitute
+        done: Still 100, so V = 100 cm³.
+
+--- bronze[5] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A prism has a rectangular cross-section 6 cm by 3 cm and is 15 cm long. Find its volume.
+SOL: [270]
+HINT: Find the cross-section area (6 × 3) first, then multiply by the length.
+  MIS[0] expect=18 pattern=forgot_length
+       msg: That is just the cross-section area. Multiply by the length: 18 × 15 = 270 cm³.
+  MIS[1] expect=24 pattern=added
+       msg: Multiply, do not add: (6 × 3) × 15 = 270 cm³.
+   gs[0] SAY: Volume of a prism is the cross-section area times the length. The cross-section here is a 6 by 3 rectangle.
+   gs[1] BOX pre='Cross-section area: 6 × 3 = ' post='' answer=18 phase=None
+   gs[2] BOX pre='Multiply by the length: 18 × 15 = ' post='' answer=270 phase=substitute
+        done: So V = 270 cm³.
+   gs[3] BOX pre='Check: 270 ÷ 15 = ' post='' answer=18 phase=substitute
+        done: Back to the 18 cm² cross-section, so V = 270 cm³.
+
+--- bronze[6] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A cube has volume 27 cm³. Find the side length.
+SOL: [3]
+HINT: Cube root: find the number that, cubed, gives 27.
+  MIS[0] expect=9 pattern=divided_by_3
+       msg: Do not divide by 3. Find the cube root: 3³ = 27, so the side is 3 cm.
+  MIS[1] expect=13.5 pattern=halved
+       msg: Do not divide by 2. Take the cube root: 3³ = 27, so the side is 3 cm.
+   gs[0] SAY: Volume of a cube is side³, so we need the number whose cube is 27.
+   gs[1] BOX pre='Try a side of 3. First 3 × 3 = ' post='' answer=9 phase=None
+   gs[2] BOX pre='Now multiply by 3 again: 9 × 3 = ' post='' answer=27 phase=substitute
+        done: 27 matches the volume.
+   gs[3] BOX pre='So the side length is ' post='' answer=3 phase=substitute
+        done: Side = 3 cm.
+
+--- bronze[7] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> How many cm³ are there in 1 litre?
+SOL: [1000]
+HINT: 1 litre fills a cube 10 cm on every side.
+  MIS[0] expect=100 pattern=wrong_conversion
+       msg: 1 litre = 1000 cm³. A 10 cm cube holds 10 × 10 × 10 = 1000.
+  MIS[1] expect=10000 pattern=too_many
+       msg: 1 litre = 1000 cm³, not 10 000.
+   gs[0] SAY: 1 litre is exactly the space inside a cube 10 cm on every side. Count the cm³ cubes.
+   gs[1] BOX pre='Base layer: 10 × 10 = ' post='' answer=100 phase=None
+   gs[2] BOX pre='Stack 10 layers up: 100 × 10 = ' post='' answer=1000 phase=substitute
+        done: So 1 litre = 1000 cm³.
+   gs[3] BOX pre='Check: 10 × 10 × 10 = ' post='' answer=1000 phase=substitute
+        done: Still 1000 cm³, so 1 litre = 1000 cm³.
+
+########## silver  desc: Cylinders, cones, pyramids and hemispheres, plus a reverse problem that finds a missing length.
+
+--- silver[0] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the volume of a cylinder with radius 4 cm and height 10 cm. Give your answer to 1 d.p.
+SOL: [502.7]
+HINT: Volume of a cylinder is π r² h. Square the radius first.
+  MIS[0] expect=125.7 pattern=forgot_square
+       msg: The radius must be squared: V = π × 4² × 10 = 160π = 502.7 cm³, not π × 4 × 10.
+   gs[0] SAY: Volume of a cylinder is \(\pi r^2 h\). Square the radius first.
+   gs[1] BOX pre='Square the radius: 4² = ' post='' answer=16 phase=None
+   gs[2] BOX pre='Multiply by the height: 16 × 10 = ' post='' answer=160 phase=None
+   gs[3] BOX pre='Multiply by π: 160 × π = ' post='' answer=502.7 phase=substitute
+        done: So V = 502.7 cm³.
+   gs[4] BOX pre='Check in one go: π × 4² × 10 rounds to ' post='' answer=502.7 phase=substitute
+        done: Still 502.7 cm³.
+
+--- silver[1] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the volume of a cone with radius 3 cm and height 7 cm. Give your answer to 1 d.p.
+SOL: [66.0]
+HINT: Volume of a cone is one third of π r² h.
+  MIS[0] expect=197.9 pattern=forgot_third
+       msg: That is the full cylinder. A cone is one third: V = ⅓ × π × 3² × 7 = 21π = 66.0 cm³.
+  MIS[1] expect=22.0 pattern=forgot_square
+       msg: Square the radius: V = ⅓ × π × 3² × 7 = 21π = 66.0 cm³.
+   gs[0] SAY: Volume of a cone is \(\frac{1}{3}\pi r^2 h\). Build \(\pi r^2 h\), then take a third.
+   gs[1] BOX pre='Square the radius: 3² = ' post='' answer=9 phase=None
+   gs[2] BOX pre='Multiply by the height: 9 × 7 = ' post='' answer=63 phase=None
+   gs[3] BOX pre='Take one third: 63 ÷ 3 = ' post='' answer=21 phase=None
+   gs[4] BOX pre='Multiply by π: 21 × π = ' post='' answer=66.0 phase=substitute
+        done: So V = 66.0 cm³.
+   gs[5] BOX pre='Check in one go: ⅓ × π × 9 × 7 rounds to ' post='' answer=66.0 phase=substitute
+        done: Still 66.0 cm³.
+
+--- silver[2] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A pyramid has a square base of side 6 cm and height 8 cm. Find its volume.
+SOL: [96]
+HINT: Volume of a pyramid is one third of base area × height.
+  MIS[0] expect=288 pattern=forgot_third
+       msg: That is base area × height with no third. A pyramid is one third: V = ⅓ × 36 × 8 = 96 cm³.
+  MIS[1] expect=16 pattern=used_side
+       msg: Use the base AREA (6 × 6 = 36), not the side: V = ⅓ × 36 × 8 = 96 cm³.
+   gs[0] SAY: Volume of a pyramid is \(\frac{1}{3} \times\) base area \(\times h\). Find the base area first.
+   gs[1] BOX pre='Base area (square): 6 × 6 = ' post='' answer=36 phase=None
+   gs[2] BOX pre='Multiply by the height: 36 × 8 = ' post='' answer=288 phase=None
+   gs[3] BOX pre='Take one third: 288 ÷ 3 = ' post='' answer=96 phase=substitute
+        done: So V = 96 cm³.
+   gs[4] BOX pre='Check: ⅓ × 36 × 8 = ' post='' answer=96 phase=substitute
+        done: Still 96 cm³.
+
+--- silver[3] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the total surface area of a cylinder with radius 3 cm and height 10 cm. Give your answer to 1 d.p.
+SOL: [245.0]
+HINT: Surface area of a cylinder is 2πr² (two ends) + 2πrh (curved part).
+  MIS[0] expect=188.5 pattern=only_curved
+       msg: Add the two circular ends too: SA = 2πr² + 2πrh = 18π + 60π = 78π = 245.0 cm².
+  MIS[1] expect=56.5 pattern=just_ends
+       msg: That is only the two ends. Add the curved part 2πrh = 60π: total 78π = 245.0 cm².
+   gs[0] SAY: Surface area of a cylinder is \(2\pi r^2 + 2\pi r h\). Work in multiples of π, then multiply once.
+   gs[1] BOX pre='The two ends, 2πr², in π units: 2 × 3² = ' post='' answer=18 phase=None
+   gs[2] BOX pre='The curved part, 2πrh, in π units: 2 × 3 × 10 = ' post='' answer=60 phase=None
+   gs[3] BOX pre='Add them: 18 + 60 = ' post='' answer=78 phase=substitute
+        done: So the total is 78π.
+   gs[4] BOX pre='Multiply by π: 78 × π = ' post='' answer=245.0 phase=substitute
+        done: So SA = 245.0 cm².
+
+--- silver[4] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A cylinder has volume \(500\pi\) cm³ and radius 10 cm. Find its height.
+SOL: [5]
+HINT: Volume of a cylinder is πr²h. Work in multiples of π; the π cancels.
+  MIS[0] expect=50 pattern=forgot_square
+       msg: Square the radius: 500π = π × 10² × h = 100πh, so h = 500 ÷ 100 = 5 cm.
+   gs[0] SAY: Volume of a cylinder is \(\pi r^2 h\). Work in π units so the π cancels.
+   gs[1] BOX pre='Square the radius: 10² = ' post='' answer=100 phase=None
+   gs[2] BOX pre='So 100 × h = 500 (in π units). Divide: 500 ÷ 100 = ' post='' answer=5 phase=substitute
+        done: So the height is 5 cm.
+   gs[3] BOX pre='Check: π × 10² × 5 in π units is 100 × 5 = ' post='' answer=500 phase=substitute
+        done: 500π, matching, so h = 5 cm.
+
+--- silver[5] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the volume of a hemisphere with radius 6 cm. Give your answer to 1 d.p.
+SOL: [452.4]
+HINT: A hemisphere is half a sphere: find the full sphere, then halve it.
+  MIS[0] expect=904.8 pattern=full_sphere
+       msg: A hemisphere is HALF a sphere: V = ½ × \(\frac{4}{3}\) × π × 6³ = 144π = 452.4 cm³. The full sphere (904.8) is double.
+  MIS[1] expect=75.4 pattern=squared_radius
+       msg: Cube the radius, do not square it: V = ½ × \(\frac{4}{3}\) × π × 6³ = 144π = 452.4 cm³.
+   gs[0] SAY: A hemisphere is half a sphere. Find the full sphere's volume, then halve it.
+   gs[1] BOX pre='Cube the radius: 6³ = ' post='' answer=216 phase=None
+   gs[2] BOX pre='Full sphere factor: 216 × 4 ÷ 3 = ' post='' answer=288 phase=None
+   gs[3] BOX pre='Halve it for a hemisphere: 288 ÷ 2 = ' post='' answer=144 phase=None
+   gs[4] BOX pre='Multiply by π: 144 × π = ' post='' answer=452.4 phase=substitute
+        done: So V = 452.4 cm³.
+   gs[5] BOX pre='Check in one go: \\(\\frac{2}{3}\\) × π × 216 rounds to ' post='' answer=452.4 phase=substitute
+        done: Still 452.4 cm³.
+
+--- silver[6] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A prism has a trapezium cross-section with parallel sides 5 cm and 9 cm and height 4 cm. The prism is 12 cm long. Find its volume.
+SOL: [336]
+HINT: Find the trapezium area, ½(a + b)h, then multiply by the length.
+  MIS[0] expect=28 pattern=forgot_length
+       msg: That is just the cross-section area. Multiply by the length: 28 × 12 = 336 cm³.
+  MIS[1] expect=672 pattern=forgot_half
+       msg: Trapezium area is ½(a + b)h. Do not drop the ½: area = 28, so V = 28 × 12 = 336 cm³.
+   gs[0] SAY: Volume of a prism is cross-section area × length. First find the trapezium area, \(\frac{1}{2}(a+b)h\).
+   gs[1] BOX pre='Add the parallel sides: 5 + 9 = ' post='' answer=14 phase=None
+   gs[2] BOX pre='Trapezium area: ½ × 14 × 4 = ' post='' answer=28 phase=substitute
+        done: Cross-section area is 28 cm².
+   gs[3] BOX pre='Multiply by the length: 28 × 12 = ' post='' answer=336 phase=substitute
+        done: So V = 336 cm³.
+
+########## gold  desc: Spheres, composite solids and rearranging a formula to find a length.
+
+--- gold[0] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the volume of a sphere with radius 9 cm. Give your answer to the nearest whole number.
+SOL: [3054]
+HINT: Volume of a sphere is four thirds of π r³. Cube the radius first.
+  MIS[0] expect=2290 pattern=forgot_four_thirds
+       msg: Include the four thirds: V = \(\frac{4}{3}\) × π × 9³ = 972π = 3054 cm³, not just πr³.
+  MIS[1] expect=1018 pattern=surface_area
+       msg: That is close to the surface area (4πr²). Volume = \(\frac{4}{3}\)πr³ = 972π = 3054 cm³.
+   gs[0] SAY: Volume of a sphere is \(\frac{4}{3}\pi r^3\). Cube the radius first.
+   gs[1] BOX pre='Cube the radius: 9³ = ' post='' answer=729 phase=None
+   gs[2] BOX pre='Multiply by 4: 729 × 4 = ' post='' answer=2916 phase=None
+   gs[3] BOX pre='Divide by 3: 2916 ÷ 3 = ' post='' answer=972 phase=None
+   gs[4] BOX pre='Multiply by π and round: 972 × π = ' post='' answer=3054 phase=substitute
+        done: So V = 3054 cm³.
+   gs[5] BOX pre='Check in one go: \\(\\frac{4}{3}\\) × π × 729 rounds to ' post='' answer=3054 phase=substitute
+        done: Still 3054 cm³.
+
+--- gold[1] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> Find the surface area of a sphere with radius 5 cm. Give your answer to 1 d.p.
+SOL: [314.2]
+HINT: Surface area of a sphere is 4 π r². Square the radius first.
+  MIS[0] expect=523.6 pattern=volume
+       msg: That is the volume. Surface area = 4πr² = 4 × π × 25 = 100π = 314.2 cm².
+  MIS[1] expect=78.5 pattern=one_circle
+       msg: Surface area is 4πr², not πr² (that is one circle): 100π = 314.2 cm².
+   gs[0] SAY: Surface area of a sphere is \(4\pi r^2\). Square the radius first.
+   gs[1] BOX pre='Square the radius: 5² = ' post='' answer=25 phase=None
+   gs[2] BOX pre='Multiply by 4: 25 × 4 = ' post='' answer=100 phase=substitute
+        done: So it is 100π.
+   gs[3] BOX pre='Multiply by π: 100 × π = ' post='' answer=314.2 phase=substitute
+        done: So SA = 314.2 cm².
+
+--- gold[2] input_type=single_value calc=False
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A sphere has volume \(\frac{256}{3}\pi\) cm³. Find the radius.
+SOL: [4]
+HINT: Volume of a sphere is \(\frac{4}{3}\)πr³. Work in π units, then take the cube root.
+  MIS[0] expect=64 pattern=forgot_cube_root
+       msg: 64 is r³, not r. Take the cube root: r = ∛64 = 4 cm.
+  MIS[1] expect=8 pattern=square_root
+       msg: Cube root, not square root: r³ = 64, so r = ∛64 = 4 cm.
+   gs[0] SAY: Volume of a sphere is \(\frac{4}{3}\pi r^3\). Set \(\frac{4}{3}r^3 = \frac{256}{3}\) in π units.
+   gs[1] BOX pre='Multiply both sides by 3: \\(\\frac{256}{3}\\) × 3 gives 4r³ = ' post='' answer=256 phase=None
+   gs[2] BOX pre='Divide by 4: 256 ÷ 4 = ' post='' answer=64 phase=substitute
+        done: So r³ = 64.
+   gs[3] BOX pre='Cube root: ∛64 = ' post='' answer=4 phase=substitute
+        done: So the radius is 4 cm.
+   gs[4] BOX pre='Check: \\(\\frac{4}{3}\\) × 4³ in π units is \\(\\frac{4}{3}\\) × 64 = ' post='' answer=85.3 phase=substitute
+        done: That is \(\frac{256}{3}\)π, matching, so r = 4 cm.
+
+--- gold[3] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A cone and a cylinder both have radius 5 cm and height 12 cm. How much more volume does the cylinder have? Give your answer to 1 d.p.
+SOL: [628.3]
+HINT: Cylinder volume minus cone volume. A cone is one third of the cylinder.
+  MIS[0] expect=314.2 pattern=cone_only
+       msg: That is the cone's volume. The extra = cylinder − cone = 300π − 100π = 200π = 628.3 cm³.
+  MIS[1] expect=942.5 pattern=whole_cylinder
+       msg: That is the whole cylinder. The extra is cylinder − cone = 200π = 628.3 cm³.
+   gs[0] SAY: The cone is \(\frac{1}{3}\) of the cylinder, so the difference is \(\frac{2}{3}\) of the cylinder. Work in π units.
+   gs[1] BOX pre='Cylinder factor: r²h = 5² × 12 = ' post='' answer=300 phase=None
+   gs[2] BOX pre='Cone is a third: 300 ÷ 3 = ' post='' answer=100 phase=None
+   gs[3] BOX pre='Difference: 300 − 100 = ' post='' answer=200 phase=substitute
+        done: So the extra is 200π.
+   gs[4] BOX pre='Multiply by π: 200 × π = ' post='' answer=628.3 phase=substitute
+        done: So the cylinder has 628.3 cm³ more.
+
+--- gold[4] input_type=single_value calc=True
+DISPLAY: [SVG]<span class="figure-caption">Diagram not drawn accurately</span> A solid is a cylinder (radius 3 cm, height 10 cm) with a hemisphere (radius 3 cm) on top. Find the total volume. Give your answer to 1 d.p.
+SOL: [339.3]
+HINT: Total = cylinder volume + hemisphere volume.
+  MIS[0] expect=282.7 pattern=forgot_hemisphere
+       msg: Add the hemisphere on top: cylinder 90π + hemisphere 18π = 108π = 339.3 cm³.
+  MIS[1] expect=395.8 pattern=full_sphere
+       msg: The top is a HALF sphere, not a whole one: 90π + 18π = 108π = 339.3 cm³.
+   gs[0] SAY: Total volume = cylinder + hemisphere on top. Work each in π units, then add.
+   gs[1] BOX pre='Cylinder factor: r²h = 3² × 10 = ' post='' answer=90 phase=None
+   gs[2] BOX pre='Hemisphere factor: \\(\\frac{2}{3}\\) × 3³ = \\(\\frac{2}{3}\\) × 27 = ' post='' answer=18 phase=None
+   gs[3] BOX pre='Add them: 90 + 18 = ' post='' answer=108 phase=substitute
+        done: So the total is 108π.
+   gs[4] BOX pre='Multiply by π: 108 × π = ' post='' answer=339.3 phase=substitute
+        done: So V = 339.3 cm³.

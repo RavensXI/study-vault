@@ -1,18 +1,10 @@
 import os, json, urllib.request
-ID = "2d827ad4-80ab-4327-81f8-a2e5cec4f50a"
-KEY = os.environ["SUPABASE_SERVICE_KEY"]
-url = f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data,title,slug,unit_id"
-req = urllib.request.Request(url, headers={"apikey": KEY, "Authorization": f"Bearer {KEY}"})
-row = json.load(urllib.request.urlopen(req))[0]
-with open("_RECHK_live.json", "w", encoding="utf-8") as f:
-    json.dump(row["practice_data"], f, indent=2, ensure_ascii=False)
-print("title:", row.get("title"), "slug:", row.get("slug"))
-pd = row["practice_data"]
-print("top keys:", list(pd.keys()))
-pb = pd.get("problem_bank", {})
-if isinstance(pb, dict):
-    print("pb keys:", list(pb.keys()))
-    for t in ["bronze","silver","gold"]:
-        v = pb.get(t)
-        if isinstance(v, list):
-            print(t, "count:", len(v))
+ID="7f378aaa-68dc-4420-b952-f56d8349b1ed"
+key=os.environ["SUPABASE_SERVICE_KEY"]
+url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data,slug,title"
+req=urllib.request.Request(url, headers={"apikey":key,"Authorization":f"Bearer {key}"})
+data=json.load(urllib.request.urlopen(req))
+open("_rechk_live.json","w",encoding="utf-8").write(json.dumps(data[0]["practice_data"],ensure_ascii=False,indent=2))
+print("title:",data[0].get("title"),"slug:",data[0].get("slug"))
+pd=data[0]["practice_data"]
+print("top keys:",list(pd.keys()))

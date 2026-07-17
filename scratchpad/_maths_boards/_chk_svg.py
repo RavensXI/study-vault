@@ -1,52 +1,50 @@
-import json, io, sys, re
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+import json,re,io,sys
+sys.stdout=io.TextIOWrapper(sys.stdout.buffer,encoding="utf-8")
+pd=json.load(open("_CHK_LIVE_fresh.json",encoding="utf-8"))["practice_data"]
 
-d = json.load(open('_live_L04.json', encoding='utf-8'))[0]['practice_data']
-pb = d['problem_bank']
+def get_axes(svg):
+    # x tick labels: <text ...>N</text> preceded by tick line at x=..; parse tick lines with y at axis
+    # Instead parse from labelled ticks: find all <line x1=A y1=B x2=A y2=B+3> then text at x=A
+    return svg
 
-def parse_num(s):
-    # convert unicode minus to ascii
-    return float(s.replace('−', '-').replace('–', '-').replace(' ', ''))
+def parse_ticks(svg):
+    # x ticks: small vertical lines length 3 below axis, with a number text at same x
+    texts=re.findall(r'<text x="([\-\d.]+)" y="[\-\d.]+" font-size="9"[^>]*text-anchor="middle">([\-\d]+)</text>',svg)
+    xmap={} # px->val
+    for px,val in texts:
+        xmap[float(px)]=int(val)
+    ytexts=re.findall(r'<text x="([\-\d.]+)" y="([\-\d.]+)" font-size="9"[^>]*text-anchor="end">([\-\d]+)</text>',svg)
+    ymap={}
+    for px,py,val in ytexts:
+        ymap[float(py)]=int(val)
+    return xmap,ymap
 
-def check_svg(tier, idx):
-    disp = pb[tier][idx]['display']
-    m = re.search(r'<svg.*?</svg>', disp, re.S)
-    if not m:
-        print(f'{tier}[{idx}]: NO SVG')
-        return
-    svg = m.group(0)
-    # bold axis lines have stroke-width="1.6"
-    bold = re.findall(r'<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)" stroke="currentColor" stroke-width="1.6"/>', svg)
-    # x-axis: horizontal bold (y1==y2); y-axis: vertical bold (x1==x2)
-    xaxis_y = yaxis_x = None
-    for x1, y1, x2, y2 in bold:
-        if y1 == y2:
-            xaxis_y = float(y1)
-        if x1 == x2:
-            yaxis_x = float(x1)
-    # scale: from gridline spacing. Find all vertical gridline x positions
-    vlines = sorted(set(float(x) for x in re.findall(r'<line x1="([\d.]+)" y1="[\d.]+" x2="\1" y2="[\d.]+" stroke="currentColor" stroke-opacity', svg)))
-    scale = None
-    if len(vlines) >= 2:
-        diffs = [round(vlines[i+1]-vlines[i], 2) for i in range(len(vlines)-1)]
-        scale = sum(diffs)/len(diffs)
-    print(f'{tier}[{idx}]: origin_px=({yaxis_x},{xaxis_y}) scale={scale:.3f}')
-    # circles: cx, cy, then following text label
-    for cm in re.finditer(r'<circle cx="([\d.]+)" cy="([\d.]+)"[^>]*/>\s*<text[^>]*>([^<]+)</text>', svg):
-        cx, cy, label = float(cm.group(1)), float(cm.group(2)), cm.group(3)
-        gx = (cx - yaxis_x)/scale
-        gy = (xaxis_y - cy)/scale
-        # parse label coords
-        nums = re.findall(r'-?\d+', label.replace('−','-'))
-        print(f'   circle label={label!r} -> px({cx},{cy}) -> grid=({gx:.2f},{gy:.2f})')
-    # crosses: two lines crossing, followed by text 'centre (a, b)'
-    for cm in re.finditer(r'<line x1="([\d.]+)" y1="([\d.]+)" x2="([\d.]+)" y2="([\d.]+)" stroke="currentColor" stroke-width="1.8"/>\s*<line[^>]*stroke-width="1.8"/>\s*<text[^>]*>([^<]+)</text>', svg):
-        x1, y1, x2, y2 = map(float, cm.group(1,2,3,4))
-        label = cm.group(5)
-        cx = (x1+x2)/2; cy = (y1+y2)/2
-        gx = (cx - yaxis_x)/scale
-        gy = (xaxis_y - cy)/scale
-        print(f'   cross  label={label!r} -> centre_px({cx},{cy}) -> grid=({gx:.2f},{gy:.2f})')
+def linfit(m):
+    items=sorted(m.items())
+    (p1,v1),(p2,v2)=items[0],items[-1]
+    scale=(v2-v1)/(p2-p1)
+    return lambda p:(p-p1)*scale+v1
 
-for t, i in [('silver',2), ('silver',6), ('gold',0), ('gold',1), ('gold',2), ('gold',4)]:
-    check_svg(t, i)
+def check(name,svg,f):
+    xmap,ymap=parse_ticks(svg)
+    fx=linfit(xmap); fy=linfit(ymap)
+    poly=re.search(r'<polyline points="([^"]+)"',svg).group(1)
+    pts=[tuple(map(float,p.split(','))) for p in poly.split()]
+    errs=0
+    for px,py in pts[::12]:
+        x=fx(px); y=fy(py); yt=f(x)
+        if abs(y-yt)>0.25:
+            print(f"  {name} MISMATCH px={px} x={x:.2f} plotted_y={y:.2f} eqn_y={yt:.2f}"); errs+=1
+    # check markers (circles)
+    print(f"{name}: {len(pts)} pts, {errs} mismatches; xmap={xmap}; ymap={ymap}")
+    return errs
+
+tot=0
+tot+=check("teach.gold", pd["guided"]["teach"]["gold"]["display"], lambda x:-x**2+4*x-1)
+tot+=check("teach.bronze", pd["guided"]["teach"]["bronze"]["display"], lambda x:x**2-2*x-3)
+tot+=check("teach.silver", pd["guided"]["teach"]["silver"]["display"], lambda x:x**2-6*x+8)
+# opener: arch through (0,0),(8,0),(4,?) height; symmetric; parametric not an eqn but check symmetry & 3m@2 ->? 
+op=pd["guided"]["opener"]["display"]
+xmap,ymap=parse_ticks(op)
+print("opener xmap:",xmap)
+print("TOTAL svg mismatches:",tot)

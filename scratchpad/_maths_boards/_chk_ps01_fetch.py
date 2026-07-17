@@ -1,15 +1,12 @@
 import os, json, urllib.request
-
-ID = "aa2fb8d9-f47f-4412-8231-28085ce43740"
-KEY = os.environ["SUPABASE_SERVICE_KEY"]
-url = f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data"
-req = urllib.request.Request(url, headers={
-    "apikey": KEY,
-    "Authorization": f"Bearer {KEY}",
-})
-data = json.load(urllib.request.urlopen(req))
-pd = data[0]["practice_data"]
-with open("_CHK_ps01_LIVE.json", "w", encoding="utf-8") as f:
-    json.dump(pd, f, indent=2, ensure_ascii=False)
-print("keys:", list(pd.keys()))
-print("problem_bank tiers:", list(pd.get("problem_bank", {}).keys()) if isinstance(pd.get("problem_bank"), dict) else type(pd.get("problem_bank")))
+ID="a28fddf4-3ee1-48dc-b138-aa17facad15d"
+key=os.environ["SUPABASE_SERVICE_KEY"]
+url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data,slug,title"
+req=urllib.request.Request(url, headers={"apikey":key,"Authorization":f"Bearer {key}"})
+data=json.load(urllib.request.urlopen(req))
+open("_CHK_ps01_live.json","w",encoding="utf-8").write(json.dumps(data[0], ensure_ascii=False, indent=2))
+print("title:", data[0].get("title"), "slug:", data[0].get("slug"))
+pd=data[0]["practice_data"]
+print("top keys:", list(pd.keys()))
+pb=pd.get("problem_bank",{})
+print("problem_bank keys:", list(pb.keys()) if isinstance(pb,dict) else type(pb))

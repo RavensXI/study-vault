@@ -1,15 +1,25 @@
-import json
-ID="89689a46-7251-4c2a-900e-5fdc240dafd3"
-live=json.load(open("_chk_gL01_live.json",encoding="utf-8"))["practice_data"]
-pre=json.load(open("_pre_dump_maths-ocr.json",encoding="utf-8"))
-entry=pre[ID] if isinstance(pre,dict) and ID in pre else next(v for v in (pre.values() if isinstance(pre,dict) else pre) if v.get("id")==ID)
-pd=entry.get("practice_data",entry)
-pwe=pd["worked_examples"]; lwe=live["worked_examples"]
-for i,(p,l) in enumerate(zip(pwe,lwe)):
-    for j,(ps,ls) in enumerate(zip(p["steps"],l["steps"])):
-        if ps.get("label")!=ls.get("label"):
-            print(f"we[{i}].steps[{j}].label: PRE={ps['label']!r} LIVE={ls['label']!r}")
-        if ps.get("content")!=ls.get("content"):
-            print(f"we[{i}].steps[{j}].content DIFF")
-    if p.get("question")!=l.get("question"): print(f"we[{i}].question DIFF")
-print("counts:",len(pwe),len(lwe))
+import json,io,sys
+sys.stdout=io.TextIOWrapper(sys.stdout.buffer,encoding="utf-8")
+live=json.load(open("_CHK_LIVE_fresh.json",encoding="utf-8"))["practice_data"]["worked_examples"]
+pre=json.load(open("_pre_dump_maths-eduqas.json",encoding="utf-8"))
+ID="39bdcd12-eb3d-45b1-b0c5-d8e2257610df"
+entry=[e for e in pre if e.get("id")==ID][0]
+pwe=entry["practice_data"]["worked_examples"]
+for i,(a,b) in enumerate(zip(pwe,live)):
+    for j,(sa,sb) in enumerate(zip(a["steps"],b["steps"])):
+        if sa.get("content")!=sb.get("content"):
+            print(f"we[{i}].steps[{j}].content DIFF:\n  PRE={sa.get('content')}\n  LIVE={sb.get('content')}")
+    if a.get("question")!=b.get("question"):
+        print(f"we[{i}].question: PRE={a.get('question')} LIVE={b.get('question')}")
+# emdash scan
+def walk(o,path=""):
+    if isinstance(o,dict):
+        for k,v in o.items():
+            if k=="note": continue
+            walk(v,path+"."+k)
+    elif isinstance(o,list):
+        for i,v in enumerate(o): walk(v,path+f"[{i}]")
+    elif isinstance(o,str):
+        if "—" in o: print("EM DASH at",path,":",o[:80])
+walk(json.load(open("_CHK_LIVE_fresh.json",encoding="utf-8"))["practice_data"])
+print("scan done")

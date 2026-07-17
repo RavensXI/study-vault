@@ -1,31 +1,34 @@
 import json
-ID="9f0126b9-ab85-4cbc-bc94-5d1214d5c4c2"
-pre=json.load(open("_pre_dump_maths-ocr.json",encoding="utf-8"))
-entry=[e for e in pre if e.get("id")==ID][0]
-ppd=entry.get("practice_data") or entry
-live=json.load(open("_live_L06.json",encoding="utf-8"))
-print("PRE keys:",sorted(ppd.keys()))
+ID="d6cc3827-bbe2-42ae-b116-7c8398b1bf70"
+live=json.load(open("_live_L03.json",encoding="utf-8"))
+dump=json.load(open("_pre_dump_maths-eduqas.json",encoding="utf-8"))
+entry=[e for e in dump if e.get("id")==ID][0]
+pre=entry["practice_data"]
+print("PRE keys:", sorted(pre.keys()))
+print("LIVE keys:", sorted(live.keys()))
+# Preservation-critical fields per spec section 9
 for f in ["related_videos","topic_links","worked_examples"]:
-    same = json.dumps(ppd.get(f),sort_keys=True,ensure_ascii=False)==json.dumps(live.get(f),sort_keys=True,ensure_ascii=False)
-    print(f, "PRESERVED" if same else "CHANGED")
-    if not same:
-        print("  PRE:",json.dumps(ppd.get(f),ensure_ascii=False)[:400])
-        print("  LIVE:",json.dumps(live.get(f),ensure_ascii=False)[:400])
-# check method_card presence pre vs live
-print("pre has method_card:", "method_card" in ppd, "| pre has problem_bank:", "problem_bank" in ppd)
-# compare problem displays & solutions preserved
-def bank(pd): return pd.get("problem_bank",{})
-pb_pre=bank(ppd); pb_live=bank(live)
+    a=json.dumps(pre.get(f),sort_keys=True,ensure_ascii=False)
+    b=json.dumps(live.get(f),sort_keys=True,ensure_ascii=False)
+    print(f"{f}: {'UNCHANGED' if a==b else 'CHANGED'}")
+# problem counts + displays + solutions preserved?
 for tier in ["bronze","silver","gold"]:
-    a=pb_pre.get(tier,[]); b=pb_live.get(tier,[])
-    print(f"{tier}: pre {len(a)} live {len(b)}")
-    for i in range(max(len(a),len(b))):
-        da=a[i].get("display") if i<len(a) else None
-        db=b[i].get("display") if i<len(b) else None
-        sa=a[i].get("solutions") if i<len(a) else None
-        sb=b[i].get("solutions") if i<len(b) else None
-        flag = "" if (da==db and sa==sb) else "  <<< DIFF"
-        if flag:
-            print(f"  [{i}] soln pre={sa} live={sb}{flag}")
-            print(f"       disp pre: {da}")
-            print(f"       disp liv: {db}")
+    pb_pre=pre.get("problem_bank",{}).get(tier,[])
+    pb_live=live.get("problem_bank",{}).get(tier,[])
+    print(f"\n{tier}: pre={len(pb_pre)} live={len(pb_live)}")
+    for i in range(max(len(pb_pre),len(pb_live))):
+        pp=pb_pre[i] if i<len(pb_pre) else {}
+        pl=pb_live[i] if i<len(pb_live) else {}
+        ds_pre=pp.get("display",""); ds_live=pl.get("display","")
+        sol_pre=pp.get("solutions"); sol_live=pl.get("solutions")
+        # strip svg for display compare
+        import re
+        d_pre=re.sub(r'<svg.*?</svg>','[SVG]',ds_pre,flags=re.S).strip()
+        d_live=re.sub(r'<svg.*?</svg>','[SVG]',ds_live,flags=re.S).strip()
+        flag=""
+        if sol_pre!=sol_live: flag+=f" SOL {sol_pre}->{sol_live}"
+        if d_pre!=d_live: flag+=f" DISPLAY-TEXT-CHANGED"
+        print(f"  [{i}] sol_pre={sol_pre} sol_live={sol_live}{flag}")
+        if d_pre!=d_live:
+            print(f"       PRE : {d_pre[:120]}")
+            print(f"       LIVE: {d_live[:120]}")

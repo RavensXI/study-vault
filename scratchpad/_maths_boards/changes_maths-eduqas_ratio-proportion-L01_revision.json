@@ -1,0 +1,33 @@
+{
+  "key": "ratio-proportion-L01",
+  "board": "maths-eduqas",
+  "lesson_id": "a6f6c5da-0aa8-437c-b3fe-75b8a48d6714",
+  "revision_of": "changes_maths-eduqas_ratio-proportion-L01.json",
+  "problems_fixed": [
+    {
+      "tier": "gold",
+      "index": 1,
+      "path": "problem_bank.gold[1].misconceptions[0]",
+      "what": "Honest-diagnosis fix. Problem: Amy:Beth 5:3, Amy £40 more than Beth (Beth = £60). Old pattern 'used_total' claimed the £24 option came from treating £40 as the total and sharing 5:3, but that error yields £15 (40x3/8), which is neither £24 nor an offered option, so the message mis-diagnosed anyone who picked £24. Relabelled to the error that actually reproduces £24: student treats £40 as Amy's whole share and divides by her 5 parts (40/5=8), then Beth = 3x8 = £24. Expect (index 2 = £24) unchanged and now reproduces from its stated error.",
+      "old": {"pattern": "used_total", "expect": 2, "message": "£40 is the difference, not the total. As a difference it is 2 parts, so one part = £20 and Beth = 3 × £20 = £60."},
+      "new": {"pattern": "difference_as_share", "expect": 2, "message": "You treated the £40 as Amy's whole share and divided by her 5 parts: 40 ÷ 5 = £8, then Beth = 3 × £8 = £24. But £40 is the difference, worth 5 − 3 = 2 parts, so one part = £20 and Beth = 3 × £20 = £60."}
+    },
+    {
+      "tier": "silver",
+      "index": 5,
+      "path": "problem_bank.silver[5].misconceptions[1]",
+      "what": "Message-quality fix. Problem: cement:sand:gravel 1:2:4 for 35 kg, sand = 10 kg. Expect (index 3 = 14 kg) already reproduced (student sums the other parts 1+4=5, dropping sand's own 2 from the total, 35/5=7, sand=2x7=14) but the old message merely restated the correct method without diagnosing the 14 kg answer. Rewrote the message to name the exact error and relabelled pattern from 'forgot_total' to 'left_out_own_part'.",
+      "old": {"pattern": "forgot_total", "expect": 3, "message": "Total parts = 1 + 2 + 4 = 7, so one part = 5 kg and sand = 2 × 5 = 10 kg."},
+      "new": {"pattern": "left_out_own_part", "expect": 3, "message": "You added only the other parts, 1 + 4 = 5, leaving sand's own 2 out of the total. Every part counts: 1 + 2 + 4 = 7, so one part = 5 kg and sand = 2 × 5 = 10 kg."}
+    }
+  ],
+  "issues_resolved": 2,
+  "figures_added": [],
+  "figures_note": "Ratio & Proportion is a textual unit; no problem describes a printable figure. No figures required or added (confirmed by the check).",
+  "opener_concept": "Unchanged (Priya and Sam share 15 stickers 2:3 by counting fair rounds).",
+  "preservation": "Diff of the patched practice_data vs the prior live row shows exactly four changed fields: message + pattern on each of the two targeted misconceptions. Every other field byte-identical: related_videos, topic_links, worked_examples, method_card, tier_guides, guided opener/teach walks, and all 20 problems' displays/options/solutions/input_type/hints untouched.",
+  "verification": "Both revised expects re-derived by committing the stated error: gold 40 ÷ 5 = 8, 3 × 8 = 24 = options[2] (£24); silver 35 ÷ (1+4) = 7, 2 × 7 = 14 = options[3] (14 kg). No em or en dashes in student-facing strings; U+2212 minus used.",
+  "validator": "PASS: structure, style, budgets all clean",
+  "patch": "204; live re-read confirms gold[1].misconceptions[0] pattern=difference_as_share expect=2 and silver[5].misconceptions[1] pattern=left_out_own_part expect=3.",
+  "notes": "Revision pass only. The two independent-check defects were the sole findings; the rest of the lesson was verified correct by the checker and left unchanged."
+}

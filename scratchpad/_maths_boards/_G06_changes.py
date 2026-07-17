@@ -1,0 +1,56 @@
+# -*- coding: utf-8 -*-
+import json, io
+changes = {
+  "key": "graphs-L06",
+  "board": "maths-eduqas",
+  "lesson_id": "683b816a-4d56-4d3d-911b-58cb3bca5efd",
+  "title": "Trigonometric Graphs",
+  "problems_fixed": [
+    {"tier": "bronze", "index": 3,
+     "what": "Duplicate-answer disease: original 'value of sin 90°' (=1) duplicated cos 0°/max/tan 45°. Re-posed to a distinct exact value.",
+     "old": "sin 90°  ->  1", "new": "sin 30°  ->  0.5"},
+    {"tier": "bronze", "index": 6,
+     "what": "Duplicate-answer disease: original 'value of cos 90°' (=0) duplicated sin 0°. Re-posed to a key-feature question with a distinct answer.",
+     "old": "cos 90°  ->  0", "new": "period of y = sin x  ->  360"},
+    {"tier": "bronze", "index": 0,
+     "what": "Duplicate-answer disease: original 'maximum value of y = sin x' (=1) duplicated. Re-posed to the ANGLE of the maximum (distinct, and the tier's completion problem with a full graph-reading walk).",
+     "old": "max value of sin  ->  1", "new": "angle of sin maximum  ->  90"},
+    {"tier": "bronze", "index": 7,
+     "what": "Duplicate-answer disease: original 'value of tan 45°' (=1) duplicated. Re-posed to the ANGLE of the cosine minimum (distinct).",
+     "old": "tan 45°  ->  1", "new": "angle of cos minimum  ->  180"},
+    {"tier": "silver", "index": 4,
+     "what": "Duplicate-answer disease: original 'value of cos 60°' (=0.5) duplicated sin 30° in the same tier. Re-posed to cos 120° (distinct, and adds a genuine reference-angle + sign walk).",
+     "old": "cos 60°  ->  0.5", "new": "cos 120°  ->  -0.5"},
+    {"tier": "silver", "index": 6,
+     "what": "Duplicate-answer disease: original 'cos x = 0, smaller solution' (=90) duplicated sin x = 1 in the same tier. Switched to the larger solution (distinct).",
+     "old": "cos x = 0 smaller  ->  90", "new": "cos x = 0 larger  ->  270"},
+    {"tier": "all", "index": -1,
+     "what": "Style: removed em dashes from preserved worked_examples step labels (validator + house rule: no em dashes student-facing).",
+     "old": "'Step 1 — Where does cos = 0?' etc.", "new": "'Step 1: Where does cos = 0?' etc."},
+  ],
+  "issues_resolved": 7,
+  "figures_added": [
+    {"tier": "opener", "index": 0, "kind": "svg", "what": "Big-wheel figure: radius 10 m, top +10 m, bottom -10 m, start at 0 m on the dashed centre line; theme-safe currentColor, matches the opener's box answers."},
+    {"tier": "bronze", "index": 0, "kind": "chart", "what": "sin curve, 0-360 deg (angle of maximum)"},
+    {"tier": "bronze", "index": 5, "kind": "chart", "what": "tan curve with asymptote gaps at 90/270 (period of tan)"},
+    {"tier": "bronze", "index": 6, "kind": "chart", "what": "sin curve (period)"},
+    {"tier": "bronze", "index": 7, "kind": "chart", "what": "cos curve (angle of minimum)"},
+    {"tier": "silver", "index": 0, "kind": "chart", "what": "sin curve + dashed y = 1 line"},
+    {"tier": "silver", "index": 1, "kind": "chart", "what": "cos curve + dashed y = -1 line"},
+    {"tier": "silver", "index": 2, "kind": "chart", "what": "sin curve + dashed y = 0 line"},
+    {"tier": "silver", "index": 4, "kind": "chart", "what": "cos curve + dashed y = -0.5 line"},
+    {"tier": "silver", "index": 5, "kind": "chart", "what": "tan curve with asymptote gaps (asymptote question)"},
+    {"tier": "silver", "index": 6, "kind": "chart", "what": "cos curve + dashed y = 0 line"},
+    {"tier": "gold", "index": 0, "kind": "chart", "what": "sin curve + dashed y = 0.5 line"},
+    {"tier": "gold", "index": 1, "kind": "chart", "what": "cos curve + dashed y = 0.5 line"},
+    {"tier": "gold", "index": 2, "kind": "chart", "what": "sin curve + dashed y = -1 line"},
+    {"tier": "gold", "index": 3, "kind": "chart", "what": "tan curve + dashed y = 0 line (tan zeros)"},
+    {"tier": "gold", "index": 4, "kind": "chart", "what": "cos curve + dashed y = -0.5 line"},
+  ],
+  "opener_concept": "Big wheel (Ferris wheel): your height above the centre line as the wheel turns traces a wave, 0 at 0deg, +10 at 90deg, 0 at 180deg, -10 at 270deg, 0 at 360deg. That IS the sine curve scaled; its repeat length is the period. Names sin/cos/tan honestly from what the student just did.",
+  "opener_touched": True,
+  "notes": "Lesson was fully unconverted (no guided/tier_guides). Full stack built in one pass: opener (wheel), 3 teach walks, tier_guides with stepped examples, guided_steps on all 15 non-MC problems except 5 atomic exact-value recalls (sin 0, cos 0, sin 30 x2, cos 180) which carry guided_skip_reason (no intermediate steps to walk), method_card slimmed to <=140 words, misconception expects derived by committing each error. 15 Chart.js figures (sin/cos/tan curves, faithful points every 5deg, dashed y=k solution lines) + opener SVG. No duplicate answers within any tier after repair. All solutions fresh-solved; every chart point re-verified against sin/cos/tan; every k-line matches its problem. Validator PASS on the live row; semantic round-trip identical (int/float normalisation only). Preserved topic_links + related_videos byte-for-byte; worked_examples changed only to strip em dashes."
+}
+json.dump(changes, io.open("changes_maths-eduqas_graphs-L06.json","w",encoding="utf-8"), indent=1, ensure_ascii=False)
+print("wrote changes_maths-eduqas_graphs-L06.json")
+print("shard:", __import__("os").path.exists("lesson_maths-eduqas_graphs-L06.json"))

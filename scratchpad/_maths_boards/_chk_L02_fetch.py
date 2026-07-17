@@ -1,12 +1,10 @@
 import os, json, urllib.request
-KEY = os.environ["SUPABASE_SERVICE_KEY"]
-ID = "cbc91397-a67c-472a-b0da-308aa9da1653"
-url = f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=id,slug,title,practice_data"
-req = urllib.request.Request(url, headers={"apikey":KEY,"Authorization":f"Bearer {KEY}"})
-data = json.load(urllib.request.urlopen(req))
-with open("_CHK_L02_live.json","w",encoding="utf-8") as f:
-    json.dump(data, f, indent=2, ensure_ascii=False)
-row = data[0]
-print("title:", row["title"], "| slug:", row["slug"])
-pd = row["practice_data"]
-print("keys:", list(pd.keys()))
+ID="bba25423-da94-4b3e-8415-2e9161014760"
+key=os.environ["SUPABASE_SERVICE_KEY"]
+url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}&select=practice_data,slug,title"
+req=urllib.request.Request(url, headers={"apikey":key,"Authorization":f"Bearer {key}"})
+data=json.load(urllib.request.urlopen(req))
+open("_CHK_L02_live.json","w",encoding="utf-8").write(json.dumps(data[0]["practice_data"],ensure_ascii=False,indent=1))
+print("slug:",data[0].get("slug"),"| title:",data[0].get("title"))
+pd=data[0]["practice_data"]
+print("top keys:",list(pd.keys()))

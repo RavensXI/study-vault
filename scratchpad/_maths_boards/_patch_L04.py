@@ -1,17 +1,18 @@
-import os,json,io,urllib.request
-KEY=os.environ["SUPABASE_SERVICE_KEY"]
-ID="6a2afcf8-1c03-4b07-b228-3999deb3d402"
-pd=json.load(io.open("lesson_maths-ocr_number-L04.json",encoding="utf-8"))
-body=json.dumps({"practice_data":pd},ensure_ascii=False).encode("utf-8")
-url="https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.%s"%ID
+import os, json, urllib.request
+ID="499de8ed-424f-4027-a013-e64b3b083820"
+key=os.environ["SUPABASE_SERVICE_KEY"]
+pd=json.load(open("lesson_maths-eduqas_geometry-L04.json",encoding="utf-8"))
+url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{ID}"
+body=json.dumps({"practice_data":pd}).encode("utf-8")
 req=urllib.request.Request(url,data=body,method="PATCH",headers={
-  "apikey":KEY,"Authorization":"Bearer "+KEY,"Content-Type":"application/json","Prefer":"return=minimal"})
+ "apikey":key,"Authorization":f"Bearer {key}","Content-Type":"application/json","Prefer":"return=minimal"})
 r=urllib.request.urlopen(req)
 print("PATCH status",r.status)
-# verify readback
-url2=url+"&select=practice_data"
-req2=urllib.request.Request(url2,headers={"apikey":KEY,"Authorization":"Bearer "+KEY})
-live=json.load(urllib.request.urlopen(req2))[0]["practice_data"]
-print("live has guided:", "guided" in live, "tier_guides:", "tier_guides" in live)
-print("silver solutions:", [p["solutions"] for p in live["problem_bank"]["silver"]])
-print("bronze n/silver n/gold n:", len(live["problem_bank"]["bronze"]),len(live["problem_bank"]["silver"]),len(live["problem_bank"]["gold"]))
+# verify
+g=urllib.request.Request(url+"&select=practice_data",headers={"apikey":key,"Authorization":f"Bearer {key}"})
+live=json.load(urllib.request.urlopen(g))[0]["practice_data"]
+print("live keys:",sorted(live.keys()))
+print("has guided:", "guided" in live, "| tier_guides:", "tier_guides" in live)
+print("bronze[0] hint:", live["problem_bank"]["bronze"][0].get("hint","MISSING")[:40])
+print("gold[0] mis[0] expect:", live["problem_bank"]["gold"][0]["misconceptions"][0]["expect"])
+print("silver[2] display starts svg:", live["problem_bank"]["silver"][2]["display"][:10])

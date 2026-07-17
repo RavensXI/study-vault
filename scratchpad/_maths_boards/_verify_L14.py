@@ -1,44 +1,99 @@
-import math
-def diffs(s):
-    d1=[s[i+1]-s[i] for i in range(len(s)-1)]
-    d2=[d1[i+1]-d1[i] for i in range(len(d1)-1)]
-    return d1,d2
-def quad_nth(seq):
-    d1,d2=diffs(seq)
-    a=d2[0]/2
-    rem=[seq[i]-a*(i+1)**2 for i in range(len(seq))]
-    # linear part
-    b=rem[1]-rem[0]; c=rem[0]-b
-    return a,b,c,rem
-seqs={
- "gold[0] 2,8,18,32,50":[2,8,18,32,50],
- "gold[3] 1,7,17,31,49":[1,7,17,31,49],
- "bronze[4] 3,6,11,18,27":[3,6,11,18,27],
- "silver[0] 0,3,8,15,24":[0,3,8,15,24],
- "silver[4] 4,10,18,28,40":[4,10,18,28,40],
- "teach.gold 4,13,26,43,64":[4,13,26,43,64],
- "mcard 3,8,15,24,35":[3,8,15,24,35],
- "we0 2,6,12,20,30":[2,6,12,20,30],
- "goldex 4,13,28,49":[4,13,28,49],
-}
-for k,s in seqs.items():
-    a,b,c,rem=quad_nth(s)
-    print(f"{k}: a={a} b={b} c={c} rem={rem}")
-# silver6 next term
-s=[5,12,23]; d1,_=diffs(s); print("silver6 gaps",d1,"next gap",d1[-1]+(d1[1]-d1[0]),"next term",s[-1]+d1[-1]+(d1[1]-d1[0]))
-# gold2 iteration
-import math
-print("gold2 disc",25+8,"sqrt33",round(math.sqrt(33),4),"L",round((5+math.sqrt(33))/2,4),"x1",round(math.sqrt(17),4))
-# gold1 inverse: f=(2x+1)/(x-3)
-print("gold1 f^-1 num coeff = 3 (from x(y-2)=3y+1)")
-# silver3 iteration
-x0=2; x1=(x0**2+5)/4; x2=(x1**2+5)/4; print("silver3 x1",x1,"x2",round(x2,4))
-# we2
-x=1
-for i in range(3): x=(x**2+3)/5
-print("we2 x3",round(x,4))
-# functions
-print("silver1 fg(2)=",3*(2**2)-1,"gf(2)=",(3*2-1)**2)
-print("silver5 gf(4)=",3*(4**2+2),"fg(4)=",(3*4)**2+2)
-print("silver2 f^-1(17)=",(17-2)/5,"f(17)=",5*17+2)
-print("gold4 fg roots (2x-1)^2=25 ->",3,-2)
+# -*- coding: utf-8 -*-
+import json, io
+d = json.load(io.open("lesson_maths-eduqas_algebra-L14.json", encoding="utf-8"))
+pb = d["problem_bank"]
+errs = []
+
+def nth_from_seq(seq):
+    d1 = [seq[i+1]-seq[i] for i in range(len(seq)-1)]
+    d2 = [d1[i+1]-d1[i] for i in range(len(d1)-1)]
+    a = d2[0]/2
+    rem = [seq[i]-a*(i+1)**2 for i in range(len(seq))]
+    b = rem[1]-rem[0]; c = rem[0]-b
+    return a, b, c
+
+checks = []
+checks.append(("G0 nth", nth_from_seq([2,9,20,35,54]), (2,1,-1)))
+checks.append(("G1 fg solve", (19-13)/3, 2))
+x=1; x=(x**2+3)/5; x=(x**2+3)/5
+checks.append(("G2 x2", round(x,3), 0.728))
+checks.append(("G3 inv check f(4)->9->4", (3*9+1)/(9-2), 4))
+checks.append(("G4 nth", nth_from_seq([5,12,23,38]), (2,1,2)))
+a,b,c = nth_from_seq([5,12,23,38]); checks.append(("G4 10th", a*100+b*10+c, 212))
+d1=[4-1,9-4,16-9,25-16]; checks.append(("B0 2nd diff", d1[1]-d1[0], 2))
+checks.append(("B1 a", 6/2, 3))
+checks.append(("B2 f4", 2*4+3, 11))
+checks.append(("B3 f3", 3**2-1, 8))
+checks.append(("B4 fneg1", 2*(-1)+3, 1))
+checks.append(("B5 x3", 1+3+3, 7))
+checks.append(("B6 squares", [i*i for i in range(1,5)], [1,4,9,16]))
+checks.append(("B7 f3", 5*3, 15))
+checks.append(("S0 nth", nth_from_seq([3,8,15,24,35]), (1,2,0)))
+checks.append(("S1 fg2", 3*(2**2)+1, 13))
+checks.append(("S2 gf2", (3*2+1)**2, 49))
+checks.append(("S3 inv check f(3)->1->3", (1+5)/2, 3))
+checks.append(("S4 nth", nth_from_seq([0,3,8,15,24]), (1,0,-1)))
+x=1; x=(x+5)/2; x=(x+5)/2
+checks.append(("S5 x2", x, 4))
+checks.append(("S6 inv check f(5)->2->5", 3*2-1, 5))
+
+for name, got, want in checks:
+    ok = got == want or (isinstance(got,tuple) and tuple(round(g,6) for g in got)==tuple(want))
+    if not ok:
+        errs.append("%s got %r want %r" % (name, got, want))
+
+# landing box == solution for every non-MC problem
+for tier in ("bronze","silver","gold"):
+    for i,p in enumerate(pb[tier]):
+        if p.get("input_type")=="multiple_choice": continue
+        live=[s for s in (p.get("guided_steps") or []) if s.get("answer") is not None]
+        last=live[-1]["answer"]; sol=p["solutions"][0]
+        if abs(float(last)-float(sol))>1e-9:
+            errs.append("%s[%d] last box %r != sol %r"%(tier,i,last,sol))
+
+# MC expects valid distractor indices (1..n-1), never 0
+for tier in ("bronze","silver","gold"):
+    for i,p in enumerate(pb[tier]):
+        if p.get("input_type")!="multiple_choice": continue
+        n=len(p["options"])
+        for mm in p["misconceptions"]:
+            e=mm["expect"]
+            if not (isinstance(e,int) and 1<=e<=n-1):
+                errs.append("%s[%d] bad MC expect %r"%(tier,i,e))
+
+# single_value expect must not equal solution and must be plausibly the error's value (just non-equal check)
+for tier in ("bronze","silver","gold"):
+    for i,p in enumerate(pb[tier]):
+        if p.get("input_type")=="multiple_choice": continue
+        for mm in p["misconceptions"]:
+            e=mm["expect"]
+            if e is not None and abs(float(e)-float(p["solutions"][0]))<1e-9:
+                errs.append("%s[%d] expect equals sol"%(tier,i))
+
+# duplicate solutions within tier
+for tier in ("bronze","silver","gold"):
+    seen={}
+    for i,p in enumerate(pb[tier]):
+        if p.get("input_type")=="multiple_choice": continue
+        k=tuple(p["solutions"])
+        if k in seen: errs.append("%s dup sol %r (%d,%d)"%(tier,k,seen[k],i))
+        seen[k]=i
+
+# em dash scan
+import re
+def scan(o,path=""):
+    if isinstance(o,dict):
+        for k,v in o.items():
+            if k in ("note",): continue
+            scan(v,path+"."+k)
+    elif isinstance(o,list):
+        for j,v in enumerate(o): scan(v,path+"[%d]"%j)
+    elif isinstance(o,str) and "—" in o:
+        errs.append("EM DASH at "+path)
+scan(d)
+
+if errs:
+    print("VERIFY FAIL:")
+    for e in errs: print("  -",e)
+else:
+    print("VERIFY OK: fresh-solves, landing boxes, MC/SV expects, uniqueness, no em dash")

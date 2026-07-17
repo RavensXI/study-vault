@@ -1,43 +1,27 @@
-import json, io, re
-pd=json.load(io.open("_CHK_L09_live.json",encoding="utf-8"))
-pb=pd["problem_bank"]
+import json, re
 
-def parse_eqs(display):
-    # extract \(...\) equations
-    eqs=re.findall(r'\\((.*?)\\)', display)
-    return eqs
+live=json.load(open("_LIVE_eduqas_probstat_L02.json",encoding="utf-8"))
 
-# manual fresh-solve using sympy
-import sympy as sp
-x,y=sp.symbols('x y')
-def solve_from_eqstrings(eqstrs):
-    eqs=[]
-    for s in eqstrs:
-        s=s.replace('−','-')
-        if '=' not in s: continue
-        L,R=s.split('=')
-        # insert * between number and variable
-        L=re.sub(r'(\d)([xy])', r'\1*\2', L)
-        R=re.sub(r'(\d)([xy])', r'\1*\2', R)
-        eqs.append(sp.Eq(sp.sympify(L), sp.sympify(R)))
-    return sp.solve(eqs,[x,y])
+# 1. Em dash scan across all student-facing strings
+EM="—"
+def walk(o,path=""):
+    if isinstance(o,dict):
+        for k,v in o.items():
+            # skip internal note fields
+            if k=="note": continue
+            walk(v,f"{path}.{k}")
+    elif isinstance(o,list):
+        for i,v in enumerate(o):
+            walk(v,f"{path}[{i}]")
+    elif isinstance(o,str):
+        if EM in o:
+            print("EMDASH:",path,repr(o[:80]))
+walk(live)
+print("emdash scan done")
 
-problems_report=[]
-for tier in ("bronze","silver","gold"):
-    for i,p in enumerate(pb[tier]):
-        disp=p["display"]
-        sols=p["solutions"]
-        eqstrs=parse_eqs(disp)
-        # Some problems are word problems: skip auto-solve, handle manually
-        note=""
-        if len(eqstrs)>=2 and all('=' in e for e in eqstrs):
-            try:
-                res=solve_from_eqstrings(eqstrs)
-                sx=float(res[x]); sy=float(res[y])
-                ok = abs(sx-sols[0])<1e-9 and abs(sy-sols[1])<1e-9
-                note=f"solved x={sx} y={sy} stored={sols} {'OK' if ok else '*** MISMATCH ***'}"
-            except Exception as e:
-                note=f"autoSolveFail: {e}"
-        else:
-            note=f"WORD PROBLEM (manual) stored={sols}"
-        print(f"{tier}[{i}]: {note}")
+# 2. Check pre-dump preservation
+pre=json.load(open("_pre_dump_maths-eduqas.json",encoding="utf-8"))
+# pre may be a list of rows or dict
+print("pre type:",type(pre))
+if isinstance(pre,dict):
+    print("pre keys sample:",list(pre.keys())[:5])

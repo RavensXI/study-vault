@@ -1,25 +1,18 @@
-import json, re
-ID = "96f5aef3-e4c8-4faf-ba82-1d587dc4e10e"
-pre = json.load(open("_pre_dump_maths-aqa.json", encoding="utf-8"))
-live = json.load(open("_live_graphsL02.json", encoding="utf-8"))["practice_data"]
-entry = next(r for r in pre if r["id"]==ID)
-pb_pre = entry["practice_data"]["problem_bank"]
-pb_live = live["problem_bank"]
-
-def strip_svg(s):
-    return re.sub(r"<svg.*?</svg>", "[svg]", s or "", flags=re.S)
-
+import json
+ID="32acb3ec-b5ac-410b-984c-d9008683af8e"
+live=json.load(open("_live_algL06_eduqas.json",encoding="utf-8"))["practice_data"]
+dump=json.load(open("_pre_dump_maths-eduqas.json",encoding="utf-8"))
+entry=[r for r in dump if r.get("id")==ID][0]
+pre=entry["practice_data"]
 for tier in ["bronze","silver","gold"]:
-    pre_t = pb_pre.get(tier, [])
-    live_t = pb_live.get(tier, [])
-    print(f"=== {tier}: pre {len(pre_t)} live {len(live_t)}")
-    for i in range(max(len(pre_t),len(live_t))):
-        p = pre_t[i] if i<len(pre_t) else {}
-        l = live_t[i] if i<len(live_t) else {}
-        dp, dl = strip_svg(p.get("display")), strip_svg(l.get("display"))
-        sp, sl = p.get("solutions"), l.get("solutions")
-        if dp!=dl or sp!=sl:
-            print(f"  [{i}] DISPLAY {'diff' if dp!=dl else 'same'} | SOL pre={sp} live={sl}")
-            if dp!=dl:
-                print("     PRE :", dp[:200])
-                print("     LIVE:", dl[:200])
+    lb=live["problem_bank"][tier]; pb=pre["problem_bank"][tier]
+    print(f"=== {tier}: pre {len(pb)} live {len(lb)} ===")
+    for i,(p,l) in enumerate(zip(pb,lb)):
+        dchg = p.get("display")!=l.get("display")
+        schg = p.get("solutions")!=l.get("solutions")
+        ochg = p.get("options")!=l.get("options")
+        if dchg or schg or ochg:
+            print(f" [{i}] display {'CHG' if dchg else ''} sol {'CHG' if schg else ''} opts {'CHG' if ochg else ''}")
+            if dchg: print("    pre:",p.get("display"),"| live:",l.get("display"))
+            if schg: print("    pre sol:",p.get("solutions"),"| live:",l.get("solutions"))
+            if ochg: print("    pre opts:",p.get("options"),"\n    live opts:",l.get("options"))

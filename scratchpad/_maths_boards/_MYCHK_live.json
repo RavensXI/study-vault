@@ -1,0 +1,1211 @@
+{
+  "guided": {
+    "teach": {
+      "gold": {
+        "steps": [
+          {
+            "say": "The new move: a Newton-Raphson formula. Work the numerator and denominator separately, then divide, and repeat."
+          },
+          {
+            "pre": "x₁ numerator: 2 × 3³ + 20 = 2 × 27 + 20 = ",
+            "hint": "3³ = 27, doubled is 54, plus 20.",
+            "post": "",
+            "answer": 74
+          },
+          {
+            "pre": "x₁ denominator: 3 × 3² = 3 × 9 = ",
+            "hint": "3² = 9, times 3.",
+            "post": "",
+            "answer": 27
+          },
+          {
+            "pre": "x₁ = 74 ÷ 27 to 4 d.p. = ",
+            "hint": "74 ÷ 27 = 2.7407...",
+            "post": "",
+            "answer": 2.7407
+          },
+          {
+            "pre": "x₂ = (2 × 2.7407³ + 20) ÷ (3 × 2.7407²) to 3 d.p. = ",
+            "hint": "Numerator ≈ 61.18, denominator ≈ 22.53.",
+            "post": "",
+            "answer": 2.715
+          },
+          {
+            "pre": "Check: 2.715³ to the nearest whole number = ",
+            "done": "≈ 20, so x₂ solves x³ = 20. Gone. That was the whole point of the Newton-Raphson step.",
+            "hint": "2.715 × 2.715 × 2.715.",
+            "post": "",
+            "answer": 20
+          }
+        ],
+        "display": "Use \\(x_{n+1} = \\frac{2x_n^3 + 20}{3x_n^2}\\) with \\(x_0 = 3\\). Find \\(x_2\\) to 3 d.p."
+      },
+      "bronze": {
+        "steps": [
+          {
+            "say": "Rate of change is the steepness of the line: how much y climbs for the x you move across. It is rise ÷ run."
+          },
+          {
+            "pre": "Rise (top y minus bottom y): 15 − 3 = ",
+            "hint": "15 take away 3.",
+            "post": "",
+            "answer": 12
+          },
+          {
+            "pre": "Run (right x minus left x): 5 − 1 = ",
+            "hint": "5 take away 1.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Rate of change = rise ÷ run = 12 ÷ 4 = ",
+            "hint": "12 shared into 4.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Check: a gradient of 3 over a run of 4 climbs 3 × 4 = ",
+            "done": "That matches the rise of 12. Gone. That was the whole point: rise over run.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 12
+          }
+        ],
+        "display": "A tangent to a curve passes through (1, 3) and (5, 15). Find the rate of change."
+      },
+      "silver": {
+        "steps": [
+          {
+            "say": "The new move here: iterate with a calculator, keeping full precision, feeding each answer back in."
+          },
+          {
+            "pre": "x₁ denominator: 2 + 2 = ",
+            "hint": "Add 2 to the start value.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "x₁ = 12 ÷ 4 = ",
+            "hint": "12 shared into 4.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "x₂ denominator: 3 + 2 = ",
+            "hint": "Add 2 to x₁.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "x₂ = 12 ÷ 5 = ",
+            "hint": "12 ÷ 5 = 2.4.",
+            "post": "",
+            "answer": 2.4
+          },
+          {
+            "pre": "Check: 2.4 × 5 = ",
+            "done": "= 12, so x₂ = 2.4. That was the whole point: feed each answer back in.",
+            "hint": "Should come back to 12.",
+            "post": "",
+            "answer": 12
+          }
+        ],
+        "display": "Use \\(x_{n+1} = \\frac{12}{x_n + 2}\\) with \\(x_0 = 2\\). Find \\(x_2\\)."
+      }
+    },
+    "opener": {
+      "steps": [
+        {
+          "say": "A fish tank holds 200 litres. Each day you drain half the water, then top it up with 60 litres of fresh water. No algebra, just do the two sums."
+        },
+        {
+          "pre": "After day 1 the tank holds ",
+          "hint": "Halve 200 to get 100, then add the 60 litres.",
+          "post": " litres",
+          "answer": 160
+        },
+        {
+          "say": "Now take that new amount, 160 litres, through the <strong>same</strong> rule again."
+        },
+        {
+          "pre": "After day 2 the tank holds ",
+          "hint": "Halve 160 to get 80, then add 60.",
+          "post": " litres",
+          "answer": 140
+        },
+        {
+          "say": "Each new amount was the old one put through one rule: halve, then add 60. Feeding an answer back into the same rule, over and over, is called <strong>iteration</strong>. In algebra we write the rule as \\(x_{n+1} = \\frac{x_n}{2} + 60\\), with \\(x_0 = 200\\) the starting amount (the levels settle toward 120 litres). The other half of this lesson reads a <strong>rate of change</strong> straight off a graph: the steepness, or gradient, of the line, rise ÷ run."
+        }
+      ]
+    }
+  },
+  "method_card": {
+    "steps": [
+      "Rate of change = gradient: (change in y) ÷ (change in x) between two points on the line or tangent.",
+      "Iteration: start at x₀ and apply xₙ₊₁ = f(xₙ) repeatedly, feeding each answer back in.",
+      "Keep full accuracy between steps; round only the final term to the accuracy asked for.",
+      "A sign change in f(x) between two x-values shows a root lies between them."
+    ],
+    "title": "How to Work with Rates of Change & Iteration",
+    "content": "<p>A <strong>rate of change</strong> is the gradient of a graph: on a distance-time graph it is a speed, on a speed-time graph an acceleration. Find it with (change in y) ÷ (change in x).</p><p>An <strong>iterative process</strong> uses \\(x_{n+1} = f(x_n)\\): start at \\(x_0\\), substitute to get \\(x_1\\), then feed that back in for \\(x_2\\), and so on until the values settle.</p>",
+    "example": "<p><strong>Iterate \\(x_{n+1} = \\sqrt{3x_n + 1}\\) with \\(x_0 = 1\\).</strong></p><p>\\(x_1 = \\sqrt{3(1)+1} = \\sqrt{4} = 2\\)</p><p>\\(x_2 = \\sqrt{3(2)+1} = \\sqrt{7} \\approx 2.65\\)</p>"
+  },
+  "tier_guides": {
+    "gold": {
+      "steps": [
+        "A <strong>Newton-Raphson</strong> formula is a fraction such as \\(\\frac{2x_n^3 + a}{3x_n^2}\\): work numerator and denominator separately, then divide.",
+        "<strong>Trapezium rule</strong>: ½ × strip width × (first height + last height + 2 × the middle heights).",
+        "For a real-life model, the average rate of change is (change in output) ÷ (change in input) between the two given values."
+      ],
+      "title": "Gold: Newton-Raphson, trapezium rule and real rates",
+      "example": {
+        "steps": [
+          {
+            "label": "Numerator",
+            "content": "2 × 2³ + 7 = 16 + 7 = 23"
+          },
+          {
+            "label": "Denominator",
+            "content": "3 × 2² = 12"
+          },
+          {
+            "label": "Check",
+            "content": "23 ÷ 12 ≈ 1.92, close to ∛7 ≈ 1.91"
+          },
+          {
+            "label": "Answer",
+            "content": "\\(x_1 = 23 \\div 12 = 1.917\\) (3 d.p.)",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "Use \\(x_{n+1} = \\frac{2x_n^3 + 7}{3x_n^2}\\) with \\(x_0 = 2\\). Find \\(x_1\\) to 3 d.p."
+      }
+    },
+    "bronze": {
+      "steps": [
+        "<strong>Rate of change</strong> = gradient of the line: (change in y) ÷ (change in x), or rise ÷ run.",
+        "<strong>Iteration</strong>: start at \\(x_0\\), put it into the formula for \\(x_1\\), then feed \\(x_1\\) back in for \\(x_2\\).",
+        "Work one step at a time and write each term down. Watch the sign whenever a value is negative."
+      ],
+      "title": "Bronze: rates of change and first iteration steps",
+      "example": {
+        "steps": [
+          {
+            "label": "Rise",
+            "content": "15 − 3 = 12"
+          },
+          {
+            "label": "Run",
+            "content": "5 − 1 = 4"
+          },
+          {
+            "label": "Check",
+            "content": "4 × 3 = 12, matching the rise"
+          },
+          {
+            "label": "Answer",
+            "content": "Gradient = 12 ÷ 4 = 3",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "A line passes through (1, 3) and (5, 15). Find the gradient."
+      }
+    },
+    "silver": {
+      "steps": [
+        "Keep the <strong>full calculator value</strong> for each term. Round only the final term, to the decimal places asked for.",
+        "For \\(x_2\\), apply the formula twice: each answer becomes the next input.",
+        "On a speed-time graph the gradient is an <strong>acceleration</strong>. A <strong>sign change</strong> in \\(f(x)\\) traps a root."
+      ],
+      "title": "Silver: calculator iteration, acceleration and sign changes",
+      "example": {
+        "steps": [
+          {
+            "label": "x₁",
+            "content": "√(4 × 1 + 5) = √9 = 3"
+          },
+          {
+            "label": "Inside for x₂",
+            "content": "4 × 3 + 5 = 17"
+          },
+          {
+            "label": "Check",
+            "content": "√17 sits between √16 = 4 and √25 = 5"
+          },
+          {
+            "label": "Answer",
+            "content": "\\(x_2 = \\sqrt{17} = 4.12\\) (2 d.p.)",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "Use \\(x_{n+1} = \\sqrt{4x_n + 5}\\) with \\(x_0 = 1\\). Find \\(x_2\\) to 2 d.p."
+      }
+    }
+  },
+  "topic_links": {
+    "prerequisites": [
+      {
+        "slug": "ratio-proportion/4",
+        "title": "Direct & Inverse Proportion"
+      },
+      {
+        "slug": "ratio-proportion/5",
+        "title": "Proportion Equations & Powers"
+      }
+    ]
+  },
+  "problem_bank": {
+    "gold": [
+      {
+        "hint": "The rate of change is the gradient of the tangent: rise ÷ run.",
+        "display": "A tangent to a curve at \\(x = 2\\) passes through the points (0, 1) and (4, 13). Find the rate of change at \\(x = 2\\).",
+        "solutions": [
+          3
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise (top y minus bottom y): 13 − 1 = ",
+            "hint": "13 take away 1.",
+            "post": "",
+            "answer": 12
+          },
+          {
+            "pre": "Run (right x minus left x): 4 − 0 = ",
+            "hint": "4 take away 0.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Rate of change = rise ÷ run = 12 ÷ 4 = ",
+            "say": "The rate of change is the gradient of the tangent.",
+            "hint": "12 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 3
+          },
+          {
+            "pre": "Check: 3 × 4 = ",
+            "done": "That matches the rise of 12, so the rate of change is 3.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 12
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "divided run by rise",
+            "expect": 0.333,
+            "message": "0.333 is run ÷ rise, upside down. Rate of change = rise ÷ run = 12 ÷ 4 = 3.",
+            "pattern": "inverted_gradient"
+          }
+        ]
+      },
+      {
+        "hint": "Work the numerator and denominator separately, then divide. Repeat to x2.",
+        "display": "Use \\(x_{n+1} = \\frac{2x_n^3 + 5}{3x_n^2}\\) with \\(x_0 = 2\\). Find \\(x_2\\) to 3 d.p.",
+        "solutions": [
+          1.711
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ numerator: 2 × 2³ + 5 = 2 × 8 + 5 = ",
+            "hint": "2³ = 8, doubled is 16, plus 5.",
+            "post": "",
+            "answer": 21
+          },
+          {
+            "pre": "x₁ denominator: 3 × 2² = 3 × 4 = ",
+            "hint": "2² = 4, times 3.",
+            "post": "",
+            "answer": 12
+          },
+          {
+            "pre": "x₁ = 21 ÷ 12 = ",
+            "say": "Now feed x₁ back into the same formula for x₂.",
+            "hint": "21 ÷ 12 = 1.75.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 1.75
+          },
+          {
+            "pre": "x₂ = (2 × 1.75³ + 5) ÷ (3 × 1.75²) to 3 d.p. = ",
+            "hint": "Numerator ≈ 15.719, denominator ≈ 9.188.",
+            "post": "",
+            "answer": 1.711
+          },
+          {
+            "pre": "Check: 1.711³ to the nearest whole number = ",
+            "done": "≈ 5, so x₂ solves x³ = 5. The answer is 1.711.",
+            "hint": "1.711 × 1.711 × 1.711.",
+            "post": "",
+            "answer": 5
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "stopped at x1",
+            "expect": 1.75,
+            "message": "1.75 is x₁, only one substitution. x₂ needs the formula applied again, feeding x₁ back in: 1.711.",
+            "pattern": "single_substitution"
+          },
+          {
+            "note": "used x^3+5",
+            "expect": 1.119,
+            "message": "1.119 drops the 2 in the numerator. The top is 2x³ + 5, not x³ + 5; redo each step with the full formula.",
+            "pattern": "missing_coefficient"
+          }
+        ]
+      },
+      {
+        "hint": "Find P at both times, subtract, then divide by the 10 years.",
+        "display": "The population \\(P\\) of a town is modelled by \\(P = 2000 \\times 1.05^t\\), where \\(t\\) is in years. Find the average rate of change between \\(t = 0\\) and \\(t = 10\\), to the nearest whole number.",
+        "solutions": [
+          126
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "P(0) = 2000 × 1.05⁰ = ",
+            "hint": "Anything to the power 0 is 1.",
+            "post": "",
+            "answer": 2000
+          },
+          {
+            "pre": "P(10) = 2000 × 1.05¹⁰, to the nearest whole number = ",
+            "hint": "1.05 to the power 10, times 2000.",
+            "post": "",
+            "answer": 3258
+          },
+          {
+            "pre": "Change in P = 3258 − 2000 = ",
+            "say": "The average rate of change is the total change over the time.",
+            "hint": "Subtract the two populations.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 1258
+          },
+          {
+            "pre": "Rate = 1258 ÷ 10 = 125.8, to the nearest whole number = ",
+            "done": "The population grows by about 126 people per year on average.",
+            "hint": "Divide by the 10 years, then round.",
+            "post": "",
+            "answer": 126
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "gave total change",
+            "expect": 1258,
+            "message": "1258 is the total change over 10 years. Divide by 10 for the rate: 1258 ÷ 10 ≈ 126.",
+            "pattern": "forgot_divide"
+          }
+        ]
+      },
+      {
+        "hint": "Use ½ × width × (first height + last height + 2 × the middle heights).",
+        "display": "<svg viewBox=\"0 0 250 175\" role=\"img\" aria-label=\"Curve y equals x squared from x=0 to x=4 with four trapezium strips of width 1 and heights 0, 1, 4, 9, 16\"><line x1=\"45\" y1=\"18\" x2=\"45\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"45\" y1=\"155\" x2=\"233\" y2=\"155\" stroke=\"currentColor\" stroke-width=\"1\"/><polygon points=\"45.0,155 45.0,155.0 90.0,146.6 90.0,155\" fill=\"#60a5fa\" fill-opacity=\"0.25\" stroke=\"#3b82f6\" stroke-width=\"0.8\"/><polygon points=\"90.0,155 90.0,146.6 135.0,121.2 135.0,155\" fill=\"#60a5fa\" fill-opacity=\"0.25\" stroke=\"#3b82f6\" stroke-width=\"0.8\"/><polygon points=\"135.0,155 135.0,121.2 180.0,79.1 180.0,155\" fill=\"#60a5fa\" fill-opacity=\"0.25\" stroke=\"#3b82f6\" stroke-width=\"0.8\"/><polygon points=\"180.0,155 180.0,79.1 225.0,20.0 225.0,155\" fill=\"#60a5fa\" fill-opacity=\"0.25\" stroke=\"#3b82f6\" stroke-width=\"0.8\"/><polyline points=\"45.0,155.0 56.2,154.5 67.5,152.9 78.8,150.3 90.0,146.6 101.2,141.8 112.5,136.0 123.8,129.2 135.0,121.2 146.2,112.3 157.5,102.3 168.8,91.2 180.0,79.1 191.2,65.9 202.5,51.6 213.8,36.3 225.0,20.0\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"/><text x=\"42\" y=\"169\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">0</text><text x=\"87\" y=\"169\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">1</text><text x=\"132\" y=\"169\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">2</text><text x=\"177\" y=\"169\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">3</text><text x=\"222\" y=\"169\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">4</text><text x=\"41\" y=\"151\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">0</text><text x=\"86\" y=\"143\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">1</text><text x=\"131\" y=\"117\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">4</text><text x=\"176\" y=\"75\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">9</text><text x=\"221\" y=\"16\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">16</text><text x=\"213\" y=\"169\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">x</text></svg><p>Use the trapezium rule with 4 strips (each of width 1) to estimate the area under \\(y = x^2\\) from \\(x = 0\\) to \\(x = 4\\). The heights are 0, 1, 4, 9 and 16.</p><span class=\"figure-caption\">Diagram not drawn accurately</span>",
+        "solutions": [
+          22
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Height at x = 2: 2² = ",
+            "hint": "2 squared.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Height at x = 3: 3² = ",
+            "hint": "3 squared.",
+            "post": "",
+            "answer": 9
+          },
+          {
+            "pre": "Add the two end heights: 0 + 16 = ",
+            "hint": "First height plus last height.",
+            "post": "",
+            "answer": 16
+          },
+          {
+            "pre": "Double the middle heights: 2 × (1 + 4 + 9) = ",
+            "say": "Now apply the trapezium rule.",
+            "hint": "1 + 4 + 9 = 14, then × 2.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 28
+          },
+          {
+            "pre": "Area = ½ × 1 × (16 + 28) = ",
+            "done": "The trapezium-rule estimate is 22 square units.",
+            "hint": "16 + 28 = 44, then halve.",
+            "post": "",
+            "answer": 22
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "did not double middles",
+            "expect": 15,
+            "message": "15 forgets to double the middle heights. Area ≈ ½ × [(0 + 16) + 2 × (1 + 4 + 9)] = ½ × 44 = 22.",
+            "pattern": "forgot_double_middles"
+          }
+        ]
+      },
+      {
+        "hint": "Square both sides, rearrange to a quadratic, factorise, take the positive root.",
+        "display": "An iteration converges to the solution of \\(x = \\sqrt{2x + 15}\\). Find the positive value it converges to.",
+        "solutions": [
+          5
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "say": "When the iteration settles, x stops changing, so \\(x = \\sqrt{2x + 15}\\). Square both sides: \\(x^2 = 2x + 15\\), which rearranges to \\(x^2 - 2x - 15 = 0\\)."
+          },
+          {
+            "pre": "Two numbers that multiply to −15 and add to −2: one is −5, the other is ",
+            "hint": "−5 × 3 = −15 and −5 + 3 = −2.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "So (x − 5)(x + 3) = 0. The negative root is x = ",
+            "say": "Set each bracket to zero to find the roots.",
+            "hint": "x + 3 = 0 gives x = −3.",
+            "post": "",
+            "phase": "substitute",
+            "answer": -3
+          },
+          {
+            "pre": "The question wants the positive value, so x = ",
+            "hint": "5 is positive, −3 is not.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "Check: 2 × 5 + 15 = ",
+            "done": "√25 = 5 = x, so it balances and the value is 5.",
+            "hint": "2 × 5 = 10, plus 15.",
+            "post": "",
+            "answer": 25
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "gave negative root",
+            "expect": -3,
+            "message": "−3 is the other root. The question asks for the positive value, which is 5.",
+            "pattern": "wrong_root_sign"
+          }
+        ]
+      }
+    ],
+    "bronze": [
+      {
+        "hint": "Speed is the gradient: distance travelled divided by the time taken.",
+        "display": "<svg viewBox=\"0 0 240 160\" role=\"img\" aria-label=\"Distance-time graph: a straight line from the origin to the point 4 hours, 80 km\"><line x1=\"40\" y1=\"18\" x2=\"40\" y2=\"135\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"40\" y1=\"135\" x2=\"220\" y2=\"135\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"40\" y1=\"135\" x2=\"215.0\" y2=\"20.0\" stroke=\"#3b82f6\" stroke-width=\"2\"/><circle cx=\"215.0\" cy=\"20.0\" r=\"3.5\" fill=\"#3b82f6\"/><text x=\"18\" y=\"24\" font-family=\"Inter, sans-serif\" font-size=\"11\" fill=\"currentColor\">80</text><text x=\"211\" y=\"150\" font-family=\"Inter, sans-serif\" font-size=\"11\" fill=\"currentColor\">4</text><text x=\"10\" y=\"16\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">km</text><text x=\"185\" y=\"150\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">hours</text></svg><p>A distance-time graph is a straight line from the origin to the point (4, 80), where distance is in km and time in hours. What is the speed?</p>",
+        "solutions": [
+          20
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Distance travelled (the y-value at the end): ",
+            "hint": "Read the height of the endpoint.",
+            "post": "",
+            "answer": 80
+          },
+          {
+            "pre": "Time taken (the x-value at the end): ",
+            "hint": "Read across to the endpoint.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Speed = distance ÷ time = 80 ÷ 4 = ",
+            "say": "Speed is the steepness of the line.",
+            "hint": "80 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 20
+          },
+          {
+            "pre": "Check: speed × time = 20 × 4 = ",
+            "done": "That matches the 80 km travelled, so the speed is 20 km/h.",
+            "hint": "Multiply speed by time to get distance back.",
+            "post": "",
+            "answer": 80
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "answered the distance",
+            "expect": 80,
+            "message": "80 km is the total distance, not the speed. Speed = distance ÷ time = 80 ÷ 4 = 20 km/h.",
+            "pattern": "read_distance"
+          }
+        ]
+      },
+      {
+        "hint": "Gradient = change in y divided by change in x (rise over run).",
+        "display": "A straight line passes through (1, 4) and (5, 20). Find its gradient.",
+        "solutions": [
+          4
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Rise (top y minus bottom y): 20 − 4 = ",
+            "hint": "20 take away 4.",
+            "post": "",
+            "answer": 16
+          },
+          {
+            "pre": "Run (right x minus left x): 5 − 1 = ",
+            "hint": "5 take away 1.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "Gradient = rise ÷ run = 16 ÷ 4 = ",
+            "say": "Now put the two together.",
+            "hint": "16 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 4
+          },
+          {
+            "pre": "Check: gradient × run = 4 × 4 = ",
+            "done": "That matches the rise of 16, so the gradient is 4.",
+            "hint": "Multiply gradient by run.",
+            "post": "",
+            "answer": 16
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "gave rise, not gradient",
+            "expect": 16,
+            "message": "16 is the change in y only. Divide by the change in x, 5 − 1 = 4, to get 16 ÷ 4 = 4.",
+            "pattern": "forgot_divide"
+          }
+        ]
+      },
+      {
+        "hint": "Add 4 each time: find x1 first, then x2.",
+        "display": "Use \\(x_{n+1} = x_n + 4\\) with \\(x_0 = 3\\). Find \\(x_2\\).",
+        "solutions": [
+          11
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁ = 3 + 4 = ",
+            "hint": "Start value 3, add 4.",
+            "post": "",
+            "answer": 7
+          },
+          {
+            "pre": "x₂ = 7 + 4 = ",
+            "say": "Feed each answer back into the same rule.",
+            "hint": "Feed x₁ back in, add 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 11
+          },
+          {
+            "pre": "Check: from the start, two jumps of 4 is 3 + 8 = ",
+            "done": "Same answer, so x₂ = 11.",
+            "hint": "Two lots of 4 is 8, added to the start.",
+            "post": "",
+            "answer": 11
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "stopped at x1",
+            "expect": 7,
+            "message": "7 is x₁. The question asks for x₂, so apply the rule once more: 7 + 4 = 11.",
+            "pattern": "stopped_early"
+          }
+        ]
+      },
+      {
+        "hint": "Multiply the start value by 2 first, then subtract 1.",
+        "display": "Use \\(x_{n+1} = 2x_n - 1\\) with \\(x_0 = 4\\). Find \\(x_1\\).",
+        "solutions": [
+          7
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "First multiply: 2 × 4 = ",
+            "hint": "Double 4.",
+            "post": "",
+            "answer": 8
+          },
+          {
+            "pre": "Then subtract 1: 8 − 1 = ",
+            "say": "The rule is: double, then take away 1.",
+            "hint": "Take 1 from the double.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 7
+          },
+          {
+            "pre": "Check: reverse it, (7 + 1) ÷ 2 = ",
+            "done": "That returns the start value 4, so x₁ = 7.",
+            "hint": "Add 1, then halve.",
+            "post": "",
+            "answer": 4
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "subtracted before multiplying",
+            "expect": 6,
+            "message": "6 comes from 2 × (4 − 1). Multiply first, then subtract: 2 × 4 − 1 = 7.",
+            "pattern": "wrong_order"
+          }
+        ]
+      },
+      {
+        "hint": "Acceleration is the gradient of a speed-time graph. A flat line has gradient 0.",
+        "display": "<svg viewBox=\"0 0 240 160\" role=\"img\" aria-label=\"Speed-time graph: a horizontal line at 12 metres per second from 0 to 8 seconds\"><line x1=\"40\" y1=\"18\" x2=\"40\" y2=\"135\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"40\" y1=\"135\" x2=\"215\" y2=\"135\" stroke=\"currentColor\" stroke-width=\"1\"/><line x1=\"40\" y1=\"48.8\" x2=\"210.0\" y2=\"48.8\" stroke=\"#3b82f6\" stroke-width=\"2\"/><line x1=\"210.0\" y1=\"48.8\" x2=\"210.0\" y2=\"135\" stroke=\"currentColor\" stroke-width=\"0.8\" stroke-dasharray=\"3 3\"/><circle cx=\"40\" cy=\"48.8\" r=\"3\" fill=\"#3b82f6\"/><circle cx=\"210.0\" cy=\"48.8\" r=\"3\" fill=\"#3b82f6\"/><text x=\"18\" y=\"53\" font-family=\"Inter, sans-serif\" font-size=\"11\" fill=\"currentColor\">12</text><text x=\"206\" y=\"150\" font-family=\"Inter, sans-serif\" font-size=\"11\" fill=\"currentColor\">8</text><text x=\"6\" y=\"16\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">m/s</text><text x=\"204\" y=\"150\" font-family=\"Inter, sans-serif\" font-size=\"10\" fill=\"currentColor\">s</text></svg><p>A speed-time graph shows a horizontal line at 12 m/s for 8 seconds. What is the acceleration?</p>",
+        "solutions": [
+          0
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "The speed starts at 12 and ends at 12, so the change in speed is 12 − 12 = ",
+            "hint": "The speed does not change.",
+            "post": "",
+            "answer": 0
+          },
+          {
+            "pre": "The time taken is ",
+            "hint": "Read the end of the line.",
+            "post": " seconds",
+            "answer": 8
+          },
+          {
+            "pre": "Acceleration = change in speed ÷ time = 0 ÷ 8 = ",
+            "say": "Acceleration is how fast the speed changes.",
+            "hint": "Zero shared by anything is zero.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0
+          },
+          {
+            "pre": "Check: acceleration × time = 0 × 8 = ",
+            "done": "The change in speed was 0, so the acceleration is 0 m/s².",
+            "hint": "That should equal the change in speed.",
+            "post": "",
+            "answer": 0
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "divided the speed by time",
+            "expect": 1.5,
+            "message": "1.5 comes from 12 ÷ 8, but the speed is constant. There is no change in speed, so the acceleration is 0.",
+            "pattern": "divided_speed"
+          }
+        ]
+      },
+      {
+        "hint": "Square the start value first, then subtract 4.",
+        "display": "Use \\(x_{n+1} = x_n^2 - 4\\) with \\(x_0 = 3\\). Find \\(x_1\\).",
+        "solutions": [
+          5
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Square the start value: 3² = ",
+            "hint": "3 times 3.",
+            "post": "",
+            "answer": 9
+          },
+          {
+            "pre": "Then subtract 4: 9 − 4 = ",
+            "say": "The rule is: square, then take away 4.",
+            "hint": "Take 4 from the square.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 5
+          },
+          {
+            "pre": "Check: 5 + 4 = ",
+            "done": "That rebuilds 3² = 9, so x₁ = 5.",
+            "hint": "Add 4 back on.",
+            "post": "",
+            "answer": 9
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "stopped at the square",
+            "expect": 9,
+            "message": "9 is just 3². You still need to subtract 4: 9 − 4 = 5.",
+            "pattern": "forgot_subtract"
+          }
+        ]
+      },
+      {
+        "hint": "Acceleration = change in speed ÷ time.",
+        "display": "A car speeds up from 0 to 48 m/s in 6 seconds. What is the acceleration?",
+        "solutions": [
+          8
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Change in speed: 48 − 0 = ",
+            "hint": "Final speed minus start speed.",
+            "post": "",
+            "answer": 48
+          },
+          {
+            "pre": "Time taken: ",
+            "hint": "Given in the question.",
+            "post": " seconds",
+            "answer": 6
+          },
+          {
+            "pre": "Acceleration = 48 ÷ 6 = ",
+            "say": "Divide the change in speed by the time.",
+            "hint": "48 shared into 6.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 8
+          },
+          {
+            "pre": "Check: 8 × 6 = ",
+            "done": "That matches the change in speed of 48, so the acceleration is 8 m/s².",
+            "hint": "Multiply acceleration by time.",
+            "post": "",
+            "answer": 48
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "divided time by speed",
+            "expect": 0.125,
+            "message": "0.125 is 6 ÷ 48, the wrong way round. Acceleration = change in speed ÷ time = 48 ÷ 6 = 8.",
+            "pattern": "inverted"
+          }
+        ]
+      },
+      {
+        "hint": "Gradient is how much the distance changes for each unit of time.",
+        "display": "What does the gradient of a distance-time graph represent?",
+        "options": [
+          "Speed",
+          "Acceleration",
+          "Distance",
+          "Time"
+        ],
+        "solutions": [
+          0
+        ],
+        "calculator": false,
+        "input_type": "multiple_choice",
+        "misconceptions": [
+          {
+            "expect": null,
+            "message": "Acceleration is the gradient of a speed-time graph. On a distance-time graph, the gradient is the speed.",
+            "pattern": "confused_graphs"
+          }
+        ]
+      }
+    ],
+    "silver": [
+      {
+        "hint": "Add 1 to the term for the denominator, then divide 10 by it. Do it twice.",
+        "display": "Use \\(x_{n+1} = \\frac{10}{x_n + 1}\\) with \\(x_0 = 3\\). Find \\(x_2\\) to 2 d.p.",
+        "solutions": [
+          2.86
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "x₁: denominator 3 + 1 = 4, so 10 ÷ 4 = ",
+            "hint": "Bottom is 3 + 1 = 4, then 10 ÷ 4.",
+            "post": "",
+            "answer": 2.5
+          },
+          {
+            "pre": "x₂: denominator 2.5 + 1 = 3.5, so 10 ÷ 3.5 to 2 d.p. = ",
+            "say": "Feed x₁ back in for x₂.",
+            "hint": "10 ÷ 3.5 = 2.857..., round to 2 d.p.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2.86
+          },
+          {
+            "pre": "Check: 2.86 × 3.5 = ",
+            "done": "≈ 10, so x₂ = 2.86 is right.",
+            "hint": "Should come back to about 10.",
+            "post": "",
+            "answer": 10.01
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "stopped at x1",
+            "expect": 2.5,
+            "message": "2.5 is x₁. One more step is needed: x₂ = 10 ÷ (2.5 + 1) = 2.86.",
+            "pattern": "stopped_at_x1"
+          }
+        ]
+      },
+      {
+        "hint": "Deceleration = size of the change in speed divided by the time.",
+        "display": "A car decelerates from 25 m/s to 5 m/s in 4 seconds. Find the deceleration.",
+        "solutions": [
+          5
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Change in speed (start minus end): 25 − 5 = ",
+            "hint": "25 take away 5.",
+            "post": "",
+            "answer": 20
+          },
+          {
+            "pre": "Deceleration = 20 ÷ 4 = ",
+            "say": "Divide the change in speed by the time.",
+            "hint": "20 shared into 4.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 5
+          },
+          {
+            "pre": "Check: 5 × 4 = ",
+            "done": "That matches the 20 m/s drop, so the deceleration is 5 m/s².",
+            "hint": "Multiply deceleration by time.",
+            "post": "",
+            "answer": 20
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "gave the change, not the rate",
+            "expect": 20,
+            "message": "20 is the total change in speed. Divide by the 4 seconds: 20 ÷ 4 = 5.",
+            "pattern": "forgot_divide"
+          }
+        ]
+      },
+      {
+        "hint": "Work out the numerator and denominator separately, then divide.",
+        "display": "Use \\(x_{n+1} = \\frac{x_n^2 + 5}{2x_n}\\) with \\(x_0 = 3\\). Find \\(x_1\\) to 3 d.p.",
+        "solutions": [
+          2.333
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Numerator: 3² + 5 = ",
+            "hint": "9 plus 5.",
+            "post": "",
+            "answer": 14
+          },
+          {
+            "pre": "Denominator: 2 × 3 = ",
+            "hint": "Double the term.",
+            "post": "",
+            "answer": 6
+          },
+          {
+            "pre": "x₁ = 14 ÷ 6 to 3 d.p. = ",
+            "say": "Now divide the numerator by the denominator.",
+            "hint": "14 ÷ 6 = 2.333...",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2.333
+          },
+          {
+            "pre": "Check: 2.333 × 6 (to the nearest whole number) = ",
+            "done": "≈ 14, the numerator, so x₁ = 2.333.",
+            "hint": "Multiply back by the denominator.",
+            "post": "",
+            "answer": 14
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "used x not 2x",
+            "expect": 4.667,
+            "message": "4.667 divides by 3 instead of 2 × 3. The denominator is 2 × 3 = 6, so 14 ÷ 6 = 2.333.",
+            "pattern": "wrong_denominator"
+          }
+        ]
+      },
+      {
+        "hint": "Work out f(1) and f(2); a sign change traps a root.",
+        "display": "\\(f(x) = x^3 - x - 5\\). Show that a root lies between \\(x = 1\\) and \\(x = 2\\). What is \\(f(2)\\)?",
+        "solutions": [
+          1
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "f(1) = 1³ − 1 − 5 = 1 − 1 − 5 = ",
+            "hint": "1 − 1 − 5.",
+            "post": "",
+            "answer": -5
+          },
+          {
+            "pre": "Now 2³ = ",
+            "hint": "2 × 2 × 2.",
+            "post": "",
+            "answer": 8
+          },
+          {
+            "pre": "f(2) = 8 − 2 − 5 = ",
+            "say": "Now evaluate f at x = 2.",
+            "hint": "8 − 2 − 5.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 1
+          },
+          {
+            "pre": "f(1) = −5 (negative) and f(2) is positive. The value asked for, f(2), is ",
+            "done": "Sign change from − to +, so a root lies between x = 1 and x = 2.",
+            "hint": "Read off f(2) from the line above.",
+            "post": "",
+            "answer": 1
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "treated 2^3 as 6",
+            "expect": -1,
+            "message": "−1 uses 2³ = 6. It is 2 × 2 × 2 = 8, so f(2) = 8 − 2 − 5 = 1.",
+            "pattern": "cubed_wrong"
+          }
+        ]
+      },
+      {
+        "hint": "Acceleration = change in speed divided by time.",
+        "display": "A car speeds up from 8 m/s to 20 m/s in 3 seconds. Find the acceleration.",
+        "solutions": [
+          4
+        ],
+        "calculator": false,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "Change in speed: 20 − 8 = ",
+            "hint": "20 take away 8.",
+            "post": "",
+            "answer": 12
+          },
+          {
+            "pre": "Acceleration = 12 ÷ 3 = ",
+            "say": "Divide the change in speed by the time.",
+            "hint": "12 shared into 3.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 4
+          },
+          {
+            "pre": "Check: 4 × 3 = ",
+            "done": "That matches the 12 m/s gain, so the acceleration is 4 m/s².",
+            "hint": "Multiply acceleration by time.",
+            "post": "",
+            "answer": 12
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "gave the change, not the rate",
+            "expect": 12,
+            "message": "12 is the change in speed. Divide by the 3 seconds: 12 ÷ 3 = 4.",
+            "pattern": "forgot_divide"
+          }
+        ]
+      },
+      {
+        "hint": "Work out the inside first, take the square root, then repeat.",
+        "display": "Use \\(x_{n+1} = \\sqrt{3x_n + 1}\\) with \\(x_0 = 1\\). Find \\(x_2\\) to 2 d.p.",
+        "solutions": [
+          2.65
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "First iteration, inside the root: 3 × 1 + 1 = ",
+            "hint": "3 × 1 = 3, then + 1.",
+            "post": "",
+            "answer": 4
+          },
+          {
+            "pre": "x₁ = √4 = ",
+            "hint": "Square root of 4.",
+            "post": "",
+            "answer": 2
+          },
+          {
+            "pre": "Second iteration, inside the root: 3 × 2 + 1 = ",
+            "say": "Feed x₁ back in for x₂.",
+            "hint": "3 × 2 = 6, then + 1.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 7
+          },
+          {
+            "pre": "x₂ = √7 to 2 d.p. = ",
+            "done": "x₂ ≈ 2.65, the sequence is settling.",
+            "hint": "Square root of 7 is 2.645..., round to 2 d.p.",
+            "post": "",
+            "answer": 2.65
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "stopped at x1",
+            "expect": 2,
+            "message": "2 is x₁. Apply the formula once more: x₂ = √(3 × 2 + 1) = √7 ≈ 2.65.",
+            "pattern": "stopped_at_x1"
+          }
+        ]
+      },
+      {
+        "hint": "Keep the full value of x1, then use it to find x2.",
+        "display": "Use \\(x_{n+1} = \\sqrt{2x_n + 3}\\) with \\(x_0 = 4\\). Find \\(x_2\\) to 3 d.p.",
+        "solutions": [
+          3.104
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "guided_steps": [
+          {
+            "pre": "First iteration, inside the root: 2 × 4 + 3 = ",
+            "hint": "2 × 4 = 8, then + 3.",
+            "post": "",
+            "answer": 11
+          },
+          {
+            "pre": "x₁ = √11 to 4 d.p. = ",
+            "hint": "Square root of 11. Keep 4 d.p.",
+            "post": "",
+            "answer": 3.3166
+          },
+          {
+            "pre": "Second iteration, inside the root: 2 × 3.3166 + 3 to 4 d.p. = ",
+            "say": "Feed x₁ back in, keeping full precision.",
+            "hint": "2 × 3.3166 = 6.6332, then + 3.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 9.6332
+          },
+          {
+            "pre": "x₂ = √9.6332 to 3 d.p. = ",
+            "done": "x₂ ≈ 3.104, converging toward the root of x² = 2x + 3.",
+            "hint": "Square root of 9.6332.",
+            "post": "",
+            "answer": 3.104
+          }
+        ],
+        "misconceptions": [
+          {
+            "note": "stopped at x1",
+            "expect": 3.317,
+            "message": "3.317 is x₁ (√11). One more step is needed: x₂ = √(2 × 3.3166 + 3) ≈ 3.104.",
+            "pattern": "stopped_at_x1"
+          }
+        ]
+      }
+    ],
+    "gold_description": "Tangent gradients, Newton-Raphson iteration, the trapezium rule, convergence and real-life rates of change.",
+    "bronze_description": "Find a rate of change from a straight-line graph or two points, and take the first steps of a simple iteration.",
+    "silver_description": "Iterate to x2 with a calculator, calculate acceleration or deceleration, and test an interval for a sign change."
+  },
+  "related_videos": [],
+  "worked_examples": [
+    {
+      "steps": [
+        {
+          "label": "Step 1: Gradient",
+          "content": "<p>Speed = gradient = \\(\\frac{120 - 0}{4 - 0} = \\frac{120}{4}\\)</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p><strong>30 km/h</strong></p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "The distance-time graph is a straight line from (0, 0) to (4, 120). Find the speed.",
+      "difficulty": "Bronze"
+    },
+    {
+      "steps": [
+        {
+          "label": "Step 1: Find x₁",
+          "content": "<p>\\(x_1 = \\frac{4 + 3}{4} = 1.75\\)</p>"
+        },
+        {
+          "label": "Step 2: Find x₂",
+          "content": "<p>\\(x_2 = \\frac{3.0625 + 3}{3.5} = \\frac{6.0625}{3.5} = 1.732\\)</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p><strong>\\(x_2 = 1.732\\)</strong> (this converges to \\(\\sqrt{3}\\))</p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "Use x_{n+1} = (x_n² + 3) / (2x_n) with x_0 = 2 to find x_2 (to 3 d.p.)",
+      "difficulty": "Silver"
+    },
+    {
+      "steps": [
+        {
+          "label": "Step 1: Change in speed",
+          "content": "<p>\\(30 - 10 = 20\\) m/s</p>"
+        },
+        {
+          "label": "Step 2: Acceleration",
+          "content": "<p>\\(a = \\frac{\\Delta v}{\\Delta t} = \\frac{20}{5} = 4\\) m/s²</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p><strong>4 m/s²</strong></p>",
+          "isAnswer": true,
+          "is_answer": true
+        }
+      ],
+      "question": "A car accelerates from 10 m/s to 30 m/s in 5 seconds. What is the acceleration?",
+      "difficulty": "Gold"
+    }
+  ]
+}

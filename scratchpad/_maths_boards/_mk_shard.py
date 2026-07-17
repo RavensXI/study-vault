@@ -1,6 +1,4 @@
 import json
-live=json.load(open("_live_L06.json",encoding="utf-8"))
-json.dump({"practice_data":live},open("_live_L06_shard.json","w",encoding="utf-8"),ensure_ascii=False)
-# also raw
-json.dump(live,open("_live_L06_raw.json","w",encoding="utf-8"),ensure_ascii=False)
-print("done")
+live=json.load(open("_LIVE_eduqas_L12.json",encoding="utf-8"))
+json.dump(live["practice_data"], open("_LIVE_shard_L12.json","w",encoding="utf-8"), ensure_ascii=False, indent=2)
+print("wrote shard")
