@@ -874,6 +874,17 @@
     .problem-tier-pill.pill-silver { color: var(--silver); background: var(--silver-badge); }
     .problem-tier-pill.pill-gold   { color: var(--gold); background: var(--gold-badge); }
 
+    .learn-passage-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted, #8a8580);
+      margin-top: 1rem;
+    }
+    .learn-full-passage .rs-quote { max-height: 40vh; overflow-y: auto; }
+
     .problem-tier-desc {
       font-family: 'Inter', sans-serif;
       font-size: 0.78rem;
@@ -5536,9 +5547,19 @@
       diffEl.className = 'learn-difficulty diff-' + diff;
       diffEl.textContent = diff.charAt(0).toUpperCase() + diff.slice(1);
 
-      // Question + passage quote
+      // Question + passage. Worked examples analyse a full extract; show the
+      // WHOLE passage when it exists (matched by difficulty key), not just the
+      // example's snippet — steps quote lines the snippet doesn't contain, and
+      // students read that as "the story is cut off" (bug report, 16 Jul).
       var questionHtml = example.question || '';
-      if (example.passage) {
+      var fullPassage = (window._practicePassages || []).filter(function(p) {
+        return p && p.id === diff && (p.text || '').trim();
+      })[0];
+      if (fullPassage) {
+        questionHtml += '<div class="learn-full-passage">' +
+          (fullPassage.label ? '<div class="learn-passage-label">' + escapeHtml(fullPassage.label) + '</div>' : '') +
+          '<div class="rs-quote" style="margin-top:0.5rem;">' + escapeHtml(fullPassage.text) + '</div></div>';
+      } else if (example.passage) {
         questionHtml += '<div class="rs-quote" style="margin-top:1rem;">' + escapeHtml(example.passage) + '</div>';
       }
       document.getElementById('learn-question').innerHTML = questionHtml;
