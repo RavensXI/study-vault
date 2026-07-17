@@ -1,0 +1,74 @@
+bronze[0] \(\frac{1}{4} + \frac{1}{3}\) = [7, 12]
+     expect=None pat=add_denominators msg=Don't add denominators. Find LCD = 12: 3/12 + 4/12 = 7/12.
+     expect=None pat=wrong msg=LCD of 4 and 3 is 12. Convert: 3/12 + 4/12 = 7/12.
+bronze[1] \(\frac{3}{5} + \frac{1}{5}\) = [4, 5]
+     expect=None pat=add_denominators msg=Same denominator — just add numerators: 3 + 1 = 4. Answer: 4/5.
+     expect=None pat=wrong msg=When denominators match, add numerators only: 3/5 + 1/5 = 4/5.
+bronze[2] \(\frac{5}{6} - \frac{1}{3}\) = [1, 2]
+     expect=None pat=subtract_denoms msg=Convert 1/3 to 2/6 first: 5/6 − 2/6 = 3/6 = 1/2.
+     expect=None pat=no_simplify msg=3/6 simplifies to 1/2. Always check for common factors.
+bronze[3] \(\frac{2}{7} + \frac{3}{7}\) = [5, 7]
+     expect=None pat=add_denominators msg=Same denominator — add numerators: 2 + 3 = 5. Answer: 5/7.
+     expect=None pat=wrong msg=2/7 + 3/7 = 5/7 (same denominator, add numerators).
+bronze[4] \(\frac{1}{2} \times \frac{3}{4}\) = [3, 8]
+     expect=None pat=add_instead msg=For multiplication, multiply across: 1 × 3 = 3 and 2 × 4 = 8. Answer: 3/8.
+     expect=None pat=wrong msg=Multiply numerators: 1 × 3 = 3. Multiply denominators: 2 × 4 = 8. Answer: 3/8.
+bronze[5] \(\frac{7}{8} - \frac{3}{8}\) = [1, 2]
+     expect=None pat=no_simplify msg=4/8 simplifies to 1/2. Divide numerator and denominator by 4.
+     expect=None pat=wrong msg=7/8 − 3/8 = 4/8 = 1/2.
+bronze[6] \(\frac{2}{5} \times \frac{5}{6}\) = [1, 3]
+     expect=None pat=no_simplify msg=10/30 simplifies to 1/3. Divide both by 10.
+     expect=None pat=wrong msg=2 × 5 = 10, 5 × 6 = 30. Then 10/30 = 1/3.
+bronze[7] \(\frac{1}{3} + \frac{1}{6}\) = [1, 2]
+     expect=None pat=add_denominators msg=Don't add denominators. LCD = 6: 2/6 + 1/6 = 3/6 = 1/2.
+     expect=None pat=wrong msg=Convert 1/3 to 2/6. Then 2/6 + 1/6 = 3/6 = 1/2.
+silver[0] \(\frac{2}{3} + \frac{5}{8}\) = [31, 24]
+     expect=None pat=add_denominators msg=LCD = 24: 16/24 + 15/24 = 31/24.
+     expect=None pat=wrong msg=Convert: 2/3 = 16/24 and 5/8 = 15/24. Add: 31/24.
+silver[1] \(\frac{3}{4} - \frac{2}{5}\) = [7, 20]
+     expect=None pat=subtract_denoms msg=LCD = 20: 15/20 − 8/20 = 7/20.
+     expect=None pat=wrong msg=Convert: 3/4 = 15/20 and 2/5 = 8/20. Subtract: 7/20.
+silver[2] \(\frac{3}{5} \times \frac{10}{9}\) = [2, 3]
+     expect=None pat=no_simplify msg=30/45 = 2/3. Cancel before multiplying: 3 and 9 share factor 3, 5 and 10 share factor 5.
+     expect=None pat=wrong msg=Cross-cancel: 3/5 × 10/9 = 1/1 × 2/3 = 2/3.
+silver[3] \(\frac{4}{5} \div \frac{2}{3}\) = [6, 5]
+     expect=None pat=no_flip msg=To divide fractions, flip the second and multiply: 4/5 × 3/2 = 12/10 = 6/5.
+     expect=None pat=wrong msg=Flip and multiply: 4/5 × 3/2 = 12/10 = 6/5.
+silver[4] \(1\frac{1}{3} + \frac{2}{5}\) = [26, 15]
+     expect=None pat=ignore_whole msg=Convert mixed number: 1⅓ = 4/3. LCD = 15: 20/15 + 6/15 = 26/15.
+     expect=None pat=wrong msg=4/3 + 2/5 = 20/15 + 6/15 = 26/15.
+silver[5] \(\frac{5}{6} \div \frac{5}{12}\) = [2]
+     expect=None pat=no_flip msg=Flip and multiply: 5/6 × 12/5. Cancel 5s: 1/6 × 12/1 = 12/6 = 2.
+     expect=None pat=wrong msg=5/6 × 12/5 = 60/30 = 2.
+silver[6] \(\frac{7}{10} - \frac{1}{4}\) = [9, 20]
+     expect=None pat=subtract_denoms msg=LCD = 20: 14/20 − 5/20 = 9/20.
+     expect=None pat=wrong msg=Convert: 7/10 = 14/20 and 1/4 = 5/20. Subtract: 9/20.
+gold[0] \(\frac{2}{3} + \frac{3}{4} - \frac{1}{6}\) = [5, 4]
+     expect=None pat=wrong_lcd msg=LCD = 12: 8/12 + 9/12 − 2/12 = 15/12 = 5/4.
+     expect=None pat=wrong msg=Convert all to twelfths: 8/12 + 9/12 − 2/12 = 15/12 = 5/4.
+gold[1] \(2\frac{1}{2} \times 1\frac{3}{5}\) = [4]
+     expect=None pat=ignore_whole msg=Convert: 5/2 × 8/5. Cancel 5s: 1/2 × 8/1 = 8/2 = 4.
+     expect=None pat=wrong msg=5/2 × 8/5 = 40/10 = 4.
+gold[2] \(3\frac{1}{4} - 1\frac{2}{3}\) = [19, 12]
+     expect=None pat=wrong_conversion msg=Convert: 13/4 − 5/3. LCD = 12: 39/12 − 20/12 = 19/12.
+     expect=None pat=wrong msg=13/4 − 5/3 = 39/12 − 20/12 = 19/12.
+gold[3] \(\frac{3}{8} \div \frac{9}{16}\) = [2, 3]
+     expect=None pat=no_flip msg=Flip and multiply: 3/8 × 16/9. Cancel: 1/1 × 2/3 = 2/3.
+     expect=None pat=wrong msg=3/8 × 16/9 = 48/72 = 2/3.
+gold[4] \(\frac{5}{6} \times \frac{3}{10} + \frac{1}{4}\) = [1, 2]
+     expect=None pat=wrong_order msg=Multiply first: 5/6 × 3/10 = 15/60 = 1/4. Then 1/4 + 1/4 = 2/4 = 1/2.
+     expect=None pat=wrong msg=BIDMAS applies to fractions too. Multiply first, then add.
+
+--- method_card ---
+{
+ "steps": [
+  "For add/subtract: find the LCD and convert both fractions",
+  "Add or subtract the numerators (denominators stay the same)",
+  "For multiply: multiply numerators and denominators straight across",
+  "For divide: flip the second fraction and multiply",
+  "Simplify the answer using the HCF"
+ ],
+ "title": "How to Work with Fractions",
+ "content": "<p><strong>Fractions</strong> represent parts of a whole. To <strong>add or subtract</strong> fractions, you need a <strong>common denominator</strong> — the lowest common multiple (LCM) of both denominators. Convert each fraction, then add or subtract the numerators.</p><p>To <strong>multiply</strong> fractions, multiply the numerators together and the denominators together: \\(\\frac{a}{b} \\times \\frac{c}{d} = \\frac{ac}{bd}\\). To <strong>divide</strong>, flip the second fraction and multiply: \\(\\frac{a}{b} \\div \\frac{c}{d} = \\frac{a}{b} \\times \\frac{d}{c}\\).</p><p>Always <strong>simplify</strong> your answer by dividing numerator and denominator by their highest common factor (HCF). Convert improper fractions to mixed numbers where appropriate.</p><p>For <strong>mixed numbers</strong>, convert to improper fractions before calculating. To convert: multiply the whole number by the denominator, add the numerator, and keep the same denominator.</p>",
+ "example": "<p><strong>Calculate</strong> \\(\\frac{2}{3} + \\frac{3}{4}\\)</p><p><strong>Step 1:</strong> LCD of 3 and 4 = 12</p><p><strong>Step 2:</strong> Convert: \\(\\frac{8}{12} + \\frac{9}{12}\\)</p><p><strong>Step 3:</strong> Add numerators: \\(\\frac{17}{12}\\)</p><p><strong>Step 4:</strong> As a mixed number: \\(1\\frac{5}{12}\\)</p><p><strong>Answer:</strong> \\(\\frac{17}{12}\\) or \\(1\\frac{5}{12}\\)</p>"
+}

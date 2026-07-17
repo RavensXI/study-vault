@@ -1,24 +1,28 @@
 import json
-pre=json.load(open("_pre_dump_maths-aqa.json",encoding="utf-8"))
-live=json.load(open("_live_gl02.json",encoding="utf-8"))
-ID="96f5aef3-e4c8-4faf-ba82-1d587dc4e10e"
-# pre may be list or dict keyed by id
-entry=None
-if isinstance(pre,list):
-    for r in pre:
-        if r.get("id")==ID: entry=r.get("practice_data"); break
-elif isinstance(pre,dict):
-    if ID in pre: entry=pre[ID]
-    elif "lessons" in pre:
-        for r in pre["lessons"]:
-            if r.get("id")==ID: entry=r.get("practice_data"); break
-print("found pre entry:", entry is not None)
-if entry:
-    for f in ["topic_links","related_videos","worked_examples"]:
-        same = json.dumps(entry.get(f),sort_keys=True,ensure_ascii=False)==json.dumps(live.get(f),sort_keys=True,ensure_ascii=False)
-        print(f"{f}: preserved={same}")
-        if not same:
-            print("  PRE:",json.dumps(entry.get(f),ensure_ascii=False)[:400])
-            print("  LIVE:",json.dumps(live.get(f),ensure_ascii=False)[:400])
-    # also check bank displays/solutions preservation summary
-    print("pre keys:",list(entry.keys()))
+ID="e40e80e4-666f-4cce-a8b3-5f7bb6b5c490"
+KEY="graphs-L02"
+pre=json.load(open("_pre_dump_maths-ocr.json",encoding="utf-8"))
+# pre could be list or dict
+def find(pre):
+    if isinstance(pre,dict):
+        # maybe keyed by id
+        if ID in pre: return pre[ID]
+        for v in pre.values():
+            if isinstance(v,dict) and v.get("id")==ID: return v
+    if isinstance(pre,list):
+        for e in pre:
+            if e.get("id")==ID: return e
+            pd=e.get("practice_data") or {}
+    return None
+entry=find(pre)
+print("type:",type(pre).__name__, "len:", len(pre))
+if entry is None:
+    # try scanning
+    if isinstance(pre,list):
+        for e in pre[:2]:
+            print("sample keys:",list(e.keys()))
+    elif isinstance(pre,dict):
+        ks=list(pre.keys())[:3]
+        print("sample dict keys:",ks)
+else:
+    print("found entry keys:",list(entry.keys()))

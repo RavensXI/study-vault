@@ -1,0 +1,97 @@
+# -*- coding: utf-8 -*-
+import math
+pi = math.pi
+def r1(x): return round(x,1)
+def r0(x): return round(x)
+out=[]
+def chk(label, got, exp, tol=0.05):
+    ok = abs(got-exp) <= tol
+    out.append((("OK " if ok else "FAIL"), label, f"got {got}", f"stored {exp}"))
+    return ok
+
+# ---------- SOLUTIONS ----------
+chk("B0 rect 9x4 area",9*4,36)
+chk("B1 tri b10 h6 area",0.5*10*6,30)
+chk("B2 rect 8x5 perim",2*(8+5),26)
+chk("B3 par b7 h4 area",7*4,28)
+chk("B4 trap 6,10 h4 area",0.5*(6+10)*4,32)
+chk("B5 circ r7 circ",r1(pi*14),44.0)
+chk("B6 square s9 area",9*9,81)
+chk("B7 equi s5 perim",3*5,15)
+chk("S0 circ r6 area",r1(pi*36),113.1)
+chk("S1 circ d14 circ",r1(pi*14),44.0)
+chk("S2 circ area50.3 radius",r1(math.sqrt(50.3/pi)),4.0)
+chk("S3 trap 5,11 h8 area",0.5*(5+11)*8,64)
+chk("S4 sector r6 90 area",r1(0.25*pi*36),28.3)
+chk("S5 sector r10 72 arc",r1(0.2*2*pi*10),12.6)
+chk("S6 rect12x8 - circ r3",r1(96-pi*9),67.7)
+chk("G0 semicirc d12 area",r1(0.5*pi*36),56.5)
+chk("G1 sector r8 135 arc",r1((135/360)*2*pi*8),18.8)
+chk("G2 sector r5 arc10 angle",r0((10/(2*pi*5))*360),115)
+chk("G3 ring R5 r3 area",r1(pi*(25-9)),50.3)
+chk("G4 sector area75 r10 angle",r0((75/(pi*100))*360),86)
+
+# ---------- KEY GUIDED BOXES / CHECKS ----------
+chk("B0 check 9+9+9+9",9*4,36)
+chk("B1 check 30x2",30*2,60)
+chk("S0 check 113.1/36",r1(113.1/36),3.1)
+chk("S2 box 50.3/pi",r0(50.3/pi),16)
+chk("S4 box 0.25x113.1",r1(0.25*113.1),28.3)
+chk("S4 check 28.3x4",r1(28.3*4),113.2)
+chk("S5 box 0.2x62.8",r1(0.2*62.8),12.6)
+chk("S5 check 12.6x5",r1(12.6*5),63.0)
+chk("S6 box pi*9",r1(pi*9),28.3)
+chk("G0 box 0.5pi36",r1(0.5*pi*36),56.5)
+chk("G0 check 56.5x2",r1(56.5*2),113.0)
+chk("G1 box 135/360",135/360,0.375)
+chk("G1 box 0.375*circ",r1(0.375*2*pi*8),18.8)
+chk("G1 check 18.8/0.375",r1(18.8/0.375),50.1)
+chk("G2 box 2pi5",r1(2*pi*5),31.4)
+chk("G2 box 10/31.416",round(10/31.416,4),0.3183)
+chk("G2 box 0.3183*360 deg",r0(0.3183*360),115)
+chk("G2 check 0.3183*31.416",r1(0.3183*31.416),10.0)
+chk("G3 check pi*25",r1(pi*25),78.5)
+chk("G4 box pi*100",r1(pi*100),314.2)
+chk("G4 box 75/314.16",round(75/314.16,4),0.2387)
+chk("G4 box 0.2387*360",r0(0.2387*360),86)
+chk("G4 check 0.2387*314.16",r1(0.2387*314.16),75.0)
+
+# teach walks
+chk("silver teach 0.5pi64",r1(0.5*pi*64),100.5)
+chk("silver teach 100.5x2",r1(100.5*2),201.0)
+chk("gold teach 113.097/6",r1(113.097/6),18.8)
+chk("gold teach 18.8x6",r1(18.8*6),112.8)
+
+# ---------- EXPECTS ----------
+chk("B0 mc perimeter",2*(9+4),26)
+chk("B1 mc forgot_half",10*6,60)
+chk("B2 mc area",8*5,40)
+chk("B3 mc halved",0.5*7*4,14)
+chk("B4 mc no_average",(6+10)*4,64)
+chk("B5 mc used_area",r1(pi*49),153.9)
+chk("B5 mc radius_as_diameter",r1(pi*7),22.0)
+chk("B6 mc perimeter",4*9,36)
+chk("B7 mc two_sides",2*5,10)
+chk("S0 mc forgot_square",r1(pi*6),18.8)
+chk("S0 mc used_circumference",r1(2*pi*6),37.7)
+chk("S1 mc used_area(r7)",r1(pi*49),153.9)
+chk("S1 mc doubled_diameter",r1(2*pi*14),88.0)
+chk("S2 mc forgot_root",16,16)
+chk("S2 mc divided_by_2pi",r1(50.3/(2*pi)),8.0)
+chk("S3 mc no_average",(5+11)*8,128)
+chk("S4 mc forgot_fraction",r1(pi*36),113.1)
+chk("S5 mc forgot_fraction",r1(2*pi*10),62.8)
+chk("S6 mc added",r1(96+pi*9),124.3)
+chk("G0 mc forgot_half",r1(pi*36),113.1)
+chk("G0 mc diameter_as_radius",r1(0.5*pi*144),226.2)
+chk("G1 mc used_area",r1(0.375*pi*64),75.4)
+chk("G1 mc forgot_fraction",r1(2*pi*8),50.3)
+chk("G2 mc half_circle",r0((10/(2*pi*5))*180),57)
+chk("G3 mc subtracted_radii",r1(pi*4),12.6)
+chk("G3 mc added",r1(pi*34),106.8)
+chk("G4 mc half_circle",r0((75/(pi*100))*180),43)
+
+fails=[x for x in out if x[0]=="FAIL"]
+for x in out:
+    if x[0]=="FAIL": print(" | ".join(x))
+print(f"\nTOTAL {len(out)} checks, {len(fails)} FAIL")

@@ -1,0 +1,43 @@
+
+=== tier_guides.bronze (steps wordcount=52) title=Bronze: one step at a time
+  STEP: A straight line's <strong>rate of change</strong> is its gradient: change in y divided by change in x between two points.
+  STEP: An <strong>iteration</strong> puts the current value \(x_n\) into the rule, and the answer becomes the next value \(x_{n+1}\).
+  STEP: For \(x_2\), do the rule twice: find \(x_1\) first, then feed it back in.
+  EXAMPLE q: \(x_{n+1} = 2x_n + 1\), \(x_0 = 3\). Find \(x_2\).
+     Step 1 | <p>\(x_1 = 2(3) + 1 = 7\)</p> | isAnswer= None None
+     Step 2 | <p>\(x_2 = 2(7) + 1 = 15\)</p> | isAnswer= None None
+     Check | <p>Each step doubles and adds 1, so 7 then 15 is right.</p> | isAnswer= None None
+     Answer | <p>\(x_2 = 15\)</p> | isAnswer= True True
+
+=== tier_guides.silver (steps wordcount=49) title=Silver: iterate and round
+  STEP: Silver formulas are fractions or surds, like \(\sqrt{8 + x_n}\) or \(\frac{x_n^2 + 5}{2x_n}\).
+  STEP: Work the top and bottom (or inside the root) separately, then combine. Round only at the end to the stated decimal places.
+  STEP: For \(x_2\), keep extra digits of \(x_1\) so the final rounding stays accurate.
+  EXAMPLE q: \(x_{n+1} = \sqrt{5 + x_n}\), \(x_0 = 4\). Find \(x_1\) to 3 d.p.
+     Inside | <p>\(5 + 4 = 9\)</p> | isAnswer= None None
+     Root | <p>\(\sqrt{9} = 3.000\)</p> | isAnswer= None None
+     Check | <p>\(3^2 = 9\), which matches, so the root is right.</p> | isAnswer= None None
+     Answer | <p>\(x_1 = 3.000\)</p> | isAnswer= True True
+
+=== tier_guides.gold (steps wordcount=49) title=Gold: many steps and rearranging
+  STEP: Gold uses cube-roots or Newton-style formulas and asks for \(x_2\) or \(x_3\), so you iterate several times.
+  STEP: Carry full calculator accuracy through every step, rounding only the final answer.
+  STEP: Some questions run backwards: rearrange \(x^3 = 5x + 4\) into \(x = \sqrt[3]{5x + 4}\) to build the formula.
+  EXAMPLE q: \(x_{n+1} = \sqrt[3]{4x_n + 1}\), \(x_0 = 2\). Find \(x_2\) to 3 d.p.
+     Step 1 | <p>\(x_1 = \sqrt[3]{4(2) + 1} = \sqrt[3]{9} = 2.0801\)</p> | isAnswer= None None
+     Step 2 | <p>\(x_2 = \sqrt[3]{4(2.0801) + 1} = \sqrt[3]{9.3204} = 2.104\)</p> | isAnswer= None None
+     Check | <p>The terms are rising slowly towards the root, so 2.104 is sensible.</p> | isAnswer= None None
+     Answer | <p>\(x_2 = 2.104\)</p> | isAnswer= True True
+
+=== method_card ===
+{
+ "steps": [
+  "Rate of change = gradient = rise ÷ run (draw a tangent first on a curve)",
+  "Iteration: substitute x₀ into the formula to get x₁",
+  "Then substitute x₁ to get x₂, and keep going",
+  "Stop when the answer is stable to the required decimal places"
+ ],
+ "title": "Rates of Change & Iteration",
+ "content": "<p><strong>Rate of change</strong> is the gradient of a graph at a point. For curves, draw a tangent and find its gradient.</p><p><strong>Iteration:</strong> Start with \\(x_0\\), then apply the formula \\(x_{n+1} = f(x_n)\\) repeatedly to converge on a solution.</p>",
+ "example": "<p><strong>\\(x_{n+1} = \\frac{5}{x_n + 1}\\), \\(x_0 = 2\\). Find \\(x_3\\).</strong></p><p>\\(x_1 = 5/3 ≈ 1.667\\), \\(x_2 = 5/2.667 ≈ 1.875\\), \\(x_3 = 5/2.875 ≈ 1.739\\).</p>"
+}

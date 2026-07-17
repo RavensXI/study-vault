@@ -1,92 +1,90 @@
-import json, math
-pd=json.load(open("_live_L06_fetched.json",encoding="utf-8"))
-def r(x,n=1): return round(x,n)
-errs=[]
-def chk(name, got, exp, tol=0.05):
-    if abs(got-exp)>tol:
-        errs.append(f"{name}: computed {got:.4f} vs stored {exp}")
+# -*- coding: utf-8 -*-
+import json, io, math
+pd = json.load(io.open("lesson_maths-ocr_ratio-proportion-L06.json", encoding="utf-8"))
+pb = pd["problem_bank"]
+errs = []
+def close(a,b,t=1e-6): return abs(a-b) < t
 
-# ---- GOLD ----
-g=pd["problem_bank"]["gold"]
-# G1 a=10 b=7 B=40
-sinA=10*math.sin(math.radians(40))/7
-A1=math.degrees(math.asin(sinA)); 
-chk("G1 sol0",r(A1),g[0]["solutions"][0]); chk("G1 sol1",r(180-A1),g[0]["solutions"][1])
-chk("G1 box 10sin40",10*math.sin(math.radians(40)),6.4279,0.0002)
-chk("G1 box /7",6.4279/7,0.9183,0.0002)
-chk("G1 asin",math.degrees(math.asin(0.9183)),66.7,0.06)
-# G2 ship
-ang=220-150; chk("G2 interior",ang,70)
-AC2=64+36-96*math.cos(math.radians(70)); chk("G2 AC2",AC2,67.1661,0.001); chk("G2 AC",r(math.sqrt(AC2)),8.2)
-chk("G2 term",96*math.cos(math.radians(70)),32.8339,0.001)
-# G2 misc expect 11.5 uses 110
-chk("G2 misc",r(math.sqrt(100-96*math.cos(math.radians(110)))),11.5)
-# G3 area40 PQ10 PR12
-sinP=40/60; P=math.degrees(math.asin(sinP)); chk("G3 sol",r(P),41.8)
-chk("G3 misc no_half",r(math.degrees(math.asin(40/120))),19.5)
-# G4 13,14,15
-cosA=(196+225-169)/420; A=math.degrees(math.acos(cosA)); area=0.5*14*15*math.sin(math.radians(A))
-chk("G4 cosA",cosA,0.6,0.001); chk("G4 area",area,84,0.1)
-# G5 x9 y11 Z120
-z2=81+121-2*9*11*math.cos(math.radians(120)); chk("G5 z2",z2,301,0.01); chk("G5 z",r(math.sqrt(z2)),17.3)
-chk("G5 misc",r(math.sqrt(202-99)),10.1)
+expect = {
+ ("bronze",0):[2],("bronze",1):[3],("bronze",2):[7],("bronze",3):[5],
+ ("bronze",4):[4],("bronze",5):[6],("bronze",6):[8],("bronze",7):[14],
+ ("silver",0):[2.333],("silver",1):[3.317],("silver",2):[3.364],("silver",3):[0],
+ ("silver",4):[2],("silver",5):[1],("silver",6):[1.667],
+ ("gold",0):[2.552],("gold",1):[-4],("gold",2):[2.6458],("gold",3):[0],("gold",4):[3.111],
+}
+for tier in ("bronze","silver","gold"):
+    for i,p in enumerate(pb[tier]):
+        got=p["solutions"]; exp=expect[(tier,i)]
+        if [round(float(x),4) for x in got]!=[round(float(x),4) for x in exp]:
+            errs.append("%s[%d] solution %r != fresh %r"%(tier,i,got,exp))
 
-# ---- BRONZE ----
-b=pd["problem_bank"]["bronze"]
-# B1 A40 B60 b12 find a
-a=12*math.sin(math.radians(40))/math.sin(math.radians(60)); chk("B1 a",r(a),8.9)
-chk("B1 misc inv",r(12*math.sin(math.radians(60))/math.sin(math.radians(40))),16.2)
-# B2 a12 b9 A35 find B
-sB=9*math.sin(math.radians(35))/12; B=math.degrees(math.asin(sB)); chk("B2 B",r(B),25.5)
-chk("B2 third",180-35-r(B),119.5)
-chk("B2 misc swap",r(math.degrees(math.asin(12*math.sin(math.radians(35))/9))),49.9)
-# B3 area 6,10,45
-chk("B3 area",0.5*6*10*math.sin(math.radians(45)),21.2,0.05); chk("B3 misc",r(6*10*math.sin(math.radians(45))),42.4)
-# B4 area 8,6,30
-chk("B4 area",0.5*8*6*math.sin(math.radians(30)),12,0.01); chk("B4 misc",r(8*6*math.sin(math.radians(30))),24)
-# B5 A50 B80 a7 find b
-bb=7*math.sin(math.radians(80))/math.sin(math.radians(50)); chk("B5 b",r(bb),9)
-chk("B5 misc",r(7*math.sin(math.radians(50))/math.sin(math.radians(80))),5.4)
-# B6 a6 b8 C90 find c
-c=math.sqrt(36+64-2*6*8*math.cos(math.radians(90))); chk("B6 c",r(c),10)
-# B7 area 12,9,60
-chk("B7 area",0.5*12*9*math.sin(math.radians(60)),46.8,0.05); chk("B7 misc",r(12*9*math.sin(math.radians(60))),93.5)
-# B8 b10 c7 A50 find a
-a8=math.sqrt(100+49-2*10*7*math.cos(math.radians(50))); chk("B8 a",r(a8),7.7)
-chk("B8 term",2*10*7*math.cos(math.radians(50)),89.9903,0.001)
-chk("B8 misc add",r(math.sqrt(149+2*70*math.cos(math.radians(50)))),15.5)
+for tier in ("bronze","silver","gold"):
+    for i,p in enumerate(pb[tier]):
+        gs=p.get("guided_steps")
+        if not gs:
+            if p.get("input_type")!="multiple_choice":
+                errs.append("%s[%d] missing guided_steps"%(tier,i))
+            continue
+        boxes=[s for s in gs if s.get("answer") is not None]
+        if not boxes: errs.append("%s[%d] no boxes"%(tier,i)); continue
+        sol=float(p["solutions"][0])
+        if not any(close(float(b["answer"]),sol,0.02) for b in boxes):
+            errs.append("%s[%d] solution %r not reached by any box"%(tier,i,sol))
+        sub=[j for j,s in enumerate(gs) if s.get("phase")=="substitute"]
+        if not sub: errs.append("%s[%d] no phase:substitute"%(tier,i))
+        else:
+            after=sum(1 for s in gs[sub[0]:] if s.get("answer") is not None)
+            before=sum(1 for s in gs[:sub[0]] if s.get("answer") is not None)
+            if after<2: errs.append("%s[%d] <2 live boxes after boundary"%(tier,i))
+            if before<1: errs.append("%s[%d] <1 box before boundary"%(tier,i))
 
-# ---- SILVER ----
-s=pd["problem_bank"]["silver"]
-# S1 a8 b6 c10 find A
-cA=(36+100-64)/120; chk("S1 A",r(math.degrees(math.acos(cA))),53.1); chk("S1 misc",r(math.degrees(math.acos(-0.6))),126.9)
-# S2 a12 b9 c7 find C
-cC=(144+81-49)/216; chk("S2 cosC",cC,0.8148,0.0002); chk("S2 C",r(math.degrees(math.acos(cC))),35.4)
-chk("S2 misc",r(math.degrees(math.acos(-0.8148))),144.6)
-# S3 11,14,75 third
-c3=math.sqrt(121+196-2*11*14*math.cos(math.radians(75))); chk("S3 c",r(c3),15.4)
-chk("S3 term",2*11*14*math.cos(math.radians(75)),79.7163,0.001)
-chk("S3 misc",r(math.sqrt(317+2*11*14*math.cos(math.radians(75)))),19.9)
-# S4 PQR 15,11,42
-chk("S4 area",0.5*15*11*math.sin(math.radians(42)),55.2,0.05); chk("S4 misc",r(15*11*math.sin(math.radians(42))),110.4)
-# S5 a5 A30 B105 find b
-b5=5*math.sin(math.radians(105))/math.sin(math.radians(30)); chk("S5 b",r(b5),9.7); chk("S5 misc",r(5*math.sin(math.radians(30))/math.sin(math.radians(105))),2.6)
-# S6 b15 c20 A110 find a
-a6=math.sqrt(225+400-2*15*20*math.cos(math.radians(110))); chk("S6 a",r(a6),28.8)
-chk("S6 term",2*15*20*math.cos(math.radians(110)),-205.2121,0.001)
-chk("S6 misc",r(math.sqrt(625-2*15*20*math.cos(math.radians(110))*-1 if False else 625+2*15*20*math.cos(math.radians(110)))),20.5)
-# S7 hikers 3,5 bearings 60,120
-d=math.sqrt(9+25-2*3*5*math.cos(math.radians(60))); chk("S7 d",r(d),4.4); chk("S7 misc",r(math.sqrt(34+15)),7)
+for tier in ("bronze","silver","gold"):
+    for i,p in enumerate(pb[tier]):
+        sol=float(p["solutions"][0])
+        for j,m in enumerate(p.get("misconceptions") or []):
+            if "expect" not in m: errs.append("%s[%d].m[%d] no expect key"%(tier,i,j))
+            e=m.get("expect")
+            if e is not None and close(float(e),sol,0.011):
+                errs.append("%s[%d].m[%d] expect==answer"%(tier,i,j))
 
-# tier guides
-chk("TG gold ex",math.degrees(math.asin(48/96)),30,0.05)
-chk("TG bronze ex",8*math.sin(math.radians(30))/math.sin(math.radians(90)),4,0.01)
-chk("TG silver ex",math.degrees(math.acos((25+36-49)/60)),78.5,0.06)
-# method card
-chk("MC ex",8*math.sin(math.radians(50))/math.sin(math.radians(70)),6.5,0.05)
-# worked examples
-chk("WE1",math.degrees(math.asin(10*0.5/7)),45.6,0.06)
-chk("WE2",math.sqrt(25+64-40),7,0.01)
+def box_answers(tier,i):
+    return [s["answer"] for s in pb[tier][i]["guided_steps"] if s.get("answer") is not None]
+g0=box_answers("gold",0)
+chk=[14, round(14**(1/3),4), round((5*round(14**(1/3),4)+4)**(1/3),4), round(5*2.5225+4,4), round((16.6125)**(1/3),3)]
+if [round(x,4) for x in g0]!=[round(x,4) for x in chk]:
+    errs.append("gold0 chain %r vs %r"%(g0,chk))
+g2=box_answers("gold",2)
+if g2!=[16,2.6667,7.1113,14.1113,2.6458]: errs.append("gold2 chain %r"%(g2,))
+s2=box_answers("silver",2)
+if s2!=[11,3.317,11.317,3.364]: errs.append("silver2 chain %r"%(s2,))
 
-print("ERRORS:" if errs else "ALL NUMERIC CHECKS PASS")
-for e in errs: print(" -",e)
+for tier in ("bronze","silver","gold"):
+    t=pd["guided"]["teach"][tier]
+    nb=sum(1 for s in t["steps"] if s.get("answer") is not None)
+    if nb<4: errs.append("teach.%s <4 boxes"%tier)
+if round(41**(1/3),3)!=3.448: errs.append("cbrt41 mismatch")
+opb=[s["answer"] for s in pd["guided"]["opener"]["steps"] if s.get("answer") is not None]
+if opb!=[8,7]: errs.append("opener boxes %r"%(opb,))
+
+def scan(o,path):
+    if isinstance(o,dict):
+        for k,v in o.items():
+            if k in ("note","guided_skip_reason"): continue
+            scan(v,path+"."+str(k))
+    elif isinstance(o,list):
+        for j,v in enumerate(o): scan(v,path+"[%d]"%j)
+    elif isinstance(o,str) and "—" in o: errs.append("EMDASH at "+path)
+scan(pd,"pd")
+
+# preservation check vs pre-dump
+pre=json.load(io.open("_pre_dump_maths-ocr.json",encoding="utf-8"))
+row=[r for r in pre if r["id"]=="4e8ba0ab-6dca-4615-98e2-2fac39408f5c"][0]["practice_data"]
+for k in ("related_videos","topic_links","worked_examples"):
+    if json.dumps(row.get(k),sort_keys=True)!=json.dumps(pd.get(k),sort_keys=True):
+        errs.append("PRESERVATION changed: %s"%k)
+
+if errs:
+    print("VERIFY FAIL (%d):"%len(errs))
+    for e in errs: print("  -",e)
+else:
+    print("VERIFY OK: solutions fresh, walks land, boundaries valid, expects clean, no em dashes, preserved fields intact")

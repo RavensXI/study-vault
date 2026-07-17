@@ -1,27 +1,24 @@
-import json,io,sys
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
-live = json.load(open("_CHK_L02_live.json",encoding="utf-8"))[0]["practice_data"]
-print("=== METHOD CARD ===")
-mc=live.get("method_card",{})
-print("title:",mc.get("title"))
-steps=mc.get("steps",[])
-print("n_steps:",len(steps),"content_wordcount:", sum(len(str(s).split()) for s in steps))
-print(json.dumps(mc,indent=1,ensure_ascii=False)[:1200])
-
-# preservation vs pre-dump
-ID="cbc91397-a67c-472a-b0da-308aa9da1653"
-pre=json.load(open("_pre_dump_maths-aqa.json",encoding="utf-8"))
-entry=None
+import json
+ID="fe589e29-485c-4272-94df-41687f398c1b"
+live=json.load(open("_CHK_L02_livefresh.json",encoding="utf-8"))["practice_data"]
+pre=json.load(open("_pre_dump_maths-ocr.json",encoding="utf-8"))
+# pre-dump structure?
 if isinstance(pre,list):
-    for r in pre:
-        if r.get("id")==ID: entry=r.get("practice_data"); break
+    entry=[x for x in pre if x.get("id")==ID]
+    entry=entry[0] if entry else None
 elif isinstance(pre,dict):
-    entry = pre.get(ID,{}).get("practice_data") if ID in pre else None
-print("\n=== PRE-DUMP found:", entry is not None)
-if entry:
-    for fld in ["related_videos","topic_links","worked_examples"]:
-        a=json.dumps(entry.get(fld),sort_keys=True,ensure_ascii=False)
-        b=json.dumps(live.get(fld),sort_keys=True,ensure_ascii=False)
-        print(f"  {fld}: pre_present={fld in entry} live_present={fld in live} IDENTICAL={a==b}")
-    print("  pre keys:", sorted(entry.keys()))
-    print("  live keys:", sorted(live.keys()))
+    entry=pre.get(ID) or (pre.get("lessons") and next((x for x in pre["lessons"] if x.get("id")==ID),None))
+else:
+    entry=None
+print("pre-dump type:",type(pre).__name__, "keys/len:", (list(pre.keys())[:5] if isinstance(pre,dict) else len(pre)))
+if entry is None:
+    # try find by scanning
+    print("could not locate entry directly")
+else:
+    pp = entry.get("practice_data") if "practice_data" in entry else entry
+    for f in ["related_videos","topic_links","worked_examples"]:
+        same = json.dumps(pp.get(f),sort_keys=True,ensure_ascii=False)==json.dumps(live.get(f),sort_keys=True,ensure_ascii=False)
+        print(f"{f}: {'UNCHANGED' if same else 'CHANGED'}")
+        if not same:
+            print("   PRE:",json.dumps(pp.get(f),ensure_ascii=False)[:300])
+            print("   LIVE:",json.dumps(live.get(f),ensure_ascii=False)[:300])

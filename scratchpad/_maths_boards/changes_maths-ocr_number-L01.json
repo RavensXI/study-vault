@@ -1,0 +1,38 @@
+{
+ "key": "number-L01",
+ "board": "maths-ocr",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "duplicate answer within tier: bronze[0] and bronze[4] both evaluated to 13, which the validator rejects. Reposed to keep the two-high-priority-ops (one division, one multiplication) teaching point with a distinct answer.",
+   "old": "15 \\div 3 + 4 \\times 2  (= 13)",
+   "new": "15 \\div 3 + 4 \\times 3  (= 17)"
+  },
+  {
+   "tier": "silver",
+   "index": 6,
+   "what": "duplicate answer within tier: silver[3] and silver[6] both evaluated to 30. Changed the leading constant only (50 -> 60) to preserve the power-inside-bracket teaching point with a distinct answer.",
+   "old": "50 - 2 \\times (3^2 + 1)  (= 30)",
+   "new": "60 - 2 \\times (3^2 + 1)  (= 40)"
+  },
+  {
+   "tier": "worked_examples",
+   "index": -1,
+   "what": "em dashes in every worked-example step label (e.g. 'Step 1 — Brackets') replaced with colons per style rule; content, questions and answers preserved and re-verified correct.",
+   "old": "Step 1 — Brackets",
+   "new": "Step 1: Brackets"
+  },
+  {
+   "tier": "method_card",
+   "index": -1,
+   "what": "method_card carried a mojibake em dash (rendered as a replacement char) and over-length content; slimmed to <=4 steps / <=140 words per spec section 8, em dashes removed, fraction-bar + root note retained.",
+   "old": "long content with garbled em dashes",
+   "new": "slim BIDMAS reference (BODMAS noted), fraction bar groups top/bottom, root = index"
+  }
+ ],
+ "misconceptions_reworked": "All 20 legacy {check,message,pattern} misconceptions converted to {pattern,message,expect,note}. Kept exactly one real, derivable misconception per problem (dropped the vague 'wrong' entries that had no determinate expect). Every expect derived by actually committing the error and checked distinct from the correct answer: bronze left-to-right (16,48,4.5,101), reversed subtraction (-14), straight-chain left-to-right (27,68), right-to-left division (16); silver ignore-brackets (23,62,43), index-as-product (21,46), square-the-product (124), square-each-term (48); gold fraction-not-grouped (18), partial-answer (4), index-as-product (21,10), square-the-product (41). One legacy silver value (44) was undeivable/bogus and was replaced with a genuine square-each-term error (48).",
+ "issues_resolved": 2,
+ "opener_concept": "Taxi fare: £3 flag fee to start, then £2 per mile for a 4 mile trip. The student multiplies the miles (4 × 2 = 8) before adding the flag fee by pure instinct; the reveal names that instinct as 'multiplication before addition' and shows blind left-to-right (20) is wrong. Fixed-charge-plus-per-unit is a fresh concrete BIDMAS hook (Edexcel/AQA siblings used a shopping bill). Pure-imagination wording, no figure claimed.",
+ "notes": "Fresh-solved all 20 problems from display before anything else: arithmetic on all matched stored solutions (0 wrong answers); the only bank defects were two within-tier duplicate answers (bronze 13, silver 30), both reposed with minimal clean-integer edits. All non-calculator, all integer answers. Added guided.opener, guided.teach (bronze/silver/gold, all fresh non-bank problems), tier_guides (bronze/silver/gold within the 115-word budget), problem_bank tier descriptions, per-problem hint + guided_steps with phase:substitute completion boundary (set-up = brackets/indices/multiply-divide pre-worked; student finishes the add/subtract + read-back check). Every guided box and every teach/opener box recomputed independently and lands on the stored solutions. Preserved topic_links, related_videos, worked_examples (only em-dash label repair). Validator PASS."
+}

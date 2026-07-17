@@ -1,0 +1,468 @@
+# -*- coding: utf-8 -*-
+import json, io
+
+MIN = "−"  # true minus sign
+TIMES = "×"
+DIV = "÷"
+
+# ---- reused, verified theme-safe SVGs from the AQA sibling ----
+OPENER_SVG = '<svg viewBox="0 0 260 132" role="img" aria-label="Two cafe table layouts: one square table with four seats, and two tables pushed together with six seats." style="max-width:280px"><rect x="30" y="46" width="44" height="44" rx="4" fill="#60a5fa" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="52" cy="34" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="52" cy="102" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="68" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="86" cy="68" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><text x="52" y="124" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" fill="currentColor">1 table = 4 seats</text><rect x="150" y="46" width="88" height="44" rx="4" fill="#60a5fa" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><line x1="194" y1="46" x2="194" y2="90" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3"/><circle cx="172" cy="34" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="216" cy="34" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="172" cy="102" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="216" cy="102" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="138" cy="68" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><circle cx="250" cy="68" r="7" fill="#f59e0b" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/><text x="194" y="124" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" fill="currentColor">2 tables = 6 seats</text></svg>'
+
+TEACH_BRONZE_SVG = '<svg viewBox="0 0 285 96" role="img" aria-label="Three matchstick patterns of squares in a row: pattern 1 uses 4 matchsticks, pattern 2 uses 7, pattern 3 uses 10." style="max-width:280px"><rect x="22" y="22" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/><text x="37" y="88" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" fill="currentColor">Pattern 1: 4</text><rect x="102" y="22" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/><rect x="132" y="22" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/><text x="147" y="88" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" fill="currentColor">Pattern 2: 7</text><rect x="197" y="22" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/><rect x="227" y="22" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/><rect x="257" y="22" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2"/><text x="242" y="88" font-family="Inter,sans-serif" font-size="11" text-anchor="middle" fill="currentColor">Pattern 3: 10</text></svg>'
+
+# ---------------- BRONZE ----------------
+bronze = [
+ # idx0 : completion problem (single_value, full walk)
+ {
+  "display": "Find the 20th term of \\(3, 7, 11, 15, ...\\)",
+  "solutions": [79], "calculator": False, "input_type": "single_value",
+  "hint": "Find the nth term rule first, then put n = 20 into it.",
+  "misconceptions": [
+   {"expect": 80, "message": "4 " + TIMES + " 20 = 80 is only the dn part. The rule is 4n " + MIN + " 1, so the 20th term is 80 " + MIN + " 1 = 79.", "pattern": "forgot_constant"},
+   {"expect": 83, "message": "The constant is first term minus d = 3 " + MIN + " 4 = " + MIN + "1, not +3. The rule is 4n " + MIN + " 1, giving 79.", "pattern": "used_first_term"},
+  ],
+  "guided_steps": [
+   {"say": "A straight-line sequence, so build its rule first."},
+   {"pre": "Common difference: 7 " + MIN + " 3 = ", "post": "", "answer": 4, "hint": "Subtract the first term from the second."},
+   {"pre": "Zero term: 3 " + MIN + " 4 = ", "post": "", "answer": -1, "hint": "Subtract d from the first term.", "done": "So the rule is \\(4n " + MIN + " 1\\)."},
+   {"pre": "The dn part of the 20th term: 4 " + TIMES + " 20 = ", "post": "", "answer": 80, "hint": "Multiply the difference by 20.", "say": "Now use the rule for n = 20.", "phase": "substitute"},
+   {"pre": "Subtract the constant: 80 " + MIN + " 1 = ", "post": "", "answer": 79, "hint": "Take 1 away from 80."},
+   {"pre": "Check the rule rebuilds term 1: 4 " + TIMES + " 1 " + MIN + " 1 = ", "post": "", "answer": 3, "hint": "Put n = 1 in.", "done": "Gives the first term, so the 20th term is 79."},
+  ],
+ },
+ # idx1 : MCQ 5,9,13,17
+ {
+  "display": "Find the nth term of \\(5, 9, 13, 17, ...\\)",
+  "options": ["\\(4n + 1\\)", "\\(4n + 5\\)", "\\(5n + 4\\)", "\\(n + 4\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "Common difference is 4; the constant is 5 minus 4.",
+  "misconceptions": [
+   {"expect": 1, "message": "The constant is first term minus d = 5 " + MIN + " 4 = 1, not the first term. The rule is 4n + 1.", "pattern": "used_first_term"},
+   {"expect": 2, "message": "The number in front of n is the common difference (4), not the first term. The rule is 4n + 1.", "pattern": "swapped_d"},
+  ],
+ },
+ # idx2 : MCQ 2,5,8,11
+ {
+  "display": "Find the nth term of \\(2, 5, 8, 11, ...\\)",
+  "options": ["\\(3n - 1\\)", "\\(3n + 2\\)", "\\(2n + 3\\)", "\\(n + 3\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "Common difference is 3; the constant is 2 minus 3.",
+  "misconceptions": [
+   {"expect": 1, "message": "The constant is first term minus d = 2 " + MIN + " 3 = " + MIN + "1, not +2. The rule is 3n " + MIN + " 1.", "pattern": "used_first_term"},
+   {"expect": 2, "message": "The number in front of n is the common difference (3), not the first term. The rule is 3n " + MIN + " 1.", "pattern": "swapped_d"},
+  ],
+ },
+ # idx3 : MCQ 7,12,17,22
+ {
+  "display": "Find the nth term of \\(7, 12, 17, 22, ...\\)",
+  "options": ["\\(5n + 2\\)", "\\(5n + 7\\)", "\\(7n + 5\\)", "\\(n + 5\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "Common difference is 5; the constant is 7 minus 5.",
+  "misconceptions": [
+   {"expect": 1, "message": "The constant is first term minus d = 7 " + MIN + " 5 = 2, not the first term. The rule is 5n + 2.", "pattern": "used_first_term"},
+   {"expect": 2, "message": "The number in front of n is the common difference (5), not the first term. The rule is 5n + 2.", "pattern": "swapped_d"},
+  ],
+ },
+ # idx4 : MCQ 1,5,9,13
+ {
+  "display": "Find the nth term of \\(1, 5, 9, 13, ...\\)",
+  "options": ["\\(4n - 3\\)", "\\(4n + 1\\)", "\\(n + 4\\)", "\\(4n - 1\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "Common difference is 4; the constant is 1 minus 4.",
+  "misconceptions": [
+   {"expect": 1, "message": "The constant is first term minus d = 1 " + MIN + " 4 = " + MIN + "3, not +1. Check n = 1: 4 " + MIN + " 3 = 1. The rule is 4n " + MIN + " 3.", "pattern": "used_first_term"},
+   {"expect": 3, "message": "Take care with the subtraction: 1 " + MIN + " 4 = " + MIN + "3, not " + MIN + "1. The rule is 4n " + MIN + " 3.", "pattern": "arithmetic_slip"},
+  ],
+ },
+ # idx5 : common difference of 10,7,4,1
+ {
+  "display": "Find the common difference of \\(10, 7, 4, 1, ...\\)",
+  "solutions": [-3], "calculator": False, "input_type": "single_value",
+  "hint": "Subtract a term from the one after it; the sequence is falling, so it is negative.",
+  "misconceptions": [
+   {"expect": 3, "message": "The sequence is decreasing, so subtract in order: 7 " + MIN + " 10 = " + MIN + "3. The difference is negative.", "pattern": "subtracted_backwards"},
+  ],
+  "guided_steps": [
+   {"say": "The common difference is any term minus the one before it."},
+   {"pre": "First difference: 7 " + MIN + " 10 = ", "post": "", "answer": -3, "hint": "Take 10 from 7; it goes negative."},
+   {"pre": "Second difference: 4 " + MIN + " 7 = ", "post": "", "answer": -3, "hint": "Take 7 from 4.", "say": "Check the gap is the same each time:", "phase": "substitute"},
+   {"pre": "Third difference: 1 " + MIN + " 4 = ", "post": "", "answer": -3, "hint": "Take 4 from 1.", "done": "Every gap is " + MIN + "3, so the common difference is " + MIN + "3."},
+  ],
+ },
+ # idx6 : 5th term of 2n+3
+ {
+  "display": "What is the 5th term of the sequence with nth term \\(2n + 3\\)?",
+  "solutions": [13], "calculator": False, "input_type": "single_value",
+  "hint": "Substitute n = 5 into 2n + 3.",
+  "misconceptions": [
+   {"expect": 10, "message": "2 " + TIMES + " 5 = 10 is only the first part. Add the 3: 10 + 3 = 13.", "pattern": "forgot_constant"},
+   {"expect": 16, "message": "\\(2n + 3\\) means (2 " + TIMES + " 5) + 3, not 2 " + TIMES + " (5 + 3). The 5th term is 13.", "pattern": "bracket_error"},
+  ],
+  "guided_steps": [
+   {"say": "The rule is given, so put n = 5 in."},
+   {"pre": "First the 2n part: 2 " + TIMES + " 5 = ", "post": "", "answer": 10, "hint": "Multiply 2 by 5."},
+   {"pre": "Now add the constant: 10 + 3 = ", "post": "", "answer": 13, "hint": "Add 3.", "say": "Finish the substitution:", "phase": "substitute"},
+   {"pre": "Check with n = 1: 2 " + TIMES + " 1 + 3 = ", "post": "", "answer": 5, "hint": "Put n = 1 in; it gives the first term.", "done": "First term is 5, consistent, so the 5th term is 13."},
+  ],
+ },
+ # idx7 : next term of 3,6,12,24 (geometric)
+ {
+  "display": "Find the next term: \\(3, 6, 12, 24, ...\\)",
+  "solutions": [48], "calculator": False, "input_type": "single_value",
+  "hint": "This one multiplies each time; find the ratio and multiply the last term.",
+  "misconceptions": [
+   {"expect": 36, "message": "The gaps 3, 6, 12 are not constant, so it is not arithmetic. Each term is " + TIMES + " 2: 24 " + TIMES + " 2 = 48.", "pattern": "assumed_arithmetic"},
+  ],
+  "guided_steps": [
+   {"say": "The gaps grow, so test for multiplying instead of adding."},
+   {"pre": "Ratio: 6 " + DIV + " 3 = ", "post": "", "answer": 2, "hint": "Divide the second term by the first."},
+   {"pre": "Confirm: 12 " + DIV + " 6 = ", "post": "", "answer": 2, "hint": "Divide the third term by the second.", "done": "Constant ratio 2, so it is geometric."},
+   {"pre": "Next term: 24 " + TIMES + " 2 = ", "post": "", "answer": 48, "hint": "Multiply the last term by 2.", "say": "Multiply the last term by the ratio:", "phase": "substitute"},
+   {"pre": "Check backwards: 48 " + DIV + " 2 = ", "post": "", "answer": 24, "hint": "Divide 48 by 2.", "done": "It returns 24, the term before, so 48 is right."},
+  ],
+ },
+]
+
+# ---------------- SILVER ----------------
+silver = [
+ # idx0 : completion problem (membership, single_value)
+ {
+  "display": "Is \\(50\\) a term in the sequence \\(7n + 1\\)?  Enter 1 for Yes, 0 for No.",
+  "solutions": [1], "calculator": False, "input_type": "single_value",
+  "hint": "Set 7n + 1 equal to 50 and check whether n is a whole number.",
+  "misconceptions": [
+   {"expect": 0, "message": "Do not just divide 50 by 7. Subtract the constant first: \\(7n = 50 " + MIN + " 1 = 49\\), then n = 7, a whole number, so 50 IS a term. Enter 1.", "pattern": "divided_without_constant"},
+  ],
+  "guided_steps": [
+   {"say": "The rule is given. To test membership, set it equal to 50 and see if n is a whole number."},
+   {"pre": "Subtract the constant: 7n = 50 " + MIN + " 1 = ", "post": "", "answer": 49, "hint": "Take 1 off 50."},
+   {"pre": "Divide by 7: n = 49 " + DIV + " 7 = ", "post": "", "answer": 7, "hint": "Divide 49 by 7.", "say": "Solve for the position n:", "phase": "substitute"},
+   {"pre": "n = 7 is a whole number, so 50 is a term. Enter 1 for Yes: ", "post": "", "answer": 1, "hint": "Type 1.", "done": "n = 7 is whole, so 50 is the 7th term. Answer 1."},
+  ],
+ },
+ # idx1 : MCQ 20,17,14,11
+ {
+  "display": "Find the nth term of \\(20, 17, 14, 11, ...\\)",
+  "options": ["\\(23 - 3n\\)", "\\(20 - 3n\\)", "\\(-3n + 17\\)", "\\(3n + 20\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "The difference is minus 3; the constant is 20 minus (minus 3).",
+  "misconceptions": [
+   {"expect": 1, "message": "The constant is first term minus d = 20 " + MIN + " (" + MIN + "3) = 23, not 20. Check n = 1: 23 " + MIN + " 3 = 20. The rule is 23 " + MIN + " 3n.", "pattern": "used_first_term"},
+   {"expect": 2, "message": "Subtracting a negative adds: 20 " + MIN + " (" + MIN + "3) = 23, not 17. The rule is 23 " + MIN + " 3n.", "pattern": "double_negative_slip"},
+  ],
+ },
+ # idx2 : MCQ 6,3,0,-3
+ {
+  "display": "Find the nth term of \\(6, 3, 0, -3, ...\\)",
+  "options": ["\\(9 - 3n\\)", "\\(6 - 3n\\)", "\\(-3n + 3\\)", "\\(3 - 6n\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "The difference is minus 3; the constant is 6 minus (minus 3).",
+  "misconceptions": [
+   {"expect": 1, "message": "The constant is first term minus d = 6 " + MIN + " (" + MIN + "3) = 9, not 6. Check n = 1: 9 " + MIN + " 3 = 6. The rule is 9 " + MIN + " 3n.", "pattern": "used_first_term"},
+   {"expect": 2, "message": "Subtracting a negative adds: 6 " + MIN + " (" + MIN + "3) = 9, not 3. The rule is 9 " + MIN + " 3n.", "pattern": "double_negative_slip"},
+  ],
+ },
+ # idx3 : common ratio 4,12,36,108
+ {
+  "display": "Find the common ratio of \\(4, 12, 36, 108, ...\\)",
+  "solutions": [3], "calculator": False, "input_type": "single_value",
+  "hint": "It multiplies each time; divide a term by the one before it.",
+  "misconceptions": [
+   {"expect": 8, "message": "This is geometric, so divide, do not subtract: 12 " + DIV + " 4 = 3. The ratio is 3.", "pattern": "found_difference"},
+  ],
+  "guided_steps": [
+   {"say": "Each term is the one before times a fixed ratio, so divide to find it."},
+   {"pre": "Ratio: 12 " + DIV + " 4 = ", "post": "", "answer": 3, "hint": "Divide the second term by the first."},
+   {"pre": "Confirm: 36 " + DIV + " 12 = ", "post": "", "answer": 3, "hint": "Divide the third term by the second.", "say": "Check the ratio is the same all along:", "phase": "substitute"},
+   {"pre": "And 108 " + DIV + " 36 = ", "post": "", "answer": 3, "hint": "Divide the fourth term by the third.", "done": "Every ratio is 3, so the common ratio is 3."},
+  ],
+ },
+ # idx4 : 8th term geometric 5,10,20,40
+ {
+  "display": "Find the 8th term of the geometric sequence \\(5, 10, 20, 40, ...\\)",
+  "solutions": [640], "calculator": True, "input_type": "single_value",
+  "hint": "First term 5, ratio 2; the 8th term is 5 times 2 to the power (8 minus 1).",
+  "misconceptions": [
+   {"expect": 1280, "message": "The power is n " + MIN + " 1 = 7, not 8. 5 " + TIMES + " 2⁷ = 5 " + TIMES + " 128 = 640.", "pattern": "power_n_not_n_minus_1"},
+   {"expect": 70, "message": "\\(2^{7}\\) means 2 multiplied by itself 7 times (= 128), not 2 " + TIMES + " 7. So 5 " + TIMES + " 128 = 640.", "pattern": "power_as_product"},
+  ],
+  "guided_steps": [
+   {"say": "Geometric: first term 5, ratio 2. The 8th term is 5 " + TIMES + " 2 to a power."},
+   {"pre": "The power: n " + MIN + " 1 = 8 " + MIN + " 1 = ", "post": "", "answer": 7, "hint": "Subtract 1 from 8."},
+   {"pre": "2 to that power: 2⁷ = ", "post": "", "answer": 128, "hint": "2 " + TIMES + " 2 " + TIMES + " 2 " + TIMES + " 2 " + TIMES + " 2 " + TIMES + " 2 " + TIMES + " 2.", "say": "Raise 2 to the power you found:", "phase": "substitute"},
+   {"pre": "Multiply by the first term: 5 " + TIMES + " 128 = ", "post": "", "answer": 640, "hint": "Multiply 128 by 5."},
+   {"pre": "Check the 1st term: 5 " + TIMES + " 2⁰ = 5 " + TIMES + " 1 = ", "post": "", "answer": 5, "hint": "Anything to the power 0 is 1.", "done": "First term is 5, matching, so the 8th term is 640."},
+  ],
+ },
+ # idx5 : n^2+1, 6th term
+ {
+  "display": "The nth term of a sequence is \\(n^2 + 1\\). Find the 6th term.",
+  "solutions": [37], "calculator": False, "input_type": "single_value",
+  "hint": "Substitute n = 6, squaring first: 6 squared plus 1.",
+  "misconceptions": [
+   {"expect": 13, "message": "\\(n^2\\) means 6 " + TIMES + " 6 = 36, not 2 " + TIMES + " 6. The 6th term is 36 + 1 = 37.", "pattern": "read_as_2n"},
+   {"expect": 36, "message": "6² = 36, then add the 1: 36 + 1 = 37.", "pattern": "forgot_constant"},
+  ],
+  "guided_steps": [
+   {"say": "The rule is given. Substitute n = 6, squaring first."},
+   {"pre": "Square n: 6² = 6 " + TIMES + " 6 = ", "post": "", "answer": 36, "hint": "Multiply 6 by itself."},
+   {"pre": "Add the constant: 36 + 1 = ", "post": "", "answer": 37, "hint": "Add 1 to 36.", "say": "Finish it off:", "phase": "substitute"},
+   {"pre": "Check the 1st term: 1² + 1 = ", "post": "", "answer": 2, "hint": "Put n = 1 in.", "done": "Sequence starts 2, 5, 10, 17, so the 6th term is 37."},
+  ],
+ },
+ # idx6 : which term of 3n-5 = 40
+ {
+  "display": "Which term of the sequence \\(3n - 5\\) is equal to \\(40\\)?",
+  "solutions": [15], "calculator": False, "input_type": "single_value",
+  "hint": "Set 3n minus 5 equal to 40 and solve for n.",
+  "misconceptions": [
+   {"expect": 115, "message": "Putting n = 40 in finds the 40th term, not which term equals 40. Solve \\(3n " + MIN + " 5 = 40\\) instead: n = 15.", "pattern": "substituted_value"},
+  ],
+  "guided_steps": [
+   {"say": "We know the value (40) and want the position n, so solve an equation."},
+   {"pre": "Set \\(3n " + MIN + " 5 = 40\\). Add 5 to both sides: 3n = ", "post": "", "answer": 45, "hint": "Add 5 to 40."},
+   {"pre": "Divide by 3: n = 45 " + DIV + " 3 = ", "post": "", "answer": 15, "hint": "Divide 45 by 3.", "say": "Now undo the multiply:", "phase": "substitute"},
+   {"pre": "Check term 15: 3 " + TIMES + " 15 " + MIN + " 5 = ", "post": "", "answer": 40, "hint": "Put n = 15 back in.", "done": "It gives 40, so the 15th term is 40."},
+  ],
+ },
+]
+
+# ---------------- GOLD ----------------
+gold = [
+ # idx0 : completion problem (geometric ratio from 4th term)
+ {
+  "display": "The first term of a geometric sequence is 2 and the 4th term is 54. Find the common ratio.",
+  "solutions": [3], "calculator": False, "input_type": "single_value",
+  "hint": "The 4th term is the first term times r cubed; divide by 2, then take the cube root.",
+  "misconceptions": [
+   {"expect": 27, "message": "54 " + DIV + " 2 = 27 is r³, not r. Take the cube root: r = 3.", "pattern": "ratio_not_cubed"},
+  ],
+  "guided_steps": [
+   {"say": "Geometric: the 4th term is the first term multiplied by r three times, so \\(2 " + TIMES + " r^3 = 54\\)."},
+   {"pre": "Divide by the first term: r³ = 54 " + DIV + " 2 = ", "post": "", "answer": 27, "hint": "Divide 54 by 2."},
+   {"pre": "Cube root: r = ∛27 = ", "post": "", "answer": 3, "hint": "What number cubed gives 27? 3 " + TIMES + " 3 " + TIMES + " 3 = 27.", "say": "Undo the cube to find r:", "phase": "substitute"},
+   {"pre": "Check the 4th term: 2 " + TIMES + " 3³ = 2 " + TIMES + " 27 = ", "post": "", "answer": 54, "hint": "Cube 3, then double.", "done": "It rebuilds 54, so the common ratio is 3."},
+  ],
+ },
+ # idx1 : 2n^2 - 3, 5th term
+ {
+  "display": "The nth term of a sequence is \\(2n^2 - 3\\). Find the 5th term.",
+  "solutions": [47], "calculator": False, "input_type": "single_value",
+  "hint": "Square n first, then multiply by 2, then subtract 3.",
+  "misconceptions": [
+   {"expect": 97, "message": "\\(2n^2\\) means 2 " + TIMES + " (5²) = 2 " + TIMES + " 25 = 50, not (2 " + TIMES + " 5)² = 100. So 50 " + MIN + " 3 = 47.", "pattern": "squared_whole"},
+   {"expect": 50, "message": "2 " + TIMES + " 25 = 50 is not the end. Subtract the 3: 50 " + MIN + " 3 = 47.", "pattern": "forgot_constant"},
+  ],
+  "guided_steps": [
+   {"say": "The rule is given. Follow BIDMAS: square n first, then multiply, then subtract."},
+   {"pre": "Square n: 5² = ", "post": "", "answer": 25, "hint": "5 " + TIMES + " 5."},
+   {"pre": "Times 2: 2 " + TIMES + " 25 = ", "post": "", "answer": 50, "hint": "Multiply 25 by 2.", "say": "Only n is squared, so multiply by 2 after squaring:"},
+   {"pre": "Subtract 3: 50 " + MIN + " 3 = ", "post": "", "answer": 47, "hint": "Take 3 off 50.", "phase": "substitute"},
+   {"pre": "Check the 1st term: 2 " + TIMES + " 1² " + MIN + " 3 = ", "post": "", "answer": -1, "hint": "Put n = 1 in: 2 " + TIMES + " 1 " + MIN + " 3.", "done": "Sequence is " + MIN + "1, 5, 15, 29, 47, so the 5th term is 47."},
+  ],
+ },
+ # idx2 : 100 x 0.5^(n-1), first below 1 (calculator)
+ {
+  "display": "A geometric sequence has first term 100 and common ratio 0.5. After how many terms is the value first below 1?",
+  "solutions": [8], "calculator": True, "input_type": "single_value",
+  "hint": "Halve from 100 and count the terms until one drops below 1.",
+  "misconceptions": [
+   {"expect": 7, "message": "The 7th term, \\(100 " + TIMES + " 0.5^6 = 1.5625\\), is still above 1. The 8th term, 0.78, is the first below 1. Answer 8.", "pattern": "off_by_one_power"},
+  ],
+  "guided_steps": [
+   {"say": "Halve from 100 and count terms until you drop below 1."},
+   {"pre": "6th term: 100 halved five times, 100 " + DIV + " 32 = ", "post": "", "answer": 3.125, "hint": "Halve 100 five times."},
+   {"pre": "7th term: halve again, 3.125 " + DIV + " 2 = ", "post": "", "answer": 1.5625, "hint": "Halve 3.125.", "done": "Still above 1."},
+   {"pre": "8th term: halve again, 1.5625 " + DIV + " 2 = ", "post": "", "answer": 0.78125, "hint": "Halve 1.5625.", "say": "Keep halving until below 1:", "phase": "substitute"},
+   {"pre": "That is below 1. Which term number is it? ", "post": "", "answer": 8, "hint": "It is the 8th term in the list.", "done": "The 7th term (1.56) is above 1, the 8th (0.78) is the first below, so the answer is 8."},
+  ],
+ },
+ # idx3 : Fibonacci 10th term
+ {
+  "display": "A sequence starts \\(1, 1, 2, 3, 5, 8, 13, ...\\) What is the 10th term?",
+  "solutions": [55], "calculator": False, "input_type": "single_value",
+  "hint": "Each term is the sum of the two before it; keep adding to the 10th.",
+  "misconceptions": [
+   {"expect": 34, "message": "34 is the 9th term. Continue one more: the 10th is 21 + 34 = 55.", "pattern": "off_by_one_count"},
+  ],
+  "guided_steps": [
+   {"say": "Each term is the sum of the two before it. Keep adding until the 10th."},
+   {"pre": "The 7th term is 13. The 8th: 8 + 13 = ", "post": "", "answer": 21, "hint": "Add the two before it, 8 and 13."},
+   {"pre": "9th term: 13 + 21 = ", "post": "", "answer": 34, "hint": "Add 13 and 21."},
+   {"pre": "10th term: 21 + 34 = ", "post": "", "answer": 55, "hint": "Add 21 and 34.", "say": "Add the last two each time to reach the 10th:", "phase": "substitute"},
+   {"pre": "Count the terms 1, 1, 2, 3, 5, 8, 13, 21, 34, 55: the last is term number ", "post": "", "answer": 10, "hint": "Count how many terms are listed.", "done": "The 10th term is 55."},
+  ],
+ },
+ # idx4 : MCQ proof (sum of 3 consecutive of 2n+1)
+ {
+  "display": "The sum of any 3 consecutive terms of the sequence \\(2n + 1\\) is always divisible by 3. What is the sum for terms \\(n, n+1, n+2\\)?",
+  "options": ["\\(6n + 9\\)", "\\(6n + 3\\)", "\\(6n + 6\\)", "\\(3(2n + 1)\\)"],
+  "solutions": [0], "calculator": False, "input_type": "multiple_choice",
+  "hint": "Write the three terms as 2n+1, 2n+3, 2n+5, then add them.",
+  "misconceptions": [
+   {"expect": 3, "message": "\\(3(2n+1)\\) treats all three terms as the same. They increase: \\(2n+1, 2n+3, 2n+5\\), summing to 6n + 9.", "pattern": "same_term"},
+   {"expect": 2, "message": "The terms of \\(2n+1\\) go up in 2s: \\(2n+1, 2n+3, 2n+5\\), not \\(2n+1, 2n+2, 2n+3\\). The sum is 6n + 9.", "pattern": "wrong_step"},
+  ],
+ },
+]
+
+problem_bank = {
+ "bronze": bronze, "silver": silver, "gold": gold,
+ "bronze_description": "Find the nth term rule of a straight-line sequence, and use a given rule to find any term.",
+ "silver_description": "Test if a number belongs in a sequence, find common ratios and geometric terms, and solve for a position.",
+ "gold_description": "Reasoning problems: geometric ratios from a distant term, quadratic rules, growth and decay, Fibonacci, and algebraic proof.",
+}
+
+tier_guides = {
+ "bronze": {
+  "title": "Bronze: the nth term of a straight-line sequence",
+  "steps": [
+   "Find the <strong>common difference</strong> d: subtract each term from the next. If it is the same every time, the sequence is arithmetic.",
+   "The rule starts <strong>dn</strong>. Find the constant from the <strong>zero term</strong>: first term minus d.",
+   "So nth term = dn + (first term minus d). Check it at n = 1 rebuilds the start. To find a term, substitute that n into a given rule.",
+  ],
+  "example": {
+   "question": "Find the nth term of 6, 10, 14, 18, ...",
+   "steps": [
+    {"label": "Common difference", "content": "<p>\\(10 - 6 = 4\\), and it stays 4, so \\(d = 4\\).</p>"},
+    {"label": "Zero term", "content": "<p>First term minus d: \\(6 - 4 = 2\\).</p>"},
+    {"label": "Check", "content": "<p>Rule \\(4n + 2\\) at \\(n = 1\\) gives \\(4 + 2 = 6\\). ✓</p>"},
+    {"label": "nth term", "content": "<p>\\(4n + 2\\)</p>", "isAnswer": True, "is_answer": True},
+   ],
+  },
+ },
+ "silver": {
+  "title": "Silver: membership, geometric ratios, and solving for a position",
+  "steps": [
+   "To test if a number N is in a sequence, set the nth term equal to N and solve for n. A whole number means yes, a fraction means no.",
+   "<strong>Geometric</strong> sequences multiply by a fixed <strong>ratio</strong> r; find r by dividing a term by the one before, and the nth term is \\(ar^{n-1}\\).",
+   "To find which term equals a value, set the rule equal to it and solve the equation for n.",
+  ],
+  "example": {
+   "question": "Find the 5th term of 3, 6, 12, 24, ...",
+   "steps": [
+    {"label": "Common ratio", "content": "<p>\\(6 \\div 3 = 2\\), and it stays 2, so \\(r = 2\\).</p>"},
+    {"label": "nth term rule", "content": "<p>\\(ar^{n-1} = 3 \\times 2^{n-1}\\).</p>"},
+    {"label": "Check", "content": "<p>\\(n = 5\\): \\(3 \\times 2^{4} = 3 \\times 16 = 48\\).</p>"},
+    {"label": "5th term", "content": "<p>\\(48\\)</p>", "isAnswer": True, "is_answer": True},
+   ],
+  },
+ },
+ "gold": {
+  "title": "Gold: distant terms, powers, and proof",
+  "steps": [
+   "For a geometric sequence, a distant term gives r: the 4th term is \\(ar^3\\), so divide by the first term and take the cube root.",
+   "Quadratic rules like \\(2n^2 - 3\\) need BIDMAS: square n first, then multiply and add or subtract.",
+   "For a proof, write the terms in n (for \\(2n+1\\): \\(2n+1, 2n+3, 2n+5\\)), add or simplify, then read off the factor.",
+  ],
+  "example": {
+   "question": "The first term is 3 and the 3rd term is 75. Find the common ratio.",
+   "steps": [
+    {"label": "Set up", "content": "<p>3rd term \\(= 3 \\times r^2 = 75\\).</p>"},
+    {"label": "Solve", "content": "<p>\\(r^2 = 25\\), so \\(r = 5\\).</p>"},
+    {"label": "Check", "content": "<p>Terms 3, 15, 75: each \\(\\times 5\\). ✓</p>"},
+    {"label": "ratio", "content": "<p>\\(5\\)</p>", "isAnswer": True, "is_answer": True},
+   ],
+  },
+ },
+}
+
+guided = {
+ "opener": {
+  "label": "Warm-up",
+  "display": OPENER_SVG + "<p>A cafe pushes square tables into one long row. Look at how the seats grow, no algebra needed.</p>",
+  "steps": [
+   {"say": "One square table seats 4. Push another table on and you gain 2 more seats (the two long sides)."},
+   {"pre": "So 2 tables seat ", "post": "", "answer": 6, "hint": "One table seats 4, and one more table adds 2."},
+   {"pre": "And 3 tables seat ", "post": "", "answer": 8, "hint": "Add another 2 seats to your last answer.", "say": "Every extra table adds the same 2 seats.", "done": "Up by 2 every time. That fixed jump is the whole idea."},
+   {"say": "That fixed jump of 2 is the <strong>common difference</strong>. To skip ahead to any number of tables \\(n\\) without drawing them, the rule is \\(2n + 2\\). Check: \\(n = 3\\) gives \\(2(3) + 2 = 8\\). That rule is the <strong>nth term</strong>. Every straight-line sequence works this way: a fixed step, then the rule \\(dn + (\\text{start} - d)\\)."},
+  ],
+ },
+ "teach": {
+  "bronze": {
+   "label": "Bronze walk",
+   "display": TEACH_BRONZE_SVG + "<p>Each pattern is made of matchstick squares: pattern 1 uses 4, pattern 2 uses 7, pattern 3 uses 10. Find the rule for the number of matchsticks in pattern \\(n\\).</p>",
+   "steps": [
+    {"say": "The counts are 4, 7, 10. First find how many matchsticks are added each time."},
+    {"pre": "7 " + MIN + " 4 = ", "post": "", "answer": 3, "hint": "Subtract pattern 1 from pattern 2.", "done": "It adds 3 every pattern (10 " + MIN + " 7 = 3 too), so d = 3."},
+    {"pre": "Now the zero term: 4 " + MIN + " 3 = ", "post": "", "answer": 1, "hint": "Subtract d from the first count.", "say": "The rule starts \\(3n\\). The constant is the zero term:", "done": "So the rule is \\(3n + 1\\)."},
+    {"pre": "Use it for pattern 10: 3 " + TIMES + " 10 + 1 = ", "post": "", "answer": 31, "hint": "Multiply 3 by 10, then add 1.", "say": "Now the rule works for any pattern, even ones you have not drawn."},
+    {"pre": "Check it rebuilds pattern 1: 3 " + TIMES + " 1 + 1 = ", "post": "", "answer": 4, "hint": "Put n = 1 into 3n + 1.", "say": "Last, make sure the rule gives back the start:", "done": "Gives 4 matchsticks, so \\(3n + 1\\) is right."},
+   ],
+  },
+  "silver": {
+   "label": "Silver walk",
+   "display": "<p>Is 80 a term in the sequence \\(5, 9, 13, 17, ...\\)?</p>",
+   "steps": [
+    {"say": "First find the rule for the sequence."},
+    {"pre": "Common difference: 9 " + MIN + " 5 = ", "post": "", "answer": 4, "hint": "Subtract 5 from 9."},
+    {"pre": "Zero term: 5 " + MIN + " 4 = ", "post": "", "answer": 1, "hint": "Subtract d from the first term.", "done": "So the rule is \\(4n + 1\\)."},
+    {"pre": "Now test 80. Set \\(4n + 1 = 80\\), so \\(4n = 79\\). Then n = 79 " + DIV + " 4 = ", "post": "", "answer": 19.75, "hint": "Divide 79 by 4; type the decimal.", "say": "The new move: to test if a number is in the list, set the rule equal to it and solve for the position n.", "done": "n is not a whole number, so 80 lands between terms. It is NOT in the sequence."},
+    {"pre": "Contrast with 81: \\(4n + 1 = 81\\) gives \\(4n = 80\\), so n = 80 " + DIV + " 4 = ", "post": "", "answer": 20, "hint": "Divide 80 by 4.", "say": "Compare with a number that does fit:", "done": "A whole number, so 81 is the 20th term. Whole n means yes, a fraction means no."},
+   ],
+  },
+  "gold": {
+   "label": "Gold walk",
+   "display": "<p>The first term of a geometric sequence is 3 and the 4th term is 375. Find the common ratio.</p>",
+   "steps": [
+    {"say": "The 4th term is the first term multiplied by r three times: \\(3 " + TIMES + " r^3 = 375\\)."},
+    {"pre": "Divide by the first term: r³ = 375 " + DIV + " 3 = ", "post": "", "answer": 125, "hint": "Divide 375 by 3."},
+    {"pre": "Cube root: r = ∛125 = ", "post": "", "answer": 5, "hint": "What cubed gives 125? 5 " + TIMES + " 5 " + TIMES + " 5 = 125.", "say": "The new move: undo the cube to find r.", "done": "So r = 5."},
+    {"pre": "Find the 2nd term to check: 3 " + TIMES + " 5 = ", "post": "", "answer": 15, "hint": "Multiply the first term by r."},
+    {"pre": "Check the 4th term: 3 " + TIMES + " 5³ = 3 " + TIMES + " 125 = ", "post": "", "answer": 375, "hint": "Cube 5, then times 3.", "done": "Terms 3, 15, 75, 375: each " + TIMES + " 5, so the ratio is 5."},
+   ],
+  },
+ },
+}
+
+method_card = {
+ "title": "How to Find the nth Term of a Sequence",
+ "steps": [
+  "Find the common difference d between consecutive terms.",
+  "The rule is dn + (first term minus d). Check it at n = 1.",
+  "Geometric sequences multiply by a ratio r: nth term = ar^(n" + MIN + "1).",
+  "To find a position, set the rule equal to the value and solve for n.",
+ ],
+ "content": "<p><strong>Arithmetic sequences</strong> have a constant difference \\(d\\). The nth term is \\(dn + (\\text{first term} - d)\\): find \\(d\\), subtract it from the first term for the constant, then check \\(n = 1\\) rebuilds the start.</p><p><strong>Geometric sequences</strong> multiply by a constant ratio \\(r\\); the nth term is \\(ar^{n-1}\\).</p><p><strong>Special sequences:</strong> squares 1, 4, 9, 16; triangular 1, 3, 6, 10; Fibonacci-type add the previous two.</p>",
+ "example": "<p><strong>Find the nth term of</strong> 5, 8, 11, 14, ...</p><p>\\(d = 3\\); constant \\(= 5 - 3 = 2\\); nth term \\(= 3n + 2\\). Check \\(n = 1\\): \\(3 + 2 = 5\\) \\(\\checkmark\\)</p>",
+}
+
+# ---- preserve untouched fields from the live row ----
+live = json.load(io.open(r"C:/Users/tshau/Documents/Study Vault/.claude/worktrees/sandbox/scratchpad/_maths_boards/_ocr_L13_live.json", encoding="utf-8"))
+
+# strip em-dash "Step N — " prefixes from preserved worked_examples labels (style rule)
+worked = live.get("worked_examples", [])
+for we in worked:
+    for st in we.get("steps", []):
+        lab = st.get("label")
+        if isinstance(lab, str) and "—" in lab:
+            st["label"] = lab.split("—", 1)[1].strip()
+
+pd = {
+ "method_card": method_card,
+ "topic_links": live.get("topic_links", {"prerequisites": []}),
+ "problem_bank": problem_bank,
+ "related_videos": live.get("related_videos", []),
+ "worked_examples": worked,
+ "tier_guides": tier_guides,
+ "guided": guided,
+}
+
+out = r"C:/Users/tshau/Documents/Study Vault/.claude/worktrees/sandbox/scratchpad/_maths_boards/lesson_maths-ocr_algebra-L13.json"
+json.dump(pd, io.open(out, "w", encoding="utf-8"), indent=1, ensure_ascii=False)
+print("written", out)
+
+# quick internal em-dash guard
+def scan(o, p=""):
+    if isinstance(o, dict):
+        for k, v in o.items():
+            if k in ("note", "guided_skip_reason"):
+                continue
+            scan(v, p + "." + str(k))
+    elif isinstance(o, list):
+        for i, v in enumerate(o):
+            scan(v, p + "[%d]" % i)
+    elif isinstance(o, str) and "—" in o:
+        print("EMDASH", p)
+scan(pd)
+print("emdash scan done")

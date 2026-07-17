@@ -1,57 +1,35 @@
-import json, re
-base = "C:/Users/tshau/Documents/Study Vault/.claude/worktrees/sandbox/scratchpad/_maths_boards/"
-live = json.load(open(base+"_LIVE_L05.json", encoding="utf-8"))
+import math, json
+def r(x,n): return round(x,n)
+def tand(d): return math.tan(math.radians(d))
+def sind(d): return math.sin(math.radians(d))
+def cosd(d): return math.cos(math.radians(d))
+def atand(x): return math.degrees(math.atan(x))
+def asind(x): return math.degrees(math.asin(x))
+def acosd(x): return math.degrees(math.acos(x))
 
-# ---- Preservation vs pre-dump ----
-pre = json.load(open(base+"_pre_dump_maths-aqa.json", encoding="utf-8"))
-ID = "d2ed09e5-eea7-4e13-a9b6-2437ace7f664"
-entry = None
-if isinstance(pre, dict):
-    # could be keyed by id or list under a key
-    if ID in pre: entry = pre[ID]
-    else:
-        for k,v in pre.items():
-            if isinstance(v, dict) and v.get("id")==ID: entry=v; break
-            if isinstance(v, list):
-                for it in v:
-                    if isinstance(it,dict) and it.get("id")==ID: entry=it; break
-elif isinstance(pre, list):
-    for it in pre:
-        if isinstance(it,dict) and it.get("id")==ID: entry=it; break
-print("pre-dump entry found:", entry is not None)
-if entry is not None:
-    pdpre = entry.get("practice_data", entry)
-    for f in ["related_videos","topic_links","worked_examples"]:
-        a = json.dumps(pdpre.get(f), sort_keys=True, ensure_ascii=False)
-        b = json.dumps(live.get(f), sort_keys=True, ensure_ascii=False)
-        print(f"PRESERVE {f}: {'SAME' if a==b else 'CHANGED'}")
-        if a!=b:
-            print("  PRE :", a[:400])
-            print("  LIVE:", b[:400])
-    print("pre-dump top keys:", list(pdpre.keys()))
+print("=== TEACH WALKS ===")
+print("gold ramp: 2/9=",r(2/9,2),"atan=",r(atand(2/9),1),"tan12.5=",r(tand(12.5),2),"sqrt85=",r(math.sqrt(85),1))
+print("silver: 9/12=",r(9/12,2),"atan=",r(atand(9/12),1),"90-36.9=",90-36.9,"tan36.9=",r(tand(36.9),2))
+print("bronze: sqrt400=",math.sqrt(400))
 
-# ---- Em dash scan in student-facing strings ----
-EM = "—"
-hits=[]
-def walk(o, path):
-    if isinstance(o, dict):
-        for k,v in o.items():
-            if k=="note": continue  # internal exempt
-            walk(v, f"{path}.{k}")
-    elif isinstance(o, list):
-        for i,v in enumerate(o): walk(v, f"{path}[{i}]")
-    elif isinstance(o, str):
-        if EM in o: hits.append(path)
-walk(live, "root")
-print("EM DASH hits:", hits)
+print("=== GOLD BANK ===")
+print("g0 sqrt100",math.sqrt(100))
+print("g1 sqrt(100-36)",math.sqrt(64))
+print("g2 sqrt169",math.sqrt(169))
+print("g3 sqrt225",math.sqrt(225))
+print("g4 tan32=",r(tand(32),2),"50tan32=",r(50*tand(32),1),"check 31.2/50=",r(31.2/50,2),"sin exp 50sin32=",r(50*sind(32),1))
 
-# ---- charts/svg present? ----
-def find_fig(o, path, out):
-    if isinstance(o,dict):
-        if "chart" in o: out.append(path+".chart")
-        for k,v in o.items(): find_fig(v,f"{path}.{k}",out)
-    elif isinstance(o,list):
-        for i,v in enumerate(o): find_fig(v,f"{path}[{i}]",out)
-    elif isinstance(o,str) and "<svg" in o: out.append(path+"(svg)")
-figs=[]; find_fig(live,"root",figs)
-print("FIGURES:", figs if figs else "none")
+print("=== SILVER BANK ===")
+print("s0 5/12=",r(5/12,2),"atan=",r(atand(5/12),1),"tan22.6=",r(tand(22.6),2),"exp atan(12/5)=",r(atand(12/5),1))
+print("s1 tan40=",r(tand(40),2),"10tan40=",r(10*tand(40),1),"exp 10sin40=",r(10*sind(40),1))
+print("s2 sin30=",sind(30),"7/0.5=",7/0.5,"exp 7sin30=",7*sind(30))
+print("s3 8/10=",8/10,"acos0.8=",r(acosd(0.8),1),"cos36.9=",r(cosd(36.9),2),"exp asin0.8=",r(asind(0.8),1))
+print("s4 sqrt16=",math.sqrt(16),"exp sqrt34=",r(math.sqrt(34),1))
+print("s5 cos50=",r(cosd(50),2),"15cos50=",r(15*cosd(50),1),"exp 15sin50=",r(15*sind(50),1))
+print("s6 7/25=",7/25,"asin0.28=",r(asind(0.28),1),"sin16.3=",r(sind(16.3),2),"exp acos0.28=",r(acosd(0.28),1))
+
+print("=== BRONZE expects ===")
+print("b1 sqrt194=",r(math.sqrt(194),1))
+print("b3 sqrt136=",r(math.sqrt(136),1))
+print("b7 sqrt674=",r(math.sqrt(674),1))
+print("s0 chk atan25... none")

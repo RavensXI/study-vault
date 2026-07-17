@@ -1,0 +1,134 @@
+
+############## bronze (desc: Read a single value straight off a bar chart, or turn a pie chart sector into a frequency.) ##############
+
+----- bronze[0] -----
+DISPLAY: How many students chose swimming?
+SOL: [20] | input_type: single_value
+HINT: Follow the top of the Swimming bar across to the number axis.
+CHART: {"data": {"labels": ["Football", "Tennis", "Swimming", "Rugby"], "datasets": [{"data": [30, 15, 20, 10], "borderRadius": 6, "backgroundColor": ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444"]}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Sport", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Number of students", "display": true}, "beginAtZero": true}}}}
+  MISC expect=4 | pattern=gridline_not_scaled | msg=Each gridline is worth 5, not 1. The Swimming bar is 4 gridlines up, so 4 × 5 = 20.
+
+----- bronze[1] -----
+DISPLAY: How many students were surveyed in total?
+SOL: [75] | input_type: single_value
+HINT: Add the height of every bar together.
+CHART: {"data": {"labels": ["Football", "Tennis", "Swimming", "Rugby"], "datasets": [{"data": [30, 15, 20, 10], "borderRadius": 6, "backgroundColor": ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444"]}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Sport", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Number of students", "display": true}, "beginAtZero": true}}}}
+  MISC expect=65 | pattern=missed_a_bar | msg=Add every bar, including Rugby. 30 + 15 + 20 + 10 = 75.
+
+----- bronze[2] -----
+DISPLAY: <svg viewBox="0 0 150 150" role="img" aria-label="A pie chart with a Maths sector of 90 degrees" style="max-width:180px"><path d="M70.0 70.0 L70.0 18.0 A52 52 0 0 1 122.0 70.0 Z" fill="#60a5fa" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="92.1" y="47.9" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Maths 90°</text><path d="M70.0 70.0 L122.0 70.0 A52 52 0 1 1 70.0 18.0 Z" fill="#94a3b8" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="47.9" y="92.1" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Other</text></svg>A pie chart represents 200 students. The Maths sector has an angle of 90°. How many students chose Maths?
+SOL: [50] | input_type: single_value
+HINT: Angle over 360 gives the fraction; multiply that by 200.
+  MISC expect=90 | pattern=angle_as_count | msg=90 is the angle, not the number of students. Work out (90/360) × 200 = 50.
+
+----- bronze[3] -----
+DISPLAY: In a frequency table, frequencies are 8, 12, 5, 15. What is the total?
+SOL: [40] | input_type: single_value
+HINT: Add all four frequencies together.
+  MISC expect=25 | pattern=missed_a_value | msg=Add all four frequencies. 8 + 12 + 5 + 15 = 40.
+
+----- bronze[4] -----
+DISPLAY: <svg viewBox="0 0 150 150" role="img" aria-label="A pie chart with a sector of 60 degrees" style="max-width:180px"><path d="M70.0 70.0 L70.0 18.0 A52 52 0 0 1 115.0 44.0 Z" fill="#60a5fa" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="85.6" y="43.0" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">60°</text><path d="M70.0 70.0 L115.0 44.0 A52 52 0 1 1 70.0 18.0 Z" fill="#94a3b8" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="54.4" y="97.0" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Other</text></svg>A pie chart represents 72 people. One sector has an angle of 60°. How many people does it represent?
+SOL: [12] | input_type: single_value
+HINT: Work out how many 60° sectors fit in 360°, then share 72 between them.
+  MISC expect=432 | pattern=multiplied_not_divided | msg=6 is how many 60° sectors fit in the circle. Divide the total by 6, do not multiply: 72 ÷ 6 = 12.
+
+----- bronze[5] -----
+DISPLAY: 40 people surveyed. 15 chose 'A'. What angle for A on a pie chart?
+SOL: [135] | input_type: single_value
+HINT: Fraction of people times 360 gives the angle.
+  MISC expect=15 | pattern=times_total_not_360 | msg=Multiply the fraction by 360°, not by the number of people. (15/40) × 360 = 135.
+
+----- bronze[6] -----
+DISPLAY: Describe the correlation: as temperature increases, ice cream sales increase.
+SOL: [0] | input_type: multiple_choice
+OPTIONS: ['Positive', 'Negative', 'No correlation', 'Cannot tell']
+HINT: As one quantity rises, does the other rise, fall, or show no pattern?
+  MISC expect=None | pattern=mislabels_trend | msg=Both quantities increase together, so this is positive correlation.
+
+----- bronze[7] -----
+DISPLAY: Describe the correlation: as distance from school increases, there is no pattern in test scores.
+SOL: [0] | input_type: multiple_choice
+OPTIONS: ['No correlation', 'Positive', 'Negative', 'Strong positive']
+HINT: Is there any clear pattern linking the two quantities?
+  MISC expect=None | pattern=mislabels_trend | msg=There is no pattern linking the two, so this is no correlation.
+
+############## silver (desc: Compare two data sets, convert between pie chart angles and frequencies, and read two-way tables.) ##############
+
+----- silver[0] -----
+DISPLAY: How many more girls than boys chose Drama?
+SOL: [15] | input_type: single_value
+HINT: Read both Drama bars, then subtract boys from girls.
+CHART: {"data": {"labels": ["Sport", "Drama", "Music", "Art"], "datasets": [{"data": [25, 10, 15, 20], "label": "Boys", "borderRadius": 6, "backgroundColor": "#3b82f6"}, {"data": [15, 25, 20, 15], "label": "Girls", "borderRadius": 6, "backgroundColor": "#ec4899"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Club", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Frequency", "display": true}, "beginAtZero": true}}}}
+  MISC expect=35 | pattern=added_not_subtracted | msg=How many MORE girls means subtract boys from girls: 25 − 10 = 15, not add.
+
+----- silver[1] -----
+DISPLAY: <svg viewBox="0 0 150 150" role="img" aria-label="A pie chart with a sector of 144 degrees representing 36 students" style="max-width:180px"><path d="M70.0 70.0 L70.0 18.0 A52 52 0 0 1 100.6 112.1 Z" fill="#60a5fa" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="99.7" y="60.4" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">144°</text><path d="M70.0 70.0 L100.6 112.1 A52 52 0 1 1 70.0 18.0 Z" fill="#94a3b8" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="40.3" y="79.6" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Other</text></svg>A pie chart has a sector of 144° representing 36 students. Find the total number of students.
+SOL: [90] | input_type: single_value
+HINT: The sector is 2/5 of the circle, so 36 is 2/5 of the total.
+  MISC expect=None | pattern=scaled_wrong | msg=The sector is 2/5 of the circle, so 36 is 2/5 of the total. Total = 36 ÷ 2 × 5 = 90.
+
+----- silver[2] -----
+DISPLAY: Two-way table: 50 students. 28 male, 22 female. 30 pass, 20 fail. 18 males pass. How many females pass?
+SOL: [12] | input_type: single_value
+HINT: Female passes = total passes minus male passes.
+  MISC expect=10 | pattern=wrong_cell | msg=10 is the number of males who failed. Female passes = total passes (30) − male passes (18) = 12.
+
+----- silver[3] -----
+DISPLAY: A scatter graph shows negative correlation between hours of TV and test score. Which is the best description?
+SOL: [0] | input_type: multiple_choice
+OPTIONS: ['More TV → lower scores', 'More TV → higher scores', 'No relationship', 'TV causes low scores']
+HINT: As TV hours go up, do scores go up or down?
+  MISC expect=None | pattern=mislabels_trend | msg=Negative correlation means as one rises the other falls: more TV, lower scores.
+
+----- silver[4] -----
+DISPLAY: <svg viewBox="0 0 150 150" role="img" aria-label="A pie chart with Pizza 150 degrees, Chips 90 degrees and an unknown Salad sector" style="max-width:180px"><path d="M70.0 70.0 L70.0 18.0 A52 52 0 0 1 96.0 115.0 Z" fill="#60a5fa" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="100.1" y="61.9" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Pizza 150°</text><path d="M70.0 70.0 L96.0 115.0 A52 52 0 0 1 25.0 96.0 Z" fill="#f59e0b" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="61.9" y="100.1" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Chips 90°</text><path d="M70.0 70.0 L25.0 96.0 A52 52 0 0 1 70.0 18.0 Z" fill="#34d399" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="43.0" y="54.4" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Salad ?</text></svg>A pie chart shows lunch choices. The Pizza sector is 150° and the Chips sector is 90°. The rest is Salad. There are 72 people in total. How many chose Salad?
+SOL: [24] | input_type: single_value
+HINT: Find the Salad angle first (angles fill 360°), then turn it into people.
+  MISC expect=120 | pattern=angle_as_count | msg=120 is the Salad angle, not the number of people. (120/360) × 72 = 24.
+
+----- silver[5] -----
+DISPLAY: In a grouped frequency table, 10-20 has freq 5, 20-30 has freq 12, 30-40 has freq 8. Total frequency?
+SOL: [25] | input_type: single_value
+HINT: Add the three group frequencies together.
+  MISC expect=17 | pattern=missed_a_value | msg=Add all three group frequencies. 5 + 12 + 8 = 25.
+
+----- silver[6] -----
+DISPLAY: In a survey of 50 students, 20 walk to school, 15 take the bus and 10 come by car. The rest cycle. How many cycle?
+SOL: [5] | input_type: single_value
+HINT: Subtract the three known groups from the total of 50.
+  MISC expect=45 | pattern=forgot_subtract | msg=45 is how many walk, bus or drive. Cyclists = 50 − 45 = 5.
+
+############## gold (desc: Combine steps: composite bar charts, frequency density, and estimating from a line of best fit.) ##############
+
+----- gold[0] -----
+DISPLAY: The scatter graph shows TV hours vs test scores. Using the line of best fit, estimate the test score for 28 hours of TV.
+SOL: [36] | input_type: single_value
+HINT: Read the trend at 28 hours, using the points at 25 and 30 hours.
+CHART: {"data": {"datasets": [{"data": [{"x": 10, "y": 50}, {"x": 15, "y": 45}, {"x": 20, "y": 42}, {"x": 25, "y": 38}, {"x": 30, "y": 35}, {"x": 35, "y": 30}, {"x": 40, "y": 28}, {"x": 45, "y": 22}], "pointRadius": 5, "backgroundColor": "#ef4444"}, {"data": [{"x": 10, "y": 49}, {"x": 45, "y": 23}], "fill": false, "type": "line", "label": "Line of best fit", "tension": 0, "borderColor": "#1e40af", "borderWidth": 2, "pointRadius": 0}]}, "type": "scatter", "options": {"scales": {"x": {"max": 50, "min": 5, "grid": {"color": "rgba(0,0,0,0.05)"}, "ticks": {"stepSize": 5}, "title": {"text": "Hours of TV per week", "display": true}}, "y": {"max": 55, "min": 15, "grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Test score (%)", "display": true}}}}}
+  MISC expect=38 | pattern=read_wrong_x | msg=38% is the score at 25 hours. At 28 hours the trend gives about 36%.
+
+----- gold[1] -----
+DISPLAY: <svg viewBox="0 0 150 150" role="img" aria-label="A pie chart with an Other sector of 72 degrees" style="max-width:180px"><path d="M70.0 70.0 L70.0 18.0 A52 52 0 0 1 119.5 53.9 Z" fill="#60a5fa" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="88.3" y="44.8" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Other 72°</text><path d="M70.0 70.0 L119.5 53.9 A52 52 0 1 1 70.0 18.0 Z" fill="#94a3b8" fill-opacity="0.35" stroke="currentColor" stroke-width="1.3"/><text x="51.7" y="95.2" font-family="Inter,sans-serif" font-size="11" fill="currentColor" text-anchor="middle" dominant-baseline="middle">Rest</text></svg>A pie chart represents 500 people. The 'Other' sector has an angle of 72°. How many chose Other?
+SOL: [100] | input_type: single_value
+HINT: Angle over 360 gives the fraction; multiply by 500.
+  MISC expect=72 | pattern=angle_as_count | msg=72 is the angle, not the number of people. (72/360) × 500 = 100.
+
+----- gold[2] -----
+DISPLAY: A histogram has a bar for the class 30 to 40 with frequency 25 and class width 10. What is the frequency density?
+SOL: [2.5] | input_type: single_value
+HINT: Frequency density = frequency divided by class width.
+  MISC expect=250 | pattern=multiplied_not_divided | msg=Frequency density divides by the width: 25 ÷ 10 = 2.5, not 25 × 10.
+
+----- gold[3] -----
+DISPLAY: A comparative bar chart shows Year 10 scored 65% and Year 11 scored 72%. What is the percentage point difference?
+SOL: [7] | input_type: single_value
+HINT: Percentage point difference is one percentage minus the other.
+  MISC expect=137 | pattern=added_not_subtracted | msg='Difference' means subtract, not add: 72 − 65 = 7.
+
+----- gold[4] -----
+DISPLAY: The composite bar chart shows quarterly sales. What percentage of Q4 total came from Clothing? Round to nearest %.
+SOL: [25] | input_type: single_value
+HINT: Add the three Q4 parts for the total, then Clothing as a percentage of it.
+CHART: {"data": {"labels": ["Q1", "Q2", "Q3", "Q4"], "datasets": [{"data": [40, 50, 45, 55], "label": "Electronics", "backgroundColor": "#3b82f6"}, {"data": [20, 25, 20, 25], "label": "Clothing", "backgroundColor": "#f59e0b"}, {"data": [20, 25, 15, 20], "label": "Food", "backgroundColor": "#22c55e"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Quarter", "display": true}, "stacked": true}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 20}, "title": {"text": "Sales (£1000s)", "display": true}, "stacked": true, "beginAtZero": true}}}}
+  MISC expect=None | pattern=wrong_total | msg=Q4 total = 55 + 25 + 20 = 100. Clothing = 25, so 25/100 × 100 = 25%.
