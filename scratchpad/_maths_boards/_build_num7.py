@@ -1,0 +1,513 @@
+# -*- coding: utf-8 -*-
+import json
+
+# ---- SVG figures (theme-safe, currentColor, soft fills) ----
+OPENER_SVG = (
+    '<div style="text-align:center"><svg viewBox="0 0 260 120" role="img" '
+    'aria-label="A square of area 9 and a cube of volume 8">'
+    '<text x="55" y="16" font-family="Inter, sans-serif" font-size="11" fill="currentColor" text-anchor="middle">Square</text>'
+    '<text x="193" y="16" font-family="Inter, sans-serif" font-size="11" fill="currentColor" text-anchor="middle">Cube</text>'
+    '<rect x="25" y="30" width="60" height="60" fill="#60a5fa" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/>'
+    '<text x="55" y="64" font-family="Inter, sans-serif" font-size="11" fill="currentColor" text-anchor="middle">Area 9</text>'
+    '<text x="55" y="106" font-family="Inter, sans-serif" font-size="10" fill="currentColor" text-anchor="middle">? cm</text>'
+    '<rect x="160" y="45" width="50" height="50" fill="#34d399" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/>'
+    '<polygon points="160,45 178,30 228,30 210,45" fill="#34d399" fill-opacity="0.2" stroke="currentColor" stroke-width="1.5"/>'
+    '<polygon points="210,45 228,30 228,80 210,95" fill="#34d399" fill-opacity="0.15" stroke="currentColor" stroke-width="1.5"/>'
+    '<text x="185" y="74" font-family="Inter, sans-serif" font-size="10" fill="currentColor" text-anchor="middle">Vol 8</text>'
+    '<text x="193" y="112" font-family="Inter, sans-serif" font-size="10" fill="currentColor" text-anchor="middle">? cm</text>'
+    '</svg></div>'
+)
+
+RECT_SVG = (
+    '<div style="text-align:center"><svg viewBox="0 0 260 150" role="img" '
+    'aria-label="Rectangle 12.4 cm wide and 5.8 cm tall, not to scale">'
+    '<rect x="40" y="35" width="170" height="75" fill="#60a5fa" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/>'
+    '<text x="125" y="26" font-family="Inter, sans-serif" font-size="11" fill="currentColor" text-anchor="middle">12.4 cm</text>'
+    '<text x="224" y="76" font-family="Inter, sans-serif" font-size="11" fill="currentColor" text-anchor="start">5.8 cm</text>'
+    '</svg></div>'
+)
+
+pd = {}
+
+# ---------------- method_card (slim) ----------------
+pd["method_card"] = {
+    "title": "How to Use Indices, Surds and Bounds",
+    "steps": [
+        "Index laws: multiplying adds powers, dividing subtracts, a power of a power multiplies. A negative power means one over; a fractional power means a root.",
+        "Simplify a surd by splitting off its largest square factor: \\(\\sqrt{72} = \\sqrt{36 \\times 2} = 6\\sqrt{2}\\).",
+        "Rationalise a denominator by multiplying top and bottom by the surd (or by the conjugate for two terms).",
+        "For bounds, the true value lies within half a rounding unit: add for the upper bound, subtract for the lower.",
+    ],
+    "content": "<p><strong>Index laws:</strong> \\(a^m \\times a^n = a^{m+n}\\), \\(a^m \\div a^n = a^{m-n}\\), \\((a^m)^n = a^{mn}\\), \\(a^{-n} = \\frac{1}{a^n}\\), \\(a^{m/n} = (\\sqrt[n]{a})^m\\).</p><p><strong>Surds:</strong> simplify with the largest square factor; \\(\\sqrt{a} \\times \\sqrt{b} = \\sqrt{ab}\\). Rationalise by multiplying by the surd, or by the conjugate for \\(a + \\sqrt{b}\\).</p><p><strong>Bounds:</strong> a value rounded to a unit lies within half that unit. For 5.3 (1 d.p.): lower 5.25, upper 5.35. For a maximum, use the largest top and smallest bottom.</p>",
+    "example": "<p><strong>Simplify \\(\\sqrt{72}\\)</strong></p><p><strong>Step 1:</strong> Largest square factor: \\(72 = 36 \\times 2\\).</p><p><strong>Step 2:</strong> \\(\\sqrt{72} = \\sqrt{36} \\times \\sqrt{2} = 6\\sqrt{2}\\).</p>",
+}
+
+# preserved fields
+pd["topic_links"] = {"prerequisites": []}
+pd["related_videos"] = []
+
+# ---------------- problem_bank ----------------
+bronze = [
+    {
+        "display": "Simplify \\(27^{1/3}\\)",
+        "solutions": [3], "calculator": False, "input_type": "single_value",
+        "hint": "A power of 1/3 means the cube root: find the number that cubes to 27.",
+        "misconceptions": [
+            {"pattern": "divide_by_index", "expect": 9,
+             "message": "9 comes from dividing 27 by 3. The power 1/3 means the cube root: the number that multiplies by itself three times to give 27, which is 3."}
+        ],
+        "guided_steps": [
+            {"say": "\\(27^{1/3}\\) means the cube root of 27: the number that multiplies by itself three times to give 27."},
+            {"pre": "Try 3. First work out 3 × 3.", "answer": 9, "hint": "3 × 3 = 9."},
+            {"pre": "Now multiply by 3 again: 9 × 3.", "answer": 27, "hint": "9 × 3 = 27.", "phase": "substitute"},
+            {"pre": "3 cubed is 27, so the cube root of 27 is 3. Write the answer.", "answer": 3, "hint": "It is 3.",
+             "done": "Check: 3 × 3 × 3 = 27. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(16^{3/4}\\)",
+        "solutions": [8], "calculator": False, "input_type": "single_value",
+        "hint": "The bottom of the fraction is the root, the top is the power: fourth root of 16, then cube it.",
+        "misconceptions": [
+            {"pattern": "root_only", "expect": 2,
+             "message": "2 is the fourth root of 16, but you must still apply the top power. Cube it: 2 × 2 × 2 = 8."}
+        ],
+        "guided_steps": [
+            {"say": "A fractional power splits into a root and a power. The bottom (4) is the root, the top (3) is the power."},
+            {"pre": "Find the fourth root of 16. Try 2: work out 2 × 2 × 2 × 2.", "answer": 16, "hint": "2 × 2 × 2 × 2 = 16."},
+            {"pre": "So the fourth root is 2. Now apply the top power: cube it, 2 × 2 × 2.", "answer": 8, "hint": "2 × 2 × 2 = 8.", "phase": "substitute"},
+            {"pre": "Write the value of \\(16^{3/4}\\).", "answer": 8, "hint": "It is 8.",
+             "done": "Check: fourth root of 16 is 2, and 2 cubed is 8. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(5^{-2}\\). Give the denominator of the fraction.",
+        "solutions": [25], "calculator": False, "input_type": "single_value",
+        "hint": "A negative power gives one over the positive power, so find 5 squared for the denominator.",
+        "misconceptions": [
+            {"pattern": "index_times_base", "expect": 10,
+             "message": "10 comes from 5 × 2. A power of 2 means 5 × 5 = 25, so 5 to the power −2 is 1/25 and the denominator is 25."}
+        ],
+        "guided_steps": [
+            {"say": "A negative power does not make a negative number. It flips to one over the positive power: \\(5^{-2} = \\frac{1}{5^2}\\)."},
+            {"pre": "First work out the positive power 5 squared: 5 × 5.", "answer": 25, "hint": "5 × 5 = 25."},
+            {"pre": "So \\(5^{-2} = \\frac{1}{25}\\). Write the denominator of that fraction.", "answer": 25, "hint": "The denominator is 25.", "phase": "substitute"},
+            {"pre": "Confirm the sign: the answer is positive (1/25), never −25. Type the denominator again.", "answer": 25, "hint": "It is 25.",
+             "done": "Check: 5 squared is 25, so the denominator is 25. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(\\sqrt{50}\\). The answer is \\(a\\sqrt{2}\\). Find \\(a\\).",
+        "solutions": [5], "calculator": False, "input_type": "single_value",
+        "hint": "Split off the largest square factor of 50, which is 25.",
+        "misconceptions": [
+            {"pattern": "factor_not_rooted", "expect": 25,
+             "message": "25 uses the factor 25 without taking its square root. \\(\\sqrt{50} = \\sqrt{25} \\times \\sqrt{2} = 5\\sqrt{2}\\), so a = 5."}
+        ],
+        "guided_steps": [
+            {"say": "To simplify a surd, split off the largest square factor."},
+            {"pre": "The largest square factor of 50 is 25. Work out 50 ÷ 25.", "answer": 2, "hint": "50 ÷ 25 = 2."},
+            {"pre": "So 50 = 25 × 2 and \\(\\sqrt{50} = \\sqrt{25} \\times \\sqrt{2}\\). Work out √25.", "answer": 5, "hint": "√25 = 5.", "phase": "substitute"},
+            {"pre": "So \\(\\sqrt{50} = 5\\sqrt{2}\\). Write a.", "answer": 5, "hint": "a = 5.",
+             "done": "Check: 5 squared times 2 is 50. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(\\sqrt{8}\\). The answer is \\(a\\sqrt{2}\\). Find \\(a\\).",
+        "solutions": [2], "calculator": False, "input_type": "single_value",
+        "hint": "Split off the largest square factor of 8, which is 4.",
+        "misconceptions": [
+            {"pattern": "factor_not_rooted", "expect": 4,
+             "message": "4 uses the factor 4 without taking its square root. \\(\\sqrt{8} = \\sqrt{4} \\times \\sqrt{2} = 2\\sqrt{2}\\), so a = 2."}
+        ],
+        "guided_steps": [
+            {"say": "Split off the largest square factor of 8."},
+            {"pre": "The largest square factor of 8 is 4. Work out 8 ÷ 4.", "answer": 2, "hint": "8 ÷ 4 = 2."},
+            {"pre": "So 8 = 4 × 2 and \\(\\sqrt{8} = \\sqrt{4} \\times \\sqrt{2}\\). Work out √4.", "answer": 2, "hint": "√4 = 2.", "phase": "substitute"},
+            {"pre": "So \\(\\sqrt{8} = 2\\sqrt{2}\\). Write a.", "answer": 2, "hint": "a = 2.",
+             "done": "Check: 2 squared times 2 is 8. Correct."},
+        ],
+    },
+    {
+        "display": "A length is \\(6.5\\) cm to 1 d.p. What is the lower bound?",
+        "solutions": [6.45], "calculator": False, "input_type": "single_value",
+        "hint": "To 1 d.p. the value is within 0.05, so subtract 0.05 for the lower bound.",
+        "misconceptions": [
+            {"pattern": "whole_unit", "expect": 6.4,
+             "message": "6.4 subtracts a whole 0.1. To 1 d.p. the value is within 0.05, so the lower bound is 6.5 − 0.05 = 6.45."}
+        ],
+        "guided_steps": [
+            {"say": "To 1 d.p., the true value could be up to half of 0.1 away."},
+            {"pre": "Half of 0.1 is the error. Work out 0.1 ÷ 2.", "answer": 0.05, "hint": "0.1 ÷ 2 = 0.05."},
+            {"pre": "The lower bound subtracts that: 6.5 − 0.05.", "answer": 6.45, "hint": "6.5 − 0.05 = 6.45.", "phase": "substitute"},
+            {"pre": "Write the lower bound.", "answer": 6.45, "hint": "It is 6.45.",
+             "done": "Check: anything from 6.45 up to 6.55 rounds to 6.5, so 6.45 is the lower bound. Correct."},
+        ],
+    },
+    {
+        "display": "A mass is \\(340\\) g to the nearest \\(10\\) g. What is the upper bound?",
+        "solutions": [345], "calculator": False, "input_type": "single_value",
+        "hint": "To the nearest 10 the value is within 5, so add 5 for the upper bound.",
+        "misconceptions": [
+            {"pattern": "whole_unit", "expect": 350,
+             "message": "350 adds a whole 10. Rounding to the nearest 10 means within 5, so the upper bound is 340 + 5 = 345."}
+        ],
+        "guided_steps": [
+            {"say": "To the nearest 10, the true value is within half of 10."},
+            {"pre": "Half of 10 is the error. Work out 10 ÷ 2.", "answer": 5, "hint": "10 ÷ 2 = 5."},
+            {"pre": "The upper bound adds that: 340 + 5.", "answer": 345, "hint": "340 + 5 = 345.", "phase": "substitute"},
+            {"pre": "Write the upper bound.", "answer": 345, "hint": "It is 345.",
+             "done": "Check: anything up to 345 rounds to 340, so 345 is the upper bound. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(\\sqrt{108}\\). The answer is \\(a\\sqrt{3}\\). Find \\(a\\).",
+        "solutions": [6], "calculator": False, "input_type": "single_value",
+        "hint": "Split off the largest square factor of 108, which is 36.",
+        "misconceptions": [
+            {"pattern": "not_largest_factor", "expect": 3,
+             "message": "3 uses 108 = 9 × 12 and stops. The largest square factor is 36: \\(\\sqrt{108} = \\sqrt{36} \\times \\sqrt{3} = 6\\sqrt{3}\\), so a = 6."}
+        ],
+        "guided_steps": [
+            {"say": "Split off the largest square factor of 108."},
+            {"pre": "The largest square factor of 108 is 36. Work out 108 ÷ 36.", "answer": 3, "hint": "108 ÷ 36 = 3."},
+            {"pre": "So 108 = 36 × 3 and \\(\\sqrt{108} = \\sqrt{36} \\times \\sqrt{3}\\). Work out √36.", "answer": 6, "hint": "√36 = 6.", "phase": "substitute"},
+            {"pre": "So \\(\\sqrt{108} = 6\\sqrt{3}\\). Write a.", "answer": 6, "hint": "a = 6.",
+             "done": "Check: 6 squared times 3 is 108. Correct."},
+        ],
+    },
+]
+
+silver = [
+    {
+        "display": "Simplify \\(\\frac{x^5 \\times x^3}{x^2}\\). The answer is \\(x^n\\). Find \\(n\\).",
+        "solutions": [6], "calculator": False, "input_type": "single_value",
+        "hint": "Multiplying adds the powers, dividing subtracts them.",
+        "misconceptions": [
+            {"pattern": "added_all", "expect": 10,
+             "message": "10 adds all three powers. Dividing subtracts, so it is 5 + 3 − 2 = 6."}
+        ],
+        "guided_steps": [
+            {"say": "Multiplying powers of the same base adds the indices; dividing subtracts them."},
+            {"pre": "Top: \\(x^5 \\times x^3\\) adds the powers. Work out 5 + 3.", "answer": 8, "hint": "5 + 3 = 8."},
+            {"pre": "Now divide by \\(x^2\\): subtract the power. Work out 8 − 2.", "answer": 6, "hint": "8 − 2 = 6.", "phase": "substitute"},
+            {"pre": "So the answer is \\(x^n\\) with n = ?", "answer": 6, "hint": "n = 6.",
+             "done": "Check: \\(x^8 \\div x^2 = x^6\\). Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\((2x^3)^4\\). The coefficient is?",
+        "solutions": [16], "calculator": False, "input_type": "single_value",
+        "hint": "Raise both the 2 and the x to the power 4.",
+        "misconceptions": [
+            {"pattern": "base_times_power", "expect": 8,
+             "message": "8 comes from 2 × 4. The whole bracket is raised to the 4th, so the coefficient is 2 to the power 4 = 16."}
+        ],
+        "guided_steps": [
+            {"say": "A power outside a bracket hits every part inside."},
+            {"pre": "Raise the number: 2 to the power 4 is 2 × 2 × 2 × 2. Work it out.", "answer": 16, "hint": "2 × 2 × 2 × 2 = 16."},
+            {"pre": "Raise the x: \\((x^3)^4\\) multiplies the indices, 3 × 4. Work it out.", "answer": 12, "hint": "3 × 4 = 12.", "phase": "substitute"},
+            {"pre": "So \\((2x^3)^4 = 16x^{12}\\). Write the coefficient.", "answer": 16, "hint": "It is 16.",
+             "done": "Check: 2 to the power 4 is 16 and the power of x is 12. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(\\sqrt{12} + \\sqrt{27}\\). The answer is \\(a\\sqrt{3}\\). Find \\(a\\).",
+        "solutions": [5], "calculator": False, "input_type": "single_value",
+        "hint": "Simplify √12 and √27 to √3 terms, then add the numbers in front.",
+        "misconceptions": [
+            {"pattern": "multiplied", "expect": 6,
+             "message": "6 multiplies the 2 and 3. When adding like surds you add the numbers in front: 2√3 + 3√3 = 5√3, so a = 5."}
+        ],
+        "guided_steps": [
+            {"say": "Simplify each surd first, then add the like terms."},
+            {"pre": "√12 = √(4 × 3) = a√3. Since √4 = 2, the front number is?", "answer": 2, "hint": "√12 = 2√3."},
+            {"pre": "√27 = √(9 × 3) = a√3. Since √9 = 3, the front number is?", "answer": 3, "hint": "√27 = 3√3."},
+            {"pre": "Both are √3 terms: 2√3 + 3√3. Add the fronts: 2 + 3.", "answer": 5, "hint": "2 + 3 = 5.", "phase": "substitute"},
+            {"pre": "So the answer is \\(a\\sqrt{3}\\) with a = ?", "answer": 5, "hint": "a = 5.",
+             "done": "Check: 5√3 = √75, and √12 + √27 combine to √75. Correct."},
+        ],
+    },
+    {
+        "display": "Rationalise \\(\\frac{6}{\\sqrt{2}}\\). The answer is \\(a\\sqrt{2}\\). Find \\(a\\).",
+        "solutions": [3], "calculator": False, "input_type": "single_value",
+        "hint": "Multiply top and bottom by √2, then simplify.",
+        "misconceptions": [
+            {"pattern": "forgot_divide", "expect": 6,
+             "message": "6 forgets to divide by the 2 in the denominator. 6√2 ÷ 2 = 3√2, so a = 3."}
+        ],
+        "guided_steps": [
+            {"say": "Rationalise: multiply top and bottom by √2 to clear the surd from the bottom."},
+            {"pre": "Denominator: √2 × √2 = ?", "answer": 2, "hint": "√2 × √2 = 2."},
+            {"pre": "Numerator becomes 6√2. Now divide the 6 by the denominator 2.", "answer": 3, "hint": "6 ÷ 2 = 3.", "phase": "substitute"},
+            {"pre": "So \\(\\frac{6}{\\sqrt{2}} = a\\sqrt{2}\\) with a = ?", "answer": 3, "hint": "a = 3.",
+             "done": "Check: 3√2 squared is 9 × 2 = 18, and (6/√2) squared is 36/2 = 18. Correct."},
+        ],
+    },
+    {
+        "display": "Evaluate \\(81^{-3/4}\\). The answer is \\(1/n\\). Find \\(n\\).",
+        "solutions": [27], "calculator": False, "input_type": "single_value",
+        "hint": "Fourth root of 81, then cube it, then flip for the negative power.",
+        "misconceptions": [
+            {"pattern": "forgot_power", "expect": 3,
+             "message": "3 is the fourth root of 81, but you must still cube it: 3 × 3 × 3 = 27, so n = 27."}
+        ],
+        "guided_steps": [
+            {"say": "A negative power flips the number; the fraction gives root then power."},
+            {"pre": "Fourth root of 81: try 3, work out 3 × 3 × 3 × 3.", "answer": 81, "hint": "3 × 3 × 3 × 3 = 81."},
+            {"pre": "So the fourth root is 3. Apply the top power: cube it, 3 × 3 × 3.", "answer": 27, "hint": "3 × 3 × 3 = 27.", "phase": "substitute"},
+            {"pre": "The negative sign flips it to \\(1/27\\). Write n.", "answer": 27, "hint": "n = 27.",
+             "done": "Check: \\(81^{3/4} = 27\\), and the minus flips it to 1/27. Correct."},
+        ],
+    },
+    {
+        "display": "A time is \\(4.6\\) seconds to 1 d.p. Find the upper bound.",
+        "solutions": [4.65], "calculator": False, "input_type": "single_value",
+        "hint": "To 1 d.p. the value is within 0.05, so add 0.05 for the upper bound.",
+        "misconceptions": [
+            {"pattern": "whole_unit", "expect": 4.7,
+             "message": "4.7 adds a whole 0.1. To 1 d.p. the value is within 0.05, so the upper bound is 4.6 + 0.05 = 4.65."}
+        ],
+        "guided_steps": [
+            {"say": "To 1 d.p., the value is within 0.05."},
+            {"pre": "Half of 0.1: work out 0.1 ÷ 2.", "answer": 0.05, "hint": "0.1 ÷ 2 = 0.05."},
+            {"pre": "The upper bound adds it: 4.6 + 0.05.", "answer": 4.65, "hint": "4.6 + 0.05 = 4.65.", "phase": "substitute"},
+            {"pre": "Write the upper bound.", "answer": 4.65, "hint": "It is 4.65.",
+             "done": "Check: 4.65 is the largest value that still rounds to 4.6. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(\\sqrt{8} \\times \\sqrt{6}\\). The answer is \\(a\\sqrt{3}\\). Find \\(a\\).",
+        "solutions": [4], "calculator": False, "input_type": "single_value",
+        "hint": "Multiply under one root to get √48, then simplify with the factor 16.",
+        "misconceptions": [
+            {"pattern": "not_largest_factor", "expect": 2,
+             "message": "2 uses 48 = 4 × 12 and stops. The largest square factor is 16: √48 = √16 × √3 = 4√3, so a = 4."}
+        ],
+        "guided_steps": [
+            {"say": "Multiply under one root, then simplify the result."},
+            {"pre": "Combine: √8 × √6 = √(8 × 6). Work out 8 × 6.", "answer": 48, "hint": "8 × 6 = 48."},
+            {"pre": "Simplify √48: the largest square factor is 16. Work out 48 ÷ 16.", "answer": 3, "hint": "48 ÷ 16 = 3."},
+            {"pre": "√48 = √16 × √3 = a√3, and √16 = 4. Write a.", "answer": 4, "hint": "√16 = 4, so a = 4.", "phase": "substitute"},
+            {"pre": "Confirm the front number a.", "answer": 4, "hint": "It is 4.",
+             "done": "Check: 4√3 squared is 16 × 3 = 48 = 8 × 6. Correct."},
+        ],
+    },
+]
+
+gold = [
+    {
+        "display": "Rationalise \\(\\frac{1}{3 + \\sqrt{2}}\\). The denominator of the simplified fraction is?",
+        "solutions": [7], "calculator": False, "input_type": "single_value",
+        "hint": "Multiply top and bottom by the conjugate 3 − √2.",
+        "misconceptions": [
+            {"pattern": "added_squares", "expect": 11,
+             "message": "11 comes from 3 squared plus 2. Multiplying by the conjugate gives 3 squared minus (√2) squared = 9 − 2 = 7."}
+        ],
+        "guided_steps": [
+            {"say": "For a two-term denominator, multiply by the conjugate: keep the terms, flip the middle sign."},
+            {"pre": "The conjugate of 3 + √2 is 3 − √2. Multiply the first terms: 3 × 3.", "answer": 9, "hint": "3 × 3 = 9."},
+            {"pre": "Subtract the square of the surd, (√2) squared = 2. Work out 9 − 2.", "answer": 7, "hint": "9 − 2 = 7.", "phase": "substitute"},
+            {"pre": "The middle terms −3√2 + 3√2 cancel. Write the denominator.", "answer": 7, "hint": "It is 7.",
+             "done": "Check: (3 + √2)(3 − √2) = 9 − 2 = 7. Correct."},
+        ],
+    },
+    {
+        "display": "Expand and simplify \\((\\sqrt{5} + 2)(\\sqrt{5} - 3)\\). The answer is \\(a + b\\sqrt{5}\\). Find \\(a\\).",
+        "solutions": [-1], "calculator": False, "input_type": "single_value",
+        "hint": "Expand all four products, then collect the whole-number parts.",
+        "misconceptions": [
+            {"pattern": "forgot_constant", "expect": 5,
+             "message": "5 keeps only √5 × √5 = 5 and drops the 2 × (−3) = −6. Adding it gives 5 − 6 = −1, so a = −1."}
+        ],
+        "guided_steps": [
+            {"say": "Expand all four products (FOIL), then collect the whole numbers and the √5 terms separately."},
+            {"pre": "First terms: √5 × √5 = ?", "answer": 5, "hint": "√5 × √5 = 5."},
+            {"pre": "The two constants multiply: 2 × (−3). Work it out.", "answer": -6, "hint": "2 × (−3) = −6.", "phase": "substitute"},
+            {"pre": "The whole-number part is 5 + (−6). Work it out: this is a.", "answer": -1, "hint": "5 − 6 = −1.",
+             "done": "Check: the full expansion is 5 − 3√5 + 2√5 − 6 = −1 − √5, so a = −1. Correct."},
+        ],
+    },
+    {
+        "display": RECT_SVG + "A rectangle is \\(12.4\\) cm by \\(5.8\\) cm (both to 1 d.p.). Find the lower bound of the perimeter (cm)."
+                   + '<span class="figure-caption">Diagram not drawn accurately</span>',
+        "solutions": [36.2], "calculator": True, "input_type": "single_value",
+        "hint": "Use the lower bound of each side, then double the sum.",
+        "misconceptions": [
+            {"pattern": "used_rounded", "expect": 36.4,
+             "message": "36.4 uses the rounded lengths, 2 × (12.4 + 5.8). For the lower bound use the lower bounds: 2 × (12.35 + 5.75) = 36.2."}
+        ],
+        "guided_steps": [
+            {"say": "The smallest possible perimeter uses the smallest possible side lengths."},
+            {"pre": "Lower bound of 12.4 (to 1 d.p.): 12.4 − 0.05. Work it out.", "answer": 12.35, "hint": "12.4 − 0.05 = 12.35."},
+            {"pre": "Lower bound of 5.8: 5.8 − 0.05. Work it out.", "answer": 5.75, "hint": "5.8 − 0.05 = 5.75."},
+            {"pre": "Perimeter = 2 × (length + width). Add the two lower bounds: 12.35 + 5.75.", "answer": 18.1, "hint": "12.35 + 5.75 = 18.1.", "phase": "substitute"},
+            {"pre": "Double it: 2 × 18.1.", "answer": 36.2, "hint": "2 × 18.1 = 36.2.",
+             "done": "Check: the smallest sides give the smallest perimeter, 36.2 cm. Correct."},
+        ],
+    },
+    {
+        "display": "Simplify \\(\\frac{\\sqrt{20} + \\sqrt{5}}{\\sqrt{5}}\\)",
+        "solutions": [3], "calculator": False, "input_type": "single_value",
+        "hint": "Divide each surd on the top by √5 separately.",
+        "misconceptions": [
+            {"pattern": "partial", "expect": 2,
+             "message": "2 divides only √20 by √5 and forgets the second term. √20 ÷ √5 = 2 and √5 ÷ √5 = 1, so the answer is 2 + 1 = 3."}
+        ],
+        "guided_steps": [
+            {"say": "Divide each surd on the top by √5 separately."},
+            {"pre": "First term: √20 ÷ √5 = √(20 ÷ 5) = √4. Work out √4.", "answer": 2, "hint": "√(20 ÷ 5) = √4 = 2."},
+            {"pre": "Second term: √5 ÷ √5 = 1. Add the two results: 2 + 1.", "answer": 3, "hint": "2 + 1 = 3.", "phase": "substitute"},
+            {"pre": "So the whole expression equals?", "answer": 3, "hint": "It is 3.",
+             "done": "Check: √20 = 2√5, so the top is 3√5, and 3√5 ÷ √5 = 3. Correct."},
+        ],
+    },
+    {
+        "display": "\\(v = \\frac{d}{t}\\). \\(d = 240\\) m (2 s.f.), \\(t = 8.4\\) s (1 d.p.). Find the upper bound of \\(v\\) to 3 s.f.",
+        "solutions": [29.3], "calculator": True, "input_type": "single_value",
+        "hint": "Maximum speed uses the largest distance and the smallest time.",
+        "misconceptions": [
+            {"pattern": "used_upper_time", "expect": 29.0,
+             "message": "29.0 divides by the upper bound of the time. For the maximum speed, divide by the smallest possible time: 245 ÷ 8.35 = 29.3 (3 s.f.)."}
+        ],
+        "guided_steps": [
+            {"say": "Speed is largest when the distance is at its biggest and the time at its smallest."},
+            {"pre": "Upper bound of d = 240 to 2 s.f. (nearest 10, so within 5): 240 + 5. Work it out.", "answer": 245, "hint": "240 + 5 = 245."},
+            {"pre": "Lower bound of t = 8.4 to 1 d.p. (within 0.05): 8.4 − 0.05. Work it out.", "answer": 8.35, "hint": "8.4 − 0.05 = 8.35."},
+            {"pre": "Maximum v = 245 ÷ 8.35, rounded to 3 s.f. Work it out.", "answer": 29.3, "hint": "245 ÷ 8.35 = 29.34..., which is 29.3 to 3 s.f.", "phase": "substitute"},
+            {"pre": "Confirm the upper bound of v to 3 s.f.", "answer": 29.3, "hint": "It is 29.3.",
+             "done": "Check: biggest distance over smallest time gives the maximum speed, 29.3 m/s. Correct."},
+        ],
+    },
+]
+
+pd["problem_bank"] = {
+    "bronze": bronze,
+    "silver": silver,
+    "gold": gold,
+    "bronze_description": "Evaluate roots, fractional and negative powers, simplify basic surds, and find the bound of a single rounded measurement.",
+    "silver_description": "Apply the index laws to algebraic terms, combine and rationalise surds, and find upper and lower bounds.",
+    "gold_description": "Rationalise with conjugates, expand and simplify surd brackets, and find bounds of a calculation such as a perimeter or speed.",
+}
+
+# ---------------- worked_examples (preserved byte-for-byte) ----------------
+pd["worked_examples"] = json.load(open("_live_number-L07.json", encoding="utf-8"))["worked_examples"]
+
+# ---------------- tier_guides ----------------
+pd["tier_guides"] = {
+    "bronze": {
+        "title": "Bronze: Roots, negative powers and simple surds",
+        "steps": [
+            "<strong>A fractional power is a root.</strong> \\(a^{1/2} = \\sqrt{a}\\) and \\(a^{1/3} = \\sqrt[3]{a}\\). For \\(a^{m/n}\\), take the root (bottom) then the power (top).",
+            "<strong>A negative power flips:</strong> \\(a^{-n} = \\frac{1}{a^n}\\). It never makes a negative number.",
+            "<strong>Simplify a surd</strong> by splitting off the largest square factor: \\(\\sqrt{50} = \\sqrt{25 \\times 2} = 5\\sqrt{2}\\).",
+            "<strong>Bounds:</strong> the true value is within half a rounding unit. To 1 d.p. that is 0.05.",
+        ],
+        "example": {
+            "question": "Simplify \\(16^{3/4}\\)",
+            "steps": [
+                {"label": "Root", "content": "Fourth root of 16 is 2."},
+                {"label": "Power", "content": "Cube it: 2 × 2 × 2 = 8."},
+                {"label": "Check", "content": "The fourth root of 16 is 2, so the root is right."},
+                {"label": "Answer", "content": "\\(8\\)", "isAnswer": True, "is_answer": True},
+            ],
+        },
+    },
+    "silver": {
+        "title": "Silver: Index laws, combining and rationalising surds",
+        "steps": [
+            "<strong>Index laws:</strong> multiplying adds powers (\\(x^5 \\times x^3 = x^8\\)), dividing subtracts (\\(x^8 \\div x^2 = x^6\\)), and a bracket power multiplies: \\((2x^3)^4 = 2^4 x^{12}\\).",
+            "<strong>Add like surds</strong> by adding the numbers in front: \\(2\\sqrt{3} + 3\\sqrt{3} = 5\\sqrt{3}\\). Simplify each surd first.",
+            "<strong>Rationalise</strong> \\(\\frac{6}{\\sqrt{2}}\\) by multiplying top and bottom by \\(\\sqrt{2}\\): \\(\\frac{6\\sqrt{2}}{2} = 3\\sqrt{2}\\).",
+        ],
+        "example": {
+            "question": "Simplify \\(\\frac{x^6 \\times x^2}{x^5}\\). Answer \\(x^n\\).",
+            "steps": [
+                {"label": "Multiply", "content": "Top: 6 + 2 = 8, so \\(x^8\\)."},
+                {"label": "Divide", "content": "8 − 5 = 3."},
+                {"label": "Check", "content": "\\(x^8 \\div x^5 = x^3\\)."},
+                {"label": "Answer", "content": "\\(n = 3\\)", "isAnswer": True, "is_answer": True},
+            ],
+        },
+    },
+    "gold": {
+        "title": "Gold: Conjugates, surd expansions and bounds",
+        "steps": [
+            "<strong>Conjugate:</strong> to rationalise \\(\\frac{1}{a + \\sqrt{b}}\\), multiply by \\(a - \\sqrt{b}\\). The denominator becomes \\(a^2 - b\\).",
+            "<strong>Expand surd brackets</strong> with FOIL, then collect the whole numbers and the surd terms separately.",
+            "<strong>Bounds in a calculation:</strong> for a maximum, use the largest top and smallest bottom; for a minimum, the reverse.",
+        ],
+        "example": {
+            "question": "Rationalise \\(\\frac{1}{4 - \\sqrt{3}}\\). Find the denominator.",
+            "steps": [
+                {"label": "Conjugate", "content": "Multiply by 4 + √3."},
+                {"label": "Multiply out", "content": "4 squared minus (√3) squared = 16 − 3."},
+                {"label": "Check", "content": "The middle terms cancel."},
+                {"label": "Answer", "content": "\\(13\\)", "isAnswer": True, "is_answer": True},
+            ],
+        },
+    },
+}
+
+# ---------------- guided ----------------
+pd["guided"] = {
+    "opener": {
+        "display": OPENER_SVG + "A square tile has <strong>area 9</strong>. A cube has <strong>volume 8</strong>.<br>Both are shown above. Find the missing lengths.",
+        "steps": [
+            {"pre": "The square's area is side × side = 9. What is the side length in cm?", "answer": 3, "hint": "3 × 3 = 9, so the side is 3."},
+            {"pre": "The cube's volume is edge × edge × edge = 8. What is the edge length in cm?", "answer": 2, "hint": "2 × 2 × 2 = 8, so the edge is 2."},
+            {"say": "You just found a <strong>square root</strong> and a <strong>cube root</strong>. In index notation these are fractional powers: \\(\\sqrt{9} = 9^{1/2} = 3\\) and \\(\\sqrt[3]{8} = 8^{1/3} = 2\\). The bottom of the fraction tells you which root to take. This whole lesson is that idea: powers and roots are the same tool, surds keep roots exact, and bounds handle rounded measurements."},
+        ],
+    },
+    "teach": {
+        "bronze": {
+            "display": "Work out \\(64^{2/3}\\).",
+            "steps": [
+                {"say": "A fractional power splits into a root and a power. The bottom (3) is the root, the top (2) is the power."},
+                {"pre": "Find the cube root of 64. Try 4: work out 4 × 4 × 4.", "answer": 64, "hint": "4 × 4 × 4 = 64."},
+                {"pre": "So the cube root is 4. Apply the top power: square it, 4 × 4.", "answer": 16, "hint": "4 × 4 = 16."},
+                {"pre": "Check the root a different way: 4 × 16 should give 64. Work it out.", "answer": 64, "hint": "4 × 16 = 64."},
+                {"pre": "So \\(64^{2/3}\\) equals?", "answer": 16, "hint": "Root first (4), then square (16).",
+                 "done": "Root first, then power: \\(64^{2/3} = 16\\). That was the whole point."},
+            ],
+        },
+        "silver": {
+            "display": "Rationalise \\(\\frac{8}{\\sqrt{2}}\\). The answer is \\(a\\sqrt{2}\\); find a.",
+            "steps": [
+                {"say": "Rationalising clears the surd from the bottom. Multiply top and bottom by that surd."},
+                {"pre": "Multiply the denominator by itself: √2 × √2.", "answer": 2, "hint": "√2 × √2 = 2."},
+                {"pre": "The top becomes 8√2. Divide the 8 by the new denominator 2.", "answer": 4, "hint": "8 ÷ 2 = 4."},
+                {"pre": "So \\(\\frac{8}{\\sqrt{2}} = a\\sqrt{2}\\). Write a.", "answer": 4, "hint": "It is 4√2, so a = 4."},
+                {"pre": "Check: 4 squared times 2 should equal (8 squared) ÷ 2 = 32. Work out 4 × 4 × 2.", "answer": 32, "hint": "16 × 2 = 32.",
+                 "done": "Both routes give 32, so \\(\\frac{8}{\\sqrt{2}} = 4\\sqrt{2}\\). Gone."},
+            ],
+        },
+        "gold": {
+            "display": "Rationalise \\(\\frac{1}{5 + \\sqrt{3}}\\). Find the denominator.",
+            "steps": [
+                {"say": "A two-term denominator needs the conjugate: keep the terms, flip the middle sign."},
+                {"pre": "The conjugate of 5 + √3 is 5 − √3. Multiply the first terms: 5 × 5.", "answer": 25, "hint": "5 × 5 = 25."},
+                {"pre": "Subtract the square of the surd, (√3) squared = 3. Work out 25 − 3.", "answer": 22, "hint": "25 − 3 = 22."},
+                {"pre": "The middle terms −5√3 + 5√3 cancel. Type the value they add to.", "answer": 0, "hint": "They cancel to 0."},
+                {"pre": "So the denominator is 25 − 3. Write it.", "answer": 22, "hint": "25 − 3 = 22.",
+                 "done": "The conjugate cleared the surd, leaving 22. Gone."},
+            ],
+        },
+    },
+}
+
+json.dump(pd, open("lesson_maths-aqa_number-L07.json", "w", encoding="utf-8"), indent=2, ensure_ascii=False)
+print("written lesson_maths-aqa_number-L07.json")
+
+# ---- self-verification of tier-level duplicate solutions ----
+for tier in ("bronze", "silver", "gold"):
+    sols = [tuple(p["solutions"]) for p in pd["problem_bank"][tier]]
+    dupes = [s for s in sols if sols.count(s) > 1]
+    print(tier, "solutions:", sols, "DUPES:" if dupes else "(no dupes)", set(dupes))
+
+# ---- verify each guided walk ends on the stored solution ----
+for tier in ("bronze", "silver", "gold"):
+    for i, p in enumerate(pd["problem_bank"][tier]):
+        last_box = [s for s in p["guided_steps"] if s.get("answer") is not None][-1]
+        assert last_box["answer"] == p["solutions"][0], (tier, i, last_box["answer"], p["solutions"])
+print("all guided walks land on stored solutions")

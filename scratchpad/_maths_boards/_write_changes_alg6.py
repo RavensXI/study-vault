@@ -1,0 +1,28 @@
+import json
+
+changes = {
+ "key": "maths-aqa_algebra-L06",
+ "problems_fixed": [
+  {"tier": "bronze", "index": 2, "what": "duplicate distractor: options (2x+4)(x+1) and (x+1)(2x+4) were identical expansions (2x^2+6x+4); replaced the duplicate with a sign-error distractor (2x-1)(x-4)", "old": "\\((x + 1)(2x + 4)\\)", "new": "\\((2x - 1)(x - 4)\\)"},
+  {"tier": "bronze", "index": 7, "what": "duplicate distractor: (2x+2)(x+3) and (2x+6)(x+1) were identical expansions (2x^2+8x+6); replaced the duplicate with a sign-error distractor (2x-3)(x-2)", "old": "\\((2x + 6)(x + 1)\\)", "new": "\\((2x - 3)(x - 2)\\)"},
+  {"tier": "all", "index": -1, "what": "predictable-position disease: the correct option was at index 0 on all 20 problems. Re-seated correct answers across indices 0-3 (bronze [2,0,3,1,2,3,0,1], silver [1,3,0,2,3,1,0], gold [3,0,2,1,0]) and updated every solutions index accordingly", "old": "all solutions=[0]", "new": "varied 0-3"},
+  {"tier": "all", "index": -1, "what": "every problem lacked a hint field (validator-required). Added a plain-text ac-method hint to all 20 problems", "old": "no hint", "new": "ac-method hint per problem"},
+  {"tier": "all", "index": -1, "what": "misconceptions had expect=null placeholders and check='wrong'. Rewrote as honest diagnoses: expect now = the option index a student choosing that specific error (forgot_a / wrong_pair / sign_error / difference-of-two-squares) actually selects; short diagnostic messages", "old": "expect=null", "new": "expect=distractor index"},
+  {"tier": "all", "index": -1, "what": "tier _descriptions were null; added bronze/silver/gold descriptions", "old": "null", "new": "set"},
+ ],
+ "issues_resolved": 24,
+ "opener_concept": "Rectangle of area 15 m^2 whose two whole-number sides add to 8 (drawn as an inline SVG figure); the student finds sides 3 and 5 by common sense, which the reveal names as hunting for a target product (a x c) and target sum (b), the engine of the ac method.",
+ "notes": "Fresh-solved every factorisation from its display: all 20 stored answers were mathematically correct (option[0] matched target). No solution values changed; repairs were option-set hygiene (2 degenerate distractor pairs), answer-position variety, and the full guided-learning + figure conversion (opener, bronze/silver/gold teach walks each with >=4 numeric boxes, tier_guides with fresh non-bank examples, trimmed method_card). worked_examples, related_videos, topic_links preserved. All multiple_choice, so no per-problem guided_steps required. Independent sympy verifier confirms every option expansion, distinct distractors, opener/teach box arithmetic, and tier-guide examples.",
+}
+json.dump(changes, open("changes_maths-aqa_algebra-L06.json","w",encoding="utf-8"), indent=1, ensure_ascii=False)
+
+diag = {
+ "key": "maths-aqa_algebra-L06",
+ "figures_added": [
+  {"tier": "opener", "index": 0, "kind": "svg", "what": "Labelled rectangle, area 15 m^2 with both sides marked '? m', currentColor strokes/text and soft blue 0.3-opacity fill; makes the product/sum hook concrete (Tom's show-what-you-say rule). Caption 'Diagram not drawn accurately'."},
+ ],
+ "opener_touched": True,
+ "notes": "Factorising quadratics is a textual unit: the exam prints no figures for the problems themselves, so no per-problem SVGs were added (exam-realism test). The single figure is the opener rectangle, which the opener text claims and now shows. Theme-safe, self-contained, ~0.8KB, validator scan_svg clean.",
+}
+json.dump(diag, open("changes_maths-aqa_algebra-L06_diagrams.json","w",encoding="utf-8"), indent=1, ensure_ascii=False)
+print("wrote changes files")

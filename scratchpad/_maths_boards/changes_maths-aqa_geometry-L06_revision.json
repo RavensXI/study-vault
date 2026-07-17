@@ -1,0 +1,44 @@
+{
+  "key": "maths-aqa_geometry-L06",
+  "lesson_id": "6e4a84ec-b6c4-489b-9d86-0cc1a7fb65b0",
+  "revision_of": "changes_maths-aqa_geometry-L06.json",
+  "reason": "Independent checker FAIL: false/mislabelled say-step formulas + one mis-posed ambiguous SSA problem. Bank solutions, boxes, expects, completion boundaries, and preservation were all already clean.",
+  "problems_fixed": [
+    {
+      "tier": "bronze", "index": 4, "what": "say-step false sine rule + mislabelled givens",
+      "old": "Sine rule: b/sinA = b/sinB ... pair (b=7, B=50) and angle A=80",
+      "new": "Sine rule: a/sinA = b/sinB ... pair (a=7, A=50) and angle B=80, so b = a sinB / sinA (matches boxes, answer 9.0)"
+    },
+    {
+      "tier": "silver", "index": 4, "what": "say-step same garbled sine rule + mislabelled givens",
+      "old": "b/sinA = b/sinB ... pair (b=5, B=30), A=105",
+      "new": "a/sinA = b/sinB ... pair (a=5, A=30) and angle B=105, so b = a sinB / sinA (answer 9.7)"
+    },
+    {
+      "tier": "bronze", "index": 7, "what": "say-step cosine rule with a^2 on both sides",
+      "old": "a^2 = a^2 + b^2 - 2ab cos C",
+      "new": "a^2 = b^2 + c^2 - 2bc cos A (display b=10, c=7, A=50; answer 7.7)"
+    },
+    {
+      "tier": "silver", "index": 5, "what": "say-step same a^2-both-sides cosine garble",
+      "old": "a^2 = a^2 + b^2 - 2ab cos C",
+      "new": "a^2 = b^2 + c^2 - 2bc cos A (display b=15, c=20, A=110; answer 28.8)"
+    },
+    {
+      "tier": "silver", "index": 1, "what": "say-step cos-C formula + wrong opposite-side label",
+      "old": "cos C = (b^2 + c^2 - a^2)/(2bc), where a=7 is opposite the angle",
+      "new": "cos C = (a^2 + b^2 - c^2)/(2ab), where c=7 is opposite the angle (a=12, b=9, c=7; answer 35.4; matches boxes 176/216=0.8148)"
+    },
+    {
+      "tier": "bronze", "index": 1, "what": "mis-posed ambiguous SSA (a=9,b=12,A=35 gives B=49.9 OR 130.1, both valid) presented with a unique answer",
+      "old": "a=9, b=12, A=35, find B, solution [49.9]",
+      "new": "swapped a<->b to a=12, b=9, A=35 (side opposite the given angle now the larger), so B is acute and unique; solution [25.5]. Rewrote SVG side labels + prompt, guided_steps, and the swapped_sides misconception (expect 49.9). Check step now verifies the third angle (180-35-25.5=119.5) instead of silently discarding an obtuse solution."
+    }
+  ],
+  "issues_resolved": 6,
+  "preserved_unchanged": ["related_videos", "topic_links", "worked_examples", "method_card", "tier_guides", "guided"],
+  "figures_added": 0,
+  "validator": "PASS",
+  "patched": true,
+  "notes": "Only bronze[1], bronze[4], bronze[7], silver[1], silver[4], silver[5] differ vs live pre-revision; every other field byte-identical. All touched box values fresh-solved to the stored solutions in Python (math module)."
+}

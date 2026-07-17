@@ -1,0 +1,30 @@
+# -*- coding: utf-8 -*-
+import math
+r = lambda x,n=1: round(x,n)
+def d(deg): return math.radians(deg)
+
+print("== BRONZE ==")
+print("B0 6,8:", math.sqrt(36+64), "add", 6+8)
+print("B1 hyp13 leg5:", math.sqrt(169-25), "addsq", r(math.sqrt(169+25),1))
+print("B2 9,12:", math.sqrt(81+144), "add", 9+12)
+print("B3 hyp10 leg6:", math.sqrt(100-36), "addsq", r(math.sqrt(100+36),1))
+print("B4 8,15:", math.sqrt(64+225), "add", 8+15)
+print("B5 7,24:", math.sqrt(49+576), "add", 7+24)
+print("B6 sin30 H18: O=", 18*0.5, "div", 18/0.5)
+print("B7 cos60 H14: A=", 14*0.5, "div", 14/0.5)
+
+print("== SILVER ==")
+print("S0 sin40 H15: O=", r(15*math.sin(d(40))), "cos-err", r(15*math.cos(d(40))), "sin40=",round(math.sin(d(40)),2))
+print("S1 cos55 H12: A=", r(12*math.cos(d(55))), "sin-err", r(12*math.sin(d(55))), "cos55=",round(math.cos(d(55)),2), "6.9/12 1dp",round(6.9/12,1))
+print("S2 opp7 hyp10: sin-1(0.7)=", r(math.degrees(math.asin(0.7))), "cos-err", r(math.degrees(math.acos(0.7))), "sin44.4=",round(math.sin(d(44.4)),2))
+print("S3 opp8 adj6: tan-1(8/6)=", r(math.degrees(math.atan(8/6))), "div-err", r(math.degrees(math.atan(6/8))), "8/6 2dp",round(8/6,2),"tan53.1=",round(math.tan(d(53.1)),2))
+print("S4 ladder5 70: h=", r(5*math.sin(d(70))), "cos-err", r(5*math.cos(d(70))), "sin70=",round(math.sin(d(70)),2),"4.7/5",round(4.7/5,2))
+print("S5 adj9 38 tan: x=", r(9*math.tan(d(38))), "sin-err", r(9*math.sin(d(38))), "tan38=",round(math.tan(d(38)),2),"7/9 2dp",round(7/9,2))
+print("S6 legs3.5,4.8:", r(math.sqrt(3.5**2+4.8**2)), "sub-err", r(math.sqrt(4.8**2-3.5**2)), "5.9^2",round(5.9**2,2), "sum",3.5**2+4.8**2)
+
+print("== GOLD ==")
+print("G0 cliff25 dep35: d=", r(25/math.tan(d(35))), "mult-err", r(25*math.tan(d(35))), "tan35 3dp",round(math.tan(d(35)),3),"check 35.7*tan35",round(35.7*math.tan(d(35)),1))
+print("G1 iso 10,10,12: h=", math.sqrt(100-36))
+print("G2 cuboid 3,4,12:", math.sqrt(9+16+144), "2d-err", math.sqrt(9+16))
+print("G3 adj11 25 cos hyp: H=", r(11/math.cos(d(25))), "mult-err", r(11*math.cos(d(25))), "cos25 2dp",round(math.cos(d(25)),2),"11/12.1 2dp",round(11/12.1,2))
+print("G4 field 50,120: diag", math.sqrt(2500+14400), "both",50+120, "saving",170-130)

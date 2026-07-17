@@ -1,0 +1,665 @@
+# -*- coding: utf-8 -*-
+import json, io
+
+live = json.load(io.open("_live_rp01.json", encoding="utf-8"))
+
+# ---------- SVG helpers (theme-safe: currentColor strokes/text, soft opacity fills) ----------
+def bar(segs, total_label, aria):
+    # segs: list of (count, fill, label)
+    total = sum(c for c, _, _ in segs)
+    W = 250.0; x0 = 8.0; top = 30.0; h = 26.0
+    cw = (W - 2 * x0) / total
+    parts = ['<svg viewBox="0 0 250 92" role="img" aria-label="%s" '
+             'style="max-width:100%%" font-family="Inter, sans-serif">' % aria]
+    idx = 0
+    for c, fill, label in segs:
+        seg_x = x0 + idx * cw
+        seg_w = c * cw
+        for k in range(c):
+            cx = x0 + (idx + k) * cw
+            parts.append('<rect x="%.1f" y="%.0f" width="%.1f" height="%.0f" rx="3" '
+                         'fill="%s" fill-opacity="0.3" stroke="currentColor" stroke-width="1"/>'
+                         % (cx + 1, top, cw - 2, h, fill))
+        parts.append('<text x="%.1f" y="22" text-anchor="middle" font-size="11" '
+                     'fill="currentColor">%s</text>' % (seg_x + seg_w / 2, label))
+        idx += c
+    # total bracket line under the whole bar
+    by = top + h + 8
+    parts.append('<line x1="%.1f" y1="%.0f" x2="%.1f" y2="%.0f" stroke="currentColor" stroke-width="1"/>'
+                 % (x0, by, W - x0, by))
+    parts.append('<text x="125" y="%.0f" text-anchor="middle" font-size="11" '
+                 'fill="currentColor">%s</text>' % (by + 14, total_label))
+    parts.append('</svg>')
+    return "".join(parts)
+
+def sweets_svg(n, aria):
+    W = 250.0; per = 6; r = 12.0
+    parts = ['<svg viewBox="0 0 250 78" role="img" aria-label="%s" style="max-width:100%%">' % aria]
+    rows = (n + per - 1) // per
+    for i in range(n):
+        row = i // per; col = i % per
+        cx = 25 + col * 40
+        cy = 22 + row * 34
+        parts.append('<circle cx="%.0f" cy="%.0f" r="%.0f" fill="#f59e0b" fill-opacity="0.3" '
+                     'stroke="currentColor" stroke-width="1.5"/>' % (cx, cy, r))
+    parts.append('</svg>')
+    return "".join(parts)
+
+BLUE = "#60a5fa"; AMBER = "#f59e0b"; GREEN = "#34d399"
+
+# ---------- method_card (slim) ----------
+method_card = {
+    "title": "Working with Ratios",
+    "steps": [
+        "Simplify: divide both parts by their highest common factor (HCF).",
+        "Share a total: add the parts, divide the total to get one part, then multiply.",
+        "Missing value: find the multiplier from the pair you know, then apply it.",
+        "Reverse: if you know one share, find one part first, then build the total."
+    ],
+    "content": ("<p>A <strong>ratio</strong> compares quantities in the same units. "
+                "\\(a : b\\) means for every \\(a\\) of one thing there are \\(b\\) of another.</p>"
+                "<p>The key idea is <strong>one part</strong>. Add the ratio numbers to get the "
+                "number of parts, find what a single part is worth, then multiply. Everything else "
+                "follows from that.</p>"),
+    "example": ("<p><strong>Share £80 in the ratio 3 : 5.</strong> Parts = 8, "
+                "one part = 80 ÷ 8 = £10, so the shares are £30 and £50.</p>")
+}
+
+# ---------- tier descriptions ----------
+descriptions = {
+    "bronze_description": "One step: simplify a ratio, share a total, or scale up using the multiplier.",
+    "silver_description": "Two ideas combined: sharing with a difference, three part ratios, or scale and unit conversion.",
+    "gold_description": "Reverse and chained ratios: work back from one share, link two ratios, or find an age gap."
+}
+
+# ---------- BRONZE ----------
+bronze = []
+bronze.append({
+    "display": "Simplify the ratio \\(10 : 15\\). Give the first part.",
+    "solutions": [2], "calculator": False, "input_type": "single_value",
+    "hint": "Divide both parts by their highest common factor.",
+    "misconceptions": [{
+        "pattern": "not_simplified", "check": "not_simplified", "expect": 10,
+        "message": "10 : 15 is not yet in its simplest form. Divide both parts by 5 to get 2 : 3, so the first part is 2.",
+        "note": "student gives original first part without simplifying"
+    }],
+    "guided_steps": [
+        {"say": "To simplify, first find the highest common factor of 10 and 15.",
+         "pre": "The HCF of 10 and 15 is ", "post": "", "answer": 5,
+         "hint": "The biggest number that divides both 10 and 15."},
+        {"phase": "substitute", "say": "Now divide each part by 5.",
+         "pre": "10 ÷ 5 = ", "post": "", "answer": 2, "hint": "Divide the first part by the HCF."},
+        {"phase": "substitute", "pre": "15 ÷ 5 = ", "post": "", "answer": 3,
+         "hint": "Divide the second part by the HCF.",
+         "done": "So 10 : 15 = 2 : 3. The first part is 2."},
+        {"say": "Check by scaling 2 : 3 back up.", "pre": "2 × 5 = ", "post": "", "answer": 10,
+         "hint": "Multiply the simplified first part by 5.",
+         "done": "2 × 5 = 10 and 3 × 5 = 15, so 2 : 3 is correct."}
+    ]
+})
+bronze.append({
+    "display": "Simplify \\(24 : 16\\). Give the first part.",
+    "solutions": [3], "calculator": False, "input_type": "single_value",
+    "hint": "Find the biggest number that divides into both, then divide.",
+    "misconceptions": [{
+        "pattern": "partial_hcf", "check": "partial_hcf", "expect": 6,
+        "message": "6 : 4 still simplifies. You divided by 4, but the HCF of 24 and 16 is 8. Dividing by 8 gives 3 : 2, so the first part is 3.",
+        "note": "student divides by 4 (a common factor, not the HCF)"
+    }],
+    "guided_steps": [
+        {"say": "Find the highest common factor of 24 and 16.",
+         "pre": "The HCF of 24 and 16 is ", "post": "", "answer": 8,
+         "hint": "The biggest number that divides both."},
+        {"phase": "substitute", "say": "Divide each part by 8.",
+         "pre": "24 ÷ 8 = ", "post": "", "answer": 3, "hint": "Divide the first part by 8."},
+        {"phase": "substitute", "pre": "16 ÷ 8 = ", "post": "", "answer": 2,
+         "hint": "Divide the second part by 8.",
+         "done": "So 24 : 16 = 3 : 2. The first part is 3."},
+        {"say": "Check by scaling back.", "pre": "3 × 8 = ", "post": "", "answer": 24,
+         "hint": "Multiply the simplified first part by 8.",
+         "done": "3 × 8 = 24 and 2 × 8 = 16, correct."}
+    ]
+})
+bronze.append({
+    "display": "Share £40 in the ratio \\(1 : 3\\). How much is the larger share?",
+    "solutions": [30], "calculator": False, "input_type": "single_value",
+    "hint": "Add the parts to get 4, find one part, then take 3 of them.",
+    "misconceptions": [{
+        "pattern": "gives_one_part", "check": "gives_one_part", "expect": 10,
+        "message": "That is the smaller share, which is one part. The larger share is 3 parts, so 3 × 10 = £30.",
+        "note": "student stops at one part"
+    }],
+    "guided_steps": [
+        {"say": "Add the ratio numbers to find how many parts share the £40.",
+         "pre": "1 + 3 = ", "post": "", "answer": 4, "hint": "Add the two ratio numbers."},
+        {"phase": "substitute", "say": "Find what one part is worth.",
+         "pre": "40 ÷ 4 = ", "post": "", "answer": 10, "hint": "Divide the total by the number of parts."},
+        {"phase": "substitute", "say": "The larger share is 3 parts.",
+         "pre": "3 × 10 = ", "post": "", "answer": 30, "hint": "Multiply one part by 3.",
+         "done": "The larger share is £30."},
+        {"say": "Check both shares add to the total.", "pre": "10 + 30 = ", "post": "", "answer": 40,
+         "hint": "Add the smaller and larger shares.", "done": "£10 + £30 = £40, correct."}
+    ]
+})
+bronze.append({
+    "display": "Share £60 in the ratio \\(2 : 1\\). How much is the larger share?",
+    "solutions": [40], "calculator": False, "input_type": "single_value",
+    "hint": "Three parts share the £60, and the larger share is 2 of them.",
+    "misconceptions": [{
+        "pattern": "gives_one_part", "check": "gives_one_part", "expect": 20,
+        "message": "That is one part, the smaller share. The larger share is 2 parts, so 2 × 20 = £40.",
+        "note": "student gives the single (smaller) part"
+    }],
+    "guided_steps": [
+        {"say": "Add the ratio numbers.", "pre": "2 + 1 = ", "post": "", "answer": 3,
+         "hint": "Add the two ratio numbers."},
+        {"phase": "substitute", "say": "Find one part.", "pre": "60 ÷ 3 = ", "post": "", "answer": 20,
+         "hint": "Divide the total by the number of parts."},
+        {"phase": "substitute", "say": "The larger share is 2 parts.", "pre": "2 × 20 = ", "post": "",
+         "answer": 40, "hint": "Multiply one part by 2.", "done": "The larger share is £40."},
+        {"say": "Check both shares total £60.", "pre": "40 + 20 = ", "post": "", "answer": 60,
+         "hint": "Add both shares.", "done": "£40 + £20 = £60, correct."}
+    ]
+})
+bronze.append({
+    "display": "In the ratio \\(3 : 7\\), there are 21 of the second quantity. How many of the first?",
+    "solutions": [9], "calculator": False, "input_type": "single_value",
+    "hint": "Work out what you multiplied 7 by to reach 21, then do the same to 3.",
+    "misconceptions": [{
+        "pattern": "gives_multiplier", "check": "gives_multiplier", "expect": 3,
+        "message": "3 is the multiplier, not the answer. You multiply 7 by 3 to reach 21, so multiply the 3 by 3 as well: 3 × 3 = 9.",
+        "note": "student reports the scale factor"
+    }],
+    "guided_steps": [
+        {"say": "Compare the second quantity with its ratio number to find the multiplier.",
+         "pre": "21 ÷ 7 = ", "post": "", "answer": 3, "hint": "What do you multiply 7 by to reach 21?"},
+        {"phase": "substitute", "say": "Apply the same multiplier to the first ratio number.",
+         "pre": "3 × 3 = ", "post": "", "answer": 9, "hint": "Multiply the first ratio number by 3."},
+        {"phase": "substitute", "say": "Check the pair keeps the ratio 3 : 7.",
+         "pre": "9 ÷ 3 = ", "post": "", "answer": 3, "hint": "Divide 9 by 3 to check the multiplier.",
+         "done": "9 : 21 divides by 3 to give 3 : 7, correct."}
+    ]
+})
+bronze.append({
+    "display": "Write \\(5 : 20\\) in the form \\(1 : n\\). What is \\(n\\)?",
+    "solutions": [4], "calculator": False, "input_type": "single_value",
+    "hint": "Divide both sides by the first number so it becomes 1.",
+    "misconceptions": [{
+        "pattern": "subtracts", "check": "subtracts", "expect": 15,
+        "message": "15 comes from subtracting 5 from 20. Ratios scale by dividing, not subtracting. Divide both parts by 5: 5 ÷ 5 = 1 and 20 ÷ 5 = 4, so n = 4.",
+        "note": "additive thinking"
+    }],
+    "guided_steps": [
+        {"say": "To reach 1 in front, divide the first part by itself.",
+         "pre": "5 ÷ 5 = ", "post": "", "answer": 1, "hint": "Any number divided by itself is 1."},
+        {"phase": "substitute", "say": "Do the same to the second part.",
+         "pre": "20 ÷ 5 = ", "post": "", "answer": 4, "hint": "Divide 20 by 5.",
+         "done": "So 5 : 20 = 1 : 4, and n = 4."},
+        {"say": "Check by scaling 1 : 4 back up.", "pre": "4 × 5 = ", "post": "", "answer": 20,
+         "hint": "Multiply 4 by 5.", "done": "1 × 5 = 5 and 4 × 5 = 20, correct."}
+    ]
+})
+bronze.append({
+    "display": "Share 45 sweets in the ratio \\(2 : 3 : 4\\). How many does the middle person get?",
+    "solutions": [15], "calculator": False, "input_type": "single_value",
+    "hint": "Nine parts share the 45, and the middle person gets 3 of them.",
+    "misconceptions": [{
+        "pattern": "wrong_parts", "check": "wrong_parts", "expect": 45,
+        "message": "45 would mean the middle person gets everything. There are 2 + 3 + 4 = 9 parts, so one part is 45 ÷ 9 = 5, and the middle share is 3 × 5 = 15.",
+        "note": "student divides by number of people (3) then times 3, or forgets to share"
+    }],
+    "guided_steps": [
+        {"say": "Add the three ratio numbers.", "pre": "2 + 3 + 4 = ", "post": "", "answer": 9,
+         "hint": "Add all three ratio numbers."},
+        {"phase": "substitute", "say": "Find one part.", "pre": "45 ÷ 9 = ", "post": "", "answer": 5,
+         "hint": "Divide 45 by the number of parts."},
+        {"phase": "substitute", "say": "The middle person gets 3 parts.", "pre": "3 × 5 = ", "post": "",
+         "answer": 15, "hint": "Multiply one part by 3.", "done": "The middle person gets 15 sweets."},
+        {"say": "Check the three shares total 45.", "pre": "10 + 15 + 20 = ", "post": "", "answer": 45,
+         "hint": "Add 2 parts, 3 parts and 4 parts.",
+         "done": "2 parts = 10, 3 parts = 15, 4 parts = 20, and 10 + 15 + 20 = 45."}
+    ]
+})
+bronze.append({
+    "display": "Simplify \\(42 : 49\\). Give the second part.",
+    "solutions": [7], "calculator": False, "input_type": "single_value",
+    "hint": "Divide both parts by their highest common factor, then read off the second.",
+    "misconceptions": [{
+        "pattern": "not_simplified", "check": "not_simplified", "expect": 49,
+        "message": "49 is the original second part. Divide both by the HCF, 7: 42 ÷ 7 = 6 and 49 ÷ 7 = 7, so the simplified second part is 7.",
+        "note": "student does not simplify"
+    }],
+    "guided_steps": [
+        {"say": "Find the highest common factor of 42 and 49.",
+         "pre": "The HCF of 42 and 49 is ", "post": "", "answer": 7,
+         "hint": "7 divides both: 42 = 6 × 7 and 49 = 7 × 7."},
+        {"phase": "substitute", "say": "Divide each part by 7.",
+         "pre": "42 ÷ 7 = ", "post": "", "answer": 6, "hint": "Divide the first part by 7."},
+        {"phase": "substitute", "pre": "49 ÷ 7 = ", "post": "", "answer": 7,
+         "hint": "Divide the second part by 7.",
+         "done": "So 42 : 49 = 6 : 7. The second part is 7."},
+        {"say": "Check by scaling back.", "pre": "7 × 7 = ", "post": "", "answer": 49,
+         "hint": "Multiply the simplified second part by 7.",
+         "done": "6 × 7 = 42 and 7 × 7 = 49, correct."}
+    ]
+})
+
+# ---------- SILVER ----------
+silver = []
+silver.append({
+    "display": "Share £120 in the ratio \\(3 : 5\\). How much more does the larger share get?",
+    "solutions": [30], "calculator": False, "input_type": "single_value",
+    "hint": "Find one part, work out both shares, then subtract.",
+    "misconceptions": [{
+        "pattern": "gives_larger_share", "check": "gives_larger_share", "expect": 75,
+        "message": "75 is the larger share, not how much more it is. The shares are £45 and £75, and the question asks for the gap: 75 − 45 = £30.",
+        "note": "student gives larger share instead of the difference"
+    }],
+    "guided_steps": [
+        {"say": "Add the ratio numbers.", "pre": "3 + 5 = ", "post": "", "answer": 8,
+         "hint": "Add the two ratio numbers."},
+        {"say": "Find one part.", "pre": "120 ÷ 8 = ", "post": "", "answer": 15,
+         "hint": "Divide £120 by 8."},
+        {"phase": "substitute", "say": "Work out the shares. The larger is 5 parts.",
+         "pre": "5 × 15 = ", "post": "", "answer": 75, "hint": "Multiply one part by 5 for the larger share."},
+        {"phase": "substitute", "say": "The smaller is 3 parts.", "pre": "3 × 15 = ", "post": "",
+         "answer": 45, "hint": "Multiply one part by 3 for the smaller share."},
+        {"phase": "substitute", "say": "The question asks how much more the larger share gets.",
+         "pre": "75 − 45 = ", "post": "", "answer": 30, "hint": "Subtract the smaller share from the larger.",
+         "done": "The larger share gets £30 more."},
+        {"say": "Check: the gap is 2 parts (5 − 3).", "pre": "2 × 15 = ", "post": "", "answer": 30,
+         "hint": "Two parts of £15.", "done": "2 parts × £15 = £30, matching the difference."}
+    ]
+})
+silver.append({
+    "display": "The ratio of cats to dogs is \\(5 : 3\\). There are 40 cats. How many dogs?",
+    "solutions": [24], "calculator": False, "input_type": "single_value",
+    "hint": "Find the multiplier from the cats, then apply it to the dogs.",
+    "misconceptions": [{
+        "pattern": "gives_multiplier", "check": "gives_multiplier", "expect": 8,
+        "message": "8 is the multiplier, not the number of dogs. Each part is 40 ÷ 5 = 8, and dogs are 3 parts: 3 × 8 = 24.",
+        "note": "student reports the scale factor"
+    }],
+    "guided_steps": [
+        {"say": "Find the multiplier from the cats.", "pre": "40 ÷ 5 = ", "post": "", "answer": 8,
+         "hint": "What do you multiply 5 by to reach 40?"},
+        {"phase": "substitute", "say": "Apply the multiplier to the dogs' ratio number.",
+         "pre": "3 × 8 = ", "post": "", "answer": 24, "hint": "Multiply 3 by the multiplier."},
+        {"phase": "substitute", "say": "Check the ratio 40 : 24 simplifies back.",
+         "pre": "24 ÷ 8 = ", "post": "", "answer": 3, "hint": "Divide 24 by 8.",
+         "done": "40 : 24 divides by 8 to give 5 : 3, correct."}
+    ]
+})
+silver.append({
+    "display": "Concrete is mixed in the ratio cement : sand : gravel = \\(1 : 2 : 4\\). How much sand is needed for 35 kg of concrete?",
+    "solutions": [10], "calculator": False, "input_type": "single_value",
+    "hint": "Seven parts make up the 35 kg, and sand is 2 of them.",
+    "misconceptions": [{
+        "pattern": "gives_one_part", "check": "gives_one_part", "expect": 5,
+        "message": "5 kg is one part. Sand is 2 parts of the mix, so 2 × 5 = 10 kg.",
+        "note": "student stops at one part"
+    }],
+    "guided_steps": [
+        {"say": "Add the three ratio numbers.", "pre": "1 + 2 + 4 = ", "post": "", "answer": 7,
+         "hint": "Add all three ratio numbers."},
+        {"phase": "substitute", "say": "Find one part.", "pre": "35 ÷ 7 = ", "post": "", "answer": 5,
+         "hint": "Divide 35 kg by 7."},
+        {"phase": "substitute", "say": "Sand is 2 parts.", "pre": "2 × 5 = ", "post": "", "answer": 10,
+         "hint": "Multiply one part by 2.", "done": "10 kg of sand is needed."},
+        {"say": "Check the three amounts total 35 kg.", "pre": "5 + 10 + 20 = ", "post": "", "answer": 35,
+         "hint": "Add 1 part, 2 parts and 4 parts.",
+         "done": "cement 5, sand 10, gravel 20, total 35 kg."}
+    ]
+})
+silver.append({
+    "display": "The ratio of girls to boys in a class is \\(4 : 5\\). There are 27 students total. How many girls?",
+    "solutions": [12], "calculator": False, "input_type": "single_value",
+    "hint": "Nine parts share the 27 students, and girls are 4 of them.",
+    "misconceptions": [{
+        "pattern": "gives_other_group", "check": "gives_other_group", "expect": 15,
+        "message": "15 is the number of boys. There are 9 parts sharing 27, so one part is 3, and girls are 4 parts: 4 × 3 = 12.",
+        "note": "student gives boys instead of girls"
+    }],
+    "guided_steps": [
+        {"say": "Add the ratio numbers.", "pre": "4 + 5 = ", "post": "", "answer": 9,
+         "hint": "Add the two ratio numbers."},
+        {"phase": "substitute", "say": "Find one part.", "pre": "27 ÷ 9 = ", "post": "", "answer": 3,
+         "hint": "Divide 27 by 9."},
+        {"phase": "substitute", "say": "Girls are 4 parts.", "pre": "4 × 3 = ", "post": "", "answer": 12,
+         "hint": "Multiply one part by 4.", "done": "There are 12 girls."},
+        {"say": "Check girls and boys total 27.", "pre": "12 + 15 = ", "post": "", "answer": 27,
+         "hint": "Add girls (4 parts) and boys (5 parts).", "done": "12 girls + 15 boys = 27, correct."}
+    ]
+})
+silver.append({
+    "display": "Write \\(4 : 10\\) in the form \\(1 : n\\). What is \\(n\\)?",
+    "solutions": [2.5], "calculator": False, "input_type": "single_value",
+    "hint": "Divide both parts by the first number.",
+    "misconceptions": [{
+        "pattern": "subtracts", "check": "subtracts", "expect": 6,
+        "message": "6 comes from subtracting 4 from 10. Ratios scale by dividing: 10 ÷ 4 = 2.5, so n = 2.5.",
+        "note": "additive thinking"
+    }],
+    "guided_steps": [
+        {"say": "Divide the first part by itself to reach 1.", "pre": "4 ÷ 4 = ", "post": "", "answer": 1,
+         "hint": "Any number divided by itself is 1."},
+        {"phase": "substitute", "say": "Do the same to the second part.",
+         "pre": "10 ÷ 4 = ", "post": "", "answer": 2.5, "hint": "10 divided by 4.",
+         "done": "So 4 : 10 = 1 : 2.5, and n = 2.5."},
+        {"say": "Check by scaling back.", "pre": "2.5 × 4 = ", "post": "", "answer": 10,
+         "hint": "Multiply 2.5 by 4.", "done": "1 × 4 = 4 and 2.5 × 4 = 10, correct."}
+    ]
+})
+silver.append({
+    "display": "Alex and Ben share £90 so that Alex gets £15 more than Ben. What is Alex's share?",
+    "solutions": [52.5], "calculator": False, "input_type": "single_value",
+    "hint": "Give Ben the extra £15 first, share what is left equally, then add it back.",
+    "misconceptions": [{
+        "pattern": "adds_to_half", "check": "adds_to_half", "expect": 60,
+        "message": "60 comes from adding the whole £15 onto half of £90. Take the £15 off first: 90 − 15 = 75 shared equally is £37.50 each, then Alex gets 37.50 + 15 = £52.50.",
+        "note": "student does 45 + 15"
+    }],
+    "guided_steps": [
+        {"say": "Take Alex's extra £15 off the total first, so the rest can be shared equally.",
+         "pre": "90 − 15 = ", "post": "", "answer": 75, "hint": "Subtract the extra £15 from £90."},
+        {"phase": "substitute", "say": "Share the £75 equally: that is Ben's share.",
+         "pre": "75 ÷ 2 = ", "post": "", "answer": 37.5, "hint": "Divide £75 by 2."},
+        {"phase": "substitute", "say": "Alex gets Ben's share plus the extra £15.",
+         "pre": "37.5 + 15 = ", "post": "", "answer": 52.5, "hint": "Add £15 to Ben's share.",
+         "done": "Alex's share is £52.50."},
+        {"say": "Check both shares total £90.", "pre": "52.5 + 37.5 = ", "post": "", "answer": 90,
+         "hint": "Add Alex's and Ben's shares.",
+         "done": "£52.50 + £37.50 = £90 and the gap is £15, correct."}
+    ]
+})
+silver.append({
+    "display": "A map scale is \\(1 : 25000\\). A road is 8 cm on the map. How many metres is it in real life?",
+    "solutions": [2000], "calculator": False, "input_type": "single_value",
+    "hint": "Multiply the map distance by 25000, then change centimetres to metres.",
+    "misconceptions": [{
+        "pattern": "no_unit_convert", "check": "no_unit_convert", "expect": 200000,
+        "message": "200000 is the distance in centimetres: 8 × 25000. There are 100 cm in a metre, so divide by 100: 200000 ÷ 100 = 2000 m.",
+        "note": "student forgets cm to m conversion"
+    }],
+    "guided_steps": [
+        {"say": "Real distance in centimetres: multiply the map distance by 25000.",
+         "pre": "8 × 25000 = ", "post": "", "answer": 200000, "hint": "Multiply 8 by 25000."},
+        {"phase": "substitute", "say": "Change centimetres to metres by dividing by 100.",
+         "pre": "200000 ÷ 100 = ", "post": "", "answer": 2000, "hint": "There are 100 cm in a metre.",
+         "done": "The road is 2000 m long."},
+        {"say": "Check by working backwards: 2000 m is 200000 cm.",
+         "pre": "2000 × 100 = ", "post": "", "answer": 200000, "hint": "Multiply 2000 by 100.",
+         "done": "200000 cm ÷ 25000 = 8 cm on the map, correct."}
+    ]
+})
+
+# ---------- GOLD ----------
+gold = []
+gold.append({
+    "display": "The ratio \\(a : b = 3 : 4\\) and \\(b : c = 2 : 5\\). Find \\(a : b : c\\). What is \\(c\\)?",
+    "solutions": [10], "calculator": False, "input_type": "single_value",
+    "hint": "Make the shared letter b match in both ratios, then read off c.",
+    "misconceptions": [{
+        "pattern": "no_match", "check": "no_match", "expect": 5,
+        "message": "5 is c before matching b. In a : b, b is 4; in b : c, b is 2. Scale 2 : 5 up to 4 : 10 so both have b = 4, giving a : b : c = 3 : 4 : 10 and c = 10.",
+        "note": "student reads c straight from the second ratio without matching b"
+    }],
+    "guided_steps": [
+        {"say": "The shared letter is b. In a : b it is 4; in b : c it is 2. Scale b : c so that b becomes 4. Find the multiplier.",
+         "pre": "4 ÷ 2 = ", "post": "", "answer": 2, "hint": "What do you multiply the 2 by to reach 4?"},
+        {"phase": "substitute", "say": "Apply that multiplier to c.",
+         "pre": "5 × 2 = ", "post": "", "answer": 10, "hint": "Multiply the 5 by 2.",
+         "done": "So a : b : c = 3 : 4 : 10 and c = 10."},
+        {"phase": "substitute", "say": "Check b : c is still 2 : 5.",
+         "pre": "10 ÷ 5 = ", "post": "", "answer": 2, "hint": "Divide 10 by 5.",
+         "done": "4 : 10 divides by 2 to give 2 : 5, so the chain is right."}
+    ]
+})
+gold.append({
+    "display": "Purple paint is mixed using red and blue in the ratio \\(3 : 7\\). I have 2 litres of red. How much blue do I need? Give answer as a fraction.",
+    "solutions": [14, 3], "calculator": False, "input_type": "fraction",
+    "hint": "Find the multiplier 2 over 3, then multiply the blue part by it.",
+    "misconceptions": [{
+        "pattern": "whole_multiplier", "check": "whole_multiplier", "expect": [14, 1],
+        "message": "14 uses a multiplier of 2. But 2 litres fills only the 3 red parts, so one part is 2/3 of a litre. Blue is 7 parts: 7 × 2/3 = 14/3 litres.",
+        "note": "student multiplies 7 by 2 instead of 2/3"
+    }],
+    "guided_steps": [
+        {"say": "Red is 3 parts and equals 2 litres, so one part is 2 ÷ 3 litres. Blue is 7 parts, so blue = 7 × 2 ÷ 3. Work out the numerator: 7 × 2.",
+         "pre": "7 × 2 = ", "post": "", "answer": 14, "hint": "Multiply 7 by 2 for the top of the fraction."},
+        {"phase": "substitute", "say": "The denominator is the 3 red parts.",
+         "pre": "The denominator is ", "post": "", "answer": 3, "hint": "Red is 3 parts, so divide by 3."},
+        {"phase": "substitute", "say": "So blue = 14/3 litres. Check the ratio: red is 2 = 6/3 and blue is 14/3, so compare 6 : 14.",
+         "pre": "14 ÷ 2 = ", "post": "", "answer": 7, "hint": "Divide 14 by 2 to simplify 6 : 14.",
+         "done": "6 : 14 = 3 : 7, matching the mix, so blue = 14/3 litres."}
+    ]
+})
+gold.append({
+    "display": "Share £200 in the ratio \\(1 : 2 : 5\\). What fraction of the total does the middle share represent?",
+    "solutions": [1, 4], "calculator": False, "input_type": "fraction",
+    "hint": "Count the total parts, then write the middle over the total and simplify.",
+    "misconceptions": [{
+        "pattern": "part_over_rest", "check": "part_over_rest", "expect": [1, 3],
+        "message": "1/3 compares the middle to the other two shares (2 to 6). A fraction of the total uses all the parts: total = 1 + 2 + 5 = 8, so the middle is 2/8 = 1/4.",
+        "note": "student writes middle over the remaining parts (2/6)"
+    }],
+    "guided_steps": [
+        {"say": "Add the parts to find the total number of parts.",
+         "pre": "1 + 2 + 5 = ", "post": "", "answer": 8, "hint": "Add all three ratio numbers."},
+        {"phase": "substitute", "say": "The middle share is 2 parts out of 8. The numerator is the middle parts.",
+         "pre": "Numerator = ", "post": "", "answer": 2, "hint": "The middle ratio number."},
+        {"phase": "substitute", "say": "Simplify 2/8 by dividing top and bottom by 2. New numerator:",
+         "pre": "2 ÷ 2 = ", "post": "", "answer": 1, "hint": "Divide the top by 2."},
+        {"phase": "substitute", "say": "New denominator:", "pre": "8 ÷ 2 = ", "post": "", "answer": 4,
+         "hint": "Divide the bottom by 2.", "done": "The middle share is 2/8 = 1/4 of the total."}
+    ]
+})
+gold.append({
+    "display": "After sharing in the ratio \\(3 : 5\\), the larger share is £70. Find the total amount shared.",
+    "solutions": [112], "calculator": False, "input_type": "single_value",
+    "hint": "The £70 is 5 parts, so find one part, then find all 8.",
+    "misconceptions": [{
+        "pattern": "share_as_one_part", "check": "share_as_one_part", "expect": 560,
+        "message": "560 treats £70 as a single part. £70 is the larger share, which is 5 parts, so one part is 70 ÷ 5 = 14, and the total is 8 × 14 = £112.",
+        "note": "student multiplies 70 by 8"
+    }],
+    "guided_steps": [
+        {"say": "The larger share is £70 and that is 5 parts. Find one part.",
+         "pre": "70 ÷ 5 = ", "post": "", "answer": 14, "hint": "Divide £70 by 5 parts."},
+        {"phase": "substitute", "say": "The total is all the parts.",
+         "pre": "3 + 5 = ", "post": "", "answer": 8, "hint": "Add the ratio numbers."},
+        {"phase": "substitute", "say": "Total amount is 8 parts.",
+         "pre": "8 × 14 = ", "post": "", "answer": 112, "hint": "Multiply the number of parts by one part.",
+         "done": "The total shared is £112."},
+        {"say": "Check the larger share is £70.", "pre": "5 × 14 = ", "post": "", "answer": 70,
+         "hint": "Multiply 5 parts by £14.",
+         "done": "5 parts × £14 = £70, matching the question, and the smaller is 3 × 14 = £42."}
+    ]
+})
+gold.append({
+    "display": "The ratio of Tom's age to Sam's age is \\(5 : 3\\). Tom is 8 years older than Sam. How old is Tom?",
+    "solutions": [20], "calculator": False, "input_type": "single_value",
+    "hint": "The 8 year gap is the difference in parts, so find one part first.",
+    "misconceptions": [{
+        "pattern": "gap_as_one_part", "check": "gap_as_one_part", "expect": 40,
+        "message": "40 treats the 8 years as one part. The 8 years is the difference of 5 − 3 = 2 parts, so one part is 4, and Tom is 5 × 4 = 20.",
+        "note": "student multiplies 8 by 5"
+    }],
+    "guided_steps": [
+        {"say": "Tom has 5 parts, Sam has 3 parts, so the age gap is the difference in parts. Find it.",
+         "pre": "5 − 3 = ", "post": "", "answer": 2, "hint": "Subtract the ratio numbers."},
+        {"phase": "substitute", "say": "That 2 part gap equals 8 years. Find one part.",
+         "pre": "8 ÷ 2 = ", "post": "", "answer": 4, "hint": "Divide the 8 year gap by 2 parts."},
+        {"phase": "substitute", "say": "Tom is 5 parts.", "pre": "5 × 4 = ", "post": "", "answer": 20,
+         "hint": "Multiply one part by 5.", "done": "Tom is 20 years old."},
+        {"say": "Check the gap is 8 years. Sam is 3 × 4 = 12, so:",
+         "pre": "20 − 12 = ", "post": "", "answer": 8, "hint": "Subtract Sam's age from Tom's.",
+         "done": "Tom 20, Sam 12, gap 8 years, correct."}
+    ]
+})
+
+# ---------- tier_guides ----------
+tier_guides = {
+    "bronze": {
+        "title": "Bronze: one step with parts",
+        "steps": [
+            "<strong>Simplify</strong> by dividing both parts by their highest common factor.",
+            "<strong>Share</strong> a total: add the parts, divide the total to get one part, then multiply each share.",
+            "<strong>Scale</strong> using the multiplier: find what one side was multiplied by, then do the same to the other."
+        ],
+        "example": {
+            "question": "Share £45 in the ratio 2 : 7.",
+            "steps": [
+                {"label": "Count the parts", "content": "<p>2 + 7 = 9 parts.</p>"},
+                {"label": "One part", "content": "<p>45 ÷ 9 = £5.</p>"},
+                {"label": "Check", "content": "<p>2 parts = £10, 7 parts = £35, and £10 + £35 = £45.</p>"},
+                {"label": "Answer", "content": "<p>The shares are £10 and £35.</p>",
+                 "isAnswer": True, "is_answer": True}
+            ]
+        }
+    },
+    "silver": {
+        "title": "Silver: combine two ideas",
+        "steps": [
+            "Find both shares first, then answer what is asked: a <strong>difference</strong>, one colour, or one person's amount.",
+            "For a <strong>three part</strong> ratio, add all three numbers to get the number of parts.",
+            "For <strong>scale and units</strong>, multiply by the scale, then convert (100 cm = 1 m)."
+        ],
+        "example": {
+            "question": "£48 is shared in the ratio 1 : 5. How much more does the larger share get?",
+            "steps": [
+                {"label": "Parts", "content": "<p>1 + 5 = 6 parts, one part = 48 ÷ 6 = £8.</p>"},
+                {"label": "Both shares", "content": "<p>Smaller = £8, larger = 5 × 8 = £40.</p>"},
+                {"label": "Check", "content": "<p>£8 + £40 = £48.</p>"},
+                {"label": "Answer", "content": "<p>The larger share gets 40 − 8 = £32 more.</p>",
+                 "isAnswer": True, "is_answer": True}
+            ]
+        }
+    },
+    "gold": {
+        "title": "Gold: reverse and chain",
+        "steps": [
+            "Work <strong>backwards</strong>: if you know one share, find one part first, then build the total.",
+            "For a <strong>chained</strong> ratio, make the shared letter match in both, then read the ends.",
+            "For a <strong>difference</strong> problem, the gap in years or amount is the difference in parts."
+        ],
+        "example": {
+            "question": "The smaller share in the ratio 3 : 8 is £15. Find the total.",
+            "steps": [
+                {"label": "One part", "content": "<p>3 parts = £15, so one part = 15 ÷ 3 = £5.</p>"},
+                {"label": "Total parts", "content": "<p>3 + 8 = 11 parts.</p>"},
+                {"label": "Check", "content": "<p>Larger = 8 × 5 = £40, and £15 + £40 = £55.</p>"},
+                {"label": "Answer", "content": "<p>Total = 11 × 5 = £55.</p>",
+                 "isAnswer": True, "is_answer": True}
+            ]
+        }
+    }
+}
+
+# ---------- guided (opener + teach) ----------
+opener_svg = sweets_svg(12, "Twelve sweets to be shared between two people")
+guided = {
+    "opener": {
+        "label": "Before any method",
+        "display": ("You and your friend share these 12 sweets. Because your friend is older, "
+                    "for every 1 sweet you take, they take 2.<br>" + opener_svg),
+        "steps": [
+            {"say": "No method yet, just deal the sweets out fairly.",
+             "pre": "Dealing 1 for you and 2 for your friend, over and over, how many does your friend get?",
+             "post": "", "answer": 8,
+             "hint": "Every group of 3 sweets gives 2 to your friend, and there are 4 groups."},
+            {"say": "And the rest are yours.", "pre": "How many sweets do you get?",
+             "post": "", "answer": 4, "hint": "12 sweets take away your friend's 8."},
+            {"say": "You just shared 12 in the ratio <strong>1 : 2</strong>. Three equal parts (1 + 2), "
+                    "each part is 12 ÷ 3 = 4, so you get 4 and your friend gets 8. That is all ratio "
+                    "sharing is: split into parts, find one part, then multiply."}
+        ]
+    },
+    "teach": {
+        "bronze": {
+            "label": "Together: your first share",
+            "display": ("Share £30 in the ratio 2 : 3. The bar shows 5 equal parts.<br>"
+                        + bar([(2, BLUE, "2 parts"), (3, AMBER, "3 parts")], "£30 total",
+                              "A bar of 5 equal parts split 2 and 3, sharing 30 pounds")),
+            "steps": [
+                {"say": "Add the ratio numbers to find the number of parts.",
+                 "pre": "2 + 3 = ", "post": "", "answer": 5, "hint": "Add 2 and 3."},
+                {"say": "Find what one part is worth.", "pre": "30 ÷ 5 = ", "post": "", "answer": 6,
+                 "hint": "Divide £30 by 5 parts."},
+                {"say": "The first share is 2 parts.", "pre": "2 × 6 = ", "post": "", "answer": 12,
+                 "hint": "Multiply one part by 2."},
+                {"say": "The second share is 3 parts.", "pre": "3 × 6 = ", "post": "", "answer": 18,
+                 "hint": "Multiply one part by 3."},
+                {"say": "Check the shares total £30.", "pre": "12 + 18 = ", "post": "", "answer": 30,
+                 "hint": "Add both shares.",
+                 "done": "£12 + £18 = £30. That is the whole method: parts, one part, multiply."}
+            ]
+        },
+        "silver": {
+            "label": "Together: the silver move",
+            "display": ("£72 is shared in the ratio 3 : 5. How much more does the larger share get? "
+                        "The bar shows 8 equal parts.<br>"
+                        + bar([(3, BLUE, "3 parts"), (5, AMBER, "5 parts")], "£72 total",
+                              "A bar of 8 equal parts split 3 and 5, sharing 72 pounds")),
+            "steps": [
+                {"say": "Add the ratio numbers.", "pre": "3 + 5 = ", "post": "", "answer": 8,
+                 "hint": "Add 3 and 5."},
+                {"say": "Find one part.", "pre": "72 ÷ 8 = ", "post": "", "answer": 9,
+                 "hint": "Divide £72 by 8."},
+                {"say": "Larger share is 5 parts.", "pre": "5 × 9 = ", "post": "", "answer": 45,
+                 "hint": "Multiply one part by 5."},
+                {"say": "Smaller share is 3 parts.", "pre": "3 × 9 = ", "post": "", "answer": 27,
+                 "hint": "Multiply one part by 3."},
+                {"say": "The extra is the difference.", "pre": "45 − 27 = ", "post": "", "answer": 18,
+                 "hint": "Subtract the smaller from the larger.",
+                 "done": "£18 more. The new move: find both shares, then compare them."}
+            ]
+        },
+        "gold": {
+            "label": "Together: the gold move",
+            "display": ("After sharing in the ratio 4 : 7, the smaller share is £20. Find the total. "
+                        "The bar shows the 4 part share marked £20.<br>"
+                        + bar([(4, BLUE, "£20"), (7, AMBER, "7 parts")], "Total = ?",
+                              "A bar of 11 equal parts, the first 4 marked 20 pounds")),
+            "steps": [
+                {"say": "The smaller share is 4 parts and equals £20. Find one part.",
+                 "pre": "20 ÷ 4 = ", "post": "", "answer": 5, "hint": "Divide £20 by 4 parts."},
+                {"say": "Total number of parts.", "pre": "4 + 7 = ", "post": "", "answer": 11,
+                 "hint": "Add the ratio numbers."},
+                {"say": "Total amount is 11 parts.", "pre": "11 × 5 = ", "post": "", "answer": 55,
+                 "hint": "Multiply parts by one part."},
+                {"say": "Check the larger share.", "pre": "7 × 5 = ", "post": "", "answer": 35,
+                 "hint": "Multiply 7 parts by £5."},
+                {"say": "Check both shares total £55.", "pre": "20 + 35 = ", "post": "", "answer": 55,
+                 "hint": "Add £20 and £35.",
+                 "done": "£20 + £35 = £55. The new move: work back from one known share to one part."}
+            ]
+        }
+    }
+}
+
+# ---------- assemble (preserve related_videos, worked_examples, topic_links) ----------
+out = {
+    "method_card": method_card,
+    "topic_links": live.get("topic_links", {"prerequisites": []}),
+    "problem_bank": {
+        "gold": gold,
+        "bronze": bronze,
+        "silver": silver,
+        "bronze_description": descriptions["bronze_description"],
+        "silver_description": descriptions["silver_description"],
+        "gold_description": descriptions["gold_description"]
+    },
+    "related_videos": live.get("related_videos", []),
+    "worked_examples": live.get("worked_examples", []),
+    "tier_guides": tier_guides,
+    "guided": guided
+}
+
+fn = "lesson_maths-aqa_ratio-proportion-L01.json"
+io.open(fn, "w", encoding="utf-8").write(json.dumps(out, indent=1, ensure_ascii=False))
+print("wrote", fn)
+
+# quick em-dash self-check
+s = json.dumps(out, ensure_ascii=False)
+print("em dashes present:" , "—" in s)

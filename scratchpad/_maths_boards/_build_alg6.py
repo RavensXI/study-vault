@@ -1,0 +1,277 @@
+# -*- coding: utf-8 -*-
+import json, io
+
+live = json.load(io.open("_live_aqa_algL06.json", encoding="utf-8"))
+
+MSG = {
+ "forgot_a": "This is \\(a \\neq 1\\), so the simple method fails; multiply \\(a \\times c\\) first, then find the factor pair.",
+ "wrong_pair": "The two numbers must multiply to \\(ac\\), not just \\(c\\), and add to \\(b\\); recompute \\(ac\\) and pick the right pair.",
+ "sign_error": "Check the signs inside the brackets; flipping both signs changes the sign of the middle term.",
+ "dots": "No middle term means the difference of two squares: \\(9x^2 - 4 = (3x)^2 - 2^2 = (3x+2)(3x-2)\\).",
+}
+
+# Each problem: display, correct latex, ordered distractors [(tag, latex)],
+# correct_index (varies to break the always-index-0 disease), hint, mis tags.
+def P(display, correct, distractors, ci, hint, mis):
+    return dict(display=display, correct=correct, distractors=distractors,
+                ci=ci, hint=hint, mis=mis)
+
+bronze = [
+ P("Factorise \\(2x^2 + 5x + 3\\)", "\\((2x + 3)(x + 1)\\)",
+   [("wrong_pair","\\((2x + 1)(x + 3)\\)"),("forgot_a","\\((x + 3)(x + 1)\\)"),("na","\\(2(x^2 + 5x + 3)\\)")],
+   2, "Work out ac = 2 × 3 = 6, then find two numbers that multiply to 6 and add to 5.", ["forgot_a","wrong_pair"]),
+ P("Factorise \\(3x^2 + 7x + 2\\)", "\\((3x + 1)(x + 2)\\)",
+   [("wrong_pair","\\((3x + 2)(x + 1)\\)"),("forgot_a","\\((x + 1)(x + 2)\\)"),("na","\\(3(x^2 + 7x + 2)\\)")],
+   0, "Work out ac = 3 × 2 = 6, then find two numbers that multiply to 6 and add to 7.", ["forgot_a","wrong_pair"]),
+ P("Factorise \\(2x^2 + 9x + 4\\)", "\\((2x + 1)(x + 4)\\)",
+   [("wrong_pair","\\((2x + 4)(x + 1)\\)"),("sign_error","\\((2x - 1)(x - 4)\\)"),("na","\\(2(x + 1)(x + 4)\\)")],
+   3, "Work out ac = 2 × 4 = 8, then find two numbers that multiply to 8 and add to 9.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(5x^2 + 11x + 2\\)", "\\((5x + 1)(x + 2)\\)",
+   [("wrong_pair","\\((5x + 2)(x + 1)\\)"),("forgot_a","\\((x + 2)(x + 1)\\)"),("na","\\(5(x + 2)(x + 1)\\)")],
+   1, "Work out ac = 5 × 2 = 10, then find two numbers that multiply to 10 and add to 11.", ["forgot_a","wrong_pair"]),
+ P("Factorise \\(2x^2 + 11x + 5\\)", "\\((2x + 1)(x + 5)\\)",
+   [("wrong_pair","\\((2x + 5)(x + 1)\\)"),("forgot_a","\\((x + 5)(x + 1)\\)"),("na","\\(2(x^2 + 11x + 5)\\)")],
+   2, "Work out ac = 2 × 5 = 10, then find two numbers that multiply to 10 and add to 11.", ["forgot_a","wrong_pair"]),
+ P("Factorise \\(3x^2 + 10x + 3\\)", "\\((3x + 1)(x + 3)\\)",
+   [("wrong_pair","\\((3x + 3)(x + 1)\\)"),("forgot_a","\\((x + 3)(x + 1)\\)"),("na","\\(3(x + 3)(x + 1)\\)")],
+   3, "Work out ac = 3 × 3 = 9, then find two numbers that multiply to 9 and add to 10.", ["forgot_a","wrong_pair"]),
+ P("Factorise \\(4x^2 + 8x + 3\\)", "\\((2x + 1)(2x + 3)\\)",
+   [("wrong_pair","\\((4x + 3)(x + 1)\\)"),("wrong_pair2","\\((4x + 1)(x + 3)\\)"),("na","\\(4(x + 1)(x + 3)\\)")],
+   0, "Work out ac = 4 × 3 = 12, then find two numbers that multiply to 12 and add to 8.", ["wrong_pair"]),
+ P("Factorise \\(2x^2 + 7x + 6\\)", "\\((2x + 3)(x + 2)\\)",
+   [("wrong_pair","\\((2x + 2)(x + 3)\\)"),("sign_error","\\((2x - 3)(x - 2)\\)"),("na","\\(2(x + 3)(x + 2)\\)")],
+   1, "Work out ac = 2 × 6 = 12, then find two numbers that multiply to 12 and add to 7.", ["sign_error","wrong_pair"]),
+]
+
+silver = [
+ P("Factorise \\(3x^2 - 5x - 2\\)", "\\((3x + 1)(x - 2)\\)",
+   [("sign_error","\\((3x - 1)(x + 2)\\)"),("wrong_pair","\\((3x - 2)(x + 1)\\)"),("wp2","\\((3x + 2)(x - 1)\\)")],
+   1, "Work out ac = 3 × (−2) = −6, then find two numbers that multiply to −6 and add to −5.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(2x^2 - 7x + 3\\)", "\\((2x - 1)(x - 3)\\)",
+   [("wrong_pair","\\((2x - 3)(x - 1)\\)"),("sign_error","\\((2x + 1)(x - 3)\\)"),("wp2","\\((x - 1)(2x + 3)\\)")],
+   3, "Work out ac = 2 × 3 = 6, then find two numbers that multiply to 6 and add to −7 (both negative).", ["sign_error","wrong_pair"]),
+ P("Factorise \\(5x^2 - 13x + 6\\)", "\\((5x - 3)(x - 2)\\)",
+   [("wrong_pair","\\((5x - 6)(x - 1)\\)"),("wp2","\\((5x - 2)(x - 3)\\)"),("sign_error","\\((x - 2)(5x + 3)\\)")],
+   0, "Work out ac = 5 × 6 = 30, then find two numbers that multiply to 30 and add to −13 (both negative).", ["sign_error","wrong_pair"]),
+ P("Factorise \\(4x^2 + 4x - 3\\)", "\\((2x + 3)(2x - 1)\\)",
+   [("sign_error","\\((2x - 3)(2x + 1)\\)"),("wrong_pair","\\((4x + 3)(x - 1)\\)"),("wp2","\\((4x - 1)(x + 3)\\)")],
+   2, "Work out ac = 4 × (−3) = −12, then find two numbers that multiply to −12 and add to 4.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(6x^2 + 5x - 6\\)", "\\((3x - 2)(2x + 3)\\)",
+   [("sign_error","\\((3x + 2)(2x - 3)\\)"),("wrong_pair","\\((6x - 1)(x + 6)\\)"),("wp2","\\((6x + 6)(x - 1)\\)")],
+   3, "Work out ac = 6 × (−6) = −36, then find two numbers that multiply to −36 and add to 5.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(3x^2 + 11x - 4\\)", "\\((3x - 1)(x + 4)\\)",
+   [("wrong_pair","\\((3x + 4)(x - 1)\\)"),("sign_error","\\((3x + 1)(x - 4)\\)"),("wp2","\\((3x - 4)(x + 1)\\)")],
+   1, "Work out ac = 3 × (−4) = −12, then find two numbers that multiply to −12 and add to 11.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(4x^2 - 12x + 5\\)", "\\((2x - 1)(2x - 5)\\)",
+   [("sign_error","\\((2x + 1)(2x - 5)\\)"),("wrong_pair","\\((4x - 5)(x - 1)\\)"),("wp2","\\((4x - 1)(x - 5)\\)")],
+   0, "Work out ac = 4 × 5 = 20, then find two numbers that multiply to 20 and add to −12 (both negative).", ["sign_error","wrong_pair"]),
+]
+
+gold = [
+ P("Factorise \\(6x^2 - 19x + 10\\)", "\\((3x - 2)(2x - 5)\\)",
+   [("wrong_pair","\\((6x - 5)(x - 2)\\)"),("wp2","\\((3x - 5)(2x - 2)\\)"),("wp3","\\((6x - 2)(x - 5)\\)")],
+   3, "Work out ac = 6 × 10 = 60, then find two numbers that multiply to 60 and add to −19 (both negative).", ["wrong_pair"]),
+ P("Factorise \\(8x^2 + 2x - 3\\)", "\\((4x + 3)(2x - 1)\\)",
+   [("sign_error","\\((4x - 3)(2x + 1)\\)"),("wrong_pair","\\((8x + 3)(x - 1)\\)"),("wp2","\\((4x - 1)(2x + 3)\\)")],
+   0, "Work out ac = 8 × (−3) = −24, then find two numbers that multiply to −24 and add to 2.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(10x^2 + 19x + 6\\)", "\\((5x + 2)(2x + 3)\\)",
+   [("wrong_pair","\\((5x + 3)(2x + 2)\\)"),("wp2","\\((10x + 3)(x + 2)\\)"),("wp3","\\((5x + 6)(2x + 1)\\)")],
+   2, "Work out ac = 10 × 6 = 60, then find two numbers that multiply to 60 and add to 19.", ["wrong_pair"]),
+ P("Factorise \\(12x^2 - 7x - 10\\)", "\\((4x - 5)(3x + 2)\\)",
+   [("sign_error","\\((4x + 5)(3x - 2)\\)"),("wrong_pair","\\((6x - 5)(2x + 2)\\)"),("wp2","\\((12x + 5)(x - 2)\\)")],
+   1, "Work out ac = 12 × (−10) = −120, then find two numbers that multiply to −120 and add to −7.", ["sign_error","wrong_pair"]),
+ P("Factorise \\(9x^2 - 4\\)", "\\((3x + 2)(3x - 2)\\)",
+   [("wrong_pair","\\((9x + 2)(x - 2)\\)"),("dots","\\((3x - 2)^2\\)"),("wp3","\\((9x + 4)(x - 1)\\)")],
+   0, "There is no x term, so use the difference of two squares: write each part as something squared.", ["dots","wrong_pair"]),
+]
+
+def build_problem(p):
+    slots = [None, None, None, None]
+    ci = p["ci"]
+    slots[ci] = p["correct"]
+    tagpos = {}
+    di = 0
+    for tag, latex in p["distractors"]:
+        while slots[di] is not None:
+            di += 1
+        slots[di] = latex
+        tagpos[tag] = di
+        di += 1
+    options = slots
+    mis = []
+    for tag in p["mis"]:
+        base = "sign_error" if tag == "sign_error" else ("forgot_a" if tag == "forgot_a" else ("dots" if tag == "dots" else "wrong_pair"))
+        mis.append({"pattern": base, "expect": tagpos[tag], "message": MSG[base]})
+    return {
+        "display": p["display"],
+        "options": options,
+        "solutions": [ci],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": p["hint"],
+        "misconceptions": mis,
+    }
+
+pb = {
+ "bronze": [build_problem(x) for x in bronze],
+ "silver": [build_problem(x) for x in silver],
+ "gold":   [build_problem(x) for x in gold],
+ "bronze_description": "Factorise quadratics with small, all-positive coefficients.",
+ "silver_description": "Include negative terms and mixed signs.",
+ "gold_description": "Larger leading numbers and products, including a difference of two squares.",
+}
+
+method_card = {
+ "title": "Factorising quadratics (a ≠ 1)",
+ "steps": [
+  "Multiply \\(a \\times c\\) to get a target product.",
+  "Find two numbers that multiply to \\(ac\\) and add to \\(b\\).",
+  "Split the middle term \\(bx\\) into those two terms.",
+  "Factorise in pairs and take out the common bracket."
+ ],
+ "content": "<p>When \\(a \\neq 1\\) you cannot just find two numbers that multiply to \\(c\\); you must aim for the product \\(ac\\). This is the <strong>ac method</strong>, or splitting the middle term.</p><p>Find two numbers that multiply to \\(ac\\) and add to \\(b\\), rewrite the middle term as those two terms, then factorise in pairs and pull out the shared bracket. Always expand your answer to check it gives the original quadratic.</p>",
+ "example": "<p><strong>Factorise</strong> \\(3x^2 + 10x + 3\\)</p><p>\\(ac = 9\\); two numbers multiply to 9 and add to 10: 1 and 9. Split: \\(3x^2 + x + 9x + 3 = x(3x+1) + 3(3x+1)\\). Answer: \\((x+3)(3x+1)\\).</p>",
+}
+
+OPENER_SVG = (
+ '<svg viewBox="0 0 240 158" style="display:block;margin:0 auto 0.25rem;max-width:250px;width:100%" '
+ 'role="img" aria-label="A rectangle of area 15 square metres with both whole-number side lengths unknown">'
+ '<rect x="46" y="34" width="150" height="82" fill="#60a5fa" fill-opacity="0.3" stroke="currentColor" stroke-width="1.5"/>'
+ '<text x="121" y="79" text-anchor="middle" fill="currentColor" font-family="Inter,sans-serif" font-size="13">Area = 15 m²</text>'
+ '<text x="121" y="132" text-anchor="middle" fill="currentColor" font-family="Inter,sans-serif" font-size="12">? m</text>'
+ '<text x="30" y="79" text-anchor="middle" fill="currentColor" font-family="Inter,sans-serif" font-size="12">? m</text>'
+ '</svg>'
+ '<span class="figure-caption">Diagram not drawn accurately</span>'
+)
+
+opener = {
+ "label": "Before any algebra",
+ "display": OPENER_SVG,
+ "steps": [
+  {"say": "A puzzle first, no algebra needed. This rectangle has an area of 15 m², and its two whole-number side lengths add up to 8 m."},
+  {"pre": "The shorter side, in metres, is ", "post": " m", "answer": 3,
+   "hint": "Which two whole numbers multiply to 15 (the area) and add to 8? Try 1 and 15, then 3 and 5."},
+  {"pre": "and the longer side, in metres, is ", "post": " m", "answer": 5,
+   "hint": "The two sides multiply to the area, 15, so the partner of 3 is 15 ÷ 3."},
+  {"say": "You just found two numbers from a target <strong>product</strong> (15) and a target <strong>sum</strong> (8). That hunt is the whole engine of factorising \\(ax^2+bx+c\\): the product you aim for is \\(a \\times c\\), and the sum you aim for is the middle number \\(b\\). The rest is splitting and bracketing."},
+ ],
+}
+
+teach = {
+ "bronze": {
+  "display": "Factorise \\(3x^2 + 8x + 4\\)",
+  "steps": [
+   {"say": "When the number in front of \\(x^2\\) is not 1, use the ac method. First multiply that front number, \\(a\\), by the constant, \\(c\\)."},
+   {"pre": "a × c = 3 × 4 = ", "post": "", "answer": 12, "hint": "Multiply 3 by 4."},
+   {"say": "Now find two numbers that multiply to 12 and add to the middle number, 8."},
+   {"pre": "Try 6 and 2. Their product 6 × 2 = ", "post": "", "answer": 12, "hint": "Multiply 6 by 2."},
+   {"pre": "Their sum 6 + 2 = ", "post": "", "answer": 8, "hint": "Add 6 and 2; it should equal the middle number.",
+    "done": "They hit 12 and 8, so 6 and 2 are the numbers."},
+   {"say": "Split the middle term: \\(3x^2 + 6x + 2x + 4\\). Group in pairs: \\(3x(x+2) + 2(x+2)\\), giving \\((3x+2)(x+2)\\)."},
+   {"pre": "Check the constant: multiply the two second numbers, 2 × 2 = ", "post": "", "answer": 4,
+    "hint": "Multiply the 2 and the 2 inside the brackets.",
+    "done": "It matches the +4 in the question, so \\((3x+2)(x+2)\\) is right."},
+  ],
+ },
+ "silver": {
+  "display": "Factorise \\(3x^2 + 2x - 8\\)",
+  "steps": [
+   {"say": "Same method, but now a term is negative. Multiply \\(a\\) by \\(c\\), keeping the sign."},
+   {"pre": "a × c = 3 × (−8) = ", "post": "", "answer": -24, "hint": "A positive times a negative is negative."},
+   {"say": "Find two numbers that multiply to \\(-24\\) and add to the middle number, 2. A negative product means one number is positive and one is negative."},
+   {"pre": "Try 6 and −4. Their product 6 × (−4) = ", "post": "", "answer": -24, "hint": "Positive times negative is negative."},
+   {"pre": "Their sum 6 + (−4) = ", "post": "", "answer": 2, "hint": "6 take away 4.",
+    "done": "They hit −24 and 2, so 6 and −4 are the numbers."},
+   {"say": "Split: \\(3x^2 + 6x - 4x - 8\\). Group: \\(3x(x+2) - 4(x+2)\\), giving \\((3x-4)(x+2)\\)."},
+   {"pre": "Check the constant: multiply the two second numbers, (−4) × 2 = ", "post": "", "answer": -8,
+    "hint": "Negative 4 times 2.",
+    "done": "It matches the −8 in the question, so \\((3x-4)(x+2)\\) is right."},
+  ],
+ },
+ "gold": {
+  "display": "Factorise \\(8x^2 - 10x + 3\\)",
+  "steps": [
+   {"say": "A bigger leading number, but the method does not change. Multiply \\(a\\) by \\(c\\)."},
+   {"pre": "a × c = 8 × 3 = ", "post": "", "answer": 24, "hint": "8 times 3."},
+   {"say": "Find two numbers that multiply to 24 and add to the middle number, \\(-10\\). Both are negative."},
+   {"pre": "Try −6 and −4. Their product (−6) × (−4) = ", "post": "", "answer": 24, "hint": "Negative times negative is positive."},
+   {"pre": "Their sum (−6) + (−4) = ", "post": "", "answer": -10, "hint": "Add two negatives.",
+    "done": "They hit 24 and −10, so −6 and −4 are the numbers."},
+   {"say": "Split: \\(8x^2 - 6x - 4x + 3\\). Group: \\(2x(4x-3) - 1(4x-3)\\), giving \\((2x-1)(4x-3)\\)."},
+   {"pre": "Check the constant: multiply the two second numbers, (−1) × (−3) = ", "post": "", "answer": 3,
+    "hint": "Negative 1 times negative 3.",
+    "done": "It matches the +3 in the question, so \\((2x-1)(4x-3)\\) is right."},
+  ],
+ },
+}
+
+tier_guides = {
+ "bronze": {
+  "title": "Bronze: factorising with small positive numbers",
+  "steps": [
+   "Multiply <strong>a</strong> by <strong>c</strong> (the number in front of \\(x^2\\) times the constant). This is your target product.",
+   "Find two numbers that multiply to that product and add to the middle number <strong>b</strong>. With all-positive terms both numbers are positive.",
+   "Split the middle term into those two pieces, then factorise in pairs to reveal the shared bracket."
+  ],
+  "example": {
+   "question": "Factorise \\(2x^2 + 7x + 3\\)",
+   "steps": [
+    {"label": "Target product", "content": "<p>\\(ac = 2 \\times 3 = 6\\)</p>"},
+    {"label": "Factor pair", "content": "<p>Two numbers multiply to 6 and add to 7: \\(6\\) and \\(1\\).</p>"},
+    {"label": "Split and group", "content": "<p>\\(2x^2 + 6x + x + 3 = 2x(x+3) + 1(x+3)\\)</p>"},
+    {"label": "Check", "content": "<p>Expand back: \\((2x+1)(x+3) = 2x^2 + 7x + 3\\)</p>"},
+    {"label": "Answer", "content": "<p><strong>\\((2x+1)(x+3)\\)</strong></p>", "isAnswer": True, "is_answer": True},
+   ],
+  },
+ },
+ "silver": {
+  "title": "Silver: factorising with negative terms",
+  "steps": [
+   "Multiply <strong>a</strong> by <strong>c</strong> as before, but watch the sign: a negative constant makes the product negative.",
+   "Find two numbers that multiply to that product and add to <strong>b</strong>. A negative product means one number is positive and one is negative.",
+   "Split the middle term and factorise in pairs, keeping every sign as you go."
+  ],
+  "example": {
+   "question": "Factorise \\(2x^2 + 3x - 5\\)",
+   "steps": [
+    {"label": "Target product", "content": "<p>\\(ac = 2 \\times (-5) = -10\\)</p>"},
+    {"label": "Factor pair", "content": "<p>Multiply to \\(-10\\), add to 3: \\(5\\) and \\(-2\\).</p>"},
+    {"label": "Split and group", "content": "<p>\\(2x^2 + 5x - 2x - 5 = x(2x+5) - 1(2x+5)\\)</p>"},
+    {"label": "Check", "content": "<p>Expand back: \\((x-1)(2x+5) = 2x^2 + 3x - 5\\)</p>"},
+    {"label": "Answer", "content": "<p><strong>\\((x-1)(2x+5)\\)</strong></p>", "isAnswer": True, "is_answer": True},
+   ],
+  },
+ },
+ "gold": {
+  "title": "Gold: large products and mixed signs",
+  "steps": [
+   "Multiply <strong>a</strong> by <strong>c</strong>. With larger leading numbers the product can be big, so list the factor pairs carefully.",
+   "Pick the pair that multiplies to \\(ac\\) and adds to <strong>b</strong>, choosing signs so the product and the sum both come out right.",
+   "Split, group in pairs, pull out the common bracket, then expand to check."
+  ],
+  "example": {
+   "question": "Factorise \\(6x^2 + 11x - 10\\)",
+   "steps": [
+    {"label": "Target product", "content": "<p>\\(ac = 6 \\times (-10) = -60\\)</p>"},
+    {"label": "Factor pair", "content": "<p>Multiply to \\(-60\\), add to 11: \\(15\\) and \\(-4\\).</p>"},
+    {"label": "Split and group", "content": "<p>\\(6x^2 + 15x - 4x - 10 = 3x(2x+5) - 2(2x+5)\\)</p>"},
+    {"label": "Check", "content": "<p>Expand back: \\((3x-2)(2x+5) = 6x^2 + 11x - 10\\)</p>"},
+    {"label": "Answer", "content": "<p><strong>\\((3x-2)(2x+5)\\)</strong></p>", "isAnswer": True, "is_answer": True},
+   ],
+  },
+ },
+}
+
+out = dict(live)  # preserve everything
+out["method_card"] = method_card
+out["problem_bank"] = pb
+out["tier_guides"] = tier_guides
+out["guided"] = {"opener": opener, "teach": teach}
+# related_videos, worked_examples, topic_links preserved from live as-is
+
+json.dump(out, io.open("lesson_maths-aqa_algebra-L06.json", "w", encoding="utf-8"),
+          indent=1, ensure_ascii=False)
+print("wrote lesson_maths-aqa_algebra-L06.json")
+# print solution positions to confirm variety
+for t in ("bronze","silver","gold"):
+    print(t, [p["solutions"][0] for p in pb[t]])

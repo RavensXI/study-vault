@@ -1,0 +1,34 @@
+# -*- coding: utf-8 -*-
+import json, io
+
+main = {
+ "key": "maths-aqa_algebra-L07",
+ "lesson_id": "80de6f33-3b1d-40af-9068-8e6fc132c36d",
+ "problems_fixed": [
+  {
+   "tier": "gold", "index": 1,
+   "what": "Unwinnable problem: root 2/3 is a recurring decimal stored as 0.667, but the two_solutions player uses STRICT equality (no tolerance), so no typed answer can ever match. Replaced with a clean-root a!=1 quadratic.",
+   "old": "Solve 3x^2 - 11x + 6 = 0  (roots 2/3, 3; stored [0.667, 3])",
+   "new": "Solve 5x^2 - 9x - 2 = 0  ((5x+1)(x-2); roots -0.2, 2)"
+  },
+  {
+   "tier": "gold", "index": 3,
+   "what": "Unwinnable problem: roots 4/3 and -3/2 are recurring/half decimals stored as 1.333 and -1.5; 4/3 cannot be typed to match the strict-equality two_solutions check. Replaced with a clean-root a!=1 quadratic.",
+   "old": "Solve 6x^2 + x - 12 = 0  (roots 4/3, -3/2; stored [-1.5, 1.333])",
+   "new": "Solve 4x^2 - 11x - 3 = 0  ((4x+1)(x-3); roots -0.25, 3)"
+  }
+ ],
+ "issues_resolved": 2,
+ "opener_concept": "Zero-product hook: two numbers multiply to 0 and one is 6, so the other MUST be 0. The reveal names the null-factor law and applies it to (x-4)(x-5)=0, setting each bracket to 0 to get x=4 and x=5. A student who has never met quadratics answers box 1 (6 x ? = 0) by pure common sense, and box 1 IS the key idea of the lesson.",
+ "notes": "Full guided conversion on the two_solutions bank (8 bronze / 7 silver / 5 gold). Fresh-solved all 20 quadratics with sympy: bronze and silver were all correct (integer roots); gold[1] and gold[3] were unwinnable under the player's strict-equality two_solutions matcher (recurring-decimal roots) and were replaced with clean-root a!=1 quadratics (verified factorisations and every guided box). Added tier_guides, guided.opener, guided.teach (one walk per tier showing the tier's new move: factorise-then-set-each-to-0 / rearrange-to-0-first / split-the-middle), guided_steps + plain-text hint + one honest-diagnosis misconception on every problem, and slimmed method_card (74 words). Every misconception expect derived by committing the named error (divide-by-x loses x=0; sign not flipped; DOTS forgets the negative root; a!=1 forgets to divide by the coefficient) and confirmed determinate and != the correct answer; s4 hint contains 'Rearrange' so the player's built-in not-rearranged fallback also fires. All bank/opener/teach boxes recomputed and land exactly on the stored solutions; no within-tier duplicate answers. worked_examples, topic_links, related_videos preserved byte-for-byte. No em dashes. Validator PASS."
+}
+json.dump(main, io.open("changes_maths-aqa_algebra-L07.json","w",encoding="utf-8"), indent=1, ensure_ascii=False)
+
+diagrams = {
+ "key": "maths-aqa_algebra-L07",
+ "figures_added": [],
+ "opener_touched": False,
+ "notes": "No figures added. Exam-realism test: 'Solving Quadratics by Factorising' is a purely textual algebra unit; every bank item is 'Solve (quadratic) = 0', which GCSE papers print as algebra, never as a diagram. No problem describes a shape, graph, tree, Venn, chart or grid, so neither the Chart.js nor the inline-SVG mechanism applies. The opener is the zero-product law posed with plain numbers and brackets (no figure claimed), so nothing is stated that a figure would need to show. Matches the textual-algebra sibling algebra-L05."
+}
+json.dump(diagrams, io.open("changes_maths-aqa_algebra-L07_diagrams.json","w",encoding="utf-8"), indent=1, ensure_ascii=False)
+print("wrote changes_maths-aqa_algebra-L07.json and changes_maths-aqa_algebra-L07_diagrams.json")

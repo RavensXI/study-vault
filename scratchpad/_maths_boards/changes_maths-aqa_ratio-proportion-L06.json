@@ -1,0 +1,43 @@
+{
+ "key": "ratio-proportion-L06",
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 1,
+   "what": "Duplicate answer within bronze (B1 avg rate = 2 collided with B3 f(3) = 2). Changed the line from y = 2x + 3 to y = 3x + 1 so the average rate of change is 3.",
+   "old": "y = 2x + 3 between x = 0 and x = 5, rate = 2",
+   "new": "y = 3x + 1 between x = 0 and x = 5, rate = 3"
+  },
+  {
+   "tier": "silver",
+   "index": 5,
+   "what": "Duplicate answer within silver (S6 f(1) = -1 collided with S1 f(2) = -1). Changed the equation from x^2 - 3x + 1 to x^2 - 4x + 1 (S5/S6 share the equation). f(0) stays 1; f(1) becomes -2. Root still lies between 0 and 1 (root 2 - sqrt3 = 0.268).",
+   "old": "x^2 - 3x + 1, f(0)=1, f(1)=-1",
+   "new": "x^2 - 4x + 1, f(0)=1, f(1)=-2"
+  },
+  {
+   "tier": "gold",
+   "index": 0,
+   "what": "Duplicate answer within gold (G0 and G4 both computed cube-root(13) = 2.351). Changed G0's start value from x0 = 2 to x0 = 3, so x1 = cube-root(18) = 2.621. G4 (the rearrangement problem) kept as the canonical cube-root(13).",
+   "old": "x0 = 2, x1 = cbrt(13) = 2.351",
+   "new": "x0 = 3, x1 = cbrt(18) = 2.621"
+  },
+  {
+   "tier": "gold",
+   "index": 1,
+   "what": "Rounding-boundary defect. f(1.5) = -0.625 exactly, so 'to 2 d.p.' is ambiguous (round-half-up gives -0.63, round-half-to-even gives -0.62). At the midpoint x = 1.5 an integer-coefficient cubic always lands on a .x25/.x75 boundary, so asking to 3 d.p. gives the exact value with no rounding.",
+   "old": "f(1.5) to 2 d.p., solution -0.63",
+   "new": "f(1.5) to 3 d.p., solution -0.625"
+  },
+  {
+   "tier": "gold",
+   "index": 1,
+   "what": "Revision fix (checker finding). misconceptions[0] (pattern dropped_linear) had a non-reproducing expect: stored -4.625 never equals the answer the named error produces, so the message could never fire and misdiagnosed. Committing the dropped-linear error (drop the +2x term) on f(1.5)=x^3+2x-7 gives 1.5^3 - 7 = 3.375 - 7 = -3.625. Set expect to -3.625 and rewrote the message, which was self-contradictory (claimed -4.625 then showed the fully-correct -0.625 working). New message names the -3.625 slip and shows putting +2x back to reach -0.625.",
+   "old": "expect -4.625, message '−4.625 forgets the +2x term. f(1.5) = 3.375 + 3 − 7 = −0.625.'",
+   "new": "expect -3.625, message '−3.625 forgets the +2x term. Put it back: f(1.5) = 3.375 + 3 − 7 = −0.625.'"
+  }
+ ],
+ "issues_resolved": 5,
+ "opener_concept": "A car is 20 km from home at 1 pm and 80 km at 3 pm. By common sense the student finds it travelled 60 km further over 2 hours, so 30 km/h on average. That IS the average rate of change: change in output over change in input, (f(b)-f(a))/(b-a), the gradient of the chord. An inline SVG distance-time graph shows the two points and the chord to scale.",
+ "notes": "Fresh-solved all 20 problems from display before touching anything. Every stored solution was mathematically correct; the only defects were three within-tier duplicate answers (the exact disease the board brief predicted) plus one rounding-boundary problem (G1). All fixed with minimal clean-integer/exact-decimal edits and full recompute of solutions, guided_steps and misconception expects. Converted every misconception from the old {check, message} format to honest-diagnosis {pattern, expect, message}: each expect committed by actually making the named error (null on the MC problem). Added guided_steps to all 19 non-MC problems with a phase:'substitute' completion boundary (setup pre-worked, solve-through and check live), tier_guides (bronze/silver/gold) within the 115-word budget, three teach walks on problems NOT in the bank (avg rate y=x^2 1 to 4; sign-change x^3-2x-5; iteration sqrt(2x+6)), tier descriptions, and slimmed method_card from 5 steps to 4. Every guided box independently recomputed and lands on the stored solution. No em dashes; British English; unicode symbols. Preserved topic_links, related_videos ([]) and worked_examples byte-for-byte (verified equal after PATCH). REVISION (checker pass): fixed the only reported defect, gold[1].misconceptions[0].expect (-4.625 -> -3.625, dropped_linear pattern) plus its incoherent message; all other checker items already PASS. Re-ran validator (PASS) and re-PATCHed live; expect and message confirmed on the live row, preservation re-verified."
+}
