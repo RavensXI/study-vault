@@ -225,12 +225,48 @@ def stage_plan(cfg):
         msg = stream.get_final_message()
 
     text = "".join(b.text for b in msg.content if b.type == "text")
-    rec = log_usage(cfg, "plan", MODEL_PLAN, "plan", msg.usage)
-    print("plan usage: in=%d out=%d searches=%s  ($%.3f)" % (
-        rec["input_tokens"], rec["output_tokens"], rec["web_searches"], cost_of(rec)))
-    plan = parse_json_reply(text)
-    write_json(os.path.join(cfg["run_dir"], "plan.json"), plan)
     io.open(os.path.join(cfg["run_dir"], "plan_raw.txt"), "w", encoding="utf-8").write(text)
+    io.open(os.path.join(cfg["run_dir"], "plan_msg_dump.json"), "w", encoding="utf-8").write(
+        json.dumps(msg.model_dump(), ensure_ascii=False, default=str))
+    rec = log_usage(cfg, "plan", MODEL_PLAN, "plan", msg.usage)
+    print("plan usage: in=%d out=%d searches=%s stop=%s blocks=%s  ($%.3f)" % (
+        rec["input_tokens"], rec["output_tokens"], rec["web_searches"],
+        msg.stop_reason, [b.type for b in msg.content][:12], cost_of(rec)))
+    try:
+        plan = parse_json_reply(text)
+    except (ValueError, json.JSONDecodeError):
+        # Opus with the 2026 search tool family sometimes builds the JSON in
+        # the bundled code-execution sandbox and cats it — hunt the tool
+        # result blocks for the largest parseable JSON object.
+        plan = None
+        for b in reversed(msg.model_dump()["content"]):
+            blob = json.dumps(b)
+            for candidate in re.findall(r'"stdout":\s*"', blob):
+                pass
+            def hunt(x):
+                if isinstance(x, dict):
+                    for v in x.values():
+                        r = hunt(v)
+                        if r:
+                            return r
+                elif isinstance(x, list):
+                    for it in x:
+                        r = hunt(it)
+                        if r:
+                            return r
+                elif isinstance(x, str) and x.lstrip().startswith("{") and len(x) > 5000:
+                    try:
+                        return json.loads(x[x.find("{"):x.rfind("}") + 1])
+                    except Exception:
+                        return None
+                return None
+            plan = hunt(b)
+            if plan:
+                print("plan recovered from a %s block" % b.get("type"))
+                break
+        if plan is None:
+            raise ValueError("no plan JSON found in any content block")
+    write_json(os.path.join(cfg["run_dir"], "plan.json"), plan)
     n_lessons = sum(len(u.get("lessons", [])) for u in plan.get("article_units", []))
     print("plan saved: %d units, %d lessons, gaps: %s" % (
         len(plan.get("article_units", [])), n_lessons, plan.get("gaps") or "none"))
