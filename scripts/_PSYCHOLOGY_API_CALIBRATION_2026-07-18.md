@@ -1,4 +1,29 @@
-# Psychology OCR (J203) — First API-Built Subject: Cost Calibration
+# Psychology API Builds (OCR J203 + Edexcel 1PS0): Cost Calibration
+
+## TWO-BOARD RESULT (the headline)
+
+| Board | Lessons | API cost | Per lesson | Notes |
+|---|---|---|---|---|
+| OCR J203 | 31 | **$35.00 (£27.65)** | $1.13 | First build — included two one-time mistakes |
+| Edexcel 1PS0 | 38 | **$23.57 (£18.62)** | **$0.62** | Clean build, both fixes applied |
+
+**Board two is the real number for a de-risked build: ~$0.62/lesson, so a typical
+30-lesson subject ≈ $18-19 ≈ £15 on the API** (plus ~£4 Azure narration, £0 heroes
+via index reuse). Both boards together were **$58.57 (~£46)** of the $100 top-up —
+three-board Psychology (AQA already existed) for under half the budget.
+
+A note on honesty: my in-run cost meter first showed Edexcel at $87 because a
+polling loop re-collected the same finished batch ~14 times and my ledger counted
+each re-read as fresh spend. **Anthropic only ever billed the batch once** — the
+$23.57 is the true figure after deduplicating byte-identical re-reads. I fixed the
+underlying bug (poll stages were saving a stale state snapshot that wiped the
+"already collected" marker) and added a dedup safety net, so the meter now matches
+the invoice. It's a good reminder to reconcile the driver's ledger against the
+Console's actual usage number before trusting either build's figure.
+
+---
+
+# Psychology OCR (J203) — First API-Built Subject: detail
 
 **Built 18 July 2026** entirely through the Anthropic **API** (not the Claude Code
 subscription) via a new deterministic Batch-API driver
