@@ -969,37 +969,50 @@ def stage_media(cfg):
     media_doc = read(os.path.join(cfg["docs_dir"], "RELATED_MEDIA_PIPELINE.md"))
     system = [{"type": "text", "text":
                "You are the related-media curation agent for StudyVault, a GCSE revision "
-               "platform. Follow the pipeline doc below exactly — especially the URL "
-               "verification rules (oembed for YouTube, body-check for JustWatch, hub "
-               "paths only for Bitesize). Use web_search to find candidates and "
-               "web_fetch to verify EVERY url before returning it. Do NOT include a "
-               "'Lesson Podcast' item — the platform injects that separately.\n\n"
+               "platform. Follow the pipeline doc below for category structure, ordering, "
+               "and source guidance. Use web_search (a few searches) to find REAL, "
+               "currently-existing content — established podcasts, real YouTube channels/"
+               "videos, real films/documentaries on JustWatch UK, BBC Bitesize hub pages. "
+               "Do NOT exhaustively fetch and open every candidate — a downstream Python "
+               "auditor verifies and prunes every URL (oembed for YouTube, body-check for "
+               "JustWatch, hub-paths for Bitesize), so your job is breadth of plausible "
+               "real candidates, not per-URL verification. Return slightly MORE than the "
+               "minimum per category so the auditor has margin after pruning. Do NOT "
+               "include a 'Lesson Podcast' item — the platform injects that separately.\n\n"
                + media_doc,
                "cache_control": {"type": "ephemeral", "ttl": "1h"}}]
     cl = client()
     reqs = []
+    st = load_state(cfg)
+    # Self-healing: skip lessons that already have usable media on file.
+    existing = {}
+    mpath = os.path.join(cfg["run_dir"], "related_media.json")
+    if os.path.exists(mpath):
+        existing = json.load(io.open(mpath, encoding="utf-8"))
     for u in plan["article_units"]:
         for l in u["lessons"]:
             cid = lesson_key(u["slug"], l["number"])
+            if cid in existing:
+                continue
             user = ("SUBJECT: GCSE %s\nUNIT: %s\nLESSON: %s\nLESSON COVERS: %s\n\n"
-                    "Find, verify, and return the related media as a JSON object "
+                    "Find and return the related media as a JSON object "
                     "{\"related_media\": [{\"category\": ..., \"items\": [{\"title\", \"url\", "
-                    "\"description\"}]}]} with categories in the canonical order. Meet the "
-                    "required minimums (>=6 items, >=1 podcast, >=1 video, >=1 of "
-                    "movies/TV/documentaries, >=1 study tool). Plain unicode in titles and "
-                    "descriptions, no HTML entities. Return ONLY the JSON."
+                    "\"description\"}]}]} with categories in the canonical order. Provide "
+                    ">=2 per category where sensible so >=8 items total survive pruning, "
+                    "covering: podcasts, videos/channels, at least one of movies/TV/"
+                    "documentaries, and study tools. Plain unicode in titles and "
+                    "descriptions, no HTML entities. Once you have candidates, STOP "
+                    "searching and output ONLY the JSON."
                     % (cfg["subject_name"], u["name"], l["title"], l.get("description", "")))
             reqs.append({"custom_id": cid, "params": {
-                "model": MODEL_CONTENT, "max_tokens": 4000,
+                "model": MODEL_CONTENT, "max_tokens": 10000,
                 "tools": [
-                    {"type": "web_search_20260209", "name": "web_search", "max_uses": 10},
-                    {"type": "web_fetch_20260209", "name": "web_fetch", "max_uses": 14},
+                    {"type": "web_search_20260209", "name": "web_search", "max_uses": 5},
                 ],
                 "system": system,
                 "messages": [{"role": "user", "content": user}],
             }})
     batch = cl.messages.batches.create(requests=reqs)
-    st = load_state(cfg)
     st["media_batch_id"] = batch.id
     save_state(cfg, st)
     print("media batch submitted:", batch.id, "requests:", len(reqs))
@@ -1011,7 +1024,8 @@ def stage_pollmedia(cfg):
     if out is None:
         return
     texts, errors = out
-    media = {}
+    mpath = os.path.join(cfg["run_dir"], "related_media.json")
+    media = json.load(io.open(mpath, encoding="utf-8")) if os.path.exists(mpath) else {}
     problems = {}
     for cid, text in sorted(texts.items()):
         try:
