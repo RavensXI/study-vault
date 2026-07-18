@@ -127,6 +127,7 @@
     ],
     'psychology': [
       { board: 'AQA', slug: 'psychology-aqa' },
+      { board: 'Edexcel', slug: 'psychology-edexcel' },
       { board: 'OCR', slug: 'psychology-ocr' }
     ],
     'french': [
