@@ -2,39 +2,42 @@
 
 ## TWO-BOARD RESULT (the headline) — GROUND TRUTH IS THE CONSOLE
 
-**Actual spend for BOTH boards, from the Anthropic Console: $29.18**
-($100 top-up → $70.82 remaining, 18 Jul). That is 69 lessons across two boards
-for **~$0.42/lesson**. A typical clean 30-lesson subject is therefore **≈ $9-13
-on the API ≈ £7-10** (plus ~£4 Azure narration, £0 heroes via index reuse).
-Three-board Psychology (AQA already existed) came in under a third of the budget.
+**Final actual spend for BOTH boards, from the Anthropic Console: $31.29**
+($100 top-up → $68.71 remaining, settled figure ~24h later, 19 Jul). That is 69
+lessons across two boards for **~$0.45/lesson**. A typical clean 30-lesson subject is
+therefore **≈ $13-14 on the API ≈ £11** (plus ~£3 Azure narration, £0 heroes via
+index reuse). Three-board Psychology (AQA already existed) came in at under a third
+of the budget.
 
 **Do not trust the driver's internal cost ledger — reconcile against the Console.**
-My in-run meter reported **$58.57**, exactly 2.0× the Console. Two separate errors
-compounded here:
+My in-run meter reported **$58.57 — exactly 1.87× the settled Console figure.** Two
+separate errors:
 1. A polling loop re-collected finished batches many times and re-ledgered each
    read as fresh spend (meter briefly showed a phantom $87). Fixed: poll stages
    reload state after `collect_batch`; plus a token-identity dedup. After that the
    record count was exactly right (every real API call, no duplicates).
-2. Even with correct record counts, the ledger still read 2× the Console. The
-   per-record arithmetic matches Anthropic's published rates, so the residual 2× is
-   either Batch API charges still settling (batch billing posts asynchronously) or a
-   systematic error in how the formula prices server-tool-heavy calls
-   (plan/fact-check/media). **Unresolved from our side — the messages key can't read
-   the Cost API (admin-key gated).** The Console is authoritative.
+2. Even with correct record counts, the ledger still reads ~1.9× the Console.
+   **This is now confirmed to be a formula error, NOT batch-billing lag** — the
+   Console moved only $2.11 (from $29.18 to $31.29) over ~24h, so charges had
+   essentially posted already. The per-record arithmetic matches published rates
+   individually, so the over-count is in how the formula aggregates server-tool-heavy
+   calls (plan/fact-check/media output tokens, web-search, or cache accounting).
+   **TODO: fix `cost_of()` before quoting any future build from the meter.** The
+   messages key can't read the admin Cost API to introspect, so the fix is empirical:
+   reconcile one stage at a time against a Console delta.
 
-Net: the real cost is **at most $29.18 and possibly still settling** — in every case
-≤ what the meter claims, so the business conclusion (API generation is cheap) only
-gets stronger. The per-board and per-stage tables below show the *relative shape*
-(media and fact-check are the costly stages) but their absolute dollar values run
-~2× high; halve them for a Console-grounded estimate.
+Net: the real, settled cost is **$31.29 for both boards** — the business conclusion
+(API generation is cheap) stands firm on a settled number now, not an estimate. The
+per-board and per-stage tables below show the *relative shape* (media and fact-check
+are the costly stages) but their absolute dollar values run ~1.9× high.
 
-### Meter figures (shape only — ~2× the real Console spend)
+### Meter figures (shape only — ~1.9× the real Console spend)
 
-| Board | Lessons | Meter (≈2× high) | Console-grounded ≈ |
+| Board | Lessons | Meter (≈1.9× high) | Console-grounded ≈ |
 |---|---|---|---|
-| OCR J203 | 31 | $35.00 | ~$17.5 |
-| Edexcel 1PS0 | 38 | $23.57 | ~$11.8 |
-| **Both** | 69 | $58.57 | **$29.18 (Console)** |
+| OCR J203 | 31 | $35.00 | ~$18.7 |
+| Edexcel 1PS0 | 38 | $23.57 | ~$12.6 |
+| **Both** | 69 | $58.57 | **$31.29 (Console, settled)** |
 
 ---
 
