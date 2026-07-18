@@ -912,6 +912,222 @@ def stage_pollapplyfixes(cfg):
         print("errored:", errors)
 
 
+# ---------------------------------------------------------------- stage: media
+
+MEDIA_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "related_media": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "category": {"type": "string",
+                                 "enum": ["Podcasts", "Videos & Channels", "Movies",
+                                          "TV Shows", "Documentaries", "Study Tools"]},
+                    "items": {"type": "array", "items": {
+                        "type": "object",
+                        "properties": {"title": {"type": "string"},
+                                       "url": {"type": "string"},
+                                       "description": {"type": "string"}},
+                        "required": ["title", "url", "description"],
+                        "additionalProperties": False}},
+                },
+                "required": ["category", "items"],
+                "additionalProperties": False,
+            },
+        }
+    },
+    "required": ["related_media"],
+    "additionalProperties": False,
+}
+
+
+def stage_media(cfg):
+    plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
+    media_doc = read(os.path.join(cfg["docs_dir"], "RELATED_MEDIA_PIPELINE.md"))
+    system = [{"type": "text", "text":
+               "You are the related-media curation agent for StudyVault, a GCSE revision "
+               "platform. Follow the pipeline doc below exactly — especially the URL "
+               "verification rules (oembed for YouTube, body-check for JustWatch, hub "
+               "paths only for Bitesize). Use web_search to find candidates and "
+               "web_fetch to verify EVERY url before returning it. Do NOT include a "
+               "'Lesson Podcast' item — the platform injects that separately.\n\n"
+               + media_doc,
+               "cache_control": {"type": "ephemeral", "ttl": "1h"}}]
+    cl = client()
+    reqs = []
+    for u in plan["article_units"]:
+        for l in u["lessons"]:
+            cid = lesson_key(u["slug"], l["number"])
+            user = ("SUBJECT: GCSE %s\nUNIT: %s\nLESSON: %s\nLESSON COVERS: %s\n\n"
+                    "Find, verify, and return the related media as a JSON object "
+                    "{\"related_media\": [{\"category\": ..., \"items\": [{\"title\", \"url\", "
+                    "\"description\"}]}]} with categories in the canonical order. Meet the "
+                    "required minimums (>=6 items, >=1 podcast, >=1 video, >=1 of "
+                    "movies/TV/documentaries, >=1 study tool). Plain unicode in titles and "
+                    "descriptions, no HTML entities. Return ONLY the JSON."
+                    % (cfg["subject_name"], u["name"], l["title"], l.get("description", "")))
+            reqs.append({"custom_id": cid, "params": {
+                "model": MODEL_CONTENT, "max_tokens": 4000,
+                "tools": [
+                    {"type": "web_search_20260209", "name": "web_search", "max_uses": 10},
+                    {"type": "web_fetch_20260209", "name": "web_fetch", "max_uses": 14},
+                ],
+                "system": system,
+                "messages": [{"role": "user", "content": user}],
+            }})
+    batch = cl.messages.batches.create(requests=reqs)
+    st = load_state(cfg)
+    st["media_batch_id"] = batch.id
+    save_state(cfg, st)
+    print("media batch submitted:", batch.id, "requests:", len(reqs))
+
+
+def stage_pollmedia(cfg):
+    st = load_state(cfg)
+    out = collect_batch(cfg, st["media_batch_id"], "media", "raw_media")
+    if out is None:
+        return
+    texts, errors = out
+    media = {}
+    problems = {}
+    for cid, text in sorted(texts.items()):
+        try:
+            obj = parse_json_reply(text)
+            rm = obj["related_media"]
+            n = sum(len(c["items"]) for c in rm)
+            cats = {c["category"] for c in rm}
+            probs = []
+            if n < 6:
+                probs.append("only %d items" % n)
+            if "Podcasts" not in cats:
+                probs.append("no Podcasts")
+            if "Videos & Channels" not in cats:
+                probs.append("no Videos")
+            if "Study Tools" not in cats:
+                probs.append("no Study Tools")
+            if not cats & {"Movies", "TV Shows", "Documentaries"}:
+                probs.append("no Movies/TV/Docs")
+            media[cid] = rm
+            if probs:
+                problems[cid] = probs
+        except Exception as e:
+            problems[cid] = ["parse: %s" % e]
+    write_json(os.path.join(cfg["run_dir"], "related_media.json"), media)
+    st["media_problems"] = problems
+    save_state(cfg, st)
+    print("media collected for %d lessons; coverage problems: %s"
+          % (len(media), problems or "none"))
+    if errors:
+        print("errored:", errors)
+
+
+def stage_insertmedia(cfg):
+    """PATCH related_media onto lesson shells (with Lesson Podcast placeholder)."""
+    st = load_state(cfg)
+    plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
+    media = json.load(io.open(os.path.join(cfg["run_dir"], "related_media.json"), encoding="utf-8"))
+    units = supa(cfg, "GET", "/rest/v1/units?subject_id=eq.%s&select=id,slug" % st["subject_id"])
+    uid = {u["slug"]: u["id"] for u in units}
+    n = 0
+    for u in plan["article_units"]:
+        for l in u["lessons"]:
+            cid = lesson_key(u["slug"], l["number"])
+            if cid not in media:
+                continue
+            rm = media[cid]
+            pod = next((c for c in rm if c["category"] == "Podcasts"), None)
+            placeholder = {"url": None, "title": "Lesson Podcast",
+                           "description": "Audio overview of this lesson."}
+            if pod:
+                pod["items"].insert(0, placeholder)
+            else:
+                rm.insert(0, {"category": "Podcasts", "items": [placeholder]})
+            supa(cfg, "PATCH", "/rest/v1/lessons?unit_id=eq.%s&lesson_number=eq.%s"
+                 % (uid[u["slug"]], l["number"]), {"related_media": rm})
+            n += 1
+    print("related_media patched onto %d lessons" % n)
+
+
+# ---------------------------------------------------------------- stage: guides
+
+def stage_guides(cfg):
+    """Copy source-board guide pages, rewrite links, batch-adapt examples that
+    reference topics absent from this board's spec."""
+    plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
+    src = supa(cfg, "GET", "/rest/v1/subjects?slug=eq.%s&select=id" % cfg["source_subject_slug"])
+    guides = supa(cfg, "GET",
+                  "/rest/v1/guide_pages?subject_id=eq.%s&select=slug,guide_type,title,sort_order,content_html&order=sort_order"
+                  % src[0]["id"])
+    topics = [u["name"] for u in plan["article_units"]]
+    lesson_titles = [l["title"] for u in plan["article_units"] for l in u["lessons"]]
+    cl = client()
+    reqs = []
+    passthrough = {}
+    for g in guides:
+        html = g["content_html"].replace("/guide/%s/" % cfg["source_subject_slug"],
+                                         "/guide/%s/" % cfg["slug"])
+        if g["slug"] == "index":
+            passthrough[g["slug"]] = dict(g, content_html=html)
+            continue
+        user = (
+            "This is a revision-technique guide page for GCSE %s. It was written for a "
+            "different exam board's version of the subject. This board's topic list is:\n%s\n"
+            "Lesson titles available on this board:\n%s\n\n"
+            "TASK: The pedagogy text is canonical — do not touch it. ONLY adjust the "
+            "subject worked examples: if an example references a topic NOT on this "
+            "board's topic list above (e.g. visual illusions/perception, topics from "
+            "another board), replace that example with an equivalent using one of this "
+            "board's topics, matching the original example's depth and format. If every "
+            "example already fits this board's topics, return the HTML unchanged. Keep "
+            "ALL HTML structure, classes, and entity usage identical. Return ONLY the "
+            "full HTML, no code fences, no commentary.\n\nGUIDE HTML:\n%s"
+        ) % (cfg["subject_name"], json.dumps(topics), json.dumps(lesson_titles), html)
+        reqs.append({"custom_id": "guide-" + g["slug"], "params": {
+            "model": MODEL_CONTENT, "max_tokens": 16000,
+            "messages": [{"role": "user", "content": user}],
+        }})
+        passthrough[g["slug"]] = dict(g, content_html=html)
+    write_json(os.path.join(cfg["run_dir"], "guides_base.json"), passthrough)
+    batch = cl.messages.batches.create(requests=reqs)
+    st = load_state(cfg)
+    st["guides_batch_id"] = batch.id
+    save_state(cfg, st)
+    print("guides batch submitted:", batch.id, "(%d technique pages + index passthrough)" % len(reqs))
+
+
+def stage_pollguides(cfg):
+    st = load_state(cfg)
+    out = collect_batch(cfg, st["guides_batch_id"], "guides", "raw_guides")
+    if out is None:
+        return
+    texts, errors = out
+    base = json.load(io.open(os.path.join(cfg["run_dir"], "guides_base.json"), encoding="utf-8"))
+    rows = []
+    for slug, g in base.items():
+        html = g["content_html"]
+        key = "guide-" + slug
+        if key in texts:
+            t = texts[key].strip()
+            if t.startswith("```"):
+                t = re.sub(r"^```[a-zA-Z]*\s*", "", t)
+                t = re.sub(r"\s*```$", "", t)
+            if "<main" in t:
+                html = t
+        rows.append({"subject_id": st["subject_id"], "slug": slug,
+                     "guide_type": g["guide_type"], "title": g["title"],
+                     "sort_order": g["sort_order"], "content_html": html})
+    existing = supa(cfg, "GET", "/rest/v1/guide_pages?subject_id=eq.%s&select=slug" % st["subject_id"])
+    if existing:
+        print("ABORT: %d guide rows already exist for this subject" % len(existing))
+        return
+    supa(cfg, "POST", "/rest/v1/guide_pages", rows)
+    print("inserted %d guide pages (%s)" % (len(rows), ", ".join(r["slug"] for r in rows)))
+    if errors:
+        print("errored:", errors)
+
+
 # ---------------------------------------------------------------- stage: insert
 
 def stage_insert(cfg):
@@ -985,6 +1201,8 @@ STAGES = {
     "fix": stage_fix, "pollfix": stage_pollfix,
     "factcheck": stage_factcheck, "pollfactcheck": stage_pollfactcheck,
     "applyfixes": stage_applyfixes, "pollapplyfixes": stage_pollapplyfixes,
+    "media": stage_media, "pollmedia": stage_pollmedia, "insertmedia": stage_insertmedia,
+    "guides": stage_guides, "pollguides": stage_pollguides,
     "insert": stage_insert, "costs": stage_costs,
 }
 
