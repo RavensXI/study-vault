@@ -764,6 +764,8 @@ def stage_pollfix(cfg):
 
 FACTCHECK_SYSTEM = """You are fact-checking a GCSE Psychology revision lesson before publication. Students sit real exams on this material — factual errors cost marks.
 
+BOARD CONTEXT: the user message states which exam board this lesson targets and lists that board's registered question tariffs. Do NOT flag question mark tariffs, command words, or question formats that match the stated board — different boards use different tariffs, and judging this lesson by another board's format is a false positive.
+
 VERIFY WITH WEB SEARCH every checkable claim:
 - Named studies: researcher names, year, procedure, findings, sample details (e.g. a study's condition counts, percentages, age ranges)
 - Named theories and their attribution (the theorist actually proposed what the lesson says)
@@ -795,6 +797,7 @@ An empty findings array means the lesson verified clean."""
 
 def stage_factcheck(cfg):
     st = load_state(cfg)
+    plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
     lessons_dir = os.path.join(cfg["run_dir"], "lessons")
     cl = client()
     reqs = []
@@ -804,8 +807,11 @@ def stage_factcheck(cfg):
                    ("content_html", "exam_tip_html", "conclusion_html",
                     "knowledge_checks", "flashcard_questions", "glossary_terms",
                     "practice_questions")}
-        user = ("LESSON: %s\n\n%s\n\nFact-check this lesson. Return the findings JSON."
-                % (cid, json.dumps(payload, ensure_ascii=False)))
+        user = ("LESSON: %s\nTARGET BOARD: %s GCSE %s — question tariffs on this board: %s\n\n"
+                "%s\n\nFact-check this lesson. Return the findings JSON."
+                % (cid, cfg["exam_board"], cfg["subject_name"],
+                   " | ".join(plan.get("question_type_names", [])),
+                   json.dumps(payload, ensure_ascii=False)))
         reqs.append({"custom_id": cid, "params": {
             "model": MODEL_FACTCHECK, "max_tokens": 8000,
             "tools": [{"type": "web_search_20260209", "name": "web_search", "max_uses": 8}],
