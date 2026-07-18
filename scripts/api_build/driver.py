@@ -684,6 +684,7 @@ def stage_poll(cfg):
     out = collect_batch(cfg, st["content_batch_id"], "content", "raw_content")
     if out is None:
         return
+    st = load_state(cfg)  # reload: collect_batch wrote collected_batches; don't clobber it
     texts, errors = out
     for cid, text in texts.items():
         io.open(os.path.join(cfg["run_dir"], "raw_content", cid + ".txt"), "w",
@@ -744,6 +745,7 @@ def stage_pollfix(cfg):
     out = collect_batch(cfg, st["fix_batch_id"], "content-fix", "raw_content")
     if out is None:
         return
+    st = load_state(cfg)  # reload: collect_batch wrote collected_batches; don't clobber it
     texts, errors = out
     for cid, text in texts.items():
         io.open(os.path.join(cfg["run_dir"], "raw_content", cid + ".txt"), "w",
@@ -1023,6 +1025,7 @@ def stage_pollmedia(cfg):
     out = collect_batch(cfg, st["media_batch_id"], "media", "raw_media")
     if out is None:
         return
+    st = load_state(cfg)  # reload: collect_batch wrote collected_batches; don't clobber it
     texts, errors = out
     mpath = os.path.join(cfg["run_dir"], "related_media.json")
     media = json.load(io.open(mpath, encoding="utf-8")) if os.path.exists(mpath) else {}
