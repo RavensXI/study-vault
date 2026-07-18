@@ -550,7 +550,10 @@ def stage_prep(cfg):
                 "custom_id": lesson_key(u["slug"], l["number"]),
                 "params": {
                     "model": MODEL_CONTENT,
-                    "max_tokens": 16000,
+                    # Sonnet 5 runs adaptive thinking by default; it bills
+                    # against max_tokens (~10-14k/lesson observed) on top of
+                    # the ~4-8k lesson JSON. 16000 truncated 23/31 lessons.
+                    "max_tokens": 32000,
                     "system": system,
                     "messages": [{"role": "user", "content": user}],
                 },
@@ -705,7 +708,11 @@ def stage_fix(cfg):
     for cid in sorted(set(list(failures) + errored)):
         base = by_id[cid]
         user = base["params"]["messages"][0]["content"]
-        if cid in failures:
+        parse_only = cid in failures and all(
+            p.startswith("JSON parse error") for p in failures[cid])
+        if parse_only:
+            pass  # truncated attempt — clean re-run with the raised cap
+        elif cid in failures:
             raw_path = os.path.join(cfg["run_dir"], "raw_content", cid + ".txt")
             prev = read(raw_path) if os.path.exists(raw_path) else ""
             user += ("\n\nYOUR PREVIOUS ATTEMPT FAILED VALIDATION. Violations:\n- "
@@ -889,7 +896,7 @@ def stage_applyfixes(cfg):
                 "CORRECTIONS:\n%s\n\nLESSON JSON:\n%s\n\n"
                 "Return the complete corrected lesson JSON only, no code fences."
                 % (json.dumps(fl, ensure_ascii=False), json.dumps(obj, ensure_ascii=False)))
-        p = {"model": MODEL_CONTENT, "max_tokens": 16000,
+        p = {"model": MODEL_CONTENT, "max_tokens": 32000,
              "messages": [{"role": "user", "content": user}]}
         if st.get("use_structured", True):
             p = try_structured(p)
