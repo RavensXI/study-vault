@@ -1,0 +1,28 @@
+{
+  "key": "physics-calculations-L01@087ba4e3f7",
+  "canonical_id": "e68bcd00-8b3f-47d3-9a5b-e327a9ddde48",
+  "rows_patched": 2,
+  "all_row_ids": [
+    "e68bcd00-8b3f-47d3-9a5b-e327a9ddde48",
+    "3848d92a-26c5-4ebf-a4d4-7f55b392e888"
+  ],
+  "problems_fixed": [
+    {"tier": "bronze", "index": 7, "what": "duplicate solution 150 J with bronze[2] (both W=Fd). Changed distance 5 m to 4 m so W = 30 x 4 = 120 J, unique in tier. Recomputed guided_steps and misconception message.", "old": 150, "new": 120},
+    {"tier": "silver", "index": 3, "what": "duplicate solution 20 m/s with silver[5]. Changed KE 40 J to 10 J so v = sqrt(2*10/0.2) = 10 m/s, unique in tier. Recomputed guided_steps, hint, expect.", "old": 20, "new": 10}
+  ],
+  "issues_resolved": 2,
+  "figures_added": 0,
+  "opener_concept": "Kinetic energy v-squared: two identical bumper cars, one twice as fast as the other. Student divides speeds (x2), squares the factor (=4), and the reveal names E_k = 1/2 m v^2 - double the speed is FOUR times the energy and damage, not twice.",
+  "em_dashes_fixed": [
+    "method_card.content (rewritten and slimmed to <=140 words)",
+    "exam_context.frequency: 'High — ...' -> 'High: ...'",
+    "worked_examples: all 8 'Step N — label' labels -> 'Step N: label'"
+  ],
+  "misconceptions": "Added an 'expect' key to every misconception (validator-required). Expects derived by committing the named error and confirmed to sit outside each problem's accept window: e.g. forgot_square drops the square (KE 9->3, 80->20, 240000->12000), forgot_half drops the half (9->18, 80->160, 240000->480000), unit_error uses g=9.8 on GPE (200->196, 60->58.8, 4500->4410) or leaves grams unconverted (h 18->0.018), inverse_error multiplies instead of dividing (P 30->12000, 300->7500; G3 1600->57600), forgot_step stops at the energy on two-step power problems (1000->30000, 1600->9600, 450->1800), forgot_square on 'find v' stops at v-squared (10->100, 20->400, 30->900), forgot_square on braking-force drops the square (10800->360). Non-determinate warnings (wrong_equation reminders, forgot_rearrange framing) set expect=null so they never mis-fire.",
+  "added_fields": "tier_guides (bronze/silver/gold with slim reference + stepped example), guided.opener (v-squared hook), guided.teach.{bronze,silver,gold} walks (5/4/5 boxes, all off-bank), guided_steps on all 19 bank problems (phase:substitute boundary leaves the compute + check to the student, >=2 live boxes), problem_bank.{tier}_description, plain-text hint on every problem, accept + higher_only:false on every problem.",
+  "board_neutrality": "No board names anywhere. g = 10 N/kg is stated in the problem displays themselves, so 'this lesson uses g = 10' is a problem fact, not a board claim. equation_hint recall toggles kept byte-for-byte on the 14 bronze/silver problems that had them.",
+  "ladder_notes": "Bank ladder mostly matches Bronze(one-step)/Silver(rearrange-or-convert)/Gold(two-step). Two mild mismatches noted, NOT reordered per spec: silver[2] (75 kg x 6 m GPE) is a straight one-step GPE that reads bronze-level; silver[4] (crane, GPE then power) is a genuine two-step that reads gold-level. Left in place to preserve row identity.",
+  "verification": "Every solution independently re-solved from the display (g=10 as stated); every guided box, opener box and teach box recomputed; final/check boxes land exactly on stored solutions; no within-tier duplicate solutions remain; every expect outside its accept window; validator PASS on authored shard and on the live canonical row; both all_row_ids confirmed byte-identical to the authored practice_data after PATCH.",
+  "notes": "No electricity/circuit or graph problems in this bank, so no SVG/chart figures were warranted (figures_added = 0). worked_examples, exam_context, topic_links, related_videos preserved apart from the mandatory em-dash style fixes and the method_card slim-down.",
+  "revision_2026-07-18": "CONTENT-CLOBBER RECOVERY. An independent check found the live rows (e68bcd00, 3848d92a) had been transiently overwritten with L03 'Circuit Calculations' practice_data while retaining the Energy title/slug. Re-solved and re-validated the authored Energy shard (all 20 problems solve exactly: KE=1/2mv^2, GPE=mgh, W=Fd, P=E/t, g=10 per displays; bronze[7]=120 J and silver[3]=10 m/s dedup fixes intact), then re-PATCHed BOTH all_row_ids from lesson_physics-calculations-L01@087ba4e3f7.json. Post-patch: both rows return 204, both sorted-byte-identical to authored shard, canonical==propagation byte-identical, validator PASS on the live canonical row. Audited the L03 circuit worker's recorded patch list (_patch_mine330.py + changes_physics-calculations-L03@330faf0468.json): it patches ONLY b2dd6adb + ffdd38c1 and does NOT reference the Energy IDs, so the saved scripts are clean; the clobber was an unsaved/ad-hoc write since reverted. Energy content is now durably live and correctly propagated."
+}

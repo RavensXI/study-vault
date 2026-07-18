@@ -1,0 +1,61 @@
+{
+ "key": "chemistry-calculations-L04@6f3d09988e",
+ "title": "Rates from Graphs and Concentrations",
+ "canonical_id": "1563a319-bb93-438e-9b64-e079bd7e410a",
+ "rows_patched": 2,
+ "all_row_ids": [
+  "1563a319-bb93-438e-9b64-e079bd7e410a",
+  "ea8d64f3-4cf2-4568-afe6-d4d41d065f55"
+ ],
+ "problems_fixed": [
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "Duplicate solution value [2] within bronze tier (clashed with bronze[1] = 2 cm3/s). Changed volume 0.25 dm3 -> 0.2 dm3 so 0.5/0.2 = 2.5 mol/dm3, a clean unique answer; recomputed inverse_error expect (0.4) and message.",
+   "old": "0.5 mol in 0.25 dm3 -> 2 mol/dm3",
+   "new": "0.5 mol in 0.2 dm3 -> 2.5 mol/dm3"
+  },
+  {
+   "tier": "all",
+   "index": -1,
+   "what": "Every misconception was missing the required 'expect' key (validator hard-fail). Added a derived expect to all 13 misconceptions by committing the named error: inverse_error = b/a divides; unit_error = skipped cm3->dm3 conversion; forgot_step = used mass instead of moles. Rewrote each message to actually diagnose the error rather than restate the method. gold[1] ratio-inversion set expect:null (inverse 5/1.5 = 3.33... non-terminating, unreliable at the +/-0.005 box tolerance).",
+   "old": "misconceptions had pattern/check/message but no expect",
+   "new": "expect present on all; each verified outside the accept window"
+  },
+  {
+   "tier": "gold",
+   "index": -1,
+   "what": "gold[0..2] had neither 'hint' nor 'equation_hint' (validator hard-fail). Added a plain-text 'hint' to each gold problem.",
+   "old": "no hint / no equation_hint on gold",
+   "new": "plain hint added to gold[0], gold[1], gold[2]"
+  },
+  {
+   "tier": "method_card",
+   "index": -1,
+   "what": "method_card.content and exam_context.frequency and worked_examples step labels contained em dashes (validator hard-fail, student-facing). Rewrote content to a slim <=140-word reference (74 words) with no em dashes; frequency 'Medium-High. Rate and concentration...'; step labels 'Step N: ...'.",
+   "old": "em dashes in content, frequency, worked_examples labels",
+   "new": "em dashes removed; content slimmed to 74 words"
+  }
+ ],
+ "figures_added": [
+  {
+   "tier": "silver",
+   "index": 3,
+   "kind": "chart",
+   "what": "Problem states 'A rate-of-reaction graph shows 30 cm3 in the first 10 s ... completes at 50 cm3 after 40 s'. Added a Chart.js line chart, points (t,V) = (0,0),(10,30),(20,42),(30,48),(40,50),(50,50). First-10s slice yields 30/10 = 3 cm3/s (the stored answer); plateau at 50 cm3 by t=40 matches 'completes'. Axes: Time (s) vs Volume of gas (cm3), theme-neutral blue."
+  }
+ ],
+ "guided_added": {
+  "opener_concept": "A tap fills a bucket (12 L in 4 s -> 3 L/s) then 6 g sugar in 2 L -> 3 g/L: the same amount-over-something move named as rate (amount/time) then concentration (amount/volume). Common sense first, notation second; dm3/cm3 unit note in the reveal.",
+  "teach_walks": "bronze (45 cm3 / 15 s = 3 cm3/s), silver (6 g / 300 cm3 -> 20 g/dm3, unit-conversion box), gold (1.17 g NaCl Mr 58.5 / 100 cm3 -> 0.2 mol/dm3, moles-then-concentration). None reuse a bank problem; each >= 4 numeric boxes.",
+  "tier_guides": "bronze 'one step, right units'; silver 'convert or rearrange first'; gold 'chain two steps'. Each has a worked stepped example. Ladder matches the actual bank.",
+  "guided_steps": "Added to all 13 bank problems. Walk ritual: equation say-step -> explicit cm3->dm3 conversion box where units are not base -> substitute -> phase:'substitute' compute boundary (>=2 live boxes) -> check box + final answer stated WITH unit in the say/done. equation_hint fields preserved verbatim."
+ },
+ "verification": {
+  "bank": "All 13 problems fresh-solved from display; every stored solution correct. bronze[0]48/12=4, bronze[1]60/30=2, bronze[2]250cm3=0.25dm3, bronze[3]3.6/0.2=18, bronze[4](edited)0.5/0.2=2.5, bronze[5]0.4x0.5=0.2; silver[0]1.5x40=60, silver[1]0.4/0.5=0.8, silver[2]0.1/2=0.05, silver[3]30/10=3; gold[0]5.85/58.5=0.1 then /0.25=0.4, gold[1]1.5/5=0.3, gold[2]0.05/0.1=0.5dm3=500cm3.",
+  "boxes": "Every guided/opener/teach box recomputed; each problem's compute box lands on the stored solution (gold[2] final box=500 after dm3->cm3).",
+  "board_neutral": "No board named; no 'equation sheet'/'must memorise' claims. Shared across science-ocr-b + separate-sciences-ocr-b.",
+  "propagation": "Both all_row_ids re-fetched post-patch: byte-identical; live canonical passes _validate_guided.py."
+ },
+ "notes": "Kept tier sizes (bronze 6 / silver 4 / gold 3) and all input_types, units, calculator flags. accept/higher_only were absent on every problem and were left absent (all answers exact; engine tolerance +/-0.005 suffices). Note: several problems use mol/dm3 concentration, which is HT/Separate content per the equation reference, but the published bank did not flag higher_only and this pass did not add flags (would alter the published item); flagged here for a future tier-filtering pass. A sibling AQA build of the same lesson (canonical e6963758, key @b7b54666b8) exists but was converted independently; this OCR-B fingerprint was solved fresh."
+}

@@ -1,0 +1,111 @@
+
+========== bronze  desc=One formula and, where needed, one unit conversion: moles, concentration, or volume in a single step.
+--- bronze[0] input=single_value sol=[0.0025] accept=None unit=mol ho=None calc=True
+  DISPLAY: A solution has a concentration of 0.1 mol/dm³. Calculate the number of moles in 25.0 cm³ of this solution.
+  EQHINT: \(\text{moles} = \text{concentration} \times \text{volume in dm}^3\)
+  HINT: Convert 25.0 cm³ to dm³ first, then multiply by the concentration.
+   MIS unit_error expect=2.5 | Convert cm³ to dm³ first: 25.0 ÷ 1000 = 0.025 dm³. Then moles = 0.1 × 0.025 = 0.0025 mol.
+   MIS forgot_convert expect=0.025 | If you divided by 100 instead of 1000 you would get 0.025 mol. The step is ÷1000: 25.0 cm³ = 0.025 dm³, so moles = 0.1 × 0.025 = 0.0025 mol.
+--- bronze[1] input=single_value sol=[2] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 0.5 mol of a solute is dissolved in 0.25 dm³ of solution. Calculate the concentration in mol/dm³.
+  EQHINT: \(c = \frac{n}{V}\)
+  HINT: Concentration = moles ÷ volume. The volume is already in dm³.
+   MIS inverse_error expect=0.125 | Concentration = moles ÷ volume = 0.5 ÷ 0.25 = 2 mol/dm³. Don't multiply.
+--- bronze[2] input=single_value sol=[0.4] accept=None unit=dm³ ho=None calc=True
+  DISPLAY: A solution has a concentration of 0.5 mol/dm³. What volume (in dm³) is needed to contain 0.2 mol?
+  EQHINT: \(V = \frac{n}{c}\)
+  HINT: Rearrange to volume = moles ÷ concentration.
+   MIS inverse_error expect=0.1 | Rearrange: volume = moles ÷ concentration = 0.2 ÷ 0.5 = 0.4 dm³.
+--- bronze[3] input=single_value sol=[0.1] accept=None unit=mol ho=None calc=True
+  DISPLAY: 4.0 g of NaOH is dissolved in 500 cm³ of water. Calculate the number of moles of NaOH. (Ar: Na = 23, O = 16, H = 1)
+  EQHINT: \(n = \frac{\text{mass}}{M_r}\)
+  HINT: Find the Mr of NaOH, then moles = mass ÷ Mr. The volume is not needed.
+   MIS wrong_Mr expect=None | Mr of NaOH = 23 + 16 + 1 = 40. Moles = 4.0 ÷ 40 = 0.1 mol.
+--- bronze[4] input=single_value sol=[0.3] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: A solution contains 0.15 mol of solute in 500 cm³. Calculate the concentration in mol/dm³.
+  EQHINT: \(c = \frac{n}{V}\)
+  HINT: Convert 500 cm³ to dm³, then concentration = moles ÷ volume.
+   MIS unit_error expect=0.0003 | Convert volume first: 500 cm³ = 0.5 dm³. Concentration = 0.15 ÷ 0.5 = 0.3 mol/dm³.
+--- bronze[5] input=single_value sol=[0.025] accept=None unit=mol ho=None calc=True
+  DISPLAY: Calculate the number of moles in 100 cm³ of a 0.25 mol/dm³ solution.
+  EQHINT: \(n = c \times V\)
+  HINT: Convert 100 cm³ to dm³, then moles = concentration × volume.
+   MIS unit_error expect=25 | 100 cm³ = 0.1 dm³. Moles = 0.25 × 0.1 = 0.025 mol.
+--- bronze[6] input=single_value sol=[0.05] accept=None unit=dm³ ho=None calc=True
+  DISPLAY: Convert 50 cm³ to dm³.
+  EQHINT: \(\text{dm}^3 = \frac{\text{cm}^3}{1000}\)
+  HINT: There are 1000 cm³ in 1 dm³, so divide by 1000.
+   MIS wrong_factor expect=0.5 | Divide by 1000, not 100. 50 cm³ ÷ 1000 = 0.05 dm³.
+--- bronze[7] input=single_value sol=[0.0548] accept=0.0001 unit=mol ho=None calc=True
+  DISPLAY: 2.0 g of HCl is dissolved in water. Calculate the number of moles. Give your answer to 3 significant figures. (Ar: H = 1, Cl = 35.5)
+  EQHINT: \(n = \frac{\text{mass}}{M_r}\)
+  HINT: Mr of HCl = 1 + 35.5, then moles = mass ÷ Mr, to 3 s.f.
+   MIS wrong_Mr expect=None | Mr of HCl = 1 + 35.5 = 36.5. Moles = 2.0 ÷ 36.5 = 0.0548 mol (3 s.f.).
+
+========== silver  desc=A titration in one pass: moles of the known solution, the balanced ratio, then the other concentration.
+--- silver[0] input=single_value sol=[0.1] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 25.0 cm³ of NaOH of unknown concentration is neutralised by 20.0 cm³ of 0.125 mol/dm³ HCl. The equation is: HCl + NaOH → NaCl + H₂O. Calculate the concentration of the NaOH in mol/dm³.
+  EQHINT: \(n = c \times V\) then use mole ratio, then \(c = \frac{n}{V}\)
+  HINT: Moles of HCl, then 1:1 ratio, then divide by the NaOH volume.
+   MIS forgot_convert expect=None | Convert volumes to dm³: 20.0 cm³ = 0.02 dm³, 25.0 cm³ = 0.025 dm³. Moles HCl = 0.125 × 0.02 = 0.0025. Ratio 1:1, so moles NaOH = 0.0025. Conc = 0.0025 ÷ 0.025 = 0.1 mol/dm³.
+   MIS wrong_volume expect=0.125 | Use the NaOH volume (25.0 cm³) for the final step, not the HCl volume.
+--- silver[1] input=single_value sol=[0.125] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 25.0 cm³ of 0.2 mol/dm³ NaOH is neutralised by 20.0 cm³ of H₂SO₄. The equation is: H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O. Calculate the concentration of the H₂SO₄ in mol/dm³.
+  EQHINT: \(n = c \times V\) then use mole ratio
+  HINT: Moles of NaOH, halve for the 2:1 ratio, then divide by the acid volume.
+   MIS mole_ratio expect=0.25 | The ratio is 1:2 (H₂SO₄ : NaOH). Moles NaOH = 0.2 × 0.025 = 0.005. Moles H₂SO₄ = 0.005 ÷ 2 = 0.0025. Conc = 0.0025 ÷ 0.02 = 0.125 mol/dm³.
+   MIS forgot_ratio expect=0.5 | One mole of H₂SO₄ reacts with two moles of NaOH, so you need HALF as many moles of acid: divide by 2, do not multiply. Doubling gives 0.5 mol/dm³, which is wrong.
+--- silver[2] input=single_value sol=[0.2] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 25.0 cm³ of 0.15 mol/dm³ HCl is neutralised by 18.75 cm³ of NaOH. The equation is: HCl + NaOH → NaCl + H₂O. Calculate the concentration of the NaOH in mol/dm³.
+  EQHINT: \(n = c \times V\) then \(c = \frac{n}{V}\)
+  HINT: Moles of HCl, 1:1 ratio, then divide by the NaOH volume (18.75 cm³).
+   MIS wrong_volume expect=0.15 | Use the NaOH volume for the final step. Moles HCl = 0.15 × 0.025 = 0.00375. Ratio 1:1. Conc NaOH = 0.00375 ÷ 0.01875 = 0.2 mol/dm³.
+--- silver[3] input=single_value sol=[0.375] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 25.0 cm³ of 0.15 mol/dm³ Ca(OH)₂ is neutralised by 20.0 cm³ of HCl. The equation is: Ca(OH)₂ + 2HCl → CaCl₂ + 2H₂O. Calculate the concentration of the HCl in mol/dm³.
+  EQHINT: \(n = c \times V\) then use mole ratio
+  HINT: Moles of Ca(OH)₂, double for the 1:2 ratio, then divide by the HCl volume.
+   MIS mole_ratio expect=0.1875 | Ca(OH)₂ : HCl = 1 : 2. Moles Ca(OH)₂ = 0.15 × 0.025 = 0.00375. Moles HCl = 0.00375 × 2 = 0.0075. Conc = 0.0075 ÷ 0.02 = 0.375 mol/dm³.
+   MIS forgot_ratio expect=None | The equation shows 2 moles of HCl per mole of Ca(OH)₂, so double the moles.
+--- silver[4] input=single_value sol=[0.25] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 25.0 cm³ of 0.2 mol/dm³ KOH is neutralised by 20.0 cm³ of HNO₃. The equation is: KOH + HNO₃ → KNO₃ + H₂O. Calculate the concentration of the HNO₃ in mol/dm³.
+  EQHINT: \(n = c \times V\) then \(c = \frac{n}{V}\)
+  HINT: Moles of KOH, 1:1 ratio, then divide by the HNO₃ volume.
+   MIS wrong_volume expect=0.2 | Moles KOH = 0.2 × 0.025 = 0.005. Ratio 1:1. Conc HNO₃ = 0.005 ÷ 0.02 = 0.25 mol/dm³.
+--- silver[5] input=single_value sol=[0.5] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 25.0 cm³ of 0.5 mol/dm³ KOH is neutralised by 12.5 cm³ of H₂SO₄. The equation is: H₂SO₄ + 2KOH → K₂SO₄ + 2H₂O. Calculate the concentration of the H₂SO₄ in mol/dm³.
+  EQHINT: \(n = c \times V\) then use mole ratio
+  HINT: Moles of KOH, halve for the 2:1 ratio, then divide by the acid volume (12.5 cm³).
+   MIS mole_ratio expect=1.0 | H₂SO₄ : KOH = 1 : 2. Moles KOH = 0.5 × 0.025 = 0.0125. Moles H₂SO₄ = 0.0125 ÷ 2 = 0.00625. Conc = 0.00625 ÷ 0.0125 = 0.5 mol/dm³.
+   MIS forgot_ratio expect=None | Two moles of KOH react with one mole of H₂SO₄. Halve the moles of KOH.
+
+========== gold  desc=Multi-step: mass to moles, scaling a sample up to the whole flask, then chaining to a final mass or concentration.
+--- gold[0] input=single_value sol=[0.2] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 2.0 g of NaOH (Mr = 40) is dissolved in water and made up to 200 cm³ in a volumetric flask. 25.0 cm³ of this solution is titrated against HCl. The titre is 31.25 cm³. The equation is: NaOH + HCl → NaCl + H₂O. Calculate the concentration of the HCl in mol/dm³.
+  HINT: Flask concentration first, then sample moles, ratio, then divide by the titre.
+   MIS forgot_step expect=None | First find moles NaOH = 2/40 = 0.05 mol. Conc in flask = 0.05/0.2 = 0.25 mol/dm³. Moles in 25cm³ = 0.25 × 0.025 = 0.00625. Conc HCl = 0.00625/0.03125 = 0.2 mol/dm³.
+   MIS wrong_volume expect=1.6 | The 200 cm³ is the total flask volume. You only use 25.0 cm³ in the titration.
+--- gold[1] input=single_value sol=[0.4] accept=None unit=mol/dm³ ho=None calc=True
+  DISPLAY: 5.3 g of Na₂CO₃ is dissolved in water and made up to 250 cm³. 25.0 cm³ of this solution is titrated against HCl, and the titre is 25.0 cm³. The equation is: Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂. Calculate the concentration of the HCl in mol/dm³. (Ar: Na = 23, C = 12, O = 16)
+  HINT: Mass to moles to flask concentration, then sample, the 1:2 ratio, then the titre.
+   MIS wrong_Mr expect=None | Mr Na₂CO₃ = (2×23) + 12 + (3×16) = 106. Moles = 5.3/106 = 0.05. Conc = 0.05/0.25 = 0.2 mol/dm³. In 25cm³: 0.005 mol. HCl = 0.005×2 = 0.01. Conc = 0.01/0.025 = 0.4 mol/dm³.
+   MIS mole_ratio expect=0.2 | Na₂CO₃ : HCl = 1 : 2. You need double the moles of HCl.
+--- gold[2] input=single_value sol=[4.6] accept=0.1 unit=g ho=None calc=True
+  DISPLAY: Calculate the mass of hydrogen chloride (HCl) needed to make 250 cm³ of a 0.5 mol/dm³ solution. Give your answer to 1 decimal place. (Ar: H = 1, Cl = 35.5)
+  HINT: Moles from concentration × volume, then mass = moles × Mr, to 1 d.p.
+   MIS forgot_convert expect=4562.5 | You must convert 250 cm³ to 0.25 dm³ first. Using 250 gives moles = 0.5 × 250 = 125 and a mass of 4562.5 g, which is nonsense. Volume = 250 ÷ 1000 = 0.25 dm³.
+   MIS wrong_Mr expect=None | Mr of HCl = 1 + 35.5 = 36.5, not 37.
+--- gold[3] input=single_value sol=[2.24] accept=0.01 unit=g ho=None calc=True
+  DISPLAY: A student dissolves some KOH in water and makes up 500 cm³ of solution. A 25.0 cm³ sample is titrated with 20.0 cm³ of 0.1 mol/dm³ HCl. KOH + HCl → KCl + H₂O. Calculate the mass of KOH originally dissolved. (Ar: K = 39, O = 16, H = 1)
+  HINT: Titre to moles, 1:1 ratio, scale up to the 500 cm³ flask, then mass.
+   MIS forgot_step expect=None | Moles HCl = 0.1 × 0.02 = 0.002. 1:1 ratio, so moles KOH in 25cm³ = 0.002. Conc KOH = 0.002/0.025 = 0.08 mol/dm³. Total moles in 500cm³ = 0.08 × 0.5 = 0.04 mol. Mr KOH = 56. Mass = 0.04 × 56 = 2.24 g.
+   MIS scale_error expect=0.112 | The titration only uses 25.0 cm³ of a 500 cm³ flask. Find the concentration (0.08 mol/dm³), then scale up: total moles = 0.08 × 0.5 = 0.04 mol, mass = 2.24 g. Skipping the scale-up gives just 0.112 g.
+--- gold[4] input=single_value sol=[1.6] accept=None unit=g ho=None calc=True
+  DISPLAY: A student dissolves some NaOH in water and makes 250 cm³ of solution. 25.0 cm³ of this is titrated with 20.0 cm³ of 0.2 mol/dm³ HNO₃. NaOH + HNO₃ → NaNO₃ + H₂O. Calculate the mass of NaOH dissolved. (Ar: Na = 23, O = 16, H = 1)
+  HINT: Titre to moles, 1:1 ratio, scale up to the 250 cm³ flask, then mass.
+   MIS forgot_step expect=None | Moles HNO₃ = 0.2 × 0.02 = 0.004. 1:1 ratio. Conc NaOH = 0.004/0.025 = 0.16 mol/dm³. Total moles = 0.16 × 0.25 = 0.04. Mr NaOH = 40. Mass = 0.04 × 40 = 1.6 g.
+   MIS scale_error expect=0.16 | You titrated 25.0 cm³ from a 250 cm³ flask, so scale up by 10: total moles = conc × 0.25 = 0.04 mol, mass = 1.6 g. Using only the sample moles gives just 0.16 g.
+--- gold[5] input=single_value sol=[2.65] accept=0.01 unit=g ho=None calc=True
+  DISPLAY: A student dissolves Na₂CO₃ in water and makes up 500 cm³ of solution. 25.0 cm³ of this is titrated with 12.5 cm³ of 0.1 mol/dm³ H₂SO₄. The equation is: Na₂CO₃ + H₂SO₄ → Na₂SO₄ + H₂O + CO₂. Calculate the mass of Na₂CO₃ originally dissolved. (Ar: Na = 23, C = 12, O = 16)
+  HINT: Titre to moles, 1:1 ratio, scale up to the 500 cm³ flask, then mass with the Mr.
+   MIS forgot_step expect=0.1325 | You titrated 25.0 cm³ from a 500 cm³ flask. Scale up: concentration = 0.05 mol/dm³, total moles = 0.05 × 0.5 = 0.025 mol, Mr = 106, mass = 2.65 g. Using only the sample moles gives just 0.1325 g.
+   MIS wrong_Mr expect=None | Mr Na₂CO₃ = (2×23) + 12 + (3×16) = 46 + 12 + 48 = 106.

@@ -1,0 +1,110 @@
+========= OPENER =========
+display: Picture a stack of identical books on a table. Each book weighs 15 N.
+### opener
+  [0] SAY say='The table holds the whole pile, but each book only feels the weight of the ones stacked above it.' done=None
+  [1] BOX pre='Put 3 books in the pile. The bottom book has all three pressing down: 3 × 15 = ' post='N' answer=45 phase=None hint='Three books, 15 N each.' done=None say=None
+  [2] BOX pre='Now make it 6 books. The bottom feels 6 × 15 = ' post='N' answer=90 phase=None hint='Six books this time.' done=None say=None
+  [3] SAY say="Deeper in the pile means more weight pressing down. Water is the same: the deeper you go, the more fluid is stacked above, so the pressure climbs. That is exactly \\(p = h\\rho g\\): pressure grows with depth h, with the fluid's density ρ, and with g." done=None
+========= TEACH bronze =========
+display: A storage tank holds oil 4.0 m deep. Oil density = 900 kg/m³, g = 9.8 N/kg. Find the pressure at the base, then at twice the depth.
+### teach.bronze
+  [0] SAY say='Fluid pressure is \\(p = h\\rho g\\). Multiply depth, density and g.' done=None
+  [1] BOX pre='Depth × density: 4.0 × 900 = ' post='' answer=3600 phase=None hint='Four times 900.' done=None say=None
+  [2] BOX pre='Now × g: 3600 × 9.8 = ' post='' answer=35280 phase=None hint='3600 times 9.8. That is the pressure at 4.0 m.' done=None say=None
+  [3] BOX pre='At 8.0 m (twice as deep): 8.0 × 900 × 9.8 = ' post='' answer=70560 phase=None hint='Same sum with 8.0 instead of 4.0.' done=None say=None
+  [4] BOX pre='Compare the two: 70560 ÷ 35280 = ' post='' answer=2 phase=None hint='Divide the deeper pressure by the shallower one.' done='Double the depth, double the pressure. That is p = hρg in action.' say=None
+========= TEACH silver =========
+display: A submersible sits at 25 m in sea water (density 1025 kg/m³, g = 9.8 N/kg). Atmospheric pressure = 101,000 Pa. Find the total pressure.
+### teach.silver
+  [0] SAY say='Total pressure has two parts: the fluid above, plus the air pressing down on the surface. \\(p_{total} = p_{atm} + h\\rho g\\).' done=None
+  [1] BOX pre='Fluid pressure: 25 × 1025 = ' post='' answer=25625 phase=None hint='Twenty-five times 1025.' done=None say=None
+  [2] BOX pre='Now × g: 25625 × 9.8 = ' post='' answer=251125 phase=None hint='25625 times 9.8. That is the fluid pressure.' done=None say=None
+  [3] BOX pre='Add atmospheric: 251125 + 101000 = ' post='' answer=352125 phase=None hint='Add on the 101,000.' done=None say=None
+  [4] BOX pre='How much did the air add? 352125 − 251125 = ' post='' answer=101000 phase=None hint='Subtract the fluid part.' done='Exactly atmospheric pressure, the part people forget for total pressure.' say=None
+========= TEACH gold =========
+display: A sealed drum of volume 0.20 m³ and mass 150 kg is held fully under fresh water (density 1000 kg/m³, g = 9.8 N/kg). Find the net force when it is released, and its direction.
+### teach.gold
+  [0] SAY say='Two forces act: upthrust up, weight down. Work out each, then subtract.' done=None
+  [1] BOX pre='Upthrust = ρVg = 1000 × 0.20 × 9.8. First 1000 × 0.20 = ' post='' answer=200 phase=None hint='A thousand times 0.20.' done=None say=None
+  [2] BOX pre='Now × g: 200 × 9.8 = ' post='' answer=1960 phase=None hint='200 times 9.8. That is the upthrust in N.' done=None say=None
+  [3] BOX pre='Weight = 150 × 9.8 = ' post='' answer=1470 phase=None hint='Mass times g.' done=None say=None
+  [4] BOX pre='Net force = 1960 − 1470 = ' post='' answer=490 phase=None hint='Subtract weight from upthrust.' done='Upthrust wins by 490 N, so the drum accelerates upward and bobs to the surface.' say=None
+### bronze[0].guided_steps  (sol=[19600])
+  [0] SAY say='Fluid pressure is \\(p = h\\rho g\\). Multiply the three values in turn.' done=None
+  [1] BOX pre='Depth × density: 2.0 × 1000 = ' post='' answer=2000 phase=None hint='Two times 1000.' done=None say=None
+  [2] BOX pre='Now × g: 2000 × 9.8 = ' post='' answer=19600 phase=substitute hint='2000 times 9.8.' done=None say=None
+  [3] BOX pre='Check by working back: 19600 ÷ (1000 × 9.8) = 19600 ÷ 9800 = ' post='' answer=2 phase=substitute hint='Divide 19600 by 9800.' done='That returns the 2.0 m depth, so the answer is 19,600 Pa.' say=None
+### bronze[1].guided_steps  (sol=[49000])
+  [0] SAY say='Fluid pressure is \\(p = h\\rho g\\).' done=None
+  [1] BOX pre='Depth × density: 5.0 × 1000 = ' post='' answer=5000 phase=None hint='Five times 1000.' done=None say=None
+  [2] BOX pre='Now × g: 5000 × 9.8 = ' post='' answer=49000 phase=substitute hint='5000 times 9.8.' done=None say=None
+  [3] BOX pre='Check: 49000 ÷ 9800 = ' post='' answer=5 phase=substitute hint='Divide the pressure by ρg.' done='Back to the 5.0 m depth, so the answer is 49,000 Pa.' say=None
+### bronze[2].guided_steps  (sol=[9.8])
+  [0] SAY say="Upthrust \\(= \\rho V g\\). First find the cube's volume." done=None
+  [1] BOX pre='Volume = side³ = 0.10 × 0.10 × 0.10 = ' post='' answer=0.001 phase=None hint='0.1 cubed: 0.1×0.1 = 0.01, then ×0.1 = 0.001.' done=None say=None
+  [2] BOX pre='Upthrust = 1000 × 0.001 × 9.8. First 1000 × 0.001 = ' post='' answer=1 phase=substitute hint='A thousand times one thousandth.' done=None say=None
+  [3] BOX pre='Now × g: 1 × 9.8 = ' post='' answer=9.8 phase=substitute hint='One times 9.8.' done=None say=None
+  [4] BOX pre='Check: 9.8 ÷ 9.8 ÷ 1000 = ' post='' answer=0.001 phase=substitute hint='Divide back by g then by density.' done='Returns the volume 0.001 m³, so the upthrust is 9.8 N.' say=None
+### bronze[3].guided_steps  (sol=[591000])
+  [0] SAY say='Total pressure = atmospheric + fluid: \\(p_{total} = p_{atm} + h\\rho g\\).' done=None
+  [1] BOX pre='Fluid pressure first: 50 × 1000 = ' post='' answer=50000 phase=None hint='Fifty times 1000.' done=None say=None
+  [2] BOX pre='Now × g: 50000 × 9.8 = ' post='' answer=490000 phase=None hint='50000 times 9.8.' done=None say=None
+  [3] BOX pre='Add atmospheric: 490000 + 101000 = ' post='' answer=591000 phase=substitute hint='Add on the 101,000.' done=None say=None
+  [4] BOX pre='Check the fluid part: 591000 − 101000 = ' post='' answer=490000 phase=substitute hint='Take the atmospheric part back off.' done='That is the fluid pressure we found, so the total is 591,000 Pa.' say=None
+### bronze[4].guided_steps  (sol=[19.9])
+  [0] SAY say='Rearrange \\(p = h\\rho g\\) to find depth: \\(h = \\dfrac{p}{\\rho g}\\).' done=None
+  [1] BOX pre='Work out ρg first: 1025 × 9.8 = ' post='' answer=10045 phase=None hint='Density times g.' done=None say=None
+  [2] BOX pre='Divide (to 2 d.p.): 200000 ÷ 10045 = ' post='' answer=19.91 phase=substitute hint='Pressure divided by ρg.' done=None say=None
+  [3] BOX pre='Sense check: at roughly 100,000 Pa per 10 m, 200,000 Pa is about 200000 ÷ 100000 = 2 lots of 10 m, so ≈ ' post='' answer=20 phase=substitute hint='Roughly double 10 m.' done='About 20 m, matching our 19.9 m. Answer: 19.9 m.' say=None
+### silver[0].guided_steps  (sol=[502800])
+  [0] SAY say='Total pressure = atmospheric + fluid: \\(p_{total} = p_{atm} + h\\rho g\\).' done=None
+  [1] BOX pre='Fluid pressure: 40 × 1025 = ' post='' answer=41000 phase=None hint='Forty times 1025.' done=None say=None
+  [2] BOX pre='Now × g: 41000 × 9.8 = ' post='' answer=401800 phase=None hint='41000 times 9.8.' done=None say=None
+  [3] BOX pre='Add atmospheric: 401800 + 101000 = ' post='' answer=502800 phase=substitute hint='Add on the 101,000.' done=None say=None
+  [4] BOX pre='Check: 502800 − 101000 = ' post='' answer=401800 phase=substitute hint='Take the atmospheric part back off.' done='Matches the fluid pressure, so the total is 502,800 Pa.' say=None
+### silver[1].guided_steps  (sol=[1.96])
+  [0] SAY say='Net force = upthrust − weight. Work out each one.' done=None
+  [1] BOX pre='Upthrust = ρVg = 1000 × 0.0005 × 9.8. First 1000 × 0.0005 = ' post='' answer=0.5 phase=None hint='A thousand times five ten-thousandths.' done=None say=None
+  [2] BOX pre='Now × g: 0.5 × 9.8 = ' post='' answer=4.9 phase=substitute hint='Half of 9.8.' done=None say=None
+  [3] BOX pre='Weight = 0.30 × 9.8 = ' post='' answer=2.94 phase=substitute hint='Mass times g.' done=None say=None
+  [4] BOX pre='Net upward force = 4.9 − 2.94 = ' post='' answer=1.96 phase=substitute hint='Subtract weight from upthrust.' done='Upthrust beats weight by 1.96 N, so the ball is pushed up. Answer: 1.96 N upward.' say=None
+### silver[2].guided_steps  (sol=[1000])
+  [0] SAY say='Rearrange Upthrust \\(= \\rho V g\\) for density: \\(\\rho = \\dfrac{\\text{upthrust}}{V g}\\). The mass is a distractor.' done=None
+  [1] BOX pre='Work out Vg: 0.0004 × 9.8 = ' post='' answer=0.00392 phase=None hint='Volume times g.' done=None say=None
+  [2] BOX pre='Divide: 3.92 ÷ 0.00392 = ' post='' answer=1000 phase=substitute hint='Upthrust divided by Vg.' done=None say=None
+  [3] BOX pre='Check: 1000 × 0.00392 = ' post='' answer=3.92 phase=substitute hint='Multiply density by Vg to get the upthrust back.' done='Returns the 3.92 N upthrust, so the density is 1000 kg/m³ (fresh water).' say=None
+### silver[3].guided_steps  (sol=[25000])
+  [0] SAY say='Pressure transmitted uses the piston the force acts on: \\(p = \\dfrac{F}{A}\\). The large piston area is a distractor.' done=None
+  [1] BOX pre='Area the 50 N pushes on is the small piston: A = ' post='' answer=0.002 phase=None hint='The force is applied to the small piston.' done=None say=None
+  [2] BOX pre='Pressure = 50 ÷ 0.002 = ' post='' answer=25000 phase=substitute hint='Fifty divided by 0.002.' done=None say=None
+  [3] BOX pre='Check: 25000 × 0.002 = ' post='' answer=50 phase=substitute hint='Multiply pressure by the small area to get the force back.' done='Returns the 50 N force, so the pressure is 25,000 Pa.' say=None
+### silver[4].guided_steps  (sol=[0.245])
+  [0] SAY say='Net force = upthrust − weight. Work out both.' done=None
+  [1] BOX pre='Upthrust = ρVg = 1025 × 0.0002 × 9.8. First 1025 × 0.0002 = ' post='' answer=0.205 phase=None hint='1025 times two ten-thousandths.' done=None say=None
+  [2] BOX pre='Now × g: 0.205 × 9.8 = ' post='' answer=2.009 phase=substitute hint='0.205 times 9.8.' done=None say=None
+  [3] BOX pre='Weight = 0.18 × 9.8 = ' post='' answer=1.764 phase=substitute hint='Mass times g.' done=None say=None
+  [4] BOX pre='Net force = 2.009 − 1.764 = ' post='' answer=0.245 phase=substitute hint='Subtract weight from upthrust.' done='Upthrust is a little larger, so the net force is 0.245 N upward: the fish tends to rise. Answer: 0.245 N upward.' say=None
+### gold[0].guided_steps  (sol=[110596000])
+  [0] SAY say='Total pressure = atmospheric + fluid: \\(p_{total} = p_{atm} + h\\rho g\\). The fluid term is enormous here.' done=None
+  [1] BOX pre='Fluid: 11000 × 1025 = ' post='' answer=11275000 phase=None hint='Eleven thousand times 1025.' done=None say=None
+  [2] BOX pre='Now × g: 11275000 × 9.8 = ' post='' answer=110495000 phase=None hint='Multiply by 9.8.' done=None say=None
+  [3] BOX pre='Add atmospheric: 110495000 + 101000 = ' post='' answer=110596000 phase=substitute hint='Add on the 101,000.' done=None say=None
+  [4] BOX pre='See how small the atmospheric part is: 110596000 − 110495000 = ' post='' answer=101000 phase=substitute hint='Subtract the fluid part.' done='Just 101,000 Pa out of 110 million, so atmospheric barely matters. Answer: 110,596,000 Pa (about 1.11 × 10⁸ Pa).' say=None
+### gold[1].guided_steps  (sol=[20.8])
+  [0] SAY say='Net force = upthrust − weight, then say which way it acts.' done=None
+  [1] BOX pre='Upthrust = ρVg = 1025 × 0.005 × 9.8. First 1025 × 0.005 = ' post='' answer=5.125 phase=None hint='1025 times five thousandths.' done=None say=None
+  [2] BOX pre='Now × g: 5.125 × 9.8 = ' post='' answer=50.225 phase=substitute hint='5.125 times 9.8.' done=None say=None
+  [3] BOX pre='Weight = 3.0 × 9.8 = ' post='' answer=29.4 phase=substitute hint='Mass times g.' done=None say=None
+  [4] BOX pre='Net = 50.225 − 29.4 = ' post='' answer=20.825 phase=substitute hint='Subtract weight from upthrust.' done='Upthrust wins, so the net force is about 20.8 N upward: the sphere rises. Answer: 20.8 N upward.' say=None
+### gold[2].guided_steps  (sol=[3.0])
+  [0] SAY say='Floating means upthrust = weight. The g cancels, leaving \\(\\rho V_{sub} = m\\). Find the submerged volume, then the depth.' done=None
+  [1] BOX pre='Submerged volume V = m ÷ ρ = 60000 ÷ 1000 = ' post='' answer=60 phase=None hint='Mass divided by water density.' done=None say=None
+  [2] BOX pre='Draught = volume ÷ base area = 60 ÷ 20 = ' post='' answer=3 phase=substitute hint='Spread that volume over 20 m².' done=None say=None
+  [3] BOX pre='Check the weight: 60000 × 9.8 = ' post='' answer=588000 phase=substitute hint='Mass times g.' done=None say=None
+  [4] BOX pre='Check the upthrust: 1000 × 60 × 9.8 = ' post='' answer=588000 phase=substitute hint='Density × submerged volume × g.' done='Upthrust 588,000 N equals the weight 588,000 N, so it floats at a draught of 3.0 m.' say=None
+### gold[3].guided_steps  (sol=[79.97])
+  [0] SAY say="Upthrust \\(= \\rho V g\\) with the mercury density, then compare with the block's weight." done=None
+  [1] BOX pre='Upthrust = 13600 × 0.0006 × 9.8. First 13600 × 0.0006 = ' post='' answer=8.16 phase=None hint='13600 times six ten-thousandths.' done=None say=None
+  [2] BOX pre='Now × g: 8.16 × 9.8 = ' post='' answer=79.968 phase=substitute hint='8.16 times 9.8.' done=None say=None
+  [3] BOX pre='Weight of block = 5.0 × 9.8 = ' post='' answer=49 phase=substitute hint='Mass times g.' done=None say=None
+  [4] BOX pre='Compare: 79.968 ÷ 49 = ' post='' answer=1.632 phase=substitute hint='Divide upthrust by weight.' done='Upthrust is over 1.6× the weight, so the block floats high on the dense mercury. Answer: upthrust ≈ 79.97 N, floats.' say=None

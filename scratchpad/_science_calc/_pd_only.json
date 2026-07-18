@@ -1,0 +1,973 @@
+{
+  "guided": {
+    "teach": {
+      "gold": {
+        "label": "Together: your first one",
+        "steps": [
+          {
+            "say": "Two steps: the current with \\(I = \\frac{P}{V}\\), then the heat loss with \\(P = I^2 R\\)."
+          },
+          {
+            "pre": "Current: I = 40000000 \u00f7 40000 = ",
+            "hint": "Divide power by voltage. 40 MW = 40000000 W.",
+            "post": "",
+            "answer": 1000
+          },
+          {
+            "pre": "Square it: 1000 \u00d7 1000 = ",
+            "hint": "The current is squared in the loss equation.",
+            "post": "",
+            "answer": 1000000
+          },
+          {
+            "pre": "Multiply by resistance: 1000000 \u00d7 6 = ",
+            "hint": "Multiply by R = 6.",
+            "post": "",
+            "answer": 6000000
+          },
+          {
+            "pre": "In megawatts: 6000000 \u00f7 1000000 = ",
+            "done": "6 MW lost. A higher voltage would cut the current and slash this loss, because it depends on current squared.",
+            "hint": "Divide by a million.",
+            "post": "",
+            "answer": 6
+          }
+        ],
+        "display": "A power station sends 40 MW at 40 000 V through cables of resistance 6 \u03a9. Find the power lost in the cables."
+      },
+      "bronze": {
+        "label": "Together: your first one",
+        "steps": [
+          {
+            "say": "Turns ratio \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\), so \\(V_s = V_p \\times \\frac{n_s}{n_p}\\)."
+          },
+          {
+            "pre": "Divide to get the ratio: 1000 \u00f7 200 = ",
+            "hint": "Secondary turns divided by primary turns.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "Multiply: Vs = 30 \u00d7 5 = ",
+            "hint": "Primary voltage times the ratio.",
+            "post": "",
+            "answer": 150
+          },
+          {
+            "pre": "Sanity check the voltage ratio: 150 \u00f7 30 = ",
+            "hint": "Divide the two voltages.",
+            "post": "",
+            "answer": 5
+          },
+          {
+            "pre": "And the turns match: 5 \u00d7 200 = ",
+            "done": "Back to 1000 secondary turns, so Vs = 150 V. More turns, higher voltage: a step-up.",
+            "hint": "Ratio times primary turns.",
+            "post": "",
+            "answer": 1000
+          }
+        ],
+        "display": "A transformer has 200 primary turns and 1000 secondary turns. The primary voltage is 30 V. Find the secondary voltage."
+      },
+      "silver": {
+        "label": "Together: your first one",
+        "steps": [
+          {
+            "say": "Power in = power out: \\(V_p I_p = V_s I_s\\), so \\(I_p = \\frac{V_s I_s}{V_p}\\)."
+          },
+          {
+            "pre": "Power out = Vs \u00d7 Is = 100 \u00d7 12 = ",
+            "hint": "Multiply the secondary voltage by the secondary current.",
+            "post": "",
+            "answer": 1200
+          },
+          {
+            "pre": "That is the power in too. Ip = 1200 \u00f7 400 = ",
+            "hint": "Divide the power by the primary voltage.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Check power in: Vp \u00d7 Ip = 400 \u00d7 3 = ",
+            "hint": "Multiply the primary voltage by your answer.",
+            "post": "",
+            "answer": 1200
+          },
+          {
+            "pre": "Current check: Vp is 4\u00d7 Vs, so Ip = Is \u00f7 4 = 12 \u00f7 4 = ",
+            "done": "The higher-voltage side carries the lower current. Ip = 3 A.",
+            "hint": "Divide the secondary current by 4.",
+            "post": "",
+            "answer": 3
+          }
+        ],
+        "display": "A transformer has Vp = 400 V, Vs = 100 V and Is = 12 A. Find the primary current, assuming 100% efficiency."
+      }
+    },
+    "opener": {
+      "label": "Before any equations",
+      "steps": [
+        {
+          "pre": "At 20 V, the current needed is 2000 \u00f7 20 = ",
+          "say": "Power = voltage \u00d7 current. The power is fixed; the voltage is your choice.",
+          "hint": "Power = voltage \u00d7 current, so current = power \u00f7 voltage.",
+          "post": "",
+          "answer": 100
+        },
+        {
+          "pre": "At 2000 V, the current needed is 2000 \u00f7 2000 = ",
+          "say": "Now push the same power through at a much higher voltage.",
+          "hint": "2000 divided by 2000.",
+          "post": "",
+          "answer": 1
+        },
+        {
+          "say": "Same 2000 W, but 100 A versus 1 A. Wires heat up as the current <strong>squared</strong> (loss = \\(I^2 R\\)), so 100 A wastes ten thousand times more than 1 A. That is why power travels at very high voltage. A <strong>transformer</strong> trades voltage for current without losing power: \\(V_p I_p = V_s I_s\\)."
+        }
+      ],
+      "display": "A power line must carry 2000 W to a village.<br>You can push it through the wire at a low voltage or a high voltage."
+    }
+  },
+  "method_card": {
+    "steps": [
+      "Use the turns ratio Vp/Vs = np/ns to find a missing voltage or number of turns.",
+      "For currents, use VpIp = VsIs (true when 100% efficient).",
+      "Step-up means more secondary turns: higher voltage, lower current.",
+      "Grid loss is P = I squared R, so high voltage (low current) wastes far less."
+    ],
+    "title": "Transformers and Power Transmission",
+    "content": "<p>Transformers use two equations: the turns ratio \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\) and, for currents, \\(V_p I_p = V_s I_s\\) (true when 100% efficient). Check whether your board gives you these or expects them from memory.</p><p><strong>Step-up</strong>: more secondary turns, so voltage rises and current falls. <strong>Step-down</strong> is the reverse. The National Grid sends power at very high voltage to keep the current low, because cable loss \\(P = I^2 R\\) grows with the current squared.</p>"
+  },
+  "tier_guides": {
+    "gold": {
+      "steps": [
+        "Gold questions combine steps: turns then power, an efficiency below 100%, or a grid loss.",
+        "For a grid loss, find the current with \\(I = \\frac{P}{V}\\), then the heat lost with \\(P = I^2 R\\). The current is squared, so high voltage (low current) wastes far less.",
+        "Efficiency = useful power out \u00f7 total power in. Work in base units and convert to kW or MW only at the end."
+      ],
+      "title": "Gold: chain two ideas",
+      "example": {
+        "steps": [
+          {
+            "label": "Current",
+            "content": "<p>\\(I = \\frac{P}{V} = \\frac{20\\,000\\,000}{40\\,000} = 500\\) A</p>"
+          },
+          {
+            "label": "Loss",
+            "content": "<p>\\(P = I^2 R = 500^2 \\times 5 = 250\\,000 \\times 5\\)</p>"
+          },
+          {
+            "label": "Check",
+            "content": "<p>1 250 000 W = 1.25 MW, a small fraction of 20 MW.</p>"
+          },
+          {
+            "label": "Answer",
+            "content": "<p>\\(P\\) = <strong>1.25 MW</strong></p>",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "20 MW is sent at 40 000 V through cables of resistance 5 \u03a9. Find the power lost."
+      }
+    },
+    "bronze": {
+      "steps": [
+        "Transformers link voltage to turns: \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\). The primary is the input coil, the secondary is the output.",
+        "To find a secondary voltage: \\(V_s = V_p \\times \\frac{n_s}{n_p}\\). More secondary turns gives a higher voltage (step-up); fewer gives a lower one (step-down).",
+        "Put the numbers straight in and work left to right."
+      ],
+      "title": "Bronze: one equation, straight in",
+      "example": {
+        "steps": [
+          {
+            "label": "Equation",
+            "content": "<p>\\(V_s = V_p \\times \\frac{n_s}{n_p}\\)</p>"
+          },
+          {
+            "label": "Substitute",
+            "content": "<p>\\(V_s = 240 \\times \\frac{100}{400} = 240 \\times 0.25\\)</p>"
+          },
+          {
+            "label": "Check",
+            "content": "<p>Fewer secondary turns, so a step-down: 60 V is below 240 V.</p>"
+          },
+          {
+            "label": "Answer",
+            "content": "<p>\\(V_s\\) = <strong>60 V</strong></p>",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "A transformer has 400 primary turns and 100 secondary turns. Vp = 240 V. Find the secondary voltage."
+      }
+    },
+    "silver": {
+      "steps": [
+        "For currents, a 100% efficient transformer obeys \\(V_p I_p = V_s I_s\\) (power in = power out).",
+        "Rearrange before you substitute, for example \\(I_p = \\frac{V_s I_s}{V_p}\\). The higher-voltage side always carries the lower current.",
+        "For a cable loss, use \\(P = I^2 R\\): square the current first."
+      ],
+      "title": "Silver: rearrange or use power",
+      "example": {
+        "steps": [
+          {
+            "label": "Equation",
+            "content": "<p>\\(I_p = \\frac{V_s I_s}{V_p}\\)</p>"
+          },
+          {
+            "label": "Substitute",
+            "content": "<p>\\(I_p = \\frac{50 \\times 8}{200} = \\frac{400}{200}\\)</p>"
+          },
+          {
+            "label": "Check",
+            "content": "<p>The higher-voltage side (200 V) carries the lower current, so Ip < Is.</p>"
+          },
+          {
+            "label": "Answer",
+            "content": "<p>\\(I_p\\) = <strong>2 A</strong></p>",
+            "isAnswer": true,
+            "is_answer": true
+          }
+        ],
+        "question": "A transformer has Vp = 200 V, Vs = 50 V and Is = 8 A. Find the primary current (100% efficient)."
+      }
+    }
+  },
+  "topic_links": {
+    "prerequisites": [
+      {
+        "slug": "higher-calculations/5",
+        "title": "Nuclear Equations and Half-Life Drill"
+      }
+    ]
+  },
+  "exam_context": {
+    "marks": "3 to 6 per question",
+    "paper": "Paper 2 (Physics)",
+    "frequency": "High. Transformer and National Grid questions appear on almost every Higher Physics paper."
+  },
+  "problem_bank": {
+    "gold": [
+      {
+        "hint": "Find the turns ratio, then multiply the primary voltage by it.",
+        "unit": "V",
+        "display": "A power station transformer has 200 primary turns connected to 25 000 V and 40 000 secondary turns. Calculate the secondary voltage.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Power-station transformer, 25 000 V primary with 200 turns, 40 000 secondary turns, find secondary voltage\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 25 000 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 200</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = ?</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = 40 000</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Large step-up: find Vs</text></svg><p style=\"margin-top:0.7em;\">A power station transformer has 200 primary turns connected to 25 000 V and 40 000 secondary turns. Calculate the secondary voltage.</p>",
+        "solutions": [
+          5000000
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Use \\(V_s = V_p \\times \\frac{n_s}{n_p}\\). This is a very large step-up."
+          },
+          {
+            "pre": "Turns ratio ns \u00f7 np = 40000 \u00f7 200 = ",
+            "hint": "Divide the secondary turns by the primary turns.",
+            "post": "",
+            "answer": 200
+          },
+          {
+            "pre": "Vs = 25000 \u00d7 200 = ",
+            "hint": "Multiply the primary voltage by the ratio.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 5000000
+          },
+          {
+            "pre": "Check: Vs \u00f7 Vp = 5000000 \u00f7 25000 = ",
+            "done": "That matches the turns ratio 40 000 \u00f7 200 = 200, so Vs = 5 000 000 V.",
+            "hint": "Divide the two voltages.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 200
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 125,
+            "message": "Vs = Vp \u00d7 (ns/np) = 25 000 \u00d7 (40 000/200) = 25 000 \u00d7 200 = 5 000 000 V. Flipping the ratio gives only 125 V.",
+            "pattern": "inverse_ratio"
+          }
+        ]
+      },
+      {
+        "hint": "Multiply the primary voltage by the primary current, then divide by the secondary voltage.",
+        "unit": "A",
+        "accept": 0.1,
+        "display": "Using the transformer above (Vp = 25 000 V, Ip = 500 A, Vs = 5 000 000 V), calculate the secondary current assuming 100% efficiency.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer with 25 000 V primary at 500 A stepped up to 5 000 000 V, 100 percent efficient, find secondary current\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 25 000 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ip = 500 A</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 5 000 000 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Is = ?</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Ideal: find Is</text></svg><p style=\"margin-top:0.7em;\">Using the transformer above (Vp = 25 000 V, Ip = 500 A, Vs = 5 000 000 V), calculate the secondary current assuming 100% efficiency.</p>",
+        "solutions": [
+          2.5
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Power in = power out: \\(V_p I_p = V_s I_s\\), so \\(I_s = \\frac{V_p I_p}{V_s}\\)."
+          },
+          {
+            "pre": "Power in = Vp \u00d7 Ip = 25000 \u00d7 500 = ",
+            "hint": "Multiply the primary voltage by the primary current.",
+            "post": "",
+            "answer": 12500000
+          },
+          {
+            "pre": "Is = 12500000 \u00f7 Vs = 12500000 \u00f7 5000000 = ",
+            "hint": "Divide the power by the secondary voltage.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2.5
+          },
+          {
+            "pre": "Check: power out = Vs \u00d7 Is = 5000000 \u00d7 2.5 = ",
+            "done": "Power out equals the power in, 12 500 000 W, so Is = 2.5 A.",
+            "hint": "Multiply the secondary voltage by your answer.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 12500000
+          }
+        ],
+        "equation_hint": "\\(V_p I_p = V_s I_s\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 100000,
+            "message": "Is = VpIp/Vs = (25 000 \u00d7 500)/5 000 000 = 2.5 A. Scaling the current up with the voltage gives 100 000 A, which is wrong: step-up raises voltage but lowers current.",
+            "pattern": "inverse_error"
+          }
+        ]
+      },
+      {
+        "hint": "Square the current, then multiply by the resistance.",
+        "unit": "W",
+        "display": "The transmission cables carry a current of 2.5 A and have a resistance of 2 \u03a9. Calculate the power lost as heat in the cables.",
+        "question": "<svg viewBox=\"0 0 400 130\" role=\"img\" aria-label=\"Transmission cable carrying 2.5 A with resistance 2 ohms, find power lost as heat\" style=\"max-width:320px;margin:0.6em auto;display:block;\"><line x1=\"40\" y1=\"58\" x2=\"150\" y2=\"58\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"250\" y1=\"58\" x2=\"360\" y2=\"58\" stroke=\"currentColor\" stroke-width=\"2\"/><polygon points=\"82,51 100,58 82,65\" fill=\"#dc2626\"/><text x=\"96\" y=\"42\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">I = 2.5 A</text><rect x=\"150\" y=\"45\" width=\"100\" height=\"26\" fill=\"currentColor\" fill-opacity=\"0.14\" stroke=\"currentColor\" stroke-width=\"1.5\"/><text x=\"200\" y=\"62\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">cable, R = 2 \u03a9</text><text x=\"200\" y=\"102\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">P lost = ?</text></svg><p style=\"margin-top:0.7em;\">The transmission cables carry a current of 2.5 A and have a resistance of 2 \u03a9. Calculate the power lost as heat in the cables.</p>",
+        "solutions": [
+          12.5
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Cable loss uses \\(P = I^2 R\\). Square the current before multiplying by the resistance."
+          },
+          {
+            "pre": "Square the current: 2.5 \u00d7 2.5 = ",
+            "hint": "Multiply the current by itself.",
+            "post": "",
+            "answer": 6.25
+          },
+          {
+            "pre": "Multiply by R: 6.25 \u00d7 2 = ",
+            "hint": "Multiply by the resistance.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 12.5
+          },
+          {
+            "pre": "Check by dividing back: 12.5 \u00f7 2 = ",
+            "done": "That is 2.5\u00b2 = 6.25, so P = 12.5 W. Keeping the current low keeps this loss tiny.",
+            "hint": "Divide the power by the resistance.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 6.25
+          }
+        ],
+        "equation_hint": "\\(P = I^2 R\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 5,
+            "message": "P = I\u00b2R = 2.5\u00b2 \u00d7 2 = 6.25 \u00d7 2 = 12.5 W. Square the current first, or you get only 5 W.",
+            "pattern": "forgot_square"
+          }
+        ]
+      },
+      {
+        "hint": "Find the input power (output power divided by the efficiency), then divide by the primary voltage.",
+        "unit": "A",
+        "accept": 0.005,
+        "display": "A transformer steps down 230 V to 12 V. The secondary current is 5 A. The transformer is 85% efficient. Calculate the primary current. Give your answer to 3 decimal places.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Step-down transformer 230 V to 12 V, secondary current 5 A, 85 percent efficient, find primary current\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 230 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ip = ?</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 12 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Is = 5 A</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">85% efficient: find Ip</text></svg><p style=\"margin-top:0.7em;\">A transformer steps down 230 V to 12 V. The secondary current is 5 A. The transformer is 85% efficient. Calculate the primary current. Give your answer to 3 decimal places.</p>",
+        "solutions": [
+          0.307
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Efficiency = useful power out \u00f7 total power in. Find the input power first, then \\(I_p = \\frac{\\text{power in}}{V_p}\\)."
+          },
+          {
+            "pre": "Power out = Vs \u00d7 Is = 12 \u00d7 5 = ",
+            "hint": "Multiply the secondary voltage by the secondary current.",
+            "post": "",
+            "answer": 60
+          },
+          {
+            "pre": "Power in = power out \u00f7 efficiency (to 1 d.p.) = 60 \u00f7 0.85 = ",
+            "hint": "Divide the output power by 0.85.",
+            "post": "",
+            "answer": 70.6
+          },
+          {
+            "pre": "Ip = power in \u00f7 Vp (to 3 d.p.) = 70.6 \u00f7 230 = ",
+            "hint": "Divide the input power by the primary voltage.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.307
+          },
+          {
+            "pre": "Check the efficiency: power out \u00f7 power in = 60 \u00f7 70.6 = ",
+            "done": "That is about 0.85, or 85%, so Ip = 0.307 A.",
+            "hint": "Divide the two powers.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.85
+          }
+        ],
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 0.261,
+            "message": "Do not assume 100% efficiency. Power out = 12 \u00d7 5 = 60 W, but power in is larger: 60 \u00f7 0.85 = 70.6 W. Ip = 70.6 \u00f7 230 = 0.307 A. Ignoring the efficiency gives 0.261 A.",
+            "pattern": "assumed_100"
+          },
+          {
+            "check": "common",
+            "expect": 0.222,
+            "message": "Efficiency divides, it does not multiply the output. Ip = (power out \u00f7 efficiency) \u00f7 Vp = (60 \u00f7 0.85)/230 = 0.307 A. Multiplying by 0.85 gives 0.222 A.",
+            "pattern": "wrong_rearrange"
+          }
+        ]
+      }
+    ],
+    "bronze": [
+      {
+        "hint": "Multiply the primary voltage by the secondary turns, then divide by the primary turns.",
+        "unit": "V",
+        "accept": 0.5,
+        "display": "A transformer has 500 primary turns and 50 secondary turns. The primary voltage is 230 V. Calculate the secondary voltage.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer, 230 V primary with 500 turns, 50 secondary turns, find secondary voltage\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 230 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 500</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = ?</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = 50</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-down: find Vs</text></svg><p style=\"margin-top:0.7em;\">A transformer has 500 primary turns and 50 secondary turns. The primary voltage is 230 V. Calculate the secondary voltage.</p>",
+        "solutions": [
+          23.0
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Turns and voltage share the same ratio: \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\), so \\(V_s = V_p \\times \\frac{n_s}{n_p}\\)."
+          },
+          {
+            "pre": "Turns ratio ns \u00f7 np = 50 \u00f7 500 = ",
+            "hint": "Divide the secondary turns by the primary turns.",
+            "post": "",
+            "answer": 0.1
+          },
+          {
+            "pre": "Vs = Vp \u00d7 0.1 = 230 \u00d7 0.1 = ",
+            "hint": "Multiply the primary voltage by the ratio.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 23
+          },
+          {
+            "pre": "Check: Vs \u00f7 Vp = 23 \u00f7 230 = ",
+            "done": "That equals 50 \u00f7 500 = 0.1, so Vs = 23 V is right.",
+            "hint": "Divide the two voltages.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.1
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 2300,
+            "message": "Vs = Vp \u00d7 (ns/np) = 230 \u00d7 (50/500) = 230 \u00d7 0.1 = 23 V. Fewer secondary turns means a lower voltage.",
+            "pattern": "inverse_ratio"
+          }
+        ]
+      },
+      {
+        "hint": "Multiply the primary turns by the secondary voltage, then divide by the primary voltage.",
+        "unit": "",
+        "display": "A transformer has a primary voltage of 12 V and a secondary voltage of 240 V. The primary coil has 100 turns. Calculate the number of secondary turns.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer, 12 V primary with 100 turns stepped up to 240 V, find secondary turns\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 12 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 100</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 240 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = ?</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-up: find Ns</text></svg><p style=\"margin-top:0.7em;\">A transformer has a primary voltage of 12 V and a secondary voltage of 240 V. The primary coil has 100 turns. Calculate the number of secondary turns.</p>",
+        "solutions": [
+          2000
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Rearrange \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\) for the secondary turns: \\(n_s = n_p \\times \\frac{V_s}{V_p}\\)."
+          },
+          {
+            "pre": "np \u00d7 Vs = 100 \u00d7 240 = ",
+            "hint": "Multiply the primary turns by the secondary voltage.",
+            "post": "",
+            "answer": 24000
+          },
+          {
+            "pre": "Divide by Vp: 24000 \u00f7 12 = ",
+            "hint": "Divide by the primary voltage.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2000
+          },
+          {
+            "pre": "Check: Vs = Vp \u00d7 ns \u00f7 np = 12 \u00d7 2000 \u00f7 100 = ",
+            "done": "It gives 240 V, the stated secondary voltage, so ns = 2000 turns.",
+            "hint": "Work it left to right.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 240
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 5,
+            "message": "ns = np \u00d7 (Vs/Vp) = 100 \u00d7 (240/12) = 100 \u00d7 20 = 2000 turns. Flipping the fraction gives just 5.",
+            "pattern": "wrong_rearrange"
+          }
+        ]
+      },
+      {
+        "hint": "Find the turns ratio, then multiply the primary voltage by it.",
+        "unit": "V",
+        "display": "A transformer has 1000 primary turns and 2000 secondary turns. The primary voltage is 230 V. Calculate the secondary voltage.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer, 230 V primary with 1000 turns, 2000 secondary turns, find secondary voltage\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 230 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 1000</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = ?</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = 2000</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-up: find Vs</text></svg><p style=\"margin-top:0.7em;\">A transformer has 1000 primary turns and 2000 secondary turns. The primary voltage is 230 V. Calculate the secondary voltage.</p>",
+        "solutions": [
+          460
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Use \\(V_s = V_p \\times \\frac{n_s}{n_p}\\)."
+          },
+          {
+            "pre": "Turns ratio ns \u00f7 np = 2000 \u00f7 1000 = ",
+            "hint": "Divide the secondary turns by the primary turns.",
+            "post": "",
+            "answer": 2
+          },
+          {
+            "pre": "Vs = 230 \u00d7 2 = ",
+            "hint": "Multiply the primary voltage by the ratio.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 460
+          },
+          {
+            "pre": "Check: Vs \u00f7 Vp = 460 \u00f7 230 = ",
+            "done": "That matches the turns ratio 2000 \u00f7 1000 = 2, so Vs = 460 V.",
+            "hint": "Divide the two voltages.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 115,
+            "message": "Vs = Vp \u00d7 (ns/np) = 230 \u00d7 (2000/1000) = 230 \u00d7 2 = 460 V. More secondary turns means a higher voltage.",
+            "pattern": "inverse_ratio"
+          }
+        ]
+      },
+      {
+        "hint": "Find the turns ratio, then multiply the primary voltage by it.",
+        "unit": "V",
+        "display": "A transformer has 800 primary turns and 80 secondary turns. The primary voltage is 240 V. Calculate the secondary voltage.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer, 240 V primary with 800 turns, 80 secondary turns, find secondary voltage\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 240 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 800</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = ?</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = 80</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-down: find Vs</text></svg><p style=\"margin-top:0.7em;\">A transformer has 800 primary turns and 80 secondary turns. The primary voltage is 240 V. Calculate the secondary voltage.</p>",
+        "solutions": [
+          24
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Use \\(V_s = V_p \\times \\frac{n_s}{n_p}\\)."
+          },
+          {
+            "pre": "Turns ratio ns \u00f7 np = 80 \u00f7 800 = ",
+            "hint": "Divide the secondary turns by the primary turns.",
+            "post": "",
+            "answer": 0.1
+          },
+          {
+            "pre": "Vs = 240 \u00d7 0.1 = ",
+            "hint": "Multiply the primary voltage by the ratio.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 24
+          },
+          {
+            "pre": "Check: Vs \u00f7 Vp = 24 \u00f7 240 = ",
+            "done": "That equals 80 \u00f7 800 = 0.1, so Vs = 24 V is right.",
+            "hint": "Divide the two voltages.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.1
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 2400,
+            "message": "Vs = Vp \u00d7 (ns/np) = 240 \u00d7 (80/800) = 240 \u00d7 0.1 = 24 V. Flipping the ratio gives 2400 V, far too big.",
+            "pattern": "inverse_ratio"
+          }
+        ]
+      },
+      {
+        "unit": "",
+        "display": "A transformer has 200 primary turns and 1000 secondary turns. Is this a step-up or a step-down transformer?",
+        "options": [
+          "Step-up",
+          "Step-down"
+        ],
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer with 200 primary turns and 1000 secondary turns, decide step-up or step-down\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 200</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = 1000</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-up or step-down?</text></svg><p style=\"margin-top:0.7em;\">A transformer has 200 primary turns and 1000 secondary turns. Is this a step-up or a step-down transformer?</p>",
+        "solutions": [
+          0
+        ],
+        "calculator": false,
+        "input_type": "multiple_choice",
+        "higher_only": false,
+        "equation_hint": "More secondary turns means step-up",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": null,
+            "message": "More secondary turns (1000) than primary (200) means the voltage is stepped UP. This is a step-up transformer.",
+            "pattern": "confused"
+          }
+        ],
+        "guided_skip_reason": "Conceptual step-up/step-down identification; no numeric solve to walk through."
+      }
+    ],
+    "silver": [
+      {
+        "hint": "Find the voltage ratio, then multiply the primary turns by it.",
+        "unit": "",
+        "display": "A step-up transformer at a power station has a primary voltage of 25 000 V and a secondary voltage of 400 000 V. The primary coil has 500 turns. Calculate the number of secondary turns.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Power-station transformer stepping 25 000 V up to 400 000 V with 500 primary turns, find secondary turns\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 25 000 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 500</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 400 000 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = ?</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-up: find Ns</text></svg><p style=\"margin-top:0.7em;\">A step-up transformer at a power station has a primary voltage of 25 000 V and a secondary voltage of 400 000 V. The primary coil has 500 turns. Calculate the number of secondary turns.</p>",
+        "solutions": [
+          8000
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Rearrange \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\) for the secondary turns: \\(n_s = n_p \\times \\frac{V_s}{V_p}\\)."
+          },
+          {
+            "pre": "Voltage ratio Vs \u00f7 Vp = 400000 \u00f7 25000 = ",
+            "hint": "Divide the secondary voltage by the primary voltage.",
+            "post": "",
+            "answer": 16
+          },
+          {
+            "pre": "ns = np \u00d7 16 = 500 \u00d7 16 = ",
+            "hint": "Multiply the primary turns by the ratio.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 8000
+          },
+          {
+            "pre": "Check: ns \u00f7 np = 8000 \u00f7 500 = ",
+            "done": "That matches the voltage ratio 16, so ns = 8000 turns.",
+            "hint": "Divide the two turn numbers.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 16
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 31.25,
+            "message": "ns = np \u00d7 (Vs/Vp) = 500 \u00d7 (400 000/25 000) = 500 \u00d7 16 = 8000 turns. Flipping the ratio gives about 31.",
+            "pattern": "wrong_rearrange"
+          }
+        ]
+      },
+      {
+        "hint": "Multiply the secondary voltage by the secondary current, then divide by the primary voltage.",
+        "unit": "A",
+        "accept": 0.005,
+        "display": "A transformer steps down 230 V to 12 V. The secondary current is 4 A. Calculate the primary current, assuming 100% efficiency.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Step-down transformer 230 V to 12 V, secondary current 4 A, 100 percent efficient, find primary current\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 230 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ip = ?</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 12 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Is = 4 A</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Ideal: find Ip</text></svg><p style=\"margin-top:0.7em;\">A transformer steps down 230 V to 12 V. The secondary current is 4 A. Calculate the primary current, assuming 100% efficiency.</p>",
+        "solutions": [
+          0.209
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "For a 100% efficient transformer, power in = power out: \\(V_p I_p = V_s I_s\\), so \\(I_p = \\frac{V_s I_s}{V_p}\\)."
+          },
+          {
+            "pre": "Vs \u00d7 Is = 12 \u00d7 4 = ",
+            "hint": "Multiply the secondary voltage by the secondary current.",
+            "post": "",
+            "answer": 48
+          },
+          {
+            "pre": "Divide by Vp (to 3 d.p.): 48 \u00f7 230 = ",
+            "hint": "Divide by the primary voltage.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.209
+          },
+          {
+            "pre": "Check the power balance, power out = Vs \u00d7 Is = 12 \u00d7 4 = ",
+            "done": "Power in is Vp \u00d7 Ip \u2248 230 \u00d7 0.209 = 48 W too, so Ip = 0.209 A.",
+            "hint": "Multiply the secondary voltage by the secondary current.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 48
+          }
+        ],
+        "equation_hint": "\\(V_p I_p = V_s I_s\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 76.67,
+            "message": "Ip = VsIs/Vp = (12 \u00d7 4)/230 = 48/230 = 0.209 A. Scaling the current up with the voltage ratio gives about 77 A, which is wrong.",
+            "pattern": "inverse_error"
+          }
+        ]
+      },
+      {
+        "hint": "Square the current, then multiply by the resistance.",
+        "unit": "W",
+        "display": "Electricity is transmitted at 50 A through cables with a total resistance of 5 \u03a9. Calculate the power wasted as heat in the cables.",
+        "question": "<svg viewBox=\"0 0 400 130\" role=\"img\" aria-label=\"Transmission cable carrying 50 A with resistance 5 ohms, find power lost as heat\" style=\"max-width:320px;margin:0.6em auto;display:block;\"><line x1=\"40\" y1=\"58\" x2=\"150\" y2=\"58\" stroke=\"currentColor\" stroke-width=\"2\"/><line x1=\"250\" y1=\"58\" x2=\"360\" y2=\"58\" stroke=\"currentColor\" stroke-width=\"2\"/><polygon points=\"82,51 100,58 82,65\" fill=\"#dc2626\"/><text x=\"96\" y=\"42\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">I = 50 A</text><rect x=\"150\" y=\"45\" width=\"100\" height=\"26\" fill=\"currentColor\" fill-opacity=\"0.14\" stroke=\"currentColor\" stroke-width=\"1.5\"/><text x=\"200\" y=\"62\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" fill=\"currentColor\">cable, R = 5 \u03a9</text><text x=\"200\" y=\"102\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">P lost = ?</text></svg><p style=\"margin-top:0.7em;\">Electricity is transmitted at 50 A through cables with a total resistance of 5 \u03a9. Calculate the power wasted as heat in the cables.</p>",
+        "solutions": [
+          12500
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Cable loss uses \\(P = I^2 R\\). Square the current before multiplying by the resistance."
+          },
+          {
+            "pre": "Square the current: 50 \u00d7 50 = ",
+            "hint": "Multiply the current by itself.",
+            "post": "",
+            "answer": 2500
+          },
+          {
+            "pre": "Multiply by R: 2500 \u00d7 5 = ",
+            "hint": "Multiply by the resistance.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 12500
+          },
+          {
+            "pre": "Check by dividing back: 12500 \u00f7 5 = ",
+            "done": "That is 50\u00b2 = 2500, so P = 12 500 W is right.",
+            "hint": "Divide the power by the resistance.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 2500
+          }
+        ],
+        "equation_hint": "\\(P = I^2 R\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 250,
+            "message": "P = I\u00b2R = 50\u00b2 \u00d7 5 = 2500 \u00d7 5 = 12 500 W. Square the current first, or you get only 250 W.",
+            "pattern": "forgot_square"
+          }
+        ]
+      },
+      {
+        "hint": "Multiply the primary turns by the secondary voltage, then divide by the primary voltage.",
+        "unit": "",
+        "accept": 0.5,
+        "display": "A local substation steps voltage down from 11 000 V to 230 V. The primary coil has 1000 turns. Calculate the number of secondary turns.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Substation transformer stepping 11 000 V down to 230 V with 1000 primary turns, find secondary turns\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 11 000 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Np = 1000</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 230 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ns = ?</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Step-down: find Ns</text></svg><p style=\"margin-top:0.7em;\">A local substation steps voltage down from 11 000 V to 230 V. The primary coil has 1000 turns. Calculate the number of secondary turns.</p>",
+        "solutions": [
+          20.9
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "Rearrange \\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\) for the secondary turns: \\(n_s = n_p \\times \\frac{V_s}{V_p}\\)."
+          },
+          {
+            "pre": "np \u00d7 Vs = 1000 \u00d7 230 = ",
+            "hint": "Multiply the primary turns by the secondary voltage.",
+            "post": "",
+            "answer": 230000
+          },
+          {
+            "pre": "Divide by Vp (to 1 d.p.): 230000 \u00f7 11000 = ",
+            "hint": "Divide by the primary voltage.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 20.9
+          },
+          {
+            "pre": "Check: Vs = Vp \u00d7 ns \u00f7 np = 11000 \u00d7 20.9 \u00f7 1000 = ",
+            "done": "That is about 230 V, the stated secondary voltage, so ns = 20.9 turns.",
+            "hint": "Work it left to right.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 229.9
+          }
+        ],
+        "equation_hint": "\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 47826,
+            "message": "ns = np \u00d7 (Vs/Vp) = 1000 \u00d7 (230/11 000) \u2248 20.9 turns. Flipping the ratio gives about 47 800, far too many.",
+            "pattern": "wrong_rearrange"
+          }
+        ]
+      },
+      {
+        "hint": "Divide the secondary power by the secondary voltage.",
+        "unit": "A",
+        "accept": 0.005,
+        "display": "A transformer steps 230 V down to 9 V a.c. The secondary coil delivers 3 W. Calculate the secondary current.",
+        "question": "<svg viewBox=\"0 0 440 190\" role=\"img\" aria-label=\"Transformer with 9 V secondary delivering 3 W, find the secondary current\" style=\"max-width:340px;margin:0.6em auto;display:block;\"><rect x=\"195\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"225\" y=\"52\" width=\"20\" height=\"96\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"52\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><rect x=\"195\" y=\"134\" width=\"50\" height=\"14\" fill=\"currentColor\" fill-opacity=\"0.22\"/><circle cx=\"205\" cy=\"78\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"100\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"205\" cy=\"122\" r=\"11\" fill=\"none\" stroke=\"#dc2626\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"74\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"92\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"110\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><circle cx=\"235\" cy=\"128\" r=\"10\" fill=\"none\" stroke=\"#2563eb\" stroke-width=\"2.5\"/><text x=\"98\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vp = 230 V</text><text x=\"98\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Ps = 3 W</text><text x=\"342\" y=\"88\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Vs = 9 V</text><text x=\"342\" y=\"106\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"12\" font-weight=\"600\" fill=\"currentColor\">Is = ?</text><text x=\"220\" y=\"176\" text-anchor=\"middle\" font-family=\"Inter,sans-serif\" font-size=\"11\" font-style=\"italic\" fill=\"currentColor\" fill-opacity=\"0.75\">Find Is from power</text></svg><p style=\"margin-top:0.7em;\">A transformer steps 230 V down to 9 V a.c. The secondary coil delivers 3 W. Calculate the secondary current.</p>",
+        "solutions": [
+          0.333
+        ],
+        "calculator": true,
+        "input_type": "single_value",
+        "higher_only": false,
+        "guided_steps": [
+          {
+            "say": "The secondary side obeys \\(P = V_s I_s\\), so \\(I_s = \\frac{P}{V_s}\\)."
+          },
+          {
+            "pre": "Write the secondary power in watts, Ps = ",
+            "hint": "The coil delivers 3 W.",
+            "post": "",
+            "answer": 3
+          },
+          {
+            "pre": "Is = Ps \u00f7 Vs (to 3 d.p.) = 3 \u00f7 9 = ",
+            "hint": "Divide the power by the secondary voltage.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 0.333
+          },
+          {
+            "pre": "Check the power, Vs \u00d7 Is to the nearest watt = 9 \u00d7 0.333 = ",
+            "done": "That is about 3 W, the stated power, so Is = 0.333 A.",
+            "hint": "Multiply the secondary voltage by your answer.",
+            "post": "",
+            "phase": "substitute",
+            "answer": 3
+          }
+        ],
+        "equation_hint": "\\(P = V_s I_s\\)",
+        "misconceptions": [
+          {
+            "check": "common",
+            "expect": 3,
+            "message": "P = Vs \u00d7 Is, so Is = P/Vs = 3/9 = 0.333 A. Dividing the wrong way (9/3) gives 3 A.",
+            "pattern": "inverse_error"
+          }
+        ]
+      }
+    ],
+    "gold_description": "Multi-step: combine turns with power, bring in efficiency below 100%, or find grid loss with P = I squared R.",
+    "bronze_description": "One equation, values already in the right units. Use the turns ratio Vp/Vs = np/ns to find a voltage or a number of turns.",
+    "silver_description": "Rearrange or chain: use the power equation VpIp = VsIs, find a missing voltage first, or work out a cable loss with P = I squared R."
+  },
+  "related_videos": [],
+  "worked_examples": [
+    {
+      "steps": [
+        {
+          "label": "Step 1: Write the turns ratio equation",
+          "content": "<p>\\(\\frac{V_p}{V_s} = \\frac{n_p}{n_s}\\)</p>"
+        },
+        {
+          "label": "Step 2: Rearrange and substitute",
+          "content": "<p>\\(V_s = V_p \\times \\frac{n_s}{n_p} = 25 \\times \\frac{1000}{200}\\)</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p>\\(V_s\\) = <strong>125 V</strong></p>",
+          "is_answer": true
+        }
+      ],
+      "question": "A transformer has 200 primary turns and 1000 secondary turns. The primary voltage is 25 V. Calculate the secondary voltage.",
+      "difficulty": "Bronze"
+    },
+    {
+      "steps": [
+        {
+          "label": "Step 1: Write the power equation",
+          "content": "<p>\\(V_p I_p = V_s I_s\\)</p>"
+        },
+        {
+          "label": "Step 2: Rearrange for Is",
+          "content": "<p>\\(I_s = \\frac{V_p I_p}{V_s} = \\frac{25\\,000 \\times 800}{400\\,000}\\)</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p>\\(I_s\\) = <strong>50 A</strong></p>",
+          "is_answer": true
+        }
+      ],
+      "question": "A step-up transformer has primary voltage 25 000 V and secondary voltage 400 000 V. The primary current is 800 A. Calculate the secondary current (assume 100% efficiency).",
+      "difficulty": "Silver"
+    },
+    {
+      "steps": [
+        {
+          "label": "Step 1: Write the equation",
+          "content": "<p>\\(P = I^2 R\\)</p>"
+        },
+        {
+          "label": "Step 2: Substitute",
+          "content": "<p>\\(P = 50^2 \\times 5 = 2500 \\times 5\\)</p>"
+        },
+        {
+          "label": "Answer",
+          "content": "<p>\\(P\\) = <strong>12 500 W</strong></p>",
+          "is_answer": true
+        }
+      ],
+      "question": "Electricity is transmitted at 50 A through cables with total resistance 5 \u03a9. Calculate the power wasted as heat.",
+      "difficulty": "Gold"
+    }
+  ]
+}

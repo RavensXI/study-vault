@@ -1,0 +1,64 @@
+OPENER display: None
+### opener
+  [0] SAY 'A sweets factory melts 100 g of mixture in a tray. Out of every 100 g, 75 g sets into the sweet they sell and 25 g stays stuck to the tray as waste.' done=None
+  [1] BOX pre='Out of 100 g of product, what percentage is the sweet you actually want? ' post='%' ans=75 phase=None hint='75 out of 100 is what percentage?' done=None
+  [2] SAY 'You just found the <strong>atom economy</strong>: the share of the total product that is the thing you want. In a reaction the masses come from the balanced equation (the \\(M_r\\) of each product), but the idea is identical: desired ÷ all products × 100.' done=None
+  [3] BOX pre='Now gases. One mole of any gas at RTP fills 24 dm³, like identical balloons. Three moles fill ' post=' dm³' ans=72 phase=None hint='Three lots of 24.' done=None
+  [4] SAY 'That is <strong>molar volume</strong>: volume = moles × 24. Two ideas, both just scaling and sharing, and that is the whole lesson.' done=None
+TEACH bronze display: Calculate the volume of 0.25 mol of carbon dioxide at RTP, in dm³.
+### teach.bronze
+  [0] SAY 'Molar volume: at RTP one mole of any gas fills 24 dm³, so volume = moles × 24.' done=None
+  [1] BOX pre='moles of gas = ' post=None ans=0.25 phase=None hint='It is given in the question.' done=None
+  [2] BOX pre='the molar volume in dm³ = ' post=None ans=24 phase=None hint='One mole of any gas at RTP fills this.' done=None
+  [3] BOX pre='now multiply: 0.25 × 24 = ' post=None ans=6 phase=None hint='A quarter of 24.' done=None
+  [4] BOX pre='Check: 24 ÷ 6 = ' post=None ans=4 phase=None hint='Divide the molar volume by your answer.' done='0.25 mol is a quarter of a mole, so a quarter of 24 dm³. State it as 6 dm³.'
+TEACH silver display: 8.0 g of methane, CH₄, burns completely: CH₄ + 2O₂ → CO₂ + 2H₂O. Calculate the volume of CO₂ produced at RTP, in dm³. (Mr: CH₄ = 16)
+### teach.silver
+  [0] SAY 'Mass is given, so find moles first, then use the ratio, then \\(V = n \\times 24\\).' done=None
+  [1] BOX pre='moles CH₄ = 8.0 ÷ 16 = ' post=None ans=0.5 phase=None hint='Mass over Mr.' done=None
+  [2] SAY 'The ratio CH₄ : CO₂ is 1 : 1.' done=None
+  [3] BOX pre='moles CO₂ = ' post=None ans=0.5 phase=None hint='Same as the moles of CH₄.' done=None
+  [4] BOX pre='volume = 0.5 × 24 = ' post=None ans=12 phase=None hint='Half of 24.' done=None
+  [5] BOX pre='Check: 12 ÷ 24 = ' post=None ans=0.5 phase=None hint='Divide back by the molar volume.' done='Returns 0.5 mol, so the volume of CO₂ is 12 dm³.'
+TEACH gold display: 4.0 g of calcium carbonate is heated: CaCO₃ → CaO + CO₂. The student collects 720 cm³ of CO₂ at RTP. Calculate the percentage yield. (Mr: CaCO₃ = 100)
+### teach.gold
+  [0] SAY 'Plan: find the theoretical volume of CO₂, convert it to cm³, then compare with the 720 cm³ collected.' done=None
+  [1] BOX pre='moles CaCO₃ = 4.0 ÷ 100 = ' post=None ans=0.04 phase=None hint='Mass over Mr.' done=None
+  [2] BOX pre='moles CO₂ (ratio 1 : 1) = ' post=None ans=0.04 phase=None hint='Same as CaCO₃.' done=None
+  [3] BOX pre='theoretical volume in dm³ = 0.04 × 24 = ' post=None ans=0.96 phase=None hint='0.04 lots of 24.' done=None
+  [4] BOX pre='convert to cm³ to match the data: 0.96 × 1000 = ' post=None ans=960 phase=None hint='1 dm³ = 1000 cm³.' done=None
+  [5] BOX pre='yield = (720 ÷ 960) × 100 = ' post=None ans=75 phase=None hint='720 over 960, times 100.' done=None
+  [6] BOX pre='Check: 75% of 960 = 0.75 × 960 = ' post=None ans=720 phase=None hint='Take 75% of the theoretical volume.' done='Matches the 720 cm³ collected, so the percentage yield is 75%.'
+
+==== TIER GUIDES ====
+bronze title: Bronze: one gas-law step
+  steps: ['<strong>Molar volume:</strong> at RTP one mole of any gas fills 24 dm³. Volume = moles × 24; moles = volume ÷ 24.', '<strong>Atom economy</strong> for a single desired product = \\(M_r\\) of that product ÷ \\(M_r\\) of all products × 100.', 'Values arrive ready to use. Pick the equation, substitute, then state the unit (dm³, mol or %).']
+  example.q: Calculate the volume of 3 mol of nitrogen gas at RTP, in dm³.
+    - Equation :: <p>volume = moles × 24</p> ans? None
+    - Substitute :: <p>volume = 3 × 24</p> ans? None
+    - Check :: <p>72 ÷ 24 = 3 mol ✓</p> ans? None
+    - Answer :: <p><strong>72 dm³</strong></p> ans? True
+silver title: Silver: convert to moles first
+  steps: ['A mass or a different substance is given, so <strong>find moles first</strong>: moles = mass ÷ \\(M_r\\).', "Use the balanced equation's <strong>ratio</strong> to switch to the gas you want, then volume = moles × 24.", 'For yield, turn moles into a theoretical mass (moles × \\(A_r\\)), then actual ÷ theoretical × 100.']
+  example.q: 6.0 g of carbon burns: C + O₂ → CO₂. Calculate the volume of CO₂ at RTP, in dm³. (Ar: C = 12)
+    - Moles :: <p>moles C = 6 ÷ 12 = 0.5</p> ans? None
+    - Ratio :: <p>C : CO₂ = 1 : 1, so moles CO₂ = 0.5</p> ans? None
+    - Volume :: <p>0.5 × 24 = 12</p> ans? None
+    - Check :: <p>12 ÷ 24 = 0.5 mol ✓</p> ans? None
+    - Answer :: <p><strong>12 dm³</strong></p> ans? True
+gold title: Gold: two ideas chained
+  steps: ['Multi-step: often a <strong>theoretical amount</strong> then a comparison, so plan the route before you start.', 'Watch units: molar volume gives dm³, but collected gas is often in cm³. <strong>1 dm³ = 1000 cm³.</strong>', 'Atom economy needs the <strong>coefficients</strong> in every \\(M_r\\) (2Fe means 2 × 56). Round only at the very end.']
+  example.q: 1.2 g of magnesium reacts with excess HCl: Mg + 2HCl → MgCl₂ + H₂. It gives 960 cm³ of H₂ at RTP. Find the percentage yield. (Ar: Mg = 24)
+    - Moles :: <p>1.2 ÷ 24 = 0.05 mol Mg, so 0.05 mol H₂</p> ans? None
+    - Theoretical volume :: <p>0.05 × 24 = 1.2 dm³ = 1200 cm³</p> ans? None
+    - Yield :: <p>(960 ÷ 1200) × 100</p> ans? None
+    - Check :: <p>0.8 × 1200 = 960 cm³ ✓</p> ans? None
+    - Answer :: <p><strong>80%</strong></p> ans? True
+
+==== METHOD CARD ====
+{"steps": ["Identify which calculation: gas volume, atom economy, or percentage yield", "For gas volume: find moles of gas (from equation), then multiply by 24", "For atom economy: find Mr of desired product ÷ Mr of ALL products × 100", "For yield: actual mass ÷ theoretical mass × 100"], "title": "Gas Volumes and Atom Economy", "content": "<p>Three calculations that test different ideas.</p><p><strong>Gas volume at RTP:</strong> one mole of any gas occupies 24 dm³ (24,000 cm³). Volume = moles × 24; moles = volume ÷ 24.</p><p><strong>Atom economy</strong> is about the balanced equation: Mr of the desired product ÷ Mr of all products × 100. Use product Mr values, never reactants, and include the coefficients.</p><p><strong>Percentage yield</strong> is about the experiment: actual ÷ theoretical × 100. It is always below 100% because of losses and side reactions.</p>"}
+
+==== exam_context ==== {"marks": "3–5 per calculation", "paper": "Paper 1 (Chemistry) or Paper 2 (Chemistry)", "frequency": "High : atom economy and gas volumes are common in Separate Chemistry"}
+==== related_videos ==== []
+==== topic_links ==== {"prerequisites": []}
+==== worked_examples count ==== 3

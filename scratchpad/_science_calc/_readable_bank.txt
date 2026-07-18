@@ -1,0 +1,269 @@
+
+########## BRONZE ##########
+
+----- bronze[0] -----
+display: An iron block has a mass of 3.9 kg and a volume of 0.0005 m³. Calculate its density.
+input_type: single_value | solutions: [7800] | accept: None | unit: kg/m³ | calc: True | higher_only: None
+equation_hint: \(\rho = \frac{m}{V}\)
+hint: Density is mass divided by volume, both already in base units.
+  MISC pattern=inverse_error expect=None :: Density = mass ÷ volume, not volume ÷ mass. ρ = 3.9 ÷ 0.0005 = 7800 kg/m³.
+  step0 SAY: Density is mass shared over volume: \(\rho = \frac{m}{V}\). Both values are already in kg and m³, so go straight in.
+  step1 pre='Mass in kg, m = ' post='' answer=3.9 hint='It is given in kg already: 3.9.'
+  step2 pre='Volume in m³, V = ' post='' answer=0.0005 hint='Given in m³ already: 0.0005.'
+  step3 [PHASE] pre='Now divide: 3.9 ÷ 0.0005 = ' post='' answer=7800 hint='Dividing by 0.0005 is the same as × 2000.'
+  step4 pre='Check by multiplying back: 7800 × 0.0005 = ' post='' answer=3.9 hint='7800 × 0.0005 should return the original mass.' done='Back to the mass we started with, so the density is 7800 kg/m³.'
+  step5 SAY: So \(\rho = 7800\) kg/m³.
+
+----- bronze[1] -----
+display: A liquid has a density of 800 kg/m³ and occupies a volume of 0.002 m³. Calculate its mass.
+input_type: single_value | solutions: [1.6] | accept: None | unit: kg | calc: True | higher_only: None
+equation_hint: \(\rho = \frac{m}{V}\)
+hint: Rearrange to mass = density × volume.
+  MISC pattern=wrong_rearrange expect=None :: Rearrange ρ = m/V to get m = ρ × V = 800 × 0.002 = 1.6 kg.
+  step0 SAY: Density and volume are given, and we want the mass. Rearrange \(\rho = \frac{m}{V}\) to \(m = \rho V\).
+  step1 pre='Density in kg/m³, ρ = ' post='' answer=800 hint='Given: 800.'
+  step2 pre='Volume in m³, V = ' post='' answer=0.002 hint='Given: 0.002.'
+  step3 [PHASE] pre='Multiply: 800 × 0.002 = ' post='' answer=1.6 hint='800 × 0.002 = 800 ÷ 500.'
+  step4 pre='Check with the original equation: 1.6 ÷ 0.002 = ' post='' answer=800 hint='Mass ÷ volume should give back 800.' done='That returns the density, so the mass is 1.6 kg.'
+  step5 SAY: So \(m = 1.6\) kg.
+
+----- bronze[2] -----
+display: A 2 kg block of aluminium is heated from 25°C to 75°C. The SHC of aluminium is 900 J/(kg°C). Calculate the energy transferred.
+input_type: single_value | solutions: [90000] | accept: None | unit: J | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(\Delta E = mc\Delta\theta\)
+hint: Find the temperature change first, then multiply m × c × Δθ.
+  MISC pattern=forgot_step expect=135000 :: Use the temperature change, not the final temperature. Δθ = 75 − 25 = 50°C. ΔE = 2 × 900 × 50 = 90,000 J.
+  step0 SAY: Heating with no state change means specific heat capacity: \(\Delta E = mc\Delta\theta\). First find the temperature change.
+  step1 pre='Temperature change Δθ = 75 − 25 = ' post='' answer=50 hint='Final minus start: 75 − 25.'
+  step2 pre='Mass in kg, m = ' post='' answer=2 hint='Given in kg: 2.'
+  step3 [PHASE] pre='Substitute and multiply: 2 × 900 × 50 = ' post='' answer=90000 hint='2 × 900 = 1800, then × 50.'
+  step4 pre='Check: 90000 ÷ (2 × 900) = 90000 ÷ 1800 = ' post='' answer=50 hint='Energy ÷ (m × c) returns the temperature change.' done='Back to the 50°C change, so the energy is 90,000 J.'
+  step5 SAY: So \(\Delta E = 90{,}000\) J.
+
+----- bronze[3] -----
+display: A 3 kg block of water is heated. The SHC of water is 4200 J/(kg°C). The temperature rises from 20°C to 100°C. Calculate the energy supplied.
+input_type: single_value | solutions: [1008000] | accept: None | unit: J | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(\Delta E = mc\Delta\theta\)
+hint: Temperature change is 100 − 20, then m × c × Δθ.
+  MISC pattern=forgot_step expect=1260000 :: Δθ = 100 − 20 = 80°C. ΔE = 3 × 4200 × 80 = 1,008,000 J.
+  step0 SAY: Temperature is changing, so use SHC: \(\Delta E = mc\Delta\theta\). Find the change first.
+  step1 pre='Δθ = 100 − 20 = ' post='' answer=80 hint='Final minus start: 100 − 20.'
+  step2 pre='Mass in kg, m = ' post='' answer=3 hint='Given in kg: 3.'
+  step3 [PHASE] pre='Multiply: 3 × 4200 × 80 = ' post='' answer=1008000 hint='3 × 4200 = 12600, then × 80.'
+  step4 pre='Check: 1008000 ÷ (3 × 4200) = 1008000 ÷ 12600 = ' post='' answer=80 hint='Energy ÷ (m × c) returns the temperature change.' done='Back to the 80°C change, so the energy is 1,008,000 J.'
+  step5 SAY: So \(\Delta E = 1{,}008{,}000\) J.
+
+----- bronze[4] -----
+display: Calculate the energy needed to melt 0.5 kg of ice. The specific latent heat of fusion of water is 334,000 J/kg.
+input_type: single_value | solutions: [167000] | accept: None | unit: J | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(E = mL\)
+hint: State change, so energy = mass × latent heat.
+  MISC pattern=inverse_error expect=None :: E = m × L = 0.5 × 334,000 = 167,000 J. Don't divide, multiply mass by the specific latent heat.
+  step0 SAY: Melting is a state change, so use latent heat: \(E = mL\). No temperature change here.
+  step1 pre='Mass in kg, m = ' post='' answer=0.5 hint='Given in kg: 0.5.'
+  step2 pre='Latent heat of fusion, L = ' post='' answer=334000 hint='The value given: 334,000.'
+  step3 [PHASE] pre='Multiply: 0.5 × 334000 = ' post='' answer=167000 hint='Half of 334,000.'
+  step4 pre='Check: 167000 ÷ 0.5 = ' post='' answer=334000 hint='Energy ÷ mass returns the latent heat.' done='Back to L, so the energy is 167,000 J.'
+  step5 SAY: So \(E = 167{,}000\) J.
+
+----- bronze[5] -----
+display: Calculate the energy needed to boil 0.1 kg of water at 100°C. The specific latent heat of vaporisation of water is 2,260,000 J/kg.
+input_type: single_value | solutions: [226000] | accept: None | unit: J | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(E = mL\)
+hint: Boiling is a state change: energy = mass × latent heat of vaporisation.
+  MISC pattern=wrong_formula expect=None :: This is a state change (boiling), so use E = mL. E = 0.1 × 2,260,000 = 226,000 J. Don't use SHC, the temperature isn't changing during boiling.
+  step0 SAY: Boiling is a state change, so use latent heat: \(E = mL\). Use the vaporisation value.
+  step1 pre='Mass in kg, m = ' post='' answer=0.1 hint='Given in kg: 0.1.'
+  step2 pre='Latent heat of vaporisation, L = ' post='' answer=2260000 hint='Given: 2,260,000.'
+  step3 [PHASE] pre='Multiply: 0.1 × 2260000 = ' post='' answer=226000 hint='One tenth of 2,260,000.'
+  step4 pre='Check: 226000 ÷ 0.1 = ' post='' answer=2260000 hint='Energy ÷ mass returns the latent heat.' done='Back to L, so the energy is 226,000 J.'
+  step5 SAY: So \(E = 226{,}000\) J.
+
+----- bronze[6] -----
+display: Which equation would you use to calculate the energy needed to change the state of a substance without changing its temperature?
+input_type: multiple_choice | solutions: [2] | accept: None | unit: None | calc: False | higher_only: None
+options: ['\\(\\rho = \\frac{m}{V}\\)', '\\(\\Delta E = mc\\Delta\\theta\\)', '\\(E = mL\\)', '\\(E_p = mgh\\)']
+hint: A state change at constant temperature uses latent heat.
+  MISC pattern=wrong_equation expect=None :: State changes (melting, boiling) use latent heat: E = mL. SHC (mcΔθ) is for temperature changes, not state changes.
+  guided_steps: NONE  skip_reason: None
+
+----- bronze[7] -----
+display: A stone has a mass of 0.15 kg and a volume of 0.00005 m³. Calculate its density.
+input_type: single_value | solutions: [3000] | accept: None | unit: kg/m³ | calc: True | higher_only: None
+equation_hint: \(\rho = \frac{m}{V}\)
+hint: Density is mass divided by volume.
+  MISC pattern=inverse_error expect=None :: ρ = m ÷ V = 0.15 ÷ 0.00005 = 3000 kg/m³. Divide mass by volume, not the other way round.
+  step0 SAY: Density is mass over volume: \(\rho = \frac{m}{V}\). Both units are already base units.
+  step1 pre='Mass in kg, m = ' post='' answer=0.15 hint='Given in kg: 0.15.'
+  step2 pre='Volume in m³, V = ' post='' answer=5e-05 hint='Given in m³: 0.00005.'
+  step3 [PHASE] pre='Divide: 0.15 ÷ 0.00005 = ' post='' answer=3000 hint='0.15 ÷ 0.00005 = 0.15 × 20000.'
+  step4 pre='Check: 3000 × 0.00005 = ' post='' answer=0.15 hint='Density × volume returns the mass.' done='Back to the mass, so the density is 3000 kg/m³.'
+  step5 SAY: So \(\rho = 3000\) kg/m³.
+
+########## SILVER ##########
+
+----- silver[0] -----
+display: A 400 g piece of copper is heated from 18°C to 118°C. The SHC of copper is 385 J/(kg°C). Calculate the energy transferred in kJ.
+input_type: single_value | solutions: [15.4] | accept: None | unit: kJ | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(\Delta E = mc\Delta\theta\)
+hint: Convert 400 g to kg, find Δθ, then convert the answer to kJ.
+  MISC pattern=unit_error expect=None :: Convert g to kg: 400 g = 0.4 kg. Δθ = 118 − 18 = 100°C. ΔE = 0.4 × 385 × 100 = 15,400 J = 15.4 kJ.
+  MISC pattern=forgot_step expect=None :: Find the temperature change first: Δθ = 118 − 18 = 100°C, not 118°C.
+  step0 SAY: Temperature is changing, so SHC: \(\Delta E = mc\Delta\theta\). The mass is in grams and the answer is wanted in kJ, so convert carefully.
+  step1 pre='Convert mass to kg: 400 ÷ 1000 = ' post='' answer=0.4 hint='Grams to kilograms: divide by 1000.'
+  step2 pre='Temperature change Δθ = 118 − 18 = ' post='' answer=100 hint='Final minus start: 118 − 18.'
+  step3 [PHASE] pre='Energy in joules: 0.4 × 385 × 100 = ' post='' answer=15400 hint='0.4 × 385 = 154, then × 100.'
+  step4 pre='Convert to kJ: 15400 ÷ 1000 = ' post='' answer=15.4 hint='Joules to kilojoules: divide by 1000.' done='15.4 kJ, matching the answer wanted in kilojoules.'
+  step5 SAY: So \(\Delta E = 15.4\) kJ.
+
+----- silver[1] -----
+display: A heater supplies 50,400 J to 2 kg of water. The SHC of water is 4200 J/(kg°C). Calculate the temperature rise.
+input_type: single_value | solutions: [6] | accept: None | unit: °C | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(\Delta E = mc\Delta\theta\)
+hint: Rearrange to Δθ = energy ÷ (m × c).
+  MISC pattern=wrong_rearrange expect=None :: Rearrange: Δθ = ΔE ÷ (mc) = 50,400 ÷ (2 × 4200) = 50,400 ÷ 8400 = 6°C.
+  step0 SAY: Energy and mass are given, and we want the temperature rise. Rearrange \(\Delta E = mc\Delta\theta\) to \(\Delta\theta = \frac{\Delta E}{mc}\).
+  step1 pre='First work out m × c: 2 × 4200 = ' post='' answer=8400 hint='Multiply mass by specific heat capacity.'
+  step2 pre='Energy supplied, ΔE = ' post='' answer=50400 hint='Given in joules: 50,400.'
+  step3 [PHASE] pre='Divide: 50400 ÷ 8400 = ' post='' answer=6 hint='50400 ÷ 8400.'
+  step4 pre='Check: 2 × 4200 × 6 = ' post='' answer=50400 hint='m × c × Δθ should return the energy.' done='Back to the 50,400 J supplied, so the rise is 6°C.'
+  step5 SAY: So \(\Delta\theta = 6\)°C.
+
+----- silver[2] -----
+display: A gold ring has a density of 19,300 kg/m³ and a mass of 9.65 g. Calculate its volume in cm³. (1 m³ = 1,000,000 cm³)
+input_type: single_value | solutions: [0.5] | accept: None | unit: cm³ | calc: True | higher_only: None
+equation_hint: \(\rho = \frac{m}{V}\)
+hint: Convert the density to g/cm³, then volume = mass ÷ density.
+  MISC pattern=unit_error expect=None :: Convert g to kg: 9.65 g = 0.00965 kg. V = m/ρ = 0.00965 ÷ 19,300 = 5 × 10⁻⁷ m³. Convert to cm³: 5 × 10⁻⁷ × 1,000,000 = 0.5 cm³.
+  MISC pattern=wrong_rearrange expect=None :: Rearrange ρ = m/V to V = m/ρ. Don't multiply mass by density.
+  step0 SAY: We want the volume, so rearrange \(\rho = \frac{m}{V}\) to \(V = \frac{m}{\rho}\). The mass is in grams, so convert the density to grams per cm³ to match.
+  step1 pre='Convert density to g/cm³: 19300 ÷ 1000 = ' post='' answer=19.3 hint='1000 kg/m³ = 1 g/cm³, so divide by 1000.'
+  step2 pre='Mass in grams, m = ' post='' answer=9.65 hint='Given in grams: 9.65.'
+  step3 [PHASE] pre='Volume: 9.65 ÷ 19.3 = ' post='' answer=0.5 hint='9.65 ÷ 19.3 = 0.5.'
+  step4 pre='Check: 19.3 × 0.5 = ' post='' answer=9.65 hint='Density × volume returns the mass.' done='Back to the 9.65 g mass, so the volume is 0.5 cm³.'
+  step5 SAY: So \(V = 0.5\) cm³.
+
+----- silver[3] -----
+display: An immersion heater provides 836,000 J to heat 2.5 kg of water. The SHC of water is 4200 J/(kg°C). The starting temperature is 15°C. Calculate the final temperature.
+input_type: single_value | solutions: [94.6] | accept: 0.5 | unit: °C | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(\Delta E = mc\Delta\theta\)
+hint: Find the rise with Δθ = energy ÷ (m × c), then add the start temperature.
+  MISC pattern=wrong_rearrange expect=None :: Δθ = ΔE ÷ (mc) = 836,000 ÷ (2.5 × 4200) = 836,000 ÷ 10,500 = 79.6°C. Final temp = 15 + 79.6 = 94.6°C.
+  MISC pattern=incomplete expect=79.6 :: You found the temperature rise (79.6°C), but the question asks for the final temperature. Add the starting temperature: 15 + 79.6 = 94.6°C.
+  step0 SAY: Find the temperature rise first, then add the starting temperature. Rearrange to \(\Delta\theta = \frac{\Delta E}{mc}\).
+  step1 pre='Work out m × c: 2.5 × 4200 = ' post='' answer=10500 hint='Mass × specific heat capacity.'
+  step2 pre='Energy, ΔE = ' post='' answer=836000 hint='Given: 836,000 J.'
+  step3 [PHASE] pre='Temperature rise (to 1 d.p.): 836000 ÷ 10500 = ' post='' answer=79.6 hint='836000 ÷ 10500 = 79.6 to 1 d.p.'
+  step4 pre='Add the start temperature: 15 + 79.6 = ' post='' answer=94.6 hint='Final temperature = start + rise.' done='94.6°C, the final temperature, not just the rise.'
+  step5 SAY: So the final temperature is \(94.6\)°C.
+
+----- silver[4] -----
+display: Calculate the energy needed to melt 250 g of ice at 0°C. The specific latent heat of fusion of water is 334,000 J/kg.
+input_type: single_value | solutions: [83500] | accept: None | unit: J | calc: True | higher_only: None
+equation_hint: Given on equation sheet: \(E = mL\)
+hint: Convert 250 g to kg, then energy = mass × latent heat.
+  MISC pattern=unit_error expect=83500000 :: Convert g to kg first: 250 g = 0.25 kg. E = mL = 0.25 × 334,000 = 83,500 J.
+  step0 SAY: Melting is a state change: \(E = mL\). The mass is in grams, so convert first.
+  step1 pre='Convert mass to kg: 250 ÷ 1000 = ' post='' answer=0.25 hint='Grams to kilograms: divide by 1000.'
+  step2 pre='Latent heat of fusion, L = ' post='' answer=334000 hint='Given: 334,000 J/kg.'
+  step3 [PHASE] pre='Multiply: 0.25 × 334000 = ' post='' answer=83500 hint='A quarter of 334,000.'
+  step4 pre='Check: 83500 ÷ 0.25 = ' post='' answer=334000 hint='Energy ÷ mass returns the latent heat.' done='Back to L, so the energy is 83,500 J.'
+  step5 SAY: So \(E = 83{,}500\) J.
+
+----- silver[5] -----
+display: A metal block of volume 60 cm³ has a mass of 162 g. Calculate its density in g/cm³.
+input_type: single_value | solutions: [2.7] | accept: None | unit: g/cm³ | calc: True | higher_only: None
+equation_hint: \(\rho = \frac{m}{V}\)
+hint: Keep grams and cm³: density = mass ÷ volume.
+  MISC pattern=unit_error expect=2700 :: The question asks for g/cm³, so keep the units as given: ρ = 162 ÷ 60 = 2.7 g/cm³. Don't convert to kg and m³.
+  MISC pattern=inverse_error expect=None :: Density = mass ÷ volume = 162 ÷ 60 = 2.7 g/cm³.
+  step0 SAY: The question asks for g/cm³, so keep grams and cm³ as they are: \(\rho = \frac{m}{V}\).
+  step1 pre='Mass in grams, m = ' post='' answer=162 hint='Given in grams: 162.'
+  step2 pre='Volume in cm³, V = ' post='' answer=60 hint='Given in cm³: 60.'
+  step3 [PHASE] pre='Divide: 162 ÷ 60 = ' post='' answer=2.7 hint='162 ÷ 60 = 2.7.'
+  step4 pre='Check: 2.7 × 60 = ' post='' answer=162 hint='Density × volume returns the mass.' done='Back to the 162 g mass, so the density is 2.7 g/cm³.'
+  step5 SAY: So \(\rho = 2.7\) g/cm³.
+
+########## GOLD ##########
+
+----- gold[0] -----
+display: Calculate the total energy needed to heat 0.3 kg of ice at 0°C to water at 40°C. SHC of water = 4200 J/(kg°C), specific latent heat of fusion of water = 334,000 J/kg.
+input_type: single_value | solutions: [150600] | accept: None | unit: J | calc: True | higher_only: None
+hint: Melt the ice, warm the water, then add the two energies.
+  MISC pattern=forgot_step expect=None :: Two steps needed. Step 1: melt the ice: E₁ = mL = 0.3 × 334,000 = 100,200 J. Step 2: heat the water: E₂ = mcΔθ = 0.3 × 4200 × 40 = 50,400 J. Total = 100,200 + 50,400 = 150,600 J.
+  MISC pattern=wrong_formula expect=None :: Melting uses latent heat (E = mL), heating uses SHC (ΔE = mcΔθ). You need both, add them together.
+  step0 SAY: Two things happen: the ice melts, then the water warms up. Do each and add. Melting uses \(E = mL\); warming uses \(\Delta E = mc\Delta\theta\).
+  step1 pre='Step 1, melt the ice: 0.3 × 334000 = ' post='' answer=100200 hint='m × L = 0.3 × 334,000.'
+  step2 pre='Step 2, temperature change of the water: 40 − 0 = ' post='' answer=40 hint='Final minus start: 40 − 0.'
+  step3 pre='Step 2, warm the water: 0.3 × 4200 × 40 = ' post='' answer=50400 hint='0.3 × 4200 = 1260, then × 40.'
+  step4 [PHASE] pre='Add the two energies: 100200 + 50400 = ' post='' answer=150600 hint='Melting energy plus warming energy.'
+  step5 pre='Check the melting share: 150600 − 50400 = ' post='' answer=100200 hint='Total minus the warming part returns the melting part.' done='Back to the melting energy, so the total is 150,600 J.'
+  step6 SAY: So the total energy is \(150{,}600\) J.
+
+----- gold[1] -----
+display: Calculate the total energy needed to heat 0.5 kg of water from 20°C to 100°C and then completely boil it. SHC of water = 4200 J/(kg°C), specific latent heat of vaporisation = 2,260,000 J/kg.
+input_type: single_value | solutions: [1298000] | accept: None | unit: J | calc: True | higher_only: None
+hint: Heat the water to 100°C, boil it, then add the two energies.
+  MISC pattern=forgot_step expect=None :: Step 1: heat to 100°C: E₁ = mcΔθ = 0.5 × 4200 × 80 = 168,000 J. Step 2: boil: E₂ = mL = 0.5 × 2,260,000 = 1,130,000 J. Total = 168,000 + 1,130,000 = 1,298,000 J.
+  step0 SAY: Two steps: heat the water to boiling, then boil it. Warming uses \(\Delta E = mc\Delta\theta\); boiling uses \(E = mL\).
+  step1 pre='Temperature change: 100 − 20 = ' post='' answer=80 hint='Final minus start: 100 − 20.'
+  step2 pre='Step 1, heat the water: 0.5 × 4200 × 80 = ' post='' answer=168000 hint='0.5 × 4200 = 2100, then × 80.'
+  step3 pre='Step 2, boil the water: 0.5 × 2260000 = ' post='' answer=1130000 hint='m × L = 0.5 × 2,260,000.'
+  step4 [PHASE] pre='Add the two energies: 168000 + 1130000 = ' post='' answer=1298000 hint='Heating energy plus boiling energy.'
+  step5 pre='Check the boiling share: 1298000 − 168000 = ' post='' answer=1130000 hint='Total minus the heating part returns the boiling part.' done='Back to the boiling energy, so the total is 1,298,000 J.'
+  step6 SAY: So the total energy is \(1{,}298{,}000\) J.
+
+----- gold[2] -----
+display: A 50 W heater is used to melt 0.5 kg of wax. It takes 8 minutes and 20 seconds to fully melt the wax. Calculate the specific latent heat of fusion of the wax.
+input_type: single_value | solutions: [50000] | accept: None | unit: J/kg | calc: True | higher_only: None
+hint: Convert the time to seconds, find energy with P × t, then L = energy ÷ mass.
+  MISC pattern=unit_error expect=None :: Convert time: 8 min 20 s = 500 s. Energy = Pt = 50 × 500 = 25,000 J. Then L = E/m = 25,000 ÷ 0.5 = 50,000 J/kg.
+  MISC pattern=wrong_rearrange expect=None :: From E = mL, rearrange to L = E ÷ m. First find E = Pt = 50 × 500 = 25,000 J. Then L = 25,000 ÷ 0.5 = 50,000 J/kg.
+  step0 SAY: First find the energy the heater supplied with \(E = Pt\), then use \(E = mL\) to get the latent heat. Convert the time to seconds first.
+  step1 pre='Convert time to seconds: 8 × 60 + 20 = ' post='' answer=500 hint='8 minutes is 480 s, plus 20 s.'
+  step2 pre='Energy supplied: 50 × 500 = ' post='' answer=25000 hint='Power × time = 50 × 500.'
+  step3 [PHASE] pre='Rearrange \\(E = mL\\) to \\(L = E/m\\): 25000 ÷ 0.5 = ' post='' answer=50000 hint='Energy ÷ mass = 25,000 ÷ 0.5.'
+  step4 pre='Check: 0.5 × 50000 = ' post='' answer=25000 hint='m × L should return the energy.' done='Back to the 25,000 J supplied, so L = 50,000 J/kg.'
+  step5 SAY: So the specific latent heat of fusion is \(50{,}000\) J/kg.
+
+----- gold[3] -----
+display: An object of mass 120 g is placed in a measuring cylinder containing 50 cm³ of water. The water level rises to 80 cm³. Calculate the density of the object in kg/m³. (1 cm³ = 1 × 10⁻⁶ m³)
+input_type: single_value | solutions: [4000] | accept: None | unit: kg/m³ | calc: True | higher_only: None
+hint: The volume is the water rise; convert mass and volume to base units first.
+  MISC pattern=unit_error expect=None :: Volume = 80 − 50 = 30 cm³ = 30 × 10⁻⁶ m³ = 0.00003 m³. Mass = 120 g = 0.12 kg. ρ = 0.12 ÷ 0.00003 = 4000 kg/m³.
+  MISC pattern=forgot_step expect=1500 :: The volume of the object is the rise in water level: 80 − 50 = 30 cm³, not 80 cm³.
+  step0 SAY: The volume of the object is how much the water rose. Then convert to base units and use \(\rho = \frac{m}{V}\).
+  step1 pre='Volume from the water rise: 80 − 50 = ' post='' answer=30 hint='The object pushes the level up: 80 − 50.'
+  step2 pre='Convert mass to kg: 120 ÷ 1000 = ' post='' answer=0.12 hint='Grams to kilograms: divide by 1000.'
+  step3 pre='Convert volume to m³: 30 ÷ 1000000 = ' post='' answer=3e-05 hint='1 cm³ = 1 × 10⁻⁶ m³, so divide by a million.'
+  step4 [PHASE] pre='Divide: 0.12 ÷ 0.00003 = ' post='' answer=4000 hint='0.12 ÷ 0.00003.'
+  step5 pre='Check: 4000 × 0.00003 = ' post='' answer=0.12 hint='Density × volume returns the mass.' done='Back to the 0.12 kg mass, so the density is 4000 kg/m³.'
+  step6 SAY: So \(\rho = 4000\) kg/m³.
+
+----- gold[4] -----
+display: A 40 W heater heats 0.8 kg of liquid from 20°C to 30°C in 2 minutes. Calculate the specific heat capacity of the liquid.
+input_type: single_value | solutions: [600] | accept: None | unit: J/(kg°C) | calc: True | higher_only: None
+hint: Convert time to seconds, find energy with P × t, then c = energy ÷ (m × Δθ).
+  MISC pattern=unit_error expect=10 :: Convert time: 2 min = 120 s. Energy supplied = Pt = 40 × 120 = 4800 J. Δθ = 30 − 20 = 10°C. Rearrange ΔE = mcΔθ → c = ΔE/(mΔθ) = 4800 ÷ (0.8 × 10) = 4800 ÷ 8 = 600 J/(kg°C).
+  MISC pattern=wrong_rearrange expect=None :: Rearrange ΔE = mcΔθ to c = ΔE ÷ (m × Δθ). Don't multiply all three together.
+  step0 SAY: Find the energy with \(E = Pt\), then use \(\Delta E = mc\Delta\theta\) rearranged to \(c = \frac{\Delta E}{m\Delta\theta}\). Convert the time first.
+  step1 pre='Convert time to seconds: 2 × 60 = ' post='' answer=120 hint='2 minutes × 60.'
+  step2 pre='Energy supplied: 40 × 120 = ' post='' answer=4800 hint='Power × time = 40 × 120.'
+  step3 pre='Temperature change: 30 − 20 = ' post='' answer=10 hint='Final minus start: 30 − 20.'
+  step4 [PHASE] pre='Divide: 4800 ÷ (0.8 × 10) = 4800 ÷ 8 = ' post='' answer=600 hint='m × Δθ = 8, then 4800 ÷ 8.'
+  step5 pre='Check: 0.8 × 600 × 10 = ' post='' answer=4800 hint='m × c × Δθ should return the energy.' done='Back to the 4800 J supplied, so c = 600 J/(kg°C).'
+  step6 SAY: So the specific heat capacity is \(600\) J/(kg°C).
+
+----- gold[5] -----
+display: An ice cube of mass 0.05 kg at 0°C is dropped into 0.3 kg of water at 25°C. The ice melts and the final temperature of the water is 21°C. Use this data to estimate the specific latent heat of fusion of ice. SHC of water = 4200 J/(kg°C).
+input_type: single_value | solutions: [12600] | accept: 100 | unit: J/kg | calc: True | higher_only: None
+hint: Energy lost by the water = melting energy + warming energy of the melted ice.
+  MISC pattern=forgot_step expect=100800 :: Energy lost by warm water = mcΔθ = 0.3 × 4200 × 4 = 5040 J. Energy gained by ice = melting + warming = 0.05L + 0.05 × 4200 × 21 = 0.05L + 4410. Set equal: 5040 = 0.05L + 4410. 0.05L = 630. L = 12,600 J/kg.
+  MISC pattern=wrong_rearrange expect=None :: Energy lost by warm water = energy gained by ice (melting + warming). Set up: 0.3 × 4200 × 4 = 0.05 × L + 0.05 × 4200 × 21. Solve for L = 12,600 J/kg.
+  step0 SAY: Energy lost by the warm water equals energy gained by the ice as it melts and then warms. Set them equal and solve for L.
+  step1 pre='Water cools by: 25 − 21 = ' post='' answer=4 hint='The warm water drops from 25 to 21.'
+  step2 pre='Energy lost by the water: 0.3 × 4200 × 4 = ' post='' answer=5040 hint='m × c × Δθ = 0.3 × 4200 × 4.'
+  step3 pre='Energy to warm the melted ice from 0 to 21: 0.05 × 4200 × 21 = ' post='' answer=4410 hint='The melted ice warms up: 0.05 × 4200 × 21.'
+  step4 [PHASE] pre='Energy left for melting: 5040 − 4410 = ' post='' answer=630 hint='Total gained minus the warming part.'
+  step5 pre='Latent heat: 630 ÷ 0.05 = ' post='' answer=12600 hint='Melting energy ÷ mass of ice = 630 ÷ 0.05.' done='L = 12,600 J/kg, the estimate for the ice.'
+  step6 SAY: So the specific latent heat of fusion is about \(12{,}600\) J/kg.

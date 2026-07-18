@@ -1,0 +1,45 @@
+{
+ "key": "physics-calculations-L08@d964afae07",
+ "canonical_id": "af432bd7-94b6-4601-a30d-4356767061bb",
+ "rows_patched": 2,
+ "all_row_ids": [
+  "af432bd7-94b6-4601-a30d-4356767061bb",
+  "578cc26a-c6ab-4e1f-b87d-f818dd50e901"
+ ],
+ "opener_concept": "Two shopping trolleys (10 kg empty, 50 kg full) given the SAME shove: the light one speeds up more. The student computes a = F/m for each (100/10 = 10, 100/50 = 2), which IS F = ma rearranged, before the equation is named.",
+ "problems_fixed": [
+  {"tier": "silver", "index": 1, "what": "Duplicate solution within tier: silver[1] (change in momentum) and silver[3] (force) both stored 18000. Changed the car mass 900 kg to 1,000 kg so Delta p = 1000 x 20 = 20,000 kg m/s. Misconception expect recomputed.", "old": "900 kg / [18000]", "new": "1,000 kg / [20000]"},
+  {"tier": "all", "index": "all", "what": "Every misconception was missing the required expect key (validator fail) and merely restated the method. Rewrote each as honest diagnosis with a determinate wrong-answer expect derived by committing the error (add-instead-of-multiply, multiply-instead-of-divide, use-shorter-time, report-momentum-not-speed, assume-equal-speeds).", "old": "no expect", "new": "expect on every misconception, all outside accept"},
+  {"tier": "gold", "index": "0,1,2", "what": "Gold problems had no hint and no equation_hint (validator fail). Added a plain-text method hint to every gold problem.", "old": "no hint", "new": "hint added"}
+ ],
+ "figures_added": [],
+ "figures_repaired": [
+  {"tier": "bronze", "index": 2, "kind": "svg", "what": "Wave figure (lambda = 0.04 m): removed xmlns (its http:// value tripped the external-ref check), added role=img + aria-label."},
+  {"tier": "bronze", "index": 3, "kind": "svg", "what": "Wave figure (lambda = ?): same repair, aria-label describes the unknown wavelength."},
+  {"tier": "silver", "index": 0, "kind": "svg", "what": "Radio-wave figure (lambda = 300 m): same repair. All visible labels match the problem numbers."}
+ ],
+ "added": [
+  "tier_guides.{bronze,silver,gold} (title, steps, worked example each)",
+  "guided.opener (F=ma trolley hook, 3 boxes + reveal)",
+  "guided.teach.{bronze,silver,gold} (4-box walks, one new move per tier)",
+  "guided_steps on all 13 bank problems (walk ritual: equation, identify values, substitute at phase boundary, compute, check backwards)",
+  "problem_bank.{tier}_description",
+  "hint on every problem (kept every equation_hint recall toggle intact)"
+ ],
+ "style_fixes": [
+  "Removed em dashes from method_card.content, exam_context.frequency, and 6 worked_examples step labels (Step 1 — X became Step 1: X).",
+  "Trimmed method_card.content to ~90 words (budget 140)."
+ ],
+ "verification": {
+  "problems_fresh_solved": 13,
+  "all_stored_solutions_match": true,
+  "all_guided_boxes_recomputed": true,
+  "all_expects_outside_accept": true,
+  "no_duplicate_solutions_within_tier": true,
+  "no_em_dashes": true,
+  "board_neutral": "No board named; no equation-sheet claims. Wording uses generic 'the equation' framing suitable for AQA + Edexcel + OCR shared rows.",
+  "propagation_byte_identical": true,
+  "validator": "PASS on shard and on live canonical row"
+ },
+ "notes": "g not used in this lesson (Newton's laws / momentum / waves), so no g=9.8 dependency. All given quantities were already in base units (kg, m/s, m, s, Hz), so no unit-conversion box was needed in any walk; walks kept lean. LADDER: bronze is mostly single-equation (B4 a=F/m and B3 lambda=v/f are mild single-step rearranges, acceptable for a drill lesson); silver adds rearrange + one standard-form problem; gold is genuinely multi-step (impulse-then-speed, conservation of momentum). TIER FLAG NOTE: momentum (p=mv, Delta p, conservation) is AQA HT-only, but the existing bank does not set higher_only:true on any momentum problem; flagging them would empty the gold tier (all 3 are momentum) and gut silver for Foundation. Left higher_only untouched to preserve the existing design and tier sizes rather than reorder aggressively, per spec section on tier guides."
+}

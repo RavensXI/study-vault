@@ -1,0 +1,24 @@
+{
+  "key": "higher-calculations-L06@a0ecd54583",
+  "title": "Transformers and Electromagnetic Induction",
+  "rows_patched": 1,
+  "all_row_ids": ["91158ba8-389c-4771-9735-326785654ccb"],
+  "problems_fixed": [
+    {"tier": "bronze", "index": 5, "what": "Converted string-answer 'step-up/step-down' problem to multiple_choice (guided format requires numeric solutions); options Step-up/Step-down, solution index 0", "old": "input_type single_value, solutions ['step-up']", "new": "input_type multiple_choice, options [Step-up, Step-down], solutions [0]"},
+    {"tier": "bronze", "index": 7, "what": "Converted string-answer 'step-up/step-down' problem to multiple_choice", "old": "input_type single_value, solutions ['step-down']", "new": "input_type multiple_choice, options [Step-up, Step-down], solutions [1]"},
+    {"tier": "all", "index": -1, "what": "Added expect values to every misconception (were absent; validator requires the key). Derived each by committing the error: inverse_ratio/wrong_rearrange flips (e.g. B1 4600, B5 8000, S4 250000), forgot_square (G1 0.625 kW, G2 0.01 MW), inverse efficiency (G3 125%), forgot_efficiency (G6 23 A). Conceptual-only errors set to null.", "old": "misconceptions had pattern+message only", "new": "each misconception has expect (number or null), verified outside accept window"},
+    {"tier": "all", "index": -1, "what": "Removed all 106 em dashes (worked_examples labels 'Step N —', exam_context, method_card, misconception messages) replacing with colons/full stops per house style", "old": "em dashes throughout", "new": "no em dashes; validator clean"},
+    {"tier": "method_card", "index": -1, "what": "Neutralised board claim 'given on the sheet' to 'check whether your board gives you these or expects them from memory'; trimmed content to 90 words (budget 140)", "old": "content named the equation sheet as fact", "new": "board-neutral, within budget"}
+  ],
+  "guided_added": {
+    "opener_concept": "Deliver a fixed 1000 W at 10 V vs 1000 V: student computes the two currents (100 A vs 1 A) by common sense (I = P/V), revealing why the grid uses high voltage (low current = less I squared R loss) and that a transformer trades voltage for current (VpIp = VsIs).",
+    "teach_walks": "Bronze: 300:1500 turns step-up voltage. Silver: rearrange VpIp=VsIs for primary current. Gold: grid loss via I=P/V then I squared R (30 MW, 30 kV, 8 ohm -> 8 MW).",
+    "tier_guides": "Bronze one-equation turns ratio; Silver rearrange/use power; Gold chain two ideas (turns+power, efficiency, grid loss).",
+    "guided_steps": "Every numeric bank problem given micro-step walks with a phase:substitute completion boundary leaving >= 2 live boxes (compute + check). MC problems (B6/B8) omit walks."
+  },
+  "figures_added": [],
+  "figures_note": "No figures added. No problem describes a standard circuit built from the cell/resistor/ammeter/voltmeter symbol set in the spec; transformer coil schematics are not in that set and every problem is pure-formula. No student-facing text claims an unshown figure, so 'show what you say' is satisfied without SVG.",
+  "verification_note": "Fresh-solved all 20 problems from display: all stored solutions correct (B1 11.5, B2 24, B3 100, B4 12, B5 20, B7 60; S1 0.2, S2 1, S3 5, S4 100, S5 0.8, S6 120; G1 39.0625->39.1 kW within accept 0.1, G2 10 MW, G3 80%, G4 920, G5 8000, G6 20.7 A). g not used (electromagnetism). higher_only fields absent in source and left as-is (entire unit is HT/Separate). G1/G2 final guided boxes work in watts (exact) with kW/MW conversion stated in done note, since 39.1 kW is not exact at +-0.005.",
+  "rows_patched_note": "all_row_ids has a single id; patched once, raw server bytes verified (106 U+00D7 times signs, 0 mojibake, 0 em dash), live row re-validated PASS.",
+  "notes": "Bank ladder matched the science tier spec (bronze one-equation, silver rearrange/power, gold multi-step incl grid loss and efficiency); no reordering needed. Caught and fixed a Windows cp1252 double-encoding bug in the first PATCH (open() without encoding='utf-8' mojibaked every times sign to 'A-tilde em-dash'); re-patched reading the shard as UTF-8."
+}

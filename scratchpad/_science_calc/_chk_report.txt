@@ -1,0 +1,138 @@
+=== bronze[0] ===
+DISPLAY: [SVG]A current of 3 A flows through a circuit for 12 seconds. Calculate the charge that passes.
+input_type=single_value solutions=[36] unit='C' accept=None higher_only=None calc=True
+  MISC pattern=inverse_error expect=0.25 :: Q = I × t, so multiply: 3 × 12 = 36 C. Dividing (3 ÷ 12 = 0.25) is the slip here.
+  gs[0] SAY: Charge uses Q = I × t. Current is in amps and time in seconds already, so no conversion.
+  gs[1] pre='Write the current in amps: I =' post='' answer=3 phase= done=''
+  gs[2] pre='Q = I × t = 3 × 12 =' post='' answer=36 phase=substitute done=''
+  gs[3] pre='Check by dividing back: 36 ÷ 12 =' post='' answer=3 phase=substitute done='Back to 3 A, so Q = 36 C is correct.'
+
+=== bronze[1] ===
+DISPLAY: [SVG]A resistor has 9 V across it and 0.3 A through it. Calculate its resistance.
+input_type=single_value solutions=[30] unit='Ω' accept=None higher_only=None calc=True
+  MISC pattern=inverse_error expect=2.7 :: R = V ÷ I = 9 ÷ 0.3 = 30 Ω. Multiplying (9 × 0.3 = 2.7) is the slip: divide instead.
+  gs[0] SAY: Ohm's law is V = I × R. You want R, so rearrange to R = V ÷ I.
+  gs[1] pre='Write the pd in volts: V =' post='' answer=9 phase= done=''
+  gs[2] pre='R = V ÷ I = 9 ÷ 0.3 =' post='' answer=30 phase=substitute done=''
+  gs[3] pre='Check with V = I × R = 0.3 × 30 =' post='' answer=9 phase=substitute done='Back to 9 V, so R = 30 Ω.'
+
+=== bronze[2] ===
+DISPLAY: [SVG]A resistor of 20 Ω has a current of 0.5 A through it. Calculate the potential difference.
+input_type=single_value solutions=[10] unit='V' accept=None higher_only=None calc=True
+  MISC pattern=inverse_error expect=0.025 :: V = I × R = 0.5 × 20 = 10 V. Dividing (0.5 ÷ 20 = 0.025) is the slip: multiply here.
+  gs[0] SAY: Ohm's law V = I × R. Current and resistance are given, so substitute straight in.
+  gs[1] pre='Write the current in amps: I =' post='' answer=0.5 phase= done=''
+  gs[2] pre='V = I × R = 0.5 × 20 =' post='' answer=10 phase=substitute done=''
+  gs[3] pre='Check with I = V ÷ R = 10 ÷ 20 =' post='' answer=0.5 phase=substitute done='Back to 0.5 A, so V = 10 V.'
+
+=== bronze[3] ===
+DISPLAY: [SVG]Two resistors of 7 Ω and 5 Ω are connected in series. What is the total resistance?
+input_type=single_value solutions=[12] unit='Ω' accept=None higher_only=None calc=True
+  MISC pattern=parallel_formula expect=2.92 :: In series, add the resistances: 7 + 5 = 12 Ω. Using the parallel rule (about 2.92 Ω) is wrong here; parallel is for branches, not a chain.
+  gs[0] SAY: In a series chain the resistances simply add: R = R₁ + R₂.
+  gs[1] pre='Write the first resistance: R₁ =' post='' answer=7 phase= done=''
+  gs[2] pre='Add them: 7 + 5 =' post='' answer=12 phase=substitute done=''
+  gs[3] pre='A series total is larger than either part. 12 Ω is bigger than 7 and 5, so type' post='' answer=12 phase=substitute done='Bigger than both parts, so R = 12 Ω.'
+
+=== bronze[4] ===
+DISPLAY: [SVG]A circuit has a 12 V battery and a single 40 Ω resistor. Calculate the current.
+input_type=single_value solutions=[0.3] unit='A' accept=None higher_only=None calc=True
+  MISC pattern=wrong_equation expect=480 :: I = V ÷ R = 12 ÷ 40 = 0.3 A. Multiplying (12 × 40 = 480) is the slip: divide the pd by the resistance.
+  gs[0] SAY: Ohm's law rearranged for current: I = V ÷ R.
+  gs[1] pre='Write the resistance in ohms: R =' post='' answer=40 phase= done=''
+  gs[2] pre='I = V ÷ R = 12 ÷ 40 =' post='' answer=0.3 phase=substitute done=''
+  gs[3] pre='Check with V = I × R = 0.3 × 40 =' post='' answer=12 phase=substitute done='Back to 12 V, so I = 0.3 A.'
+
+=== bronze[5] ===
+DISPLAY: [SVG]A charge of 100 C passes through a wire in 25 seconds. Calculate the current.
+input_type=single_value solutions=[4] unit='A' accept=None higher_only=None calc=True
+  MISC pattern=inverse_error expect=0.25 :: I = Q ÷ t = 100 ÷ 25 = 4 A. Dividing the wrong way (25 ÷ 100 = 0.25) is the slip.
+  gs[0] SAY: Current is charge per second, so rearrange Q = I × t to I = Q ÷ t.
+  gs[1] pre='Write the charge in coulombs: Q =' post='' answer=100 phase= done=''
+  gs[2] pre='I = Q ÷ t = 100 ÷ 25 =' post='' answer=4 phase=substitute done=''
+  gs[3] pre='Check with Q = I × t = 4 × 25 =' post='' answer=100 phase=substitute done='Back to 100 C, so I = 4 A.'
+
+=== silver[0] ===
+DISPLAY: [SVG]A 6 V battery is connected to three resistors in series: 4 Ω, 6 Ω and 2 Ω. Calculate the total resistance.
+input_type=single_value solutions=[12] unit='Ω' accept=None higher_only=None calc=True
+  MISC pattern=wrong_formula expect=1.09 :: Series resistances add: 4 + 6 + 2 = 12 Ω. Combining them as parallel branches (about 1.09 Ω) is the wrong rule for a chain.
+  gs[0] SAY: A series chain adds every resistance: R = R₁ + R₂ + R₃.
+  gs[1] pre='Add the first two: 4 + 6 =' post='' answer=10 phase= done=''
+  gs[2] pre='Add the third: 10 + 2 =' post='' answer=12 phase=substitute done=''
+  gs[3] pre='The series total is the sum of all three, so type' post='' answer=12 phase=substitute done='4 + 6 + 2 = 12 Ω.'
+
+=== silver[1] ===
+DISPLAY: [SVG]Using the 6 V battery and 12 Ω total resistance from the previous question, calculate the current in the circuit.
+input_type=single_value solutions=[0.5] unit='A' accept=None higher_only=None calc=True
+  MISC pattern=wrong_equation expect=72 :: I = V ÷ R = 6 ÷ 12 = 0.5 A. Multiplying (6 × 12 = 72) is the slip: divide the pd by the total resistance.
+  gs[0] SAY: The whole supply pd drives the current through the total resistance: I = V ÷ R.
+  gs[1] pre='Write the total resistance in ohms: R =' post='' answer=12 phase= done=''
+  gs[2] pre='I = V ÷ R = 6 ÷ 12 =' post='' answer=0.5 phase=substitute done=''
+  gs[3] pre='Check with V = I × R = 0.5 × 12 =' post='' answer=6 phase=substitute done='Back to 6 V, so I = 0.5 A.'
+
+=== silver[2] ===
+DISPLAY: [SVG]The current in the series circuit above is 0.5 A. Calculate the pd across the 6 Ω resistor.
+input_type=single_value solutions=[3] unit='V' accept=None higher_only=None calc=True
+  MISC pattern=wrong_equation expect=0.083 :: V = I × R = 0.5 × 6 = 3 V. Dividing (0.5 ÷ 6 ≈ 0.083) is the slip: multiply the current by that one resistance.
+  gs[0] SAY: In series the same current flows through each resistor, so for one component V = I × R.
+  gs[1] pre='Write the current in amps: I =' post='' answer=0.5 phase= done=''
+  gs[2] pre='V = I × R = 0.5 × 6 =' post='' answer=3 phase=substitute done=''
+  gs[3] pre='Check with I = V ÷ R = 3 ÷ 6 =' post='' answer=0.5 phase=substitute done='Back to 0.5 A, so the pd is 3 V.'
+
+=== silver[3] ===
+DISPLAY: [SVG]A lamp filament has resistance 240 Ω when hot. Connected to 12 V supply, calculate the current in amperes.
+input_type=single_value solutions=[0.05] unit='A' accept=None higher_only=None calc=True
+  MISC pattern=wrong_equation expect=2880 :: I = V ÷ R = 12 ÷ 240 = 0.05 A. Multiplying (12 × 240 = 2880) is the slip: divide the pd by the resistance.
+  gs[0] SAY: Ohm's law for current: I = V ÷ R. A large resistance means a small current.
+  gs[1] pre='Write the resistance in ohms: R =' post='' answer=240 phase= done=''
+  gs[2] pre='I = V ÷ R = 12 ÷ 240 =' post='' answer=0.05 phase=substitute done=''
+  gs[3] pre='Check with V = I × R = 0.05 × 240 =' post='' answer=12 phase=substitute done='Back to 12 V, so I = 0.05 A.'
+
+=== silver[4] ===
+DISPLAY: [SVG]A circuit has 2 A flowing for 15 seconds. Calculate the charge transferred in coulombs.
+input_type=single_value solutions=[30] unit='C' accept=None higher_only=None calc=True
+  MISC pattern=inverse_error expect=7.5 :: Q = I × t = 2 × 15 = 30 C. Dividing (15 ÷ 2 = 7.5) is the slip: multiply current by time.
+  gs[0] SAY: Charge is current times time: Q = I × t, with time in seconds.
+  gs[1] pre='Write the current in amps: I =' post='' answer=2 phase= done=''
+  gs[2] pre='Q = I × t = 2 × 15 =' post='' answer=30 phase=substitute done=''
+  gs[3] pre='Check with I = Q ÷ t = 30 ÷ 15 =' post='' answer=2 phase=substitute done='Back to 2 A, so Q = 30 C.'
+
+=== gold[0] ===
+DISPLAY: [SVG]A 12 V battery drives a current of 0.2 A through a series circuit of three resistors (10 Ω, 20 Ω and R). Calculate R.
+input_type=single_value solutions=[30] unit='Ω' accept=None higher_only=None calc=True
+  MISC pattern=forgot_step expect=60 :: 60 Ω is the total resistance (V ÷ I). The question wants only R, so subtract the known resistors: 60 − 10 − 20 = 30 Ω.
+  MISC pattern=wrong_rearrange expect=None :: Find the total resistance with R = V ÷ I = 12 ÷ 0.2 = 60 Ω, then take away the two known resistors: R = 60 − 10 − 20 = 30 Ω.
+  gs[0] SAY: In series the resistances add to the total. Find that total from Ohm's law, then peel off the known ones.
+  gs[1] pre='Total resistance R = V ÷ I = 12 ÷ 0.2 =' post='' answer=60 phase= done=''
+  gs[2] pre='Subtract the known resistors: 60 − 10 − 20 =' post='' answer=30 phase=substitute done=''
+  gs[3] pre='Check: 10 + 20 + 30 = 60 Ω, and 12 ÷ 60 =' post='' answer=0.2 phase=substitute done='Back to 0.2 A, so R = 30 Ω.'
+
+=== gold[1] ===
+DISPLAY: [SVG]A thermistor in series with a 100 Ω fixed resistor is connected to a 6 V supply. The current is 0.03 A. Calculate the resistance of the thermistor.
+input_type=single_value solutions=[100] unit='Ω' accept=None higher_only=None calc=True
+  MISC pattern=forgot_step expect=200 :: 200 Ω is the total resistance (V ÷ I). The thermistor is the total minus the fixed resistor: 200 − 100 = 100 Ω.
+  MISC pattern=inverse_error expect=None :: Total R = V ÷ I = 6 ÷ 0.03 = 200 Ω. Thermistor = total − fixed = 200 − 100 = 100 Ω.
+  gs[0] SAY: Series resistances add, so the total is thermistor + fixed. Find the total from Ohm's law first.
+  gs[1] pre='Total resistance R = V ÷ I = 6 ÷ 0.03 =' post='' answer=200 phase= done=''
+  gs[2] pre='Thermistor = total − fixed = 200 − 100 =' post='' answer=100 phase=substitute done=''
+  gs[3] pre='Check: 100 + 100 = 200 Ω, and 6 ÷ 200 =' post='' answer=0.03 phase=substitute done='Back to 0.03 A, so the thermistor is 100 Ω.'
+
+=== gold[2] ===
+DISPLAY: [SVG]A 9 V battery drives current through two parallel branches. Branch 1 has a 30 Ω resistor. Branch 2 has a 45 Ω resistor. Calculate the current through branch 1 in amperes.
+input_type=single_value solutions=[0.3] unit='A' accept=None higher_only=None calc=True
+  MISC pattern=series_mistake expect=0.12 :: The branches are in parallel, not series. Treating them as series gives 30 + 45 = 75 Ω and 9 ÷ 75 = 0.12 A, which is wrong. Each branch has the full 9 V, so I₁ = 9 ÷ 30 = 0.3 A.
+  MISC pattern=wrong_equation expect=0.2 :: Use branch 1's own resistance: I₁ = 9 ÷ 30 = 0.3 A. Using 45 Ω (9 ÷ 45 = 0.2 A) gives branch 2, not branch 1.
+  gs[0] SAY: In a parallel circuit every branch has the full supply pd across it, so treat branch 1 on its own.
+  gs[1] pre='The pd across branch 1 equals the supply: V =' post='' answer=9 phase= done=''
+  gs[2] pre='I₁ = V ÷ R = 9 ÷ 30 =' post='' answer=0.3 phase=substitute done=''
+  gs[3] pre='Check with V = I × R = 0.3 × 30 =' post='' answer=9 phase=substitute done='Back to 9 V, so I₁ = 0.3 A.'
+
+=== gold[3] ===
+DISPLAY: [SVG]A charge of 2,400 C passes through a resistor of 5 Ω in 200 seconds. Calculate the potential difference across the resistor.
+input_type=single_value solutions=[60] unit='V' accept=None higher_only=None calc=True
+  MISC pattern=forgot_step expect=12 :: 12 A is the current (Q ÷ t). The question asks for pd, so keep going: V = I × R = 12 × 5 = 60 V.
+  MISC pattern=wrong_equation expect=12000 :: First find the current: I = Q ÷ t = 2400 ÷ 200 = 12 A. Then V = I × R = 12 × 5 = 60 V. Multiplying charge by resistance (2400 × 5) is not a real step.
+  gs[0] SAY: Two steps: turn the charge and time into a current, then use Ohm's law.
+  gs[1] pre='Current I = Q ÷ t = 2400 ÷ 200 =' post='' answer=12 phase= done=''
+  gs[2] pre='V = I × R = 12 × 5 =' post='' answer=60 phase=substitute done=''
+  gs[3] pre='Check with I = V ÷ R = 60 ÷ 5 =' post='' answer=12 phase=substitute done='Back to 12 A, so V = 60 V.'

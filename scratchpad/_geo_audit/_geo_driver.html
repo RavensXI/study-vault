@@ -1,0 +1,50 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Geo practice driver</title>
+<style>body{margin:0}iframe{border:0}</style>
+<iframe id="f" style="width:1440px;height:2200px"></iframe>
+<script>
+var qs = new URLSearchParams(location.search);
+document.getElementById('f').src = qs.get('path') || '/practice/geography-aqa/geographical-skills/11';
+var f = document.getElementById('f');
+function until(cond, cb, tries) {
+  tries = tries || 0;
+  var ok = false;
+  try { ok = cond(); } catch (e) {}
+  if (ok) { cb(); return; }
+  if (tries > 400) { document.title = 'GEO DRIVER TIMEOUT'; return; }
+  setTimeout(function() { until(cond, cb, tries + 1); }, 50);
+}
+function doc() { return f.contentDocument; }
+until(function() {
+  var b = doc().getElementById('method-modal-go-btn');
+  return b && b.offsetParent !== null;
+}, function() {
+  doc().getElementById('method-modal-go-btn').click();
+  until(function() {
+    var j = doc().getElementById('learn-back-practice-btn');
+    return j && j.offsetParent !== null;
+  }, function() {
+    doc().getElementById('learn-back-practice-btn').click();
+    // advance to the requested question index (0-based) by answering wrong
+    var target = parseInt(qs.get('q') || '0', 10);
+    function step(n) {
+      until(function() {
+        return doc().querySelector('#problem-inputs-area .problem-input, #problem-inputs-area .mc-option') &&
+               doc().getElementById('problem-check-btn').offsetParent !== null;
+      }, function() {
+        if (n >= target) { document.title = 'GEO DRIVER READY'; return; }
+        doc().querySelectorAll('#problem-inputs-area input:not([type=hidden])').forEach(function(i) { i.value = '1'; });
+        var mc = doc().querySelector('#problem-inputs-area .mc-option');
+        if (mc) mc.click();
+        doc().getElementById('problem-check-btn').click();
+        until(function() { return doc().getElementById('problem-next-btn').offsetParent !== null; }, function() {
+          doc().getElementById('problem-next-btn').click();
+          setTimeout(function() { step(n + 1); }, 300);
+        });
+      });
+    }
+    step(0);
+  });
+});
+</script>

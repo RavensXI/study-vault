@@ -1,0 +1,30 @@
+import os,json,io,urllib.request
+key=os.environ["SUPABASE_SERVICE_KEY"]
+cid="c36f2b4d-aeaa-4c83-a6b2-9a5da3abb976"
+url=f"https://baipckgywpnwapobwtsy.supabase.co/rest/v1/lessons?id=eq.{cid}&select=practice_data"
+req=urllib.request.Request(url,headers={"apikey":key,"Authorization":f"Bearer {key}"})
+json.dump(json.load(urllib.request.urlopen(req))[0]["practice_data"],
+          io.open("_live_canonical.json","w",encoding="utf-8"),indent=1,ensure_ascii=False)
+changes={
+ "key":"higher-calculations-L02@b3c8bb1c4f",
+ "problems_fixed":[
+   {"tier":"silver","index":1,"what":"net force ball, wrong stored answer","old":1.97,"new":1.96},
+   {"tier":"silver","index":4,"what":"net force fish, stored answer far outside accept","old":0.6,"new":0.245},
+   {"tier":"gold","index":0,"what":"Mariana Trench total pressure miscomputed","old":110456000,"new":110596000},
+   {"tier":"gold","index":1,"what":"hollow sphere net force outside own accept","old":20.3,"new":20.8},
+   {"tier":"gold","index":2,"what":"barge draught, stored answer was wrong (self-doubting note)","old":0.306,"new":3.0}
+ ],
+ "figures_added":[],
+ "figures_fixed":[
+   {"tier":"gold","index":1,"what":"label typo 3.0 kg kg -> 3.0 kg"},
+   {"tier":"gold","index":3,"what":"label typo 5.0 kg kg -> 5.0 kg"},
+   {"tier":"silver","index":2,"what":"weight-arrow label W = 0.50 kg N -> m = 0.50 kg"},
+   {"tier":"bronze","index":2,"what":"placeholder W = W N -> Weight; removed stray newline in volume label"},
+   {"tier":"all","index":-1,"what":"added role=img + aria-label and removed xmlns http to make all 11 question SVGs validator-compliant"}
+ ],
+ "rows_patched":1,
+ "opener_concept":"stacking books: the deeper a book sits in a pile, the more weight presses on it, mirroring how fluid pressure grows with depth (p = h rho g)",
+ "notes":"Full guided conversion: opener + 3 teach walks + guided_steps on all 11 bank problems + tier_guides + tier_descriptions + slim method_card. Kept equation_hint fields; added plain hint to every problem (gold had none). Fixed pre-existing em dashes in worked_examples labels and exam_context.frequency, and rephrased exam_context to be board-neutral (higher-tier physics, not a named board). Every misconception given a derived expect that sits outside the accept window. Box values all exact at +-0.005; the one rounded quantity (bronze[4] depth 19.9) uses an estimate sense-check that lands exactly. Tier ladder matches: bronze straight-substitution, silver rearrange/add atmospheric/net force, gold chained floating conditions. all_row_ids has a single id (Edexcel Separate) so propagation is that row; readback byte-identical."
+}
+json.dump(changes,io.open("changes_higher-calculations-L02@b3c8bb1c4f.json","w",encoding="utf-8"),indent=1,ensure_ascii=False)
+print("changes written")
