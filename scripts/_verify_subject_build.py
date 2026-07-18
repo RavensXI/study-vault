@@ -196,7 +196,10 @@ def main():
         # studies). The keyword 'investigation' overlaps with statistical
         # enquiries; skip subjects where the word doesn't carry a safeguarding
         # implication.
-        FIELDWORK_SAFE_SUBJECTS = ("statistics-",)  # statistical investigations, not field trips
+        # Subjects where 'investigation' means a research-methods/statistical
+        # enquiry taught identically to every student, NOT a school-specific
+        # field trip. A fieldwork notice on these would misinform students.
+        FIELDWORK_SAFE_SUBJECTS = ("statistics-", "psychology-", "sociology-")
         is_fieldwork_subject = not any(args.slug.startswith(p) for p in FIELDWORK_SAFE_SUBJECTS)
         title_l = (l.get("title") or "").lower()
         if is_fieldwork_subject and not is_practice and any(k in title_l for k in FIELDWORK_KEYWORDS) and ch:
