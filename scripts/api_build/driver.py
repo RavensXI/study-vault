@@ -616,6 +616,8 @@ def collect_batch(cfg, batch_id, stage_name, out_subdir):
                                        b.request_counts.model_dump()))
     if b.processing_status != "ended":
         return None
+    st = load_state(cfg)
+    already_logged = batch_id in st.get("collected_batches", [])
     outd = os.path.join(cfg["run_dir"], out_subdir)
     os.makedirs(outd, exist_ok=True)
     results = {}
@@ -624,12 +626,18 @@ def collect_batch(cfg, batch_id, stage_name, out_subdir):
         cid = result.custom_id
         if result.result.type == "succeeded":
             m = result.result.message
-            log_usage(cfg, stage_name, m.model, cid, m.usage, batch=True)
+            if not already_logged:
+                log_usage(cfg, stage_name, m.model, cid, m.usage, batch=True)
             text = "".join(blk.text for blk in m.content if blk.type == "text")
             results[cid] = text
         else:
             errors[cid] = result.result.type
-    print("collected: %d ok, %d errored (%s)" % (len(results), len(errors), errors or ""))
+    if not already_logged:
+        st.setdefault("collected_batches", []).append(batch_id)
+        save_state(cfg, st)
+    print("collected: %d ok, %d errored (%s)%s" % (
+        len(results), len(errors), errors or "",
+        " [usage already ledgered]" if already_logged else ""))
     return results, errors
 
 
