@@ -77,6 +77,22 @@ function walk(name, stepsArr, wrongFirstOn, onButtons) {
   tick();
 }
 
+// A guided card replaces the question card but the map/chart lives in the side
+// panel. If the problem being walked carries a stimulus, that stimulus must be
+// on screen, or the student is asked to read a map that is not there.
+function assertStimulus(name, p) {
+  if (!p || (!p.image && !p.chart)) return;
+  var area = doc().getElementById('practice-passage-area');
+  var shown = area && area.style.display !== 'none';
+  var img = area ? area.querySelector('img') : null;
+  var canvas = area ? area.querySelector('canvas') : null;
+  var kind = p.image ? 'map' : 'chart';
+  if (!shown) { bad(name + ': problem has a ' + kind + ' but the stimulus panel is hidden'); return; }
+  if (p.image && !img) { bad(name + ': problem has an image but no <img> is rendered'); return; }
+  if (p.chart && !canvas && !img) { bad(name + ': problem has a chart but no canvas is rendered'); return; }
+  log('  stimulus ok (' + kind + ' visible alongside the walk)');
+}
+
 // Answer the current bank problem deliberately WRONG, whatever its input type.
 function answerWrong() {
   var p = win()._currentProblem || {};
@@ -152,6 +168,10 @@ until('lesson + guided data loaded', function () {
           var pre = doc().querySelectorAll('.guided-step-prefilled').length;
           log('PASS P3 completion card, ' + pre + ' steps pre-worked');
           if (!pre) log('  WARN expected pre-worked steps');
+          var walked = (win().guidedState && win().guidedState.cfg && win().guidedState.cfg.problem) || q1;
+          log('  walked problem: image=' + !!(walked && walked.image) + ' chart=' + !!(walked && walked.chart) +
+              ' | _currentProblem image=' + !!(q1 && q1.image));
+          assertStimulus('P3 completion', walked);
           walk('P3 completion', q1.guided_steps, -1, function (b3) {
             b3[0].click();
 
@@ -198,6 +218,7 @@ until('lesson + guided data loaded', function () {
                 log('PASS P4 wrong answer offers rescue');
                 doc().getElementById('fb-do-with-me').click();
                 until('rescue walk', function () { return visible(doc().getElementById('guided-card')); }, function () {
+                  assertStimulus('P4 rescue', p2);
                   walk('P4 rescue', p2.guided_steps, -1, function (b4) {
                     b4[0].click();
 
@@ -208,6 +229,7 @@ until('lesson + guided data loaded', function () {
                       l3.click();
                       until('pre-answer walk', function () { return visible(doc().getElementById('guided-card')); }, function () {
                         log('PASS P5 pre-answer walk opened on ' + q3label + ' without failing first');
+                        assertStimulus('P5 pre-answer walk', p3);
                         walk('P5 walk-instead', p3.guided_steps, -1, function (b5) {
                           b5[0].click();
                           until('advanced onward', function () {

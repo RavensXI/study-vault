@@ -1,0 +1,37 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>browse probe</title>
+<pre id="log">loading…</pre>
+<iframe id="f" style="width:1280px;height:900px"></iframe>
+<script>
+// Loads a browse page and reports the hrefs of its lesson cards, so we can see
+// whether Geographical Skills links to /practice/ or /lesson/.
+var qs = new URLSearchParams(location.search);
+var path = qs.get('path') || '/browse/geography-aqa/geographical-skills';
+document.getElementById('f').src = path;
+var L = document.getElementById('log');
+function done(t) { L.textContent = t; document.title = 'PROBE DONE'; }
+var tries = 0;
+(function tick() {
+  var d = null;
+  try { d = document.getElementById('f').contentDocument; } catch (e) {}
+  var cards = d ? d.querySelectorAll('a.lesson-card') : [];
+  var units = d ? d.querySelectorAll('a[href*="/browse/"], a[href*="/practice/"], a[href*="/lesson/"]') : [];
+  if (((cards.length || units.length) && tries > 60) || tries > 400) {
+    var out = ['path: ' + path,
+               'lesson cards: ' + cards.length,
+               'unit cards: ' + units.length];
+    for (var i = 0; i < Math.min(cards.length, 6); i++) {
+      out.push('  ' + cards[i].getAttribute('href'));
+    }
+    for (var j = 0; j < Math.min(units.length, 25); j++) {
+      out.push('  LINK ' + units[j].getAttribute('href') + '   [' + (units[j].className||'') + ']');
+    }
+    if (!cards.length && !units.length) out.push('  (nothing found; body starts: ' +
+      (d ? (d.body.textContent || '').trim().slice(0, 120) : 'no doc') + ')');
+    done(out.join('\n'));
+    return;
+  }
+  tries++; setTimeout(tick, 50);
+})();
+</script>

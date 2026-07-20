@@ -4418,6 +4418,7 @@
         if (pf > 0) {
           showGuided({
             label: 'First one: finish it',
+            problem: p,
             display: p.display,
             steps: p.guided_steps,
             prefill: pf,
@@ -4661,6 +4662,7 @@
             saveProgress();
             showGuided({
               label: 'Together',
+              problem: p,
               display: p.display,
               steps: p.guided_steps,
               doneText: 'Next problem →',
@@ -5088,6 +5090,7 @@
           ev.preventDefault();
           showGuided({
             label: 'Together',
+            problem: problem,
             display: problem.display,
             steps: problem.guided_steps,
             doneText: 'Next problem →',
@@ -5252,6 +5255,32 @@
       guidedState = { cfg: cfg, idx: 0, wrongs: 0, reveals: 0 };
       card.style.display = '';
       practiceRenderKaTeX(disp);
+
+      // The stimulus lives in the side panel, not in the guided card, and only
+      // renderCurrentProblem() used to populate it. So a guided card for a real
+      // bank problem (the completion problem, and the "do this one with me"
+      // walks) asked the student to read a map that was not on screen. Render
+      // the walked problem's map/chart; openers and teach walks carry their own
+      // inline figure and get the panel cleared instead.
+      if (cfg.problem) {
+        handlePassagePanel(cfg.problem);
+        // Bare questions are map-first, but during a walk the steps are the main
+        // event and the map is reference: at 62% the walk column wraps to about
+        // twenty characters a line. Hand the width back for the walk; the map is
+        // still readable and tap-to-enlarge covers detail.
+        var gMap = document.getElementById('practice-passage-area');
+        if (gMap) gMap.classList.remove('passage-area--map');
+        // handlePassagePanel flips mobile to the stimulus tab, which would hide
+        // the boxes the student is meant to be typing into.
+        if (window.innerWidth <= 900) switchMobileTab('question');
+      } else {
+        var gArea = document.getElementById('practice-passage-area');
+        if (gArea) {
+          gArea.style.display = 'none';
+          gArea.classList.remove('passage-area--map');
+        }
+        updateMobileTabsVisibility(false);
+      }
       // Completion mode: the first `prefill` steps arrive already worked and
       // ticked (backward fading) so the student finishes, not starts.
       if (cfg.prefill && cfg.prefill > 0) {
