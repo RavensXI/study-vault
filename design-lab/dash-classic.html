@@ -589,7 +589,7 @@ function refreshWeekCard(){
     +(w?'<div class="ln"><span>Warm-up today</span><b>'+w.correct+' / '+w.total+'</b></div>':'')
     +'<p class="weekempty">Best subject and cards due join in as the week builds.</p>';
 }
-function urlFor(s,u){ return '/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
+function urlFor(s,u){ return '/'+(window.svIsPracticeUnit&&window.svIsPracticeUnit(s,u[3])?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/'+Math.min(u[2]+1,u[1]); }
 function nav(u){ document.body.classList.remove('ready'); setTimeout(()=>{ location.href=u; },180); }
 addEventListener('pageshow',e=>{ document.body.classList.add('ready');
   if(e.persisted) location.reload();   /* back-cache: progress may be stale */ });
@@ -848,7 +848,7 @@ function showLessons(s,u){
   const titles=((LESSON_TITLES[s.sub]||{})[u[3]])||[];
   if(!titles.length) fetchTitles(s,u);
   const n=titles.length||u[1];
-  const base='/'+(s.mode==='p'?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
+  const base='/'+(window.svIsPracticeUnit&&window.svIsPracticeUnit(s,u[3])?'practice':'lesson')+'/'+s.sub+'/'+u[3]+'/';
   const dset=u[4]||null;                     /* day-one: exact done set from the rollup */
   let nextK=Math.min(u[2]+1,n);
   if(dset){ let k=1; while(k<=n&&dset.includes(k)) k++; nextK=Math.min(k,n); }

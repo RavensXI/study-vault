@@ -125,11 +125,25 @@ function keepUnit(su, uslug) {
   return true;
 }
 
+/* Is THIS unit practice-format? su.mode is a subject-level flag, but several
+   subjects are mixed: Geography is article for Paper 1 and Paper 2 and practice
+   for Geographical Skills, and Science has calculation units alongside article
+   ones. Routing a practice unit to /lesson/ renders an empty article, because
+   those lessons hold practice_data and no content_html. subjects.settings
+   .practice_units is the same source browse-loader.js uses. */
+function svIsPracticeUnit(su, unitSlug) {
+  if (!su) return false;
+  if (su.mode === 'p') return true;
+  var pu = su.practiceUnits;
+  return !!(pu && unitSlug && pu.indexOf(unitSlug) >= 0);
+}
+window.svIsPracticeUnit = svIsPracticeUnit;
+
 /* where does day one actually start? A real lesson if we know the unit,
    the subject's browse page if we don't, nowhere if it isn't built yet. */
 function dayOneUrl(su) {
   if (!su || !su.sub) return null;
-  if (su.first) return (su.mode === 'p' ? '/practice/' : '/lesson/') + su.sub + '/' + su.first + '/1';
+  if (su.first) return (svIsPracticeUnit(su, su.first) ? '/practice/' : '/lesson/') + su.sub + '/' + su.first + '/1';
   return '/browse/' + su.sub;
 }
 
@@ -198,7 +212,7 @@ function svContinueTarget(SUBJECTS) {
       var k = 1; while (k <= u[1] && set.indexOf(k) >= 0) k++;
       if (k <= u[1])
         return { su: su, unitName: u[0], unitSlug: u[3], total: u[1], num: k,
-                 url: '/' + (su.mode === 'p' ? 'practice' : 'lesson') + '/' + su.sub + '/' + u[3] + '/' + k };
+                 url: '/' + (svIsPracticeUnit(su, u[3]) ? 'practice' : 'lesson') + '/' + su.sub + '/' + u[3] + '/' + k };
     }
   }
   return null;
@@ -375,7 +389,7 @@ function svDashInit(SUBJECTS, opts) {
   var subs = SUBJECTS.filter(function (su) { return su.sub && su.mode !== 'p'; })
     .map(function (su) { return su.sub; });
   if (!subs.length) return;
-  fetch(SUPA + '/rest/v1/subjects?select=slug,units(slug,name,lesson_count,sort_order)'
+  fetch(SUPA + '/rest/v1/subjects?select=slug,settings,units(slug,name,lesson_count,sort_order)'
       + '&school_id=is.null&slug=in.(' + subs.map(function (x) { return '"' + x + '"'; }).join(',') + ')',
       { headers: { apikey: ANON } })
     .then(function (r) { return r.json(); })
@@ -383,6 +397,8 @@ function svDashInit(SUBJECTS, opts) {
       rows.forEach(function (row) {
         var su = SUBJECTS.find(function (x) { return x.sub === row.slug; });
         if (!su) return;
+        // mixed-format subjects: which of these units are practice-first
+        su.practiceUnits = (row.settings && row.settings.practice_units) || [];
         var us = (row.units || []).sort(function (a, b) { return (a.sort_order || 0) - (b.sort_order || 0); })
           .filter(function (u) { return keepUnit(su, u.slug); });
         if (!us.length) return;

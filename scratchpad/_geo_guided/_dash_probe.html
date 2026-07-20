@@ -1,0 +1,63 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>dash routing probe</title>
+<pre id="log" style="font:12px ui-monospace,monospace">loading…</pre>
+<iframe id="f" style="width:1280px;height:900px"></iframe>
+<script>
+// Confirms the dashboard routes a practice unit inside an article subject to
+// /practice/ rather than /lesson/. Geography is the case that broke: Paper 1
+// and Paper 2 are article units, Geographical Skills is practice.
+var qs = new URLSearchParams(location.search);
+document.getElementById('f').src = qs.get('path') || '/classic?picked=geog';
+var L = document.getElementById('log'), f = document.getElementById('f'), tries = 0;
+function done(t) { L.textContent = t; document.title = 'PROBE DONE'; }
+
+(function tick() {
+  var w = null;
+  try { w = f.contentWindow; } catch (e) {}
+  // `const SUBJECTS` does not attach to window, so exercise the routing
+  // functions directly with the object shape dash-data.js builds.
+  var ready = w && typeof w.urlFor === 'function' && typeof w.svIsPracticeUnit === 'function';
+  if (ready || tries > 500) {
+    if (!ready) {
+      var diag = [];
+      try {
+        diag.push('path=' + w.location.pathname);
+        diag.push('readyState=' + f.contentDocument.readyState);
+        diag.push('SUPA=' + typeof w.SUPA + ' NAMEC=' + typeof w.NAMEC +
+                  ' svDashInit=' + typeof w.svDashInit);
+        diag.push('urlFor=' + typeof w.urlFor + ' svIsPracticeUnit=' + typeof w.svIsPracticeUnit);
+        diag.push('scripts=' + f.contentDocument.querySelectorAll('script').length);
+        diag.push('body chars=' + (f.contentDocument.body ? f.contentDocument.body.innerHTML.length : 0));
+      } catch (e) { diag.push('diag error: ' + e); }
+      done('routing fns not found\n  ' + diag.join('\n  '));
+      return;
+    }
+    var geo = { sub: 'geography-aqa', mode: 'l', practiceUnits: ['geographical-skills'] };
+    var units = [['Paper 1: Physical Geography', 20, 5, 'paper-1', []],
+                 ['Paper 2: Human Geography', 20, 4, 'paper-2', []],
+                 ['Geographical Skills', 12, 0, 'geographical-skills', []]];
+    var out = ['subject ' + geo.sub + ' mode=' + geo.mode +
+               ' practiceUnits=' + JSON.stringify(geo.practiceUnits)];
+    units.forEach(function (u) {
+      var want = u[3] === 'geographical-skills' ? '/practice/' : '/lesson/';
+      var url = w.urlFor(geo, u);
+      out.push('  ' + (String(url).indexOf(want) === 0 ? 'OK   ' : 'WRONG') +
+               ' ' + u[3] + ' isPractice=' + w.svIsPracticeUnit(geo, u[3]) + ' -> ' + url);
+    });
+    // a fully-article subject must be unaffected
+    var hist = { sub: 'history-aqa', mode: 'l', practiceUnits: [] };
+    var hu = ['Elizabethan England', 12, 1, 'elizabethan-england', []];
+    out.push('  ' + (String(w.urlFor(hist, hu)).indexOf('/lesson/') === 0 ? 'OK   ' : 'WRONG') +
+             ' history/elizabethan-england -> ' + w.urlFor(hist, hu));
+    // a fully-practice subject must be unaffected
+    var mth = { sub: 'maths-aqa', mode: 'p' };
+    var mu = ['Algebra', 14, 5, 'algebra', []];
+    out.push('  ' + (String(w.urlFor(mth, mu)).indexOf('/practice/') === 0 ? 'OK   ' : 'WRONG') +
+             ' maths/algebra -> ' + w.urlFor(mth, mu));
+    done(out.join(String.fromCharCode(10)));
+    return;
+  }
+  tries++; setTimeout(tick, 50);
+})();
+</script>
