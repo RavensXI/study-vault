@@ -1,0 +1,1371 @@
+# -*- coding: utf-8 -*-
+"""Build guided practice_data for Geography Skills L09 (Proportional Symbols & Flow Lines)."""
+import json, io, os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+PROP = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/proportional-symbol-uk.png"
+FLOW = "https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/flow-line-uk.png"
+
+RED = 'fill="#d9736f" stroke="#8c3b38" stroke-width="1.5"'
+BLU = '#4a80d6'
+
+
+def box(pre, answer, hint, post=None, done=None, say=None, phase=None):
+    d = {"pre": pre, "answer": answer, "hint": hint}
+    if post: d["post"] = post
+    if done: d["done"] = done
+    if say: d["say"] = say
+    if phase: d["phase"] = phase
+    return d
+
+
+def say(text):
+    return {"say": text}
+
+
+# ---------------------------------------------------------------- SVG assets
+OPENER_SVG = (
+    '<p>Two towns are drawn on a map. Bigger circle means more people. '
+    'Thicker arrow means more people moving in.</p>'
+    '<svg viewBox="0 0 420 215" role="img" aria-label="Ashby drawn as a small circle '
+    'and Barton drawn as a circle twice as wide, plus a thin arrow pointing into Ashby '
+    'and an arrow three times as thick pointing into Barton">'
+    '<rect x="0" y="0" width="420" height="215" fill="#f4f1ec"/>'
+    '<circle cx="95" cy="58" r="16" ' + RED + '/>'
+    '<text x="95" y="102" text-anchor="middle" font-size="15" fill="#2d2a26">Ashby</text>'
+    '<circle cx="275" cy="58" r="32" ' + RED + '/>'
+    '<text x="275" y="112" text-anchor="middle" font-size="15" fill="#2d2a26">Barton</text>'
+    '<rect x="22" y="158" width="54" height="4" fill="' + BLU + '"/>'
+    '<polygon points="76,152 94,160 76,168" fill="' + BLU + '"/>'
+    '<text x="104" y="165" font-size="13" fill="#2d2a26">into Ashby</text>'
+    '<rect x="212" y="152" width="52" height="12" fill="' + BLU + '"/>'
+    '<polygon points="264,144 288,158 264,172" fill="' + BLU + '"/>'
+    '<text x="296" y="165" font-size="13" fill="#2d2a26">into Barton</text>'
+    '</svg>'
+)
+
+TEACH_BRONZE_SVG = (
+    '<p>A mini proportional symbol map of four towns, with a key.</p>'
+    '<svg viewBox="0 0 470 250" role="img" aria-label="Mini proportional symbol map with '
+    'four town circles labelled Redhill, Marsden, Kelby and Oakford, and a key showing a '
+    'small circle worth 200 thousand people and a circle twice as wide worth 800 thousand">'
+    '<rect x="0" y="0" width="470" height="250" fill="#eef3f7"/>'
+    '<circle cx="130" cy="58" r="12" ' + RED + '/>'
+    '<text x="130" y="34" text-anchor="middle" font-size="13" fill="#2d2a26">Redhill</text>'
+    '<circle cx="285" cy="72" r="17" ' + RED + '/>'
+    '<text x="285" y="42" text-anchor="middle" font-size="13" fill="#2d2a26">Marsden</text>'
+    '<circle cx="150" cy="170" r="9" ' + RED + '/>'
+    '<text x="150" y="196" text-anchor="middle" font-size="13" fill="#2d2a26">Kelby</text>'
+    '<circle cx="350" cy="165" r="24" ' + RED + '/>'
+    '<text x="350" y="205" text-anchor="middle" font-size="13" fill="#2d2a26">Oakford</text>'
+    '<rect x="8" y="212" width="200" height="34" fill="#faf8f5" stroke="#b9b3aa"/>'
+    '<circle cx="26" cy="229" r="12" ' + RED + '/>'
+    '<text x="44" y="234" font-size="12" fill="#2d2a26">200</text>'
+    '<circle cx="106" cy="229" r="24" ' + RED + '/>'
+    '<text x="136" y="234" font-size="12" fill="#2d2a26">800 (thousands)</text>'
+    '</svg>'
+)
+
+TEACH_SILVER_SVG = (
+    '<p>A mini proportional symbol map of three towns. The key circle and Havenport '
+    'have been measured with a ruler.</p>'
+    '<svg viewBox="0 0 470 250" role="img" aria-label="Mini proportional symbol map with '
+    'three town circles, Havenport in the north east measured 30 millimetres across, and a '
+    'key circle worth 100 thousand people measured 10 millimetres across">'
+    '<rect x="0" y="0" width="470" height="250" fill="#eef3f7"/>'
+    '<circle cx="110" cy="80" r="14" ' + RED + '/>'
+    '<text x="110" y="112" text-anchor="middle" font-size="13" fill="#2d2a26">Ferndale</text>'
+    '<circle cx="140" cy="185" r="10" ' + RED + '/>'
+    '<text x="140" y="212" text-anchor="middle" font-size="13" fill="#2d2a26">Stanwick</text>'
+    '<circle cx="345" cy="88" r="30" ' + RED + '/>'
+    '<text x="345" y="140" text-anchor="middle" font-size="13" fill="#2d2a26">Havenport</text>'
+    '<text x="345" y="158" text-anchor="middle" font-size="12" fill="#2d2a26">30 mm across</text>'
+    '<rect x="8" y="205" width="240" height="40" fill="#faf8f5" stroke="#b9b3aa"/>'
+    '<circle cx="30" cy="225" r="10" ' + RED + '/>'
+    '<text x="50" y="222" font-size="12" fill="#2d2a26">100 thousand people</text>'
+    '<text x="50" y="238" font-size="12" fill="#2d2a26">key circle is 10 mm across</text>'
+    '</svg>'
+)
+
+TEACH_GOLD_SVG = (
+    '<p>A mini flow line map. Three arrows point into Rivermouth and one points out.</p>'
+    '<svg viewBox="0 0 470 260" role="img" aria-label="Mini flow line map with three blue '
+    'arrows pointing into Rivermouth from Ashcombe, Beckton and Coldale, one arrow pointing '
+    'out of Rivermouth to Dunmere, and a key showing widths worth 10, 25 and 40 thousand '
+    'people a year">'
+    '<rect x="0" y="0" width="470" height="260" fill="#eef3f7"/>'
+    '<text x="330" y="118" font-size="14" fill="#2d2a26">Rivermouth</text>'
+    '<circle cx="318" cy="130" r="5" fill="#2d2a26"/>'
+    '<text x="26" y="52" font-size="13" fill="#2d2a26">Ashcombe</text>'
+    '<rect x="96" y="62" width="180" height="8" fill="' + BLU + '"/>'
+    '<polygon points="276,54 306,66 276,78" fill="' + BLU + '"/>'
+    '<text x="26" y="136" font-size="13" fill="#2d2a26">Beckton</text>'
+    '<rect x="96" y="127" width="180" height="5" fill="' + BLU + '"/>'
+    '<polygon points="276,121 306,129 276,137" fill="' + BLU + '"/>'
+    '<text x="26" y="204" font-size="13" fill="#2d2a26">Coldale</text>'
+    '<rect x="96" y="192" width="180" height="2" fill="' + BLU + '"/>'
+    '<polygon points="276,187 306,193 276,199" fill="' + BLU + '"/>'
+    '<rect x="332" y="164" width="80" height="3" fill="' + BLU + '"/>'
+    '<polygon points="412,159 440,165 412,171" fill="' + BLU + '"/>'
+    '<text x="356" y="188" font-size="13" fill="#2d2a26">to Dunmere</text>'
+    '<rect x="8" y="212" width="300" height="44" fill="#faf8f5" stroke="#b9b3aa"/>'
+    '<rect x="18" y="222" width="46" height="2" fill="' + BLU + '"/>'
+    '<text x="70" y="227" font-size="11" fill="#2d2a26">10</text>'
+    '<rect x="100" y="221" width="46" height="5" fill="' + BLU + '"/>'
+    '<text x="152" y="227" font-size="11" fill="#2d2a26">25</text>'
+    '<rect x="182" y="219" width="46" height="8" fill="' + BLU + '"/>'
+    '<text x="234" y="227" font-size="11" fill="#2d2a26">40</text>'
+    '<text x="18" y="246" font-size="11" fill="#2d2a26">thousands of people a year</text>'
+    '</svg>'
+)
+
+# ---------------------------------------------------------------- opener
+OPENER = {
+    "display": OPENER_SVG,
+    "steps": [
+        say("No method needed yet. Just look at the picture and use common sense."),
+        box("Barton's circle is drawn wider than Ashby's. Which town has more people? "
+            "Type 1 for Ashby or 2 for Barton.",
+            2,
+            "On this map a wider circle simply means more people. Compare the two widths.",
+            done="Bigger circle, bigger place. You just read a proportional symbol."),
+        box("The arrow into Barton is drawn 3 times as thick as the arrow into Ashby. "
+            "5,000 people moved into Ashby last year. How many moved into Barton?",
+            15000,
+            "Three times as thick means three times as many people, so multiply.",
+            done="Thicker arrow, bigger flow. You just read a flow line."),
+        say("Those two moves are the whole topic. A <strong>proportional symbol</strong> "
+            "carries its value in the size of the shape, and a <strong>flow line</strong> "
+            "carries its value in the thickness of the arrow while the arrowhead shows "
+            "which way people are going. The only extra care needed later is that circles "
+            "scale by <strong>area</strong>, not by width."),
+    ],
+}
+
+# ---------------------------------------------------------------- teach walks
+TEACH = {
+    "bronze": {
+        "display": TEACH_BRONZE_SVG,
+        "question": "Use the key to read the populations of Oakford and Redhill.",
+        "steps": [
+            say("Start by getting your bearings on the map, not by calculating."),
+            box("How many town circles are drawn on the map? Do not count the two circles "
+                "inside the key box.",
+                4,
+                "Count the labelled towns: Redhill, Marsden, Kelby and Oakford.",
+                done="Knowing what is on the map before you read it stops you mixing up "
+                     "a key circle with a real place."),
+            box("Which town has the biggest circle? Type 1 for Redhill, 2 for Marsden, "
+                "3 for Kelby or 4 for Oakford.",
+                4,
+                "Compare widths across the whole map before you decide.",
+                done="On a proportional symbol map the largest circle is always the "
+                     "largest value."),
+            box("Now look at the key. The larger key circle stands for how many thousand "
+                "people?",
+                800,
+                "The two numbers printed beside the key circles are 200 and 800.",
+                done="The key is the only place the map tells you what a size is worth."),
+            box("Oakford's circle is the same size as that larger key circle. Give "
+                "Oakford's population in thousands.",
+                800,
+                "Matching sizes means matching values.",
+                done="Matching a symbol against the key is the whole bronze skill."),
+            box("Redhill's circle matches the smaller key circle. Give Redhill's "
+                "population in thousands.",
+                200,
+                "Read the number printed beside the smaller key circle."),
+            box("Check it makes sense. Divide Oakford's population by Redhill's.",
+                4,
+                "Divide the larger value by the smaller one.",
+                done="Oakford's circle is twice as wide as Redhill's, and twice the width "
+                     "means four times the area, so a factor of 4 is exactly right."),
+        ],
+    },
+    "silver": {
+        "display": TEACH_SILVER_SVG,
+        "question": "The key circle for 100 thousand people is 10 mm across. Havenport's "
+                    "circle is 30 mm across. Estimate Havenport's population in thousands.",
+        "steps": [
+            say("Locate first, measure second, calculate last."),
+            box("How many town circles are drawn on this mini map?",
+                3,
+                "Ferndale, Stanwick and Havenport are labelled.",
+                done="Orienting yourself first means you measure the right circle."),
+            box("Read the key. How many thousand people does the key circle stand for?",
+                100,
+                "The value is printed next to the key circle.",
+                done="Every silver estimate starts from a key value."),
+            box("Divide Havenport's diameter by the key circle's diameter. How many times "
+                "wider is Havenport's circle?",
+                3,
+                "Divide 30 mm by 10 mm.",
+                done="This ratio is a width ratio, not a population ratio yet."),
+            box("Circles carry their value in their area, so square that ratio.",
+                9,
+                "Multiply the ratio by itself.",
+                done="This is the one move that separates silver from bronze. Doubling "
+                     "the width quadruples the area."),
+            box("Multiply by the key value to get Havenport's population in thousands.",
+                900,
+                "Multiply your squared ratio by the number of thousands in the key."),
+            box("Check it. Divide your population by the key value. It should return the "
+                "area factor you found.",
+                9,
+                "Divide your answer in thousands by the key value in thousands.",
+                done="It returns the area factor, so the scaling was applied once and "
+                     "in the right direction."),
+        ],
+    },
+    "gold": {
+        "display": TEACH_GOLD_SVG,
+        "question": "Find the total flow into Rivermouth and its net gain of people.",
+        "steps": [
+            say("Flows have a direction. Sort the arrows before you add anything."),
+            box("How many arrowheads point into Rivermouth?",
+                3,
+                "Follow each arrow to its point and see where it lands.",
+                done="Sorting arrows by direction first is what stops you adding an "
+                     "outward flow into an inward total."),
+            box("The widest arrow, from Ashcombe, matches the widest key line. What is it "
+                "worth, in thousands per year?",
+                40,
+                "Hold the arrow against the three key widths and find the match.",
+                done="Flow line widths scale straight, so a line twice as wide is twice "
+                     "the flow."),
+            box("Beckton's arrow matches the middle key line and Coldale's matches the "
+                "narrowest. Add all three inward flows, in thousands.",
+                75,
+                "The middle key line is 25 and the narrowest is 10. Add them to the "
+                "Ashcombe flow.",
+                done="Adding only the inward arrows gives the gross inward flow."),
+            box("One arrow points out of Rivermouth, to Dunmere. It sits between the "
+                "narrowest and middle key lines, at 15. Subtract it from your inward "
+                "total to get the net gain, in thousands.",
+                60,
+                "Net gain is everything coming in minus everything going out."),
+            box("Check it. Take your net gain away from the inward total. You should get "
+                "the outward flow back.",
+                15,
+                "Subtract the net figure from the gross inward figure.",
+                done="Getting the outward flow back proves the subtraction went the right "
+                     "way round."),
+        ],
+    },
+}
+
+# ---------------------------------------------------------------- bank
+bronze = [
+    # 0 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "Look at the proportional symbol map. Which city has the largest population?",
+        "options": ["Birmingham", "Manchester", "London", "Glasgow"],
+        "solutions": [2],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Compare the width of every circle on the map, then match the biggest one to its label.",
+        "misconceptions": [
+            {"pattern": "second_largest_chosen", "expect": 0,
+             "message": "That is one of the wider circles, but it is not the widest. Scan "
+                        "the whole map, including the far south east, before you decide."},
+            {"pattern": "label_offset_confusion", "expect": 3,
+             "message": "Labels on this map sit beside their circle, not on it. Check which "
+                        "circle really belongs to the name you picked, then compare widths."},
+        ],
+        "guided_steps": [
+            say("Get your bearings on the map before comparing anything."),
+            box("Find the key box in the bottom left corner. How many reference circles "
+                "does it show?",
+                3,
+                "Count the circles drawn inside the key box, not the ones on the map itself.",
+                done="The key is where the map tells you what a size is worth, so it is "
+                     "always the first thing to find."),
+            box("What is the largest key circle worth, in thousands of people?",
+                8000,
+                "Read the number printed beside the biggest circle in the key."),
+            box("Now find the four option cities on the map. How many of them have a "
+                "circle as wide as that largest key circle?",
+                1,
+                "Only one circle on the entire map comes close to the biggest key circle.",
+                phase="substitute",
+                done="Narrowing four options to one by size is the whole bronze move."),
+            box("Type the position of that city in the option list, counting 1 for "
+                "Birmingham at the top down to 4 for Glasgow.",
+                3,
+                "Count down the list of four options to find where that city sits."),
+            box("Check it. How many circles anywhere on the map are wider than the one "
+                "you chose?",
+                0,
+                "Look right across the map for anything bigger.",
+                done="Nothing on the map is wider, so the city you chose must hold the "
+                     "largest population."),
+        ],
+    },
+    # 1 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "On the flow line map, which city sends the most migrants to London?",
+        "options": ["Manchester", "Leeds", "Birmingham", "Liverpool"],
+        "solutions": [2],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Find the arrows that end at London, then pick the widest one and follow it back to its start.",
+        "misconceptions": [
+            {"pattern": "narrower_arrow_chosen", "expect": 0,
+             "message": "That arrow does reach London, but another blue arrow into London "
+                        "is wider than it. Width is what carries the size of a flow."},
+            {"pattern": "arrow_not_to_london", "expect": 3,
+             "message": "Follow that city's arrow to its arrowhead. It does not end at "
+                        "London, so it is not a flow into London at all."},
+        ],
+        "guided_steps": [
+            say("Locate the destination first, then sort the arrows that reach it."),
+            box("Find London in the south east of the map. How many blue arrowheads end "
+                "at London?",
+                3,
+                "Follow each blue arrow to its point and count only the ones that land on London.",
+                done="Only arrows that end at London are flows into London. Everything "
+                     "else is a different journey."),
+            box("Look at the key in the bottom left. How many reference arrows does it show?",
+                3,
+                "Count the three sample arrow widths drawn in the key box."),
+            box("What is the widest key arrow worth, in thousands of people a year?",
+                60,
+                "Read the number printed beside the thickest arrow in the key.",
+                phase="substitute"),
+            box("How many of the three arrows into London are as wide as that widest key arrow?",
+                1,
+                "Only one of the three arrows into London matches the thickest key arrow."),
+            box("Follow that arrow back to where it starts and type that city's position "
+                "in the option list, counting 1 for Manchester down to 4 for Liverpool.",
+                3,
+                "Count down the four options to find where that city sits."),
+            box("Check it. How many of the four option cities have any arrow at all "
+                "ending at London?",
+                3,
+                "One of the four sends its arrow somewhere else entirely.",
+                done="One option never reaches London, so it could never have been the "
+                     "answer, and of the three that do, you picked the widest."),
+        ],
+    },
+    # 2 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "Using the map and key, which of these cities has a population closest to 500,000?",
+        "options": ["London", "Birmingham", "Liverpool", "Norwich"],
+        "solutions": [2],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Hold each option's circle against the smallest key circle and find the one that matches it almost exactly.",
+        "misconceptions": [
+            {"pattern": "too_large_chosen", "expect": 1,
+             "message": "That circle is clearly wider than the smallest key circle, so its "
+                        "value sits well above the key value you are matching to."},
+            {"pattern": "biggest_not_closest", "expect": 0,
+             "message": "You have picked the widest circle rather than the one nearest the "
+                        "key value. The task is to match a size, not to find the maximum."},
+        ],
+        "guided_steps": [
+            say("Match against the key rather than against the other cities."),
+            box("Find the key box. What is the smallest key circle worth, in thousands "
+                "of people?",
+                500,
+                "Read the number beside the smallest circle in the key.",
+                done="This is the target size. Every option now gets held against it."),
+            box("Two options are easy to rule out on sight: one circle is enormous and "
+                "one is tiny. How many options are left after those two go?",
+                2,
+                "Rule out the largest circle on the map and the smallest of the four."),
+            box("Of the two that remain, one circle is noticeably wider than the key "
+                "circle. How many of the two match the key circle almost exactly?",
+                1,
+                "Compare each remaining circle with the smallest key circle.",
+                phase="substitute"),
+            box("Type that city's position in the option list, counting 1 for London "
+                "down to 4 for Norwich.",
+                3,
+                "Count down the four options to find where that city sits."),
+            box("Check by ordering. Put the four options in size order, largest circle "
+                "first. What position does your chosen city take?",
+                3,
+                "Rank all four circles from widest to narrowest and find your city.",
+                done="Two options are larger than it and one is smaller, so it sits third, "
+                     "which is exactly where a value near the smallest key circle belongs."),
+        ],
+    },
+    # 3 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "The flow line map uses two colours. What do the red arrows represent?",
+        "options": ["Migration towards London", "Migration away from London",
+                    "International migration", "Commuter journeys"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Read the colour note under the key, then check which end of a red arrow carries the arrowhead.",
+        "misconceptions": [
+            {"pattern": "arrow_direction_reversed", "expect": 0,
+             "message": "You have read the arrows the wrong way round. The arrowhead marks "
+                        "where a journey ends, and the note under the key tells you which "
+                        "colour leaves London."},
+            {"pattern": "assumed_international", "expect": 2,
+             "message": "Every place named on this map lies inside the same country, so no "
+                        "arrow on it crosses an international border."},
+        ],
+        "guided_steps": [
+            say("Colour questions are always answered from the key, never from a guess."),
+            box("Look at the map and the note printed below the key. How many different "
+                "colours of arrow are drawn?",
+                2,
+                "Scan the arrows for a second colour, then read the note under the key.",
+                done="The key note is the map's own statement about colour, so it "
+                     "outranks anything the arrows look like."),
+            box("Count the red arrows drawn on the map.",
+                2,
+                "Look for arrows drawn in red rather than blue."),
+            box("Follow each red arrow to its point. How many red arrowheads land on London?",
+                0,
+                "Check where the pointed end of each red arrow finishes.",
+                phase="substitute"),
+            box("If no red arrowhead lands on London, how many red arrows must instead "
+                "begin at London?",
+                2,
+                "Every arrow has one end that starts and one end that finishes."),
+            box("Type the option position that describes this, counting 1 for towards "
+                "London down to 4 for commuter journeys.",
+                2,
+                "Count down the four options to the one that matches red arrows leaving London.",
+                done="The key note and the arrowheads agree, so the direction is settled "
+                     "by the map itself rather than by assumption."),
+        ],
+    },
+    # 4 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "Birmingham has the second-largest circle on the map. Using the key, estimate its population.",
+        "options": ["About 500,000", "About 1,000,000", "About 2,000,000", "About 5,000,000"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Trap the circle between two key circles first, then pick the only option that falls inside that gap.",
+        "misconceptions": [
+            {"pattern": "upper_bound_taken", "expect": 2,
+             "message": "The circle you are reading is narrower than the middle key circle, "
+                        "so its value has to sit below that key value, not on it."},
+            {"pattern": "lower_bound_taken", "expect": 0,
+             "message": "The circle you are reading is clearly wider than the smallest key "
+                        "circle, so its value has to sit above that key value, not on it."},
+        ],
+        "guided_steps": [
+            say("Trapping a value between two key circles is safer than guessing a number."),
+            box("Find Birmingham in the middle of England. How many circles on the whole "
+                "map are wider than Birmingham's?",
+                1,
+                "Only the huge circle in the south east beats it.",
+                done="Confirming it really is second largest tells you roughly where in "
+                     "the key range to look."),
+            box("Read the key. The smallest circle is worth 500 thousand. What is the "
+                "middle key circle worth, in thousands?",
+                2000,
+                "Read the number printed beside the middle circle in the key."),
+            box("Birmingham's circle is wider than the smallest key circle but narrower "
+                "than the middle one. How many of the four options fall strictly between "
+                "those two key values?",
+                1,
+                "Check each option against the range from 500 thousand up to 2 million.",
+                phase="substitute"),
+            box("Type that option's position, counting 1 for about 500,000 down to 4 for "
+                "about 5,000,000.",
+                2,
+                "Count down the four options to the value that sits inside the gap."),
+            box("Check it against the key. How many key circles are wider than Birmingham's "
+                "circle?",
+                2,
+                "Count the key circles that are bigger than the one you are reading.",
+                done="Two key circles are wider than it, so its value must sit below both "
+                     "of them, which rules out the two largest options."),
+        ],
+    },
+    # 5 -----------------------------------------------------------------
+    {
+        "display": "Which of these datasets would be best shown using a proportional symbol map?",
+        "options": ["Average temperature across UK regions",
+                    "Number of hospital beds in each city",
+                    "Percentage of land used for farming by county",
+                    "Direction of wind across the country"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Proportional symbols show a total counted at one point, so sort the options by what kind of value each one is.",
+        "misconceptions": [
+            {"pattern": "percentage_chosen", "expect": 2,
+             "message": "A percentage describes a whole area rather than a single point, so "
+                        "it belongs on a shaded area map instead."},
+            {"pattern": "direction_chosen", "expect": 3,
+             "message": "Direction needs an arrow, not a circle. That data suits a flow "
+                        "line or wind map."},
+        ],
+        "guided_steps": [
+            say("Sort the four options by the kind of value each one is."),
+            box("How many of the four options give a whole-number count taken at one "
+                "named place?",
+                1,
+                "Look for the option that counts things in a single city rather than "
+                "describing a region.",
+                done="A count at a point is exactly what a proportional symbol is built "
+                     "to show."),
+            box("How many of the four are averages or percentages spread across a whole area?",
+                2,
+                "An average temperature and a percentage of land are both area measures."),
+            box("How many of the four describe a direction rather than an amount?",
+                1,
+                "One option is about which way something moves.",
+                phase="substitute"),
+            box("Add your three counts together. Do they account for all four options?",
+                4,
+                "Add the count, the area measures and the direction together."),
+            box("Type the option position of the single count at a place, counting 1 for "
+                "temperature down to 4 for wind direction.",
+                2,
+                "Count down the four options to the one you classified as a count.",
+                done="The four options sort cleanly into one count, two area measures and "
+                     "one direction, so only one can suit a proportional symbol map."),
+        ],
+    },
+    # 6 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "Compare the blue arrow from Leeds to London with the blue arrow from Birmingham to London. What can you conclude?",
+        "options": ["More people migrate from Leeds than from Birmingham",
+                    "More people migrate from Birmingham than from Leeds",
+                    "Equal numbers migrate from both cities",
+                    "The arrows show commuter journeys, not migration"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Match each of the two arrows to a key width first, then compare the two values.",
+        "misconceptions": [
+            {"pattern": "width_read_backwards", "expect": 0,
+             "message": "You have matched the arrows to the key the wrong way round. On a "
+                        "flow line map the wider arrow is always the larger flow."},
+            {"pattern": "widths_seen_as_equal", "expect": 2,
+             "message": "The two arrows are not the same width. Hold each one against the "
+                        "key arrows in turn and the difference shows up clearly."},
+        ],
+        "guided_steps": [
+            say("Turn both arrows into numbers before you compare them."),
+            box("Find Leeds and Birmingham and follow their blue arrows. How many of "
+                "these two arrows end at London?",
+                2,
+                "Trace each arrow to its point and see where it lands.",
+                done="Both flows share the same destination, so comparing their widths is "
+                     "a fair comparison."),
+            box("Look at the key. What is the widest reference arrow worth, in thousands "
+                "a year?",
+                60,
+                "Read the number beside the thickest arrow in the key."),
+            box("Birmingham's arrow matches that widest key arrow. Leeds' arrow matches "
+                "the middle key arrow. What is the middle key arrow worth, in thousands?",
+                30,
+                "Read the number beside the middle arrow in the key.",
+                phase="substitute"),
+            box("How many thousand more people move from Birmingham than from Leeds?",
+                30,
+                "Subtract the smaller flow from the larger one."),
+            box("A positive difference means the first city sends more. Type the option "
+                "position that says this, counting 1 for more from Leeds down to 4 for "
+                "commuter journeys.",
+                2,
+                "Count down the four options to the one that matches your difference."),
+            box("Check it. Divide the Birmingham flow by the Leeds flow. How many times "
+                "bigger is it?",
+                2,
+                "Divide the larger flow by the smaller one.",
+                done="The Birmingham arrow is exactly twice the flow, which is why it is "
+                     "drawn twice as wide."),
+        ],
+    },
+    # 7 -----------------------------------------------------------------
+    {
+        "display": "Give one advantage of a flow line map over a table of migration figures.",
+        "options": ["A flow line map shows exact numbers more precisely",
+                    "A flow line map shows the direction and relative size of movements at a glance",
+                    "A flow line map can display more data than a table",
+                    "Tables cannot show migration data"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "An advantage has to be something the map genuinely does better, not something untrue about tables.",
+        "misconceptions": [
+            {"pattern": "precision_claimed", "expect": 0,
+             "message": "Flow widths are estimated by eye, so precision is the one thing a "
+                        "flow line map is weak at, not strong at."},
+            {"pattern": "table_dismissed", "expect": 3,
+             "message": "Tables show migration figures perfectly well. Look for an option "
+                        "that names something the map does better, not something false "
+                        "about tables."},
+        ],
+        "guided_steps": [
+            say("Work out what a flow line actually carries, then test each option against it."),
+            box("A flow line arrow carries two pieces of information at once: its width "
+                "and where its head points. How many is that?",
+                2,
+                "Count the two visible properties of a single arrow.",
+                done="Width gives size and the arrowhead gives direction. That pair is the "
+                     "map's real advantage."),
+            box("How many of those two can a plain table show without the reader working "
+                "through the numbers?",
+                0,
+                "A table gives figures, but the reader has to interpret them.",
+                phase="substitute"),
+            box("How many of the four options make a claim that is simply untrue, either "
+                "about precision or about what tables can do?",
+                3,
+                "Options about precision, about holding more data and about tables being "
+                 "unable to show migration are all false."),
+            box("Only one option is left. Type its position, counting 1 down to 4.",
+                2,
+                "Count down the four options to the one you did not rule out.",
+                done="Three options fail on fact, and the survivor is the one that names "
+                     "the two things an arrow shows at a glance."),
+        ],
+    },
+]
+
+silver = [
+    # 0 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "The key shows that a circle representing 2,000,000 people has roughly "
+                   "twice the diameter of one representing 500,000 people, because the area "
+                   "of the circle carries the value. On a printed copy the 500 key circle "
+                   "measures 25.0 mm across and Glasgow's circle measures 28.2 mm across. "
+                   "Estimate Glasgow's population in thousands, to the nearest thousand.",
+        "solutions": [636],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Divide the two diameters first, then square that ratio before multiplying by the key value.",
+        "misconceptions": [
+            {"pattern": "linear_scaling", "expect": 564,
+             "message": "You have scaled straight from the width. On a proportional symbol "
+                        "map the area carries the value, so the width ratio has to be "
+                        "squared before you use it."},
+            {"pattern": "wrong_key_circle", "expect": 2545,
+             "message": "You have scaled from the wrong reference circle. Use the key circle "
+                        "whose measurement the question actually gives you."},
+            {"pattern": "units_people_not_thousands", "expect": 636000,
+             "message": "Your scaling is sound but the units are not what was asked for. "
+                        "Re read the last line of the question."},
+        ],
+        "guided_steps": [
+            say("Find the circle on the map first, then measure, then scale."),
+            box("Find Glasgow in central Scotland. How many circles in Scotland are wider "
+                "than Glasgow's?",
+                0,
+                "Compare Glasgow's circle with the other Scottish circles on the map.",
+                done="Glasgow is the widest circle in Scotland, so an answer below the "
+                     "smallest key value would already look wrong."),
+            box("Read the key. What is the smallest key circle worth, in thousands of people?",
+                500,
+                "Read the number printed beside the smallest circle in the key."),
+            box("Divide Glasgow's diameter by the key circle's diameter. Give the ratio "
+                "to 3 decimal places.",
+                1.128,
+                "Divide 28.2 by 25.0.",
+                phase="substitute",
+                done="This is only a width ratio so far, not a population ratio."),
+            box("Area goes with the square of the diameter. Square that ratio, to 3 "
+                "decimal places.",
+                1.272,
+                "Multiply the ratio by itself and round to 3 decimal places.",
+                done="Squaring the width ratio is the single move that makes a "
+                     "proportional symbol estimate honest."),
+            box("Multiply by the key value and round to the nearest thousand to get "
+                "Glasgow's population in thousands.",
+                636,
+                "Multiply your squared ratio by the key value in thousands."),
+            box("Check it. Divide your answer by the key value and give the result to 3 "
+                "decimal places.",
+                1.272,
+                "Divide your population in thousands by the key value in thousands.",
+                done="It returns the area factor exactly, so the scaling was applied once "
+                     "and in the right direction."),
+        ],
+    },
+    # 1 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "The flow from Birmingham to London is 60,000 people per year. The flow "
+                   "from Leeds to London appears to be half as wide. Estimate the Leeds to "
+                   "London flow in thousands.",
+        "solutions": [30],
+        "calculator": False,
+        "input_type": "single_value",
+        "hint": "Half the arrow width means half the flow, and the answer is wanted in thousands.",
+        "misconceptions": [
+            {"pattern": "units_people_not_thousands", "expect": 30000,
+             "message": "That is the right size of flow but the wrong units. Check the last "
+                        "few words of the question."},
+            {"pattern": "multiplied_not_divided", "expect": 120,
+             "message": "You have gone the wrong way. A narrower arrow means a smaller flow, "
+                        "so this is a division, not a multiplication."},
+        ],
+        "guided_steps": [
+            say("Locate the two arrows before touching the numbers."),
+            box("Find London and count the blue arrowheads that end there.",
+                3,
+                "Trace each blue arrow to its point and count the ones landing on London.",
+                done="Both arrows in this question are among those three, so they are "
+                     "directly comparable."),
+            box("The question gives the Birmingham flow in people per year. How many "
+                "thousand is that?",
+                60,
+                "Convert 60,000 people into thousands."),
+            box("The Leeds arrow is half as wide. Flow widths scale straight, so halve "
+                "that value.",
+                30,
+                "Divide the Birmingham figure in thousands by 2.",
+                phase="substitute"),
+            box("Check it. Double your answer. It should return the Birmingham flow in "
+                "thousands.",
+                60,
+                "Multiply your answer by 2.",
+                done="Doubling gives the Birmingham flow back, so the halving went the "
+                     "right way round and the units stayed in thousands."),
+        ],
+    },
+    # 2 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "In the area around Manchester, Leeds, Sheffield, and Liverpool, the circles are close together. What problem does this create for the map reader?",
+        "options": ["The colours are too similar",
+                    "Circles overlap, making it hard to read individual values",
+                    "The cities are too far apart to compare",
+                    "The key does not include these cities"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Look at what happens to symbol edges when several similar circles are drawn very close together.",
+        "misconceptions": [
+            {"pattern": "distance_blamed", "expect": 2,
+             "message": "Those cities sit close together on the map, so distance is not what "
+                        "makes them awkward to read."},
+            {"pattern": "colour_blamed", "expect": 0,
+             "message": "Every circle on this map is drawn in the same single colour, so "
+                        "colour is not what causes the difficulty."},
+        ],
+        "guided_steps": [
+            say("Look at the cluster itself before reading the options."),
+            box("Find Manchester, Leeds, Sheffield and Liverpool in the north of England. "
+                "How many circles is that packed into one small area?",
+                4,
+                "Count the labelled cities named in the question.",
+                done="Four symbols in a small area is what creates the difficulty."),
+            box("Compare them with Birmingham's circle. How many of the four are narrower "
+                "than Birmingham's?",
+                4,
+                "Check each of the four against Birmingham's circle.",
+                done="They are all a similar size, so none of them stands clear of its "
+                     "neighbours."),
+            box("Similar sized circles drawn close together touch and cover each other. "
+                "How many of the four option statements blame overlapping circles?",
+                1,
+                "Read each option and count the ones that mention overlap.",
+                phase="substitute"),
+            box("Type that option's position, counting 1 for colours down to 4 for the key.",
+                2,
+                "Count down the four options to the one about overlap."),
+            box("Check the rivals. How many of the four options describe these cities as "
+                "far apart, which the map contradicts?",
+                1,
+                "Look for the option that claims distance is the problem.",
+                done="That option is contradicted by the map itself, and the key and colour "
+                     "options fail too, which leaves overlap as the only fair description."),
+        ],
+    },
+    # 3 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "The flow from Manchester to London is 45,000 per year. The flow from London to Manchester is 20,000 per year. Calculate the net migration from Manchester to London.",
+        "solutions": [25000],
+        "calculator": True,
+        "input_type": "single_value",
+        "hint": "Net migration is the flow towards a place minus the flow away from it.",
+        "misconceptions": [
+            {"pattern": "added_not_subtracted", "expect": 65000,
+             "message": "You have combined the two flows instead of comparing them. Net "
+                        "migration is a difference, not a total."},
+            {"pattern": "subtracted_wrong_way", "expect": -25000,
+             "message": "You have taken the larger flow away from the smaller one. Net "
+                        "movement towards a place is the inward flow minus the outward flow."},
+            {"pattern": "units_thousands_not_people", "expect": 25,
+             "message": "Your working is right but the units are not. Both figures in the "
+                        "question are given in people, so the answer should be too."},
+        ],
+        "guided_steps": [
+            say("Sort the arrows by direction before you subtract anything."),
+            box("Find Manchester and London. How many arrows run between just these two "
+                "cities?",
+                2,
+                "Look for one arrow in each direction between the pair.",
+                done="A pair of opposing arrows is exactly the situation net migration is "
+                     "designed for."),
+            box("How many of those two arrows are red, meaning they leave London?",
+                1,
+                "The note under the key tells you which colour leaves London."),
+            box("Write down the flow towards London, in people per year.",
+                45000,
+                "The question gives the Manchester to London figure directly.",
+                phase="substitute"),
+            box("Subtract the flow away from London to get the net migration, in people "
+                "per year.",
+                25000,
+                "Take the London to Manchester figure away from the Manchester to London "
+                "figure."),
+            box("Check it. Add your net figure to the London to Manchester flow. It "
+                "should return the Manchester to London flow.",
+                45000,
+                "Add 20,000 to your answer.",
+                done="It returns the inward flow exactly, so the subtraction went the "
+                     "right way round."),
+        ],
+    },
+    # 4 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "Describe the spatial pattern shown by the proportional symbol map.",
+        "options": ["Large cities are evenly spread across the UK",
+                    "The largest cities are concentrated in the south-east and the Midlands, with smaller cities in Scotland and Wales",
+                    "All cities have similar populations",
+                    "Cities in Scotland are larger than cities in England"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Test each statement against the map by counting circles in each part of the country.",
+        "misconceptions": [
+            {"pattern": "even_spread_claimed", "expect": 0,
+             "message": "The circles differ hugely in width and bunch together in places, so "
+                        "an even spread does not describe what is drawn."},
+            {"pattern": "scotland_overrated", "expect": 3,
+             "message": "Compare the widest Scottish circle with the widest English one "
+                        "before accepting that statement."},
+        ],
+        "guided_steps": [
+            say("Test each statement against the map rather than against memory."),
+            box("Find the single widest circle on the map. How many circles anywhere are "
+                "wider than it?",
+                0,
+                "Scan the whole map for anything bigger.",
+                done="One circle dominates everything else, which already rules out any "
+                     "statement about cities being similar."),
+            box("Count the town circles drawn in Scotland.",
+                3,
+                "Look for the labelled Scottish cities in the north.",
+                done="Three modest circles in Scotland is the comparison you need for the "
+                     "last option."),
+            box("How many of those Scottish circles are as wide as the widest circle on "
+                "the map?",
+                0,
+                "Compare each Scottish circle with the dominant one.",
+                phase="substitute"),
+            box("How many of the four statements say the largest cities sit in the south "
+                "east and the Midlands?",
+                1,
+                "Read each option and count the ones matching what you have just measured."),
+            box("Type that option's position, counting 1 for evenly spread down to 4 for "
+                "Scotland being larger.",
+                2,
+                "Count down the four options to the matching statement.",
+                done="Two options fail because circle sizes clearly differ, and the "
+                     "Scotland claim fails on your own count, leaving one statement standing."),
+        ],
+    },
+    # 5 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "Most blue arrows on the map point towards London. Suggest a reason for this pattern.",
+        "options": ["London has better weather than other cities",
+                    "London offers more job opportunities, higher wages, and more services, attracting migrants from across the UK",
+                    "People prefer to live in the south because it is flatter",
+                    "London is the only city with universities"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "A good reason names a pull factor that would actually make people move for work or services.",
+        "misconceptions": [
+            {"pattern": "weather_chosen", "expect": 0,
+             "message": "Weather is a weak pull factor for movement inside one country, and "
+                        "the map carries no climate data at all."},
+            {"pattern": "false_claim_chosen", "expect": 3,
+             "message": "That statement is factually false, so it cannot explain anything "
+                        "the map shows."},
+        ],
+        "guided_steps": [
+            say("Confirm the pattern on the map, then judge the four explanations."),
+            box("Count the blue arrowheads that end at London.",
+                3,
+                "Trace each blue arrow to its point and count those landing on London.",
+                done="Three separate cities feeding one destination is a genuine pull "
+                     "pattern, not a coincidence."),
+            box("How many of the four options give an economic reason, naming jobs, wages "
+                "or services?",
+                1,
+                "Read each option and count the ones about work or services."),
+            box("How many of the four give a physical reason instead, about weather or "
+                "the shape of the land?",
+                2,
+                "Two options talk about climate or relief.",
+                phase="substitute"),
+            box("Your two counts leave one option unaccounted for, and it makes a claim "
+                "that is untrue. Type the position of the economic option, counting 1 "
+                "down to 4.",
+                2,
+                "Count down the four options to the one about jobs, wages and services."),
+            box("Check it. How many of the four options can be dismissed as false, "
+                "trivial or unsupported by the map?",
+                3,
+                "Count the options you have ruled out.",
+                done="Three fail on fact or relevance, leaving a single explanation that "
+                     "matches a real pull factor."),
+        ],
+    },
+    # 6 -----------------------------------------------------------------
+    {
+        "display": "A student wants to show both the total population of UK cities and the population density of the regions around them. Which combination of map types would work best?",
+        "options": ["Two choropleth maps",
+                    "A proportional symbol map for city totals and a choropleth for regional density",
+                    "Two flow line maps",
+                    "A dot map and a flow line map"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "One value is a total at a point and the other is a ratio across an area, so each needs a different map type.",
+        "misconceptions": [
+            {"pattern": "two_area_maps", "expect": 0,
+             "message": "A shaded area map cannot show a total at a single point, so two of "
+                        "them still leave one of the two needs unmet."},
+            {"pattern": "movement_map_chosen", "expect": 3,
+             "message": "Flow lines show movement between places, and neither of the two "
+                        "things being mapped here is a movement."},
+        ],
+        "guided_steps": [
+            say("Split the task in two, then find the map type each half needs."),
+            box("The student needs two things mapped: a city total and a regional density. "
+                "How many map types will that need?",
+                2,
+                "One value is measured at a point, the other across an area.",
+                done="Two different kinds of value almost always need two different map "
+                     "types layered together."),
+            box("How many of the four options include a shaded area map for the density "
+                "half?",
+                2,
+                "Look for the options that mention a choropleth."),
+            box("Of those two, how many also show a total at a single point?",
+                1,
+                "Check which of the two also uses a symbol placed on a city.",
+                phase="substitute"),
+            box("Type that option's position, counting 1 for two choropleths down to 4 "
+                "for a dot map and flow line.",
+                2,
+                "Count down the four options to the pairing you identified."),
+            box("Check the rejected pair. How many of the last two options can show a "
+                "regional density?",
+                0,
+                "Consider whether flow lines or a dot map can shade a region by ratio.",
+                done="Neither of them can show density across an area, so they were never "
+                     "in contention."),
+        ],
+    },
+]
+
+gold = [
+    # 0 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "Using the flow line map, calculate the total migration flow into London from Birmingham (60,000), Manchester (45,000), and Leeds (30,000). Give your answer in thousands.",
+        "solutions": [135],
+        "calculator": True,
+        "input_type": "single_value",
+        "hint": "Add all three inward flows together and give the total in thousands.",
+        "misconceptions": [
+            {"pattern": "units_people_not_thousands", "expect": 135000,
+             "message": "The total itself is right but the units are not. Check the last "
+                        "sentence of the question."},
+            {"pattern": "one_city_omitted", "expect": 105,
+             "message": "One of the three named cities has been left out of your sum. Count "
+                        "the flows again before adding."},
+            {"pattern": "averaged_not_totalled", "expect": 45,
+             "message": "You have found a typical flow rather than the combined flow. The "
+                        "question asks for all three added together."},
+        ],
+        "guided_steps": [
+            say("Check the arrows before adding, so nothing outward creeps into the total."),
+            box("Find London and count the blue arrowheads that end there.",
+                3,
+                "Trace each blue arrow to its point and count only those landing on London.",
+                done="Three inward arrows, and the question names three cities, so nothing "
+                     "is missing and nothing outward is included."),
+            box("How many of the three named cities in the question appear on the map?",
+                3,
+                "Look for Birmingham, Manchester and Leeds among the labels."),
+            box("Add the Birmingham and Manchester flows, in thousands.",
+                105,
+                "Add 60 and 45.",
+                phase="substitute"),
+            box("Now add the Leeds flow, in thousands, to get the total.",
+                135,
+                "Add 30 to your running total."),
+            box("Check it. Take the Birmingham flow away from your total. What is left, "
+                "in thousands?",
+                75,
+                "Subtract 60 from your total.",
+                done="What is left is exactly the Manchester and Leeds flows added "
+                     "together, so all three were counted once each."),
+        ],
+    },
+    # 1 -----------------------------------------------------------------
+    {
+        "display": "A student draws a proportional symbol map but makes the radius of each circle proportional to the value, instead of the area. London (population 8.8 million) gets a circle with 10 times the radius of Newcastle (300,000). Why is this misleading?",
+        "options": ["The circles should all be the same size",
+                    "Using radius instead of area makes London appear 100 times larger than Newcastle, massively exaggerating the difference",
+                    "Proportional symbols should use squares, not circles",
+                    "Newcastle is actually larger than London"],
+        "solutions": [1],
+        "calculator": True,
+        "input_type": "multiple_choice",
+        "hint": "Work out what 10 times the radius does to the area, then compare that with the real ratio of the two populations.",
+        "misconceptions": [
+            {"pattern": "same_size_symbols", "expect": 0,
+             "message": "If every circle were the same size the map would carry no data at "
+                        "all, so that cannot be the fault being described."},
+            {"pattern": "data_reversed", "expect": 3,
+             "message": "Compare the two population figures printed in the question before "
+                        "accepting that claim."},
+        ],
+        "guided_steps": [
+            say("Turn the drawing error into a number, then hold it against the real data."),
+            box("Area grows with the square of the radius. If a circle has 10 times the "
+                "radius, how many times the area does it have?",
+                100,
+                "Multiply 10 by itself.",
+                done="This is the size difference the reader actually sees on the page."),
+            box("Now the real data. Divide London's population by Newcastle's, to the "
+                "nearest whole number.",
+                29,
+                "Divide 8,800,000 by 300,000 and round."),
+            box("How many times bigger does the drawing look than the data really is? "
+                "Divide the area factor by the data factor, to the nearest whole number.",
+                3,
+                "Divide your area factor by your population ratio and round.",
+                phase="substitute",
+                done="The picture overstates the gap by roughly three times, which is why "
+                     "radius scaling is banned."),
+            box("Type the option position that names the 100 times exaggeration, counting "
+                "1 for same size down to 4 for Newcastle being larger.",
+                2,
+                "Count down the four options to the one describing the area effect."),
+            box("Check the last option. Divide Newcastle's population by London's and "
+                "round to the nearest whole number.",
+                0,
+                "Divide 300,000 by 8,800,000 and round.",
+                done="Newcastle is a small fraction of London, so the option claiming the "
+                     "opposite fails outright."),
+        ],
+    },
+    # 2 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "The map shows red arrows from London to Bristol and Manchester. This movement away from London is an example of which geographical process?",
+        "options": ["Urbanisation", "Counter-urbanisation", "Suburbanisation", "Gentrification"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "Check where the red arrowheads land, then name the process for people leaving a large city for other places.",
+        "misconceptions": [
+            {"pattern": "direction_reversed", "expect": 0,
+             "message": "Urbanisation is movement into cities. Check which end of the red "
+                        "arrows carries the arrowhead."},
+            {"pattern": "scale_confused", "expect": 2,
+             "message": "Suburbanisation is a short move to the edge of the same city. "
+                        "These arrows reach cities a long way off."},
+        ],
+        "guided_steps": [
+            say("Settle the direction from the map first, then name the process."),
+            box("Count the red arrows drawn on the map.",
+                2,
+                "Look for arrows drawn in red rather than blue.",
+                done="Two red arrows, and the note under the key says red arrows come from "
+                     "London."),
+            box("How many of those red arrows start at London?",
+                2,
+                "Check where the tail of each red arrow begins."),
+            box("How many of the two red arrowheads land on a city whose circle would be "
+                "far smaller than London's?",
+                2,
+                "Both red arrowheads land on cities well outside the capital.",
+                phase="substitute"),
+            box("Movement out of a large city towards smaller places has a name. Type the "
+                "option position, counting 1 for urbanisation down to 4 for gentrification.",
+                2,
+                "Count down the four options to the process that means leaving the big city."),
+            box("Check it. How many red arrowheads point at London?",
+                0,
+                "Look at where the pointed end of each red arrow finishes.",
+                done="None point at London, so the movement is outward, which rules out "
+                     "the process that means moving into cities."),
+        ],
+    },
+    # 3 -----------------------------------------------------------------
+    {
+        "image": PROP,
+        "display": "Evaluate the proportional symbol map as a way of showing UK city populations. Which statement best describes its strengths and weaknesses?",
+        "options": ["It shows exact values clearly but cannot show location",
+                    "It shows the spatial distribution and relative size of cities at a glance, but exact values are hard to read and symbols overlap in crowded areas",
+                    "It is better than a bar chart in every way",
+                    "It only works for capital cities"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "A fair evaluation names something the map does well and something it does badly, and both must be true of this map.",
+        "misconceptions": [
+            {"pattern": "location_denied", "expect": 0,
+             "message": "Every circle is drawn on top of the place it belongs to, so showing "
+                        "location is a strength of this map rather than a failing."},
+            {"pattern": "no_weakness_given", "expect": 2,
+             "message": "No map type is better in every way. An evaluation has to name a "
+                        "weakness as well as a strength."},
+        ],
+        "guided_steps": [
+            say("Gather evidence from the map before judging the statements."),
+            box("Look at the crowded area around Manchester, Leeds, Sheffield and "
+                "Liverpool. How many circles are drawn there?",
+                4,
+                "Count the four cities named.",
+                done="Four similar circles in a tight cluster is direct evidence of the "
+                     "overlap weakness."),
+            box("How many exact population figures are printed next to those four circles?",
+                0,
+                "Look for numbers written beside the symbols themselves.",
+                done="Nothing is printed, so exact values can only be estimated from the key."),
+            box("How many of the four statements name both a strength and a weakness?",
+                1,
+                "Read each option and count the ones that do both.",
+                phase="substitute"),
+            box("Type that option's position, counting 1 for exact values but no location "
+                "down to 4 for capital cities only.",
+                2,
+                "Count down the four options to the balanced statement."),
+            box("Check the last option. Of the four circles in that northern cluster, how "
+                "many are capital cities?",
+                0,
+                "Consider whether any of those four cities is a capital.",
+                done="None of them is a capital, yet all four are mapped, so the statement "
+                     "about capitals only is contradicted by the map itself."),
+        ],
+    },
+    # 4 -----------------------------------------------------------------
+    {
+        "image": FLOW,
+        "display": "A student wants to improve this flow line map. Which suggestion would be most useful?",
+        "options": ["Remove all the arrows and just use a table",
+                    "Add exact figures as labels on each arrow so readers can see both the pattern and precise values",
+                    "Make all arrows the same width for fairness",
+                    "Only show flows to London and remove all other arrows"],
+        "solutions": [1],
+        "calculator": False,
+        "input_type": "multiple_choice",
+        "hint": "A good improvement keeps everything the map already does well and fixes the one thing it does badly.",
+        "misconceptions": [
+            {"pattern": "throws_away_pattern", "expect": 0,
+             "message": "That suggestion discards the spatial pattern, which is the whole "
+                        "point of drawing the data on a map. An improvement should keep it."},
+            {"pattern": "removes_the_data", "expect": 2,
+             "message": "Equal widths would strip the size information out of the arrows "
+                        "completely, leaving only direction."},
+        ],
+        "guided_steps": [
+            say("Diagnose the map's real weakness from the map itself, then match a fix to it."),
+            box("Look at the arrows on the map. How many of them have their exact value "
+                "printed on them?",
+                0,
+                "Look for numbers written along the arrows themselves.",
+                done="No figures at all, so precision is the weakness a fix should target."),
+            box("How many reference widths does the key give you to estimate from?",
+                3,
+                "Count the sample arrows drawn in the key box."),
+            box("The key jumps from its middle width to its widest with nothing between. "
+                "How many reference widths sit between those two?",
+                0,
+                "Look for any key arrow drawn between the middle and widest ones.",
+                phase="substitute",
+                done="Large gaps in the key are exactly why reading an exact value off an "
+                     "arrow is unreliable."),
+            box("Type the option position of the fix that keeps the arrows and adds exact "
+                "figures, counting 1 for removing the arrows down to 4 for London only.",
+                2,
+                "Count down the four options to the one that adds labels."),
+            box("Check the rivals. How many of the other three options throw away "
+                "information the map already shows?",
+                3,
+                "Consider what each of the other three suggestions removes.",
+                done="All three destroy something the map does well, while the survivor "
+                     "adds to it, which is what an improvement should do."),
+        ],
+    },
+]
+
+# ---------------------------------------------------------------- tier guides
+TIER_GUIDES = {
+    "bronze": {
+        "title": "Bronze: reading the map straight off the key",
+        "steps": [
+            "Find the key first. It tells you what a circle size or an arrow width is worth.",
+            "Bigger circle means a bigger value. Thicker arrow means a bigger flow, and the "
+            "arrowhead shows which way people are going.",
+            "Hold your symbol against the reference symbols in the key and read the value off.",
+        ],
+        "example": {
+            "question": "A key shows circles for 200 and 800 thousand people. Oakford's "
+                        "circle is the same size as the larger key circle. What is Oakford's "
+                        "population?",
+            "steps": [
+                {"label": "Find the key",
+                 "content": "<p>The key gives two reference circles: 200 thousand and 800 thousand.</p>"},
+                {"label": "Match the symbol",
+                 "content": "<p>Oakford's circle is the same width as the 800 thousand circle.</p>"},
+                {"label": "Check",
+                 "content": "<p>Oakford's circle is clearly the wider of the two key circles, "
+                            "so the value must be the larger key value, not the smaller one.</p>"},
+                {"label": "Answer", "isAnswer": True, "is_answer": True,
+                 "content": "<p><strong>800,000 people</strong></p>"},
+            ],
+        },
+    },
+    "silver": {
+        "title": "Silver: turning a symbol size into a number",
+        "steps": [
+            "Measure the symbol and the matching key symbol in the same units, usually millimetres.",
+            "Circles carry their value in their <strong>area</strong>, so divide the diameters, "
+            "square the result, then multiply by the key value.",
+            "Flow line widths scale straight, so an arrow twice as wide is twice the flow.",
+            "Check the units before you write the answer: thousands and people are different.",
+        ],
+        "example": {
+            "question": "A key circle for 100 thousand people is 10 mm across. Havenport's "
+                        "circle is 30 mm across. Estimate Havenport's population.",
+            "steps": [
+                {"label": "Divide the diameters",
+                 "content": "<p>30 mm ÷ 10 mm = 3, so Havenport's circle is 3 times as wide.</p>"},
+                {"label": "Square it for area",
+                 "content": "<p>3² = 9, so the circle covers 9 times the area.</p>"},
+                {"label": "Scale the key value",
+                 "content": "<p>9 × 100 thousand = 900 thousand.</p>"},
+                {"label": "Check",
+                 "content": "<p>900 ÷ 100 = 9, which returns the area factor, so the "
+                            "squaring was applied once and the right way round.</p>"},
+                {"label": "Answer", "isAnswer": True, "is_answer": True,
+                 "content": "<p><strong>About 900,000 people</strong></p>"},
+            ],
+        },
+    },
+    "gold": {
+        "title": "Gold: combining flows and judging the map",
+        "steps": [
+            "Sort arrows by direction first. Add the inward flows for a total, then subtract "
+            "the outward flow to get a net figure.",
+            "When you evaluate a map, give one thing it does well and one thing it does badly.",
+            "Watch for symbols scaled by width instead of area, because that exaggerates large "
+            "values enormously.",
+        ],
+        "example": {
+            "question": "Three arrows point into Rivermouth, worth 40, 25 and 10 thousand a "
+                        "year. One arrow worth 15 thousand points out. Find the net gain.",
+            "steps": [
+                {"label": "Total the inward flows",
+                 "content": "<p>40 + 25 + 10 = 75 thousand a year.</p>"},
+                {"label": "Subtract the outward flow",
+                 "content": "<p>75 − 15 = 60 thousand a year.</p>"},
+                {"label": "Check",
+                 "content": "<p>75 − 60 = 15, which gives the outward arrow back, so the "
+                            "subtraction went the right way round.</p>"},
+                {"label": "Answer", "isAnswer": True, "is_answer": True,
+                 "content": "<p><strong>A net gain of 60,000 people a year</strong></p>"},
+            ],
+        },
+    },
+}
+
+# ---------------------------------------------------------------- method card
+METHOD_CARD = {
+    "title": "Proportional Symbol & Flow Line Maps",
+    "steps": [
+        "Read the key first to find what each symbol size is worth",
+        "Hold your symbol against the key and estimate its value",
+        "For flow lines, use the width for volume and the arrowhead for direction",
+        "Describe the pattern: where the big values sit and where the main flows run",
+    ],
+    "content": "<p><strong>Proportional symbol maps</strong> draw a symbol, usually a circle, "
+               "whose <strong>area</strong> is proportional to the value at that place. A city "
+               "with four times the population gets a circle with four times the area, which is "
+               "only twice the width.</p>"
+               "<p><strong>Flow line maps</strong> draw arrows whose width is proportional to "
+               "the volume moving, with the arrowhead showing the direction of travel.</p>"
+               "<p>Both types show location and size together, which makes patterns obvious. "
+               "Both are weak on precision: exact values are hard to read, and crowded symbols "
+               "overlap.</p>",
+    "example": "<p><strong>Proportional symbol:</strong> a key circle for 500 thousand people "
+               "is 25 mm across. A city circle is 50 mm across, so it is 2 times as wide and "
+               "2² = 4 times the area: about 2,000,000 people.</p>"
+               "<p><strong>Flow line:</strong> an arrow is 8 mm wide where the key shows 2 mm "
+               "= 10,000 people a year, so the flow is 8 ÷ 2 × 10,000 = 40,000 people a year.</p>",
+}
+
+WORKED_EXAMPLES = [
+    {
+        "steps": [
+            {"label": "Read the scale", "content": "<p>1 cm diameter = 2 million</p>"},
+            {"label": "Calculate",
+             "content": "<p>3 cm = 3 × 2 million = <strong>6 million</strong> (note: this is a "
+                        "simplified linear scale; true proportional symbols scale by area)</p>"},
+        ],
+        "question": "On a proportional symbol map, the key shows a circle with diameter 1 cm = "
+                    "2 million people. City A has a circle with diameter 3 cm. Estimate its "
+                    "population.",
+        "difficulty": "Bronze",
+    },
+    {
+        "steps": [
+            {"label": "Read the scale",
+             "content": "<p>2 mm = £10 billion, so 1 mm = £5 billion</p>"},
+            {"label": "Calculate",
+             "content": "<p>8 mm × £5 billion per mm = <strong>£40 billion</strong></p>"},
+        ],
+        "question": "A flow line map shows trade between countries. Arrow from UK to USA is 8 mm "
+                    "wide, and the scale shows 2 mm = £10 billion. Calculate the estimated trade "
+                    "value.",
+        "difficulty": "Silver",
+    },
+]
+
+pd = {
+    "method_card": METHOD_CARD,
+    "topic_links": {"prerequisites": []},
+    "problem_bank": {
+        "bronze_description": "Read one symbol or one arrow straight off the map using the key.",
+        "silver_description": "Turn a symbol size or an arrow width into a number, then compare or combine two of them.",
+        "gold_description": "Combine several flows, or judge how honestly the map represents the data.",
+        "bronze": bronze,
+        "silver": silver,
+        "gold": gold,
+    },
+    "tier_guides": TIER_GUIDES,
+    "guided": {"opener": OPENER, "teach": TEACH},
+    "related_videos": [],
+    "worked_examples": WORKED_EXAMPLES,
+}
+
+out = os.path.join(HERE, "lesson_L09.json")
+with io.open(out, "w", encoding="utf-8") as f:
+    json.dump(pd, f, ensure_ascii=False, indent=1)
+print("wrote", out)

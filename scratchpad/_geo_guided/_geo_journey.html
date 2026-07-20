@@ -27,7 +27,23 @@ function until(name, cond, cb, tries) {
   var ok = false;
   try { ok = cond(); } catch (e) { ok = false; }
   if (ok) { cb(); return; }
-  if (tries > 900) { bad('timeout: ' + name); document.title = 'DRIVER FAILED'; return; }
+  if (tries > 900) {
+    bad('timeout: ' + name);
+    // Report the state we were waiting on, so a timeout says what went wrong
+    // rather than only that it did.
+    try {
+      var d = doc();
+      var gc = d.getElementById('guided-card'), gl = d.getElementById('guided-label');
+      var pc = d.getElementById('current-problem-card'), pl = d.getElementById('problem-number-label');
+      log('  state: guided-card=' + (gc ? (gc.style.display || 'shown') : 'absent') +
+          ' label=' + JSON.stringify(gl ? gl.textContent : null) +
+          ' problem-card=' + (pc ? (pc.style.display || 'shown') : 'absent') +
+          ' problem=' + JSON.stringify(pl ? pl.textContent : null));
+      var acts = d.querySelectorAll('#guided-actions button');
+      log('  guided buttons: ' + Array.prototype.map.call(acts, function (b) { return b.textContent.trim(); }).join(' | '));
+    } catch (e) { log('  state unreadable: ' + e); }
+    document.title = 'DRIVER FAILED'; return;
+  }
   setTimeout(function () { until(name, cond, cb, tries + 1); }, 50);
 }
 function doc() { return f.contentDocument; }
@@ -102,11 +118,37 @@ until('lesson + guided data loaded', function () {
       walk('P2 teach-bronze', win()._guided.teach.bronze.steps, -1, function (b2) {
         b2[0].click();
 
-        var q1 = win()._problemBank.bronze[0];
-        until('completion card', function () {
-          return visible(doc().getElementById('guided-card')) &&
-                 doc().getElementById('guided-label').textContent.indexOf('finish it') !== -1;
-        }, function () {
+        // The completion card is dealt on the tier's first WALK-CAPABLE question.
+        // When the shuffle puts a purely evaluative multiple choice first, the
+        // student answers that bare and the card arrives on the next one, so wait
+        // for either and step forward through unwalkable problems.
+        function awaitCompletion(cb, guard) {
+          guard = guard || 0;
+          if (guard > 8) { bad('completion card never appeared'); document.title = 'DRIVER FAILED'; return; }
+          until('completion card or a bare problem', function () {
+            var gc = visible(doc().getElementById('guided-card'));
+            var gl = doc().getElementById('guided-label');
+            if (gc && gl && gl.textContent.indexOf('finish it') !== -1) return true;
+            return visible(doc().getElementById('current-problem-card')) &&
+                   doc().querySelector('#problem-inputs-area .problem-input, #problem-inputs-area .mc-option');
+          }, function () {
+            var gl = doc().getElementById('guided-label');
+            if (visible(doc().getElementById('guided-card')) && gl &&
+                gl.textContent.indexOf('finish it') !== -1) { cb(); return; }
+            var p = win()._currentProblem;
+            var q = doc().getElementById('problem-number-label').textContent;
+            log('  ' + q + ' dealt bare (' + (p.guided_steps ? p.guided_steps.length : 0) +
+                ' walk steps) before the completion card');
+            answerWrong();
+            until('next btn', function () { return visible(doc().getElementById('problem-next-btn')); }, function () {
+              doc().getElementById('problem-next-btn').click();
+              setTimeout(function () { awaitCompletion(cb, guard + 1); }, 250);
+            });
+          });
+        }
+
+        awaitCompletion(function () {
+          var q1 = win()._currentProblem;
           var pre = doc().querySelectorAll('.guided-step-prefilled').length;
           log('PASS P3 completion card, ' + pre + ' steps pre-worked');
           if (!pre) log('  WARN expected pre-worked steps');

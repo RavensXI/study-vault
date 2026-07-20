@@ -1,0 +1,745 @@
+======================================================================
+gold 3
+{
+ "hint": "Ask how many of the points each line actually takes account of.",
+ "display": "A class adds a line of best fit to the same scatter graph of 10 points. Student A's line ends up with 5 points above it and 5 below. Student B's line is drawn straight from the first point to the last point. Whose line is more appropriate?",
+ "options": [
+  "Student A, because a good line of best fit has roughly equal numbers of points above and below",
+  "Student B, because the line should connect the end points",
+  "Both are equally valid",
+  "Neither, because the line must pass through the origin"
+ ],
+ "solutions": [
+  0
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "Ten points are plotted. Points sitting above Student A's line: ",
+   "say": "Take stock of the two lines before judging them.",
+   "hint": "The question tells you how Student A's line splits the points.",
+   "post": "",
+   "answer": 5
+  },
+  {
+   "pre": "Points sitting below Student A's line: ",
+   "done": "An even split, which is the test a line of best fit has to pass.",
+   "hint": "Ten points in total, and you have already placed five of them.",
+   "post": "",
+   "answer": 5
+  },
+  {
+   "pre": "Difference between those two counts: ",
+   "say": "Now measure how balanced that is.",
+   "hint": "Subtract one count from the other.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 0
+  },
+  {
+   "pre": "Student B's line is fixed by only the first and last points. Points that had no say in where it went: ",
+   "hint": "Take the two end points away from the ten.",
+   "post": "",
+   "answer": 8
+  },
+  {
+   "pre": "Options describing a line judged against every point rather than just a couple: ",
+   "done": "Only one option describes a line answerable to all ten points, and balancing the points either side is exactly how a line of best fit is judged.",
+   "hint": "Read the four options and count how many use the whole data set.",
+   "post": "",
+   "answer": 1
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 1,
+   "message": "Joining the first and last points ignores everything in between, including an anomaly sitting at either end.",
+   "pattern": "endpoints_rule"
+  },
+  {
+   "expect": 3,
+   "message": "A line of best fit follows the data. Nothing forces it through the origin.",
+   "pattern": "must_pass_origin"
+  },
+  {
+   "expect": 2,
+   "message": "Both lines are judged by the same test, and they do not perform equally well on it.",
+   "pattern": "both_valid"
+  }
+ ]
+}
+======================================================================
+silver 1
+{
+ "hint": "Use the plotted points either side of 25 and take the value midway between them, then round it.",
+ "chart": {
+  "data": {
+   "datasets": [
+    {
+     "data": [
+      {
+       "x": 8,
+       "y": 4
+      },
+      {
+       "x": 12,
+       "y": 8
+      },
+      {
+       "x": 15,
+       "y": 15
+      },
+      {
+       "x": 18,
+       "y": 20
+      },
+      {
+       "x": 22,
+       "y": 32
+      },
+      {
+       "x": 28,
+       "y": 45
+      },
+      {
+       "x": 30,
+       "y": 50
+      },
+      {
+       "x": 35,
+       "y": 60
+      },
+      {
+       "x": 38,
+       "y": 68
+      },
+      {
+       "x": 42,
+       "y": 75
+      }
+     ],
+     "pointRadius": 5,
+     "backgroundColor": "#7c3aed"
+    }
+   ]
+  },
+  "type": "scatter",
+  "options": {
+   "scales": {
+    "x": {
+     "grid": {
+      "color": "rgba(0,0,0,0.05)"
+     },
+     "ticks": {
+      "stepSize": 5
+     },
+     "title": {
+      "text": "Birth rate (per 1000)",
+      "display": true
+     },
+     "beginAtZero": true
+    },
+    "y": {
+     "grid": {
+      "color": "rgba(0,0,0,0.08)"
+     },
+     "ticks": {
+      "stepSize": 10
+     },
+     "title": {
+      "text": "Infant mortality (per 1000)",
+      "display": true
+     },
+     "beginAtZero": true
+    }
+   }
+  }
+ },
+ "display": "The scatter graph shows birth rate and infant mortality for 10 countries. Using the line of best fit, estimate the infant mortality rate for a country with a birth rate of 25. Give your answer to the nearest whole number.",
+ "solutions": [
+  39
+ ],
+ "calculator": false,
+ "input_type": "single_value",
+ "guided_steps": [
+  {
+   "pre": "Find 25 along the bottom axis. Nothing is plotted there, so use the neighbours. The nearest point to the left is at a birth rate of 22, with infant mortality of ",
+   "say": "Start on the axis.",
+   "hint": "Find 22 on the bottom axis and read the dot above it.",
+   "post": "",
+   "answer": 32
+  },
+  {
+   "pre": "The nearest point to the right is at a birth rate of 28, with infant mortality of ",
+   "done": "Both neighbours located, so the estimate is boxed in.",
+   "hint": "Find 28 on the bottom axis and read the dot above it.",
+   "post": "",
+   "answer": 45
+  },
+  {
+   "pre": "32 + 45 = ",
+   "say": "25 sits exactly halfway between 22 and 28, so the trend value sits halfway between their readings.",
+   "hint": "Add the two readings you just took.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 77
+  },
+  {
+   "pre": "77 ÷ 2 = ",
+   "hint": "Halve the total to land midway between the two readings.",
+   "post": "",
+   "answer": 38.5
+  },
+  {
+   "pre": "The question asks for a whole number, so round it to ",
+   "done": "It sits between the 32 below and the 45 above, exactly where a birth rate of 25 sits between 22 and 28.",
+   "hint": "Round the midpoint to the nearest whole number.",
+   "post": "",
+   "answer": 39
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 32,
+   "message": "That is the reading at the point to the left of 25, not at 25 itself. The estimate belongs between the two neighbours.",
+   "pattern": "read_left_neighbour"
+  },
+  {
+   "expect": 45,
+   "message": "That is the reading at the point to the right. Take a value between the two neighbouring points instead.",
+   "pattern": "read_right_neighbour"
+  },
+  {
+   "expect": 38.5,
+   "message": "That is the midpoint before rounding. Check what form the question asks the answer in.",
+   "pattern": "unrounded_midpoint"
+  },
+  {
+   "expect": 25,
+   "message": "You have typed the birth rate back. Infant mortality is read off the vertical axis.",
+   "pattern": "echoed_x_value"
+  }
+ ]
+}
+======================================================================
+bronze 1
+{
+ "hint": "Decide which way the points travel as you move right along the altitude axis.",
+ "display": "On a scatter graph, altitude (m) is plotted along the bottom and temperature (°C) up the side. The points slope downward from left to right. What type of correlation is this?",
+ "options": [
+  "Positive correlation",
+  "Negative correlation",
+  "No correlation",
+  "Cannot determine"
+ ],
+ "solutions": [
+  1
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "Moving right along the bottom axis, altitude climbs from 0 m to 2,000 m, a rise of ",
+   "say": "Picture two of the plotted points: one at 0 m with 15 °C, and one at 2,000 m with 3 °C.",
+   "hint": "Subtract the left hand altitude from the right hand one.",
+   "post": " m",
+   "answer": 2000
+  },
+  {
+   "pre": "Over that same stretch the temperature goes from 15 °C to 3 °C, a fall of 15 − 3 = ",
+   "done": "One variable up, the other down.",
+   "hint": "Take the higher altitude reading away from the lower altitude one.",
+   "post": " °C",
+   "answer": 12
+  },
+  {
+   "pre": "Type 1 if points like these climb to the right, or 2 if they fall: ",
+   "say": "Turn that into a direction.",
+   "hint": "The temperature values got smaller as you moved right.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 2
+  },
+  {
+   "pre": "Check the middle. Halfway up, at 1,000 m, the temperature sits at (15 + 3) ÷ 2 = ",
+   "done": "9 °C is below 15 and above 3, so the line falls steadily the whole way rather than jumping.",
+   "hint": "Add the two temperatures and halve the total.",
+   "post": " °C",
+   "answer": 9
+  },
+  {
+   "say": "One variable rises while the other falls, which is what a downward slope means. Choose that option."
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 0,
+   "message": "Both variables changing is not the same as both rising. Check whether temperature goes up or down as altitude increases.",
+   "pattern": "both_change_equals_positive"
+  },
+  {
+   "expect": 3,
+   "message": "The direction of the slope is all you need to name a correlation, and you have been told which way it slopes.",
+   "pattern": "needs_more_info"
+  }
+ ]
+}
+======================================================================
+bronze 4
+{
+ "hint": "Decide the direction first, then check which of the two variables could sensibly influence the other.",
+ "display": "A scatter graph compares hours of sunshine and number of tourists at a beach resort. As sunshine increases, tourist numbers increase. Describe the relationship.",
+ "options": [
+  "Positive correlation, because more sunshine attracts more tourists",
+  "Negative correlation, because more sunshine reduces tourist numbers",
+  "No correlation, because sunshine does not affect tourism",
+  "Positive correlation, because tourists cause more sunshine"
+ ],
+ "solutions": [
+  0
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "Along the bottom axis sunshine rises from 3 hours to 9 hours, a rise of ",
+   "say": "Picture two of the resort's records: a day with 3 hours of sunshine and 200 visitors, and a day with 9 hours and 800 visitors.",
+   "hint": "Subtract the smaller number of hours from the larger.",
+   "post": " hours",
+   "answer": 6
+  },
+  {
+   "pre": "Over the same stretch visitors go from 200 to 800, a rise of ",
+   "done": "Both variables moved the same way.",
+   "hint": "Subtract 200 from 800.",
+   "post": "",
+   "answer": 600
+  },
+  {
+   "pre": "Type 1 if points like these climb to the right, or 2 if they fall: ",
+   "say": "Turn that into a direction.",
+   "hint": "Both readings got larger as you moved right.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 1
+  },
+  {
+   "pre": "Now the cause. Type 1 if sunshine can change visitor numbers, or 2 if visitor numbers can change the weather: ",
+   "done": "Only one direction makes physical sense, which is why sunshine belongs along the bottom axis. Even so, a correlation on its own never proves which variable causes which.",
+   "hint": "Ask which of the two things could physically affect the other.",
+   "post": "",
+   "answer": 1
+  },
+  {
+   "say": "Rising together, with the weather doing the influencing. Choose the option that says both."
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 3,
+   "message": "You have the direction right, but the cause is the wrong way round. Ask which of the two could physically change the other.",
+   "pattern": "reversed_causation"
+  },
+  {
+   "expect": 1,
+   "message": "Check whether the visitor numbers rise or fall as sunshine hours increase before choosing a direction.",
+   "pattern": "direction_reversed"
+  }
+ ]
+}
+======================================================================
+bronze 6
+{
+ "hint": "Rule out the pairs where one thing could physically affect the other.",
+ "display": "Which of these pairs of geographical variables would you expect to show NO correlation?",
+ "options": [
+  "Rainfall and river discharge",
+  "Population density and distance from capital",
+  "Shoe size and rainfall",
+  "Temperature and altitude"
+ ],
+ "solutions": [
+  2
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "Number of pairs you must rule out to be left with the odd one: ",
+   "say": "Four pairs are offered, and only one has no geographical link.",
+   "hint": "There are four pairs and only one survives.",
+   "post": "",
+   "answer": 3
+  },
+  {
+   "pre": "Rainfall and river discharge. Type 1 if more rain puts more water into a river, or 2 if it makes no difference: ",
+   "done": "Ruled in as a real relationship.",
+   "hint": "Think where the water in a river comes from.",
+   "post": "",
+   "answer": 1
+  },
+  {
+   "pre": "Population density and distance from the capital. Type 1 if settlement thins out with distance, or 2 if distance is irrelevant: ",
+   "say": "Two more to test.",
+   "hint": "Capital cities pull people and jobs towards them.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 1
+  },
+  {
+   "pre": "Temperature and altitude. Type 1 if climbing higher changes the temperature, or 2 if it does not: ",
+   "hint": "Think about the air on top of a mountain.",
+   "post": "",
+   "answer": 1
+  },
+  {
+   "pre": "Three pairs ruled in. Number of pairs left: ",
+   "done": "The pair still standing measures two things with no physical connection at all, so its points would just scatter.",
+   "hint": "Take the three you ruled in away from the four on the list.",
+   "post": "",
+   "answer": 1
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 1,
+   "message": "There is a real link there: settlement and jobs thin out with distance from a capital city. Look for the pair with no physical connection at all.",
+   "pattern": "ruled_out_real_link"
+  },
+  {
+   "expect": 3,
+   "message": "Temperature and altitude are strongly linked, because air cools as it rises. Try the pair whose two measurements have nothing to do with each other.",
+   "pattern": "ruled_out_lapse_rate"
+  }
+ ]
+}
+======================================================================
+silver 2
+{
+ "hint": "Ask what a country's emissions depend on besides how developed it is.",
+ "display": "A scatter graph shows HDI vs CO₂ emissions with strong positive correlation. One country with HDI 0.85 has very low emissions. Why might it be an anomaly?",
+ "options": [
+  "Data entry error, so the point should be deleted",
+  "The country may rely heavily on renewable energy despite high development",
+  "The country has a very large population diluting emissions",
+  "HDI and CO₂ have no relationship"
+ ],
+ "solutions": [
+  1
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "Human Development Index runs from 0 to 1 along the bottom. This country's HDI is ",
+   "say": "Place the country on the graph before judging the explanations.",
+   "hint": "The value is given in the question itself.",
+   "post": "",
+   "answer": 0.85
+  },
+  {
+   "pre": "Strong positive correlation means high development usually comes with high emissions. Type 1 if this country sits above the trend, or 2 if it sits below: ",
+   "done": "Below the trend, so the explanation must account for low emissions at high development.",
+   "hint": "Its emissions were described as very low for its level of development.",
+   "post": "",
+   "answer": 2
+  },
+  {
+   "pre": "Number of the four options that simply dismiss the data, either as an error or as no relationship: ",
+   "say": "Now thin the four options out.",
+   "hint": "One calls it a data entry error, one denies any relationship exists.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 2
+  },
+  {
+   "pre": "Emissions on this kind of graph are measured per person. Type 1 if a bigger population automatically lowers a per person figure, or 2 if it does not: ",
+   "hint": "Population has already been divided out of a per person figure.",
+   "post": "",
+   "answer": 2
+  },
+  {
+   "pre": "Two options dismissed and one ruled out on population. Options left: ",
+   "done": "Only one explanation survives, and it works because a country can be highly developed and still generate its electricity without burning fossil fuels.",
+   "hint": "Take the three you ruled out away from the four offered.",
+   "post": "",
+   "answer": 1
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 0,
+   "message": "Unusual points are usually real. Look for a geographical reason before deciding the data must be faulty.",
+   "pattern": "blames_the_data"
+  },
+  {
+   "expect": 2,
+   "message": "Emissions here are measured per person, so population size has already been divided out.",
+   "pattern": "population_confusion"
+  },
+  {
+   "expect": 3,
+   "message": "The other countries follow a clear pattern, so a relationship plainly exists. The question is why this one country sits apart from it.",
+   "pattern": "denies_relationship"
+  }
+ ]
+}
+======================================================================
+silver 4
+{
+ "hint": "Ask what else land close to a city centre gets used for besides homes.",
+ "display": "A scatter graph of population density vs distance from CBD shows negative correlation. One point at 3km from CBD has unusually low density. Suggest a geographical explanation.",
+ "options": [
+  "It could be a park, industrial zone or transport hub with few residents",
+  "The data must be wrong",
+  "3km is too close to the CBD for anyone to live",
+  "Negative correlation means all nearby areas have low density"
+ ],
+ "solutions": [
+  0
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "The graph runs outwards from the city centre. The unusual point sits at ",
+   "say": "Place the odd point before explaining it.",
+   "hint": "The distance is stated in the question.",
+   "post": " km",
+   "answer": 3
+  },
+  {
+   "pre": "Negative correlation means density is highest near the centre. Type 1 if the trend expects high density at 3 km, or 2 if it expects low density: ",
+   "done": "The trend expects high density there, but this point is low, so it sits below the trend.",
+   "hint": "Close to the centre means near the left of the graph, where density is greatest.",
+   "post": "",
+   "answer": 1
+  },
+  {
+   "pre": "Number of options that simply claim the data must be wrong: ",
+   "say": "Now thin the four explanations out.",
+   "hint": "Look for the option that blames the figures rather than the geography.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 1
+  },
+  {
+   "pre": "Number of options that claim nobody could live 3 km from a centre: ",
+   "hint": "Plenty of people live 3 km from a city centre, so that option cannot stand.",
+   "post": "",
+   "answer": 1
+  },
+  {
+   "pre": "One more option misreads negative correlation as a rule every point must obey. Options left: ",
+   "done": "The surviving explanation works because land near a centre is not all housing, so a single site can hold very few residents while its neighbours are packed.",
+   "hint": "Take the three ruled out away from the four offered.",
+   "post": "",
+   "answer": 1
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 1,
+   "message": "Unusual points are usually real. Look for a land use reason before deciding the figures are faulty.",
+   "pattern": "blames_the_data"
+  },
+  {
+   "expect": 2,
+   "message": "People certainly live 3 km from a city centre, so that cannot be the explanation.",
+   "pattern": "impossible_claim"
+  },
+  {
+   "expect": 3,
+   "message": "Negative correlation describes the overall trend, not a rule that every single point must obey.",
+   "pattern": "trend_as_rule"
+  }
+ ]
+}
+======================================================================
+silver 6
+{
+ "hint": "Ask whether anyone actually collected data in the range being predicted.",
+ "display": "Why is extrapolation from a scatter graph less reliable than interpolation?",
+ "options": [
+  "Extrapolation predicts beyond the data range where the pattern may not continue",
+  "Extrapolation can only be done with negative correlation",
+  "Interpolation uses a wider range of data",
+  "Extrapolation is always wrong"
+ ],
+ "solutions": [
+  0
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "The largest rainfall value actually measured is ",
+   "say": "Picture a study that measured rainfall from 10 mm up to 80 mm, then tried to predict at 120 mm.",
+   "hint": "It is the top of the range the data was collected over.",
+   "post": " mm",
+   "answer": 80
+  },
+  {
+   "pre": "The prediction is wanted at 120 mm, which is beyond the data by ",
+   "done": "That gap is the whole issue.",
+   "hint": "Subtract the largest measured value from the value being predicted.",
+   "post": " mm",
+   "answer": 40
+  },
+  {
+   "pre": "Type 1 if anyone measured what happens at 120 mm, or 2 if nobody did: ",
+   "say": "Now weigh the four options.",
+   "hint": "The study stopped at the top of its measured range.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 2
+  },
+  {
+   "pre": "Two options claim extrapolation only works with one type of correlation or is always wrong. Options left after ruling those out: ",
+   "hint": "Four options, two ruled out.",
+   "post": "",
+   "answer": 2
+  },
+  {
+   "pre": "One of the two left says interpolation uses a wider range of data, which is the wrong way round. Options left: ",
+   "done": "The surviving option is the one that names the real problem: the prediction sits outside the range anybody measured, so the pattern out there is unknown.",
+   "hint": "Take the ruled out option away from the two remaining.",
+   "post": "",
+   "answer": 1
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 3,
+   "message": "Extrapolation is not banned, it is just less trustworthy. Choose the option that explains why.",
+   "pattern": "always_wrong"
+  },
+  {
+   "expect": 2,
+   "message": "Interpolation works inside the measured range, so it does not use a wider spread of data than extrapolation does.",
+   "pattern": "range_confusion"
+  }
+ ]
+}
+======================================================================
+gold 1
+{
+ "hint": "Compare the value being predicted with the largest value that was actually measured.",
+ "display": "A student plots rainfall vs crop yield and uses the line to predict yield at 1200mm when data only goes to 800mm. Why is this unreliable?",
+ "options": [
+  "1200 mm is outside the data range (extrapolation), and too much rain may flood crops, reversing the trend",
+  "The line of best fit is always wrong",
+  "You can only interpolate with negative correlation",
+  "1200 mm of rainfall is impossible"
+ ],
+ "solutions": [
+  0
+ ],
+ "calculator": false,
+ "input_type": "multiple_choice",
+ "guided_steps": [
+  {
+   "pre": "The largest rainfall the student collected data for is ",
+   "say": "Pin down the range the student actually has evidence for.",
+   "hint": "The question states where the data stops.",
+   "post": " mm",
+   "answer": 800
+  },
+  {
+   "pre": "The prediction is at 1200 mm, which is beyond the data by ",
+   "done": "That gap is the whole problem.",
+   "hint": "Subtract 800 from 1200.",
+   "post": " mm",
+   "answer": 400
+  },
+  {
+   "pre": "Type 1 if the student has any evidence about what happens above 800 mm, or 2 if they have none: ",
+   "say": "Now test the options.",
+   "hint": "Nobody measured a plot that wet.",
+   "post": "",
+   "phase": "substitute",
+   "answer": 2
+  },
+  {
+   "pre": "Type 1 if crops can be harmed by too much water, or 2 if more rain always means more yield: ",
+   "done": "There is no evidence above 800 mm and good reason to think the rising trend would break down, since waterlogged roots rot. A prediction that far out cannot be trusted.",
+   "hint": "Think about waterlogged fields and flooded roots.",
+   "post": "",
+   "answer": 1
+  },
+  {
+   "say": "Choose the option that names the missing data range as the problem."
+  }
+ ],
+ "misconceptions": [
+  {
+   "expect": 1,
+   "message": "A line of best fit is a useful summary. The problem here is where it is being used, not the line itself.",
+   "pattern": "blames_the_line"
+  },
+  {
+   "expect": 3,
+   "message": "How likely that rainfall total is somewhere is not the issue. The issue is whether any data was collected that far out.",
+   "pattern": "irrelevant_objection"
+  }
+ ]
+}
+======================================================================
+TEACH BRONZE
+{
+ "label": "Together: name the pattern",
+ "steps": [
+  {
+   "pre": "The point furthest left sits at 0 m. Its temperature in °C is ",
+   "say": "Start by finding your way around the graph, not by calculating anything.",
+   "hint": "Read straight across from that dot to the numbers up the side.",
+   "post": "",
+   "answer": 12
+  },
+  {
+   "pre": "Now the point furthest right, at 500 m. Its temperature is ",
+   "done": "Two ends located. Now the graph can be read.",
+   "hint": "The last dot on the right, read across to the side axis.",
+   "post": "",
+   "answer": 7
+  },
+  {
+   "pre": "Across the whole graph the temperature has changed by 12 − 7 = ",
+   "hint": "Subtract the right hand reading from the left hand one.",
+   "post": " °C",
+   "answer": 5
+  },
+  {
+   "pre": "At 200 m the temperature is ",
+   "say": "A fall, but is it steady or does it jump about?",
+   "hint": "Find 200 on the bottom axis and read the dot above it.",
+   "post": " °C",
+   "phase": "substitute",
+   "answer": 10
+  },
+  {
+   "pre": "So every 100 m of climb costs ",
+   "done": "Perfectly even, which is why the dots make a straight line.",
+   "hint": "Six readings drop from 12 to 7 in equal steps of 100 m.",
+   "post": " °C",
+   "answer": 1
+  },
+  {
+   "pre": "Pattern number: ",
+   "say": "Now name it. Type <strong>1</strong> if the dots climb to the right, <strong>2</strong> if they fall, <strong>3</strong> if there is no pattern.",
+   "hint": "You just watched the temperature drop from 12 down to 7 as altitude rose.",
+   "post": "",
+   "answer": 2
+  },
+  {
+   "pre": "At 400 m the temperature reads ",
+   "say": "Last thing, check the naming against a point you have not used yet.",
+   "done": "8 sits between 7 and 10, so the fall really does continue all the way. Altitude up, temperature down: negative correlation, and it matches the geography, because air cools as it rises.",
+   "hint": "Find 400 on the bottom axis and read the dot above it.",
+   "post": " °C",
+   "answer": 8
+  }
+ ],
+ "display": "Six weather stations in the same valley. Altitude against mean temperature.<br><svg viewBox=\"0 0 300 210\" role=\"img\" aria-label=\"Scatter graph of six weather stations: altitude in metres along the bottom against mean temperature in degrees Celsius up the side. The dots fall steadily from left to right.\" style=\"max-width:340px;width:100%\"><line x1=\"45\" y1=\"170\" x2=\"285\" y2=\"170\" stroke=\"#8a8580\" stroke-width=\"1\"/><line x1=\"45\" y1=\"20\" x2=\"45\" y2=\"170\" stroke=\"#8a8580\" stroke-width=\"1\"/><circle cx=\"55.0\" cy=\"38.0\" r=\"4.5\" fill=\"#059669\"/><circle cx=\"97.0\" cy=\"60.0\" r=\"4.5\" fill=\"#059669\"/><circle cx=\"139.0\" cy=\"82.0\" r=\"4.5\" fill=\"#059669\"/><circle cx=\"181.0\" cy=\"104.0\" r=\"4.5\" fill=\"#059669\"/><circle cx=\"223.0\" cy=\"126.0\" r=\"4.5\" fill=\"#059669\"/><circle cx=\"265.0\" cy=\"148.0\" r=\"4.5\" fill=\"#059669\"/><text x=\"55.0\" y=\"184\" font-size=\"10\" text-anchor=\"middle\" fill=\"#5a554f\">0</text><text x=\"139.0\" y=\"184\" font-size=\"10\" text-anchor=\"middle\" fill=\"#5a554f\">200</text><text x=\"223.0\" y=\"184\" font-size=\"10\" text-anchor=\"middle\" fill=\"#5a554f\">400</text><text x=\"265.0\" y=\"184\" font-size=\"10\" text-anchor=\"middle\" fill=\"#5a554f\">500</text><text x=\"38\" y=\"151.5\" font-size=\"10\" text-anchor=\"end\" fill=\"#5a554f\">7</text><text x=\"38\" y=\"107.5\" font-size=\"10\" text-anchor=\"end\" fill=\"#5a554f\">9</text><text x=\"38\" y=\"63.5\" font-size=\"10\" text-anchor=\"end\" fill=\"#5a554f\">11</text><text x=\"38\" y=\"41.5\" font-size=\"10\" text-anchor=\"end\" fill=\"#5a554f\">12</text><text x=\"168\" y=\"203\" font-size=\"11\" text-anchor=\"middle\" fill=\"#2d2a26\">Altitude (m)</text><text x=\"13\" y=\"95\" font-size=\"11\" text-anchor=\"middle\" fill=\"#2d2a26\" transform=\"rotate(-90 13 95)\">Temperature (°C)</text></svg>"
+}

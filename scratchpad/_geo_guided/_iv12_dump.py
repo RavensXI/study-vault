@@ -1,0 +1,26 @@
+import json, os, io, sys
+d=os.path.dirname(os.path.abspath(__file__))
+pd=json.load(open(os.path.join(d,"_iv12_live.json"),encoding="utf-8"))
+out=io.StringIO()
+def w(*a): print(*a, file=out)
+w("=== TIER GUIDES ===")
+w(json.dumps(pd["tier_guides"], ensure_ascii=False, indent=1))
+w("=== METHOD CARD ===")
+w(json.dumps(pd["method_card"], ensure_ascii=False, indent=1))
+w("=== GUIDED.OPENER ===")
+w(json.dumps(pd["guided"]["opener"], ensure_ascii=False, indent=1))
+w("=== GUIDED.TEACH ===")
+w(json.dumps(pd["guided"]["teach"], ensure_ascii=False, indent=1))
+pb=pd["problem_bank"]
+for t in ("bronze","silver","gold"):
+    w("=== %s_description: %s" % (t, pb.get(t+"_description")))
+    for i,p in enumerate(pb[t]):
+        w("--- %s[%d] ---" % (t,i))
+        w(json.dumps(p, ensure_ascii=False, indent=1))
+w("=== WORKED EXAMPLES ===")
+w(json.dumps(pd.get("worked_examples"), ensure_ascii=False, indent=1))
+w("=== TOPIC LINKS / EXAM CONTEXT ===")
+w(json.dumps(pd.get("topic_links"), ensure_ascii=False, indent=1))
+w(json.dumps(pd.get("exam_context"), ensure_ascii=False, indent=1))
+open(os.path.join(d,"_iv12_dump.txt"),"w",encoding="utf-8").write(out.getvalue())
+print(len(out.getvalue()))

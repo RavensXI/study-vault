@@ -1,0 +1,575 @@
+######################################################################
+TIER bronze
+------------------------------------------------------------
+bronze[0]  input_type=single_value
+ display: The bar chart shows average monthly rainfall in London. What is the rainfall in October?
+ solutions: [60]
+ hint: Find October along the bottom axis, then read straight across from the top of its bar to the side axis.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [55, 40, 42, 45, 50, 48, 47, 50, 52, 60, 65, 55], "borderRadius": 4, "backgroundColor": "#3b82f6"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "Rainfall (mm)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"note": "September = 52", "expect": 52, "message": "You have read the bar next to October. Line the bar up with its own label along the bottom axis before you read the top.", "pattern": "read_neighbour_month"}
+  misc[1]: {"note": "November = 65", "expect": 65, "message": "That is the tallest bar on the chart, not the one the question names. Find October first, then read.", "pattern": "read_tallest_bar"}
+  gs[0]: {"pre": "Counting from the left, October is bar number ", "say": "Locate first. Find the month the question names before you read anything.", "hint": "The bars run January to December in order.", "post": "", "answer": 10}
+  gs[1]: {"pre": "On the side axis, one gridline step is worth ", "hint": "Compare two labelled gridlines next to each other.", "post": "", "answer": 10}
+  gs[2]: {"pre": "Read across from the top of October's bar. It reads ", "hint": "It lands on a labelled gridline, so no fractions needed.", "post": " mm.", "phase": "substitute", "answer": 60}
+  gs[3]: {"pre": "Only one other bar on the chart is taller than October's. That is ", "done": "Your reading has to be the second highest on the chart, and it is. If it were not, you have read the wrong bar.", "hint": "Scan the twelve bar tops and count how many rise above October's.", "post": " bar.", "answer": 1}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[1]  input_type=multiple_choice
+ display: The bar chart shows average monthly rainfall in London. Which month has the highest rainfall?
+ options: ["October", "November", "December", "January"]
+ solutions: [1]
+ hint: Compare the tops of the four named bars, not their positions along the chart.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [55, 40, 42, 45, 50, 48, 47, 50, 52, 60, 65, 55], "borderRadius": 4, "backgroundColor": "#3b82f6"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "Rainfall (mm)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"expect": 2, "message": "December sits at the right-hand end of the chart, but being last is not the same as being tallest. Compare bar tops, not positions.", "pattern": "picked_the_last_bar"}
+  misc[1]: {"expect": 0, "message": "October is where the rainfall starts climbing, but the climb carries on past it. Follow the bars right until they stop rising.", "pattern": "stopped_at_the_first_rise"}
+  gs[0]: {"pre": "Counting from the left, November is bar number ", "say": "The four options are October, November, December and January. Locate each one first.", "hint": "The bars run January to December in order.", "post": "", "answer": 11}
+  gs[1]: {"pre": "October's bar reads ", "hint": "Read across from its top to the side axis.", "post": " mm.", "answer": 60}
+  gs[2]: {"pre": "November's bar reads ", "hint": "It is half a step above the 60 gridline.", "post": " mm.", "phase": "substitute", "answer": 65}
+  gs[3]: {"pre": "December and January both read 55 mm. Of the four named months, the number reading above 60 mm is ", "done": "Only one of the four rises above the rest, so that month is the wettest of the group.", "hint": "Compare each of the four readings with 60.", "post": " month.", "answer": 1}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[2]  input_type=single_value
+ display: The bar chart shows average monthly temperature in Cairo. What is the temperature in April?
+ solutions: [22]
+ hint: Line April up with its own bar, then judge where the bar top sits between the labelled gridlines.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [14, 15, 18, 22, 26, 28, 30, 30, 28, 24, 20, 16], "borderRadius": 4, "backgroundColor": "#f59e0b"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Temperature (°C)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"note": "May = 26", "expect": 26, "message": "You have counted one bar too far to the right. January is bar 1, so check which bar sits directly above the April label.", "pattern": "counted_one_bar_too_far"}
+  misc[1]: {"note": "March = 18", "expect": 18, "message": "That is the bar to the left of April. Line each bar up with its own label before reading.", "pattern": "read_the_bar_before"}
+  gs[0]: {"pre": "Counting from the left, April is bar number ", "say": "Find April's bar before you read any value.", "hint": "January is bar 1, so count on from there.", "post": "", "answer": 4}
+  gs[1]: {"pre": "On the side axis, one labelled step is worth ", "hint": "Look at the gap between two labelled gridlines.", "post": "", "answer": 5}
+  gs[2]: {"pre": "April's bar top sits between two gridlines. It reads ", "hint": "It is a small fraction of a 5 step above the 20 gridline.", "post": " °C.", "phase": "substitute", "answer": 22}
+  gs[3]: {"pre": "March reads 18 °C, so April is warmer by ", "done": "Neighbouring months should differ by a few degrees, not by ten or more. A jump that big means you have read the wrong bar.", "hint": "Subtract March's reading from yours.", "post": " °C.", "answer": 4}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[3]  input_type=single_value
+ display: The line graph shows population growth of a town from 2000 to 2020. What was the population in 2010?
+ solutions: [35000]
+ hint: Find 2010 on the bottom axis, go up to the plotted point, then read across, remembering the axis counts people in thousands.
+ chart: {"data": {"labels": ["2000", "2005", "2010", "2015", "2020"], "datasets": [{"data": [20000, 28000, 35000, 40000, 48000], "fill": false, "tension": 0.3, "borderColor": "#059669", "pointRadius": 4, "pointBackgroundColor": "#059669"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Year", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5000}, "title": {"text": "Population", "display": true}, "beginAtZero": false}}}}
+  misc[0]: {"note": "2005 = 28000", "expect": 28000, "message": "That is the point one place to the left. Check the year label directly under the point before you read across.", "pattern": "read_the_point_to_the_left"}
+  misc[1]: {"note": "reading 35 instead of 35000", "expect": 35, "message": "You have read the position on the axis correctly but ignored what the axis counts in. Check the labels on the side axis.", "pattern": "dropped_the_scale"}
+  gs[0]: {"pre": "Counting from the left, 2010 is plotted point number ", "say": "Line graphs are read the same way as bars: locate the point first.", "hint": "The points sit at 2000, 2005, 2010, 2015 and 2020.", "post": "", "answer": 3}
+  gs[1]: {"pre": "One labelled step on the side axis is worth ", "hint": "Compare two labels next to each other on the side axis.", "post": "", "answer": 5000}
+  gs[2]: {"pre": "Reading across from the 2010 point gives a population of ", "hint": "It sits exactly on a labelled gridline.", "post": "", "phase": "substitute", "answer": 35000}
+  gs[3]: {"pre": "The 2005 point reads 28,000. Your reading is bigger by ", "done": "The 2015 point reads 40,000, so a value a few thousand above 2005 and below 2015 is exactly where 2010 should sit.", "hint": "Subtract 28,000 from your reading.", "post": "", "answer": 7000}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[4]  input_type=single_value
+ display: The line graph shows average monthly temperature in London. What is the range of temperatures across the year?
+ solutions: [14]
+ hint: Range means the gap between the highest and the lowest points anywhere on the line.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [5, 5, 8, 11, 14, 17, 19, 19, 16, 12, 8, 6], "fill": false, "tension": 0.3, "borderColor": "#ef4444", "pointRadius": 4, "pointBackgroundColor": "#ef4444"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 2}, "title": {"text": "Temperature (°C)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"note": "Dec 6 − Jan 5 = 1", "expect": 1, "message": "You have used January and December rather than the highest and lowest points anywhere on the line. Scan the whole line for its peak and its trough.", "pattern": "used_first_and_last"}
+  misc[1]: {"note": "19 + 5 = 24", "expect": 24, "message": "You have added the two readings together. A range measures the gap between them, so subtract.", "pattern": "added_the_two"}
+  gs[0]: {"pre": "The line climbs to a flat top in midsummer. The first month at that peak is month number ", "say": "Range needs two readings: the highest point and the lowest. Find them on the line first.", "hint": "Count along from January as month 1.", "post": "", "answer": 7}
+  gs[1]: {"pre": "The peak reads ", "hint": "Read across from the flat top of the line.", "post": " °C.", "answer": 19}
+  gs[2]: {"pre": "The lowest part of the line reads ", "hint": "The line is flattest and lowest at the start of the year.", "post": " °C.", "phase": "substitute", "answer": 5}
+  gs[3]: {"pre": "Range = highest − lowest = ", "hint": "Subtract your second reading from your first.", "post": " °C.", "answer": 14}
+  gs[4]: {"pre": "Check: add your range back onto the lowest reading and you get ", "done": "It lands exactly on the peak, so the range spans the whole line.", "hint": "Lowest reading plus the range.", "post": "", "answer": 19}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[5]  input_type=single_value
+ display: The bar chart shows tourist arrivals (thousands) in five countries. How many more tourists visited Spain than Italy?
+ solutions: [10]
+ hint: Read both named bars first, then subtract the smaller from the larger.
+ chart: {"data": {"labels": ["France", "Spain", "Italy", "UK", "Germany"], "datasets": [{"data": [90, 85, 75, 40, 35], "borderRadius": 4, "backgroundColor": ["#3b82f6", "#ef4444", "#22c55e", "#f59e0b", "#8b5cf6"]}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Country", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "Tourist arrivals (thousands)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"note": "France 90 − Italy 75 = 15", "expect": 15, "message": "You have used the tallest bar rather than the one labelled Spain. Match each country name to the bar directly above it.", "pattern": "used_the_tallest_bar"}
+  misc[1]: {"note": "85 + 75 = 160", "expect": 160, "message": "You have added the two readings. A question asking how many more wants the gap between them.", "pattern": "added_the_bars"}
+  gs[0]: {"pre": "The bars run France, Spain, Italy, UK, Germany. Counting from the left, Italy is bar number ", "say": "Two bars are named in the question. Locate both before you read either.", "hint": "Match each country name to the bar directly above it.", "post": "", "answer": 3}
+  gs[1]: {"pre": "Spain's bar reads ", "hint": "Read across from its top to the side axis.", "post": " thousand.", "answer": 85}
+  gs[2]: {"pre": "Italy's bar reads ", "hint": "Read across from Italy's bar top the same way.", "post": " thousand.", "phase": "substitute", "answer": 75}
+  gs[3]: {"pre": "So Spain had ", "hint": "Subtract Italy's reading from Spain's.", "post": " thousand more arrivals.", "answer": 10}
+  gs[4]: {"pre": "Check: add your difference back onto Italy's reading and you get ", "done": "It lands back on Spain's bar top, so the subtraction went the right way round.", "hint": "Italy's reading plus the difference.", "post": "", "answer": 85}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[6]  input_type=single_value
+ display: The line graph shows river discharge over 24 hours after a storm. At what hour does peak discharge occur?
+ solutions: [8]
+ hint: The question asks for a time, so once you have found the highest point, read down to the bottom axis.
+ chart: {"data": {"labels": ["0", "2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24"], "datasets": [{"data": [5, 6, 10, 18, 25, 22, 18, 14, 11, 9, 7, 6, 5], "fill": true, "tension": 0.3, "borderColor": "#3b82f6", "pointRadius": 3, "backgroundColor": "rgba(59,130,246,0.15)", "pointBackgroundColor": "#3b82f6"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Hours after storm", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Discharge (cumecs)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"expect": 25, "message": "That is the discharge value from the side axis. The question asks for a time, which is read off the bottom axis.", "pattern": "gave_the_discharge"}
+  misc[1]: {"expect": 5, "message": "You have given the position of the point along the line, not the hour printed under it. Read the number on the bottom axis.", "pattern": "counted_points_not_hours"}
+  gs[0]: {"pre": "The bottom axis counts hours in steps of 2. Counting from the left, the highest point on the line is point number ", "say": "Find the peak of the line before you read anything off either axis.", "hint": "The first point sits at hour 0, so count that as point 1.", "post": "", "answer": 5}
+  gs[1]: {"pre": "At that peak the discharge reads ", "hint": "Read across to the side axis.", "post": " cumecs.", "answer": 25}
+  gs[2]: {"pre": "Now read down to the bottom axis instead. That point sits at hour ", "hint": "The bottom axis is labelled every 2 hours.", "post": "", "phase": "substitute", "answer": 8}
+  gs[3]: {"pre": "Scanning the whole line, the number of points reading higher than 25 cumecs is ", "done": "Nothing on the line rises above it, so that really is the peak.", "hint": "Compare every plotted point with the peak you read.", "post": "", "answer": 0}
+  otherfield calculator : false
+------------------------------------------------------------
+bronze[7]  input_type=multiple_choice
+ display: The bar chart shows CO₂ emissions per capita (tonnes) for six countries. Which country has the lowest emissions?
+ options: ["USA", "China", "UK", "India", "Germany", "Brazil"]
+ solutions: [3]
+ hint: Compare the two shortest bars carefully against the gridlines before you choose.
+ chart: {"data": {"labels": ["USA", "China", "UK", "India", "Germany", "Brazil"], "datasets": [{"data": [15, 8, 5, 2, 9, 2.5], "borderRadius": 4, "backgroundColor": "#059669"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Country", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 2}, "title": {"text": "CO₂ emissions per capita (tonnes)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"expect": 5, "message": "Brazil's bar is short, but one bar is shorter still. Compare the two shortest tops against the gridlines.", "pattern": "picked_the_second_shortest"}
+  misc[1]: {"expect": 2, "message": "The UK sits well below the tallest bars, but lowest means the shortest bar in the whole chart, not simply a low one.", "pattern": "picked_a_low_but_not_lowest_bar"}
+  gs[0]: {"pre": "Six bars, labelled left to right. Counting from the left, India is bar number ", "say": "Lowest means shortest bar. Locate the short ones first.", "hint": "The order is USA, China, UK, India, Germany, Brazil.", "post": "", "answer": 4}
+  gs[1]: {"pre": "India's bar reads ", "hint": "Read across from its top to the side axis.", "post": " tonnes.", "answer": 2}
+  gs[2]: {"pre": "Brazil's bar is the only other short one. It reads ", "hint": "Its top sits a quarter of a step above the 2 gridline.", "post": " tonnes.", "phase": "substitute", "answer": 2.5}
+  gs[3]: {"pre": "So Brazil's bar is taller than India's by ", "done": "A small but real gap, so the two are not tied and the shorter one is clear.", "hint": "Subtract the smaller reading from the larger.", "post": " tonnes.", "answer": 0.5}
+  gs[4]: {"say": "The shortest bar of all is <strong>India</strong>. Choose that option."}
+  otherfield calculator : false
+######################################################################
+TIER silver
+------------------------------------------------------------
+silver[0]  input_type=multiple_choice
+ display: The line graph shows average monthly temperatures for London and Moscow. In which month is the difference between the two cities greatest?
+ options: ["January", "April", "July", "October"]
+ solutions: [0]
+ hint: Work out the size of the gap between the two lines in each named month, taking care with values below zero.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [5, 5, 8, 11, 14, 17, 19, 19, 16, 12, 8, 6], "fill": false, "label": "London", "tension": 0.3, "borderColor": "#3b82f6", "pointRadius": 4, "pointBackgroundColor": "#3b82f6"}, {"data": [-8, -6, 0, 8, 14, 18, 20, 18, 12, 6, 0, -5], "fill": false, "label": "Moscow", "tension": 0.3, "borderColor": "#ef4444", "pointRadius": 4, "pointBackgroundColor": "#ef4444"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Temperature (°C)", "display": true}}}}, "showLegend": true}
+  misc[0]: {"expect": 2, "message": "July is where both lines are highest, but the question asks where they are furthest apart, not where they are warmest.", "pattern": "picked_the_hottest_month"}
+  misc[1]: {"expect": 3, "message": "October does show a clear gap, but check the winter months, where one line drops below zero and the gap is measured across the zero line too.", "pattern": "ignored_the_negative_values"}
+  gs[0]: {"pre": "The four options are January, April, July and October. Counting from the left, October is point number ", "say": "Greatest difference means the widest gap between the two lines, so measure gaps, not heights.", "hint": "January is point 1, so count along the bottom axis.", "post": "", "answer": 10}
+  gs[1]: {"pre": "In January, London's line reads ", "hint": "Use the legend to pick out London's line first.", "post": " °C.", "answer": 5}
+  gs[2]: {"pre": "In January, Moscow's line reads ", "hint": "It sits below the zero line, so give a negative number.", "post": " °C.", "phase": "substitute", "answer": -8}
+  gs[3]: {"pre": "So the January gap between them is ", "hint": "Subtract Moscow's value from London's, remembering that subtracting a negative adds.", "post": " °C.", "answer": 13}
+  gs[4]: {"pre": "In July London reads 19 °C and Moscow reads 20 °C, so the July gap is ", "done": "April (11 and 8) and October (12 and 6) give gaps of 3 and 6, so the winter gap is far the widest.", "hint": "Subtract the smaller July reading from the larger.", "post": " °C.", "answer": 1}
+  gs[5]: {"say": "The widest gap between the two lines is in <strong>January</strong>. Choose that option."}
+  otherfield calculator : false
+------------------------------------------------------------
+silver[1]  input_type=single_value
+ display: The line graph shows UK population from 1950 to 2020. Calculate the percentage increase from 1950 to 2020. Give your answer to the nearest whole number.
+ solutions: [32]
+ hint: Find the increase first, then divide it by the starting value and multiply by 100.
+ chart: {"data": {"labels": ["1950", "1960", "1970", "1980", "1990", "2000", "2010", "2020"], "datasets": [{"data": [50, 52, 56, 56, 58, 59, 63, 66], "fill": false, "tension": 0.3, "borderColor": "#7c3aed", "pointRadius": 4, "pointBackgroundColor": "#7c3aed"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Year", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Population (millions)", "display": true}, "beginAtZero": false}}}}
+  misc[0]: {"note": "16/66*100 = 24.2 -> 24", "expect": 24, "message": "You have divided by the finishing value. Percentage change is always measured against the starting value.", "pattern": "divided_by_the_new_value"}
+  misc[1]: {"expect": 16, "message": "That is the increase in millions, not a percentage. Divide it by the starting value, then multiply by 100.", "pattern": "gave_the_raw_increase"}
+  gs[0]: {"pre": "The line runs from 1950 to 2020. The number of plotted points is ", "say": "Percentage change always needs two readings: the starting value and the finishing value.", "hint": "One point per labelled decade along the bottom axis.", "post": "", "answer": 8}
+  gs[1]: {"pre": "The 1950 point reads ", "hint": "Read across from the left-hand end of the line.", "post": " million.", "answer": 50}
+  gs[2]: {"pre": "The 2020 point reads ", "hint": "Read across from the right-hand end of the line.", "post": " million.", "phase": "substitute", "answer": 66}
+  gs[3]: {"pre": "Increase = later − earlier = ", "hint": "Subtract the 1950 reading from the 2020 reading.", "post": " million.", "answer": 16}
+  gs[4]: {"pre": "Percentage increase = increase ÷ starting value × 100 = ", "hint": "Divide by the 1950 value, not the 2020 one, then multiply by 100.", "post": "%.", "answer": 32}
+  gs[5]: {"pre": "Check: take that percentage of 50 million and add it on. You get ", "done": "It returns to the 2020 point, so the percentage was measured against the right value.", "hint": "A third of 50 is roughly 16, and 50 + 16 should land on the 2020 reading.", "post": " million.", "answer": 66}
+  otherfield calculator : true
+------------------------------------------------------------
+silver[2]  input_type=single_value
+ display: The bar chart shows the number of vehicles passing a survey point in one hour. What is the total number of vehicles?
+ solutions: [190]
+ hint: Add every bar on the chart, then count the bars you used to be sure none was missed.
+ chart: {"data": {"labels": ["Cars", "Vans", "Lorries", "Buses", "Motorcycles"], "datasets": [{"data": [95, 40, 25, 15, 15], "borderRadius": 4, "backgroundColor": ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6"]}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Vehicle type", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "Number of vehicles", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"note": "omitting motorcycles (15)", "expect": 175, "message": "One bar has been missed out of the total. Count the bars you added and compare that with the number on the chart.", "pattern": "left_a_bar_out"}
+  misc[1]: {"expect": 5, "message": "That is how many bars there are, not how many vehicles. Add the bar heights rather than counting bars.", "pattern": "counted_the_bars"}
+  gs[0]: {"pre": "The chart has one bar per vehicle type. The number of bars is ", "say": "A total means every bar, so start by knowing how many there are.", "hint": "Count the labels along the bottom axis.", "post": "", "answer": 5}
+  gs[1]: {"pre": "The tallest bar, cars, reads ", "hint": "Its top sits half a step above the 90 gridline.", "post": "", "answer": 95}
+  gs[2]: {"pre": "Vans and lorries read 40 and 25, so together they come to ", "hint": "Add the two readings.", "post": "", "phase": "substitute", "answer": 65}
+  gs[3]: {"pre": "Buses and motorcycles are the same height. Doubling one of them gives ", "hint": "Each reads 15, so add it to itself.", "post": "", "answer": 30}
+  gs[4]: {"pre": "Adding your three subtotals gives a total of ", "hint": "95 + 65 + 30.", "post": " vehicles.", "answer": 190}
+  gs[5]: {"pre": "Check: the number of bars you have used is ", "done": "Five bars used and five bars on the chart, so nothing has been left out of the total.", "hint": "Count them: cars, vans, lorries, buses, motorcycles.", "post": "", "answer": 5}
+  otherfield calculator : false
+------------------------------------------------------------
+silver[3]  input_type=single_value
+ display: The dual bar chart compares rainfall in Manchester and London. What is the difference in total annual rainfall between the two cities?
+ solutions: [231]
+ hint: Add all twelve bars for each city separately, then subtract one annual total from the other.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [80, 60, 65, 55, 60, 70, 65, 75, 70, 85, 80, 75], "label": "Manchester", "borderRadius": 4, "backgroundColor": "#3b82f6"}, {"data": [55, 40, 42, 45, 50, 48, 47, 50, 52, 60, 65, 55], "label": "London", "borderRadius": 4, "backgroundColor": "#f59e0b"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "Rainfall (mm)", "display": true}, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"note": "October: 85 - 60 = 25", "expect": 25, "message": "That is the gap for a single month, not for the year. Add all twelve bars for each city before you subtract.", "pattern": "used_one_month_only"}
+  misc[1]: {"note": "840 + 609 = 1449", "expect": 1449, "message": "You have added the two annual totals. A difference asks you to subtract one from the other.", "pattern": "added_the_totals"}
+  gs[0]: {"pre": "Each month has one bar per city. The number of pairs of bars on the chart is ", "say": "Annual totals mean every bar counts, so work through one city at a time.", "hint": "One pair per month along the bottom axis.", "post": "", "answer": 12}
+  gs[1]: {"pre": "Manchester's first six bars are 80, 60, 65, 55, 60, 70. They add to ", "hint": "Add them in pairs if it helps: 80 + 60, then 65 + 55, then 60 + 70.", "post": " mm.", "answer": 390}
+  gs[2]: {"pre": "Manchester's last six bars are 65, 75, 70, 85, 80, 75. They add to ", "hint": "Again, add them in pairs.", "post": " mm.", "phase": "substitute", "answer": 450}
+  gs[3]: {"pre": "So Manchester's annual total is ", "hint": "Add your two half-year subtotals.", "post": " mm.", "answer": 840}
+  gs[4]: {"pre": "London's twelve bars are 55, 40, 42, 45, 50, 48, 47, 50, 52, 60, 65, 55. They add to ", "hint": "Work in halves again: the first six, then the last six.", "post": " mm.", "answer": 609}
+  gs[5]: {"pre": "The difference in annual rainfall is ", "hint": "Subtract London's total from Manchester's.", "post": " mm.", "answer": 231}
+  gs[6]: {"pre": "Check: add your difference back onto London's total and you get ", "done": "It lands exactly on Manchester's total, so the subtraction was the right way round.", "hint": "London's annual total plus the difference.", "post": "", "answer": 840}
+  otherfield calculator : true
+------------------------------------------------------------
+silver[4]  input_type=multiple_choice
+ display: The line graph shows deforestation rates in the Amazon (thousand km²/year). Between which two consecutive years did the biggest decrease in deforestation occur?
+ options: ["2004 to 2005", "2005 to 2006", "2006 to 2007", "2008 to 2009"]
+ solutions: [0]
+ hint: Work out the fall for each pair of years listed, then compare those falls.
+ chart: {"data": {"labels": ["2004", "2005", "2006", "2007", "2008", "2009", "2010"], "datasets": [{"data": [27, 19, 14, 12, 13, 7, 7], "fill": true, "tension": 0.3, "borderColor": "#059669", "pointRadius": 4, "backgroundColor": "rgba(5,150,105,0.12)", "pointBackgroundColor": "#059669"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Year", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Area deforested (thousand km²)", "display": true}, "beginAtZero": true}}}}
+  misc[0]: {"expect": 3, "message": "That pair does show a clear fall, but one earlier pair falls further. Work out every fall before choosing.", "pattern": "picked_a_later_steep_fall"}
+  misc[1]: {"expect": 2, "message": "The line is at its lowest towards the right, but the question asks where it falls furthest in one step, not where it ends up lowest.", "pattern": "picked_the_lowest_point"}
+  gs[0]: {"pre": "The line runs from 2004 to 2010. The number of plotted points is ", "say": "A decrease is a subtraction, so each option needs working out before you can compare them.", "hint": "One point per year along the bottom axis.", "post": "", "answer": 7}
+  gs[1]: {"pre": "2004 reads 27 and 2005 reads 19, so the fall is ", "hint": "Subtract the later value from the earlier one.", "post": " thousand km².", "answer": 8}
+  gs[2]: {"pre": "2005 to 2006 goes from 19 to 14, a fall of ", "hint": "Same move, next pair.", "post": " thousand km².", "phase": "substitute", "answer": 5}
+  gs[3]: {"pre": "2008 to 2009 goes from 13 to 7, a fall of ", "hint": "Same move again.", "post": " thousand km².", "answer": 6}
+  gs[4]: {"pre": "2006 to 2007 goes from 14 to 12, a fall of ", "done": "Four falls compared: 8, 5, 6 and 2. The steepest section of the line is the first one.", "hint": "The gentlest section of the line.", "post": " thousand km².", "answer": 2}
+  gs[5]: {"say": "The biggest single-year fall is from <strong>2004 to 2005</strong>. Choose that option."}
+  otherfield calculator : false
+------------------------------------------------------------
+silver[5]  input_type=single_value
+ display: The bar chart shows the percentage of workers in primary, secondary and tertiary sectors in two countries. What percentage of Country B works in the tertiary sector?
+ solutions: [30]
+ hint: Use the legend to find the tertiary colour, and read only the bars above the Country B label.
+ chart: {"data": {"labels": ["Country A", "Country B"], "datasets": [{"data": [5, 55], "label": "Primary", "backgroundColor": "#22c55e"}, {"data": [20, 15], "label": "Secondary", "backgroundColor": "#f59e0b"}, {"data": [75, 30], "label": "Tertiary", "backgroundColor": "#3b82f6"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "% of workforce", "display": true}, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"note": "Country A tertiary = 75", "expect": 75, "message": "You have read the tertiary bar from the other country's group. Check which group of three sits above the Country B label.", "pattern": "read_the_other_country"}
+  misc[1]: {"expect": 55, "message": "That is Country B's primary bar. Use the legend to find which colour shows the tertiary sector.", "pattern": "read_the_primary_bar"}
+  gs[0]: {"pre": "Each country has three bars, in the order primary, secondary, tertiary. Within Country B's group, tertiary is bar number ", "say": "Two groups of three bars. Locate the right group before you read anything.", "hint": "The legend gives the order and the colours.", "post": "", "answer": 3}
+  gs[1]: {"pre": "Country B's primary bar reads ", "hint": "Primary is the green bar in Country B's group.", "post": "%.", "answer": 55}
+  gs[2]: {"pre": "Country B's secondary bar reads ", "hint": "Secondary is the yellow bar in the same group.", "post": "%.", "phase": "substitute", "answer": 15}
+  gs[3]: {"pre": "The three sectors must total 100%, so the tertiary bar should read ", "hint": "Subtract your two readings from 100.", "post": "%.", "answer": 30}
+  gs[4]: {"pre": "Now read the tertiary bar itself. It reads ", "done": "Your prediction and your reading agree, and the three sectors add to 100%, so the reading is sound.", "hint": "The blue bar in Country B's group.", "post": "%.", "answer": 30}
+  otherfield calculator : false
+------------------------------------------------------------
+silver[6]  input_type=single_value
+ display: The line graph shows river discharge over 48 hours. How long is the lag time (time between peak rainfall and peak discharge)?
+ solutions: [8]
+ hint: Find the hour of each peak along the bottom axis, then subtract one time from the other.
+ chart: {"data": {"labels": ["0", "4", "8", "12", "16", "20", "24", "28", "32", "36", "40", "44", "48"], "datasets": [{"data": [0, 2, 8, 4, 1, 0, 0, 0, 0, 0, 0, 0, 0], "fill": true, "label": "Rainfall (mm)", "tension": 0.2, "borderColor": "#3b82f6", "pointRadius": 3, "backgroundColor": "rgba(59,130,246,0.1)", "pointBackgroundColor": "#3b82f6"}, {"data": [5, 6, 8, 12, 18, 16, 13, 10, 8, 7, 6, 5, 5], "fill": false, "label": "Discharge (cumecs)", "tension": 0.3, "borderColor": "#ef4444", "pointRadius": 3, "pointBackgroundColor": "#ef4444"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Hours", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 2}, "title": {"text": "Value", "display": true}, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"expect": 16, "message": "That is the hour the discharge peaks, not the gap between the two peaks. Subtract the rainfall peak hour from it.", "pattern": "gave_the_discharge_peak_time"}
+  misc[1]: {"note": "18 - 8 = 10", "expect": 10, "message": "You have subtracted the two peak heights. Lag time is measured along the bottom axis, in hours.", "pattern": "subtracted_the_peak_heights"}
+  gs[0]: {"pre": "The bottom axis counts hours in steps of 4. Counting from the left, hour 16 is plotted point number ", "say": "Lag time is a gap between two times, so both peaks must be located on the bottom axis first.", "hint": "The first point sits at hour 0, so count that as point 1.", "post": "", "answer": 5}
+  gs[1]: {"pre": "The rainfall line peaks at hour ", "hint": "Find the highest point on the rainfall line, then read down.", "post": "", "answer": 8}
+  gs[2]: {"pre": "The discharge line peaks at hour ", "hint": "Find the highest point on the discharge line, then read down.", "post": "", "phase": "substitute", "answer": 16}
+  gs[3]: {"pre": "Lag time = peak discharge time − peak rainfall time = ", "hint": "Subtract the earlier hour from the later one.", "post": " hours.", "answer": 8}
+  gs[4]: {"pre": "Check: add your lag time onto the rainfall peak hour and you get hour ", "done": "It lands on the discharge peak, so the lag has been measured the right way round.", "hint": "Rainfall peak hour plus the lag.", "post": "", "answer": 16}
+  otherfield calculator : false
+######################################################################
+TIER gold
+------------------------------------------------------------
+gold[0]  input_type=single_value
+ display: The composite bar chart shows employment in three sectors across two decades. Calculate the percentage of workers in the tertiary sector in 2020.
+ solutions: [76]
+ hint: In a stacked bar, a section's size is the level at its top minus the level where it starts.
+ chart: {"data": {"labels": ["2000", "2010", "2020"], "datasets": [{"data": [4, 2, 1], "label": "Primary", "backgroundColor": "#22c55e"}, {"data": [28, 25, 23], "label": "Secondary", "backgroundColor": "#f59e0b"}, {"data": [68, 73, 76], "label": "Tertiary", "backgroundColor": "#3b82f6"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "stacked": true}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "% of workforce", "display": true}, "stacked": true, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"expect": 24, "message": "You have read the level where the tertiary section begins, not how tall it is. In a stacked bar, subtract the level below from the level above.", "pattern": "read_where_the_section_starts"}
+  misc[1]: {"note": "2010 tertiary = 73", "expect": 73, "message": "That is a different year's tertiary section. Check the year label under the bar before you read it.", "pattern": "read_the_wrong_year"}
+  gs[0]: {"pre": "Three bars, one per year, each split into three stacked sections. Counting from the left, 2020 is bar number ", "say": "Stacked bars pile the sections on top of each other, so locate the right bar first.", "hint": "The years run 2000, 2010, 2020 along the bottom axis.", "post": "", "answer": 3}
+  gs[1]: {"pre": "The whole 2020 bar reaches the ", "done": "A stacked percentage bar always fills to 100.", "hint": "Read the very top of the bar across to the side axis.", "post": " level.", "answer": 100}
+  gs[2]: {"pre": "The two sections below tertiary are primary (1%) and secondary (23%). Together they reach the ", "hint": "Add the two lower sections.", "post": " level.", "phase": "substitute", "answer": 24}
+  gs[3]: {"pre": "Tertiary fills the rest of the bar, so it is worth ", "hint": "Take the level where tertiary starts away from the level at the top of the bar.", "post": "%.", "answer": 76}
+  gs[4]: {"pre": "Check: the three sections add to ", "done": "They fill the bar exactly, which is what a stacked percentage bar must do.", "hint": "Add all three percentages together.", "post": "", "answer": 100}
+  otherfield calculator : true
+------------------------------------------------------------
+gold[1]  input_type=single_value
+ display: The line graph shows annual CO₂ emissions for China, USA and India. By how many million tonnes did China's emissions increase between 2000 and 2020?
+ solutions: [7000]
+ hint: Use the legend colour to follow one country's line, then compare its first and last points.
+ chart: {"data": {"labels": ["2000", "2005", "2010", "2015", "2020"], "datasets": [{"data": [3000, 5500, 8000, 9500, 10000], "fill": false, "label": "China", "tension": 0.3, "borderColor": "#ef4444", "pointRadius": 4, "pointBackgroundColor": "#ef4444"}, {"data": [6000, 6000, 5500, 5200, 5000], "fill": false, "label": "USA", "tension": 0.3, "borderColor": "#3b82f6", "pointRadius": 4, "pointBackgroundColor": "#3b82f6"}, {"data": [1000, 1200, 1700, 2200, 2600], "fill": false, "label": "India", "tension": 0.3, "borderColor": "#22c55e", "pointRadius": 4, "pointBackgroundColor": "#22c55e"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Year", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 2000}, "title": {"text": "CO₂ emissions (million tonnes)", "display": true}, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"note": "India 2600 - 1000 = 1600", "expect": 1600, "message": "You have followed a different country's line. Match the legend colour before reading either point.", "pattern": "followed_the_wrong_line"}
+  misc[1]: {"expect": 10000, "message": "That is the 2020 reading, not the change. Take the 2000 reading away from it.", "pattern": "gave_the_final_value"}
+  gs[0]: {"pre": "Three lines share the chart. Each one has ", "say": "Three lines means the legend matters. Pick out the right one before reading.", "hint": "Count the labelled years along the bottom axis.", "post": " plotted points.", "answer": 5}
+  gs[1]: {"pre": "China's line starts in 2000 at ", "hint": "Use the legend colour, then read the left-hand end of that line.", "post": " million tonnes.", "answer": 3000}
+  gs[2]: {"pre": "China's line finishes in 2020 at ", "hint": "Read the right-hand end of the same line.", "post": " million tonnes.", "phase": "substitute", "answer": 10000}
+  gs[3]: {"pre": "Increase = 2020 value − 2000 value = ", "hint": "Subtract the earlier reading from the later one.", "post": " million tonnes.", "answer": 7000}
+  gs[4]: {"pre": "Check: add your increase onto the 2000 reading and you get ", "done": "It returns to the 2020 point on China's line, so the increase is right.", "hint": "The 2000 reading plus the increase.", "post": "", "answer": 10000}
+  otherfield calculator : false
+------------------------------------------------------------
+gold[2]  input_type=multiple_choice
+ display: The bar chart shows average monthly rainfall for a town. Which statement best describes its rainfall pattern?
+ options: ["Wet all year, with the most rain in summer", "Dry summers and wet winters, a Mediterranean pattern", "Rain spread evenly through the year", "Almost no rain in any month"]
+ solutions: [1]
+ hint: Compare the midsummer bars with the midwinter ones before you choose.
+ chart: {"data": {"labels": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"], "datasets": [{"data": [80, 70, 55, 40, 25, 10, 5, 10, 30, 55, 70, 85], "label": "Rainfall (mm)", "borderRadius": 4, "backgroundColor": "rgba(59,130,246,0.5)"}]}, "type": "bar", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Month", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 10}, "title": {"text": "Rainfall (mm)", "display": true}, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"expect": 0, "message": "The wettest bars sit at the two ends of the year, not in the middle. Compare the midsummer bars with the midwinter ones.", "pattern": "summer_maximum"}
+  misc[1]: {"expect": 2, "message": "The bars are far from even: check the shortest bar against the tallest before you decide.", "pattern": "assumed_even_rainfall"}
+  gs[0]: {"pre": "Twelve bars, January to December. Counting from the left, July is bar number ", "say": "A pattern question still starts with readings. Take one from midsummer and one from midwinter.", "hint": "January is bar 1, so count on from there.", "post": "", "answer": 7}
+  gs[1]: {"pre": "July's bar reads ", "hint": "It is the shortest bar on the chart.", "post": " mm.", "answer": 5}
+  gs[2]: {"pre": "December's bar reads ", "hint": "It is the tallest bar on the chart.", "post": " mm.", "phase": "substitute", "answer": 85}
+  gs[3]: {"pre": "So December's rainfall is bigger than July's by a factor of ", "done": "A winter month with many times the rain of a midsummer month is the signature of dry summers and wet winters.", "hint": "Divide the taller reading by the shorter one.", "post": "", "answer": 17}
+  gs[4]: {"say": "Dry summers, wet winters: that is the <strong>Mediterranean</strong> pattern. Choose that option."}
+  otherfield calculator : false
+------------------------------------------------------------
+gold[3]  input_type=single_value
+ display: The line graph shows life expectancy in the UK from 1900 to 2020. Calculate the average increase in life expectancy per decade. Give your answer to the nearest whole year.
+ solutions: [3]
+ hint: Find the total rise first, then divide it by the number of ten year blocks between the first and last year.
+ chart: {"data": {"labels": ["1900", "1920", "1940", "1960", "1980", "2000", "2020"], "datasets": [{"data": [47, 55, 60, 70, 73, 78, 81], "fill": false, "tension": 0.3, "borderColor": "#7c3aed", "pointRadius": 4, "pointBackgroundColor": "#7c3aed"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Year", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Life expectancy (years)", "display": true}, "beginAtZero": false}}}}
+  misc[0]: {"expect": 34, "message": "That is the whole rise across 120 years. The question asks for the average rise in a single decade, so divide.", "pattern": "gave_the_total_rise"}
+  misc[1]: {"note": "34/7 = 4.86 -> 5", "expect": 5, "message": "You have divided by the number of plotted points rather than the number of decades. Count how many ten year blocks fit between the first and last year.", "pattern": "divided_by_the_points"}
+  gs[0]: {"pre": "The bottom axis runs 1900 to 2020 in 20 year steps. The number of plotted points is ", "say": "An average per decade needs two things: the total rise, and how many decades it happened over.", "hint": "Count the labelled years along the bottom axis.", "post": "", "answer": 7}
+  gs[1]: {"pre": "The 1900 point reads ", "hint": "Read the left-hand end of the line across to the side axis.", "post": " years.", "answer": 47}
+  gs[2]: {"pre": "The 2020 point reads ", "hint": "Read the right-hand end of the line.", "post": " years.", "phase": "substitute", "answer": 81}
+  gs[3]: {"pre": "Total increase across the whole period = ", "hint": "Subtract the 1900 reading from the 2020 reading.", "post": " years.", "answer": 34}
+  gs[4]: {"pre": "Between 1900 and 2020 the number of decades is ", "hint": "That is 120 years, and a decade is ten years.", "post": "", "answer": 12}
+  gs[5]: {"pre": "Dividing the increase by the number of decades, then rounding to the nearest whole year, gives ", "hint": "34 ÷ 12 comes out just under 3.", "post": " years per decade.", "answer": 3}
+  gs[6]: {"pre": "Check: multiply your rounded answer by 12 decades to get ", "done": "36 years is close to the true rise of 34, so rounding to the nearest whole year is fair.", "hint": "Your answer times 12.", "post": " years.", "answer": 36}
+  otherfield calculator : true
+------------------------------------------------------------
+gold[4]  input_type=multiple_choice
+ display: The dual line graph shows birth rate and death rate for a developing country. In which year did the country enter Stage 3 of the DTM (death rate fallen, birth rate starting to fall)?
+ options: ["1960", "1980", "2000", "2020"]
+ solutions: [1]
+ hint: Stage 3 begins where the birth rate line starts falling steeply, after the death rate has already dropped.
+ chart: {"data": {"labels": ["1960", "1970", "1980", "1990", "2000", "2010", "2020"], "datasets": [{"data": [45, 44, 40, 32, 24, 20, 18], "fill": false, "label": "Birth rate", "tension": 0.3, "borderColor": "#ef4444", "pointRadius": 4, "pointBackgroundColor": "#ef4444"}, {"data": [25, 18, 12, 10, 8, 7, 6], "fill": false, "label": "Death rate", "tension": 0.3, "borderColor": "#3b82f6", "pointRadius": 4, "pointBackgroundColor": "#3b82f6"}]}, "type": "line", "options": {"scales": {"x": {"grid": {"color": "rgba(0,0,0,0.05)"}, "title": {"text": "Year", "display": true}}, "y": {"grid": {"color": "rgba(0,0,0,0.08)"}, "ticks": {"stepSize": 5}, "title": {"text": "Rate per 1000", "display": true}, "beginAtZero": true}}}, "showLegend": true}
+  misc[0]: {"expect": 0, "message": "In 1960 both rates are still high and the birth rate has barely moved. Look for where the birth rate begins its steep fall.", "pattern": "picked_the_start"}
+  misc[1]: {"expect": 2, "message": "By 2000 the birth rate has already been falling for years. Stage 3 starts when that fall begins, not part way through it.", "pattern": "picked_too_late"}
+  gs[0]: {"pre": "Two lines share the chart, one per rate. The bottom axis runs 1960 to 2020, so each line has ", "say": "Stage 3 is about which line is falling and when, so measure both falls.", "hint": "Count the labelled years along the bottom axis.", "post": " plotted points.", "answer": 7}
+  gs[1]: {"pre": "The death rate goes from 25 in 1960 to 12 in 1980, a fall of ", "hint": "Subtract the later reading from the earlier one.", "post": "", "answer": 13}
+  gs[2]: {"pre": "Over the same years the birth rate goes from 45 to 40, a fall of only ", "hint": "Same move, this time on the birth rate line.", "post": "", "phase": "substitute", "answer": 5}
+  gs[3]: {"pre": "From 1980 to 2000 the birth rate goes from 40 to 24, a fall of ", "done": "The death rate did its falling first, while the birth rate barely moved. The birth rate only starts dropping steeply after 1980, and that switch is Stage 3.", "hint": "Subtract the 2000 reading from the 1980 reading.", "post": "", "answer": 16}
+  gs[4]: {"say": "The country enters Stage 3 in <strong>1980</strong>. Choose that option."}
+  otherfield calculator : false
+######################################################################
+GUIDED
+{
+ "teach": {
+  "gold": {
+   "label": "Together: reading a stacked bar",
+   "steps": [
+    {
+     "pre": "Counting from the bottom of the bar, tertiary is section number ",
+     "say": "In a stacked bar the sections sit on top of each other, so nothing starts at zero except the first.",
+     "hint": "The legend lists the sections in the order they are stacked.",
+     "post": "",
+     "answer": 3
+    },
+    {
+     "pre": "Country P's whole bar reaches the ",
+     "done": "A stacked percentage bar always fills to 100.",
+     "hint": "Follow the very top of the bar across to the side axis.",
+     "post": " level.",
+     "answer": 100
+    },
+    {
+     "pre": "The secondary section of Country P ends at the ",
+     "done": "This level is where tertiary begins, not how big tertiary is.",
+     "hint": "That is the line where the yellow band stops and the blue band starts.",
+     "post": " level.",
+     "answer": 40
+    },
+    {
+     "pre": "So the tertiary section is worth ",
+     "hint": "Take the level where tertiary starts away from the level where the bar ends.",
+     "post": "%.",
+     "answer": 60
+    },
+    {
+     "pre": "Check: primary 10 + secondary 30 + tertiary gives ",
+     "done": "The sections fill the bar exactly, so the subtraction was right. Subtracting levels is the gold move.",
+     "hint": "Add all three sections together.",
+     "post": "",
+     "answer": 100
+    }
+   ],
+   "display": "<p>Employment by sector in two countries. How big is Country P's tertiary section?</p><svg viewBox=\"0 0 300 195\" role=\"img\" aria-label=\"Two stacked percentage bars of employment by sector. Country P is 10 percent primary, 30 percent secondary and 60 percent tertiary. Country Q is 40 percent primary, 25 percent secondary and 35 percent tertiary.\"><rect x=\"0\" y=\"0\" width=\"300\" height=\"195\" fill=\"#faf8f5\"/><line x1=\"50\" y1=\"150\" x2=\"285\" y2=\"150\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"153.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">0</text><line x1=\"50\" y1=\"126\" x2=\"285\" y2=\"126\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"129.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">20</text><line x1=\"50\" y1=\"102\" x2=\"285\" y2=\"102\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"105.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">40</text><line x1=\"50\" y1=\"78\" x2=\"285\" y2=\"78\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"81.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">60</text><line x1=\"50\" y1=\"54\" x2=\"285\" y2=\"54\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"57.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">80</text><line x1=\"50\" y1=\"30\" x2=\"285\" y2=\"30\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"33.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">100</text><line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><line x1=\"50\" y1=\"150\" x2=\"285\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><rect x=\"90\" y=\"138\" width=\"60\" height=\"12\" fill=\"#86efac\" stroke=\"#16a34a\"/><rect x=\"90\" y=\"102\" width=\"60\" height=\"36\" fill=\"#fcd34d\" stroke=\"#d97706\"/><rect x=\"90\" y=\"30\" width=\"60\" height=\"72\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"190\" y=\"102\" width=\"60\" height=\"48\" fill=\"#86efac\" stroke=\"#16a34a\"/><rect x=\"190\" y=\"72\" width=\"60\" height=\"30\" fill=\"#fcd34d\" stroke=\"#d97706\"/><rect x=\"190\" y=\"30\" width=\"60\" height=\"42\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><text x=\"120\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Country P</text><text x=\"220\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Country Q</text><rect x=\"55\" y=\"178\" width=\"10\" height=\"10\" fill=\"#86efac\" stroke=\"#16a34a\"/><text x=\"70\" y=\"187\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Primary</text><rect x=\"135\" y=\"178\" width=\"10\" height=\"10\" fill=\"#fcd34d\" stroke=\"#d97706\"/><text x=\"150\" y=\"187\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Secondary</text><rect x=\"225\" y=\"178\" width=\"10\" height=\"10\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><text x=\"240\" y=\"187\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Tertiary</text><text x=\"50\" y=\"20\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">% of workforce</text></svg>"
+  },
+  "bronze": {
+   "label": "Together: your first reading",
+   "steps": [
+    {
+     "pre": "Counting from the left, beach C is bar number ",
+     "say": "Locate before you read. Find the bar the question names.",
+     "hint": "The bars are labelled A, B, C, D in order along the bottom axis.",
+     "post": "",
+     "answer": 3
+    },
+    {
+     "pre": "One gridline step on the side axis is worth ",
+     "done": "Never read a value until you know what one step is worth.",
+     "hint": "Look at two labelled gridlines next to each other and see how much the number goes up.",
+     "post": "",
+     "answer": 10
+    },
+    {
+     "pre": "Beach C's bar top sits half a step above 10, so it reads ",
+     "done": "Bar tops do not always land on a label. Judge the fraction of the gap.",
+     "hint": "Half of a 10 step is 5, added onto the gridline below.",
+     "post": "",
+     "answer": 15
+    },
+    {
+     "pre": "The tallest bar is beach B. It reads ",
+     "hint": "Its top sits half a step above 30.",
+     "post": "",
+     "answer": 35
+    },
+    {
+     "pre": "So beach B has ",
+     "done": "Read, then compare. That pair of moves handles every bronze question.",
+     "hint": "Take beach C's count away from beach B's.",
+     "post": " more items than beach C.",
+     "answer": 20
+    }
+   ],
+   "display": "<p>Litter collected on four beaches. Read the count for beach C.</p><svg viewBox=\"0 0 290 180\" role=\"img\" aria-label=\"Bar chart of litter items collected on four beaches. Beach A 20, Beach B 35, Beach C 15 and Beach D 30, on a scale from 0 to 40.\"><rect x=\"0\" y=\"0\" width=\"290\" height=\"180\" fill=\"#faf8f5\"/><line x1=\"50\" y1=\"150\" x2=\"275\" y2=\"150\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"153.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">0</text><line x1=\"50\" y1=\"120\" x2=\"275\" y2=\"120\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"123.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">10</text><line x1=\"50\" y1=\"90\" x2=\"275\" y2=\"90\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"93.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">20</text><line x1=\"50\" y1=\"60\" x2=\"275\" y2=\"60\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"63.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">30</text><line x1=\"50\" y1=\"30\" x2=\"275\" y2=\"30\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"33.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">40</text><line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><line x1=\"50\" y1=\"150\" x2=\"275\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><rect x=\"70\" y=\"90\" width=\"40\" height=\"60\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"120\" y=\"45\" width=\"40\" height=\"105\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"170\" y=\"105\" width=\"40\" height=\"45\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"220\" y=\"60\" width=\"40\" height=\"90\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><text x=\"90\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">A</text><text x=\"140\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">B</text><text x=\"190\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">C</text><text x=\"240\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">D</text><text x=\"50\" y=\"20\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Litter items collected</text></svg>"
+  },
+  "silver": {
+   "label": "Together: two readings at once",
+   "steps": [
+    {
+     "pre": "Counting from the left, autumn is pair number ",
+     "say": "Two bars per season now, so the legend matters.",
+     "hint": "The pairs run spring, summer, autumn, winter.",
+     "post": "",
+     "answer": 3
+    },
+    {
+     "pre": "In winter, Town X reads ",
+     "hint": "Use the legend: Town X is the blue bar of each pair.",
+     "post": " mm.",
+     "answer": 80
+    },
+    {
+     "pre": "In winter, Town Y reads ",
+     "hint": "Town Y is the yellow bar, the right-hand one of the pair.",
+     "post": " mm.",
+     "answer": 50
+    },
+    {
+     "pre": "So the winter gap between the towns is ",
+     "hint": "Subtract the smaller winter reading from the larger one.",
+     "post": " mm.",
+     "answer": 30
+    },
+    {
+     "pre": "In summer Town X reads 20 mm and Town Y reads 35 mm, so the summer gap is ",
+     "done": "Gaps can run either way round. Always subtract the smaller from the larger.",
+     "hint": "Same move, but this time Town Y is the taller of the two.",
+     "post": " mm.",
+     "answer": 15
+    },
+    {
+     "pre": "Adding Town X's four bars gives an annual total of ",
+     "done": "Silver is about combining readings: differences and totals, not single values.",
+     "hint": "40 + 20 + 60 + 80.",
+     "post": " mm.",
+     "answer": 200
+    }
+   ],
+   "display": "<p>Seasonal rainfall in two towns. Compare them.</p><svg viewBox=\"0 0 300 195\" role=\"img\" aria-label=\"Dual bar chart of seasonal rainfall in two towns. Town X reads 40, 20, 60 and 80 millimetres and Town Y reads 30, 35, 45 and 50 millimetres across spring, summer, autumn and winter, on a scale from 0 to 80.\"><rect x=\"0\" y=\"0\" width=\"300\" height=\"195\" fill=\"#faf8f5\"/><line x1=\"50\" y1=\"150\" x2=\"285\" y2=\"150\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"153.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">0</text><line x1=\"50\" y1=\"120\" x2=\"285\" y2=\"120\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"123.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">20</text><line x1=\"50\" y1=\"90\" x2=\"285\" y2=\"90\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"93.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">40</text><line x1=\"50\" y1=\"60\" x2=\"285\" y2=\"60\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"63.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">60</text><line x1=\"50\" y1=\"30\" x2=\"285\" y2=\"30\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"33.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">80</text><line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><line x1=\"50\" y1=\"150\" x2=\"285\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><rect x=\"60\" y=\"90\" width=\"22\" height=\"60\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"115\" y=\"120\" width=\"22\" height=\"30\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"170\" y=\"60\" width=\"22\" height=\"90\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"225\" y=\"30\" width=\"22\" height=\"120\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"84\" y=\"105\" width=\"22\" height=\"45\" fill=\"#fcd34d\" stroke=\"#d97706\"/><rect x=\"139\" y=\"97.5\" width=\"22\" height=\"52.5\" fill=\"#fcd34d\" stroke=\"#d97706\"/><rect x=\"194\" y=\"82.5\" width=\"22\" height=\"67.5\" fill=\"#fcd34d\" stroke=\"#d97706\"/><rect x=\"249\" y=\"75\" width=\"22\" height=\"75\" fill=\"#fcd34d\" stroke=\"#d97706\"/><text x=\"93\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Spring</text><text x=\"148\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Summer</text><text x=\"203\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Autumn</text><text x=\"258\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Winter</text><rect x=\"60\" y=\"178\" width=\"10\" height=\"10\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><text x=\"75\" y=\"187\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Town X</text><rect x=\"140\" y=\"178\" width=\"10\" height=\"10\" fill=\"#fcd34d\" stroke=\"#d97706\"/><text x=\"155\" y=\"187\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Town Y</text><text x=\"50\" y=\"20\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Rainfall (mm)</text></svg>"
+  }
+ },
+ "opener": {
+  "label": "Before any graph rules",
+  "steps": [
+   {
+    "pre": "Tuesday's bar reaches ",
+    "say": "No rules yet. Just look at the two bars.",
+    "hint": "Follow the top of the taller bar straight across to the scale on the left.",
+    "post": " mm",
+    "answer": 50
+   },
+   {
+    "pre": "Monday's bar reaches 30 mm, so Tuesday had ",
+    "hint": "Take Monday's 30 mm away from the number you just read.",
+    "post": " mm more rain.",
+    "answer": 20
+   },
+   {
+    "say": "<strong>That is the whole skill.</strong> You matched a bar top to a number on the side axis, then subtracted one reading from another to compare them. Every question in this lesson is those two moves on a bigger chart."
+   }
+  ],
+  "display": "<p>Rainfall measured at one weather station on two days:</p><svg viewBox=\"0 0 280 180\" role=\"img\" aria-label=\"Bar chart of rainfall on two days. Monday reaches 30 millimetres and Tuesday reaches 50 millimetres on a scale from 0 to 60 millimetres.\"><rect x=\"0\" y=\"0\" width=\"280\" height=\"180\" fill=\"#faf8f5\"/><line x1=\"50\" y1=\"150\" x2=\"265\" y2=\"150\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"153.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">0</text><line x1=\"50\" y1=\"130\" x2=\"265\" y2=\"130\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"133.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">10</text><line x1=\"50\" y1=\"110\" x2=\"265\" y2=\"110\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"113.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">20</text><line x1=\"50\" y1=\"90\" x2=\"265\" y2=\"90\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"93.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">30</text><line x1=\"50\" y1=\"70\" x2=\"265\" y2=\"70\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"73.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">40</text><line x1=\"50\" y1=\"50\" x2=\"265\" y2=\"50\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"53.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">50</text><line x1=\"50\" y1=\"30\" x2=\"265\" y2=\"30\" stroke=\"#d8d2c8\" stroke-width=\"1\"/><text x=\"44\" y=\"33.0\" text-anchor=\"end\" font-size=\"9\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">60</text><line x1=\"50\" y1=\"30\" x2=\"50\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><line x1=\"50\" y1=\"150\" x2=\"265\" y2=\"150\" stroke=\"#2d2a26\" stroke-width=\"1\"/><rect x=\"80\" y=\"90\" width=\"60\" height=\"60\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><rect x=\"175\" y=\"50\" width=\"60\" height=\"100\" fill=\"#93c5fd\" stroke=\"#3b82f6\"/><text x=\"110\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Monday</text><text x=\"205\" y=\"164\" text-anchor=\"middle\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Tuesday</text><text x=\"50\" y=\"20\" font-size=\"10\" font-family=\"Inter,Segoe UI,sans-serif\" fill=\"#2d2a26\">Rainfall (mm)</text></svg>"
+ }
+}
+######################################################################
+TIER_GUIDES
+{
+ "gold": {
+  "steps": [
+   "In a <strong>stacked bar</strong> each section begins where the last one ended, so a section's size is the level at its top minus the level below.",
+   "When two data sets share a chart, check which line or colour belongs to which before you read anything.",
+   "Finish by saying what the pattern <strong>means</strong>: a trend, a lag, a stage, a climate type. Back it up with a number you have read."
+  ],
+  "title": "Gold: stacked bars, two data sets, and what the pattern shows",
+  "example": {
+   "steps": [
+    {
+     "label": "Top of the bar",
+     "content": "<p>The whole bar fills to 100%.</p>"
+    },
+    {
+     "label": "Level below",
+     "content": "<p>The secondary section ends at the 35% level.</p>"
+    },
+    {
+     "label": "Subtract",
+     "content": "<p>Tertiary = 100 − 35 = 65%.</p>"
+    },
+    {
+     "label": "Check",
+     "content": "<p>Primary 10 + secondary 25 + tertiary 65 = 100. ✓</p>"
+    },
+    {
+     "label": "Answer",
+     "content": "<p><strong>65%</strong></p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "A stacked bar shows employment by sector. Find the size of the tertiary section."
+  }
+ },
+ "bronze": {
+  "steps": [
+   "Start with the <strong>axis titles</strong>. They tell you what is being measured and in what units.",
+   "Find your category or year along the bottom axis, then move up to the bar top or the plotted point.",
+   "Slide across to the side axis and read the value. Check the gridline step first, because bar tops often land between labels."
+  ],
+  "title": "Bronze: one reading, straight off the chart",
+  "example": {
+   "steps": [
+    {
+     "label": "Locate",
+     "content": "<p>Count along the bottom axis. March is the third bar.</p>"
+    },
+    {
+     "label": "Check the scale",
+     "content": "<p>The side axis is labelled every 10 mm, so one gridline step is worth 10 mm.</p>"
+    },
+    {
+     "label": "Read across",
+     "content": "<p>March's bar top sits one full gridline above 40, so it reads 50 mm.</p>"
+    },
+    {
+     "label": "Check",
+     "content": "<p>February reads 40 mm and April reads 55 mm, so 50 mm sits sensibly between them. ✓</p>"
+    },
+    {
+     "label": "Answer",
+     "content": "<p><strong>50 mm</strong></p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "A bar chart of monthly rainfall. Read the value for March."
+  }
+ },
+ "silver": {
+  "steps": [
+   "Silver questions need <strong>two or more readings</strong>, so take each one carefully before you calculate anything.",
+   "Use the <strong>legend</strong> to tell paired bars or lines apart, and read both at the same place on the bottom axis.",
+   "Then do the move the question asks for: a difference, a total, a range or a percentage change. Subtract the smaller or earlier value from the larger or later one."
+  ],
+  "title": "Silver: two readings, then a calculation",
+  "example": {
+   "steps": [
+    {
+     "label": "Total the first town",
+     "content": "<p>Add all twelve of Town A's bars: 620 mm.</p>"
+    },
+    {
+     "label": "Total the second",
+     "content": "<p>Add all twelve of Town B's bars: 480 mm.</p>"
+    },
+    {
+     "label": "Subtract",
+     "content": "<p>620 − 480 = 140 mm.</p>"
+    },
+    {
+     "label": "Check",
+     "content": "<p>480 + 140 = 620, back on Town A's total. ✓</p>"
+    },
+    {
+     "label": "Answer",
+     "content": "<p><strong>140 mm</strong></p>",
+     "isAnswer": true,
+     "is_answer": true
+    }
+   ],
+   "question": "A dual bar chart of rainfall in two towns. Find the difference in their annual totals."
+  }
+ }
+}
+######################################################################
+METHOD_CARD
+{
+ "steps": [
+  "Read the axis titles and units first",
+  "Find your category or year on the bottom axis",
+  "Read across to the side axis, checking the gridline step",
+  "Then compare, total or subtract as the question asks"
+ ],
+ "title": "Bar Charts & Line Graphs",
+ "content": "<p><strong>Bar charts</strong> compare separate categories: the taller the bar, the bigger the value. <strong>Line graphs</strong> show change over time, so they reveal trends, peaks and troughs.</p><p>Always check the <strong>gridline step</strong> before you read a value. A step might be worth 1, 5, 10 or 5,000. Bar tops and plotted points often sit between gridlines, so judge the fraction of the gap.</p><p><strong>Stacked bars</strong> sit sections on top of each other, so a section's size is the level at its top minus the level below it. <strong>Dual charts</strong> show two sets of data together, so use the legend to pick the right one before reading.</p>",
+ "example": "<p><strong>Question:</strong> A bar chart shows summer rainfall: June 70 mm, July 65 mm, August 75 mm. Find the total.</p><p><strong>Step 1:</strong> Read each bar top across to the side axis.</p><p><strong>Step 2:</strong> Add them: 70 + 65 + 75.</p><p><strong>Answer:</strong> 210 mm</p>"
+}
+######################################################################
+DESCRIPTIONS
+gold_description : Work with stacked bars and paired data sets, then explain what the pattern shows.
+bronze_description : Take a single value off a bar top or a plotted point, or pick out the highest or lowest.
+silver_description : Take two or more readings, then find a difference, a total, a range or a percentage change.

@@ -1,0 +1,72 @@
+{
+ "key": "L12",
+ "lesson_id": "3a0b41fb-d6d3-43ac-9d74-08abb8926e8a",
+ "title": "Distance & Direction",
+ "problems_fixed": [
+  {
+   "tier": "silver",
+   "index": 3,
+   "what": "Answer restated in metres (same measured distance) to clear a within-tier solution-value collision: silver[3] stored 4 km while silver[2] is a multiple-choice question whose stored option index is also 4, which the validator reads as a duplicate. The map, image, ruler and the two named features are untouched; only the requested unit changed (to the nearest 500 m) and a metre-conversion step was added to the walk.",
+   "old": "4 (km)",
+   "new": "4000 (m)"
+  },
+  {
+   "tier": "silver",
+   "index": 6,
+   "what": "Answer restated in metres (same measured distance) to clear a within-tier duplicate with silver[1], which also stored 2.5 km. Map, ruler and features untouched; question now asks for metres to the nearest 500 m and the walk gains a kilometres-to-metres step plus a divide-back check.",
+   "old": "2.5 (km)",
+   "new": "2500 (m)"
+  },
+  {
+   "tier": "silver",
+   "index": 6,
+   "what": "Hint was arithmetically impossible for this map: it claimed Castleton was 3.5 km south and 3.5 km east of the high ground, which gives about 5 km, yet bronze[7] establishes the whole diagonal of this same map as 5.5 km. Replaced with a method-pointing hint. Stored distance left alone.",
+   "old": "Castleton is roughly 3.5 km south and 3.5 km east of the high ground. Use Pythagoras.",
+   "new": "Measure in centimetres, convert to kilometres with the map scale, then turn kilometres into metres."
+  },
+  {
+   "tier": "gold",
+   "index": 0,
+   "what": "Hint belonged to a different question: it quoted eastings 86/83 and northings 43/46, none of which appear in this problem's references (476636 to 488625). Replaced. Stored option index unchanged; the six-figure references do give 1.2 km east and 1.1 km south, and Pythagoras gives 1.63 km, which rounds to the stored 1.5 km, SE.",
+   "old": "Horizontal: 86-83 = 3 km east. Vertical: 43-46 = 3 km south. Use Pythagoras.",
+   "new": "Split it into how far east and how far north or south first, using the six-figure references."
+  },
+  {
+   "tier": "bronze",
+   "index": 4,
+   "what": "Misconception text contradicted the stored answer (it said the direction was SE while the stored option index is S). Rewritten as an expect-matched misconception that fires only on the SE distractor.",
+   "old": "Hare Runs is south and slightly east of the roundabout, so the direction is SE.",
+   "new": "A small sideways shift has been turned into a full compass point. Only add east or west when the sideways gap is about as big as the up and down gap."
+  },
+  {
+   "tier": "gold",
+   "index": 1,
+   "what": "Misconception text asserted an arithmetic route that does not reach the stored answer (it derived 2.24 and then claimed it rounds to 2.5). Replaced with two expect-matched errors. Stored distance untouched.",
+   "old": "Horizontal: ~1 km west. Vertical: ~2 km south. sqrt(1+4) = sqrt5 = 2.2, rounds to 2.5 km.",
+   "new": "expect-matched: answered in centimetres (5), rounded away the half kilometre (2)"
+  },
+  {
+   "tier": "silver",
+   "index": 1,
+   "what": "Same defect as gold[1]: the misconception derived 3.2 km and claimed it rounds to 3.5 km, for a problem whose stored answer is 2.5 km. Replaced with expect-matched errors.",
+   "old": "Horizontal: ~2 km. Vertical: ~2.5 km. sqrt(4 + 6.25) = sqrt10.25 = 3.2, rounds to 3.5 km.",
+   "new": "expect-matched: answered in centimetres (5), rounded to a whole kilometre (2)"
+  },
+  {
+   "tier": "bronze",
+   "index": 7,
+   "what": "Hint field was an empty string; every problem now carries one plain-text method hint.",
+   "old": "",
+   "new": "Measure the full diagonal in centimetres, then convert with the 2 cm to 1 km scale."
+  }
+ ],
+ "misconceptions_rewritten": 40,
+ "flagged_unverifiable": [
+  "All 20 problems are built on OS map images that cannot be read by an agent, so every stored distance and direction was trusted as given. No stored answer was changed on map evidence; the only value edits are the two unit restatements in silver (4 km to 4000 m, 2.5 km to 2500 m), which preserve the underlying measurement exactly.",
+  "bronze[1] (Corfe Castle from Kingston, stored N) and bronze[3]/silver[2] rely on a place sitting 'roughly straight above/below' the start. The walks encode that judgement in a locating box consistent with the stored answer; if the map shows a clear sideways offset the stored option, not the walk, would be the thing to revisit.",
+  "gold[4] asks for the length of the A6 'visible on this map'. The stored 2 km assumes both ends of the pink road are on the sheet; the walk's first box asks the student to confirm exactly that, so a map where the road runs off both edges would make the question ambiguous.",
+  "Ruler-based walks assume the measured reading lands on a whole number of centimetres (stored km x cm-per-km). That is exact at 2 cm/km for every 0.5 km answer, and the z16 maps at 4 cm/km give whole centimetres too, but a student measuring 1 cm out will be marked wrong on that box before the hint appears."
+ ],
+ "opener_concept": "A drawn path measuring 6 cm sits above the map's scale bar, which is 2 cm long and stands for 1 km. The student counts how many 2 cm lengths fit along the path (3), states the real length (3 km), then does a 5 cm path (2.5 km) with no method taught. The reveal names what they did: divide the centimetres by the number of centimetres that stand for 1 km. Drawn as inline SVG at true proportions (240 units for 6 cm, 80 units for 2 cm).",
+ "notes": "All 20 problems now carry guided_steps, including all 9 multiple-choice ones (none are evaluative, so no guided_skip_reason is used). Every walk's first box locates on the stimulus: grid-line eastings, or which of the two places sits higher up / further across the page, or how many ends of the road are on the sheet. Compass walks use a numbered 8-point list (N=1 clockwise to NW=8) so every typed value is numeric, and every compass walk ends with a reversal check (opposites are four apart on that list). Ruler walks end by converting back to centimetres or by counting whole grid squares. Every catch-all check:'wrong' and check:'close' misconception was deleted; the 37 replacements are all expect-matched to a determinate wrong answer: reversed start and finish (opposite option), swapped left and right (mirrored option), answered in centimetres (the ruler reading), divided by the wrong scale, rounded a half kilometre away, left the answer in kilometres where metres were asked, counted grid lines instead of gaps, and reading the northing as rising. No message, hint or tier description states its problem's answer. Added: three tier descriptions, three tier_guides with stepped examples, the opener, and three teach walks (bronze 5 boxes, silver 5, gold 7) each drawn as a self-contained inline SVG grid map rather than reusing an OS image I cannot describe. No image URL was invented, dropped or altered; all 20 images and 11 ruler configs round-trip identical to the pre-patch row. method_card slimmed to 4 steps and 129 words. Em dashes stripped from exam_context and worked_examples (replaced with colons); worked_examples otherwise untouched. Validator PASS; PATCH returned 204 and a GET confirms the stored row is byte-identical to lesson_L12.json."
+}

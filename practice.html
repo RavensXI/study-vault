@@ -4402,7 +4402,13 @@
       // Completion problem (backward fading): the tier's first question comes
       // half-worked. Elimination is done and ticked; the student finishes the
       // substitute-back and check. Bridges the teach walk and bare questions.
-      if (idx === 0 && !practiceState.completionShown[tier] && window._guided &&
+      // Fire on the tier's first WALK-CAPABLE question, not strictly on index 0.
+      // Purely evaluative multiple choice carries no guided_steps, so when the
+      // shuffle deals one of those first the completion step used to be skipped
+      // for that tier entirely and the student went straight from the teach walk
+      // to bare questions. Geography Skills is 41% multiple choice and hit this
+      // often; maths MC-first lessons had the same gap.
+      if (!practiceState.completionShown[tier] && window._guided &&
           p.guided_steps && p.guided_steps.length) {
         practiceState.completionShown[tier] = true;
         var pf = 0;

@@ -1,0 +1,584 @@
+
+
+########## BRONZE (8) desc='Read one value straight off a map: match a shade to its key band, or read the isoline a point sits on or beside.'
+==============================================================================
+bronze[0] | type: multiple_choice
+DISPLAY: Look at the choropleth map below. Region X is marked in the Scottish Highlands. What is the population density at X?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/choropleth-uk.png
+   opt[0]: 0–50 people/km²
+   opt[1]: 50–200 people/km²
+   opt[2]: 200–1000 people/km²
+   opt[3]: 1000+ people/km²
+SOLUTIONS: [0]
+HINT: Match the shade printed over Region X to the key squares one at a time, palest first.
+  MIS[0] pattern=read_key_upside_down expect=3 check=None
+        msg: You matched X to the darkest key square rather than to the shade actually printed over it. Put the map shade next to each key square in turn.
+  MIS[1] pattern=off_by_one_band expect=1 check=None
+        msg: You landed one band too high. Count the key squares from the palest and check which number you stopped on.
+  [0] SAY: Key first, map second.
+  [1] BOX phase=None ans=4
+      pre: Type how many shading bands the key on this map shows.
+      hint: Count the coloured squares listed in the key.
+      done: Four bands, so your answer has to be one of four ranges.
+  [2] BOX phase=substitute ans=1
+      pre: Counting the palest shade as band 1, type the band number that matches the shading over Region X.
+      hint: Hold the shade over X against each key square until one matches.
+  [3] BOX phase=None ans=0
+      pre: Type the lower limit of that band, in people per km².
+      hint: Read the first number printed beside that key square.
+  [4] BOX phase=None ans=50
+      pre: Check: type the upper limit of the same band, in people per km².
+      hint: Read the second number beside that key square.
+      done: Both limits come from the same key square, so the band you quote is the one X is actually shaded in.
+  [5] SAY: The option that names that band is the answer: <strong>0 to 50 people per km²</strong>.
+==============================================================================
+bronze[1] | type: multiple_choice
+DISPLAY: Look at the choropleth map. Which area has the highest population density?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/choropleth-uk.png
+   opt[0]: Scottish Highlands
+   opt[1]: Rural Wales
+   opt[2]: London
+   opt[3]: Northern Ireland
+SOLUTIONS: [2]
+HINT: Highest density means darkest shading, so find the top band in the key before you scan the map.
+  MIS[0] pattern=picked_lightest expect=0 check=None
+        msg: You picked the palest area on the map. Check which end of the key means more people, not fewer.
+  MIS[1] pattern=chose_rural expect=1 check=None
+        msg: You chose a largely rural area. Density is people per km², so judge it by shade, not by how big the region looks.
+  [0] SAY: Highest value means darkest shade, so start by working out what the darkest shade means.
+  [1] BOX phase=None ans=4
+      pre: Type how many bands the key shows.
+      hint: Count the coloured squares in the key.
+      done: You now know which key square is the top of the scale.
+  [2] BOX phase=substitute ans=1000
+      pre: Type the lower limit of the darkest band, in people per km².
+      hint: Read the number beside the last key square.
+  [3] BOX phase=None ans=1
+      pre: Scan the four listed places on the map. Type how many of them are shaded in that darkest band.
+      hint: Only count places whose shading really matches the last key square.
+  [4] BOX phase=None ans=0
+      pre: Check: type how many of the four listed places are shaded more darkly than that one place.
+      hint: If your choice is the darkest, nothing can be darker than it.
+      done: Nothing outranks it, so the place you picked really is the densest of the four.
+  [5] SAY: That single darkest place is <strong>London</strong>.
+==============================================================================
+bronze[2] | type: multiple_choice
+DISPLAY: The isotherm map shows January temperatures across the UK. Point P is in southern England, just south of the 8°C isotherm. Is the temperature at P likely to be warmer or cooler than 8°C?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isotherm-uk.png
+   opt[0]: Cooler than 8°C, since P sits on the cooler side of the line
+   opt[1]: Exactly 8°C, since P sits on the line itself
+   opt[2]: Warmer than 8°C, since P sits on the warmer side of the line
+   opt[3]: Cannot tell from an isotherm map
+SOLUTIONS: [2]
+HINT: Work out which way the isotherm values are climbing, then see which side of the line P is on.
+  MIS[0] pattern=wrong_side_of_line expect=0 check=None
+        msg: You put P on the cooler side. Check which direction the isotherm labels increase in before deciding which side is which.
+  MIS[1] pattern=point_on_line expect=1 check=None
+        msg: P is described as just south of the line, not on it, so it cannot take the line's own value.
+  [0] SAY: First place P against the lines, then work out which way the numbers run.
+  [1] BOX phase=None ans=8
+      pre: Type the value, in °C, of the isotherm that P sits just south of.
+      hint: The question names it, and the label is printed on the line.
+  [2] BOX phase=None ans=2
+      pre: The isotherms on this map are labelled 4, 6 and 8. Type the gap, in °C, between one isotherm and the next.
+      hint: Subtract one label from the next label along.
+      done: A steady 2°C step means you can predict the next line's value in either direction.
+  [3] BOX phase=substitute ans=10
+      pre: The cooler values (4°C) lie towards the north. If the 2°C steps continue southwards, type the value of the next isotherm south of the 8°C line, in °C.
+      hint: Add one step to 8.
+  [4] BOX phase=None ans=9
+      pre: P lies between the 8°C line and that next line south. Type your midway estimate for P, in °C.
+      hint: Add half the gap to the cooler line's value.
+  [5] BOX phase=None ans=1
+      pre: Check: type the difference in °C between your estimate for P and the 8°C line.
+      hint: Subtract 8 from your estimate.
+      done: A positive difference means P is above the line's value, so P is on the warm side.
+  [6] SAY: So P is <strong>warmer than 8°C</strong>.
+  !! OPTIONS CHANGED. OLD: ['Cooler than 8°C — P is north of the line', 'Exactly 8°C — P is on the line', 'Warmer than 8°C — P is on the warmer side of the line', 'Cannot tell from an isotherm map']
+==============================================================================
+bronze[3] | type: multiple_choice
+DISPLAY: On the weather map, Point A is in northern England between two isobars. Which two isobars is A between?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isobar-uk.png
+   opt[0]: 1004 mb and 1008 mb
+   opt[1]: 1008 mb and 1012 mb
+   opt[2]: 1012 mb and 1016 mb
+   opt[3]: 1016 mb and 1020 mb
+SOLUTIONS: [2]
+HINT: Read the label on the line each side of A, not the labels on the lines further away.
+  MIS[0] pattern=one_interval_low expect=1 check=None
+        msg: Your pair is one interval too low. Trace each line out from A to its own label instead of counting lines by eye.
+  MIS[1] pattern=one_interval_high expect=3 check=None
+        msg: Your pair is one interval too high. Check you followed the lines immediately either side of A.
+  [0] SAY: Find A first, then read the label on each side of it.
+  [1] BOX phase=None ans=1012
+      pre: Find Point A in northern England. Type the value, in mb, of the lower-pressure isobar of the two lines either side of it.
+      hint: Follow the line on one side of A until you meet its printed label.
+      done: Locating A between two labelled lines is the whole task here.
+  [2] BOX phase=substitute ans=1016
+      pre: Type the value, in mb, of the higher-pressure isobar of that pair.
+      hint: Follow the line on the other side of A to its label.
+  [3] BOX phase=None ans=4
+      pre: Type the interval between one isobar and the next on this map, in mb.
+      hint: Subtract the smaller of your two readings from the larger.
+  [4] BOX phase=None ans=1014
+      pre: Check: type the pressure you would estimate at a point exactly midway between your two lines, in mb.
+      hint: Add half the interval to the lower reading.
+      done: Your midway value sits inside the pair you named, which is only possible if you read the right two lines.
+  [5] SAY: A therefore lies between <strong>1012 mb and 1016 mb</strong>.
+==============================================================================
+bronze[4] | type: multiple_choice
+DISPLAY: Look at the rainfall map. Point P is in North Wales and Point Q is on the east coast. Which point receives more rainfall?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isohyet-uk.png
+   opt[0]: Point P
+   opt[1]: Point Q
+   opt[2]: They receive the same
+   opt[3]: Cannot tell from this map
+SOLUTIONS: [0]
+HINT: Pin each point to the pair of isohyets it lies between, then compare the two bands.
+  MIS[0] pattern=east_assumed_wetter expect=1 check=None
+        msg: You chose the east coast point. Compare the isohyet labels either side of each point rather than guessing from position.
+  MIS[1] pattern=bands_treated_as_equal expect=2 check=None
+        msg: The two points do not sit between the same pair of lines, so their bands are not the same. Read both pairs of labels again.
+  [0] SAY: Two points means two separate readings, then one comparison.
+  [1] BOX phase=None ans=800
+      pre: Find Point P in North Wales. Type the value, in mm, of the drier of the two isohyets it lies between.
+      hint: Follow the line on the drier side of P until you reach its label.
+      done: P is now pinned between two named lines.
+  [2] BOX phase=None ans=1000
+      pre: Type the value, in mm, of the wetter isohyet P lies between.
+      hint: Follow the line on P's other side to its label.
+  [3] BOX phase=substitute ans=800
+      pre: Now find Point Q on the east coast. Type the value, in mm, of the wetter of the two isohyets Q lies between.
+      hint: Read the label on the line to Q's west.
+  [4] BOX phase=None ans=600
+      pre: Type the value, in mm, of the drier isohyet Q lies between.
+      hint: Read the label on the line on Q's other side.
+  [5] BOX phase=None ans=200
+      pre: Check: type the difference in mm between P's wetter limit and Q's wetter limit.
+      hint: Subtract Q's upper figure from P's upper figure.
+      done: P's whole band starts where Q's band ends, so every value P could take is at least as high as any value Q could take.
+  [6] SAY: <strong>Point P</strong> receives more rainfall.
+==============================================================================
+bronze[5] | type: multiple_choice
+DISPLAY: A student says the choropleth map proves that everyone in London lives in a crowded area. Why is this conclusion unreliable?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/choropleth-uk.png
+   opt[0]: Choropleth maps hide variation within areas, so parts of London are far less dense than others
+   opt[1]: The map uses the wrong colours
+   opt[2]: London is too small to show on a choropleth map
+   opt[3]: Choropleth maps cannot display population data
+SOLUTIONS: [0]
+HINT: Think about what one shade has to do to a whole area before it can be printed on the map.
+  MIS[0] pattern=blames_colour_scheme expect=1 check=None
+        msg: The colour choice is not the flaw here. Think about what a single shade does to the range of values inside one area.
+  MIS[1] pattern=rejects_technique expect=3 check=None
+        msg: Choropleths handle population data perfectly well. The weakness is in what one shade per area conceals.
+SKIP: Evaluative: judges the reliability of a claim about averaging. There is no reading or calculation procedure that reaches the option.
+  !! OPTIONS CHANGED. OLD: ['Choropleth maps hide variation within areas — some parts of London are much less dense than others', 'The map uses the wrong colours', 'London is too small to show on a choropleth map', 'Choropleth maps cannot display population data']
+==============================================================================
+bronze[6] | type: multiple_choice
+DISPLAY: On the weather map, the isobars are much closer together near the L (low pressure) in the north-west than near the H (high pressure) in the south-east. What does this tell us?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isobar-uk.png
+   opt[0]: Wind speeds are stronger near the low pressure
+   opt[1]: Wind speeds are stronger near the high pressure
+   opt[2]: Wind speeds are the same everywhere
+   opt[3]: Isobar spacing has nothing to do with wind
+SOLUTIONS: [0]
+HINT: Turn spacing into a gradient: the same pressure step squeezed into a shorter distance.
+  MIS[0] pattern=spacing_inverted expect=1 check=None
+        msg: You picked the side where the lines are spread out. Work out the pressure change per 100 km on each side and compare them.
+  MIS[1] pattern=spacing_ignored expect=2 check=None
+        msg: Spacing is not decoration. The same pressure step over a shorter distance is a steeper gradient.
+  [0] SAY: Spacing is really a gradient in disguise. Put numbers on it and it becomes obvious.
+  [1] BOX phase=None ans=4
+      pre: Look at the isobars near the L in the north-west and near the H in the south-east. Type the interval, in mb, between one isobar and the next on this map.
+      hint: Subtract one printed isobar label from the next one along.
+      done: The step is the same everywhere, so only the distance between lines can differ.
+  [2] BOX phase=None ans=4
+      pre: Suppose that near the L the lines are 100 km apart. Type the pressure change per 100 km there, in mb.
+      hint: One whole interval fits into one 100 km length.
+  [3] BOX phase=substitute ans=4
+      pre: Suppose that near the H the same interval is spread over 400 km. Type how many 100 km lengths that is.
+      hint: Divide the distance by 100.
+  [4] BOX phase=None ans=1
+      pre: Type the pressure change per 100 km near the H, in mb.
+      hint: Share the interval evenly across those 100 km lengths.
+  [5] BOX phase=None ans=4
+      pre: Check: type how many times steeper the gradient near the L is than the gradient near the H.
+      hint: Divide the larger gradient by the smaller one.
+      done: A steeper pressure gradient drives faster air movement, so the tightly packed side is the windy one.
+  [6] SAY: Tightly packed isobars sit near the L, so <strong>wind speeds are stronger near the low pressure</strong>.
+==============================================================================
+bronze[7] | type: multiple_choice
+DISPLAY: The rainfall map shows that the west of the UK receives more rainfall than the east. What is the main reason for this pattern?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isohyet-uk.png
+   opt[0]: The west is closer to cities which produce more rain
+   opt[1]: Prevailing winds bring moist air from the Atlantic, which rises over western mountains causing rainfall
+   opt[2]: The east coast is sheltered by Europe
+   opt[3]: Eastern rivers carry water away faster
+SOLUTIONS: [1]
+HINT: Ask where the UK's wet air arrives from and what the land makes that air do first.
+  MIS[0] pattern=urban_cause expect=0 check=None
+        msg: Cities do not create this national pattern. Think about the direction the UK's wet air arrives from.
+  MIS[1] pattern=drainage_cause expect=3 check=None
+        msg: Rivers move water after it has fallen. The pattern is about where the rain falls in the first place.
+SKIP: Explanatory: asks for the physical cause of a pattern already read off the map. No value can be read or calculated to reach the option.
+
+
+########## SILVER (7) desc='Estimate a value between two isolines by interpolating, and judge what a shaded band does and does not tell you.'
+==============================================================================
+silver[0] | type: single_value
+DISPLAY: On the isotherm map, Point Q is located in central Scotland between the 4°C and 6°C isotherms, roughly midway between them. Estimate the January temperature at Q.
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isotherm-uk.png
+SOLUTIONS: [5]
+HINT: Find the gap between the two lines, take the fraction of it the question describes, then add it to the cooler line.
+  MIS[0] pattern=took_lower_line expect=4 check=None
+        msg: You quoted the cooler line itself instead of estimating between the lines. Q is described as midway, not on a line.
+  MIS[1] pattern=took_upper_line expect=6 check=None
+        msg: You quoted the warmer line itself. Interpolate across the gap rather than jumping to a printed label.
+  [0] SAY: Interpolation: how far across the gap is the point?
+  [1] BOX phase=None ans=4
+      pre: Find Q in central Scotland. Type the value, in °C, of the cooler isotherm it sits between.
+      hint: The question names both lines, and each label is printed on its line.
+      done: Q is now pinned between two named lines, which is all interpolation needs.
+  [2] BOX phase=None ans=6
+      pre: Type the value, in °C, of the warmer isotherm Q sits between.
+      hint: Type the larger of the two labels.
+  [3] BOX phase=substitute ans=2
+      pre: Type the gap between the two isotherms, in °C.
+      hint: Subtract the cooler label from the warmer one.
+  [4] BOX phase=None ans=1
+      pre: Q is midway across the gap. Type half of the gap, in °C.
+      hint: Halve the gap.
+  [5] BOX phase=None ans=5
+      pre: Add that to the cooler isotherm. Type your estimate for Q, in °C.
+      hint: Start at the cooler line and step up by the amount you just found.
+  [6] BOX phase=None ans=1
+      pre: Check: type the difference in °C between your estimate and the warmer isotherm.
+      hint: Subtract your estimate from the warmer label.
+      done: Your estimate is the same distance from each line, which is exactly what midway means.
+==============================================================================
+silver[1] | type: multiple_choice
+DISPLAY: The isotherm map shows that south-western areas of the UK are warmer than the north-east in January. The isotherms also bend slightly, with coastal areas warmer than inland areas at the same latitude. What mainly explains the warmer coastal temperatures?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isotherm-uk.png
+   opt[0]: Altitude, because coastal areas are lower
+   opt[1]: Maritime influence, because the sea keeps coastal areas warmer in winter
+   opt[2]: Latitude, because southern areas are always warmer
+   opt[3]: Urbanisation, because coastal cities are warmer
+SOLUTIONS: [1]
+HINT: The comparison is coast against inland at the same latitude, so latitude cannot be the cause.
+  MIS[0] pattern=latitude_confusion expect=2 check=None
+        msg: The places being compared share a latitude, so latitude cannot explain the difference between them.
+  MIS[1] pattern=urban_heat expect=3 check=None
+        msg: Urban warming is local and small. Look for something that affects every stretch of coast, city or not.
+SKIP: Explanatory: asks for the physical control behind a bend in the isotherms. Nothing on the map can be read or calculated to reach the option.
+  !! OPTIONS CHANGED. OLD: ['Altitude — coastal areas are lower', 'Maritime influence — the sea keeps coastal areas warmer in winter', 'Latitude — southern areas are always warmer', 'Urbanisation — cities along the coast are warmer']
+==============================================================================
+silver[2] | type: single_value
+DISPLAY: On the weather map, Point B is located in south Wales between the 1012 mb and 1016 mb isobars, roughly three-quarters of the way from 1012 towards 1016. Estimate the pressure at B.
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isobar-uk.png
+SOLUTIONS: [1015]
+HINT: Take three quarters of the gap between the two isobars and add it to the lower one.
+  MIS[0] pattern=quarter_not_three_quarters expect=1013 check=None
+        msg: You moved one quarter across instead of three quarters. Re-read which line the question measures from.
+  MIS[1] pattern=assumed_midway expect=1014 check=None
+        msg: You interpolated as if B were midway. The fraction given is not a half.
+  [0] SAY: Same interpolation as before, but the fraction is no longer a half.
+  [1] BOX phase=None ans=1012
+      pre: Find B in south Wales. Type the value, in mb, of the lower-pressure isobar it sits between.
+      hint: The question names both lines; type the smaller label.
+      done: B is pinned between two named isobars, ready to interpolate.
+  [2] BOX phase=None ans=1016
+      pre: Type the value, in mb, of the higher-pressure isobar B sits between.
+      hint: Type the larger label.
+  [3] BOX phase=substitute ans=4
+      pre: Type the gap between the two isobars, in mb.
+      hint: Subtract the lower label from the higher one.
+  [4] BOX phase=None ans=3
+      pre: B lies three quarters of the way across. Type three quarters of the gap, in mb.
+      hint: Divide the gap by 4, then multiply by 3.
+  [5] BOX phase=None ans=1015
+      pre: Add that to the lower isobar. Type your estimate for B, in mb.
+      hint: Start at the lower line and step up by the amount you just found.
+  [6] BOX phase=None ans=1
+      pre: Check: type the difference in mb between your estimate and the higher isobar.
+      hint: Subtract your estimate from the higher label.
+      done: One quarter of the gap is left above your estimate, which is what three quarters across should leave.
+==============================================================================
+silver[3] | type: multiple_choice
+DISPLAY: A geography student says: "The choropleth map shows that Scotland has a low population density everywhere." Using the map, explain why this statement is not fully accurate.
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/choropleth-uk.png
+   opt[0]: Scotland has the same density as England
+   opt[1]: The Central Belt (Glasgow, Edinburgh) has a much higher density than the Highlands, so the choropleth does show variation within Scotland
+   opt[2]: Choropleth maps cannot show Scotland
+   opt[3]: Scotland has a higher density than London
+SOLUTIONS: [1]
+HINT: Count how many different shades appear inside Scotland before you accept the word everywhere.
+  MIS[0] pattern=compared_wrong_places expect=3 check=None
+        msg: You compared Scotland with somewhere else. The claim is about variation inside Scotland, so compare places within it.
+  MIS[1] pattern=flattened_to_one_band expect=0 check=None
+        msg: You treated the whole country as one shade. Look for more than one band inside Scotland's borders.
+  [0] SAY: The word everywhere is testable. Count shades inside Scotland.
+  [1] BOX phase=None ans=4
+      pre: Type how many shading bands the key shows.
+      hint: Count the coloured squares in the key.
+      done: Four bands means Scotland could contain up to four different shades.
+  [2] BOX phase=substitute ans=1
+      pre: Counting the palest as band 1, type the band number that matches the Highlands.
+      hint: Compare the Highlands shading with each key square in turn.
+  [3] BOX phase=None ans=2
+      pre: The Glasgow and Edinburgh area is shaded more darkly than the Highlands. Type the smallest band number it could therefore be.
+      hint: Darker means further along the key than band 1.
+  [4] BOX phase=None ans=2
+      pre: Check: type how many different shading bands you have now found inside Scotland.
+      hint: Count the band numbers you typed.
+      done: More than one band inside one country means the density is not the same everywhere, so the claim overreaches.
+  [5] SAY: The option naming the Central Belt against the Highlands is the answer.
+  !! OPTIONS CHANGED. OLD: ['Scotland has the same density as England', 'The Central Belt (Glasgow, Edinburgh) has much higher density than the Highlands — the choropleth shows variation within Scotland', 'Choropleth maps cannot show Scotland', 'Scotland has higher density than London']
+==============================================================================
+silver[4] | type: multiple_choice
+DISPLAY: A geography student says: "Choropleth maps are better than dot maps because they show exact values." Is this statement correct?
+   opt[0]: Yes, choropleths always show exact values
+   opt[1]: No, choropleths show ranges (bands), not exact values
+   opt[2]: No, dot maps are always more accurate
+   opt[3]: Yes, but only for population data
+SOLUTIONS: [1]
+HINT: Ask how many different true values one single shade on the map could stand for.
+  MIS[0] pattern=band_read_as_exact expect=0 check=None
+        msg: You treated a shade as a precise figure. Look at how wide one band in the key is.
+  MIS[1] pattern=overclaims_dot_maps expect=2 check=None
+        msg: The question is about what a choropleth reports, not about ranking the two techniques in every situation.
+  [0] SAY: Test the claim by asking what one shade can and cannot pin down.
+  [1] BOX phase=None ans=4
+      pre: A key runs 0 to 50, 50 to 200, 200 to 1000, 1000 or more. Type how many bands that is.
+      hint: Count the ranges listed.
+      done: Four shades have to cover every possible density in the country.
+  [2] BOX phase=substitute ans=50
+      pre: An area is shaded in the second band. Type the lowest density, in people per km², it could have.
+      hint: Read where that band starts.
+  [3] BOX phase=None ans=200
+      pre: Type the highest density, in people per km², that same area could have.
+      hint: Read where that band stops.
+  [4] BOX phase=None ans=150
+      pre: Check: type the width of that band, in people per km² (upper limit minus lower limit).
+      hint: Subtract the lower limit from the upper limit.
+      done: One shade stands for a whole spread of possible values, so it cannot be an exact figure.
+  [5] SAY: So the statement is wrong: a choropleth reports <strong>bands, not exact values</strong>.
+  !! DISPLAY CHANGED. OLD: On the rainfall map, Point Q is on the east coast just east of the 800 mm isohyet. Is the annual rainfall at Q likely to be more or less than 800 mm?
+  !! SOLUTIONS CHANGED. OLD: [2]
+  !! OPTIONS CHANGED. OLD: ['More than 800 mm — Q is on the wetter side of the line', 'Exactly 800 mm — Q is on the line', 'Less than 800 mm — Q is on the drier side of the line', 'Cannot tell from this map']
+  !! IMAGE CHANGED. OLD: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isohyet-uk.png
+==============================================================================
+silver[5] | type: single_value
+DISPLAY: Using the isotherm map, estimate the temperature at Point P in southern England and Point Q in central Scotland. What is the temperature difference between them?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isotherm-uk.png
+SOLUTIONS: [2]
+HINT: Estimate each point separately first, then subtract the estimates, not the printed labels.
+  MIS[0] pattern=line_label_for_estimate expect=3 check=None
+        msg: You used a printed line label for one point and an interpolated estimate for the other. Estimate both the same way before subtracting.
+  MIS[1] pattern=added_instead_of_subtracted expect=12 check=None
+        msg: You combined the two estimates instead of comparing them. A difference is one taken away from the other.
+  [0] SAY: Two estimates, then one subtraction. Never subtract the line labels.
+  [1] BOX phase=None ans=6
+      pre: Find P in southern England. Type the value, in °C, of the cooler isotherm it sits between.
+      hint: Trace out from P to the cooler of the two lines either side.
+      done: P is pinned between two lines, so it can be estimated.
+  [2] BOX phase=None ans=8
+      pre: Type the value, in °C, of the warmer isotherm P sits between.
+      hint: Trace out to the line on P's other side.
+  [3] BOX phase=substitute ans=7
+      pre: P lies roughly midway between them. Type your estimate for P, in °C.
+      hint: Add half the gap to the cooler line.
+  [4] BOX phase=None ans=5
+      pre: Q sits roughly midway between the 4°C and 6°C isotherms. Type your estimate for Q, in °C.
+      hint: Add half of that gap to its cooler line.
+  [5] BOX phase=None ans=2
+      pre: Subtract your estimate for Q from your estimate for P. Type the difference, in °C.
+      hint: Take the smaller estimate away from the larger one.
+  [6] BOX phase=None ans=7
+      pre: Check: add your difference to your estimate for Q. Type the result, in °C.
+      hint: A correct difference must rebuild the warmer estimate.
+      done: It rebuilds P exactly, so the gap between the two places is right.
+  !! DISPLAY CHANGED. OLD: A geography student says: "Choropleth maps are better than dot maps because they show exact values." Is this statement correct?
+  !! SOLUTIONS CHANGED. OLD: [1]
+  !! OPTIONS CHANGED. OLD: ['Yes, choropleths always show exact values', 'No — choropleths show ranges (bands), not exact values', 'No — dot maps are always more accurate', 'Yes, but only for population data']
+  !! IMAGE CHANGED. OLD: None
+  !! TYPE CHANGED. OLD: multiple_choice
+==============================================================================
+silver[6] | type: multiple_choice
+DISPLAY: On the rainfall map, Point Q is on the east coast just east of the 800 mm isohyet. Is the annual rainfall at Q likely to be more or less than 800 mm?
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isohyet-uk.png
+   opt[0]: More than 800 mm, because Q is on the wetter side of the line
+   opt[1]: Exactly 800 mm, because Q is on the line
+   opt[2]: Less than 800 mm, because Q is on the drier side of the line
+   opt[3]: Cannot tell from this map
+SOLUTIONS: [2]
+HINT: Work out which way the isohyet values fall as you cross the country, then place Q on that scale.
+  MIS[0] pattern=wetter_side_inverted expect=0 check=None
+        msg: You placed Q on the wetter side. Check which direction the isohyet labels are falling in before choosing a side.
+  MIS[1] pattern=point_on_line expect=1 check=None
+        msg: Q is described as just east of the line, not on it, so it cannot take the line's own value.
+  [0] SAY: Which way do the numbers run? Answer that and the side question answers itself.
+  [1] BOX phase=None ans=800
+      pre: Find Q on the east coast. Type the value, in mm, of the isohyet it sits just east of.
+      hint: The question names it and the label is printed on the line.
+  [2] BOX phase=None ans=200
+      pre: The isohyets on this map are labelled 600, 800 and 1000. Type the gap between one isohyet and the next, in mm.
+      hint: Subtract one label from the next along.
+      done: A steady 200 mm step lets you name the next line in either direction.
+  [3] BOX phase=substitute ans=600
+      pre: Rainfall totals fall towards the east coast. Type the value of the next isohyet east of the 800 mm line, in mm.
+      hint: Take one step down from 800.
+  [4] BOX phase=None ans=700
+      pre: Q lies between those two lines. Type your midway estimate for Q, in mm.
+      hint: Add half the gap to the drier line.
+  [5] BOX phase=None ans=100
+      pre: Check: type the difference in mm between the 800 mm line and your estimate for Q.
+      hint: Subtract your estimate from 800.
+      done: Your estimate falls short of the line's value, so Q must be drier than it.
+  [6] SAY: So Q receives <strong>less than 800 mm</strong>.
+  !! DISPLAY CHANGED. OLD: Using the isotherm map, estimate the temperature at Point P in southern England and Point Q in central Scotland. What is the temperature difference between them?
+  !! OPTIONS CHANGED. OLD: None
+  !! IMAGE CHANGED. OLD: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isotherm-uk.png
+  !! TYPE CHANGED. OLD: single_value
+
+
+########## GOLD (5) desc='Combine two readings into a difference or a gradient, and weigh up what the technique hides as well as what it shows.'
+==============================================================================
+gold[0] | type: single_value
+DISPLAY: Using the rainfall map, estimate the annual rainfall at Point P and Point Q. Calculate the difference in rainfall between them. Give your answer in mm.
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isohyet-uk.png
+SOLUTIONS: [200]
+HINT: Interpolate each point on its own, then take the smaller estimate away from the larger.
+  MIS[0] pattern=used_line_labels expect=0 check=None
+        msg: You subtracted a line label from a line label instead of subtracting your two estimates. Interpolate both points first.
+  MIS[1] pattern=added_estimates expect=1600 check=None
+        msg: You combined the two rainfall figures rather than comparing them. A difference is one taken away from the other.
+  [0] SAY: Two interpolations, then one subtraction.
+  [1] BOX phase=None ans=800
+      pre: Find Point P on the map. Type the value, in mm, of the drier isohyet it sits between.
+      hint: Trace out from P to the lower of the two labels either side.
+      done: P is pinned between two named lines.
+  [2] BOX phase=None ans=1000
+      pre: Type the value, in mm, of the wetter isohyet P sits between.
+      hint: Trace out to the line on P's other side.
+  [3] BOX phase=substitute ans=900
+      pre: P lies roughly midway between them. Type your estimate for P, in mm.
+      hint: Add half the gap to the drier line.
+  [4] BOX phase=None ans=700
+      pre: Point Q sits roughly midway between the 600 mm and 800 mm isohyets. Type your estimate for Q, in mm.
+      hint: Add half of that gap to its drier line.
+  [5] BOX phase=None ans=200
+      pre: Subtract your estimate for Q from your estimate for P. Type the difference, in mm.
+      hint: Take the smaller estimate away from the larger one.
+  [6] BOX phase=None ans=900
+      pre: Check: add your difference to your estimate for Q. Type the result, in mm.
+      hint: A correct difference must rebuild the wetter estimate.
+      done: It rebuilds P exactly, so the gap between the two places is right.
+==============================================================================
+gold[1] | type: multiple_choice
+DISPLAY: A geographer creates a choropleth map of mean household income by local authority. One area has a mean of £45,000, but 80% of households earn under £25,000. What problem does this illustrate?
+   opt[0]: The colour is too dark for this area
+   opt[1]: The mean is skewed by extreme values, hiding the fact that most residents have lower incomes
+   opt[2]: Choropleth maps cannot display income data
+   opt[3]: The area is too small to shade accurately
+SOLUTIONS: [1]
+HINT: Work out what the remaining fifth of households must earn for the mean to come out that high.
+  MIS[0] pattern=blames_shading expect=0 check=None
+        msg: The shade follows the statistic it was given. The problem is in the statistic, not the colour.
+  MIS[1] pattern=rejects_technique expect=2 check=None
+        msg: Income maps like this are common. Ask instead what an average does to a very uneven spread of values.
+  [0] SAY: Put numbers on it. Imagine 100 households in this area.
+  [1] BOX phase=None ans=80
+      pre: Read the figure in the question. Type the percentage of households earning under £25,000.
+      hint: It is stated in the question.
+      done: So 80 of every 100 households sit below £25,000.
+  [2] BOX phase=substitute ans=4500000
+      pre: The map shades this area by a mean of £45,000. For 100 households, type the total income in £ that mean implies.
+      hint: Multiply the mean by 100.
+  [3] BOX phase=None ans=2000000
+      pre: Type the largest total, in £, those 80 lower-earning households could contribute.
+      hint: Multiply 80 by £25,000.
+  [4] BOX phase=None ans=2500000
+      pre: Type the smallest total, in £, the remaining 20 households must contribute.
+      hint: Subtract the lower earners' total from the whole area's total.
+  [5] BOX phase=None ans=125000
+      pre: Check: divide that by 20. Type the smallest mean income, in £, of those 20 households.
+      hint: Share their total out between the 20 households.
+      done: A small group on very high incomes drags the mean far above what most households actually earn, so the shade misrepresents the typical resident.
+  [6] SAY: That is <strong>a mean skewed by extreme values</strong>. A median would describe the typical household far better.
+==============================================================================
+gold[2] | type: single_value
+DISPLAY: On the weather map, the distance between the 1000 mb and 1008 mb isobars is approximately 400 km. Calculate the pressure gradient in mb per 100 km.
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isobar-uk.png
+SOLUTIONS: [2]
+HINT: Find the pressure change first, then share it evenly across each 100 km of the distance.
+  MIS[0] pattern=divided_upside_down expect=50 check=None
+        msg: You divided distance by pressure change. The units asked for are millibars per distance, so the pressure change goes on top.
+  MIS[1] pattern=no_scaling expect=8 check=None
+        msg: You stopped at the total change across the whole gap. The question wants the change per 100 km.
+  [0] SAY: A gradient is change ÷ distance, scaled to the units asked for.
+  [1] BOX phase=None ans=1000
+      pre: Find the two isobars named in the question on the map. Type the value, in mb, of the lower-pressure one.
+      hint: Type the smaller of the two labels.
+      done: Naming both lines before any maths keeps the gradient the right way up.
+  [2] BOX phase=None ans=1008
+      pre: Type the value, in mb, of the higher-pressure isobar.
+      hint: Type the larger label.
+  [3] BOX phase=substitute ans=8
+      pre: Type the pressure change between them, in mb.
+      hint: Subtract the lower reading from the higher one.
+  [4] BOX phase=None ans=4
+      pre: The gap is 400 km. Type how many 100 km lengths that is.
+      hint: Divide the distance by 100.
+  [5] BOX phase=None ans=2
+      pre: Divide the pressure change by that number. Type the gradient in mb per 100 km.
+      hint: Share the total change evenly across each 100 km length.
+  [6] BOX phase=None ans=8
+      pre: Check: multiply your gradient by the number of 100 km lengths. Type the result in mb.
+      hint: This must rebuild the total pressure change.
+      done: It rebuilds the change across the whole 400 km, so the rate per 100 km is right.
+==============================================================================
+gold[3] | type: single_value
+DISPLAY: On the isotherm map, a town is located three-quarters of the way from the 4°C isotherm towards the 6°C isotherm. Estimate the temperature at the town. Give your answer to 1 decimal place.
+IMAGE: https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/geographical-skills/maps/isotherm-uk.png
+SOLUTIONS: [5.5]
+HINT: Take three quarters of the gap between the two isotherms and add it to the line you start from.
+  MIS[0] pattern=assumed_midway expect=5 check=None
+        msg: You interpolated as if the town were midway between the lines. The fraction given is not a half.
+  MIS[1] pattern=measured_from_wrong_line expect=4.5 check=None
+        msg: You measured three quarters down from the warmer line instead of up from the line the question starts at.
+  [0] SAY: Fraction of the gap, added to the line the question measures from.
+  [1] BOX phase=None ans=4
+      pre: Find the town on the map. Type the value, in °C, of the isotherm the question measures from.
+      hint: It is the line named first in the question.
+      done: Interpolation always runs from the line you start at, so fixing that first matters.
+  [2] BOX phase=None ans=6
+      pre: Type the value, in °C, of the isotherm the town is measured towards.
+      hint: It is the second line named.
+  [3] BOX phase=substitute ans=2
+      pre: Type the gap between the two isotherms, in °C.
+      hint: Subtract the starting line's value from the other.
+  [4] BOX phase=None ans=1.5
+      pre: Type three quarters of that gap, in °C.
+      hint: Divide the gap by 4, then multiply by 3.
+  [5] BOX phase=None ans=5.5
+      pre: Add that to the starting isotherm. Type your estimate for the town, in °C.
+      hint: Step up from the line you started at by the amount you just found.
+  [6] BOX phase=None ans=0.5
+      pre: Check: type the difference in °C between your estimate and the 6°C isotherm.
+      hint: Subtract your estimate from 6.
+      done: One quarter of the gap is left above your estimate, which is exactly what three quarters of the way across should leave.
+==============================================================================
+gold[4] | type: multiple_choice
+DISPLAY: A student needs to compare literacy rates across African countries. She has exact percentage data for each country. Suggest why a choropleth map would be an appropriate technique.
+   opt[0]: Literacy rate is a ratio measured per area, making area-shading ideal for comparing countries at a glance
+   opt[1]: Dot maps cannot show African countries
+   opt[2]: Choropleths are always better than other map types
+   opt[3]: Choropleth maps show exact values rather than estimates
+SOLUTIONS: [0]
+HINT: Ask what kind of data suits shading a whole area rather than plotting points inside it.
+  MIS[0] pattern=claims_exact_values expect=3 check=None
+        msg: A choropleth reports bands, so exactness is not the reason to choose it. Think about the type of data instead.
+  MIS[1] pattern=always_better expect=2 check=None
+        msg: No technique is always best. The justification has to come from this particular data.
+SKIP: Evaluative: judges the fit between a data type and a technique. No value can be read or calculated to reach the option.

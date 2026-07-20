@@ -1,0 +1,258 @@
+DESC gold_description : Calculate dependency ratios and work out what the pyramid predicts for the years ahead.
+DESC bronze_description : Find an age band on the pyramid, read a single bar off the scale, and name the shape.
+DESC silver_description : Add several bands together and explain what a bulge, a dip or a narrow base is telling you.
+======================================================================
+bronze[0] input=multiple_choice calc=False
+DISPLAY: The population pyramid shows a country with a wide base and narrow top. What type of country is this most likely to be?
+OPTIONS: ['Low-income country (LIC)', 'High-income country (HIC)', 'Newly emerging economy (NEE)', 'All countries look like this']
+SOLUTIONS: [0]
+HINT: Compare how wide the bottom row is with how wide the top row is.
+CHART type=bar labels=['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75+']
+   ds Male [-9, -8.5, -8, -7.5, -6.5, -5.5, -4.5, -3.5, -3, -2.5, -2, -1.5, -1, -0.8, -0.4, -0.2]
+   ds Female [8.5, 8, 7.5, 7, 6, 5, 4, 3.5, 3, 2.5, 2, 1.5, 1.2, 0.9, 0.5, 0.3]
+  gs[0] {"say": "Start by working out where you are on the pyramid."}
+  gs[1] {"pre": "Counting the bottom bar as row 1, which row number is the 15-19 age group?", "hint": "Read the age labels up the side: 0-4, 5-9, 10-14, then 15-19.", "answer": 4}
+  gs[2] {"pre": "Read the male bar for 0-4 off the scale.", "hint": "Blue side, bottom row. Ignore the minus sign, it only sends the bar left.", "answer": 9}
+  gs[3] {"pre": "Now read the male bar for 75+, the top row.", "hint": "It is a very short blue bar, less than one whole unit.", "phase": "substitute", "answer": 0.2}
+  gs[4] {"pre": "How many times longer is the 0-4 male bar than the 75+ male bar?", "hint": "Divide the bottom reading by the top reading.", "answer": 45}
+  gs[5] {"pre": "Check the base another way: add male and female for 0-4.", "done": "Almost a fifth of everyone is under 5, while the over 75s barely register. That gap is the signature of a high birth rate with a low life expectancy.", "hint": "Both sides of the bottom row.", "answer": 17.5}
+  mc[0] {"expect": 1, "message": "You have matched the wrong end of the pyramid. The bottom row is the youngest age group, so a wide base is about births, not about old age.", "pattern": "pyramid_upside_down"}
+  mc[1] {"expect": 3, "message": "Pyramid shapes differ enormously between countries. Compare the width of the base with the width of the top before you decide.", "pattern": "shapes_all_alike"}
+======================================================================
+bronze[1] input=multiple_choice calc=False
+DISPLAY: Looking at the population pyramid, which age group has the highest percentage of the population?
+OPTIONS: ['0-4', '15-19', '30-34', '60-64']
+SOLUTIONS: [0]
+HINT: The bars get shorter as you go up, so start your comparison at the bottom row.
+CHART type=bar labels=['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75+']
+   ds Male [-9, -8.5, -8, -7.5, -6.5, -5.5, -4.5, -3.5, -3, -2.5, -2, -1.5, -1, -0.8, -0.4, -0.2]
+   ds Female [8.5, 8, 7.5, 7, 6, 5, 4, 3.5, 3, 2.5, 2, 1.5, 1.2, 0.9, 0.5, 0.3]
+  gs[0] {"say": "Locate yourself first, then read."}
+  gs[1] {"pre": "Counting the bottom bar as row 1, which row number is 30-34?", "hint": "Count the age labels upwards: 0-4 is 1, 5-9 is 2, and so on.", "answer": 7}
+  gs[2] {"pre": "Read the male bar for 0-4.", "hint": "Bottom row, blue side.", "answer": 9}
+  gs[3] {"pre": "Read the female bar for 0-4.", "hint": "Bottom row, red side.", "phase": "substitute", "answer": 8.5}
+  gs[4] {"pre": "Add them to get the whole 0-4 band.", "hint": "Male share plus female share.", "answer": 17.5}
+  gs[5] {"pre": "Now do the same for 30-34 to compare.", "done": "The bottom band is double the 30-34 band, and every band above 0-4 is shorter than the one below, so no other band can beat it.", "hint": "Male 4.5 and female 4 on that row.", "answer": 8.5}
+  mc[0] {"expect": 3, "message": "You have read the pyramid upside down. Age runs upwards, so the oldest people are at the top and the youngest at the base.", "pattern": "read_top_down"}
+  mc[1] {"expect": 2, "message": "You have gone for the middle of the pyramid. On this shape every bar is shorter than the one below it, so check the very bottom row.", "pattern": "assume_middle_bulge"}
+======================================================================
+bronze[2] input=multiple_choice calc=False
+DISPLAY: A population pyramid for the UK shows relatively even bar lengths from age 0 to 60, with a slight bulge around 50-60. What shape is this?
+OPTIONS: ['Triangular (LIC)', 'Column/barrel (HIC)', 'Inverted triangle (ageing)', 'Diamond shape']
+SOLUTIONS: [1]
+HINT: Ask what the bars do as you move up: shrink steadily, stay similar, or widen.
+SKIP: Evaluative shape classification from a written description: there are no plotted values to read or compute, so a numeric walk would be invented rather than derived.
+  mc[0] {"expect": 0, "message": "Even bars are not a triangle. A triangular shape needs each bar to be clearly shorter than the one below it.", "pattern": "even_read_as_triangle"}
+  mc[1] {"expect": 2, "message": "An inverted shape needs the base to be narrower than the middle. Look again at what happens between age 0 and age 60.", "pattern": "bulge_read_as_inverted"}
+======================================================================
+bronze[3] input=single_value calc=False
+DISPLAY: The population pyramid shows data for a HIC. What percentage of males are aged 40-44?
+SOLUTIONS: [4]
+HINT: Count the age labels up from the base to land on the right row, then read the blue side only.
+CHART type=bar labels=['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75+']
+   ds Male [-3, -3, -3.2, -3.5, -3.5, -3.8, -4, -4, -4, -4.2, -4.5, -4, -3.5, -3, -2, -1.5]
+   ds Female [2.8, 2.8, 3, 3.2, 3.3, 3.5, 3.8, 3.8, 4, 4.2, 4.5, 4, 3.5, 3.2, 2.5, 2.5]
+  gs[0] {"say": "Find the row before you read anything off it."}
+  gs[1] {"pre": "Counting the bottom bar as row 1, which row number is 40-44?", "hint": "0-4, 5-9, 10-14, 15-19, 20-24, 25-29, 30-34, 35-39, then 40-44.", "answer": 9}
+  gs[2] {"pre": "Warm up on the row above it: read the male bar for 45-49.", "hint": "Blue side, one row higher than the one you need.", "answer": 4.2}
+  gs[3] {"pre": "Now read the male bar for 40-44.", "hint": "Blue side, the row you located.", "phase": "substitute", "answer": 4}
+  gs[4] {"pre": "Check: subtract your 40-44 reading from your 45-49 reading.", "done": "A small positive gap is right: on this pyramid the bars widen slightly towards middle age, so 40-44 should sit just inside 45-49.", "hint": "Take the smaller from the larger.", "answer": 0.2}
+  mc[0] {"expect": 4.2, "message": "You have read one row too high. Count the age labels up from the bottom until you reach 40-44.", "pattern": "row_miscount"}
+  mc[1] {"expect": 8, "message": "You have added both sides of the pyramid. The question asks for males only, which is one side of the centre line.", "pattern": "added_both_sexes"}
+======================================================================
+bronze[4] input=multiple_choice calc=False
+DISPLAY: What does a 'narrow base' on a population pyramid indicate?
+OPTIONS: ['High birth rate', 'Low birth rate', 'High death rate', 'High immigration']
+SOLUTIONS: [1]
+HINT: The base of a pyramid only ever shows the youngest children, so ask what makes that group small.
+SKIP: Evaluative recall of what a pyramid feature means: there is no stimulus and no quantity to work with.
+  mc[0] {"expect": 0, "message": "You have read narrow as meaning more. A short bar means fewer people in that age group, not more.", "pattern": "narrow_means_more"}
+  mc[1] {"expect": 2, "message": "Death rates show themselves at the top of a pyramid, where people stop surviving. The base is about how many are being born.", "pattern": "death_rate_at_base"}
+======================================================================
+bronze[5] input=multiple_choice calc=False
+DISPLAY: A population pyramid shows a large bulge at ages 45-65 and a narrow base. What challenge will this country face in 20 years?
+OPTIONS: ['A very large elderly population needing pensions and healthcare', 'Too many young people for schools to accommodate', 'Rapid population growth requiring new housing', 'A shortage of elderly people']
+SOLUTIONS: [0]
+HINT: Add twenty years to the ages in the bulge and see which age band they land in.
+  gs[0] {"say": "To predict from a pyramid you simply age it."}
+  gs[1] {"pre": "Someone aged 45 today will be how old in 20 years?", "hint": "Add twenty to their current age.", "answer": 65}
+  gs[2] {"pre": "And someone aged 65 today?", "hint": "Add twenty again.", "phase": "substitute", "answer": 85}
+  gs[3] {"pre": "The base holds children aged 0-4. How old will the oldest of them be in 20 years?", "hint": "Add twenty to the top of that band.", "answer": 24}
+  gs[4] {"pre": "Working age runs from 15 to 64. Of the three ages you have just worked out (65, 85 and 24), how many fall inside that range?", "done": "Only one of the three is still working, and the narrow base means very few replacements are coming through behind them.", "hint": "Check each one against 15 to 64 in turn.", "answer": 1}
+  mc[0] {"expect": 1, "message": "You have aged the wrong part of the pyramid. Add the twenty years to the bulge, not to the base.", "pattern": "aged_wrong_band"}
+  mc[1] {"expect": 2, "message": "Rapid growth needs a wide base. Check what a narrow base says about how many children are being born.", "pattern": "narrow_base_growth"}
+======================================================================
+bronze[6] input=multiple_choice calc=False
+DISPLAY: A population pyramid for Nigeria shows 0-14 year olds make up 44% of the population. What does this suggest about the dependency ratio?
+OPTIONS: ['High dependency ratio, because many young dependants rely on each worker', 'Low dependency ratio, because few people depend on workers', 'Dependency ratio is not related to age structure', 'High dependency ratio, because many elderly dependants rely on each worker']
+SOLUTIONS: [0]
+HINT: Work out what is left for the working age group once the under 15s are taken out.
+  gs[0] {"say": "Turn the shape into numbers, then judge it."}
+  gs[1] {"pre": "If 44% are under 15, what percentage are aged 15 or over?", "hint": "Take 44 away from 100.", "answer": 56}
+  gs[2] {"pre": "Suppose 4% are also over 65. What percentage is then working age, 15 to 64?", "hint": "Take the elderly share off the figure you just found.", "answer": 52}
+  gs[3] {"pre": "Add the two dependant groups together.", "hint": "Young dependants plus elderly dependants.", "phase": "substitute", "answer": 48}
+  gs[4] {"pre": "Divide dependants by workers and multiply by 100. Give a whole number.", "hint": "Dependants on top, workers underneath.", "answer": 92}
+  gs[5] {"pre": "Check: take your ratio away from 100.", "done": "Nearly one dependant for every worker, and almost all of them are children, which is exactly what a very wide base does to a country.", "hint": "A ratio just under 100 means workers barely outnumber dependants.", "answer": 8}
+  mc[0] {"expect": 3, "message": "Right idea, wrong dependants. Under 15s are counted at the base of the pyramid, not at the top.", "pattern": "elderly_dependants"}
+  mc[1] {"expect": 1, "message": "Nearly half the population is under 15. Think about whether that makes the load on each worker lighter or heavier.", "pattern": "dependants_lighten_load"}
+======================================================================
+bronze[7] input=multiple_choice calc=False
+DISPLAY: Which DTM stage is most associated with a triangular population pyramid?
+OPTIONS: ['Stage 1 or 2', 'Stage 3', 'Stage 4', 'Stage 5']
+SOLUTIONS: [0]
+HINT: Match the shape to what birth and death rates are doing at each stage of the model.
+SKIP: Evaluative recall linking a shape to a stage of a model: no figure and no values, so any boxes would be invented.
+  mc[0] {"expect": 3, "message": "The last stage of the model has a narrow base. A steep triangle points to the opposite end of the model.", "pattern": "late_stage_triangle"}
+  mc[1] {"expect": 2, "message": "Stage 4 gives a fairly even column. A steep triangle means births are still far higher than that.", "pattern": "stage_four_triangle"}
+======================================================================
+silver[0] input=single_value calc=True
+DISPLAY: The population pyramid shows Japan's age structure. Approximately what percentage of the total population is aged 65 and over? Give your answer to the nearest whole number.
+SOLUTIONS: [19]
+HINT: Three bands sit at 65 and over, and each one has a male bar and a female bar.
+CHART type=bar labels=['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75+']
+   ds Male [-2, -2.2, -2.5, -2.8, -3, -3.2, -3.5, -3.8, -4, -4.2, -3.8, -3.5, -3.2, -3, -2.5, -3]
+   ds Female [1.8, 2, 2.3, 2.5, 2.8, 3, 3.2, 3.5, 3.8, 4, 3.8, 3.5, 3.2, 3.2, 3, 4.5]
+  gs[0] {"say": "Find the bands you need before you add anything."}
+  gs[1] {"pre": "Counting the top bar as row 1 and working down, which row number is 65-69?", "hint": "The top row is 75+, then 70-74, then 65-69.", "answer": 3}
+  gs[2] {"pre": "Add the three male bars for 65-69, 70-74 and 75+.", "hint": "Blue side only: 3, 2.5 and 3.", "answer": 8.5}
+  gs[3] {"pre": "Now add the three female bars for the same rows.", "hint": "Red side: 3.2, 3 and 4.5.", "phase": "substitute", "answer": 10.7}
+  gs[4] {"pre": "Add the two totals together.", "hint": "Males aged 65 and over plus females aged 65 and over.", "answer": 19.2}
+  gs[5] {"pre": "Round that to the nearest whole number.", "done": "Roughly one person in five is 65 or over, and the female total beats the male one, which is what the longer red bars at the top should give.", "hint": "Look at the first digit after the decimal point.", "answer": 19}
+  mc[0] {"expect": 8.5, "message": "You have added only one side of the pyramid. Every age band has a male bar and a female bar, and both count towards the total.", "pattern": "one_side_only"}
+  mc[1] {"expect": 11.7, "message": "The oldest band is missing from your total. Anything above the 65-69 row is also aged 65 and over.", "pattern": "missed_top_band"}
+======================================================================
+silver[1] input=multiple_choice calc=False
+DISPLAY: Country A has a wide base and a narrow top. Country B has even bars throughout. Which country is likely to have a higher population growth rate?
+OPTIONS: ['Country A, because a wide base means a high birth rate and rapid growth', 'Country B, because even bars mean steady growth', 'Both have equal growth rates', 'Population pyramids cannot tell you anything about growth']
+SOLUTIONS: [0]
+HINT: Growth depends on how many are being born, so compare the youngest bands in each country.
+SKIP: Evaluative comparison of two pyramids described only in words: neither shape carries plotted values, so there is nothing to compute.
+  mc[0] {"expect": 1, "message": "Even bars mean a steady population, not a fast growing one. Compare the size of the youngest bands in each country.", "pattern": "even_means_growing"}
+  mc[1] {"expect": 3, "message": "A pyramid does show growth: the width of the base tells you how many children there are compared with everyone else.", "pattern": "pyramid_shows_nothing"}
+======================================================================
+silver[2] input=multiple_choice calc=False
+DISPLAY: A population pyramid for China shows a noticeable 'dip' in the 25-35 age group (born 1990-2000). What policy might explain this?
+OPTIONS: ['One-child policy reduced births from 1979 onwards', 'A major war killed many people in this age group', 'Mass emigration of 25-35 year olds', 'A disease outbreak reduced this age group']
+SOLUTIONS: [0]
+HINT: Work out which years the missing generation would have been born in, then ask what was happening then.
+  gs[0] {"say": "Turn ages into birth years, then line them up with the dates."}
+  gs[1] {"pre": "Take the survey year as 2025. Someone aged 25 was born in which year?", "hint": "Subtract the age from the survey year.", "answer": 2000}
+  gs[2] {"pre": "And someone aged 35?", "hint": "Subtract again.", "answer": 1990}
+  gs[3] {"pre": "The policy in option one began in 1979. How many years before 1990 was that?", "hint": "Take 1979 from 1990.", "phase": "substitute", "answer": 11}
+  gs[4] {"pre": "Of your two birth years, 1990 and 2000, how many fall after 1979?", "done": "The whole missing generation was born after the policy started, so the dates line up: the dip covers exactly the years the policy was in force.", "hint": "Compare each birth year with 1979.", "answer": 2}
+  mc[0] {"expect": 1, "message": "A war lowers births only while it is being fought and usually thins the male side more. Check the birth years of the missing band first.", "pattern": "war_instead_of_policy"}
+  mc[1] {"expect": 2, "message": "Emigration moves people who were still born in the normal numbers. A dip this deep means fewer births, not fewer stayers.", "pattern": "emigration_instead"}
+======================================================================
+silver[3] input=multiple_choice calc=False
+DISPLAY: The population pyramid for Germany shows a very narrow base. If this trend continues, what will happen to Germany's total population?
+OPTIONS: ['The population will decline as deaths exceed births', 'The population will grow rapidly', 'The population will stay the same', 'The population will grow due to the large elderly population']
+SOLUTIONS: [0]
+HINT: Compare the base with the bands above it: each generation has to replace the one before it.
+CHART type=bar labels=['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75+']
+   ds Male [-2, -2.2, -2.3, -2.5, -3, -3.5, -4, -4, -4.2, -4.5, -4.2, -3.8, -3.5, -3, -2.5, -2]
+   ds Female [1.8, 2, 2.2, 2.3, 2.8, 3.2, 3.8, 3.8, 4, 4.3, 4, 3.8, 3.5, 3.2, 3, 3.5]
+  gs[0] {"say": "Locate the widest part of the pyramid first, then compare."}
+  gs[1] {"pre": "Counting the bottom bar as row 1, which row holds the longest male bar?", "hint": "The blue bars grow to a maximum somewhere in middle age, then shrink. Count up to it.", "answer": 10}
+  gs[2] {"pre": "Read the male bar for 0-4.", "hint": "Bottom row, blue side.", "answer": 2}
+  gs[3] {"pre": "Read the male bar for that widest row, 45-49.", "hint": "Blue side, the row you located.", "phase": "substitute", "answer": 4.5}
+  gs[4] {"pre": "How many times wider is the widest male bar than the 0-4 male bar?", "hint": "Divide the larger reading by the smaller one.", "answer": 2.25}
+  gs[5] {"pre": "Check the whole base: add male and female for 0-4.", "done": "The base is less than half the size of the parents' generation, so each new generation is smaller than the one replacing it.", "hint": "Both sides of the bottom row.", "answer": 3.8}
+  mc[0] {"expect": 3, "message": "A large elderly population adds deaths, not births. Look at the base to count the future parents.", "pattern": "elderly_cause_growth"}
+  mc[1] {"expect": 2, "message": "Staying level needs each generation to be about the size of the one before it. Compare the base with the widest band.", "pattern": "stays_stable"}
+======================================================================
+silver[4] input=multiple_choice calc=False
+DISPLAY: A population pyramid shows more females than males in the 75+ age group. Suggest a reason for this difference.
+OPTIONS: ['Women generally have a longer life expectancy than men', 'More baby girls are born than baby boys', 'Men emigrate more in old age', 'Men are counted differently in the census']
+SOLUTIONS: [0]
+HINT: The gap only appears in the oldest band, so think about who survives to get there.
+SKIP: Evaluative reasoning about a cause: the problem carries no figure and no values, so a numeric walk would be invented.
+  mc[0] {"expect": 1, "message": "Slightly more boys than girls are born everywhere, so births cannot explain a gap that appears only at the top of the pyramid.", "pattern": "birth_ratio_reason"}
+  mc[1] {"expect": 2, "message": "Migration in old age is rare and small. This gap widens with age, which points at survival instead.", "pattern": "elderly_migration"}
+======================================================================
+silver[5] input=single_value calc=True
+DISPLAY: Using the population pyramid, add together the male and female bars for every working age band, 15-19 up to 60-64. What is the combined total of those bars?
+SOLUTIONS: [66.5]
+HINT: Add the male bar and the female bar for every age band from 15-19 up to 60-64.
+CHART type=bar labels=['0-4', '5-9', '10-14', '15-19', '20-24', '25-29', '30-34', '35-39', '40-44', '45-49', '50-54', '55-59', '60-64', '65-69', '70-74', '75+']
+   ds Male [-9, -8.5, -8, -7, -6, -5, -4, -3.5, -3, -2.5, -2, -1.5, -1, -0.8, -0.4, -0.2]
+   ds Female [8.5, 8, 7.5, 6.5, 5.5, 4.5, 3.5, 3, 2.5, 2, 1.5, 1.2, 0.8, 0.6, 0.3, 0.2]
+  gs[0] {"say": "Mark off the working age section of the pyramid before you add."}
+  gs[1] {"pre": "Counting the bottom bar as row 1, which row number is 15-19?", "hint": "0-4, 5-9, 10-14, then 15-19.", "answer": 4}
+  gs[2] {"pre": "How many rows are there from 15-19 up to 60-64 inclusive?", "hint": "Count the age labels in that block, including both ends.", "answer": 10}
+  gs[3] {"pre": "Add the male bars for those ten rows.", "hint": "Blue side: 7, 6, 5, 4, 3.5, 3, 2.5, 2, 1.5 and 1.", "phase": "substitute", "answer": 35.5}
+  gs[4] {"pre": "Now add the female bars for the same ten rows.", "hint": "Red side: 6.5, 5.5, 4.5, 3.5, 3, 2.5, 2, 1.5, 1.2 and 0.8.", "answer": 31}
+  gs[5] {"pre": "Add the two totals together.", "done": "The bars either side of this block are the children and the elderly, and there are far more children, so a working age block that is well under three quarters of the pyramid is what a wide base gives you.", "hint": "Male working age total plus female working age total.", "answer": 66.5}
+  mc[0] {"expect": 35.5, "message": "Only one side of the pyramid has been added. Every band has a male bar and a female bar.", "pattern": "one_side_only"}
+  mc[1] {"expect": 67.9, "message": "One band too many. Working age stops at 64, so the 65-69 row is outside it.", "pattern": "included_65_69"}
+======================================================================
+silver[6] input=multiple_choice calc=False
+DISPLAY: A population pyramid for the UAE shows a huge bulge in males aged 25-40 but very few females in the same age group. Explain this pattern.
+OPTIONS: ['Large-scale male labour migration for construction and oil industry jobs', 'Women in the UAE die younger than men', 'The census excludes women', 'More boys than girls are born in the UAE']
+SOLUTIONS: [0]
+HINT: A gap that appears in one working age band, in one sex only, is usually about people arriving rather than people dying.
+SKIP: Evaluative explanation of a cause: the pattern is described in words with no values attached, so there is nothing to compute.
+  mc[0] {"expect": 3, "message": "Birth ratios are close to even everywhere, so births cannot create a gap that shows up only in the 25-40 bands.", "pattern": "births_explain_gap"}
+  mc[1] {"expect": 1, "message": "Women live longer than men almost everywhere. A gap this large in one working age band points at people arriving, not at survival.", "pattern": "women_die_younger"}
+======================================================================
+gold[0] input=single_value calc=True
+DISPLAY: Country X has 60 million people. 42% are under 15 and 4% are over 65. Calculate the dependency ratio, to the nearest whole number.
+SOLUTIONS: [85]
+HINT: Dependants go on top of the division and the working age group goes underneath.
+  gs[0] {"say": "Set the population out in three groups first."}
+  gs[1] {"pre": "What percentage are dependants, young and elderly together?", "hint": "Add the under 15 share to the over 65 share.", "answer": 46}
+  gs[2] {"pre": "What percentage are therefore of working age?", "hint": "Take the dependants away from 100.", "answer": 54}
+  gs[3] {"pre": "The country has 60 million people. How many million are dependants?", "hint": "Find 46% of 60 million.", "phase": "substitute", "answer": 27.6}
+  gs[4] {"pre": "And how many million are of working age?", "hint": "Find 54% of 60 million, or take your last answer from 60.", "answer": 32.4}
+  gs[5] {"pre": "Now divide dependants by workers and multiply by 100, to the nearest whole number.", "done": "Working from millions gives the same ratio as working from percentages, which confirms the division was set up the right way round.", "hint": "Use the two millions figures; the percentages give the same result.", "answer": 85}
+  mc[0] {"expect": 46, "message": "You have compared dependants with the whole population. The ratio compares them with the working age group only.", "pattern": "divided_by_total"}
+  mc[1] {"expect": 117, "message": "The two parts are the wrong way round. Dependants belong on top of the division, workers underneath.", "pattern": "ratio_inverted"}
+======================================================================
+gold[1] input=multiple_choice calc=False
+DISPLAY: Two countries have identical total populations. Country A has a triangular pyramid; Country B has a column shape. Which country has a larger labour force?
+OPTIONS: ['Country B, because its more even shape means a larger proportion of working age adults', 'Country A, because its high birth rate means more workers', 'They are the same, because the same total population means the same labour force', 'Country A, because young populations work harder']
+SOLUTIONS: [0]
+HINT: The labour force is the middle of the pyramid, so compare how much of each shape sits between 15 and 64.
+SKIP: Evaluative comparison of two shapes given only in words: no plotted or stated values exist for either country.
+  mc[0] {"expect": 1, "message": "A high birth rate fills the base with children, and children are not in the labour force.", "pattern": "children_as_workers"}
+  mc[1] {"expect": 2, "message": "Equal totals can still be split very differently by age. Compare the middle section of each pyramid.", "pattern": "same_total_same_workers"}
+======================================================================
+gold[2] input=multiple_choice calc=False
+DISPLAY: An NEE population pyramid shows a bulge at ages 20-30 alongside a narrowing base. What TWO things does this suggest?
+OPTIONS: ['Birth rate is falling AND a previous baby boom generation is now in their 20s-30s', 'Death rate is rising AND immigration of elderly people', 'Birth rate is rising AND death rate is stable', 'The country is in Stage 1 of the DTM AND experiencing emigration']
+SOLUTIONS: [0]
+HINT: Turn both features into birth years, then put those years in order.
+  gs[0] {"say": "Convert the ages into birth years so you can date each feature."}
+  gs[1] {"pre": "Take the year as 2025. Someone aged 20 was born in which year?", "hint": "Subtract the age from 2025.", "answer": 2005}
+  gs[2] {"pre": "And someone aged 30?", "hint": "Subtract again.", "answer": 1995}
+  gs[3] {"pre": "How many years wide is that birth window, 1995 to 2005?", "hint": "Take the earlier year from the later one.", "phase": "substitute", "answer": 10}
+  gs[4] {"pre": "The narrowing base holds children born in the last five years, so from which year onwards?", "hint": "Take five off the survey year.", "answer": 2020}
+  gs[5] {"pre": "How many years pass between the end of the bulge births in 2005 and the start of the narrow base in 2020?", "done": "Births were high across a full decade, then clearly lower 15 years later, so the pyramid carries a past boom and a falling birth rate at the same time.", "hint": "Subtract one year from the other.", "answer": 15}
+  mc[0] {"expect": 2, "message": "A rising birth rate would widen the base, not narrow it. Check which end of the pyramid is shrinking.", "pattern": "rising_births"}
+  mc[1] {"expect": 3, "message": "The first stage of the model has a very wide base. A bulge of young adults above a shrinking base points the other way.", "pattern": "earliest_stage"}
+======================================================================
+gold[3] input=single_value calc=True
+DISPLAY: Japan's dependency ratio was 64 in 2020. If the elderly percentage rises from 28% to 35% by 2040 while the young percentage stays at 12%, what will the new dependency ratio be? Give your answer to the nearest whole number.
+SOLUTIONS: [89]
+HINT: Rebuild the working age percentage from the new figures before you divide.
+  gs[0] {"say": "Rebuild the three groups for 2040 before touching the old ratio."}
+  gs[1] {"pre": "What percentage will be dependants in 2040?", "hint": "Add the young percentage to the new elderly percentage.", "answer": 47}
+  gs[2] {"pre": "What percentage will be of working age?", "hint": "Take the dependants away from 100.", "answer": 53}
+  gs[3] {"pre": "Divide dependants by workers and multiply by 100, to the nearest whole number.", "hint": "Dependants on top, workers underneath.", "phase": "substitute", "answer": 89}
+  gs[4] {"pre": "How much higher is that than the 2020 ratio of 64?", "hint": "Subtract 64 from your new ratio.", "answer": 25}
+  gs[5] {"pre": "Check: take your new ratio away from 100.", "done": "Dependants at 47% against workers at 53% must give a ratio a little under 100, so a small positive gap here confirms the calculation.", "hint": "A positive result means workers still just outnumber dependants.", "answer": 11}
+  mc[0] {"expect": 47, "message": "Dividing by the whole population loses the point of the ratio, which is the load carried per worker.", "pattern": "divided_by_total"}
+  mc[1] {"expect": 78, "message": "The working age share changes when the elderly share changes. Work it out again from the new figures before dividing.", "pattern": "old_working_age"}
+======================================================================
+gold[4] input=multiple_choice calc=False
+DISPLAY: Explain why a country's population pyramid might show a 'waist' (indentation) at ages 70-80 but wider bars at 60-70 and 80+.
+OPTIONS: ['The 70-80 group were born during a war (e.g. WWII) when birth rates dropped dramatically', 'People aged 70-80 all emigrated', 'A disease only affected that specific age group', 'Census data for that age group was lost']
+SOLUTIONS: [0]
+HINT: Work out which years the missing generation would have been born in, then match those years to an event.
+  gs[0] {"say": "Date the waist, then see which event sits in those years."}
+  gs[1] {"pre": "The waist covers ages 70 to 80. How many years wide is that band?", "hint": "Take 70 from 80.", "answer": 10}
+  gs[2] {"pre": "The Second World War ran from 1939 to 1945. How many years is that?", "hint": "Take 1939 from 1945.", "answer": 6}
+  gs[3] {"pre": "If the pyramid was drawn in 2015, someone aged 70 was born in which year?", "hint": "Subtract the age from the year of the pyramid.", "phase": "substitute", "answer": 1945}
+  gs[4] {"pre": "And someone aged 80?", "hint": "Subtract again.", "answer": 1935}
+  gs[5] {"pre": "Check: take the war's end year, 1945, away from 2015 to see which age the waist should start at.", "done": "The waist begins at exactly the age you get by dating the end of the war, so the missing births sit inside the war years rather than beside them.", "hint": "Subtract 1945 from 2015.", "answer": 70}
+  mc[0] {"expect": 1, "message": "Whole ten year cohorts do not emigrate, and the bands either side stayed wide. Think about what was happening when the missing band was born.", "pattern": "whole_cohort_emigrated"}
+  mc[1] {"expect": 2, "message": "A disease that killed one ten year band and spared both its neighbours is very unlikely. Look at the birth years instead.", "pattern": "age_specific_disease"}
