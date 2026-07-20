@@ -1,0 +1,21 @@
+<!doctype html>
+<meta charset="utf-8"><title>card shot</title>
+<style>body{margin:0}iframe{border:0;display:block}</style>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/1" style="width:1300px;height:940px"></iframe>
+<script>
+var f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;try{ok=!!w()._problemBank&&!!d().getElementById('problem-inputs-area');}catch(e){}
+  if(ok&&t>120){
+    // jump straight to the silver lag-time question and give it a unit
+    var pb=w()._problemBank, target=null;
+    ['bronze','silver','gold'].forEach(function(tr){(pb[tr]||[]).forEach(function(p,i){
+      if((p.display||'').indexOf('lag time')>=0){p.unit='hours';target=[tr,i];}});});
+    if(target){ w().practiceState.currentTier=target[0]; w().practiceState[target[0]].index=target[1];
+                w().practiceState.completionShown[target[0]]=true; w().renderCurrentProblem(); }
+    setTimeout(function(){document.title='SHOT READY';},900);
+    return;}
+  if(t>700){document.title='TIMEOUT';return;}
+  t++;setTimeout(tick,50);})();
+</script>

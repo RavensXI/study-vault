@@ -1,0 +1,62 @@
+<!doctype html>
+<meta charset="utf-8"><title>dark scan</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" style="width:1300px;height:900px"></iframe>
+<script>
+// In dark mode, hunt for elements whose computed background is LIGHT while
+// they carry visible text. Those are the light-only rules outranking dark ones.
+var qs=new URLSearchParams(location.search);
+document.getElementById('f').src=qs.get('path');
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+function lum(c){var m=(c||'').match(/[\d.]+/g);if(!m||m.length<3)return null;
+  var a=[+m[0],+m[1],+m[2]].map(function(v){v=v>1?v/255:v;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});
+  return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2];}
+function opaque(c){var m=(c||'').match(/[\d.]+/g);return !(m&&m.length>3&&+m[3]<0.5);}
+(function tick(){
+  var ok=false;try{ok=!!d().body&&d().readyState==='complete';}catch(e){}
+  if((ok&&t>150)||t>700){
+    var toggle=null;
+    try{toggle=d().getElementById('dark-mode-toggle')||d().querySelector('.dark-mode-toggle');}catch(e){}
+    if(toggle) toggle.click(); else { try{d().body.classList.add('dark-mode');}catch(e){} }
+    // ?break=1 removes the desk-world dark-mode fix, to prove this scanner
+    // actually detects the bug it was written for.
+    if(qs.get('break')){
+      try{
+        [...d().styleSheets].forEach(function(ss){
+          var rules; try{rules=ss.cssRules;}catch(e){return;}
+          for(var i=rules.length-1;i>=0;i--){
+            var sel=rules[i].selectorText||'';
+            if(sel.indexOf('desk-world.dark-mode')>=0) ss.deleteRule(i);
+          }
+        });
+      }catch(e){}
+    }
+    setTimeout(function(){
+      var out=[],seen={};
+      try{
+        [...d().querySelectorAll('body *')].forEach(function(el){
+          if(!el.offsetParent&&el.tagName!=='BODY')return;
+          var r=el.getBoundingClientRect(); if(r.width<40||r.height<12)return;
+          var cs=d().defaultView.getComputedStyle(el);
+          var bg=cs.backgroundColor;
+          if(!opaque(bg))return;
+          var lb=lum(bg); if(lb===null||lb<0.55)return;      // not a light background
+          var txt=(el.textContent||'').trim(); if(!txt)return;
+          var lf=lum(cs.color); if(lf===null)return;
+          var hi=Math.max(lb,lf),lo=Math.min(lb,lf);
+          var ratio=(hi+0.05)/(lo+0.05);
+          if(ratio>=4.5)return;                               // light bg but readable text: fine
+          var key=el.tagName+'.'+String(el.className).slice(0,30);
+          if(seen[key])return; seen[key]=1;
+          out.push(key+'  bg='+bg+'  fg='+cs.color+'  contrast='+ratio.toFixed(2)+'  "'+txt.slice(0,28)+'"');
+        });
+      }catch(e){out.push('err '+e);}
+      L.textContent=(out.length?out.join(String.fromCharCode(10)):'CLEAN — no light-background/low-contrast elements found');
+      document.title='SCAN DONE';
+    },1200);
+    return;
+  }
+  t++;setTimeout(tick,50);
+})();
+</script>
