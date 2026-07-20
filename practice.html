@@ -262,9 +262,20 @@
       min-width: 0;
       overflow-wrap: break-word;
     }
-    #panel-method .tier-intro-example { font-size: 0.82rem; padding: 0.7rem 0.75rem; }
-    #panel-method .tier-intro-example-step { gap: 0.45rem; }
-    #panel-method .tier-intro-example-step .tie-label { min-width: 4.6rem; }
+    #panel-method .tier-intro-example { font-size: 0.82rem; padding: 0.7rem 0.85rem; }
+    /* The side panel is too narrow for a label column: two columns left the
+       prose in a ~30-character gutter. Stack the label above its step so the
+       content gets the full width and shares one left edge. */
+    #panel-method .tier-intro-example-step {
+      display: block;
+      margin-bottom: 0.7rem;
+    }
+    #panel-method .tier-intro-example-step .tie-label {
+      display: block;
+      margin-bottom: 0.15rem;
+      font-size: 0.64rem;
+    }
+    #panel-method .tier-intro-example-step .tie-content { padding-left: 0; }
     .tier-intro-example-step .tie-content { min-width: 0; overflow-wrap: break-word; }
 
     .panel-method-steps li::before {
@@ -932,15 +943,18 @@
       margin-bottom: 0.4rem;
       align-items: baseline;
     }
+    /* Fixed basis, not `0 0 auto` with a min-width: sized to its own text,
+       every label was a different width and the content column started at a
+       different x on each row, which read as ragged. */
     .tier-intro-example-step .tie-label {
-      flex: 0 0 auto;
+      flex: 0 0 7rem;
       font-family: 'Inter', sans-serif;
       font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
+      line-height: 1.35;
       color: var(--text-muted, #8a8580);
-      min-width: 6.5rem;
     }
     .tier-intro-example-step .tie-content p { margin: 0; }
     .tier-intro-example-step.is-answer .tie-content { font-weight: 700; }
