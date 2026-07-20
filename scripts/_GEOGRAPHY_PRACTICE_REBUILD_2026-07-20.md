@@ -121,6 +121,40 @@ Final state across all 12: **240 problems, 228 walks, 516 misconceptions, zero
 surviving `check:"wrong"`, zero walk-landing failures.** The 12 problems without
 walks are purely evaluative multiple choice carrying `guided_skip_reason`.
 
+## L13 and L14 built (21 Jul, overnight)
+
+The section stopped at L12 and had never covered contours or whole-map
+interpretation. Both now exist, built to this same guided spec:
+
+- **L13 Contours & Relief** — contour interval, spacing as gradient, spot
+  heights, landform shape, height at a point, gradient in m per km at gold.
+- **L14 Map Interpretation** — land use from symbols, settlement site and
+  shape, relief and drainage, evidence-based judgement at gold.
+
+20 problems each (8/7/5) and **every problem is walkable (20/20)**, better
+coverage than the original twelve. Zero catch-all misconceptions, zero
+walk-landing failures, units on measured quantities and on no multiple choice.
+
+Built from the 14 OS sheets no lesson was using. The checkers verified map
+facts from pixels: the 10 m contour interval confirmed on every sheet by
+scanning for four thin lines between index contours, Worsaw Hill's 200 m ring
+confirmed to contain two closed rings, square 9073 measured at zero contour
+pixels against a neighbour's 1189.
+
+One confirmed defect, repaired: an L13 walk note claimed a contour gap spanned
+"most of a square"; measured, the grid is 713 px per km and the gap is 19-39 px,
+about a eighteenth. The stored answer and box values were right, only the
+description overstated.
+
+**Status: `pending_review` on all six variants.** Admins see them with a preview
+banner, students cannot. `scratchpad/_geo_guided/_publish_l13_l14.py --publish`
+flips status and `units.lesson_count` together (browse lists live lessons but
+labels from lesson_count, so the two must move as one); `--unpublish` reverses.
+
+Preview (logged in as admin):
+- https://study-vault-git-landing-wizard-tom-shauns-projects.vercel.app/practice/geography-aqa/geographical-skills/13
+- https://study-vault-git-landing-wizard-tom-shauns-projects.vercel.app/practice/geography-aqa/geographical-skills/14
+
 ## Outstanding
 
 1. **L04 teach pyramids** are captioned "% of total population" but their bars
