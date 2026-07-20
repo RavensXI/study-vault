@@ -227,7 +227,6 @@ All in environment variables — never commit.
 | `docs/FUTURE_FEATURES.md` | Planned features and wishlist |
 | `docs/SUBJECT_ROADMAP.md` | Subjects built and still to build |
 | `docs/FILE_STRUCTURE.md` | Repo file/folder layout |
-| `docs/COMMERCIALISATION.md` | Pricing, cost model, commercial strategy |
 | `docs/archive/` | Superseded docs (pre-rebuild). Do not generate from these |
 | `scripts/science-practice/SCIENCE_PRACTICE_SCHEMA.md` | Science practice data format, equation reference |
 | `scripts/language-practice/PRACTICE_DATA_SCHEMA.md` | Language practice data format, 12 input types |
