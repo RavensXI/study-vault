@@ -1,0 +1,243 @@
+===== bronze[0] sol [200]
+ hint: Look for a small brown number sitting in a gap in one of the lines that ring the hill.
+  MC0 pattern=read_a_grid_line expect=77 check=None
+     msg: That is a grid line number, not a contour value. Grid numbers sit in blue on the edges of the map, contour values sit in brown on the brown lines.
+  MC1 pattern=read_the_northing expect=43 check=None
+     msg: You read a northing off the side of the map. Contour values are printed along the contour lines themselves.
+  gs0 SAY: Contour numbers are printed on the line itself, sitting in a small gap so the line stays readable.
+  gs1 BOX ans=77 phase=None | pre=Look along the top edge for the vertical grid lines. Type the number on the vertical grid line immediately to the left of Worsaw Hill. | hint=The eastings on this map read 76, 77, 78 from left to right. | done=The hill is now pinned to one column of the grid, so you know exactly where to look.
+  gs2 BOX ans=43 phase=None | pre=Type the number on the horizontal grid line immediately below Worsaw Hill. | hint=The northings are printed up the left and right edges. | done=None
+  gs3 BOX ans=200 phase='substitute' | pre=Now read the brown number printed on the contour line that circles the hill. Type it. | hint=It is printed in brown, in a gap in the line, close to the hill's name. | done=None
+  gs4 BOX ans=1 phase=None | pre=Type 1 if that number is a height above sea level in metres, or 2 if it is a distance across the map. | hint=Contour lines join places that are all the same height. | done=Contour numbers are always heights, which is why the same number can turn up in several places on one map.
+===== bronze[1] sol [210]
+ hint: Moving inwards on a hill means moving uphill, so add the interval once.
+  MC0 pattern=went_downhill_not_up expect=190 check=None
+     msg: You took the interval away instead of adding it. Moving inwards on a hill is moving uphill.
+  MC1 pattern=used_the_index_spacing expect=250 check=None
+     msg: You added the gap between thick index contours instead of the gap between neighbouring lines.
+  gs0 SAY: Rings inside rings mean a hill. The smaller the ring, the higher the ground it encloses.
+  gs1 BOX ans=77 phase=None | pre=Find Worsaw Hill in the north-east. Type the number on the vertical grid line immediately to its left. | hint=The eastings read 76, 77, 78 from left to right. | done=Hill located, so the rings you count next belong to it and not to its neighbour.
+  gs2 BOX ans=1 phase=None | pre=Type how many closed rings are drawn inside the labelled contour. | hint=Look for a smaller brown loop drawn inside the labelled one. | done=One ring inside means one step up from the labelled line.
+  gs3 BOX ans=200 phase=None | pre=Type the height printed on the labelled contour, in metres. | hint=It is the brown number printed on the outer ring. | done=None
+  gs4 BOX ans=10 phase='substitute' | pre=Type the contour interval on this map, in metres. | hint=The interval is given to you in the question. | done=None
+  gs5 BOX ans=210 phase=None | pre=Add one interval to the labelled height. Type the height of the inner ring, in metres. | hint=Inwards on a hill is uphill, so the value goes up by one interval. | done=None
+  gs6 BOX ans=1 phase=None | pre=Type 1 if the ground inside that inner ring must be higher than the ring itself, or 2 if it must be lower. | hint=The ring is the last line the land climbs past. | done=The summit is always higher than the highest ring drawn round it, which is why maps often print a spot height as well.
+===== bronze[2] sol [0]
+ hint: Ask yourself whether the ground inside the loops is higher or lower than the ground outside them.
+  MC0 pattern=read_it_as_a_valley expect=1 check=None
+     msg: A valley bends the contours into Vs along a stream. Loops closing on themselves are a different pattern.
+  MC1 pattern=read_it_as_a_cliff expect=3 check=None
+     msg: A cliff is drawn with its own symbol, not with nested loops. Look at what the loops enclose.
+  gs0 SAY: Closed loops always mean a change in height, either up to a top or down into a hollow.
+  gs1 BOX ans=88 phase=None | pre=Type the number on the vertical grid line immediately to the left of Cow Close Fell. | hint=The eastings on this map run 88 to 91 from left to right. | done=Locating the fell first means every reading afterwards comes from the right part of the sheet.
+  gs2 BOX ans=600 phase=None | pre=Type the number printed on the thick brown loop that runs round the fell. | hint=It is printed in brown where the thick loop runs along the southern side of the fell. | done=None
+  gs3 BOX ans=2 phase='substitute' | pre=Type how many smaller loops are drawn inside that thick one. | hint=Look for thinner loops nested inside the thick one and count them. | done=None
+  gs4 BOX ans=1 phase=None | pre=Type 1 if the loops get smaller as the land gets higher, or 2 if they get smaller as it gets lower. | hint=The moor falls away from the fell on every side. | done=Smaller loops sitting on higher ground is the test that separates a hill from a hollow.
+  gs5 SAY: The smallest loop sits on the highest ground, so this is a hill and the top of it lies inside that smallest loop.
+===== bronze[3] sol [0]
+ hint: Read the easting along the bottom edge first, then the northing up the side.
+  MC0 pattern=used_the_line_above expect=1 check=None
+     msg: You took the northing from the line above the ring instead of the line below it. A square is named from its bottom left corner.
+  MC1 pattern=used_the_line_to_the_right expect=2 check=None
+     msg: You took the easting from the line to the right of the ring. A square is named from its bottom left corner.
+  gs0 SAY: A grid square takes its name from the line to its left and the line below it, easting first.
+  gs1 BOX ans=88 phase=None | pre=Type the easting of the vertical grid line immediately to the LEFT of the smallest ring. | hint=Eastings are printed along the top and bottom edges. | done=Left first, then below. That order is the whole rule.
+  gs2 BOX ans=72 phase='substitute' | pre=Type the northing of the horizontal grid line immediately BELOW the smallest ring. | hint=Northings read 72, 73, 74 going up the sides of the map. | done=None
+  gs3 BOX ans=8872 phase=None | pre=Put them together, easting first. Type the four figure reference as one number. | hint=Write the two easting digits, then the two northing digits, with nothing between them. | done=None
+  gs4 BOX ans=1 phase=None | pre=Type 1 if swapping the two pairs round would land you in a different square, or 2 if it would land you in the same one. | hint=Try reading the digits the other way round and see where they take you. | done=Easting always comes before northing. Swapping them sends you somewhere else entirely.
+===== bronze[4] sol [0]
+ hint: A contour is only drawn where the land climbs or drops past that height.
+  MC0 pattern=no_lines_means_steep expect=1 check=None
+     msg: Missing contour lines do not mean a slope too steep to draw. Think about what a line crossing actually records.
+  MC1 pattern=blank_means_water expect=3 check=None
+     msg: Water is drawn in blue, not left as white space. The river itself is the blue line running through the square.
+  gs0 SAY: Every contour you cross records the land going up or down by one interval.
+  gs1 BOX ans=0 phase=None | pre=Find the square with easting 90 down its left side and northing 73 along its base. Type how many brown contour lines cross that square. | hint=Look between those grid lines. If there are no brown lines at all, the answer is zero. | done=Zero is a real reading here, not a missing one.
+  gs2 BOX ans=0 phase='substitute' | pre=Type how many metres the land rises or falls if you cross no contour lines at all. | hint=No lines crossed means no interval gained and none lost. | done=None
+  gs3 BOX ans=1 phase=None | pre=Now look at square 8973, one square to the west. Type 1 if it has many more contour lines than 9073, or 2 if it has fewer. | hint=The valley side west of Litton is covered in brown lines. | done=Same map, same interval, completely different spacing. That contrast is the relief of the dale.
+  gs4 SAY: Square 9073 is valley floor, so the land there is almost flat, while the square to its west climbs steeply out of the dale.
+===== bronze[5] sol [4]
+ hint: Count only the thin lines that sit between the two labelled thick ones, and do not count the thick ones themselves.
+  MC0 pattern=counted_the_index_lines_too expect=6 check=None
+     msg: You counted the two labelled thick lines as well. The question asks only for the thin ones between them.
+  MC1 pattern=counted_the_gaps expect=5 check=None
+     msg: You counted the gaps rather than the lines. Lines and gaps are never the same number.
+  gs0 SAY: Index contours are drawn thicker so you can find a height quickly on a crowded slope.
+  gs1 BOX ans=69 phase=None | pre=Find the labels 650 and 700 to the right of the middle of the map. Type the number on the vertical grid line immediately to their left. | hint=The eastings on this map read 67 to 71 from left to right. | done=Both labels are now pinned to one column of the grid, so you will count on the right slope.
+  gs2 BOX ans=50 phase=None | pre=Type the difference between those two heights, in metres. | hint=Take the smaller value away from the larger one. | done=Both ends of the count are now fixed, which is what makes the count mean something.
+  gs3 BOX ans=4 phase='substitute' | pre=Now follow a straight line from the thick 650 contour across to the thick 700 contour. Type how many thin brown lines you cross on the way. | hint=Cross the slope at right angles to the lines and count each thin line once. | done=None
+  gs4 BOX ans=5 phase=None | pre=Type how many steps that makes from the 650 line up to the 700 line, counting the step onto the thick line as well. | hint=Four lines in between create one more gap than there are lines. | done=None
+  gs5 BOX ans=10 phase=None | pre=Share the height difference between those steps. Type the height gap between neighbouring lines, in metres. | hint=Divide the height difference by the number of steps. | done=Fifty metres shared over five equal steps gives the contour interval, which is the fact the rest of this lesson rests on.
+===== bronze[6] sol [0]
+ hint: Close lines mean a lot of height is gained over very little ground.
+  MC0 pattern=reversed_the_spacing_rule expect=1 check=None
+     msg: You have the spacing rule the wrong way round. Think about how far you walk between one line and the next.
+  MC1 pattern=flat_land_reading expect=2 check=None
+     msg: Flat land shows as an absence of contour lines, not as a mass of them.
+  gs0 SAY: Spacing is the quickest reading on any relief map, and it needs no arithmetic at all.
+  gs1 BOX ans=35 phase=None | pre=Type the easting of the vertical grid line on the left-hand side of square 3508. | hint=Eastings run 34, 35, 36 across this map. | done=You are looking at the right square before you judge anything about the slope.
+  gs2 BOX ans=50 phase=None | pre=Each contour here is 10 m apart in height. Type how many metres you climb crossing 5 of them. | hint=Five steps of ten metres each. | done=None
+  gs3 BOX ans=1 phase='substitute' | pre=In this square those 5 lines are crossed in well under half a kilometre. Type 1 if that is a lot of height in a short distance, or 2 if it is a little height over a long distance. | hint=Fifty metres of climb inside a few hundred metres of walking is hard work. | done=None
+  gs4 BOX ans=1 phase=None | pre=Type 1 if lines drawn further apart would mean a gentler slope, or 2 if they would mean a steeper one. | hint=Same height gap, more ground covered between the lines. | done=The height gap never changes, so only the ground covered can change, and that is what spacing shows.
+  gs5 SAY: Contours packed almost touching in square 3508 mean the slope there is very steep.
+===== bronze[7] sol [590]
+ hint: Downhill means the next line outwards from the ring, one interval lower.
+  MC0 pattern=went_uphill expect=610 check=None
+     msg: You added an interval instead of taking one off. Outwards from a summit is downhill.
+  MC1 pattern=used_index_spacing expect=550 check=None
+     msg: You stepped by the gap between thick index lines rather than by the gap between neighbouring lines.
+  gs0 SAY: Outwards from a summit is downhill. Inwards is uphill. That is the whole direction rule.
+  gs1 BOX ans=88 phase=None | pre=Type the easting of the vertical grid line immediately to the left of Cow Close Fell. | hint=The eastings run 88 to 91 across this map. | done=Fell located, so the ring you read next is certainly the right one.
+  gs2 BOX ans=600 phase=None | pre=Type the number printed on the thick ring round the fell, in metres. | hint=It is printed on the thick loop along the southern side of the fell. | done=Start every height count from a line the map has labelled for you.
+  gs3 BOX ans=10 phase=None | pre=Type the contour interval on this map, in metres. | hint=The interval is given in the question. | done=None
+  gs4 BOX ans=1 phase='substitute' | pre=Type 1 if walking outwards from the ring goes downhill, or 2 if it goes uphill. | hint=The fell falls away in every direction from its top. | done=None
+  gs5 BOX ans=590 phase=None | pre=Take one interval off the ring's height. Type the height of the next line out, in metres. | hint=One step down from the labelled ring. | done=None
+  gs6 BOX ans=580 phase=None | pre=Type the height of the line one more step downhill, in metres. | hint=Take another ten metres off. | done=Each step out from a summit takes one interval off, which is how you read any height the map does not print.
+===== silver[0] sol [10]
+ hint: Count the steps from one labelled line to the other, then share the height difference between those steps.
+  MC0 pattern=divided_by_lines_not_steps expect=12.5 check=None
+     msg: You divided by the number of thin lines instead of the number of steps. Four lines make five gaps.
+  MC1 pattern=used_the_index_spacing expect=50 check=None
+     msg: That is the gap between the two thick lines, not the gap between neighbouring lines.
+  gs0 SAY: The interval is never printed on a map. You work it out from two labelled lines.
+  gs1 BOX ans=69 phase=None | pre=Find the two labels to the right of the middle of the map. Type the number on the vertical grid line immediately to their left. | hint=The eastings on this map read 67 to 71 from left to right. | done=Labels located, so the lines you count between are the ones the question means.
+  gs2 BOX ans=700 phase=None | pre=Type the higher of the two contour values, in metres. | hint=The two labels read 650 and 700. | done=Two known heights on the same slope is all the evidence you need.
+  gs3 BOX ans=50 phase=None | pre=Type the height difference between the two labelled lines, in metres. | hint=Take the smaller value away from the larger one. | done=None
+  gs4 BOX ans=5 phase='substitute' | pre=There are 4 thin lines between them. Type how many equal steps that makes from the lower label up to the higher one. | hint=Four lines in between create one more gap than there are lines. | done=None
+  gs5 BOX ans=10 phase=None | pre=Share the height difference between those steps. Type the contour interval, in metres. | hint=Divide the height difference by the number of steps. | done=None
+  gs6 BOX ans=660 phase=None | pre=Check it. Type the height of the thin line immediately above the 650 line, in metres. | hint=Add one interval to 650. | done=One step up from a labelled line landing on a sensible round value is the sign the interval is right.
+===== silver[1] sol [620]
+ hint: Each ring inwards is one interval higher, so count the rings as steps.
+  MC0 pattern=counted_one_ring_only expect=610 check=None
+     msg: You went up by a single step. Count every ring drawn inside the labelled one.
+  MC1 pattern=subtracted_going_inwards expect=580 check=None
+     msg: You went down instead of up. Inwards on a hill is uphill.
+  gs0 SAY: Counting inwards from a labelled ring is how you read the top of any hill.
+  gs1 BOX ans=88 phase=None | pre=Type the easting of the vertical grid line immediately to the left of the fell. | hint=Eastings run 88 to 91 across this map. | done=Fell located, so the rings you count next are certainly the right ones.
+  gs2 BOX ans=2 phase=None | pre=Type how many rings are drawn inside the labelled one. | hint=Look for thinner loops nested inside the thick one. | done=None
+  gs3 BOX ans=20 phase='substitute' | pre=Type how many metres you gain crossing those 2 rings, at 10 m each. | hint=Two steps of ten metres. | done=None
+  gs4 BOX ans=620 phase=None | pre=Add that gain to the labelled height. Type the height of the smallest ring, in metres. | hint=Start at the labelled ring and go up by the amount you have just worked out. | done=None
+  gs5 BOX ans=630 phase=None | pre=The summit is higher than the smallest ring but lower than the next contour, which is not drawn. Type the height of that undrawn contour, in metres. | hint=One more interval above the smallest ring. | done=The top of the fell is trapped between those two values, which is as precise as contours alone can be.
+===== silver[2] sol [0]
+ hint: Follow one contour line into the stream and watch which way its sharp point faces.
+  MC0 pattern=read_it_as_a_spur expect=1 check=None
+     msg: A spur bends the contours the other way, out and down the hill. Check which way the points face where the stream crosses.
+  MC1 pattern=flat_ground_reading expect=2 check=None
+     msg: Flat ground would leave this part of the map almost blank. These lines are close and busy.
+  gs0 SAY: Valleys and spurs both bend contours into points. Only the direction of the point tells them apart.
+  gs1 BOX ans=34 phase=None | pre=Type the easting of the vertical grid line immediately to the left of the Greenhead Gill label. | hint=Eastings run 34, 35, 36 across this map. | done=You are now reading the right stretch of the map rather than a similar looking one nearby.
+  gs2 BOX ans=1 phase=None | pre=Type 1 if the gill itself is drawn in blue, or 2 if it is drawn in brown. | hint=Water is always blue on these maps, relief is always brown. | done=None
+  gs3 BOX ans=1 phase='substitute' | pre=Follow a contour into the stream. Type 1 if its point faces up the slope towards the higher ground in the north-east, or 2 if it faces down towards Grasmere in the south-west. | hint=Look at the sharp corner each contour makes as it crosses the water. | done=None
+  gs4 BOX ans=1 phase=None | pre=Type 1 if a stream runs along the lowest ground it can find, or 2 if it runs along the highest. | hint=Water can only ever run downhill. | done=Because the water takes the lowest line, a contour must bend up the valley to stay at the same height. That bend is the signature you are reading.
+  gs5 SAY: Sharp points aimed upstream mean the stream has cut down into the land, so this is a valley.
+===== silver[3] sol [0]
+ hint: Decide whether the high ground is pushing out towards the low ground, or the low ground is biting in.
+  MC0 pattern=read_it_as_a_valley expect=1 check=None
+     msg: Valleys bend the contours the opposite way, with the points facing uphill. Check the direction of the bends again.
+  MC1 pattern=chose_a_glacial_hollow expect=2 check=None
+     msg: A hollow of that kind shows as a steep horseshoe of contours round a flat floor, often with a small lake in it. That is not the pattern here.
+  gs0 SAY: The same points test works for both landforms, so read the direction before you name anything.
+  gs1 BOX ans=9 phase=None | pre=Type the northing of the horizontal grid line immediately below the Stone Arthur label. | hint=The northings on this map read 08 and 09. | done=Feature located, so the bends you read next belong to Stone Arthur and not to the ridge behind it.
+  gs2 BOX ans=1 phase=None | pre=Type 1 if the land gets lower towards the south-west corner, where Grasmere village is drawn, or 2 if it gets higher. | hint=Villages sit on low ground, and the contour values fall towards it. | done=None
+  gs3 BOX ans=1 phase='substitute' | pre=Now look at the points the contours make below Stone Arthur. Type 1 if they face south-west, down towards the village, or 2 if they face north-east. | hint=Follow one contour along until it turns its sharpest corner. | done=None
+  gs4 BOX ans=1 phase=None | pre=Type 1 if points facing downhill mean high ground reaching out from the ridge, or 2 if they mean low ground cutting in. | hint=Ask which sort of ground the point is made of, the ground inside the bend or outside it. | done=The bend is made of high ground pushing out, and the low ground lies either side of it.
+  gs5 SAY: High ground reaching out from a ridge, with lower ground on both sides, is a spur.
+===== silver[4] sol [0]
+ hint: Compare how much ground you cross between the same two contour lines on each side of the hill.
+  MC0 pattern=reversed_the_spacing_rule expect=1 check=None
+     msg: You matched wide spacing with a steep slope. Think about how far you walk between one line and the next.
+  MC1 pattern=assumed_symmetry expect=2 check=None
+     msg: Hills are rarely the same on both sides. Compare the spacing directly rather than assuming.
+  gs0 SAY: To compare two slopes fairly, use the same pair of contour lines on both of them.
+  gs1 BOX ans=77 phase=None | pre=Type the number on the vertical grid line immediately to the left of Worsaw Hill. | hint=The eastings read 76, 77, 78. | done=Hill located, so the two slopes you compare next are the two sides of the same hill.
+  gs2 BOX ans=200 phase=None | pre=Type the height printed on the labelled contour that circles the hill, in metres. | hint=It is the brown number printed beside the hill's name. | done=None
+  gs3 BOX ans=1 phase='substitute' | pre=Walk south from that labelled line, down towards Worsaw End House. Type 1 if the lines below it are close together, or 2 if they are far apart. | hint=On the southern side the lines are almost touching. | done=None
+  gs4 BOX ans=2 phase=None | pre=Now walk north from the same labelled line, towards the top edge of the map. Type 1 if those lines are close together, or 2 if they are far apart. | hint=There is a wide white gap before the next line appears. | done=One interval crossed in a few millimetres on one side and across most of a square on the other. That is the comparison the question wants.
+  gs5 SAY: The same height gap covers far less ground on the southern side, so that is the steeper slope.
+===== silver[5] sol [220]
+ hint: Take the starting height away from the finishing height.
+  MC0 pattern=added_the_heights expect=1020 check=None
+     msg: You added the two heights together instead of finding the difference between them.
+  MC1 pattern=counted_lines_not_metres expect=22 check=None
+     msg: That is the number of contour lines crossed, not the height gained. Each line is worth one interval.
+  gs0 SAY: Height gain is a subtraction, but only once both heights have been read correctly off the map.
+  gs1 BOX ans=74 phase=None | pre=Find the label 400 in the north-west quarter of the map. Type the northing of the horizontal grid line immediately below it. | hint=Northings read 72, 73, 74 going up the sides of the map. | done=Start point located, so you are subtracting from a height you can actually point at.
+  gs2 BOX ans=400 phase=None | pre=Type the starting height, in metres. | hint=It is the value printed on the contour where the walker sets off. | done=None
+  gs3 BOX ans=620 phase='substitute' | pre=Type the finishing height, in metres. | hint=The height of the smallest ring is given in the question. | done=None
+  gs4 BOX ans=220 phase=None | pre=Take the start away from the finish. Type the height gained, in metres. | hint=Subtract the smaller height from the larger one. | done=None
+  gs5 BOX ans=22 phase=None | pre=At 10 m per contour, type how many contour lines the walker crosses on the way up. | hint=Divide the height gained by the contour interval. | done=The line count and the subtraction have to agree, because they are the same climb counted two ways.
+===== silver[6] sol [150]
+ hint: Index lines come every fifty metres, and heading downhill means going down by that amount.
+  MC0 pattern=went_uphill expect=250 check=None
+     msg: You added the index gap instead of taking it off. The land falls away to the south here.
+  MC1 pattern=stepped_by_the_interval expect=190 check=None
+     msg: You stepped by the gap between neighbouring lines rather than the gap between thick index lines.
+  gs0 SAY: Thick index lines are a ladder. Once you know one rung, the rest come fifty metres at a time.
+  gs1 BOX ans=43 phase=None | pre=Type the number on the horizontal grid line immediately below Worsaw Hill. | hint=The northings on this map read 42 and 43. | done=Hill located, so the thick line you read next is the one on its southern slope.
+  gs2 BOX ans=200 phase=None | pre=Type the height printed on the thick contour that circles the hill, in metres. | hint=It is the brown number printed beside the hill's name. | done=None
+  gs3 BOX ans=50 phase='substitute' | pre=Type the gap between index contours on this map, in metres. | hint=The index spacing is given in the question. | done=None
+  gs4 BOX ans=150 phase=None | pre=Heading south from the hill is heading downhill. Take one index gap off. Type the height of the lower thick line, in metres. | hint=Subtract the index gap from the labelled height. | done=None
+  gs5 BOX ans=4 phase=None | pre=Check it against the thin lines: at 10 m each, type how many thin lines should lie between those two thick ones. | hint=Divide the index gap by the interval, then take one off for the step onto the thick line. | done=Four thin lines fit a fifty metre gap at ten metres a line, and four is exactly what the map draws there.
+===== gold[0] sol [100]
+ hint: Divide the height climbed by the distance travelled, keeping the distance in km.
+  MC0 pattern=divided_the_wrong_way expect=0.01 check=None
+     msg: You divided the distance by the height. Gradient puts the height on top.
+  MC1 pattern=treated_it_as_a_full_km expect=50 check=None
+     msg: You used the distance as if it were a whole kilometre. Half the ground for the same climb makes a steeper figure.
+  gs0 SAY: Gradient is height gained divided by ground covered. The units you divide in are the units you answer in.
+  gs1 BOX ans=88 phase=None | pre=Type the easting of the vertical grid line immediately to the left of Cow Close Fell. | hint=The eastings run 88 to 91 across this map. | done=Fell located, so the slope you measure is the western flank and not another one.
+  gs2 BOX ans=550 phase=None | pre=Type the lower of the two contour heights named, in metres. | hint=It is the labelled line out to the west of the fell. | done=Both ends of the slope are now fixed to labelled lines, so the climb is a fact rather than an estimate.
+  gs3 BOX ans=50 phase=None | pre=Type the height climbed between the two lines, in metres. | hint=Take the lower height away from the higher one. | done=None
+  gs4 BOX ans=0.5 phase='substitute' | pre=Type the horizontal distance between them, in km. | hint=The distance is given in the question. | done=None
+  gs5 BOX ans=100 phase=None | pre=Divide the height climbed by the distance. Type the gradient in metres per km. | hint=Fifty metres of climb shared over half a kilometre of ground. | done=None
+  gs6 BOX ans=200 phase=None | pre=Check it. At that gradient, type how many metres you would climb over a full 2 km. | hint=Multiply the gradient by two. | done=Doubling the distance doubles the climb, which is exactly what an average gradient promises.
+===== gold[1] sol [10]
+ hint: Turn the distance into metres first, then work out how far you travel along for each metre you go up.
+  MC0 pattern=divided_the_wrong_way expect=0.1 check=None
+     msg: You divided the height by the distance. A ratio counts the metres along for each single metre up.
+  MC1 pattern=left_distance_in_km expect=0.01 check=None
+     msg: You kept the distance in kilometres. Both parts of a ratio must be in the same unit.
+  gs0 SAY: A ratio gradient compares metres up with metres along, so both have to be in metres.
+  gs1 BOX ans=88 phase=None | pre=Type the easting of the vertical grid line immediately to the left of Cow Close Fell. | hint=The eastings run 88 to 91 across this map. | done=Same slope as before, located the same way, so the two answers can be compared.
+  gs2 BOX ans=50 phase=None | pre=Type the height climbed, in metres. | hint=It is the gap between the two contour values named in the question. | done=The rise is already in metres, so only the distance needs converting.
+  gs3 BOX ans=500 phase='substitute' | pre=Type the horizontal distance, in metres. | hint=There are one thousand metres in a kilometre, so half a kilometre is half of that. | done=None
+  gs4 BOX ans=10 phase=None | pre=Divide the distance along by the height up. Type the answer. | hint=Five hundred shared into fifty. | done=None
+  gs5 BOX ans=10 phase=None | pre=Check it. Type how many metres along you would travel while climbing just 1 m at that gradient. | hint=The ratio is the metres along for every single metre up. | done=One metre up for that many along is the same slope written a different way, so the two readings agree.
+===== gold[2] sol [0]
+ hint: Read the contour values along the line in order and note where they stop rising and start falling.
+  MC0 pattern=read_it_as_a_valley expect=1 check=None
+     msg: A V shape needs the values to fall first and rise afterwards. Check the order in which you meet them.
+  MC1 pattern=stopped_at_the_summit expect=3 check=None
+     msg: The line does not stop at the top. Follow it down the eastern side and see what the values do.
+  gs0 SAY: A cross section is only the contour values met along a line, plotted in the order you meet them.
+  gs1 BOX ans=88 phase=None | pre=Type the easting of the vertical grid line immediately to the left of Cow Close Fell. | hint=The eastings run 88 to 91 across this map. | done=The line of section now has a fixed place on the map, which is what makes the profile repeatable.
+  gs2 BOX ans=550 phase=None | pre=Type the value of the labelled contour the line starts on, in metres. | hint=It is printed on the thick line to the west of the fell. | done=The line now has a fixed starting height, so every later value can be compared with it.
+  gs3 BOX ans=600 phase=None | pre=Type the value of the thick ring the line crosses next, in metres. | hint=It is the labelled ring drawn round the fell. | done=None
+  gs4 BOX ans=620 phase='substitute' | pre=Type the value of the smallest ring the line crosses at the top, in metres. | hint=Count the rings inside the thick one, one interval each. | done=None
+  gs5 BOX ans=1 phase=None | pre=Type 1 if the same contour values appear again on the eastern side of the top, or 2 if brand new higher values appear. | hint=Look at the rings east of the summit and read their values. | done=Values repeating on the far side is what makes a profile symmetrical enough to call a top rather than a step.
+  gs6 SAY: The values rise to a maximum at the smallest ring and then repeat downwards, which draws a rounded top with a fall away on the far side.
+===== gold[3] sol [15]
+ hint: Work out the height climbed first, then see how many ten metre steps fit into it.
+  MC0 pattern=counted_the_starting_line expect=16 check=None
+     msg: You counted the line you set off from. The count starts above it.
+  MC1 pattern=used_the_index_spacing expect=3 check=None
+     msg: You divided by the gap between thick lines instead of by the gap between neighbouring lines.
+  gs0 SAY: On a crowded slope, arithmetic is safer than counting lines one by one with your eye.
+  gs1 BOX ans=35 phase=None | pre=Type the easting of the vertical grid line immediately to the left of those labels. | hint=The eastings run 34, 35, 36 across this map. | done=Labels located, so both ends of the climb sit on the slope the question means.
+  gs2 BOX ans=600 phase=None | pre=Type the highest of the labelled index values on the eastern side of the map, in metres. | hint=Four index contours are labelled down that side: 450, 500, 550 and 600. | done=Both ends of the climb are labelled lines, so the height gained is certain.
+  gs3 BOX ans=150 phase=None | pre=Type the height climbed between the two labelled lines, in metres. | hint=Take the lower value away from the higher one. | done=None
+  gs4 BOX ans=10 phase='substitute' | pre=Type the contour interval, in metres. | hint=The interval is given in the question. | done=None
+  gs5 BOX ans=15 phase=None | pre=Divide the climb by the interval. Type how many lines are crossed. | hint=Each line crossed is worth one interval of climb. | done=None
+  gs6 BOX ans=3 phase=None | pre=Check it with the thick lines: type how many index contours the walker crosses, counting the 600 line but not the 450 one. | hint=Index lines come every 50 m. | done=Three thick lines inside fifteen lines in total is one thick line every five, which is exactly how the map is drawn.
+===== gold[4] sol [220]
+ hint: One more interval above the highest ring that is actually drawn.
+  MC0 pattern=took_a_step_down expect=200 check=None
+     msg: You went down a step instead of up. The undrawn line lies above the highest ring, not below it.
+  MC1 pattern=used_the_index_gap expect=260 check=None
+     msg: You added the gap between thick index lines rather than a single interval.
+  gs0 SAY: The highest ring drawn sets a floor for the summit. The first undrawn contour sets the ceiling.
+  gs1 BOX ans=77 phase=None | pre=Type the number on the vertical grid line immediately to the left of Worsaw Hill. | hint=The eastings read 76, 77, 78. | done=Hill located, so you are reasoning about the right summit and not one of its neighbours.
+  gs2 BOX ans=210 phase=None | pre=Type the height of the highest ring drawn on the hill, in metres. | hint=The height of that ring is given in the question. | done=None
+  gs3 BOX ans=10 phase='substitute' | pre=Type the contour interval, in metres. | hint=The interval is given in the question. | done=None
+  gs4 BOX ans=220 phase=None | pre=Add one interval to the highest ring. Type the value of the first contour that is not drawn, in metres. | hint=One step above the highest ring. | done=None
+  gs5 BOX ans=1 phase=None | pre=Type 1 if the summit must be lower than that undrawn contour, or 2 if it could be higher than it. | hint=Ask what the map would have done if the land reached that height. | done=If the ground reached that height the map would have drawn the ring, so the summit is trapped between the two values.
