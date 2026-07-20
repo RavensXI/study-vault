@@ -1,0 +1,76 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Map layout harness</title>
+<!-- Renders the REAL practice.html in an iframe, then injects the exact panel
+     markup handlePassagePanel() produces for an image problem, so the map-first
+     CSS is verified against production styles without racing the content fleet. -->
+<style>body{margin:0;background:#333}iframe{border:0;display:block}</style>
+<!-- A real route is required (bare practice.html shows "Invalid URL"). Uses a
+     maths lesson deliberately: the geography rows are being rewritten by the
+     content fleet right now, and the CSS under test is shared anyway. -->
+<iframe id="f" src="/practice/maths-edexcel/number/1" style="width:1440px;height:900px"></iframe>
+<script>
+var qs = new URLSearchParams(location.search);
+var MAP = 'https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/os-maps/burnley-unity-z15-final.jpg';
+var f = document.getElementById('f');
+
+function ready(cb, n) {
+  n = n || 0;
+  var d = null;
+  try { d = f.contentDocument; } catch (e) {}
+  if (d && d.getElementById('practice-passage-area') && d.getElementById('practice-columns')) return cb(d);
+  if (n > 300) { document.title = 'HARNESS TIMEOUT'; return; }
+  setTimeout(function(){ ready(cb, n + 1); }, 50);
+}
+
+// The loader keeps rendering after the elements first appear and will hide the
+// passage area again, so settle first, then inject, then re-assert on a timer.
+ready(function(d) { setTimeout(function(){ inject(d); }, 3500); });
+
+function inject(d) {
+  var area = d.getElementById('practice-passage-area');
+  var wide = qs.get('mode') !== 'before';
+
+  if (wide) {
+    area.className = 'practice-passage-area passage-area--map';
+    area.innerHTML =
+      '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
+      '<div class="chart-panel-body chart-panel-body--map">' +
+        '<img src="' + MAP + '" alt="Map for this question">' +
+        '<div class="map-zoom-hint"><button type="button">Tap the map to enlarge</button></div>' +
+      '</div>';
+  } else {
+    // the shape before the fix, for side-by-side comparison
+    area.className = 'practice-passage-area';
+    area.innerHTML =
+      '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
+      '<div class="chart-panel-body" style="padding:0.75rem"><img src="' + MAP +
+      '" alt="Map" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px"></div>';
+  }
+  area.style.display = 'flex';
+
+  // Put a representative question in the work area so the split is visible.
+  var q = d.getElementById('problem-question');
+  if (q) q.innerHTML = 'What is the <strong>four-figure</strong> grid reference of the grid square containing <strong>Burnley Barracks</strong> and <strong>Burnley Manchester Road</strong> train stations?';
+  var pv = d.getElementById('practice-view');
+  if (pv) { pv.classList.add('active'); pv.style.display = ''; }
+  var lv = d.getElementById('learn-view');
+  if (lv) { lv.classList.remove('active'); lv.style.display = 'none'; }
+
+  // Keep it visible against any later loader re-render, and report measurements
+  // into the title so the run is checkable without eyeballing alone.
+  var ticks = 0;
+  var iv = setInterval(function () {
+    area.style.display = 'flex';
+    var im = area.querySelector('img');
+    if (im && im.complete && im.naturalWidth) {
+      var r = area.getBoundingClientRect(), ir = im.getBoundingClientRect();
+      var host = d.getElementById('practice-columns').getBoundingClientRect();
+      document.title = 'READY panel=' + Math.round(r.width) + '/' + Math.round(host.width) +
+        ' (' + Math.round(100 * r.width / host.width) + '%) img=' +
+        Math.round(ir.width) + 'x' + Math.round(ir.height);
+    }
+    if (++ticks > 40) clearInterval(iv);
+  }, 200);
+}
+</script>

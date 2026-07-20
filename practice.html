@@ -2360,6 +2360,54 @@
       cursor: zoom-in;
     }
 
+    /* Map-first layout. A map IS the question in Geography Skills, so when one
+       is showing it takes the larger share of the split and fills its panel
+       instead of floating in centred dead space. Desktop only: below 900px the
+       columns stack into tabs and the map already gets the full width. */
+    @media (min-width: 901px) {
+      .practice-passage-area.passage-area--map { flex: 1.6; }
+    }
+    /* Map + its zoom affordance are centred as one group. Left to its own
+       flex:1 the body pushed the hint to the panel's bottom edge, where a
+       900px-tall viewport clipped it. */
+    .chart-panel-body--map {
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      min-height: 0;
+    }
+    /* Width-fill only. Forcing height:100% too makes the element taller than
+       the map, letterboxing inside it and pushing the zoom hint out of the
+       clipped panel. object-fit:contain never crops, which maps require. */
+    .chart-panel-body--map img {
+      width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    .map-zoom-hint {
+      flex-shrink: 0;
+      text-align: center;
+      padding: 0 1rem 0.6rem;
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #8a7e72;
+    }
+    .map-zoom-hint button {
+      background: none;
+      border: none;
+      font: inherit;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      border-radius: 6px;
+    }
+    .map-zoom-hint button:hover { background: rgba(0,0,0,0.04); text-decoration: underline; }
+    body.dark-mode .map-zoom-hint { color: #a89e93; }
+    body.dark-mode .map-zoom-hint button:hover { background: rgba(255,255,255,0.06); }
+
     /* ===== RULER TOOL ===== */
     .ruler-container {
       position: relative;
@@ -6598,6 +6646,9 @@
     function handlePassagePanel(problem) {
       var area = document.getElementById('practice-passage-area');
       if (!area) return;
+      // Reset the map-first widening; only the image branches below re-apply it.
+      // Without this the wider split sticks to the next chart or passage problem.
+      area.classList.remove('passage-area--map');
       var passages = window._practicePassages || [];
       var hasPassage = problem.passage_id || problem.passage;
       // highlight_evidence renders passage inline
@@ -6638,10 +6689,20 @@
             '</div>';
           initRuler(problem.ruler);
         } else {
+          // The map is the question here, so give it the whole panel and make
+          // the zoom real: the img has had cursor:zoom-in since launch but no
+          // click handler, so it advertised a zoom that never happened.
           area.innerHTML =
             '<div class="passage-header"><span class="passage-header-label">Map</span></div>' +
-            '<div class="chart-panel-body" style="padding:0.75rem"><img src="' + problem.image + '" alt="Map" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px"></div>';
+            '<div class="chart-panel-body chart-panel-body--map">' +
+              '<img src="' + problem.image + '" alt="Map for this question" ' +
+                   'onclick="lightboxOpen(this.src)">' +
+              '<div class="map-zoom-hint"><button type="button" ' +
+                   'onclick="lightboxOpen(this.closest(\'.chart-panel-body--map\').querySelector(\'img\').src)">' +
+                   'Tap the map to enlarge</button></div>' +
+            '</div>';
         }
+        area.classList.add('passage-area--map');
         area.style.display = 'flex';
         var a11yBar = document.getElementById('score-bar-a11y');
         if (a11yBar) a11yBar.style.display = 'none';
