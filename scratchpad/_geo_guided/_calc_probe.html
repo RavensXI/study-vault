@@ -1,0 +1,39 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>calc probe</title>
+<pre id="log" style="font:12px ui-monospace,monospace">loading…</pre>
+<iframe id="f" style="width:1280px;height:900px"></iframe>
+<script>
+var qs=new URLSearchParams(location.search);
+document.getElementById('f').src=qs.get('path')||'/practice/geography-aqa/geographical-skills/1';
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function done(x){L.textContent=x;document.title='PROBE DONE';}
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;
+  try{ok=!!d().getElementById('calc-fab')&&typeof w().updateCalcFab==='function'
+        &&typeof w().toggleCalcFloat==='function';}catch(e){}
+  if((ok&&t>40)||t>600){
+    if(!ok){done('calc fns/markup not found (t='+t+')');return;}
+    var out=[],fab=d().getElementById('calc-fab'),fl=d().getElementById('calc-float');
+    // calculator-allowed question whose panel is busy -> offer the pop-out
+    w().updateCalcFab({calculator:true,chart:{}});
+    out.push('calc-allowed, panel busy  -> fab shown: '+(fab.style.display!=='none'));
+    w().toggleCalcFloat();
+    out.push('  toggled open: '+fl.classList.contains('open')+', keypad: '+!!fl.querySelector('#calc-value'));
+    w().calcDigit('1');w().calcDigit('2');w().calcOp('+');w().calcDigit('3');w().calcDigit('0');w().calcEq();
+    out.push('  12 + 30 = '+(d().getElementById('calc-value')||{}).textContent);
+    w().calcOp('/');w().calcDigit('6');w().calcEq();
+    out.push('  then / 6 = '+(d().getElementById('calc-value')||{}).textContent);
+    // no-calculator question -> hidden and cleared
+    w().updateCalcFab({calculator:false});
+    out.push('no-calculator question   -> fab hidden: '+(fab.style.display==='none')+
+             ', panel cleared: '+(!fl.classList.contains('open')&&fl.innerHTML===''));
+    // guided opener (no problem) -> hidden
+    w().updateCalcFab(null);
+    out.push('opener / teach walk      -> fab hidden: '+(fab.style.display==='none'));
+    done(out.join(String.fromCharCode(10)));return;
+  }
+  t++;setTimeout(tick,50);
+})();
+</script>

@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8"><title>calc shot</title>
+<style>body{margin:0}iframe{border:0;display:block}</style>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/1" style="width:1300px;height:900px"></iframe>
+<script>
+var f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;
+  try{ok=!!d().getElementById('calc-fab')&&typeof w().updateCalcFab==='function';}catch(e){}
+  if(ok&&t>60){
+    w().updateCalcFab({calculator:true,chart:{}});
+    w().toggleCalcFloat();
+    w().calcDigit('6');w().calcDigit('7');w().calcOp('/');w().calcDigit('5');w().calcDigit('2');w().calcEq();
+    document.title='SHOT READY';return;
+  }
+  if(t>600){document.title='SHOT TIMEOUT';return;}
+  t++;setTimeout(tick,50);
+})();
+</script>
