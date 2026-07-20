@@ -128,12 +128,20 @@ until('lesson + guided data loaded', function () {
                 var link = doc().getElementById('problem-walk-link');
                 var shown = link && link.style.display !== 'none';
                 var n = p.guided_steps ? p.guided_steps.length : 0;
-                log('  ' + q + ': ' + p.input_type + ', ' + n + ' walk steps, link=' + shown);
-                if (n && !shown) bad(q + ' HAS guided_steps but the lifeline link is hidden');
-                if (!n && shown) bad(q + ' has NO guided_steps but shows a lifeline link');
-                if (n) { cb(p, q); return; }
-                // skip this one: answer wrong, move on
-                answerWrong();
+                var answered = !!(win().practiceState && win().practiceState.answered);
+                log('  ' + q + ': ' + p.input_type + ', ' + n + ' walk steps, link=' + shown +
+                    (answered ? ' (already answered)' : ''));
+
+                // The lifeline is deliberately withdrawn once a problem has been
+                // answered, so only assert its visibility on a fresh problem.
+                if (!answered) {
+                  if (n && !shown) bad(q + ' HAS guided_steps but the lifeline link is hidden');
+                  if (!n && shown) bad(q + ' has NO guided_steps but shows a lifeline link');
+                  if (n) { cb(p, q); return; }
+                }
+
+                // Already answered, or not walkable: advance and keep looking.
+                if (!answered) answerWrong();
                 until('next btn', function () { return visible(doc().getElementById('problem-next-btn')); }, function () {
                   doc().getElementById('problem-next-btn').click();
                   setTimeout(function () { seekWalkable(cb, guard + 1); }, 250);
