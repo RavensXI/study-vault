@@ -2430,9 +2430,38 @@
       overflow: hidden; display: none;
     }
     .calc-float.open { display: block; }
-    .calc-float .passage-header { padding: 0.6rem 0.9rem 0.2rem; }
-    /* renderCalculatorTool draws its own title as well as the panel header */
+    /* our own title bar replaces both of renderCalculatorTool's headings */
+    .calc-float .passage-header,
     .calc-float .stats-tool-title { display: none; }
+    .calc-float-bar {
+      display: flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 0.5rem 0.4rem 0.55rem;
+      background: rgba(0,0,0,0.04);
+      border-bottom: 1px solid #e4ded4;
+      cursor: grab;
+      touch-action: none;        /* let us own the drag gesture on touch */
+      user-select: none;
+    }
+    .calc-float-bar:active { cursor: grabbing; }
+    .calc-float-grip { color: #b3a99c; font-size: 0.8rem; letter-spacing: -2px; }
+    .calc-float-title {
+      flex: 1; font-size: 0.66rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.07em; color: #8a7e72;
+    }
+    .calc-float-btn {
+      width: 22px; height: 22px; padding: 0;
+      border: none; background: none; cursor: pointer;
+      border-radius: 6px; color: #8a7e72;
+      font-size: 0.95rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .calc-float-btn:hover { background: rgba(0,0,0,0.08); color: #2d2a26; }
+    .calc-float.minimised { width: auto; }
+    .calc-float.minimised .calc-float-body { display: none; }
+    body.dark-mode .calc-float-bar { background: rgba(255,255,255,0.05); border-bottom-color: #3a3836; }
+    body.dark-mode .calc-float-grip { color: #6d655c; }
+    body.dark-mode .calc-float-title, body.dark-mode .calc-float-btn { color: #a89e93; }
+    body.dark-mode .calc-float-btn:hover { background: rgba(255,255,255,0.10); color: #f0ece4; }
     .calc-float .stats-tool { padding: 0.5rem 0.7rem 0.75rem; }
     @media (max-width: 900px) {
       .calc-fab { right: 68px; bottom: 4.6rem; }   /* clear tab bar + FAB stack */
@@ -2441,6 +2470,18 @@
     }
     body.dark-mode .calc-fab { background: #2a2724; color: #e8e4df; border-color: #3a3836; }
     body.dark-mode .calc-float { background: #252118; border-color: #3a3836; }
+    /* the keypad itself had no dark treatment: white display, white keys */
+    body.dark-mode .calc-display { background: #1c1b19; border-color: #3a3836; }
+    body.dark-mode .calc-value { color: #f0ece4; }
+    body.dark-mode .calc-expr { color: #a89e93; }
+    body.dark-mode .calc-btn {
+      background: #2f2b27; border-color: #3f3a35; color: #e8e4df;
+    }
+    body.dark-mode .calc-btn:hover { background: #3a352f; }
+    body.dark-mode .calc-btn:active { background: #443e37; }
+    body.dark-mode .calc-btn.calc-op { background: #35302a; color: #d8c9a6; }
+    body.dark-mode .calc-btn.calc-op:hover { background: #403a33; }
+    body.dark-mode .calc-btn.calc-clear { color: #e08a7a; }
 
     /* ===== RULER TOOL ===== */
     .ruler-container {
@@ -3151,6 +3192,47 @@
     }
 
     /* ===== DARK MODE TOGGLE BUTTON ===== */
+    /* Bug + tour, adopted out of the bottom-right corner into the score bar.
+       They arrive as position:fixed FABs from bug-reporter.js and
+       skin-switcher.js, so everything positional has to be unwound and they
+       are restyled to match .dark-mode-toggle beside them. */
+    .score-bar-utils { display: flex; align-items: center; gap: 0.4rem; }
+    /* id selector: bug-reporter.js injects its own stylesheet into <head> at
+       runtime, so it lands after these rules and wins on equal specificity.
+       Every positional and sizing property has to be forced, not just some. */
+    #score-bar-utils > * {
+      position: static !important;
+      inset: auto !important;
+      margin: 0 !important;
+      width: 32px !important;
+      height: 32px !important;
+      min-width: 0 !important;
+      min-height: 0 !important;
+      padding: 0 !important;
+      border-radius: 8px;
+      border: 1px solid var(--border-light, #e8e4df) !important;
+      background: transparent !important;
+      color: var(--text-muted, #8a8580) !important;
+      box-shadow: none !important;
+      transform: none !important;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    #score-bar-utils > *:hover {
+      color: var(--accent) !important;
+      border-color: var(--accent) !important;
+    }
+    #score-bar-utils svg { width: 16px !important; height: 16px !important; }
+    /* their text labels ("Tour", "Report a problem") would blow out the bar */
+    #score-bar-utils > * > span:not(.sr-only) { display: none !important; }
+    body.dark-mode #score-bar-utils > * {
+      border-color: #3a3836 !important;
+      color: #cfc7bb !important;
+    }
+    @media (max-width: 600px) { .score-bar-utils { display: none; } }
+
     .dark-mode-toggle {
       display: flex;
       align-items: center;
@@ -3215,6 +3297,26 @@
     body.dark-mode .mode-prompt { background: #2a2826; box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
     body.dark-mode .problem-input { background: #1c1b19; border-color: #3a3836; color: #e8e4df; }
     body.dark-mode .problem-input:focus { background: #2a2826; }
+    /* The guided walks use .guided-input, which had no dark rule, so every box
+       in a walk rendered as a stark white block on the dark card. */
+    body.dark-mode .guided-input {
+      background: #1c1b19; border-color: #4a4642; color: #e8e4df;
+    }
+    body.dark-mode .guided-input:focus { background: #2a2826; border-color: var(--accent); }
+    body.dark-mode .guided-input:disabled { background: #262320; color: #a89e93; }
+    /* Tier badges kept their light parchment fill against the dark bar. */
+    body.dark-mode .score-bar-tier-badge.tier-is-bronze { background: rgba(180,83,9,0.22); color: #e8b384; }
+    body.dark-mode .score-bar-tier-badge.tier-is-silver { background: rgba(148,163,184,0.20); color: #cbd5e1; }
+    body.dark-mode .score-bar-tier-badge.tier-is-gold   { background: rgba(202,138,4,0.22); color: #f0cf7a; }
+    /* practice-loader sets this pill's colour and background inline from the
+       unit accent, which is a light-background badge tint, so it washed out to
+       unreadable on the dark bar. Inline styles need !important to override. */
+    body.dark-mode #header-unit-label {
+      background: rgba(255,255,255,0.10) !important;
+      color: #f0ece4 !important;
+    }
+    body.dark-mode .score-bar-examples-btn { border-color: #3a3836; color: #cfc7bb; }
+    body.dark-mode .score-bar-examples-btn:hover { border-color: var(--accent); color: var(--accent); }
     body.dark-mode .mc-option { background: #1c1b19; border-color: #3a3836; color: #e8e4df; }
     body.dark-mode .mc-option:hover { background: var(--accent-light, #1a2040); }
     body.dark-mode .mc-option.selected { background: var(--accent-badge, #202a4a); }
@@ -3953,7 +4055,15 @@
             aria-controls="calc-float" title="Open the calculator">
       <span aria-hidden="true">&#128425;</span><span class="calc-fab-txt">Calculator</span>
     </button>
-    <div class="calc-float" id="calc-float" role="dialog" aria-label="Calculator"></div>
+    <div class="calc-float" id="calc-float" role="dialog" aria-label="Calculator">
+      <div class="calc-float-bar" id="calc-float-bar">
+        <span class="calc-float-grip" aria-hidden="true">&#8942;&#8942;</span>
+        <span class="calc-float-title">Calculator</span>
+        <button class="calc-float-btn" id="calc-float-min" type="button" title="Minimise" aria-label="Minimise calculator">&#8722;</button>
+        <button class="calc-float-btn" id="calc-float-close" type="button" title="Close" aria-label="Close calculator">&#215;</button>
+      </div>
+      <div class="calc-float-body" id="calc-float-body"></div>
+    </div>
 
     <!-- METHOD MODAL (shown on first load) -->
     <div class="method-modal-overlay" id="method-modal-overlay">
@@ -4048,6 +4158,10 @@
             <span class="score-bar-streak" id="score-bar-streak">&#x1F525; <span id="score-bar-streak-count">0</span></span>
             <button class="score-bar-examples-btn" id="back-to-examples-btn" onclick="switchMode('learn');if(window._workedExamples&&window._workedExamples.length)renderLearnExample();">Back to examples</button>
           </div>
+          <!-- Adopted here from the bottom-right corner: the bug and tour
+               buttons floated over the content as FABs. Lesson pages already
+               relocate the same pair into a utility row for the same reason. -->
+          <span class="score-bar-utils" id="score-bar-utils"></span>
           <button class="dark-mode-toggle" id="dark-mode-toggle" aria-pressed="false" title="Dark mode">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
           </button>
@@ -6703,12 +6817,13 @@
     function updateCalcFab(problem) {
       var fab = document.getElementById('calc-fab');
       var panel = document.getElementById('calc-float');
+      var body = document.getElementById('calc-float-body');
       if (!fab || !panel) return;
       var need = !!(problem && problem.calculator === true) && !panelHasCalculator();
       fab.style.display = need ? '' : 'none';
       if (!need) {
         panel.classList.remove('open');
-        panel.innerHTML = '';
+        if (body) body.innerHTML = '';
         fab.setAttribute('aria-expanded', 'false');
       }
     }
@@ -6716,18 +6831,99 @@
     function toggleCalcFloat() {
       var fab = document.getElementById('calc-fab');
       var panel = document.getElementById('calc-float');
-      if (!panel) return;
+      var body = document.getElementById('calc-float-body');
+      if (!panel || !body) return;
       if (panel.classList.contains('open')) {
         panel.classList.remove('open');
-        panel.innerHTML = '';                     // drop stale calc state
+        body.innerHTML = '';                      // drop stale calc state
         if (fab) fab.setAttribute('aria-expanded', 'false');
         return;
       }
-      renderCalculatorTool({}, panel);
+      renderCalculatorTool({}, body);
+      panel.classList.remove('minimised');
+      var mb = document.getElementById('calc-float-min');
+      if (mb) { mb.textContent = '−'; mb.title = 'Minimise'; }
       panel.classList.add('open');
       if (fab) fab.setAttribute('aria-expanded', 'true');
     }
     window.toggleCalcFloat = toggleCalcFloat;
+
+    /* Detachable calculator: drag it anywhere by the title bar, minimise it to
+       just that bar, close it. Position is kept between openings so a student
+       who parks it out of the way finds it there next time. */
+    (function initCalcPanelChrome() {
+      var panel = document.getElementById('calc-float');
+      var bar = document.getElementById('calc-float-bar');
+      if (!panel || !bar) return;
+      var dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+
+      bar.addEventListener('pointerdown', function (e) {
+        if (e.target.closest('.calc-float-btn')) return;   // buttons are not a drag handle
+        var r = panel.getBoundingClientRect();
+        // Anchored bottom/right by CSS; switch to left/top so dragging is absolute.
+        panel.style.left = r.left + 'px';
+        panel.style.top = r.top + 'px';
+        panel.style.right = 'auto';
+        panel.style.bottom = 'auto';
+        dragging = true; sx = e.clientX; sy = e.clientY; ox = r.left; oy = r.top;
+        try { bar.setPointerCapture(e.pointerId); } catch (err) {}
+        e.preventDefault();
+      });
+
+      bar.addEventListener('pointermove', function (e) {
+        if (!dragging) return;
+        var w = panel.offsetWidth, h = panel.offsetHeight;
+        var nx = Math.max(4, Math.min(ox + (e.clientX - sx), window.innerWidth - w - 4));
+        var ny = Math.max(4, Math.min(oy + (e.clientY - sy), window.innerHeight - h - 4));
+        panel.style.left = nx + 'px';
+        panel.style.top = ny + 'px';
+      });
+
+      ['pointerup', 'pointercancel'].forEach(function (t) {
+        bar.addEventListener(t, function (e) {
+          dragging = false;
+          try { bar.releasePointerCapture(e.pointerId); } catch (err) {}
+        });
+      });
+
+      var minBtn = document.getElementById('calc-float-min');
+      if (minBtn) minBtn.addEventListener('click', function () {
+        var min = panel.classList.toggle('minimised');
+        this.textContent = min ? '+' : '−';
+        this.title = min ? 'Restore' : 'Minimise';
+        this.setAttribute('aria-label', min ? 'Restore calculator' : 'Minimise calculator');
+      });
+
+      var closeBtn = document.getElementById('calc-float-close');
+      if (closeBtn) closeBtn.addEventListener('click', function () { toggleCalcFloat(); });
+
+      // keep it on screen if the window shrinks under it
+      window.addEventListener('resize', function () {
+        if (panel.style.left === '' || !panel.classList.contains('open')) return;
+        var w = panel.offsetWidth, h = panel.offsetHeight;
+        panel.style.left = Math.max(4, Math.min(parseFloat(panel.style.left), window.innerWidth - w - 4)) + 'px';
+        panel.style.top = Math.max(4, Math.min(parseFloat(panel.style.top), window.innerHeight - h - 4)) + 'px';
+      });
+    })();
+
+    /* Bug + tour buttons arrive as fixed-position FABs from deferred scripts,
+       so watch for them rather than assuming they exist at load. */
+    function adoptUtilityButtons() {
+      var host = document.getElementById('score-bar-utils');
+      if (!host) return;
+      ['.bugr-fab', '.sv-tour-replay'].forEach(function (sel) {
+        var el = document.querySelector(sel);
+        if (el && el.parentNode !== host) host.appendChild(el);
+      });
+    }
+    (function watchUtilityButtons() {
+      adoptUtilityButtons();
+      if (document.body) {
+        new MutationObserver(adoptUtilityButtons)
+          .observe(document.body, { childList: true, subtree: true });
+      }
+      setTimeout(adoptUtilityButtons, 2500);
+    })();
 
     function renderStatsTool(problem, area) {
       var tool = detectStatsTool(problem);

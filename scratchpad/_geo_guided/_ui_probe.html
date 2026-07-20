@@ -1,0 +1,43 @@
+<!doctype html>
+<meta charset="utf-8"><title>ui probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/8" style="width:1300px;height:900px"></iframe>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false; try{ok=!!d().getElementById('score-bar-utils')&&typeof w().toggleCalcFloat==='function';}catch(e){}
+  if((ok&&t>140)||t>700){
+    var out=[];
+    if(!ok){L.textContent='not ready';document.title='DONE';return;}
+    var host=d().getElementById('score-bar-utils');
+    out.push('adopted into score bar: '+[...host.children].map(function(c){return c.className;}).join(' | ')||'(none)');
+    var stray=[...d().querySelectorAll('.bugr-fab,.sv-tour-replay')].filter(function(e){return !host.contains(e);});
+    out.push('still floating loose: '+stray.length);
+    // dark mode
+    d().getElementById('dark-mode-toggle').click();
+    setTimeout(function(){
+      var cs=function(sel,prop){var e=d().querySelector(sel);return e?d().defaultView.getComputedStyle(e)[prop]:'(absent)';};
+      out.push('DARK score-bar bg = '+cs('.practice-score-bar','backgroundColor'));
+      out.push('DARK lesson pill bg = '+cs('.header-lesson-pill','backgroundColor'));
+      // calculator
+      w().updateCalcFab({calculator:true,chart:{}});
+      w().toggleCalcFloat();
+      var panel=d().getElementById('calc-float');
+      out.push('calc open='+panel.classList.contains('open')+' keypad='+!!panel.querySelector('#calc-value')
+               +' bar='+!!d().getElementById('calc-float-bar'));
+      out.push('DARK guided-input bg = '+cs('.guided-input','backgroundColor'));
+      // minimise
+      d().getElementById('calc-float-min').click();
+      out.push('minimised='+panel.classList.contains('minimised')+' bodyHidden='+
+               (d().defaultView.getComputedStyle(d().getElementById('calc-float-body')).display==='none'));
+      d().getElementById('calc-float-min').click();
+      out.push('restored='+!panel.classList.contains('minimised'));
+      L.textContent=out.join(String.fromCharCode(10));
+      document.title='DONE';
+    },900);
+    return;
+  }
+  t++;setTimeout(tick,50);
+})();
+</script>

@@ -1,0 +1,33 @@
+<!doctype html>
+<meta charset="utf-8"><title>fab probe</title>
+<pre id="log" style="font:12px ui-monospace,monospace">loading…</pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/8" style="width:1300px;height:900px"></iframe>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;}
+(function tick(){
+  var ok=false; try{ok=!!d().getElementById('practice-columns');}catch(e){}
+  if((ok&&t>160)||t>600){
+    var out=[];
+    try{
+      [...d().querySelectorAll('body *')].forEach(function(el){
+        var cs=d().defaultView.getComputedStyle(el);
+        if(cs.position==='fixed'){
+          var r=el.getBoundingClientRect();
+          if(r.width>8&&r.width<400){
+            out.push([el.tagName.toLowerCase(),
+              'id='+(el.id||'-'),
+              'cls='+(el.className&&el.className.baseVal!==undefined?el.className.baseVal:String(el.className)).slice(0,40),
+              'r='+Math.round(window.innerWidth-r.right)+' b='+Math.round(d().defaultView.innerHeight-r.bottom),
+              'z='+cs.zIndex,
+              'txt='+(el.textContent||'').trim().slice(0,20)].join('  '));
+          }
+        }
+      });
+    }catch(e){out.push('err '+e);}
+    L.textContent=out.join(String.fromCharCode(10))||'none found';
+    document.title='PROBE DONE';return;
+  }
+  t++;setTimeout(tick,50);
+})();
+</script>

@@ -1,0 +1,23 @@
+<!doctype html>
+<meta charset="utf-8"><title>dark shot</title>
+<style>body{margin:0}iframe{border:0;display:block}</style>
+<iframe id="f" style="width:1300px;height:900px"></iframe>
+<script>
+var qs=new URLSearchParams(location.search);
+document.getElementById('f').src=qs.get('path')||'/practice/geography-aqa/geographical-skills/8';
+var f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false; try{ok=!!d().getElementById('dark-mode-toggle')&&typeof w().toggleCalcFloat==='function';}catch(e){}
+  if(ok&&t>150){
+    d().getElementById('dark-mode-toggle').click();
+    w().updateCalcFab({calculator:true,chart:{}});
+    w().toggleCalcFloat();
+    w().calcDigit('4');w().calcDigit('2');w().calcOp('*');w().calcDigit('3');w().calcEq();
+    setTimeout(function(){document.title='SHOT READY';},1200);
+    return;
+  }
+  if(t>700){document.title='SHOT TIMEOUT';return;}
+  t++;setTimeout(tick,50);
+})();
+</script>

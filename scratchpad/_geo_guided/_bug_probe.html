@@ -1,0 +1,27 @@
+<!doctype html><meta charset="utf-8"><title>bug probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/8" style="width:1300px;height:900px"></iframe>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;}
+(function tick(){
+  var ok=false;try{ok=!!d().getElementById('score-bar-utils');}catch(e){}
+  if((ok&&t>200)||t>700){
+    var out=[],host=d().getElementById('score-bar-utils');
+    ['.bugr-fab','.sv-tour-replay'].forEach(function(s){
+      var el=d().querySelector(s);
+      if(!el){out.push(s+' ABSENT');return;}
+      var cs=d().defaultView.getComputedStyle(el),r=el.getBoundingClientRect();
+      out.push([s,'parent='+(el.parentElement&&el.parentElement.id||el.parentElement.className||'?'),
+        'pos='+cs.position,'w='+Math.round(r.width),'x='+Math.round(r.left),'y='+Math.round(r.top),
+        'inHost='+host.contains(el)].join('  '));
+    });
+    // anything else fixed bottom-right?
+    [...d().querySelectorAll('body *')].forEach(function(el){
+      var cs=d().defaultView.getComputedStyle(el);
+      if(cs.position==='fixed'){var r=el.getBoundingClientRect();
+        if(r.width>20&&r.width<80&&r.top>600) out.push('OTHER FIXED: '+el.tagName+'.'+String(el.className).slice(0,30)+' x='+Math.round(r.left)+' y='+Math.round(r.top));}
+    });
+    L.textContent=out.join(String.fromCharCode(10));document.title='DONE';return;}
+  t++;setTimeout(tick,50);})();
+</script>

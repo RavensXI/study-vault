@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8"><title>body probe</title>
+<pre id="log"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/8" style="width:1200px;height:700px"></iframe>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+(function tick(){var d=null;try{d=f.contentDocument;}catch(e){}
+ if((d&&d.body&&d.getElementById('practice-score-bar')&&t>90)||t>500){
+   d.getElementById('dark-mode-toggle').click();
+   setTimeout(function(){
+     var b=d.body,el=d.getElementById('practice-score-bar');
+     L.textContent=['bodyClass='+b.className,'dataSkin='+b.getAttribute('data-skin'),
+       'scorebar bg='+d.defaultView.getComputedStyle(el).backgroundColor].join(String.fromCharCode(10));
+     document.title='DONE';},800);
+   return;}
+ t++;setTimeout(tick,50);})();
+</script>
