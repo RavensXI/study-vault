@@ -1,0 +1,40 @@
+<!doctype html><meta charset="utf-8"><title>unit probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" style="width:1300px;height:900px"></iframe>
+<script>
+document.getElementById('f').src='/practice/geography-aqa/geographical-skills/1?cb='+Date.now();
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;try{ok=!!w()._problemBank;}catch(e){}
+  if(ok&&t>140){
+    var pb=w()._problemBank,out=[],n=0,first=null;
+    ['bronze','silver','gold'].forEach(function(tr){(pb[tr]||[]).forEach(function(p,i){
+      if(p.unit){n++; if(!first&&p.input_type!=='multiple_choice')first=[tr,i,p];}});});
+    out.push('units present in _problemBank: '+n);
+    if(!first){L.textContent=out.join('\n');document.title='DONE';return;}
+    out.push('target '+first[0]+'['+first[1]+'] unit='+JSON.stringify(first[2].unit));
+    // practiceState.index is not an index into _problemBank, so move the
+    // target to position 0 and render that instead of chasing the mapping.
+    var arr=pb[first[0]];
+    arr.splice(arr.indexOf(first[2]),1); arr.unshift(first[2]);
+    w().practiceState.currentTier=first[0];
+    w().practiceState[first[0]].index=0;
+    w().practiceState.completionShown[first[0]]=true;
+    w().renderCurrentProblem();
+    setTimeout(function(){
+      var suf=d().querySelector('.problem-answer-unit');
+      out.push('rendered suffix: '+(suf?JSON.stringify(suf.textContent):'NOT RENDERED'));
+      var cp=w()._currentProblem||{};
+      out.push('live problem unit='+JSON.stringify(cp.unit)+' type='+cp.input_type);
+      var inp=d().getElementById('problem-input-a');
+      if(inp&&cp.solutions){inp.value=String(cp.solutions[0]);w().checkAnswer();}
+      setTimeout(function(){
+        var fb=d().querySelector('.feedback-text');
+        out.push('feedback: '+(fb?JSON.stringify(fb.textContent.trim()):'none'));
+        L.textContent=out.join('\n');document.title='DONE';},600);
+    },700);
+    return;}
+  if(t>700){document.title='TIMEOUT';return;}
+  t++;setTimeout(tick,50);})();
+</script>

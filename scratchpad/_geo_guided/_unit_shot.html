@@ -1,0 +1,28 @@
+<!doctype html>
+<meta charset="utf-8"><title>unit shot</title>
+<style>body{margin:0}iframe{border:0;display:block}</style>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/1" style="width:1300px;height:940px"></iframe>
+<script>
+var f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;try{ok=!!w()._problemBank&&typeof w().renderCurrentProblem==='function';}catch(e){}
+  if(ok&&t>130){
+    var pb=w()._problemBank,hit=null;
+    ['bronze','silver','gold'].forEach(function(tr){(pb[tr]||[]).forEach(function(p,i){
+      if(!hit&&(p.display||'').indexOf('lag time')>=0) hit=[tr,i];});});
+    if(hit){
+      w().practiceState.currentTier=hit[0];
+      w().practiceState[hit[0]].index=hit[1];
+      w().practiceState.completionShown[hit[0]]=true;
+      w().renderCurrentProblem();
+      setTimeout(function(){
+        var inp=d().getElementById('problem-input-a');
+        if(inp){inp.value='8'; w().checkAnswer();}
+        setTimeout(function(){document.title='SHOT READY';},700);
+      },700);
+    } else { document.title='NO TARGET'; }
+    return;}
+  if(t>700){document.title='TIMEOUT';return;}
+  t++;setTimeout(tick,50);})();
+</script>
