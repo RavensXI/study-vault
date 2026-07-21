@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sv-v5';
+const CACHE_VERSION = 'sv-v6';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 
@@ -115,6 +115,10 @@ self.addEventListener('fetch', function (event) {
       }
       return response;
     }).catch(function () {
+      // Offline fallback. This also fires when a fetch fails for reasons that
+      // are NOT offline (a preview deployment's SSO redirect, for one), and it
+      // will then serve a stale page indefinitely with no error in the console.
+      // Bump CACHE_VERSION whenever shipping a change that must not be missed.
       return caches.match(event.request);
     })
   );
