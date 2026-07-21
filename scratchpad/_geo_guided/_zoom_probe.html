@@ -1,0 +1,36 @@
+<!doctype html><meta charset="utf-8"><title>zoom probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/11" style="width:1300px;height:900px"></iframe>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;try{ok=typeof w().lightboxOpen==='function';}catch(e){}
+  if(ok&&t>120){
+    var out=[];
+    w().lightboxOpen('https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/geography/os-maps/pendle-hill-z16-final.jpg');
+    setTimeout(function(){
+      var ov=d().querySelector('.lb-overlay'),img=d().getElementById('lb-img'),lvl=d().getElementById('lb-level');
+      if(!ov){L.textContent='overlay not created';document.title='DONE';return;}
+      out.push('overlay open: true  natural='+img.naturalWidth+'x'+img.naturalHeight);
+      out.push('starts at: '+lvl.textContent+'  transform='+img.style.transform.slice(0,52));
+      // zoom in twice via the bar
+      var inBtn=ov.querySelector('[data-act="in"]');
+      inBtn.click(); inBtn.click();
+      setTimeout(function(){
+        out.push('after 2x zoom-in: '+lvl.textContent+'  transform='+img.style.transform.slice(0,52));
+        ov.querySelector('[data-act="reset"]').click();
+        setTimeout(function(){
+          out.push('after reset: '+lvl.textContent);
+          ov.querySelector('[data-act="close"]').click();
+          setTimeout(function(){
+            out.push('closed: '+(d().querySelector('.lb-overlay')===null));
+            out.push('body scroll restored: '+JSON.stringify(d().body.style.overflow));
+            L.textContent=out.join(String.fromCharCode(10));document.title='DONE';},250);
+        },250);
+      },300);
+    },1800);
+    return;}
+  if(t>700){document.title='TIMEOUT';return;}
+  t++;setTimeout(tick,50);})();
+</script>
