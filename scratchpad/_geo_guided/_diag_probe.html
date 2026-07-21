@@ -1,0 +1,42 @@
+<!doctype html><meta charset="utf-8"><title>diag</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/11?probe=1"></iframe>
+<script>
+var fr=document.getElementById('f'),L=document.getElementById('log'),t=0,out=[];
+function d(){return fr.contentDocument;} function w(){return fr.contentWindow;}
+function clean(h){return (h||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}
+(function tick(){
+  var ok=false; try{ok=!!w()._problemBank&&typeof w().checkAnswer==='function';}catch(e){}
+  if(ok&&t>120){
+    var arr=w()._problemBank.bronze,idx=-1;
+    for(var j=0;j<arr.length;j++) if(clean(arr[j].display).indexOf('What is the four-figure grid reference of the grid square co')===0){idx=j;break;}
+    out.push('found at bank index '+idx+' of '+arr.length);
+    out.push('display: '+clean(arr[idx].display).slice(0,70));
+    out.push('solutions: '+JSON.stringify(arr[idx].solutions));
+    w().practiceState.currentTier='bronze';
+    w().practiceState.currentIndex=idx;
+    w().practiceState.completionShown.bronze=true;
+    w().practiceState.answered=false;
+    w().renderCurrentProblem();
+    setTimeout(function(){
+      var gc=d().getElementById('guided-card'), pc=d().getElementById('current-problem-card');
+      out.push('guided card display: '+(gc?(gc.style.display||'SHOWN'):'absent'));
+      out.push('problem card display: '+(pc?(pc.style.display||'SHOWN'):'absent'));
+      out.push('rendered question: '+clean(d().getElementById('problem-equation')?d().getElementById('problem-equation').innerHTML:'').slice(0,70));
+      var inp=d().getElementById('problem-input-a');
+      out.push('input present: '+!!inp);
+      if(inp){ inp.value='6841'; out.push('input value set to: '+inp.value); }
+      out.push('practiceState.answered before: '+w().practiceState.answered);
+      out.push('currentIndex before check: '+w().practiceState.currentIndex);
+      w().checkAnswer();
+      setTimeout(function(){
+        out.push('answered after: '+w().practiceState.answered);
+        out.push('card classes: '+(pc?pc.className:'-'));
+        var fb=d().getElementById('problem-feedback')||d().querySelector('.feedback-box');
+        out.push('feedback: '+clean(fb?fb.innerHTML:'(none)').slice(0,120));
+        L.textContent=out.join(String.fromCharCode(10)); document.title='DONE';
+      },400);
+    },700);
+    return;}
+  if(t>700){document.title='TIMEOUT';return;} t++;setTimeout(tick,50);})();
+</script>

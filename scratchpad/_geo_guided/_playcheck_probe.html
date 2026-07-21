@@ -1,0 +1,130 @@
+<!doctype html><meta charset="utf-8"><title>play-through check</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f"></iframe>
+<script>
+/* Types each authored answer into the real player and asks whether the real
+   checkAnswer() accepts it.
+
+   Everything upstream of this checks the data against itself. This checks the
+   data against the thing a student actually uses: the ±1 tolerance on six-figure
+   references, the 0.01 float compare, unit rendering, and above all the
+   multiple-choice mapping -- options are rendered in a SHUFFLED order and mapped
+   back through data-idx, so a solution index that drifted while the options were
+   rewritten would look perfectly right in the JSON and be wrong on screen.
+
+   A wrong answer is entered afterwards as a control. A question that accepts
+   everything is not passing, it is broken. */
+var fr = document.getElementById('f');
+fr.style.width = '1400px'; fr.style.height = '820px';
+var L = document.getElementById('log'), out = [], man = null, byLesson = {}, order = [], li = 0;
+var pass = 0, fail = 0, ctrlfail = 0;
+
+function d(){ return fr.contentDocument; }
+function w(){ return fr.contentWindow; }
+
+fetch('/scratchpad/_geo_guided/_playcheck_manifest.json').then(function(r){ return r.json(); }).then(function(j){
+  man = j;
+  j.forEach(function(m){ (byLesson[m.lesson] = byLesson[m.lesson] || []).push(m); });
+  order = Object.keys(byLesson).sort(function(a,b){ return a-b; });
+  next();
+});
+
+function clean(h){ return (h||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim(); }
+
+/* Find the problem by its text, and do not touch the bank.
+   The first version of this looked up bank[tier][index] using the database
+   index and then moved the problem to the front of the array. Both were wrong:
+   _problemBank is shuffled when the lesson loads, so the database index points
+   at a different question, and mutating the array meant every later lookup in
+   the same tier was wrong again. It reported 21 of 28 questions broken. */
+function render(m) {
+  var pb = w()._problemBank, arr = pb[m.tier] || [];
+  var idx = -1;
+  for (var j = 0; j < arr.length; j++) {
+    if (clean(arr[j].display) === m.match) { idx = j; break; }
+  }
+  if (idx < 0) return null;
+  w().practiceState.currentTier = m.tier;
+  w().practiceState.currentIndex = idx;
+  w().practiceState.completionShown[m.tier] = true;
+  w().practiceState.answered = false;
+  w()._currentProblem = null;
+  w().renderCurrentProblem();
+  return arr[idx];
+}
+
+function enter(m, value) {
+  var doc = d();
+  if (m.input_type === 'multiple_choice') {
+    var btn = doc.querySelector('.mc-option[data-idx="' + value + '"]');
+    if (!btn) return 'no option with data-idx=' + value;
+    btn.click();
+  } else {
+    var inp = doc.getElementById('problem-input-a');
+    if (!inp) return 'no input field';
+    inp.value = String(value);
+  }
+  w().checkAnswer();
+  return null;
+}
+
+function verdict() {
+  var card = d().getElementById('current-problem-card');
+  if (card && card.classList.contains('card-correct')) return true;
+  var fb = d().querySelector('.feedback-correct');
+  return !!fb;
+}
+
+function runLesson(n, done) {
+  fr.src = '/practice/geography-aqa/geographical-skills/' + n + '?probe=1';
+  var t = 0;
+  (function tick(){
+    var ok = false;
+    try { ok = !!w()._problemBank && typeof w().checkAnswer === 'function'; } catch(e){}
+    if (ok && t > 120) {
+      var list = byLesson[n], k = 0;
+      (function step(){
+        if (k >= list.length) return done();
+        var m = list[k++];
+        var p = render(m);
+        if (!p) { out.push('L' + n + ' ' + m.tier + '[' + m.index + '] MISSING'); fail++; return setTimeout(step, 60); }
+        var err = enter(m, m.solution);
+        setTimeout(function(){
+          var good = err ? false : verdict();
+          if (good) pass++; else fail++;
+          var line = 'L' + n + ' ' + (m.tier + '[' + m.index + ']    ').slice(0,11) +
+                     ' answer=' + String(m.solution).padEnd(9) +
+                     (good ? 'ACCEPTED' : 'REJECTED' + (err ? ' (' + err + ')' : ''));
+          // control: a deliberately wrong answer must NOT be accepted
+          render(m);
+          var wrong = m.input_type === 'multiple_choice'
+              ? (m.solution === 0 ? 1 : 0)
+              : (typeof m.solution === 'number' ? m.solution + 7 : 0);
+          var werr = enter(m, wrong);
+          setTimeout(function(){
+            var acceptedWrong = werr ? false : verdict();
+            if (acceptedWrong) { ctrlfail++; line += '  <-- ALSO accepts ' + wrong; }
+            out.push(line);
+            setTimeout(step, 60);
+          }, 260);
+        }, 320);
+      })();
+      return;
+    }
+    if (t > 700) { out.push('L' + n + ' TIMEOUT'); return done(); }
+    t++; setTimeout(tick, 50);
+  })();
+}
+
+function next(){
+  if (li >= order.length) {
+    out.push('');
+    out.push('accepted ' + pass + ' / ' + (pass + fail) +
+             '   rejected ' + fail + '   also-accepts-a-wrong-answer ' + ctrlfail);
+    L.textContent = out.join(String.fromCharCode(10));
+    document.title = 'DONE';
+    return;
+  }
+  runLesson(order[li++], next);
+}
+</script>
