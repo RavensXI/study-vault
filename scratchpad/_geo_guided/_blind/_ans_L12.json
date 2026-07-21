@@ -1,0 +1,106 @@
+{
+  "maps": [
+    {
+      "url_tail": "clitheroe-z16-final.jpg",
+      "px_per_km": 708.6,
+      "defects": "Genuine duplicate place name: TWO separate 'Nu Farm' labels appear on this map, at pixel (863,410) near Chapel House and at pixel (1314,756) near Darwens Farm / Chaigley Ct, roughly 0.8 km apart. Both have their own distinct building cluster, so this is not a rendering glitch of one point printed twice -- it is two genuinely different, identically-named locations on the same sheet. This makes Q01 ('Long Plantation to Nu Farm') ambiguous. No other defects (contours, colour fills, blank areas all look normal)."
+    },
+    {
+      "url_tail": "yorkshire-dales-z15-w90-final.jpg",
+      "px_per_km": 356.7,
+      "defects": "none observed"
+    },
+    {
+      "url_tail": "ribble-valley-z15-final.jpg",
+      "px_per_km": 355.7,
+      "defects": "none observed. Note: 'Scale Hall' and 'Newton' are large named residential areas/villages, not single-point features, so the exact anchor point used for measurement (label text centre) carries some inherent positional uncertainty (~50-100 m)."
+    },
+    {
+      "url_tail": "peak-district-z15-final.jpg",
+      "px_per_km": 350.7,
+      "defects": "'Red Barn' has no drawn building icon on this map -- unlike every other named farm on this sheet (Dunscar, Marston, Woodseats, Spring House, Knowlegates, Rowter all show a small tan building block), 'Red Barn' is a bare text label sitting at a stream/hedge junction with no building footprint under or near it. Used the label-text centroid as its point, which carries more positional uncertainty than the building-block points used elsewhere."
+    }
+  ],
+  "answers": [
+    {
+      "qid": "L12-Q01",
+      "answer": null,
+      "raw_measure": "0.437 km to the nearer 'Nu Farm' (863,410); 1.185 km to the farther 'Nu Farm' (1314,756)",
+      "working": "Grid lines confirmed 1 km spacing (labelled 68/69 verticals, 42/41 horizontals; px_per_km = 712.5 horizontal, 704.8 vertical). Long Plantation centroid measured at (773,115). Two distinct 'Nu Farm' labels exist on this map: one at (863,410) [~0.44 km from Long Plantation -> rounds to 0.5 km] and one at (1314,756) [~1.18 km from Long Plantation -> rounds to 1.0 km]. These two candidate answers (0.5 km vs 1.0 km) are not close to each other, so this is a real fork, not just rounding noise.",
+      "confidence": "low",
+      "concerns": "Cannot answer without guessing which 'Nu Farm' is intended -- the map has two genuinely different locations both labelled 'Nu Farm', giving two different rounded answers (0.5 km or 1.0 km). Flagging as a map/question defect rather than picking one."
+    },
+    {
+      "qid": "L12-Q02",
+      "answer": "N",
+      "raw_measure": "bearing approx 6.7 degrees from north",
+      "working": "Grid lines confirmed 1 km spacing (labelled 88/89 verticals, 74/73/72 horizontals; px_per_km = 357 horizontal, 356.5 vertical). Cow Close Fell label centre at (720,721); Wilson's Pasture label centre at (767,321). Vector from Cow Close Fell to Wilson's Pasture: dx=+47 px (east), dy=-400 px (north). Bearing = atan2(47,400) = 6.7 degrees, i.e. almost due north with a very slight easting.",
+      "confidence": "high",
+      "concerns": "none -- bearing sits 15.8 degrees clear of the nearest sector boundary (22.5 degrees)"
+    },
+    {
+      "qid": "L12-Q03",
+      "answer": 2.0,
+      "raw_measure": "1.842 km",
+      "working": "Grid lines confirmed 1 km spacing (labelled 46/47/48/49 verticals, 65/64/63 horizontals; px_per_km = 359.3 horizontal, 352.0 vertical). Scale Hall label centre at (320,1078); Newton label centre at (982,1080) -- almost exactly due east of each other (dy is negligible). dx=662 px -> 1.842 km, dy=2 px -> 0.006 km. Straight-line distance = 1.842 km, rounding to 2.0 km.",
+      "confidence": "medium",
+      "concerns": "Measured distance (1.842 km) is only 0.092 km from the 1.75 km rounding boundary between 1.5 and 2.0 -- within the 0.1 km flag threshold. Both places are large named areas rather than single point features, so the label-centre anchor used here has some inherent slack; a small shift in either anchor point could tip this to 1.5 km."
+    },
+    {
+      "qid": "L12-Q04",
+      "answer": "E",
+      "raw_measure": "bearing approx 92.8 degrees from north",
+      "working": "Grid lines confirmed 1 km spacing (labelled 13/14/15/16 verticals, 85/84/83/82 horizontals; px_per_km = 348.7 horizontal, 352.7 vertical). Dunscar Farm building cluster at (580,612); Marston Farm building cluster at (1155,640). Vector from Dunscar to Marston: dx=+575 px (east), dy=+28 px (south, i.e. very slightly south of due east). Bearing = 180 - atan(575/28) = 92.8 degrees.",
+      "confidence": "high",
+      "concerns": "none -- bearing sits 19.7 degrees clear of the nearest sector boundary (112.5 degrees)"
+    },
+    {
+      "qid": "L12-Q05",
+      "answer": 2.0,
+      "raw_measure": "2.052 km",
+      "working": "Same grid as Q04 (px_per_km = 348.7 horizontal, 352.7 vertical). Woodseats building cluster at (379,369); Spring House Farm building cluster at (1093,416). dx=714 px -> 2.048 km, dy=47 px -> 0.133 km. Straight-line distance = sqrt(2.048^2+0.133^2) = 2.052 km, rounds to 2.0 km.",
+      "confidence": "high",
+      "concerns": "none -- 2.052 km is 0.20 km clear of the nearest rounding boundary (2.25 km)"
+    },
+    {
+      "qid": "L12-Q06",
+      "answer": "SE",
+      "raw_measure": "bearing approx 136.1 degrees from north",
+      "working": "Same grid as Q01 (px_per_km = 712.5 horizontal, 704.8 vertical). Chadswell Home Farm building cluster at (421,242); Chaigley Hall building cluster at (968,811). Vector from Chadswell to Chaigley Hall: dx=+547 px (east), dy=+569 px (south). Bearing = 180 - atan(547/569) = 136.1 degrees.",
+      "confidence": "high",
+      "concerns": "none -- bearing sits 21.4 degrees clear of the nearest sector boundary (157.5 degrees)"
+    },
+    {
+      "qid": "L12-Q07",
+      "answer": 1.5,
+      "raw_measure": "1.51 km (using 'Castleton' label centre) / 1.37 km (using dense-building centroid of the village) -- both round to the same answer",
+      "working": "Same grid as Q04/Q05. Knowlegates Farm building cluster at (440,629). Castleton is a village, so I checked two anchor conventions: label-text centre (925,834) gives dx=485,dy=205 -> 1.508 km; built-up-area centroid over a wider box (890,787) gives dx=450,dy=158 -> 1.365 km. Both round to 1.5 km.",
+      "confidence": "high",
+      "concerns": "Castleton is a whole village rather than a single point, so the exact anchor is inherently approximate, but the rounded answer (1.5 km) is robust to that choice -- both conventions tested land on the same 0.5 km bucket."
+    },
+    {
+      "qid": "L12-Q08",
+      "answer": 2.5,
+      "raw_measure": "2.575 km",
+      "working": "Same grid as Q04/Q05/Q07. Red Barn label centre (no building icon present) at (734,338); Rowter Farm building cluster at (215,1079). dx=519 px -> 1.488 km, dy=741 px -> 2.101 km. Straight-line distance = sqrt(1.488^2+2.101^2) = 2.575 km, rounds to 2.5 km.",
+      "confidence": "medium",
+      "concerns": "Red Barn has no drawn building on this map (see map defect note) -- only a bare text label -- so its point position is less certain than a building-block point. 2.575 km is 0.175 km from the nearest rounding boundary (2.75 km), which is outside the strict 0.1 km flag threshold but close enough to mention given the Red Barn positional uncertainty."
+    },
+    {
+      "qid": "L12-Q09",
+      "answer": "1.5 km, SE",
+      "raw_measure": "1.629 km, bearing approx 131.9 degrees from north",
+      "working": "Same grid as Q03 (px_per_km = 359.3 horizontal, 352.0 vertical). Six-figure grid ref 476636 = easting 47.6, northing 63.6 -> pixel (750.6, 772.8), which falls within the dense terraced-housing area near 'Yale Trees' (confirmed genuine houses at that spot). Grid ref 488625 = easting 48.8, northing 62.5 -> pixel (1182.5, 1160), which falls within the curved-street housing estate labelled 'Ridge' (confirmed genuine houses at that spot). Vector A->B: dx=+431.9 px (east), dy=+387.2 px (south). Distance = sqrt(1.202^2+1.100^2) = 1.629 km, rounds to 1.5 km. Bearing = 180 - atan(431.9/387.2) = 131.9 degrees = SE. This matches option 1 ('1.5 km, SE').",
+      "confidence": "high",
+      "concerns": "1.629 km is 0.12 km from the 1.75 km rounding boundary -- just outside the 0.1 km flag threshold, but noting it since it's not a huge margin. Bearing (131.9 degrees) is a comfortable 19.4 degrees clear of the nearest sector boundary."
+    },
+    {
+      "qid": "L12-Q10",
+      "answer": 3.0,
+      "raw_measure": "3.0003 km",
+      "working": "Vertical grid line for easting '46' at pixel x=176; vertical grid line for easting '49' at pixel x=1254 (three grid squares apart, confirmed by the intervening '47' and '48' lines at x=535 and x=895, evenly spaced ~359-360 px apart). Distance = (1254-176)/359.33 = 3.0003 km -- this is simply 3 grid squares of 1 km each.",
+      "confidence": "high",
+      "concerns": "none -- this is a deterministic grid-to-grid measurement, not a feature-to-feature one"
+    }
+  ]
+}

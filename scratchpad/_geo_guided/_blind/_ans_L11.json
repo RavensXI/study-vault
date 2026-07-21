@@ -1,0 +1,125 @@
+{
+  "maps": [
+    {
+      "url_tail": "norfolk-broads-z15-final.jpg",
+      "eastings_seen": [38, 39, 40, 41, 42],
+      "northings_seen": [18, 17, 16],
+      "gridline_pixels": {"vertical_x": [140, 471, 803, 1134, 1466], "horizontal_y": [362, 730, 1097]},
+      "defects": "None found. Flat marshland terrain (no contours) is correct for the Broads. Note: the top edge of the image sits only ~6px above where the northing-19 line would fall, so the square 4018 (Low Farm) is very marginally cropped at its north edge - not material to the answer."
+    },
+    {
+      "url_tail": "peak-district-z15-final.jpg",
+      "eastings_seen": [13, 14, 15, 16],
+      "northings_seen": [85, 84, 83, 82],
+      "gridline_pixels": {"vertical_x": [154, 503, 852, 1201], "horizontal_y": [75, 428, 780, 1132]},
+      "defects": "None found. Contour lines around Mam Tor (bottom-left summit, 'Ma[m Tor] 500') and elsewhere are continuous and converge naturally; no dead-stop straight segments or blank/solid-colour patches observed."
+    },
+    {
+      "url_tail": "burnley-unity-z15-final.jpg",
+      "eastings_seen": [83, 84, 85, 86],
+      "northings_seen": [33, 32, 31],
+      "gridline_pixels": {"vertical_x": [340, 695, 1049, 1404], "horizontal_y": [300, 653, 1006]},
+      "defects": "None found."
+    },
+    {
+      "url_tail": "burnley-unity-z16-final.jpg",
+      "eastings_seen": [84, 85],
+      "northings_seen": [33, 32],
+      "gridline_pixels": {"vertical_x": [365, 1075], "horizontal_y": [87, 793]},
+      "defects": "None structurally wrong with the map, but the Library building footprint is small (~28x23 px against a ~710/706 px grid square) and its bounding box straddles both a tenths easting boundary (0.1/0.2) and a tenths northing boundary (0.3/0.4) - see concern on Q04."
+    },
+    {
+      "url_tail": "clitheroe-z16-final.jpg",
+      "eastings_seen": [68, 69],
+      "northings_seen": [42, 41],
+      "gridline_pixels": {"vertical_x": [522.5, 1235], "horizontal_y": [413, 1117.5]},
+      "defects": "None found. Concentric hill contours (250/300 lines, bottom-left) are continuous and plausible for the terrain."
+    }
+  ],
+  "answers": [
+    {
+      "qid": "L11-Q01",
+      "answer": 4016,
+      "working": "norfolk-broads-z15-final.jpg. Verticals read 38,39,40,41,42 at x=140,471,803,1134,1466; horizontals read 18,17,16 at y=362,730,1097. The 'Thurne' village label and its built-up cluster sit at approx (905,948), which is between the 40 (x=803) and 41 (x=1134) verticals, and between the 17 (y=730) and 16 (y=1097) horizontals, i.e. in the square whose SW corner is (40,16). Comfortably mid-square in both directions, not near any boundary.",
+      "confidence": "high",
+      "concerns": ""
+    },
+    {
+      "qid": "L11-Q02",
+      "answer": 159834,
+      "working": "peak-district-z15-final.jpg. Verticals 13,14,15,16 at x=154,503,852,1201; horizontals 85,84,83,82 at y=75,428,780,1132. Two small building blocks below the 'Marston Farm' road-name label, centroid approx (1189,637). Easting: offset from x=852 is 337/349=0.966 -> tenth digit 9 -> 159. Northing: point lies between y=428(84) and y=780(83), so square 83; offset from bottom line (780-637=143)/352=0.406 -> tenth digit 4 -> 834.",
+      "confidence": "medium",
+      "concerns": "The building sits close to the 15/16 easting boundary (96.6% across square 15) - comfortably still digit 9, but flagging the proximity."
+    },
+    {
+      "qid": "L11-Q03",
+      "answer": 8332,
+      "working": "burnley-unity-z15-final.jpg. Verticals 83,84,85,86 at x=340,695,1049,1404; horizontals 33,32,31 at y=300,653,1006. Burnley Barracks station marker (red dot) at approx (372,387); Burnley Manchester Road station marker at approx (575,597). Both fall between x=340(83)/695(84) and between y=300(33)/653(32), i.e. both inside the same square with SW corner (83,32). Neither marker is near a boundary line.",
+      "confidence": "high",
+      "concerns": ""
+    },
+    {
+      "qid": "L11-Q04",
+      "answer": 841324,
+      "working": "burnley-unity-z16-final.jpg. Verticals 84,85 at x=365,1075; horizontals 33,32 at y=87,793. The 'Library' label sits directly below a small orange building on the south side of Red Lion Street; building bounding box x=486-514 (centre ~500), y=494-517 (centre ~505.5). Easting: (500-365)/710=0.190 -> digit 1 -> 841. Northing: point is between y=87(33) and y=793(32), square 32; offset (793-505.5)/706=0.407 -> digit 4 -> 324.",
+      "confidence": "low",
+      "concerns": "The building is small relative to one grid square and its bounding box straddles both tenths boundaries used here: the easting 0.1/0.2 line falls inside the building footprint (fraction range across the building is ~0.170-0.210), and the northing 0.3/0.4 line also falls inside it (fraction range ~0.391-0.423). Depending on which point on the building is taken as 'the library', 842324, 841323 or 842323 are all defensible alternatives to 841324."
+    },
+    {
+      "qid": "L11-Q05",
+      "answer": 1583,
+      "working": "peak-district-z15-final.jpg. Verticals 13,14,15,16 at x=154,503,852,1201; horizontals 85,84,83,82 at y=75,428,780,1132. Castleton straddles the grid intersection at (852,780). I tallied building-colour pixels in a box around the village by quadrant relative to that intersection: square 1583 (x>=852,y<780) = 572 px, square 1582 (x>=852,y>=780) = 372 px, square 1482 (x<852,y>=780) = 337 px, square 1483 (x<852,y<780) = 119 px. The historic core (crossroads, PO, Cross Street, Church Lane) sits in square 1583, and it also holds the plurality of built-up area, so I've given that as the answer.",
+      "confidence": "medium",
+      "concerns": "Castleton's built-up area genuinely straddles all four squares around the (15,83)/(15,82)/(14,83)/(14,82) intersection. The printed 'Castleton' text label itself is offset south-east of the core, landing in square 1582 rather than 1583 - if the question intends the label position rather than the settlement centre/majority extent, 1582 is the defensible alternative answer."
+    },
+    {
+      "qid": "L11-Q06",
+      "answer": 399171,
+      "working": "norfolk-broads-z15-final.jpg. Verticals 38-42 at x=140,471,803,1134,1466; horizontals 18,17,16 at y=362,730,1097. Followed the narrow channel running south from the Ludham/Womack area down past 'Reed Hall'; it visually merges into the wide meandering channel that loops down from the top-right (Horse Fen) of the map. The confluence vertex (tip of land between the two channels, where their bank-lines converge into one) is at approx (776,668). Easting: (776-471)/332=0.919 -> digit 9 -> 399. Northing: point between y=362(18)/730(17), square 17; (730-668)/368=0.168 -> digit 1 -> 171.",
+      "confidence": "medium",
+      "concerns": "This is not a labelled point - it's a visually-judged confluence vertex, so the exact pixel chosen shifts the answer. An earlier, slightly less precise read of the same junction gave x=768 (fraction 0.894, digit 8, i.e. 398 instead of 399); 398171 is a defensible alternative to 399171. The northing digit (1) is reasonably safe (0.168 vs nearest boundary at 0.2, an 11-12px margin)."
+    },
+    {
+      "qid": "L11-Q07",
+      "answer": 153838,
+      "working": "peak-district-z15-final.jpg. Verticals 13-16 at x=154,503,852,1201; horizontals 85,84,83,82 at y=75,428,780,1132. Building cluster labelled 'Losehill Hall' has centroid approx (966,488). Easting: (966-852)/349=0.327 -> digit 3 -> 153. Northing: point between y=428(84)/780(83), square 83; (780-488)/352=0.830 -> digit 8 -> 838.",
+      "confidence": "high",
+      "concerns": "Northing fraction (0.830) is reasonably but not extremely far from the 0.8/0.9 boundaries (~10px margin either side)."
+    },
+    {
+      "qid": "L11-Q08",
+      "answer": 4018,
+      "working": "norfolk-broads-z15-final.jpg. Same grid as Q01: verticals at x=140,471,803,1134,1466 (38-42); horizontals at y=362,730,1097 (18,17,16). The small building-point marker for 'Low Farm' sits at approx (1015,290), just above the road-end near Red Roofs Farmhouse. This is between x=803(40)/1134(41), and above the y=362(18) line (i.e. in the square whose bottom edge is the 18 line), giving square (40,18).",
+      "confidence": "high",
+      "concerns": "The square's own north edge falls just off the top of the image (see map defects note), but this doesn't affect which square the marker is in."
+    },
+    {
+      "qid": "L11-Q09",
+      "answer": 848320,
+      "working": "burnley-unity-z16-final.jpg. Verticals 84,85 at x=365,1075; horizontals 33,32 at y=87,793. Traced Towneley Holmes Road (unclassified, black-outlined) from its name label westward to where it meets Todmorden Road (A671, green-highlighted); the merge point is at approx (978,741). Easting: (978-365)/710=0.863 -> digit 8 -> 848. Northing: point between y=87(33)/793(32), square 32; (793-741)/706=0.074 -> digit 0 -> 320.",
+      "confidence": "medium",
+      "concerns": "The northing tenths digit (0) is the closest of the two to its boundary: 0.074 vs the 0/1 boundary at 0.1, a margin of about 18px (~2.5% of the square). A slightly different (but still reasonable) choice of 'the meeting point' along the curved junction could shift this to 848321."
+    },
+    {
+      "qid": "L11-Q10",
+      "answer": 6841,
+      "working": "clitheroe-z16-final.jpg. Verticals 68,69 at x=522.5,1235; horizontals 42,41 at y=413,1117.5. Chaigley Hall's building cluster (below the 'Chaigley Hall' label) has centroid approx (967,812). This is between x=522.5(68)/1235(69), and between y=413(42)/1117.5(41) - in the square whose SW corner is (68,41), i.e. below the 42 line. Comfortably mid-square in both directions (fractions 0.62 and 0.43).",
+      "confidence": "high",
+      "concerns": ""
+    },
+    {
+      "qid": "L11-Q11",
+      "answer": 406181,
+      "working": "norfolk-broads-z15-final.jpg. Same grid as Q01/Q08. The Low Farm point marker (small circle) spans x=1012-1019, y=286-292 (roughly), centre approx (1015.5,289). Easting: (1015.5-803)/331=0.642 -> digit 6 -> 406. Northing: point in square 18 (above y=362 line); (362-289)/368=0.198 -> digit 1 -> 181.",
+      "confidence": "medium",
+      "concerns": "The northing tenths digit is extremely close to the 1/2 boundary: fraction 0.198 vs 0.200, i.e. under 1px of margin at this image resolution, well within the size of the marker symbol itself (which spans y=286-299, straddling the boundary at y=288.4). The majority of the symbol's vertical extent (289-299, about 77%) falls on the '1' side, which is why I've given 406181, but 406182 is equally defensible and I cannot rule it out from the image alone."
+    },
+    {
+      "qid": "L11-Q12",
+      "answer": 678422,
+      "working": "clitheroe-z16-final.jpg. Verticals 68,69 at x=522.5,1235 (only the 68 line falls within the image in this area); horizontals 42,41 at y=413,1117.5. The Chadswell Home Farm building cluster (right of its label) has centroid approx (429,254). Easting: point is left of x=522.5(68) i.e. in square 67 (its line-69 companion is off-image to the left); offset measured from the 68 line as (522.5-429)=93.5, so fraction-from-right=93.5/712.5=0.131, giving square-67 fraction 1-0.131=0.869 -> digit 8 -> 678. Northing: point above y=413(42), square 42; (413-254)/704.5=0.226 -> digit 2 -> 422.",
+      "confidence": "high",
+      "concerns": "The 67 easting gridline itself is off the left edge of the image, so the easting tenth digit was computed by measuring back from the visible 68 line rather than forward from a visible left boundary; this is a slightly less direct measurement than usual but the arithmetic is unambiguous and not close to any digit boundary (0.869, ~10px from the 0.8/0.9 boundaries)."
+    }
+  ]
+}
