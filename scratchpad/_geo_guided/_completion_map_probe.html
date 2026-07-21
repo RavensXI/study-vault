@@ -1,0 +1,86 @@
+<!doctype html><meta charset="utf-8"><title>completion map probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/13?probe=1"></iframe>
+<script>
+/* Reproduces Tom's path, which the earlier probe did not.
+
+   _l13_map_probe.html set completionShown = true, which suppresses the very
+   card he was looking at, and it called renderCurrentProblem() directly. So it
+   exercised the ordinary question path and passed while the completion card
+   was broken.
+
+   Here: leave completionShown false so the completion card renders, then do the
+   Learn/Practice round trip that a return visitor makes (the page opens in Learn
+   mode on a second visit; "Start Practice" calls switchMode('practice')).
+   Reports the panel after each step, and finally repeats the check with the
+   global cleared to demonstrate the mechanism itself. */
+var fr = document.getElementById("f");
+fr.style.width = "1400px"; fr.style.height = "820px";
+var L = document.getElementById('log'), out = [], t = 0;
+function d(){ return fr.contentDocument; }
+function w(){ return fr.contentWindow; }
+
+function panel() {
+  var a = d().getElementById('practice-passage-area');
+  if (!a) return { vis:false, note:'absent' };
+  var vis = d().defaultView.getComputedStyle(a).display !== 'none';
+  var img = a.querySelector('img');
+  return { vis: vis, img: img ? img.src.split('/').pop() : null,
+           w: Math.round(a.getBoundingClientRect().width) };
+}
+function say(step) {
+  var p = panel(), card = d().getElementById('guided-card');
+  var label = d().getElementById('guided-label');
+  out.push(step.padEnd(34) + ' panel=' + (p.vis ? 'VISIBLE' : 'hidden') +
+           ' img=' + (p.img || '-') + ' w=' + (p.w || 0) +
+           ' card=' + (card && card.style.display !== 'none' ? (label ? label.textContent : 'shown') : 'hidden') +
+           ' _currentProblem=' + (w()._currentProblem ? 'set' : 'UNSET'));
+}
+
+(function tick(){
+  var ok = false;
+  try { ok = !!w()._problemBank && typeof w().renderCurrentProblem === 'function'; } catch(e){}
+  if (ok && t > 140) {
+    var pb = w()._problemBank, hit = null;
+    ['bronze','silver','gold'].forEach(function(tr){
+      (pb[tr]||[]).forEach(function(p){
+        if (!hit && (p.display||'').indexOf('mountain map') >= 0) hit = [tr,p];
+      });
+    });
+    if (!hit) { L.textContent = 'target problem not found'; document.title='DONE'; return; }
+    // put the target first in its tier so the completion card lands on it
+    var arr = pb[hit[0]];
+    arr.splice(arr.indexOf(hit[1]), 1); arr.unshift(hit[1]);
+    w().practiceState.currentTier = hit[0];
+    w().practiceState.currentIndex = 0;
+    w().practiceState.completionShown[hit[0]] = false;   // let the completion card fire
+    w()._currentProblem = null;                          // as on a fresh load
+
+    w().renderCurrentProblem();
+    setTimeout(function(){
+      say('1. completion card rendered');
+      w().switchMode('learn');
+      setTimeout(function(){
+        say('2. Back to examples');
+        w().switchMode('practice');
+        setTimeout(function(){
+          say('3. Start Practice  <-- Tom here');
+          // mechanism check: with the global cleared, the panel must vanish
+          w()._currentProblem = null;
+          w().switchMode('practice');
+          setTimeout(function(){
+            say('4. same, global cleared');
+            out.push('');
+            out.push('PASS if step 3 is VISIBLE and step 4 is hidden.');
+            L.textContent = out.join(String.fromCharCode(10));
+            document.title = 'DONE';
+          }, 300);
+        }, 300);
+      }, 300);
+    }, 900);
+    return;
+  }
+  if (t > 700) { document.title = 'TIMEOUT'; return; }
+  t++; setTimeout(tick, 50);
+})();
+</script>

@@ -4663,6 +4663,11 @@
 
       var p = items[idx];
       practiceState.answered = false;
+      // Set before any early return below. switchView() restores the stimulus
+      // panel from this global and hides the panel when it is unset, so if the
+      // completion branch returns without it, entering practice via Start
+      // Practice or Back to examples hides the map that walk just rendered.
+      window._currentProblem = p;
 
       // Completion problem (backward fading): the tier's first question comes
       // half-worked. Elimination is done and ticked; the student finishes the
@@ -4750,7 +4755,6 @@
       }
 
       // Handle passage panel (English Language types)
-      window._currentProblem = p;
       handlePassagePanel(p);
       updateCalcFab(p);
 
