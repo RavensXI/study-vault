@@ -1,0 +1,79 @@
+<!doctype html><meta charset="utf-8"><title>map fix probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f"></iframe>
+<script>
+/* Loads L13 then L14, and for every problem in the bank checks that the map the
+   question points at actually loads in the browser at its natural size. A 404 or
+   a swapped path would otherwise only show up as a blank panel in front of a
+   student. Also renders one guided card per lesson to confirm the stimulus panel
+   still appears after the completion-card fix. */
+var LESSONS = [13, 14];
+var fr = document.getElementById('f');
+fr.style.width = '1400px'; fr.style.height = '760px';
+var L = document.getElementById('log'), out = [], li = 0;
+function d(){ return fr.contentDocument; }
+function w(){ return fr.contentWindow; }
+
+function checkImages(pb, done) {
+  var urls = {}, names = [];
+  ['bronze','silver','gold'].forEach(function(t){
+    (pb[t]||[]).forEach(function(p){ if (p.image) urls[p.image] = 1; });
+  });
+  for (var u in urls) names.push(u);
+  var left = names.length, bad = [];
+  if (!left) return done([], 0);
+  names.forEach(function(u){
+    var im = new Image();
+    im.onload = function(){ if (!im.naturalWidth) bad.push(u); if (!--left) done(bad, names.length); };
+    im.onerror = function(){ bad.push(u.split('/').pop()); if (!--left) done(bad, names.length); };
+    im.src = u;
+  });
+}
+
+function run(n, after) {
+  fr.src = '/practice/geography-aqa/geographical-skills/' + n + '?probe=1';
+  var t = 0;
+  (function tick(){
+    var ok = false;
+    try { ok = !!w()._problemBank && typeof w().renderCurrentProblem === 'function'; } catch(e){}
+    if (ok && t > 120) {
+      var pb = w()._problemBank;
+      checkImages(pb, function(bad, total){
+        out.push('L' + n + '  maps referenced=' + total + '  failed to load=' + (bad.length ? bad.join(',') : 'none'));
+        // render the first walkable problem and confirm the panel shows it
+        var tier = 'bronze', arr = pb[tier] || [];
+        var hit = null;
+        for (var i = 0; i < arr.length; i++) { if (arr[i].guided_steps && arr[i].image) { hit = arr[i]; break; } }
+        if (!hit) { out.push('L' + n + '  no walkable image problem'); return after(); }
+        arr.splice(arr.indexOf(hit), 1); arr.unshift(hit);
+        w().practiceState.currentTier = tier;
+        w().practiceState.currentIndex = 0;
+        w().practiceState.completionShown[tier] = false;
+        w()._currentProblem = null;
+        w().renderCurrentProblem();
+        setTimeout(function(){
+          var a = d().getElementById('practice-passage-area');
+          var vis = a && d().defaultView.getComputedStyle(a).display !== 'none';
+          var img = a && a.querySelector('img');
+          out.push('L' + n + '  completion card: panel=' + (vis ? 'VISIBLE' : 'hidden') +
+                   '  img=' + (img ? img.src.split('/').pop() : 'none') +
+                   '  loaded=' + (img && img.naturalWidth ? img.naturalWidth + 'px' : 'NO'));
+          after();
+        }, 1200);
+      });
+      return;
+    }
+    if (t > 700) { out.push('L' + n + ' TIMEOUT'); return after(); }
+    t++; setTimeout(tick, 50);
+  })();
+}
+
+(function next(){
+  if (li >= LESSONS.length) {
+    L.textContent = out.join(String.fromCharCode(10));
+    document.title = 'DONE';
+    return;
+  }
+  run(LESSONS[li++], next);
+})();
+</script>

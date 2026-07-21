@@ -1,0 +1,276 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Geo guided journey driver</title>
+<pre id="log" style="font:12px ui-monospace,monospace">starting…</pre>
+<iframe id="f"></iframe>
+<script>var _W=new URLSearchParams(location.search).get("w")||1200;var _fr=document.getElementById("f");_fr.style.width=_W+"px";_fr.style.height="900px";</script>
+<script>
+// Full-journey driver for a converted Geography Skills lesson.
+//   ?path=/practice/geography-aqa/geographical-skills/8
+// Adapted from the maths L09 driver. The geography banks are heavily
+// multiple-choice (98 of 240 problems), and MC options are shuffled on render,
+// so the maths driver's "type 999" trick could silently pick the CORRECT
+// option and then wait forever for a rescue link. This one reads the live
+// problem and deliberately chooses a wrong option.
+document.getElementById('f').src =
+  new URLSearchParams(location.search).get('path') ||
+  '/practice/geography-aqa/geographical-skills/8';
+</script>
+<script>
+var LOG = document.getElementById('log');
+var FAILED = false;
+function log(m) { LOG.textContent += '\n' + m; }
+function bad(m) { FAILED = true; log('FAIL ' + m); }
+var f = document.getElementById('f');
+
+function until(name, cond, cb, tries) {
+  tries = tries || 0;
+  var ok = false;
+  try { ok = cond(); } catch (e) { ok = false; }
+  if (ok) { cb(); return; }
+  if (tries > 900) {
+    bad('timeout: ' + name);
+    // Report the state we were waiting on, so a timeout says what went wrong
+    // rather than only that it did.
+    try {
+      var d = doc();
+      var gc = d.getElementById('guided-card'), gl = d.getElementById('guided-label');
+      var pc = d.getElementById('current-problem-card'), pl = d.getElementById('problem-number-label');
+      log('  state: guided-card=' + (gc ? (gc.style.display || 'shown') : 'absent') +
+          ' label=' + JSON.stringify(gl ? gl.textContent : null) +
+          ' problem-card=' + (pc ? (pc.style.display || 'shown') : 'absent') +
+          ' problem=' + JSON.stringify(pl ? pl.textContent : null));
+      var acts = d.querySelectorAll('#guided-actions button');
+      log('  guided buttons: ' + Array.prototype.map.call(acts, function (b) { return b.textContent.trim(); }).join(' | '));
+    } catch (e) { log('  state unreadable: ' + e); }
+    document.title = 'DRIVER FAILED'; return;
+  }
+  setTimeout(function () { until(name, cond, cb, tries + 1); }, 50);
+}
+function doc() { return f.contentDocument; }
+function win() { return f.contentWindow; }
+function visible(el) { return el && el.style.display !== 'none'; }
+
+function walk(name, stepsArr, wrongFirstOn, onButtons) {
+  var wrongDone = false;
+  function tick() {
+    var rows = doc().querySelectorAll('#guided-steps .guided-step');
+    var btns = doc().querySelectorAll('#guided-actions button');
+    if (btns.length) { log('PASS ' + name + ' (' + rows.length + ' steps)'); onButtons(btns); return; }
+    if (!rows.length) { setTimeout(tick, 50); return; }
+    var idx = rows.length - 1, st = stepsArr[idx];
+    if (!st) { setTimeout(tick, 50); return; }
+    var row = rows[idx], input = row.querySelector('.guided-input');
+    if (st.answer === undefined || st.answer === null || !input || input.disabled) { setTimeout(tick, 60); return; }
+    if (idx === wrongFirstOn && !wrongDone) {
+      wrongDone = true;
+      input.value = String(Number(st.answer) + 7);
+      row.querySelector('.guided-go').click();
+      var hint = row.querySelector('.guided-hint');
+      if (hint && hint.style.display !== 'none') log('  hint shown on wrong try (step ' + idx + ')');
+      else log('  WARN no hint after wrong try (step ' + idx + ')');
+      setTimeout(tick, 80); return;
+    }
+    input.value = String(st.answer);
+    row.querySelector('.guided-go').click();
+    setTimeout(tick, 80);
+  }
+  tick();
+}
+
+// A guided card replaces the question card but the map/chart lives in the side
+// panel. If the problem being walked carries a stimulus, that stimulus must be
+// on screen, or the student is asked to read a map that is not there.
+function assertStimulus(name, p) {
+  if (!p || (!p.image && !p.chart)) return;
+  var area = doc().getElementById('practice-passage-area');
+  var shown = area && area.style.display !== 'none';
+  var img = area ? area.querySelector('img') : null;
+  var canvas = area ? area.querySelector('canvas') : null;
+  var kind = p.image ? 'map' : 'chart';
+  if (!shown) { bad(name + ': problem has a ' + kind + ' but the stimulus panel is hidden'); return; }
+  if (p.image && !img) { bad(name + ': problem has an image but no <img> is rendered'); return; }
+  if (p.chart && !canvas && !img) { bad(name + ': problem has a chart but no canvas is rendered'); return; }
+  log('  stimulus ok (' + kind + ' visible alongside the walk)');
+}
+
+// Answer the current bank problem deliberately WRONG, whatever its input type.
+function answerWrong() {
+  var p = win()._currentProblem || {};
+  var mc = doc().querySelectorAll('#problem-inputs-area .mc-option');
+  if (mc.length) {
+    var correct = (p.solutions || [])[0];
+    var picked = null;
+    for (var i = 0; i < mc.length; i++) {
+      if (parseInt(mc[i].getAttribute('data-idx'), 10) !== correct) { picked = mc[i]; break; }
+    }
+    if (!picked) { log('  WARN every MC option looks correct; picking first'); picked = mc[0]; }
+    picked.click();
+    log('  chose MC option idx=' + picked.getAttribute('data-idx') + ' (correct=' + correct + ')');
+  } else {
+    var ins = doc().querySelectorAll('#problem-inputs-area input:not([type=hidden])');
+    ins.forEach(function (inp) { inp.value = '999'; });
+    log('  typed 999 into ' + ins.length + ' input(s)');
+  }
+  doc().getElementById('problem-check-btn').click();
+}
+
+until('lesson + guided data loaded', function () {
+  return win()._guided && doc().getElementById('guided-card') &&
+         visible(doc().getElementById('guided-card'));
+}, function () {
+  log('PASS boot — opener visible, problem card hidden: ' +
+      (doc().getElementById('current-problem-card').style.display === 'none'));
+
+  walk('P1 opener', win()._guided.opener.steps, 0, function (btns) {
+    if (btns.length !== 2) log('  WARN expected 2 doors, got ' + btns.length);
+    log('  doors: [' + btns[0].textContent.trim() + '] / [' + btns[1].textContent.trim() + ']');
+    var openerDisp = doc().getElementById('guided-display').innerHTML;
+    var DOOR = +(new URLSearchParams(location.search).get('door') || 0);
+    log('  taking door ' + DOOR + ': ' + btns[DOOR].textContent.trim());
+    btns[DOOR].click();
+
+    if (DOOR === 1) {
+      // jump straight in: no teach walk, straight to the bank
+      setTimeout(function () {
+        var area = doc().getElementById('practice-passage-area');
+        var gl = doc().getElementById('guided-label');
+        var cp = (win().guidedState && win().guidedState.cfg && win().guidedState.cfg.problem) || win()._currentProblem || {};
+        log('  after jump: label=' + JSON.stringify(gl ? gl.textContent : null));
+        log('  problem image=' + (cp.image ? cp.image.split('/').pop() : 'none'));
+        log('  panel computed display=' + (area ? doc().defaultView.getComputedStyle(area).display : 'absent'));
+        log('  panel img present=' + !!(area && area.querySelector('img')));
+        assertStimulus('jump-straight-in', cp);
+        log(FAILED ? 'FINISHED WITH FAILURES' : 'DOOR-1 PATH OK');
+        document.title = FAILED ? 'DRIVER FAILED' : 'DRIVER DONE';
+      }, 2500);
+      return;
+    }
+
+    until('teach bronze', function () {
+      return visible(doc().getElementById('guided-card')) &&
+             doc().getElementById('guided-display').innerHTML !== openerDisp;
+    }, function () {
+      walk('P2 teach-bronze', win()._guided.teach.bronze.steps, -1, function (b2) {
+        b2[0].click();
+
+        // The completion card is dealt on the tier's first WALK-CAPABLE question.
+        // When the shuffle puts a purely evaluative multiple choice first, the
+        // student answers that bare and the card arrives on the next one, so wait
+        // for either and step forward through unwalkable problems.
+        function awaitCompletion(cb, guard) {
+          guard = guard || 0;
+          if (guard > 8) { bad('completion card never appeared'); document.title = 'DRIVER FAILED'; return; }
+          until('completion card or a bare problem', function () {
+            var gc = visible(doc().getElementById('guided-card'));
+            var gl = doc().getElementById('guided-label');
+            if (gc && gl && gl.textContent.indexOf('finish it') !== -1) return true;
+            return visible(doc().getElementById('current-problem-card')) &&
+                   doc().querySelector('#problem-inputs-area .problem-input, #problem-inputs-area .mc-option');
+          }, function () {
+            var gl = doc().getElementById('guided-label');
+            if (visible(doc().getElementById('guided-card')) && gl &&
+                gl.textContent.indexOf('finish it') !== -1) { cb(); return; }
+            var p = win()._currentProblem;
+            var q = doc().getElementById('problem-number-label').textContent;
+            log('  ' + q + ' dealt bare (' + (p.guided_steps ? p.guided_steps.length : 0) +
+                ' walk steps) before the completion card');
+            answerWrong();
+            until('next btn', function () { return visible(doc().getElementById('problem-next-btn')); }, function () {
+              doc().getElementById('problem-next-btn').click();
+              setTimeout(function () { awaitCompletion(cb, guard + 1); }, 250);
+            });
+          });
+        }
+
+        awaitCompletion(function () {
+          var q1 = win()._currentProblem;
+          var pre = doc().querySelectorAll('.guided-step-prefilled').length;
+          log('PASS P3 completion card, ' + pre + ' steps pre-worked');
+          if (!pre) log('  WARN expected pre-worked steps');
+          var walked = (win().guidedState && win().guidedState.cfg && win().guidedState.cfg.problem) || q1;
+          log('  walked problem: image=' + !!(walked && walked.image) + ' chart=' + !!(walked && walked.chart) +
+              ' | _currentProblem image=' + !!(q1 && q1.image));
+          assertStimulus('P3 completion', walked);
+          walk('P3 completion', q1.guided_steps, -1, function (b3) {
+            b3[0].click();
+
+            // Not every bank problem is walkable: genuinely evaluative MC carries
+            // guided_skip_reason and correctly offers no lifeline. Advance until
+            // we reach one that DOES have a walk, and test the rescue there.
+            function seekWalkable(cb, guard) {
+              guard = guard || 0;
+              if (guard > 12) { bad('no walkable problem found in the first 12'); document.title = 'DRIVER FAILED'; return; }
+              until('a bare problem', function () {
+                return visible(doc().getElementById('current-problem-card')) &&
+                       doc().querySelector('#problem-inputs-area .problem-input, #problem-inputs-area .mc-option');
+              }, function () {
+                var p = win()._currentProblem;
+                var q = doc().getElementById('problem-number-label').textContent;
+                var link = doc().getElementById('problem-walk-link');
+                var shown = link && link.style.display !== 'none';
+                var n = p.guided_steps ? p.guided_steps.length : 0;
+                var answered = !!(win().practiceState && win().practiceState.answered);
+                log('  ' + q + ': ' + p.input_type + ', ' + n + ' walk steps, link=' + shown +
+                    (answered ? ' (already answered)' : ''));
+
+                // The lifeline is deliberately withdrawn once a problem has been
+                // answered, so only assert its visibility on a fresh problem.
+                if (!answered) {
+                  if (n && !shown) bad(q + ' HAS guided_steps but the lifeline link is hidden');
+                  if (!n && shown) bad(q + ' has NO guided_steps but shows a lifeline link');
+                  if (n) { cb(p, q); return; }
+                }
+
+                // Already answered, or not walkable: advance and keep looking.
+                if (!answered) answerWrong();
+                until('next btn', function () { return visible(doc().getElementById('problem-next-btn')); }, function () {
+                  doc().getElementById('problem-next-btn').click();
+                  setTimeout(function () { seekWalkable(cb, guard + 1); }, 250);
+                });
+              });
+            }
+
+            seekWalkable(function (p2, qlabel) {
+              log('PASS P4 found walkable ' + qlabel);
+              answerWrong();
+              until('rescue link', function () { return doc().getElementById('fb-do-with-me'); }, function () {
+                log('PASS P4 wrong answer offers rescue');
+                doc().getElementById('fb-do-with-me').click();
+                until('rescue walk', function () { return visible(doc().getElementById('guided-card')); }, function () {
+                  assertStimulus('P4 rescue', p2);
+                  walk('P4 rescue', p2.guided_steps, -1, function (b4) {
+                    b4[0].click();
+
+                    // P5: on the next walkable problem, use the lifeline BEFORE
+                    // answering, which must not require failing first.
+                    seekWalkable(function (p3, q3label) {
+                      var l3 = doc().getElementById('problem-walk-link');
+                      l3.click();
+                      until('pre-answer walk', function () { return visible(doc().getElementById('guided-card')); }, function () {
+                        log('PASS P5 pre-answer walk opened on ' + q3label + ' without failing first');
+                        assertStimulus('P5 pre-answer walk', p3);
+                        walk('P5 walk-instead', p3.guided_steps, -1, function (b5) {
+                          b5[0].click();
+                          until('advanced onward', function () {
+                            return visible(doc().getElementById('current-problem-card')) &&
+                                   doc().getElementById('problem-number-label').textContent !== q3label;
+                          }, function () {
+                            log('PASS P5 advanced past ' + q3label);
+                            log(FAILED ? 'FINISHED WITH FAILURES' : 'ALL PHASES PASSED');
+                            document.title = FAILED ? 'DRIVER FAILED' : 'DRIVER DONE';
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    });
+  });
+});
+</script>

@@ -1,0 +1,37 @@
+<!doctype html><meta charset="utf-8"><title>completion trace</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/13" style="width:1400px;height:900px"></iframe>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0,trace=[];
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;try{ok=typeof w().handlePassagePanel==='function'&&typeof w().showGuided==='function';}catch(e){}
+  if(ok&&t>120){
+    // instrument
+    var W=w();
+    var origHPP=W.handlePassagePanel, origSG=W.showGuided;
+    W.handlePassagePanel=function(p){ trace.push('handlePassagePanel(image='+(p&&p.image?p.image.split('/').pop():'none')+')'); return origHPP.apply(this,arguments); };
+    W.showGuided=function(cfg){ trace.push('showGuided(label="'+(cfg&&cfg.label)+'", problem='+(cfg&&cfg.problem?'YES image='+(cfg.problem.image?cfg.problem.image.split('/').pop():'none'):'UNDEFINED')+')'); return origSG.apply(this,arguments); };
+    // walk the real user path: opener -> jump straight in
+    function until(cond,cb,n){n=n||0;var ok2=false;try{ok2=cond();}catch(e){}
+      if(ok2)return cb(); if(n>300){trace.push('TIMEOUT waiting');dump();return;}
+      setTimeout(function(){until(cond,cb,n+1);},50);}
+    function dump(){
+      var area=d().getElementById('practice-passage-area');
+      trace.push('--- final ---');
+      trace.push('panel display: '+(area?(area.style.display||'(empty)'):'absent'));
+      trace.push('panel computed: '+(area?d().defaultView.getComputedStyle(area).display:'-'));
+      trace.push('panel innerHTML len: '+(area?area.innerHTML.length:0));
+      trace.push('guided label: '+((d().getElementById('guided-label')||{}).textContent));
+      L.textContent=trace.join(String.fromCharCode(10));document.title='DONE';
+    }
+    until(function(){return d().querySelectorAll('#guided-actions button').length>=2;},function(){
+      var btns=d().querySelectorAll('#guided-actions button');
+      trace.push('doors: '+btns.length+' -> clicking "jump straight in"');
+      btns[1].click();
+      setTimeout(dump,2500);
+    });
+    return;}
+  if(t>700){document.title='TIMEOUT';return;}
+  t++;setTimeout(tick,50);})();
+</script>

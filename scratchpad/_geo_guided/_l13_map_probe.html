@@ -1,0 +1,42 @@
+<!doctype html><meta charset="utf-8"><title>l13 map probe</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/13"></iframe>
+<script>var W=new URLSearchParams(location.search).get("w")||1300;var fr=document.getElementById("f");fr.style.width=W+"px";fr.style.height="820px";</script>
+<script>
+var L=document.getElementById('log'),f=document.getElementById('f'),t=0;
+function d(){return f.contentDocument;} function w(){return f.contentWindow;}
+(function tick(){
+  var ok=false;try{ok=!!w()._problemBank&&typeof w().renderCurrentProblem==='function';}catch(e){}
+  if(ok&&t>140){
+    var out=[],pb=w()._problemBank,hit=null;
+    ['bronze','silver','gold'].forEach(function(tr){(pb[tr]||[]).forEach(function(p){
+      if(!hit&&(p.display||'').indexOf('mountain map')>=0) hit=[tr,p];});});
+    if(!hit){L.textContent='target problem not found';document.title='DONE';return;}
+    var arr=pb[hit[0]];arr.splice(arr.indexOf(hit[1]),1);arr.unshift(hit[1]);
+    w().practiceState.currentTier=hit[0];
+    w().practiceState[hit[0]].index=0;
+    w().practiceState.completionShown[hit[0]]=true;
+    w().renderCurrentProblem();
+    setTimeout(function(){
+      var cp=w()._currentProblem||{};
+      var area=d().getElementById('practice-passage-area');
+      var img=area?area.querySelector('img'):null;
+      out.push('problem: '+String(cp.display).slice(0,60));
+      out.push('problem.image: '+(cp.image?cp.image.split('/').pop():'NONE'));
+      out.push('panel display: '+(area?(area.style.display||'shown'):'absent'));
+      out.push('panel classes: '+(area?area.className:'-'));
+      out.push('img element: '+(img?('src='+img.src.split('/').pop()+' natural='+img.naturalWidth):'NO IMG'));
+      out.push('panel width: '+(area?Math.round(area.getBoundingClientRect().width):'-'));
+      out.push('window inner: '+w().innerWidth);
+      var tabs=d().getElementById('mobile-tabs')||d().querySelector('.mobile-tabs');
+      out.push('mobile tabs visible: '+(tabs?(d().defaultView.getComputedStyle(tabs).display!=='none'):'none found'));
+      var cols=d().getElementById('practice-columns');
+      out.push('columns class: '+(cols?cols.className:'-'));
+      var vis=area&&d().defaultView.getComputedStyle(area).display!=='none';
+      out.push('PANEL ACTUALLY VISIBLE: '+vis);
+      L.textContent=out.join(String.fromCharCode(10));document.title='DONE';
+    },1400);
+    return;}
+  if(t>700){document.title='TIMEOUT';return;}
+  t++;setTimeout(tick,50);})();
+</script>
