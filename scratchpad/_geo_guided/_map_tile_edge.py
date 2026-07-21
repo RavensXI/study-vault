@@ -33,12 +33,17 @@ except (AttributeError, OSError):
 
 from PIL import Image, ImageFilter
 
+# Every sheet still in use. The first pass only tested sheets that a whole-sheet
+# ink score had already flagged, which is why snowdonia-z15 was never examined:
+# it scores "ok" at 83% because the two thirds that DID render are dense. A
+# blind checker spotted the straight edge that the score hid.
 SUSPECT = [
-    "yorkshire-dales-z15-final.jpg", "northumberland-z16-final.jpg",
-    "norfolk-broads-z16-final.jpg", "south-downs-z15-final.jpg",
-    "dartmoor-z15-final.jpg", "clitheroe-z15-final.jpg",
-    "dorset-coast-z15-final.jpg", "south-downs-z16-final.jpg",
-    "dorset-coast-z16-final.jpg", "dartmoor-z16-final.jpg",
+    "snowdonia-z15-final.jpg", "peak-district-z15-final.jpg", "peak-district-z16-final.jpg",
+    "lake-district-z15-final.jpg", "lake-district-z16-final.jpg",
+    "pendle-hill-z15-final.jpg", "pendle-hill-z16-final.jpg",
+    "northumberland-z15-final.jpg", "norfolk-broads-z15-final.jpg",
+    "clitheroe-z16-final.jpg", "burnley-unity-z15-final.jpg", "burnley-unity-z16-final.jpg",
+    "ribble-valley-z15-final.jpg", "ribble-valley-z16-final.jpg",
 ]
 
 
