@@ -129,18 +129,61 @@ def heuristic_map(lesson):
     return {"lesson_id": lesson["lesson_id"], "picks": picks, "src": "heuristic"}
 
 
+def resolve_claude():
+    """Locate the claude CLI without depending on PATH.
+
+    The scheduled task runs with a bare environment in which %APPDATA%\\npm is
+    not on PATH, so shutil.which("claude") returned nothing and every night's
+    mapping fell back to the heuristic. Check an explicit override, then PATH,
+    then the npm global install locations. Prefer claude.cmd on Windows: the
+    extensionless shim is a shell script that subprocess.run cannot exec.
+    """
+    override = os.environ.get("CLAUDE_CLI")
+    if override and os.path.isfile(override):
+        return override
+    for name in ("claude.cmd", "claude.exe", "claude") if sys.platform == "win32" else ("claude",):
+        found = shutil.which(name)
+        if found:
+            return found
+    candidates = []
+    for base in (os.environ.get("APPDATA"), os.environ.get("USERPROFILE")):
+        if not base:
+            continue
+        candidates += [
+            os.path.join(base, "npm", "claude.cmd"),
+            os.path.join(base, "AppData", "Roaming", "npm", "claude.cmd"),
+        ]
+    for c in candidates:
+        if os.path.isfile(c):
+            return c
+    return None
+
+
+def subscription_env():
+    """Child env with the API key removed so the CLI uses the Claude Code
+    subscription, which is what this step is documented to run on. Leaving
+    ANTHROPIC_API_KEY set silently bills API credits for every mapping call,
+    against Tom's standing preference; if the subscription login is not present
+    in the task context the call just fails and the heuristic covers it -- same
+    outcome as before, but never a surprise on the bill."""
+    env = os.environ.copy()
+    for k in ("ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN"):
+        env.pop(k, None)
+    return env
+
+
 def claude_map(chunk_lessons):
     """One headless `claude -p` call for a chunk of lessons. Returns validated
     results list or None (caller falls back to the heuristic)."""
-    exe = shutil.which("claude")
+    exe = resolve_claude()
     if not exe:
-        log("  [postpass] claude CLI not on PATH - using heuristic fallback")
+        log("  [postpass] claude CLI not found (PATH, $CLAUDE_CLI, npm global) - using heuristic fallback")
         return None
     prompt = MAP_PROMPT + json.dumps([slim(l) for l in chunk_lessons], ensure_ascii=False)
     try:
         r = subprocess.run([exe, "-p", "--model", "sonnet"], input=prompt,
                            capture_output=True, text=True, encoding="utf-8", errors="replace",
-                           timeout=CLAUDE_TIMEOUT)
+                           timeout=CLAUDE_TIMEOUT, env=subscription_env())
     except (subprocess.TimeoutExpired, OSError) as ex:
         log(f"  [postpass] claude -p failed ({ex.__class__.__name__}) - heuristic fallback")
         return None
