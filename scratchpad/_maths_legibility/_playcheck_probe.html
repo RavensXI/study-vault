@@ -1,0 +1,63 @@
+<!doctype html><meta charset="utf-8"><title>maths play-through</title>
+<pre id="log" style="font:11px ui-monospace,monospace"></pre>
+<iframe id="f"></iframe>
+<script>
+/* Reads _playcheck_manifest.json (list of {board,unit,lesson,tier,index,match,
+   solution,input_type}) and, in the real player, types each stored answer and
+   asks whether checkAnswer() accepts it, then enters a wrong answer as a
+   control. Confirms a rewrite/label change did not break the answer path.
+   Same logic as the geography harness; only the URL and manifest differ. */
+var fr=document.getElementById('f'); fr.style.width='1400px'; fr.style.height='820px';
+var L=document.getElementById('log'),out=[],man=null,groups={},order=[],gi=0,pass=0,fail=0,ctl=0;
+function d(){return fr.contentDocument;} function w(){return fr.contentWindow;}
+function clean(h){return (h||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}
+fetch('/scratchpad/_maths_legibility/_playcheck_manifest.json').then(r=>r.json()).then(j=>{
+  man=j; j.forEach(m=>{var k=m.board+'|'+m.unit+'|'+m.lesson;(groups[k]=groups[k]||[]).push(m);});
+  order=Object.keys(groups); next();
+});
+function render(m){
+  var pb=w()._problemBank,arr=pb[m.tier]||[],idx=-1;
+  for(var j=0;j<arr.length;j++){ if(clean(arr[j].display)===m.match){idx=j;break;} }
+  if(idx<0) return null;
+  w().practiceState.currentTier=m.tier; w().practiceState.currentIndex=idx;
+  w().practiceState.completionShown[m.tier]=true; w().practiceState.answered=false;
+  w()._currentProblem=null; w().renderCurrentProblem(); return arr[idx];
+}
+function enter(m,val){
+  var doc=d();
+  if(m.input_type==='multiple_choice'){ var b=doc.querySelector('.mc-option[data-idx="'+val+'"]'); if(!b) return 'no-opt'; b.click(); }
+  else { var i=doc.getElementById('problem-input-a'); if(!i) return 'no-input'; i.value=String(val); }
+  w().checkAnswer(); return null;
+}
+function ok(){ var c=d().getElementById('current-problem-card'); return (c&&c.classList.contains('card-correct'))||!!d().querySelector('.feedback-correct'); }
+function runGroup(k,done){
+  var parts=k.split('|'); fr.src='/practice/'+parts[0]+'/'+parts[1]+'/'+parts[2]+'?probe=1';
+  var t=0;
+  (function tick(){
+    var okk=false; try{okk=!!w()._problemBank&&typeof w().checkAnswer==='function';}catch(e){}
+    if(okk&&t>120){
+      var list=groups[k],n=0;
+      (function step(){
+        if(n>=list.length) return done();
+        var m=list[n++],p=render(m);
+        if(!p){out.push(parts[0]+' '+parts[1]+' L'+parts[2]+' '+m.tier+'['+m.index+'] MISSING');fail++;return setTimeout(step,40);}
+        var e=enter(m,m.solution);
+        setTimeout(function(){
+          var good=e?false:ok(); if(good)pass++;else fail++;
+          var line=parts[0].replace('maths-','')+' '+parts[1].slice(0,4)+' L'+parts[2]+' '+m.tier+'['+m.index+'] '+String(m.solution)+' -> '+(good?'OK':'REJECTED'+(e?'('+e+')':''));
+          render(m);
+          var wrong=m.input_type==='multiple_choice'?(m.solution===0?1:0):(typeof m.solution==='number'?m.solution+7:0);
+          var we=enter(m,wrong);
+          setTimeout(function(){ if(!we&&ok()){ctl++;line+='  <-- ALSO accepts '+wrong;} out.push(line); setTimeout(step,40); },220);
+        },300);
+      })();
+      return;
+    }
+    if(t>700){out.push(k+' TIMEOUT');return done();} t++;setTimeout(tick,50);
+  })();
+}
+function next(){
+  if(gi>=order.length){ out.push(''); out.push('accepted '+pass+'/'+(pass+fail)+'  rejected '+fail+'  also-accepts-wrong '+ctl); L.textContent=out.join(String.fromCharCode(10)); document.title='DONE'; return; }
+  runGroup(order[gi++],next);
+}
+</script>
