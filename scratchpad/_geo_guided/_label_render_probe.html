@@ -1,0 +1,29 @@
+<!doctype html><meta charset="utf-8"><title>label render</title>
+<pre id="log" style="font:12px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/2?probe=1"></iframe>
+<script>
+var fr=document.getElementById('f'),L=document.getElementById('log'),t=0,out=[];
+function d(){return fr.contentDocument;} function w(){return fr.contentWindow;}
+function clean(h){return (h||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}
+(function tick(){
+  var ok=false; try{ok=!!w()._problemBank&&typeof w().renderCurrentProblem==='function';}catch(e){}
+  if(ok&&t>120){
+    var arr=w()._problemBank.bronze,idx=-1;
+    for(var j=0;j<arr.length;j++) if((arr[j].display||'').indexOf('water usage')>=0){idx=j;break;}
+    // place it and open the completion "finish it" walk
+    w().practiceState.currentTier='bronze'; w().practiceState.currentIndex=idx;
+    w().practiceState.completionShown.bronze=false; w()._currentProblem=null;
+    w().renderCurrentProblem();
+    setTimeout(function(){
+      var rows=d().querySelectorAll('.guided-box-row');
+      out.push('guided box rows: '+rows.length);
+      rows.forEach(function(r){
+        var pre=clean(r.querySelector('.gb-pre')?r.querySelector('.gb-pre').textContent:'');
+        var post=r.querySelector('.gb-post');
+        out.push('  ['+(pre.slice(0,44))+'] -> post='+(post?('"'+clean(post.textContent)+'"'):'NONE'));
+      });
+      L.textContent=out.join(String.fromCharCode(10)); document.title='DONE';
+    },1100);
+    return;}
+  if(t>700){document.title='TIMEOUT';return;} t++;setTimeout(tick,50);})();
+</script>

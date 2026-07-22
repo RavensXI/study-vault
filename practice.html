@@ -983,6 +983,14 @@
       font-size: 1.08rem;
       padding-left: 0.5rem;
     }
+    /* Unit hint after a walk-step box (e.g. "billion litres", "(a decimal)"), so
+       the student knows the scale to type. Muted, to read as a label not prose. */
+    .gb-post {
+      color: var(--text-muted, #8a8580);
+      font-size: 0.98rem;
+      white-space: nowrap;
+    }
+    body.dark-mode .gb-post { color: #a89e93; }
     .guided-input {
       width: 4.2rem;
       padding: 0.35rem 0.4rem;
@@ -5624,7 +5632,11 @@
         if (cls) input.classList.add(cls);
       }
       function check() {
-        var v = parseFloat((input.value || '').trim().replace(/−/g, '-'));
+        // Strip spaces and commas the same way the graded answer box does, so a
+        // grid reference typed "84 32" or "84,32" into a walk step is read as
+        // 8432 rather than parseFloat stopping at the space/comma and reading 84.
+        // Harmless for every other answer: no walk expects a comma or a space.
+        var v = parseFloat((input.value || '').trim().replace(/−/g, '-').replace(/[\s,]+/g, ''));
         if (isNaN(v)) {
           input.classList.add('guided-wrong');
           setTimeout(function() { input.classList.remove('guided-wrong'); }, 500);

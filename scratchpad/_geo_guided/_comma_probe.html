@@ -1,0 +1,53 @@
+<!doctype html><meta charset="utf-8"><title>comma probe</title>
+<pre id="log" style="font:12px ui-monospace,monospace"></pre>
+<iframe id="f" src="/practice/geography-aqa/geographical-skills/11?probe=1"></iframe>
+<script>
+var fr=document.getElementById('f'),L=document.getElementById('log'),t=0,out=[];
+function d(){return fr.contentDocument;} function w(){return fr.contentWindow;}
+function clean(h){return (h||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}
+function place(tier,idx){
+  var arr=w()._problemBank[tier]; 
+  w().practiceState.currentTier=tier; w().practiceState.currentIndex=idx;
+  w().practiceState.completionShown[tier]=true; w().practiceState.answered=false;
+  w()._currentProblem=null; w().renderCurrentProblem();
+  return arr[idx];
+}
+function tryInput(p,val){
+  w().practiceState.answered=false;
+  // re-render fresh each attempt
+  var arr=w()._problemBank[w().practiceState.currentTier];
+  w().renderCurrentProblem();
+  var inp=d().getElementById('problem-input-a'); inp.value=val;
+  w().checkAnswer();
+  var card=d().getElementById('current-problem-card');
+  return card && card.classList.contains('card-correct');
+}
+(function tick(){
+  var ok=false; try{ok=!!w()._problemBank&&typeof w().checkAnswer==='function';}catch(e){}
+  if(ok&&t>120){
+    // find a 4-figure and a 6-figure grid-ref problem by their solution length
+    var four=null,six=null;
+    ['bronze','silver','gold'].forEach(function(tr){
+      (w()._problemBank[tr]||[]).forEach(function(p,i){
+        var s=(p.solutions||[])[0];
+        if(p.input_type==='single_value'&&String(s).length===4&&!four) four=[tr,i,s];
+        if(p.input_type==='single_value'&&String(s).length===6&&!six) six=[tr,i,s];
+      });
+    });
+    function run(label,ref){
+      if(!ref){out.push(label+': none found');return;}
+      var p=place(ref[0],ref[1]); var s=ref[2];
+      out.push(label+'  '+ref[0]+'['+ref[1]+']  answer='+s);
+      var forms=[String(s), String(s).slice(0,2)+' '+String(s).slice(2), String(s).slice(0,2)+','+String(s).slice(2)];
+      if(String(s).length===6) forms=[String(s), String(s).slice(0,3)+' '+String(s).slice(3), String(s).slice(0,3)+','+String(s).slice(3)];
+      forms.forEach(function(v){
+        var okk=tryInput(p,v);
+        out.push('    typed "'+v+'"  -> '+(okk?'ACCEPTED':'REJECTED'));
+      });
+    }
+    run('FOUR-FIGURE',four);
+    run('SIX-FIGURE',six);
+    L.textContent=out.join(String.fromCharCode(10)); document.title='DONE'; return;
+  }
+  if(t>700){document.title='TIMEOUT';return;} t++;setTimeout(tick,50);})();
+</script>
