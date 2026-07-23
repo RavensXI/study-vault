@@ -170,7 +170,14 @@ function posterFor(url){ const m=url.split('.r2.dev/'); if(m.length<2) return ''
 
 // today's playlist: least-recently-watched first within each subject (never-watched
 // leads), round-robined across subjects, starting subject rotated daily
+// QA hook: ?newest=1 plays the manifest tail-first (most recently generated
+// shorts first), whole pool, no recall checks — for reviewing fresh batches.
+const QA_NEWEST = new URLSearchParams(location.search).has('newest');
 function buildPlaylist(items, n){
+  if(QA_NEWEST){
+    const fresh = items.filter(e=>!inFeed.has(keyOf(e)));
+    return fresh.slice(-n).reverse();
+  }
   const w = lsGet(LS.watched, {});
   const by = {};
   items.forEach(e=>{ if(!inFeed.has(keyOf(e))) (by[e.subject]=by[e.subject]||[]).push(e); });
@@ -318,7 +325,7 @@ function makeShort(s){
     if(el.dataset.counted) return;
     el.dataset.counted='1'; watchedQueue.push(s);
     recordWatch(s); updateDone();
-    if(++watchedSinceCheck>=CHECK_EVERY) insertCheckAfter(el);
+    if(!QA_NEWEST && ++watchedSinceCheck>=CHECK_EVERY) insertCheckAfter(el);
   };
   vid.addEventListener('timeupdate',()=>{
     if(!vid.duration) return;
@@ -527,7 +534,7 @@ Promise.all([
   // scope the feed to the student's chosen subjects; never leave it empty while
   // a subject is still backfilling — if none of their subjects has shorts yet,
   // fall back to the whole interleaved pool rather than an empty feed.
-  const mine=mySubjectSlugs();
+  const mine=QA_NEWEST?null:mySubjectSlugs();
   let pool=m;
   if(mine && mine.length){
     const set=new Set(mine);
