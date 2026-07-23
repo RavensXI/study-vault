@@ -77,7 +77,8 @@ def skeleton(pd):
 
 
 def main(apply_it):
-    edits = json.load(io.open(os.path.join(HERE, "_apply_edits.json"), encoding="utf-8"))
+    edits_file = next((a for a in sys.argv[1:] if a.endswith(".json")), "_apply_edits.json")
+    edits = json.load(io.open(os.path.join(HERE, edits_file), encoding="utf-8"))
     by_lesson = collections.defaultdict(list)
     for e in edits:
         by_lesson[(e["board"], e["unit"], e["lesson"])].append(e)

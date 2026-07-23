@@ -15,7 +15,9 @@ K=os.environ["SUPABASE_SERVICE_KEY"];H={"apikey":K,"Authorization":"Bearer "+K}
 def get(u): return json.load(urllib.request.urlopen(urllib.request.Request(S+u,headers=H),timeout=120))
 def clean(t): return re.sub(r"\s+"," ",re.sub(r"<[^>]+>","",str(t or ""))).strip()
 BOARDS=["maths-aqa","maths-edexcel","maths-ocr","maths-eduqas"]
-hm=json.load(io.open(os.path.join(HERE,"_all_findings","rewrites_hm.json"),encoding="utf-8"))
+FINDS=sys.argv[1] if len(sys.argv)>1 else "rewrites_hm.json"
+OUTSUB=sys.argv[2] if len(sys.argv)>2 else "_apply_packs"
+hm=json.load(io.open(os.path.join(HERE,"_all_findings",FINDS),encoding="utf-8"))
 # cache: board -> unit -> {lesson_num -> practice_data}
 cache={}
 def lesson_pd(board,unit,ln):
@@ -31,7 +33,7 @@ def lesson_pd(board,unit,ln):
             rows=get("lessons?unit_id=eq.%s&lesson_number=eq.%d&select=practice_data"%(uid,ln))
             cache[board]["_les"][key]=rows[0]["practice_data"] if rows else None
     return cache[board]["_les"][key]
-outdir=os.path.join(HERE,"_apply_packs"); os.makedirs(outdir,exist_ok=True)
+outdir=os.path.join(HERE,OUTSUB); os.makedirs(outdir,exist_ok=True)
 n=0
 for base,finds in hm.items():
     m=re.match(r"([a-z\-]+)__L(\d+)",base)
