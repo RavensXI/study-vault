@@ -1064,6 +1064,38 @@
       font-family: 'Inter', sans-serif;
     }
     .guided-tick { color: #16a34a; font-weight: 700; font-size: 1.05rem; }
+    /* Choice steps — a categorical decision the student clicks rather than typing a
+       code number. Buttons sit where the input box would be. */
+    .guided-choice-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      padding-left: 0.4rem;
+      margin-top: 0.15rem;
+      align-items: center;
+    }
+    .guided-choice {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.92rem;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      border: 1.5px solid var(--border, #ddd6cc);
+      background: #fff;
+      color: var(--text-primary, #2d2a26);
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+    }
+    .guided-choice:hover:not(:disabled) { border-color: var(--accent, #2563eb); background: var(--accent-light, #eff6ff); }
+    .guided-choice:disabled { cursor: default; }
+    .guided-choice.guided-choice-right { border-color: #16a34a; background: #f0fdf4; color: #166534; font-weight: 600; }
+    .guided-choice.guided-choice-wrong { border-color: #dc2626; background: #fef2f2; animation: gshake 0.3s; }
+    .guided-choice.guided-choice-shown { border-color: #d97706; background: #fffbeb; }
+    .guided-choice-tick { color: #16a34a; font-weight: 700; font-size: 1.05rem; margin-left: 0.15rem; }
+    body.dark-mode .guided-choice { background: #2a2826; border-color: #3a3836; color: #e8e4df; }
+    body.dark-mode .guided-choice:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-light, #1a2040); }
+    body.dark-mode .guided-choice.guided-choice-right { background: #0a2e1a; color: #86efac; border-color: #166534; }
+    body.dark-mode .guided-choice.guided-choice-shown { background: #332d1f; border-color: #b45309; }
     .guided-hint { font-size: 0.82rem; color: #b45309; margin: 0.35rem 0 0 0.5rem; }
     .guided-done { font-size: 0.85rem; color: #16a34a; margin: 0.35rem 0 0 0.5rem; }
     .guided-skip {
@@ -5685,7 +5717,16 @@
       row.className = 'guided-step guided-step-prefilled';
       var h = '';
       if (st.say) h += '<p class="guided-say">' + st.say + '</p>';
-      if (st.answer !== undefined && st.answer !== null) {
+      if (st.choices && st.choices.length) {
+        if (st.pre) h += '<p class="guided-say">' + st.pre + '</p>';
+        h += '<div class="guided-choice-row">';
+        for (var ci = 0; ci < st.choices.length; ci++) {
+          var isAns = Math.abs(st.choices[ci].value - st.answer) < 0.005;
+          h += '<button class="guided-choice' + (isAns ? ' guided-choice-right' : '') + '" type="button" disabled data-val="' +
+               st.choices[ci].value + '">' + st.choices[ci].label + '</button>';
+        }
+        h += '</div>';
+      } else if (st.answer !== undefined && st.answer !== null) {
         h += '<div class="guided-box-row"><span class="gb-pre">' + (st.pre || '') + '</span>' +
              '<input type="text" class="guided-input guided-right" value="' + st.answer + '" disabled>' +
              (st.post ? '<span class="gb-post">' + st.post + '</span>' : '') +
@@ -5705,7 +5746,18 @@
       row.className = 'guided-step';
       var h = '';
       if (st.say) h += '<p class="guided-say">' + st.say + '</p>';
-      var hasBox = st.answer !== undefined && st.answer !== null;
+      // A step with `choices` is a categorical decision the student CLICKS
+      // (yes/no, this-or-that, an option list), instead of typing a code number.
+      var hasChoices = st.choices && st.choices.length;
+      var hasBox = !hasChoices && st.answer !== undefined && st.answer !== null;
+      if (hasChoices) {
+        if (st.pre) h += '<p class="guided-say">' + st.pre + '</p>';
+        h += '<div class="guided-choice-row">';
+        for (var ci = 0; ci < st.choices.length; ci++) {
+          h += '<button class="guided-choice" type="button" data-val="' + st.choices[ci].value + '">' + st.choices[ci].label + '</button>';
+        }
+        h += '</div><div class="guided-hint" style="display:none"></div>';
+      }
       if (hasBox) {
         h += '<div class="guided-box-row"><span class="gb-pre">' + (st.pre || '') + '</span>' +
              '<input type="text" class="guided-input" inputmode="text" autocomplete="off">' +
@@ -5717,6 +5769,7 @@
       row.innerHTML = h;
       document.getElementById('guided-steps').appendChild(row);
       practiceRenderKaTeX(row);
+      if (hasChoices) { wireGuidedChoices(row, st); return; }
       if (!hasBox) {
         guidedState.idx++;
         setTimeout(guidedNextStep, 200);
@@ -5776,6 +5829,49 @@
       go.addEventListener('click', check);
       input.addEventListener('keydown', function(e) { if (e.key === 'Enter') check(); });
       setTimeout(function() { input.focus({ preventScroll: false }); }, 120);
+    }
+
+    function wireGuidedChoices(row, st) {
+      var btns = row.querySelectorAll('.guided-choice');
+      var hintEl = row.querySelector('.guided-hint');
+      function pick(btn) {
+        var val = parseFloat(btn.getAttribute('data-val'));
+        if (Math.abs(val - st.answer) < 0.005) {
+          for (var i = 0; i < btns.length; i++) btns[i].disabled = true;
+          btn.classList.add('guided-choice-right');
+          hintEl.style.display = 'none';
+          if (st.done) {
+            var d = document.createElement('p');
+            d.className = 'guided-done';
+            d.innerHTML = st.done;
+            row.appendChild(d);
+            practiceRenderKaTeX(d);
+          }
+          guidedState.idx++;
+          setTimeout(guidedNextStep, 300);
+        } else {
+          guidedState.wrongs++;
+          btn.classList.add('guided-choice-wrong');
+          setTimeout(function() { btn.classList.remove('guided-choice-wrong'); }, 500);
+          if (guidedState.wrongs === 1 && st.hint) {
+            hintEl.textContent = st.hint;
+            hintEl.style.display = '';
+          } else if (guidedState.wrongs >= 2) {
+            for (var j = 0; j < btns.length; j++) {
+              btns[j].disabled = true;
+              if (Math.abs(parseFloat(btns[j].getAttribute('data-val')) - st.answer) < 0.005) btns[j].classList.add('guided-choice-shown');
+            }
+            hintEl.textContent = 'This one — look at why, then keep going.';
+            hintEl.style.display = '';
+            guidedState.reveals++;
+            guidedState.idx++;
+            setTimeout(guidedNextStep, 900);
+          }
+        }
+      }
+      for (var i = 0; i < btns.length; i++) {
+        (function(b) { b.addEventListener('click', function() { pick(b); }); })(btns[i]);
+      }
     }
 
     function guidedFinish() {
