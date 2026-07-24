@@ -268,6 +268,20 @@
     var subtitleEl = document.getElementById('lesson-subtitle');
     if (subtitleEl && lesson.description) subtitleEl.textContent = lesson.description;
 
+    // ===== LEFT PANEL: LESSON HEADER =====
+    // Unit eyebrow + lesson name + lesson pill, so the panel is anchored with a
+    // clear "you are here" instead of leading with the method-card tier.
+    var lessonHead = document.getElementById('panel-lesson-head');
+    if (lessonHead) {
+      var eyebrowEl = document.getElementById('panel-lesson-eyebrow');
+      if (eyebrowEl) eyebrowEl.textContent = unit.name || '';
+      var nameEl = document.getElementById('panel-lesson-name');
+      if (nameEl) nameEl.textContent = lesson.title || '';
+      var pillEl = document.getElementById('panel-lesson-pill');
+      if (pillEl) pillEl.textContent = 'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
+      lessonHead.style.display = '';
+    }
+
     // ===== LEFT PANEL: METHOD CARD =====
     var mc = pd.method_card;
     if (mc) {

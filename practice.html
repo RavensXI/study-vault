@@ -136,8 +136,8 @@
     .panel-section {
       background: #fff;
       border: 1px solid var(--border-light, #e8e4df);
-      border-radius: 12px;
-      padding: 1rem;
+      border-radius: 16px;
+      padding: 1.15rem;
     }
 
     .panel-section-title {
@@ -159,6 +159,38 @@
       color: var(--accent, #2563eb);
     }
 
+    /* ===== LESSON HEADER (top-left, above the method card) ===== */
+    .panel-lesson-head {
+      margin-bottom: 0.25rem;
+    }
+    .panel-lesson-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent, #2563eb);
+      margin-bottom: 0.35rem;
+    }
+    .panel-lesson-name {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.28rem;
+      font-weight: 700;
+      line-height: 1.24;
+      color: var(--text-primary, #2d2a26);
+      margin: 0 0 0.6rem;
+    }
+    .panel-lesson-pill {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--accent, #2563eb);
+      background: var(--accent-light, #eff6ff);
+      padding: 0.24em 0.7em;
+      border-radius: 999px;
+    }
+
     /* Method steps in panel */
     .panel-method-title {
       font-family: 'Source Serif 4', Georgia, serif;
@@ -170,12 +202,10 @@
     }
 
     .panel-method-content {
-      font-size: 0.72rem;
+      font-size: 0.78rem;
       line-height: 1.6;
       color: var(--text-secondary, #5a5651);
-      margin-bottom: 0.6rem;
-      padding-bottom: 0.6rem;
-      border-bottom: 1px solid rgba(0,0,0,0.06);
+      margin-bottom: 0.85rem;
       overflow-x: hidden;
       word-wrap: break-word;
     }
@@ -241,17 +271,16 @@
       counter-increment: panel-step;
       display: flex;
       align-items: baseline;
-      gap: 0.5rem;
-      padding: 0.3rem 0;
-      font-size: 0.78rem;
+      gap: 0.6rem;
+      padding: 0;
+      margin-bottom: 0.6rem;
+      font-size: 0.82rem;
       line-height: 1.5;
       color: var(--text-primary, #2d2a26);
-      border-bottom: 1px solid rgba(0,0,0,0.05);
     }
 
     .panel-method-steps li:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
+      margin-bottom: 0;
     }
 
     /* Step content must be ONE flex item — mixed text + KaTeX + <strong>
@@ -281,13 +310,13 @@
     .panel-method-steps li::before {
       content: counter(panel-step);
       flex-shrink: 0;
-      width: 1.2rem;
-      height: 1.2rem;
+      width: 1.35rem;
+      height: 1.35rem;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Inter', sans-serif;
-      font-size: 0.6rem;
+      font-size: 0.64rem;
       font-weight: 700;
       color: var(--accent, #2563eb);
       background: var(--accent-light, #eff6ff);
@@ -714,22 +743,20 @@
       max-height: 0;
       opacity: 0;
       transition: max-height 0.5s var(--practice-ease), opacity 0.4s ease, padding 0.3s ease;
-      padding: 0 0.75rem;
-      border-left: 3px solid transparent;
+      padding: 0;
     }
 
     .learn-step.revealed {
-      max-height: 200px;
+      max-height: 260px;
       opacity: 1;
-      padding: 0.65rem 0.75rem;
-      border-left-color: var(--accent-badge, #dbeafe);
+      padding: 0.55rem 0;
       margin-bottom: 0.35rem;
     }
 
     .learn-step.is-answer.revealed {
       background: var(--success-light);
-      border-left-color: #86efac;
-      border-radius: 0 10px 10px 0;
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
     }
 
     .learn-step-label {
@@ -1033,6 +1060,29 @@
     }
     .guided-prefill-note { font-style: italic; color: var(--text-muted, #8a8580); }
     .guided-step-prefilled { opacity: 0.82; }
+
+    /* ===== PINNED QUESTION HEAD =====
+       The walk/example question stays in view while the steps reveal and the card
+       scrolls, so a student never has to scroll back up to re-read what they're
+       answering. The head is opaque and lifts a soft shadow once it's pinned. */
+    .guided-card-head, .learn-card-head {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: #fff;
+      padding-bottom: 0.85rem;
+      margin-bottom: 0.4rem;
+      transition: box-shadow 0.2s ease;
+    }
+    /* A long extract or a tall inline chart can't own the whole viewport when
+       pinned — cap the head and let it scroll inside the pinned zone so there's
+       always room for the steps below. */
+    .guided-card-head { max-height: 52vh; overflow-y: auto; }
+    .learn-card-head { max-height: 48vh; overflow-y: auto; }
+    .guided-card-head.is-stuck, .learn-card-head.is-stuck {
+      box-shadow: 0 12px 14px -12px rgba(0,0,0,0.25);
+    }
+    body.dark-mode .guided-card-head, body.dark-mode .learn-card-head { background: #2a2826; }
     .guided-actions .problem-check-btn { margin-top: 0.6rem; }
     .guided-actions .guided-secondary {
       display: block;
@@ -4203,6 +4253,13 @@
       <!-- LEFT PANEL -->
       <aside class="practice-panel" id="practice-panel">
 
+        <!-- Lesson header (unit eyebrow + lesson name + lesson pill) -->
+        <div class="panel-lesson-head" id="panel-lesson-head" style="display:none;">
+          <div class="panel-lesson-eyebrow" id="panel-lesson-eyebrow"></div>
+          <h1 class="panel-lesson-name" id="panel-lesson-name"></h1>
+          <span class="panel-lesson-pill" id="panel-lesson-pill"></span>
+        </div>
+
         <!-- Method card -->
         <div class="panel-section" id="panel-method" style="display:none;">
           <div class="panel-section-title">
@@ -4300,11 +4357,13 @@
           <!-- LEARN VIEW -->
           <div class="content-view" id="learn-view">
             <div class="learn-card" id="learn-card">
-              <div class="learn-card-header">
-                <span class="learn-counter" id="learn-counter">Example 1 of 4</span>
-                <span class="learn-difficulty diff-bronze" id="learn-difficulty">Bronze</span>
+              <div class="learn-card-head" id="learn-card-head">
+                <div class="learn-card-header">
+                  <span class="learn-counter" id="learn-counter">Example 1 of 4</span>
+                  <span class="learn-difficulty diff-bronze" id="learn-difficulty">Bronze</span>
+                </div>
+                <div class="learn-question" id="learn-question"></div>
               </div>
-              <div class="learn-question" id="learn-question"></div>
               <div class="learn-steps-area" id="learn-steps-area"></div>
               <div class="learn-actions" id="learn-actions">
                 <button class="learn-reveal-btn" id="learn-reveal-btn">
@@ -4372,10 +4431,12 @@
 
               <!-- Guided walk card (learning by doing — opener, tier teaching, and rescue) -->
               <div class="problem-card guided-card" id="guided-card" style="display:none;">
-                <div class="problem-card-header">
-                  <span class="problem-number-label" id="guided-label">Together</span>
+                <div class="guided-card-head" id="guided-card-head">
+                  <div class="problem-card-header">
+                    <span class="problem-number-label" id="guided-label">Together</span>
+                  </div>
+                  <div class="guided-display" id="guided-display"></div>
                 </div>
-                <div class="guided-display" id="guided-display"></div>
                 <div class="guided-steps" id="guided-steps"></div>
                 <div class="guided-actions" id="guided-actions"></div>
               </div>
@@ -6333,6 +6394,20 @@
       // Learn mode buttons
       document.getElementById('learn-reveal-btn').addEventListener('click', revealNextLearnStep);
       document.getElementById('learn-next-btn').addEventListener('click', nextLearnExample);
+
+      // Pinned question head — lift a soft shadow once the head is stuck to the top
+      // of its scroll view, so it reads as a header rather than floating text.
+      ['learn-view', 'practice-view'].forEach(function(viewId) {
+        var v = document.getElementById(viewId);
+        if (!v) return;
+        v.addEventListener('scroll', function() {
+          var vt = v.getBoundingClientRect().top;
+          var heads = v.querySelectorAll('.guided-card-head, .learn-card-head');
+          for (var i = 0; i < heads.length; i++) {
+            heads[i].classList.toggle('is-stuck', heads[i].getBoundingClientRect().top <= vt + 1);
+          }
+        }, { passive: true });
+      });
 
       // Back to practice from learn mode
       document.getElementById('learn-back-practice-btn').addEventListener('click', function() {
