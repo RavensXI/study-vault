@@ -210,19 +210,12 @@
     var unitSlug = params.unitSlug;
 
     // ===== STANDARD HEADER =====
-    // Lesson number + unit pill in header
-    var headerUnitLabel = document.getElementById('header-unit-label');
-    if (headerUnitLabel) {
-      headerUnitLabel.textContent = 'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
-      if (unit.accent) {
-        headerUnitLabel.style.color = unit.accent;
-        headerUnitLabel.style.background = unit.accent_badge || '';
-        headerUnitLabel.style.padding = '0.15rem 0.6rem';
-        headerUnitLabel.style.borderRadius = '6px';
-        headerUnitLabel.style.fontSize = '0.75rem';
-        headerUnitLabel.style.fontWeight = '600';
-      }
-    }
+    // The wordmark drops into the left gutter; the masthead spot it used to hold
+    // now carries the lesson title + its "Lesson X of Y" pill (accent from CSS).
+    var headerLessonTitle = document.getElementById('header-lesson-title');
+    if (headerLessonTitle) headerLessonTitle.textContent = lesson.title || '';
+    var headerLessonPill = document.getElementById('header-lesson-pill');
+    if (headerLessonPill) headerLessonPill.textContent = 'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
 
     // Nav: Unit Overview
     var navUnitOverview = document.getElementById('nav-unit-overview');
@@ -267,20 +260,6 @@
 
     var subtitleEl = document.getElementById('lesson-subtitle');
     if (subtitleEl && lesson.description) subtitleEl.textContent = lesson.description;
-
-    // ===== LEFT PANEL: LESSON HEADER =====
-    // Unit eyebrow + lesson name + lesson pill, so the panel is anchored with a
-    // clear "you are here" instead of leading with the method-card tier.
-    var lessonHead = document.getElementById('panel-lesson-head');
-    if (lessonHead) {
-      var eyebrowEl = document.getElementById('panel-lesson-eyebrow');
-      if (eyebrowEl) eyebrowEl.textContent = unit.name || '';
-      var nameEl = document.getElementById('panel-lesson-name');
-      if (nameEl) nameEl.textContent = lesson.title || '';
-      var pillEl = document.getElementById('panel-lesson-pill');
-      if (pillEl) pillEl.textContent = 'Lesson ' + lesson.lesson_number + ' of ' + data.totalLessons;
-      lessonHead.style.display = '';
-    }
 
     // ===== LEFT PANEL: METHOD CARD =====
     var mc = pd.method_card;
