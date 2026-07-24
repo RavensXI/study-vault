@@ -1032,6 +1032,18 @@ function initNarration() {
         tabTrack.classList.toggle('podcast-active', mode === 'podcast');
         playerMode = mode;
 
+        // Keep the AI-disclosure note accurate for the active source: narration is
+        // Azure text-to-speech; the podcast is an AI-generated (NotebookLM) audio.
+        var aiNote = document.querySelector('.narration-ai');
+        if (aiNote) {
+          var aiText = (mode === 'podcast')
+            ? 'This podcast was generated using AI. Voices are synthetic.'
+            : 'Narration generated using AI text-to-speech.';
+          aiNote.setAttribute('aria-label', aiText);
+          var aiTip = aiNote.querySelector('.narration-ai-tip');
+          if (aiTip) aiTip.textContent = aiText;
+        }
+
         if (mode === 'podcast') {
           // Switch to single-file podcast mode
           audio.src = podcastUrl;

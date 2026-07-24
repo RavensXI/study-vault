@@ -465,6 +465,17 @@
         container.addEventListener('click', function () {
           openVideoModal(embedSrc, lesson.title, isDirectVideo);
         });
+
+        // AI-generated video disclosure — StudyVault's own overview videos are
+        // AI-made (NotebookLM); curated YouTube documentaries (the else branch)
+        // are third-party and get no such note.
+        if (!videoSection.querySelector('.sidebar-video-ai-note')) {
+          var vnote = document.createElement('div');
+          vnote.className = 'sidebar-video-ai-note';
+          vnote.textContent = 'This video was generated using AI. Voices are synthetic.';
+          vnote.style.cssText = 'font-size:0.68rem;line-height:1.3;color:var(--text-muted,#8a8580);margin-top:0.4rem;text-align:center';
+          videoSection.appendChild(vnote);
+        }
       } else {
         iframe.src = embedSrc;
         iframe.title = lesson.title;
