@@ -4543,26 +4543,32 @@ body.dark-mode .kc-blank.incorrect {
   gap: 1rem;
 }
 
-/* AI text-to-speech disclosure (Azure TTS contractual requirement) — a quiet info
-   icon by the narration controls, tooltip on hover/focus. One home, not a banner. */
-.narration-ai {
+/* Shared AI-disclosure info mark (narration player + video). A quiet (i) that
+   shows its label on hover and toggles on click; click-outside/Esc dismiss it
+   (handled in main.js). One home per surface, never a banner. */
+.ai-info {
   position: relative;
   display: inline-flex;
   align-items: center;
+  vertical-align: middle;
   color: var(--text-muted, #8a8580);
-  opacity: 0.65;
-  cursor: help;
+  opacity: 0.7;
+  cursor: pointer;
 }
-.narration-ai:hover, .narration-ai:focus { opacity: 1; outline: none; }
-.narration-ai-tip {
+.ai-info:hover, .ai-info.open { opacity: 1; }
+.ai-info svg { display: block; }
+.ai-tip {
   position: absolute;
   bottom: calc(100% + 8px);
   right: 0;
   width: max-content;
-  max-width: 220px;
+  max-width: 230px;
   background: #2d2a26;
   color: #fff;
   font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;  /* don't inherit the uppercase of a section title */
   line-height: 1.35;
   text-align: left;
   padding: 0.4rem 0.55rem;
@@ -4570,12 +4576,12 @@ body.dark-mode .kc-blank.incorrect {
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s ease;
-  z-index: 30;
+  transition: opacity 0.12s ease;
+  z-index: 40;
   pointer-events: none;
 }
-.narration-ai:hover .narration-ai-tip,
-.narration-ai:focus .narration-ai-tip { opacity: 1; visibility: visible; }
+.ai-info--left .ai-tip { right: auto; left: 0; }  /* anchor left when the mark sits near a left edge (video title) */
+.ai-info:hover .ai-tip, .ai-info.open .ai-tip { opacity: 1; visibility: visible; }
 
 .narration-play .narration-icon-pause { display: none; }
 .narration-play.playing .narration-icon-play { display: none; }
@@ -8367,6 +8373,9 @@ body.dark-mode .revision-tip-popup a {
 .sv-legal-footer p { font-size: 0.75rem; color: var(--text-muted); line-height: 1.6; margin: 0; }
 .sv-legal-footer a { color: var(--text-muted); text-decoration: underline; }
 .sv-legal-footer a:hover { color: var(--text-color); }
+/* Legal fine-print (non-affiliation) sits under the copyright/links line, smaller
+   and width-constrained so it reads as fine print rather than one long banner. */
+.sv-legal-fine { font-size: 0.68rem; line-height: 1.5; max-width: 620px; margin: 0.55rem auto 0; opacity: 0.8; }
 
 /* History (AQA) — free tier, 16 units across 4 sections (Period / Wider world / Thematic / British depth) */
 /* AUTOGEN-MARKER: history-aqa unit accents */

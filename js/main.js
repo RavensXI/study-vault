@@ -1034,13 +1034,13 @@ function initNarration() {
 
         // Keep the AI-disclosure note accurate for the active source: narration is
         // Azure text-to-speech; the podcast is an AI-generated (NotebookLM) audio.
-        var aiNote = document.querySelector('.narration-ai');
+        var aiNote = document.querySelector('.narration-player .ai-info');
         if (aiNote) {
           var aiText = (mode === 'podcast')
             ? 'This podcast was generated using AI. Voices are synthetic.'
             : 'Narration generated using AI text-to-speech.';
           aiNote.setAttribute('aria-label', aiText);
-          var aiTip = aiNote.querySelector('.narration-ai-tip');
+          var aiTip = aiNote.querySelector('.ai-tip');
           if (aiTip) aiTip.textContent = aiText;
         }
 
@@ -3405,3 +3405,22 @@ function openFlashcardModal() {
 
 // Expose globally so lesson-loader can call it
 window.openFlashcardModal = openFlashcardModal;
+
+// Shared AI-disclosure info marks (.ai-info): click toggles the tip; clicking
+// elsewhere or pressing Escape dismisses it. Delegated on document so it also
+// covers the video mark that lesson-loader adds after load. Hover still works
+// via CSS; this fixes the click-and-stuck behaviour of a :focus-based tooltip.
+(function initAiInfoMarks() {
+  document.addEventListener('click', function (e) {
+    var mark = e.target.closest ? e.target.closest('.ai-info') : null;
+    var open = document.querySelectorAll('.ai-info.open');
+    for (var i = 0; i < open.length; i++) { if (open[i] !== mark) open[i].classList.remove('open'); }
+    if (mark) { e.preventDefault(); mark.classList.toggle('open'); }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+      var open = document.querySelectorAll('.ai-info.open');
+      for (var i = 0; i < open.length; i++) open[i].classList.remove('open');
+    }
+  });
+})();
