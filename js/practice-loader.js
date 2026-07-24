@@ -463,10 +463,12 @@
     if (nextLink) {
       if (data.nextLesson) {
         nextLink.href = practiceUrl(subjectSlug, unitSlug, data.nextLesson.lesson_number);
-        nextLink.textContent = 'Next: ' + escapeHtml(data.nextLesson.title) + ' \u2192';
+        // textContent is already safe \u2014 escapeHtml here double-encodes, so a title
+        // with "&" showed the literal "&amp;". Assign the raw title.
+        nextLink.textContent = 'Next: ' + data.nextLesson.title + ' \u2192';
       } else {
         nextLink.href = browseUrl(subjectSlug, unitSlug);
-        nextLink.textContent = 'Back to ' + escapeHtml(unit.name) + ' \u2192';
+        nextLink.textContent = 'Back to ' + unit.name + ' \u2192';
       }
     }
 
