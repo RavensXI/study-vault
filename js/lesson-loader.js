@@ -465,18 +465,7 @@
         container.addEventListener('click', function () {
           openVideoModal(embedSrc, lesson.title, isDirectVideo);
         });
-
-        // AI-generated video disclosure — StudyVault's own overview videos are
-        // AI-made (NotebookLM); curated YouTube documentaries (the else branch)
-        // are third-party and get no such note. A compact (i) in the section
-        // title, not a text line, so it adds no vertical height.
-        var vTitle = videoSection.querySelector('.sidebar-section-title');
-        if (vTitle && !vTitle.querySelector('.ai-info')) {
-          vTitle.insertAdjacentHTML('beforeend',
-            ' <span class="ai-info ai-info--left" role="button" tabindex="0" aria-label="This video was generated using AI. Voices are synthetic.">' +
-            '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>' +
-            '<span class="ai-tip">This video was generated using AI. Voices are synthetic.</span></span>');
-        }
+        // AI-video disclosure lives in the footer "Disclaimers" popup (js/legal.js).
       } else {
         iframe.src = embedSrc;
         iframe.title = lesson.title;
