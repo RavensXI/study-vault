@@ -5186,7 +5186,11 @@
         given = [valA, valB];
         var sortedExpected = expected.slice().sort(function(a, b) { return a - b; });
         var sortedGiven = given.slice().sort(function(a, b) { return a - b; });
-        isCorrect = sortedExpected[0] === sortedGiven[0] && sortedExpected[1] === sortedGiven[1];
+        // Per-problem tolerance for pairs read off a curve (e.g. Q1 and Q3 from a
+        // cumulative frequency graph); default is exact match.
+        var tsTol = (typeof problem.tolerance === 'number') ? problem.tolerance : 0;
+        isCorrect = Math.abs(sortedGiven[0] - sortedExpected[0]) <= tsTol &&
+                    Math.abs(sortedGiven[1] - sortedExpected[1]) <= tsTol;
         correctText = 'x = ' + expected[0] + ' and x = ' + expected[1];
 
       } else if (inputType === 'multiple_choice') {
@@ -5255,8 +5259,12 @@
           var expN = parseInt(expStr.substring(3, 6));
           isCorrect = Math.abs(givenE - expE) <= 1 && Math.abs(givenN - expN) <= 1;
         } else {
-          // Allow small floating point tolerance for non-GR answers
-          isCorrect = Math.abs(val - exp) < 0.01;
+          // Allow small floating point tolerance for non-GR answers. A problem may
+          // set its own `tolerance` (e.g. reading an estimate off a cumulative
+          // frequency curve or line of best fit, where the exact stored value can
+          // only be read approximately) — default stays tight at 0.01.
+          var svTol = (typeof problem.tolerance === 'number') ? problem.tolerance : 0.01;
+          isCorrect = Math.abs(val - exp) < svTol;
         }
         correctText = '' + exp;
       }
