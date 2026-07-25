@@ -317,12 +317,13 @@
   .bigcard .flip{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s var(--ease)}
   .bigcard.showa .flip{transform:rotateY(180deg)}
   .bigcard .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffdf8;border-radius:8px;
-    box-shadow:0 30px 70px -25px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:14px;padding:2rem}
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.5);display:flex;flex-direction:column;align-items:center;justify-content:safe center;
+    gap:14px;padding:2rem;overflow:auto}
   .bigcard .back{transform:rotateY(180deg)}
   .bigcard .tag{font-size:.72rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
-  .bigcard .qq{font-family:var(--hand);font-size:clamp(1.5rem,4vw,2.2rem);color:#3e3a31;text-align:center;line-height:1.2}
+  .bigcard .qq{font-family:var(--hand);font-size:clamp(1.5rem,4vw,2.2rem);color:#3e3a31;text-align:center;line-height:1.2;max-width:100%;overflow-wrap:anywhere;hyphens:auto}
   .bigcard .qq.long{font-size:1.35rem;line-height:1.35}
+  .bigcard .qq.xlong{font-size:1.05rem;line-height:1.4}
   .fcbtns{display:flex;gap:10px;margin-top:.5rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
   .bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
   .fcbtns .fb{font-family:var(--head);font-weight:600;font-size:.88rem;border:1px solid var(--line);
@@ -1139,7 +1140,8 @@ function fcDeal(){
   document.getElementById('bqTag').textContent=f.name||(sub?sub.name:'');
   const q=document.getElementById('bqQ'), a=document.getElementById('baA');
   q.textContent=f.q; a.textContent=f.a;
-  q.classList.toggle('long',f.q.length>90); a.classList.toggle('long',f.a.length>90);
+  q.classList.toggle('long',f.q.length>70); a.classList.toggle('long',f.a.length>70);
+  q.classList.toggle('xlong',f.q.length>150); a.classList.toggle('xlong',f.a.length>150);
   document.getElementById('baTag').textContent='Answer';
   fcShowA=false; bigcard.classList.remove('showa');
 }

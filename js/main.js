@@ -1431,6 +1431,12 @@ function initNarration() {
   document.addEventListener('keydown', function(e) {
     var tag = e.target.tagName;
     if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.target.isContentEditable) return;
+    // A playing video owns the spacebar. When the video overview modal is open,
+    // or a <video>/<iframe> has focus, don't also toggle narration — otherwise
+    // one Space press paused the video AND started the narration (they fought).
+    if (tag === 'VIDEO' || tag === 'IFRAME') return;
+    var vm = document.getElementById('video-modal-overlay');
+    if (vm && vm.classList.contains('active')) return;
     if (e.code === 'Space') {
       e.preventDefault();
       if (audio.paused) { startPlayback(); } else { audio.pause(); }

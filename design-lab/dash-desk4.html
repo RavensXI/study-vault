@@ -284,12 +284,16 @@
   .fcmodal .bigcard .flip{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .5s var(--ease)}
   .fcmodal .bigcard.showa .flip{transform:rotateX(180deg)}
   .fcmodal .face{position:absolute;inset:0;backface-visibility:hidden;background:#fffcf4;border:1px solid #ddd3bc;border-radius:12px;
-    box-shadow:0 30px 70px -25px rgba(0,0,0,.55);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:.8rem;padding:2rem 2.6rem;
+    box-shadow:0 30px 70px -25px rgba(0,0,0,.55);display:flex;flex-direction:column;justify-content:safe center;align-items:center;gap:.8rem;padding:2rem 2.6rem;overflow:auto;
     background-image:repeating-linear-gradient(to bottom,transparent 0 44px,rgba(112,140,170,.14) 44px 45px)}
   .fcmodal .face.back{transform:rotateX(180deg)}
   .fcmodal .face::before{content:"";position:absolute;left:0;top:0;bottom:0;width:10px;border-radius:12px 0 0 12px;
     background:color-mix(in srgb,var(--fcc,#8a5a44) 30%,transparent)}
-  .fcmodal .face .qq{font-family:var(--hand);font-size:2.1rem;line-height:1.2;color:#33301c;text-align:center}
+  /* font scales with the card and steps down for longer text so nothing spills
+     over the edge; long words wrap instead of overflowing */
+  .fcmodal .face .qq{font-family:var(--hand);font-size:clamp(1.25rem,4.4vw,2.1rem);line-height:1.22;color:#33301c;text-align:center;max-width:100%;overflow-wrap:anywhere;hyphens:auto}
+  .fcmodal .face .qq.long{font-size:clamp(1.05rem,3.4vw,1.6rem)}
+  .fcmodal .face .qq.xlong{font-size:clamp(.92rem,2.7vw,1.25rem);line-height:1.3}
   .fcmodal .face .tag{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
   .fcbtns{display:flex;gap:12px;margin-top:.4rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
   .fcmodal .showa .fcbtns,.bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
@@ -599,6 +603,14 @@ function startWithWarmup(url){
   else nav(url);
 }
 function openWarmup(url){ if(window.svWarmup) svWarmup.open({subjects:SUBJECTS,target:url,nav}); }
+/* warm up on ONE subject: its own knowledge-checks, then into its next lesson.
+   (Practice subjects have no KCs, so svWarmup just goes straight to the lesson.) */
+function warmupSubject(slug){
+  const s=SUBJECTS.find(x=>x.slug===slug); if(!s||!window.svWarmup) return;
+  let target=dayOneUrl(s);
+  if(s.units&&s.units.length){ const nx=s.units.find(u=>u[2]<u[1])||s.units[0]; target=urlFor(s,nx); }
+  svWarmup.open({subjects:[s],target:target,nav});
+}
 window.svWarmupDone=()=>{ if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
 if(DAYONE){
   buildDayOneToday();
@@ -625,7 +637,7 @@ function subjSpread(s){
     <h3>Start here</h3>
     <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
       <div class="unit" tabindex="0" ${_du?`onclick="nav('${_du}')"`:''}><b><span class="hl">Lesson 1 — begin ${s.name}</span></b><small>${_du?'start here':'coming soon'}</small></div>
-      <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <div class="unit" tabindex="0" role="button" onclick="warmupSubject('${s.slug}')"><b>Warm up on ${s.name}</b><small>5 min</small></div>
       <button class="backlink" onclick="goToday()">⟵ back to today</button>
     </div>`;
     return [L,R];
@@ -649,7 +661,7 @@ function subjSpread(s){
     <h3>Pick up where you left off</h3>`)+`
     <div class="subjpg" style="display:flex;flex-direction:column;flex:1">
       <div class="unit" tabindex="0" onclick="nav('${urlFor(s,nxt)}')"><b><span class="hl">${nxt[0]} — next lesson</span></b><small>continue</small></div>
-      <div class="unit" tabindex="0"><b>Warm up on ${s.name}</b><small>5 min</small></div>
+      <div class="unit" tabindex="0" role="button" onclick="warmupSubject('${s.slug}')"><b>Warm up on ${s.name}</b><small>5 min</small></div>
       <button class="open4" onclick="nav('/browse/${s.sub}')">Open ${s.name} →</button>
       <button class="backlink" onclick="goToday()">⟵ back to today</button>
     </div>`;
@@ -974,13 +986,16 @@ fcPreview();
 
 const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
 let fci=0, fcShowA=false;
+/* step the card font down for longer Q/A so it never spills past the edge */
+function fcFit(el,s){ s=String(s||''); el.classList.toggle('long', s.length>70); el.classList.toggle('xlong', s.length>150); }
 function fcDeal(){
   const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
   fcmodal.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
   document.getElementById('bqTag').textContent=f.name||(sub?sub.name:f.slug);
-  document.getElementById('bqQ').textContent=f.q;
   document.getElementById('baTag').textContent=(sub?sub.name:f.slug)+' \u2014 answer';
-  document.getElementById('baA').textContent=f.a;
+  const _q=document.getElementById('bqQ'), _a=document.getElementById('baA');
+  _q.textContent=f.q; _a.textContent=f.a;
+  fcFit(_q,f.q); fcFit(_a,f.a);
   document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
@@ -1040,6 +1055,23 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
   const wpop=document.getElementById('wpop'), wstop=document.getElementById('wstop');
   const C=1495;
   let tEnd=0, tTotal=0;
+  /* a soft two-note chime when the timer runs out — the flash alone was silent.
+     The AudioContext is unlocked on the start tap (a user gesture) so the
+     autoplay policy lets it sound minutes later. */
+  let actx=null;
+  function unlockChime(){ try{ if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)(); if(actx.state==='suspended') actx.resume(); }catch(e){} }
+  function chime(){
+    if(!actx) return;
+    var t0=actx.currentTime;
+    [587.33,783.99].forEach(function(freq,i){        /* D5 → G5, gentle */
+      var o=actx.createOscillator(), g=actx.createGain(); var off=i*0.22;
+      o.type='sine'; o.frequency.value=freq; o.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(0.0001,t0+off);
+      g.gain.exponentialRampToValueAtTime(0.16,t0+off+0.03);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+off+1.0);
+      o.start(t0+off); o.stop(t0+off+1.05);
+    });
+  }
   /* the painted watch lies at an angle on the desk — its dial's 12 sits 45°
      clockwise of screen-up (measured from the hour ticks; the crown agrees).
      Hands (and the timer arc's rotate(-45) above) carry that tilt so the
@@ -1054,7 +1086,7 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
     if(tEnd){
       const left=tEnd-Date.now();
       if(left<=0){ tEnd=0; wstop.style.display='none';
-        tarc.classList.add('wflash');
+        tarc.classList.add('wflash'); chime();
         setTimeout(()=>{ tarc.classList.remove('wflash'); tcirc.style.strokeDashoffset=C; },1900);
       } else tcirc.style.strokeDashoffset=C*(1-left/tTotal);
     }
@@ -1064,7 +1096,7 @@ addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('o
   wpop.querySelectorAll('button').forEach(b=>b.onclick=e=>{
     e.stopPropagation();
     const min=+b.dataset.min;
-    if(min){ tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; }
+    if(min){ unlockChime(); tTotal=min*60000; tEnd=Date.now()+tTotal; tcirc.style.strokeDashoffset=0; wstop.style.display=''; }
     else { tEnd=0; tcirc.style.strokeDashoffset=C; wstop.style.display='none'; }
     wpop.classList.remove('open'); tickWatch();
   });

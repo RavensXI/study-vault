@@ -85,11 +85,15 @@
           var qs = [];
           (rows || []).forEach(function (row) {
             (row.knowledge_checks || []).forEach(function (kc) {
-              if (Array.isArray(kc.options) && typeof kc.correct === 'number' && kc.q)
-                qs.push({ q: kc.q, opts: kc.options, correct: kc.correct,
+              if (Array.isArray(kc.options) && typeof kc.correct === 'number' && kc.q) {
+                /* authors often leave the right answer in the same slot (it was
+                   very often option 2) — shuffle so position carries no signal */
+                var mixed = shuffleOpts(kc.options, kc.correct);
+                qs.push({ q: kc.q, opts: mixed.opts, correct: mixed.correct,
                           sub: s.sub, unit: s.unit, n: row.lesson_number,
                           title: row.title || ('Lesson ' + row.lesson_number),
                           from: s.name + ' · ' + (row.title || 'Lesson ' + row.lesson_number) });
+              }
             });
           });
           return qs;
@@ -110,6 +114,19 @@
       var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t;
     }
     return a;
+  }
+
+  /* shuffle a question's options and report where the correct one landed.
+     Options that only make sense in place ("all of the above", "both A and B",
+     "none of these") are left untouched — reordering them would be wrong. */
+  var POSITIONAL = /\b(all|none|both|neither)\b.*\b(above|these|apply|correct)\b|\b(a and b|b and c|a and c)\b/i;
+  function shuffleOpts(opts, correct) {
+    if (opts.some(function (o) { return POSITIONAL.test(String(o)); }))
+      return { opts: opts, correct: correct };
+    var arr = opts.map(function (o, i) { return { o: o, c: i === correct }; });
+    shuffle(arr);
+    var ci = 0; for (var i = 0; i < arr.length; i++) if (arr[i].c) { ci = i; break; }
+    return { opts: arr.map(function (x) { return x.o; }), correct: ci };
   }
 
   function open(opts) {
