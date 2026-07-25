@@ -237,6 +237,10 @@
     box-shadow:inset 0 -2px 0 rgba(0,0,0,.2);transition:filter .15s}
   .sdetail .cont:hover,.sdetail .go:hover{filter:brightness(1.07)}
   .sdetail .cont:active,.sdetail .go:active{box-shadow:inset 0 1px 2px rgba(0,0,0,.28)}
+  /* choose-your-options prompt (History/Lit/RS/Drama before the student sculpts) */
+  .optprompt{display:flex;flex-direction:column;gap:.75rem;align-items:flex-start;padding:.15rem 0 .2rem}
+  .optprompt p{margin:0;font-family:var(--read);font-size:.9rem;line-height:1.45;color:var(--sec);max-width:54ch}
+  .optprompt .cont{position:static}
   /* topics — hairline-divided ledger cells, not floating cards */
   .units{display:flex;gap:0;flex:none}
   .ublock{flex:1 1 0;min-width:0;border:none;border-left:1px solid var(--line);background:none;cursor:pointer;
@@ -787,6 +791,18 @@ function _pullOut(slug){
 }
 /* default panel: resume button + the subject's topics (click one to pick a lesson) */
 function renderSubjectPanel(s){
+  if(window.svNeedsOptionPick && svNeedsOptionPick(s)){   /* choose-your-options subject, none picked -> sculpt first */
+    const pp=document.getElementById('selprompt'); if(pp) pp.hidden=true;
+    const ep=document.getElementById('sdetail');
+    ep.hidden=false; ep.style.setProperty('--tc',s.c);
+    ep.innerHTML='<div class="top"><h3>'+s.name+'</h3>'+
+      '<span class="sub">'+(s.board?s.board+' · ':'')+'options not chosen yet</span></div>'+
+      '<div class="optprompt"><p>'+s.name+' has options your exam board offers — most students sit about four. '+
+      'Choose yours and this shows your course, not the whole catalogue.</p>'+
+      '<button class="cont">Choose your '+s.name+' options →</button></div>';
+    ep.querySelector('.cont').onclick=()=>nav('home-study.html?view=topics');
+    return;
+  }
   if(!s.units.length){                      /* day one: nothing started yet */
     const p0=document.getElementById('selprompt'); if(p0) p0.hidden=true;
     const el0=document.getElementById('sdetail');

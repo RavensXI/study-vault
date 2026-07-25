@@ -125,6 +125,24 @@ function keepUnit(su, uslug) {
   return true;
 }
 
+/* choose-your-options families: their exam board offers optional units and the
+   student sits only ~4, picked in the wizard (WIZ.topics). Until they pick, the
+   course isn't sculpted and keepUnit() lets EVERY option through — 16 History
+   units, all the set texts, etc. The dashboard uses this to show a
+   "choose your options" prompt instead of dumping the whole catalogue. */
+var OPTION_FAMILIES = ['history', 'lit', 'drama', 'rs'];
+function svNeedsOptionPick(su) {
+  if (!su || OPTION_FAMILIES.indexOf(su.slug) < 0) return false;
+  var picks = (WIZ && WIZ.topics && WIZ.topics[su.slug])
+    ? Object.values(WIZ.topics[su.slug]).flat().filter(Boolean) : [];
+  if (picks.length) return false;                 // options chosen -> sculpted, show units
+  for (var k in DONE) {                            // already studying? don't hide their progress
+    if (k.indexOf(su.sub + '/') === 0 && DONE[k].length) return false;
+  }
+  return true;
+}
+window.svNeedsOptionPick = svNeedsOptionPick;
+
 /* Is THIS unit practice-format? su.mode is a subject-level flag, but several
    subjects are mixed: Geography is article for Paper 1 and Paper 2 and practice
    for Geographical Skills, and Science has calculation units alongside article
@@ -386,7 +404,12 @@ function svDashInit(SUBJECTS, opts) {
       topicsRaw: (sl === 'history' || sl === 'lit' || sl === 'drama') ? raw : [], first: first };
   }));
 
-  var subs = SUBJECTS.filter(function (su) { return su.sub && su.mode !== 'p'; })
+  /* practice-format subjects (maths, languages, english language) DO have real
+     units in Supabase — they're just all practice-first. Fetch them too so the
+     panel shows units -> lessons like every other subject, instead of the
+     "Full course" placeholder. showLessons() already routes practice units to
+     /practice/ via svIsPracticeUnit. */
+  var subs = SUBJECTS.filter(function (su) { return su.sub; })
     .map(function (su) { return su.sub; });
   if (!subs.length) return;
   fetch(SUPA + '/rest/v1/subjects?select=slug,settings,units(slug,name,lesson_count,sort_order)'
