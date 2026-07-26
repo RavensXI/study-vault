@@ -327,6 +327,104 @@ function svUnitMedia(SUBJECTS, cb) {
   });
 }
 
+/* ---- flashcards as spaced repetition --------------------------------------
+   The dashboard deck and the in-lesson deck now share ONE Leitner store
+   (sv-flashcard-progress, written by js/main.js), keyed lessonId:qN. Instead
+   of every reached card every day (83 uncapped), svFlashDeck builds today's
+   sitting: every card that's DUE (across all lessons ever studied) first, then
+   NEW cards from the units the student has reached, capped at ~20. svFlashMark
+   moves a card through the boxes with the same rule js/main.js uses, so both
+   surfaces advance the same card together. */
+var FC_KEY = 'sv-flashcard-progress';
+var FC_BOX_INTERVALS = [0, 1, 2, 4, 7, 14];
+var FC_CAP = 20;
+function svFlashProgress() {
+  try { var p = JSON.parse(localStorage.getItem(FC_KEY)); if (p && p.cards) return p; } catch (e) {}
+  return { cards: {}, streak: { current: 0, lastStudy: null } };
+}
+function svFlashLevel(box) { return box >= 5 ? 'Mastered' : box >= 4 ? 'Secure' : box >= 2 ? 'Developing' : 'Emerging'; }
+function svFlashShuffle(a) { for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)), t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+
+/* self-mark against the shared store — identical box logic to js/main.js */
+function svFlashMark(key, correct) {
+  if (!key) return 'New';
+  var prog = svFlashProgress();
+  var today = new Date().toISOString().slice(0, 10);
+  var cp = prog.cards[key] || (prog.cards[key] = { box: 1, nextReview: today, attempts: 0, correct: 0 });
+  cp.attempts++;
+  if (correct) { cp.correct++; cp.box = Math.min(cp.box + 1, 5); } else { cp.box = 1; }
+  var d = new Date(); d.setDate(d.getDate() + FC_BOX_INTERVALS[cp.box]);
+  cp.nextReview = d.toISOString().slice(0, 10);
+  var yest = new Date(); yest.setDate(yest.getDate() - 1); yest = yest.toISOString().slice(0, 10);
+  prog.streak = prog.streak || { current: 0, lastStudy: null };
+  if (prog.streak.lastStudy !== today) {
+    prog.streak.current = (prog.streak.lastStudy === yest) ? (prog.streak.current + 1) : 1;
+    prog.streak.lastStudy = today;
+  }
+  try { localStorage.setItem(FC_KEY, JSON.stringify(prog)); } catch (e) {}
+  if (window.svProgressPushSoon) svProgressPushSoon();
+  return svFlashLevel(cp.box);
+}
+
+/* today's session: DUE cards (any studied lesson) + NEW cards (reached units),
+   deduped, due-first, capped. cb(deck) where each card is
+   {key,q,a,slug,name,sub,unit,n,level}. Empty deck => nothing due, all caught up. */
+function svFlashDeck(SUBJECTS, cb) {
+  var prog = svFlashProgress();
+  var today = new Date().toISOString().slice(0, 10);
+  var bySub = {}; (SUBJECTS || []).forEach(function (su) { if (su.sub) bySub[su.sub] = su; });
+  var dueLids = [], seenLid = {};
+  Object.keys(prog.cards || {}).forEach(function (k) {
+    if ((prog.cards[k].nextReview || '9999') > today) return;
+    var lid = k.split(':')[0]; if (!seenLid[lid]) { seenLid[lid] = 1; dueLids.push(lid); }
+  });
+  var newSrcs = [];
+  (SUBJECTS || []).forEach(function (su) {
+    if (!su.sub || su.mode === 'p') return;
+    var unit = null, next = 1;
+    if (su.units && su.units.length) {
+      for (var i = 0; i < su.units.length; i++) { var u = su.units[i], set = u[4] || []; var k = 1; while (k <= u[1] && set.indexOf(k) >= 0) k++; if (k <= u[1]) { unit = u[3]; next = k; break; } }
+      if (!unit) { unit = su.units[0][3]; next = 1; }
+    } else if (su.first) unit = su.first;
+    if (unit) newSrcs.push({ su: su, unit: unit, next: next });
+  });
+  var jobs = [];
+  if (dueLids.length) {
+    var idl = dueLids.map(function (x) { return '"' + x + '"'; }).join(',');
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,subjects!inner(slug,school_id))&id=in.(' + idl + ')&units.subjects.school_id=is.null', { headers: { apikey: ANON } })
+      .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'due', rows: rows }; }).catch(function () { return { kind: 'due', rows: [] }; }));
+  }
+  newSrcs.forEach(function (s) {
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + '&units.subjects.school_id=is.null&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
+      .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'new', su: s.su, rows: rows }; }).catch(function () { return { kind: 'new', su: s.su, rows: [] }; }));
+  });
+  if (!jobs.length) { cb([]); return; }
+  Promise.all(jobs).then(function (results) {
+    var dueCards = [], newCards = [], seen = {};
+    function mk(row, su, i, f) {
+      var key = row.id + ':q' + i;
+      return { key: key, q: f.q || f.question, a: f.a || f.answer, slug: su ? su.slug : null,
+               name: su ? su.name : '', sub: su ? su.sub : null, unit: row.units ? row.units.slug : null,
+               n: row.lesson_number, level: prog.cards[key] ? svFlashLevel(prog.cards[key].box) : 'New' };
+    }
+    results.forEach(function (res) {
+      (res.rows || []).forEach(function (row) {
+        var sub = (row.units && row.units.subjects) ? row.units.subjects.slug : (res.su ? res.su.sub : null);
+        var su = bySub[sub] || res.su;
+        (row.flashcard_questions || []).forEach(function (f, i) {
+          if (!f || !(f.q || f.question) || !(f.a || f.answer)) return;
+          var key = row.id + ':q' + i; if (seen[key]) return;
+          if (res.kind === 'due') { if (prog.cards[key] && (prog.cards[key].nextReview || '9999') <= today) { seen[key] = 1; dueCards.push(mk(row, su, i, f)); } }
+          else if (!prog.cards[key]) { seen[key] = 1; newCards.push(mk(row, su, i, f)); }
+        });
+      });
+    });
+    svFlashShuffle(dueCards); svFlashShuffle(newCards);
+    cb(dueCards.concat(newCards).slice(0, FC_CAP));
+  }).catch(function () { cb([]); });
+}
+window.svFlashDeck = svFlashDeck; window.svFlashMark = svFlashMark; window.svFlashLevel = svFlashLevel;
+
 /* signed-in avatar menu: who you are, edit subjects, sign out. Signing out
    removes the signed-in marker and the Supabase session token; the device
    keeps its setup and progress (those live locally, not on the account). */

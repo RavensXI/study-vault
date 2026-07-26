@@ -222,7 +222,7 @@
   .postcard .dy.hol{color:#a3873a}
   /* hover: the picture's caption appears handwritten on the desk below */
   .postcard .calcap{position:absolute;left:190px;top:1478px;width:1140px;font-family:var(--hand);font-size:54px;
-    color:#6b5c41;line-height:1.15;opacity:0;transition:opacity .3s ease;transform:rotate(-1.5deg);pointer-events:none}
+    color:#6b5c41;line-height:1.15;text-align:center;opacity:0;transition:opacity .3s ease;transform:rotate(-1.5deg);pointer-events:none}
   .postcard:hover .calcap{opacity:1}
 
   /* ============ the wristwatch: painted plate, live hands ============
@@ -309,7 +309,15 @@
   .fcmodal .showa .face.back .qq::after,.bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
   .fcmodal .meta{display:flex;justify-content:space-between;align-items:center;margin-top:1rem;color:#efe9da}
   .fcmodal .meta small{font-family:var(--read);font-style:italic;font-size:.95rem;opacity:.85}
+  .fcmodal .meta .metaR{display:flex;align-items:center;gap:12px}
   .fcmodal .meta .cnt{font-variant-numeric:tabular-nums;font-weight:700;font-size:.9rem}
+  /* per-card mastery (Leitner box): where this card sits in spaced repetition */
+  .fcmodal .meta .lvl{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#efe9da;white-space:nowrap}
+  .fcmodal .meta .lvl.l-new{background:rgba(255,255,255,.14);color:#e6dfce}
+  .fcmodal .meta .lvl.l-emerging{background:rgba(201,116,55,.92);color:#fff}
+  .fcmodal .meta .lvl.l-developing{background:rgba(86,118,160,.92);color:#fff}
+  .fcmodal .meta .lvl.l-secure{background:rgba(64,120,88,.92);color:#fff}
+  .fcmodal .meta .lvl.l-mastered{background:rgba(196,155,74,.95);color:#33280f}
   .fcmodal .x{position:absolute;top:-16px;right:-16px;width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
     background:#fffdf8;color:#26231e;font-size:19px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 
@@ -485,7 +493,7 @@
         </span>
       </span>
     </button>
-    <div class="meta"><small>tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="cnt" id="fcCnt"></span></div>
+    <div class="meta"><small>tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="lvl" id="fcLvl"></span><span class="cnt" id="fcCnt"></span></span></div>
   </div>
 </div>
 
@@ -523,9 +531,9 @@ function urlFor(s,u){ return '/'+(window.svIsPracticeUnit&&window.svIsPracticeUn
 if(window.svProgressSync) svProgressSync();   /* signed in: pull-merge account progress */
 svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
-  /* swap the demo flashcard deck for this student's own current-unit cards */
-  svUnitMedia(SUBJECTS,m=>{
-    if(m.deck.length>=4){ FC.length=0; m.deck.forEach(x=>FC.push(x)); fci=0; fcPreview(); }
+  /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
+  if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview(); }
   });
   if(_dq.get('warmup')&&!window._wuOpened){
     const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(SUBJECTS[0]);
@@ -996,6 +1004,8 @@ function fcDeal(){
   const _q=document.getElementById('bqQ'), _a=document.getElementById('baA');
   _q.textContent=f.q; _a.textContent=f.a;
   fcFit(_q,f.q); fcFit(_a,f.a);
+  const _lv=document.getElementById('fcLvl'), lvl=f.level||'New';
+  if(_lv){ _lv.textContent=lvl; _lv.className='lvl l-'+lvl.toLowerCase(); }
   document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
@@ -1019,12 +1029,17 @@ function fcReadGate(){
 /* self-marking: the record that feeds the teacher view + spaced repetition */
 function fcMark(ok){
   if(!fcCanMark) return;
-  try{ const f=FC[fci], lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
+  const f=FC[fci];
+  try{ const lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
     lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
       n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
     localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
+  /* move the card through the spaced-repetition boxes (shared with lessons) */
+  if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
   if(window.svProgressPushSoon) svProgressPushSoon();
-  fci=(fci+1)%FC.length; fcDeal();
+  if(fci+1<FC.length){ fci++; fcDeal(); }
+  else { fcmodal.classList.remove('open');   /* whole sitting done for today */
+    if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });

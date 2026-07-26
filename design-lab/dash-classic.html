@@ -336,7 +336,17 @@
   .bigcard .face.back .qq::after{content:"";position:absolute;left:0;bottom:0;height:2px;width:0;
     background:var(--anchor);opacity:.35;border-radius:1px}
   .bigcard.showa .face.back .qq::after{width:100%;transition:width var(--read-duration,2s) linear}
-  .fcmeta{position:fixed;left:0;right:0;bottom:26px;text-align:center;color:#f1e8d8;font-size:.85rem}
+  .fcmeta{position:fixed;left:0;right:0;bottom:26px;color:#f1e8d8;font-size:.85rem;
+    display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 16px}
+  .fcmeta .hint{opacity:.82;font-style:italic}
+  .fcmeta .cnt{font-variant-numeric:tabular-nums;font-weight:700}
+  /* per-card mastery (Leitner box): where this card sits in spaced repetition */
+  .fcmeta .lvl{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.16);color:#f1e8d8;white-space:nowrap}
+  .fcmeta .lvl.l-new{background:rgba(255,255,255,.16);color:#efe7d6}
+  .fcmeta .lvl.l-emerging{background:rgba(201,116,55,.92);color:#fff}
+  .fcmeta .lvl.l-developing{background:rgba(86,118,160,.92);color:#fff}
+  .fcmeta .lvl.l-secure{background:rgba(64,120,88,.92);color:#fff}
+  .fcmeta .lvl.l-mastered{background:rgba(196,155,74,.95);color:#33280f}
 
   /* ---- shorts modal ---- */
   .phonemodal{position:fixed;inset:0;background:rgba(38,30,18,.6);display:none;place-items:center;z-index:60}
@@ -478,7 +488,7 @@
       </span>
     </span>
   </button>
-  <div class="fcmeta">tap to flip · read the answer, then mark it — the line shows when</div>
+  <div class="fcmeta"><span class="lvl" id="fcLvl"></span><span class="cnt" id="fcCnt"></span><span class="hint">tap to flip · read the answer, then mark it — the line shows when</span></div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -519,14 +529,16 @@ svDashInit(SUBJECTS,{view:'classic',onUnits:function(){
       const ou=_dq.get('openunit'), uu=ou&&cur.units.find(x=>x[3]===ou);
       if(uu) showLessons(cur,uu); } }
   refreshDayOnePlan();
-  /* swap the demo flashcards + podcasts for this student's own (from each
-     subject's current unit) — the demo set stays only until this lands */
+  /* swap the demo podcasts for this student's own current-unit episodes */
   svUnitMedia(SUBJECTS,m=>{
-    if(m.deck.length>=4){ FC.length=0; m.deck.forEach(x=>FC.push(x)); fci=0;
-      if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
-        if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
     if(m.pods.length){ PODCASTS.length=0; m.pods.forEach(x=>PODCASTS.push(x));
       if(!podOn){ podQ=null; podPos=-1; } }
+  });
+  /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
+  if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0;
+      if(_dq.get('fc')){ fcDeal();   /* staging: re-deal so the real card shows */
+        if(_dq.get('fc')==='2'){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } } }
   });
   document.body.dataset.unitsLoaded='1';
 }});
@@ -1143,6 +1155,9 @@ function fcDeal(){
   q.classList.toggle('long',f.q.length>70); a.classList.toggle('long',f.a.length>70);
   q.classList.toggle('xlong',f.q.length>150); a.classList.toggle('xlong',f.a.length>150);
   document.getElementById('baTag').textContent='Answer';
+  const _lv=document.getElementById('fcLvl'), lvl=f.level||'New';
+  if(_lv){ _lv.textContent=lvl; _lv.className='lvl l-'+lvl.toLowerCase(); }
+  const _cn=document.getElementById('fcCnt'); if(_cn) _cn.textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
 document.getElementById('fcdoor').onclick=()=>{ fci=0; fcDeal(); fcmodal.classList.add('open');
@@ -1166,12 +1181,16 @@ function fcReadGate(){
 /* self-marking: the record that feeds the teacher view + spaced repetition */
 function fcMark(ok){
   if(!fcCanMark) return;
-  try{ const f=FC[fci], lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
+  const f=FC[fci];
+  try{ const lg=JSON.parse(localStorage.getItem('sv-flash-log'))||[];
     lg.unshift({t:Date.now(),d:new Date().toISOString().slice(0,10),sub:f.sub||null,unit:f.unit||null,
       n:f.n||null,ok:ok,q:(f.q||'').slice(0,120)});
     localStorage.setItem('sv-flash-log',JSON.stringify(lg.slice(0,400))); }catch(e){}
+  /* move the card through the spaced-repetition boxes (shared with lessons) */
+  if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
   if(window.svProgressPushSoon) svProgressPushSoon();
-  fci=(fci+1)%FC.length; fcDeal();
+  if(fci+1<FC.length){ fci++; fcDeal(); }
+  else { fcmodal.classList.remove('open'); if(DAYONE) refreshDayOnePlan(); }   /* sitting done for today */
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
