@@ -1,6 +1,6 @@
 # STATE — where everything is right now
 
-_Last updated: 12 July 2026. One page. If this file and your memory disagree, trust this file, then update it._
+_Last updated: 27 July 2026. One page. If this file and your memory disagree, trust this file, then update it._
 
 ## What's live
 
@@ -108,13 +108,56 @@ shorts check answers (`sv-shorts-checks`), flashcard self-marks
 Per-student pack: `?pack=N` — ONE A4 page (print-to-pdf verified), parent-
 readable labels, AI draft via `scripts/_teach_pack.py`, teacher-triggered.
 
-**DECIDED (14 Jul): the teacher dashboard is a SCHOOL-TIER feature and a
-headline reason schools pay.** No class codes, no join rituals: on the school
-tier students/teachers sign in with school SSO and classes/teachers MIRROR
-the school's own directory (Teams / Classroom groups) — we never own or
-maintain rosters. Free tier = student experience only. Prerequisites for the
-real build: Entra admin consent (still pending), Graph/Classroom group reads,
-capture moved to an events table + RLS.
+**DECIDED (14 Jul, revised 27 Jul): the teacher dashboard is a PAID feature
+and a headline reason schools pay. Free tier = student experience only.**
+It ships on BOTH paid ramps (the Seneca land-and-expand shape):
+
+- **Department tier (bottom-up):** a head of department signs up self-serve.
+  The teacher creates a class and hands students a **join code**; students
+  sign in like free users (email+password or "Continue with Google/Microsoft"
+  — push the school email at signup). The code enrols the student into the
+  class and grants the premium entitlement. No SSO, no DPO conversation,
+  live in minutes. *(This revises 14 Jul's "no class codes" — that stays
+  true for the school tier only.)*
+- **School tier (top-down):** whole-school licence. Students/teachers sign
+  in with school SSO and classes MIRROR the school's own directory (Teams /
+  Classroom groups) — we never own or maintain rosters at this tier. Roster
+  import later if a deal demands it: Teams/Graph first (UK is Microsoft),
+  Wonde for MIS-level rostering.
+- **Upgrade path (dept → school):** classes are ADOPTED into the school
+  workspace, never duplicated; a student's evidence history must survive the
+  transition (see identity schema below — this is why it exists).
+
+Prerequisites for the real build: Entra admin consent (still pending),
+Graph/Classroom group reads, capture moved to an events table + RLS, Stripe
+for department self-serve.
+
+## Identity schema (locked 27 Jul — bake into the launch schema)
+
+**Person ≠ credential ≠ entitlement.** Three layers, so SSO arriving later
+never forks accounts and the dept→school upgrade never orphans evidence:
+
+- **Person** = one durable UUID (Supabase `auth.users`). ALL StudyVault data
+  (progress, class membership, evidence) foreign-keys to this UUID — never
+  to an email. Emails change and get recycled; the UUID does not.
+- **Credential** = a sign-in method linked to the person (Supabase
+  `auth.identities`): email+password (identifier = verified email), Google
+  (identifier = `sub` claim, NOT the email), Microsoft (identifier =
+  `oid`+`tid`, NOT the UPN). One person, many credentials.
+- **Entitlement** = who pays, in our own table: department subscription
+  scoped to school+subject; school licence scoped to school. A student's
+  premium status = the union of their active entitlements. Class codes
+  enrol + entitle; they never create identity.
+
+Linking rules: **auto-link ONLY on a provider-verified matching email**
+(unverified match = the classic account-takeover vector — never). Any other
+merge is manual and proven by possession: sign into account A, then complete
+a live sign-in with credential B inside that session, then merge —
+ADDITIVELY (`svProgressMerge` semantics: a wrong merge can never destroy
+data). Names/classes/year groups are hints for a teacher-flagged "same
+student?" prompt, never linking evidence by themselves. Supabase implements
+the person/credential layers natively (`linkIdentity()`, verified-email
+auto-linking) — build only the entitlements table and the merge UX.
 
 ## Parked / open decisions
 
