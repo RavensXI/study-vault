@@ -222,7 +222,7 @@
   .postcard .dy.hol{color:#a3873a}
   /* hover: the picture's caption appears handwritten on the desk below */
   .postcard .calcap{position:absolute;left:190px;top:1478px;width:1140px;font-family:var(--hand);font-size:54px;
-    color:#6b5c41;line-height:1.15;text-align:center;opacity:0;transition:opacity .3s ease;transform:rotate(-1.5deg);pointer-events:none}
+    color:#6b5c41;line-height:1.15;text-align:center;opacity:0;transition:opacity .3s ease;transform:rotate(-3.2deg);pointer-events:none}
   .postcard:hover .calcap{opacity:1}
 
   /* ============ the wristwatch: painted plate, live hands ============
@@ -315,13 +315,15 @@
   .fcmodal .meta small{font-family:var(--read);font-style:italic;font-size:.95rem;opacity:.85}
   .fcmodal .meta .metaR{display:flex;align-items:center;gap:12px}
   .fcmodal .meta .cnt{font-variant-numeric:tabular-nums;font-weight:700;font-size:.9rem}
-  /* per-card mastery (Leitner box): where this card sits in spaced repetition */
-  .fcmodal .meta .lvl{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.14);color:#efe9da;white-space:nowrap}
-  .fcmodal .meta .lvl.l-new{background:rgba(255,255,255,.14);color:#e6dfce}
-  .fcmodal .meta .lvl.l-emerging{background:rgba(201,116,55,.92);color:#fff}
-  .fcmodal .meta .lvl.l-developing{background:rgba(86,118,160,.92);color:#fff}
-  .fcmodal .meta .lvl.l-secure{background:rgba(64,120,88,.92);color:#fff}
-  .fcmodal .meta .lvl.l-mastered{background:rgba(196,155,74,.95);color:#33280f}
+  /* per-card mastery (Leitner box), written on the card like a teacher's pen
+     mark — angled top-left, ink colour by level. NOT a pill. */
+  .fcmodal .face .fcmark{position:absolute;top:22px;left:38px;font-family:var(--hand);font-size:1.55rem;
+    font-weight:600;line-height:1;letter-spacing:.01em;transform:rotate(-8deg);transform-origin:left center;pointer-events:none}
+  .fcmodal .face .fcmark:empty{display:none}
+  .fcmark.m-emerging{color:#c0392b}
+  .fcmark.m-developing{color:#c9781f}
+  .fcmark.m-secure{color:#2a6f97}
+  .fcmark.m-mastered{color:#2e7d4f}
   .fcmodal .x{position:absolute;top:-16px;right:-16px;width:36px;height:36px;border-radius:50%;border:none;cursor:pointer;
     background:#fffdf8;color:#26231e;font-size:19px;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 
@@ -491,13 +493,13 @@
     <button class="x" id="closefc" aria-label="Close">&times;</button>
     <button class="bigcard" id="bigcard" aria-label="Flip the card">
       <span class="flip">
-        <span class="face front"><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
-        <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
+        <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
+        <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
           <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
         </span>
       </span>
     </button>
-    <div class="meta"><small>tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="lvl" id="fcLvl"></span><span class="cnt" id="fcCnt"></span></span></div>
+    <div class="meta"><small>tap to flip &middot; read the answer, then mark it &mdash; the line shows when</small><span class="metaR"><span class="cnt" id="fcCnt"></span></span></div>
   </div>
 </div>
 
@@ -1008,8 +1010,8 @@ function fcDeal(){
   const _q=document.getElementById('bqQ'), _a=document.getElementById('baA');
   _q.textContent=f.q; _a.textContent=f.a;
   fcFit(_q,f.q); fcFit(_a,f.a);
-  const _lv=document.getElementById('fcLvl'), lvl=f.level||'New';
-  if(_lv){ _lv.textContent=lvl; _lv.className='lvl l-'+lvl.toLowerCase(); }
+  const lvl=f.level||'New', mkTxt=(lvl==='New')?'':lvl, mkCls='fcmark m-'+lvl.toLowerCase();
+  ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=mkTxt; e.className=mkCls; } });
   document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }

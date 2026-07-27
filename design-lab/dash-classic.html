@@ -340,13 +340,15 @@
     display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;padding:0 16px}
   .fcmeta .hint{opacity:.82;font-style:italic}
   .fcmeta .cnt{font-variant-numeric:tabular-nums;font-weight:700}
-  /* per-card mastery (Leitner box): where this card sits in spaced repetition */
-  .fcmeta .lvl{font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:3px 9px;border-radius:999px;background:rgba(255,255,255,.16);color:#f1e8d8;white-space:nowrap}
-  .fcmeta .lvl.l-new{background:rgba(255,255,255,.16);color:#efe7d6}
-  .fcmeta .lvl.l-emerging{background:rgba(201,116,55,.92);color:#fff}
-  .fcmeta .lvl.l-developing{background:rgba(86,118,160,.92);color:#fff}
-  .fcmeta .lvl.l-secure{background:rgba(64,120,88,.92);color:#fff}
-  .fcmeta .lvl.l-mastered{background:rgba(196,155,74,.95);color:#33280f}
+  /* per-card mastery (Leitner box), written on the card like a teacher's pen
+     mark — angled top-left, ink colour by level. NOT a pill. */
+  .bigcard .face .fcmark{position:absolute;top:22px;left:34px;font-family:var(--hand);font-size:1.4rem;
+    font-weight:600;line-height:1;letter-spacing:.01em;transform:rotate(-8deg);transform-origin:left center;pointer-events:none}
+  .bigcard .face .fcmark:empty{display:none}
+  .fcmark.m-emerging{color:#c0392b}
+  .fcmark.m-developing{color:#c9781f}
+  .fcmark.m-secure{color:#2a6f97}
+  .fcmark.m-mastered{color:#2e7d4f}
 
   /* ---- shorts modal ---- */
   .phonemodal{position:fixed;inset:0;background:rgba(38,30,18,.6);display:none;place-items:center;z-index:60}
@@ -482,13 +484,13 @@
   <button class="x" id="closefc" aria-label="Close">×</button>
   <button class="bigcard" id="bigcard" aria-label="Flip the card">
     <span class="flip">
-      <span class="face front"><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
-      <span class="face back"><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
+      <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
+      <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
         <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
       </span>
     </span>
   </button>
-  <div class="fcmeta"><span class="lvl" id="fcLvl"></span><span class="cnt" id="fcCnt"></span><span class="hint">tap to flip · read the answer, then mark it — the line shows when</span></div>
+  <div class="fcmeta"><span class="cnt" id="fcCnt"></span><span class="hint">tap to flip · read the answer, then mark it — the line shows when</span></div>
 </div>
 
 <div class="phonemodal" id="phonemodal" aria-modal="true" role="dialog" aria-label="Shorts">
@@ -1155,8 +1157,8 @@ function fcDeal(){
   q.classList.toggle('long',f.q.length>70); a.classList.toggle('long',f.a.length>70);
   q.classList.toggle('xlong',f.q.length>150); a.classList.toggle('xlong',f.a.length>150);
   document.getElementById('baTag').textContent='Answer';
-  const _lv=document.getElementById('fcLvl'), lvl=f.level||'New';
-  if(_lv){ _lv.textContent=lvl; _lv.className='lvl l-'+lvl.toLowerCase(); }
+  const lvl=f.level||'New', mkTxt=(lvl==='New')?'':lvl, mkCls='fcmark m-'+lvl.toLowerCase();
+  ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=mkTxt; e.className=mkCls; } });
   const _cn=document.getElementById('fcCnt'); if(_cn) _cn.textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
