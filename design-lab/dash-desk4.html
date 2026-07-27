@@ -992,14 +992,16 @@ const FC=[
   {slug:'maths', q:'In y = mx + c, what is m?', a:'The gradient'},
 ];
 const cardsEl=document.getElementById('cards');
-function fcPreview(){ const f=FC[0], sub=SUBJECTS.find(x=>x.slug===f.slug);
-  cardsEl.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
-  const _t=document.getElementById('fcText'); _t.textContent=f.q; fcFit(_t,f.q);
-  document.getElementById('fcSubj').textContent=f.name||(sub?sub.name:f.slug); }
-fcPreview();
-
 const fcmodal=document.getElementById('fcmodal'), bigcard=document.getElementById('bigcard');
 let fci=0, fcShowA=false;
+/* the top card is the door into today's deck: a label + how far through it you
+   are (0 / 20 at the start, or where you stopped). No question text — it does
+   not have to sit on the drawn rules, so it never looks wrong. */
+function fcPreview(){
+  cardsEl.style.setProperty('--fcc','#8a5a44');
+  const _t=document.getElementById('fcText'); _t.textContent='Flashcards'; _t.className='q';
+  document.getElementById('fcSubj').textContent=fci+' / '+FC.length; }
+fcPreview();
 /* step the card font down for longer Q/A so it never spills past the edge */
 function fcFit(el,s){ s=String(s||''); el.classList.toggle('long', s.length>70); el.classList.toggle('xlong', s.length>150); }
 function fcDeal(){
@@ -1010,12 +1012,12 @@ function fcDeal(){
   const _q=document.getElementById('bqQ'), _a=document.getElementById('baA');
   _q.textContent=f.q; _a.textContent=f.a;
   fcFit(_q,f.q); fcFit(_a,f.a);
-  const lvl=f.level||'New', mkTxt=(lvl==='New')?'':lvl, mkCls='fcmark m-'+lvl.toLowerCase();
-  ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=mkTxt; e.className=mkCls; } });
+  const lvl=f.level||'Emerging', mkCls='fcmark m-'+lvl.toLowerCase();
+  ['fcMarkF','fcMarkB'].forEach(id=>{ const e=document.getElementById(id); if(e){ e.textContent=lvl; e.className=mkCls; } });
   document.getElementById('fcCnt').textContent=(fci+1)+' / '+FC.length;
   fcShowA=false; bigcard.classList.remove('showa');
 }
-cardsEl.onclick=()=>{ if(dragBlockClick) return; fcDeal(); fcmodal.classList.add('open');
+cardsEl.onclick=()=>{ if(dragBlockClick) return; if(fci>=FC.length) fci=0; fcDeal(); fcmodal.classList.add('open');
   try{ localStorage.setItem('sv-flash-day', new Date().toISOString().slice(0,10)); }catch(e){}
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } };
@@ -1044,16 +1046,17 @@ function fcMark(ok){
   if(window.svFlashMark && f.key) f.level=svFlashMark(f.key,ok);
   if(window.svProgressPushSoon) svProgressPushSoon();
   if(fci+1<FC.length){ fci++; fcDeal(); }
-  else { fcmodal.classList.remove('open');   /* whole sitting done for today */
+  else { fci++; fcmodal.classList.remove('open'); fcPreview();   /* whole sitting done: N / N */
     if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); } }
 }
 ['ok','no'].forEach(k=>{ document.getElementById('fb'+k).addEventListener('click',e=>{
   e.stopPropagation(); if(fcShowA) fcMark(k==='ok'); }); });
 bigcard.onclick=()=>{ if(!fcShowA){ fcShowA=true; bigcard.classList.add('showa'); fcReadGate(); } };
 /* no tap-to-skip: the only way to the next card is an honest Not yet / Got it */
-document.getElementById('closefc').onclick=()=>fcmodal.classList.remove('open');
-fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcmodal.classList.remove('open'); });
-addEventListener('keydown',e=>{ if(e.key==='Escape'&&fcmodal.classList.contains('open')) fcmodal.classList.remove('open'); });
+function fcClose(){ fcmodal.classList.remove('open'); fcPreview(); }   /* refresh the desk's "N / total" */
+document.getElementById('closefc').onclick=fcClose;
+fcmodal.addEventListener('click',e=>{ if(e.target===fcmodal) fcClose(); });
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&fcmodal.classList.contains('open')) fcClose(); });
 makeDraggable(pc,'postcard');
 
 /* ---------- the phone: live poster on screen; opens the REAL feed ---------- */

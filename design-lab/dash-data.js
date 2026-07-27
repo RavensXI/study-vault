@@ -405,7 +405,7 @@ function svFlashDeck(SUBJECTS, cb) {
       var key = row.id + ':q' + i;
       return { key: key, q: f.q || f.question, a: f.a || f.answer, slug: su ? su.slug : null,
                name: su ? su.name : '', sub: su ? su.sub : null, unit: row.units ? row.units.slug : null,
-               n: row.lesson_number, level: prog.cards[key] ? svFlashLevel(prog.cards[key].box) : 'New' };
+               n: row.lesson_number, level: prog.cards[key] ? svFlashLevel(prog.cards[key].box) : 'Emerging' };
     }
     results.forEach(function (res) {
       (res.rows || []).forEach(function (row) {
