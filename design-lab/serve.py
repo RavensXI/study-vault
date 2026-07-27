@@ -24,6 +24,7 @@ REWRITES = [
     ("/gold", "/design-lab/gold-lab.html"),  # spine-title gold tuner
     ("/shorts-review", "/design-lab/shorts-review.html"),  # review banked shorts by subject
     ("/welcome", "/design-lab/home-study.html"),  # landing concept: the study, before you sit down
+    ("/teach", "/design-lab/teach.html"),  # teacher dashboard (matches vercel.json)
 ]
 
 
