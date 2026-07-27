@@ -95,7 +95,6 @@
   .paper .meta{font-size:.72rem;color:var(--mut);margin-bottom:.3rem}
 
   /* AI digest */
-  .digest{border-left:3px solid var(--gold)}
   .digest .body{font-family:var(--read);font-size:.9rem;line-height:1.62;color:#3d3931}
   .digest .body b{color:var(--ink)}
   .digest .stamp{font-size:.74rem;color:var(--mut);margin-top:.7rem}
@@ -125,7 +124,7 @@
   .pack .legend{font-size:.72rem;color:var(--mut);margin-top:.3rem}
   .pack .two{display:grid;grid-template-columns:1fr 1fr;gap:0 2rem}
   @media (max-width:700px){ .pack .two{grid-template-columns:1fr} }
-  .pack .aidraft{border-left:3px solid var(--gold);background:#faf6ea;border-radius:0 9px 9px 0;
+  .pack .aidraft{border:1px solid #e6dcc0;background:#faf6ea;border-radius:9px;
     padding:.9rem 1.1rem;font-family:var(--read);font-size:.92rem;line-height:1.62;color:#3d3931}
   .pack .aidraft b{color:var(--ink)}
   .pack .aistamp{font-size:.72rem;color:var(--mut);margin-top:.45rem}
@@ -391,6 +390,9 @@ document.getElementById('roster').addEventListener('click',e=>{
   document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
   tr.classList.add('sel');
   drill(+tr.dataset.i);
+  /* the panel lives at the top of the right column — bring it on screen so a
+     click far down the roster visibly does something */
+  document.getElementById('drill').scrollIntoView({behavior:'smooth',block:'nearest'});
 });
 function drill(ix){
   const {s,st}=STATS[ix], p=s.p;
