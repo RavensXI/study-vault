@@ -420,7 +420,23 @@ function svFlashDeck(SUBJECTS, cb) {
       });
     });
     svFlashShuffle(dueCards); svFlashShuffle(newCards);
-    cb(dueCards.concat(newCards).slice(0, FC_CAP));
+    /* INTERLEAVE across subjects — the whole point of the warm-up is flitting
+       between subjects and topics, not a block of the one you last studied.
+       Group by subject (due cards first within each), then round-robin so
+       consecutive cards switch subject. Caps the deck at FC_CAP. */
+    var pools = {};
+    dueCards.concat(newCards).forEach(function (c) {
+      var k = c.slug || '_'; (pools[k] = pools[k] || []).push(c);
+    });
+    var lists = Object.keys(pools).map(function (k) { return pools[k]; });
+    svFlashShuffle(lists);
+    var deck = [];
+    while (deck.length < FC_CAP && lists.some(function (l) { return l.length; })) {
+      for (var li = 0; li < lists.length && deck.length < FC_CAP; li++) {
+        if (lists[li].length) deck.push(lists[li].shift());
+      }
+    }
+    cb(deck);
   }).catch(function () { cb([]); });
 }
 window.svFlashDeck = svFlashDeck; window.svFlashMark = svFlashMark; window.svFlashLevel = svFlashLevel;
