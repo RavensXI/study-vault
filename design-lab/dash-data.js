@@ -470,7 +470,7 @@ function svAvatarMenu(av) {
     }
     menu = document.createElement('div'); menu.className = 'sv-avmenu';
     menu.innerHTML = '<div class="who">Signed in as ' + esc(SVUSER.email) + '</div>'
-      + '<a href="home-study.html">Edit subjects &amp; boards</a>'
+      + '<a href="home-study.html?view=picker">Edit subjects &amp; boards</a>'
       + '<button type="button" class="out">Sign out</button>';
     document.body.appendChild(menu);
     var r = av.getBoundingClientRect();
