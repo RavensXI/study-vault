@@ -737,7 +737,7 @@
     <div class="subject-grid" id="sgrid"></div>
 
     <div class="picker-foot">
-      <button class="backlink" onclick="go('landing')">&larr; Back</button>
+      <button class="backlink" onclick="pickerBack()">&larr; Back</button>
       <span class="picker-count" id="pcount">No subjects yet</span>
       <button class="cta" id="pnext" disabled style="opacity:.45" onclick="go('boards')">Choose exam boards &rarr;</button>
     </div>
@@ -1276,8 +1276,13 @@ function renderTopics(){
   }
 }
 /* the wizard ends INSIDE the product: the real dashboard, no sign-up gate */
+function dashUrl(){ try{ return localStorage.getItem('sv-dash-view')==='desk'?'dash-desk4.html':'dash-classic.html'; }catch(e){ return 'dash-classic.html'; } }
+/* Back from the picker: if we arrived here to EDIT (from the dashboard, via
+   ?view=picker), return to the dashboard the student was using. On the fresh
+   onboarding path, go back to the landing view. */
+function pickerBack(){ if(new URLSearchParams(location.search).get('view')==='picker') location.href=dashUrl(); else go('landing'); }
 function enterDash(){ persist(); document.body.classList.remove('ready');
-  setTimeout(()=>{ location.href='dash-classic.html'; },180); }
+  setTimeout(()=>{ location.href=dashUrl(); },180); }
 function renderSave(){
   renderShelfInto(document.getElementById('shelf-save'),picked);
   const found=picked.filter(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); return su.alt?!!su.alt[boards[sl]]:(su.cover&&su.cover[boards[sl]]); });
