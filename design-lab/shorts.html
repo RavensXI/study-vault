@@ -531,15 +531,20 @@ Promise.all([
 ]).then(([m,q])=>{
   QUESTIONS=q||{};
   if(!m.length){ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts banked yet.</div></div></div>'; return; }
-  // scope the feed to the student's chosen subjects; never leave it empty while
-  // a subject is still backfilling — if none of their subjects has shorts yet,
-  // fall back to the whole interleaved pool rather than an empty feed.
+  // scope the feed STRICTLY to the student's chosen subjects — never show a
+  // subject they did not pick. Shorts are a 1-minute teach/preview format, so
+  // we include ALL of their subjects' lessons (studied and not-yet-studied);
+  // the playlist already leads with never-watched. If none of their subjects
+  // has shorts yet, say so rather than falling back to the whole catalogue.
   const mine=QA_NEWEST?null:mySubjectSlugs();
   let pool=m;
   if(mine && mine.length){
     const set=new Set(mine);
-    const scoped=m.filter(e=>set.has(e.subject));
-    pool = scoped.length ? scoped : m;
+    pool=m.filter(e=>set.has(e.subject));
+  }
+  if(!pool.length){
+    document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts for your subjects yet &mdash; they&rsquo;re on the way.</div></div></div>';
+    return;
   }
   render(pool);
 }).catch(err=>{ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">Could not load shorts.</div></div></div>'; });
