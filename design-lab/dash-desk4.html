@@ -1066,8 +1066,11 @@ fetch('/scripts/_shorts_manifest.json').then(r=>r.json()).then(m=>{
 }).catch(()=>{});
 const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
 document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return;
-  const subs=SUBJECTS.map(s=>s.sub).filter(Boolean).join(',');   /* scoped to THEIR subjects */
-  frame.src='/design-lab/shorts.html'+(subs?'?subjects='+encodeURIComponent(subs):''); modal.classList.add('open'); };
+  /* scoped to each subject's SCULPTED units (History options etc.), not the
+     whole subject — {subjectSlug:[unitSlug,...]} */
+  const scope={};
+  SUBJECTS.forEach(s=>{ if(s.sub && s.units && s.units.length) scope[s.sub]=s.units.map(u=>u[3]); });
+  frame.src='/design-lab/shorts.html?scope='+encodeURIComponent(JSON.stringify(scope)); modal.classList.add('open'); };
 document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });

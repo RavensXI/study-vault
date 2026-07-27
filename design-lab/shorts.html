@@ -531,19 +531,25 @@ Promise.all([
 ]).then(([m,q])=>{
   QUESTIONS=q||{};
   if(!m.length){ document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts banked yet.</div></div></div>'; return; }
-  // scope the feed STRICTLY to the student's chosen subjects — never show a
-  // subject they did not pick. Shorts are a 1-minute teach/preview format, so
-  // we include ALL of their subjects' lessons (studied and not-yet-studied);
-  // the playlist already leads with never-watched. If none of their subjects
-  // has shorts yet, say so rather than falling back to the whole catalogue.
-  const mine=QA_NEWEST?null:mySubjectSlugs();
+  // Scope the feed to the student's chosen subjects AND their chosen UNITS — a
+  // History student who picked America + Conflict must never see a Germany
+  // short. scope = { subjectSlug: [unitSlug,...] }, sent by the dashboard from
+  // its sculpted units. Fall back to subject-level (?subjects=) for older
+  // callers. Shorts are a teach/preview format, so we include ALL lessons of
+  // the chosen units, studied or not; the playlist leads with never-watched.
   let pool=m;
-  if(mine && mine.length){
-    const set=new Set(mine);
-    pool=m.filter(e=>set.has(e.subject));
+  if(!QA_NEWEST){
+    let scope=null;
+    try{ const s=new URLSearchParams(location.search).get('scope'); if(s) scope=JSON.parse(s); }catch(e){}
+    if(scope){
+      pool=m.filter(e=> scope[e.subject] && scope[e.subject].indexOf(e.unit)>=0 );
+    } else {
+      const mine=mySubjectSlugs();
+      if(mine && mine.length){ const set=new Set(mine); pool=m.filter(e=>set.has(e.subject)); }
+    }
   }
   if(!pool.length){
-    document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts for your subjects yet &mdash; they&rsquo;re on the way.</div></div></div>';
+    document.getElementById('feed').innerHTML='<div class="slide"><div class="check"><div class="q">No shorts for your topics yet &mdash; they&rsquo;re on the way.</div></div></div>';
     return;
   }
   render(pool);

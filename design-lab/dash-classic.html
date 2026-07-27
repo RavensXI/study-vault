@@ -1205,8 +1205,11 @@ if(_dq.get('fc')){ fcDeal(); fcmodal.classList.add('open');   /* staging: ?fc=1 
    the feed interleaves only across what they study */
 const pm=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
 document.getElementById('shortsdoor').onclick=()=>{
-  const subs=SUBJECTS.map(s=>s.sub).filter(Boolean).join(',');
-  frame.src='/design-lab/shorts.html?subjects='+encodeURIComponent(subs); pm.classList.add('open'); };
+  /* scope the feed to each subject's SCULPTED units (History options etc.), not
+     the whole subject — {subjectSlug:[unitSlug,...]} */
+  const scope={};
+  SUBJECTS.forEach(s=>{ if(s.sub && s.units && s.units.length) scope[s.sub]=s.units.map(u=>u[3]); });
+  frame.src='/design-lab/shorts.html?scope='+encodeURIComponent(JSON.stringify(scope)); pm.classList.add('open'); };
 document.getElementById('closephone').onclick=()=>{ pm.classList.remove('open'); frame.src=''; };
 pm.addEventListener('click',e=>{ if(e.target===pm){ pm.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key!=='Escape') return;
