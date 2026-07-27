@@ -83,17 +83,22 @@ class AuthExpired(Exception):
 # ── nlm CLI (self-healing auth: saved-profile re-login, then clean exit) ────
 def _reauth():
     """nlm's saved Chrome profile completes login without a human (same flow
-    batch_podcasts has used all along). 150s cap so a dead session can't hang us."""
+    batch_podcasts has used all along). 150s cap so a dead session can't hang us.
+    Retries a few times: a single `nlm login` can time out or flake transiently
+    (as on 24 Jul 2026), and one dead attempt used to cost a whole day."""
     print("  [AUTH] Cookies expired — re-authenticating via saved profile...", flush=True)
-    try:
-        result = subprocess.run(["nlm", "login"], capture_output=True, text=True,
-                                encoding="utf-8", errors="replace", env=NLM_ENV, timeout=150)
-    except subprocess.TimeoutExpired:
-        print("  [AUTH] Re-auth timed out"); return False
-    if result.returncode == 0 and "success" in (result.stdout or "").lower():
-        print("  [AUTH] Re-auth successful", flush=True)
-        return True
-    print(f"  [AUTH] Re-auth failed: {(result.stdout or '')[:200]}")
+    for attempt in range(1, 4):
+        try:
+            result = subprocess.run(["nlm", "login"], capture_output=True, text=True,
+                                    encoding="utf-8", errors="replace", env=NLM_ENV, timeout=150)
+        except subprocess.TimeoutExpired:
+            print(f"  [AUTH] Re-auth attempt {attempt}/3 timed out", flush=True)
+            time.sleep(10); continue
+        if result.returncode == 0 and "success" in (result.stdout or "").lower():
+            print(f"  [AUTH] Re-auth successful (attempt {attempt})", flush=True)
+            return True
+        print(f"  [AUTH] Re-auth attempt {attempt}/3 failed: {(result.stdout or '')[:160]}", flush=True)
+        time.sleep(10)
     return False
 
 

@@ -28,6 +28,21 @@ function Write-Log {
     Add-Content -Path $logFile -Value $line -Encoding utf8
 }
 
+# Email alert via Resend (same creds the app's bug-report/subject-request use).
+# No-ops quietly if the env vars are not set in the task's environment.
+function Send-Alert {
+    param([string]$Subject, [string]$Body)
+    $k = $env:RESEND_API_KEY; $to = $env:NOTIFY_TO; $frm = $env:NOTIFY_FROM
+    if (-not ($k -and $to -and $frm)) { Write-Log "Alert skipped: RESEND_API_KEY/NOTIFY_TO/NOTIFY_FROM not set in task env."; return }
+    try {
+        $payload = @{ from = $frm; to = @($to); subject = $Subject; text = $Body } | ConvertTo-Json
+        Invoke-RestMethod -Method Post -Uri "https://api.resend.com/emails" `
+            -Headers @{ Authorization = "Bearer $k" } -ContentType "application/json" -Body $payload | Out-Null
+        Write-Log ("Alert sent: " + $Subject)
+    } catch { Write-Log ("Alert send failed: " + $_.Exception.Message) }
+}
+$authFlag = Join-Path $logDir "_auth_alerted.flag"   # one alert per auth-outage episode, cleared on next success
+
 function Run-Py {
     # Bounded python call (same rationale as the explainer wrapper: an unguarded
     # call can hang forever on a dead Chrome/network and wedge the wrapper).
@@ -110,6 +125,19 @@ if ($dry -match "^0 lessons queued") {
     Write-Log "=== END ==="
     exit 0
 }
+# Auth expired: the batch's own self-heal (retried) could not restore it. Do NOT
+# stamp the launch — that would burn the whole 24h cooldown on a dead session (as
+# on 24 Jul 2026). Skipping unstamped means the NEXT hourly heartbeat retries, so
+# the run resumes within an hour of auth coming back. Alert once per episode.
+if ($dry -match "AUTH EXPIRED") {
+    Write-Log "NotebookLM auth EXPIRED (self-heal failed). Skipping WITHOUT stamping launch - retries next hour, no day lost."
+    if (-not (Test-Path $authFlag)) {
+        Send-Alert "StudyVault shorts: NotebookLM auth expired" "The daily shorts batch can't run - NotebookLM auth expired and the saved-profile self-heal did not restore it. Run 'nlm login' on the shorts machine. The task retries every hour and resumes automatically once auth is back - no day is lost while it's down."
+        New-Item -ItemType File -Path $authFlag -Force | Out-Null
+    }
+    Write-Log "=== END ==="
+    exit 0
+}
 
 # Acquire lock + stamp launch time, then run the whole day's batch in one go.
 # The batch itself sweeps orphans, self-heals auth, respects the daily cap,
@@ -119,7 +147,19 @@ New-Item -ItemType File -Path $lockFile -Force | Out-Null
 Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"))
 
 try {
-    Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "100") -TimeoutMin 300 | Out-Null
+    $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "100") -TimeoutMin 300
+    if ($main -match "AUTH EXPIRED") {
+        # Auth died AFTER the dry-run passed (rare). Rewind the launch stamp so the
+        # next hourly heartbeat retries instead of waiting a full 24h.
+        Write-Log "Auth expired MID-RUN. Rewinding launch stamp so the next hour retries."
+        Remove-Item $lastLaunchFile -Force -ErrorAction SilentlyContinue
+        if (-not (Test-Path $authFlag)) {
+            Send-Alert "StudyVault shorts: NotebookLM auth expired mid-run" "The daily shorts batch stopped part-way - NotebookLM auth expired mid-run. Run 'nlm login' on the shorts machine. The task retries next hour and resumes automatically once auth is back."
+            New-Item -ItemType File -Path $authFlag -Force | Out-Null
+        }
+    } else {
+        Remove-Item $authFlag -Force -ErrorAction SilentlyContinue   # healthy run: clear any prior auth-outage alert
+    }
     # Post-pass: map recall questions onto tonight's new shorts (headless
     # `claude -p` on the subscription, deterministic fallback inside) and
     # extract their poster frames. Delta-based and idempotent — if it fails,
