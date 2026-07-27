@@ -272,9 +272,13 @@
   /* live question handwritten on the clean top card */
   .fcq{position:absolute;left:0;top:0;width:660px;height:480px;transform-origin:0 0;pointer-events:none;
     transform:matrix3d(1.014860,-0.193432,0.000000,0.000009,0.266914,0.981730,0.000000,-0.000018,0.000000,0.000000,1.000000,0.000000,652.000000,523.000000,0.000000,1.000000);
-    display:flex;flex-direction:column;justify-content:center;gap:14px;padding:30px 44px}
-  .fcq .q{font-family:var(--hand);font-size:96px;line-height:1.12;color:#3e3a31}
-  .fcq .subj{font-family:var(--hand);font-size:54px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--fcc,#8a5a44) 75%,#84806f)}
+    display:flex;flex-direction:column;justify-content:center;gap:14px;padding:30px 44px;overflow:hidden}
+  /* preview question steps down + clamps for longer cards so it stays on the card */
+  .fcq .q{font-family:var(--hand);font-size:96px;line-height:1.12;color:#3e3a31;overflow-wrap:anywhere;
+    display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+  .fcq .q.long{font-size:72px;-webkit-line-clamp:5}
+  .fcq .q.xlong{font-size:56px;-webkit-line-clamp:6}
+  .fcq .subj{font-family:var(--hand);font-size:54px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:color-mix(in srgb,var(--fcc,#8a5a44) 75%,#84806f);overflow-wrap:anywhere}
 
   /* flashcard mode: the card table */
   .fcmodal{position:fixed;inset:0;z-index:50;display:none;place-items:center;background:rgba(30,24,14,.55);backdrop-filter:blur(3px)}
@@ -988,7 +992,7 @@ const FC=[
 const cardsEl=document.getElementById('cards');
 function fcPreview(){ const f=FC[0], sub=SUBJECTS.find(x=>x.slug===f.slug);
   cardsEl.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
-  document.getElementById('fcText').textContent=f.q;
+  const _t=document.getElementById('fcText'); _t.textContent=f.q; fcFit(_t,f.q);
   document.getElementById('fcSubj').textContent=f.name||(sub?sub.name:f.slug); }
 fcPreview();
 
