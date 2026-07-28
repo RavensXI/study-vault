@@ -327,10 +327,12 @@ def main():
         rng = random.Random(stable(s["email"], "sim"))
         prog, welcome, events = simulate(s, pack, shared_mc, shared_pick, fading, rng)
         # metadata carries ONLY the tiny shelf setup (it rides in every JWT);
-        # the full history goes to the progress table - no size ceiling there
+        # the full history goes to the progress table - no size ceiling there.
+        # sv_progress:None DELETES the legacy key (GoTrue merges metadata,
+        # so omitting it would leave old blobs bloating tokens forever)
         api("PUT", f"/auth/v1/admin/users/{s['id']}",
             {"user_metadata": {"full_name": s.get("full_name"), "is_demo": True,
-                               "sv_welcome": welcome}})
+                               "sv_welcome": welcome, "sv_progress": None}})
         api("POST", "/rest/v1/progress",
             {"person_id": s["id"], "school_id": school,
              "blob": dict(prog, updated=TODAY.isoformat())}, merge=True)
