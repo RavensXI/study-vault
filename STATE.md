@@ -170,6 +170,17 @@ student?" prompt, never linking evidence by themselves. Supabase implements
 the person/credential layers natively (`linkIdentity()`, verified-email
 auto-linking) — build only the entitlements table and the merge UX.
 
+## ⚠ Launch-blocking finding (28 Jul, from the demo school)
+
+**Progress sync via `user_metadata` has a hard ceiling.** Supabase embeds
+user_metadata in every access token; a term of `sv_progress` made demo
+students' JWTs so large Cloudflare 520'd ALL their PostgREST calls (content
+pages showed "not found"). Anonymous + light users are unaffected, which is
+why it never showed locally. Before launch: progress must move to tables
+(`events` + a compact per-user state row); `user_metadata` keeps only
+`sv_welcome` + tiny prefs. The demo seeder now writes a slimmed metadata
+blob (see `slim()` in scripts/demo-school/activity.py) as the interim fix.
+
 ## Parked / open decisions
 
 - **Paper→content mapping** for the planner taper (unit→paper per subject-board;

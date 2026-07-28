@@ -278,11 +278,38 @@ def simulate(student, pack, shared_mc, shared_pick, fading, rng):
     return prog, welcome, events
 
 
+def slim(prog):
+    """user_metadata rides inside EVERY access token — Supabase embeds it in
+    the JWT — so it must stay tiny or Cloudflare 520s all PostgREST calls
+    (proved by the first full-size seed). Keep just what the student's own
+    dashboards read; the rich history lives in the events table."""
+    sp = {"done": prog["done"], "warmup": prog["warmup"], "plan": None,
+          "flashday": None, "tasks": {}, "flashlog": [], "shortschecks": [],
+          "miscon": [], "practice": prog["practice"][:1],
+          "kc": {k: {"s": v["s"], "t": v["t"], "d": v["d"]}
+                 for k, v in list(prog["kc"].items())[-25:]},
+          "when": {}, "warmlog": {}, "flashsr": {"cards": {}, "streak": prog["flashsr"].get("streak", 0)}}
+    cut = iso(TODAY - dt.timedelta(days=14))
+    for k, v in prog["when"].items():
+        if v >= cut: sp["when"][k] = v
+    for d in sorted(prog["warmlog"])[-7:]:
+        w = prog["warmlog"][d]
+        sp["warmlog"][d] = {"correct": w["correct"], "total": w["total"], "units": w["units"],
+                            "misses": [{"sub": m["sub"], "unit": m["unit"], "n": m["n"],
+                                        "title": m["title"][:48]} for m in w["misses"][:3]]}
+    cards = sorted(prog["flashsr"]["cards"].items(),
+                   key=lambda kv: kv[1].get("attempts", 0), reverse=True)[:40]
+    sp["flashsr"]["cards"] = dict(cards)
+    return sp
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--only", help="email substring filter")
     ap.add_argument("--wipe-events", action="store_true")
+    ap.add_argument("--meta-only", action="store_true",
+                    help="re-PUT slimmed user_metadata; no event writes (sim is deterministic)")
     args = ap.parse_args()
 
     school = api("GET", "/rest/v1/schools?slug=eq.demo-high&select=id")[0]["id"]
@@ -325,7 +352,10 @@ def main():
         prog, welcome, events = simulate(s, pack, shared_mc, shared_pick, fading, rng)
         api("PUT", f"/auth/v1/admin/users/{s['id']}",
             {"user_metadata": {"full_name": s.get("full_name"), "is_demo": True,
-                               "sv_welcome": welcome, "sv_progress": dict(prog, updated=TODAY.isoformat())}})
+                               "sv_welcome": welcome, "sv_progress": dict(slim(prog), updated=TODAY.isoformat())}})
+        if args.meta_only:
+            if i % 20 == 0: print(f"  meta {i}/{len(students)}")
+            continue
         for e in events:
             e["person_id"] = s["id"]; e["school_id"] = school
         batch += [norm(e) for e in events]; total_ev += len(events)
