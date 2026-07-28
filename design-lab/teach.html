@@ -15,7 +15,12 @@
     --line:#e4dfd2;--linel:#efeadf;--anchor:#5b4632;--good:#4e6e5d;--warn:#a3542f;--gold:#a3873a;
     --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive}
   *{box-sizing:border-box}
-  html{background:var(--paper)}
+  html{background:var(--paper);
+    /* the type scale follows the screen: every rem in the app grows on a
+       big monitor and shrinks on a laptop, so each tab keeps filling one
+       screen instead of leaving dead space or spilling into card scroll.
+       Height is in the formula because vertical fit is the binding edge. */
+    font-size:clamp(13px, min(.62vw, 1.05vh) + 7px, 19px)}
   html,body{height:100%}
   /* the dashboard is an APP: one screen, no page scroll. Each tab's view
      fills the viewport; long content scrolls INSIDE its card, never the page. */
@@ -23,19 +28,19 @@
     display:flex;flex-direction:column;overflow:hidden}
   body.packmode{display:block;overflow:auto}
   a{color:inherit}
-  .top{max-width:1400px;width:100%;margin:0 auto;padding:20px 18px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;flex:none}
+  .top{max-width:87.5rem;width:100%;margin:0 auto;padding:20px 18px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;flex:none}
   .brand{font-family:'Young Serif',serif;font-size:1.18rem;color:#1d1c1a}
   .brand img{height:.30em;margin-left:1px;vertical-align:baseline}
   .who{font-family:var(--hand);font-size:1.25rem;color:var(--mut)}
   .classpick{margin-left:auto;font-size:.85rem;color:var(--sec);background:var(--card);border:1px solid var(--line);
     border-radius:10px;padding:.5rem .9rem}
   .classpick b{color:var(--ink)}
-  .demo{max-width:1400px;width:100%;margin:6px auto 0;padding:0 18px;font-size:.7rem;font-weight:600;
+  .demo{max-width:87.5rem;width:100%;margin:6px auto 0;padding:0 18px;font-size:.7rem;font-weight:600;
     letter-spacing:.09em;text-transform:uppercase;color:#a89a7a;flex:none}
   .demo a{color:#8a7a54;text-decoration:none}
   .demo a:hover{color:var(--ink);text-decoration:underline}
   /* the tab rail: quiet text, ink underline on the active view — no pills */
-  .tabs{max-width:1400px;width:100%;margin:14px auto 0;padding:0 18px;display:flex;gap:28px;border-bottom:1px solid var(--line);flex:none}
+  .tabs{max-width:87.5rem;width:100%;margin:14px auto 0;padding:0 18px;display:flex;gap:28px;border-bottom:1px solid var(--line);flex:none}
   .tabs button{font-family:var(--head);font-weight:600;font-size:1rem;color:var(--mut);background:none;border:none;
     padding:.6rem 2px .7rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em}
   .tabs button:hover{color:var(--ink)}
@@ -43,7 +48,7 @@
   .tabs button:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
 
   /* each view = a symmetric grid that fills the remaining viewport exactly */
-  .wrap{flex:1;min-height:0;max-width:1400px;width:100%;margin:16px auto 18px;padding:0 18px;
+  .wrap{flex:1;min-height:0;max-width:87.5rem;width:100%;margin:16px auto 18px;padding:0 18px;
     display:grid;gap:16px;grid-template-columns:1fr 1fr}
   .wrap[hidden]{display:none}
   #view-topics,#view-pace{grid-template-columns:1fr}
@@ -194,7 +199,7 @@
   .pmodal{position:fixed;inset:0;background:rgba(38,30,16,.42);display:flex;align-items:flex-start;
     justify-content:center;padding:5vh 16px;z-index:60;overflow:auto}
   .pmodal[hidden]{display:none}
-  .pmodal .sheet{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:780px;width:100%;
+  .pmodal .sheet{background:var(--card);border:1px solid var(--line);border-radius:18px;max-width:49rem;width:100%;
     padding:1.7rem 2rem 1.9rem;box-shadow:0 34px 90px -24px rgba(28,18,6,.5);position:relative;margin-bottom:5vh}
   .pmodal .x{position:absolute;top:14px;right:18px;font-size:1.5rem;line-height:1;border:none;background:none;
     color:var(--mut);cursor:pointer;padding:.2rem .4rem}
@@ -369,7 +374,7 @@
 </div>
 
 <div class="pmodal" id="regmodal" aria-modal="true" role="dialog" aria-label="The register" hidden>
-  <div class="sheet" style="max-width:900px">
+  <div class="sheet" style="max-width:56rem">
     <button class="x" onclick="document.getElementById('regmodal').hidden=true" aria-label="Close">&times;</button>
     <h2>The register</h2>
     <div class="sub">Every student, sorted needs-first · click a row to open their drill-in</div>
@@ -381,7 +386,7 @@
 </div>
 
 <div class="pmodal" id="howmodal" aria-modal="true" role="dialog" aria-label="How this is calculated" hidden>
-  <div class="sheet" style="max-width:640px">
+  <div class="sheet" style="max-width:40rem">
     <button class="x" onclick="document.getElementById('howmodal').hidden=true" aria-label="Close">&times;</button>
     <h2>How this is calculated</h2>
     <div class="sub"></div>
