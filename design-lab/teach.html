@@ -123,6 +123,17 @@
   .mc .strip i.oth3{background:#e8d8bd}
   .mc .ans{color:var(--good)}
 
+  /* ---- pace: per-unit skyline of lessons finished ---- */
+  .pace{display:grid;grid-template-columns:230px 1fr 210px;gap:18px;align-items:center;
+    padding:.75rem 0;border-top:1px solid var(--linel)}
+  .pace:first-child{border-top:none}
+  .pace .pn{font-family:var(--read);font-weight:600;font-size:.95rem}
+  .pace .pm{font-size:.76rem;color:var(--mut)}
+  .pace svg{display:block;width:100%;height:auto}
+  .behind{margin-top:.9rem;padding-top:.8rem;border-top:1px solid var(--linel);font-size:.88rem;line-height:1.6}
+  .behind b{font-weight:700}
+  .behind .names{color:var(--sec)}
+
   /* ---- the quadrant: effort x retention, one dot per student ---- */
   .quad svg{display:block;width:100%;height:auto}
   .quad text{font-family:var(--head)}
@@ -247,20 +258,25 @@
 <div class="wrap one" id="view-topics" hidden>
   <div class="col">
     <div class="card topics" id="topics">
-      <h2>What's sticking, by topic <small>recall over the half-term · every card's Leitner box</small></h2>
+      <h2>What's sticking, by topic <small>the line = recall accuracy, week by week · the squares = flashcards</small></h2>
       <div class="unitgrid" id="unitgrid"></div>
-      <div class="mkey"><i class="m1"></i>Emerging <i class="m2"></i>Developing <i class="m3"></i>Secure <i class="m4"></i>Mastered
-        &nbsp;·&nbsp; each waffle square ≈ 1% of the class's flashcards in that unit</div>
+      <div class="mkey"><b>The squares:</b> every student's flashcards for the unit, pooled — one square ≈ 1% of them,
+        coloured by how well its owner knows that card right now:
+        <i class="m1"></i>Emerging <i class="m2"></i>Developing <i class="m3"></i>Secure <i class="m4"></i>Mastered</div>
     </div>
     <div class="tworow">
       <div class="card" id="misconc">
-        <h2>Where the wrong answers went <small>the same wrong idea, counted</small></h2>
+        <h2>Misconceptions <small>much of the class is choosing the same wrong answer</small></h2>
         <div id="mcrows"></div>
       </div>
       <div class="card" id="missedc">
-        <h2>Most-missed lessons <small>across warm-ups &amp; quizzes, whole class</small></h2>
+        <h2>Answered wrong most often <small>the lessons these questions come from</small></h2>
         <div id="missrows"></div>
       </div>
+    </div>
+    <div class="card" id="pacec">
+      <h2>Where the class is up to <small>lessons finished, inferred pace — and who has fallen behind the group</small></h2>
+      <div id="pacerows"></div>
     </div>
   </div>
 </div>
@@ -489,18 +505,27 @@ const MASTERY=UNITS.map(u=>{
    subjects — same shape, tag instead of chose. */
 const MISCON=(function(){
   /* one line per QUESTION: total wrong answers + the dominant wrong choice —
-     "352 of 585 wrong answers chose X" is the teachable unit, not each variant */
+     "352 of 585 wrong answers chose X" is the teachable unit, not each variant.
+     Sources: warm-up misses, lesson-quiz misses, shorts-check misses (all now
+     carry the chosen option) + NAMED diagnoses from guided practice. */
   const byQ={};
+  function add(name,unit,q,chose,right){
+    if(!chose) return;
+    const k=unit+'|'+(q||'');
+    const e=(byQ[k]=byQ[k]||{unit:unit,q:q,right:right,total:0,who:{},choices:{}});
+    e.total++; e.who[name]=1; e.choices[chose]=(e.choices[chose]||0)+1;
+  }
   STATS.forEach(({s})=>{
-    Object.keys(s.p.warmlog||{}).forEach(d=>{ (s.p.warmlog[d].misses||[]).forEach(m=>{
-      if(!m.chose) return;
-      const k=m.unit+'|'+(m.q||'');
-      const e=(byQ[k]=byQ[k]||{unit:m.unit,q:m.q,right:m.right,total:0,who:{},choices:{}});
-      e.total++; e.who[s.name]=1; e.choices[m.chose]=(e.choices[m.chose]||0)+1; }); });
+    Object.keys(s.p.warmlog||{}).forEach(d=>{ (s.p.warmlog[d].misses||[]).forEach(m=>add(s.name,m.unit,m.q,m.chose,m.right)); });
+    Object.keys(s.p.kc||{}).forEach(k=>{ ((s.p.kc[k]||{}).miss||[]).forEach(m=>add(s.name,k.split('/')[1],m.q,m.chose,m.right)); });
+    (s.p.shortschecks||[]).forEach(c=>{ if(!c.ok) add(s.name,c.unit,c.q,c.chose,c.right); });
+    /* named guided-practice diagnoses cluster by their tag directly */
+    (s.p.miscon||[]).forEach(m=>add(s.name,m.unit,'While practising (diagnosed)',m.tag,''));
   });
   return Object.values(byQ).map(e=>{
     const top=Object.entries(e.choices).sort((a,b)=>b[1]-a[1])[0];
-    return {unit:e.unit,q:e.q,right:e.right,total:e.total,students:Object.keys(e.who).length,
+    return {unit:e.unit,q:e.q,right:e.right,total:e.total,
+            names:Object.keys(e.who),students:Object.keys(e.who).length,
             chose:top[0],n:top[1],choices:e.choices};
   }).filter(e=>e.total>=8).sort((a,b)=>b.total-a.total).slice(0,8);
 })();
@@ -514,12 +539,36 @@ function unitSeries(slug){
     return (ok+no)>=15 ? ok/(ok+no) : null;
   });
 }
-/* most-missed lessons, whole class */
+/* the lessons whose questions get answered wrong most, whole class */
 const MISSED=(function(){
   const by={};
-  STATS.forEach(({st})=>st.ev.filter(e=>!e.ok&&e.unit&&e.title).forEach(e=>{
-    const k=e.unit+'|'+e.title; (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; }));
-  return Object.values(by).sort((a,b)=>b.n-a.n).slice(0,7);
+  STATS.forEach(({s,st})=>st.ev.filter(e=>!e.ok&&e.unit&&e.title).forEach(e=>{
+    const k=e.unit+'|'+e.title;
+    const r=(by[k]=by[k]||{unit:e.unit,title:e.title,n:0,who:{}});
+    r.n++; r.who[s.name]=1; }));
+  return Object.values(by).map(r=>({...r,students:Object.keys(r.who).length}))
+    .sort((a,b)=>b.n-a.n).slice(0,7);
+})();
+/* pace: how far through each unit the class has got, and who's behind the
+   GROUP (we never know the teacher's intended pace — the class median is
+   the honest stand-in) */
+const PACE=(function(){
+  const units=UNITS.map(u=>{
+    const per=[]; for(let i=0;i<u.lessons;i++) per.push(0);
+    const tops=[];
+    STUDENTS.forEach(s=>{ const arr=s.p.done['history-aqa/'+u.slug]||[];
+      arr.forEach(n=>{ if(n>=1&&n<=u.lessons) per[n-1]++; });
+      if(arr.length) tops.push(Math.max.apply(null,arr)); });
+    tops.sort((a,b)=>a-b);
+    const med=tops.length?tops[Math.floor(tops.length/2)]:0;
+    return {u,per,started:tops.length,median:med};
+  });
+  const totals=STUDENTS.map(s=>({name:s.name,
+    total:Object.values(s.p.done||{}).reduce((a,x)=>a+x.length,0)}));
+  const sorted=[...totals].sort((a,b)=>a.total-b.total);
+  const medTotal=sorted[Math.floor(sorted.length/2)].total;
+  const behind=totals.filter(t=>medTotal-t.total>=8).sort((a,b)=>a.total-b.total);
+  return {units,medTotal,behind};
 })();
 
 /* ---------------- render ---------------------------------------------------- */
@@ -538,7 +587,7 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
   const fading=UNITAGG.filter(x=>x.fading&&x!==worst);
   const topmc=MISCON[0];
   let h='';
-  if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+'</b> is the class’s weakest recall — '+pct(worst.acc)+' across '+worst.att+' answers, misses from '+missed+' students. <b>Reteach candidate.</b></div></div>';
+  if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+'</b> is the class’s weakest recall — '+pct(worst.acc)+' across '+worst.att+' answers, wrong answers from '+missed+' students. <b>Reteach candidate.</b></div></div>';
   if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>One shared wrong idea:</b> on “'+esc(topmc.q)+'”, '+topmc.n+' of '+topmc.total+' wrong answers ('+topmc.students+' students) chose <b>“'+esc(topmc.chose)+'”</b>. One sentence on Monday fixes this.</div></div>';
   fading.forEach(x=>{ h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Fading:</b> '+esc(x.u.name)+' was at '+pct(x.accPrev)+' recall a fortnight ago — '+pct(x.accNow)+' now. Worth a warm-up before it slips further.</div></div>'; });
   if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' gone quiet</b> (5+ days): <span class="names">'+esc(quiet.join(', '))+'</span></div></div>';
@@ -597,24 +646,55 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
   }).join('');
 })();
 
-/* where the wrong answers went — proportional split per question */
+/* misconceptions — proportional split of the wrong answers, per question */
 (function(){
   $('#mcrows').innerHTML=MISCON.length?MISCON.map(m=>{
     const un=UNITS.find(u=>u.slug===m.unit);
     const parts=Object.entries(m.choices).sort((a,b)=>b[1]-a[1]);
     const strip=parts.map(([txt,n],i)=>
       '<i class="'+(i===0?'dom':'oth'+Math.min(i,3))+'" style="width:'+(n/m.total*100)+'%" title="'+esc(txt)+' — '+n+'"></i>').join('');
-    return '<div class="mc"><span class="n">'+m.total+' wrong · '+m.students+' students</span>'
+    const who=m.names.slice(0,3).join(', ')+(m.students>3?' +'+(m.students-3)+' more':'');
+    return '<div class="mc"><span class="n">'+m.total+' wrong answers</span>'
       +'<b>'+esc(m.q)+'</b>'
       +'<div class="strip">'+strip+'</div>'
-      +Math.round(m.n/m.total*100)+'% chose <span class="pick">“'+esc(m.chose)+'”</span> · answer: <span class="ans">'+esc(m.right)+'</span>'
-      +'<br><span class="u">'+esc(un?un.name:m.unit)+'</span></div>';
+      +Math.round(m.n/m.total*100)+'% chose <span class="pick">“'+esc(m.chose)+'”</span>'
+      +(m.right?' · answer: <span class="ans">'+esc(m.right)+'</span>':'')
+      +'<br><span class="u" title="'+esc(m.names.join(', '))+'">'+esc(un?un.name:m.unit)+' · '+m.students+' students: '+esc(who)+'</span></div>';
   }).join('')
-  :'<div class="mc att">Nothing clustered yet — this fills as warm-up and quiz answers accumulate. For maths and science classes, named misconceptions ("adds the denominators") from guided practice appear here too.</div>';
+  :'<div class="mc att">Nothing clustered yet — this fills as warm-up and quiz answers accumulate. For maths and science classes, named diagnoses ("adds the denominators") from guided practice appear here too.</div>';
   $('#missrows').innerHTML=MISSED.map(m=>{
     const un=UNITS.find(u=>u.slug===m.unit);
-    return '<div class="mc"><span class="n">× '+m.n+'</span><b>'+esc(m.title)+'</b><br><span class="u">'+esc(un?un.name:m.unit)+'</span></div>';
+    return '<div class="mc"><span class="n">'+m.n+' wrong answers · '+m.students+' students</span><b>'+esc(m.title)+'</b><br><span class="u">a lesson in '+esc(un?un.name:m.unit)+'</span></div>';
   }).join('');
+})();
+
+/* where the class is up to — a skyline per unit + who's behind the group */
+(function(){
+  function sky(p){
+    const N=p.per.length,W=460,H=64,gap=3,bw=(W-gap*(N-1))/N;
+    let h='<svg viewBox="0 0 '+W+' '+(H+16)+'" aria-hidden="true">';
+    for(let i=0;i<N;i++){
+      const x=i*(bw+gap), frac=p.per[i]/STUDENTS.length, bh=Math.max(2,frac*H);
+      const done=i+1<=p.median;
+      h+='<rect x="'+x+'" y="'+(H-bh)+'" width="'+bw+'" height="'+bh+'" rx="1.5" fill="'
+        +(done?'#7d8f7f':'#d8cdb6')+'"><title>Lesson '+(i+1)+' — finished by '+p.per[i]+' of '+STUDENTS.length+'</title></rect>';
+      if((i+1)%5===0||i===0||i===N-1) h+='<text x="'+(x+bw/2)+'" y="'+(H+13)+'" font-size="9.5" fill="#b0a892" text-anchor="middle">L'+(i+1)+'</text>';
+    }
+    if(p.median) { const mx=(p.median-1)*(bw+gap)+bw/2;
+      h+='<line x1="'+mx+'" y1="0" x2="'+mx+'" y2="'+H+'" stroke="#a3542f" stroke-width="1.6" stroke-dasharray="4 4"/>'; }
+    return h+'</svg>';
+  }
+  $('#pacerows').innerHTML=PACE.units.map(p=>
+    '<div class="pace"><div><div class="pn">'+esc(p.u.name)+'</div>'
+    +'<div class="pm">'+p.started+'/'+STUDENTS.length+' started</div></div>'
+    +sky(p)
+    +'<div class="pm">'+(p.started?('typical student is at <b>L'+p.median+'</b> of '+p.u.lessons+' <span style="color:#a3542f">- - -</span>'):'not started as a class')+'<br>bar height = how many have finished that lesson</div>'
+    +'</div>').join('')
+   +'<div class="behind">'+(PACE.behind.length
+     ? '<b>Behind the group:</b> <span class="names">'
+       +PACE.behind.slice(0,6).map(b=>esc(b.name)+' ('+b.total+' lessons)').join(' · ')
+       +'</span> — class median is '+PACE.medTotal+' lessons finished. Pace is yours to judge; this only compares students with their own class.'
+     : 'Nobody is significantly behind the group’s pace.')+'</div>';
 })();
 
 /* the quadrant — effort (days revised) x retention (recall), a dot each */
@@ -725,9 +805,9 @@ function drill(ix){
   if(wl.length){ h+='<div class="sect">Warm-ups, last '+wl.length+'</div><div class="wubars">'
     +wl.map(d=>{ const w=p.warmlog[d]; const pc=Math.round(w.correct/w.total*100);
       return '<i style="height:100%"><b style="height:'+pc+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>'; }
-  if(weak.length){ h+='<div class="sect">Keeps missing</div>'+weak.map(w=>{
+  if(weak.length){ h+='<div class="sect">Keeps getting wrong</div>'+weak.map(w=>{
     const un=UNITS.find(u=>u.slug===w.unit);
-    return '<div class="miss"><b>'+esc(w.title||'')+'</b> · '+esc(un?un.name:w.unit)+' <span class="att">× '+w.n+'</span></div>'; }).join(''); }
+    return '<div class="miss"><b>'+esc(w.title||'')+'</b> · '+esc(un?un.name:w.unit)+' <span class="att">'+w.n+' wrong answers</span></div>'; }).join(''); }
   if(strong.length){ h+='<div class="sect">Strengths</div><div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join(' · ')+'</div>'; }
   if((p.practice||[]).length){ h+='<div class="sect">Practice answers · AI-marked</div>'+p.practice.map(pr=>
     '<div class="paper"><div class="meta">'+esc(pr.d)+' · '+esc(pr.k)+' · '+pr.m+' marks</div>'
