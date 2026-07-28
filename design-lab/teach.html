@@ -128,7 +128,7 @@
 
   /* ---- topic cards: recall curve + card-mastery waffle, per unit.
      The 2x2 grid fills the whole view; each card flexes to its cell. ---- */
-  .unitgrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;margin-top:.2rem}
+  .unitgrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-auto-rows:1fr;gap:14px;margin-top:.2rem}
   .ucard{border:1px solid var(--linel);border-radius:12px;padding:.95rem 1.15rem .85rem;background:#fffefb;
     min-height:0;display:flex;flex-direction:column}
   .ucard .curvebox{flex:1;min-height:0;display:flex;align-items:center}
@@ -291,7 +291,7 @@
 <div class="top">
   <span class="brand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span>
   <span class="who">the teacher's side of the desk</span>
-  <span class="classpick">Class: <b>10H · History (AQA)</b> · 28 students · this week</span>
+  <span class="classpick" id="classpick"></span>
 </div>
 <div class="demo">Synthetic demo class · the real pipeline reads the same progress objects students already sync
   · <a href="#" onclick="document.getElementById('howmodal').hidden=false;return false">how this is calculated</a></div>
@@ -416,6 +416,14 @@
 /* ---------- seeded synthetic class over the REAL history-aqa structure ------- */
 function rng(seed){ return function(){ seed|=0; seed=seed+0x6D2B79F5|0; var t=Math.imul(seed^seed>>>15,1|seed);
   t=t+Math.imul(t^t>>>7,61|t)^t; return ((t^t>>>14)>>>0)/4294967296; }; }
+function iso(d){ return d.toISOString().slice(0,10); }
+const TODAY=new Date(); TODAY.setHours(0,0,0,0);
+function daysAgo(n){ const d=new Date(TODAY); d.setDate(d.getDate()-n); return d; }
+
+/* ================= THE SYNTHETIC CLASS (demo fallback) =================
+   Used when nobody is signed in as a teacher (or with ?synthetic=1). The
+   REAL path is liveClass() below — same shapes, read from the events pipe. */
+function synthClass(){
 const R=rng(20260714);
 const UNITS=[            /* the class's taught options (mirrors a real 10H) */
   {slug:'america-opportunity-inequality', name:'America, 1920–1973', lessons:14},
@@ -453,9 +461,6 @@ const DISTRACT={
    right:'Sir Francis Walsingham','wrong':['William Cecil','The Earl of Essex','Sir Walter Raleigh'],bias:.5},
 };
 
-function iso(d){ return d.toISOString().slice(0,10); }
-const TODAY=new Date(); TODAY.setHours(0,0,0,0);
-function daysAgo(n){ const d=new Date(TODAY); d.setDate(d.getDate()-n); return d; }
 
 function makeStudent(ix,arch){
   const name=FIRSTNAMES[ix]+' '+SURNAMES[ix];
@@ -532,6 +537,124 @@ function makeStudent(ix,arch){
 }
 const STUDENTS=[]; let ai=0;
 ARCH.forEach(a=>{ for(let i=0;i<a.n;i++) STUDENTS.push(makeStudent(ai++,a)); });
+return {units:UNITS, students:STUDENTS, className:'10H · History (AQA)', live:false};
+}
+
+/* ================= THE LIVE CLASS (the real pipe) =================
+   Signed-in teacher -> their classes -> members -> events (RLS enforces
+   scope end to end). Events transform into the same per-student shape the
+   synthetic generator produces, so every aggregation below is identical. */
+async function liveClass(){
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('synthetic')) return null;
+  let tok=null;
+  try{ tok=JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token')).access_token; }catch(e){}
+  if(!tok) return null;
+  const SUPA='https://baipckgywpnwapobwtsy.supabase.co';
+  const ANON='sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2';
+  const H={apikey:ANON, Authorization:'Bearer '+tok};
+  const j=async p=>{ const r=await fetch(SUPA+p,{headers:H}); if(!r.ok) throw new Error(p.split('?')[0]+' '+r.status); return r.json(); };
+  const me=await j('/auth/v1/user');
+  const classes=await j('/rest/v1/classes?teacher_id=eq.'+me.id+'&select=id,name,year_group,subject_id&order=name');
+  if(!classes.length) return null;
+  const subsAll=await j('/rest/v1/subjects?select=id,slug,name&limit=400');
+  const smap={}; subsAll.forEach(s=>smap[s.id]=s);
+  classes.forEach(c=>{ c.sname=(smap[c.subject_id]||{}).name||''; });
+  const cls=classes.find(c=>c.id===sessionStorage.getItem('sv-teach-class'))||classes[0];
+  const subj=smap[cls.subject_id]||{};
+  const mems=await j('/rest/v1/class_members?class_id=eq.'+cls.id+'&select=student_id');
+  const ids=mems.map(m=>m.student_id);
+  if(!ids.length) return null;
+  const profs=await j('/rest/v1/profiles?id=in.('+ids.join(',')+')&select=id,full_name');
+  const units=await j('/rest/v1/units?subject_id=eq.'+cls.subject_id+'&select=id,slug,name,sort_order&order=sort_order');
+  const les=await j('/rest/v1/lessons?unit_id=in.('+units.map(u=>u.id).join(',')+')&select=unit_id,lesson_number,title&order=lesson_number&limit=3000');
+  const uById={}; units.forEach(u=>uById[u.id]=u);
+  const titles={}, counts={};
+  les.forEach(l=>{ const us=(uById[l.unit_id]||{}).slug; if(!us) return;
+    (titles[us]=titles[us]||{})[l.lesson_number]=l.title;
+    counts[us]=Math.max(counts[us]||0,l.lesson_number); });
+  let UNITS=units.filter(u=>counts[u.slug]).map(u=>({slug:u.slug,name:u.name,lessons:counts[u.slug]}));
+  const since=new Date(Date.now()-42*864e5).toISOString();
+  let evs=[], page=0;
+  for(;;){ const chunk=await j('/rest/v1/events?person_id=in.('+ids.join(',')+')&subject=eq.'+subj.slug
+      +'&at=gte.'+since+'&select=person_id,unit,lesson,kind,ok,q,chose,answer,box,meta,at&order=at&limit=1000&offset='+(page*1000));
+    evs=evs.concat(chunk); if(chunk.length<1000||++page>60) break; }
+  const dones=await j('/rest/v1/events?person_id=in.('+ids.join(',')+')&subject=eq.'+subj.slug
+      +'&kind=eq.lesson_done&select=person_id,unit,lesson,at&limit=30000');
+  const byS={};
+  profs.forEach(p=>byS[p.id]={name:p.full_name||'Student', arch:null,
+    p:{done:{},when:{},warmlog:{},kc:{},practice:[],shortschecks:[],flashlog:[],miscon:[],practlog:[],flashsr:{cards:{}}}});
+  evs.forEach(e=>{
+    const S=byS[e.person_id]; if(!S) return;
+    const P=S.p, d=e.at.slice(0,10);
+    const ttl=(titles[e.unit]||{})[e.lesson]||('Lesson '+e.lesson);
+    if(e.kind==='warmup'){
+      const wl=P.warmlog[d]=P.warmlog[d]||{correct:0,total:0,misses:[],units:{}};
+      wl.total++; const uk=subj.slug+'/'+e.unit;
+      const ua=wl.units[uk]=wl.units[uk]||{a:0,m:0}; ua.a++;
+      if(e.ok) wl.correct++;
+      else{ ua.m++; wl.misses.push({sub:subj.slug,unit:e.unit,n:e.lesson,title:ttl,
+        q:e.q||'',chose:e.chose||'',right:e.answer||''}); }
+    } else if(e.kind==='quiz'){
+      const k=subj.slug+'/'+e.unit+'/'+e.lesson;
+      const r=P.kc[k]=P.kc[k]||{s:0,t:0,d:d,miss:[]};
+      r.t++; r.d=d; if(e.ok) r.s++;
+      else if(e.q) r.miss.push({q:e.q,chose:e.chose||'',right:e.answer||''});
+    } else if(e.kind==='shorts'){
+      P.shortschecks.push({d:d,sub:subj.slug,unit:e.unit,n:e.lesson,ok:!!e.ok,q:e.q,chose:e.chose,right:e.answer});
+    } else if(e.kind==='flash'){
+      /* key cards under the unit slug so the MASTERY waffle can match them */
+      const ck=e.unit+':'+((e.meta&&e.meta.card)||e.lesson);
+      const c=P.flashsr.cards[ck]=P.flashsr.cards[ck]||{box:1,attempts:0,correct:0};
+      c.attempts++; if(e.ok) c.correct++; if(e.box) c.box=e.box;
+      P.flashlog.push({t:Date.parse(e.at),unit:e.unit,ok:!!e.ok});
+    } else if(e.kind==='practice'){
+      P.practlog.push({d:d,unit:e.unit,ok:!!e.ok});
+    } else if(e.kind==='miscon'){
+      P.miscon.push({d:d,sub:subj.slug,unit:e.unit,n:e.lesson,tag:e.tag});
+    }
+  });
+  dones.forEach(e=>{ const S=byS[e.person_id]; if(!S) return;
+    const key=subj.slug+'/'+e.unit;
+    const arr=(S.p.done[key]=S.p.done[key]||[]);
+    if(arr.indexOf(e.lesson)<0) arr.push(e.lesson);
+    S.p.when[key+'/'+e.lesson]=e.at.slice(0,10); });
+  /* the SUBJECT carries every unit we offer; the CLASS studies the ones its
+     department chose. Evidence tells us which those are — show only them,
+     capped to the 6 most practised so the topic grid stays one screen. */
+  const evCount={};
+  evs.forEach(e=>{ if(e.unit) evCount[e.unit]=(evCount[e.unit]||0)+1; });
+  dones.forEach(e=>{ if(e.unit) evCount[e.unit]=(evCount[e.unit]||0)+1; });
+  UNITS=UNITS.filter(u=>evCount[u.slug]);
+  if(UNITS.length>6) UNITS=UNITS.slice().sort((a,b)=>(evCount[b.slug]||0)-(evCount[a.slug]||0)).slice(0,6)
+    .sort((a,b)=>units.findIndex(x=>x.slug===a.slug)-units.findIndex(x=>x.slug===b.slug));
+  return {units:UNITS, students:Object.values(byS), live:true, classes, cls, subj,
+          teacher:(me.user_metadata||{}).full_name||me.email,
+          className:cls.name+' · '+(subj.name||'')};
+}
+
+/* boot: live pipe when a signed-in teacher has classes, else the demo class */
+(async function(){
+  let D=null;
+  try{ D=await liveClass(); }catch(e){ console.warn('[teach] live load failed:', e.message); }
+  initDash(D||synthClass());
+})();
+
+function initDash(D){
+const UNITS=D.units, STUDENTS=D.students;
+const SLUG=D.subj?D.subj.slug:'history-aqa';
+const CLASSNAME=D.className;
+{ const cp=document.getElementById('classpick');
+  if(D.live){
+    cp.innerHTML='Class: <select id="clsel">'+D.classes.map(c=>
+      '<option value="'+c.id+'"'+(c.id===D.cls.id?' selected':'')+'>'+esc(c.name)+' · '+esc(c.sname)+'</option>').join('')
+      +'</select> · '+STUDENTS.length+' students';
+    document.getElementById('clsel').onchange=e=>{ sessionStorage.setItem('sv-teach-class',e.target.value); location.reload(); };
+    document.querySelector('.demo').textContent='Demo High School · live data from the events pipe · signed in as '+(D.teacher||'teacher');
+  } else {
+    cp.innerHTML='Class: <b>'+esc(CLASSNAME)+'</b> · '+STUDENTS.length+' students · this week';
+  }
+}
 
 /* ---------------- aggregation (this is the real code, demo data) ------------- */
 function recallEvents(p){ /* every attributable right/wrong this student produced */
@@ -546,8 +669,9 @@ function recallEvents(p){ /* every attributable right/wrong this student produce
     for(let i=0;i<r.s;i++) ev.push({d:r.d,unit,ok:true,src:'quiz'});
     for(let i=0;i<r.t-r.s;i++) ev.push({d:r.d,unit,ok:false,src:'quiz',title:'Lesson '+k.split('/')[2]+' quiz'});
   });
-  (p.shortschecks||[]).forEach(c=>ev.push({d:c.d,unit:c.unit,ok:c.ok,src:'shorts',title:c.topic}));
+  (p.shortschecks||[]).forEach(c=>ev.push({d:c.d,unit:c.unit,ok:c.ok,src:'shorts',title:c.topic,q:c.q,chose:c.chose,right:c.right}));
   (p.flashlog||[]).forEach(f=>ev.push({d:f.d,unit:f.unit,ok:f.ok,src:'flashcards',title:f.q?('Card · '+f.q):null}));
+  (p.practlog||[]).forEach(x=>ev.push({d:x.d,unit:x.unit,ok:x.ok,src:'practice'}));   /* practice-first subjects */
   return ev;
 }
 function studentStats(s){
@@ -582,7 +706,7 @@ const UNITAGG=UNITS.map(u=>{
   STATS.forEach(({s,st})=>st.ev.forEach(e=>{ if(e.unit===u.slug){
     e.ok?ok++:no++; if(!e.ok)(who[s.name]=who[s.name]||0)? who[s.name]++ : who[s.name]=1;
     if(e.d>=d14){ e.ok?okN++:noN++; } else if(e.d>=d28){ e.ok?okP++:noP++; } } }));
-  const covered=STATS.filter(({s})=>(s.p.done['history-aqa/'+u.slug]||[]).length>0).length;
+  const covered=STATS.filter(({s})=>(s.p.done[SLUG+'/'+u.slug]||[]).length>0).length;
   const accNow=(okN+noN)>=25?okN/(okN+noN):null, accPrev=(okP+noP)>=25?okP/(okP+noP):null;
   return {u,ok,no,att:ok+no,acc:(ok+no)?ok/(ok+no):null,covered,who,accNow,accPrev,
           fading:accNow!==null&&accPrev!==null&&accNow<accPrev-.08,
@@ -658,7 +782,7 @@ const PACE=(function(){
   const units=UNITS.map(u=>{
     const per=[]; for(let i=0;i<u.lessons;i++) per.push(0);
     const tops=[];
-    STUDENTS.forEach(s=>{ const arr=s.p.done['history-aqa/'+u.slug]||[];
+    STUDENTS.forEach(s=>{ const arr=s.p.done[SLUG+'/'+u.slug]||[];
       arr.forEach(n=>{ if(n>=1&&n<=u.lessons) per[n-1]++; });
       if(arr.length) tops.push(Math.max.apply(null,arr)); });
     tops.sort((a,b)=>a-b);
@@ -759,7 +883,7 @@ function goto(tab,sel,ix){
       +'<div class="toprow"><span class="big">'+pct(x.acc)+'</span>'+ann+'</div>'
       +'<div class="curvebox">'+curve(x)+'</div>'
       +waffle(x.u.slug)
-      +'<div class="fn">'+x.att+' answers · '+x.covered+'/28 started</div>'
+      +'<div class="fn">'+x.att+' answers · '+x.covered+'/'+STUDENTS.length+' started</div>'
       +'</div>';
   }).join('');
 })();
@@ -966,7 +1090,7 @@ function drill(ix){
           'The attempts, in order',evtxt]);
     });
   if(PACE.medTotal-st.lessons>=8){
-    const rows=PACE.units.map(pu=>{ const done=(p.done['history-aqa/'+pu.u.slug]||[]).length;
+    const rows=PACE.units.map(pu=>{ const done=(p.done[SLUG+'/'+pu.u.slug]||[]).length;
       return esc(pu.u.name)+': '+done+' of '+pu.u.lessons+' (typical student: L'+pu.median+')'; }).join('<br>');
     lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').',
       'Lessons finished, unit by unit',rows]); }
@@ -1022,9 +1146,9 @@ function openPractice(ix){
 
 /* AI digest — injected by the weekly generator (scripts/_teach_digest.py runs
    claude -p over THE AGGREGATES ONLY and rewrites the block below). */
-const AI_DIGEST=window.SV_TEACH_DIGEST||null;
+const AI_DIGEST=D.live?null:(window.SV_TEACH_DIGEST||null);
 if(AI_DIGEST){ $('#digestbody').innerHTML=AI_DIGEST.html; $('#digeststamp').textContent=AI_DIGEST.stamp; }
-else{ $('#digestbody').innerHTML='<i style="color:var(--mut)">No digest generated yet — run scripts/_teach_digest.py (one small-model call per class per week).</i>'; }
+else{ $('#digestbody').innerHTML='<i style="color:var(--mut)">'+(D.live?'The weekly brief generates per class — one small-model call over this page’s aggregates. Not yet scheduled for Demo High.':'No digest generated yet — run scripts/_teach_digest.py (one small-model call per class per week).')+'</i>'; }
 
 /* ---- the pack: template + visuals + the AI draft, per student ------------- */
 function renderPack(ix){
@@ -1035,7 +1159,7 @@ function renderPack(ix){
     const evs=st.ev.filter(e=>e.unit===u.slug), ok=evs.filter(e=>e.ok).length;
     const acc=evs.length>=5?ok/evs.length:null;
     const clsAcc=(UNITAGG.find(x=>x.u.slug===u.slug)||{}).acc;
-    const doneN=(p.done['history-aqa/'+u.slug]||[]).length;
+    const doneN=(p.done[SLUG+'/'+u.slug]||[]).length;
     const cls=acc===null?'':acc<.55?'low':acc<.72?'mid':'';
     return '<tr><td style="font-weight:600;max-width:230px">'+esc(u.name)+'</td>'
       +'<td><span class="ubar '+cls+'"><i style="width:'+(acc?Math.round(acc*100):0)+'%"></i>'
@@ -1056,7 +1180,7 @@ function renderPack(ix){
     +'<button class="prim" onclick="print()">Print</button></div>'
     +'<div class="pack">'
     +'<div class="phead"><div><h1>'+esc(s.name)+'</h1></div>'
-    +'<div class="pclass"><span class="pbrand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span><br>10H · History (AQA) · 4 weeks to '+TODAY.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div></div>'
+    +'<div class="pclass"><span class="pbrand">StudyVault<img src="assets/studyvault-lock-rust.svg" alt=""></span><br>'+esc(CLASSNAME)+' · 4 weeks to '+TODAY.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})+'</div></div>'
     +'<div class="kv"><div><b>'+st.lessons+'</b><small>lessons finished</small></div>'
     +'<div><b>'+win+'</b><small>days revised</small></div>'
     +'<div><b>'+pct(st.acc)+'</b><small>recall accuracy</small></div>'
@@ -1094,7 +1218,7 @@ if(new URLSearchParams(location.search).get('packagg')!==null){
   const ix=+new URLSearchParams(location.search).get('packagg');
   const {s,st}=STATS[ix], p=s.p;
   const by2={}; st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=(e.title||''); by2[k]=(by2[k]||0)+1; });
-  const agg={name:s.name, class:'10H History (AQA)',
+  const agg={name:s.name, class:CLASSNAME,
     lessons:st.lessons, recall:st.acc===null?null:Math.round(st.acc*100),
     daysRevised:st.activeDays.filter(d=>d>=iso(daysAgo(27))).length, lastSeenDaysAgo:st.lastGap,
     units:UNITS.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.slug), ok=evs.filter(e=>e.ok).length;
@@ -1109,7 +1233,7 @@ if(new URLSearchParams(location.search).get('packagg')!==null){
 
 /* expose aggregates for the digest generator (?agg=1 dumps JSON) */
 if(new URLSearchParams(location.search).get('agg')){
-  const agg={class:'10H History (AQA)',students:STATS.length,
+  const agg={class:CLASSNAME,students:STATS.length,
     week:{active:STATS.filter(x=>x.st.spark.slice(7).some(v=>v)).length,
       quiet:STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name),
       slipping:STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name),
@@ -1125,6 +1249,8 @@ if(new URLSearchParams(location.search).get('agg')){
   pre.style.cssText='position:fixed;left:0;top:0;background:#fff;z-index:999;max-width:100%;overflow:auto';
   document.body.appendChild(pre);
 }
+window.goto=goto; window.openPractice=openPractice;
+}  /* end initDash */
 </script>
 </body>
 </html>

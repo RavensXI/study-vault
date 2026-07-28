@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- QA convenience: sign in as a demo-school teacher, then open the LIVE
+     teacher dashboard. Usage:
+     /design-lab/_teach_login_qa.html?u=james.foster@demo.studyvault.co.uk&p=...
+     Local/preview tool only — nothing links here. -->
+<meta charset="utf-8"><title>teach QA sign-in</title>
+<body style="font-family:system-ui;padding:2rem">signing in…
+<script>
+(async () => {
+  const qs = new URLSearchParams(location.search);
+  const r = await fetch('https://baipckgywpnwapobwtsy.supabase.co/auth/v1/token?grant_type=password', {
+    method: 'POST',
+    headers: { apikey: 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: qs.get('u'), password: qs.get('p') })
+  });
+  const d = await r.json();
+  if (!d.access_token) { document.body.textContent = 'sign-in failed: ' + JSON.stringify(d).slice(0, 200); return; }
+  localStorage.setItem('sb-baipckgywpnwapobwtsy-auth-token', JSON.stringify(d));
+  location.replace('teach.html' + (qs.get('tab') ? '?tab=' + qs.get('tab') : ''));
+})();
+</script>

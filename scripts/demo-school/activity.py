@@ -119,7 +119,7 @@ def stable(*parts):
     return int(hashlib.md5("|".join(str(p) for p in parts).encode()).hexdigest()[:8], 16)
 
 
-def simulate(student, pack, shared_mc, fading, rng):
+def simulate(student, pack, shared_mc, shared_pick, fading, rng):
     """Return (sv_progress, sv_welcome, events[]) for one student."""
     ability, days_p = student["ability"], student["days"]
     year = student["year"]
@@ -142,10 +142,13 @@ def simulate(student, pack, shared_mc, fading, rng):
             # completion dates: most are old; the recent tail lands in-window
             age = int((1 - (i + 1) / max(1, ndone)) * 110) + rng.randint(0, 6)
             d = TODAY - dt.timedelta(days=age)
+            # EVERY completion becomes an event (pace/coverage read all-time);
+            # only recent ones get a sv-lessons-when stamp (that powers the
+            # student's "this week" figures, mirroring real capture)
+            events.append({"kind": "lesson_done", "subject": slug, "unit": u["slug"],
+                           "lesson": l["n"], "at": iso(d) + "T17:30:00Z"})
             if age <= DAYS:
                 prog["when"][key + "/" + str(l["n"])] = iso(d)
-                events.append({"kind": "lesson_done", "subject": slug, "unit": u["slug"],
-                               "lesson": l["n"], "at": iso(d) + "T17:30:00Z"})
 
     # ---- daily revision over the evidence window ---------------------------
     for back in range(DAYS, -1, -1):
@@ -168,10 +171,15 @@ def simulate(student, pack, shared_mc, fading, rng):
                 if fading.get(slug) == u["slug"] and back <= 14: a *= .72
                 return max(.05, min(.97, a))
             if art:
-                # warm-up: 10 real KCs from studied units
+                # warm-up: 10 real KCs from studied units. The seeded anchor
+                # question appears often (like the one everyone gets wrong) so
+                # class-level misconception clustering has enough signal.
                 bank = [(u, l, k) for u in started for l in u["lessons"] for k in l["kcs"]]
                 if bank:
                     picks = [bank[rng.randrange(len(bank))] for _ in range(10)]
+                    sp = shared_pick.get(slug)
+                    if sp and rng.random() < .5:
+                        picks[rng.randrange(len(picks))] = sp
                     ok_n, misses, ua = 0, [], {}
                     for (u, l, k) in picks:
                         uk = slug + "/" + u["slug"]
@@ -237,7 +245,8 @@ def simulate(student, pack, shared_mc, fading, rng):
                         prog["flashlog"].append({"t": stable(student["email"], date, ck), "unit": u["slug"], "ok": okc,
                                                  "q": l["title"][:60]})
                         events.append({"kind": "flash", "subject": slug, "unit": u["slug"],
-                                       "lesson": l["n"], "ok": okc, "box": c["box"], "at": date + "T19:05:00Z"})
+                                       "lesson": l["n"], "ok": okc, "box": c["box"],
+                                       "meta": {"card": ck}, "at": date + "T19:05:00Z"})
             else:
                 # practice-first: a session of graded problems
                 u = rng.choice(started)
@@ -278,7 +287,13 @@ def main():
 
     school = api("GET", "/rest/v1/schools?slug=eq.demo-high&select=id")[0]["id"]
     if args.wipe_events:
-        api("DELETE", f"/rest/v1/events?school_id=eq.{school}")
+        # a whole-tenant delete can exceed the REST statement timeout — chunk it
+        while True:
+            rows = api("GET", f"/rest/v1/events?school_id=eq.{school}&select=id&order=id&limit=1")
+            if not rows: break
+            hi = rows[0]["id"] + 20000
+            api("DELETE", f"/rest/v1/events?school_id=eq.{school}&id=lt.{hi}")
+            print("  wiped a chunk up to id", hi)
         print("events wiped"); return
 
     print("loading content bank...")
@@ -292,21 +307,22 @@ def main():
     # class-wide phenomena: one shared misconception per article subject
     # (a real early-unit question + one fixed distractor), one fading unit
     rng0 = random.Random(20261011)
-    shared_mc, fading = {}, {}
+    shared_mc, shared_pick, fading = {}, {}, {}
     for slug, units in pack.items():
         if slug in PRACTICE_FIRST: continue
-        bank = [k for u in units[:1] for l in u["lessons"][:6] for k in l["kcs"]]
+        bank = [(u, l, k) for u in units[:1] for l in u["lessons"][:6] for k in l["kcs"]]
         if bank:
-            k = bank[rng0.randrange(len(bank))]
+            u, l, k = bank[rng0.randrange(len(bank))]
             wrong = [i for i in range(len(k["options"])) if i != k["correct"]]
             shared_mc[(slug, k["q"])] = rng0.choice(wrong)
+            shared_pick[slug] = (u, l, k)
         if len(units) > 1:
             fading[slug] = units[rng0.randrange(1, len(units))]["slug"]
 
     batch, total_ev = [], 0
     for i, s in enumerate(students):
         rng = random.Random(stable(s["email"], "sim"))
-        prog, welcome, events = simulate(s, pack, shared_mc, fading, rng)
+        prog, welcome, events = simulate(s, pack, shared_mc, shared_pick, fading, rng)
         api("PUT", f"/auth/v1/admin/users/{s['id']}",
             {"user_metadata": {"full_name": s.get("full_name"), "is_demo": True,
                                "sv_welcome": welcome, "sv_progress": dict(prog, updated=TODAY.isoformat())}})
