@@ -82,6 +82,7 @@
   details.ev summary::before{content:'▸ ';font-size:.7rem}
   details.ev[open] summary::before{content:'▾ '}
   details.ev summary:hover{color:var(--ink)}
+  .evfree{font-size:.86rem;color:var(--sec);line-height:1.65;margin:.15rem 0 .4rem}
   .mc .belief{font-family:var(--read);font-weight:600;color:#8a3a25}
   .mc .qq{color:var(--sec);font-size:.84rem}
   .imp{font-size:.95rem;line-height:1.5;margin:.1rem 0 .6rem}
@@ -916,11 +917,28 @@ function drill(ix){
   /* ---- findings first: what the data says about THIS student, including
      the actual wrong answers they keep giving. No advice — the teacher
      decides what to do with it. Evidence sits in the drawer below. ---- */
+  /* each finding is [colour, text, evidence-label, evidence-html] — the
+     drawer below shows, PER FINDING, exactly the working that produced it */
   const lines=[];
-  if(st.flag==='quiet') lines.push(['var(--warn)','<b>No revision for '+st.lastGap+' days.</b>']);
-  if(st.flag==='slip') lines.push(['var(--gold)','<b>Recall fell this week:</b> '+pct(st.accPrev)+' → '+pct(st.accNow)+'.']);
-  if(st.flag==='grind') lines.push(['#5b4370','<b>Revised '+days14+' of the last 14 days; recall sits at '+pct(st.acc)+'.</b> Effort isn’t the gap.']);
-  if(st.flag==='fly') lines.push(['var(--good)','<b>Flying:</b> '+pct(st.acc)+' recall, revising most days.']);
+  const fmtD=d=>{ const t=new Date(d); return t.getDate()+' '+t.toLocaleDateString('en-GB',{month:'short'}); };
+  const wkC=off=>{ const evs=st.ev.filter(e=>e.d>=iso(daysAgo(off+6))&&e.d<=iso(daysAgo(off)));
+    return {n:evs.length, ok:evs.filter(e=>e.ok).length}; };
+  const wNow=wkC(0), wPrev=wkC(7);
+  const wl=Object.keys(p.warmlog||{}).sort().slice(-7);
+  const wub=wl.length?'<div class="wubars">'+wl.map(d=>{ const w=p.warmlog[d];
+    return '<i style="height:100%"><b style="height:'+Math.round(w.correct/w.total*100)+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>':'';
+  const wkEv='Last week: '+wPrev.ok+' of '+wPrev.n+' answers right'+(wPrev.n?' ('+pct(wPrev.n?wPrev.ok/wPrev.n:null)+')':'')
+    +' · this week: '+wNow.ok+' of '+wNow.n+(wNow.n?' ('+pct(wNow.n?wNow.ok/wNow.n:null)+')':'')
+    +'. Counted across warm-ups, quizzes, shorts checks and flashcards.'+(wub?'<br>Daily warm-up scores:'+wub:'');
+  if(st.flag==='quiet'){ const act=st.activeDays.slice(-5).map(fmtD).join(' · ');
+    lines.push(['var(--warn)','<b>No revision for '+st.lastGap+' days.</b>','No revision for '+st.lastGap+' days',
+      'Most recent active days: '+(act||'none recorded')+'.']); }
+  if(st.flag==='slip') lines.push(['var(--gold)','<b>Recall fell this week:</b> '+pct(st.accPrev)+' → '+pct(st.accNow)+'.',
+    'The fall in recall',wkEv]);
+  if(st.flag==='grind') lines.push(['#5b4370','<b>Revised '+days14+' of the last 14 days; recall sits at '+pct(st.acc)+'.</b> Effort isn’t the gap.',
+    'Effort vs retention','Active on '+days14+' of the last 14 days. '+wkEv]);
+  if(st.flag==='fly') lines.push(['var(--good)','<b>Flying:</b> '+pct(st.acc)+' recall, revising most days.',
+    'Flying','Active on '+days14+' of the last 14 days. '+wkEv]);
   const bymc={};
   st.ev.filter(e=>!e.ok&&e.chose).forEach(e=>{ const k=e.unit+'|'+(e.q||'');
     const r=(bymc[k]=bymc[k]||{unit:e.unit,q:e.q,right:e.right,n:0,choices:{}});
@@ -934,21 +952,38 @@ function drill(ix){
     .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit);
       /* the QUESTION is the finding — lead with it, no interpretation lecture */
       const qtxt=r.q?'“'+esc(r.q)+'”':'the '+esc(un?un.name:r.unit)+' question';
+      /* the working = the actual attempts, dated, answer by answer */
+      const tries=st.ev.filter(e=>!e.ok&&e.chose&&e.unit===r.unit&&(e.q||'')===(r.q||''))
+        .sort((a,b)=>a.d<b.d?-1:1).slice(-8)
+        .map(e=>fmtD(e.d)+' — answered “'+esc(e.chose)+'”').join('<br>');
+      const evtxt=tries+(r.n>8?'<br>(+'+(r.n-8)+' earlier)':'')
+        +(r.right?'<br>The answer: '+esc(r.right)+'.':'');
       if(r.cn/r.n>=.6)
-        lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> to '+qtxt+' — '+r.cn+' of '+r.n+' wrong tries.']);
+        lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> to '+qtxt+' — '+r.cn+' of '+r.n+' wrong tries.',
+          'The attempts, in order',evtxt]);
       else if(r.kinds>=2)
-        lines.push(['var(--gold)','<b>Doesn’t know '+qtxt+'</b> — wrong '+r.n+' times, '+r.kinds+' different answers.']);
+        lines.push(['var(--gold)','<b>Doesn’t know '+qtxt+'</b> — wrong '+r.n+' times, '+r.kinds+' different answers.',
+          'The attempts, in order',evtxt]);
     });
-  if(PACE.medTotal-st.lessons>=8) lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').']);
+  if(PACE.medTotal-st.lessons>=8){
+    const rows=PACE.units.map(pu=>{ const done=(p.done['history-aqa/'+pu.u.slug]||[]).length;
+      return esc(pu.u.name)+': '+done+' of '+pu.u.lessons+' (typical student: L'+pu.median+')'; }).join('<br>');
+    lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').',
+      'Lessons finished, unit by unit',rows]); }
   const cards=Object.values((p.flashsr||{}).cards||{});
   if(cards.length>=8){ const em=cards.filter(c=>(c.box||1)<=1).length/cards.length, sec=cards.filter(c=>(c.box||1)>=4).length/cards.length;
-    if(em>=.4) lines.push(['var(--warn)','<b>'+Math.round(em*100)+'% of '+first+'’s flashcards are still Emerging</b> ('+cards.length+' in play).']);
-    else if(sec>=.6) lines.push(['var(--good)','<b>'+Math.round(sec*100)+'% of the flashcards are Secure or Mastered.</b>']); }
+    const dist=[0,0,0,0]; cards.forEach(c=>{ const b=c.box||1; dist[b>=5?3:b>=4?2:b>=2?1:0]++; });
+    const cardEv='Emerging '+dist[0]+' · Developing '+dist[1]+' · Secure '+dist[2]+' · Mastered '+dist[3]+' — of '+cards.length+' cards '+first+' has revised.';
+    if(em>=.4) lines.push(['var(--warn)','<b>'+Math.round(em*100)+'% of '+first+'’s flashcards are still Emerging</b> ('+cards.length+' in play).',
+      'The flashcard boxes',cardEv]);
+    else if(sec>=.6) lines.push(['var(--good)','<b>'+Math.round(sec*100)+'% of the flashcards are Secure or Mastered.</b>',
+      'The flashcard boxes',cardEv]); }
   const strong=UNITAGG.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.u.slug); const ok=evs.filter(e=>e.ok).length;
-    return {name:u.u.name,acc:evs.length>=6?ok/evs.length:null,n:evs.length}; })
+    return {name:u.u.name,acc:evs.length>=6?ok/evs.length:null,n:evs.length,ok:ok}; })
     .filter(x=>x.acc!==null&&x.acc>=.8).sort((a,b)=>b.acc-a.acc);
-  if(strong.length) lines.push(['var(--good)','<b>Strongest: '+esc(strong[0].name)+'</b> — '+pct(strong[0].acc)+' recall.']);
-  if(!lines.length) lines.push(['var(--mut)','Nothing stands out this week — steady.']);
+  if(strong.length) lines.push(['var(--good)','<b>Strongest: '+esc(strong[0].name)+'</b> — '+pct(strong[0].acc)+' recall.',
+    'The strongest topic',''+strong[0].ok+' of '+strong[0].n+' answers right on '+esc(strong[0].name)+'.']);
+  if(!lines.length) lines.push(['var(--mut)','Nothing stands out this week — steady.',null,null]);
 
   let h='<div class="kv">'
     +'<div><b>'+st.lessons+'</b><small>lessons</small></div>'
@@ -956,24 +991,10 @@ function drill(ix){
     +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d')+'</b><small>last seen</small></div></div>'
     +lines.map(l=>'<div class="tri"><span class="dot" style="background:'+l[0]+'"></span><div>'+l[1]+'</div></div>').join('');
 
-  /* ---- the evidence drawer: how the findings above were reached ---- */
-  const by={};
-  st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||'');
-    const r=(by[k]=by[k]||{unit:e.unit,title:e.title,n:0,choices:{}});
-    r.n++; if(e.chose) r.choices[e.chose]=(r.choices[e.chose]||0)+1; });
-  const weak=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,5);
-  const wl=Object.keys(p.warmlog||{}).sort().slice(-7);
-  let evh='';
-  if(wl.length){ evh+='<div class="sect">Warm-ups, last '+wl.length+'</div><div class="wubars">'
-    +wl.map(d=>{ const w=p.warmlog[d]; const pc=Math.round(w.correct/w.total*100);
-      return '<i style="height:100%"><b style="height:'+pc+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>'; }
-  if(weak.length){ evh+='<div class="sect">Keeps getting wrong</div>'+weak.map(w=>{
-    const un=UNITS.find(u=>u.slug===w.unit);
-    const top=Object.entries(w.choices).sort((a,b)=>b[1]-a[1])[0];
-    return '<div class="miss"><b>'+esc(w.title||'')+'</b> · '+esc(un?un.name:w.unit)+' <span class="att">'+w.n+' wrong answers</span>'
-      +(top&&top[1]>=2?'<span class="q">usually answers “'+esc(top[0])+'”</span>':'')+'</div>'; }).join(''); }
-  if(strong.length>1){ evh+='<div class="sect">Strengths</div><div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join(' · ')+'</div>'; }
-  if(evh) h+='<details class="ev"><summary>The evidence — how we know</summary>'+evh+'</details>';
+  /* ---- the evidence drawer: one block PER FINDING, same order — exactly
+     the working that produced the sentence above it ---- */
+  const evh=lines.filter(l=>l[3]).map(l=>'<div class="sect">'+l[2]+'</div><div class="evfree">'+l[3]+'</div>').join('');
+  if(evh) h+='<details class="ev"'+(new URLSearchParams(location.search).get('evopen')?' open':'')+'><summary>The evidence — how we know</summary>'+evh+'</details>';
   h+='<div class="btnrow">'
     +((p.practice||[]).length?'<button onclick="openPractice('+ix+')">Read '+first+'’s practice answers · '+p.practice.length+'</button>':'')
     +'<a href="teach.html?pack='+ix+'">Parents’ evening pack →</a></div>';
