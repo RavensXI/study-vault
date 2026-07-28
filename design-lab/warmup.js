@@ -168,7 +168,11 @@
             if (locked) return; locked = true;
             var ok = +b.dataset.i === c.correct;
             marks[i] = ok; if (ok) correct++;
-            else misses.push({ sub: c.sub, unit: c.unit, n: c.n, title: c.title, q: (c.q || '').slice(0, 160) });
+            else misses.push({ sub: c.sub, unit: c.unit, n: c.n, title: c.title, q: (c.q || '').slice(0, 160),
+              /* the CHOSEN distractor is the teacher's misconception signal —
+                 "18 of 24 wrong answers picked X" beats "they got it wrong" */
+              chose: String(c.opts[+b.dataset.i] || '').slice(0, 90),
+              right: String(c.opts[c.correct] || '').slice(0, 90) });
             /* per-unit attempt counts — without these, unit accuracy would be
                computed from misses alone and every topic would look dire */
             var uk = (c.sub || '') + '/' + (c.unit || '');

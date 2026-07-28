@@ -1954,6 +1954,10 @@ function renderKaTeX(el) {
 function openKnowledgeCheck(questions, storageKey, scoreEl) {
   let current = 0;
   let score = 0;
+  // wrong answers WITH the chosen distractor — the teacher dashboard clusters
+  // these into shared-misconception lines ("most wrong answers chose X")
+  const kcMisses = [];
+  const kcStrip = h => String(h == null ? '' : h).replace(/<[^>]*>/g, '').slice(0, 90);
 
   const overlay = document.createElement('div');
   overlay.className = 'kc-overlay';
@@ -2038,7 +2042,10 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       grid.querySelectorAll('.kc-option').forEach(b => b.classList.add('locked'));
       const correct = selected === q.correct;
       grid.children[selected].classList.add(correct ? 'correct' : 'incorrect');
-      if (!correct) grid.children[q.correct].classList.add('correct');
+      if (!correct) {
+        grid.children[q.correct].classList.add('correct');
+        kcMisses.push({ q: kcStrip(q.q).slice(0, 160), chose: kcStrip(q.options[selected]), right: kcStrip(q.options[q.correct]) });
+      }
       if (correct) score++;
       addNextBtn(correct);
     });
@@ -2103,6 +2110,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
         else if (b.classList.contains('selected') && !correct) b.classList.add('incorrect');
       });
       if (correct) score++;
+      else kcMisses.push({ q: kcStrip(q.q).slice(0, 160), chose: kcStrip(q.options[selected]), right: kcStrip(q.options[q.correct]) });
       addNextBtn(correct);
     });
   }
@@ -2207,7 +2215,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
       var kclg = JSON.parse(localStorage.getItem('sv-kc-log')) || {};
       var kpm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
       kclg[kpm ? kpm[2] + '/' + kpm[3] + '/' + kpm[4] : storageKey] =
-        { s: score, t: total, d: new Date().toISOString().slice(0, 10) };
+        { s: score, t: total, d: new Date().toISOString().slice(0, 10), miss: kcMisses.slice(0, 5) };
       localStorage.setItem('sv-kc-log', JSON.stringify(kclg));
     } catch (e) {}
 
@@ -2215,6 +2223,7 @@ function openKnowledgeCheck(questions, storageKey, scoreEl) {
     overlay.querySelector('#kc-retry').addEventListener('click', () => {
       current = 0;
       score = 0;
+      kcMisses.length = 0;
       showQuestion();
     });
   }
@@ -2572,6 +2581,8 @@ function initLessonProgress() {
                 practice: g('sv-practice-log', []),
                 shortschecks: g('sv-shorts-checks', []),
                 flashlog: g('sv-flash-log', []),
+                miscon: g('sv-misconception-log', []),
+                flashsr: g('sv-flashcard-progress', null),
                 flashday: localStorage.getItem('sv-flash-day') || null,
                 tasks: tasks, updated: new Date().toISOString() } } })
             }).catch(function () {});

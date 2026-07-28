@@ -34,6 +34,8 @@ function svProgressGather() {
            warmlog: g('sv-warmup-log', {}), kc: g('sv-kc-log', {}),
            practice: g('sv-practice-log', []), shortschecks: g('sv-shorts-checks', []),
            flashlog: g('sv-flash-log', []),
+           miscon: g('sv-misconception-log', []),
+           flashsr: g('sv-flashcard-progress', null),
            flashday: localStorage.getItem('sv-flash-day') || null, tasks: tasks };
 }
 
@@ -74,6 +76,21 @@ function svProgressMerge(remote) {
       if (seen3[k]) return false; seen3[k] = 1; return true;
     }).sort(function (a, b) { return (b.t || 0) - (a.t || 0); }).slice(0, 400);
     if (remote.flashday && (!L.flashday || remote.flashday > L.flashday)) L.flashday = remote.flashday;
+    var seen4 = {};
+    L.miscon = (L.miscon || []).concat(remote.miscon || []).filter(function (e) {
+      var k = e.d + '|' + e.sub + '|' + e.unit + '|' + e.n + '|' + (e.tag || '').slice(0, 40);
+      if (seen4[k]) return false; seen4[k] = 1; return true;
+    }).slice(0, 200);
+    /* Leitner boxes: per card, the copy with more attempts is the truer one */
+    if (remote.flashsr && remote.flashsr.cards) {
+      L.flashsr = L.flashsr || { cards: {}, streak: 0 };
+      L.flashsr.cards = L.flashsr.cards || {};
+      Object.keys(remote.flashsr.cards).forEach(function (k) {
+        var loc = L.flashsr.cards[k], rem = remote.flashsr.cards[k];
+        if (!loc || (rem.attempts || 0) > (loc.attempts || 0)) L.flashsr.cards[k] = rem;
+      });
+      L.flashsr.streak = Math.max(L.flashsr.streak || 0, remote.flashsr.streak || 0);
+    }
   }
   try {
     localStorage.setItem('sv-lessons-done', JSON.stringify(L.done));
@@ -85,6 +102,8 @@ function svProgressMerge(remote) {
     if (L.practice) localStorage.setItem('sv-practice-log', JSON.stringify(L.practice));
     if (L.shortschecks) localStorage.setItem('sv-shorts-checks', JSON.stringify(L.shortschecks));
     if (L.flashlog) localStorage.setItem('sv-flash-log', JSON.stringify(L.flashlog));
+    if (L.miscon) localStorage.setItem('sv-misconception-log', JSON.stringify(L.miscon));
+    if (L.flashsr) localStorage.setItem('sv-flashcard-progress', JSON.stringify(L.flashsr));
     if (L.flashday) localStorage.setItem('sv-flash-day', L.flashday);
     Object.keys(L.tasks).forEach(function (k) {
       localStorage.setItem('sv_progress_' + k, JSON.stringify(L.tasks[k]));

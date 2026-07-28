@@ -402,7 +402,9 @@ function makeCheck(seeds){
     if(locked) return; locked=true;
     const ok=+b.dataset.i===c.correct;
     try{ const s=seeds[i], lg=JSON.parse(localStorage.getItem('sv-shorts-checks'))||[];
-      lg.unshift({d:new Date().toISOString().slice(0,10),lid:s.lesson_id,sub:s.subject,unit:s.unit,n:s.lesson_number,ti:s.topic_index,topic:s.topic,ok:ok});
+      const rec={d:new Date().toISOString().slice(0,10),lid:s.lesson_id,sub:s.subject,unit:s.unit,n:s.lesson_number,ti:s.topic_index,topic:s.topic,ok:ok};
+      if(!ok){ rec.q=(c.q||'').slice(0,160); rec.chose=String(c.opts[+b.dataset.i]||'').slice(0,90); rec.right=String(c.opts[c.correct]||'').slice(0,90); }
+      lg.unshift(rec);
       localStorage.setItem('sv-shorts-checks',JSON.stringify(lg.slice(0,300))); }catch(e){}
     b.classList.add(ok?'correct':'wrong');
     if(!ok) check.querySelector(`.opt[data-i="${c.correct}"]`).classList.add('correct');

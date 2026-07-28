@@ -5459,21 +5459,37 @@
         // expected result; otherwise honest guidance, never a guessed diagnosis.
         practiceState.wrongRun = (practiceState.wrongRun || 0) + 1;
         var matched = matchMisconception(problem, inputType, given);
-        var diagnosisHtml;
+        var diagnosisHtml, misTag = null;
         if (matched) {
+          misTag = matched.id || String(matched.message || '').replace(/<[^>]*>/g, '').slice(0, 110);
           diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + matched.message + '</div>';
         } else if (inputType === 'xy_pair' && given.length === 2 &&
             Math.abs(given[0] - problem.solutions[1]) < 0.011 &&
             Math.abs(given[1] - problem.solutions[0]) < 0.011 &&
             Math.abs(problem.solutions[0] - problem.solutions[1]) >= 0.011) {
+          misTag = 'swapped the two answers (x↔y)';
           diagnosisHtml = '<div class="misconception-tip"><strong>It looks like what happened:</strong> Your two values are right but swapped. The first box is \\(x\\), the second is \\(y\\). Match each value to the letter you solved for.</div>';
         } else if (inputType === 'two_solutions') {
           var det = detectMisconception(given, problem.solutions, problem);
+          if (det.type !== 'unknown') misTag = String(det.message || det.type).replace(/<[^>]*>/g, '').slice(0, 110);
           diagnosisHtml = det.type !== 'unknown'
             ? '<div class="misconception-tip"><strong>It looks like what happened:</strong> ' + det.message + '</div>'
             : '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>';
         } else {
           diagnosisHtml = '<div class="misconception-tip"><strong>Where to look:</strong> Compare your working with the method steps above, line by line, and find the first line where yours differs.</div>';
+        }
+        // teacher-facing record: a diagnosis only ever fires when the wrong
+        // answer MATCHED a known error, so each entry is a NAMED, evidenced
+        // misconception — the most actionable line the dashboard can show
+        if (misTag) {
+          try {
+            var mlg = JSON.parse(localStorage.getItem('sv-misconception-log')) || [];
+            var mpm = location.pathname.match(/\/(lesson|practice)\/([^/]+)\/([^/]+)\/(\d+)/);
+            mlg.unshift({ d: new Date().toISOString().slice(0, 10),
+              sub: mpm ? mpm[2] : '', unit: mpm ? mpm[3] : '', n: mpm ? +mpm[4] : 0, tag: misTag });
+            localStorage.setItem('sv-misconception-log', JSON.stringify(mlg.slice(0, 200)));
+            if (window.svProgressPushSoon) svProgressPushSoon();
+          } catch (e) {}
         }
         var nudgeHtml = '';
         if (problem.guided_steps && problem.guided_steps.length) {
