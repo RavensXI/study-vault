@@ -953,8 +953,12 @@ function goto(tab,sel,ix){
   let h='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Effort against retention, one dot per student">';
   for(let d=0;d<=14;d+=2) h+='<line x1="'+xs(d)+'" y1="'+T+'" x2="'+xs(d)+'" y2="'+(H-B)+'" stroke="#f2ecdf" stroke-width="1"/>';
   for(let a=0;a<=1;a+=.25) h+='<line x1="'+L+'" y1="'+ys(a)+'" x2="'+(W-Rr)+'" y2="'+ys(a)+'" stroke="#f2ecdf" stroke-width="1"/>';
-  /* quadrant guides: 7 days, 60% recall */
-  h+='<line x1="'+xs(7)+'" y1="'+T+'" x2="'+xs(7)+'" y2="'+(H-B)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
+  /* quadrant guides: the effort line sits at the CLASS MEDIAN of days
+     revised — effort is subject-scoped (a student juggles 9 subjects), so a
+     fixed threshold misreads every class; the class defines its own normal */
+  const _days=STATS.map(x=>x.st.spark.reduce((a,b)=>a+b,0)).sort((a,b)=>a-b);
+  const gx=Math.max(2,_days.length?_days[Math.floor(_days.length/2)]:7);
+  h+='<line x1="'+xs(gx)+'" y1="'+T+'" x2="'+xs(gx)+'" y2="'+(H-B)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
   h+='<line x1="'+L+'" y1="'+ys(.6)+'" x2="'+(W-Rr)+'" y2="'+ys(.6)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
   h+='<text class="qlab" x="'+(W-Rr-8)+'" y="'+(T+22)+'" text-anchor="end">flying</text>'
     +'<text class="qlab" x="'+(W-Rr-8)+'" y="'+(H-B-12)+'" text-anchor="end">working hard — not sticking yet</text>'

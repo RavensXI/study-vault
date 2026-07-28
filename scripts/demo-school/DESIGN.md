@@ -74,6 +74,16 @@ The activity generator writes each student's history twice:
    dashboards exactly as the sync layer expects;
 2. `events` rows — so the teacher pipeline aggregates the same truth.
 
+## Known calibration follow-ups (from first live runs)
+
+- Flags in `studentStats` (quiet ≥5d, grind ≥8 active days) were tuned on a
+  single-subject synthetic class. Live evidence is SUBJECT-SCOPED — a student
+  splits a fortnight across ~9 subjects — so absolute thresholds under/over
+  fire. The quadrant guide now uses the class median; the flag thresholds
+  should follow (relative to class norms), decided with real eyes on it.
+- Headline unit recall is all-time; the curve endpoint is this week. Both
+  true; pick one convention before schools see it.
+
 ## Order of work
 
 1. ✅ events table + RLS applied
