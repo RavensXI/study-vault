@@ -28,8 +28,20 @@
   .demo{max-width:1240px;margin:10px auto 0;padding:0 16px}
   .demo span{display:inline-block;font-size:.74rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
     color:#7a5b1f;background:#f3e8c8;border:1px solid #e2d3a4;border-radius:6px;padding:.3rem .6rem}
+  /* the tab rail: quiet text, ink underline on the active view — no pills */
+  .tabs{max-width:1240px;margin:16px auto 0;padding:0 16px;display:flex;gap:26px;border-bottom:1px solid var(--line)}
+  .tabs button{font-family:var(--head);font-weight:600;font-size:.95rem;color:var(--mut);background:none;border:none;
+    padding:.55rem 2px .6rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em}
+  .tabs button:hover{color:var(--ink)}
+  .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+  .tabs button:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
+
   .wrap{max-width:1240px;margin:14px auto 60px;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px}
+  .wrap.one{grid-template-columns:1fr}
+  .wrap[hidden]{display:none}
   @media (max-width:1020px){ .wrap{grid-template-columns:1fr} }
+  .tworow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media (max-width:1020px){ .tworow{grid-template-columns:1fr} }
   .col{min-width:0;display:flex;flex-direction:column;gap:16px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:1.1rem 1.2rem}
   .card h2{font-family:var(--read);font-size:1.15rem;margin:0 0 .7rem}
@@ -70,6 +82,25 @@
   .flag.quiet{background:#fbeee9;color:#9a3a25}
   .flag.slip{background:#f6ecd2;color:#8a6d1f}
   .flag.fly{background:#edf6f0;color:#1e5b3e}
+  .flag.grind{background:#efe9f4;color:#5b4370}
+
+  /* mastery distribution: the flashcard boxes as a stacked bar, pen colours */
+  .mast{position:relative;display:inline-flex;height:9px;border-radius:5px;overflow:hidden;background:var(--linel);min-width:110px;vertical-align:middle}
+  .mast i{height:100%}
+  .m1{background:#c0392b}.m2{background:#c9781f}.m3{background:#2a6f97}.m4{background:#2e7d4f}
+  .mkey{font-size:.7rem;color:var(--mut);margin-top:.55rem}
+  .mkey i{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 12px}
+  .mkey i:first-child{margin-left:0}
+  /* fading arrow on the topic grid */
+  .fade-dn{color:var(--warn);font-weight:700}
+  .fade-up{color:var(--good);font-weight:700}
+  /* misconception lines */
+  .mc{padding:.55rem 0;border-top:1px solid var(--linel);font-size:.88rem;line-height:1.5}
+  .mc:first-of-type{border-top:none}
+  .mc b{font-weight:600}
+  .mc .u{color:var(--mut);font-size:.76rem}
+  .mc .pick{color:#8a3a25;font-family:var(--read)}
+  .mc .n{float:right;color:var(--sec);font-variant-numeric:tabular-nums;font-size:.8rem;padding-left:10px}
   .acc{font-variant-numeric:tabular-nums}
   .tr-up{color:var(--good)} .tr-dn{color:var(--warn)} .tr-fl{color:var(--mut)}
 
@@ -105,7 +136,7 @@
   .foot b{color:var(--sec)}
 
   /* ---- the parents'-evening / report pack: one printable page per student ---- */
-  body.packmode .top,body.packmode .demo,body.packmode .wrap,body.packmode .foot{display:none}
+  body.packmode .top,body.packmode .demo,body.packmode .wrap,body.packmode .foot,body.packmode .tabs{display:none}
   .pack{max-width:840px;margin:26px auto 60px;background:#fff;border:1px solid var(--line);border-radius:12px;
     padding:2.2rem 2.4rem;box-shadow:0 18px 50px rgba(20,14,6,.10)}
   .pack .phead{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid var(--ink);padding-bottom:.7rem}
@@ -162,20 +193,16 @@
 </div>
 <div class="demo"><span>Synthetic demo class — school tier: classes &amp; teachers mirror the school's own directory via SSO, zero setup; the real pipeline reads the same sv_progress objects</span></div>
 
-<div class="wrap">
+<nav class="tabs" role="tablist" aria-label="Dashboard views">
+  <button role="tab" data-view="week" aria-selected="true">This week</button>
+  <button role="tab" data-view="topics" aria-selected="false">Topics</button>
+  <button role="tab" data-view="class" aria-selected="false">The class</button>
+</nav>
+
+<div class="wrap" id="view-week">
   <div class="col">
     <div class="card triage" id="triage">
       <h2>Needs your eyes <small>computed, no AI</small></h2>
-    </div>
-    <div class="card topics" id="topics">
-      <h2>What's sticking, by topic <small>recall accuracy across warm-ups, quizzes, shorts &amp; flashcards</small></h2>
-      <table><thead><tr><th>Unit</th><th>Recall</th><th></th><th>Evidence</th><th>Coverage</th></tr></thead>
-      <tbody id="topicrows"></tbody></table>
-    </div>
-    <div class="card roster" id="rosterc">
-      <h2>The class <small>click a student</small></h2>
-      <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
-      <tbody id="roster"></tbody></table>
     </div>
   </div>
   <div class="col">
@@ -184,6 +211,40 @@
       <div class="body" id="digestbody"></div>
       <div class="stamp" id="digeststamp"></div>
     </div>
+  </div>
+</div>
+
+<div class="wrap one" id="view-topics" hidden>
+  <div class="col">
+    <div class="card topics" id="topics">
+      <h2>What's sticking, by topic <small>recall accuracy across warm-ups, quizzes, shorts &amp; flashcards</small></h2>
+      <table><thead><tr><th>Unit</th><th>Recall</th><th></th><th>Trend</th><th>Mastery (flashcard boxes)</th><th>Evidence</th><th>Coverage</th></tr></thead>
+      <tbody id="topicrows"></tbody></table>
+      <div class="mkey"><i class="m1"></i>Emerging <i class="m2"></i>Developing <i class="m3"></i>Secure <i class="m4"></i>Mastered
+        &nbsp;·&nbsp; trend = this fortnight vs the one before</div>
+    </div>
+    <div class="tworow">
+      <div class="card" id="misconc">
+        <h2>Shared misconceptions <small>what wrong answers have in common</small></h2>
+        <div id="mcrows"></div>
+      </div>
+      <div class="card" id="missedc">
+        <h2>Most-missed lessons <small>across warm-ups &amp; quizzes, whole class</small></h2>
+        <div id="missrows"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-class" hidden>
+  <div class="col">
+    <div class="card roster" id="rosterc">
+      <h2>The class <small>click a student</small></h2>
+      <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
+      <tbody id="roster"></tbody></table>
+    </div>
+  </div>
+  <div class="col">
     <div class="card drill" id="drill">
       <h2 id="dname">Pick a student</h2>
       <div id="dbody" class="sub">Their week, weak spots, and practice answers with the AI marker's feedback land here.</div>
@@ -221,10 +282,28 @@ const LTITLES={ 'america-opportunity-inequality':['The Boom','Wall Street Boom &
 };
 const FIRSTNAMES='Amelia Oliver Ava Noah Isla Leo Freya Arthur Mia Oscar Grace Archie Sofia Theo Evie Finley Poppy Jude Alice Felix Ruby Louie Esme Albie Willow Ronnie Ivy Hugo'.split(' ');
 const SURNAMES='Khan Booth Ahmed Riley Clarke Osei Nowak Doyle Patel Grant Bibi Walsh Singh Moore Iqbal Fox Kaur Webb Ali Dunn Shah Cole Hart Reid Amin Page Rose Todd'.split(' ');
-const ARCH=[ {k:'steady',p:.74,days:.62,n:8},{k:'crammer',p:.66,days:.28,n:5},{k:'quiet',p:.62,days:.10,n:4},
-             {k:'struggling',p:.44,days:.5,n:5},{k:'flying',p:.88,days:.7,n:6} ];
+const ARCH=[ {k:'steady',p:.74,days:.62,n:6},{k:'crammer',p:.66,days:.28,n:5},{k:'quiet',p:.62,days:.10,n:4},
+             {k:'struggling',p:.44,days:.5,n:4},{k:'grafter',p:.47,days:.78,n:3},{k:'flying',p:.88,days:.7,n:6} ];
 /* one class-wide sore topic so the reteach signal is visible: Versailles terms */
 const SORE={unit:'conflict-tension-inter-war', dip:.30};
+/* one FADING topic: America was sticking, but recall on it decays over the
+   last 12 days — the dashboard's forgetting signal has something to find */
+const FADE={unit:'america-opportunity-inequality', from:12, mult:.72};
+/* canned distractor sets so wrong answers CLUSTER the way real ones do —
+   one dominant wrong idea per unit, exactly what the misconception panel
+   exists to surface (chosen text rides on each miss, like live capture) */
+const DISTRACT={
+ 'conflict-tension-inter-war':{q:'Which was a term of the Treaty of Versailles?',
+   right:'Germany’s army was limited to 100,000 men',
+   wrong:['Germany lost the Ruhr to France permanently','Austria joined with Germany','The Rhineland was given to Belgium'],bias:.62},
+ 'america-opportunity-inequality':{q:'What did the Wall Street Crash immediately cause?',
+   right:'A collapse in share prices and bank failures',
+   wrong:['The New Deal began that same year','Prohibition was repealed','Hoover nationalised the banks'],bias:.55},
+ 'britain-health-people':{q:'What did Jenner use to vaccinate against smallpox?',
+   right:'Cowpox matter','wrong':['Weakened smallpox itself','Penicillin','Carbolic acid'],bias:.58},
+ 'elizabethan-england':{q:'Who ran Elizabeth’s spy network?',
+   right:'Sir Francis Walsingham','wrong':['William Cecil','The Earl of Essex','Sir Walter Raleigh'],bias:.5},
+};
 
 function iso(d){ return d.toISOString().slice(0,10); }
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
@@ -257,13 +336,20 @@ function makeStudent(ix,arch){
         p.kc[key+'/'+Math.min(cursor.n,u.lessons)]={s:Math.max(0,sc),t:5,d:date}; }
     }
     /* warm-up — questions come only from units this student has studied,
-       and the log records per-unit attempts exactly like warmup.js does */
+       and the log records per-unit attempts exactly like warmup.js does.
+       Ability DECAYS on the fading unit in recent days, and each miss
+       carries the chosen distractor (clustered, like real wrong answers). */
     if(R()<.7){ const total=10; let ok=0; const misses=[], ua={};
       for(let q=0;q<total;q++){ const u=startedUnit();
-        const hit=R()<ability[u.slug];
+        let ab=ability[u.slug];
+        if(u.slug===FADE.unit && d<=FADE.from) ab*=FADE.mult;
+        const hit=R()<ab;
         const uk='history-aqa/'+u.slug; ua[uk]=ua[uk]||{a:0,m:0}; ua[uk].a++;
         if(hit) ok++; else { ua[uk].m++; const ln=1+Math.floor(R()*Math.min(8,u.lessons));
-          misses.push({sub:'history-aqa',unit:u.slug,n:ln,title:(LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln)}); } }
+          const ds=DISTRACT[u.slug];
+          const chose=ds ? (R()<ds.bias ? ds.wrong[0] : ds.wrong[1+Math.floor(R()*2)]) : '';
+          misses.push({sub:'history-aqa',unit:u.slug,n:ln,title:(LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln),
+            q:ds?ds.q:'',chose:chose,right:ds?ds.right:''}); } }
       p.warmlog[date]={correct:ok,total:total,misses:misses,units:ua}; }
     /* shorts checks */
     if(R()<.4){ const u=startedUnit();
@@ -274,6 +360,19 @@ function makeStudent(ix,arch){
         p.flashlog.push({d:date,unit:u.slug,ok:R()<ability[u.slug],
           q:((LTITLES[u.slug]||[])[ln-1]||('Lesson '+ln))}); } }
   }
+  /* Leitner flashcard boxes — the durability layer. Box level tracks
+     ability; the fading unit's cards have slipped back down. */
+  p.flashsr={cards:{},streak:Math.floor(R()*9)};
+  UNITS.slice(0,cursor.u+1).forEach(u=>{
+    const ncards=6+Math.floor(R()*10);
+    for(let c=0;c<ncards;c++){
+      let ab=ability[u.slug];
+      if(u.slug===FADE.unit) ab*=.75;   /* decay shows as regressed boxes */
+      const roll=ab+(R()-.5)*.5;
+      const box=roll>.85?5:roll>.7?4:roll>.5?3:roll>.32?2:1;
+      p.flashsr.cards[u.slug+':q'+c]={box:box,attempts:1+Math.floor(R()*6),correct:Math.floor(R()*4)};
+    } });
+
   /* one practice answer for some students */
   if(R()<.5){ const u=UNITS[Math.floor(R()*UNITS.length)]; const good=ability[u.slug]>.6;
     p.practice.push({d:iso(daysAgo(Math.floor(R()*6))),k:'history-aqa/'+u.slug+'/3',m:8,
@@ -318,18 +417,66 @@ function studentStats(s){
   const acc=ev.length?ev.filter(e=>e.ok).length/ev.length:null;
   const spark=[]; for(let d=13;d>=0;d--) spark.push(days[iso(daysAgo(d))]?1:0);
   let flag=null;
+  const active14=spark.reduce((a,b)=>a+b,0);
   if(lastGap>=5) flag='quiet';
   else if(accNow!==null&&accPrev!==null&&accNow<accPrev-.12) flag='slip';
-  else if(accNow!==null&&accNow>=.85&&spark.reduce((a,b)=>a+b,0)>=8) flag='fly';
+  /* the re-reader: revising most days, recall flat and low — the student
+     whose PROBLEM is technique, not effort. The intervention is a
+     how-to-revise conversation, not "do more". */
+  else if(acc!==null&&acc<.55&&active14>=8) flag='grind';
+  else if(accNow!==null&&accNow>=.85&&active14>=8) flag='fly';
   return {ev,activeDays,lastGap,lessons,acc,accNow,accPrev,spark,flag};
 }
 const STATS=STUDENTS.map(s=>({s,st:studentStats(s)}));
 const UNITAGG=UNITS.map(u=>{
-  let ok=0,no=0,who={};
-  STATS.forEach(({s,st})=>st.ev.forEach(e=>{ if(e.unit===u.slug){ e.ok?ok++:no++; if(!e.ok)(who[s.name]=who[s.name]||0)? who[s.name]++ : who[s.name]=1; } }));
+  let ok=0,no=0,who={},okN=0,noN=0,okP=0,noP=0;
+  const d14=iso(daysAgo(13)), d28=iso(daysAgo(27));
+  STATS.forEach(({s,st})=>st.ev.forEach(e=>{ if(e.unit===u.slug){
+    e.ok?ok++:no++; if(!e.ok)(who[s.name]=who[s.name]||0)? who[s.name]++ : who[s.name]=1;
+    if(e.d>=d14){ e.ok?okN++:noN++; } else if(e.d>=d28){ e.ok?okP++:noP++; } } }));
   const covered=STATS.filter(({s})=>(s.p.done['history-aqa/'+u.slug]||[]).length>0).length;
-  return {u,ok,no,att:ok+no,acc:(ok+no)?ok/(ok+no):null,covered,who};
+  const accNow=(okN+noN)>=25?okN/(okN+noN):null, accPrev=(okP+noP)>=25?okP/(okP+noP):null;
+  return {u,ok,no,att:ok+no,acc:(ok+no)?ok/(ok+no):null,covered,who,accNow,accPrev,
+          fading:accNow!==null&&accPrev!==null&&accNow<accPrev-.08,
+          rising:accNow!==null&&accPrev!==null&&accNow>accPrev+.08};
 });
+/* mastery distribution per unit: every student's Leitner boxes, pooled.
+   Thresholds mirror svFlashLevel in dash-data.js. */
+const MASTERY=UNITS.map(u=>{
+  const dist={e:0,d:0,s:0,m:0};
+  STUDENTS.forEach(s=>{ const cards=(s.p.flashsr||{}).cards||{};
+    Object.keys(cards).forEach(k=>{ if(k.indexOf(u.slug+':')!==0) return;
+      const b=cards[k].box||1;
+      dist[b>=5?'m':b>=4?'s':b>=2?'d':'e']++; }); });
+  return {u,dist,total:dist.e+dist.d+dist.s+dist.m};
+});
+/* shared misconceptions: cluster wrong answers by WHAT WAS CHOSEN.
+   Real capture puts chose/right on warm-up + quiz misses; a named
+   misconception stream (sv-misconception-log) joins in for practice
+   subjects — same shape, tag instead of chose. */
+const MISCON=(function(){
+  /* one line per QUESTION: total wrong answers + the dominant wrong choice —
+     "352 of 585 wrong answers chose X" is the teachable unit, not each variant */
+  const byQ={};
+  STATS.forEach(({s})=>{
+    Object.keys(s.p.warmlog||{}).forEach(d=>{ (s.p.warmlog[d].misses||[]).forEach(m=>{
+      if(!m.chose) return;
+      const k=m.unit+'|'+(m.q||'');
+      const e=(byQ[k]=byQ[k]||{unit:m.unit,q:m.q,right:m.right,total:0,who:{},choices:{}});
+      e.total++; e.who[s.name]=1; e.choices[m.chose]=(e.choices[m.chose]||0)+1; }); });
+  });
+  return Object.values(byQ).map(e=>{
+    const top=Object.entries(e.choices).sort((a,b)=>b[1]-a[1])[0];
+    return {unit:e.unit,q:e.q,right:e.right,total:e.total,students:Object.keys(e.who).length,chose:top[0],n:top[1]};
+  }).filter(e=>e.total>=8).sort((a,b)=>b.total-a.total).slice(0,8);
+})();
+/* most-missed lessons, whole class */
+const MISSED=(function(){
+  const by={};
+  STATS.forEach(({st})=>st.ev.filter(e=>!e.ok&&e.unit&&e.title).forEach(e=>{
+    const k=e.unit+'|'+e.title; (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; }));
+  return Object.values(by).sort((a,b)=>b.n-a.n).slice(0,7);
+})();
 
 /* ---------------- render ---------------------------------------------------- */
 const $=s=>document.querySelector(s);
@@ -340,28 +487,77 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
 (function(){
   const quiet=STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name);
   const slip=STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name);
+  const grind=STATS.filter(x=>x.st.flag==='grind').map(x=>x.s.name);
   const fly=STATS.filter(x=>x.st.flag==='fly').map(x=>x.s.name);
   const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
   const missed=worst?Object.keys(worst.who).length:0;
+  const fading=UNITAGG.filter(x=>x.fading&&x!==worst);
+  const topmc=MISCON[0];
   let h='';
   if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+'</b> is the class’s weakest recall — '+pct(worst.acc)+' across '+worst.att+' answers, misses from '+missed+' students. <b>Reteach candidate.</b></div></div>';
+  if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>One shared wrong idea:</b> on “'+esc(topmc.q)+'”, '+topmc.n+' of '+topmc.total+' wrong answers ('+topmc.students+' students) chose <b>“'+esc(topmc.chose)+'”</b>. One sentence on Monday fixes this.</div></div>';
+  fading.forEach(x=>{ h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Fading:</b> '+esc(x.u.name)+' was at '+pct(x.accPrev)+' recall a fortnight ago — '+pct(x.accNow)+' now. Worth a warm-up before it slips further.</div></div>'; });
   if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' gone quiet</b> (5+ days): <span class="names">'+esc(quiet.join(', '))+'</span></div></div>';
   if(slip.length) h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Accuracy slipping:</b> <span class="names">'+esc(slip.join(', '))+'</span> — down 12%+ on last week</div></div>';
+  if(grind.length) h+='<div class="tri"><span class="dot" style="background:#5b4370"></span><div><b>Revising most days, but it isn’t sticking:</b> <span class="names">'+esc(grind.join(', '))+'</span> — effort isn’t the problem; technique is. Worth a five-minute how-to-revise conversation.</div></div>';
   if(fly.length) h+='<div class="tri"><span class="dot" style="background:var(--good)"></span><div><b>Flying:</b> <span class="names">'+esc(fly.join(', '))+'</span> — high accuracy, revising most days</div></div>';
   $('#triage').insertAdjacentHTML('beforeend',h);
 })();
 
-/* topic grid */
+/* topic grid — recall + trend + mastery distribution */
 (function(){
   const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
   $('#topicrows').innerHTML=UNITAGG.map(x=>{
     const cls=x.acc===null?'':x.acc<.55?'low':x.acc<.72?'mid':'';
+    const tr=x.fading?'<span class="fade-dn" title="'+pct(x.accPrev)+' → '+pct(x.accNow)+'">▼ fading</span>'
+           :x.rising?'<span class="fade-up" title="'+pct(x.accPrev)+' → '+pct(x.accNow)+'">▲</span>'
+           :(x.accNow!==null&&x.accPrev!==null)?'<span class="att">steady</span>':'<span class="att">—</span>';
+    const ms=MASTERY.find(m=>m.u.slug===x.u.slug);
+    let mbar='<span class="att">no cards yet</span>';
+    if(ms&&ms.total){ const p=k=>Math.round(ms.dist[k]/ms.total*100);
+      mbar='<span class="mast" title="Emerging '+p('e')+'% · Developing '+p('d')+'% · Secure '+p('s')+'% · Mastered '+p('m')+'%">'
+        +'<i class="m1" style="width:'+p('e')+'%"></i><i class="m2" style="width:'+p('d')+'%"></i>'
+        +'<i class="m3" style="width:'+p('s')+'%"></i><i class="m4" style="width:'+p('m')+'%"></i></span>'; }
     return '<tr'+(x===worst?' class="worst"':'')+'><td class="u">'+esc(x.u.name)+'</td>'
       +'<td><span class="pct">'+pct(x.acc)+'</span></td>'
       +'<td><span class="bar '+cls+'"><i style="width:'+(x.acc?Math.round(x.acc*100):0)+'%"></i></span></td>'
+      +'<td>'+tr+'</td>'
+      +'<td>'+mbar+'</td>'
       +'<td class="att">'+x.att+' answers</td>'
       +'<td class="att">'+x.covered+'/28 started</td></tr>';
   }).join('');
+})();
+
+/* shared misconceptions + most-missed lessons */
+(function(){
+  $('#mcrows').innerHTML=MISCON.length?MISCON.map(m=>{
+    const un=UNITS.find(u=>u.slug===m.unit);
+    return '<div class="mc"><span class="n">'+m.n+' of '+m.total+' wrong · '+m.students+' students</span>'
+      +'<b>'+esc(m.q)+'</b><br>most chose <span class="pick">“'+esc(m.chose)+'”</span> — answer: '+esc(m.right)
+      +'<br><span class="u">'+esc(un?un.name:m.unit)+'</span></div>';
+  }).join('')
+  :'<div class="mc att">Nothing clustered yet — this fills as warm-up and quiz answers accumulate. For maths and science classes, named misconceptions ("adds the denominators") from guided practice appear here too.</div>';
+  $('#missrows').innerHTML=MISSED.map(m=>{
+    const un=UNITS.find(u=>u.slug===m.unit);
+    return '<div class="mc"><span class="n">× '+m.n+'</span><b>'+esc(m.title)+'</b><br><span class="u">'+esc(un?un.name:m.unit)+'</span></div>';
+  }).join('');
+})();
+
+/* tab rail */
+(function(){
+  const views={week:'view-week',topics:'view-topics','class':'view-class'};
+  document.querySelectorAll('.tabs button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b?'true':'false'));
+      Object.keys(views).forEach(k=>{ document.getElementById(views[k]).hidden = k!==b.dataset.view; });
+      try{ sessionStorage.setItem('sv-teach-tab',b.dataset.view); }catch(e){}
+    });
+  });
+  let t=null; try{ t=sessionStorage.getItem('sv-teach-tab'); }catch(e){}
+  const q=new URLSearchParams(location.search);
+  if(q.get('student')!==null) t='class';
+  if(q.get('tab')) t=q.get('tab');
+  if(t&&views[t]) document.querySelector('.tabs button[data-view="'+t+'"]').click();
 })();
 
 /* roster */
@@ -370,7 +566,7 @@ function sparkSvg(sp){
     '<rect class="'+(v?'hot':'')+'" x="'+(i*7)+'" y="'+(v?3:12)+'" width="5" height="'+(v?12:3)+'" rx="1"></rect>').join('')+'</svg>';
 }
 const order=[...STATS].sort((a,b)=>{
-  const w=x=>x.st.flag==='quiet'?0:x.st.flag==='slip'?1:x.st.flag==='fly'?3:2;
+  const w=x=>x.st.flag==='quiet'?0:x.st.flag==='slip'?1:x.st.flag==='grind'?2:x.st.flag==='fly'?4:3;
   return w(a)-w(b)||a.s.name.localeCompare(b.s.name);
 });
 $('#roster').innerHTML=order.map((x,i)=>{
@@ -378,7 +574,9 @@ $('#roster').innerHTML=order.map((x,i)=>{
   const trend=st.accNow===null||st.accPrev===null?'<span class="tr-fl">·</span>'
     :st.accNow>st.accPrev+.04?'<span class="tr-up">▲</span>'
     :st.accNow<st.accPrev-.04?'<span class="tr-dn">▼</span>':'<span class="tr-fl">—</span>';
-  return '<tr class="r" data-i="'+STATS.indexOf(x)+'"><td class="nm">'+esc(s.name)+(st.flag?' <span class="flag '+(st.flag==='quiet'?'quiet':st.flag==='slip'?'slip':'fly')+'">'+(st.flag==='quiet'?'quiet':st.flag==='slip'?'slipping':'flying')+'</span>':'')+'</td>'
+  const fcls={quiet:'quiet',slip:'slip',grind:'grind',fly:'fly'}[st.flag];
+  const flab={quiet:'quiet',slip:'slipping',grind:'not sticking',fly:'flying'}[st.flag];
+  return '<tr class="r" data-i="'+STATS.indexOf(x)+'"><td class="nm">'+esc(s.name)+(st.flag?' <span class="flag '+fcls+'">'+flab+'</span>':'')+'</td>'
     +'<td>'+sparkSvg(st.spark)+'</td><td>'+st.lessons+'</td>'
     +'<td class="acc">'+pct(st.acc)+' '+trend+'</td><td></td>'
     +'<td class="att">'+(st.lastGap===0?'today':st.lastGap===1?'yesterday':st.lastGap>27?'—':st.lastGap+'d ago')+'</td></tr>';
@@ -517,7 +715,10 @@ if(new URLSearchParams(location.search).get('agg')){
     week:{active:STATS.filter(x=>x.st.spark.slice(7).some(v=>v)).length,
       quiet:STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name),
       slipping:STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name),
+      revisingLotsButNotSticking:STATS.filter(x=>x.st.flag==='grind').map(x=>x.s.name),
       flying:STATS.filter(x=>x.st.flag==='fly').map(x=>x.s.name)},
+    sharedMisconceptions:MISCON.slice(0,4).map(m=>({question:m.q,mostChose:m.chose,answer:m.right,wrongAnswers:m.n,students:m.students})),
+    fadingTopics:UNITAGG.filter(x=>x.fading).map(x=>({name:x.u.name,recallPrev:Math.round(x.accPrev*100),recallNow:Math.round(x.accNow*100)})),
     units:UNITAGG.map(x=>({name:x.u.name,recall:x.acc===null?null:Math.round(x.acc*100),answers:x.att,started:x.covered})),
     topMisses:(function(){ const by={}; STATS.forEach(({st})=>st.ev.filter(e=>!e.ok&&e.title).forEach(e=>{
       const k=e.title; by[k]=(by[k]||0)+1; }));

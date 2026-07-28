@@ -108,6 +108,17 @@ shorts check answers (`sv-shorts-checks`), flashcard self-marks
 Per-student pack: `?pack=N` — ONE A4 page (print-to-pdf verified), parent-
 readable labels, AI draft via `scripts/_teach_pack.py`, teacher-triggered.
 
+**Reframed into three tabs (28 Jul):** This week (triage + digest) · Topics
+(recall grid with trend + Leitner mastery bars, shared-misconception panel,
+most-missed lessons) · The class (roster + drill-in). New surfaces: fading
+topics (fortnight-on-fortnight recall drop), "not sticking" flag (revising
+most days, recall low+flat → technique conversation), misconception lines
+("352 of 585 wrong answers chose X"). Powered by new student-side capture
+(28 Jul, all account-synced): chosen distractor on every warm-up/quiz/shorts
+miss, named misconception diagnoses from guided practice
+(`sv-misconception-log`), Leitner boxes (`sv-flashcard-progress`) now in
+sync.js. QA: `?tab=week|topics|class`.
+
 **DECIDED (14 Jul, revised 27 Jul): the teacher dashboard is a PAID feature
 and a headline reason schools pay. Free tier = student experience only.**
 It ships on BOTH paid ramps (the Seneca land-and-expand shape):
