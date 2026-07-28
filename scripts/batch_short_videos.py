@@ -503,6 +503,19 @@ def _download_and_store(sb, r2, e, nb_id, art_id, idx, topic):
             time.sleep(5)
         if not ok:
             print(f"  x L{e['lesson_number']:02d} [{topic}]: empty download after retries"); return False
+        # chop the NotebookLM/Google endcard before upload (lib/trim_endcard).
+        # If detection or verification fails, ship the original — never lose a
+        # short over a missing trim; the back-catalogue script can catch it up.
+        try:
+            from lib.trim_endcard import trim as _trim_endcard
+            tpath = path[:-4] + "_trim.mp4"
+            trep = _trim_endcard(path, tpath)
+            if trep["ok"]:
+                os.replace(tpath, path)
+            else:
+                print(f"    (endcard trim skipped: {trep['why']})")
+        except Exception as tex:
+            print(f"    (endcard trim skipped: {str(tex)[:80]})")
         key = f"shorts/{e['subject_slug']}/{e['unit_slug']}/L{e['lesson_number']:02d}_{idx + 1}.mp4"
         with open(path, "rb") as f:
             r2.put_object(Bucket=VIDEO_BUCKET, Key=key, Body=f.read(), ContentType="video/mp4")
