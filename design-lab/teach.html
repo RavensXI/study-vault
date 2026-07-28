@@ -625,7 +625,10 @@ const MISCON=(function(){
     return {unit:e.unit,q:e.q,right:e.right,total:e.total,
             names:Object.keys(e.who),students:Object.keys(e.who).length,
             chose:top[0],n:top[1],choices:e.choices};
-  }).filter(e=>e.total>=8).sort((a,b)=>b.total-a.total).slice(0,8);
+  /* a MISCONCEPTION needs the wrong answers to AGREE (dominant choice
+     >= 40%); scattered wrong answers are difficulty, not a shared wrong
+     idea — they surface in "Answered wrong most often" instead */
+  }).filter(e=>e.total>=8&&e.n/e.total>=.4).sort((a,b)=>b.total-a.total).slice(0,8);
 })();
 /* weekly recall series per unit (oldest week first) for the topic curves */
 function unitSeries(slug){
@@ -922,12 +925,20 @@ function drill(ix){
   st.ev.filter(e=>!e.ok&&e.chose).forEach(e=>{ const k=e.unit+'|'+(e.q||'');
     const r=(bymc[k]=bymc[k]||{unit:e.unit,q:e.q,right:e.right,n:0,choices:{}});
     r.n++; r.choices[e.chose]=(r.choices[e.chose]||0)+1; });
-  Object.values(bymc).map(r=>{ const top=Object.entries(r.choices).sort((a,b)=>b[1]-a[1])[0];
-      return Object.assign(r,{chose:top[0],cn:top[1]}); })
-    .filter(r=>r.cn>=3&&r.cn/r.n>=.5).sort((a,b)=>b.cn-a.cn).slice(0,2)
-    .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit);
-      lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> — '+r.cn+' of '+r.n+' wrong tries at the '
-        +esc(un?un.name:r.unit)+' question.'+(r.right?' The answer: '+esc(r.right)+'.':'')]); });
+  /* two DIFFERENT findings hide in repeated misses: the same wrong answer
+     every time = a settled wrong idea (mislearned); different wrong answers
+     each time = guessing (not learned at all). Say which one it is. */
+  Object.values(bymc).map(r=>{ const ents=Object.entries(r.choices).sort((a,b)=>b[1]-a[1]);
+      return Object.assign(r,{chose:ents[0][0],cn:ents[0][1],kinds:ents.length}); })
+    .filter(r=>r.n>=3).sort((a,b)=>b.n-a.n).slice(0,3)
+    .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit), uname=esc(un?un.name:r.unit);
+      if(r.cn/r.n>=.6)
+        lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> — '+r.cn+' of '+r.n+' wrong tries at the '
+          +uname+' question: one settled wrong idea.'+(r.right?' The answer: '+esc(r.right)+'.':'')]);
+      else if(r.kinds>=2)
+        lines.push(['var(--gold)','<b>No steady answer to the '+uname+' question</b> — wrong '+r.n+' times in '
+          +r.kinds+' different ways. Reads as not yet known, rather than mislearned.'+(r.right?' The answer: '+esc(r.right)+'.':'')]);
+    });
   if(PACE.medTotal-st.lessons>=8) lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').']);
   const cards=Object.values((p.flashsr||{}).cards||{});
   if(cards.length>=8){ const em=cards.filter(c=>(c.box||1)<=1).length/cards.length, sec=cards.filter(c=>(c.box||1)>=4).length/cards.length;
