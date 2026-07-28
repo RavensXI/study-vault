@@ -931,13 +931,15 @@ function drill(ix){
   Object.values(bymc).map(r=>{ const ents=Object.entries(r.choices).sort((a,b)=>b[1]-a[1]);
       return Object.assign(r,{chose:ents[0][0],cn:ents[0][1],kinds:ents.length}); })
     .filter(r=>r.n>=3).sort((a,b)=>b.n-a.n).slice(0,3)
-    .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit), uname=esc(un?un.name:r.unit);
+    .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit);
+      /* the QUESTION is the finding — lead with it, no interpretation lecture */
+      const qtxt=r.q?'“'+esc(r.q)+'”':'the '+esc(un?un.name:r.unit)+' question';
       if(r.cn/r.n>=.6)
-        lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> — '+r.cn+' of '+r.n+' wrong tries at the '
-          +uname+' question: one settled wrong idea.'+(r.right?' The answer: '+esc(r.right)+'.':'')]);
+        lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> to '+qtxt+' — '+r.cn+' of '+r.n+' wrong tries.'
+          +(r.right?' The answer: '+esc(r.right)+'.':'')]);
       else if(r.kinds>=2)
-        lines.push(['var(--gold)','<b>No steady answer to the '+uname+' question</b> — wrong '+r.n+' times in '
-          +r.kinds+' different ways. Reads as not yet known, rather than mislearned.'+(r.right?' The answer: '+esc(r.right)+'.':'')]);
+        lines.push(['var(--gold)','<b>Doesn’t know '+qtxt+'</b> — wrong '+r.n+' times, '+r.kinds+' different answers.'
+          +(r.right?' The answer: '+esc(r.right)+'.':'')]);
     });
   if(PACE.medTotal-st.lessons>=8) lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').']);
   const cards=Object.values((p.flashsr||{}).cards||{});
