@@ -16,31 +16,44 @@
     --head:'Schibsted Grotesk',system-ui,sans-serif;--read:'Literata',Georgia,serif;--hand:'Caveat',cursive}
   *{box-sizing:border-box}
   html{background:var(--paper)}
-  body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper)}
+  html,body{height:100%}
+  /* the dashboard is an APP: one screen, no page scroll. Each tab's view
+     fills the viewport; long content scrolls INSIDE its card, never the page. */
+  body{margin:0;font-family:var(--head);color:var(--ink);background:var(--paper);
+    display:flex;flex-direction:column;overflow:hidden}
+  body.packmode{display:block;overflow:auto}
   a{color:inherit}
-  .top{max-width:1240px;margin:0 auto;padding:26px 16px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  .top{max-width:1400px;width:100%;margin:0 auto;padding:20px 18px 0;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;flex:none}
   .brand{font-family:'Young Serif',serif;font-size:1.18rem;color:#1d1c1a}
   .brand img{height:.30em;margin-left:1px;vertical-align:baseline}
   .who{font-family:var(--hand);font-size:1.25rem;color:var(--mut)}
   .classpick{margin-left:auto;font-size:.85rem;color:var(--sec);background:var(--card);border:1px solid var(--line);
     border-radius:10px;padding:.5rem .9rem}
   .classpick b{color:var(--ink)}
-  .demo{max-width:1240px;margin:8px auto 0;padding:0 16px;font-size:.7rem;font-weight:600;
-    letter-spacing:.09em;text-transform:uppercase;color:#a89a7a}
+  .demo{max-width:1400px;width:100%;margin:6px auto 0;padding:0 18px;font-size:.7rem;font-weight:600;
+    letter-spacing:.09em;text-transform:uppercase;color:#a89a7a;flex:none}
+  .demo a{color:#8a7a54;text-decoration:none}
+  .demo a:hover{color:var(--ink);text-decoration:underline}
   /* the tab rail: quiet text, ink underline on the active view — no pills */
-  .tabs{max-width:1240px;margin:22px auto 0;padding:0 16px;display:flex;gap:30px;border-bottom:1px solid var(--line)}
+  .tabs{max-width:1400px;width:100%;margin:14px auto 0;padding:0 18px;display:flex;gap:28px;border-bottom:1px solid var(--line);flex:none}
   .tabs button{font-family:var(--head);font-weight:600;font-size:1rem;color:var(--mut);background:none;border:none;
     padding:.6rem 2px .7rem;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;letter-spacing:.01em}
   .tabs button:hover{color:var(--ink)}
   .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
   .tabs button:focus-visible{outline:2px solid var(--anchor);outline-offset:3px}
 
-  .wrap{max-width:1240px;margin:14px auto 60px;padding:0 16px;display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:16px}
-  .wrap.one{grid-template-columns:1fr}
+  /* each view = a symmetric grid that fills the remaining viewport exactly */
+  .wrap{flex:1;min-height:0;max-width:1400px;width:100%;margin:16px auto 18px;padding:0 18px;
+    display:grid;gap:16px;grid-template-columns:1fr 1fr}
   .wrap[hidden]{display:none}
-  @media (max-width:1020px){ .wrap{grid-template-columns:1fr} }
-  .tworow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media (max-width:1020px){ .tworow{grid-template-columns:1fr} }
+  #view-topics,#view-pace{grid-template-columns:1fr}
+  #view-class{grid-template-columns:1.2fr .8fr}
+  .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:16px}
+  .col>.card{flex:1;min-height:0}
+  /* cards are flex columns; the .scroll region takes the slack and scrolls
+     internally when content is longer than the screen */
+  .card{display:flex;flex-direction:column}
+  .card .scroll{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}
   .col{min-width:0;display:flex;flex-direction:column;gap:18px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1.45rem 1.6rem 1.35rem;
     box-shadow:0 1px 2px rgba(45,35,18,.04), 0 14px 34px -24px rgba(45,35,18,.25)}
@@ -107,10 +120,13 @@
   .mkey i{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 12px}
   .mkey i:first-child{margin-left:0}
 
-  /* ---- topic cards: recall curve + card-mastery waffle, per unit ---- */
-  .unitgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:.5rem}
-  @media (max-width:900px){ .unitgrid{grid-template-columns:1fr} }
-  .ucard{border:1px solid var(--linel);border-radius:10px;padding:.95rem 1.05rem .85rem;background:#fffefb}
+  /* ---- topic cards: recall curve + card-mastery waffle, per unit.
+     The 2x2 grid fills the whole view; each card flexes to its cell. ---- */
+  .unitgrid{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:14px;margin-top:.2rem}
+  .ucard{border:1px solid var(--linel);border-radius:12px;padding:.95rem 1.15rem .85rem;background:#fffefb;
+    min-height:0;display:flex;flex-direction:column}
+  .ucard .curvebox{flex:1;min-height:0;display:flex;align-items:center}
+  .ucard .curvebox svg{width:100%;height:100%;max-height:190px}
   .ucard h3{font-family:var(--read);font-size:1.04rem;font-weight:600;margin:0}
   .ucard .re{font-size:.7rem;color:var(--warn);font-weight:700;letter-spacing:.03em}
   .ucard .toprow{display:flex;align-items:baseline;gap:10px;margin:.15rem 0 .3rem}
@@ -119,7 +135,7 @@
   .ucard .ann.up{color:var(--good)}
   .ucard svg{display:block;width:100%;height:auto}
   .ucard .fn{font-size:.73rem;color:var(--mut);margin-top:.55rem}
-  .wf{display:grid;grid-template-columns:repeat(25,1fr);gap:2px;margin-top:.6rem}
+  .wf{display:grid;grid-template-columns:repeat(50,1fr);gap:2px;margin-top:.6rem;flex:none}
   .wf i{aspect-ratio:1;border-radius:1.5px;background:var(--linel)}
   .wf .wlab{grid-column:1/-1;font-size:.7rem;color:var(--mut);margin-top:2px}
 
@@ -150,7 +166,8 @@
   .behind .names{color:var(--sec)}
 
   /* ---- the quadrant: effort x retention, one dot per student ---- */
-  .quad svg{display:block;width:100%;height:auto}
+  #quadsvg{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .quad svg{width:100%;height:100%}
   .quad text{font-family:var(--head)}
   .quad .axis{font-size:11px;fill:var(--mut)}
   .quad .qlab{font-family:var(--hand);font-size:17px;fill:#a89e88}
@@ -161,6 +178,7 @@
   .tr-up{color:var(--good)} .tr-dn{color:var(--warn)} .tr-fl{color:var(--mut)}
 
   /* drill-in */
+  #dbody{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;padding-right:4px}
   .drill .sub{color:var(--sec);font-size:.85rem;margin:-.4rem 0 .8rem}
   .kv{display:flex;gap:1.8rem;flex-wrap:wrap;margin-bottom:1rem}
   .kv div b{display:block;font-size:1.55rem;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
@@ -269,30 +287,36 @@
   <span class="who">the teacher's side of the desk</span>
   <span class="classpick">Class: <b>10H · History (AQA)</b> · 28 students · this week</span>
 </div>
-<div class="demo">Synthetic demo class · the real pipeline reads the same progress objects students already sync</div>
+<div class="demo">Synthetic demo class · the real pipeline reads the same progress objects students already sync
+  · <a href="#" onclick="document.getElementById('howmodal').hidden=false;return false">how this is calculated</a></div>
 
 <nav class="tabs" role="tablist" aria-label="Dashboard views">
   <button role="tab" data-view="week" aria-selected="true">This week</button>
   <button role="tab" data-view="topics" aria-selected="false">Topics</button>
+  <button role="tab" data-view="miscon" aria-selected="false">Misconceptions</button>
+  <button role="tab" data-view="pace" aria-selected="false">Pace</button>
   <button role="tab" data-view="class" aria-selected="false">The class</button>
 </nav>
 
 <div class="wrap" id="view-week">
   <div class="col">
-    <div class="card triage" id="triage">
+    <div class="card triage">
       <h2>Needs your eyes <small>computed, no AI</small></h2>
+      <div class="scroll" id="triagebody"></div>
     </div>
   </div>
   <div class="col">
     <div class="card digest">
       <h2>This week, in brief <small>AI · written weekly, not per view</small></h2>
-      <div class="body" id="digestbody"></div>
-      <div class="stamp" id="digeststamp"></div>
+      <div class="scroll">
+        <div class="body" id="digestbody"></div>
+        <div class="stamp" id="digeststamp"></div>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="wrap one" id="view-topics" hidden>
+<div class="wrap" id="view-topics" hidden>
   <div class="col">
     <div class="card topics" id="topics">
       <h2>What's sticking, by topic <small>the line = recall accuracy, week by week · the squares = flashcards</small></h2>
@@ -301,19 +325,29 @@
         coloured by how well its owner knows that card right now:
         <i class="m1"></i>Emerging <i class="m2"></i>Developing <i class="m3"></i>Secure <i class="m4"></i>Mastered</div>
     </div>
-    <div class="tworow">
-      <div class="card" id="misconc">
-        <h2>Misconceptions <small>much of the class is choosing the same wrong answer</small></h2>
-        <div id="mcrows"></div>
-      </div>
-      <div class="card" id="missedc">
-        <h2>Answered wrong most often <small>the lessons these questions come from</small></h2>
-        <div id="missrows"></div>
-      </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-miscon" hidden>
+  <div class="col">
+    <div class="card" id="misconc">
+      <h2>Misconceptions <small>much of the class is choosing the same wrong answer</small></h2>
+      <div class="scroll" id="mcrows"></div>
     </div>
+  </div>
+  <div class="col">
+    <div class="card" id="missedc">
+      <h2>Answered wrong most often <small>the lessons these questions come from</small></h2>
+      <div class="scroll" id="missrows"></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="view-pace" hidden>
+  <div class="col">
     <div class="card" id="pacec">
       <h2>Where the class is up to <small>lessons finished, inferred pace — and who has fallen behind the group</small></h2>
-      <div id="pacerows"></div>
+      <div class="scroll" id="pacerows"></div>
     </div>
   </div>
 </div>
@@ -321,20 +355,43 @@
 <div class="wrap" id="view-class" hidden>
   <div class="col">
     <div class="card quad" id="quadc">
-      <h2>Effort &times; retention <small>last fortnight · click a student</small></h2>
+      <h2>Effort &times; retention <small>last fortnight · click a dot to open a student</small></h2>
       <div id="quadsvg"></div>
-    </div>
-    <div class="card roster" id="rosterc">
-      <h2>The class <small>click a student</small></h2>
-      <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
-      <tbody id="roster"></tbody></table>
+      <div class="btnrow" style="margin-top:.8rem"><button onclick="document.getElementById('regmodal').hidden=false">Open the register →</button></div>
     </div>
   </div>
   <div class="col">
     <div class="card drill" id="drill">
       <h2 id="dname">Pick a student</h2>
-      <div id="dbody" class="sub">Their week, weak spots, and practice answers with the AI marker's feedback land here.</div>
+      <div id="dbody" class="sub">Click a dot on the chart — or open the register. Their findings, evidence and marked practice answers land here.</div>
     </div>
+  </div>
+</div>
+
+<div class="pmodal" id="regmodal" aria-modal="true" role="dialog" aria-label="The register" hidden>
+  <div class="sheet" style="max-width:900px">
+    <button class="x" onclick="document.getElementById('regmodal').hidden=true" aria-label="Close">&times;</button>
+    <h2>The register</h2>
+    <div class="sub">Every student, sorted needs-first · click a row to open their drill-in</div>
+    <div class="roster">
+      <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
+      <tbody id="roster"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="pmodal" id="howmodal" aria-modal="true" role="dialog" aria-label="How this is calculated" hidden>
+  <div class="sheet" style="max-width:640px">
+    <button class="x" onclick="document.getElementById('howmodal').hidden=true" aria-label="Close">&times;</button>
+    <h2>How this is calculated</h2>
+    <div class="sub"></div>
+    <p style="font-size:.9rem;line-height:1.65;color:var(--sec)">Every number here is aggregated from retrieval-practice
+    evidence students already generate while revising — warm-up answers, lesson quiz scores, shorts
+    recall checks, flashcard self-marks — each one tied to a lesson and unit. Recall accuracy is a
+    <b>retention signal, not an ability judgement</b>: low numbers mean "this hasn't stuck yet", and clusters across the
+    class are reteach signals. The only AI on the page is the weekly brief (one small-model call per
+    class per week, ≈1p) and the stored practice-marking feedback, which was already generated when
+    each student pressed "mark" — nothing reasons per student per page-view.</p>
   </div>
 </div>
 
@@ -345,16 +402,6 @@
     <div class="sub" id="pmsub"></div>
     <div id="pmbody"></div>
   </div>
-</div>
-
-<div class="foot">
-  <b>How this is calculated.</b> Every number on this page is aggregated from retrieval-practice
-  evidence students already generate while revising — warm-up answers, lesson quiz scores, shorts
-  recall checks — each one tied to a lesson and unit. Recall accuracy is a <b>retention signal,
-  not an ability judgement</b>: low numbers mean "this hasn't stuck yet", and clusters across the
-  class are reteach signals. The only AI on the page is the weekly brief (one small-model call per
-  class per week, ≈1p) and the stored practice-marking feedback, which was already generated when
-  each student pressed "mark" — nothing reasons per student per page-view.
 </div>
 
 <script src="teach-digest.js"></script>
@@ -648,15 +695,15 @@ function goto(tab,sel,ix){
   const ev=(tab,sel)=>' <a class="evlink" href="#" onclick="return goto(\''+tab+'\',\''+sel+'\')">evidence →</a>';
   let h='';
   if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+' hasn’t stuck</b> — '+pct(worst.acc)+' recall across '+worst.att+' answers from '+missed+' students, and it’s the class’s most-practised unit.'+ev('topics','#unitgrid')+'</div></div>';
-  if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>Most wrong answers share one idea:</b> “'+esc(topmc.chose)+'” — '+Math.round(topmc.n/topmc.total*100)+'% of the '+topmc.total+' wrong answers on the '+esc((UNITS.find(u=>u.slug===topmc.unit)||{}).name||topmc.unit)+' question, from '+topmc.students+' students.'+ev('topics','#misconc')+'</div></div>';
+  if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>Most wrong answers share one idea:</b> “'+esc(topmc.chose)+'” — '+Math.round(topmc.n/topmc.total*100)+'% of the '+topmc.total+' wrong answers on the '+esc((UNITS.find(u=>u.slug===topmc.unit)||{}).name||topmc.unit)+' question, from '+topmc.students+' students.'+ev('miscon','#misconc')+'</div></div>';
   fading.forEach(x=>{ h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+esc(x.u.name)+' is being forgotten</b> — '+pct(x.accPrev)+' a fortnight ago, '+pct(x.accNow)+' now.'+ev('topics','#unitgrid')+'</div></div>'; });
   if(PACE.behind.length){ const b3=PACE.behind.slice(0,3).map(b=>b.name.split(' ')[0]+' ('+b.total+')').join(', ');
-    h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+PACE.behind.length+' students are well behind the class’s pace:</b> <span class="names">'+esc(b3)+(PACE.behind.length>3?' +'+(PACE.behind.length-3)+' more':'')+'</span> — class median is '+PACE.medTotal+' lessons.'+ev('topics','#pacec')+'</div></div>'; }
+    h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+PACE.behind.length+' students are well behind the class’s pace:</b> <span class="names">'+esc(b3)+(PACE.behind.length>3?' +'+(PACE.behind.length-3)+' more':'')+'</span> — class median is '+PACE.medTotal+' lessons.'+ev('pace','#pacec')+'</div></div>'; }
   if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' students, no revision for 5+ days:</b> <span class="names">'+esc(quiet.join(', '))+'</span>'+ev('class','#quadc')+'</div></div>';
   if(slip.length) h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Recall fell 12%+ this week:</b> <span class="names">'+esc(slip.join(', '))+'</span>'+ev('class','#quadc')+'</div></div>';
   if(grind.length) h+='<div class="tri"><span class="dot" style="background:#5b4370"></span><div><b>Revising most days, little sticking:</b> <span class="names">'+esc(grind.join(', '))+'</span> — effort isn’t the gap.'+ev('class','#quadc')+'</div></div>';
   if(fly.length) h+='<div class="tri"><span class="dot" style="background:var(--good)"></span><div><b>Flying:</b> <span class="names">'+esc(fly.join(', '))+'</span> — high recall, revising most days.'+ev('class','#quadc')+'</div></div>';
-  $('#triage').insertAdjacentHTML('beforeend',h);
+  $('#triagebody').innerHTML=h;
 })();
 
 /* topic cards — a recall curve on faint grid paper + a mastery waffle each */
@@ -666,7 +713,7 @@ function goto(tab,sel,ix){
     const s=unitSeries(x.u.slug);
     const W=270,H=88,L=10,Rr=34,T=10,B=12;
     const xs=i=>L+i*((W-L-Rr)/3), ys=v=>T+(1-v)*(H-T-B);
-    let h='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
+    let h='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMinYMid meet" aria-hidden="true">';
     [.25,.5,.75].forEach(g=>{ h+='<line x1="'+L+'" y1="'+ys(g)+'" x2="'+(W-Rr+16)+'" y2="'+ys(g)+'" stroke="#efe9dc" stroke-width="1"/>'; });
     const pts=s.map((v,i)=>v===null?null:[xs(i),ys(v)]).filter(Boolean);
     if(pts.length>=2){
@@ -701,7 +748,7 @@ function goto(tab,sel,ix){
     return '<div class="ucard">'
       +'<h3>'+esc(x.u.name)+(x===worst?' <span class="re">· WEAKEST RECALL</span>':'')+'</h3>'
       +'<div class="toprow"><span class="big">'+pct(x.acc)+'</span>'+ann+'</div>'
-      +curve(x)
+      +'<div class="curvebox">'+curve(x)+'</div>'
       +waffle(x.u.slug)
       +'<div class="fn">'+x.att+' answers · '+x.covered+'/28 started</div>'
       +'</div>';
@@ -770,7 +817,7 @@ function goto(tab,sel,ix){
   const W=780,H=420,L=52,Rr=20,T=18,B=44;
   const xs=d=>L+(d/14)*(W-L-Rr), ys=a=>T+(1-a)*(H-T-B);
   const col={quiet:'#9a3a25',slip:'#8a6d1f',grind:'#5b4370',fly:'#1e5b3e'};
-  let h='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Effort against retention, one dot per student">';
+  let h='<svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Effort against retention, one dot per student">';
   for(let d=0;d<=14;d+=2) h+='<line x1="'+xs(d)+'" y1="'+T+'" x2="'+xs(d)+'" y2="'+(H-B)+'" stroke="#f2ecdf" stroke-width="1"/>';
   for(let a=0;a<=1;a+=.25) h+='<line x1="'+L+'" y1="'+ys(a)+'" x2="'+(W-Rr)+'" y2="'+ys(a)+'" stroke="#f2ecdf" stroke-width="1"/>';
   /* quadrant guides: 7 days, 60% recall */
@@ -808,7 +855,7 @@ function goto(tab,sel,ix){
 
 /* tab rail */
 (function(){
-  const views={week:'view-week',topics:'view-topics','class':'view-class'};
+  const views={week:'view-week',topics:'view-topics',miscon:'view-miscon',pace:'view-pace','class':'view-class'};
   document.querySelectorAll('.tabs button').forEach(b=>{
     b.addEventListener('click',()=>{
       document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected', x===b?'true':'false'));
@@ -851,9 +898,7 @@ document.getElementById('roster').addEventListener('click',e=>{
   document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
   tr.classList.add('sel');
   drill(+tr.dataset.i);
-  /* the panel lives at the top of the right column — bring it on screen so a
-     click far down the roster visibly does something */
-  document.getElementById('drill').scrollIntoView({behavior:'smooth',block:'nearest'});
+  document.getElementById('regmodal').hidden=true;   /* back to the drill-in */
 });
 function drill(ix){
   const {s,st}=STATS[ix], p=s.p;
@@ -932,8 +977,10 @@ function openPractice(ix){
 }
 { const pm=document.getElementById('pmodal');
   document.getElementById('pmclose').onclick=()=>pm.hidden=true;
-  pm.addEventListener('click',e=>{ if(e.target===pm) pm.hidden=true; });
-  addEventListener('keydown',e=>{ if(e.key==='Escape') pm.hidden=true; });
+  ['pmodal','regmodal','howmodal'].forEach(id=>{ const m=document.getElementById(id);
+    m.addEventListener('click',e=>{ if(e.target===m) m.hidden=true; }); });
+  addEventListener('keydown',e=>{ if(e.key==='Escape')
+    ['pmodal','regmodal','howmodal'].forEach(id=>document.getElementById(id).hidden=true); });
 }
 
 /* AI digest — injected by the weekly generator (scripts/_teach_digest.py runs
