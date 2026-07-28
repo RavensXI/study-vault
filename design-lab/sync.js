@@ -112,15 +112,38 @@ function svProgressMerge(remote) {
   return L;
 }
 
+/* progress lives in its OWN TABLE (public.progress, own-row RLS) — never in
+   user_metadata: Supabase embeds metadata in every access token, and a term
+   of history once bloated student JWTs past Cloudflare's header limits,
+   520-ing all their content requests. */
+function svUid(tok) {
+  try { return JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).sub || null; }
+  catch (e) { return null; }
+}
+
 function svProgressPush(payload, tok) {
   tok = tok || svTok();
-  if (!tok) return Promise.resolve(false);
-  return fetch(SVSYNC_URL + '/auth/v1/user', {
-    method: 'PUT',
-    headers: { apikey: SVSYNC_KEY, 'Content-Type': 'application/json', Authorization: 'Bearer ' + tok },
-    body: JSON.stringify({ data: { sv_progress: Object.assign({}, payload || svProgressGather(),
-      { updated: new Date().toISOString() }) } })
+  var uid = tok && svUid(tok);
+  if (!uid) return Promise.resolve(false);
+  return fetch(SVSYNC_URL + '/rest/v1/progress', {
+    method: 'POST',
+    headers: { apikey: SVSYNC_KEY, 'Content-Type': 'application/json',
+               Authorization: 'Bearer ' + tok, Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify({ person_id: uid,
+      blob: Object.assign({}, payload || svProgressGather(), { updated: new Date().toISOString() }),
+      updated_at: new Date().toISOString() })
   }).then(function (r) { return r.ok; }).catch(function () { return false; });
+}
+
+/* the account's copy: RLS returns only the caller's own row */
+function svProgressFetch(tok) {
+  tok = tok || svTok();
+  if (!tok) return Promise.resolve(null);
+  return fetch(SVSYNC_URL + '/rest/v1/progress?select=blob&limit=1', {
+    headers: { apikey: SVSYNC_KEY, Authorization: 'Bearer ' + tok }
+  }).then(function (r) { return r.ok ? r.json() : []; })
+    .then(function (rows) { return (rows[0] && rows[0].blob) || null; })
+    .catch(function () { return null; });
 }
 
 var _svPushT = null;
@@ -135,10 +158,9 @@ function svProgressPushSoon() {
 function svProgressSync() {
   var tok = svTok(); if (!tok) return;
   var before = JSON.stringify(svProgressGather());
-  fetch(SVSYNC_URL + '/auth/v1/user', { headers: { apikey: SVSYNC_KEY, Authorization: 'Bearer ' + tok } })
-    .then(function (r) { if (!r.ok) throw 0; return r.json(); })
-    .then(function (u) {
-      var M = svProgressMerge(u.user_metadata && u.user_metadata.sv_progress);
+  svProgressFetch(tok)
+    .then(function (remote) {
+      var M = svProgressMerge(remote);
       var changed = JSON.stringify({ done: M.done, when: M.when, plan: M.plan, warmup: M.warmup,
         flashday: M.flashday, tasks: M.tasks }) !== before;
       return svProgressPush(M, tok).then(function () {

@@ -60,10 +60,11 @@ UNIT_PICK = {"history-aqa": 4, "english-literature-aqa": 4,   # departmental cho
 Y10_COVER, Y11_COVER = .42, .78                               # course progress by year
 
 
-def api(method, path, body=None):
+def api(method, path, body=None, merge=False):
     req = urllib.request.Request(URL + path, method=method,
         headers={"apikey": KEY, "Authorization": "Bearer " + KEY,
-                 "Content-Type": "application/json", "Prefer": "return=representation"},
+                 "Content-Type": "application/json",
+                 "Prefer": "return=representation" + (",resolution=merge-duplicates" if merge else "")},
         data=json.dumps(body).encode() if body is not None else None)
     try:
         with urllib.request.urlopen(req, timeout=120) as r:
@@ -278,31 +279,6 @@ def simulate(student, pack, shared_mc, shared_pick, fading, rng):
     return prog, welcome, events
 
 
-def slim(prog):
-    """user_metadata rides inside EVERY access token — Supabase embeds it in
-    the JWT — so it must stay tiny or Cloudflare 520s all PostgREST calls
-    (proved by the first full-size seed). Keep just what the student's own
-    dashboards read; the rich history lives in the events table."""
-    sp = {"done": prog["done"], "warmup": prog["warmup"], "plan": None,
-          "flashday": None, "tasks": {}, "flashlog": [], "shortschecks": [],
-          "miscon": [], "practice": prog["practice"][:1],
-          "kc": {k: {"s": v["s"], "t": v["t"], "d": v["d"]}
-                 for k, v in list(prog["kc"].items())[-25:]},
-          "when": {}, "warmlog": {}, "flashsr": {"cards": {}, "streak": prog["flashsr"].get("streak", 0)}}
-    cut = iso(TODAY - dt.timedelta(days=14))
-    for k, v in prog["when"].items():
-        if v >= cut: sp["when"][k] = v
-    for d in sorted(prog["warmlog"])[-7:]:
-        w = prog["warmlog"][d]
-        sp["warmlog"][d] = {"correct": w["correct"], "total": w["total"], "units": w["units"],
-                            "misses": [{"sub": m["sub"], "unit": m["unit"], "n": m["n"],
-                                        "title": m["title"][:48]} for m in w["misses"][:3]]}
-    cards = sorted(prog["flashsr"]["cards"].items(),
-                   key=lambda kv: kv[1].get("attempts", 0), reverse=True)[:40]
-    sp["flashsr"]["cards"] = dict(cards)
-    return sp
-
-
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0)
@@ -350,9 +326,14 @@ def main():
     for i, s in enumerate(students):
         rng = random.Random(stable(s["email"], "sim"))
         prog, welcome, events = simulate(s, pack, shared_mc, shared_pick, fading, rng)
+        # metadata carries ONLY the tiny shelf setup (it rides in every JWT);
+        # the full history goes to the progress table - no size ceiling there
         api("PUT", f"/auth/v1/admin/users/{s['id']}",
             {"user_metadata": {"full_name": s.get("full_name"), "is_demo": True,
-                               "sv_welcome": welcome, "sv_progress": dict(slim(prog), updated=TODAY.isoformat())}})
+                               "sv_welcome": welcome}})
+        api("POST", "/rest/v1/progress",
+            {"person_id": s["id"], "school_id": school,
+             "blob": dict(prog, updated=TODAY.isoformat())}, merge=True)
         if args.meta_only:
             if i % 20 == 0: print(f"  meta {i}/{len(students)}")
             continue

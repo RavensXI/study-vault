@@ -170,16 +170,18 @@ student?" prompt, never linking evidence by themselves. Supabase implements
 the person/credential layers natively (`linkIdentity()`, verified-email
 auto-linking) — build only the entitlements table and the merge UX.
 
-## ⚠ Launch-blocking finding (28 Jul, from the demo school)
+## ✅ Fixed properly (28 Jul): progress sync moved OFF user_metadata
 
-**Progress sync via `user_metadata` has a hard ceiling.** Supabase embeds
-user_metadata in every access token; a term of `sv_progress` made demo
-students' JWTs so large Cloudflare 520'd ALL their PostgREST calls (content
-pages showed "not found"). Anonymous + light users are unaffected, which is
-why it never showed locally. Before launch: progress must move to tables
-(`events` + a compact per-user state row); `user_metadata` keeps only
-`sv_welcome` + tiny prefs. The demo seeder now writes a slimmed metadata
-blob (see `slim()` in scripts/demo-school/activity.py) as the interim fix.
+Supabase embeds user_metadata in every access token; a term of
+`sv_progress` made demo students' JWTs so large Cloudflare 520'd ALL their
+PostgREST calls (content pages showed "not found"). Anonymous + light
+users unaffected, which is why it never showed locally. **The real fix is
+in:** `public.progress` table (one jsonb row per person, own-row RLS,
+`scripts/_create_progress_table.sql`, applied). `sync.js` push/pull and
+the inline lesson-completion push in `js/main.js` now use it; sign-in
+restore fetches it; `user_metadata` carries only `sv_welcome` + name.
+Students keep their FULL history with a ~2KB token. Teachers still read
+only `events`.
 
 ## Parked / open decisions
 

@@ -1474,8 +1474,10 @@ if(sibtn) sibtn.onclick=async()=>{
       if(sv&&Array.isArray(sv.picked)&&sv.picked.length){
         try{ localStorage.setItem('sv-welcome',JSON.stringify(sv)); }catch(e){}
       }
-      /* progress comes home with the account (sync.js merges it in additively) */
-      try{ if(window.svProgressMerge) svProgressMerge(u&&u.user_metadata&&u.user_metadata.sv_progress); }catch(e){}
+      /* progress comes home with the account — from the progress TABLE
+         (sync.js merges it in additively; metadata never carries it) */
+      try{ if(window.svProgressFetch) svProgressFetch(res.data&&res.data.session&&res.data.session.access_token)
+        .then(function(remote){ if(window.svProgressMerge) svProgressMerge(remote); }); }catch(e){}
       try{ localStorage.setItem('sv-user',JSON.stringify({email:u?u.email:em})); }catch(e){}
       say('Signed in — opening your StudyVault…');
       document.body.classList.remove('ready');

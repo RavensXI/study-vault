@@ -2557,24 +2557,29 @@ function initLessonProgress() {
         if (!complete && when[wkey]) delete when[wkey];
         localStorage.setItem('sv-lessons-when', JSON.stringify(when));
       } catch (e2) {}
-      // signed in: progress lives on the account too (user_metadata.sv_progress,
-      // same place the wizard setup syncs). Guests: silently local-only.
+      // signed in: progress lives on the account too — in the public.progress
+      // TABLE (own-row RLS), never in user_metadata: metadata rides inside
+      // every access token and a term of history overflows header limits.
       try {
         clearTimeout(window._svProgPushT);
         window._svProgPushT = setTimeout(function () {
           try {
             var sess = JSON.parse(localStorage.getItem('sb-baipckgywpnwapobwtsy-auth-token') || 'null');
             var tok = sess && sess.access_token; if (!tok) return;
+            var uid = null;
+            try { uid = JSON.parse(atob(tok.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).sub; } catch (e4) {}
+            if (!uid) return;
             var g = function (k, d) { try { return JSON.parse(localStorage.getItem(k)) || d; } catch (e) { return d; } };
             var tasks = {};
             Object.keys(localStorage).forEach(function (k) {
               if (k.indexOf('sv_progress_') === 0) { try { tasks[k.slice(12)] = JSON.parse(localStorage.getItem(k)); } catch (e) {} }
             });
-            fetch('https://baipckgywpnwapobwtsy.supabase.co/auth/v1/user', {
-              method: 'PUT',
+            fetch('https://baipckgywpnwapobwtsy.supabase.co/rest/v1/progress', {
+              method: 'POST',
               headers: { apikey: 'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2',
-                'Content-Type': 'application/json', Authorization: 'Bearer ' + tok },
-              body: JSON.stringify({ data: { sv_progress: {
+                'Content-Type': 'application/json', Authorization: 'Bearer ' + tok,
+                Prefer: 'resolution=merge-duplicates' },
+              body: JSON.stringify({ person_id: uid, updated_at: new Date().toISOString(), blob: {
                 done: g('sv-lessons-done', {}), when: g('sv-lessons-when', {}),
                 plan: g('sv-plan-prefs', null), warmup: g('sv-warmup', null),
                 warmlog: g('sv-warmup-log', {}), kc: g('sv-kc-log', {}),
@@ -2584,7 +2589,7 @@ function initLessonProgress() {
                 miscon: g('sv-misconception-log', []),
                 flashsr: g('sv-flashcard-progress', null),
                 flashday: localStorage.getItem('sv-flash-day') || null,
-                tasks: tasks, updated: new Date().toISOString() } } })
+                tasks: tasks, updated: new Date().toISOString() } })
             }).catch(function () {});
           } catch (e3) {}
         }, 1500);
