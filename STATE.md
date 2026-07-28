@@ -82,7 +82,7 @@ reports control coordinates) · `?plan=YYYY-MM` (open planner at a month) ·
 `?warmup=1` (auto-open the warm-up overlay) · `?psim=warm.lesson.cards`
 (fake today's plan steps done) · `?fc=1|2` (open the flashcard modal,
 2 = flipped) · `?user=email&menu=1` (fake signed-in avatar + open its menu) ·
-`?forcecheck=1` (shorts feed: splice a recall card immediately) · `?dark=1` /
+`?forcecheck=1` (shorts feed: splice a recall card immediately) · `?prob=tier:index` (practice: jump straight to one problem, skipping opener/completion) · `?dark=1` /
 `?notour=1` / `?csprobe=1` (skin-switcher QA) · `?bench` (Tom's tuning bench).
 
 ## Generators (rerun any time; all in `scripts/`)

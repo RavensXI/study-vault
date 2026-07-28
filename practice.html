@@ -4605,6 +4605,17 @@
       learnIndex: 0,                     // current worked example index
       learnStepRevealed: 0              // how many steps revealed
     };
+    // QA hook: ?prob=tier:index jumps straight to one problem (harmless live)
+    (function () {
+      var _pq = new URLSearchParams(location.search).get('prob');
+      if (!_pq) return;
+      var parts = _pq.split(':');
+      if (['bronze', 'silver', 'gold'].indexOf(parts[0]) >= 0) {
+        practiceState.currentTier = parts[0];
+        practiceState.currentIndex = Math.max(0, parseInt(parts[1], 10) || 0);
+        practiceState.completionShown = { bronze: true, silver: true, gold: true };
+      }
+    })();
 
     // ===== TIER ATTEMPT TRACKING =====
     // Records each completed tier attempt (pass OR fail) to localStorage and
@@ -6590,7 +6601,8 @@
       var lessonId0 = window._practiceLoadLessonId || window.location.pathname;
       var openerWillShow = !!(window._tierGuides && (window._guided || {}).opener &&
           (!localStorage.getItem('sv-practice-modal-' + lessonId0) ||
-           new URLSearchParams(location.search).has('fresh')));
+           new URLSearchParams(location.search).has('fresh')) &&
+          !new URLSearchParams(location.search).get('prob'));   /* QA jump skips the opener */
       if (window._problemBank) {
         var counts = getTierCounts();
         document.getElementById('score-bar-score').textContent = '0/' + (counts.bronze + counts.silver + counts.gold);
@@ -6611,7 +6623,9 @@
         // Progressive tier guides: no big up-front modal. Panel shows the
         // current rung's card; first visit teaches bronze right before Q1.
         updateMethodPanelForTier(practiceState.currentTier);
-        if (!localStorage.getItem(modalKey) || new URLSearchParams(location.search).has('fresh')) {
+        if (new URLSearchParams(location.search).get('prob')) switchMode('practice');  /* QA jump */
+        if ((!localStorage.getItem(modalKey) || new URLSearchParams(location.search).has('fresh'))
+            && !new URLSearchParams(location.search).get('prob')) {   /* QA jump skips the opener */
           _isFirstVisit = !localStorage.getItem(tooltipKey);
           switchMode('practice');
           var opener = (window._guided || {}).opener;
@@ -6641,7 +6655,7 @@
           }
           localStorage.setItem(modalKey, '1');
           if (_isFirstVisit) localStorage.setItem(tooltipKey, '1');
-        } else {
+        } else if (!new URLSearchParams(location.search).get('prob')) {   /* QA jump stays in practice */
           switchMode('learn');
           if (window._workedExamples && window._workedExamples.length) {
             renderLearnExample();
@@ -6883,11 +6897,18 @@
     }
 
     function extractNumbers(text) {
-      // Pull the data values from the question text (comma/space-separated numbers)
-      var m = text.match(/:\s*([\d.,\s\-]+)\./);
-      if (!m) m = text.match(/((?:\d+\.?\d*[,\s]+){2,}\d+\.?\d*)/);
+      // Pull the data values from the question text (comma/space-separated numbers).
+      // Content uses the typographic minus (−, U+2212) in plain text by standard —
+      // normalise it (and the en-dash) to ASCII first, or negative values silently
+      // vanish from the sorter/tally/range tools (Number('−3') is NaN).
+      text = String(text || '').replace(/[−–]/g, '-');
+      var m = text.match(/:\s*([\d.,\s\-]+)\.?/);
+      if (!m) m = text.match(/((?:-?\d+\.?\d*[,\s]+){2,}-?\d+\.?\d*)/);
       if (!m) return [];
-      return m[1].split(/[,\s]+/).map(Number).filter(function(n) { return !isNaN(n); });
+      return m[1].split(/[,\s]+/)
+        .map(function(s) { return s.replace(/\.$/, ''); })       /* '3.' at a sentence end */
+        .filter(function(s) { return s !== '' && s !== '-'; })   /* Number('') is 0 — never let it in */
+        .map(Number).filter(function(n) { return !isNaN(n); });
     }
 
     function renderSorterTool(problem, area) {
