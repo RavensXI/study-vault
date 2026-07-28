@@ -300,6 +300,7 @@
   .fcmodal .face .qq.long{font-size:clamp(1.45rem,4.4vw,2.35rem)}
   .fcmodal .face .qq.xlong{font-size:clamp(1.1rem,3.3vw,1.8rem);line-height:1.3}
   .fcmodal .face .tag{font-size:.72rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+  .fcmodal .face .utag{font-family:var(--read);font-style:italic;font-size:.85rem;color:var(--sec);margin-top:-.35rem}
   .fcbtns{display:flex;gap:12px;margin-top:.4rem;opacity:0;pointer-events:none;transition:opacity .2s .25s}
   .fcmodal .showa .fcbtns,.bigcard.showa .fcbtns{opacity:1;pointer-events:auto}
   .fcbtns .fb{font-family:var(--head);font-weight:600;font-size:.92rem;border:1px solid #ddd3bc;
@@ -494,7 +495,7 @@
     <button class="x" id="closefc" aria-label="Close">&times;</button>
     <button class="bigcard" id="bigcard" aria-label="Flip the card">
       <span class="flip">
-        <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="qq" id="bqQ"></span></span>
+        <span class="face front"><span class="fcmark" id="fcMarkF"></span><span class="tag" id="bqTag"></span><span class="utag" id="bqUnit"></span><span class="qq" id="bqQ"></span></span>
         <span class="face back"><span class="fcmark" id="fcMarkB"></span><span class="tag" id="baTag"></span><span class="qq" id="baA"></span>
           <span class="fcbtns"><span class="fb no" id="fbno" role="button" tabindex="0">✗ Not yet</span><span class="fb ok" id="fbok" role="button" tabindex="0">✓ Got it</span></span>
         </span>
@@ -540,7 +541,11 @@ svDashInit(SUBJECTS,{view:'desk',onUnits:function(){
   if(DAYONE){ buildDayOneToday(); if(current==='today') setSpread(TODAY_L,TODAY_R); }
   /* today's spaced-repetition sitting: due cards first, then new, capped ~20 */
   if(window.svFlashDeck) svFlashDeck(SUBJECTS,deck=>{
-    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview(); }
+    if(deck.length){ FC.length=0; deck.forEach(c=>FC.push(c)); fci=0; fcPreview();
+      /* if the modal is already open (fast fingers / staging), swap the
+         fallback card for the real deck's first card */
+      const m=document.getElementById('fcmodal');
+      if(m&&m.classList.contains('open')&&typeof fcDeal==='function') fcDeal(); }
   });
   if(_dq.get('warmup')&&!window._wuOpened){
     const t=svContinueTarget(SUBJECTS), u=t?t.url:dayOneUrl(SUBJECTS[0]);
@@ -1009,6 +1014,7 @@ function fcDeal(){
   const f=FC[fci], sub=SUBJECTS.find(x=>x.slug===f.slug);
   fcmodal.style.setProperty('--fcc', sub?sub.c:'#8a5a44');
   document.getElementById('bqTag').textContent=f.name||(sub?sub.name:f.slug);
+  document.getElementById('bqUnit').textContent=f.uname||'';
   document.getElementById('baTag').textContent=(sub?sub.name:f.slug)+' \u2014 answer';
   const _q=document.getElementById('bqQ'), _a=document.getElementById('baA');
   _q.textContent=f.q; _a.textContent=f.a;

@@ -391,11 +391,11 @@ function svFlashDeck(SUBJECTS, cb) {
   var jobs = [];
   if (dueLids.length) {
     var idl = dueLids.map(function (x) { return '"' + x + '"'; }).join(',');
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,subjects!inner(slug,school_id))&id=in.(' + idl + ')&units.subjects.school_id=is.null', { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&id=in.(' + idl + ')&units.subjects.school_id=is.null', { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'due', rows: rows }; }).catch(function () { return { kind: 'due', rows: [] }; }));
   }
   newSrcs.forEach(function (s) {
-    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + '&units.subjects.school_id=is.null&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
+    jobs.push(fetch(SUPA + '/rest/v1/lessons?select=id,lesson_number,title,flashcard_questions,units!inner(slug,name,subjects!inner(slug,school_id))&units.slug=eq.' + encodeURIComponent(s.unit) + '&units.subjects.slug=eq.' + encodeURIComponent(s.su.sub) + '&units.subjects.school_id=is.null&lesson_number=lte.' + s.next, { headers: { apikey: ANON } })
       .then(function (r) { return r.json(); }).then(function (rows) { return { kind: 'new', su: s.su, rows: rows }; }).catch(function () { return { kind: 'new', su: s.su, rows: [] }; }));
   });
   if (!jobs.length) { cb([]); return; }
@@ -405,6 +405,7 @@ function svFlashDeck(SUBJECTS, cb) {
       var key = row.id + ':q' + i;
       return { key: key, q: f.q || f.question, a: f.a || f.answer, slug: su ? su.slug : null,
                name: su ? su.name : '', sub: su ? su.sub : null, unit: row.units ? row.units.slug : null,
+               uname: row.units ? (row.units.name || '') : '',
                n: row.lesson_number, level: prog.cards[key] ? svFlashLevel(prog.cards[key].box) : 'Emerging' };
     }
     results.forEach(function (res) {
