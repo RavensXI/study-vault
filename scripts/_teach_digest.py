@@ -24,9 +24,12 @@ CHROME = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
 
 PROMPT = """You are writing the weekly one-paragraph brief for a GCSE class teacher,
 from aggregate revision data (below). Rules:
-- 3-4 sentences of flowing prose FIRST: the one thing to reteach (with the numbers that
-  justify it), who to check in with, and one genuine positive.
-- Then 2-3 bullet points, each ONE concrete action for this week.
+- 3-4 sentences of flowing prose FIRST: the most important finding (with the numbers
+  that justify it), who stands out and why, and one genuine positive.
+- Then 2-3 bullet points: the clearest FINDINGS a teacher should know, phrased as
+  findings ("X hasn't stuck", "Y is being forgotten", "Z revises daily but little
+  sticks") — NEVER as instructions or suggested actions. What to do about a finding
+  is the teacher's call, not yours. No "reteach", no "check in with", no "worth doing".
 - Warm, professional, zero jargon, zero flattery. Never invent numbers not in the data.
 - Retrieval accuracy is retention evidence, not ability — phrase accordingly
   ("hasn't stuck yet", never "weak students").

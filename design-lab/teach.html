@@ -47,12 +47,26 @@
   .card h2{font-family:var(--read);font-size:1.15rem;margin:0 0 .7rem}
   .card h2 small{font-family:var(--head);font-weight:600;font-size:.76rem;color:var(--mut);margin-left:.5rem}
 
-  /* triage — sentences first */
-  .triage .tri{display:flex;gap:10px;align-items:flex-start;padding:.55rem 0;border-top:1px solid var(--linel);font-size:.92rem;line-height:1.45}
-  .triage .tri:first-of-type{border-top:none}
+  /* triage — findings first. Every line states an implication; the evidence
+     link jumps to the panel that shows the working. NO prescriptions. */
+  .tri{display:flex;gap:10px;align-items:flex-start;padding:.55rem 0;border-top:1px solid var(--linel);font-size:.92rem;line-height:1.45}
+  .tri:first-of-type{border-top:none}
   .tri .dot{flex:none;width:9px;height:9px;border-radius:50%;margin-top:.42rem}
   .tri b{font-weight:700}
   .tri .names{color:var(--sec)}
+  .evlink{font-size:.78rem;font-weight:600;color:var(--mut);text-decoration:none;white-space:nowrap;margin-left:.35rem}
+  .evlink:hover{color:var(--ink);text-decoration:underline}
+  /* the evidence drawer: how a conclusion was reached, one click away */
+  details.ev{margin-top:1rem;border-top:1px solid var(--linel);padding-top:.6rem}
+  details.ev summary{cursor:pointer;font-size:.78rem;font-weight:700;letter-spacing:.08em;
+    text-transform:uppercase;color:var(--mut);list-style:none;user-select:none}
+  details.ev summary::before{content:'▸ ';font-size:.7rem}
+  details.ev[open] summary::before{content:'▾ '}
+  details.ev summary:hover{color:var(--ink)}
+  .mc .belief{font-family:var(--read);font-weight:600;color:#8a3a25}
+  .mc .qq{color:var(--sec);font-size:.84rem}
+  .imp{font-size:.95rem;line-height:1.5;margin:.1rem 0 .6rem}
+  .imp b{font-weight:700}
 
   /* topic grid */
   .topics table{width:100%;border-collapse:collapse;font-size:.86rem}
@@ -441,7 +455,7 @@ function recallEvents(p){ /* every attributable right/wrong this student produce
     if(w.units){ Object.keys(w.units).forEach(uk=>{ const u=w.units[uk], unit=uk.split('/')[1]||uk;
       for(let i=0;i<u.a-u.m;i++) ev.push({d,unit,ok:true,src:'warm-up'}); }); }
     else for(let i=0;i<w.correct;i++) ev.push({d,unit:null,ok:true});   /* legacy entries */
-    (w.misses||[]).forEach(m=>ev.push({d,unit:m.unit,n:m.n,title:m.title,q:m.q,ok:false,src:'warm-up'}));
+    (w.misses||[]).forEach(m=>ev.push({d,unit:m.unit,n:m.n,title:m.title,q:m.q,chose:m.chose,right:m.right,ok:false,src:'warm-up'}));
   });
   Object.keys(p.kc||{}).forEach(k=>{ const r=p.kc[k]; const unit=k.split('/')[1];
     for(let i=0;i<r.s;i++) ev.push({d:r.d,unit,ok:true,src:'quiz'});
@@ -576,7 +590,20 @@ const $=s=>document.querySelector(s);
 function pct(x){ return x===null?'—':Math.round(x*100)+'%'; }
 function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 
-/* triage */
+/* jump from a finding to its evidence (tab + panel, optionally a student) */
+function goto(tab,sel,ix){
+  document.querySelector('.tabs button[data-view="'+tab+'"]').click();
+  if(ix!==undefined){
+    document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
+    const tr=document.querySelector('#roster tr[data-i="'+ix+'"]'); if(tr) tr.classList.add('sel');
+    drill(ix);
+  }
+  if(sel) setTimeout(()=>{ const el=document.querySelector(sel); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); },80);
+  return false;
+}
+
+/* triage — findings, not instructions. What to DO with each is the
+   teacher's call; every line links to the evidence behind it. */
 (function(){
   const quiet=STATS.filter(x=>x.st.flag==='quiet').map(x=>x.s.name);
   const slip=STATS.filter(x=>x.st.flag==='slip').map(x=>x.s.name);
@@ -586,14 +613,17 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
   const missed=worst?Object.keys(worst.who).length:0;
   const fading=UNITAGG.filter(x=>x.fading&&x!==worst);
   const topmc=MISCON[0];
+  const ev=(tab,sel)=>' <a class="evlink" href="#" onclick="return goto(\''+tab+'\',\''+sel+'\')">evidence →</a>';
   let h='';
-  if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+'</b> is the class’s weakest recall — '+pct(worst.acc)+' across '+worst.att+' answers, wrong answers from '+missed+' students. <b>Reteach candidate.</b></div></div>';
-  if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>One shared wrong idea:</b> on “'+esc(topmc.q)+'”, '+topmc.n+' of '+topmc.total+' wrong answers ('+topmc.students+' students) chose <b>“'+esc(topmc.chose)+'”</b>. One sentence on Monday fixes this.</div></div>';
-  fading.forEach(x=>{ h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Fading:</b> '+esc(x.u.name)+' was at '+pct(x.accPrev)+' recall a fortnight ago — '+pct(x.accNow)+' now. Worth a warm-up before it slips further.</div></div>'; });
-  if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' gone quiet</b> (5+ days): <span class="names">'+esc(quiet.join(', '))+'</span></div></div>';
-  if(slip.length) h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Accuracy slipping:</b> <span class="names">'+esc(slip.join(', '))+'</span> — down 12%+ on last week</div></div>';
-  if(grind.length) h+='<div class="tri"><span class="dot" style="background:#5b4370"></span><div><b>Revising most days, but it isn’t sticking:</b> <span class="names">'+esc(grind.join(', '))+'</span> — effort isn’t the problem; technique is. Worth a five-minute how-to-revise conversation.</div></div>';
-  if(fly.length) h+='<div class="tri"><span class="dot" style="background:var(--good)"></span><div><b>Flying:</b> <span class="names">'+esc(fly.join(', '))+'</span> — high accuracy, revising most days</div></div>';
+  if(worst) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+esc(worst.u.name)+' hasn’t stuck</b> — '+pct(worst.acc)+' recall across '+worst.att+' answers from '+missed+' students, and it’s the class’s most-practised unit.'+ev('topics','#unitgrid')+'</div></div>';
+  if(topmc) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>Most wrong answers share one idea:</b> “'+esc(topmc.chose)+'” — '+Math.round(topmc.n/topmc.total*100)+'% of the '+topmc.total+' wrong answers on the '+esc((UNITS.find(u=>u.slug===topmc.unit)||{}).name||topmc.unit)+' question, from '+topmc.students+' students.'+ev('topics','#misconc')+'</div></div>';
+  fading.forEach(x=>{ h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+esc(x.u.name)+' is being forgotten</b> — '+pct(x.accPrev)+' a fortnight ago, '+pct(x.accNow)+' now.'+ev('topics','#unitgrid')+'</div></div>'; });
+  if(PACE.behind.length){ const b3=PACE.behind.slice(0,3).map(b=>b.name.split(' ')[0]+' ('+b.total+')').join(', ');
+    h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>'+PACE.behind.length+' students are well behind the class’s pace:</b> <span class="names">'+esc(b3)+(PACE.behind.length>3?' +'+(PACE.behind.length-3)+' more':'')+'</span> — class median is '+PACE.medTotal+' lessons.'+ev('topics','#pacec')+'</div></div>'; }
+  if(quiet.length) h+='<div class="tri"><span class="dot" style="background:var(--warn)"></span><div><b>'+quiet.length+' students, no revision for 5+ days:</b> <span class="names">'+esc(quiet.join(', '))+'</span>'+ev('class','#quadc')+'</div></div>';
+  if(slip.length) h+='<div class="tri"><span class="dot" style="background:var(--gold)"></span><div><b>Recall fell 12%+ this week:</b> <span class="names">'+esc(slip.join(', '))+'</span>'+ev('class','#quadc')+'</div></div>';
+  if(grind.length) h+='<div class="tri"><span class="dot" style="background:#5b4370"></span><div><b>Revising most days, little sticking:</b> <span class="names">'+esc(grind.join(', '))+'</span> — effort isn’t the gap.'+ev('class','#quadc')+'</div></div>';
+  if(fly.length) h+='<div class="tri"><span class="dot" style="background:var(--good)"></span><div><b>Flying:</b> <span class="names">'+esc(fly.join(', '))+'</span> — high recall, revising most days.'+ev('class','#quadc')+'</div></div>';
   $('#triage').insertAdjacentHTML('beforeend',h);
 })();
 
@@ -637,7 +667,7 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
     const ann=x.fading?'<span class="ann">was '+pct(x.accPrev)+' a fortnight ago</span>'
             :x.rising?'<span class="ann up">up from '+pct(x.accPrev)+'</span>':'';
     return '<div class="ucard">'
-      +'<h3>'+esc(x.u.name)+(x===worst?' <span class="re">· RETEACH CANDIDATE</span>':'')+'</h3>'
+      +'<h3>'+esc(x.u.name)+(x===worst?' <span class="re">· WEAKEST RECALL</span>':'')+'</h3>'
       +'<div class="toprow"><span class="big">'+pct(x.acc)+'</span>'+ann+'</div>'
       +curve(x)
       +waffle(x.u.slug)
@@ -654,11 +684,12 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
     const strip=parts.map(([txt,n],i)=>
       '<i class="'+(i===0?'dom':'oth'+Math.min(i,3))+'" style="width:'+(n/m.total*100)+'%" title="'+esc(txt)+' — '+n+'"></i>').join('');
     const who=m.names.slice(0,3).join(', ')+(m.students>3?' +'+(m.students-3)+' more':'');
-    return '<div class="mc"><span class="n">'+m.total+' wrong answers</span>'
-      +'<b>'+esc(m.q)+'</b>'
+    /* the false belief leads; the question it came from is the detail */
+    return '<div class="mc"><span class="n">'+Math.round(m.n/m.total*100)+'% of '+m.total+' wrong answers</span>'
+      +'<span class="belief">“'+esc(m.chose)+'”</span>'
+      +(m.right?'<br>The answer: <span class="ans">'+esc(m.right)+'</span>':'')
       +'<div class="strip">'+strip+'</div>'
-      +Math.round(m.n/m.total*100)+'% chose <span class="pick">“'+esc(m.chose)+'”</span>'
-      +(m.right?' · answer: <span class="ans">'+esc(m.right)+'</span>':'')
+      +'<span class="qq">Asked as: '+esc(m.q)+'</span>'
       +'<br><span class="u" title="'+esc(m.names.join(', '))+'">'+esc(un?un.name:m.unit)+' · '+m.students+' students: '+esc(who)+'</span></div>';
   }).join('')
   :'<div class="mc att">Nothing clustered yet — this fills as warm-up and quiz answers accumulate. For maths and science classes, named diagnoses ("adds the denominators") from guided practice appear here too.</div>';
@@ -684,7 +715,12 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
       h+='<line x1="'+mx+'" y1="0" x2="'+mx+'" y2="'+H+'" stroke="#a3542f" stroke-width="1.6" stroke-dasharray="4 4"/>'; }
     return h+'</svg>';
   }
-  $('#pacerows').innerHTML=PACE.units.map(p=>
+  const paceImp=PACE.behind.length
+    ? '<div class="imp"><b>'+PACE.behind.length+' students are well behind the group</b> — '
+      +PACE.behind.slice(0,3).map(b=>esc(b.name)).join(', ')+(PACE.behind.length>3?' and '+(PACE.behind.length-3)+' more':'')
+      +', each 8+ lessons behind the class median of '+PACE.medTotal+'.</div>'
+    : '<div class="imp"><b>The class is moving together</b> — nobody is significantly behind the group’s pace.</div>';
+  $('#pacerows').innerHTML=paceImp+PACE.units.map(p=>
     '<div class="pace"><div><div class="pn">'+esc(p.u.name)+'</div>'
     +'<div class="pm">'+p.started+'/'+STUDENTS.length+' started</div></div>'
     +sky(p)
@@ -789,30 +825,66 @@ document.getElementById('roster').addEventListener('click',e=>{
 });
 function drill(ix){
   const {s,st}=STATS[ix], p=s.p;
+  const first=s.name.split(' ')[0];
   $('#dname').textContent=s.name;
-  /* weak lessons: group misses by lesson */
-  const by={};
-  st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||''); (by[k]=by[k]||{unit:e.unit,title:e.title,n:0}).n++; });
-  const weak=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,5);
+  const days14=st.spark.reduce((a,b)=>a+b,0);
+  /* ---- findings first: what the data says about THIS student, including
+     the actual wrong answers they keep giving. No advice — the teacher
+     decides what to do with it. Evidence sits in the drawer below. ---- */
+  const lines=[];
+  if(st.flag==='quiet') lines.push(['var(--warn)','<b>No revision for '+st.lastGap+' days.</b>']);
+  if(st.flag==='slip') lines.push(['var(--gold)','<b>Recall fell this week:</b> '+pct(st.accPrev)+' → '+pct(st.accNow)+'.']);
+  if(st.flag==='grind') lines.push(['#5b4370','<b>Revised '+days14+' of the last 14 days; recall sits at '+pct(st.acc)+'.</b> Effort isn’t the gap.']);
+  if(st.flag==='fly') lines.push(['var(--good)','<b>Flying:</b> '+pct(st.acc)+' recall, revising most days.']);
+  const bymc={};
+  st.ev.filter(e=>!e.ok&&e.chose).forEach(e=>{ const k=e.unit+'|'+(e.q||'');
+    const r=(bymc[k]=bymc[k]||{unit:e.unit,q:e.q,right:e.right,n:0,choices:{}});
+    r.n++; r.choices[e.chose]=(r.choices[e.chose]||0)+1; });
+  Object.values(bymc).map(r=>{ const top=Object.entries(r.choices).sort((a,b)=>b[1]-a[1])[0];
+      return Object.assign(r,{chose:top[0],cn:top[1]}); })
+    .filter(r=>r.cn>=3&&r.cn/r.n>=.5).sort((a,b)=>b.cn-a.cn).slice(0,2)
+    .forEach(r=>{ const un=UNITS.find(u=>u.slug===r.unit);
+      lines.push(['var(--warn)','<b>Keeps answering “'+esc(r.chose)+'”</b> — '+r.cn+' of '+r.n+' wrong tries at the '
+        +esc(un?un.name:r.unit)+' question.'+(r.right?' The answer: '+esc(r.right)+'.':'')]); });
+  if(PACE.medTotal-st.lessons>=8) lines.push(['var(--gold)','<b>'+(PACE.medTotal-st.lessons)+' lessons behind the class median</b> ('+st.lessons+' vs '+PACE.medTotal+').']);
+  const cards=Object.values((p.flashsr||{}).cards||{});
+  if(cards.length>=8){ const em=cards.filter(c=>(c.box||1)<=1).length/cards.length, sec=cards.filter(c=>(c.box||1)>=4).length/cards.length;
+    if(em>=.4) lines.push(['var(--warn)','<b>'+Math.round(em*100)+'% of '+first+'’s flashcards are still Emerging</b> ('+cards.length+' in play).']);
+    else if(sec>=.6) lines.push(['var(--good)','<b>'+Math.round(sec*100)+'% of the flashcards are Secure or Mastered.</b>']); }
   const strong=UNITAGG.map(u=>{ const evs=st.ev.filter(e=>e.unit===u.u.slug); const ok=evs.filter(e=>e.ok).length;
     return {name:u.u.name,acc:evs.length>=6?ok/evs.length:null,n:evs.length}; })
     .filter(x=>x.acc!==null&&x.acc>=.8).sort((a,b)=>b.acc-a.acc);
-  const wl=Object.keys(p.warmlog||{}).sort().slice(-7);
+  if(strong.length) lines.push(['var(--good)','<b>Strongest: '+esc(strong[0].name)+'</b> — '+pct(strong[0].acc)+' recall.']);
+  if(!lines.length) lines.push(['var(--mut)','Nothing stands out this week — steady.']);
+
   let h='<div class="kv">'
     +'<div><b>'+st.lessons+'</b><small>lessons</small></div>'
     +'<div><b>'+pct(st.acc)+'</b><small>recall</small></div>'
-    +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d')+'</b><small>last seen</small></div></div>';
-  if(wl.length){ h+='<div class="sect">Warm-ups, last '+wl.length+'</div><div class="wubars">'
+    +'<div><b>'+(st.lastGap===0?'today':st.lastGap+'d')+'</b><small>last seen</small></div></div>'
+    +lines.map(l=>'<div class="tri"><span class="dot" style="background:'+l[0]+'"></span><div>'+l[1]+'</div></div>').join('');
+
+  /* ---- the evidence drawer: how the findings above were reached ---- */
+  const by={};
+  st.ev.filter(e=>!e.ok&&e.unit).forEach(e=>{ const k=e.unit+'|'+(e.title||'');
+    const r=(by[k]=by[k]||{unit:e.unit,title:e.title,n:0,choices:{}});
+    r.n++; if(e.chose) r.choices[e.chose]=(r.choices[e.chose]||0)+1; });
+  const weak=Object.values(by).sort((a,b)=>b.n-a.n).slice(0,5);
+  const wl=Object.keys(p.warmlog||{}).sort().slice(-7);
+  let evh='';
+  if(wl.length){ evh+='<div class="sect">Warm-ups, last '+wl.length+'</div><div class="wubars">'
     +wl.map(d=>{ const w=p.warmlog[d]; const pc=Math.round(w.correct/w.total*100);
       return '<i style="height:100%"><b style="height:'+pc+'%"></b><small>'+d.slice(8)+'</small></i>'; }).join('')+'</div>'; }
-  if(weak.length){ h+='<div class="sect">Keeps getting wrong</div>'+weak.map(w=>{
+  if(weak.length){ evh+='<div class="sect">Keeps getting wrong</div>'+weak.map(w=>{
     const un=UNITS.find(u=>u.slug===w.unit);
-    return '<div class="miss"><b>'+esc(w.title||'')+'</b> · '+esc(un?un.name:w.unit)+' <span class="att">'+w.n+' wrong answers</span></div>'; }).join(''); }
-  if(strong.length){ h+='<div class="sect">Strengths</div><div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join(' · ')+'</div>'; }
-  if((p.practice||[]).length){ h+='<div class="sect">Practice answers · AI-marked</div>'+p.practice.map(pr=>
+    const top=Object.entries(w.choices).sort((a,b)=>b[1]-a[1])[0];
+    return '<div class="miss"><b>'+esc(w.title||'')+'</b> · '+esc(un?un.name:w.unit)+' <span class="att">'+w.n+' wrong answers</span>'
+      +(top&&top[1]>=2?'<span class="q">usually answers “'+esc(top[0])+'”</span>':'')+'</div>'; }).join(''); }
+  if(strong.length>1){ evh+='<div class="sect">Strengths</div><div class="ok">'+strong.map(x=>esc(x.name)+' ('+pct(x.acc)+')').join(' · ')+'</div>'; }
+  if((p.practice||[]).length){ evh+='<div class="sect">Practice answers · AI-marked</div>'+p.practice.map(pr=>
     '<div class="paper"><div class="meta">'+esc(pr.d)+' · '+esc(pr.k)+' · '+pr.m+' marks</div>'
     +'<p class="pq">'+esc(pr.q)+'</p><div class="pa">'+esc(pr.a)+'</div>'
     +'<div class="pr">'+esc(pr.r).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n\n/g,'<br><br>')+'</div></div>').join(''); }
+  if(evh) h+='<details class="ev"><summary>The evidence — how we know</summary>'+evh+'</details>';
   h+='<div class="sect">Parents’ evening / reports</div>'
     +'<a href="teach.html?pack='+ix+'" style="display:inline-block;font-weight:600;font-size:.88rem;'
     +'border:1px solid var(--line);border-radius:9px;background:#fff;padding:.55rem 1rem;text-decoration:none">Generate this student’s pack →</a>';
