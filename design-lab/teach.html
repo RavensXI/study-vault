@@ -84,23 +84,53 @@
   .flag.fly{background:#edf6f0;color:#1e5b3e}
   .flag.grind{background:#efe9f4;color:#5b4370}
 
-  /* mastery distribution: the flashcard boxes as a stacked bar, pen colours */
-  .mast{position:relative;display:inline-flex;height:9px;border-radius:5px;overflow:hidden;background:var(--linel);min-width:110px;vertical-align:middle}
-  .mast i{height:100%}
-  .m1{background:#c0392b}.m2{background:#c9781f}.m3{background:#2a6f97}.m4{background:#2e7d4f}
-  .mkey{font-size:.7rem;color:var(--mut);margin-top:.55rem}
+  /* pen colours for the Leitner boxes (match the flashcard pen marks) —
+     doubled selectors so they outrank .wf i / .mkey i element rules */
+  .wf i.m1,.mkey i.m1{background:#c0392b} .wf i.m2,.mkey i.m2{background:#c9781f}
+  .wf i.m3,.mkey i.m3{background:#2a6f97} .wf i.m4,.mkey i.m4{background:#2e7d4f}
+  .mkey{font-size:.7rem;color:var(--mut);margin-top:.8rem}
   .mkey i{display:inline-block;width:9px;height:9px;border-radius:2px;vertical-align:-1px;margin:0 4px 0 12px}
   .mkey i:first-child{margin-left:0}
-  /* fading arrow on the topic grid */
-  .fade-dn{color:var(--warn);font-weight:700}
-  .fade-up{color:var(--good);font-weight:700}
-  /* misconception lines */
-  .mc{padding:.55rem 0;border-top:1px solid var(--linel);font-size:.88rem;line-height:1.5}
+
+  /* ---- topic cards: recall curve + card-mastery waffle, per unit ---- */
+  .unitgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:.5rem}
+  @media (max-width:900px){ .unitgrid{grid-template-columns:1fr} }
+  .ucard{border:1px solid var(--linel);border-radius:10px;padding:.95rem 1.05rem .85rem;background:#fffefb}
+  .ucard h3{font-family:var(--read);font-size:1.04rem;font-weight:600;margin:0}
+  .ucard .re{font-size:.7rem;color:var(--warn);font-weight:700;letter-spacing:.03em}
+  .ucard .toprow{display:flex;align-items:baseline;gap:10px;margin:.15rem 0 .3rem}
+  .ucard .big{font-size:1.75rem;font-weight:800;font-family:var(--head);font-variant-numeric:tabular-nums}
+  .ucard .ann{font-family:var(--hand);font-size:1.08rem;color:#a3542f}
+  .ucard .ann.up{color:var(--good)}
+  .ucard svg{display:block;width:100%;height:auto}
+  .ucard .fn{font-size:.73rem;color:var(--mut);margin-top:.55rem}
+  .wf{display:grid;grid-template-columns:repeat(25,1fr);gap:2px;margin-top:.6rem}
+  .wf i{aspect-ratio:1;border-radius:1.5px;background:var(--linel)}
+  .wf .wlab{grid-column:1/-1;font-size:.7rem;color:var(--mut);margin-top:2px}
+
+  /* ---- answer-split strips: where the wrong answers went ---- */
+  .mc{padding:.7rem 0 .75rem;border-top:1px solid var(--linel);font-size:.88rem;line-height:1.5}
   .mc:first-of-type{border-top:none}
   .mc b{font-weight:600}
   .mc .u{color:var(--mut);font-size:.76rem}
   .mc .pick{color:#8a3a25;font-family:var(--read)}
   .mc .n{float:right;color:var(--sec);font-variant-numeric:tabular-nums;font-size:.8rem;padding-left:10px}
+  .mc .strip{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:.45rem 0 .35rem}
+  .mc .strip i{height:100%;min-width:2px}
+  .mc .strip i.dom{background:#a3542f}
+  .mc .strip i.oth1{background:#cfa984}
+  .mc .strip i.oth2{background:#ddc4a4}
+  .mc .strip i.oth3{background:#e8d8bd}
+  .mc .ans{color:var(--good)}
+
+  /* ---- the quadrant: effort x retention, one dot per student ---- */
+  .quad svg{display:block;width:100%;height:auto}
+  .quad text{font-family:var(--head)}
+  .quad .axis{font-size:11px;fill:var(--mut)}
+  .quad .qlab{font-family:var(--hand);font-size:17px;fill:#a89e88}
+  .quad .dot{cursor:pointer}
+  .quad .dot:hover circle{stroke:#26231e;stroke-width:2}
+  .quad .ini{font-size:9.5px;font-weight:700;fill:#fff;pointer-events:none}
   .acc{font-variant-numeric:tabular-nums}
   .tr-up{color:var(--good)} .tr-dn{color:var(--warn)} .tr-fl{color:var(--mut)}
 
@@ -217,15 +247,14 @@
 <div class="wrap one" id="view-topics" hidden>
   <div class="col">
     <div class="card topics" id="topics">
-      <h2>What's sticking, by topic <small>recall accuracy across warm-ups, quizzes, shorts &amp; flashcards</small></h2>
-      <table><thead><tr><th>Unit</th><th>Recall</th><th></th><th>Trend</th><th>Mastery (flashcard boxes)</th><th>Evidence</th><th>Coverage</th></tr></thead>
-      <tbody id="topicrows"></tbody></table>
+      <h2>What's sticking, by topic <small>recall over the half-term · every card's Leitner box</small></h2>
+      <div class="unitgrid" id="unitgrid"></div>
       <div class="mkey"><i class="m1"></i>Emerging <i class="m2"></i>Developing <i class="m3"></i>Secure <i class="m4"></i>Mastered
-        &nbsp;·&nbsp; trend = this fortnight vs the one before</div>
+        &nbsp;·&nbsp; each waffle square ≈ 1% of the class's flashcards in that unit</div>
     </div>
     <div class="tworow">
       <div class="card" id="misconc">
-        <h2>Shared misconceptions <small>what wrong answers have in common</small></h2>
+        <h2>Where the wrong answers went <small>the same wrong idea, counted</small></h2>
         <div id="mcrows"></div>
       </div>
       <div class="card" id="missedc">
@@ -238,6 +267,10 @@
 
 <div class="wrap" id="view-class" hidden>
   <div class="col">
+    <div class="card quad" id="quadc">
+      <h2>Effort &times; retention <small>last fortnight · click a student</small></h2>
+      <div id="quadsvg"></div>
+    </div>
     <div class="card roster" id="rosterc">
       <h2>The class <small>click a student</small></h2>
       <table><thead><tr><th>Student</th><th>Last 14 days</th><th>Lessons</th><th>Recall</th><th></th><th>Last seen</th></tr></thead>
@@ -467,9 +500,20 @@ const MISCON=(function(){
   });
   return Object.values(byQ).map(e=>{
     const top=Object.entries(e.choices).sort((a,b)=>b[1]-a[1])[0];
-    return {unit:e.unit,q:e.q,right:e.right,total:e.total,students:Object.keys(e.who).length,chose:top[0],n:top[1]};
+    return {unit:e.unit,q:e.q,right:e.right,total:e.total,students:Object.keys(e.who).length,
+            chose:top[0],n:top[1],choices:e.choices};
   }).filter(e=>e.total>=8).sort((a,b)=>b.total-a.total).slice(0,8);
 })();
+/* weekly recall series per unit (oldest week first) for the topic curves */
+function unitSeries(slug){
+  const buckets=[[27,21],[20,14],[13,7],[6,0]];
+  return buckets.map(([a,b])=>{
+    const da=iso(daysAgo(a)), db=iso(daysAgo(b));
+    let ok=0,no=0;
+    STATS.forEach(({st})=>st.ev.forEach(e=>{ if(e.unit===slug&&e.d>=da&&e.d<=db){ e.ok?ok++:no++; } }));
+    return (ok+no)>=15 ? ok/(ok+no) : null;
+  });
+}
 /* most-missed lessons, whole class */
 const MISSED=(function(){
   const by={};
@@ -504,36 +548,66 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
   $('#triage').insertAdjacentHTML('beforeend',h);
 })();
 
-/* topic grid — recall + trend + mastery distribution */
+/* topic cards — a recall curve on faint grid paper + a mastery waffle each */
 (function(){
   const worst=[...UNITAGG].filter(x=>x.att>=30).sort((a,b)=>a.acc-b.acc)[0];
-  $('#topicrows').innerHTML=UNITAGG.map(x=>{
-    const cls=x.acc===null?'':x.acc<.55?'low':x.acc<.72?'mid':'';
-    const tr=x.fading?'<span class="fade-dn" title="'+pct(x.accPrev)+' → '+pct(x.accNow)+'">▼ fading</span>'
-           :x.rising?'<span class="fade-up" title="'+pct(x.accPrev)+' → '+pct(x.accNow)+'">▲</span>'
-           :(x.accNow!==null&&x.accPrev!==null)?'<span class="att">steady</span>':'<span class="att">—</span>';
-    const ms=MASTERY.find(m=>m.u.slug===x.u.slug);
-    let mbar='<span class="att">no cards yet</span>';
-    if(ms&&ms.total){ const p=k=>Math.round(ms.dist[k]/ms.total*100);
-      mbar='<span class="mast" title="Emerging '+p('e')+'% · Developing '+p('d')+'% · Secure '+p('s')+'% · Mastered '+p('m')+'%">'
-        +'<i class="m1" style="width:'+p('e')+'%"></i><i class="m2" style="width:'+p('d')+'%"></i>'
-        +'<i class="m3" style="width:'+p('s')+'%"></i><i class="m4" style="width:'+p('m')+'%"></i></span>'; }
-    return '<tr'+(x===worst?' class="worst"':'')+'><td class="u">'+esc(x.u.name)+'</td>'
-      +'<td><span class="pct">'+pct(x.acc)+'</span></td>'
-      +'<td><span class="bar '+cls+'"><i style="width:'+(x.acc?Math.round(x.acc*100):0)+'%"></i></span></td>'
-      +'<td>'+tr+'</td>'
-      +'<td>'+mbar+'</td>'
-      +'<td class="att">'+x.att+' answers</td>'
-      +'<td class="att">'+x.covered+'/28 started</td></tr>';
+  function curve(x){
+    const s=unitSeries(x.u.slug);
+    const W=270,H=88,L=10,Rr=34,T=10,B=12;
+    const xs=i=>L+i*((W-L-Rr)/3), ys=v=>T+(1-v)*(H-T-B);
+    let h='<svg viewBox="0 0 '+W+' '+H+'" aria-hidden="true">';
+    [.25,.5,.75].forEach(g=>{ h+='<line x1="'+L+'" y1="'+ys(g)+'" x2="'+(W-Rr+16)+'" y2="'+ys(g)+'" stroke="#efe9dc" stroke-width="1"/>'; });
+    const pts=s.map((v,i)=>v===null?null:[xs(i),ys(v)]).filter(Boolean);
+    if(pts.length>=2){
+      const col=x.fading?'#a3542f':'#5b7263';
+      /* soft wash under the line, then the line itself */
+      h+='<path d="M'+pts.map(p=>p[0]+' '+p[1]).join(' L ')+' L '+pts[pts.length-1][0]+' '+ys(0)+' L '+pts[0][0]+' '+ys(0)+' Z" fill="'+col+'" opacity=".08"/>';
+      h+='<path d="M'+pts.map(p=>p[0]+' '+p[1]).join(' L ')+'" fill="none" stroke="'+col+'" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+      pts.forEach((p,i)=>{ h+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="'+(i===pts.length-1?3.6:2.6)+'" fill="'+col+'"/>'; });
+      const lp=pts[pts.length-1], lv=s.filter(v=>v!==null).pop();
+      h+='<text x="'+(lp[0]+7)+'" y="'+(lp[1]+4)+'" font-size="12" font-weight="700" fill="'+col+'">'+Math.round(lv*100)+'%</text>';
+    } else {
+      h+='<text x="'+L+'" y="'+(H/2)+'" font-size="11" fill="#84806f">not enough evidence for a curve yet</text>';
+    }
+    h+='<text x="'+L+'" y="'+(H-1)+'" font-size="9.5" fill="#b0a892">4 weeks ago</text>'
+      +'<text x="'+(W-Rr+16)+'" y="'+(H-1)+'" font-size="9.5" fill="#b0a892" text-anchor="end">now</text>';
+    return h+'</svg>';
+  }
+  function waffle(slug){
+    const ms=MASTERY.find(m=>m.u.slug===slug);
+    if(!ms||!ms.total) return '<div class="wf"><span class="wlab">no flashcards in play yet</span></div>';
+    const p=k=>ms.dist[k]/ms.total*100;
+    let cells='', acc=0;
+    [['m4','m'],['m3','s'],['m2','d'],['m1','e']].forEach(([cls,k])=>{
+      const n=Math.round(p(k)); for(let i=0;i<n&&acc<100;i++,acc++) cells+='<i class="'+cls+'"></i>';
+    });
+    while(acc<100){ cells+='<i></i>'; acc++; }
+    return '<div class="wf" title="Mastered '+Math.round(p('m'))+'% · Secure '+Math.round(p('s'))+'% · Developing '+Math.round(p('d'))+'% · Emerging '+Math.round(p('e'))+'%">'+cells+'</div>';
+  }
+  $('#unitgrid').innerHTML=UNITAGG.map(x=>{
+    const ann=x.fading?'<span class="ann">was '+pct(x.accPrev)+' a fortnight ago</span>'
+            :x.rising?'<span class="ann up">up from '+pct(x.accPrev)+'</span>':'';
+    return '<div class="ucard">'
+      +'<h3>'+esc(x.u.name)+(x===worst?' <span class="re">· RETEACH CANDIDATE</span>':'')+'</h3>'
+      +'<div class="toprow"><span class="big">'+pct(x.acc)+'</span>'+ann+'</div>'
+      +curve(x)
+      +waffle(x.u.slug)
+      +'<div class="fn">'+x.att+' answers · '+x.covered+'/28 started</div>'
+      +'</div>';
   }).join('');
 })();
 
-/* shared misconceptions + most-missed lessons */
+/* where the wrong answers went — proportional split per question */
 (function(){
   $('#mcrows').innerHTML=MISCON.length?MISCON.map(m=>{
     const un=UNITS.find(u=>u.slug===m.unit);
-    return '<div class="mc"><span class="n">'+m.n+' of '+m.total+' wrong · '+m.students+' students</span>'
-      +'<b>'+esc(m.q)+'</b><br>most chose <span class="pick">“'+esc(m.chose)+'”</span> — answer: '+esc(m.right)
+    const parts=Object.entries(m.choices).sort((a,b)=>b[1]-a[1]);
+    const strip=parts.map(([txt,n],i)=>
+      '<i class="'+(i===0?'dom':'oth'+Math.min(i,3))+'" style="width:'+(n/m.total*100)+'%" title="'+esc(txt)+' — '+n+'"></i>').join('');
+    return '<div class="mc"><span class="n">'+m.total+' wrong · '+m.students+' students</span>'
+      +'<b>'+esc(m.q)+'</b>'
+      +'<div class="strip">'+strip+'</div>'
+      +Math.round(m.n/m.total*100)+'% chose <span class="pick">“'+esc(m.chose)+'”</span> · answer: <span class="ans">'+esc(m.right)+'</span>'
       +'<br><span class="u">'+esc(un?un.name:m.unit)+'</span></div>';
   }).join('')
   :'<div class="mc att">Nothing clustered yet — this fills as warm-up and quiz answers accumulate. For maths and science classes, named misconceptions ("adds the denominators") from guided practice appear here too.</div>';
@@ -541,6 +615,47 @@ function esc(t){ return String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','
     const un=UNITS.find(u=>u.slug===m.unit);
     return '<div class="mc"><span class="n">× '+m.n+'</span><b>'+esc(m.title)+'</b><br><span class="u">'+esc(un?un.name:m.unit)+'</span></div>';
   }).join('');
+})();
+
+/* the quadrant — effort (days revised) x retention (recall), a dot each */
+(function(){
+  const W=780,H=420,L=52,Rr=20,T=18,B=44;
+  const xs=d=>L+(d/14)*(W-L-Rr), ys=a=>T+(1-a)*(H-T-B);
+  const col={quiet:'#9a3a25',slip:'#8a6d1f',grind:'#5b4370',fly:'#1e5b3e'};
+  let h='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Effort against retention, one dot per student">';
+  for(let d=0;d<=14;d+=2) h+='<line x1="'+xs(d)+'" y1="'+T+'" x2="'+xs(d)+'" y2="'+(H-B)+'" stroke="#f2ecdf" stroke-width="1"/>';
+  for(let a=0;a<=1;a+=.25) h+='<line x1="'+L+'" y1="'+ys(a)+'" x2="'+(W-Rr)+'" y2="'+ys(a)+'" stroke="#f2ecdf" stroke-width="1"/>';
+  /* quadrant guides: 7 days, 60% recall */
+  h+='<line x1="'+xs(7)+'" y1="'+T+'" x2="'+xs(7)+'" y2="'+(H-B)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
+  h+='<line x1="'+L+'" y1="'+ys(.6)+'" x2="'+(W-Rr)+'" y2="'+ys(.6)+'" stroke="#d9cfba" stroke-width="1.4" stroke-dasharray="5 5"/>';
+  h+='<text class="qlab" x="'+(W-Rr-8)+'" y="'+(T+22)+'" text-anchor="end">flying</text>'
+    +'<text class="qlab" x="'+(W-Rr-8)+'" y="'+(H-B-12)+'" text-anchor="end">working hard — not sticking yet</text>'
+    +'<text class="qlab" x="'+(L+8)+'" y="'+(H-B-12)+'">gone quiet</text>'
+    +'<text class="qlab" x="'+(L+8)+'" y="'+(T+22)+'">sticking — barely revising</text>';
+  for(let a=0;a<=1;a+=.25) h+='<text class="axis" x="'+(L-8)+'" y="'+(ys(a)+4)+'" text-anchor="end">'+(a*100)+'%</text>';
+  [0,7,14].forEach(d=>{ h+='<text class="axis" x="'+xs(d)+'" y="'+(H-B+18)+'" text-anchor="middle">'+d+'</text>'; });
+  h+='<text class="axis" x="'+((L+W-Rr)/2)+'" y="'+(H-6)+'" text-anchor="middle">days revised, last fortnight</text>'
+    +'<text class="axis" transform="translate(14 '+((T+H-B)/2)+') rotate(-90)" text-anchor="middle">recall accuracy</text>';
+  STATS.forEach((x,ix)=>{
+    if(x.st.acc===null) return;
+    const days=x.st.spark.reduce((a,b)=>a+b,0);
+    const cx=xs(days)+((ix%3)-1)*7, cy=ys(x.st.acc)+((ix%5)-2)*4;
+    const c=col[x.st.flag]||'#5b4632';
+    const ini=x.s.name.split(' ').map(w=>w[0]).join('');
+    h+='<g class="dot" data-i="'+ix+'"><title>'+esc(x.s.name)+' — '+days+' days · '+pct(x.st.acc)+' recall</title>'
+      +'<circle cx="'+cx+'" cy="'+cy+'" r="11.5" fill="'+c+'" opacity=".92"/>'
+      +'<text class="ini" x="'+cx+'" y="'+(cy+3.4)+'" text-anchor="middle">'+ini+'</text></g>';
+  });
+  h+='</svg>';
+  document.getElementById('quadsvg').innerHTML=h;
+  document.getElementById('quadsvg').addEventListener('click',e=>{
+    const g=e.target.closest('.dot'); if(!g) return;
+    const tr=document.querySelector('#roster tr[data-i="'+g.dataset.i+'"]');
+    document.querySelectorAll('#roster tr').forEach(r=>r.classList.remove('sel'));
+    if(tr) tr.classList.add('sel');
+    drill(+g.dataset.i);
+    document.getElementById('drill').scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
 })();
 
 /* tab rail */
