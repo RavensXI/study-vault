@@ -26,7 +26,9 @@ FFPROBE = shutil.which("ffprobe")
 ENDCARD = 2.067        # fixed NLM endcard length (measured across the bank)
 WINDOW = 0.55          # search this far either side of the prior
 SNAP_BEFORE = 0.25     # accept a keyframe up to this much before the cut
-CUT_MIN_DIFF = 12.0    # a real hard cut, absolute floor (0-255 scale)
+CUT_MIN_DIFF = 8.0     # a real hard cut, absolute floor (0-255 scale) — pale
+                       # white-bg content vs the white card can dip to ~10;
+                       # the flat-card + tail-verify checks carry the safety
 FLAT_STD_MAX = 28.0    # post-cut card frame must be near-uniform
 
 
