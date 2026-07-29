@@ -57,7 +57,17 @@ def _generate_tags(title, description='', unit_name='', subject_name=''):
 
 
 def search_heroes(query, limit=10, exclude_subjects=None, min_score=2):
-    """Search hero images by keyword query. Returns top matches sorted by relevance score."""
+    """Search hero images by keyword query. Returns top matches sorted by relevance score.
+
+    DEPRECATED for hero SELECTION (July 2026): keyword scores assigned
+    other subjects' heroes sight-unseen to psychology lessons. Use
+    lib/hero_pipeline.py::HeroFinder, which vision-checks every candidate.
+    This function remains for lookups/reporting only.
+    """
+    import warnings
+    warnings.warn("search_heroes() must not choose hero images — "
+                  "use lib.hero_pipeline.HeroFinder (see docs/PIPELINE.md Phase 4)",
+                  stacklevel=2)
     index = _load()
     query_words = set(query.lower().split())
 

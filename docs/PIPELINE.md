@@ -138,12 +138,36 @@ If you run narration before fact-check and then a fact-check fix lands, you'll n
 
 | Asset | Produced by | Destination | Feature matrix |
 |---|---|---|---|
-| Hero image | `scripts/batch_heroes_*.py` or `download_heroes.py` (Unsplash → R2, index-first reuse) | `lessons.hero_image_url`, `hero_image_alt`, `hero_image_caption`, `hero_image_position` | Both tiers |
+| Hero image | Per-subject script built on **`scripts/lib/hero_pipeline.py` (`HeroFinder`)** — see the hard rules below | `lessons.hero_image_url`, `hero_image_alt`, `hero_image_caption`, `hero_image_position` | Both tiers |
 | Narration | `scripts/batch_narration.py` (Azure: Ollie odd / Ada even; multilingual SSML for language subjects) | `lessons.narration_manifest` array of `{id, src, duration}` | Both tiers |
 | Podcast | `scripts/batch_podcasts.py` (NotebookLM audio overview, unit-context prompt) | Inserted into `lessons.related_media` under category `Podcasts` with title `Lesson Podcast`. The tabbed player reads it from there — do not store separately. | Both tiers |
 | Related media | Dedicated Sonnet agent, one per lesson (see `RELATED_MEDIA_PIPELINE.md`) | `lessons.related_media` (array of category dicts — flat list, not nested) | Both tiers |
 | Cinematic video | `scripts/generate_cinematic_videos.py` | `lessons.youtube_video_id` = R2 URL | **Unity only** |
 | Diagram | `scripts/generate_diagrams.py` (Gemini) — see `DIAGRAM_PIPELINE.md`. GPT-image-2 replacement under evaluation (see `memory/gpt_image_2_evaluation.md`) | Inline `<figure>` in content_html; R2 URL | **Unity only** |
+
+**Hero hard rules (July 2026 — after the psychology hero incident).** The old
+"index-first reuse" flow assigned other subjects' heroes by keyword score,
+sight-unseen, with captions describing the intended image rather than the real
+one, and no dedupe. All hero scripts now go through
+`scripts/lib/hero_pipeline.py::HeroFinder`, which enforces:
+
+1. **No image is assigned unseen.** Every candidate is downloaded and graded
+   A/B/C by a vision model against the lesson title + description. A ships;
+   B only if nothing better exists; C never.
+2. **The caption describes the actual image** (the vision model's SHOWS
+   sentence) plus the credit — `description (Photo: X / Unsplash)`. Never the
+   content agent's aspirational caption.
+3. **One image, one lesson** — the finder's shared `used` set blocks repeats
+   across the whole run.
+4. **`hero_image_url` must live under the subject's own R2 folder**
+   (`{subject}/{unit}/lesson-NN-hero.jpg`). No cross-subject URLs, no offsite
+   hotlinks, no site-local paths. Reused images get re-uploaded under the new
+   subject's key.
+5. **Cross-subject index reuse is banned.** `lib/hero_index.py::search_heroes`
+   must not choose a hero. Reuse only from an explicit same-family pool
+   (e.g. psychology-aqa → psychology-ocr), vision-gated like any candidate.
+
+Reference repair/usage example: `scripts/_heroes_psychology_repair.py`.
 
 **Podcast-into-related-media is a hard contract.** `lesson-loader.js:306–317` greps `related_media` for category `Podcasts` → item title `Lesson Podcast`. Any other placement breaks the tabbed player.
 
