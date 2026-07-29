@@ -1,0 +1,73 @@
+<title>Hero treatment — free CSS options vs raw</title>
+<style>
+  :root { --bg:#faf8f5; --ink:#2d2a26; --accent:#8a5a3b; }
+  body { background:var(--bg); color:var(--ink); font:16px/1.5 Inter,system-ui,sans-serif;
+         margin:0; padding:34px 40px 60px; }
+  h1 { font:600 26px/1.2 "Source Serif 4",Georgia,serif; margin:0 0 6px; }
+  p.lede { max-width:62ch; color:#5d564e; margin:0 0 30px; }
+  h2 { font:600 18px/1.2 "Source Serif 4",Georgia,serif; margin:34px 0 4px;
+        border-top:1px solid #e3ddd4; padding-top:16px; }
+  h2 small { font:400 14px/1.4 Inter,sans-serif; color:#7d746a; display:block; margin-top:3px; }
+  .g { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; }
+  .c { margin:0; }
+  .im { aspect-ratio:3/2; border-radius:12px; overflow:hidden; position:relative;
+         box-shadow:0 1px 3px rgba(45,42,38,.13); background:#e8e2d8; }
+  .im img { width:100%; height:100%; object-fit:cover; display:block; }
+  figcaption { font-size:11.5px; color:#7d746a; margin-top:6px; line-height:1.35; }
+
+  /* A — warm duotone wash: one palette, photos stop fighting each other */
+  .wash img { filter:saturate(.28) contrast(1.06) brightness(1.03) sepia(.22); }
+  .wash::after { content:""; position:absolute; inset:0; background:var(--accent);
+                  mix-blend-mode:soft-light; opacity:.5; }
+
+  /* B — as A, plus paper grain + a drawn ink edge (closest free cousin of line-and-wash) */
+  .ink img { filter:saturate(.2) contrast(1.14) brightness(1.05) sepia(.26); }
+  .ink::after { content:""; position:absolute; inset:0; background:var(--accent);
+                 mix-blend-mode:soft-light; opacity:.52; }
+  .ink::before { content:""; position:absolute; inset:0; z-index:2; pointer-events:none;
+     box-shadow:inset 0 0 0 1px rgba(45,42,38,.42), inset 0 0 22px rgba(45,42,38,.14);
+     border-radius:12px;
+     background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.32'/%3E%3C/svg%3E");
+     mix-blend-mode:multiply; opacity:.5; }
+</style>
+
+<h1>Making a page of mismatched photos read as one thing — for £0</h1>
+<p class="lede">Ten real heroes from History Edexcel “Medicine in Britain”, exactly as they sit in the
+database today. Same images in all three rows; the only difference is CSS. Nothing was regenerated,
+nothing was uploaded, and it applies to every hero on the platform at once — including future ones.</p>
+
+<h2>Now — raw photographs<small>Different photographers, decades, light and colour. Individually fine; as a grid, noisy.</small></h2>
+<div class="g"><figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-01-hero.jpg" alt=""></div><figcaption>1. Medieval Medicine: Beliefs & Treatments c125</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-02-hero.jpg" alt=""></div><figcaption>2. The Black Death & Public Health in Medieval </figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-03-hero.jpg" alt=""></div><figcaption>3. The Medical Renaissance c1500–1700</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-04-hero.jpg" alt=""></div><figcaption>4. William Harvey & the Great Plague 1665</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-05-hero.jpg" alt=""></div><figcaption>5. Jenner, Vaccination & 18th-Century Medicine</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-06-hero.jpg" alt=""></div><figcaption>6. Germ Theory: Pasteur, Koch & Disease</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-07-hero.jpg" alt=""></div><figcaption>7. Public Health & Fighting Cholera in the 19th</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-08-hero.jpg" alt=""></div><figcaption>8. Modern Medicine: The NHS & Antibiotics</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-09-hero.jpg" alt=""></div><figcaption>9. Lung Cancer, Prevention & Modern Challenges</figcaption></figure>
+<figure class="c"><div class="im "><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-10-hero.jpg" alt=""></div><figcaption>10. Medicine on the Western Front 1914–18</figcaption></figure></div>
+
+<h2>Option A — warm duotone wash<small>One palette across every image. Pure CSS filter + accent blend.</small></h2>
+<div class="g"><figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-01-hero.jpg" alt=""></div><figcaption>1. Medieval Medicine: Beliefs & Treatments c125</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-02-hero.jpg" alt=""></div><figcaption>2. The Black Death & Public Health in Medieval </figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-03-hero.jpg" alt=""></div><figcaption>3. The Medical Renaissance c1500–1700</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-04-hero.jpg" alt=""></div><figcaption>4. William Harvey & the Great Plague 1665</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-05-hero.jpg" alt=""></div><figcaption>5. Jenner, Vaccination & 18th-Century Medicine</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-06-hero.jpg" alt=""></div><figcaption>6. Germ Theory: Pasteur, Koch & Disease</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-07-hero.jpg" alt=""></div><figcaption>7. Public Health & Fighting Cholera in the 19th</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-08-hero.jpg" alt=""></div><figcaption>8. Modern Medicine: The NHS & Antibiotics</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-09-hero.jpg" alt=""></div><figcaption>9. Lung Cancer, Prevention & Modern Challenges</figcaption></figure>
+<figure class="c"><div class="im wash"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-10-hero.jpg" alt=""></div><figcaption>10. Medicine on the Western Front 1914–18</figcaption></figure></div>
+
+<h2>Option B — wash plus paper grain and an ink edge<small>Adds tooth and a drawn border. The closest free relative of the line-and-wash look.</small></h2>
+<div class="g"><figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-01-hero.jpg" alt=""></div><figcaption>1. Medieval Medicine: Beliefs & Treatments c125</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-02-hero.jpg" alt=""></div><figcaption>2. The Black Death & Public Health in Medieval </figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-03-hero.jpg" alt=""></div><figcaption>3. The Medical Renaissance c1500–1700</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-04-hero.jpg" alt=""></div><figcaption>4. William Harvey & the Great Plague 1665</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-05-hero.jpg" alt=""></div><figcaption>5. Jenner, Vaccination & 18th-Century Medicine</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-06-hero.jpg" alt=""></div><figcaption>6. Germ Theory: Pasteur, Koch & Disease</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-07-hero.jpg" alt=""></div><figcaption>7. Public Health & Fighting Cholera in the 19th</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-08-hero.jpg" alt=""></div><figcaption>8. Modern Medicine: The NHS & Antibiotics</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-09-hero.jpg" alt=""></div><figcaption>9. Lung Cancer, Prevention & Modern Challenges</figcaption></figure>
+<figure class="c"><div class="im ink"><img src="https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/history-edexcel/medicine-in-britain/lesson-10-hero.jpg" alt=""></div><figcaption>10. Medicine on the Western Front 1914–18</figcaption></figure></div>
