@@ -37,6 +37,8 @@ import urllib.request
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from lib.unsplash import search_unsplash, trigger_unsplash_download
+from lib.pexels import search_pexels
+from lib.pixabay import search_pixabay
 from lib.wikimedia import search_wikimedia, resize_and_compress, MIN_FILE_SIZE
 from lib.r2 import get_r2_client, IMAGES_BUCKET
 
@@ -109,6 +111,17 @@ class HeroFinder:
         # across every lesson this finder touches — the dedupe backbone.
         self.used = set()
         self.vision_calls = 0
+        self._src_errors = {}
+
+    def _stock_sources(self):
+        """Stock-photo sources in preference order, skipping any that is
+        unconfigured or has erred 3+ times in a row (dead quota)."""
+        out = [("unsplash", search_unsplash, "Photo")]
+        if os.environ.get("PEXELS_API_KEY"):
+            out.append(("pexels", search_pexels, "Photo"))
+        if os.environ.get("PIXABAY_API_KEY"):
+            out.append(("pixabay", search_pixabay, "Image"))
+        return [(n, f, c) for n, f, c in out if self._src_errors.get(n, 0) < 3]
 
     # ---------------------------------------------------------------- model calls
 
@@ -235,33 +248,41 @@ class HeroFinder:
             if winner:
                 break
 
-        # 2. Unsplash — model-suggested queries, skipping used photos
+        # 2. Stock search — model-suggested queries across every available
+        # source (Unsplash / Pexels / Pixabay), skipping used photos. A source
+        # that keeps erroring (exhausted quota) is dropped for this run.
         if not winner:
             for query in self.suggest_queries(title, description, subject_name):
                 if checks_left <= 0:
                     break
-                self.log(f"      Unsplash: '{query}'")
-                try:
-                    results = search_unsplash(query, per_page=6)
-                except Exception as e:
-                    self.log(f"      Unsplash error: {e}")
-                    continue
-                for photo in results[:3]:
-                    pid = photo["url"].split("?")[0]
-                    if pid in self.used:
+                for src_name, search_fn, credit_word in self._stock_sources():
+                    if checks_left <= 0 or winner:
+                        break
+                    self.log(f"      {src_name}: '{query}'")
+                    try:
+                        results = search_fn(query, per_page=6)
+                        self._src_errors[src_name] = 0
+                    except Exception as e:
+                        self._src_errors[src_name] = self._src_errors.get(src_name, 0) + 1
+                        self.log(f"      {src_name} error ({self._src_errors[src_name]}): {e}")
                         continue
-                    credit = f"Photo: {photo['photographer']} / Unsplash" \
-                        if photo.get("photographer") else "Unsplash"
-                    winner = consider(self._fetch_jpeg(photo["url"]), credit,
-                                      "unsplash", pid)
-                    if winner:
-                        try:
-                            trigger_unsplash_download(photo.get("_download_location", ""))
-                        except Exception:
-                            pass
-                        break
-                    if checks_left <= 0:
-                        break
+                    for photo in results[:2]:
+                        pid = photo["url"].split("?")[0]
+                        if pid in self.used:
+                            continue
+                        credit = f"{credit_word}: {photo['photographer']} / {src_name.capitalize()}" \
+                            if photo.get("photographer") else src_name.capitalize()
+                        winner = consider(self._fetch_jpeg(photo["url"]), credit,
+                                          src_name, pid)
+                        if winner:
+                            if src_name == "unsplash":
+                                try:
+                                    trigger_unsplash_download(photo.get("_download_location", ""))
+                                except Exception:
+                                    pass
+                            break
+                        if checks_left <= 0:
+                            break
                 if winner:
                     break
                 time.sleep(0.5)
