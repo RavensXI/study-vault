@@ -16,6 +16,7 @@ import os
 import re
 import sys
 import threading
+import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
@@ -30,7 +31,7 @@ except (AttributeError, OSError):
 import anthropic
 
 MODEL = "claude-haiku-4-5-20251001"
-WORKERS = 6
+WORKERS = 3
 SKIP_SUBJECTS = {"psychology-ocr", "psychology-edexcel"}  # mid-repair
 SCRATCH = os.path.join(
     r"C:\Users\tshau\AppData\Local\Temp\claude\C--Users-tshau-Documents-Study-Vault",
@@ -97,6 +98,8 @@ def fetch_image(url):
     # Wikimedia's robot policy requires a descriptive UA with contact details
     ua = ("StudyVaultHeroAudit/1.0 (https://www.studyvault.co.uk; "
           "studyvault.info@gmail.com)")
+    # legacy Unity R2 keys contain literal spaces — encode like a browser would
+    url = urllib.parse.quote(url, safe=":/?&=%")
     req = urllib.request.Request(url, headers={"User-Agent": ua})
     with urllib.request.urlopen(req, timeout=45) as resp:
         data = resp.read()

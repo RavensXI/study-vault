@@ -72,6 +72,23 @@ C = wrong: unrelated subject matter, text-heavy screenshot, software UI, waterma
 """
 
 
+_US_UK = [
+    ("colored", "coloured"), ("colorful", "colourful"), ("color", "colour"),
+    ("gray", "grey"), ("center", "centre"), ("theater", "theatre"),
+    ("artifacts", "artefacts"), ("artifact", "artefact"), ("armor", "armour"),
+    ("harbor", "harbour"), ("labeled", "labelled"), ("jewelry", "jewellery"),
+    ("plow", "plough"), ("traveling", "travelling"), ("meter", "metre"),
+]
+
+
+def briticise(text):
+    """Vision models write American English; captions are British English."""
+    for us, uk in _US_UK:
+        text = re.sub(rf"\b{us}\b", uk, text)
+        text = re.sub(rf"\b{us.capitalize()}\b", uk.capitalize(), text)
+    return text
+
+
 def _grade(text):
     m = re.search(r"GRADE:\s*([ABC])", text)
     return m.group(1) if m else "C"
@@ -283,6 +300,7 @@ class HeroFinder:
         self.used.add(source_id)
         url = self._upload(jpeg, subject_slug, unit_slug, lesson_number)
         self.used.add(url)
+        shows = briticise(shows)
         caption = f"{shows.rstrip('.')} ({credit})" if credit else shows.rstrip(".") + "."
         return {"url": url, "caption": caption, "source": source,
                 "credit": credit, "shows": shows}
