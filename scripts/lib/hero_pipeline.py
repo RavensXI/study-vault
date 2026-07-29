@@ -134,7 +134,10 @@ class HeroFinder:
                 tmp_src = f.name
             with tempfile.NamedTemporaryFile(delete=False, suffix=".jpg") as f:
                 tmp_dst = f.name
-            req = urllib.request.Request(url, headers={"User-Agent": "StudyVault/1.0"})
+            # Wikimedia's robot policy 429s generic UAs — be identifiable
+            ua = ("StudyVaultHeroBot/1.0 (https://www.studyvault.co.uk; "
+                  "studyvault.info@gmail.com)")
+            req = urllib.request.Request(url, headers={"User-Agent": ua})
             with urllib.request.urlopen(req, timeout=60) as resp:
                 data = resp.read()
             if len(data) < MIN_FILE_SIZE:

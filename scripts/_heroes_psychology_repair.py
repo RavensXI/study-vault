@@ -92,6 +92,34 @@ def main():
     reuse_pool = build_reuse_pool(sb)
     print(f"Reuse pool from {REUSE_SOURCE}: {len(reuse_pool)} images")
 
+    # Unsplash's search API allows ~50 calls/hour: run in rounds, sleeping
+    # between them, until every lesson is done or a round makes no progress
+    # twice in a row.
+    import time as _time
+    stalled = 0
+    while True:
+        before = len(state["done"])
+        run_round(sb, finder, state, reuse_pool, one_only)
+        if one_only:
+            return
+        total = sum(len(fetch_lessons(sb, slug)) for slug, _ in SUBJECTS)
+        if len(state["done"]) >= total:
+            break
+        stalled = stalled + 1 if len(state["done"]) == before else 0
+        if stalled >= 2:
+            print("no progress across two rounds — stopping for inspection")
+            break
+        print(f"\n{len(state['done'])}/{total} done — sleeping 20 min for the "
+              f"Unsplash search window to reset...")
+        _time.sleep(20 * 60)
+
+    done_n = len(state["done"])
+    print(f"\nDone: {done_n} lessons | failed: {state['failed'] or 'none'}")
+    print(f"vision calls: {finder.vision_calls}")
+
+
+def run_round(sb, finder, state, reuse_pool, one_only):
+    state["failed"] = []
     for subject_slug, board_label in SUBJECTS:
         lessons = fetch_lessons(sb, subject_slug)
         print(f"\n===== {subject_slug}: {len(lessons)} lessons =====")
@@ -138,10 +166,6 @@ def main():
                 print("\n--one: stopping after the first lesson.")
                 print(f"vision calls so far: {finder.vision_calls}")
                 return
-
-    done_n = len(state["done"])
-    print(f"\nDone: {done_n} lessons | failed: {state['failed'] or 'none'}")
-    print(f"vision calls: {finder.vision_calls}")
 
 
 if __name__ == "__main__":
