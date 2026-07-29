@@ -154,9 +154,15 @@ one, and no dedupe. All hero scripts now go through
 1. **No image is assigned unseen.** Every candidate is downloaded and graded
    A/B/C by a vision model against the lesson title + description. A ships;
    B only if nothing better exists; C never.
-2. **The caption describes the actual image** (the vision model's SHOWS
-   sentence) plus the credit — `description (Photo: X / Unsplash)`. Never the
-   content agent's aspirational caption.
+2. **The caption describes the actual image** plus the credit. Never the
+   content agent's aspirational caption. Format (Tom, 30 Jul 2026):
+   `[what it shows, 3–6 words] — [link to the lesson, 4–8 words] (credit)`,
+   under ~12 words before the credit. The first clause is strictly
+   visible-truth; the second may reference the lesson (it is what makes an
+   abstract pick make sense to a student). No "representing / illustrating /
+   showing" filler, no furniture inventories.
+   Example: `An empty courtroom — where sentencing decisions are made
+   (Photo: David Veksler / Unsplash)`.
 3. **One image, one lesson** — the finder's shared `used` set blocks repeats
    across the whole run.
 4. **`hero_image_url` must live under the subject's own R2 folder**
