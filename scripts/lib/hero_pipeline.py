@@ -217,15 +217,31 @@ class HeroFinder:
 
     # ---------------------------------------------------------------- main entry
 
+    @staticmethod
+    def _trust_description(title, description):
+        """A description that shares almost nothing with its own title is
+        stale or mis-assigned (see science-edexcel, July 2026). Searching on
+        it sends the finder hunting for the wrong subject entirely, so drop
+        it and let the title lead."""
+        if not description:
+            return ""
+        tw = set(re.findall(r"[a-z]{4,}", (title or "").lower()))
+        dw = set(re.findall(r"[a-z]{4,}", description.lower()))
+        if not tw or not dw:
+            return description
+        return "" if not (tw & dw) else description
+
     def find(self, subject_slug, subject_name, unit_slug, unit_name,
              lesson_number, title, description, reuse_pool=None):
         """Find, vision-gate, and upload one hero. Returns
         {url, caption, source, credit, shows} or None."""
+        description = self._trust_description(title, description)
         checks_left = MAX_VISION_CHECKS_PER_LESSON
-        fallback = None  # best B-grade seen: (jpeg, shows, credit, source, source_id)
+        seconds = []  # every B-grade seen; the most topical one wins if no A
+        cur_query = ""  # the search phrase that surfaced the candidate
 
         def consider(jpeg, credit, source, source_id):
-            nonlocal checks_left, fallback
+            nonlocal checks_left
             if jpeg is None or checks_left <= 0:
                 return None
             checks_left -= 1
@@ -233,9 +249,23 @@ class HeroFinder:
             self.log(f"      [vision {grade}] {source}: {shows[:80]}")
             if grade == "A":
                 return (jpeg, shows, credit, source, source_id)
-            if grade == "B" and fallback is None:
-                fallback = (jpeg, shows, credit, source, source_id)
+            if grade == "B":
+                seconds.append((jpeg, shows, credit, source, source_id, cur_query))
             return None
+
+        def stems(text):
+            # 5-char prefixes so system/systems and hormone/hormonal match
+            return {w[:5] for w in re.findall(r"[a-z]{4,}", (text or "").lower())}
+
+        def best_second():
+            """Rank B-grades by topical overlap with the lesson (and with the
+            query that found them) — stops a generic stock photo of a person
+            beating an anatomical diagram just by being seen first."""
+            if not seconds:
+                return None
+            want = stems(f"{title} {description or ''} {subject_name}")
+            return max(seconds, key=lambda c: len(want & stems(
+                f"{c[1]} {c[5] if len(c) > 5 else ''}")))
 
         winner = None
 
@@ -255,6 +285,7 @@ class HeroFinder:
             for query in self.suggest_queries(title, description, subject_name):
                 if checks_left <= 0:
                     break
+                cur_query = query
                 for src_name, search_fn, credit_word in self._stock_sources():
                     if checks_left <= 0 or winner:
                         break
@@ -292,6 +323,7 @@ class HeroFinder:
             for query in self.suggest_queries(title, description, subject_name)[:2]:
                 if checks_left <= 0:
                     break
+                cur_query = query
                 self.log(f"      Wikimedia: '{query}'")
                 try:
                     results = search_wikimedia(query, limit=10)
@@ -313,11 +345,11 @@ class HeroFinder:
                 time.sleep(2)
 
         if not winner:
-            winner = fallback  # settle for the best B if no A anywhere
+            winner = best_second()  # settle for the most topical B
         if not winner:
             return None
 
-        jpeg, shows, credit, source, source_id = winner
+        jpeg, shows, credit, source, source_id = winner[:5]
         self.used.add(source_id)
         url = self._upload(jpeg, subject_slug, unit_slug, lesson_number)
         self.used.add(url)
