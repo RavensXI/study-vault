@@ -146,6 +146,12 @@ def main():
             resize_and_compress(tmp_src, tmp_dst, max_width=1200, quality=82)
             with open(tmp_dst, "rb") as f:
                 body = f.read()
+        except Exception as e:  # truncated/corrupt download — record, move on
+            print(f"  [FAIL] {key}: image processing: {str(e)[:90]}")
+            state["failed"][j["lesson_id"]] = {"key": key, "url": j["url"],
+                                               "error": str(e)[:200]}
+            json.dump(state, io.open(STATE, "w", encoding="utf-8"), indent=1)
+            continue
         finally:
             for p in (tmp_src, tmp_dst):
                 if p:
