@@ -32,7 +32,7 @@ import anthropic
 
 MODEL = "claude-haiku-4-5-20251001"
 WORKERS = 3
-SKIP_SUBJECTS = {"psychology-ocr", "psychology-edexcel"}  # mid-repair
+SKIP_SUBJECTS = set()
 SCRATCH = os.path.join(
     r"C:\Users\tshau\AppData\Local\Temp\claude\C--Users-tshau-Documents-Study-Vault",
     r"b7ce0950-5850-4b5c-8f69-ce16ff3c08b6\scratchpad")
