@@ -2447,3 +2447,28 @@ body[data-skin="reader"].desk-world.dark-mode .header-lesson-pill{
 }
 body[data-skin="reader"].desk-world.dark-mode .method-modal{ background:#26231f; }
 body[data-skin="reader"].desk-world.dark-mode .method-modal-overlay{ background:rgba(0,0,0,.62); }
+
+/* ── Hero wash (EXPERIMENT, 30 Jul) ────────────────────────────────────────
+   Unifies a platform of stock photographs from many sources into one palette
+   for £0, instead of regenerating every hero. Opt-in per page via
+   data-hero-wash="1" (QA hook: ?wash=1); "2" adds paper grain + ink edge.
+   Applies to lesson mastheads, unit cards and subject cards alike.        */
+body[data-hero-wash] #hero-figure img,
+body[data-hero-wash] .unit-card-image img,
+body[data-hero-wash] .home-card-img{
+  filter:saturate(.28) contrast(1.06) brightness(1.03) sepia(.22);
+}
+body[data-hero-wash] #hero-figure::before,
+body[data-hero-wash] .unit-card-image::before{
+  content:""; position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:var(--accent, #8a5a3b); mix-blend-mode:soft-light; opacity:.5;
+}
+body[data-hero-wash="2"] #hero-figure img,
+body[data-hero-wash="2"] .unit-card-image img,
+body[data-hero-wash="2"] .home-card-img{
+  filter:saturate(.2) contrast(1.14) brightness(1.05) sepia(.26);
+}
+body[data-hero-wash="2"] #hero-figure::before,
+body[data-hero-wash="2"] .unit-card-image::before{ opacity:.52; }
+body[data-hero-wash="2"] #hero-figure figcaption{ z-index:4; }
+body[data-hero-wash="2"] #hero-figure::marker{ content:none; }

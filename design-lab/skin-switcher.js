@@ -46,6 +46,10 @@
     // ink IS a dark skin; otherwise leave dark-mode alone — it belongs to the
     // accessibility toolbar (prefs.darkMode), not the skin switcher.
     if (skin === 'ink') document.body.classList.add('dark-mode');
+    // HERO WASH EXPERIMENT (?wash=1 duotone, ?wash=2 + grain/ink edge) — the
+    // £0 alternative to regenerating every hero in the line-and-wash style.
+    var wash = new URLSearchParams(location.search).get('wash');
+    if (wash === '1' || wash === '2') document.body.dataset.heroWash = wash;
     applySubjectAccent();
     wireDeskHome();
     [].forEach.call(bar.querySelectorAll('button'), function (b) {
