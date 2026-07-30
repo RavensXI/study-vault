@@ -41,6 +41,8 @@ from lib.r2 import get_r2_client, upload_bytes_to_r2, AUDIO_BUCKET, AUDIO_PUBLIC
 STATE_FILE = os.path.join(SCRIPT_DIR, "_batch_podcast_state.json")
 NLM_ENV = {**os.environ, "NO_COLOR": "1", "PYTHONUTF8": "1", "PYTHONIOENCODING": "utf-8"}
 
+LIVE_ONLY = False  # set by --live-only: only podcast lessons students can see
+
 SUBJECT_ORDER = [
     "science-edexcel", "science-ocr",
     "english-language-edexcel", "english-language-ocr", "english-language-eduqas",
@@ -174,11 +176,16 @@ def _fetch_subject_lessons(sb, slug, subject, limit, all_pending):
     for unit in (units.data or []):
         # Get all lessons in unit for context
         all_unit_lessons = sb.from_('lessons').select(
-            'id, title, lesson_number, content_html, related_media'
+            'id, title, lesson_number, status, content_html, related_media'
         ).eq('unit_id', unit['id']).order('lesson_number').execute()
 
         for lesson in (all_unit_lessons.data or []):
             if has_podcast(lesson):
+                continue
+            # practice-format / stub lessons can't sustain a podcast
+            if len(lesson.get("content_html") or "") < 800:
+                continue
+            if LIVE_ONLY and lesson.get("status") != "live":
                 continue
             all_pending.append({
                 "lesson": lesson,
@@ -437,7 +444,11 @@ def main():
     parser.add_argument("--status", action="store_true")
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--cleanup", action="store_true")
+    parser.add_argument("--live-only", action="store_true",
+                        help="Only lessons with status=live (dispatcher mode)")
     args = parser.parse_args()
+    global LIVE_ONLY
+    LIVE_ONLY = args.live_only
 
     if args.status:
         cmd_status(args)

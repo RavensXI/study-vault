@@ -147,7 +147,43 @@ New-Item -ItemType File -Path $lockFile -Force | Out-Null
 Write-Log ("Lock acquired. Launch timestamp written: {0}" -f (Get-Date -Format "yyyy-MM-dd HH:mm:ss"))
 
 try {
-    $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "100") -TimeoutMin 300
+    # ── Stage 1: PODCASTS (priority over shorts) ──────────────────────────
+    # Live free-tier lessons missing our "Lesson Podcast" — usually zero.
+    # A new subject enters this sweep automatically the day its lessons flip
+    # to live; nobody has to remember to fire a batch. Conservative budget
+    # model: one shared 100/day NLM pool (downgraded-Ultra tier) — if audio
+    # and video prove to be separate pools, drop the subtraction below.
+    $nlmBudget = 100
+    $podcastsMade = 0
+    $sweepOut = Run-Py -PyArgs @("scripts\_podcast_sweep.py", "--total") -TimeoutMin 10
+    $backlog = 0
+    foreach ($ln in $sweepOut) { if ($ln -match '^\s*(\d+)\s*$') { $backlog = [int]$Matches[1]; break } }
+    if ($backlog -gt 0) {
+        Write-Log ("PODCAST backlog: {0} live lessons - podcasts run first today." -f $backlog)
+        Run-Py -PyArgs @("scripts\batch_podcasts.py", "--live-only", "--limit", "$nlmBudget") -TimeoutMin 90 | Out-Null
+        for ($i = 0; $i -lt 15; $i++) {
+            Start-Sleep -Seconds 300
+            $st = Run-Py -PyArgs @("scripts\batch_podcasts.py", "--status") -TimeoutMin 15
+            if (($st -match "No in-progress jobs") -or ($st -match ", 0 still in progress")) { break }
+        }
+        Run-Py -PyArgs @("scripts\batch_podcasts.py", "--download", "--cleanup") -TimeoutMin 120 | Out-Null
+        # verified count = backlog shrinkage re-measured from Supabase (catches
+        # the old "--download didn't write Supabase" failure by construction)
+        $sweepAfter = Run-Py -PyArgs @("scripts\_podcast_sweep.py", "--total") -TimeoutMin 10
+        $after = $backlog
+        foreach ($ln in $sweepAfter) { if ($ln -match '^\s*(\d+)\s*$') { $after = [int]$Matches[1]; break } }
+        $podcastsMade = [Math]::Max(0, $backlog - $after)
+        Write-Log ("PODCASTS made+verified: {0} ({1} still pending for tomorrow)" -f $podcastsMade, $after)
+    }
+
+    # ── Stage 2: SHORTS with whatever budget remains ─────────────────────
+    $shortsCap = [Math]::Max(0, $nlmBudget - $podcastsMade)
+    if ($shortsCap -eq 0) {
+        Write-Log "NLM budget fully consumed by podcasts - no shorts today."
+        $main = @()
+    } else {
+        $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "$shortsCap") -TimeoutMin 300
+    }
     if ($main -match "AUTH EXPIRED") {
         # Auth died AFTER the dry-run passed (rare). Rewind the launch stamp so the
         # next hourly heartbeat retries instead of waiting a full 24h.
