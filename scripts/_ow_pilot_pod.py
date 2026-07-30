@@ -14,7 +14,10 @@ import sys
 import time
 
 import torch
-from diffusers import QwenImageEditPipeline
+try:  # 2509 ships as "Edit Plus" in newer diffusers; fall back if absent
+    from diffusers import QwenImageEditPlusPipeline as QwenImageEditPipeline
+except ImportError:
+    from diffusers import QwenImageEditPipeline
 from PIL import Image
 
 ORIG = "/workspace/orig"
@@ -27,13 +30,20 @@ PROMPT = ("Redraw this exact image as a REFINED study, partway to finished: clea
           "linework tracing the forms with a first thin watercolour wash of the same colours, still mostly warm "
           "uncoloured paper — as if the picture is coming into focus. " + KEEP)
 
-print("loading Qwen-Image-Edit…", flush=True)
+print("loading Qwen-Image-Edit-2509 (8-bit transformer)…", flush=True)
 t0 = time.time()
+# 20B bf16 = ~56GB total, which wedged the 50GB-RAM pod via cpu-offload.
+# 8-bit transformer (~20GB) + bf16 text encoder (~16GB) + VAE fits the
+# A40's 46GB of VRAM outright — no offload, no RAM involvement at all.
+from diffusers import PipelineQuantizationConfig
+quant = PipelineQuantizationConfig(
+    quant_backend="bitsandbytes_8bit",
+    quant_kwargs={"load_in_8bit": True},
+    components_to_quantize=["transformer"])
 pipe = QwenImageEditPipeline.from_pretrained(
-    "Qwen/Qwen-Image-Edit", torch_dtype=torch.bfloat16)
-# bf16 weights need a shade more than the A40's 46GB if moved wholesale;
-# offload parks idle components in the pod's 50GB system RAM instead
-pipe.enable_model_cpu_offload()
+    "Qwen/Qwen-Image-Edit-2509", torch_dtype=torch.bfloat16,
+    quantization_config=quant)
+pipe.to("cuda")
 print(f"loaded in {time.time()-t0:.0f}s", flush=True)
 
 srcs = sorted(glob.glob(os.path.join(ORIG, "*-orig.png")))
