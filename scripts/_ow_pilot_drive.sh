@@ -20,7 +20,8 @@ echo "== 2/4 install deps (idempotent) =="
 $SSH "pip install -q --upgrade diffusers transformers accelerate safetensors pillow 2>&1 | tail -1 || true"
 
 echo "== 3/4 run (model download ~40GB on first pass) =="
-$SSH "cd /workspace && python3 _ow_pilot_pod.py"
+# HF cache MUST live on the 100GB volume — the 20GB container disk can't hold the model
+$SSH "cd /workspace && HF_HOME=/workspace/hf python3 _ow_pilot_pod.py"
 
 echo "== 4/4 pull outputs =="
 $SCP "$USER@$HOST:/workspace/out/*-qwen.png" "$SCRATCH/" || true

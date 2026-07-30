@@ -31,7 +31,9 @@ print("loading Qwen-Image-Edit…", flush=True)
 t0 = time.time()
 pipe = QwenImageEditPipeline.from_pretrained(
     "Qwen/Qwen-Image-Edit", torch_dtype=torch.bfloat16)
-pipe.to("cuda")
+# bf16 weights need a shade more than the A40's 46GB if moved wholesale;
+# offload parks idle components in the pod's 50GB system RAM instead
+pipe.enable_model_cpu_offload()
 print(f"loaded in {time.time()-t0:.0f}s", flush=True)
 
 srcs = sorted(glob.glob(os.path.join(ORIG, "*-orig.png")))
@@ -49,6 +51,7 @@ for i, path in enumerate(srcs):
     t = time.time()
     try:
         result = pipe(image=img, prompt=PROMPT,
+                      negative_prompt=" ",  # required to actually enable true_cfg guidance
                       num_inference_steps=40, true_cfg_scale=4.0,
                       generator=torch.Generator("cuda").manual_seed(7)).images[0]
         result.save(out)
