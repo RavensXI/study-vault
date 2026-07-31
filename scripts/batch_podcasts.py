@@ -373,9 +373,11 @@ def cmd_download(args):
     print(f"Downloading {len(completed)} podcasts...\n")
     downloaded = 0
 
-    for job in completed:
+    for i, job in enumerate(completed):
         label = job["label"]
         notebook_id = job["notebook_id"]
+        if i:
+            time.sleep(20)  # ~30 rapid 40MB pulls tripped server throttling (31 Jul)
 
         try:
             # Download audio
