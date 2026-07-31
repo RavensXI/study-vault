@@ -125,6 +125,11 @@
       { board: 'Edexcel', slug: 'business-edexcel' },
       { board: 'OCR', slug: 'business-ocr' }
     ],
+    'psychology': [
+      { board: 'AQA', slug: 'psychology-aqa' },
+      { board: 'Edexcel', slug: 'psychology-edexcel' },
+      { board: 'OCR', slug: 'psychology-ocr' }
+    ],
     'french': [
       { board: 'AQA', slug: 'french-aqa' },
       { board: 'Edexcel', slug: 'french-edexcel' }
