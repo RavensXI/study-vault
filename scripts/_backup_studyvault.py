@@ -32,10 +32,18 @@ REPO = r"C:\Users\tshau\Documents\Study Vault"
 BUSINESS = r"C:\Users\tshau\Documents\StudyVault Business"
 MEMORY = r"C:\Users\tshau\.claude\projects\C--Users-tshau-Documents-Study-Vault\memory"
 
-TABLES = ["schools", "subjects", "units", "lessons", "guide_pages",
-          "school_subscriptions", "classes", "class_members", "teacher_subjects",
-          "teacher_invitations", "profiles", "progress", "events",
-          "upload_jobs", "content_pipeline_logs", "notifications"]
+# table -> stable ordering column for pagination (not all tables have `id`)
+TABLES = {"schools": "id", "subjects": "id", "units": "id", "lessons": "id",
+          "guide_pages": "id", "classes": "id", "teacher_invitations": "id",
+          "profiles": "id", "events": "id", "upload_jobs": "id",
+          "content_pipeline_logs": "id", "notifications": "id",
+          "class_members": "class_id", "teacher_subjects": "teacher_id",
+          "progress": "person_id", "bug_reports": "id",
+          "knowledge_check_scores": "id", "lesson_visits": "id",
+          "picker_school_submissions": "id", "pipeline_steps": "id",
+          "practice_qa_flags": "id", "simplify_cache": "id",
+          "subject_requests": "id", "user_selected_subjects": "id"}
+# NB: "school_subscriptions" in CLAUDE.md does not exist in the live schema
 
 
 def sq(path):
@@ -44,10 +52,10 @@ def sq(path):
     return json.load(urllib.request.urlopen(r, timeout=120))
 
 
-def dump_table(name, outdir):
+def dump_table(name, outdir, order_col="id"):
     rows, off = [], 0
     while True:
-        page = sq(f"/rest/v1/{name}?select=*&order=id&limit=1000&offset={off}")
+        page = sq(f"/rest/v1/{name}?select=*&order={order_col}&limit=1000&offset={off}")
         rows += page
         if len(page) < 1000:
             break
@@ -61,9 +69,12 @@ def dump_table(name, outdir):
 def main():
     os.makedirs(os.path.join(DEST, "supabase"), exist_ok=True)
     total = 0
-    for t in TABLES:
+    only = set(sys.argv[1:])
+    for t, col in TABLES.items():
+        if only and t not in only:
+            continue
         try:
-            total += dump_table(t, os.path.join(DEST, "supabase"))
+            total += dump_table(t, os.path.join(DEST, "supabase"), col)
         except Exception as e:
             print(f"  {t}: FAILED {str(e)[:90]}")
 
