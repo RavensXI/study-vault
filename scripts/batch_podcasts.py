@@ -379,7 +379,7 @@ def cmd_download(args):
         try:
             # Download audio
             mp3_path = os.path.join(SCRIPT_DIR, f"_temp_podcast_{label.replace('/', '_')}.m4a")
-            nlm_run(["download", "audio", notebook_id, "-o", mp3_path], timeout=120)
+            nlm_run(["download", "audio", notebook_id, "-o", mp3_path], timeout=420)  # post-rebrand downloads run ~2-4 min each; 120s timed out on ALL of them
 
             if not os.path.exists(mp3_path):
                 print(f"  {label}: Download failed — file not found")
