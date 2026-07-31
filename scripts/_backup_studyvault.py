@@ -39,10 +39,10 @@ TABLES = {"schools": "id", "subjects": "id", "units": "id", "lessons": "id",
           "content_pipeline_logs": "id", "notifications": "id",
           "class_members": "class_id", "teacher_subjects": "teacher_id",
           "progress": "person_id", "bug_reports": "id",
-          "knowledge_check_scores": "id", "lesson_visits": "id",
+          "knowledge_check_scores": "created_at", "lesson_visits": "created_at",
           "picker_school_submissions": "id", "pipeline_steps": "id",
           "practice_qa_flags": "id", "simplify_cache": "id",
-          "subject_requests": "id", "user_selected_subjects": "id"}
+          "subject_requests": "id", "user_selected_subjects": "created_at"}
 # NB: "school_subscriptions" in CLAUDE.md does not exist in the live schema
 
 
