@@ -190,14 +190,11 @@ try {
         Write-Log ("PODCASTS made+verified: {0} ({1} still pending for tomorrow)" -f $podcastsMade, $after)
     }
 
-    # ── Stage 2: SHORTS with whatever budget remains ─────────────────────
-    $shortsCap = [Math]::Max(0, $nlmBudget - $podcastsMade)
-    if ($shortsCap -eq 0) {
-        Write-Log "NLM budget fully consumed by podcasts - no shorts today."
-        $main = @()
-    } else {
-        $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "$shortsCap") -TimeoutMin 300
-    }
+    # ── Stage 2: SHORTS at full budget ───────────────────────────────────
+    # PROVEN 31 Jul: audio (podcasts) and video (shorts) quotas are separate
+    # pools — 71 audio generations succeeded the same day shorts spent ~93
+    # video generations. No subtraction needed; podcasts never throttle shorts.
+    $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "$nlmBudget") -TimeoutMin 300
     if ($main -match "AUTH EXPIRED") {
         # Auth died AFTER the dry-run passed (rare). Rewind the launch stamp so the
         # next hourly heartbeat retries instead of waiting a full 24h.
