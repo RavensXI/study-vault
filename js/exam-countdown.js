@@ -8,7 +8,9 @@
   'use strict';
 
   var HIDE_KEY = 'studyvault-hide-countdown';
-  var DATES_PATH = '/data/exam-dates-2026.json';
+  // Auto-rolls to the next cohort's dates the day after 2026 results day.
+  var DATES_PATH = (new Date() < new Date('2026-08-21'))
+    ? '/data/exam-dates-2026.json' : '/data/exam-dates-2027.json';
 
   function getSubjectSlug() {
     var match = window.location.pathname.match(/^\/(browse|lesson|practice|guide)\/([^/]+)/);

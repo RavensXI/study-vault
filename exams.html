@@ -1423,7 +1423,8 @@
     /* ── Init ── */
     async function init() {
       try {
-        var resp = await fetch('/data/exam-dates-2026.json');
+        var _datesFile = (new Date() < new Date('2026-08-21')) ? '2026' : '2027';
+        var resp = await fetch('/data/exam-dates-' + _datesFile + '.json');
         if (!resp.ok) throw new Error('Failed to load exam dates');
         allDates = await resp.json();
       } catch (e) {
