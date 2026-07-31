@@ -160,7 +160,21 @@ try {
     foreach ($ln in $sweepOut) { if ($ln -match '^\s*(\d+)\s*$') { $backlog = [int]$Matches[1]; break } }
     if ($backlog -gt 0) {
         Write-Log ("PODCAST backlog: {0} live lessons - podcasts run first today." -f $backlog)
-        Run-Py -PyArgs @("scripts\batch_podcasts.py", "--live-only", "--limit", "$nlmBudget") -TimeoutMin 90 | Out-Null
+        # batch_podcasts' bare sweep walks a stale hardcoded SUBJECT_ORDER, so
+        # the dispatcher must name each subject explicitly from the sweep.
+        $sweepJson = Run-Py -PyArgs @("scripts\_podcast_sweep.py", "--json") -TimeoutMin 10
+        $subjects = @()
+        foreach ($ln in $sweepJson) {
+            if ($ln -match '^\s*\{') { $subjects = (ConvertFrom-Json $ln).subjects; break }
+        }
+        $left = $nlmBudget
+        foreach ($subj in $subjects) {
+            if ($left -le 0) { break }
+            $take = [Math]::Min([int]$subj.pending, $left)
+            Write-Log ("PODCASTS: {0} - requesting {1}" -f $subj.slug, $take)
+            Run-Py -PyArgs @("scripts\batch_podcasts.py", "--subject", $subj.slug, "--live-only", "--limit", "$take") -TimeoutMin 90 | Out-Null
+            $left -= $take
+        }
         for ($i = 0; $i -lt 15; $i++) {
             Start-Sleep -Seconds 300
             $st = Run-Py -PyArgs @("scripts\batch_podcasts.py", "--status") -TimeoutMin 15
