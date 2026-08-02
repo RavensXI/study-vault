@@ -123,7 +123,7 @@ All content served from Supabase. Static HTML files remain as backup.
 - **URL scheme:** `/lesson/{subject}/{unit}/{number}`, `/practice/{subject}/{unit}/{number}` (maths, geography skills, english-language, spanish, french, german, science calculations), `/browse/{subject}/{unit?}`, `/guide/{subject}/{type}/{slug?}`, `/exams` (personal exam timetable + revision planner)
 - **Mixed-format subjects:** `subjects.settings.practice_units` array lists which units use `/practice/` URLs. `browse-loader.js` checks this per unit. Example: Geography has article units (Paper 1, Paper 2) + practice unit (Geographical Skills). English Language has all 4 units as practice-first.
 - **Auth (4 tiers):**
-  - **Free users:** No login. Generic content (school_id NULL) + ads. Prefs stored in localStorage via `js/free-user.js`.
+  - **Free users:** No login. Generic content (school_id NULL). NO ADS — decided against ads on the free tier. Prefs stored in localStorage via `js/free-user.js`.
   - **School students:** Enter school code (stored in `schools.settings.student_code`). Validated via `api/auth/login.js`, stored in sessionStorage. Sees only subscribed subjects (restricted mode via `school_subscriptions` table), no ads.
   - **Teachers:** Individual Supabase Auth accounts (email + password). Invited by admin, sign up at `/teacher/signup?token=...`. Login at `/teacher/login`. Scoped to their school + assigned subjects via `teacher_subjects` table. Session stored in both sessionStorage and localStorage (cross-tab). Auth-gate supports `data-auth="teacher"` mode.
   - **Admin:** `ADMIN_PASSWORD` via `js/auth-gate.js`. Sees all schools/subjects. Shared password still works alongside Supabase Auth.
