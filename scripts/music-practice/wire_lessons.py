@@ -71,12 +71,51 @@ def main():
         urls[ex] = AUDIO_PUBLIC_URL + "/" + key
     print("uploaded %d excerpts to R2" % len(needed))
 
+    STEP_TEMPLATES = {
+        "tonality": ["<strong>Step 1 &mdash; overall colour.</strong> Listen to the whole excerpt once. Does it feel bright and open, or dark and heavy? That first impression is usually your tonality answer &mdash; but check it against the detail.",
+                      "<strong>Step 2 &mdash; the character cues.</strong> Faster, lighter music with simple, sunny chords usually signals major; slower music with darker chords leans minor. Pentatonic melodies use only five notes and sound folk-like; chromatic lines creep in semitones and sound unstable.",
+                      "<strong>Step 3 &mdash; confirm on the ending.</strong> Listen to the final chord. A settled, warm ending confirms major; a sombre ending confirms minor. Answer: <strong>{answer}</strong>."],
+        "instrument_family": ["<strong>Step 1 &mdash; isolate the melody.</strong> Ignore the accompaniment. Hum the main tune to yourself and focus only on the sound making it.",
+                      "<strong>Step 2 &mdash; the timbre checklist.</strong> Breathy or reedy = woodwind. Warm and bowed, with smooth swells = strings. Bright, metallic and fanfare-like = brass.",
+                      "<strong>Step 3 &mdash; decide.</strong> Match what you hear against the checklist and commit. Answer: <strong>{answer}</strong>."],
+        "mixed": ["<strong>Step 1 &mdash; name the feature.</strong> Read the question first so you know whether you are listening for texture, a device, or a cadence &mdash; each needs a different kind of attention.",
+                      "<strong>Step 2 &mdash; listen structurally.</strong> For texture: count the independent lines. For a device: listen for repetition &mdash; does a shape repeat higher/lower (sequence), does the bass repeat unchanged (ostinato), is there a sustained held note (drone)? For a cadence: focus only on the final two chords.",
+                      "<strong>Step 3 &mdash; eliminate and answer.</strong> Cross off options that contradict what you heard, then choose. Answer: <strong>{answer}</strong>."],
+    }
+
     for spec in LESSONS:
         lq = [q for q in qs if q["fact"] in spec["facts"]]
         if not lq:
             print("SKIP", spec["slug"], "- no verified questions")
             continue
+        # balance: round-robin across answer truths so consecutive questions
+        # never share the same answer run (caught by Tom: bronze was 4x major)
+        from collections import defaultdict as _dd
+        groups = _dd(list)
+        for q in lq:
+            groups[q["truth"]].append(q)
+        order, balanced = sorted(groups, key=lambda t: -len(groups[t])), []
+        while any(groups[t] for t in order):
+            for t in order:
+                if groups[t]:
+                    balanced.append(groups[t].pop(0))
+        lq = balanced
+        # worked example: take the first question out of the bank
+        wq = lq.pop(0)
+        tmpl = STEP_TEMPLATES.get(spec["facts"][0] if spec["facts"][0] in STEP_TEMPLATES else "mixed",
+                                  STEP_TEMPLATES["mixed"])
+        worked = [{"question": "Listen to the extract. " + wq["question"],
+                   "difficulty": "bronze",
+                   "steps": [s.replace("{answer}", wq["truth"]) for s in tmpl]}]
         passages, bank = [], {"bronze": [], "silver": [], "gold": []}
+        # the worked example's excerpt becomes the FIRST passage (Extract tab)
+        first_pid = wq["excerpt"]
+        passages.append({"id": first_pid, "text":
+            '<div style="text-align: center;"><p style="font-family: Inter, sans-serif; '
+            'font-size: 0.95rem; color: var(--text-primary); margin-bottom: 1rem;">'
+            'Listen to the excerpt, then answer.</p>'
+            '<audio controls preload="metadata" src="%s" '
+            'style="width: 100%%; max-width: 480px; margin: 0.5rem auto;"></audio></div>' % urls[first_pid]})
         for i, q in enumerate(lq):
             pid = q["excerpt"]
             if pid not in [p["id"] for p in passages]:
@@ -102,7 +141,7 @@ def main():
                   "Answer, then listen one final time to confirm"]},
               "exam_context": "Component 1: Understanding Music — the listening exam plays short "
                               "excerpts and asks you to identify musical elements exactly like these drills.",
-              "worked_examples": []}
+              "worked_examples": worked}
         existing_l = sb.from_("lessons").select("id").eq("unit_id", unit_id).eq("lesson_number", spec["n"]).execute().data
         row = {"unit_id": unit_id, "lesson_number": spec["n"], "slug": spec["slug"],
                "title": spec["title"], "description": spec["desc"],
