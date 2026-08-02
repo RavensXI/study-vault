@@ -109,7 +109,11 @@ def main():
             m = re.match(r"<strong>(.*?)</strong>\s*(.*)$", s, re.S)
             label = re.sub(r"&mdash;", "—", m.group(1)).rstrip(". ") if m else "Step"
             return {"label": label, "content": m.group(2) if m else s}
-        worked = [{"question": "Listen to the extract. " + wq["question"],
+        worked = [{"question":
+                       '<div style="text-align:center; margin-bottom: 0.75rem;">'
+                       '<audio controls preload="metadata" src="%s" '
+                       'style="width: 100%%; max-width: 420px;"></audio></div>'
+                       'Listen to the extract. %s' % (urls[wq["excerpt"]], wq["question"]),
                    "difficulty": "bronze",
                    "steps": [_split_step(s.replace("{answer}", wq["truth"])) for s in tmpl]}]
         passages, bank = [], {"bronze": [], "silver": [], "gold": []}
