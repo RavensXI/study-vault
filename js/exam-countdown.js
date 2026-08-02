@@ -11,6 +11,7 @@
   // Auto-rolls to the next cohort's dates the day after 2026 results day.
   var DATES_PATH = (new Date() < new Date('2026-08-21'))
     ? '/data/exam-dates-2026.json' : '/data/exam-dates-2027.json';
+  var DATES_YEAR = DATES_PATH.indexOf('2027') !== -1 ? 2027 : 2026;
 
   function getSubjectSlug() {
     var match = window.location.pathname.match(/^\/(browse|lesson|practice|guide)\/([^/]+)/);
@@ -172,6 +173,8 @@
     _initInFlight = true;
 
     try {
+      var cohortYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      if (cohortYear && cohortYear > DATES_YEAR) return;
       var slug = getSubjectSlug();
       if (!slug) return;
       var pageType = getPageType();

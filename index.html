@@ -2662,6 +2662,8 @@
       var firstAvailable = null;
       boardKeys.forEach(function (board) {
         var available = boards[board];
+        var sunsetYear = svBoardSunset(slug, board.toLowerCase());
+        if (sunsetYear) available = false;
         if (available && !firstAvailable) firstAvailable = board;
         var pill = document.createElement('button');
         pill.type = 'button';
@@ -2669,6 +2671,10 @@
         pill.textContent = board;
         pill.dataset.board = board.toLowerCase();
         pill.dataset.available = available ? 'true' : 'false';
+        if (sunsetYear) {
+          pill.classList.add('sunset');
+          pill.title = 'Final exams summer ' + sunsetYear + ' — before your exam year';
+        }
         pill.addEventListener('click', function () { fwPickBoard(slug, board, pill); });
         pills.appendChild(pill);
       });
@@ -2703,6 +2709,12 @@
     }
 
     function fwPickBoard(slug, board, clickedPill) {
+      if (clickedPill.classList.contains('sunset')) {
+        var srow = clickedPill.closest('.fw-board-row');
+        var shelp = srow ? srow.querySelector('.fw-board-help') : null;
+        if (shelp) shelp.textContent = clickedPill.title + '. Pick another board.';
+        return;
+      }
       var available = clickedPill.dataset.available !== 'false';
       if (!available) {
         if (!clickedPill.classList.contains('requested')) {
@@ -2745,6 +2757,30 @@
       var optLabel = document.getElementById('fw-optional-label');
       coreContainer.innerHTML = '';
       optContainer.innerHTML = '';
+
+      var yearRow = document.createElement('div');
+      yearRow.className = 'fw-board-row fw-year-row resolved';
+      var yearBase = svExamYearBase();
+      var yearNow = svExamYear();
+      yearRow.innerHTML = '<div class="fw-board-head"><div class="fw-board-name">' +
+        '<span>Which year are you in?</span></div>' +
+        '<div class="fw-board-status">Sets your exam year</div></div>';
+      var ypills = document.createElement('div');
+      ypills.className = 'fw-board-pills';
+      [{ label: 'Year 11 — exams ' + yearBase, year: yearBase },
+       { label: 'Year 10 — exams ' + (yearBase + 1), year: yearBase + 1 }].forEach(function (opt) {
+        var p = document.createElement('button');
+        p.type = 'button';
+        p.className = 'fw-board-pill' + (yearNow === opt.year ? ' selected' : '');
+        p.textContent = opt.label;
+        p.addEventListener('click', function () {
+          localStorage.setItem('studyvault-exam-year', String(opt.year));
+          fwBuildStep2();
+        });
+        ypills.appendChild(p);
+      });
+      yearRow.appendChild(ypills);
+      coreContainer.appendChild(yearRow);
 
       CORE_SLUGS.forEach(function (slug) { coreContainer.appendChild(fwMakeBoardRow(slug, true)); });
       if (fwSelected.size > 0) {
@@ -4012,6 +4048,29 @@
       finishWizard();
     });
 
+    // Cohort gate: last summer exam series per target slug (annual spec audit).
+    // A student whose exam year is after a board's final series must not start
+    // that course. Exam year is set by the wizard's year toggle.
+    var SUNSET_YEARS = {
+      'science-ocr-b': 2027,
+      'separate-sciences-ocr-b': 2027,
+      'food-preparation-and-nutrition-eduqas': 2027,
+      'l12-ict': 2028
+    };
+    function svExamYearBase() {
+      var now = new Date();
+      return now.getMonth() >= 6 ? now.getFullYear() + 1 : now.getFullYear();
+    }
+    function svExamYear() {
+      var y = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      return y || svExamYearBase();
+    }
+    function svBoardSunset(baseSlug, boardLower) {
+      var m = (typeof slugMap !== 'undefined') ? slugMap[baseSlug] : null;
+      var target = m ? m[boardLower] : null;
+      var y = target ? SUNSET_YEARS[target] : null;
+      return (y && svExamYear() > y) ? y : null;
+    }
     // Map (base subject slug, board) → actual Supabase subject slug
     var slugMap = {
       'english-language': { 'aqa': 'english-language-aqa', 'edexcel': 'english-language-edexcel', 'ocr': 'english-language-ocr', 'eduqas': 'english-language-eduqas' },
