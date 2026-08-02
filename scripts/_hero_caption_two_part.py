@@ -116,6 +116,12 @@ def fetch_jobs():
         if len(page) < 1000:
             break
         off += 1000
+    su = os.environ.get("CAPTION_SUBJECT")
+    un = os.environ.get("CAPTION_UNIT")
+    if su:
+        jobs = [j for j in jobs if j["subject"] == su]
+    if un:
+        jobs = [j for j in jobs if j["unit"] == un]
     return jobs
 
 
