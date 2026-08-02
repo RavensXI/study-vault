@@ -2387,7 +2387,7 @@ function initRevisionTips() {
       { selector: 'figure.diagram', text: 'Create a comparison table from this diagram showing similarities and differences.', link: 'comparison-tables.html', label: 'Comparison Tables', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Use the points inside to plan both sides of a 12-mark evaluation answer.', link: 'argument-planning.html', label: 'Argument Planning', maxPerPage: 1 }
     ],
-    'gcse-music': [
+    'music-aqa': [
       { selector: '.key-fact', text: 'Cover this box and try to recall every detail from memory.', link: 'retrieval-practice.html', label: 'Retrieval Practice' },
       { selector: 'figure.diagram', text: 'Redraw this diagram from memory, labelling each musical element.', link: 'dual-coding.html', label: 'Dual Coding', maxPerPage: 1 },
       { selector: '.collapsible', text: 'Listen to an example piece and try to identify each element discussed inside.', link: 'active-listening.html', label: 'Active Listening', maxPerPage: 1 }
