@@ -12,6 +12,7 @@ import io
 import json
 import os
 import sys
+import re
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -104,9 +105,13 @@ def main():
         wq = lq.pop(0)
         tmpl = STEP_TEMPLATES.get(spec["facts"][0] if spec["facts"][0] in STEP_TEMPLATES else "mixed",
                                   STEP_TEMPLATES["mixed"])
+        def _split_step(s):
+            m = re.match(r"<strong>(.*?)</strong>\s*(.*)$", s, re.S)
+            label = re.sub(r"&mdash;", "—", m.group(1)).rstrip(". ") if m else "Step"
+            return {"label": label, "content": m.group(2) if m else s}
         worked = [{"question": "Listen to the extract. " + wq["question"],
                    "difficulty": "bronze",
-                   "steps": [s.replace("{answer}", wq["truth"]) for s in tmpl]}]
+                   "steps": [_split_step(s.replace("{answer}", wq["truth"])) for s in tmpl]}]
         passages, bank = [], {"bronze": [], "silver": [], "gold": []}
         # the worked example's excerpt becomes the FIRST passage (Extract tab)
         first_pid = wq["excerpt"]
