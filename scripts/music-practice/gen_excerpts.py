@@ -98,7 +98,7 @@ def _triad(k, degree, octave=3, ql=1.0, seventh=False):
 
 def gen_metre(kind, seed):
     rng = random.Random(seed)
-    inst_name = rng.choice(list(MELODIC))
+    inst_name = rng.choice(["flute", "violin", "trumpet"])
     inst_cls, family = MELODIC[inst_name]
     k = rng.choice(MAJORS)
     conf = {
@@ -119,15 +119,34 @@ def gen_metre(kind, seed):
             acc.append(_triad(k, [1, 4, 5, 1, 5, 1][bar], ql=1.5))
             acc.append(_triad(k, [1, 4, 5, 1, 5, 1][bar], ql=1.5))
     else:
-        for n in _stepwise_melody(k, rng, bpb, 6):
-            mel.append(n)
-        # oom-pah accompaniment makes the metre audible
+        # melody: long accented downbeat note then movement — metre-defining
+        sc = key.Key(k).getScale()
+        degs = [1, 3, 5, 3, 4, 2]
+        for bar in range(6):
+            d0 = degs[bar]
+            if int(bpb) == 2:
+                mel.append(note.Note(sc.pitchFromDegree(d0).transpose(12), quarterLength=1.5))
+                mel.append(note.Note(sc.pitchFromDegree(d0 % 7 + 1).transpose(12), quarterLength=0.5))
+            elif int(bpb) == 3:
+                mel.append(note.Note(sc.pitchFromDegree(d0).transpose(12), quarterLength=2.0))
+                mel.append(note.Note(sc.pitchFromDegree(d0 % 7 + 1).transpose(12), quarterLength=1.0))
+            else:
+                mel.append(note.Note(sc.pitchFromDegree(d0).transpose(12), quarterLength=1.5))
+                mel.append(note.Note(sc.pitchFromDegree(d0 % 7 + 1).transpose(12), quarterLength=0.5))
+                mel.append(note.Note(sc.pitchFromDegree((d0 + 1) % 7 + 1).transpose(12), quarterLength=1.0))
+                mel.append(note.Note(sc.pitchFromDegree(d0).transpose(12), quarterLength=1.0))
+        # percussive oom-pah: accented low root on the downbeat, marimba chords off
+        acc.insert(0, instrument.Marimba())
         for bar in range(6):
             deg = [1, 4, 5, 1, 5, 1][bar]
             root = _triad(k, deg, octave=2, ql=1.0)
-            acc.append(note.Note(root.root(), quarterLength=1.0))
+            dn = note.Note(root.root(), quarterLength=1.0)
+            dn.volume.velocity = 110
+            acc.append(dn)
             for _ in range(int(bpb) - 1):
-                acc.append(_triad(k, deg, ql=1.0))
+                c = _triad(k, deg, octave=4, ql=1.0)
+                c.volume.velocity = 70
+                acc.append(c)
     s.insert(0, mel)
     s.insert(0, acc)
     return s, {"metre": kind, "tonality": "major", "instrument": inst_name,
@@ -141,10 +160,17 @@ def gen_tonality(kind, seed):
     s = stream.Score()
     if kind in ("major", "minor"):
         k = rng.choice(MAJORS if kind == "major" else MINORS)
-        mel = _mk_parts(k, "4/4", 104, inst_cls)
+        bpm = 112 if kind == "major" else 76
+        mel = _mk_parts(k, "4/4", bpm, inst_cls)
         acc = _accomp_part(k, "4/4")
-        for n in _stepwise_melody(k, rng, 4, 6):
-            mel.append(n)
+        kk = key.Key(k)
+        sc = kk.getScale()
+        degs = [1, 3, 5, 6, 5, 4, 3, 2, 1, 7, 1, 3, 2, 7, 1, 1]
+        for i, d in enumerate(degs):
+            p = sc.pitchFromDegree((d - 1) % 7 + 1).transpose(12)
+            if kind == "minor" and d == 7:
+                p = p.transpose(1)  # harmonic minor leading note
+            mel.append(note.Note(p, quarterLength=1.5 if i % 4 == 0 else (0.5 if i % 4 == 1 else 1.0)))
         for bar in range(6):
             acc.append(_triad(k, [1, 4, 5, 6, 5, 1][bar], ql=4.0))
         s.insert(0, mel); s.insert(0, acc)
@@ -182,16 +208,19 @@ def gen_cadence(kind, seed):
     acc = _accomp_part(k, "4/4")
     for n in _stepwise_melody(k, rng, 4, 4):
         mel.append(n)
-    final = {"perfect": (5, 1), "imperfect": (2, 5), "plagal": (4, 1), "interrupted": (5, 6)}[kind]
-    for bar, deg in enumerate([1, 6, 4, 1]):
+    final = {"perfect": (5, 1), "imperfect": (4, 5), "plagal": (4, 1), "interrupted": (5, 6)}[kind]
+    for bar, deg in enumerate([1, 6, 2, 1]):
         acc.append(_triad(k, deg, ql=4.0))
-    # the cadence itself: two clear root-position minims, then stop
+    # the cadence itself, ISOLATED: silence, then two whole-bar chords, stop
     pen, fin = final
-    acc.append(_triad(k, pen, ql=2.0))
-    acc.append(_triad(k, fin, ql=2.0))
-    end_deg = {1: 1, 5: 5, 6: 3}[fin]
-    mel.append(note.Note(kk.getScale().pitchFromDegree(pen if pen != 2 else 2).transpose(12), quarterLength=2.0))
-    mel.append(note.Note(kk.getScale().pitchFromDegree(end_deg).transpose(12), quarterLength=2.0))
+    mel.append(note.Rest(quarterLength=4.0))
+    acc.append(note.Rest(quarterLength=4.0))
+    acc.append(_triad(k, pen, ql=4.0))
+    acc.append(_triad(k, fin, ql=4.0))
+    end_deg = {1: 1, 5: 2, 6: 3}[fin]
+    pen_deg = {5: 7, 4: 6}[pen]
+    mel.append(note.Note(kk.getScale().pitchFromDegree(pen_deg).transpose(12), quarterLength=4.0))
+    mel.append(note.Note(kk.getScale().pitchFromDegree(end_deg).transpose(12), quarterLength=4.0))
     s.insert(0, mel); s.insert(0, acc)
     return s, {"cadence": kind, "tonality": "major", "metre": "simple quadruple (4/4)",
                "instrument": inst_name, "instrument_family": family, "tempo_bpm": 92}

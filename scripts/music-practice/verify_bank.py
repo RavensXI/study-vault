@@ -18,7 +18,7 @@ sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 KEY = os.environ["GEMINI_API_KEY"]
 
 OPTIONS = {
-    "metre": ["simple duple (2/4)", "simple triple (3/4)", "simple quadruple (4/4)", "compound duple (6/8)"],
+    "metre": ["simple time, in 2 or 4", "simple triple time, in 3", "compound time (6/8)"],
     "tonality": ["major", "minor", "pentatonic", "chromatic"],
     "cadence": ["perfect", "imperfect", "plagal", "interrupted"],
     "texture": ["monophonic", "melody and accompaniment", "imitative polyphony", "unison"],
@@ -77,21 +77,45 @@ def main(bank_dir):
         fact_keys += [k for k in SECONDARY.get(f["topic"], []) if k in f and k not in fact_keys]
         for fk in fact_keys:
             truth = f.get(fk)
+            if fk == "metre":
+                truth = {"simple duple (2/4)": "simple time, in 2 or 4",
+                         "simple quadruple (4/4)": "simple time, in 2 or 4",
+                         "simple triple (3/4)": "simple triple time, in 3",
+                         "compound duple (6/8)": "compound time (6/8)"}.get(truth, truth)
+            if fk == "instrument_family" and f.get("instrument") in ("horn", "cello", "oboe"):
+                continue  # FluidR3 timbres too ambiguous for family questions
             if truth not in (OPTIONS.get(fk) or []):
                 continue
             opts = list(OPTIONS[fk])
+            if truth == 'pentatonic':
+                opts = ['minor', 'pentatonic', 'chromatic', 'whole-tone']
+            votes = []
+            last_why = ""
+            for trial in range(3):
+                topts = list(opts)
+                rng.shuffle(topts)
+                letter, why = ask(audio_b64, PROMPTS[fk], topts)
+                gi = ord(letter) - 65
+                votes.append(topts[gi] if 0 <= gi < len(topts) else "?")
+                last_why = why
+            n_truth = votes.count(truth)
+            from collections import Counter as _C
+            top, top_n = _C(votes).most_common(1)[0]
+            if n_truth >= 2:
+                status = "verified"
+            elif top_n >= 2 and top != truth:
+                status = "flagged-consistent"   # machine consistently hears something else
+            else:
+                status = "flagged-ambiguous"    # machine flip-flops: perceptually unclear
+            agree += 1 if status == "verified" else 0
+            flagged += 0 if status == "verified" else 1
             rng.shuffle(opts)
-            correct_idx = opts.index(truth)
-            letter, why = ask(audio_b64, PROMPTS[fk], opts)
-            ok = letter == chr(65 + correct_idx)
-            agree += 1 if ok else 0
-            flagged += 0 if ok else 1
             questions.append({"excerpt": f["id"], "fact": fk, "question": PROMPTS[fk],
-                              "options": opts, "correct": correct_idx, "truth": truth,
-                              "gemini": letter, "gemini_why": why,
-                              "status": "verified" if ok else "flagged"})
-            print("%s %-18s truth=%-26s gemini=%s %s" % (
-                f["id"], fk, truth, letter, "OK" if ok else "<-- FLAG"), flush=True)
+                              "options": opts, "correct": opts.index(truth), "truth": truth,
+                              "votes": votes, "gemini_why": last_why, "status": status})
+            print("%s %-18s truth=%-26s votes=%s %s" % (
+                f["id"], fk, truth, "/".join(v[:14] for v in votes),
+                "OK" if status == "verified" else "<-- " + status.upper()), flush=True)
     io.open(os.path.join(bank_dir, "questions.json"), "w", encoding="utf-8").write(
         json.dumps(questions, ensure_ascii=False, indent=1))
     print("\nTOTAL: %d questions, %d verified, %d flagged" % (len(questions), agree, flagged))
