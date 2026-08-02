@@ -215,13 +215,22 @@ def stage_plan(cfg):
 
     print("planning call: system %dk chars, user %dk chars" % (len(system) // 1000, len(user) // 1000))
     cl = client()
+    # Search OFF by default: every search round re-bills the full (huge) spec
+    # context. The spec audit already verifies currency — set plan_search_max
+    # in the config only when a spec is genuinely in doubt. The user message
+    # (spec + catalog) is cached so any search/retry rounds re-read at 0.1x.
+    search_max = cfg.get("plan_search_max", 0)
+    tools = ([{"type": "web_search_20260209", "name": "web_search",
+               "max_uses": search_max}] if search_max else [])
     with cl.messages.stream(
         model=MODEL_PLAN,
         max_tokens=40000,
         thinking={"type": "adaptive"},
-        tools=[{"type": "web_search_20260209", "name": "web_search", "max_uses": 12}],
-        system=system,
-        messages=[{"role": "user", "content": user}],
+        tools=tools,
+        system=[{"type": "text", "text": system}],
+        messages=[{"role": "user", "content": [
+            {"type": "text", "text": user,
+             "cache_control": {"type": "ephemeral"}}]}],
     ) as stream:
         msg = stream.get_final_message()
 
