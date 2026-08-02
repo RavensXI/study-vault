@@ -162,7 +162,8 @@
     ],
     'physical-education': [
       { board: 'AQA', slug: 'physical-education-aqa' },
-      { board: 'OCR', slug: 'physical-education-ocr' }
+      { board: 'OCR', slug: 'physical-education-ocr' },
+      { board: 'Edexcel', slug: 'physical-education-edexcel' }
     ],
     'religious-studies': [
       { board: 'AQA', slug: 'religious-studies-aqa' },
