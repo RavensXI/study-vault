@@ -207,6 +207,7 @@
     ],
     'design-technology': [
       { board: 'AQA', slug: 'design-technology' },
+      { board: 'Edexcel', slug: 'design-technology-edexcel' },
       { board: 'Eduqas', slug: 'design-technology-eduqas' },
       { board: 'WJEC', slug: 'design-technology-eduqas' }
     ],
