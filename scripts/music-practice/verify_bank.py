@@ -95,7 +95,7 @@ def main(bank_dir):
                 topts = list(opts)
                 rng.shuffle(topts)
                 letter, why = ask(audio_b64, PROMPTS[fk], topts)
-                gi = ord(letter) - 65
+                gi = (ord(letter) - 65) if len(letter) == 1 else -1
                 votes.append(topts[gi] if 0 <= gi < len(topts) else "?")
                 last_why = why
             n_truth = votes.count(truth)
