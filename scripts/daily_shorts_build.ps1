@@ -190,11 +190,21 @@ try {
         Write-Log ("PODCASTS made+verified: {0} ({1} still pending for tomorrow)" -f $podcastsMade, $after)
     }
 
-    # ── Stage 2: SHORTS at full budget ───────────────────────────────────
+    # ── Stage 2: SHORTS, yielding to the explainer build ─────────────────
     # PROVEN 31 Jul: audio (podcasts) and video (shorts) quotas are separate
-    # pools — 71 audio generations succeeded the same day shorts spent ~93
-    # video generations. No subtraction needed; podcasts never throttle shorts.
-    $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "$nlmBudget") -TimeoutMin 300
+    # pools — podcasts never throttle shorts. But EXPLAINERS are video too:
+    # the hourly explainer wrapper (daily_explainer_build.ps1, cap 35) draws
+    # from the same ~100/day video pool. Ask the explainer sweep how much it
+    # wants today and hand shorts the remainder, so the two wrappers stop
+    # racing one quota into failure on new-subject days.
+    $explainerWant = 0
+    $exDry = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "35", "--dry-run") -TimeoutMin 10
+    foreach ($ln in $exDry) {
+        if ($ln -match 'Generating explainer videos for (\d+) lessons') { $explainerWant = [Math]::Min(35, [int]$Matches[1]); break }
+    }
+    $shortsCap = [Math]::Max(0, $nlmBudget - $explainerWant)
+    Write-Log ("SHORTS budget: {0} (explainer sweep wants {1} of the video pool)" -f $shortsCap, $explainerWant)
+    $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "$shortsCap") -TimeoutMin 300
     if ($main -match "AUTH EXPIRED") {
         # Auth died AFTER the dry-run passed (rare). Rewind the launch stamp so the
         # next hourly heartbeat retries instead of waiting a full 24h.
