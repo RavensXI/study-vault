@@ -229,8 +229,10 @@ def stage_plan(cfg):
         tools=tools,
         system=[{"type": "text", "text": system}],
         messages=[{"role": "user", "content": [
-            {"type": "text", "text": user,
-             "cache_control": {"type": "ephemeral"}}]}],
+            # cache only when search rounds will re-read the spec context;
+            # a one-shot plan call would pay the 1.25x write for nothing
+            dict({"type": "text", "text": user},
+                 **({"cache_control": {"type": "ephemeral"}} if search_max else {}))]}],
     ) as stream:
         msg = stream.get_final_message()
 
@@ -526,6 +528,13 @@ def lesson_key(unit_slug, number):
 def stage_prep(cfg):
     plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
     system = shared_system_blocks(cfg, plan)
+    # Batch requests process in PARALLEL, so cache hits are best-effort and land
+    # ~5% in practice (D&T arm: 1 read / 22 requests). Below ~53% hits a 1h
+    # marker LOSES money: 21/22 requests re-wrote the 80k prefix at the 2x
+    # write premium, adding ~$1.93 (+48%) to that stage vs plain batch input.
+    # Strip markers from batched requests; the sequential stages (content-fix,
+    # factcheck, media) keep theirs and genuinely hit 70-90%.
+    system = [{k: v for k, v in blk.items() if k != "cache_control"} for blk in system]
     requests = []
     for u in plan["article_units"]:
         for l in u["lessons"]:
@@ -589,22 +598,21 @@ def stage_submit(cfg):
     cl = client()
     st = load_state(cfg)
 
-    # 1h-cache pre-warm: same shared system prefix, tiny output. Batch cache
-    # hits are best-effort, but a pre-written 1h prefix is the documented way
-    # to make them likely.
-    warm = dict(requests[0]["params"])
-    warm_p = {"model": warm["model"], "max_tokens": 32, "system": warm["system"],
-              "messages": [{"role": "user", "content": "warmup — reply with the single word OK"}]}
+    # Structured-outputs capability probe. (This used to be a full 1h-cache
+    # pre-warm of the shared system prefix, but batched requests no longer
+    # carry cache markers — see stage_prep — so warming 80k tokens at the 2x
+    # write premium bought nothing. A tiny system-free call answers the only
+    # question that matters: does the SDK/model accept output_config?)
+    probe = {"model": requests[0]["params"]["model"], "max_tokens": 32,
+             "messages": [{"role": "user", "content": "reply with the single word OK"}]}
     use_structured = True
     try:
-        msg = cl.messages.create(**try_structured(warm_p))
+        msg = cl.messages.create(**try_structured(probe))
+        rec = log_usage(cfg, "probe", probe["model"], "probe", msg.usage)
+        print("structured-outputs probe OK ($%.4f)" % cost_of(rec))
     except (TypeError, anthropic.BadRequestError) as e:
-        print("structured outputs unavailable on warmup (%s) — falling back to prompt-only JSON" % e)
+        print("structured outputs unavailable (%s) — falling back to prompt-only JSON" % e)
         use_structured = False
-        msg = cl.messages.create(**warm_p)
-    rec = log_usage(cfg, "warmup", warm["model"], "warmup", msg.usage)
-    print("warmup: cache_write_1h=%s cache_read=%s ($%.3f)"
-          % (rec["cache_write_1h"], rec["cache_read"], cost_of(rec)))
 
     batch_requests = []
     for r in requests:
