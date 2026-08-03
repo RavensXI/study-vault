@@ -18,10 +18,13 @@ module.exports = async function handler(req, res) {
     let subjectSummary = [];
 
     if (!lessons_only) {
-      // Fetch all subjects (for filter dropdown + summary)
+      // Fetch all subjects (for filter dropdown + summary). Archived subjects
+      // (retired quals, e.g. Eduqas French/Spanish) keep their lessons in the
+      // DB but must not clutter the review queue.
       let subjectsQuery = supabase
         .from('subjects')
         .select('id, slug, name, school_id, schools(name)')
+        .neq('status', 'archived')
         .order('name');
 
       // Teachers only see their school's subjects + generic
@@ -81,7 +84,7 @@ module.exports = async function handler(req, res) {
       for (const L of allLessons) {
         const sid = unitToSubject[L.unit_id];
         if (sid === undefined) continue;          // unit not in scope / orphan lesson
-        if (!isAdmin && !subjectIds.has(sid)) continue;
+        if (!subjectIds.has(sid)) continue;       // out of scope OR archived subject
         counts[L.status] = (counts[L.status] || 0) + 1;
         if (!perSubject[sid]) perSubject[sid] = {};
         perSubject[sid][L.status] = (perSubject[sid][L.status] || 0) + 1;
@@ -104,6 +107,7 @@ module.exports = async function handler(req, res) {
     let query = supabase
       .from('lessons')
       .select('id, lesson_number, slug, title, status, updated_at, reviewed_at, published_at, hero_image_url, hero_image_position, rejection_notes, unit_id, units!inner(name, slug, subject_id, subjects!inner(id, name, slug, school_id, settings))')
+      .neq('units.subjects.status', 'archived')
       .order('lesson_number', { ascending: true })
       .limit(200);
 
