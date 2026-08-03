@@ -128,6 +128,9 @@ for ($i = 1; $i -le $maxLoops; $i++) {
     Start-Sleep -Seconds $pollIntervalSec
 
     Write-Log ("Phase 2 loop {0}/{1}: status check" -f $i, $maxLoops)
+    # Quota-swallowed launches leave no artifact; the rolling window slides,
+    # so a spaced retry lands. Bounded inside the batch: 3 attempts, 20m apart.
+    Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--refire-missing") -TimeoutMin 15 | Out-Null
     $status = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--status") -TimeoutMin 10
 
     # Exit when nothing is still cooking. Two phrasings:

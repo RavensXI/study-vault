@@ -267,6 +267,7 @@ def cmd_generate(args):
                 continue
             focus = build_explainer_focus(lesson, entry["subject_name"], entry["unit_name"],
                                            entry["exam_board"], entry["unit_lessons"])
+            stuck_job["focus"] = focus
             try:
                 nlm_run(["video", "create", stuck_job["notebook_id"], "--format", "explainer",
                          "--focus", focus, "--confirm"], timeout=90)
@@ -362,6 +363,7 @@ def cmd_generate(args):
             "notebook_id": notebook_id,
             "artifact_id": artifact_id,
             "status": "in_progress",
+            "focus": focus,
         })
         save_state(state)
         created += 1
@@ -408,6 +410,54 @@ def cmd_status(args):
     still_active = sum(1 for j in active if j.get("status") == "in_progress")
     failed = sum(1 for j in active if j.get("status") == "failed")
     print(f"\n{completed} newly completed, {still_active} still in progress, {failed} failed")
+
+
+def cmd_refire_missing(args):
+    """Re-fire video create for in-progress jobs whose notebook has NO video
+    artifact. NLM's rolling quota window counts even REJECTED attempts, so a
+    launch that starts at the same minute daily collides with yesterday's
+    attempts and its first requests are silently swallowed (15 re-fires on
+    3 Aug; the same window's later requests succeeded). Called from the
+    wrapper's poll loop: the window slides continuously, so a retry 20+ min
+    later lands. Per-job: max 3 attempts, >=20 min apart, focus required
+    (stored at launch; legacy jobs get it on their next generate re-fire)."""
+    state = load_state()
+    now = time.time()
+    candidates = [j for j in state["jobs"]
+                  if j.get("status") == "in_progress" and not j.get("artifact_id")
+                  and j.get("focus") and j.get("refires", 0) < 3
+                  and now - j.get("last_refire_ts", 0) >= 1200]
+    if not candidates:
+        print("No jobs need a re-fire.")
+        return
+    print(f"Re-firing {len(candidates)} artifact-less jobs...")
+    for job in candidates:
+        # a launch-time create may just not have been visible yet — check first
+        artifact_id = None
+        try:
+            status = nlm_json(["studio", "status", job["notebook_id"]])
+            for s in (status or []):
+                if s.get("type") == "video":
+                    artifact_id = s["id"]
+                    break
+        except Exception as e:
+            print(f"  {job['label']}: status check failed ({str(e)[:80]}) - skipping")
+            continue
+        if artifact_id:
+            job["artifact_id"] = artifact_id
+            save_state(state)
+            print(f"  {job['label']}: artifact appeared ({artifact_id}) - no re-fire")
+            continue
+        try:
+            nlm_run(["video", "create", job["notebook_id"], "--format", "explainer",
+                     "--focus", job["focus"], "--confirm"], timeout=90)
+            print(f"  {job['label']}: re-fired (attempt {job.get('refires', 0) + 1})")
+        except Exception as e:
+            print(f"  {job['label']}: re-fire raised: {str(e)[:100]}")
+        job["refires"] = job.get("refires", 0) + 1
+        job["last_refire_ts"] = now
+        save_state(state)
+        time.sleep(3)
 
 
 def cmd_download(args):
@@ -481,12 +531,16 @@ def main():
     parser.add_argument("--status", action="store_true")
     parser.add_argument("--download", action="store_true")
     parser.add_argument("--cleanup", action="store_true")
+    parser.add_argument("--refire-missing", action="store_true",
+                        help="Re-fire video create for in-progress jobs with no artifact (quota-swallowed launches)")
     args = parser.parse_args()
 
-    if args.daily_cap and not (args.status or args.download):
+    if args.daily_cap and not (args.status or args.download or args.refire_missing):
         args.limit = args.daily_cap
 
-    if args.status:
+    if args.refire_missing:
+        cmd_refire_missing(args)
+    elif args.status:
         cmd_status(args)
     elif args.download:
         cmd_download(args)
