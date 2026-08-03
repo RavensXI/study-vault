@@ -16,7 +16,7 @@ if (-not (Test-Path $logDir)) {
 $logFile = Join-Path $logDir ("{0}.log" -f (Get-Date -Format "yyyy-MM-dd"))
 $lockFile = Join-Path $logDir "_running.lock"
 $lastLaunchFile = Join-Path $logDir "_last_launch.txt"
-$cooldownHours = 24.0833  # 24h05m - rolling quota window + safety buffer
+$cooldownHours = 23.9167  # 23h55m - catches the SAME hourly slot daily (24h05m drifted +1h/day; shorts wrapper learned this first)
 $lockStaleHours = 12       # treat lock as orphaned past this (run probably crashed)
 
 function Write-Log {

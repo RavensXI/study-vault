@@ -240,8 +240,13 @@ def cmd_generate(args):
     print(f"Generating podcasts for {len(pending)} lessons")
     print("=" * 60)
 
+    # try/finally so a mid-loop crash still prints the actual launched count.
+    # Previously "Launched N" only printed on clean exit, and the dry-run loop's
+    # identical summary line above made crashed runs look successful.
     created = 0
-    for entry in pending:
+    total = len(pending)
+    try:
+      for entry in pending:
         lesson = entry["lesson"]
         label = f"{entry['subject_slug']}/{entry['unit_slug']}/L{lesson['lesson_number']:02d}"
         print(f"\n  {label}: {lesson['title']}")
@@ -295,14 +300,20 @@ def cmd_generate(args):
             pass
         time.sleep(2)
 
-        # Get artifact ID
+        # Get artifact ID. notebooklm_tools' studio_status command occasionally
+        # crashes (upstream package bug). If we let that propagate the whole batch
+        # dies and remaining lessons silently abandoned. Swallow it; --status discovers
+        # the artifact on the next poll.
         audio_artifact_id = None
-        status = nlm_json(["studio", "status", notebook_id])
-        if status:
-            for s in status:
-                if s.get("type") == "audio" and s.get("status") in ("in_progress", "completed"):
-                    audio_artifact_id = s["id"]
-                    break
+        try:
+            status = nlm_json(["studio", "status", notebook_id])
+            if status:
+                for s in status:
+                    if s.get("type") == "audio" and s.get("status") in ("in_progress", "completed"):
+                        audio_artifact_id = s["id"]
+                        break
+        except Exception as e:
+            print(f"  WARN: studio status raised: {str(e)[:120]} - saving without artifact_id")
 
         job = {
             "lesson_id": lesson["id"],
@@ -316,10 +327,11 @@ def cmd_generate(args):
         created += 1
         print(f"  LAUNCHED (artifact: {audio_artifact_id})")
         time.sleep(3)
-
-    print(f"\n{'=' * 60}")
-    print(f"Launched {created} podcast generations")
-    print(f"Run with --status to check, --download --cleanup when complete")
+    finally:
+        print(f"\n{'=' * 60}")
+        verb = "Would launch (dry-run)" if args.dry_run else "Launched"
+        print(f"{verb} {created} of {total} attempted")
+        print(f"Run with --status to check, --download --cleanup when complete")
 
 
 def cmd_status(args):

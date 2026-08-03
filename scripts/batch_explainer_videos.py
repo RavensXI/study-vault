@@ -214,10 +214,14 @@ def get_pending_lessons(sb, limit, subject_filter=None):
 def cmd_generate(args):
     sb = get_client()
     state = load_state()
-    active_ids = {j["lesson_id"] for j in state["jobs"] if j.get("status") == "in_progress"}
+    # in_progress jobs whose video-create was silently swallowed (daily-limit
+    # rejection leaves the notebook with NO video artifact, ever — 53 lessons
+    # stuck this way on 2026-08-02). Their lessons still appear in the sweep;
+    # instead of skipping them we RE-FIRE video create on the EXISTING
+    # notebook, counted against the cap. Genuinely-cooking jobs are skipped.
+    jobs_by_lesson = {j["lesson_id"]: j for j in state["jobs"] if j.get("status") == "in_progress"}
 
     pending = get_pending_lessons(sb, args.limit, args.subject)
-    pending = [p for p in pending if p["lesson"]["id"] not in active_ids]
 
     if not pending:
         print("No lessons pending explainer video generation!")
@@ -226,15 +230,61 @@ def cmd_generate(args):
     print(f"Generating explainer videos for {len(pending)} lessons")
     print("=" * 60)
 
+    # try/finally so a mid-loop crash still prints the actual launched count.
+    # Previously "Launched N" only ever fired on clean exit, and the dry-run loop's
+    # identical summary line above lulled us into thinking crashed runs had shipped.
     created = 0
-    for entry in pending:
+    total = len(pending)
+    try:
+      for entry in pending:
         lesson = entry["lesson"]
         label = f"{entry['subject_slug']}/{entry['unit_slug']}/L{lesson['lesson_number']:02d}"
         print(f"\n  {label}: {lesson['title']}")
 
+        stuck_job = jobs_by_lesson.get(lesson["id"])
         if args.dry_run:
-            print(f"  [DRY RUN] Would create notebook + generate explainer video")
+            verb = "re-fire video on existing notebook" if stuck_job else "create notebook + generate explainer video"
+            print(f"  [DRY RUN] Would {verb}")
             created += 1
+            continue
+
+        if stuck_job:
+            # Live-check: if an artifact exists the job is genuinely cooking —
+            # leave it to --status/--download and spend no cap slot on it.
+            artifact_id = None
+            try:
+                status = nlm_json(["studio", "status", stuck_job["notebook_id"]])
+                for s in (status or []):
+                    if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
+                        artifact_id = s["id"]
+                        break
+            except Exception as e:
+                print(f"  WARN: studio status raised: {str(e)[:120]}")
+            if artifact_id:
+                stuck_job["artifact_id"] = artifact_id
+                save_state(state)
+                print(f"  Still cooking (artifact {artifact_id}) - no re-fire needed")
+                continue
+            focus = build_explainer_focus(lesson, entry["subject_name"], entry["unit_name"],
+                                           entry["exam_board"], entry["unit_lessons"])
+            try:
+                nlm_run(["video", "create", stuck_job["notebook_id"], "--format", "explainer",
+                         "--focus", focus, "--confirm"], timeout=90)
+            except Exception as e:
+                print(f"  WARN: video create (re-fire) raised: {str(e)[:120]}")
+            time.sleep(2)
+            try:
+                status = nlm_json(["studio", "status", stuck_job["notebook_id"]])
+                for s in (status or []):
+                    if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
+                        stuck_job["artifact_id"] = s["id"]
+                        break
+            except Exception as e:
+                print(f"  WARN: studio status raised: {str(e)[:120]} - --status will discover it")
+            save_state(state)
+            created += 1
+            print(f"  RE-FIRED on existing notebook (artifact: {stuck_job.get('artifact_id')})")
+            time.sleep(3)
             continue
 
         content = strip_html(lesson["content_html"] or "")
@@ -289,13 +339,22 @@ def cmd_generate(args):
             print(f"  WARN: video create raised: {str(e)[:120]}")
         time.sleep(2)
 
+        # The notebooklm_tools CLI occasionally crashes inside its own studio_status
+        # command (upstream package bug — internal traceback bubbles out as stderr).
+        # If we let that propagate the entire batch dies and every remaining lesson
+        # in the queue is silently abandoned (cost: 155 lessons on 2026-06-09, 91 on
+        # 2026-06-14). Catch it, save the job without an artifact_id, and let --status
+        # discover the artifact on the next poll round.
         artifact_id = None
-        status = nlm_json(["studio", "status", notebook_id])
-        if status:
-            for s in status:
-                if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
-                    artifact_id = s["id"]
-                    break
+        try:
+            status = nlm_json(["studio", "status", notebook_id])
+            if status:
+                for s in status:
+                    if s.get("type") == "video" and s.get("status") in ("in_progress", "completed"):
+                        artifact_id = s["id"]
+                        break
+        except Exception as e:
+            print(f"  WARN: studio status raised: {str(e)[:120]} - saving without artifact_id")
 
         state["jobs"].append({
             "lesson_id": lesson["id"],
@@ -308,10 +367,11 @@ def cmd_generate(args):
         created += 1
         print(f"  LAUNCHED (artifact: {artifact_id})")
         time.sleep(3)
-
-    print(f"\n{'=' * 60}")
-    print(f"Launched {created} explainer video generations")
-    print(f"Run with --status to check, --download --cleanup when complete")
+    finally:
+        print(f"\n{'=' * 60}")
+        verb = "Would launch (dry-run)" if args.dry_run else "Launched"
+        print(f"{verb} {created} of {total} attempted")
+        print(f"Run with --status to check, --download --cleanup when complete")
 
 
 def cmd_status(args):
