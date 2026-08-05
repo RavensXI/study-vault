@@ -197,13 +197,26 @@ try {
     # from the same ~100/day video pool. Ask the explainer sweep how much it
     # wants today and hand shorts the remainder, so the two wrappers stop
     # racing one quota into failure on new-subject days.
+    # The explainer stream lives in the MAIN checkout (its scheduled task runs
+    # that copy, so the job state file is there). Asking the sandbox copy would
+    # read an empty state and always report zero recent launches.
+    $exScript = "C:\Users\tshau\Documents\Study Vault\scripts\batch_explainer_videos.py"
     $explainerWant = 0
-    $exDry = Run-Py -PyArgs @("scripts\batch_explainer_videos.py", "--daily-cap", "35", "--dry-run") -TimeoutMin 10
+    $exDry = Run-Py -PyArgs @($exScript, "--daily-cap", "35", "--dry-run") -TimeoutMin 10
     foreach ($ln in $exDry) {
         if ($ln -match 'Generating explainer videos for (\d+) lessons') { $explainerWant = [Math]::Min(35, [int]$Matches[1]); break }
     }
-    $shortsCap = [Math]::Max(0, $nlmBudget - $explainerWant)
-    Write-Log ("SHORTS budget: {0} (explainer sweep wants {1} of the video pool)" -f $shortsCap, $explainerWant)
+    # NLM's quota is a ROLLING 24h window, but this split is per calendar day and
+    # the explainer wrapper fires ~12h after this one. Yesterday's explainer
+    # launches are therefore still counted when tonight's shorts run — reserve
+    # whichever is larger so the instantaneous window never exceeds the pool.
+    $explainerRecent = 0
+    $exRec = Run-Py -PyArgs @($exScript, "--recent-launches") -TimeoutMin 10
+    foreach ($ln in $exRec) { if ($ln -match '^\s*(\d+)\s*$') { $explainerRecent = [int]$Matches[1]; break } }
+    $explainerReserve = [Math]::Max($explainerWant, $explainerRecent)
+    $shortsCap = [Math]::Max(0, $nlmBudget - $explainerReserve)
+    Write-Log ("SHORTS budget: {0} (explainer reserve {1} = max of want {2}, launched-in-last-24h {3})" `
+               -f $shortsCap, $explainerReserve, $explainerWant, $explainerRecent)
     $main = Run-Py -PyArgs @("scripts\batch_short_videos.py", "--daily-cap", "$shortsCap") -TimeoutMin 300
     if ($main -match "AUTH EXPIRED") {
         # Auth died AFTER the dry-run passed (rare). Rewind the launch stamp so the
