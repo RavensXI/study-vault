@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- served at /welcome (serve.py + vercel.json rewrite) -->
 <base href="/design-lab/">
-<title>StudyVault — everything you’re sitting, nothing you’re not</title>
+<title>StudyVault — everything you’re studying, nothing you’re not</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400..800&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..500&family=Caveat:wght@400..700&family=Fraunces:ital,opsz,wght@1,9..144,300..700&family=Instrument+Serif:ital@1&family=Young+Serif&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -525,7 +525,7 @@
             <span class="bks" data-books="maths,lang,lit,science,triple,@bookstack"></span>
           </span>
           <div class="slot brandslot">
-            <h1>Everything you&rsquo;re sitting.<br>Nothing you&rsquo;re not.</h1>
+            <h1>Everything you&rsquo;re studying.<br>Nothing you&rsquo;re not.</h1>
           </div>
           <span class="wing wr">
             <span class="bks" data-books="@trophy,history,geog,french,spanish,german,@inkwell"></span>
@@ -546,7 +546,7 @@
           </span>
           <div class="slot door">
             <h2>Revising on my own</h2>
-            <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re sitting</button>
+            <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re taking</button>
             <p class="tiny"><a href="#" onclick="go('signin');return false">Sign in</a></p>
           </div>
           <span class="wing wm">
@@ -606,7 +606,7 @@
           <div><span class="handnote"><b>1.</b> Pick your subjects</span></div>
           <div><span class="handnote"><b>2.</b> Tell us your boards</span>
             <div class="steptags"><span class="brasschip">AQA</span><span class="brasschip">EDEXCEL</span><span class="brasschip">OCR</span></div></div>
-          <div><span class="handnote"><b>3.</b> Only what you&rsquo;re sitting</span></div>
+          <div><span class="handnote"><b>3.</b> Only what you&rsquo;re studying</span></div>
         </div>
       </div>
 
@@ -721,7 +721,7 @@
       <div class="casefloor">
         <div class="floorcta rvself">
           <span class="handnote">Still scrolling?</span>
-          <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re sitting</button>
+          <button class="cta" onclick="go('picker')">Tell us what you&rsquo;re taking</button>
         </div>
         <div class="skirting"></div>
         <div class="floorboards">
@@ -995,7 +995,7 @@ const FAQS=[
  {k:'BOARDS',q:'Which exam boards?',
   a:'AQA, Pearson Edexcel, OCR, WJEC and Eduqas. You choose your board for each subject, so you only ever see your own specification.'},
  {k:'MY SPEC',q:'Will it match my exact spec?',
-  a:'That’s the whole idea. Tell us what you’re sitting and StudyVault shows the units your board sets — nothing else.'},
+  a:'That’s the whole idea. Tell us what you’re taking and StudyVault shows the units your board sets — nothing else.'},
  {k:'PRACTICE',q:'Is it just reading?',
   a:'No. Every lesson carries practice questions, a knowledge check and flashcards — and maths, languages and English Language are full workbooks that spot which mistake you made, not just that you made one.'},
  {k:'MY DATA',q:'What happens to my data?',
@@ -1230,7 +1230,7 @@ function renderBoards(){
   const v=document.getElementById('verdict');
   if(!chosen.length) v.innerHTML='Pick a board for each subject.';
   else if(reqs.length===0 && chosen.length===picked.length)
-    v.innerHTML='<b>'+found.length+' of '+picked.length+' covered.</b> Everything you&rsquo;re sitting is here.';
+    v.innerHTML='<b>'+found.length+' of '+picked.length+' covered.</b> Everything you&rsquo;re studying is here.';
   else{
     let t='<b>'+found.length+' of '+picked.length+'</b> covered so far.';
     if(reqs.length) t+=' <span class="req">'+reqs.map(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl);
@@ -1330,7 +1330,7 @@ function renderSave(){
   const found=picked.filter(sl=>{ const su=SUBJECTS.find(x=>x.slug===sl); return su.alt?!!su.alt[boards[sl]]:(su.cover&&su.cover[boards[sl]]); });
   const reqs=picked.length-found.length;
   document.getElementById('savesub').textContent=
-    reqs===0?(picked.length+(picked.length===1?' subject':' subjects')+' \u00b7 everything you\u2019re sitting.')
+    reqs===0?(picked.length+(picked.length===1?' subject':' subjects')+' \u00b7 everything you\u2019re studying.')
             :(found.length+' ready now \u00b7 '+reqs+' on the way \u2014 we\u2019ll email you.');
 }
 function go(v){
