@@ -484,6 +484,10 @@
   .chip[aria-pressed="true"]{background:var(--tc);border-color:var(--tc);color:#fff}
   /* a board we don't have yet: honest, and one tap turns the miss into a request */
   .chip.off{border-style:dashed;color:var(--mut)}
+  .chip .reqtag{display:inline-block;margin-left:.42rem;padding:.08rem .3rem;border-radius:3px;
+    background:rgba(161,121,61,.16);color:#8a6a35;font-size:.62rem;letter-spacing:.04em;
+    text-transform:uppercase;vertical-align:1px}
+  .chip.off[aria-pressed="true"] .reqtag{background:rgba(255,255,255,.24);color:#fff}
   .chip.off[aria-pressed="true"]{background:#a1793d;border-color:#a1793d;border-style:solid;color:#fff}
   .verdict{text-align:center;font-size:.92rem;color:var(--sec);margin:1rem 0 0}
   .verdict b{color:var(--ink)}
@@ -872,37 +876,37 @@ const SUBJECTS=[
  {slug:'maths',  name:'Mathematics',        c:'#4e5f66', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
  {slug:'lang',   name:'English Language',   c:'#5b7285', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
  {slug:'lit',    name:'English Literature', c:'#7d5a78', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
- {slug:'science',name:'Combined Science',   c:'#4e6e5d', cover:{aqa:1,edexcel:1,ocr:1,eduqas:0}},
- {slug:'triple', name:'Triple Science',     c:'#3d5c50', cover:{aqa:1,edexcel:1,ocr:1,eduqas:0}},
+ {slug:'science',name:'Combined Science',   c:'#4e6e5d', cover:{aqa:1,edexcel:1,ocr:1}},
+ {slug:'triple', name:'Triple Science',     c:'#3d5c50', cover:{aqa:1,edexcel:1,ocr:1}},
  {slug:'history',name:'History',            c:'#8a5a44', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
  {slug:'geog',   name:'Geography',          c:'#6d7a4e', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
- {slug:'french', name:'French',             c:'#5c72a4', cover:{aqa:1,edexcel:1,ocr:0,eduqas:1}},
- {slug:'spanish',name:'Spanish',            c:'#a2643f', cover:{aqa:1,edexcel:1,ocr:0,eduqas:1}},
- {slug:'german', name:'German',             c:'#7c4a52', cover:{aqa:1,edexcel:1,ocr:0,eduqas:0}},
+ {slug:'french', name:'French',             c:'#5c72a4', cover:{aqa:1,edexcel:1}},
+ {slug:'spanish',name:'Spanish',            c:'#a2643f', cover:{aqa:1,edexcel:1}},
+ {slug:'german', name:'German',             c:'#7c4a52', cover:{aqa:1,edexcel:1}},
  {slug:'cs',     name:'Computer Science',   c:'#54606e', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
- {slug:'business',name:'Business',          c:'#3f5570', cover:{aqa:1,edexcel:1,ocr:1,eduqas:0}},
- {slug:'pe',     name:'Physical Education', c:'#a34a3a', cover:{aqa:1,edexcel:1,ocr:1,eduqas:0}},
- {slug:'psych',  name:'Psychology',         c:'#9c6b74', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
+ {slug:'business',name:'Business',          c:'#3f5570', cover:{aqa:1,edexcel:1,ocr:1}},
+ {slug:'pe',     name:'Physical Education', c:'#a34a3a', cover:{aqa:1,edexcel:1,ocr:1}},
+ {slug:'psych',  name:'Psychology',         c:'#9c6b74', cover:{aqa:1,edexcel:1,ocr:1}},
  {slug:'rs',     name:'Religious Studies',  c:'#6f5b91', cover:{aqa:1,edexcel:1,ocr:1,eduqas:1}},
- {slug:'socio',  name:'Sociology',          c:'#85688f', cover:{aqa:1,edexcel:0,ocr:0,eduqas:1}},
- {slug:'econ',   name:'Economics',          c:'#35594e', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
- {slug:'stats',  name:'Statistics',         c:'#557a8a', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
- {slug:'media',  name:'Media Studies',      c:'#6b4f63', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
- {slug:'film',   name:'Film Studies',       c:'#4a4a52', cover:{aqa:0,edexcel:0,ocr:0,eduqas:1}},
- {slug:'drama',  name:'Drama',              c:'#8d3f4c', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
- {slug:'music',  name:'Music',              c:'#446272', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
+ {slug:'socio',  name:'Sociology',          c:'#85688f', cover:{aqa:1,eduqas:1}},
+ {slug:'econ',   name:'Economics',          c:'#35594e', cover:{aqa:1}},
+ {slug:'stats',  name:'Statistics',         c:'#557a8a', cover:{aqa:1}},
+ {slug:'media',  name:'Media Studies',      c:'#6b4f63', cover:{aqa:1}},
+ {slug:'film',   name:'Film Studies',       c:'#4a4a52', cover:{eduqas:1}},
+ {slug:'drama',  name:'Drama',              c:'#8d3f4c', cover:{aqa:1}},
+ {slug:'music',  name:'Music',              c:'#446272', cover:{aqa:1}},
  {slug:'mtech',  name:'Music Technology',   c:'#4c5480', cover:{}, alt:{ncfe:'NCFE'}},
- {slug:'dt',     name:'Design & Technology',c:'#8a713b', cover:{aqa:1,edexcel:0,ocr:0,eduqas:1}},
- {slug:'eng',    name:'Engineering',        c:'#5a6068', cover:{aqa:1,edexcel:0,ocr:0,eduqas:1}},
- {slug:'electronics',name:'Electronics',    c:'#8f5b31', cover:{aqa:0,edexcel:0,ocr:0,eduqas:1}},
- {slug:'it',     name:'IT',                 c:'#4f6d7d', cover:{aqa:0,edexcel:0,ocr:1,eduqas:0}},
- {slug:'astro',  name:'Astronomy',          c:'#3c4a6b', cover:{aqa:0,edexcel:1,ocr:0,eduqas:0}},
- {slug:'geology',name:'Geology',            c:'#6e6459', cover:{aqa:0,edexcel:0,ocr:0,eduqas:1}},
- {slug:'classics',name:'Classical Civilisation',c:'#9a8a5a', cover:{aqa:0,edexcel:0,ocr:1,eduqas:0}},
- {slug:'citizenship',name:'Citizenship',    c:'#5d5f8d', cover:{aqa:1,edexcel:0,ocr:0,eduqas:0}},
- {slug:'food',   name:'Food & Nutrition',   c:'#a8842f', cover:{aqa:1,edexcel:0,ocr:0,eduqas:1}},
- {slug:'hosp',   name:'Hospitality & Catering',c:'#67424e', cover:{aqa:0,edexcel:0,ocr:0,eduqas:1}},
- {slug:'hsc',    name:'Health & Social Care',c:'#4e7d78', cover:{aqa:0,edexcel:1,ocr:1,eduqas:1}},
+ {slug:'dt',     name:'Design & Technology',c:'#8a713b', cover:{aqa:1,edexcel:1,eduqas:1}},
+ {slug:'eng',    name:'Engineering',        c:'#5a6068', cover:{aqa:1,eduqas:1}},
+ {slug:'electronics',name:'Electronics',    c:'#8f5b31', cover:{eduqas:1}},
+ {slug:'it',     name:'IT',                 c:'#4f6d7d', cover:{ocr:1}},
+ {slug:'astro',  name:'Astronomy',          c:'#3c4a6b', cover:{edexcel:1}},
+ {slug:'geology',name:'Geology',            c:'#6e6459', cover:{eduqas:1}},
+ {slug:'classics',name:'Classical Civilisation',c:'#9a8a5a', cover:{ocr:1}},
+ {slug:'citizenship',name:'Citizenship',    c:'#5d5f8d', cover:{aqa:1}},
+ {slug:'food',   name:'Food & Nutrition',   c:'#a8842f', cover:{aqa:1,eduqas:1}},
+ {slug:'hosp',   name:'Hospitality & Catering',c:'#67424e', cover:{eduqas:1}},
+ {slug:'hsc',    name:'Health & Social Care',c:'#4e7d78', cover:{edexcel:1,ocr:1,eduqas:1}},
 ];
 const ROW_TOP=['maths','lang','lit','science','triple','history','geog','french','spanish','german','cs','business','pe','psych','rs','socio'];
 const ROW_BOTTOM=SUBJECTS.map(s=>s.slug).filter(sl=>!ROW_TOP.includes(sl));
@@ -1058,6 +1062,11 @@ function renderPickerShelf(newSlug){
    Honest gaps today: Combined Science has no Eduqas/WJEC row; Spanish has no OCR. */
 const BOARDKEYS=['aqa','edexcel','ocr','eduqas'];
 const BOARDLBL={aqa:'AQA',edexcel:'Edexcel',ocr:'OCR',eduqas:'Eduqas / WJEC'};
+/* Which boards actually AWARD each subject — generated from specs/index.json
+   unioned with what we have live, NOT the same question as `cover` (what we
+   have built). Showing a board that does not award the qualification is
+   misinformation, so those chips are never rendered. */
+const BOARD_OFFERS={astro:['edexcel'],business:['aqa','edexcel','ocr','eduqas'],citizenship:['aqa','edexcel','ocr'],classics:['ocr'],cs:['aqa','edexcel','ocr','eduqas'],drama:['aqa','edexcel','ocr','eduqas'],dt:['aqa','edexcel','ocr','eduqas'],econ:['aqa','ocr'],electronics:['eduqas'],eng:['aqa','ocr','eduqas'],film:['eduqas'],food:['aqa','ocr','eduqas'],french:['aqa','edexcel','eduqas'],geog:['aqa','edexcel','ocr','eduqas'],geology:['eduqas'],german:['aqa','edexcel','eduqas'],history:['aqa','edexcel','ocr','eduqas'],hosp:['eduqas'],hsc:['edexcel','ocr','eduqas'],it:['ocr'],lang:['aqa','edexcel','ocr','eduqas'],lit:['aqa','edexcel','ocr','eduqas'],maths:['aqa','edexcel','ocr','eduqas'],media:['aqa','ocr','eduqas'],music:['aqa','edexcel','ocr','eduqas'],pe:['aqa','edexcel','ocr','eduqas'],psych:['aqa','edexcel','ocr'],rs:['aqa','edexcel','ocr','eduqas'],science:['aqa','edexcel','ocr'],socio:['aqa','eduqas'],spanish:['aqa','edexcel','eduqas'],stats:['aqa','edexcel'],triple:['aqa','edexcel','ocr','eduqas']};
 
 /* Topic-level pickers — mined from the production wizard (index.html:
    litTexts, historyOptions, filmStudiesOptions, religiousEducationOptions,
@@ -1189,15 +1198,25 @@ function renderBoards(){
     const row=document.createElement('div'); row.className='brow'; row.style.setProperty('--tc',su.c);
     row.innerHTML='<img src="assets/lw/shelf/book_'+slug+'.webp" alt=""><span class="bn">'+su.name+'</span><span class="chips"></span>';
     const chips=row.querySelector('.chips');
-    const keys=su.alt?Object.keys(su.alt):BOARDKEYS;
+    const keys=su.alt?Object.keys(su.alt)
+      :BOARDKEYS.filter(function(k){ var o=BOARD_OFFERS[slug]; return o?o.indexOf(k)>=0:true; });
     keys.forEach(k=>{
       const have=su.alt?1:(su.cover&&su.cover[k]);
       const ch=document.createElement('button'); ch.type='button';
       ch.className='chip'+(have?'':' off');
       ch.setAttribute('aria-pressed',String(boards[slug]===k));
-      ch.textContent=su.alt?su.alt[k]:BOARDLBL[k];
-      ch.title=have?'':'Not available yet \u2014 tap to request it';
+      var lbl=su.alt?su.alt[k]:BOARDLBL[k];
+      /* a chip we cannot serve is a REQUEST, not a dead option — say so on the
+         chip itself, so nobody taps it expecting content */
+      ch.innerHTML=have?lbl:lbl+'<span class="reqtag">request</span>';
+      ch.title=have?'':'We have not built this board yet \u2014 tap to request it and we will email you';
       ch.onclick=()=>{ if(boards[slug]===k) delete boards[slug]; else boards[slug]=k;
+        /* English Language and English Literature are sat with the same board
+           in almost every school, so choosing one answers the other */
+        const twin=slug==='lang'?'lit':(slug==='lit'?'lang':null);
+        if(twin&&picked.indexOf(twin)>=0&&(BOARD_OFFERS[twin]||[]).indexOf(k)>=0){
+          if(boards[slug]) boards[twin]=k; else delete boards[twin];
+        }
         persist(); renderBoards(); };
       chips.appendChild(ch);
     });
