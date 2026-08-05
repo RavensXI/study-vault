@@ -76,7 +76,27 @@ def sections():
     ]
 
 
-def build_bank():
+# Rejected on Tom's ear, 5 Aug 2026. sections() deliberately still lists them:
+# qid drives the shuffle seed, so removing entries upstream would re-roll the
+# option order of every later question and break the match with the reviewed
+# page. Reject AFTER numbering instead.
+REJECTED_CLIPS = {
+    # Accurate by construction but not coherent MUSIC - a drill has to sound
+    # like a piece before it can test listening. Both go back to Flow.
+    "aos4_minimalism": "constructed audio not musically convincing",
+    "aos4_dissonant_modern": "constructed audio not musically convincing",
+}
+REJECTED_QUESTIONS = {
+    # Keyed 'fiddle and acoustic guitar'. Tom hears guitar + a low bowed string
+    # (double bass or cello); 3 of 4 UNPRIMED probes agree ('likely cello') and
+    # only the option-primed probe said violin. Machine timbre ID under primed
+    # options is not evidence - see [[project_music_listening_prototype]].
+    ("aos3_british_folk", "Which instruments open the excerpt?"):
+        "instrument identification not defensible on this recording",
+}
+
+
+def build_bank(include_rejected=False):
     """Flat question records with the shipped (shuffled) option order.
 
     The shuffle is seeded from the question's 1-based position so it is stable
@@ -87,6 +107,9 @@ def build_bank():
     for clip, folder, aos, provenance, note, qs in sections():
         for question, options, truth_i in qs:
             qid += 1
+            if not include_rejected and (clip in REJECTED_CLIPS
+                                         or (clip, question) in REJECTED_QUESTIONS):
+                continue
             truth = options[truth_i]
             shuffled = list(options)
             random.Random(qid * 7919).shuffle(shuffled)
