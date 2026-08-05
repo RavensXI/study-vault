@@ -2472,3 +2472,70 @@ body[data-hero-wash="2"] #hero-figure::before,
 body[data-hero-wash="2"] .unit-card-image::before{ opacity:.52; }
 body[data-hero-wash="2"] #hero-figure figcaption{ z-index:4; }
 body[data-hero-wash="2"] #hero-figure::marker{ content:none; }
+
+/* ── Listening extract + native audio players ──────────────────────────────
+   Tom, 5 Aug: the native player's pill shape fights the squared-off reskin.
+   Chrome draws the player in shadow DOM, so squaring it means reaching the
+   -webkit-media-controls-enclosure — setting border-radius on the <audio>
+   element alone leaves the inner panel round.
+
+   Applies to both places audio appears: extracts inside article prose
+   (.sv-listen) and the extract players in the practice drills. */
+/* Selectors carry .study-notes deliberately: the skin sets paragraph type at
+   reading size with (0,2,2) specificity, which beat a plainer .sv-listen-for
+   rule and rendered the caption and credit as body copy. Measured, not
+   guessed. Radius is a literal 4px to match .sv-panel rather than the
+   per-skin token, which runs to 7px on the reader skin - too round for the
+   squared-off look. */
+/* #study-notes, not .study-notes: the simplify feature wraps blocks in
+   .sv-chunk, and `#study-notes .sv-chunk` (an ID selector) sets an 8px radius
+   that beats any class-only rule - which is why the card stayed rounded on the
+   first attempt. */
+body[data-skin] #study-notes figure.sv-listen,
+body[data-skin] .study-notes figure.sv-listen {
+  margin: 1.9rem 0;
+  padding: 1.15rem 1.35rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  box-shadow: 0 1px 2px rgba(29, 28, 26, .05);
+}
+body[data-skin] .study-notes .sv-listen .sv-listen-label {
+  font-family: var(--font-ui);
+  font-size: .74rem;
+  line-height: 1.3;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 .7rem;
+}
+body[data-skin] .study-notes .sv-listen .sv-listen-for {
+  font-family: var(--font-read);
+  font-size: .95rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  margin: .9rem 0 0;
+}
+body[data-skin] .study-notes .sv-listen .sv-listen-credit {
+  font-family: var(--font-ui);
+  font-size: .78rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  margin: .5rem 0 0;
+}
+body[data-skin] .sv-listen-player,
+body[data-skin] .study-notes audio,
+body[data-skin] .practice-passage-area audio,
+body[data-skin] .passage-text audio {
+  width: 100%;
+  height: 40px;
+  display: block;
+  border: 1px solid var(--border-light);
+  border-radius: 0;
+  background: var(--bg-card);
+}
+body[data-skin] audio::-webkit-media-controls-enclosure,
+body[data-skin] audio::-webkit-media-controls-panel {
+  border-radius: 0;
+  background: transparent;
+}
