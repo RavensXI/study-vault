@@ -268,6 +268,7 @@ def cmd_generate(args):
             focus = build_explainer_focus(lesson, entry["subject_name"], entry["unit_name"],
                                            entry["exam_board"], entry["unit_lessons"])
             stuck_job["focus"] = focus
+            stuck_job["launched_ts"] = time.time()
             try:
                 nlm_run(["video", "create", stuck_job["notebook_id"], "--format", "explainer",
                          "--focus", focus, "--confirm"], timeout=90)
@@ -364,6 +365,7 @@ def cmd_generate(args):
             "artifact_id": artifact_id,
             "status": "in_progress",
             "focus": focus,
+            "launched_ts": time.time(),
         })
         save_state(state)
         created += 1
@@ -456,8 +458,26 @@ def cmd_refire_missing(args):
             print(f"  {job['label']}: re-fire raised: {str(e)[:100]}")
         job["refires"] = job.get("refires", 0) + 1
         job["last_refire_ts"] = now
+        job["launched_ts"] = now
         save_state(state)
         time.sleep(3)
+
+
+def cmd_recent_launches(args):
+    """Print how many video creates this stream fired in the last 24h.
+
+    NLM enforces its quota over a ROLLING 24h window, but the nightly
+    dispatcher splits the pool per CALENDAR day. The two wrappers launch ~12h
+    apart, so yesterday's explainer spend is still inside the window when
+    tonight's shorts batch runs: on 5 Aug 2026 shorts took 81 (explainers only
+    wanted 19) while yesterday's 35 explainers were still counted, i.e. 116
+    against a ~100 ceiling. The shorts wrapper reserves
+    max(today's want, this number) so the instantaneous window stays inside the
+    quota. Jobs from before this field existed count as 0 — they are older than
+    any window that matters."""
+    state = load_state()
+    cutoff = time.time() - 24 * 3600
+    print(sum(1 for j in state["jobs"] if (j.get("launched_ts") or 0) >= cutoff))
 
 
 def cmd_download(args):
@@ -533,12 +553,17 @@ def main():
     parser.add_argument("--cleanup", action="store_true")
     parser.add_argument("--refire-missing", action="store_true",
                         help="Re-fire video create for in-progress jobs with no artifact (quota-swallowed launches)")
+    parser.add_argument("--recent-launches", action="store_true", dest="recent_launches",
+                        help="Print how many video creates fired in the last 24h (for the shorts dispatcher)")
     args = parser.parse_args()
 
-    if args.daily_cap and not (args.status or args.download or args.refire_missing):
+    if args.daily_cap and not (args.status or args.download or args.refire_missing
+                               or args.recent_launches):
         args.limit = args.daily_cap
 
-    if args.refire_missing:
+    if args.recent_launches:
+        cmd_recent_launches(args)
+    elif args.refire_missing:
         cmd_refire_missing(args)
     elif args.status:
         cmd_status(args)
