@@ -1247,7 +1247,12 @@ function renderTopics(){
   if(tstep>=steps.length) tstep=steps.length-1;
   if(tstep<0) tstep=0;
   const st=steps[tstep], su=SUBJECTS.find(x=>x.slug===st.sl);
-  renderShelfInto(document.getElementById('shelf-topics'),[st.sl]);
+  /* the shelf BUILDS as you answer: every subject you have reached stays up
+     there, newest on the right. Showing only the current subject made the
+     shelf metaphor read as one book at a time, when the whole point is
+     watching your own shelf fill. */
+  const sofar=[]; steps.slice(0,tstep+1).forEach(s=>{ if(sofar.indexOf(s.sl)<0) sofar.push(s.sl); });
+  renderShelfInto(document.getElementById('shelf-topics'),sofar);
   const tc=document.getElementById('tcard'); tc.style.setProperty('--tc',su.c);
   tc.innerHTML='<div class="tprog">Question '+(tstep+1)+' of '+steps.length+'</div>'
     +'<div class="tsubj"><img src="assets/lw/shelf/book_'+st.sl+'.webp" alt="">'
