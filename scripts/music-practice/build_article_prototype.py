@@ -31,20 +31,22 @@ UNIT_SLUG = "aos3-traditional-music"
 
 
 def excerpt(nid, label, clip, listen_for):
-    """Inline listening extract. Deliberately a plain white card with a soft
-    shadow - no coloured edge stripe."""
+    """Inline listening extract.
+
+    CLASSES, NOT INLINE STYLES. The first version hard-coded a 16px radius
+    inline, which meant the redesign could not restyle it - inline styles beat
+    any stylesheet, so the card stayed round inside a squared-off skin. The
+    look now lives in css/style.css (production) and css/reskin.css (redesign),
+    so each skin owns its own treatment and the content stays presentational-
+    free. Deliberately no coloured edge stripe in either.
+    """
     return (
-        '<figure data-narration-id="%s" style="margin:1.75rem 0;padding:1.25rem 1.5rem;'
-        'background:#fff;border-radius:16px;box-shadow:0 2px 10px rgba(0,0,0,0.06);">'
-        '<figcaption style="font-family:Inter,sans-serif;font-size:0.72rem;'
-        'letter-spacing:0.09em;text-transform:uppercase;color:#8a8178;'
-        'margin-bottom:0.65rem;">Listen &mdash; %s</figcaption>'
-        '<audio controls preload="none" src="%s/%s.mp3" style="width:100%%;"></audio>'
-        '<p style="font-family:Inter,sans-serif;font-size:0.9rem;color:#57534e;'
-        'margin:0.85rem 0 0;"><strong>Listen for:</strong> %s</p>'
-        '<p style="font-family:Inter,sans-serif;font-size:0.75rem;color:#8a8178;'
-        'margin:0.5rem 0 0;">StudyVault study extract &mdash; written to demonstrate '
-        'the style.</p></figure>' % (nid, label, R2, clip, listen_for))
+        '<figure class="sv-listen" data-narration-id="%s">'
+        '<figcaption class="sv-listen-label">Listen &mdash; %s</figcaption>'
+        '<audio class="sv-listen-player" controls preload="none" src="%s/%s.mp3"></audio>'
+        '<p class="sv-listen-for"><strong>Listen for:</strong> %s</p>'
+        '<p class="sv-listen-credit">StudyVault study extract &mdash; written to '
+        'demonstrate the style.</p></figure>' % (nid, label, R2, clip, listen_for))
 
 
 CONTENT = """
