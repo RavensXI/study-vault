@@ -45,43 +45,47 @@ def _inst(cls, program=None):
 
 
 def build_fusion():
+    # v2 timbre fix: v1's clean e-guitar + uniform velocity read as CHIPTUNE.
+    # Steel acoustic + kalimba + humanised velocities read organic.
     s = stream.Score()
-    # guitar 1: 3-quarter-beat ostinato (E-G-A), guitar 2: 4-beat ostinato -
-    # patterns realign every 12 beats: polymetric interlock by construction.
-    g1 = stream.Part(); g1.insert(0, _inst(instrument.ElectricGuitar, 27))
-    g1.insert(0, tempo.MetronomeMark(number=116)); g1.insert(0, meter.TimeSignature("4/4"))
-    for _ in range(20):
+    rng = random.Random(17)
+    g1 = stream.Part(); g1.insert(0, _inst(instrument.AcousticGuitar, 25))
+    g1.insert(0, tempo.MetronomeMark(number=104)); g1.insert(0, meter.TimeSignature("4/4"))
+    for _ in range(18):
         for p, d in [("E4", 0.5), ("G4", 0.5), ("A4", 0.5), ("E4", 0.5), ("G4", 0.5), ("A4", 0.5)]:
             g1.append(note.Note(p, quarterLength=d))
-    g2 = stream.Part(); g2.insert(0, _inst(instrument.ElectricGuitar, 27))
-    for _ in range(15):
+    g2 = stream.Part(); g2.insert(0, _inst(instrument.AcousticGuitar, 25))
+    for _ in range(14):
         for p, d in [("C5", 0.5), ("B4", 0.5), ("A4", 0.5), ("C5", 0.5),
                      ("D5", 0.75), ("C5", 0.75), ("A4", 0.5)]:
             g2.append(note.Note(p, quarterLength=d))
-    mar = stream.Part(); mar.insert(0, _inst(instrument.Marimba))
-    for _ in range(30):
-        for p, d in [("A2", 0.25), ("E3", 0.25), ("A3", 0.25), ("E3", 0.25),
-                     ("G2", 0.25), ("D3", 0.25), ("G3", 0.25), ("D3", 0.25)]:
-            mar.append(note.Note(p, quarterLength=d))
-    bass = stream.Part(); bass.insert(0, _inst(instrument.ElectricBass))
-    for _ in range(10):
+    kal = stream.Part(); kal.insert(0, _inst(instrument.Kalimba, 108))
+    for _ in range(27):
+        for p, d in [("A3", 0.25), ("E4", 0.25), ("A4", 0.25), ("E4", 0.25),
+                     ("G3", 0.25), ("D4", 0.25), ("G4", 0.25), ("D4", 0.25)]:
+            kal.append(note.Note(p, quarterLength=d))
+    bass = stream.Part(); bass.insert(0, _inst(instrument.AcousticBass, 32))
+    for _ in range(9):
         for p, d in [("A1", 1.0), ("C2", 0.5), ("E2", 0.5), ("G1", 1.0), ("A1", 0.5), ("C2", 0.5),
                      ("A1", 1.0), ("E2", 1.0), ("G1", 1.0), ("A1", 1.0)]:
             bass.append(note.Note(p, quarterLength=d))
-    for p in (g1, g2, mar, bass):
+    for p in (g1, g2, kal, bass):
         s.insert(0, p)
     for n in s.recurse().notes:
-        n.volume.velocity = 96
+        n.volume.velocity = rng.randint(76, 102)
     return s
 
 
 def build_minimalism():
+    # v2 timbre fix: slower, piano carries the low octave with gentle varied
+    # touch (acoustic read), marimba stays mid-register; still strict additive.
     s = stream.Score()
+    rng = random.Random(29)
     cell = [("E4", 0.25), ("G4", 0.25), ("B4", 0.25), ("A4", 0.25)]
     add1 = cell + [("D5", 0.25)]
     add2 = add1 + [("C5", 0.25)]
     mar = stream.Part(); mar.insert(0, _inst(instrument.Marimba))
-    mar.insert(0, tempo.MetronomeMark(number=138)); mar.insert(0, meter.TimeSignature("4/4"))
+    mar.insert(0, tempo.MetronomeMark(number=120)); mar.insert(0, meter.TimeSignature("4/4"))
     for phase in (cell, add1, add2):
         beats = 0.0
         while beats < 32.0:                      # 8 bars per phase
@@ -93,49 +97,62 @@ def build_minimalism():
         beats = 0.0
         while beats < 32.0:
             for p, d in phase:
-                pno.append(note.Note(p, quarterLength=d).transpose(-12)); beats += d
+                pno.append(note.Note(p, quarterLength=d).transpose(-24)); beats += d
     s.insert(0, mar); s.insert(0, pno)
     for n in s.recurse().notes:
-        n.volume.velocity = 84
+        n.volume.velocity = rng.randint(68, 92)
     return s
 
 
 def build_dissonant():
+    # v3: v1 read as cartoon (fast triplets+timpani), v2 as industrial drone
+    # (GM strings' slow attack = organ pad; flute leaps = siren). v3 removes
+    # every sustained sound: xylophone + violin + low trombone fragments,
+    # SHORT marcato string clusters, hammered low piano clusters. Nothing
+    # rings longer than a crotchet - stab-world, not drone-world.
     s = stream.Score()
     rng = random.Random(9)
-    frag = [("C5", "F#5", "D5"), ("B4", "C6", "E5"), ("F5", "B5", "C#5")]  # tritone/7th/9th leaps
-    fl = stream.Part(); fl.insert(0, _inst(instrument.Flute))
-    fl.insert(0, tempo.MetronomeMark(number=96)); fl.insert(0, meter.TimeSignature("4/4"))
+    frag = [("C5", "F#5", "D6"), ("B3", "C5", "E6"), ("F5", "B3", "C#6")]  # wide compound leaps
+    xy = stream.Part(); xy.insert(0, _inst(instrument.Xylophone))
+    xy.insert(0, tempo.MetronomeMark(number=88)); xy.insert(0, meter.TimeSignature("4/4"))
     vn = stream.Part(); vn.insert(0, _inst(instrument.Violin))
     tb = stream.Part(); tb.insert(0, _inst(instrument.Trombone))
     st = stream.Part(); st.insert(0, _inst(instrument.StringInstrument, 48))
-    tp = stream.Part(); tp.insert(0, _inst(instrument.Timpani))
-    parts = [fl, vn, tb]
+    pn = stream.Part(); pn.insert(0, _inst(instrument.Piano))
+    parts = [xy, vn, tb]
     t = 0.0
-    total = 64.0
+    total = 56.0
     while t < total:
         p = parts[int(t / 4) % 3]
         f = frag[rng.randrange(3)]
         for other in parts:
             if other is not p:
-                other.append(note.Rest(quarterLength=2.0))
+                other.append(note.Rest(quarterLength=4.0))
+        used = 0.0
         for pitch in f:
-            n = note.Note(pitch, quarterLength=2.0 / 3)
-            n.volume.velocity = 52 if rng.random() < 0.6 else 116   # pp vs ff extremes
+            base = pitch if p is not tb else note.Note(pitch).transpose(-24).nameWithOctave
+            n = note.Note(base, quarterLength=rng.choice([0.5, 0.75, 0.25]))
+            n.volume.velocity = 48 if rng.random() < 0.5 else 120   # pp vs ff extremes
             p.append(n)
-        # irregular cluster stabs: strings+timpani semitone clusters
-        gap = rng.choice([0.5, 1.0, 1.5])
-        st.append(note.Rest(quarterLength=gap))
-        cl = chord.Chord(["C4", "C#4", "D4", "D#4", "E4"], quarterLength=0.5)
-        cl.volume.velocity = 120
-        st.append(cl)
-        st.append(note.Rest(quarterLength=2.0 - gap - 0.5 if gap + 0.5 < 2.0 else 0.001))
-        tp.append(note.Rest(quarterLength=gap))
-        hit = note.Note("C2", quarterLength=0.5); hit.volume.velocity = 118
-        tp.append(hit)
-        tp.append(note.Rest(quarterLength=2.0 - gap - 0.5 if gap + 0.5 < 2.0 else 0.001))
-        t += 2.0
-    for part in (fl, vn, tb, st, tp):
+            used += n.quarterLength
+            gap = rng.choice([0.25, 0.5, 0.75])                     # jagged silences inside lines
+            p.append(note.Rest(quarterLength=gap))
+            used += gap
+        if used < 4.0:
+            p.append(note.Rest(quarterLength=4.0 - used))
+        # irregular SHORT cluster stabs: hammered low piano + marcato strings
+        gap = rng.choice([0.75, 1.25, 2.25])
+        for part, pitches, dur in ((pn, ["C2", "C#2", "D2", "D#2", "E2"], 0.5),
+                                   (st, ["C3", "C#3", "D3", "D#3"], 0.25)):
+            part.append(note.Rest(quarterLength=gap))
+            cl = chord.Chord(pitches, quarterLength=dur)
+            cl.volume.velocity = 122
+            part.append(cl)
+            rest = 4.0 - gap - dur
+            if rest > 0:
+                part.append(note.Rest(quarterLength=rest))
+        t += 4.0
+    for part in (xy, vn, tb, st, pn):
         s.insert(0, part)
     return s
 
@@ -178,6 +195,8 @@ def main():
     os.makedirs(OUT, exist_ok=True)
     builders = {"aos3_african_fusion": build_fusion, "aos4_minimalism": build_minimalism,
                 "aos4_dissonant_modern": build_dissonant}
+    if len(sys.argv) > 1:      # optional: only rebuild the named excerpts
+        builders = {k: v for k, v in builders.items() if k in sys.argv[1:]}
     rng = random.Random(41)
     results = {}
     for name, build in builders.items():
