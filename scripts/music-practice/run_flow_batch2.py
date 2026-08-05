@@ -161,21 +161,57 @@ def free_text(b64, prompt):
         {"text": prompt}]}]}).split())
 
 
+NEGATORS = ("no ", "not ", "without ", "none ", "absent", "lack")
+
+
+def mentions(text, word):
+    """True only if `word` appears OUTSIDE a negation.
+
+    Learned the hard way: a take was disqualified because the drift word
+    "vocal" matched inside "no discernible vocals" — the description was
+    agreeing with the brief, not violating it.
+    """
+    low = text.lower()
+    start = 0
+    while True:
+        i = low.find(word, start)
+        if i < 0:
+            return False
+        window = low[max(0, i - 24):i]
+        if not any(n in window for n in NEGATORS):
+            return True
+        start = i + len(word)
+
+
+def idiom_gate(b64, spec, rounds=3):
+    """Repeat unprimed probes. ONE description is not evidence — in batch 2 two
+    probes on the same take returned 'North African folk' and 'xylophone'.
+    Only a feature the majority of independent probes volunteers counts."""
+    texts = []
+    for i in range(rounds):
+        texts.append(free_text(b64, DESCRIBE if i == 0 else
+                               "In two sentences: what style or genre is this, and which "
+                               "instruments play it? Be specific and concrete."))
+        time.sleep(3)
+    texts.append(free_text(b64, INSTRUMENTS))
+    time.sleep(3)
+    need = len(texts) / 2.0
+    hits = [w for w in spec["expect_any"]
+            if sum(1 for t in texts if mentions(t, w)) > need]
+    vetoes = [w for w in spec["reject_any"]
+              if sum(1 for t in texts if mentions(t, w)) > need]
+    return texts, hits, vetoes, bool(hits) and not vetoes
+
+
 def validate(name, path, spec, rng):
     b64 = base64.b64encode(open(path, "rb").read()).decode()
     print("\n=== %s ===" % name)
 
-    desc = free_text(b64, DESCRIBE)
-    time.sleep(3)
-    instr = free_text(b64, INSTRUMENTS)
-    time.sleep(3)
-    print("  DESC : %s" % desc[:260])
-    print("  INSTR: %s" % instr[:260])
-    blob = (desc + " " + instr).lower()
-    hits = [w for w in spec["expect_any"] if w in blob]
-    vetoes = [w for w in spec["reject_any"] if w in blob]
-    gate = bool(hits) and not vetoes
-    print("  GATE : %s  (expected seen: %s | drift words: %s)"
+    texts, hits, vetoes, gate = idiom_gate(b64, spec)
+    for i, t in enumerate(texts):
+        print("  PROBE%d: %s" % (i + 1, t[:200]))
+    desc, instr = texts[0], texts[-1]
+    print("  GATE : %s  (majority-reported: %s | drift words: %s)"
           % ("PASS" if gate else "FAIL", hits or "none", vetoes or "none"))
 
     qres = []
@@ -249,8 +285,12 @@ def main():
             # a take that failed the unprimed gate is not eligible, however
             # well it scored under primed options
             scores[suffix] = clean if r["gate"] else -1
-        if not scores or max(scores.values()) < 0:
-            print("\nNO WINNER %s - both takes failed the idiom gate" % base)
+        # A take with zero clean-verified questions is not a winner, it is a
+        # clip with no usable questions. Batch 2 "won" the Hungarian dance on
+        # 0 vs 0 and the clip turned out to be a circus march.
+        if not scores or max(scores.values()) < 1:
+            print("\nNO WINNER %s - no take cleared the gate with a clean question (%s)"
+                  % (base, scores))
             continue
         best = max(sorted(scores), key=lambda s: scores[s])
         winners[base] = best
@@ -263,6 +303,12 @@ def main():
                         "-af", "afade=t=in:d=0.5,afade=t=out:st=%d:d=1" % (WINDOW - 1),
                         dst], check=True)
         b64 = base64.b64encode(open(dst, "rb").read()).decode()
+        # the trim re-earns the idiom too, not just the questions: a 40s window
+        # can land on the one section that sounds like something else
+        _t, thits, tvetoes, tgate = idiom_gate(b64, spec, rounds=2)
+        results["%s_%s" % (base, best)]["trim_gate"] = tgate
+        print("  TRIM GATE %s (majority-reported: %s | drift: %s)"
+              % ("PASS" if tgate else "FAIL", thits or "none", tvetoes or "none"))
         for q in results["%s_%s" % (base, best)]["questions"]:
             if q["status"] != "verified":
                 continue
