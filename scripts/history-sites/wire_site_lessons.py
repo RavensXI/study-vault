@@ -6,8 +6,9 @@ each lesson must land at max(lesson_number)+1 in its unit, and the script
 refuses to touch any existing row.
 
 Usage:
-    python scripts/history-sites/wire_site_lessons.py --dry-run
-    python scripts/history-sites/wire_site_lessons.py
+    python scripts/history-sites/wire_site_lessons.py --dry-run            # 2027 set
+    python scripts/history-sites/wire_site_lessons.py --set 2028 --dry-run
+    python scripts/history-sites/wire_site_lessons.py --set 2028
 """
 import re
 import sys
@@ -19,8 +20,13 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 from lib.supabase_client import get_client
-from site_lessons_a import LESSONS as LESSONS_A
-from site_lessons_b import LESSONS as LESSONS_B
+
+if "2028" in (sys.argv[sys.argv.index("--set") + 1] if "--set" in sys.argv else "2027"):
+    from site_lessons_2028_a import LESSONS as LESSONS_A
+    from site_lessons_2028_b import LESSONS as LESSONS_B
+else:
+    from site_lessons_a import LESSONS as LESSONS_A
+    from site_lessons_b import LESSONS as LESSONS_B
 
 DRY = "--dry-run" in sys.argv
 ALL = LESSONS_A + LESSONS_B

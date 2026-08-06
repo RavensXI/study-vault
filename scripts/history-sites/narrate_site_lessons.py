@@ -39,12 +39,19 @@ from lib.narration import (
 )
 
 # (subject slug, generic?, unit-name fragment, lesson number)
-TARGETS = [
+TARGETS_2027 = [
     ("history-aqa", True, "Norman England", 13),
     ("history-aqa", True, "Medieval England", 12),
     ("history-aqa", True, "Elizabethan England", 13),
     ("history-aqa", True, "Restoration England", 13),
     ("history", False, "Elizabethan England", 16),
+]
+TARGETS_2028 = [
+    ("history-aqa", True, "Norman England", 14),
+    ("history-aqa", True, "Medieval England", 13),
+    ("history-aqa", True, "Elizabethan England", 14),
+    ("history-aqa", True, "Restoration England", 14),
+    ("history", False, "Elizabethan England", 17),
 ]
 
 
@@ -53,6 +60,7 @@ def main():
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--force", action="store_true",
                     help="re-narrate even if a manifest exists (post-fix re-runs)")
+    ap.add_argument("--set", choices=["2027", "2028"], default="2027")
     args = ap.parse_args()
 
     if not AZURE_KEY:
@@ -63,7 +71,8 @@ def main():
     r2 = None if args.dry_run else get_r2_client()
     total_clips, total_chars = 0, 0
 
-    for slug, generic, frag, num in TARGETS:
+    targets = TARGETS_2028 if args.set == "2028" else TARGETS_2027
+    for slug, generic, frag, num in targets:
         subs = sb.table("subjects").select("id,school_id").eq("slug", slug).execute().data
         sub = [s for s in subs if (s["school_id"] is None) == generic][0]
         unit = [u for u in sb.table("units").select("id,slug,name").eq(
