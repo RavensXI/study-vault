@@ -5895,6 +5895,16 @@
       var hasChart = !!problem.chart && !hasPassage;
       var hasImage = !!problem.image && !hasPassage && !hasChart;
 
+      // Stop any playing excerpt when the passage is changing or going away —
+      // an <audio> detached by an innerHTML swap keeps playing invisibly
+      // otherwise. Same-passage advances keep playing (multi-question excerpts).
+      var _incomingPid = hasPassage ? (problem.passage_id || problem.passage) : null;
+      if (_incomingPid !== _currentPassageId) {
+        area.querySelectorAll('audio').forEach(function (aud) {
+          try { aud.pause(); } catch (e) {}
+        });
+      }
+
       if (!hasPassage && !hasChart && !hasImage) {
         // Try statistics tools before hiding
         _currentPassageId = null;
