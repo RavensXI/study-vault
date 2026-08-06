@@ -31,8 +31,7 @@ AUDIO_BASE = "https://pub-f7b76d81365b4b2f954567763694a24e.r2.dev/"
 # every extract a lesson is allowed to embed
 ALLOWED = {AUDIO_BASE + "music-aqa/western-classical-1650-1910/" + f for f in
            ("lesson-01.mp3", "lesson-03.mp3", "lesson-04.mp3", "lesson-05.mp3",
-            "lesson-06.mp3", "lesson-07.mp3", "lesson-07b.mp3", "lesson-08.mp3",
-            "mozart-40-mvt1.mp3")} | {
+            "lesson-06.mp3", "lesson-07.mp3", "lesson-07b.mp3", "lesson-08.mp3")} | {
     AUDIO_BASE + "music-aqa/aos-listening/" + f for f in
     ("aos2_broadway_ballad.mp3", "aos2_film_score.mp3", "aos2_game_music.mp3",
      "aos2_pop_dance.mp3", "aos2_rock_shuffle.mp3", "aos3_blues.mp3",
