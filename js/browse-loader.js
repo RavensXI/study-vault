@@ -690,6 +690,26 @@
       lessons = lessons.filter(function(l) { return l.tier !== 'higher'; });
     }
 
+    // Cohort-year scoping (historic environment rotations etc.):
+    // subjects.settings.exam_year_lessons maps "unit-slug/lesson-number" -> year.
+    // Students with a wizard-selected exam year see only their year's lessons;
+    // no year set (or staff) -> show everything, titles carry the year.
+    var yearMap = subject.settings && subject.settings.exam_year_lessons;
+    if (yearMap) {
+      var cohortYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      var browseStaff = false;
+      try {
+        var _ba = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+        browseStaff = !!(_ba && ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(_ba.role) !== -1);
+      } catch (e) {}
+      if (cohortYear && !browseStaff) {
+        lessons = lessons.filter(function (l) {
+          var y = yearMap[unitSlug + '/' + l.lesson_number];
+          return !y || y === cohortYear;
+        });
+      }
+    }
+
     // Free user Film Studies: trim set-film lessons within this unit to only
     // the student's picked film (if any of the 5 picks falls in this unit).
     // Overviews, comparative-method, specialist-writing etc. keep showing.

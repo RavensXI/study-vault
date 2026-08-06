@@ -237,6 +237,22 @@
     var siblingsResult = await siblingsQuery;
 
     var siblings = siblingsResult.data || [];
+
+    // Cohort-year scoping for prev/next: skip rotation lessons for other exam
+    // years (subjects.settings.exam_year_lessons, "unit-slug/lesson-number" ->
+    // year) so navigation matches the browse listing. Current lesson always
+    // stays in the list so the index maths holds. Staff see everything.
+    var navYearMap = unit.subjects && unit.subjects.settings && unit.subjects.settings.exam_year_lessons;
+    if (navYearMap && !isStaff) {
+      var navCohortYear = parseInt(localStorage.getItem('studyvault-exam-year') || '', 10);
+      if (navCohortYear) {
+        siblings = siblings.filter(function (s) {
+          if (s.lesson_number === params.lessonNumber) return true;
+          var y = navYearMap[unit.slug + '/' + s.lesson_number];
+          return !y || y === navCohortYear;
+        });
+      }
+    }
     var currentIdx = siblings.findIndex(function (s) {
       return s.lesson_number === params.lessonNumber;
     });
