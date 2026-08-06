@@ -1,0 +1,49 @@
+# Music AQA — Hosted Audio Provenance Ledger
+
+Every real recording hosted on R2 for music-aqa, with licence evidence.
+Rule (hard-won 6 Aug 2026): verify the RECORDING's licence, not just the
+composition's; verify audio CONTENT matches the catalogue claim (one sourced
+item was nearly shipped on metadata alone); CC BY-SA is excluded; synthesised
+audio is never used for timbre-identification questions.
+
+## AoS3 blues — LIVE in aos-listening L2 + AoS3 article (added 7 Aug 2026)
+
+| R2 file (music-aqa/aos-listening/) | Recording | Licence basis | Evidence |
+|---|---|---|---|
+| aos3_rainey_seeseerider.mp3 | Ma Rainey, "See See Rider Blues", rec. 16 Oct 1924, Paramount 12252 (Louis Armstrong, cornet) | Item CC0; recording US PD (MMA, 1 Jan 2025) + UK PD (pre-1963 term expiry); composition Rainey d. 1939 | https://archive.org/details/JV-1265-1924-QmQei6ftSXLGJymA5Chd5NjBE8z1scKdPuTUnWckrr8T3Z.mp3 |
+| aos3_smith_dixieflyer.mp3 | Bessie Smith, "Dixie Flyer Blues", rec. 15 May 1925, Columbia 14079-D | Item CC0; recording US PD (1 Jan 2026) + UK PD; composition Smith d. 1937 | https://archive.org/details/JV-1628-1925-QmThndipy3imoNMcPgWiipTCkNBTqmaKCmmRWtKAupjQ7j.mp3 |
+| aos3_blythe_chicagostomp.mp3 | Jimmy Blythe, "Chicago Stomp", rec. Apr 1924, Paramount 12207 | Item CC0; recording US PD (1 Jan 2025) + UK PD; composition Blythe d. 1931 | https://archive.org/details/JV-980-1924-QmX3HouVVhfWkmi8HJKYncqYAFMaR2jXhmMEpAia8fNCvQ.mp3 |
+
+Content authenticity verified 7 Aug 2026 by lyric-transcription probe
+(See See Rider letter verse; Dixie Flyer train lyrics; Blythe instrumental).
+Excerpts ~22s, loudnorm I=-17, fades.
+
+## Real instrument recordings — UPLOADED, NOT YET WIRED (family drill pending)
+
+Eleven clips at music-aqa/listening-skills/real_*.mp3 (Henneberg flute 1916,
+McNeice clarinet 1911, Mazziotta flute 1901, Heifetz violin 1917, CC0 Bach
+cello 2024, Apituley viola CC BY 3.0, Pryor trombone 1904, Kryl cornet 1918,
+Buono cornet 1922, Francisco xylophone 1908, Mills xylophone 1906). Licence
+evidence in the 7 Aug sourcing report (session transcript). VERDICT: the
+acoustic-era discs are too band-limited for fair family identification —
+machine-ear cannot corroborate them and students should not be graded on
+100-year-old narrowband timbre. Keep for possible context/history use. The
+family drill needs MODERN clean licence-free recordings (US military band
+recordings = federal PD are the recommended source). Until then L2 runs on
+the balanced synthesised bank and MUST NOT be approved live.
+
+## AoS2-4 verified excerpt bank (aos2_*, aos3_*, aos4_* at music-aqa/aos-listening/)
+
+Flow-generated (ear-verified by Tom + gates) and PD orchestral excerpts
+(Gershwin/Prokofiev/Respighi — see reference_aos4_licence_clean_audio memory).
+
+## Constructed clips (listening-skills demos + drills, exT/exF/ex0 series)
+
+FluidSynth + FluidR3_GM renders of our own notation — no third-party rights.
+Valid for pitch-domain facts only (tonality, cadence, metre), never timbre ID.
+
+## ⚠ AoS1 drill recordings (western-classical-1650-1910/lesson-0X.mp3)
+
+Real recordings, multi-MB, ID3 stripped at re-encode; provenance records
+absent (predate this regime). Compositions PD; the RECORDINGS' licences are
+unverified. OPEN ITEM: Tom to decide accept vs re-source (Musopen).
