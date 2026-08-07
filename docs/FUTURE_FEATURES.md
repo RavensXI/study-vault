@@ -1,5 +1,12 @@
 # Future Features
 
+## Per-question wrong-rate anomaly analysis - "mis-key detector" (idea, 7 Aug 2026, Tom keen)
+The strongest automated mistake-finder we have: when nearly every student gets the same knowledge-check or practice question "wrong", the answer key is usually what's wrong - proven repeatedly by hand during the music build. Design:
+- **Signal**: per-question wrong rate, split by chosen option. Everyone picking the SAME wrong option = probable mis-key; spread across options = probably just a hard question. That split is the core of the detector.
+- **Data gap**: `knowledge_check_scores` is currently empty and likely aggregate-only - capture needs to record (lesson_id, question_index, option_chosen, correct_bool) per attempt, anonymised. Add capture first, detector is then a nightly query.
+- **Output**: ranked list in the admin content-health view - questions above a wrong-rate threshold with a dominant wrong option, linked straight to the lesson editor.
+- Pairs with lesson ratings + "Spotted an error" reports (below) as the three content-health signals.
+
 ## Lesson ratings + content health dashboard (idea, 7 Aug 2026)
 Post-launch quality triage: an optional one-tap star rating at each lesson's natural end point (article conclusion / listening finish card / last practice question) - never a forced exit prompt. No imputed 5-stars for unrated completions; use shrinkage instead (every lesson starts at the global mean with N pseudo-ratings, real ratings move it). Combine in one "content health" admin view with the stronger accuracy signals: "Spotted an error" reports (live), per-question wrong-rate anomalies from knowledge_check_scores (mis-key detector), and low shrunk-mean flags. Table: `lesson_ratings` (lesson_id, anon/student id, stars, ts); free-tier dedupe via localStorage.
 
