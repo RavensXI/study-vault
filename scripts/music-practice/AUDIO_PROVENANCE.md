@@ -18,7 +18,28 @@ Content authenticity verified 7 Aug 2026 by lyric-transcription probe
 (See See Rider letter verse; Dixie Flyer train lyrics; Blythe instrumental).
 Excerpts ~22s, loudnorm I=-17, fades.
 
-## Real instrument recordings — UPLOADED, NOT YET WIRED (family drill pending)
+## Family drill (Listening Skills L2) — LIVE roster, 7 Aug 2026
+
+All machine-ear corroborated (>=2/3 blind votes). Woodwind: fam_flute_mozart
+(Mozart K.313, Musopen PD-author), fam_clarinet_joergensmann (VRT-ticketed PD
+release, 2008), fam_oboe_albinoni (Musopen CC0, Paul Arden-Taylor). Strings:
+fam_violin_bach (CC0 2014), real_cello_bach (CC0 2024), fam_strings_afband
+(USAF, 17 USC 105). Brass: fam_bugle_taps (USMC), fam_brass_heralds (US Army
+Herald Trumpets), fam_trumpet_taps_af (USAF) — all 17 USC 105. Percussion:
+fam_mallets_fleet (US Pacific Fleet Band xylophone+marimba, 17 USC 105),
+exF08 constructed timpani (RULE REFINEMENT: synth allowed for timbre-ID only
+when machine-corroborated — exF08 passed 3/3; no licence-clean real timpani
+exists (best candidate was CC BY-SA)).
+
+PIPELINE RULES (paid for in blood, 7 Aug): (1) ffmpeg INPUT-seek (-ss before
+-i) when combining seek with fades — output-side seek applied fades on source
+timestamps and silently produced silence for any window past ~21s; this also
+hit 2 of 3 shipped blues clips (refixed). (2) Never upload a clip without
+measuring its OUTPUT RMS (> -35dB). (3) Gemini hallucinates confident answers
+on silent audio — a FLAG can mean broken clip, not wrong content; describe-
+probe before concluding. (4) Trust no sourced window claim: scan RMS first.
+
+## Acoustic-era instrument discs — PARKED (unfit for family drilling)
 
 Eleven clips at music-aqa/listening-skills/real_*.mp3 (Henneberg flute 1916,
 McNeice clarinet 1911, Mazziotta flute 1901, Heifetz violin 1917, CC0 Bach
