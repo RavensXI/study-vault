@@ -1,4 +1,6 @@
-# Annotated Study-Piece Player — Build Plan (execute on usage reset)
+# Annotated Study-Piece Player — Build Plan
+
+**DO NOT EXECUTE until Tom says go.** (His word, 7 Aug dinner-time.)
 
 Tom's idea, 7 Aug: a large player for the Beethoven study-piece lesson with
 the full recording and clickable feature annotations that seek the audio.
@@ -9,9 +11,9 @@ PD 17 U.S.C. §105).
 ## Why Beethoven (and what it does NOT apply to)
 Seeking requires HOSTED audio. Beethoven qualifies. Bartok's extracts are
 YouTube embeds (in-copyright) — cannot seek; Bartok keeps prose timestamps.
-Viable follow-ons (phase 2, also hosted): K.622 Rondo (refrain/episode
-buttons) and Haydn 94 mvt 2 (theme + variations buttons) — this makes the
-structures teaching audible per lesson L2's forms.
+SCOPE (Tom's call): this is a ONE-OFF for the Beethoven study piece.
+Prove it works first. Porting to K.622 Rondo / Haydn 94 (also hosted) is an
+optional later conversation only if the component turns out easy to reuse.
 
 ## Component design
 - content_html block (NO narration ids → no re-narration):
@@ -34,14 +36,19 @@ structures teaching audible per lesson L2's forms.
   lesson's end (replaces the current "complete movement" figure; the
   intro-only clip stays as the first figure).
 
-## Sections to annotate (from AQA's teacher guide landmarks)
-Fetch + extract AQA-8271-TEACHER-GUIDE-AOS1-BEETHOVEN.PDF (markitdown works
-on these). Chapters: 1 Adagio molto intro (0:00) · 2 Allegro: first subject
-(C major, ~1:47 — ALREADY LOCATED, triple-probed) · 3 transition · 4 second
-subject (G major, woodwind dialogue) · 5 codetta/exposition end · 6
-exposition REPEAT if taken (581s total suggests yes — must detect) · 7
-development · 8 recapitulation (first subject back in C) · 9 coda. Plus at
-most 2-3 highlight moments (sforzandi passage; timpani) — keep scannable.
+## Chapters to annotate — DRIVEN BY THE LESSON'S OWN CONTENT (Tom's spec)
+Granularity rule: "anything we talk about in this lesson that students need
+to know for this study piece." So step 1 of execution is to PARSE AoS1 L3's
+content_html and list every analytical claim it teaches (the V7-of-F opening
+chord, Adagio molto intro, first subject + sforzandi, second subject in the
+dominant with woodwind, development, recapitulation in the tonic, prominent
+wind writing, coda, etc.), cross-referenced against the AQA teacher guide
+(fetch AQA-8271-TEACHER-GUIDE-AOS1-BEETHOVEN.PDF, markitdown works). Every
+taught feature that is locatable in the recording gets a chapter/moment
+button; nothing the lesson does not teach gets one. Structural anchors
+already known: intro 0:00; Allegro con brio ~1:47 (triple-probed). Detect
+whether the exposition repeat is taken (581s suggests yes) since it shifts
+all later timestamps.
 
 ## Timestamp methodology (no human ear needed — proven on the intro)
 Per boundary: (a) coarse probe (wide window, "at what mm:ss does X begin"),
@@ -68,9 +75,10 @@ Check both skins (default + reader).
   "click every chapter — does each land where its label says?")
 - Commits local both branches; preview needs a sandbox push (Tom's word).
 
-## Open questions (answers may arrive from Tom before execution)
-1. Granularity: six structural chapters + 2-3 highlight moments is the
-   recommendation — more becomes clutter. Confirm or trim.
-2. Phase 2 (K.622 rondo map + Haydn variations map, same component):
-   recommended, same session if budget allows. Confirm scope.
-3. Design authority: build to house style, Tom critiques on the render.
+## Questions — ALL ANSWERED by Tom, 7 Aug
+1. Granularity: everything the lesson teaches about the piece, no more.
+2. Scope: Beethoven one-off; porting is a later maybe.
+3. Design: ANSWERED — house style, Tom critiques the render. In the
+   reader skin (redesign) the player must be SQUARED OFF like everything
+   else there (4px radii, no pill shapes, native audio controls squared via
+   the ::-webkit-media-controls-enclosure treatment already in reskin.css).
