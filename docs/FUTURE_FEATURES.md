@@ -1,5 +1,8 @@
 # Future Features
 
+## Lesson ratings + content health dashboard (idea, 7 Aug 2026)
+Post-launch quality triage: an optional one-tap star rating at each lesson's natural end point (article conclusion / listening finish card / last practice question) - never a forced exit prompt. No imputed 5-stars for unrated completions; use shrinkage instead (every lesson starts at the global mean with N pseudo-ratings, real ratings move it). Combine in one "content health" admin view with the stronger accuracy signals: "Spotted an error" reports (live), per-question wrong-rate anomalies from knowledge_check_scores (mis-key detector), and low shrunk-mean flags. Table: `lesson_ratings` (lesson_id, anon/student id, stars, ts); free-tier dedupe via localStorage.
+
 ## Teacher Content Editors — v1 built, needs iteration
 
 ### Lesson Editor (`/admin/editor`)
