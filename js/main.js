@@ -3275,8 +3275,7 @@ function initAnnotatedPlayers() {
     var pins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
     var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
     var DUR = 0, PEAKS = null;
-    var pvBanner = document.querySelector('.sv-preview-banner');
-    if (pvBanner) fig.style.top = (58 + pvBanner.offsetHeight) + 'px';
+    document.body.classList.add('sv-has-ap-dock');
     var inlinePeaks = fig.querySelector('.sv-ap-peaks');
     if (inlinePeaks) {
       try { var d0 = JSON.parse(inlinePeaks.textContent); PEAKS = d0.peaks; DUR = d0.duration; } catch (e) {}
