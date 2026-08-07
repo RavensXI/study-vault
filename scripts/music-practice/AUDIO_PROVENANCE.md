@@ -63,7 +63,20 @@ Flow-generated (ear-verified by Tom + gates) and PD orchestral excerpts
 FluidSynth + FluidR3_GM renders of our own notation — no third-party rights.
 Valid for pitch-domain facts only (tonality, cadence, metre), never timbre ID.
 
-## ⚠ AoS1 drill recordings (western-classical-1650-1910/lesson-0X.mp3)
+## AoS1 works recordings — PROVENANCE SOLVED by duration matching (7 Aug)
+
+All 8 identified to the millisecond. lesson-01 Beethoven = US Marine Band 2019
+(17 USC 105). mozart-40 = Musopen Symphony 2012 (PD-author). lesson-03 Rondo:
+WAS ibiblio CC BY-SA 2.0 — REPLACED with Krumpoeck/Merkur Orchester 1999 under
+its CC BY 2.5 multi-licence option; credit in drill passage; character/window
+re-verified. lesson-04 Haydn = Koussevitzky/BSO 1929, PD-EU-audio (US-PD
+2030 — accepted posture, review before any US-market push). lesson-05 Zadok =
+St Matthew's Concert Choir 2013 CC BY 3.0 — attribution now displayed in the
+drill. lesson-06 Chopin = Musopen Frank Levy (PD). lesson-07/07b Kinderszenen
+= Musopen set (PD, VRT ticket). lesson-08 Verdi: ICBSA transfer CC BY-SA 4.0
+— MUST REPLACE, still open (IMSLP Fricsay candidate needs manual download).
+
+## (superseded note)
 
 Real recordings, multi-MB, ID3 stripped at re-encode; provenance records
 absent (predate this regime). Compositions PD; the RECORDINGS' licences are
