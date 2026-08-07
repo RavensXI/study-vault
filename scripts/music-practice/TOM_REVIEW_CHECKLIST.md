@@ -20,6 +20,17 @@ session anything that fails and it gets re-voiced/re-composed.
 - [ ] New **ternary miniature** (end of the Ternary section): bright A,
       minor-key B, exact return of A?
 
+## AoS1 L3 (Beethoven study piece)
+- [ ] New first extract = the Adagio molto introduction only (boundary
+      machine-located at ~1:47, triple-probed): does the clip end just as the
+      fast music arrives?
+- [ ] Full movement now sits at the end of the lesson with the 1:47 signpost.
+
+## AoS1 L3 — ANNOTATED PLAYER (new)
+- [ ] Click every chapter: does each land where its label says? (Development
+      at 6:18 is the least certain — nudge it with "set to here" if off.)
+- [ ] Try the staff flow: Adjust chapters -> set to here -> Save chapters.
+
 ## Listening Skills L1 (Tonality) — from the rebuild
 - [ ] Spot-check a few of the nine new excerpts: does each tonality sound
       like what the method-panel demo teaches (esp. the two whole-tone golds)?

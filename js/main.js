@@ -31,6 +31,7 @@ function initLessonFeatures() {
   initVisitedTracking();
   initPracticeQuestions();
   initNarration();
+  initAnnotatedPlayers();
   initGlossary();
   initLightbox();
   initHeroEdit();
@@ -3260,3 +3261,98 @@ function openFlashcardModal() {
 
 // Expose globally so lesson-loader can call it
 window.openFlashcardModal = openFlashcardModal;
+
+
+// ---- Annotated study-piece player (music study pieces) ----
+function initAnnotatedPlayers() {
+  document.querySelectorAll('.sv-annotated-player').forEach(function (fig) {
+    var audio = fig.querySelector('audio');
+    if (!audio || fig.getAttribute('data-ap-init')) return;
+    fig.setAttribute('data-ap-init', '1');
+    if (!audio.getAttribute('src')) audio.setAttribute('src', fig.getAttribute('data-audio'));
+    var chapters = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-chapter'));
+    chapters.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (fig.classList.contains('sv-ap-adjusting')) return;
+        audio.currentTime = parseFloat(btn.getAttribute('data-t')) || 0;
+        audio.play();
+      });
+    });
+    audio.addEventListener('timeupdate', function () {
+      var t = audio.currentTime, active = null;
+      chapters.forEach(function (btn) {
+        if (t >= (parseFloat(btn.getAttribute('data-t')) || 0) - 0.3) active = btn;
+      });
+      chapters.forEach(function (btn) { btn.classList.toggle('sv-ap-active', btn === active); });
+    });
+    var sess = null;
+    try {
+      sess = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
+    } catch (e) {}
+    if (!sess || ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(sess.role) === -1) return;
+    function fmt(t) { t = Math.max(0, Math.round(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+    var bar = document.createElement('div');
+    bar.className = 'sv-ap-staffbar';
+    bar.innerHTML = '<button type="button" class="sv-ap-toggle">Adjust chapters</button><span class="sv-ap-status"></span>';
+    fig.appendChild(bar);
+    var status = bar.querySelector('.sv-ap-status');
+    bar.querySelector('.sv-ap-toggle').addEventListener('click', function () {
+      var on = fig.classList.toggle('sv-ap-adjusting');
+      this.textContent = on ? 'Done adjusting' : 'Adjust chapters';
+      if (!on || fig.querySelector('.sv-ap-tools')) return;
+      chapters.forEach(function (btn) {
+        var tools = document.createElement('span');
+        tools.className = 'sv-ap-tools';
+        tools.innerHTML = '<button type="button" data-d="-1">-1s</button>' +
+          '<button type="button" data-d="1">+1s</button>' +
+          '<button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+        btn.parentNode.appendChild(tools);
+        var show = function () { tools.querySelector('.sv-ap-t').textContent = fmt(parseFloat(btn.getAttribute('data-t')) || 0); };
+        tools.addEventListener('click', function (e) {
+          var b = e.target.closest('button');
+          if (!b) return;
+          var t = parseFloat(btn.getAttribute('data-t')) || 0;
+          t = b.getAttribute('data-set') ? audio.currentTime : t + parseFloat(b.getAttribute('data-d'));
+          btn.setAttribute('data-t', Math.max(0, Math.round(t * 10) / 10));
+          show();
+          status.textContent = 'unsaved changes';
+        });
+        show();
+      });
+      var save = document.createElement('button');
+      save.type = 'button';
+      save.className = 'sv-ap-save';
+      save.textContent = 'Save chapters';
+      bar.appendChild(save);
+      save.addEventListener('click', function () {
+        var lessonId = fig.getAttribute('data-lesson-id');
+        var times = {};
+        chapters.forEach(function (btn) { times[btn.getAttribute('data-cid')] = btn.getAttribute('data-t'); });
+        status.textContent = 'saving...';
+        var sb2 = window.supabase.createClient(
+          'https://baipckgywpnwapobwtsy.supabase.co',
+          'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
+        sb2.from('lessons').select('content_html').eq('id', lessonId).single().then(function (r) {
+          if (!r.data) { status.textContent = 'load failed'; return; }
+          var html = r.data.content_html;
+          Object.keys(times).forEach(function (cid) {
+            html = html.replace(new RegExp('(data-cid="' + cid + '"[^>]*data-t=")[^"]*(")'), '$1' + times[cid] + '$2');
+          });
+          var headers = { 'Content-Type': 'application/json' };
+          if (sess.pw) headers['X-Admin-Password'] = sess.pw;
+          fetch('/api/pipeline/update-lesson', {
+            method: 'POST', headers: headers,
+            body: JSON.stringify({ lesson_id: lessonId, content_html: html })
+          }).then(function (resp) {
+            if (resp.ok) { status.textContent = 'saved'; return; }
+            navigator.clipboard.writeText(JSON.stringify(times));
+            status.textContent = 'save blocked - chapter times copied to clipboard, paste them to the session';
+          }).catch(function () {
+            navigator.clipboard.writeText(JSON.stringify(times));
+            status.textContent = 'save failed - chapter times copied to clipboard, paste them to the session';
+          });
+        });
+      });
+    });
+  });
+}

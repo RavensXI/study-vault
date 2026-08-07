@@ -83,3 +83,12 @@ Content probe confirmed the Dies irae; credit displayed in the drill.
 Real recordings, multi-MB, ID3 stripped at re-encode; provenance records
 absent (predate this regime). Compositions PD; the RECORDINGS' licences are
 unverified. OPEN ITEM: Tom to decide accept vs re-source (Musopen).
+
+## Beethoven annotated-player chapter timestamps (Marine Band recording, 7 Aug)
+0:00 intro | 107s Allegro/first subject (triple-probed) | 143s second subject
+(probe 130+13) | 242s exposition repeat (probe 180+62.5; confirm-probe said
+'exact start, themes, original keys') | 378s development (derived: end of
+expo2 = 242.5+135.5) | 406s recapitulation (direct probe: 'first subject
+returns in tonic'; coheres with coda+end arithmetic) | 520s coda (probe
+490+30). Least certain: development 378 (derived, not probed) — staff
+'set to here' exists for exactly this.
