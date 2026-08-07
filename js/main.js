@@ -32,6 +32,7 @@ function initLessonFeatures() {
   initPracticeQuestions();
   initNarration();
   initAnnotatedPlayers();
+  initListeningLesson();
   initGlossary();
   initLightbox();
   initHeroEdit();
@@ -3262,6 +3263,138 @@ function openFlashcardModal() {
 // Expose globally so lesson-loader can call it
 window.openFlashcardModal = openFlashcardModal;
 
+
+// ---- Listening lesson: card carousel over the docked player ----
+function initListeningLesson() {
+  var stage = document.querySelector('.sv-listening');
+  if (!stage || stage.getAttribute('data-ll-init')) return;
+  stage.setAttribute('data-ll-init', '1');
+  document.body.classList.add('sv-listening-mode');
+  var cards = Array.prototype.slice.call(stage.querySelectorAll('.sv-card'));
+
+  var fin = document.createElement('section');
+  fin.className = 'sv-card sv-card--finish';
+  fin.setAttribute('data-title', 'Test yourself');
+  fin.innerHTML = '<h2>Now prove it</h2>' +
+    '<p>You have heard the whole movement and read the ideas behind it. Lock it in before you move on.</p>' +
+    '<div class="sv-finish-actions">' +
+    '<button type="button" data-act="quiz">Quick Quiz</button>' +
+    '<button type="button" data-act="cards">Flashcards</button>' +
+    '<button type="button" data-act="practice">Practice questions</button></div>';
+  stage.appendChild(fin);
+  cards.push(fin);
+  fin.querySelector('.sv-finish-actions').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'quiz') { var k = document.getElementById('knowledge-check-btn'); if (k) k.click(); }
+    if (act === 'cards') { var f = document.getElementById('sidebar-flashcard-btn'); if (f) f.click(); }
+    if (act === 'practice') {
+      var t = document.querySelector('.tile-practice button, .tile-practice');
+      if (t) { t.click(); return; }
+      var pr = document.getElementById('practice');
+      if (!pr) return;
+      var ov = document.querySelector('.sv-ll-practice-ov');
+      if (!ov) {
+        ov = document.createElement('div'); ov.className = 'sv-ll-practice-ov';
+        var box = document.createElement('div'); box.className = 'sv-ll-practice-box';
+        var x = document.createElement('button'); x.className = 'sv-ll-practice-close'; x.innerHTML = '&times;';
+        x.addEventListener('click', function () { ov.style.display = 'none'; });
+        box.appendChild(x); box.appendChild(pr); ov.appendChild(box); document.body.appendChild(ov);
+      }
+      ov.style.display = 'flex'; pr.style.display = 'block';
+    }
+  });
+
+  var hero = document.getElementById('hero-image');
+  if (hero && hero.getAttribute('src')) {
+    var img = document.createElement('img');
+    img.className = 'sv-card-hero'; img.alt = ''; img.src = hero.getAttribute('src');
+    cards[0].insertBefore(img, cards[0].firstChild);
+  }
+
+  var track = document.createElement('div');
+  track.className = 'sv-ll-track';
+  cards.forEach(function (c) { track.appendChild(c); });
+  stage.appendChild(track);
+
+  var nav = document.createElement('div'); nav.className = 'sv-ll-nav';
+  var dots = [];
+  cards.forEach(function (c, i) {
+    var d = document.createElement('button');
+    d.type = 'button'; d.className = 'sv-ll-dot';
+    d.title = c.getAttribute('data-title') || ('Card ' + (i + 1));
+    d.setAttribute('aria-label', d.title);
+    d.addEventListener('click', function () { goTo(i); });
+    nav.appendChild(d); dots.push(d);
+  });
+  document.body.appendChild(nav);
+  var mk = function (cls, html, step) {
+    var a = document.createElement('button');
+    a.type = 'button'; a.className = 'sv-ll-arrow ' + cls; a.innerHTML = html;
+    a.setAttribute('aria-label', step > 0 ? 'Next card' : 'Previous card');
+    a.addEventListener('click', function () { goTo(idx + step); });
+    document.body.appendChild(a); return a;
+  };
+  var prevB = mk('sv-ll-prev', '&larr;', -1), nextB = mk('sv-ll-next', '&rarr;', 1);
+
+  var idx = 0, autoFollow = false;
+  function goTo(i, fromMusic) {
+    idx = Math.max(0, Math.min(cards.length - 1, i));
+    track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    dots.forEach(function (d, j) { d.classList.toggle('sv-ll-dot--on', j === idx); });
+    prevB.disabled = idx === 0; nextB.disabled = idx === cards.length - 1;
+    if (!fromMusic) autoFollow = false;
+  }
+  goTo(0);
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (e.key === 'ArrowRight') { goTo(idx + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { goTo(idx - 1); e.preventDefault(); }
+  });
+
+  var chapMap = {};
+  cards.forEach(function (c, i) {
+    (c.getAttribute('data-chapters') || '').split(',').forEach(function (k) {
+      k = k.trim(); if (k) chapMap[k] = i;
+    });
+  });
+  var fig = document.querySelector('.sv-annotated-player');
+  if (fig) {
+    fig.addEventListener('click', function (e) {
+      if (e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas')) autoFollow = true;
+    });
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('.sv-ap-ref')) autoFollow = true;
+    });
+    setInterval(function () {
+      if (!autoFollow) return;
+      var act = fig.querySelector('.sv-ap-pin.sv-ap-active');
+      if (!act) return;
+      var i = chapMap[act.getAttribute('data-cid')];
+      if (i != null && i !== idx) goTo(i, true);
+    }, 800);
+    if (window.LessonTutor && fig.querySelector('.sv-ap-bar')) {
+      var chip = document.createElement('button');
+      chip.type = 'button'; chip.className = 'sv-ap-tutor'; chip.textContent = 'Ask the tutor';
+      chip.addEventListener('click', function () { window.LessonTutor.askAbout(''); });
+      fig.querySelector('.sv-ap-bar').appendChild(chip);
+    }
+  }
+
+  function size() {
+    var top = 56;
+    var hdr = document.querySelector('header');
+    if (hdr) top = Math.max(top, Math.round(hdr.getBoundingClientRect().bottom));
+    var pb = document.querySelector('.sv-preview-banner');
+    if (pb) top += pb.offsetHeight;
+    document.documentElement.style.setProperty('--ll-top', top + 'px');
+    document.documentElement.style.setProperty('--ll-bottom', (fig ? fig.offsetHeight : 230) + 'px');
+  }
+  size();
+  window.addEventListener('resize', size);
+  setInterval(size, 1500);
+}
 
 // ---- Annotated study-piece player (waveform) ----
 function initAnnotatedPlayers() {

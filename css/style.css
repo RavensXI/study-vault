@@ -9167,6 +9167,55 @@ body.dark-mode .sv-explained { background: #262420; border-color: #3a3733; }
   color: var(--text-muted);
 }
 
+/* ---- Listening lesson (carousel stage) ---- */
+body.sv-listening-mode { overflow: hidden; }
+body.sv-listening-mode .lesson-hero-image, body.sv-listening-mode .lesson-header,
+body.sv-listening-mode .audio-player-wrapper, body.sv-listening-mode .lesson-sidebar,
+body.sv-listening-mode .practice-section, body.sv-listening-mode .lesson-nav,
+body.sv-listening-mode .back-link, body.sv-listening-mode .exam-tip,
+body.sv-listening-mode .conclusion, body.sv-listening-mode .sv-legal-footer { display: none !important; }
+.sv-listening { position: fixed; left: 0; right: 0; top: var(--ll-top, 110px);
+  bottom: var(--ll-bottom, 235px); overflow: hidden; background: #faf8f5; z-index: 40; }
+.sv-ll-track { display: flex; height: 100%; transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.sv-listening .sv-card { flex: 0 0 100%; min-width: 0; overflow-y: auto;
+  padding: 2.6rem calc(50% - 380px) 2rem; }
+.sv-card-hero { display: block; width: 100%; max-width: 760px; height: 36%; min-height: 160px;
+  object-fit: cover; border-radius: 16px; margin: 0 auto 1.6rem; }
+.sv-card-kicker { font: 600 0.78rem Inter, sans-serif; letter-spacing: 0.08em;
+  text-transform: uppercase; opacity: 0.55; margin: 0 auto 0.8rem; }
+.sv-ll-nav { position: fixed; top: calc(var(--ll-top, 110px) + 10px); left: 50%;
+  transform: translateX(-50%); display: flex; gap: 0.5rem; z-index: 45; }
+.sv-ll-dot { width: 10px; height: 10px; border-radius: 50%; padding: 0; cursor: pointer;
+  border: 1.5px solid #2d2a26; background: transparent; opacity: 0.55; transition: all 0.2s; }
+.sv-ll-dot--on { background: #2d2a26; opacity: 1; }
+.sv-ll-arrow { position: fixed; z-index: 45; width: 44px; height: 44px; border-radius: 50%;
+  border: 1.5px solid #2d2a26; background: #fff; cursor: pointer; font-size: 1rem;
+  top: calc(var(--ll-top, 110px) + (100vh - var(--ll-top, 110px) - var(--ll-bottom, 235px)) / 2 - 22px); }
+.sv-ll-prev { left: 20px; } .sv-ll-next { right: 20px; }
+.sv-ll-arrow:hover { background: #2d2a26; color: #fff; }
+.sv-ll-arrow:disabled { opacity: 0.25; pointer-events: none; }
+.sv-card--finish { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+.sv-finish-actions { display: flex; gap: 0.8rem; justify-content: center; flex-wrap: wrap; margin-top: 1.2rem; }
+.sv-finish-actions button { font: 600 0.95rem Inter, sans-serif; padding: 0.85rem 1.6rem;
+  border: 1.5px solid #2d2a26; border-radius: 12px; background: #fff; cursor: pointer; transition: all 0.15s; }
+.sv-finish-actions button:hover { background: #2d2a26; color: #fff; }
+.sv-ap-tutor { font: 600 0.78rem Inter, sans-serif; padding: 0.35rem 0.8rem; margin-left: 0.8rem;
+  border: 1.5px solid #2d2a26; border-radius: 999px; background: #fff; cursor: pointer; flex: none; }
+.sv-ap-tutor:hover { background: #2d2a26; color: #fff; }
+body.sv-listening-mode .sv-ap-now { display: none; }
+.sv-ll-practice-ov { display: none; position: fixed; inset: 0; z-index: 80;
+  background: rgba(45,42,38,0.45); align-items: center; justify-content: center; padding: 3vh 3vw; }
+.sv-ll-practice-box { position: relative; background: #faf8f5; border-radius: 16px;
+  max-width: 900px; width: 100%; max-height: 88vh; overflow-y: auto; padding: 1.5rem 2rem; }
+.sv-ll-practice-close { position: absolute; top: 0.6rem; right: 0.8rem; font-size: 1.4rem;
+  border: none; background: none; cursor: pointer; }
+@media (max-width: 900px) {
+  .sv-listening .sv-card { padding: 2.2rem 1.2rem 1.5rem; }
+  .sv-ll-arrow { width: 36px; height: 36px; }
+  .sv-ll-prev { left: 8px; } .sv-ll-next { right: 8px; }
+  .sv-card-hero { height: 24%; min-height: 110px; }
+}
+
 /* ---- Annotated study-piece player (bottom dock) ---- */
 .sv-annotated-player { position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
   margin: 0; padding: 0.7rem 2rem 0.5rem; background: #faf8f5;
