@@ -50,6 +50,24 @@ already known: intro 0:00; Allegro con brio ~1:47 (triple-probed). Detect
 whether the exposition repeat is taken (581s suggests yes) since it shifts
 all later timestamps.
 
+## Staff chapter editing (Tom's addition, 7 Aug)
+Chapters must be adjustable by staff without a code round-trip. Design:
+- When the staff flag is present (same studyvault-auth check the loaders
+  use), the player shows an "Adjust chapters" toggle.
+- In adjust mode every chapter gets: nudge buttons (−1s / +1s) AND a
+  "set to here" button that stamps the audio's CURRENT position onto that
+  chapter — pause exactly where the boundary really is, click, done. This
+  beats dragging for precision, but ALSO render the chapters as markers on
+  a click-to-seek timeline strip; markers are draggable in adjust mode for
+  coarse moves. Students never see any of this.
+- Persistence: "Save chapters" writes the updated list back to the lesson.
+  Investigate the admin editor's existing save path first (/admin/editor
+  must have one); if it needs a service key we cannot use client-side,
+  fallback = the button copies the adjusted chapter JSON to the clipboard
+  with a one-line "paste this to the session" instruction, and I apply it.
+- Chapter data lives as data-t attributes in the content_html block either
+  way, so a save is a single content_html update.
+
 ## Timestamp methodology (no human ear needed — proven on the intro)
 Per boundary: (a) coarse probe (wide window, "at what mm:ss does X begin"),
 (b) narrow confirm probe (20-30s window, "does X begin here? at what
@@ -65,6 +83,8 @@ AUDIO_PROVENANCE.md appendix.
 Playwright on the sandbox worktree: render L3, click every chapter, assert
 currentTime jumped to data-t ±0.5s and audio is playing; assert active-
 chapter highlight follows on timeupdate; screenshot the player for Tom.
+Staff mode: toggle adjust, nudge a chapter, "set to here", verify the
+data-t updates and (if the save path works) persists after reload.
 Check both skins (default + reader).
 
 ## Files touched
