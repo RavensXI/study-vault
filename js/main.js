@@ -3360,14 +3360,12 @@ function initListeningLesson() {
   var fig = document.querySelector('.sv-annotated-player');
   if (fig) {
     fig.addEventListener('click', function (e) {
-      if (!e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas')) return;
-      var au = fig.querySelector('audio');
-      autoFollow = !(au && au.paused);
+      if (!e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas, .sv-ap-track')) return;
+      setTimeout(function () { autoFollow = !!(fig._ap && !fig._ap.paused()); }, 400);
     });
     setInterval(function () {
       if (!autoFollow) return;
-      var au2 = fig.querySelector('audio');
-      if (au2 && au2.paused) return;
+      if (!fig._ap || fig._ap.paused()) return;
       var act = fig.querySelector('.sv-ap-pin.sv-ap-active');
       if (!act) return;
       var i = chapMap[act.getAttribute('data-cid')];
@@ -3400,8 +3398,12 @@ function initAnnotatedPlayers() {
   document.querySelectorAll('.sv-annotated-player').forEach(function (fig) {
     if (fig.getAttribute('data-ap-init')) return;
     fig.setAttribute('data-ap-init', '1');
+    if (fig.getAttribute('data-yt')) { setupYTFigure(fig); return; }
     var audio = fig.querySelector('audio');
     audio.setAttribute('src', fig.getAttribute('data-audio'));
+    fig._ap = { play: function () { audio.play(); }, pause: function () { audio.pause(); },
+      seek: function (t) { audio.currentTime = t; audio.play(); }, time: function () { return audio.currentTime; },
+      paused: function () { return audio.paused; } };
     var cv = fig.querySelector('.sv-ap-canvas'), ctx = cv.getContext('2d');
     var wrap = fig.querySelector('.sv-ap-wrap');
     var pins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
@@ -3523,6 +3525,158 @@ function initAnnotatedPlayers() {
               status.textContent = 'save blocked - pin times copied, paste them to the session';
             });
         });
+      });
+    });
+  });
+}
+
+// ---- Guided Listening: YouTube embed variant ----
+var _ytReadyCbs = [], _ytApiLoading = false;
+function whenYTReady(cb) {
+  if (window.YT && window.YT.Player) { cb(); return; }
+  _ytReadyCbs.push(cb);
+  if (_ytApiLoading) return;
+  _ytApiLoading = true;
+  var prev = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = function () {
+    if (prev) try { prev(); } catch (e) {}
+    _ytReadyCbs.forEach(function (f) { try { f(); } catch (e) {} });
+    _ytReadyCbs = [];
+  };
+  var s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+}
+
+function setupYTFigure(fig) {
+  var pins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
+  var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
+  var track = fig.querySelector('.sv-ap-track'), fill = fig.querySelector('.sv-ap-trackfill');
+  var DUR = 0, DUR0 = parseFloat(fig.getAttribute('data-dur')) || 0;
+  var pendingSeek = null, positioned = false;
+  function fmt(t) { t = Math.max(0, Math.floor(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+  function inst() {
+    var fr = fig.querySelector('.sv-ap-video iframe');
+    if (!fr || !window.YT || !YT.get) return null;
+    var p = YT.get(fr.id);
+    return (p && typeof p.seekTo === 'function' && typeof p.getPlayerState === 'function') ? p : null;
+  }
+  fig._ap = {
+    play: function () { var p = inst(); if (p) p.playVideo(); },
+    pause: function () { var p = inst(); if (p) p.pauseVideo(); },
+    seek: function (t) { var p = inst(); if (p) { p.seekTo(t, true); p.playVideo(); } else pendingSeek = t; },
+    time: function () { var p = inst(); try { return p ? (p.getCurrentTime() || 0) : 0; } catch (e) { return 0; } },
+    paused: function () { var p = inst(); try { return !(p && p.getPlayerState() === 1); } catch (e) { return true; } }
+  };
+  whenYTReady(function () {
+    var mount = fig.querySelector('.sv-ap-ytmount');
+    if (mount) new YT.Player(mount, { videoId: fig.getAttribute('data-yt'), playerVars: { rel: 0, playsinline: 1 } });
+  });
+  function seek(t) { fig._ap.seek(t); }
+  pins.forEach(function (p) {
+    p.addEventListener('click', function () {
+      if (!fig.classList.contains('sv-ap-adjusting')) seek(parseFloat(p.getAttribute('data-t')));
+    });
+  });
+  document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
+    b.addEventListener('click', function () { seek(parseFloat(b.getAttribute('data-t'))); });
+  });
+  playB.addEventListener('click', function () { fig._ap.paused() ? fig._ap.play() : fig._ap.pause(); });
+  track.addEventListener('click', function (e) {
+    var d = DUR || DUR0;
+    if (!d) return;
+    var r = track.getBoundingClientRect();
+    seek(d * (e.clientX - r.left) / r.width);
+  });
+  function frame() {
+    var p = inst();
+    if (p) {
+      try {
+        if (!DUR) DUR = p.getDuration() || 0;
+        if (DUR && !positioned) {
+          positioned = true;
+          pins.forEach(function (pin) {
+            pin.style.left = (100 * (parseFloat(pin.getAttribute('data-t')) || 0) / DUR) + '%';
+          });
+        }
+        if (pendingSeek != null && DUR) { p.seekTo(pendingSeek, true); p.playVideo(); pendingSeek = null; }
+        var t = fig._ap.time(), d = DUR || DUR0;
+        if (d) {
+          tick.textContent = fmt(t) + ' / ' + fmt(d);
+          fill.style.width = Math.min(100, 100 * t / d) + '%';
+        }
+        var playing = !fig._ap.paused();
+        playB.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+        var act = null;
+        pins.forEach(function (pin) { if (t >= parseFloat(pin.getAttribute('data-t')) - 0.3) act = pin; });
+        pins.forEach(function (pin) { pin.classList.toggle('sv-ap-active', pin === act); });
+        if (act && playing) {
+          var s = act.querySelector('strong');
+          now.textContent = s ? s.textContent : '';
+        }
+      } catch (e) {}
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+  var sess = null;
+  try { sess = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')); } catch (e) {}
+  if (!sess || ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(sess.role) === -1) return;
+  var bar = document.createElement('div');
+  bar.className = 'sv-ap-staffbar';
+  bar.innerHTML = '<button type="button" class="sv-ap-toggle">Adjust pins</button><span class="sv-ap-status"></span>';
+  fig.appendChild(bar);
+  var status = bar.querySelector('.sv-ap-status');
+  bar.querySelector('.sv-ap-toggle').addEventListener('click', function () {
+    var on = fig.classList.toggle('sv-ap-adjusting');
+    this.textContent = on ? 'Done' : 'Adjust pins';
+    if (!on || bar.querySelector('.sv-ap-tools')) return;
+    pins.forEach(function (p) {
+      var tools = document.createElement('span');
+      tools.className = 'sv-ap-tools';
+      var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
+      tools.innerHTML = '<em>' + name + '</em><button type="button" data-d="-1">-1s</button>' +
+        '<button type="button" data-d="1">+1s</button><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+      bar.appendChild(tools);
+      var show = function () {
+        var t = parseFloat(p.getAttribute('data-t')) || 0;
+        tools.querySelector('.sv-ap-t').textContent = fmt(t);
+        if (DUR) p.style.left = (100 * t / DUR) + '%';
+      };
+      tools.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        var t = parseFloat(p.getAttribute('data-t')) || 0;
+        t = b.getAttribute('data-set') ? fig._ap.time() : t + parseFloat(b.getAttribute('data-d'));
+        p.setAttribute('data-t', Math.max(0, Math.round(t * 10) / 10));
+        show(); status.textContent = 'unsaved changes';
+      });
+      show();
+    });
+    var save = document.createElement('button');
+    save.type = 'button'; save.className = 'sv-ap-save'; save.textContent = 'Save pins';
+    bar.appendChild(save);
+    save.addEventListener('click', function () {
+      var lessonId = fig.getAttribute('data-lesson-id'), times = {};
+      pins.forEach(function (p) { times[p.getAttribute('data-cid')] = p.getAttribute('data-t'); });
+      status.textContent = 'saving...';
+      var sb2 = window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co',
+        'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
+      sb2.from('lessons').select('content_html').eq('id', lessonId).single().then(function (r) {
+        if (!r.data) { status.textContent = 'load failed'; return; }
+        var html2 = r.data.content_html;
+        Object.keys(times).forEach(function (cid) {
+          html2 = html2.replace(new RegExp('(data-cid="' + cid + '"[^>]*data-t=")[^"]*(")'), '$1' + times[cid] + '$2');
+        });
+        var headers = { 'Content-Type': 'application/json' };
+        if (sess.pw) headers['X-Admin-Password'] = sess.pw;
+        fetch('/api/pipeline/update-lesson', { method: 'POST', headers: headers,
+          body: JSON.stringify({ lesson_id: lessonId, content_html: html2 }) })
+          .then(function (resp) {
+            if (resp.ok) { status.textContent = 'saved'; return; }
+            navigator.clipboard.writeText(JSON.stringify(times));
+            status.textContent = 'save blocked - pin times copied, paste them to the session';
+          });
       });
     });
   });
