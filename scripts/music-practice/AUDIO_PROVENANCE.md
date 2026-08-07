@@ -73,8 +73,10 @@ re-verified. lesson-04 Haydn = Koussevitzky/BSO 1929, PD-EU-audio (US-PD
 2030 — accepted posture, review before any US-market push). lesson-05 Zadok =
 St Matthew's Concert Choir 2013 CC BY 3.0 — attribution now displayed in the
 drill. lesson-06 Chopin = Musopen Frank Levy (PD). lesson-07/07b Kinderszenen
-= Musopen set (PD, VRT ticket). lesson-08 Verdi: ICBSA transfer CC BY-SA 4.0
-— MUST REPLACE, still open (IMSLP Fricsay candidate needs manual download).
+= Musopen set (PD, VRT ticket). lesson-08 Verdi: REPLACED 7 Aug with Fricsay/RIAS 1954 (DG), IMSLP tag
+'Public Domain - Non-PD US' — UK/EU PD, same posture as the Haydn (both are
+the accepted UK-exposure items to revisit before any US-market push).
+Content probe confirmed the Dies irae; credit displayed in the drill.
 
 ## (superseded note)
 
