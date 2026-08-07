@@ -3449,74 +3449,118 @@ window.openFlashcardModal = openFlashcardModal;
 })();
 
 
-// ---- Annotated study-piece player (music study pieces) ----
+// ---- Annotated study-piece player (waveform) ----
 function initAnnotatedPlayers() {
   document.querySelectorAll('.sv-annotated-player').forEach(function (fig) {
-    var audio = fig.querySelector('audio');
-    if (!audio || fig.getAttribute('data-ap-init')) return;
+    if (fig.getAttribute('data-ap-init')) return;
     fig.setAttribute('data-ap-init', '1');
-    if (!audio.getAttribute('src')) audio.setAttribute('src', fig.getAttribute('data-audio'));
-    var chapters = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-chapter'));
-    chapters.forEach(function (btn) {
-      btn.addEventListener('click', function () {
-        if (fig.classList.contains('sv-ap-adjusting')) return;
-        audio.currentTime = parseFloat(btn.getAttribute('data-t')) || 0;
-        audio.play();
+    var audio = fig.querySelector('audio');
+    audio.setAttribute('src', fig.getAttribute('data-audio'));
+    var cv = fig.querySelector('.sv-ap-canvas'), ctx = cv.getContext('2d');
+    var wrap = fig.querySelector('.sv-ap-wrap');
+    var pins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
+    var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
+    var DUR = 0, PEAKS = null;
+    var pvBanner = document.querySelector('.sv-preview-banner');
+    if (pvBanner) fig.style.top = (58 + pvBanner.offsetHeight) + 'px';
+    var inlinePeaks = fig.querySelector('.sv-ap-peaks');
+    if (inlinePeaks) {
+      try { var d0 = JSON.parse(inlinePeaks.textContent); PEAKS = d0.peaks; DUR = d0.duration; } catch (e) {}
+    }
+    if (!PEAKS && fig.getAttribute('data-peaks')) {
+      fetch(fig.getAttribute('data-peaks')).then(function (r) { return r.json(); }).then(function (d) {
+        PEAKS = d.peaks; DUR = d.duration; draw();
+      }).catch(function () {});
+    }
+    function fmt(t) { t = Math.max(0, Math.floor(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+    function draw() {
+      if (!PEAKS) return;
+      var w = cv.clientWidth, h = cv.clientHeight;
+      if (cv.width !== w * 2) { cv.width = w * 2; cv.height = h * 2; }
+      ctx.setTransform(2, 0, 0, 2, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      var bw = w / PEAKS.length, played = DUR ? audio.currentTime / DUR : 0;
+      var css = getComputedStyle(fig);
+      for (var i = 0; i < PEAKS.length; i++) {
+        var bh = Math.max(2, PEAKS[i] * (h - 6));
+        ctx.fillStyle = (i / PEAKS.length) < played ? (css.color || '#2d2a26') : 'rgba(45,42,38,0.26)';
+        ctx.fillRect(i * bw, (h - bh) / 2, Math.max(1, bw - 1), bh);
+      }
+    }
+    cv.addEventListener('click', function (e) {
+      var r = cv.getBoundingClientRect();
+      if (DUR) { audio.currentTime = DUR * (e.clientX - r.left) / r.width; audio.play(); }
+    });
+    function seek(t) { audio.currentTime = t; audio.play(); }
+    pins.forEach(function (p) {
+      p.addEventListener('click', function () {
+        if (!fig.classList.contains('sv-ap-adjusting')) seek(parseFloat(p.getAttribute('data-t')));
       });
     });
-    audio.addEventListener('timeupdate', function () {
-      var t = audio.currentTime, active = null;
-      chapters.forEach(function (btn) {
-        if (t >= (parseFloat(btn.getAttribute('data-t')) || 0) - 0.3) active = btn;
-      });
-      chapters.forEach(function (btn) { btn.classList.toggle('sv-ap-active', btn === active); });
+    document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
+      b.addEventListener('click', function () { seek(parseFloat(b.getAttribute('data-t'))); });
     });
+    playB.addEventListener('click', function () { audio.paused ? audio.play() : audio.pause(); });
+    audio.addEventListener('play', function () { playB.innerHTML = '&#10074;&#10074;'; });
+    audio.addEventListener('pause', function () { playB.innerHTML = '&#9654;'; });
+    function frame() {
+      if (DUR) {
+        tick.textContent = fmt(audio.currentTime) + ' / ' + fmt(DUR);
+        var act = null;
+        pins.forEach(function (p) { if (audio.currentTime >= parseFloat(p.getAttribute('data-t')) - 0.3) act = p; });
+        pins.forEach(function (p) { p.classList.toggle('sv-ap-active', p === act); });
+        if (act && !audio.paused) {
+          var s = act.querySelector('strong');
+          now.textContent = s ? s.textContent : '';
+        }
+        draw();
+      }
+      requestAnimationFrame(frame);
+    }
+    frame();
+    // staff adjust
     var sess = null;
-    try {
-      sess = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth'));
-    } catch (e) {}
+    try { sess = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')); } catch (e) {}
     if (!sess || ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(sess.role) === -1) return;
-    function fmt(t) { t = Math.max(0, Math.round(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
     var bar = document.createElement('div');
     bar.className = 'sv-ap-staffbar';
-    bar.innerHTML = '<button type="button" class="sv-ap-toggle">Adjust chapters</button><span class="sv-ap-status"></span>';
+    bar.innerHTML = '<button type="button" class="sv-ap-toggle">Adjust pins</button><span class="sv-ap-status"></span>';
     fig.appendChild(bar);
     var status = bar.querySelector('.sv-ap-status');
     bar.querySelector('.sv-ap-toggle').addEventListener('click', function () {
       var on = fig.classList.toggle('sv-ap-adjusting');
-      this.textContent = on ? 'Done adjusting' : 'Adjust chapters';
-      if (!on || fig.querySelector('.sv-ap-tools')) return;
-      chapters.forEach(function (btn) {
+      this.textContent = on ? 'Done' : 'Adjust pins';
+      if (!on || bar.querySelector('.sv-ap-tools')) return;
+      pins.forEach(function (p) {
         var tools = document.createElement('span');
         tools.className = 'sv-ap-tools';
-        tools.innerHTML = '<button type="button" data-d="-1">-1s</button>' +
-          '<button type="button" data-d="1">+1s</button>' +
-          '<button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
-        btn.parentNode.appendChild(tools);
-        var show = function () { tools.querySelector('.sv-ap-t').textContent = fmt(parseFloat(btn.getAttribute('data-t')) || 0); };
+        var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
+        tools.innerHTML = '<em>' + name + '</em><button type="button" data-d="-1">-1s</button>' +
+          '<button type="button" data-d="1">+1s</button><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+        bar.appendChild(tools);
+        var show = function () {
+          var t = parseFloat(p.getAttribute('data-t')) || 0;
+          tools.querySelector('.sv-ap-t').textContent = fmt(t);
+          if (DUR) p.style.left = (100 * t / DUR) + '%';
+        };
         tools.addEventListener('click', function (e) {
           var b = e.target.closest('button');
           if (!b) return;
-          var t = parseFloat(btn.getAttribute('data-t')) || 0;
+          var t = parseFloat(p.getAttribute('data-t')) || 0;
           t = b.getAttribute('data-set') ? audio.currentTime : t + parseFloat(b.getAttribute('data-d'));
-          btn.setAttribute('data-t', Math.max(0, Math.round(t * 10) / 10));
-          show();
-          status.textContent = 'unsaved changes';
+          p.setAttribute('data-t', Math.max(0, Math.round(t * 10) / 10));
+          show(); status.textContent = 'unsaved changes';
         });
         show();
       });
       var save = document.createElement('button');
-      save.type = 'button';
-      save.className = 'sv-ap-save';
-      save.textContent = 'Save chapters';
+      save.type = 'button'; save.className = 'sv-ap-save'; save.textContent = 'Save pins';
       bar.appendChild(save);
       save.addEventListener('click', function () {
-        var lessonId = fig.getAttribute('data-lesson-id');
-        var times = {};
-        chapters.forEach(function (btn) { times[btn.getAttribute('data-cid')] = btn.getAttribute('data-t'); });
+        var lessonId = fig.getAttribute('data-lesson-id'), times = {};
+        pins.forEach(function (p) { times[p.getAttribute('data-cid')] = p.getAttribute('data-t'); });
         status.textContent = 'saving...';
-        var sb2 = window.supabase.createClient(
-          'https://baipckgywpnwapobwtsy.supabase.co',
+        var sb2 = window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co',
           'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
         sb2.from('lessons').select('content_html').eq('id', lessonId).single().then(function (r) {
           if (!r.data) { status.textContent = 'load failed'; return; }
@@ -3526,17 +3570,13 @@ function initAnnotatedPlayers() {
           });
           var headers = { 'Content-Type': 'application/json' };
           if (sess.pw) headers['X-Admin-Password'] = sess.pw;
-          fetch('/api/pipeline/update-lesson', {
-            method: 'POST', headers: headers,
-            body: JSON.stringify({ lesson_id: lessonId, content_html: html })
-          }).then(function (resp) {
-            if (resp.ok) { status.textContent = 'saved'; return; }
-            navigator.clipboard.writeText(JSON.stringify(times));
-            status.textContent = 'save blocked - chapter times copied to clipboard, paste them to the session';
-          }).catch(function () {
-            navigator.clipboard.writeText(JSON.stringify(times));
-            status.textContent = 'save failed - chapter times copied to clipboard, paste them to the session';
-          });
+          fetch('/api/pipeline/update-lesson', { method: 'POST', headers: headers,
+            body: JSON.stringify({ lesson_id: lessonId, content_html: html }) })
+            .then(function (resp) {
+              if (resp.ok) { status.textContent = 'saved'; return; }
+              navigator.clipboard.writeText(JSON.stringify(times));
+              status.textContent = 'save blocked - pin times copied, paste them to the session';
+            });
         });
       });
     });
