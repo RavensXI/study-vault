@@ -9191,36 +9191,39 @@ body.dark-mode .sv-explained { background: #262420; border-color: #3a3733; }
 
 /* AUTOGEN-MARKER-END: religious-studies-edexcel unit accents */
 
-/* ---- Annotated study-piece player (waveform) ---- */
-.sv-annotated-player { position: sticky; top: 58px; z-index: 30; margin: 0 0 2rem;
-  padding: 0.9rem 1.1rem 0.6rem; background: #faf8f5;
-  border: 1px solid rgba(45,42,38,0.14); border-radius: 16px; }
+/* ---- Annotated study-piece player (bottom dock) ---- */
+.sv-annotated-player { position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+  margin: 0; padding: 0.7rem 2rem 0.5rem; background: #faf8f5;
+  border-top: 1px solid rgba(45,42,38,0.16); box-shadow: 0 -6px 24px rgba(45,42,38,0.08); }
+body.sv-has-ap-dock { padding-bottom: 240px; }
 .sv-ap-bar { display: flex; align-items: center; gap: 0.8rem; font-family: Inter, sans-serif; }
-.sv-ap-play { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid #2d2a26;
-  background: #fff; cursor: pointer; font-size: 0.85rem; flex: none; }
+.sv-ap-play { width: 42px; height: 42px; border-radius: 50%; border: 1.5px solid #2d2a26;
+  background: #fff; cursor: pointer; font-size: 0.9rem; flex: none; }
 .sv-ap-play:hover { background: #2d2a26; color: #fff; }
 .sv-ap-tick { font-variant-numeric: tabular-nums; font-size: 0.82rem; opacity: 0.7; }
 .sv-ap-now { font-size: 0.84rem; font-weight: 600; opacity: 0.85; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; margin-left: auto; max-width: 55%; }
-.sv-ap-wrap { position: relative; height: 76px; margin-top: 0.5rem; }
-.sv-ap-canvas { width: 100%; height: 64px; display: block; margin-top: 12px; cursor: pointer; }
+.sv-ap-wrap { position: relative; height: 128px; margin-top: 0.4rem; }
+.sv-ap-canvas { width: 100%; height: 104px; display: block; margin-top: 24px; cursor: pointer; }
 .sv-ap-pin { position: absolute; top: 0; transform: translateX(-50%); width: 22px; height: 22px;
   border-radius: 50%; border: 1.5px solid #2d2a26; background: #faf8f5;
   font: 600 0.7rem Inter, sans-serif; cursor: pointer; z-index: 3; padding: 0; }
 .sv-ap-pin:hover, .sv-ap-pin.sv-ap-active { background: #2d2a26; color: #faf8f5; }
-.sv-ap-pin .sv-ap-tip { display: none; position: absolute; top: calc(100% + 8px); left: 50%;
-  transform: translateX(-50%); width: 240px; background: #2d2a26; color: #faf8f5;
+.sv-ap-pin .sv-ap-tip { display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%); width: 250px; background: #2d2a26; color: #faf8f5;
   font: 400 0.78rem/1.45 Inter, sans-serif; padding: 0.55rem 0.7rem; border-radius: 6px;
   text-align: left; pointer-events: none; z-index: 5; }
 .sv-ap-pin:hover .sv-ap-tip, .sv-ap-pin:focus .sv-ap-tip { display: block; }
+.sv-ap-pin:first-of-type .sv-ap-tip { left: 0; transform: none; }
+.sv-ap-pin:last-of-type .sv-ap-tip { left: auto; right: 0; transform: none; }
 .sv-ap-pin .sv-ap-tip strong { display: block; margin-bottom: 0.15rem; }
 .sv-ap-ref { display: inline-flex; align-items: center; justify-content: center;
   width: 1.4em; height: 1.4em; border-radius: 50%; border: 1.5px solid #2d2a26;
   background: #fff; font: 600 0.75em Inter, sans-serif; cursor: pointer;
   vertical-align: 0.1em; margin: 0 0.12em; padding: 0; transition: background 0.15s; }
 .sv-ap-ref:hover { background: #2d2a26; color: #fff; }
-.sv-annotated-player .sv-listen-credit { font-size: 0.72rem; opacity: 0.55; margin: 0.4rem 0 0; }
-.sv-ap-staffbar { margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid rgba(45,42,38,0.10);
+.sv-annotated-player .sv-listen-credit { font-size: 0.72rem; opacity: 0.55; margin: 0.35rem 0 0; }
+.sv-ap-staffbar { margin-top: 0.4rem; padding-top: 0.4rem; border-top: 1px solid rgba(45,42,38,0.10);
   display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; font-family: Inter, sans-serif; }
 .sv-ap-staffbar button { font-size: 0.75rem; padding: 0.25rem 0.55rem;
   border: 1px solid rgba(45,42,38,0.22); border-radius: 8px; background: #fff; cursor: pointer; }
@@ -9228,3 +9231,10 @@ body.dark-mode .sv-explained { background: #262420; border-color: #3a3733; }
 .sv-ap-tools em { font-style: normal; opacity: 0.7; }
 .sv-annotated-player:not(.sv-ap-adjusting) .sv-ap-tools { display: none; }
 .sv-annotated-player:not(.sv-ap-adjusting) .sv-ap-save { display: none; }
+@media (max-width: 900px) {
+  .sv-annotated-player { padding: 0.5rem 1rem 0.4rem; }
+  body.sv-has-ap-dock { padding-bottom: 150px; }
+  .sv-ap-wrap { height: 78px; }
+  .sv-ap-canvas { height: 56px; margin-top: 22px; }
+  .sv-ap-now { display: none; }
+}
