@@ -3474,10 +3474,8 @@ function initListeningLesson() {
     if (!b) return;
     var act = b.getAttribute('data-act');
     if (act === 'quiz') { var k = document.getElementById('knowledge-check-btn'); if (k) k.click(); }
-    if (act === 'cards') { var f = document.getElementById('sidebar-flashcard-btn'); if (f) f.click(); }
+    if (act === 'cards') { if (typeof openFlashcardModal === 'function') openFlashcardModal(); }
     if (act === 'practice') {
-      var t = document.querySelector('.tile-practice button, .tile-practice');
-      if (t) { t.click(); return; }
       var pr = document.getElementById('practice');
       if (!pr) return;
       var ov = document.querySelector('.sv-ll-practice-ov');
@@ -3488,7 +3486,7 @@ function initListeningLesson() {
         x.addEventListener('click', function () { ov.style.display = 'none'; });
         box.appendChild(x); box.appendChild(pr); ov.appendChild(box); document.body.appendChild(ov);
       }
-      ov.style.display = 'flex'; pr.style.display = 'block';
+      ov.style.display = 'flex'; pr.style.setProperty('display', 'block', 'important');
     }
   });
 
@@ -3548,10 +3546,14 @@ function initListeningLesson() {
   var fig = document.querySelector('.sv-annotated-player');
   if (fig) {
     fig.addEventListener('click', function (e) {
-      if (e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas')) autoFollow = true;
+      if (!e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas')) return;
+      var au = fig.querySelector('audio');
+      autoFollow = !(au && au.paused);
     });
     setInterval(function () {
       if (!autoFollow) return;
+      var au2 = fig.querySelector('audio');
+      if (au2 && au2.paused) return;
       var act = fig.querySelector('.sv-ap-pin.sv-ap-active');
       if (!act) return;
       var i = chapMap[act.getAttribute('data-cid')];
