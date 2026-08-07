@@ -3550,9 +3550,6 @@ function initListeningLesson() {
     fig.addEventListener('click', function (e) {
       if (e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas')) autoFollow = true;
     });
-    document.addEventListener('click', function (e) {
-      if (e.target.closest('.sv-ap-ref')) autoFollow = true;
-    });
     setInterval(function () {
       if (!autoFollow) return;
       var act = fig.querySelector('.sv-ap-pin.sv-ap-active');
