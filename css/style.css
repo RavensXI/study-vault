@@ -9245,7 +9245,12 @@ body.sv-listening-mode .sv-ap-now { display: none; }
 
 .sv-stage-strip { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 1.5rem;
   border: 1px solid rgba(45,42,38,0.16); border-radius: 16px; overflow: hidden; background: #fff; }
-.sv-stage { padding: 0.85rem 1.1rem; }
+.sv-stage { padding: 0.85rem 1.1rem; position: relative; }
+.sv-stage + .sv-stage::before { content: "→"; position: absolute; left: -11px; top: 50%;
+  transform: translateY(-50%); width: 22px; height: 22px; border-radius: 50%; background: #fff;
+  border: 1px solid rgba(45,42,38,0.16); display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; color: rgba(45,42,38,0.65); z-index: 1; }
+@media (max-width: 1100px) { .sv-stage + .sv-stage::before { display: none; } }
 .sv-stage + .sv-stage { border-left: 1px solid rgba(45,42,38,0.12); }
 .sv-stage strong { display: block; font: 600 0.92rem Inter, sans-serif; margin-bottom: 0.3rem; }
 .sv-stage span { font-size: 0.82rem; line-height: 1.45; opacity: 0.75; }
