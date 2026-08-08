@@ -3447,6 +3447,31 @@ function initAnnotatedPlayers() {
         if (!fig.classList.contains('sv-ap-adjusting')) seek(parseFloat(p.getAttribute('data-t')));
       });
     });
+pins.forEach(function (p) {
+  p.addEventListener('pointerdown', function (e) {
+    if (!fig.classList.contains('sv-ap-adjusting')) return;
+    var d = DUR; if (!d) return;
+    e.preventDefault(); e.stopPropagation();
+    p.setPointerCapture(e.pointerId);
+    var r = wrap.getBoundingClientRect();
+    var move = function (ev) {
+      var frac = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+      p.setAttribute('data-t', Math.round(d * frac * 10) / 10);
+      p.style.left = (100 * frac) + '%';
+      if (p._syncTools) p._syncTools();
+    };
+    var up = function () {
+      p.removeEventListener('pointermove', move);
+      p.removeEventListener('pointerup', up);
+      var st = fig.querySelector('.sv-ap-status');
+      if (st) st.textContent = 'unsaved changes';
+      if (fig._ap) fig._ap.seek(parseFloat(p.getAttribute('data-t')));
+    };
+    p.addEventListener('pointermove', move);
+    p.addEventListener('pointerup', up);
+  });
+});
+
     document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
       b.addEventListener('click', function () { seek(parseFloat(b.getAttribute('data-t'))); });
     });
@@ -3485,10 +3510,9 @@ function initAnnotatedPlayers() {
         var tools = document.createElement('span');
         tools.className = 'sv-ap-tools';
         var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
-        tools.innerHTML = '<em>' + name + '</em><button type="button" data-d="-1">-1s</button>' +
-          '<button type="button" data-d="1">+1s</button><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+        tools.innerHTML = '<em>' + name + '</em><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
         bar.appendChild(tools);
-        var show = function () {
+        var show = p._syncTools = function () {
           var t = parseFloat(p.getAttribute('data-t')) || 0;
           tools.querySelector('.sv-ap-t').textContent = fmt(t);
           if (DUR) p.style.left = (100 * t / DUR) + '%';
@@ -3556,6 +3580,7 @@ function setupYTFigure(fig) {
   var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
   var track = fig.querySelector('.sv-ap-track'), fill = fig.querySelector('.sv-ap-trackfill');
   var tBtns = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-trackbtn'));
+  var wrap = fig.querySelector('.sv-ap-wrap');
   var cur = null, DUR = 0, DUR0 = 0, pendingSeek = null, positioned = false;
   function fmt(t) { t = Math.max(0, Math.floor(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
   function btnFor(k) { for (var i = 0; i < tBtns.length; i++) if (tBtns[i].getAttribute('data-track') === k) return tBtns[i]; return tBtns[0]; }
@@ -3609,6 +3634,31 @@ function setupYTFigure(fig) {
       if (!fig.classList.contains('sv-ap-adjusting')) fig._ap.seek(parseFloat(p.getAttribute('data-t')), p.getAttribute('data-track'));
     });
   });
+allPins.forEach(function (p) {
+  p.addEventListener('pointerdown', function (e) {
+    if (!fig.classList.contains('sv-ap-adjusting')) return;
+    var d = DUR || DUR0; if (!d) return;
+    e.preventDefault(); e.stopPropagation();
+    p.setPointerCapture(e.pointerId);
+    var r = wrap.getBoundingClientRect();
+    var move = function (ev) {
+      var frac = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+      p.setAttribute('data-t', Math.round(d * frac * 10) / 10);
+      p.style.left = (100 * frac) + '%';
+      if (p._syncTools) p._syncTools();
+    };
+    var up = function () {
+      p.removeEventListener('pointermove', move);
+      p.removeEventListener('pointerup', up);
+      var st = fig.querySelector('.sv-ap-status');
+      if (st) st.textContent = 'unsaved changes';
+      if (fig._ap) fig._ap.seek(parseFloat(p.getAttribute('data-t')), p.getAttribute('data-track'));
+    };
+    p.addEventListener('pointermove', move);
+    p.addEventListener('pointerup', up);
+  });
+});
+
   document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
     b.addEventListener('click', function () { fig._ap.seek(parseFloat(b.getAttribute('data-t')), b.getAttribute('data-track')); });
   });
@@ -3669,10 +3719,9 @@ function setupYTFigure(fig) {
       var tools = document.createElement('span');
       tools.className = 'sv-ap-tools';
       var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
-      tools.innerHTML = '<em>' + name + '</em><button type="button" data-d="-1">-1s</button>' +
-        '<button type="button" data-d="1">+1s</button><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+      tools.innerHTML = '<em>' + name + '</em><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
       bar.appendChild(tools);
-      var show = function () {
+      var show = p._syncTools = function () {
         var t = parseFloat(p.getAttribute('data-t')) || 0;
         tools.querySelector('.sv-ap-t').textContent = fmt(t);
         if (DUR) p.style.left = (100 * t / DUR) + '%';
