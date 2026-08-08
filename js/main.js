@@ -3784,6 +3784,10 @@ function setupYTFigure(fig) {
     cur = k;
     tBtns.forEach(function (x) { x.classList.toggle('sv-ap-trackbtn--on', x === b); });
     allPins.forEach(function (p) { p.style.display = p.getAttribute('data-track') === k ? '' : 'none'; });
+    if (fig.classList.contains('sv-ap-adjusting')) {
+      var tg = fig.querySelector('.sv-ap-toggle');
+      if (tg) { tg.click(); tg.click(); }
+    }
     DUR = 0; DUR0 = parseFloat(b.getAttribute('data-dur')) || 0; positioned = false;
     var p = inst();
     if (!p) { if (startAt != null) pendingSeek = startAt; return; }
