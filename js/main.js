@@ -3528,6 +3528,9 @@ function initListeningLesson() {
     track.style.transform = 'translateX(-' + (idx * 100) + '%)';
     dots.forEach(function (d, j) { d.classList.toggle('sv-ll-dot--on', j === idx); });
     prevB.disabled = idx === 0; nextB.disabled = idx === cards.length - 1;
+    var trk = cards[idx].getAttribute('data-track');
+    var figX = document.querySelector('.sv-annotated-player');
+    if (trk && figX && figX._setTrack) figX._setTrack(trk, false);
     if (!fromMusic) autoFollow = false;
   }
   goTo(0);
@@ -3584,7 +3587,7 @@ function initAnnotatedPlayers() {
   document.querySelectorAll('.sv-annotated-player').forEach(function (fig) {
     if (fig.getAttribute('data-ap-init')) return;
     fig.setAttribute('data-ap-init', '1');
-    if (fig.getAttribute('data-yt')) { setupYTFigure(fig); return; }
+    if (fig.getAttribute('data-yt') || fig.classList.contains('sv-ap-yt')) { setupYTFigure(fig); return; }
     var audio = fig.querySelector('audio');
     audio.setAttribute('src', fig.getAttribute('data-audio'));
     fig._ap = { play: function () { audio.play(); }, pause: function () { audio.pause(); },
@@ -3735,44 +3738,72 @@ function whenYTReady(cb) {
 }
 
 function setupYTFigure(fig) {
-  var pins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
+  var allPins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
   var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
   var track = fig.querySelector('.sv-ap-track'), fill = fig.querySelector('.sv-ap-trackfill');
-  var DUR = 0, DUR0 = parseFloat(fig.getAttribute('data-dur')) || 0;
-  var pendingSeek = null, positioned = false;
+  var tBtns = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-trackbtn'));
+  var cur = null, DUR = 0, DUR0 = 0, pendingSeek = null, positioned = false;
   function fmt(t) { t = Math.max(0, Math.floor(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+  function btnFor(k) { for (var i = 0; i < tBtns.length; i++) if (tBtns[i].getAttribute('data-track') === k) return tBtns[i]; return tBtns[0]; }
+  function curPins() { return allPins.filter(function (p) { return !cur || p.getAttribute('data-track') === cur; }); }
   function inst() {
     var fr = fig.querySelector('.sv-ap-video iframe');
     if (!fr || !window.YT || !YT.get) return null;
     var p = YT.get(fr.id);
     return (p && typeof p.seekTo === 'function' && typeof p.getPlayerState === 'function') ? p : null;
   }
+  function setTrack(k, autoplay, startAt) {
+    if (k === cur && startAt == null) return;
+    var b = btnFor(k);
+    var sameTrack = (k === cur);
+    cur = k;
+    tBtns.forEach(function (x) { x.classList.toggle('sv-ap-trackbtn--on', x === b); });
+    allPins.forEach(function (p) { p.style.display = p.getAttribute('data-track') === k ? '' : 'none'; });
+    DUR = 0; DUR0 = parseFloat(b.getAttribute('data-dur')) || 0; positioned = false;
+    var p = inst();
+    if (!p) { if (startAt != null) pendingSeek = startAt; return; }
+    if (sameTrack) {
+      if (startAt != null) { p.seekTo(startAt, true); p.playVideo(); }
+      return;
+    }
+    var vid = b.getAttribute('data-yt');
+    if (autoplay || startAt != null) p.loadVideoById({ videoId: vid, startSeconds: startAt || 0 });
+    else p.cueVideoById(vid);
+  }
+  fig._setTrack = function (k, autoplay) { if (k !== cur) setTrack(k, autoplay); };
   fig._ap = {
     play: function () { var p = inst(); if (p) p.playVideo(); },
     pause: function () { var p = inst(); if (p) p.pauseVideo(); },
-    seek: function (t) { var p = inst(); if (p) { p.seekTo(t, true); p.playVideo(); } else pendingSeek = t; },
+    seek: function (t, trk) {
+      if (trk && trk !== cur) { setTrack(trk, true, t); return; }
+      var p = inst();
+      if (p) { p.seekTo(t, true); p.playVideo(); } else pendingSeek = t;
+    },
     time: function () { var p = inst(); try { return p ? (p.getCurrentTime() || 0) : 0; } catch (e) { return 0; } },
     paused: function () { var p = inst(); try { return !(p && p.getPlayerState() === 1); } catch (e) { return true; } }
   };
   whenYTReady(function () {
     var mount = fig.querySelector('.sv-ap-ytmount');
-    if (mount) new YT.Player(mount, { videoId: fig.getAttribute('data-yt'), playerVars: { rel: 0, playsinline: 1 } });
+    if (mount) new YT.Player(mount, { videoId: btnFor('t1').getAttribute('data-yt'), playerVars: { rel: 0, playsinline: 1 } });
   });
-  function seek(t) { fig._ap.seek(t); }
-  pins.forEach(function (p) {
+  setTrack(tBtns.length ? tBtns[0].getAttribute('data-track') : 't1', false);
+  tBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setTrack(b.getAttribute('data-track'), true); });
+  });
+  allPins.forEach(function (p) {
     p.addEventListener('click', function () {
-      if (!fig.classList.contains('sv-ap-adjusting')) seek(parseFloat(p.getAttribute('data-t')));
+      if (!fig.classList.contains('sv-ap-adjusting')) fig._ap.seek(parseFloat(p.getAttribute('data-t')), p.getAttribute('data-track'));
     });
   });
   document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
-    b.addEventListener('click', function () { seek(parseFloat(b.getAttribute('data-t'))); });
+    b.addEventListener('click', function () { fig._ap.seek(parseFloat(b.getAttribute('data-t')), b.getAttribute('data-track')); });
   });
   playB.addEventListener('click', function () { fig._ap.paused() ? fig._ap.play() : fig._ap.pause(); });
   track.addEventListener('click', function (e) {
     var d = DUR || DUR0;
     if (!d) return;
     var r = track.getBoundingClientRect();
-    seek(d * (e.clientX - r.left) / r.width);
+    fig._ap.seek(d * (e.clientX - r.left) / r.width);
   });
   function frame() {
     var p = inst();
@@ -3781,7 +3812,7 @@ function setupYTFigure(fig) {
         if (!DUR) DUR = p.getDuration() || 0;
         if (DUR && !positioned) {
           positioned = true;
-          pins.forEach(function (pin) {
+          curPins().forEach(function (pin) {
             pin.style.left = (100 * (parseFloat(pin.getAttribute('data-t')) || 0) / DUR) + '%';
           });
         }
@@ -3794,11 +3825,11 @@ function setupYTFigure(fig) {
         var playing = !fig._ap.paused();
         playB.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
         var act = null;
-        pins.forEach(function (pin) { if (t >= parseFloat(pin.getAttribute('data-t')) - 0.3) act = pin; });
-        pins.forEach(function (pin) { pin.classList.toggle('sv-ap-active', pin === act); });
-        if (act && playing) {
-          var s = act.querySelector('strong');
-          now.textContent = s ? s.textContent : '';
+        curPins().forEach(function (pin) { if (t >= parseFloat(pin.getAttribute('data-t')) - 0.3) act = pin; });
+        allPins.forEach(function (pin) { pin.classList.toggle('sv-ap-active', pin === act); });
+        if (act && playing && now) {
+          var st = act.querySelector('strong');
+          now.textContent = st ? st.textContent : '';
         }
       } catch (e) {}
     }
@@ -3816,8 +3847,11 @@ function setupYTFigure(fig) {
   bar.querySelector('.sv-ap-toggle').addEventListener('click', function () {
     var on = fig.classList.toggle('sv-ap-adjusting');
     this.textContent = on ? 'Done' : 'Adjust pins';
-    if (!on || bar.querySelector('.sv-ap-tools')) return;
-    pins.forEach(function (p) {
+    bar.querySelectorAll('.sv-ap-tools').forEach(function (t2) { t2.remove(); });
+    var oldSave = bar.querySelector('.sv-ap-save');
+    if (oldSave) oldSave.remove();
+    if (!on) return;
+    curPins().forEach(function (p) {
       var tools = document.createElement('span');
       tools.className = 'sv-ap-tools';
       var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
@@ -3844,7 +3878,7 @@ function setupYTFigure(fig) {
     bar.appendChild(save);
     save.addEventListener('click', function () {
       var lessonId = fig.getAttribute('data-lesson-id'), times = {};
-      pins.forEach(function (p) { times[p.getAttribute('data-cid')] = p.getAttribute('data-t'); });
+      allPins.forEach(function (p) { times[p.getAttribute('data-cid')] = p.getAttribute('data-t'); });
       status.textContent = 'saving...';
       var sb2 = window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co',
         'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
