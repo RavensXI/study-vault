@@ -51,3 +51,8 @@ Lesson: music-aqa / aos2-popular-music / L3 (id 6f19*-check via query). Sandbox 
 
 ## Also open (unrelated but this lesson)
 - Flashcards: only Beethoven L3 has a deck (task #42 subject-wide retrofit).
+
+## Pin-tip contract (locked with Tom, 8 Aug)
+Prose models fluent exam terminology (with refs attached AT the term). Pin tips are just-in-time glosses:
+"Term - plain-English what-you-are-hearing-right-now." No lyrics, no invented colour, facts from the
+fact-checked body only. Applied to all 23 pins (Queen 16 + Beethoven 7) on 8 Aug.
