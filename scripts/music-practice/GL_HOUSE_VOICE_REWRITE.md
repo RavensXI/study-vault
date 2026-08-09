@@ -68,3 +68,9 @@ right; t1 tips currently thin — improve from Little Fly facts above).
 Pins are TEACHABLE MOMENTS, not section markers. Every pin must be anchored by exactly one numbered
 ref in the copy, at the sentence that teaches it; every hear-it-worthy claim gets a pin. No
 unreferenced pins (deleted "Strings alone"). Machine-audit: pin data-t set == ref data-t set per track.
+
+## Embed ladder result (9 Aug)
+Little Fly t1 = MgeAQNBXKk0, the auto-generated album art-track (3:33) - PLAYS embedded and is the
+set recording (Tom ear-confirmed). Precedent: Concord (indie) art-tracks allow embedding where
+UMG/SME blocked theirs. Ladder step: try the art-track even when majors have refused before.
+Spalding deck now: t1 album audio / t2 Official Audio / t3 Album Version - all set recordings.
