@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'sv-v21';
+const CACHE_VERSION = 'sv-v23';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 

@@ -1580,6 +1580,7 @@ function initGlossary() {
     popup.className = 'term-popup';
     popup.textContent = term.dataset.def;
     term.appendChild(popup);
+    term._popup = popup;
   });
 
   let activeTerm = null;
@@ -1589,7 +1590,7 @@ function initGlossary() {
 
     const rects = term.getClientRects();
     const rect = term.getBoundingClientRect();
-    const popup = term.querySelector('.term-popup');
+    const popup = term._popup || term.querySelector('.term-popup');
     // For wrapped inline elements, absolute positioning is relative to the
     // first line fragment, not the bounding box — use that as our reference
     const refLeft = rects.length > 1 ? rects[0].left : rect.left;
@@ -1620,7 +1621,22 @@ function initGlossary() {
       let popupLeft = termCentre - popupWidth / 2;
       popupLeft = Math.max(8, Math.min(popupLeft, contentRight - popupWidth - 8));
 
-      popup.style.left = (popupLeft - refLeft) + 'px';
+      if (term.closest('.sv-listening')) {
+        // Multi-column bodies mis-place absolute children, and the translated
+        // card track hijacks position:fixed - so float the popup on body.
+        document.body.appendChild(popup);
+        popup.classList.add('term-popup--float');
+        const fw = popup.offsetWidth, fh = popup.offsetHeight;
+        let fx = Math.max(8, Math.min(termCentre - fw / 2, window.innerWidth - fw - 8));
+        popup.style.left = fx + 'px';
+        if (anchorRect.top - fh - 10 > 60) {
+          popup.style.top = (anchorRect.top - fh - 10) + 'px';
+        } else {
+          popup.style.top = (anchorRect.bottom + 10) + 'px';
+        }
+      } else {
+        popup.style.left = (popupLeft - refLeft) + 'px';
+      }
       popup.style.transform = 'none';
       term.classList.add('term-visible');
     } else {
@@ -1632,11 +1648,15 @@ function initGlossary() {
 
   function hideTerm(term) {
     term.classList.remove('term-visible', 'term-flip');
-    const popup = term.querySelector('.term-popup');
+    const popup = term._popup || term.querySelector('.term-popup');
     if (popup) {
+      if (popup.parentNode !== term) term.appendChild(popup);
+      popup.classList.remove('term-popup--float');
       popup.style.left = '';
       popup.style.right = '';
       popup.style.transform = '';
+      popup.style.position = '';
+      popup.style.top = '';
     }
     if (activeTerm === term) activeTerm = null;
   }
