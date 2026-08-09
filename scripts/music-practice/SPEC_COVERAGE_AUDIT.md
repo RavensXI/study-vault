@@ -63,3 +63,17 @@ GOTCHA worth remembering: practice_questions REQUIRE a "marks" field. Omit it an
 formatMarkScheme() throws inside initLessonFeatures, which silently kills every later feature on
 the page — chunk menu, glossary popups, knowledge check. The lesson still LOOKS fine.
 Always set text + type + marks.
+
+FACT-CHECK (agent, 9 Aug) — report scripts/_fact_check/music-aqa-aos2-l4.md
+1 HIGH found IN MY OWN WRITING and fixed: I dated grid-exact/programmed drums to "the 1990s or
+later". Wrong — drum machines (Linn LM-1, TR-808, both 1980) put quantised drums on mainstream pop
+from 1980-82. Reworded to "common since the early 1980s, so it rules out 1960s/70s live-band rock",
+which is what the test is actually good for. The claim appeared in THREE places (key fact, KC1,
+flashcard 5) — all corrected; KC1 reworded to ask what it rules OUT.
+2 LOW fixed: overdrive tooltip vs glossary disagreed and over-specified valve amps; sung-through
+definition contradicted itself. Also added the 3 tooltipped-but-missing glossary cards (fuzz,
+double-tracked, ostinato) — 10 terms now.
+Everything else verified sound, including all answer keys.
+HERO: via the real sandbox HeroFinder (scripts/lib/hero_pipeline.py) — vision grade A, vinyl records
+of different eras, Eric Krull / Unsplash, md5 e47d0843bf58dda0dd24918da5d3ff44, deduped against all
+11 existing music-aqa heroes. NOTE: HeroFinder lives ONLY in the sandbox worktree, not main.
