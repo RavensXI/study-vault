@@ -3886,9 +3886,10 @@ allPins.forEach(function (p) {
     var p = inst();
     if (p) {
       try {
-        if (!DUR) DUR = p.getDuration() || 0;
-        if (DUR && !positioned) {
-          positioned = true;
+        var gd = 0;
+        try { gd = p.getDuration() || 0; } catch (e2) {}
+        if (gd && Math.abs(gd - DUR) > 0.5) {
+          DUR = gd;
           curPins().forEach(function (pin) {
             pin.style.left = (100 * (parseFloat(pin.getAttribute('data-t')) || 0) / DUR) + '%';
           });
