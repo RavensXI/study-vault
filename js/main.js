@@ -1570,6 +1570,8 @@ function initGlossary() {
         // card track hijacks position:fixed - so float the popup on body.
         document.body.appendChild(popup);
         popup.classList.add('term-popup--float');
+        popup.style.bottom = 'auto';
+        popup.style.right = 'auto';
         const fw = popup.offsetWidth, fh = popup.offsetHeight;
         let fx = Math.max(8, Math.min(termCentre - fw / 2, window.innerWidth - fw - 8));
         popup.style.left = fx + 'px';
@@ -1601,6 +1603,7 @@ function initGlossary() {
       popup.style.transform = '';
       popup.style.position = '';
       popup.style.top = '';
+      popup.style.bottom = '';
     }
     if (activeTerm === term) activeTerm = null;
   }
