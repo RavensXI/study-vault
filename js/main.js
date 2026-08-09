@@ -3572,7 +3572,20 @@ pins.forEach(function (p) {
             .then(function (resp) {
               if (resp.ok) { status.textContent = 'saved'; return; }
               navigator.clipboard.writeText(JSON.stringify(times));
-              status.textContent = 'save blocked - pin times copied, paste them to the session';
+              if (!bar.querySelector('.sv-ap-pwrow')) {
+                var rowEl = document.createElement('span');
+                rowEl.className = 'sv-ap-tools sv-ap-pwrow';
+                rowEl.innerHTML = '<em>admin password:</em>' +
+                  '<input type="password" class="sv-ap-pw" style="width:110px">' +
+                  '<button type="button" class="sv-ap-pwgo">retry save</button>';
+                bar.appendChild(rowEl);
+                rowEl.querySelector('.sv-ap-pwgo').addEventListener('click', function () {
+                  sess.pw = rowEl.querySelector('.sv-ap-pw').value;
+                  try { sessionStorage.setItem('studyvault-auth', JSON.stringify(sess)); } catch (e9) {}
+                  save.click();
+                });
+              }
+              status.textContent = 'save blocked - enter the admin password and retry (times copied as backup)';
             });
         });
       });
@@ -3786,7 +3799,20 @@ allPins.forEach(function (p) {
           .then(function (resp) {
             if (resp.ok) { status.textContent = 'saved'; return; }
             navigator.clipboard.writeText(JSON.stringify(times));
-            status.textContent = 'save blocked - pin times copied, paste them to the session';
+            if (!bar.querySelector('.sv-ap-pwrow')) {
+              var rowEl = document.createElement('span');
+              rowEl.className = 'sv-ap-tools sv-ap-pwrow';
+              rowEl.innerHTML = '<em>admin password:</em>' +
+                '<input type="password" class="sv-ap-pw" style="width:110px">' +
+                '<button type="button" class="sv-ap-pwgo">retry save</button>';
+              bar.appendChild(rowEl);
+              rowEl.querySelector('.sv-ap-pwgo').addEventListener('click', function () {
+                sess.pw = rowEl.querySelector('.sv-ap-pw').value;
+                try { sessionStorage.setItem('studyvault-auth', JSON.stringify(sess)); } catch (e9) {}
+                save.click();
+              });
+            }
+            status.textContent = 'save blocked - enter the admin password and retry (times copied as backup)';
           });
       });
     });
