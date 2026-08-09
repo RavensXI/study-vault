@@ -52,3 +52,14 @@ in the unfamiliar-listening practice drill, never in a taught article.
 Every previous check was piecemeal — study pieces one day, one movement another. Nobody had
 read all four Areas of Study against all 30 lessons in one pass until now. Do this whole-spec
 sweep FIRST on any subject, not last.
+
+## AoS2 era gap CLOSED (9 Aug)
+New lesson aos2-popular-music L4 "Placing a Track in Time" (id d601ff11) — appended, never inserted.
+Covers all four AoS2 Section A strands by ERA: rock 60s/70s, pop 90s+, Broadway across its decades,
+film+gaming 90s+. Full asset set: 5 KCs, 5 flashcards, 6 practice questions WITH mark schemes,
+7 glossary terms, exam tip, conclusion. No hero image and no narration yet (see below).
+
+GOTCHA worth remembering: practice_questions REQUIRE a "marks" field. Omit it and
+formatMarkScheme() throws inside initLessonFeatures, which silently kills every later feature on
+the page — chunk menu, glossary popups, knowledge check. The lesson still LOOKS fine.
+Always set text + type + marks.
