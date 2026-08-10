@@ -154,21 +154,37 @@ NOT work — no rewrites).
 
 ## FACT-CHECK COVERAGE — the honest state (10 Aug)
 
-Asked "have we fact-checked all these?", the answer was no. Actual coverage before today:
+**Correction to an earlier draft of this section:** it claimed only 4 of 14 article lessons had
+ever been fact-checked. That was wrong. A Phase 6 pass DID run at build time.
 
-| Lesson | Checked? |
-|--------|----------|
-| aos2 L3 Queen | YES — vs BBC Bitesize, 3 errors fixed |
-| aos3 L2 Spalding | YES — vs BBC Bitesize, 4 errors fixed |
-| aos4 L2 Bartok | YES — vs BBC Bitesize, 7 errors fixed |
-| aos2 L4 Placing a Track in Time | YES — agent, 1 HIGH + 2 LOW fixed |
-| aos1 L1, L2, L3 / aos2 L1, L2 / aos3 L1 / aos4 L1, L3 | NO |
-| aos-listening L1, L3 intro prose | NO |
-| **all 18 drills, 165 questions** | **NEVER IN SCOPE** |
+| Pass | When | Scope | Result |
+|------|------|-------|--------|
+| Build-time Phase 6 | 6 Aug (`f2b2d505`) | all 11 article lessons then existing | 3 HIGH, 4 MEDIUM, 6 LOW — applied by `apply_factcheck_fixes.py`, grounded in AQA teacher guides |
+| Bitesize deep pass | 9 Aug | Queen, Spalding, Bartok (the 3 embed decks) | **14 further errors** in lessons the 6 Aug pass had already cleared |
+| Agent | 9 Aug | aos2 L4 (new lesson) | 1 HIGH + 2 LOW |
+| This pass | 10 Aug | timestamps subject-wide + aos4 L3 | 10 timestamp corrections + 1 contradiction |
+| — | — | **all 18 drills, 165 questions** | **NEVER IN SCOPE** |
 
-The drills were invisible to `_fact_check_subject.py`: it plans only lessons with `content_html`,
-and drills keep everything in `practice_data`. So 165 answer keys had never been looked at. A wrong
-key marks a correct answer wrong — worse than a wrong sentence.
+Two process failures, both worth more than any individual error:
+
+**1. The build-time pass left no artefact.** Every other subject has
+`scripts/_fact_check/{slug}.json` + `.md`. Music has neither, so from the filesystem it looked as
+though no check had happened. If a pass leaves no report, the next person re-does it or wrongly
+assumes it never ran — both waste a day. **Always write the report.**
+
+**2. The fixes were applied to `content_html` only.** `apply_factcheck_fixes.py` correctly found
+that Riley's In C is not additive and rewrote the body — but never touched the `<h2>` heading
+("The additive process — Terry Riley") or flashcard 2, which both went on asserting exactly the
+claim the check had just refuted. It surfaced today as a live contradiction, four days later.
+**A fact-check fix must sweep every field: content, headings, KCs, flashcards, glossary and
+practice questions.** Same shape as the drum-machine error that hid in three fields on aos2 L4.
+
+And the 9 Aug pass finding 14 more errors in three lessons the 6 Aug pass had signed off says the
+build-time check was real but not sufficient — it is a floor, not a guarantee.
+
+The drills were invisible to `_fact_check_subject.py` throughout: it plans only lessons with
+`content_html`, and drills keep everything in `practice_data`. So 165 answer keys had never been
+looked at. A wrong key marks a correct answer wrong — worse than a wrong sentence.
 
 ### Timestamp errors found and fixed (10 Aug)
 Measured from the hosted recordings with ffmpeg (amplitude envelope, 1s buckets) — not guessed.
@@ -207,10 +223,13 @@ explanation naming a non-key option, no orphan `passage_id`, every question has 
 **This does NOT confirm the answers are musically true** — that needs ears on the audio and stays
 on Tom's check list. Script: `scripts/music-practice/audit_drill_keys.py`.
 
-### Still unchecked
-aos1 L3 (Beethoven study-piece prose), aos2 L1, aos2 L2, aos3 L1, aos4 L1, and the aos-listening
-L1/L3 intro prose. Base rate on this subject is 14 mark-affecting errors across the 3 study pieces
-that were checked, so assume these are no cleaner.
+### What has and has not had a DEEP pass
+All 11 original articles had the 6 Aug build-time pass. Only Queen, Spalding and Bartok have had a
+second, source-grounded pass against BBC Bitesize — and that one found 14 further errors, so the
+build-time pass alone should not be treated as sufficient.
+
+Never deep-checked: aos1 L1, aos1 L2, aos1 L3 (Beethoven — a study piece, so highest stakes),
+aos2 L1, aos2 L2, aos3 L1, aos4 L1, aos4 L3, plus the aos-listening L1/L3 intro prose.
 
 ## Stale-rotation sweep (10 Aug)
 Regex swept all 30 lessons for "previous set work / assessed to 202x / until 202x". Two hits, both
