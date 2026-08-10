@@ -94,7 +94,9 @@ def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
     u = _staff_unit(svg)
     fs = u * 1.5
     pad_top = fs * 0.8 + (fs * 2.0 if ring else 0)
-    pad_bot = fs * 0.6
+    ring_below = any(_uses(svg, c) and _uses(svg, c)[0][1] > _staff_bottom(svg)
+                     for c, _ in (ring or []))
+    pad_bot = fs * 0.6 + (fs * 2.6 if ring_below else 0)
     if brackets:
         pad_bot += fs * (2.4 + (0.95 if len(brackets) > 1 else 0))
     if note_labels:
@@ -127,10 +129,19 @@ def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
         rx, ry = u * 0.95, u * 1.7
         a.append('<ellipse cx="%.0f" cy="%.0f" rx="%.0f" ry="%.0f" fill="none" stroke="%s" '
                  'stroke-width="%.0f"/>' % (cx, cy, rx, ry, ACCENT, u * 0.13))
-        ty = cy - ry - fs * 0.8
+        # Elements below the stave (dynamics) need the label BELOW them, or it is
+        # drawn straight over the notes — which is what happened in the narrow
+        # method-card column where there is no spare width to escape sideways.
+        below = y > _staff_bottom(svg)
         lx, anchor = edge_safe(cx, lbl, fs)
-        a.append('<path d="M %.0f %.0f L %.0f %.0f" stroke="%s" stroke-width="%.0f"/>'
-                 % (cx, ty + fs * 0.3, cx, cy - ry - u * 0.12, ACCENT, u * 0.11))
+        if below:
+            ty = cy + ry + fs * 1.15
+            a.append('<path d="M %.0f %.0f L %.0f %.0f" stroke="%s" stroke-width="%.0f"/>'
+                     % (cx, cy + ry + u * 0.12, cx, ty - fs * 0.85, ACCENT, u * 0.11))
+        else:
+            ty = cy - ry - fs * 0.8
+            a.append('<path d="M %.0f %.0f L %.0f %.0f" stroke="%s" stroke-width="%.0f"/>'
+                     % (cx, ty + fs * 0.3, cx, cy - ry - u * 0.12, ACCENT, u * 0.11))
         text(lx, ty, lbl, anchor=anchor)
 
     notes = _uses(svg, "note")
