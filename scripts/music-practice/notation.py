@@ -218,16 +218,22 @@ def playable(abc, notes, tempo=100, width=1500, title=None, caption=None,
     """
     svg = figure(abc, width=width)
     ids = re.findall(r'<g id="([^"]+)" class="note"', svg)
-    sounding = [n for n in notes if n[0] is not None]
-    if len(ids) != len(sounding):
-        raise ValueError("%d engraved notes but %d sounding supplied (%s)"
-                         % (len(ids), len(sounding), abc))
+    # midi=None  -> a rest: advances the clock, claims no engraved note
+    # midi=False -> printed but NOT played: claims an engraved note, makes no
+    #               sound and no highlight. This is what makes "spot where the
+    #               performance departs from the score" possible.
+    claims = [n for n in notes if n[0] is not None]
+    if len(ids) != len(claims):
+        raise ValueError("%d engraved notes but %d claimed (%s)" % (len(ids), len(claims), abc))
     # Rests advance the clock but claim no engraved note: they render as
     # class="rest", so pairing them against note ids silently mis-aligns
     # everything after the first rest.
     seq, k = [], 0
     for midi, beats in notes:
-        if midi is None:
+        if midi is None:                       # rest
+            seq.append({"id": None, "midi": None, "beats": beats})
+        elif midi is False:                    # printed, never played
+            k += 1
             seq.append({"id": None, "midi": None, "beats": beats})
         else:
             seq.append({"id": ids[k], "midi": midi, "beats": beats})

@@ -59,6 +59,31 @@ E_D = playable(H + "C D E F | G2 G2 | A4 |",
 E_E = playable(H + "C E G E | C4 |", [(60, 1), (64, 1), (67, 1), (64, 1), (60, 4)], tempo=100,
                title="Extract E", caption="", hint="Play as often as you like.")
 
+# --- follow-and-check: the audio deliberately DIFFERS from the engraving -----
+# playable() takes the engraving and the sounding notes separately, so a
+# mismatch needs no new machinery. This is the hard exercise: it cannot be
+# guessed from the options, and it forces genuine simultaneous reading and
+# listening rather than "count the highlights".
+# Engraved:  C D E F | G F E D | C E G c | G4
+# Played:    bar 3 has A instead of G on beat 3.
+E_F = playable(H + "C D E F | G F E D | C E G c | G4 |",
+               [(60, 1), (62, 1), (64, 1), (65, 1),
+                (67, 1), (65, 1), (64, 1), (62, 1),
+                (60, 1), (64, 1), (69, 1), (72, 1),      # <- 69 where the score prints G (67)
+                (67, 4)], tempo=112,
+               title="Extract F",
+               caption="The performance contains <b>one</b> note that does not match the printed score.",
+               hint="Follow the printed notes as it plays. Something will not line up.")
+
+# Engraved:  a steady climb. Played: bar 2 is rhythmically wrong (two beats swapped for one long).
+E_G = playable(H + "C D E F | G A B c | d4 |",
+               [(60, 1), (62, 1), (64, 1), (65, 1),
+                (67, 2), (False, 0), (71, 1), (72, 1),   # <- G held 2 beats; the printed A never sounds
+                (74, 4)], tempo=112,
+               title="Extract G",
+               caption="Again, the performance departs from the score once.",
+               hint="This time listen to the rhythm as much as the pitch.")
+
 PASSAGES = [
     {"id": "t-beat", "label": "The beat", "text": T_STEADY + T_LONG},
     {"id": "t-shape", "label": "Shape and silence", "text": T_SHAPE + T_REST},
@@ -67,6 +92,8 @@ PASSAGES = [
     {"id": "e-c", "label": "Extract C", "text": E_C},
     {"id": "e-d", "label": "Extract D", "text": E_D},
     {"id": "e-e", "label": "Extract E", "text": E_E},
+    {"id": "e-f", "label": "Extract F", "text": E_F},
+    {"id": "e-g", "label": "Extract G", "text": E_G},
 ]
 
 METHOD = {
@@ -140,16 +167,6 @@ BANK = {
                         "whole skill."},
     ],
     "gold": [
-        {"input_type": "multiple_choice", "passage_id": "t-shape",
-         "question": "In the fourth teaching example above, the highlight goes out twice. What does that "
-                     "tell you about the notation at those moments?",
-         "options": ["The music got quieter",
-                     "There is a rest — silence, written down",
-                     "The instrument changed",
-                     "The recording was cut"], "solutions": [1],
-         "explanation": "Nothing is lit because nothing is sounding, and the mark on the stave at that "
-                        "point is a rest. Silence is notated as carefully as sound, and Section A does ask "
-                        "about rests."},
         {"input_type": "multiple_choice", "passage_id": "e-a",
          "question": "Play Extract A again. Its last note is hollow and the others are filled in. What did "
                      "you hear that matches?",
@@ -158,8 +175,26 @@ BANK = {
                      "The hollow note lasted longer",
                      "The hollow note was played by a different instrument"], "solutions": [2],
          "explanation": "A hollow head means a longer note, and you heard it hold while the filled ones "
-                        "went past in a beat each. You have just read a note value off the page by ear — "
-                        "which is what the next lesson names and drills."},
+                        "went past in a beat each. You have just read a note value off the page by ear."},
+        {"input_type": "multiple_choice", "passage_id": "e-f",
+         "question": "Play Extract F. The performance departs from the printed score in exactly one "
+                     "place. In which bar?",
+         "options": ["Bar 1", "Bar 2", "Bar 3", "Bar 4"], "solutions": [2],
+         "explanation": "Bar 3 is printed C&ndash;E&ndash;G&ndash;C, climbing evenly. What sounds on the "
+                        "third beat is a note higher than the printed G, so the line jumps further than "
+                        "the page says. Following the printed notes while listening is exactly what "
+                        "Section A asks of you when it prints an extract of the music being played."},
+        {"input_type": "multiple_choice", "passage_id": "e-g",
+         "question": "Play Extract G. Again the performance departs from the score once. What is wrong, "
+                     "and where?",
+         "options": ["Bar 1 — a note is played too short",
+                     "Bar 2 — a note is held too long and the next one is missed",
+                     "Bar 3 — the last note is too low",
+                     "Bar 2 — two notes are swapped in order"], "solutions": [1],
+         "explanation": "The score prints four separate notes climbing through bar 2. In the performance "
+                        "the first of them is held for two beats, so the note that should follow it never "
+                        "sounds — the bar still lasts four beats, which is why it is easy to miss. "
+                        "Checking rhythm against the page, not just pitch, is the harder half of the skill."},
     ],
 }
 
