@@ -366,7 +366,6 @@
     //  STATE
     // ================================================================
     var accessToken = null;
-    var demoUser = null;
     var currentLesson = null;   // full lesson row from Supabase
     var currentUnit = null;
     var currentSubject = null;
@@ -413,21 +412,19 @@
       var result = await sb.auth.getSession();
       if (result.data.session) {
         accessToken = result.data.session.access_token;
-        return;
       }
-      try {
-        var stored = localStorage.getItem('studyvault-user');
-        if (stored) {
-          var u = JSON.parse(stored);
-          if (u && u.isDemo) demoUser = u.id;
-        }
-      } catch (e) {}
     }
 
     function authHeaders() {
       var h = { 'Content-Type': 'application/json' };
       if (accessToken) h['Authorization'] = 'Bearer ' + accessToken;
-      else if (demoUser) h['X-Demo-User'] = demoUser;
+      else {
+        // Fall back to admin/teacher password from auth-gate session
+        try {
+          var session = JSON.parse(sessionStorage.getItem('studyvault-auth') || 'null') || JSON.parse(localStorage.getItem('studyvault-auth') || 'null');
+          if (session && session.pw) h['X-Admin-Password'] = session.pw;
+        } catch (e) {}
+      }
       return h;
     }
 

@@ -353,18 +353,16 @@
 
     async function validateToken(token) {
       try {
-        // Query the teacher_invitations table to validate the token
-        var resp = await sb.from('teacher_invitations')
-          .select('id, email, school_id, accepted_at, expires_at, schools(name)')
-          .eq('token', token)
-          .single();
+        // Look up the invitation via a SECURITY DEFINER function that only
+        // returns non-secret fields for an exact token match. The table
+        // itself is not anon-readable (RLS), so tokens can't be enumerated.
+        var resp = await sb.rpc('get_invitation_by_token', { p_token: token });
 
-        if (resp.error || !resp.data) {
+        var inv = resp.data && resp.data.length ? resp.data[0] : null;
+        if (resp.error || !inv) {
           showView(errorView);
           return;
         }
-
-        var inv = resp.data;
 
         // Check if already used
         if (inv.accepted_at) {
@@ -383,7 +381,7 @@
         // Valid invitation
         invitation = inv;
         emailInput.value = inv.email;
-        schoolNameBadge.textContent = inv.schools ? inv.schools.name : 'Your School';
+        schoolNameBadge.textContent = inv.school_name || 'Your School';
         showView(formView);
         fullNameInput.focus();
 

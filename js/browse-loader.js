@@ -162,7 +162,8 @@
     ],
     'physical-education': [
       { board: 'AQA', slug: 'physical-education-aqa' },
-      { board: 'OCR', slug: 'physical-education-ocr' }
+      { board: 'OCR', slug: 'physical-education-ocr' },
+      { board: 'Edexcel', slug: 'physical-education-edexcel' }
     ],
     'religious-studies': [
       { board: 'AQA', slug: 'religious-studies-aqa' },
@@ -206,6 +207,7 @@
     ],
     'design-technology': [
       { board: 'AQA', slug: 'design-technology' },
+      { board: 'Edexcel', slug: 'design-technology-edexcel' },
       { board: 'Eduqas', slug: 'design-technology-eduqas' },
       { board: 'WJEC', slug: 'design-technology-eduqas' }
     ],
@@ -424,10 +426,12 @@
     }
     overviewTier = overviewTier || 'higher';
     var foundationFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'foundation');
+    var higherFilter = (TIERED_OVERVIEW.indexOf(subjectSlug) !== -1 && overviewTier === 'higher');
     var countPromises = units.map(function (u) {
       var q = sb.from('lessons').select('id', { count: 'exact', head: true })
         .eq('unit_id', u.id).eq('status', 'live');
       if (foundationFilter) q = q.neq('tier', 'higher');
+      else if (higherFilter) q = q.neq('tier', 'foundation');
       return q.then(function (res) { u._filteredCount = res.count || 0; });
     });
     await Promise.all(countPromises);
@@ -462,6 +466,7 @@
             .then(function (res) {
               var rows = res.data || [];
               if (foundationFilter) rows = rows.filter(function (r) { return r.tier !== 'higher'; });
+              else if (higherFilter) rows = rows.filter(function (r) { return r.tier !== 'foundation'; });
               rows = rows.filter(function (r) {
                 if (FILM_SELECTABLE_MAP[r.slug]) return pickedFilmSet.has(r.slug);
                 return true;
@@ -688,6 +693,10 @@
     subjectTier = subjectTier || 'higher';
     if (subjectTier === 'foundation') {
       lessons = lessons.filter(function(l) { return l.tier !== 'higher'; });
+    } else if (subjectTier === 'higher') {
+      // Foundation-only lessons are hidden from Higher students. Lessons with
+      // tier=null (the vast majority on non-tiered subjects) are unaffected.
+      lessons = lessons.filter(function(l) { return l.tier !== 'foundation'; });
     }
 
     // Cohort-year scoping (historic environment rotations etc.):

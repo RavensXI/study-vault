@@ -51,12 +51,13 @@ SUPA = "https://baipckgywpnwapobwtsy.supabase.co"
 
 MODEL_CONTENT = "claude-sonnet-5"
 MODEL_PLAN = "claude-opus-4-8"
-MODEL_FACTCHECK = "claude-opus-4-8"
+MODEL_FACTCHECK = "claude-opus-5"
 
 # $/MTok. Sonnet 5 is intro pricing through 2026-08-31.
 PRICES = {
     "claude-sonnet-5": {"in": 2.0, "out": 10.0},
     "claude-opus-4-8": {"in": 5.0, "out": 25.0},
+    "claude-opus-5": {"in": 5.0, "out": 25.0},
 }
 WEB_SEARCH_PER_1K = 10.0
 
@@ -214,13 +215,24 @@ def stage_plan(cfg):
 
     print("planning call: system %dk chars, user %dk chars" % (len(system) // 1000, len(user) // 1000))
     cl = client()
+    # Search OFF by default: every search round re-bills the full (huge) spec
+    # context. The spec audit already verifies currency — set plan_search_max
+    # in the config only when a spec is genuinely in doubt. The user message
+    # (spec + catalog) is cached so any search/retry rounds re-read at 0.1x.
+    search_max = cfg.get("plan_search_max", 0)
+    tools = ([{"type": "web_search_20260209", "name": "web_search",
+               "max_uses": search_max}] if search_max else [])
     with cl.messages.stream(
         model=MODEL_PLAN,
         max_tokens=40000,
         thinking={"type": "adaptive"},
-        tools=[{"type": "web_search_20260209", "name": "web_search", "max_uses": 12}],
-        system=system,
-        messages=[{"role": "user", "content": user}],
+        tools=tools,
+        system=[{"type": "text", "text": system}],
+        messages=[{"role": "user", "content": [
+            # cache only when search rounds will re-read the spec context;
+            # a one-shot plan call would pay the 1.25x write for nothing
+            dict({"type": "text", "text": user},
+                 **({"cache_control": {"type": "ephemeral"}} if search_max else {}))]}],
     ) as stream:
         msg = stream.get_final_message()
 
@@ -516,6 +528,13 @@ def lesson_key(unit_slug, number):
 def stage_prep(cfg):
     plan = json.load(io.open(os.path.join(cfg["run_dir"], "plan.json"), encoding="utf-8"))
     system = shared_system_blocks(cfg, plan)
+    # Batch requests process in PARALLEL, so cache hits are best-effort and land
+    # ~5% in practice (D&T arm: 1 read / 22 requests). Below ~53% hits a 1h
+    # marker LOSES money: 21/22 requests re-wrote the 80k prefix at the 2x
+    # write premium, adding ~$1.93 (+48%) to that stage vs plain batch input.
+    # Strip markers from batched requests; the sequential stages (content-fix,
+    # factcheck, media) keep theirs and genuinely hit 70-90%.
+    system = [{k: v for k, v in blk.items() if k != "cache_control"} for blk in system]
     requests = []
     for u in plan["article_units"]:
         for l in u["lessons"]:
@@ -579,22 +598,21 @@ def stage_submit(cfg):
     cl = client()
     st = load_state(cfg)
 
-    # 1h-cache pre-warm: same shared system prefix, tiny output. Batch cache
-    # hits are best-effort, but a pre-written 1h prefix is the documented way
-    # to make them likely.
-    warm = dict(requests[0]["params"])
-    warm_p = {"model": warm["model"], "max_tokens": 32, "system": warm["system"],
-              "messages": [{"role": "user", "content": "warmup — reply with the single word OK"}]}
+    # Structured-outputs capability probe. (This used to be a full 1h-cache
+    # pre-warm of the shared system prefix, but batched requests no longer
+    # carry cache markers — see stage_prep — so warming 80k tokens at the 2x
+    # write premium bought nothing. A tiny system-free call answers the only
+    # question that matters: does the SDK/model accept output_config?)
+    probe = {"model": requests[0]["params"]["model"], "max_tokens": 32,
+             "messages": [{"role": "user", "content": "reply with the single word OK"}]}
     use_structured = True
     try:
-        msg = cl.messages.create(**try_structured(warm_p))
+        msg = cl.messages.create(**try_structured(probe))
+        rec = log_usage(cfg, "probe", probe["model"], "probe", msg.usage)
+        print("structured-outputs probe OK ($%.4f)" % cost_of(rec))
     except (TypeError, anthropic.BadRequestError) as e:
-        print("structured outputs unavailable on warmup (%s) — falling back to prompt-only JSON" % e)
+        print("structured outputs unavailable (%s) — falling back to prompt-only JSON" % e)
         use_structured = False
-        msg = cl.messages.create(**warm_p)
-    rec = log_usage(cfg, "warmup", warm["model"], "warmup", msg.usage)
-    print("warmup: cache_write_1h=%s cache_read=%s ($%.3f)"
-          % (rec["cache_write_1h"], rec["cache_read"], cost_of(rec)))
 
     batch_requests = []
     for r in requests:
@@ -764,7 +782,9 @@ def stage_pollfix(cfg):
 
 # ---------------------------------------------------------------- stage: factcheck
 
-FACTCHECK_SYSTEM = """You are fact-checking a GCSE Psychology revision lesson before publication. Students sit real exams on this material — factual errors cost marks.
+FACTCHECK_SYSTEM = """You are fact-checking a GCSE revision lesson before publication. Students sit real exams on this material — factual errors cost marks.
+
+If a SOURCE TEXT document is provided after this prompt (e.g. the full text of set poems), it is the PRIMARY authority: every quotation in the lesson that is attributed to that source MUST appear verbatim in it (allowing only straight/curly quote and whitespace differences). A quotation not found verbatim in the source text is a HIGH finding — supply the nearest real line as the correction. Also verify against the source text: line/stanza counts, form and rhyme claims, speaker and narrative details, and any claim about "the poem says/shows X".
 
 BOARD CONTEXT: the user message states which exam board this lesson targets and lists that board's registered question tariffs. Do NOT flag question mark tariffs, command words, or question formats that match the stated board — different boards use different tariffs, and judging this lesson by another board's format is a false positive.
 
@@ -817,8 +837,14 @@ def stage_factcheck(cfg):
         reqs.append({"custom_id": cid, "params": {
             "model": MODEL_FACTCHECK, "max_tokens": 8000,
             "tools": [{"type": "web_search_20260209", "name": "web_search", "max_uses": 8}],
-            "system": [{"type": "text", "text": FACTCHECK_SYSTEM,
-                        "cache_control": {"type": "ephemeral", "ttl": "1h"}}],
+            "system": ([{"type": "text", "text": FACTCHECK_SYSTEM},
+                        {"type": "text",
+                         "text": "SOURCE TEXT (primary authority for quotations):\n\n"
+                                 + read(cfg["factcheck_context_doc"]),
+                         "cache_control": {"type": "ephemeral", "ttl": "1h"}}]
+                       if cfg.get("factcheck_context_doc") else
+                       [{"type": "text", "text": FACTCHECK_SYSTEM,
+                         "cache_control": {"type": "ephemeral", "ttl": "1h"}}]),
             "messages": [{"role": "user", "content": user}],
         }})
     try:
@@ -906,12 +932,13 @@ def stage_applyfixes(cfg):
     reqs = []
     for cid, fl in sorted(by_lesson.items()):
         obj = json.load(io.open(os.path.join(lessons_dir, cid + ".json"), encoding="utf-8"))
-        user = ("Apply ONLY the corrections below to this GCSE Psychology lesson JSON. "
+        user = ("Apply ONLY the corrections below to this GCSE %s lesson JSON. "
                 "Change nothing else — no rewrites, no restructuring, no new narration IDs "
                 "unless a correction forces one. Keep every data-narration-id sequence intact.\n\n"
                 "CORRECTIONS:\n%s\n\nLESSON JSON:\n%s\n\n"
                 "Return the complete corrected lesson JSON only, no code fences."
-                % (json.dumps(fl, ensure_ascii=False), json.dumps(obj, ensure_ascii=False)))
+                % (cfg["subject_name"], json.dumps(fl, ensure_ascii=False),
+                   json.dumps(obj, ensure_ascii=False)))
         p = {"model": MODEL_CONTENT, "max_tokens": 32000,
              "messages": [{"role": "user", "content": user}]}
         if st.get("use_structured", True):
