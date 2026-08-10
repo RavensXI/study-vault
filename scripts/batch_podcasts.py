@@ -382,7 +382,16 @@ def cmd_download(args):
         try:
             # Download audio
             mp3_path = os.path.join(tempfile.gettempdir(), f"_temp_podcast_{label.replace('/', '_')}.m4a")  # NOT SCRIPT_DIR: nlm refuses to write under .claude/ (worktree path)
-            nlm_run(["download", "audio", notebook_id, "-o", mp3_path], timeout=420)  # post-rebrand downloads run ~2-4 min each; 120s timed out on ALL of them
+            try:
+                nlm_run(["download", "audio", notebook_id, "-o", mp3_path], timeout=420)
+            except Exception as first_err:
+                # cookies now expire within hours post-rebrand — self-heal like
+                # the generate stage does, then retry this file once
+                if "auth" in str(first_err).lower() or "Download failed" in str(first_err):
+                    _reauth()
+                    nlm_run(["download", "audio", notebook_id, "-o", mp3_path], timeout=420)
+                else:
+                    raise
 
             if not os.path.exists(mp3_path):
                 print(f"  {label}: Download failed — file not found")
