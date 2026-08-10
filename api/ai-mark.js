@@ -16,8 +16,15 @@
  * If both tier and marks are omitted, defaults to "quick".
  *
  * Rate limited per student session. API keys stored in env vars.
- * Supports Groq as optional fallback for quick tier (set GROQ_API_KEY).
+ *
+ * NOTE ON GROQ: despite the name below, Groq is NOT a fallback — when
+ * GROQ_API_KEY is set it is tried FIRST on the quick tier and Anthropic
+ * catches its failures. Groq is US-served and cannot be pinned to its EU
+ * region without an Enterprise plan, so unset GROQ_API_KEY to keep pupil work
+ * inside Europe. Anthropic calls route via api/_lib/claude.js.
  */
+
+const { callClaude } = require('./_lib/claude');
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -152,31 +159,13 @@ async function callGroq(system, prompt) {
 
 
 async function callAnthropic(system, prompt, model, maxTokens) {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
-
-  const resp = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'x-api-key': key,
-      'anthropic-version': '2023-06-01',
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: model,
-      max_tokens: maxTokens || 600,
-      system: system || 'You are a GCSE examiner. Mark the student response against the provided mark scheme.',
-      messages: [
-        { role: 'user', content: prompt },
-      ],
-    }),
+  const data = await callClaude({
+    model: model,
+    max_tokens: maxTokens || 600,
+    system: system || 'You are a GCSE examiner. Mark the student response against the provided mark scheme.',
+    messages: [
+      { role: 'user', content: prompt },
+    ],
   });
-
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error('Anthropic API error: ' + resp.status + ' ' + err);
-  }
-
-  const data = await resp.json();
   return data.content[0].text;
 }

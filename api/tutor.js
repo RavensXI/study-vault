@@ -21,6 +21,8 @@
  * Rate limited per IP. ANTHROPIC_API_KEY from env.
  */
 
+const { callClaude } = require('./_lib/claude');
+
 const MODEL = 'claude-haiku-4-5-20251001';
 const MAX_LESSON_CHARS = 9000;   // cap grounding context (~2.2k tokens)
 const MAX_TURNS = 12;            // keep the last N messages
@@ -109,38 +111,21 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const key = process.env.ANTHROPIC_API_KEY;
-    if (!key) throw new Error('ANTHROPIC_API_KEY not configured');
-
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': key,
-        'anthropic-version': '2023-06-01',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        max_tokens: 240,   // keep replies short — forces concision, not mini-lectures
-        temperature: 0.5,
-        // System = stable instructions + lesson content. cache_control on the
-        // lesson block caches the whole prefix (system prompt + lesson) across
-        // the conversation's turns; only `messages` varies request to request.
-        system: [
-          { type: 'text', text: SYSTEM_PROMPT },
-          { type: 'text', text: lessonContext, cache_control: { type: 'ephemeral' } },
-        ],
-        messages: cleanMessages,
-      }),
+    const data = await callClaude({
+      model: MODEL,
+      max_tokens: 240,   // keep replies short — forces concision, not mini-lectures
+      temperature: 0.5,
+      // System = stable instructions + lesson content. cache_control on the
+      // lesson block caches the whole prefix (system prompt + lesson) across
+      // the conversation's turns; only `messages` varies request to request.
+      // Bedrock supports prompt caching too, so this survives the move.
+      system: [
+        { type: 'text', text: SYSTEM_PROMPT },
+        { type: 'text', text: lessonContext, cache_control: { type: 'ephemeral' } },
+      ],
+      messages: cleanMessages,
     });
 
-    if (!resp.ok) {
-      const detail = await resp.text();
-      console.error('Tutor API error:', resp.status, detail);
-      return res.status(502).json({ error: 'Tutor unavailable', detail: detail.slice(0, 200) });
-    }
-
-    const data = await resp.json();
     const reply = (data.content || []).map(b => b.text || '').join('').trim();
     return res.status(200).json({ reply, model: MODEL });
   } catch (err) {

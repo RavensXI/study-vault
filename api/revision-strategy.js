@@ -12,6 +12,8 @@
  * Body: { exams: [{subject, paper, date, session}, ...], today: "2026-04-14" }
  */
 
+const { callClaude, useBedrock } = require('./_lib/claude');
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -54,8 +56,8 @@ module.exports = async function handler(req, res) {
   }
   rates[ip].push(now);
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  // Either credential set is fine: Bedrock (AWS_*) or the direct API key.
+  if (!useBedrock() && !process.env.ANTHROPIC_API_KEY) {
     return res.status(500).json({ error: 'API key not configured' });
   }
 
@@ -110,28 +112,13 @@ Return ONLY valid JSON. No markdown fences, no explanation.`;
   const userPrompt = `Generate my revision topic lists as JSON.`;
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 4096,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
+    const data = await callClaude({
+      model: 'claude-sonnet-4-6',
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
     });
 
-    if (!response.ok) {
-      const err = await response.text();
-      console.error('Anthropic API error:', err);
-      return res.status(502).json({ error: 'AI service error' });
-    }
-
-    const data = await response.json();
     let text = (data.content?.[0]?.text || '').trim();
     text = text.replace(/^```json?\s*\n?/, '').replace(/\n?```\s*$/, '');
 
