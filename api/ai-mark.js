@@ -69,12 +69,16 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'System prompt too long' });
   }
 
-  // Determine tier: explicit > auto (from marks) > default quick
-  // Free tier users always get Haiku (quick) regardless of marks
+  // Determine tier: explicit > auto (from marks) > default quick.
+  //
+  // Free-tier users are NOT pinned to the quick tier. They used to be, which
+  // meant a free pupil's 30-mark essay got the short-answer model and 400
+  // tokens of feedback — the exact failure this tier split exists to prevent.
+  // The daily cap (5 marks) is the cost control; a second, invisible limit
+  // inside it bought roughly 6p a day per maxed-out user and made the offer
+  // impossible to describe in one sentence.
   let tier;
-  if (free_tier) {
-    tier = 'quick';
-  } else if (requestedTier === 'quick' || requestedTier === 'exam') {
+  if (requestedTier === 'quick' || requestedTier === 'exam') {
     tier = requestedTier;
   } else if (typeof marks === 'number') {
     tier = marks > 8 ? 'exam' : 'quick';
