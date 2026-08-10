@@ -154,7 +154,14 @@ async function callClaude(body) {
   } catch (err) {
     console.error('[claude] Bedrock failed, falling back to api.anthropic.com —',
       'DATA IS LEAVING THE UK. Model:', payload.model, '| Error:', err.message);
-    return viaAnthropic(Object.assign({}, body));
+    const out = await viaAnthropic(Object.assign({}, body));
+    // Carry the Bedrock failure out with the response. Without this the only
+    // record is a Vercel log line, and the migration is being debugged from
+    // the outside — a silent fallback that cannot be diagnosed is how a
+    // temporary workaround becomes permanent.
+    out._servedBy = 'anthropic-direct (bedrock failed: '
+      + String(err.message).replace(/\s+/g, ' ').slice(0, 220) + ')';
+    return out;
   }
 }
 
