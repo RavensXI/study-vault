@@ -223,13 +223,50 @@ explanation naming a non-key option, no orphan `passage_id`, every question has 
 **This does NOT confirm the answers are musically true** — that needs ears on the audio and stays
 on Tom's check list. Script: `scripts/music-practice/audit_drill_keys.py`.
 
-### What has and has not had a DEEP pass
-All 11 original articles had the 6 Aug build-time pass. Only Queen, Spalding and Bartok have had a
-second, source-grounded pass against BBC Bitesize — and that one found 14 further errors, so the
-build-time pass alone should not be treated as sufficient.
+### Deep pass now COMPLETE for every article lesson (10 Aug)
+Three agents, batched by Area of Study, read every field — not just content_html — against the spec,
+the saved Bitesize text and the audio itself. Every finding was re-verified here before applying;
+nothing was taken on the agent's word.
 
-Never deep-checked: aos1 L1, aos1 L2, aos1 L3 (Beethoven — a study piece, so highest stakes),
-aos2 L1, aos2 L2, aos3 L1, aos4 L1, aos4 L3, plus the aos-listening L1/L3 intro prose.
+| Lesson | Verdict |
+|--------|---------|
+| aos1 L1 Orchestra | clean (beyond today's timestamp fixes) |
+| aos1 L2 Structures | clean |
+| aos1 L3 Beethoven (study piece) | **exposition-repeat pin 9.5s late** + portrait caption |
+| aos2 L1 Rock and Pop | clean |
+| aos2 L2 Stage, Screen and Games | clean |
+| aos3 L1 Four Styles | **mark scheme paid twice for one fact** |
+| aos4 L1 Twentieth-Century Colour | clean |
+| aos4 L3 Minimalism | **off-spec composer credited as the model answer** |
+| aos-listening L1, L3 | clean |
+
+**aos1 L3 — exposition-repeat pin (MEDIUM).** Pin c4 and its in-text ref both pointed at 242s; the
+repeat actually begins at ~232.5s, so clicking "the whole exposition repeats" dropped you into the
+middle of the restated first subject. Corroborated in two independent feature spaces: the agent's
+chroma cross-correlation (peak 232.5s, 0.97) and, here, log-spectrogram band correlation using the
+lesson's own first-subject pin (107s) as reference — a sharp isolated peak of 0.9800 at 232.5s
+against a surrounding plateau of ~0.945-0.955, with 242s scoring 0.9491. Moved to 232.5s, left%
+recomputed against the true duration 581.45s. Pin/ref invariant re-checked after the edit.
+The agent also *cleared* the recapitulation pin (c6, 406s) after initially suspecting it — bar-count
+maths said the development should be longer, but a ~3x sustained energy jump at 404-406s matches the
+recap's fortissimo unison entry. Worth noting: it reported the negative result rather than quietly
+dropping it.
+
+**aos3 L1 — a mark payable twice (MEDIUM).** "Describe two features of the rhythm" credited both
+"swung/shuffle rhythm" AND "uneven long-short division of the beat", but the lesson's own glossary
+defines swung rhythm AS an uneven long-short division. One fact, two names, two marks. Merged.
+
+**aos4 L3 — off-spec composer (MEDIUM).** PQ1's mark scheme named Philip Glass as "most clearly"
+the right composer for the additive process. The spec strand is "Minimalist music of John Adams,
+Steve Reich and Terry Riley" (spec line 857) — Glass is neither in it nor taught in the lesson.
+The agent proposed crediting Reich instead; REJECTED, because the body teaches Reich as phasing and
+never as additive, so the swap would only move the contradiction. The underlying defect was that the
+question demanded a composer the course never supplies — none of the three named composers cleanly
+exemplifies the additive process, and the lesson says so of Riley explicitly. Question rewritten to
+test the distinction the lesson does teach: name the technique, then explain how In C differs.
+
+Lesson for next time: when an agent proposes a fix, check whether the fix creates a new
+contradiction. Two of the three findings here needed a different remedy from the one suggested.
 
 ## Stale-rotation sweep (10 Aug)
 Regex swept all 30 lessons for "previous set work / assessed to 202x / until 202x". Two hits, both
