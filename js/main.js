@@ -31,6 +31,8 @@ function initLessonFeatures() {
   initVisitedTracking();
   initPracticeQuestions();
   initNarration();
+  initAnnotatedPlayers();
+  initListeningLesson();
   initGlossary();
   initLightbox();
   initHeroEdit();
@@ -1522,6 +1524,7 @@ function initGlossary() {
     popup.className = 'term-popup';
     popup.textContent = term.dataset.def;
     term.appendChild(popup);
+    term._popup = popup;
   });
 
   let activeTerm = null;
@@ -1531,7 +1534,7 @@ function initGlossary() {
 
     const rects = term.getClientRects();
     const rect = term.getBoundingClientRect();
-    const popup = term.querySelector('.term-popup');
+    const popup = term._popup || term.querySelector('.term-popup');
     // For wrapped inline elements, absolute positioning is relative to the
     // first line fragment, not the bounding box — use that as our reference
     const refLeft = rects.length > 1 ? rects[0].left : rect.left;
@@ -1562,7 +1565,24 @@ function initGlossary() {
       let popupLeft = termCentre - popupWidth / 2;
       popupLeft = Math.max(8, Math.min(popupLeft, contentRight - popupWidth - 8));
 
-      popup.style.left = (popupLeft - refLeft) + 'px';
+      if (term.closest('.sv-listening')) {
+        // Multi-column bodies mis-place absolute children, and the translated
+        // card track hijacks position:fixed - so float the popup on body.
+        document.body.appendChild(popup);
+        popup.classList.add('term-popup--float');
+        popup.style.bottom = 'auto';
+        popup.style.right = 'auto';
+        const fw = popup.offsetWidth, fh = popup.offsetHeight;
+        let fx = Math.max(8, Math.min(termCentre - fw / 2, window.innerWidth - fw - 8));
+        popup.style.left = fx + 'px';
+        if (anchorRect.top - fh - 10 > 60) {
+          popup.style.top = (anchorRect.top - fh - 10) + 'px';
+        } else {
+          popup.style.top = (anchorRect.bottom + 10) + 'px';
+        }
+      } else {
+        popup.style.left = (popupLeft - refLeft) + 'px';
+      }
       popup.style.transform = 'none';
       term.classList.add('term-visible');
     } else {
@@ -1574,11 +1594,16 @@ function initGlossary() {
 
   function hideTerm(term) {
     term.classList.remove('term-visible', 'term-flip');
-    const popup = term.querySelector('.term-popup');
+    const popup = term._popup || term.querySelector('.term-popup');
     if (popup) {
+      if (popup.parentNode !== term) term.appendChild(popup);
+      popup.classList.remove('term-popup--float');
       popup.style.left = '';
       popup.style.right = '';
       popup.style.transform = '';
+      popup.style.position = '';
+      popup.style.top = '';
+      popup.style.bottom = '';
     }
     if (activeTerm === term) activeTerm = null;
   }
@@ -3260,3 +3285,536 @@ function openFlashcardModal() {
 
 // Expose globally so lesson-loader can call it
 window.openFlashcardModal = openFlashcardModal;
+
+
+// ---- Listening lesson: card carousel over the docked player ----
+function initListeningLesson() {
+  var stage = document.querySelector('.sv-listening');
+  if (!stage || stage.getAttribute('data-ll-init')) return;
+  stage.setAttribute('data-ll-init', '1');
+  document.body.classList.add('sv-listening-mode');
+  var cards = Array.prototype.slice.call(stage.querySelectorAll('.sv-card'));
+
+  var fin = document.createElement('section');
+  fin.className = 'sv-card sv-card--finish';
+  fin.setAttribute('data-title', 'Test yourself');
+  fin.innerHTML = '<h2>Now prove it</h2>' +
+    '<p>You have heard the whole movement and read the ideas behind it. Lock it in before you move on.</p>' +
+    '<div class="sv-finish-actions">' +
+    '<button type="button" data-act="quiz">Quick Quiz</button>' +
+    '<button type="button" data-act="cards">Flashcards</button>' +
+    '<button type="button" data-act="practice">Practice questions</button></div>';
+  stage.appendChild(fin);
+  cards.push(fin);
+  fin.querySelector('.sv-finish-actions').addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var act = b.getAttribute('data-act');
+    if (act === 'quiz') { var k = document.getElementById('knowledge-check-btn'); if (k) k.click(); }
+    if (act === 'cards') { if (typeof openFlashcardModal === 'function') openFlashcardModal(); }
+    if (act === 'practice') {
+      var pr = document.getElementById('practice');
+      if (!pr) return;
+      var ov = document.querySelector('.sv-ll-practice-ov');
+      if (!ov) {
+        ov = document.createElement('div'); ov.className = 'sv-ll-practice-ov';
+        var box = document.createElement('div'); box.className = 'sv-ll-practice-box';
+        var x = document.createElement('button'); x.className = 'sv-ll-practice-close'; x.innerHTML = '&times;';
+        x.addEventListener('click', function () { ov.style.display = 'none'; });
+        box.appendChild(x); box.appendChild(pr); ov.appendChild(box); document.body.appendChild(ov);
+      }
+      ov.style.display = 'flex'; pr.style.setProperty('display', 'block', 'important');
+    }
+  });
+
+  var hero = document.getElementById('hero-image');
+  if (hero && hero.getAttribute('src')) {
+    var img = document.createElement('img');
+    img.className = 'sv-card-hero'; img.alt = ''; img.src = hero.getAttribute('src');
+    cards[0].insertBefore(img, cards[0].firstChild);
+  }
+
+  var track = document.createElement('div');
+  track.className = 'sv-ll-track';
+  cards.forEach(function (c) { track.appendChild(c); });
+  stage.appendChild(track);
+
+  var nav = document.createElement('div'); nav.className = 'sv-ll-nav';
+  var dots = [];
+  cards.forEach(function (c, i) {
+    var d = document.createElement('button');
+    d.type = 'button'; d.className = 'sv-ll-dot';
+    d.title = c.getAttribute('data-title') || ('Card ' + (i + 1));
+    d.setAttribute('aria-label', d.title);
+    d.addEventListener('click', function () { goTo(i); });
+    nav.appendChild(d); dots.push(d);
+  });
+  document.body.appendChild(nav);
+  var mk = function (cls, html, step) {
+    var a = document.createElement('button');
+    a.type = 'button'; a.className = 'sv-ll-arrow ' + cls; a.innerHTML = html;
+    a.setAttribute('aria-label', step > 0 ? 'Next card' : 'Previous card');
+    a.addEventListener('click', function () { goTo(idx + step); });
+    document.body.appendChild(a); return a;
+  };
+  var prevB = mk('sv-ll-prev', '&larr;', -1), nextB = mk('sv-ll-next', '&rarr;', 1);
+
+  var idx = 0, autoFollow = false;
+  function goTo(i, fromMusic) {
+    idx = Math.max(0, Math.min(cards.length - 1, i));
+    track.style.transform = 'translateX(-' + (idx * 100) + '%)';
+    dots.forEach(function (d, j) { d.classList.toggle('sv-ll-dot--on', j === idx); });
+    prevB.disabled = idx === 0; nextB.disabled = idx === cards.length - 1;
+    var trk = cards[idx].getAttribute('data-track');
+    var figX = document.querySelector('.sv-annotated-player');
+    if (trk && figX && figX._setTrack) figX._setTrack(trk, false);
+    if (!fromMusic) autoFollow = false;
+  }
+  goTo(0);
+  document.addEventListener('keydown', function (e) {
+    if (e.target.closest('input, textarea, select, [contenteditable]')) return;
+    if (e.key === 'ArrowRight') { goTo(idx + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft') { goTo(idx - 1); e.preventDefault(); }
+  });
+
+  var chapMap = {};
+  cards.forEach(function (c, i) {
+    (c.getAttribute('data-chapters') || '').split(',').forEach(function (k) {
+      k = k.trim(); if (k) chapMap[k] = i;
+    });
+  });
+  var fig = document.querySelector('.sv-annotated-player');
+  if (fig) {
+    fig.addEventListener('click', function (e) {
+      if (!e.target.closest('.sv-ap-play, .sv-ap-pin, .sv-ap-canvas, .sv-ap-track')) return;
+      setTimeout(function () { autoFollow = !!(fig._ap && !fig._ap.paused()); }, 400);
+    });
+    setInterval(function () {
+      if (!autoFollow) return;
+      if (!fig._ap || fig._ap.paused()) return;
+      var act = fig.querySelector('.sv-ap-pin.sv-ap-active');
+      if (!act) return;
+      var i = chapMap[act.getAttribute('data-cid')];
+      if (i != null && i !== idx) goTo(i, true);
+    }, 800);
+    if (window.LessonTutor && fig.querySelector('.sv-ap-bar')) {
+      var chip = document.createElement('button');
+      chip.type = 'button'; chip.className = 'sv-ap-tutor'; chip.textContent = 'Ask the tutor';
+      chip.addEventListener('click', function () { window.LessonTutor.askAbout(''); });
+      fig.querySelector('.sv-ap-bar').appendChild(chip);
+    }
+  }
+
+  function size() {
+    var top = 56;
+    var hdr = document.querySelector('header');
+    if (hdr) top = Math.max(top, Math.round(hdr.getBoundingClientRect().bottom));
+    var pb = document.querySelector('.sv-preview-banner');
+    if (pb) top += pb.offsetHeight;
+    document.documentElement.style.setProperty('--ll-top', top + 'px');
+    document.documentElement.style.setProperty('--ll-bottom', (fig ? fig.offsetHeight : 230) + 'px');
+  }
+  size();
+  window.addEventListener('resize', size);
+  setInterval(size, 1500);
+}
+
+// ---- Annotated study-piece player (waveform) ----
+function initAnnotatedPlayers() {
+  document.querySelectorAll('.sv-annotated-player').forEach(function (fig) {
+    if (fig.getAttribute('data-ap-init')) return;
+    fig.setAttribute('data-ap-init', '1');
+    if (fig.getAttribute('data-yt') || fig.classList.contains('sv-ap-yt')) { setupYTFigure(fig); return; }
+    var audio = fig.querySelector('audio');
+    audio.setAttribute('src', fig.getAttribute('data-audio'));
+    fig._ap = { play: function () { audio.play(); }, pause: function () { audio.pause(); },
+      seek: function (t) { audio.currentTime = t; audio.play(); }, time: function () { return audio.currentTime; },
+      paused: function () { return audio.paused; } };
+    var cv = fig.querySelector('.sv-ap-canvas'), ctx = cv.getContext('2d');
+    var wrap = fig.querySelector('.sv-ap-wrap');
+    var pins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
+    var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
+    var DUR = 0, PEAKS = null;
+    document.body.classList.add('sv-has-ap-dock');
+    var inlinePeaks = fig.querySelector('.sv-ap-peaks');
+    if (inlinePeaks) {
+      try { var d0 = JSON.parse(inlinePeaks.textContent); PEAKS = d0.peaks; DUR = d0.duration; } catch (e) {}
+    }
+    if (!PEAKS && fig.getAttribute('data-peaks')) {
+      fetch(fig.getAttribute('data-peaks')).then(function (r) { return r.json(); }).then(function (d) {
+        PEAKS = d.peaks; DUR = d.duration; draw();
+      }).catch(function () {});
+    }
+    function fmt(t) { t = Math.max(0, Math.floor(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+    function draw() {
+      if (!PEAKS) return;
+      var w = cv.clientWidth, h = cv.clientHeight;
+      if (cv.width !== w * 2) { cv.width = w * 2; cv.height = h * 2; }
+      ctx.setTransform(2, 0, 0, 2, 0, 0);
+      ctx.clearRect(0, 0, w, h);
+      var bw = w / PEAKS.length, played = DUR ? audio.currentTime / DUR : 0;
+      var css = getComputedStyle(fig);
+      for (var i = 0; i < PEAKS.length; i++) {
+        var bh = Math.max(2, PEAKS[i] * (h - 6));
+        ctx.fillStyle = (i / PEAKS.length) < played ? (css.color || '#2d2a26') : 'rgba(45,42,38,0.26)';
+        ctx.fillRect(i * bw, (h - bh) / 2, Math.max(1, bw - 1), bh);
+      }
+    }
+    cv.addEventListener('click', function (e) {
+      var r = cv.getBoundingClientRect();
+      if (DUR) { audio.currentTime = DUR * (e.clientX - r.left) / r.width; audio.play(); }
+    });
+    function seek(t) { audio.currentTime = t; audio.play(); }
+    pins.forEach(function (p) {
+      p.addEventListener('click', function () {
+        if (!fig.classList.contains('sv-ap-adjusting')) seek(parseFloat(p.getAttribute('data-t')));
+      });
+    });
+pins.forEach(function (p) {
+  p.addEventListener('pointerdown', function (e) {
+    if (!fig.classList.contains('sv-ap-adjusting')) return;
+    var d = DUR; if (!d) return;
+    e.preventDefault(); e.stopPropagation();
+    p.setPointerCapture(e.pointerId);
+    var r = wrap.getBoundingClientRect();
+    var move = function (ev) {
+      var frac = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+      p.setAttribute('data-t', Math.round(d * frac * 10) / 10);
+      p.style.left = (100 * frac) + '%';
+      if (p._syncTools) p._syncTools();
+    };
+    var up = function () {
+      p.removeEventListener('pointermove', move);
+      p.removeEventListener('pointerup', up);
+      var st = fig.querySelector('.sv-ap-status');
+      if (st) st.textContent = 'unsaved changes';
+      if (fig._ap) fig._ap.seek(parseFloat(p.getAttribute('data-t')));
+    };
+    p.addEventListener('pointermove', move);
+    p.addEventListener('pointerup', up);
+  });
+});
+
+    document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
+      b.addEventListener('click', function () { seek(parseFloat(b.getAttribute('data-t'))); });
+    });
+    playB.addEventListener('click', function () { audio.paused ? audio.play() : audio.pause(); });
+    audio.addEventListener('play', function () { playB.innerHTML = '&#10074;&#10074;'; });
+    audio.addEventListener('pause', function () { playB.innerHTML = '&#9654;'; });
+    function frame() {
+      if (DUR) {
+        tick.textContent = fmt(audio.currentTime) + ' / ' + fmt(DUR);
+        var act = null;
+        pins.forEach(function (p) { if (audio.currentTime >= parseFloat(p.getAttribute('data-t')) - 0.3) act = p; });
+        pins.forEach(function (p) { p.classList.toggle('sv-ap-active', p === act); });
+        if (act && !audio.paused) {
+          var s = act.querySelector('strong');
+          now.textContent = s ? s.textContent : '';
+        }
+        draw();
+      }
+      requestAnimationFrame(frame);
+    }
+    frame();
+    // staff adjust
+    var sess = null;
+    try { sess = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')); } catch (e) {}
+    if (!sess || ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(sess.role) === -1) return;
+    var bar = document.createElement('div');
+    bar.className = 'sv-ap-staffbar';
+    bar.innerHTML = '<button type="button" class="sv-ap-toggle">Adjust pins</button><span class="sv-ap-status"></span>';
+    fig.appendChild(bar);
+    var status = bar.querySelector('.sv-ap-status');
+    bar.querySelector('.sv-ap-toggle').addEventListener('click', function () {
+      var on = fig.classList.toggle('sv-ap-adjusting');
+      this.textContent = on ? 'Done' : 'Adjust pins';
+      if (!on || bar.querySelector('.sv-ap-tools')) return;
+      pins.forEach(function (p) {
+        var tools = document.createElement('span');
+        tools.className = 'sv-ap-tools';
+        var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
+        tools.innerHTML = '<em>' + name + '</em><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+        bar.appendChild(tools);
+        var show = p._syncTools = function () {
+          var t = parseFloat(p.getAttribute('data-t')) || 0;
+          tools.querySelector('.sv-ap-t').textContent = fmt(t);
+          if (DUR) p.style.left = (100 * t / DUR) + '%';
+        };
+        tools.addEventListener('click', function (e) {
+          var b = e.target.closest('button');
+          if (!b) return;
+          var t = parseFloat(p.getAttribute('data-t')) || 0;
+          t = b.getAttribute('data-set') ? audio.currentTime : t + parseFloat(b.getAttribute('data-d'));
+          p.setAttribute('data-t', Math.max(0, Math.round(t * 10) / 10));
+          show(); status.textContent = 'unsaved changes';
+        });
+        show();
+      });
+      var save = document.createElement('button');
+      save.type = 'button'; save.className = 'sv-ap-save'; save.textContent = 'Save pins';
+      bar.appendChild(save);
+      save.addEventListener('click', function () {
+        var lessonId = fig.getAttribute('data-lesson-id'), times = {};
+        pins.forEach(function (p) { times[p.getAttribute('data-cid')] = p.getAttribute('data-t'); });
+        status.textContent = 'saving...';
+        var sb2 = window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co',
+          'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
+        sb2.from('lessons').select('content_html').eq('id', lessonId).single().then(function (r) {
+          if (!r.data) { status.textContent = 'load failed'; return; }
+          var html = r.data.content_html;
+          Object.keys(times).forEach(function (cid) {
+            html = html.replace(new RegExp('(data-cid="' + cid + '"[^>]*data-t=")[^"]*(")'), '$1' + times[cid] + '$2');
+          });
+          var headers = { 'Content-Type': 'application/json' };
+          if (sess.pw) headers['X-Admin-Password'] = sess.pw;
+          fetch('/api/pipeline/update-lesson', { method: 'POST', headers: headers,
+            body: JSON.stringify({ lesson_id: lessonId, content_html: html }) })
+            .then(function (resp) {
+              if (resp.ok) { status.textContent = 'saved'; return; }
+              navigator.clipboard.writeText(JSON.stringify(times));
+              if (!bar.querySelector('.sv-ap-pwrow')) {
+                var rowEl = document.createElement('span');
+                rowEl.className = 'sv-ap-tools sv-ap-pwrow';
+                rowEl.innerHTML = '<em>admin password:</em>' +
+                  '<input type="password" class="sv-ap-pw" style="width:110px">' +
+                  '<button type="button" class="sv-ap-pwgo">retry save</button>';
+                bar.appendChild(rowEl);
+                rowEl.querySelector('.sv-ap-pwgo').addEventListener('click', function () {
+                  sess.pw = rowEl.querySelector('.sv-ap-pw').value;
+                  try { sessionStorage.setItem('studyvault-auth', JSON.stringify(sess)); } catch (e9) {}
+                  save.click();
+                });
+              }
+              status.textContent = 'save blocked - enter the admin password and retry (times copied as backup)';
+            });
+        });
+      });
+    });
+  });
+}
+
+// ---- Guided Listening: YouTube embed variant ----
+var _ytReadyCbs = [], _ytApiLoading = false;
+function whenYTReady(cb) {
+  if (window.YT && window.YT.Player) { cb(); return; }
+  _ytReadyCbs.push(cb);
+  if (_ytApiLoading) return;
+  _ytApiLoading = true;
+  var prev = window.onYouTubeIframeAPIReady;
+  window.onYouTubeIframeAPIReady = function () {
+    if (prev) try { prev(); } catch (e) {}
+    _ytReadyCbs.forEach(function (f) { try { f(); } catch (e) {} });
+    _ytReadyCbs = [];
+  };
+  var s = document.createElement('script');
+  s.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(s);
+}
+
+function setupYTFigure(fig) {
+  var allPins = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-pin'));
+  var playB = fig.querySelector('.sv-ap-play'), tick = fig.querySelector('.sv-ap-tick'), now = fig.querySelector('.sv-ap-now');
+  var track = fig.querySelector('.sv-ap-track'), fill = fig.querySelector('.sv-ap-trackfill');
+  var tBtns = Array.prototype.slice.call(fig.querySelectorAll('.sv-ap-trackbtn'));
+  var wrap = fig.querySelector('.sv-ap-wrap');
+  var cur = null, DUR = 0, DUR0 = 0, pendingSeek = null, positioned = false;
+  function fmt(t) { t = Math.max(0, Math.floor(t)); return Math.floor(t / 60) + ':' + ('0' + (t % 60)).slice(-2); }
+  function btnFor(k) { for (var i = 0; i < tBtns.length; i++) if (tBtns[i].getAttribute('data-track') === k) return tBtns[i]; return tBtns[0]; }
+  function curPins() { return allPins.filter(function (p) { return !cur || p.getAttribute('data-track') === cur; }); }
+  function inst() {
+    var fr = fig.querySelector('.sv-ap-video iframe');
+    if (!fr || !window.YT || !YT.get) return null;
+    var p = YT.get(fr.id);
+    return (p && typeof p.seekTo === 'function' && typeof p.getPlayerState === 'function') ? p : null;
+  }
+  function setTrack(k, autoplay, startAt) {
+    if (k === cur && startAt == null) return;
+    var b = btnFor(k);
+    var sameTrack = (k === cur);
+    cur = k;
+    tBtns.forEach(function (x) { x.classList.toggle('sv-ap-trackbtn--on', x === b); });
+    allPins.forEach(function (p) { p.style.display = p.getAttribute('data-track') === k ? '' : 'none'; });
+    if (fig.classList.contains('sv-ap-adjusting')) {
+      var tg = fig.querySelector('.sv-ap-toggle');
+      if (tg) { tg.click(); tg.click(); }
+    }
+    DUR = 0; DUR0 = parseFloat(b.getAttribute('data-dur')) || 0; positioned = false;
+    var p = inst();
+    if (!p) { if (startAt != null) pendingSeek = startAt; return; }
+    if (sameTrack) {
+      if (startAt != null) { p.seekTo(startAt, true); p.playVideo(); }
+      return;
+    }
+    var vid = b.getAttribute('data-yt');
+    if (autoplay || startAt != null) p.loadVideoById({ videoId: vid, startSeconds: startAt || 0 });
+    else p.cueVideoById(vid);
+  }
+  fig._setTrack = function (k, autoplay) { if (k !== cur) setTrack(k, autoplay); };
+  fig._ap = {
+    play: function () { var p = inst(); if (p) p.playVideo(); },
+    pause: function () { var p = inst(); if (p) p.pauseVideo(); },
+    seek: function (t, trk) {
+      if (trk && trk !== cur) { setTrack(trk, true, t); return; }
+      var p = inst();
+      if (p) { p.seekTo(t, true); p.playVideo(); } else pendingSeek = t;
+    },
+    time: function () { var p = inst(); try { return p ? (p.getCurrentTime() || 0) : 0; } catch (e) { return 0; } },
+    paused: function () { var p = inst(); try { return !(p && p.getPlayerState() === 1); } catch (e) { return true; } }
+  };
+  whenYTReady(function () {
+    var mount = fig.querySelector('.sv-ap-ytmount');
+    if (mount) new YT.Player(mount, { videoId: btnFor('t1').getAttribute('data-yt'), playerVars: { rel: 0, playsinline: 1 } });
+  });
+  setTrack(tBtns.length ? tBtns[0].getAttribute('data-track') : 't1', false);
+  tBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setTrack(b.getAttribute('data-track'), true); });
+  });
+  allPins.forEach(function (p) {
+    p.addEventListener('click', function () {
+      if (!fig.classList.contains('sv-ap-adjusting')) fig._ap.seek(parseFloat(p.getAttribute('data-t')), p.getAttribute('data-track'));
+    });
+  });
+allPins.forEach(function (p) {
+  p.addEventListener('pointerdown', function (e) {
+    if (!fig.classList.contains('sv-ap-adjusting')) return;
+    var d = DUR || DUR0; if (!d) return;
+    e.preventDefault(); e.stopPropagation();
+    p.setPointerCapture(e.pointerId);
+    var r = wrap.getBoundingClientRect();
+    var move = function (ev) {
+      var frac = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+      p.setAttribute('data-t', Math.round(d * frac * 10) / 10);
+      p.style.left = (100 * frac) + '%';
+      if (p._syncTools) p._syncTools();
+    };
+    var up = function () {
+      p.removeEventListener('pointermove', move);
+      p.removeEventListener('pointerup', up);
+      var st = fig.querySelector('.sv-ap-status');
+      if (st) st.textContent = 'unsaved changes';
+      if (fig._ap) fig._ap.seek(parseFloat(p.getAttribute('data-t')), p.getAttribute('data-track'));
+    };
+    p.addEventListener('pointermove', move);
+    p.addEventListener('pointerup', up);
+  });
+});
+
+  document.querySelectorAll('.sv-ap-ref').forEach(function (b) {
+    b.addEventListener('click', function () { fig._ap.seek(parseFloat(b.getAttribute('data-t')), b.getAttribute('data-track')); });
+  });
+  playB.addEventListener('click', function () { fig._ap.paused() ? fig._ap.play() : fig._ap.pause(); });
+  track.addEventListener('click', function (e) {
+    var d = DUR || DUR0;
+    if (!d) return;
+    var r = track.getBoundingClientRect();
+    fig._ap.seek(d * (e.clientX - r.left) / r.width);
+  });
+  function frame() {
+    var p = inst();
+    if (p) {
+      try {
+        var gd = 0;
+        try { gd = p.getDuration() || 0; } catch (e2) {}
+        if (gd && Math.abs(gd - DUR) > 0.5) {
+          DUR = gd;
+          curPins().forEach(function (pin) {
+            pin.style.left = (100 * (parseFloat(pin.getAttribute('data-t')) || 0) / DUR) + '%';
+          });
+        }
+        if (pendingSeek != null && DUR) { p.seekTo(pendingSeek, true); p.playVideo(); pendingSeek = null; }
+        var t = fig._ap.time(), d = DUR || DUR0;
+        if (d) {
+          tick.textContent = fmt(t) + ' / ' + fmt(d);
+          fill.style.width = Math.min(100, 100 * t / d) + '%';
+        }
+        var playing = !fig._ap.paused();
+        playB.innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+        var act = null;
+        curPins().forEach(function (pin) { if (t >= parseFloat(pin.getAttribute('data-t')) - 0.3) act = pin; });
+        allPins.forEach(function (pin) { pin.classList.toggle('sv-ap-active', pin === act); });
+        if (act && playing && now) {
+          var st = act.querySelector('strong');
+          now.textContent = st ? st.textContent : '';
+        }
+      } catch (e) {}
+    }
+    requestAnimationFrame(frame);
+  }
+  frame();
+  var sess = null;
+  try { sess = JSON.parse(sessionStorage.getItem('studyvault-auth')) || JSON.parse(localStorage.getItem('studyvault-auth')); } catch (e) {}
+  if (!sess || ['admin', 'platform_admin', 'teacher', 'school_admin'].indexOf(sess.role) === -1) return;
+  var bar = document.createElement('div');
+  bar.className = 'sv-ap-staffbar';
+  bar.innerHTML = '<button type="button" class="sv-ap-toggle">Adjust pins</button><span class="sv-ap-status"></span>';
+  fig.appendChild(bar);
+  var status = bar.querySelector('.sv-ap-status');
+  bar.querySelector('.sv-ap-toggle').addEventListener('click', function () {
+    var on = fig.classList.toggle('sv-ap-adjusting');
+    this.textContent = on ? 'Done' : 'Adjust pins';
+    bar.querySelectorAll('.sv-ap-tools').forEach(function (t2) { t2.remove(); });
+    var oldSave = bar.querySelector('.sv-ap-save');
+    if (oldSave) oldSave.remove();
+    if (!on) return;
+    curPins().forEach(function (p) {
+      var tools = document.createElement('span');
+      tools.className = 'sv-ap-tools';
+      var name = p.querySelector('strong') ? p.querySelector('strong').textContent : p.getAttribute('data-cid');
+      tools.innerHTML = '<em>' + name + '</em><button type="button" data-set="1">set to here</button><em class="sv-ap-t"></em>';
+      bar.appendChild(tools);
+      var show = p._syncTools = function () {
+        var t = parseFloat(p.getAttribute('data-t')) || 0;
+        tools.querySelector('.sv-ap-t').textContent = fmt(t);
+        if (DUR) p.style.left = (100 * t / DUR) + '%';
+      };
+      tools.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        var t = parseFloat(p.getAttribute('data-t')) || 0;
+        t = b.getAttribute('data-set') ? fig._ap.time() : t + parseFloat(b.getAttribute('data-d'));
+        p.setAttribute('data-t', Math.max(0, Math.round(t * 10) / 10));
+        show(); status.textContent = 'unsaved changes';
+      });
+      show();
+    });
+    var save = document.createElement('button');
+    save.type = 'button'; save.className = 'sv-ap-save'; save.textContent = 'Save pins';
+    bar.appendChild(save);
+    save.addEventListener('click', function () {
+      var lessonId = fig.getAttribute('data-lesson-id'), times = {};
+      allPins.forEach(function (p) { times[p.getAttribute('data-cid')] = p.getAttribute('data-t'); });
+      status.textContent = 'saving...';
+      var sb2 = window.supabase.createClient('https://baipckgywpnwapobwtsy.supabase.co',
+        'sb_publishable_PYj2nvjclOsUWmZPolhRuA_1OvYhnc2');
+      sb2.from('lessons').select('content_html').eq('id', lessonId).single().then(function (r) {
+        if (!r.data) { status.textContent = 'load failed'; return; }
+        var html2 = r.data.content_html;
+        Object.keys(times).forEach(function (cid) {
+          html2 = html2.replace(new RegExp('(data-cid="' + cid + '"[^>]*data-t=")[^"]*(")'), '$1' + times[cid] + '$2');
+        });
+        var headers = { 'Content-Type': 'application/json' };
+        if (sess.pw) headers['X-Admin-Password'] = sess.pw;
+        fetch('/api/pipeline/update-lesson', { method: 'POST', headers: headers,
+          body: JSON.stringify({ lesson_id: lessonId, content_html: html2 }) })
+          .then(function (resp) {
+            if (resp.ok) { status.textContent = 'saved'; return; }
+            navigator.clipboard.writeText(JSON.stringify(times));
+            if (!bar.querySelector('.sv-ap-pwrow')) {
+              var rowEl = document.createElement('span');
+              rowEl.className = 'sv-ap-tools sv-ap-pwrow';
+              rowEl.innerHTML = '<em>admin password:</em>' +
+                '<input type="password" class="sv-ap-pw" style="width:110px">' +
+                '<button type="button" class="sv-ap-pwgo">retry save</button>';
+              bar.appendChild(rowEl);
+              rowEl.querySelector('.sv-ap-pwgo').addEventListener('click', function () {
+                sess.pw = rowEl.querySelector('.sv-ap-pw').value;
+                try { sessionStorage.setItem('studyvault-auth', JSON.stringify(sess)); } catch (e9) {}
+                save.click();
+              });
+            }
+            status.textContent = 'save blocked - enter the admin password and retry (times copied as backup)';
+          });
+      });
+    });
+  });
+}

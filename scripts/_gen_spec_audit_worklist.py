@@ -17,8 +17,21 @@ sys.path.insert(0, 'scripts')
 from lib.supabase_client import get_client
 
 
+# Live rows sometimes store component/unit codes rather than the qualification
+# code the catalogue uses. Without these aliases the token join fails and the
+# qualification appears twice in the audit — once researched via the live-row
+# fallthrough, once wrongly as "not-built" from the catalogue side (seen in
+# the 2027 audit: Unity Music and Sport Science).
+ALIASES = {
+    'C660U': 'C660QS',   # Unity Music: Eduqas component prefix vs qual code
+    'R180': 'J828',      # Unity Sport Science: exam unit vs Cambridge National
+}
+
+
 def tokens(code):
-    return set(t for t in re.split(r'[\s/,;]+', (code or '').upper()) if t)
+    toks = set(t for t in re.split(r'[\s/,;]+', (code or '').upper()) if t)
+    toks |= {ALIASES[t] for t in toks if t in ALIASES}
+    return toks
 
 
 def main():
