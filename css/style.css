@@ -9376,3 +9376,25 @@ body.dark-mode .sv-notefig-title { color: #f0ece6; }
 .sv-noterow-cell svg { width: 100% !important; }
 .sv-noterow-cap { display: block; font-family: Inter, system-ui, sans-serif; font-size: 0.74rem;
   line-height: 1.35; margin-top: 0.25rem; opacity: 0.85; }
+
+/* ---- Play-along notation (js/score-player.js) ----------------------------
+   The exam is a listening paper; notation appears while music sounds. The
+   highlight moving note by note is how a non-reader gets in. */
+.sv-scoreplay { margin: 0 0 1.1rem; padding: 0.75rem 0.9rem 0.6rem; background: #fff;
+  border: 1px solid rgba(45, 42, 38, 0.10); border-radius: 12px; }
+.sv-scoreplay svg { width: 100%; height: auto; display: block; margin: 0 auto; }
+.sv-sp-bar { display: flex; align-items: center; gap: 0.6rem; justify-content: center;
+  margin-top: 0.45rem; font-family: Inter, system-ui, sans-serif; }
+.sv-sp-play { border: 1.5px solid #2d2a26; background: #fff; color: #2d2a26; cursor: pointer;
+  border-radius: 999px; padding: 0.3rem 1.05rem; font: 600 0.82rem Inter, system-ui, sans-serif;
+  transition: background 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1); }
+.sv-sp-play:hover, .sv-scoreplay.is-playing .sv-sp-play { background: #2d2a26; color: #fff; }
+.sv-sp-hint { font-size: 0.76rem; opacity: 0.6; }
+.sv-scoreplay.is-playing .sv-sp-hint { opacity: 0.85; }
+/* the moving highlight */
+.sv-scoreplay g.note { transition: none; }
+.sv-scoreplay g.note.sv-sp-on { color: #7c3aed; }
+.sv-scoreplay g.note.sv-sp-on use { fill: #7c3aed; }
+@media (prefers-reduced-motion: reduce) { .sv-sp-play { transition: none; } }
+body.dark-mode .sv-scoreplay { background: #2a2826; border-color: #3a3836; }
+body.dark-mode .sv-sp-play { background: #2a2826; color: #f0ece6; border-color: #6b6560; }

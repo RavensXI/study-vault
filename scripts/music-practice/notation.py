@@ -19,6 +19,7 @@ Element coords (meterSig at 735,600) are relative to page-margin. Annotations go
 in a sibling group carrying the SAME translate, so coordinates match directly.
 Staff lines sit 180 content-units apart; that spacing is the unit for sizing.
 """
+import json
 import re
 
 import verovio
@@ -200,6 +201,45 @@ def row(items, title=None, caption=None):
     if title:
         h.append('<figcaption class="sv-notefig-title">%s</figcaption>' % title)
     h.append('<div class="sv-noterow">%s</div>' % "".join(cells))
+    if caption:
+        h.append('<p class="sv-notefig-cap">%s</p>' % caption)
+    h.append("</figure>")
+    return "".join(h)
+
+
+def playable(abc, notes, tempo=100, width=1500, title=None, caption=None,
+             hint="Press play and watch the notes light up as they sound."):
+    """Engraved notation that plays, with a highlight moving note by note.
+
+    notes: [(midi, beats)] in the same order the notes appear. Passed explicitly
+    rather than parsed out of the ABC — the pairing with the engraved element ids
+    is asserted below, so a mismatch fails loudly instead of drifting silently.
+    Use midi=None for a rest.
+    """
+    svg = figure(abc, width=width)
+    ids = re.findall(r'<g id="([^"]+)" class="note"', svg)
+    sounding = [n for n in notes if n[0] is not None]
+    if len(ids) != len(sounding):
+        raise ValueError("%d engraved notes but %d sounding supplied (%s)"
+                         % (len(ids), len(sounding), abc))
+    # Rests advance the clock but claim no engraved note: they render as
+    # class="rest", so pairing them against note ids silently mis-aligns
+    # everything after the first rest.
+    seq, k = [], 0
+    for midi, beats in notes:
+        if midi is None:
+            seq.append({"id": None, "midi": None, "beats": beats})
+        else:
+            seq.append({"id": ids[k], "midi": midi, "beats": beats})
+            k += 1
+    payload = json.dumps({"tempo": tempo, "notes": seq}, separators=(",", ":"))
+    h = ['<figure class="sv-scoreplay">']
+    if title:
+        h.append('<figcaption class="sv-notefig-title">%s</figcaption>' % title)
+    h.append('<script type="application/json" class="sv-sp-map">%s</script>' % payload)
+    h.append(svg)
+    h.append('<div class="sv-sp-bar"><button type="button" class="sv-sp-play">Play</button>'
+             '<span class="sv-sp-hint">%s</span></div>' % hint)
     if caption:
         h.append('<p class="sv-notefig-cap">%s</p>' % caption)
     h.append("</figure>")
