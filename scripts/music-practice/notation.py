@@ -75,7 +75,7 @@ def card(svg, title=None, caption=None):
 
 
 def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
-           scale=55, width=1800):
+           bare=False, scale=55, width=1800):
     """Engrave `abc` and annotate it. Returns the SVG only — use card() for
     title and caption.
 
@@ -83,6 +83,8 @@ def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
     note_labels  [(index, text)]       label notes by their order in the bar
     brackets     [(i0, i1, text)]      bracket spanning notes i0..i1
     stagger      alternate note labels between two rows when they would collide
+    bare         drop the clef and time signature — for anatomy figures where a
+                 repeated clef in every cell is just noise
     """
     svg = render(abc, scale=scale, width=width)
     dm = re.search(r'(<svg class="definition-scale"[^>]*viewBox=")([\d.\- ]+)(")', svg)
@@ -132,10 +134,10 @@ def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
 
     notes = _uses(svg, "note")
     base = _staff_bottom(svg)
-    for row, (i, s) in enumerate(note_labels or []):
+    for li, (i, s) in enumerate(note_labels or []):
         if i >= len(notes):
             continue
-        dy = u * (2.2 + (1.5 if (stagger and row % 2) else 0))
+        dy = u * (2.2 + (1.5 if (stagger and li % 2) else 0))
         lx, anchor = edge_safe(notes[i][0] + u * 0.3, s, fs * 0.88)
         text(lx, base + dy, s, anchor=anchor, size=fs * 0.88, colour=INK, weight="500")
 
@@ -170,4 +172,35 @@ def figure(abc, ring=None, note_labels=None, brackets=None, stagger=False,
     # 2-bar figure and a 6-bar figure show glyphs at wildly different sizes.
     pct = min(100.0, round(cvb_w / REF_WIDTH * 100.0, 1))
     svg = svg.replace("<svg ", '<svg style="width:%s%%;height:auto;display:block;margin:0 auto" ' % pct, 1)
+    if bare:
+        # Hide, do not delete. Deleting these groups by regex removed the
+        # noteheads twice: <g class="keySig" /> is self-closing, so a
+        # <g ...>...</g> match runs past it and swallows the notes. Injected
+        # LAST because adding an attribute earlier breaks the viewBox regexes.
+        svg = svg.replace('<svg ', '<svg data-bare="1" ', 1)
+        svg = svg.replace('</defs>', '</defs><style>svg[data-bare="1"] g.clef,'
+                          'svg[data-bare="1"] g.meterSig,'
+                          'svg[data-bare="1"] g.keySig{display:none}</style>', 1)
     return svg
+
+
+def row(items, title=None, caption=None):
+    """Lay several small figures side by side, each with its own HTML caption.
+
+    Long labels under closely-spaced notes always collide inside one drawing.
+    Giving each note its own cell removes the problem entirely, and the captions
+    wrap and re-flow because they are HTML rather than SVG text.
+    items: [(abc, caption_html)]
+    """
+    cells = []
+    for abc, cap in items:
+        cells.append('<div class="sv-noterow-cell">%s<span class="sv-noterow-cap">%s</span></div>'
+                     % (figure(abc, width=520, bare=True), cap))
+    h = ['<figure class="sv-notefig">']
+    if title:
+        h.append('<figcaption class="sv-notefig-title">%s</figcaption>' % title)
+    h.append('<div class="sv-noterow">%s</div>' % "".join(cells))
+    if caption:
+        h.append('<p class="sv-notefig-cap">%s</p>' % caption)
+    h.append("</figure>")
+    return "".join(h)

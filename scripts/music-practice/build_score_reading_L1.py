@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 from lib.supabase_client import get_client
-from notation import figure, card
+from notation import figure, card, row
 
 BACKUP = os.path.join(HERE, "_score_reading_L1_backup.json")
 
@@ -41,18 +41,28 @@ F_ANATOMY = card(figure("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG G G G |",
                  "Reading the two numbers",
                  "Top: how many beats in each bar. Bottom: 4 means the beat is a crotchet.")
 
-F_VALUES = card(figure("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG4 | G2 G2 | G G G G |",
-                       note_labels=[(0, "semibreve &mdash; 4 beats"), (1, "minim &mdash; 2"),
-                                    (2, "minim &mdash; 2"), (3, "crotchet &mdash; 1"), (5, "1")],
-                       stagger=True, width=1500),
-                "Each value lasts half as long as the one before",
-                "One semibreve fills the bar. Two minims fill the same bar. So do four crotchets.")
+# Tom's confusion, and it was my fault: the old text said "a tail or a beam
+# shortens it again", which makes a minim ambiguous — it is hollow AND carries a
+# vertical line. That line is a STEM, not a tail. Separate the three parts
+# explicitly, and give each note its own cell so the labels cannot collide.
+_V = [("G4", "semibreve<br><b>4 beats</b><br>hollow, no stem"),
+      ("G2", "minim<br><b>2 beats</b><br>hollow, with stem"),
+      ("G", "crotchet<br><b>1 beat</b><br>filled, with stem"),
+      ("G/2", "quaver<br><b>half a beat</b><br>filled, one tail"),
+      ("G//", "semiquaver<br><b>quarter beat</b><br>filled, two tails")]
+F_VALUES = row([("X:1\nT:\nM:4/4\nL:1/4\nK:C\n%s|" % v, c) for v, c in _V],
+               "The five note values",
+               "Three things to look at: is the <b>head</b> hollow or filled, and how many "
+               "<b>tails</b> does it have? The <b>stem</b> &mdash; the vertical line &mdash; is "
+               "just a handle. It never changes the length.")
 
-F_DOT = card(figure("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG3 G |",
-                    note_labels=[(0, "dotted minim &mdash; 3 beats"), (1, "crotchet &mdash; 1")],
-                    stagger=True, width=1000),
-             "A dot adds half the note's value again",
-             "A minim is 2 beats. The dot adds one more, so a dotted minim is 3.")
+F_DOT = row([("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG2|", "minim<br><b>2 beats</b>"),
+             ("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG3|", "dotted minim<br><b>3 beats</b><br>2 + half of 2"),
+             ("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG|", "crotchet<br><b>1 beat</b>"),
+             ("X:1\nT:\nM:4/4\nL:1/4\nK:C\nG3/2|", "dotted crotchet<br><b>1&frac12; beats</b><br>1 + half of 1")],
+            "A dot adds half of whatever the note is worth",
+            "It does <b>not</b> always add one beat. Add half of the note's own value: a minim "
+            "(2) gains 1 and becomes 3; a crotchet (1) gains a half and becomes 1&frac12;.")
 
 F_SIMPLE = card(figure("X:1\nT:\nM:2/4\nL:1/8\nK:C\nGG GG |",
                        ring=[("meterSig", "simple time")],
@@ -103,8 +113,12 @@ METHOD = {
         "before it asks you anything.</p>"
         "<p><strong>1. The time signature.</strong> Two numbers stacked at the very start, just "
         "after the clef.</p>" + F_WHERE + F_ANATOMY +
-        "<p><strong>2. How long each note lasts.</strong> A hollow note head is long; a filled one "
-        "is shorter; a tail or a beam shortens it again.</p>" + F_VALUES + F_DOT +
+        "<p><strong>2. How long each note lasts.</strong> Every note is built from up to three "
+        "parts, and only two of them affect the length. The <strong>head</strong> is hollow (long) "
+        "or filled (shorter). The <strong>tails</strong> &mdash; the little flags, or the beams "
+        "joining notes together &mdash; halve it again for each one. The <strong>stem</strong>, the "
+        "plain vertical line, changes nothing at all: a minim is hollow and has a stem, and it is "
+        "still 2 beats.</p>" + F_VALUES + F_DOT +
         "<p><strong>3. Simple or compound.</strong> This is the distinction examiners ask for most "
         "often, and it is decided by the top number alone.</p>" + F_SIMPLE + F_COMPOUND +
         "<p><strong>4. An anacrusis.</strong> A short, incomplete bar before the first full one.</p>"
