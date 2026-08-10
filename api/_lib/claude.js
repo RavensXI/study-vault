@@ -2,14 +2,17 @@
  * Single entry point for every Claude call the API makes.
  *
  * WHY THIS EXISTS
- *   Five routes (ai-mark, tutor, simplify, simplify-qa, revision-strategy)
- *   each built their own fetch to api.anthropic.com, which meant pupil work
- *   left the UK on five separate code paths. Routing them through here lets
- *   one env-var change move all five into Europe.
+ *   Four routes (ai-mark, tutor, simplify, simplify-qa) each built their own
+ *   fetch to api.anthropic.com, which meant pupil work left the UK on four
+ *   separate code paths. Routing them through here lets one env-var change
+ *   move all of them into Europe. (A fifth, revision-strategy, went the same
+ *   way and was deleted — nothing had ever called it.)
  *
  * HOW IT ROUTES
  *   AWS credentials present  -> Amazon Bedrock, London (eu-west-2), EU
  *                               inference profile. Data stays in the EEA.
+ *                               A failure here is an ERROR, not a quiet
+ *                               retry in the US — see "FAILS CLOSED" below.
  *   AWS credentials absent   -> api.anthropic.com, exactly as before.
  *
  *   The fallback is deliberate: until AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY
@@ -28,8 +31,7 @@
  */
 
 // Which Bedrock model serves the "bigger than Haiku" tier — the exam tier in
-// ai-mark, the explain model in simplify, the QA model in simplify-qa, and
-// revision-strategy.
+// ai-mark, the explain model in simplify, and the QA model in simplify-qa.
 //
 // Sonnet 4.6 — the model the exam tier ran on before this migration, so on
 // Bedrock the marking behaviour is unchanged and only its location moves.
@@ -131,36 +133,32 @@ async function callClaude(body) {
 
   if (!onBedrock) return viaAnthropic(payload);
 
-  // TEMPORARY SAFETY NET (10 Aug 2026).
+  // FAILS CLOSED. Once Bedrock is configured, a Bedrock failure is an error —
+  // it does NOT quietly re-run the request against api.anthropic.com.
   //
-  // Bedrock is refusing every model ID we have tried in eu-west-2 — both the
-  // bare `anthropic.claude-haiku-4-5` and the `eu.`-prefixed inference-profile
-  // form come back "does not exist", while the same account reaches Haiku fine
-  // in the console playground. The likeliest explanation is that the playground
-  // uses Bedrock's older InvokeModel integration and this account has no access
-  // to the newer bedrock-mantle endpoint at all, in which case the fix is the
-  // legacy client rather than a different ID.
+  // The temptation is obvious: falling back keeps marking alive during a
+  // Bedrock outage. But a residency promise that silently suspends itself
+  // whenever it is inconvenient is not a promise. If we tell a school that
+  // pupils' work is processed in the UK, the failure mode has to be "the
+  // marking is unavailable for ten minutes", not "the marking quietly went to
+  // Virginia and nobody was told".
   //
-  // Until that is settled with evidence rather than guesswork, a Bedrock
-  // failure falls back to the direct API instead of taking AI marking, the
-  // tutor and simplify down with it. The fallback is LOUD (console.error, one
-  // line per failure) precisely so this cannot become permanent by accident:
-  // while it is firing, pupil work is still going to the US and the residency
-  // claim is NOT yet true.
-  //
-  // Remove this the moment the correct transport is confirmed.
+  // The escape hatch is deliberately explicit and deliberately ugly to type.
+  // ALLOW_US_FALLBACK exists for a real incident where availability genuinely
+  // outranks residency for a while — set it, and every fallback logs loudly and
+  // is reported in servedBy, so the exposure is visible rather than assumed.
+  // Unset it again afterwards.
+  if (!process.env.ALLOW_US_FALLBACK) return viaBedrock(payload);
+
   try {
     return await viaBedrock(payload);
   } catch (err) {
-    console.error('[claude] Bedrock failed, falling back to api.anthropic.com —',
-      'DATA IS LEAVING THE UK. Model:', payload.model, '| Error:', err.message);
+    console.error('[claude] ALLOW_US_FALLBACK is set — Bedrock failed and this',
+      'request is being re-run in the US. DATA IS LEAVING THE UK. Model:',
+      payload.model, '| Error:', err.message);
     const out = await viaAnthropic(Object.assign({}, body));
-    // Carry the Bedrock failure out with the response. Without this the only
-    // record is a Vercel log line, and the migration is being debugged from
-    // the outside — a silent fallback that cannot be diagnosed is how a
-    // temporary workaround becomes permanent.
-    out._servedBy = 'anthropic-direct (bedrock failed: '
-      + String(err.message).replace(/\s+/g, ' ').slice(0, 220) + ')';
+    out._servedBy = 'anthropic-direct (US FALLBACK; bedrock failed: '
+      + String(err.message).replace(/\s+/g, ' ').slice(0, 200) + ')';
     return out;
   }
 }
