@@ -115,12 +115,50 @@ async function callClaude(body) {
 }
 
 
+/**
+ * Model IDs to try, in order.
+ *
+ * eu-west-2 is not one of Bedrock's "in-region only" regions, so it cannot
+ * serve a bare model ID — it needs a cross-region inference profile, which is
+ * the same ID carrying a geography prefix (`eu.` for European regions, `us.`
+ * for US, `apac.` for Asia-Pacific). A bare ID there fails with the unhelpful
+ * "The model 'x' does not exist" rather than anything about profiles.
+ *
+ * Both forms are tried because which one a region accepts is not reliably
+ * documented and does vary: `us-east-1` takes the bare ID, `eu-west-2` does
+ * not. Trying costs one wasted round trip on the first call after a deploy;
+ * guessing wrong costs an outage.
+ */
+function modelCandidates(model) {
+  const region = String(process.env.AWS_REGION || '');
+  const geo = region.startsWith('eu-') ? 'eu.'
+    : region.startsWith('us-') ? 'us.'
+    : region.startsWith('ap-') ? 'apac.'
+    : '';
+  return geo ? [geo + model, model] : [model];
+}
+
+
 async function viaBedrock(payload) {
-  try {
-    return await bedrockClient().messages.create(payload);
-  } catch (err) {
-    throw new Error('Bedrock error: ' + (err && err.message ? err.message : err));
+  const candidates = modelCandidates(payload.model);
+  let lastErr = null;
+
+  for (const model of candidates) {
+    try {
+      return await bedrockClient().messages.create(
+        Object.assign({}, payload, { model: model })
+      );
+    } catch (err) {
+      lastErr = err;
+      const msg = (err && err.message) || String(err);
+      // Only a "no such model" is worth retrying under a different ID form.
+      // A permission or validation error means the ID was understood and the
+      // problem is elsewhere — retrying just doubles the latency of the failure.
+      if (!/does not exist|ValidationException|ResourceNotFound/i.test(msg)) break;
+    }
   }
+
+  throw new Error('Bedrock error: ' + ((lastErr && lastErr.message) || lastErr));
 }
 
 
