@@ -51,7 +51,10 @@
 
   function addLogoutButton() {
     function inject() {
-      var nav = document.querySelector('.header-nav');
+      // Admin pages use .admin-nav, the student shell uses .header-nav. Only the
+      // latter was checked, so no admin page has ever shown a Sign out — a stale
+      // staff session in localStorage auto-admits forever with no way to clear it.
+      var nav = document.querySelector('.header-nav') || document.querySelector('.admin-nav');
       if (!nav) return;
       if (nav.querySelector('.auth-logout-btn')) return;
     var btn = document.createElement('a');

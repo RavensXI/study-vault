@@ -221,32 +221,103 @@
       return null;
     }
 
+    // ---- Re-authentication ----
+    // A staff session saved without a password (or from an older build) still
+    // satisfies auth-gate, so the page renders and then every API call 401s with
+    // no way out — the gate never re-prompts. Rather than expect a sign-out that
+    // admin pages did not offer, ask for the password in place and repair the
+    // stored session. Resolves true if the caller should retry.
+    var reauthInFlight = null;
+    function reauth() {
+      if (reauthInFlight) return reauthInFlight;
+      reauthInFlight = new Promise(function (resolve) {
+        var wrap = document.createElement('div');
+        wrap.className = 'modal-overlay';
+        wrap.innerHTML =
+          '<div class="modal-box">' +
+            '<h3>Session needs your password</h3>' +
+            '<p>You are signed in, but this browser did not keep the admin password ' +
+            'needed to talk to the review API. Enter it once and it will be stored.</p>' +
+            '<input type="password" id="reauth-pw" autocomplete="current-password" ' +
+              'style="width:100%;padding:0.65rem 0.85rem;border:1px solid #ddd;border-radius:10px;font:inherit">' +
+            '<p class="reauth-err" style="color:#dc2626;font-size:0.82rem;display:none;margin:0.5rem 0 0"></p>' +
+            '<div class="modal-actions">' +
+              '<button class="btn" id="reauth-cancel" style="background:#f3f4f6">Cancel</button>' +
+              '<button class="btn" id="reauth-go" style="background:#2d2a26;color:#fff">Unlock</button>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(wrap);
+        var input = wrap.querySelector('#reauth-pw');
+        var err = wrap.querySelector('.reauth-err');
+        var go = wrap.querySelector('#reauth-go');
+        input.focus();
+
+        function finish(ok) { wrap.remove(); reauthInFlight = null; resolve(ok); }
+        wrap.querySelector('#reauth-cancel').addEventListener('click', function () { finish(false); });
+
+        async function submit() {
+          var pw = input.value;
+          if (!pw) return;
+          go.disabled = true; go.textContent = 'Checking…'; err.style.display = 'none';
+          try {
+            var r = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: pw })
+            });
+            var d = await r.json();
+            if (r.ok && d.role) {
+              var s = {};
+              try { s = JSON.parse(localStorage.getItem('studyvault-auth')) || {}; } catch (e) {}
+              s.role = d.role;
+              s.pw = pw;
+              if (d.school_id) s.school_id = d.school_id;
+              var json = JSON.stringify(s);
+              sessionStorage.setItem('studyvault-auth', json);
+              localStorage.setItem('studyvault-auth', json);
+              finish(true);
+              return;
+            }
+            err.textContent = d.error || 'Incorrect password';
+          } catch (e) {
+            err.textContent = 'Connection error. Try again.';
+          }
+          err.style.display = '';
+          go.disabled = false; go.textContent = 'Unlock';
+          input.select();
+        }
+        go.addEventListener('click', submit);
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') submit(); });
+      });
+      return reauthInFlight;
+    }
+
     // ---- API helpers ----
-    async function apiGet(params) {
+    async function callApi(path, init, retried) {
       var headers = getAuthHeaders();
       var token = await getAccessToken();
       if (token) headers['Authorization'] = 'Bearer ' + token;
-
-      var qs = new URLSearchParams(params).toString();
-      var resp = await fetch('/api/pipeline/review?' + qs, { headers: headers });
+      var resp = await fetch(path, Object.assign({}, init, { headers: headers }));
       var data = await resp.json();
+      if (resp.status === 401 && !retried) {
+        // exactly one retry — a password that logs in but is still refused here
+        // means something server-side, and re-prompting would just loop
+        if (await reauth()) return callApi(path, init, true);
+      }
       if (!resp.ok) throw new Error(data.error || 'API error');
       return data;
     }
 
-    async function apiPost(body) {
-      var headers = getAuthHeaders();
-      var token = await getAccessToken();
-      if (token) headers['Authorization'] = 'Bearer ' + token;
+    async function apiGet(params) {
+      var qs = new URLSearchParams(params).toString();
+      return callApi('/api/pipeline/review?' + qs, {});
+    }
 
-      var resp = await fetch('/api/pipeline/review', {
+    async function apiPost(body) {
+      return callApi('/api/pipeline/review', {
         method: 'POST',
-        headers: headers,
         body: JSON.stringify(body)
       });
-      var data = await resp.json();
-      if (!resp.ok) throw new Error(data.error || 'API error');
-      return data;
     }
 
     // ---- Toast ----
