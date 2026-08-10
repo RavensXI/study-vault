@@ -107,14 +107,39 @@ Listening.** Different job, opposite pedagogy.
 165 questions across the 18 drills, bronze/silver/gold, all on 70 distinct licence-clean MP3s
 hosted on R2 (`music-aqa/...`). No YouTube anywhere in the drills.
 
-### The one thing that IS wrong with them (open)
-The drills render audio as a bare browser `<audio controls>` grey pill, while the study pieces got
-the bespoke waveform dock. Same subject, same act of listening, two different levels of craft —
-that reads as neglect. Fix is to reuse the existing dock as an INLINE variant (not the bottom
-`sv-listening-mode` dock) inside the practice passage renderer. Needs: an inline player variant,
-a practice-loader swap, and one peaks-generation run over the 70 R2 MP3s. No pin times needed for
-the base upgrade — pins are optional and only 8 of 165 questions cite a timestamp, so pins would
-be real ear-work, best done later as reveal-after-answering.
+### Player upgrade DONE (10 Aug)
+The drills used to render audio as a bare browser `<audio controls>` grey pill next to the study
+pieces' bespoke waveform dock. Now they have their own inline player: 90 of them across all 18
+lessons, one row — play, waveform, clock.
+
+- `js/practice-audio.js` (sandbox branch) — self-contained, NOT the main.js dock. practice.html
+  does not load main.js, and the components want opposite things: the dock is fixed to the
+  viewport and carries pins, which would be wrong here. **Never add pins to a drill** — Section A
+  is unfamiliar listening, so annotation deletes the skill being tested.
+- `scripts/music-practice/gen_drill_peaks.py` — ffmpeg -> 260-value envelope per file.
+  Manifest `_drill_peaks.json` is committed, so a re-run costs nothing.
+- `scripts/music-practice/apply_inline_player.py` — swaps the markup in Supabase. Idempotent,
+  writes a backup first, `--dry-run` and `--restore <backup>` supported. The backup
+  (`_drill_practice_data_backup.json`) is gitignored — it is a point-in-time dump, not source.
+- Peaks travel INLINE in the passage HTML. R2 sends no `Access-Control-Allow-Origin` header, so
+  the browser cannot fetch a `.peaks.json` cross-origin. Do not "improve" this to a fetch.
+- Players are wired by a MutationObserver, so passage panel / worked examples / method-card modal
+  all work without hooking three separate injection sites.
+
+Pins were deliberately left out: only 8 of the 165 drill questions cite a timestamp, so pin times
+are real ear-work. If they are ever added, do it as reveal-AFTER-answering so the excerpt stays
+unannotated until the student has committed.
+
+### Two defects found while doing it
+1. `listening-skills` L3's only worked example pointed at `ex015_cadence.mp3`, which 404s — the
+   demonstration played silence. Re-pointed to `exC_perfect.mp3`, the one existing clip matching
+   the worked answer ("perfect"). It is also a silver question's clip; reused deliberately, since
+   hearing a perfect cadence in the demo and again in a question is reinforcement.
+2. `.learn-card-head` is a capped scroll box with NO affordance, so the last visible line read as
+   the end of the question. Real overflow measured: music AoS1 L1 70px, score reading L1 225px,
+   geography skills L1 115px. Students were answering truncated sentences. Fixed with a bottom
+   fade that appears only when there is more, plus a cap raise 48vh -> 60vh (guided 52 -> 58) —
+   verified at 960/800/720 heights that the action buttons stay on screen even at 64vh.
 
 ## Reviewing Guided Listening lessons — MUST use the preview deployment
 `origin/platform` (and so www.studyvault.co.uk) has ZERO Guided Listening assets: 0 hits for
