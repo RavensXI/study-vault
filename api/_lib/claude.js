@@ -73,14 +73,33 @@ function useBedrock() {
   );
 }
 
+// WHICH BEDROCK INTEGRATION.
+//
+// Bedrock has two. `AnthropicBedrockMantle` speaks the newer Messages-API
+// endpoint (bedrock-mantle.{region}.api.aws); `AnthropicBedrock` speaks the
+// older bedrock-runtime InvokeModel API. They take DIFFERENT model IDs and
+// DIFFERENT IAM actions.
+//
+// This account has the legacy one. Evidence: every ID tried against Mantle
+// returned "does not exist" — including the exact ID that
+// `aws bedrock list-foundation-models --region eu-west-2` reports
+// (anthropic.claude-haiku-4-5-20251001-v1:0) — while the console playground
+// reaches the same models fine. The version-suffixed ID format is itself the
+// legacy scheme.
+//
+// IAM: legacy needs bedrock:InvokeModel, NOT bedrock-mantle:CreateInference.
+// A policy granting only the latter fails here with AccessDenied.
+const USE_MANTLE = false;
+
 let _bedrock = null;
 function bedrockClient() {
   if (!_bedrock) {
     // Required lazily so the dependency is only needed once Bedrock is
     // actually configured — a deploy without the package still serves every
     // route via the direct path rather than failing at import time.
-    const { AnthropicBedrockMantle } = require('@anthropic-ai/bedrock-sdk');
-    _bedrock = new AnthropicBedrockMantle({ awsRegion: process.env.AWS_REGION });
+    const sdk = require('@anthropic-ai/bedrock-sdk');
+    const Client = USE_MANTLE ? sdk.AnthropicBedrockMantle : sdk.AnthropicBedrock;
+    _bedrock = new Client({ awsRegion: process.env.AWS_REGION });
   }
   return _bedrock;
 }
@@ -155,12 +174,17 @@ async function callClaude(body) {
  * guessing wrong costs an outage.
  */
 function modelCandidates(model) {
+  // Cross-region inference profiles (the eu./us./apac. prefixes) belong to the
+  // Mantle endpoint. On the legacy API the bare, version-suffixed ID is the
+  // one that resolves, so try it first and keep the prefixed form only as a
+  // second guess for whenever this account gains Mantle access.
   const region = String(process.env.AWS_REGION || '');
   const geo = region.startsWith('eu-') ? 'eu.'
     : region.startsWith('us-') ? 'us.'
     : region.startsWith('ap-') ? 'apac.'
     : '';
-  return geo ? [geo + model, model] : [model];
+  if (!geo) return [model];
+  return USE_MANTLE ? [geo + model, model] : [model, geo + model];
 }
 
 
