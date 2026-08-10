@@ -111,7 +111,33 @@ async function callClaude(body) {
   // would still 400 anyone who moves a caller to Sonnet 5 directly.
   if (REJECTS_TEMPERATURE.has(payload.model)) delete payload.temperature;
 
-  return onBedrock ? viaBedrock(payload) : viaAnthropic(payload);
+  if (!onBedrock) return viaAnthropic(payload);
+
+  // TEMPORARY SAFETY NET (10 Aug 2026).
+  //
+  // Bedrock is refusing every model ID we have tried in eu-west-2 — both the
+  // bare `anthropic.claude-haiku-4-5` and the `eu.`-prefixed inference-profile
+  // form come back "does not exist", while the same account reaches Haiku fine
+  // in the console playground. The likeliest explanation is that the playground
+  // uses Bedrock's older InvokeModel integration and this account has no access
+  // to the newer bedrock-mantle endpoint at all, in which case the fix is the
+  // legacy client rather than a different ID.
+  //
+  // Until that is settled with evidence rather than guesswork, a Bedrock
+  // failure falls back to the direct API instead of taking AI marking, the
+  // tutor and simplify down with it. The fallback is LOUD (console.error, one
+  // line per failure) precisely so this cannot become permanent by accident:
+  // while it is firing, pupil work is still going to the US and the residency
+  // claim is NOT yet true.
+  //
+  // Remove this the moment the correct transport is confirmed.
+  try {
+    return await viaBedrock(payload);
+  } catch (err) {
+    console.error('[claude] Bedrock failed, falling back to api.anthropic.com —',
+      'DATA IS LEAVING THE UK. Model:', payload.model, '| Error:', err.message);
+    return viaAnthropic(Object.assign({}, body));
+  }
 }
 
 
