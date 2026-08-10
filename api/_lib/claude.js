@@ -190,8 +190,15 @@ function modelCandidates(model) {
     : region.startsWith('us-') ? 'us.'
     : region.startsWith('ap-') ? 'apac.'
     : '';
+  // Prefixed FIRST on both integrations. eu-west-2 is not an "in-region only"
+  // region, so it cannot serve a model on on-demand throughput at all — it
+  // requires an inference profile, and the profile ID is the model ID with a
+  // geography prefix. Verified from the provider's own error:
+  //   "Invocation of model ID anthropic.claude-haiku-4-5-20251001-v1:0 with
+  //    on-demand throughput isn't supported. Retry your request with the ID or
+  //    ARN of an inference profile that contains this model."
   if (!geo) return [model];
-  return USE_MANTLE ? [geo + model, model] : [model, geo + model];
+  return [geo + model, model];
 }
 
 
@@ -212,7 +219,10 @@ async function viaBedrock(payload) {
       // Only a "no such model" is worth retrying under a different ID form.
       // A permission or validation error means the ID was understood and the
       // problem is elsewhere — retrying just doubles the latency of the failure.
-      if (!/does not exist|ValidationException|ResourceNotFound/i.test(msg)) break;
+      // "inference profile" and "on-demand throughput" matter as much as the
+      // not-found cases: that is the error a region gets when it needs a
+      // profile ID, and omitting it here is why the retry silently never fired.
+      if (!/does not exist|ValidationException|ResourceNotFound|inference profile|on-demand throughput/i.test(msg)) break;
     }
   }
 
