@@ -20,7 +20,7 @@
 
 const { supabase } = require('./pipeline/_lib/supabase');
 
-const { callClaude } = require('./_lib/claude');
+const { callClaudeText } = require('./_lib/claude');
 
 const QA_MODEL = 'claude-sonnet-4-6';
 const SIMPLE_MODEL = 'claude-haiku-4-5-20251001';
@@ -264,12 +264,14 @@ async function generate(text, presentTerms, level) {
 
 async function callAnthropic(system, prompt, model, maxTokens, temperature) {
   // temperature is dropped automatically for models that reject it (Sonnet 5).
-  var data = await callClaude({
+  // Joins every text block — a thinking-enabled model returns [thinking, text]
+  // and content[0].text would be undefined. temperature is dropped
+  // automatically for models that reject it (Sonnet 5).
+  return callClaudeText({
     model: model,
     max_tokens: maxTokens || 600,
     temperature: typeof temperature === 'number' ? temperature : 0.2,
     system: system,
     messages: [{ role: 'user', content: prompt }]
   });
-  return data.content[0].text;
 }

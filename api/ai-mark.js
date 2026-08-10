@@ -24,7 +24,7 @@
  * inside Europe. Anthropic calls route via api/_lib/claude.js.
  */
 
-const { callClaude } = require('./_lib/claude');
+const { callClaudeText } = require('./_lib/claude');
 
 // Extended responses (>8 marks) need judgement, not fact-spotting, and Haiku
 // is measurably too generous there — in the bake-off it gave 5/6 to invented
@@ -173,7 +173,12 @@ async function callGroq(system, prompt) {
 
 
 async function callAnthropic(system, prompt, model, maxTokens) {
-  const data = await callClaude({
+  // callClaudeText joins EVERY text block. Reading content[0].text breaks on
+  // any model that thinks: Sonnet 5 has adaptive thinking on by default, so it
+  // returns [thinking, text] and content[0] is the thinking block, which has no
+  // .text at all. That shipped as an exam tier returning empty feedback while
+  // happily billing for 1,230 output tokens of perfectly good marking.
+  return callClaudeText({
     model: model,
     max_tokens: maxTokens || 600,
     system: system || 'You are a GCSE examiner. Mark the student response against the provided mark scheme.',
@@ -181,5 +186,4 @@ async function callAnthropic(system, prompt, model, maxTokens) {
       { role: 'user', content: prompt },
     ],
   });
-  return data.content[0].text;
 }

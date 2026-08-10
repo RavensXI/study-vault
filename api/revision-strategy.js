@@ -119,7 +119,9 @@ Return ONLY valid JSON. No markdown fences, no explanation.`;
       messages: [{ role: 'user', content: userPrompt }]
     });
 
-    let text = (data.content?.[0]?.text || '').trim();
+    // Every text block, not content[0] — a thinking-enabled model puts a
+    // thinking block first and content[0].text is undefined.
+    let text = (data.content || []).map(b => b.text || '').join('').trim();
     text = text.replace(/^```json?\s*\n?/, '').replace(/\n?```\s*$/, '');
 
     let result;
