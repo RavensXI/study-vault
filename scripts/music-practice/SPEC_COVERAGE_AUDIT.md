@@ -152,6 +152,66 @@ the auth wall, not a missing build):
 Local equivalent: `python design-lab/serve.py` then http://127.0.0.1:8901/ (plain http.server will
 NOT work — no rewrites).
 
+## FACT-CHECK COVERAGE — the honest state (10 Aug)
+
+Asked "have we fact-checked all these?", the answer was no. Actual coverage before today:
+
+| Lesson | Checked? |
+|--------|----------|
+| aos2 L3 Queen | YES — vs BBC Bitesize, 3 errors fixed |
+| aos3 L2 Spalding | YES — vs BBC Bitesize, 4 errors fixed |
+| aos4 L2 Bartok | YES — vs BBC Bitesize, 7 errors fixed |
+| aos2 L4 Placing a Track in Time | YES — agent, 1 HIGH + 2 LOW fixed |
+| aos1 L1, L2, L3 / aos2 L1, L2 / aos3 L1 / aos4 L1, L3 | NO |
+| aos-listening L1, L3 intro prose | NO |
+| **all 18 drills, 165 questions** | **NEVER IN SCOPE** |
+
+The drills were invisible to `_fact_check_subject.py`: it plans only lessons with `content_html`,
+and drills keep everything in `practice_data`. So 165 answer keys had never been looked at. A wrong
+key marks a correct answer wrong — worse than a wrong sentence.
+
+### Timestamp errors found and fixed (10 Aug)
+Measured from the hosted recordings with ffmpeg (amplitude envelope, 1s buckets) — not guessed.
+
+- **Haydn 94 'Surprise', lesson-04.mp3.** Bars 1-8 end ~0:21; the pianissimo repeat sits at
+  0.007-0.037 until 0:41; **0:42 jumps to 0.541, a x27 step**. The chord is at **0:42**, not the
+  0:27 we claimed. At 0:27 the music is near-silent — a student following the instruction hears
+  nothing. Fixed in 4 places: aos1 L1, aos1 L2, and TWO drill L4 questions.
+- **Handel Zadok, lesson-05.mp3.** Crescendo 0.066 -> 0.096 through 1:20-1:33, 1:34 = 0.185,
+  1:36 = 0.451. **Choir enters ~1:36**, not 1:30. Fixed in 4 places: aos1 L1, drill L5 method card
+  and two drill L5 questions.
+- **Beethoven Sym 1, lesson-01.mp3.** Our content disagreed with itself: the lessons said the
+  Allegro arrives "about 1:50", the drill method card said "Adagio 0:00-1:10 / Allegro from 1:10".
+  Loudness alone was ambiguous because **the Allegro con brio begins piano**. Extending the window
+  settled it: quiet trough 1:31-1:43 (rms 0.013-0.042), then sustained growth from **1:45** to a
+  tutti by 1:53 (rms 0.11). The Guided Listening pin `data-t="107"` (1:47) agrees independently.
+  So the LESSONS were right and the DRILL was wrong — the method card is now 1:45. Nearly corrected
+  the wrong one; measuring is what caught it.
+
+Note: aos1 L3's apparent "1:502" typo is not a typo. It is 1:50 followed by a GL ref button
+`<button class="sv-ap-ref" data-t="107">2</button>`. Tag-stripped extraction makes it look garbled —
+same class of illusion as [[reference_practice_display_inline_svg]]. Left alone.
+
+### Content error found and fixed
+**aos4 L3 contradicted itself about Terry Riley.** Body: In C "works differently — built not on
+note-by-note growth but on staggered repetition". PQ1 mark scheme: "(Terry Riley's In C is NOT
+additive)". But the section heading read "The additive process — Terry Riley" and flashcard 2
+answered "which composer is linked to it" with "Terry Riley". A student revising from the flashcard
+learned the exact association the lesson's own mark scheme refuses to credit. Heading and flashcard
+fixed; body and mark scheme were already right.
+
+### Drill answer keys — machine audit (165 questions)
+Structurally clean: every solution index in range, no duplicate or near-identical options (the 9
+flags were the heuristic misfiring on legitimate distractors like "2 quavers per beat" vs "3"), no
+explanation naming a non-key option, no orphan `passage_id`, every question has an explanation.
+**This does NOT confirm the answers are musically true** — that needs ears on the audio and stays
+on Tom's check list. Script: `scripts/music-practice/audit_drill_keys.py`.
+
+### Still unchecked
+aos1 L3 (Beethoven study-piece prose), aos2 L1, aos2 L2, aos3 L1, aos4 L1, and the aos-listening
+L1/L3 intro prose. Base rate on this subject is 14 mark-affecting errors across the 3 study pieces
+that were checked, so assume these are no cleaner.
+
 ## Stale-rotation sweep (10 Aug)
 Regex swept all 30 lessons for "previous set work / assessed to 202x / until 202x". Two hits, both
 on drill L3. Fixed: L1 "The current AQA set work" -> "The set work for this Area of Study";
