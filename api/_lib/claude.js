@@ -20,8 +20,11 @@
  *   Same object you would have handed to fetch(). Model IDs stay first-party
  *   (`claude-haiku-4-5-20251001`); the Bedrock prefix and the Sonnet upgrade
  *   are applied here so no call site has to know which transport it is on.
- *   The return value is the parsed Message, so `data.content[0].text` and
- *   `(data.content || []).map(b => b.text)` keep working unchanged.
+ *   Prefer callClaudeText() — it joins every text block. Do NOT read
+ *   content[0].text: a thinking-enabled model (Sonnet 5 thinks by default)
+ *   returns [thinking, text], so content[0] is the thinking block and has no
+ *   .text. callClaude() returns the raw Message for callers that need usage
+ *   or stop_reason.
  */
 
 // Which Bedrock model serves the "bigger than Haiku" tier — the exam tier in
