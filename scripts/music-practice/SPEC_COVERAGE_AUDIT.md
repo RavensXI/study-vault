@@ -77,3 +77,59 @@ Everything else verified sound, including all answer keys.
 HERO: via the real sandbox HeroFinder (scripts/lib/hero_pipeline.py) — vision grade A, vinyl records
 of different eras, Eric Krull / Unsplash, md5 e47d0843bf58dda0dd24918da5d3ff44, deduped against all
 11 existing music-aqa heroes. NOTE: HeroFinder lives ONLY in the sandbox worktree, not main.
+
+## Format map — why this subject has THREE kinds of lesson (10 Aug)
+
+Read this before asking "what are these old-looking lessons for?" again. Music is a mixed-format
+subject: `subjects.settings.practice_units` lists four units that serve at `/practice/`, the rest
+serve at `/lesson/`. That is deliberate, not drift.
+
+| Unit | Lessons | Route | Format | Job |
+|------|---------|-------|--------|-----|
+| aos1-western-classical | 3 | /lesson/ | article + 1 Guided Listening | teach AoS1 |
+| aos2-popular-music | 4 | /lesson/ | article + 1 Guided Listening | teach AoS2 |
+| aos3-traditional-music | 2 | /lesson/ | article + 1 Guided Listening | teach AoS3 |
+| aos4-since-1910 | 3 | /lesson/ | article + 1 Guided Listening | teach AoS4 |
+| listening-skills | 3 | /practice/ | drill | build the ear from scratch |
+| western-classical-1650-1910 | 8 | /practice/ | drill | AoS1 Section A unfamiliar listening |
+| aos-listening | 3 | /practice/ | drill | AoS2-4 Section A unfamiliar listening |
+| score-reading | 4 | /practice/ | drill | read the printed score in Section A |
+
+**The four Guided Listening lessons are the four Section B set works** — Beethoven, Queen,
+Spalding, Bartók. GL exists to walk you THROUGH a piece you are required to know: pinned
+annotations tell you what you are hearing as you hear it.
+
+**The 18 drill lessons are Section A** — 68 of the 96 marks. Section A plays music you have never
+heard. The whole skill is extracting features with NO scaffolding. Annotating those excerpts with
+GL pins would delete the exam skill they exist to build. So: **do not convert the drills to Guided
+Listening.** Different job, opposite pedagogy.
+
+165 questions across the 18 drills, bronze/silver/gold, all on 70 distinct licence-clean MP3s
+hosted on R2 (`music-aqa/...`). No YouTube anywhere in the drills.
+
+### The one thing that IS wrong with them (open)
+The drills render audio as a bare browser `<audio controls>` grey pill, while the study pieces got
+the bespoke waveform dock. Same subject, same act of listening, two different levels of craft —
+that reads as neglect. Fix is to reuse the existing dock as an INLINE variant (not the bottom
+`sv-listening-mode` dock) inside the practice passage renderer. Needs: an inline player variant,
+a practice-loader swap, and one peaks-generation run over the 70 R2 MP3s. No pin times needed for
+the base upgrade — pins are optional and only 8 of 165 questions cite a timestamp, so pins would
+be real ear-work, best done later as reveal-after-answering.
+
+## Reviewing Guided Listening lessons — MUST use the preview deployment
+`origin/platform` (and so www.studyvault.co.uk) has ZERO Guided Listening assets: 0 hits for
+`sv-listening` in css/style.css, 0 for `initListeningLesson` in js/main.js, service worker still
+sv-v5. A GL lesson opened from the PRODUCTION /admin/review screen renders as unstyled markup —
+it looks broken because the CSS and JS simply are not there.
+Review at the landing-wizard preview instead (Vercel SSO-protected, so curl sees a 302 — that is
+the auth wall, not a missing build):
+  https://study-vault-git-landing-wizard-tom-shauns-projects.vercel.app/admin/review
+Local equivalent: `python design-lab/serve.py` then http://127.0.0.1:8901/ (plain http.server will
+NOT work — no rewrites).
+
+## Stale-rotation sweep (10 Aug)
+Regex swept all 30 lessons for "previous set work / assessed to 202x / until 202x". Two hits, both
+on drill L3. Fixed: L1 "The current AQA set work" -> "The set work for this Area of Study";
+L3 "Previous AQA set work (assessed to 2025)" -> dropped. Mozart Clarinet Concerto stays — it is
+still valid Section A practice for the Haydn/Mozart/Beethoven orchestral strand, it just must not
+be framed by which rotation it used to belong to.
