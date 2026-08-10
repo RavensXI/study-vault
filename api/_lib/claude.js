@@ -31,30 +31,26 @@
 // ai-mark, the explain model in simplify, the QA model in simplify-qa, and
 // revision-strategy.
 //
-// ⚠ TEMPORARY. Sonnet 5 returns AccessDeniedException on this AWS account
-// ("not available for this account", 10 Aug 2026) — a per-model entitlement
-// gate, not the retired per-region access setting. Haiku is a STOPGAP here,
-// not the right answer: the bake-off (scripts/model-eval/) found it markedly
-// too generous on answers that should score badly — 5/6 for invented Dickens
-// quotations, 2/4 for a conservation-of-energy error, 1/6 for a non-attempt.
-// That is exactly the failure mode that matters on a 16- or 30-mark essay.
-//
-// (Haiku's headline win over Sonnet in that run was an artefact of
-// max_tokens: 400. Untruncated, Sonnet scored 98% — the best of any model
-// tested. The exam tier now allows 2000 tokens for that reason.)
-//
-// Change this ONE line to the first of these the account can reach:
-//   'anthropic.claude-sonnet-5'  — best price/performance, $2/$10 per MTok
-//   'anthropic.claude-opus-4-8'  — $5/$25, fallback
-//   'anthropic.claude-opus-4-7'  — $5/$25, last resort
-const SONNET_TIER = 'anthropic.claude-haiku-4-5';
+// Sonnet 4.6 — the model the exam tier ran on before this migration, so on
+// Bedrock the marking behaviour is unchanged and only its location moves.
+// Sonnet 5 is listed in eu-west-2 but returned AccessDeniedException on this
+// account (10 Aug 2026), a per-model entitlement gate; retry it here once AWS
+// lifts that, since untruncated it was the best marker in the bake-off (98%).
+// Do NOT put Haiku here: it marks long answers far too generously — 5/6 for
+// invented Dickens quotations, 2/4 for a conservation-of-energy error.
+const SONNET_TIER = 'anthropic.claude-sonnet-4-6';
 
 // Bedrock carries an `anthropic.` provider prefix and drops date suffixes.
 // NOTE: there is no `anthropic.claude-sonnet-4-6` — Sonnet 4.6 is not served
 // on Bedrock at all, so every 4.6 caller has to move regardless.
+// IDs verified against this account with:
+//   aws bedrock list-foundation-models --region eu-west-2 --by-provider anthropic
+// Note they are NOT uniform: Haiku 4.5 carries a date and version suffix,
+// while Sonnet 4.6 / Sonnet 5 / the Opus 4.7+ line are bare. Guessing a
+// consistent scheme is what produced "The model ... does not exist" twice.
 const BEDROCK_MODEL_IDS = {
-  'claude-haiku-4-5-20251001': 'anthropic.claude-haiku-4-5',
-  'claude-haiku-4-5': 'anthropic.claude-haiku-4-5',
+  'claude-haiku-4-5-20251001': 'anthropic.claude-haiku-4-5-20251001-v1:0',
+  'claude-haiku-4-5': 'anthropic.claude-haiku-4-5-20251001-v1:0',
   'claude-sonnet-4-6': SONNET_TIER,
   'claude-sonnet-5': SONNET_TIER,
   'claude-opus-4-8': 'anthropic.claude-opus-4-8',
