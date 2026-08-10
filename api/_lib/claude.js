@@ -28,16 +28,22 @@
 // ai-mark, the explain model in simplify, the QA model in simplify-qa, and
 // revision-strategy.
 //
-// ⚠ Sonnet 5 is DENIED on this AWS account (AccessDeniedException, "not
-// available for this account", 10 Aug 2026) — a new-account entitlement gate,
-// not a per-region model-access setting. Until AWS grants it, this points at
-// Haiku, which the bake-off (scripts/model-eval/) found scores BETTER than
-// Sonnet at production settings anyway: 81% vs 69%, because Sonnet overruns
-// max_tokens on half its calls and gets truncated.
+// ⚠ TEMPORARY. Sonnet 5 returns AccessDeniedException on this AWS account
+// ("not available for this account", 10 Aug 2026) — a per-model entitlement
+// gate, not the retired per-region access setting. Haiku is a STOPGAP here,
+// not the right answer: the bake-off (scripts/model-eval/) found it markedly
+// too generous on answers that should score badly — 5/6 for invented Dickens
+// quotations, 2/4 for a conservation-of-energy error, 1/6 for a non-attempt.
+// That is exactly the failure mode that matters on a 16- or 30-mark essay.
 //
-// Change this ONE line when AWS opens up a bigger model:
-//   'anthropic.claude-opus-4-8'  — if Opus 4.8 is available
-//   'anthropic.claude-sonnet-5'  — once the Sonnet gate is lifted
+// (Haiku's headline win over Sonnet in that run was an artefact of
+// max_tokens: 400. Untruncated, Sonnet scored 98% — the best of any model
+// tested. The exam tier now allows 2000 tokens for that reason.)
+//
+// Change this ONE line to the first of these the account can reach:
+//   'anthropic.claude-sonnet-5'  — best price/performance, $2/$10 per MTok
+//   'anthropic.claude-opus-4-8'  — $5/$25, fallback
+//   'anthropic.claude-opus-4-7'  — $5/$25, last resort
 const SONNET_TIER = 'anthropic.claude-haiku-4-5';
 
 // Bedrock carries an `anthropic.` provider prefix and drops date suffixes.

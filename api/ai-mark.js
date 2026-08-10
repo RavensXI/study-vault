@@ -26,6 +26,12 @@
 
 const { callClaude } = require('./_lib/claude');
 
+// Extended responses (>8 marks) need judgement, not fact-spotting, and Haiku
+// is measurably too generous there — in the bake-off it gave 5/6 to invented
+// quotations and 2/4 to a conservation-of-energy error. Keep this tier on the
+// largest model the account can actually reach; api/_lib/claude.js maps it.
+const EXAM_MODEL = 'claude-sonnet-5';
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -100,8 +106,12 @@ module.exports = async function handler(req, res) {
     let model;
 
     if (tier === 'exam') {
-      result = await callAnthropic(system, prompt, 'claude-sonnet-4-6', 800);
-      model = 'claude-sonnet-4-6';
+      // 2000, not 800. The bake-off (scripts/model-eval/) found Sonnet hit an
+      // 800-token ceiling on HALF its calls even on short answers — it scored
+      // 69% truncated against 98% untruncated, so the old budget was measuring
+      // the cap rather than the model. A 16- or 30-mark essay needs the room.
+      result = await callAnthropic(system, prompt, EXAM_MODEL, 2000);
+      model = EXAM_MODEL;
     } else {
       // Quick tier: try Groq first (cheaper), fall back to Haiku
       if (process.env.GROQ_API_KEY) {
