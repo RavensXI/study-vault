@@ -170,9 +170,11 @@ async function viaBedrock(payload) {
 
   for (const model of candidates) {
     try {
-      return await bedrockClient().messages.create(
+      const out = await bedrockClient().messages.create(
         Object.assign({}, payload, { model: model })
       );
+      out._servedBy = 'bedrock:' + (process.env.AWS_REGION || '?') + ':' + model;
+      return out;
     } catch (err) {
       lastErr = err;
       const msg = (err && err.message) || String(err);
@@ -205,7 +207,9 @@ async function viaAnthropic(body) {
     const detail = await resp.text();
     throw new Error('Anthropic API error: ' + resp.status + ' ' + detail);
   }
-  return resp.json();
+  const out = await resp.json();
+  out._servedBy = 'anthropic-direct:' + body.model;
+  return out;
 }
 
 
@@ -216,4 +220,22 @@ async function callClaudeText(body) {
 }
 
 
-module.exports = { callClaude, callClaudeText, useBedrock };
+/**
+ * Same as callClaudeText but also reports WHICH transport answered.
+ *
+ * Without this there is no way to tell from the outside whether a response
+ * came from London or from the US fallback — the call sites report the model
+ * they asked for, not the one that served them, so a silently failing Bedrock
+ * looks identical to a working one. `servedBy` is the difference between
+ * "configured for London" and "actually in London".
+ */
+async function callClaudeDetailed(body) {
+  const data = await callClaude(body);
+  return {
+    text: (data.content || []).map(b => b.text || '').join(''),
+    servedBy: data._servedBy || 'unknown',
+  };
+}
+
+
+module.exports = { callClaude, callClaudeText, callClaudeDetailed, useBedrock };

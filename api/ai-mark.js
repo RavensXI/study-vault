@@ -24,7 +24,7 @@
  * inside Europe. Anthropic calls route via api/_lib/claude.js.
  */
 
-const { callClaudeText } = require('./_lib/claude');
+const { callClaudeDetailed } = require('./_lib/claude');
 
 // Extended responses (>8 marks) need judgement, not fact-spotting, and Haiku
 // is measurably too generous there — in the bake-off it gave 5/6 to invented
@@ -108,13 +108,15 @@ module.exports = async function handler(req, res) {
   try {
     let result;
     let model;
+    let served = 'groq';
 
     if (tier === 'exam') {
       // 2000, not 800. The bake-off (scripts/model-eval/) found Sonnet hit an
       // 800-token ceiling on HALF its calls even on short answers — it scored
       // 69% truncated against 98% untruncated, so the old budget was measuring
       // the cap rather than the model. A 16- or 30-mark essay needs the room.
-      result = await callAnthropic(system, prompt, EXAM_MODEL, 2000);
+      const r = await callAnthropic(system, prompt, EXAM_MODEL, 2000);
+      result = r.text; served = r.servedBy;
       model = EXAM_MODEL;
     } else {
       // Quick tier: try Groq first (cheaper), fall back to Haiku
@@ -124,16 +126,18 @@ module.exports = async function handler(req, res) {
           model = 'groq/gpt-oss-120b';
         } catch (groqErr) {
           // Groq failed — fall back to Haiku
-          result = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+          const r = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+          result = r.text; served = r.servedBy;
           model = 'claude-haiku-4-5-20251001';
         }
       } else {
-        result = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+        const r = await callAnthropic(system, prompt, 'claude-haiku-4-5-20251001', 400);
+        result = r.text; served = r.servedBy;
         model = 'claude-haiku-4-5-20251001';
       }
     }
 
-    return res.status(200).json({ result, model, tier });
+    return res.status(200).json({ result, model, tier, servedBy: served });
   } catch (err) {
     console.error('AI marking error:', err.message);
     return res.status(502).json({ error: 'AI marking failed', detail: err.message });
@@ -178,7 +182,7 @@ async function callAnthropic(system, prompt, model, maxTokens) {
   // returns [thinking, text] and content[0] is the thinking block, which has no
   // .text at all. That shipped as an exam tier returning empty feedback while
   // happily billing for 1,230 output tokens of perfectly good marking.
-  return callClaudeText({
+  return callClaudeDetailed({
     model: model,
     max_tokens: maxTokens || 600,
     system: system || 'You are a GCSE examiner. Mark the student response against the provided mark scheme.',
