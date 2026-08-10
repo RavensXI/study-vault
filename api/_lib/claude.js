@@ -24,16 +24,30 @@
  *   `(data.content || []).map(b => b.text)` keep working unchanged.
  */
 
+// Which Bedrock model serves the "bigger than Haiku" tier — the exam tier in
+// ai-mark, the explain model in simplify, the QA model in simplify-qa, and
+// revision-strategy.
+//
+// ⚠ Sonnet 5 is DENIED on this AWS account (AccessDeniedException, "not
+// available for this account", 10 Aug 2026) — a new-account entitlement gate,
+// not a per-region model-access setting. Until AWS grants it, this points at
+// Haiku, which the bake-off (scripts/model-eval/) found scores BETTER than
+// Sonnet at production settings anyway: 81% vs 69%, because Sonnet overruns
+// max_tokens on half its calls and gets truncated.
+//
+// Change this ONE line when AWS opens up a bigger model:
+//   'anthropic.claude-opus-4-8'  — if Opus 4.8 is available
+//   'anthropic.claude-sonnet-5'  — once the Sonnet gate is lifted
+const SONNET_TIER = 'anthropic.claude-haiku-4-5';
+
 // Bedrock carries an `anthropic.` provider prefix and drops date suffixes.
 // NOTE: there is no `anthropic.claude-sonnet-4-6` — Sonnet 4.6 is not served
-// on Bedrock at all, so every 4.6 caller moves to Sonnet 5. That is an upgrade
-// (better, and cheaper until 31 Aug 2026), but it is a forced one, not a
-// preference — do not "fix" it back.
+// on Bedrock at all, so every 4.6 caller has to move regardless.
 const BEDROCK_MODEL_IDS = {
   'claude-haiku-4-5-20251001': 'anthropic.claude-haiku-4-5',
   'claude-haiku-4-5': 'anthropic.claude-haiku-4-5',
-  'claude-sonnet-4-6': 'anthropic.claude-sonnet-5',
-  'claude-sonnet-5': 'anthropic.claude-sonnet-5',
+  'claude-sonnet-4-6': SONNET_TIER,
+  'claude-sonnet-5': SONNET_TIER,
   'claude-opus-4-8': 'anthropic.claude-opus-4-8',
 };
 
