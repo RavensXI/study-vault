@@ -201,9 +201,14 @@
     // ---- Auth ----
     function getAuthHeaders() {
       var headers = { 'Content-Type': 'application/json' };
-      // Check for admin password in sessionStorage
+      // Staff sessions persist in localStorage across tabs; sessionStorage may be
+      // empty in a tab opened straight from a link. Check both, or the page gets
+      // past auth-gate and then every API call 401s.
       var session = null;
       try { session = JSON.parse(sessionStorage.getItem('studyvault-auth')); } catch (e) {}
+      if (!session || !session.pw) {
+        try { session = JSON.parse(localStorage.getItem('studyvault-auth')) || session; } catch (e) {}
+      }
       if (session && session.pw) {
         headers['X-Admin-Password'] = session.pw;
       }

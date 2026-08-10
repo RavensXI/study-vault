@@ -1131,12 +1131,34 @@
     /* A long extract or a tall inline chart can't own the whole viewport when
        pinned — cap the head and let it scroll inside the pinned zone so there's
        always room for the steps below. */
-    .guided-card-head { max-height: 52vh; overflow-y: auto; }
-    .learn-card-head { max-height: 48vh; overflow-y: auto; }
+    /* 48vh was leaving ~200px of the column empty while cutting the question in
+       half on any card carrying an image — score extracts, OS maps. Measured at
+       960/800/720 viewport heights: the action buttons stay on screen at 64vh, so
+       60vh is safe and lets most cards be read without scrolling at all. */
+    .guided-card-head { max-height: 58vh; overflow-y: auto; }
+    .learn-card-head { max-height: 60vh; overflow-y: auto; }
     .guided-card-head.is-stuck, .learn-card-head.is-stuck {
       box-shadow: 0 12px 14px -12px rgba(0,0,0,0.25);
     }
+    /* Capped and scrollable is fine; capped and SILENT is not. Without a cue the
+       last visible line looks like the question ends there — an extract with a
+       score image or a map overflows often enough that students read a truncated
+       sentence and answer the wrong thing. Fade the bottom edge whenever there is
+       more below, and drop it the moment they reach the end. */
+    .guided-card-head::after, .learn-card-head::after {
+      content: ''; display: block; position: sticky; bottom: 0;
+      height: 42px; margin-top: -42px; pointer-events: none;
+      opacity: 0; transition: opacity 0.2s ease;
+      background: linear-gradient(to top, #fff 22%, rgba(255,255,255,0));
+    }
+    .guided-card-head.has-more::after, .learn-card-head.has-more::after { opacity: 1; }
     body.dark-mode .guided-card-head, body.dark-mode .learn-card-head { background: #2a2826; }
+    body.dark-mode .guided-card-head::after, body.dark-mode .learn-card-head::after {
+      background: linear-gradient(to top, #2a2826 22%, rgba(42,40,38,0));
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .guided-card-head::after, .learn-card-head::after { transition: none; }
+    }
     .guided-actions .problem-check-btn { margin-top: 0.6rem; }
     .guided-actions .guided-secondary {
       display: block;
@@ -4576,6 +4598,7 @@
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
   <script src="/js/practice-loader.js"></script>
   <script src="/js/exam-countdown.js"></script>
+  <script src="/js/practice-audio.js"></script>
   <script defer src="/js/anon-welcome.js"></script>
 
   <!-- ===== Practice interactivity (reads from window._problemBank set by loader) ===== -->
@@ -6551,6 +6574,37 @@
           }
         }, { passive: true });
       });
+
+      // Bottom-fade cue on the capped question head — see .has-more in the CSS.
+      // The head is its own scroll container, so it needs its own listener; the
+      // content arrives asynchronously, so re-check on resize and on DOM changes.
+      (function () {
+        function syncHead(h) {
+          if (!h) return;
+          h.classList.toggle('has-more', h.scrollHeight - h.scrollTop - h.clientHeight > 8);
+        }
+        function syncAll() {
+          document.querySelectorAll('.guided-card-head, .learn-card-head').forEach(syncHead);
+        }
+        document.addEventListener('scroll', function (e) {
+          var t = e.target;
+          if (t && t.classList &&
+              (t.classList.contains('learn-card-head') || t.classList.contains('guided-card-head'))) {
+            syncHead(t);
+          }
+        }, true);
+        window.addEventListener('resize', syncAll);
+        if (window.MutationObserver) {
+          var queued = false;
+          new MutationObserver(function () {
+            if (queued) return;
+            queued = true;
+            requestAnimationFrame(function () { queued = false; syncAll(); });
+          }).observe(document.body, { childList: true, subtree: true });
+        }
+        syncAll();
+        setTimeout(syncAll, 400);
+      })();
 
       // Back to practice from learn mode
       document.getElementById('learn-back-practice-btn').addEventListener('click', function() {

@@ -9379,3 +9379,31 @@ body.sv-has-ap-dock { padding-bottom: 240px; }
   .sv-ap-canvas { height: 56px; margin-top: 22px; }
   .sv-ap-now { display: none; }
 }
+
+/* ---- Inline waveform player: practice drills (js/practice-audio.js) ----
+   Sits in the flow of a passage, unlike the fixed Guided Listening dock above.
+   No pins: Section A is unfamiliar listening, so the excerpt must not be
+   annotated. This replaces the browser's default <audio controls> pill. */
+.sv-ap-inline { display: flex; align-items: center; gap: 0.7rem;
+  margin: 0.75rem auto 0.55rem; max-width: 560px; padding: 0.4rem 0.6rem;
+  background: rgba(255, 255, 255, 0.72); border: 1px solid rgba(45, 42, 38, 0.10);
+  border-radius: 12px; box-shadow: 0 1px 3px rgba(45, 42, 38, 0.05); }
+.sv-api-play { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 50%;
+  border: 1.5px solid #2d2a26; background: #fff; color: #2d2a26; cursor: pointer;
+  font-size: 0.72rem; line-height: 1; padding: 0; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.18s cubic-bezier(0.16, 1, 0.3, 1), color 0.18s cubic-bezier(0.16, 1, 0.3, 1); }
+.sv-api-play:hover { background: #2d2a26; color: #fff; }
+.sv-ap-inline.is-playing .sv-api-play { background: #2d2a26; color: #fff; }
+.sv-api-tick { flex: 0 0 auto; font-family: Inter, system-ui, sans-serif;
+  font-size: 0.76rem; font-variant-numeric: tabular-nums; opacity: 0.6; }
+.sv-api-wrap { flex: 1 1 auto; position: relative; height: 38px; min-width: 0;
+  cursor: pointer; border-radius: 5px; }
+.sv-api-wrap:focus-visible { outline: 2px solid #7c3aed; outline-offset: 3px; }
+.sv-api-canvas { width: 100%; height: 38px; display: block; }
+@media (max-width: 700px) {
+  .sv-ap-inline { max-width: 100%; gap: 0.5rem; padding: 0.35rem 0.5rem; }
+  .sv-api-wrap, .sv-api-canvas { height: 32px; }
+  .sv-api-tick { font-size: 0.7rem; }
+}
+@media (prefers-reduced-motion: reduce) { .sv-api-play { transition: none; } }
