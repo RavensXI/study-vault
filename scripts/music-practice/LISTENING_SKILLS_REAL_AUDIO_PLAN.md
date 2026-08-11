@@ -56,10 +56,29 @@ Enough for tonality (5 major / 2 minor) and for several textures.
 - **L2 Hearing Instruments and Families** → already real recordings. It needs
   only ONE more gold question, so this is a small sourcing job, not a rebuild.
   Route used before: Commons / US military bands, CC0 or PD (see task #39).
-- **aos-listening L1 (AoS2 popular music)** → **stays synthetic.** There is no
-  public-domain rock or pop. Either keep the constructed clips, or link out to
-  official recordings rather than hosting. Record the reason in the lesson so
-  nobody "fixes" it later.
+- **aos-listening L1 (AoS2 popular music)** → **use openly licensed real music.**
+
+  CORRECTION (11 Aug, after Tom heard the synthetic clips: *"those are garbage
+  and don't sound like pop at all... they both just basically sound like
+  somebody playing a flute"*). An earlier draft of this plan said AoS2 had to
+  stay synthetic because no public-domain pop exists. That was misleading. It is
+  true of RECORDINGS — UK sound-recording copyright runs 70 years from release,
+  so there is no PD pop — but it ignores the large body of modern music released
+  under CC0 and CC BY, both of which our licence rule already permits.
+
+  Sources worth mining, all CC BY or CC0:
+    - incompetech.com (Kevin MacLeod) — large, well-catalogued, CC BY 4.0,
+      covers rock, funk, electronic and pop idioms
+    - Free Music Archive — filter to CC0 / CC BY, genre by genre
+    - ccMixter — CC BY, strong for remix-friendly pop and hip-hop beds
+
+  This is arguably BETTER than chart pop for the purpose. Section A plays music
+  the student has never heard: the task is identifying features, not recognising
+  a song. Library and indie tracks in a pop idiom carry the thing the synthetic
+  clips lack — real drum kit, bass guitar, electric guitar, produced vocals.
+
+  Still excluded: CC BY-SA (derivative risk). Attribution for CC BY must be
+  recorded in AUDIO_PROVENANCE.md and displayed with the clip.
 
 ## Method
 
