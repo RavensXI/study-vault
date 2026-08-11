@@ -1194,13 +1194,26 @@
     .problem-equation .q-instr { display: block; margin-top: 0.5em; }
 
     /* Inline diagram figures (exam-style) inside problem and guided displays */
-    .problem-equation svg, .guided-display svg {
+    /* Exam-style diagram figures only. KaTeX draws a radical sign, and several
+       other stretchy symbols, as a tiny inline <svg>; this rule used to catch
+       those too and force them to display:block at width:100% on their own
+       line, which knocked the surd out of the formula and left a gap where the
+       root should be. Tom found it on a gold question: 5^2 + [gap]49 over 2^3.
+       :not(.katex *) is not a thing, so exclude by ancestor instead. */
+    .problem-equation > svg,
+    .problem-equation .problem-figure svg,
+    .guided-display > svg,
+    .guided-display .problem-figure svg {
       display: block;
       margin: 0.35rem auto;
       max-width: 280px;
       width: 100%;
       height: auto;
     }
+    /* Do NOT add a counter-rule for .katex svg here. KaTeX positions its
+       radicals with display:block and width:100% inside a sized wrapper;
+       overriding those draws the surd's tail straight through the digits.
+       Restricting the figure rule to direct children is the whole fix. */
     .figure-caption {
       display: block;
       font-family: 'Inter', sans-serif;
@@ -5665,7 +5678,12 @@
         var s = document.getElementById(ids[1]);
         var c = document.getElementById(ids[2]);
         if (t) t.textContent = g.title || '';
-        if (s) s.innerHTML = stepsHtml;
+        /* The steps were the only part of the method card never run through
+           KaTeX, so any LaTeX in them showed as raw source — "Roots such as
+           \(\sqrt{49}\) count as indices" appeared verbatim, while the worked
+           example beside it rendered fine. 2,071 occurrences across 270 lessons,
+           so this is a renderer gap, not content to rewrite. */
+        if (s) { s.innerHTML = stepsHtml; practiceRenderKaTeX(s); }
         if (c) { c.innerHTML = exHtml; practiceRenderKaTeX(c); }
       });
     }
