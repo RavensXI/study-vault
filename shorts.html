@@ -110,8 +110,8 @@
 <script src="/js/free-user.js"></script>
 <script src="/js/school-session.js"></script>
 <script>
-const MANIFEST = "/scripts/_shorts_manifest.json";
-const QUESTIONS_URL = "/scripts/_shorts_questions.json";
+const MANIFEST = "/data/_shorts_manifest.json";
+const QUESTIONS_URL = "/data/_shorts_questions.json";
 const SITE = "https://www.studyvault.co.uk";   // Lesson deep-links (design-lab has no /lesson router)
 const CHECK_EVERY = 3;    // a check card appears after this many genuinely-watched shorts
 const QS_PER_CHECK = 2;   // questions per check card (drawn from that window's shorts)
@@ -166,7 +166,7 @@ function accent(slug){
 }
 function titleCase(s){ return s.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()); }
 // poster frame mirrors the R2 video key under shorts/posters/ on R2, .mp4 -> .webp
-function posterFor(url){ const m=url.split('.r2.dev/'); if(m.length<2) return ''; return 'https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/shorts/posters/'+m[1].replace(/\.mp4$/,'.webp'); }
+function posterFor(url){ const m=url.split('.r2.dev/'); if(m.length<2) return ''; return 'https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/shorts/posters/'+m[1].replace(/^shorts\//,'').replace(/\.mp4$/,'.webp'); }
 
 // today's playlist: least-recently-watched first within each subject (never-watched
 // leads), round-robined across subjects, starting subject rotated daily

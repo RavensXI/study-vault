@@ -1070,7 +1070,7 @@ makeDraggable(pc,'postcard');
 fetch('/data/_shorts_manifest.json').then(r=>r.json()).then(m=>{
   for(const s of m){ const p=(s.url||'').split('.r2.dev/');
     if(p.length>1){ document.documentElement.style.setProperty('--pshot',
-      "url('/design-lab/_posters/"+p[1].replace(/\.mp4$/,'.jpg')+"')"); break; } }
+      "url('https://pub-aeb94e100e5a48f4a133be5bf206aecb.r2.dev/shorts/posters/"+p[1].replace(/^shorts\//,'').replace(/\.mp4$/,'.webp')+"')"); break; } }
 }).catch(()=>{});
 const modal=document.getElementById('phonemodal'), frame=document.getElementById('feedframe');
 document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return;
@@ -1078,7 +1078,7 @@ document.getElementById('phone').onclick=()=>{ if(dragBlockClick) return;
      whole subject — {subjectSlug:[unitSlug,...]} */
   const scope={};
   SUBJECTS.forEach(s=>{ if(s.sub && s.units && s.units.length) scope[s.sub]=s.units.map(u=>u[3]); });
-  frame.src='/design-lab/shorts.html?scope='+encodeURIComponent(JSON.stringify(scope)); modal.classList.add('open'); };
+  frame.src='/shorts.html?scope='+encodeURIComponent(JSON.stringify(scope)); modal.classList.add('open'); };
 document.getElementById('closephone').onclick=()=>{ modal.classList.remove('open'); frame.src=''; };
 modal.addEventListener('click',e=>{ if(e.target===modal){ modal.classList.remove('open'); frame.src=''; } });
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&modal.classList.contains('open')){ modal.classList.remove('open'); frame.src=''; } });
