@@ -56,6 +56,47 @@ acoustic kit with room · dates to the 1960s–70s.
 construction · heavy compression · dates to the 1990s or later.
 **Pairs directly with clip 1** — same question, opposite answer.
 
+### REVISION 2 — take 1 failed the screen
+
+Measured (pass 3): both takes came back at ~163 ms beat spread, **wider than the
+rock clips at ~140 ms**. The pair that is supposed to carry the whole era
+question had the machine breathing more than the band, so a student reasoning
+correctly would have been marked wrong. "Locked exactly to the grid" and "no
+tempo variation" were not enough — Flow reads "pop" as live-ish unless the
+machine is named.
+
+Target: **beat spread under 120 ms.** Two different angles, one per take.
+
+**`aos2_pop_90s_now_v2a` — name the machine**
+
+> Instrumental electronic dance-pop, built entirely on a computer. A programmed
+> drum machine plays a four-on-the-floor kick on every beat with a crisp
+> clap-snare on beats two and four and a closed hi-hat on every off-beat. Every
+> drum hit is quantised precisely to a sixteenth-note grid — machine-exact, no
+> swing, no groove, no human drummer, no push or pull against the beat. Deep
+> synthesised sub-bass locked to the kick, bright synth stabs, and a short synth
+> hook looping every four bars. Heavily compressed and limited so the whole mix
+> sits loud and level. Tempo exactly 104 beats per minute, rock steady from
+> first bar to last. No acoustic drum kit, no cymbals played by hand, no
+> electric guitar, no orchestral instruments, no rubato, no fills that break the
+> loop, no lyrics.
+
+**`aos2_pop_90s_now_v2b` — make the loop literally identical**
+
+> Instrumental chart pop produced entirely in a sequencer. One two-bar pattern is
+> copied and repeated unchanged for the whole track: sequenced drum machine
+> kick, clap and hi-hat, all landing exactly on the grid, with a synthesised bass
+> line following the kick note for note and a repeating synthesiser riff on top.
+> Because the bar is duplicated rather than replayed, every repetition is
+> identical to the last — same timing, same velocity, no variation at all.
+> Bright, clean, compressed studio sound. Tempo exactly 112 beats per minute,
+> set by a click and never deviating. No live instruments, no acoustic drums, no
+> guitar, no strings, no swing, no fills, no lyrics.
+
+**Screen before listening:** `python scripts/music-practice/audio_features.py
+<folder>` — reject anything over 120 ms spread. That number is the whole
+question.
+
 ## 3. `aos2_broadway_a` / `_b` — Broadway pit orchestra
 
 > Show-tune instrumental for a Broadway pit orchestra in a 1950s–60s style.
@@ -67,6 +108,12 @@ construction · heavy compression · dates to the 1990s or later.
 
 **Tests:** pit-orchestra scoring · show-tune idiom · key change for lift ·
 Broadway strand.
+
+**ACCEPTED on take 1** (Tom: "broadway sounds fine to me"). Pass 3 flagged it for
+low percussive ratio (0.129 against a 0.18 threshold) — that was the SCREEN being
+wrong, not the clip. 0.18 is calibrated for a rock kit; a pit orchestra uses light
+swung brushes and reads lower by nature. Do not apply the drum threshold to
+orchestral or theatre idioms.
 
 ## 4. `aos2_gaming_loop_a` / `_b` — film and computer gaming music
 
